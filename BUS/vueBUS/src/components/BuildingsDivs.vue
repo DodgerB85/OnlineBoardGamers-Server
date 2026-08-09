@@ -214,7 +214,6 @@ function clickedDesignerToVrom(designerIdx, junction) {
 		if (!controller.currentPlayerObj().playerJunctions.includes(junction)) return
 	}
 	if (funcs.getDesignerStatusJunction(designerIdx === rf.DESIGNER_JEROEN ? store.jeroenStatus : store.jorisStatus) !== junction) return
-	console.log("DESIGNER CLICK", { designerIdx, junction, jeroenStatus: store.jeroenStatus, jorisStatus: store.jorisStatus, desiredBuilding: store.desiredBuilding, eligible: store.context.eligibleJunctionsToVromPitts })
 	store.context.selectedDesignerToVrom = designerIdx
 	store.context.selectedPaxToVromJunction = junction
 }

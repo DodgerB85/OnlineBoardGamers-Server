@@ -73,9 +73,13 @@ export const VROM_DEST_AIRPORT = -4 // One-way ride to the Airport (automatic re
 // Positions of the two convention spots, in the same 400-based board space as getBuildingPos [top, left]
 export const PITTS_CONVENTION_JEROEN_SPOT = [1396, 750]
 export const PITTS_CONVENTION_JORIS_SPOT = [1252, 798]
-// The destination building type each designer's convention spot represents (1 = office, 2 = pub)
-export const DESIGNER_JEROEN_BUILDING_TYPE = 2
-export const DESIGNER_JORIS_BUILDING_TYPE = 1
+// Building types (1 = home, 2 = office, 3 = pub)
+export const BLDG_HOME = 1
+export const BLDG_OFFICE = 2
+export const BLDG_PUB = 3
+// The destination building type each designer's convention spot represents
+export const DESIGNER_JORIS_BUILDING_TYPE = BLDG_OFFICE
+export const DESIGNER_JEROEN_BUILDING_TYPE = BLDG_PUB
 
 // FROM->TO (one-way streets)
 export const PITTS_ONE_WAY_JUNCTION_IDS = [[9, 17], [17, 18], [19, 20], [20, 21], [21, 12], [13, 12], [12, 10], [10, 20], [10, 9]]

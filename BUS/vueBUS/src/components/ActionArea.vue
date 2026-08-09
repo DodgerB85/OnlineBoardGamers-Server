@@ -77,7 +77,7 @@ function getBuildingImgBorder(bldgNum) {
 function alterTime(stoppingTime) {
 	if (!stoppingTime) {
 		store.desiredBuilding++
-		if (store.desiredBuilding === 4) store.desiredBuilding = 1
+		if (store.desiredBuilding > rf.BLDG_PUB) store.desiredBuilding = rf.BLDG_HOME
 		store.context.historyObj.push(store.desiredBuilding, 0)
 	} else {
 		controller.currentPlayerObj().timeStones++

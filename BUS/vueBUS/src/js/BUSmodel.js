@@ -697,7 +697,6 @@ export function getVromBuildings() {
 	// Splotter Designer destinations (Pittsburgh convention centre / Airport)
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
 		const origin = store.context.selectedPaxToVromJunction
-		console.log("VROMBLDGS", { origin, jeroenStatus: store.jeroenStatus, jorisStatus: store.jorisStatus, desiredBuilding: store.desiredBuilding, ret })
 		if (funcs.getDesignerStatusJunction(store.jeroenStatus) === origin && store.jeroenStatus !== rf.DESIGNER_REMOVED) {
 			if (!funcs.hasDesignerAttendedCon(store.jeroenStatus) && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE)
 				ret.push([rf.PITTS_CONVENTION_JUNCTION, [rf.VROM_DEST_JEROEN_CON]])

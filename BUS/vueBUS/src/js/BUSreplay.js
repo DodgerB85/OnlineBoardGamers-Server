@@ -96,7 +96,7 @@ async function resetDataForReplay() {
 			}
 		}
 	}
-	store.desiredBuilding = 1
+store.desiredBuilding = rf.BLDG_HOME
 	store.remainingTimeStones = 5
 	if (store.players.length === 3) store.remainingTimeStones--
 	store.remainingPassengers = 11
@@ -359,7 +359,7 @@ function replayAlterTime(historyIndex, playerIndex, entry3) {
 	// If no player, or not stopping
 	if (store.history[historyIndex][1] === -1 || entry3[1] === 0) {
 		store.desiredBuilding++
-		if (store.desiredBuilding === 4) store.desiredBuilding = 1
+		if (store.desiredBuilding > rf.BLDG_PUB) store.desiredBuilding = rf.BLDG_HOME
 	} else if (entry3[1] === 1) {
 		store.players[playerIndex].timeStones++
 		model.decreaseScore(store.players[playerIndex])

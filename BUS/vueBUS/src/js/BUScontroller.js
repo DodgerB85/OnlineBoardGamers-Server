@@ -520,7 +520,7 @@ export function endCurrentPhase() {
 		}
 		if (botAlterTime || store.actionAreaData[4][0] === -1 || store.gameflow.turnOrder.length === 0) {
 			store.desiredBuilding++
-			if (store.desiredBuilding === 4) store.desiredBuilding = 1
+			if (store.desiredBuilding > rf.BLDG_PUB) store.desiredBuilding = rf.BLDG_HOME
 			store.history.push([rf.HIST_ALTER_TIME, -1, Math.round(new Date().getTime() / 1000 - personal.gameCreationTimestamp), [store.desiredBuilding]])
 			endCurrentPhase()
 			return

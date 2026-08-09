@@ -75,13 +75,13 @@ function getPointerRotation() {
     let targetBaseAngle = 0;
     let coords = [1880, 260];
 
-    if (store.desiredBuilding === 1) {
+    if (store.desiredBuilding === rf.BLDG_HOME) {
         targetBaseAngle = -120;
         coords = [1886, 264];
-    } else if (store.desiredBuilding === 2) {
+    } else if (store.desiredBuilding === rf.BLDG_OFFICE) {
         targetBaseAngle = 0;
         coords = [1880, 260];
-    } else if (store.desiredBuilding === 3) {
+    } else if (store.desiredBuilding === rf.BLDG_PUB) {
         targetBaseAngle = 120;
         coords = [1888, 265];
     }

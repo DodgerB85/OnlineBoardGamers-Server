@@ -96,9 +96,9 @@ function getPointerRotation() {
 	let targetRotation
 
 	// 1. Define base angles
-	if (store.desiredBuilding === 1) targetRotation = -109
-	else if (store.desiredBuilding === 2) targetRotation = 11
-	else if (store.desiredBuilding === 3) targetRotation = 130
+	if (store.desiredBuilding === rf.BLDG_HOME) targetRotation = -109
+	else if (store.desiredBuilding === rf.BLDG_OFFICE) targetRotation = 11
+	else if (store.desiredBuilding === rf.BLDG_PUB) targetRotation = 130
 	else return [1815, 3336, 0]
 
     // 2. Normalize the target relative to the current rotation
@@ -112,9 +112,9 @@ function getPointerRotation() {
     store.pointerRotation = finalRotation
     // 4. Return position array
     const coords = {
-        1: [1815, 3336],
-        2: [1805, 3340],
-        3: [1814, 3350],
+        [rf.BLDG_HOME]: [1815, 3336],
+        [rf.BLDG_OFFICE]: [1805, 3340],
+        [rf.BLDG_PUB]: [1814, 3350],
     }
     const [x, y] = coords[store.desiredBuilding] || [1815, 3336]
     return [x, y, finalRotation]

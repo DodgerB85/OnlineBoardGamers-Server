@@ -35,7 +35,7 @@ export const useModelStore = defineStore("model", () => {
 	}
 
 	const refSize = ref(120)
-	const desiredBuilding = ref(1)
+	const desiredBuilding = ref(rf.BLDG_HOME)
 
 	const remainingTimeStones = ref(5) // 4 IN THREE PLAYERS !!!
 	const remainingPassengers = ref(11)
@@ -76,7 +76,7 @@ export const useModelStore = defineStore("model", () => {
 		buildingsLeftToPlace: 0,
 		linesLeftToPlace: 0,
 		passengersLeftToPlace: 0,
-		selectedBuildingType: 1,
+		selectedBuildingType: rf.BLDG_HOME,
 		remainingVroms: 0,
 		turnEndingErrorMessage: "",
 		//subphase: 0,
@@ -133,7 +133,7 @@ export const useModelStore = defineStore("model", () => {
 		context.buildingsLeftToPlace = 0
 		context.linesLeftToPlace = 0
 		context.passengersLeftToPlace = 0
-		context.selectedBuildingType = 1
+		context.selectedBuildingType = rf.BLDG_HOME
 		context.remainingVroms = 0
 		context.turnEndingErrorMessage = ""
 		//context.subphase = 0

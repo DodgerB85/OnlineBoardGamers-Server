@@ -76,10 +76,10 @@ function getPlayerIndexOrderForTable() {
         <span v-if="store.gameflow.phase <= rf.PHASE_CHOOSE_ACTIONS || store.actionAreaData[4][0] !== -1">Expected
         </span>Destination:
         <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="buildingDesireImg"
-          :src="view.getImage('building' + String((store.desiredBuilding === 3) ? 1 : store.desiredBuilding + 1))"
+          :src="view.getImage('building' + String((store.desiredBuilding === rf.BLDG_PUB) ? rf.BLDG_HOME : store.desiredBuilding + 1))"
           alt="desiredBldg">
         <img v-if="personal.selectedBoard === rf.BOARD_OG" class="buildingDesireImg"
-          :src="view.getImage('building' + String((store.desiredBuilding === 3) ? 1 : store.desiredBuilding + 1) + '_orig')"
+          :src="view.getImage('building' + String((store.desiredBuilding === rf.BLDG_PUB) ? rf.BLDG_HOME : store.desiredBuilding + 1) + '_orig')"
           alt="desiredBldg">
 
         Altering Time would keep Destination as:
@@ -102,10 +102,10 @@ function getPlayerIndexOrderForTable() {
         <span v-if="store.gameflow.phase <= rf.PHASE_CHOOSE_ACTIONS || store.actionAreaData[4][0] !== -1">Expected
         </span>Destination:
         <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="buildingDesireImg"
-          :src="view.getImage('building' + String((store.desiredBuilding === 3) ? 1 : store.desiredBuilding + 1))"
+          :src="view.getImage('building' + String((store.desiredBuilding === rf.BLDG_PUB) ? rf.BLDG_HOME : store.desiredBuilding + 1))"
           alt="desiredBldg">
         <img v-if="personal.selectedBoard === rf.BOARD_OG" class="buildingDesireImg"
-          :src="view.getImage('building' + String((store.desiredBuilding === 3) ? 1 : store.desiredBuilding + 1) + '_orig')"
+          :src="view.getImage('building' + String((store.desiredBuilding === rf.BLDG_PUB) ? rf.BLDG_HOME : store.desiredBuilding + 1) + '_orig')"
           alt="desiredBldg">
 
         <template v-if="store.gameflow.phase <= rf.PHASE_CHOOSE_ACTIONS || store.actionAreaData[4][0] !== -1">

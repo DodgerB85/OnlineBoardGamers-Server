@@ -86,7 +86,7 @@ function addBuildingsToAllSpots() {
 	for (let i = 0; i < store.junctions.length; i++) {
 		for (let j = 0; j < 5; j++) {
 			if (store.junctions[i][j] === 0) {
-				store.junctions[i][j] = 1 // Pub
+				store.junctions[i][j] = rf.BLDG_HOME // Home
 			}
 		}
 	}
@@ -131,7 +131,7 @@ function addLinesToAllOptions() {
 	<button @click="highlightBuildingOptions(1)">Highligh Bldg Options</button>
 	<button @click="removeAllBuildings()">Remove All Bldgs</button>
 	<button @click="removePax()">Remove Pax</button>
-	<button @click="addPax(1)">Add Pax</button>
+	<button @click="addPax(rf.BLDG_HOME)">Add Pax</button>
 	<button @click="exportLoc()">export</button>
 	<button @click="importLoc()">import</button>
 	
