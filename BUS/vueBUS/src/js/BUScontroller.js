@@ -56,11 +56,17 @@ function canPlayerVrom(forceCheck) {
 }
 
 function canPlayerVromPitts(player, store) {
+	const personal = usePersonalStore()
+	// Network includes placed bridges joined to the player's line, so passengers
+	// on the far side of a bridge are also candidates
+	let networkJunctions = [...player.playerJunctions]
+	if (personal.selectedBoard === rf.BOARD_PITTS) networkJunctions = model.getPlayerNetworkJunctionsPitts(player)
+
 	// Find all junctions with passengers
 	let paxJunctions = []
-	for (let i = 0; i < player.playerJunctions.length; i++) {
-		if (store.junctions[player.playerJunctions[i]][rf.paxIdx] > 0) {
-			paxJunctions.push(player.playerJunctions[i])
+	for (let i = 0; i < networkJunctions.length; i++) {
+		if (store.junctions[networkJunctions[i]][rf.paxIdx] > 0) {
+			paxJunctions.push(networkJunctions[i])
 		}
 	}
 
@@ -123,12 +129,11 @@ function canReachBuildingFromJunction(startJunction, player, store) {
 			// Check if this player has built this line
 			let canUseLine = store.lines[lineID].includes(player.colour)
 			
-			// Pittsburgh bridge usage: any player can use a bridge if it's connected to their line
+			// Pittsburgh bridge usage: any player can use a bridge if it's connected to their network
 			if (personal.selectedBoard === rf.BOARD_PITTS && !canUseLine) {
 				if (rf.PITTS_BRIDGE_LINE_IDS.includes(lineID) && store.bridges.includes(lineID)) {
-					// Bridge exists - check if it's connected to player's line
-					// A bridge is connected if either end junction is in the player's network
-					if (player.playerJunctions.includes(junctionsAtEnd[0]) || player.playerJunctions.includes(junctionsAtEnd[1])) {
+					// Bridge is joined to the network if either end junction is reachable
+					if (visited.has(junctionsAtEnd[0]) || visited.has(junctionsAtEnd[1])) {
 						canUseLine = true
 					}
 				}
@@ -137,7 +142,7 @@ function canReachBuildingFromJunction(startJunction, player, store) {
 			if (canUseLine) {
 				// Check if movement is allowed (respect one-way streets)
 				if (canTravelOnLine(currentJunction, otherJunction)) {
-					if (!visited.has(otherJunction) && player.playerJunctions.includes(otherJunction)) {
+					if (!visited.has(otherJunction)) {
 						junctionsToVisit.push(otherJunction)
 					}
 				}

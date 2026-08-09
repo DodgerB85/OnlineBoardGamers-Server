@@ -581,17 +581,50 @@ export function getLinePlacementOptions() {
 	return possibilities
 }
 
+export function getPlayerNetworkJunctionsPitts(player) {
+	const store = useModelStore()
+	const reachable = new Set(player.playerJunctions)
+	const junctionsToVisit = [...player.playerJunctions]
+
+	while (junctionsToVisit.length > 0) {
+		const currentJunction = junctionsToVisit.shift()
+		const linesAroundJunction = view.getLinesAroundJunction(currentJunction)
+
+		for (const lineID of linesAroundJunction) {
+			const lineColours = store.lines[lineID]
+			const isPlayerLine = lineColours && lineColours.includes(player.colour)
+			// Pittsburgh bridge: any player can use a placed bridge joined to the network
+			const isUseBridge = rf.PITTS_BRIDGE_LINE_IDS.includes(lineID) && store.bridges.includes(lineID)
+			if (!isPlayerLine && !isUseBridge) continue
+
+			const junctionsAtEnds = view.getJunctionsAtEndOfLine(lineID)
+			for (const junction of junctionsAtEnds) {
+				if (!reachable.has(junction)) {
+					reachable.add(junction)
+					junctionsToVisit.push(junction)
+				}
+			}
+		}
+	}
+
+	return Array.from(reachable)
+}
+
 export function canPlayerVrom(forceCheck) {
 	const store = useModelStore()
+	const personal = usePersonalStore()
 	if (!forceCheck) {
 		if (store.context.remainingVroms === 0) return false
 		if (store.gameflow.phase !== rf.PHASE_VROM) return false
 	}
 	let player = controller.currentPlayerObj()
+	let networkJunctions = [...player.playerJunctions]
+	// Pittsburgh: network includes placed bridges joined to the player's line
+	if (personal.selectedBoard === rf.BOARD_PITTS) networkJunctions = getPlayerNetworkJunctionsPitts(player)
 	let anyPax = false
 	// If no pax on owned junctions, cannot vrom
-	for (let i = 0; i < player.playerJunctions.length; i++) {
-		if (store.junctions[player.playerJunctions[i]][rf.paxIdx] > 0) {
+	for (let i = 0; i < networkJunctions.length; i++) {
+		if (store.junctions[networkJunctions[i]][rf.paxIdx] > 0) {
 			anyPax = true
 			break
 		}
@@ -602,9 +635,9 @@ export function canPlayerVrom(forceCheck) {
 		return false
 	}
 	let anyBldg = false
-	for (let i = 0; i < player.playerJunctions.length; i++) {
-		for (let j = 0; j < store.junctions[player.playerJunctions[i]].length - 1; j++) {
-			if (store.junctions[player.playerJunctions[i]][j] === store.desiredBuilding) {
+	for (let i = 0; i < networkJunctions.length; i++) {
+		for (let j = 0; j < store.junctions[networkJunctions[i]].length - 1; j++) {
+			if (store.junctions[networkJunctions[i]][j] === store.desiredBuilding) {
 				anyBldg = true
 				break
 			}
@@ -621,13 +654,17 @@ export function canPlayerVrom(forceCheck) {
 
 export function getVromBuildings() {
 	const store = useModelStore()
+	const personal = usePersonalStore()
 	if (store.context.selectedPaxToVromJunction === -1) return
 	let ret = []
-	for (let i = 0; i < controller.currentPlayerObj().playerJunctions.length; i++) {
-		if (store.junctions[controller.currentPlayerObj().playerJunctions[i]].slice(0, -1).includes(store.desiredBuilding)) {
-			let retLine = [controller.currentPlayerObj().playerJunctions[i], []]
+	// Pittsburgh: buildings on the far side of bridges joined to the player's network are targets
+	let networkJunctions = [...controller.currentPlayerObj().playerJunctions]
+	if (personal.selectedBoard === rf.BOARD_PITTS) networkJunctions = getPlayerNetworkJunctionsPitts(controller.currentPlayerObj())
+	for (let i = 0; i < networkJunctions.length; i++) {
+		if (store.junctions[networkJunctions[i]].slice(0, -1).includes(store.desiredBuilding)) {
+			let retLine = [networkJunctions[i], []]
 			// need [junction.id, [bld idx, bldidx]]
-			for (let j = 0; j < store.junctions[controller.currentPlayerObj().playerJunctions[i]].length - 1; j++) if (store.junctions[controller.currentPlayerObj().playerJunctions[i]][j] === store.desiredBuilding) retLine[1].push(j)
+			for (let j = 0; j < store.junctions[networkJunctions[i]].length - 1; j++) if (store.junctions[networkJunctions[i]][j] === store.desiredBuilding) retLine[1].push(j)
 			ret.push(retLine)
 		}
 	}
@@ -815,6 +852,7 @@ export function chooseBridgeExpansion(expandFromBridge) {
 
 export function getJunctionsReachableFromJunction(playerIndex, junctionID) {
 	const store = useModelStore()
+	const personal = usePersonalStore()
 	const playerColout = store.players[playerIndex].colour
 
 	// Use a Set to avoid duplicates and a stack/queue for BFS
@@ -832,17 +870,29 @@ export function getJunctionsReachableFromJunction(playerIndex, junctionID) {
 		for (const lineID of linesAroundJunction) {
 			// Check if this player has built this line
 			const lineColours = store.lines[lineID]
-			if (lineColours && lineColours.includes(playerColout)) {
-				// Get the junctions at the ends of this line
-				const junctionsAtEnds = view.getJunctionsAtEndOfLine(lineID)
+			let canUseLine = lineColours && lineColours.includes(playerColout)
 
-				// Find the junction at the other end (not the current one)
-				for (const junctionAtEnd of junctionsAtEnds) {
-					if (junctionAtEnd !== currentJunction && !reachableJunctions.has(junctionAtEnd)) {
-						// Add this junction to our reachable set and queue
-						reachableJunctions.add(junctionAtEnd)
-						junctionsToVisit.push(junctionAtEnd)
+			// Pittsburgh bridge usage: any player can use a placed bridge joined to the network
+			if (personal.selectedBoard === rf.BOARD_PITTS && !canUseLine) {
+				if (rf.PITTS_BRIDGE_LINE_IDS.includes(lineID) && store.bridges.includes(lineID)) {
+					const junctionsAtEnds = view.getJunctionsAtEndOfLine(lineID)
+					if (reachableJunctions.has(junctionsAtEnds[0]) || reachableJunctions.has(junctionsAtEnds[1])) {
+						canUseLine = true
 					}
+				}
+			}
+
+			if (!canUseLine) continue
+
+			// Get the junctions at the ends of this line
+			const junctionsAtEnds = view.getJunctionsAtEndOfLine(lineID)
+
+			// Find the junction at the other end (not the current one)
+			for (const junctionAtEnd of junctionsAtEnds) {
+				if (junctionAtEnd !== currentJunction && !reachableJunctions.has(junctionAtEnd)) {
+					// Add this junction to our reachable set and queue
+					reachableJunctions.add(junctionAtEnd)
+					junctionsToVisit.push(junctionAtEnd)
 				}
 			}
 		}
