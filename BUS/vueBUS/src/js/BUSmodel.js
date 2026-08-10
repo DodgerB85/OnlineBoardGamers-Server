@@ -371,6 +371,10 @@ export function getEmptyBuildingSpotsByNumberTotal(number) {
 
 export async function moveAllPassengersOntoJunctions() {
 	const store = useModelStore()
+	// A designer parked on their convention-centre spot returns to the convention junction (17) at round
+	// end, like a delivered passenger
+	if (store.jeroenStatus >= rf.DESIGNER_ON_BUILDING_FLAG && store.jeroenStatus % rf.DESIGNER_ON_BUILDING_FLAG === rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION) store.jeroenStatus %= rf.DESIGNER_ON_BUILDING_FLAG
+	if (store.jorisStatus >= rf.DESIGNER_ON_BUILDING_FLAG && store.jorisStatus % rf.DESIGNER_ON_BUILDING_FLAG === rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION) store.jorisStatus %= rf.DESIGNER_ON_BUILDING_FLAG
 	for (let i = 0; i < store.junctions.length; i++) {
 		for (let j = 0; j < store.junctions[i].length - 1; j++) {
 			if (store.junctions[i][j] >= 30) {
@@ -653,14 +657,18 @@ export function canPlayerVrom(forceCheck) {
 	}
 	// Pittsburgh: a designer can ride to their matching convention-centre spot when that destination
 	// type is desired, as long as they stand on one of your junctions, are not already parked on a
-	// building, and have not yet attended the Splotter Con; an attended designer can always be flown
-	// to the Airport
+	// building, and have not yet attended the Splotter Con; after attending the Splotter Con a designer
+	// can be transported back to the Airport (Returning to the Netherlands), again only when the desired
+	// type matches theirs (Jeroen - pubs, Joris - offices)
 	let specialDest = false
 	if (personal.selectedBoard === rf.BOARD_PITTS && !anyBldg) {
-		const jeroenJunction = funcs.getDesignerStatusJunction(store.jeroenStatus)
-		const jorisJunction = funcs.getDesignerStatusJunction(store.jorisStatus)
-		if (store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE && store.jeroenStatus !== rf.DESIGNER_REMOVED && !funcs.hasDesignerAttendedCon(store.jeroenStatus) && networkJunctions.includes(jeroenJunction)) specialDest = true
-		if (store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE && store.jorisStatus !== rf.DESIGNER_REMOVED && !funcs.hasDesignerAttendedCon(store.jorisStatus) && networkJunctions.includes(jorisJunction)) specialDest = true
+		const jeroenJunction = funcs.getDesignerTransportJunction(store.jeroenStatus)
+		const jorisJunction = funcs.getDesignerTransportJunction(store.jorisStatus)
+		// Only count a designer as a valid move when they actually have a ride available (their
+		// convention-centre ride, or the return flight to the Airport when a bus route exists);
+		// this keeps the whole-turn gate in sync with what is highlighted and selectable
+		if (store.jeroenStatus !== rf.DESIGNER_REMOVED && networkJunctions.includes(jeroenJunction) && controller.canReachBuildingFromJunction(jeroenJunction, player, store, rf.DESIGNER_JEROEN)) specialDest = true
+		if (store.jorisStatus !== rf.DESIGNER_REMOVED && networkJunctions.includes(jorisJunction) && controller.canReachBuildingFromJunction(jorisJunction, player, store, rf.DESIGNER_JORIS)) specialDest = true
 	}
 	if (!anyBldg && !specialDest) {
 		store.context.turnEndingErrorMessage = "No available buildings of the desired type in your network"
@@ -675,8 +683,8 @@ export function canPlayerVrom(forceCheck) {
 function junctionHasMovableToken(junction) {
 	const store = useModelStore()
 	if (store.junctions[junction][rf.paxIdx] > 0) return true
-	if (funcs.getDesignerStatusJunction(store.jeroenStatus) === junction) return true
-	if (funcs.getDesignerStatusJunction(store.jorisStatus) === junction) return true
+	if (funcs.getDesignerTransportJunction(store.jeroenStatus) === junction) return true
+	if (funcs.getDesignerTransportJunction(store.jorisStatus) === junction) return true
 	return false
 }
 
@@ -685,30 +693,39 @@ export function getVromBuildings() {
 	const personal = usePersonalStore()
 	if (store.context.selectedPaxToVromJunction === -1) return
 	let ret = []
-	// Pittsburgh: buildings on the far side of bridges added to the player's network are targets
-	let networkJunctions = [...controller.currentPlayerObj().playerJunctions]
-	if (personal.selectedBoard === rf.BOARD_PITTS) networkJunctions = getPlayerNetworkJunctionsPitts(controller.currentPlayerObj())
-	for (let i = 0; i < networkJunctions.length; i++) {
-		if (store.junctions[networkJunctions[i]].slice(0, -1).includes(store.desiredBuilding)) {
-			let retLine = [networkJunctions[i], []]
-			// need [junction.id, [bld idx, bldidx]]
-			for (let j = 0; j < store.junctions[networkJunctions[i]].length - 1; j++) if (store.junctions[networkJunctions[i]][j] === store.desiredBuilding) retLine[1].push(j)
-			ret.push(retLine)
+	const selectedDesigner = store.context.selectedDesignerToVrom
+	const selectedDesignerStatus = selectedDesigner === rf.DESIGNER_JEROEN ? store.jeroenStatus : selectedDesigner === rf.DESIGNER_JORIS ? store.jorisStatus : -1
+	// A designer parked on a building or on the convention-centre spot cannot move this turn,
+	// so no regular building destinations are offered to them
+	const designerParkedAtCon = selectedDesignerStatus >= rf.DESIGNER_ON_BUILDING_FLAG
+	if (!designerParkedAtCon) {
+		// Pittsburgh: buildings on the far side of bridges added to the player's network are targets
+		let networkJunctions = [...controller.currentPlayerObj().playerJunctions]
+		if (personal.selectedBoard === rf.BOARD_PITTS) networkJunctions = getPlayerNetworkJunctionsPitts(controller.currentPlayerObj())
+		for (let i = 0; i < networkJunctions.length; i++) {
+			if (store.junctions[networkJunctions[i]].slice(0, -1).includes(store.desiredBuilding)) {
+				let retLine = [networkJunctions[i], []]
+				// need [junction.id, [bld idx, bldidx]]
+				for (let j = 0; j < store.junctions[networkJunctions[i]].length - 1; j++) if (store.junctions[networkJunctions[i]][j] === store.desiredBuilding) retLine[1].push(j)
+				ret.push(retLine)
+			}
 		}
 	}
 	// Splotter Designer destinations (Pittsburgh convention centre / Airport)
 	// Only shown when the matching designer is the selected token and the demand is correct
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
 		const origin = store.context.selectedPaxToVromJunction
-		if (store.context.selectedDesignerToVrom === rf.DESIGNER_JEROEN && funcs.getDesignerStatusJunction(store.jeroenStatus) === origin && store.jeroenStatus !== rf.DESIGNER_REMOVED) {
+		if (store.context.selectedDesignerToVrom === rf.DESIGNER_JEROEN && funcs.getDesignerTransportJunction(store.jeroenStatus) === origin && store.jeroenStatus !== rf.DESIGNER_REMOVED) {
 			if (!funcs.hasDesignerAttendedCon(store.jeroenStatus) && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE)
 				ret.push([rf.PITTS_CONVENTION_JUNCTION, [rf.VROM_DEST_JEROEN_CON]])
-			if (funcs.hasDesignerAttendedCon(store.jeroenStatus)) ret.push([rf.PITTS_AIRPORT_JUNCTION, [rf.VROM_DEST_AIRPORT]])
+			if (funcs.hasDesignerAttendedCon(store.jeroenStatus) && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE)
+				ret.push([rf.PITTS_AIRPORT_JUNCTION, [rf.VROM_DEST_AIRPORT]])
 		}
-		if (store.context.selectedDesignerToVrom === rf.DESIGNER_JORIS && funcs.getDesignerStatusJunction(store.jorisStatus) === origin && store.jorisStatus !== rf.DESIGNER_REMOVED) {
+		if (store.context.selectedDesignerToVrom === rf.DESIGNER_JORIS && funcs.getDesignerTransportJunction(store.jorisStatus) === origin && store.jorisStatus !== rf.DESIGNER_REMOVED) {
 			if (!funcs.hasDesignerAttendedCon(store.jorisStatus) && store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE)
 				ret.push([rf.PITTS_CONVENTION_JUNCTION, [rf.VROM_DEST_JORIS_CON]])
-			if (funcs.hasDesignerAttendedCon(store.jorisStatus)) ret.push([rf.PITTS_AIRPORT_JUNCTION, [rf.VROM_DEST_AIRPORT]])
+			if (funcs.hasDesignerAttendedCon(store.jorisStatus) && store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE)
+				ret.push([rf.PITTS_AIRPORT_JUNCTION, [rf.VROM_DEST_AIRPORT]])
 		}
 	}
 	return ret

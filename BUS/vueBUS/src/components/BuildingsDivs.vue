@@ -218,6 +218,10 @@ function clickedDesignerToVrom(designerIdx, junction) {
 	store.context.selectedPaxToVromJunction = junction
 }
 
+// A designer parked on their convention-centre spot is parked until the round end (returning to the
+// convention junction like a delivered passenger); the Airport flight is only offered on a later
+// round from junction 17 itself, so no click handling is added here
+
 // A passenger can select this junction for VROOMM only when a regular desired building is reachable from it;
 // designer special rides (convention centre / Airport) never make a junction selectable for a passenger
 function paxSelectableForVrom(junction) {
@@ -268,11 +272,16 @@ function clickedVromBldg(junction, buildingIndex) {
 		else if (buildingIndex === rf.VROM_DEST_JORIS_CON && designerIdx !== rf.DESIGNER_JORIS) return
 		else if (buildingIndex === rf.VROM_DEST_AIRPORT && designerIdx !== rf.DESIGNER_JEROEN && designerIdx !== rf.DESIGNER_JORIS) return
 		store.context.historyObj.push([origin, junction, buildingIndex, designerIdx])
-		if (buildingIndex === rf.VROM_DEST_AIRPORT) setDesignerStatus(designerIdx, rf.DESIGNER_REMOVED)
-		else setDesignerStatus(designerIdx, rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION)
+		if (buildingIndex === rf.VROM_DEST_AIRPORT) {
+			setDesignerStatus(designerIdx, rf.DESIGNER_REMOVED)
+			playPassengerPlopAnimation(junction, designerIdx === rf.DESIGNER_JEROEN ? "jeroen" : "joris")
+		} else {
+			// Parked on the convention-centre spot like a delivered passenger; returns to the
+			// convention junction (17) at round end
+			setDesignerStatus(designerIdx, rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION)
+		}
 		store.context.remainingVroms--
 		controller.currentPlayerObj().score++
-		playPassengerPlopAnimation(junction, designerIdx === rf.DESIGNER_JEROEN ? "jeroen" : "joris")
 		store.context.selectedPaxToVromJunction = -1
 		store.context.selectedDesignerToVrom = -1
 		controller.canPlayerVrom(true)
@@ -461,6 +470,31 @@ function getBuildingRadius() {
 			@mouseover="mouseOverDesignerNumber($event, index, rf.DESIGNER_JORIS, true)"
 			@mouseleave="mouseOverDesignerNumber($event, index, rf.DESIGNER_JORIS, false)" />
 	</template>
+
+	<!-- Splotter Designers parked on their convention-centre spot (small size, like a building occupant);
+			parked until round end, then returned to the convention junction like a delivered passenger -->
+	<img
+		v-if="personal.selectedBoard === rf.BOARD_PITTS && store.jeroenStatus === rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION"
+		class="passengerImgBldg"
+		:src="view.getImage('jeroen')"
+		alt="Jeroen"
+		:style="{
+			top: view.getVromDestinationPos(rf.PITTS_CONVENTION_JUNCTION, rf.VROM_DEST_JEROEN_CON, false)[0] + (store.refSize * 10) / 400 + 'px',
+			left: view.getVromDestinationPos(rf.PITTS_CONVENTION_JUNCTION, rf.VROM_DEST_JEROEN_CON, false)[1] + (store.refSize * 4) / 400 + 'px',
+			width: (store.refSize * 184) / 1500 + 'px',
+			height: (store.refSize * 311) / 1500 + 'px',
+		}" />
+	<img
+		v-if="personal.selectedBoard === rf.BOARD_PITTS && store.jorisStatus === rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION"
+		class="passengerImgBldg"
+		:src="view.getImage('joris')"
+		alt="Joris"
+		:style="{
+			top: view.getVromDestinationPos(rf.PITTS_CONVENTION_JUNCTION, rf.VROM_DEST_JORIS_CON, false)[0] + (store.refSize * 10) / 400 + 'px',
+			left: view.getVromDestinationPos(rf.PITTS_CONVENTION_JUNCTION, rf.VROM_DEST_JORIS_CON, false)[1] + (store.refSize * 4) / 400 + 'px',
+			width: (store.refSize * 184) / 1500 + 'px',
+			height: (store.refSize * 311) / 1500 + 'px',
+		}" />
 
 	<!-- Add highlight circles to VROM building spots -->
 	<!-- FOR junction in playersJunctions, if junction includes(reqBld) then add a circle there-->

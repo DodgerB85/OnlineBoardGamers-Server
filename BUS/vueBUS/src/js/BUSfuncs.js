@@ -320,11 +320,23 @@ export var LZString = (function () {
 // Splotter Designer helper functions
 // Status is a single number:
 // -1 = not arrived yet, -2 = removed from the game (returned to the Netherlands)
-// 0..99 = junction the designer is on; 100+ = their junction plus 100 (has attended Splotter Con)
+// 0..99 = junction the designer is on
+// 100..499 = their junction plus 100 (has attended Splotter Con)
+// 500+ = parked on a building (or on their convention-centre spot), plus 100 if they have attended;
+//        restored to the base value at round end like a delivered passenger
 
 export function getDesignerStatusJunction(status) {
 	if (status < 0 || status >= rf.DESIGNER_ON_BUILDING_FLAG) return -1
 	return status % rf.DESIGNER_CON_FLAG
+}
+
+// The junction a designer can be transported from. While parked (500+, e.g. on a building or the
+// convention-centre spot) a designer cannot be transported at all; an attended designer who has
+// returned to the convention junction (17) at round end is transported from there
+export function getDesignerTransportJunction(status) {
+	if (status < 0 || status >= rf.DESIGNER_ON_BUILDING_FLAG) return -1
+	if (status >= rf.DESIGNER_CON_FLAG) return rf.PITTS_CONVENTION_JUNCTION
+	return status
 }
 
 export function hasDesignerAttendedCon(status) {

@@ -65,7 +65,7 @@ function canPlayerVromPitts(player, store) {
 	// Find all junctions with passengers (or Splotter Designers)
 	let paxJunctions = []
 	for (let i = 0; i < networkJunctions.length; i++) {
-		if (store.junctions[networkJunctions[i]][rf.paxIdx] > 0 || funcs.getDesignerStatusJunction(store.jeroenStatus) === networkJunctions[i] || funcs.getDesignerStatusJunction(store.jorisStatus) === networkJunctions[i]) {
+		if (store.junctions[networkJunctions[i]][rf.paxIdx] > 0 || funcs.getDesignerTransportJunction(store.jeroenStatus) === networkJunctions[i] || funcs.getDesignerTransportJunction(store.jorisStatus) === networkJunctions[i]) {
 			paxJunctions.push(networkJunctions[i])
 		}
 	}
@@ -108,22 +108,39 @@ export function canReachBuildingFromJunction(startJunction, player, store, token
 	const personal = usePersonalStore()
 
 	// Splotter Designer special rides (Pittsburgh):
-	// - a designer can ride to their matching convention-centre spot when that destination type is currently desired,
-	//   as long as they have not yet attended the Splotter Con
+	// - a designer on one of your junctions can ride to their matching convention-centre spot when that
+	//   destination type is currently desired, as long as they have not yet attended the Splotter Con;
+	//   they stay parked on the spot until the round end, when they return to the convention junction (17)
+	//   like a delivered passenger
+	// - after attending the Splotter Con, a designer back on junction 17 can be transported to the Airport
+	//   during a later Vrrooomm! action, when the desired type matches theirs (Jeroen - pubs, Joris - offices)
+	//   and a bus route to the Airport exists
 	// - passengers only highlight when a regular (non convention-centre) desired building is in the network;
 	//   when the convention centre is the only desired stop, only the matching designer who has not yet visited it is an option
-	// - a designer who attended the Splotter Con can always be flown to the Airport when a regular desired building is available
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
-		const jeroenHere = funcs.getDesignerStatusJunction(store.jeroenStatus) === startJunction && store.jeroenStatus !== rf.DESIGNER_REMOVED
-		const jorisHere = funcs.getDesignerStatusJunction(store.jorisStatus) === startJunction && store.jorisStatus !== rf.DESIGNER_REMOVED
+		const jeroenHere = funcs.getDesignerTransportJunction(store.jeroenStatus) === startJunction && store.jeroenStatus !== rf.DESIGNER_REMOVED
+		const jorisHere = funcs.getDesignerTransportJunction(store.jorisStatus) === startJunction && store.jorisStatus !== rf.DESIGNER_REMOVED
 		const jeroenAllowed = tokenIdx === undefined || tokenIdx === rf.DESIGNER_JEROEN
 		const jorisAllowed = tokenIdx === undefined || tokenIdx === rf.DESIGNER_JORIS
+		const jeroenAttendedHere = jeroenHere && funcs.hasDesignerAttendedCon(store.jeroenStatus)
+		const jorisAttendedHere = jorisHere && funcs.hasDesignerAttendedCon(store.jorisStatus)
 		if (jeroenAllowed && jeroenHere && !funcs.hasDesignerAttendedCon(store.jeroenStatus) && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE) return true
 		if (jorisAllowed && jorisHere && !funcs.hasDesignerAttendedCon(store.jorisStatus) && store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE) return true
+		// Returning to the Netherlands: only after attending the Splotter Con, with the matching desired type,
+		// can a designer be transported back to the Airport, following the normal passenger transport rules
+		if (jeroenAllowed && jeroenAttendedHere && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE && reachableByBus(startJunction, rf.PITTS_AIRPORT_JUNCTION, player, store)) return true
+		if (jorisAllowed && jorisAttendedHere && store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE && reachableByBus(startJunction, rf.PITTS_AIRPORT_JUNCTION, player, store)) return true
 		if (!playerHasRegularDesiredBuilding(player, store)) return false
-		if (jeroenAllowed && jeroenHere && funcs.hasDesignerAttendedCon(store.jeroenStatus)) return true
-		if (jorisAllowed && jorisHere && funcs.hasDesignerAttendedCon(store.jorisStatus)) return true
 	}
+
+	return reachableByBus(startJunction, null, player, store)
+}
+
+// BFS reachability over the player's bus lines (and placed bridges joined to the network on the
+// Pittsburgh map); success when `targetJunction` is reached (or, when none is given, when a junction
+// with an empty spot of the desired building type is reached)
+function reachableByBus(startJunction, targetJunction, player, store) {
+	const personal = usePersonalStore()
 
 	const visited = new Set()
 	const junctionsToVisit = [startJunction]
@@ -133,6 +150,8 @@ export function canReachBuildingFromJunction(startJunction, player, store, token
 
 		if (visited.has(currentJunction)) continue
 		visited.add(currentJunction)
+
+		if (currentJunction === targetJunction) return true
 
 		// Check if this junction has the desired building with space
 		for (let j = 0; j < store.junctions[currentJunction].length - 1; j++) {
@@ -235,6 +254,10 @@ function moveAllPassengersOntoCorrectBuilding(bldgNum) {
 
 function moveAllPassengersOntoJunctions() {
 	const store = useModelStore()
+	// A designer parked on their convention-centre spot returns to the convention junction (17) at round
+	// end, like a delivered passenger
+	if (store.jeroenStatus >= rf.DESIGNER_ON_BUILDING_FLAG && store.jeroenStatus % rf.DESIGNER_ON_BUILDING_FLAG === rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION) store.jeroenStatus %= rf.DESIGNER_ON_BUILDING_FLAG
+	if (store.jorisStatus >= rf.DESIGNER_ON_BUILDING_FLAG && store.jorisStatus % rf.DESIGNER_ON_BUILDING_FLAG === rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION) store.jorisStatus %= rf.DESIGNER_ON_BUILDING_FLAG
 	for (let i = 0; i < store.junctions.length; i++) {
 		// On each junction, check for pax, and try to move to correct bldg
 		for (let j = 0; j < store.junctions[i].length - 1; j++) {
