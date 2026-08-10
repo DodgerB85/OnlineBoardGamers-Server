@@ -101,18 +101,28 @@ function setUpPlayerVromPitts(paxJunctions, player, store) {
 	}
 }
 
-function canReachBuildingFromJunction(startJunction, player, store) {
+// Can the given token at startJunction reach a building of the desired type (Pittsburgh-aware)?
+// `tokenIdx` is undefined for the any-token check (used to build the eligible-junction list),
+// `null` for a passenger (no designer special rides), or the designer index for that designer's special rides
+export function canReachBuildingFromJunction(startJunction, player, store, tokenIdx) {
 	const personal = usePersonalStore()
 
 	// Splotter Designer special rides (Pittsburgh):
-	// - a designer can ride to their matching convention-centre spot when that destination type is currently desired
-	// - a designer who attended the Splotter Con can always be flown to the Airport
+	// - a designer can ride to their matching convention-centre spot when that destination type is currently desired,
+	//   as long as they have not yet attended the Splotter Con
+	// - passengers only highlight when a regular (non convention-centre) desired building is in the network;
+	//   when the convention centre is the only desired stop, only the matching designer who has not yet visited it is an option
+	// - a designer who attended the Splotter Con can always be flown to the Airport when a regular desired building is available
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
 		const jeroenHere = funcs.getDesignerStatusJunction(store.jeroenStatus) === startJunction && store.jeroenStatus !== rf.DESIGNER_REMOVED
 		const jorisHere = funcs.getDesignerStatusJunction(store.jorisStatus) === startJunction && store.jorisStatus !== rf.DESIGNER_REMOVED
-		if (jeroenHere && !funcs.hasDesignerAttendedCon(store.jeroenStatus) && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE) return true
-		if (jorisHere && !funcs.hasDesignerAttendedCon(store.jorisStatus) && store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE) return true
-		if ((jeroenHere && funcs.hasDesignerAttendedCon(store.jeroenStatus)) || (jorisHere && funcs.hasDesignerAttendedCon(store.jorisStatus))) return true
+		const jeroenAllowed = tokenIdx === undefined || tokenIdx === rf.DESIGNER_JEROEN
+		const jorisAllowed = tokenIdx === undefined || tokenIdx === rf.DESIGNER_JORIS
+		if (jeroenAllowed && jeroenHere && !funcs.hasDesignerAttendedCon(store.jeroenStatus) && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE) return true
+		if (jorisAllowed && jorisHere && !funcs.hasDesignerAttendedCon(store.jorisStatus) && store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE) return true
+		if (!playerHasRegularDesiredBuilding(player, store)) return false
+		if (jeroenAllowed && jeroenHere && funcs.hasDesignerAttendedCon(store.jeroenStatus)) return true
+		if (jorisAllowed && jorisHere && funcs.hasDesignerAttendedCon(store.jorisStatus)) return true
 	}
 
 	const visited = new Set()
@@ -162,6 +172,18 @@ function canReachBuildingFromJunction(startJunction, player, store) {
 		}
 	}
 
+	return false
+}
+
+// Does the player's network contain a regular (non convention-centre) building of the desired type?
+// Convention-centre/airport spots stay empty (0) until occupied, so bare `desiredBuilding` values only match real buildings
+function playerHasRegularDesiredBuilding(player, store) {
+	const networkJunctions = model.getPlayerNetworkJunctionsPitts(player)
+	for (const junction of networkJunctions) {
+		for (let j = 0; j < store.junctions[junction].length - 1; j++) {
+			if (store.junctions[junction][j] === store.desiredBuilding) return true
+		}
+	}
 	return false
 }
 

@@ -661,7 +661,6 @@ export function canPlayerVrom(forceCheck) {
 		const jorisJunction = funcs.getDesignerStatusJunction(store.jorisStatus)
 		if (store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE && store.jeroenStatus !== rf.DESIGNER_REMOVED && !funcs.hasDesignerAttendedCon(store.jeroenStatus) && networkJunctions.includes(jeroenJunction)) specialDest = true
 		if (store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE && store.jorisStatus !== rf.DESIGNER_REMOVED && !funcs.hasDesignerAttendedCon(store.jorisStatus) && networkJunctions.includes(jorisJunction)) specialDest = true
-		if (attendedDesignerInNetwork(networkJunctions)) specialDest = true
 	}
 	if (!anyBldg && !specialDest) {
 		store.context.turnEndingErrorMessage = "No available buildings of the desired type in your network"
@@ -678,16 +677,6 @@ function junctionHasMovableToken(junction) {
 	if (store.junctions[junction][rf.paxIdx] > 0) return true
 	if (funcs.getDesignerStatusJunction(store.jeroenStatus) === junction) return true
 	if (funcs.getDesignerStatusJunction(store.jorisStatus) === junction) return true
-	return false
-}
-
-// Is any designer that has attended the Splotter Con sitting within the player's network?
-function attendedDesignerInNetwork(networkJunctions) {
-	const store = useModelStore()
-	for (let i = 0; i < networkJunctions.length; i++) {
-		if (funcs.getDesignerStatusJunction(store.jeroenStatus) === networkJunctions[i] && funcs.hasDesignerAttendedCon(store.jeroenStatus)) return true
-		if (funcs.getDesignerStatusJunction(store.jorisStatus) === networkJunctions[i] && funcs.hasDesignerAttendedCon(store.jorisStatus)) return true
-	}
 	return false
 }
 

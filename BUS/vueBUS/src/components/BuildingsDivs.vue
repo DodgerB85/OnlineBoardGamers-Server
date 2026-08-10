@@ -197,7 +197,7 @@ function addDesignerToJunction(designerIdx) {
 function clickedPaxToVrom(junction) {
 	if (!model.canPlayerVrom()) return
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
-		if (!store.context.eligibleJunctionsToVromPitts.includes(junction)) return
+		if (!paxSelectableForVrom(junction)) return
 	} else {
 		if (!controller.currentPlayerObj().playerJunctions.includes(junction)) return
 	}
@@ -209,7 +209,7 @@ function clickedPaxToVrom(junction) {
 function clickedDesignerToVrom(designerIdx, junction) {
 	if (!model.canPlayerVrom()) return
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
-		if (!store.context.eligibleJunctionsToVromPitts.includes(junction)) return
+		if (!designerSelectableForVrom(junction, designerIdx)) return
 	} else {
 		if (!controller.currentPlayerObj().playerJunctions.includes(junction)) return
 	}
@@ -218,15 +218,23 @@ function clickedDesignerToVrom(designerIdx, junction) {
 	store.context.selectedPaxToVromJunction = junction
 }
 
-function designerSelectableForVrom(junction) {
-	if (personal.selectedBoard === rf.BOARD_PITTS) return model.canPlayerVrom() && store.context.eligibleJunctionsToVromPitts.includes(junction)
-	return model.canPlayerVrom() && controller.currentPlayerObj().playerJunctions.includes(junction)
+// A passenger can select this junction for VROOMM only when a regular desired building is reachable from it;
+// designer special rides (convention centre / Airport) never make a junction selectable for a passenger
+function paxSelectableForVrom(junction) {
+	if (personal.selectedBoard !== rf.BOARD_PITTS) return model.canPlayerVrom() && controller.currentPlayerObj().playerJunctions.includes(junction)
+	return model.canPlayerVrom() && store.context.eligibleJunctionsToVromPitts.includes(junction) && controller.canReachBuildingFromJunction(junction, controller.currentPlayerObj(), store, null)
+}
+
+// A Splotter Designer can select this junction only when their own rides (and regular building rides) reach a destination
+function designerSelectableForVrom(junction, designerIdx) {
+	if (personal.selectedBoard !== rf.BOARD_PITTS) return model.canPlayerVrom() && controller.currentPlayerObj().playerJunctions.includes(junction)
+	return model.canPlayerVrom() && store.context.eligibleJunctionsToVromPitts.includes(junction) && controller.canReachBuildingFromJunction(junction, controller.currentPlayerObj(), store, designerIdx)
 }
 
 function mouseOverPaxNumber(e, junction, entering) {
 	if (!model.canPlayerVrom()) return
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
-		if (!store.context.eligibleJunctionsToVromPitts.includes(junction)) return
+		if (!paxSelectableForVrom(junction)) return
 	} else {
 		if (!controller.currentPlayerObj().playerJunctions.includes(junction)) return
 	}
@@ -235,7 +243,7 @@ function mouseOverPaxNumber(e, junction, entering) {
 }
 
 function mouseOverDesignerNumber(e, junction, designerIdx, entering) {
-	if (!designerSelectableForVrom(junction)) return
+	if (!designerSelectableForVrom(junction, designerIdx)) return
 	if (entering) document.getElementById("designerImg" + String(designerIdx) + "x" + String(junction)).classList.add("onHover")
 	else document.getElementById("designerImg" + String(designerIdx) + "x" + String(junction)).classList.remove("onHover")
 }
@@ -384,8 +392,8 @@ function getBuildingRadius() {
 					height: (store.refSize * 311) / 1000 + 'px',
 				}"
 				:class="{
-					selectablePaxToVrom: personal.selectedBoard === rf.BOARD_PITTS ? store.context.eligibleJunctionsToVromPitts.includes(index) : model.canPlayerVrom() && controller.currentPlayerObj().playerJunctions.includes(index),
-					notSelectablePaxToVrom: personal.selectedBoard === rf.BOARD_PITTS ? !store.context.eligibleJunctionsToVromPitts.includes(index) : !model.canPlayerVrom() || !controller.currentPlayerObj().playerJunctions.includes(index),
+					selectablePaxToVrom: paxSelectableForVrom(index),
+					notSelectablePaxToVrom: !paxSelectableForVrom(index),
 					selectedPaxToVrom: store.context.selectedPaxToVromJunction === index,
 				}" />
 			<!-- Add the number of pax ADD THE PAX CLICK HERE AS IT COVERS BASICALLY THE WHOLE PAX -->
@@ -400,7 +408,7 @@ function getBuildingRadius() {
 					height: (store.refSize * 311) / 1000 + 'px',
 				}"
 				:class="{
-					selectablePaxToVromNumber: personal.selectedBoard === rf.BOARD_PITTS ? store.context.eligibleJunctionsToVromPitts.includes(index) : model.canPlayerVrom() && controller.currentPlayerObj().playerJunctions.includes(index),
+					selectablePaxToVromNumber: paxSelectableForVrom(index),
 				}"
 				@click="clickedPaxToVrom(index)"
 				@mouseover="mouseOverPaxNumber($event, index, true)"
@@ -419,7 +427,7 @@ function getBuildingRadius() {
 			:src="view.getImage('jeroen')"
 			alt="Jeroen"
 			:class="{
-				selectablePaxToVrom: designerSelectableForVrom(index),
+				selectablePaxToVrom: designerSelectableForVrom(index, rf.DESIGNER_JEROEN),
 				selectedPaxToVrom: store.context.selectedPaxToVromJunction === index && store.context.selectedDesignerToVrom === rf.DESIGNER_JEROEN,
 			}"
 			:style="{
@@ -440,7 +448,7 @@ function getBuildingRadius() {
 			:src="view.getImage('joris')"
 			alt="Joris"
 			:class="{
-				'selectablePaxToVrom': designerSelectableForVrom(index),
+				'selectablePaxToVrom': designerSelectableForVrom(index, rf.DESIGNER_JORIS),
 				selectedPaxToVrom: store.context.selectedPaxToVromJunction === index && store.context.selectedDesignerToVrom === rf.DESIGNER_JORIS,
 			}"
 			:style="{
