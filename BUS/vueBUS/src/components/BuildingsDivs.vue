@@ -363,7 +363,7 @@ function getBuildingRadius() {
 				<!-- Draw the occupant (pax or Splotter Designer) -->
 				<img
 					v-if="building[1] > 10"
-					class="passengerImgBldg"
+					:class="building[1] >= 20 ? 'designerImgBldg' : 'passengerImgBldg'"
 					:src="view.getImage(view.getBuildingOccupantImage(building[1]))"
 					alt="pax"
 					:style="{
@@ -474,7 +474,7 @@ function getBuildingRadius() {
 			parked until round end, then returned to the convention junction like a delivered passenger -->
 	<img
 		v-if="personal.selectedBoard === rf.BOARD_PITTS && store.jeroenStatus === rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION"
-		class="passengerImgBldg"
+		class="designerImgBldg"
 		:src="view.getImage('jeroen')"
 		alt="Jeroen"
 		:style="{
@@ -485,7 +485,7 @@ function getBuildingRadius() {
 		}" />
 	<img
 		v-if="personal.selectedBoard === rf.BOARD_PITTS && store.jorisStatus === rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION"
-		class="passengerImgBldg"
+		class="designerImgBldg"
 		:src="view.getImage('joris')"
 		alt="Joris"
 		:style="{
@@ -712,7 +712,7 @@ function getBuildingRadius() {
 				<!-- Draw the occupant (pax or Splotter Designer) -->
 				<img
 					v-if="building[1] > 10"
-					class="passengerImgBldg"
+					:class="building[1] >= 20 ? 'designerImgBldg' : 'passengerImgBldg'"
 					:src="view.getImage(view.getBuildingOccupantImage(building[1]))"
 					alt="pax"
 					:style="{
@@ -817,6 +817,11 @@ function getBuildingRadius() {
 	position: absolute;
 }
 
+.designerImgBldg {
+	position: absolute;
+	filter: drop-shadow(2px 0 0 white) drop-shadow(0 2px 0 white) drop-shadow(-2px 0 0 white) drop-shadow(0 -2px 0 white);
+}
+
 .passengerImg {
 	position: absolute;
 	filter: drop-shadow(2px 0 0 black) drop-shadow(0 2px 0 black) drop-shadow(-2px 0 0 black) drop-shadow(0 -2px 0 black);
@@ -825,7 +830,7 @@ function getBuildingRadius() {
 .designerImg {
 	position: absolute;
 	z-index: 6;
-	filter: drop-shadow(2px 0 0 black) drop-shadow(0 2px 0 black) drop-shadow(-2px 0 0 black) drop-shadow(0 -2px 0 black);
+	filter: drop-shadow(2px 0 0 white) drop-shadow(0 2px 0 white) drop-shadow(-2px 0 0 white) drop-shadow(0 -2px 0 white);
 }
 
 .designerImg.selectablePaxToVrom:hover {
