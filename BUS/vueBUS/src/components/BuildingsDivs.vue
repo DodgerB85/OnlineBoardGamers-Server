@@ -252,15 +252,13 @@ function setDesignerStatus(designerIdx, status) {
 function clickedVromBldg(junction, buildingIndex) {
 	const origin = store.context.selectedPaxToVromJunction
 	// SPLOTTER DESIGNER DESTINATIONS - convention centre spots and the Airport
+	// Only the matching designer can ride these; a normal pax can never move to them
 	if (buildingIndex < 0) {
-		let designerIdx = store.context.selectedDesignerToVrom
-		if (buildingIndex === rf.VROM_DEST_JEROEN_CON && funcs.getDesignerStatusJunction(store.jeroenStatus) === origin && !funcs.hasDesignerAttendedCon(store.jeroenStatus)) designerIdx = rf.DESIGNER_JEROEN
-		else if (buildingIndex === rf.VROM_DEST_JORIS_CON && funcs.getDesignerStatusJunction(store.jorisStatus) === origin && !funcs.hasDesignerAttendedCon(store.jorisStatus)) designerIdx = rf.DESIGNER_JORIS
-		else if (buildingIndex === rf.VROM_DEST_AIRPORT) {
-			if (funcs.getDesignerStatusJunction(store.jeroenStatus) === origin) designerIdx = rf.DESIGNER_JEROEN
-			else if (funcs.getDesignerStatusJunction(store.jorisStatus) === origin) designerIdx = rf.DESIGNER_JORIS
-		}
+		const designerIdx = store.context.selectedDesignerToVrom
 		if (designerIdx === -1) return
+		if (buildingIndex === rf.VROM_DEST_JEROEN_CON && designerIdx !== rf.DESIGNER_JEROEN) return
+		else if (buildingIndex === rf.VROM_DEST_JORIS_CON && designerIdx !== rf.DESIGNER_JORIS) return
+		else if (buildingIndex === rf.VROM_DEST_AIRPORT && designerIdx !== rf.DESIGNER_JEROEN && designerIdx !== rf.DESIGNER_JORIS) return
 		store.context.historyObj.push([origin, junction, buildingIndex, designerIdx])
 		if (buildingIndex === rf.VROM_DEST_AIRPORT) setDesignerStatus(designerIdx, rf.DESIGNER_REMOVED)
 		else setDesignerStatus(designerIdx, rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION)

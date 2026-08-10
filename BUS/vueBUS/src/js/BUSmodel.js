@@ -695,14 +695,15 @@ export function getVromBuildings() {
 		}
 	}
 	// Splotter Designer destinations (Pittsburgh convention centre / Airport)
+	// Only shown when the matching designer is the selected token and the demand is correct
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
 		const origin = store.context.selectedPaxToVromJunction
-		if (funcs.getDesignerStatusJunction(store.jeroenStatus) === origin && store.jeroenStatus !== rf.DESIGNER_REMOVED) {
+		if (store.context.selectedDesignerToVrom === rf.DESIGNER_JEROEN && funcs.getDesignerStatusJunction(store.jeroenStatus) === origin && store.jeroenStatus !== rf.DESIGNER_REMOVED) {
 			if (!funcs.hasDesignerAttendedCon(store.jeroenStatus) && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE)
 				ret.push([rf.PITTS_CONVENTION_JUNCTION, [rf.VROM_DEST_JEROEN_CON]])
 			if (funcs.hasDesignerAttendedCon(store.jeroenStatus)) ret.push([rf.PITTS_AIRPORT_JUNCTION, [rf.VROM_DEST_AIRPORT]])
 		}
-		if (funcs.getDesignerStatusJunction(store.jorisStatus) === origin && store.jorisStatus !== rf.DESIGNER_REMOVED) {
+		if (store.context.selectedDesignerToVrom === rf.DESIGNER_JORIS && funcs.getDesignerStatusJunction(store.jorisStatus) === origin && store.jorisStatus !== rf.DESIGNER_REMOVED) {
 			if (!funcs.hasDesignerAttendedCon(store.jorisStatus) && store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE)
 				ret.push([rf.PITTS_CONVENTION_JUNCTION, [rf.VROM_DEST_JORIS_CON]])
 			if (funcs.hasDesignerAttendedCon(store.jorisStatus)) ret.push([rf.PITTS_AIRPORT_JUNCTION, [rf.VROM_DEST_AIRPORT]])

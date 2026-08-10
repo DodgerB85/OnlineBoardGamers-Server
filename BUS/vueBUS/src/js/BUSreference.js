@@ -71,7 +71,7 @@ export const VROM_DEST_JEROEN_CON = -2 // Jeroen's pub spot at the convention ce
 export const VROM_DEST_JORIS_CON = -3 // Joris's office spot at the convention centre
 export const VROM_DEST_AIRPORT = -4 // One-way ride to the Airport (automatic removal)
 // Positions of the two convention spots, in the same 400-based board space as getBuildingPos [top, left]
-export const PITTS_CONVENTION_JEROEN_SPOT = [1396, 750]
+export const PITTS_CONVENTION_JEROEN_SPOT = [1166, 626.67]
 export const PITTS_CONVENTION_JORIS_SPOT = [1252, 798]
 // Building types (1 = home, 2 = office, 3 = pub)
 export const BLDG_HOME = 1
