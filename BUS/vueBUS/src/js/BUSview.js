@@ -526,7 +526,7 @@ export function getVromDestinationPos(junctionID, spotSlot, outline) {
 		return [(store.refSize * rf.PITTS_CONVENTION_JORIS_SPOT[0]) / 400, (store.refSize * rf.PITTS_CONVENTION_JORIS_SPOT[1]) / 400]
 	}
 	if (spotSlot === rf.VROM_DEST_AIRPORT) {
-		return getBuildingPos(junctionID, -1, true)
+		return [(store.refSize * rf.PITTS_AIRPORT_SPOT[0]) / 400, (store.refSize * rf.PITTS_AIRPORT_SPOT[1]) / 400]
 	}
 	return getBuildingPos(junctionID, spotSlot, outline)
 }

@@ -74,6 +74,8 @@ export const VROM_DEST_AIRPORT = -4 // One-way ride to the Airport (automatic re
 // Positions of the two convention spots, in the same 400-based board space as getBuildingPos [top, left]
 export const PITTS_CONVENTION_JEROEN_SPOT = [1166, 626.67]
 export const PITTS_CONVENTION_JORIS_SPOT = [1045.33, 664.67]
+// Position of the Airport highlight (renders at top 678.8px / left 29.5px at refSize 120), in the same 400-based space
+export const PITTS_AIRPORT_SPOT = [2262.67, 98.33]
 // Building types (1 = home, 2 = office, 3 = pub)
 export const BLDG_HOME = 1
 export const BLDG_OFFICE = 2

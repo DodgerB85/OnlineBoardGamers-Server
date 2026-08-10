@@ -274,7 +274,6 @@ function clickedVromBldg(junction, buildingIndex) {
 		store.context.historyObj.push([origin, junction, buildingIndex, designerIdx])
 		if (buildingIndex === rf.VROM_DEST_AIRPORT) {
 			setDesignerStatus(designerIdx, rf.DESIGNER_REMOVED)
-			playPassengerPlopAnimation(junction, designerIdx === rf.DESIGNER_JEROEN ? "jeroen" : "joris")
 		} else {
 			// Parked on the convention-centre spot like a delivered passenger; returns to the
 			// convention junction (17) at round end

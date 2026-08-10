@@ -249,6 +249,30 @@ function moveAllPassengersOntoCorrectBuilding(bldgNum) {
 				store.junctions[i][rf.paxIdx]--
 			}
 		}
+		// A designer standing on a junction with the desired building (never the convention-centre
+		// spots) also automatically occupies that building, like a passenger
+		if (i !== rf.PITTS_CONVENTION_JUNCTION) {
+			if (funcs.getDesignerStatusJunction(store.jeroenStatus) === i && store.jeroenStatus !== rf.DESIGNER_REMOVED) {
+				for (let j = 0; j < store.junctions[i].length - 1; j++) {
+					if (store.junctions[i][j] === bldgNum) {
+						// Park Jeroen on the building (21-23), keeping the attended flag
+						store.junctions[i][j] += 20
+						store.jeroenStatus = rf.DESIGNER_ON_BUILDING_FLAG + (funcs.hasDesignerAttendedCon(store.jeroenStatus) ? rf.DESIGNER_CON_FLAG : 0) + i
+						break
+					}
+				}
+			}
+			if (funcs.getDesignerStatusJunction(store.jorisStatus) === i && store.jorisStatus !== rf.DESIGNER_REMOVED) {
+				for (let j = 0; j < store.junctions[i].length - 1; j++) {
+					if (store.junctions[i][j] === bldgNum) {
+						// Park Joris on the building (31-33), keeping the attended flag
+						store.junctions[i][j] += 30
+						store.jorisStatus = rf.DESIGNER_ON_BUILDING_FLAG + (funcs.hasDesignerAttendedCon(store.jorisStatus) ? rf.DESIGNER_CON_FLAG : 0) + i
+						break
+					}
+				}
+			}
+		}
 	}
 }
 
