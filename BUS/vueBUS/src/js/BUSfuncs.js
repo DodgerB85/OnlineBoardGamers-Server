@@ -323,7 +323,7 @@ export var LZString = (function () {
 // 0..99 = junction the designer is on; 100+ = their junction plus 100 (has attended Splotter Con)
 
 export function getDesignerStatusJunction(status) {
-	if (status < 0) return -1
+	if (status < 0 || status >= rf.DESIGNER_ON_BUILDING_FLAG) return -1
 	return status % rf.DESIGNER_CON_FLAG
 }
 

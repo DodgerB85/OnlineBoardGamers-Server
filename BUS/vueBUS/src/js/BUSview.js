@@ -509,6 +509,13 @@ export function getBuildingPos(junctionID, buildingSlot, outline) {
 	return [0, 0]
 }
 
+// Which occupant sits on a building (11-13 pax, 21-23 Jeroen, 31-33 Joris)
+export function getBuildingOccupantImage(value) {
+	if (value >= 30) return "joris"
+	if (value >= 20) return "jeroen"
+	return "passenger"
+}
+
 // Get the position of a VROOMM destination spot, including the special convention/airport spots
 export function getVromDestinationPos(junctionID, spotSlot, outline) {
 	const store = useModelStore()

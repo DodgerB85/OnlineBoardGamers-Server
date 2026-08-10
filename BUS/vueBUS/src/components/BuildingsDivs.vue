@@ -267,7 +267,7 @@ function clickedVromBldg(junction, buildingIndex) {
 		playPassengerPlopAnimation(junction, designerIdx === rf.DESIGNER_JEROEN ? "jeroen" : "joris")
 		store.context.selectedPaxToVromJunction = -1
 		store.context.selectedDesignerToVrom = -1
-		model.canPlayerVrom()
+		controller.canPlayerVrom(true)
 		return
 	}
 	// A designer rides to any normal building destination too
@@ -275,13 +275,14 @@ function clickedVromBldg(junction, buildingIndex) {
 		const designerIdx = store.context.selectedDesignerToVrom
 		store.context.historyObj.push([origin, junction, buildingIndex, designerIdx])
 		const attended = funcs.hasDesignerAttendedCon(getDesignerStatus(designerIdx))
-		setDesignerStatus(designerIdx, (attended ? rf.DESIGNER_CON_FLAG : 0) + junction)
+		// Park the designer on the building like a delivered pax (21-23 Jeroen, 31-33 Joris)
+		store.junctions[junction][buildingIndex] += designerIdx === rf.DESIGNER_JEROEN ? 20 : 30
+		setDesignerStatus(designerIdx, rf.DESIGNER_ON_BUILDING_FLAG + (attended ? rf.DESIGNER_CON_FLAG : 0) + junction)
 		store.context.remainingVroms--
 		controller.currentPlayerObj().score++
-		playPassengerPlopAnimation(junction, designerIdx === rf.DESIGNER_JEROEN ? "jeroen" : "joris")
 		store.context.selectedPaxToVromJunction = -1
 		store.context.selectedDesignerToVrom = -1
-		model.canPlayerVrom()
+		controller.canPlayerVrom(true)
 		return
 	}
 	store.context.historyObj.push([store.context.selectedPaxToVromJunction, junction, buildingIndex])
@@ -296,7 +297,7 @@ function clickedVromBldg(junction, buildingIndex) {
 	// reset vars
 	store.context.selectedPaxToVromJunction = -1
 	store.context.selectedDesignerToVrom = -1
-	model.canPlayerVrom()
+	controller.canPlayerVrom(true)
 }
 
 function getBuildingRadius() {
@@ -343,11 +344,11 @@ function getBuildingRadius() {
 				<!-- Draw the building -->
 				<img class="buildingImg" :src="view.getImage('building' + String(building[1] % 10))" alt="buildingOnJS" />
 
-				<!-- Draw any pax -->
+				<!-- Draw the occupant (pax or Splotter Designer) -->
 				<img
 					v-if="building[1] > 10"
 					class="passengerImgBldg"
-					:src="view.getImage('passenger')"
+					:src="view.getImage(view.getBuildingOccupantImage(building[1]))"
 					alt="pax"
 					:style="{
 						top: (store.refSize * 10) / 400 + 'px',
@@ -667,11 +668,11 @@ function getBuildingRadius() {
 				<!-- Draw the building -->
 				<img class="buildingImg" :src="view.getImage('building' + String(building[1] % 10) + '_orig')" alt="buildingOnJS" />
 
-				<!-- Draw any pax -->
+				<!-- Draw the occupant (pax or Splotter Designer) -->
 				<img
 					v-if="building[1] > 10"
 					class="passengerImgBldg"
-					:src="view.getImage('passenger')"
+					:src="view.getImage(view.getBuildingOccupantImage(building[1]))"
 					alt="pax"
 					:style="{
 						top: (store.refSize * 10) / 400 + 'px',

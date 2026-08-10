@@ -373,7 +373,15 @@ export async function moveAllPassengersOntoJunctions() {
 	const store = useModelStore()
 	for (let i = 0; i < store.junctions.length; i++) {
 		for (let j = 0; j < store.junctions[i].length - 1; j++) {
-			if (store.junctions[i][j] > 10) {
+			if (store.junctions[i][j] >= 30) {
+				// Joris parked on a building - move back to the junction standee
+				store.junctions[i][j] -= 30
+				store.jorisStatus %= rf.DESIGNER_ON_BUILDING_FLAG
+			} else if (store.junctions[i][j] >= 20) {
+				// Jeroen parked on a building - move back to the junction standee
+				store.junctions[i][j] -= 20
+				store.jeroenStatus %= rf.DESIGNER_ON_BUILDING_FLAG
+			} else if (store.junctions[i][j] > 10) {
 				// Remove pax from bldg
 				store.junctions[i][j] -= 10
 				store.junctions[i][rf.paxIdx]++
@@ -643,11 +651,16 @@ export function canPlayerVrom(forceCheck) {
 			}
 		}
 	}
-	// The convention centre always offers its spot of the matching destination type (Pittsburgh),
-	// and an attended designer can always be flown to the Airport
+	// Pittsburgh: a designer can ride to their matching convention-centre spot when that destination
+	// type is desired, as long as they stand on one of your junctions, are not already parked on a
+	// building, and have not yet attended the Splotter Con; an attended designer can always be flown
+	// to the Airport
 	let specialDest = false
 	if (personal.selectedBoard === rf.BOARD_PITTS && !anyBldg) {
-		if (networkJunctions.includes(rf.PITTS_CONVENTION_JUNCTION) && (store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE || store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE)) specialDest = true
+		const jeroenJunction = funcs.getDesignerStatusJunction(store.jeroenStatus)
+		const jorisJunction = funcs.getDesignerStatusJunction(store.jorisStatus)
+		if (store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE && store.jeroenStatus !== rf.DESIGNER_REMOVED && !funcs.hasDesignerAttendedCon(store.jeroenStatus) && networkJunctions.includes(jeroenJunction)) specialDest = true
+		if (store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE && store.jorisStatus !== rf.DESIGNER_REMOVED && !funcs.hasDesignerAttendedCon(store.jorisStatus) && networkJunctions.includes(jorisJunction)) specialDest = true
 		if (attendedDesignerInNetwork(networkJunctions)) specialDest = true
 	}
 	if (!anyBldg && !specialDest) {

@@ -384,12 +384,14 @@ function replayVrom(historyIndex, playerIndex, entry3) {
 				if (designerIdx === rf.DESIGNER_JEROEN) store.jeroenStatus = rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION
 				else store.jorisStatus = rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION
 			} else {
+				// Designer parked on the destination building (21-23 Jeroen, 31-33 Joris)
+				store.junctions[entry3[i][1]][entry3[i][2]] += designerIdx === rf.DESIGNER_JEROEN ? 20 : 30
 				if (designerIdx === rf.DESIGNER_JEROEN) {
 					const attended = funcs.hasDesignerAttendedCon(store.jeroenStatus)
-					store.jeroenStatus = (attended ? rf.DESIGNER_CON_FLAG : 0) + entry3[i][1]
+					store.jeroenStatus = rf.DESIGNER_ON_BUILDING_FLAG + (attended ? rf.DESIGNER_CON_FLAG : 0) + entry3[i][1]
 				} else {
 					const attended = funcs.hasDesignerAttendedCon(store.jorisStatus)
-					store.jorisStatus = (attended ? rf.DESIGNER_CON_FLAG : 0) + entry3[i][1]
+					store.jorisStatus = rf.DESIGNER_ON_BUILDING_FLAG + (attended ? rf.DESIGNER_CON_FLAG : 0) + entry3[i][1]
 				}
 			}
 			model.increaseScore(store.players[playerIndex])

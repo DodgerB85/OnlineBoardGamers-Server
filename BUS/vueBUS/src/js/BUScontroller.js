@@ -8,7 +8,7 @@ import * as view from "./BUSview.js"
 import { useModelStore } from "../stores/BUSstore.js"
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 
-function canPlayerVrom(forceCheck) {
+export function canPlayerVrom(forceCheck) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	if (!forceCheck) {
@@ -216,7 +216,15 @@ function moveAllPassengersOntoJunctions() {
 	for (let i = 0; i < store.junctions.length; i++) {
 		// On each junction, check for pax, and try to move to correct bldg
 		for (let j = 0; j < store.junctions[i].length - 1; j++) {
-			if (store.junctions[i][j] > 9) {
+			if (store.junctions[i][j] >= 30) {
+				// Joris parked on a building - move back to the junction standee
+				store.junctions[i][j] -= 30
+				store.jorisStatus %= rf.DESIGNER_ON_BUILDING_FLAG
+			} else if (store.junctions[i][j] >= 20) {
+				// Jeroen parked on a building - move back to the junction standee
+				store.junctions[i][j] -= 20
+				store.jeroenStatus %= rf.DESIGNER_ON_BUILDING_FLAG
+			} else if (store.junctions[i][j] > 9) {
 				// add pax to bldg
 				store.junctions[i][j] -= 10
 				store.junctions[i][rf.paxIdx]++

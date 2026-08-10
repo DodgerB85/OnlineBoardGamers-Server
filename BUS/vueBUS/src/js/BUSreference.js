@@ -60,6 +60,7 @@ export const DESIGNER_JORIS = 1
 export const DESIGNER_NOT_ARRIVED = -1 // Still in the Netherlands
 export const DESIGNER_REMOVED = -2 // Returned to the Netherlands after Splotter Con
 export const DESIGNER_CON_FLAG = 100 // Added to the status when the designer has attended Splotter Con
+export const DESIGNER_ON_BUILDING_FLAG = 500 // Added to the status while the designer is parked on a building
 export const DESIGNER_JEROEN_COLOUR = "#30343D"
 export const DESIGNER_JORIS_COLOUR = "#697687"
 export const PITTS_AIRPORT_JUNCTION = 30 // The Airport in Moon Township, also functions as a Train Station
