@@ -270,8 +270,6 @@ export function getBuildingPos(junctionID, buildingSlot, outline) {
 		if (junctionID === 15) return  [shift + (store.refSize * 1158) / 400, shift + (store.refSize * 290) / 400]
 		if (junctionID === 16 && buildingSlot === 2) return [shift + (store.refSize * 1449) / 400, shift + (store.refSize * 490) / 400]
 		if (junctionID === 16 && buildingSlot === 3) return [shift + (store.refSize * 1469) / 400, shift + (store.refSize * 690) / 400]
-		// TODO convention center
-		//if (junctionID === 17) return [shift + (store.refSize * 2658) / 400, shift + (store.refSize * 1846) / 400, -35]
 		// CORRECT UP TO HERE
 		if (junctionID === 18 && buildingSlot === 0) return [shift + (store.refSize * 1262) / 400, shift + (store.refSize * 1387) / 400]
 		if (junctionID === 18 && buildingSlot === 2) return [shift + (store.refSize * 1174) / 400, shift + (store.refSize * 1207) / 400]
@@ -544,8 +542,6 @@ export function getLineSVGpoints(lineID, index, raw) {
 		let lineWidth = (store.refSize * 25) / 400
 
 		let coords = []
-		// TODO: Add Pittsburgh line coordinates (70 lines total)
-		// Use draggable line tool to get coordinates in format [x1, y1, x2, y2]
 		if (lineID === 0) coords = [737, 275, 1117, 245]
 		if (lineID === 1) coords = [1257, 283, 1487, 446]
 		if (lineID === 2) coords = [1617, 535, 1710, 600]

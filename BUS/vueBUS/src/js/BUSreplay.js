@@ -1,6 +1,7 @@
 import * as model from "./BUSmodel.js"
 import * as controller from "./BUScontroller.js"
 import * as funcs from "../js/BUSfuncs.js"
+import * as pitts from "./BUSpitts.js"
 import * as rf from "./BUSreference.js"
 
 import { useModelStore } from "../stores/BUSstore.js"
@@ -259,8 +260,6 @@ function performReplayEndTurn(historyIndex) {
 }
 
 function replayAddLine(historyIndex, playerIndex, entry3) {
-	const store = useModelStore()
-
 	performReplayEndTurn(historyIndex)
 
 	for (let i = 0; i < entry3.length; i++) {
@@ -268,7 +267,7 @@ function replayAddLine(historyIndex, playerIndex, entry3) {
 	}
 }
 
-function replayAddBuilding(historyIndex, playerIndex, entry3) {
+function replayAddBuilding(historyIndex, _playerIndex, entry3) {
 	const store = useModelStore()
 
 	performReplayEndTurn(historyIndex)
@@ -289,7 +288,7 @@ function replayChooseAction(historyIndex, playerIndex, entry3) {
 	}
 }
 
-function replayNewTurn(historyIndex, playerIndex, entry3) {
+function replayNewTurn(historyIndex, _playerIndex, _entry3) {
 	const store = useModelStore()
 
 	performReplayEndTurn(historyIndex)
@@ -323,7 +322,7 @@ function replayNewTurn(historyIndex, playerIndex, entry3) {
 	}
 }
 
-function replayAddBus(historyIndex, playerIndex, entry3) {
+function replayAddBus(historyIndex, playerIndex, _entry3) {
 	const store = useModelStore()
 
 	performReplayEndTurn(historyIndex)
@@ -331,7 +330,7 @@ function replayAddBus(historyIndex, playerIndex, entry3) {
 	store.players[playerIndex].buses++
 }
 
-function replayAddPax(historyIndex, playerIndex, entry3) {
+function replayAddPax(historyIndex, _playerIndex, entry3) {
 	const store = useModelStore()
 
 	performReplayEndTurn(historyIndex)
@@ -388,10 +387,10 @@ function replayVrom(historyIndex, playerIndex, entry3) {
 				// Designer parked on the destination building (21-23 Jeroen, 31-33 Joris)
 				store.junctions[entry3[i][1]][entry3[i][2]] += designerIdx === rf.DESIGNER_JEROEN ? 20 : 30
 				if (designerIdx === rf.DESIGNER_JEROEN) {
-					const attended = funcs.hasDesignerAttendedCon(store.jeroenStatus)
+					const attended = pitts.hasDesignerAttendedCon(store.jeroenStatus)
 					store.jeroenStatus = rf.DESIGNER_ON_BUILDING_FLAG + (attended ? rf.DESIGNER_CON_FLAG : 0) + entry3[i][1]
 				} else {
-					const attended = funcs.hasDesignerAttendedCon(store.jorisStatus)
+					const attended = pitts.hasDesignerAttendedCon(store.jorisStatus)
 					store.jorisStatus = rf.DESIGNER_ON_BUILDING_FLAG + (attended ? rf.DESIGNER_CON_FLAG : 0) + entry3[i][1]
 				}
 			}
@@ -409,7 +408,7 @@ function replayVrom(historyIndex, playerIndex, entry3) {
 	}
 }
 
-function replayStartingPlayer(historyIndex, playerIndex, entry3) {
+function replayStartingPlayer(historyIndex, _playerIndex, _entry3) {
 	const store = useModelStore()
 
 	performReplayEndTurn(historyIndex)
@@ -435,7 +434,7 @@ function replayStartingPlayer(historyIndex, playerIndex, entry3) {
 	store.gameflow.phase = rf.PHASE_CHANGE_START_PLAYER
 }
 
-function replayGameEnd(historyIndex, playerIndex, entry3) {
+function replayGameEnd(_historyIndex, _playerIndex, _entry3) {
 	const store = useModelStore()
 	store.gameflow.phase = rf.PHASE_GAME_OVER
 	let scoreObj = model.getScoreObj()
@@ -451,7 +450,7 @@ function replayGameEnd(historyIndex, playerIndex, entry3) {
 	store.gameflow.turnOrder.push(order[0])
 }
 
-function replayMissingPlayer(historyIndex, playerIndex, entry3) {
+function replayMissingPlayer(historyIndex, _playerIndex, _entry3) {
 	const store = useModelStore()
 
 	performReplayEndTurn(historyIndex)

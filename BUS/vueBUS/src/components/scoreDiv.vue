@@ -9,8 +9,11 @@ const personal = usePersonalStore()
 
 function getScoreDiscPos(scoreSet) {
 	if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL) return [Math.max((store.refSize * 2788) / 400 - (scoreSet[0] * store.refSize * 154) / 400, (store.refSize * 20) / 400), (store.refSize * 21) / 400]
-	else if (personal.selectedBoard === rf.BOARD_PITTS) return [Math.max((store.refSize * 2748) / 400 , (store.refSize * 30) / 400), (store.refSize * 97) / 400 + (scoreSet[0] * store.refSize * 176) / 400]
-	else if (personal.selectedBoard === rf.BOARD_OG) {
+	else if (personal.selectedBoard === rf.BOARD_PITTS) {
+		if (scoreSet[0] <= 0) return [(store.refSize * 2548) / 400, (store.refSize * 197) / 400]
+		return [Math.max((store.refSize * 2748) / 400 , (store.refSize * 30) / 400), (store.refSize * 97) / 400 + ((scoreSet[0]-1) * store.refSize * 176) / 400]
+	}
+		else if (personal.selectedBoard === rf.BOARD_OG) {
 		if (scoreSet[0] <= 0) return [(store.refSize * 500) / 400, (store.refSize * 49) / 400]
 		if (scoreSet[0] === 1) return [(store.refSize * 330) / 400, (store.refSize * 60) / 400]
 		if (scoreSet[0] === 2) return [(store.refSize * 160) / 400, (store.refSize * 53) / 400]

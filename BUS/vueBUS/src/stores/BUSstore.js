@@ -39,7 +39,6 @@ export const useModelStore = defineStore("model", () => {
 
 	const remainingTimeStones = ref(5) // 4 IN THREE PLAYERS !!!
 	const remainingPassengers = ref(11)
-	const USE_PITTS_MAP = false
 	const lines = reactive(Array.from({ length: 80 }, () => []))
 
 	const jeroenStatus = ref(-1)
@@ -176,7 +175,6 @@ export const useModelStore = defineStore("model", () => {
 		topMenuViews,
 		remainingTimeStones,
 		remainingPassengers,
-		USE_PITTS_MAP,
 		turnResetData,
 		resetVarsOnTurnEnd,
 		initializeJunctions,

@@ -317,9 +317,13 @@ function clickedActionOption(action, index) {
 					<td>
 						Building Spots:
 						<br />
-						<br />
+						<br v-if="personal.selectedBoard !== rf.BOARD_PITTS" />
 						{{ model.getEmptyBuildingSpotsByNumberTotal(1) }} / {{ model.getEmptyBuildingSpotsByNumberTotal(2) }} / {{ model.getEmptyBuildingSpotsByNumberTotal(3) }} /
 						{{ model.getEmptyBuildingSpotsByNumberTotal(4) }}
+						<span v-if="personal.selectedBoard === rf.BOARD_PITTS">
+							<br />
+							Bridges: <span :class="{ noMoreLeft: store.remainingBridgeMarkers === 0 }">{{ store.remainingBridgeMarkers }}</span>
+						</span>
 					</td>
 				</tr>
 			</tbody>

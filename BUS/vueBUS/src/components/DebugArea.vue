@@ -35,13 +35,13 @@ function swapPlayerOrder() {
 
 function highlightBuildingOptions() {
 	modifyPlayerScore(1, 'increase')
-	store.getVromBuildings()
+	model.getVromBuildings()
 }
 function removePax() {
-	store.moveAllPassengersOntoJunctions()
+	model.moveAllPassengersOntoJunctions()
 }
 function addPax(bldgNumber) {
-	store.moveAllPassengersOntoCorrectBuilding(bldgNumber)
+	model.moveAllPassengersOntoCorrectBuilding(bldgNumber)
 }
 
 function removeAllBuildings() {

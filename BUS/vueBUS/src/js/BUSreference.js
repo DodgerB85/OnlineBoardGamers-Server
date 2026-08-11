@@ -149,7 +149,6 @@ export const initialJunctionsStateArray = [
 
 // Pittsburgh map initial junctions state (38 junctions)
 // The format is [spot1, (2nd spot1), spot2, spot3, spot4, pax]
-// TODO: Update with actual initial passenger positions for Pittsburgh
 export const initialJunctionsStateArrayPitts = [
 	[-1, -1, -1, -1, 0, 0],// 0
 	[-1, -1, 0, -1, -1, 0],
@@ -171,12 +170,12 @@ export const initialJunctionsStateArrayPitts = [
 	[-1, -1, -1, -1, -1, 0],// 17 - con center
 	[0, -1, 0, -1, -1, 0],
 	[0, 0, -1, -1, -1, 1],
-	[0, 0, -1, -1, 0, 1],// 20
+	[0, 0, -1, -1, -1, 1],// 20
 	[-1, -1, 0, 0, -1, 0],
 	[-1, -1, 0, -1, -1, 0],
 	[-1, -1, -1, -1, 0, 0],
-	[0, -1, 0, -1, 0, 0],
-	[0, -1, 0, -1, 0, 0],// 25
+	[0, -1, 0, -1, -1, 0],
+	[0, -1, 0, -1, -1, 0],// 25
 	[-1, -1, 0, 0, -1, 0],
 	[-1, -1, 0, -1, -1, 0],
 	[-1, -1, 0, -1, 0, 0],

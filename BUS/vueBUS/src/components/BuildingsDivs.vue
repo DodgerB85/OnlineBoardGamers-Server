@@ -3,7 +3,7 @@ import * as rf from "../js/BUSreference.js"
 import * as view from "../js/BUSview.js"
 import * as controller from "../js/BUScontroller.js"
 import * as model from "../js/BUSmodel.js"
-import * as funcs from "../js/BUSfuncs.js"
+import * as pitts from "../js/BUSpitts.js"
 
 import { useModelStore } from "../stores/BUSstore.js"
 const store = useModelStore()
@@ -185,7 +185,7 @@ function addPassengerToJunction(junction) {
 // Bring a Splotter Designer into play at the Airport (junction 30), instead of two regular passengers
 function addDesignerToJunction(designerIdx) {
 	if (store.context.passengersLeftToPlace < 2) return
-	if (funcs.designerArrivedThisRound()) return
+	if (pitts.designerArrivedThisRound()) return
 	const designerStatus = designerIdx === rf.DESIGNER_JEROEN ? store.jeroenStatus : store.jorisStatus
 	if (designerStatus !== rf.DESIGNER_NOT_ARRIVED) return
 	if (designerIdx === rf.DESIGNER_JEROEN) store.jeroenStatus = rf.PITTS_AIRPORT_JUNCTION
@@ -213,7 +213,7 @@ function clickedDesignerToVrom(designerIdx, junction) {
 	} else {
 		if (!controller.currentPlayerObj().playerJunctions.includes(junction)) return
 	}
-	if (funcs.getDesignerStatusJunction(designerIdx === rf.DESIGNER_JEROEN ? store.jeroenStatus : store.jorisStatus) !== junction) return
+	if (pitts.getDesignerStatusJunction(designerIdx === rf.DESIGNER_JEROEN ? store.jeroenStatus : store.jorisStatus) !== junction) return
 	store.context.selectedDesignerToVrom = designerIdx
 	store.context.selectedPaxToVromJunction = junction
 }
@@ -289,7 +289,7 @@ function clickedVromBldg(junction, buildingIndex) {
 	if (store.context.selectedDesignerToVrom !== -1) {
 		const designerIdx = store.context.selectedDesignerToVrom
 		store.context.historyObj.push([origin, junction, buildingIndex, designerIdx])
-		const attended = funcs.hasDesignerAttendedCon(getDesignerStatus(designerIdx))
+		const attended = pitts.hasDesignerAttendedCon(getDesignerStatus(designerIdx))
 		// Park the designer on the building like a delivered pax (21-23 Jeroen, 31-33 Joris)
 		store.junctions[junction][buildingIndex] += designerIdx === rf.DESIGNER_JEROEN ? 20 : 30
 		setDesignerStatus(designerIdx, rf.DESIGNER_ON_BUILDING_FLAG + (attended ? rf.DESIGNER_CON_FLAG : 0) + junction)
@@ -428,7 +428,7 @@ function getBuildingRadius() {
 	<!-- Display any Splotter Designers waiting on junctions -->
 	<template v-for="(junction, index) in store.junctions" v-bind:key="'jeroen' + index">
 		<img
-			v-if="personal.selectedBoard === rf.BOARD_PITTS && funcs.getDesignerStatusJunction(store.jeroenStatus) === index"
+			v-if="personal.selectedBoard === rf.BOARD_PITTS && pitts.getDesignerStatusJunction(store.jeroenStatus) === index"
 			class="designerImg"
 			:id="'designerImg' + String(rf.DESIGNER_JEROEN) + 'x' + String(index)"
 			:src="view.getImage('jeroen')"
@@ -449,7 +449,7 @@ function getBuildingRadius() {
 	</template>
 	<template v-for="(junction, index) in store.junctions" v-bind:key="'joris' + index">
 		<img
-			v-if="personal.selectedBoard === rf.BOARD_PITTS && funcs.getDesignerStatusJunction(store.jorisStatus) === index"
+			v-if="personal.selectedBoard === rf.BOARD_PITTS && pitts.getDesignerStatusJunction(store.jorisStatus) === index"
 			class="designerImg"
 			:id="'designerImg' + String(rf.DESIGNER_JORIS) + 'x' + String(index)"
 			:src="view.getImage('joris')"
@@ -576,7 +576,7 @@ function getBuildingRadius() {
 				@click="addPassengerToJunction(30)"></div>
 			<!-- SPLOTTER DESIGNER ARRIVAL - at the Airport (junction 30) instead of two passengers -->
 			<div
-				v-if="store.context.passengersLeftToPlace >= 2 && !funcs.designerArrivedThisRound() && store.jeroenStatus === rf.DESIGNER_NOT_ARRIVED"
+				v-if="store.context.passengersLeftToPlace >= 2 && !pitts.designerArrivedThisRound() && store.jeroenStatus === rf.DESIGNER_NOT_ARRIVED"
 				class="designerArrivalOption"
 				:style="{
 					top: view.getBuildingPos(30, -1, true)[0] + (store.refSize * 70) / 400 + 'px',
@@ -592,7 +592,7 @@ function getBuildingRadius() {
 				<img class="designerArrivalImg" :src="view.getImage('jeroen')" alt="Jeroen" />
 			</div>
 			<div
-				v-if="store.context.passengersLeftToPlace >= 2 && !funcs.designerArrivedThisRound() && store.jorisStatus === rf.DESIGNER_NOT_ARRIVED"
+				v-if="store.context.passengersLeftToPlace >= 2 && !pitts.designerArrivedThisRound() && store.jorisStatus === rf.DESIGNER_NOT_ARRIVED"
 				class="designerArrivalOption"
 				:style="{
 					top: view.getBuildingPos(30, -1, true)[0] + (store.refSize * 70) / 400 + 'px',

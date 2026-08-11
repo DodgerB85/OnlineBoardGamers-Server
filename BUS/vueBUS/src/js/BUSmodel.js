@@ -2,6 +2,7 @@ import * as rf from "./BUSreference.js"
 import * as IO from "../backend/BUS_IO.js"
 import * as WS from "../backend/BUSwebsocket.js"
 import * as funcs from "./BUSfuncs.js"
+import * as pitts from "./BUSpitts.js"
 //import * as replay from "./BUSreplay.js"
 import * as view from "./BUSview.js"
 import * as controller from "./BUScontroller.js"
@@ -23,11 +24,8 @@ export function initGame() {
 	personal.trainingGame = false
 	if (window.initData.startingOptions.includes(102)) personal.trainingGame = true
 
-	store.USE_PITTS_MAP = false
-	if (window.initData.startingOptions.includes(3)) store.USE_PITTS_MAP = true
-
 	// Initialize junctions based on board selection
-	if (store.USE_PITTS_MAP) {
+	if (window.initData.startingOptions.includes(3)) {
 		store.initializeJunctions(rf.BOARD_PITTS)
 	} else {
 		store.initializeJunctions(window.initData.preferredBusBoard)
@@ -44,7 +42,7 @@ export function initGame() {
 	if (window.initData.name != undefined) {
 		personal.name = window.initData.name
 		store.chatData = funcs.decompressChatData(window.initData.chatData)
-		if (store.USE_PITTS_MAP) {
+		if (window.initData.startingOptions.includes(3)) {
 			personal.selectedBoard = rf.BOARD_PITTS
 		} else {
 			personal.selectedBoard = window.initData.preferredBusBoard
@@ -200,7 +198,7 @@ export function getWinnerName(returnScores) {
 		// Primary: higher score wins
 		// Secondary: more timestones wins (not fewer)
 		// Tertiary: lower maxScore wins (reached score first)
-		return cmp(Math.floor(b.score), Math.floor(a.score)) || cmp(b.timeStones, a.timeStones) || cmp(a.maxScore, b.maxScore)
+		return cmp(Math.floor(b.score), Math.floor(a.score)) || cmp(b.timeStones, a.timeStones) || cmp(b.maxScore, a.maxScore)
 	})
 
 	if (returnScores) return resArr
@@ -408,22 +406,22 @@ export async function moveAllPassengersOntoCorrectBuilding(bldgNum) {
 		// A designer standing on a junction with the desired building (never the convention-centre
 		// spots) also automatically occupies that building, like a passenger
 		if (i !== rf.PITTS_CONVENTION_JUNCTION) {
-			if (funcs.getDesignerStatusJunction(store.jeroenStatus) === i && store.jeroenStatus !== rf.DESIGNER_REMOVED) {
+			if (pitts.getDesignerStatusJunction(store.jeroenStatus) === i && store.jeroenStatus !== rf.DESIGNER_REMOVED) {
 				for (let j = 0; j < store.junctions[i].length - 1; j++) {
 					if (store.junctions[i][j] === bldgNum) {
 						// Park Jeroen on the building (21-23), keeping the attended flag
 						store.junctions[i][j] += 20
-						store.jeroenStatus = rf.DESIGNER_ON_BUILDING_FLAG + (funcs.hasDesignerAttendedCon(store.jeroenStatus) ? rf.DESIGNER_CON_FLAG : 0) + i
+						store.jeroenStatus = rf.DESIGNER_ON_BUILDING_FLAG + (pitts.hasDesignerAttendedCon(store.jeroenStatus) ? rf.DESIGNER_CON_FLAG : 0) + i
 						break
 					}
 				}
 			}
-			if (funcs.getDesignerStatusJunction(store.jorisStatus) === i && store.jorisStatus !== rf.DESIGNER_REMOVED) {
+			if (pitts.getDesignerStatusJunction(store.jorisStatus) === i && store.jorisStatus !== rf.DESIGNER_REMOVED) {
 				for (let j = 0; j < store.junctions[i].length - 1; j++) {
 					if (store.junctions[i][j] === bldgNum) {
 						// Park Joris on the building (31-33), keeping the attended flag
 						store.junctions[i][j] += 30
-						store.jorisStatus = rf.DESIGNER_ON_BUILDING_FLAG + (funcs.hasDesignerAttendedCon(store.jorisStatus) ? rf.DESIGNER_CON_FLAG : 0) + i
+						store.jorisStatus = rf.DESIGNER_ON_BUILDING_FLAG + (pitts.hasDesignerAttendedCon(store.jorisStatus) ? rf.DESIGNER_CON_FLAG : 0) + i
 						break
 					}
 				}
@@ -570,7 +568,7 @@ export function getLinePlacementOptions() {
 		return possibilities
 	}
 
-	let otherEndJuncs = []
+	//let otherEndJuncs = []
 
 	// Otherwise, get the roads around each end junction
 	//currentPlayer().endJunctions.forEach((junc) => possibilities = possibilities.concat(getLinesAroundJunction(junc)))
@@ -686,8 +684,8 @@ export function canPlayerVrom(forceCheck) {
 	// type matches theirs (Jeroen - pubs, Joris - offices)
 	let specialDest = false
 	if (personal.selectedBoard === rf.BOARD_PITTS && !anyBldg) {
-		const jeroenJunction = funcs.getDesignerTransportJunction(store.jeroenStatus)
-		const jorisJunction = funcs.getDesignerTransportJunction(store.jorisStatus)
+		const jeroenJunction = pitts.getDesignerTransportJunction(store.jeroenStatus)
+		const jorisJunction = pitts.getDesignerTransportJunction(store.jorisStatus)
 		// Only count a designer as a valid move when they actually have a ride available (their
 		// convention-centre ride, or the return flight to the Airport when a bus route exists);
 		// this keeps the whole-turn gate in sync with what is highlighted and selectable
@@ -707,8 +705,8 @@ export function canPlayerVrom(forceCheck) {
 function junctionHasMovableToken(junction) {
 	const store = useModelStore()
 	if (store.junctions[junction][rf.paxIdx] > 0) return true
-	if (funcs.getDesignerTransportJunction(store.jeroenStatus) === junction) return true
-	if (funcs.getDesignerTransportJunction(store.jorisStatus) === junction) return true
+	if (pitts.getDesignerTransportJunction(store.jeroenStatus) === junction) return true
+	if (pitts.getDesignerTransportJunction(store.jorisStatus) === junction) return true
 	return false
 }
 
@@ -739,16 +737,16 @@ export function getVromBuildings() {
 	// Only shown when the matching designer is the selected token and the demand is correct
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
 		const origin = store.context.selectedPaxToVromJunction
-		if (store.context.selectedDesignerToVrom === rf.DESIGNER_JEROEN && funcs.getDesignerTransportJunction(store.jeroenStatus) === origin && store.jeroenStatus !== rf.DESIGNER_REMOVED) {
-			if (!funcs.hasDesignerAttendedCon(store.jeroenStatus) && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE)
+		if (store.context.selectedDesignerToVrom === rf.DESIGNER_JEROEN && pitts.getDesignerTransportJunction(store.jeroenStatus) === origin && store.jeroenStatus !== rf.DESIGNER_REMOVED) {
+			if (!pitts.hasDesignerAttendedCon(store.jeroenStatus) && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE)
 				ret.push([rf.PITTS_CONVENTION_JUNCTION, [rf.VROM_DEST_JEROEN_CON]])
-			if (funcs.hasDesignerAttendedCon(store.jeroenStatus) && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE)
+			if (pitts.hasDesignerAttendedCon(store.jeroenStatus) && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE)
 				ret.push([rf.PITTS_AIRPORT_JUNCTION, [rf.VROM_DEST_AIRPORT]])
 		}
-		if (store.context.selectedDesignerToVrom === rf.DESIGNER_JORIS && funcs.getDesignerTransportJunction(store.jorisStatus) === origin && store.jorisStatus !== rf.DESIGNER_REMOVED) {
-			if (!funcs.hasDesignerAttendedCon(store.jorisStatus) && store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE)
+		if (store.context.selectedDesignerToVrom === rf.DESIGNER_JORIS && pitts.getDesignerTransportJunction(store.jorisStatus) === origin && store.jorisStatus !== rf.DESIGNER_REMOVED) {
+			if (!pitts.hasDesignerAttendedCon(store.jorisStatus) && store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE)
 				ret.push([rf.PITTS_CONVENTION_JUNCTION, [rf.VROM_DEST_JORIS_CON]])
-			if (funcs.hasDesignerAttendedCon(store.jorisStatus) && store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE)
+			if (pitts.hasDesignerAttendedCon(store.jorisStatus) && store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE)
 				ret.push([rf.PITTS_AIRPORT_JUNCTION, [rf.VROM_DEST_AIRPORT]])
 		}
 	}
