@@ -130,6 +130,12 @@ function clickedBldg(junction, building) {
 	playPlopAnimation(junction, building)
 }
 function highlight(e, entering) {
+	// Designer arrival options are column wrappers; the border lives on their inner circle
+	if (e.currentTarget.classList.contains("designerArrivalOption")) {
+		const circle = e.currentTarget.querySelector(".designerArrivalCircle")
+		if (circle) circle.style.borderColor = entering ? "lightgreen" : "yellow"
+		return
+	}
 	if (entering) e.target.style.border = String((store.refSize * 5) / 100) + "px solid lightgreen"
 	else e.target.style.border = String((store.refSize * 5) / 100) + "px solid yellow"
 }
@@ -579,33 +585,45 @@ function getBuildingRadius() {
 				v-if="store.context.passengersLeftToPlace >= 2 && !pitts.designerArrivedThisRound() && store.jeroenStatus === rf.DESIGNER_NOT_ARRIVED"
 				class="designerArrivalOption"
 				:style="{
-					top: view.getBuildingPos(30, -1, true)[0] + (store.refSize * 70) / 400 + 'px',
-					left: view.getBuildingPos(30, -1, true)[1] - (store.refSize * 55) / 400 + 'px',
-					width: (store.refSize * 28) / 100 + 'px',
-					height: (store.refSize * 28) / 100 + 'px',
-					border: String((store.refSize * 5) / 100) + 'px solid ' + rf.DESIGNER_JEROEN_COLOUR,
+					top: view.getBuildingPos(30, -1, true)[0] + (store.refSize * 272) / 400 + 'px',
+					left: view.getBuildingPos(30, -1, true)[1] - (store.refSize * 63) / 400 + 'px',
 				}"
 				title="Bring Jeroen into play at the Airport (uses two of your passenger placements)"
 				@mouseover="highlight($event, true)"
 				@mouseleave="highlight($event, false)"
 				@click="addDesignerToJunction(rf.DESIGNER_JEROEN)">
-				<img class="designerArrivalImg" :src="view.getImage('jeroen')" alt="Jeroen" />
+				<div
+					class="designerArrivalCircle"
+					:style="{
+						width: (store.refSize * 40) / 100 + 'px',
+						height: (store.refSize * 40) / 100 + 'px',
+						border: String((store.refSize * 5) / 100) + 'px solid yellow',
+					}">
+					<img class="designerArrivalImg" :src="view.getImage('jeroen')" alt="Jeroen" />
+				</div>
+				<span class="designerArrivalName" :style="{ fontSize: (store.refSize * 50) / 400 + 'px' }">Jeroen</span>
 			</div>
 			<div
 				v-if="store.context.passengersLeftToPlace >= 2 && !pitts.designerArrivedThisRound() && store.jorisStatus === rf.DESIGNER_NOT_ARRIVED"
 				class="designerArrivalOption"
 				:style="{
-					top: view.getBuildingPos(30, -1, true)[0] + (store.refSize * 70) / 400 + 'px',
-					left: view.getBuildingPos(30, -1, true)[1] + (store.refSize * 25) / 400 + 'px',
-					width: (store.refSize * 28) / 100 + 'px',
-					height: (store.refSize * 28) / 100 + 'px',
-					border: String((store.refSize * 5) / 100) + 'px solid ' + rf.DESIGNER_JORIS_COLOUR,
+					top: view.getBuildingPos(30, -1, true)[0] + (store.refSize * 272) / 400 + 'px',
+					left: view.getBuildingPos(30, -1, true)[1] + (store.refSize * 127) / 400 + 'px',
 				}"
 				title="Bring Joris into play at the Airport (takes two of your passenger placements)"
 				@mouseover="highlight($event, true)"
 				@mouseleave="highlight($event, false)"
 				@click="addDesignerToJunction(rf.DESIGNER_JORIS)">
-				<img class="designerArrivalImg" :src="view.getImage('joris')" alt="Joris" />
+				<div
+					class="designerArrivalCircle"
+					:style="{
+						width: (store.refSize * 40) / 100 + 'px',
+						height: (store.refSize * 40) / 100 + 'px',
+						border: String((store.refSize * 5) / 100) + 'px solid yellow',
+					}">
+					<img class="designerArrivalImg" :src="view.getImage('joris')" alt="Joris" />
+				</div>
+				<span class="designerArrivalName" :style="{ fontSize: (store.refSize * 50) / 400 + 'px' }">Joris</span>
 			</div>
 		</template>
 	</template>
@@ -839,8 +857,17 @@ function getBuildingRadius() {
 .designerArrivalOption {
 	position: absolute;
 	z-index: 10;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.designerArrivalOption:hover {
+	cursor: pointer;
+}
+
+.designerArrivalCircle {
 	border-radius: 100%;
-	border-color: yellow;
 	background-color: white;
 	display: flex;
 	align-items: center;
@@ -848,9 +875,13 @@ function getBuildingRadius() {
 	overflow: hidden;
 }
 
-.designerArrivalOption:hover {
-	cursor: pointer;
-	border-color: lightgreen;
+.designerArrivalName {
+	color: #d4eafd;
+	font-weight: bold;
+	line-height: 1.1;
+	margin-top: 2px;
+	white-space: nowrap;
+	text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
 }
 
 .designerArrivalImg {
