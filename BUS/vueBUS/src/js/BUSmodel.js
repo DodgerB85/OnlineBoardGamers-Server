@@ -371,10 +371,10 @@ export function getEmptyBuildingSpotsByNumberTotal(number) {
 
 export async function moveAllPassengersOntoJunctions() {
 	const store = useModelStore()
-	// A designer parked on their convention-centre spot returns to the convention junction (17) at round
-	// end, like a delivered passenger
-	if (store.jeroenStatus >= rf.DESIGNER_ON_BUILDING_FLAG && store.jeroenStatus % rf.DESIGNER_ON_BUILDING_FLAG === rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION) store.jeroenStatus %= rf.DESIGNER_ON_BUILDING_FLAG
-	if (store.jorisStatus >= rf.DESIGNER_ON_BUILDING_FLAG && store.jorisStatus % rf.DESIGNER_ON_BUILDING_FLAG === rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION) store.jorisStatus %= rf.DESIGNER_ON_BUILDING_FLAG
+	// A designer currently on the convention junction (17) moves onto their convention pub/office
+	// spot at round end, like a delivered passenger
+	if (store.jeroenStatus >= 0 && store.jeroenStatus < rf.DESIGNER_ON_BUILDING_FLAG && store.jeroenStatus % rf.DESIGNER_CON_FLAG === rf.PITTS_CONVENTION_JUNCTION) store.jeroenStatus = rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION
+	if (store.jorisStatus >= 0 && store.jorisStatus < rf.DESIGNER_ON_BUILDING_FLAG && store.jorisStatus % rf.DESIGNER_CON_FLAG === rf.PITTS_CONVENTION_JUNCTION) store.jorisStatus = rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION
 	for (let i = 0; i < store.junctions.length; i++) {
 		for (let j = 0; j < store.junctions[i].length - 1; j++) {
 			if (store.junctions[i][j] >= 30) {

@@ -218,9 +218,8 @@ function clickedDesignerToVrom(designerIdx, junction) {
 	store.context.selectedPaxToVromJunction = junction
 }
 
-// A designer parked on their convention-centre spot is parked until the round end (returning to the
-// convention junction like a delivered passenger); the Airport flight is only offered on a later
-// round from junction 17 itself, so no click handling is added here
+// A designer parked on their convention-centre spot stays there like a delivered passenger; the
+// Airport flight is only offered on a later round from junction 17 itself, so no click handling is added here
 
 // A passenger can select this junction for VROOMM only when a regular desired building is reachable from it;
 // designer special rides (convention centre / Airport) never make a junction selectable for a passenger
@@ -471,7 +470,7 @@ function getBuildingRadius() {
 	</template>
 
 	<!-- Splotter Designers parked on their convention-centre spot (small size, like a building occupant);
-			parked until round end, then returned to the convention junction like a delivered passenger -->
+			parked from delivery onwards, like a delivered passenger -->
 	<img
 		v-if="personal.selectedBoard === rf.BOARD_PITTS && store.jeroenStatus === rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION"
 		class="designerImgBldg"

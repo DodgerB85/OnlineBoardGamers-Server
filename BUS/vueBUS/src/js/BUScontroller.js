@@ -110,11 +110,10 @@ export function canReachBuildingFromJunction(startJunction, player, store, token
 	// Splotter Designer special rides (Pittsburgh):
 	// - a designer on one of your junctions can ride to their matching convention-centre spot when that
 	//   destination type is currently desired, as long as they have not yet attended the Splotter Con;
-	//   they stay parked on the spot until the round end, when they return to the convention junction (17)
-	//   like a delivered passenger
-	// - after attending the Splotter Con, a designer back on junction 17 can be transported to the Airport
-	//   during a later Vrrooomm! action, when the desired type matches theirs (Jeroen - pubs, Joris - offices)
-	//   and a bus route to the Airport exists
+	//   they stay parked on their convention pub/office spot like a delivered passenger
+	// - after attending the Splotter Con, a designer transported from the convention junction (17) can be
+	//   flown to the Airport during a later Vrroooomm! action, when the desired type matches theirs
+	//   (Jeroen - pubs, Joris - offices) and a bus route to the Airport exists
 	// - passengers only highlight when a regular (non convention-centre) desired building is in the network;
 	//   when the convention centre is the only desired stop, only the matching designer who has not yet visited it is an option
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
@@ -278,10 +277,10 @@ function moveAllPassengersOntoCorrectBuilding(bldgNum) {
 
 function moveAllPassengersOntoJunctions() {
 	const store = useModelStore()
-	// A designer parked on their convention-centre spot returns to the convention junction (17) at round
-	// end, like a delivered passenger
-	if (store.jeroenStatus >= rf.DESIGNER_ON_BUILDING_FLAG && store.jeroenStatus % rf.DESIGNER_ON_BUILDING_FLAG === rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION) store.jeroenStatus %= rf.DESIGNER_ON_BUILDING_FLAG
-	if (store.jorisStatus >= rf.DESIGNER_ON_BUILDING_FLAG && store.jorisStatus % rf.DESIGNER_ON_BUILDING_FLAG === rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION) store.jorisStatus %= rf.DESIGNER_ON_BUILDING_FLAG
+	// A designer currently on the convention junction (17) moves onto their convention pub/office
+	// spot at round end, like a delivered passenger
+	if (store.jeroenStatus >= 0 && store.jeroenStatus < rf.DESIGNER_ON_BUILDING_FLAG && store.jeroenStatus % rf.DESIGNER_CON_FLAG === rf.PITTS_CONVENTION_JUNCTION) store.jeroenStatus = rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION
+	if (store.jorisStatus >= 0 && store.jorisStatus < rf.DESIGNER_ON_BUILDING_FLAG && store.jorisStatus % rf.DESIGNER_CON_FLAG === rf.PITTS_CONVENTION_JUNCTION) store.jorisStatus = rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION
 	for (let i = 0; i < store.junctions.length; i++) {
 		// On each junction, check for pax, and try to move to correct bldg
 		for (let j = 0; j < store.junctions[i].length - 1; j++) {

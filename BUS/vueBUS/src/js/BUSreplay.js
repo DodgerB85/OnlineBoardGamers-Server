@@ -381,7 +381,7 @@ function replayVrom(historyIndex, playerIndex, entry3) {
 				if (designerIdx === rf.DESIGNER_JEROEN) store.jeroenStatus = rf.DESIGNER_REMOVED
 				else store.jorisStatus = rf.DESIGNER_REMOVED
 			} else if (entry3[i][2] < 0) {
-				// Parked on the convention-centre spot (attended); returns to the convention junction at round end
+				// Parked on the convention-centre spot (attended); stays there like a delivered passenger
 				if (designerIdx === rf.DESIGNER_JEROEN) store.jeroenStatus = rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION
 				else store.jorisStatus = rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION
 			} else {
