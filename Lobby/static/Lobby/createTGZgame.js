@@ -14,6 +14,8 @@ function initGameCreation(fillData, setupData = {}) {
 
 	selectPlayers()
 
+	applyInitialExpertState()
+
 	if (fillData) {
 		document.getElementById("name").value = setupData.gameName
 		document.getElementById("description").value = setupData.gameDescription
@@ -46,6 +48,14 @@ function initGameCreation(fillData, setupData = {}) {
 			document.getElementById("mapData").value = ""
 		}
 	}
+}
+
+function applyInitialExpertState() {
+	const enableAdvancedOptions = document.getElementById("enableAdvancedOptions")
+	if (!enableAdvancedOptions || enableAdvancedOptions.checked) return
+	const expertOptions = document.getElementById("expertOptions")
+	expertOptions.style.maxHeight = "370px"
+	expertOptions.style.overflowY = "auto"
 }
 
 function setPlayersforMapData() {
@@ -230,6 +240,7 @@ function validateExpertOptions(checkbox) {
 			removeOption("schismRadio_half")
 			removeOption("schismRadio_mix")
 			document.getElementById("expertOptions").style.maxHeight = "fit-content"
+			document.getElementById("expertOptions").style.overflowY = "visible"
 			// Enable expert checkboxes
 			expertCheckboxes.forEach((expertCheckbox) => {
 				expertCheckbox.disabled = false
@@ -250,6 +261,7 @@ function validateExpertOptions(checkbox) {
 		} else {
 			addOption("useSchism")
 			document.getElementById("expertOptions").style.maxHeight = "370px"
+			document.getElementById("expertOptions").style.overflowY = "auto"
 			// Disable and uncheck expert checkboxes
 			expertCheckboxes.forEach((expertCheckbox) => {
 				expertCheckbox.checked = false
@@ -331,11 +343,13 @@ function changeValue(event, button, increment) {
 	let span = document.getElementById("expertSummaryVRSpan")
 
 	if (isAnyValueChanged) {
-		span.style.color = "red"
-		span.style.backgroundColor = "yellow"
-		span.style.fontSize = "20px"
-		span.style.fontWeight = "bold"
-		span.innerHTML = "<br/>CAUTION: New VR unbalances the game - less likely players will join"
+		span.style.padding = "8px 12px"
+		span.style.borderRadius = "var(--radius-sm)"
+		span.style.background = "var(--color-warn-bg)"
+		span.style.color = "var(--color-warn)"
+		span.style.fontSize = "13px"
+		span.style.fontWeight = "600"
+		span.innerHTML = "CAUTION: New VR unbalances the game - less likely players will join"
 
 		// Check if reset button already exists
 		const resetButton = document.getElementById("resetButton")
@@ -344,12 +358,20 @@ function changeValue(event, button, increment) {
 			span.parentNode.appendChild(resetButton)
 		}
 	} else {
+		span.style.padding = ""
+		span.style.borderRadius = ""
+		span.style.background = ""
+		span.style.color = ""
+		span.style.fontSize = ""
+		span.style.fontWeight = ""
 		span.innerHTML = ""
 	}
 }
 
 function pickRandomgods(event, button) {
 	event.preventDefault() // Prevent form submission
+
+	if (!document.getElementById("enableAdvancedOptions").checked) return
 
 	const checkboxes1 = document.querySelectorAll('#expertOptions input[type="checkbox"]')
 	const checkboxes = Array.from(checkboxes1).slice(1)
@@ -391,7 +413,15 @@ function resetAllValues() {
 		valueFields[i].value = defaultValues[i]
 	}
 	let span = document.getElementById("expertSummaryVRSpan")
+	span.style.padding = ""
+	span.style.borderRadius = ""
+	span.style.background = ""
+	span.style.color = ""
+	span.style.fontSize = ""
+	span.style.fontWeight = ""
 	span.innerHTML = ""
+	const resetButton = document.getElementById("resetButton")
+	if (resetButton) resetButton.parentNode.removeChild(resetButton)
 }
 
 function selectPlayers() {
