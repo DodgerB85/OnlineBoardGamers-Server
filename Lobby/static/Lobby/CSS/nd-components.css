@@ -1578,7 +1578,7 @@ body.nd .nd-create-page textarea {
 }
 
 body.nd .nd-create-page #blitzWarningSpan {
-    display: block;
+    display: none;
     padding: 12px 16px;
     color: var(--color-warn);
     font-weight: 600;

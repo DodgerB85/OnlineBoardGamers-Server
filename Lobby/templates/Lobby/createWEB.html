@@ -85,7 +85,7 @@
                             <input type="text" id="player4" name="player4" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
                         </div></div>
                     </div>
-                    <div id="blitzWarningSpan" style="margin:4px 0 8px;padding:8px 12px;border-radius:var(--radius-sm);background:var(--color-warn-bg);color:var(--color-warn);font-size:13px;font-weight:600">{% translate "Careful: A 5 min game with 3p could still take ~2+ hrs" %}</div>
+                    <div id="blitzWarningSpan" style="display:none;margin:4px 0 8px;padding:8px 12px;border-radius:var(--radius-sm);background:var(--color-warn-bg);color:var(--color-warn);font-size:13px;font-weight:600">{% translate "Careful, Live gives each player 5 minutes per move, not per game. With 3 players each round is about 15 min, and a full game has many rounds, so it can still take ~2+ hours." %}</div>
                 </div>
 
                 <div class="nd-card">
@@ -245,7 +245,7 @@
                                 </div>
                             </div>
                         </div>
-                        <span id="blitzWarningSpan">{% translate "Careful: A 5 min game with 3p could still take ~2+ hrs" %}</span>
+                        <span id="blitzWarningSpan">{% translate "Careful, Live gives each player 5 minutes per move, not per game. With 3 players each round is about 15 min, and a full game has many rounds, so it can still take ~2+ hours." %}</span>
                     </fieldset>
                     <fieldset id="basicOptions" class="optionsGroupTop">
                         <legend class="optionsHeader">{% translate "Common Options" %}</legend>
