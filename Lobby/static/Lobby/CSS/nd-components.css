@@ -115,7 +115,6 @@ body.nd .nd-page-header h1 {
 }
 
 body.nd .nd-page-subtitle {
-    color: var(--color-muted);
     font-weight: 600;
     font-size: 14px;
 }
@@ -127,7 +126,6 @@ body.nd .nd-section {
 body.nd .nd-section-title {
     font-size: 13px;
     font-weight: 800;
-    color: var(--color-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin: 0 0 10px;
@@ -250,7 +248,6 @@ body.nd .nd-create-page input[type="submit"]:disabled {
     cursor: not-allowed;
     background: var(--color-surface-soft);
     border-color: #cbd3db;
-    color: var(--color-muted);
 }
 
 @media (hover: hover) {
@@ -260,7 +257,6 @@ body.nd .nd-create-page input[type="submit"]:disabled {
     body.nd .nd-create-page input[type="submit"]:disabled:hover {
         background: var(--color-surface-soft);
         border-color: #cbd3db;
-        color: var(--color-muted);
         cursor: not-allowed;
     }
 }
@@ -367,7 +363,6 @@ body.nd .nd-form-label {
 
 body.nd .nd-form-row .nd-form-help {
     flex-basis: 100%;
-    color: var(--color-muted);
     font-size: 13px;
     margin: 0;
     padding-left: 232px;
@@ -441,7 +436,6 @@ body.nd .nd-register-form input[type="password"] {
 body.nd .nd-register-form .helptext {
     display: block;
     margin-top: 4px;
-    color: var(--color-muted);
     font-size: 12px;
     line-height: 1.4;
 }
@@ -494,7 +488,6 @@ body.nd .nd-table td {
 
 body.nd .nd-table th {
     background: var(--color-surface-soft);
-    color: var(--color-muted);
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -535,7 +528,6 @@ body.nd .nd-log-entry:last-child {
 body.nd .nd-log-date {
     font-size: 12px;
     font-weight: 600;
-    color: var(--color-muted);
     margin-bottom: 6px;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -596,7 +588,6 @@ body.nd .nd-donate-option {
 body.nd .nd-donate-option-label {
     font-size: 12px;
     font-weight: 600;
-    color: var(--color-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
@@ -638,7 +629,6 @@ body.nd .nd-form-actions {
 }
 body.nd .nd-form-footer-link {
     font-size: 14px;
-    color: var(--color-muted);
     margin-top: 14px;
     margin-bottom: 0;
 }
@@ -653,7 +643,6 @@ body.nd .nd-pill {
     font-size: 13px;
     font-weight: 700;
     background: var(--color-surface-soft);
-    color: var(--color-muted);
     border: 1px solid var(--color-border);
     white-space: nowrap;
 }
@@ -705,7 +694,6 @@ body.nd .nd-tab {
     font-size: 15px;
     font-weight: 600;
     letter-spacing: 0.01em;
-    color: var(--color-muted);
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -830,7 +818,6 @@ body.nd .nd-mod-wrap:focus-within::after {
         transform: none;
         opacity: 1;
         background: transparent;
-        color: var(--color-muted);
         padding: 0;
         font-size: 11px;
     }
@@ -1076,7 +1063,6 @@ body.nd .nd-map-editor-actions .nd-button input {
 body.nd .nd-map-editor-help,
 body.nd .nd-map-editor-note {
     margin: 0;
-    color: var(--color-muted);
     font-size: 14px;
     line-height: 1.45;
 }
@@ -1272,8 +1258,6 @@ body.nd .nd-map-editor .BGH_drinkSpot {
 }
 
 /* ---------- UTILITY ---------- */
-body.nd .nd-muted { color: var(--color-muted); }
-body.nd .nd-small { font-size: 14px; }
 body.nd .nd-center { text-align: center; }
 
 /* Existing game-creation forms keep their established IDs and client-side hooks. */
@@ -1443,7 +1427,6 @@ body.nd .nd-create-page .inlineHelp,
 body.nd .nd-create-page .optionHelp {
     flex: 1 0 calc(100% - 28px);
     margin-left: 28px;
-    color: var(--color-muted);
     font-size: 13px;
     font-style: italic;
 }
@@ -1466,7 +1449,6 @@ body.nd .nd-page .paceHelpIcon {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: var(--color-muted, #666);
     font-weight: 700;
     font-size: 11px;
     border: 1px solid var(--color-border-strong, #999);
@@ -1573,7 +1555,6 @@ body.nd .nd-create-page textarea:disabled {
 body.nd .nd-create-page input:disabled + label,
 body.nd .nd-create-page label:has(input:disabled),
 body.nd .nd-create-page input:disabled ~ .inlineHelp {
-    color: var(--color-muted);
     opacity: 0.6;
 }
 
@@ -1682,7 +1663,6 @@ body.nd .nd-create-page .singleChoiceDivText:has(input:disabled),
 body.nd .nd-create-page .FCMsingleChoiceDiv:has(input:disabled) {
     background: var(--color-surface-soft);
     border-radius: var(--radius-sm);
-    color: var(--color-muted);
 }
 
 /* D4 bare checkbox/radio label rows inside a fieldset (not singleChoiceDiv) */
@@ -1791,7 +1771,6 @@ body.nd .nd-row-flex {
    clicked to open a popup modal with that game's full description. */
 body.nd .nd-section-hint {
     margin: -6px 0 14px;
-    color: var(--color-muted);
 }
 body.nd .nd-modal-box .nd-flavour-body {
     padding: 6px 0 4px;
@@ -1839,7 +1818,6 @@ body.nd .nd-modal-close {
     right: 12px;
     background: transparent;
     border: none;
-    color: var(--color-muted);
     font-size: 26px;
     line-height: 1;
     cursor: pointer;
@@ -1981,13 +1959,11 @@ body.nd .nd-check-label input[type=radio] {
 body.nd .nd-check-label:has(input:disabled) {
     cursor: not-allowed;
     background: var(--color-surface-soft);
-    color: var(--color-muted);
     border-radius: var(--radius-sm);
 }
 body.nd .nd-check-label input[type=checkbox]:disabled ~ div,
 body.nd .nd-check-label input[type=radio]:disabled ~ div {
     opacity: 0.5;
-    color: var(--color-muted);
 }
 body.nd .nd-check-label input[type=checkbox]:disabled,
 body.nd .nd-check-label input[type=radio]:disabled {
@@ -1998,7 +1974,6 @@ body.nd #FCMallOptions #nonExpertOptions .nd-check-label:has(input:disabled) {
 }
 body.nd .nd-opt-help {
     font-size: 12px;
-    color: var(--color-muted);
     margin-top: 2px;
     line-height: 1.4;
 }
@@ -2217,7 +2192,6 @@ body.nd .nd-stats-tile-num {
 }
 body.nd .nd-stats-tile-label {
     font-size: 12px;
-    color: var(--color-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     margin-top: 4px;
@@ -2248,7 +2222,6 @@ body.nd .nd-stats-gamebreak > .nd-game-stat-sep {
 body.nd .nd-empty {
     font-size: 14px;
     font-weight: 400;
-    color: var(--color-muted);
     margin: 8px 0;
 }
 
@@ -2294,7 +2267,6 @@ body.nd .nd-icon-legend h3 {
 }
 body.nd .nd-icon-legend h4 {
     font-size: 13px;
-    color: var(--color-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     margin: 16px 0 8px;
@@ -2427,7 +2399,6 @@ body.nd .nd-table:has(.nd-row09) thead th {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--color-muted);
     border: none;
     text-align: left;
 }
@@ -2482,14 +2453,14 @@ body.nd .nd-row-divider::before {
     right: 0;
     top: 50%;
     height: 1px;
-    background: var(--nd-divider-color, var(--color-muted));
+    background: var(--nd-divider-color, var(--color-ink));
     opacity: 0.25;
 }
 body.nd .nd-row-divider-icon {
     justify-self: center;
     width: var(--nd-divider-size);
     height: var(--nd-divider-size);
-    background: var(--nd-divider-color, var(--color-muted));
+    background: var(--nd-divider-color, var(--color-ink));
     -webkit-mask: var(--nd-divider-icon) center / contain no-repeat;
     mask: var(--nd-divider-icon) center / contain no-repeat;
     transform: rotate(var(--nd-divider-rotation));
@@ -2497,8 +2468,8 @@ body.nd .nd-row-divider-icon {
 body.nd .nd-row-divider-tile {
     -webkit-mask: none;
     mask: none;
-    background-color: var(--nd-divider-color, var(--color-muted));
-    background-image: linear-gradient(var(--nd-divider-color, var(--color-muted)), var(--nd-divider-color, var(--color-muted))), var(--nd-divider-icon);
+    background-color: var(--nd-divider-color, var(--color-ink));
+    background-image: linear-gradient(var(--nd-divider-color, var(--color-ink)), var(--nd-divider-color, var(--color-ink))), var(--nd-divider-icon);
     background-size: cover;
     background-blend-mode: color;
     border-radius: 2px;
@@ -2533,7 +2504,6 @@ body.nd .nd-col-game strong {
     color: var(--color-ink);
 }
 body.nd .nd-col-game small {
-    color: var(--color-muted);
     font-size: 14px;
     line-height: 1.4;
 }
@@ -2645,7 +2615,6 @@ body.nd .nd-row09 .nd-col-options img.startingMap {
         display: block;
         font-size: 11px;
         font-weight: 600;
-        color: var(--color-muted);
         text-transform: uppercase;
         letter-spacing: 0.04em;
         margin-bottom: 4px;
@@ -2840,7 +2809,6 @@ body.nd .nd-tgz-options .diffVR {
 	body.nd .nd-game-card-body p { font-size: 15px; }
 	body.nd .nd-create-tile-label { font-size: 16px; }
 	body.nd .nd-map-editor-grid .nd-create-tile-label { font-size: 15px; }
-	body.nd .nd-small { font-size: 15px; }
 	body.nd .nd-modal-box .nd-flavour-body { font-size: 16px; }
 	body.nd .nd-modal-title { font-size: 22px; }
 	body.nd .nd-fcm-china-help { font-size: 17px; }

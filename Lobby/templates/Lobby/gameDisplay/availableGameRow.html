@@ -10,7 +10,7 @@
         <small><i>{{ game.gameDescription }}</i></small>
       {% endif %}
       <br>
-      <small class="nd-muted">
+      <small class="">
         <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a> ·
         {{ game.pace|safe }}
         {% if game.learningGame %}· <span class="nd-pill nd-pill-accent">Learning</span>{% endif %}
@@ -18,7 +18,7 @@
       </small>
     </td>
     <td class="nd-col-players" data-label="{% translate "Players" %}">
-      <span class="nd-muted nd-small">{{ game.allPlayers|length }}/{{ game.maxPlayers }}</span>
+      <span class="">{{ game.allPlayers|length }}/{{ game.maxPlayers }}</span>
       {% for player in game.allPlayers %}
         <a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>
         {% if not forloop.last %},{% endif %}
@@ -66,7 +66,7 @@
       {% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}
     </td>
     <td class="nd-col-status" data-label="{% translate "Created" %}">
-      <span class="timeToConvertSpan nd-small nd-muted">{{ game.created }}</span>
+      <span class="timeToConvertSpan">{{ game.created }}</span>
     </td>
     <td class="nd-col-cta" data-label="{% translate "Join" %}">
       {% if game.involvedPlayer %}

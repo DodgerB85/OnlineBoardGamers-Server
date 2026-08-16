@@ -162,7 +162,6 @@ body.nd .nd-stats-section .playerStatsDiv:first-child {
 body.nd .nd-stats-section h2 {
 	font-size: 13px;
 	font-weight: 700;
-	color: var(--color-muted);
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
 	margin: 0 0 8px;
@@ -171,7 +170,6 @@ body.nd .nd-stats-section h2 {
 /* "Win stats are calculated hourly..." footnote. */
 body.nd .nd-stats-hint {
 	font-size: 12px;
-	color: var(--color-muted);
 	margin: 10px 0 0;
 	padding: 0;
 	line-height: 1.45;
@@ -236,7 +234,6 @@ body.nd .nd-fcm-stats .tablinks {
 	background: transparent;
 	border: none;
 	border-right: 1px solid var(--color-border);
-	color: var(--color-muted);
 	cursor: pointer;
 	font-family: inherit;
 	font-size: 14px;
@@ -330,7 +327,6 @@ body.nd .nd-tgz-stats .tablinks {
 	background: transparent;
 	border: none;
 	border-right: 1px solid var(--color-border);
-	color: var(--color-muted);
 	cursor: pointer;
 	font-family: inherit;
 	font-size: 14px;
@@ -385,7 +381,6 @@ body.nd .nd-tgz-stats ul {
 
 body.nd .nd-tgz-stats .specNoteSpan {
 	font-size: 13px;
-	color: var(--color-muted);
 }
 
 /* ============================================================
@@ -430,7 +425,6 @@ body.nd .nd-aqy-stats .tablinks {
 	background: transparent;
 	border: none;
 	border-right: 1px solid var(--color-border);
-	color: var(--color-muted);
 	cursor: pointer;
 	font-family: inherit;
 	font-size: 14px;
@@ -541,7 +535,6 @@ body.nd .nd-ten-games .nd-col-options img.startingMap {
 		display: block;
 		font-size: 11px;
 		font-weight: 600;
-		color: var(--color-muted);
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 		margin-bottom: 4px;
@@ -677,7 +670,6 @@ body.nd #playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead th {
 body.nd .nd-player-sub {
 	font-size: 13px;
 	font-weight: 700;
-	color: var(--color-muted);
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
 	margin: 0 0 8px;

@@ -71,7 +71,7 @@
                                 </button>
                             {% endif %}
                         </div>
-                        <p class="nd-muted" style="font-size: 12px; margin: 0;">
+                        <p class="" style="font-size: 12px; margin: 0;">
                             {% blocktranslate trimmed %}
                                 Adds you to the OBG Discord server and sends turn notifications via DM.
                             {% endblocktranslate %}
@@ -88,14 +88,14 @@
                                 onclick="askForBrowserNotifications()">
                             {% translate "Request Browser Notifications" %}
                         </button>
-                        <p class="nd-muted" style="font-size: 12px; margin: 0;">{% translate "Sends a browser notification when it's your turn. Requires the tab to be open." %}</p>
+                        <p class="" style="font-size: 12px; margin: 0;">{% translate "Sends a browser notification when it's your turn. Requires the tab to be open." %}</p>
                     </div>
                 </div>
 
                 <div style="margin-top: 20px; margin-bottom: 8px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-muted);">
                     {% translate "Email Notifications" %}
                 </div>
-                <p class="nd-muted" style="font-size: 13px; margin: 0 0 8px;">
+                <p class="" style="font-size: 13px; margin: 0 0 8px;">
                     {% blocktranslate trimmed %}
                         Select which emails you'd like to receive. Add admin[at]onlineboardgamers.com to your whitelist and check spam if emails are missing.
                     {% endblocktranslate %}
@@ -193,7 +193,7 @@
             <div class="nd-card-header">
                 <h2>{% translate "Webhooks" %}</h2>
             </div>
-            <p class="nd-muted" style="font-size: 13px; margin: 0 0 10px;">
+            <p class="" style="font-size: 13px; margin: 0 0 10px;">
                 {% translate "For help adding webhook notifications, see" %}
                 <a href="{% url 'lobbyHelp' %}" target="_blank">{% translate "Help" %}</a>.
             </p>
@@ -233,7 +233,7 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="4" class="nd-muted">{% translate "No webhooks set up" %}</td>
+                                <td colspan="4" class="">{% translate "No webhooks set up" %}</td>
                             </tr>
                         {% endif %}
                         <form id="webhookAddForm" action="{% url 'addWebhook' %}" method="post">
@@ -548,7 +548,7 @@
                 <div class="nd-card-header">
                     <h2>{% translate "Individual Game Preferences" %}</h2>
                 </div>
-                <p class="nd-muted" style="font-size:13px;margin:0 0 12px;">
+                <p class="" style="font-size:13px;margin:0 0 12px;">
                     {% translate "Click these buttons to set up more detailed preferences for the following games:" %}
                 </p>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -614,7 +614,7 @@
                         </div>
                     {% endfor %}
                 {% else %}
-                    <div id="noBlacklistedPlayers" class="nd-muted" style="font-size:13px;">{% translate "No players blacklisted" %}</div>
+                    <div id="noBlacklistedPlayers" class="" style="font-size:13px;">{% translate "No players blacklisted" %}</div>
                 {% endif %}
             </div>
         </div>

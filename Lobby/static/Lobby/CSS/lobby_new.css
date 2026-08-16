@@ -49,7 +49,6 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--color-muted);
     font-size: 16px;
     line-height: 1;
     padding: 2px 6px;
@@ -103,7 +102,6 @@ body.nd .colourGuideDiv { display: none; }
     margin: 6px 0 0;
     font-size: 13px;
     font-weight: 600;
-    color: var(--color-muted);
 }
 .nd-empty-hint a {
     color: var(--color-accent-strong);
@@ -148,7 +146,6 @@ body.nd .nd-table.nd-lobby-games-table thead th {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.07em;
-    color: var(--color-muted);
     border: none;
     text-align: left;
 }
@@ -204,7 +201,6 @@ body.nd .nd-no-options {
         display: block;
         font-size: 11px;
         font-weight: 700;
-        color: var(--color-muted);
         text-transform: uppercase;
         letter-spacing: 0.06em;
         margin-bottom: 4px;
@@ -244,7 +240,6 @@ body.nd .nd-no-options {
 @media (max-width: 720px) {
     body.nd .nd-no-options {
         display: inline;
-        color: var(--color-muted);
     }
     body.nd .nd-table.nd-lobby-games-table thead {
         display: none;
@@ -398,7 +393,6 @@ body.nd .nd-col-cta .deleteTrainingGame {
 .nd-table thead th,
 .nd-table thead td {
     padding: 4px 8px;
-    color: var(--color-muted);
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
@@ -483,7 +477,6 @@ body.nd .nd-col-cta .deleteTrainingGame {
 
 .buttonDiv.Leave {
     background: transparent;
-    color: var(--color-muted);
     border: 1px solid var(--color-border);
 }
 .buttonDiv.Leave:hover {
@@ -505,7 +498,6 @@ body.nd .nd-col-cta .deleteTrainingGame {
 
 /* ---- Misc ---- */
 .nd-empty {
-    color: var(--color-muted);
     font-size: 14px;
     padding: 20px 0;
 }
@@ -513,7 +505,6 @@ body.nd .nd-col-cta .deleteTrainingGame {
 .nd-section-label {
     font-size: 13px;
     font-weight: 600;
-    color: var(--color-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin: 18px 0 6px;
@@ -547,7 +538,6 @@ body.nd .nd-col-cta .deleteTrainingGame {
 .nd-colour-guide strong {
     display: block;
     margin-bottom: 8px;
-    color: var(--color-muted);
     text-transform: uppercase;
     font-size: 12px;
     letter-spacing: 0.06em;

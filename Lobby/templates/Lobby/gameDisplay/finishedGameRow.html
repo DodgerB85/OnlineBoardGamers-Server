@@ -7,7 +7,7 @@
     {% if game.chatNotification %}<img class="startingOption" alt="Chat" width="20" height="20" src="{% static "Lobby/images/icon-chat-lobby.svg" %}" title="New Chat Message">{% endif %}
     <a href="/{{ game.gameCode }}/{{ game.gameID }}/show/"><strong>{{ game.gameName }}</strong></a>
     {% if game.gameDescription %}<br><small><i>{{ game.gameDescription }}</i></small>{% endif %}
-    <br><small class="nd-muted">{% translate "Winner" %}: {{ game.winner }}</small>
+    <br><small class="">{% translate "Winner" %}: {{ game.winner }}</small>
   </td>
   <td class="nd-col-players" data-label="{% translate "Players" %}">
     {% for player in game.allPlayers %}<a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
@@ -24,7 +24,7 @@
     {% if game.deleteableGame %}
       <div id="{{ game.gameCode }}deleteTrainingGame{{ game.gameID }}" class="deleteTrainingGame">{% translate "Delete" %}</div>
     {% else %}
-      <span class="timeToConvertSpan nd-small nd-muted">{{ game.latestUpdate }}</span>
+      <span class="timeToConvertSpan">{{ game.latestUpdate }}</span>
     {% endif %}
   </td>
 </tr>
