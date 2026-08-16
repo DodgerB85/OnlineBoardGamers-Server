@@ -38,8 +38,8 @@
   </td>
   <td class="nd-col-cta nd-last-move" data-label="{% translate "Last Move" %}">
     <span class="nd-last-move-text">
-      <span class="timeToConvertSpan nd-small nd-muted">{{ game.latestUpdate }}</span>
-      <span class="nd-small nd-muted">{{ game.latestUpdateElapsedTimeString }}</span>
+      <span class="timeToConvertSpan nd-muted">{{ game.latestUpdate }}</span>
+      <span class="nd-muted">{{ game.latestUpdateElapsedTimeString }}</span>
     </span>
     {% if game.maxPlayers != 1 and 'SHADOW' not in game.allPlayers %}{% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}{% endif %}
     {% if game.deleteableGame %}

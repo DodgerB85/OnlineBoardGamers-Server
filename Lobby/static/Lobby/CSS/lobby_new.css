@@ -138,6 +138,9 @@ body.nd .nd-table.nd-current-games-table thead tr,
 body.nd .nd-table.nd-current-games-table .nd-row09 {
     grid-template-columns: 64px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(110px, 0.7fr);
 }
+body.nd .nd-table.nd-current-games-table .nd-col-turn small {
+    font-size: inherit;
+}
 body.nd .nd-table.nd-lobby-games-table thead th {
     display: block;
     padding: 0;
