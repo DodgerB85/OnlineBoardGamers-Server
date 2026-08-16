@@ -190,7 +190,10 @@ body.nd .nd-map-editor-grid {
 body.nd .nd-button,
 body.nd a.nd-button,
 body.nd button.nd-button,
-body.nd input.nd-button {
+body.nd input.nd-button,
+body.nd .nd-create-page .registerbtn,
+body.nd .nd-create-page .createNewGameButton,
+body.nd .nd-create-page input[type="submit"] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -214,7 +217,10 @@ body.nd input.nd-button {
 }
 
 @media (hover: hover) {
-    body.nd .nd-button:hover {
+    body.nd .nd-button:hover,
+    body.nd .nd-create-page .registerbtn:hover,
+    body.nd .nd-create-page .createNewGameButton:hover,
+    body.nd .nd-create-page input[type="submit"]:hover {
         background: var(--color-accent-strong);
         border-color: var(--color-accent-strong);
         color: #fff;
@@ -233,6 +239,29 @@ body.nd .nd-button-primary {
         background: var(--color-accent-strong);
         border-color: rgba(0, 0, 0, 0.15);
         color: #fff;
+    }
+}
+
+body.nd .nd-button:disabled,
+body.nd .nd-create-page .registerbtn:disabled,
+body.nd .nd-create-page .createNewGameButton:disabled,
+body.nd .nd-create-page input[type="submit"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--color-surface-soft);
+    border-color: #cbd3db;
+    color: var(--color-muted);
+}
+
+@media (hover: hover) {
+    body.nd .nd-button:disabled:hover,
+    body.nd .nd-create-page .registerbtn:disabled:hover,
+    body.nd .nd-create-page .createNewGameButton:disabled:hover,
+    body.nd .nd-create-page input[type="submit"]:disabled:hover {
+        background: var(--color-surface-soft);
+        border-color: #cbd3db;
+        color: var(--color-muted);
+        cursor: not-allowed;
     }
 }
 
@@ -1246,6 +1275,509 @@ body.nd .nd-map-editor .BGH_drinkSpot {
 body.nd .nd-muted { color: var(--color-muted); }
 body.nd .nd-small { font-size: 14px; }
 body.nd .nd-center { text-align: center; }
+
+/* Existing game-creation forms keep their established IDs and client-side hooks. */
+body.nd .nd-create-page {
+    width: min(1320px, calc(100% - 32px));
+    margin: 28px auto 40px;
+}
+
+body.nd .nd-create-page .messages {
+    margin-bottom: 16px;
+}
+
+body.nd .nd-create-page .messages > div,
+body.nd .nd-create-page #invalidForm {
+    display: block;
+    margin-bottom: 8px;
+    padding: 10px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-ink);
+}
+
+body.nd .nd-create-page .messages .error,
+body.nd .nd-create-page #invalidForm.error {
+    border-color: var(--color-danger);
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+}
+
+body.nd .nd-create-page #allOptions {
+    width: 100%;
+}
+
+body.nd .nd-create-page .topOfNewGameSpan {
+    display: block;
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-soft);
+    color: var(--color-ink);
+    font-size: 14px;
+}
+
+body.nd .nd-create-page .topOfNewGameOptionsDiv {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    align-items: start;
+    gap: 16px;
+}
+
+body.nd .nd-create-page .optionsGroupTop,
+body.nd .nd-create-page .optionsGroupModules {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    overflow: hidden;
+}
+
+body.nd .nd-create-page .optionsGroupTop > legend,
+body.nd .nd-create-page .optionsGroupModules > legend {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-soft);
+    color: var(--color-ink);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+body.nd .nd-create-page .singleChoiceDiv,
+body.nd .nd-create-page .singleChoiceWithTextDiv,
+body.nd .nd-create-page .singleChoiceDivText,
+body.nd .nd-create-page .FCMsingleChoiceDiv {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+    margin: 0 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-ink);
+}
+
+body.nd .nd-create-page .singleChoiceDiv > br,
+body.nd .nd-create-page .singleChoiceWithTextDiv > br,
+body.nd .nd-create-page .singleChoiceDivText > br,
+body.nd .nd-create-page .FCMsingleChoiceDiv > br {
+    display: none;
+}
+
+body.nd .nd-create-page .optionsGroupTop > :last-child,
+body.nd .nd-create-page .optionsGroupModules > :last-child {
+    border-bottom: 0;
+}
+
+body.nd .nd-create-page .choiceLabel,
+body.nd .nd-create-page .choiceLabelText {
+    flex: 0 0 145px;
+    margin: 0;
+    color: var(--color-ink);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+body.nd .nd-create-page .optionSelection,
+body.nd .nd-create-page .optionSelectionText,
+body.nd .nd-create-page .autocomplete {
+    flex: 1 1 180px;
+    min-width: 0;
+}
+
+body.nd .nd-create-page .autocomplete {
+    position: relative;
+}
+
+body.nd .nd-create-page .autocomplete-items {
+    position: absolute;
+    z-index: 20;
+    top: 100%;
+    right: 0;
+    left: 0;
+    overflow: hidden;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-md);
+}
+
+body.nd .nd-create-page .autocomplete-items div {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--color-border);
+    cursor: pointer;
+}
+
+body.nd .nd-create-page .autocomplete-items div:last-child {
+    border-bottom: 0;
+}
+
+body.nd .nd-create-page .autocomplete-items div:hover,
+body.nd .nd-create-page .autocomplete-active {
+    background: var(--color-positive-bg);
+}
+
+body.nd .nd-create-page .optionSelection input[type="text"],
+body.nd .nd-create-page .optionSelectionText input[type="text"],
+body.nd .nd-create-page .autocomplete input[type="text"] {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+body.nd .nd-create-page .choiceLabel > input,
+body.nd .nd-create-page .singleChoiceDiv > input[type="checkbox"],
+body.nd .nd-create-page .singleChoiceDiv > input[type="radio"],
+body.nd .nd-create-page .singleChoiceWithTextDiv > input[type="checkbox"] {
+    flex: 0 0 auto;
+    margin-top: 3px;
+}
+
+body.nd .nd-create-page .inlineHelp,
+body.nd .nd-create-page .optionHelp {
+    flex: 1 0 calc(100% - 28px);
+    margin-left: 28px;
+    color: var(--color-muted);
+    font-size: 13px;
+    font-style: italic;
+}
+
+body.nd .nd-create-page .singleChoiceDiv:has(.choiceLabel) .inlineHelp,
+body.nd .nd-create-page .singleChoiceWithTextDiv:has(.choiceLabelText) .inlineHelp {
+    margin-left: 157px;
+}
+
+body.nd .nd-create-page .notEnoughExperience {
+    padding: 2px 4px;
+    border-radius: var(--radius-sm);
+    background: var(--color-warn-bg);
+    color: var(--color-warn);
+}
+
+body.nd .nd-page .paceHelpIcon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--color-muted, #666);
+    font-weight: 700;
+    font-size: 11px;
+    border: 1px solid var(--color-border-strong, #999);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+body.nd .nd-page .paceHelpIcon .paceTooltip {
+    visibility: hidden;
+    width: 300px;
+    background: #333;
+    color: #fff;
+    text-align: left;
+    padding: 8px 12px;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 100;
+    bottom: auto;
+    top: 100%;
+    left: 50%;
+    margin-left: -150px;
+    margin-top: 10px;
+    opacity: 0;
+    transition: opacity 0.25s;
+    font-size: 13px;
+    font-weight: normal;
+    line-height: 1.5;
+    pointer-events: auto;
+}
+
+body.nd .nd-page .paceHelpIcon .paceTooltip::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -6px;
+    border: 6px solid transparent;
+    border-bottom-color: #333;
+}
+
+body.nd .nd-page .paceHelpIcon .paceTooltip b {
+    color: #fff;
+}
+
+body.nd .nd-page .paceHelpIcon.is-open .paceTooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+@media (hover: hover) {
+    body.nd .nd-page .paceHelpIcon:hover:not(.is-dismissed) .paceTooltip {
+        visibility: visible;
+        opacity: 1;
+    }
+}
+
+body.nd .nd-page .paceHelpIcon:focus-visible {
+    outline: 2px solid var(--color-accent-strong, #5875f8);
+    outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+    body.nd .nd-page .paceHelpIcon .paceTooltip {
+        position: fixed;
+        top: 50%;
+        right: 16px;
+        bottom: auto;
+        left: 16px;
+        width: auto;
+        max-height: calc(100dvh - 32px);
+        margin: 0;
+        overflow-y: auto;
+        transform: translateY(-50%);
+    }
+    body.nd .nd-page .paceHelpIcon .paceTooltip::after {
+        display: none;
+    }
+}
+
+body.nd .nd-create-page .registerbtn,
+body.nd .nd-create-page .createNewGameButton,
+body.nd .nd-create-page input[type="submit"] {
+    display: flex;
+    width: fit-content;
+    max-width: 100%;
+    margin: 20px auto;
+}
+
+body.nd .nd-create-page input[type="checkbox"],
+body.nd .nd-create-page input[type="radio"] {
+    accent-color: var(--color-accent-strong);
+}
+
+body.nd .nd-create-page input:disabled,
+body.nd .nd-create-page select:disabled,
+body.nd .nd-create-page textarea:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+body.nd .nd-create-page input:disabled + label,
+body.nd .nd-create-page label:has(input:disabled),
+body.nd .nd-create-page input:disabled ~ .inlineHelp {
+    color: var(--color-muted);
+    opacity: 0.6;
+}
+
+body.nd .nd-create-page .actionsLineButton {
+    padding: 7px 10px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font: inherit;
+}
+
+body.nd .nd-create-page .cautionText,
+body.nd .nd-create-page .errorText {
+    color: var(--color-danger);
+}
+
+body.nd .nd-create-page textarea {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+body.nd .nd-create-page #blitzWarningSpan {
+    display: block;
+    padding: 12px 16px;
+    color: var(--color-warn);
+    font-weight: 600;
+}
+
+body.nd .nd-create-page #invalidForm {
+    display: none;
+}
+
+body.nd .nd-create-rnb #mapPreviewContainer,
+body.nd .nd-create-rnb #mapPreviewContent {
+    max-width: 100%;
+}
+
+body.nd .nd-create-rnb #mapPreviewContainer {
+    overflow: auto;
+}
+
+body.nd .nd-create-rnb #hexDIV {
+    max-width: 100%;
+}
+
+body.nd .nd-create-rnb .topOfNewGameOptionsDiv > fieldset:last-child {
+    grid-column: span 2;
+}
+
+@media (max-width: 720px) {
+    body.nd .nd-create-page {
+        width: min(100% - 20px, 1320px);
+        margin-top: 16px;
+    }
+
+    body.nd .nd-create-page .topOfNewGameOptionsDiv {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    body.nd .nd-create-page .singleChoiceDiv,
+    body.nd .nd-create-page .singleChoiceWithTextDiv,
+    body.nd .nd-create-page .singleChoiceDivText,
+    body.nd .nd-create-page .FCMsingleChoiceDiv {
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-inline: 12px;
+    }
+
+    body.nd .nd-create-page .choiceLabel,
+    body.nd .nd-create-page .choiceLabelText {
+        flex-basis: 100%;
+    }
+
+    body.nd .nd-create-page .optionSelection,
+    body.nd .nd-create-page .optionSelectionText,
+    body.nd .nd-create-page .autocomplete {
+        flex-basis: 100%;
+    }
+
+    body.nd .nd-create-page .inlineHelp,
+    body.nd .nd-create-page .singleChoiceDiv:has(.choiceLabel) .inlineHelp,
+    body.nd .nd-create-page .singleChoiceWithTextDiv:has(.choiceLabelText) .inlineHelp {
+        flex-basis: 100%;
+        margin-left: 0;
+    }
+
+    body.nd .nd-create-page .registerbtn,
+    body.nd .nd-create-page .createNewGameButton,
+    body.nd .nd-create-page input[type="submit"] {
+        width: 100%;
+    }
+
+    body.nd .nd-create-rnb .topOfNewGameOptionsDiv > fieldset:last-child {
+        grid-column: auto;
+    }
+}
+
+/* ---------- CREATE-PAGE ALIGNMENT (FCM direction) ---------- */
+
+/* D1 disabled rows: match .nd-check-label:has(input:disabled) shading */
+body.nd .nd-create-page .singleChoiceDiv:has(input:disabled),
+body.nd .nd-create-page .singleChoiceWithTextDiv:has(input:disabled),
+body.nd .nd-create-page .singleChoiceDivText:has(input:disabled),
+body.nd .nd-create-page .FCMsingleChoiceDiv:has(input:disabled) {
+    background: var(--color-surface-soft);
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+}
+
+/* D4 bare checkbox/radio label rows inside a fieldset (not singleChoiceDiv) */
+body.nd .nd-create-page .optionsGroupTop > input[type="checkbox"],
+body.nd .nd-create-page .optionsGroupTop > input[type="radio"],
+body.nd .nd-create-page .optionsGroupModules > input[type="checkbox"],
+body.nd .nd-create-page .optionsGroupModules > input[type="radio"] {
+    margin-top: 8px;
+}
+body.nd .nd-create-page .optionsGroupTop > input[type="checkbox"] + label.checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+}
+body.nd .nd-create-page .optionsGroupTop > input[type="radio"] + label.checkboxLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 8px 16px 8px 0;
+}
+/* Disabled bare rows: FCM shading + dim */
+body.nd .nd-create-page .optionsGroupTop > input[type="checkbox"]:disabled + label.checkboxLabel,
+body.nd .nd-create-page .optionsGroupTop > input[type="radio"]:disabled + label.checkboxLabel {
+    background: var(--color-surface-soft);
+    border-radius: var(--radius-sm);
+    padding: 2px 6px;
+    opacity: 0.8;
+}
+/* Legacy first-radio indent (CNS table size / junk) */
+body.nd .nd-create-page #tableJunkRadio1,
+body.nd .nd-create-page #tableSizeRadio1 {
+    margin-left: 2px;
+}
+
+/* D5 help text: non-italic like FCM nd-opt-help */
+body.nd .nd-create-page .inlineHelp,
+body.nd .nd-create-page .optionHelp {
+    font-style: normal;
+}
+
+/* D3 TGZ Expert Options: flex stepper rows + disabled shading + scroll */
+body.nd .nd-create-page .expertTGZoptions .valueContainer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+body.nd .nd-create-page .expertTGZoptions .valueContainer:last-child {
+    border-bottom: none;
+}
+body.nd .nd-create-page .expertTGZoptions .valueContainer:has(input:disabled) {
+    background: var(--color-surface-soft);
+    border-radius: var(--radius-sm);
+}
+body.nd .nd-create-page .expertTGZoptions .valueField {
+    width: 34px;
+}
+body.nd .nd-create-page .expertTGZoptions .valueContainer button {
+    padding: 2px 8px;
+    min-height: 28px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-size: 13px;
+    cursor: pointer;
+}
+body.nd .nd-create-page .expertTGZoptions .valueContainer button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+body.nd .nd-create-page .expertTGZoptions .expertSummarySpan {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-ink);
+    margin: 6px 0;
+}
+body.nd .nd-create-page .expertTGZoptions {
+    max-height: 370px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+body.nd .nd-create-page .expertTGZoptions > hr {
+    margin: 8px 0;
+    border: none;
+    border-top: 1px solid var(--color-border);
+}
+
+/* D1b disabled option labels */
+body.nd .nd-create-page label:has(input:disabled) {
+    cursor: not-allowed;
+}
 body.nd .nd-spacer { flex: 1; }
 body.nd .nd-row-flex {
     display: flex;
@@ -1504,7 +2036,7 @@ body.nd .nd-setup-cards-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 16px;
-    align-items: stretch;
+    align-items: start;
     margin-bottom: 16px;
 }
 @media (min-width: 720px) {
@@ -2244,7 +2776,10 @@ body.nd .nd-tgz-options .diffVR {
 	body.nd .nd-button,
 	body.nd a.nd-button,
 	body.nd button.nd-button,
-	body.nd input.nd-button { font-size: 16px; }
+	body.nd input.nd-button,
+	body.nd .nd-create-page .registerbtn,
+	body.nd .nd-create-page .createNewGameButton,
+	body.nd .nd-create-page input[type="submit"] { font-size: 16px; }
 	body.nd .nd-button-sm { font-size: 15px; }
 	body.nd input[type="text"],
 	body.nd input[type="email"],

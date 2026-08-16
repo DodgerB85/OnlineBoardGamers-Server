@@ -1,12 +1,538 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-    <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
+    {% if not request.use_new_design %}
+        <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+        <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
+    {% endif %}
 {% endblock head %}
 {% block body %}
     {{ request.user.id|json_script:"user_id" }}
     {{ request.user.username|json_script:"username" }}
+    {% if request.use_new_design %}
+    <div class="nd-page">
+        <div class="nd-page-header">
+            <h1>{% translate "The Great Zimbabwe" %}{% if MT_Creation %} — {% translate "Mini Tournament" %}{% endif %}</h1>
+            {% if MT_Creation %}
+                <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'newMiniTournaments' %}">&#8592; {% translate "Mini Tournaments" %}</a>
+            {% else %}
+                <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'newGamesPage' %}">&#8592; {% translate "New Game" %}</a>
+            {% endif %}
+        </div>
+
+        {% if messages %}
+        <div style="margin-bottom:16px">
+            {% for message in messages %}
+            <div class="nd-pill {% if message.tags == 'error' %}nd-pill-danger{% elif message.tags == 'success' %}nd-pill-positive{% else %}nd-pill-accent{% endif %}" style="display:block;padding:10px 14px;border-radius:var(--radius-md);margin-bottom:8px">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if user.username == "TGZtourneyAdmin" %}
+        <div style="margin-bottom:16px">
+            <span style="font-size:2em;background-color:yellow;color:darkred;">YOU ARE MAKING AN EXTERNAL TOURNAMENT GAME</span>
+        </div>
+        {% endif %}
+
+        <div id="invalidForm" class="messages error" style="display:none;margin-bottom:16px;padding:10px 14px;border:1px solid var(--color-danger);border-radius:var(--radius-md);background:var(--color-danger-bg);color:var(--color-danger)">Please Select at Most 8 gods, and ensure all VR are valid</div>
+
+        <div class="nd-card nd-card-soft" style="border-left:3px solid var(--color-accent);margin-bottom:16px">
+            {% url "lobbyHelp" as help_url %}
+            <span style="font-size:14px">{% blocktranslate trimmed %}New to The Great Zimbabwe? For Rules, How to Play, and Game Guide, please see <a href="{{ help_url }}">Help</a>{% endblocktranslate %}</span>
+        </div>
+
+        {% if MT_Creation %}
+        <form autocomplete="off" action="{% url 'createTGZminiTournament' %}" method="post" id="TGZnewGameForm" onsubmit="validateForm(event{% if MT_Creation %}, true{% endif %})">
+        {% else %}
+        <form id="TGZnewGameForm" autocomplete="off" action="{% url 'TGZ:createTGZgame' %}" method="post" onsubmit="validateForm(event{% if MT_Creation %}, true{% endif %})">
+        {% endif %}
+            {% csrf_token %}
+            <input type="hidden" id="mapData" name="mapData" value="{{ mapData }}">
+
+            <div class="nd-setup-cards-grid">
+                {% if MT_Creation %}
+                <div class="nd-card">
+                    <div class="nd-card-header"><h2>{% translate "Mini Tournament Setup Options" %}</h2></div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="tournamentName">{% translate "Tournament Name" %}</label>
+                        <input type="text" name="tournamentName" id="tournamentName" placeholder="{% translate "Tournament Name" %}" maxlength="100" required>
+                        <div class="nd-form-help">{% translate "Keep this short! It will form part of every game name" %}</div>
+                    </div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="tournamentDescription">{% translate "Description" %}</label>
+                        <input type="text" name="tournamentDescription" id="tournamentDescription" placeholder="{% translate "Optional, eg fast EST time zone" %}" maxlength="100">
+                        <div class="nd-form-help">{% translate "Optional, eg Time zone / style / etc" %}</div>
+                    </div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="tournamentFormat">{% translate "Format" %}</label>
+                        <select name="tournamentFormat" id="tournamentFormat">
+                            <option value="RR" selected="selected">Rounds</option>
+                            <option value="TL">Two Lives</option>
+                            <option value="PT">Points</option>
+                        </select>
+                    </div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="playersPerGameMT">{% translate "Players Per Game" %}</label>
+                        <select name="playersPerGameMT" id="playersPerGameMT" onchange="validateOptions(this.id);">
+                            <option value=2 selected="selected">2</option>
+                            <option value=3>3</option>
+                            <option value=4>4</option>
+                            <option value=5>5</option>
+                        </select>
+                        <div class="nd-form-help">{% translate "Games will use this player count unless there are not enough players to fill the last game" %}</div>
+                    </div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="totalPlayersMT">{% translate "Total Tournament Players" %}</label>
+                        <select name="totalPlayersMT" id="totalPlayersMT">
+                            <option value="6">6</option>
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                            <option value="12" selected="selected">12</option>
+                        </select>
+                        <div class="nd-form-help">{% translate "This must be between 6 and 12, and a multiple of the per game player count" %}</div>
+                    </div>
+                    <label class="nd-check-label" style="margin-top:4px">
+                        <input type="checkbox" class="myCheckbox" id="privateTournament" name="privateTournament" value="1">
+                        <div><div>{% translate "Private Tournament" %}</div><div class="nd-opt-help">{% translate "Players can only join through the link" %}</div></div>
+                    </label>
+                </div>
+                {% else %}
+                <div class="nd-card">
+                    <div class="nd-card-header"><h2>{% translate "Setup Options" %}</h2></div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="name">{% translate "Name" %}</label>
+                        <input type="text" name="gameName" id="name" placeholder="{% translate " Game name" %}" maxlength="100">
+                    </div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="description">{% translate "Description" %}</label>
+                        <input type="text" name="gameDescription" id="description" placeholder="{% translate "Optional, eg fast EST time zone" %}" maxlength="100">
+                    </div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="pace">{% translate "Playing Speed" %}</label>
+                        <select name="pace" id="pace" onchange="validateOptions(this.id)">
+                            <option value="10">{% translate "Live: Play the game in one session" %}</option>
+                            <option value="20">{% translate "Fast: Several moves per day" %}</option>
+                            <option value="30" selected>{% translate "Standard: 1-2+ moves a day" %}</option>
+                            <option value="40">{% translate "Slow: At least one move a day" %}</option>
+                            <option value="50">{% translate "Casual: Just take your time" %}</option>
+                        </select>
+                        <span class="paceHelpIcon" role="button" tabindex="0" aria-expanded="false">?<span class="paceTooltip"><b>Live</b> &mdash; Play in one continuous session. Kickout options: 5, 10, or 20 minutes. No Flex-Time.<br><b>Fast</b> &mdash; Several moves per day in total. Kickout options: 12 hours or 1 day. For 12h+ kickouts, each player has one 24-hour Flex-Time bank for the whole game.<br><b>Standard</b> &mdash; About 1&ndash;2 moves per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.<br><b>Slow</b> &mdash; At least one move per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.<br><b>Casual</b> &mdash; No fixed schedule. Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.</span></span>
+                        <div class="nd-form-help" style="padding-left:0">{% translate "Alters kickout options. All games update 'live'" %}</div>
+                        <div class="nd-form-help" style="padding-left:0">{% translate "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}</div>
+                    </div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="playerNumber">{% translate "Number of players" %}</label>
+                        <select name="playerNumber" id="playerNumber" onchange="selectPlayers();">
+                            <option value="2" selected="selected">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    {% if user.username == "TGZtourneyAdmin" %}
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="player1">{% translate "Player 1" %}</label>
+                        <div class="nd-field">
+                            <div class="autocomplete">
+                                <input type="text" id="player1" name="player1" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                            </div>
+                            <span id="player2help" style="display:block;margin-top:4px;font-size:13px;color:var(--color-muted)">{% translate "Leave blank to invite anybody" %}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="player2">{% translate "Player 2" %}</label>
+                        <div class="nd-field">
+                            <div class="autocomplete">
+                                <input type="text" id="player2" name="player2" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                            </div>
+                            <span id="player2help" style="display:block;margin-top:4px;font-size:13px;color:var(--color-muted)">{% translate "Leave blank to invite anybody" %}</span>
+                        </div>
+                    </div>
+                    <div class="nd-form-row" id="selPlayer3" style="display:none">
+                        <label class="nd-form-label" for="player3">{% translate "Player 3" %}</label>
+                        <div class="nd-field"><div class="autocomplete">
+                            <input type="text" id="player3" name="player3" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                        </div></div>
+                    </div>
+                    <div class="nd-form-row" id="selPlayer4" style="display:none">
+                        <label class="nd-form-label" for="player4">{% translate "Player 4" %}</label>
+                        <div class="nd-field"><div class="autocomplete">
+                            <input type="text" id="player4" name="player4" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                        </div></div>
+                    </div>
+                    <div class="nd-form-row" id="selPlayer5" style="display:none">
+                        <label class="nd-form-label" for="player5">{% translate "Player 5" %}</label>
+                        <div class="nd-field"><div class="autocomplete">
+                            <input type="text" id="player5" name="player5" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                        </div></div>
+                    </div>
+                    <div id="blitzWarningSpan" style="margin:4px 0 8px;padding:8px 12px;border-radius:var(--radius-sm);background:var(--color-warn-bg);color:var(--color-warn);font-size:13px;font-weight:600">{% translate "Careful: A 5 min game with 3p could still take ~8 hrs" %}</div>
+                </div>
+                {% endif %}
+
+                {% if MT_Creation %}
+                <div class="nd-card">
+                    <div class="nd-card-header"><h2>{% translate "Common Options" %}</h2></div>
+                    <div class="nd-form-row">
+                        <div class="nd-form-label" style="flex:0 0 auto">{% translate "Playing Speed: Fast" %}</div>
+                    </div>
+                    <div class="nd-form-row">
+                        <div class="nd-form-label" style="flex:0 0 auto">{% translate "Kickout available after: 12 hours (with 24hr flex time)" %}</div>
+                    </div>
+                    <div class="nd-check-list">
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useSchism" name="useSchism" value="99">
+                            <div>
+                                <div>{% translate "Use Schism Expansion" %}</div>
+                                <div class="nd-opt-help">{% translate "Fan made expansion! Pool of 12 new gods. Game will be excluded from stats" %}</div>
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="radio" onchange="validateOptions(this.id)" class="myCheckbox" id="schismRadio_mix" name="schismRadio" value="7" disabled>
+                            <div><div>{% translate "Mix Original & Schism" %}</div><div class="nd-opt-help">{% translate "HIGHLY RECOMMENDED: Intended Experience" %}</div></div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="radio" onchange="validateOptions(this.id)" class="myCheckbox" id="schismRadio_half" name="schismRadio" value="8" disabled>
+                            <div><div>{% translate "4 / 4 Split" %}</div><div class="nd-opt-help">{% translate "Use 4 Original and 4 Schism" %}</div></div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="radio" onchange="validateOptions(this.id)" class="myCheckbox" id="schismRadio_schismOnly" name="schismRadio" value="9" disabled>
+                            <div><div>{% translate "Schism Only" %}</div><div class="nd-opt-help">{% translate "Use 8 of the 12 Schism gods" %}</div></div>
+                        </label>
+                    </div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="playerToInviteMT">{% translate "Find Player" %}</label>
+                        <div class="nd-field">
+                            <div class="autocomplete">
+                                <input type="text" placeholder="{% translate "Player Username" %}" id="playerToInviteMT" class="textInput playerInput" name="playerToInviteMT" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                            </div>
+                            <span id="invitedPlayersWarningSpanMT" style="display:block;margin-top:4px;font-size:13px;color:var(--color-warn)"></span>
+                            <button type="button" class="nd-button nd-button-ghost nd-button-sm" id="invitePlayerMTbutton" style="margin-top:8px">{% translate "Add Player to Invite List" %}</button>
+                            <input type="hidden" id="invtedPlayersListMT" name="invtedPlayersListMT" value="">
+                            <span id="invitedPlayersSpanMT" style="display:block;margin-top:8px;font-size:13px"></span>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="nd-card">
+                    <div class="nd-card-header"><h2>{% translate "Common Options" %}</h2></div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="kickoutDuration">{% translate "Kickout available after:" %}</label>
+                        <select name="kickoutDuration" id="kickoutDuration" style="flex:0 0 auto;width:auto">
+                            <option value="100">{% translate "1 day" %}</option>
+                            <option value="200" selected="selected">{% translate "2 days" %}</option>
+                            <option value="300">{% translate "3 days" %}</option>
+                            <option value="500">{% translate "5 days" %}</option>
+                        </select>
+                        <div class="nd-form-help">{% translate "Change Playing Speed for different options" %}</div>
+                    </div>
+                    <div class="nd-check-list">
+                        {% url "lobbyHelp" as the_url %}
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="trainingGame" name="trainingGame" value="102">
+                            <div>
+                                <div>{% translate "Practice Game" %}</div>
+                                <div class="nd-opt-help">{% blocktranslate trimmed %}Play as up to 5 players on the same device. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="privateGame" name="privateGame" value="1">
+                            <div>
+                                <div>{% translate "Private Game" %}</div>
+                                <div class="nd-opt-help">{% translate "Players can only join with invite or link" %}</div>
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="learningGame" name="learningGame" value="110">
+                            <div>
+                                <div>{% translate "Request Learning Game" %}</div>
+                                <div class="nd-opt-help">{% blocktranslate trimmed %}Request help to learn the game. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="experiencedGame" name="experiencedGame" value="120" disabled>
+                            <div>
+                                <div>{% translate "Experienced Game" %}</div>
+                                <div class="nd-opt-help">{% blocktranslate trimmed %}Minimum Experience Level. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
+                                {% if not experienced %}<div style="font-size:12px;color:var(--color-danger);margin-top:2px">{% translate "You do not have enough experience" %}</div>{% endif %}
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useSchism" name="useSchism" value="99">
+                            <div>
+                                <div>{% translate "Use Schism Expansion" %}</div>
+                                <div class="nd-opt-help">{% translate "Fan made expansion! Pool of 12 new gods. Game will be excluded from stats" %}</div>
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="radio" onchange="validateOptions(this.id)" class="myCheckbox" id="schismRadio_mix" name="schismRadio" value="7" disabled>
+                            <div><div>{% translate "Mix Original & Schism" %}</div><div class="nd-opt-help">{% translate "HIGHLY RECOMMENDED: Intended Experience" %}</div></div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="radio" onchange="validateOptions(this.id)" class="myCheckbox" id="schismRadio_half" name="schismRadio" value="8" disabled>
+                            <div><div>{% translate "4 / 4 Split" %}</div><div class="nd-opt-help">{% translate "Use 4 Original and 4 Schism" %}</div></div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="radio" onchange="validateOptions(this.id)" class="myCheckbox" id="schismRadio_schismOnly" name="schismRadio" value="9" disabled>
+                            <div><div>{% translate "Schism Only" %}</div><div class="nd-opt-help">{% translate "Use 8 of the 12 Schism gods" %}</div></div>
+                        </label>
+                    </div>
+                    <div id="keepMapDiv" style="display:none;padding:8px 0 0">
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="keepMap" name="keepMap" value="">
+                            {% translate "Keep the same map" %}
+                        </label>
+                    </div>
+                </div>
+
+                <div class="nd-card expertTGZoptions" id="expertOptions">
+                    <div class="nd-card-header"><h2>{% translate "Expert Options" %}</h2></div>
+                    <label class="nd-check-label">
+                        <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="enableAdvancedOptions" name="enableAdvancedOptions" value="expert">
+                        <div><div>{% translate "Enable Advanced Setup Options" %}</div></div>
+                    </label>
+                    <div style="margin-top:8px;font-size:13px;color:var(--color-muted)"><b><u>Set used gods</u></b></div>
+
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:4px 24px;margin-top:12px">
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod0" type="number" class="valueField" value="4" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="shadipinyi" name="shadipinyi" value="0" disabled>
+                            <label for="shadipinyi" style="font-size:13px">{% translate "Shadipinyi (Extra Plaque)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod1" type="number" class="valueField" value="4" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="elegua" name="elegua" value="1" disabled>
+                            <label for="elegua" style="font-size:13px">{% translate "Elegua (3 Bid Cows)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod2" type="number" class="valueField" value="2" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="dziva" name="dziva" value="2" disabled>
+                            <label for="dziva" style="font-size:13px">{% translate "Dziva (Lower Prices)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod3" type="number" class="valueField" value="4" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="eshu" name="eshu" value="3" disabled>
+                            <label for="eshu" style="font-size:13px">{% translate "Eshu (Range 6)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod4" type="number" class="valueField" value="4" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="gu" name="gu" value="4" disabled>
+                            <label for="gu" style="font-size:13px">{% translate "Gu (1 VR Craftsmen)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod5" type="number" class="valueField" value="7" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="obatala" name="obatala" value="5" disabled>
+                            <label for="obatala" style="font-size:13px">{% translate "Obatala (2 Monuments)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod6" type="number" class="valueField" value="5" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="atete" name="atete" value="6" disabled>
+                            <label for="atete" style="font-size:13px">{% translate "Atete (Use Res Twice)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod7" type="number" class="valueField" value="3" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="tsuiGoab" name="tsuiGoab" value="7" disabled>
+                            <label for="tsuiGoab" style="font-size:13px">{% translate "Tsui-Goab (Any goods)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod8" type="number" class="valueField" value="5" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="anansi" name="anansi" value="8" disabled>
+                            <label for="anansi" style="font-size:13px">{% translate "Anansi (Pay 1 cow / good)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod9" type="number" class="valueField" value="2" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="qamata" name="qamata" value="9" disabled>
+                            <label for="qamata" style="font-size:13px">{% translate "Qamata (Get Hub Cows)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod10" type="number" class="valueField" value="5" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="engai" name="engai" value="10" disabled>
+                            <label for="engai" style="font-size:13px">{% translate "Engai (2 Cow Income)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod11" type="number" class="valueField" value="-2" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="xango" name="xango" value="11" disabled>
+                            <label for="xango" style="font-size:13px">{% translate "Xango (2nd Tiebreaker)" %}</label>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:12px;font-size:13px;color:var(--color-muted)"><b><u>Schism</u></b></div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:4px 24px;margin-top:8px">
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod12" type="number" class="valueField" value="5" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="agwu_nsi" name="agwu_nsi" value="12" disabled>
+                            <label for="agwu_nsi" style="font-size:13px">{% translate "Agwu-Nsi (Use any Res)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod13" type="number" class="valueField" value="3" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="aja" name="aja" value="13" disabled>
+                            <label for="aja" style="font-size:13px">{% translate "Aja (Free Pass)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod14" type="number" class="valueField" value="4" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="aje_shaluga" name="aje_shaluga" value="14" disabled>
+                            <label for="aje_shaluga" style="font-size:13px">{% translate "Aje-Shaluga (Free Pri)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod15" type="number" class="valueField" value="2" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="alajire" name="alajire" value="15" disabled>
+                            <label for="alajire" style="font-size:13px">{% translate "Alajire (+VR)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod16" type="number" class="valueField" value="6" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="anyanwu" name="anyanwu" value="16" disabled>
+                            <label for="anyanwu" style="font-size:13px">{% translate "Anyanwu (Raise to 3)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod17" type="number" class="valueField" value="0" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="ekwensu" name="ekwensu" value="17" disabled>
+                            <label for="ekwensu" style="font-size:13px">{% translate "Ekwensu (Build Cows)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod18" type="number" class="valueField" value="3" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="ogun" name="ogun" value="18" disabled>
+                            <label for="ogun" style="font-size:13px">{% translate "Ogun (Blacksmith Tech)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod19" type="number" class="valueField" value="4" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="ovia" name="ovia" value="19" disabled>
+                            <label for="ovia" style="font-size:13px">{% translate "Ovia (1st Craftsman cow)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod20" type="number" class="valueField" value="6" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="oya" name="oya" value="20" disabled>
+                            <label for="oya" style="font-size:13px">{% translate "Oya (Monument for RG)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod21" type="number" class="valueField" value="2" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="simbi" name="simbi" value="21" disabled>
+                            <label for="simbi" style="font-size:13px">{% translate "Simbi (Res as Water)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod22" type="number" class="valueField" value="7" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="tiurakh" name="tiurakh" value="22" disabled>
+                            <label for="tiurakh" style="font-size:13px">{% translate "Tiurakh (One less RG)" %}</label>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRgod23" type="number" class="valueField" value="4" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="yemoja" name="yemoja" value="23" disabled>
+                            <label for="yemoja" style="font-size:13px">{% translate "Yemoja (Raise Any Mon)" %}</label>
+                        </div>
+                    </div>
+
+                    <button id="pickRandomgods" class="nd-button nd-button-ghost" disabled style="margin-top:12px">{% translate "Pick 8 random gods" %}</button>
+                    <hr style="margin:16px 0;border:0;border-top:1px solid var(--color-border)">
+                    <div style="margin-bottom:8px;font-size:13px;color:var(--color-muted)"><b><u>Alter VR</u></b></div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:4px 24px">
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRherd" type="number" class="valueField" value="6" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <span class="specVRlabel" style="font-size:13px">{% translate "Herd" %}</span>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRnomads" type="number" class="valueField" value="1" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <span class="specVRlabel" style="font-size:13px">{% translate "Nomads" %}</span>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRrain" type="number" class="valueField" value="1" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <span class="specVRlabel" style="font-size:13px">{% translate "Rain Ceremony" %}</span>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRshaman" type="number" class="valueField" value="3" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <span class="specVRlabel" style="font-size:13px">{% translate "Shaman" %}</span>
+                        </div>
+                        <div class="valueContainer" style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--color-border)">
+                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                            <input name="VRbuilder" type="number" class="valueField" value="2" disabled style="width:34px">
+                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                            <span class="specVRlabel" style="font-size:13px">{% translate "Builder" %}</span>
+                        </div>
+                    </div>
+                    <div style="margin-top:12px;font-size:13px;color:var(--color-muted)" class="expertSummarySpan" id="expertSummarygodsSpan"></div>
+                    <div style="font-size:13px;color:var(--color-muted)" class="expertSummarySpan" id="expertSummaryVRSpan"></div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="text-align:center;margin-top:8px">
+                {% if user.username == "TGZtourneyAdmin" %}
+                <p>
+                    <span style="font-size:2em;background-color:yellow;color:darkred;">Batch Game Creation. To use, ensure "Player 1" field above is blank. Otherwise this will be ignored</span>
+                    <br />
+                    <span style="font-size:2em;background-color:yellow;color:darkred;">GAME_NAME, player1, player2, player3, ...</span>
+                    <br />
+                    <span style="font-size:2em;background-color:yellow;color:darkred;">REMEMBER: The order of players name will EXACTLY match in game start turn order. Starting player is next to the game name</span>
+                    <br />
+                    <textarea name="batchGameData" cols="150" rows="10"></textarea>
+                </p>
+                {% endif %}
+                <input type="submit" class="nd-button nd-button-primary registerbtn" {% if user.username == "TGZtourneyAdmin" %} value="{% translate "Create And Start The Great Zimbabwe Tournament Game" %}" {% elif MT_Creation %} value="{% translate "Create The Great Zimbabwe Mini Tournament" %}" {% else %} value="{% translate "Create The Great Zimbabwe Game" %}" {% endif %} />
+            </div>
+        </form>
+
+        {% if user.username == "TGZtourneyAdmin" %}
+        <div style="margin-top:16px">
+            <span style="font-size:2em;background-color:yellow;color:darkred;">YOU ARE MAKING AN EXTERNAL TOURNAMENT GAME</span>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
     <div class="container">
         {% if messages %}
             <div class="messages">
@@ -15,8 +541,6 @@
                 {% endfor %}
             </div>
         {% endif %}
-        <!--<p><span style="font-size: 2em; background-color: yellow; color: darkred;">Want to play in person? Check out <a href="https://splottercon.com/" target="_blank">Splotter Con 2024</a>! Pittsburgh from Aug 30</span></p>
--->
         {% if user.username == "TGZtourneyAdmin" %}
             <p>
                 <span style="font-size: 2em; background-color: yellow; color: darkred;">YOU ARE MAKING AN EXTERNAL TOURNAMENT GAME</span>
@@ -122,9 +646,7 @@
                                 <span class="inlineHelp">{% translate "Players can only join through the link" %}</span>
                                 <br />
                             </fieldset>
-                            <!-- End MT Setup Options-->
                         {% else %}
-                            <!-- Start Normal Setup Options -->
                             <fieldset id="setupOptions" class="optionsGroupTop">
                                 <legend class="optionsHeader">{% translate "Setup Options" %}</legend>
                                 <div class="singleChoiceWithTextDiv">
@@ -161,711 +683,557 @@
                                         <b>Slow</b> — At least one move per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.
                                         <br>
                                         <b>Casual</b> — No fixed schedule. Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.</span></span>
-                                </label>
-                                <div class="optionSelection">
-                                    <select name="pace" id="pace" onchange="validateOptions(this.id)">
-                                        <option value="10">{% translate "Live: Play the game in one session" %}</option>
-                                        <option value="20">{% translate "Fast: Several moves per day" %}</option>
-                                        <option value="30" selected>{% translate "Standard: 1-2+ moves a day" %}</option>
-                                        <option value="40">{% translate "Slow: At least one move a day" %}</option>
-                                        <option value="50">{% translate "Casual: Just take your time" %}</option>
-                                    </select>
-                                    <br />
-                                    <span class="optionHelp">{% translate "Alters kickout options. All games update 'live'" %}</span>
-                                    <br />
-                                    <span class="optionHelp">{% translate "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}</span>
+                                    </label>
+                                    <div class="optionSelection">
+                                        <select name="pace" id="pace" onchange="validateOptions(this.id)">
+                                            <option value="10">{% translate "Live: Play the game in one session" %}</option>
+                                            <option value="20">{% translate "Fast: Several moves per day" %}</option>
+                                            <option value="30" selected>{% translate "Standard: 1-2+ moves a day" %}</option>
+                                            <option value="40">{% translate "Slow: At least one move a day" %}</option>
+                                            <option value="50">{% translate "Casual: Just take your time" %}</option>
+                                        </select>
+                                        <br />
+                                        <span class="optionHelp">{% translate "Alters kickout options. All games update 'live'" %}</span>
+                                        <br />
+                                        <span class="optionHelp">{% translate "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="singleChoiceDiv">
-                                <label class="choiceLabel" for="pace">{% translate "Number of players" %}</label>
-                                <div class="optionSelection">
-                                    <select name="playerNumber" id="playerNumber" onchange="selectPlayers();">
-                                        <option value="2" selected="selected">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
-                                    </select>
+                                <div class="singleChoiceDiv">
+                                    <label class="choiceLabel" for="pace">{% translate "Number of players" %}</label>
+                                    <div class="optionSelection">
+                                        <select name="playerNumber" id="playerNumber" onchange="selectPlayers();">
+                                            <option value="2" selected="selected">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                            {% if user.username == "TGZtourneyAdmin" %}
+                                {% if user.username == "TGZtourneyAdmin" %}
+                                    <div class="singleChoiceWithTextDiv">
+                                        <label class="choiceLabelText" for="player2">{% translate "Player 1" %}</label>
+                                        <div class="optionSelectionText">
+                                            <div class="autocomplete">
+                                                <input type="text"
+                                                       id="player1"
+                                                       class="textInput"
+                                                       name="player1"
+                                                       autocomplete="off">
+                                            </div>
+                                            <span id="player2help" class="inlineHelp">{% translate "Leave blank to invite anybody" %}</span>
+                                        </div>
+                                    </div>
+                                {% endif %}
                                 <div class="singleChoiceWithTextDiv">
-                                    <label class="choiceLabelText" for="player2">{% translate "Player 1" %}</label>
+                                    <label class="choiceLabelText" for="player2">{% translate "Player 2" %}</label>
                                     <div class="optionSelectionText">
                                         <div class="autocomplete">
                                             <input type="text"
-                                                   id="player1"
+                                                   id="player2"
                                                    class="textInput"
-                                                   name="player1"
-                                                   class="playerInput"
+                                                   name="player2"
                                                    autocomplete="off">
                                         </div>
                                         <span id="player2help" class="inlineHelp">{% translate "Leave blank to invite anybody" %}</span>
                                     </div>
                                 </div>
-                            {% endif %}
-                            <div class="singleChoiceWithTextDiv">
-                                <label class="choiceLabelText" for="player2">{% translate "Player 2" %}</label>
-                                <div class="optionSelectionText">
-                                    <div class="autocomplete">
-                                        <input type="text"
-                                               id="player2"
-                                               class="textInput"
-                                               name="player2"
-                                               class="playerInput"
-                                               autocomplete="off">
-                                    </div>
-                                    <span id="player2help" class="inlineHelp">{% translate "Leave blank to invite anybody" %}</span>
-                                </div>
-                            </div>
-                            <div class="singleChoiceWithTextDiv" id="selPlayer3" style="display: none">
-                                <label class="choiceLabelText" for="player3">{% translate "Player 3" %}</label>
-                                <div class="optionSelectionText">
-                                    <div class="autocomplete">
-                                        <input type="text"
-                                               id="player3"
-                                               class="textInput"
-                                               name="player3"
-                                               class="playerInput"
-                                               autocomplete="off">
+                                <div class="singleChoiceWithTextDiv" id="selPlayer3" style="display: none">
+                                    <label class="choiceLabelText" for="player3">{% translate "Player 3" %}</label>
+                                    <div class="optionSelectionText">
+                                        <div class="autocomplete">
+                                            <input type="text"
+                                                   id="player3"
+                                                   class="textInput"
+                                                   name="player3"
+                                                   autocomplete="off">
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="singleChoiceWithTextDiv" id="selPlayer4" style="display: none">
-                                <label class="choiceLabelText" for="player3">{% translate "Player 4" %}</label>
-                                <div class="optionSelectionText">
-                                    <div class="autocomplete">
-                                        <input type="text"
-                                               id="player4"
-                                               class="textInput"
-                                               name="player4"
-                                               class="playerInput"
-                                               autocomplete="off">
+                                <div class="singleChoiceWithTextDiv" id="selPlayer4" style="display: none">
+                                    <label class="choiceLabelText" for="player3">{% translate "Player 4" %}</label>
+                                    <div class="optionSelectionText">
+                                        <div class="autocomplete">
+                                            <input type="text"
+                                                   id="player4"
+                                                   class="textInput"
+                                                   name="player4"
+                                                   autocomplete="off">
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="singleChoiceWithTextDiv" id="selPlayer5" style="display: none">
-                                <label class="choiceLabelText" for="player5">{% translate "Player 5" %}</label>
-                                <div class="optionSelectionText">
-                                    <div class="autocomplete">
-                                        <input type="text"
-                                               id="player5"
-                                               class="textInput"
-                                               name="player5"
-                                               class="playerInput"
-                                               autocomplete="off">
+                                <div class="singleChoiceWithTextDiv" id="selPlayer5" style="display: none">
+                                    <label class="choiceLabelText" for="player5">{% translate "Player 5" %}</label>
+                                    <div class="optionSelectionText">
+                                        <div class="autocomplete">
+                                            <input type="text"
+                                                   id="player5"
+                                                   class="textInput"
+                                                   name="player5"
+                                                   autocomplete="off">
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <span id="blitzWarningSpan">{% translate "Careful: A 5 min game with 3p could still take ~8 hrs" %}</span>
-                        </fieldset>
-                    {% endif %}
-                    {% if MT_Creation %}
-                        <fieldset id="basicOptions" class="optionsGroupTop">
-                            <legend class="optionsHeader">{% translate "Common Options" %}</legend>
-                            <label class="checkboxLabel">{% translate "Playing Speed: Fast" %}</label>
-                            <br />
-                            <label class="checkboxLabel">{% translate "Kickout available after: 12 hours (with 24hr flex time)" %}</label>
-                            <br />
-                            <!-- SCHISM -->
-                            <input type="checkbox"
-                                   onchange="validateOptions(this.id)"
-                                   class="myCheckbox"
-                                   id="useSchism"
-                                   name="useSchism"
-                                   value="99">
-                            <label for="useSchism" class="checkboxLabel">{% translate "Use Schism Expansion" %}</label>
-                            <br />
-                            <span class="inlineHelp">
-                                {% translate "Fan made expansion! Pool of 12 new gods<br />Game will be excluded from stats" %}
-                            </span>
-                            <br />
-                            <input type="radio"
-                                   onchange="validateOptions(this.id)"
-                                   class="myCheckbox"
-                                   id="schismRadio_mix"
-                                   name="schismRadio"
-                                   value="7"
-                                   disabled>
-                            <label for="schismRadio_mix" class="checkboxLabel">{% translate "Mix Original & Schism" %}</label>
-                            <br />
-                            <span class="inlineHelp">{% translate "HIGHLY RECOMMENDED: Intended Experience" %}</span>
-                            <br />
-                            <input type="radio"
-                                   onchange="validateOptions(this.id)"
-                                   class="myCheckbox"
-                                   id="schismRadio_half"
-                                   name="schismRadio"
-                                   value="8"
-                                   disabled>
-                            <label for="schismRadio_half" class="checkboxLabel">{% translate "4 / 4 Split" %}</label>
-                            <br />
-                            <span class="inlineHelp">{% translate "Use 4 Original and 4 Schism" %}</span>
-                            <br />
-                            <input type="radio"
-                                   onchange="validateOptions(this.id)"
-                                   class="myCheckbox"
-                                   id="schismRadio_schismOnly"
-                                   name="schismRadio"
-                                   value="9"
-                                   disabled>
-                            <label for="schismRadio_schismOnly" class="checkboxLabel">{% translate "Schism Only" %}</label>
-                            <br />
-                            <span class="inlineHelp">{% translate "Use 8 of the 12 Schism gods" %}</span>
-                            <div class="singleChoiceWithTextDiv">
-                                <label class="choiceLabelText" for="playerToInviteMT">{% translate "Find Player" %}</label>
-                                <div class="optionSelectionText">
-                                    <div class="autocomplete">
-                                        <input type="text"
-                                               placeholder="{% translate "Player Username" %}"
-                                               id="playerToInviteMT"
-                                               class="textInput playerInput"
-                                               name="playerToInviteMT"
-                                               autocomplete="off">
-                                    </div>
-                                </div>
-                            </div>
-                            <span id="invitedPlayersWarningSpanMT"></span>
-                            <button type="button" class="actionsLineButton" id="invitePlayerMTbutton">
-                                {% translate "Add Player to Invite List" %}
-                            </button>
-                            <input type="hidden"
-                                   id="invtedPlayersListMT"
-                                   name="invtedPlayersListMT"
-                                   value="">
-                            <span id="invitedPlayersSpanMT"></span>
-                        </fieldset>
-                    {% else %}
-                        <fieldset id="basicOptions" class="optionsGroupTop">
-                            <legend class="optionsHeader">{% translate "Common Options" %}</legend>
-                            <div class="singleChoiceDiv">
-                                <label class="choiceLabel" for="kickoutDuration">{% translate "Kickout available after:" %}</label>
-                                <div class="optionSelection">
-                                    <select name="kickoutDuration" id="kickoutDuration" onchange="">
-                                        <option value="100">{% translate "1 day" %}</option>
-                                        <option value="200" selected="selected">{% translate "2 days" %}</option>
-                                        <option value="300">{% translate "3 days" %}</option>
-                                        <option value="500">{% translate "5 days" %}</option>
-                                    </select>
-                                </div>
+                                <span id="blitzWarningSpan">{% translate "Careful: A 5 min game with 3p could still take ~8 hrs" %}</span>
+                            </fieldset>
+                        {% endif %}
+                        {% if MT_Creation %}
+                            <fieldset id="basicOptions" class="optionsGroupTop">
+                                <legend class="optionsHeader">{% translate "Common Options" %}</legend>
+                                <label class="checkboxLabel">{% translate "Playing Speed: Fast" %}</label>
                                 <br />
-                                <span class="inlineHelp">{% translate "Change Playing Speed for different options" %}</span>
-                            </div>
-                            <input type="checkbox"
-                                   onchange="validateOptions(this.id)"
-                                   class="myCheckbox"
-                                   id="trainingGame"
-                                   name="trainingGame"
-                                   value="102">
-                            <label for="trainingGame">{% translate "Practice Game" %}</label>
-                            <br />
-                            <span class="inlineHelp">
-                                {% url "lobbyHelp" as the_url %}
-                                {% blocktranslate trimmed %}
-                                    Play as up to 5 players on the same device.
-                                    See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
-                                {% endblocktranslate %}
-                            </span>
-                            <br />
-                            <input type="checkbox"
-                                   onchange="validateOptions(this.id)"
-                                   class="myCheckbox"
-                                   id="privateGame"
-                                   name="privateGame"
-                                   value="1">
-                            <label for="privateGame" class="checkboxLabel">{% translate "Private Game" %}</label>
-                            <br />
-                            <span class="inlineHelp">{% translate "Players can only join with invite or link" %}</span>
-                            <br />
-                            <input type="checkbox"
-                                   onchange="validateOptions(this.id)"
-                                   class="myCheckbox"
-                                   id="learningGame"
-                                   name="learningGame"
-                                   value="110">
-                            <label for="learningGame">{% translate " Request Learning Game" %}</label>
-                            <br />
-                            <span class="inlineHelp">
-                                {% url "lobbyHelp" as the_url %}
-                                {% blocktranslate trimmed %}
-                                    Request help to learn the game.
-                                    See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
-                                {% endblocktranslate %}
-                            </span>
-                            <br />
-                            <input type="checkbox"
-                                   onchange="validateOptions(this.id)"
-                                   class="myCheckbox"
-                                   id="experiencedGame"
-                                   name="experiencedGame"
-                                   value="120"
-                                   disabled>
-                            <label for="experiencedGame">{% translate "Experienced Game" %}</label>
-                            <br />
-                            <span class="inlineHelp">
-                                {% url "lobbyHelp" as the_url %}
-                                {% blocktranslate trimmed %}
-                                    Minimum Experience Level. See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
-                                {% endblocktranslate %}
-                                {% if not experienced %}
-                                    <br />
-                                    <span class="notEnoughExperience">{% translate "You do not have enough experience" %}</span>
-                                {% endif %}
-                            </span>
-                            <br />
-                            <!-- SCHISM -->
-                            <input type="checkbox"
-                                   onchange="validateOptions(this.id)"
-                                   class="myCheckbox"
-                                   id="useSchism"
-                                   name="useSchism"
-                                   value="99">
-                            <label for="useSchism" class="checkboxLabel">{% translate "Use Schism Expansion" %}</label>
-                            <br />
-                            <span class="inlineHelp">
-                                {% translate "Fan made expansion! Pool of 12 new gods<br />Game will be excluded from stats" %}
-                            </span>
-                            <br />
-                            <input type="radio"
-                                   onchange="validateOptions(this.id)"
-                                   class="myCheckbox"
-                                   id="schismRadio_mix"
-                                   name="schismRadio"
-                                   value="7"
-                                   disabled>
-                            <label for="schismRadio_mix" class="checkboxLabel">{% translate "Mix Original & Schism" %}</label>
-                            <br />
-                            <span class="inlineHelp">{% translate "HIGHLY RECOMMENDED: Intended Experience" %}</span>
-                            <br />
-                            <input type="radio"
-                                   onchange="validateOptions(this.id)"
-                                   class="myCheckbox"
-                                   id="schismRadio_half"
-                                   name="schismRadio"
-                                   value="8"
-                                   disabled>
-                            <label for="schismRadio_half" class="checkboxLabel">{% translate "4 / 4 Split" %}</label>
-                            <br />
-                            <span class="inlineHelp">{% translate "Use 4 Original and 4 Schism" %}</span>
-                            <br />
-                            <input type="radio"
-                                   onchange="validateOptions(this.id)"
-                                   class="myCheckbox"
-                                   id="schismRadio_schismOnly"
-                                   name="schismRadio"
-                                   value="9"
-                                   disabled>
-                            <label for="schismRadio_schismOnly" class="checkboxLabel">{% translate "Schism Only" %}</label>
-                            <br />
-                            <span class="inlineHelp">{% translate "Use 8 of the 12 Schism gods" %}</span>
-                            <br />
-                            <div id="keepMapDiv" style="background-color: yellow;display: none;">
+                                <label class="checkboxLabel">{% translate "Kickout available after: 12 hours (with 24hr flex time)" %}</label>
+                                <br />
                                 <input type="checkbox"
                                        onchange="validateOptions(this.id)"
                                        class="myCheckbox"
-                                       id="keepMap"
-                                       name="keepMap"
-                                       value="">
-                                <label for="keepMap">{% translate "Keep the same map" %}</label>
+                                       id="useSchism"
+                                       name="useSchism"
+                                       value="99">
+                                <label for="useSchism" class="checkboxLabel">{% translate "Use Schism Expansion" %}</label>
                                 <br />
-                                <!--<span class="inlineHelp">Untick to play with a random map</span><br />-->
+                                <span class="inlineHelp">
+                                    {% translate "Fan made expansion! Pool of 12 new gods<br />Game will be excluded from stats" %}
+                                </span>
+                                <br />
+                                <input type="radio"
+                                       onchange="validateOptions(this.id)"
+                                       class="myCheckbox"
+                                       id="schismRadio_mix"
+                                       name="schismRadio"
+                                       value="7"
+                                       disabled>
+                                <label for="schismRadio_mix" class="checkboxLabel">{% translate "Mix Original & Schism" %}</label>
+                                <br />
+                                <span class="inlineHelp">{% translate "HIGHLY RECOMMENDED: Intended Experience" %}</span>
+                                <br />
+                                <input type="radio"
+                                       onchange="validateOptions(this.id)"
+                                       class="myCheckbox"
+                                       id="schismRadio_half"
+                                       name="schismRadio"
+                                       value="8"
+                                       disabled>
+                                <label for="schismRadio_half" class="checkboxLabel">{% translate "4 / 4 Split" %}</label>
+                                <br />
+                                <span class="inlineHelp">{% translate "Use 4 Original and 4 Schism" %}</span>
+                                <br />
+                                <input type="radio"
+                                       onchange="validateOptions(this.id)"
+                                       class="myCheckbox"
+                                       id="schismRadio_schismOnly"
+                                       name="schismRadio"
+                                       value="9"
+                                       disabled>
+                                <label for="schismRadio_schismOnly" class="checkboxLabel">{% translate "Schism Only" %}</label>
+                                <br />
+                                <span class="inlineHelp">{% translate "Use 8 of the 12 Schism gods" %}</span>
+                                <div class="singleChoiceWithTextDiv">
+                                    <label class="choiceLabelText" for="playerToInviteMT">{% translate "Find Player" %}</label>
+                                    <div class="optionSelectionText">
+                                        <div class="autocomplete">
+                                            <input type="text"
+                                                   placeholder="{% translate "Player Username" %}"
+                                                   id="playerToInviteMT"
+                                                   class="textInput playerInput"
+                                                   name="playerToInviteMT"
+                                                   autocomplete="off">
+                                        </div>
+                                    </div>
+                                </div>
+                                <span id="invitedPlayersWarningSpanMT"></span>
+                                <button type="button" class="actionsLineButton" id="invitePlayerMTbutton">
+                                    {% translate "Add Player to Invite List" %}
+                                </button>
+                                <input type="hidden"
+                                       id="invtedPlayersListMT"
+                                       name="invtedPlayersListMT"
+                                       value="">
+                                <span id="invitedPlayersSpanMT"></span>
+                            </fieldset>
+                        {% else %}
+                            <fieldset id="basicOptions" class="optionsGroupTop">
+                                <legend class="optionsHeader">{% translate "Common Options" %}</legend>
+                                <div class="singleChoiceDiv">
+                                    <label class="choiceLabel" for="kickoutDuration">{% translate "Kickout available after:" %}</label>
+                                    <div class="optionSelection">
+                                        <select name="kickoutDuration" id="kickoutDuration" onchange="">
+                                            <option value="100">{% translate "1 day" %}</option>
+                                            <option value="200" selected="selected">{% translate "2 days" %}</option>
+                                            <option value="300">{% translate "3 days" %}</option>
+                                            <option value="500">{% translate "5 days" %}</option>
+                                        </select>
+                                    </div>
+                                    <br />
+                                    <span class="inlineHelp">{% translate "Change Playing Speed for different options" %}</span>
+                                </div>
+                                <input type="checkbox"
+                                       onchange="validateOptions(this.id)"
+                                       class="myCheckbox"
+                                       id="trainingGame"
+                                       name="trainingGame"
+                                       value="102">
+                                <label for="trainingGame">{% translate "Practice Game" %}</label>
+                                <br />
+                                <span class="inlineHelp">
+                                    {% url "lobbyHelp" as the_url %}
+                                    {% blocktranslate trimmed %}
+                                        Play as up to 5 players on the same device.
+                                        See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
+                                    {% endblocktranslate %}
+                                </span>
+                                <br />
+                                <input type="checkbox"
+                                       onchange="validateOptions(this.id)"
+                                       class="myCheckbox"
+                                       id="privateGame"
+                                       name="privateGame"
+                                       value="1">
+                                <label for="privateGame" class="checkboxLabel">{% translate "Private Game" %}</label>
+                                <br />
+                                <span class="inlineHelp">{% translate "Players can only join with invite or link" %}</span>
+                                <br />
+                                <input type="checkbox"
+                                       onchange="validateOptions(this.id)"
+                                       class="myCheckbox"
+                                       id="learningGame"
+                                       name="learningGame"
+                                       value="110">
+                                <label for="learningGame">{% translate " Request Learning Game" %}</label>
+                                <br />
+                                <span class="inlineHelp">
+                                    {% url "lobbyHelp" as the_url %}
+                                    {% blocktranslate trimmed %}
+                                        Request help to learn the game.
+                                        See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
+                                    {% endblocktranslate %}
+                                </span>
+                                <br />
+                                <input type="checkbox"
+                                       onchange="validateOptions(this.id)"
+                                       class="myCheckbox"
+                                       id="experiencedGame"
+                                       name="experiencedGame"
+                                       value="120"
+                                       disabled>
+                                <label for="experiencedGame">{% translate "Experienced Game" %}</label>
+                                <br />
+                                <span class="inlineHelp">
+                                    {% url "lobbyHelp" as the_url %}
+                                    {% blocktranslate trimmed %}
+                                        Minimum Experience Level. See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
+                                    {% endblocktranslate %}
+                                    {% if not experienced %}
+                                        <span class="notEnoughExperience">{% translate "You do not have enough experience" %}</span>
+                                    {% endif %}
+                                </span>
+                                <br />
+                                <input type="checkbox"
+                                       onchange="validateOptions(this.id)"
+                                       class="myCheckbox"
+                                       id="useSchism"
+                                       name="useSchism"
+                                       value="99">
+                                <label for="useSchism" class="checkboxLabel">{% translate "Use Schism Expansion" %}</label>
+                                <br />
+                                <span class="inlineHelp">
+                                    {% translate "Fan made expansion! Pool of 12 new gods<br />Game will be excluded from stats" %}
+                                </span>
+                                <br />
+                                <input type="radio"
+                                       onchange="validateOptions(this.id)"
+                                       class="myCheckbox"
+                                       id="schismRadio_mix"
+                                       name="schismRadio"
+                                       value="7"
+                                       disabled>
+                                <label for="schismRadio_mix" class="checkboxLabel">{% translate "Mix Original & Schism" %}</label>
+                                <br />
+                                <span class="inlineHelp">{% translate "HIGHLY RECOMMENDED: Intended Experience" %}</span>
+                                <br />
+                                <input type="radio"
+                                       onchange="validateOptions(this.id)"
+                                       class="myCheckbox"
+                                       id="schismRadio_half"
+                                       name="schismRadio"
+                                       value="8"
+                                       disabled>
+                                <label for="schismRadio_half" class="checkboxLabel">{% translate "4 / 4 Split" %}</label>
+                                <br />
+                                <span class="inlineHelp">{% translate "Use 4 Original and 4 Schism" %}</span>
+                                <br />
+                                <input type="radio"
+                                       onchange="validateOptions(this.id)"
+                                       class="myCheckbox"
+                                       id="schismRadio_schismOnly"
+                                       name="schismRadio"
+                                       value="9"
+                                       disabled>
+                                <label for="schismRadio_schismOnly" class="checkboxLabel">{% translate "Schism Only" %}</label>
+                                <br />
+                                <span class="inlineHelp">{% translate "Use 8 of the 12 Schism gods" %}</span>
+                                <br />
+                                <div id="keepMapDiv" style="background-color: yellow;display: none;">
+                                    <input type="checkbox"
+                                           onchange="validateOptions(this.id)"
+                                           class="myCheckbox"
+                                           id="keepMap"
+                                           name="keepMap"
+                                           value="">
+                                    <label for="keepMap">{% translate "Keep the same map" %}</label>
+                                    <br />
+                                    <!--<span class="inlineHelp">Untick to play with a random map</span><br />-->
+                                </div>
+                            </fieldset>
+                        {% endif %}
+                        <fieldset id="expertOptions" class="optionsGroupTop expertTGZoptions">
+                            <legend class="optionsHeader">{% translate "Expert Options" %}</legend>
+                            <input type="checkbox"
+                                   onchange="validateExpertOptions(this)"
+                                   class="myCheckbox"
+                                   id="enableAdvancedOptions"
+                                   name="enableAdvancedOptions"
+                                   value="expert">
+                            <label for="enableAdvancedOptions">{% translate "Enable Advanced Setup Options" %}</label>
+                            <br />
+                            <span class="expertSummarySpan"><b><u>Alter VR</u></b> -- <b><u>Set used gods</b></u></span>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod0" type="number" class="valueField" value="4" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="shadipinyi" name="shadipinyi" value="0" disabled>
+                                <label for="shadipinyi">{% translate "Shadipinyi (Extra Plaque)" %}</label>
+                                <br />
                             </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod1" type="number" class="valueField" value="4" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="elegua" name="elegua" value="1" disabled>
+                                <label for="elegua">{% translate "Elegua (3 Bid Cows)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod2" type="number" class="valueField" value="2" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="dziva" name="dziva" value="2" disabled>
+                                <label for="dziva">{% translate "Dziva (Lower Prices)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod3" type="number" class="valueField" value="4" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="eshu" name="eshu" value="3" disabled>
+                                <label for="eshu">{% translate "Eshu (Range 6)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod4" type="number" class="valueField" value="4" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="gu" name="gu" value="4" disabled>
+                                <label for="gu">{% translate "Gu (1 VR Craftsmen)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod5" type="number" class="valueField" value="7" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="obatala" name="obatala" value="5" disabled>
+                                <label for="obatala">{% translate "Obatala (2 Monuments)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod6" type="number" class="valueField" value="5" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="atete" name="atete" value="6" disabled>
+                                <label for="atete">{% translate "Atete (Use Res Twice)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod7" type="number" class="valueField" value="3" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="tsuiGoab" name="tsuiGoab" value="7" disabled>
+                                <label for="tsuiGoab">{% translate "Tsui-Goab (Any goods)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod8" type="number" class="valueField" value="5" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="anansi" name="anansi" value="8" disabled>
+                                <label for="anansi">{% translate "Anansi (Pay 1 cow / good)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod9" type="number" class="valueField" value="2" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="qamata" name="qamata" value="9" disabled>
+                                <label for="qamata">{% translate "Qamata (Get Hub Cows)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod10" type="number" class="valueField" value="5" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="engai" name="engai" value="10" disabled>
+                                <label for="engai">{% translate "Engai (2 Cow Income)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod11" type="number" class="valueField" value="-2" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="xango" name="xango" value="11" disabled>
+                                <label for="xango">{% translate "Xango (2nd Tiebreaker)" %}</label>
+                                <br />
+                            </div>
+                            <!-- SCHISM -->
+                            <hr />
+                            <span class="expertSummarySpan"><b><u>Schism</u></b></span>
+                            <br />
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod12" type="number" class="valueField" value="5" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="agwu_nsi" name="agwu_nsi" value="12" disabled>
+                                <label for="agwu_nsi">{% translate "Agwu-Nsi (Use any Res)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod13" type="number" class="valueField" value="3" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="aja" name="aja" value="13" disabled>
+                                <label for="aja">{% translate "Aja (Free Pass)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod14" type="number" class="valueField" value="4" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="aje_shaluga" name="aje_shaluga" value="14" disabled>
+                                <label for="aje_shaluga">{% translate "Aje-Shaluga (Free Pri)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod15" type="number" class="valueField" value="2" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="alajire" name="alajire" value="15" disabled>
+                                <label for="alajire">{% translate "Alajire (+VR)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod16" type="number" class="valueField" value="6" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="anyanwu" name="anyanwu" value="16" disabled>
+                                <label for="anyanwu">{% translate "Anyanwu (Raise to 3)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod17" type="number" class="valueField" value="0" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="ekwensu" name="ekwensu" value="17" disabled>
+                                <label for="ekwensu">{% translate "Ekwensu (Build Cows)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod18" type="number" class="valueField" value="3" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="ogun" name="ogun" value="18" disabled>
+                                <label for="ogun">{% translate "Ogun (Blacksmith Tech)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod19" type="number" class="valueField" value="4" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="ovia" name="ovia" value="19" disabled>
+                                <label for="ovia">{% translate "Ovia (1st Craftsman cow)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod20" type="number" class="valueField" value="6" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="oya" name="oya" value="20" disabled>
+                                <label for="oya">{% translate "Oya (Monument for RG)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod21" type="number" class="valueField" value="2" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="simbi" name="simbi" value="21" disabled>
+                                <label for="simbi">{% translate "Simbi (Res as Water)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod22" type="number" class="valueField" value="7" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="tiurakh" name="tiurakh" value="22" disabled>
+                                <label for="tiurakh">{% translate "Tiurakh (One less RG)" %}</label>
+                                <br />
+                            </div>
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRgod23" type="number" class="valueField" value="4" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="yemoja" name="yemoja" value="23" disabled>
+                                <label for="yemoja">{% translate "Yemoja (Raise Any Mon)" %}</label>
+                                <br />
+                            </div>
+                            <button id="pickRandomgods" disabled>Pick 8 random gods</button>
+                            <hr class="narrowHR" />
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRherd" type="number" class="valueField" value="6" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <span class="specVRlabel">{% translate "Herd" %}</span>
+                            </div>
+                            <br />
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRnomads" type="number" class="valueField" value="1" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <span class="specVRlabel">{% translate "Nomads" %}</span>
+                            </div>
+                            <br />
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRrain" type="number" class="valueField" value="1" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <span class="specVRlabel">{% translate "Rain Ceremony" %}</span>
+                            </div>
+                            <br />
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRshaman" type="number" class="valueField" value="3" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <span class="specVRlabel">{% translate "Shaman" %}</span>
+                            </div>
+                            <br />
+                            <div class="valueContainer">
+                                <button onclick="changeValue(event, this, -1)" disabled>↓</button>
+                                <input name="VRbuilder" type="number" class="valueField" value="2" disabled>
+                                <button onclick="changeValue(event, this, 1)" disabled>↑</button>
+                                <span class="specVRlabel">{% translate "Builder" %}</span>
+                                <br />
+                            </div>
+                            <span class="expertSummarySpan" id="expertSummarygodsSpan"></span>
+                            <span class="expertSummarySpan" id="expertSummaryVRSpan"></span>
                         </fieldset>
-                    {% endif %}
-                    <fieldset id="expertOptions" class="optionsGroupTop expertTGZoptions">
-                        <legend class="optionsHeader">{% translate "Expert Options" %}</legend>
-                        <input type="checkbox"
-                               onchange="validateExpertOptions(this)"
-                               class="myCheckbox"
-                               id="enableAdvancedOptions"
-                               name="enableAdvancedOptions"
-                               value="expert">
-                        <label for="enableAdvancedOptions">{% translate "Enable Advanced Setup Options" %}</label>
-                        <br />
-                        <span class="expertSummarySpan"><b><u>Alter VR</u></b> -- <b><u>Set used gods</b></u></span>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod0" type="number" class="valueField" value="4" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="shadipinyi"
-                                   name="shadipinyi"
-                                   value="0"
-                                   disabled>
-                            <label for="shadipinyi">{% translate "Shadipinyi (Extra Plaque)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod1" type="number" class="valueField" value="4" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="elegua"
-                                   name="elegua"
-                                   value="1"
-                                   disabled>
-                            <label for="elegua">{% translate "Elegua (3 Bid Cows)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod2" type="number" class="valueField" value="2" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="dziva"
-                                   name="dziva"
-                                   value="2"
-                                   disabled>
-                            <label for="dziva">{% translate "Dziva (Lower Prices)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod3" type="number" class="valueField" value="4" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="eshu"
-                                   name="eshu"
-                                   value="3"
-                                   disabled>
-                            <label for="eshu">{% translate "Eshu (Range 6)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod4" type="number" class="valueField" value="4" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="gu"
-                                   name="gu"
-                                   value="4"
-                                   disabled>
-                            <label for="gu">{% translate "Gu (1 VR Craftsmen)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod5" type="number" class="valueField" value="7" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="obatala"
-                                   name="obatala"
-                                   value="5"
-                                   disabled>
-                            <label for="obatala">{% translate "Obatala (2 Monuments)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod6" type="number" class="valueField" value="5" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="atete"
-                                   name="atete"
-                                   value="6"
-                                   disabled>
-                            <label for="atete">{% translate "Atete (Use Res Twice)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod7" type="number" class="valueField" value="3" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="tsuiGoab"
-                                   name="tsuiGoab"
-                                   value="7"
-                                   disabled>
-                            <label for="tsuiGoab">{% translate "Tsui-Goab (Any goods)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod8" type="number" class="valueField" value="5" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="anansi"
-                                   name="anansi"
-                                   value="8"
-                                   disabled>
-                            <label for="anansi">{% translate "Anansi (Pay 1 cow / good)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod9" type="number" class="valueField" value="2" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="qamata"
-                                   name="qamata"
-                                   value="9"
-                                   disabled>
-                            <label for="qamata">{% translate "Qamata (Get Hub Cows)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod10" type="number" class="valueField" value="5" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="engai"
-                                   name="engai"
-                                   value="10"
-                                   disabled>
-                            <label for="engai">{% translate "Engai (2 Cow Income)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod11" type="number" class="valueField" value="-2" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="xango"
-                                   name="xango"
-                                   value="11"
-                                   disabled>
-                            <label for="xango">{% translate "Xango (2nd Tiebreaker)" %}</label>
-                            <br />
-                        </div>
-                        <!-- SCHISM -->
-                        <hr />
-                        <span class="expertSummarySpan"><b><u>Schism</u></b></span>
-                        <br />
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod12" type="number" class="valueField" value="5" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="agwu_nsi"
-                                   name="agwu_nsi"
-                                   value="12"
-                                   disabled>
-                            <label for="agwu_nsi">{% translate "Agwu-Nsi (Use any Res)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod13" type="number" class="valueField" value="3" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="aja"
-                                   name="aja"
-                                   value="13"
-                                   disabled>
-                            <label for="aja">{% translate "Aja (Free Pass)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod14" type="number" class="valueField" value="4" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="aje_shaluga"
-                                   name="aje_shaluga"
-                                   value="14"
-                                   disabled>
-                            <label for="aje_shaluga">{% translate "Aje-Shaluga (Free Pri)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod15" type="number" class="valueField" value="2" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="alajire"
-                                   name="alajire"
-                                   value="15"
-                                   disabled>
-                            <label for="alajire">{% translate "Alajire (+VR)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod16" type="number" class="valueField" value="6" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="anyanwu"
-                                   name="anyanwu"
-                                   value="16"
-                                   disabled>
-                            <label for="anyanwu">{% translate "Anyanwu (Raise to 3)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod17" type="number" class="valueField" value="0" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="ekwensu"
-                                   name="ekwensu"
-                                   value="17"
-                                   disabled>
-                            <label for="ekwensu">{% translate "Ekwensu (Build Cows)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod18" type="number" class="valueField" value="3" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="ogun"
-                                   name="ogun"
-                                   value="18"
-                                   disabled>
-                            <label for="ogun">{% translate "Ogun (Blacksmith Tech)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod19" type="number" class="valueField" value="4" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="ovia"
-                                   name="ovia"
-                                   value="19"
-                                   disabled>
-                            <label for="ovia">{% translate "Ovia (1st Craftsman cow)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod20" type="number" class="valueField" value="6" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="oya"
-                                   name="oya"
-                                   value="20"
-                                   disabled>
-                            <label for="oya">{% translate "Oya (Monument for RG)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod21" type="number" class="valueField" value="2" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="simbi"
-                                   name="simbi"
-                                   value="21"
-                                   disabled>
-                            <label for="simbi">{% translate "Simbi (Res as Water)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod22" type="number" class="valueField" value="7" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="tiurakh"
-                                   name="tiurakh"
-                                   value="22"
-                                   disabled>
-                            <label for="tiurakh">{% translate "Tiurakh (One less RG)" %}</label>
-                            <br />
-                        </div>
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRgod23" type="number" class="valueField" value="4" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <input type="checkbox"
-                                   onchange="validateExpertOptions(this)"
-                                   class="myCheckbox"
-                                   id="yemoja"
-                                   name="yemoja"
-                                   value="23"
-                                   disabled>
-                            <label for="yemoja">{% translate "Yemoja (Raise Any Mon)" %}</label>
-                            <br />
-                        </div>
-                        <button id="pickRandomgods" disabled>Pick 8 random gods</button>
-                        <hr class="narrowHR" />
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRherd" type="number" class="valueField" value="6" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <span class="specVRlabel">{% translate "Herd" %}</span>
-                        </div>
-                        <br />
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRnomads" type="number" class="valueField" value="1" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <span class="specVRlabel">{% translate "Nomads" %}</span>
-                        </div>
-                        <br />
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRrain" type="number" class="valueField" value="1" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <span class="specVRlabel">{% translate "Rain Ceremony" %}</span>
-                        </div>
-                        <br />
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRshaman" type="number" class="valueField" value="3" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <span class="specVRlabel">{% translate "Shaman" %}</span>
-                        </div>
-                        <br />
-                        <div class="valueContainer">
-                            <button onclick="changeValue(event, this, -1)" disabled>↓</button>
-                            <input name="VRbuilder" type="number" class="valueField" value="2" disabled>
-                            <button onclick="changeValue(event, this, 1)" disabled>↑</button>
-                            <span class="specVRlabel">{% translate "Builder" %}</span>
-                            <br />
-                        </div>
-                        <span class="expertSummarySpan" id="expertSummarygodsSpan"></span>
-                        <span class="expertSummarySpan" id="expertSummaryVRSpan"></span>
-                    </fieldset>
-                </div>
-                <br />
-            </div>
-            <div>
+                    </div>
+                    <br />
                 {% if user.username == "TGZtourneyAdmin" %}
                     <p>
                         <span style="font-size: 2em; background-color: yellow; color: darkred;">Batch Game Creation. To use, ensure "Player 1" field above is blank. Otherwise this will be ignored</span>
@@ -880,25 +1248,22 @@
                 <input type="submit"
                        class="registerbtn"
                        {% if user.username == "TGZtourneyAdmin" %} value="{% translate "Create And Start The Great Zimbabwe Tournament Game" %}" {% elif MT_Creation %} value="{% translate "Create The Great Zimbabwe Mini Tournament" %}" {% else %} value="{% translate "Create The Great Zimbabwe Game" %}" {% endif %} />
-            </div>
+            </form>
             {% if user.username == "TGZtourneyAdmin" %}
                 <p>
                     <span style="font-size: 2em; background-color: yellow; color: darkred;">YOU ARE MAKING AN EXTERNAL TOURNAMENT GAME</span>
                 </p>
             {% endif %}
-            {% if MT_Creation %}
-            </form>
-        {% else %}
-        </form>
+        </div>
+        {% include "Lobby/donate/donateBanner.html" %}
+        {% include "Lobby/splotterconSponsor.html" %}
+    </div>
     {% endif %}
-    {% include "Lobby/donate/donateBanner.html" %}
-    {% include "Lobby/splotterconSponsor.html" %}
-</div>
-{% block script %}
-    {% compress js %}
-        <script src="{% static 'Lobby/createTGZgame.js' %}"></script>
-    {% endcompress %}
-    <script>
+    {% block script %}
+        {% compress js %}
+            <script src="{% static 'Lobby/createTGZgame.js' %}"></script>
+        {% endcompress %}
+        <script>
     var global = {};
     global.player2normText = '{% translate "Leave blank to invite anybody" %}';
     global.player2practiceText = '{% translate "You can change the in-game name of the other players" %}';
@@ -913,7 +1278,6 @@
     {% else %}
     global.MT_Creation = false;
     {% endif %}
-
 
     document.addEventListener('DOMContentLoaded', function () {
         {% if MT_Creation %}
@@ -930,10 +1294,9 @@
         {% if mapData %}
         boardTiles = {{ mapData }};
         setPlayersforMapData();
-    {% endif %}
-
+        {% endif %}
+ 
     {% if fillData %}
-    //alert("Filling Data")
     var setupData = {};
     setupData.gameName = "{{ gameName }}";
     setupData.gameDescription = "{{ gameDescription }}";
@@ -947,10 +1310,8 @@
     initGameCreation(true, setupData);
     {% else %}
     initGameCreation(false);
-    {% endif %}      
-});
-
-
-    </script>
-{% endblock script %}
+    {% endif %}
+    });
+        </script>
+    {% endblock script %}
 {% endblock body %}
