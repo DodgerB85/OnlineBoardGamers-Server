@@ -513,13 +513,13 @@ body.nd .nd-table-scroll {
 
 /* Constrain game and starting-option icons rendered inside table cells */
 body.nd .nd-table td .gameIcon {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     vertical-align: middle;
 }
 body.nd .nd-table td .startingOption {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     vertical-align: middle;
     display: inline-block;
 }
@@ -2635,8 +2635,8 @@ body.nd .nd-row09 .nd-col-options {
 }
 
 body.nd .nd-row09 .nd-col-options img.startingMap {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
 }
 
 @media (max-width: 720px) {
@@ -2657,8 +2657,8 @@ body.nd .nd-row09 .nd-col-options img.startingMap {
         flex-wrap: wrap;
     }
     body.nd .nd-row09 .nd-col-options img.startingMap {
-        width: 28px;
-        height: 28px;
+        width: 40px;
+        height: 40px;
     }
     body.nd .nd-row09 .nd-col-status {
         text-align: left;
