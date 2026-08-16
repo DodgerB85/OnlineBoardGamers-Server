@@ -7,6 +7,7 @@ import * as funcs from "../js/BUSfuncs.js"
 import * as view from "../js/BUSview.js"
 import * as controller from "../js/BUScontroller.js"
 import * as model from "../js/BUSmodel.js"
+import * as pitts from "../js/BUSpitts.js"
 
 import { useModelStore } from "../stores/BUSstore.js"
 const store = useModelStore()
@@ -40,6 +41,10 @@ function getActionText() {
 	if (store.gameflow.phase === rf.PHASE_ADD_PAX) {
 		phaseStr = "Choose one of the two stations to add a Passenger"
 		phaseStr += "<br/>Remaining Passengers: " + store.context.passengersLeftToPlace
+		if (personal.selectedBoard === rf.BOARD_PITTS) {
+			if (pitts.designerArrivedThisRound()) phaseStr += "<br/><span style='color: red'>Designer has already arrived this round</span>"
+			else if (store.jeroenStatus === rf.DESIGNER_NOT_ARRIVED && store.jorisStatus === rf.DESIGNER_NOT_ARRIVED) phaseStr += "<br/><span style='color: #ff9900'>Remember: You may only bring one designer onto the board per round</span>"
+		}
 	}
 	if (store.gameflow.phase === rf.PHASE_ADD_BLDGS) {
 		phaseStr = "Choose a location to add a Building" // (GE check)

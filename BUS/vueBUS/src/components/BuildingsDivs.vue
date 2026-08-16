@@ -140,8 +140,9 @@ function highlight(e, entering) {
 	else e.target.style.border = String((store.refSize * 5) / 100) + "px solid yellow"
 }
 
-function playPassengerPlopAnimation(junction, image) {
+function playPassengerPlopAnimation(junction, image, leftOffset, plopWidth, plopHeight) {
 	if (image === undefined) image = "passenger"
+	if (leftOffset === undefined) leftOffset = 0
 	const position = view.getBuildingPos(junction, -1)
 	
 	// Set up the animation element with passenger image at same position as pax number
@@ -150,9 +151,9 @@ function playPassengerPlopAnimation(junction, image) {
 	plopAnimationRef.value.style.backgroundRepeat = 'no-repeat'
 	plopAnimationRef.value.style.backgroundPosition = 'center'
 	plopAnimationRef.value.style.top = position[0] + 'px'
-	plopAnimationRef.value.style.left = position[1] + 'px'
-	plopAnimationRef.value.style.width = (store.refSize * 32) / 100 + 'px'
-	plopAnimationRef.value.style.height = (store.refSize * 32) / 100 + 'px'
+	plopAnimationRef.value.style.left = position[1] + leftOffset + 'px'
+	plopAnimationRef.value.style.width = (plopWidth === undefined ? (store.refSize * 32) / 100 : plopWidth) + 'px'
+	plopAnimationRef.value.style.height = (plopHeight === undefined ? (store.refSize * 32) / 100 : plopHeight) + 'px'
 	
 	// Reset rotation for passengers
 	plopAnimationRef.value.style.transform = ''
@@ -188,6 +189,15 @@ function addPassengerToJunction(junction) {
 	}
 }
 
+// Landing offset for a designer standing on a junction: on the junction like a pax when no regular
+// pax are waiting, else directly to the right of the waiting pax (Jeroen first, then Joris)
+function getDesignerLandingOffset(designerIdx, junction, index) {
+	if (junction[rf.paxIdx] === 0) return (store.refSize * 30) / 400
+	let offset = (store.refSize * 30) / 400 + (store.refSize * 184) / 1000
+	if (designerIdx === rf.DESIGNER_JORIS && pitts.getDesignerStatusJunction(store.jeroenStatus) === index) offset += (store.refSize * 184) / 1000
+	return offset
+}
+
 // Bring a Splotter Designer into play at the Airport (junction 30), instead of two regular passengers
 function addDesignerToJunction(designerIdx) {
 	if (store.context.passengersLeftToPlace < 2) return
@@ -198,7 +208,9 @@ function addDesignerToJunction(designerIdx) {
 	else store.jorisStatus = rf.PITTS_AIRPORT_JUNCTION
 	store.context.passengersLeftToPlace -= 2
 	store.context.historyObj.push([rf.PITTS_AIRPORT_JUNCTION, designerIdx])
-	playPassengerPlopAnimation(rf.PITTS_AIRPORT_JUNCTION, designerIdx === rf.DESIGNER_JEROEN ? "jeroen" : "joris")
+	// Plop at the designer's actual landing spot
+	const landingOffset = getDesignerLandingOffset(designerIdx, store.junctions[rf.PITTS_AIRPORT_JUNCTION], rf.PITTS_AIRPORT_JUNCTION)
+	playPassengerPlopAnimation(rf.PITTS_AIRPORT_JUNCTION, designerIdx === rf.DESIGNER_JEROEN ? "jeroen" : "joris", landingOffset, (store.refSize * 184) / 1000, (store.refSize * 311) / 1000)
 }
 function clickedPaxToVrom(junction) {
 	if (!model.canPlayerVrom()) return
@@ -285,7 +297,7 @@ function clickedVromBldg(junction, buildingIndex) {
 			setDesignerStatus(designerIdx, rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION)
 		}
 		store.context.remainingVroms--
-		controller.currentPlayerObj().score++
+		model.increaseScore(controller.currentPlayerObj())
 		store.context.selectedPaxToVromJunction = -1
 		store.context.selectedDesignerToVrom = -1
 		controller.canPlayerVrom(true)
@@ -300,7 +312,7 @@ function clickedVromBldg(junction, buildingIndex) {
 		store.junctions[junction][buildingIndex] += designerIdx === rf.DESIGNER_JEROEN ? 20 : 30
 		setDesignerStatus(designerIdx, rf.DESIGNER_ON_BUILDING_FLAG + (attended ? rf.DESIGNER_CON_FLAG : 0) + junction)
 		store.context.remainingVroms--
-		controller.currentPlayerObj().score++
+		model.increaseScore(controller.currentPlayerObj())
 		store.context.selectedPaxToVromJunction = -1
 		store.context.selectedDesignerToVrom = -1
 		controller.canPlayerVrom(true)
@@ -314,7 +326,7 @@ function clickedVromBldg(junction, buildingIndex) {
 	// remove a move
 	store.context.remainingVroms--
 	// Increase scre
-	controller.currentPlayerObj().score++
+	model.increaseScore(controller.currentPlayerObj())
 	// reset vars
 	store.context.selectedPaxToVromJunction = -1
 	store.context.selectedDesignerToVrom = -1
@@ -445,7 +457,7 @@ function getBuildingRadius() {
 			}"
 			:style="{
 				top: view.getBuildingPos(index, -1)[0] + 'px',
-				left: view.getBuildingPos(index, -1)[1] + (store.refSize * 120) / 400 + 'px',
+				left: view.getBuildingPos(index, -1)[1] + getDesignerLandingOffset(rf.DESIGNER_JEROEN, junction, index) + 'px',
 				width: (store.refSize * 184) / 1000 + 'px',
 				height: (store.refSize * 311) / 1000 + 'px',
 			}"
@@ -466,7 +478,7 @@ function getBuildingRadius() {
 			}"
 			:style="{
 				top: view.getBuildingPos(index, -1)[0] + 'px',
-				left: view.getBuildingPos(index, -1)[1] + (store.refSize * 180) / 400 + 'px',
+				left: view.getBuildingPos(index, -1)[1] + getDesignerLandingOffset(rf.DESIGNER_JORIS, junction, index) + 'px',
 				width: (store.refSize * 184) / 1000 + 'px',
 				height: (store.refSize * 311) / 1000 + 'px',
 			}"
@@ -938,7 +950,8 @@ function getBuildingRadius() {
 .plop-animation {
 	position: absolute;
 	display: none;
-	z-index: 5;
+	z-index: 7;
+	pointer-events: none;
 }
 
 .plop-animation.plop-animation {

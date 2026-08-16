@@ -425,6 +425,7 @@ function validateOptions(change) {
 			removeOption("newDistrictsParkDraft")
 			removeOption("minModules")
 			removeOption("maxModules")
+			removeOption("includeChineseExpansion")
 			removeOption("fcmAI")
 			document.getElementById("nonExpertOptions").style.display = "inline-block"
 		}
@@ -434,6 +435,7 @@ function validateOptions(change) {
 			addOption("random_newMS")
 			addOption("minModules")
 			addOption("maxModules")
+			addOption("includeChineseExpansion")
 			document.getElementById("random_originalMS").checked = true
 			document.getElementById("draftModules").checked = false
 			removeOption("draft_originalMS")
@@ -446,6 +448,7 @@ function validateOptions(change) {
 			removeOption("random_newMS")
 			removeOption("minModules")
 			removeOption("maxModules")
+			removeOption("includeChineseExpansion")
 		}
 	} else if (change === "random_originalMS") {
 		let newOption1 = new Option("15", "15")
