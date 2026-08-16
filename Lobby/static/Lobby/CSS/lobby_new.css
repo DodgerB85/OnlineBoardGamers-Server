@@ -260,6 +260,7 @@ body.nd .nd-no-options {
     body.nd .nd-table.nd-lobby-games-table .nd-col-game {
         grid-column: auto;
         align-self: center;
+        text-align: center;
     }
     body.nd .nd-table.nd-lobby-games-table .nd-row09 > .nd-col-game[data-label]::before {
         content: none;
