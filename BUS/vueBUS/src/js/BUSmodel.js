@@ -197,7 +197,7 @@ export function getWinnerName(returnScores) {
 
 		// Primary: higher score wins
 		// Secondary: more timestones wins (not fewer)
-		// Tertiary: lower maxScore wins (reached score first)
+		// Tertiary: higher maxScore wins (reached score first)
 		return cmp(Math.floor(b.score), Math.floor(a.score)) || cmp(b.timeStones, a.timeStones) || cmp(b.maxScore, a.maxScore)
 	})
 

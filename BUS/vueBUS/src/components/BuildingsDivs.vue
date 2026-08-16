@@ -285,7 +285,7 @@ function clickedVromBldg(junction, buildingIndex) {
 			setDesignerStatus(designerIdx, rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION)
 		}
 		store.context.remainingVroms--
-		controller.currentPlayerObj().score++
+		model.increaseScore(controller.currentPlayerObj())
 		store.context.selectedPaxToVromJunction = -1
 		store.context.selectedDesignerToVrom = -1
 		controller.canPlayerVrom(true)
@@ -300,7 +300,7 @@ function clickedVromBldg(junction, buildingIndex) {
 		store.junctions[junction][buildingIndex] += designerIdx === rf.DESIGNER_JEROEN ? 20 : 30
 		setDesignerStatus(designerIdx, rf.DESIGNER_ON_BUILDING_FLAG + (attended ? rf.DESIGNER_CON_FLAG : 0) + junction)
 		store.context.remainingVroms--
-		controller.currentPlayerObj().score++
+		model.increaseScore(controller.currentPlayerObj())
 		store.context.selectedPaxToVromJunction = -1
 		store.context.selectedDesignerToVrom = -1
 		controller.canPlayerVrom(true)
@@ -314,7 +314,7 @@ function clickedVromBldg(junction, buildingIndex) {
 	// remove a move
 	store.context.remainingVroms--
 	// Increase scre
-	controller.currentPlayerObj().score++
+	model.increaseScore(controller.currentPlayerObj())
 	// reset vars
 	store.context.selectedPaxToVromJunction = -1
 	store.context.selectedDesignerToVrom = -1
