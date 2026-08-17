@@ -136,6 +136,12 @@ body.nd .nd-table.nd-current-games-table thead tr,
 body.nd .nd-table.nd-current-games-table .nd-row09 {
     grid-template-columns: 44px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(110px, 0.7fr);
 }
+/* Lobby game rows are .nd-row09 grid blocks stacked flush, so the divider
+   lives on the row (not per-cell td borders, which the component removes)
+   so one clean line falls between rows and aligns with each row. */
+body.nd .nd-table.nd-lobby-games-table tbody tr.nd-row09 {
+    border-bottom: 2px solid #a7bcba;
+}
 body.nd .nd-table.nd-current-games-table .nd-col-turn small {
     font-size: inherit;
 }
