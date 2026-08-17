@@ -16,7 +16,14 @@
     max-width: 700px;
     height: auto;
 }
-@media only screen and (max-width: 1475px) {
+@media only screen and (max-width: 1645px) {
+    #logoLoggedOut {
+        max-width: 480px;
+        height: auto;
+        margin-top: 15px;
+    }
+}
+@media only screen and (max-width: 1490px) {
     #logoLoggedOut {
         max-width: 400px;
         height: auto;
@@ -91,7 +98,7 @@ body.nd .mobileQuickNav {
     }
 }
 
-@media only screen and (max-width: 1170px) {
+@media only screen and (max-width: 1410px) {
     #logoLoggedOut {
         display: none;
     }
@@ -296,7 +303,7 @@ body.nd .topBarLink:hover {
     padding: 0px;
     position: absolute;
     left: 10px;
-    top: 56px;
+    top: 53px;
     color: var(--color-brand-blue);
 }
 
@@ -309,6 +316,7 @@ body.nd .topBarLink:hover {
     text-align: center;
     text-decoration: none;
     font-size: 17px;
+    vertical-align: center;
     outline: none;
 }
 
@@ -363,6 +371,8 @@ body.nd.ndAuthed #rightLinksLoggedIn .hamburger {
 
 #loginForm .loginInput {
     box-sizing: border-box;
+    padding-top: 3px;
+    padding-bottom: 3px;
 }
 
 /* The "Login" submit in the top bar uses the same nd-button-primary style as
