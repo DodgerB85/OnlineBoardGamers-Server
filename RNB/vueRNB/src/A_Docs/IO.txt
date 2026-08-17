@@ -1,0 +1,73 @@
+GAME OVER
+==========
+Solo - wonder brick adding checks for game over and sets the phase
+    - IO.saveGame checks the phase every time it runs, and if it's GAME_OVER does the final save
+    - So just let solo games save as normal, as they only use saveGame()
+
+Practice - ending with neutral brick saves as above
+        - ending by BUILDING a PLAYER brick actions a save in wonder.addBrickToWonder
+
+PVP - ending a turn saves into saveStackMove, which process and runs saveGame on gameOver or after adding neutral brick
+    - This should work in any combination of ending by players adding brick or neutral adding brick
+
+STACK MOVES
+===========
+JS: 
+    Firstly, make the stack action, eg
+    	let stackAction = [rf.STACK_MANUAL_PRODUCTION, buildingID, transporterID, [...compressedBuildingLocation], [...compressedLocation]]
+	Then, add it to the stack, along with an action flag and player Index
+        	stack.addItemToStack({
+				action: rf.STACK_MANUAL_PRODUCTION,
+				historyEntry: stackAction,
+				playerIndex: controller.currentPlayerIndex(),
+			})
+    This is processed for resverse/combined actions, and if it's a new action,
+    it is added to store.actionStack in the exact form above (action/historyEntry/playerIndex)
+
+    On save, IO compresses store.actionStack and sends it to the server
+        actionStack = funcs.compressData64(store.actionStack)
+        
+
+    This newy submitted stack is saved on the gp object in COMPRESSED form, but with additional data for the server
+        newMoveEntry = {
+                "turn": jsonData["turn"],
+                "phase": jsonData["phase"],
+                "actionStack": jsonData["actionStack"],
+                "status": "current",
+                "knownFinalHistoryidx": 
+            }
+
+MAIN PHASE SKIPS
+================
+JS
+    This is sent to the server in the form [turn, phase]
+    mainPhaseSkipsData
+Python
+    mainPhaseSkipData is then used to set up a main phase stack, but with the word SKIP in it, NOT B64 data
+
+
+CONFLICT DECICIONS
+==================
+JS: 
+    let conflictPresetMove = {
+			turn: store.gameflow.turn,
+			phase: store.gameflow.phase + 1,
+			conflictPreset: [store.conflictPreset.conflictDecision, store.conflictPreset.prayingDecision, store.conflictPreset.turnOrderDecision],
+		}
+    Multiple presetMoves can be added to conflictPresetMoves which are all 
+    compressed directly to conflictPresetData
+    
+PYTHON:
+    The compressed conflictPresetData is decompressed and stored exactly as above on the gp Object
+
+
+
+WORKING FROM THE DB TO THE GAME
+
+- currentMove is got from the presenter
+It is a single data set for the CURRENT already set actions, ie having moved out of turn.
+It is in full form, ie
+{'turn': 3, 'phase': 7, 'status': 'pending', 'username': 'admin', 'actionStack': '...B64data....='}
+
+- allMyMoveData is an array of the above - including all present and future moves, ie
+  initData.allMyMoveData = [{'turn': 3, 'phase': 8, 'status': 'pending', 'username': 'admin', 'conflictPreset': [1, 0, 0]}, {'turn': 3, 'phase': 7, 'status': 'pending', 'username': 'admin', 'actionStack': '...B64data....='}];

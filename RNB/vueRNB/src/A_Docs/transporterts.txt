@@ -1,0 +1,5 @@
+ * - Currently transporters are in their own object, displayed on MapArea. 
+
+ Final position is set by map.getTransporterPositionFromLocation
+
+which is set to transporterObj.rawTransporterXY

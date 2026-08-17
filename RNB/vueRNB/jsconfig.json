@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "allowJs": true,
+    "checkJs": false,      // 👈 ENSURE THIS IS FALSE to prevent strict type generation checks
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    // 👇 ADD THIS LINE to prevent the compiler from generating complex recursive Pinia types
+    "skipLibCheck": true   
+  },
+  "include": [
+    "src/**/*", 
+    "src/**/*.vue"
+  ]
+}

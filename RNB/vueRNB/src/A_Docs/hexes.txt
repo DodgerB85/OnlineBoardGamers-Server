@@ -1,0 +1,10 @@
+ * - Hex coords are used. They are stored simply as [q,r,s] in the hex object. 
+ *   This is handled correctly when clicking to add a hex to the map/
+
+
+ * - In terms or drawing stuff, the default to work in is POINTY hexes.
+ *   These can then be rotated by 30 degrees to get FLAT hexes. Mostly this just works fine.
+ *    However, sometimes the "correct" type of flat/pointy data needs to be used. EG you can rotate a hex 30 degrees to get a flat top, BUT
+ *    BUT, you must use a "flat" scheme to position the hex center, otherwise it won't display properly.
+ *    Simlarly, you must use a "flat" schema to get the pixel/viewpoint width/height, as this will be diffrent from flat to pointy.
+ *    store.RATIO will depend on flat/pointy but converts itself automatically to keep the view constant

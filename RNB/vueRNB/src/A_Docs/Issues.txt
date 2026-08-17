@@ -1,0 +1,4 @@
+If i just save the base known lengths
+- i produce a trans
+- they produce a trans
+- delta becomes 2 
