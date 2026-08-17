@@ -1890,6 +1890,13 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 
 		transporterObj.location = toLocation
 
+		// Keep visual positions in sync for the moved transporter and anything it carries
+		transporterObj.rawTransporterXY = map.getTransporterPositionFromLocation(transporterObj.location, stats, transporterObj.id)
+		model.transportersOnTransporter(transporterObj.id).forEach((carried) => {
+			const carriedStats = rf.getTransporterStats(carried.type)
+			carried.rawTransporterXY = map.getTransporterPositionFromLocation(carried.location, carriedStats, carried.id)
+		})
+
 		// Update all resources FOLLOWING the transporter to indicate they've been moved
 		let resourcesFollowingTransporter = model.resourcesFollowingTransporter(transporterObj.id)
 		for (let i = 0; i < resourcesFollowingTransporter.length; i++) {
@@ -1955,9 +1962,13 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 		if (loc.isDockedLocation(toLocation)) transporterObj.remainingMoves = 0
 		transporterObj.location = toLocation
 
-		// Update rawTransporterXY for correct position (especially for docked locations with offsets)
-		/*let newPos = map.getTransporterPositionFromLocation(toLocation, stats, movingTransporterID, true)
-		transporterObj.rawTransporterXY = newPos*/
+		// Keep visual positions in sync for the moved transporter and anything it carries (especially for docked locations with offsets)
+		const movingStats = rf.getTransporterStats(transporterObj.type)
+		transporterObj.rawTransporterXY = map.getTransporterPositionFromLocation(transporterObj.location, movingStats, transporterObj.id)
+		model.transportersOnTransporter(transporterObj.id).forEach((carried) => {
+			const carriedStats = rf.getTransporterStats(carried.type)
+			carried.rawTransporterXY = map.getTransporterPositionFromLocation(carried.location, carriedStats, carried.id)
+		})
 
 		// Update all resources FOLLOWING the transporter to indicate they've been moved
 		let resourcesFollowingTransporter = model.resourcesFollowingTransporter(transporterObj.id)
