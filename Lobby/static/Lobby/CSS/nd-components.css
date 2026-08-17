@@ -2045,8 +2045,11 @@ body.nd .nd-setup-cards-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 16px;
-    align-items: start;
     margin-bottom: 16px;
+    /* Items stretch to the row height by default so cards that share a row
+       (SETUP + COMMON) grow to the same height instead of leaving a short
+       card next to a tall one. */
+    align-items: stretch;
 }
 @media (min-width: 720px) {
     body.nd .nd-setup-cards-grid {
@@ -2057,12 +2060,26 @@ body.nd .nd-setup-cards-grid {
         justify-self: center;
         width: calc(50% - 8px);
     }
+    /* RnB has four cards (Setup, Common, Game, and a Map card that spans the
+       full grid), so Game Options lands alone in row 2. Center it the same way
+       as a lone last card. Sized to a 4-card grid only, so it never touches
+       the 3-card or other layouts. */
+    body.nd .nd-setup-cards-grid .nd-card:nth-child(3):nth-last-child(2) {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: calc(50% - 8px);
+    }
 }
 @media (min-width: 1100px) {
     body.nd .nd-setup-cards-grid {
         grid-template-columns: repeat(3, 1fr);
     }
     body.nd .nd-setup-cards-grid .nd-card:nth-last-child(1):nth-child(odd) {
+        grid-column: auto;
+        justify-self: auto;
+        width: auto;
+    }
+    body.nd .nd-setup-cards-grid .nd-card:nth-child(3):nth-last-child(2) {
         grid-column: auto;
         justify-self: auto;
         width: auto;
