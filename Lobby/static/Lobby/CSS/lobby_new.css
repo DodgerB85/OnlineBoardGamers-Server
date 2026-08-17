@@ -318,11 +318,11 @@ body.nd .nd-no-options {
 
 
 /* Row CTA buttons mirror the shared 2-type button system (nd-components.css):
-   Join/Accept = primary teal, Leave/Decline + Copy Link = white secondary —
-   so they match the buttons on profile/create pages. The styling is mirrored
-   here (rather than swapping in nd-button classes) because the .buttonDiv /
-   .Join / .Leave / .copyGameLinkButtonInTable markup is shared with the old
-   design and is keyed on by the Lobby.js click handlers. */
+   Leave/Decline + Copy Link = white secondary — and Join now shares the same
+   look as Copy Link — to match the buttons on profile/create pages. The
+   styling is mirrored here (rather than swapping in nd-button classes) because
+   the .buttonDiv / .Join / .Leave / .copyGameLinkButtonInTable markup is shared
+   with the old design and is keyed on by the Lobby.js click handlers. */
 body.nd .nd-col-cta .buttonDiv,
 body.nd .nd-col-cta .copyGameLinkButtonInTable {
     display: inline-flex;
@@ -351,20 +351,19 @@ body.nd .nd-col-cta .copyGameLinkButtonInTable {
         color: var(--color-accent-strong);
     }
 }
-/* Join / Accept = primary teal */
+/* Join / Accept now share the same look as Copy Link (white secondary). */
 body.nd .nd-col-cta .buttonDiv.Join,
 body.nd .nd-col-cta .buttonDiv.availableLink {
-    background: var(--color-accent);
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    color: var(--color-accent-ink);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+    background: var(--color-surface);
+    border: 2px solid #b8c2cc;
+    color: var(--color-ink);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 @media (hover: hover) {
     body.nd .nd-col-cta .buttonDiv.Join:hover,
     body.nd .nd-col-cta .buttonDiv.availableLink:hover {
-        background: var(--color-accent-strong);
-        border-color: rgba(0, 0, 0, 0.15);
-        color: #fff;
+        border-color: var(--color-accent-strong);
+        color: var(--color-accent-strong);
     }
 }
 body.nd .nd-col-cta .deleteTrainingGame {

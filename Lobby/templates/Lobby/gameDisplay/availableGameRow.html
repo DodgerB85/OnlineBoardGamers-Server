@@ -19,10 +19,7 @@
     </td>
     <td class="nd-col-players" data-label="{% translate "Players" %}">
       <span class="">{{ game.allPlayers|length }}/{{ game.maxPlayers }}</span>
-      {% for player in game.allPlayers %}
-        <a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>
-        {% if not forloop.last %},{% endif %}
-      {% endfor %}
+      {% for player in game.allPlayers %}<a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
     </td>
     <td class="nd-col-options" data-label="{% translate "Options" %}">
       {% if game.startingMap and game.gameCode == "FCM" %}
