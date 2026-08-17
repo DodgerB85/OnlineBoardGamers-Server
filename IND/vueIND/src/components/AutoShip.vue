@@ -61,7 +61,8 @@ function localRecalcMaxPoss() {
 		store.players.map((player) => player.slots),
 		playerIndex,
 		store.context.selectedSlotToOperate,
-		store.context.historyObj.slice(1)
+		store.context.historyObj.slice(1),
+		true // force a fresh solve so RECALCULATE can surface a different lowest-cost solution
 	)
 	// NO - the max poss should only be set when you start operating a slot
 	//store.context.maxPoss = maxPossRet.length

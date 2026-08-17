@@ -333,15 +333,19 @@ export function findPossibleJourneys(graph, productionAreas, shippingCompanies) 
 				return top
 			}
 
-			// Best (cheapest) cost each node has been reached at so far. Any partial
-			// path that reaches a node at a cost that is NOT strictly better than the
-			// best-known is dominated and discarded, pruning the exponential duplicate
-			// enumeration.
+			// Best (cheapest) cost each node has been reached at so far. Partial paths
+			// that reach a node at a strictly worse cost than the best-known are
+			// dominated and discarded, pruning the exponential duplicate enumeration.
+			// A bounded number of equally-cheapest partial paths per node are kept, so
+			// a RECALCULATE re-solve can surface different lowest-cost solutions.
 			const bestKnown = new Array(graph.nodes.length).fill(Infinity)
+			const bestCount = new Array(graph.nodes.length).fill(0)
+			const MAX_EQUAL_PATHS_PER_NODE = 4
 			for (const n of initial) {
 				const target = graph.edgeNodes[n][1]
-				if (0 < bestKnown[target]) {
+				if (bestCount[target] < MAX_EQUAL_PATHS_PER_NODE) {
 					bestKnown[target] = 0
+					bestCount[target]++
 					heapPush(0, edgeSpareCapacity(n, false), target, new Set([graph.source]), [n], [false])
 				}
 			}
@@ -371,8 +375,11 @@ export function findPossibleJourneys(graph, productionAreas, shippingCompanies) 
 					const reverseFactor = isReversed ? -1 : 1
 					const nextCost = cost + graph.edgeCost[edge] * reverseFactor
 					const target = edgeOtherNode(edge, node)
-					if (nextCost >= bestKnown[target]) continue
-					bestKnown[target] = nextCost
+					if (nextCost > bestKnown[target]) continue
+					if (nextCost === bestKnown[target] && bestCount[target] >= MAX_EQUAL_PATHS_PER_NODE) continue
+					if (nextCost < bestKnown[target]) bestCount[target] = 0
+					bestKnown[target] = Math.min(bestKnown[target], nextCost)
+					bestCount[target]++
 					const nextVisited = new Set(visitedSet)
 					nextVisited.add(node)
 					heapPush(nextCost, newCapacity(capacity, edge, isReversed), target, nextVisited, visitedEdges.concat([edge]), reversed.concat([isReversed]))
@@ -447,18 +454,21 @@ export function findPossibleJourneys(graph, productionAreas, shippingCompanies) 
 // inputs recur across the several getCheapestMaxPossibleShipmentsFromSlotIDX
 // call sites, so re-solving each time is wasted work. The cache key includes
 // every input that can affect the result. Callers copy the returned array, so
-// sharing is safe.
+// sharing is safe. The RECALCULATE flow passes recalculate=true to skip the
+// cache lookup and re-solve, replacing the cached entry with the fresh result.
 let maxShippingMemo = new Map()
 let maxShippingMemoOrder = []
 const MAX_SHIPPING_MEMO_SIZE = 16
 
-export function getCheapestMaxPossibleShipmentsFromSlotIDX(cities, activeCompanies, playerCosts, unfavouredPlayerSubsidies, playerSlots, playerIndex, slotIDX, subtractedRoutes) {
+export function getCheapestMaxPossibleShipmentsFromSlotIDX(cities, activeCompanies, playerCosts, unfavouredPlayerSubsidies, playerSlots, playerIndex, slotIDX, subtractedRoutes, recalculate) {
 	const mapData = useModelStore().mapData
 
 	const memoKey = JSON.stringify([playerIndex, slotIDX, playerCosts, unfavouredPlayerSubsidies, mapData, cities, activeCompanies, playerSlots, subtractedRoutes])
-	const memoHit = maxShippingMemo.get(memoKey)
-	if (memoHit !== undefined) {
-		return memoHit.slice()
+	if (!recalculate) {
+		const memoHit = maxShippingMemo.get(memoKey)
+		if (memoHit !== undefined) {
+			return memoHit.slice()
+		}
 	}
 
 	const subtractedGoodMarkers = subtractedRoutes.map((route) => route[0])

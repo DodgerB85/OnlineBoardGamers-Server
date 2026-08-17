@@ -243,19 +243,20 @@ describe("IND maxShipping (findPossibleJourneys)", () => {
 		const journeys = findPossibleJourneys(graph, productionAreas, shippingCompanies)
 
 		// The optimised algorithm deterministically produces this valid max-shipping
-		// plan on this board. Among equally-cheap routes a representative one is
-		// chosen; the cardinality (10 = all shippable goods) and validity are the
-		// invariants that must never regress, and the exact plan must stay stable.
+		// plan on this board (shuffle is stubbed to identity). Among equally-cheap
+		// routes a representative one is chosen; the cardinality (10 = all shippable
+		// goods) and validity are the invariants that must never regress, and the
+		// exact plan must stay stable for a fixed shuffle stub.
 		// Sun markers / good ids are the first element, then [player, compId, shipTerr..., cityTerr].
 		const expected = [
 			[0, 0, 101, 35, 36, 37, 38, 24],
 			[1, 0, 101, 35, 36, 37, 38, 24],
-			[12, 0, 101, 43, 25],
-			[13, 0, 101, 43, 25],
-			[18, 0, 101, 48, 47, 46, 26],
-			[19, 0, 101, 48, 47, 46, 26],
-			[20, 0, 101, 50, 27],
-			[21, 0, 101, 50, 27],
+			[12, 0, 101, 44, 43, 25],
+			[13, 0, 101, 44, 43, 25],
+			[18, 0, 101, 49, 48, 47, 46, 26],
+			[19, 0, 101, 49, 48, 47, 46, 26],
+			[20, 0, 101, 51, 50, 27],
+			[21, 0, 101, 51, 50, 27],
 			[22, 0, 101, 53, 54, 28],
 			[23, 0, 101, 53, 54, 28],
 		]
