@@ -114,6 +114,7 @@
                         <span class="paceHelpIcon" role="button" tabindex="0" aria-expanded="false">?<span class="paceTooltip"><b>Live</b> &mdash; Play in one continuous session. Kickout options: 5, 10, or 20 minutes. No Flex-Time.<br><b>Fast</b> &mdash; Several moves per day in total. Kickout options: 12 hours or 1 day. For 12h+ kickouts, each player has one 24-hour Flex-Time bank for the whole game.<br><b>Standard</b> &mdash; About 1&ndash;2 moves per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.<br><b>Slow</b> &mdash; At least one move per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.<br><b>Casual</b> &mdash; No fixed schedule. Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.</span></span>
                         <div class="nd-form-help" style="padding-left:0">{% translate "Alters kickout options. All games update 'live'" %}</div>
                         <div class="nd-form-help" style="padding-left:0">{% translate "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}</div>
+                        <div id="blitzWarningSpan" style="display:none;margin:4px 0 8px;padding:8px 12px;border-radius:var(--radius-sm);background:var(--color-warn-bg);color:var(--color-warn);font-size:13px;font-weight:600;flex-basis:100%">{% translate "Careful, Live gives each player 5 minutes per move, not per game. With 3 players each round is about 15 min, and a full game has many rounds, so it can still take ~2+ hours." %}</div>
                     </div>
                     <div class="nd-form-row">
                         <label class="nd-form-label" for="playerNumber">{% translate "Number of players" %}</label>
@@ -159,7 +160,6 @@
                             <input type="text" id="player6" name="player6" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
                         </div></div>
                     </div>
-                    <div id="blitzWarningSpan" style="display:none;margin:4px 0 8px;padding:8px 12px;border-radius:var(--radius-sm);background:var(--color-warn-bg);color:var(--color-warn);font-size:13px;font-weight:600">{% translate "Careful, Live gives each player 5 minutes per move, not per game. With 3 players each round is about 15 min, and a full game has many rounds, so it can still take ~2+ hours." %}</div>
                 </div>
 
                 <div class="nd-card">
