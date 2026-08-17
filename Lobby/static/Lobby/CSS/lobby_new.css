@@ -140,7 +140,7 @@ body.nd .nd-table.nd-current-games-table .nd-row09 {
    lives on the row (not per-cell td borders, which the component removes)
    so one clean line falls between rows and aligns with each row. */
 body.nd .nd-table.nd-lobby-games-table tbody tr.nd-row09 {
-    border-bottom: 2px solid #a7bcba;
+    border-bottom: 2px solid #0B275B;
 }
 body.nd .nd-table.nd-current-games-table .nd-col-turn small {
     font-size: inherit;

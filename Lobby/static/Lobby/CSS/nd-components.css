@@ -2506,14 +2506,14 @@ body.nd .nd-col-game small {
     font-size: 14px;
     line-height: 1.4;
 }
-body.nd .nd-col-game a { color: var(--color-accent-strong); text-decoration: none; }
+body.nd .nd-col-game a { color: #0B275B; text-decoration: none; }
 body.nd .nd-col-game a:hover { text-decoration: underline; }
 body.nd .nd-col-players {
     color: var(--color-ink-soft);
     line-height: 1.4;
 }
 body.nd .nd-col-players a {
-    color: var(--color-accent-strong);
+    color: #0B275B;
     text-decoration: none;
 }
 body.nd .nd-col-players a:hover { text-decoration: underline; }
@@ -2523,7 +2523,7 @@ body.nd .nd-col-status {
     line-height: 1.4;
 }
 body.nd .nd-col-status a {
-    color: var(--color-accent-strong);
+    color: #0B275B;
     text-decoration: none;
 }
 body.nd .nd-col-status a:hover { text-decoration: underline; }
@@ -2557,13 +2557,13 @@ body.nd .nd-col-cta {
 
 /* State backgrounds on the whole row. Keep these separate from the old td
    cell-fill rules so the color reads as one continuous row state. */
-body.nd .nd-row09.myMove { background: rgba(157, 205, 142, 0.35); }
-body.nd .nd-row09.kickoutRequired1 { background: rgba(255, 200, 100, 0.30); }
-body.nd .nd-row09.kickoutRequired2 { background: var(--color-danger-bg); }
+body.nd .nd-row09.myMove { background: #BFE2B6; }
+body.nd .nd-row09.kickoutRequired1 { background: #FFE1AD; }
+body.nd .nd-row09.kickoutRequired2 { background: #F2BABA; }
 @media (hover: hover) {
-    body.nd .nd-row09.myMove:hover { background: rgba(157, 205, 142, 0.22); }
-    body.nd .nd-row09.kickoutRequired1:hover { background: rgba(255, 200, 100, 0.16); }
-    body.nd .nd-row09.kickoutRequired2:hover { background: rgba(220, 80, 80, 0.22); }
+    body.nd .nd-row09.myMove:hover { background: #D9EED3; }
+    body.nd .nd-row09.kickoutRequired1:hover { background: #ffeacc; }
+    body.nd .nd-row09.kickoutRequired2:hover { background: #f6cdcd; }
 }
 
 /* Mobile collapse (per 09 prototype) */
