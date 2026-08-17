@@ -276,8 +276,12 @@ export async function reloadGameData() {
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
-		if (data.finishedGame) funcs.importModel(data.gameData, false, true)
-		else funcs.importModel(data.gameData, false, false)
+		if (data.finishedGame) {
+			personal.finishedGame = true
+			// Reveal everyone's money (and allow replays) once the game is over
+			store.hiddenMoney = false
+			funcs.importModel(data.gameData, false, true)
+		} else funcs.importModel(data.gameData, false, false)
 
 		// Import any pre-moves
 		if (personal.pov >= 0) {

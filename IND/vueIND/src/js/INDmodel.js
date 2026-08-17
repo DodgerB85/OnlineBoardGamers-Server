@@ -33,7 +33,7 @@ export async function initGame() {
 
 	// Disallow any play whilst init-ing the game.
 	personal.haltPlay = true
-	if (window.initData.startingOptions.includes(1)) store.hiddenMoney = true
+	if (window.initData.startingOptions.includes(1) && !window.initData.finishedGame) store.hiddenMoney = true
 	// Put a data dump here to force a load
 	//window.initData.gameData = 'H4sIAAAAAAAAA3VTyWpDMQz8l5xVsLz7WvoX5h0KCb2UFgL9/87Ijt1HKNm0vdFImvTeL9ef++3r+v55kT9mEHVOnPSeDuken/nGR8XbS2FXUS9NNBziHfzL2/f143Z/BdiyVDQPrMinn7AMD3YWjZJEUZEdkz1EJLvZydGk5cvDigFPdkAf9AJNott3EdKB/YL2qdVijlpls2DxiWxIguyiqw24bDljqKnBOrtVpa1GoxBWEWHAJFrAo6a5GAeLEVFg6wokNnc7H+DkyHjIM6BSKzCljIpIdqFxQj8DKqXY8szHrFJqRo80feQBYNua7RY71TO3cGbmd7Y9MVXJ7Ko+LWK+bh7klTZN0mq2QXMTm6F5H0fQzAWXqYrYJNZ5xtEVOz0W6ZjOpNu/63wmDcuVzE2o95t3YmTzVl5x+hl5SAa/Q/6Bk9jjEkj2xW8ZWZXugR4yj5UeV4XbjQFPvmFQoVxYllAOZClZSKFAMbaPGVJODSIUoLebdo5ivknT4YpZCuH2v0tM+zj88QuFVMuh5gMAAA=='
 
@@ -1781,6 +1781,8 @@ export function endGame() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	personal.finishedGame = true
+	// Reveal everyone's money (and allow replays) once the game is over
+	store.hiddenMoney = false
 	store.gameflow.phase = rf.PHASE_GAME_OVER
 
 	let finalRes = endGame_core()
