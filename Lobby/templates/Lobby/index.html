@@ -148,6 +148,7 @@
       </section>
       <section class="nd-section">
         <h2 class="nd-section-title">{% translate "Games available" %}</h2>
+        <p class="nd-section-hint">{% translate "Click a game card to read more about it." %}</p>
         <div class="nd-card-grid nd-card-grid-wide">
           {% include "Lobby/_nd_game_card.html" with title="Food Chain Magnate" img="FCM/images/fcm-box.jpg" players="2–6" tagline="Build a fast-food empire by out-advertising and out-producing your rivals." full_id="game-fcm" %}
           {% include "Lobby/_nd_game_card.html" with title="Horseless Carriage" img="HLC/images/hlc-box.jpg" players="3–5" tagline="Race rivals to build and sell the most automobiles in a brand-new market." full_id="game-hlc" %}
@@ -160,152 +161,201 @@
           {% include "Lobby/_nd_game_card.html" with title="Roads & Boats" img="RNB/images/RNBbox.jpg" players="2–6" tagline="Build a civilisation by logistics and transport — there is no territory." full_id="game-rnb" %}
           {% include "Lobby/_nd_game_card.html" with title="Keyflower" img="KFW/images/KFWbox.jpg" players="2–6" tagline="Bid for village tiles and use workers across four seasons." full_id="game-kfw" %}
         </div>
-        <div class="nd-game-flavour">
-          <h2 class="nd-section-title">{% translate "About the games" %}</h2>
-          <details id="game-fcm">
-            <summary>Food Chain Magnate</summary>
-            <div class="nd-flavour-body">
-              <p>
-                {% translate "Build up your fast food empire by out advertising and out producing your opponents to win the match" %}
-              </p>
-              <p>
-                {% blocktranslate trimmed %}
-                  From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
-                {% endblocktranslate %}
-              </p>
-              <p>
-                <i>{% translate "Food Chain Magnate is a heavy strategy game about building a fast food chain. The focus is on building your company using a card-driven (human) resource management system. Players compete on a variable city map through purchasing, marketing and sales, and on a job market for key staff members." %}</i>
-              </p>
-              <p>
-                {% translate "Includes options for all expansion modules. Play with 2-6 people or start a practice game to play as all players on one device." %}
-              </p>
+        <div class="nd-game-modals">
+          <div class="nd-modal" id="game-fcm" role="dialog" aria-modal="true" aria-hidden="true" hidden>
+            <div class="nd-modal-box">
+              <button type="button" class="nd-modal-close" data-nd-modal-close aria-label="Close">×</button>
+              <h3 class="nd-modal-title">{% translate "Food Chain Magnate" %}</h3>
+              <div class="nd-flavour-body">
+                <p>
+                  {% translate "Build up your fast food empire by out advertising and out producing your opponents to win the match" %}
+                </p>
+                <p>
+                  {% blocktranslate trimmed %}
+                    From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
+                  {% endblocktranslate %}
+                </p>
+                <p>
+                  <i>{% translate "Food Chain Magnate is a heavy strategy game about building a fast food chain. The focus is on building your company using a card-driven (human) resource management system. Players compete on a variable city map through purchasing, marketing and sales, and on a job market for key staff members." %}</i>
+                </p>
+                <p>
+                  {% translate "Includes options for all expansion modules. Play with 2-6 people or start a practice game to play as all players on one device." %}
+                </p>
+              </div>
             </div>
-          </details>
-          <details id="game-rnb">
-            <summary>Roads &amp; Boats</summary>
-            <div class="nd-flavour-body">
-              <p>
-                {% translate "Build your civilisation through logistics and transport - manage goods, roads, boats and more to outproduce your rivals" %}
-              </p>
-              <p>
-                {% blocktranslate trimmed %}
-                  From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
-                {% endblocktranslate %}
-              </p>
-              <p>
-                <i>{% translate "In Roads & Boats, each player builds a civilisation over a long period of time, like in many other games. Unlike most games, however, the emphasis is not on warfare, population growth, city or statebuilding, but on logistics, or rather: on transport. Each player starts the game with three donkeys, a pile of wooden boards, a number of stones and two geese. With these few resources, you try to build such diverse things as woodcutters, roads, boats, mines, a stock exchange... but beware! There is no concept of territory in this game: you cannot own land, nor will you ever keep it. Before you know it, someone else might settle in your place and take over your hard work!" %}</i>
-              </p>
-              <p>{% translate "Play with 2-6 people or solo, or start a practice game to play as all players on one device." %}</p>
+          </div>
+          <div class="nd-modal" id="game-rnb" role="dialog" aria-modal="true" aria-hidden="true" hidden>
+            <div class="nd-modal-box">
+              <button type="button" class="nd-modal-close" data-nd-modal-close aria-label="Close">×</button>
+              <h3 class="nd-modal-title">{% translate "Roads &amp; Boats" %}</h3>
+              <div class="nd-flavour-body">
+                <p>
+                  {% translate "Build your civilisation through logistics and transport - manage goods, roads, boats and more to outproduce your rivals" %}
+                </p>
+                <p>
+                  {% blocktranslate trimmed %}
+                    From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
+                  {% endblocktranslate %}
+                </p>
+                <p>
+                  <i>{% translate "In Roads & Boats, each player builds a civilisation over a long period of time, like in many other games. Unlike most games, however, the emphasis is not on warfare, population growth, city or statebuilding, but on logistics, or rather: on transport. Each player starts the game with three donkeys, a pile of wooden boards, a number of stones and two geese. With these few resources, you try to build such diverse things as woodcutters, roads, boats, mines, a stock exchange... but beware! There is no concept of territory in this game: you cannot own land, nor will you ever keep it. Before you know it, someone else might settle in your place and take over your hard work!" %}</i>
+                </p>
+                <p>{% translate "Play with 2-6 people or solo, or start a practice game to play as all players on one device." %}</p>
+              </div>
             </div>
-          </details>
-          <details id="game-hlc">
-            <summary>Horseless Carriage</summary>
-            <div class="nd-flavour-body">
-              <p>
-                {% translate "Compete to build and sell the most vehicles - research and influence the market to forge your path to victory" %}
-              </p>
-              <p>
-                {% blocktranslate trimmed %}
-                  From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
-                {% endblocktranslate %}
-              </p>
-              <p>
-                <i>{% translate "Horseless Carriage is a game about the dawn of the automobile: a time when cars were invented, and no one quite knew yet what this new contraption would look like, and what features would be essential." %}</i>
-              </p>
-              <p>{% translate "Play with 3-5 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+          <div class="nd-modal" id="game-hlc" role="dialog" aria-modal="true" aria-hidden="true" hidden>
+            <div class="nd-modal-box">
+              <button type="button" class="nd-modal-close" data-nd-modal-close aria-label="Close">×</button>
+              <h3 class="nd-modal-title">{% translate "Horseless Carriage" %}</h3>
+              <div class="nd-flavour-body">
+                <p>
+                  {% translate "Compete to build and sell the most vehicles - research and influence the market to forge your path to victory" %}
+                </p>
+                <p>
+                  {% blocktranslate trimmed %}
+                    From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
+                  {% endblocktranslate %}
+                </p>
+                <p>
+                  <i>{% translate "Horseless Carriage is a game about the dawn of the automobile: a time when cars were invented, and no one quite knew yet what this new contraption would look like, and what features would be essential." %}</i>
+                </p>
+                <p>{% translate "Play with 3-5 people or start a practice game to play as all players on one device." %}</p>
+              </div>
             </div>
-          </details>
-          <details id="game-tgz">
-            <summary>The Great Zimbabwe</summary>
-            <div class="nd-flavour-body">
-              <p>{% translate "Raise your monuments to establish your empire as having the best mythology" %}</p>
-              <p>
-                {% blocktranslate trimmed %}
-                  From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
-                {% endblocktranslate %}
-              </p>
-              <p>
-                <i>{% translate "The Great Zimbabwe is a game about building a trade based civilization in ancient Africa." %}</i>
-              </p>
-              <p>{% translate "Play with 2-5 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+          <div class="nd-modal" id="game-tgz" role="dialog" aria-modal="true" aria-hidden="true" hidden>
+            <div class="nd-modal-box">
+              <button type="button" class="nd-modal-close" data-nd-modal-close aria-label="Close">×</button>
+              <h3 class="nd-modal-title">{% translate "The Great Zimbabwe" %}</h3>
+              <div class="nd-flavour-body">
+                <p>{% translate "Raise your monuments to establish your empire as having the best mythology" %}</p>
+                <p>
+                  {% blocktranslate trimmed %}
+                    From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
+                  {% endblocktranslate %}
+                </p>
+                <p>
+                  <i>{% translate "The Great Zimbabwe is a game about building a trade based civilization in ancient Africa." %}</i>
+                </p>
+                <p>{% translate "Play with 2-5 people or start a practice game to play as all players on one device." %}</p>
+              </div>
             </div>
-          </details>
-          <details id="game-ind">
-            <summary>Indonesia</summary>
-            <div class="nd-flavour-body">
-              <p>{% translate "Ship your goods as efficiently as possible to dominate the economy!" %}</p>
-              <p>{% translate "Play with 2-5 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+          <div class="nd-modal" id="game-ind" role="dialog" aria-modal="true" aria-hidden="true" hidden>
+            <div class="nd-modal-box">
+              <button type="button" class="nd-modal-close" data-nd-modal-close aria-label="Close">×</button>
+              <h3 class="nd-modal-title">{% translate "Indonesia" %}</h3>
+              <div class="nd-flavour-body">
+                <p>{% translate "Ship your goods as efficiently as possible to dominate the economy!" %}</p>
+                <p>{% translate "Play with 2-5 people or start a practice game to play as all players on one device." %}</p>
+              </div>
             </div>
-          </details>
-          <details id="game-aqy">
-            <summary>Antiquity</summary>
-            <div class="nd-flavour-body">
-              <p>{% translate "Build up your cities to exploit the countryside and please your chosen Saint!" %}</p>
-              <p>{% translate "Play with 2-4 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+          <div class="nd-modal" id="game-aqy" role="dialog" aria-modal="true" aria-hidden="true" hidden>
+            <div class="nd-modal-box">
+              <button type="button" class="nd-modal-close" data-nd-modal-close aria-label="Close">×</button>
+              <h3 class="nd-modal-title">{% translate "Antiquity" %}</h3>
+              <div class="nd-flavour-body">
+                <p>{% translate "Build up your cities to exploit the countryside and please your chosen Saint!" %}</p>
+                <p>{% translate "Play with 2-4 people or start a practice game to play as all players on one device." %}</p>
+              </div>
             </div>
-          </details>
-          <details id="game-bus">
-            <summary>Bus</summary>
-            <div class="nd-flavour-body">
-              <p>
-                {% translate "Transport as many passengers as you can - but with a time altering clock in the mix, the outcome can be hard to predict!" %}
-              </p>
-              <p>{% translate "Play with 3-5 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+          <div class="nd-modal" id="game-bus" role="dialog" aria-modal="true" aria-hidden="true" hidden>
+            <div class="nd-modal-box">
+              <button type="button" class="nd-modal-close" data-nd-modal-close aria-label="Close">×</button>
+              <h3 class="nd-modal-title">{% translate "Bus" %}</h3>
+              <div class="nd-flavour-body">
+                <p>
+                  {% translate "Transport as many passengers as you can - but with a time altering clock in the mix, the outcome can be hard to predict!" %}
+                </p>
+                <p>{% translate "Play with 3-5 people or start a practice game to play as all players on one device." %}</p>
+              </div>
             </div>
-          </details>
-          <details id="game-cns">
-            <summary>Cannes</summary>
-            <div class="nd-flavour-body">
-              <p>{% translate "Shift your network of connections to produce and release movies in Cannes" %}</p>
-              <p>{% translate "Play with 2-4 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+          <div class="nd-modal" id="game-cns" role="dialog" aria-modal="true" aria-hidden="true" hidden>
+            <div class="nd-modal-box">
+              <button type="button" class="nd-modal-close" data-nd-modal-close aria-label="Close">×</button>
+              <h3 class="nd-modal-title">{% translate "Cannes" %}</h3>
+              <div class="nd-flavour-body">
+                <p>{% translate "Shift your network of connections to produce and release movies in Cannes" %}</p>
+                <p>{% translate "Play with 2-4 people or start a practice game to play as all players on one device." %}</p>
+              </div>
             </div>
-          </details>
-          <details id="game-web">
-            <summary>Web</summary>
-            <div class="nd-flavour-body">
-              <p>{% translate "Connect servers up to computers to outscore and outmaneuver your opponents" %}</p>
-              <p>{% translate "Play with 2-4 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+          <div class="nd-modal" id="game-web" role="dialog" aria-modal="true" aria-hidden="true" hidden>
+            <div class="nd-modal-box">
+              <button type="button" class="nd-modal-close" data-nd-modal-close aria-label="Close">×</button>
+              <h3 class="nd-modal-title">{% translate "Web" %}</h3>
+              <div class="nd-flavour-body">
+                <p>{% translate "Connect servers up to computers to outscore and outmaneuver your opponents" %}</p>
+                <p>{% translate "Play with 2-4 people or start a practice game to play as all players on one device." %}</p>
+              </div>
             </div>
-          </details>
-          <details id="game-kfw">
-            <summary>Keyflower</summary>
-            <div class="nd-flavour-body">
-              <p>
-                {% translate "Bid for tiles and use actions with your workers. Build up your village to achieve the highest score at the end of Winter!" %}
-              </p>
-              <p>{% translate "Play with 2-6 people or start a practice game to play as all players on one device." %}</p>
+          </div>
+          <div class="nd-modal" id="game-kfw" role="dialog" aria-modal="true" aria-hidden="true" hidden>
+            <div class="nd-modal-box">
+              <button type="button" class="nd-modal-close" data-nd-modal-close aria-label="Close">×</button>
+              <h3 class="nd-modal-title">{% translate "Keyflower" %}</h3>
+              <div class="nd-flavour-body">
+                <p>
+                  {% translate "Bid for tiles and use actions with your workers. Build up your village to achieve the highest score at the end of Winter!" %}
+                </p>
+                <p>{% translate "Play with 2-6 people or start a practice game to play as all players on one device." %}</p>
+              </div>
             </div>
-          </details>
+          </div>
         </div>
       </section>
     </div>
     <script>
   (function () {
-    // Only one game's <details> flavour text should be open at a time.
-    var allDetails = document.querySelectorAll('.nd-game-flavour details');
-    allDetails.forEach(function (d) {
-      d.addEventListener('toggle', function () {
-        if (!d.open) return;
-        allDetails.forEach(function (other) {
-          if (other !== d) other.open = false;
-        });
+    // Game cards on the landing page are <button>s; clicking a card opens a
+    // popup modal with that game's flavour text.
+    var cards = document.querySelectorAll('[data-nd-game-card]');
+
+    function closeModal(modal) {
+      if (!modal) return;
+      modal.hidden = true;
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('nd-modal-open');
+      var card = document.querySelector('[data-nd-game-card="' + modal.id + '"]');
+      if (card) card.setAttribute('aria-expanded', 'false');
+    }
+
+    function openModal(modal) {
+      if (!modal) return;
+      // Only one modal open at a time.
+      document.querySelectorAll('.nd-modal').forEach(function (m) { closeModal(m); });
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('nd-modal-open');
+      var card = document.querySelector('[data-nd-game-card="' + modal.id + '"]');
+      if (card) card.setAttribute('aria-expanded', 'true');
+    }
+
+    cards.forEach(function (card) {
+      card.addEventListener('click', function () {
+        var targetId = card.getAttribute('data-nd-game-card');
+        if (!targetId) return;
+        openModal(document.getElementById(targetId));
       });
     });
 
-    // Game cards on the landing page are <button>s; clicking a card opens
-    // (and scrolls to) the matching <details> in .nd-game-flavour below.
-    var cards = document.querySelectorAll('[data-nd-game-card]');
-    if (!cards.length) return;
-    cards.forEach(function (card) {
-      var targetId = card.getAttribute('data-nd-game-card');
-      if (!targetId) return;
-      card.addEventListener('click', function () {
-        var d = document.getElementById(targetId);
-        if (!d) return;
-        d.open = true;
-        d.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        card.setAttribute('aria-expanded', 'true');
-      });
+    // Close the popup when the close button is clicked, when the overlay
+    // (area around the box) is clicked, or when the box itself is clicked.
+    document.querySelectorAll('.nd-modal').forEach(function (modal) {
+      var closeButton = modal.querySelector('[data-nd-modal-close]');
+      if (closeButton) closeButton.addEventListener('click', function () { closeModal(modal); });
+      modal.addEventListener('click', function () { closeModal(modal); });
+    });
+
+    // Close on Escape.
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.nd-modal').forEach(function (m) { closeModal(m); });
+      }
     });
   })();
     </script>

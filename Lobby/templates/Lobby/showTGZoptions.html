@@ -14,7 +14,7 @@
             <a class="nd-button nd-button-ghost" href="{% url 'index' %}">&#8592; {% translate "Lobby" %}</a>
         </div>
         <div class="nd-card">
-            {% if gameDescription %}<p class="nd-muted" style="margin-bottom:12px;">{{ gameDescription }}</p>{% endif %}
+            {% if gameDescription %}<p class="" style="margin-bottom:12px;">{{ gameDescription }}</p>{% endif %}
             <p style="margin-bottom:12px;">{% translate "The game will use the following customisations:" %}</p>
             <div class="nd-tgz-options">{{ godsVRhtml|safe }}</div>
         </div>

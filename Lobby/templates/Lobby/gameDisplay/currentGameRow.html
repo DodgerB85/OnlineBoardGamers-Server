@@ -9,9 +9,9 @@
     <a href="/{{ game.gameCode }}/{{ game.gameID }}/show/"><strong>{{ game.gameName }}</strong></a>
     {% if game.gameDescription %}<br><small><i>{{ game.gameDescription }}</i></small>{% endif %}
     {% if showCurrentTurnColumn %}
-      <br><small class="nd-muted">{{ game.pace|safe }} · {% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a></small>
+      <br><small class="">{{ game.pace|safe }} · {% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a></small>
     {% else %}
-      <br><small class="nd-muted">{% translate "Turn" %} {{ game.currentTurn }} · {{ game.pace|safe }} · {% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a></small>
+      <br><small class="">{% translate "Turn" %} {{ game.currentTurn }} · {{ game.pace|safe }} · {% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a></small>
     {% endif %}
   </td>
   <td class="nd-col-status" data-label="{% translate "Turn status" %}">
@@ -24,7 +24,7 @@
     </span>
   </td>
   {% if showCurrentTurnColumn %}
-  <td class="nd-col-turn" data-label="{% translate "Current Turn" %}"><small class="nd-muted">{{ game.currentTurn }}</small></td>
+  <td class="nd-col-turn" data-label="{% translate "Current Turn" %}"><small class="">{{ game.currentTurn }}</small></td>
   {% endif %}
   <td class="nd-col-players" data-label="{% translate "Players" %}">
     {% for player in game.allPlayers %}<a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
@@ -38,8 +38,8 @@
   </td>
   <td class="nd-col-cta nd-last-move" data-label="{% translate "Last Move" %}">
     <span class="nd-last-move-text">
-      <span class="timeToConvertSpan nd-small nd-muted">{{ game.latestUpdate }}</span>
-      <span class="nd-small nd-muted">{{ game.latestUpdateElapsedTimeString }}</span>
+      <span class="timeToConvertSpan">{{ game.latestUpdate }}</span>
+      <span class="">{{ game.latestUpdateElapsedTimeString }}</span>
     </span>
     {% if game.maxPlayers != 1 and 'SHADOW' not in game.allPlayers %}{% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}{% endif %}
     {% if game.deleteableGame %}

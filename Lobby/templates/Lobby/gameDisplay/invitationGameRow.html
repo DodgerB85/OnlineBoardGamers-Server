@@ -5,10 +5,10 @@
   <td class="nd-col-game" data-label="{% translate "Game Name" %}">
     <strong>{{ game.gameName }}</strong>
     {% if game.gameDescription %}<br><small><i>{{ game.gameDescription }}</i></small>{% endif %}
-    <br><small class="nd-muted">{% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a> · {{ game.pace|safe }}</small>
+    <br><small class="">{% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a> · {{ game.pace|safe }}</small>
   </td>
   <td class="nd-col-players" data-label="{% translate "Players" %}">
-    <span class="nd-muted nd-small">{{ game.allPlayers|length }}/{{ game.maxPlayers }}</span>
+    <span class="">{{ game.allPlayers|length }}/{{ game.maxPlayers }}</span>
     {% for player in game.allPlayers %}<a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
   </td>
   <td class="nd-col-options" data-label="{% translate "Options" %}">
@@ -20,7 +20,7 @@
   </td>
   <td class="nd-col-status" data-label="{% translate "Invited" %}"><span class="nd-pill nd-pill-accent">{% translate "Invited" %}</span></td>
   <td class="nd-col-cta" data-label="{% translate "Accept / Decline" %}">
-    <span class="timeToConvertSpan nd-small nd-muted">{{ game.created }}</span><br>
+    <span class="timeToConvertSpan">{{ game.created }}</span><br>
     <div class="buttonDiv Join availableLink">{% translate "Accept" %}</div>
     <div class="buttonDiv Leave leaveDeclineLink invitations">{% translate "Decline" %}</div>
     <input type="text" class="declineInputClass" id="{{ game.gameCode }}declineReason{{ game.gameID }}" placeholder="{% translate 'Reason (optional)' %}">

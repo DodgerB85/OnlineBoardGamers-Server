@@ -1,8 +1,10 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static %}
 {% load i18n %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
+    {% if not request.use_new_design %}
+        <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
+    {% endif %}
     <style>
 	/* Ensure topBar stays on top of map */
 	.topBar {
@@ -21,7 +23,7 @@
     </style>
 {% endblock head %}
 {% block body %}
-    <div class="container">
+    <div class="{% if request.use_new_design %}nd-page nd-map-editor{% else %}container{% endif %}">
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}
@@ -53,6 +55,8 @@ var initData = {};
 initData.mapEditor = true;
 initData.username = "{{ username }}";
         </script>
-        {% include "Lobby/common/homeButton.html" %}
+        {% if not request.use_new_design %}
+            {% include "Lobby/common/homeButton.html" %}
+        {% endif %}
     </div>
 {% endblock body %}

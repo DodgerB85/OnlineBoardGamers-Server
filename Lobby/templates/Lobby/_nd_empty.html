@@ -2,7 +2,7 @@
 <div class="nd-empty-card">
   <p class="nd-empty-msg">{{ message|default:"Nothing here yet." }}</p>
   {% if showNewGame %}
-    <a class="nd-empty-cta" href="{% url 'newGamesPage' %}">{% translate "Start a new game" %}</a>
+    <a class="nd-button nd-button-primary nd-empty-cta" href="{% url 'newGamesPage' %}">{% translate "Start a new game" %}</a>
   {% endif %}
   <p class="nd-empty-hint">
     {% url 'lobbyHelp' as help_url %}

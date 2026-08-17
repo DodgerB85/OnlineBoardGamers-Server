@@ -5,12 +5,12 @@
   <td class="nd-col-game" data-label="{% translate "Game Name" %}">
     <strong>{{ game.gameName }}</strong>
     {% if game.gameDescription %}<br><small><i>{{ game.gameDescription }}</i></small>{% endif %}
-    <br><small class="nd-muted">{% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a> · {{ game.pace|safe }}</small>
+    <br><small class="">{% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a> · {{ game.pace|safe }}</small>
   </td>
   <td class="nd-col-players" data-label="{% translate "Players" %}">
-    <span class="nd-muted nd-small">{{ game.allPlayers|length }}/{{ game.maxPlayers }}</span>
+    <span class="">{{ game.allPlayers|length }}/{{ game.maxPlayers }}</span>
     {% for player in game.allPlayers %}<a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
-    {% if game.invitedPlayers %}<br><small class="nd-muted">{% translate "Invited" %}: {% for player in game.invitedPlayers %}<a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</small>{% endif %}
+    {% if game.invitedPlayers %}<br><small class="">{% translate "Invited" %}: {% for player in game.invitedPlayers %}<a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</small>{% endif %}
   </td>
   <td class="nd-col-options" data-label="{% translate "Options" %}">
     {% if game.startingMap and game.gameCode == "FCM" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMap.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="FCM">{% endif %}
@@ -19,7 +19,7 @@
     {% if game.startingMap and game.gameCode == "RNB" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapRNB.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="RNB" data-gameID="{{ game.gameID }}">{% endif %}
     {% if game.gameCode != "TGZ" and not game.startingMap and not game.startingOptionsHTML or game.gameCode != "TGZ" and not game.startingMap and game.startingOptionsHTML == "[None]" %}<span class="nd-no-options">{% translate "No options" %}</span>{% else %}{{ game.startingOptionsHTML|safe }}{% endif %}
   </td>
-  <td class="nd-col-status" data-label="{% translate "Created" %}"><span class="timeToConvertSpan nd-small nd-muted">{{ game.created }}</span></td>
+  <td class="nd-col-status" data-label="{% translate "Created" %}"><span class="timeToConvertSpan">{{ game.created }}</span></td>
   <td class="nd-col-cta" data-label="{% translate "Leave" %}">
     <div class="buttonDiv Leave leaveDeclineLink waiting">{% translate "Leave" %}</div>
     <button class="copyGameLinkButtonInTable nd-button-ghost nd-button-sm"

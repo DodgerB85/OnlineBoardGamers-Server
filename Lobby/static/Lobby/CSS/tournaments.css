@@ -121,7 +121,6 @@ body.nd #MTchatBox h2,
 body.nd #MTchatBox h3 {
 	font-size: 12px !important;
 	font-weight: 600 !important;
-	color: var(--color-muted) !important;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
 	margin: 0 0 8px !important;
@@ -197,7 +196,6 @@ body.nd #messageList .chatentry .header .bold {
 
 body.nd #messageList .chatentry .header .date {
 	font-size: 11px;
-	color: var(--color-muted);
 	float: none;
 	font-style: normal;
 }
@@ -283,7 +281,6 @@ body.nd #messageList .chatentry .body {
 		content: attr(data-label);
 		font-size: 11px;
 		font-weight: 600;
-		color: var(--color-muted);
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 	}
