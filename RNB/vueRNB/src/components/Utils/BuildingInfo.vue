@@ -180,8 +180,21 @@ function clickedNewBuilding(bldgNum) {
 		// You must have clicked a transport, so there will be a TM selected
 		if (bldgNum === rf.BLDG_PSEUDO_ROAD) {
 			store.context.newRoadInfo.splice(0)
-			store.context.newRoadInfo.push([hexID, bucketIds])
-			context.setHexPiecesToHighlight(map.allLandVertexBucketsWithoutRoadsAdjacentTo(hexID, bucketIds))
+			// Boats can often build roads from several banks, but the road-end pieces
+			// can't tell those banks apart, so let the player pick the FROM bucket first
+			const adjacentPieces = map.allLandVertexBucketsWithoutRoadsAdjacentTo(hexID, bucketIds)
+			const buildableBuckets = model.isWaterTransporter(transporterObj.type)
+				? bucketIds.filter((b) => map.allLandVertexBucketsWithoutRoadsAdjacentTo(hexID, [b]).length > 0)
+				: []
+			if (buildableBuckets.length > 1) {
+				context.setHexPiecesToHighlight(buildableBuckets.map((b) => [hexID, [b]]))
+			} else if (buildableBuckets.length === 1) {
+				store.context.newRoadInfo.push([hexID, buildableBuckets])
+				context.setHexPiecesToHighlight(map.allLandVertexBucketsWithoutRoadsAdjacentTo(hexID, buildableBuckets))
+			} else {
+				store.context.newRoadInfo.push([hexID, bucketIds])
+				context.setHexPiecesToHighlight(adjacentPieces)
+			}
 		} else if (bldgNum === rf.BLDG_PSEUDO_BRIDGE) {
 			for (let i = 0; i < hexObj.bridges.length; i++) {
 				const bridge = hexObj.bridges[i]
