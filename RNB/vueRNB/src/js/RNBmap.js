@@ -1028,10 +1028,12 @@ export function addWallToMap_core(transporterID, hex1ID, hex2ID, playerIndex, de
 
 				if (dockedBoats.length > 0) {
 					const seaHexID = hex1isSea ? id1 : id2
+					const seaBucketLocation = loc.setBucketLocation(seaHexID, 0)
 					// For each boat, if it isn't the currentPlayerIndex, move them out to see
 					dockedBoats.forEach((boat) => {
 						if (boat.ownerIndex !== playerIndex) {
-							const newSeaLocation = loc.setSeaVertexLocation(seaHexID, 0)
+							// Pick a distinct sea vertex near where the boat enters the sea hex, avoiding vertices other boats already occupy
+							const newSeaLocation = loc.getVisualLocationFromBucketLocation(seaBucketLocation, boat.location, boat.type)
 							boat.location = newSeaLocation
 							shiftedBoatIDs.push(boat.id)
 							// Keep the boat's visual position in sync and move any carried transporters too
