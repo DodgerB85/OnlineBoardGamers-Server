@@ -2100,6 +2100,58 @@ body.nd .nd-check-list > .nd-check-label:last-child {
     border-bottom: none;
 }
 
+/* D4c TGZ Schism expansion sub-options: tree-branch connector under the
+   "Use Schism Expansion" checkbox. The 3 schism radios are wrapped in
+   .nd-schism-suboptions, so they are no longer children of .nd-check-list and
+   lose the direct-child row divider; replicate that row look here. */
+body.nd .nd-check-list > .nd-schism-suboptions > .nd-check-label {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+body.nd .nd-check-list > .nd-schism-suboptions > .nd-check-label:last-child {
+    border-bottom: none;
+}
+/* Neutralize the UA default radio margin so the tick anchor edge is fixed. */
+body.nd .nd-check-list > .nd-schism-suboptions > .nd-check-label > input[type=radio] {
+    margin-left: 0;
+    position: relative;
+}
+/* Indent the sub-options and reserve space for the connector line. */
+body.nd .nd-check-list > .nd-schism-suboptions {
+    position: relative;
+    padding-left: 24px;
+}
+/* Vertical connector line + top notch, only while the schism checkbox is on. */
+body.nd .nd-check-list:has(#useSchism:checked) > .nd-schism-suboptions::before {
+    content: "";
+    position: absolute;
+    background: var(--color-border-strong);
+    left: 12px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+}
+body.nd .nd-check-list:has(#useSchism:checked) > .nd-schism-suboptions::after {
+    content: "";
+    position: absolute;
+    background: var(--color-border-strong);
+    left: 0;
+    top: 0;
+    width: 13px;
+    height: 2px;
+}
+/* Horizontal tick from the vertical line into each radio row. */
+body.nd .nd-check-list:has(#useSchism:checked) > .nd-schism-suboptions > .nd-check-label > input[type=radio]::before {
+    content: "";
+    position: absolute;
+    left: -12px;
+    width: 12px;
+    height: 2px;
+    background: var(--color-border-strong);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
 /* Help page Q&A — readable type for the long, mostly-text help sections. */
 body.nd .nd-help-qa {
     font-size: 15px;
