@@ -666,6 +666,10 @@ body.nd #playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead th {
 	text-align: left;
 }
 
+body.nd #playerInfoPage .nd-game-list .nd-table:has(.nd-row09) tbody tr.nd-row09 {
+	border-bottom: 2px solid #0B275B;
+}
+
 /* Sub-section labels inside the Joint Games card. */
 body.nd .nd-player-sub {
 	font-size: 13px;

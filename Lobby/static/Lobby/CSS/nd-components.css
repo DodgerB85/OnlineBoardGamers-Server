@@ -2630,11 +2630,11 @@ body.nd .nd-col-status a {
 }
 body.nd .nd-col-status a:hover { text-decoration: underline; }
 body.nd .nd-col-status .nd-status-wrap {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
+    /* Names are already joined with a ", " separator in the markup
+       (<a>FcmBot</a>, <a>BotKickStarter</a>, ...), so render them as normal
+       inline flow. Making this a flex container drops the space after the
+       comma and adds a gap on both sides of it. */
+    text-align: center;
 }
 body.nd .nd-col-options {
     display: flex;
