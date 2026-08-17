@@ -498,12 +498,12 @@ function handleSelectBubbleClick() {
 							<circle :cx="hex.mineData[1][0] * store.RATIO" :cy="hex.mineData[1][1] * store.RATIO" :r="145 * store.RATIO" fill="none" stroke="rgba(255,255,255,0.85)" :stroke-width="10 * store.RATIO" />
 
 							<!-- Iron Number -->
-							<text :x="hex.mineData[1][0] * store.RATIO - 40 * store.RATIO" :y="hex.mineData[1][1] * store.RATIO + 20 * store.RATIO" text-anchor="middle" dominant-baseline="middle" :style="{ 'font-size': 175 * store.RATIO + 'px', fill: 'red', 'font-weight': 700, stroke: 'black', 'stroke-width': 10 * store.RATIO + 'px' }">
+							<text :x="hex.mineData[1][0] * store.RATIO - (hex.mineData[2][1] >= 10 ? 55 : 40) * store.RATIO" :y="hex.mineData[1][1] * store.RATIO + 20 * store.RATIO" text-anchor="middle" dominant-baseline="middle" :style="{ 'font-size': (hex.mineData[2][1] >= 10 ? 100 : 175) * store.RATIO + 'px', fill: 'red', 'font-weight': 900, stroke: 'black', 'stroke-width': (hex.mineData[2][1] >= 10 ? 6 : 10) * store.RATIO + 'px' }">
 								{{ hex.mineData[2][1] }}
 							</text>
 
 							<!-- Gold Number -->
-							<text :x="hex.mineData[1][0] * store.RATIO + 40 * store.RATIO" :y="hex.mineData[1][1] * store.RATIO + 20 * store.RATIO" text-anchor="middle" dominant-baseline="middle" :style="{ 'font-size': 175 * store.RATIO + 'px', fill: 'gold', 'font-weight': 700, stroke: 'black', 'stroke-width': 10 * store.RATIO + 'px' }">
+							<text :x="hex.mineData[1][0] * store.RATIO + (hex.mineData[2][0] >= 10 ? 55 : 40) * store.RATIO" :y="hex.mineData[1][1] * store.RATIO + 20 * store.RATIO" text-anchor="middle" dominant-baseline="middle" :style="{ 'font-size': (hex.mineData[2][0] >= 10 ? 100 : 175) * store.RATIO + 'px', fill: 'gold', 'font-weight': 900, stroke: 'black', 'stroke-width': (hex.mineData[2][0] >= 10 ? 6 : 10) * store.RATIO + 'px' }">
 								{{ hex.mineData[2][0] }}
 							</text>
 						</g>
@@ -579,19 +579,19 @@ function handleSelectBubbleClick() {
 					<g v-for="(edgeData, idx) in store.mapData.edgeData" :key="idx">
 						<g v-if="edgeData.wall[0] > 0">
 							<g :transform="`translate(${model.getHexByID(edgeData.edgeHexIDs[0]).rawXY[0]} , ${model.getHexByID(edgeData.edgeHexIDs[0]).rawXY[1]})`">
-								<g :transform="store.hexStyle === rf.FLAT ? 'rotate(30 0 0)' : ''">
-									<polygon
-										:points="view.getWallSVGpointsFromHexID(edgeData.edgeHexIDs[0], edgeData.edgeHexIDs[1], false, false, false)"
-										:style="{
-											'stroke-width': 10 * store.RATIO + 'px',
-											stroke: 'white',
-											fill: edgeData.wall[1] === -1 ? 'white' : personal.getCorrectedColourHex(store.players[edgeData.wall[1]].colour),
-										}" />
-								</g>
+<g :transform="store.hexStyle === rf.FLAT ? 'rotate(30 0 0)' : ''">
+								<polygon
+									:points="view.getWallSVGpointsFromHexID(edgeData.edgeHexIDs[0], edgeData.edgeHexIDs[1], false, false, false)"
+									:style="{
+										'stroke-width': 10 * store.RATIO + 'px',
+										stroke: 'white',
+										fill: edgeData.wall[1] === -1 ? 'white' : personal.getCorrectedColourHex(store.players[edgeData.wall[1]].colour),
+									}" />
 								<text
 									v-if="edgeData.wall[0] > 1"
 									:x="view.getWallSVGpointsFromHexID(edgeData.edgeHexIDs[0], edgeData.edgeHexIDs[1], false, true, false)[0]"
 									:y="view.getWallSVGpointsFromHexID(edgeData.edgeHexIDs[0], edgeData.edgeHexIDs[1], false, true, false)[1]"
+									:transform="store.hexStyle === rf.FLAT ? `rotate(-30 ${view.getWallSVGpointsFromHexID(edgeData.edgeHexIDs[0], edgeData.edgeHexIDs[1], false, true, false)[0]} ${view.getWallSVGpointsFromHexID(edgeData.edgeHexIDs[0], edgeData.edgeHexIDs[1], false, true, false)[1]})` : ''"
 									text-anchor="middle"
 									dominant-baseline="middle"
 									:style="{
@@ -603,6 +603,7 @@ function handleSelectBubbleClick() {
 									}">
 									{{ edgeData.wall[0] }}
 								</text>
+							</g>
 							</g>
 						</g>
 					</g>

@@ -798,9 +798,9 @@ const computedMaxNeutralBricks = computed(() => {
 					<g v-if="computedZoomData.mineData.length > 0">
 						<circle class="mineSVGcircle" :cx="computedZoomData.mineData[1][0]" :cy="computedZoomData.mineData[1][1]" :r="rf.DEFAULT_BLDG_WIDTH / 1.5 / 2" fill="gray" stroke="#734A36" :stroke-width="50 * store.RATIO" />
 						<!-- Iron Number -->
-						<text :x="computedZoomData.mineData[1][0] - 40" :y="computedZoomData.mineData[1][1] + 20" text-anchor="middle" dominant-baseline="middle" class="mineText ironText">{{ computedZoomData.mineData[2][1] }}</text>
+						<text :x="computedZoomData.mineData[1][0] - (computedZoomData.mineData[2][1] >= 10 ? 55 : 40)" :y="computedZoomData.mineData[1][1] + 20" text-anchor="middle" dominant-baseline="middle" class="mineText ironText" :style="{ fontSize: computedZoomData.mineData[2][1] >= 10 ? '100px' : '175px', strokeWidth: computedZoomData.mineData[2][1] >= 10 ? '6px' : '10px' }">{{ computedZoomData.mineData[2][1] }}</text>
 						<!-- Gold Number -->
-						<text :x="computedZoomData.mineData[1][0] + 40" :y="computedZoomData.mineData[1][1] + 20" text-anchor="middle" dominant-baseline="middle" class="mineText goldText">{{ computedZoomData.mineData[2][0] }}</text>
+						<text :x="computedZoomData.mineData[1][0] + (computedZoomData.mineData[2][0] >= 10 ? 55 : 40)" :y="computedZoomData.mineData[1][1] + 20" text-anchor="middle" dominant-baseline="middle" class="mineText goldText" :style="{ fontSize: computedZoomData.mineData[2][0] >= 10 ? '100px' : '175px', strokeWidth: computedZoomData.mineData[2][0] >= 10 ? '6px' : '10px' }">{{ computedZoomData.mineData[2][0] }}</text>
 					</g>
 					<!-- RESOURCES-->
 					<g :transform="`rotate(${store.hexStyle === rf.FLAT ? 30 : 0} 0 0)`">
@@ -916,27 +916,29 @@ const computedMaxNeutralBricks = computed(() => {
 					</g>
 
 					<!-- WALLS -->
-					<g v-for="(wallData, idx) in computedZoomData.wallData" :key="idx">
-						<g v-if="wallData.wall[0] > 0">
-							<polygon
-								:points="view.getWallSVGpointsFromHexID(wallData.edgeHexIDs[0], wallData.edgeHexIDs[1], false, false, true)"
-								class="wallPolygon"
-								:style="{
-									fill: wallData.wall[1] === -1 ? 'white' : personal.getCorrectedColourHex(store.players[wallData.wall[1]].colour),
-								}" />
-							<text
-								v-if="wallData.wall[0] > 1"
-								:x="view.getWallSVGpointsFromHexID(wallData.edgeHexIDs[0], wallData.edgeHexIDs[1], false, true, true)[0]"
-								:y="view.getWallSVGpointsFromHexID(wallData.edgeHexIDs[0], wallData.edgeHexIDs[1], false, true, true)[1]"
-								:transform="store.hexStyle === rf.POINTY ? '' : `rotate(-30 ${view.getWallSVGpointsFromHexID(wallData.edgeHexIDs[0], wallData.edgeHexIDs[1], false, true, true)[0]} ${view.getWallSVGpointsFromHexID(wallData.edgeHexIDs[0], wallData.edgeHexIDs[1], false, true, true)[1]})`"
-								text-anchor="middle"
-								dominant-baseline="middle"
-								class="wallText"
-								:style="{
-									fill: wallData.wall[1] === -1 ? 'black' : 'white',
-								}">
-								{{ wallData.wall[0] }}
-							</text>
+					<g :transform="`rotate(${store.hexStyle === rf.FLAT ? 30 : 0} 0 0)`">
+						<g v-for="(wallData, idx) in computedZoomData.wallData" :key="idx">
+							<g v-if="wallData.wall[0] > 0">
+								<polygon
+									:points="view.getWallSVGpointsFromHexID(wallData.edgeHexIDs[0], wallData.edgeHexIDs[1], false, false, true)"
+									class="wallPolygon"
+									:style="{
+										fill: wallData.wall[1] === -1 ? 'white' : personal.getCorrectedColourHex(store.players[wallData.wall[1]].colour),
+									}" />
+								<text
+									v-if="wallData.wall[0] > 1"
+									:x="view.getWallSVGpointsFromHexID(wallData.edgeHexIDs[0], wallData.edgeHexIDs[1], false, true, true)[0]"
+									:y="view.getWallSVGpointsFromHexID(wallData.edgeHexIDs[0], wallData.edgeHexIDs[1], false, true, true)[1]"
+									:transform="store.hexStyle === rf.POINTY ? '' : `rotate(-30 ${view.getWallSVGpointsFromHexID(wallData.edgeHexIDs[0], wallData.edgeHexIDs[1], false, true, true)[0]} ${view.getWallSVGpointsFromHexID(wallData.edgeHexIDs[0], wallData.edgeHexIDs[1], false, true, true)[1]})`"
+									text-anchor="middle"
+									dominant-baseline="middle"
+									class="wallText"
+									:style="{
+										fill: wallData.wall[1] === -1 ? 'black' : 'white',
+									}">
+									{{ wallData.wall[0] }}
+								</text>
+							</g>
 						</g>
 					</g>
 
@@ -1181,6 +1183,7 @@ const computedMaxNeutralBricks = computed(() => {
 	font-size: 200px;
 	font-weight: bolder;
 	stroke: black;
+	stroke-width: 10px;
 }
 
 .mineText {
