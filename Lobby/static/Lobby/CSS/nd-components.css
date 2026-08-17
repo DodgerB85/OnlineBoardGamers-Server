@@ -2947,3 +2947,13 @@ body.nd .nd-tgz-options .diffVR {
 		text-align: center;
 	}
 }
+
+@media (min-width: 1100px) {
+	body.nd .nd-table.nd-lobby-games-table .nd-col-options {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 4px;
+		justify-items: center;
+		align-items: center;
+	}
+}
