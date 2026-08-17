@@ -274,6 +274,25 @@ function validateExpertOptions(checkbox) {
 				expertCheckbox.disabled = true
 			})
 			pickRandomgods.disabled = true
+			const expertSummaryGodsSpan = document.getElementById("expertSummarygodsSpan")
+			expertSummaryGodsSpan.style.padding = ""
+			expertSummaryGodsSpan.style.borderRadius = ""
+			expertSummaryGodsSpan.style.background = ""
+			expertSummaryGodsSpan.style.color = "var(--color-muted)"
+			expertSummaryGodsSpan.style.fontSize = "13px"
+			expertSummaryGodsSpan.style.fontWeight = ""
+			expertSummaryGodsSpan.innerHTML = ""
+			const expertSummaryVRSpan = document.getElementById("expertSummaryVRSpan")
+			expertSummaryVRSpan.style.padding = ""
+			expertSummaryVRSpan.style.borderRadius = ""
+			expertSummaryVRSpan.style.background = ""
+			expertSummaryVRSpan.style.color = ""
+			expertSummaryVRSpan.style.fontSize = ""
+			expertSummaryVRSpan.style.fontWeight = ""
+			expertSummaryVRSpan.style.marginBottom = ""
+			expertSummaryVRSpan.innerHTML = ""
+			const resetButton = document.getElementById("resetButton")
+			if (resetButton) resetButton.parentNode.removeChild(resetButton)
 		}
 	} else {
 		// Enable selections
@@ -284,11 +303,19 @@ function validateExpertOptions(checkbox) {
 		let span = document.getElementById("expertSummarygodsSpan")
 		span.innerHTML = "<br/>" + String(checkedCount) + " of 8 gods selected."
 		if (checkedCount !== 8) {
-			span.style.color = "red"
-			span.style.backgroundColor = "yellow"
+			span.style.padding = "8px 12px"
+			span.style.borderRadius = "var(--radius-sm)"
+			span.style.background = "var(--color-warn-bg)"
+			span.style.color = "var(--color-warn)"
+			span.style.fontSize = "13px"
+			span.style.fontWeight = "600"
 		} else {
-			span.style.color = "" // Reset to default color
-			span.style.backgroundColor = "" // Reset to default background color
+			span.style.padding = ""
+			span.style.borderRadius = ""
+			span.style.background = ""
+			span.style.color = "var(--color-muted)"
+			span.style.fontSize = "13px"
+			span.style.fontWeight = ""
 		}
 	}
 }
@@ -349,6 +376,7 @@ function changeValue(event, button, increment) {
 		span.style.color = "var(--color-warn)"
 		span.style.fontSize = "13px"
 		span.style.fontWeight = "600"
+		span.style.marginBottom = "6px"
 		span.innerHTML = "CAUTION: New VR unbalances the game - less likely players will join"
 
 		// Check if reset button already exists
@@ -364,6 +392,7 @@ function changeValue(event, button, increment) {
 		span.style.color = ""
 		span.style.fontSize = ""
 		span.style.fontWeight = ""
+		span.style.marginBottom = ""
 		span.innerHTML = ""
 	}
 }

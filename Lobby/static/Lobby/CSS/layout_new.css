@@ -28,7 +28,7 @@ body.nd .mobileQuickNav {
     display: none;
 }
 
-@media only screen and (max-width: 1280px) {
+@media only screen and (max-width: 1370px) {
 	#rightLoggedInHyperlinks {
 		display: none;
     }
@@ -97,7 +97,7 @@ body.nd .mobileQuickNav {
     }
 }
 
-@media only screen and (max-width: 1370px) {
+@media only screen and (max-width: 1450px) {
     #logoLoggedIn {
         width: 320px;
         max-width: 90vw;

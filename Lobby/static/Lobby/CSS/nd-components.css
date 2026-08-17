@@ -996,6 +996,9 @@ body.nd .nd-map-editor-grid .nd-create-tile-label {
 /* ---------- MAP EDITORS ---------- */
 body.nd .nd-map-editor {
     max-width: 1440px;
+    /* Match old-design `.container { text-align: center }` so the map board
+       and its fit-content children center on the /nd/ map-editor page. */
+    text-align: center;
 }
 
 body.nd .nd-map-editor-workspace {
@@ -1719,6 +1722,25 @@ body.nd .nd-create-page .expertTGZoptions .valueContainer:has(input:disabled) {
     background: var(--color-surface-soft);
     border-radius: var(--radius-sm);
 }
+/* Match FCM's disabled expert options. */
+body.nd #expertOptions.expertTGZoptions .valueContainer:has(input[type="checkbox"]:disabled) {
+    background: var(--color-surface-soft);
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    cursor: not-allowed;
+}
+body.nd #expertOptions.expertTGZoptions .valueContainer:has(input[type="checkbox"]:disabled) * {
+    cursor: not-allowed;
+}
+body.nd #expertOptions.expertTGZoptions .valueContainer:has(input[type="checkbox"]:disabled) > label,
+body.nd #expertOptions.expertTGZoptions .valueContainer:has(input[type="checkbox"]:disabled) > .specVRlabel {
+    opacity: 0.5;
+}
+body.nd #expertOptions.expertTGZoptions .valueContainer input[type="number"]:disabled {
+    background: var(--color-surface-soft);
+    color: var(--color-muted);
+    opacity: 0.5;
+}
 body.nd .nd-create-page .expertTGZoptions .valueField {
     width: 34px;
 }
@@ -1766,76 +1788,72 @@ body.nd .nd-row-flex {
     flex-wrap: wrap;
 }
 
-/* ---------- FLAVOUR TEXT (game popup modals on landing) ---------- */
-/* A short hint sits under the "Games available" title. Each game card can be
-   clicked to open a popup modal with that game's full description. */
-body.nd .nd-section-hint {
-    margin: -6px 0 14px;
+/* ---------- FLAVOUR TEXT (details/summary on landing) ---------- */
+/* Each game card can be clicked to expand its full description. The
+   <details> is hidden when JS-disabled would be unusable; default is open
+   so the SEO copy is visible. The 1-line summary inside the card stays
+   short. Always laid out in a single column. */
+body.nd .nd-game-flavour {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: 8px 16px;
 }
-body.nd .nd-modal-box .nd-flavour-body {
+body.nd .nd-game-flavour > h2 {
+    grid-column: 1 / -1;
+}
+body.nd .nd-game-flavour details {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 8px 14px;
+    box-shadow: var(--shadow-sm);
+    /* scrollIntoView lands the opened panel's header below the fixed top
+       nav bar (80px on desktop, taller on mobile with quick-nav) instead of
+       underneath it. */
+    scroll-margin-top: 100px;
+}
+body.nd .nd-game-flavour details summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--color-accent-strong);
+    padding: 4px 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+body.nd .nd-game-flavour details summary::-webkit-details-marker { display: none; }
+body.nd .nd-game-flavour details summary::before {
+    content: "▸";
+    color: var(--color-muted);
+    font-size: 12px;
+    transition: transform 0.1s;
+    display: inline-block;
+    width: 12px;
+}
+body.nd .nd-game-flavour details[open] summary::before {
+    transform: rotate(90deg);
+}
+body.nd .nd-game-flavour .nd-flavour-body {
     padding: 6px 0 4px;
     font-size: 14px;
     line-height: 1.6;
     color: var(--color-ink-soft);
 }
-body.nd .nd-modal-box .nd-flavour-body p {
+body.nd .nd-game-flavour .nd-flavour-body p {
     margin: 0 0 10px;
 }
-body.nd .nd-modal-box .nd-flavour-body p:last-child {
+body.nd .nd-game-flavour .nd-flavour-body p:last-child {
     margin-bottom: 0;
 }
-
-/* ---------- GAME INFO MODAL ---------- */
-body.nd .nd-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 1100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background: rgba(25, 52, 60, 0.55);
-    cursor: pointer;
-}
-body.nd .nd-modal[hidden] {
-    display: none;
-}
-body.nd .nd-modal-box {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border-strong);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    max-width: min(92vw, 620px);
-    max-height: min(85vh, 720px);
-    overflow-y: auto;
-    padding: 28px 30px;
-    position: relative;
-    cursor: default;
-}
-body.nd .nd-modal-close {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    background: transparent;
-    border: none;
-    font-size: 26px;
-    line-height: 1;
-    cursor: pointer;
-    padding: 2px 8px;
-    border-radius: var(--radius-sm);
-}
-body.nd .nd-modal-close:hover {
-    color: var(--color-ink);
-    background: var(--color-border);
-}
-body.nd .nd-modal-title {
-    margin: 0 0 10px;
-    padding-right: 28px;
-    font-size: 20px;
-    color: var(--color-accent-strong);
-}
-body.nd.nd-modal-open {
-    overflow: hidden;
+/* A short hint sits under the "Games available" title telling users they can
+   click a card to read more about it. */
+body.nd .nd-section-hint {
+    margin: -6px 0 14px;
+    color: var(--color-muted);
 }
 
 /* ---------- GAME HELP CONTENT ---------- */
@@ -2027,8 +2045,11 @@ body.nd .nd-setup-cards-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 16px;
-    align-items: start;
     margin-bottom: 16px;
+    /* Items stretch to the row height by default so cards that share a row
+       (SETUP + COMMON) grow to the same height instead of leaving a short
+       card next to a tall one. */
+    align-items: stretch;
 }
 @media (min-width: 720px) {
     body.nd .nd-setup-cards-grid {
@@ -2039,12 +2060,26 @@ body.nd .nd-setup-cards-grid {
         justify-self: center;
         width: calc(50% - 8px);
     }
+    /* RnB has four cards (Setup, Common, Game, and a Map card that spans the
+       full grid), so Game Options lands alone in row 2. Center it the same way
+       as a lone last card. Sized to a 4-card grid only, so it never touches
+       the 3-card or other layouts. */
+    body.nd .nd-setup-cards-grid .nd-card:nth-child(3):nth-last-child(2) {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: calc(50% - 8px);
+    }
 }
 @media (min-width: 1100px) {
     body.nd .nd-setup-cards-grid {
         grid-template-columns: repeat(3, 1fr);
     }
     body.nd .nd-setup-cards-grid .nd-card:nth-last-child(1):nth-child(odd) {
+        grid-column: auto;
+        justify-self: auto;
+        width: auto;
+    }
+    body.nd .nd-setup-cards-grid .nd-card:nth-child(3):nth-last-child(2) {
         grid-column: auto;
         justify-self: auto;
         width: auto;
@@ -2099,6 +2134,58 @@ body.nd .nd-check-list > .nd-check-label {
 }
 body.nd .nd-check-list > .nd-check-label:last-child {
     border-bottom: none;
+}
+
+/* D4c TGZ Schism expansion sub-options: tree-branch connector under the
+   "Use Schism Expansion" checkbox. The 3 schism radios are wrapped in
+   .nd-schism-suboptions, so they are no longer children of .nd-check-list and
+   lose the direct-child row divider; replicate that row look here. */
+body.nd .nd-check-list > .nd-schism-suboptions > .nd-check-label {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+body.nd .nd-check-list > .nd-schism-suboptions > .nd-check-label:last-child {
+    border-bottom: none;
+}
+/* Neutralize the UA default radio margin so the tick anchor edge is fixed. */
+body.nd .nd-check-list > .nd-schism-suboptions > .nd-check-label > input[type=radio] {
+    margin-left: 0;
+    position: relative;
+}
+/* Indent the sub-options and reserve space for the connector line. */
+body.nd .nd-check-list > .nd-schism-suboptions {
+    position: relative;
+    padding-left: 24px;
+}
+/* Vertical connector line + top notch, only while the schism checkbox is on. */
+body.nd .nd-check-list:has(#useSchism:checked) > .nd-schism-suboptions::before {
+    content: "";
+    position: absolute;
+    background: var(--color-border-strong);
+    left: 12px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+}
+body.nd .nd-check-list:has(#useSchism:checked) > .nd-schism-suboptions::after {
+    content: "";
+    position: absolute;
+    background: var(--color-border-strong);
+    left: 0;
+    top: 0;
+    width: 13px;
+    height: 2px;
+}
+/* Horizontal tick from the vertical line into each radio row. */
+body.nd .nd-check-list:has(#useSchism:checked) > .nd-schism-suboptions > .nd-check-label > input[type=radio]::before {
+    content: "";
+    position: absolute;
+    left: -12px;
+    width: 12px;
+    height: 2px;
+    background: var(--color-border-strong);
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 /* Help page Q&A — readable type for the long, mostly-text help sections. */
@@ -2507,14 +2594,14 @@ body.nd .nd-col-game small {
     font-size: 14px;
     line-height: 1.4;
 }
-body.nd .nd-col-game a { color: var(--color-accent-strong); text-decoration: none; }
+body.nd .nd-col-game a { color: #0B275B; text-decoration: none; }
 body.nd .nd-col-game a:hover { text-decoration: underline; }
 body.nd .nd-col-players {
     color: var(--color-ink-soft);
     line-height: 1.4;
 }
 body.nd .nd-col-players a {
-    color: var(--color-accent-strong);
+    color: #0B275B;
     text-decoration: none;
 }
 body.nd .nd-col-players a:hover { text-decoration: underline; }
@@ -2524,7 +2611,7 @@ body.nd .nd-col-status {
     line-height: 1.4;
 }
 body.nd .nd-col-status a {
-    color: var(--color-accent-strong);
+    color: #0B275B;
     text-decoration: none;
 }
 body.nd .nd-col-status a:hover { text-decoration: underline; }
@@ -2558,13 +2645,13 @@ body.nd .nd-col-cta {
 
 /* State backgrounds on the whole row. Keep these separate from the old td
    cell-fill rules so the color reads as one continuous row state. */
-body.nd .nd-row09.myMove { background: rgba(157, 205, 142, 0.35); }
-body.nd .nd-row09.kickoutRequired1 { background: rgba(255, 200, 100, 0.30); }
-body.nd .nd-row09.kickoutRequired2 { background: var(--color-danger-bg); }
+body.nd .nd-row09.myMove { background: #BFE2B6; }
+body.nd .nd-row09.kickoutRequired1 { background: #FFE1AD; }
+body.nd .nd-row09.kickoutRequired2 { background: #F2BABA; }
 @media (hover: hover) {
-    body.nd .nd-row09.myMove:hover { background: rgba(157, 205, 142, 0.22); }
-    body.nd .nd-row09.kickoutRequired1:hover { background: rgba(255, 200, 100, 0.16); }
-    body.nd .nd-row09.kickoutRequired2:hover { background: rgba(220, 80, 80, 0.22); }
+    body.nd .nd-row09.myMove:hover { background: #D9EED3; }
+    body.nd .nd-row09.kickoutRequired1:hover { background: #ffeacc; }
+    body.nd .nd-row09.kickoutRequired2:hover { background: #f6cdcd; }
 }
 
 /* Mobile collapse (per 09 prototype) */
@@ -2809,8 +2896,9 @@ body.nd .nd-tgz-options .diffVR {
 	body.nd .nd-game-card-body p { font-size: 15px; }
 	body.nd .nd-create-tile-label { font-size: 16px; }
 	body.nd .nd-map-editor-grid .nd-create-tile-label { font-size: 15px; }
-	body.nd .nd-modal-box .nd-flavour-body { font-size: 16px; }
-	body.nd .nd-modal-title { font-size: 22px; }
+	body.nd .nd-game-flavour details summary { font-size: 17px; }
+	body.nd .nd-game-flavour details summary::before { font-size: 14px; }
+	body.nd .nd-game-flavour .nd-flavour-body { font-size: 16px; }
 	body.nd .nd-fcm-china-help { font-size: 17px; }
 	body.nd .nd-check-label { font-size: 16px; }
 	body.nd .nd-opt-help { font-size: 14px; }
@@ -2874,5 +2962,15 @@ body.nd .nd-tgz-options .diffVR {
 	}
 	body.nd .nd-last-move-text {
 		text-align: center;
+	}
+}
+
+@media (min-width: 1100px) {
+	body.nd .nd-table.nd-lobby-games-table .nd-col-options {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 4px;
+		justify-items: center;
+		align-items: center;
 	}
 }
