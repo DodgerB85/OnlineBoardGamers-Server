@@ -1722,6 +1722,25 @@ body.nd .nd-create-page .expertTGZoptions .valueContainer:has(input:disabled) {
     background: var(--color-surface-soft);
     border-radius: var(--radius-sm);
 }
+/* Match FCM's disabled expert options. */
+body.nd #expertOptions.expertTGZoptions .valueContainer:has(input[type="checkbox"]:disabled) {
+    background: var(--color-surface-soft);
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    cursor: not-allowed;
+}
+body.nd #expertOptions.expertTGZoptions .valueContainer:has(input[type="checkbox"]:disabled) * {
+    cursor: not-allowed;
+}
+body.nd #expertOptions.expertTGZoptions .valueContainer:has(input[type="checkbox"]:disabled) > label,
+body.nd #expertOptions.expertTGZoptions .valueContainer:has(input[type="checkbox"]:disabled) > .specVRlabel {
+    opacity: 0.5;
+}
+body.nd #expertOptions.expertTGZoptions .valueContainer input[type="number"]:disabled {
+    background: var(--color-surface-soft);
+    color: var(--color-muted);
+    opacity: 0.5;
+}
 body.nd .nd-create-page .expertTGZoptions .valueField {
     width: 34px;
 }
