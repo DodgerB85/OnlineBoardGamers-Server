@@ -27,18 +27,21 @@ vi.mock("./INDfuncs.js", async (importOriginal) => {
 // The shipping module pulls in the whole INDmodel chain (Pinia stores,
 // websocket, document access, Vue) which is not importable under node. Stub
 // the heavy dependencies so we only exercise the shipping algorithm itself.
+// slotCompanyLookup / mockMapData are filled in per test.
+let slotCompanyLookup = []
+let mockMapData = null
 vi.mock("./INDmodel.js", () => ({
-	slotCompanies: () => [],
+	slotCompanies: (slot) => slotCompanyLookup.filter((company) => slot.includes(company.id)),
 }))
 vi.mock("../stores/INDstore.js", () => ({
-	useModelStore: () => ({ mapData: null }),
+	useModelStore: () => ({ mapData: mockMapData }),
 }))
 vi.mock("./INDreference.js", async (importOriginal) => {
 	const actual = await importOriginal()
 	return actual
 })
 
-import { createShippingGraph, findPossibleJourneys, contiguousProductionAreas } from "./INDshipping.js"
+import { createShippingGraph, findPossibleJourneys, contiguousProductionAreas, getShippingAlternatives } from "./INDshipping.js"
 
 // Synthetic map mirroring a real Indonesia map layout:
 // territory index -> [neighbour terrIDs] for all/land/sea.
@@ -261,5 +264,54 @@ describe("IND maxShipping (findPossibleJourneys)", () => {
 			[23, 0, 101, 53, 54, 28],
 		]
 		expect(journeys).toEqual(expected)
+	})
+
+	it("shipping alternatives never drop below the max count", () => {
+		mockMapData = buildMapData()
+		const deeds = buildCompanies()
+		slotCompanyLookup = deeds.concat([
+			{ player: 1, id: 101, type: 0, territories: Array.from({ length: 34 }, (_, i) => [30 + i, 2]), tokens: Array.from({ length: 34 }, (_, i) => [30 + i, 2]) },
+			{ player: 2, id: 102, type: 0, territories: Array.from({ length: 34 }, (_, i) => [30 + i, 2]), tokens: Array.from({ length: 34 }, (_, i) => [30 + i, 2]) },
+		])
+		// player 0 operates all 4 deeds; players 1 and 2 own one shipping company each
+		const playerSlots = [[[1, 2, 3, 4]], [[101]], [[102]]]
+		const cities = buildCities()
+		const playerCosts = [0, 1, 1]
+		const unfavouredPlayerSubsidies = [0, 0, 0]
+		const shippingCompanies = slotCompanyLookup.slice(4)
+
+		const allAreas = contiguousProductionAreas(mockMapData, deeds)
+		const cityTerritory = cities.map((c) => c.territory)
+		const cityCapacity = cities.map((c) => c.size)
+		const productionCapacity = allAreas.map((a) => a.length)
+		const graph = createShippingGraph(mockMapData, cityTerritory, cityCapacity, playerCosts, unfavouredPlayerSubsidies, allAreas, productionCapacity, shippingCompanies, [])
+		const journeys = findPossibleJourneys(graph, allAreas, shippingCompanies)
+
+		const { byGood } = getShippingAlternatives(
+			journeys,
+			cities,
+			[],
+			playerCosts,
+			unfavouredPlayerSubsidies,
+			playerSlots,
+			0,
+			0,
+			[]
+		)
+
+		expect(journeys.length).toBeGreaterThan(0)
+		// Every alternative is a full max-shipping plan carried by the chosen company
+		let switchable = false
+		for (const journey of journeys) {
+			const alts = byGood[journey[0]]
+			if (!alts) continue
+			switchable = true
+			for (const alt of alts) {
+				expect(alt.journeys.length).toBe(journeys.length)
+				expect(alt.journeys.some((candidate) => candidate[2] === alt.id)).toBe(true)
+			}
+		}
+		// With two symmetric shipping companies some good must be switchable
+		expect(switchable).toBe(true)
 	})
 })

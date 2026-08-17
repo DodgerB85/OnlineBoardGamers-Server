@@ -487,7 +487,7 @@ export function getCheapestMaxPossibleShipmentsFromSlotIDX(cities, activeCompani
 			const allProductionAreas = contiguousProductionAreas(mapData, activeCompany)
 			const productionAreas = subtractGoodMarkers(subtractedGoodMarkers, allProductionAreas)
 			const productionCapacity = productionAreas.map((a) => a.length)
-			const shippingCompanies = allPlayerShippingCompanies(playerSlots, activeCompanies)
+const shippingCompanies = allPlayerShippingCompanies(playerSlots, activeCompanies)
 			
 			const cityTerritory = cities.map((city) => city.territory)
 			const cityCapacity = cities.map((city) => city.size - city.receivedGoods.filter((good) => good === currentGood).length)
@@ -506,6 +506,134 @@ export function getCheapestMaxPossibleShipmentsFromSlotIDX(cities, activeCompani
 	}
 
 	return result
+}
+
+function addForcedSourceEdges(graph, mapData, productionAreas, shippingCompanies, productionAreaIndex, companyIndex, unfavouredPlayerSubsidies) {
+	const area = productionAreas[productionAreaIndex]
+	const areaAdjacentSea = []
+	for (const territory of area) {
+		areaAdjacentSea.push(...mapData.landNeighbours[territory])
+	}
+	const cost = unfavouredPlayerSubsidies[shippingCompanies[companyIndex].player]
+	for (let e = 0; e < graph.edgeNodes.length; e++) {
+		const origin = graph.edgeOrigin[e]
+		if (origin.type !== "shipping" || origin.company !== companyIndex || !areaAdjacentSea.includes(origin.territory)) {
+			continue
+		}
+		const inNode = graph.edgeNodes[e][0]
+		const id = graph.edges.length
+		graph.nodeEdges[graph.source].push(id)
+		graph.nodeEdges[inNode].push(id)
+		graph.edges.push(id)
+		graph.edgeNodes.push([graph.source, inNode])
+		graph.edgeHasLimit.push(false)
+		graph.edgeLimit.push(0)
+		graph.edgeCost.push(cost)
+		graph.edgeOrigin.push({ type: "company", productionArea: productionAreaIndex })
+	}
+}
+
+/**
+ * For each good in the given max-shipping journeys, find other shipping
+ * companies that can carry one of the same production area's goods in some
+ * solution that still ships the most possible goods. The stored alternative
+ * solutions are full max-shipping plans, so applying one can never reduce the
+ * number of goods shipped.
+ *
+ * A company qualifies for a production area if the flow still reaches the max
+ * count when one unit of that area is only loadable onto that company's ships
+ * (the area's source capacity is cut by one and a direct source edge to the
+ * company's adjacent tokens is added instead), AND the resulting plan actually
+ * carries a good of that area with that company.
+ */
+export function getShippingAlternatives(journeys, cities, activeCompanies, playerCosts, unfavouredPlayerSubsidies, playerSlots, playerIndex, slotIDX, subtractedRoutes) {
+	const mapData = useModelStore().mapData
+
+	if (journeys.length === 0) {
+		return { byGood: {} }
+	}
+	const activeSlot = playerSlots[playerIndex][slotIDX]
+	if (activeSlot.length === 0) {
+		return { byGood: {} }
+	}
+	const activeCompany = model.slotCompanies(activeSlot, activeCompanies)
+	if (activeCompany.type === rf.COMPANY_SHIPPING) {
+		return { byGood: {} }
+	}
+
+	const currentGood = activeCompany[0].good
+	const allProductionAreas = contiguousProductionAreas(mapData, activeCompany)
+	const productionAreas = subtractGoodMarkers(subtractedRoutes.map((route) => route[0]), allProductionAreas)
+	const productionCapacity = productionAreas.map((a) => a.length)
+	const shippingCompanies = allPlayerShippingCompanies(playerSlots, activeCompanies)
+
+	const cityTerritory = cities.map((city) => city.territory)
+	const cityCapacity = cities.map((city) => city.size - city.receivedGoods.filter((good) => good === currentGood).length)
+
+	// Which companies' ships are land-adjacent to each production area
+	const companyAdjacentAreas = shippingCompanies.map((company) => {
+		const tokenTerrs = company.tokens.map((token) => token[0])
+		return productionAreas.map((area) => {
+			const areaAdjacentSea = []
+			for (const territory of area) {
+				areaAdjacentSea.push(...mapData.landNeighbours[territory])
+			}
+			return tokenTerrs.some((terr) => areaAdjacentSea.includes(terr))
+		})
+	})
+
+	// The production area each journey's good comes from
+	const rowAreas = journeys.map((journey) => productionAreas.findIndex((area) => area.includes(journey[0])))
+
+	const byGood = {}
+	const baseKey = journeys.map((journey) => JSON.stringify(journey)).sort().join("|")
+	// How many goods of each production area the current plan ships
+	const areaShippedCount = new Array(productionAreas.length).fill(0)
+	for (let row = 0; row < journeys.length; row++) {
+		if (rowAreas[row] >= 0) {
+			areaShippedCount[rowAreas[row]]++
+		}
+	}
+	for (let areaIndex = 0; areaIndex < productionAreas.length; areaIndex++) {
+		if (areaShippedCount[areaIndex] === 0) {
+			continue
+		}
+		for (let c = 0; c < shippingCompanies.length; c++) {
+			const company = shippingCompanies[c]
+			if (!companyAdjacentAreas[c][areaIndex]) {
+				continue
+			}
+			// The area's source capacity is cut to one below what the current plan
+			// ships, so one unit of this area can ONLY be loaded onto this
+			// company's ships. Reaching the max count then proves this company can
+			// carry one of the area's goods without dropping any shipments.
+			const modifiedProductionCapacity = productionCapacity.slice()
+			modifiedProductionCapacity[areaIndex] = areaShippedCount[areaIndex] - 1
+			const graph = createShippingGraph(mapData, cityTerritory, cityCapacity, playerCosts, unfavouredPlayerSubsidies, allProductionAreas, modifiedProductionCapacity, shippingCompanies, [])
+			addForcedSourceEdges(graph, mapData, allProductionAreas, shippingCompanies, areaIndex, c, unfavouredPlayerSubsidies)
+			const candidate = findPossibleJourneys(graph, productionAreas, shippingCompanies)
+			if (candidate.length !== journeys.length) {
+				continue
+			}
+			if (!candidate.some((journey) => journey[2] === company.id && productionAreas[areaIndex].includes(journey[0]))) {
+				continue
+			}
+			// Don't offer a switch that would leave the displayed plan unchanged
+			const candidateKey = candidate.map((journey) => JSON.stringify(journey)).sort().join("|")
+			if (candidateKey === baseKey) {
+				continue
+			}
+			for (let row = 0; row < journeys.length; row++) {
+				if (rowAreas[row] === areaIndex) {
+					if (!byGood[journeys[row][0]]) {
+						byGood[journeys[row][0]] = []
+					}
+					byGood[journeys[row][0]].push({ player: company.player, id: company.id, journeys: candidate })
+				}
+			}
+		}
+	}
+	return { byGood }
 }
 
 export function completeCurrentPath(cityTerritory, activeCompanies, playerCosts, unfavouredPlayerSubsidies, playerSlots, playerIndex, slotIDX, currentGoodJourney) {

@@ -10,7 +10,41 @@ import { useModelStore } from "../stores/INDstore.js"
 const store = useModelStore()
 import { usePersonalStore } from "../stores/INDpersonal.js"
 //import { nextTick } from 'vue';
+import { computed } from "vue"
 const personal = usePersonalStore()
+
+// Alternative shipping companies per good: for each row's good, other companies
+// that can carry it in some solution that still ships the most possible goods.
+// Each alternative stores a full validated max-shipping plan, so switching can
+// never drop the number of goods shipped.
+const shippingAlternatives = computed(() => {
+	const playerIndex = controller.currentPlayerIndex()
+	return mpf.getShippingAlternatives(
+		store.context.maxPossData,
+		store.cities,
+		store.activeCompanies,
+		store.players.map((_, n) => (n == playerIndex ? 0 : store.context.unfavouredPlayerIndexes[n] ? 2 : 1)),
+		store.players.map((_, n) => (store.useShippingSubsidy && store.context.unfavouredPlayerIndexes[n] ? store.players[n].RnD[rf.RnD_SHIPPING_SUBSIDY_IDX] - 1 : 0)),
+		store.players.map((player) => player.slots),
+		playerIndex,
+		store.context.selectedSlotToOperate,
+		store.context.historyObj.slice(1)
+	)
+})
+
+function getRowAlternatives(entry) {
+	const alts = shippingAlternatives.value.byGood[entry[0]]
+	if (!alts) {
+		return []
+	}
+	return alts.filter((alt) => alt.id !== entry[2])
+}
+
+function localSwitchCompany(entry, alternative) {
+	store.stopFlashingGoodsJourney()
+	store.context.maxPossData = alternative.journeys.map((journey) => [...journey])
+	model.checkForResponseAfterDeliverGoodsToCity(controller.currentPlayerObj().slots[store.context.selectedSlotToOperate], true)
+}
 
 function getAutoShipNetIncome(entry) {
 	let goodIncome = rf.GOOD_INCOME[model.getActiveCompanyDataFromID(controller.currentPlayerObj().slots[store.context.selectedSlotToOperate][0]).good]
@@ -161,7 +195,7 @@ function toggleCheckbox(playerIndexToggled) {
 		<table id="autoShipPlayerTable">
 			<thead>
 				<tr>
-					<th><b>Player</b></th>
+					<th><b>Company</b></th>
 					<th><b>Ships</b></th>
 					<th><b>Ship cost</b></th>
 					<th><b>Net Income</b></th>
@@ -172,16 +206,25 @@ function toggleCheckbox(playerIndexToggled) {
 			<tbody>
 				<!-- journeys.push([].concat([goodId, shipCompany.player, shipCompany.id], trace, [city])) -->
 				<tr v-for="(entry, idx) in store.context.maxPossData" :key="idx">
-					<!-- Player-->
+					<!-- Shipping company, plus alternative companies that can ship this good
+					without reducing the max poss goods shipped -->
 					<td @click="localClickedShippingRow(entry)">
-						<span class="mainEntryPlayer"
-							:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-								store.players[entry[1]].displayName }}</span>
-						<svg class="shipSVG">
+						<svg class="shipSVG" :title="'Shipping by ' + store.players[entry[1]].displayName">
 							<image class="shipIMG" :filter="view.getShipMarkerMainFilterURLfromPlayerIndex(entry[1])"
 								:xlink:href="view.getImage(model.getActiveCompanyDataFromID(entry[2]).shipGfx)"
 								alt="Ship" />
 						</svg>
+						<template v-if="getRowAlternatives(entry).length > 0">
+							<span v-for="alt in getRowAlternatives(entry)" :key="alt.id" class="altShipSpan"
+								@click.stop="localSwitchCompany(entry, alt)">
+								<svg class="shipSVG altShipSVG"
+									:title="'Ship this good with ' + store.players[alt.player].displayName">
+									<image class="shipIMG" :filter="view.getShipMarkerMainFilterURLfromPlayerIndex(alt.player)"
+										:xlink:href="view.getImage(model.getActiveCompanyDataFromID(alt.id).shipGfx)"
+										alt="Ship" />
+								</svg>
+							</span>
+						</template>
 					</td>
 					<!-- Ship Count -->
 					<td @click="localClickedShippingRow(entry)">{{ entry.length - 4 }}</td>
@@ -360,6 +403,17 @@ function toggleCheckbox(playerIndexToggled) {
 .shipSVG {
 	width: 21px;
 	height: 21px;
+}
+
+.altShipSpan {
+	cursor: pointer;
+}
+
+.altShipSVG {
+	width: 15px;
+	height: 15px;
+	margin-left: 3px;
+	opacity: 0.85;
 }
 
 .shipIMG {
