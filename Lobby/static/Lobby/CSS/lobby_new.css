@@ -664,6 +664,12 @@ body.nd .nd-col-cta .deleteTrainingGame {
         grid-template-columns: 44px minmax(0, 1.15fr) minmax(0, 1.125fr) minmax(0, 0.85fr) minmax(0, 0.9fr) minmax(80px, 0.5fr) minmax(150px, 0.925fr);
     }
 
+    /* Non-current lists put options at track 4; keep it compact like current. */
+    body.nd .nd-table.nd-lobby-games-table:not(.nd-current-games-table) thead tr,
+    body.nd .nd-table.nd-lobby-games-table:not(.nd-current-games-table) .nd-row09 {
+        grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(90px, 0.55fr) minmax(120px, 0.91fr);
+    }
+
     /* Header centering */
     body.nd .nd-table.nd-lobby-games-table thead th {
         text-align: center;
