@@ -472,18 +472,20 @@ function validateOptions(change) {
 		if (parseInt(document.getElementById("minModules").value) > maxModules) {
 			document.getElementById("minModules").value = String(maxModules)
 		}
-	} else if (change === "draftModules") {
-		if (document.getElementById(change).checked == true) {
-			addOption("draft_originalMS")
-			addOption("draft_newMS")
-			document.getElementById("draft_originalMS").checked = true
-			addOption("newDistrictsDraft")
-			document.getElementById("randomModules").checked = false
-			removeOption("random_originalMS")
-			removeOption("random_newMS")
-			removeOption("minModules")
-			removeOption("maxModules")
-		} else {
+		} else if (change === "draftModules") {
+			if (document.getElementById(change).checked == true) {
+				addOption("draft_originalMS")
+				addOption("draft_newMS")
+				document.getElementById("draft_originalMS").checked = true
+				addOption("newDistrictsDraft")
+				addOption("newDistrictsAppDraft")
+				addOption("newDistrictsParkDraft")
+				document.getElementById("randomModules").checked = false
+				removeOption("random_originalMS")
+				removeOption("random_newMS")
+				removeOption("minModules")
+				removeOption("maxModules")
+			} else {
 			removeOption("draft_originalMS")
 			removeOption("draft_newMS")
 			removeOption("newDistrictsDraft")
