@@ -373,6 +373,11 @@ export function createCompleteGraph(hexData, edgeData, playerIndex) {
 	let edges = [] // Edge connections (by node indices)
 	let edgeTypes = [] // Movement type for each edge
 	let edgeInternalIds = [] // Internal edge IDs (for tracking)
+	// Per-edge flag: true only for internal (ring) edges that are part of a drawn road.
+	// The truck prefers these edges on cost/length ties so it follows the road arc,
+	// keeping movement visually consistent with the road drawn around mountain hexes,
+	// regardless of discovery order or graph layout.
+	let edgeIsRoad = []
 	let hexNodeOffset = [] // Offset where each hex's nodes start
 	let hexVertexOffset = [] // Number of vertices in each hex
 	let sideData = [] // Side data for each hex
@@ -404,6 +409,7 @@ export function createCompleteGraph(hexData, edgeData, playerIndex) {
 				edgeTypes.push(type)
 				edges.push(nodes.map((n) => n + offset))
 				edgeInternalIds.push(graph.edges.internalIds[k])
+				edgeIsRoad.push(!!hexData[i].edgeHasRoad[graph.edges.internalIds[k]])
 			}
 		}
 	}
@@ -423,6 +429,7 @@ export function createCompleteGraph(hexData, edgeData, playerIndex) {
 			edgeCosts.push(type === rf.MOVE_DONKEY ? 2 : 1)
 			edges.push(nodes)
 			edgeInternalIds.push(-1)
+			edgeIsRoad.push(false)
 		}
 		// Extract edge information
 		const edge = edgeData[i]
@@ -538,6 +545,7 @@ export function createCompleteGraph(hexData, edgeData, playerIndex) {
 			types: edgeTypes,
 			costs: edgeCosts,
 			internalIds: edgeInternalIds,
+			isRoad: edgeIsRoad,
 		},
 	}
 }
@@ -559,6 +567,16 @@ export function pathfind(graph, inputLocation, validMove, maxCost) {
 	const distance = new Int32Array(nodeCount).fill(-1)
 	const previous = new Int32Array(nodeCount).fill(-1)
 	const viaEdge = new Int32Array(nodeCount).fill(-1)
+	// Accumulated count of road-marked internal edges along the best known path
+	// to each node. Used only to break cost/length ties so the truck follows the
+	// drawn road. Internal-hex pathfind (no isRoad field) treats this as 0 for
+	// every edge, leaving its existing behavior unchanged.
+	const roadCount = new Int32Array(nodeCount).fill(0)
+	// Per-edge flag: true for internal (ring) edges that are part of a drawn road.
+	// Absent on the single-hex internal graph, in which case every edge is 0 and
+	// this tiebreak is inert (road marking keeps its existing behavior).
+	const edgeIsRoad = graph.edges.isRoad || []
+	const roadCountFor = (srcNode, edgeId) => roadCount[srcNode] + (edgeIsRoad[edgeId] ? 1 : 0)
 
 	/// HACK
 	let inputLocationUse = [...inputLocation]
@@ -615,6 +633,11 @@ export function pathfind(graph, inputLocation, validMove, maxCost) {
 				shouldUpdate = true
 			} else if (destCost === targetCost && nextDist < targetDist) {
 				shouldUpdate = true
+			} else if (destCost === targetCost && nextDist === targetDist && roadCountFor(source, edgeId) > roadCount[target]) {
+				// Equal cost and length: prefer the route that follows the
+				// drawn road (more road-marked internal edges), so the truck
+				// agrees with the road arc around mountain hexes.
+				shouldUpdate = true
 			} else if (reached[target] === 0 && validMoveSet.has(edgeTypes[edgeId])) {
 				shouldUpdate = true
 			}
@@ -625,6 +648,7 @@ export function pathfind(graph, inputLocation, validMove, maxCost) {
 				distance[target] = nextDist
 				previous[target] = source
 				viaEdge[target] = edgeId
+				roadCount[target] = roadCountFor(source, edgeId)
 				buckets[destCost].push(target)
 
 				// NEW DOCKS: add all offsets
@@ -640,6 +664,7 @@ export function pathfind(graph, inputLocation, validMove, maxCost) {
 							distance[offsetIndex] = nextDist
 							previous[offsetIndex] = source
 							viaEdge[offsetIndex] = edgeId
+							roadCount[offsetIndex] = roadCountFor(source, edgeId)
 							buckets[destCost].push(offsetIndex)
 						}
 					}
