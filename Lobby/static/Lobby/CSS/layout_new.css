@@ -98,9 +98,16 @@ body.nd .mobileQuickNav {
     }
 }
 
+/* Rather than vanishing mid-range, the logo keeps shrinking continuously
+   as the links-mode bar runs out of room: from 400px down to ~100px just
+   before the hamburger mode takes over (≤1100px, which has its own sizing
+   below). 1001px accounts for the login stack (541px) + gaps/padding
+   (28px) + the links-mode cluster incl. its margins (~412px) + slack
+   (~20px), so the logo never runs underneath the nav links. */
 @media only screen and (max-width: 1410px) {
     #logoLoggedOut {
-        display: none;
+        display: block;
+        width: min(400px, calc(100vw - 1001px));
     }
 }
 
