@@ -896,6 +896,29 @@ export function importRNBmodel(input, forGameOver) {
 		store.gameflow.newWonderPrayingOrder = Array(store.players.length).fill(-1)
 		if (inputModel[6].length > 6) store.gameflow.newWonderPrayingOrder = JSON.parse(JSON.stringify(inputModel[6][6]))
 
+		// Repair legacy conflict arrays that can carry -1 placeholders
+		// (players dropped from the turn order during an earlier conflict without praying)
+		const repairMissingPlayerIndexes = (arr) => {
+			if (arr.length !== store.players.length) return arr
+			const result = [...arr]
+			for (let i = 0; i < store.players.length; i++) {
+				if (!result.includes(i)) {
+					const emptyPos = result.indexOf(-1)
+					if (emptyPos !== -1) result[emptyPos] = i
+				}
+			}
+			return result
+		}
+		store.gameflow.wonderPrayingOrder = repairMissingPlayerIndexes(store.gameflow.wonderPrayingOrder)
+		store.gameflow.fullTurnOrder = repairMissingPlayerIndexes(store.gameflow.fullTurnOrder)
+		// During praying, any player not yet prayed and not in the turn order should still get their pray turn
+		if (rf.PHASE_CONFLICT_PRAYINGS.includes(store.gameflow.phase)) {
+			const prayedSoFar = new Set(store.gameflow.newWonderPrayingOrder.filter((idx) => Number.isInteger(idx) && idx >= 0 && idx < store.players.length))
+			for (let i = 0; i < store.players.length; i++) {
+				if (!prayedSoFar.has(i) && !store.gameflow.turnOrder.includes(i)) store.gameflow.turnOrder.push(i)
+			}
+		}
+
 		store.ongoingVars.resourceSharingData = JSON.parse(JSON.stringify(inputModel[7][0]))
 	} else if (forGameOver) {
 		// recreate gameflow

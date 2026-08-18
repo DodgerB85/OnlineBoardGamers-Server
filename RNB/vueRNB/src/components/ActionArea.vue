@@ -637,13 +637,12 @@ const getGameOverReason = computed(() => {
 				<br />
 				<b><u>Current Praying Order</u></b>
 				<br />
-				<!-- temple area-->
-				<div>
-					<!--Old temple figures -->
+<!-- temple area-->
+			<div>
+				<!--Old temple figures -->
+				<template v-for="(playerIndex, idx) in store.gameflow.wonderPrayingOrder" :key="idx">
 					<div
-						v-for="(playerIndex, idx) in store.gameflow.wonderPrayingOrder"
 						v-if="playerIndex !== -1 && store.players[playerIndex]"
-						:key="idx"
 						class="prayingDiv"
 						:class="{ wholeTurnOrderFigureDivActive: playerIndex === store.gameflow.turnOrder[0] }"
 						:style="{
@@ -651,10 +650,11 @@ const getGameOverReason = computed(() => {
 						}">
 						<img class="prayingFigureImg" :src="view.getImage('pray_' + String(personal.getCorrectedColour(store.players[playerIndex].colour)))" />
 					</div>
-					<img class="templeIconImg" :src="view.getImage('temple_icon')" />
-				</div>
-				<br />
-				<b><u>New Praying Order</u></b>
+				</template>
+				<img class="templeIconImg" :src="view.getImage('temple_icon')" />
+			</div>
+			<br />
+			<b><u>New Praying Order</u></b>
 				<br />
 				<!-- NEW temple figures -->
 				<div>
@@ -692,17 +692,17 @@ const getGameOverReason = computed(() => {
 				<!-- temple area-->
 				<div>
 					<!--Old temple figures -->
-					<div
-						v-for="(playerIndex, idx) in store.gameflow.wonderPrayingOrder"
-						v-if="playerIndex !== -1 && store.players[playerIndex]"
-						:key="idx"
-						class="prayingDiv"
-						:class="{ wholeTurnOrderFigureDivActive: playerIndex === store.gameflow.turnOrder[0] }"
-						:style="{
-							borderColor: personal.getCorrectedColourHex(store.players[playerIndex].colour),
-						}">
-						<img class="prayingFigureImg" :src="view.getImage('pray_' + String(personal.getCorrectedColour(store.players[playerIndex].colour)))" />
-					</div>
+					<template v-for="(playerIndex, idx) in store.gameflow.wonderPrayingOrder" :key="idx">
+						<div
+							v-if="playerIndex !== -1 && store.players[playerIndex]"
+							class="prayingDiv"
+							:class="{ wholeTurnOrderFigureDivActive: playerIndex === store.gameflow.turnOrder[0] }"
+							:style="{
+								borderColor: personal.getCorrectedColourHex(store.players[playerIndex].colour),
+							}">
+							<img class="prayingFigureImg" :src="view.getImage('pray_' + String(personal.getCorrectedColour(store.players[playerIndex].colour)))" />
+						</div>
+					</template>
 					<img class="templeIconImg" :src="view.getImage('temple_icon')" />
 				</div>
 				<br />
