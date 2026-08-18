@@ -142,23 +142,34 @@
             {% else %}
                 <!-- Not logged in TOP BAR -->
                 <div id="loginForm">
-                    <form action="{% url 'myLogin' %}" method="post">
-                        {% csrf_token %}
-                        <input class="loginInput"
-                               type="text"
-                               name="username"
-                               placeholder="{% translate " Username" %}"
-                               required>
-                        <input class="loginInput"
-                               type="password"
-                               name="password"
-                               placeholder="{% translate " Password" %}"
-                               required>
-                        <input type="hidden" name="next" value="{{ request.GET.next }}" />
-                        <input class="nd-button nd-button-primary loginSubmit"
-                               type="submit"
-                               value="{% translate " Login" %}">
-                    </form>
+                    <div id="loginFormStack">
+                        <form action="{% url 'myLogin' %}" method="post">
+                            {% csrf_token %}
+                            <input class="loginInput"
+                                   type="text"
+                                   name="username"
+                                   placeholder="{% translate " Username" %}"
+                                   required>
+                            <input class="loginInput"
+                                   type="password"
+                                   name="password"
+                                   placeholder="{% translate " Password" %}"
+                                   required>
+                            <input type="hidden" name="next" value="{{ request.GET.next }}" />
+                            <input class="nd-button nd-button-primary loginSubmit"
+                                   type="submit"
+                                   value="{% translate " Login" %}">
+                        </form>
+                        <div id="registerLink">
+                            <a class="topBarLink" href="{% url 'register' %}">
+                                <span id="registerLinkTextLong">{% translate "Register New Account" %}</span>
+                                <span id="registerLinkTextShort">{% translate "Register" %}</span>
+                            </a>|
+                            <a class="topBarLink"
+                               id="forgotPwdLink"
+                               href="{% url 'password_reset' %}">{% translate "Forgot Password?" %}</a>
+                        </div>
+                    </div>
                     <a href="{% url 'index' %}">
                         <img id="logoLoggedOut"
                              width="800px"
@@ -166,15 +177,6 @@
                              src="{% static 'Lobby/images/Logo1.png' %}"
                              alt="Online Board Gamers">
                     </a>
-                </div>
-                <div id="registerLink">
-                    <a class="topBarLink" href="{% url 'register' %}">
-                        <span id="registerLinkTextLong">{% translate "Register New Account" %}</span>
-                        <span id="registerLinkTextShort">{% translate "Register" %}</span>
-                    </a>|
-                    <a class="topBarLink"
-                       id="forgotPwdLink"
-                       href="{% url 'password_reset' %}">{% translate "Forgot Password?" %}</a>
                 </div>
                 <div id="rightLinksLoggedOut">
                     <div id="rightLoggedOutHyperlinks">
@@ -215,7 +217,8 @@
             {% endif %}
         </div>
         {% if user.is_authenticated %}
-            <nav class="mobileQuickNav" aria-label="{% translate "Primary navigation" %}">
+            <nav class="mobileQuickNav"
+                 aria-label="{% translate "Primary navigation" %}">
                 <a class="topBarLink" href="{% url 'newGamesPage' %}">{% translate "New Game" %}</a>
                 <a class="topBarLink"
                    href="{% url 'playerInfo' usernameToProfile=user.username %}">{% translate "My Games" %}</a>
