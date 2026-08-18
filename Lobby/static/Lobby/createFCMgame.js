@@ -285,6 +285,7 @@ function validateOptions(change) {
 			/*document.getElementById('playerNumber').value = 2;
             document.getElementById('playerNumber').disabled = true;
             selectPlayers();*/
+			document.getElementById("blitzWarningSpan").style.display = "block"
 		}
 		// Live
 		else if (document.getElementById("pace").value == 20) {
@@ -300,6 +301,7 @@ function validateOptions(change) {
 			// Unlock from 2p
 			document.getElementById("playerNumber").disabled = false
 			selectPlayers()
+			document.getElementById("blitzWarningSpan").style.display = "none"
 		}
 		// Fast / std / slow
 		else if (document.getElementById("pace").value >= 30) {
@@ -322,6 +324,7 @@ function validateOptions(change) {
 			// Unlock from 2p
 			document.getElementById("playerNumber").disabled = false
 			selectPlayers()
+			document.getElementById("blitzWarningSpan").style.display = "none"
 		}
 	} else if (change === "newMilestones") {
 		if (document.getElementById(change).checked == true) {
