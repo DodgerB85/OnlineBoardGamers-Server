@@ -122,6 +122,15 @@ function copyRoute(entry) {
 	model.checkForResponseAfterDeliverGoodsToCity(store.context.historyObj[0], true)
 }
 
+// A player with no shipping companies has nothing to favour — mirror the
+// solver's own allPlayerShippingCompanies check (slotCompanies + COMPANY_SHIPPING)
+function playerHasShippingCompanies(playerIndex) {
+	return store.players[playerIndex].slots.some((slot) => {
+		if (slot.length === 0) return false
+		return model.slotCompanies(slot, store.activeCompanies)[0].type === rf.COMPANY_SHIPPING
+	})
+}
+
 function toggleCheckbox(playerIndexToggled) {
 	store.clearHistoryHelpers()
 
@@ -232,11 +241,12 @@ function toggleCheckbox(playerIndexToggled) {
 					<template v-if="playerIndex !== controller.currentPlayerIndex()">
 						<label>
 							<span class="mainEntryPlayer turnOrderSpan"
-								:class="'mainEntryPlayer' + personal.getCorrectedColour(player.colour)">
+								:class="['mainEntryPlayer' + personal.getCorrectedColour(player.colour), { noShipping: !playerHasShippingCompanies(playerIndex) }]">
 								{{ player.displayName }}
 							</span>
-							<input @change="toggleCheckbox(playerIndex)" type="checkbox"
-								:checked="!store.context.unfavouredPlayerIndexes[playerIndex]" />
+<input @change="toggleCheckbox(playerIndex)" type="checkbox"
+							:checked="!store.context.unfavouredPlayerIndexes[playerIndex]"
+							:disabled="!playerHasShippingCompanies(playerIndex)" />
 						</label>
 					</template>
 				</template>
@@ -300,6 +310,19 @@ function toggleCheckbox(playerIndexToggled) {
 	padding: 10px;
 	margin: auto;
 	margin-right: 5px;
+}
+
+.noShipping {
+	position: relative;
+}
+
+.noShipping::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-image:
+		linear-gradient(to top right, transparent calc(50% - 2px), #000 calc(50% - 2px), #000 calc(50% + 2px), transparent calc(50% + 2px)),
+		linear-gradient(to top left, transparent calc(50% - 2px), #000 calc(50% - 2px), #000 calc(50% + 2px), transparent calc(50% + 2px));
 }
 
 /*** AUTO SHIP CSS */
