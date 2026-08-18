@@ -377,8 +377,9 @@ export function startPhase() {
 	// Start conflict phases
 	else if (rf.PHASE_CONFLICT_PRAYINGS.includes(phase)) {
 		store.gameflow.newWonderPrayingOrder = Array(store.players.length).fill(-1)
-		// Set the TO's
-		store.gameflow.fullTurnOrder = [...store.gameflow.wonderPrayingOrder].reverse()
+		// Set the TO's - don't carry -1 placeholders from an incomplete praying order forward
+		const validPrayingOrder = store.gameflow.wonderPrayingOrder.filter((idx) => Number.isInteger(idx) && idx >= 0 && idx < store.players.length)
+		store.gameflow.fullTurnOrder = [...validPrayingOrder].reverse()
 		store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
 	}
 }
@@ -470,7 +471,7 @@ export async function endPlayerTurn(overridePlayerName = null, overridePlayerInd
 				}
 				Bot.removeBotPlayers()
 
-				if (store.gameflow.turnOrder.length <= 1 && !store.gameflow.newWonderPrayingOrder.includes(-1)) processOnePlayerLeftDuringConflict()
+				if (store.gameflow.turnOrder.length <= 1) processOnePlayerLeftDuringConflict()
 			}
 			await IO.saveConflictMove(true, overridePlayerName, overridePlayerIndex)
 		}
@@ -546,6 +547,15 @@ export function processOnePlayerLeftDuringConflict() {
 	// You should only be here if there is 0 or 1 person left
 	if (store.gameflow.turnOrder.length > 1) return
 	if (rf.PHASE_CONFLICT_PRAYINGS.includes(store.gameflow.phase)) {
+		// Ensure newWonderPrayingOrder is complete before using it as the praying order
+		// (players can time out or be kicked before praying, leaving -1 slots behind)
+		const existingIndexes = new Set(store.gameflow.newWonderPrayingOrder.filter((idx) => Number.isInteger(idx) && idx >= 0 && idx < store.players.length))
+		for (let i = 0; i < store.players.length; i++) {
+			if (!existingIndexes.has(i)) {
+				const firstEmpty = store.gameflow.newWonderPrayingOrder.indexOf(-1)
+				if (firstEmpty !== -1) store.gameflow.newWonderPrayingOrder[firstEmpty] = i
+			}
+		}
 		// Choose TO in REVERSE praying order
 		store.gameflow.turnOrder = [...store.gameflow.newWonderPrayingOrder]
 		store.gameflow.wonderPrayingOrder = [...store.gameflow.newWonderPrayingOrder]

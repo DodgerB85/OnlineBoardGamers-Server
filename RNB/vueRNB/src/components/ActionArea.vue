@@ -642,6 +642,7 @@ const getGameOverReason = computed(() => {
 					<!--Old temple figures -->
 					<div
 						v-for="(playerIndex, idx) in store.gameflow.wonderPrayingOrder"
+						v-if="playerIndex !== -1 && store.players[playerIndex]"
 						:key="idx"
 						class="prayingDiv"
 						:class="{ wholeTurnOrderFigureDivActive: playerIndex === store.gameflow.turnOrder[0] }"
@@ -693,6 +694,7 @@ const getGameOverReason = computed(() => {
 					<!--Old temple figures -->
 					<div
 						v-for="(playerIndex, idx) in store.gameflow.wonderPrayingOrder"
+						v-if="playerIndex !== -1 && store.players[playerIndex]"
 						:key="idx"
 						class="prayingDiv"
 						:class="{ wholeTurnOrderFigureDivActive: playerIndex === store.gameflow.turnOrder[0] }"

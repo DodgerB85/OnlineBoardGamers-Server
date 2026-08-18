@@ -87,8 +87,17 @@ const getFullTurnOrderArray = computed(() => {
 		if (!store.gameflow.wonderPrayingOrder.includes(-1)) return store.gameflow.wonderPrayingOrder
 		return store.gameflow.turnOrder
 	}
-	return store.gameflow.fullTurnOrder
-
+	// Fill -1 placeholders (leftover from an incomplete praying order) with the missing players,
+	// keeping the existing players in their positions so the table always shows everyone
+	const fto = store.gameflow.fullTurnOrder
+	if (fto.includes(-1)) {
+		const result = [...fto]
+		for (let i = 0; i < store.players.length; i++) {
+			if (!result.includes(i)) result[result.indexOf(-1)] = i
+		}
+		return result
+	}
+	return fto
 })
 
 </script>
