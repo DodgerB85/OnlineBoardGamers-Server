@@ -16,7 +16,14 @@
     max-width: 700px;
     height: auto;
 }
-@media only screen and (max-width: 1475px) {
+@media only screen and (max-width: 1645px) {
+    #logoLoggedOut {
+        max-width: 480px;
+        height: auto;
+        margin-top: 15px;
+    }
+}
+@media only screen and (max-width: 1490px) {
     #logoLoggedOut {
         max-width: 400px;
         height: auto;
@@ -91,7 +98,7 @@ body.nd .mobileQuickNav {
     }
 }
 
-@media only screen and (max-width: 1170px) {
+@media only screen and (max-width: 1410px) {
     #logoLoggedOut {
         display: none;
     }
@@ -296,7 +303,7 @@ body.nd .topBarLink:hover {
     padding: 0px;
     position: absolute;
     left: 10px;
-    top: 56px;
+    top: 50px;
     color: var(--color-brand-blue);
 }
 
@@ -309,6 +316,7 @@ body.nd .topBarLink:hover {
     text-align: center;
     text-decoration: none;
     font-size: 17px;
+    vertical-align: center;
     outline: none;
 }
 
@@ -350,19 +358,22 @@ body.nd.ndAuthed #rightLinksLoggedIn .hamburger {
 
 #loginForm {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 8px;
     padding: 10px;
 }
 
 #loginForm form {
     display: flex;
-    align-items: stretch;
+    align-items: center;
     gap: 8px;
 }
 
 #loginForm .loginInput {
     box-sizing: border-box;
+    padding: 1px 4px;
+    height: 24px;
+    line-height: 1;
 }
 
 /* The "Login" submit in the top bar uses the same nd-button-primary style as
@@ -371,7 +382,17 @@ body.nd.ndAuthed #rightLinksLoggedIn .hamburger {
    but its padding needs a slight nudge so it sits flush with the inputs. */
 #loginForm .loginSubmit {
     margin: 0;
-    align-self: stretch;
+    align-self: center;
+    padding: 0 12px;
+    min-height: 0;
+    height: 24px;
+    line-height: 1;
+}
+
+/* centre the logged-out login row vertically within the taller guest bar */
+body.nd.ndGuest .topBar {
+    display: flex;
+    align-items: center;
 }
 
 #leftLoggedInAsInfo {

@@ -1,0 +1,66 @@
+{% load i18n %}
+<div class="nd-page">
+  {% include "Lobby/_nd_messages.html" %}
+  <div class="nd-page-header">
+    <div>
+      <h1>{{ game_name }} {% translate "Stat Games" %}</h1>
+      <p class="nd-page-subtitle">
+        {% blocktranslate with total=total_games_count %}{{ total }} finished games{% endblocktranslate %}
+      </p>
+    </div>
+    <a class="nd-button nd-button-ghost nd-button-sm" href="{{ stats_url }}">← {% translate "Back to Stats" %}</a>
+  </div>
+
+  <section class="nd-card">
+    <div class="nd-card-header">
+      <h2>{% translate "Finished Games" %}</h2>
+    </div>
+    <div class="nd-game-list">
+      <div class="nd-table-wrap">
+        <table class="nd-table gamesTable">
+          <thead>
+            <tr>
+              <th></th>
+              <th>{% translate "Name" %}</th>
+              <th>{% translate "Players" %}</th>
+              <th>{% translate "Options" %}</th>
+              <th>{% translate "Status" %}</th>
+              <th>{% translate "Last Activity" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for game in finishedGamesList %}
+              {% include "Lobby/gameDisplay/finishedGameRow.html" with game=game %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="nd-card-header">
+      <span class="nd-page-subtitle">{% translate "Page" %} {{ page }} {% translate "of" %} {{ num_pages }}</span>
+      <div>
+        {% if page > 1 %}
+          <button type="button" class="nd-button nd-button-ghost nd-button-sm" onclick="submitForm('1')">« {% translate "First" %}</button>
+          <button type="button" class="nd-button nd-button-ghost nd-button-sm" onclick="submitForm('{{ page|add:'-1' }}')">{% translate "Previous" %}</button>
+        {% endif %}
+        {% if page < num_pages %}
+          <button type="button" class="nd-button nd-button-ghost nd-button-sm" onclick="submitForm('{{ page|add:'1' }}')">{% translate "Next" %}</button>
+          <button type="button" class="nd-button nd-button-ghost nd-button-sm" onclick="submitForm('{{ num_pages }}')">{% translate "Last" %} »</button>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <form id="paginationForm" method="post" action="{{ stat_games_url }}">
+    {% csrf_token %}
+    <input type="hidden" name="game_ids" value="{{ game_ids_json }}">
+    <input type="hidden" id="pageInput" name="page" value="{{ page }}">
+  </form>
+</div>
+<script>
+  function submitForm(page) {
+    document.getElementById('pageInput').value = page;
+    document.getElementById('paginationForm').submit();
+  }
+</script>

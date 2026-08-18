@@ -1,12 +1,19 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
+    {% if not request.use_new_design %}
+        <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
+    {% endif %}
     {% compress js %}
         <script src="{% static 'Lobby/common.js' %}"></script>
     {% endcompress %}
 {% endblock head %}
 {% block body %}
+    {% if request.use_new_design %}
+        {% url 'TGZ:TGZstats' as stats_url %}
+        {% url 'TGZ:TGZstatGames' as stat_games_url %}
+        {% include "Lobby/_nd_stat_games.html" with game_name="The Great Zimbabwe" stats_url=stats_url stat_games_url=stat_games_url %}
+    {% else %}
     <div class="container">
         {% if messages %}
             <div class="messages">
@@ -38,7 +45,7 @@
             <br />
             <div class="pagination">
                 <span class="step-links">
-                    {% if z > 1 %}
+                    {% if page > 1 %}
                         <a href="#" onclick="submitForm('1')">« first</a>
                         <a href="#" onclick="submitForm('{{ page|add:'-1' }}')">previous</a>
                     {% endif %}
@@ -65,4 +72,5 @@
         </div>
         {% include "Lobby/common/homeButton.html" %}
     </div>
+    {% endif %}
 {% endblock body %}

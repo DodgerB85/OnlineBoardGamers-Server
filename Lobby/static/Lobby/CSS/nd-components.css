@@ -1719,12 +1719,12 @@ body.nd .nd-create-page .expertTGZoptions .valueContainer:last-child {
     border-bottom: none;
 }
 body.nd .nd-create-page .expertTGZoptions .valueContainer:has(input:disabled) {
-    background: var(--color-surface-soft);
+    background: #fccdb0;
     border-radius: var(--radius-sm);
 }
 /* Match FCM's disabled expert options. */
 body.nd #expertOptions.expertTGZoptions .valueContainer:has(input[type="checkbox"]:disabled) {
-    background: var(--color-surface-soft);
+    background: #fccdb0;
     border-radius: var(--radius-sm);
     color: var(--color-muted);
     cursor: not-allowed;
@@ -2123,6 +2123,20 @@ body.nd .nd-opts-amber  { background: #d8e3c0; border-left-color: rgba(110,140,6
 body.nd .nd-opts-blue   { background: #cde7e9; border-left-color: rgba(80,140,150,0.7);  }
 body.nd .nd-opts-purple { background: #ffffff; border-left-color: rgba(160,160,160,0.7); }
 body.nd .nd-opts-orange { background: #ffffff; border-left-color: rgba(160,160,160,0.7); }
+
+body.nd .nd-expert-options {
+    background: #fbc19d;
+    border-left: 3px solid #f89c62;
+}
+/* Disabled rows get their own tint, not the default gray surface */
+body.nd .nd-expert-options .nd-check-label:has(input:disabled) {
+    background: #fccdb0;
+}
+/* Disabled text stays opaque in expert card; tinted bg marks unavailability */
+body.nd .nd-expert-options label:has(input:disabled),
+body.nd .nd-expert-options .nd-check-label input:disabled ~ div {
+    opacity: 1;
+}
 
 /* Full-width checkbox list — use instead of nd-form-row when there is no label column */
 body.nd .nd-check-list {
@@ -2616,11 +2630,11 @@ body.nd .nd-col-status a {
 }
 body.nd .nd-col-status a:hover { text-decoration: underline; }
 body.nd .nd-col-status .nd-status-wrap {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
+    /* Names are already joined with a ", " separator in the markup
+       (<a>FcmBot</a>, <a>BotKickStarter</a>, ...), so render them as normal
+       inline flow. Making this a flex container drops the space after the
+       comma and adds a gap on both sides of it. */
+    text-align: center;
 }
 body.nd .nd-col-options {
     display: flex;
