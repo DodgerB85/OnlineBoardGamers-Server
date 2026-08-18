@@ -565,3 +565,17 @@ html {
     body.nd .footer { font-size: 15px; }
     body.nd .footer p { font-size: 15px; }
 }
+
+/* Guest-bar hamburger mode: the lang-select + hamburger cluster is the only
+   thing on the right once the links are hidden. Anchor it to the vertical
+   centre of the 80px guest bar instead of the top, so it doesn't hang at
+   the bottom. Placed last so it wins over the base #rightLinksLoggedOut
+   top/margin rules above. (The element is position: fixed, so 50% would be
+   the viewport — use the bar's fixed height of 80px instead.) */
+@media only screen and (max-width: 1100px) {
+    #rightLinksLoggedOut {
+        top: 40px;
+        transform: translateY(-50%);
+        margin-top: 0;
+    }
+}
