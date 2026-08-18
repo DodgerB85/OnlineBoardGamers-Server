@@ -91,10 +91,10 @@ body.nd .mobileQuickNav {
     }
     #rightLinksLoggedOut .hamburger {
         display: block;
-        margin: 25px;
+        margin: 25px 8px;
     }
     #langSelectLoggedOut {
-        margin-right: 50px;
+        margin-right: 0;
     }
 }
 
@@ -577,5 +577,23 @@ html {
         top: 40px;
         transform: translateY(-50%);
         margin-top: 0;
+    }
+    /* keep the OBG logo visible in hamburger mode: it sits in the space
+       between the login cluster and the right-hand cluster, shrinking
+       with the screen down to a readable minimum. 753px accounts for
+       the login stack (541px) + gaps/padding (28px) + the fixed
+       right-hand cluster incl. its margins (~174px) + scrollbar slack
+       (~20px), so it never runs underneath the language select. */
+    #logoLoggedOut {
+        display: block;
+        width: min(240px, calc(100vw - 753px));
+        min-width: 150px;
+    }
+}
+
+/* once the bar can no longer fit the logo at its minimum width, drop it */
+@media only screen and (max-width: 903px) {
+    #logoLoggedOut {
+        display: none;
     }
 }
