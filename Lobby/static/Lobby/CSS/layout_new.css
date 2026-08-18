@@ -129,7 +129,12 @@ body.nd .mobileQuickNav {
     display: none;
 }
 
-@media only screen and (max-width: 540px) {
+/* Compact the guest-bar login cluster on small screens. Deliberately
+   starts at 620px (not 540px): between ~540px and ~620px the full-size
+   login form reaches far enough right to sit underneath the language
+   select in the column-mode cluster. Switching to the compact layout
+   earlier keeps the two apart. */
+@media only screen and (max-width: 620px) {
     .loginInput {
         width: 70px;
     }
