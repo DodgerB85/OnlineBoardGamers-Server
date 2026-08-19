@@ -7,6 +7,8 @@
 
 export const DELETE_VOTE_TOPIC = "delete_game_votes"
 export const STATS_EXCLUDE_VOTE_TOPIC = "stats_exclude_votes"
+export const KICKOUT_VOTE_TOPIC = "kickout_player_votes"
+export const KICKOUT_SOLO_DELAY_MS = 2 * 24 * 60 * 60 * 1000
 
 /** COLOURS 2E */
 export const BLUE = 0

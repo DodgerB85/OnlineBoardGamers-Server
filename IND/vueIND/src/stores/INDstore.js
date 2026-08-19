@@ -30,6 +30,8 @@ import { usePersonalStore } from "./INDpersonal.js"
 export const useModelStore = defineStore("store", () => {
 	const deleteVotesData = ref({})
 	const statsExcludeVotesData = ref({})
+	const kickoutVotesData = ref({})
+	const kickoutVoteThreshold = ref(1)
 	const preMovesCompressed =  ref("")
 	const cityColourScheme = ref(0)
 	// This var affects the ZOOM level
@@ -419,6 +421,8 @@ export const useModelStore = defineStore("store", () => {
 		stopFlashingGoodsJourney,
 		deleteVotesData,
 		statsExcludeVotesData,
+		kickoutVotesData,
+		kickoutVoteThreshold,
 		preMovesCompressed,
 		historyOnly,
 		spinoffReplayData,
