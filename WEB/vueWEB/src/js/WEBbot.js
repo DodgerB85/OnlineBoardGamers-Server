@@ -17,6 +17,9 @@ export async function actionPlayerKickout() {
 	if (personal.kickoutRequired === 2) {
 		personal.kickoutRequired = 0
 
+		const result = await IO.kickout()
+		if (result && result.voteCast) return
+
 		// Action the kick in game
 		model.addHistory(rf.HIST_KICKOUT, controller.currentPlayerIndex(), 0, [controller.currentPlayerObj().displayName])
 

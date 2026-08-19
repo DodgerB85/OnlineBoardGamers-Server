@@ -274,6 +274,8 @@
   initData.secondsToNextKickout = {{ secondsToNextKickout }};
   {% if kickoutRequired > 0 and not myMove %}
   initData.kickoutRequired = {{kickoutRequired}};
+    initData.kickoutVotesData = {{ kickoutVotesData | safe }};
+    initData.kickoutVoteThreshold = {{ kickoutVoteThreshold }};
   {% endif %}
   initData.notes = '{{ notes | safe }}';
   initData.yourTurnAudioType = {{ yourTurnAudioType }};

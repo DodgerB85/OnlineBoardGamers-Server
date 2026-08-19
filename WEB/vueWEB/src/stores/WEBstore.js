@@ -28,6 +28,8 @@ export const useModelStore = defineStore('store', () => {
   var gameName = 'Game Name'
   const deleteVotesData = ref({})
   const statsExcludeVotesData = ref({})
+  const kickoutVotesData = ref({})
+  const kickoutVoteThreshold = ref(1)
   // This var affects the ZOOM level
   // So everything that will be affected by zooming should be referenced through this
   const refSize = ref(50) // This is the side length of a small square on the grid
@@ -230,5 +232,7 @@ export const useModelStore = defineStore('store', () => {
     computedHistory,
     deleteVotesData,
     statsExcludeVotesData,
+    kickoutVotesData,
+    kickoutVoteThreshold,
   }
 })
