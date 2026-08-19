@@ -141,6 +141,7 @@
                             <input type="checkbox" onchange="validateGameOptions(this.id)" class="myCheckbox" id="limitVehicles" name="limitVehicles" value="2">
                             <div>
                                 <div>{% translate "Limit Vehicles" %}</div>
+                                <div class="nd-opt-help">{% translate "Limits Vehicles. For Intro game, select Only Cars. Game will be excluded from stats. CAUTION: Players may not wish to join this game type" %}</div>
                                 <div style="margin-top:6px;display:flex;flex-direction:column;gap:4px;font-size:13px">
                                     <label style="display:flex;align-items:center;gap:4px"><input type="radio" name="vehicleLimitRadio" id="vehicleLimitRadio1" disabled value="3">{% translate "Only Cars" %}</label>
                                     <label style="display:flex;align-items:center;gap:4px"><input type="radio" name="vehicleLimitRadio" id="vehicleLimitRadio2" disabled value="4">{% translate "Only Trucks" %}</label>
@@ -149,10 +150,9 @@
                                     <label style="display:flex;align-items:center;gap:4px"><input type="radio" name="vehicleLimitRadio" id="vehicleLimitRadio5" disabled value="7">{% translate "Cars + Sports" %}</label>
                                     <label style="display:flex;align-items:center;gap:4px"><input type="radio" name="vehicleLimitRadio" id="vehicleLimitRadio6" disabled value="8">{% translate "Trucks + Sports" %}</label>
                                 </div>
-                                <div class="nd-opt-help">{% translate "Limits Vehicles. For Intro game, select Only Cars. Game will be excluded from stats. CAUTION: Players may not wish to join this game type" %}</div>
                             </div>
                         </label>
-                        <label class="nd-check-label">
+                        <label class="nd-check-label" style="padding-left:24px">
                             <input type="checkbox" class="myCheckbox" id="increaseMainlines" name="increaseMainlines" value="9" disabled>
                             <div>
                                 <div>{% translate "Increase Mainlines" %}</div>
