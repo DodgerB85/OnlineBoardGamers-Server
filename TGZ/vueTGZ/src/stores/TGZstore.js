@@ -5,6 +5,8 @@ import { ref, reactive } from 'vue'
 export const useModelStore = defineStore('store', () => {
   const deleteVotesData = ref({})
   const statsExcludeVotesData = ref({})
+  const kickoutVotesData = ref({})
+  const kickoutVoteThreshold = ref(1)
   //const players = reactive(initialPlayersState)
   const players = reactive([])
 
@@ -260,6 +262,8 @@ function resetTurnVars() {
     statsModeData,
     deleteVotesData,
     statsExcludeVotesData,
+    kickoutVotesData,
+    kickoutVoteThreshold,
     allowMultiple_gods
   }
 })

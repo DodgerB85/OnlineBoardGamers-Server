@@ -557,8 +557,14 @@ export async function kickout() {
 			alert("It appears you have an older version of the game. Please refresh the page")
 			return
 		}
+		if (data.voteCast) {
+			store.kickoutVotesData = data.votesData
+			store.topMenuViews.showLoader = false
+			return data
+		}
 		personal.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
+		return data
 	} catch (error) {
 		console.error("Error kicking:", error)
 		alert("Error Kicking")

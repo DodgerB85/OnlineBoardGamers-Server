@@ -8,7 +8,7 @@ import * as controller from "../js/TGZcontroller"
 import * as Bot from "../js/TGZbot"
 import * as IO from "../js/TGZ_IO"
 
-import { ref, computed, watch } from "vue"
+import { ref, computed, watch, onUnmounted } from "vue"
 
 import { useModelStore } from "../stores/TGZstore.js"
 const store = useModelStore()
@@ -465,6 +465,74 @@ function getFlexiKickoutTImerText() {
 	return hoursToGo + ":" + minsToGo + ":" + secsToGo
 }
 
+function currentKickoutTarget() {
+	return controller.currentPlayerObj().name
+}
+function myKickoutVote() {
+	return store.kickoutVotesData[personal.name]
+}
+function canKickoutNow() {
+	const target = currentKickoutTarget()
+	const myVote = myKickoutVote()
+	if (myVote) {
+		if (myVote[0] === target) {
+			if (new Date().getTime() - myVote[1] > rf.KICKOUT_SOLO_DELAY_MS) return true
+		} else if (new Date().getTime() - myVote[1] > rf.KICKOUT_SOLO_DELAY_MS) {
+			// My 2 day old vote is for someone else, so clear the requirement for the target
+			personal.kickoutRequired = 0
+			return false
+		}
+	}
+	if (store.kickoutVoteThreshold === 1) return true
+	return false
+}
+function kickoutVoteCount() {
+	return Object.values(store.kickoutVotesData).filter((vote) => vote[0] === currentKickoutTarget()).length
+}
+function kickoutVoters() {
+	let names = []
+	for (const voter in store.kickoutVotesData) {
+		const vote = store.kickoutVotesData[voter]
+		if (vote[0] === currentKickoutTarget()) names.push(voter)
+	}
+	return names.join(", ")
+}
+function isLastVoteRequired() {
+	return kickoutVoteCount() + 1 >= store.kickoutVoteThreshold
+}
+const soloKickoutCountdown = ref("")
+function updateSoloKickoutCountdown() {
+	const myVote = myKickoutVote()
+	if (!myVote || myVote[0] !== currentKickoutTarget()) {
+		soloKickoutCountdown.value = ""
+		return
+	}
+	const remainingMs = Math.max(rf.KICKOUT_SOLO_DELAY_MS - (new Date().getTime() - myVote[1]), 0)
+	const totalSeconds = Math.floor(remainingMs / 1000)
+	const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0")
+	const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0")
+	const seconds = String(totalSeconds % 60).padStart(2, "0")
+	soloKickoutCountdown.value = hours + ":" + minutes + ":" + seconds
+	if (remainingMs <= 0) {
+		soloKickoutCountdown.value = ""
+		return
+	}
+}
+watch(
+	() => store.kickoutVotesData[personal.name],
+	() => {
+		updateSoloKickoutCountdown()
+		if (soloKickoutCountdown.value !== "") {
+			if (personal.kickoutCountdownIntervalTimer != undefined) clearInterval(personal.kickoutCountdownIntervalTimer)
+			personal.kickoutCountdownIntervalTimer = setInterval(updateSoloKickoutCountdown, 1000)
+		}
+	},
+	{ immediate: true }
+)
+onUnmounted(() => {
+	if (personal.kickoutCountdownIntervalTimer != undefined) clearInterval(personal.kickoutCountdownIntervalTimer)
+})
+
 function localReplaceExternalTournamentPlayer() {
 	IO.replaceExternalTournamentPlayer()
 	confirmTournamentReplacement.value = false
@@ -601,6 +669,7 @@ function failedToJustPlaceCraftsmanFlag() {
 		</div>
 
 		<div v-else id="kickoutDiv">
+			<template v-if="canKickoutNow()">
 			<br />
 			<template v-if="store.context.action !== rf.ACT_CONFIRM_KICKOUT">
 				Player
@@ -642,6 +711,48 @@ function failedToJustPlaceCraftsmanFlag() {
 				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
 				<span>
 					<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">Permanently Kickout {{ controller.currentPlayerObj().name }}</button>
+				</span>
+			</template>
+			</template>
+			<template v-else>
+				<br />
+				Player
+				<b>{{ controller.currentPlayerObj().name }}</b>
+				has timed out
+				<br />
+				A vote from the other players is needed to kick out
+				<b>{{ controller.currentPlayerObj().name }}</b>
+				<br />
+				<br />
+				Votes: {{ kickoutVoteCount() }}/{{ store.kickoutVoteThreshold }} ({{ kickoutVoters() }})
+				<br />
+				<br />
+				<span v-if="!myKickoutVote()">
+					<template v-if="isLastVoteRequired()">
+						This will permanently remove
+						<b>{{ controller.currentPlayerObj().name }}</b>
+						from the game
+						<br />
+						<b>It cannot be undone</b>
+						<br />
+						<br />
+					</template>
+					<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout">Vote to Kickout {{ controller.currentPlayerObj().name }}</button>
+				</span>
+				<span v-else>
+					You have voted to kick out
+					<b>{{ controller.currentPlayerObj().name }}</b>
+					<br />
+					If the other players do not also vote, you will be able to kick them out directly in
+					{{ soloKickoutCountdown }}
+				</span>
+				<br />
+				<br />
+				<span>
+					<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button>
+				</span>
+				<span>
+					<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
 				</span>
 			</template>
 		</div>
