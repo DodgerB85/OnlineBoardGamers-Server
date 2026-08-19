@@ -77,6 +77,9 @@ export const useModelStore = defineStore("store", () => {
 
 	const chatData = reactive([])
 
+	const kickoutVotesData = ref({})
+	const kickoutVoteThreshold = ref(1)
+
 	const history = reactive([])
 
 	const ongoingVars = reactive({
@@ -411,6 +414,9 @@ export const useModelStore = defineStore("store", () => {
 		replayData,
 		replayStep,
 		chatData,
+
+		kickoutVotesData,
+		kickoutVoteThreshold,
 
 		ongoingVars,
 

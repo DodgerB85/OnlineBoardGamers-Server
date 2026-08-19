@@ -17,14 +17,17 @@ export async function actionPlayerKickout() {
 	if (personal.kickoutRequired === 2) {
 		personal.kickoutRequired = 0
 
+		// Ask the server first: 3p+ games need a majority vote to kick,
+		// so this may only record a vote rather than actually kick.
+		const result = await IO.kickout()
+		if (result && result.voteCast) return
+
 		// Action the kick in game
 		model.addHistory(rf.HIST_KICKOUT, personal.pov, 0, [controller.currentPlayerObj().displayName])
 
 		// Set up end of turn vars
 		personal.removeCurrentFlexTime = true
 		personal.removeCurrentFlexTimeName = controller.currentPlayerObj().name
-
-		await IO.kickout()
 
 		controller.currentPlayerObj().displayName = rf.BOT_NAME
 

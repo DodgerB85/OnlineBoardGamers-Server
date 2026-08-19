@@ -115,6 +115,9 @@ export async function initGame() {
 
 	personal.liveWS = false
 
+	store.kickoutVotesData = window.initData.kickoutVotesData
+	store.kickoutVoteThreshold = window.initData.kickoutVoteThreshold
+
 	// Set up logged in player, but not involved
 	if (window.initData.pov === -9 || window.initData.pov >= 0) {
 		personal.name = window.initData.name

@@ -491,6 +491,8 @@ def _processKFWturn(request):
 
         ################ END REWIND EVERY SAVE #######################
 
+        presenter.clearKickoutVotes()
+
         currentGame.save()
 
         response_data = {
@@ -553,6 +555,8 @@ def _processKFWturn(request):
         if jsonData["phase"] == 12:
             response[-1]["GameDataBoo"] = True  # Corrected line
             response.append({"GameData": currentGame.gameData})
+
+        presenter.clearKickoutVotes()
 
         currentGame.save()
         return JsonResponse(response, safe=False)
@@ -675,6 +679,8 @@ def _processKFWturn(request):
             )
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": "12345"}, safe=False)
+
+        presenter.clearKickoutVotes()
 
         if len(currentGame.rewindData) == 0:
             return JsonResponse(
@@ -808,6 +814,14 @@ def _processKFWturn(request):
             )
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": "12345"}, safe=False)
+
+        # Voting layer: 3p+ games need a majority vote to kick, unless the
+        # requester's own vote for this target is more than 2 days old.
+        # If the vote is only recorded, return straight away without kicking.
+        kickout_vote_result = presenter.processKickoutVote(request.user.username, jsonData["kickedName"])
+        if kickout_vote_result["voteCast"]:
+            currentGame.save()
+            return JsonResponse(kickout_vote_result, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
         presenter.addMissingPlayer(_missingPlayer)
