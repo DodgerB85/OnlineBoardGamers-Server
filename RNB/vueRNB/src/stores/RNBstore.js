@@ -53,6 +53,8 @@ export const useModelStore = defineStore("store", () => {
 	const hexStyle = ref(rf.POINTY)
 	const deleteVotesData = ref({})
 	const statsExcludeVotesData = ref({})
+	const kickoutVotesData = ref({})
+	const kickoutVoteThreshold = ref(1)
 	const mapUpdateTrigger = ref(0)
 
 	// Settings flags
@@ -468,6 +470,8 @@ export const useModelStore = defineStore("store", () => {
 		wonderBricks,
 		deleteVotesData,
 		statsExcludeVotesData,
+		kickoutVotesData,
+		kickoutVoteThreshold,
 		adminCheatMoveData,
 		trainingGameSkipConflictPhase,
 		stackControl,

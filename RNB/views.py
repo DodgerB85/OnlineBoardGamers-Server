@@ -423,8 +423,10 @@ def _processRNBturn(request):
                 doSaveRewind(currentGame, jsonData)
 
             ################ END REWIND EVERY SAVE #######################
-
             # Single save: transactionID + rewindData (and any earlier game-level changes)
+
+            presenter.clearKickoutVotes()
+
             currentGame.save()
 
             # If the client disconnects before completing stack processing,
@@ -697,6 +699,8 @@ def _processRNBturn(request):
 
             ################ END REWIND EVERY SAVE #######################
 
+            presenter.clearKickoutVotes()
+
             currentGame.save()
 
             schedule(
@@ -764,6 +768,8 @@ def _processRNBturn(request):
             doSaveRewind(currentGame, jsonData)
 
         ################ END REWIND EVERY SAVE #######################
+
+        presenter.clearKickoutVotes()
 
         currentGame.save()
 
@@ -944,6 +950,8 @@ def _processRNBturn(request):
 
         ################ END REWIND EVERY SAVE #######################
 
+        presenter.clearKickoutVotes()
+
         currentGame.save()
 
         # time.sleep(10)
@@ -1051,6 +1059,8 @@ def _processRNBturn(request):
 
         # currentGame.actionRewindAlterConsent()
 
+        presenter.clearKickoutVotes()
+
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
@@ -1144,6 +1154,14 @@ def _processRNBturn(request):
             )
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
+
+        # Voting layer: 3p+ games need a majority vote to kick, unless the
+        # requester's own vote for this target is more than 2 days old.
+        # If the vote is only recorded, return straight away without kicking.
+        kickout_vote_result = presenter.processKickoutVote(request.user.username, jsonData["kickedName"])
+        if kickout_vote_result["voteCast"]:
+            currentGame.save()
+            return JsonResponse(kickout_vote_result, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
         presenter.addMissingPlayer(_missingPlayer)
@@ -1300,6 +1318,8 @@ def performSaveGame(request, currentGame, jsonData):
         doSaveRewind(currentGame, jsonData)
 
     ################ END REWIND EVERY SAVE #######################
+
+    presenter.clearKickoutVotes()
 
     currentGame.save()
 

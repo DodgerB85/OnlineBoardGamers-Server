@@ -55,10 +55,13 @@ export async function actionPlayerKickout() {
 		personal.kickoutRequired = 0
 		const playerObj = controller.timedOutPlayerObj()
 
+		// Ask the server first: 3p+ games need a majority vote to kick,
+		// so this may only record a vote rather than actually kick.
+		const result = await IO.kickout(timedOutPlayerIndex)
+		if (result && result.voteCast) return
+
 		// Action the kick in game
 		model.addHistory(rf.HIST_KICKOUT, personal.pov, 0, [timedOutPlayerIndex])
-
-		await IO.kickout(timedOutPlayerIndex)
 
 		playerObj.displayName = rf.BOT_NAME
 
