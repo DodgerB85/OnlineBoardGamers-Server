@@ -485,7 +485,7 @@ var IO = {
 				}
 				hideLoader()
 				if (result.voteCast) {
-					global.kickoutVotesData = result.votesData
+					global.kickoutVotesData = JSON.parse(result.votesData)
 					global.kickoutVoteThreshold = result.threshold
 					return result
 				}

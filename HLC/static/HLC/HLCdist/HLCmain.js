@@ -12953,7 +12953,7 @@ var IO = {
 				}
 				hideLoader()
 				if (result.voteCast) {
-					global.kickoutVotesData = result.votesData
+					global.kickoutVotesData = JSON.parse(result.votesData)
 					global.kickoutVoteThreshold = result.threshold
 					return result
 				}
@@ -14105,27 +14105,35 @@ function buildKickoutActions() {
 		} else if (global.kickoutRequired === 2) {
 			$("#actions").html(interpolate(gettext("Player <b>%(playerToKickName)s</b> has timed out<BR/>A vote from the other players is needed to kick out <b>%(playerToKickName)s</b><BR/>"), { playerToKickName: playerToKickName }, true))
 			$("#actions").append("<br/><br/>")
-			$("#actions").append(gettext("Votes: ") + getKickoutVoteCount() + "/" + global.kickoutVoteThreshold + " (" + getKickoutVoters() + ")")
-			$("#actions").append("<br/><br/>")
+			var kickoutVoters = getKickoutVoters()
+			if (kickoutVoters === "") kickoutVoters = gettext("None")
+			$("#actions").append(gettext("Votes: ") + getKickoutVoteCount() + "/" + global.kickoutVoteThreshold + " (" + kickoutVoters + ")")
+			$("#actions").append("<br/>")
 			if (!getMyKickoutVote()) {
 				if (isLastKickoutVoteRequired()) {
 					$("#actions").append(interpolate(gettext("This will permanently remove <b>%(playerToKickName)s</b> from the game<br/><b>It cannot be undone</b><br/><br/>"), { playerToKickName: playerToKickName }, true))
 				}
 				var voteButtonSpan = $("<span><button class='actionsLineButton' id='voteKickoutButton'>" + gettext("Vote to Kickout ") + playerToKickName + "</button></span>")
 				$("#actions").append(voteButtonSpan)
+				$("#actions").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")
 				$("#voteKickoutButton").on("click", { playerToKickName: playerToKickName }, Bot.actionPlayerKickout)
+				var cancelButtonSpan = $("<span><button class='actionsLineButton' id='cancelKickoutButton'>" + gettext("Not now - allow more time") + "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>")
+				$("#actions").append(cancelButtonSpan)
+				$("#cancelKickoutButton").on("click", function () {
+					$("#actions").hide()
+				})
 			} else {
 				$("#actions").append(interpolate(gettext("You have voted to kick out <b>%(playerToKickName)s</b><br/>If the other players do not also vote, you will be able to kick them out directly in <span id='soloKickoutCountdownSpan'></span>"), { playerToKickName: playerToKickName }, true))
 				if (global.kickoutSoloCountdownIntervalTimer != undefined) clearInterval(global.kickoutSoloCountdownIntervalTimer)
 				global.kickoutSoloCountdownIntervalTimer = setInterval(updateSoloKickoutCountdown, 1000)
 				updateSoloKickoutCountdown()
+				$("#actions").append("<br/><br/>")
+				var cancelButtonSpan = $("<BR/><span><button class='actionsLineButton' id='cancelKickoutButton'>" + gettext("Not now - allow more time") + "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>")
+				$("#actions").append(cancelButtonSpan)
+				$("#cancelKickoutButton").on("click", function () {
+					$("#actions").hide()
+				})
 			}
-			$("#actions").append("<br/><br/>")
-			var cancelButtonSpan = $("<BR/><span><button class='actionsLineButton' id='cancelKickoutButton'>" + gettext("Not now - allow more time") + "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>")
-			$("#actions").append(cancelButtonSpan)
-			$("#cancelKickoutButton").on("click", function () {
-				$("#actions").hide()
-			})
 		}
 	}
 	$("#actions").show()
