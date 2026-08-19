@@ -1,1 +1,218 @@
-(function(_0x269c6a,_0x56f4e1){var _0x437420=a0_0x225e,_0x54950c=_0x269c6a();while(!![]){try{var _0x51e5ad=parseInt(_0x437420(0x1e5))/0x1*(parseInt(_0x437420(0x1e4))/0x2)+-parseInt(_0x437420(0x1f6))/0x3*(-parseInt(_0x437420(0x1f0))/0x4)+parseInt(_0x437420(0x1fe))/0x5+-parseInt(_0x437420(0x1e9))/0x6*(parseInt(_0x437420(0x1f2))/0x7)+parseInt(_0x437420(0x1fa))/0x8*(parseInt(_0x437420(0x201))/0x9)+parseInt(_0x437420(0x1e6))/0xa*(parseInt(_0x437420(0x1fb))/0xb)+parseInt(_0x437420(0x1eb))/0xc*(-parseInt(_0x437420(0x1f9))/0xd);if(_0x51e5ad===_0x56f4e1)break;else _0x54950c['push'](_0x54950c['shift']());}catch(_0x1470da){_0x54950c['push'](_0x54950c['shift']());}}}(a0_0x1cd2,0xa4ea7));function a0_0x225e(_0x2e8471,_0x59b5ce){var _0x1cd2d7=a0_0x1cd2();return a0_0x225e=function(_0x225e2d,_0x546f11){_0x225e2d=_0x225e2d-0x1e4;var _0x4f68b8=_0x1cd2d7[_0x225e2d];return _0x4f68b8;},a0_0x225e(_0x2e8471,_0x59b5ce);}function a0_0x1cd2(){var _0x34e1a1=['gameIncomeSummary','336JIMNXx','SALES_SUMMARY','players','unshift','gameMoneySummary','376aGUBup','data','49rfelmq','Turn','colour','parse','3243MAUugh','#000000','Income\x20On\x20Each\x20Turn','1109043kTZVPc','944mOgCuJ','2913493bKavYj','Total\x20Money','bold','4429955NQNMPV','param','datasets','74727NUWULK','name','push','logs','line','661162MbsdKj','4jCEndk','10BeAOoD','length','Turn\x20Income','420294WXXBcE'];a0_0x1cd2=function(){return _0x34e1a1;};return a0_0x1cd2();}function initHLCgameSummary(){var _0x1f1f71=a0_0x225e,_0x5b542d=[],_0x173d1a=0x0,_0x4eaf91=0x0;for(_0x173d1a=0x0;_0x173d1a<M[_0x1f1f71(0x204)]['length'];_0x173d1a++){if(M['logs'][_0x173d1a]['action']===Log[_0x1f1f71(0x1ec)])_0x5b542d[_0x1f1f71(0x203)](M[_0x1f1f71(0x204)][_0x173d1a][_0x1f1f71(0x1ff)]);}var _0x54aef1=[];for(_0x173d1a=0x0;_0x173d1a<M[_0x1f1f71(0x1ed)][_0x1f1f71(0x1e7)];_0x173d1a++)_0x54aef1[_0x1f1f71(0x203)]([]);for(_0x173d1a=0x0;_0x173d1a<_0x5b542d[_0x1f1f71(0x1e7)];_0x173d1a++){for(_0x4eaf91=0x0;_0x4eaf91<_0x5b542d[_0x173d1a][_0x1f1f71(0x1e7)];_0x4eaf91++){_0x54aef1[_0x4eaf91][_0x1f1f71(0x203)](_0x5b542d[_0x173d1a][_0x4eaf91][0x3]);}}for(_0x173d1a=0x0;_0x173d1a<_0x54aef1[_0x1f1f71(0x1e7)];_0x173d1a++)_0x54aef1[_0x173d1a][_0x1f1f71(0x1ee)](0x0);var _0x3fc838=JSON[_0x1f1f71(0x1f5)](JSON['stringify'](_0x54aef1));for(_0x173d1a=0x0;_0x173d1a<_0x3fc838[_0x1f1f71(0x1e7)];_0x173d1a++){for(_0x4eaf91=0x0;_0x4eaf91<_0x3fc838[_0x173d1a]['length']-0x1;_0x4eaf91++){_0x3fc838[_0x173d1a][_0x4eaf91+0x1]=_0x3fc838[_0x173d1a][_0x4eaf91]+_0x54aef1[_0x173d1a][_0x4eaf91+0x1];}}var _0x14aba4=gettext(_0x1f1f71(0x1f3)),_0xb7a4fd=gettext(_0x1f1f71(0x1e8)),_0xc49101=gettext(_0x1f1f71(0x1fc)),_0x31ae12=gettext('Total\x20Money\x20VS\x20Turn'),_0x18f21a=gettext(_0x1f1f71(0x1f8)),_0xa8b130=[];for(_0x173d1a=0x0;_0x173d1a<_0x3fc838[0x0][_0x1f1f71(0x1e7)];_0x173d1a++)_0xa8b130[_0x1f1f71(0x203)](_0x173d1a);var _0x171eb0={'type':_0x1f1f71(0x205),'data':{'labels':_0xa8b130,'datasets':[]},'options':{'scales':{'x':{'title':{'display':!![],'text':_0x14aba4,'font':{'size':0x14,'weight':'bold','lineHeight':1.2}}},'y':{'beginAtZero':!![],'title':{'display':!![],'text':_0xc49101,'font':{'size':0x14,'weight':_0x1f1f71(0x1fd),'lineHeight':1.2}}}},'plugins':{'legend':{'labels':{'boxHeight':0x2}},'subtitle':{'display':!![],'text':_0x31ae12,'color':'#000000','font':{'size':0x19}}}}};for(_0x173d1a=0x0;_0x173d1a<_0x3fc838[_0x1f1f71(0x1e7)];_0x173d1a++){var _0x4e6123=getCorrectedColour(M[_0x1f1f71(0x1ed)][_0x173d1a]['colour']),_0x2d6246=getPlayerHexColourFromNumber(_0x4e6123);_0x171eb0[_0x1f1f71(0x1f1)][_0x1f1f71(0x200)][_0x1f1f71(0x203)]({'data':[..._0x3fc838[_0x173d1a]],'borderColor':_0x2d6246,'fill':![],'lineTension':0x0,'label':M[_0x1f1f71(0x1ed)][_0x173d1a][_0x1f1f71(0x202)]});}new Chart(_0x1f1f71(0x1ef),_0x171eb0);var _0x5b883a={'type':_0x1f1f71(0x205),'data':{'labels':_0xa8b130,'datasets':[]},'options':{'scales':{'x':{'title':{'display':!![],'text':_0x14aba4,'font':{'size':0x14,'weight':_0x1f1f71(0x1fd),'lineHeight':1.2}}},'y':{'beginAtZero':!![],'title':{'display':!![],'text':_0xb7a4fd,'font':{'size':0x14,'weight':_0x1f1f71(0x1fd),'lineHeight':1.2}}}},'plugins':{'legend':{'labels':{'boxHeight':0x2}},'subtitle':{'display':!![],'text':_0x18f21a,'color':_0x1f1f71(0x1f7),'font':{'size':0x19}}}}};for(_0x173d1a=0x0;_0x173d1a<_0x54aef1[_0x1f1f71(0x1e7)];_0x173d1a++){var _0x4e6123=getCorrectedColour(M[_0x1f1f71(0x1ed)][_0x173d1a][_0x1f1f71(0x1f4)]),_0x2d6246=getPlayerHexColourFromNumber(_0x4e6123);_0x5b883a[_0x1f1f71(0x1f1)]['datasets'][_0x1f1f71(0x203)]({'data':[..._0x54aef1[_0x173d1a]],'borderColor':_0x2d6246,'fill':![],'lineTension':0x0,'label':M[_0x1f1f71(0x1ed)][_0x173d1a][_0x1f1f71(0x202)]});}new Chart(_0x1f1f71(0x1ea),_0x5b883a);}
+function initHLCgameSummary() {
+    var allSellingSummaries = [];
+    var i = 0;
+    var j = 0;
+
+    for (i = 0; i < M.logs.length; i++) {
+        if (M.logs[i].action === Log.SALES_SUMMARY) allSellingSummaries.push(M.logs[i].param);
+    }
+
+    // Now collect the number of cars / sports / trucks sold by each player, and a grand total
+
+    var totalIncomePerTurn = [];
+    for (i = 0; i < M.players.length; i++) totalIncomePerTurn.push([]);
+
+    for (i = 0; i < allSellingSummaries.length; i++) {
+        for (j = 0; j < allSellingSummaries[i].length; j++) {
+            totalIncomePerTurn[j].push(allSellingSummaries[i][j][3]);
+        }
+    }
+    for (i = 0; i < totalIncomePerTurn.length; i++) totalIncomePerTurn[i].unshift(0);
+
+
+    // Now sum to make it total money
+    var totalMoneyPerTurn = JSON.parse(JSON.stringify(totalIncomePerTurn));
+
+    //alert(JSON.stringify(totalMoneyPerTurn, null, 4));
+
+    for (i = 0; i < totalMoneyPerTurn.length; i++) {
+        for (j = 0; j < totalMoneyPerTurn[i].length-1; j++) {
+            totalMoneyPerTurn[i][j+1] = totalMoneyPerTurn[i][j] + totalIncomePerTurn[i][j + 1];
+        }
+    }
+
+    //alert(JSON.stringify(totalMoneyPerTurn, null, 4));
+
+    //alert(JSON.stringify(totalMoneyPerTurn, null, 4));
+    var text_turn = gettext("Turn");
+    var text_turnIncome = gettext("Turn Income");
+    var text_TotalMoney = gettext("Total Money");
+
+    var text_TotalMoneyTitle = gettext("Total Money VS Turn");
+    var text_TotalIncomeTitle = gettext("Income On Each Turn");
+    
+
+    var xValues = [];
+    for (i = 0; i < totalMoneyPerTurn[0].length; i++) xValues.push(i);
+
+    var lineChartData = {
+        type: "line",
+        data: {
+            labels: xValues,
+            datasets: []
+        },
+        options: {
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: text_turn,
+                        font: {
+                            // family: 'Comic Sans MS',
+                            size: 20,
+                            weight: 'bold',
+                            lineHeight: 1.2,
+                        },
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: text_TotalMoney,
+                        font: {
+                            //family: 'Comic Sans MS',
+                            size: 20,
+                            weight: 'bold',
+                            lineHeight: 1.2,
+                        },
+                    }
+                },
+
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        //usePointStyle: true,
+                        boxHeight: 2,
+                    },
+                },
+                subtitle: {
+                    display: true,
+                    text: text_TotalMoneyTitle,
+                    color: '#000000',
+                    font: {
+                        size: 25
+                    }
+                }
+            }
+
+        }
+
+        /* ADD DATA ABOVE LINE POINT
+        plugins: [{
+            afterDatasetsDraw: function(chart) {
+               var ctx = chart.ctx;
+               chart.data.datasets.forEach(function(dataset, index) {
+                  var datasetMeta = chart.getDatasetMeta(index);
+                  if (datasetMeta.hidden) return;
+                  datasetMeta.data.forEach(function(point, index) {
+                     var value = dataset.data[index],
+                         x = point.getCenterPoint().x,
+                         y = point.getCenterPoint().y,
+                         radius = point._model.radius,
+                         fontSize = 14,
+                         fontFamily = 'Verdana',
+                         fontColor = 'black',
+                         fontStyle = 'normal';
+                     ctx.save();
+                     ctx.textBaseline = 'middle';
+                     ctx.textAlign = 'center';
+                     ctx.font = fontStyle + ' ' + fontSize + 'px' + ' ' + fontFamily;
+                     ctx.fillStyle = fontColor;
+                     ctx.fillText(value, x, y - radius - fontSize);
+                     ctx.restore();
+                  });
+               });
+            }
+         }]
+         */
+
+    };
+
+    for (i = 0; i < totalMoneyPerTurn.length; i++) {
+        var lineColourNum = getCorrectedColour(M.players[i].colour);
+        var lineColour = getPlayerHexColourFromNumber(lineColourNum);
+
+        lineChartData.data.datasets.push({
+            data: [...totalMoneyPerTurn[i]],
+            borderColor: lineColour,
+            fill: false, // fillsunderneath
+            lineTension: 0,
+            label: M.players[i].name,
+        });
+    }
+
+    new Chart("gameMoneySummary", lineChartData);
+
+    var gameIncomeSummaryData = {
+        type: "line",
+        data: {
+            labels: xValues,
+            datasets: []
+        },
+        options: {
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: text_turn,
+                        font: {
+                            // family: 'Comic Sans MS',
+                            size: 20,
+                            weight: 'bold',
+                            lineHeight: 1.2,
+                        },
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: text_turnIncome,
+                        font: {
+                            //family: 'Comic Sans MS',
+                            size: 20,
+                            weight: 'bold',
+                            lineHeight: 1.2,
+                        },
+                    }
+                },
+
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        //usePointStyle: true,
+                        boxHeight: 2,
+                    },
+                },
+                subtitle: {
+                    display: true,
+                    text: text_TotalIncomeTitle,
+                    color: '#000000',
+                    font: {
+                        size: 25
+                    }
+                }
+            }
+        }
+    };
+
+    for (i = 0; i < totalIncomePerTurn.length; i++) {
+        var lineColourNum = getCorrectedColour(M.players[i].colour);
+        var lineColour = getPlayerHexColourFromNumber(lineColourNum);
+
+        gameIncomeSummaryData.data.datasets.push({
+            data: [...totalIncomePerTurn[i]],
+            borderColor: lineColour,
+            fill: false, // fillsunderneath
+            lineTension: 0,
+            label: M.players[i].name,
+        });
+    }
+
+
+    new Chart("gameIncomeSummary", gameIncomeSummaryData);
+
+} // end init
