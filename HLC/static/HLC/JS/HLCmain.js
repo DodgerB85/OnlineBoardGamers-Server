@@ -3,6 +3,176 @@ var imagePreURL = "/static/HLC/images/"
 /* exported soundPreURL */
 var soundPreURL = "/static/HLC/Sound/"
 
+function getMyKickoutVote() {
+	if (global.kickoutVotesData == undefined) return undefined
+	return global.kickoutVotesData[global.name]
+}
+
+function hasSoloKickoutRight(targetName) {
+	var myVote = getMyKickoutVote()
+	if (!myVote || myVote[0] !== targetName) return false
+	return new Date().getTime() - myVote[1] > KICKOUT_SOLO_DELAY_MS
+}
+
+function canKickoutNow() {
+	var target = global.playerToKickName
+	var myVote = getMyKickoutVote()
+	if (myVote) {
+		if (myVote[0] === target) {
+			if (new Date().getTime() - myVote[1] > KICKOUT_SOLO_DELAY_MS) return true
+		} else if (new Date().getTime() - myVote[1] > KICKOUT_SOLO_DELAY_MS) {
+			// My 2 day old vote is for someone else, so clear the requirement for the target
+			global.kickoutRequired = 0
+			return false
+		}
+	}
+	if (global.kickoutVoteThreshold === 1) return true
+	return false
+}
+
+function getKickoutVoteCount() {
+	var count = 0
+	for (var voter in global.kickoutVotesData) {
+		var vote = global.kickoutVotesData[voter]
+		if (vote[0] === global.playerToKickName) count++
+	}
+	return count
+}
+
+function getKickoutVoters() {
+	var names = []
+	for (var voter in global.kickoutVotesData) {
+		var vote = global.kickoutVotesData[voter]
+		if (vote[0] === global.playerToKickName) names.push(voter)
+	}
+	return names.join(", ")
+}
+
+function isLastKickoutVoteRequired() {
+	return getKickoutVoteCount() + 1 >= global.kickoutVoteThreshold
+}
+
+function updateSoloKickoutCountdown() {
+	if ($("#soloKickoutCountdownSpan").length === 0) return
+	var myVote = getMyKickoutVote()
+	if (!myVote || myVote[0] !== global.playerToKickName) {
+		$("#soloKickoutCountdownSpan").html("")
+		return
+	}
+	var remainingMs = Math.max(KICKOUT_SOLO_DELAY_MS - (new Date().getTime() - myVote[1]), 0)
+	if (remainingMs <= 0) {
+		$("#soloKickoutCountdownSpan").html("")
+		if (global.kickoutSoloCountdownIntervalTimer != undefined) clearInterval(global.kickoutSoloCountdownIntervalTimer)
+		// Solo kickout right is now available, so rebuild the actions
+		buildKickoutActions()
+		return
+	}
+	var totalSeconds = Math.floor(remainingMs / 1000)
+	var hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0")
+	var minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0")
+	var seconds = String(totalSeconds % 60).padStart(2, "0")
+	$("#soloKickoutCountdownSpan").html(hours + ":" + minutes + ":" + seconds)
+}
+
+function buildKickoutActions() {
+	var playerToKickName = global.playerToKickName
+	$("#actions").empty()
+	if (global.kickoutRequired === 1) {
+		$("#actions").html(interpolate(gettext("Player <b>%(playerToKickName)s</b> has used all the standard kickout time."), { playerToKickName: playerToKickName }, true))
+		$("#actions").append("<br/><br/>")
+		$("#actions").append(gettext("Remaining Flex-Time:"))
+		$("#actions").append(" ")
+		$("#actions").append('<span id="flexiKickoutTimerSpan"></span><br/><br/>')
+		$("#actions").append(gettext('For more information see <b><a href="/help/" target="_blank">Help</a></b>'))
+
+		// Calculate remaining flexi-time
+		let KickoutFlexiDataArray = global.KickoutFlexiDataArray
+		let secondsIn24Hours = 24 * 60 * 60
+		let playerSeconds = 0
+
+		// Iterate over the KickoutFlexiDataArray to find the player's entry
+		for (let i = 0; i < KickoutFlexiDataArray.length; i++) {
+			let entry = KickoutFlexiDataArray[i]
+
+			// Check if the entry is a length-2 array and the first element matches the playerName
+			if (Array.isArray(entry) && entry.length === 2 && entry[0] === playerToKickName) {
+				playerSeconds = entry[1]
+				break
+			}
+		}
+
+		let remainingFlexSecondsBeforeThisMove = secondsIn24Hours - playerSeconds
+		global.remainingFlexiSeconds = remainingFlexSecondsBeforeThisMove + global.secondsToNextKickout
+
+		if (global.kickoutFlexiCountdownIntervalTimer != undefined) clearInterval(global.kickoutFlexiCountdownIntervalTimer)
+		global.kickoutFlexiCountdownIntervalTimer = setInterval(V.kickoutFlexiTimeFunction, 1000)
+
+		if (global.remainingFlexiSeconds < 0) global.remainingFlexiSeconds = 0
+		let hoursToGo = String(Math.floor(global.remainingFlexiSeconds / 60 / 60))
+		let minsToGo = String(Math.floor((global.remainingFlexiSeconds % 3600) / 60)).padStart(2, "0")
+		let secsToGo = String(Math.floor(global.remainingFlexiSeconds % 60)).padStart(2, "0")
+
+		$("#flexiKickoutTimerSpan").html(" " + hoursToGo + ":" + minsToGo + ":" + secsToGo)
+	} else if (global.kickoutRequired === 2) {
+		if (canKickoutNow()) {
+			if (global.kickoutSoloCountdownIntervalTimer != undefined) clearInterval(global.kickoutSoloCountdownIntervalTimer)
+			$("#actions").html(interpolate(gettext("Player <b>%(playerToKickName)s</b> has timed out<BR/>To kick out <B>%(playerToKickName)s</b> press Confirm Kickout<BR/>The game will proceed to the next player/phase/turn<BR/><BR/>Otherwise you can allow <b>%(playerToKickName)s</b> more time - reload the page to initiate kickout again<BR/>"), { playerToKickName: playerToKickName }, true))
+
+			var cancelButtonSpan = $("<BR/><span><button class='actionsLineButton' id='cancelKickoutButton'>" + gettext("Not now - allow more time") + "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>")
+			var ConfirmButtonSpan = $("<span><button class='actionsLineButton' id='confirmKickoutButton'>" + gettext("Confirm Kickout") + "</button></span>")
+
+			$("#actions").append(cancelButtonSpan)
+			$("#actions").append(ConfirmButtonSpan)
+			$("#cancelKickoutButton").on("click", function () {
+				$("#actions").hide()
+			})
+
+			//ConfirmButtonSpan.on("click", { playerToKickName: playerToKickName }, Bot.actionPlayerKickout)
+			ConfirmButtonSpan.on("click", function () {
+				$("#actions").empty()
+				$("#actions").html(interpolate(gettext("This will permanently remove <b>%(playerToKickName)s</b> from the game<br/><b>It cannot be undone</b><br/><br/>Try checking the chat in case they have given a reason for any temporary absence<br/>Please consider giving them a short grace period, in case they are just delayed<br/>"), { playerToKickName: playerToKickName }, true))
+
+				var cancelButtonSpan = $("<BR/><span><button class='actionsLineButton' id='cancelKickoutButton'>" + gettext("Not now - allow more time") + "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>")
+				var ConfirmButtonSpan = $("<span><button class='actionsLineButton' id='confirmKickoutButton'>" + gettext("Confirm Kickout") + "</button></span>")
+
+				$("#actions").append(cancelButtonSpan)
+				$("#actions").append(ConfirmButtonSpan)
+				$("#cancelKickoutButton").on("click", function () {
+					$("#actions").hide()
+				})
+
+				ConfirmButtonSpan.on("click", { playerToKickName: global.playerToKickName }, Bot.actionPlayerKickout)
+			})
+		} else if (global.kickoutRequired === 2) {
+			$("#actions").html(interpolate(gettext("Player <b>%(playerToKickName)s</b> has timed out<BR/>A vote from the other players is needed to kick out <b>%(playerToKickName)s</b><BR/>"), { playerToKickName: playerToKickName }, true))
+			$("#actions").append("<br/><br/>")
+			$("#actions").append(gettext("Votes: ") + getKickoutVoteCount() + "/" + global.kickoutVoteThreshold + " (" + getKickoutVoters() + ")")
+			$("#actions").append("<br/><br/>")
+			if (!getMyKickoutVote()) {
+				if (isLastKickoutVoteRequired()) {
+					$("#actions").append(interpolate(gettext("This will permanently remove <b>%(playerToKickName)s</b> from the game<br/><b>It cannot be undone</b><br/><br/>"), { playerToKickName: playerToKickName }, true))
+				}
+				var voteButtonSpan = $("<span><button class='actionsLineButton' id='voteKickoutButton'>" + gettext("Vote to Kickout ") + playerToKickName + "</button></span>")
+				$("#actions").append(voteButtonSpan)
+				$("#voteKickoutButton").on("click", { playerToKickName: playerToKickName }, Bot.actionPlayerKickout)
+			} else {
+				$("#actions").append(interpolate(gettext("You have voted to kick out <b>%(playerToKickName)s</b><br/>If the other players do not also vote, you will be able to kick them out directly in <span id='soloKickoutCountdownSpan'></span>"), { playerToKickName: playerToKickName }, true))
+				if (global.kickoutSoloCountdownIntervalTimer != undefined) clearInterval(global.kickoutSoloCountdownIntervalTimer)
+				global.kickoutSoloCountdownIntervalTimer = setInterval(updateSoloKickoutCountdown, 1000)
+				updateSoloKickoutCountdown()
+			}
+			$("#actions").append("<br/><br/>")
+			var cancelButtonSpan = $("<BR/><span><button class='actionsLineButton' id='cancelKickoutButton'>" + gettext("Not now - allow more time") + "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>")
+			$("#actions").append(cancelButtonSpan)
+			$("#cancelKickoutButton").on("click", function () {
+				$("#actions").hide()
+			})
+		}
+	}
+	$("#actions").show()
+	V.renderKickoutCountdown()
+}
+
 function init() {
 	//var M;
 	// global.debug = true;
@@ -217,74 +387,7 @@ function init() {
 		var playerToKickName = currentPlayersArray[0]
 		global.playerToKickName = playerToKickName
 
-		$("#actions").empty()
-		if (global.kickoutRequired === 1) {
-			$("#actions").html(interpolate(gettext("Player <b>%(playerToKickName)s</b> has used all the standard kickout time."), { playerToKickName: playerToKickName }, true))
-			$("#actions").append("<br/><br/>")
-			$("#actions").append(gettext("Remaining Flex-Time:"))
-			$("#actions").append(" ")
-			$("#actions").append('<span id="flexiKickoutTimerSpan"></span><br/><br/>')
-			$("#actions").append(gettext('For more information see <b><a href="/help/" target="_blank">Help</a></b>'))
-
-			// Calculate remaining flexi-time
-			let KickoutFlexiDataArray = global.KickoutFlexiDataArray
-			let secondsIn24Hours = 24 * 60 * 60
-			let playerSeconds = 0
-
-			// Iterate over the KickoutFlexiDataArray to find the player's entry
-			for (let i = 0; i < KickoutFlexiDataArray.length; i++) {
-				let entry = KickoutFlexiDataArray[i]
-
-				// Check if the entry is a length-2 array and the first element matches the playerName
-				if (Array.isArray(entry) && entry.length === 2 && entry[0] === playerToKickName) {
-					playerSeconds = entry[1]
-					break
-				}
-			}
-
-			let remainingFlexSecondsBeforeThisMove = secondsIn24Hours - playerSeconds
-			global.remainingFlexiSeconds = remainingFlexSecondsBeforeThisMove + global.secondsToNextKickout
-
-			if (global.kickoutFlexiCountdownIntervalTimer != undefined) clearInterval(global.kickoutFlexiCountdownIntervalTimer)
-			global.kickoutFlexiCountdownIntervalTimer = setInterval(V.kickoutFlexiTimeFunction, 1000)
-
-			if (global.remainingFlexiSeconds < 0) global.remainingFlexiSeconds = 0
-			let hoursToGo = String(Math.floor(global.remainingFlexiSeconds / 60 / 60))
-			let minsToGo = String(Math.floor((global.remainingFlexiSeconds % 3600) / 60)).padStart(2, "0")
-			let secsToGo = String(Math.floor(global.remainingFlexiSeconds % 60)).padStart(2, "0")
-
-			$("#flexiKickoutTimerSpan").html(" " + hoursToGo + ":" + minsToGo + ":" + secsToGo)
-		} else if (global.kickoutRequired === 2) {
-			$("#actions").html(interpolate(gettext("Player <b>%(playerToKickName)s</b> has timed out<BR/>To kick out <B>%(playerToKickName)s</b> press Confirm Kickout<BR/>The game will proceed to the next player/phase/turn<BR/><BR/>Otherwise you can allow <b>%(playerToKickName)s</b> more time - reload the page to initiate kickout again<BR/>"), { playerToKickName: playerToKickName }, true))
-
-			var cancelButtonSpan = $("<BR/><span><button class='actionsLineButton' id='cancelKickoutButton'>" + gettext("Not now - allow more time") + "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>")
-			var ConfirmButtonSpan = $("<span><button class='actionsLineButton' id='confirmKickoutButton'>" + gettext("Confirm Kickout") + "</button></span>")
-
-			$("#actions").append(cancelButtonSpan)
-			$("#actions").append(ConfirmButtonSpan)
-			$("#cancelKickoutButton").on("click", function () {
-				$("#actions").hide()
-			})
-
-			//ConfirmButtonSpan.on("click", { playerToKickName: playerToKickName }, Bot.actionPlayerKickout)
-			ConfirmButtonSpan.on("click", function () {
-				$("#actions").empty()
-				$("#actions").html(interpolate(gettext("This will permanently remove <b>%(playerToKickName)s</b> from the game<br/><b>It cannot be undone</b><br/><br/>Try checking the chat in case they have given a reason for any temporary absence<br/>Please consider giving them a short grace period, in case they are just delayed<br/>"), { playerToKickName: playerToKickName }, true))
-
-				var cancelButtonSpan = $("<BR/><span><button class='actionsLineButton' id='cancelKickoutButton'>" + gettext("Not now - allow more time") + "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>")
-				var ConfirmButtonSpan = $("<span><button class='actionsLineButton' id='confirmKickoutButton'>" + gettext("Confirm Kickout") + "</button></span>")
-
-				$("#actions").append(cancelButtonSpan)
-				$("#actions").append(ConfirmButtonSpan)
-				$("#cancelKickoutButton").on("click", function () {
-					$("#actions").hide()
-				})
-
-				ConfirmButtonSpan.on("click", { playerToKickName: global.playerToKickName }, Bot.actionPlayerKickout)
-			})
-		}
-		$("#actions").show()
-		V.renderKickoutCountdown()
+		buildKickoutActions()
 	}
 
 	$("#loggedInDiv").click(function () {

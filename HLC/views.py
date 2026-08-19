@@ -491,6 +491,8 @@ def _processHLCturn(request):
 
         ################ END REWIND EVERY SAVE #######################
 
+        presenter.clearKickoutVotes()
+
         currentGame.save()
 
         return JsonResponse(
@@ -582,6 +584,7 @@ def _processHLCturn(request):
         if currentGame.activeVotes and "rewind_consent" in currentGame.activeVotes:
             presenter.actionRewindAlterConsent()
         presenter.clearAllMoveData()
+        presenter.clearKickoutVotes()
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
@@ -637,6 +640,27 @@ def _processHLCturn(request):
             {
                 "latestUpdate": currentGame.latestUpdate,
                 # "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+            },
+            safe=False,
+        )
+
+    elif jsonData["action"] == "kickout":
+        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate) and not jsonData["ignoreSync"]:
+            print(f"* * * * * HLC: Sync Error Kickout Vote {jsonData['gameID']}")
+            return JsonResponse({"syncError": True}, safe=False)
+
+        # Voting layer: 3p+ games need a majority vote to kick, unless the
+        # requester's own vote for this target is more than 2 days old.
+        # If the vote is only recorded, return straight away without kicking.
+        kickout_vote_result = presenter.processKickoutVote(request.user.username, jsonData["kickedName"])
+        if kickout_vote_result["voteCast"]:
+            currentGame.save()
+            return JsonResponse(kickout_vote_result, safe=False)
+
+        return JsonResponse(
+            {
+                "latestUpdate": currentGame.latestUpdate,
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             },
             safe=False,
         )
@@ -831,6 +855,8 @@ def showHLCgame(request, game_id):
             "allPlayerListBySeat": allPlayerListBySeat,
             "currentNotes": currentNotes,
             "kickoutRequired": kickoutRequired,
+            "kickoutVotesData": json.dumps(presenter.getKickoutVotesData()),
+            "kickoutVoteThreshold": presenter.getKickoutVoteThreshold(),
             "involvedPlayer": involvedPlayer,
             "gameName": presenter.getGameName(),
             "startingOptionsLiteral": (json.loads(currentGame.startingOptions) if currentGame.startingOptions else []),

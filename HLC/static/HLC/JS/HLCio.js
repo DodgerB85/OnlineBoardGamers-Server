@@ -461,6 +461,43 @@ var IO = {
 		return false
 	},
 
+	kickout: async function () {
+		// Voting layer: 3p+ games need a majority vote to kick, unless the
+		// requester's own vote for this target is more than 2 days old.
+		// If the vote is only recorded, return straight away without kicking.
+		showLoader()
+		var csrftoken = getCookie("csrftoken")
+		return fetch("/HLC/processHLCturn/", {
+			method: "POST",
+			body: JSON.stringify({
+				action: "kickout",
+				gameID: global.gameID,
+				kickedName: global.playerToKickName,
+				latestUpdate: global.latestUpdate,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+			.then((response) => response.json())
+			.then((result) => {
+				if (result.syncError) {
+					alert(gettext("It appears you have an older version of the game. Please refresh the page"))
+					return
+				}
+				hideLoader()
+				if (result.voteCast) {
+					global.kickoutVotesData = result.votesData
+					global.kickoutVoteThreshold = result.threshold
+					return result
+				}
+				global.latestUpdate = String(result.latestUpdate)
+				global.secondsToNextKickout = result.secondsToNextKickout
+				return result
+			})
+			.catch((error) => {
+				console.log("Error:", error)
+			})
+	},
+
 	saveGameDataFromKickout: async function (model, nextPlayersArr, kickedName) {
 		// TODO
 		let wsConnecting = null

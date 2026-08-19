@@ -12,6 +12,8 @@ const TL_DISPLAY_IDX_ORDER = [0, 2, 3, 4, 1] // Display on dealerships in order 
 DELETE_VOTE_TOPIC = "delete_game_votes"
 STATS_EXCLUDE_VOTE_TOPIC = "stats_exclude_votes"
 REWIND_CONSENT_VOTE_TOPIC = "rewind_consent_votes"
+KICKOUT_VOTE_TOPIC = "kickout_player_votes"
+KICKOUT_SOLO_DELAY_MS = 2 * 24 * 60 * 60 * 1000
 
 var RED = 0
 var GREEN = 1

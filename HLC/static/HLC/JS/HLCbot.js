@@ -47,12 +47,21 @@ var Bot = (function () {
 		}
 	}
 
-	self.actionPlayerKickout = function (event) {
+	self.actionPlayerKickout = async function (event) {
 		var playerToKickName = event.data.playerToKickName
 		const playerToKickIndex = M.players.findIndex((object) => {
 			return object.name === playerToKickName
 		})
 		if (global.kickoutRequired === 2) {
+			// Voting layer: 3p+ games need a majority vote to kick out,
+			// unless my own vote for this target is more than 2 days old.
+			if (global.kickoutVoteThreshold > 1 && !hasSoloKickoutRight(playerToKickName)) {
+				const result = await IO.kickout()
+				if (result && result.voteCast) {
+					buildKickoutActions()
+					return
+				}
+			}
 			global.kickoutRequired = 0
 			var i = 0
 			var bot = BOT

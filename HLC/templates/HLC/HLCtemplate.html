@@ -369,6 +369,9 @@
     global.kickoutRequired = {{kickoutRequired}};
     {% endif %}
 
+    global.kickoutVotesData = {{ kickoutVotesData | safe }};
+    global.kickoutVoteThreshold = {{ kickoutVoteThreshold }};
+
     {% if liveNotification %}
     global.liveNotification = {{ liveNotification }};
     {% endif %}
