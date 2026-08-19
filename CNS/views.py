@@ -361,6 +361,9 @@ def _processCNSturn(request):
 
         ################ END REWIND EVERY SAVE #######################
 
+        # Any game save moves the game on, so any pending kickout votes are void
+        presenter.clearKickoutVotes()
+
         currentGame.save()
 
         response_data = {
@@ -419,6 +422,9 @@ def _processCNSturn(request):
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
+
+        # A rewind moves the game on, so any pending kickout votes are void
+        presenter.clearKickoutVotes()
 
         currentGame.save()
 
@@ -479,6 +485,14 @@ def _processCNSturn(request):
     elif jsonData["action"] == "kickout":
         if latest_update != "9999999999999" and latest_update != str(currentGame.latestUpdate):  # and not jsonData["ignoreSync"]:
             return JsonResponse({"syncError": True}, safe=False)
+
+        # Voting layer: 3p+ games need a majority vote to kick, unless the
+        # requester's own vote for this target is more than 5 days old.
+        # If the vote is only recorded, return straight away without kicking.
+        kickout_vote_result = presenter.processKickoutVote(request.user.username, jsonData["kickedName"])
+        if kickout_vote_result["voteCast"]:
+            currentGame.save()
+            return JsonResponse(kickout_vote_result, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
         missing_gp = currentGame.players.filter(player=_missingPlayer).first()

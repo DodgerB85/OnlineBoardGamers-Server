@@ -203,6 +203,8 @@ def build_show_game_data(
         "chatNotification": chatNotification,
         "yourTurnAudioType": liveNotification,
         "statsExcludedGame": currentGame.statsExcludedGame,
+        "kickoutVotesData": json.dumps(presenter.getKickoutVotesData()),
+        "kickoutVoteThreshold": presenter.getKickoutVoteThreshold(),
     }
 
     return {

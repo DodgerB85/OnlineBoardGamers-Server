@@ -26,12 +26,14 @@ export function actionAnyBotMooves() {
 export async function actionPlayerKickout() {
 	const personal = usePersonalStore()
 	if (personal.kickoutRequired === 2) {
+		// May only record a vote rather than actually kicking out (3p+ games)
+		const result = await IO.kickout()
+		if (result && result.voteCast) return
+
 		personal.kickoutRequired = 0
 
 		// Action the kick in game
 		model.addHistory(rf.HIST_KICKOUT, personal.pov, 0, [controller.currentPlayerObj().displayName])
-
-		await IO.kickout()
 
 		controller.currentPlayerObj().displayName = rf.BOT_NAME
 

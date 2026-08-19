@@ -24,6 +24,8 @@ import { ref, reactive } from 'vue'
 export const useModelStore = defineStore('store', () => {
   const deleteVotesData = ref({})
   const statsExcludeVotesData = ref({})
+  const kickoutVotesData = ref({})
+  const kickoutVoteThreshold = ref(1)
   // This var affects the ZOOM level
   // So everything that will be affected by zooming should be referenced through this
   const refSize = ref(2400)
@@ -235,5 +237,7 @@ export const useModelStore = defineStore('store', () => {
     networkPhaseResetData,
     deleteVotesData,
     statsExcludeVotesData,
+    kickoutVotesData,
+    kickoutVoteThreshold,
   }
 })

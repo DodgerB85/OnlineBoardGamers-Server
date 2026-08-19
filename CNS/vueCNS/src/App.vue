@@ -38,6 +38,8 @@ async function initGame() {
 	personal.haltPlay = true
 	store.deleteVotesData = window.initData.deleteVotesData
 	store.statsExcludeVotesData = window.initData.statsExcludeVotesData
+	store.kickoutVotesData = window.initData.kickoutVotesData || {}
+	store.kickoutVoteThreshold = window.initData.kickoutVoteThreshold || 1
 
 	// Set up all Data
 	personal.gameID = window.initData.gameID

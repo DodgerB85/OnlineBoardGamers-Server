@@ -177,6 +177,92 @@ class GamePresenter:
 
     # END KICKOUT STUFF
 
+    # KICKOUT VOTE STUFF
+    # Votes live in activeVotes[KICKOUT_VOTE_TOPIC] as {voter_username: [target_username, vote_time_ms]}.
+    # A kickout goes ahead when the votes for the target reach a majority of the
+    # remaining players (2p stays a single-player kickout), or when a voter's own
+    # vote for that target is more than 2 days old.
+    def getKickoutVotesData(self):
+        if not self.gameObj.activeVotes:
+            return {}
+        return self.gameObj.activeVotes.get(rf.KICKOUT_VOTE_TOPIC, {}) or {}
+
+    def getKickoutVoteThreshold(self):
+        remaining_players = self.gameObj.players.filter(is_kicked=False).count()
+        return (remaining_players + 1) // 2
+
+    def castKickoutVote(self, voter_username, target_username):
+        if not self.gameObj.activeVotes:
+            self.gameObj.activeVotes = {}
+        kickout_votes = self.gameObj.activeVotes.get(rf.KICKOUT_VOTE_TOPIC)
+        if kickout_votes is None:
+            kickout_votes = {}
+            self.gameObj.activeVotes[rf.KICKOUT_VOTE_TOPIC] = kickout_votes
+        existing_vote = kickout_votes.get(voter_username)
+        if (
+            isinstance(existing_vote, (list, tuple))
+            and len(existing_vote) >= 2
+            and existing_vote[0] == target_username
+        ):
+            # Keep the original vote time so the 2-day solo-kickout counter is not reset
+            return
+        kickout_votes[voter_username] = [target_username, int(time.time() * 1000)]
+
+    def clearKickoutVotes(self):
+        if self.gameObj.activeVotes and rf.KICKOUT_VOTE_TOPIC in self.gameObj.activeVotes:
+            del self.gameObj.activeVotes[rf.KICKOUT_VOTE_TOPIC]
+
+    def canSoloKickout(self, voter_username, target_username):
+        vote = self.getKickoutVotesData().get(voter_username)
+        if not isinstance(vote, (list, tuple)) or len(vote) < 2:
+            return False
+        if vote[0] != target_username:
+            return False
+        return (int(time.time() * 1000) - vote[1]) >= rf.KICKOUT_VOTE_SOLO_DELAY_SECONDS * 1000
+
+    def getKickoutVoteCountForTarget(self, target_username):
+        valid_voters = (
+            set(
+                self.gameObj.players.exclude(is_kicked=True)
+                .filter(player__isnull=False)
+                .values_list("player__username", flat=True)
+            )
+            - {target_username}
+            - rf.SHADOW_USERNAMES
+        )
+        votes = self.getKickoutVotesData()
+        return sum(
+            1
+            for voter, vote in votes.items()
+            if voter in valid_voters and isinstance(vote, (list, tuple)) and len(vote) >= 1 and vote[0] == target_username
+        )
+
+    def processKickoutVote(self, voter_username, target_username):
+        """Voting layer for kickouts.
+
+        Returns a dict. If ``voteCast`` is True the vote was recorded and the
+        kickout must NOT proceed; otherwise the kickout may proceed immediately
+        (majority reached, 2-player game, or a stale 2-day-old own vote).
+        """
+        threshold = self.getKickoutVoteThreshold()
+
+        if threshold <= 1 or self.canSoloKickout(voter_username, target_username):
+            self.clearKickoutVotes()
+            return {"voteCast": False, "threshold": threshold, "votesData": "{}"}
+
+        self.castKickoutVote(voter_username, target_username)
+        if self.getKickoutVoteCountForTarget(target_username) >= threshold:
+            self.clearKickoutVotes()
+            return {"voteCast": False, "threshold": threshold, "votesData": "{}"}
+
+        return {
+            "voteCast": True,
+            "threshold": threshold,
+            "votesData": json.dumps(self.getKickoutVotesData()),
+        }
+
+    # END KICKOUT VOTE STUFF
+
     def addMissingPlayer(self, user):
         """Mark a player as missing"""
         gp = self.gameObj.players.filter(player=user).first()

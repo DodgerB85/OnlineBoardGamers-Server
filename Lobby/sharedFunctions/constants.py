@@ -7,6 +7,9 @@ SHADOW_USERNAMES = {*SHADOW_PLAYER_NAMES, "FcmAI"}
 DELETE_VOTE_TOPIC: Final = "delete_game_votes"
 STATS_EXCLUDE_VOTE_TOPIC = "stats_exclude_votes"
 REWIND_CONSENT_VOTE_TOPIC = "rewind_consent_votes"
+KICKOUT_VOTE_TOPIC = "kickout_player_votes"
+# A player whose kickout vote is this old may kick out alone (no majority needed)
+KICKOUT_VOTE_SOLO_DELAY_SECONDS = 2 * 24 * 60 * 60
 BLANK_MESSAGE_TEMPLATE = {
     "gameID": 0,
     "gameName": "NO_GAME_NAME",
