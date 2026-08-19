@@ -188,7 +188,7 @@ class GamePresenter:
         return self.gameObj.activeVotes.get(rf.KICKOUT_VOTE_TOPIC, {}) or {}
 
     def getKickoutVoteThreshold(self):
-        remaining_players = self.gameObj.players.filter(is_kicked=False).count()
+        remaining_players = self.gameObj.players.filter(is_missing=False).count()
         return (remaining_players + 1) // 2
 
     def castKickoutVote(self, voter_username, target_username):
@@ -223,7 +223,7 @@ class GamePresenter:
     def getKickoutVoteCountForTarget(self, target_username):
         valid_voters = (
             set(
-                self.gameObj.players.exclude(is_kicked=True)
+                self.gameObj.players.exclude(is_missing=True)
                 .filter(player__isnull=False)
                 .values_list("player__username", flat=True)
             )
