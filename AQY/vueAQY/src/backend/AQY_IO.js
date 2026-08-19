@@ -1038,11 +1038,21 @@ export async function kickout() {
 			store.topMenuViews.rewindErrorText = "It appears you have an older version of the game. Please refresh the page"
 			return
 		}
+		if (data.voteCast) {
+			// Vote recorded but no kickout (yet): show the updated vote state
+			store.kickoutVotesData = JSON.parse(data.votesData)
+			store.kickoutVoteThreshold = data.threshold
+			store.topMenuViews.tradeSuccessText = "Kickout vote recorded"
+			store.topMenuViews.showLoader = false
+			return data
+		}
 		personal.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
+		return data
 	} catch (error) {
 		console.error("Error kicking:", error)
 		rf.doAdminAlrt("Error Kicking")
+		return false
 	}
 }
 

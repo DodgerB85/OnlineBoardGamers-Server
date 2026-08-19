@@ -30,6 +30,8 @@ import { ref, reactive, computed } from "vue"
 export const useModelStore = defineStore("store", () => {
 	const deleteVotesData = ref({})
 	const statsExcludeVotesData = ref({})
+	const kickoutVotesData = ref({})
+	const kickoutVoteThreshold = ref(1)
 	// TEMPORARY VAR, USE TO DEBUG HOW MANY TIMES STUFF RUNS, ETC
 	const counter = ref(0)
 
@@ -535,6 +537,8 @@ export const useModelStore = defineStore("store", () => {
 		prePhaseResetData,
 		deleteVotesData,
 		statsExcludeVotesData,
+		kickoutVotesData,
+		kickoutVoteThreshold,
 		computedHistory,
 	}
 })

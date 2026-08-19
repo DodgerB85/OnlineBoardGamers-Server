@@ -21,6 +21,8 @@ import * as country from "../js/AQYcountry.js"
 import * as IO from "../backend/AQY_IO"
 import * as funcs from "../js/AQYfuncs.js"
 
+import { ref, watch, onUnmounted } from "vue"
+
 import { useModelStore } from "../stores/AQYstore.js"
 import { usePersonalStore } from "../stores/AQYpersonal.js"
 const personal = usePersonalStore()
@@ -40,6 +42,92 @@ function getFlexiKickoutTImerText() {
 
 	return hoursToGo + ":" + minsToGo + ":" + secsToGo
 }
+
+function currentKickoutTarget() {
+	return controller.currentPlayerObj().name
+}
+
+// Returns my vote entry [target, time] if I have voted to kick out the current player
+function myKickoutVote() {
+	const vote = store.kickoutVotesData[personal.name]
+	if (!vote || !Array.isArray(vote) || vote[0] !== currentKickoutTarget()) return null
+	return vote
+}
+
+// 2-player games keep the old direct kickout; otherwise I must have a vote
+// for this player that is more than 2 days old before I can kick out alone
+function canKickoutNow() {
+	if (store.kickoutVoteThreshold <= 1) return true
+	const myVote = myKickoutVote()
+	if (!myVote) return false
+	return Date.now() - myVote[1] >= rf.KICKOUT_SOLO_DELAY_MS
+}
+
+function kickoutVoteCount() {
+	const target = currentKickoutTarget()
+	let count = 0
+	for (const voter in store.kickoutVotesData) {
+		const vote = store.kickoutVotesData[voter]
+		if (Array.isArray(vote) && vote[0] === target) count++
+	}
+	return count
+}
+
+function kickoutVoters() {
+	const target = currentKickoutTarget()
+	let voters = "None"
+	for (const voter in store.kickoutVotesData) {
+		const vote = store.kickoutVotesData[voter]
+		if (Array.isArray(vote) && vote[0] === target) {
+			if (voters === "None") voters = String(voter)
+			else voters += ", " + voter
+		}
+	}
+	return voters
+}
+
+// My vote would bring the count to the threshold, so the kickout goes ahead
+function isLastVoteRequired() {
+	return kickoutVoteCount() + 1 >= store.kickoutVoteThreshold
+}
+
+const soloKickoutCountdown = ref("")
+let soloKickoutCountdownTimer = null
+
+function updateSoloKickoutCountdown() {
+	const myVote = myKickoutVote()
+	if (!myVote || store.kickoutVoteThreshold <= 1) {
+		soloKickoutCountdown.value = ""
+		return
+	}
+	let remainingMs = rf.KICKOUT_SOLO_DELAY_MS - (Date.now() - myVote[1])
+	if (remainingMs <= 0) {
+		clearInterval(soloKickoutCountdownTimer)
+		soloKickoutCountdownTimer = null
+		soloKickoutCountdown.value = ""
+		return
+	}
+	let totalSeconds = Math.floor(remainingMs / 1000)
+	let hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0")
+	let mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0")
+	let secs = String(Math.floor(totalSeconds % 60)).padStart(2, "0")
+	soloKickoutCountdown.value = hours + ":" + mins + ":" + secs
+}
+
+watch(
+	() => store.kickoutVotesData[personal.name],
+	(vote) => {
+		if (vote && Array.isArray(vote) && soloKickoutCountdownTimer == null) {
+			updateSoloKickoutCountdown()
+			soloKickoutCountdownTimer = setInterval(updateSoloKickoutCountdown, 1000)
+		}
+	},
+	{ immediate: true }
+)
+
+onUnmounted(() => {
+	if (soloKickoutCountdownTimer != null) clearInterval(soloKickoutCountdownTimer)
+})
 /** End Kickout */
 
 function setupCountryBuilding(bldg) {
@@ -706,23 +794,77 @@ function flatmapResourceArray(array) {
 
 		<div v-else id="kickoutDiv">
 			<br />
-			<template v-if="store.context.action !== rf.ACT_CONFIRM_KICKOUT">
+			<template v-if="canKickoutNow()">
+				<template v-if="store.context.action !== rf.ACT_CONFIRM_KICKOUT">
+					Player
+					<b>{{ controller.currentPlayerObj().name }}</b>
+					has timed out
+					<br />
+					To kick out
+					<b>{{ controller.currentPlayerObj().name }}</b>
+					press Confirm Kickout
+					<br />
+					The game will proceed to the next player/phase/turn
+					<br />
+					<br />
+					Otherwise you can allow
+					<b>{{ controller.currentPlayerObj().name }}</b>
+					more time - reload the page to initiate kickout again
+					<br />
+
+					<br />
+					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow
+							more time</button></span>
+					<span>
+						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{
+							controller.currentPlayerObj().name }} in the game - but end their current turn</button>
+					</span>
+					<span><button class="actionsLineButton" id="confirmKickoutButton"
+							@click="store.context.action = rf.ACT_CONFIRM_KICKOUT">Confirm Kickout</button></span>
+				</template>
+				<template v-if="store.context.action === rf.ACT_CONFIRM_KICKOUT">
+					This will permanently remove <b>{{ controller.currentPlayerObj().name }}</b> from the game<br />
+					<b>It cannot be undone</b><br />
+					<br />
+					Try checking the chat in case they have given a reason for any temporary absence<br />
+					Please consider giving them a short grace period, in case they are just delayed
+
+					<br />
+					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow
+							more time</button></span>
+					<span><button class="actionsLineButton" id="confirmKickoutButton"
+							@click="Bot.actionPlayerKickout">Permanently Kickout {{ controller.currentPlayerObj().name
+							}}</button></span>
+				</template>
+			</template>
+			<template v-else>
 				Player
 				<b>{{ controller.currentPlayerObj().name }}</b>
 				has timed out
 				<br />
-				To kick out
+				A vote from the other players is needed to kick out
 				<b>{{ controller.currentPlayerObj().name }}</b>
-				press Confirm Kickout
 				<br />
-				The game will proceed to the next player/phase/turn
+				Votes: {{ kickoutVoteCount() }}/{{ store.kickoutVoteThreshold }}
+				({{ kickoutVoters() }})
 				<br />
 				<br />
-				Otherwise you can allow
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				more time - reload the page to initiate kickout again
+				<span v-if="!myKickoutVote()">
+					<template v-if="isLastVoteRequired()">
+						This will permanently remove <b>{{ controller.currentPlayerObj().name }}</b> from the game<br />
+						<b>It cannot be undone</b><br />
+						<br />
+					</template>
+					<button class="actionsLineButton" id="voteKickoutButton"
+						@click="Bot.actionPlayerKickout">Vote to Kickout {{ controller.currentPlayerObj().name }}</button>
+				</span>
+				<span v-else>
+					You have voted to kick out
+					<b>{{ controller.currentPlayerObj().name }}</b>
+					<br />
+					If the other players do not also vote, you will be able to kick them out directly in {{ soloKickoutCountdown }}
+				</span>
 				<br />
-
 				<br />
 				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow
 						more time</button></span>
@@ -730,22 +872,6 @@ function flatmapResourceArray(array) {
 					<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{
 						controller.currentPlayerObj().name }} in the game - but end their current turn</button>
 				</span>
-				<span><button class="actionsLineButton" id="confirmKickoutButton"
-						@click="store.context.action = rf.ACT_CONFIRM_KICKOUT">Confirm Kickout</button></span>
-			</template>
-			<template v-if="store.context.action === rf.ACT_CONFIRM_KICKOUT">
-				This will permanently remove <b>{{ controller.currentPlayerObj().name }}</b> from the game<br />
-				<b>It cannot be undone</b><br />
-				<br />
-				Try checking the chat in case they have given a reason for any temporary absence<br />
-				Please consider giving them a short grace period, in case they are just delayed
-
-				<br />
-				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow
-						more time</button></span>
-				<span><button class="actionsLineButton" id="confirmKickoutButton"
-						@click="Bot.actionPlayerKickout">Permanently Kickout {{ controller.currentPlayerObj().name
-						}}</button></span>
 			</template>
 		</div>
 	</template>

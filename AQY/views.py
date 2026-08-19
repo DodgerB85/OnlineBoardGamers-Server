@@ -286,6 +286,8 @@ def _processAQYturn(request):
 
         ################ END REWIND EVERY SAVE #######################
 
+        presenter.clearKickoutVotes()
+
         currentGame.save()
 
         # time.sleep(10)
@@ -737,6 +739,8 @@ def _processAQYturn(request):
             base64_data = base64.b64encode(compressed_data).decode("utf-8")
             currentGame.playerTradeData = base64_data
 
+        presenter.clearKickoutVotes()
+
         response = presenter.getJsonMoveResponse()
 
         currentGame.save()
@@ -772,6 +776,8 @@ def _processAQYturn(request):
             # Step 3: Convert the compressed data to a base64-encoded string
             base64_data = base64.b64encode(compressed_data).decode("utf-8")
             currentGame.playerTradeData = base64_data
+
+        presenter.clearKickoutVotes()
 
         response = presenter.getJsonMoveResponse()
 
@@ -851,6 +857,8 @@ def _processAQYturn(request):
         # Delete move data
         presenter.clearAllMoveData()
 
+        presenter.clearKickoutVotes()
+
         currentGame.save()
 
         return JsonResponse(
@@ -912,6 +920,14 @@ def _processAQYturn(request):
             )
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
+
+        # Voting layer: 3p+ games need a majority vote to kick, unless the
+        # requester's own vote for this target is more than 2 days old.
+        # If the vote is only recorded, return straight away without kicking.
+        kickout_vote_result = presenter.processKickoutVote(request.user.username, jsonData["kickedName"])
+        if kickout_vote_result["voteCast"]:
+            currentGame.save()
+            return JsonResponse(kickout_vote_result, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
         presenter.addMissingPlayer(_missingPlayer)
