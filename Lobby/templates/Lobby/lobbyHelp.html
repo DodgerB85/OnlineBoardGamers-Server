@@ -289,14 +289,56 @@
           There is no required skill level; just a willingness to finish the game!
         {% endblocktranslate %}
       </p>
-      <ul>
-        <li>{% translate "Food Chain Magnate requires 2 finished, non-practice games" %}</li>
-        <li>{% translate "Horseless Carriage requires 1 finished, non-practice game" %}</li>
-        <li>{% translate "Bus requires 1 finished, non-practice game" %}</li>
-        <li>{% translate "The Great Zimbabwe requires 2 finished, non-practice games" %}</li>
-        <li>{% translate "Cannes requires 2 finished, non-practice games" %}</li>
-        <li>{% translate "Antiquity requires 2 finished, non-practice games" %}</li>
-      </ul>
+      <table class="nd-help-exp-table">
+        <thead>
+          <tr>
+            <th>{% translate "Game" %}</th>
+            <th>{% translate "Finished, non-practice games required" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="FCM" %} {% translate "Food Chain Magnate" %}</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="HLC" %} {% translate "Horseless Carriage" %}</td>
+            <td>1</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="BUS" %} {% translate "Bus" %}</td>
+            <td>1</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="TGZ" %} {% translate "The Great Zimbabwe" %}</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="CNS" %} {% translate "Cannes" %}</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="AQY" %} {% translate "Antiquity" %}</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="IND" %} {% translate "Indonesia" %}</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="KFW" %} {% translate "Keyflower" %}</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="WEB" %} {% translate "Web" %}</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="RNB" %} {% translate "Roads and Boats" %}</td>
+            <td>2</td>
+          </tr>
+        </tbody>
+      </table>
       <p>
         {% blocktranslate trimmed %}
           If you do not yet meet these requirements, and are unable to join an available game, then try starting your own game
@@ -387,31 +429,34 @@
         {% endblocktranslate %}
       </p>
       <p>
-        <b>FCM:</b> {% translate "You can resign during any Restructure phase. You can also resign at the confirmation options when placing your initial restaurant. This will allow you to exit games you didn't mean to join. It will still count as a loss in your statistics." %}
+        <b>Food Chain Magnate:</b> {% translate "You can resign during any Restructure phase. You can also resign at the confirmation options when placing your initial restaurant. This will allow you to exit games you didn't mean to join. It will still count as a loss in your statistics." %}
       </p>
       <p>
-        <b>HLC:</b> {% translate "You can resign during the Research phase." %}
+        <b>Horseless Carriage:</b> {% translate "You can resign during the Research phase." %}
       </p>
       <p>
         <b>Bus:</b> {% translate "You can resign during your 'Choose Actions' phase." %}
       </p>
       <p>
-        <b>TGZ:</b> {% translate "You can resign during your actions phase; as long as no one has exceeded their VR. In this case the game will end in the current round anyway." %}
+        <b>The Great Zimbabwe:</b> {% translate "You can resign during your actions phase; as long as no one has exceeded their VR. In this case the game will end in the current round anyway." %}
       </p>
       <p>
-        <b>CNS:</b> {% translate "You can resign during your 'place tiles' phase." %}
+        <b>Cannes:</b> {% translate "You can resign during your 'place tiles' phase." %}
       </p>
       <p>
-        <b>AQY:</b> {% translate "You can resign during your 'City Build' phase." %}
+        <b>Antiquity:</b> {% translate "You can resign during your 'City Build' phase." %}
       </p>
       <p>
-        <b>IND:</b> {% translate "You can resign during your 'Turn Order Bid' phase." %}
+        <b>Indonesia:</b> {% translate "You can resign during your 'Turn Order Bid' phase." %}
       </p>
       <p>
-        <b>KFW:</b> {% translate "You can resign during your 'Bidding and Actions' phase, as long as at least one other player hasn't passed yet." %}
+        <b>Keyflower:</b> {% translate "You can resign during your 'Bidding and Actions' phase, as long as at least one other player hasn't passed yet." %}
       </p>
       <p>
         <b>Web:</b> {% translate "You can resign before adding a tile to the grid." %}
+      </p>
+      <p>
+        <b>Roads and Boats:</b> {% translate "You can resign during your production turn (not during a pre-move)." %}
       </p>
       <b><u>{% translate "What is the penalty for Resigning?" %}</u></b>
       <p>
@@ -705,14 +750,59 @@
       <br />
       There is no required skill level; just a willingness to finish the game!
       <br />
-      <ul>
-        <li>Food Chain Magnate requires 2 finished, non-practice games</li>
-        <li>Horseless Carriage requires 1 finished, non-practice game</li>
-        <li>Bus requires 1 finished, non-practice game</li>
-        <li>The Great Zimbabwe requires 2 finished, non-practice games</li>
-        <li>Cannes requires 2 finished, non-practice games</li>
-        <li>Antiquity requires 2 finished, non-practice games</li>
-      </ul>
+    {% endblocktranslate %}
+      <table class="nd-help-exp-table">
+        <thead>
+          <tr>
+            <th>Game</th>
+            <th>Finished, non-practice games required</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="FCM" %} Food Chain Magnate</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="HLC" %} Horseless Carriage</td>
+            <td>1</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="BUS" %} Bus</td>
+            <td>1</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="TGZ" %} The Great Zimbabwe</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="CNS" %} Cannes</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="AQY" %} Antiquity</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="IND" %} Indonesia</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="KFW" %} Keyflower</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="WEB" %} Web</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="RNB" %} Roads and Boats</td>
+            <td>2</td>
+          </tr>
+        </tbody>
+      </table>
+      <br />
+      {% blocktranslate trimmed %}
       If you do not yet meet these requirements, and are unable to join an available game, then try starting your own game
       and allowing anyone to join. Learning Games do count towards your experience level.
     {% endblocktranslate %}
@@ -831,25 +921,27 @@
                     <b><u>Keyflower</b></u>: You can resign during your "Bidding and Actions" phase, as long as at least one other player hasn't passed yet.
                       <br />
                       <b><u>Web</b></u>: You can resign before adding a tile to the grid.
-                      {% endblocktranslate %}
+                        <br />
+                        <b><u>Roads and Boats</b></u>: You can resign during your production turn (not during a pre-move).
+                        {% endblocktranslate %}
+                        <br />
+                        <br />
+                        <b><u>{% translate "What is the penalty for Resigning?" %}</u></b>
+                        <br />
+                        {% blocktranslate trimmed %}
+                          Please note that although resigning is discourageed in 3p+ games, at Online Board Gamers players will never be penalised
+                          if they choose to resign.
+                          Sometimes it is a valid (and best!) option. It will count as a loss.
+                        {% endblocktranslate %}
+                        <br />
+                        <br />
+                      </div>
+                      <h2>{% translate "Tournaments" %}</h2>
+                      <div class="lobbyHelpSection">
+                        See <a class="linkOther" href="{% url 'helpTournaments' %}">{% translate "Tournaments Help" %}</a> page
+                      </div>
                       <br />
                       <br />
-                      <b><u>{% translate "What is the penalty for Resigning?" %}</u></b>
-                      <br />
-                      {% blocktranslate trimmed %}
-                        Please note that although resigning is discourageed in 3p+ games, at Online Board Gamers players will never be penalised
-                        if they choose to resign.
-                        Sometimes it is a valid (and best!) option. It will count as a loss.
-                      {% endblocktranslate %}
-                      <br />
-                      <br />
-                    </div>
-                    <h2>{% translate "Tournaments" %}</h2>
-                    <div class="lobbyHelpSection">
-                      See <a class="linkOther" href="{% url 'helpTournaments' %}">{% translate "Tournaments Help" %}</a> page
-                    </div>
-                    <br />
-                    <br />
-                    {% include 'Lobby/donate/donateBanner.html' %}
-                    {% include 'Lobby/common/homeButton.html' %}
-                  {% endblock %}
+                      {% include 'Lobby/donate/donateBanner.html' %}
+                      {% include 'Lobby/common/homeButton.html' %}
+                    {% endblock %}

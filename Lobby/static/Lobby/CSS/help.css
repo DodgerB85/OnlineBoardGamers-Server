@@ -407,3 +407,28 @@
 	max-width: 460px;
 	text-align: center;
 }
+
+.nd-help-exp-table {
+	width: 100%;
+	max-width: 540px;
+	border-collapse: collapse;
+}
+
+.nd-help-exp-table th,
+.nd-help-exp-table td {
+	border: 1px solid #ccc;
+	padding: 6px 10px;
+	text-align: left;
+	vertical-align: middle;
+}
+
+.nd-help-exp-table th {
+	background-color: #f5f5f5;
+}
+
+.nd-help-exp-table .gameIcon {
+	height: 25px;
+	width: 25px;
+	vertical-align: middle;
+	margin-right: 6px;
+}
