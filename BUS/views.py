@@ -348,6 +348,8 @@ def _processBUSturn(request):
 
         ################ END REWIND EVERY SAVE #######################
 
+        presenter.clearKickoutVotes()
+
         currentGame.save()
 
         return JsonResponse(
@@ -393,6 +395,8 @@ def _processBUSturn(request):
 
         currentGame.rewindTempData = loadData
         currentGame.rewindData = json.dumps(currentRewindDataArray)
+
+        presenter.clearKickoutVotes()
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
@@ -458,6 +462,14 @@ def _processBUSturn(request):
             )
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
+
+        # Voting layer: 3p+ games need a majority vote to kick, unless the
+        # requester's own vote for this target is more than 2 days old.
+        # If the vote is only recorded, return straight away without kicking.
+        kickout_vote_result = presenter.processKickoutVote(request.user.username, jsonData["kickedName"])
+        if kickout_vote_result["voteCast"]:
+            currentGame.save()
+            return JsonResponse(kickout_vote_result, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
         presenter.addMissingPlayer(_missingPlayer)

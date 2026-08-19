@@ -20,6 +20,8 @@ import { defineStore } from "pinia"
 export const useModelStore = defineStore("model", () => {
 	const deleteVotesData = ref({})
 	const statsExcludeVotesData = ref({})
+	const kickoutVotesData = ref({})
+	const kickoutVoteThreshold = ref(1)
 
 	const players = reactive([])
 	const junctions = reactive([])
@@ -172,6 +174,8 @@ export const useModelStore = defineStore("model", () => {
 		endReplayResetData,
 		deleteVotesData,
 		statsExcludeVotesData,
+		kickoutVotesData,
+		kickoutVoteThreshold,
 		topMenuViews,
 		remainingTimeStones,
 		remainingPassengers,

@@ -435,6 +435,12 @@ export async function saveGameDataAfterKickout() {
 			alert("It appears you have an older version of the game. Please refresh the page")
 			return
 		}
+		if (data.voteCast) {
+			store.kickoutVotesData = data.votesData
+			store.topMenuViews.showLoader = false
+			store.successText = "Kickout vote recorded"
+			return data
+		}
 		personal.latestUpdate = data.latestUpdate
 		// Now set the game to the next state
 		// Count non players and end game if only 1 left

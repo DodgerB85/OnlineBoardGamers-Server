@@ -25,11 +25,16 @@ export function actionAnyBotMooves() {
 
 /**================================================================================================ */
 
-export function actionPlayerKickout() {
+export async function actionPlayerKickout() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	if (personal.kickoutRequired === 2) {
 		personal.kickoutRequired = 0
+
+		// Ask the server first: 3p+ games need a majority vote to kick,
+		// so this may only record a vote rather than actually kick.
+		const result = await IO.saveGameDataAfterKickout()
+		if (result && result.voteCast) return
 
 		// Action the kick in game
 		store.history.push([rf.HIST_KICKOUT, personal.pov, Math.round(new Date().getTime() / 1000 - personal.gameCreationTimestamp), [store.gameflow.turnOrder[0]]])
@@ -38,8 +43,6 @@ export function actionPlayerKickout() {
 		store.players[store.gameflow.turnOrder[0]].displayName = rf.BOT_NAME
 		store.players[store.gameflow.turnOrder[0]].score = 0
 		store.players[store.gameflow.turnOrder[0]].remainingActions = 0
-
-		IO.saveGameDataAfterKickout()
 	}
 }
 
