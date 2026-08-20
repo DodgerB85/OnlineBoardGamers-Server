@@ -15,6 +15,12 @@
         {% endblocktranslate %}
       </p>
       <p>
+        {% static 'BUS/Bus_Pitts_Rules.pdf' as pitts_rules_url %}
+        {% blocktranslate trimmed %}
+          Pittsburgh rules availabe <a class="linkOther" href="{{ pitts_rules_url }}" target="_blank">here</a>
+        {% endblocktranslate %}
+      </p>
+      <p>
         {% blocktranslate trimmed %}
           How to play guide example <a href="https://www.youtube.com/watch?v=CKW0tYoIU_k" target="_blank">here</a>
         {% endblocktranslate %}
@@ -115,6 +121,13 @@
     {% static 'BUS/Bus_Rules.pdf' as bus_rules_url %}
     {% blocktranslate trimmed %}
       Bus rules available <a href="{{ bus_rules_url }}" target="_blank">here</a>
+    {% endblocktranslate %}
+    <br />
+    {% static 'BUS/Bus_Pitts_Rules.pdf' as pitts_rules_url %}
+    {% blocktranslate trimmed %}
+      Pittsburgh rules availabe <a class="linkOther" href="{{ pitts_rules_url }}" target="_blank">here</a>.
+      <br />
+      Game will be excluded from stats
     {% endblocktranslate %}
     <br />
     {% blocktranslate trimmed %}

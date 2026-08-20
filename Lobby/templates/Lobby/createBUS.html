@@ -55,7 +55,6 @@
                         <div class="nd-form-help" style="padding-left:0">{% translate "Alters kickout options. All games update 'live'" %}</div>
                         <div class="nd-form-help" style="padding-left:0">{% translate "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}</div>
                         <div id="blitzWarningSpan" style="display:none;margin:4px 0 8px;padding:8px 12px;border-radius:var(--radius-sm);background:var(--color-warn-bg);color:var(--color-warn);font-size:13px;font-weight:600;flex-basis:100%">{% translate "Careful, Live gives each player 5 minutes per move, not per game. With 3 players each round is about 15 min, and a full game has many rounds, so it can still take ~8 hours." %}</div>
-
                     </div>
                     <div class="nd-form-row">
                         <label class="nd-form-label" for="playerNumber">{% translate "Number of players" %}</label>
@@ -92,7 +91,6 @@
                             <input type="text" id="player5" name="player5" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
                         </div></div>
                     </div>
-                    
                 </div>
 
                 <div class="nd-card">
@@ -133,6 +131,20 @@
                         </label>
                     </div>
                 </div>
+
+                <div class="nd-card">
+                    <div class="nd-card-header"><h2>{% translate "Game Options" %}</h2></div>
+                    <div class="nd-check-list">
+                        {% static 'BUS/Bus_Pitts_Rules.pdf' as pitts_rules_url %}
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateGameOptions(this.id)" class="myCheckbox" id="usePittsburghMap" name="usePittsburghMap" value="3">
+                            <div>
+                                <div>{% translate "Use Pittsburgh Map" %}</div>
+                                <div class="nd-opt-help">{% blocktranslate trimmed %}Play on the custom Pittsburgh map with special <a href="{{ pitts_rules_url }}" target="_blank">rules</a>. Game will be excluded from stats{% endblocktranslate %}</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <div style="text-align:center;margin-top:8px">
@@ -151,10 +163,10 @@
         {% endif %}
         <div id="allOptions">
             <span class="topOfNewGameSpan">{% translate "New to Bus? For Rules, How to Play, and Game Guide, please see " %}<a class="linkOther" href="{% url 'BUS:BUShelp' %}">{% translate "Help" %}</a></span>
-            <form autocomplete="off"
+            <form id="gameCreationForm"
+                  autocomplete="off"
                   action="{% url 'BUS:createBUSgame' %}"
-                  method="post"
-                  id="gameCreationForm">
+                  method="post">
                 {% csrf_token %}
                 <div class="topOfNewGameOptionsDiv">
                     <fieldset id="setupOptions" class="optionsGroupTop">
@@ -233,7 +245,7 @@
                             </div>
                         </div>
                         <div class="singleChoiceWithTextDiv" id="selPlayer4" style="display: none">
-                            <label class="choiceLabelText" for="player3">{% translate "Player 4" %}</label>
+                            <label class="choiceLabelText" for="player4">{% translate "Player 4" %}</label>
                             <div class="optionSelectionText">
                                 <div class="autocomplete">
                                     <input type="text"
@@ -279,7 +291,7 @@
                                id="trainingGame"
                                name="trainingGame"
                                value="102">
-                        <label for="trainingGame">{% translate "Practice Game" %}</label>
+                        <label for="trainingGame" class="checkboxLabel">{% translate "Practice Game" %}</label>
                         <br />
                         <span class="inlineHelp">
                             {% url "lobbyHelp" as the_url %}
@@ -306,7 +318,7 @@
                                name="experiencedGame"
                                value="120"
                                disabled>
-                        <label for="experiencedGame">{% translate "Experienced Game" %}</label>
+                        <label for="experiencedGame" class="checkboxLabel">{% translate "Experienced Game" %}</label>
                         <br />
                         <span class="inlineHelp">
                             {% url "lobbyHelp" as the_url %}
@@ -319,6 +331,25 @@
                         </span>
                         <br />
                     </fieldset>
+                    <fieldset id="basicOptions" class="optionsGroupTop">
+                        <legend class="optionsHeader">{% translate "Game Options" %}</legend>
+                        <input type="checkbox"
+                               onchange="validateGameOptions(this.id)"
+                               class="myCheckbox"
+                               id="usePittsburghMap"
+                               name="usePittsburghMap"
+                               value="3">
+                        <label for="usePittsburghMap" class="checkboxLabel">{% translate "Use Pittsburgh Map" %}</label>
+                        <br />
+                        <span class="inlineHelp">
+                            {% static 'BUS/Bus_Pitts_Rules.pdf' as pitts_rules_url %}
+                            {% blocktranslate trimmed %}
+                                Play on the custom Pittsburgh map with special <a class="linkOther" href="{{ pitts_rules_url }}" target="_blank">rules</a>.
+                                <br />
+                                Game will be excluded from stats
+                            {% endblocktranslate %}
+                        </span>
+                    </fieldset>
                 </div>
                 <br />
                 <input type="submit"
@@ -326,8 +357,8 @@
                        value="{% translate "Create Bus Game" %}">
             </form>
         </div>
-        {% include "Lobby/donate/donateBanner.html" %}
-        {% include "Lobby/splotterconSponsor.html" %}
+        {% include 'Lobby/donate/donateBanner.html' %}
+        {% include 'Lobby/splotterconSponsor.html' %}
     </div>
     {% endif %}
     {% block script %}
@@ -371,7 +402,7 @@
     setupData.kickoutDuration = "{{ kickoutDuration }}";
     setupData.playerNumber = {{ playerNumber }};
     setupData.playerNames = {{ playerNames | safe }};
-    setupData.startingOptions = "{{ startingOptions }}";
+    setupData.startingOptions = {{ startingOptions }};
     initGameCreation(true, setupData);
     {% else %}
     initGameCreation(false);
