@@ -506,8 +506,8 @@ body.nd .nd-table-scroll {
 
 /* Constrain game and starting-option icons rendered inside table cells */
 body.nd .nd-table td .gameIcon {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     vertical-align: middle;
 }
 body.nd .nd-table td .startingOption {
@@ -2675,7 +2675,7 @@ body.nd .nd-row09.kickoutRequired2 { background: #F2BABA; }
         gap: 8px 10px;
         padding: 12px;
     }
-    body.nd .nd-col-icon img { width: 44px; height: 44px; }
+    body.nd .nd-col-icon img { width: 50px; height: 50px; }
     body.nd .nd-col-players,
     body.nd .nd-col-options,
     body.nd .nd-col-status,
