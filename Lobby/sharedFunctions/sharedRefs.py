@@ -1003,6 +1003,8 @@ def SR_getBUSstartingOptionsHTML(startingOptionsArr):
             startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
         elif option == rf.SO_EXPERIENCED_GAME:
             startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
+        elif option == 3:
+            startingOptionsHTML += "<img class='startingOption' src='/static/BUS/images/so_pitts.jpg' title='" + gettext("Pittsburgh Map") + "'>"
 
     return startingOptionsHTML
 
