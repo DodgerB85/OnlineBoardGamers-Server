@@ -416,8 +416,8 @@ export function importModel(input, includeContext, gameOver) {
 			name: inputModel[0][i][0],
 			displayName: inputModel[0][i][1],
 			colour: inputModel[0][i][2],
-			moneyCash: inputModel[0][i][3],
-			moneyBank: inputModel[0][i][4],
+			moneyCash: Math.round(inputModel[0][i][3]),
+			moneyBank: Math.round(inputModel[0][i][4]),
 			slots: JSON.parse(JSON.stringify(inputModel[0][i][5])),
 			RnD: JSON.parse(JSON.stringify(inputModel[0][i][6])),
 
@@ -426,7 +426,7 @@ export function importModel(input, includeContext, gameOver) {
 			preMoves: [],
 		})
 		if (!gameOver) store.players[i].eraCards = JSON.parse(JSON.stringify(inputModel[0][i][7]))
-		if (!gameOver) store.players[i].moneyRoundIncome = inputModel[0][i][8]
+		if (!gameOver) store.players[i].moneyRoundIncome = Math.round(inputModel[0][i][8])
 	}
 
 	// 1 cities

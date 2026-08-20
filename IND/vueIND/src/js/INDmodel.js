@@ -500,8 +500,8 @@ export function completeMerger_core(winningPlayerIndex, winningBidAmount, mergin
 
 	// Then distribute the money to the previous owners.
 	// If the company was NOT owned by the merger winner, then they get all the cash
-	const company0income = winningBidAmount * (mergingCompanies[0][2] / (mergingCompanies[0][2] + mergingCompanies[1][2]))
-	const company1income = winningBidAmount * (mergingCompanies[1][2] / (mergingCompanies[0][2] + mergingCompanies[1][2]))
+	const company0income = Math.round(winningBidAmount * (mergingCompanies[0][2] / (mergingCompanies[0][2] + mergingCompanies[1][2])))
+	const company1income = winningBidAmount - company0income
 	// Firstly, if you owned both comps, you cannot get back more than netWinningBidAmount
 	if (winningPlayerIndex === mergingCompanies[0][0] && winningPlayerIndex === mergingCompanies[1][0]) {
 		store.players[winningPlayerIndex].moneyCash += Math.min(netWinningBidAmount, company0income + company1income)
