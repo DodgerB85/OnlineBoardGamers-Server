@@ -212,14 +212,15 @@
     initData.nextURL = '{{ nextURL|safe }}';
     {% endif %}
   
+    initData.kickoutVotesData = {{ kickoutVotesData | default:'{}' | safe }};
+    initData.kickoutVoteThreshold = {{ kickoutVoteThreshold | default:'0' }};
+
     ///////////////////////
     {% if involvedPlayer %}
 
     initData.statsExcludedGame = {{ statsExcludedGame|lower }};
     initData.pov = {{ pov }};
-    initData.kickoutVotesData = {{ kickoutVotesData | safe }};
-    initData.kickoutVoteThreshold = {{ kickoutVoteThreshold }};
-    
+
     initData.secondsToNextKickout = {{ secondsToNextKickout }};
     {% if kickoutRequired > 0 and not myMove %}
     initData.kickoutRequired = {{kickoutRequired}};

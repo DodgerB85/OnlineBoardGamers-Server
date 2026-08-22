@@ -115,7 +115,7 @@ export async function initGame() {
 
 	personal.liveWS = false
 
-	store.kickoutVotesData = window.initData.kickoutVotesData
+	store.kickoutVotesData = window.initData.kickoutVotesData || {}
 	store.kickoutVoteThreshold = window.initData.kickoutVoteThreshold
 
 	// Set up logged in player, but not involved
