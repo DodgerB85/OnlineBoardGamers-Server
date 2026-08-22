@@ -275,6 +275,7 @@ export const useModelStore = defineStore("store", () => {
 
 	const viewSettings = reactive({
 		showNotes: false,
+		showNoteHexIDs: false,
 		showChat: false,
 		showBug: false,
 		showHistory: false,

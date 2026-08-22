@@ -284,6 +284,7 @@ function currentKickoutTarget() {
 	return controller.timedOutPlayerObj().name
 }
 function myKickoutVote() {
+	if (personal.pov < 0) return false
 	return store.kickoutVotesData[personal.name]
 }
 function canKickoutNow() {
@@ -302,9 +303,11 @@ function canKickoutNow() {
 	return false
 }
 function kickoutVoteCount() {
+	if (personal.pov < 0) return 0
 	return Object.values(store.kickoutVotesData).filter((vote) => vote[0] === currentKickoutTarget()).length
 }
 function kickoutVoters() {
+	if (personal.pov < 0) return ""
 	let names = []
 	for (const voter in store.kickoutVotesData) {
 		const vote = store.kickoutVotesData[voter]
@@ -334,8 +337,9 @@ function updateSoloKickoutCountdown() {
 	}
 }
 watch(
-	() => store.kickoutVotesData[personal.name],
+	() => personal.pov >= 0 ? store.kickoutVotesData[personal.name] : false,
 	() => {
+		if (personal.pov < 0) return
 		updateSoloKickoutCountdown()
 		if (soloKickoutCountdown.value !== "") {
 			if (personal.kickoutCountdownIntervalTimer != undefined) clearInterval(personal.kickoutCountdownIntervalTimer)

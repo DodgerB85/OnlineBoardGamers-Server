@@ -737,6 +737,15 @@ function handleSelectBubbleClick() {
 					</g>
 				</g>
 
+				<!-- NOTE HEX IDs -->
+				<g v-if="store.viewSettings.showNoteHexIDs">
+					<g v-for="hex in store.mapData.hexData" :key="'noteID' + hex.hexID">
+						<text v-if="hex?.noteID >= 0" class="noClick" :transform="`translate(${hex.rawXY[0]} , ${hex.rawXY[1]})`" text-anchor="middle" dominant-baseline="middle" fill="white" :style="{ 'font-size': 175 * store.RATIO + 'px', 'font-weight': 900, stroke: 'black', 'stroke-width': 6 * store.RATIO + 'px' }">
+							{{ hex.noteID }}
+						</text>
+					</g>
+				</g>
+
 				<!-- HISTORY STUFF-->
 				<!-- HISTORY HEX PIECES TO Highlight -->
 				<g v-for="(entry, idx) in store.historyHelpers.histHexPiecesToHighlight" :key="idx" :transform="`translate(${model.getHexByID(entry[0]).rawXY[0]} , ${model.getHexByID(entry[0]).rawXY[1]})`">

@@ -49,6 +49,7 @@ async function toggleReplay() {
 function toggleNotes() {
 	store.viewSettings.showBug = false
 	store.viewSettings.showNotes = !store.viewSettings.showNotes
+	if (!store.viewSettings.showNotes) store.viewSettings.showNoteHexIDs = false
 }
 function toggleChat() {
 	if (store.viewSettings.showHistory) {

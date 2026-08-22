@@ -63,6 +63,42 @@ function toggleNotes() {
 	store.viewSettings.showBug = false
 	store.viewSettings.showNotes = !store.viewSettings.showNotes
 }
+function toggleNoteHexIDs() {
+	if (store.viewSettings.showNoteHexIDs) store.viewSettings.showNoteHexIDs = false
+	else {
+		// Recompute if not yet done, or if the hex style has changed since last time
+		if (!store.mapData.hexData[0].noteID || store.mapData.hexData[0].noteStyle !== store.hexStyle) {
+			let hexesCopy = [...store.mapData.hexData]
+
+			hexesCopy.sort((a, b) => {
+				if (store.hexStyle === rf.POINTY) {
+					// Rows run horizontally (constant r): start at the top left, go along horizontally, then down a row
+					if (a.coord[1] !== b.coord[1]) {
+						return a.coord[1] - b.coord[1]
+					} else {
+						return a.coord[0] - b.coord[0]
+					}
+				} else {
+					// FLAT - Compare s values first (higher s values come first)
+					if (a.coord[2] !== b.coord[2]) {
+						return b.coord[2] - a.coord[2]
+					} else {
+						// If s values are the same, compare q values (lower q values come first)
+						return a.coord[0] - b.coord[0]
+					}
+				}
+			})
+
+			// add a noteID to each hex
+			for (let i = 0; i < hexesCopy.length; i++) {
+				hexesCopy[i].noteStyle = store.hexStyle
+				if (hexesCopy[i].hexTerrainID === rf.TERR_VOID) hexesCopy[i].noteID = -1
+				else hexesCopy[i].noteID = i + 1
+			}
+		}
+		store.viewSettings.showNoteHexIDs = true
+	}
+}
 function parseMessage(message) {
 	//message = message.replace(/SNLB/g, "\n")
 	return message
@@ -239,6 +275,12 @@ function localCastVote(topic) {
 			<p>Only you can see these notes</p>
 			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes" maxlength="5000"></textarea></div>
 			<div>
+				<button class="actionsLineButton" @click="toggleNoteHexIDs">
+					<template v-if="store.viewSettings.showNoteHexIDs">Hide</template>
+					<template v-else>Show</template>
+					hex IDs
+				</button>
+				<br />
 				<button id="submitNotes" class="actionsLineButton" @click="IO.saveNotes">Save</button>
 				<button id="clearNotes" class="actionsLineButton" @click="clearNotes">Clear</button>
 				<button id="closeNotes" class="actionsLineButton" @click="toggleNotes">Close</button>

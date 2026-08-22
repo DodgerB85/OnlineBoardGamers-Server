@@ -84,7 +84,7 @@ export async function initGame() {
 
 	store.deleteVotesData = window.initData.deleteVotesData
 	store.statsExcludeVotesData = window.initData.statsExcludeVotesData
-	store.kickoutVotesData = window.initData.kickoutVotesData
+	store.kickoutVotesData = window.initData.kickoutVotesData || {}
 	store.kickoutVoteThreshold = window.initData.kickoutVoteThreshold
 
 	personal.liveWS = false

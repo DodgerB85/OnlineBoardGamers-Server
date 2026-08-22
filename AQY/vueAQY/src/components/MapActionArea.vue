@@ -34,6 +34,10 @@ function cancelKickout() {
 	personal.kickoutRequired = 0
 }
 
+function passKickout() {
+	controller.endPlayerTurn()
+}
+
 function getFlexiKickoutTImerText() {
 	if (personal.flexiSecondsToNextKickout < 0) personal.flexiSecondsToNextKickout = 0
 	let hoursToGo = String(Math.floor(personal.flexiSecondsToNextKickout / 60 / 60))
@@ -49,6 +53,7 @@ function currentKickoutTarget() {
 
 // Returns my vote entry [target, time] if I have voted to kick out the current player
 function myKickoutVote() {
+	if (personal.pov < 0) return null
 	const vote = store.kickoutVotesData[personal.name]
 	if (!vote || !Array.isArray(vote) || vote[0] !== currentKickoutTarget()) return null
 	return vote
@@ -64,6 +69,7 @@ function canKickoutNow() {
 }
 
 function kickoutVoteCount() {
+	if (personal.pov < 0) return 0
 	const target = currentKickoutTarget()
 	let count = 0
 	for (const voter in store.kickoutVotesData) {
@@ -74,6 +80,7 @@ function kickoutVoteCount() {
 }
 
 function kickoutVoters() {
+	if (personal.pov < 0) return "None"
 	const target = currentKickoutTarget()
 	let voters = "None"
 	for (const voter in store.kickoutVotesData) {
@@ -115,10 +122,12 @@ function updateSoloKickoutCountdown() {
 }
 
 watch(
-	() => store.kickoutVotesData[personal.name],
-	(vote) => {
-		if (vote && Array.isArray(vote) && soloKickoutCountdownTimer == null) {
-			updateSoloKickoutCountdown()
+	() => personal.pov >= 0 ? store.kickoutVotesData[personal.name] : undefined,
+	() => {
+		if (personal.pov < 0) return
+		updateSoloKickoutCountdown()
+		if (soloKickoutCountdown.value !== "") {
+			if (soloKickoutCountdownTimer != null) clearInterval(soloKickoutCountdownTimer)
 			soloKickoutCountdownTimer = setInterval(updateSoloKickoutCountdown, 1000)
 		}
 	},
@@ -362,8 +371,8 @@ function localEndTurn() {
 function getCountryEndTurnWarnings() {
 	let ret = []
 	let player = controller.currentPlayerObj()
-	let playerIndex = controller.currentPlayerIndex()
-	let resources = player.availableResources
+	let _playerIndex = controller.currentPlayerIndex()
+	let _resources = player.availableResources
 	// Caution: Unused cart shops
 	if (city.getCartShopStatus(controller.currentPlayerIndex())[0] > 0) ret.push(["orange", "Caution: You have unused Cart Shops"])
 
