@@ -147,6 +147,7 @@ export const initialJunctionsStateArray = [
 	[-1, -1, -1, -1, 0, 0],
 	[-1, -1, -1, -1, 0, 0],
 	[-1, -1, -1, -1, 0, 0],
+	[-1, -1, -1, -1, 0, 0],// 35
 ]
 
 // Pittsburgh map initial junctions state (38 junctions)

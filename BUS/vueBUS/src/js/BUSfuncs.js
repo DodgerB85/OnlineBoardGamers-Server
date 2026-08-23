@@ -327,10 +327,12 @@ export function compressJunctions(junctions) {
 }
 
 // 2. DECOMPRESS: Map the template back using the flat list
+// Saves from before junction 35 was restored have fewer values than the template has open spots,
+// so missing trailing values default to 0 (empty building spot / no passengers)
 export function decompressJunctions(compressedJunctions) {
 	const store = useModelStore()
 	let i = 0
-	return store.junctions.map((row) => row.map((cell) => (cell === -1 ? -1 : compressedJunctions[i++])))
+	return store.junctions.map((row) => row.map((cell) => (cell === -1 ? -1 : i < compressedJunctions.length ? compressedJunctions[i++] : 0)))
 }
 
 /**
