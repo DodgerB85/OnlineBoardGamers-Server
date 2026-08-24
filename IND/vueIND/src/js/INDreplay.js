@@ -160,8 +160,11 @@ export async function generateReplayData(spoilerFree = false) {
 		else if (store.computedHistory[i][0] === rf.HIST_MERGER_WITHOUT_BIDDING) replayMergerWithoutBidding(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_MERGER_REMOVE_SIAP_FAJI_TERRS) replayMergerRemoveSiapFajiTerrs(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_MERGER_SHIP_REDEPLOYMENT) replayMergerRedeployShips(i, store.computedHistory[i][1], store.computedHistory[i][3])
+		else if (store.computedHistory[i][0] === rf.HIST_REMOVE_COMPANY_NO_TERRS) replayRemoveCompanyNoTerrs(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_OPERATE_LAND_PAID_EXPANSION_ONLY) replayOperateLandPaidExpansion(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_REMOVE_ERA_CARD) replayRemoveEraCard(i, store.computedHistory[i][1], store.computedHistory[i][3])
+		else if (store.computedHistory[i][0] === rf.HIST_FINAL_INCOME) replayFinalIncome(i, store.computedHistory[i][1], store.computedHistory[i][3])
+		else if (store.computedHistory[i][0] === rf.HIST_GAME_END) replayGameEnd(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_CITY_GROWTH) replayCityGrowth(i, store.computedHistory[i][1], store.computedHistory[i][3])
 
 		replayData.push(funcs.simpleExportWholeINDmodelNoCompression())
@@ -550,7 +553,7 @@ export const HIST_SKIP_ACQUISITOIN_NO_COMPANIES = 47
 */
 
 	// Ignore player trades, as they won't ever end a turn or player (which is done by city build)
-	let entriesToIgnore = [rf.HIST_REWIND, rf.HIST_RESIGN, rf.HIST_KICKOUT, rf.HIST_CITY_GROWTH, rf.HIST_NO_CITY_GROWTH, rf.HIST_NEW_GAME, rf.HIST_NEW_TURN, rf.HIST_SET_NEW_TURN_ORDER, rf.HIST_REMOVE_COMPANY_NO_TERRS, rf.HIST_FINAL_INCOME, rf.HIST_GAME_END, rf.HIST_OPERATION_INCOME_SUMMARY, rf.HIST_SET_NEW_TURN_ORDER]
+	let entriesToIgnore = [rf.HIST_REWIND, rf.HIST_RESIGN, rf.HIST_KICKOUT, rf.HIST_CITY_GROWTH, rf.HIST_NO_CITY_GROWTH, rf.HIST_NEW_GAME, rf.HIST_NEW_TURN, rf.HIST_SET_NEW_TURN_ORDER, rf.HIST_OPERATION_INCOME_SUMMARY]
 	if (entriesToIgnore.includes(currentAction)) return // NOTHING
 
 	let currentPlayerIndex = store.computedHistory[historyIndex][1]
@@ -625,4 +628,36 @@ export const HIST_SKIP_ACQUISITOIN_NO_COMPANIES = 47
 		}
 	}
 	//return NOTHING
+}
+
+function replayRemoveCompanyNoTerrs(historyIndex, playerIndex, entry3) {
+	const store = useModelStore()
+	let companyId = entry3[0]
+	for (let j = 0; j < store.availableCompanies.length; j++) {
+		if (store.availableCompanies[j].id === companyId) {
+			store.availableCompanies.splice(j, 1)
+			break
+		}
+	}
+}
+
+function replayFinalIncome(historyIndex, playerIndex, entry3) {
+	const store = useModelStore()
+	const roundIncomes = entry3
+	for (let j = 0; j < store.players.length; j++) {
+		store.players[j].moneyCash += roundIncomes[j]
+	}
+}
+
+function replayGameEnd(historyIndex, playerIndex, entry3) {
+	const store = useModelStore()
+	store.gameflow.phase = rf.PHASE_GAME_OVER
+	const finalRes = entry3
+	if (finalRes && finalRes.length > 0) {
+		store.gameflow.fullTurnOrder.splice(0)
+		for (let j = 0; j < finalRes.length; j++) {
+			store.gameflow.fullTurnOrder.push(finalRes[j][0])
+		}
+		store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
+	}
 }
