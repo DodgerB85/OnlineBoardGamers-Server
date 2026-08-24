@@ -14,7 +14,7 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 const personal = usePersonalStore()
 
-import { computed } from "vue"
+import { computed, ref, watch } from "vue"
 
 const forwardChars = ["A", "B", "C", "D", "E", "F"]
 const reverseChars = ["F", "E", "D", "C", "B", "A"]
@@ -91,33 +91,33 @@ function clickedActionOption(action, index) {
 	store.context.actionChosen = true
 }
 
-function getPointerRotation() {
-	const currentRotation = store.pointerRotation || 0
-	let targetRotation
+// Per-component rotation state, updated only via this watcher.
+// Writing it from a render-time function (old getPointerRotation) caused an infinite
+// update loop in production builds - dev builds break out with a recursive-update warning.
+const pointerRotation = ref(0)
+watch(
+	() => store.desiredBuilding,
+	() => {
+		let targetRotation
+		if (store.desiredBuilding === rf.BLDG_HOME) targetRotation = -109
+		else if (store.desiredBuilding === rf.BLDG_OFFICE) targetRotation = 11
+		else if (store.desiredBuilding === rf.BLDG_PUB) targetRotation = 130
+		else return
+		// Take the shortest path to the new angle, keeping the cumulative value
+		// DO NOT NORMALIZE THIS. If it's 371, leave it at 371.
+		let rotationDiff = (targetRotation - pointerRotation.value) % 360
+		if (rotationDiff > 180) rotationDiff -= 360
+		if (rotationDiff < -180) rotationDiff += 360
+		pointerRotation.value = pointerRotation.value + rotationDiff
+	},
+	{ immediate: true }
+)
 
-	// 1. Define base angles
-	if (store.desiredBuilding === rf.BLDG_HOME) targetRotation = -109
-	else if (store.desiredBuilding === rf.BLDG_OFFICE) targetRotation = 11
-	else if (store.desiredBuilding === rf.BLDG_PUB) targetRotation = 130
-	else return [1815, 3336, 0]
-
-    // 2. Normalize the target relative to the current rotation
-    // to find the shortest displacement
-    let rotationDiff = (targetRotation - currentRotation) % 360
-    if (rotationDiff > 180) rotationDiff -= 360
-    if (rotationDiff < -180) rotationDiff += 360
-    // 3. Calculate the absolute new rotation
-    // DO NOT NORMALIZE THIS. If it's 371, leave it at 371.
-    const finalRotation = currentRotation + rotationDiff
-    store.pointerRotation = finalRotation
-    // 4. Return position array
-    const coords = {
-        [rf.BLDG_HOME]: [1815, 3336],
-        [rf.BLDG_OFFICE]: [1805, 3340],
-        [rf.BLDG_PUB]: [1814, 3350],
-    }
-    const [x, y] = coords[store.desiredBuilding] || [1815, 3336]
-    return [x, y, finalRotation]
+function getPointerCoords() {
+	if (store.desiredBuilding === rf.BLDG_HOME) return [1815, 3336]
+	if (store.desiredBuilding === rf.BLDG_OFFICE) return [1805, 3340]
+	if (store.desiredBuilding === rf.BLDG_PUB) return [1814, 3350]
+	return [1815, 3336]
 }
 
 
@@ -451,9 +451,9 @@ function getCorrectedBusIndex(position) {
 							:style="{
 								width: (store.refSize * 100) / 400 + 'px',
 								height: (store.refSize * 400) / 400 + 'px',
-								top: (store.refSize * getPointerRotation()[0]) / 400 + 'px',
-								left: (store.refSize * getPointerRotation()[1]) / 400 + 'px',
-								transform: 'rotate(' + getPointerRotation()[2] + 'deg)',
+								top: (store.refSize * getPointerCoords()[0]) / 400 + 'px',
+								left: (store.refSize * getPointerCoords()[1]) / 400 + 'px',
+								transform: 'rotate(' + pointerRotation + 'deg)',
 							}">
 							<img :src="view.getImage('pointer')" class="pointerImg" alt="pointer" />
 						</div>

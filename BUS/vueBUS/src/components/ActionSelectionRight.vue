@@ -9,7 +9,7 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 const personal = usePersonalStore()
 
-import { computed } from "vue"
+import { computed, ref, watch } from "vue"
 
 const forwardChars = ["A", "B", "C", "D", "E", "F"]
 const reverseChars = ["F", "E", "D", "C", "B", "A"]
@@ -67,38 +67,31 @@ function getActionSelectionWidth() {
 	if (personal.selectedBoard === rf.BOARD_PITTS) return 279
 }
 
-function getPointerRotation() {
-    // 1. Get the current cumulative rotation from the store (default to 0)
-    const currentRotation = store.pointerRotation || 0;
-    
-    // 2. Define the base targets and coordinates
-    let targetBaseAngle = 0;
-    let coords = [1880, 260];
+// Per-component rotation state, updated only via this watcher.
+// Writing it from a render-time function (old getPointerRotation) caused an infinite
+// update loop in production builds - dev builds break out with a recursive-update warning.
+const pointerRotation = ref(0)
+watch(
+	() => store.desiredBuilding,
+	() => {
+		let targetBaseAngle = 0
+		if (store.desiredBuilding === rf.BLDG_HOME) targetBaseAngle = -120
+		else if (store.desiredBuilding === rf.BLDG_OFFICE) targetBaseAngle = 0
+		else if (store.desiredBuilding === rf.BLDG_PUB) targetBaseAngle = 120
+		// Take the shortest path to the new angle, keeping the cumulative value
+		let diff = (targetBaseAngle - pointerRotation.value) % 360
+		if (diff > 180) diff -= 360
+		if (diff < -180) diff += 360
+		pointerRotation.value = pointerRotation.value + diff
+	},
+	{ immediate: true }
+)
 
-    if (store.desiredBuilding === rf.BLDG_HOME) {
-        targetBaseAngle = -120;
-        coords = [1886, 264];
-    } else if (store.desiredBuilding === rf.BLDG_OFFICE) {
-        targetBaseAngle = 0;
-        coords = [1880, 260];
-    } else if (store.desiredBuilding === rf.BLDG_PUB) {
-        targetBaseAngle = 120;
-        coords = [1888, 265];
-    }
-
-    // 3. Calculate the shortest difference
-    // This formula finds the quickest way to the new angle (-180 to 180 range)
-    let diff = (targetBaseAngle - currentRotation) % 360;
-    
-    if (diff > 180) diff -= 360;
-    if (diff < -180) diff += 360;
-
-    // 4. Update the store with the NEW cumulative rotation
-    const newRotation = currentRotation + diff;
-    store.pointerRotation = newRotation;
-
-    // 5. Return the array with the non-normalized rotation
-    return [coords[0], coords[1], newRotation];
+function getPointerCoords() {
+	if (store.desiredBuilding === rf.BLDG_HOME) return [1886, 264]
+	if (store.desiredBuilding === rf.BLDG_OFFICE) return [1880, 260]
+	if (store.desiredBuilding === rf.BLDG_PUB) return [1888, 265]
+	return [1880, 260]
 }
 </script>
 
@@ -413,9 +406,9 @@ function getPointerRotation() {
 			:style="{
 				width: (store.refSize * 50) / 400 + 'px',
 				height: (store.refSize * 200) / 400 + 'px',
-				top: (store.refSize * getPointerRotation()[0]) / 400 + 'px',
-				left: (store.refSize * getPointerRotation()[1]) / 400 + 'px',
-				transform: 'rotate(' + getPointerRotation()[2] + 'deg)',
+				top: (store.refSize * getPointerCoords()[0]) / 400 + 'px',
+				left: (store.refSize * getPointerCoords()[1]) / 400 + 'px',
+				transform: 'rotate(' + pointerRotation + 'deg)',
 			}">
 			<img :src="view.getImage('pointer')" class="pointerImg" alt="pointer" />
 		</div>
