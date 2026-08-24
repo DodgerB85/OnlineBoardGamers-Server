@@ -40,7 +40,7 @@ def buildFCMstartingOptions(post_data):
 
     if "enableAdvancedOptions" in post_data:
         if "randomModules" in post_data:
-            if post_data["random_MS"] == "202":
+            if post_data.get("random_MS") == "202":
                 optionsArr.append(rfFCM.SO_NEW_MS)
             optionsArr.append(rfFCM.SO_RANDOM_MODULES)
             min_modules = post_data["minModules"].zfill(2)  # Pad to two digits
@@ -56,7 +56,7 @@ def buildFCMstartingOptions(post_data):
                     rfFCM.SO_HAWKERS
                 ])
         if "draftModules" in post_data:
-            if post_data["draft_MS"] == "302":
+            if post_data.get("draft_MS") == "302":
                 optionsArr.append(rfFCM.SO_NEW_MS)
             if "newDistrictsDraft" in post_data:
                 optionsArr.append(rfFCM.SO_NEW_DISTRICTS)
