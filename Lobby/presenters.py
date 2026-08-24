@@ -1854,13 +1854,19 @@ class FCMpresenter(GamePresenter):
             if rfFCM.SO_NEW_MS not in starting_options:
                 availableModules.append(rfFCM.SO_HARD_CHOICES)
             selectedModules = []
-            moduleRange = []
+            # Defaults matching the create-game form, used when the min/max options are missing
+            minModules = 1
+            maxModules = 15
             for i in range(len(starting_options)):
-                if len(str(starting_options[i])) == 5:
-                    moduleRange.append(str(starting_options[i]))
-            for i in range(len(moduleRange)):
-                moduleRange[i] = int(moduleRange[i][-2:])
-            numberOfModulesToPick = random.randrange(int(moduleRange[0]), int(moduleRange[1] + 1), 1)
+                optionStr = str(starting_options[i])
+                if len(optionStr) == 5:
+                    if int(optionStr[:3]) == rfFCM.SO_MIN_RANDOM_MODULES:
+                        minModules = int(optionStr[-2:])
+                    elif int(optionStr[:3]) == rfFCM.SO_MAX_RANDOM_MODULES:
+                        maxModules = int(optionStr[-2:])
+            if maxModules < minModules:
+                maxModules = minModules
+            numberOfModulesToPick = random.randrange(minModules, maxModules + 1, 1)
             for _i in range(numberOfModulesToPick):
                 currentIndex = random.randrange(0, len(availableModules), 1)
                 selectedModules.append(availableModules.pop(currentIndex))
