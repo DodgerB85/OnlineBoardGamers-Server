@@ -32,7 +32,9 @@
                class="nd-button nd-button-primary"
                target="_blank">{% translate "Join the Discord" %}</a>
           </div>
-          <form method="post" class="nd-stacked-form">
+          <form method="post"
+                class="nd-stacked-form"
+                onsubmit="const b=this.querySelector('button[type=submit]'); b.disabled=true; b.textContent='Sending feedback......';">
             {% csrf_token %}
             <div class="nd-form-row">
               <label for="feedback" class="nd-form-label">{% translate "Your Feedback" %}</label>
