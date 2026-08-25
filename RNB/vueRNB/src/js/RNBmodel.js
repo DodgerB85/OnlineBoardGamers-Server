@@ -799,10 +799,10 @@ export function addTransporterToGame(playerIndex, transporterType, bucketLocatio
 	if (!ignoreAnyExcessTransporters) {
 		// Now check for transporter violations
 		const problemRet = excessTransporterCheck(playerIndex)
-		if (problemRet[0] || problemRet[1] || problemRet[2]) {
+		if (problemRet[0] || problemRet[1] || problemRet[2] || problemRet[3]) {
 			context.resetContextAndHighlights()
 			store.context.action = rf.ACT_REMOVE_EXCESS_TRANSPORTERS
-			highlight.highlightEligibleTransportersForRemoval(playerIndex, problemRet[0], problemRet[1], problemRet[2])
+			highlight.highlightEligibleTransportersForRemoval(playerIndex, problemRet[0], problemRet[1], problemRet[2], problemRet[3])
 		}
 	}
 
@@ -813,13 +813,17 @@ export function excessTransporterCheck(playerIndex) {
 	let currentTransporters = getTransportersByPlayerIndex(playerIndex).length
 	let currentLandTransporters = getTransportersByPlayerIndexandType(playerIndex, rf.LAND_TYPE).length
 	let currentWaterTransporters = getTransportersByPlayerIndexandType(playerIndex, rf.WATER_TYPE).length
+	let currentCaravans = getTransportersByPlayerIndex(playerIndex).filter((t) => t.type === rf.EXHIBITION_TRANSPORTER).length
 	let totalProblem = false
 	let landProblem = false
 	let waterProblem = false
+	let caravanProblem = false
 	if (currentTransporters > 8) totalProblem = true
 	if (currentLandTransporters > 5) landProblem = true
 	if (currentWaterTransporters > 5) waterProblem = true
-	return [totalProblem, landProblem, waterProblem, currentTransporters, currentLandTransporters, currentWaterTransporters]
+	// Art & The Atelier: a player is limited to 3 exhibition caravans
+	if (currentCaravans > 3) caravanProblem = true
+	return [totalProblem, landProblem, waterProblem, caravanProblem, currentTransporters, currentLandTransporters, currentWaterTransporters, currentCaravans]
 }
 
 export function resetTransportersForNewTurn() {

@@ -10,6 +10,7 @@ import * as loc from "./RNBlocation.js"
 import * as context from "./RNBcontext.js"
 import * as stack from "./RNBstack.js"
 import * as Bot from "./RNBbot.js"
+import * as atelier from "./RNBatelier.js"
 
 import { useModelStore } from "../stores/RNBstore.js"
 import { usePersonalStore } from "../stores/RNBpersonal.js"
@@ -229,6 +230,11 @@ export function getHeldResourcesScore(playerIndex) {
 	return score
 }
 
+// Total score = wonder points + held-resource points + Art & The Atelier artwork points
+export function getPlayerTotalScore(playerIndex) {
+	return getPlayerWonderPoints(playerIndex) + getHeldResourcesScore(playerIndex) + atelier.scoreArtwork(playerIndex)
+}
+
 export function getPlayerWonderPoints(playerIndex) {
 	const store = useModelStore()
 	const rowLengths = [4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6, 7, 7, 7]
@@ -368,8 +374,8 @@ export function setFullTurnOrderForGameover() {
 	// Before changing the phase, alter the TO / fullTO to result
 	store.gameflow.fullTurnOrder.sort((x, y) => {
 		// 1. Calculate Primary Score
-		const scoreX = getPlayerWonderPoints(x) + getHeldResourcesScore(x)
-		const scoreY = getPlayerWonderPoints(y) + getHeldResourcesScore(y)
+		const scoreX = getPlayerTotalScore(x)
+		const scoreY = getPlayerTotalScore(y)
 		const scoreDiff = scoreY - scoreX
 
 		// 2. If scores are different, sort by score (descending)

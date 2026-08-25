@@ -40,6 +40,7 @@ import * as context from "./RNBcontext"
 import * as prod from "./RNBproduce"
 import * as stack from "./RNBstack"
 import * as produce from "./RNBproduce"
+import * as atelier from "./RNBatelier"
 
 import { useModelStore } from "../stores/RNBstore.js"
 import { usePersonalStore } from "../stores/RNBpersonal.js"
@@ -264,6 +265,8 @@ export function updateHexInternalPowerLines(hexId, nodeIds) {
 export function clickedHighlight(entry, event = null) {
 	const store = useModelStore()
 	store.clearMessages()
+	// Art & The Atelier: block map clicks while choosing an atelier recipe
+	if (store.context.action === rf.ACT_SELECT_ATELIER_RECIPE) return
 	const hexID = entry[0]
 	const bucketIds = entry[1]
 	const clickedLocation = entry[2]
@@ -1394,6 +1397,14 @@ export function clickedRes(event, _hexID, resID) {
 		}
 		// Load the resource onto the transporter
 		const compressedOldResLocationUsed = stack.compressLocation(resObj.location)
+		// Art & The Atelier: caravans may only carry artwork, one of each type
+		if (transporterObj.type === rf.EXHIBITION_TRANSPORTER && !atelier.canCaravanCarry(transporterObj, resObj.type)) {
+			let clientX = event.clientX
+			let clientY = event.clientY
+			let htmlMessage = "Exhibition caravans can only carry artwork, one of each type"
+			model.showPopup("error", clientX, clientY, htmlMessage)
+			return
+		}
 		pickupRes_core(transporterObj.id, resID)
 		// create the stack
 		// Resources must be in a hexID and bucket. So use that for the location
@@ -1422,6 +1433,11 @@ export function pickupRes_core(transporterID, resID) {
 	}
 	// Find the transporter
 	let transporterObj = model.getTransporterByID(transporterID)
+	// Art & The Atelier: exhibition caravans may only carry artwork, one of each type
+	if (transporterObj.type === rf.EXHIBITION_TRANSPORTER) {
+		if (!rf.ALL_ARTWORK_RES.includes(resObj.type)) return 9
+		if (model.resourcesOnTransport(transporterID).some((r) => r.type === resObj.type)) return 9
+	}
 	// Load the resource onto the transporter
 	resObj.location = loc.setTransporterLocation(transporterObj.id)
 	return 0
@@ -1487,8 +1503,33 @@ export function clickedBuilding(buildingID, forcedInputGoods = []) {
 	// Determine transporter ID based on mode (TM or non-TM) - use LOWEST if there's a choice
 	const transporterID = store.context.selectedTransporterIDforTM >= 0 ? store.context.selectedTransporterIDforTM : Math.min(...model.getTransportersByPlayerIndexAndHexID(controller.currentPlayerIndex(), building.location[1]).map((t) => t.id))
 
+	// Art & The Atelier: pick the feasible recipe. Its output is remembered so the
+	// generic production machinery produces the right artwork / caravan. If several
+	// recipes are feasible, defer to the recipe bubble choice.
+	if (building.type === rf.BLDG_ATELIER) {
+		const feasibleRecipes = atelier.findFeasibleRecipeIndices(transporterID)
+		if (feasibleRecipes.length === 0) {
+			rf.doAdminAlrt("Atelier: no feasible recipe (all recipe inputs must be on the transporter)")
+			return
+		}
+		if (feasibleRecipes.length === 1) {
+			const recipeIdx = feasibleRecipes[0]
+			inputResources = [...bldgStats.inputRes[recipeIdx]]
+			store.context.atelierRecipeOutput = atelier.getRecipeOutput(recipeIdx)
+		} else {
+			// Multiple recipes possible - show the recipe bubble UI to pick one
+			store.context.atelierRecipeOptions = [...feasibleRecipes]
+			store.context.atelierBuildingID = buildingID
+			store.context.atelierTransporterID = transporterID
+			store.context.action = rf.ACT_SELECT_ATELIER_RECIPE
+			store.context.researchHexIDpossibilities.splice(0)
+			context.clearAllHighlights()
+			return
+		}
+	}
+
 	// If it is a multi-option input building, detect if options exist, and if so, go to option selection
-	if (bldgStats.inputRes.length > 1 && forcedInputGoods.length === 0) {
+	if (building.type !== rf.BLDG_ATELIER && bldgStats.inputRes.length > 1 && forcedInputGoods.length === 0) {
 		// First, check if you actually have a choice. This will only happen if you have >1 trunk AND >1 boards
 		const reachableResources = loc.getAllResourcesAccessibleToTransporter(transporterID, true)
 		const resourceOnHex = model.resourceCountByType(reachableResources.map((res) => res.type))
@@ -1509,12 +1550,21 @@ export function clickedBuilding(buildingID, forcedInputGoods = []) {
 		if (trunksOnHex >= 2 && boardsOnHex === 0) inputResources = [rf.RES_TRUNKS, rf.RES_TRUNKS]
 		else if (trunksOnHex === 0 && boardsOnHex >= 2) inputResources = [rf.RES_BOARDS, rf.RES_BOARDS]
 		else if (trunksOnHex >= 1 && boardsOnHex >= 1) inputResources = [rf.RES_TRUNKS, rf.RES_BOARDS]
-	} else if (bldgStats.inputRes.length > 1 && forcedInputGoods.length !== 0) {
+	} else if (building.type !== rf.BLDG_ATELIER && bldgStats.inputRes.length > 1 && forcedInputGoods.length !== 0) {
 		inputResources = [...forcedInputGoods]
 		if (inputResources.includes(rf.RES_BOARDS) && inputResources.includes(rf.RES_TRUNKS)) inputResources = [rf.RES_TRUNKS, rf.RES_BOARDS]
 	}
 
 	// Process building production - this removes resources, and adds transporters ONLY at this stage - sets up new water trans action if needed
+	completeManualProduction(building, transporterID, inputResources)
+	context.createUndoPoint()
+}
+
+// Shared tail of manual secondary production: removes inputs via processBuildingProduction,
+// produces the output, records the stack action, and re-highlights.
+function completeManualProduction(building, transporterID, inputResources) {
+	const store = useModelStore()
+	const bldgStats = model.getBuildingStatsFromBuildingID(building.id)
 	const buildingProductionRet = processBuildingProduction(transporterID, building, bldgStats, inputResources)
 	const buildingProductionRetError = buildingProductionRet[0]
 	const buildingProductionRetRemovedTransporterID = buildingProductionRet[1]
@@ -1532,9 +1582,13 @@ export function clickedBuilding(buildingID, forcedInputGoods = []) {
 	// If you selected resources different from first option, record it here
 	let resSetIdx = 0
 	if (!util.arraysEqual(inputResources, bldgStats.inputRes[0])) {
-		if (util.arraysEqual(inputResources, bldgStats.inputRes[1])) resSetIdx = 1
-		else if (util.arraysEqual(inputResources, bldgStats.inputRes[2])) resSetIdx = 2
-		else rf.doAdminAlrt("ERROR: Unrecognized input resource set for building production history")
+		for (let r = 1; r < bldgStats.inputRes.length; r++) {
+			if (util.arraysEqual(inputResources, bldgStats.inputRes[r])) {
+				resSetIdx = r
+				break
+			}
+		}
+		if (resSetIdx === 0) rf.doAdminAlrt("ERROR: Unrecognized input resource set for building production history")
 	}
 
 	// If you are pending water placement, don't reset now, and don't add to the stack yet
@@ -1555,11 +1609,28 @@ export function clickedBuilding(buildingID, forcedInputGoods = []) {
 		historyEntry: stackAction,
 		playerIndex: controller.currentPlayerIndex(),
 	})
+	// Art & The Atelier: clear the per-production recipe output
+	store.context.atelierRecipeOutput = -1
 	building.remainingConversions--
 	if (![rf.ACT_REMOVE_EXCESS_TRANSPORTERS, rf.ACT_REMOVE_EXCESS_TRANSPORTERS_FOR_DONKEY].includes(store.context.action)) {
 		context.resetContextAndHighlights()
 		highlight.updateAllHighlightsForTransporterMode()
 	}
+}
+
+// Art & The Atelier: called from the recipe bubble UI when the player picks a recipe.
+export function produceAtelierRecipe(recipeIdx) {
+	const store = useModelStore()
+	const buildingID = store.context.atelierBuildingID
+	const transporterID = store.context.atelierTransporterID
+	store.context.atelierRecipeOptions.splice(0)
+	store.context.atelierBuildingID = -1
+	store.context.atelierTransporterID = -1
+	store.context.action = rf.ACT_TM_SELECT_PICKUP_DROP_MOVE
+	const building = model.getBuildingByID(buildingID)
+	const bldgStats = model.getBuildingStatsFromBuildingID(buildingID)
+	store.context.atelierRecipeOutput = atelier.getRecipeOutput(recipeIdx)
+	completeManualProduction(building, transporterID, [...bldgStats.inputRes[recipeIdx]])
 	context.createUndoPoint()
 }
 
@@ -1577,14 +1648,18 @@ function processBuildingProduction(transporterID, building, bldgStats, inputReso
 
 	model.removeResourcesFromGameUsingTransporter(transporterID, inputResources, false)
 
+	// Art & The Atelier: the output depends on the chosen recipe (caravan vs artwork)
+	const atelierOutput = store.context.atelierRecipeOutput
+	const outputRes = building.type === rf.BLDG_ATELIER ? atelierOutput : bldgStats.outputRes.length === 1 ? bldgStats.outputRes[0] : -1
+
 	// Handle transporter input if required
 	let transporterAlreadyAdded = false
 	if (store.context.selectedTransporterIDforTM >= 0 && inputResources.some((res) => res > rf.RES_UPPER_LIMIT)) {
 		const transporterTypeNeeded = inputResources.find((res) => res > rf.RES_UPPER_LIMIT)
 		const transporterObj = model.getTransporterByID(transporterID)
 		if (transporterObj.type === transporterTypeNeeded) {
-			if (bldgStats.outputRes.length === 1 && bldgStats.outputRes[0] > rf.RES_UPPER_LIMIT) {
-				model.removeAndAddTransporterFromGameUsingID(transporterID, bldgStats.outputRes[0])
+			if (outputRes > rf.RES_UPPER_LIMIT) {
+				model.removeAndAddTransporterFromGameUsingID(transporterID, outputRes)
 				removedTransporterID = transporterID
 				transporterAlreadyAdded = true
 			} else {
@@ -1595,8 +1670,8 @@ function processBuildingProduction(transporterID, building, bldgStats, inputReso
 	}
 
 	// Add output transporter if needed
-	if (bldgStats.outputRes.length === 1 && bldgStats.outputRes[0] > rf.RES_UPPER_LIMIT && !transporterAlreadyAdded) {
-		return [0, removedTransporterID, addTransporterProductionToGame(bldgStats.outputRes[0], building.id)]
+	if (outputRes > rf.RES_UPPER_LIMIT && !transporterAlreadyAdded) {
+		return [0, removedTransporterID, addTransporterProductionToGame(outputRes, building.id)]
 	}
 
 	return [0, removedTransporterID, []]
@@ -1610,7 +1685,9 @@ function addTransporterProductionToGame(transporterType, buildingID) {
 	const store = useModelStore()
 	const building = model.getBuildingByID(buildingID)
 
-	if (rf.LAND_TRANSPORTERS.includes(transporterType)) {
+	// Art & The Atelier: exhibition caravans move on land but are not in LAND_TRANSPORTERS
+	// (so they don't count toward the 5-land limit). Treat them as land for placement.
+	if (rf.LAND_TRANSPORTERS.includes(transporterType) || transporterType === rf.EXHIBITION_TRANSPORTER) {
 		model.addTransporterToGame(controller.currentPlayerIndex(), transporterType, building.location, false)
 		return building.location
 	}
@@ -1673,6 +1750,15 @@ export function clickedResOnTransporter(transporterID, resourceID) {
 				let clientX = event.clientX
 				let clientY = event.clientY
 				let htmlMessage = "Transporter is<br/>already full<br/>Max Capacity: " + transporterStats.maxCapacity
+				model.showPopup("error", clientX, clientY, htmlMessage)
+				return
+			}
+			// Art & The Atelier: caravans may only carry artwork, one of each type
+			const stolenResObj = model.getResByID(resourceID)
+			if (selectedTransporterObj.type === rf.EXHIBITION_TRANSPORTER && !atelier.canCaravanCarry(selectedTransporterObj, stolenResObj.type)) {
+				let clientX = event.clientX
+				let clientY = event.clientY
+				let htmlMessage = "Exhibition caravans can only carry artwork, one of each type"
 				model.showPopup("error", clientX, clientY, htmlMessage)
 				return
 			}

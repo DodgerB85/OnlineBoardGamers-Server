@@ -209,6 +209,8 @@ const computedEntry3 = computed(() => {
 			priEntry.outputResourcesGfx = []
 			// ELECTRICITY: a -3 marker at index 2 means this primary was powered/doubled
 			priEntry.powered = priHistEntry.length > 2 && priHistEntry[2] === -3
+			// Art & The Atelier: a -4 marker at index 3 means the quarry produced marble
+			priEntry.producedMarble = priHistEntry.length > 3 && priHistEntry[3] === -4
 			if (buildingType === rf.BLDG_POWER_PLANT) {
 				// ELECTRICITY: powered power plant. Entry: [bldgID, loc, fuelType, -3]
 				priEntry.isPowerPlant = true
@@ -220,7 +222,8 @@ const computedEntry3 = computed(() => {
 				if (outputRes !== 0) priEntry.outputResourcesGfx.push("res_" + String(outputRes))
 			} else {
 				for (let j = 0; j < bldgStats.outputRes.length; j++) {
-					priEntry.outputResourcesGfx.push("res_" + String(bldgStats.outputRes[j]))
+					const outRes = priEntry.producedMarble ? rf.RES_MARBLE : bldgStats.outputRes[j]
+					priEntry.outputResourcesGfx.push("res_" + String(outRes))
 				}
 			}
 			Object.assign(priEntry, getHighlightData([fullLocation]))
@@ -891,6 +894,14 @@ const computedEntry3 = computed(() => {
 				}
 				thisStepHist.bricks = bricks
 				thisStepHist.addBrickText = addBrickText
+			}
+			// Art & The Atelier: [STACK_EXHIBITION, caravanTransID, stagerIdx, targetIdx, beauty]
+			else if (stackAction[0] === rf.STACK_EXHIBITION) {
+				thisStepHist.action = rf.STACK_EXHIBITION
+				thisStepHist.stagerIdx = stackAction[2]
+				thisStepHist.targetIdx = stackAction[3]
+				thisStepHist.beauty = stackAction[4]
+				thisStepHist.targetName = store.players[thisStepHist.targetIdx].displayName
 			}
 			thisStepHist.singleStackEntryID = i - 1
 			ret.stackSteps.push(thisStepHist)
@@ -1569,6 +1580,14 @@ const computedEntry3 = computed(() => {
 								<span v-if="idx > 0">+&nbsp;</span>
 								<img v-for="(resGfx, idx2) in brick" :key="idx2" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
 							</div>
+						</div>
+					</template>
+					<!-- Art & The Atelier: EXHIBITION -->
+					<template v-if="stackEntry.action === rf.STACK_EXHIBITION">
+						<div class="flexContainer stackEntryDiv">
+							<span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.stagerIdx].colour)">{{ store.players[stackEntry.stagerIdx].displayName }}</span>
+							&nbsp;staged an exhibition of {{ stackEntry.beauty }} works at
+							<span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.targetIdx].colour)">{{ stackEntry.targetName }}</span>'s tile
 						</div>
 					</template>
 					<!-- End of stack entries -->

@@ -688,6 +688,9 @@ export function exportRNBmodel(forGameOver) {
 		else tempPlayer.push([store.players[i].name, store.players[i].displayName])
 		// 1 - colour
 		tempPlayer.push(store.players[i].colour)
+		// 2 - Art & The Atelier: shows staged per target, best beauty shown at this tile
+		tempPlayer.push(store.players[i].artShownAt || {})
+		tempPlayer.push(store.players[i].artBestShownHere || 0)
 
 		tempPlayers.push(tempPlayer)
 	}
@@ -705,7 +708,8 @@ export function exportRNBmodel(forGameOver) {
 		tempTransporter.push(transporterObj.ownerIndex)
 		tempTransporter.push(transporterObj.type)
 		let exportLocation = []
-		if (rf.LAND_TRANSPORTERS.includes(transporterObj.type)) exportLocation = exportLandTransporterLocation(transporterObj.location)
+		// Art & The Atelier: exhibition caravans are land movers but not in LAND_TRANSPORTERS
+		if (rf.LAND_TRANSPORTERS.includes(transporterObj.type) || transporterObj.type === rf.EXHIBITION_TRANSPORTER) exportLocation = exportLandTransporterLocation(transporterObj.location)
 		else if (rf.WATER_TRANSPORTERS.includes(transporterObj.type)) exportLocation = exportWaterTransporterLocation(transporterObj.location)
 		tempTransporter.push([...exportLocation])
 		if (!forGameOver) tempTransporter.push(transporterObj.uniqueID)
@@ -804,6 +808,9 @@ export function importRNBmodel(input, forGameOver) {
 			displayName: displayName,
 			colour: colour,
 			RnD: [...RnD],
+			// Art & The Atelier: restored for old saves that lack these fields
+			artShownAt: entry[2] || {},
+			artBestShownHere: entry[3] || 0,
 		})
 	}
 
@@ -821,7 +828,8 @@ export function importRNBmodel(input, forGameOver) {
 		let uniqueID = ""
 		if (!forGameOver) uniqueID = entry[3]
 		let transporterLocation = []
-		if (rf.LAND_TRANSPORTERS.includes(transporterType)) transporterLocation = importLandTransporterLocation(exportedLocation)
+		// Art & The Atelier: exhibition caravans are land movers but not in LAND_TRANSPORTERS
+		if (rf.LAND_TRANSPORTERS.includes(transporterType) || transporterType === rf.EXHIBITION_TRANSPORTER) transporterLocation = importLandTransporterLocation(exportedLocation)
 		else if (rf.WATER_TRANSPORTERS.includes(transporterType)) transporterLocation = importWaterTransporterLocation(exportedLocation)
 		const transporterStats = rf.getTransporterStats(transporterType)
 

@@ -261,7 +261,12 @@ export function getImage(image) {
 	else if (image === "res_" + rf.RES_MANAGER) return new URL(`../../../static/RNB/images/resources/res_manager.jpg`, import.meta.url).href
 	else if (image === "res_" + rf.RES_PEARL) return new URL(`../../../static/RNB/images/resources/res_pearl.jpg`, import.meta.url).href
 	else if (image === "res_" + rf.RES_MARBLE) return new URL(`../../../static/RNB/images/resources/res_marble.jpg`, import.meta.url).href
-	//else if (image === "res_" + rf.RES_ART) return new URL(`../../../static/RNB/images/resources/res_art.jpg`, import.meta.url).href
+	// Art & The Atelier artwork
+	else if (image === "res_" + rf.RES_WOOD_CARVING) return new URL(`../../../static/RNB/images/resources/res_woodcarving.jpg`, import.meta.url).href
+	else if (image === "res_" + rf.RES_RING) return new URL(`../../../static/RNB/images/resources/res_ring.jpg`, import.meta.url).href
+	else if (image === "res_" + rf.RES_SKETCH) return new URL(`../../../static/RNB/images/resources/res_sketch.jpg`, import.meta.url).href
+	else if (image === "res_" + rf.RES_POTTERY) return new URL(`../../../static/RNB/images/resources/res_pottery.jpg`, import.meta.url).href
+	else if (image === "res_" + rf.RES_STATUE) return new URL(`../../../static/RNB/images/resources/res_statue.jpg`, import.meta.url).href
 	else if (image === "res_" + rf.RES_PSEUDO_MINE) return new URL(`../../../static/RNB/images/resources/res_pseudo_mine.jpg`, import.meta.url).href
 	// Buildings
 	else if (image === "bldg_" + rf.BLDG_WOODCUTTER) return new URL(`../../../static/RNB/images/buildings/bldg_woodcutter.jpg`, import.meta.url).href

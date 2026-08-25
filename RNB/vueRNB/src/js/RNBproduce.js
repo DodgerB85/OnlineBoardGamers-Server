@@ -18,6 +18,7 @@ import * as context from "./RNBcontext"
 import * as highlight from "./RNBhighlight"
 import * as controller from "./RNBcontroller.js"
 import * as electricity from "./RNBelectricity.js"
+import * as atelier from "./RNBatelier.js"
 import { usePersonalStore } from "../stores/RNBpersonal.js"
 
 // NOTE: This outputs resources, and prevents out put of an unclaimed transporter production.
@@ -33,6 +34,14 @@ export function addBuildingOutputResourcesToGame_core(buildingID, forcedOutputRe
 	// hex set is deterministic, so this also doubles output correctly in replay.
 	const isPoweredPrimary = store.gameOptions.useElectricity && model.isPrimaryProducer(building) && electricity.isHexPowered(location[1])
 
+	// Art & The Atelier: a quarry with 3+ stone on its tile and no marble yet produces
+	// marble instead of stone. Pure board-state function, so replay is deterministic.
+	const produceMarble = building.type === rf.BLDG_QUARRY && atelier.quarryProducesMarble(location[1])
+
+	// Art & The Atelier: an atelier produces the chosen recipe's output (set just before
+	// production). A caravan recipe output is a transporter, added elsewhere, not here.
+	const atelierOutputRes = building.type === rf.BLDG_ATELIER ? store.context.atelierRecipeOutput : -1
+
 	// Use a single result variable instead of re-assigning an array repeatedly
 	let producedMineRes = 0
 	let mineResults = []
@@ -41,8 +50,15 @@ export function addBuildingOutputResourcesToGame_core(buildingID, forcedOutputRe
 		if (outputRes > rf.RES_UPPER_LIMIT) continue
 
 		if (type !== rf.BLDG_MINE) {
-			model.addResourceToGame_core(outputRes, location, playerIndex)
-			if (isPoweredPrimary) model.addResourceToGame_core(outputRes, location, playerIndex)
+			let resToProduce = outputRes
+			if (produceMarble) resToProduce = rf.RES_MARBLE
+			else if (building.type === rf.BLDG_ATELIER) {
+				// Caravan recipe: the caravan transporter is added by processBuildingProduction
+				if (atelierOutputRes > rf.RES_UPPER_LIMIT) continue
+				resToProduce = atelierOutputRes
+			}
+			model.addResourceToGame_core(resToProduce, location, playerIndex)
+			if (isPoweredPrimary) model.addResourceToGame_core(resToProduce, location, playerIndex)
 			continue
 		}
 
@@ -206,6 +222,9 @@ export function doPrimaryProduction(performingFromReplay, histEntry = []) {
 			if (mineProductionEntry.length > 2 && mineProductionEntry[2] !== -3) outputRes = mineProductionEntry[2]
 			addBuildingOutputResourcesToGame_core(building.id, outputRes, 9)
 		} else {
+			// Art & The Atelier: marble quarry. Checked BEFORE producing so the marble
+			// just added to the tile doesn't invalidate the check.
+			const producedMarble = building.type === rf.BLDG_QUARRY && atelier.quarryProducesMarble(building.location[1])
 			addBuildingOutputResourcesToGame_core(building.id, -1, 9)
 			//const mineInfo =
 			// Output is fixed, so we only need to record the type and location UNLESS it is a mine
@@ -214,8 +233,11 @@ export function doPrimaryProduction(performingFromReplay, histEntry = []) {
 			// index 2 so history can show the electricity symbol. Index 2 is unused for
 			// non-mine primaries, so it is safe.
 			const powered = store.gameOptions.useElectricity && electricity.isHexPowered(building.location[1])
-			if (powered) store.context.historyObj[0].push([building.id, [...compressedLocation], -3])
-			else store.context.historyObj[0].push([building.id, [...compressedLocation]])
+			const entry = [building.id, [...compressedLocation]]
+			if (powered) entry.push(-3)
+			// Art & The Atelier: mark a quarry that produced marble with -4 at index 3
+			if (producedMarble) entry.push(-4)
+			store.context.historyObj[0].push(entry)
 		}
 	}
 
@@ -371,6 +393,8 @@ export function doAutoSecondaryProduction(prePhase, ignoreHistory) {
 	// Pre-phase, only produce if there's no transporters reaching the bldg
 	for (const i of util.indicesOf(model.getAllInGameBuildings(), model.isSecondaryProducer)) {
 		let bldg = model.getAllInGameBuildings()[i]
+		// Art & The Atelier: an atelier needs a chosen recipe, so it is never auto-produced
+		if (bldg.type === rf.BLDG_ATELIER) continue
 		const bldgLocation = bldg.location
 		if (bldgLocation[0] !== rf.LOCATION_BUCKET) {
 			rf.doAdminAlrt("do auto sec prod: why is there a building not in a bucket?")

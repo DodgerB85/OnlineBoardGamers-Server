@@ -84,7 +84,7 @@ export async function saveGame(saveRewind, saveContext = false) {
 		postData.finalPositions = [...store.gameflow.fullTurnOrder]
 
 		const turnOrder = store.gameflow.fullTurnOrder
-		const winningPlayerScore = wonder.getPlayerWonderPoints(turnOrder[0]) + wonder.getHeldResourcesScore(turnOrder[0])
+		const winningPlayerScore = wonder.getPlayerTotalScore(turnOrder[0])
 		postData.winningPlayerScore = winningPlayerScore
 		postData.tournamentData = turnOrder.map((playerIdx, i) => {
 			const player = store.players[playerIdx]
@@ -92,7 +92,7 @@ export async function saveGame(saveRewind, saveContext = false) {
 			// First player gets [Name], others get [Name, calculatedValue]
 			if (i === 0) return [player.name]
 
-			const playerScore = wonder.getPlayerWonderPoints(playerIdx) + wonder.getHeldResourcesScore(playerIdx)
+			const playerScore = wonder.getPlayerTotalScore(playerIdx)
 			const diffValue = Math.ceil((winningPlayerScore - playerScore) / 10)
 			return [player.name, diffValue]
 		})
@@ -967,7 +967,7 @@ export async function saveAndUpdateNotifictionsAfterStack(currentPlayerNeedsToFi
 		postData.finalPositions = [...store.gameflow.fullTurnOrder]
 
 		const turnOrder = store.gameflow.fullTurnOrder
-		const winningPlayerScore = wonder.getPlayerWonderPoints(turnOrder[0]) + wonder.getHeldResourcesScore(turnOrder[0])
+		const winningPlayerScore = wonder.getPlayerTotalScore(turnOrder[0])
 		postData.winningPlayerScore = winningPlayerScore
 		postData.tournamentData = turnOrder.map((playerIdx, i) => {
 			const player = store.players[playerIdx]
@@ -975,7 +975,7 @@ export async function saveAndUpdateNotifictionsAfterStack(currentPlayerNeedsToFi
 			// First player gets [Name], others get [Name, calculatedValue]
 			if (i === 0) return [player.name]
 
-			const playerScore = wonder.getPlayerWonderPoints(playerIdx) + wonder.getHeldResourcesScore(playerIdx)
+			const playerScore = wonder.getPlayerTotalScore(playerIdx)
 			const diffValue = Math.ceil((winningPlayerScore - playerScore) / 10)
 			return [player.name, diffValue]
 		})

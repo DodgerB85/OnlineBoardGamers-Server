@@ -7,6 +7,7 @@ import * as controller from "../js/RNBcontroller.js"
 import * as loc from "../js/RNBlocation.js"
 import * as wonder from "../js/RNBwonder.js"
 import * as util from "../js/RNButil.js"
+import * as atelier from "../js/RNBatelier.js"
 
 import { useModelStore } from "../stores/RNBstore.js"
 const store = useModelStore()
@@ -137,6 +138,7 @@ const getFullTurnOrderArray = computed(() => {
 						<tr>
 							<th style="text-align: center">Goods</th>
 							<th style="text-align: center">Wonder</th>
+							<th style="text-align: center">Art</th>
 							<th style="text-align: center">Total</th>
 							<template v-if="!props.minimiseInfoForMainScreen">
 								<!-- These are the sub-headers for Transports -->
@@ -158,7 +160,8 @@ const getFullTurnOrderArray = computed(() => {
 							<!-- Wealth Points -->
 							<td>{{ wonder.getHeldResourcesScore(playerIndex) }}</td>
 							<td>{{ wonder.getPlayerWonderPoints(playerIndex) }}</td>
-							<td>{{ wonder.getHeldResourcesScore(playerIndex) + wonder.getPlayerWonderPoints(playerIndex) }}</td>
+							<td>{{ atelier.scoreArtwork(playerIndex) }}</td>
+							<td>{{ wonder.getPlayerTotalScore(playerIndex) }}</td>
 
 							<!-- TRANSPORTERS-->
 							<td v-if="!minimiseInfoForMainScreen">{{ playerTransportCounts[playerIndex]?.land ?? 0 }}</td>

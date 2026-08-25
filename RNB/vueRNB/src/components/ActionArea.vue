@@ -635,13 +635,13 @@ const getGameOverReason = computed(() => {
 				Winner:
 				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[store.gameflow.fullTurnOrder[0]].colour)">{{ store.players[store.gameflow.fullTurnOrder[0]].displayName }}</span>
 
-				({{ wonder.getPlayerWonderPoints(store.gameflow.fullTurnOrder[0]) + wonder.getHeldResourcesScore(store.gameflow.fullTurnOrder[0]) }})
+				({{ wonder.getPlayerTotalScore(store.gameflow.fullTurnOrder[0]) }})
 				<br />
 				<template v-for="(playerIndex, idx1) in store.gameflow.fullTurnOrder.slice(1)" :key="idx1">
 					{{ getOrdinal(idx1 + 2) }}:
 					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ store.players[playerIndex].displayName }}</span>
 
-					({{ wonder.getPlayerWonderPoints(playerIndex) + wonder.getHeldResourcesScore(playerIndex) }})
+					({{ wonder.getPlayerTotalScore(playerIndex) }})
 					<br />
 				</template>
 				<br />

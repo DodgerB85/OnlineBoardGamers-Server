@@ -10,6 +10,7 @@ import * as computes from "../js/RNBcomputes"
 import * as highlight from "../js/RNBhighlight"
 import * as context from "../js/RNBcontext"
 import * as stack from "../js/RNBstack"
+import * as atelier from "../js/RNBatelier"
 
 import { useModelStore } from "../stores/RNBstore.js"
 
@@ -763,6 +764,11 @@ export function moveTransporterTo(entry, transporterID, event = null) {
 			})
 		}
 
+		// Art & The Atelier: an exhibition caravan landing on another player's starting
+		// tile may stage a show (caravan + artwork vanish, recorded as a stack action).
+		// If it does, the caravan no longer exists, so there is nothing to re-highlight.
+		if (atelier.checkExhibitionOnMove(transporterObj)) return
+
 		// Remove all highlights
 		context.resetContextAndHighlights()
 		// Now highlight the new items for move/pickup/drop
@@ -986,7 +992,7 @@ export function getVisualLocationFromBucketLocation(inputLocation, startingLocat
 		}
 
 		const stats = rf.getTransporterStats(transporterType)
-		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, controller.currentPlayerIndex())
+		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, controller.currentPlayerIndex(), transporterType === rf.EXHIBITION_TRANSPORTER)
 		const pathfindResult = graph.pathfind(movementGraph, pathfindStart, stats.validMove, remainingMoves)
 
 		const locationIndices = util.indexArray(pathfindResult.locations.length)

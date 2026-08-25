@@ -112,6 +112,10 @@ export function resetContext() {
 	context.chosenInputGoods[0].splice(0)
 	context.chosenInputGoods[1].splice(0)
 	context.chosenInputGoods[2] = -1
+	context.atelierRecipeOutput = -1
+	context.atelierRecipeOptions.splice(0)
+	context.atelierBuildingID = -1
+	context.atelierTransporterID = -1
 	//context.researchHexIDpossibilities.splice(0)
 	context.researchIndexForBuildingUpgrades = -1
 

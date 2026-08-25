@@ -12,6 +12,7 @@ import * as util from "../../js/RNButil"
 import * as stack from "../../js/RNBstack"
 import * as wonder from "../../js/RNBwonder"
 import * as electricity from "../../js/RNBelectricity"
+import * as atelier from "../../js/RNBatelier"
 
 import { useModelStore } from "../../stores/RNBstore.js"
 import { usePersonalStore } from "../../stores/RNBpersonal"
@@ -272,6 +273,7 @@ export const HIST_CONFLICT_TURN_ORDER = 6
 				else if (stackAction[0] === rf.STACK_UPGRADE_BUILDING) replayStackUpgradeBuilding(stackAction, store.computedHistory[i][1])
 				else if (stackAction[0] === rf.STACK_DONKEY_REPRODUCTION) replayStackDonkeyReproduction(stackAction, store.computedHistory[i][1])
 				else if (stackAction[0] === rf.STACK_ADD_WONDER_BRICKS) replayStackaddWonderBricks(stackAction, store.computedHistory[i][1])
+				else if (stackAction[0] === rf.STACK_EXHIBITION) replayStackExhibition(stackAction, store.computedHistory[i][1])
 				// Now save the data as sub-entries
 				replayData.push({
 					importData: funcs.simpleExportWholeRNBmodelNoCompression(),
@@ -845,18 +847,28 @@ function replayStackManualProduction(stackAction, playerIndex) {
 	// if it's a wagon factory, remove a donkey
 	// Remove any input transp
 	if (removedTransporterID >= 0) model.removeTransporterIDfromGame(removedTransporterID)
+	// Art & The Atelier: restore the recipe output for an atelier
+	const atelierOutput = buildingType === rf.BLDG_ATELIER ? atelier.getRecipeOutput(inputResIdx) : -1
+	store.context.atelierRecipeOutput = atelierOutput
 	// add output res
 	produce.addBuildingOutputResourcesToGame_core(buildingID, -1, playerIndex)
 	// But if the output is a transporter, add it here
-	if (bldgStats.outputRes.length === 1 && bldgStats.outputRes[0] > rf.RES_UPPER_LIMIT) {
-		model.addTransporterToGame(playerIndex, bldgStats.outputRes[0], transporterOutputBucketlocation, true)
+	const outputTransporter = buildingType === rf.BLDG_ATELIER ? atelierOutput : bldgStats.outputRes.length === 1 && bldgStats.outputRes[0] > rf.RES_UPPER_LIMIT ? bldgStats.outputRes[0] : -1
+	if (outputTransporter > rf.RES_UPPER_LIMIT) {
+		model.addTransporterToGame(playerIndex, outputTransporter, transporterOutputBucketlocation, true)
 	}
+	store.context.atelierRecipeOutput = -1
 	bldgObj.remainingConversions--
 }
 
 function replayStackRemoveExcessTransporterAtFactory(stackAction, _playerIndex) {
 	const transporterID = stackAction[1]
 	model.removeTransporterIDfromGame(transporterID)
+}
+
+// Art & The Atelier: replay an exhibition show (caravan + artwork vanish, counters update)
+function replayStackExhibition(stackAction, _playerIndex) {
+	atelier.performExhibitionStackAction(stackAction)
 }
 
 function replayStackDoResearch(stackAction, playerIndex) {

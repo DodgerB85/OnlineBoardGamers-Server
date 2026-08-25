@@ -251,6 +251,10 @@ export const useModelStore = defineStore("store", () => {
 		possibleDonkeyReproductionData: [], // Persists until turn end
 		selectedDonkeyIdxToStoreTransporterRemoveal: -1,
 		chosenInputGoods: [[], [], -1], // [[possible inputs], [chosen input], bldg.id]
+		atelierRecipeOutput: -1, // Art & The Atelier: output (res or transporter) for the current atelier production
+		atelierRecipeOptions: [], // Art & The Atelier: feasible recipe indices awaiting a bubble choice
+		atelierBuildingID: -1,
+		atelierTransporterID: -1,
 		researchHexIDpossibilities: [],
 		researchIndexForBuildingUpgrades: -1,
 
@@ -429,7 +433,7 @@ export const useModelStore = defineStore("store", () => {
 			// Add the winning entry
 			let histEntry = []
 			for (const playerIndex of gameflow.fullTurnOrder) {
-				histEntry.push([playerIndex, wonder.getPlayerWonderPoints(playerIndex) + wonder.getHeldResourcesScore(playerIndex)])
+				histEntry.push([playerIndex, wonder.getPlayerTotalScore(playerIndex)])
 			}
 			computedHistory.push([rf.HIST_GAME_END, -1, personal.gameCreationTimestamp, histEntry])
 		}

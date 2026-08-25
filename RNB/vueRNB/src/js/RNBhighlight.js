@@ -375,7 +375,8 @@ export function highlightEligibleHexAreasForTransporterMove(transporterID) {
 	if (model.transportersOnTransporter(transporterID).length > 0 && model.transportersOnTransporter(transporterID)[0].movedThisTurn) return 3
 
 	const stats = rf.getTransporterStats(transporterObj.type)
-	const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, controller.currentPlayerIndex())
+	// Art & The Atelier: exhibition caravans move freely through walls
+	const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, controller.currentPlayerIndex(), transporterObj.type === rf.EXHIBITION_TRANSPORTER)
 	const pathfind = graph.pathfind(movementGraph, transporterObj.location, stats.validMove, transporterObj.remainingMoves)
 	const locationIndices = util.indexArray(pathfind.locations.length)
 	let indicesToValid = util.boolFilter(
@@ -550,17 +551,19 @@ export function highlightEligibleSecondaryBuildingsForManualProduction(transport
 	}
 }
 
-export function highlightEligibleTransportersForRemoval(playerIndex, isTotalProblem, isLandProblem, isWaterProblem) {
-	const eligibleTransporteridS = getEligibleTransportersForRemoval(playerIndex, isTotalProblem, isLandProblem, isWaterProblem)
+export function highlightEligibleTransportersForRemoval(playerIndex, isTotalProblem, isLandProblem, isWaterProblem, isCaravanProblem) {
+	const eligibleTransporteridS = getEligibleTransportersForRemoval(playerIndex, isTotalProblem, isLandProblem, isWaterProblem, isCaravanProblem)
 	context.setTransportersToHighlight(eligibleTransporteridS)
 }
 
-export function getEligibleTransportersForRemoval(playerIndex, isTotalProblem, isLandProblem, isWaterProblem) {
+export function getEligibleTransportersForRemoval(playerIndex, isTotalProblem, isLandProblem, isWaterProblem, isCaravanProblem) {
 	let typesForRemoval = []
 	// If you have too many land, you MUST remove a land
 	if (isLandProblem) typesForRemoval.push(rf.LAND_TYPE)
 	// If you have too many water, you MUST remove a water
 	else if (isWaterProblem) typesForRemoval.push(rf.WATER_TYPE)
+	// If you have too many caravans, you MUST remove a caravan
+	else if (isCaravanProblem) typesForRemoval.push(rf.EXHIBITION_TRANSPORTER)
 	// Otherwise, just remove any
 	else if (isTotalProblem) typesForRemoval = [rf.LAND_TYPE, rf.WATER_TYPE]
 
@@ -575,6 +578,7 @@ export function getEligibleTransportersForRemoval(playerIndex, isTotalProblem, i
 		let isEligibleType = false
 		if (typesForRemoval.includes(rf.LAND_TYPE) && rf.LAND_TRANSPORTERS.includes(transporter.type)) isEligibleType = true
 		else if (typesForRemoval.includes(rf.WATER_TYPE) && rf.WATER_TRANSPORTERS.includes(transporter.type)) isEligibleType = true
+		else if (typesForRemoval.includes(rf.EXHIBITION_TRANSPORTER) && transporter.type === rf.EXHIBITION_TRANSPORTER) isEligibleType = true
 		return isCorrectOwner && isEligibleType
 	})
 

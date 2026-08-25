@@ -29,6 +29,7 @@ import * as context from "../js/RNBcontext"
 //import * as funcs from "../js/RNBfuncs"
 import * as highlight from "../js/RNBhighlight"
 import * as produce from "../js/RNBproduce"
+import * as atelier from "../js/RNBatelier"
 
 import { useModelStore } from "../stores/RNBstore.js"
 const store = useModelStore()
@@ -174,11 +175,18 @@ const shouldShowPickupSelectBubbles = computed(() => {
 	return store.context.action === rf.ACT_TM_DECIDE_ON_TRANSPORTER_PICKUP_OR_SELECT && store.context.selectedTransporterIDforPickupOrSelection !== -1
 })
 
+// Art & The Atelier: recipe choice bubbles when an atelier has multiple feasible recipes
+const shouldShowAtelierRecipeBubbles = computed(() => {
+	return store.context.action === rf.ACT_SELECT_ATELIER_RECIPE && store.context.atelierRecipeOptions.length > 0
+})
+
 const transporterScreenPosition = computed(() => {
-	if (store.context.selectedTransporterIDforTM === -1) return null
-	if (!shouldShowResearchBubbles.value && !shouldShowBuildingOptions.value && !shouldShowPickupSelectBubbles.value) return null
-	let transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
-	if (shouldShowPickupSelectBubbles.value) transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforPickupOrSelection)
+	if (store.context.selectedTransporterIDforTM === -1 && !shouldShowAtelierRecipeBubbles.value) return null
+	if (!shouldShowResearchBubbles.value && !shouldShowBuildingOptions.value && !shouldShowPickupSelectBubbles.value && !shouldShowAtelierRecipeBubbles.value) return null
+	let transporterObj
+	if (shouldShowAtelierRecipeBubbles.value) transporterObj = model.getTransporterByID(store.context.atelierTransporterID)
+	else if (shouldShowPickupSelectBubbles.value) transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforPickupOrSelection)
+	else transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
 	//const hex = model.getHexByID(transporterObj.location[1])
 
 	// 1. Get the SVG element and the container
@@ -242,6 +250,18 @@ function getPickupSelectBubblePosition(type) {
 	}
 }
 
+// Art & The Atelier: arrange the feasible recipe bubbles in a circle around the transporter
+function getAtelierRecipeBubblePosition(recipeIdx) {
+	const totalBubbles = store.context.atelierRecipeOptions.length
+	const bubbleIndex = store.context.atelierRecipeOptions.findIndex((r) => r === recipeIdx)
+	if (totalBubbles === 0) return {}
+	const radius = 90
+	const angle = (bubbleIndex / totalBubbles) * 2 * Math.PI - Math.PI / 2
+	return {
+		transform: `translate(${Math.cos(angle) * radius}px, ${Math.sin(angle) * radius}px)`,
+	}
+}
+
 function handlePickupBubbleClick() {
 	const transporterID = store.context.selectedTransporterIDforPickupOrSelection
 	map.executePickupTransporter(transporterID)
@@ -254,6 +274,13 @@ function handleSelectBubbleClick() {
 	context.resetContextAndHighlights()
 	store.context.selectedTransporterIDforTM = transporterID
 	highlight.updateAllHighlightsForTransporterMode()
+}
+
+// Art & The Atelier: gfx for a recipe bubble (artwork res image, or caravan transporter)
+function getAtelierRecipeGfx(recipeIdx) {
+	const output = atelier.getAtelierStats().recipes[recipeIdx].output
+	if (output > rf.RES_UPPER_LIMIT) return `transporter_${output}_${personal.getCorrectedColour(controller.currentPlayerObj().colour)}`
+	return `res_${output}`
 }
 </script>
 
@@ -816,6 +843,20 @@ function handleSelectBubbleClick() {
 							<div class="researchBubbleContent">
 								<img :src="view.getImage(`research_${idx}`)" class="researchBubbleImg" />
 								<span class="researchBubbleText">{{ rf.RND_STRINGS[idx] }}</span>
+							</div>
+						</div>
+					</template>
+				</div>
+			</transition>
+
+			<!-- Art & The Atelier: Recipe choice bubbles -->
+			<transition name="fade">
+				<div v-if="shouldShowAtelierRecipeBubbles && transporterScreenPosition" class="researchBubblesOverlay" :style="{ left: transporterScreenPosition.x + 'px', top: transporterScreenPosition.y + 'px' }">
+					<template v-for="recipeIdx in store.context.atelierRecipeOptions" :key="recipeIdx">
+						<div class="researchBubble" @click="map.produceAtelierRecipe(recipeIdx)" :style="getAtelierRecipeBubblePosition(recipeIdx)">
+							<div class="researchBubbleContent">
+								<img :src="view.getImage(getAtelierRecipeGfx(recipeIdx))" class="researchBubbleImg" />
+								<span class="researchBubbleText">Produce</span>
 							</div>
 						</div>
 					</template>

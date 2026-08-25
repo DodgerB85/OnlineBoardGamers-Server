@@ -210,6 +210,7 @@ export const ACT_SELECT_INPUT_RESOURCES_FOR_SEC_PRODUCTION = 21
 export const ACT_CHOOSE_BUILDING_TO_UPGRADE = 22
 export const ACT_REMOVE_EXCESS_TRANSPORTERS = 23
 export const ACT_REMOVE_EXCESS_TRANSPORTERS_FOR_DONKEY = 24
+export const ACT_SELECT_ATELIER_RECIPE = 25
 // Movement
 export const ACT_TM_CHOOSE_GOOSE_LOCATION = 30
 export const ACT_TM_CHOOSE_GOOSE_DEPOSIT_LOCATION = 31
@@ -258,6 +259,7 @@ export const STACK_DEMOLISH_WALL = 23
 export const STACK_BUILD_BUILDING = 24
 export const STACK_RESHAFT_MINE = 25
 export const STACK_BUILD_POWER_LINE = 26
+export const STACK_EXHIBITION = 27
 
 // PRODUCTION ACTIONS
 export const STACK_MANUAL_PRODUCTION = 30
@@ -489,19 +491,26 @@ export const RES_BOMB = 11
 export const RES_MANAGER = 12
 export const RES_PEARL = 13
 export const RES_MARBLE = 14
+// Art & The Atelier artwork
+export const RES_WOOD_CARVING = 15
+export const RES_RING = 16
+export const RES_SKETCH = 17
+export const RES_POTTERY = 18
+export const RES_STATUE = 19
 
 export const RES_PSEUDO_MINE = 28 // Do not include in ALL_RES for now
 
 // Total
-export const TOTAL_RES = 15
-//export const RES_ART = 15
+export const TOTAL_RES = 20
 
-export const ALL_RES = [RES_TRUNKS, RES_BOARDS, RES_PAPER, RES_GOOSE, RES_CLAY, RES_STONE, RES_FUEL, RES_IRON, RES_GOLD, RES_COINS, RES_STOCK, RES_BOMB, RES_MANAGER, RES_PEARL, RES_MARBLE]
+export const ALL_ARTWORK_RES = [RES_WOOD_CARVING, RES_RING, RES_SKETCH, RES_POTTERY, RES_STATUE]
+
+export const ALL_RES = [RES_TRUNKS, RES_BOARDS, RES_PAPER, RES_GOOSE, RES_CLAY, RES_STONE, RES_FUEL, RES_IRON, RES_GOLD, RES_COINS, RES_STOCK, RES_BOMB, RES_MANAGER, RES_PEARL, RES_MARBLE, ...ALL_ARTWORK_RES]
 
 export const ALL_POINT_SCORING_RES = [RES_GOLD, RES_COINS, RES_STOCK]
 
 // NB - ONLY used for admin cheat add resource
-export const ALL_RES_STRINGS = ["Trunks", "Boards", "Paper", "Goose", "Clay", "Stone", "Fuel", "Iron", "Gold", "Coins", "Stock", "Bomb", "Manager", "Pearl", "Marble"]
+export const ALL_RES_STRINGS = ["Trunks", "Boards", "Paper", "Goose", "Clay", "Stone", "Fuel", "Iron", "Gold", "Coins", "Stock", "Bomb", "Manager", "Pearl", "Marble", "Wood Carving", "Ring", "Sketch", "Pottery", "Statue"]
 
 // This marks the change from resources to transporters
 export const RES_UPPER_LIMIT = 29
@@ -3142,6 +3151,18 @@ export function getTransporterStats(transporter) {
 			height: 200,
 		}
 	}
+	// Art & The Atelier: exhibition caravan - 1 step/turn on roads or unpaved land,
+	// cannot move onto the sea, moves freely through walls.
+	else if (transporter === EXHIBITION_TRANSPORTER) {
+		return {
+			maxCapacity: 5,
+			maxMoves: 1,
+			validMove: [MOVE_INTERNAL, MOVE_ROAD, MOVE_DONKEY],
+			validDrop: [LOCATION_LAND_VERTEX],
+			width: 200,
+			height: 200,
+		}
+	}
 	return {}
 }
 
@@ -3468,10 +3489,28 @@ export const BUILDING_STATS = [
 		bldg_name_summary: "Atelier",
 		isValidTerrain: terrainIsType(TERR_ANY_LAND_EXCEPT_DESERT),
 		cost: [RES_BOARDS, RES_BOARDS, RES_STONE],
-		inputRes: [[]],
-		outputRes: [],
-		makesTransporter: true, // TODO
-		maxConversions: 6,
+		inputRes: [
+			[RES_TRUNKS, RES_TRUNKS, RES_TRUNKS],
+			[RES_PEARL, RES_PEARL],
+			[RES_PAPER, RES_FUEL],
+			[RES_CLAY, RES_CLAY, RES_CLAY, RES_CLAY],
+			[RES_MARBLE, RES_MARBLE],
+			[DONKEY],
+		],
+		outputRes: [RES_WOOD_CARVING],
+		// Art & The Atelier: each input recipe produces a different output. The generic
+		// machinery only sees the first recipe (inputRes[0]/outputRes); actual output is
+		// resolved per recipe by RNBatelier.resolveAtelierRecipe.
+		recipes: [
+			{ inputs: [RES_TRUNKS, RES_TRUNKS, RES_TRUNKS], output: RES_WOOD_CARVING },
+			{ inputs: [RES_PEARL, RES_PEARL], output: RES_RING },
+			{ inputs: [RES_PAPER, RES_FUEL], output: RES_SKETCH },
+			{ inputs: [RES_CLAY, RES_CLAY, RES_CLAY, RES_CLAY], output: RES_POTTERY },
+			{ inputs: [RES_MARBLE, RES_MARBLE], output: RES_STATUE },
+			{ inputs: [DONKEY], output: EXHIBITION_TRANSPORTER },
+		],
+		makesTransporter: true,
+		maxConversions: 1,
 		startingOptionRequired: SO_ART,
 		requiredResearchIndex: -1,
 	},

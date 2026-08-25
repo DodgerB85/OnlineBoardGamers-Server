@@ -9,6 +9,7 @@ import * as map from "./RNBmap.js"
 import * as loc from "./RNBlocation.js"
 //import * as context from "./RNBcontext.js"
 import * as produce from "./RNBproduce.js"
+import * as atelier from "./RNBatelier.js"
 import * as wonder from "./RNBwonder.js"
 import * as funcs from "./RNBfuncs.js"
 import * as context from "./RNBcontext.js"
@@ -1134,7 +1135,7 @@ export function verifySingleStackAction(stackActionData) {
 
 		// Find reachable locations
 		const stats = rf.getTransporterStats(transporterObj.type)
-		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, playerIndex)
+		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, playerIndex, transporterObj.type === rf.EXHIBITION_TRANSPORTER)
 		const pathfind = graph.pathfind(movementGraph, transporterObj.location, stats.validMove, transporterObj.remainingMoves)
 		let indicesToValid = util.boolFilter(
 			util.indexArray(pathfind.locations.length),
@@ -1901,7 +1902,7 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 		const transporterObj = model.getTransporterByID(movingTransporterID)
 		// Find reachable locations
 		const stats = rf.getTransporterStats(transporterObj.type)
-		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, stackPlayerIndex)
+		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, stackPlayerIndex, transporterObj.type === rf.EXHIBITION_TRANSPORTER)
 		const pathfind = graph.pathfind(movementGraph, transporterObj.location, stats.validMove, transporterObj.remainingMoves)
 		const destinationIdx = util.indexOfArrayInArray(pathfind.locations, toLocationFromStack)
 		let indicesToValid = util.boolFilter(
@@ -2420,14 +2421,19 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 		model.removeResourcesFromGameUsingTransporter(transporterID, inputRes, false)
 		// Remove any input transp
 		if (removedTransporterID >= 0) model.removeTransporterIDfromGame(removedTransporterID)
+		// Art & The Atelier: restore the recipe output for an atelier
+		const atelierOutput = buildingType === rf.BLDG_ATELIER ? atelier.getRecipeOutput(inputResIdx) : -1
+		store.context.atelierRecipeOutput = atelierOutput
 		// add output res
 		produce.addBuildingOutputResourcesToGame_core(buildingID, -1, stackPlayerIndex)
 		// But if the output is a transporter, add it here
-		if (bldgStats.outputRes.length === 1 && bldgStats.outputRes[0] > rf.RES_UPPER_LIMIT) {
+		const outputTransporter = buildingType === rf.BLDG_ATELIER ? atelierOutput : bldgStats.outputRes.length === 1 && bldgStats.outputRes[0] > rf.RES_UPPER_LIMIT ? bldgStats.outputRes[0] : -1
+		if (outputTransporter > rf.RES_UPPER_LIMIT) {
 			const transporterObj = model.getTransporterByID(transporterID)
 			const playerIndex = transporterObj.ownerIndex
-			model.addTransporterToGame(playerIndex, bldgStats.outputRes[0], transporterOutputBucketlocation, true)
+			model.addTransporterToGame(playerIndex, outputTransporter, transporterOutputBucketlocation, true)
 		}
+		store.context.atelierRecipeOutput = -1
 		// Remove the building use
 		buildingObj.remainingConversions--
 	}
@@ -2490,9 +2496,12 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 		//if (removedTransporterID >= knownTransLen) removedTransporterID += transIDdelta
 		model.removeTransporterIDfromGame(removedTransporterID)
 	}
+	// Art & The Atelier: an exhibition caravan stages a show and vanishes
+	else if (action === rf.STACK_EXHIBITION) {
+		atelier.performExhibitionStackAction(stackAction)
+	}
 	// WONDER
 	else if (action === rf.STACK_ADD_WONDER_BRICKS) {
-		// Start at index 1 to skip the 'action' string
 		for (let i = 1; i < stackAction.length; i++) {
 			if (swapIDs) {
 				// Mutate the IDs inside this specific brick array

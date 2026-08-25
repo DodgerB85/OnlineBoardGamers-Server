@@ -59,7 +59,7 @@ export const NODE_OFFSET_RIGHT_BANK = 42 // Start of BANK_RIGHT docked nodes (6 
  * @param {number} playerIndex - The current player's index (for wall checks)
  * @returns {Object} The internal graph structure with nodes, edges, and side data
  */
-export function createInternalGraph(hexId, playerIndex) {
+export function createInternalGraph(hexId, playerIndex, ignoreWalls) {
 	const store = useModelStore()
 	// Get hex data and initialize arrays
 	const hex = model.getHexByID(hexId)
@@ -169,6 +169,7 @@ export function createInternalGraph(hexId, playerIndex) {
 	 */
 	function blockedByWall(i) {
 		//return false
+		if (ignoreWalls) return false
 		let edgeId = hex.edgeLookup[i]
 		if (edgeId === -1) {
 			return false
@@ -362,7 +363,7 @@ export function reachableFrom(graph, traverse, visit, inputLocation) {
  * @param {number} playerIndex - The current player's index
  * @returns {Object} The complete graph structure
  */
-export function createCompleteGraph(hexData, edgeData, playerIndex) {
+export function createCompleteGraph(hexData, edgeData, playerIndex, ignoreWalls) {
 	let hexCount = hexData.length
 
 	// Initialize arrays to store graph data
@@ -389,7 +390,7 @@ export function createCompleteGraph(hexData, edgeData, playerIndex) {
 		hexNodeOffset.push(offset)
 
 		// Create the internal graph for this hex
-		let graph = createInternalGraph(hexData[i].hexID, playerIndex)
+		let graph = createInternalGraph(hexData[i].hexID, playerIndex, ignoreWalls)
 		hexVertexOffset.push(graph.vertexCount)
 		sideData.push(graph.sides)
 
