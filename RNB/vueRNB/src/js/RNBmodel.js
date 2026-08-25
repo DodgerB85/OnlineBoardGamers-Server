@@ -70,6 +70,31 @@ export async function initGame() {
 		store.gameOptions.useSoloMineRules = true
 	}
 
+	if (store.internalStartingOptions.includes(rf.SO_ELECTRICITY)) {
+		store.gameOptions.useElectricity = true
+	}
+	if (store.internalStartingOptions.includes(rf.SO_MANAGEMENT)) {
+		store.gameOptions.useManagement = true
+	}
+	if (store.internalStartingOptions.includes(rf.SO_ART)) {
+		store.gameOptions.useArt = true
+	}
+	if (store.internalStartingOptions.includes(rf.SO_TRADE)) {
+		store.gameOptions.useTrade = true
+	}
+	if (store.internalStartingOptions.includes(rf.SO_FUNDAMENTAL_RESEARCH)) {
+		store.gameOptions.useFundamentalResearch = true
+	}
+	if (store.internalStartingOptions.includes(rf.SO_PLANES)) {
+		store.gameOptions.usePlanes = true
+	}
+	if (store.internalStartingOptions.includes(rf.SO_BOMBS)) {
+		store.gameOptions.useBombs = true
+	}
+	if (store.internalStartingOptions.includes(rf.SO_JUMP_START)) {
+		store.gameOptions.useJumpStart = true
+	}
+
 	// Set up all Data
 	personal.gameID = window.initData.gameID
 	store.gameName = window.initData.gameName

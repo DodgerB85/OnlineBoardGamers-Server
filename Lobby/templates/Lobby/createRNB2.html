@@ -1,0 +1,791 @@
+{% extends base_template %}
+{% load static i18n compress %}
+{% block head %}
+    {% if not request.use_new_design %}
+        <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
+        <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
+    {% endif %}
+    <style>
+        /* Ensure topBar stays on top of map */
+        .topBar {
+            z-index: 1000 !important;
+        }
+        
+        /* Map container should be below topBar */
+        #hexDIV {
+            z-index: 1;
+        }
+        
+        /* Map preview container styles */
+        #mapPreviewContainer {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #mapPreviewContent {
+            position: relative;
+            min-height: 300px;
+        }
+        
+        /* Hide map preview elements that might interfere */
+        #mapPreviewContent .loading-text {
+            display: none;
+        }
+    </style>
+    {% if settingsDebug %}
+        <script type="module" src="http://localhost:3042/static/@vite/client"></script>
+        <script type="module" src="http://localhost:3042/static/main.js"></script>
+    {% else %}
+        <link href="{% static 'RNB/RNBvuedist/main.css' %}?" rel="stylesheet" />
+        <script type="module"
+                crossorigin=""
+                src="{% static 'RNB/RNBvuedist/main.js' %}"></script>
+    {% endif %}
+    {% if request.use_new_design %}
+        <style>
+            body.nd {
+                width: 100%;
+                min-width: 0;
+                overflow-x: hidden;
+                background-color: var(--color-page-bg);
+                font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+                font-size: 16px;
+            }
+        </style>
+    {% endif %}
+    {% compress js %}
+        <script src="{% static 'Lobby/createRNB2.js' %}"></script>
+    {% endcompress %}
+    <script>
+    window.initData = {
+        showMapOnly: true,
+        gameID: -1,
+        startingMap: [],
+        gameName: "{{ gameName|escapejs }}"
+    };
+    </script>
+{% endblock head %}
+{% block body %}
+    {{ request.user.id|json_script:"user_id" }}
+    {{ request.user.username|json_script:"username" }}
+    {% if request.use_new_design %}
+    <div class="nd-page nd-create-rnb">
+        <div class="nd-page-header">
+            <h1>{% translate "Roads & Boats" %}</h1>
+            <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'newGamesPage' %}">&#8592; {% translate "New Game" %}</a>
+        </div>
+
+        {% if messages %}
+        <div style="margin-bottom:16px">
+            {% for message in messages %}
+            <div class="nd-pill {% if message.tags == 'error' %}nd-pill-danger{% elif message.tags == 'success' %}nd-pill-positive{% else %}nd-pill-accent{% endif %}" style="display:block;padding:10px 14px;border-radius:var(--radius-md);margin-bottom:8px">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="nd-card nd-card-soft" style="border-left:3px solid var(--color-accent);margin-bottom:16px">
+            <span style="font-size:14px">{% translate "New to Roads & Boats? For Rules, How to Play, and Game Guide, please see " %}<a href="{% url 'RNB:RNBhelp' %}">{% translate "Help" %}</a>.</span>
+        </div>
+
+        <form id="gameCreationForm" autocomplete="off" action="{% url 'RNB:createRNBgame' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="mapData" name="mapData" value="{{ mapData }}">
+
+            <div class="nd-setup-cards-grid">
+                <div class="nd-card">
+                    <div class="nd-card-header"><h2>{% translate "Setup Options" %}</h2></div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="name">{% translate "Name" %}</label>
+                        <input type="text" name="gameName" id="name" placeholder="{% translate " Game name" %}" maxlength="100">
+                    </div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="description">{% translate "Description" %}</label>
+                        <input type="text" name="gameDescription" id="description" placeholder="{% translate "Optional, eg fast EST time zone" %}" maxlength="100">
+                    </div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="pace">{% translate "Playing Speed" %}</label>
+                        <select name="pace" id="pace" onchange="validateOptions(this.id)">
+                            <option value="10">{% translate "Live: Play the game in one session" %}</option>
+                            <option value="20">{% translate "Fast: Several moves per day" %}</option>
+                            <option value="30" selected>{% translate "Standard: 1-2+ moves a day" %}</option>
+                            <option value="40">{% translate "Slow: At least one move a day" %}</option>
+                            <option value="50">{% translate "Casual: Just take your time" %}</option>
+                        </select>
+                        <span class="paceHelpIcon" role="button" tabindex="0" aria-expanded="false">?<span class="paceTooltip"><b>Live</b> &mdash; Play in one continuous session. Kickout options: 5, 10, or 20 minutes. No Flex-Time.<br><b>Fast</b> &mdash; Several moves per day in total. Kickout options: 12 hours or 1 day. For 12h+ kickouts, each player has one 24-hour Flex-Time bank for the whole game.<br><b>Standard</b> &mdash; About 1&ndash;2 moves per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.<br><b>Slow</b> &mdash; At least one move per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.<br><b>Casual</b> &mdash; No fixed schedule. Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.</span></span>
+                        <div class="nd-form-help" style="padding-left:0">{% translate "Alters kickout options. All games update 'live'" %}</div>
+                        <div class="nd-form-help" style="padding-left:0">{% translate "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}</div>
+                        <div id="blitzWarningSpan" style="display:none;margin:4px 0 8px;padding:8px 12px;border-radius:var(--radius-sm);background:var(--color-warn-bg);color:var(--color-warn);font-size:13px;font-weight:600;flex-basis:100%">{% translate "Careful, Live gives each player 5 minutes per move, not per game. With 3 players each round is about 15 min, and a full game has many rounds, so it can still take ~2+ hours." %}</div>
+                    </div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="playerNumber">{% translate "Number of players" %}</label>
+                        <select name="playerNumber" id="playerNumber" onchange="selectPlayers();">
+                            <option value="1">1 (Solo)</option>
+                            <option value="2" selected="selected">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                        </select>
+                    </div>
+                    <div class="nd-form-row" id="selPlayer2">
+                        <label class="nd-form-label" for="player2">{% translate "Player 2" %}</label>
+                        <div class="nd-field">
+                            <div class="autocomplete">
+                                <input type="text" id="player2" name="player2" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                            </div>
+                            <span id="player2help" style="display:block;margin-top:4px;font-size:13px;color:var(--color-muted)">{% translate "Leave blank to invite anybody" %}</span>
+                        </div>
+                    </div>
+                    <div class="nd-form-row" id="selPlayer3" style="display:none">
+                        <label class="nd-form-label" for="player3">{% translate "Player 3" %}</label>
+                        <div class="nd-field"><div class="autocomplete">
+                            <input type="text" id="player3" name="player3" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                        </div></div>
+                    </div>
+                    <div class="nd-form-row" id="selPlayer4" style="display:none">
+                        <label class="nd-form-label" for="player4">{% translate "Player 4" %}</label>
+                        <div class="nd-field"><div class="autocomplete">
+                            <input type="text" id="player4" name="player4" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                        </div></div>
+                    </div>
+                    <div class="nd-form-row" id="selPlayer5" style="display:none">
+                        <label class="nd-form-label" for="player5">{% translate "Player 5" %}</label>
+                        <div class="nd-field"><div class="autocomplete">
+                            <input type="text" id="player5" name="player5" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                        </div></div>
+                    </div>
+                    <div class="nd-form-row" id="selPlayer6" style="display:none">
+                        <label class="nd-form-label" for="player6">{% translate "Player 6" %}</label>
+                        <div class="nd-field"><div class="autocomplete">
+                            <input type="text" id="player6" name="player6" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                        </div></div>
+                    </div>
+                </div>
+
+                <div class="nd-card">
+                    <div class="nd-card-header"><h2>{% translate "Common Options" %}</h2></div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="kickoutDuration">{% translate "Kickout available after:" %}</label>
+                        <select name="kickoutDuration" id="kickoutDuration" style="flex:0 0 auto;width:auto">
+                            <option value="100">{% translate "1 day" %}</option>
+                            <option value="200" selected="selected">{% translate "2 days" %}</option>
+                            <option value="300">{% translate "3 days" %}</option>
+                            <option value="500">{% translate "5 days" %}</option>
+                        </select>
+                        <div class="nd-form-help">{% translate "Change Playing Speed for different options" %}</div>
+                    </div>
+                    <div class="nd-check-list">
+                        {% url "lobbyHelp" as the_url %}
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="trainingGame" name="trainingGame" value="102">
+                            <div>
+                                <div>{% translate "Practice Game" %}</div>
+                                <div class="nd-opt-help">{% blocktranslate trimmed %}Play as up to 4 players on the same device. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="privateGame" name="privateGame" value="1">
+                            <div>
+                                <div>{% translate "Private Game" %}</div>
+                                <div class="nd-opt-help">{% translate "Players can only join with invite or link" %}</div>
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="learningGame" name="learningGame" value="110">
+                            <div>
+                                <div>{% translate "Request Learning Game" %}</div>
+                                <div class="nd-opt-help">{% blocktranslate trimmed %}Request help to learn the game. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="experiencedGame" name="experiencedGame" value="120" disabled>
+                            <div>
+                                <div>{% translate "Experienced Game" %}</div>
+                                <div class="nd-opt-help">{% blocktranslate trimmed %}Minimum Experience Level. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
+                                {% if not experienced %}<div style="font-size:12px;color:var(--color-danger);margin-top:2px">{% translate "You do not have enough experience" %}</div>{% endif %}
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="nd-card">
+                    <div class="nd-card-header"><h2>{% translate "Game Options" %}</h2></div>
+                    <div class="nd-check-list">
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useSoloMineRules" name="useSoloMineRules" value="8">
+                            <div>
+                                <div>{% translate "Solo mine rules (fixed output)" %}</div>
+                                <div class="nd-opt-help">{% translate "Use solo rules; mines produce whatever they have more of, or gold if contents are equal" %}</div>
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useElectricity" name="useElectricity" value="0">
+                            <div>
+                                <div>{% translate "Electricity" %}</div>
+                                <div class="nd-opt-help">{% translate "Expansion content" %}</div>
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useManagement" name="useManagement" value="1">
+                            <div>
+                                <div>{% translate "Management" %}</div>
+                                <div class="nd-opt-help">{% translate "Expansion content" %}</div>
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useArt" name="useArt" value="2">
+                            <div>
+                                <div>{% translate "Art" %}</div>
+                                <div class="nd-opt-help">{% translate "Expansion content" %}</div>
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useTrade" name="useTrade" value="3">
+                            <div>
+                                <div>{% translate "Trade" %}</div>
+                                <div class="nd-opt-help">{% translate "Expansion content" %}</div>
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useFundamentalResearch" name="useFundamentalResearch" value="4">
+                            <div>
+                                <div>{% translate "Fundamental Research" %}</div>
+                                <div class="nd-opt-help">{% translate "Expansion content" %}</div>
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="usePlanes" name="usePlanes" value="5">
+                            <div>
+                                <div>{% translate "Planes" %}</div>
+                                <div class="nd-opt-help">{% translate "Expansion content" %}</div>
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useBombs" name="useBombs" value="6">
+                            <div>
+                                <div>{% translate "Bombs" %}</div>
+                                <div class="nd-opt-help">{% translate "Expansion content" %}</div>
+                            </div>
+                        </label>
+                        <label class="nd-check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useJumpStart" name="useJumpStart" value="7">
+                            <div>
+                                <div>{% translate "Jump Start" %}</div>
+                                <div class="nd-opt-help">{% translate "Expansion content" %}</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="nd-card" style="grid-column:1 / -1">
+                    <div class="nd-card-header"><h2>{% translate "Map Selection" %}</h2></div>
+                    <div class="nd-form-row">
+                        <label class="nd-form-label" for="mapSelection">{% translate "Select Map" %}</label>
+                        <a id="viewHighscoresBtn" href="#" style="display:none;margin-left:10px;width:auto;padding:6px 12px;font-size:14px;text-decoration:none" class="nd-button nd-button-ghost nd-button-sm">{% translate "View Highscores" %}</a>
+                        <div class="nd-field">
+                            <select name="mapSelection" id="mapSelection" onchange="onMapSelectionChange();" oninvalid="this.setCustomValidity('{% translate "Please Select a Map" %}')" oninput="this.setCustomValidity('')" required style="width:100%">
+                                <option value="">{% translate "Select Map (sorted by player count)" %}</option>
+                            </select>
+                            <div class="mapFilterToggle" style="margin-top:8px">
+                                <label class="nd-check-label">
+                                    <input type="checkbox" id="isVerifiedToggle" onchange="clearMapSelection(); loadMaps();">
+                                    {% translate "Verified maps only" %}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top:8px">
+                        <div id="mapInfoDisplay" style="display:none;margin-bottom:10px">
+                            <div style="font-weight:bold;font-size:16px;margin-bottom:5px" id="selectedMapName"></div>
+                            <div style="color:#666;font-size:14px;line-height:1.4;white-space:pre-line" id="selectedMapDescription"></div>
+                        </div>
+                        <div id="mapPreviewContainer" style="min-height:300px;border:1px solid #ccc;background-color:#f9f9f9;display:flex;align-items:center;justify-content:center">
+                            <div id="mapPreviewPlaceholder">{% translate "Select a map to preview" %}</div>
+                            <div id="mapPreviewContent" style="display:none;width:100%;height:100%">
+                                <div id="app" style="width:100%;height:100%;">
+                                    <div id="loadingText">Loading Map........</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin-top:8px">
+                <span id="mapPlayerCountWarning" class="cautionText" style="display:none;"></span>
+                <div style="margin-top:8px">
+                    <input type="submit" class="nd-button nd-button-primary createNewGameButton" value="{% translate "Create Roads & Boats Game" %}">
+                </div>
+            </div>
+        </form>
+    </div>
+    {% else %}
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div id="allOptions">
+            <span class="topOfNewGameSpan">{% translate "New to Roads & Boats? For Rules, How to Play, and Game Guide, please see " %}<a class="linkOther" href="{% url 'RNB:RNBhelp' %}">{% translate "Help" %}</a></span>
+            <form autocomplete="off"
+                  action="{% url 'RNB:createRNBgame' %}"
+                  method="post"
+                  id="gameCreationForm">
+                {% csrf_token %}
+                <div class="topOfNewGameOptionsDiv">
+                    <input type="hidden" id="mapData" name="mapData" value="{{ mapData }}">
+                    <fieldset id="setupOptions" class="optionsGroupTop">
+                        <legend class="optionsHeader">{% translate "Setup Options" %}</legend>
+                        <div class="singleChoiceWithTextDiv">
+                            <label class="choiceLabelText" for="pace">{% translate "Name" %}</label>
+                            <div class="optionSelectionText">
+                                <input type="text"
+                                       class="textInput"
+                                       name="gameName"
+                                       id="name"
+                                       placeholder="{% translate " Game name" %}"
+                                       maxlength="100">
+                            </div>
+                        </div>
+                        <div class="singleChoiceWithTextDiv">
+                            <label class="choiceLabelText" for="description">{% translate "Description" %}</label>
+                            <div class="optionSelectionText">
+                                <input type="text"
+                                       name="gameDescription"
+                                       size="30"
+                                       class="textInput"
+                                       id="description"
+                                       placeholder="{% translate "Optional, eg fast EST time zone" %}"
+                                       maxlength="100">
+                            </div>
+                        </div>
+                        <div class="singleChoiceDiv">
+                            <label class="choiceLabel" for="pace">{% translate "Playing Speed" %}</label>
+                            <div class="optionSelection">
+                                <select name="pace" id="pace" onchange="validateOptions(this.id)">
+                                    <option value="10">{% translate "Live: Play the game in one session" %}</option>
+                                    <option value="20">{% translate "Fast: Several moves per day" %}</option>
+                                    <option value="30" selected>{% translate "Standard: 1-2+ moves a day" %}</option>
+                                    <option value="40">{% translate "Slow: At least one move a day" %}</option>
+                                    <option value="50">{% translate "Casual: Just take your time" %}</option>
+                                </select>
+                                <span class="optionHelp">{% translate "Alters kickout options. All games update 'live'" %}</span>
+                                <br />
+                                <span class="optionHelp">{% translate "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}</span>
+                            </div>
+                        </div>
+                        <div class="singleChoiceDiv">
+                            <label class="choiceLabel" for="pace">{% translate "Number of players" %}</label>
+                            <div class="optionSelection">
+                                <select name="playerNumber" id="playerNumber" onchange="selectPlayers();">
+                                    <option value="1">1 (Solo)</option>
+                                    <option value="2" selected="selected">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="singleChoiceWithTextDiv" id="selPlayer2">
+                            <label class="choiceLabelText" for="player2">{% translate "Player 2" %}</label>
+                            <div class="optionSelectionText">
+                                <div class="autocomplete">
+                                    <input type="text"
+                                           id="player2"
+                                           name="player2"
+                                           class="textInput"
+                                           autocomplete="off">
+                                </div>
+                                <span id="player2help" class="inlineHelp">{% translate "Leave blank to invite anybody" %}</span>
+                            </div>
+                        </div>
+                        <div class="singleChoiceWithTextDiv" id="selPlayer3" style="display: none">
+                            <label class="choiceLabelText" for="player3">{% translate "Player 3" %}</label>
+                            <div class="optionSelectionText">
+                                <div class="autocomplete">
+                                    <input type="text"
+                                           id="player3"
+                                           name="player3"
+                                           class="textInput"
+                                           autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="singleChoiceDivText" id="selPlayer4" style="display: none;">
+                            <label class="choiceLabelText" for="player4">{% translate "Player 4" %}</label>
+                            <div class="optionSelectionText">
+                                <div class="autocomplete">
+                                    <input type="text"
+                                           id="player4"
+                                           name="player4"
+                                           class="textInput"
+                                           autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="singleChoiceDivText" id="selPlayer5" style="display: none;">
+                            <label class="choiceLabelText" for="player5">{% translate "Player 5" %}</label>
+                            <div class="optionSelectionText">
+                                <div class="autocomplete">
+                                    <input type="text"
+                                           id="player5"
+                                           name="player5"
+                                           class="textInput"
+                                           autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="singleChoiceDivText" id="selPlayer6" style="display: none;">
+                            <label class="choiceLabelText" for="player6">{% translate "Player 6" %}</label>
+                            <div class="optionSelectionText">
+                                <div class="autocomplete">
+                                    <input type="text"
+                                           id="player6"
+                                           name="player6"
+                                           class="textInput"
+                                           autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <span id="blitzWarningSpan">{% translate "Careful, Live gives each player 5 minutes per move, not per game. With 3 players each round is about 15 min, and a full game has many rounds, so it can still take ~2+ hours." %}</span>
+                    </fieldset>
+                    <fieldset id="basicOptions" class="optionsGroupTop">
+                        <legend class="optionsHeader">{% translate "Common Options" %}</legend>
+                        <div class="singleChoiceDiv">
+                            <label class="choiceLabel" for="kickoutDuration">{% translate "Kickout available after:" %}</label>
+                            <div class="optionSelection">
+                                <select name="kickoutDuration" id="kickoutDuration" onchange="">
+                                    <option value="100">{% translate "1 day" %}</option>
+                                    <option value="200" selected="selected">{% translate "2 days" %}</option>
+                                    <option value="300">{% translate "3 days" %}</option>
+                                    <option value="500">{% translate "5 days" %}</option>
+                                </select>
+                            </div>
+                            <br />
+                            <span class="inlineHelp">{% translate "Change Playing Speed for different options" %}</span>
+                        </div>
+                        <input type="checkbox"
+                               onchange="validateOptions(this.id)"
+                               class="myCheckbox"
+                               id="trainingGame"
+                               name="trainingGame"
+                               value="102">
+                        <label for="trainingGame" class="checkboxLabel">{% translate "Practice Game" %}</label>
+                        <br />
+                        <span class="inlineHelp">
+                            {% url "lobbyHelp" as the_url %}
+                            {% blocktranslate trimmed %}
+                                Play as up to 4 players on the same device.
+                                See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
+                            {% endblocktranslate %}
+                        </span>
+                        <br />
+                        <input type="checkbox"
+                               onchange="validateOptions(this.id)"
+                               class="myCheckbox"
+                               id="privateGame"
+                               name="privateGame"
+                               value="1">
+                        <label for="privateGame" class="checkboxLabel">{% translate "Private Game" %}</label>
+                        <br />
+                        <span class="inlineHelp">{% translate "Players can only join with invite or link" %}</span>
+                        <br />
+                        <input type="checkbox"
+                               onchange="validateOptions(this.id)"
+                               class="myCheckbox"
+                               id="learningGame"
+                               name="learningGame"
+                               value="110">
+                        <label for="learningGame" class="checkboxLabel">{% translate " Request Learning Game" %}</label>
+                        <br />
+                        <span class="inlineHelp">
+                            {% url "lobbyHelp" as the_url %}
+                            {% blocktranslate trimmed %}
+                                Request help to learn the game.
+                                See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
+                            {% endblocktranslate %}
+                        </span>
+                        <br />
+                        <input type="checkbox"
+                               onchange="validateOptions(this.id)"
+                               class="myCheckbox"
+                               id="experiencedGame"
+                               name="experiencedGame"
+                               value="120"
+                               disabled>
+                        <label for="experiencedGame" class="checkboxLabel">{% translate "Experienced Game" %}</label>
+                        <br />
+                        <span class="inlineHelp">
+                            {% url "lobbyHelp" as the_url %}
+                            {% blocktranslate trimmed %}
+                                Minmum Experience Level. See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
+                            {% endblocktranslate %}
+                            {% if not experienced %}
+                                <span class="notEnoughExperience">{% translate "You do not have enough experience" %}</span>
+                            {% endif %}
+                        </span>
+                        <br />
+                    </fieldset>
+                    <fieldset id="basicOptions" class="optionsGroupTop">
+                        <legend class="optionsHeader">{% translate "Game Options" %}</legend>
+                        <div class="singleChoiceDiv">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox"
+                                   id="useSoloMineRules"
+                                   name="useSoloMineRules"
+                                   value="8">
+                            <label for="useSoloMineRules" class="checkboxLabel">{% translate "Solo mine rules (fixed output)" %}</label>
+                            <br />
+                            <span class="inlineHelp">{% translate "Use solo rules; mines produce whatever they have more of, or gold if contents are equal" %}</span>
+                        </div>
+                        <div class="singleChoiceDiv">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox"
+                                   id="useElectricity"
+                                   name="useElectricity"
+                                   value="0">
+                            <label for="useElectricity" class="checkboxLabel">{% translate "Electricity" %}</label>
+                            <br />
+                            <span class="inlineHelp">{% translate "Expansion content" %}</span>
+                        </div>
+                        <div class="singleChoiceDiv">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox"
+                                   id="useManagement"
+                                   name="useManagement"
+                                   value="1">
+                            <label for="useManagement" class="checkboxLabel">{% translate "Management" %}</label>
+                            <br />
+                            <span class="inlineHelp">{% translate "Expansion content" %}</span>
+                        </div>
+                        <div class="singleChoiceDiv">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox"
+                                   id="useArt"
+                                   name="useArt"
+                                   value="2">
+                            <label for="useArt" class="checkboxLabel">{% translate "Art" %}</label>
+                            <br />
+                            <span class="inlineHelp">{% translate "Expansion content" %}</span>
+                        </div>
+                        <div class="singleChoiceDiv">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox"
+                                   id="useTrade"
+                                   name="useTrade"
+                                   value="3">
+                            <label for="useTrade" class="checkboxLabel">{% translate "Trade" %}</label>
+                            <br />
+                            <span class="inlineHelp">{% translate "Expansion content" %}</span>
+                        </div>
+                        <div class="singleChoiceDiv">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox"
+                                   id="useFundamentalResearch"
+                                   name="useFundamentalResearch"
+                                   value="4">
+                            <label for="useFundamentalResearch" class="checkboxLabel">{% translate "Fundamental Research" %}</label>
+                            <br />
+                            <span class="inlineHelp">{% translate "Expansion content" %}</span>
+                        </div>
+                        <div class="singleChoiceDiv">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox"
+                                   id="usePlanes"
+                                   name="usePlanes"
+                                   value="5">
+                            <label for="usePlanes" class="checkboxLabel">{% translate "Planes" %}</label>
+                            <br />
+                            <span class="inlineHelp">{% translate "Expansion content" %}</span>
+                        </div>
+                        <div class="singleChoiceDiv">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox"
+                                   id="useBombs"
+                                   name="useBombs"
+                                   value="6">
+                            <label for="useBombs" class="checkboxLabel">{% translate "Bombs" %}</label>
+                            <br />
+                            <span class="inlineHelp">{% translate "Expansion content" %}</span>
+                        </div>
+                        <div class="singleChoiceDiv">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox"
+                                   id="useJumpStart"
+                                   name="useJumpStart"
+                                   value="7">
+                            <label for="useJumpStart" class="checkboxLabel">{% translate "Jump Start" %}</label>
+                            <br />
+                            <span class="inlineHelp">{% translate "Expansion content" %}</span>
+                        </div>
+                        <br />
+                    </fieldset>
+                    <fieldset id="basicOptions" class="optionsGroupTop">
+                        <legend class="optionsHeader">{% translate "Map Selection" %}</legend>
+                        <div class="singleChoiceDiv">
+                            <label class="choiceLabel" for="mapSelection">{% translate "Select Map" %}</label>
+                            <a id="viewHighscoresBtn"
+                               href="#"
+                               style="display: none;
+                                      margin-left: 10px;
+                                      width: auto;
+                                      padding: 6px 12px;
+                                      font-size: 14px;
+                                      text-decoration: none"
+                               class="registerbtn">{% translate "View Highscores" %}</a>
+                            <br />
+                            <div class="optionSelection">
+                                <select name="mapSelection"
+                                        id="mapSelection"
+                                        onchange="onMapSelectionChange();"
+                                        oninvalid="this.setCustomValidity('{% translate "Please Select a Map" %}')"
+                                        oninput="this.setCustomValidity('')"
+                                        required>
+                                    <option value="">Select Map (sorted by player count)</option>
+                                </select>
+                                <br />
+                                <div class="mapFilterToggle">
+                                    <label class="checkboxLabel">
+                                        <input type="checkbox"
+                                               id="isVerifiedToggle"
+                                               onchange="clearMapSelection(); loadMaps();">
+                                        {% translate "Verified maps only" %}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Map Preview -->
+                        <div class="singleChoiceDiv">
+                            <div class="optionSelection">
+                                <!-- Map Info Display -->
+                                <div id="mapInfoDisplay" style="display: none; margin-bottom: 10px;">
+                                    <div style="font-weight: bold;
+                                                font-size: 16px;
+                                                margin-bottom: 5px"
+                                         id="selectedMapName"></div>
+                                    <div style="color: #666;
+                                                font-size: 14px;
+                                                line-height: 1.4;
+                                                white-space: pre-line"
+                                         id="selectedMapDescription"></div>
+                                </div>
+                                <div id="mapPreviewContainer"
+                                     style="min-height: 300px;
+                                            border: 1px solid #ccc;
+                                            background-color: #f9f9f9;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center">
+                                    <div id="mapPreviewPlaceholder">{% translate "Select a map to preview" %}</div>
+                                    <div id="mapPreviewContent"
+                                         style="display: none;
+                                                width: 100%;
+                                                height: 100%">
+                                        <div id="app" style="width: 100%; height: 100%;">
+                                            <div id="loadingText">Loading Map........</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div>
+                <span id="mapPlayerCountWarning" class="cautionText" style="display: none;"></span>
+            </div>
+            <div>
+                <input type="submit"
+                       class="registerbtn createNewGameButton"
+                       value="{% translate "Create Roads & Boats Game" %}">
+            </div>
+        </form>
+        {% include "Lobby/donate/donateBanner.html" %}
+        {% include "Lobby/splotterconSponsor.html" %}
+    </div>
+    {% endif %}
+    {% block script %}
+        <script>
+    var global = {};
+    global.player2normText = '{% translate "Leave blank to invite anybody" %}';
+    global.player2practiceText = '{% translate "You can change the in-game name of the other players" %}';
+    {% if experienced %}
+    global.experienced = true;
+    {% else %}
+    global.experienced = false;
+    {% endif %}
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('gameCreationForm');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                const btn = event.submitter || this.querySelector('.createNewGameButton');
+                if (btn) {
+                    btn.value = "{% translate 'Creating Roads & Boats Game...' %}";
+                    btn.disabled = true;
+                    btn.style.backgroundColor = "#cccccc";
+                    btn.style.cursor = "not-allowed";
+                } else {
+                    console.error("Submit button not found in form context.");
+                }
+            });
+        }
+        autocomplete(document.getElementById("player2"));
+        autocomplete(document.getElementById("player3"));
+        autocomplete(document.getElementById("player4"));
+
+        loadMaps();
+
+    {% if fillData %}
+    var setupData = {};
+    setupData.gameName = "{{ gameName|escapejs }}";
+    setupData.gameDescription = "{{ gameDescription }}";
+    setupData.gamePace = {{ gamePace }};
+    setupData.kickoutDuration = "{{ kickoutDuration }}";
+    setupData.playerNumber = {{ playerNumber }};
+    setupData.playerNames = {{ playerNames | safe }};
+    setupData.startingOptions = {{ startingOptions }};
+    initGameCreation(true, setupData);
+
+    {% if selectedMapId %}
+    loadMaps().then(function() {
+        var mapSelect = document.getElementById("mapSelection");
+        if (mapSelect) {
+            for (var i = 0; i < mapSelect.options.length; i++) {
+                var option = mapSelect.options[i];
+                if (option.value) {
+                    try {
+                        var mapData = JSON.parse(option.value);
+                        if (mapData.uniqueID == {{ selectedMapId }}) {
+                            mapSelect.selectedIndex = i;
+                            onMapSelectionChange();
+                            break;
+                        }
+                    } catch (e) {
+                    }
+                }
+            }
+        }
+    }).catch(function(error) {
+        console.error("Error loading maps for selection:", error);
+    });
+    {% endif %}
+    {% else %}
+    initGameCreation(false);
+    {% endif %}
+    });
+        </script>
+    {% endblock script %}
+{% endblock body %}

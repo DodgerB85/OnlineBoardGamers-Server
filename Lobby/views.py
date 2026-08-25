@@ -2382,6 +2382,68 @@ def createRNBpage(request, gameID=0):
 
 
 @login_required
+def createRNB2page(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "RNB", Game)
+    # Get settings debug flag for RNB map rendering
+    settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
+
+    # Handle query parameters for solo map play
+    if request.method != "POST" and gameID == 0:
+        context = {"experienced": experienced, "settingsDebug": settings_debug}
+
+        # Check for map and players query parameters
+        map_id = request.GET.get("map")
+        players = request.GET.get("players")
+
+        if map_id and players == "1":
+            # Set up for solo play with selected map
+            context.update(
+                {
+                    "fillData": True,
+                    "gamePace": 30,  # Default pace
+                    "playerNumber": 1,  # Solo play
+                    "playerNames": [],  # No additional players
+                    "kickoutDuration": 100,  # Default kickout duration
+                    "startingOptions": [],  # No special starting options
+                    "selectedMapId": map_id,  # Pass uniqueID for matching
+                }
+            )
+
+        return render(request, "Lobby/createRNB2.html", context)
+    elif request.method != "POST" and gameID != 0:
+        # Extract the data from gameID and return template with all data
+        try:
+            currentGame = Game.objects.get(id=gameID, gameCode="RNB")
+        except Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist")) from None
+        # presenter = currentGame.presenter()
+        all_players = currentGame.players.exclude(player=request.user).select_related("player")
+        playerNames = [gp.player.username for gp in all_players if gp.player]
+
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+
+        messages.success(request, (gettext("Game creation for rematch")))
+        return render(
+            request,
+            "Lobby/createRNB2.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.presenter().getGameName(),
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "startingOptions": loadedStartingOptions,
+                "experienced": experienced,
+                "settingsDebug": settings_debug,
+            },
+        )
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
 def createTGZpage(request, gameID=0):
     experienced = SF_hasRequiredExperience(request, "TGZ", Game)
     if request.method != "POST" and gameID == 0:

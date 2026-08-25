@@ -113,6 +113,7 @@ This repository is a Django-backed online board gaming site where most game logi
   - Pinia stores for long-lived state
 - Prefer editing source in `vue<CODE>/src` when that source exists.
 - Do not hand-edit built `*vuedist` output if the real source workspace is present, unless the task is explicitly about a built artifact and source is unavailable.
+- Build the RNB frontend with `RNB/vueRNB/rnb.bat` (run from that directory). It runs `npm run build`, deletes the generated `RNB/static/RNB/RNBvuedist/images/` folder from the dist (that folder is not kept in the repo), then starts the dev server. Use this rather than running `npm run build` bare, or you will leave the unwanted `images/` directory behind.
 - Some older or transitional games do not have complete source-side parity in this repo. In those cases, work with what actually exists instead of inventing a large migration.
 
 ## Tests And Verification

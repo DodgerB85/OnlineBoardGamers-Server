@@ -37,6 +37,13 @@ export const useModelStore = defineStore("store", () => {
 	var gameOptions = {
 		useFundamentalResearch: false,
 		useSoloMineRules: false,
+		useElectricity: false,
+		useManagement: false,
+		useArt: false,
+		useTrade: false,
+		usePlanes: false,
+		useBombs: false,
+		useJumpStart: false,
 	}
 	var CUSTOM_RULES = []
 

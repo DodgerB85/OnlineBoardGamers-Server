@@ -148,6 +148,19 @@ def create_rnb_game(
         if "useSoloMineRules" in request.POST:
             starting_options.append(int(request.POST.get("useSoloMineRules")))
 
+        for checkbox_name, option_value in (
+            ("useElectricity", rfRNB.SO_ELECTRICITY),
+            ("useManagement", rfRNB.SO_MANAGEMENT),
+            ("useArt", rfRNB.SO_ART),
+            ("useTrade", rfRNB.SO_TRADE),
+            ("useFundamentalResearch", rfRNB.SO_FUNDAMENTAL_RESEARCH),
+            ("usePlanes", rfRNB.SO_PLANES),
+            ("useBombs", rfRNB.SO_BOMBS),
+            ("useJumpStart", rfRNB.SO_JUMP_START),
+        ):
+            if checkbox_name in request.POST:
+                starting_options.append(option_value)
+
         all_players.append(request.user)
 
     with transaction.atomic():
