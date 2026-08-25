@@ -11,6 +11,8 @@ _ND_SKIP_PREFIXES = (
     "/favicons/",
     "/admin/",
     "/__debug__/",
+    # /nextGame is a no-trailing-slash redirect endpoint (reads query params) - never prefix it
+    "/nextGame",
 )
 
 # Paths that are never user-facing pages and must not be redirected to /nd/.
@@ -109,7 +111,8 @@ class NewDesignMiddleware:
         else:
             request.use_new_design = True
             if _should_redirect_to_nd(request):
-                return HttpResponsePermanentRedirect("/nd" + path)
+                query = request.META.get("QUERY_STRING", "")
+                return HttpResponsePermanentRedirect("/nd" + path + (f"?{query}" if query else ""))
 
         response = self.get_response(request)
 
