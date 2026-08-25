@@ -228,6 +228,7 @@ export const ACT_CONFIRM_END_GAME = 100
 export const ACT_ADMIN_ADD_RES = 900
 export const ACT_ADMIN_ADD_BLDG = 901
 export const ACT_ADMIN_ADD_TRANSPORTER = 902
+export const ACT_ADMIN_ADD_POWER_LINE = 903
 /** ACTION STACK */
 // For the main prod/move/build phase, each possible player action will be recorded on a 'stack'
 // This is used to then redo all moves in turn order, to check they are still valid

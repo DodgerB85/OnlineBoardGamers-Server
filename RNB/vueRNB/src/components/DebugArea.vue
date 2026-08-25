@@ -80,6 +80,17 @@ function startRoad() {
 	}
 }
 
+function startPowerLine() {
+	context.resetContextAndHighlights()
+	store.context.action = rf.ACT_ADMIN_ADD_POWER_LINE
+	for (let i = 0; i < store.mapData.hexData.length; i++) {
+		const hex = store.mapData.hexData[i]
+		for (const bucketId of hex.bucketIdsInitial) {
+			context.addHexPieceToHighlight([store.mapData.hexData[i].hexID, [bucketId]])
+		}
+	}
+}
+
 function startAdminAddRes() {
 	context.resetContextAndHighlights()
 	store.context.action = rf.ACT_ADMIN_ADD_RES
@@ -207,6 +218,7 @@ function giveAllResearch() {
 
 			<button class="actionsLineButton" @click="startBridges">CHEAT: Bridge</button>
 			<button class="actionsLineButton" @click="startRoad">CHEAT:Road</button>
+			<button class="actionsLineButton" @click="startPowerLine">CHEAT: Power</button>
 			<button class="actionsLineButton" @click="wonder.addBrickToWonder(0)">P0 brick</button>
 			<button class="actionsLineButton" @click="wonder.addBrickToWonder(1)">P1 brick</button>
 			<button class="actionsLineButton" @click="wonder.addBrickToWonder(9)">N brick</button>

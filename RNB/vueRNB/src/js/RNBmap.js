@@ -398,6 +398,27 @@ export function clickedHighlight(entry, event = null) {
 		}
 	}
 
+	// CHEAT ONLY - build power line code
+	if (store.context.action === rf.ACT_ADMIN_ADD_POWER_LINE) {
+		store.context.hexPiecesToHighlight.splice(0)
+		// If it's the first piece, add it and highlight options
+		if (store.context.newRoadInfo.length === 0) {
+			store.context.newRoadInfo.push(entry)
+			context.setHexPiecesToHighlight(allVertexBucketsWithoutPowerLinesAdjacentTo(hexID, bucketIds))
+		}
+		// Otherwise, add the power line into the edge data
+		else {
+			store.context.newRoadInfo.push(entry)
+			const fromHexID = store.context.newRoadInfo[0][0]
+			const firstFromBucketInList = store.context.newRoadInfo[0][1][0]
+			const secondEntry = store.context.newRoadInfo[1]
+			// ADMIN CHEAT ONLY - build without needing a transporter or resources
+			addPowerLineToMap_core([fromHexID, firstFromBucketInList], [secondEntry[0], secondEntry[1][0]], -1, false)
+			store.context.newRoadInfo.splice(0)
+			return
+		}
+	}
+
 	// During building phase, the only reason to click a segment is to build a road or power line
 	if (rf.PHASE_BUILDINGS.includes(store.gameflow.phase)) {
 		if (store.context.action === rf.ACT_TM_BUILD_SELECT_BRIDGE_ROAD_WALL_BUILDING_RES_PICKUP_DROP) {
