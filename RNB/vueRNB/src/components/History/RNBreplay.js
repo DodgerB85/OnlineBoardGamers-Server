@@ -578,7 +578,9 @@ function replayStackMoveLand(stackAction, playerIndex) {
 	// Find reachable locations
 	else {
 		const stats = rf.getTransporterStats(transporterObj.type)
-		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, playerIndex)
+		// Art & The Atelier: caravans move freely through walls and cross-country
+		const isCaravan = transporterObj.type === rf.EXHIBITION_TRANSPORTER
+		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, playerIndex, isCaravan, isCaravan)
 		const pathfind = graph.pathfind(movementGraph, transporterObj.location, stats.validMove, transporterObj.remainingMoves)
 		let indicesToValid = util.boolFilter(
 			util.indexArray(pathfind.locations.length),

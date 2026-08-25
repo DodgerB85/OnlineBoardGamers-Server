@@ -992,7 +992,8 @@ export function getVisualLocationFromBucketLocation(inputLocation, startingLocat
 		}
 
 		const stats = rf.getTransporterStats(transporterType)
-		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, controller.currentPlayerIndex(), transporterType === rf.EXHIBITION_TRANSPORTER)
+		const isCaravan = transporterType === rf.EXHIBITION_TRANSPORTER
+		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, controller.currentPlayerIndex(), isCaravan, isCaravan)
 		const pathfindResult = graph.pathfind(movementGraph, pathfindStart, stats.validMove, remainingMoves)
 
 		const locationIndices = util.indexArray(pathfindResult.locations.length)

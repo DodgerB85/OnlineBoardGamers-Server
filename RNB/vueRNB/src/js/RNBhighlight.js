@@ -375,8 +375,9 @@ export function highlightEligibleHexAreasForTransporterMove(transporterID) {
 	if (model.transportersOnTransporter(transporterID).length > 0 && model.transportersOnTransporter(transporterID)[0].movedThisTurn) return 3
 
 	const stats = rf.getTransporterStats(transporterObj.type)
-	// Art & The Atelier: exhibition caravans move freely through walls
-	const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, controller.currentPlayerIndex(), transporterObj.type === rf.EXHIBITION_TRANSPORTER)
+	// Art & The Atelier: exhibition caravans move freely through walls and cross-country
+	const isCaravan = transporterObj.type === rf.EXHIBITION_TRANSPORTER
+	const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, controller.currentPlayerIndex(), isCaravan, isCaravan)
 	const pathfind = graph.pathfind(movementGraph, transporterObj.location, stats.validMove, transporterObj.remainingMoves)
 	const locationIndices = util.indexArray(pathfind.locations.length)
 	let indicesToValid = util.boolFilter(

@@ -363,7 +363,7 @@ export function reachableFrom(graph, traverse, visit, inputLocation) {
  * @param {number} playerIndex - The current player's index
  * @returns {Object} The complete graph structure
  */
-export function createCompleteGraph(hexData, edgeData, playerIndex, ignoreWalls) {
+export function createCompleteGraph(hexData, edgeData, playerIndex, ignoreWalls, cheapCrossCountry) {
 	let hexCount = hexData.length
 
 	// Initialize arrays to store graph data
@@ -427,7 +427,9 @@ export function createCompleteGraph(hexData, edgeData, playerIndex, ignoreWalls)
 		 */
 		function addEdge(type, nodes) {
 			edgeTypes.push(type)
-			edgeCosts.push(type === rf.MOVE_DONKEY ? 2 : 1)
+			// Art & The Atelier: exhibition caravans move 1 hex cross-country, so their
+			// unpaved-land edges cost 1 (donkeys pay 2)
+			edgeCosts.push(type === rf.MOVE_DONKEY && !cheapCrossCountry ? 2 : 1)
 			edges.push(nodes)
 			edgeInternalIds.push(-1)
 			edgeIsRoad.push(false)

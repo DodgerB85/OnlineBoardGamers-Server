@@ -1135,7 +1135,8 @@ export function verifySingleStackAction(stackActionData) {
 
 		// Find reachable locations
 		const stats = rf.getTransporterStats(transporterObj.type)
-		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, playerIndex, transporterObj.type === rf.EXHIBITION_TRANSPORTER)
+		const isCaravan = transporterObj.type === rf.EXHIBITION_TRANSPORTER
+		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, playerIndex, isCaravan, isCaravan)
 		const pathfind = graph.pathfind(movementGraph, transporterObj.location, stats.validMove, transporterObj.remainingMoves)
 		let indicesToValid = util.boolFilter(
 			util.indexArray(pathfind.locations.length),
@@ -1902,7 +1903,8 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 		const transporterObj = model.getTransporterByID(movingTransporterID)
 		// Find reachable locations
 		const stats = rf.getTransporterStats(transporterObj.type)
-		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, stackPlayerIndex, transporterObj.type === rf.EXHIBITION_TRANSPORTER)
+		const isCaravan = transporterObj.type === rf.EXHIBITION_TRANSPORTER
+		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, stackPlayerIndex, isCaravan, isCaravan)
 		const pathfind = graph.pathfind(movementGraph, transporterObj.location, stats.validMove, transporterObj.remainingMoves)
 		const destinationIdx = util.indexOfArrayInArray(pathfind.locations, toLocationFromStack)
 		let indicesToValid = util.boolFilter(

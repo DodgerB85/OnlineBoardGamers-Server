@@ -1652,13 +1652,25 @@ function processBuildingProduction(transporterID, building, bldgStats, inputReso
 	const atelierOutput = store.context.atelierRecipeOutput
 	const outputRes = building.type === rf.BLDG_ATELIER ? atelierOutput : bldgStats.outputRes.length === 1 ? bldgStats.outputRes[0] : -1
 
-	// Handle transporter input if required
+	// Handle transporter input if required. The selected transporter is normally the
+	// input transporter. For the atelier, the donkey chosen by findFeasibleRecipeIndices
+	// is ALWAYS the input, whether or not it was explicitly selected first.
 	let transporterAlreadyAdded = false
-	if (store.context.selectedTransporterIDforTM >= 0 && inputResources.some((res) => res > rf.RES_UPPER_LIMIT)) {
+	const useTransporterAsInput = store.context.selectedTransporterIDforTM >= 0 || building.type === rf.BLDG_ATELIER
+	if (useTransporterAsInput && inputResources.some((res) => res > rf.RES_UPPER_LIMIT)) {
 		const transporterTypeNeeded = inputResources.find((res) => res > rf.RES_UPPER_LIMIT)
 		const transporterObj = model.getTransporterByID(transporterID)
 		if (transporterObj.type === transporterTypeNeeded) {
 			if (outputRes > rf.RES_UPPER_LIMIT) {
+				// Art & The Atelier: caravans can only carry artwork, so drop anything
+				// else the donkey was hauling onto its tile before converting it.
+				if (building.type === rf.BLDG_ATELIER) {
+					const donkeyCargo = model.resourcesOnTransport(transporterID)
+					const dropBucket = [rf.LOCATION_BUCKET, transporterObj.location[1], loc.getBucketIDfromAnyHexIDandVertex(transporterObj.location[1], transporterObj.location[2])]
+					for (const res of donkeyCargo) {
+						if (!rf.ALL_ARTWORK_RES.includes(res.type)) res.location = [...dropBucket]
+					}
+				}
 				model.removeAndAddTransporterFromGameUsingID(transporterID, outputRes)
 				removedTransporterID = transporterID
 				transporterAlreadyAdded = true
