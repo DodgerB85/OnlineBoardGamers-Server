@@ -86,15 +86,15 @@
                         align-items: center;
                         gap: 12px;
                         flex-wrap: wrap">
-                <span>Testing the new design. Please provide feedback!</span>
+                <span>Using the new design! Please provide feedback.</span>
                 <a href="{% url 'feedback' %}"
                    class="nd-button nd-button-primary"
                    style="padding: 6px 12px;
                           font-size: 14px">Give feedback</a>
-                <a href="../"
+                <a href="/old{{ request.path }}"
                    class="nd-button"
                    style="padding: 6px 12px;
-                          font-size: 14px">Use old design</a>
+                          font-size: 14px">Switch back to old design</a>
             </div>
         </div>
         <!-- hidden map editor forms (required by Lobby.js) -->
