@@ -138,7 +138,7 @@ const getFullTurnOrderArray = computed(() => {
 						<tr>
 							<th style="text-align: center">Goods</th>
 							<th style="text-align: center">Wonder</th>
-							<th style="text-align: center">Art</th>
+							<th v-if="store.gameOptions.useArt" style="text-align: center">Art</th>
 							<th style="text-align: center">Total</th>
 							<template v-if="!props.minimiseInfoForMainScreen">
 								<!-- These are the sub-headers for Transports -->
@@ -160,7 +160,7 @@ const getFullTurnOrderArray = computed(() => {
 							<!-- Wealth Points -->
 							<td>{{ wonder.getHeldResourcesScore(playerIndex) }}</td>
 							<td>{{ wonder.getPlayerWonderPoints(playerIndex) }}</td>
-							<td>{{ atelier.scoreArtwork(playerIndex) }}</td>
+							<td v-if="store.gameOptions.useArt">{{ atelier.scoreArtwork(playerIndex) }}</td>
 							<td>{{ wonder.getPlayerTotalScore(playerIndex) }}</td>
 
 							<!-- TRANSPORTERS-->

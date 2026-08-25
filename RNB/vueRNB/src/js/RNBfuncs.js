@@ -689,8 +689,8 @@ export function exportRNBmodel(forGameOver) {
 		// 1 - colour
 		tempPlayer.push(store.players[i].colour)
 		// 2 - Art & The Atelier: shows staged per target, best beauty shown at this tile
-		tempPlayer.push(store.players[i].artShownAt || {})
-		tempPlayer.push(store.players[i].artBestShownHere || 0)
+		if (store.gameOptions.useArt) tempPlayer.push(store.players[i].artShownAt || {})
+		if (store.gameOptions.useArt) tempPlayer.push(store.players[i].artBestShownHere || 0)
 
 		tempPlayers.push(tempPlayer)
 	}

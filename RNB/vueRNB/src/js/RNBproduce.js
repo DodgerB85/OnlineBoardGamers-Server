@@ -377,6 +377,31 @@ export function processDonkeyReproduction(playerIndex) {
 	return histObjForStack
 }
 
+// Art & The Atelier: an unattended atelier produces ONCE per turn, using the first
+// feasible artwork recipe in priority order. The donkey->caravan recipe is manual only.
+function doAutoAtelierProduction(bldg, hexID, bucketID, prePhase, ignoreHistory) {
+	const store = useModelStore()
+	if (bldg.remainingConversions <= 0) return
+	const atelierStats = atelier.getAtelierStats()
+	// Recipes 0-4 are the artwork recipes in the required priority order
+	for (let r = 0; r <= 4; r++) {
+		const inputRes = atelierStats.inputRes[r]
+		if (!map.doesBucketHaveAccessToResources(hexID, bucketID, inputRes, false)) continue
+		const histObj = [bldg.id, stack.compressLocation(bldg.location)]
+		if (r > 0) histObj.push(r)
+		if (!ignoreHistory) {
+			if (prePhase) store.context.historyObj[2].push([...histObj])
+			else store.context.historyObj[0].push([...histObj])
+		}
+		model.removeResourcesFromGameUsingBucket_core(hexID, bucketID, inputRes)
+		bldg.remainingConversions--
+		store.context.atelierRecipeOutput = atelier.getRecipeOutput(r)
+		addBuildingOutputResourcesToGame_core(bldg.id, -1, 9)
+		store.context.atelierRecipeOutput = -1
+		return
+	}
+}
+
 export function doAutoSecondaryProduction(prePhase, ignoreHistory) {
 	const store = useModelStore()
 	const secondaryBuildings = model.getAllInGameBuildings().filter(model.isSecondaryProducer)
@@ -393,8 +418,6 @@ export function doAutoSecondaryProduction(prePhase, ignoreHistory) {
 	// Pre-phase, only produce if there's no transporters reaching the bldg
 	for (const i of util.indicesOf(model.getAllInGameBuildings(), model.isSecondaryProducer)) {
 		let bldg = model.getAllInGameBuildings()[i]
-		// Art & The Atelier: an atelier needs a chosen recipe, so it is never auto-produced
-		if (bldg.type === rf.BLDG_ATELIER) continue
 		const bldgLocation = bldg.location
 		if (bldgLocation[0] !== rf.LOCATION_BUCKET) {
 			rf.doAdminAlrt("do auto sec prod: why is there a building not in a bucket?")
@@ -402,6 +425,12 @@ export function doAutoSecondaryProduction(prePhase, ignoreHistory) {
 		let hexID = bldgLocation[1]
 		let bucketID = bldgLocation[2]
 		if (prePhase && secondaryBuildingsReachableIDs.includes(bldg.id)) continue
+
+		// Art & The Atelier: an unattended atelier produces once in recipe priority order
+		if (bldg.type === rf.BLDG_ATELIER) {
+			doAutoAtelierProduction(bldg, hexID, bucketID, prePhase, ignoreHistory)
+			continue
+		}
 		const bldgStats = model.getBuildingStatsFromBuildingID(bldg.id)
 		for (let i = 0; i < bldgStats.inputRes.length; i++) {
 			const inputRes = bldgStats.inputRes[i]

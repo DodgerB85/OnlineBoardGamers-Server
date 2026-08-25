@@ -2415,10 +2415,15 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 			transporterOutputBucketlocation = decompressWaterLocation([...stackAction[4]], true)
 			//transporterOutputlocation = loc.getVisualLocationFromBucketLocation(transporterOutputBucketlocation)
 		} else if (stackAction.length > 4 && buildingType === rf.BLDG_WAGON_FACTORY) removedTransporterID = stackAction[4]
+		// Art & The Atelier: the recipe index is always the last element (the caravan
+		// recipe also records the removed donkey transporter before it)
+		else if (stackAction.length > 4 && buildingType === rf.BLDG_ATELIER) inputResIdx = stackAction[stackAction.length - 1]
 		else if (stackAction.length > 4) inputResIdx = stackAction[4]
 		const inputRes = bldgStats.inputRes[inputResIdx]
 		// remove input res
 		model.removeResourcesFromGameUsingTransporter(transporterID, inputRes, false)
+		// Art & The Atelier: the caravan recipe consumes the selected donkey
+		if (buildingType === rf.BLDG_ATELIER && atelier.getRecipeOutput(inputResIdx) > rf.RES_UPPER_LIMIT) removedTransporterID = transporterID
 		// Remove any input transp
 		if (removedTransporterID >= 0) model.removeTransporterIDfromGame(removedTransporterID)
 		// Art & The Atelier: restore the recipe output for an atelier

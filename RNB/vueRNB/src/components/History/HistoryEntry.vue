@@ -6,6 +6,7 @@ import * as history from "./RNBhistory"
 import * as model from "../../js/RNBmodel.js"
 import * as loc from "../../js/RNBlocation"
 import * as stack from "../../js/RNBstack"
+import * as atelier from "../../js/RNBatelier"
 //import * as map from "../../js/RNBmap"
 
 import { useModelStore } from "../../stores/RNBstore.js"
@@ -258,8 +259,20 @@ const computedEntry3 = computed(() => {
 			//ret.hexIDSandVertexesToHighlight.push(buildingLoc)
 			secEntry.inputResourcesGfx = []
 			secEntry.outputResourcesGfx = []
+			// Art & The Atelier: recipe-based production (recipe index in secHistEntry[2])
+			if (buildingType === rf.BLDG_ATELIER) {
+				const recipeIdx = secHistEntry.length > 2 ? secHistEntry[2] : 0
+				const atelierInputRes = bldgStats.inputRes[recipeIdx]
+				for (let j = 0; j < atelierInputRes.length; j++) {
+					if (atelierInputRes[j] < rf.RES_UPPER_LIMIT) secEntry.inputResourcesGfx.push("res_" + String(atelierInputRes[j]))
+					else secEntry.inputResourcesGfx.push(`transporter_${atelierInputRes[j]}_${personal.getCorrectedColour(store.players[entry[1]].colour)}`)
+				}
+				const atelierOutput = atelier.getRecipeOutput(recipeIdx)
+				if (atelierOutput < rf.RES_UPPER_LIMIT) secEntry.outputResourcesGfx.push("res_" + String(atelierOutput))
+				else secEntry.outputResourcesGfx.push(`transporter_${atelierOutput}_${personal.getCorrectedColour(store.players[entry[1]].colour)}`)
+			}
 			// If len = 2, no input res was recorded. So must be default
-			if (secHistEntry.length === 2) {
+			else if (secHistEntry.length === 2) {
 				for (let j = 0; j < bldgStats.inputRes[0].length; j++) {
 					secEntry.inputResourcesGfx.push("res_" + String(bldgStats.inputRes[0][j]))
 				}
@@ -269,11 +282,14 @@ const computedEntry3 = computed(() => {
 				}
 			}
 
-			for (let j = 0; j < bldgStats.outputRes.length; j++) {
-				// If it's a res, it's produced
-				if (bldgStats.outputRes[j] < rf.RES_UPPER_LIMIT) secEntry.outputResourcesGfx.push("res_" + String(bldgStats.outputRes[j]))
-				// Otherwise, the transporter is lost
-				else secEntry.outputResourcesGfx.push("res_blank")
+			// Art & The Atelier: the recipe output is already set above - skip the generic output
+			if (buildingType !== rf.BLDG_ATELIER) {
+				for (let j = 0; j < bldgStats.outputRes.length; j++) {
+					// If it's a res, it's produced
+					if (bldgStats.outputRes[j] < rf.RES_UPPER_LIMIT) secEntry.outputResourcesGfx.push("res_" + String(bldgStats.outputRes[j]))
+					// Otherwise, the transporter is lost
+					else secEntry.outputResourcesGfx.push("res_blank")
+				}
 			}
 			//secEntry.hexPiecesToOutline = [[buildingHexID, [bucketId]]]
 			ret.secondaryProductions.push(secEntry)
@@ -306,8 +322,20 @@ const computedEntry3 = computed(() => {
 			secEntry.inputResourcesGfx = []
 			secEntry.outputResourcesGfx = []
 			secEntry.buildingHexID = buildingHexID
+			// Art & The Atelier: recipe-based production (recipe index in secHistEntry[2])
+			if (buildingType === rf.BLDG_ATELIER) {
+				const recipeIdx = secHistEntry.length > 2 ? secHistEntry[2] : 0
+				const atelierInputRes = bldgStats.inputRes[recipeIdx]
+				for (let j = 0; j < atelierInputRes.length; j++) {
+					if (atelierInputRes[j] < rf.RES_UPPER_LIMIT) secEntry.inputResourcesGfx.push("res_" + String(atelierInputRes[j]))
+					else secEntry.inputResourcesGfx.push(`transporter_${atelierInputRes[j]}_${personal.getCorrectedColour(store.players[entry[1]].colour)}`)
+				}
+				const atelierOutput = atelier.getRecipeOutput(recipeIdx)
+				if (atelierOutput < rf.RES_UPPER_LIMIT) secEntry.outputResourcesGfx.push("res_" + String(atelierOutput))
+				else secEntry.outputResourcesGfx.push(`transporter_${atelierOutput}_${personal.getCorrectedColour(store.players[entry[1]].colour)}`)
+			}
 			// If len = 2, no input res was recorded. So must be default
-			if (secHistEntry.length === 2) {
+			else if (secHistEntry.length === 2) {
 				for (let j = 0; j < bldgStats.inputRes[0].length; j++) {
 					secEntry.inputResourcesGfx.push("res_" + String(bldgStats.inputRes[0][j]))
 				}
@@ -319,11 +347,14 @@ const computedEntry3 = computed(() => {
 				}
 			}
 
-			for (let j = 0; j < bldgStats.outputRes.length; j++) {
-				// If it's a res, it's produced
-				if (bldgStats.outputRes[j] < rf.RES_UPPER_LIMIT) secEntry.outputResourcesGfx.push("res_" + String(bldgStats.outputRes[j]))
-				// Otherwise, the transporter is lost
-				else secEntry.outputResourcesGfx.push("res_blank")
+			// Art & The Atelier: the recipe output is already set above - skip the generic output
+			if (buildingType !== rf.BLDG_ATELIER) {
+				for (let j = 0; j < bldgStats.outputRes.length; j++) {
+					// If it's a res, it's produced
+					if (bldgStats.outputRes[j] < rf.RES_UPPER_LIMIT) secEntry.outputResourcesGfx.push("res_" + String(bldgStats.outputRes[j]))
+					// Otherwise, the transporter is lost
+					else secEntry.outputResourcesGfx.push("res_blank")
+				}
 			}
 			Object.assign(secEntry, getHighlightData([buildingLoc]))
 			secEntry.buildingsToHighlight = [[buildingType, buildingHexID, buildingBucketID]]
@@ -780,8 +811,23 @@ const computedEntry3 = computed(() => {
 				thisStepHist.inputResourcesGfx = []
 				thisStepHist.outputResourcesGfx = []
 				thisStepHist.waterTransportOutputData = {}
+				// Art & The Atelier: recipe-based production. The recipe index is the
+				// last element (resSetIdx > 0) or 0 when the default recipe was used.
+				if (buildingType === rf.BLDG_ATELIER) {
+					const recipeIdx = stackAction.length > 4 ? stackAction[stackAction.length - 1] : 0
+					const inputRes = bldgStats.inputRes[recipeIdx]
+					for (let j = 0; j < inputRes.length; j++) {
+						// If it's a res, it's consumed
+						if (inputRes[j] < rf.RES_UPPER_LIMIT) thisStepHist.inputResourcesGfx.push(`res_${String(inputRes[j])}`)
+						// Otherwise, the transporter (donkey) is consumed
+						else thisStepHist.inputResourcesGfx.push(`transporter_${inputRes[j]}_${personal.getCorrectedColour(store.players[entry[1]].colour)}`)
+					}
+					const outputRes = atelier.getRecipeOutput(recipeIdx)
+					if (outputRes < rf.RES_UPPER_LIMIT) thisStepHist.outputResourcesGfx.push(`res_${String(outputRes)}`)
+					else thisStepHist.outputResourcesGfx.push(`transporter_${outputRes}_${personal.getCorrectedColour(store.players[entry[1]].colour)}`)
+				}
 				// If len = 2, no input res was recorded. So must be default
-				if (stackAction.length === 4) {
+				else if (stackAction.length === 4) {
 					for (let j = 0; j < bldgStats.inputRes[0].length; j++) {
 						// If it's a res, it's consumed
 						if (bldgStats.inputRes[0][j] < rf.RES_UPPER_LIMIT) thisStepHist.inputResourcesGfx.push(`res_${String(bldgStats.inputRes[0][j])}`)

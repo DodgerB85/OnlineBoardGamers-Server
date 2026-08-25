@@ -80,7 +80,9 @@ const buildingInputImages = computed(() => {
 	for (let i = 0; i < bldgStats.inputRes.length; i++) {
 		ret.push([])
 		for (let j = 0; j < bldgStats.inputRes[i].length; j++) {
-			ret[i].push(`res_${bldgStats.inputRes[i][j]}`)
+			// If it's a res, show the resource; otherwise it's a transporter input (donkey)
+			if (bldgStats.inputRes[i][j] < rf.RES_UPPER_LIMIT) ret[i].push(`res_${bldgStats.inputRes[i][j]}`)
+			else ret[i].push(`transporter_${bldgStats.inputRes[i][j]}_${personal.getCorrectedColour(store.players[localCurrentPlayerIndex].colour)}`)
 		}
 	}
 	return ret
