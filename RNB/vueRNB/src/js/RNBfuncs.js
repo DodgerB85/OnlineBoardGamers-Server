@@ -944,6 +944,7 @@ export function importRNBmodel(input, forGameOver) {
 	let newHomeMarkers = []
 	let newBridges = []
 	let newRoads = []
+	let newPowerLines = []
 	let newBuildings = []
 	for (let i = 0; i < store.history.length; i++) {
 		const entry = store.history[i]
@@ -990,6 +991,13 @@ export function importRNBmodel(input, forGameOver) {
 						const fromLoc = stack.decompressLocation(stackAction[2])
 						const toLoc = stack.decompressLocation(stackAction[3])
 						newRoads.push([
+							[fromLoc[1], fromLoc[2]],
+							[toLoc[1], toLoc[2]],
+						])
+					} else if (stackAction[0] === rf.STACK_BUILD_POWER_LINE) {
+						const fromLoc = stack.decompressLocation(stackAction[2])
+						const toLoc = stack.decompressLocation(stackAction[3])
+						newPowerLines.push([
 							[fromLoc[1], fromLoc[2]],
 							[toLoc[1], toLoc[2]],
 						])
@@ -1040,6 +1048,9 @@ export function importRNBmodel(input, forGameOver) {
 	}
 	for (const bridgeEntry of newBridges) {
 		map.addBridgeToMap_core(bridgeEntry[0], -1, bridgeEntry[1], false)
+	}
+	for (const powerLineEntry of newPowerLines) {
+		map.addPowerLineToMap_core(powerLineEntry[0], powerLineEntry[1], -1, false)
 	}
 	// Now update mine to current content by ID
 	for (const mineEntry of inputModel[5]) {

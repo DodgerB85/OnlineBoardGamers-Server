@@ -1482,6 +1482,55 @@ export function verifySingleStackAction(stackActionData) {
 		return 0
 	}
 	//
+	else if (action === rf.STACK_BUILD_POWER_LINE) {
+		let transporterID = stackAction[1]
+		const fromStackLocation = stackAction[2]
+		const toStackLocation = stackAction[3]
+
+		const fromHexID = fromStackLocation[0]
+		const toHexID = toStackLocation[0]
+		let fromBucketID = 0
+		let toBucketID = 0
+		if (fromStackLocation.length > 1) fromBucketID = fromStackLocation[1]
+		if (toStackLocation.length > 1) toBucketID = toStackLocation[1]
+
+		const transporterObj = model.getTransporterByID(transporterID)
+		const fromvertex = loc.getAnyVertexInHexIDbucketID(fromHexID, fromBucketID)
+		const fromPowerLineLocation = [rf.LOCATION_LAND_VERTEX, fromHexID, fromvertex]
+
+		const validLocations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(transporterObj.location, false, "sbpl")
+		// Check you can reach the FROM location
+		if (!util.includesArray(validLocations, fromPowerLineLocation)) return 1
+		const reachableResources = loc.getAllResourcesAccessibleToTransporter(transporterID, true)
+		// Check you can reach iron for building
+		if (!reachableResources.some((res) => res.type === rf.RES_IRON)) return 2
+		// Check there isn't already a power line there
+		const fromHex = model.getHexByID(fromHexID)
+		const toHex = model.getHexByID(toHexID)
+		const fromHexSide = hd.getJoiningSide(fromHex.coord, toHex.coord)
+		const toHexSide = (fromHexSide + 3) % 6
+		const edgeData = store.mapData.edgeData[fromHex.edgeLookup[fromHexSide]]
+		const flipped = edgeData.edgeHexIDs[1] === fromHexID
+		const hexIds = flipped ? [toHexID, fromHexID] : [fromHexID, toHexID]
+		const hexSides = flipped ? [toHexSide, fromHexSide] : [fromHexSide, toHexSide]
+		const bucketIds = flipped ? [toBucketID, fromBucketID] : [fromBucketID, toBucketID]
+		const hexes = hexIds.map(model.getHexByID)
+
+		// If there is only 1 power line option, then build the power line
+		if (edgeData.hasPowerLine.length === 1) {
+			if (edgeData.hasPowerLine[0]) return 3
+		}
+		// Otherwise we need to find which side of the river the power line should be
+		else {
+			const firstHexCorner = hexes[0].cornerNodeIds[hexSides[0]][0]
+			const secondHexCorner = hexes[1].cornerNodeIds[hexSides[1]][1]
+			const oppositeCorner = hexes[0].nodeBucketIds[firstHexCorner] !== bucketIds[0] || hexes[1].nodeBucketIds[secondHexCorner] !== bucketIds[1]
+			const actual = oppositeCorner ? 1 : 0
+			if (edgeData.hasPowerLine[actual]) return 3
+		}
+		return 0
+	}
+	//
 	else if (action === rf.STACK_BUILD_BRIDGE) {
 		let transporterID = stackAction[1]
 		//if (transporterID >= knownTransLen) transporterID += transIDdelta
@@ -2225,6 +2274,25 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 		if (toStackLocation.length > 1) toBucketID = toStackLocation[1]
 
 		map.addRoadToMap_core([fromHexID, fromBucketID], [toHexID, toBucketID], transporterID, true)
+
+		return 0
+	} else if (action === rf.STACK_BUILD_POWER_LINE) {
+		let transporterID = stackAction[1]
+		if (swapIDs && typeof transporterID === "string") {
+			stackAction[1] = model.getTransporterByID(transporterID).id
+			transporterID = stackAction[1]
+		}
+		const fromStackLocation = stackAction[2]
+		const toStackLocation = stackAction[3]
+
+		const fromHexID = fromStackLocation[0]
+		const toHexID = toStackLocation[0]
+		let fromBucketID = 0
+		let toBucketID = 0
+		if (fromStackLocation.length > 1) fromBucketID = fromStackLocation[1]
+		if (toStackLocation.length > 1) toBucketID = toStackLocation[1]
+
+		map.addPowerLineToMap_core([fromHexID, fromBucketID], [toHexID, toBucketID], transporterID, true)
 
 		return 0
 	} else if (action === rf.STACK_BUILD_BRIDGE) {

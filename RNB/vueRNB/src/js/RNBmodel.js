@@ -614,8 +614,15 @@ export function isPrimaryProducer(building) {
 	return stats.inputRes[0].length === 0
 }
 
+// Special buildings that are neither primary nor secondary producers. E.g. the
+// power plant - its fuel is consumed at the start of the production phase, and
+// it does not produce goods through the normal production machinery.
+export function isNonProducingBuilding(building) {
+	return building.type === rf.BLDG_POWER_PLANT
+}
+
 export function isSecondaryProducer(building) {
-	return !isPrimaryProducer(building)
+	return !isPrimaryProducer(building) && !isNonProducingBuilding(building)
 }
 
 export function isSecondaryProducerWithoutTransporterInput(building) {

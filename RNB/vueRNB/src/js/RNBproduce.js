@@ -17,6 +17,7 @@ import * as stack from "./RNBstack"
 import * as context from "./RNBcontext"
 import * as highlight from "./RNBhighlight"
 import * as controller from "./RNBcontroller.js"
+import * as electricity from "./RNBelectricity.js"
 import { usePersonalStore } from "../stores/RNBpersonal.js"
 
 // NOTE: This outputs resources, and prevents out put of an unclaimed transporter production.
@@ -28,49 +29,64 @@ export function addBuildingOutputResourcesToGame_core(buildingID, forcedOutputRe
 	const bldgStats = model.getBuildingStatsFromBuildingID(buildingID)
 	const { type, location, remainingMineContent, id } = building
 
+	// ELECTRICITY: A powered primary producer produces twice as much. The powered
+	// hex set is deterministic, so this also doubles output correctly in replay.
+	const isPoweredPrimary = store.gameOptions.useElectricity && model.isPrimaryProducer(building) && electricity.isHexPowered(location[1])
+
 	// Use a single result variable instead of re-assigning an array repeatedly
 	let producedMineRes = 0
+	let mineResults = []
 
 	for (const outputRes of bldgStats.outputRes) {
 		if (outputRes > rf.RES_UPPER_LIMIT) continue
 
 		if (type !== rf.BLDG_MINE) {
 			model.addResourceToGame_core(outputRes, location, playerIndex)
+			if (isPoweredPrimary) model.addResourceToGame_core(outputRes, location, playerIndex)
 			continue
 		}
 
 		// Handle Mine Logic
-		const [gold, iron] = remainingMineContent
-		const total = gold + iron
-		if (total <= 0) continue
+		// Powered mines pull 2 goods per turn (exhausting them faster). During
+		// replay each recorded pull is replayed individually, so we only double
+		// in live play (forcedOutputRes === -1) and never during pre-turn previews.
+		const numPulls = isPoweredPrimary && forcedOutputRes === -1 && !forPreTurn ? 2 : 1
 
-		// For PRE-TURN, get eithe ronly option, OR pseudo good
-		if (forPreTurn) {
-			if (store.gameOptions.useSoloMineRules) producedMineRes = iron > gold ? rf.RES_IRON : rf.RES_GOLD
-			else if (gold === 0) producedMineRes = rf.RES_IRON
-			else if (iron === 0) producedMineRes = rf.RES_GOLD
-			else producedMineRes = rf.RES_PSEUDO_MINE
+		for (let pull = 0; pull < numPulls; pull++) {
+			const [gold, iron] = remainingMineContent
+			const total = gold + iron
+			if (total <= 0) break
+
+			// For PRE-TURN, get eithe ronly option, OR pseudo good
+			if (forPreTurn) {
+				if (store.gameOptions.useSoloMineRules) producedMineRes = iron > gold ? rf.RES_IRON : rf.RES_GOLD
+				else if (gold === 0) producedMineRes = rf.RES_IRON
+				else if (iron === 0) producedMineRes = rf.RES_GOLD
+				else producedMineRes = rf.RES_PSEUDO_MINE
+			}
+			// If for solo (and not replay), use the solo rules order
+			else if ((store.gameOptions.useSoloMineRules || personal.soloGame) && forcedOutputRes === -1) {
+				producedMineRes = iron > gold ? rf.RES_IRON : rf.RES_GOLD
+			} else {
+				// Actual turn logic
+				producedMineRes = forcedOutputRes !== -1 ? forcedOutputRes : Math.random() * total < gold ? rf.RES_GOLD : rf.RES_IRON
+			}
+
+			// Execute resource addition and decrement state
+			model.addResourceToGame_core(producedMineRes, location, 9)
+
+			if (producedMineRes === rf.RES_GOLD) remainingMineContent[0]--
+			else if (producedMineRes === rf.RES_IRON) remainingMineContent[1]--
+
+			// The original code returns early for mines during preTurn,
+			// otherwise it continues the loop (though mines usually have 1 outputRes).
+			if (forPreTurn) return [[id, producedMineRes]]
+			mineResults.push([id, producedMineRes])
 		}
-		// If for solo (and not replay), use the solo rules order
-		else if ((store.gameOptions.useSoloMineRules || personal.soloGame) && forcedOutputRes === -1) {
-			producedMineRes = iron > gold ? rf.RES_IRON : rf.RES_GOLD
-		} else {
-			// Actual turn logic
-			producedMineRes = forcedOutputRes !== -1 ? forcedOutputRes : Math.random() * total < gold ? rf.RES_GOLD : rf.RES_IRON
-		}
-
-		// Execute resource addition and decrement state
-		model.addResourceToGame_core(producedMineRes, location, 9)
-
-		if (producedMineRes === rf.RES_GOLD) remainingMineContent[0]--
-		else if (producedMineRes === rf.RES_IRON) remainingMineContent[1]--
-
-		// The original code returns early for mines during preTurn,
-		// otherwise it continues the loop (though mines usually have 1 outputRes).
-		if (forPreTurn) return [id, producedMineRes]
 	}
 
-	return producedMineRes ? [id, producedMineRes] : []
+	if (mineResults.length > 0) return mineResults
+	return producedMineRes ? [[id, producedMineRes]] : []
 }
 /*export function addBuildingOutputResourcesToGame_core(buildingID, forcedOutputRes = -1, playerIndex = 9, forPreTurn) {
 	const building = model.getBuildingByID(buildingID)
@@ -122,6 +138,9 @@ export function addBuildingOutputResourcesToGame_core(buildingID, forcedOutputRe
 export function doMineProduction(performingFromReplay, histEntry = [], forPreTurn) {
 	const store = useModelStore()
 	store.context.historyObj.splice(0)
+	// ELECTRICITY: Fuel the power plants (once per turn) before any mines pull.
+	// Fuelled plants are recorded in primary production, not here.
+	electricity.fuelPowerPlants()
 	for (const building of model.getAllInGameBuildings().filter(model.isPrimaryProducer)) {
 		// Skip NON mines here - they are done after conflict
 		if (building.type !== rf.BLDG_MINE) continue
@@ -134,14 +153,22 @@ export function doMineProduction(performingFromReplay, histEntry = [], forPreTur
 			if (mineProductionEntry.length > 2) outputRes = mineProductionEntry[2]
 			addBuildingOutputResourcesToGame_core(building.id, outputRes, 9)
 		} else {
-			const mineInfo = addBuildingOutputResourcesToGame_core(building.id, -1, 9, forPreTurn)
-			// Record output
+			const mineInfos = addBuildingOutputResourcesToGame_core(building.id, -1, 9, forPreTurn)
+			// Record output - a powered mine may pull twice. The first pull is marked
+			// with a trailing -3 powered flag so history can show the electricity symbol.
 			const compressedLocation = stack.compressLocation(building.location)
-			if (mineInfo.length > 0) {
+			const powered = store.gameOptions.useElectricity && electricity.isHexPowered(building.location[1])
+			for (let k = 0; k < mineInfos.length; k++) {
+				const mineInfo = mineInfos[k]
+				const poweredFlag = powered && k === 0 ? -3 : undefined
 				if (mineInfo[1] !== rf.RES_GOLD) {
-					store.context.historyObj.push([building.id, [...compressedLocation], mineInfo[1]])
+					const entry = [building.id, [...compressedLocation], mineInfo[1]]
+					if (poweredFlag !== undefined) entry.push(poweredFlag)
+					store.context.historyObj.push(entry)
 				} else {
-					store.context.historyObj.push([building.id, [...compressedLocation]])
+					const entry = [building.id, [...compressedLocation]]
+					if (poweredFlag !== undefined) entry.push(poweredFlag)
+					store.context.historyObj.push(entry)
 				}
 			}
 		}
@@ -154,6 +181,18 @@ export function doPrimaryProduction(performingFromReplay, histEntry = []) {
 	store.context.historyObj.splice(0)
 	// Make an history array entry for primary producers
 	if (!performingFromReplay) store.context.historyObj.push([])
+
+	// ELECTRICITY: powered (fuelled) power plants are recorded FIRST in primary
+	// production. Entry shape: [bldgID, compressedLoc, fuelType, -3] so history can
+	// show the fuel input and the doubled electricity output.
+	if (!performingFromReplay) {
+		for (const plant of model.getAllInGameBuildings().filter(electricity.isPowerPlant)) {
+			if (plant.powerActive !== true || plant.powerFuelType === undefined || plant.powerFuelType === -1) continue
+			const compressedLocation = stack.compressLocation(plant.location)
+			store.context.historyObj[0].push([plant.id, [...compressedLocation], plant.powerFuelType, -3])
+		}
+	}
+
 	for (const building of model.getAllInGameBuildings().filter(model.isPrimaryProducer)) {
 		// Skip mines here - they must be done BEFORE conflict
 		if (building.type === rf.BLDG_MINE) continue
@@ -163,17 +202,20 @@ export function doPrimaryProduction(performingFromReplay, histEntry = []) {
 			const priEntries = histEntry[0]
 			let mineProductionEntry = priEntries.find((a) => a[0] === building.id)
 			let outputRes = rf.RES_GOLD
-			if (mineProductionEntry.length > 2) outputRes = mineProductionEntry[2]
+			// Ignore the electricity -3 powered marker when reading the output
+			if (mineProductionEntry.length > 2 && mineProductionEntry[2] !== -3) outputRes = mineProductionEntry[2]
 			addBuildingOutputResourcesToGame_core(building.id, outputRes, 9)
 		} else {
 			addBuildingOutputResourcesToGame_core(building.id, -1, 9)
 			//const mineInfo =
 			// Output is fixed, so we only need to record the type and location UNLESS it is a mine
 			const compressedLocation = stack.compressLocation(building.location)
-			//if (mineInfo.length > 0 && mineInfo[1] !== rf.RES_GOLD) {
-			//	store.context.historyObj[0].push([building.id, [...compressedLocation], mineInfo[1]])
-			//} else
-			store.context.historyObj[0].push([building.id, [...compressedLocation]])
+			// ELECTRICITY: mark powered primaries (their output was doubled) with -3 at
+			// index 2 so history can show the electricity symbol. Index 2 is unused for
+			// non-mine primaries, so it is safe.
+			const powered = store.gameOptions.useElectricity && electricity.isHexPowered(building.location[1])
+			if (powered) store.context.historyObj[0].push([building.id, [...compressedLocation], -3])
+			else store.context.historyObj[0].push([building.id, [...compressedLocation]])
 		}
 	}
 

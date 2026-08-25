@@ -237,6 +237,11 @@ export const useModelStore = defineStore("store", () => {
 		resIDbeingMoved: -1,
 		transporterIDbeingDropped: -1,
 
+		// Electricity vars
+		buildingPowerLine: false, // True while the player is placing power line segments
+		poweredHexIDs: [], // Hexes energised this production phase by a working power plant
+		powerPlantsFueledTurn: -1, // Turn the power plants were last fuelled for (idempotency guard)
+
 		// Transporter Mode vars
 		selectedTransporterIDforTM: -1,
 		gooseID: -1,

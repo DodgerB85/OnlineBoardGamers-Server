@@ -35,6 +35,13 @@ export function setEligibleItemsToBuild(playerIndex, transporterID) {
 		if (!store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_ROAD) && map.allLandVertexBucketsWithoutRoadsAdjacentTo(hexID, roadBucketIDs).length > 0) store.context.eligibleBuildingsToBuild.push(rf.BLDG_PSEUDO_ROAD)
 	}
 
+	// Is power line building possible
+	if (store.gameOptions.useElectricity && resourceOnHex[rf.RES_IRON] > 0) {
+		let powerLineBucketIDs = []
+		for (const bucketID of bucketIds) powerLineBucketIDs = powerLineBucketIDs.concat(model.hexCurrentBucketToInitial(hexID, bucketID))
+		if (!store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_POWER_LINE) && map.allVertexBucketsWithoutPowerLinesAdjacentTo(hexID, powerLineBucketIDs).length > 0) store.context.eligibleBuildingsToBuild.push(rf.BLDG_PSEUDO_POWER_LINE)
+	}
+
 	// Is bridge building possible
 	if (stoneOnHex > 0) {
 		for (let i = 0; i < hexObj.bridges.length; i++) {

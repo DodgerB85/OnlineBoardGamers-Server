@@ -14,6 +14,10 @@ export function clearDataForGameReload() {
 	store.undoPoints.splice(0)
 	store.actionStack.splice(0)
 	store.context.possibleDonkeyReproductionData.splice(0)
+	// ELECTRICITY: clear transient power state so a stale guard from a cancelled
+	// pre-phase preview can't suppress fuelling (or its history entry) on the real turn.
+	store.context.powerPlantsFueledTurn = -1
+	store.context.poweredHexIDs.splice(0)
 	// stack control
 	stack.resetStackControlData()
 }
@@ -119,6 +123,7 @@ export function resetContext() {
 	// Building Vars
 	context.selectedBuildingToBuild = -1
 	context.mineSelectionType = 0
+	context.buildingPowerLine = false
 	context.remainingBuildingSummaryOptions.splice(0)
 	context.noTransportersOnHomeTile = false
 

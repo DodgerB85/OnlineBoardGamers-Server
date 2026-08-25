@@ -778,6 +778,10 @@ const computedMaxNeutralBricks = computed(() => {
 						<!-- ROADS-->
 						<path :d="computedZoomData.fullRoadPathZP" stroke="#1C2526" stroke-width="60" stroke-linejoin="round" stroke-linecap="round" />
 						<path :d="computedZoomData.fullRoadPathZP" stroke="#F5F5F5" stroke-width="7" stroke-dasharray="25 20" fill="none" />
+						<g v-if="store.gameOptions.useElectricity && computedZoomData.fullPowerLinePathZP">
+							<path :d="computedZoomData.fullPowerLinePathZP" stroke="#B22222" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" fill="none" />
+							<path :d="computedZoomData.fullPowerLinePathZP" stroke="#FFD700" stroke-width="3" stroke-dasharray="8 14" fill="none" />
+						</g>
 					</g>
 					<!-- BUILDINGS-->
 					<!-- NON MINES -->

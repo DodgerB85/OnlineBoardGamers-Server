@@ -130,6 +130,7 @@ function clickedNewBuilding(bldgNum) {
 		store.context.eligibleBridgesToBuild.splice(0)
 		store.context.eligibleWallsToDemolish.splice(0)
 		store.context.eligibleBuildingsToBuild.splice(0)
+		store.context.buildingPowerLine = false
 
 		// Set up the general params
 		const transporterID = store.context.selectedTransporterIDforTM
@@ -180,6 +181,7 @@ function clickedNewBuilding(bldgNum) {
 		// You must have clicked a transport, so there will be a TM selected
 		if (bldgNum === rf.BLDG_PSEUDO_ROAD) {
 			store.context.newRoadInfo.splice(0)
+			store.context.buildingPowerLine = false
 			// Boats can often build roads from several banks, but the road-end pieces
 			// can't tell those banks apart, so let the player pick the FROM bucket first
 			const adjacentPieces = map.allLandVertexBucketsWithoutRoadsAdjacentTo(hexID, bucketIds)
@@ -195,6 +197,12 @@ function clickedNewBuilding(bldgNum) {
 				store.context.newRoadInfo.push([hexID, bucketIds])
 				context.setHexPiecesToHighlight(adjacentPieces)
 			}
+		} else if (bldgNum === rf.BLDG_PSEUDO_POWER_LINE) {
+			store.context.newRoadInfo.splice(0)
+			store.context.buildingPowerLine = true
+			const adjacentPieces = map.allVertexBucketsWithoutPowerLinesAdjacentTo(hexID, bucketIds)
+			store.context.newRoadInfo.push([hexID, bucketIds])
+			context.setHexPiecesToHighlight(adjacentPieces)
 		} else if (bldgNum === rf.BLDG_PSEUDO_BRIDGE) {
 			for (let i = 0; i < hexObj.bridges.length; i++) {
 				const bridge = hexObj.bridges[i]

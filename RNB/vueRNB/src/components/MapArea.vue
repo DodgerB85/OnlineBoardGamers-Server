@@ -68,6 +68,7 @@ const hexesForDisplay = computed(() =>
 		bridgeRiverLines: hex.bridgeRiverLines,
 		roadJoinPoints: hex.roadJoinPoints,
 		fullRoadPath: hex.fullRoadPath,
+		fullPowerLinePath: hex.fullPowerLinePath,
 	}))
 )
 
@@ -433,6 +434,11 @@ function handleSelectBubbleClick() {
 								<path class="noClick" :d="hex.fullRoadPath" stroke="#1C2526" :stroke-width="60 * store.RATIO" stroke-linejoin="round" stroke-linecap="round" />
 								<path class="noClick" :d="hex.fullRoadPath" stroke="#F5F5F5" :stroke-width="(7 * store.RATIO).toFixed(0)" :stroke-dasharray="`${(25 * store.RATIO).toFixed(0)} ${(20 * store.RATIO).toFixed(0)}`" fill="none" />
 							</g>
+						</g>
+						<!-- POWER LINES - narrow red line with yellow dots, drawn inside roads -->
+						<g v-if="store.gameOptions.useElectricity && hex.fullPowerLinePath">
+							<path class="noClick" :d="hex.fullPowerLinePath" stroke="#B22222" :stroke-width="(14 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="round" fill="none" />
+							<path class="noClick" :d="hex.fullPowerLinePath" stroke="#FFD700" :stroke-width="(3 * store.RATIO).toFixed(0)" :stroke-dasharray="`${(8 * store.RATIO).toFixed(0)} ${(14 * store.RATIO).toFixed(0)}`" fill="none" />
 						</g>
 					</g>
 					<!-- NOT FINE TO ROTATE TO FLAT-->

@@ -559,6 +559,7 @@ export function createActualHex(coord, rotation, hexTerrainID) {
 	newHex.builtBridges = [] // pairs of nodes which have been built as bridges, e.g [[2, 5], [3, 1]]
 	newHex.bridgeHasRoad = [] // matches builtBridges. For display purposes, doesn't have to be saved
 	newHex.edgeHasRoad = util.makeArrayOfSizeWithFill(reference.nodeEdges.length, false) // for display purposes, doesn't have to be saved
+	newHex.edgeHasPowerLine = util.makeArrayOfSizeWithFill(reference.nodeEdges.length, false) // for display purposes, doesn't have to be saved
 	newHex.nodeIsRoadAnchor = util.indexArray(reference.nodeBucketIds.length).map((i) => reference.roadAnchors.includes(i)) // creates a bool array from ids. Doesn't have to be saved
 	rotateHex(newHex, rotation)
 	newHex.initialBucketCorners = newHex.bucketIdsInitial.map((bucket) => util.indicesOf(newHex.cornerBucketIds, (a) => a === bucket))

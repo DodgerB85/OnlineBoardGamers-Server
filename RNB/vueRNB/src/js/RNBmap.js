@@ -69,6 +69,7 @@ export function addNewEdge(hexIds) {
 			[(joiningSide + 1) % 6, secondOppositeVertex],
 		],
 		hasRoad: hasRiver ? [false, false] : [false], // Road either side of the river,
+		hasPowerLine: hasRiver ? [false, false] : [false], // Power line either side of the river,
 		hasRiver: hasRiver,
 	})
 
@@ -154,11 +155,40 @@ export function existingEntryPoints(hexId) {
 	return isEntryPoint
 }
 
+export function existingPowerLineEntryPoints(hexId) {
+	const store = useModelStore()
+	const hex = model.getHexByID(hexId)
+	let isEntryPoint = util.makeArrayOfSizeWithFill(hex.nodeBucketIds.length, false)
+	for (const side of util.indexArray(6)) {
+		const edgeId = hex.edgeLookup[side]
+		if (edgeId !== -1) {
+			const edge = store.mapData.edgeData[edgeId]
+			if (edge.hasPowerLine.length === 1) {
+				isEntryPoint[hex.sideNodeIds[side]] = edge.hasPowerLine[0]
+			} else {
+				let offset = hexId === edge.edgeHexIDs[0] ? 0 : 1
+				for (const k of [0, 1].filter((k) => edge.hasPowerLine[k])) {
+					isEntryPoint[hex.cornerNodeIds[side][(k + offset) % 2]] = true
+				}
+			}
+		}
+	}
+	return isEntryPoint
+}
+
 export function addRedundantRoads(hexId) {
+	addRedundantPaths(hexId, "edgeHasRoad")
+}
+
+export function addRedundantPowerLines(hexId) {
+	addRedundantPaths(hexId, "edgeHasPowerLine")
+}
+
+function addRedundantPaths(hexId, edgeHasKey) {
 	const hex = model.getHexByID(hexId)
 	let nodeHasRoad = util.makeArrayOfSizeWithFill(hex.nodeBucketIds, false)
 	for (let i = 0; i < hex.nodeEdges.length; i++) {
-		if (hex.edgeHasRoad[i]) {
+		if (hex[edgeHasKey][i]) {
 			for (const node of hex.nodeEdges[i]) {
 				nodeHasRoad[node] = true
 			}
@@ -167,12 +197,12 @@ export function addRedundantRoads(hexId) {
 	for (let i = 0; i < hex.nodeEdges.length; i++) {
 		const nodes = hex.nodeEdges[i]
 		if (nodeHasRoad[nodes[0]] && nodeHasRoad[nodes[1]]) {
-			hex.edgeHasRoad[i] = true
+			hex[edgeHasKey][i] = true
 		}
 	}
 }
 
-export function updateHexInternalRoadsViaNode(hexId, hexGraph, initialEntryPoints, nodeId) {
+export function updateHexInternalRoadsViaNode(hexId, hexGraph, initialEntryPoints, nodeId, edgeHasKey = "edgeHasRoad") {
 	const hex = model.getHexByID(hexId)
 	let isEntryPoint = initialEntryPoints.slice()
 	for (const bridge of hex.builtBridges) {
@@ -194,7 +224,7 @@ export function updateHexInternalRoadsViaNode(hexId, hexGraph, initialEntryPoint
 			let dest = anchorIndices[0]
 			while (dest !== pathfind.previous[dest]) {
 				let edgeId = pathfind.viaEdge[dest]
-				hex.edgeHasRoad[edgeId] = true
+				hex[edgeHasKey][edgeId] = true
 				dest = pathfind.previous[dest]
 			}
 		}
@@ -203,12 +233,12 @@ export function updateHexInternalRoadsViaNode(hexId, hexGraph, initialEntryPoint
 			let dest = index
 			while (dest !== pathfind.previous[dest]) {
 				let edgeId = pathfind.viaEdge[dest]
-				hex.edgeHasRoad[edgeId] = true
+				hex[edgeHasKey][edgeId] = true
 				dest = pathfind.previous[dest]
 			}
 		}
 	}
-	addRedundantRoads(hexId)
+	addRedundantPaths(hexId, edgeHasKey)
 }
 
 export function updateHexInternalRoads(hexId, nodeIds) {
@@ -217,7 +247,17 @@ export function updateHexInternalRoads(hexId, nodeIds) {
 	const isEntryPoint = existingEntryPoints(hexId)
 
 	for (const nodeId of nodeIds) {
-		updateHexInternalRoadsViaNode(hexId, hexGraph, isEntryPoint, nodeId)
+		updateHexInternalRoadsViaNode(hexId, hexGraph, isEntryPoint, nodeId, "edgeHasRoad")
+	}
+}
+
+export function updateHexInternalPowerLines(hexId, nodeIds) {
+	const hex = model.getHexByID(hexId)
+	const hexGraph = graph.createCompleteGraph([hex], [], -1)
+	const isEntryPoint = existingPowerLineEntryPoints(hexId)
+
+	for (const nodeId of nodeIds) {
+		updateHexInternalRoadsViaNode(hexId, hexGraph, isEntryPoint, nodeId, "edgeHasPowerLine")
 	}
 }
 
@@ -358,7 +398,7 @@ export function clickedHighlight(entry, event = null) {
 		}
 	}
 
-	// During building phase, the only reason to click a segment is to build a road
+	// During building phase, the only reason to click a segment is to build a road or power line
 	if (rf.PHASE_BUILDINGS.includes(store.gameflow.phase)) {
 		if (store.context.action === rf.ACT_TM_BUILD_SELECT_BRIDGE_ROAD_WALL_BUILDING_RES_PICKUP_DROP) {
 			if (store.context.newRoadInfo.length === 0) {
@@ -366,7 +406,8 @@ export function clickedHighlight(entry, event = null) {
 				// NB I think you can only get here using "cheat raod"
 				store.context.newRoadInfo.push(entry)
 				context.clearAllHighlights()
-				context.setHexPiecesToHighlight(allLandVertexBucketsWithoutRoadsAdjacentTo(hexID, bucketIds))
+				if (store.context.buildingPowerLine) context.setHexPiecesToHighlight(allVertexBucketsWithoutPowerLinesAdjacentTo(hexID, bucketIds))
+				else context.setHexPiecesToHighlight(allLandVertexBucketsWithoutRoadsAdjacentTo(hexID, bucketIds))
 			} else {
 				const firstEntry = store.context.newRoadInfo[0]
 				const fromHexID = firstEntry[0]
@@ -408,7 +449,11 @@ export function clickedHighlight(entry, event = null) {
 						}
 					}
 				}
-				addRoadToMap([fromHexID, fromBucketToUse], [toHexID, firstToBucket], true)
+				if (store.context.buildingPowerLine) {
+					addPowerLineToMap([fromHexID, fromBucketToUse], [toHexID, firstToBucket], true)
+				} else {
+					addRoadToMap([fromHexID, fromBucketToUse], [toHexID, firstToBucket], true)
+				}
 				return
 			}
 		}
@@ -603,6 +648,81 @@ export function addRoadToMap_core([fromHexID, fromBucketId], [toHexID, toBucketI
 	}
 }
 
+export function addPowerLineToMap([fromHexID, fromBucketId], [toHexID, toBucketId], deductResources) {
+	const store = useModelStore()
+
+	// First make sure you can deduct the resources. This flag can be set false for map creation / debug
+	if (deductResources) {
+		let errorFlag = model.removeResourcesFromGameUsingTransporter(store.context.selectedTransporterIDforTM, [rf.RES_IRON], true)
+		if (errorFlag === 1) {
+			rf.doAdminAlrt("You don't have enough resources to build a power line")
+			return
+		}
+	}
+
+	// Add the power line
+	addPowerLineToMap_core([fromHexID, fromBucketId], [toHexID, toBucketId], store.context.selectedTransporterIDforTM, deductResources)
+
+	// Add to the stack
+	const compressedFromLocation = stack.compressLocation([rf.LOCATION_BUCKET, fromHexID, fromBucketId])
+	const compressedToLocation = stack.compressLocation([rf.LOCATION_BUCKET, toHexID, toBucketId])
+	const transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
+	let stackAction = [rf.STACK_BUILD_POWER_LINE, stack.getTransIDtoUse(transporterObj), [...compressedFromLocation], [...compressedToLocation]]
+	stack.addItemToStack({
+		action: rf.STACK_BUILD_POWER_LINE,
+		historyEntry: stackAction,
+		playerIndex: controller.currentPlayerIndex(),
+	})
+
+	// Reset the context
+	highlight.updateAllHighlightsForTransporterMode()
+	context.createUndoPoint()
+}
+
+export function addPowerLineToMap_core([fromHexID, fromBucketId], [toHexID, toBucketId], transporterID, deductResources) {
+	const store = useModelStore()
+
+	if (deductResources) {
+		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_IRON], false)
+		if (errorFlag === 1) {
+			rf.doAdminAlrt("ERROR: No resources for building power line - but this should already have been checked or proven")
+			return
+		}
+	}
+
+	// Find the joining side from the first to the 2nd hex
+	const fromHex = model.getHexByID(fromHexID)
+	const toHex = model.getHexByID(toHexID)
+	const fromHexSide = hd.getJoiningSide(fromHex.coord, toHex.coord)
+	const toHexSide = (fromHexSide + 3) % 6
+	const edgeData = store.mapData.edgeData[fromHex.edgeLookup[fromHexSide]]
+	const flipped = edgeData.edgeHexIDs[1] === fromHexID
+	const hexIds = flipped ? [toHexID, fromHexID] : [fromHexID, toHexID]
+	const hexSides = flipped ? [toHexSide, fromHexSide] : [fromHexSide, toHexSide]
+	const bucketIds = flipped ? [toBucketId, fromBucketId] : [fromBucketId, toBucketId]
+	const hexes = hexIds.map(model.getHexByID)
+
+	let entryNodes = [-1, -1]
+
+	// If there is only 1 power line option, then build the power line
+	if (edgeData.hasPowerLine.length === 1) {
+		edgeData.hasPowerLine = [true]
+		entryNodes = [0, 1].map((j) => hexes[j].sideNodeIds[hexSides[j]])
+	}
+	// Otherwise we need to find which side of the river the power line should be
+	else {
+		const firstHexCorner = hexes[0].cornerNodeIds[hexSides[0]][0]
+		const secondHexCorner = hexes[1].cornerNodeIds[hexSides[1]][1]
+		const oppositeCorner = hexes[0].nodeBucketIds[firstHexCorner] !== bucketIds[0] || hexes[1].nodeBucketIds[secondHexCorner] !== bucketIds[1]
+		const actual = oppositeCorner ? 1 : 0
+		edgeData.hasPowerLine[actual] = true
+		entryNodes = [0, 1].map((k) => hexes[k].cornerNodeIds[hexSides[k]][(actual + k) % 2])
+	}
+	for (const k of [0, 1]) {
+		updateHexInternalPowerLines(hexIds[k], [entryNodes[k]])
+	}
+}
+
 export function clickedBridgeOption(entry) {
 	const store = useModelStore()
 	const hexID = entry[0]
@@ -659,6 +779,7 @@ export function addBridgeToMap_core(hexID, transporterID, bridgeArr, deductResou
 
 	hex.nodeEdges.push(bridgeArr)
 	hex.edgeHasRoad.push(false)
+	hex.edgeHasPowerLine.push(false)
 	hex.builtBridges.push(bridgeArr)
 	let a = hex.bucketIdsCurrent[hex.nodeBucketIds[bridgeArr[0]]]
 	let b = hex.bucketIdsCurrent[hex.nodeBucketIds[bridgeArr[1]]]
@@ -689,6 +810,9 @@ export function addBridgeToMap_core(hexID, transporterID, bridgeArr, deductResou
 
 	const isEntryPoint = existingEntryPoints(hexID)
 	updateHexInternalRoads(hexID, util.boolFilter(util.indexArray(isEntryPoint.length), isEntryPoint))
+	// Re-draw internal power line segments too - bridges are power line entry points
+	const isPowerLineEntryPoint = existingPowerLineEntryPoints(hexID)
+	updateHexInternalPowerLines(hexID, util.boolFilter(util.indexArray(isPowerLineEntryPoint.length), isPowerLineEntryPoint))
 }
 
 export function checkAddingBuildingToMap(bldgNum) {
@@ -1085,6 +1209,56 @@ export function allLandVertexBucketsWithoutRoadsAdjacentTo(hexID, bucketIds) {
 				for (const k of [0, 1].filter((k) => inBucket(hex.cornerNodeIds[side][cornerSide[k]]) && !edge.hasRoad[k])) {
 					addRes(otherHex.cornerNodeIds[otherSide][otherCornerSide[k]])
 				}
+			}
+		}
+	}
+	return res
+}
+
+// A power line may only cross a river boundary when a bridge exists on that
+// boundary. A bridge merges the two bank buckets of a hex, so we check whether
+// the two corner nodes of the river side now sit in the same current bucket on
+// either hex (i.e. a bridge has physically connected the two banks).
+function riverCrossingAllowed(hexA, sideA, hexB, sideB) {
+	function banksConnected(hex, side) {
+		const [n0, n1] = hex.cornerNodeIds[side]
+		if (n0 === -1 || n1 === -1) return false
+		return hex.bucketIdsCurrent[hex.nodeBucketIds[n0]] === hex.bucketIdsCurrent[hex.nodeBucketIds[n1]]
+	}
+	return banksConnected(hexA, sideA) || banksConnected(hexB, sideB)
+}
+
+// Power lines function like roads, but can be built on land, sea or polders,
+// and may only cross a river where a bridge already exists on that boundary.
+export function allVertexBucketsWithoutPowerLinesAdjacentTo(hexID, bucketIds) {
+	const store = useModelStore()
+	const hex = model.getHexByID(hexID)
+	function inBucket(nodeId) {
+		return nodeId >= 0 && bucketIds.includes(hex.bucketIdsInitial[hex.nodeBucketIds[nodeId]])
+	}
+	let res = []
+	for (const side of util.indexArray(6).filter((side) => hex.hexLookup[side] !== -1)) {
+		const edge = store.mapData.edgeData[hex.edgeLookup[side]]
+		const otherHexId = hex.hexLookup[side]
+		const otherHex = model.getHexByID(otherHexId)
+		// Both hexes must be buildable (land, sea or polder - never void)
+		if (!rf.TERR_ANY.includes(hex.currentTerrain) || !rf.TERR_ANY.includes(otherHex.currentTerrain)) continue
+		// Rivers may only be crossed where a bridge exists on the boundary
+		if (edge.hasRiver && !riverCrossingAllowed(hex, side, otherHex, (side + 3) % 6)) continue
+		function addRes(nodeId) {
+			const otherBucketId = otherHex.bucketIdsInitial[otherHex.nodeBucketIds[nodeId]]
+			res.push([otherHexId, [otherBucketId]])
+		}
+		const otherSide = (side + 3) % 6
+		if (hex.sideNodeIds[side] !== -1 && !edge.hasPowerLine[0]) {
+			if (inBucket(hex.sideNodeIds[side])) {
+				addRes(otherHex.sideNodeIds[otherSide])
+			}
+		} else {
+			const cornerSide = edge.edgeHexIDs[0] === hexID ? [0, 1] : [1, 0]
+			const otherCornerSide = cornerSide.map((i) => (i + 1) % 2)
+			for (const k of [0, 1].filter((k) => inBucket(hex.cornerNodeIds[side][cornerSide[k]]) && !edge.hasPowerLine[k])) {
+				addRes(otherHex.cornerNodeIds[otherSide][otherCornerSide[k]])
 			}
 		}
 	}

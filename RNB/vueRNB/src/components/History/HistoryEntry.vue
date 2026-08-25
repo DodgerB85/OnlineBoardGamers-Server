@@ -170,8 +170,11 @@ const computedEntry3 = computed(() => {
 			priEntry.bldgGfx = "bldg_" + String(buildingType)
 			//ret.hexIDSandVertexesToHighlight.push(buildingLoc)
 			priEntry.outputResourcesGfx = []
+			// ELECTRICITY: a trailing -3 marker means this pull is electricity-doubled
+			priEntry.powered = priHistEntry.length > 0 && priHistEntry[priHistEntry.length - 1] === -3
 			let outputRes = rf.RES_GOLD
-			if (priHistEntry.length > 2) outputRes = priHistEntry[2]
+			// Find the output resource: it is at index 2 unless the -3 marker is there
+			if (priHistEntry.length > 2 && priHistEntry[2] !== -3) outputRes = priHistEntry[2]
 			if (outputRes !== 0) priEntry.outputResourcesGfx.push("res_" + String(outputRes))
 
 			Object.assign(priEntry, getHighlightData([fullLocation]))
@@ -204,9 +207,16 @@ const computedEntry3 = computed(() => {
 			priEntry.bldgGfx = "bldg_" + String(buildingType)
 			//ret.hexIDSandVertexesToHighlight.push(buildingLoc)
 			priEntry.outputResourcesGfx = []
-			if (bldg.type === rf.BLDG_MINE) {
+			// ELECTRICITY: a -3 marker at index 2 means this primary was powered/doubled
+			priEntry.powered = priHistEntry.length > 2 && priHistEntry[2] === -3
+			if (buildingType === rf.BLDG_POWER_PLANT) {
+				// ELECTRICITY: powered power plant. Entry: [bldgID, loc, fuelType, -3]
+				priEntry.isPowerPlant = true
+				priEntry.powered = true
+				priEntry.inputResGfx = ["res_" + String(priHistEntry[2])]
+			} else if (bldg.type === rf.BLDG_MINE) {
 				let outputRes = rf.RES_GOLD
-				if (priHistEntry.length > 2) outputRes = priHistEntry[2]
+				if (priHistEntry.length > 2 && priHistEntry[2] !== -3) outputRes = priHistEntry[2]
 				if (outputRes !== 0) priEntry.outputResourcesGfx.push("res_" + String(outputRes))
 			} else {
 				for (let j = 0; j < bldgStats.outputRes.length; j++) {
@@ -618,6 +628,25 @@ const computedEntry3 = computed(() => {
 				thisStepHist.transporterGfx = `transporter_${transporterObj.type}_${personal.getCorrectedColour(store.players[transporterObj.ownerIndex].colour)}`
 				Object.assign(thisStepHist.fromData, getHighlightData([fromLocation]))
 				Object.assign(thisStepHist.toData, getHighlightData([toLocation]))
+			} else if (stackAction[0] === rf.STACK_BUILD_POWER_LINE) {
+				const transporterID = stackAction[1]
+				const compressedFromLocation = stackAction[2]
+				const compressedToLocation = stackAction[3]
+				const fromLocation = stack.decompressLocation(compressedFromLocation)
+				const toLocation = stack.decompressLocation(compressedToLocation)
+
+				const fromHexID = fromLocation[1]
+				const toHexID = toLocation[1]
+
+				thisStepHist.action = rf.STACK_BUILD_POWER_LINE
+				thisStepHist.fromHexID = fromHexID
+				thisStepHist.toHexID = toHexID
+				thisStepHist.fromData = {}
+				thisStepHist.toData = {}
+				const transporterObj = history.getTransporterByID_HIST(transporterID)
+				thisStepHist.transporterGfx = `transporter_${transporterObj.type}_${personal.getCorrectedColour(store.players[transporterObj.ownerIndex].colour)}`
+				Object.assign(thisStepHist.fromData, getHighlightData([fromLocation]))
+				Object.assign(thisStepHist.toData, getHighlightData([toLocation]))
 			} else if (stackAction[0] === rf.STACK_BUILD_BRIDGE) {
 				//	let stackAction = [rf.STACK_BUILD_BRIDGE, store.context.selectedTransporterIDforTM, hexID, bridgeArr]
 				const transporterID = stackAction[1]
@@ -955,6 +984,11 @@ const computedEntry3 = computed(() => {
 						<template v-if="primaryEntry.outputResourcesGfx.length > 0">
 							<div class="rightArrow"></div>
 							<img v-for="(resGfx, idx2) in primaryEntry.outputResourcesGfx" :key="idx2" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
+							<!-- ELECTRICITY: a powered mine pulls an extra good -->
+							<span v-if="primaryEntry.powered" class="electricitySymbol" title="Powered by electricity - doubled output">⚡</span>
+							<template v-if="primaryEntry.powered">
+								<img v-for="(resGfx, idx3) in primaryEntry.outputResourcesGfx" :key="'d' + idx3" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
+							</template>
 						</template>
 						<template v-else>is empty</template>
 					</div>
@@ -977,15 +1011,30 @@ const computedEntry3 = computed(() => {
 				<template v-for="(primaryEntry, idx) in computedEntry3.primaryProductions" :key="idx">
 					<div class="flexContainer">
 						<MiniHex :hexID="primaryEntry.buildingHexID" :hexPiecesToOutline="primaryEntry.hexPiecesToOutline" />
-						<img v-if="!primaryEntry.isMine" class="buildingProductionSummaryImg" :src="view.getImage(primaryEntry.bldgGfx)" />
-						<svg v-if="primaryEntry.isMine" class="buildingProductionSummaryImg" xmlns="http://www.w3.org/2000/svg" viewBox="-500 -500 1000 1000">
-							<circle class="mineSVGcircle" cx="0" cy="0" r="450" fill="gray" stroke="#734A36" stroke-width="100" />
-						</svg>
-						<template v-if="primaryEntry.outputResourcesGfx.length > 0">
+						<template v-if="primaryEntry.isPowerPlant">
+							<!-- ELECTRICITY: powered power plant - fuel in, doubled electricity out -->
+							<img v-for="(resGfx, pi) in primaryEntry.inputResGfx" :key="'ppin' + pi" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
 							<div class="rightArrow"></div>
-							<img v-for="(resGfx, idx2) in primaryEntry.outputResourcesGfx" :key="idx2" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
+							<span class="electricitySymbol" title="Powered by electricity - doubled output">⚡</span>
+							<span class="electricitySymbol" title="Powered by electricity - doubled output">⚡</span>
+							<span class="electricitySymbol" title="Powered by electricity - doubled output">⚡</span>
 						</template>
-						<template v-else>is empty</template>
+						<template v-else>
+							<img v-if="!primaryEntry.isMine" class="buildingProductionSummaryImg" :src="view.getImage(primaryEntry.bldgGfx)" />
+							<svg v-if="primaryEntry.isMine" class="buildingProductionSummaryImg" xmlns="http://www.w3.org/2000/svg" viewBox="-500 -500 1000 1000">
+								<circle class="mineSVGcircle" cx="0" cy="0" r="450" fill="gray" stroke="#734A36" stroke-width="100" />
+							</svg>
+							<template v-if="primaryEntry.outputResourcesGfx.length > 0">
+								<div class="rightArrow"></div>
+								<img v-for="(resGfx, idx2) in primaryEntry.outputResourcesGfx" :key="idx2" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
+								<!-- ELECTRICITY: a powered primary also produces another of its goods -->
+								<span v-if="primaryEntry.powered" class="electricitySymbol" title="Powered by electricity - doubled output">⚡</span>
+								<template v-if="primaryEntry.powered">
+									<img v-for="(resGfx, idx3) in primaryEntry.outputResourcesGfx" :key="'d' + idx3" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
+								</template>
+							</template>
+							<template v-else>is empty</template>
+						</template>
 					</div>
 				</template>
 				<span v-if="computedEntry3.primaryProductions.length === 0">
@@ -1360,6 +1409,16 @@ const computedEntry3 = computed(() => {
 							<MiniHex :hexID="stackEntry.toHexID" :hexPiecesToOutline="stackEntry.toData.hexPiecesToOutline" />
 						</div>
 					</template>
+					<!-- BUILD POWER LINE -->
+					<template v-if="stackEntry.action === rf.STACK_BUILD_POWER_LINE">
+						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.fromData.hexPiecesToHighlight.concat(stackEntry.toData.hexPiecesToHighlight))">
+							<MiniHex :hexID="stackEntry.fromHexID" :hexPiecesToOutline="stackEntry.fromData.hexPiecesToOutline" />
+							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
+							Builds Power Line
+							<div class="rightArrow"></div>
+							<MiniHex :hexID="stackEntry.toHexID" :hexPiecesToOutline="stackEntry.toData.hexPiecesToOutline" />
+						</div>
+					</template>
 					<!-- BUILD BRIDGE -->
 					<template v-if="stackEntry.action === rf.STACK_BUILD_BRIDGE">
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], [], [], [], [], stackEntry.bridgeHighlight)">
@@ -1646,6 +1705,15 @@ const computedEntry3 = computed(() => {
 	position: absolute;
 	right: -10px;
 	top: -10.5px;
+}
+
+/* ELECTRICITY history markers */
+.electricitySymbol {
+	font-size: 28px;
+	line-height: 1;
+	margin-right: 4px;
+	vertical-align: middle;
+	color: #b22222;
 }
 
 /******** STACK ITEMS */

@@ -11,6 +11,7 @@ import * as graph from "../../js/RNBgraph"
 import * as util from "../../js/RNButil"
 import * as stack from "../../js/RNBstack"
 import * as wonder from "../../js/RNBwonder"
+import * as electricity from "../../js/RNBelectricity"
 
 import { useModelStore } from "../../stores/RNBstore.js"
 import { usePersonalStore } from "../../stores/RNBpersonal"
@@ -259,6 +260,7 @@ export const HIST_CONFLICT_TURN_ORDER = 6
 				else if (stackAction[0] === rf.STACK_DROP_TRANSPORTER) replayStackDropTransporter(stackAction)
 				else if (stackAction[0] === rf.STACK_STEAL_RES) replayStackStealRes(stackAction)
 				else if (stackAction[0] === rf.STACK_BUILD_ROAD) replayStackBuildRoad(stackAction)
+				else if (stackAction[0] === rf.STACK_BUILD_POWER_LINE) replayStackBuildPowerLine(stackAction)
 				else if (stackAction[0] === rf.STACK_BUILD_BRIDGE) replayStackBuildBridge(stackAction)
 				else if (stackAction[0] === rf.STACK_BUILD_WALL) replayStackBuildWall(stackAction, store.computedHistory[i][1])
 				else if (stackAction[0] === rf.STACK_DEMOLISH_WALL) replayStackDemolishWall(stackAction, store.computedHistory[i][1])
@@ -393,7 +395,21 @@ function replayChooseHomeTile(_historyIndex, playerIndex, entry3) {
 }
 
 function replayPreProduction(_historyIndex, _playerIndex, entry3) {
-	//const store = useModelStore()
+	// ELECTRICITY: powered power plants are recorded FIRST in the primary production
+	// entries ([bldgID, compressedLoc, fuelType, -3]). Restore their active state and
+	// consume their fuel before replaying primaries so powered output doubles.
+	let poweredPlants = 0
+	for (const entry of entry3[0]) {
+		const bldgObj = model.getBuildingByID(entry[0])
+		if (!bldgObj || bldgObj.type !== rf.BLDG_POWER_PLANT) continue
+		bldgObj.powerActive = true
+		bldgObj.powerFuelType = entry[2]
+		const bldgLocation = stack.decompressLocation(entry[1])
+		const fuelResObj = model.getAllInGameResources().find((r) => r.type === entry[2] && loc.isBucketLocation(r.location) && r.location[1] === bldgLocation[1] && r.location[2] === bldgLocation[2])
+		if (fuelResObj) fuelResObj.location = loc.setOOBlocation()
+		poweredPlants++
+	}
+	if (poweredPlants > 0) electricity.computePoweredStateFromActivePlants()
 	try {
 		produce.doPrimaryProduction(true, entry3)
 		produce.doAutoSecondaryProduction(true, true)
@@ -404,11 +420,13 @@ function replayPreProduction(_historyIndex, _playerIndex, entry3) {
 }
 
 function replayPreProductionMines(_historyIndex, _playerIndex, entry3) {
+	// Powered plants are restored in replayPreProduction (their primary production
+	// entries carry the fuel). Here we just pull mines.
 	for (const entry of entry3) {
 		const bldgID = entry[0]
-		//const stackLocation = entry[1]
 		let outputRes = rf.RES_GOLD
-		if (entry.length >= 3) outputRes = entry[2]
+		// Ignore the electricity -3 powered marker when reading the mine output
+		if (entry.length >= 3 && entry[2] !== -3) outputRes = entry[2]
 		// Force mine outputs if doing a replay
 		produce.addBuildingOutputResourcesToGame_core(bldgID, outputRes, 9)
 	}
@@ -417,6 +435,7 @@ function replayPreProductionMines(_historyIndex, _playerIndex, entry3) {
 function replayPostProduction(_historyIndex, _playerIndex, _entry3) {
 	produce.doAutoSecondaryProduction(false, true)
 	model.resetBuildingsAfterProduction()
+	electricity.resetPowerState()
 	// Make sure transporters have correct remaining moves before movement
 	model.resetTransportersForNewTurn()
 }
@@ -714,6 +733,17 @@ function replayStackBuildRoad(stackAction) {
 	const toHexID = toLocation[1]
 	const toBucketID = toLocation[2]
 	map.addRoadToMap_core([fromHexID, fromBucketID], [toHexID, toBucketID], transporterID, true)
+}
+
+function replayStackBuildPowerLine(stackAction) {
+	const transporterID = stackAction[1]
+	const fromLocation = stack.decompressLocation(stackAction[2])
+	const toLocation = stack.decompressLocation(stackAction[3])
+	const fromHexID = fromLocation[1]
+	const fromBucketID = fromLocation[2]
+	const toHexID = toLocation[1]
+	const toBucketID = toLocation[2]
+	map.addPowerLineToMap_core([fromHexID, fromBucketID], [toHexID, toBucketID], transporterID, true)
 }
 
 function replayStackBuildBridge(stackAction) {

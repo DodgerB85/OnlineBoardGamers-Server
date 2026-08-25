@@ -256,6 +256,7 @@ export const STACK_BUILD_WALL = 22
 export const STACK_DEMOLISH_WALL = 23
 export const STACK_BUILD_BUILDING = 24
 export const STACK_RESHAFT_MINE = 25
+export const STACK_BUILD_POWER_LINE = 26
 
 // PRODUCTION ACTIONS
 export const STACK_MANUAL_PRODUCTION = 30
@@ -575,6 +576,7 @@ export const BLDG_PSEUDO_ROAD = 102
 export const BLDG_PSEUDO_BRIDGE = 103
 export const BLDG_PSEUDO_WALL = 104
 export const BLDG_PSEUDO_DEMOLISH_WALL = 105
+export const BLDG_PSEUDO_POWER_LINE = 106
 
 export const ALL_BUILDINGS = [BLDG_WOODCUTTER, BLDG_SAWMILL, BLDG_PAPERMILL, BLDG_CLAY_PIT, BLDG_STONE_FACTORY, BLDG_QUARRY, BLDG_OILRIG, BLDG_COAL_BURNER, BLDG_MINE, BLDG_MINT, BLDG_STOCK_EXCHANGE, BLDG_WAGON_FACTORY, BLDG_TRUCK_FACTORY, BLDG_RAFT_FACTORY, BLDG_ROWBOAT_FACTORY, BLDG_STEAMER_FACTORY, BLDG_AEROPORT, BLDG_BOMB_FACTORY, BLDG_POWER_PLANT, BLDG_PEARL_FISHERY, BLDG_ATELIER, ...ALL_MBA_BUILDINGS]
 
@@ -582,7 +584,7 @@ export const ALL_TRANSPORTER_FACTORIES = [BLDG_WAGON_FACTORY, BLDG_TRUCK_FACTORY
 // NB Wagon factory REMOVES and ADDS
 export const ALL_TRANSPORTER_ADDING_BUILDINGS = [BLDG_TRUCK_FACTORY, BLDG_RAFT_FACTORY, BLDG_ROWBOAT_FACTORY, BLDG_STEAMER_FACTORY]
 export const ALL_WATER_TRANSPORTER_BUILDINGS = [BLDG_RAFT_FACTORY, BLDG_ROWBOAT_FACTORY, BLDG_STEAMER_FACTORY]
-export const ALL_PSEUDO_BUILDINGS = [BLDG_PSEUDO_RESHAFT_MINE, BLDG_PSEUDO_ROAD, BLDG_PSEUDO_BRIDGE, BLDG_PSEUDO_WALL, BLDG_PSEUDO_DEMOLISH_WALL]
+export const ALL_PSEUDO_BUILDINGS = [BLDG_PSEUDO_RESHAFT_MINE, BLDG_PSEUDO_ROAD, BLDG_PSEUDO_BRIDGE, BLDG_PSEUDO_WALL, BLDG_PSEUDO_DEMOLISH_WALL, BLDG_PSEUDO_POWER_LINE]
 
 // NB ONLY USED IN ADMIN ACTION SELECT
 export const ALL_BUILDING_STRINGS = ["Woodcutter", "Sawmill", "Papermill", "Clay Pit", "Stone Factory", "Quarry", "Oil Rig", "Coal Burner", "Mine", "Mint", "Stock Exchange", "Wagon Factory", "Truck Factory", "Raft Factory", "Rowboat Factory", "Steamer Factory", "Airport", "Bomb Factory", "Power Plant", "Pearl Fisher", "Atelier", "MBA (Woods)", "MBA (Mountain)", "MBA (Rock)", "MBA (Pasture)", "MBA (Coast)", "MBA (Desert)"]
@@ -3536,6 +3538,21 @@ export const BUILDING_STATS = [
 		makesTransporter: false,
 		maxConversions: 99,
 		startingOptionRequired: SO_BASE_GAME,
+		requiredResearchIndex: -1,
+	},
+	{
+		// ELECTRICITY: Built along hex edges like a road. Costs 1 iron per stretch.
+		// Can be built on land, sea or polders. Can only cross a river where a bridge exists.
+		building: BLDG_PSEUDO_POWER_LINE,
+		bldg_name: "Power Line",
+		bldg_name_summary: "Power Line",
+		isValidTerrain: terrainIsType(TERR_ANY), // land, sea or polder
+		cost: [RES_IRON],
+		inputRes: [[]],
+		outputRes: [],
+		makesTransporter: false,
+		maxConversions: 99,
+		startingOptionRequired: SO_ELECTRICITY,
 		requiredResearchIndex: -1,
 	},
 

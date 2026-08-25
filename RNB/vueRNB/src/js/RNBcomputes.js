@@ -42,6 +42,7 @@ export const computedHexes = computed(() => {
 				whiteCrosses: [],
 				mineData: [],
 				roadSegments: [],
+				powerLineSegments: [],
 			}) //)
 		)
 
@@ -50,6 +51,7 @@ export const computedHexes = computed(() => {
 	for (let i = 0; i < computedHexes.length; i++) {
 		const hex = computedHexes[i]
 		computedHexes[i].roadSegments = util.boolFilter(computedHexes[i].nodeEdges, computedHexes[i].edgeHasRoad).map((arr) => arr.map((a) => hex.vertices[a]))
+		computedHexes[i].powerLineSegments = util.boolFilter(computedHexes[i].nodeEdges, computedHexes[i].edgeHasPowerLine).map((arr) => arr.map((a) => hex.vertices[a]))
 		let resourcesOnHex = model.resourcesOnHex(hex.hexID)
 		let buildingsOnHex = model.buildingsOnHex(hex.hexID)
 		let homeMarkersOnHex = model.homeMarkersOnHex(hex.hexID)
@@ -226,6 +228,31 @@ export const computedHexes = computed(() => {
 				}
 			}
 		}
+		// POWER LINES - mirror the roads, but draw slightly inside so they fit next to a road
+		if (edge.hasPowerLine.length === 1) {
+			if (edge.hasPowerLine[0]) {
+				for (const j of [0, 1]) {
+					const hex = hexes[j]
+					const side = hexSides[j]
+					const entryNode = hex.sideNodeIds[side]
+					if (entryNode !== -1) hex.powerLineSegments.push([hex.nodeVertexDefinitions[entryNode], coord.relative([side, 0.5, 0])].map((c) => toXY(c, true)))
+				}
+			}
+		} else {
+			for (const k of [0, 1].filter((k) => edge.hasPowerLine[k])) {
+				for (const j of [0, 1]) {
+					const hex = hexes[j]
+					const side = hexSides[j]
+					const lr = j === 0 ? k : (k + 1) % 2
+					const entryNode = hex.cornerNodeIds[side][lr]
+					if (entryNode !== -1) {
+						hex.powerLineSegments.push(
+							[hex.nodeVertexDefinitions[entryNode], coord.relative([side, rf.ROAD_SIDE_ALIGNMENT + (1 - 2 * rf.ROAD_SIDE_ALIGNMENT) * lr, 0])].map((c) => toXY(c, true))
+						)
+					}
+				}
+			}
+		}
 	}
 
 	// road joins
@@ -256,6 +283,18 @@ export const computedHexes = computed(() => {
 			})
 			.join(" ")
 		hex.fullRoadPathZP = hex.roadSegments
+			.map((seg) => {
+				// Each segment is [[x1, y1], [x2, y2]]
+				return `M${seg[0][0] * 1} ${seg[0][1] * 1} L${seg[1][0] * 1} ${seg[1][1] * 1}`
+			})
+			.join(" ")
+		hex.fullPowerLinePath = hex.powerLineSegments
+			.map((seg) => {
+				// Each segment is [[x1, y1], [x2, y2]]
+				return `M${seg[0][0] * store.RATIO} ${seg[0][1] * store.RATIO} L${seg[1][0] * store.RATIO} ${seg[1][1] * store.RATIO}`
+			})
+			.join(" ")
+		hex.fullPowerLinePathZP = hex.powerLineSegments
 			.map((seg) => {
 				// Each segment is [[x1, y1], [x2, y2]]
 				return `M${seg[0][0] * 1} ${seg[0][1] * 1} L${seg[1][0] * 1} ${seg[1][1] * 1}`

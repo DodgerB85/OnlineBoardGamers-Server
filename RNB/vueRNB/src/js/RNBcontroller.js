@@ -8,6 +8,7 @@
 import * as rf from "./RNBreference"
 import * as model from "./RNBmodel"
 import * as produce from "./RNBproduce"
+import * as electricity from "./RNBelectricity"
 //import * as map from "./RNBmap"
 import * as highlight from "./RNBhighlight"
 import * as funcs from "./RNBfuncs"
@@ -247,6 +248,7 @@ export function endCurrentPhase(endingConflictDecisionWithConflict = false) {
 		produce.doAutoSecondaryProduction(false)
 		model.addHistory(rf.HIST_POST_PRODUCTION, -1, 0, [...store.context.historyObj])
 		model.resetBuildingsAfterProduction()
+		electricity.resetPowerState()
 		// Solo mode no conflict
 		if (personal.soloGame) store.gameflow.phase = rf.PHASE_MOVEMENT_TO
 		// training game conflict check
@@ -354,6 +356,10 @@ export function performAllPreProductionExceptMines() {
 	const store = useModelStore()
 	// NOTE: remainingConversions are reset at the start of the production phase (startPhase)
 	store.context.historyObj.splice(0)
+	// ELECTRICITY: ensure power plants are fuelled before primary production.
+	// Mines are pulled before conflict (in endCurrentPhase), so this is normally a no-op.
+	// Fuelled plants are recorded in primary production, not in their own entry.
+	electricity.fuelPowerPlants()
 	// All primaries produce
 	produce.doPrimaryProduction(false)
 	// All secondaries produce - if no transporters present
