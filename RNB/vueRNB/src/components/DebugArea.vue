@@ -181,7 +181,7 @@ function giveAllResearch() {
 			<label for="resource-select">Select Bldg:</label>
 
 			<select v-model="store.adminCheatMoveData.selectedBldg" id="resource-select">
-				<option v-for="(bldg, index) in rf.ALL_BUILDING_STRINGS" :key="index" :value="index + 50">
+				<option v-for="(bldg, index) in rf.ALL_BUILDING_STRINGS" :key="index" :value="rf.ALL_BUILDINGS[index]">
 					{{ bldg }}
 				</option>
 			</select>
