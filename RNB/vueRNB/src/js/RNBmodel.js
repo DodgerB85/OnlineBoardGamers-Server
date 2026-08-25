@@ -864,8 +864,11 @@ export function toggleManagerActivation(hexID) {
 export function resetBuildingsAfterProduction() {
 	const buildingsInGame = getAllInGameBuildings()
 	for (let i = 0; i < buildingsInGame.length; i++) {
-		const bldgStats = getBuildingStatsFromBuildingID(buildingsInGame[i].id)
-		buildingsInGame[i].remainingConversions = bldgStats.maxConversions
+		const bldg = buildingsInGame[i]
+		const bldgStats = getBuildingStatsFromBuildingID(bldg.id)
+		// A Manager on the tile doubles the max production capacity of secondary producers there
+		const capacityMultiplier = isSecondaryProducer(bldg) ? getManagerProductionMultiplierForHex(bldg.location[1]) : 1
+		bldg.remainingConversions = bldgStats.maxConversions * capacityMultiplier
 	}
 }
 

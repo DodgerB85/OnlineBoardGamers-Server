@@ -122,6 +122,12 @@ export function getEligibleMainBuildingsToBuildWithTransporterID(transporterID) 
 
 			if (stats.building >= rf.BLDG_PSEUDO_INDEX) return false // These are done seperately
 
+			// MBAs can only be built if the Management rule is enabled
+			if (rf.ALL_MBA_BUILDINGS.includes(stats.building) && !store.gameOptions.useManagement) return false
+
+			// MBAs are one per terrain type - don't offer a type that's already been built in the game
+			if (rf.ALL_MBA_BUILDINGS.includes(stats.building) && model.getAllInGameBuildings().some((b) => b.type === stats.building)) return false
+
 			// Check research
 			if (stats.requiredResearchIndex >= 0 && store.players[playerIndex].RnD[stats.requiredResearchIndex] !== 1) return false
 			const costs = model.resourceCountByType(stats.cost)

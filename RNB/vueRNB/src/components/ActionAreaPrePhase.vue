@@ -245,6 +245,7 @@ function presetMainPhase(futureUnboundedMainPhaseNum, event = null) {
 			store.gameflow.turn++
 			//let prevKnownLength = store.ALL_RESOURCES.length
 			produce.doMineProduction(false, [], true)
+			model.resetBuildingsAfterProduction()
 			controller.performAllPreProductionExceptMines()
 			store.context.researchHexIDpossibilities = produce.findAllResearchHexIDpossibilities(personal.pov)
 		}
@@ -278,6 +279,7 @@ function presetMainPhase(futureUnboundedMainPhaseNum, event = null) {
 		wonder.addBrickToWonder_core(8, [])
 		store.gameflow.turn++
 		produce.doMineProduction(false, [], true)
+		model.resetBuildingsAfterProduction()
 		controller.performAllPreProductionExceptMines()
 		store.context.researchHexIDpossibilities = produce.findAllResearchHexIDpossibilities(personal.pov)
 	}
@@ -310,6 +312,7 @@ function previewPresetPhase(futureUnboundedMainPhaseNum, event = null) {
 			wonder.addBrickToWonder_core(8, [])
 			store.gameflow.turn++
 			produce.doMineProduction(false, [], true)
+			model.resetBuildingsAfterProduction()
 			controller.performAllPreProductionExceptMines()
 			store.context.researchHexIDpossibilities = produce.findAllResearchHexIDpossibilities(personal.pov)
 		}
@@ -338,6 +341,7 @@ function previewPresetPhase(futureUnboundedMainPhaseNum, event = null) {
 		wonder.addBrickToWonder_core(8, [])
 		store.gameflow.turn++
 		produce.doMineProduction(false, [], true)
+		model.resetBuildingsAfterProduction()
 		controller.performAllPreProductionExceptMines()
 		store.context.researchHexIDpossibilities = produce.findAllResearchHexIDpossibilities(personal.pov)
 	}

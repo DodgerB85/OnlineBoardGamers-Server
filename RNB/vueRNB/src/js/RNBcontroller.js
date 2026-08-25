@@ -352,8 +352,7 @@ export function endCurrentPhase(endingConflictDecisionWithConflict = false) {
 
 export function performAllPreProductionExceptMines() {
 	const store = useModelStore()
-	// Reset all remainingConversions
-	model.resetBuildingsAfterProduction()
+	// NOTE: remainingConversions are reset at the start of the production phase (startPhase)
 	store.context.historyObj.splice(0)
 	// All primaries produce
 	produce.doPrimaryProduction(false)
@@ -366,6 +365,9 @@ export function startPhase() {
 	const store = useModelStore()
 	let phase = store.gameflow.phase
 	if (rf.PHASE_PRODUCTIONS.includes(phase)) {
+		// Reset remaining production capacity here, BEFORE pre-production runs,
+		// so an active manager on a tile doubles the capacity for the whole phase
+		model.resetBuildingsAfterProduction()
 		performAllPreProductionExceptMines()
 	} else if (rf.PHASE_MOVEMENTS.includes(phase)) {
 		// Do start of movement phase

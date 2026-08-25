@@ -2249,6 +2249,7 @@ export async function cancelPreviewAndRedo() {
 			wonder.addBrickToWonder_core(8, [])
 			store.gameflow.turn++
 			produce.doMineProduction(false, [], true)
+			model.resetBuildingsAfterProduction()
 			controller.performAllPreProductionExceptMines()
 			store.context.researchHexIDpossibilities = produce.findAllResearchHexIDpossibilities(personal.pov)
 		}
@@ -2277,6 +2278,7 @@ export async function cancelPreviewAndRedo() {
 		wonder.addBrickToWonder_core(8, [])
 		store.gameflow.turn++
 		produce.doMineProduction(false, [], true)
+		model.resetBuildingsAfterProduction()
 		controller.performAllPreProductionExceptMines()
 		store.context.researchHexIDpossibilities = produce.findAllResearchHexIDpossibilities(personal.pov)
 	}
