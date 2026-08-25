@@ -34,7 +34,7 @@ const rowDividerResources = {
 }
 
 function addGameRowDividers() {
-	return
+	//return
 	document.querySelectorAll(".nd-row09").forEach((row) => {
 		const gameIcon = row.querySelector(".gameIcon")
 		const gameCode = gameIcon?.src.match(/\/static\/([^/]+)\//)?.[1]
