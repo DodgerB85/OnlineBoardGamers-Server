@@ -94,8 +94,8 @@ const buildingOutputImages = computed(() => {
 	let localCurrentPlayerIndex = controller.currentPlayerIndex()
 	if (localCurrentPlayerIndex < 0) localCurrentPlayerIndex = 0
 
-	if (bldgStats.makesTransporter) {
-		return ["transporter_" + String(bldgStats.outputRes) + "_" + personal.getCorrectedColour(store.players[localCurrentPlayerIndex].colour)]
+	if (bldgStats.makesTransporter && bldgStats.outputRes.length > 0 && bldgStats.outputRes[0] > rf.RES_UPPER_LIMIT) {
+		return ["transporter_" + bldgStats.outputRes[0] + "_" + personal.getCorrectedColour(store.players[localCurrentPlayerIndex].colour)]
 	} else {
 		for (let i = 0; i < bldgStats.outputRes.length; i++) {
 			ret.push(`res_${bldgStats.outputRes[i]}`)

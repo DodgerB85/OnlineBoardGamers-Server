@@ -289,6 +289,13 @@ export function getImage(image) {
 	//else if (image === "bldg_" + rf.BLDG_QUARRY_MARBLE)
 	//	return new URL(`../../../static/RNB/images/buildings/bldg_quarrymarble.jpg`, import.meta.url).href // *** TODO
 	else if (image === "bldg_" + rf.BLDG_ATELIER) return new URL(`../../../static/RNB/images/buildings/bldg_atelier.jpg`, import.meta.url).href
+	// MBAs - ONE PER TERRAIN TYPE
+	else if (image === "bldg_" + rf.BLDG_MBA_WOODS) return new URL(`../../../static/RNB/images/buildings/bldg_mbawoods.jpg`, import.meta.url).href
+	else if (image === "bldg_" + rf.BLDG_MBA_MOUNTAIN) return new URL(`../../../static/RNB/images/buildings/bldg_mbamountain.jpg`, import.meta.url).href
+	else if (image === "bldg_" + rf.BLDG_MBA_ROCK) return new URL(`../../../static/RNB/images/buildings/bldg_mbarock.jpg`, import.meta.url).href
+	else if (image === "bldg_" + rf.BLDG_MBA_PASTURE) return new URL(`../../../static/RNB/images/buildings/bldg_mbapasture.jpg`, import.meta.url).href
+	else if (image === "bldg_" + rf.BLDG_MBA_COAST) return new URL(`../../../static/RNB/images/buildings/bldg_mbacoast.jpg`, import.meta.url).href
+	else if (image === "bldg_" + rf.BLDG_MBA_DESERT) return new URL(`../../../static/RNB/images/buildings/bldg_mbadesert.jpg`, import.meta.url).href
 	// Transporters - transporter_TRANSPORTERCODE_COLOURCODE
 	else if (image === "transporter_" + rf.DONKEY + "_" + rf.BLACK) return new URL(`../../../static/RNB/images/transporters/transport_donkey_black.png`, import.meta.url).href
 	else if (image === "transporter_" + rf.DONKEY + "_" + rf.BLUE) return new URL(`../../../static/RNB/images/transporters/transport_donkey_blue.png`, import.meta.url).href
@@ -326,6 +333,13 @@ export function getImage(image) {
 	else if (image === "transporter_" + rf.STEAMER + "_" + rf.GREY) return new URL(`../../../static/RNB/images/transporters/transport_steamer_grey.png`, import.meta.url).href
 	else if (image === "transporter_" + rf.STEAMER + "_" + rf.RED) return new URL(`../../../static/RNB/images/transporters/transport_steamer_red.png`, import.meta.url).href
 	else if (image === "transporter_" + rf.STEAMER + "_" + rf.YELLOW) return new URL(`../../../static/RNB/images/transporters/transport_steamer_yellow.png`, import.meta.url).href
+	// Planes (&c)
+	else if (image === "transporter_" + rf.PLANE + "_" + rf.BLACK) return new URL(`../../../static/RNB/images/transporters/planeblack.png`, import.meta.url).href
+	else if (image === "transporter_" + rf.PLANE + "_" + rf.BLUE) return new URL(`../../../static/RNB/images/transporters/planeblue.png`, import.meta.url).href
+	else if (image === "transporter_" + rf.PLANE + "_" + rf.GREEN) return new URL(`../../../static/RNB/images/transporters/planegreen.png`, import.meta.url).href
+	else if (image === "transporter_" + rf.PLANE + "_" + rf.GREY) return new URL(`../../../static/RNB/images/transporters/planegrey.png`, import.meta.url).href
+	else if (image === "transporter_" + rf.PLANE + "_" + rf.RED) return new URL(`../../../static/RNB/images/transporters/planered.png`, import.meta.url).href
+	else if (image === "transporter_" + rf.PLANE + "_" + rf.YELLOW) return new URL(`../../../static/RNB/images/transporters/planeyellow.png`, import.meta.url).href
 	// &c
 	else rf.doAdminAlrt("V-GI: " + image)
 }

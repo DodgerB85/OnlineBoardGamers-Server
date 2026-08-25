@@ -554,10 +554,19 @@ export const BLDG_STEAMER_FACTORY = 65
 export const BLDG_AEROPORT = 66
 export const BLDG_BOMB_FACTORY = 67
 export const BLDG_POWER_PLANT = 68
-//export const MBA = 69
+// 69 removed (old mba)
 export const BLDG_PEARL_FISHERY = 70
 export const BLDG_ATELIER = 71
 //export const BLDG_QUARRY_MARBLE = THIS IS JUST A PSEUDO BUILDING
+
+// MBAs - ONE PER TERRAIN TYPE
+export const BLDG_MBA_WOODS = 72
+export const BLDG_MBA_MOUNTAIN = 73
+export const BLDG_MBA_ROCK = 74
+export const BLDG_MBA_PASTURE = 75
+export const BLDG_MBA_COAST = 76
+export const BLDG_MBA_DESERT = 77
+export const ALL_MBA_BUILDINGS = [BLDG_MBA_WOODS, BLDG_MBA_MOUNTAIN, BLDG_MBA_ROCK, BLDG_MBA_PASTURE, BLDG_MBA_COAST, BLDG_MBA_DESERT]
 
 // PSEUDO BUILDINGS - only to generate options in build phase
 export const BLDG_PSEUDO_INDEX = 100 // Check if greater than this for P-B
@@ -567,7 +576,7 @@ export const BLDG_PSEUDO_BRIDGE = 103
 export const BLDG_PSEUDO_WALL = 104
 export const BLDG_PSEUDO_DEMOLISH_WALL = 105
 
-export const ALL_BUILDINGS = [BLDG_WOODCUTTER, BLDG_SAWMILL, BLDG_PAPERMILL, BLDG_CLAY_PIT, BLDG_STONE_FACTORY, BLDG_QUARRY, BLDG_OILRIG, BLDG_COAL_BURNER, BLDG_MINE, BLDG_MINT, BLDG_STOCK_EXCHANGE, BLDG_WAGON_FACTORY, BLDG_TRUCK_FACTORY, BLDG_RAFT_FACTORY, BLDG_ROWBOAT_FACTORY, BLDG_STEAMER_FACTORY, BLDG_AEROPORT, BLDG_BOMB_FACTORY, BLDG_POWER_PLANT, BLDG_PEARL_FISHERY, BLDG_ATELIER]
+export const ALL_BUILDINGS = [BLDG_WOODCUTTER, BLDG_SAWMILL, BLDG_PAPERMILL, BLDG_CLAY_PIT, BLDG_STONE_FACTORY, BLDG_QUARRY, BLDG_OILRIG, BLDG_COAL_BURNER, BLDG_MINE, BLDG_MINT, BLDG_STOCK_EXCHANGE, BLDG_WAGON_FACTORY, BLDG_TRUCK_FACTORY, BLDG_RAFT_FACTORY, BLDG_ROWBOAT_FACTORY, BLDG_STEAMER_FACTORY, BLDG_AEROPORT, BLDG_BOMB_FACTORY, BLDG_POWER_PLANT, BLDG_PEARL_FISHERY, BLDG_ATELIER, ...ALL_MBA_BUILDINGS]
 
 export const ALL_TRANSPORTER_FACTORIES = [BLDG_WAGON_FACTORY, BLDG_TRUCK_FACTORY, BLDG_RAFT_FACTORY, BLDG_ROWBOAT_FACTORY, BLDG_STEAMER_FACTORY]
 // NB Wagon factory REMOVES and ADDS
@@ -576,7 +585,7 @@ export const ALL_WATER_TRANSPORTER_BUILDINGS = [BLDG_RAFT_FACTORY, BLDG_ROWBOAT_
 export const ALL_PSEUDO_BUILDINGS = [BLDG_PSEUDO_RESHAFT_MINE, BLDG_PSEUDO_ROAD, BLDG_PSEUDO_BRIDGE, BLDG_PSEUDO_WALL, BLDG_PSEUDO_DEMOLISH_WALL]
 
 // NB ONLY USED IN ADMIN ACTION SELECT
-export const ALL_BUILDING_STRINGS = ["Woodcutter", "Sawmill", "Papermill", "Clay Pit", "Stone Factory", "Quarry", "Oil Rig", "Coal Burner", "Mine", "Mint", "Stock Exchange", "Wagon Factory", "Truck Factory", "Raft Factory", "Rowboat Factory", "Steamer Factory", "Airport", "Bomb Factory", "Power Plant", "Pearl Fisher", "Atelier"]
+export const ALL_BUILDING_STRINGS = ["Woodcutter", "Sawmill", "Papermill", "Clay Pit", "Stone Factory", "Quarry", "Oil Rig", "Coal Burner", "Mine", "Mint", "Stock Exchange", "Wagon Factory", "Truck Factory", "Raft Factory", "Rowboat Factory", "Steamer Factory", "Airport", "Bomb Factory", "Power Plant", "Pearl Fisher", "Atelier", "MBA (Woods)", "MBA (Mountain)", "MBA (Rock)", "MBA (Pasture)", "MBA (Coast)", "MBA (Desert)"]
 
 export const VERTEX_CENTER = 0
 export const VERTEX_CORNER = [1, 2, 3, 4, 5, 6]
@@ -3168,7 +3177,13 @@ export const BUILDING_OPTION_DISPLAY_ORDER = [
 	BLDG_BOMB_FACTORY,
 	BLDG_POWER_PLANT,
 	BLDG_PEARL_FISHERY,
-	// TODO: MBA's
+	// Management
+	BLDG_MBA_WOODS,
+	BLDG_MBA_MOUNTAIN,
+	BLDG_MBA_ROCK,
+	BLDG_MBA_PASTURE,
+	BLDG_MBA_COAST,
+	BLDG_MBA_DESERT,
 ]
 
 // State these explicitly here for easy reference
@@ -3524,9 +3539,89 @@ export const BUILDING_STATS = [
 		requiredResearchIndex: -1,
 	},
 
-	//export const MBA = 69
 	// MBAs are ONE PER HEX TYPE. So should probably define 1 building per type
 	// startingOptionRequired: SO_MANAGEMENT,
+	{
+		building: BLDG_MBA_WOODS,
+		bldg_name: "MBA (Woods)",
+		bldg_name_summary: "MBA (Woods)",
+		isValidTerrain: terrainIsType([TERR_WOODS]),
+		cost: [RES_BOARDS, RES_BOARDS],
+		inputRes: [[RES_GOLD]],
+		outputRes: [RES_MANAGER],
+		makesTransporter: false,
+		maxConversions: 1,
+		startingOptionRequired: SO_MANAGEMENT,
+		requiredResearchIndex: -1,
+	},
+	{
+		building: BLDG_MBA_MOUNTAIN,
+		bldg_name: "MBA (Mountain)",
+		bldg_name_summary: "MBA (Mountain)",
+		isValidTerrain: terrainIsType([TERR_MOUNTAINS]),
+		cost: [RES_BOARDS, RES_BOARDS],
+		inputRes: [[RES_GOLD]],
+		outputRes: [RES_MANAGER],
+		makesTransporter: false,
+		maxConversions: 1,
+		startingOptionRequired: SO_MANAGEMENT,
+		requiredResearchIndex: -1,
+	},
+	{
+		building: BLDG_MBA_ROCK,
+		bldg_name: "MBA (Rock)",
+		bldg_name_summary: "MBA (Rock)",
+		isValidTerrain: terrainIsType([TERR_ROCK]),
+		cost: [RES_BOARDS, RES_BOARDS],
+		inputRes: [[RES_GOLD]],
+		outputRes: [RES_MANAGER],
+		makesTransporter: false,
+		maxConversions: 1,
+		startingOptionRequired: SO_MANAGEMENT,
+		requiredResearchIndex: -1,
+	},
+	{
+		building: BLDG_MBA_PASTURE,
+		bldg_name: "MBA (Pasture)",
+		bldg_name_summary: "MBA (Pasture)",
+		isValidTerrain: terrainIsType([TERR_PASTURE]),
+		cost: [RES_BOARDS, RES_BOARDS],
+		inputRes: [[RES_GOLD]],
+		outputRes: [RES_MANAGER],
+		makesTransporter: false,
+		maxConversions: 1,
+		startingOptionRequired: SO_MANAGEMENT,
+		requiredResearchIndex: -1,
+	},
+	{
+		building: BLDG_MBA_COAST,
+		bldg_name: "MBA (Coast)",
+		bldg_name_summary: "MBA (Coast)",
+		// Coast / Sea / River - valid on sea tiles (and shores that become sea-adjacent)
+		isValidTerrain: terrainIsType([TERR_SEA]),
+		cost: [RES_BOARDS, RES_BOARDS],
+		inputRes: [[RES_GOLD]],
+		outputRes: [RES_MANAGER],
+		makesTransporter: false,
+		maxConversions: 1,
+		startingOptionRequired: SO_MANAGEMENT,
+		requiredResearchIndex: -1,
+	},
+	{
+		building: BLDG_MBA_DESERT,
+		bldg_name: "MBA (Desert)",
+		bldg_name_summary: "MBA (Desert)",
+		// SPECIAL RULE: buildable on desert even before irrigation - unirrigated desert has currentTerrain TERR_DESERT,
+		// so this check passes regardless of the irrigation wonder having been built.
+		isValidTerrain: terrainIsType([TERR_DESERT]),
+		cost: [RES_BOARDS, RES_BOARDS],
+		inputRes: [[RES_GOLD]],
+		outputRes: [RES_MANAGER],
+		makesTransporter: false,
+		maxConversions: 1,
+		startingOptionRequired: SO_MANAGEMENT,
+		requiredResearchIndex: -1,
+	},
 ]
 
 export function doAdminAlrt(message) {

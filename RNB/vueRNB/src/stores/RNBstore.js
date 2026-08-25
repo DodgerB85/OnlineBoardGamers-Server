@@ -47,6 +47,10 @@ export const useModelStore = defineStore("store", () => {
 	}
 	var CUSTOM_RULES = []
 
+	// MANAGEMENT: Owner's choice for whether their transporter-carried managers activate on a tile.
+	// { [playerIndex]: { [hexID]: true/false } }. Defaults to true (active) when not set.
+	var managerActivation = {}
+
 	// This var affects the ZOOM level
 	// So everything that will be affected by zooming should be referenced through this
 	const refSize = ref(2400) // default 2400
@@ -484,6 +488,7 @@ export const useModelStore = defineStore("store", () => {
 		trainingGameSkipConflictPhase,
 		stackControl,
 		gameOptions,
+		managerActivation,
 		conflictPreset,
 		allStackData,
 		internalStartingOptions,

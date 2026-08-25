@@ -825,6 +825,42 @@ export function resetTransportersForNewTurn() {
 	}
 }
 
+// MANAGEMENT MECHANIC: A Manager on a tile doubles the max production capacity of all
+// secondary producers on that tile. Only one manager applies per tile.
+// Managers placed directly on the tile are always active. Managers inside a transporter on
+// the tile are active unless the transporter's owner has de-activated them for that tile.
+export function isManagerActiveOnHex(hexID) {
+	const store = useModelStore()
+
+	// Managers placed directly on the tile (bucket / vertex / docked / river)
+	const managersOnTile = getAllInGameResources().filter((r) => r.type === rf.RES_MANAGER && loc.isSpecificHexLocation(r.location, hexID))
+	if (managersOnTile.length > 0) return true
+
+	// Managers carried inside transporters that are on the tile - active unless the
+	// transporter owner has opted out for this tile (see store.managerActivation)
+	const transportersOnTile = getAllInGameTransporters().filter((t) => loc.isSpecificHexLocation(t.location, hexID))
+	for (const t of transportersOnTile) {
+		const carriedManager = resourcesOnTransport(t.id).find((r) => r.type === rf.RES_MANAGER)
+		if (carriedManager && (store.managerActivation[t.ownerIndex]?.[hexID] ?? true)) return true
+	}
+	return false
+}
+
+// Doubles secondary producer capacity on a tile when a manager is active there.
+export function getManagerProductionMultiplierForHex(hexID) {
+	return isManagerActiveOnHex(hexID) ? 2 : 1
+}
+
+// Toggle whether the current player's transporter-carried managers on a tile activate.
+// Defaults to active (true). TODO: wire this up to the production phase UI.
+export function toggleManagerActivation(hexID) {
+	const store = useModelStore()
+	const playerIndex = controller.currentPlayerIndex()
+	store.managerActivation[playerIndex] = store.managerActivation[playerIndex] || {}
+	const currentlyActive = store.managerActivation[playerIndex][hexID] ?? true
+	store.managerActivation[playerIndex][hexID] = !currentlyActive
+}
+
 export function resetBuildingsAfterProduction() {
 	const buildingsInGame = getAllInGameBuildings()
 	for (let i = 0; i < buildingsInGame.length; i++) {

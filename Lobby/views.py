@@ -2382,7 +2382,7 @@ def createRNBpage(request, gameID=0):
 
 
 @login_required
-def createRNB2page(request, gameID=0):
+def createRNBpage2(request, gameID=0):
     experienced = SF_hasRequiredExperience(request, "RNB", Game)
     # Get settings debug flag for RNB map rendering
     settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
