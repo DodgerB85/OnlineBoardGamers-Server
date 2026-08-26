@@ -511,6 +511,8 @@ body.nd .nd-table td .gameIcon {
     height: 50px;
     vertical-align: middle;
 }
+
+
 body.nd .nd-table td .startingOption {
     width: 40px;
     height: 40px;
@@ -2603,8 +2605,6 @@ body.nd .nd-col-icon img {
     height: 52px;
     border-radius: 6px;
     object-fit: contain;
-    background: var(--color-surface-soft);
-    border: 1px solid var(--color-border);
     padding: 2px;
 }
 body.nd .nd-col-game strong {
