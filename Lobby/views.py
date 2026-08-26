@@ -743,8 +743,11 @@ def feedback(request):
             #f"Email: {email}\n"
             f"Feedback: {feedback_text}"
         )
+
+
+        # Send to the feedback Discord webhook (configured in .env)
         requests.post(
-            "https://discord.com/api/webhooks/1534150843979534397/Kcm_rierS-jR5PPbkRMS1qUPqoWcevKiJ7IL9MHyU4JT3mcHOsKzpQ9y3jrd6_21WF79",
+            f"https://discord.com/api/webhooks/{config('WEBHOOK_DISCORD_FEEDBACK')}",
             data={"content": discord_message},
             timeout=5,
         )
