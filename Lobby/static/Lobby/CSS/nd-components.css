@@ -738,19 +738,7 @@ body.nd .nd-tab.active .nd-tab-count {
 @media (max-width: 768px) {
     body.nd .nd-tabs {
         gap: 1px;
-        overflow-x: auto;
-        flex-wrap: nowrap;
-        padding-bottom: 4px;
-    }
-    body.nd .nd-tabs::-webkit-scrollbar {
-        height: 6px;
-    }
-    body.nd .nd-tabs::-webkit-scrollbar-track {
-        background: var(--color-surface-soft);
-    }
-    body.nd .nd-tabs::-webkit-scrollbar-thumb {
-        background: var(--color-border-strong);
-        border-radius: 3px;
+        flex-wrap: wrap;
     }
     body.nd .nd-tab {
         padding: 8px 10px 6px;
