@@ -653,7 +653,7 @@ class CNSpresenter(GamePresenter):
 
             convertedFinalPositions.append([username, posText, pos])
 
-        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "CNS", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "CNS", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
         # Tournament processing
         if self.gameObj.relatedMainTournament:
@@ -741,7 +741,7 @@ class WEBpresenter(GamePresenter):
         for name in new_names:
             finalResults.append([name, "Trapped in a dot matrix", 9])
 
-        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "WEB", finalResults, _gameID, self.gameObj.gamePace, self.getGameName())
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "WEB", finalResults, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
         # Tournament processing
         if self.gameObj.relatedMainTournament:
@@ -837,7 +837,7 @@ class AQYpresenter(GamePresenter):
         for name in new_names:
             finalResults.append([name, "Lost in Antiquity", 9])
 
-        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "AQY", finalResults, _gameID, self.gameObj.gamePace, self.getGameName())
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "AQY", finalResults, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
@@ -1099,7 +1099,7 @@ class TGZpresenter(GamePresenter):
 
             convertedFinalPositions.append([username, posText, pos])
 
-        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "TGZ", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "TGZ", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
@@ -1209,7 +1209,7 @@ class INDpresenter(GamePresenter):
             convertedFinalPositions.append([username, posText, pos])
 
         # Now send winning notification
-        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "IND", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "IND", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
@@ -1407,7 +1407,7 @@ class BUSpresenter(GamePresenter):
             convertedFinalPositions.append([username, posText, pos])
 
         # Now send winning notification
-        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "BUS", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "BUS", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
@@ -1590,7 +1590,7 @@ class RNBpresenter(GamePresenter):
 
         # Now send winning notification - if not solo
         elif not self.gameObj.players.filter(player__username="SHADOW").exists() and self.gameObj.maxPlayers > 1:
-            async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "RNB", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
+            async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "RNB", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
             if self.gameObj.relatedMainTournament:
                 SF_M_ProcessAnyTournamentEndGame(
@@ -2347,7 +2347,7 @@ class FCMpresenter(GamePresenter):
 
             convertedFinalPositions.append([username, posText, pos])
 
-        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "FCM", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "FCM", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
@@ -2542,7 +2542,7 @@ class HLCpresenter(GamePresenter):
             convertedFinalPositions.append([username, posText, pos])
 
         # Now send winning notification
-        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "HLC", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName())
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "HLC", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
         # Tournament processing
         if self.gameObj.relatedMainTournament:
@@ -2814,7 +2814,7 @@ class KFWpresenter(GamePresenter):
             finalResults.append([name, "Out to sea", 9])
 
         # Now send winning notification
-        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "KFW", finalResults, _gameID, self.gameObj.gamePace, self.getGameName())
+        async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "KFW", finalResults, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
         # Tournament processing
         if self.gameObj.relatedMainTournament:

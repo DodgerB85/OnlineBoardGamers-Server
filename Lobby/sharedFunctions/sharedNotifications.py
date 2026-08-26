@@ -361,7 +361,7 @@ def shouldSendEmail(emailType, username, profile, currentGamePace):
     return True
 
 # This is async
-def SN_M_sendEndGameNotificationAnyGame(gameCode, finalPositions, gameID, currentGamePace, currentGameName):
+def SN_M_sendEndGameNotificationAnyGame(gameCode, finalPositions, gameID, currentGamePace, currentGameName, excludeUsername=None):
     # originalLang = get_language()
 
     # Pre-fetch users and profiles to avoid N+1 queries
@@ -371,6 +371,8 @@ def SN_M_sendEndGameNotificationAnyGame(gameCode, finalPositions, gameID, curren
 
     for entry in finalPositions:
         # user = None
+        if entry[0] == excludeUsername:
+            continue
         userObj = user_dict.get(entry[0])
         if not userObj:
             print(f"Error: could not find user object for username '{entry[0]}' in SN_M_sendEndGameNotificationTieGame")
