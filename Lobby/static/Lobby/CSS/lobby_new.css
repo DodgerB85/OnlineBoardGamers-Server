@@ -107,10 +107,21 @@ body.nd .colourGuideDiv { display: none; }
     color: var(--color-accent-strong);
 }
 
+/* Tabs sit flush on the games table, centered above it, so the accent
+   heading row reads as a continuation of the tab strip. */
+body.nd .nd-lobby .nd-tabs {
+    margin: 0;
+    justify-content: center;
+}
+body.nd .nd-lobby .nd-table-wrap {
+    border-radius: 0 0 8px 8px;
+}
+
 /* ---- Tables ---- */
 .nd-table-wrap {
     margin-bottom: 10px;
     border: 1px solid var(--color-border);
+    border-top: 0;
     border-radius: 8px;
     background: var(--color-surface);
     overflow: visible;
@@ -129,7 +140,7 @@ body.nd .nd-table.nd-lobby-games-table thead tr {
     grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
     gap: 12px;
     padding: 8px 14px 6px;
-    background: var(--color-surface-soft);
+    background: var(--color-accent);
     border-bottom: 2px solid var(--color-border-strong);
 }
 body.nd .nd-table.nd-current-games-table thead tr,
@@ -160,6 +171,7 @@ body.nd .nd-table.nd-lobby-games-table thead th {
     letter-spacing: 0.07em;
     border: none;
     text-align: left;
+    color: #fff;
 }
 body.nd .nd-last-move {
     display: grid;

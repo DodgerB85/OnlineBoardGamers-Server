@@ -231,7 +231,8 @@ body.nd .nd-fcm-stats .tab {
 }
 
 body.nd .nd-fcm-stats .tablinks {
-	background: transparent;
+	background: var(--color-surface);
+	color: var(--color-ink);
 	border: none;
 	border-right: 1px solid var(--color-border);
 	cursor: pointer;
@@ -244,7 +245,7 @@ body.nd .nd-fcm-stats .tablinks {
 
 body.nd .nd-fcm-stats .tablinks.active {
 	background: var(--color-accent);
-	color: var(--color-accent-ink);
+	color: #fff;
 }
 
 body.nd .nd-fcm-stats .FCMstatsDiv {
@@ -324,7 +325,8 @@ body.nd .nd-tgz-stats .tab {
 }
 
 body.nd .nd-tgz-stats .tablinks {
-	background: transparent;
+	background: var(--color-surface);
+	color: var(--color-ink);
 	border: none;
 	border-right: 1px solid var(--color-border);
 	cursor: pointer;
@@ -337,7 +339,7 @@ body.nd .nd-tgz-stats .tablinks {
 
 body.nd .nd-tgz-stats .tablinks.active {
 	background: var(--color-accent);
-	color: var(--color-accent-ink);
+	color: #fff;
 }
 
 body.nd .nd-tgz-stats .statsDiv,
@@ -422,7 +424,8 @@ body.nd .nd-aqy-stats .tab {
 }
 
 body.nd .nd-aqy-stats .tablinks {
-	background: transparent;
+	background: var(--color-surface);
+	color: var(--color-ink);
 	border: none;
 	border-right: 1px solid var(--color-border);
 	cursor: pointer;
@@ -435,7 +438,7 @@ body.nd .nd-aqy-stats .tablinks {
 
 body.nd .nd-aqy-stats .tablinks.active {
 	background: var(--color-accent);
-	color: var(--color-accent-ink);
+	color: #fff;
 }
 
 body.nd .nd-aqy-stats .statsDiv {
@@ -501,7 +504,7 @@ body.nd .nd-ten-games .nd-table:has(.nd-row09) thead tr {
 	grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
 	gap: 12px;
 	padding: 6px 14px;
-	background: var(--color-surface-soft);
+	background: var(--color-accent);
 	border-bottom: 2px solid var(--color-border-strong);
 }
 
@@ -509,7 +512,7 @@ body.nd .nd-ten-games .nd-table:has(.nd-row09) thead th {
 	display: block;
 	padding: 0;
 	border: none;
-	text-align: left;
+	text-align: center;
 }
 
 /* The starting-options icons sit side-by-side in a 36px grid. On
@@ -655,7 +658,7 @@ body.nd #playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead tr {
 	grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
 	gap: 12px;
 	padding: 6px 14px;
-	background: var(--color-surface-soft);
+	background: var(--color-accent);
 	border-bottom: 2px solid var(--color-border-strong);
 }
 
@@ -663,7 +666,7 @@ body.nd #playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead th {
 	display: block;
 	padding: 0;
 	border: none;
-	text-align: left;
+	text-align: center;
 }
 
 body.nd #playerInfoPage .nd-game-list .nd-table:has(.nd-row09) tbody tr.nd-row09 {

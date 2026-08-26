@@ -487,7 +487,8 @@ body.nd .nd-table td {
 }
 
 body.nd .nd-table th {
-    background: var(--color-surface-soft);
+    background: transparent;
+    color: #fff;
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -685,7 +686,8 @@ body.nd .nd-tabs {
 }
 
 body.nd .nd-tab {
-    background: transparent;
+    background: var(--color-surface);
+    color: var(--color-ink);
     border: none;
     border-right: 1px solid var(--color-border);
     padding: 10px 16px;
@@ -703,16 +705,20 @@ body.nd .nd-tab {
 }
 body.nd .nd-tab:last-child { border-right: none; }
 
+body.nd .nd-tab.tablinks {
+    border: 1px solid var(--color-accent);
+}
+
 @media (hover: hover) {
     body.nd .nd-tab:hover {
-        color: var(--color-ink);
-        background: rgba(147, 213, 208, 0.12);
+        color: #fff;
+        background: var(--color-accent-strong);
     }
 }
 
 body.nd .nd-tab.active,
 body.nd .nd-tab.tablinks.active {
-    color: var(--color-accent-ink);
+    color: #fff;
     background: var(--color-accent);
 }
 
