@@ -4,6 +4,7 @@
   {% if not request.use_new_design %}
     <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
   {% endif %}
+  <link href="{% static 'Lobby/CSS/tournaments.css' %}" rel="stylesheet">
 {% endblock head %}
 {% block body %}
   {% compress js %}
@@ -69,16 +70,18 @@ If anything does happen then I will keep the tournament going if at all possible
                 <div class="allTournamentsDiv">
                   <table class="generalTable">
                   {% endif %}
-                  <tr>
-                    <th>{% translate "Game" %}</th>
-                    <th>{% translate "Name" %}</th>
-                    <th>{% translate "Total Players" %}</th>
-                    <th>{% translate "Players per Game" %}</th>
-                    <th>{% translate "Format" %}</th>
-                    <th>{% translate "Starting Options" %}</th>
-                    <th>{% translate "Created" %}</th>
-                    <th>{% translate "Winner" %}</th>
-                  </tr>
+                  <thead>
+                    <tr>
+                      <th>{% translate "Game" %}</th>
+                      <th>{% translate "Name" %}</th>
+                      <th>{% translate "Total Players" %}</th>
+                      <th>{% translate "Players per Game" %}</th>
+                      <th>{% translate "Format" %}</th>
+                      <th>{% translate "Starting Options" %}</th>
+                      <th>{% translate "Created" %}</th>
+                      <th>{% translate "Winner" %}</th>
+                    </tr>
+                  </thead>
                   {% for tourny in tournamentsJson %}
                     <tr onclick="window.location.href='{{ tourny.tournamentLink }}';">
                       <td>

@@ -387,6 +387,42 @@ body.nd #messageList .chatentry .body {
 	background-color: white;
 }
 
+/* New-design tournament tables get the same accent thead as the lobby /
+   stats games tables. */
+body.nd .nd-table thead tr {
+	background: var(--color-accent);
+}
+body.nd .nd-table thead th {
+	text-align: center;
+}
+
+/* AllMiniTournaments list uses .nd-row09 rows, which the shared rules turn
+   into cards and hide the thead. Restore the header grid like the lobby /
+   stats games tables. */
+body.nd .nd-table:has(.nd-row09) thead {
+	display: block;
+}
+body.nd .nd-table:has(.nd-row09) thead tr {
+	display: grid;
+	grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
+	gap: 12px;
+	padding: 6px 14px;
+	background: var(--color-accent);
+	border-bottom: 2px solid var(--color-border-strong);
+}
+body.nd .nd-table:has(.nd-row09) thead th {
+	display: block;
+	padding: 0;
+	border: none;
+	text-align: center;
+}
+
+@media (max-width: 980px) {
+	body.nd .nd-table:has(.nd-row09) thead {
+		display: none;
+	}
+}
+
 @media (max-width: 920px) {
 	.containerFlex {
 		flex-direction: column; /* Stack the columns vertically */

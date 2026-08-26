@@ -77,10 +77,12 @@
             <div class="tournamentSignupContainer">
               <div class="MTallRoundHolder">
                 <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
-                  <tr>
-                    <th>#</th>
-                    <th>{% translate "Current Players" %}</th>
-                  </tr>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>{% translate "Current Players" %}</th>
+                    </tr>
+                  </thead>
                   {% for player in startingPlayers %}
                     <tr class="clickablePlayerRow"
                         id="playerRow{{ player.username }}"
@@ -115,10 +117,12 @@
                 </p>
                 <div class="tournamentSignupContainer">
                   <table class="nd-table">
-                    <tr>
-                      <th>#</th>
-                      <th>{% translate "Current Players" %}</th>
-                    </tr>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>{% translate "Current Players" %}</th>
+                      </tr>
+                    </thead>
                     {% for player in startingPlayers %}
                       <tr class="clickablePlayerRow"
                           id="playerRow{{ player.username }}"
@@ -433,10 +437,12 @@
                     <div class="MTallRoundHolder">
                       <div class="MTroundTableDiv">
                         <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
-                          <tr>
-                            <th>{% translate "Position" %}</th>
-                            <th>{% translate "Player" %}</th>
-                          </tr>
+                          <thead>
+                            <tr>
+                              <th>{% translate "Position" %}</th>
+                              <th>{% translate "Player" %}</th>
+                            </tr>
+                          </thead>
                           {% for entry in winnersData %}
                             <tr>
                               <td>
@@ -558,10 +564,12 @@
                   {% if tournament.tournamentType == "PT" %}
                     <h2>Points</h2>
                     <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
-                      <tr>
-                        <th>{% translate "Position" %}</th>
-                        <th>{% translate "Points" %}</th>
-                      </tr>
+                      <thead>
+                        <tr>
+                          <th>{% translate "Position" %}</th>
+                          <th>{% translate "Points" %}</th>
+                        </tr>
+                      </thead>
                       {% for entry in pointsValues.normal %}
                         <tr>
                           <td>{{ entry.0 }}</td>
@@ -581,10 +589,12 @@
                   {% endif %}
                   <h2>{% translate "Players" %}</h2>
                   <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
-                    <tr>
-                      <th>{{ playersData.headingRow.0 }}</th>
-                      <th>{{ playersData.headingRow.1 }}</th>
-                    </tr>
+                    <thead>
+                      <tr>
+                        <th>{{ playersData.headingRow.0 }}</th>
+                        <th>{{ playersData.headingRow.1 }}</th>
+                      </tr>
+                    </thead>
                     {% for playerEntry in playersData.playerData %}
                       <tr class="clickablePlayerRow"
                           id="playerRow{{ playerEntry.2 }}"
@@ -605,10 +615,12 @@
                     <div class="MTallRoundHolder">
                       <div class="MTroundTableDiv">
                         <table class="{% if request.use_new_design %}nd-table{% else %}generalTable{% endif %}">
-                          <tr>
-                            <th>{% translate "Position" %}</th>
-                            <th>{% translate "Player" %}</th>
-                          </tr>
+                          <thead>
+                            <tr>
+                              <th>{% translate "Position" %}</th>
+                              <th>{% translate "Player" %}</th>
+                            </tr>
+                          </thead>
                           {% for entry in winnersData %}
                             <tr>
                               <td>
