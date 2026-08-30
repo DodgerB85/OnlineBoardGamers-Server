@@ -256,6 +256,17 @@ updateToFinalPosition("RAW")
 			:style="{
 				pointerEvents: isTransporterSelectable() ? 'painted' : 'painted',
 			}" />
+		<!-- Planes & Aeroports: show the current movement mode (FLY/TAXI) on the selected plane -->
+		<text
+			v-if="props.transporterObjProp.type === rf.PLANE && store.context.selectedTransporterIDforTM === props.transporterObjProp.id"
+			:x="0"
+			:y="-transporterImgHeight / 2 - 10 * store.RATIO"
+			:font-size="28 * store.RATIO"
+			fill="white"
+			stroke="black"
+			:text-anchor="middle">
+			{{ store.context.selectedPlaneMode === rf.MOVE_TAXI ? "TAXI" : "FLY" }}
+		</text>
 		<!-- RESOURCES ON TRANSPORTER-->
 		<g v-for="(computedResObj, idx) in getComputedTransporterResources" :key="idx">
 			<g :transform="`translate(${getresOnTransporterPos(idx)[0]},${getresOnTransporterPos(idx)[1]})`">

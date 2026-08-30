@@ -1641,6 +1641,10 @@ export function produceAtelierRecipe(recipeIdx) {
 function processBuildingProduction(transporterID, building, bldgStats, inputResources) {
 	const store = useModelStore()
 	let removedTransporterID = -1
+	// Planes & Aeroports: plane production. The 3-plane-per-player cap and the global
+	// 8-transporter total are enforced AFTER the plane is created (addTransporterToGame ->
+	// excessTransporterCheck), which routes to the "remove excess transporters" flow just
+	// like any other transporter. Do NOT block here.
 	// Attempt to remove required resources
 	if (model.removeResourcesFromGameUsingTransporter(transporterID, inputResources, true) !== 0) {
 		return [-1, removedTransporterID, []]
@@ -1697,9 +1701,11 @@ function addTransporterProductionToGame(transporterType, buildingID) {
 	const store = useModelStore()
 	const building = model.getBuildingByID(buildingID)
 
+	// Planes & Aeroports: a plane is placed on the aeroport's tile (land), like other
+	// land transporters. It is excluded from LAND_TRANSPORTERS so it bypasses the 5-land cap.
 	// Art & The Atelier: exhibition caravans move on land but are not in LAND_TRANSPORTERS
 	// (so they don't count toward the 5-land limit). Treat them as land for placement.
-	if (rf.LAND_TRANSPORTERS.includes(transporterType) || transporterType === rf.EXHIBITION_TRANSPORTER) {
+	if (rf.LAND_TRANSPORTERS.includes(transporterType) || transporterType === rf.EXHIBITION_TRANSPORTER || transporterType === rf.PLANE) {
 		model.addTransporterToGame(controller.currentPlayerIndex(), transporterType, building.location, false)
 		return building.location
 	}
@@ -1734,6 +1740,19 @@ export function getPossibleDropBucketsForResourceOnTransporter(resID) {
 	if (loc.getLocationType(resObj.location) !== rf.LOCATION_TRANSPORTER) {
 		transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
 	} else transporterObj = model.getTransporterByID(resObj.location[1])
+	// Planes & Aeroports: a plane in FLY mode can airdrop a single resource onto ANY land
+	// tile (TERR_ANY_LAND). Return every land bucket so each carried good can be dropped
+	// individually at a different location.
+	if (transporterObj.type === rf.PLANE) {
+		let buckets = []
+		for (const hex of store.mapData.hexData) {
+			if (!rf.TERR_ANY_LAND.includes(hex.currentTerrain)) continue
+			for (let v = 0; v < hex.nodeBucketIds.length; v++) {
+				buckets.push([rf.LOCATION_BUCKET, hex.id, hex.nodeBucketIds[v]])
+			}
+		}
+		return buckets
+	}
 	const reachable = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(transporterObj.location, false, "gpdbfrot")
 	const buckets = model.getVertexBucketsFromLocations(reachable)
 	return buckets

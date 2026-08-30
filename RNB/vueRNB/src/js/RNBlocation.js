@@ -536,6 +536,8 @@ export function moveTransporterTo(entry, transporterID, event = null) {
 	store.context.transporterMoveInfo.push(entry)
 	let transporterObj = model.getTransporterByID(transporterID)
 	const transporterStats = rf.getTransporterStats(transporterObj.type)
+	// Planes & Aeroports: FLY mode (default) vs TAXI. Fly = free over-land movement.
+	const isFly = transporterObj.type === rf.PLANE && store.context.selectedPlaneMode !== rf.MOVE_TAXI
 	const oldTrandporterLocation = transporterObj.location
 
 	// If moving to a docked location, find and assign an unused offset
@@ -550,6 +552,12 @@ export function moveTransporterTo(entry, transporterID, event = null) {
 	// NB all locations (except edges for walls, or following transporters) are hexLocations
 	// IE this always runs
 	if (isAnyHexLocation(finalLocation)) {
+		// Planes & Aeroports: a FLY landing must satisfy canPlaneLandOnTile (empty land, no buildings,
+		// no unattended geese, river-shore rule). This guards against clicking a highlighted-invalid tile.
+		if (isFly && loc.isLandVertexLocation(finalLocation) && !model.canPlaneLandOnTile(transporterObj, finalLocation)) {
+			rf.doAdminAlrt("Planes can only land on empty land tiles (no buildings, no unattended geese)")
+			return
+		}
 		const pathfinding = store.context.pathfinding // set in highlight.highlightEligibleHexAreasForTransporterMove
 		let destinationIdx = util.indexOfArrayInArray(pathfinding.locations, finalLocation)
 
@@ -641,12 +649,13 @@ export function moveTransporterTo(entry, transporterID, event = null) {
 		store.$patch((state) => {
 			const trans = state.ALL_TRANSPORTERS.find((t) => t.id === transporterID)
 			if (trans) {
-				trans.movedThisTurn = true
-				// USE A DEEP COPY HERE TOO to prevent Chrome reference pinning
-				trans.animationWaypoints = JSON.parse(JSON.stringify(waypoints))
-				trans.location = finalLocation
-				trans.rawTransporterXY = [...finalPixelPt] // NEW LINE
-				trans.remainingMoves -= pathfinding.cost[destinationIdx]
+			trans.movedThisTurn = true
+			// USE A DEEP COPY HERE TOO to prevent Chrome reference pinning
+			trans.animationWaypoints = JSON.parse(JSON.stringify(waypoints))
+			trans.location = finalLocation
+			trans.rawTransporterXY = [...finalPixelPt] // NEW LINE
+			// Planes & Aeroports: a fly move consumes the whole turn (one move per turn)
+			trans.remainingMoves = isFly ? 0 : trans.remainingMoves - pathfinding.cost[destinationIdx]
 			}
 
 			transporterOntrans.forEach((carried) => {
@@ -740,12 +749,19 @@ export function moveTransporterTo(entry, transporterID, event = null) {
 			else if (resourcesOnTransporter.length > 0) currentStack.push([...resourcesOnTransporter.map((r) => stack.getResIDtoUse(r))])
 			else currentStack.push([])
 			//if (model.resourcesFollowingTransporter(transporterID).length > 0) currentStack.push(model.resourcesFollowingTransporter(transporterID).length)
-			if (geeseFollowingStack.length > 0) currentStack.push([...geeseFollowingStack])
-			stack.addItemToStack({
-				action: rf.STACK_MOVE_LAND,
-				historyEntry: currentStack,
-				playerIndex: controller.currentPlayerIndex(),
-			})
+		if (geeseFollowingStack.length > 0) {
+			// Planes & Aeroports: carry the isFly flag as a 3rd element so replay
+			// (validate/apply) knows to rebuild the augmented fly graph.
+			if (isFly) geeseFollowingStack.push(1)
+			currentStack.push([...geeseFollowingStack])
+		} else if (isFly) {
+			currentStack.push([0, 0, 1])
+		}
+		stack.addItemToStack({
+			action: rf.STACK_MOVE_LAND,
+			historyEntry: currentStack,
+			playerIndex: controller.currentPlayerIndex(),
+		})
 		} else {
 			currentStack.push(rf.STACK_MOVE_WATER)
 			currentStack.push(stack.getTransIDtoUse(transporterObj))

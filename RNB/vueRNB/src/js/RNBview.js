@@ -339,12 +339,12 @@ export function getImage(image) {
 	else if (image === "transporter_" + rf.STEAMER + "_" + rf.RED) return new URL(`../../../static/RNB/images/transporters/transport_steamer_red.png`, import.meta.url).href
 	else if (image === "transporter_" + rf.STEAMER + "_" + rf.YELLOW) return new URL(`../../../static/RNB/images/transporters/transport_steamer_yellow.png`, import.meta.url).href
 	// Planes (&c)
-	else if (image === "transporter_" + rf.PLANE + "_" + rf.BLACK) return new URL(`../../../static/RNB/images/transporters/planeblack.png`, import.meta.url).href
-	else if (image === "transporter_" + rf.PLANE + "_" + rf.BLUE) return new URL(`../../../static/RNB/images/transporters/planeblue.png`, import.meta.url).href
-	else if (image === "transporter_" + rf.PLANE + "_" + rf.GREEN) return new URL(`../../../static/RNB/images/transporters/planegreen.png`, import.meta.url).href
-	else if (image === "transporter_" + rf.PLANE + "_" + rf.GREY) return new URL(`../../../static/RNB/images/transporters/planegrey.png`, import.meta.url).href
-	else if (image === "transporter_" + rf.PLANE + "_" + rf.RED) return new URL(`../../../static/RNB/images/transporters/planered.png`, import.meta.url).href
-	else if (image === "transporter_" + rf.PLANE + "_" + rf.YELLOW) return new URL(`../../../static/RNB/images/transporters/planeyellow.png`, import.meta.url).href
+	else if (image === "transporter_" + rf.PLANE + "_" + rf.BLACK) return new URL(`../../../static/RNB/images/transporters/transport_plane_black.png`, import.meta.url).href
+	else if (image === "transporter_" + rf.PLANE + "_" + rf.BLUE) return new URL(`../../../static/RNB/images/transporters/transport_plane_blue.png`, import.meta.url).href
+	else if (image === "transporter_" + rf.PLANE + "_" + rf.GREEN) return new URL(`../../../static/RNB/images/transporters/transport_plane_green.png`, import.meta.url).href
+	else if (image === "transporter_" + rf.PLANE + "_" + rf.GREY) return new URL(`../../../static/RNB/images/transporters/transport_plane_grey.png`, import.meta.url).href
+	else if (image === "transporter_" + rf.PLANE + "_" + rf.RED) return new URL(`../../../static/RNB/images/transporters/transport_plane_red.png`, import.meta.url).href
+	else if (image === "transporter_" + rf.PLANE + "_" + rf.YELLOW) return new URL(`../../../static/RNB/images/transporters/transport_plane_yellow.png`, import.meta.url).href
 	// Art & The Atelier: exhibition caravan
 	else if (image === "transporter_" + rf.EXHIBITION_TRANSPORTER + "_" + rf.BLACK) return new URL(`../../../static/RNB/images/transporters/transport_caravan_black.png`, import.meta.url).href
 	else if (image === "transporter_" + rf.EXHIBITION_TRANSPORTER + "_" + rf.BLUE) return new URL(`../../../static/RNB/images/transporters/transport_caravan_blue.png`, import.meta.url).href

@@ -1135,9 +1135,23 @@ export function verifySingleStackAction(stackActionData) {
 
 		// Find reachable locations
 		const stats = rf.getTransporterStats(transporterObj.type)
-		const isCaravan = transporterObj.type === rf.EXHIBITION_TRANSPORTER
-		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, playerIndex, isCaravan, isCaravan)
-		const pathfind = graph.pathfind(movementGraph, transporterObj.location, stats.validMove, transporterObj.remainingMoves)
+		// Planes & Aeroports: a fly move carries an isFly flag in stackAction[5][2]
+		const isFly = stackAction.length >= 6 && stackAction[5].length > 2 && stackAction[5][2] === 1
+		let movementGraph
+		let effectiveValidMove
+		let effectiveMaxMoves
+		if (transporterObj.type === rf.PLANE) {
+			const eff = model.getEffectiveMoveParams(transporterObj, isFly)
+			movementGraph = graph.createMovementGraph(transporterObj, playerIndex, isFly)
+			effectiveValidMove = eff.validMove
+			effectiveMaxMoves = eff.maxMoves
+		} else {
+			const isCaravan = transporterObj.type === rf.EXHIBITION_TRANSPORTER
+			movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, playerIndex, isCaravan, isCaravan)
+			effectiveValidMove = stats.validMove
+			effectiveMaxMoves = transporterObj.remainingMoves
+		}
+		const pathfind = graph.pathfind(movementGraph, transporterObj.location, effectiveValidMove, effectiveMaxMoves)
 		let indicesToValid = util.boolFilter(
 			util.indexArray(pathfind.locations.length),
 			pathfind.cost.map((cost) => cost > 0)
@@ -1273,8 +1287,12 @@ export function verifySingleStackAction(stackActionData) {
 		const dropLocation = [rf.LOCATION_LAND_VERTEX, dropHexID, dropVertex]
 		if (hexObj.baseTerrain === rf.TERR_SEA) dropLocation[0] = rf.LOCATION_SEA_VERTEX
 		const reachableLocs = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(transporterObj.location, false, "ssdr")
-		// Check you can reach the drop location
-		if (!util.includesArray(reachableLocs, dropLocation)) return 1
+		// Check you can reach the drop location.
+		// Planes & Aeroports: a plane may airdrop onto ANY land tile (TERR_ANY_LAND), so skip the
+		// normal adjacency check but still forbid sea / wet-polder tiles.
+		if (transporterObj.type === rf.PLANE) {
+			if (!rf.TERR_ANY_LAND.includes(hexObj.currentTerrain)) return 1
+		} else if (!util.includesArray(reachableLocs, dropLocation)) return 1
 		// Check all the res are on the transp
 		for (const resID of resIDs) {
 			let correctedResID = resID
@@ -1903,9 +1921,23 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 		const transporterObj = model.getTransporterByID(movingTransporterID)
 		// Find reachable locations
 		const stats = rf.getTransporterStats(transporterObj.type)
-		const isCaravan = transporterObj.type === rf.EXHIBITION_TRANSPORTER
-		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, stackPlayerIndex, isCaravan, isCaravan)
-		const pathfind = graph.pathfind(movementGraph, transporterObj.location, stats.validMove, transporterObj.remainingMoves)
+		// Planes & Aeroports: a fly move carries an isFly flag in stackAction[5][2]
+		const isFly = stackAction.length >= 6 && stackAction[5].length > 2 && stackAction[5][2] === 1
+		let movementGraph
+		let effectiveValidMove
+		let effectiveMaxMoves
+		if (transporterObj.type === rf.PLANE) {
+			const eff = model.getEffectiveMoveParams(transporterObj, isFly)
+			movementGraph = graph.createMovementGraph(transporterObj, stackPlayerIndex, isFly)
+			effectiveValidMove = eff.validMove
+			effectiveMaxMoves = eff.maxMoves
+		} else {
+			const isCaravan = transporterObj.type === rf.EXHIBITION_TRANSPORTER
+			movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, stackPlayerIndex, isCaravan, isCaravan)
+			effectiveValidMove = stats.validMove
+			effectiveMaxMoves = transporterObj.remainingMoves
+		}
+		const pathfind = graph.pathfind(movementGraph, transporterObj.location, effectiveValidMove, effectiveMaxMoves)
 		const destinationIdx = util.indexOfArrayInArray(pathfind.locations, toLocationFromStack)
 		let indicesToValid = util.boolFilter(
 			util.indexArray(pathfind.locations.length),
@@ -1938,7 +1970,8 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 		//indicesToValid.sort((i, k) => pathfind.distances[i] - pathfind.distances[k])
 		let cost = pathfind.cost[destinationIdx]
 		// Move the transporter
-		transporterObj.remainingMoves -= cost
+		// Planes & Aeroports: a fly move consumes the whole turn (one move per turn)
+		transporterObj.remainingMoves = isFly ? 0 : transporterObj.remainingMoves - cost
 
 		transporterObj.location = toLocation
 
@@ -2096,6 +2129,7 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 		const dropVertex = loc.getAnyVertexInHexIDbucketID(dropHexID, dropBucket)
 		const dropLocation = [rf.LOCATION_LAND_VERTEX, dropHexID, dropVertex]
 		if (hexObj.baseTerrain === rf.TERR_SEA) dropLocation[0] = rf.LOCATION_SEA_VERTEX
+		// Planes & Aeroports: a plane may airdrop onto any land tile, so no reachability gate here.
 
 		for (let i = 0; i < stackAction[2].length; i++) {
 			if (swapIDs) {

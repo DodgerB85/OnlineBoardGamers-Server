@@ -375,10 +375,21 @@ export function highlightEligibleHexAreasForTransporterMove(transporterID) {
 	if (model.transportersOnTransporter(transporterID).length > 0 && model.transportersOnTransporter(transporterID)[0].movedThisTurn) return 3
 
 	const stats = rf.getTransporterStats(transporterObj.type)
-	// Art & The Atelier: exhibition caravans move freely through walls and cross-country
-	const isCaravan = transporterObj.type === rf.EXHIBITION_TRANSPORTER
-	const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, controller.currentPlayerIndex(), isCaravan, isCaravan)
-	const pathfind = graph.pathfind(movementGraph, transporterObj.location, stats.validMove, transporterObj.remainingMoves)
+	// Planes & Aeroports: build the correct graph + move params for FLY vs TAXI
+	const isPlane = transporterObj.type === rf.PLANE
+	const isFly = isPlane ? store.context.selectedPlaneMode !== rf.MOVE_TAXI : false
+	let effective
+	let movementGraph
+	if (isPlane) {
+		effective = model.getEffectiveMoveParams(transporterObj, isFly)
+		movementGraph = graph.createMovementGraph(transporterObj, controller.currentPlayerIndex(), isFly)
+	} else {
+		// Art & The Atelier: exhibition caravans move freely through walls and cross-country
+		const isCaravan = transporterObj.type === rf.EXHIBITION_TRANSPORTER
+		movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, controller.currentPlayerIndex(), isCaravan, isCaravan)
+		effective = { validMove: stats.validMove, maxMoves: transporterObj.remainingMoves }
+	}
+	const pathfind = graph.pathfind(movementGraph, transporterObj.location, effective.validMove, effective.maxMoves)
 	const locationIndices = util.indexArray(pathfind.locations.length)
 	let indicesToValid = util.boolFilter(
 		locationIndices,
@@ -437,7 +448,17 @@ export function highlightEligibleHexAreasForTransporterMove(transporterID) {
 			model,
 		})
 	)
-	const validMoves = util.getByIndices(pathfind.locations, indicesToValid)
+	let validMoves = util.getByIndices(pathfind.locations, indicesToValid)
+	// Planes & Aeroports: in FLY mode only tiles satisfying canPlaneLandOnTile are valid landings
+	if (isPlane && isFly) {
+		validMoves = validMoves.filter((l) => model.canPlaneLandOnTile(transporterObj, l))
+	}
+	// Planes & Aeroports: any land tile is a potential airdrop target during a flight
+	if (isPlane && isFly) {
+		store.context.midFlightDropTiles = pathfind.locations.filter(
+			(l) => loc.isLandVertexLocation(l) && rf.TERR_ANY_LAND.includes(model.getHexByID(l[1]).currentTerrain)
+		)
+	}
 	store.context.pathfinding = pathfind
 	store.context.transporterMoveInfo = [transporterID]
 	highlightLocations(validMoves)
@@ -552,12 +573,12 @@ export function highlightEligibleSecondaryBuildingsForManualProduction(transport
 	}
 }
 
-export function highlightEligibleTransportersForRemoval(playerIndex, isTotalProblem, isLandProblem, isWaterProblem, isCaravanProblem) {
-	const eligibleTransporteridS = getEligibleTransportersForRemoval(playerIndex, isTotalProblem, isLandProblem, isWaterProblem, isCaravanProblem)
+export function highlightEligibleTransportersForRemoval(playerIndex, isTotalProblem, isLandProblem, isWaterProblem, isCaravanProblem, isPlaneProblem) {
+	const eligibleTransporteridS = getEligibleTransportersForRemoval(playerIndex, isTotalProblem, isLandProblem, isWaterProblem, isCaravanProblem, isPlaneProblem)
 	context.setTransportersToHighlight(eligibleTransporteridS)
 }
 
-export function getEligibleTransportersForRemoval(playerIndex, isTotalProblem, isLandProblem, isWaterProblem, isCaravanProblem) {
+export function getEligibleTransportersForRemoval(playerIndex, isTotalProblem, isLandProblem, isWaterProblem, isCaravanProblem, isPlaneProblem) {
 	let typesForRemoval = []
 	// If you have too many land, you MUST remove a land
 	if (isLandProblem) typesForRemoval.push(rf.LAND_TYPE)
@@ -565,8 +586,10 @@ export function getEligibleTransportersForRemoval(playerIndex, isTotalProblem, i
 	else if (isWaterProblem) typesForRemoval.push(rf.WATER_TYPE)
 	// If you have too many caravans, you MUST remove a caravan
 	else if (isCaravanProblem) typesForRemoval.push(rf.EXHIBITION_TRANSPORTER)
-	// Otherwise, just remove any
-	else if (isTotalProblem) typesForRemoval = [rf.LAND_TYPE, rf.WATER_TYPE]
+	// Planes & Aeroports: if you have too many planes, you MUST remove a plane
+	else if (isPlaneProblem) typesForRemoval.push(rf.AIR_TYPE)
+	// Otherwise, just remove any (planes count toward the global total too)
+	else if (isTotalProblem) typesForRemoval = [rf.LAND_TYPE, rf.WATER_TYPE, rf.AIR_TYPE]
 
 	// Find the bucket locations of all eligible buildings
 	const factoryBucketLocations = model
@@ -580,6 +603,7 @@ export function getEligibleTransportersForRemoval(playerIndex, isTotalProblem, i
 		if (typesForRemoval.includes(rf.LAND_TYPE) && rf.LAND_TRANSPORTERS.includes(transporter.type)) isEligibleType = true
 		else if (typesForRemoval.includes(rf.WATER_TYPE) && rf.WATER_TRANSPORTERS.includes(transporter.type)) isEligibleType = true
 		else if (typesForRemoval.includes(rf.EXHIBITION_TRANSPORTER) && transporter.type === rf.EXHIBITION_TRANSPORTER) isEligibleType = true
+		else if (typesForRemoval.includes(rf.AIR_TYPE) && rf.AIR_TRANSPORTERS.includes(transporter.type)) isEligibleType = true
 		return isCorrectOwner && isEligibleType
 	})
 

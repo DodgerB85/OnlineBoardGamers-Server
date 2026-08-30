@@ -263,6 +263,10 @@ export const useModelStore = defineStore("store", () => {
 		remainingTransportersWithMovement: [],
 		selectedTransporterIDforPickupOrSelection: -1,
 
+		// Plane (Planes & Aeroports) vars
+		selectedPlaneMode: -1, // rf.MOVE_FLY | rf.MOVE_TAXI while a plane is selected
+		midFlightDropTiles: [], // land tiles validated for airdrop this move
+
 		// Building Vars
 		eligibleBuildingsToBuild: [],
 		eligibleBridgesToBuild: [],

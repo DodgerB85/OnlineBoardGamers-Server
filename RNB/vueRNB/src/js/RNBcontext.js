@@ -124,6 +124,10 @@ export function resetContext() {
 	context.remainingTransportersWithMovement.splice(0)
 	context.selectedTransporterIDforPickupOrSelection = -1
 
+	// Planes & Aeroports vars
+	context.selectedPlaneMode = -1
+	context.midFlightDropTiles.splice(0)
+
 	// Building Vars
 	context.selectedBuildingToBuild = -1
 	context.mineSelectionType = 0

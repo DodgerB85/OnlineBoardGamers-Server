@@ -879,3 +879,50 @@ export function findValidWaterDestination(toLocationBucket, transporterObj, play
 	if (foundIdx === -1) return null
 	return { location: validMoves[foundIdx], cost: validCosts[foundIdx] }
 }
+
+// ============================================================================
+// PLANES & AEROPORTS — Fly movement graph
+// ============================================================================
+// A plane in FLY mode can reach ANY land tile (TERR_ANY_LAND). We model this by
+// connecting every land vertex node to every other land vertex node with a single
+// MOVE_FLY edge, so the existing pathfind() / highlight / move pipeline works
+// unchanged. Sea and wet-polder tiles are intentionally excluded.
+export function addFlyEdges(graph) {
+	const landVertexIndices = []
+	for (let i = 0; i < graph.nodes.types.length; i++) {
+		if (graph.nodes.types[i] !== rf.NODE_VERTEX) continue
+		const loc0 = graph.nodes.locations[i]
+		const hex = model.getHexByID(loc0[1])
+		if (hex && rf.TERR_ANY_LAND.includes(hex.currentTerrain)) landVertexIndices.push(i)
+	}
+	const edges = graph.edges.nodes
+	const edgeTypes = graph.edges.types
+	const edgeCosts = graph.edges.costs
+	const edgeIsRoad = graph.edges.isRoad || []
+	for (let a = 0; a < landVertexIndices.length; a++) {
+		for (let b = a + 1; b < landVertexIndices.length; b++) {
+			edges.push([landVertexIndices[a], landVertexIndices[b]])
+			edgeTypes.push(rf.MOVE_FLY)
+			edgeCosts.push(1)
+			edgeIsRoad.push(false)
+		}
+	}
+	const adj = graphAdjacencies(graph.nodes.types.length, edges)
+	graph.nodes.adjacentNodes = adj.nodes
+	graph.nodes.adjacentEdges = adj.edges
+	graph.edges.nodes = edges
+	graph.edges.types = edgeTypes
+	graph.edges.costs = edgeCosts
+	graph.edges.isRoad = edgeIsRoad
+	return graph
+}
+
+// Build the movement graph for a transporter, augmenting with fly edges when the
+// transporter is a plane and `forceFly` is true (i.e. FLY mode).
+export function createMovementGraph(transporterObj, playerIndex, forceFly) {
+	const store = useModelStore()
+	const isCaravan = transporterObj.type === rf.EXHIBITION_TRANSPORTER
+	const graph = createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, playerIndex, isCaravan, isCaravan)
+	if (transporterObj.type === rf.PLANE && forceFly) return addFlyEdges(graph)
+	return graph
+}

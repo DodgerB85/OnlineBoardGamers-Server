@@ -441,6 +441,7 @@ export function getTransportersByPlayerIndexAndHexID(playerIndex, hexID) {
 export function getTransportersByPlayerIndexandType(playerIndex, type) {
 	if (type === rf.LAND_TYPE) return getAllInGameTransporters().filter((t) => t.ownerIndex === playerIndex && rf.LAND_TRANSPORTERS.includes(t.type))
 	else if (type === rf.WATER_TYPE) return getAllInGameTransporters().filter((t) => t.ownerIndex === playerIndex && rf.WATER_TRANSPORTERS.includes(t.type))
+	else if (type === rf.AIR_TYPE) return getAllInGameTransporters().filter((t) => t.ownerIndex === playerIndex && rf.AIR_TRANSPORTERS.includes(t.type))
 	rf.doAdminAlrt("No type set")
 }
 
@@ -454,6 +455,46 @@ export function isLandTransporter(type) {
 
 export function isWaterTransporter(type) {
 	return rf.WATER_TRANSPORTERS.includes(type)
+}
+
+// Planes & Aeroports: effective movement parameters for a plane, depending on fly/taxi mode.
+// `isFly` is explicit so replay (validate/apply) can derive the same graph without UI state.
+export function getEffectiveMoveParams(transporterObj, isFly) {
+	const stats = rf.getTransporterStats(transporterObj.type)
+	if (transporterObj.type !== rf.PLANE) return { validMove: stats.validMove, maxMoves: stats.maxMoves, isFly: false }
+	if (isFly) return { validMove: [rf.MOVE_FLY], maxMoves: stats.maxMoves, isFly: true }
+	// TAXI: 1 step over roads (land) or 1 adjacent sea step (sea). Never rivers, never cargo.
+	const onLand = loc.isLandVertexLocation(transporterObj.location)
+	return { validMove: onLand ? [rf.MOVE_ROAD, rf.MOVE_DONKEY] : [rf.MOVE_WATER], maxMoves: 1, isFly: false }
+}
+
+// A tile blocks plane landing if it has ANY building, or an unattended goose.
+function tileHasPlaneLandingBlocker(hexID) {
+	if (model.getAllInGameBuildings().some((b) => loc.isSpecificHexLocation(b.location, hexID))) return true
+	const unattendedGeese = model.getAllInGameResources().filter((r) => r.type === rf.RES_GOOSE && loc.isSpecificHexLocation(r.location, hexID) && !r.followingTransporterID)
+	return unattendedGeese.length > 0
+}
+
+// Planes & Aeroports: can a plane land on `location` (a land vertex bucket)?
+// Rules: must be a land vertex on TERR_ANY_LAND (not sea / wet polder); no buildings of
+// any kind and no unattended geese on the tile; a river blocks BOTH shores if either
+// shore's tile has a building/unattended goose.
+export function canPlaneLandOnTile(planeObj, location) {
+	const store = useModelStore()
+	if (!loc.isLandVertexLocation(location)) return false
+	const hexID = location[1]
+	const hex = model.getHexByID(hexID)
+	if (!hex || !rf.TERR_ANY_LAND.includes(hex.currentTerrain)) return false
+	if (tileHasPlaneLandingBlocker(hexID)) return false
+	// River rule: for each side that has a river, check the opposite-shore hex
+	if (hex.sideRiverVertexIds) {
+		for (let s = 0; s < hex.sideRiverVertexIds.length; s++) {
+			if (hex.sideRiverVertexIds[s] === -1) continue
+			const neighbour = store.mapData.neighbours[hexID] ? store.mapData.neighbours[hexID][s] : -1
+			if (neighbour >= 0 && tileHasPlaneLandingBlocker(neighbour)) return false
+		}
+	}
+	return true
 }
 
 export function transporterIsOnTransporter(transporter) {
@@ -652,7 +693,7 @@ export function getHexByID(hexID, passInErrorFalg) {
 	let hexObj = store.mapData.hexData.find((h) => h.hexID === hexID)
 	if (!hexObj) {
 		rf.doAdminAlrt(`GHBBI: hexID not found: ${hexID} flag: ${passInErrorFalg}`)
-		return
+		return store.mapData.hexData[0]
 	}
 	return hexObj
 }
@@ -799,10 +840,10 @@ export function addTransporterToGame(playerIndex, transporterType, bucketLocatio
 	if (!ignoreAnyExcessTransporters) {
 		// Now check for transporter violations
 		const problemRet = excessTransporterCheck(playerIndex)
-		if (problemRet[0] || problemRet[1] || problemRet[2] || problemRet[3]) {
+		if (problemRet[0] || problemRet[1] || problemRet[2] || problemRet[3] || problemRet[4]) {
 			context.resetContextAndHighlights()
 			store.context.action = rf.ACT_REMOVE_EXCESS_TRANSPORTERS
-			highlight.highlightEligibleTransportersForRemoval(playerIndex, problemRet[0], problemRet[1], problemRet[2], problemRet[3])
+			highlight.highlightEligibleTransportersForRemoval(playerIndex, problemRet[0], problemRet[1], problemRet[2], problemRet[3], problemRet[4])
 		}
 	}
 
@@ -814,16 +855,23 @@ export function excessTransporterCheck(playerIndex) {
 	let currentLandTransporters = getTransportersByPlayerIndexandType(playerIndex, rf.LAND_TYPE).length
 	let currentWaterTransporters = getTransportersByPlayerIndexandType(playerIndex, rf.WATER_TYPE).length
 	let currentCaravans = getTransportersByPlayerIndex(playerIndex).filter((t) => t.type === rf.EXHIBITION_TRANSPORTER).length
+	// Planes & Aeroports: a player is limited to 3 planes. Planes are NOT counted in the
+	// land/water 5-caps (they are excluded from LAND_TRANSPORTERS/WATER_TRANSPORTERS) but
+	// they DO count toward the global 8-transporter total (currentTransporters above).
+	let currentPlanes = getTransportersByPlayerIndexandType(playerIndex, rf.AIR_TYPE).length
 	let totalProblem = false
 	let landProblem = false
 	let waterProblem = false
 	let caravanProblem = false
+	let planeProblem = false
 	if (currentTransporters > 8) totalProblem = true
 	if (currentLandTransporters > 5) landProblem = true
 	if (currentWaterTransporters > 5) waterProblem = true
 	// Art & The Atelier: a player is limited to 3 exhibition caravans
 	if (currentCaravans > 3) caravanProblem = true
-	return [totalProblem, landProblem, waterProblem, caravanProblem, currentTransporters, currentLandTransporters, currentWaterTransporters, currentCaravans]
+	// Planes & Aeroports: a player is limited to 3 planes
+	if (currentPlanes > 3) planeProblem = true
+	return [totalProblem, landProblem, waterProblem, caravanProblem, planeProblem, currentTransporters, currentLandTransporters, currentWaterTransporters, currentCaravans, currentPlanes]
 }
 
 export function resetTransportersForNewTurn() {
