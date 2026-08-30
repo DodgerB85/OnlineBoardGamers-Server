@@ -264,7 +264,7 @@ updateToFinalPosition("RAW")
 			:font-size="28 * store.RATIO"
 			fill="white"
 			stroke="black"
-			:text-anchor="middle">
+			text-anchor="middle">
 			{{ store.context.selectedPlaneMode === rf.MOVE_TAXI ? "TAXI" : "FLY" }}
 		</text>
 		<!-- RESOURCES ON TRANSPORTER-->

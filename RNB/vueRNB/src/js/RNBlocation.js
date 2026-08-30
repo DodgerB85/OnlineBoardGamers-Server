@@ -554,7 +554,7 @@ export function moveTransporterTo(entry, transporterID, event = null) {
 	if (isAnyHexLocation(finalLocation)) {
 		// Planes & Aeroports: a FLY landing must satisfy canPlaneLandOnTile (empty land, no buildings,
 		// no unattended geese, river-shore rule). This guards against clicking a highlighted-invalid tile.
-		if (isFly && loc.isLandVertexLocation(finalLocation) && !model.canPlaneLandOnTile(transporterObj, finalLocation)) {
+		if (isFly && isLandVertexLocation(finalLocation) && !model.canPlaneLandOnTile(transporterObj, finalLocation)) {
 			rf.doAdminAlrt("Planes can only land on empty land tiles (no buildings, no unattended geese)")
 			return
 		}

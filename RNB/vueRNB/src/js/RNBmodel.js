@@ -470,8 +470,8 @@ export function getEffectiveMoveParams(transporterObj, isFly) {
 
 // A tile blocks plane landing if it has ANY building, or an unattended goose.
 function tileHasPlaneLandingBlocker(hexID) {
-	if (model.getAllInGameBuildings().some((b) => loc.isSpecificHexLocation(b.location, hexID))) return true
-	const unattendedGeese = model.getAllInGameResources().filter((r) => r.type === rf.RES_GOOSE && loc.isSpecificHexLocation(r.location, hexID) && !r.followingTransporterID)
+	if (getAllInGameBuildings().some((b) => loc.isSpecificHexLocation(b.location, hexID))) return true
+	const unattendedGeese = getAllInGameResources().filter((r) => r.type === rf.RES_GOOSE && loc.isSpecificHexLocation(r.location, hexID) && !r.followingTransporterID)
 	return unattendedGeese.length > 0
 }
 
@@ -483,7 +483,7 @@ export function canPlaneLandOnTile(planeObj, location) {
 	const store = useModelStore()
 	if (!loc.isLandVertexLocation(location)) return false
 	const hexID = location[1]
-	const hex = model.getHexByID(hexID)
+	const hex = getHexByID(hexID)
 	if (!hex || !rf.TERR_ANY_LAND.includes(hex.currentTerrain)) return false
 	if (tileHasPlaneLandingBlocker(hexID)) return false
 	// River rule: for each side that has a river, check the opposite-shore hex

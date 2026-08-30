@@ -708,8 +708,9 @@ export function exportRNBmodel(forGameOver) {
 		tempTransporter.push(transporterObj.ownerIndex)
 		tempTransporter.push(transporterObj.type)
 		let exportLocation = []
-		// Art & The Atelier: exhibition caravans are land movers but not in LAND_TRANSPORTERS
-		if (rf.LAND_TRANSPORTERS.includes(transporterObj.type) || transporterObj.type === rf.EXHIBITION_TRANSPORTER) exportLocation = exportLandTransporterLocation(transporterObj.location)
+		// Art & The Atelier: exhibition caravans are land movers but not in LAND_TRANSPORTERS.
+		// Planes & Aeroports: a plane is placed on a land vertex bucket, so export it like a land transporter.
+		if (rf.LAND_TRANSPORTERS.includes(transporterObj.type) || transporterObj.type === rf.EXHIBITION_TRANSPORTER || transporterObj.type === rf.PLANE) exportLocation = exportLandTransporterLocation(transporterObj.location)
 		else if (rf.WATER_TRANSPORTERS.includes(transporterObj.type)) exportLocation = exportWaterTransporterLocation(transporterObj.location)
 		tempTransporter.push([...exportLocation])
 		if (!forGameOver) tempTransporter.push(transporterObj.uniqueID)
@@ -829,7 +830,7 @@ export function importRNBmodel(input, forGameOver) {
 		if (!forGameOver) uniqueID = entry[3]
 		let transporterLocation = []
 		// Art & The Atelier: exhibition caravans are land movers but not in LAND_TRANSPORTERS
-		if (rf.LAND_TRANSPORTERS.includes(transporterType) || transporterType === rf.EXHIBITION_TRANSPORTER) transporterLocation = importLandTransporterLocation(exportedLocation)
+		if (rf.LAND_TRANSPORTERS.includes(transporterType) || transporterType === rf.EXHIBITION_TRANSPORTER || transporterType === rf.PLANE) transporterLocation = importLandTransporterLocation(exportedLocation)
 		else if (rf.WATER_TRANSPORTERS.includes(transporterType)) transporterLocation = importWaterTransporterLocation(exportedLocation)
 		const transporterStats = rf.getTransporterStats(transporterType)
 
