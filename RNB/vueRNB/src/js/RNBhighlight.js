@@ -588,8 +588,17 @@ export function getEligibleTransportersForRemoval(playerIndex, isTotalProblem, i
 	else if (isCaravanProblem) typesForRemoval.push(rf.EXHIBITION_TRANSPORTER)
 	// Planes & Aeroports: if you have too many planes, you MUST remove a plane
 	else if (isPlaneProblem) typesForRemoval.push(rf.AIR_TYPE)
-	// Otherwise, just remove any (planes count toward the global total too)
+	// When the only problem is total, allow removing any type
 	else if (isTotalProblem) typesForRemoval = [rf.LAND_TYPE, rf.WATER_TYPE, rf.AIR_TYPE]
+
+	// Planes & Aeroports: the global 8-transporter total always applies. When total is
+	// exceeded alongside a type-specific cap, all types contributing to that total should
+	// be eligible for removal.
+	if (isTotalProblem) {
+		if (!typesForRemoval.includes(rf.LAND_TYPE)) typesForRemoval.push(rf.LAND_TYPE)
+		if (!typesForRemoval.includes(rf.WATER_TYPE)) typesForRemoval.push(rf.WATER_TYPE)
+		if (!typesForRemoval.includes(rf.AIR_TYPE)) typesForRemoval.push(rf.AIR_TYPE)
+	}
 
 	// Find the bucket locations of all eligible buildings
 	const factoryBucketLocations = model
