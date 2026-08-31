@@ -19,6 +19,15 @@
 	margin-right: 20px;
 }
 
+/* playerInfo per-game stat tabs start hidden so all games' tables don't
+   flash before playerInfo.js shows the active one. Scoped to the
+   playerInfo page containers — stats.html and tournament rounds reuse
+   .playerStatsDiv but must stay visible. */
+.playerInfoStatsContainer.largeTableContainer > .playerStatsDiv,
+body.nd .nd-player-stats > .playerStatsDiv {
+	display: none;
+}
+
 .gameCountIcon {
 	height: 40px;
 	vertical-align: middle;
