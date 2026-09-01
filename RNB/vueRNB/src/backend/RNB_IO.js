@@ -2133,7 +2133,13 @@ export function loadCurrentMove() {
 		return true
 	}
 	if (rf.MAIN_PHASES.includes(store.gameflow.phase) && currentMoveData.actionStack !== "" && personal.pov >= 0) {
-		if (currentMoveData.turn === store.gameflow.turn && currentMoveData.phase === store.gameflow.phase && currentMoveData.username === store.players[personal.pov].name && store.gameflow.turnOrder.includes(personal.pov)) {
+		// Only load the pre-move into the live game when this player is CURRENT. A pending
+		// player's pre-move must not be performed on the live (exportable) state: the replay
+		// moves transporters / picks up resources, and any export (saveConflictMove, kickout,
+		// rewind...) then bakes those effects into the saved gameData while the turn order is
+		// untouched — and the still-pending pre-move processes again = an extra movement turn.
+		// Pending players can still view/edit their pre-move via the pre-phase preview panel.
+		if (currentMoveData.turn === store.gameflow.turn && currentMoveData.phase === store.gameflow.phase && currentMoveData.username === store.players[personal.pov].name && store.gameflow.turnOrder[0] === personal.pov) {
 			stack.attemptToLoadWholeCurrentMoveStack(currentMoveData, store.gameflow.phase)
 			if (store.actionStack.length > 0) {
 				store.stackControl.loadedPreMove = true
