@@ -2648,7 +2648,13 @@ export function attemptToLoadWholeCurrentMoveStack(currentMoveData, historyPhase
 
 	// Sync history with completed actions, and add the stack
 	// This only happens during NON practice games, when reloading YOUR stack. So use personal.pov
-	if (stackEntries.length > 0) model.addHistory(rf.HIST_STACK_ACTIONS, personal.pov, 0, [historyPhase, ...stackEntries])
+	// Only record the stack in the history when it is actually being played NOW (current player,
+	// real phase). Merely loading a pre-move for a pending player (or a preview) must not bake a
+	// phantom movement into the history — that history is exported into saved gameData, and the
+	// still-pending pre-move then processes again, giving the player an extra movement turn.
+	if (stackEntries.length > 0 && historyPhase === store.gameflow.phase && store.gameflow.turnOrder[0] === personal.pov) {
+		model.addHistory(rf.HIST_STACK_ACTIONS, personal.pov, 0, [historyPhase, ...stackEntries])
+	}
 
 	if (stack.length > 0) store.actionStack = JSON.parse(JSON.stringify(stack))
 }
