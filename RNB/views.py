@@ -666,6 +666,18 @@ def _processRNBturn(request):
             game_id = currentGame.id
             presenter = cast("RNBpresenter", currentGame.presenter())
 
+            # Check if old version is older than DB version, and if so, return
+            if str(latest_update) != str(db_latest_update):
+                turn = jsonData.get("turn", "N/A")
+                phase = jsonData.get("phase", "N/A")
+                message = (
+                    f"SYNC ERROR IN: RNB save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
+                    f"- DB_LU: {db_latest_update} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
+                    f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {', '.join(presenter.getArrayOfIsCurrentPlayers())}"
+                )
+                SN_sendAdminErrorMessage(message)
+                return JsonResponse({"syncError": True}, safe=False)
+
             gameDataB64 = jsonData["gameDataB64"]
             # raw_binary = base64.b64decode(gameDataStr)
             # currentGame.gameDataBLOB = raw_binary
@@ -735,6 +747,18 @@ def _processRNBturn(request):
         latest_update = jsonData.get("latestUpdate", 0)
         game_id = currentGame.id
         presenter = cast("RNBpresenter", currentGame.presenter())
+
+        # Check if old version is older than DB version, and if so, return
+        if str(latest_update) != str(db_latest_update):
+            turn = jsonData.get("turn", "N/A")
+            phase = jsonData.get("phase", "N/A")
+            message = (
+                f"SYNC ERROR IN: RNB save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
+                f"- DB_LU: {db_latest_update} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
+                f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {', '.join(presenter.getArrayOfIsCurrentPlayers())}"
+            )
+            SN_sendAdminErrorMessage(message)
+            return JsonResponse({"syncError": True}, safe=False)
 
         gameDataB64 = jsonData["gameDataB64"]
         # raw_binary = base64.b64decode(gameDataStr)

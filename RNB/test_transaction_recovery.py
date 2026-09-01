@@ -442,6 +442,58 @@ class TransactionRecoveryTest(TestCase):
             notified_username = mock_send.call_args[0][0]
             self.assertEqual(notified_username, "playerA")  # submitter, not B
 
+    # ------------------------------------------------------------------
+    # J: saveConflictMove rejects stale latestUpdate (praying/TO branch)
+    # ------------------------------------------------------------------
+    def test_J_saveConflictMove_rejects_stale_latest_update(self):
+        """
+        A stale client save during a conflict praying/TO phase must NOT
+        overwrite the game state. Otherwise its stale wonderTurnOrder /
+        turnOrder corrupts the new turn order and the next phase (eg
+        movement) starts with the wrong player.
+        """
+        # setUp already puts the game in a TO phase (phase=2)
+        lu = self.game.latestUpdate
+        conflict_payload = {
+            "action": "saveConflictMove",
+            "latestUpdate": lu,
+            "gameDataB64": _minimal_game_data_b64(),
+            "turn": 1,
+            "phase": 2,
+            "status": "ACTIVE",
+            "gameID": self.game.id,
+            "BKSN": "playerA",
+            "conflictPresetData": "",
+            "saveRewind": False,
+            "clientNextPlayerNames": ["playerB"],
+            "nextSinglePlayerUsername": "playerB",
+            "allRemainingPlayersInTurnOrder": ["playerB"],
+        }
+        resp = self.clientA.post(
+            "/RNB/processRNBturn/",
+            data=json.dumps(conflict_payload),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotIn("syncError", resp.json(), "Fresh latestUpdate must be accepted")
+
+        # Now a STALE client (old latestUpdate) submits: must be rejected
+        stale_payload = dict(conflict_payload)
+        stale_payload["latestUpdate"] = "1"  # old version
+        resp = self.clientA.post(
+            "/RNB/processRNBturn/",
+            data=json.dumps(stale_payload),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue(data.get("syncError"), "Stale latestUpdate must be rejected with syncError")
+
+        # The game state must be untouched by the stale save
+        self.game.refresh_from_db()
+        self.assertEqual(self.game.phase, 2)
+        self.assertNotEqual(self.game.latestUpdate, stale_payload["latestUpdate"])
+
 
 if __name__ == "__main__":
     import unittest

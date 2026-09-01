@@ -548,6 +548,16 @@ export async function saveConflictMove(saveRewind = true, overrideBKSN = null, o
 
 	const nextSinglePlayerUsername = store.gameflow.turnOrder.length > 0 ? store.players[store.gameflow.turnOrder[0]].name : ""
 
+	// When the conflict ends and this save lands IN a main phase (eg movement after turn-order
+	// selection), send the FULL remaining turn order so the server's
+	// serverCurrentPlayerNamesInTurnOrder stays complete. A single-player list makes
+	// page-loading clients rebuild a broken turn order (initLoadGame), which can let a
+	// wrong player take the phase. Conflict phases stay single-player as before.
+	let allRemainingPlayersInTurnOrder = [nextSinglePlayerUsername]
+	if (rf.MAIN_PHASES.includes(store.gameflow.phase)) {
+		allRemainingPlayersInTurnOrder = getNextCurrentPlayers().allRemainingPlayersInTurnOrder
+	}
+
 	let postData = {
 		action: "saveConflictMove",
 		latestUpdate: personal.latestUpdate,
@@ -561,7 +571,7 @@ export async function saveConflictMove(saveRewind = true, overrideBKSN = null, o
 		saveRewind: saveRewind,
 		clientNextPlayerNames: clientNextPlayerNames,
 		nextSinglePlayerUsername: nextSinglePlayerUsername,
-		allRemainingPlayersInTurnOrder: [nextSinglePlayerUsername],
+		allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
 	}
 
 	// Use this to kickPass another player and remove their flexi time
