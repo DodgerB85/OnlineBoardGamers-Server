@@ -11,6 +11,11 @@ if exist "C:\Roger\Programming\OnlineBoardGamers\RNB\static\RNB\RNBvuedist\image
     echo [CLEANUP] Deleted unwanted images directory.
 )
 
+if exist "C:\Roger\Programming\OnlineBoardGamers\RNB\static\RNB\RNBvuedist\help" (
+    rd /s /q "C:\Roger\Programming\OnlineBoardGamers\RNB\static\RNB\RNBvuedist\help"
+    echo [CLEANUP] Deleted unwanted help directory.
+)
+
 REM --- Your existing REMs ---
 REM START /B /WAIT cmd /c copy C:\Roger\Programming\MyOG\RNB\static\RNB\RNBvuedist\main.js .
 REM START /B /WAIT cmd /c javascript-obfuscator.cmd main.js

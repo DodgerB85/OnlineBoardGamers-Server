@@ -104,6 +104,8 @@ export default defineConfig(({ command }) => ({
 							return `images/research/[name].${extType}`
 						}else if (assetInfo.originalFileNames[0].startsWith("../../static/RNB/images/playerAids/")) {
 							return `images/playerAids/[name].${extType}`
+						} else if (assetInfo.originalFileNames[0].startsWith("../../static/RNB/help/")) {
+							return `help/[name].${extType}`
 						} else if (assetInfo.originalFileNames[0].startsWith("../../static/RNB/images/")) {
 							return `images/[name].${extType}`
 						} else return `images/[name].${extType}`
