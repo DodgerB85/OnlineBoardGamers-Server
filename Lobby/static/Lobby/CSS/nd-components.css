@@ -2525,7 +2525,7 @@ body.nd .nd-row09 {
     gap: 12px;
     align-items: center;
     position: relative;
-    padding: 14px;
+    padding: 2px 5px;
     background: var(--color-surface);
     transition: background 0.1s;
 }

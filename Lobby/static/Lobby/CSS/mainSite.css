@@ -628,7 +628,7 @@ a {
 
 .gamesTable td {
 	text-align: center;
-	padding: 10px;
+	padding: 6px;
 	min-width: 20px;
 }
 
@@ -656,14 +656,14 @@ a {
 }
 
 .gameRow {
-	height: 50px;
+	height: 40px;
 	border-top: 3px solid lightgray;
 	border-bottom: 3px solid lightgray;
 	background-color: white;
 }
 
 .clickableGameRow {
-	height: 50px;
+	height: 40px;
 	border-top: 3px solid lightgray;
 	border-bottom: 3px solid lightgray;
 	background-color: white
