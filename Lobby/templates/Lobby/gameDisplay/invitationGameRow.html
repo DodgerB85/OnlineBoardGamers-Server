@@ -4,8 +4,8 @@
   <td class="nd-col-icon">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}</td>
   <td class="nd-col-game" data-label="{% translate "Game Name" %}">
     <strong>{{ game.gameName }}</strong>
-    {% if game.gameDescription %}<br><small><i>{{ game.gameDescription }}</i></small>{% endif %}
-    <br><small class="">{% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a> · {{ game.pace|safe }}</small>
+    {% if game.gameDescription %}<small class="nd-game-desc"><i>{{ game.gameDescription }}</i></small>{% endif %}
+    <small class="">{% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a> · {{ game.pace|safe }}</small>
   </td>
   <td class="nd-col-players" data-label="{% translate "Players" %}">
     <span class="">{{ game.allPlayers|length }}/{{ game.maxPlayers }}</span>

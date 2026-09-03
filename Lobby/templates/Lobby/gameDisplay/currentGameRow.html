@@ -7,11 +7,11 @@
   <td class="nd-col-game" data-label="{% translate "Game Name" %}">
     {% if game.chatNotification %}<img class="startingOption" alt="Chat" width="20" height="20" src="{% static "Lobby/images/icon-chat-lobby.svg" %}" title="New Chat Message">{% endif %}
     <a href="/{{ game.gameCode }}/{{ game.gameID }}/show/"><strong>{{ game.gameName }}</strong></a>
-    {% if game.gameDescription %}<br><small><i>{{ game.gameDescription }}</i></small>{% endif %}
+    {% if game.gameDescription %}<small class="nd-game-desc"><i>{{ game.gameDescription }}</i></small>{% endif %}
     {% if showCurrentTurnColumn %}
-      <br><small class="">{{ game.pace|safe }} · {% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a></small>
+      <small class="">{{ game.pace|safe }} · {% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a></small>
     {% else %}
-      <br><small class="">{% translate "Turn" %} {{ game.currentTurn }} · {{ game.pace|safe }} · {% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a></small>
+      <small class="">{% translate "Turn" %} {{ game.currentTurn }} · {{ game.pace|safe }} · {% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a></small>
     {% endif %}
   </td>
   <td class="nd-col-status" data-label="{% translate "Current player" %}">

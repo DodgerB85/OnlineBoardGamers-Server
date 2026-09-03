@@ -159,6 +159,9 @@ body.nd .nd-table.nd-current-games-table thead th {
 body.nd .nd-table.nd-lobby-games-table tbody tr.nd-row09 {
     border-bottom: 2px solid #0B275B;
 }
+body.nd .nd-game-desc {
+    display: block;
+}
 body.nd .nd-table.nd-current-games-table .nd-col-turn small {
     font-size: inherit;
 }

@@ -6,10 +6,8 @@
     <td class="nd-col-game" data-label="{% translate "Game Name" %}">
       <strong>{{ game.gameName }}</strong>
       {% if game.gameDescription %}
-        <br>
-        <small><i>{{ game.gameDescription }}</i></small>
+        <small class="nd-game-desc"><i>{{ game.gameDescription }}</i></small>
       {% endif %}
-      <br>
       <small class="">
         <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a> ·
         {{ game.pace|safe }}
