@@ -16,6 +16,15 @@
                 {% endfor %}
             </div>
         {% endif %}
+        {% if splotterconGame %}
+            <div class="nd-notice">
+                <span>Live Splotter Con Pitts Bus Match <a href="{% url 'BUS:showBUSgame' splotterconGame.id %}">Here!</a></span>
+            </div>
+        {% else %}
+            <div class="nd-notice">
+                <span>Live Splotter Con Pitts Bus Match Coming Soon!</span>
+            </div>
+        {% endif %}
         {% if availableTournaments|length > 0 %}
             <div class="nd-notice">
                 {% for game in availableTournaments %}

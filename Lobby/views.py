@@ -1552,6 +1552,8 @@ def index(request):
 
     # print_timestamp("Final prep complete")
 
+    splottercon_game = Game.objects.filter(gameCode="BUS", gameName__iexact="Splottercon").first()
+
     template = "Lobby/lobby_new.html" if getattr(request, "use_new_design", False) else "Lobby/lobby.html"
     return render(
         request,
@@ -1577,6 +1579,7 @@ def index(request):
             "available_MT": available_MT,
             "current_MT": current_MT,
             "waitingGameIsAvailableForOthers": waiting_game_is_available_for_others,
+            "splotterconGame": splottercon_game,
         },
     )
 

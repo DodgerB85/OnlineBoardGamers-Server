@@ -96,6 +96,11 @@
             <a class="newDesignBannerButton" href="/nd/">Try new design</a>
             <a class="newDesignBannerButton" href="{% url 'feedback' %}">Give feedback</a>
         </div>
+        {% if splotterconGame %}
+            <span class="newsSpan">Live Splotter Con Pitts Bus Match <a class="linkOther" href="{% url 'BUS:showBUSgame' splotterconGame.id %}">Here!</a></span><br />
+        {% else %}
+            <span class="newsSpan">Live Splotter Con Pitts Bus Match Coming Soon!</span><br />
+        {% endif %}
         <!--<span class="newsSpan">Keyflower is coming! Set your colour preference in your <a class="linkOther" target="_self" href="{% url 'profile' %}">Profile</a> </span><br />-->
         <!--<span class="newsSpan">Keyflower is coming! Help page available <a class="linkOther" target="_self" href="{% url 'KFW:KFWhelp' %}">Here!</a> </span><br />-->
         <!--<span class="newsSpan">Keyflower is <a href="{% url 'newGamesPage' %}" id="createNewGamesLink">Here</a>!</span><br />-->

@@ -13,6 +13,28 @@ const personal = usePersonalStore()
 
 import { ref, computed } from "vue"
 
+const bridgeCoords = {
+	2: [1617, 535, 1710, 600],
+	11: [1300, 912, 1447, 998],
+	24: [850, 1091, 857, 1218],
+	36: [330, 1030, 410, 889],
+	40: [717, 1358, 823, 1265],
+	44: [1160, 1576, 1270, 1469],
+	47: [1663, 1546, 1750, 1446],
+	54: [1957, 1953, 2170, 1959],
+	68: [2077, 2378, 2280, 2375],
+}
+
+const bridgeAngles = computed(() => {
+	const angles = {}
+	for (const [id, c] of Object.entries(bridgeCoords)) {
+		const dx = c[2] - c[0]
+		const dy = c[3] - c[1]
+		angles[id] = (Math.atan2(dy, dx) * 180) / Math.PI
+	}
+	return angles
+})
+
 // Track animated lines to avoid re-animating existing lines
 const animatedLines = ref(new Set())
 
@@ -76,7 +98,7 @@ function isBridgeSpace(lineID) {
 
 function changeFillColor(e) {
 	if (isBridgeSpace(Number(e.target.dataset.lineId))) {
-		e.target.style.fill = "white"
+		e.target.style.fill = `url(#bridgePattern-${e.target.dataset.lineId})`
 		e.target.style.stroke = "yellow"
 		e.target.style["fill-opacity"] = 1
 		return
@@ -238,6 +260,10 @@ const lineEndCircles = computed(() => {
 		<pattern id="innerPattern" x="3" y="3" width="9" height="9" patternUnits="userSpaceOnUse">
 			<rect x="0" y="0" width="6" height="6" style="stroke: none; fill: #ff0000" />
 		</pattern>
+		<pattern v-for="(angle, id) in bridgeAngles" :key="`bp-${id}`" :id="`bridgePattern-${id}`" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse" :patternTransform="`rotate(${angle})`">
+			<rect x="0" y="0" width="12" height="12" fill="white" />
+			<line x1="0" y1="0" x2="0" y2="12" stroke="grey" stroke-width="12" />
+		</pattern>
 
 		<!-- render the played lines -->
 		<g v-for="(lines, index1) in store.lines" v-bind:key="`lines-${index1}`">
@@ -281,7 +307,7 @@ const lineEndCircles = computed(() => {
 				:style="{
 					stroke: 'black',
 					'stroke-width': 2,
-					fill: 'white',
+					fill: `url(#bridgePattern-${bridgeLineID})`,
 				}"></polygon>
 		</g>
 
