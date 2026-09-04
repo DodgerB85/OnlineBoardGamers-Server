@@ -26,6 +26,30 @@ export const shuffle = (array) => {
   return array
 }
 
+// Seeded PRNG (mulberry32) — deterministic shuffle from a seed
+function mulberry32(seed) {
+  return function () {
+    seed |= 0
+    seed = (seed + 0x6d2b79f5) | 0
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+export const seededShuffle = (array, seed) => {
+  const rng = mulberry32(seed)
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(rng() * (i + 1))
+    ;[array[i], array[j]] = [array[j], array[i]]
+  }
+  return array
+}
+
+export const generateSeed = () => {
+  return Math.floor(Math.random() * 2147483647)
+}
+
 export function removeItemAll(arr, value) {
   var arrCopy = [...arr]
   var i = 0

@@ -176,24 +176,23 @@ export async function initGame() {
 				else store.players[i].displayName = store.players[i].name
 			}
 
-			// Set up the tiles
+			// Set up the tiles with a seeded shuffle so replays can reproduce the deal
+			let gameSeed = funcs.generateSeed()
+			store.history.push([rf.HIST_SEED, -1, 0, gameSeed])
+
 			let ALL_SQUARE_TILES = JSON.parse(JSON.stringify(rf.ALL_SQUARE_TILES))
 			let ALL_RECT_TILES = JSON.parse(JSON.stringify(rf.ALL_RECT_TILES))
 			let ALL_CORNER_TILES = JSON.parse(JSON.stringify(rf.ALL_CORNER_TILES))
 
-			ALL_SQUARE_TILES = funcs.shuffle(ALL_SQUARE_TILES)
-			ALL_RECT_TILES = funcs.shuffle(ALL_RECT_TILES)
-			ALL_CORNER_TILES = funcs.shuffle(ALL_CORNER_TILES)
+			ALL_SQUARE_TILES = funcs.seededShuffle(ALL_SQUARE_TILES, gameSeed)
+			ALL_RECT_TILES = funcs.seededShuffle(ALL_RECT_TILES, gameSeed + 1)
+			ALL_CORNER_TILES = funcs.seededShuffle(ALL_CORNER_TILES, gameSeed + 2)
 
 			for (let i = 0; i < store.players.length; i++) {
 				store.players[i].tileIDarrays.push([ALL_SQUARE_TILES.pop(), 0])
 				store.players[i].tileIDarrays.push([ALL_RECT_TILES.pop(), 0])
 				store.players[i].tileIDarrays.push([ALL_CORNER_TILES.pop(), 0])
 			}
-
-			// Record each player's starting tiles so replays can restore them
-			let initialTilesData = store.players.map((p) => JSON.parse(JSON.stringify(p.tileIDarrays)))
-			store.history.push([rf.HIST_INITIAL_TILES, -1, 0, initialTilesData])
 
 			for (let i = 0; i < ALL_SQUARE_TILES.length; i++) {
 				if (i % 2 === 0) store.SQUARE_PILE_1.push(ALL_SQUARE_TILES[i])

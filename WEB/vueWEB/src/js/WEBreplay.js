@@ -88,28 +88,56 @@ async function resetDataForReplay() {
 	// Restore center tile at its final position
 	store.mapTiles.push(centerTile)
 
-	// Find HIST_INITIAL_TILES entry (may not exist for old games)
+	// Find HIST_SEED entry (may not exist for old games)
 	const computedHistory = store.computedHistory
-	let initialTilesEntry = null
+	let gameSeed = null
 	for (let i = 0; i < computedHistory.length; i++) {
-		if (computedHistory[i][0] === rf.HIST_INITIAL_TILES) {
-			initialTilesEntry = computedHistory[i]
+		if (computedHistory[i][0] === rf.HIST_SEED) {
+			gameSeed = computedHistory[i][3]
 			break
 		}
 	}
 
-	if (initialTilesEntry) {
-		// New games: restore exact starting tiles from history
+	if (gameSeed !== null) {
+		// New games: reproduce the exact same shuffle and deal using the seed
+		let ALL_SQUARE_TILES = JSON.parse(JSON.stringify(rf.ALL_SQUARE_TILES))
+		let ALL_RECT_TILES = JSON.parse(JSON.stringify(rf.ALL_RECT_TILES))
+		let ALL_CORNER_TILES = JSON.parse(JSON.stringify(rf.ALL_CORNER_TILES))
+
+		ALL_SQUARE_TILES = funcs.seededShuffle(ALL_SQUARE_TILES, gameSeed)
+		ALL_RECT_TILES = funcs.seededShuffle(ALL_RECT_TILES, gameSeed + 1)
+		ALL_CORNER_TILES = funcs.seededShuffle(ALL_CORNER_TILES, gameSeed + 2)
+
+		// Deal starting tiles (same pop order as game setup)
 		for (let i = 0; i < store.players.length; i++) {
 			store.players[i].tileIDarrays.splice(0)
-			if (initialTilesEntry[3][i]) {
-				for (let j = 0; j < initialTilesEntry[3][i].length; j++) {
-					store.players[i].tileIDarrays.push([...initialTilesEntry[3][i][j]])
-				}
-			}
+			store.players[i].tileIDarrays.push([ALL_SQUARE_TILES.pop(), 0])
+			store.players[i].tileIDarrays.push([ALL_RECT_TILES.pop(), 0])
+			store.players[i].tileIDarrays.push([ALL_CORNER_TILES.pop(), 0])
+		}
+
+		// Fill supply piles (same distribution as game setup)
+		store.SQUARE_PILE_1.splice(0)
+		store.SQUARE_PILE_2.splice(0)
+		store.RECT_PILE_1.splice(0)
+		store.RECT_PILE_2.splice(0)
+		store.CORNER_PILE_1.splice(0)
+		store.CORNER_PILE_2.splice(0)
+
+		for (let i = 0; i < ALL_SQUARE_TILES.length; i++) {
+			if (i % 2 === 0) store.SQUARE_PILE_1.push(ALL_SQUARE_TILES[i])
+			else store.SQUARE_PILE_2.push(ALL_SQUARE_TILES[i])
+		}
+		for (let i = 0; i < ALL_RECT_TILES.length; i++) {
+			if (i % 2 === 0) store.RECT_PILE_1.push(ALL_RECT_TILES[i])
+			else store.RECT_PILE_2.push(ALL_RECT_TILES[i])
+		}
+		for (let i = 0; i < ALL_CORNER_TILES.length; i++) {
+			if (i % 2 === 0) store.CORNER_PILE_1.push(ALL_CORNER_TILES[i])
+			else store.CORNER_PILE_2.push(ALL_CORNER_TILES[i])
 		}
 	} else {
-		// Old games without HIST_INITIAL_TILES: deduce which tiles players started with
+		// Old games without HIST_SEED: deduce which tiles players started with
 		// by tracking which tiles were placed or picked up from piles
 		let playerUsedTiles = new Set()
 		let allPlacedTiles = new Set()
@@ -178,63 +206,55 @@ async function resetDataForReplay() {
 			if (!hasRect && remainingRects.length > 0) store.players[i].tileIDarrays.push([remainingRects.pop(), 0])
 			if (!hasCorner && remainingCorners.length > 0) store.players[i].tileIDarrays.push([remainingCorners.pop(), 0])
 		}
-	}
 
-	// Collect tiles to exclude from supply piles.
-	// Only exclude center tile, placed tiles, and starting tiles.
-	// Do NOT exclude drawn tiles (HIST_GET_NEW_TILE) — they must stay in the
-	// piles so replayGetNewTile can remove them one-by-one as the replay progresses.
-	let usedTiles = new Set()
-	usedTiles.add(rf.TILE_CENTER)
-	for (let i = 1; i < computedHistory.length; i++) {
-		let entry = computedHistory[i]
-		if (entry[0] === rf.HIST_ADD_TILE) usedTiles.add(entry[3][1])
-	}
-	// Also mark starting tiles as used (they're in players' hands, not in piles)
-	for (let i = 0; i < store.players.length; i++) {
-		for (let j = 0; j < store.players[i].tileIDarrays.length; j++) {
-			usedTiles.add(store.players[i].tileIDarrays[j][0])
+		// Build supply piles for old games (random shuffle since no seed)
+		let usedTiles2 = new Set()
+		usedTiles2.add(rf.TILE_CENTER)
+		for (let i = 1; i < computedHistory.length; i++) {
+			let entry = computedHistory[i]
+			if (entry[0] === rf.HIST_ADD_TILE) usedTiles2.add(entry[3][1])
 		}
-	}
+		for (let i = 0; i < store.players.length; i++) {
+			for (let j = 0; j < store.players[i].tileIDarrays.length; j++) {
+				usedTiles2.add(store.players[i].tileIDarrays[j][0])
+			}
+		}
 
-	// Build remaining tile lists for supply piles
-	let allSquareTiles = []
-	let allRectTiles = []
-	let allCornerTiles = []
+		let allSquareTiles = []
+		let allRectTiles = []
+		let allCornerTiles = []
+		for (let i = 0; i < rf.ALL_SQUARE_TILES.length; i++) {
+			if (!usedTiles2.has(rf.ALL_SQUARE_TILES[i])) allSquareTiles.push(rf.ALL_SQUARE_TILES[i])
+		}
+		for (let i = 0; i < rf.ALL_RECT_TILES.length; i++) {
+			if (!usedTiles2.has(rf.ALL_RECT_TILES[i])) allRectTiles.push(rf.ALL_RECT_TILES[i])
+		}
+		for (let i = 0; i < rf.ALL_CORNER_TILES.length; i++) {
+			if (!usedTiles2.has(rf.ALL_CORNER_TILES[i])) allCornerTiles.push(rf.ALL_CORNER_TILES[i])
+		}
+		allSquareTiles = funcs.shuffle(allSquareTiles)
+		allRectTiles = funcs.shuffle(allRectTiles)
+		allCornerTiles = funcs.shuffle(allCornerTiles)
 
-	for (let i = 0; i < rf.ALL_SQUARE_TILES.length; i++) {
-		if (!usedTiles.has(rf.ALL_SQUARE_TILES[i])) allSquareTiles.push(rf.ALL_SQUARE_TILES[i])
-	}
-	for (let i = 0; i < rf.ALL_RECT_TILES.length; i++) {
-		if (!usedTiles.has(rf.ALL_RECT_TILES[i])) allRectTiles.push(rf.ALL_RECT_TILES[i])
-	}
-	for (let i = 0; i < rf.ALL_CORNER_TILES.length; i++) {
-		if (!usedTiles.has(rf.ALL_CORNER_TILES[i])) allCornerTiles.push(rf.ALL_CORNER_TILES[i])
-	}
+		store.SQUARE_PILE_1.splice(0)
+		store.SQUARE_PILE_2.splice(0)
+		store.RECT_PILE_1.splice(0)
+		store.RECT_PILE_2.splice(0)
+		store.CORNER_PILE_1.splice(0)
+		store.CORNER_PILE_2.splice(0)
 
-	allSquareTiles = funcs.shuffle(allSquareTiles)
-	allRectTiles = funcs.shuffle(allRectTiles)
-	allCornerTiles = funcs.shuffle(allCornerTiles)
-
-	// Fill supply piles
-	store.SQUARE_PILE_1.splice(0)
-	store.SQUARE_PILE_2.splice(0)
-	store.RECT_PILE_1.splice(0)
-	store.RECT_PILE_2.splice(0)
-	store.CORNER_PILE_1.splice(0)
-	store.CORNER_PILE_2.splice(0)
-
-	for (let i = 0; i < allSquareTiles.length; i++) {
-		if (i % 2 === 0) store.SQUARE_PILE_1.push(allSquareTiles[i])
-		else store.SQUARE_PILE_2.push(allSquareTiles[i])
-	}
-	for (let i = 0; i < allRectTiles.length; i++) {
-		if (i % 2 === 0) store.RECT_PILE_1.push(allRectTiles[i])
-		else store.RECT_PILE_2.push(allRectTiles[i])
-	}
-	for (let i = 0; i < allCornerTiles.length; i++) {
-		if (i % 2 === 0) store.CORNER_PILE_1.push(allCornerTiles[i])
-		else store.CORNER_PILE_2.push(allCornerTiles[i])
+		for (let i = 0; i < allSquareTiles.length; i++) {
+			if (i % 2 === 0) store.SQUARE_PILE_1.push(allSquareTiles[i])
+			else store.SQUARE_PILE_2.push(allSquareTiles[i])
+		}
+		for (let i = 0; i < allRectTiles.length; i++) {
+			if (i % 2 === 0) store.RECT_PILE_1.push(allRectTiles[i])
+			else store.RECT_PILE_2.push(allRectTiles[i])
+		}
+		for (let i = 0; i < allCornerTiles.length; i++) {
+			if (i % 2 === 0) store.CORNER_PILE_1.push(allCornerTiles[i])
+			else store.CORNER_PILE_2.push(allCornerTiles[i])
+		}
 	}
 
 	// Rebuild coords for the final grid with the center tile
