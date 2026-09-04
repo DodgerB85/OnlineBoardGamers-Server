@@ -124,8 +124,8 @@ export function canReachBuildingFromJunction(startJunction, player, store, token
 		const jorisAllowed = tokenIdx === undefined || tokenIdx === rf.DESIGNER_JORIS
 		const jeroenAttendedHere = jeroenHere && pitts.hasDesignerAttendedCon(store.jeroenStatus)
 		const jorisAttendedHere = jorisHere && pitts.hasDesignerAttendedCon(store.jorisStatus)
-		if (jeroenAllowed && jeroenHere && !pitts.hasDesignerAttendedCon(store.jeroenStatus) && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE) return true
-		if (jorisAllowed && jorisHere && !pitts.hasDesignerAttendedCon(store.jorisStatus) && store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE) return true
+		if (jeroenAllowed && jeroenHere && !pitts.hasDesignerAttendedCon(store.jeroenStatus) && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE && reachableByBus(startJunction, rf.PITTS_CONVENTION_JUNCTION, player, store)) return true
+		if (jorisAllowed && jorisHere && !pitts.hasDesignerAttendedCon(store.jorisStatus) && store.desiredBuilding === rf.DESIGNER_JORIS_BUILDING_TYPE && reachableByBus(startJunction, rf.PITTS_CONVENTION_JUNCTION, player, store)) return true
 		// Returning to the Netherlands: only after attending the Splotter Con, with the matching desired type,
 		// can a designer be transported back to the Airport, following the normal passenger transport rules
 		if (jeroenAllowed && jeroenAttendedHere && store.desiredBuilding === rf.DESIGNER_JEROEN_BUILDING_TYPE && reachableByBus(startJunction, rf.PITTS_AIRPORT_JUNCTION, player, store)) return true
