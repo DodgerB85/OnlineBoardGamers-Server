@@ -2656,10 +2656,18 @@ body.nd .nd-col-cta {
 body.nd .nd-row09.myMove { background: #BFE2B6; }
 body.nd .nd-row09.kickoutRequired1 { background: #FFE1AD; }
 body.nd .nd-row09.kickoutRequired2 { background: #F2BABA; }
+body.nd .nd-row09.pendingFinish {
+  background-image: repeating-conic-gradient(#c8c8c8 0% 25%, #f0f0f0 0% 50%);
+  background-size: 14px 14px;
+}
 @media (hover: hover) {
     body.nd .nd-row09.myMove:hover { background: #D9EED3; }
     body.nd .nd-row09.kickoutRequired1:hover { background: #ffeacc; }
     body.nd .nd-row09.kickoutRequired2:hover { background: #f6cdcd; }
+    body.nd .nd-row09.pendingFinish:hover {
+      background-image: repeating-conic-gradient(#b8b8b8 0% 25%, #e4e4e4 0% 50%);
+      background-size: 14px 14px;
+    }
 }
 
 /* Mobile collapse (per 09 prototype) */

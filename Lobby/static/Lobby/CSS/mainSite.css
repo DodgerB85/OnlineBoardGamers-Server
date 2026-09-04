@@ -705,6 +705,11 @@ a {
 	background-color: rgba(245, 135, 135, 0.75);
 }
 
+.pendingFinish {
+	background-image: repeating-conic-gradient(#c8c8c8 0% 25%, #f0f0f0 0% 50%);
+	background-size: 14px 14px;
+}
+
 .gameName:hover {
 	cursor: pointer;
 }

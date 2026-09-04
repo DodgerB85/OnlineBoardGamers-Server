@@ -1,6 +1,6 @@
 {% load static i18n %}
 {% if request.use_new_design %}
-<tr class="nd-row09 clickableGameRow {% if game.myMove %}myMove{% endif %} {% if game.kickoutRequiredNum == 1 %}kickoutRequired1{% elif game.kickoutRequiredNum == 2 %}kickoutRequired2{% endif %}"
+<tr class="nd-row09 clickableGameRow {% if game.myMove %}myMove{% endif %} {% if game.pendingFinish %}pendingFinish{% endif %} {% if game.kickoutRequiredNum == 1 %}kickoutRequired1{% elif game.kickoutRequiredNum == 2 %}kickoutRequired2{% endif %}"
     id="{{ game.gameCode }}gamesRow{{ game.gameID }}"
     onclick="window.location.href='/{{ game.gameCode }}/{{ game.gameID }}/show/';">
   <td class="nd-col-icon">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}</td>
@@ -44,7 +44,7 @@
   </td>
 </tr>
 {% else %}
-<tr class="clickableGameRow {% if game.myMove %}myMove{% endif %} {% if game.kickoutRequiredNum == 1 %} kickoutRequired1{% elif game.kickoutRequiredNum == 2 %}kickoutRequired2{% endif %}"
+<tr class="clickableGameRow {% if game.myMove %}myMove{% endif %} {% if game.pendingFinish %}pendingFinish{% endif %} {% if game.kickoutRequiredNum == 1 %} kickoutRequired1{% elif game.kickoutRequiredNum == 2 %}kickoutRequired2{% endif %}"
     id="{{ game.gameCode }}gamesRow{{ game.gameID }}"
     onclick="window.location.href='/{{ game.gameCode }}/{{ game.gameID }}/show/';">
   <td class="nameTDcurrent tdWithBox" id="td1">
