@@ -26,6 +26,7 @@
 import TopMenu from "./components/TopMenu.vue"
 import TopMenuViews from "./components/TopMenuViews.vue"
 import HistoryTab from "./components/HistoryTab.vue"
+import ReplayArea from "./components/ReplayArea.vue"
 import FooterBar from "./components/FooterBar.vue"
 import DebugArea from "./components/DebugArea.vue"
 import MapArea from "./components/MapArea.vue"
@@ -42,6 +43,7 @@ import * as rf from "./js/WEBreference"
 import * as view from "./js/WEBview"
 import * as funcs from "./js/WEBfuncs"
 import * as IO from "./backend/WEB_IO"
+import * as replay from "./js/WEBreplay"
 import PlayerTable from "./components/PlayerTable.vue"
 import AvailableTiles from "./components/AvailableTiles.vue"
 
@@ -120,7 +122,7 @@ function getUniqueTileGfx() {
 						<AvailableTiles />
 					</div>
 
-					<!--<ReplayArea v-if="store.viewSettings.generatingReplay || !store.viewSettings.replayAtBottom" />-->
+					<ReplayArea v-if="store.viewSettings.generatingReplay || !store.viewSettings.replayAtBottom" />
 					<template v-if="!store.viewSettings.generatingReplay">
 						<div id="mainAreaLessHistory">
 							<div v-if="store.viewSettings.showLoader" id="fLoadingBar">
@@ -131,7 +133,7 @@ function getUniqueTileGfx() {
 							<div class="mapAndControlPanelContainer">
 								<MapArea />
 							</div>
-							<!--<ReplayArea v-if="store.viewSettings.replayAtBottom" />-->
+							<ReplayArea v-if="store.viewSettings.replayAtBottom" />
 
 							<DebugArea v-if="IO.DEBUG_USERS.includes(personal.name)" />
 						</div>

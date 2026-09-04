@@ -277,6 +277,120 @@ export async function simpleImportWholeWEBmodel(input, importContext) {
 
 }
 
+export function simpleExportWholeWEBmodelNoCompression() {
+  const store = useModelStore()
+
+  let temp = []
+
+  // 0 - players
+  temp.push(JSON.parse(JSON.stringify(store.players)))
+
+  // 1 - gameflow
+  temp.push(JSON.parse(JSON.stringify(store.gameflow)))
+
+  //2 coords
+  temp.push(JSON.parse(JSON.stringify(store.coords)))
+
+  // 3 mapTiles
+  temp.push(JSON.parse(JSON.stringify(store.mapTiles)))
+
+  // 4 SQUARE_PILE_1
+  temp.push(JSON.parse(JSON.stringify(store.SQUARE_PILE_1)))
+
+  // 5 SQUARE_PILE_2
+  temp.push(JSON.parse(JSON.stringify(store.SQUARE_PILE_2)))
+
+  // 6 RECT_PILE_1
+  temp.push(JSON.parse(JSON.stringify(store.RECT_PILE_1)))
+
+  // 7 RECT_PILE_2
+  temp.push(JSON.parse(JSON.stringify(store.RECT_PILE_2)))
+
+  // 8 CORNER_PILE_1
+  temp.push(JSON.parse(JSON.stringify(store.CORNER_PILE_1)))
+
+  // 9 CORNER_PILE_2
+  temp.push(JSON.parse(JSON.stringify(store.CORNER_PILE_2)))
+
+  // 10 cables
+  temp.push(JSON.parse(JSON.stringify(store.cables)))
+
+  // 11 grid dimensions
+  temp.push(JSON.parse(JSON.stringify(store.gridDimensions)))
+
+  // 12 - history
+  temp.push(JSON.parse(JSON.stringify(store.history)))
+
+  // 13 - context
+  temp.push(JSON.parse(JSON.stringify(store.context)))
+
+  return temp
+}
+
+export function simpleImportWholeWEBmodelNoCompression(input, keepHistory = false) {
+  const store = useModelStore()
+
+  if (!input) return
+
+  // 0 players
+  store.players.splice(0)
+  Object.assign(store.players, input[0])
+
+  // 1 gameflow
+  Object.assign(store.gameflow, input[1])
+
+  //2 coords
+  store.coords.splice(0)
+  Object.assign(store.coords, input[2])
+
+  // 3 mapTiles
+  store.mapTiles.splice(0)
+  Object.assign(store.mapTiles, input[3])
+
+  // 4 SQUARE_PILE_1
+  store.SQUARE_PILE_1.splice(0)
+  Object.assign(store.SQUARE_PILE_1, input[4])
+
+  // 5 SQUARE_PILE_2
+  store.SQUARE_PILE_2.splice(0)
+  Object.assign(store.SQUARE_PILE_2, input[5])
+
+  // 6 RECT_PILE_1
+  store.RECT_PILE_1.splice(0)
+  Object.assign(store.RECT_PILE_1, input[6])
+
+  // 7 RECT_PILE_2
+  store.RECT_PILE_2.splice(0)
+  Object.assign(store.RECT_PILE_2, input[7])
+
+  // 8 CORNER_PILE_1
+  store.CORNER_PILE_1.splice(0)
+  Object.assign(store.CORNER_PILE_1, input[8])
+
+  // 9 CORNER_PILE_2
+  store.CORNER_PILE_2.splice(0)
+  Object.assign(store.CORNER_PILE_2, input[9])
+
+  // 10 cables
+  store.cables.splice(0)
+  Object.assign(store.cables, input[10])
+
+  // 11 grid dimensions
+  store.gridDimensions[0] = input[11][0]
+  store.gridDimensions[1] = input[11][1]
+
+  // 12 - history
+  if (!keepHistory) {
+    store.history.splice(0)
+    Object.assign(store.history, input[12])
+  }
+
+  store.resetContext()
+  Object.assign(store.context, input[13])
+
+  map.initCoords()
+}
+
 export function exportWEBmodel(includeContext, forGameOver) {
   const store = useModelStore()
   //const personal = usePersonalStore()

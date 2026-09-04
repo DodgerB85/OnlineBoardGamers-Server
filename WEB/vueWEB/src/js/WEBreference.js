@@ -46,6 +46,7 @@ export const HIST_ENTRIES_WITH_INDEX_AS_FIRST_ENTRY = [HIST_ADD_TILE, HIST_ADD_C
 export const HIST_RESIGN = 7
 export const HIST_KICKOUT = 8
 export const HIST_REWIND = 9
+export const HIST_INITIAL_TILES = 10
 export const HIST_GAME_END = 99
 
 // Squares

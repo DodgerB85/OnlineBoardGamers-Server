@@ -5,8 +5,8 @@
 import * as rf from "../js/WEBreference"
 //import * as map from '../js/WEBmap'
 import * as controller from "../js/WEBcontroller"
-//import * as funcs from '../js/WEBfuncs'
-//import * as replay from '../js/WEBreplay'
+import * as funcs from '../js/WEBfuncs'
+import * as replay from '../js/WEBreplay'
 import * as IO from "../backend/WEB_IO"
 
 import { useModelStore } from "../stores/WEBstore.js"
@@ -41,21 +41,18 @@ function toggleBug() {
 	store.viewSettings.showBug = !store.viewSettings.showBug
 }
 
-/*async function toggleReplay() {
+async function toggleReplay() {
   if (!store.viewSettings.showReplay) {
-    //store.replayResetData = funcs.exportModel(true) // FIZ
+    store.replayResetData = funcs.simpleExportWholeWEBmodel()
     store.viewSettings.showReplay = true
-
-    // TURM ON
-    //await replay.generateReplayData()
+    await replay.generateReplayData()
   } else {
-    // TURN OFF
     store.clearHistoryHighlights()
-    store.clearVars(false)
+    store.resetContext()
     store.viewSettings.showReplay = false
-    //funcs.importModel(store.replayResetData, true)
+    funcs.simpleImportWholeWEBmodel(store.replayResetData, true)
   }
-}*/
+}
 function toggleNotes() {
 	store.viewSettings.showBug = false
 	store.viewSettings.showNotes = !store.viewSettings.showNotes
@@ -180,10 +177,10 @@ function toggleReserve() {
 				<span>History</span>
 			</span>
 
-			<!--<span class="topMenuItem" @click="toggleReplay()">
+			<span class="topMenuItem" @click="toggleReplay()">
 				<img src="@static/WEB/images/icon-replay.svg" />
 				<span>Replay</span>
-			</span>-->
+			</span>
 
 			<div class="menuDivider"></div>
 

@@ -3,6 +3,7 @@ import * as rf from "../js/WEBreference"
 import * as funcs from "../js/WEBfuncs"
 import * as view from "../js/WEBview"
 import * as history from "../js/WEBhistory"
+import * as replay from "../js/WEBreplay"
 import * as cb from "../js/WEBcables"
 import * as model from "../js/WEBmodel"
 
@@ -20,7 +21,7 @@ function clickedHistoryEntry(action, entry3, entry_id) {
 	// If not replay, or if clicking on the replay entry, just do highlights
 	if (!store.viewSettings.showReplay || entry_id === -1) history.setupHistoryHighlight(action, entry3)
 	// Otherwise, you are clicking in history during replay
-	//else history.goToReplayStep(entry_id)
+	else replay.goToReplayStep(entry_id)
 }
 
 const computedEntry3 = computed(() => {

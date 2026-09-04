@@ -100,6 +100,8 @@ export const useModelStore = defineStore('store', () => {
     performingRewind: false,
 
     showReplay: false,
+    generatingReplay: false,
+    replayAtBottom: false,
 
     showIntroInfo: true,
   })
@@ -137,6 +139,10 @@ export const useModelStore = defineStore('store', () => {
   const wholeTurnResetData = ref('')
   const phaseResetData = ref('')
   const replayResetData = ref('')
+  const actualGameState = reactive({
+    phase: 0,
+    finishedGame: false,
+  })
 
   const replayData = reactive([])
   const spinoffReplayData = reactive([])
@@ -213,6 +219,7 @@ export const useModelStore = defineStore('store', () => {
 
     replayResetData,
     spinoffReplayData,
+    actualGameState,
 
     gameName,
     gameMessages,

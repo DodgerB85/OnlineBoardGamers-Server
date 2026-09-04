@@ -58,6 +58,7 @@ import * as IO from "../backend/WEB_IO.js"
 import * as WS from "../backend/WEBwebsocket.js"
 import * as cb from "./WEBcables.js"
 import * as view from "./WEBview.js"
+import * as replay from "./WEBreplay.js"
 
 export async function initGame() {
 	const store = useModelStore()
@@ -190,6 +191,10 @@ export async function initGame() {
 				store.players[i].tileIDarrays.push([ALL_CORNER_TILES.pop(), 0])
 			}
 
+			// Record each player's starting tiles so replays can restore them
+			let initialTilesData = store.players.map((p) => JSON.parse(JSON.stringify(p.tileIDarrays)))
+			store.history.push([rf.HIST_INITIAL_TILES, -1, 0, initialTilesData])
+
 			for (let i = 0; i < ALL_SQUARE_TILES.length; i++) {
 				if (i % 2 === 0) store.SQUARE_PILE_1.push(ALL_SQUARE_TILES[i])
 				else store.SQUARE_PILE_2.push(ALL_SQUARE_TILES[i])
@@ -229,14 +234,11 @@ export async function initGame() {
 		personal.votedToDelete = store.deleteVotesData[personal.name]
 		personal.votedToExclude = store.statsExcludeVotesData[personal.name]
 		// Go to replay mode if requested
-		/*if (window.initData.spoilerFree) {
-			// Enter replay mode at step 1
+		if (window.initData.spoilerFree) {
 			store.viewSettings.showReplay = true
-			store.replayResetData = funcs.exportKFWmodel(true) // FIZ
-
-			// TURM ON
+			store.replayResetData = funcs.simpleExportWholeWEBmodel()
 			await replay.generateReplayData(true)
-		}*/
+		}
 	}
 
 	// Allow play
