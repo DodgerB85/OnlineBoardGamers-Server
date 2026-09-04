@@ -10,356 +10,488 @@
     {{ request.user.id|json_script:"user_id" }}
     {{ request.user.username|json_script:"username" }}
     {% if request.use_new_design %}
-    <div class="nd-page">
-        <div class="nd-page-header">
-            <h1>{% translate "Bus" %}</h1>
-            <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'newGamesPage' %}">&#8592; {% translate "New Game" %}</a>
-        </div>
-
-        {% if messages %}
-        <div style="margin-bottom:16px">
-            {% for message in messages %}
-            <div class="nd-pill {% if message.tags == 'error' %}nd-pill-danger{% elif message.tags == 'success' %}nd-pill-positive{% else %}nd-pill-accent{% endif %}" style="display:block;padding:10px 14px;border-radius:var(--radius-md);margin-bottom:8px">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <div class="nd-card nd-card-soft" style="border-left:3px solid var(--color-accent);margin-bottom:16px">
-            <span style="font-size:14px">{% translate "New to Bus? For Rules, How to Play, and Game Guide, please see " %}<a href="{% url 'BUS:BUShelp' %}">{% translate "Help" %}</a>.</span>
-        </div>
-
-        <form id="gameCreationForm" autocomplete="off" action="{% url 'BUS:createBUSgame' %}" method="post">
-            {% csrf_token %}
-
-            <div class="nd-setup-cards-grid">
-                <div class="nd-card">
-                    <div class="nd-card-header"><h2>{% translate "Setup Options" %}</h2></div>
-                    <div class="nd-form-row">
-                        <label class="nd-form-label" for="name">{% translate "Name" %}</label>
-                        <input type="text" name="gameName" id="name" placeholder="{% translate "Game name" %}" maxlength="100">
-                    </div>
-                    <div class="nd-form-row">
-                        <label class="nd-form-label" for="description">{% translate "Description" %}</label>
-                        <input type="text" name="gameDescription" id="description" placeholder="{% translate "Optional, eg fast EST time zone" %}" maxlength="100">
-                    </div>
-                    <div class="nd-form-row">
-                        <label class="nd-form-label" for="pace">{% translate "Playing Speed" %}</label>
-                        <select name="pace" id="pace" onchange="validateOptions(this.id)">
-                            <option value="10">{% translate "Live: Play the game in one session" %}</option>
-                            <option value="20">{% translate "Fast: Several moves per day" %}</option>
-                            <option value="30" selected>{% translate "Standard: 1-2+ moves a day" %}</option>
-                            <option value="40">{% translate "Slow: At least one move a day" %}</option>
-                            <option value="50">{% translate "Casual: Just take your time" %}</option>
-                        </select>
-                        <span class="paceHelpIcon" role="button" tabindex="0" aria-expanded="false">?<span class="paceTooltip"><b>Live</b> &mdash; Play in one continuous session. Kickout options: 5, 10, or 20 minutes. No Flex-Time.<br><b>Fast</b> &mdash; Several moves per day in total. Kickout options: 12 hours or 1 day. For 12h+ kickouts, each player has one 24-hour Flex-Time bank for the whole game.<br><b>Standard</b> &mdash; About 1&ndash;2 moves per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.<br><b>Slow</b> &mdash; At least one move per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.<br><b>Casual</b> &mdash; No fixed schedule. Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.</span></span>
-                        <div class="nd-form-help" style="padding-left:0">{% translate "Alters kickout options. All games update 'live'" %}</div>
-                        <div class="nd-form-help" style="padding-left:0">{% translate "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}</div>
-                        <div id="blitzWarningSpan" style="display:none;margin:4px 0 8px;padding:8px 12px;border-radius:var(--radius-sm);background:var(--color-warn-bg);color:var(--color-warn);font-size:13px;font-weight:600;flex-basis:100%">{% translate "Careful, Live gives each player 5 minutes per move, not per game. With 3 players each round is about 15 min, and a full game has many rounds, so it can still take ~8 hours." %}</div>
-                    </div>
-                    <div class="nd-form-row">
-                        <label class="nd-form-label" for="playerNumber">{% translate "Number of players" %}</label>
-                        <select name="playerNumber" id="playerNumber" onchange="selectPlayers();">
-                            <option value="3" selected="selected">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                        </select>
-                    </div>
-                    <div class="nd-form-row">
-                        <label class="nd-form-label" for="player2">{% translate "Player 2" %}</label>
-                        <div class="nd-field">
-                            <div class="autocomplete">
-                                <input type="text" id="player2" name="player2" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
-                            </div>
-                            <span id="player2help" style="display:block;margin-top:4px;font-size:13px;color:var(--color-muted)">{% translate "Leave blank to invite anybody" %}</span>
-                        </div>
-                    </div>
-                    <div class="nd-form-row" id="selPlayer3" style="display:none">
-                        <label class="nd-form-label" for="player3">{% translate "Player 3" %}</label>
-                        <div class="nd-field"><div class="autocomplete">
-                            <input type="text" id="player3" name="player3" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
-                        </div></div>
-                    </div>
-                    <div class="nd-form-row" id="selPlayer4" style="display:none">
-                        <label class="nd-form-label" for="player4">{% translate "Player 4" %}</label>
-                        <div class="nd-field"><div class="autocomplete">
-                            <input type="text" id="player4" name="player4" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
-                        </div></div>
-                    </div>
-                    <div class="nd-form-row" id="selPlayer5" style="display:none">
-                        <label class="nd-form-label" for="player5">{% translate "Player 5" %}</label>
-                        <div class="nd-field"><div class="autocomplete">
-                            <input type="text" id="player5" name="player5" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
-                        </div></div>
-                    </div>
-                </div>
-
-                <div class="nd-card">
-                    <div class="nd-card-header"><h2>{% translate "Common Options" %}</h2></div>
-                    <div class="nd-form-row">
-                        <label class="nd-form-label" for="kickoutDuration">{% translate "Kickout available after:" %}</label>
-                        <select name="kickoutDuration" id="kickoutDuration" style="flex:0 0 auto;width:auto">
-                            <option value="100">{% translate "1 day" %}</option>
-                            <option value="200" selected="selected">{% translate "2 days" %}</option>
-                            <option value="300">{% translate "3 days" %}</option>
-                            <option value="500">{% translate "5 days" %}</option>
-                        </select>
-                        <div class="nd-form-help">{% translate "Change Playing Speed for different options" %}</div>
-                    </div>
-                    <div class="nd-check-list">
-                        {% url "lobbyHelp" as the_url %}
-                        <label class="nd-check-label">
-                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="trainingGame" name="trainingGame" value="102">
-                            <div>
-                                <div>{% translate "Practice Game" %}</div>
-                                <div class="nd-opt-help">{% blocktranslate trimmed %}Play as up to 5 players on the same device. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
-                            </div>
-                        </label>
-                        <label class="nd-check-label">
-                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="privateGame" name="privateGame" value="1">
-                            <div>
-                                <div>{% translate "Private Game" %}</div>
-                                <div class="nd-opt-help">{% translate "Players can only join with invite or link" %}</div>
-                            </div>
-                        </label>
-                        <label class="nd-check-label">
-                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="experiencedGame" name="experiencedGame" value="120" disabled>
-                            <div>
-                                <div>{% translate "Experienced Game" %}</div>
-                                <div class="nd-opt-help">{% blocktranslate trimmed %}Minimum Experience Level. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
-                                {% if not experienced %}<div style="font-size:12px;color:var(--color-danger);margin-top:2px">{% translate "You do not have enough experience" %}</div>{% endif %}
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="nd-card">
-                    <div class="nd-card-header"><h2>{% translate "Game Options" %}</h2></div>
-                    <div class="nd-check-list">
-                        {% static 'BUS/Bus_Pitts_Rules.pdf' as pitts_rules_url %}
-                        <label class="nd-check-label">
-                            <input type="checkbox" onchange="validateGameOptions(this.id)" class="myCheckbox" id="usePittsburghMap" name="usePittsburghMap" value="3">
-                            <div>
-                                <div>{% translate "Use Pittsburgh Map" %}</div>
-                                <div class="nd-opt-help">{% blocktranslate trimmed %}Play on the custom Pittsburgh map with special <a href="{{ pitts_rules_url }}" target="_blank">rules</a>. Game will be excluded from stats{% endblocktranslate %}</div>
-                            </div>
-                        </label>
-                    </div>
-                </div>
+        <div class="nd-page">
+            <div class="nd-page-header">
+                <h1>{% translate "Bus" %}</h1>
+                <a class="nd-button nd-button-ghost nd-button-sm"
+                   href="{% url 'newGamesPage' %}">&#8592; {% translate "New Game" %}</a>
             </div>
-
-            <div style="text-align:center;margin-top:8px">
-                <input type="submit" class="nd-button nd-button-primary createNewGameButton" value="{% translate "Create Bus Game" %}">
+            {% if messages %}
+                <div style="margin-bottom:16px">
+                    {% for message in messages %}
+                        <div class="nd-pill {% if message.tags == 'error' %}nd-pill-danger{% elif message.tags == 'success' %}nd-pill-positive{% else %}nd-pill-accent{% endif %}"
+                             style="display:block;
+                                    padding:10px 14px;
+                                    border-radius:var(--radius-md);
+                                    margin-bottom:8px">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="nd-card nd-card-soft"
+                 style="border-left:3px solid var(--color-accent);
+                        margin-bottom:16px">
+                <span style="font-size:14px">{% translate "New to Bus? For Rules, How to Play, and Game Guide, please see " %}<a href="{% url 'BUS:BUShelp' %}">{% translate "Help" %}</a>.</span>
             </div>
-        </form>
-    </div>
-    {% else %}
-    <div class="container">
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
-        <div id="allOptions">
-            <span class="topOfNewGameSpan">{% translate "New to Bus? For Rules, How to Play, and Game Guide, please see " %}<a class="linkOther" href="{% url 'BUS:BUShelp' %}">{% translate "Help" %}</a></span>
             <form id="gameCreationForm"
                   autocomplete="off"
                   action="{% url 'BUS:createBUSgame' %}"
                   method="post">
                 {% csrf_token %}
-                <div class="topOfNewGameOptionsDiv">
-                    <fieldset id="setupOptions" class="optionsGroupTop">
-                        <legend class="optionsHeader">{% translate "Setup Options" %}</legend>
-                        <div class="singleChoiceWithTextDiv">
-                            <label class="choiceLabelText" for="pace">{% translate "Name" %}</label>
-                            <div class="optionSelectionText">
-                                <input type="text"
-                                       name="gameName"
-                                       id="name"
-                                       class="textInput"
-                                       placeholder="{% translate "Game name" %}"
-                                       maxlength="100">
+                <div class="nd-setup-cards-grid">
+                    <div class="nd-card">
+                        <div class="nd-card-header">
+                            <h2>{% translate "Setup Options" %}</h2>
+                        </div>
+                        <div class="nd-form-row">
+                            <label class="nd-form-label" for="name">{% translate "Name" %}</label>
+                            <input type="text"
+                                   name="gameName"
+                                   id="name"
+                                   placeholder="{% translate "Game name" %}"
+                                   maxlength="100">
+                        </div>
+                        <div class="nd-form-row">
+                            <label class="nd-form-label" for="description">{% translate "Description" %}</label>
+                            <input type="text"
+                                   name="gameDescription"
+                                   id="description"
+                                   placeholder="{% translate "Optional, eg fast EST time zone" %}"
+                                   maxlength="100">
+                        </div>
+                        <div class="nd-form-row">
+                            <label class="nd-form-label" for="pace">{% translate "Playing Speed" %}</label>
+                            <select name="pace" id="pace" onchange="validateOptions(this.id)">
+                                <option value="10">{% translate "Live: Play the game in one session" %}</option>
+                                <option value="20">{% translate "Fast: Several moves per day" %}</option>
+                                <option value="30" selected>{% translate "Standard: 1-2+ moves a day" %}</option>
+                                <option value="40">{% translate "Slow: At least one move a day" %}</option>
+                                <option value="50">{% translate "Casual: Just take your time" %}</option>
+                            </select>
+                            <span class="paceHelpIcon" role="button" tabindex="0" aria-expanded="false">?<span class="paceTooltip"><b>Live</b> &mdash; Play in one continuous session. Kickout options: 5, 10, or 20 minutes. No Flex-Time.
+                                <br>
+                                <b>Fast</b> &mdash; Several moves per day in total. Kickout options: 12 hours or 1 day. For 12h+ kickouts, each player has one 24-hour Flex-Time bank for the whole game.
+                                <br>
+                                <b>Standard</b> &mdash; About 1&ndash;2 moves per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.
+                                <br>
+                                <b>Slow</b> &mdash; At least one move per day in total (not per player). Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.
+                                <br>
+                                <b>Casual</b> &mdash; No fixed schedule. Kickout options: 1, 2, 3, or 5 days. Each player has one 24-hour Flex-Time bank for the whole game.</span></span>
+                            <div class="nd-form-help" style="padding-left:0">
+                                {% translate "Alters kickout options. All games update 'live'" %}
+                            </div>
+                            <div class="nd-form-help" style="padding-left:0">
+                                {% translate "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}
+                            </div>
+                            <div id="blitzWarningSpan"
+                                 style="display:none;
+                                        margin:4px 0 8px;
+                                        padding:8px 12px;
+                                        border-radius:var(--radius-sm);
+                                        background:var(--color-warn-bg);
+                                        color:var(--color-warn);
+                                        font-size:13px;
+                                        font-weight:600;
+                                        flex-basis:100%">
+                                {% translate "Careful, Live gives each player 5 minutes per move, not per game. With 3 players each round is about 15 min, and a full game has many rounds, so it can still take ~8 hours." %}
                             </div>
                         </div>
-                        <div class="singleChoiceWithTextDiv">
-                            <label class="choiceLabelText" for="description">{% translate "Description" %}</label>
-                            <div class="optionSelectionText">
-                                <input type="text"
-                                       name="gameDescription"
-                                       size="30"
-                                       id="description"
-                                       class="textInput"
-                                       placeholder="{% translate "Optional, eg fast EST time zone" %}"
-                                       maxlength="100">
-                            </div>
+                        <div class="nd-form-row">
+                            <label class="nd-form-label" for="playerNumber">{% translate "Number of players" %}</label>
+                            <select name="playerNumber" id="playerNumber" onchange="selectPlayers();">
+                                <option value="3" selected="selected">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
                         </div>
-                        <div class="singleChoiceDiv">
-                            <label class="choiceLabel" for="pace">{% translate "Playing Speed" %}</label>
-                            <div class="optionSelection">
-                                <select name="pace" id="pace" onchange="validateOptions(this.id)">
-                                    <option value="10">{% translate "Live: Play the game in one session" %}</option>
-                                    <option value="20">{% translate "Fast: Several moves per day" %}</option>
-                                    <option value="30" selected>{% translate "Standard: 1-2+ moves a day" %}</option>
-                                    <option value="40">{% translate "Slow: At least one move a day" %}</option>
-                                    <option value="50">{% translate "Casual: Just take your time" %}</option>
-                                </select>
-                                <span class="optionHelp">{% translate "Alters kickout options. All games update 'live'" %}</span>
-                                <br />
-                                <span class="optionHelp">{% translate "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}</span>
-                            </div>
-                        </div>
-                        <div class="singleChoiceDiv">
-                            <label class="choiceLabel" for="pace">{% translate "Number of players" %}</label>
-                            <div class="optionSelection">
-                                <select name="playerNumber" id="playerNumber" onchange="selectPlayers();">
-                                    <option value="3" selected="selected">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="singleChoiceWithTextDiv">
-                            <label class="choiceLabelText" for="player2">{% translate "Player 2" %}</label>
-                            <div class="optionSelectionText">
+                        <div class="nd-form-row">
+                            <label class="nd-form-label" for="player2">{% translate "Player 2" %}</label>
+                            <div class="nd-field">
                                 <div class="autocomplete">
                                     <input type="text"
                                            id="player2"
-                                           class="textInput"
                                            name="player2"
-                                           autocomplete="off">
+                                           autocomplete="off"
+                                           style="width:100%;
+                                                  box-sizing:border-box;
+                                                  padding:8px 10px;
+                                                  border:1px solid var(--color-border-strong);
+                                                  border-radius:var(--radius-sm);
+                                                  font-size:14px;
+                                                  font-family:inherit">
                                 </div>
-                                <span id="player2help" class="inlineHelp">{% translate "Leave blank to invite anybody" %}</span>
+                                <span id="player2help"
+                                      style="display:block;
+                                             margin-top:4px;
+                                             font-size:13px;
+                                             color:var(--color-muted)">{% translate "Leave blank to invite anybody" %}</span>
                             </div>
                         </div>
-                        <div class="singleChoiceWithTextDiv" id="selPlayer3" style="display: none">
-                            <label class="choiceLabelText" for="player3">{% translate "Player 3" %}</label>
-                            <div class="optionSelectionText">
+                        <div class="nd-form-row" id="selPlayer3" style="display:none">
+                            <label class="nd-form-label" for="player3">{% translate "Player 3" %}</label>
+                            <div class="nd-field">
                                 <div class="autocomplete">
                                     <input type="text"
                                            id="player3"
-                                           class="textInput"
                                            name="player3"
-                                           autocomplete="off">
+                                           autocomplete="off"
+                                           style="width:100%;
+                                                  box-sizing:border-box;
+                                                  padding:8px 10px;
+                                                  border:1px solid var(--color-border-strong);
+                                                  border-radius:var(--radius-sm);
+                                                  font-size:14px;
+                                                  font-family:inherit">
                                 </div>
                             </div>
                         </div>
-                        <div class="singleChoiceWithTextDiv" id="selPlayer4" style="display: none">
-                            <label class="choiceLabelText" for="player4">{% translate "Player 4" %}</label>
-                            <div class="optionSelectionText">
+                        <div class="nd-form-row" id="selPlayer4" style="display:none">
+                            <label class="nd-form-label" for="player4">{% translate "Player 4" %}</label>
+                            <div class="nd-field">
                                 <div class="autocomplete">
                                     <input type="text"
                                            id="player4"
-                                           class="textInput"
                                            name="player4"
-                                           autocomplete="off">
+                                           autocomplete="off"
+                                           style="width:100%;
+                                                  box-sizing:border-box;
+                                                  padding:8px 10px;
+                                                  border:1px solid var(--color-border-strong);
+                                                  border-radius:var(--radius-sm);
+                                                  font-size:14px;
+                                                  font-family:inherit">
                                 </div>
                             </div>
                         </div>
-                        <div class="singleChoiceWithTextDiv" id="selPlayer5" style="display: none">
-                            <label class="choiceLabelText" for="player5">{% translate "Player 5" %}</label>
-                            <div class="optionSelectionText">
+                        <div class="nd-form-row" id="selPlayer5" style="display:none">
+                            <label class="nd-form-label" for="player5">{% translate "Player 5" %}</label>
+                            <div class="nd-field">
                                 <div class="autocomplete">
                                     <input type="text"
                                            id="player5"
-                                           class="textInput"
                                            name="player5"
-                                           autocomplete="off">
+                                           autocomplete="off"
+                                           style="width:100%;
+                                                  box-sizing:border-box;
+                                                  padding:8px 10px;
+                                                  border:1px solid var(--color-border-strong);
+                                                  border-radius:var(--radius-sm);
+                                                  font-size:14px;
+                                                  font-family:inherit">
                                 </div>
                             </div>
                         </div>
-                        <span id="blitzWarningSpan">{% translate "Careful, Live gives each player 5 minutes per move, not per game. With 3 players each round is about 15 min, and a full game has many rounds, so it can still take ~8 hours." %}</span>
-                    </fieldset>
-                    <fieldset id="basicOptions" class="optionsGroupTop">
-                        <legend class="optionsHeader">{% translate "Common Options" %}</legend>
-                        <div class="singleChoiceDiv">
-                            <label class="choiceLabel" for="kickoutDuration">{% translate "Kickout available after:" %}</label>
-                            <div class="optionSelection">
-                                <select name="kickoutDuration" id="kickoutDuration" onchange="">
-                                    <option value="100">{% translate "1 day" %}</option>
-                                    <option value="200" selected="selected">{% translate "2 days" %}</option>
-                                    <option value="300">{% translate "3 days" %}</option>
-                                    <option value="500">{% translate "5 days" %}</option>
-                                </select>
-                            </div>
-                            <br />
-                            <span class="inlineHelp">{% translate "Change Playing Speed for different options" %}</span>
+                    </div>
+                    <div class="nd-card">
+                        <div class="nd-card-header">
+                            <h2>{% translate "Common Options" %}</h2>
                         </div>
-                        <input type="checkbox"
-                               onchange="validateOptions(this.id)"
-                               class="myCheckbox"
-                               id="trainingGame"
-                               name="trainingGame"
-                               value="102">
-                        <label for="trainingGame" class="checkboxLabel">{% translate "Practice Game" %}</label>
-                        <br />
-                        <span class="inlineHelp">
+                        <div class="nd-form-row">
+                            <label class="nd-form-label" for="kickoutDuration">{% translate "Kickout available after:" %}</label>
+                            <select name="kickoutDuration"
+                                    id="kickoutDuration"
+                                    style="flex:0 0 auto;
+                                           width:auto">
+                                <option value="100">{% translate "1 day" %}</option>
+                                <option value="200" selected="selected">{% translate "2 days" %}</option>
+                                <option value="300">{% translate "3 days" %}</option>
+                                <option value="500">{% translate "5 days" %}</option>
+                            </select>
+                            <div class="nd-form-help">{% translate "Change Playing Speed for different options" %}</div>
+                        </div>
+                        <div class="nd-check-list">
                             {% url "lobbyHelp" as the_url %}
-                            {% blocktranslate trimmed %}
-                                Play as up to 5 players on the same device.
-                                See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
-                            {% endblocktranslate %}
-                        </span>
-                        <br />
-                        <input type="checkbox"
-                               onchange="validateOptions(this.id)"
-                               class="myCheckbox"
-                               id="privateGame"
-                               name="privateGame"
-                               value="1">
-                        <label for="privateGame" class="checkboxLabel">{% translate "Private Game" %}</label>
-                        <br />
-                        <span class="inlineHelp">{% translate "Players can only join with invite or link" %}</span>
-                        <br />
-                        <input type="checkbox"
-                               onchange="validateOptions(this.id)"
-                               class="myCheckbox"
-                               id="experiencedGame"
-                               name="experiencedGame"
-                               value="120"
-                               disabled>
-                        <label for="experiencedGame" class="checkboxLabel">{% translate "Experienced Game" %}</label>
-                        <br />
-                        <span class="inlineHelp">
-                            {% url "lobbyHelp" as the_url %}
-                            {% blocktranslate trimmed %}
-                                Minmum Experience Level. See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
-                            {% endblocktranslate %}
-                            {% if not experienced %}
-                                <span class="notEnoughExperience">{% translate "You do not have enough experience" %}</span>
-                            {% endif %}
-                        </span>
-                        <br />
-                    </fieldset>
-                    <fieldset id="basicOptions" class="optionsGroupTop">
-                        <legend class="optionsHeader">{% translate "Game Options" %}</legend>
-                        <input type="checkbox"
-                               onchange="validateGameOptions(this.id)"
-                               class="myCheckbox"
-                               id="usePittsburghMap"
-                               name="usePittsburghMap"
-                               value="3">
-                        <label for="usePittsburghMap" class="checkboxLabel">{% translate "Use Pittsburgh Map" %}</label>
-                        <br />
-                        <span class="inlineHelp">
+                            <label class="nd-check-label">
+                                <input type="checkbox"
+                                       onchange="validateOptions(this.id)"
+                                       class="myCheckbox"
+                                       id="trainingGame"
+                                       name="trainingGame"
+                                       value="102">
+                                <div>
+                                    <div>{% translate "Practice Game" %}</div>
+                                    <div class="nd-opt-help">
+                                        {% blocktranslate trimmed %}
+                                            Play as up to 5 players on the same device. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>
+                                        {% endblocktranslate %}
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="nd-check-label">
+                                <input type="checkbox"
+                                       onchange="validateOptions(this.id)"
+                                       class="myCheckbox"
+                                       id="privateGame"
+                                       name="privateGame"
+                                       value="1">
+                                <div>
+                                    <div>{% translate "Private Game" %}</div>
+                                    <div class="nd-opt-help">{% translate "Players can only join with invite or link" %}</div>
+                                </div>
+                            </label>
+                            <label class="nd-check-label">
+                                <input type="checkbox"
+                                       onchange="validateOptions(this.id)"
+                                       class="myCheckbox"
+                                       id="experiencedGame"
+                                       name="experiencedGame"
+                                       value="120"
+                                       disabled>
+                                <div>
+                                    <div>{% translate "Experienced Game" %}</div>
+                                    <div class="nd-opt-help">
+                                        {% blocktranslate trimmed %}
+                                            Minimum Experience Level. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>
+                                        {% endblocktranslate %}
+                                    </div>
+                                    {% if not experienced %}
+                                        <div style="font-size:12px;color:var(--color-danger);margin-top:2px">
+                                            {% translate "You do not have enough experience" %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="nd-card">
+                        <div class="nd-card-header">
+                            <h2>{% translate "Game Options" %}</h2>
+                        </div>
+                        <div class="nd-check-list">
                             {% static 'BUS/Bus_Pitts_Rules.pdf' as pitts_rules_url %}
-                            {% blocktranslate trimmed %}
-                                Play on the custom Pittsburgh map with special <a class="linkOther" href="{{ pitts_rules_url }}" target="_blank">rules</a>.
-                                <br />
-                                Game will be excluded from stats
-                            {% endblocktranslate %}
-                        </span>
-                    </fieldset>
+                            <label class="nd-check-label">
+                                <input type="checkbox"
+                                       onchange="validateOptions(this.id)"
+                                       class="myCheckbox"
+                                       id="usePittsburghMap"
+                                       name="usePittsburghMap"
+                                       value="3">
+                                <div>
+                                    <div>{% translate "Use Pittsburgh Map" %}</div>
+                                    <div class="nd-opt-help">
+                                        {% blocktranslate trimmed %}
+                                            Play on the custom Pittsburgh map with special <a href="{{ pitts_rules_url }}" target="_blank">rules</a>. Game will be excluded from stats
+                                        {% endblocktranslate %}
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
                 </div>
-                <br />
-                <input type="submit"
-                       class="registerbtn createNewGameButton"
-                       value="{% translate "Create Bus Game" %}">
+                <div style="text-align:center;margin-top:8px">
+                    <input type="submit"
+                           class="nd-button nd-button-primary createNewGameButton"
+                           value="{% translate "Create Bus Game" %}">
+                </div>
             </form>
         </div>
-        {% include 'Lobby/donate/donateBanner.html' %}
-        {% include 'Lobby/splotterconSponsor.html' %}
-    </div>
+    {% else %}
+        <div class="container">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div id="allOptions">
+                <span class="topOfNewGameSpan">{% translate "New to Bus? For Rules, How to Play, and Game Guide, please see " %}<a class="linkOther" href="{% url 'BUS:BUShelp' %}">{% translate "Help" %}</a></span>
+                <form id="gameCreationForm"
+                      autocomplete="off"
+                      action="{% url 'BUS:createBUSgame' %}"
+                      method="post">
+                    {% csrf_token %}
+                    <div class="topOfNewGameOptionsDiv">
+                        <fieldset id="setupOptions" class="optionsGroupTop">
+                            <legend class="optionsHeader">{% translate "Setup Options" %}</legend>
+                            <div class="singleChoiceWithTextDiv">
+                                <label class="choiceLabelText" for="pace">{% translate "Name" %}</label>
+                                <div class="optionSelectionText">
+                                    <input type="text"
+                                           name="gameName"
+                                           id="name"
+                                           class="textInput"
+                                           placeholder="{% translate "Game name" %}"
+                                           maxlength="100">
+                                </div>
+                            </div>
+                            <div class="singleChoiceWithTextDiv">
+                                <label class="choiceLabelText" for="description">{% translate "Description" %}</label>
+                                <div class="optionSelectionText">
+                                    <input type="text"
+                                           name="gameDescription"
+                                           size="30"
+                                           id="description"
+                                           class="textInput"
+                                           placeholder="{% translate "Optional, eg fast EST time zone" %}"
+                                           maxlength="100">
+                                </div>
+                            </div>
+                            <div class="singleChoiceDiv">
+                                <label class="choiceLabel" for="pace">{% translate "Playing Speed" %}</label>
+                                <div class="optionSelection">
+                                    <select name="pace" id="pace" onchange="validateOptions(this.id)">
+                                        <option value="10">{% translate "Live: Play the game in one session" %}</option>
+                                        <option value="20">{% translate "Fast: Several moves per day" %}</option>
+                                        <option value="30" selected>{% translate "Standard: 1-2+ moves a day" %}</option>
+                                        <option value="40">{% translate "Slow: At least one move a day" %}</option>
+                                        <option value="50">{% translate "Casual: Just take your time" %}</option>
+                                    </select>
+                                    <span class="optionHelp">{% translate "Alters kickout options. All games update 'live'" %}</span>
+                                    <br />
+                                    <span class="optionHelp">{% translate "Setting speed to 'live' or 'fast' will stop 'your turn' emails being sent if the last move was less than 30 minutes ago" %}</span>
+                                </div>
+                            </div>
+                            <div class="singleChoiceDiv">
+                                <label class="choiceLabel" for="pace">{% translate "Number of players" %}</label>
+                                <div class="optionSelection">
+                                    <select name="playerNumber" id="playerNumber" onchange="selectPlayers();">
+                                        <option value="3" selected="selected">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="singleChoiceWithTextDiv">
+                                <label class="choiceLabelText" for="player2">{% translate "Player 2" %}</label>
+                                <div class="optionSelectionText">
+                                    <div class="autocomplete">
+                                        <input type="text"
+                                               id="player2"
+                                               class="textInput"
+                                               name="player2"
+                                               autocomplete="off">
+                                    </div>
+                                    <span id="player2help" class="inlineHelp">{% translate "Leave blank to invite anybody" %}</span>
+                                </div>
+                            </div>
+                            <div class="singleChoiceWithTextDiv" id="selPlayer3" style="display: none">
+                                <label class="choiceLabelText" for="player3">{% translate "Player 3" %}</label>
+                                <div class="optionSelectionText">
+                                    <div class="autocomplete">
+                                        <input type="text"
+                                               id="player3"
+                                               class="textInput"
+                                               name="player3"
+                                               autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="singleChoiceWithTextDiv" id="selPlayer4" style="display: none">
+                                <label class="choiceLabelText" for="player4">{% translate "Player 4" %}</label>
+                                <div class="optionSelectionText">
+                                    <div class="autocomplete">
+                                        <input type="text"
+                                               id="player4"
+                                               class="textInput"
+                                               name="player4"
+                                               autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="singleChoiceWithTextDiv" id="selPlayer5" style="display: none">
+                                <label class="choiceLabelText" for="player5">{% translate "Player 5" %}</label>
+                                <div class="optionSelectionText">
+                                    <div class="autocomplete">
+                                        <input type="text"
+                                               id="player5"
+                                               class="textInput"
+                                               name="player5"
+                                               autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                            <span id="blitzWarningSpan">{% translate "Careful, Live gives each player 5 minutes per move, not per game. With 3 players each round is about 15 min, and a full game has many rounds, so it can still take ~8 hours." %}</span>
+                        </fieldset>
+                        <fieldset id="basicOptions" class="optionsGroupTop">
+                            <legend class="optionsHeader">{% translate "Common Options" %}</legend>
+                            <div class="singleChoiceDiv">
+                                <label class="choiceLabel" for="kickoutDuration">{% translate "Kickout available after:" %}</label>
+                                <div class="optionSelection">
+                                    <select name="kickoutDuration" id="kickoutDuration" onchange="">
+                                        <option value="100">{% translate "1 day" %}</option>
+                                        <option value="200" selected="selected">{% translate "2 days" %}</option>
+                                        <option value="300">{% translate "3 days" %}</option>
+                                        <option value="500">{% translate "5 days" %}</option>
+                                    </select>
+                                </div>
+                                <br />
+                                <span class="inlineHelp">{% translate "Change Playing Speed for different options" %}</span>
+                            </div>
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox"
+                                   id="trainingGame"
+                                   name="trainingGame"
+                                   value="102">
+                            <label for="trainingGame" class="checkboxLabel">{% translate "Practice Game" %}</label>
+                            <br />
+                            <span class="inlineHelp">
+                                {% url "lobbyHelp" as the_url %}
+                                {% blocktranslate trimmed %}
+                                    Play as up to 5 players on the same device.
+                                    See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
+                                {% endblocktranslate %}
+                            </span>
+                            <br />
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox"
+                                   id="privateGame"
+                                   name="privateGame"
+                                   value="1">
+                            <label for="privateGame" class="checkboxLabel">{% translate "Private Game" %}</label>
+                            <br />
+                            <span class="inlineHelp">{% translate "Players can only join with invite or link" %}</span>
+                            <br />
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox"
+                                   id="experiencedGame"
+                                   name="experiencedGame"
+                                   value="120"
+                                   disabled>
+                            <label for="experiencedGame" class="checkboxLabel">{% translate "Experienced Game" %}</label>
+                            <br />
+                            <span class="inlineHelp">
+                                {% url "lobbyHelp" as the_url %}
+                                {% blocktranslate trimmed %}
+                                    Minmum Experience Level. See <a class="linkOther" href="{{ the_url }}#navGameType" target="_blank">Help</a>
+                                {% endblocktranslate %}
+                                {% if not experienced %}
+                                    <span class="notEnoughExperience">{% translate "You do not have enough experience" %}</span>
+                                {% endif %}
+                            </span>
+                            <br />
+                        </fieldset>
+                        <fieldset id="basicOptions" class="optionsGroupTop">
+                            <legend class="optionsHeader">{% translate "Game Options" %}</legend>
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox"
+                                   id="usePittsburghMap"
+                                   name="usePittsburghMap"
+                                   value="3">
+                            <label for="usePittsburghMap" class="checkboxLabel">{% translate "Use Pittsburgh Map" %}</label>
+                            <br />
+                            <span class="inlineHelp">
+                                {% static 'BUS/Bus_Pitts_Rules.pdf' as pitts_rules_url %}
+                                {% blocktranslate trimmed %}
+                                    Play on the custom Pittsburgh map with special <a class="linkOther" href="{{ pitts_rules_url }}" target="_blank">rules</a>.
+                                    <br />
+                                    Game will be excluded from stats
+                                {% endblocktranslate %}
+                            </span>
+                        </fieldset>
+                    </div>
+                    <br />
+                    <input type="submit"
+                           class="registerbtn createNewGameButton"
+                           value="{% translate "Create Bus Game" %}">
+                </form>
+            </div>
+            {% include 'Lobby/donate/donateBanner.html' %}
+            {% include 'Lobby/splotterconSponsor.html' %}
+        </div>
     {% endif %}
     {% block script %}
         {% compress js %}
