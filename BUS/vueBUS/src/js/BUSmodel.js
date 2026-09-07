@@ -723,14 +723,19 @@ export function getVromBuildings() {
 	// so no regular building destinations are offered to them
 	const designerParkedAtCon = selectedDesignerStatus >= rf.DESIGNER_ON_BUILDING_FLAG
 	if (!designerParkedAtCon) {
-		// Pittsburgh: buildings on the far side of bridges added to the player's network are targets
+		// Pittsburgh: buildings on the far side of bridges added to the player's network are targets,
+		// but only if reachable from the selected pax (respecting one-way streets)
 		let networkJunctions = [...controller.currentPlayerObj().playerJunctions]
 		if (personal.selectedBoard === rf.BOARD_PITTS) networkJunctions = getPlayerNetworkJunctionsPitts(controller.currentPlayerObj())
+		const paxJunction = store.context.selectedPaxToVromJunction
 		for (let i = 0; i < networkJunctions.length; i++) {
-			if (store.junctions[networkJunctions[i]].slice(0, -1).includes(store.desiredBuilding)) {
-				let retLine = [networkJunctions[i], []]
+			const junc = networkJunctions[i]
+			if (store.junctions[junc].slice(0, -1).includes(store.desiredBuilding)) {
+				// Pittsburgh: only highlight if reachable from the selected pax (one-way aware)
+				if (personal.selectedBoard === rf.BOARD_PITTS && !controller.isJunctionReachableFrom(paxJunction, junc, controller.currentPlayerObj(), store)) continue
+				let retLine = [junc, []]
 				// need [junction.id, [bld idx, bldidx]]
-				for (let j = 0; j < store.junctions[networkJunctions[i]].length - 1; j++) if (store.junctions[networkJunctions[i]][j] === store.desiredBuilding) retLine[1].push(j)
+				for (let j = 0; j < store.junctions[junc].length - 1; j++) if (store.junctions[junc][j] === store.desiredBuilding) retLine[1].push(j)
 				ret.push(retLine)
 			}
 		}

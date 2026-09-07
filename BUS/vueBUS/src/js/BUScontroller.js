@@ -194,6 +194,11 @@ function reachableByBus(startJunction, targetJunction, player, store) {
 	return false
 }
 
+// Is targetJunction reachable from startJunction via the player's lines (one-way aware)?
+export function isJunctionReachableFrom(startJunction, targetJunction, player, store) {
+	return reachableByBus(startJunction, targetJunction, player, store)
+}
+
 // Does the player's network contain a regular (non convention-centre) building of the desired type?
 // Convention-centre/airport spots stay empty (0) until occupied, so bare `desiredBuilding` values only match real buildings
 function playerHasRegularDesiredBuilding(player, store) {
