@@ -264,7 +264,7 @@ export function currentPlayerObj() {
 	const store = useModelStore()
 	if (store.gameflow.turnOrder.length > 0) return store.players[store.gameflow.turnOrder[0]]
 	else {
-		if (!store.topMenuViews.generatingReplay && store.gameflow.phase !== rf.PHASE_SETUP_BLDGS) alert("CP() Error")
+		if (!store.topMenuViews.generatingReplay && !store.topMenuViews.showReplay && store.gameflow.phase !== rf.PHASE_SETUP_BLDGS) alert("CP() Error")
 		return 0
 	}
 }
