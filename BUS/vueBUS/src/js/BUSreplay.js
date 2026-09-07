@@ -136,9 +136,10 @@ function turnEndToPerform(historyIndex) {
 	const SHIFT = 2
 
 	if (store.gameflow.turnOrder.length === 0) {
+		if (store.gameflow.phase === rf.PHASE_SETUP_BLDGS) return NOTHING
 		if (store.history[historyIndex][0] === rf.HIST_VROM) return SHIFT
 		if (store.history[historyIndex][0] === rf.HIST_ALTER_TIME) return SHIFT
-		return NOTHING
+		return SHIFT
 	}
 	let entriesToIgnore = [rf.HIST_REWIND, rf.HIST_RESIGN, rf.HIST_KICKOUT]
 
