@@ -58,6 +58,12 @@ function toggleChat() {
 	})
 }
 
+function forceEndTurn() {
+	if (store.gameflow.turnOrder.length === 0) return
+	if (store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS) controller.endPlayerChooseActionTurn()
+	else controller.endPlayerTurn()
+}
+
 function toggleHistory() {
 	store.topMenuViews.showChat = false
 	store.clearHistoryHelpers()
@@ -271,6 +277,10 @@ function toggleStatsExcludeDropdown() {
 							<div id="dropdownText">
 								<input name="inhibitChatPopup" id="inhibitChatPopup" type="checkbox" v-model="personal.inhibitChatPopup" />
 								<label for="inhibitChatPopup">Inhibit Chat Popup</label>
+							</div>
+
+							<div id="dropdownText">
+								<button @click="forceEndTurn" class="actionsLineButton">CHEAT: Force player to end turn</button>
 							</div>
 						</div>
 					</transition>
