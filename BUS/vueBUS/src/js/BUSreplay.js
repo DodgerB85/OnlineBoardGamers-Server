@@ -160,7 +160,7 @@ function turnEndToPerform(historyIndex) {
 		if (store.history[historyIndex][0] === rf.HIST_NEW_TURN) return NOTHING
 		if (store.history[historyIndex][3][0] >= 10) return SHIFT
 		return PUSH_SHIFT
-	} else if (store.history[historyIndex][0] === rf.HIST_ADD_BUS) return SHIFT
+	} else if (store.history[historyIndex][0] === rf.HIST_ADD_BUS) return NOTHING
 	else if (store.history[historyIndex][0] === rf.HIST_ADD_PAX) return SHIFT
 	else if (store.gameflow.turn > 0 && store.history[historyIndex][0] === rf.HIST_ADD_BLDG) return SHIFT
 	else if (store.history[historyIndex][0] === rf.HIST_ALTER_TIME) return SHIFT
@@ -194,69 +194,72 @@ function performReplayEndTurn(historyIndex) {
 	} else if (turnEndToPerform(historyIndex) === SHIFT && store.gameflow.turnOrder.length > 0) store.gameflow.turnOrder.shift()
 
 	if (store.gameflow.turnOrder.length === 0) {
-		// Skip phases that no one has chosen
+		// Advance past pass-through phases (ADD_BUS, ALTER_TIME auto, CHANGE_START_PLAYER)
+		// that don't set turnOrder, matching how the real endCurrentPhase() recurses.
+		let safetyCounter = 0
 		do {
-			store.gameflow.phase++
-			if (store.gameflow.phase > rf.PHASE_CHANGE_START_PLAYER) store.gameflow.phase = rf.PHASE_CHOOSE_ACTIONS
-		} while (replayCanSkipPhase())
+			// Skip phases that no one has chosen
+			do {
+				store.gameflow.phase++
+				if (store.gameflow.phase > rf.PHASE_CHANGE_START_PLAYER) store.gameflow.phase = rf.PHASE_CHOOSE_ACTIONS
+			} while (replayCanSkipPhase())
 
-		if (store.gameflow.phase === rf.PHASE_SETUP_LINES) {
-			store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder].concat([...store.gameflow.fullTurnOrder].reverse())
-			store.gameflow.turnOrder.splice(store.players.length, 1)
-		}
-		// Phase choose actions
-		// Phase Line Expansion
-		else if (store.gameflow.phase === rf.PHASE_LINE_EXPANSION) {
-			store.gameflow.turnOrder = funcs.removeItemAll([...store.actionAreaData[0]], -1)
-			// Swap colour number for array index number
-			for (let i = 0; i < store.gameflow.turnOrder.length; i++) store.gameflow.turnOrder[i] = controller.getPlayerIndexFromColour(store.gameflow.turnOrder[i])
-			store.gameflow.fullActionTurnOrder = [...store.gameflow.turnOrder]
-		}
-		// Phase Add Bus
-		else if (store.gameflow.phase === rf.PHASE_ADD_BUS) {
-			if (store.actionAreaData[1][0] !== -1) {
-				controller.getPlayerByColour(store.actionAreaData[1][0]).buses++
+			if (store.gameflow.phase === rf.PHASE_SETUP_LINES) {
+				store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder].concat([...store.gameflow.fullTurnOrder].reverse())
+				store.gameflow.turnOrder.splice(store.players.length, 1)
 			}
-		}
-		// Phase Add Pax
-		else if (store.gameflow.phase === rf.PHASE_ADD_PAX) {
-			store.gameflow.turnOrder = funcs.removeItemAll([...store.actionAreaData[2]], -1)
-			// Swap colour number for array index number
-			for (let i = 0; i < store.gameflow.turnOrder.length; i++) store.gameflow.turnOrder[i] = controller.getPlayerIndexFromColour(store.gameflow.turnOrder[i])
-			store.gameflow.fullActionTurnOrder = [...store.gameflow.turnOrder]
-		}
-		// Phase Add Bldgs
-		else if (store.gameflow.phase === rf.PHASE_ADD_BLDGS) {
-			store.gameflow.turnOrder = funcs.removeItemAll([...store.actionAreaData[3]], -1)
-			// Swap colour number for array index number
-			for (let i = 0; i < store.gameflow.turnOrder.length; i++) store.gameflow.turnOrder[i] = controller.getPlayerIndexFromColour(store.gameflow.turnOrder[i])
-			store.gameflow.fullActionTurnOrder = [...store.gameflow.turnOrder]
-		}
-		// Phase alter time
-		else if (store.gameflow.phase === rf.PHASE_ALTER_TIME) {
-			let botAlterTime = false
-			if (store.actionAreaData[4][0] !== -1) {
-				store.gameflow.turnOrder = [store.actionAreaData[4][0]]
-				store.gameflow.turnOrder[0] = controller.getPlayerIndexFromColour(store.gameflow.turnOrder[0])
-				if (store.players[store.gameflow.turnOrder[0]].displayName === rf.BOT_NAME) botAlterTime = true
-				//Bot.updateTurnOrder()
+			// Phase Line Expansion
+			else if (store.gameflow.phase === rf.PHASE_LINE_EXPANSION) {
+				store.gameflow.turnOrder = funcs.removeItemAll([...store.actionAreaData[0]], -1)
+				// Swap colour number for array index number
+				for (let i = 0; i < store.gameflow.turnOrder.length; i++) store.gameflow.turnOrder[i] = controller.getPlayerIndexFromColour(store.gameflow.turnOrder[i])
+				store.gameflow.fullActionTurnOrder = [...store.gameflow.turnOrder]
 			}
-			if (botAlterTime || store.actionAreaData[4][0] === -1 || store.gameflow.turnOrder.length === 0) {
-				// do nothing
+			// Phase Add Bus - pass-through, bus given by replayAddBus handler
+			else if (store.gameflow.phase === rf.PHASE_ADD_BUS) {
+				// turnOrder stays empty → loop continues past this phase
 			}
-		}
-		// Phase VROM
-		else if (store.gameflow.phase === rf.PHASE_VROM) {
-			model.moveAllPassengersOntoCorrectBuilding(store.desiredBuilding)
-			store.gameflow.turnOrder = funcs.removeItemAll([...store.actionAreaData[5]], -1)
-			// Swap colour number for array index number
-			for (let i = 0; i < store.gameflow.turnOrder.length; i++) store.gameflow.turnOrder[i] = controller.getPlayerIndexFromColour(store.gameflow.turnOrder[i])
-			store.gameflow.fullActionTurnOrder = [...store.gameflow.turnOrder]
-		}
-		// Phase Change Start Player
-		else if (store.gameflow.phase === rf.PHASE_CHANGE_START_PLAYER) {
-			// do nothing
-		}
+			// Phase Add Pax
+			else if (store.gameflow.phase === rf.PHASE_ADD_PAX) {
+				store.gameflow.turnOrder = funcs.removeItemAll([...store.actionAreaData[2]], -1)
+				// Swap colour number for array index number
+				for (let i = 0; i < store.gameflow.turnOrder.length; i++) store.gameflow.turnOrder[i] = controller.getPlayerIndexFromColour(store.gameflow.turnOrder[i])
+				store.gameflow.fullActionTurnOrder = [...store.gameflow.turnOrder]
+			}
+			// Phase Add Bldgs
+			else if (store.gameflow.phase === rf.PHASE_ADD_BLDGS) {
+				store.gameflow.turnOrder = funcs.removeItemAll([...store.actionAreaData[3]], -1)
+				// Swap colour number for array index number
+				for (let i = 0; i < store.gameflow.turnOrder.length; i++) store.gameflow.turnOrder[i] = controller.getPlayerIndexFromColour(store.gameflow.turnOrder[i])
+				store.gameflow.fullActionTurnOrder = [...store.gameflow.turnOrder]
+			}
+			// Phase alter time
+			else if (store.gameflow.phase === rf.PHASE_ALTER_TIME) {
+				if (store.actionAreaData[4][0] !== -1) {
+					let playerIdx = controller.getPlayerIndexFromColour(store.actionAreaData[4][0])
+					if (store.players[playerIdx].displayName !== rf.BOT_NAME) {
+						store.gameflow.turnOrder = [playerIdx]
+						store.gameflow.fullActionTurnOrder = [...store.gameflow.turnOrder]
+					}
+					// Bot: turnOrder stays empty → loop continues past this phase
+				}
+				// No one chose it: turnOrder stays empty → loop continues
+			}
+			// Phase VROM
+			else if (store.gameflow.phase === rf.PHASE_VROM) {
+				model.moveAllPassengersOntoCorrectBuilding(store.desiredBuilding)
+				store.gameflow.turnOrder = funcs.removeItemAll([...store.actionAreaData[5]], -1)
+				// Swap colour number for array index number
+				for (let i = 0; i < store.gameflow.turnOrder.length; i++) store.gameflow.turnOrder[i] = controller.getPlayerIndexFromColour(store.gameflow.turnOrder[i])
+				store.gameflow.fullActionTurnOrder = [...store.gameflow.turnOrder]
+			}
+			// Phase Change Start Player - pass-through
+			else if (store.gameflow.phase === rf.PHASE_CHANGE_START_PLAYER) {
+				// turnOrder stays empty → loop continues
+			}
+
+			safetyCounter++
+		} while (store.gameflow.turnOrder.length === 0 && store.gameflow.phase !== rf.PHASE_CHANGE_START_PLAYER && safetyCounter < 20)
 	}
 }
 
