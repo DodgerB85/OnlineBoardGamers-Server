@@ -153,10 +153,12 @@ function reachableByBus(startJunction, targetJunction, player, store) {
 
 		if (currentJunction === targetJunction) return true
 
-		// Check if this junction has the desired building with space
-		for (let j = 0; j < store.junctions[currentJunction].length - 1; j++) {
-			if (store.junctions[currentJunction][j] === store.desiredBuilding && store.junctions[currentJunction][j] < 10) {
-				return true
+		// When no specific target, check if this junction has the desired building with space
+		if (targetJunction === null) {
+			for (let j = 0; j < store.junctions[currentJunction].length - 1; j++) {
+				if (store.junctions[currentJunction][j] === store.desiredBuilding && store.junctions[currentJunction][j] < 10) {
+					return true
+				}
 			}
 		}
 
