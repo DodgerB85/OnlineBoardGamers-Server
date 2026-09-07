@@ -163,9 +163,17 @@ function turnEndToPerform(historyIndex) {
 	} else if (store.history[historyIndex][0] === rf.HIST_ADD_BUS) return NOTHING
 	else if (store.history[historyIndex][0] === rf.HIST_ADD_PAX) return SHIFT
 	else if (store.gameflow.turn > 0 && store.history[historyIndex][0] === rf.HIST_ADD_BLDG) return SHIFT
-	else if (store.history[historyIndex][0] === rf.HIST_ALTER_TIME) return SHIFT
+	else if (store.history[historyIndex][0] === rf.HIST_ALTER_TIME) {
+		// Auto-alter (player -1): no one took a turn, just an info entry. Don't shift.
+		if (store.history[historyIndex][1] === -1) return NOTHING
+		return SHIFT
+	}
 	else if (store.history[historyIndex][0] === rf.HIST_VROM) return SHIFT
-	else if (store.history[historyIndex][0] === rf.HIST_STARTING_PLAYER) return SHIFT
+	else if (store.history[historyIndex][0] === rf.HIST_STARTING_PLAYER) {
+		// No one chose starting player: info entry, don't shift.
+		if (store.history[historyIndex][1] === -1) return NOTHING
+		return SHIFT
+	}
 	return SHIFT
 }
 
