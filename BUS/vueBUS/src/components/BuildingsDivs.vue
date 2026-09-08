@@ -592,52 +592,56 @@ function getBuildingRadius() {
 				@mouseover="highlight($event, true)"
 				@mouseleave="highlight($event, false)"
 				@click="addPassengerToJunction(30)"></div>
-			<!-- SPLOTTER DESIGNER ARRIVAL - at the Airport (junction 30) instead of two passengers -->
-			<div
-				v-if="store.context.passengersLeftToPlace >= 2 && !pitts.designerArrivedThisRound() && store.jeroenStatus === rf.DESIGNER_NOT_ARRIVED"
-				class="designerArrivalOption"
-				:style="{
-					top: view.getBuildingPos(30, -1, true)[0] + (store.refSize * 272) / 400 + 'px',
-					left: view.getBuildingPos(30, -1, true)[1] - (store.refSize * 63) / 400 + 'px',
-				}"
-				title="Bring Jeroen into play at the Airport (uses two of your passenger placements)"
-				@mouseover="highlight($event, true)"
-				@mouseleave="highlight($event, false)"
-				@click="addDesignerToJunction(rf.DESIGNER_JEROEN)">
-				<div
-					class="designerArrivalCircle"
-					:style="{
-						width: (store.refSize * 40) / 100 + 'px',
-						height: (store.refSize * 40) / 100 + 'px',
-						border: String((store.refSize * 5) / 100) + 'px solid yellow',
-					}">
-					<img class="designerArrivalImg" :src="view.getImage('jeroen')" alt="Jeroen" />
-				</div>
-				<span class="designerArrivalName" :style="{ fontSize: (store.refSize * 50) / 400 + 'px' }">Jeroen</span>
-			</div>
-			<div
-				v-if="store.context.passengersLeftToPlace >= 2 && !pitts.designerArrivedThisRound() && store.jorisStatus === rf.DESIGNER_NOT_ARRIVED"
-				class="designerArrivalOption"
-				:style="{
-					top: view.getBuildingPos(30, -1, true)[0] + (store.refSize * 272) / 400 + 'px',
-					left: view.getBuildingPos(30, -1, true)[1] + (store.refSize * 127) / 400 + 'px',
-				}"
-				title="Bring Joris into play at the Airport (takes two of your passenger placements)"
-				@mouseover="highlight($event, true)"
-				@mouseleave="highlight($event, false)"
-				@click="addDesignerToJunction(rf.DESIGNER_JORIS)">
-				<div
-					class="designerArrivalCircle"
-					:style="{
-						width: (store.refSize * 40) / 100 + 'px',
-						height: (store.refSize * 40) / 100 + 'px',
-						border: String((store.refSize * 5) / 100) + 'px solid yellow',
-					}">
-					<img class="designerArrivalImg" :src="view.getImage('joris')" alt="Joris" />
-				</div>
-				<span class="designerArrivalName" :style="{ fontSize: (store.refSize * 50) / 400 + 'px' }">Joris</span>
-			</div>
 		</template>
+	</template>
+
+	<!-- SPLOTTER DESIGNER ARRIVAL - at the Airport (junction 30) instead of two passengers -->
+	<!-- Outside the remainingPassengers gate so they show even when normal pax are depleted -->
+	<template v-if="personal.selectedBoard === rf.BOARD_PITTS && personal.canPlay() && store.context.passengersLeftToPlace >= 2 && !pitts.designerArrivedThisRound()">
+		<div
+			v-if="store.jeroenStatus === rf.DESIGNER_NOT_ARRIVED"
+			class="designerArrivalOption"
+			:style="{
+				top: view.getBuildingPos(30, -1, true)[0] + (store.refSize * 272) / 400 + 'px',
+				left: view.getBuildingPos(30, -1, true)[1] - (store.refSize * 63) / 400 + 'px',
+			}"
+			title="Bring Jeroen into play at the Airport (uses two of your passenger placements)"
+			@mouseover="highlight($event, true)"
+			@mouseleave="highlight($event, false)"
+			@click="addDesignerToJunction(rf.DESIGNER_JEROEN)">
+			<div
+				class="designerArrivalCircle"
+				:style="{
+					width: (store.refSize * 40) / 100 + 'px',
+					height: (store.refSize * 40) / 100 + 'px',
+					border: String((store.refSize * 5) / 100) + 'px solid yellow',
+				}">
+				<img class="designerArrivalImg" :src="view.getImage('jeroen')" alt="Jeroen" />
+			</div>
+			<span class="designerArrivalName" :style="{ fontSize: (store.refSize * 50) / 400 + 'px' }">Jeroen</span>
+		</div>
+		<div
+			v-if="store.jorisStatus === rf.DESIGNER_NOT_ARRIVED"
+			class="designerArrivalOption"
+			:style="{
+				top: view.getBuildingPos(30, -1, true)[0] + (store.refSize * 272) / 400 + 'px',
+				left: view.getBuildingPos(30, -1, true)[1] + (store.refSize * 127) / 400 + 'px',
+			}"
+			title="Bring Joris into play at the Airport (takes two of your passenger placements)"
+			@mouseover="highlight($event, true)"
+			@mouseleave="highlight($event, false)"
+			@click="addDesignerToJunction(rf.DESIGNER_JORIS)">
+			<div
+				class="designerArrivalCircle"
+				:style="{
+					width: (store.refSize * 40) / 100 + 'px',
+					height: (store.refSize * 40) / 100 + 'px',
+					border: String((store.refSize * 5) / 100) + 'px solid yellow',
+				}">
+				<img class="designerArrivalImg" :src="view.getImage('joris')" alt="Joris" />
+			</div>
+			<span class="designerArrivalName" :style="{ fontSize: (store.refSize * 50) / 400 + 'px' }">Joris</span>
+		</div>
 	</template>
 
 	<img class="ghostImg" ref="ghostBuildingRef" src="" alt="GI Image" />
