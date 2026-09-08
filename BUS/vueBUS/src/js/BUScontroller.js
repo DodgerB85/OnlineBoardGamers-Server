@@ -623,8 +623,10 @@ export function endCurrentPhase() {
 			store.gameflow.turnOrder.shift()
 			// Bot.updateTurnOrder()
 		} while (store.gameflow.turnOrder.length > 0)
-		endCurrentPhase()
-		return
+		if (store.gameflow.turnOrder.length === 0) {
+			endCurrentPhase()
+			return
+		}
 	}
 	Bot.actionAnyBotMooves()
 } // end current phase
