@@ -7,6 +7,7 @@ import * as rf from '../js/BUSreference.js'
 //import { useModelStore } from './model.js'
 
 import { useModelStore } from '../stores/BUSstore.js'
+import * as pitts from '../js/BUSpitts.js'
 
 export const usePersonalStore = defineStore('personal', () => {
   const store = useModelStore()
@@ -54,7 +55,8 @@ export const usePersonalStore = defineStore('personal', () => {
       return true
     if (
       store.gameflow.phase === rf.PHASE_ADD_PAX &&
-      store.context.passengersLeftToPlace === 0
+      (store.context.passengersLeftToPlace === 0 ||
+        (store.remainingPassengers <= 0 && pitts.designerArrivedThisRound()))
     )
       return true
     if (
