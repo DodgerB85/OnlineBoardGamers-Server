@@ -513,7 +513,7 @@ export function exportBUSmodel(forGameOver, saveContext) {
 	return exportDataB64
 }
 
-export function importBUSmodel(inputBase64, forGameOver, restoreContext) {
+export function importBUSmodel(inputBase64, forGameOver, restoreContext, historyScanCount) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 
@@ -677,7 +677,13 @@ export function importBUSmodel(inputBase64, forGameOver, restoreContext) {
 	if (store.players.length === 3) store.remainingTimeStones = 4
 
 	// Restore data from history
-	for (let i = 0; i < store.history.length; i++) {
+	// historyScanCount limits the scan to a prefix, used when importing a replay
+	// snapshot (snapshot k is the state after history[0..k], but every snapshot
+	// embeds the full history - without this the counters would show the final
+	// game values at every replay step)
+	let scanCount = store.history.length
+	if (historyScanCount !== undefined && historyScanCount < scanCount) scanCount = historyScanCount
+	for (let i = 0; i < scanCount; i++) {
 		const histEntry = store.history[i]
 		if (histEntry[0] === rf.HIST_NEW_TURN) store.gameflow.turn++
 		// P=Remaining Actions

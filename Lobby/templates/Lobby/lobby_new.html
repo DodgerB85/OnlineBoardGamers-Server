@@ -16,15 +16,9 @@
                 {% endfor %}
             </div>
         {% endif %}
-        {% if splotterconGame %}
-            <div class="nd-notice">
-                <span>Live Splotter Con Pitts Bus Match <a href="{% url 'BUS:showBUSgame' splotterconGame.id %}">Here!</a></span>
-            </div>
-        {% else %}
-            <div class="nd-notice">
-                <span>Live Splotter Con Pitts Bus Match Coming Soon! ~1300 GMT Mon 7 Sep</span>
-            </div>
-        {% endif %}
+        <div class="nd-notice">
+            <span>Splotter Con Gand Final Pitts Bus Match <a href="/BUS/34571/spoilerFree/">Here!</a></span>
+        </div>
         {% if availableTournaments|length > 0 %}
             <div class="nd-notice">
                 {% for game in availableTournaments %}
@@ -103,7 +97,7 @@
                 <a href="/old{{ request.path }}"
                    class="nd-button"
                    style="padding: 6px 12px;
-                          font-size: 14px">Switch back to old design</a>
+                          font-size: 14px">Switch back to old design (Will be removed ~15 Sep)</a>
             </div>
         </div>
         <!-- hidden map editor forms (required by Lobby.js) -->

@@ -43,7 +43,9 @@ export function performStep(amount) {
 	if (store.replayStep < 0) store.replayStep = 0
 	if (store.replayStep > store.replayData.length - 1) store.replayStep = store.replayData.length - 1
 
-	funcs.importBUSmodel(store.replayData[store.replayStep], false, false)
+	// replayStep+1: snapshot k is the state after history[0..k], so only count
+	// that prefix when rebuilding buses/timeStones/etc from the embedded history
+	funcs.importBUSmodel(store.replayData[store.replayStep], false, false, store.replayStep + 1)
 
 	let requireHighlights = [rf.HIST_ADD_BLDG, rf.HIST_ADD_LINE, rf.HIST_VROM]
 	if (requireHighlights.includes(store.history[store.replayStep][0])) setupReplayHighlights(store.history[store.replayStep][3])
