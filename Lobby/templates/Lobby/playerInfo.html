@@ -107,18 +107,19 @@
                             <div class="nd-table-wrap">
                                 <table class="nd-table gamesTable">
                                     <thead>
-                                        <tr>
-                                            <th></th>
-                                            <th>{% translate "Name" %}</th>
-                                            <th>{% translate "Players" %}</th>
-                                            <th>{% translate "Options" %}</th>
-                                            <th>{% translate "Status" %}</th>
-                                            <th>{% translate "Last Move" %}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for game in activeJointGames %}
-                                            {% include "Lobby/gameDisplay/currentGameRow.html" with game=game %}
+                                    <tr>
+                                        <th></th>
+                                        <th>{% translate "Name" %}</th>
+                                        <th>{% translate "Current Player" %}</th>
+                                        <th>{% translate "Current Turn" %}</th>
+                                        <th>{% translate "Players" %}</th>
+                                        <th>{% translate "Options" %}</th>
+                                        <th>{% translate "Last Move" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for game in activeJointGames %}
+                                        {% include "Lobby/gameDisplay/currentGameRow.html" with game=game showCurrentTurnColumn=True %}
                                         {% endfor %}
                                     </tbody>
                                 </table>
@@ -129,6 +130,7 @@
                     {% endif %}
                     {% if finishedJointGames %}
                         <div class="nd-player-sub">
+                            <br />
                             {% translate "Joint Finished Games" %} ({{ finishedJointGames|length }}) - {% translate "Wins" %}: {{ jointWinTotal }}/{{ finishedJointGames|length }} ({{ jointWinPercentage }}%)
                         </div>
                         <div class="nd-joint-summary">
@@ -141,14 +143,13 @@
                         </div>
                         <div class="nd-game-list">
                             <div class="nd-table-wrap">
-                                <table class="nd-table gamesTable">
+                                <table class="nd-table gamesTable nd-finished-games-table">
                                     <thead>
                                         <tr>
                                             <th></th>
                                             <th>{% translate "Name" %}</th>
                                             <th>{% translate "Players" %}</th>
                                             <th>{% translate "Options" %}</th>
-                                            <th>{% translate "Status" %}</th>
                                             <th>{% translate "Last Activity" %}</th>
                                         </tr>
                                     </thead>
@@ -178,15 +179,16 @@
                                     <tr>
                                         <th></th>
                                         <th>{% translate "Name" %}</th>
+                                        <th>{% translate "Current Player" %}</th>
+                                        <th>{% translate "Current Turn" %}</th>
                                         <th>{% translate "Players" %}</th>
                                         <th>{% translate "Options" %}</th>
-                                        <th>{% translate "Status" %}</th>
                                         <th>{% translate "Last Move" %}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for game in activeOtherGames %}
-                                        {% include "Lobby/gameDisplay/currentGameRow.html" with game=game %}
+                                        {% include "Lobby/gameDisplay/currentGameRow.html" with game=game showCurrentTurnColumn=True %}
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -204,14 +206,13 @@
                     </div>
                     <div class="nd-game-list">
                         <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable">
+                            <table class="nd-table gamesTable nd-finished-games-table">
                                 <thead>
                                     <tr>
                                         <th></th>
                                         <th>{% translate "Name" %}</th>
                                         <th>{% translate "Players" %}</th>
                                         <th>{% translate "Options" %}</th>
-                                        <th>{% translate "Status" %}</th>
                                         <th>{% translate "Last Activity" %}</th>
                                     </tr>
                                 </thead>

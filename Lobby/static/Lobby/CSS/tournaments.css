@@ -404,7 +404,7 @@ body.nd .nd-table:has(.nd-row09) thead {
 }
 body.nd .nd-table:has(.nd-row09) thead tr {
 	display: grid;
-	grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
+	grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
 	gap: 12px;
 	padding: 6px 14px;
 	background: var(--color-accent);

@@ -2483,7 +2483,7 @@ body.nd .nd-table:has(.nd-row09) thead {
 }
 body.nd .nd-table:has(.nd-row09) thead tr {
     display: grid;
-    grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
+    grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
     gap: 12px;
     padding: 6px 14px;
     background: var(--color-surface-soft);
@@ -2521,7 +2521,7 @@ body.nd .nd-table:not(:has(.nd-row09)) tbody {
 
 body.nd .nd-row09 {
     display: grid;
-    grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
+    grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
     gap: 12px;
     align-items: center;
     position: relative;
@@ -2940,10 +2940,10 @@ body.nd .nd-tgz-options .diffVR {
 
 	/* Column width adjustments */
 	body.nd .nd-table:has(.nd-row09) thead tr {
-		grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.99fr) minmax(90px, 0.55fr) minmax(120px, 0.91fr);
+		grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.99fr) minmax(90px, 0.55fr) minmax(120px, 0.91fr);
 	}
 	body.nd .nd-row09 {
-		grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.99fr) minmax(90px, 0.55fr) minmax(120px, 0.91fr);
+		grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.99fr) minmax(90px, 0.55fr) minmax(120px, 0.91fr);
 	}
 
 	/* Header centering */

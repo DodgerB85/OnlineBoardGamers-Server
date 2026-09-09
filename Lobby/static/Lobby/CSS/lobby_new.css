@@ -137,15 +137,18 @@ body.nd .nd-table.nd-lobby-games-table thead {
 }
 body.nd .nd-table.nd-lobby-games-table thead tr {
     display: grid;
-    grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
+    grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px minmax(90px, 0.55fr) minmax(120px, 0.8fr);
     gap: 12px;
     padding: 8px 14px 6px;
     background: var(--color-accent);
     border-bottom: 2px solid var(--color-border-strong);
 }
+body.nd .nd-table.nd-lobby-games-table.nd-finished-games-table thead tr {
+    grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px 255px;
+}
 body.nd .nd-table.nd-current-games-table thead tr,
 body.nd .nd-table.nd-current-games-table .nd-row09 {
-    grid-template-columns: 44px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(110px, 0.7fr);
+    grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(110px, 0.7fr);
 }
 body.nd .nd-table.nd-current-games-table thead .nd-col-game {
     grid-column: span 2;
@@ -239,12 +242,15 @@ body.nd .nd-no-options {
    column clustered on the left while the six-column header remains visible. */
 @media (min-width: 721px) and (max-width: 980px) {
     body.nd .nd-table.nd-lobby-games-table .nd-row09 {
-        grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
+    grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px minmax(90px, 0.55fr) minmax(120px, 0.8fr);
         gap: 12px;
         padding: 7px 14px;
     }
+    body.nd .nd-table.nd-lobby-games-table.nd-finished-games-table .nd-row09 {
+        grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px 255px;
+    }
     body.nd .nd-table.nd-current-games-table .nd-row09 {
-        grid-template-columns: 44px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(110px, 0.7fr);
+    grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(110px, 0.7fr);
     }
     body.nd .nd-table.nd-lobby-games-table .nd-col-players,
     body.nd .nd-table.nd-lobby-games-table .nd-col-turn,
@@ -672,17 +678,20 @@ body.nd .nd-col-cta .deleteTrainingGame {
 
     /* Desktop current-games column widths */
     body.nd .nd-table.nd-lobby-games-table thead tr {
-        grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.99fr) minmax(90px, 0.55fr) minmax(120px, 0.91fr);
+        grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px minmax(90px, 0.55fr) minmax(120px, 0.91fr);
+    }
+    body.nd .nd-table.nd-lobby-games-table .nd-row09 {
+        grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px minmax(90px, 0.55fr) minmax(120px, 0.91fr);
     }
     body.nd .nd-table.nd-current-games-table thead tr,
     body.nd .nd-table.nd-current-games-table .nd-row09 {
         grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.125fr) minmax(0, 0.85fr) minmax(0, 0.9fr) minmax(80px, 0.5fr) minmax(150px, 0.925fr);
     }
 
-    /* Non-current lists put options at track 4; keep it compact like current. */
-    body.nd .nd-table.nd-lobby-games-table:not(.nd-current-games-table) thead tr,
-    body.nd .nd-table.nd-lobby-games-table:not(.nd-current-games-table) .nd-row09 {
-        grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(90px, 0.55fr) minmax(120px, 0.91fr);
+    /* Finished games: icon | name | players | options | last activity */
+    body.nd .nd-table.nd-lobby-games-table.nd-finished-games-table thead tr,
+    body.nd .nd-table.nd-lobby-games-table.nd-finished-games-table .nd-row09 {
+        grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px 255px;
     }
 
     /* Header centering */
