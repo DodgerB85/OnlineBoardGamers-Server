@@ -393,7 +393,15 @@ export function highlightEligibleHexAreasForTransporterMove(transporterID) {
 	const locationIndices = util.indexArray(pathfind.locations.length)
 	let indicesToValid = util.boolFilter(
 		locationIndices,
-		locationIndices.map((i) => pathfind.cost[i] > 0 && loc.locationAllowsStop(pathfind.locations[i]))
+		locationIndices.map((i) => {
+			if (pathfind.cost[i] <= 0 || !loc.locationAllowsStop(pathfind.locations[i])) return false
+			// Filter out docked locations at the same hex+side+bank as the source (offset is just visual)
+			const dest = pathfind.locations[i]
+			if (loc.isDockedLocation(transporterObj.location) && loc.isDockedLocation(dest)) {
+				if (dest[1] === transporterObj.location[1] && dest[2] === transporterObj.location[2] && dest[3] === transporterObj.location[3]) return false
+			}
+			return true
+		})
 	)
 	// this little trickery lets us find the closest / emptiest vertex in the destination bucket
 	const transportersPerLocation = pathfind.locations.map((location) => model.getAllInGameTransporters().filter((a) => util.arraysEqual(a.location, location)).length)
