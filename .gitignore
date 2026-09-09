@@ -46,6 +46,7 @@ Lobby/sharedFunctions/emailCounter.txt
 vuePPF/
 vueFCM/
 staticfiles/
+/SplotterCon/oldsite/
 
 # Handle stats carefully and specifically
 # Ignore everything inside the folder
