@@ -175,7 +175,7 @@ if (!window.initData.showMapOnly && !window.initData.mapEditor) {
 									<MapControlPanel />
 								</div>
 
-								<DebugArea v-if="rf.DEBUG_USERS.includes(personal.name)" />
+								<DebugArea v-if="rf.DEBUG_USERS.includes(personal.name) || (rf.DEBUG_PRACTICE_USERS.includes(personal.name) && personal.trainingGame)" />
 
 								<div class="playerAidDiv">
 									<img class="playerAidImg" :src="view.getImage(`playerAid_${personal.preferredPlayerAid}`)" />
