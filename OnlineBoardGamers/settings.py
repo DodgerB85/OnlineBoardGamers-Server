@@ -138,7 +138,6 @@ INSTALLED_APPS = [
     "PPF",
     "WEB",
     "RNB",
-    "SplotterCon",
     "statici18n",
     "i18n",
 ]
