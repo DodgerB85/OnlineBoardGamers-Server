@@ -62,7 +62,7 @@ def createBUSgame(request):
     return create_bus_game(request)
 
 
-def showBUSgame(request, game_id):
+def showBUSgame(request, game_id, spoilerFree=False, replayStep=1):
     result = build_show_game_data(
         request,
         game_id,
@@ -80,6 +80,12 @@ def showBUSgame(request, game_id):
     returnData = {**result["base_data"]}
     # Bus uses settingsDEBUG (uppercase) as template key
     returnData["settingsDEBUG"] = returnData.pop("settingsDebug")
+    returnData.update(
+        {
+            "spoilerFree": spoilerFree,
+            "replayStep": replayStep,
+        }
+    )
 
     if not result["is_authenticated"]:
         return render(request, "BUS/showBUSgame.html", returnData)

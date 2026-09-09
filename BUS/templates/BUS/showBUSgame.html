@@ -101,6 +101,11 @@
     initData.deleteVotesData = {{ deleteVotesData | safe }};
     initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
 
+    {% if spoilerFree %}
+    initData.spoilerFree = true;
+    initData.replayStep = {{replayStep}}-1;
+    {% endif %}
+
     {% if finishedGame %}
     initData.finishedGame = true
     {% endif %}

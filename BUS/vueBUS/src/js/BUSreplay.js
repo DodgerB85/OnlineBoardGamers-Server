@@ -472,7 +472,7 @@ function replayMissingPlayer(historyIndex, _playerIndex, _entry3) {
 	store.players[store.history[historyIndex][1]].score = 0
 }
 
-export async function generateReplayData() {
+export async function generateReplayData(spoilerFree = false) {
 	const store = useModelStore()
 	store.topMenuViews.generatingReplay = true
 	// Reset the data
@@ -504,5 +504,11 @@ export async function generateReplayData() {
 	}
 	store.topMenuViews.generatingReplay = false
 	store.replayStep = store.replayData.length - 1
-	store.topMenuViews.showReplay = true
+	if (spoilerFree) {
+		if (window.initData.replayStep <= 0) store.replayStep = 0
+		else if (window.initData.replayStep >= store.replayData.length - 1) store.replayStep = store.replayData.length - 1
+		else store.replayStep = window.initData.replayStep
+	}
+	if (store.replayData.length > 0) store.topMenuViews.showReplay = true
+	goToReplayStep(store.replayStep)
 }

@@ -3,7 +3,7 @@ import * as IO from "../backend/BUS_IO.js"
 import * as WS from "../backend/BUSwebsocket.js"
 import * as funcs from "./BUSfuncs.js"
 import * as pitts from "./BUSpitts.js"
-//import * as replay from "./BUSreplay.js"
+import * as replay from "./BUSreplay.js"
 import * as view from "./BUSview.js"
 import * as controller from "./BUScontroller.js"
 
@@ -160,6 +160,10 @@ export function initGame() {
 		if (window.initData.pov != undefined) {
 			personal.votedToDelete = store.deleteVotesData[personal.name]
 			personal.votedToExclude = store.statsExcludeVotesData[personal.name]
+		}
+		if (window.initData.spoilerFree) {
+			store.topMenuViews.showReplay = true
+			replay.generateReplayData(true)
 		}
 	}
 

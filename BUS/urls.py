@@ -9,6 +9,18 @@ app_name = "BUS"
 urlpatterns = [
     path("", views.index),
     path("<int:game_id>/show/", views.showBUSgame, name="showBUSgame"),
+    path(
+        "<int:game_id>/spoilerFree/",
+        views.showBUSgame,
+        {"spoilerFree": True},
+        name="showBUSgameSpoilerFree",
+    ),
+    path(
+        "<int:game_id>/replay/<int:replayStep>/",
+        views.showBUSgame,
+        {"spoilerFree": True},
+        name="showBUSreplayStep",
+    ),
     path("<int:original_id>/", views.redirect_old_url, name="showBUSgameOld"),
     path("help/", views.BUShelp, name="BUShelp"),
     path("data/<int:dataType>/", views.busData, name="busData"),
