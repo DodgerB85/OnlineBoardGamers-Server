@@ -837,6 +837,32 @@ export function addLine_core(playerIndex, lineID) {
 					return startedEqual
 				}
 			}
+
+			// Pittsburgh: bridge connecting through an existing bridge - if this new bridge
+			// sits at the far end of a bridge attached to one of the player's end junctions,
+			// its own junctions won't match the player's end junctions directly (the end
+			// junction is on the near side of the bridge). Place the bridge across from there.
+			if (personal.selectedBoard === rf.BOARD_PITTS) {
+				for (let i = 0; i < player.endJunctions.length; i++) {
+					let endJunction = player.endJunctions[i]
+					const bridgedLineIDs = view
+						.getLinesAroundJunction(endJunction)
+						.filter((id) => rf.PITTS_BRIDGE_LINE_IDS.includes(id) && store.bridges.includes(id))
+
+					for (let bridgeLineID of bridgedLineIDs) {
+						const bridgeFarEnd = view.getJunctionsAtEndOfLine(bridgeLineID).find((j) => j !== endJunction)
+						if (bridgeFarEnd === undefined) continue
+
+						if (endJuncs[0] === bridgeFarEnd || endJuncs[1] === bridgeFarEnd) {
+							store.remainingBridgeMarkers--
+							store.bridges.push(lineID)
+							store.bridgeEnds[lineID] = i
+							store.context.bridgeExpansionOption = { lineID: lineID, endIndex: i }
+							return startedEqual
+						}
+					}
+				}
+			}
 		}
 		return startedEqual
 	}
