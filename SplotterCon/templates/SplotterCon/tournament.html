@@ -1,0 +1,62 @@
+{% extends "SplotterCon/base.html" %}
+{% load static %}
+{% block title %}Devil's Egg Tournament{% endblock %}
+{% block content %}
+<div class="container page-section">
+    <div class="page-intro">
+        <h1>2026 Devil's Egg Tournament</h1>
+        <p class="subtitle">Our flagship tournament</p>
+    </div>
+
+    <h3>Devil's Egg Tournament Rules</h3>
+    <p><strong>This year, we will be transitioning to web-based reporting but will use the stamp system as backup.</strong> This means all of your games must be added within our scheduling system and recorded as Completed Games to count.</p>
+    <p>As part of your Con Swag Bag, you will receive a Player Aid. Find the Devil's Egg tracking sheet inside.</p>
+    <ul>
+        <li><b>You only score points for games that you win</b>!
+            <ul>
+                <li>We encourage everyone to keep track of all qualified wins as ya never know.</li>
+            </ul>
+        </li>
+        <li>The six games included in the 2026 tournament are: <strong>Antiquity</strong>, <strong>Bus</strong>, <strong>Food Chain Magnate</strong> (original or <strong>Ketchup</strong>), <strong>Horseless Carriage</strong>, <strong>Indonesia</strong>, and <strong>Roads &amp; Boats</strong>.</li>
+        <li><b>Up to three wins per title</b> can be counted during preliminary rounds.
+            <ul>
+                <li>After each game you win, <b>record the tournament points earned</b> (using the table below) and the day of your game on your tournament sheet.</li>
+                <li><strong>Points are rewarded to the winner of each game only</strong>: 1000 points per win plus additional points per player (see table below). Only the player counts listed for each game will score.</li>
+                <li>At the end of each day, <b>add your daily points total to the Tournament Scoreboard</b>.</li>
+            </ul>
+        </li>
+        <li><b>Cutoff Time</b>: Points online will freeze on <b>Sunday @ 11PM</b>. We will sum all of your points across the three days. <i>If you dispute the scores listed on our website, bring your Player Aid to Dean for review before the end of Sunday night.</i></li>
+        <li>The <strong>4 players with the most points at the end of Sunday night will meet in a final showdown on Monday at 9:00 AM</strong>. The final tournament game this year will be <b>Bus: Pittsburgh</b>.
+            <ul>
+                <li>If we have 5 or more tied players, we'll select the 4 players with the most Bus wins during the preliminary rounds. If there is still a tie, the <b>second</b> tie breaker will be highest <i>qualifying</i> Bus score. Final tie breaker will go to player with <b>most Indonesia wins</b> during qualifiers.</li>
+                <li>The players' moves during this final match will be <b>live broadcast on <a href="http://onlineboardgamers.com" target="_blank" rel="noopener">onlineboardgamers.com</a></b>, and will be available afterward to review.</li>
+                <li><b>Strategy advice to other players during the final match is prohibited</b>. Non-strategy table talk is permissible. This rule does not apply to preliminary games.</li>
+            </ul>
+        </li>
+        <li><b>1st place winner will receive the 2026 Devil's Egg Trophy and will have first pick of prizes donated by our generous sponsors.</b> The other three finalists will receive early prize selections.</li>
+    </ul>
+
+    <h3>Devil's Egg Tournament Points Table</h3>
+    <div class="table-wrap">
+        <table class="data">
+            <thead>
+                <tr><th>Game</th><th>3p</th><th>4p</th><th>5p</th><th>Per Player</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Antiquity</td><td>1450</td><td>1600</td><td>n/a</td><td>150</td></tr>
+                <tr><td>Bus</td><td>1300</td><td>1400</td><td>1500</td><td>100</td></tr>
+                <tr><td>Food Chain Magnate</td><td>1450</td><td>1600</td><td>1750</td><td>150</td></tr>
+                <tr><td>Horseless Carriage</td><td>1375</td><td>1500</td><td>1625</td><td>125</td></tr>
+                <tr><td>Indonesia</td><td>1525</td><td>1700</td><td>1875</td><td>175</td></tr>
+                <tr><td>Roads &amp; Boats</td><td>1525</td><td>1700</td><td>1875</td><td>175</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="photo-row">
+        <img src="{% static 'SplotterCon/images/pxl_20240902_151404259.jpg' %}" alt="Devil's Egg Tournament">
+        <img src="{% static 'SplotterCon/images/9_01a075.jpg' %}" alt="Devil's Egg Tournament">
+        <img src="{% static 'SplotterCon/images/card_4x8_gamelogos6b2.jpg' %}" alt="Tournament games">
+    </div>
+</div>
+{% endblock %}

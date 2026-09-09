@@ -1,0 +1,83 @@
+{% extends "SplotterCon/base.html" %}
+{% load static %}
+{% block title %}GOSSIP! SC 2026 Special Edition{% endblock %}
+{% block content %}
+<div class="container page-section">
+    <nav aria-label="Breadcrumb" style="font-size:.9rem;color:var(--muted);">
+        <a href="{% url 'SplotterCon:home' %}">Home</a> &raquo; <a href="{% url 'SplotterCon:merch' %}">Merch</a> &raquo; GOSSIP! SC 2026 Special Edition
+    </nav>
+
+    <div class="product-detail">
+        <div>
+            <div class="gallery-main">
+                <img src="{% static 'SplotterCon/images/gossip-cover-draft.jpg' %}" alt="GOSSIP! SC 2026 Special Edition">
+            </div>
+            <div class="gallery-thumbs">
+                <img src="{% static 'SplotterCon/images/playerboards_concept3.jpg' %}" alt="" data-full="{% static 'SplotterCon/images/playerboards_concept3.jpg' %}">
+                <img src="{% static 'SplotterCon/images/playerboards_concept2.jpg' %}" alt="" data-full="{% static 'SplotterCon/images/playerboards_concept2.jpg' %}">
+                <img src="{% static 'SplotterCon/images/playerboards_concept1.jpg' %}" alt="" data-full="{% static 'SplotterCon/images/playerboards_concept1.jpg' %}">
+                <img src="{% static 'SplotterCon/images/characters_concept01.jpg' %}" alt="" data-full="{% static 'SplotterCon/images/characters_concept01.jpg' %}">
+                <img src="{% static 'SplotterCon/images/character_outdoor_cards.jpg' %}" alt="" data-full="{% static 'SplotterCon/images/character_outdoor_cards.jpg' %}">
+                <img src="{% static 'SplotterCon/images/artstyle_001.jpg' %}" alt="" data-full="{% static 'SplotterCon/images/artstyle_001.jpg' %}">
+            </div>
+        </div>
+        <div>
+            <div class="product-cat">Boardgame</div>
+            <h1>GOSSIP! SC 2026 Special Edition</h1>
+            <p class="price">$60.00</p>
+            <p>+ Free Shipping</p>
+            <p>Don't miss out on this limited edition, special release of Splotter's 1998 small box game, GOSSIP!. Rulebook has been updated and edited. All new graphic design and artwork by Dutch artist, <strong>Rachel Kremer</strong>.</p>
+            <p class="availability">Availability: Preorders available</p>
+        </div>
+    </div>
+
+    <h2>Description</h2>
+    <p>In GOSSIP!, players whisper cards across backyard fences in this delightfully nosy neighborhood, hoping to be seen with the right residents and avoid getting tangled up with the more questionable ones. Each round, reputations rise and tumble as some are caught Dating or Seen Together, dragged into awkward Public Disputes, and targeted by sneaky Silent Treatments that ripple through the cul-de-sac, crowning The Darling while someone else becomes the neighborhood Outsider.</p>
+    <p>Play your cards shrewdly to flatter the popular folks, undermine rivals, and avoid becoming the talk of the block, because every rumor you spread might boost your standing. Or send it crashing into the gutter. When that fateful STOP! card finally surfaces and the gossip settles, only one Darling will shine brightest!</p>
+    <p>Don't miss out on this limited edition, special release of Splotter's 1998 small box game, <strong>GOSSIP!</strong>. Rulebook has been updated and edited. All new graphic design and artwork by Dutch artist, <strong>Rachel Kremer</strong>.</p>
+    <p><strong><a href="https://www.youtube.com/watch?v=7jXJbhs_NHA" target="_blank" rel="noopener">How to Play Gossip!</a> video by Ryan Campbell of Cards Unbarred</strong></p>
+
+    <hr>
+    <p><strong>Important Release Notes:</strong></p>
+    <ul>
+        <li>Limited quantity printed. One copy per customer (however, we will do <em>group orders</em> if you contact us directly).</li>
+        <li>Preorders are open.</li>
+        <li>Games are available for free pickup at Splotter Con 2026. If you're not attending the con, you can still stop by to pick up your copy.</li>
+        <li>Games will not be shipped until after the convention in early September 2025.</li>
+    </ul>
+    <p><em>Our friends at <a href="https://travel-games.co.uk/" target="_blank" rel="noopener"><strong>Travel-Games.co.UK</strong></a> will have limited copies of Gossip! for those of you in Europe that want to save on shipping costs.</em></p>
+
+    <h2>Additional Information</h2>
+    <div class="table-wrap">
+        <table class="data">
+            <tbody>
+                <tr><th>Weight</th><td>1.25 lbs</td></tr>
+                <tr><th>Dimensions</th><td>9 &times; 5.6 &times; 2 in</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Related products</h2>
+    <div class="product-grid">
+        <div class="product-card">
+            <a href="{% url 'SplotterCon:registration' %}"><img src="{% static 'SplotterCon/images/woocommerce-placeholder.png' %}" alt="SC26 4-Day Badge"></a>
+            <div class="product-cat">SplotterCon2026</div>
+            <h3><a href="{% url 'SplotterCon:registration' %}">SC26 4-Day-Badge</a></h3>
+            <p class="price">$100.00</p>
+        </div>
+        <div class="product-card">
+            <a href="{% url 'SplotterCon:product_draf' %}"><img src="{% static 'SplotterCon/images/imageedit_1_7385487804.jpg' %}" alt="D'R AF SC24 Special Edition"></a>
+            <div class="product-cat">Boardgame</div>
+            <h3><a href="{% url 'SplotterCon:product_draf' %}">D'R AF SC24 Special Edition</a></h3>
+            <p class="price">$80.00</p>
+            <p class="out-of-stock">Out of stock</p>
+        </div>
+        <div class="product-card">
+            <a href="{% url 'SplotterCon:product_web' %}"><img src="{% static 'SplotterCon/images/web_boximg.png' %}" alt="WEB SC 2025 Special Edition"></a>
+            <div class="product-cat">Boardgame</div>
+            <h3><a href="{% url 'SplotterCon:product_web' %}">WEB SC 2025 Special Edition</a></h3>
+            <p class="price">$62.00</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

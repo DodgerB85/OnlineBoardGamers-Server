@@ -1,0 +1,56 @@
+{% extends "SplotterCon/base.html" %}
+{% load static %}
+{% block title %}TGZ Tournament{% endblock %}
+{% block content %}
+<div class="container page-section">
+    <div class="page-intro">
+        <h1>2026 The Great Zimbabwe Tournament</h1>
+        <p class="subtitle">The inaugural TGZ tournament</p>
+    </div>
+
+    <h3>TGZ Tournament Introduction</h3>
+    <p>Since our first year, launching a dedicated <strong>The Great Zimbabwe Tournament</strong> has been a quiet ambition of Splotter Con, and in 2026, it finally feels like the right moment. <i>The Great Zimbabwe</i> is not only a perennial favorite among our attendees, but one of my personal top five games of all time: a design of rare elegance that rewards deep planning, razor-sharp timing, and the courage to embrace asymmetry. Last year's fan-created <i>Schism</i> expansion only underscored how alive and evolving this game remains within the community, while the steady drumbeat of competitive play, fueled by ongoing online tournaments hosted by our friends at OnlineBoardGamers.com, has made it clear that TGZ is more than a classic; it's a living competitive system. With its perfect blend of tension, adaptability, and hard-earned mastery, Splotter Con's inaugural <em>The Great Zimbabwe</em> Tournament feels less like an experiment and more like an inevitability whose time has finally come.</p>
+
+    <h3>TGZ Tournament Rules</h3>
+    <ul>
+        <li><strong>Requires minimum of 12-players to register, capped at 16 players.</strong>
+            <ul>
+                <li>First 16 people to sign up + 4 alternates will be included.</li>
+                <li>Minimum player commitment: 2 games | Maximum: 4 games</li>
+            </ul>
+        </li>
+        <li><strong>Qualifiers on Saturday at 9 AM &amp; 11:30 AM → 4-players per game</strong>
+            <ul>
+                <li>Heat 1: 4 Tables – Random Seating</li>
+                <li>Heat 2: 4 Tables – Random Seating</li>
+            </ul>
+        </li>
+        <li><strong>Semi-Finals on Saturday at 2 PM</strong>
+            <ul>
+                <li>2 Tables – All unique table winners from the qualifying rounds will advance to the semi-final round.</li>
+                <li>Because a player may win both of their preliminary games, any remaining semi-final spots will be filled by the non-winner players with the <b>largest, combined score margin</b> across the preliminary heats.</li>
+                <li><strong>Largest combined score margin: Total Victory Points (VP) – Total Victory Requirement (VR).</strong></li>
+            </ul>
+        </li>
+        <li><strong>Finals on Sunday at 4 PM: Top 4 players advance to a single championship table</strong>
+            <ul>
+                <li>Two Semi-Finals table winners + next two players with largest combined score margins advance.</li>
+                <li>Winner → Tournament Champion (trophy + early prize selection)</li>
+            </ul>
+        </li>
+        <li><strong>Miscellaneous Rules</strong>
+            <ul>
+                <li>The base game only will be played in the final match.</li>
+                <li>The <em>Schism</em> expansion is permitted in qualifying rounds, if and only if, there is unanimous agreement amongst players at a given table. Otherwise, the base game will be used.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <div class="photo-row">
+        <img src="{% static 'SplotterCon/images/pxl_20240902_144500645.mp.jpg' %}" alt="TGZ tournament">
+        <img src="{% static 'SplotterCon/images/9_01a027.jpg' %}" alt="TGZ tournament">
+    </div>
+
+    <p><em>We are <strong>seeking a TGZ Tournament GM</strong>. If you're interested, please reach out to <a href="mailto:splottercon@gmail.com">splottercon@gmail.com</a>.</em></p>
+</div>
+{% endblock %}

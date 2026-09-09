@@ -1,0 +1,89 @@
+{% extends "SplotterCon/base.html" %}
+{% load static %}
+{% block title %}Partners{% endblock %}
+{% block content %}
+<div class="container page-section">
+    <div class="page-intro">
+        <h1>Splotter Con Partners</h1>
+    </div>
+
+    <h3>2026 Keystone Partners</h3>
+    <p><em>Our cornerstone partners, whose extraordinary generosity in games and support form the foundation of Splotter Con.</em></p>
+    <div class="sponsor-grid">
+        <div class="sponsor">
+            <a href="https://www.riograndegames.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/rio-grande-games-logo.png' %}" alt="Rio Grande Games"></a>
+            <div class="name"><a href="https://www.riograndegames.com/" target="_blank" rel="noopener">Rio Grande Games</a></div>
+        </div>
+        <div class="sponsor">
+            <a href="https://www.gmtgames.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/gmt.webp' %}" alt="GMT Games"></a>
+            <div class="name"><a href="https://www.gmtgames.com/" target="_blank" rel="noopener">GMT Games</a></div>
+        </div>
+        <div class="sponsor">
+            <a href="https://www.allplay.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/allplay-web-safe-logo.jpg' %}" alt="Allplay"></a>
+            <div class="name"><a href="https://www.allplay.com/" target="_blank" rel="noopener">Allplay</a></div>
+        </div>
+    </div>
+
+    <h3>2026 Foundry Partners</h3>
+    <p><em>Curated national and international publishers, retailers, platforms, and creators whose games and products reflect the depth, elegance, and strategic appeal that Splotter fans love.</em></p>
+    <div class="sponsor-grid">
+        {% with "SplotterCon/images/" as img %}
+        <div class="sponsor"><a href="https://www.eagle-gryphon.com/" target="_blank" rel="noopener"><img src="{% static img|add:'e-g.webp' %}" alt="Eagle-Gryphon Games"></a><div class="name"><a href="https://www.eagle-gryphon.com/" target="_blank" rel="noopener">Eagle-Gryphon Games</a></div></div>
+        <div class="sponsor"><a href="https://www.nobleknight.com/" target="_blank" rel="noopener"><img src="{% static img|add:'nobleknight.png' %}" alt="Noble Knight Games"></a><div class="name"><a href="https://www.nobleknight.com/" target="_blank" rel="noopener">Noble Knight Games</a></div></div>
+        <div class="sponsor"><a href="https://cube4me.com/" target="_blank" rel="noopener"><img src="{% static img|add:'cube4me_new2.png' %}" alt="cube4me"></a><div class="name"><a href="https://cube4me.com/" target="_blank" rel="noopener">cube4me</a></div></div>
+        <div class="sponsor"><a href="https://www.cmyk.games/" target="_blank" rel="noopener"><img src="{% static img|add:'cmyk_symbol_white_bg_600x200.avif' %}" alt="CMYK Games"></a><div class="name"><a href="https://www.cmyk.games/" target="_blank" rel="noopener">CMYK Games</a></div></div>
+        <div class="sponsor"><a href="https://store.looneylabs.com/" target="_blank" rel="noopener"><img src="{% static img|add:'looneylabslogoblack.png' %}" alt="Looney Labs"></a><div class="name"><a href="https://store.looneylabs.com/" target="_blank" rel="noopener">Looney Labs</a></div></div>
+        <div class="sponsor"><a href="https://wehrlegig.com/" target="_blank" rel="noopener"><img src="{% static img|add:'logo-black.png' %}" alt="Wehrlegig Games"></a><div class="name"><a href="https://wehrlegig.com/" target="_blank" rel="noopener">Wehrlegig Games</a></div></div>
+        <div class="sponsor"><a href="https://www.onlineboardgamers.com/" target="_blank" rel="noopener"><img src="{% static img|add:'obg-vertical.png' %}" alt="OnlineBoardGamers.com"></a><div class="name"><a href="https://www.onlineboardgamers.com/" target="_blank" rel="noopener">OnlineBoardGamers.com</a></div></div>
+        <div class="sponsor"><a href="https://traxx-denver.com/" target="_blank" rel="noopener"><img src="{% static img|add:'traxx-logo-huge-tshirt.png' %}" alt="TraXX 18XX Convention"></a><div class="name"><a href="https://traxx-denver.com/" target="_blank" rel="noopener">TraXX 18XX Convention</a></div></div>
+        <div class="sponsor"><a href="https://neoncometgames.com/" target="_blank" rel="noopener"><img src="{% static img|add:'neon_comet_games_logo_large.png' %}" alt="Neon Comet Games"></a><div class="name"><a href="https://neoncometgames.com/" target="_blank" rel="noopener">Neon Comet Games</a></div></div>
+        <div class="sponsor"><a href="https://www.grandtrunkgames.com/" target="_blank" rel="noopener"><img src="{% static img|add:'gtg_logo_twitter.png' %}" alt="Grand Trunk Games"></a><div class="name"><a href="https://www.grandtrunkgames.com/" target="_blank" rel="noopener">Grand Trunk Games</a></div></div>
+        <div class="sponsor"><a href="https://www.youtube.com/@CardsUnbarred" target="_blank" rel="noopener"><img src="{% static img|add:'cards-unbarred-circle.png' %}" alt="Cards Unbarred"></a><div class="name"><a href="https://www.youtube.com/@CardsUnbarred" target="_blank" rel="noopener">Cards Unbarred</a></div></div>
+        <div class="sponsor"><a href="https://ledergames.com/" target="_blank" rel="noopener"><img src="{% static img|add:'ledergames_logo-stacked-redblack.png' %}" alt="Leder Games"></a><div class="name"><a href="https://ledergames.com/" target="_blank" rel="noopener">Leder Games</a></div></div>
+        <div class="sponsor"><a href="https://boardgamegeekstore.com/" target="_blank" rel="noopener"><img src="{% static img|add:'bgg_primary_logo_rgb_04_xl.png' %}" alt="BGG Store"></a><div class="name"><a href="https://boardgamegeekstore.com/" target="_blank" rel="noopener">BGG Store</a></div></div>
+        <div class="sponsor"><a href="https://luckyduckgames.com/usa/" target="_blank" rel="noopener"><img src="{% static img|add:'ldg_logo_rgb_r_big_lightbg.png' %}" alt="Lucky Duck Games"></a><div class="name"><a href="https://luckyduckgames.com/usa/" target="_blank" rel="noopener">Lucky Duck Games</a></div></div>
+        <div class="sponsor"><a href="https://capstone-games.com/" target="_blank" rel="noopener"><img src="{% static img|add:'capstone.png' %}" alt="Capstone Games"></a><div class="name"><a href="https://capstone-games.com/" target="_blank" rel="noopener">Capstone Games</a></div></div>
+        <div class="sponsor"><a href="https://gamesunl.com/" target="_blank" rel="noopener"><img src="{% static img|add:'gu-logo_2021-03-unbox-some-fun-western-shirt-back-final-01.png' %}" alt="Games Unlimited"></a><div class="name"><a href="https://gamesunl.com/" target="_blank" rel="noopener">Games Unlimited</a></div></div>
+        <div class="sponsor"><a href="https://www.splottershop.com/" target="_blank" rel="noopener"><img src="{% static img|add:'splotter-logo.webp' %}" alt="Splotter"></a><div class="name"><a href="https://www.splottershop.com/" target="_blank" rel="noopener">Splotter</a></div></div>
+        <div class="sponsor"><a href="https://roxley.com/" target="_blank" rel="noopener"><img src="{% static img|add:'roxley.webp' %}" alt="Roxley Games"></a><div class="name"><a href="https://roxley.com/" target="_blank" rel="noopener">Roxley Games</a></div></div>
+        <div class="sponsor"><a href="https://octoraffe.com/" target="_blank" rel="noopener"><img src="{% static img|add:'logo-octoraffe-yellow.png' %}" alt="Octoraffe Games"></a><div class="name"><a href="https://octoraffe.com/" target="_blank" rel="noopener">Octoraffe Games</a></div></div>
+        <div class="sponsor"><a href="https://www.kayentapublishing.com/" target="_blank" rel="noopener"><img src="{% static img|add:'kenyata-logo.avif' %}" alt="Kayenta Games"></a><div class="name"><a href="https://www.kayentapublishing.com/" target="_blank" rel="noopener">Kayenta Games</a></div></div>
+        <div class="sponsor"><a href="https://us.shop.mindclashgames.com/" target="_blank" rel="noopener"><img src="{% static img|add:'mcg_logo_new.png' %}" alt="Mindclash Games"></a><div class="name"><a href="https://us.shop.mindclashgames.com/" target="_blank" rel="noopener">Mindclash Games</a></div></div>
+        <div class="sponsor"><a href="https://bitewinggames.com/" target="_blank" rel="noopener"><img src="{% static img|add:'bitewing_t_fullonlight-2048x421.png' %}" alt="Bitewing Games"></a><div class="name"><a href="https://bitewinggames.com/" target="_blank" rel="noopener">Bitewing Games</a></div></div>
+        <div class="sponsor"><a href="https://mightiestmeeple.odoo.com/shop" target="_blank" rel="noopener"><img src="{% static img|add:'mightiestmeeplelogo_name.png' %}" alt="Mightiest Meeple"></a><div class="name"><a href="https://mightiestmeeple.odoo.com/shop" target="_blank" rel="noopener">Mightiest Meeple</a></div></div>
+        <div class="sponsor"><a href="https://hollandspiele.com/" target="_blank" rel="noopener"><img src="{% static img|add:'hollandspiele-logo.webp' %}" alt="Hollandspiele"></a><div class="name"><a href="https://hollandspiele.com/" target="_blank" rel="noopener">Hollandspiele</a></div></div>
+        <div class="sponsor"><a href="https://25thcenturygames.com/" target="_blank" rel="noopener"><img src="{% static img|add:'25th-outofthisworld-circle-logo.webp' %}" alt="25th Century Games"></a><div class="name"><a href="https://25thcenturygames.com/" target="_blank" rel="noopener">25th Century Games</a></div></div>
+        {% endwith %}
+    </div>
+
+    <p><b>Splotter Spellen ⦿ 25th Century Games ⦿ BGG Store ⦿ Bitewing Games ⦿ Bizzo Boxes ⦿ Capstone Games ⦿ Cards Unbarred ⦿ Cube4Me ⦿ CMYK Games ⦿ Eagle-Gryphon Games ⦿ Games Unlimited ⦿ Grand Trunk Games ⦿ Hollandspiele ⦿ Kayenta Publishing ⦿ Leder Games ⦿ Looney Labs ⦿ Lucky Duck Games ⦿ Mightiest Meeple ⦿ Mindclash Games ⦿ Neon Comet Games ⦿ Noble Knight Games ⦿ Octoraffe Games ⦿ OnlineBoardGamers.com ⦿ Roxley Games ⦿ TraXX 18xx Convention ⦿ Wehrlegig Games ⦿</b></p>
+
+    <h3>2026 Artisan Partners</h3>
+    <p><em>The designers and small presses of Western Pennsylvania—along with attendee creators—crafting original games through passion, ingenuity, and community.</em></p>
+    <ul>
+        <li><b>Diatoms</b> – game designed by Pittsburgh's Sabrina Culyba</li>
+        <li><b>Aiaia</b> – <em>Age of Steam</em> map designed by SC attendee and former volunteer, Ashley Miller</li>
+        <li><b>The Hedgehog's Dilemma</b> – designed by Pittsburgher &amp; Splotter Con attendee, Scott King</li>
+        <li><b>Winsome Choose Some Con</b> – Pittsburgh convention celebrating Pittsburgh designer John Bohrer run by former Pittsburgher, Joshua Acosta</li>
+        <li><b>Pulp Romance</b> – designed by Pittsburgher Todd Sanders</li>
+    </ul>
+
+    <h4>Splotter Con Sponsors: Throughout the Years</h4>
+    <ul>
+        <li><strong>2025</strong> — <strong>Keystone Partner: <a href="https://roxley.com/" target="_blank" rel="noopener">Roxley Games</a></strong>
+            <ul>
+                <li><strong>2025 Foundry Partners:</strong> Splotter Spellen, Allplay, BGG Store, Bizzo Boxes, Capstone Games, Cards Unbarred, cube4me, Games Unlimited, GMT Games, Last Night Games, Leder Games, Lucky Duck Games, Mightiest Meeple, Neon Comet Games, Noble Knight Games, OnlineBoardGamers, Printables by Caren, Rio Grande Games, TraXX, Wehrlegig Games, Winsome Choose Some Con</li>
+            </ul>
+        </li>
+        <li><strong>2024</strong> — <strong>Keystone Partners: <a href="https://cube4me.com/" target="_blank" rel="noopener">CUBE4ME</a> &amp; <a href="https://neoncometgames.com/" target="_blank" rel="noopener">Neon Comet Games</a></strong>
+            <ul>
+                <li><strong>2024 Foundry Partners:</strong> Splotter Spellen, 3D Kiwi, Allplay, BGG Store, BoardGameCore, Capstone Games, cube4me, Games Unlimited, GMT Games, Grand Trunk Games, Mightiest Meeple, Neon Comet Games, Noble Knight Games, OnlineBoardGamers, Renegade Game Studios, Practically Art, Rio Grande Games, Spielworxx, TraXX, Wehrlegig Games</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h4>Support the Games. Support the Community.</h4>
+    <p>We are grateful for the support of our sponsors, helping to make Splotter Con a memorable experience. If you'd like to donate games, goods, money or services to help make our event a success, please reach out to Dean Brandt at <a href="mailto:splottercon@gmail.com">splottercon@gmail.com</a>.</p>
+    <p>We offer grassroots marketing to an active fan community, your logo/link on home &amp; sponsor pages of our website, mentions in emails &amp; at con, and any other creative ideas we (or you) might come up with.</p>
+</div>
+{% endblock %}

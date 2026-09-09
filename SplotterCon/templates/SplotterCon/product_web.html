@@ -1,0 +1,66 @@
+{% extends "SplotterCon/base.html" %}
+{% load static %}
+{% block title %}WEB SC 2025 Special Edition{% endblock %}
+{% block content %}
+<div class="container page-section">
+    <nav aria-label="Breadcrumb" style="font-size:.9rem;color:var(--muted);">
+        <a href="{% url 'SplotterCon:home' %}">Home</a> &raquo; <a href="{% url 'SplotterCon:merch' %}">Merch</a> &raquo; WEB SC 2025 Special Edition
+    </nav>
+
+    <div class="product-detail">
+        <div>
+            <div class="gallery-main">
+                <img src="{% static 'SplotterCon/images/web_boximg.png' %}" alt="WEB SC 2025 Special Edition">
+            </div>
+        </div>
+        <div>
+            <div class="product-cat">Boardgame</div>
+            <h1>WEB SC 2025 Special Edition</h1>
+            <p class="price">$62.00</p>
+            <p>+ Free Shipping</p>
+            <p>Don't miss out on this limited edition, special release of Splotter's 1997 small box game, WEB. Rulebook has been updated and edited. All new graphic design and artwork by Japanese artist, Sai Beppu.</p>
+            <p><em>Ships immediately.</em></p>
+            <p class="availability">Availability: In stock</p>
+        </div>
+    </div>
+
+    <h2>Description</h2>
+    <p><em>At the head office of Splotter-4-All Computer Services the phones just won't stop ringing: complaints galore! Everyone wants internet. Where are all the connections?</em></p>
+    <p><strong>WEB</strong> is a game in which players attempt to connect as many computers as possible. More than anyone else at least. If that isn't possible by connecting more computers yourself, there are other means: Stealing computers from your neighbor, dumping uninteresting contracts on them…in WEB, everything is allowed!</p>
+    <p>The 2025 Splotter Con Special, Limited Edition of Splotter's 1997 small-box game, WEB, is the first release under the publishing moniker, <strong>Damwise Publishing</strong>. 500 copies were printed. Don't miss out!</p>
+    <p>Rulebook has been updated and edited. All new graphic design and artwork by Japanese artist, <strong>Sai Beppu</strong>.</p>
+
+    <h2>Additional Information</h2>
+    <div class="table-wrap">
+        <table class="data">
+            <tbody>
+                <tr><th>Weight</th><td>1.25 lbs</td></tr>
+                <tr><th>Dimensions</th><td>9 &times; 5.6 &times; 2 in</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Related products</h2>
+    <div class="product-grid">
+        <div class="product-card">
+            <a href="{% url 'SplotterCon:product_unboxed' %}"><img src="{% static 'SplotterCon/images/imageedit_12_3427699063.jpg' %}" alt="Splotter Unboxed"></a>
+            <div class="product-cat">Book</div>
+            <h3><a href="{% url 'SplotterCon:product_unboxed' %}">Splotter Unboxed: A Complete Compendium of Game Editions Through 2025</a></h3>
+            <p class="price">$25.00</p>
+        </div>
+        <div class="product-card">
+            <a href="{% url 'SplotterCon:product_draf' %}"><img src="{% static 'SplotterCon/images/imageedit_1_7385487804.jpg' %}" alt="D'R AF SC24 Special Edition"></a>
+            <div class="product-cat">Boardgame</div>
+            <h3><a href="{% url 'SplotterCon:product_draf' %}">D'R AF SC24 Special Edition</a></h3>
+            <p class="price">$80.00</p>
+            <p class="out-of-stock">Out of stock</p>
+        </div>
+        <div class="product-card">
+            <a href="{% url 'SplotterCon:product_gossip' %}"><img src="{% static 'SplotterCon/images/gossip-cover-draft.jpg' %}" alt="GOSSIP! SC 2026 Special Edition"></a>
+            <div class="product-cat">Boardgame</div>
+            <h3><a href="{% url 'SplotterCon:product_gossip' %}">GOSSIP! SC 2026 Special Edition</a></h3>
+            <p class="price">$60.00</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

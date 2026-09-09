@@ -1,0 +1,109 @@
+{% extends "SplotterCon/base.html" %}
+{% load static %}
+{% block title %}Heavy Board Game Convention in Pittsburgh{% endblock %}
+{% block content %}
+
+<section class="hero" aria-label="Featured slides">
+    <div class="slide active" style="background-image: url('{% static 'SplotterCon/images/9_01c042.jpg' %}')">
+        <div class="slide-contents">
+            <h2>Splotter Con 2026</h2>
+            <p>
+                FRI SEP 4 — MON SEP 7, 2026<br>
+                Labor Day Weekend<br><br>
+                4 Days | Every Splotter | Contests | Tournaments<br><br>
+                <i>Registration open Sunday, January 18th @ Noon ET</i>
+            </p>
+            <a class="btn" href="{% url 'SplotterCon:registration' %}">Register</a>
+        </div>
+    </div>
+    <div class="slide" style="background-image: url('{% static 'SplotterCon/images/b013.jpg' %}')">
+        <div class="slide-contents">
+            <h2>Damwise Publishing</h2>
+            <p>View our merchandise.</p>
+            <a class="btn" href="{% url 'SplotterCon:merch' %}">Shop</a>
+        </div>
+    </div>
+    <div class="slide" style="background-image: url('{% static 'SplotterCon/images/wyndham-exterior.png' %}')">
+        <div class="slide-contents">
+            <h2>Wyndham Grand Downtown Pittsburgh</h2>
+            <p>Official Splotter Con 2026 hotel.<br><i>Discounted room block available now.</i></p>
+            <a class="btn" href="https://book.passkey.com/go/splottercon" target="_blank" rel="noopener">Book Room</a>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <div class="countdown" data-date="1788526800" role="timer" aria-label="Countdown to Splotter Con 2026">
+        <div class="cd-item"><span class="cd-digits"></span><span class="cd-label">Days</span></div>
+        <div class="cd-item"><span class="cd-digits"></span><span class="cd-label">Hours</span></div>
+        <div class="cd-item"><span class="cd-digits"></span><span class="cd-label">Minutes</span></div>
+    </div>
+
+    <section class="page-section">
+        <div class="memorial-note">
+            <p><strong><em>Splotter Con 2026 is dedicated to the memory of <a href="https://splottercon.us11.list-manage.com/track/click?u=3028e7dbf1ee9c4927c3dbf78&amp;id=4da76efe64&amp;e=8727613052" target="_blank" rel="noopener">Adam Kramer</a> — a dear friend, devoted Splotter collector, and one of the convention's earliest volunteers, whose presence helped shape our community from the very beginning.</em></strong>
+            <em>His spirit remains a part of this gathering, and we honor his memory by dedicating this year's convention to the values he so fully embodied. ~Dean Brandt, Splotter Con Organizer</em></p>
+        </div>
+
+        <div class="two-col">
+            <div>
+                <p><strong>Splotter Con</strong> is a small, community-focused <strong>heavy board game convention</strong> in Pittsburgh for players who love deep economic and strategy games. It's built for people who want more than a crowded hall: more games played, more meaningful conversation, and a friendlier pace where it's easy to meet others and get the right group to the table.</p>
+                <p>The weekend centers on a curated library of titles (including Splotter classics and modern heavy favorites), organized play opportunities, and light structure that helps everyone feel included, whether you're bringing a group or arriving solo. Expect tournaments and contests, prizes and swag, and plenty of space to play well into the night.</p>
+                <p>If you enjoy challenging games and great company, you'll fit right in.</p>
+            </div>
+            <div>
+                <p>Splotter Con, while having the publisher's blessing and support, is not directly affiliated with Splotter Spellen. Splotter Con is organized independently by Splotter Con LLC, a USA-based business.</p>
+                <h6><em><a href="{% url 'SplotterCon:about' %}">More details can be found here</a>.</em></h6>
+                <p><strong><a href="https://discord.gg/BzKFRQGynx" target="_blank" rel="noopener">Splotter Con Discord</a></strong></p>
+                <div class="video-frame">
+                    <iframe src="https://660885f8.sibforms.com/v2/serve/MUIFAMorf0Ndnc_dJLY5OHrwDCz_5NBIgh3fQTAmSvSTKEKjeGdWQNRSRFb_tLcGd6n-J7hwSfpNnBaarYf9iSDDWC8IrPz8ijNeQUUlYA7B6GfNcGc3UTfIS0im8sjrh5YRY0D2DvBUGKrCJ4ghwjoHbVH4qO5UL3WSMGb-tndr4jx-EVlr7S0i8Adl7-rKkCtSC8EoaYQQlHvcog==" width="540" height="305" frameborder="0" scrolling="auto" allowfullscreen="" title="Newsletter signup" style="display:block;max-width:100%;"></iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<section class="page-section tinted">
+    <div class="container">
+        <h2 style="text-align:center;">Meet Our Sponsors</h2>
+        <p style="text-align:center;max-width:720px;margin:0 auto;">These outstanding companies are fans of Splotter games and have generously contributed to our convention in a variety of ways. Please support them!</p>
+        <p style="text-align:center;margin-top:18px;"><a class="btn" href="{% url 'SplotterCon:sponsor' %}">Be a Con Sponsor!</a></p>
+
+        <h3 style="text-align:center;margin-top:34px;">Splotter Con 2026 Keystone Partners</h3>
+        <div class="sponsor-wall">
+            <a href="https://www.riograndegames.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/rio-grande-games-logo.png' %}" alt="Rio Grande Games"></a>
+            <a href="https://www.gmtgames.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/gmt.webp' %}" alt="GMT Games"></a>
+            <a href="https://www.splottershop.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/splotter-logo.webp' %}" alt="Splotter"></a>
+            <a href="https://www.allplay.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/allplay-web-safe-logo.jpg' %}" alt="Allplay"></a>
+        </div>
+
+        <h3 style="text-align:center;margin-top:34px;">Foundry Partners</h3>
+        <div class="sponsor-wall">
+            <a href="https://roxley.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/roxley.webp' %}" alt="Roxley Games"></a>
+            <a href="https://wehrlegig.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/logo-black.png' %}" alt="Wehrlegig Games"></a>
+            <a href="https://www.nobleknight.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/nobleknight.png' %}" alt="Noble Knight Games"></a>
+            <a href="https://gamesunl.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/gu-logo_2021-03-unbox-some-fun-western-shirt-back-final-01.png' %}" alt="Games Unlimited"></a>
+            <a href="https://mightiestmeeple.odoo.com/shop" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/mightiestmeeplelogo_name.png' %}" alt="Mightiest Meeple"></a>
+            <a href="https://traxx-denver.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/traxx-6-logo.png' %}" alt="TraXX 18XX Convention"></a>
+            <a href="https://us.shop.mindclashgames.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/mindclash.png' %}" alt="Mindclash Games"></a>
+            <a href="https://octoraffe.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/logo-octoraffe-yellow.png' %}" alt="Octoraffe Games"></a>
+            <a href="https://25thcenturygames.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/25th-outofthisworld-circle-logo.webp' %}" alt="25th Century Games"></a>
+            <a href="https://luckyduckgames.com/usa/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/ldg_logo_rgb_r_big_lightbg.png' %}" alt="Lucky Duck Games"></a>
+            <a href="https://www.onlineboardgamers.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/obg-vertical.png' %}" alt="OnlineBoardGamers.com"></a>
+            <a href="https://www.kayentapublishing.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/kenyata-logo.avif' %}" alt="Kayenta Games"></a>
+            <a href="https://cube4me.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/cube4me_new2.png' %}" alt="cube4me"></a>
+            <a href="https://capstone-games.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/capstone.png' %}" alt="Capstone Games"></a>
+            <a href="https://bitewinggames.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/bitewing_t_fullonlight-2048x421.png' %}" alt="Bitewing Games"></a>
+            <a href="https://ledergames.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/ledergames_logo-stacked-redblack.png' %}" alt="Leder Games"></a>
+            <a href="https://boardgamegeekstore.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/bgg_primary_logo_rgb_04_xl.png' %}" alt="BGG Store"></a>
+            <a href="https://www.eagle-gryphon.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/e-g.webp' %}" alt="Eagle-Gryphon Games"></a>
+            <a href="{% url 'SplotterCon:about' %}"><img src="{% static 'SplotterCon/images/damwise_p_logo.jpg' %}" alt="Damwise Publishing"></a>
+            <a href="https://www.youtube.com/@CardsUnbarred" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/cards-unbarred-circle.png' %}" alt="Cards Unbarred"></a>
+            <a href="https://neoncometgames.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/neon_comet_games_logo_large.png' %}" alt="Neon Comet Games"></a>
+            <a href="https://hollandspiele.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/hollandspiele-logo.webp' %}" alt="Hollandspiele"></a>
+            <a href="https://store.looneylabs.com/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/looneylabslogoblack.png' %}" alt="Looney Labs"></a>
+            <a href="https://www.cmyk.games/" target="_blank" rel="noopener"><img src="{% static 'SplotterCon/images/cmyk_symbol_white_bg_600x200.avif' %}" alt="CMYK Games"></a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Splotter Con{% endblock %} — Splotter Con</title>
+    <meta name="description" content="{% block description %}Splotter Con is a small, community-focused heavy board game convention in Pittsburgh.{% endblock %}">
+    <link rel="stylesheet" href="{% static 'SplotterCon/css/splottercon.css' %}">
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="logo" href="{% url 'SplotterCon:home' %}" aria-label="Splotter Con home">
+                <img src="{% static 'SplotterCon/images/cropped-logo-no-background.png' %}" alt="Splotter Con">
+            </a>
+            <button class="nav-toggle" aria-expanded="false" aria-controls="primary-nav" type="button">Menu</button>
+            <nav class="primary-nav" id="primary-nav" aria-label="Primary">
+                <ul>
+                    <li><a href="{% url 'SplotterCon:home' %}">Home</a></li>
+                    <li class="has-children">
+                        <a href="{% url 'SplotterCon:registration' %}">Attend</a>
+                        <ul class="submenu">
+                            <li><a href="{% url 'SplotterCon:registration' %}">Registration</a></li>
+                            <li><a href="{% url 'SplotterCon:hotel' %}">Hotel</a></li>
+                            <li><a href="{% url 'SplotterCon:food' %}">Food (Greentree)</a></li>
+                            <li><a href="{% url 'SplotterCon:faqs' %}">FAQs</a></li>
+                            <li><a href="{% url 'SplotterCon:policies' %}">Policies</a></li>
+                        </ul>
+                    </li>
+                    <li class="has-children">
+                        <a href="{% url 'SplotterCon:prizerules' %}">Events</a>
+                        <ul class="submenu">
+                            <li><a href="{% url 'SplotterCon:prizerules' %}">Prize Distribution</a></li>
+                            <li><a href="{% url 'SplotterCon:contests' %}">Contests</a></li>
+                            <li class="has-children">
+                                <a href="{% url 'SplotterCon:tournament' %}">Tournaments</a>
+                                <ul class="submenu">
+                                    <li><a href="{% url 'SplotterCon:tournament' %}">Devil's Egg</a></li>
+                                    <li><a href="{% url 'SplotterCon:tgz_tournament' %}">TGZ</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="has-children">
+                        <a href="{% url 'SplotterCon:library' %}">Library</a>
+                        <ul class="submenu">
+                            <li><a href="{% url 'SplotterCon:library' %}">Games Library</a></li>
+                            <li><a href="{% url 'SplotterCon:donate' %}">Donate or Lend</a></li>
+                        </ul>
+                    </li>
+                    <li class="has-children">
+                        <a href="{% url 'SplotterCon:merch' %}">Merch</a>
+                        <ul class="submenu">
+                            <li><a href="{% url 'SplotterCon:merch' %}">Shop</a></li>
+                            <li><a href="{% url 'SplotterCon:accessories' %}">Splotter Accessories</a></li>
+                            <li><a href="{% url 'SplotterCon:product_draf' %}">D'r af SC24 Special Edition</a></li>
+                            <li><a href="{% url 'SplotterCon:product_web' %}">Web SC25 Special Edition</a></li>
+                            <li><a href="{% url 'SplotterCon:product_gossip' %}">Gossip! SC26 Special Edition</a></li>
+                            <li><a href="{% url 'SplotterCon:product_unboxed' %}">Splotter Unboxed</a></li>
+                        </ul>
+                    </li>
+                    <li class="has-children">
+                        <a href="{% url 'SplotterCon:gallery_2024' %}">Galleries</a>
+                        <ul class="submenu">
+                            <li><a href="{% url 'SplotterCon:gallery_2024' %}">2024 Gallery</a></li>
+                            <li><a href="{% url 'SplotterCon:gallery_2025_friday' %}">2025 Friday</a></li>
+                            <li><a href="{% url 'SplotterCon:gallery_2025_saturday' %}">2025 Saturday</a></li>
+                            <li><a href="{% url 'SplotterCon:gallery_2025_sunday' %}">2025 Sunday</a></li>
+                            <li><a href="{% url 'SplotterCon:gallery_2025_monday' %}">2025 Monday</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="{% url 'SplotterCon:sponsors' %}">Partners</a></li>
+                    <li class="has-children">
+                        <a href="{% url 'SplotterCon:about' %}">About</a>
+                        <ul class="submenu">
+                            <li><a href="{% url 'SplotterCon:about' %}">Splotter Con</a></li>
+                            <li><a href="{% url 'SplotterCon:contact' %}">Contact</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main" id="main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-grid">
+            <div class="footer-logo">
+                <img src="{% static 'SplotterCon/images/logo-no-background_wht-300x187.png' %}" alt="Splotter Con">
+                <p>A small, community-focused heavy board game convention in Pittsburgh, PA.</p>
+            </div>
+            <div>
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="{% url 'SplotterCon:home' %}">Home</a></li>
+                    <li><a href="{% url 'SplotterCon:registration' %}">Registration</a></li>
+                    <li><a href="{% url 'SplotterCon:hotel' %}">Hotel</a></li>
+                    <li><a href="{% url 'SplotterCon:merch' %}">Merch</a></li>
+                    <li><a href="{% url 'SplotterCon:policies' %}">Policies</a></li>
+                    <li><a href="{% url 'SplotterCon:contact' %}">Contact</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Follow Us</h4>
+                <ul>
+                    <li><a href="https://twitter.com/SplotterCon" target="_blank" rel="noopener">Splotter Con on X</a></li>
+                    <li><a href="https://www.facebook.com/splottercon/" target="_blank" rel="noopener">Splotter Con on Facebook</a></li>
+                    <li><a href="https://discord.gg/BzKFRQGynx" target="_blank" rel="noopener">Splotter Con Discord</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            Copyright © 2024-2026 Splotter Con | Powered by <a href="https://deanbrandt.info" target="_blank" rel="noopener">deanbrandt.info</a>
+        </div>
+    </footer>
+
+    <div class="lightbox" aria-hidden="true">
+        <img src="" alt="Enlarged photo">
+    </div>
+
+    <script src="{% static 'SplotterCon/js/splottercon.js' %}"></script>
+</body>
+</html>
