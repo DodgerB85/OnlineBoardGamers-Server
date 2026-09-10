@@ -69,7 +69,7 @@ export function createInternalGraph(hexId, playerIndex, ignoreWalls) {
 	const vertexIndices = util.indexArray(hex.nodeVertexDefinitions.length)
 
 	// Create vertex nodes - these are the corners of the hex
-	const vertexLocations = vertexIndices.map((i) => (hex.currentTerrain === rf.TERR_SEA ? loc.setSeaVertexLocation(hexId, i) : loc.setLandVertexLocation(hexId, i)))
+	const vertexLocations = vertexIndices.map((i) => (rf.TERR_ACTS_LIKE_WATER.includes(hex.currentTerrain) ? loc.setSeaVertexLocation(hexId, i) : loc.setLandVertexLocation(hexId, i)))
 	// All vertices are type NODE_VERTEX
 	const vertexNodeTypes = vertexLocations.map((_) => rf.NODE_VERTEX)
 	// All vertices are valid by default

@@ -213,14 +213,18 @@ export function updateHexInternalRoadsViaNode(hexId, hexGraph, initialEntryPoint
 	}
 	isEntryPoint[nodeId] = false
 
-	const pathfind = graph.pathfind(hexGraph, loc.setLandVertexLocation(hexId, nodeId), [rf.MOVE_INTERNAL], 1)
+	// Wet polders use sea vertex locations in the graph
+	const startLocation = rf.TERR_ACTS_LIKE_WATER.includes(hex.currentTerrain)
+		? loc.setSeaVertexLocation(hexId, nodeId)
+		: loc.setLandVertexLocation(hexId, nodeId)
+	const pathfind = graph.pathfind(hexGraph, startLocation, [rf.MOVE_INTERNAL], 1)
 	let indices = util.indexArray(pathfind.locations.length)
 	//indices.sort((a, b) => pathfind.distances[a] > pathfind.distances[b])
 	indices.sort((a, b) => pathfind.distances[a] - pathfind.distances[b])
 
-	let entryPointIndices = indices.filter((i) => loc.isLandVertexLocation(pathfind.locations[i]) && isEntryPoint[pathfind.locations[i][2]])
+	let entryPointIndices = indices.filter((i) => loc.isNonRiverVertexLocation(pathfind.locations[i]) && isEntryPoint[pathfind.locations[i][2]])
 	if (entryPointIndices.length === 0) {
-		let anchorIndices = indices.filter((i) => loc.isLandVertexLocation(pathfind.locations[i]) && hex.nodeIsRoadAnchor[pathfind.locations[i][2]])
+		let anchorIndices = indices.filter((i) => loc.isNonRiverVertexLocation(pathfind.locations[i]) && hex.nodeIsRoadAnchor[pathfind.locations[i][2]])
 		if (anchorIndices.length > 0) {
 			let dest = anchorIndices[0]
 			while (dest !== pathfind.previous[dest]) {
@@ -248,6 +252,7 @@ export function updateHexInternalRoads(hexId, nodeIds) {
 	const isEntryPoint = existingEntryPoints(hexId)
 
 	for (const nodeId of nodeIds) {
+		if (nodeId < 0) continue // Skip invalid nodeIds (e.g. -1 from polder cornerNodeIds)
 		updateHexInternalRoadsViaNode(hexId, hexGraph, isEntryPoint, nodeId, "edgeHasRoad")
 	}
 }
@@ -258,6 +263,7 @@ export function updateHexInternalPowerLines(hexId, nodeIds) {
 	const isEntryPoint = existingPowerLineEntryPoints(hexId)
 
 	for (const nodeId of nodeIds) {
+		if (nodeId < 0) continue
 		updateHexInternalRoadsViaNode(hexId, hexGraph, isEntryPoint, nodeId, "edgeHasPowerLine")
 	}
 }
@@ -2282,7 +2288,14 @@ export function getTransporterPositionFromLocation(inputLocation, transporterSta
 	}
 	if (loc.isNonRiverVertexLocation(inputLocation)) {
 		const vertex = inputLocation[2]
-		pt = vec.scaleBy(store.RATIO, hexObj.vertices[vertex])
+		// Polder hexes use uniformPlains (7 vertices 0-6); sea vertices 7-12 map to side nodes 1-6
+		if (hexObj.vertices && hexObj.vertices[vertex]) {
+			pt = vec.scaleBy(store.RATIO, hexObj.vertices[vertex])
+		} else if (hexObj.vertices && hexObj.vertices[vertex - 6]) {
+			pt = vec.scaleBy(store.RATIO, hexObj.vertices[vertex - 6])
+		} else {
+			pt = vec.scaleBy(store.RATIO, [0, 0])
+		}
 	} else if (locationType === rf.LOCATION_DOCKED) {
 		// Check for multiple transporters at same docked location and offset them
 		// Calculate position based on offset stored in location[4]

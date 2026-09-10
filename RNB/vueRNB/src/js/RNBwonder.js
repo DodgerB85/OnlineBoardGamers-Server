@@ -199,6 +199,26 @@ export function convertDesertsToPastures() {
 
 const WONDER_ROW_STARTS = [0, 4, 8, 12, 17, 22, 27, 32, 38, 44, 50, 56, 62, 69, 76]
 
+export function syncPoldersToBrickCount() {
+	const store = useModelStore()
+	if (!store.gameOptions.usePolders) return
+	const brickCount = store.wonderBricks.length
+	let toggleCount = 0
+	for (const rowStart of WONDER_ROW_STARTS) {
+		if (rowStart > 0 && brickCount >= rowStart) toggleCount++
+	}
+	const shouldBeWet = toggleCount % 2 === 0
+	store.mapData.hexData.forEach((hex) => {
+		if (hex.baseTerrain === rf.TERR_POLDER) {
+			const targetTerrain = shouldBeWet ? rf.TERR_POLDER_WET : rf.TERR_POLDER_DRY
+			if (hex.currentTerrain !== targetTerrain) {
+				hex.currentTerrain = targetTerrain
+				hex.hexGfx = shouldBeWet ? "hex_" + hex.hexTerrainID + "_f" : "hex_" + hex.hexTerrainID
+			}
+		}
+	})
+}
+
 function togglePoldersIfNewRow(prevBrickCount, newBrickCount) {
 	const store = useModelStore()
 	for (const rowStart of WONDER_ROW_STARTS) {
@@ -209,25 +229,35 @@ function togglePoldersIfNewRow(prevBrickCount, newBrickCount) {
 					const wasDry = hex.currentTerrain === rf.TERR_POLDER_DRY
 					hex.currentTerrain = hex.currentTerrain === rf.TERR_POLDER_WET ? rf.TERR_POLDER_DRY : rf.TERR_POLDER_WET
 					const baseGfx = "hex_" + hex.hexTerrainID
-					hex.hexGfx = hex.currentTerrain === rf.TERR_POLDER_WET ? baseGfx + "_f" : baseGfx
-					// When polder becomes wet (dry→wet), move any docked boats onto the hex as sea transporters
-					if (wasDry && hex.currentTerrain === rf.TERR_POLDER_WET) {
-						const dockedBoats = model.getAllInGameTransporters().filter(
-							(t) => loc.isDockedLocation(t.location) && t.location[1] === hex.hexID
-						)
-						const seaBucketLocation = loc.setBucketLocation(hex.hexID, 0)
-						dockedBoats.forEach((boat) => {
-							const newSeaLocation = loc.getVisualLocationFromBucketLocation(seaBucketLocation, boat.location, boat.type)
-							boat.location = newSeaLocation
-							const boatStats = rf.getTransporterStats(boat.type)
-							const newPos = map.getTransporterPositionFromLocation(newSeaLocation, boatStats, boat.id)
-							boat.rawTransporterXY = newPos
-							model.transportersOnTransporter(boat.id).forEach((carried) => {
-								const carriedStats = rf.getTransporterStats(carried.type)
-								carried.rawTransporterXY = map.getTransporterPositionFromLocation(carried.location, carriedStats, carried.id)
-							})
+				hex.hexGfx = hex.currentTerrain === rf.TERR_POLDER_WET ? baseGfx + "_f" : baseGfx
+				// When polder becomes wet (dry→wet), move any docked boats onto the hex as sea transporters
+				if (wasDry && hex.currentTerrain === rf.TERR_POLDER_WET) {
+					const dockedBoats = model.getAllInGameTransporters().filter(
+						(t) => loc.isDockedLocation(t.location) && t.location[1] === hex.hexID
+					)
+					// Use land vertices 1-6 for positioning (polders only have 7 vertices, no sea vertices 7-12)
+					const landVertices = [1, 2, 3, 4, 5, 6]
+					const usedVertices = new Set(
+						model.getAllInGameTransporters()
+							.filter((t) => loc.isSeaVertexLocation(t.location) && t.location[1] === hex.hexID)
+							.map((t) => t.location[2])
+					)
+					let vertexIdx = 0
+					dockedBoats.forEach((boat) => {
+						while (vertexIdx < landVertices.length && usedVertices.has(landVertices[vertexIdx])) vertexIdx++
+						const vertex = vertexIdx < landVertices.length ? landVertices[vertexIdx] : landVertices[0]
+						vertexIdx++
+						const newSeaLocation = loc.setSeaVertexLocation(hex.hexID, vertex)
+						boat.location = newSeaLocation
+						const boatStats = rf.getTransporterStats(boat.type)
+						const newPos = map.getTransporterPositionFromLocation(newSeaLocation, boatStats, boat.id)
+						boat.rawTransporterXY = newPos
+						model.transportersOnTransporter(boat.id).forEach((carried) => {
+							const carriedStats = rf.getTransporterStats(carried.type)
+							carried.rawTransporterXY = map.getTransporterPositionFromLocation(carried.location, carriedStats, carried.id)
 						})
-					}
+					})
+				}
 				}
 			}
 			return

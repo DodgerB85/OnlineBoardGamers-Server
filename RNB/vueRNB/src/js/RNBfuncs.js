@@ -226,6 +226,7 @@ export function importStartingMap(inputArr) {
 	hd.setNeighbours()
 	map.updateEdgeData()
 	hd.updateAllHexRawXY()
+
 	// if gameID is -1, load the home markers to show the locations
 	if (personal.gameID === -1 || personal.showMapOnly) {
 		if (store.mapData.setupData.HM) {
@@ -686,6 +687,9 @@ export async function simpleImportWholeRNBmodel(inputBase64, keepHistory = false
 		const transporterStats = rf.getTransporterStats(transporterObj.type)
 		transporterObj.rawTransporterXY = map.getTransporterPositionFromLocation(transporterLocation, transporterStats, transporterObj.id)
 	}
+
+	// Sync polder state to match the loaded wonder brick count
+	wonder.syncPoldersToBrickCount()
 }
 
 export function exportRNBmodel(forGameOver) {
@@ -831,6 +835,9 @@ export function importRNBmodel(input, forGameOver) {
 	// 1 - Wonder Bricks
 	store.wonderBricks.splice(0)
 	Object.assign(store.wonderBricks, inputModel[1])
+
+	// Sync polder state to match the loaded wonder brick count (must be before transporters are positioned)
+	wonder.syncPoldersToBrickCount()
 
 	// 2 - Transporters
 	store.ALL_TRANSPORTERS.splice(0)
