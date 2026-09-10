@@ -109,8 +109,8 @@ export function setEligibleItemsToBuild(playerIndex, transporterID) {
 		}
 	}
 
-	// Strengthen pseudo-building: need stone on hex, and a non-strengthened building on the hex
-	if (stoneOnHex >= 1) {
+	// Strengthen pseudo-building: need bombs enabled, stone on hex, and a non-strengthened building on the hex
+	if (store.gameOptions.useBombs && stoneOnHex >= 1) {
 		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
 		if (buildingsOnHex.some((b) => !b.strengthened)) {
 			if (!store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_STRENGTHEN)) store.context.eligibleBuildingsToBuild.push(rf.BLDG_PSEUDO_STRENGTHEN)
