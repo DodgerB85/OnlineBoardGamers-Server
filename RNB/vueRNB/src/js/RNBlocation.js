@@ -199,7 +199,11 @@ export function isRiverStoppingVertex(location) {
 
 export function isSeaStoppingVertex(location) {
 	const vertexId = location[2]
-	return vertexId >= 7
+	if (vertexId >= 7) return true
+	// Wet polders use uniformPlains (7 vertices 0-6); side nodes 1-6 are valid stopping vertices
+	const hex = model.getHexByID(location[1])
+	if (hex && rf.TERR_IS_POLDER.includes(hex.baseTerrain) && hex.currentTerrain === rf.TERR_POLDER_WET) return vertexId >= 1 && vertexId <= 6
+	return false
 }
 
 export function locationAllowsStop(location) {
