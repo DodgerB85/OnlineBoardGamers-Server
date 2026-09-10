@@ -476,7 +476,7 @@ function tileHasPlaneLandingBlocker(hexID) {
 }
 
 // Planes & Aeroports: can a plane land on `location` (a land vertex bucket)?
-// Rules: must be a land vertex on TERR_ANY_LAND (not sea / wet polder); no buildings of
+// Rules: must be a land vertex on TERR_ANY_LAND (not sea); no buildings of
 // any kind and no unattended geese on the tile; a river blocks BOTH shores if either
 // shore's tile has a building/unattended goose.
 export function canPlaneLandOnTile(planeObj, location) {

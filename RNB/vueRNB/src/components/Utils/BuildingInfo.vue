@@ -244,6 +244,20 @@ function clickedNewBuilding(bldgNum) {
 					store.context.eligibleWallsToDemolish.push(hexIds)
 				}
 			}
+		} else if (bldgNum === rf.BLDG_PSEUDO_BOMB) {
+			// Highlight non-strengthened buildings on this hex for bombing
+			const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && !b.strengthened)
+			for (const bldg of buildingsOnHex) {
+				context.addEligibleBuildingToBomb(bldg.id)
+			}
+			store.context.buildingIDsToHighlight = buildingsOnHex.map((b) => b.id)
+		} else if (bldgNum === rf.BLDG_PSEUDO_STRENGTHEN) {
+			// Highlight non-strengthened buildings on this hex for strengthening
+			const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && !b.strengthened)
+			for (const bldg of buildingsOnHex) {
+				context.addEligibleBuildingToStrengthen(bldg.id)
+			}
+			store.context.buildingIDsToHighlight = buildingsOnHex.map((b) => b.id)
 		}
 	}
 }
@@ -286,7 +300,13 @@ function transporterLimitIssue() {
 				<br />
 				<template v-if="!rf.ALL_PSEUDO_BUILDINGS.includes(buildingStats.building)">
 					<!-- NORMAL BUILDING-->
-					<img v-if="(props.bldg !== undefined && props.bldg.type !== rf.BLDG_MINE) || (props.bldgNum !== undefined && props.bldgNum !== rf.BLDG_MINE)" class="buildingOnHexSummaryImg" :class="{ buildingOnHexSummaryImgHighlight: isHighlighted }" @click="props.bldg !== undefined ? map.clickedBuilding(props.bldg.id) : ''" :src="view.getImage(getBuildingGfx())" />
+					<div v-if="(props.bldg !== undefined && props.bldg.type !== rf.BLDG_MINE) || (props.bldgNum !== undefined && props.bldgNum !== rf.BLDG_MINE)" style="position: relative; display: inline-block;">
+						<img class="buildingOnHexSummaryImg" :class="{ buildingOnHexSummaryImgHighlight: isHighlighted }" @click="props.bldg !== undefined ? map.clickedBuilding(props.bldg.id) : ''" :src="view.getImage(getBuildingGfx())" />
+						<!-- Strengthened indicator: wooden cube -->
+						<svg v-if="props.bldg !== undefined && props.bldg.strengthened" style="position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; pointer-events: none;">
+							<rect x="2" y="2" width="14" height="14" rx="2" fill="#8B6914" stroke="#5C4A0E" stroke-width="1.5" />
+						</svg>
+					</div>
 					<!-- MINE -->
 					<svg v-else viewBox="-110 -110 220 220" class="buildingOnHexSummaryImg">
 						<circle cx="0" cy="0" r="100" fill="gray" stroke="#734A36" stroke-width="20" />
@@ -392,6 +412,10 @@ function transporterLimitIssue() {
 					</template>
 					<!-- RE-SHAFT MINE TEXT-->
 					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_RESHAFT_MINE">Add to mine stock</template>
+					<!-- BOMB TEXT -->
+					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_BOMB">Destroy a building</template>
+					<!-- STRENGTHEN TEXT -->
+					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_STRENGTHEN">Make bomb-proof</template>
 				</div>
 			</div>
 		</div>

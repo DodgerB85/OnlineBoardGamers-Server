@@ -34,6 +34,18 @@ import FailedStackEntry from "./Utils/FailedStackEntry.vue"
 import ActionAreaPrePhase from "./ActionAreaPrePhase.vue"
 import ConflictDecisionPanel from "./ConflictDecisionPanel.vue"
 
+function chosenStartTileIsPolder() {
+	const homeLoc = model.getPlayersHomeMarkerLocation(controller.currentPlayerIndex())
+	const hex = model.getHexByID(homeLoc[1])
+	return rf.TERR_IS_POLDER.includes(hex.currentTerrain)
+}
+
+function chosenStartTileIsFloodedPolder() {
+	const homeLoc = model.getPlayersHomeMarkerLocation(controller.currentPlayerIndex())
+	const hex = model.getHexByID(homeLoc[1])
+	return hex.currentTerrain === rf.TERR_POLDER_WET
+}
+
 function finishActions(stopActionChange = false, event = null) {
 	// Save the "Go Back" stats
 	store.goBackResetData = funcs.simpleExportWholeRNBmodel()
@@ -738,6 +750,13 @@ const getGameOverReason = computed(() => {
 				<br />
 				Choose your home tile
 				<template v-if="store.context.action === rf.ACT_CONFIRM_END_TURN">
+					<template v-if="chosenStartTileIsPolder()">
+						<br />
+						<br />
+						<span class="donkeyWarningSpan">
+							Caution: You have chosen a{{ chosenStartTileIsFloodedPolder() ? ' flooded' : '' }} polder tile
+						</span>
+					</template>
 					<br />
 					<br />
 					<button @click="resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>

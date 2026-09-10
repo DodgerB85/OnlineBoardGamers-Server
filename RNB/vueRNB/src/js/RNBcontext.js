@@ -77,6 +77,8 @@ export function clearAllHighlights() {
 	context.eligibleWallsToBuild.splice(0)
 	context.eligibleWallsToDemolish.splice(0)
 	context.eligibleBridgesToBuild.splice(0)
+	context.eligibleBuildingsToBomb.splice(0)
+	context.eligibleBuildingsToStrengthen.splice(0)
 	context.riversToHighlight.splice(0)
 	context.shoresToHighlight.splice(0)
 	context.halfShoresToHighlight.splice(0)
@@ -192,6 +194,18 @@ export function addEligibleBridgeToBuild(entry) {
 	const store = useModelStore()
 	let context = store.context
 	context.eligibleBridgesToBuild.push(entry)
+}
+
+export function addEligibleBuildingToBomb(buildingID) {
+	const store = useModelStore()
+	let context = store.context
+	context.eligibleBuildingsToBomb.push(buildingID)
+}
+
+export function addEligibleBuildingToStrengthen(buildingID) {
+	const store = useModelStore()
+	let context = store.context
+	context.eligibleBuildingsToStrengthen.push(buildingID)
 }
 
 // The input arr is in form [hexID, riverIdx/ID, [fullLoc]]

@@ -118,6 +118,10 @@ if (!window.initData.showMapOnly && !window.initData.mapEditor) {
 			<pattern v-for="(hexGfx, idx) in ['hex_00_irrigated', 'hex_01_irrigated', 'hex_50_irrigated', 'hex_51_irrigated', 'hex_52_irrigated', 'hex_53_irrigated', 'hex_54_irrigated']" :key="idx" :id="'pattern' + hexGfx" width="100%" height="100%" patternContentUnits="objectBoundingBox" :patternTransform="store.hexStyle === rf.FLAT ? '' : ''">
 				<image :xlink:href="view.getImage(hexGfx)" :preserveAspectRatio="store.hexStyle === rf.POINTY ? 'none' : 'none'" :x="store.hexStyle === rf.POINTY ? 0 : 0" :y="store.hexStyle === rf.POINTY ? 0 : 0" :width="store.hexStyle === rf.POINTY ? 1 : 1" :height="store.hexStyle === rf.POINTY ? 1 : 1" />
 			</pattern>
+			<!-- FLOODED POLDERS -->
+			<pattern v-for="(hexGfx, idx) in ['hex_90_f', 'hex_91_f', 'hex_92_f', 'hex_93_f', 'hex_94_f']" :key="idx" :id="'pattern' + hexGfx" width="100%" height="100%" patternContentUnits="objectBoundingBox" :patternTransform="store.hexStyle === rf.FLAT ? '' : ''">
+				<image :xlink:href="view.getImage(hexGfx)" preserveAspectRatio="none" x="0" y="0" width="1" height="1" />
+			</pattern>
 			<!-- RESOURCES -->
 			<pattern v-for="(res, idx) in rf.ALL_RES.concat(rf.RES_PSEUDO_MINE)" :key="idx" :id="'pattern_res_' + res" width="100%" height="100%" patternContentUnits="objectBoundingBox">
 				<image :xlink:href="view.getImage('res_' + res)" preserveAspectRatio="none" x="0" y="0" width="1" height="1" />

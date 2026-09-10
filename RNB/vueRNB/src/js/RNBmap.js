@@ -760,6 +760,54 @@ export function clickedBridgeOption(entry) {
 	}
 }
 
+export function clickedBombOption(buildingID) {
+	const store = useModelStore()
+	const transporterID = store.context.selectedTransporterIDforTM
+	const transporterObj = model.getTransporterByID(transporterID)
+	const buildingObj = model.getBuildingByID(buildingID)
+	if (!buildingObj || buildingObj.strengthened) return
+	// Deduct the bomb
+	let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], true)
+	if (errorFlag !== 0) return
+	// Remove the bomb for real
+	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
+	// Remove the building
+	model.removeBuildingByID(buildingID)
+	// Add to stack
+	let stackAction = [rf.STACK_BOMB_BUILDING, stack.getTransIDtoUse(transporterObj), buildingObj.type, buildingObj.location[1], buildingObj.location[2]]
+	stack.addItemToStack({
+		action: rf.STACK_BOMB_BUILDING,
+		historyEntry: stackAction,
+		playerIndex: controller.currentPlayerIndex(),
+	})
+	store.context.eligibleBuildingsToBomb.splice(0)
+	context.createUndoPoint()
+}
+
+export function clickedStrengthenOption(buildingID) {
+	const store = useModelStore()
+	const transporterID = store.context.selectedTransporterIDforTM
+	const transporterObj = model.getTransporterByID(transporterID)
+	const buildingObj = model.getBuildingByID(buildingID)
+	if (!buildingObj || buildingObj.strengthened) return
+	// Deduct the stone
+	let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_STONE], true)
+	if (errorFlag !== 0) return
+	// Remove the stone for real
+	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_STONE], false)
+	// Strengthen the building
+	buildingObj.strengthened = true
+	// Add to stack
+	let stackAction = [rf.STACK_STRENGTHEN_BUILDING, stack.getTransIDtoUse(transporterObj), buildingObj.type, buildingObj.location[1], buildingObj.location[2]]
+	stack.addItemToStack({
+		action: rf.STACK_STRENGTHEN_BUILDING,
+		historyEntry: stackAction,
+		playerIndex: controller.currentPlayerIndex(),
+	})
+	store.context.eligibleBuildingsToStrengthen.splice(0)
+	context.createUndoPoint()
+}
+
 // Adds a bridge to the hex, and recalculates the nodeBucketIdsCurrent according to all bridges
 export function addBridgeToMap(hexID, bridgeArr, deductResources) {
 	const store = useModelStore()
@@ -1045,6 +1093,7 @@ export function addBuildingToMap_core(buildingType, inputLocation, deductResourc
 			rawXY: [0, 0],
 			remainingMineContent: [...remainingMineContent],
 			uniqueID: finalUniqueIDString,
+			strengthened: false,
 		})
 	} else
 		store.ALL_BUILDINGS.push({
@@ -1055,6 +1104,7 @@ export function addBuildingToMap_core(buildingType, inputLocation, deductResourc
 			remainingConversions: bldgStats.maxConversions,
 			rawXY: [0, 0],
 			uniqueID: finalUniqueIDString,
+			strengthened: false,
 		})
 }
 
@@ -1127,28 +1177,35 @@ export function addWallToMap_core(transporterID, hex1ID, hex2ID, playerIndex, de
 	let currentOwner = edgeEntry.wall[1]
 	// First make sure you can deduct the resources. This flag can be set false for map creation / debug
 	if (deductResources) {
+		const store = useModelStore()
 		const transporterObj = model.getTransporterByID(transporterID)
 		const transporterLocation = transporterObj.location
 		let resIncreaseDueBuildingFromWater = 0
 		if (loc.isWaterVertexLocation(transporterLocation)) resIncreaseDueBuildingFromWater = 2
+		// Polder cost modifier: +2 stone/boards when building from/demolishing from a polder
+		const hex1 = model.getHexByID(id1)
+		const hex2 = model.getHexByID(id2)
+		const eitherIsPolder = rf.TERR_IS_POLDER.includes(hex1.currentTerrain) || rf.TERR_IS_POLDER.includes(hex2.currentTerrain)
+		let polderCostModifier = 0
+		if (store.gameOptions.usePolders && eitherIsPolder) polderCostModifier = 2
 		let requiredResources = []
 		let stoneUsed = true
 		// At level 0, you are building the first wall
 		if (currentLevel === 0) {
 			requiredResources = [rf.RES_STONE]
-			for (let i = 0; i < resIncreaseDueBuildingFromWater; i++) requiredResources.push(rf.RES_STONE)
+			for (let i = 0; i < resIncreaseDueBuildingFromWater + polderCostModifier; i++) requiredResources.push(rf.RES_STONE)
 		}
 		// Else if you own it, OR are building up a demolished wall, need lvl+1 stone
 		else if (currentOwner === playerIndex || currentOwner === -1) {
 			for (let i = 0; i <= currentLevel; i++) requiredResources.push(rf.RES_STONE)
-			for (let i = 0; i < resIncreaseDueBuildingFromWater; i++) requiredResources.push(rf.RES_STONE)
+			for (let i = 0; i < resIncreaseDueBuildingFromWater + polderCostModifier; i++) requiredResources.push(rf.RES_STONE)
 		}
 		// Otherwise to demolish it, need boards + level
 		else {
 			requiredResources.splice(0)
 			stoneUsed = false
 			for (let i = 0; i <= currentLevel; i++) requiredResources.push(rf.RES_BOARDS)
-			for (let i = 0; i < resIncreaseDueBuildingFromWater; i++) requiredResources.push(rf.RES_BOARDS)
+			for (let i = 0; i < resIncreaseDueBuildingFromWater + polderCostModifier; i++) requiredResources.push(rf.RES_BOARDS)
 		}
 		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, requiredResources)
 		if (errorFlag === 1) {
@@ -1450,6 +1507,17 @@ export function clickedBuilding(buildingID, forcedInputGoods = []) {
 	// Exit if building is not highlighted
 	if (!store.context.buildingIDsToHighlight.includes(buildingID) && forcedInputGoods.length === 0) return
 	if (store.context.action === rf.ACT_CONFIRM_END_TURN) return
+
+	// Handle bomb pseudo-building
+	if (store.context.eligibleBuildingsToBomb.includes(buildingID)) {
+		clickedBombOption(buildingID)
+		return
+	}
+	// Handle strengthen pseudo-building
+	if (store.context.eligibleBuildingsToStrengthen.includes(buildingID)) {
+		clickedStrengthenOption(buildingID)
+		return
+	}
 
 	const building = model.getBuildingByID(buildingID)
 	const bldgStats = model.getBuildingStatsFromBuildingID(building.id)

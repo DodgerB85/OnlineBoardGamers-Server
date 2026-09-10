@@ -203,6 +203,19 @@ export function importStartingMap(inputArr) {
 		store.mapData.hexData.push(newHex)
 	}
 
+	// Auto-detect polders from map hexes
+	const hasPolders = store.mapData.hexData.some((hex) => hex.baseTerrain === rf.TERR_POLDER)
+	if (hasPolders) {
+		store.gameOptions.usePolders = true
+		// Initialize polders as flooded (wet)
+		store.mapData.hexData.forEach((hex) => {
+			if (hex.baseTerrain === rf.TERR_POLDER) {
+				hex.currentTerrain = rf.TERR_POLDER_WET
+				hex.hexGfx = "hex_" + hex.hexTerrainID + "_f"
+			}
+		})
+	}
+
 	// ST === 1 for flat style
 	if (store.mapData.setupData.ST && store.mapData.setupData.ST === 1) {
 		store.hexStyle = rf.FLAT
@@ -955,6 +968,8 @@ export function importRNBmodel(input, forGameOver) {
 	let newRoads = []
 	let newPowerLines = []
 	let newBuildings = []
+	let bombedBuildings = [] // [buildingType, hexID]
+	let strengthenedBuildings = [] // [buildingType, hexID]
 	for (let i = 0; i < store.history.length; i++) {
 		const entry = store.history[i]
 		if (entry[0] === rf.HIST_CHOOSE_HOME_TILE) {
@@ -1028,6 +1043,18 @@ export function importRNBmodel(input, forGameOver) {
 						const toHexID = stackAction[3]
 						map.addWallToMap_core(-1, fromHexID, toHexID, entry[1], false, false)
 					}
+					// Bomb: note the building type and hex for removal after buildings are created
+					else if (stackAction[0] === rf.STACK_BOMB_BUILDING) {
+						const buildingType = stackAction[2]
+						const hexID = stackAction[3]
+						bombedBuildings.push([buildingType, hexID])
+					}
+					// Strengthen: note the building type and hex for strengthening after buildings are created
+					else if (stackAction[0] === rf.STACK_STRENGTHEN_BUILDING) {
+						const buildingType = stackAction[2]
+						const hexID = stackAction[3]
+						strengthenedBuildings.push([buildingType, hexID])
+					}
 					if (stackAction[0] === rf.STACK_DO_RESEARCH) {
 						const researchIdx = stackAction[2]
 						store.players[entry[1]].RnD[researchIdx] = 1
@@ -1051,6 +1078,15 @@ export function importRNBmodel(input, forGameOver) {
 			// Add the new one
 			map.addBuildingToMap_core(bldgEntry[2], bldgEntry[3], false, -1, rf.MINE_NORMAL, bldgEntry[4], bldgEntry[5])
 		}
+	}
+	// Apply bomb and strengthen operations after buildings are created
+	for (const [buildingType, hexID] of bombedBuildings) {
+		const bldgsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && b.type === buildingType)
+		if (bldgsOnHex.length > 0) model.removeBuildingByID(bldgsOnHex[0].id)
+	}
+	for (const [buildingType, hexID] of strengthenedBuildings) {
+		const bldgsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && b.type === buildingType)
+		if (bldgsOnHex.length > 0) bldgsOnHex[0].strengthened = true
 	}
 	for (const roadEntry of newRoads) {
 		map.addRoadToMap_core(roadEntry[0], roadEntry[1], -1, false)

@@ -1592,20 +1592,31 @@ export function verifySingleStackAction(stackActionData) {
 		// If the current level isn't correct, fail the move
 		if (currentWallLevel !== newLevel - 1) return 3
 
+		// Polder restrictions: no polder-to-polder or polder-to-sea walls
+		const hex1 = model.getHexByID(transporterHexID)
+		const hex2 = model.getHexByID(otherHexID)
+		const hex1IsPolder = rf.TERR_IS_POLDER.includes(hex1.currentTerrain)
+		const hex2IsPolder = rf.TERR_IS_POLDER.includes(hex2.currentTerrain)
+		if (hex1IsPolder && hex2IsPolder) return 5
+		if ((hex1IsPolder || hex2IsPolder) && (hex1.currentTerrain === rf.TERR_SEA || hex2.currentTerrain === rf.TERR_SEA)) return 6
+
 		const transporterLocation = transporterObj.location
 		let resIncreaseDueBuildingFromWater = 0
 		if (loc.isWaterVertexLocation(transporterLocation)) resIncreaseDueBuildingFromWater = 2
+		// Polder cost modifier: +2 stone when building from/to a polder
+		let polderCostModifier = 0
+		if (store.gameOptions.usePolders && (hex1IsPolder || hex2IsPolder)) polderCostModifier = 2
 		let requiredResources = []
 		//let stoneUsed = true
 		// At level 0, you are building the first wall
 		if (currentWallLevel === 0) {
 			requiredResources = [rf.RES_STONE]
-			for (let i = 0; i < resIncreaseDueBuildingFromWater; i++) requiredResources.push(rf.RES_STONE)
+			for (let i = 0; i < resIncreaseDueBuildingFromWater + polderCostModifier; i++) requiredResources.push(rf.RES_STONE)
 		}
 		// Else if you own it, OR are building up a demolished wall, need lvl+1 stone
 		else if (currentWallOwner === transporterOwnerIndex || currentWallOwner === -1) {
 			for (let i = 0; i <= currentWallLevel; i++) requiredResources.push(rf.RES_STONE)
-			for (let i = 0; i < resIncreaseDueBuildingFromWater; i++) requiredResources.push(rf.RES_STONE)
+			for (let i = 0; i < resIncreaseDueBuildingFromWater + polderCostModifier; i++) requiredResources.push(rf.RES_STONE)
 		}
 		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, requiredResources, true)
 		if (errorFlag > 0) return errorFlag + 10
@@ -1635,14 +1646,25 @@ export function verifySingleStackAction(stackActionData) {
 		// If the levels don't match, fail the move
 		if (currentWallLevel !== currentLevel) return 4
 
+		// Polder restrictions: no polder-to-polder or polder-to-sea walls
+		const hex1 = model.getHexByID(transporterHexID)
+		const hex2 = model.getHexByID(otherHexID)
+		const hex1IsPolder = rf.TERR_IS_POLDER.includes(hex1.currentTerrain)
+		const hex2IsPolder = rf.TERR_IS_POLDER.includes(hex2.currentTerrain)
+		if (hex1IsPolder && hex2IsPolder) return 5
+		if ((hex1IsPolder || hex2IsPolder) && (hex1.currentTerrain === rf.TERR_SEA || hex2.currentTerrain === rf.TERR_SEA)) return 6
+
 		const transporterLocation = transporterObj.location
 		let resIncreaseDueBuildingFromWater = 0
 		if (loc.isWaterVertexLocation(transporterLocation)) resIncreaseDueBuildingFromWater = 2
+		// Polder cost modifier: +2 boards when demolishing from/to a polder
+		let polderCostModifier = 0
+		if (store.gameOptions.usePolders && (hex1IsPolder || hex2IsPolder)) polderCostModifier = 2
 		let requiredResources = []
 		//  to demolish it, need boards + level
 		requiredResources.splice(0)
 		for (let i = 0; i <= currentWallLevel; i++) requiredResources.push(rf.RES_BOARDS)
-		for (let i = 0; i < resIncreaseDueBuildingFromWater; i++) requiredResources.push(rf.RES_BOARDS)
+		for (let i = 0; i < resIncreaseDueBuildingFromWater + polderCostModifier; i++) requiredResources.push(rf.RES_BOARDS)
 
 		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, requiredResources, true)
 		if (errorFlag > 0) return errorFlag + 10
@@ -1814,6 +1836,44 @@ export function verifySingleStackAction(stackActionData) {
 		if (bldgsOnHex.length === 0) return 1
 		if (!bldgsOnHex.some((b) => rf.ALL_TRANSPORTER_FACTORIES.includes(b.type))) return 2
 
+		return 0
+	}
+	// BOMB BUILDING
+	else if (action === rf.STACK_BOMB_BUILDING) {
+		// stackAction = [STACK_BOMB_BUILDING, transporterID, buildingType, hexID, bucketID]
+		const transporterID = stackAction[1]
+		const buildingType = stackAction[2]
+		const hexID = stackAction[3]
+		const bucketID = stackAction[4]
+		const transporterObj = model.getTransporterByID(transporterID)
+		// Transporter must be on the correct hex
+		if (transporterObj.location[1] !== hexID) return 1
+		// Must have a bomb accessible
+		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], true)
+		if (errorFlag > 0) return errorFlag + 10
+		// Must be a non-strengthened building on the hex
+		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
+		const targetBldg = buildingsOnHex.find((b) => b.type === buildingType && !b.strengthened)
+		if (!targetBldg) return 20
+		return 0
+	}
+	// STRENGTHEN BUILDING
+	else if (action === rf.STACK_STRENGTHEN_BUILDING) {
+		// stackAction = [STACK_STRENGTHEN_BUILDING, transporterID, buildingType, hexID, bucketID]
+		const transporterID = stackAction[1]
+		const buildingType = stackAction[2]
+		const hexID = stackAction[3]
+		const bucketID = stackAction[4]
+		const transporterObj = model.getTransporterByID(transporterID)
+		// Transporter must be on the correct hex
+		if (transporterObj.location[1] !== hexID) return 1
+		// Must have 1 stone accessible
+		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_STONE], true)
+		if (errorFlag > 0) return errorFlag + 10
+		// Must be a non-strengthened building on the hex
+		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
+		const targetBldg = buildingsOnHex.find((b) => b.type === buildingType && !b.strengthened)
+		if (!targetBldg) return 20
 		return 0
 	}
 	// WONDER
@@ -2540,6 +2600,40 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 	// Art & The Atelier: an exhibition caravan stages a show and vanishes
 	else if (action === rf.STACK_EXHIBITION) {
 		atelier.performExhibitionStackAction(stackAction)
+	}
+	// BOMB BUILDING
+	else if (action === rf.STACK_BOMB_BUILDING) {
+		let transporterID = stackAction[1]
+		if (swapIDs && typeof transporterID === "string") {
+			stackAction[1] = model.getTransporterByID(transporterID).id
+			transporterID = stackAction[1]
+		}
+		const buildingType = stackAction[2]
+		const hexID = stackAction[3]
+		const bucketID = stackAction[4]
+		// Remove the bomb from the transporter
+		model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
+		// Find and remove the building
+		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
+		const targetBldg = buildingsOnHex.find((b) => b.type === buildingType)
+		if (targetBldg) model.removeBuildingByID(targetBldg.id)
+	}
+	// STRENGTHEN BUILDING
+	else if (action === rf.STACK_STRENGTHEN_BUILDING) {
+		let transporterID = stackAction[1]
+		if (swapIDs && typeof transporterID === "string") {
+			stackAction[1] = model.getTransporterByID(transporterID).id
+			transporterID = stackAction[1]
+		}
+		const buildingType = stackAction[2]
+		const hexID = stackAction[3]
+		const bucketID = stackAction[4]
+		// Remove the stone from the transporter
+		model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_STONE], false)
+		// Find and strengthen the building
+		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
+		const targetBldg = buildingsOnHex.find((b) => b.type === buildingType)
+		if (targetBldg) targetBldg.strengthened = true
 	}
 	// WONDER
 	else if (action === rf.STACK_ADD_WONDER_BRICKS) {

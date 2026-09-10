@@ -134,9 +134,11 @@ export function createInternalGraph(hexId, playerIndex, ignoreWalls) {
 		return nodes.map(nodeIndex)
 	}
 
-	// Special case: Sea hexes only have vertices (no sides, coasts, or rivers)
+	// Special case: Sea hexes and wet polders only have vertices (no sides, coasts, or rivers)
 	// Void hexes have nothing, but this code works for them too
-	if ([rf.TERR_SEA, rf.TERR_VOID].includes(hex.currentTerrain)) {
+	// Polders use uniformPlains (7 vertices, sideNodeIds [1..6]) which are valid indices in the simplified graph
+	// Corner node IDs are -1 for polders; cross-hex edge code guards against this
+	if ([rf.TERR_SEA, rf.TERR_VOID].includes(hex.currentTerrain) || hex.currentTerrain === rf.TERR_POLDER_WET) {
 		// Return simplified sea hex graph
 		return {
 			vertexCount: vertexCount,
@@ -159,7 +161,7 @@ export function createInternalGraph(hexId, playerIndex, ignoreWalls) {
 
 	// Analyze hex sides
 	const sideExists = hex.hexLookup.map((i) => i >= 0) // Does this side have a neighboring hex?
-	const sideIsCoast = sideIndices.map((i) => sideExists[i] && model.getHexByID(hex.hexLookup[i]).currentTerrain === rf.TERR_SEA) // Does this side border sea?
+	const sideIsCoast = sideIndices.map((i) => sideExists[i] && rf.TERR_ACTS_LIKE_WATER.includes(model.getHexByID(hex.hexLookup[i]).currentTerrain)) // Does this side border sea or wet polder?
 	const sideHasRiver = hex.sideRiverVertexIds.map((i) => i >= 0) // Does this side have a river?
 
 	/**
@@ -457,8 +459,8 @@ export function createCompleteGraph(hexData, edgeData, playerIndex, ignoreWalls,
 			const blockedByWall = ![playerIndex, -1].includes(edge.wall[1])
 
 			// Determine what types of hexes are connected
-			let hasSea = hexTypes.includes(rf.TERR_SEA)
-			let hasLand = hexTypes[0] !== rf.TERR_SEA || hexTypes[1] !== rf.TERR_SEA
+			let hasSea = hexTypes.some((t) => rf.TERR_ACTS_LIKE_WATER.includes(t))
+			let hasLand = !rf.TERR_ACTS_LIKE_WATER.includes(hexTypes[0]) || !rf.TERR_ACTS_LIKE_WATER.includes(hexTypes[1])
 			let bothSea = hasSea && !hasLand
 			let bothLand = hasLand && !hasSea
 
@@ -470,10 +472,14 @@ export function createCompleteGraph(hexData, edgeData, playerIndex, ignoreWalls,
 						[0, 1].map((k) => hexOffset[k] + hexSideNodes[k])
 					)
 					for (let j = 0; j < 2; j++) {
-						addEdge(
-							rf.MOVE_WATER,
-							[0, 1].map((k) => hexOffset[k] + hexCornerNodes[k][j])
-						)
+						const cn0 = hexCornerNodes[0][j]
+						const cn1 = hexCornerNodes[1][j]
+						if (cn0 !== -1 && cn1 !== -1) {
+							addEdge(
+								rf.MOVE_WATER,
+								[0, 1].map((k) => hexOffset[k] + hexCornerNodes[k][j])
+							)
+						}
 					}
 				} else if (bothLand) {
 					// river edge
@@ -495,33 +501,39 @@ export function createCompleteGraph(hexData, edgeData, playerIndex, ignoreWalls,
 						)
 					}
 				}
-				// sea to coast edge, and potentially sea to river edge
+				// sea/wet-polder to coast edge, and potentially sea/wet-polder to river edge
 				else {
-					let seaHex = hexTypes[0] === rf.TERR_SEA ? 0 : 1
+					let seaHex = rf.TERR_ACTS_LIKE_WATER.includes(hexTypes[0]) ? 0 : 1
 					let seaHexOffset = hexOffset[seaHex]
 					let seaSideNode = hexSideNodes[seaHex]
 					let landHex = [1, 0][seaHex]
 					let landHexId = hexIds[landHex]
 					let landHexOffset = hexOffset[landHex]
 					let landHexSide = sides[landHex]
+					const seaCornerNodes = hexCornerNodes[seaHex]
+					const hasValidCorners = seaCornerNodes[0] !== -1 && seaCornerNodes[1] !== -1
 					// Only create sea-to-docked edges if this side is actually a coast
 					if (sideData[landHexId].hasRiver[landHexSide]) {
 						// dual-bank docking plus river
 						addEdge(rf.MOVE_WATER, [seaHexOffset + seaSideNode, landHexOffset + sideData[landHexId].riverVertexIndex[landHexSide]])
-						for (let offset = 0; offset < 3; offset++) {
-							for (const seaNode of [seaSideNode, hexCornerNodes[seaHex][0]]) {
-								addEdge(rf.MOVE_WATER, [seaHexOffset + seaNode, landHexOffset + vertexCount[landHex] + NODE_OFFSET_LEFT_BANK + landHexSide + 6 * offset])
-							}
-							for (const seaNode of [seaSideNode, hexCornerNodes[seaHex][1]]) {
-								addEdge(rf.MOVE_WATER, [seaHexOffset + seaNode, landHexOffset + vertexCount[landHex] + NODE_OFFSET_RIGHT_BANK + landHexSide + 6 * offset])
+						if (hasValidCorners) {
+							for (let offset = 0; offset < 3; offset++) {
+								for (const seaNode of [seaSideNode, seaCornerNodes[0]]) {
+									addEdge(rf.MOVE_WATER, [seaHexOffset + seaNode, landHexOffset + vertexCount[landHex] + NODE_OFFSET_LEFT_BANK + landHexSide + 6 * offset])
+								}
+								for (const seaNode of [seaSideNode, seaCornerNodes[1]]) {
+									addEdge(rf.MOVE_WATER, [seaHexOffset + seaNode, landHexOffset + vertexCount[landHex] + NODE_OFFSET_RIGHT_BANK + landHexSide + 6 * offset])
+								}
 							}
 						}
 					} else {
 						// docking, no river
 						for (let offset = 0; offset < 3; offset++) {
 							addEdge(rf.MOVE_WATER, [seaHexOffset + seaSideNode, landHexOffset + vertexCount[landHex] + NODE_OFFSET_COAST + landHexSide + 6 * offset])
-							for (let j = 0; j < 2; j++) {
-								addEdge(rf.MOVE_WATER, [seaHexOffset + hexCornerNodes[seaHex][j], landHexOffset + vertexCount[landHex] + NODE_OFFSET_COAST + landHexSide + 6 * offset])
+							if (hasValidCorners) {
+								for (let j = 0; j < 2; j++) {
+									addEdge(rf.MOVE_WATER, [seaHexOffset + seaCornerNodes[j], landHexOffset + vertexCount[landHex] + NODE_OFFSET_COAST + landHexSide + 6 * offset])
+								}
 							}
 						}
 					}

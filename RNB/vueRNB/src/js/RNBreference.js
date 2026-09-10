@@ -261,6 +261,8 @@ export const STACK_BUILD_BUILDING = 24
 export const STACK_RESHAFT_MINE = 25
 export const STACK_BUILD_POWER_LINE = 26
 export const STACK_EXHIBITION = 27
+export const STACK_BOMB_BUILDING = 28
+export const STACK_STRENGTHEN_BUILDING = 29
 
 // PRODUCTION ACTIONS
 export const STACK_MANUAL_PRODUCTION = 30
@@ -431,12 +433,16 @@ export const TERR_MOUNTAINS = 3
 export const TERR_DESERT = 4
 export const TERR_SEA = 5
 export const TERR_POLDER = 6
+export const TERR_POLDER_WET = 7
+export const TERR_POLDER_DRY = 8
 
 export const TERR_VOID = 9 // blank hex
 
-export const TERR_ANY_LAND = [TERR_WOODS, TERR_PASTURE, TERR_ROCK, TERR_MOUNTAINS, TERR_DESERT]
+export const TERR_ANY_LAND = [TERR_WOODS, TERR_PASTURE, TERR_ROCK, TERR_MOUNTAINS, TERR_DESERT, TERR_POLDER, TERR_POLDER_WET, TERR_POLDER_DRY]
 export const TERR_ANY_LAND_EXCEPT_DESERT = [TERR_WOODS, TERR_PASTURE, TERR_ROCK, TERR_MOUNTAINS]
-export const TERR_ANY = [TERR_WOODS, TERR_PASTURE, TERR_ROCK, TERR_MOUNTAINS, TERR_DESERT, TERR_SEA, TERR_POLDER]
+export const TERR_ANY = [TERR_WOODS, TERR_PASTURE, TERR_ROCK, TERR_MOUNTAINS, TERR_DESERT, TERR_SEA, TERR_POLDER, TERR_POLDER_WET, TERR_POLDER_DRY]
+export const TERR_IS_POLDER = [TERR_POLDER, TERR_POLDER_WET, TERR_POLDER_DRY]
+export const TERR_ACTS_LIKE_WATER = [TERR_SEA, TERR_POLDER_WET]
 
 // Movement graph
 export const MOVE_NONE = 0
@@ -597,6 +603,8 @@ export const BLDG_PSEUDO_BRIDGE = 103
 export const BLDG_PSEUDO_WALL = 104
 export const BLDG_PSEUDO_DEMOLISH_WALL = 105
 export const BLDG_PSEUDO_POWER_LINE = 106
+export const BLDG_PSEUDO_BOMB = 107
+export const BLDG_PSEUDO_STRENGTHEN = 108
 
 export const ALL_BUILDINGS = [BLDG_WOODCUTTER, BLDG_SAWMILL, BLDG_PAPERMILL, BLDG_CLAY_PIT, BLDG_STONE_FACTORY, BLDG_QUARRY, BLDG_OILRIG, BLDG_COAL_BURNER, BLDG_MINE, BLDG_MINT, BLDG_STOCK_EXCHANGE, BLDG_WAGON_FACTORY, BLDG_TRUCK_FACTORY, BLDG_RAFT_FACTORY, BLDG_ROWBOAT_FACTORY, BLDG_STEAMER_FACTORY, BLDG_AEROPORT, BLDG_BOMB_FACTORY, BLDG_POWER_PLANT, BLDG_PEARL_FISHERY, BLDG_ATELIER, ...ALL_MBA_BUILDINGS]
 
@@ -604,7 +612,7 @@ export const ALL_TRANSPORTER_FACTORIES = [BLDG_WAGON_FACTORY, BLDG_TRUCK_FACTORY
 // NB Wagon factory REMOVES and ADDS
 export const ALL_TRANSPORTER_ADDING_BUILDINGS = [BLDG_TRUCK_FACTORY, BLDG_RAFT_FACTORY, BLDG_ROWBOAT_FACTORY, BLDG_STEAMER_FACTORY, BLDG_ATELIER, BLDG_AEROPORT]
 export const ALL_WATER_TRANSPORTER_BUILDINGS = [BLDG_RAFT_FACTORY, BLDG_ROWBOAT_FACTORY, BLDG_STEAMER_FACTORY]
-export const ALL_PSEUDO_BUILDINGS = [BLDG_PSEUDO_RESHAFT_MINE, BLDG_PSEUDO_ROAD, BLDG_PSEUDO_BRIDGE, BLDG_PSEUDO_WALL, BLDG_PSEUDO_DEMOLISH_WALL, BLDG_PSEUDO_POWER_LINE]
+export const ALL_PSEUDO_BUILDINGS = [BLDG_PSEUDO_RESHAFT_MINE, BLDG_PSEUDO_ROAD, BLDG_PSEUDO_BRIDGE, BLDG_PSEUDO_WALL, BLDG_PSEUDO_DEMOLISH_WALL, BLDG_PSEUDO_POWER_LINE, BLDG_PSEUDO_BOMB, BLDG_PSEUDO_STRENGTHEN]
 
 // NB ONLY USED IN ADMIN ACTION SELECT
 export const ALL_BUILDING_STRINGS = ["Woodcutter", "Sawmill", "Papermill", "Clay Pit", "Stone Factory", "Quarry", "Oil Rig", "Coal Burner", "Mine", "Mint", "Stock Exchange", "Wagon Factory", "Truck Factory", "Raft Factory", "Rowboat Factory", "Steamer Factory", "Airport", "Bomb Factory", "Power Plant", "Pearl Fisher", "Atelier", "MBA (Woods)", "MBA (Mountain)", "MBA (Rock)", "MBA (Pasture)", "MBA (Coast)", "MBA (Desert)"]
@@ -3605,6 +3613,32 @@ export const BUILDING_STATS = [
 		makesTransporter: false,
 		maxConversions: 99,
 		startingOptionRequired: SO_ELECTRICITY,
+		requiredResearchIndex: -1,
+	},
+	{
+		building: BLDG_PSEUDO_BOMB,
+		bldg_name: "Bomb Building",
+		bldg_name_summary: "Bomb",
+		isValidTerrain: terrainIsType(TERR_ANY_LAND),
+		cost: [RES_BOMB],
+		inputRes: [[]],
+		outputRes: [],
+		makesTransporter: false,
+		maxConversions: 99,
+		startingOptionRequired: SO_BOMBS,
+		requiredResearchIndex: -1,
+	},
+	{
+		building: BLDG_PSEUDO_STRENGTHEN,
+		bldg_name: "Strengthen Building",
+		bldg_name_summary: "Strengthen",
+		isValidTerrain: terrainIsType(TERR_ANY_LAND),
+		cost: [RES_STONE],
+		inputRes: [[]],
+		outputRes: [],
+		makesTransporter: false,
+		maxConversions: 99,
+		startingOptionRequired: SO_BASE_GAME,
 		requiredResearchIndex: -1,
 	},
 

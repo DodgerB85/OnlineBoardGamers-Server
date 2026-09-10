@@ -507,6 +507,10 @@ export function getTerrainColour(hexID) {
 			return "#5AC7DB"
 		case rf.TERR_POLDER:
 			return "#5BA56B"
+		case rf.TERR_POLDER_WET:
+			return "#5AC7DB"
+		case rf.TERR_POLDER_DRY:
+			return "#5BA56B"
 		default:
 			return "none"
 	}

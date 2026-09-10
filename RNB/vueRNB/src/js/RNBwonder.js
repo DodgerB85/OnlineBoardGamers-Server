@@ -2,6 +2,7 @@ import * as rf from "./RNBreference.js"
 //import * as util from "./RNButil.js"
 import * as model from "./RNBmodel.js"
 import * as controller from "./RNBcontroller.js"
+import * as map from "./RNBmap.js"
 //import * as graph from "./RNBgraph.js"
 //import * as map from "./RNBmap.js"
 //import * as computes from "./RNBcomputes.js"
@@ -172,11 +173,16 @@ export function addBrickToWonder_core(playerIndex, resIDsToDeduct) {
 	for (const resID of resIDsToDeduct) {
 		model.getResByID(resID).location = loc.setOOBlocation()
 	}
+	const prevBrickCount = store.wonderBricks.length
 	store.wonderBricks.push(playerIndex)
-	if (store.wonderBricks.length >= 45) convertDesertsToPastures()
-	if (store.CUSTOM_RULES.includes(rf.CR_START_2_DONKEY_3RD_ON_WONDER_BRICK_27) && store.wonderBricks.length === 27) {
+	const newBrickCount = store.wonderBricks.length
+	if (newBrickCount >= 45) convertDesertsToPastures()
+	if (store.CUSTOM_RULES.includes(rf.CR_START_2_DONKEY_3RD_ON_WONDER_BRICK_27) && newBrickCount === 27) {
 		const homeTileLocation = store.ALL_HOME_MARKERS[0].location
 		model.addTransporterToGame(0, rf.DONKEY, homeTileLocation, true)
+	}
+	if (store.gameOptions.usePolders) {
+		togglePoldersIfNewRow(prevBrickCount, newBrickCount)
 	}
 }
 
@@ -187,6 +193,44 @@ export function convertDesertsToPastures() {
 		if (store.mapData.hexData[i].currentTerrain === rf.TERR_DESERT) {
 			store.mapData.hexData[i].currentTerrain = rf.TERR_PASTURE
 			store.mapData.hexData[i].hexGfx += "_irrigated"
+		}
+	}
+}
+
+const WONDER_ROW_STARTS = [0, 4, 8, 12, 17, 22, 27, 32, 38, 44, 50, 56, 62, 69, 76]
+
+function togglePoldersIfNewRow(prevBrickCount, newBrickCount) {
+	const store = useModelStore()
+	for (const rowStart of WONDER_ROW_STARTS) {
+		if (rowStart > 0 && prevBrickCount === rowStart) {
+			for (let i = 0; i < store.mapData.hexData.length; i++) {
+				const hex = store.mapData.hexData[i]
+				if (hex.baseTerrain === rf.TERR_POLDER) {
+					const wasDry = hex.currentTerrain === rf.TERR_POLDER_DRY
+					hex.currentTerrain = hex.currentTerrain === rf.TERR_POLDER_WET ? rf.TERR_POLDER_DRY : rf.TERR_POLDER_WET
+					const baseGfx = "hex_" + hex.hexTerrainID
+					hex.hexGfx = hex.currentTerrain === rf.TERR_POLDER_WET ? baseGfx + "_f" : baseGfx
+					// When polder becomes wet (dry→wet), move any docked boats onto the hex as sea transporters
+					if (wasDry && hex.currentTerrain === rf.TERR_POLDER_WET) {
+						const dockedBoats = model.getAllInGameTransporters().filter(
+							(t) => loc.isDockedLocation(t.location) && t.location[1] === hex.hexID
+						)
+						const seaBucketLocation = loc.setBucketLocation(hex.hexID, 0)
+						dockedBoats.forEach((boat) => {
+							const newSeaLocation = loc.getVisualLocationFromBucketLocation(seaBucketLocation, boat.location, boat.type)
+							boat.location = newSeaLocation
+							const boatStats = rf.getTransporterStats(boat.type)
+							const newPos = map.getTransporterPositionFromLocation(newSeaLocation, boatStats, boat.id)
+							boat.rawTransporterXY = newPos
+							model.transportersOnTransporter(boat.id).forEach((carried) => {
+								const carriedStats = rf.getTransporterStats(carried.type)
+								carried.rawTransporterXY = map.getTransporterPositionFromLocation(carried.location, carriedStats, carried.id)
+							})
+						})
+					}
+				}
+			}
+			return
 		}
 	}
 }

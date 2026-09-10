@@ -44,6 +44,7 @@ export const useModelStore = defineStore("store", () => {
 		usePlanes: false,
 		useBombs: false,
 		useJumpStart: false,
+		usePolders: false,
 	}
 	var CUSTOM_RULES = []
 
@@ -272,6 +273,8 @@ export const useModelStore = defineStore("store", () => {
 		eligibleBridgesToBuild: [],
 		eligibleWallsToBuild: [],
 		eligibleWallsToDemolish: [],
+		eligibleBuildingsToBomb: [],
+		eligibleBuildingsToStrengthen: [],
 		selectedBuildingToBuild: -1,
 		mineSelectionType: 0,
 		// summary
