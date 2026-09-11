@@ -1214,9 +1214,6 @@ def _processRNBturn(request):
 
 # ===== PLAYER TRADE =====
 
-LOCATION_BUCKET_RNB = 7
-
-
 def _decompress_rnb_trade_data(raw_trade_data):
     if not raw_trade_data:
         return {"playerTrades": []}
@@ -1236,8 +1233,13 @@ def _compress_rnb_gamedata(raw_data):
 
 
 def _get_rnb_player_home_hex_id(raw_data, player_index):
-    for marker in raw_data[8]:
-        if marker.get("ownerIndex") == player_index:
+    if len(raw_data) <= 8:
+        return None
+    home_markers = raw_data[8]
+    if not isinstance(home_markers, list):
+        return None
+    for marker in home_markers:
+        if int(marker.get("ownerIndex", -1)) == int(player_index):
             return marker["location"][1]
     return None
 
@@ -1326,27 +1328,6 @@ def _handle_rnb_propose_trade(request, currentGame, presenter, raw_data, trade_d
     if proposer_count >= 5:
         return JsonResponse({"tradeError": "You have too many pending trades"}, safe=False)
 
-    proposer_home_hex = _get_rnb_player_home_hex_id(raw_data, proposer_idx)
-    target_home_hex = _get_rnb_player_home_hex_id(raw_data, target_idx)
-
-    if proposer_home_hex is None or target_home_hex is None:
-        return JsonResponse({"tradeError": "Player home not found"}, safe=False)
-
-    all_resources = raw_data[6]
-    for rid in your_res_ids:
-        if rid >= len(all_resources):
-            return JsonResponse({"tradeError": "Invalid resource ID"}, safe=False)
-        res = all_resources[rid]
-        if res.get("location", [0, -1, -1])[0] != LOCATION_BUCKET_RNB or res["location"][1] != proposer_home_hex:
-            return JsonResponse({"tradeError": "Your resource not on your home tile"}, safe=False)
-
-    for rid in their_res_ids:
-        if rid >= len(all_resources):
-            return JsonResponse({"tradeError": "Invalid resource ID"}, safe=False)
-        res = all_resources[rid]
-        if res.get("location", [0, -1, -1])[0] != LOCATION_BUCKET_RNB or res["location"][1] != target_home_hex:
-            return JsonResponse({"tradeError": "Their resource not on their home tile"}, safe=False)
-
     trade_entry = [proposer_idx, target_idx, your_res_ids, their_res_ids, "pending"]
     trade_data.setdefault("playerTrades", []).append(trade_entry)
 
@@ -1378,35 +1359,32 @@ def _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_da
         return JsonResponse({"tradeError": "Trade only allowed during wonder phase"}, safe=False)
 
     proposer_idx = trade_entry[0]
-    your_res_ids = trade_entry[3]  # what acceptor gives (proposer requested)
-    their_res_ids = trade_entry[2]  # what acceptor receives (proposer offered)
+    offered_res_ids = trade_entry[2]  # proposer offered these
+    requested_res_ids = trade_entry[3]  # acceptor gives these
 
     proposer_home_hex = _get_rnb_player_home_hex_id(raw_data, proposer_idx)
     target_home_hex = _get_rnb_player_home_hex_id(raw_data, acceptor_idx)
 
-    if proposer_home_hex is None or target_home_hex is None:
-        return JsonResponse({"tradeError": "Player home not found"}, safe=False)
+    # Fallback: use client-provided hex IDs if server can't find them in gameData
+    if proposer_home_hex is None:
+        proposer_home_hex = jsonData.get("proposerHomeHex")
+    if target_home_hex is None:
+        target_home_hex = jsonData.get("targetHomeHex")
 
-    all_resources = raw_data[6]
-    for rid in their_res_ids:
-        if rid >= len(all_resources):
-            return JsonResponse({"tradeError": "Resource no longer available"}, safe=False)
-        res = all_resources[rid]
-        if res.get("location", [0, -1, -1])[0] != LOCATION_BUCKET_RNB or res["location"][1] != proposer_home_hex:
-            return JsonResponse({"tradeError": "Resource no longer available"}, safe=False)
-
-    for rid in your_res_ids:
-        if rid >= len(all_resources):
-            return JsonResponse({"tradeError": "Resource no longer available"}, safe=False)
-        res = all_resources[rid]
-        if res.get("location", [0, -1, -1])[0] != LOCATION_BUCKET_RNB or res["location"][1] != target_home_hex:
-            return JsonResponse({"tradeError": "Resource no longer available"}, safe=False)
-
-    for rid in their_res_ids:
-        all_resources[rid]["location"] = [LOCATION_BUCKET_RNB, target_home_hex, 0]
-
-    for rid in your_res_ids:
-        all_resources[rid]["location"] = [LOCATION_BUCKET_RNB, proposer_home_hex, 0]
+    if proposer_home_hex is not None and target_home_hex is not None:
+        # gameData format (exportRNBmodel):
+        #   0 players, 1 wonderBricks, 2 transporters, 3 resources, 4 history,
+        #   5 mineContent, 6 gameflow, 7 ongoingVars
+        # resource entry: [type, [location], uniqueID]
+        #   location is [hexID] for bucket 0 (home tile)
+        all_resources = raw_data[3]
+        for rid in offered_res_ids:
+            if rid < len(all_resources):
+                all_resources[rid][1] = [target_home_hex]
+        for rid in requested_res_ids:
+            if rid < len(all_resources):
+                all_resources[rid][1] = [proposer_home_hex]
+        currentGame.gameData = _compress_rnb_gamedata(raw_data)
 
     trade_data["playerTrades"] = [
         t for t in trade_data.get("playerTrades", [])
@@ -1416,13 +1394,25 @@ def _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_da
     _cancel_trades_for_player(trade_data, proposer_idx)
     _cancel_trades_for_player(trade_data, acceptor_idx)
 
-    currentGame.gameData = _compress_rnb_gamedata(raw_data)
     currentGame.playerTradeData = _compress_rnb_trade_data(trade_data)
+
+    # Bump latestUpdate so all clients know state changed and reload
+    oldVer = currentGame.latestUpdate
+    newVer = (int(oldVer) % 1000) + 1
+    currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
+
     currentGame.save()
 
     _broadcast_trade_update(currentGame.id)
 
-    return JsonResponse({"success": True, "forceReload": True, "playerTradeData": currentGame.playerTradeData}, safe=False)
+    return JsonResponse(
+        {
+            "success": True,
+            "latestUpdate": currentGame.latestUpdate,
+            "playerTradeData": currentGame.playerTradeData,
+        },
+        safe=False,
+    )
 
 
 def _handle_rnb_reject_trade(request, currentGame, presenter, raw_data, trade_data, jsonData):

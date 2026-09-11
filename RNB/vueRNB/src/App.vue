@@ -291,6 +291,10 @@ html {
 	text-align: center;
 	font-size: 40px;
 	font-weight: bolder;
+	white-space: normal;
+	word-wrap: break-word;
+	padding: 0 10px;
+	box-sizing: border-box;
 }
 
 /** UNSCOPED CSS */

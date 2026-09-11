@@ -173,7 +173,12 @@ async function RNBwebSocketOnInfo(IncomingInfo) {
 
 	if (IncomingInfo.data.slice(0, 9) === "NEWDATATT") {
 		if (IncomingInfo.data.slice(9) == personal.gameID) {
+			// A trade changed resources, so clear the cached wonder goods list
+			// so the reload recomputes it from the fresh game data.
+			store.context.resIDsOnHomeTile.splice(0)
+			store.context.resIDsInWonderBrick.splice(0)
 			await IO.reloadTradeData()
+			await IO.checkForLatestData()
 			if (personal.yourTurnAudioType > 0) {
 				let beep
 				if (personal.yourTurnAudioType == 1) beep = new Audio("/static/Lobby/common/sounds/beep.mp3")

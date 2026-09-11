@@ -2346,6 +2346,9 @@ export async function acceptTrade(tradeEntry) {
 	const personal = usePersonalStore()
 	let csrftoken = funcs.getCookie("csrftoken")
 
+	const proposerHomeMarker = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === tradeEntry[0])
+	const acceptorHomeMarker = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === tradeEntry[1])
+
 	try {
 		const response = await fetch("/RNB/processTrade/", {
 			method: "POST",
@@ -2357,6 +2360,8 @@ export async function acceptTrade(tradeEntry) {
 				phase: store.gameflow.phase,
 				tradeEntry: tradeEntry,
 				BKSN: personal.pov >= 0 ? store.players[personal.pov].name : personal.name,
+				proposerHomeHex: proposerHomeMarker ? proposerHomeMarker.location[1] : null,
+				targetHomeHex: acceptorHomeMarker ? acceptorHomeMarker.location[1] : null,
 			}),
 			headers: { "X-CSRFToken": csrftoken },
 		})
@@ -2367,11 +2372,12 @@ export async function acceptTrade(tradeEntry) {
 			store.gameMessages.actionError = data.tradeError
 			return
 		}
-		if (data.forceReload) {
-			await checkForLatestData()
+		if (data.success) {
 			if (data.playerTradeData) funcs.decompressTradeData(data.playerTradeData)
+			await checkForLatestData()
+			WS.broadcastGameUpdate()
+			WS.broadcastTradeUpdate()
 		}
-		WS.broadcastGameUpdate()
 	} catch (error) {
 		console.error("Error accepting trade:", error)
 	}

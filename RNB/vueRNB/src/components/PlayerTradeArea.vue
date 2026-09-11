@@ -22,6 +22,10 @@ const isTradeEnabled = computed(() => {
 	return rf.PHASE_WONDERS.includes(store.gameflow.phase) && !personal.soloGame && !personal.trainingGame && store.gameOptions.useTrade
 })
 
+const hasEndedTurn = computed(() => {
+	return rf.MAIN_PHASES.includes(store.gameflow.phase) && !store.gameflow.turnOrder.includes(personal.pov)
+})
+
 const eligibleOpponents = computed(() => {
 	return store.players
 		.map((player, idx) => ({ idx, name: player.displayName || player.name }))
@@ -33,7 +37,7 @@ const yourResIDsOnHomeTile = computed(() => {
 	const homeMarker = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === personal.pov)
 	if (!homeMarker) return []
 	const hexID = homeMarker.location[1]
-	return store.ALL_RESOURCES.filter((r) => r.location[0] === rf.LOCATION_BUCKET && r.location[1] === hexID && r.location[0] !== rf.LOCATION_OOB).map((r) => r.id)
+	return store.ALL_RESOURCES.filter((r) => r.location[0] === rf.LOCATION_BUCKET && r.location[1] === hexID).map((r) => r.id)
 })
 
 const theirResIDsOnHomeTile = computed(() => {
@@ -41,7 +45,7 @@ const theirResIDsOnHomeTile = computed(() => {
 	const homeMarker = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === tradeOpponentIdx.value)
 	if (!homeMarker) return []
 	const hexID = homeMarker.location[1]
-	return store.ALL_RESOURCES.filter((r) => r.location[0] === rf.LOCATION_BUCKET && r.location[1] === hexID && r.location[0] !== rf.LOCATION_OOB).map((r) => r.id)
+	return store.ALL_RESOURCES.filter((r) => r.location[0] === rf.LOCATION_BUCKET && r.location[1] === hexID).map((r) => r.id)
 })
 
 const opponentHasTransporter = computed(() => {
@@ -53,8 +57,18 @@ const opponentHasTransporter = computed(() => {
 })
 
 const canPropose = computed(() => {
-	return tradeOpponentIdx.value >= 0 && tradeYourResIDs.value.length > 0 && tradeTheirResIDs.value.length > 0 && opponentHasTransporter.value && store.context.tradeRelevantOutgoing.length < rf.MAX_PLAYER_TRADES
+	return tradeOpponentIdx.value >= 0 && (tradeYourResIDs.value.length > 0 || tradeTheirResIDs.value.length > 0) && opponentHasTransporter.value && store.context.tradeRelevantOutgoing.length < rf.MAX_PLAYER_TRADES
 })
+
+const incomingCount = computed(() => store.context.tradeRelevantIncoming.length)
+
+function playerColorClass(playerIndex) {
+	return "mainEntryPlayer mainEntryPlayer" + personal.getCorrectedColour(store.players[playerIndex].colour)
+}
+
+function playerColorHex(playerIndex) {
+	return personal.getCorrectedColourHex(store.players[playerIndex].colour)
+}
 
 function toggleTradePanel() {
 	showTradePanel.value = !showTradePanel.value
@@ -115,114 +129,129 @@ function resName(resID) {
 
 <template>
 	<div v-if="isTradeEnabled" class="tradeAreaContainer">
-		<button class="actionsLineButton tradeToggleButton" @click="toggleTradePanel" :class="{ tradeToggleButtonActive: showTradePanel }">
-			Trade
-			<span v-if="store.context.tradeRelevantIncoming.length > 0" class="tradeNotification">{{ store.context.tradeRelevantIncoming.length }}</span>
-		</button>
+		<div class="tradeButtonRow">
+			<button class="actionsLineButton" @click="toggleTradePanel">
+				Trade {{ showTradePanel ? "▲" : "▼" }}
+				<span v-if="incomingCount > 0" class="tradeNotification">{{ incomingCount }}</span>
+			</button>
+		</div>
 
-		<div v-if="showTradePanel" class="tradePanel">
-			<!-- INCOMING TRADES -->
-			<div v-if="store.context.tradeRelevantIncoming.length > 0" class="tradeSection">
-				<strong>Incoming Trades:</strong>
-				<div v-for="(entry, idx) in store.context.tradeRelevantIncoming" :key="idx" class="tradeEntry">
-					<span>{{ store.players[entry[0]].displayName || store.players[entry[0]].name }} offers:</span>
+		<div class="tradePanelWrap" :class="{ tradePanelOpen: showTradePanel }">
+			<div class="tradePanelInner">
+				<!-- INCOMING TRADES -->
+				<div v-if="store.context.tradeRelevantIncoming.length > 0" class="tradeSection">
+					<strong>Incoming Trades:</strong>
+					<div v-for="(entry, idx) in store.context.tradeRelevantIncoming" :key="idx" class="tradeEntry">
+						<span :class="playerColorClass(entry[0])">{{ store.players[entry[0]].displayName }}</span>
+						offers:
+						<span class="tradeResList">
+							<img v-for="resID in entry[2]" :key="resID" class="tradeResImg" :src="resName(resID)" />
+						</span>
+						to
+						<span :class="playerColorClass(entry[1])">{{ store.players[entry[1]].displayName }}</span>
+						for:
+						<span class="tradeResList">
+							<img v-for="resID in entry[3]" :key="resID" class="tradeResImg" :src="resName(resID)" />
+						</span>
+						<br />
+						<button class="actionsLineButton" @click="localAcceptTrade(entry)">Accept</button>
+						<button class="actionsLineButton" @click="localRejectTrade(entry)">Reject</button>
+					</div>
+				</div>
+
+				<!-- OUTGOING TRADES -->
+				<div v-if="store.context.tradeRelevantOutgoing.length > 0" class="tradeSection">
+					<strong>Your Pending Trades:</strong>
+					<div v-for="(entry, idx) in store.context.tradeRelevantOutgoing" :key="idx" class="tradeEntry">
+						<span :class="playerColorClass(entry[0])">{{ store.players[entry[0]].displayName }}</span>
+						offers:
+						<span class="tradeResList">
+							<img v-for="resID in entry[2]" :key="resID" class="tradeResImg" :src="resName(resID)" />
+						</span>
+						to
+						<span :class="playerColorClass(entry[1])">{{ store.players[entry[1]].displayName }}</span>
+						for:
+						<span class="tradeResList">
+							<img v-for="resID in entry[3]" :key="resID" class="tradeResImg" :src="resName(resID)" />
+						</span>
+						<br />
+						<button class="actionsLineButton" @click="localCancelTrade(entry)">Cancel</button>
+					</div>
+				</div>
+
+				<!-- TRADE SETUP -->
+				<div v-if="!tradeConfirmStep && !hasEndedTurn" class="tradeSection">
+					<strong>Propose a Trade:</strong>
+					<br />
+					<span>Opponent:</span>
+					<select v-model="tradeOpponentIdx">
+						<option :value="-1">-- Choose --</option>
+						<option v-for="opponent in eligibleOpponents" :key="opponent.idx" :value="opponent.idx" :style="{ backgroundColor: playerColorHex(opponent.idx), color: 'white' }">
+							{{ opponent.name }}
+						</option>
+					</select>
+
+					<div v-if="tradeOpponentIdx >= 0">
+						<div v-if="!opponentHasTransporter" class="donkeyWarningSpan">Opponent has no transporter on their home tile</div>
+
+						<div class="tradeGoodsSection">
+							<strong>Your goods:</strong>
+							<span v-if="yourResIDsOnHomeTile.length === 0" class="donkeyWarningSpan">No goods on your home tile</span>
+							<div class="tradeResPicker">
+								<img v-for="resID in yourResIDsOnHomeTile" :key="resID" class="tradeResImg tradeResSelectable" :class="{ tradeResSelected: tradeYourResIDs.includes(resID) }" :src="resName(resID)" @click="toggleYourRes(resID)" />
+							</div>
+						</div>
+
+						<div class="tradeGoodsSection">
+							<strong>
+								<span :class="playerColorClass(tradeOpponentIdx)">{{ store.players[tradeOpponentIdx].displayName }}</span>
+								's goods:
+							</strong>
+							<div class="tradeResPicker">
+								<img v-for="resID in theirResIDsOnHomeTile" :key="resID" class="tradeResImg tradeResSelectable" :class="{ tradeResSelected: tradeTheirResIDs.includes(resID) }" :src="resName(resID)" @click="toggleTheirRes(resID)" />
+							</div>
+						</div>
+
+						<button class="actionsLineButton" :disabled="!canPropose" @click="proposeTrade">Propose Trade</button>
+					</div>
+				</div>
+
+				<!-- ENDED TURN - cannot propose -->
+				<div v-if="!tradeConfirmStep && hasEndedTurn" class="tradeSection">
+					<span class="donkeyWarningSpan">You may not propose a trade once you have ended your turn</span>
+				</div>
+
+				<!-- CONFIRM TRADE -->
+				<div v-if="tradeConfirmStep" class="tradeSection">
+					<strong>Confirm Trade:</strong>
+					<br />
+					<span>You give:</span>
 					<span class="tradeResList">
-						<img v-for="resID in entry[2]" :key="resID" class="tradeResImg" :src="resName(resID)" />
-					</span>
-					<span>for your:</span>
-					<span class="tradeResList">
-						<img v-for="resID in entry[3]" :key="resID" class="tradeResImg" :src="resName(resID)" />
+						<img v-for="resID in tradeYourResIDs" :key="resID" class="tradeResImg" :src="resName(resID)" />
 					</span>
 					<br />
-					<button class="tradeSmallButton tradeAcceptButton" @click="localAcceptTrade(entry)">Accept</button>
-					<button class="tradeSmallButton tradeRejectButton" @click="localRejectTrade(entry)">Reject</button>
-				</div>
-			</div>
-
-			<!-- OUTGOING TRADES -->
-			<div v-if="store.context.tradeRelevantOutgoing.length > 0" class="tradeSection">
-				<strong>Your Pending Trades:</strong>
-				<div v-for="(entry, idx) in store.context.tradeRelevantOutgoing" :key="idx" class="tradeEntry">
-					<span>You offer:</span>
+					<span>You receive:</span>
 					<span class="tradeResList">
-						<img v-for="resID in entry[2]" :key="resID" class="tradeResImg" :src="resName(resID)" />
-					</span>
-					<span>to {{ store.players[entry[1]].displayName || store.players[entry[1]].name }} for:</span>
-					<span class="tradeResList">
-						<img v-for="resID in entry[3]" :key="resID" class="tradeResImg" :src="resName(resID)" />
+						<img v-for="resID in tradeTheirResIDs" :key="resID" class="tradeResImg" :src="resName(resID)" />
 					</span>
 					<br />
-					<button class="tradeSmallButton tradeCancelButton" @click="localCancelTrade(entry)">Cancel</button>
+					<button class="actionsLineButton" @click="confirmPropose">Confirm</button>
+					<button class="actionsLineButton" @click="cancelPropose">Back</button>
 				</div>
 			</div>
-
-			<!-- TRADE SETUP -->
-			<div v-if="!tradeConfirmStep" class="tradeSection">
-				<strong>Propose a Trade:</strong>
-				<br />
-				<span>Opponent:</span>
-				<select v-model="tradeOpponentIdx" class="tradeSelect">
-					<option :value="-1">-- Choose --</option>
-					<option v-for="opponent in eligibleOpponents" :key="opponent.idx" :value="opponent.idx">
-						{{ opponent.name }}
-					</option>
-				</select>
-
-				<div v-if="tradeOpponentIdx >= 0">
-					<div v-if="!opponentHasTransporter" class="donkeyWarningSpan">Opponent has no transporter on their home tile</div>
-
-					<div class="tradeGoodsSection">
-						<strong>Your goods:</strong>
-						<span v-if="yourResIDsOnHomeTile.length === 0" class="donkeyWarningSpan">No goods on your home tile</span>
-						<div class="tradeResPicker">
-							<img v-for="resID in yourResIDsOnHomeTile" :key="resID" class="tradeResImg tradeResSelectable" :class="{ tradeResSelected: tradeYourResIDs.includes(resID) }" :src="resName(resID)" @click="toggleYourRes(resID)" />
-						</div>
-					</div>
-
-					<div class="tradeGoodsSection">
-						<strong>{{ store.players[tradeOpponentIdx].displayName || store.players[tradeOpponentIdx].name }}'s goods:</strong>
-						<div class="tradeResPicker">
-							<img v-for="resID in theirResIDsOnHomeTile" :key="resID" class="tradeResImg tradeResSelectable" :class="{ tradeResSelected: tradeTheirResIDs.includes(resID) }" :src="resName(resID)" @click="toggleTheirRes(resID)" />
-						</div>
-					</div>
-
-					<button class="actionsLineButton" :disabled="!canPropose" @click="proposeTrade">Propose Trade</button>
-				</div>
-			</div>
-
-			<!-- CONFIRM TRADE -->
-			<div v-if="tradeConfirmStep" class="tradeSection">
-				<strong>Confirm Trade:</strong>
-				<br />
-				<span>You give:</span>
-				<span class="tradeResList">
-					<img v-for="resID in tradeYourResIDs" :key="resID" class="tradeResImg" :src="resName(resID)" />
-				</span>
-				<br />
-				<span>You receive:</span>
-				<span class="tradeResList">
-					<img v-for="resID in tradeTheirResIDs" :key="resID" class="tradeResImg" :src="resName(resID)" />
-				</span>
-				<br />
-				<button class="actionsLineButton tradeAcceptButton" @click="confirmPropose">Confirm</button>
-				<button class="actionsLineButton" @click="cancelPropose">Back</button>
-			</div>
-
-			<button class="actionsLineButton" @click="toggleTradePanel" style="margin-top: 5px">Close</button>
 		</div>
 	</div>
 </template>
 
 <style scoped>
 .tradeAreaContainer {
-	position: relative;
-	display: inline-block;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
-.tradeToggleButton {
-	position: relative;
-}
-.tradeToggleButtonActive {
-	background-color: #c9a84c;
+.tradeButtonRow {
+	display: flex;
+	justify-content: center;
 }
 .tradeNotification {
 	background-color: red;
@@ -232,16 +261,21 @@ function resName(resID) {
 	font-size: 10px;
 	margin-left: 3px;
 }
-.tradePanel {
-	position: absolute;
-	left: 0;
-	bottom: 35px;
-	background-color: #2c2c2c;
+.tradePanelWrap {
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 0.3s ease-in-out;
+	width: 100%;
+}
+.tradePanelWrap.tradePanelOpen {
+	max-height: 500px;
+}
+.tradePanelInner {
+	background-color: #d4eafd;
 	border: 1px solid #555;
 	padding: 8px;
-	min-width: 350px;
-	z-index: 100;
 	border-radius: 4px;
+	margin-top: 4px;
 }
 .tradeSection {
 	margin-bottom: 8px;
@@ -256,8 +290,8 @@ function resName(resID) {
 	vertical-align: middle;
 }
 .tradeResImg {
-	width: 20px;
-	height: 20px;
+	width: 30px;
+	height: 30px;
 	vertical-align: middle;
 	margin: 1px;
 }
@@ -271,34 +305,8 @@ function resName(resID) {
 }
 .tradeResSelected {
 	border-color: #4caf50;
+	border-width: 4px;
 	background-color: rgba(76, 175, 80, 0.2);
-}
-.tradeSelect {
-	background-color: #3c3c3c;
-	color: white;
-	border: 1px solid #666;
-	padding: 3px;
-	margin: 3px 0;
-}
-.tradeSmallButton {
-	padding: 2px 8px;
-	font-size: 11px;
-	margin: 2px;
-}
-.tradeAcceptButton {
-	background-color: #2e7d32;
-	color: white;
-	border: 1px solid #4caf50;
-}
-.tradeRejectButton {
-	background-color: #c62828;
-	color: white;
-	border: 1px solid #f44336;
-}
-.tradeCancelButton {
-	background-color: #555;
-	color: white;
-	border: 1px solid #777;
 }
 .tradeGoodsSection {
 	margin: 5px 0;
