@@ -955,9 +955,18 @@ def TGZstatGames(request):
         num_pages = paginator.num_pages
 
     # Filter the games for the current page ONLY
-    TGZ_games = Game.objects.filter(gameCode="TGZ", original_id__in=gameIDs_page).select_related("creator__profile", "creator").prefetch_related("players__player", "invitedPlayers")
-
-    finishedGames = list(TGZ_games)
+    # Try to find games by id first, then fall back to original_id for old game references
+    finishedGames = list(
+        Game.objects.filter(gameCode="TGZ", id__in=gameIDs_page)
+        .select_related("creator__profile", "creator")
+        .prefetch_related("players__player", "invitedPlayers")
+    )
+    if not finishedGames:
+        finishedGames = list(
+            Game.objects.filter(gameCode="TGZ", original_id__in=gameIDs_page)
+            .select_related("creator__profile", "creator")
+            .prefetch_related("players__player", "invitedPlayers")
+        )
 
     # Sort by latestUpdate
     finishedGames.sort(key=lambda x: x.latestUpdate, reverse=True)

@@ -174,8 +174,10 @@ def analyze_games(player_count_index, schism_games=False, external_tournament=Fa
             .distinct()
         )
     finishedGamesCount = len(dataSet)
+    all_game_ids = []
 
     for game_data_encoded, winner_username, game_id in dataSet:
+        all_game_ids.append(game_id)
         try:
             byte_array = bytearray(base64.b64decode(game_data_encoded))
             decompressed_data = gzip.decompress(byte_array)
@@ -259,6 +261,7 @@ def analyze_games(player_count_index, schism_games=False, external_tournament=Fa
         seat_wins_4p_ids,
         seat_wins_4pT,
         seat_wins_4pT_ids,
+        all_game_ids,
     )
 
 
@@ -271,6 +274,7 @@ def calculate_stats(
     finishedGamesCount,
     playerCount,
     schism_games,
+    all_game_ids=None,
 ):
     """Calculates statistics based on the game data."""
     if schism_games:
@@ -324,7 +328,7 @@ def calculate_stats(
         god_name = G_NAMES[i]
         if god_name == "None":
             available_count = finishedGamesCount
-            available_game_ids = list(range(1, finishedGamesCount + 1))  # Assuming game IDs are sequential
+            available_game_ids = all_game_ids if all_game_ids is not None else list(range(1, finishedGamesCount + 1))
             not_chosen_game_ids = []
             not_chosen_count = 0  # placeholder 0
         else:
@@ -423,6 +427,7 @@ def generate_stats_data(schism_games=False):
             seat_wins_4p_ids,
             seat_wins_4pT,
             seat_wins_4pT_ids,
+            all_game_ids,
         ) = analyze_games(playerCountIndex, schism_games)
 
         G_STATS_DATA, S_STATS_DATA = calculate_stats(
@@ -434,6 +439,7 @@ def generate_stats_data(schism_games=False):
             finishedGamesCount,
             playerCount,
             schism_games,
+            all_game_ids,
         )
 
         player_data = {
@@ -469,6 +475,7 @@ def generate_stats_data(schism_games=False):
         seat_wins_4p_ids,
         seat_wins_4pT,
         seat_wins_4pT_ids,
+        all_game_ids,
     ) = analyze_games(4, schism_games, external_tournament=True)  # Always 4 player
 
     G_STATS_DATA, S_STATS_DATA = calculate_stats(
@@ -480,6 +487,7 @@ def generate_stats_data(schism_games=False):
         finishedGamesCount,
         4,  # Always 4 player
         schism_games,
+        all_game_ids,
     )
 
     # ALL_DATA["player_counts"]["4.5"] = {
