@@ -3817,6 +3817,7 @@ export const PHP_NEIGHBOUR_PAIRS = [
 	[PH_QUE_1, PH_QUE_3],
 	[PH_QUE_2, PH_QUE_3],
 	[PH_QUE_2, PH_CAP_1],
+	[PH_QUE_3, PH_CAP_1],
 	[PH_QUE_3, PH_C_4],
 	[PH_QUE_3, PH_QUE_4],
 	[PH_QUE_3, PH_QUE_5],
