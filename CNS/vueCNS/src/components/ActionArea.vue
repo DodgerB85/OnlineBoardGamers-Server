@@ -10,7 +10,7 @@ import * as controller from "../js/CNScontroller"
 import * as funcs from "../js/CNSfuncs"
 import * as model from "../js/CNSmodel"
 import * as map from "../js/CNSmap"
-import * as Bot from "../js/CNSBot"
+import * as Bot from "../js/CNSbot"
 
 import { ref, watch, onUnmounted } from "vue"
 
