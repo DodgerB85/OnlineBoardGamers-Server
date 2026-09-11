@@ -16,7 +16,7 @@ export const KICKOUT_SOLO_DELAY_MS = 2 * 24 * 60 * 60 * 1000
 
 export const SUPER_USERS = ["BotKickStarter"]
 export const DEBUG_USERS = ["admin", "BotKickStarter", "Ross"]
-export const DEBUG_PRACTICE_USERS = ["JoshuaAcosta", "BlackM"]
+export const DEBUG_PRACTICE_USERS = ["JoshuaAcosta", "BlackM", "chaosmagician"]
 export const DEBUG_VERTEX_USERS = ["Ross"]
 export const APP_ONLY_USERS = ["Ross"]
 
@@ -225,6 +225,7 @@ export const ACT_CONFIRM_RESIGN = 97
 export const ACT_CONFIRM_KICKOUT = 98
 export const ACT_CONFIRM_END_TURN = 99
 export const ACT_CONFIRM_END_GAME = 100
+export const ACT_SETUP_PLAYER_TRADE = 101
 
 // ADMIN ACTIONS
 export const ACT_ADMIN_ADD_RES = 900
@@ -304,6 +305,9 @@ export const HIST_NO_MOVEMENT_ACTIONS = 36
 export const HIST_NO_WONDER_ACTIONS = 37
 
 export const HIST_GAME_END = 40
+export const HIST_PLAYER_TRADE = 41
+
+export const MAX_PLAYER_TRADES = 5
 
 export const ENTRIES_TO_IGNORE = [HIST_REWIND, HIST_KICKOUT, HIST_RESIGN]
 

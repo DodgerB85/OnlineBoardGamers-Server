@@ -2303,3 +2303,154 @@ export async function cancelPreviewAndRedo() {
 		model.getAllInGameTransporters()[i].remainingMoves = savedRemainingMoves[i]
 	}
 }
+
+// ===== PLAYER TRADE FUNCTIONS =====
+
+export async function proposeTrade(targetIdx, yourResIDs, theirResIDs) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	let csrftoken = funcs.getCookie("csrftoken")
+
+	try {
+		const response = await fetch("/RNB/processTrade/", {
+			method: "POST",
+			body: JSON.stringify({
+				action: "proposeTrade",
+				gameID: personal.gameID,
+				latestUpdate: personal.latestUpdate,
+				turn: store.gameflow.turn,
+				phase: store.gameflow.phase,
+				targetIdx: targetIdx,
+				yourResIDs: yourResIDs,
+				theirResIDs: theirResIDs,
+				BKSN: personal.pov >= 0 ? store.players[personal.pov].name : personal.name,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) throw new Error("Network response was not ok")
+		const data = await response.json()
+		if (data.syncError) return
+		if (data.tradeError) {
+			store.gameMessages.actionError = data.tradeError
+			return
+		}
+		if (data.playerTradeData) funcs.decompressTradeData(data.playerTradeData)
+		WS.broadcastTradeUpdate()
+	} catch (error) {
+		console.error("Error proposing trade:", error)
+	}
+}
+
+export async function acceptTrade(tradeEntry) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	let csrftoken = funcs.getCookie("csrftoken")
+
+	try {
+		const response = await fetch("/RNB/processTrade/", {
+			method: "POST",
+			body: JSON.stringify({
+				action: "acceptTrade",
+				gameID: personal.gameID,
+				latestUpdate: personal.latestUpdate,
+				turn: store.gameflow.turn,
+				phase: store.gameflow.phase,
+				tradeEntry: tradeEntry,
+				BKSN: personal.pov >= 0 ? store.players[personal.pov].name : personal.name,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) throw new Error("Network response was not ok")
+		const data = await response.json()
+		if (data.syncError) return
+		if (data.tradeError) {
+			store.gameMessages.actionError = data.tradeError
+			return
+		}
+		if (data.forceReload) {
+			await checkForLatestData()
+			if (data.playerTradeData) funcs.decompressTradeData(data.playerTradeData)
+		}
+		WS.broadcastGameUpdate()
+	} catch (error) {
+		console.error("Error accepting trade:", error)
+	}
+}
+
+export async function rejectTrade(tradeEntry) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	let csrftoken = funcs.getCookie("csrftoken")
+
+	try {
+		const response = await fetch("/RNB/processTrade/", {
+			method: "POST",
+			body: JSON.stringify({
+				action: "rejectTrade",
+				gameID: personal.gameID,
+				latestUpdate: personal.latestUpdate,
+				turn: store.gameflow.turn,
+				phase: store.gameflow.phase,
+				tradeEntry: tradeEntry,
+				BKSN: personal.pov >= 0 ? store.players[personal.pov].name : personal.name,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) throw new Error("Network response was not ok")
+		const data = await response.json()
+		if (data.syncError) return
+		if (data.playerTradeData) funcs.decompressTradeData(data.playerTradeData)
+		WS.broadcastTradeUpdate()
+	} catch (error) {
+		console.error("Error rejecting trade:", error)
+	}
+}
+
+export async function cancelTrade(tradeEntry) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	let csrftoken = funcs.getCookie("csrftoken")
+
+	try {
+		const response = await fetch("/RNB/processTrade/", {
+			method: "POST",
+			body: JSON.stringify({
+				action: "cancelTrade",
+				gameID: personal.gameID,
+				latestUpdate: personal.latestUpdate,
+				turn: store.gameflow.turn,
+				phase: store.gameflow.phase,
+				tradeEntry: tradeEntry,
+				BKSN: personal.pov >= 0 ? store.players[personal.pov].name : personal.name,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) throw new Error("Network response was not ok")
+		const data = await response.json()
+		if (data.syncError) return
+		if (data.playerTradeData) funcs.decompressTradeData(data.playerTradeData)
+		WS.broadcastTradeUpdate()
+	} catch (error) {
+		console.error("Error cancelling trade:", error)
+	}
+}
+
+export async function reloadTradeData() {
+	const personal = usePersonalStore()
+	let csrftoken = funcs.getCookie("csrftoken")
+
+	try {
+		const response = await fetch("/RNB/data/4/", {
+			method: "POST",
+			body: JSON.stringify({
+				gameID: personal.gameID,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) throw new Error("Network response was not ok")
+		const data = await response.json()
+		funcs.decompressTradeData(data.playerTradeData)
+	} catch (error) {
+		console.error("Error fetching trade data:", error)
+	}
+}

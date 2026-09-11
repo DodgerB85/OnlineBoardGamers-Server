@@ -297,6 +297,14 @@ export const useModelStore = defineStore("store", () => {
 		shoresToHighlight: [],
 		halfShoresToHighlight: [], // [hexID, vertex, sideForTheHalfSide]
 
+		// Player Trade vars
+		tradeRelevantIncoming: [], // trades targeting me or from me
+		tradeRelevantOutgoing: [], // trades from me
+		tradeIrrelevant: [], // trades not involving me
+		tradeOpponentIdx: -1, // selected opponent for trade proposal
+		tradeYourResIDs: [], // resource IDs offered by proposer in trade setup
+		tradeTheirResIDs: [], // resource IDs requested from opponent in trade setup
+
 		pathfinding: {},
 	})
 

@@ -792,6 +792,44 @@ export function exportRNBmodel(forGameOver) {
 	return base64Data
 }
 
+export function decompressTradeData(data) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	if (personal.pov < 0 || !data || data.length === 0) {
+		store.context.tradeRelevantIncoming.splice(0)
+		store.context.tradeRelevantOutgoing.splice(0)
+		store.context.tradeIrrelevant.splice(0)
+		return
+	}
+
+	let tradeData
+	try {
+		let compressedData = Uint8Array.from(atob(data), (c) => c.charCodeAt(0))
+		// eslint-disable-next-line no-undef
+		let decompressedData = pako.ungzip(compressedData, { to: "string" })
+		tradeData = JSON.parse(decompressedData)
+	} catch {
+		store.context.tradeRelevantIncoming.splice(0)
+		store.context.tradeRelevantOutgoing.splice(0)
+		store.context.tradeIrrelevant.splice(0)
+		return
+	}
+
+	let relevantIncoming = []
+	let relevantOutgoing = []
+	let irrelevant = []
+
+	for (const trade of tradeData.playerTrades) {
+		if (trade[1] === personal.pov) relevantIncoming.push([...trade])
+		else if (trade[0] === personal.pov) relevantOutgoing.push([...trade])
+		else irrelevant.push([...trade])
+	}
+
+	store.context.tradeRelevantIncoming = relevantIncoming
+	store.context.tradeRelevantOutgoing = relevantOutgoing
+	store.context.tradeIrrelevant = irrelevant
+}
+
 export function importRNBmodel(input, forGameOver) {
 	// COUNT BRICKS AND ADD DESERT TO PASTURE CONVERSION
 	const store = useModelStore()

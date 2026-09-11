@@ -18,6 +18,7 @@ urlpatterns = [
     path("sendChatMessageRNB/", views.sendChatMessageRNB, name="sendChatMessagRNB"),
     path("saveNotesRNB/", views.saveNotesRNB, name="saveNotesRNB"),
     path("processRNBturn/", views.processRNBturn, name="processRNBturn"),
+    path("processTrade/", views.processRNBtrade, name="processRNBtrade"),
     path("data/<int:dataType>/", views.RNBdata, name="RNBdata"),
     path("saveZoomRNB/", views.saveZoomRNB, name="saveZoomRNB"),
     path("saveRNBmap/", views.saveRNBmap, name="saveRNBmap"),

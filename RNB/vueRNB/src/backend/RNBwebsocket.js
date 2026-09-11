@@ -170,6 +170,18 @@ async function RNBwebSocketOnInfo(IncomingInfo) {
 			} else RNBwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
 		}
 	}
+
+	if (IncomingInfo.data.slice(0, 9) === "NEWDATATT") {
+		if (IncomingInfo.data.slice(9) == personal.gameID) {
+			await IO.reloadTradeData()
+			if (personal.yourTurnAudioType > 0) {
+				let beep
+				if (personal.yourTurnAudioType == 1) beep = new Audio("/static/Lobby/common/sounds/beep.mp3")
+				if (personal.yourTurnAudioType == 2) beep = new Audio("/static/Lobby/common/sounds/bell.mp3")
+				beep.play()
+			}
+		}
+	}
 }
 
 export async function broadcastGameUpdate(existingPromise = null) {
@@ -202,5 +214,18 @@ export async function broadcastChatUpdate() {
 		}
 	} catch (err) {
 		console.warn("Chat broadcast failed:", err)
+	}
+}
+
+export async function broadcastTradeUpdate() {
+	const personal = usePersonalStore()
+	if (!personal.liveWS) return
+	try {
+		const socket = await StartWebSocket()
+		if (socket.readyState === WebSocket.OPEN) {
+			socket.send("NEWDATATT" + String(personal.gameID))
+		}
+	} catch (err) {
+		console.warn("Trade broadcast failed:", err)
 	}
 }

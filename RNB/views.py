@@ -714,6 +714,8 @@ def _processRNBturn(request):
 
             presenter.clearKickoutVotes()
 
+            _cancel_all_trades_on_turn_submit(currentGame, nameToUse)
+
             currentGame.save()
 
             schedule(
@@ -1210,6 +1212,288 @@ def _processRNBturn(request):
     return HttpResponse(status=204)  # No Content
 
 
+# ===== PLAYER TRADE =====
+
+LOCATION_BUCKET_RNB = 7
+
+
+def _decompress_rnb_trade_data(raw_trade_data):
+    if not raw_trade_data:
+        return {"playerTrades": []}
+    return json.loads(gzip.decompress(bytearray(base64.b64decode(raw_trade_data))).decode("utf-8"))
+
+
+def _compress_rnb_trade_data(trade_data):
+    return base64.b64encode(gzip.compress(json.dumps(trade_data).encode("utf-8"))).decode("utf-8")
+
+
+def _decompress_rnb_gamedata(string_to_decompress):
+    return json.loads(gzip.decompress(bytearray(base64.b64decode(string_to_decompress))).decode("utf-8"))
+
+
+def _compress_rnb_gamedata(raw_data):
+    return base64.b64encode(gzip.compress(json.dumps(raw_data).encode("utf-8"))).decode("utf-8")
+
+
+def _get_rnb_player_home_hex_id(raw_data, player_index):
+    for marker in raw_data[8]:
+        if marker.get("ownerIndex") == player_index:
+            return marker["location"][1]
+    return None
+
+
+def _broadcast_trade_update(game_id):
+    """Trade WS broadcasts are handled client-side via WS.broadcastTradeUpdate()."""
+    pass
+
+
+def _get_player_idx_from_name(presenter, name):
+    all_names = presenter.getAllPlayersOrderedySeatInArray(False, True)
+    for i, n in enumerate(all_names):
+        if n == name:
+            return i
+    return None
+
+
+def _cancel_trades_for_player(trade_data, player_index):
+    original_len = len(trade_data["playerTrades"])
+    trade_data["playerTrades"] = [
+        t for t in trade_data["playerTrades"]
+        if t[0] != player_index and t[1] != player_index
+    ]
+    return len(trade_data["playerTrades"]) != original_len
+
+
+@login_required()
+def processRNBtrade(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    jsonData = json.loads(request.body)
+    game_id = jsonData["gameID"]
+
+    try:
+        currentGame = Game.objects.get(id=game_id, gameCode="RNB")
+    except Game.DoesNotExist:
+        raise Http404(gettext("Game does not exist")) from None
+
+    presenter = cast("RNBpresenter", currentGame.presenter())
+
+    raw_data = _decompress_rnb_gamedata(currentGame.gameData)
+    trade_data = _decompress_rnb_trade_data(currentGame.playerTradeData or "")
+
+    action = jsonData["action"]
+
+    if action == "proposeTrade":
+        return _handle_rnb_propose_trade(request, currentGame, presenter, raw_data, trade_data, jsonData)
+    elif action == "acceptTrade":
+        return _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_data, jsonData)
+    elif action == "rejectTrade":
+        return _handle_rnb_reject_trade(request, currentGame, presenter, raw_data, trade_data, jsonData)
+    elif action == "cancelTrade":
+        return _handle_rnb_cancel_trade(request, currentGame, presenter, raw_data, trade_data, jsonData)
+
+    return HttpResponse(status=204)
+
+
+def _handle_rnb_propose_trade(request, currentGame, presenter, raw_data, trade_data, jsonData):
+    nameToUse = request.user.username
+    if request.user.username == "BotKickStarter":
+        nameToUse = jsonData.get("BKSN", nameToUse)
+
+    proposer_idx = _get_player_idx_from_name(presenter, nameToUse)
+    if proposer_idx is None:
+        return JsonResponse({"tradeError": "Player not found"}, safe=False)
+
+    target_idx = jsonData["targetIdx"]
+    your_res_ids = jsonData["yourResIDs"]
+    their_res_ids = jsonData["theirResIDs"]
+
+    if proposer_idx == target_idx:
+        return JsonResponse({"tradeError": "Cannot trade with yourself"}, safe=False)
+
+    if currentGame.phase != rfRNB.PHASE_WONDER_TO:
+        return JsonResponse({"tradeError": "Trade only allowed during wonder phase"}, safe=False)
+
+    loaded_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    if rfRNB.SO_TRADE not in loaded_options:
+        return JsonResponse({"tradeError": "Trade option not enabled"}, safe=False)
+
+    if len(trade_data.get("playerTrades", [])) >= 5:
+        return JsonResponse({"tradeError": "Maximum concurrent trades reached"}, safe=False)
+
+    proposer_count = sum(1 for t in trade_data.get("playerTrades", []) if t[0] == proposer_idx)
+    if proposer_count >= 5:
+        return JsonResponse({"tradeError": "You have too many pending trades"}, safe=False)
+
+    proposer_home_hex = _get_rnb_player_home_hex_id(raw_data, proposer_idx)
+    target_home_hex = _get_rnb_player_home_hex_id(raw_data, target_idx)
+
+    if proposer_home_hex is None or target_home_hex is None:
+        return JsonResponse({"tradeError": "Player home not found"}, safe=False)
+
+    all_resources = raw_data[6]
+    for rid in your_res_ids:
+        if rid >= len(all_resources):
+            return JsonResponse({"tradeError": "Invalid resource ID"}, safe=False)
+        res = all_resources[rid]
+        if res.get("location", [0, -1, -1])[0] != LOCATION_BUCKET_RNB or res["location"][1] != proposer_home_hex:
+            return JsonResponse({"tradeError": "Your resource not on your home tile"}, safe=False)
+
+    for rid in their_res_ids:
+        if rid >= len(all_resources):
+            return JsonResponse({"tradeError": "Invalid resource ID"}, safe=False)
+        res = all_resources[rid]
+        if res.get("location", [0, -1, -1])[0] != LOCATION_BUCKET_RNB or res["location"][1] != target_home_hex:
+            return JsonResponse({"tradeError": "Their resource not on their home tile"}, safe=False)
+
+    trade_entry = [proposer_idx, target_idx, your_res_ids, their_res_ids, "pending"]
+    trade_data.setdefault("playerTrades", []).append(trade_entry)
+
+    currentGame.playerTradeData = _compress_rnb_trade_data(trade_data)
+    currentGame.save()
+
+    _broadcast_trade_update(currentGame.id)
+
+    return JsonResponse({"playerTradeData": currentGame.playerTradeData}, safe=False)
+
+
+def _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_data, jsonData):
+    nameToUse = request.user.username
+    if request.user.username == "BotKickStarter":
+        nameToUse = jsonData.get("BKSN", nameToUse)
+
+    acceptor_idx = _get_player_idx_from_name(presenter, nameToUse)
+    if acceptor_idx is None:
+        return JsonResponse({"tradeError": "Player not found"}, safe=False)
+
+    trade_entry = jsonData["tradeEntry"]
+    if len(trade_entry) < 5:
+        return JsonResponse({"tradeError": "Invalid trade entry"}, safe=False)
+
+    if trade_entry[1] != acceptor_idx:
+        return JsonResponse({"tradeError": "This trade is not for you"}, safe=False)
+
+    if currentGame.phase != rfRNB.PHASE_WONDER_TO:
+        return JsonResponse({"tradeError": "Trade only allowed during wonder phase"}, safe=False)
+
+    proposer_idx = trade_entry[0]
+    your_res_ids = trade_entry[3]  # what acceptor gives (proposer requested)
+    their_res_ids = trade_entry[2]  # what acceptor receives (proposer offered)
+
+    proposer_home_hex = _get_rnb_player_home_hex_id(raw_data, proposer_idx)
+    target_home_hex = _get_rnb_player_home_hex_id(raw_data, acceptor_idx)
+
+    if proposer_home_hex is None or target_home_hex is None:
+        return JsonResponse({"tradeError": "Player home not found"}, safe=False)
+
+    all_resources = raw_data[6]
+    for rid in their_res_ids:
+        if rid >= len(all_resources):
+            return JsonResponse({"tradeError": "Resource no longer available"}, safe=False)
+        res = all_resources[rid]
+        if res.get("location", [0, -1, -1])[0] != LOCATION_BUCKET_RNB or res["location"][1] != proposer_home_hex:
+            return JsonResponse({"tradeError": "Resource no longer available"}, safe=False)
+
+    for rid in your_res_ids:
+        if rid >= len(all_resources):
+            return JsonResponse({"tradeError": "Resource no longer available"}, safe=False)
+        res = all_resources[rid]
+        if res.get("location", [0, -1, -1])[0] != LOCATION_BUCKET_RNB or res["location"][1] != target_home_hex:
+            return JsonResponse({"tradeError": "Resource no longer available"}, safe=False)
+
+    for rid in their_res_ids:
+        all_resources[rid]["location"] = [LOCATION_BUCKET_RNB, target_home_hex, 0]
+
+    for rid in your_res_ids:
+        all_resources[rid]["location"] = [LOCATION_BUCKET_RNB, proposer_home_hex, 0]
+
+    trade_data["playerTrades"] = [
+        t for t in trade_data.get("playerTrades", [])
+        if not (t[0] == proposer_idx and t[1] == acceptor_idx and t[2] == trade_entry[2] and t[3] == trade_entry[3])
+    ]
+
+    _cancel_trades_for_player(trade_data, proposer_idx)
+    _cancel_trades_for_player(trade_data, acceptor_idx)
+
+    currentGame.gameData = _compress_rnb_gamedata(raw_data)
+    currentGame.playerTradeData = _compress_rnb_trade_data(trade_data)
+    currentGame.save()
+
+    _broadcast_trade_update(currentGame.id)
+
+    return JsonResponse({"success": True, "forceReload": True, "playerTradeData": currentGame.playerTradeData}, safe=False)
+
+
+def _handle_rnb_reject_trade(request, currentGame, presenter, raw_data, trade_data, jsonData):
+    nameToUse = request.user.username
+    if request.user.username == "BotKickStarter":
+        nameToUse = jsonData.get("BKSN", nameToUse)
+
+    rejector_idx = _get_player_idx_from_name(presenter, nameToUse)
+    if rejector_idx is None:
+        return JsonResponse({"tradeError": "Player not found"}, safe=False)
+
+    trade_entry = jsonData["tradeEntry"]
+    if len(trade_entry) < 5:
+        return JsonResponse({"tradeError": "Invalid trade entry"}, safe=False)
+
+    if trade_entry[1] != rejector_idx:
+        return JsonResponse({"tradeError": "This trade is not for you"}, safe=False)
+
+    trade_data["playerTrades"] = [
+        t for t in trade_data.get("playerTrades", [])
+        if not (t[0] == trade_entry[0] and t[1] == trade_entry[1] and t[2] == trade_entry[2] and t[3] == trade_entry[3])
+    ]
+
+    currentGame.playerTradeData = _compress_rnb_trade_data(trade_data)
+    currentGame.save()
+
+    _broadcast_trade_update(currentGame.id)
+
+    return JsonResponse({"playerTradeData": currentGame.playerTradeData}, safe=False)
+
+
+def _handle_rnb_cancel_trade(request, currentGame, presenter, raw_data, trade_data, jsonData):
+    nameToUse = request.user.username
+    if request.user.username == "BotKickStarter":
+        nameToUse = jsonData.get("BKSN", nameToUse)
+
+    canceller_idx = _get_player_idx_from_name(presenter, nameToUse)
+    if canceller_idx is None:
+        return JsonResponse({"tradeError": "Player not found"}, safe=False)
+
+    trade_entry = jsonData["tradeEntry"]
+    if len(trade_entry) < 5:
+        return JsonResponse({"tradeError": "Invalid trade entry"}, safe=False)
+
+    if trade_entry[0] != canceller_idx:
+        return JsonResponse({"tradeError": "You can only cancel your own trades"}, safe=False)
+
+    trade_data["playerTrades"] = [
+        t for t in trade_data.get("playerTrades", [])
+        if not (t[0] == trade_entry[0] and t[1] == trade_entry[1] and t[2] == trade_entry[2] and t[3] == trade_entry[3])
+    ]
+
+    currentGame.playerTradeData = _compress_rnb_trade_data(trade_data)
+    currentGame.save()
+
+    _broadcast_trade_update(currentGame.id)
+
+    return JsonResponse({"playerTradeData": currentGame.playerTradeData}, safe=False)
+
+
+def _cancel_all_trades_on_turn_submit(currentGame, player_name):
+    """Cancel all trades involving a player when they submit their turn."""
+    trade_data = _decompress_rnb_trade_data(currentGame.playerTradeData or "")
+    presenter = cast("RNBpresenter", currentGame.presenter())
+    player_idx = _get_player_idx_from_name(presenter, player_name)
+    if player_idx is not None:
+        if _cancel_trades_for_player(trade_data, player_idx):
+            currentGame.playerTradeData = _compress_rnb_trade_data(trade_data)
+            currentGame.save()
+
+
 def doSaveRewind(currentGame, jsonData):
     new_b64_point = jsonData["gameDataB64"]
 
@@ -1345,6 +1629,8 @@ def performSaveGame(request, currentGame, jsonData):
     ################ END REWIND EVERY SAVE #######################
 
     presenter.clearKickoutVotes()
+
+    _cancel_all_trades_on_turn_submit(currentGame, request.user.username)
 
     currentGame.save()
 
@@ -1791,6 +2077,13 @@ def RNBdata(request, dataType=1):
                 "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
                 "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
                 "transactionID": currentGame.transactionID,
+            }
+        )
+
+    if dataType == 4:
+        return JsonResponse(
+            {
+                "playerTradeData": currentGame.playerTradeData or "",
             }
         )
 

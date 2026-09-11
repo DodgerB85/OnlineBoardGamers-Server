@@ -21,6 +21,7 @@ import * as build from "../js/RNBbuild"
 import * as IO from "../backend/RNB_IO"
 
 import MiniHex from "./Utils/MiniHex.vue"
+import PlayerTradeArea from "./PlayerTradeArea.vue"
 
 import { useModelStore } from "../stores/RNBstore.js"
 const store = useModelStore()
@@ -1104,6 +1105,7 @@ const getGameOverReason = computed(() => {
 				<button class="actionsLineButton" @click="IO.resetGameStateToLoadedPreMove()" v-if="rf.ALL_PRE_PHASE_MAIN_PHASES.includes(store.gameflow.phase)">Cancel</button>
 				<button @click="resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>
 				<button @click="context.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length <= 1">Undo Last Action</button>
+				<PlayerTradeArea />
 
 				<button v-if="personal.trainingGame || personal.soloGame" @click="finishActionsAndEndTurn($event)" class="actionsLineButton">Finish Actions & End Turn</button>
 				<button v-else @click="finishActions(false, $event)" class="actionsLineButton">Finish Actions</button>

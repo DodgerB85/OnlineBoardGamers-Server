@@ -167,6 +167,10 @@ export async function initGame() {
 		store.CUSTOM_RULES = [...store.mapData.setupData.CR]
 	}
 
+	if (window.initData.trade) {
+		funcs.decompressTradeData(window.initData.trade)
+	}
+
 	hd.calculateCanvasSize()
 	personal.haltPlay = false
 
