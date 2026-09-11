@@ -1440,7 +1440,7 @@ def _processTurn(request):
         currentRewindDataArray = load_rewind_data(currentGame)
         if len(currentRewindDataArray) == 0:
             return JsonResponse(
-                {"message": "<b>" + gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data") + " </b>"},
+                {"message": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")},
                 safe=False,
             )
 

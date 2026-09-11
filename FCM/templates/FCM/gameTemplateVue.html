@@ -22,7 +22,7 @@
     <style>
     body {
       margin: 0px !important;
-      background-color: #8B7355;
+      background-color: #d4eafd;
       font-family: Arial, sans-serif;
       box-sizing: border-box; /* Ensure padding/margins are included in width */
     }
@@ -33,159 +33,46 @@
       font-size: 40px;
       margin-top: 20px;
       left: 50%;
-      white-space: nowrap;
+      width: 100%;
+      padding: 0 10px;
+      box-sizing: border-box;
+      text-align: center;
       z-index: 10; /* Ensure text is above animation */
-      color: white;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+      color: black;
     }
 
     /* Container for the loading animation */
     #loadingContainer {
       position: absolute;
       top: 50%;
-      left: 0;
-      right: 0;
-      transform: translateY(-50%);
+      left: 50%;
+      transform: translate(-50%, -50%);
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 5px; /* 5px gap from screen edges on small screens */
-      box-sizing: border-box; /* Ensure padding is included in width */
+      align-items: flex-end;
+      gap: 18px;
     }
 
-    /* Left image (restaurant) */
-    #restaurantImage {
-      width: 100px;
-      height: 100px;
-      position: absolute;
-      left: 5px;
-      top: 50%;
-      transform: translateY(-50%);
+    .foodIcon {
+      height: 64px;
+      width: auto;
+      animation: foodBounce 1.2s infinite ease-in-out;
     }
 
-    /* Right image container for farms, houses, etc. */
-    #rightImageContainer {
-      position: absolute;
-      right: 5px; /* Ensure 5px gap from right edge */
-      top: 50%;
-      transform: translateY(-50%);
-      width: 100px;
-      height: 100px;
+    .foodIcon:nth-child(2) { animation-delay: 0.12s; }
+    .foodIcon:nth-child(3) { animation-delay: 0.24s; }
+    .foodIcon:nth-child(4) { animation-delay: 0.36s; }
+    .foodIcon:nth-child(5) { animation-delay: 0.48s; }
+    .foodIcon:nth-child(6) { animation-delay: 0.6s; }
+
+    @keyframes foodBounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-28px); }
     }
 
-    /* Right images with animation */
-    .rightImage {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      opacity: 0;
-      animation: cycleRightImages 1s infinite ease-in-out;
-    }
-
-    #farmImage { animation-delay: 0s; }
-    #houseImage { animation-delay: 0.25s; }
-    #marketImage { animation-delay: 0.5s; }
-    #warehouseImage { animation-delay: 0.75s; }
-
-    @keyframes cycleRightImages {
-      0%, 25% { opacity: 1; }
-      25.01%, 100% { opacity: 0; }
-    }
-
-    /* Roads container to fill space between images */
-    #roadsContainer {
-      position: absolute;
-      left: 110px; /* restaurant width (100px) + 5px gap + 5px padding */
-      right: 110px; /* farms-houses width (100px) + 5px gap */
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      justify-content: space-between;
-    }
-
-    /* Individual roads */
-    .road {
-      height: 10px; /* Thickness of the road */
-      background-color: #654321; /* Road color */
-      border: 1px solid #333; /* Border */
-      opacity: 0;
-      flex: 1; /* Equal width for each road */
-      max-width: 100px; /* Maximum width for each road */
-      margin: 0 2px; /* Small gap between roads */
-    }
-
-    #road1 { animation: showRoad1 1s infinite ease-in-out;}
-    #road2 { animation: showRoad2 1s infinite ease-in-out;}
-    #road3 { animation: showRoad3 1s infinite ease-in-out;}
-    #road4 { animation: showRoad4 1s infinite ease-in-out;}
-
-    @keyframes showRoad1 {
-      0% { opacity: 0; }
-      0.01%, 10% { opacity: 1; } /* Visible from delay until 2s */
-      99% { opacity: 1; }
-       99.01%, 100% { opacity: 0; } /* Hidden at cycle end */
-    }
-
-    @keyframes showRoad2 {
-      0%, 25% { opacity: 0; }
-      25.01%, 35% { opacity: 1; } /* Visible from delay until 2s */
-      99% { opacity: 1; }
-       99.01%, 100% { opacity: 0; } /* Hidden at cycle end */
-    }
-
-    @keyframes showRoad3 {
-      0%, 50% { opacity: 0; }
-      50.01%, 60% { opacity: 1; } /* Visible from delay until 2s */
-      99% { opacity: 1; }
-       99.01%, 100% { opacity: 0; } /* Hidden at cycle end */
-    }
-
-    @keyframes showRoad4 {
-      0%, 75% { opacity: 0; }
-      75.01%, 85% { opacity: 1; } /* Visible from delay until 2s */
-      99% { opacity: 1; }
-       99.01%, 100% { opacity: 0; } /* Hidden at cycle end */
-    }
-
-    /* For screens wider than 600px: Center the animation */
-    @media (min-width: 600.001px) {
-      #loadingContainer {
-        width: 528px; /* 100px (restaurant) + 5px + 4x100px (roads) + 8px (gaps) + 100px (farms-houses) + 5px */
-        margin: 0 auto; /* Center horizontally */
-        padding: 0; /* Remove padding */
-      }
-      #restaurantImage {
-        left: 5px; /* 5px gap from left of #loadingContainer */
-      }
-      #rightImageContainer {
-        right: 5px; /* 5px gap from right of #loadingContainer */
-      }
-      #roadsContainer {
-        left: 110px; /* restaurant width (100px) + 5px gap + 5px padding */
-        right: 110px; /* farms-houses width (100px) + 5px gap */
-      }
-    }
-
-    /* For screens 600px or narrower: Stretch roads, keep images at edges */
+    /* For screens 600px or narrower: shrink icons */
     @media (max-width: 600px) {
-      #loadingContainer {
-        width: 100%;
-        padding: 0 5px;
-        box-sizing: border-box; /* Ensure padding is included in width */
-      }
-      #restaurantImage {
-        left: 5px;
-      }
-      #rightImageContainer {
-        right: 5px; /* Ensure 5px gap from right edge */
-      }
-      #roadsContainer {
-        left: 110px; /* restaurant width (100px) + 5px gap + 5px padding */
-        right: 110px; /* farms-houses width (100px) + 5px gap */
-      }
-      .road {
-        max-width: none; /* Allow roads to shrink */
-      }
+      #loadingContainer { gap: 10px; }
+      .foodIcon { height: 44px; }
     }
     </style>
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
@@ -206,33 +93,20 @@
     <div id="app">
       <div id="loadingText">Food Chain Magnate is loading........</div>
       <div id="loadingContainer">
-        <img id="restaurantImage"
-             src="{% static 'FCM/images/restaurant.jpg' %}"
-             alt="Restaurant" />
-        <div id="roadsContainer">
-          <div id="road1" class="road"></div>
-          <div id="road2" class="road"></div>
-          <div id="road3" class="road"></div>
-          <div id="road4" class="road"></div>
-        </div>
-        <div id="rightImageContainer">
-          <img id="farmImage"
-               class="rightImage"
-               src="{% static 'FCM/images/garden.jpg' %}"
-               alt="Farm" />
-          <img id="houseImage"
-               class="rightImage"
-               src="{% static 'FCM/images/house.jpg' %}"
-               alt="House" />
-          <img id="marketImage"
-               class="rightImage"
-               src="{% static 'FCM/images/beer.png' %}"
-               alt="Market" />
-          <img id="warehouseImage"
-               class="rightImage"
-               src="{% static 'FCM/images/r_xango_blues_open.jpg' %}"
-               alt="Warehouse" />
-        </div>
+        <img class="foodIcon"
+             src="{% static 'FCM/images/burger.png' %}"
+             alt="Burger" />
+        <img class="foodIcon"
+             src="{% static 'FCM/images/pizza.png' %}"
+             alt="Pizza" />
+        <img class="foodIcon" src="{% static 'FCM/images/coke.png' %}" alt="Coke" />
+        <img class="foodIcon" src="{% static 'FCM/images/beer.png' %}" alt="Beer" />
+        <img class="foodIcon"
+             src="{% static 'FCM/images/coffee.png' %}"
+             alt="Coffee" />
+        <img class="foodIcon"
+             src="{% static 'FCM/images/juice.png' %}"
+             alt="Juice" />
       </div>
     </div>
   </body>
@@ -285,7 +159,7 @@
   {% if kickoutRequired > 0 and not myMove %}
   initData.kickoutRequired = {{kickoutRequired}};
   {% endif %}
-  initData.notes = '{{ notes | safe }}';
+  initData.notes = '{{ currentNotes | safe }}';
   {% if not gameData %}
   {% if displayNames %}
   initData.displayNames = {{ displayNames | safe }};
@@ -297,7 +171,7 @@
   {% if gameData and phase == 13 %}initData.startingOptions = {{ startingOptionsLiteral }};{% endif %}
   initData.assistance = {{ showAssistance }};
   {% if currentPlayers %}initData.currentPlayersArray = {{ currentPlayers | safe }};{% endif %}
-  {% if preferredColour != -1 %}initData.preferedColor = {{ preferredColour }};{% endif %}
+  initData.preferedColor = {{ preferredColour }};
   {% if highContrastBoardItems %}initData.highContrastBoardItems = true;{% endif %}
   {% if secondsToNextKickout %}initData.secondsToNextKickout = {{ secondsToNextKickout }};{% endif %}
   {% if currentNotes %}initData.currentNotes = '{{ currentNotes | safe }}';{% endif %}
@@ -307,6 +181,10 @@
   {% if myZoomLevel %}initData.zoomLevel = {{ myZoomLevel }};{% endif %}
   {% if liveNotification %}initData.liveNotification = {{ liveNotification }};{% endif %}
   {% if tournamentGame %}initData.tournamentGame = true;{% endif %}
+  initData.rewindPanelType = {{ rewindPanelType }};
+  initData.rewindHostPossible = {{ rewindHostPossible|lower }};
+  initData.rewindHostHTML = '{{ rewindHostHTML|addslashes|safe }}';
+  initData.currentRewindConsent = {{ currentRewindConsent }};
   
   // Static initialization variables
   initData.saveRewind = true;
