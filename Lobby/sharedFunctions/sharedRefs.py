@@ -382,7 +382,7 @@ def SR_getTournamentRoundsHTML(
 
 def SR_currentTurnString(gameCode, turn, phase):
     if gameCode == "FCM":
-        currentTurnString = str(turn) + "."
+        currentTurnString = str(turn) + " - "
         if phase == rfFCM.PHASE_SETUP_MODULES:
             currentTurnString = gettext("Setup - Draft Modules")
         if phase == rfFCM.PHASE_URBAN_PLANNING:
@@ -392,49 +392,49 @@ def SR_currentTurnString(gameCode, turn, phase):
         if phase == rfFCM.PHASE_SETUP_RESERVE:
             currentTurnString = gettext("Setup - Reserve Cards")
         if phase == rfFCM.PHASE_RESTRUCTURING:
-            currentTurnString += gettext("1 - Restructuring")
+            currentTurnString += gettext("Restructuring")
         if phase == rfFCM.PHASE_TURN_ORDER:
-            currentTurnString += gettext("2 - Order of Business")
+            currentTurnString += gettext("Order of Business")
         if phase == rfFCM.PHASE_WORKING_DAY:
-            currentTurnString += gettext("3 - Working 9:00-5:00")
+            currentTurnString += gettext("Working 9:00-5:00")
         if phase == rfFCM.PHASE_DINNERTIME:
-            currentTurnString += gettext("4 - Dinnertime")
+            currentTurnString += gettext("Dinnertime")
         if phase == rfFCM.PHASE_PAYDAY:
-            currentTurnString += gettext("5 - Payday")
+            currentTurnString += gettext("Payday")
         if phase == rfFCM.PHASE_MARKETING_CAMPAIGNS:
-            currentTurnString += gettext("6 - Marketing Campaigns")
+            currentTurnString += gettext("Marketing Campaigns")
         if phase == rfFCM.PHASE_CLEAN_UP:
-            currentTurnString += gettext("7 - Clean up")
+            currentTurnString += gettext("Clean up")
         if phase == rfFCM.PHASE_GAME_OVER:
             currentTurnString += gettext("Game End")
         if phase == rfFCM.PHASE_PIZZA_BOMB:
-            currentTurnString += gettext("4 - Pizza Milestone")
+            currentTurnString += gettext("Pizza Milestone")
         if phase == rfFCM.PHASE_COFFE_SHOP_MS:
-            currentTurnString += gettext("7 - Coffee Shop Milestone")
+            currentTurnString += gettext("Coffee Shop Milestone")
         if phase == rfFCM.PHASE_CHOOSE_CEO_BONUS:
             currentTurnString += gettext("Choose CEO Bonus")
         return currentTurnString
 
     elif gameCode == "HLC":
-        currentTurnString = str(turn) + "."
+        currentTurnString = str(turn) + " - "
         if turn == 0:
             currentTurnString = gettext("Factory Setup")
         elif phase == 1:
-            currentTurnString += gettext("1 - Research")
+            currentTurnString += gettext("Research")
         elif phase == 2:
-            currentTurnString += gettext("2 - Set Focus")
+            currentTurnString += gettext("Set Focus")
         elif phase == 3:
-            currentTurnString += gettext("3 - Build Factory")
+            currentTurnString += gettext("Build Factory")
         elif phase == 4:
-            currentTurnString += gettext("4 - Print Sales Brochures")
+            currentTurnString += gettext("Print Sales Brochures")
         elif phase == 5:
-            currentTurnString += gettext("5 - Sell")
+            currentTurnString += gettext("Sell")
         elif phase == 6:
-            currentTurnString += gettext("6 - Game End")
+            currentTurnString += gettext("Game End")
         elif phase == 7:
-            currentTurnString += gettext("7 - Increase Expectations")
+            currentTurnString += gettext("Increase Expectations")
         elif phase == 8:
-            currentTurnString += gettext("8 - Grow Demands")
+            currentTurnString += gettext("Grow Demands")
 
         return currentTurnString
 
@@ -445,25 +445,25 @@ def SR_currentTurnString(gameCode, turn, phase):
         elif phase == 1:
             currentTurnString += " - " + gettext("Setup Lines")
         elif phase == 2:
-            currentTurnString += "." + gettext("1 - Choose Actions")
+            currentTurnString += " - " + gettext("Choose Actions")
         elif phase == 3:
-            currentTurnString += "." + gettext("2 - Line Expansion")
+            currentTurnString += " - " + gettext("Line Expansion")
         elif phase == 4:
-            currentTurnString += "." + gettext("3 - Add a Bus")
+            currentTurnString += " - " + gettext("Add a Bus")
         elif phase == 5:
-            currentTurnString += "." + gettext("4 - Add Passengers")
+            currentTurnString += " - " + gettext("Add Passengers")
         elif phase == 6:
-            currentTurnString += "." + gettext("5 - Add Buildings")
+            currentTurnString += " - " + gettext("Add Buildings")
         elif phase == 7:
-            currentTurnString += "." + gettext("6 - Alter Time")
+            currentTurnString += " - " + gettext("Alter Time")
         elif phase == 8:
-            currentTurnString += "." + gettext("7 - VRROOOMM!!")
+            currentTurnString += " - " + gettext("VRROOOMM!!")
         elif phase == 9:
-            currentTurnString += "." + gettext("8 - Change Start Player")
+            currentTurnString += " - " + gettext("Change Start Player")
         elif phase == 10:
-            currentTurnString += "." + gettext("9 - Game End Check")
+            currentTurnString += " - " + gettext("Game End Check")
         elif phase == 11:
-            currentTurnString += "." + gettext("10 - Game Finished")
+            currentTurnString += " - " + gettext("Game Finished")
 
         return currentTurnString
 
@@ -495,51 +495,51 @@ def SR_currentTurnString(gameCode, turn, phase):
         if phase == rfAQY.PHASE_FIRST_CITY:
             currentTurnString += " - " + gettext("Place First City")
         elif phase == rfAQY.PHASE_ALL_RISE:
-            currentTurnString += "." + gettext("All Rise")
+            currentTurnString += " - " + gettext("All Rise")
         elif phase == rfAQY.PHASE_CITY_BUILDING:
-            currentTurnString += "." + gettext("City Building")
+            currentTurnString += " - " + gettext("City Building")
         elif phase == rfAQY.PHASE_TURN_ORDER:
-            currentTurnString += "." + gettext("Turn Order")
+            currentTurnString += " - " + gettext("Turn Order")
         elif phase == rfAQY.PHASE_COUNTRYSIDE_BUILDING:
-            currentTurnString += "." + gettext("Countryside Building")
+            currentTurnString += " - " + gettext("Countryside Building")
         elif phase == rfAQY.PHASE_STORE_GOODS:
-            currentTurnString += "." + gettext("Storage")
+            currentTurnString += " - " + gettext("Storage")
         elif phase == rfAQY.PHASE_HARVEST:
-            currentTurnString += "." + gettext("Harvest")
+            currentTurnString += " - " + gettext("Harvest")
         elif phase == rfAQY.PHASE_EXPLORE:
-            currentTurnString += "." + gettext("Explore")
+            currentTurnString += " - " + gettext("Explore")
         elif phase == rfAQY.PHASE_FAMINE:
-            currentTurnString += "." + gettext("Famine")
+            currentTurnString += " - " + gettext("Famine")
         elif phase == rfAQY.PHASE_POLLUTION:
-            currentTurnString += "." + gettext("Pollution")
+            currentTurnString += " - " + gettext("Pollution")
         elif phase == rfAQY.PHASE_CHECK_VICTORY:
-            currentTurnString += "." + gettext("Game End Check")
+            currentTurnString += " - " + gettext("Game End Check")
         elif phase == rfAQY.PHASE_GAME_OVER:
-            currentTurnString += "." + gettext("Game End")
+            currentTurnString += " - " + gettext("Game End")
         return currentTurnString
 
     elif gameCode == "IND":
         currentTurnString = str(turn)
         if phase == 0:
-            currentTurnString += "." + gettext("New Era")
+            currentTurnString += " - " + gettext("New Era")
         elif phase == 1:
-            currentTurnString += "." + gettext("Turn Order Bidding")
+            currentTurnString += " - " + gettext("Turn Order Bidding")
         elif phase == 2:
-            currentTurnString += "." + gettext("Mergers")
+            currentTurnString += " - " + gettext("Mergers")
         elif phase == 3:
-            currentTurnString += "." + gettext("Merger Bidding")
+            currentTurnString += " - " + gettext("Merger Bidding")
         elif phase == 4:
-            currentTurnString += "." + gettext("Siap Faji Merger")
+            currentTurnString += " - " + gettext("Siap Faji Merger")
         elif phase == 5:
-            currentTurnString += "." + gettext("Acquisitions")
+            currentTurnString += " - " + gettext("Acquisitions")
         elif phase == 6:
-            currentTurnString += "." + gettext("R & D")
+            currentTurnString += " - " + gettext("R & D")
         elif phase == 7:
-            currentTurnString += "." + gettext("Operations")
+            currentTurnString += " - " + gettext("Operations")
         elif phase == 8:
-            currentTurnString += "." + gettext("City Growth")
+            currentTurnString += " - " + gettext("City Growth")
         elif phase == 9:
-            currentTurnString += "." + gettext("Game End")
+            currentTurnString += " - " + gettext("Game End")
         return currentTurnString
 
     elif gameCode == "KFW":
