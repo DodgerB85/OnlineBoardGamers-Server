@@ -2,6 +2,7 @@
 import * as rf from "../js/RNBreference"
 import * as model from "../js/RNBmodel"
 import * as view from "../js/RNBview"
+import * as highlight from "../js/RNBhighlight"
 import * as IO from "../backend/RNB_IO"
 import * as funcs from "../js/RNBfuncs"
 
@@ -19,8 +20,10 @@ const tradeTheirResIDs = ref([])
 const tradeConfirmStep = ref(false)
 
 const isTradeEnabled = computed(() => {
-	return rf.PHASE_WONDERS.includes(store.gameflow.phase) && !personal.soloGame && !personal.trainingGame && store.gameOptions.useTrade
+	return rf.PHASE_WONDERS.includes(store.gameflow.phase) && !personal.soloGame && store.gameOptions.useTrade
 })
+
+const isTrainingMode = computed(() => personal.trainingGame && !personal.soloGame)
 
 const hasEndedTurn = computed(() => {
 	return rf.MAIN_PHASES.includes(store.gameflow.phase) && !store.gameflow.turnOrder.includes(personal.pov)
@@ -104,6 +107,32 @@ function confirmPropose() {
 	resetTradeForm()
 }
 
+function completeTradeLocal() {
+	if (!canPropose.value) return
+	// In training mode, swap resources instantly in the local store.
+	// POV is the proposer; tradeOpponentIdx is the other player.
+	const proposerIdx = personal.pov
+	const targetIdx = tradeOpponentIdx.value
+	const proposerHomeMarker = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === proposerIdx)
+	const targetHomeMarker = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === targetIdx)
+	if (proposerHomeMarker && targetHomeMarker) {
+		const proposerHex = proposerHomeMarker.location[1]
+		const targetHex = targetHomeMarker.location[1]
+		for (const rid of tradeYourResIDs.value) {
+			if (store.ALL_RESOURCES[rid]) store.ALL_RESOURCES[rid].location = [rf.LOCATION_BUCKET, targetHex, 0]
+		}
+		for (const rid of tradeTheirResIDs.value) {
+			if (store.ALL_RESOURCES[rid]) store.ALL_RESOURCES[rid].location = [rf.LOCATION_BUCKET, proposerHex, 0]
+		}
+	}
+	resetTradeForm()
+	// Clear cached wonder resource lists so they recompute from the new locations
+	store.context.resIDsOnHomeTile.splice(0)
+	store.context.resIDsInWonderBrick.splice(0)
+	store.context.wonderError = 0
+	highlight.updateAllHighlightsForTransporterMode()
+}
+
 function cancelPropose() {
 	tradeConfirmStep.value = false
 }
@@ -180,7 +209,7 @@ function resName(resID) {
 				</div>
 
 				<!-- TRADE SETUP -->
-				<div v-if="!tradeConfirmStep && !hasEndedTurn" class="tradeSection">
+				<div v-if="!tradeConfirmStep && (!hasEndedTurn || isTrainingMode)" class="tradeSection">
 					<strong>Propose a Trade:</strong>
 					<br />
 					<span>Opponent:</span>
@@ -212,17 +241,18 @@ function resName(resID) {
 							</div>
 						</div>
 
-						<button class="actionsLineButton" :disabled="!canPropose" @click="proposeTrade">Propose Trade</button>
+						<button v-if="isTrainingMode" class="actionsLineButton" :disabled="!canPropose" @click="completeTradeLocal">Complete Trade</button>
+						<button v-else class="actionsLineButton" :disabled="!canPropose" @click="proposeTrade">Propose Trade</button>
 					</div>
 				</div>
 
 				<!-- ENDED TURN - cannot propose -->
-				<div v-if="!tradeConfirmStep && hasEndedTurn" class="tradeSection">
+				<div v-if="!tradeConfirmStep && hasEndedTurn && !isTrainingMode" class="tradeSection">
 					<span class="donkeyWarningSpan">You may not propose a trade once you have ended your turn</span>
 				</div>
 
 				<!-- CONFIRM TRADE -->
-				<div v-if="tradeConfirmStep" class="tradeSection">
+				<div v-if="tradeConfirmStep && !isTrainingMode" class="tradeSection">
 					<strong>Confirm Trade:</strong>
 					<br />
 					<span>You give:</span>
