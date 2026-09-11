@@ -769,6 +769,10 @@ export function canSkipCurrentPlayer() {
 				.eraCards.map((cardId) => rf.PH_ALL_ERA_CARDS.find((card) => card.id === cardId))
 				.filter((card) => card.era === store.gameflow.currentEra)
 
+		if (validEraCards.length === 0) {
+			return true
+		}
+
 		if (validEraCards.length === 2) {
 			//let terrCount = 0
 			store.context.selectedEraCard = validEraCards[0].id

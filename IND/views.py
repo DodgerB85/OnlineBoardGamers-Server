@@ -705,6 +705,9 @@ def forkINDgame(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist")) from None
 
+    if source_game.gameStatus == "FINISHED":
+        return JsonResponse({"error": "Cannot fork a finished game."}, status=400)
+
     # Clone the currentGame object
     # newGame = copy.deepcopy(currentGame)
     # newGame.pk = None  # Set id to None to create a new object
