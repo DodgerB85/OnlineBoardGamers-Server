@@ -78,7 +78,7 @@ SHAMAN = 3
 BUILDER = 4
 
 
-def analyze_games(player_count_index, schism_games=False, external_tournament=False):
+def analyze_games(player_count_index, schism_games=False, external_tournament_or_4p_tournament=False):
     """Analyzes game data for a given player count."""
 
     num_gods = 25 if schism_games else 13  # Determine number of gods based on schism
@@ -104,7 +104,7 @@ def analyze_games(player_count_index, schism_games=False, external_tournament=Fa
     ]  # Initialize array to store game IDs for each seat
 
     playerCount = player_count_index
-    ## NB THIS WILL NEVER HAPPEN - USE external_tournament flag instead
+    ## NB THIS WILL NEVER HAPPEN - USE external_tournament_or_4p_tournament flag instead
     if playerCount == 4.5:
         playerCount = 4
 
@@ -115,48 +115,38 @@ def analyze_games(player_count_index, schism_games=False, external_tournament=Fa
         # & Q(missingPlayers__isnull=True)
     )
 
-    def contains_7_8_or_9(json_data):
-        """
-        Checks if the JSON data contains 7, 8, or 9 at any level.
-        """
-        if isinstance(json_data, list):
-            for item in json_data:
-                if contains_7_8_or_9(item):
-                    return True
-        elif isinstance(json_data, (int, float)) and json_data in (7, 8, 9):
-            return True
-        return False
-
     if schism_games:
         query = (
-            Q(gameCode="TGZ") & Q(gameStatus="FINISHED") & ~Q(players__player=shadowUser) & Q(statsExcludedGame=True) & Q(turn__gte=4) & Q(created__gte="1742571597000")
+            Q(gameCode="TGZ") & Q(gameStatus="FINISHED") & ~Q(players__player=shadowUser) & Q(turn__gte=4) & Q(created__gte="1742571597000")
             # & Q(missingPlayers__isnull=True)
         )
 
-    query = query & Q(maxPlayers=4) & Q(externalTournamentGame=True) if external_tournament else query & Q(maxPlayers=playerCount)
-
-    # if player_count_index == 4.5:
-    #    query = query & Q(externalTournamentGame=True)
+    if external_tournament_or_4p_tournament:
+        if schism_games:
+            query = query & Q(relatedMainTournament__isnull=False) & Q(maxPlayers=4)
+        else:
+            query = query & (Q(externalTournamentGame=True) | (Q(relatedMainTournament__isnull=False) & Q(maxPlayers=4)))
+    else:
+        query = query & Q(maxPlayers=playerCount)
 
     # Fetch the initial queryset based on the query
     # Remove any game with missing players here
     queryset = Game.objects.filter(query).exclude(players__is_missing=True).distinct()  # Define queryset here
 
     if schism_games:
-        # Filter the queryset in Python based on the JSON startingOptions
-        filtered_queryset = []
-        for game in queryset:
+        # Filter to schism games: a top-level 7, 8 or 9 in startingOptions
+        schism_game_ids = []
+        for game_id, starting_options in queryset.values_list("id", "startingOptions"):
             try:
-                starting_options = json.loads(game.startingOptions)
-                if contains_7_8_or_9(starting_options):
-                    filtered_queryset.append(game)
+                loaded_options = json.loads(starting_options) if starting_options else []
             except (json.JSONDecodeError, TypeError):
-                # Handle cases where startingOptions is not valid JSON or is None
-                pass  # Or log the error, or exclude the game, depending on your needs
+                continue
+            if isinstance(loaded_options, list) and any(option in (7, 8, 9) for option in loaded_options):
+                schism_game_ids.append(game_id)
 
         # Apply values_list to the filtered queryset
         dataSet = (
-            Game.objects.filter(query)
+            Game.objects.filter(id__in=schism_game_ids)
             .filter(players__winner=True)  # Ensures game has a winner & picks that specific user
             .exclude(players__is_missing=True)  # Drops game if ANY player is missing
             .values_list("gameData", "players__player__username", "id")
@@ -230,7 +220,7 @@ def analyze_games(player_count_index, schism_games=False, external_tournament=Fa
                     if winner_seat == -1:
                         print("Error: Winner's seat not found")
                     else:
-                        if external_tournament:
+                        if external_tournament_or_4p_tournament:
                             # Increment the seat wins
                             seat_wins_4pT[winner_seat] += 1
 
@@ -476,7 +466,7 @@ def generate_stats_data(schism_games=False):
         seat_wins_4pT,
         seat_wins_4pT_ids,
         all_game_ids,
-    ) = analyze_games(4, schism_games, external_tournament=True)  # Always 4 player
+    ) = analyze_games(4, schism_games=schism_games, external_tournament_or_4p_tournament=True)
 
     G_STATS_DATA, S_STATS_DATA = calculate_stats(
         G_AVAILABLE,
@@ -485,7 +475,7 @@ def generate_stats_data(schism_games=False):
         SPEC_LOST,
         SPEC_WON,
         finishedGamesCount,
-        4,  # Always 4 player
+        4,
         schism_games,
         all_game_ids,
     )
