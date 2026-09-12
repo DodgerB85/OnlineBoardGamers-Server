@@ -602,11 +602,11 @@ export function getEligibleTransportersForRemoval(playerIndex, isTotalProblem, i
 	// Planes & Aeroports: the global 8-transporter total always applies. When total is
 	// exceeded alongside a type-specific cap, all types contributing to that total should
 	// be eligible for removal.
-	if (isTotalProblem) {
+	/*if (isTotalProblem) {
 		if (!typesForRemoval.includes(rf.LAND_TYPE)) typesForRemoval.push(rf.LAND_TYPE)
 		if (!typesForRemoval.includes(rf.WATER_TYPE)) typesForRemoval.push(rf.WATER_TYPE)
 		if (!typesForRemoval.includes(rf.AIR_TYPE)) typesForRemoval.push(rf.AIR_TYPE)
-	}
+	}*/
 
 	// Find the bucket locations of all eligible buildings
 	const factoryBucketLocations = model
