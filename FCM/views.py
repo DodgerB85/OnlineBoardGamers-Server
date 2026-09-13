@@ -207,8 +207,7 @@ def showGame(request, game_id):
                 "moveData": "",
             }
         )
-        fcm_template = "FCM/GameTemplate_new.html" if getattr(request, "use_new_design", False) else "FCM/GameTemplate.html"
-        return render(request, fcm_template, returnData)
+        return render(request, "FCM/GameTemplate_new.html", returnData)
 
     # Logged in
     user_profile = result["user_profile"]
@@ -300,10 +299,9 @@ def showGame(request, game_id):
                 player_gp.save()
             currentNotes = ""
 
-    fcm_template = "FCM/GameTemplate_new.html" if getattr(request, "use_new_design", False) else "FCM/GameTemplate.html"
     return render(
         request,
-        fcm_template,
+        "FCM/GameTemplate_new.html",
         {
             "gameCreationTimestamp": currentGame.created,
             "now": now,

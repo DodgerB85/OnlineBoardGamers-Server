@@ -1548,10 +1548,9 @@ def index(request):
 
     # print_timestamp("Final prep complete")
 
-    template = "Lobby/lobby_new.html" if getattr(request, "use_new_design", False) else "Lobby/lobby.html"
     return render(
         request,
-        template,
+        "Lobby/lobby_new.html",
         {
             "availableGamesList": available_games,
             "currentGamesList": current_games,
