@@ -266,6 +266,8 @@ export const useModelStore = defineStore("store", () => {
 
 		// Plane (Planes & Aeroports) vars
 		selectedPlaneMode: -1, // rf.MOVE_FLY | rf.MOVE_TAXI while a plane is selected
+		planeModeSelectionActive: false, // true when Taxi/Takeoff bubbles should show
+		planeInFlight: false, // true after takeoff, before landing
 		midFlightDropTiles: [], // land tiles validated for airdrop this move
 
 		// Building Vars

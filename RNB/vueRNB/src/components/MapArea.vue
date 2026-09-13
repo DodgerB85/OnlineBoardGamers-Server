@@ -180,9 +180,35 @@ const shouldShowAtelierRecipeBubbles = computed(() => {
 	return store.context.action === rf.ACT_SELECT_ATELIER_RECIPE && store.context.atelierRecipeOptions.length > 0
 })
 
+// Planes & Aeroports: show Taxi/Takeoff bubbles when a plane is selected in movement phase
+const shouldShowPlaneModeBubbles = computed(() => {
+	if (!rf.PHASE_MOVEMENTS.includes(store.gameflow.phase)) return false
+	if (store.context.selectedTransporterIDforTM === -1) return false
+	const transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
+	if (!transporterObj || transporterObj.type !== rf.PLANE) return false
+	return store.context.planeModeSelectionActive
+})
+
+// Planes & Aeroports: show Land bubble when plane is in flight
+const shouldShowLandBubble = computed(() => {
+	if (!rf.PHASE_MOVEMENTS.includes(store.gameflow.phase)) return false
+	if (store.context.selectedTransporterIDforTM === -1) return false
+	const transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
+	if (!transporterObj || transporterObj.type !== rf.PLANE) return false
+	return store.context.planeInFlight
+})
+
+// Planes & Aeroports: check if taxi is disabled (plane carrying goods)
+const isTaxiDisabled = computed(() => {
+	if (store.context.selectedTransporterIDforTM === -1) return false
+	const transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
+	if (!transporterObj || transporterObj.type !== rf.PLANE) return false
+	return model.transporterCarriesAnything(transporterObj.id)
+})
+
 const transporterScreenPosition = computed(() => {
 	if (store.context.selectedTransporterIDforTM === -1 && !shouldShowAtelierRecipeBubbles.value) return null
-	if (!shouldShowResearchBubbles.value && !shouldShowBuildingOptions.value && !shouldShowPickupSelectBubbles.value && !shouldShowAtelierRecipeBubbles.value) return null
+	if (!shouldShowResearchBubbles.value && !shouldShowBuildingOptions.value && !shouldShowPickupSelectBubbles.value && !shouldShowAtelierRecipeBubbles.value && !shouldShowPlaneModeBubbles.value && !shouldShowLandBubble.value) return null
 	let transporterObj
 	if (shouldShowAtelierRecipeBubbles.value) transporterObj = model.getTransporterByID(store.context.atelierTransporterID)
 	else if (shouldShowPickupSelectBubbles.value) transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforPickupOrSelection)
@@ -274,6 +300,63 @@ function handleSelectBubbleClick() {
 	context.resetContextAndHighlights()
 	store.context.selectedTransporterIDforTM = transporterID
 	highlight.updateAllHighlightsForTransporterMode()
+}
+
+// Planes & Aeroports: position Taxi/Takeoff bubbles
+function getPlaneModeBubblePosition(type) {
+	const radius = 60
+	const angle = type === 'taxi' ? -Math.PI / 4 : (-3 * Math.PI) / 4
+	const x = Math.cos(angle) * radius
+	const y = Math.sin(angle) * radius
+	return { transform: `translate(${x}px, ${y}px)` }
+}
+
+// Planes & Aeroports: position Land bubble (single bubble, above plane)
+function getLandBubblePosition() {
+	return { transform: `translate(0px, -60px)` }
+}
+
+// Planes & Aeroports: handle Taxi mode selection
+function handleTaxiModeClick() {
+	store.context.selectedPlaneMode = rf.MOVE_TAXI
+	store.context.planeModeSelectionActive = false
+	store.context.planeInFlight = false
+	highlight.updateAllHighlightsForTransporterMode()
+}
+
+// Planes & Aeroports: handle Takeoff mode selection
+function handleTakeoffModeClick() {
+	store.context.selectedPlaneMode = rf.MOVE_FLY
+	store.context.planeModeSelectionActive = false
+	store.context.planeInFlight = true
+	// Position plane top-center of hex for takeoff
+	const transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
+	if (transporterObj) {
+		const hex = model.getHexByID(transporterObj.location[1])
+		if (hex) {
+			transporterObj.rawTransporterXY = [hex.rawXY[0], hex.rawXY[1] - 40 * store.RATIO]
+		}
+	}
+	highlight.updateAllHighlightsForTransporterMode()
+}
+
+// Planes & Aeroports: handle Land mode - validate landing and execute
+function handleLandClick() {
+	const transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
+	if (!transporterObj) return
+	// Validate landing using canPlaneLandOnTile on current location
+	if (!model.canPlaneLandOnTile(transporterObj, transporterObj.location)) {
+		rf.doAdminAlrt('Planes can only land on empty land tiles (no buildings, no unattended geese)')
+		return
+	}
+	// Exit flight mode - plane lands where it is
+	store.context.planeInFlight = false
+	store.context.selectedPlaneMode = rf.MOVE_TAXI
+	context.resetContextAndHighlights()
+	store.context.action = rf.ACT_TM_SELECT_PICKUP_DROP_MOVE
+	store.context.selectedTransporterIDforTM = transporterObj.id
+	highlight.updateAllHighlightsForTransporterMode()
+	context.createUndoPoint()
 }
 
 // Art & The Atelier: gfx for a recipe bubble (artwork res image, or caravan transporter)
@@ -883,6 +966,39 @@ function getAtelierRecipeGfx(recipeIdx) {
 				</div>
 			</transition>
 
+			<!-- Planes & Aeroports: Taxi/Takeoff Bubbles -->
+			<transition name="fade">
+				<div v-if="shouldShowPlaneModeBubbles && transporterScreenPosition" class="researchBubblesOverlay" :style="{ left: transporterScreenPosition.x + 'px', top: transporterScreenPosition.y + 'px' }">
+					<!-- Taxi Bubble -->
+					<div class="researchBubble" :class="{ taxiDisabled: isTaxiDisabled }" @click="!isTaxiDisabled && handleTaxiModeClick()" :style="getPlaneModeBubblePosition('taxi')">
+						<div class="researchBubbleContent">
+							<img :src="view.getImage('plane_taxi')" class="researchBubbleImg" />
+							<span class="researchBubbleText">Taxi</span>
+							<span v-if="isTaxiDisabled" class="planeWarningText">You may not taxi<br/>with goods</span>
+						</div>
+					</div>
+					<!-- Takeoff Bubble -->
+					<div class="researchBubble" @click="handleTakeoffModeClick" :style="getPlaneModeBubblePosition('takeoff')">
+						<div class="researchBubbleContent">
+							<img :src="view.getImage('plane_takeoff')" class="researchBubbleImg" />
+							<span class="researchBubbleText">Takeoff</span>
+						</div>
+					</div>
+				</div>
+			</transition>
+
+			<!-- Planes & Aeroports: Land Bubble -->
+			<transition name="fade">
+				<div v-if="shouldShowLandBubble && transporterScreenPosition" class="researchBubblesOverlay" :style="{ left: transporterScreenPosition.x + 'px', top: transporterScreenPosition.y + 'px' }">
+					<div class="researchBubble" @click="handleLandClick" :style="getLandBubblePosition()">
+						<div class="researchBubbleContent">
+							<img :src="view.getImage('plane_land')" class="researchBubbleImg" />
+							<span class="researchBubbleText">Land</span>
+						</div>
+					</div>
+				</div>
+			</transition>
+
 			<!-- Building Options Card -->
 			<BuildingOptionsCard v-if="store.context.eligibleBuildingsToBuild.length > 0 && store.context.selectedTransporterIDforTM !== -1" :position="transporterScreenPosition" />
 		</div>
@@ -1008,6 +1124,29 @@ function getAtelierRecipeGfx(recipeIdx) {
 
 .noClick {
 	pointer-events: none;
+}
+
+/* Planes & Aeroports: disabled taxi bubble */
+.taxiDisabled {
+	opacity: 0.5;
+	filter: grayscale(100%);
+	pointer-events: none;
+	border-color: grey;
+}
+
+.taxiDisabled:hover {
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+	border-color: grey;
+}
+
+/* Planes & Aeroports: warning text inside taxi bubble */
+.planeWarningText {
+	font-size: 7px;
+	color: red;
+	text-align: center;
+	margin-top: 2px;
+	pointer-events: none;
+	max-width: 60px;
 }
 
 #hexDIV {

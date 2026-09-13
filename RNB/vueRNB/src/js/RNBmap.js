@@ -2051,12 +2051,32 @@ export function clickedTransporter(transporterID) {
 	let transporterObj = model.getTransporterByID(transporterID)
 	if (loc.isAnyHexLocation(transporterObj.location)) store.mapData.zoomData.hexID = transporterObj.location[1]
 
+	// Planes & Aeroports: if a plane in flight is clicked, show the Land bubble
+	if (transporterObj.type === rf.PLANE && store.context.planeInFlight && store.context.selectedTransporterIDforTM === transporterID) {
+		// Highlight goods on the plane for the Land bubble
+		context.resetContextAndHighlights()
+		store.context.action = rf.ACT_TM_SELECT_PICKUP_DROP_MOVE
+		store.context.selectedTransporterIDforTM = transporterID
+		highlight.highlightEligibleItemsForTransporterDrop(transporterID)
+		highlight.highlightEligibleResourcesForTransporterPickup(transporterID)
+		return
+	}
+
 	// If there is no transporter selected, select a transport
 	if (store.context.selectedTransporterIDforTM === -1) {
 		context.resetContextAndHighlights()
 		store.context.selectedTransporterIDforTM = transporterID
+		store.context.planeModeSelectionActive = false
+		store.context.planeInFlight = false
 		highlight.updateAllHighlightsForTransporterMode()
 		return
+	}
+
+	// If a non-plane transporter is clicked while plane bubbles are showing, reset plane state
+	if (transporterObj.type !== rf.PLANE && store.context.planeModeSelectionActive) {
+		store.context.planeModeSelectionActive = false
+		store.context.planeInFlight = false
+		store.context.selectedPlaneMode = -1
 	}
 
 	// So now we know we are in TM with a selected transporter already

@@ -472,26 +472,34 @@ export function getEffectiveMoveParams(transporterObj, isFly) {
 	return { validMove: onLand ? [rf.MOVE_ROAD, rf.MOVE_DONKEY] : [rf.MOVE_WATER], maxMoves: 1, isFly: false }
 }
 
-// A tile blocks plane landing if it has ANY building, or an unattended goose.
+// A tile blocks plane landing if it has ANY building (except aeroports), or an
+// unattended goose (except on aeroports).
 function tileHasPlaneLandingBlocker(hexID) {
-	if (getAllInGameBuildings().some((b) => loc.isSpecificHexLocation(b.location, hexID))) return true
+	// Aeroports are exempt from both building and unattended-goose blocking
+	const buildings = getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
+	if (buildings.length > 0 && !buildings.some((b) => b.type === rf.BLDG_AEROPORT)) return true
 	const unattendedGeese = getAllInGameResources().filter((r) => r.type === rf.RES_GOOSE && loc.isSpecificHexLocation(r.location, hexID) && !r.followingTransporterID)
-	return unattendedGeese.length > 0
+	if (unattendedGeese.length > 0 && !buildings.some((b) => b.type === rf.BLDG_AEROPORT)) return true
+	return false
 }
 
-// Planes & Aeroports: can a plane land on `location` (a land vertex bucket)?
-// Rules: must be a land vertex on TERR_ANY_LAND (not sea); no buildings of
-// any kind and no unattended geese on the tile; a river blocks BOTH shores if either
-// shore's tile has a building/unattended goose.
+// Planes & Aeroports: can a plane land on `location`?
+// Rules: no buildings (except aeroports) and no unattended geese (except on aeroports)
+// on the tile; a river blocks BOTH shores if either shore's tile has a
+// building/unattended goose. A plane may also land at sea.
 export function canPlaneLandOnTile(planeObj, location) {
 	const store = useModelStore()
-	if (!loc.isLandVertexLocation(location)) return false
+	// Planes can land at sea
+	if (!loc.isLandVertexLocation(location) && !loc.isSeaVertexLocation(location)) return false
 	const hexID = location[1]
 	const hex = getHexByID(hexID)
-	if (!hex || !rf.TERR_ANY_LAND.includes(hex.currentTerrain)) return false
+	if (!hex) return false
+	// Must be land or sea terrain (not rivers, which are already excluded by location type)
+	if (loc.isLandVertexLocation(location) && !rf.TERR_ANY_LAND.includes(hex.currentTerrain)) return false
 	if (tileHasPlaneLandingBlocker(hexID)) return false
 	// River rule: for each side that has a river, check the opposite-shore hex
-	if (hex.sideRiverVertexIds) {
+	// (only applies to land vertices, not sea)
+	if (loc.isLandVertexLocation(location) && hex.sideRiverVertexIds) {
 		for (let s = 0; s < hex.sideRiverVertexIds.length; s++) {
 			if (hex.sideRiverVertexIds[s] === -1) continue
 			const neighbour = store.mapData.neighbours[hexID] ? store.mapData.neighbours[hexID][s] : -1

@@ -141,12 +141,6 @@ function resetWholeTurn() {
 	context.resetWholeTurn()
 }
 
-// Planes & Aeroports: toggle FLY / TAXI movement mode for the selected plane, then re-highlight
-function setPlaneMode(mode) {
-	store.context.selectedPlaneMode = mode
-	highlight.updateAllHighlightsForTransporterMode()
-}
-
 function anyDonkeyProducingProblems(forcedIncomingDonkeys = -1) {
 	const [isLandProblem, isWaterProblem] = produce.findExcessTransportersWithDonkeyProduction(controller.currentPlayerIndex(), forcedIncomingDonkeys)
 
@@ -993,19 +987,12 @@ const getGameOverReason = computed(() => {
 				</template>
 			</div>
 
-			<!-- MOVEMENT-->
-			<div v-if="rf.PHASE_MOVEMENTS.includes(store.gameflow.phase) && store.context.action !== rf.ACT_CONFIRM_END_TURN">
-			<span v-if="store.context.selectedTransporterIDforTM === -1">Movement: Select a transporter</span>
-			<span v-else>Move or pickup/drop/ferry goods</span>
-			<br />
-			<!-- Planes & Aeroports: FLY / TAXI mode toggle for the selected plane -->
-			<template v-if="store.context.selectedTransporterIDforTM !== -1 && model.getTransporterByID(store.context.selectedTransporterIDforTM)?.type === rf.PLANE">
-				Plane movement mode:
-				<button class="actionsLineButton" :class="{ actionsLineButtonActive: store.context.selectedPlaneMode !== rf.MOVE_TAXI }" @click="setPlaneMode(rf.MOVE_FLY)">Fly</button>
-				<button class="actionsLineButton" :class="{ actionsLineButtonActive: store.context.selectedPlaneMode === rf.MOVE_TAXI }" @click="setPlaneMode(rf.MOVE_TAXI)">Taxi</button>
-				<br />
-			</template>
-				<span v-if="personal.soloGame && store.gameflow.turn === lastSoloTurn" class="donkeyWarningSpan">
+		<!-- MOVEMENT-->
+		<div v-if="rf.PHASE_MOVEMENTS.includes(store.gameflow.phase) && store.context.action !== rf.ACT_CONFIRM_END_TURN">
+		<span v-if="store.context.selectedTransporterIDforTM === -1">Movement: Select a transporter</span>
+		<span v-else>Move or pickup/drop/ferry goods</span>
+		<br />
+			<span v-if="personal.soloGame && store.gameflow.turn === lastSoloTurn" class="donkeyWarningSpan">
 					<br />
 					Caution: This is your last turn
 					<br />

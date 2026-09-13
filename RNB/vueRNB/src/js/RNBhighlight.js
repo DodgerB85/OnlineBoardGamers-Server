@@ -202,11 +202,49 @@ export function updateAllHighlightsForTransporterMode() {
 		return
 	}
 	if (rf.PHASE_MOVEMENTS.includes(store.gameflow.phase)) {
+		// Planes: if a mode was already chosen (Taxi/Takeoff), skip the reset and proceed to movement highlights
+		const savedPlaneMode = store.context.selectedPlaneMode
 		context.resetContextAndHighlights()
 
 		store.context.action = rf.ACT_TM_SELECT_PICKUP_DROP_MOVE
 
 		store.context.selectedTransporterIDforTM = transporterID
+
+		const isPlane = transporterObj.type === rf.PLANE
+
+		// Planes: if no mode chosen yet and plane can still move, show Taxi/Takeoff bubbles
+		if (isPlane && savedPlaneMode === -1 && transporterObj.remainingMoves > 0) {
+			store.context.planeModeSelectionActive = true
+			store.context.planeInFlight = false
+			// You can load other transporters
+			highlightEligibleTransportersForTransporterPickup(store.context.selectedTransporterIDforTM)
+			// You can load res
+			highlightEligibleResourcesForTransporterPickup(store.context.selectedTransporterIDforTM)
+			// You can drop res
+			highlightEligibleItemsForTransporterDrop(store.context.selectedTransporterIDforTM)
+			// You can "steal" resources from other transporters you own
+			highlightEligibleResourcesOnOtherTransporters(store.context.selectedTransporterIDforTM)
+			// NO movement highlighting yet - wait for mode choice
+			return
+		}
+		// Planes: if mode IS chosen (Taxi or Takeoff), proceed to highlight movement hexes
+		if (isPlane) {
+			store.context.selectedPlaneMode = savedPlaneMode
+			store.context.planeModeSelectionActive = false
+			// You can load other transporters
+			highlightEligibleTransportersForTransporterPickup(store.context.selectedTransporterIDforTM)
+			// You can load res
+			highlightEligibleResourcesForTransporterPickup(store.context.selectedTransporterIDforTM)
+			// You can drop res
+			highlightEligibleItemsForTransporterDrop(store.context.selectedTransporterIDforTM)
+			// You can "steal" resources from other transporters you own
+			highlightEligibleResourcesOnOtherTransporters(store.context.selectedTransporterIDforTM)
+			// You can move
+			highlightEligibleHexAreasForTransporterMove(store.context.selectedTransporterIDforTM)
+			// You can drop transporters
+			highlightEligibleTransportersForTransporterDrop(store.context.selectedTransporterIDforTM)
+			return
+		}
 
 		// You can load other transporters
 		highlightEligibleTransportersForTransporterPickup(store.context.selectedTransporterIDforTM)

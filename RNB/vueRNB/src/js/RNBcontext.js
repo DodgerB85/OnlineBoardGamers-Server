@@ -128,6 +128,8 @@ export function resetContext() {
 
 	// Planes & Aeroports vars
 	context.selectedPlaneMode = -1
+	context.planeModeSelectionActive = false
+	context.planeInFlight = false
 	context.midFlightDropTiles.splice(0)
 
 	// Building Vars
