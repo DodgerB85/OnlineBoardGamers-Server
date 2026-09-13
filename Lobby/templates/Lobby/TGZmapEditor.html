@@ -1,13 +1,11 @@
 {% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-  {% if not request.use_new_design %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-  {% endif %}
+  
   <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">
 {% endblock head %}
 {% block body %}
-  {% if request.use_new_design %}
+  
   <div class="nd-page nd-map-editor">
     {% include "Lobby/_nd_messages.html" %}
     <div class="nd-page-header">
@@ -56,78 +54,7 @@
       </main>
     </div>
   </div>
-  {% else %}
-  <div class="container">
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-    <div id="playerNumberArea">
-      <img class="playerCountFixed"
-           src="{% static 'Lobby/images/playerFilled.svg' %}"
-           id="1player"
-           height="50"
-           width="50"
-           alt="1 player">
-      <img class="playerCount"
-           src="{% static 'Lobby/images/playerFilled.svg' %}"
-           id="2player"
-           height="50"
-           width="50"
-           alt="2 players">
-      <img class="playerCount"
-           src="{% static 'Lobby/images/playerOutline.svg' %}"
-           id="3player"
-           height="50"
-           width="50"
-           alt="3 players">
-      <img class="playerCount"
-           src="{% static 'Lobby/images/playerOutline.svg' %}"
-           id="4player"
-           height="50"
-           width="50"
-           alt="4 players">
-      <img class="playerCount"
-           src="{% static 'Lobby/images/playerOutline.svg' %}"
-           id="5player"
-           height="50"
-           width="50"
-           alt="5 players">
-    </div>
-    <div id="topButtons">
-      <form id="mapSubmit" action="{% url 'createTGZpage' %}" method="post">
-        {% csrf_token %}
-        <input type="hidden" id="mapData" name="mapData" value="">
-        <input type="button"
-               class="actionsLineButton"
-               onclick="createGameWithMap()"
-               value="{% translate " Create a game with this map" %}">
-      </form>
-    </div>
-    <h1>{% translate "Drag and drop tiles - then click on tiles to rotate" %}</h1>
-    <div id="availableMapTiles"></div>
-    <div id="topButtons">
-      <input type="button"
-             onclick="fillMap()"
-             class="actionsLineButton"
-             value="{% translate " Complete map with random tiles" %}">
-      <input type="button"
-             onclick="shuffleCurrentBoard()"
-             class="actionsLineButton"
-             value="{% translate " Shuffle the current board" %}">
-      <input type="button"
-             onclick="clearMap()"
-             class="actionsLineButton"
-             value="{% translate " Clear map" %}">
-    </div>
-    <div id="boardArea">
-      <div id="board"></div>
-    </div>
-  </div>
-  {% endif %}
+  
   {% block script %}
       <script>
   document.addEventListener('DOMContentLoaded', function () {

@@ -2,21 +2,17 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-  {% if not request.use_new_design %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-  {% endif %}
+  
   <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
-  {% if request.use_new_design %}
+  
     <div class="nd-page">
       <div class="nd-page-header">
         <h1>{% translate "Coffee Help" %}</h1>
         <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'FCM:FCMhelp' %}">&#8592; {% trans "FCM Help" %}</a>
       </div>
-    {% else %}
-      <div class="container">
-      {% endif %}
+    
       {% if messages %}
         <div class="messages">
           {% for message in messages %}
@@ -24,12 +20,10 @@
           {% endfor %}
         </div>
       {% endif %}
-      {% if not request.use_new_design %}
-        <div id="coffeeHelpPage">
-        {% else %}
+      
           <div class="nd-card nd-section">
-          {% endif %}
-          {% if not request.use_new_design %}<h1>{% translate "Coffee Help" %}</h1>{% endif %}
+          
+          
           <div class="coffeeHelpSection">
             <p>
               {% blocktranslate trimmed %}
@@ -335,7 +329,7 @@
             contact me.
           {% endblocktranslate %}
         </div>
-        {% if request.use_new_design %}
+        
           <div class="nd-card nd-section">
             <h2>{% translate "Further Help" %}</h2>
             <p>
@@ -347,14 +341,9 @@
                    height="30" />
             </p>
           </div>
-        {% endif %}
+        
       </div>
-      {% if not request.use_new_design %}
-        <br />
-        <br />
-        {% include 'Lobby/donate/donateBanner.html' %}
-        {% include 'Lobby/common/homeButton.html' %}
-      {% endif %}
+      
     </div>
     <script>
   document.addEventListener('DOMContentLoaded', function () {

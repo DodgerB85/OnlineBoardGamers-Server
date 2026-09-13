@@ -1,14 +1,14 @@
 {% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-  {% if not request.use_new_design %}<link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">{% endif %}
+  
 {% endblock head %}
 {% block body %}
   {% compress js %}
     <script src="{% static 'Lobby/common.js' %}"></script>
   {% endcompress %}
-  {% if request.use_new_design %}<div class="nd-page nd-page-narrow" id="changelogPage">{% else %}<div class="container" id="changelogPage">{% endif %}
-  {% if request.use_new_design %}
+  <div class="nd-page nd-page-narrow" id="changelogPage">
+  
 
     <div class="nd-page-header">
       <h1>Updates</h1>
@@ -91,38 +91,7 @@
       {% endif %}
     </div>
 
-  {% else %}
-
-    {% if user.username == 'admin' %}
-      Add Update
-      <form method="post">
-        {% csrf_token %}
-        {% for field in changelogFormVar %}
-          {{ field }}
-          <br />
-          <br ?>
-        {% endfor %}
-        <br />
-        <input type="hidden" id="action" name="action" value="dooby">
-        <button type="submit">Add Update</button>
-      </form>
-    {% endif %}
-    <h1>Online Board Gamers Updates:</h1>
-    For full updates and discussionse see the OBG Discord. Click <a href="https://discord.gg/hCU7Fr77yV"
-    class="linkOther"
-    target="_blank">Here</a> to join
-    <br />
-    <br />
-    {% for change in allChanges %}
-      <b><u><span class="timeToConvertSpan">{{ change.timestamp }}</span></u></b>
-      <br />
-      {{ change.update }}
-      <br />
-      <br />
-    {% endfor %}
-    {% include "Lobby/donate/donateBanner.html" %}
-
-  {% endif %}
+  
   </div>
-  {% if not request.use_new_design %}{% include "Lobby/common/homeButton.html" %}{% endif %}
+  
 {% endblock body %}

@@ -1,24 +1,20 @@
 {% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-    {% if not request.use_new_design %}
-        <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-    {% endif %}
+    
     <link href="{% static 'Lobby/CSS/tournaments.css' %}" rel="stylesheet">
-    {% if request.use_new_design %}
+    
         <link href="{% static 'Lobby/CSS/lobby_new.css' %}" rel="stylesheet">
-    {% endif %}
+    
     {% compress js %}
         <script src="{% static 'Lobby/common.js' %}"></script>
     {% endcompress %}
 {% endblock head %}
 {% block body %}
-    {% if request.use_new_design %}
+    
         <div class="nd-page">
-        {% else %}
-            <div class="container miniTournamentsMainPage">
-            {% endif %}
-            {% if request.use_new_design %}
+        
+            
                 <div class="nd-page-header">
                     <div>
                         <h1>{% translate "Mini Tournaments" %}</h1>
@@ -30,29 +26,15 @@
                 <p style="font-size:14px; color:var(--color-muted); margin-bottom:16px;">
                     Faster-paced tournaments with a smaller player pool. Anyone can create or join.
                 </p>
-            {% else %}
-                <h1>{% translate "Mini Tournaments" %}</h1>
-                {% blocktranslate trimmed %}
-                    Mini Tournaments are meant to be faster paced tournaments with a smaller player pool
-                    <br />
-                    Anyone is free to create or join a mini tournament
-                    <br />
-                {% endblocktranslate %}
-                <b><a class="linkOther size25text" href="{% url 'newMiniTournaments' %}">{% translate "Click here to create a Mini Tournament" %}</a></b>
-                <br />
-            {% endif %}
+            
             {% if available_MT %}
-                {% if request.use_new_design %}
+                
                     <div class="nd-section-title" style="margin-top:8px;">Available</div>
-                {% else %}
-                    <h2>Available Mini Tournaments</h2>
-                {% endif %}
-                {% if request.use_new_design %}
+                
+                
                     <div class="nd-card">
-                    {% else %}
-                        <div class="tableOnlyDiv">
-                        {% endif %}
-                        <table class="{% if request.use_new_design %}nd-table{% else %}gamesTable{% endif %}">
+                    
+                        <table class="nd-table">
                             <thead>
                                 <tr class="headingRow">
                                     <th></th>
@@ -69,22 +51,16 @@
                         </table>
                     </div>
                 {% else %}
-                    {% if not request.use_new_design %}
-                        <h2>{% translate "No Available Mini Tournaments" %}</h2>
-                    {% endif %}
+                    
                 {% endif %}
                 {% if current_MT %}
-                    {% if request.use_new_design %}
+                    
                         <div class="nd-section-title" style="margin-top:20px;">In Progress</div>
-                    {% else %}
-                        <h2>Current Mini Tournaments</h2>
-                    {% endif %}
-                    {% if request.use_new_design %}
+                    
+                    
                         <div class="nd-card">
-                        {% else %}
-                            <div class="tableOnlyDiv">
-                            {% endif %}
-                            <table class="{% if request.use_new_design %}nd-table{% else %}gamesTable{% endif %}">
+                        
+                            <table class="nd-table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
@@ -101,22 +77,16 @@
                             </table>
                         </div>
                     {% else %}
-                        {% if not request.use_new_design %}
-                            <h2>{% translate "No Current Mini Tournaments" %}</h2>
-                        {% endif %}
+                        
                     {% endif %}
                     {% if finished_MT %}
-                        {% if request.use_new_design %}
+                        
                             <div class="nd-section-title" style="margin-top:20px;">Finished</div>
-                        {% else %}
-                            <h2>Finished Mini Tournaments</h2>
-                        {% endif %}
-                        {% if request.use_new_design %}
+                        
+                        
                             <div class="nd-card">
-                            {% else %}
-                                <div class="tableOnlyDiv">
-                                {% endif %}
-                                <table class="{% if request.use_new_design %}nd-table{% else %}gamesTable{% endif %}">
+                            
+                                <table class="nd-table">
                                     <thead>
                                         <tr class="headingRow">
                                             <th></th>
@@ -133,18 +103,12 @@
                                 </table>
                             </div>
                         {% else %}
-                            {% if not request.use_new_design %}
-                                <h2>{% translate "No Finished Mini Tournaments" %}</h2>
-                            {% endif %}
+                            
                         {% endif %}
                         <br />
                     </div>
-                    {% if not request.use_new_design %}
-                        <div class="container">{% include "Lobby/donate/donateBanner.html" %}</div>
-                    {% endif %}
-                    {% if not request.use_new_design %}
-                        {% include "Lobby/common/homeButton.html" %}
-                    {% endif %}
+                    
+                    
                     {% block script %}
                         <script>
     var global = {}

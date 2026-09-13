@@ -1,16 +1,14 @@
 {% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-  {% if not request.use_new_design %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-  {% endif %}
+  
   <link href="{% static 'Lobby/CSS/tournaments.css' %}" rel="stylesheet">
 {% endblock head %}
 {% block body %}
   {% compress js %}
     <script src="{% static 'Lobby/Mini_Tournament.js' %}"></script>
   {% endcompress %}
-  {% if request.use_new_design %}
+  
     <div class="nd-page">
       <div class="nd-page-header">
         <h1>{{ tournament.tournamentName }}</h1>
@@ -131,7 +129,7 @@
                 <h2>{{ winnerHTML|safe }}</h2>
               </div>
             {% endif %}
-            <div class="{% if tournament.tournamentType == 'PT' and request.use_new_design %}nd-mini-pt-grid{% endif %}"
+            <div class="{% if tournament.tournamentType == 'PT' %}nd-mini-pt-grid{% endif %}"
                  style="display: grid;
                         grid-template-columns: {% if tournament.tournamentType == 'PT' %}1fr 1fr{% else %}1fr{% endif %};
                         gap: 16px;
@@ -277,242 +275,7 @@
         </div>
       </div>
     </div>
-  {% else %}
-    <div class="container containerFlex">
-      <div id="wholeMTchat">
-        <div id="MTchatBox">
-          <h2>{% translate "Send a message" %}</h2>
-          <div>
-            <textarea rows="6" name="chatMessage" id="chatMessage"></textarea>
-          </div>
-          <div>
-            <button id="sendMessageButton" class="chatButton">{% translate "Send" %}</button>
-          </div>
-        </div>
-        <div id="messageList"></div>
-      </div>
-      <div class="right-column">
-        {% if messages %}
-          <div class="messages">
-            {% for message in messages %}
-              <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-            {% endfor %}
-          </div>
-        {% endif %}
-        <h1>{{ tournament.tournamentName }}</h1>
-        {% if tournament.tournamentDescription %}
-          <h3>
-            <i>{{ tournament.tournamentDescription }}</i>
-          </h3>
-        {% endif %}
-        <h3>Creator: {{ creator }}</h3>
-        {% if startingOptionsHTML != "" %}{{ startingOptionsHTML|safe }}{% endif %}
-        <!-- OPEN MT -->
-        {% if tournament.tournamentStatus == "OP" or tournament.tournamentStatus == "PR" %}
-          <h3>
-            {% blocktranslate trimmed %}
-              Before joining, please be aware: tournament games give you 12 hours per turn. After that, a personal 24-hour flex time bank starts being consumed — flex time never resets during a game. If you run out of flex, any player can kick you out.
-              <br />
-            {% endblocktranslate %}
-          </h3>
-          {% if invitedPlayerString != "" %}<h3>Invited Players: {{ invitedPlayerString }}</h3>{% endif %}
-          <h3>{% translate "Max Players" %}: {{ tournament.maxTournamentPlayers }}</h3>
-          <h3>{% translate "Players per game" %}: {{ tournament.maxGamePlayers }}</h3>
-          <h3>{% translate "Tournament Format" %}: {{ tournament.get_tournamentType_display }}</h3>
-          <div class="tournamentSignupContainer">
-            <div class="MTallRoundHolder">
-              <table class="generalTable">
-                <tr>
-                  <th>#</th>
-                  <th>{% translate "Current Players" %}</th>
-                </tr>
-                {% for player in startingPlayers %}
-                  <tr class="clickablePlayerRow"
-                      id="playerRow{{ player.username }}"
-                      onclick="window.location.href='/profile/{{ player.username }}';">
-                    <td>{{ forloop.counter }}</td>
-                    <td>
-                      <a href="{% url 'playerInfo' usernameToProfile=player.username %}">{{ player.username }}</a>
-                    </td>
-                  </tr>
-                {% endfor %}
-                {% for i in openSlots %}
-                  <tr>
-                    <td>{{ i }}</td>
-                    <td></td>
-                  </tr>
-                {% endfor %}
-              </table>
-            </div>
-          </div>
-          {% if not isSignedUp %}
-            <br />
-            <form action="{% url 'MiniTournament' Mini_Tournament_id=MT_ID %}"
-                  method="post">
-              {% csrf_token %}
-              <div>
-                <input type="checkbox"
-                       id="understand_movement"
-                       name="understand_movement"
-                       required>
-                <label for="understand_movement">
-                  I understand: 12hr per turn + 24hr flex bank (used when I exceed 12hr; if it runs out I can be kicked)
-                </label>
-              </div>
-              <input class="registerbtn"
-                     type="submit"
-                     value="{% if isInvitedPlayer %}Accept Invite & Join Mini Tournament{% else %}{% translate "Join Mini Tournament" %}{% endif %}" />
-            </form>
-            {% if isInvitedPlayer %}
-              <form action="{% url 'MiniTournament' Mini_Tournament_id=MT_ID %}"
-                    method="post">
-                {% csrf_token %}
-                <input type="hidden" name="declineInvite" value="true">
-                <input class="declineButton"
-                       type="submit"
-                       value="{% translate "Decline Invite" %}" />
-              </form>
-            {% endif %}
-          {% endif %}
-          <!-- ////////////////////////////////////////////////////////////////// IP MT -->
-        {% elif tournament.tournamentStatus == "IP" or tournament.tournamentStatus == "FN" %}
-          <div class="IPcontainer">
-            <div class="IPleftColumn">
-              {% if tournament.tournamentType == "PT" %}
-                <h2>Points</h2>
-                <table class="generalTable">
-                  <tr>
-                    <th>{% translate "Position" %}</th>
-                    <th>{% translate "Points" %}</th>
-                  </tr>
-                  {% for entry in pointsValues.normal %}
-                    <tr>
-                      <td>{{ entry.0 }}</td>
-                      <td>{{ entry.1 }}</td>
-                    </tr>
-                  {% endfor %}
-                  <tr>
-                    <td colspan="2">
-                      <hr />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>{% translate "Bye" %}</td>
-                    <td>{{ pointsValues.bye }}</td>
-                  </tr>
-                </table>
-              {% endif %}
-              <h2>{% translate "Players" %}</h2>
-              <table class="generalTable">
-                <tr>
-                  <th>{{ playersData.headingRow.0 }}</th>
-                  <th>{{ playersData.headingRow.1 }}</th>
-                </tr>
-                {% for playerEntry in playersData.playerData %}
-                  <tr class="clickablePlayerRow"
-                      id="playerRow{{ playerEntry.2 }}"
-                      onclick="window.location.href='/profile/{{ playerEntry.2 }}';">
-                    <td class="IPplayerNameTD">{{ playerEntry.0 }}</td>
-                    <td class="IPpointsTD">{{ playerEntry.1 }}</td>
-                  </tr>
-                {% endfor %}
-              </table>
-            </div>
-            <div class="IPrightColumn">
-              {% if tournament.tournamentStatus == "FN" %}<h2>{{ winnerHTML|safe }}</h2>{% endif %}
-              <h3>{% translate "Max Players" %}: {{ tournament.maxTournamentPlayers }}</h3>
-              <h3>{% translate "Players per game" %}: {{ tournament.maxGamePlayers }}</h3>
-              <h3>{% translate "Tournament Format" %}: {{ tournament.get_tournamentType_display }}</h3>
-              {% if tournament.tournamentStatus == "FN" %}
-                <h2>{% translate "Result" %}</h2>
-                <div class="MTallRoundHolder">
-                  <div class="MTroundTableDiv">
-                    <table class="generalTable">
-                      <tr>
-                        <th>{% translate "Position" %}</th>
-                        <th>{% translate "Player" %}</th>
-                      </tr>
-                      {% for entry in winnersData %}
-                        <tr>
-                          <td>
-                            {% if forloop.first %}
-                              1st
-                            {% elif forloop.counter == 2 %}
-                              2nd
-                            {% elif forloop.counter == 3 %}
-                              3rd
-                            {% endif %}
-                          </td>
-                          <td>
-                            {% for player in entry %}
-                              {% if not forloop.last %}
-                                <a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>,
-                              {% else %}
-                                <a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>
-                              {% endif %}
-                            {% endfor %}
-                          </td>
-                        </tr>
-                      {% endfor %}
-                    </table>
-                  </div>
-                </div>
-              {% endif %}
-              <div class="MTallRoundHolder">
-                {% for round in roundsData %}
-                  <div class="MTroundTableDiv">
-                    <h2>{{ round.roundTitle }}</h2>
-                    <table class="generalTable">
-                      <thead>
-                        <tr>
-                          <th>Game</th>
-                          <th>Winner</th>
-                        </tr>
-                      </thead>
-                      {% for game in round.gamesData %}
-                        <tr class="clickableGameRow  {{ tournament.gameCode }}"
-                            onclick="window.location.href='/{{ tournament.gameCode }}/{{ game.gameID }}/show/';"
-                            id="gamesRow{{ game.gameID }}">
-                          <td>
-                            {% for player in game.players %}
-                              <a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>
-                              {% if not forloop.last %}VS{% endif %}
-                            {% endfor %}
-                          </td>
-                          <td class="roundWinnerTD">
-                            {% for player in game.winnersArr %}
-                              <a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>
-                            {% endfor %}
-                          </td>
-                        </tr>
-                      {% endfor %}
-                      {% if round.byesNames %}
-                        <tr>
-                          <td colspan="2">
-                            Byes:
-                            {% for player in round.byesNames %}
-                              <a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>
-                            {% endfor %}
-                          </td>
-                        </tr>
-                      {% endif %}
-                    </table>
-                  </div>
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-        {% endif %}
-      </div>
-      <br />
-    </div>
-    {% if not request.use_new_design %}
-      <div class="container">{% include "Lobby/donate/donateBanner.html" %}</div>
-    {% endif %}
-    {% if not request.use_new_design %}
-      {% include "Lobby/common/homeButton.html" %}
-    {% endif %}
-  {% endif %}
+  
   {% block script %}
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
     <script>

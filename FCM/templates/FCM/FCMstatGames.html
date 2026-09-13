@@ -1,77 +1,15 @@
 {% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-  {% if not request.use_new_design %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-  {% endif %}
+  
   {% compress js %}
     <script src="{% static 'Lobby/common.js' %}"></script>
   {% endcompress %}
 {% endblock %}
 {% block body %}
-  {% if request.use_new_design %}
+  
     {% url 'FCM:FCMstats' as stats_url %}
     {% url 'FCM:FCMstatGames' as stat_games_url %}
     {% include "Lobby/_nd_stat_games.html" with game_name="Food Chain Magnate" stats_url=stats_url stat_games_url=stat_games_url %}
-  {% else %}
-  <div class="container">
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-    <h1>FCM Stat Games</h1>
-    <!-- FINIHED GAMES -->
-    <div id="finishedGamesListView222">
-      <div class="tableOnlyDiv">
-        <table class="gamesTable">
-          <thead>
-            <tr class="headingRow">
-              <td class="nameHeaderCurrent">{% translate "Name" %}</td>
-              <td class="playersHeader">{% translate "Players" %}</td>
-              <td class="currentPlayersHeader">{% translate "All Players" %}</td>
-              <td class="createdHeader">{% translate "Created" %}</td>
-              <td class="lastActivityHeader">{% translate "Last Activity" %}</td>
-              <td class="winnerHeader">{% translate "Winner" %}</td>
-            </tr>
-          </thead>
-          {% for game in finishedGamesList %}
-            {% include 'Lobby/gameDisplay/finishedGameRow.html' with game=game %}
-          {% endfor %}
-        </table>
-      </div>
-      <br />
-      <div class="pagination">
-        <span class="step-links">
-          {% if page > 1 %}
-            <a href="#" onclick="submitForm('1')">&laquo; first</a>
-            <a href="#" onclick="submitForm('{{ page|add:'-1' }}')">previous</a>
-          {% endif %}
-          <span class="current">
-            {% translate "Page" %} {{ page }} {% translate "of" %} {{ num_pages }}. {% translate "Total Games:" %}
-            {{ total_games_count }}
-          </span>
-          {% if page < num_pages %}
-            <a href="#" onclick="submitForm('{{ page|add:'1' }}')">next</a>
-            <a href="#" onclick="submitForm('{{ num_pages }}')">last &raquo;</a>
-          {% endif %}
-        </span>
-      </div>
-      <form id="paginationForm" method="post" action="/FCM/FCMstatGames/">
-        {% csrf_token %}
-        <input type="hidden" name="game_ids" value="{{ game_ids_json }}">
-        <input type="hidden" id="pageInput" name="page" value="{{ page }}">
-      </form>
-      <script>
-          function submitForm(page) {
-              document.getElementById('pageInput').value = page;
-              document.getElementById('paginationForm').submit();
-          }
-      </script>
-    </div>
-    {% include 'Lobby/common/homeButton.html' %}
-  </div>
-  {% endif %}
+  
 {% endblock %}
