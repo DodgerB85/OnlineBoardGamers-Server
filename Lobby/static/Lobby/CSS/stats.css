@@ -189,6 +189,9 @@ body.nd .nd-stats-section .nd-table {
 	font-size: 13px;
 }
 
+body.nd .nd-stats-section .nd-table thead tr {
+	background: var(--color-accent);
+}
 body.nd .nd-stats-section .nd-table th,
 body.nd .nd-stats-section .nd-table td {
 	padding: 6px 8px;
