@@ -8,10 +8,6 @@ import re
 import time
 import traceback
 from collections import Counter
-
-# import hashlib
-# import urllib
-# from random import randint
 from datetime import timedelta
 
 import requests
