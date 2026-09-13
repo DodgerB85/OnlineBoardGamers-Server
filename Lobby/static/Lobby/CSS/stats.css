@@ -653,6 +653,9 @@ body.nd .nd-trophy-detail .trophyNumberSummaryDiv {
 /* Per-game stat tables (Players/Games/Wins/Win%). These don't use
    nd-row09, so nd-components.css keeps them as normal tables; just
    tighten the padding so a 4-col table sits comfortably on mobile. */
+body.nd .nd-player-stats .nd-table thead tr {
+	background: var(--color-accent);
+}
 body.nd .nd-player-stats .nd-table th,
 body.nd .nd-player-stats .nd-table td {
 	padding: 6px 10px;
