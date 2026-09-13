@@ -653,14 +653,14 @@ body.nd .nd-trophy-detail .trophyNumberSummaryDiv {
 	left: 11px;
 }
 
-/* Per-game stat tables (Players/Games/Wins/Win%). These don't use
-   nd-row09, so nd-components.css keeps them as normal tables; just
-   tighten the padding so a 4-col table sits comfortably on mobile. */
-body.nd .nd-player-stats .nd-table thead tr {
+/* Per-game stat table (Players/Games/Wins/Win%) on the player profile page.
+   Bespoke class, not scoped through an ancestor + generic .nd-table — a
+   change here can't leak onto any other table. */
+body.nd .playerInfoStatsTable thead tr {
 	background: var(--color-accent);
 }
-body.nd .nd-player-stats .nd-table th,
-body.nd .nd-player-stats .nd-table td {
+body.nd .playerInfoStatsTable th,
+body.nd .playerInfoStatsTable td {
 	padding: 6px 10px;
 }
 
