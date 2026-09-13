@@ -1,11 +1,4 @@
 /*** TGZT IN PROGRESS */
-.TGZTplayerTable-container {
-	max-width: 800px;
-	/* Adjust the value as per your requirement */
-	overflow-x: auto;
-	margin: auto;
-}
-
 .TGZTplayerTable {
 	border-collapse: collapse;
 	/*width: 100%;*/
@@ -78,13 +71,6 @@
 
 
 
-.TGZTgamesTable-container {
-	max-width: 800px;
-	/* Adjust the value as per your requirement */
-	overflow-x: auto;
-	margin: auto;
-}
-
 .TGZTgamesTable {
 	background-color: white;
 	max-width: 800px;
@@ -130,12 +116,6 @@
 
 
 /*** FIXED Spring 24 */
-.TGZTplayerTableSpring24-container {
-	max-width: 800px;
-	overflow-x: auto;
-	margin: auto;
-}
-
 .TGZTplayerTableSpring24 {
 	border-collapse: collapse;
 	width: 100%;
