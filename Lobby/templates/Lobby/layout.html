@@ -49,10 +49,6 @@
         <meta name="revisit-after" content="2 days">
         <meta name="author" content="Online Board Gamers">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!--<link rel="preload"
-      href="/static/Lobby/Lobby.css"
-      as="style"
-      onload="this.rel='stylesheet'">-->
         <!-- Browser Icons -->
         <link rel="icon"
               type="image/png"
@@ -73,10 +69,16 @@
         <meta property="og:image"
               content="https://www.onlineboardgamers.com{% static 'Lobby/favicons/favicon-96x96.png' %}" />
         {% block canonical %}<link rel="canonical" href="https://www.onlineboardgamers.com/">{% endblock %}
-        <link href="{% static 'Lobby/CSS/layout.css' %}" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap"
+              rel="stylesheet">
+        <link href="{% static 'Lobby/CSS/nd-components.css' %}?v=23"
+              rel="stylesheet">
+        <link href="{% static 'Lobby/CSS/layout_new.css' %}" rel="stylesheet">
         {% block head %}{% endblock %}
     </head>
-    <body>
+    <body class="nd {% if user.is_authenticated %}ndAuthed{% else %}ndGuest{% endif %}">
         <div class="topBar">
             {% if user.is_authenticated %}
                 <!-- LOGGED IN TOP BAR -->
@@ -88,7 +90,7 @@
                         <br />
                         <span id="leftLoggedInAsInfo">{% translate "Logged in as" %}: {{ user.username }}</span>
                     </div>
-                    <a href="{% url 'indexSpecialRedirect' %}">
+                    <a href="{% url 'index' %}">
                         <img id="logoLoggedIn"
                              src="{% static 'Lobby/images/Logo1.png' %}"
                              width="400px"
@@ -107,7 +109,6 @@
                         <a class="topBarLink" href="{% url 'changelog' %}">{% translate "Updates" %}</a> |
                         <a class="topBarLink" href="{% url 'donate' %}">{% translate "Support" %}</a> |
                         <a class="topBarLink" id="aboutLink" href="{% url 'about' %}">{% translate "About" %}</a>
-                        <!--<a class="topBarLink" id="contactLink" href="{% url 'contact' %}">{% translate "Contact" %}</a>-->
                     </div>
                     <div id="langSelectLoggedIn">
                         {% get_current_language_bidi as LANGUAGE_BIDI %}
@@ -141,21 +142,34 @@
             {% else %}
                 <!-- Not logged in TOP BAR -->
                 <div id="loginForm">
-                    <form action="{% url 'myLogin' %}" method="post">
-                        {% csrf_token %}
-                        <input class="loginInput"
-                               type="text"
-                               name="username"
-                               placeholder="{% translate " Username" %}"
-                               required>
-                        <input class="loginInput"
-                               type="password"
-                               name="password"
-                               placeholder="{% translate " Password" %}"
-                               required>
-                        <input type="hidden" name="next" value="{{ request.GET.next }}" />
-                        <input type="submit" value="{% translate " Login" %}">
-                    </form>
+                    <div id="loginFormStack">
+                        <form action="{% url 'myLogin' %}" method="post">
+                            {% csrf_token %}
+                            <input class="loginInput"
+                                   type="text"
+                                   name="username"
+                                   placeholder="{% translate " Username" %}"
+                                   required>
+                            <input class="loginInput"
+                                   type="password"
+                                   name="password"
+                                   placeholder="{% translate " Password" %}"
+                                   required>
+                            <input type="hidden" name="next" value="{{ request.GET.next }}" />
+                            <input class="nd-button nd-button-primary loginSubmit"
+                                   type="submit"
+                                   value="{% translate " Login" %}">
+                        </form>
+                        <div id="registerLink">
+                            <a class="topBarLink" href="{% url 'register' %}">
+                                <span id="registerLinkTextLong">{% translate "Register New Account" %}</span>
+                                <span id="registerLinkTextShort">{% translate "Register" %}</span>
+                            </a>|
+                            <a class="topBarLink"
+                               id="forgotPwdLink"
+                               href="{% url 'password_reset' %}">{% translate "Forgot Password?" %}</a>
+                        </div>
+                    </div>
                     <a href="{% url 'index' %}">
                         <img id="logoLoggedOut"
                              width="800px"
@@ -163,15 +177,6 @@
                              src="{% static 'Lobby/images/Logo1.png' %}"
                              alt="Online Board Gamers">
                     </a>
-                </div>
-                <div id="registerLink">
-                    <a class="topBarLink" href="{% url 'register' %}">
-                        <span id="registerLinkTextLong">{% translate "Register New Account" %}</span>
-                        <span id="registerLinkTextShort">{% translate "Register" %}</span>
-                    </a>|
-                    <a class="topBarLink"
-                       id="forgotPwdLink"
-                       href="{% url 'password_reset' %}">{% translate "Forgot Password?" %}</a>
                 </div>
                 <div id="rightLinksLoggedOut">
                     <div id="rightLoggedOutHyperlinks">
@@ -212,7 +217,8 @@
             {% endif %}
         </div>
         {% if user.is_authenticated %}
-            <nav class="mobileQuickNav" aria-label="{% translate "Primary navigation" %}">
+            <nav class="mobileQuickNav"
+                 aria-label="{% translate "Primary navigation" %}">
                 <a class="topBarLink" href="{% url 'newGamesPage' %}">{% translate "New Game" %}</a>
                 <a class="topBarLink"
                    href="{% url 'playerInfo' usernameToProfile=user.username %}">{% translate "My Games" %}</a>
@@ -235,9 +241,6 @@
                 <div class="hamburgerLinkDiv">
                     <a class="topBarLink" href="{% url 'about' %}">{% translate "About" %}</a>
                 </div>
-                <!--<div class="hamburgerLinkDiv">
-                    <a class="topBarLink" href="{% url 'contact' %}">{% translate "Contact" %}</a>
-                </div>-->
             </div>
         {% else %}
             <!-- Hamburger not logged in -->
@@ -256,10 +259,14 @@
                 </div>
             </div>
         {% endif %}
-        <div class="mainLayout">
+        <main class="mainLayout">
             {% block body %}{% endblock %}
-        </div>
-        <div class="footer">
+        </main>
+        <footer class="footer">
+            <div class="nd-support-strip">
+                {% include "Lobby/donate/donateBanner.html" %}
+                {% include "Lobby/splotterconSponsor.html" %}
+            </div>
             <div class="content">
                 <p>
                     {% blocktranslate trimmed %}
@@ -275,55 +282,18 @@
                     Summary icons from <a href="https://game-icons.net/">game-icons.net</a>
                 </p>
             </div>
-        </div>
-    </body>
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-
-        const hamburger = document.querySelector(".hamburger");
-        const hamburgerMenu = document.querySelector(".hamburgerMenu");
-        //const langSelectLoggedOut = document.getElementById("langSelectLoggedOut")
-
-        hamburger.addEventListener("click", () => {
-            hamburger.classList.toggle("active");
-            hamburgerMenu.classList.toggle("active");
-        })
-
-        var winX = window.clientWidth;// + window.outerWidth;
-        winX = document.documentElement.clientWidth;
-        winX -= 75;
-        //alert(winX)
-        hamburger.style.position = 'fixed';
-        hamburger.style.left = "" + String(winX) + "px"
-        hamburger.style.top = "0px"
-
-
-        //hamburgerMenu.style.width = "" + String(document.documentElement.clientWidth) + "px";
-        hamburgerMenu.style.left = "" + String(document.documentElement.clientWidth - 200) + "px";
-        //alert(winX)
-
-       // langSelectLoggedOut.style.position = 'fixed';
-        //langSelectSmallScreen.style.left = "" + String(winX) + "px"
-       // langSelectLoggedOut.style.top = "0px"
-     //   langSelectLoggedOut.style.left = "" + String(document.documentElement.clientWidth - 175) + "px";
-
-        addEventListener("resize", (event) => {
-            winX = document.documentElement.clientWidth;
-            winX -= 75;
-            hamburger.style.position = 'fixed';
-            hamburger.style.left = "" + String(winX) + "px"
-            hamburger.style.top = "0px"
-
-            //hamburgerMenu.style.width = "" + String(document.documentElement.clientWidth) + "px";
-            hamburgerMenu.style.left = "" + String(document.documentElement.clientWidth - 200) + "px";
-
-           // langSelectLoggedOut.style.position = 'fixed';
-            //langSelectSmallScreen.style.left = "" + String(winX) + "px"
-          //  langSelectLoggedOut.style.top = "0px"
-          //  langSelectLoggedOut.style.left = "" + String(document.documentElement.clientWidth - 175) + "px";
-
+        </footer>
+        <script src="{% static 'Lobby/js/ndTooltips.js' %}"></script>
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const hamburger = document.querySelector(".hamburger");
+            const hamburgerMenu = document.querySelector(".hamburgerMenu");
+            if (!hamburger || !hamburgerMenu) return;
+            hamburger.addEventListener("click", () => {
+                hamburger.classList.toggle("active");
+                hamburgerMenu.classList.toggle("active");
+            });
         });
-
-    });
-    </script>
+        </script>
+    </body>
 </html>

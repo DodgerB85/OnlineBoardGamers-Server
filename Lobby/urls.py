@@ -168,6 +168,5 @@ urlpatterns = [
         "sendMainTchatMessage/", views.sendMainTchatMessage, name="sendMainTchatMessage"
     ),
     path("reloadMainTchatData/", views.reloadMainTchatData, name="reloadMainTchatData"),
-    path("newDesign/<int:design_num>/", views.newDesign, name="newDesign"),
     path('test-500-error/', views.trigger_500_error, name='test_500_error'),
 ]

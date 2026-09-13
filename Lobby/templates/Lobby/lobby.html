@@ -1,241 +1,149 @@
 {% extends "Lobby/layout.html" %}
 {% load static i18n compress %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
+    <link href="{% static 'Lobby/CSS/lobby_new.css' %}?v=7" rel="stylesheet" />
 {% endblock head %}
 {% block body %}
     {% compress js %}
         <script src="{% static 'Lobby/Lobby.js' %}"></script>
         <script src="{% static 'Lobby/common.js' %}"></script>
     {% endcompress %}
-    <div class="container" id="lobbyPage">
+    <div class="nd-lobby" id="lobbyPage">
         {% if messages %}
-            <div class="messages">
+            <div class="nd-messages">
                 {% for message in messages %}
                     <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
                 {% endfor %}
             </div>
         {% endif %}
+        <div class="nd-notice">
+            <span>Splotter Con Gand Final Pitts Bus Match <a href="/BUS/34571/spoilerFree/">Here!</a></span>
+        </div>
         {% if availableTournaments|length > 0 %}
-            <span class="availableTournamentsSpan">
+            <div class="nd-notice">
                 {% for game in availableTournaments %}
                     {% if game == "FCM" %}
                         <img src="{% static 'FCM/images/burger_board.png' %}"
-                             alt="FCM game"
-                             width="40"
-                             height="40"
-                             title="FCM Game"
-                             class="statsIMG" />
+                             alt="FCM"
+                             width="28"
+                             height="28"
+                             class="nd-notice-icon" />
                     {% elif game == "HLC" %}
                         <img src="{% static 'HLC/images/icon_car.png' %}"
-                             alt="HLC game"
-                             width="50"
-                             height="40"
-                             title="HLC Game"
-                             class="statsIMG" />
+                             alt="HLC"
+                             width="32"
+                             height="28"
+                             class="nd-notice-icon" />
                     {% elif game == "BUS" %}
                         <img src="{% static 'BUS/images/bus_icon.png' %}"
-                             alt="Bus game"
-                             width="40"
-                             height="40"
-                             title="Bus Game"
-                             class="statsIMG" />
+                             alt="Bus"
+                             width="28"
+                             height="28"
+                             class="nd-notice-icon" />
                     {% elif game == "TGZ" %}
                         <img src="{% static 'TGZ/images/tgz_icon.png' %}"
-                             alt="TGZ game"
-                             width="40"
-                             height="40"
-                             title="TGZ Game"
-                             class="statsIMG" />
+                             alt="TGZ"
+                             width="28"
+                             height="28"
+                             class="nd-notice-icon" />
                     {% elif game == "AQY" %}
                         <img src="{% static 'AQY/images/aqy_icon.png' %}"
-                             alt="AQY game"
-                             width="40"
-                             height="40"
-                             title="AQY Game"
-                             class="statsIMG" />
+                             alt="AQY"
+                             width="28"
+                             height="28"
+                             class="nd-notice-icon" />
                     {% elif game == "IND" %}
                         <img src="{% static 'IND/images/ind_icon.png' %}"
-                             alt="IND game"
-                             width="40"
-                             height="40"
-                             title="IND Game"
-                             class="statsIMG" />
+                             alt="IND"
+                             width="28"
+                             height="28"
+                             class="nd-notice-icon" />
                     {% elif game == "RNB" %}
                         <img src="{% static 'RNB/images/rnb_icon.png' %}"
-                             alt="RNB game"
-                             width="40"
-                             height="40"
-                             title="RNB Game"
-                             class="statsIMG" />
+                             alt="RNB"
+                             width="28"
+                             height="28"
+                             class="nd-notice-icon" />
                     {% endif %}
                 {% endfor %}
-                {% url "AllTournaments" as the_url %}
-                {% blocktranslate trimmed %}
-                    Tournament open for signup! See
-                    <a class="linkOther" href="{{ the_url }}">Tournaments</a>
-                {% endblocktranslate %}
-            </span>
-            <br />
-        {% endif %}
-        <!--<span class="newsSpan">
-      {% blocktranslate trimmed %}
-        OBG discord! Click <a href="https://discord.gg/hCU7Fr77yV" class="linkOther" target="_blank">Here</a> to
-        join!
-      {% endblocktranslate %}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <br />
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </span>-->
-        <!--<span class="newsSpan"><a href="https://splottercon.com/" target="_blank">Splotter Con</a> Finishes with a great TGZ match!</span>-->
-        <!--<span class="newsSpan"><a href="https://www.onlineboardgamers.com/TGZ/1894/spoilerFree" target="_blank">Click here to go to the start of the replay</a>! <a href="https://group.doubletree.com/48x0hz" target="_blank">Discounted Hotel Rooms</a>!</span>-->
-        <!--<span class="newsSpan">Splotter Con (Pitts, USA, 29 Aug - 2 Sep ) <a href="https://tabletop.events/conventions/splotter-con-2025" target="_blank">Last few badges left!</a>!  <a href="https://splottercon.com/" target="_blank">Main Splotter Con Site</a> </span>-->
-        <!--<span class="newsSpan"><a href="https://splottercon.com/" target="_blank">Splotter Con 2024</a> Update! Free pass contest now open - subscribe to either the <a href="https://twitter.com/SplotterCon" target="_blank"><strong>Twitter</strong></a> or <a href="https://bsky.app/profile/splottercon.bsky.social" target="_blank"><strong>bsky</strong></a> feed </span>-->
-        <!--<span class="newsSpan">External TGZ tournament available! <a href="https://boardgamegeek.com/thread/3144834/tgz-tournament-announcements" target="_blank">Signup Here</a> </span>-->
-        <!--<span class="newsSpan">Splotter Con (30 Aug - 2 Sep ) <a href="https://tabletop.events/conventions/splotter-con-2024" target="_blank">Badges on Sale</a>! Last 4 (or less!) badges left! <a href="https://splottercon.com/" target="_blank">Main Splotter Con Site</a> </span>-->
-        <div class="newDesignBanner">
-            <span class="newDesignBannerText">New website design ready to test! Try it out and let us know what feels off.</span>
-            <a class="newDesignBannerButton" href="/nd/">Try new design</a>
-            <a class="newDesignBannerButton" href="{% url 'feedback' %}">Give feedback</a>
-        </div>
-        <span class="newsSpan">Live Splotter Con Pitts Bus Match <a class="linkOther"
-    href="/BUS/34571/spoilerFree/">Here!</a></span>
-        <br />
-        <!--<span class="newsSpan">Keyflower is coming! Set your colour preference in your <a class="linkOther" target="_self" href="{% url 'profile' %}">Profile</a> </span><br />-->
-        <!--<span class="newsSpan">Keyflower is coming! Help page available <a class="linkOther" target="_self" href="{% url 'KFW:KFWhelp' %}">Here!</a> </span><br />-->
-        <!--<span class="newsSpan">Keyflower is <a href="{% url 'newGamesPage' %}" id="createNewGamesLink">Here</a>!</span><br />-->
-        <!--span class="newsSpan">Please check updated email settings in your <a class="linkOther" target="_self" href="{% url 'profile' %}">Profile</a> </span>-->
-        <!--<span class="newsSpan">HLC tournament started prematurely - I've canceled the games and reopend signup. <br />Tournament starts 7th April!</span>-->
-        <!--<span class="newsSpan">UPDATE TO FCM SIMULTANEOUS TURN CODE - Simultaneous turns in progress have been reset</span>-->
-        <!--<span class="newsSpan">Mini Tournaments now Available! <a class="linkOther size25text" href="{% url 'newMiniTournaments' %}">{% translate "Click here to create a Mini Tournament" %}</a></span>-->
-        <!--<span class="newsSpan">Congratulations radio414! Winner of the <a href="https://splottercon.com/" target="_blank">Splotter Con</a> tournament! <a target="_self" href="/BUS/1616/">Click here to replay the final</a>! </span>
-    <br />-->
-        <!--<span class="newsSpan">Set your Indonesia Preferences in your <a href="{% url 'profileIND' %}" id="createNewGamesLink">Profile</a>!</span>-->
-        <!--<button id="stopEmailsButton" class="openAllMyMoveGamesButton">Set in js</button>-->
-        <a href="{% url 'newGamesPage' %}" id="createNewGamesLink">
-            <div class="createNewGamesDiv">
-                <img class="newGameMiniImg"
-                     src="{% static "CNS/images/CNSbox.jpg" %}"
-                     alt="CNS" />
-                <img class="newGameMiniImg"
-                     src="{% static "BUS/images/bus-box.jpg" %}"
-                     alt="Bus" />
-                <img class="newGameMiniImg"
-                     src="{% static "AQY/images/AQYbox.jpg" %}"
-                     alt="Antiquity" />
-                <img class="newGameMiniImg"
-                     src="{% static "IND/images/INDbox.jpg" %}"
-                     alt="Indonesia" />
-                <img class="newGameMiniImg"
-                     src="{% static "TGZ/images/TGZ_box.jpg" %}"
-                     alt="TGZ" />
-                <img class="newGameMiniImg"
-                     src="{% static "HLC/images/hlc-box.jpg" %}"
-                     alt="Horseless Carriage" />
-                <img class="newGameMiniImg"
-                     src="{% static "FCM/images/fcm-box.jpg" %}"
-                     alt="Food Chain Magnate" />
-                <img class="newGameMiniImg"
-                     src="{% static "FCM/images/fcm-box2.jpg" %}"
-                     alt="Food Chain Magnate" />
-                Create New Game
-                <img class="createNewGamesArrow"
-                     src="{% static "Lobby/images/newGameArrow.svg" %}"
-                     alt="Create new Game"
-                     width="100"
-                     height="50" />
-            </div>
-        </a>
-        <br />
-        <div class="tab">
-            <button class="tablinks" id="available">
-                <span id="availableTextBig">{% translate "Available Games" %}&nbsp;({{ availableCount }})</span>
-                <span id="availableTextSmall">{% translate "Available" %}&nbsp;({{ availableCount }})</span>
-            </button>
-            <button class="tablinks" id="current">
-                {% if currentChat %}
-                    <img class="tabChatIcon"
-                         alt="Str Opt"
-                         width="50"
-                         height="50"
-                         src="{% static "Lobby/images/icon-chat-lobby.svg" %}"
-                         title="New Chat Message" />
-                {% endif %}
-                <span id="currentTextBig">{% translate "Current Games" %}</span>
-                <span id="currentTextSmall">{% translate "Current" %}</span>
-                (
-                <span id="currentCount">{{ currentCount }}</span>
-                )
-            </button>
-            <button class="tablinks" id="waiting">
-                <span id="waitingTextBig">{% translate "Waiting Games" %}&nbsp;({{ waitingCount }})</span>
-                <span id="waitingTextSmall">{% translate "Waiting" %}&nbsp;({{ waitingCount }})</span>
-            </button>
-            <button class="tablinks" id="invitations">
-                <span id="invitationsTextBig">{% translate "Invitations" %}&nbsp;({{ invitationsCount }})</span>
-                <span id="invitationsTextSmall">{% translate "Invitations" %}&nbsp;({{ invitationsCount }})</span>
-            </button>
-            <button class="tablinks" id="finished">
-                {% if finishedChat %}
-                    <img class="tabChatIcon"
-                         alt="Str Opt"
-                         width="50"
-                         height="50"
-                         src="{% static "Lobby/images/icon-chat-lobby.svg" %}"
-                         title="New Chat Message" />
-                {% endif %}
-                <span id="finishedTextBig">{% translate "Finished Games" %}</span>
-                <span id="finishedTextSmall">{% translate "Finished" %}</span>
-                (
-                <span id="finishedCount">{{ finishedCount }}</span>
-                )
-            </button>
-        </div>
-        <form id="openInMapEditorForm"
-              action="{% url 'FCMmapEditor' %}"
-              method="post">
-            {% csrf_token %}
-            <input type="hidden" id="mapData" name="mapData" value="" />
-        </form>
-        <form id="openInMapEditorFormTGZ"
-              action="{% url 'TGZmapEditor' %}"
-              method="post">
-            {% csrf_token %}
-            <input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value="" />
-        </form>
-        <form id="openInMapEditorFormAQY"
-              action="{% url 'AQYmapEditor' %}"
-              method="post">
-            {% csrf_token %}
-            <input type="hidden" id="mapDataAQY" name="mapDataAQY" value="" />
-        </form>
-        <!----------------------------------------------------------------->
-        <div class="allSqGamesContainerDiv">
-            <!--  Available Games Squares -->
-            <div id="availableGamesListSquares">
-                {% if availableGamesList %}
-                    {% for game in availableGamesList %}
-                        {% include "Lobby/gameDisplay/availableGameSq.html" with game=game %}
-                    {% endfor %}
-                {% else %}
-                    <span class="noGamesSpan">
-                        <br />
-                        {% translate "No Available Games" %}
-                        <br />
-                        <br />
-                    </span>
-                    {% include "Lobby/lobby_icons.html" with iconsClass="lobbyIconsDiv" %}
-                {% endif %}
                 <span>
-                    {% url "lobbyHelp" as the_url %}
+                    {% url "AllTournaments" as the_url %}
                     {% blocktranslate trimmed %}
-                        For icon explanations see
-                        <a class="linkOther" href="{{ the_url }}">Help</a>
+                        Tournament open for signup! See
+                        <a href="{{ the_url }}">Tournaments</a>
                     {% endblocktranslate %}
                 </span>
             </div>
+        {% endif %}
+        <div class="nd-news-banner" id="rnbAnnounceBanner">
+            <span>Roads &amp; Boats is here! Map editor available — see the <a href="{% url 'newGamesPage' %}">New Game</a> page.</span>
+            <button class="nd-news-dismiss"
+                    aria-label="Dismiss"
+                    onclick="document.getElementById('rnbAnnounceBanner').style.display='none'; try{localStorage.setItem('rnb_announce_dismissed','1');}catch(e){}">
+                &#x2715;
+            </button>
         </div>
+        <script>try{if(localStorage.getItem('rnb_announce_dismissed')==='1')document.getElementById('rnbAnnounceBanner').style.display='none';}catch(e){}</script>
+        <div class="nd-news-banner">
+            <div style="display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        flex-wrap: wrap">
+                <span>Using the new design! Please provide feedback.</span>
+                <a href="{% url 'feedback' %}"
+                   class="nd-button nd-button-primary"
+                   style="padding: 6px 12px;
+                          font-size: 14px">Give feedback</a>
+                <a href="/old{{ request.path }}"
+                   class="nd-button"
+                   style="padding: 6px 12px;
+                          font-size: 14px">Switch back to old design (Will be removed ~15 Sep)</a>
+            </div>
+        </div>
+        <!-- hidden map editor forms (required by Lobby.js) -->
+        {% include 'Lobby/_nd_map_editor_forms.html' %}
+        <!-- TABS -->
+        <div class="nd-tabs">
+            <button class="nd-tab tablinks" id="available" data-nd-tab="available">
+                <span class="nd-tab-label">{% translate "Available" %}</span>
+                <span class="nd-tab-count">({{ availableCount }})</span>
+            </button>
+            <button class="nd-tab tablinks" id="current" data-nd-tab="current">
+                {% if currentChat %}
+                    <img class="tabChatIcon nd-chat-ping"
+                         alt="New chat"
+                         width="18"
+                         height="18"
+                         src="{% static "Lobby/images/icon-chat-lobby.svg" %}"
+                         title="New Chat Message" />
+                {% endif %}
+                <span class="nd-tab-label">{% translate "Current" %}</span>
+                <span class="nd-tab-count" id="currentCount">({{ currentCount }})</span>
+            </button>
+            <button class="nd-tab tablinks" id="waiting" data-nd-tab="waiting">
+                <span class="nd-tab-label">{% translate "Waiting" %}</span>
+                <span class="nd-tab-count">({{ waitingCount }})</span>
+            </button>
+            <button class="nd-tab tablinks" id="invitations" data-nd-tab="invitations">
+                <span class="nd-tab-label">{% translate "Invitations" %}</span>
+                <span class="nd-tab-count">({{ invitationsCount }})</span>
+            </button>
+            <button class="nd-tab tablinks" id="finished" data-nd-tab="finished">
+                {% if finishedChat %}
+                    <img class="tabChatIcon nd-chat-ping"
+                         alt="New chat"
+                         width="18"
+                         height="18"
+                         src="{% static "Lobby/images/icon-chat-lobby.svg" %}"
+                         title="New Chat Message" />
+                {% endif %}
+                <span class="nd-tab-label">{% translate "Finished" %}</span>
+                <span class="nd-tab-count" id="finishedCount">({{ finishedCount }})</span>
+            </button>
+        </div>
+        <!-- learning game confirmation (used by Lobby.js) -->
         <div id="learningGameConfirmDiv">
-            <b>Note:</b>
-            The creator has requested a Learning Game.
+            <b>Note:</b> The creator has requested a Learning Game.
             <br />
             You will be expected to help / teach the other player.
             <br />
@@ -248,356 +156,329 @@
             <div id="learningCancel"
                  class="buttonDiv Leave learningGameConfirmButtons">{% translate "Cancel" %}</div>
         </div>
-        <div class="largeTableContainer">
-            <!-- AVAILABLE GAMES TABLE  -->
+        <!-- PANELS -->
+        <div class="nd-panels">
+            <!-- Available (square view — kept for Lobby.js; hidden via CSS) -->
+            <div id="availableGamesListSquares" class="nd-panel-hidden">
+                {% if availableGamesList %}
+                    {% for game in availableGamesList %}
+                        {% include "Lobby/gameDisplay/availableGameSq.html" with game=game %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <!-- Available (list view) -->
             <div id="availableGamesListView">
                 {% if availableGamesList or available_MT %}
                     {% if availableGamesList %}
-                        <div class="tableOnlyDiv">
-                            <table class="gamesTable">
+                        <div class="nd-table-wrap">
+                            <table class="nd-table gamesTable nd-lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
-                                        <td class="joinHeader"></td>
-                                        <td class="nameHeaderAvailable">{% translate "Name" %}</td>
-                                        <td class="creatorHeader">{% translate "Creator" %}</td>
-                                        <td class="playersHeader">{% translate "Players" %}</td>
-                                        <td class="speedHeader">{% translate "Speed" %}</td>
-                                        <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
-                                        <td class="createdHeader">{% translate "Created" %}</td>
-                                        <td class="startingOptionsHeader">{% translate "Starting Options" %}</td>
+                                        <th></th>
+                                        <th>{% translate "Game Name" %}</th>
+                                        <th>{% translate "Players" %}</th>
+                                        <th>{% translate "Options" %}</th>
+                                        <th>{% translate "Created" %}</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
-                                {% for game in availableGamesList %}
-                                    {% include "Lobby/gameDisplay/availableGameRow.html" with game=game %}
-                                {% endfor %}
+                                <tbody>
+                                    {% for game in availableGamesList %}
+                                        {% include "Lobby/gameDisplay/availableGameRow.html" with game=game %}
+                                    {% endfor %}
+                                </tbody>
                             </table>
                         </div>
                     {% else %}
-                        <span class="noGamesSpan">
-                            <h1>{% translate "No Available Games" %}</h1>
-                        </span>
+                        <p class="nd-empty">{% translate "No Available Games" %}</p>
                     {% endif %}
                     {% if available_MT %}
-                        Available Mini Tournaments
-                        <div class="tableOnlyDiv">
-                            <table class="gamesTable">
+                        <p class="nd-section-label">Available Mini Tournaments</p>
+                        <div class="nd-table-wrap">
+                            <table class="nd-table gamesTable nd-lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
-                                        <th>{% translate "Game" %}</th>
-                                        <th class="nameHeaderAvailable">{% translate "Name" %}</th>
-                                        <th>{% translate "Total Players" %}</th>
-                                        <th>{% translate "Players per Game" %}</th>
+                                        <th></th>
+                                        <th>{% translate "Game Name" %}</th>
+                                        <th>{% translate "Players" %}</th>
+                                        <th>{% translate "Options" %}</th>
                                         <th>{% translate "Format" %}</th>
-                                        <th>{% translate "Starting Options" %}</th>
                                         <th>{% translate "Created" %}</th>
                                     </tr>
                                 </thead>
-                                {% for Mini_Tournament in available_MT %}
-                                    {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
-                                {% endfor %}
+                                <tbody>
+                                    {% for Mini_Tournament in available_MT %}
+                                        {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
+                                    {% endfor %}
+                                </tbody>
                             </table>
                         </div>
                     {% else %}
-                        <span class="noGamesSpan">
-                            <h1>{% translate "No Available Mini Tournaments" %}</h1>
-                        </span>
+                        <p class="nd-empty">{% translate "No Available Mini Tournaments" %}</p>
                     {% endif %}
                 {% else %}
-                    <span class="noGamesSpan">
-                        <h1>{% translate "No Available Games or Mini Tournaments" %}</h1>
-                    </span>
-                    <a href="{% url 'newGamesPage' %}" id="createNewGamesLink">
-                        <div class="createNewGamesDiv">
-                            <img class="newGameMiniImg"
-                                 src="{% static "CNS/images/CNSbox.jpg" %}"
-                                 alt="CNS" />
-                            <img class="newGameMiniImg"
-                                 src="{% static "BUS/images/bus-box.jpg" %}"
-                                 alt="Bus" />
-                            <img class="newGameMiniImg"
-                                 src="{% static "AQY/images/AQYbox.jpg" %}"
-                                 alt="Antiquity" />
-                            <img class="newGameMiniImg"
-                                 src="{% static "IND/images/INDbox.jpg" %}"
-                                 alt="Indonesia" />
-                            <img class="newGameMiniImg"
-                                 src="{% static "TGZ/images/TGZ_box.jpg" %}"
-                                 alt="TGZ" />
-                            <img class="newGameMiniImg"
-                                 src="{% static "HLC/images/hlc-box.jpg" %}"
-                                 alt="Horseless Carriage" />
-                            <img class="newGameMiniImg"
-                                 src="{% static "FCM/images/fcm-box.jpg" %}"
-                                 alt="Food Chain Magnate" />
-                            <img class="newGameMiniImg"
-                                 src="{% static "FCM/images/fcm-box2.jpg" %}"
-                                 alt="Food Chain Magnate" />
-                            Create New Game
-                            <img class="createNewGamesArrow"
-                                 src="{% static "Lobby/images/newGameArrow.svg" %}"
-                                 alt="Create new Game"
-                                 width="100"
-                                 height="50" />
-                        </div>
-                    </a>
+                    {% include "Lobby/_nd_empty.html" with message="No available games or mini tournaments right now." showNewGame=True %}
                 {% endif %}
-                {% include "Lobby/lobby_icons.html" with iconsClass="lobbyIconsDiv" %}
-                {% url "lobbyHelp" as the_url %}
-                {% blocktranslate trimmed %}
-                    For icon explanations see
-                    <a class="linkOther" href="{{ the_url }}">Help</a>
-                {% endblocktranslate %}
             </div>
-            <!-- CURRENT GAMES -->
+            <!-- Current -->
             <div id="currentGamesListView">
                 {% if currentGamesList or current_MT %}
                     {% if currentGamesList %}
-                        <div class="tableOnlyDiv">
-                            <table class="gamesTable">
+                        <div class="nd-table-wrap">
+                            <table class="nd-table gamesTable nd-lobby-games-table nd-current-games-table">
                                 <thead>
                                     <tr class="headingRow">
-                                        <td class="nameHeaderCurrent">{% translate "Name" %}</td>
-                                        <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
-                                        <td class="currentTurnHeader">{% translate "Current Turn" %}</td>
-                                        <td class="playersHeader">{% translate "Players" %}</td>
-                                        <td class="speedHeader">{% translate "Speed" %}</td>
-                                        <td class="creatorHeader">{% translate "Creator" %}</td>
-                                        <td class="lastActivityHeader">{% translate "Last Turn" %}</td>
+                                        <th class="nd-col-game" colspan="2">{% translate "Game Name" %}</th>
+                                        <th>{% translate "Current player" %}</th>
+                                        <th>{% translate "Current Turn" %}</th>
+                                        <th>{% translate "Players" %}</th>
+                                        <th>{% translate "Options" %}</th>
+                                        <th>{% translate "Last Move" %}</th>
                                     </tr>
                                 </thead>
-                                {% for game in currentGamesList %}
-                                    {% include "Lobby/gameDisplay/currentGameRow.html" with game=game %}
-                                {% endfor %}
+                                <tbody>
+                                    {% for game in currentGamesList %}
+                                        {% include "Lobby/gameDisplay/currentGameRow.html" with game=game showCurrentTurnColumn=True %}
+                                    {% endfor %}
+                                </tbody>
                             </table>
                             {% if myMoveGamesData|length > 0 %}
-                                <button id="openAllMyMoveGamesButton" class="openAllMyMoveGamesButton">
+                                <button id="openAllMyMoveGamesButton"
+                                        class="nd-open-all-btn openAllMyMoveGamesButton">
                                     {% translate "Open All Games (My Turn)" %}
                                 </button>
                             {% endif %}
                         </div>
                     {% else %}
-                        <span class="noGamesSpan">
-                            <h2>{% translate "No Current Games" %}</h2>
-                        </span>
+                        <p class="nd-empty">{% translate "No Current Games" %}</p>
                     {% endif %}
                     {% if current_MT %}
-                        Current Mini Tournaments
-                        <div class="tableOnlyDiv">
-                            <table class="gamesTable">
+                        <p class="nd-section-label">Current Mini Tournaments</p>
+                        <div class="nd-table-wrap">
+                            <table class="nd-table gamesTable nd-lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
-                                        <th>{% translate "Game" %}</th>
-                                        <th class="nameHeaderAvailable">{% translate "Name" %}</th>
-                                        <th>{% translate "Total Players" %}</th>
-                                        <th>{% translate "Players per Game" %}</th>
+                                        <th></th>
+                                        <th>{% translate "Game Name" %}</th>
+                                        <th>{% translate "Players" %}</th>
+                                        <th>{% translate "Options" %}</th>
                                         <th>{% translate "Format" %}</th>
-                                        <th>{% translate "Starting Options" %}</th>
                                         <th>{% translate "Created" %}</th>
                                     </tr>
                                 </thead>
-                                {% for Mini_Tournament in current_MT %}
-                                    {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
-                                {% endfor %}
+                                <tbody>
+                                    {% for Mini_Tournament in current_MT %}
+                                        {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
+                                    {% endfor %}
+                                </tbody>
                             </table>
                         </div>
                     {% endif %}
                 {% else %}
-                    <h2>{% translate "No Current Games or Mini Tournaments" %}</h2>
-                    {% include "Lobby/lobby_icons.html" with iconsClass="lobbyIconsDiv" %}
+                    {% include "Lobby/_nd_empty.html" with message="No current games or mini tournaments." showNewGame=True %}
                 {% endif %}
-                {% if current_MT %}<br />{% endif %}
-                <b><u>{% translate "Colour Guide" %}</u></b>
-                <div class="colourGuideDiv">
-                    <span class="myMove">{% translate "It is your move" %}</span>
-                    <br />
-                    {% translate "Waiting for other players to move" %}
-                    <br />
-                    <span class="myMove kickoutRequired1">{% translate "Need to move - using Flexi-Time" %}</span>
-                    <br />
-                    <span class="myMove kickoutRequired2">{% translate "Need to move - could be kicked out" %}</span>
-                    <br />
-                    <span class="kickoutRequired1">{% translate "Current Player is using Flex-Time" %}</span>
-                    <br />
-                    <span class="kickoutRequired2">{% translate "Enter game to kickout inactive player" %}</span>
-                    <br />
-                    <!--<span class="optionHelp kickoutRequired">If you wish to allow your opponent more time, don't enter the game yet</span>-->
+                <div class="nd-colour-guide colourGuideDiv">
+                    <strong>{% translate "Colour Guide" %}</strong>
+                    <div class="nd-colour-guide-grid">
+                        <span class="myMove">{% translate "It is your move" %}</span>
+                        <span>{% translate "Waiting for other players to move" %}</span>
+                        <span class="myMove kickoutRequired1">{% translate "Need to move - using Flexi-Time" %}</span>
+                        <span class="myMove kickoutRequired2">{% translate "Need to move - could be kicked out" %}</span>
+                        <span class="kickoutRequired1">{% translate "Current Player is using Flex-Time" %}</span>
+                        <span class="kickoutRequired2">{% translate "Enter game to kickout inactive player" %}</span>
+                    </div>
                 </div>
             </div>
-            <!-- WAITING GAMES -->
+            <!-- Waiting -->
             <div id="waitingGamesListView">
                 {% if waitingGamesList or waiting_MT %}
                     {% if waitingGamesList %}
-                        <div class="tableOnlyDiv">
-                            <table class="gamesTable">
+                        <div class="nd-table-wrap">
+                            <table class="nd-table gamesTable nd-lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
-                                        <td class="nameHeader">{% translate "Name" %}</td>
-                                        <td class="creatorHeader">{% translate "Creator" %}</td>
-                                        <td class="playersHeader">{% translate "Players" %}</td>
-                                        <td class="speedHeader">{% translate "Speed" %}</td>
-                                        <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
-                                        <td class="currentPlayersHeader">{% translate "Invited Players" %}</td>
-                                        <td class="createdHeader">{% translate "Created" %}</td>
-                                        <td class="startingOptionsHeader">{% translate "Starting Options" %}</td>
-                                        <td class="cancelHeader"></td>
+                                        <th></th>
+                                        <th>{% translate "Name" %}</th>
+                                        <th>{% translate "Players" %}</th>
+                                        <th>{% translate "Options" %}</th>
+                                        <th>{% translate "Created" %}</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
-                                {% for game in waitingGamesList %}
-                                    {% include "Lobby/gameDisplay/waitingGameRow.html" with game=game %}
-                                {% endfor %}
+                                <tbody>
+                                    {% for game in waitingGamesList %}
+                                        {% include "Lobby/gameDisplay/waitingGameRow.html" with game=game %}
+                                    {% endfor %}
+                                </tbody>
                             </table>
-                            {% if waitingGameIsAvailableForOthers %}
-                                <small><i>
-                                    {% translate "Public games you have created that are waiting for players appear here for you, but will show in the Available Games list for others." %}
-                                </i></small>
-                                <br />
-                            {% endif %}
                         </div>
+                        {% if waitingGameIsAvailableForOthers %}
+                            <p class="" style="margin-top:8px;padding:0 14px 14px;">
+                                {% translate "Public games you have created that are waiting for players appear here for you, but will show in the Available Games list for others." %}
+                            </p>
+                        {% endif %}
                     {% endif %}
                     {% if waiting_MT %}
-                        <br />
-                        Waiting Mini Tournaments
-                        <div class="tableOnlyDiv">
-                            <table class="gamesTable">
+                        <p class="nd-section-label">Waiting Mini Tournaments</p>
+                        <div class="nd-table-wrap">
+                            <table class="nd-table gamesTable nd-lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
-                                        <th>{% translate "Game" %}</th>
-                                        <th class="nameHeaderAvailable">{% translate "Name" %}</th>
-                                        <th>{% translate "Total Players" %}</th>
-                                        <th>{% translate "Players per Game" %}</th>
+                                        <th></th>
+                                        <th>{% translate "Name" %}</th>
+                                        <th>{% translate "Players" %}</th>
+                                        <th>{% translate "Options" %}</th>
                                         <th>{% translate "Format" %}</th>
-                                        <th>{% translate "Starting Options" %}</th>
                                         <th>{% translate "Created" %}</th>
                                     </tr>
                                 </thead>
-                                {% for Mini_Tournament in waiting_MT %}
-                                    {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
-                                {% endfor %}
+                                <tbody>
+                                    {% for Mini_Tournament in waiting_MT %}
+                                        {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
+                                    {% endfor %}
+                                </tbody>
                             </table>
                         </div>
                     {% endif %}
                 {% else %}
-                    <span class="noGamesSpan">
-                        <h2>{% translate "No Waiting Games" %}</h2>
-                    </span>
-                    {% include "Lobby/lobby_icons.html" with iconsClass="lobbyIconsDiv" %}
+                    {% include "Lobby/_nd_empty.html" with message="No waiting games." %}
                 {% endif %}
             </div>
-            <!-- INVITATIONS GAMES -->
+            <!-- Invitations -->
             <div id="invitationGamesListView">
                 {% if invitaionsGamesList or invitations_MT %}
                     {% if invitaionsGamesList %}
-                        <div class="tableOnlyDiv">
-                            <table class="gamesTable">
+                        <div class="nd-table-wrap">
+                            <table class="nd-table gamesTable nd-lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
-                                        <td class="joinHeader"></td>
-                                        <td class="nameHeader">{% translate "Name" %}</td>
-                                        <td class="creatorHeader">{% translate "Creator" %}</td>
-                                        <td class="playersHeader">{% translate "Players" %}</td>
-                                        <td class="speedHeader">{% translate "Speed" %}</td>
-                                        <td class="currentPlayersHeader">{% translate "Current Players" %}</td>
-                                        <td class="currentPlayersHeader">{% translate "Invited Players" %}</td>
-                                        <td class="createdHeader">{% translate "Created" %}</td>
-                                        <td class="startingOptionsHeader">{% translate "Starting Options" %}</td>
-                                        <td class="cancelHeader"></td>
+                                        <th></th>
+                                        <th>{% translate "Name" %}</th>
+                                        <th>{% translate "Players" %}</th>
+                                        <th>{% translate "Options" %}</th>
+                                        <th>{% translate "Status" %}</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
-                                {% for game in invitaionsGamesList %}
-                                    {% include "Lobby/gameDisplay/invitationGameRow.html" with game=game %}
-                                {% endfor %}
+                                <tbody>
+                                    {% for game in invitaionsGamesList %}
+                                        {% include "Lobby/gameDisplay/invitationGameRow.html" with game=game %}
+                                    {% endfor %}
+                                </tbody>
                             </table>
                         </div>
                     {% endif %}
                     {% if invitations_MT %}
-                        <br />
-                        Invited Mini Tournaments
-                        <div class="tableOnlyDiv">
-                            <table class="gamesTable">
+                        <p class="nd-section-label">Invited Mini Tournaments</p>
+                        <div class="nd-table-wrap">
+                            <table class="nd-table gamesTable nd-lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
-                                        <th>{% translate "Game" %}</th>
-                                        <th class="nameHeaderAvailable">{% translate "Name" %}</th>
-                                        <th>{% translate "Total Players" %}</th>
-                                        <th>{% translate "Players per Game" %}</th>
+                                        <th></th>
+                                        <th>{% translate "Name" %}</th>
+                                        <th>{% translate "Players" %}</th>
+                                        <th>{% translate "Options" %}</th>
                                         <th>{% translate "Format" %}</th>
-                                        <th>{% translate "Starting Options" %}</th>
                                         <th>{% translate "Created" %}</th>
                                     </tr>
                                 </thead>
-                                {% for Mini_Tournament in invitations_MT %}
-                                    {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
-                                {% endfor %}
+                                <tbody>
+                                    {% for Mini_Tournament in invitations_MT %}
+                                        {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
+                                    {% endfor %}
+                                </tbody>
                             </table>
                         </div>
                     {% endif %}
                 {% else %}
-                    <span class="noGamesSpan">
-                        <h2>{% translate "No Invitations" %}</h2>
-                    </span>
-                    {% include "Lobby/lobby_icons.html" with iconsClass="lobbyIconsDiv" %}
+                    {% include "Lobby/_nd_empty.html" with message="No invitations." %}
                 {% endif %}
             </div>
-            <!-- FINIHED GAMES -->
+            <!-- Finished -->
             <div id="finishedGamesListView">
                 {% if finishedGamesList %}
-                    <div class="tableOnlyDiv">
-                        <table class="gamesTable">
+                    <div class="nd-table-wrap">
+                        <table class="nd-table gamesTable nd-lobby-games-table nd-finished-games-table">
                             <thead>
                                 <tr class="headingRow">
-                                    <td class="nameHeaderCurrent">{% translate "Name" %}</td>
-                                    <td class="playersHeader">{% translate "Players" %}</td>
-                                    <td class="currentPlayersHeader">{% translate "All Players" %}</td>
-                                    <td class="createdHeader">{% translate "Created" %}</td>
-                                    <td class="lastActivityHeader">{% translate "Last Activity" %}</td>
-                                    <td class="winnerHeader">{% translate "Winner" %}</td>
+                                    <th></th>
+                                    <th>{% translate "Game Name" %}</th>
+                                    <th>{% translate "Players" %}</th>
+                                    <th>{% translate "Options" %}</th>
+                                    <th>{% translate "Last Activity" %}</th>
                                 </tr>
                             </thead>
-                            {% for game in finishedGamesList %}
-                                {% include "Lobby/gameDisplay/finishedGameRow.html" with game=game %}
-                            {% endfor %}
+                            <tbody>
+                                {% for game in finishedGamesList %}
+                                    {% include "Lobby/gameDisplay/finishedGameRow.html" with game=game %}
+                                {% endfor %}
+                            </tbody>
                         </table>
                     </div>
-                    <br />
-                    {% url "playerInfo" user.username as the_url %}
-                    {% blocktranslate trimmed %}
-                        Check your
-                        <a href="{{ the_url }}">Game Profile</a>
-                        to see all of your finished games
-                    {% endblocktranslate %}
-                    <br />
-                    <br />
+                    <p class="nd-help-note">
+                        {% url "playerInfo" user.username as the_url %}
+                        {% blocktranslate trimmed %}
+                            Check your <a href="{{ the_url }}">Game Profile</a> to see all of your finished games
+                        {% endblocktranslate %}
+                    </p>
                 {% else %}
-                    <span class="noGamesSpan">
-                        <h2>{% translate "No Finished Games" %}</h2>
-                    </span>
-                    {% include "Lobby/lobby_icons.html" with iconsClass="lobbyIconsDiv" %}
+                    {% include "Lobby/_nd_empty.html" with message="No finished games." %}
                 {% endif %}
             </div>
         </div>
-        {% include "Lobby/donate/donateBanner.html" %}
-        {% include "Lobby/splotterconSponsor.html" %}
+        <!-- end nd-panels -->
     </div>
+    <!-- end nd-lobby -->
     {% block script %}
         <script>
-	var global = {};
-	{% if listType %}
-	global.listType = "{{ listType }}";
-	{% else %}
-	global.listType = "current";
-	{% endif %}
-	{% if stopEmailsUntil %}
-	global.stopEmailsUntil = {{ stopEmailsUntil }};
-	{% else %}
-	global.stopEmailsUntil = null;
-	{% endif %}
+        var global = {};
+        {% if listType %}
+        global.listType = "{{ listType }}";
+        {% else %}
+        global.listType = "current";
+        {% endif %}
+        {% if stopEmailsUntil %}
+        global.stopEmailsUntil = {{ stopEmailsUntil }};
+        {% else %}
+        global.stopEmailsUntil = null;
+        {% endif %}
 
-	global.currentCount = {{ currentCount }};
-	global.finishedCount = {{ finishedCount }};
-	global.myMoveCount = {{myMoveGames}};
-	global.availableCount = {{availableCount}};
-	global.invitationsCount = {{invitationsCount}};
-	global.myMoveGamesData = {{myMoveGamesData|safe}};
+        global.currentCount = {{ currentCount }};
+        global.finishedCount = {{ finishedCount }};
+        global.myMoveCount = {{myMoveGames}};
+        global.availableCount = {{availableCount}};
+        global.invitationsCount = {{invitationsCount}};
+        global.waitingCount = {{waitingCount}};
+        global.myMoveGamesData = {{myMoveGamesData|safe}};
+
+        /* Smart default: don't open an empty tab on first load */
+        if (global.listType === "current" && global.currentCount === 0) {
+            if (global.myMoveCount > 0) { /* stay on current — myMove games are there */ }
+            else if (global.availableCount > 0) global.listType = "available";
+            else if (global.waitingCount > 0) global.listType = "waiting";
+            else if (global.invitationsCount > 0) global.listType = "invitations";
+        }
+
+        /* Wrap .startingOption images so CSS tooltip works.
+           Runs on load AND watches for added rows (tab content, game creation). */
+        (function () {
+            var lobby = document.getElementById('lobbyPage') || document.body;
+            if (typeof MutationObserver === 'undefined') return;
+            if (!window.ndWrapTooltips) return;
+            var mo = new MutationObserver(function (mutations) {
+                mutations.forEach(function (m) {
+                    m.addedNodes.forEach(function (n) {
+                        if (n.nodeType !== 1) return;
+                        if (n.classList && n.classList.contains('startingOption')) {
+                            window.ndWrapTooltips(n.parentNode);
+                        } else {
+                            window.ndWrapTooltips(n);
+                        }
+                    });
+                });
+            });
+            mo.observe(lobby, { childList: true, subtree: true });
+        })();
         </script>
     {% endblock script %}
 {% endblock body %}

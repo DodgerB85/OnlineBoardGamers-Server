@@ -207,7 +207,7 @@ def showGame(request, game_id):
                 "moveData": "",
             }
         )
-        return render(request, "FCM/GameTemplate_new.html", returnData)
+        return render(request, "FCM/GameTemplate.html", returnData)
 
     # Logged in
     user_profile = result["user_profile"]
@@ -301,7 +301,7 @@ def showGame(request, game_id):
 
     return render(
         request,
-        "FCM/GameTemplate_new.html",
+        "FCM/GameTemplate.html",
         {
             "gameCreationTimestamp": currentGame.created,
             "now": now,
