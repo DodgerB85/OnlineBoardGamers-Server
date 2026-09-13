@@ -424,7 +424,7 @@ def helpTournamentsMini(request):
 @login_required
 def indexSpecialRedirect(request):
 
-    return redirect("/nd/")
+    return redirect("/")
     #return redirect("index")
     # return HttpResponseRedirect(reverse("RNB:showRNBgame"))
     # return HttpResponseRedirect(reverse("createRNBpage"))
