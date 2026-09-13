@@ -1,7 +1,6 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
   <link href="{% static 'Lobby/CSS/TGZT.css' %}" rel="stylesheet">
 {% endblock %}
 {% block body %}
@@ -13,21 +12,15 @@
     {% csrf_token %}
     <input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value="">
   </form>
-  <div class="container">
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-    <div id="playerInfoNameDiv">
+  <div class="nd-page nd-page-narrow">
+    {% include 'Lobby/_nd_messages.html' %}
+    <div class="nd-page-header">
       <h1>Indonesia - Php Games</h1>
     </div>
     {% if availableGames %}
       <h2>{% translate "Available Games (non-private)" %}</h2>
-      <div class="tableOnlyDiv">
-        <table class="gamesTable">
+      <div class="nd-table-wrap">
+        <table class="nd-table gamesTable">
           <thead>
             <tr class="headingRow">
               <td class="joinHeader"></td>
@@ -46,12 +39,12 @@
         </table>
       </div>
     {% else %}
-      <h2>{% translate "No Available Games" %}</h2>
+      {% include "Lobby/_nd_empty.html" with message="No Available Games" %}
     {% endif %}
     {% if activeGames %}
       <h2>{% translate "Active Games" %}</h2>
-      <div id="gamesListView">
-        <table class="gamesTable">
+      <div id="gamesListView" class="nd-table-wrap">
+        <table class="nd-table gamesTable">
           <thead>
             <tr class="headingRow">
               <td class="nameHeaderCurrent">{% translate "Name" %}</td>
@@ -69,7 +62,7 @@
         </table>
       </div>
     {% else %}
-      <h2>{% translate "No Current Games" %}</h2>
+      {% include "Lobby/_nd_empty.html" with message="No Current Games" %}
     {% endif %}
     {% if finishedGames %}
       <h2>{% translate "Finished Games" %}</h2>
@@ -89,8 +82,8 @@
           {% endif %}
         </span>
       </div>
-      <div id="gamesListView">
-        <table class="gamesTable">
+      <div id="gamesListView" class="nd-table-wrap">
+        <table class="nd-table gamesTable">
           <thead>
             <tr class="headingRow">
               <td class="nameHeaderCurrent">{% translate "Name" %}</td>
@@ -136,8 +129,7 @@
           }
       </script>
     {% else %}
-      <h2>{% translate "No Finished Games" %}</h2>
+      {% include "Lobby/_nd_empty.html" with message="No Finished Games" %}
     {% endif %}
-    {% include 'Lobby/common/homeButton.html' %}
   </div>
 {% endblock %}

@@ -1,12 +1,11 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static %}
 {% load i18n %}
 {% block head %}
-  <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
   <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
 {% endblock head %}
 {% block body %}
-  <div class="container">
+  <div class="nd-page">
     {% if messages %}
       <div class="messages">
         {% for message in messages %}
@@ -14,8 +13,10 @@
         {% endfor %}
       </div>
     {% endif %}
-    <div id="RNBhelpPage">
+    <div class="nd-page-header">
       <h1>{% translate "Not bugs" %}</h1>
+    </div>
+    <div class="nd-card nd-section" id="RNBhelpPage">
       - You cannot drop a boat into a docked location from a river location
       - You cannot drop a boat into a docked location from a sea hex
       <br />
@@ -34,7 +35,5 @@
       - According to the rules, a transporter that is carrying another transporter may NOT interact with any buildings.
     </div>
     {% include "Lobby/donate/donateBanner.html" %}
-    {% include "Lobby/common/homeButton.html" %}
   </div>
-</div>
 {% endblock body %}

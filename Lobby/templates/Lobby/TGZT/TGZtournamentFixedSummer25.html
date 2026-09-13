@@ -1,12 +1,11 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static %}
 {% load i18n %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
     <link href="{% static 'Lobby/CSS/TGZT.css' %}" rel="stylesheet">
 {% endblock head %}
 {% block body %}
-    <div class="container">
+    <div class="nd-page">
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}
@@ -14,15 +13,15 @@
                 {% endfor %}
             </div>
         {% endif %}
-        <div id="playerInfoNameDiv">
+        <div class="nd-page-header">
             <h1>The Great Zimbabwe Summer 25 Tournament</h1>
         </div>
         <h1>Winner: czlam</h1>
         <!-- FIXED ROUND 1-->
         <h1>Round 1</h1>
         <h2>Group A</h2>
-        <div class="TGZTplayerTableSpring24-container">
-            <table class="TGZTplayerTableSpring24 TGZTplayerTableJumboAutumn24">
+        <div class="nd-card"><div class="nd-table-scroll">
+            <table class="nd-table TGZTplayerTableSpring24 TGZTplayerTableJumboAutumn24">
                 <thead>
                     <tr>
                         <th>Player</th>
@@ -621,10 +620,10 @@
                     </tr>
                 </tbody>
             </table>
-        </div>
+        </div></div>
         <h3>Games</h3>
-        <div class="TGZTgamesTable-container">
-            <table class="TGZTgamesTable">
+        <div class="nd-card"><div class="nd-table-scroll">
+            <table class="nd-table TGZTgamesTable">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1315,13 +1314,13 @@
                     </tr>
                 </tbody>
             </table>
-        </div>
+        </div></div>
         <!-- END FIXED ROUND 1-->
         <!-- R2-->
         <h1>Round 2</h1>
         <h2>Group A</h2>
-        <div class="TGZTplayerTable-container">
-            <table class="TGZTplayerTable TGZTplayerTableJumboTHISISREMOVED">
+        <div class="nd-card"><div class="nd-table-scroll">
+            <table class="nd-table TGZTplayerTable TGZTplayerTableJumboTHISISREMOVED">
                 <thead>
                     <tr>
                         <th>Player</th>
@@ -1448,10 +1447,10 @@
                     </tr>
                 </tbody>
             </table>
-        </div>
+        </div></div>
         <h3>Games</h3>
-        <div class="TGZTgamesTable-container">
-            <table class="TGZTgamesTable">
+        <div class="nd-card"><div class="nd-table-scroll">
+            <table class="nd-table TGZTgamesTable">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1581,10 +1580,10 @@
                     </tr>
                 </tbody>
             </table>
-        </div>
+        </div></div>
         <h2>Group B</h2>
-        <div class="TGZTplayerTable-container">
-            <table class="TGZTplayerTable TGZTplayerTableJumboTHISISREMOVED">
+        <div class="nd-card"><div class="nd-table-scroll">
+            <table class="nd-table TGZTplayerTable TGZTplayerTableJumboTHISISREMOVED">
                 <thead>
                     <tr>
                         <th>Player</th>
@@ -1711,10 +1710,10 @@
                     </tr>
                 </tbody>
             </table>
-        </div>
+        </div></div>
         <h3>Games</h3>
-        <div class="TGZTgamesTable-container">
-            <table class="TGZTgamesTable">
+        <div class="nd-table-scroll">
+            <table class="nd-table TGZTgamesTable">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1845,8 +1844,8 @@
                 </tbody>
             </table>
             <h1>Final</h1>
-            <div class="TGZTplayerTableSpring24-container">
-                <table class="TGZTplayerTableSpring24">
+            <div class="nd-card"><div class="nd-table-scroll">
+                <table class="nd-table TGZTplayerTableSpring24">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -1874,15 +1873,9 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+            </div></div>
             <h1>Winner: czlam</h1>
         </div>
         <!-- END R2-->
-        <div class="container signin">
-            <input class="homeButton"
-                   type="button"
-                   onclick="location.href='/';"
-                   value="Home" />
-        </div>
     </div>
 {% endblock body %}

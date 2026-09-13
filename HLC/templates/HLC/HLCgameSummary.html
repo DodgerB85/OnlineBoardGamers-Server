@@ -1,10 +1,9 @@
-{% extends "Lobby/layout.html" %}
+{% extends base_template %}
 {% load static i18n compress %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet" />
 {% endblock head %}
 {% block body %}
-    <div class="container" id="HLCgameSummaryPage">
+    <div class="nd-page" id="HLCgameSummaryPage">
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}
@@ -12,8 +11,10 @@
                 {% endfor %}
             </div>
         {% endif %}
-        <h1>{% translate "Horseless Carriage Game Summary" %}</h1>
-        <a class="linkOther" href="{% url 'HLC:showHLCgame' game_id=gameID %}">Back to Game</a>
+        <div class="nd-page-header">
+            <h1>{% translate "Horseless Carriage Game Summary" %}</h1>
+        </div>
+        <a class="nd-button nd-button-ghost" href="{% url 'HLC:showHLCgame' game_id=gameID %}">Back to Game</a>
         <br />
         <br />
         <!--<b>NOTE: GAMES CREATED BEFORE 11 MARCH MIGHT HAVE MISSING OR INCOMPLETE INFORMATION</b><br /><br />-->
@@ -22,7 +23,6 @@
             <canvas id="gameIncomeSummary" class="HLCsummaryGraph"></canvas>
         </div>
         {% include "Lobby/donate/donateBanner.html" %}
-        {% include "Lobby/common/homeButton.html" %}
     </div>
     <script>
 	var global = {};
