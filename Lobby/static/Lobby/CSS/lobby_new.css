@@ -659,10 +659,7 @@ body.nd .nd-col-cta .deleteTrainingGame {
     .nd-empty-msg { font-size: 17px; }
     .nd-empty-cta { font-size: 16px; }
     .nd-empty-hint { font-size: 14px; }
-    body.nd .nd-table.nd-lobby-games-table thead th { font-size: 13px; }
     .nd-table { font-size: 18px; }
-    .nd-table thead th,
-    .nd-table thead td { font-size: 14px; }
     body.nd .nd-col-cta .buttonDiv,
     body.nd .nd-col-cta .copyGameLinkButtonInTable { font-size: 15px; }
     body.nd .nd-col-cta .deleteTrainingGame { font-size: 13px; }
@@ -696,10 +693,12 @@ body.nd .nd-col-cta .deleteTrainingGame {
 
     /* Header centering */
     body.nd .nd-table.nd-lobby-games-table thead th {
+        font-size: 13px;
         text-align: center;
     }
     .nd-table thead th,
     .nd-table thead td {
+        font-size: 14px;
         text-align: center;
     }
 

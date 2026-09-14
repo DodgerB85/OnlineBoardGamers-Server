@@ -474,6 +474,7 @@ body.nd .nd-register-form .errorlist {
 
 /* ---------- TABLES ---------- */
 body.nd .nd-table {
+    display: block;
     width: 100%;
     border-collapse: collapse;
     font-size: 16px;
@@ -1427,7 +1428,7 @@ body.nd .nd-create-page .optionHelp {
     flex: 1 0 calc(100% - 28px);
     margin-left: 28px;
     font-size: 13px;
-    font-style: italic;
+    font-style: normal;
 }
 
 body.nd .nd-create-page .singleChoiceDiv:has(.choiceLabel) .inlineHelp,
@@ -1695,12 +1696,6 @@ body.nd .nd-create-page .optionsGroupTop > input[type="radio"]:disabled + label.
 body.nd .nd-create-page #tableJunkRadio1,
 body.nd .nd-create-page #tableSizeRadio1 {
     margin-left: 2px;
-}
-
-/* D5 help text: non-italic like FCM nd-opt-help */
-body.nd .nd-create-page .inlineHelp,
-body.nd .nd-create-page .optionHelp {
-    font-style: normal;
 }
 
 /* D3 TGZ Expert Options: flex stepper rows + disabled shading + scroll */
@@ -2501,10 +2496,6 @@ body.nd .nd-table:has(.nd-row09) thead th {
 }
 
 /* ---- 09 Six-column row grid ---- */
-body.nd .nd-table {
-    display: block;
-    width: 100%;
-}
 body.nd .nd-table tbody {
     display: block;
 }
@@ -2705,6 +2696,8 @@ body.nd .nd-game-list .nd-table-wrap {
 
 body.nd .nd-row09 .nd-col-options {
     row-gap: 4px;
+    position: relative;
+    z-index: 2;
 }
 
 body.nd .nd-row09 .nd-col-options img.startingMap {
@@ -2797,10 +2790,6 @@ body.nd .TGZinfoContainer .startingOption {
 body.nd .TGZinfoContainer:hover .TGZinfoPopup,
 body.nd .TGZinfoContainer:focus-within .TGZinfoPopup {
     display: block !important;
-}
-body.nd .nd-row09 .nd-col-options {
-    position: relative;
-    z-index: 2;
 }
 body.nd .nd-row09 .nd-col-options:has(.TGZinfoContainer:hover) {
     z-index: 3;
@@ -2930,8 +2919,6 @@ body.nd .nd-tgz-options .diffVR {
 	body.nd .TGZinfoPopup { font-size: 15px; }
 	body.nd .TGZinfoPopup .diffVR { font-size: 16px; }
 	body.nd .nd-tgz-options .diffVR { font-size: 16px; }
-	body.nd .nd-col-game small { font-size: 16px; }
-	body.nd .nd-table:has(.nd-row09) thead th { font-size: 13px; }
 	body.nd .nd-help-pills .nd-button { font-size: 16px; }
 	body.nd .nd-page-header .nd-page-subtitle { font-size: 16px; }
 	body.nd .nd-hero-actions .nd-button { font-size: 16px; }
@@ -2948,6 +2935,7 @@ body.nd .nd-tgz-options .diffVR {
 
 	/* Header centering */
 	body.nd .nd-table:has(.nd-row09) thead th {
+		font-size: 13px;
 		text-align: center;
 	}
 
@@ -2959,6 +2947,7 @@ body.nd .nd-tgz-options .diffVR {
 		display: block;
 	}
 	body.nd .nd-col-game small {
+		font-size: 16px;
 		display: block;
 	}
 	body.nd .nd-col-players {

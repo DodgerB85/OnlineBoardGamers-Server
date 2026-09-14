@@ -297,10 +297,6 @@ body.nd .topBarLink:hover {
     margin-right: 20px;
 }
 
-#registerLink a {
-    color: var(--color-brand-blue);
-}
-
 #rightLoggedInHyperlinks {
     margin-right: 20px;
 }
