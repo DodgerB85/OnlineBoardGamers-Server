@@ -5,8 +5,8 @@
     onclick="window.location.href='/MiniTournament/{{ Mini_Tournament.Tournament_id }}/';">
   <td class="nd-col-icon">{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=Mini_Tournament.gameCode %}</td>
   <td class="nd-col-game" data-label="{% translate "Game Name" %}">
-    <strong>{{ Mini_Tournament.tournamentName }}</strong>
-    {% if Mini_Tournament.tournamentDescription %}<br><small><i>{{ Mini_Tournament.tournamentDescription }}</i></small>{% endif %}
+    <strong class="nd-col-game-name">{{ Mini_Tournament.tournamentName }}</strong>
+    {% if Mini_Tournament.tournamentDescription %}<br><small class="nd-col-game-note"><i>{{ Mini_Tournament.tournamentDescription }}</i></small>{% endif %}
   </td>
   <td class="nd-col-players" data-label="{% translate "Players" %}">
     {{ Mini_Tournament.maxTournamentPlayers }} total · {{ Mini_Tournament.maxGamePlayers }} per game

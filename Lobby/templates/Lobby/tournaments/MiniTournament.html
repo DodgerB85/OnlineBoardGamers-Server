@@ -11,7 +11,7 @@
   
     <div class="nd-page">
       <div class="nd-page-header">
-        <h1>{{ tournament.tournamentName }}</h1>
+        <h1 class="nd-page-title">{{ tournament.tournamentName }}</h1>
       </div>
       {% if tournament.tournamentDescription %}
         <p class="nd-page-subtitle" style="margin: -8px 0 16px;">{{ tournament.tournamentDescription }}</p>
@@ -51,7 +51,7 @@
             <!-- Open / Pre-release: sign-up panel -->
             <div class="nd-card" style="margin-bottom: 16px;">
               <div class="nd-card-header">
-                <h3>Players ({{ startingPlayers|length }}/{{ tournament.maxTournamentPlayers }})</h3>
+                <h3 class="nd-card-title">Players ({{ startingPlayers|length }}/{{ tournament.maxTournamentPlayers }})</h3>
               </div>
               <table class="nd-table" style="margin-bottom: 16px;">
                 <thead>

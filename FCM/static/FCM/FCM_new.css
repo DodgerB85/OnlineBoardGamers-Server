@@ -14,11 +14,11 @@
     color: #93d5d0;
 }
 
-.topMenuItem span {
+.topMenuItem-label {
     color: #c8dfe0;
 }
 
-.topMenuItem:hover span {
+.topMenuItem:hover .topMenuItem-label {
     color: #93d5d0;
 }
 

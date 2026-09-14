@@ -15,7 +15,7 @@
     {% endif %}
     
       <div class="nd-page-header">
-        <h1>{% translate "China Expansion Help" %}</h1>
+        <h1 class="nd-page-title">{% translate "China Expansion Help" %}</h1>
         <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'FCM:FCMhelp' %}">&#8592; {% trans "FCM Help" %}</a>
       </div>
     
@@ -34,7 +34,7 @@
         In addition, as this content was not designed by Splotter, I'm not sure the playtesting/balancing was quite as thorough!
       {% endblocktranslate %}
       <div class="FCMhelpSection">
-        <h2>{% translate "Urban Planning" %}</h2>
+        <h2 class="nd-fcm-china-help-title">{% translate "Urban Planning" %}</h2>
         <b><u>{% translate "Overview" %}</b></u>
           <br />
           {% blocktranslate trimmed %}
@@ -59,7 +59,7 @@
                alt="Urban Planning Example"
                width="730"
                height="343" />
-          <h2>{% translate "Urban Planning Plus" %}</h2>
+          <h2 class="nd-fcm-china-help-title">{% translate "Urban Planning Plus" %}</h2>
           <b><u>{% translate "Overview" %}</b></u>
             <br />
             {% blocktranslate trimmed %}
@@ -80,7 +80,7 @@
                 {% endblocktranslate %}
               </li>
             </ul>
-            <h2>{% translate "Jazz Musicians" %}</h2>
+            <h2 class="nd-fcm-china-help-title">{% translate "Jazz Musicians" %}</h2>
             <img class="helpEmployeeImg"
                  src="{% static 'FCM/images/e_jazz_musician.jpg' %}"
                  alt="Jazz Musician"
@@ -125,7 +125,7 @@
                   {% endblocktranslate %}
                 </li>
               </ul>
-              <h2>{% translate "Delivery Drivers" %}</h2>
+              <h2 class="nd-fcm-china-help-title">{% translate "Delivery Drivers" %}</h2>
               <img class="helpEmployeeImg"
                    src="{% static 'FCM/images/e_delivery_driver.jpg' %}"
                    alt="Delivery Driver"
@@ -162,7 +162,7 @@
                     {% endblocktranslate %}
                   </li>
                 </ul>
-                <h2>{% translate "Dumplings" %}</h2>
+                <h2 class="nd-fcm-china-help-title">{% translate "Dumplings" %}</h2>
                 <img class="helpEmployeeImg"
                      src="{% static 'FCM/images/e_dumpling_cook.jpg' %}"
                      alt="Dumpling Cook"
@@ -210,7 +210,7 @@
                     </li>
                     <li>The new CEO action is permanent.</li>
                   </ul>
-                  <h2>{% translate "Hawker Marketing" %}</h2>
+                  <h2 class="nd-fcm-china-help-title">{% translate "Hawker Marketing" %}</h2>
                   <img class="helpEmployeeImg"
                        src="{% static 'FCM/images/e_hawker_marketeer.jpg' %}"
                        alt="Hawker Marketeer"
@@ -261,7 +261,7 @@
                   <br />
                   
                     <div class="nd-card nd-section">
-                      <h2>{% translate "Further Help" %}</h2>
+                      <h2 class="nd-fcm-china-help-title">{% translate "Further Help" %}</h2>
                       <p>
                         <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>
                         <img id="contactEmailImg"

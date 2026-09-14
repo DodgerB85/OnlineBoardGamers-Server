@@ -219,7 +219,7 @@ body.nd .nd-fcm-stats-summary {
 	margin-bottom: 14px;
 }
 
-body.nd .nd-fcm-stats h2 {
+body.nd .nd-fcm-stats-title {
 	margin-top: 16px;
 }
 
@@ -313,7 +313,7 @@ body.nd .nd-tgz-stats-summary {
 	margin-bottom: 14px;
 }
 
-body.nd .nd-tgz-stats h2 {
+body.nd .nd-tgz-stats-title {
 	margin-top: 16px;
 }
 
@@ -412,7 +412,7 @@ body.nd .nd-aqy-stats-summary {
 	margin-bottom: 14px;
 }
 
-body.nd .nd-aqy-stats h2 {
+body.nd .nd-aqy-stats-title {
 	margin-top: 16px;
 }
 
@@ -604,7 +604,7 @@ body.nd .nd-player-header {
 	margin: 4px 0 16px;
 	text-align: center;
 }
-body.nd .nd-player-header h1 {
+body.nd .nd-player-name {
 	margin: 0;
 }
 body.nd .nd-player-title {

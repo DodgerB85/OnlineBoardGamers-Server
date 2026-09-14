@@ -11,13 +11,13 @@
   
 
     <div class="nd-page-header">
-      <h1>Updates</h1>
+      <h1 class="nd-page-title">Updates</h1>
       <a class="nd-button nd-button-ghost" href="https://discord.gg/hCU7Fr77yV" target="_blank" rel="noopener">Join Discord for discussion ↗</a>
     </div>
 
     {% if user.username == 'admin' %}
       <div class="nd-card nd-section">
-        <div class="nd-card-header"><h3>Add Update</h3></div>
+        <div class="nd-card-header"><h3 class="nd-card-title">Add Update</h3></div>
         <form method="post" style="padding: 4px 0;">
           {% csrf_token %}
           {% for field in changelogFormVar %}{{ field }}<br /><br />{% endfor %}

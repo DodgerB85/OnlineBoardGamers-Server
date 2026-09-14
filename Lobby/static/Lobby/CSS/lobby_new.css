@@ -165,7 +165,7 @@ body.nd .nd-table.nd-lobby-games-table tbody tr.nd-row09 {
 body.nd .nd-game-desc {
     display: block;
 }
-body.nd .nd-table.nd-current-games-table .nd-col-turn small {
+body.nd .nd-table.nd-current-games-table .nd-col-turn-value {
     font-size: inherit;
 }
 body.nd .nd-table.nd-lobby-games-table thead th {
@@ -568,7 +568,7 @@ body.nd .nd-col-cta .deleteTrainingGame {
     border-radius: 8px;
     font-size: 13px;
 }
-.nd-colour-guide strong {
+.nd-colour-guide-title {
     display: block;
     margin-bottom: 8px;
     text-transform: uppercase;
@@ -580,19 +580,19 @@ body.nd .nd-col-cta .deleteTrainingGame {
     flex-direction: column;
     gap: 5px;
 }
-.nd-colour-guide-grid span {
+.nd-colour-guide-item {
     padding: 4px 8px;
     border-radius: 4px;
     display: inline-block;
     width: fit-content;
 }
-.nd-colour-guide-grid span.myMove {
+.nd-colour-guide-item.myMove {
     background: var(--color-positive-bg);
 }
-.nd-colour-guide-grid span.kickoutRequired1 {
+.nd-colour-guide-item.kickoutRequired1 {
     background: var(--color-warn-bg);
 }
-.nd-colour-guide-grid span.kickoutRequired2 {
+.nd-colour-guide-item.kickoutRequired2 {
     background: var(--color-danger-bg);
 }
 
@@ -669,7 +669,7 @@ body.nd .nd-col-cta .deleteTrainingGame {
     .nd-section-label { font-size: 15px; }
     .nd-open-all-btn { font-size: 16px; }
     .nd-colour-guide { font-size: 15px; }
-    .nd-colour-guide strong { font-size: 13px; }
+    .nd-colour-guide-title { font-size: 13px; }
     #learningGameConfirmDiv { font-size: 16px; }
     .learningGameConfirmButtons { font-size: 16px; }
 

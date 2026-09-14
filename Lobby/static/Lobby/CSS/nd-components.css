@@ -110,7 +110,7 @@ body.nd .nd-page-header {
     margin: 4px 0 16px;
 }
 
-body.nd .nd-page-header h1 {
+body.nd .nd-page-title {
     margin: 0;
 }
 
@@ -163,8 +163,7 @@ body.nd .nd-card-header {
     margin: -4px 0 12px;
 }
 
-body.nd .nd-card-header h2,
-body.nd .nd-card-header h3 {
+body.nd .nd-card-title {
     margin: 0;
 }
 
@@ -560,10 +559,10 @@ body.nd .nd-credits .nd-credits-row {
 body.nd .nd-credits .nd-credits-row:last-child {
     border-bottom: none;
 }
-body.nd .nd-credits .nd-credits-row > span:first-child {
+body.nd .nd-credits-label {
     color: var(--color-ink);
 }
-body.nd .nd-credits .nd-credits-row > span:last-child {
+body.nd .nd-credits-value {
     color: var(--color-accent-strong);
     font-weight: 600;
     text-align: right;
@@ -830,7 +829,7 @@ body.nd .nd-hero {
     margin-bottom: 28px;
 }
 
-body.nd .nd-hero h1 {
+body.nd .nd-hero-title {
     font-size: 30px;
     line-height: 1.2;
     max-width: 760px;
@@ -871,12 +870,12 @@ body.nd .nd-feature {
     box-sizing: border-box;
 }
 
-body.nd .nd-feature h3 {
+body.nd .nd-feature-title {
     margin: 0 0 4px;
     color: var(--color-accent-strong);
 }
 
-body.nd .nd-feature p {
+body.nd .nd-feature-text {
     margin: 0;
     font-size: 14px;
     color: var(--color-ink-soft);
@@ -918,11 +917,11 @@ body.nd .nd-game-card-body {
     padding: 12px 14px 14px;
 }
 
-body.nd .nd-game-card-body h3 {
+body.nd .nd-game-card-title {
     margin: 0 0 2px;
 }
 
-body.nd .nd-game-card-body p {
+body.nd .nd-game-card-text {
     margin: 4px 0 0;
     font-size: 13px;
     color: var(--color-ink-soft);
@@ -1249,7 +1248,7 @@ body.nd .nd-map-editor .BGH_drinkSpot {
         padding: 18px;
         margin-bottom: 24px;
     }
-    body.nd .nd-hero h1 {
+    body.nd .nd-hero-title {
         font-size: 24px;
     }
     body.nd .nd-hero-sub {
@@ -1791,7 +1790,7 @@ body.nd .nd-game-flavour {
     align-items: start;
     gap: 8px 16px;
 }
-body.nd .nd-game-flavour > h2 {
+body.nd .nd-game-flavour > .nd-section-title {
     grid-column: 1 / -1;
 }
 body.nd .nd-game-flavour details {
@@ -1853,13 +1852,13 @@ body.nd .nd-fcm-china-help {
     line-height: 1.6;
 }
 
-body.nd .nd-fcm-china-help h2 {
+body.nd .nd-fcm-china-help-title {
     border-top: 1px solid var(--color-border);
     margin-top: 18px;
     padding-top: 16px;
 }
 
-body.nd .nd-fcm-china-help h2:first-of-type {
+body.nd .nd-fcm-china-help-title:first-of-type {
     border-top: none;
     margin-top: 0;
     padding-top: 0;
@@ -2352,12 +2351,12 @@ body.nd .nd-help-pills .nd-button.nd-help-pill-wide {
 
 /* Help page icon legend — table-like grid where each cell holds an icon and
    a label side by side. Columns scale with the page width. */
-body.nd .nd-icon-legend h3 {
+body.nd .nd-icon-legend-title {
     font-size: 15px;
     color: var(--color-accent-strong);
     margin: 0 0 4px;
 }
-body.nd .nd-icon-legend h4 {
+body.nd .nd-icon-legend-subtitle {
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -2391,7 +2390,7 @@ body.nd .nd-icon-cell .gameStatIcon {
     display: block;
     flex-shrink: 0;
 }
-body.nd .nd-icon-cell > span {
+body.nd .nd-icon-cell-label {
     font-size: 13px;
     color: var(--color-ink);
     line-height: 1.4;
@@ -2586,10 +2585,10 @@ body.nd .nd-col-icon img {
     object-fit: contain;
     padding: 2px;
 }
-body.nd .nd-col-game strong {
+body.nd .nd-col-game-name {
     color: var(--color-ink);
 }
-body.nd .nd-col-game small {
+body.nd .nd-col-game-note {
     font-size: 14px;
     line-height: 1.4;
 }
@@ -2895,10 +2894,10 @@ body.nd .nd-tgz-options .diffVR {
 	@media (hover: none) {
 		body.nd .nd-mod-list-mobile .nd-mod-wrap::after { font-size: 13px; }
 	}
-	body.nd .nd-hero h1 { font-size: 30px; }
+	body.nd .nd-hero-title { font-size: 30px; }
 	body.nd .nd-hero-sub { font-size: 17px; }
-	body.nd .nd-feature p { font-size: 16px; }
-	body.nd .nd-game-card-body p { font-size: 15px; }
+	body.nd .nd-feature-text { font-size: 16px; }
+	body.nd .nd-game-card-text { font-size: 15px; }
 	body.nd .nd-create-tile-label { font-size: 16px; }
 	body.nd .nd-map-editor-grid .nd-create-tile-label { font-size: 15px; }
 	body.nd .nd-game-flavour details summary { font-size: 17px; }
@@ -2913,9 +2912,9 @@ body.nd .nd-tgz-options .diffVR {
 	body.nd .nd-stats-tile-num { font-size: 26px; }
 	body.nd .nd-stats-tile-label { font-size: 14px; }
 	body.nd .nd-empty { font-size: 16px; }
-	body.nd .nd-icon-legend h3 { font-size: 17px; }
-	body.nd .nd-icon-legend h4 { font-size: 15px; }
-	body.nd .nd-icon-cell > span { font-size: 15px; }
+	body.nd .nd-icon-legend-title { font-size: 17px; }
+	body.nd .nd-icon-legend-subtitle { font-size: 15px; }
+	body.nd .nd-icon-cell-label { font-size: 15px; }
 	body.nd .TGZinfoPopup { font-size: 15px; }
 	body.nd .TGZinfoPopup .diffVR { font-size: 16px; }
 	body.nd .nd-tgz-options .diffVR { font-size: 16px; }
@@ -2943,10 +2942,10 @@ body.nd .nd-tgz-options .diffVR {
 	body.nd .nd-row09 > td {
 		text-align: center;
 	}
-	body.nd .nd-col-game strong {
+	body.nd .nd-col-game-name {
 		display: block;
 	}
-	body.nd .nd-col-game small {
+	body.nd .nd-col-game-note {
 		font-size: 16px;
 		display: block;
 	}
