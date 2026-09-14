@@ -1,18 +1,25 @@
 /**** PROFILE ****/
 
+/* unused? no template/JS reference found — verify before removing */
+
 .preferenceTitle {
 	font-size: 30px;
 	font-weight: bolder;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 .webhookHelpSpan {
 	font-size: 30px;
 	font-weight: bolder;
 }
+/* unused? no template/JS reference found — verify before removing */
 .preferenceExplanation {
 	font-size: 20px;
 	font-weight: bold;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 .profilePreferenceDiv {
 	border: 1px solid black;
@@ -102,15 +109,18 @@
 }
 
 .telegramInfo {
+	/* unused? no template/JS reference found — verify before removing */
 	display: none;
 }
 
 .discord-icon {
 	vertical-align: middle;
 	margin-right: 5px;
+	/* unused? no template/JS reference found — verify before removing */
 	transition: fill 0.3s ease;
 }
 .webhookButton.testWebhookButton:hover .discord-icon {
+	/* unused? no template/JS reference found — verify before removing */
 	fill: white;
 }
 
@@ -127,34 +137,40 @@
 	transition-duration: 0.4s;
 	cursor: pointer;
 	transition-duration: 0.4s;
+	/* unused? no template/JS reference found — verify before removing */
 	border-radius: 20px;
 }
 
 .deleteWebhookButton {
 	background-color: white;
 	color: black;
+	/* unused? no template/JS reference found — verify before removing */
 	border: 2px solid #f44336;
 }
 
 .deleteWebhookButton:hover {
 	background-color: #f44336;
+	/* unused? no template/JS reference found — verify before removing */
 	color: white;
 }
 
 .addWebhookButton {
 	background-color: white;
 	color: black;
+	/* unused? no template/JS reference found — verify before removing */
 	border: 2px solid #04aa6d;
 }
 
 .addWebhookButton:hover {
 	background-color: #04aa6d;
+	/* unused? no template/JS reference found — verify before removing */
 	color: white;
 }
 
 .testWebhookButton {
 	background-color: white;
 	color: black;
+	/* unused? no template/JS reference found — verify before removing */
 	border: 2px solid darkblue;
 }
 
@@ -247,6 +263,7 @@
 	fill: #F5F5F5;
 }
 .webPrefPolygon3 {
+	/* unused? no template/JS reference found — verify before removing */
 	fill: #c28727;
 }
 
@@ -259,10 +276,12 @@
 	cursor: pointer;
 	width: 100%;
 	opacity: 0.9;
+	/* unused? no template/JS reference found — verify before removing */
 	font-size: 20px;
 }
 
 .updateProfilebtn:hover {
+	/* unused? no template/JS reference found — verify before removing */
 	opacity: 1;
 }
 
@@ -284,10 +303,12 @@
 }
 
 .myCheckbox:hover + label {
+	/* unused? no template/JS reference found — verify before removing */
 	color: blue;
 }
 
 .checkboxLabel {
+	/* unused? no template/JS reference found — verify before removing */
 	vertical-align: middle;
 }
 
@@ -321,6 +342,7 @@
 }
 
 .greenCity {
+	/* unused? no template/JS reference found — verify before removing */
 	background-color: green;
 }
 .yellowCity {
@@ -330,6 +352,7 @@
 	background-color: red;
 }
 .orangeCity {
+	/* unused? no template/JS reference found — verify before removing */
 	background-color: orange;
 }
 
@@ -356,11 +379,13 @@
 }
 
 .dailyReminderTR {
+	/* unused? no template/JS reference found — verify before removing */
 	background-color: lightgoldenrodyellow !important;
 }
 
 #emailSelectionTitleSpan {
 	font-weight: bolder;
+	/* unused? no template/JS reference found — verify before removing */
 	font-size: 20px;
 }
 
@@ -368,6 +393,7 @@
 .blacklistSection {
 	display: flex;
 	width: fit-content;
+	/* unused? no template/JS reference found — verify before removing */
 	margin: auto;
 }
 
