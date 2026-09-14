@@ -1,6 +1,10 @@
 {% extends "Lobby/layout.html" %}
 {% load static i18n compress %}
 {% block head %}
+    <style>
+        .HLCsummaryGraph { min-width: 500px; max-width: 500px; min-height: 300px; max-height: 300px; }
+        .centeredDiv { margin: 0 auto; }
+    </style>
 {% endblock head %}
 {% block body %}
     <div class="nd-page" id="HLCgameSummaryPage">
@@ -22,7 +26,6 @@
             <canvas id="gameMoneySummary" class="HLCsummaryGraph"></canvas>
             <canvas id="gameIncomeSummary" class="HLCsummaryGraph"></canvas>
         </div>
-        {% include "Lobby/donate/donateBanner.html" %}
     </div>
     <script>
 	var global = {};

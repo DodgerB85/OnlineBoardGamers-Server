@@ -486,7 +486,8 @@ body.nd .nd-table td {
     border-bottom: 1px solid var(--color-border);
 }
 
-body.nd .nd-table th {
+body.nd .nd-table th,
+body.nd .nd-table .headingRow td {
     background: transparent;
     color: #fff;
     font-size: 12px;
