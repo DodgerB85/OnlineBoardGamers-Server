@@ -409,6 +409,10 @@ function replayVrom(historyIndex, playerIndex, entry3) {
 				}
 			}
 			model.increaseScore(store.players[playerIndex])
+			// PITTS bonus: 2 points if delivered to Convention in the same round they arrived at Airport
+			if (entry3[i][2] !== rf.VROM_DEST_AIRPORT && pitts.designerPlacedAtAirportThisRound(designerIdx)) {
+				model.increaseScore(store.players[playerIndex])
+			}
 			continue
 		}
 		if (entry3[i].length > 1) {

@@ -47,6 +47,29 @@ export function designerArrivedThisRound() {
 	return false
 }
 
+// Was the specific designer placed at the Airport this round?
+// Used for the PITTS 2-point bonus: delivering a designer to the Convention in the
+// same round they arrived at the Airport scores 2 points instead of 1.
+export function designerPlacedAtAirportThisRound(designerIdx) {
+	const store = useModelStore()
+	// Check in-progress history (current player's turn, not yet saved)
+	for (let i = 0; i < store.context.historyObj.length; i++) {
+		const entry = store.context.historyObj[i]
+		if (Array.isArray(entry) && entry[1] === designerIdx) return true
+	}
+	// Walk backwards through saved history, stopping at the round boundary
+	for (let i = store.history.length - 1; i >= 0; i--) {
+		const entry = store.history[i]
+		if (entry[0] === rf.HIST_NEW_TURN) break
+		if (entry[0] === rf.HIST_ADD_PAX && Array.isArray(entry[3])) {
+			for (let j = 0; j < entry[3].length; j++) {
+				if (Array.isArray(entry[3][j]) && entry[3][j][1] === designerIdx) return true
+			}
+		}
+	}
+	return false
+}
+
 // Can this player still bring a Designer into play from the Airport?
 // (requires two passenger placement spots, one not already used this round, and an available designer)
 export function canStillPlaceDesigner() {

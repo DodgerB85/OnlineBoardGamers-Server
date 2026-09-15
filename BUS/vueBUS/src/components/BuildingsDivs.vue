@@ -297,7 +297,11 @@ function clickedVromBldg(junction, buildingIndex) {
 			setDesignerStatus(designerIdx, rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION)
 		}
 		store.context.remainingVroms--
+		// PITTS bonus: 2 points if delivered to Convention in the same round they arrived at Airport
 		model.increaseScore(controller.currentPlayerObj())
+		if (buildingIndex !== rf.VROM_DEST_AIRPORT && pitts.designerPlacedAtAirportThisRound(designerIdx)) {
+			model.increaseScore(controller.currentPlayerObj())
+		}
 		store.context.selectedPaxToVromJunction = -1
 		store.context.selectedDesignerToVrom = -1
 		controller.canPlayerVrom(true)
