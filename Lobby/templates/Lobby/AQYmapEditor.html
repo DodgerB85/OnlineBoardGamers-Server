@@ -131,7 +131,7 @@
        {% include "Lobby/_nd_messages.html" %}
        <div class="nd-page-header">
               <div>
-                     <h1>{% translate "Antiquity Map Editor" %}</h1>
+                     <h1 class="nd-page-title">{% translate "Antiquity Map Editor" %}</h1>
                      <p class="nd-map-editor-help">{% translate "Build a map by dragging tiles to the board, then click placed tiles to rotate them." %}</p>
               </div>
               <form id="mapSubmit" action="{% url 'createAQYpage' %}" method="post">

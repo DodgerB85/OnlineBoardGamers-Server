@@ -1,6 +1,10 @@
 {% extends "Lobby/layout.html" %}
 {% load static i18n compress %}
 {% block head %}
+    <style>
+        .HLCsummaryGraph { min-width: 500px; max-width: 500px; min-height: 300px; max-height: 300px; }
+        .centeredDiv { margin: 0 auto; }
+    </style>
 {% endblock head %}
 {% block body %}
     <div class="nd-page" id="HLCgameSummaryPage">
@@ -12,7 +16,7 @@
             </div>
         {% endif %}
         <div class="nd-page-header">
-            <h1>{% translate "Horseless Carriage Game Summary" %}</h1>
+            <h1 class="nd-page-title">{% translate "Horseless Carriage Game Summary" %}</h1>
         </div>
         <a class="nd-button nd-button-ghost" href="{% url 'HLC:showHLCgame' game_id=gameID %}">Back to Game</a>
         <br />
@@ -22,7 +26,6 @@
             <canvas id="gameMoneySummary" class="HLCsummaryGraph"></canvas>
             <canvas id="gameIncomeSummary" class="HLCsummaryGraph"></canvas>
         </div>
-        {% include "Lobby/donate/donateBanner.html" %}
     </div>
     <script>
 	var global = {};

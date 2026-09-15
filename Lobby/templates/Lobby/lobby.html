@@ -262,14 +262,14 @@
                     {% include "Lobby/_nd_empty.html" with message="No current games or mini tournaments." showNewGame=True %}
                 {% endif %}
                 <div class="nd-colour-guide colourGuideDiv">
-                    <strong>{% translate "Colour Guide" %}</strong>
+                    <strong class="nd-colour-guide-title">{% translate "Colour Guide" %}</strong>
                     <div class="nd-colour-guide-grid">
-                        <span class="myMove">{% translate "It is your move" %}</span>
-                        <span>{% translate "Waiting for other players to move" %}</span>
-                        <span class="myMove kickoutRequired1">{% translate "Need to move - using Flexi-Time" %}</span>
-                        <span class="myMove kickoutRequired2">{% translate "Need to move - could be kicked out" %}</span>
-                        <span class="kickoutRequired1">{% translate "Current Player is using Flex-Time" %}</span>
-                        <span class="kickoutRequired2">{% translate "Enter game to kickout inactive player" %}</span>
+                        <span class="nd-colour-guide-item myMove">{% translate "It is your move" %}</span>
+                        <span class="nd-colour-guide-item">{% translate "Waiting for other players to move" %}</span>
+                        <span class="nd-colour-guide-item myMove kickoutRequired1">{% translate "Need to move - using Flexi-Time" %}</span>
+                        <span class="nd-colour-guide-item myMove kickoutRequired2">{% translate "Need to move - could be kicked out" %}</span>
+                        <span class="nd-colour-guide-item kickoutRequired1">{% translate "Current Player is using Flex-Time" %}</span>
+                        <span class="nd-colour-guide-item kickoutRequired2">{% translate "Enter game to kickout inactive player" %}</span>
                     </div>
                 </div>
             </div>

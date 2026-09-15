@@ -3,7 +3,7 @@
   {% include "Lobby/_nd_messages.html" %}
   <div class="nd-page-header">
     <div>
-      <h1>{{ game_name }} {% translate "Stat Games" %}</h1>
+      <h1 class="nd-page-title">{{ game_name }} {% translate "Stat Games" %}</h1>
       <p class="nd-page-subtitle">
         {% blocktranslate with total=total_games_count %}{{ total }} finished games{% endblocktranslate %}
       </p>
@@ -13,7 +13,7 @@
 
   <section class="nd-card">
     <div class="nd-card-header">
-      <h2>{% translate "Finished Games" %}</h2>
+      <h2 class="nd-card-title">{% translate "Finished Games" %}</h2>
     </div>
     <div class="nd-game-list">
       <div class="nd-table-wrap">

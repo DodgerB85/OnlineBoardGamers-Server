@@ -9,7 +9,7 @@
     
     <div class="nd-page">
         <div class="nd-page-header">
-            <h1>{% translate "The Great Zimbabwe" %}{% if MT_Creation %} — {% translate "Mini Tournament" %}{% endif %}</h1>
+            <h1 class="nd-page-title">{% translate "The Great Zimbabwe" %}{% if MT_Creation %} — {% translate "Mini Tournament" %}{% endif %}</h1>
             {% if MT_Creation %}
                 <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'newMiniTournaments' %}">&#8592; {% translate "Mini Tournaments" %}</a>
             {% else %}
@@ -49,7 +49,7 @@
             <div class="nd-setup-cards-grid">
                 {% if MT_Creation %}
                 <div class="nd-card">
-                    <div class="nd-card-header"><h2>{% translate "Mini Tournament Setup Options" %}</h2></div>
+                    <div class="nd-card-header"><h2 class="nd-card-title">{% translate "Mini Tournament Setup Options" %}</h2></div>
                     <div class="nd-form-row">
                         <label class="nd-form-label" for="tournamentName">{% translate "Tournament Name" %}</label>
                         <input type="text" name="tournamentName" id="tournamentName" placeholder="{% translate "Tournament Name" %}" maxlength="100" required>
@@ -95,7 +95,7 @@
                 </div>
                 {% else %}
                 <div class="nd-card">
-                    <div class="nd-card-header"><h2>{% translate "Setup Options" %}</h2></div>
+                    <div class="nd-card-header"><h2 class="nd-card-title">{% translate "Setup Options" %}</h2></div>
                     <div class="nd-form-row">
                         <label class="nd-form-label" for="name">{% translate "Name" %}</label>
                         <input type="text" name="gameName" id="name" placeholder="{% translate " Game name" %}" maxlength="100">
@@ -172,7 +172,7 @@
 
                 {% if MT_Creation %}
                 <div class="nd-card">
-                    <div class="nd-card-header"><h2>{% translate "Common Options" %}</h2></div>
+                    <div class="nd-card-header"><h2 class="nd-card-title">{% translate "Common Options" %}</h2></div>
                     <div class="nd-form-row">
                         <div class="nd-form-label" style="flex:0 0 auto">{% translate "Playing Speed: Fast" %}</div>
                     </div>
@@ -217,7 +217,7 @@
                 </div>
                 {% else %}
                 <div class="nd-card">
-                    <div class="nd-card-header"><h2>{% translate "Common Options" %}</h2></div>
+                    <div class="nd-card-header"><h2 class="nd-card-title">{% translate "Common Options" %}</h2></div>
                     <div class="nd-form-row">
                         <label class="nd-form-label" for="kickoutDuration">{% translate "Kickout available after:" %}</label>
                         <select name="kickoutDuration" id="kickoutDuration" style="flex:0 0 auto;width:auto">
@@ -290,7 +290,7 @@
                 </div>
 
                 <div class="nd-card nd-expert-options expertTGZoptions" id="expertOptions">
-                    <div class="nd-card-header"><h2>{% translate "Expert Options" %}</h2></div>
+                    <div class="nd-card-header"><h2 class="nd-card-title">{% translate "Expert Options" %}</h2></div>
                     <label class="nd-check-label">
                         <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="enableAdvancedOptions" name="enableAdvancedOptions" value="expert">
                         <div><div>{% translate "Enable Advanced Setup Options" %}</div></div>

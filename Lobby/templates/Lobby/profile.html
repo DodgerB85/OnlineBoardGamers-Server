@@ -14,7 +14,7 @@
         {% include 'Lobby/_nd_messages.html' %}
         <div class="nd-page-header">
             <div>
-                <h1>{{ username }}</h1>
+                <h1 class="nd-page-title">{{ username }}</h1>
                 <p class="nd-page-subtitle">{{ email }}</p>
             </div>
         </div>
@@ -22,7 +22,7 @@
         {# ── Card 1: Notifications ── #}
         <div class="nd-card" style="margin-bottom: 16px;">
             <div class="nd-card-header">
-                <h2>{% translate "Notifications" %}</h2>
+                <h2 class="nd-card-title">{% translate "Notifications" %}</h2>
             </div>
             <form method="post" id="notificationForm">
                 {% csrf_token %}
@@ -189,7 +189,7 @@
         {# ── Card 2: Webhooks ── #}
         <div class="nd-card" style="margin-bottom: 16px;">
             <div class="nd-card-header">
-                <h2>{% translate "Webhooks" %}</h2>
+                <h2 class="nd-card-title">{% translate "Webhooks" %}</h2>
             </div>
             <p class="" style="font-size: 13px; margin: 0 0 10px;">
                 {% translate "For help adding webhook notifications, see" %}
@@ -268,7 +268,7 @@
         {# ── Card 3: Game Preferences ── #}
         <div class="nd-card" style="margin-bottom: 16px;">
             <div class="nd-card-header">
-                <h2>{% translate "Game Preferences" %}</h2>
+                <h2 class="nd-card-title">{% translate "Game Preferences" %}</h2>
             </div>
             <form method="post">
                 {% csrf_token %}
@@ -544,7 +544,7 @@
             </form>
             <div class="nd-profile-game-preferences">
                 <div class="nd-card-header">
-                    <h2>{% translate "Individual Game Preferences" %}</h2>
+                    <h2 class="nd-card-title">{% translate "Individual Game Preferences" %}</h2>
                 </div>
                 <p class="" style="font-size:13px;margin:0 0 12px;">
                     {% translate "Click these buttons to set up more detailed preferences for the following games:" %}
@@ -560,7 +560,7 @@
         {# ── Card 4: Account ── #}
         <div class="nd-card" style="margin-bottom: 16px;">
             <div class="nd-card-header">
-                <h2>{% translate "Change Password" %}</h2>
+                <h2 class="nd-card-title">{% translate "Change Password" %}</h2>
             </div>
             <form method="post" class="nd-stacked-form">
                 {% csrf_token %}
@@ -581,7 +581,7 @@
         {# ── Card 5: Privacy / Blacklist ── #}
         <div class="nd-card">
             <div class="nd-card-header">
-                <h2>{% translate "Player Blacklist" %}</h2>
+                <h2 class="nd-card-title">{% translate "Player Blacklist" %}</h2>
                 <span class="nd-pill nd-pill-warn">{% translate "Privacy" %}</span>
             </div>
             <p style="font-size: 13px; color: var(--color-ink-soft); margin: 0 0 12px;">

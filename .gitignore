@@ -81,3 +81,7 @@ siteUtils/creds4.txt
 siteUtils/client_secrets.json
 live.sql
 .codeiumignore
+/scratchpad/
+
+# Generated fixture DB for the visual snapshot harness; rebuild with snapshot_fixture/build.py.
+/snapshot_fixture/db.sqlite3

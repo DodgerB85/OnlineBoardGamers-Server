@@ -68,7 +68,7 @@
     
     <div class="nd-page nd-create-rnb">
         <div class="nd-page-header">
-            <h1>{% translate "Roads & Boats" %}</h1>
+            <h1 class="nd-page-title">{% translate "Roads & Boats" %}</h1>
             <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'newGamesPage' %}">&#8592; {% translate "New Game" %}</a>
         </div>
 
@@ -90,7 +90,7 @@
 
             <div class="nd-setup-cards-grid">
                 <div class="nd-card">
-                    <div class="nd-card-header"><h2>{% translate "Setup Options" %}</h2></div>
+                    <div class="nd-card-header"><h2 class="nd-card-title">{% translate "Setup Options" %}</h2></div>
                     <div class="nd-form-row">
                         <label class="nd-form-label" for="name">{% translate "Name" %}</label>
                         <input type="text" name="gameName" id="name" placeholder="{% translate " Game name" %}" maxlength="100">
@@ -160,7 +160,7 @@
                 </div>
 
                 <div class="nd-card">
-                    <div class="nd-card-header"><h2>{% translate "Common Options" %}</h2></div>
+                    <div class="nd-card-header"><h2 class="nd-card-title">{% translate "Common Options" %}</h2></div>
                     <div class="nd-form-row">
                         <label class="nd-form-label" for="kickoutDuration">{% translate "Kickout available after:" %}</label>
                         <select name="kickoutDuration" id="kickoutDuration" style="flex:0 0 auto;width:auto">
@@ -206,7 +206,7 @@
                 </div>
 
                 <div class="nd-card">
-                    <div class="nd-card-header"><h2>{% translate "Game Options" %}</h2></div>
+                    <div class="nd-card-header"><h2 class="nd-card-title">{% translate "Game Options" %}</h2></div>
                     <div class="nd-check-list">
                         <label class="nd-check-label">
                             <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useSoloMineRules" name="useSoloMineRules" value="8">
@@ -220,7 +220,7 @@
                 </div>
 
                 <div class="nd-card" style="grid-column:1 / -1">
-                    <div class="nd-card-header"><h2>{% translate "Map Selection" %}</h2></div>
+                    <div class="nd-card-header"><h2 class="nd-card-title">{% translate "Map Selection" %}</h2></div>
                     <div class="nd-form-row">
                         <label class="nd-form-label" for="mapSelection">{% translate "Select Map" %}</label>
                         <a id="viewHighscoresBtn" href="#" style="display:none;margin-left:10px;width:auto;padding:6px 12px;font-size:14px;text-decoration:none" class="nd-button nd-button-ghost nd-button-sm">{% translate "View Highscores" %}</a>

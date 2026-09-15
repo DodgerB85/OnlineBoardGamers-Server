@@ -49,7 +49,7 @@ body {
     filter: brightness(0) saturate(100%) invert(100%) sepia(17%) saturate(6440%) hue-rotate(174deg) brightness(98%) contrast(102%);
 }
 
-.topMenuItem span {
+.topMenuItem-label {
 	font-size: 14px;
 	font-weight: bold;
 	display: block;

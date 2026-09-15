@@ -19,7 +19,7 @@
     {% endif %}
     
       <div class="nd-page-header">
-        <h1>{% translate "The Great Zimbabwe Stats" %}</h1>
+        <h1 class="nd-page-title">{% translate "The Great Zimbabwe Stats" %}</h1>
         <a class="nd-button nd-button-ghost nd-button-sm"
            href="{% url 'stats' %}">← {% translate "Back to Main Stats" %}</a>
       </div>
@@ -47,7 +47,7 @@
         <div class="nd-callout nd-callout-info">
           {% translate "These are historical stats. They show what has happened in previous games, but The Great Zimbabwe still rewards reading and responding to the current game state." %}
         </div>
-        <h2>{% translate "God and Specialist Statistics" %}</h2>
+        <h2 class="nd-tgz-stats-title">{% translate "God and Specialist Statistics" %}</h2>
         <p>
           {% translate "Choose an edition and player count to compare how often each god or specialist was available, picked, and won." %}
         </p>

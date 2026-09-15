@@ -1,12 +1,16 @@
+/* unused? no template/JS reference found — verify before removing */
 .donateButtonDiv {
 	display: inline-block;
 	vertical-align: middle;
 }
+/* unused? no template/JS reference found — verify before removing */
 .donateButtonDiv2 {
 	display: inline-block;
 	vertical-align: middle;
   margin-right: 30px;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 .donateTitleSpan {
 	font-weight: bolder;
@@ -76,6 +80,8 @@ img.kofiimg {
 	margin-bottom: 4px !important;
 	content: url("https://storage.ko-fi.com/cdn/whitelogo.svg");
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 .kofi-btn-container {
 	min-width: 220px;

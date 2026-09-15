@@ -91,7 +91,7 @@
     {{ request.user.id|json_script:"user_id" }}{{ request.user.username|json_script:"username" }}
     <div class="nd-page" id="FCMallOptions">
       <div class="nd-page-header">
-        <h1>{% trans "Food Chain Magnate — Mini Tournament" %}</h1>
+        <h1 class="nd-page-title">{% trans "Food Chain Magnate — Mini Tournament" %}</h1>
         <a class="nd-button nd-button-ghost nd-button-sm"
            href="{% url 'newMiniTournaments' %}">&#8592; {% trans "Mini Tournaments" %}</a>
       </div>
@@ -119,7 +119,7 @@
         <input type="hidden" id="mapData" name="mapData" value="{{ mapData }}" />
         <div class="nd-card">
           <div class="nd-card-header">
-            <h2>{% trans "Tournament Setup" %}</h2>
+            <h2 class="nd-card-title">{% trans "Tournament Setup" %}</h2>
           </div>
           <div class="nd-form-row">
             <label class="nd-form-label" for="tournamentName">{% trans "Tournament Name" %}</label>
@@ -190,7 +190,7 @@
         </div>
         <div class="nd-card">
           <div class="nd-card-header">
-            <h2>{% trans "Common Options" %}</h2>
+            <h2 class="nd-card-title">{% trans "Common Options" %}</h2>
           </div>
           <div class="nd-form-row">
             <label class="nd-form-label">{% trans "Playing Speed" %}</label>
@@ -243,7 +243,7 @@
         </div>
         <div class="nd-card">
           <div class="nd-card-header">
-            <h2>{% trans "Invite Players" %}</h2>
+            <h2 class="nd-card-title">{% trans "Invite Players" %}</h2>
           </div>
           <div class="nd-form-row" style="border-bottom:none">
             <label class="nd-form-label" for="playerToInviteMT">{% trans "Find Player" %}</label>
@@ -281,7 +281,7 @@
         </div>
         <div class="nd-card" id="nonExpertOptions">
           <div class="nd-card-header">
-            <h2>{% trans "Game Options" %}</h2>
+            <h2 class="nd-card-title">{% trans "Game Options" %}</h2>
           </div>
           <div class="nd-tabs" style="margin-bottom:16px">
             <button type="button"
@@ -467,7 +467,7 @@
     {{ request.user.id|json_script:"user_id" }}{{ request.user.username|json_script:"username" }}
     <div class="nd-page" id="FCMallOptions">
       <div class="nd-page-header">
-        <h1>{% trans "Food Chain Magnate" %}</h1>
+        <h1 class="nd-page-title">{% trans "Food Chain Magnate" %}</h1>
         <a class="nd-button nd-button-ghost nd-button-sm"
            href="{% url 'newGamesPage' %}">&#8592; {% trans "New Game" %}</a>
       </div>
@@ -496,7 +496,7 @@
         <div class="nd-setup-cards-grid">
           <div class="nd-card">
             <div class="nd-card-header">
-              <h2>{% trans "Setup Options" %}</h2>
+              <h2 class="nd-card-title">{% trans "Setup Options" %}</h2>
             </div>
             <div class="nd-form-row">
               <label class="nd-form-label" for="name">{% trans "Name" %}</label>
@@ -649,7 +649,7 @@
           </div>
           <div class="nd-card">
             <div class="nd-card-header">
-              <h2>{% trans "Common Options" %}</h2>
+              <h2 class="nd-card-title">{% trans "Common Options" %}</h2>
             </div>
             <div class="nd-form-row">
               <label class="nd-form-label" for="kickoutDuration">{% trans "Kickout after:" %}</label>
@@ -771,7 +771,7 @@
           </div>
           <div class="nd-card nd-expert-options">
             <div class="nd-card-header">
-              <h2>{% trans "Expert Options" %}</h2>
+              <h2 class="nd-card-title">{% trans "Expert Options" %}</h2>
             </div>
             <div class="nd-check-list">
               <label class="nd-check-label">
@@ -977,7 +977,7 @@
         </div>
         <div class="nd-card" id="nonExpertOptions">
           <div class="nd-card-header">
-            <h2>{% trans "Game Options" %}</h2>
+            <h2 class="nd-card-title">{% trans "Game Options" %}</h2>
           </div>
           <div class="nd-tabs" style="margin-bottom:16px">
             <button type="button"

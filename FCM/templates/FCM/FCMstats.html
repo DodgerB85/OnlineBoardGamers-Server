@@ -19,7 +19,7 @@
     {% endif %}
     
       <div class="nd-page-header">
-        <h1>{% translate "Food Chain Magnate Stats" %}</h1>
+        <h1 class="nd-page-title">{% translate "Food Chain Magnate Stats" %}</h1>
         <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'stats' %}">{% translate "Back to Main Stats" %}</a>
       </div>
     
@@ -53,7 +53,7 @@
         <div class="nd-callout nd-callout-info">
           {% translate "These are historical stats. They show what has happened in previous games, but Food Chain Magnate still rewards reading and responding to the current game state." %}
         </div>
-        <h2>{% translate "Module Choices" %}</h2>
+        <h2 class="nd-fcm-stats-title">{% translate "Module Choices" %}</h2>
         <p>{% translate "This shows how often a module or option is selected. Original MS vs New MS can be read from the finished game counts above." %}</p>
       
       <canvas class="bar_canvas" id="moduleChoiceBar" width="1400"></canvas>

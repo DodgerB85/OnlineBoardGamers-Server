@@ -14,11 +14,15 @@
 	}
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 /*** NEW GAMES PAGE ***/
 
 .newGameLink {
 	font-size: 25px;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 #createNewFCM,
 #createNewRNB,
@@ -41,6 +45,8 @@
 	height: fit-content;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 #createNewWEB {
 	padding: 15px;
 	color: black;
@@ -54,6 +60,8 @@
 	height: fit-content;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 #createNewFCM img,
 #createNewRNB img,
 #createNewHLC img,
@@ -61,23 +69,30 @@
 #createNewTGZ img {
 	height: 200px;
 }
+/* unused? no template/JS reference found — verify before removing */
 #createNewCNS img {
 	height: 200px;
 	width: 160px;
 }
+/* unused? no template/JS reference found — verify before removing */
 #createNewWEB img {
 	height: 200px;
 	width: 136px;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 #createNewKFW img,
 #createNewBus img {
 	height: 180px;
 }
+/* unused? no template/JS reference found — verify before removing */
 #createNewIND img {
 	width: 256px;
 	height: 180px;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 #createNewFCM:hover,
 #createNewRNB:hover,
@@ -92,6 +107,8 @@
 	background-color: lightblue;
 	cursor: pointer;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 #createNewFCMmap,
 #createNewTGZmap,
@@ -108,11 +125,15 @@
 	cursor: pointer;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 #createNewTGZmap img,
 #createNewFCMmap img,
 #createNewAQYmap img {
 	height: 200px;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 #createNewTGZmap:hover,
 #createNewFCMmap:hover,
@@ -140,6 +161,8 @@
 	background-color: darkgrey;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 .topOfNewGameOptionsDiv {
 	margin: auto;
 	width: fit-content;
@@ -147,6 +170,7 @@
 	display: flex;
 	flex-wrap: wrap;
 }
+/* unused? no template/JS reference found — verify before removing */
 .bottomOfNewGameOptionsDiv {
 	margin: auto;
 	width: fit-content;
@@ -154,6 +178,8 @@
 	display: flex;
 	flex-wrap: wrap;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 .notEnoughExperience {
 	background-color: yellow;
@@ -176,10 +202,13 @@
 	flex-flow: column wrap;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 .topOfNewGameSpan {
 	font-size: 30px;
 	font-weight: bolder;
 }
+/* unused? no template/JS reference found — verify before removing */
 .optionHelp {
 	font-style: italic;
 	font-size: 0.9em;
@@ -264,10 +293,14 @@
 	color: blue;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 .inlineHelp {
 	font-style: italic;
 	font-size: 0.9em;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 
 
@@ -310,12 +343,15 @@
 	color: #ffffff;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 /* end autocomplete */
 
 /* NAME FIX*/
 .singleChoiceDiv {
 	display: block;
 }
+/* unused? no template/JS reference found — verify before removing */
 .optionSelection {
 	display: inline;
 }	
@@ -323,15 +359,21 @@
 	vertical-align: middle;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 
 .singleChoiceWithTextDiv {
 	display: flex;
 	/*align-items: center;*/
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 .optionSelectionText {
 	flex: 1; /* This will make the input take up all remaining space */
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 /* For styling purposes - can be adjusted as needed */
 .choiceLabelText {
@@ -347,10 +389,13 @@
 	display: none;
 	color: red;
 }
+/* unused? no template/JS reference found — verify before removing */
 .center-container {
   display: flex;
   justify-content: center; /* Centers horizontally */
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 .optionTitleSpan {
 	font-size: 20px;
@@ -365,6 +410,8 @@
 	flex-flow: column wrap;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 .optionsGroupTop {
 	padding: 10px;
 	margin: 10px;
@@ -377,6 +424,8 @@
 	/* height: 340px;*/
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 .optionsGroupModules {
 	padding: 10px;
 	margin: 10px;
@@ -387,6 +436,8 @@
 	height: fit-content;
 	min-height: 399px;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 .FCMsingleChoiceDiv {
 	display: block;
@@ -403,6 +454,8 @@
 	min-height: 370px;
 	height: auto;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 #basicOptions {
 	/*height: 340px;*/
@@ -426,11 +479,15 @@
 	height: auto;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 #ketchupOptions {
 	border: 10px solid black;
 	background-color: lightgreen;
 	/*height: 340px;*/
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 #mapRouteOptions {
 	border: 10px solid black;
@@ -438,11 +495,15 @@
 	/*height: 340px;*/
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 #foodOptions {
 	/*height: 340px;*/
 	border: 10px solid black;
 	background-color: #8fa960;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 #marketingOptions {
 	/*height: 340px;*/
@@ -450,11 +511,15 @@
 	background-color: #87c2c8;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 #CEoptions {
 	/*height: 340px;*/
 	border: 10px solid black;
 	background-color: white;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 #employeeOptions {
 	/*height: 340px;*/
@@ -469,11 +534,15 @@
 	background-color: #faf2d9;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 .purpleLabel {
 	background-color: #b492c4;
 	color: white;
 	padding: 5px;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 .greenLabel {
     background-color: #8FA960;
@@ -481,11 +550,15 @@
     padding: 5px;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 .orangeLabel {
 	background-color: #E98D2A;
 	color: black;
 	padding: 5px;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 .blueLabel {
 	background-color: #87c2c8;
@@ -498,6 +571,8 @@
 	color: white;
 	padding: 5px;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 .scenarioSelectTab {
 	width: 90%;
@@ -521,6 +596,8 @@
 .valueField {
 	width: 34px;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 .narrowHR {
 	padding: 0px;
@@ -559,6 +636,8 @@
 	display: inline-block;
 	height: 50px;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 #topButtons {
 	height: auto;
@@ -623,6 +702,7 @@
 	-webkit-transform: rotate(270deg);
 	-o-transform: rotate(270deg);
 	-ms-transform: rotate(270deg);
+	/* unused? no template/JS reference found — verify before removing */
 	transform: rotate(270deg);
 }
 
@@ -686,6 +766,7 @@
 #BGHBalanceDiv ul {
 	text-align: left;
 	margin-top: 0px;
+	/* unused? no template/JS reference found — verify before removing */
 	margin-bottom: 0px;
 }
 

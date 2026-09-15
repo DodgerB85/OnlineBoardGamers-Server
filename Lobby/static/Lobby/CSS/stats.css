@@ -5,6 +5,8 @@
 	margin-bottom: 20px;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 .playerInfoStatsContainer {
 	width: 320px;
 	margin: auto;
@@ -24,6 +26,7 @@
    playerInfo page containers — stats.html and tournament rounds reuse
    .playerStatsDiv but must stay visible. */
 .playerInfoStatsContainer.largeTableContainer > .playerStatsDiv,
+/* unused? no template/JS reference found — verify before removing */
 body.nd .nd-player-stats > .playerStatsDiv {
 	display: none;
 }
@@ -68,6 +71,8 @@ body.nd .nd-player-stats > .playerStatsDiv {
 	padding: 10px;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 .clickableStatTD:hover {
 	cursor: pointer;
 	background-color: lightgreen;
@@ -75,11 +80,14 @@ body.nd .nd-player-stats > .playerStatsDiv {
 /* END TGZ/FCM STATS */
 
 /** PLAYER INFO **/
+/* unused? no template/JS reference found — verify before removing */
 .trophyHolderDiv {
 	height: 100px;
 	width: 100px;
 	position: relative;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 .trophyIMG {
 	height: 100px;
@@ -94,11 +102,14 @@ body.nd .nd-player-stats > .playerStatsDiv {
 		1px -1px 0 #fff,
 		-1px 1px 0 #fff,
 		1px 1px 0 #fff;
+	/* unused? no template/JS reference found — verify before removing */
 	color: black;
 	position: absolute;
 	top: 8px;
 	left: 40px;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 .trophyGameIcon {
 	height: 50px;
@@ -106,11 +117,14 @@ body.nd .nd-player-stats > .playerStatsDiv {
 }
 
 .trophyHolderSummaryDiv {
+	/* unused? no template/JS reference found — verify before removing */
 	height: 50px;
 	width: 50px;
 	position: relative;
 	display: inline-block;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 .trophyIMGsummary {
 	height: 50px;
@@ -219,7 +233,7 @@ body.nd .nd-fcm-stats-summary {
 	margin-bottom: 14px;
 }
 
-body.nd .nd-fcm-stats h2 {
+body.nd .nd-fcm-stats-title {
 	margin-top: 16px;
 }
 
@@ -313,7 +327,7 @@ body.nd .nd-tgz-stats-summary {
 	margin-bottom: 14px;
 }
 
-body.nd .nd-tgz-stats h2 {
+body.nd .nd-tgz-stats-title {
 	margin-top: 16px;
 }
 
@@ -412,7 +426,7 @@ body.nd .nd-aqy-stats-summary {
 	margin-bottom: 14px;
 }
 
-body.nd .nd-aqy-stats h2 {
+body.nd .nd-aqy-stats-title {
 	margin-top: 16px;
 }
 
@@ -604,7 +618,7 @@ body.nd .nd-player-header {
 	margin: 4px 0 16px;
 	text-align: center;
 }
-body.nd .nd-player-header h1 {
+body.nd .nd-player-name {
 	margin: 0;
 }
 body.nd .nd-player-title {
