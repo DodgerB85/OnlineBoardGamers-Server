@@ -31,7 +31,7 @@
     }
 }
 
-body.nd .mobileQuickNav {
+.mobileQuickNav {
     display: none;
 }
 
@@ -47,11 +47,11 @@ body.nd .mobileQuickNav {
 		margin-right: 50px;
 	}
 
-	body.nd.ndAuthed {
+	body.ndAuthed {
 		padding-top: 100px;
 	}
 
-	body.nd .mobileQuickNav {
+	.mobileQuickNav {
 		display: flex;
 		position: fixed;
 		top: 56px;
@@ -63,7 +63,7 @@ body.nd .mobileQuickNav {
 		z-index: 999;
 	}
 
-	body.nd .mobileQuickNav a {
+	.mobileQuickNav a {
 		flex: 1;
 		display: flex;
 		align-items: center;
@@ -72,15 +72,15 @@ body.nd .mobileQuickNav {
 		border-right: 1px solid rgba(147, 213, 208, 0.2);
 	}
 
-	body.nd .mobileQuickNav a:last-child {
+	.mobileQuickNav a:last-child {
 		border-right: 0;
 	}
 
-	body.nd.ndAuthed .mobileQuickNav ~ .hamburgerMenu.active {
+	body.ndAuthed .mobileQuickNav ~ .hamburgerMenu.active {
 		transform: translateY(100px);
 	}
 
-	body.nd.ndAuthed .mobileQuickNav ~ .mainLayout {
+	body.ndAuthed .mobileQuickNav ~ .mainLayout {
 		margin-top: 44px;
 	}
 }
@@ -217,7 +217,7 @@ body.nd .mobileQuickNav {
 }
 /** END HAMBURGER MENU */
 
-body.nd {
+body {
     background-color: var(--color-page-bg);
     padding: 0;
     margin: 0;
@@ -230,7 +230,7 @@ body.nd {
     color: var(--color-ink);
 }
 
-body.nd .mainLayout {
+.mainLayout {
     flex: 1 0 auto;
     padding: 16px;
     margin: 0;
@@ -238,7 +238,7 @@ body.nd .mainLayout {
 }
 
 @media only screen and (max-width: 800px) {
-    body.nd .mainLayout {
+    .mainLayout {
         padding: 8px;
     }
 }
@@ -270,7 +270,7 @@ body.nd .mainLayout {
     margin-left: 20px;
 }
 
-body.nd .topBarLink {
+.topBarLink {
     color: var(--color-brand-blue);
     text-align: center;
     margin-left: 4px;
@@ -280,7 +280,7 @@ body.nd .topBarLink {
     outline: none;
 }
 
-body.nd .topBarLink:hover {
+.topBarLink:hover {
     color: var(--color-nav-link-hover);
 }
 
@@ -331,32 +331,32 @@ body.nd .topBarLink:hover {
    thinner. We flex-centre its left/right regions vertically instead of the
    manual margin-top:25px hack, so everything stays centred at the shorter
    height. */
-body.nd.ndAuthed .topBar {
+body.ndAuthed .topBar {
     height: 56px;
 }
-body.nd.ndAuthed {
+body.ndAuthed {
     padding-top: 56px;
 }
-body.nd.ndAuthed .hamburgerMenu.active {
+body.ndAuthed .hamburgerMenu.active {
     transform: translateY(56px);
 }
-body.nd.ndAuthed #leftLoggedInLinks {
+body.ndAuthed #leftLoggedInLinks {
     margin: 0 10px;
     height: 56px;
     align-items: center;
 }
-body.nd.ndAuthed #leftLoggedInAsInfo {
+body.ndAuthed #leftLoggedInAsInfo {
     font-size: 13px;
 }
-body.nd.ndAuthed #logoLoggedIn {
+body.ndAuthed #logoLoggedIn {
     margin-top: 0;
 }
-body.nd.ndAuthed #rightLinksLoggedIn {
+body.ndAuthed #rightLinksLoggedIn {
     margin-top: 0;
     height: 56px;
 }
 /* keep the hamburger centred (no big vertical margin) in the slim bar */
-body.nd.ndAuthed #rightLinksLoggedIn .hamburger {
+body.ndAuthed #rightLinksLoggedIn .hamburger {
     margin: 0 16px;
 }
 /** END TOP BAR */
@@ -404,7 +404,7 @@ body.nd.ndAuthed #rightLinksLoggedIn .hamburger {
 }
 
 /* centre the logged-out login row vertically within the taller guest bar */
-body.nd.ndGuest .topBar {
+body.ndGuest .topBar {
     display: flex;
     align-items: center;
 }
@@ -426,7 +426,7 @@ body.nd.ndGuest .topBar {
 }
 
 /** FOOTER — sticky to viewport bottom on short pages */
-body.nd .footer {
+.footer {
     flex-shrink: 0;
     width: 100%;
     box-sizing: border-box;
@@ -438,16 +438,16 @@ body.nd .footer {
     font-size: 13px;
 }
 
-body.nd .footer a {
+.footer a {
     color: var(--color-brand-blue);
 }
 
-body.nd .nd-footer-text {
+.nd-footer-text {
     color: var(--color-brand-blue);
 }
 
 /* Support strip: donate + sponsor side by side, vertically centred */
-body.nd .nd-support-strip {
+.nd-support-strip {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -458,14 +458,14 @@ body.nd .nd-support-strip {
 }
 
 /* Donate section -------------------------------------------------- */
-body.nd .support {
+.support {
     display: flex;
     align-items: center;
     padding-right: 24px;
     border-right: 1px solid rgba(147, 213, 208, 0.2);
 }
 
-body.nd .support a {
+.support a {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -478,20 +478,20 @@ body.nd .support a {
 }
 
 @media (hover: hover) {
-    body.nd .support a:hover {
+    .support a:hover {
         background: #1f3f49;
         border-color: rgba(147, 213, 208, 0.5);
     }
 }
 
-body.nd .support img {
+.support img {
     height: 40px;
     width: auto;
     display: block;
 }
 
 /* Sponsor section ------------------------------------------------- */
-body.nd .splotterconSponsorDiv {
+.splotterconSponsorDiv {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -499,7 +499,7 @@ body.nd .splotterconSponsorDiv {
     color: var(--color-brand-blue);
 }
 
-body.nd .splotterconImg {
+.splotterconImg {
     height: 40px;
     width: auto;
     display: block;
@@ -524,7 +524,7 @@ body.nd .splotterconImg {
     }
     /* slim logged-in bar: keep lang-select + hamburger on one centred row so
        they fit the 56px height instead of stacking into a column */
-    body.nd.ndAuthed #rightLinksLoggedIn {
+    body.ndAuthed #rightLinksLoggedIn {
         flex-direction: row;
         align-items: center;
         margin-top: 0;
@@ -534,7 +534,7 @@ body.nd .splotterconImg {
 }
 
 @media (max-width: 720px) {
-    body.nd .support {
+    .support {
         border-right: none;
         border-bottom: 1px solid rgba(147, 213, 208, 0.2);
         padding-right: 0;
@@ -542,16 +542,16 @@ body.nd .splotterconImg {
         margin-bottom: 12px;
         justify-content: center;
     }
-    body.nd .support a {
+    .support a {
         flex-direction: column;
         align-items: center;
     }
-    body.nd .splotterconSponsorDiv {
+    .splotterconSponsorDiv {
         padding-left: 0;
         flex-wrap: wrap;
         justify-content: center;
     }
-    body.nd .splotterconImg {
+    .splotterconImg {
         max-width: 100%;
         width: auto !important;
     }
@@ -564,14 +564,14 @@ html {
 /* Desktop-only (≥769px) font bump */
 @media (min-width: 769px) {
     .topBar { font-size: 22px; }
-    body.nd .topBarLink { font-size: 19px; }
-    body.nd #registerLink a { font-size: 19px; }
-    body.nd.ndAuthed #leftLoggedInAsInfo { font-size: 15px; }
+    .topBarLink { font-size: 19px; }
+    #registerLink a { font-size: 19px; }
+    body.ndAuthed #leftLoggedInAsInfo { font-size: 15px; }
     #leftLoggedInAsInfo { font-size: 18px; }
     #langSelectLoggedIn select,
     #langSelectLoggedOut select { font-size: 16px; }
-    body.nd .footer { font-size: 15px; }
-    body.nd .nd-footer-text { font-size: 15px; }
+    .footer { font-size: 15px; }
+    .nd-footer-text { font-size: 15px; }
 }
 
 /* Guest-bar hamburger mode: the lang-select + hamburger cluster is the only

@@ -1,4 +1,4 @@
-{% extends "Lobby/_nd_help_shell.html" %}
+{% extends "Lobby/_help_shell.html" %}
 {% load static %}
 {% load i18n %}
 {% block page_id_attr %}id="lobbyHelpPage"{% endblock %}
@@ -8,7 +8,7 @@
 {% block page_action %}
   <a class="nd-button nd-button-ghost" href="{% url 'index' %}">&#8592; {% translate "Lobby" %}</a>
 {% endblock %}
-{% block nd_body %}
+{% block content %}
   <div class="nd-card nd-section">
     <h2>{% translate "Game Help Pages" %}</h2>
     <div class="nd-help-pills">
@@ -128,7 +128,7 @@
   <div class="nd-card nd-section">
     <h2>{% translate "Lobby" %}</h2>
     <div class="nd-help-qa">
-      {% include 'Lobby/_nd_lobby_icons.html' %}
+      {% include 'Lobby/_lobby_icons.html' %}
       <p>
         {% translate "<b>Note:</b> There are no specific starting options for Horseless Carriage, Bus, and Antiquity" %}
       </p>

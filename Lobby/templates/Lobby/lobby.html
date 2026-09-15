@@ -89,7 +89,7 @@
             <a href="{% url 'feedback' %}" class="nd-button nd-button-sm nd-button-primary" style="margin-left:8px;">Feedback</a>
         </div>
         <!-- hidden map editor forms (required by Lobby.js) -->
-        {% include 'Lobby/_nd_map_editor_forms.html' %}
+        {% include 'Lobby/_map_editor_forms.html' %}
         <!-- TABS -->
         <div class="nd-tabs">
             <button class="nd-tab tablinks" id="available" data-nd-tab="available">
@@ -205,7 +205,7 @@
                         <p class="nd-empty">{% translate "No Available Mini Tournaments" %}</p>
                     {% endif %}
                 {% else %}
-                    {% include "Lobby/_nd_empty.html" with message="No available games or mini tournaments right now." showNewGame=True %}
+                    {% include "Lobby/_empty.html" with message="No available games or mini tournaments right now." showNewGame=True %}
                 {% endif %}
             </div>
             <!-- Current -->
@@ -263,7 +263,7 @@
                         </div>
                     {% endif %}
                 {% else %}
-                    {% include "Lobby/_nd_empty.html" with message="No current games or mini tournaments." showNewGame=True %}
+                    {% include "Lobby/_empty.html" with message="No current games or mini tournaments." showNewGame=True %}
                 {% endif %}
                 <div class="nd-colour-guide colourGuideDiv">
                     <strong class="nd-colour-guide-title">{% translate "Colour Guide" %}</strong>
@@ -329,7 +329,7 @@
                         </div>
                     {% endif %}
                 {% else %}
-                    {% include "Lobby/_nd_empty.html" with message="No waiting games." %}
+                    {% include "Lobby/_empty.html" with message="No waiting games." %}
                 {% endif %}
             </div>
             <!-- Invitations -->
@@ -379,7 +379,7 @@
                         </div>
                     {% endif %}
                 {% else %}
-                    {% include "Lobby/_nd_empty.html" with message="No invitations." %}
+                    {% include "Lobby/_empty.html" with message="No invitations." %}
                 {% endif %}
             </div>
             <!-- Finished -->
@@ -410,7 +410,7 @@
                         {% endblocktranslate %}
                     </p>
                 {% else %}
-                    {% include "Lobby/_nd_empty.html" with message="No finished games." %}
+                    {% include "Lobby/_empty.html" with message="No finished games." %}
                 {% endif %}
             </div>
         </div>
