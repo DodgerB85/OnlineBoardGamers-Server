@@ -1866,21 +1866,31 @@ export function processStacks(allStackData) {
 				if (store.gameflow.turnOrder.length === 1) {
 					controller.processOnePlayerLeftDuringConflict()
 					phaseChanged = true
-					needToStop = 2
+					// Don't return here — processOnePlayerLeftDuringConflict transitions
+					// to a main phase. Let the loop continue so processMainMoveStacks
+					// can pick up pre-set moves for the first player in the new turn order.
+
+						// Same — let the loop continue to handle the new main phase
+					// This code might prevent an extra turn being processed. 
+					// But might also stop the first player from correctly being processed. 
+					/*needToStop = 2
 					return {
 						needToStop: 2,
 						phaseChanged: phaseChanged,
-					}
+					}*/
 				}
 				// If all remaining players were bots and got processed, advance the phase
 				if (store.gameflow.turnOrder.length === 0) {
 					controller.processOnePlayerLeftDuringConflict()
 					phaseChanged = true
-					needToStop = 2
+					// Same — let the loop continue to handle the new main phase
+					// This code might prevent an extra turn being processed. 
+					// But might also stop the first player from correctly being processed. 
+					/*needToStop = 2
 					return {
 						needToStop: 2,
 						phaseChanged: phaseChanged,
-					}
+					}*/
 				}
 			}
 		} else if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
