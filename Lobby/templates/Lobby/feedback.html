@@ -1,17 +1,13 @@
-{% extends base_template %}
+{% extends "Lobby/layout.html" %}
 {% load static %}
 {% load i18n %}
 {% block head %}
-  {% if not request.use_new_design %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-  {% endif %}
+  
 {% endblock head %}
 {% block body %}
-  {% if request.use_new_design %}
+  
     <div class="nd-page nd-page-narrow">
-    {% else %}
-      <div class="container" id="feedbackPage">
-      {% endif %}
+    
       {% if messages %}
         <div class="messages">
           {% for message in messages %}
@@ -19,9 +15,9 @@
           {% endfor %}
         </div>
       {% endif %}
-      {% if request.use_new_design %}
+      
         <div class="nd-page-header">
-          <h1>{% translate "Feedback" %}</h1>
+          <h1 class="nd-page-title">{% translate "Feedback" %}</h1>
         </div>
         <div class="nd-card nd-section">
           <p>{% translate "We'd love to hear your thoughts on the new lobby design!" %}</p>
@@ -49,33 +45,6 @@
             </div>
           </form>
         </div>
-      {% else %}
-        <div id="feedbackPage">
-          <h1>{% translate "Feedback" %}</h1>
-          <p>{% translate "We'd love to hear your thoughts on the new lobby design!" %}</p>
-          <div style="text-align: center; margin: 20px 0;">
-            <a href="{% url 'discordInviteLink' %}"
-               class="buttonDiv"
-               target="_blank">{% translate "Join the Discord" %}</a>
-          </div>
-          <form method="post" style="margin-top: 20px;">
-            {% csrf_token %}
-            <div>
-              <label for="feedback">{% translate "Your Feedback" %}</label>
-              <br>
-              <textarea id="feedback"
-                        name="feedback"
-                        rows="6"
-                        style="width: 100%;
-                               max-width: 600px"
-                        required
-                        placeholder="{% translate 'Tell us what you think about the new lobby design...' %}"></textarea>
-            </div>
-            <br>
-            <button type="submit" class="buttonDiv">{% translate "Send Feedback" %}</button>
-          </form>
-        </div>
-        {% include "Lobby/common/homeButton.html" %}
-      {% endif %}
+      
     </div>
   {% endblock body %}

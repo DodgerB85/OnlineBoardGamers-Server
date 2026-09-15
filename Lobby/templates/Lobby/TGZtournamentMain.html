@@ -2,11 +2,10 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
     <link href="{% static 'Lobby/CSS/TGZT.css' %}" rel="stylesheet">
 {% endblock head %}
 {% block body %}
-    <div class="container">
+    <div class="nd-page">
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}
@@ -14,14 +13,14 @@
                 {% endfor %}
             </div>
         {% endif %}
-        <div id="playerInfoNameDiv">
-            <h1>The Great Zimbabwe {{ tournamentKey }} Tournament</h1>
+        <div class="nd-page-header">
+            <h1 class="nd-page-title">The Great Zimbabwe {{ tournamentKey }} Tournament</h1>
         </div>
         <h1>Round 2</h1>
         {% for group_data in tournamentData %}
             <h2>Group {{ group_data.group }}</h2>
-            <div class="TGZTplayerTable-container">
-                <table class="TGZTplayerTable TGZTplayerTableJumboTHISISREMOVED">
+            <div class="nd-card"><div class="nd-table-scroll">
+                <table class="nd-table TGZTplayerTable">
                     <thead>
                         <tr>
                             <th>Player</th>
@@ -50,10 +49,10 @@
                         {% endfor %}
                     </tbody>
                 </table>
-            </div>
+            </div></div>
             <h3>Games</h3>
-            <div class="TGZTgamesTable-container">
-                <table class="TGZTgamesTable">
+            <div class="nd-card"><div class="nd-table-scroll">
+                <table class="nd-table TGZTgamesTable">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -84,13 +83,13 @@
                         {% endfor %}
                     </tbody>
                 </table>
-            </div>
+            </div></div>
         {% endfor %}
         <!-- FIXED ROUND 1-->
         <h1>Round 1</h1>
         <h2>Group A</h2>
-        <div class="TGZTplayerTableSpring24-container">
-            <table class="TGZTplayerTableSpring24 TGZTplayerTableJumboAutumn24">
+        <div class="nd-card"><div class="nd-table-scroll">
+            <table class="nd-table TGZTplayerTableSpring24 TGZTplayerTableJumboAutumn24">
                 <thead>
                     <tr>
                         <th>Player</th>
@@ -689,10 +688,10 @@
                     </tr>
                 </tbody>
             </table>
-        </div>
+        </div></div>
         <h3>Games</h3>
-        <div class="TGZTgamesTable-container">
-            <table class="TGZTgamesTable">
+        <div class="nd-card"><div class="nd-table-scroll">
+            <table class="nd-table TGZTgamesTable">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -1383,8 +1382,7 @@
                     </tr>
                 </tbody>
             </table>
-        </div>
+        </div></div>
         <!-- END FIXED ROUND 1-->
-        {% include 'Lobby/common/homeButton.html' %}
     </div>
 {% endblock body %}

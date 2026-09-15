@@ -1,13 +1,11 @@
-{% extends base_template %}
+{% extends "Lobby/layout.html" %}
 {% load static %}
 {% load i18n %}
 {% block head %}
-  {% if not request.use_new_design %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-  {% endif %}
+  
 {% endblock head %}
 {% block body %}
-  {% if request.use_new_design %}<div class="nd-page nd-page-narrow">{% else %}<div class="container" id="contactPage">{% endif %}
+  <div class="nd-page nd-page-narrow">
     {% if messages %}
       <div class="messages">
         {% for message in messages %}
@@ -16,9 +14,9 @@
       </div>
     {% endif %}
 
-    {% if request.use_new_design %}
+    
       <div class="nd-page-header">
-        <h1>{% translate "Contact" %}</h1>
+        <h1 class="nd-page-title">{% translate "Contact" %}</h1>
       </div>
 
       <div class="nd-card nd-section">
@@ -36,11 +34,6 @@
           {% translate "For any in game problems, you can submit a bug report from the menu at the top" %}
         </p>
       </div>
-    {% else %}
-      <div id="contactPage">
-        {% include "Lobby/donate/donateBanner.html" %}
-      </div>
-      {% include "Lobby/common/homeButton.html" %}
-    {% endif %}
+    
   </div>
 {% endblock body %}

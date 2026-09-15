@@ -1,18 +1,16 @@
-{% extends base_template %}
+{% extends "Lobby/layout.html" %}
 {% load static i18n %}
 {% block head %}
-    {% if not request.use_new_design %}
-        <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-    {% endif %}
+    
     <link href="{% static 'Lobby/CSS/profile.css' %}" rel="stylesheet">
 {% endblock head %}
 {% block body %}
-    {% if request.use_new_design %}
+    
     <script src="{% url 'javascript-catalog' %}"></script>
     <div class="nd-page nd-page-profile">
         {% include 'Lobby/_nd_messages.html' %}
         <div class="nd-page-header">
-            <h1>{% translate "Roads & Boats Preferences" %}</h1>
+            <h1 class="nd-page-title">{% translate "Roads & Boats Preferences" %}</h1>
             <a class="nd-button nd-button-ghost" href="{% url 'profile' %}">&#8592; {% translate "Profile" %}</a>
         </div>
         <p class="" style="margin-bottom:16px;">{% trans "Note: These settings are cosmetic and do not affect gameplay. Refresh any open games for these settings to take effect." %}</p>
@@ -111,142 +109,7 @@
             </form>
         </div>
     </div>
-    {% else %}
-    <script src="{% url 'javascript-catalog' %}"></script>
-    <div class="container formsPage">
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
-        <h1>Roads & Boats Settings</h1>
-        <b>Note: These settings are cosmetic and do not affect gameplay
-            <br />
-        Refresh any open games for these settings to take effect</b>
-        <div class="profilePreferenceDiv">
-            <form method="post">
-                {% csrf_token %}
-                <input type="hidden" id="action" name="action" value="updateProfileFavourites">
-                <label class="preferenceTitle">{% translate "Favourite Colour" %}</label>
-                <br />
-                <div>
-                    <div class="favRestChoice">
-                        <label for="rnbRadM1"><b>{% translate "None" %}</b></label>
-                        <br />
-                        <input type="radio" id="rnbRadM1" name="rnbColour" value="-1" {% if colour == -1 %}checked{% endif %} />
-                    </div>
-                    <div class="favRestChoice">
-                        <label for="rnbRad0"><img src="{% static 'RNB/images/transporters/transport_donkey_black.png' %}" width="100" height="100" alt="Black" /></label>
-                        <br />
-                        <b>Black</b>
-                        <br />
-                        <input type="radio" id="rnbRad0" name="rnbColour" value="0" {% if colour == 0 %}checked{% endif %} />
-                    </div>
-                    <div class="favRestChoice">
-                        <label for="rnbRad1"><img src="{% static 'RNB/images/transporters/transport_donkey_blue.png' %}" width="100" height="100" alt="Blue" /></label>
-                        <br />
-                        <b>Blue</b>
-                        <br />
-                        <input type="radio" id="rnbRad1" name="rnbColour" value="1" {% if colour == 1 %}checked{% endif %} />
-                    </div>
-                    <div class="favRestChoice">
-                        <label for="rnbRad2"><img src="{% static 'RNB/images/transporters/transport_donkey_green.png' %}" width="100" height="100" alt="Green" /></label>
-                        <br />
-                        <b>Green</b>
-                        <br />
-                        <input type="radio" id="rnbRad2" name="rnbColour" value="2" {% if colour == 2 %}checked{% endif %} />
-                    </div>
-                    <div class="favRestChoice">
-                        <label for="rnbRad3"><img src="{% static 'RNB/images/transporters/transport_donkey_grey.png' %}" width="100" height="100" alt="Grey" /></label>
-                        <br />
-                        <b>Grey</b>
-                        <br />
-                        <input type="radio" id="rnbRad3" name="rnbColour" value="3" {% if colour == 3 %}checked{% endif %} />
-                    </div>
-                    <div class="favRestChoice">
-                        <label for="rnbRad4"><img src="{% static 'RNB/images/transporters/transport_donkey_red.png' %}" width="100" height="100" alt="Red" /></label>
-                        <br />
-                        <b>Red</b>
-                        <br />
-                        <input type="radio" id="rnbRad4" name="rnbColour" value="4" {% if colour == 4 %}checked{% endif %} />
-                    </div>
-                    <div class="favRestChoice">
-                        <label for="rnbRad5"><img src="{% static 'RNB/images/transporters/transport_donkey_yellow.png' %}" width="100" height="100" alt="Yellow" /></label>
-                        <br />
-                        <b>Yellow</b>
-                        <br />
-                        <input type="radio" id="rnbRad5" name="rnbColour" value="5" {% if colour == 5 %}checked{% endif %} />
-                    </div>
-                </div>
-                <br />
-                <br />
-                <label class="preferenceTitle">{% translate "Select Player Aid" %}</label>
-                <br />
-                <label class="preferenceExplanation">{% trans "This will be displayed below the map" %}</label>
-                <br />
-                <div class="favRestChoice">
-                    <b>None</b>
-                    <br />
-                    <input type="radio" id="playerAid0" name="playerAid" value="0" {% if playerAid == 0 %}checked{% endif %} />
-                </div>
-                <div class="favRestChoice">
-                    <label for="playerAid1"><img src="{% static 'Lobby/images/RNBprofile/playerAid_OG_icon.jpg' %}" width="230" height="126" alt="Original" /></label>
-                    <br />
-                    <b>Original</b>
-                    <br />
-                    <input type="radio" id="playerAid1" name="playerAid" value="1" {% if playerAid == 1 %}checked{% endif %} />
-                </div>
-                <div class="favRestChoice">
-                    <label for="playerAid2"><img src="{% static 'Lobby/images/RNBprofile/playerAid_colour_icon.jpg' %}" width="230" height="120" alt="Colour" /></label>
-                    <br />
-                    <b>Colour</b>
-                    <br />
-                    <input type="radio" id="playerAid2" name="playerAid" value="2" {% if playerAid == 2 %}checked{% endif %} />
-                </div>
-                <div class="favRestChoice">
-                    <label for="playerAid3"><img src="{% static 'Lobby/images/RNBprofile/playerAid_colour_etc_icon.jpg' %}" width="230" height="175" alt="Colour &c" /></label>
-                    <br />
-                    <b>Colour &amp;c</b>
-                    <br />
-                    <input type="radio" id="playerAid3" name="playerAid" value="3" {% if playerAid == 3 %}checked{% endif %} />
-                </div>
-                <br />
-                <br />
-                <label class="preferenceTitle">{% translate "Colour Overlay" %}</label>
-                <br />
-                <label class="preferenceExplanation">{% trans "Enhance colours if you have visual difficulties" %}</label>
-                <br />
-                <div class="favRestChoice">
-                    <label for="colourOverlay0"><img src="{% static 'RNB/help/colourOverlay_none.jpg' %}" width="189" height="120" alt="None" /></label>
-                    <br />
-                    <b>None (Recommended)</b>
-                    <br />
-                    <input type="radio" id="colourOverlay0" name="colourOverlay" value="0" {% if colourOverlay == 0 %}checked{% endif %} />
-                </div>
-                <div class="favRestChoice">
-                    <label for="colourOverlay1"><img src="{% static 'RNB/help/colourOverlay_transparent.jpg' %}" width="189" height="120" alt="Transparent" /></label>
-                    <br />
-                    <b>Transparent</b>
-                    <br />
-                    <input type="radio" id="colourOverlay1" name="colourOverlay" value="1" {% if colourOverlay == 1 %}checked{% endif %} />
-                </div>
-                <div class="favRestChoice">
-                    <label for="colourOverlay2"><img src="{% static 'RNB/help/colourOverlay_full.jpg' %}" width="189" height="120" alt="Full" /></label>
-                    <br />
-                    <b>Full</b>
-                    <br />
-                    <input type="radio" id="colourOverlay2" name="colourOverlay" value="2" {% if colourOverlay == 2 %}checked{% endif %} />
-                </div>
-                <br />
-                <br />
-                <button type="submit" class="updateProfilebtn">{% translate "Update Roads & Boats Preferences" %}</button>
-            </form>
-        </div>
-        {% include "Lobby/common/homeButton.html" %}
-    </div>
-    {% endif %}
+    
     {% block script %}
         <script>
     var global = {};

@@ -59,6 +59,12 @@ sitemaps = {
 
 
 urlpatterns = [
+    # Permanent compat redirects for the old /nd/ and /old/ dual-design prefixes.
+    # Keep indefinitely - browsers cache the old 301s to /nd/ forever.
+    path("nd/", lambda request: redirect("/", permanent=True)),
+    path("nd/<path:rest>", lambda request, rest: redirect("/" + rest, permanent=True)),
+    path("old/", lambda request: redirect("/", permanent=True)),
+    path("old/<path:rest>", lambda request, rest: redirect("/" + rest, permanent=True)),
     #    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path(
         "sitemap.xml",

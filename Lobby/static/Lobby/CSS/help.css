@@ -1,3 +1,4 @@
+/* unused? no template/JS reference found — verify before removing */
 #lobbyHelpPage,
 #coffeeHelpPage,
 #FCMhelpPage,
@@ -13,9 +14,12 @@
 	font-size: 23px;
 }
 
+/* unused? no template/JS reference found — verify before removing */
+
 .maxWidthContainerDiv {
 	width: 100%;
 }
+/* unused? no template/JS reference found — verify before removing */
 .leftTextAlignDiv {
 	text-align: left;
 	margin: 0 auto;
@@ -65,6 +69,8 @@
 	stroke: black;
 	stroke-width: 8;
 }
+
+/* unused? no template/JS reference found — verify before removing */
 
 
 /** LOBBY+ HELP PAGE **/
@@ -263,6 +269,7 @@
 	left: 0px;
 	width: 100%;
 	height: 100%;
+	/* unused? no template/JS reference found — verify before removing */
 	background: linear-gradient(to top left, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) calc(50% - 4px), rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) calc(50% + 4px), rgba(0, 0, 0, 0) 100%), linear-gradient(to top right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) calc(50% - 4px), rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) calc(50% + 4px), rgba(0, 0, 0, 0) 100%), linear-gradient(to top, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) calc(50% - 4px), rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) calc(50% + 4px), rgba(0, 0, 0, 0) 100%), linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) calc(50% - 4px), rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) calc(50% + 4px), rgba(0, 0, 0, 0) 100%);
 }
 
@@ -275,6 +282,7 @@
 	display: inline-block;
 	justify-content: center;
 	max-width: 100%;
+	/* unused? no template/JS reference found — verify before removing */
 	font-size: 25px !important;
 }
 
@@ -282,6 +290,7 @@
 	display: flex;
 	width: fit-content;
 	flex-wrap: wrap;
+	/* unused? no template/JS reference found — verify before removing */
 	margin: auto;
 }
 
@@ -289,21 +298,25 @@
 	flex: 0 0 auto;
 	height: 304px;
 	width: 492px;
+	/* unused? no template/JS reference found — verify before removing */
 	padding-right: 10px;
 }
 .CNSsideBYsideLeft img {
 	width: 100%;
+	/* unused? no template/JS reference found — verify before removing */
 	height: 100%;
 }
 
 .CNSsideBYsideRight {
 	flex: 1 1 100%;
+	/* unused? no template/JS reference found — verify before removing */
 	max-width: 420px;
 }
 /** END CNS HELP **/
 
 /** RNB HELP **/
 .RNBsideBYsideWrapper {
+	/* unused? no template/JS reference found — verify before removing */
 	text-align: center;
 }
 
@@ -312,11 +325,13 @@
 	width: fit-content;
 	flex-wrap: wrap;
 	justify-content: center;
+	/* unused? no template/JS reference found — verify before removing */
 	margin: auto;
 }
 
 .RNBsideBYsideLeft {
 	flex: 0 0 auto;
+	/* unused? no template/JS reference found — verify before removing */
 	padding-right: 10px;
 }
 
@@ -399,6 +414,7 @@
 }
 
 #expandTableImg {
+	/* unused? no template/JS reference found — verify before removing */
 	vertical-align: middle;
 }
 

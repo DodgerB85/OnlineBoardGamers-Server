@@ -37,14 +37,6 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = 30 * 24 * 60 * 60
 
 
-#### TEMPORARY DUAL TEMPLATE FIX
-# Provides fallback context variables during offline asset compression
-COMPRESS_OFFLINE_CONTEXT = {
-    'base_template': 'Lobby/layout.html',  # Falls back to old layout for compression
-    'use_new_design': False,
-}
-### END FIX
-
 if not DEBUG:
     SECURE_SSL_REDIRECT = False  # Handled by cloudflare
 
@@ -149,7 +141,6 @@ MIDDLEWARE = [
     # 1. Always let security handle SSL/headers first
     "django.middleware.security.SecurityMiddleware",
     "Lobby.middleware.ForceTrailingSlashMiddleware",
-    "Lobby.middleware.NewDesignMiddleware",
     # This must come before Authentication and CsrfView
     "django.contrib.sessions.middleware.SessionMiddleware",
     # This must come after Session and Authentication
@@ -211,7 +202,6 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "Lobby.context_processors.base_layout",
             ],
             "auto_reload": DEBUG,  # Always disable for performance
             "translation_engine": "django.utils.translation",
@@ -236,7 +226,6 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "Lobby.context_processors.base_layout",
             ],
             "loaders": [
                 (
@@ -305,7 +294,7 @@ if LOCAL_USER_SQLITE3:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "NAME": config("SQLITE3_DB_PATH", default=BASE_DIR / "db.sqlite3"),
         }
     }
 elif LOCAL_USER:

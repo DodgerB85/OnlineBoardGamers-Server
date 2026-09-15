@@ -1,11 +1,9 @@
-{% extends base_template %}
+{% extends "Lobby/layout.html" %}
 {% load static %}
 {% load i18n %}
 {% block head %}
   <link rel="canonical" href="https://www.onlineboardgamers.com/" />
-  {% if not request.use_new_design %}
-    <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-  {% endif %}
+  
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -104,7 +102,7 @@
   </script>
 {% endblock %}
 {% block body %}
-  {% if request.use_new_design %}
+  
     <div class="nd-page nd-landing">
       {% if messages %}
         <div class="nd-messages">
@@ -115,7 +113,7 @@
       {% endif %}
       <section class="nd-card nd-hero">
         <div class="nd-hero-text">
-          <h1>{% translate "Play Splotter & other classics online — free, live, with friends or solo." %}</h1>
+          <h1 class="nd-hero-title">{% translate "Play Splotter & other classics online — free, live, with friends or solo." %}</h1>
           <p class="nd-hero-sub">
             {% translate "Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Antiquity, Indonesia, Bus, Cannes, Web, Roads & Boats and Keyflower — live updates, replays, stats, and regular tournaments." %}
           </p>
@@ -129,20 +127,20 @@
         <h2 class="nd-section-title">{% translate "What you get" %}</h2>
         <div class="nd-features">
           <div class="nd-card nd-feature">
-            <h3>{% translate "Live multiplayer" %}</h3>
-            <p>{% translate "Games update instantly between players. Get notified when it's your turn." %}</p>
+            <h3 class="nd-feature-title">{% translate "Live multiplayer" %}</h3>
+            <p class="nd-feature-text">{% translate "Games update instantly between players. Get notified when it's your turn." %}</p>
           </div>
           <div class="nd-card nd-feature">
-            <h3>{% translate "Practice solo" %}</h3>
-            <p>{% translate "Start a hot-seat game and play every seat on a single device to learn the rules." %}</p>
+            <h3 class="nd-feature-title">{% translate "Practice solo" %}</h3>
+            <p class="nd-feature-text">{% translate "Start a hot-seat game and play every seat on a single device to learn the rules." %}</p>
           </div>
           <div class="nd-card nd-feature">
-            <h3>{% translate "Stats & rewind" %}</h3>
-            <p>{% translate "Review past moves, study other players' strategies, and track your stats over time." %}</p>
+            <h3 class="nd-feature-title">{% translate "Stats & rewind" %}</h3>
+            <p class="nd-feature-text">{% translate "Review past moves, study other players' strategies, and track your stats over time." %}</p>
           </div>
           <div class="nd-card nd-feature">
-            <h3>{% translate "Tournaments" %}</h3>
-            <p>{% translate "Join open tournaments by skill bracket or community-run mini tournaments." %}</p>
+            <h3 class="nd-feature-title">{% translate "Tournaments" %}</h3>
+            <p class="nd-feature-text">{% translate "Join open tournaments by skill bracket or community-run mini tournaments." %}</p>
           </div>
         </div>
       </section>
@@ -358,201 +356,5 @@
     });
   })();
     </script>
-  {% else %}
-    <div class="container">
-      {% if messages %}
-        <div class="messages">
-          {% for message in messages %}
-            <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
-      <div id="indexContainer">
-        <h1>{% translate "Welcome to Online Board Gamers" %}</h1>
-        <h2>
-          {% translate "Please" %} <a href="{% url 'register' %}">{% translate "Register" %}</a> {% translate "or" %} <a href="{% url 'myLogin' %}">{% translate "Login" %}</a>
-        </h2>
-        <h3>
-          {% translate "Play online for free against other players, or create a practice game to play as all players on a single device" %}
-        </h3>
-        <h3>
-          {% translate "Online play with games updating live, plus player stats, regular tournaments, options to rewind, and more" %}
-        </h3>
-        <div class="indexRow">
-          <div class="indexCol">
-            <h2>{% translate "Food Chain Magnate" %}</h2>
-            <img class="indexBoxImage"
-                 width="141"
-                 height="199"
-                 src="{% static 'FCM/images/fcm-box.jpg' %}"
-                 alt="Food Chain Magnate">
-            {% translate "Build up your fast food empire by out advertising and out producing your opponents to win the match" %}
-            <br />
-            <br />
-            {% blocktranslate trimmed %}
-              From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
-              <br />
-              <i> Food Chain Magnate is a heavy strategy game about building a fast food chain.
-                The focus is on building your company using a card-driven (human) resource management system.
-                Players compete on a variable city map through purchasing, marketing and sales, and on a job market for key
-                staff members.
-              {% endblocktranslate %}
-            </i>
-            <br />
-            <img class="indexBoxImage"
-                 width="141"
-                 height="199"
-                 src="{% static 'FCM/images/fcm-box2.jpg' %}"
-                 alt="Food Chain Magnate">
-            <br />
-            {% translate "Includes options for all expansion modules" %}
-            <br />
-            <br />
-            {% translate "Play with 2-6 people or start a practice game to play as all players on one device." %}
-          </div>
-          <div class="indexCol">
-            <h2>{% translate "Roads & Boats" %}</h2>
-            <img class="indexBoxImage"
-                 width="141"
-                 height="199"
-                 src="{% static 'RNB/images/RNBbox.jpg' %}"
-                 alt="Roads & Boats">
-            {% translate "Build your civilisation through logistics and transport - manage goods, roads, boats and more to outproduce your rivals" %}
-            <br />
-            <br />
-            {% blocktranslate trimmed %}
-              From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
-              <br />
-              <i>In Roads & Boats, each player builds a civilisation over a long period of time, like in many other games. Unlike most games, however, the emphasis is not on warfare, population growth, city or statebuilding, but on logistics, or rather: on transport. Each player starts the game with three donkeys, a pile of wooden boards, a number of stones and two geese. With these few resources, you try to build such diverse things as woodcutters, roads, boats, mines, a stock exchange... but beware! There is no concept of territory in this game: you cannot own land, nor will you ever keep it. Before you know it, someone else might settle in your place and take over your hard work!
-              {% endblocktranslate %}
-            </i>
-            <br />
-            <br />
-            {% translate "Play with 2-6 people or solo, or start a practice game to play as all players on one device." %}
-          </div>
-        </div>
-        <div class="indexRow">
-          <div class="indexCol">
-            <h2>{% translate "Horseless Carriage" %}</h2>
-            <img class="indexBoxImage"
-                 width="141"
-                 height="199"
-                 src="{% static 'HLC/images/hlc-box.jpg' %}"
-                 alt="Horseless Carriage">
-            {% translate "Compete to build and sell the most vehicles - research and influence the market to forge your path to victory" %}
-            <br />
-            <br />
-            {% blocktranslate trimmed %}
-              From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
-              <br />
-              <i>Horseless Carriage is a game about the dawn of the automobile: a time when cars were invented,
-                and no one quite knew yet what this new contraption would look like, and what features would be essential.
-              {% endblocktranslate %}
-            </i>
-            <br />
-            <br />
-            {% translate "Play with 3-5 people or start a practice game to play as all players on one device." %}
-          </div>
-          <div class="indexCol">
-            <h2>{% translate "The Great Zimbabwe" %}</h2>
-            <img class="indexBoxImage"
-                 width="141"
-                 height="199"
-                 src="{% static 'TGZ/images/TGZ_box.jpg' %}"
-                 alt="The Great Zimbabwe">
-            {% translate "Raise your monuments to establish your empire as having the best mythology" %}
-            <br />
-            <br />
-            {% blocktranslate trimmed %}
-              From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
-              <br />
-              <i>The Great Zimbabwe is a game about building a trade based civilization in ancient Africa.
-              {% endblocktranslate %}
-            </i>
-            <br />
-            <br />
-            {% translate "Play with 2-5 people or start a practice game to play as all players on one device." %}
-          </div>
-        </div>
-        <div class="indexRow">
-          <div class="indexCol">
-            <h2>{% translate "Indonesia" %}</h2>
-            <img class="indexBoxBusImage"
-                 width="200"
-                 height="157"
-                 src="{% static 'IND/images/INDbox.jpg' %}"
-                 alt="Indonesia">
-            {% translate "Ship your goods as efficiently as possible to dominate the economy!" %}
-            <br />
-            <br />
-            {% translate "Play with 2-5 people or start a practice game to play as all players on one device." %}
-          </div>
-          <div class="indexCol">
-            <h2>{% translate "Antiquity" %}</h2>
-            <img class="indexBoxImage"
-                 width="141"
-                 height="199"
-                 src="{% static 'AQY/images/AQYbox.jpg' %}"
-                 alt="Antiquity">
-            {% translate "Build up your cities to exploit the countryside and please your chosen Saint!" %}
-            <br />
-            <br />
-            {% translate "Play with 2-4 people or start a practice game to play as all players on one device." %}
-          </div>
-        </div>
-        <div class="indexRow">
-          <div class="indexCol">
-            <h2>{% translate "Keyflower" %}</h2>
-            <img class="indexBoxBusImage"
-                 width="200"
-                 height="157"
-                 src="{% static 'KFW/images/KFWbox.jpg' %}"
-                 alt="Keyflower">
-            {% translate "Bid for tiles and use actions with your workers. Build up your village to achieve the highest score at the end of Winter!" %}
-            <br />
-            <br />
-            {% translate "Play with 2-6 people or start a practice game to play as all players on one device." %}
-          </div>
-          <div class="indexCol">
-            <h2>{% translate "Bus" %}</h2>
-            <img class="indexBoxBusImage"
-                 width="200"
-                 height="157"
-                 src="{% static 'BUS/images/bus-box.jpg' %}"
-                 alt="Bus">
-            {% translate "Transport as many passengers as you can - but with a time altering clock in the mix, the outcome can be hard to predict!" %}
-            <br />
-            <br />
-            {% translate "Play with 3-5 people or start a practice game to play as all players on one device." %}
-          </div>
-        </div>
-        <div class="indexRow">
-          <div class="indexCol">
-            <h2>{% translate "Cannes" %}</h2>
-            <img class="indexBoxImage"
-                 width="141"
-                 height="199"
-                 src="{% static 'CNS/images/CNSbox.jpg' %}"
-                 alt="Cannes">
-            {% translate "Shift your network of connections to produce and release movies in Cannes" %}
-            <br />
-            <br />
-            {% translate "Play with 2-4 people or start a practice game to play as all players on one device." %}
-          </div>
-          <div class="indexCol">
-            <h2>{% translate "Web" %}</h2>
-            <img class="indexBoxImage"
-                 width="141"
-                 height="199"
-                 src="{% static 'WEB/images/WEBbox.jpg' %}"
-                 alt="Web">
-            {% translate "Connect servers up to computers to outscore and outmaneuver your opponents" %}
-            <br />
-            <br />
-            {% translate "Play with 2-4 people or start a practice game to play as all players on one device." %}
-          </div>
-        </div>
-      </div>
-    </div>
-  {% endif %}
+  
 {% endblock %}

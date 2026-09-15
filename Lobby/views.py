@@ -424,7 +424,7 @@ def helpTournamentsMini(request):
 @login_required
 def indexSpecialRedirect(request):
 
-    return redirect("/nd/")
+    return redirect("/")
     #return redirect("index")
     # return HttpResponseRedirect(reverse("RNB:showRNBgame"))
     # return HttpResponseRedirect(reverse("createRNBpage"))
@@ -1548,10 +1548,9 @@ def index(request):
 
     # print_timestamp("Final prep complete")
 
-    template = "Lobby/lobby_new.html" if getattr(request, "use_new_design", False) else "Lobby/lobby.html"
     return render(
         request,
-        template,
+        "Lobby/lobby.html",
         {
             "availableGamesList": available_games,
             "currentGamesList": current_games,
@@ -4888,25 +4887,3 @@ def createTGZmainTournament(request):
     return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
 
 
-def newDesign(request, design_num):
-    """Render new design templates based on design number (1-12)"""
-    template_map = {
-        1: "Lobby/newDesign/01-functional-pro.html",
-        2: "Lobby/newDesign/02-premium-dark.html",
-        3: "Lobby/newDesign/03-forest-community.html",
-        4: "Lobby/newDesign/04-modern-slate.html",
-        5: "Lobby/newDesign/05-playful-bold.html",
-        6: "Lobby/newDesign/06-xbox-cinematic.html",
-        7: "Lobby/newDesign/07-gemini.html",
-        8: "Lobby/newDesign/08-blue-utility.html",
-        9: "Lobby/newDesign/09-dense-scoreboard.html",
-        10: "Lobby/newDesign/10-icon-first-lobby.html",
-        11: "Lobby/newDesign/11-split-context-lobby.html",
-        12: "Lobby/newDesign/12-mobile-first-stack.html",
-    }
-
-    template = template_map.get(design_num)
-    if not template:
-        raise Http404("Design not found")
-
-    return render(request, template)

@@ -297,10 +297,6 @@ body.nd .topBarLink:hover {
     margin-right: 20px;
 }
 
-#registerLink a {
-    color: var(--color-brand-blue);
-}
-
 #rightLoggedInHyperlinks {
     margin-right: 20px;
 }
@@ -446,7 +442,7 @@ body.nd .footer a {
     color: var(--color-brand-blue);
 }
 
-body.nd .footer p {
+body.nd .nd-footer-text {
     color: var(--color-brand-blue);
 }
 
@@ -575,7 +571,7 @@ html {
     #langSelectLoggedIn select,
     #langSelectLoggedOut select { font-size: 16px; }
     body.nd .footer { font-size: 15px; }
-    body.nd .footer p { font-size: 15px; }
+    body.nd .nd-footer-text { font-size: 15px; }
 }
 
 /* Guest-bar hamburger mode: the lang-select + hamburger cluster is the only

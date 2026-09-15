@@ -1,16 +1,14 @@
-{% extends base_template %}
+{% extends "Lobby/layout.html" %}
 {% load static i18n compress %}
 {% block head %}
-    {% if not request.use_new_design %}
-        <link href="{% static 'Lobby/CSS/mainSite.css' %}" rel="stylesheet">
-    {% endif %}
+    
 {% endblock head %}
 {% block body %}
-    {% if request.use_new_design %}
+    
     <div class="nd-page nd-page-narrow">
         {% include 'Lobby/_nd_messages.html' %}
         <div class="nd-page-header">
-            <h1>{% if gameName %}{{ gameName }}{% else %}{% translate "Custom TGZ Options" %}{% endif %}</h1>
+            <h1 class="nd-page-title">{% if gameName %}{{ gameName }}{% else %}{% translate "Custom TGZ Options" %}{% endif %}</h1>
             <a class="nd-button nd-button-ghost" href="{% url 'index' %}">&#8592; {% translate "Lobby" %}</a>
         </div>
         <div class="nd-card">
@@ -19,22 +17,5 @@
             <div class="nd-tgz-options">{{ godsVRhtml|safe }}</div>
         </div>
     </div>
-    {% else %}
-    <div class="container">
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
-        <h1>{{ gameName }}</h1>
-        <h2>{{ gameDescription }}</h2>
-        {% translate "The game will use the following customisations:" %}
-        <br />
-        <br />
-        {{ godsVRhtml|safe }}
-        {% include "Lobby/common/homeButton.html" %}
-    </div>
-    {% endif %}
+    
 {% endblock body %}
