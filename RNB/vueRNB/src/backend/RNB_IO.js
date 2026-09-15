@@ -1833,11 +1833,21 @@ export function processStacks(allStackData) {
 				if (store.gameflow.turnOrder.length === 1) {
 					controller.processOnePlayerLeftDuringConflict()
 					phaseChanged = true
+					needToStop = 2
+					return {
+						needToStop: 2,
+						phaseChanged: phaseChanged,
+					}
 				}
 				// If all remaining players were bots and got processed, advance the phase
 				if (store.gameflow.turnOrder.length === 0) {
 					controller.processOnePlayerLeftDuringConflict()
 					phaseChanged = true
+					needToStop = 2
+					return {
+						needToStop: 2,
+						phaseChanged: phaseChanged,
+					}
 				}
 			}
 
@@ -1856,11 +1866,21 @@ export function processStacks(allStackData) {
 				if (store.gameflow.turnOrder.length === 1) {
 					controller.processOnePlayerLeftDuringConflict()
 					phaseChanged = true
+					needToStop = 2
+					return {
+						needToStop: 2,
+						phaseChanged: phaseChanged,
+					}
 				}
 				// If all remaining players were bots and got processed, advance the phase
 				if (store.gameflow.turnOrder.length === 0) {
 					controller.processOnePlayerLeftDuringConflict()
 					phaseChanged = true
+					needToStop = 2
+					return {
+						needToStop: 2,
+						phaseChanged: phaseChanged,
+					}
 				}
 			}
 		} else if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
