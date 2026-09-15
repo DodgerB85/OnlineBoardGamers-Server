@@ -146,8 +146,7 @@
 .nd-table.nd-lobby-games-table.nd-finished-games-table thead tr {
     grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px 255px;
 }
-.nd-table.nd-current-games-table thead tr,
-.nd-table.nd-current-games-table .nd-row09 {
+.nd-table.nd-current-games-table :is(thead tr, .nd-row09) {
     grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(110px, 0.7fr);
 }
 .nd-table.nd-current-games-table thead .nd-col-game {
@@ -674,20 +673,15 @@
     .learningGameConfirmButtons { font-size: 16px; }
 
     /* Desktop current-games column widths */
-    .nd-table.nd-lobby-games-table thead tr {
+    .nd-table.nd-lobby-games-table :is(thead tr, .nd-row09) {
         grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px minmax(90px, 0.55fr) minmax(120px, 0.91fr);
     }
-    .nd-table.nd-lobby-games-table .nd-row09 {
-        grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px minmax(90px, 0.55fr) minmax(120px, 0.91fr);
-    }
-    .nd-table.nd-current-games-table thead tr,
-    .nd-table.nd-current-games-table .nd-row09 {
+    .nd-table.nd-current-games-table :is(thead tr, .nd-row09) {
         grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.125fr) minmax(0, 0.85fr) minmax(0, 0.9fr) minmax(80px, 0.5fr) minmax(150px, 0.925fr);
     }
 
     /* Finished games: icon | name | players | options | last activity */
-    .nd-table.nd-lobby-games-table.nd-finished-games-table thead tr,
-    .nd-table.nd-lobby-games-table.nd-finished-games-table .nd-row09 {
+    .nd-table.nd-lobby-games-table.nd-finished-games-table :is(thead tr, .nd-row09) {
         grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px 255px;
     }
 
