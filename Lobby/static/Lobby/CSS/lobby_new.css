@@ -212,8 +212,7 @@
         grid-column: 1;
         grid-row: 1;
     }
-    .nd-lobby-games-table .nd-last-move > .startingOption,
-    .nd-lobby-games-table .nd-last-move > .nd-mod-wrap {
+    .nd-lobby-games-table .nd-last-move > :is(.startingOption, .nd-mod-wrap) {
         grid-column: 2;
         grid-row: 1;
         align-self: center;
