@@ -2971,7 +2971,7 @@ iframe {
 }
 
 @media (min-width: 1100px) {
-	.nd-table.nd-lobby-games-table .nd-col-options {
+	.nd-lobby-games-table .nd-col-options {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
 		gap: 4px;

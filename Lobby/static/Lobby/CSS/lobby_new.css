@@ -129,13 +129,13 @@
 
 /* The shared nd-row09 rules hide table headers. Lobby tables opt back in
    explicitly rather than relying on a :has() override. */
-.nd-table.nd-lobby-games-table {
+.nd-lobby-games-table {
     border-collapse: separate;
 }
-.nd-table.nd-lobby-games-table thead {
+.nd-lobby-games-table thead {
     display: block;
 }
-.nd-table.nd-lobby-games-table thead tr {
+.nd-lobby-games-table thead tr {
     display: grid;
     grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px minmax(90px, 0.55fr) minmax(120px, 0.8fr);
     gap: 12px;
@@ -143,31 +143,31 @@
     background: var(--color-accent);
     border-bottom: 2px solid var(--color-border-strong);
 }
-.nd-table.nd-lobby-games-table.nd-finished-games-table thead tr {
+.nd-lobby-games-table.nd-finished-games-table thead tr {
     grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px 255px;
 }
-.nd-table.nd-current-games-table :is(thead tr, .nd-row09) {
+.nd-current-games-table :is(thead tr, .nd-row09) {
     grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(110px, 0.7fr);
 }
-.nd-table.nd-current-games-table thead .nd-col-game {
+.nd-current-games-table thead .nd-col-game {
     grid-column: span 2;
 }
-.nd-table.nd-current-games-table thead th {
+.nd-current-games-table thead th {
     white-space: normal;
 }
 /* Lobby game rows are .nd-row09 grid blocks stacked flush, so the divider
    lives on the row (not per-cell td borders, which the component removes)
    so one clean line falls between rows and aligns with each row. */
-.nd-table.nd-lobby-games-table tbody tr.nd-row09 {
+.nd-lobby-games-table tbody tr.nd-row09 {
     border-bottom: 2px solid #0B275B;
 }
 .nd-game-desc {
     display: block;
 }
-.nd-table.nd-current-games-table .nd-col-turn-value {
+.nd-current-games-table .nd-col-turn-value {
     font-size: inherit;
 }
-.nd-table.nd-lobby-games-table thead th {
+.nd-lobby-games-table thead th {
     display: block;
     padding: 0;
     font-size: 11px;
@@ -204,16 +204,16 @@
     min-width: fit-content;
 }
 @media (min-width: 721px) {
-    .nd-table.nd-lobby-games-table .nd-last-move {
+    .nd-lobby-games-table .nd-last-move {
         display: grid;
         grid-template-columns: minmax(0, 1fr) 40px;
     }
-    .nd-table.nd-lobby-games-table .nd-last-move-text {
+    .nd-lobby-games-table .nd-last-move-text {
         grid-column: 1;
         grid-row: 1;
     }
-    .nd-table.nd-lobby-games-table .nd-last-move > .startingOption,
-    .nd-table.nd-lobby-games-table .nd-last-move > .nd-mod-wrap {
+    .nd-lobby-games-table .nd-last-move > .startingOption,
+    .nd-lobby-games-table .nd-last-move > .nd-mod-wrap {
         grid-column: 2;
         grid-row: 1;
         align-self: center;
@@ -240,29 +240,29 @@
    The shared layout switches rows to cards at 980px, which leaves every
    column clustered on the left while the six-column header remains visible. */
 @media (min-width: 721px) and (max-width: 980px) {
-    .nd-table.nd-lobby-games-table .nd-row09 {
+    .nd-lobby-games-table .nd-row09 {
     grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px minmax(90px, 0.55fr) minmax(120px, 0.8fr);
         gap: 12px;
         padding: 7px 14px;
     }
-    .nd-table.nd-lobby-games-table.nd-finished-games-table .nd-row09 {
+    .nd-lobby-games-table.nd-finished-games-table .nd-row09 {
         grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px 255px;
     }
-    .nd-table.nd-current-games-table .nd-row09 {
+    .nd-current-games-table .nd-row09 {
     grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(110px, 0.7fr);
     }
-    .nd-table.nd-lobby-games-table .nd-col-players,
-    .nd-table.nd-lobby-games-table .nd-col-turn,
-    .nd-table.nd-lobby-games-table .nd-col-options,
-    .nd-table.nd-lobby-games-table .nd-col-status,
-    .nd-table.nd-lobby-games-table .nd-col-cta {
+    .nd-lobby-games-table .nd-col-players,
+    .nd-lobby-games-table .nd-col-turn,
+    .nd-lobby-games-table .nd-col-options,
+    .nd-lobby-games-table .nd-col-status,
+    .nd-lobby-games-table .nd-col-cta {
         grid-column: auto;
     }
-    .nd-table.nd-lobby-games-table .nd-row09 > td[data-label]::before {
+    .nd-lobby-games-table .nd-row09 > td[data-label]::before {
         content: none;
         display: none;
     }
-    .nd-table.nd-lobby-games-table .nd-col-players {
+    .nd-lobby-games-table .nd-col-players {
         overflow-wrap: anywhere;
     }
 }
@@ -273,64 +273,64 @@
     .nd-no-options {
         display: inline;
     }
-    .nd-table.nd-lobby-games-table thead {
+    .nd-lobby-games-table thead {
         display: none;
     }
-    .nd-table.nd-lobby-games-table .nd-row09 {
+    .nd-lobby-games-table .nd-row09 {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 14px 10px;
     }
-    .nd-table.nd-lobby-games-table .nd-col-icon {
+    .nd-lobby-games-table .nd-col-icon {
         grid-column: auto;
         align-self: center;
         justify-self: center;
     }
-    .nd-table.nd-lobby-games-table .nd-col-icon img {
+    .nd-lobby-games-table .nd-col-icon img {
         width: 60px;
         height: 60px;
     }
-    .nd-table.nd-lobby-games-table .nd-col-game {
+    .nd-lobby-games-table .nd-col-game {
         grid-column: auto;
         align-self: center;
         text-align: center;
     }
-    .nd-table.nd-lobby-games-table .nd-row09 > .nd-col-game[data-label]::before {
+    .nd-lobby-games-table .nd-row09 > .nd-col-game[data-label]::before {
         content: none;
         display: none;
     }
-    .nd-table.nd-lobby-games-table .nd-col-players,
-    .nd-table.nd-lobby-games-table .nd-col-turn,
-    .nd-table.nd-lobby-games-table .nd-col-options,
-    .nd-table.nd-lobby-games-table .nd-col-status,
-    .nd-table.nd-lobby-games-table .nd-col-cta {
+    .nd-lobby-games-table .nd-col-players,
+    .nd-lobby-games-table .nd-col-turn,
+    .nd-lobby-games-table .nd-col-options,
+    .nd-lobby-games-table .nd-col-status,
+    .nd-lobby-games-table .nd-col-cta {
         grid-column: auto;
         align-self: center;
         text-align: center;
     }
-    .nd-table.nd-lobby-games-table .nd-col-options,
-    .nd-table.nd-lobby-games-table .nd-col-cta {
+    .nd-lobby-games-table .nd-col-options,
+    .nd-lobby-games-table .nd-col-cta {
         justify-content: center;
     }
-    .nd-table.nd-lobby-games-table .nd-col-status,
-    .nd-table.nd-lobby-games-table .nd-col-cta {
+    .nd-lobby-games-table .nd-col-status,
+    .nd-lobby-games-table .nd-col-cta {
         text-align: center;
     }
-    .nd-table.nd-lobby-games-table .nd-row09 > .nd-col-options[data-label]::before,
-    .nd-table.nd-lobby-games-table .nd-row09 > .nd-last-move[data-label]::before {
+    .nd-lobby-games-table .nd-row09 > .nd-col-options[data-label]::before,
+    .nd-lobby-games-table .nd-row09 > .nd-last-move[data-label]::before {
         content: none;
         display: none;
     }
-    .nd-table.nd-lobby-games-table .nd-last-move {
+    .nd-lobby-games-table .nd-last-move {
         display: grid;
         grid-template-columns: max-content 40px;
         width: fit-content;
         justify-self: center;
         justify-items: center;
     }
-    .nd-table.nd-lobby-games-table .nd-last-move-text {
+    .nd-lobby-games-table .nd-last-move-text {
         grid-area: 1 / 1;
     }
-    .nd-table.nd-lobby-games-table .nd-last-move .nd-mod-wrap {
+    .nd-lobby-games-table .nd-last-move .nd-mod-wrap {
         grid-area: 1 / 2;
         align-self: center;
     }
@@ -673,20 +673,20 @@
     .learningGameConfirmButtons { font-size: 16px; }
 
     /* Desktop current-games column widths */
-    .nd-table.nd-lobby-games-table :is(thead tr, .nd-row09) {
+    .nd-lobby-games-table :is(thead tr, .nd-row09) {
         grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px minmax(90px, 0.55fr) minmax(120px, 0.91fr);
     }
-    .nd-table.nd-current-games-table :is(thead tr, .nd-row09) {
+    .nd-current-games-table :is(thead tr, .nd-row09) {
         grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.125fr) minmax(0, 0.85fr) minmax(0, 0.9fr) minmax(80px, 0.5fr) minmax(150px, 0.925fr);
     }
 
     /* Finished games: icon | name | players | options | last activity */
-    .nd-table.nd-lobby-games-table.nd-finished-games-table :is(thead tr, .nd-row09) {
+    .nd-lobby-games-table.nd-finished-games-table :is(thead tr, .nd-row09) {
         grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px 255px;
     }
 
     /* Header centering */
-    .nd-table.nd-lobby-games-table thead th {
+    .nd-lobby-games-table thead th {
         font-size: 13px;
         text-align: center;
     }
@@ -697,14 +697,14 @@
     }
 
     /* Last-move flex for desktop */
-    .nd-table.nd-lobby-games-table .nd-last-move {
+    .nd-lobby-games-table .nd-last-move {
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: center;
         gap: 4px;
     }
-    .nd-table.nd-lobby-games-table .nd-last-move-text {
+    .nd-lobby-games-table .nd-last-move-text {
         text-align: center;
     }
 }

@@ -693,7 +693,7 @@
 	text-align: center;
 }
 
-#playerInfoPage .nd-game-list .nd-table.nd-finished-games-table thead tr {
+#playerInfoPage .nd-game-list .nd-finished-games-table thead tr {
 	display: grid;
 	grid-template-columns: 58px minmax(0, 1.2fr) minmax(0, 1fr) minmax(172px, 0.5fr) minmax(110px, 0.7fr);
 	gap: 12px;
@@ -707,7 +707,7 @@
 	grid-template-columns: 58px minmax(0, 1.2fr) minmax(0, 1fr) minmax(40px, 0.4fr) minmax(0, 1fr) minmax(172px, 0.5fr) minmax(110px, 0.7fr);
 }
 
-#playerInfoPage .nd-game-list .nd-table.nd-finished-games-table tbody tr.nd-row09 {
+#playerInfoPage .nd-game-list .nd-finished-games-table tbody tr.nd-row09 {
 	grid-template-columns: 58px minmax(0, 1.2fr) minmax(0, 1fr) minmax(172px, 0.5fr) minmax(110px, 0.7fr);
 }
 
