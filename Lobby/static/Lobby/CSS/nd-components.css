@@ -2332,20 +2332,20 @@ a.nd-create-tile {
     box-sizing: border-box;
     width: auto;
 }
-.nd-help-pills .nd-button.nd-help-pill-wide {
+.nd-help-pills .nd-help-pill-wide {
     flex-basis: calc(33.333% - 6px);
 }
 @media (max-width: 520px) {
     .nd-help-pills .nd-button {
         flex-basis: calc(50% - 4px);
     }
-    .nd-help-pills .nd-button.nd-help-pill-wide {
+    .nd-help-pills .nd-help-pill-wide {
         flex-basis: calc(50% - 4px);
     }
 }
 @media (max-width: 320px) {
     .nd-help-pills .nd-button,
-    .nd-help-pills .nd-button.nd-help-pill-wide {
+    .nd-help-pills .nd-help-pill-wide {
         flex-basis: 100%;
     }
 }
