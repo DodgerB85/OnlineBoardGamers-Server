@@ -84,6 +84,10 @@
             </button>
         </div>
         <script>try{if(localStorage.getItem('rnb_announce_dismissed')==='1')document.getElementById('rnbAnnounceBanner').style.display='none';}catch(e){}</script>
+        <div class="nd-news-banner">
+            <span>New Design Active! All feedback being processed. Please let us know what improvements you would like.</span>
+            <a href="{% url 'feedback' %}" class="nd-button nd-button-sm nd-button-primary" style="margin-left:8px;">Feedback</a>
+        </div>
         <!-- hidden map editor forms (required by Lobby.js) -->
         {% include 'Lobby/_nd_map_editor_forms.html' %}
         <!-- TABS -->
