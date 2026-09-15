@@ -132,10 +132,10 @@
 .nd-lobby-games-table {
     border-collapse: separate;
 }
-.nd-lobby-games-table thead {
+.nd-table.nd-lobby-games-table thead {
     display: block;
 }
-.nd-lobby-games-table thead tr {
+.nd-table.nd-lobby-games-table thead tr {
     display: grid;
     grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px minmax(90px, 0.55fr) minmax(120px, 0.8fr);
     gap: 12px;
@@ -143,16 +143,16 @@
     background: var(--color-accent);
     border-bottom: 2px solid var(--color-border-strong);
 }
-.nd-lobby-games-table.nd-finished-games-table thead tr {
+.nd-table.nd-lobby-games-table.nd-finished-games-table thead tr {
     grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px 255px;
 }
-.nd-current-games-table :is(thead tr, .nd-row09) {
+.nd-table.nd-current-games-table :is(thead tr, .nd-row09) {
     grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(110px, 0.7fr);
 }
-.nd-current-games-table thead .nd-col-game {
+.nd-table.nd-current-games-table thead .nd-col-game {
     grid-column: span 2;
 }
-.nd-current-games-table thead th {
+.nd-table.nd-current-games-table thead th {
     white-space: normal;
 }
 /* Lobby game rows are .nd-row09 grid blocks stacked flush, so the divider
@@ -167,7 +167,7 @@
 .nd-current-games-table .nd-col-turn-value {
     font-size: inherit;
 }
-.nd-lobby-games-table thead th {
+.nd-table.nd-lobby-games-table thead th {
     display: block;
     padding: 0;
     font-size: 11px;
@@ -239,15 +239,15 @@
    The shared layout switches rows to cards at 980px, which leaves every
    column clustered on the left while the six-column header remains visible. */
 @media (min-width: 721px) and (max-width: 980px) {
-    .nd-lobby-games-table .nd-row09 {
+    .nd-table.nd-lobby-games-table .nd-row09 {
     grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px minmax(90px, 0.55fr) minmax(120px, 0.8fr);
         gap: 12px;
         padding: 7px 14px;
     }
-    .nd-lobby-games-table.nd-finished-games-table .nd-row09 {
+    .nd-table.nd-lobby-games-table.nd-finished-games-table .nd-row09 {
         grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px 255px;
     }
-    .nd-current-games-table .nd-row09 {
+    .nd-table.nd-current-games-table .nd-row09 {
     grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(110px, 0.7fr);
     }
     .nd-lobby-games-table .nd-col-players,
@@ -272,10 +272,10 @@
     .nd-no-options {
         display: inline;
     }
-    .nd-lobby-games-table thead {
+    .nd-table.nd-lobby-games-table thead {
         display: none;
     }
-    .nd-lobby-games-table .nd-row09 {
+    .nd-table.nd-lobby-games-table .nd-row09 {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 14px 10px;
     }
@@ -672,20 +672,20 @@
     .learningGameConfirmButtons { font-size: 16px; }
 
     /* Desktop current-games column widths */
-    .nd-lobby-games-table :is(thead tr, .nd-row09) {
+    .nd-table.nd-lobby-games-table :is(thead tr, .nd-row09) {
         grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px minmax(90px, 0.55fr) minmax(120px, 0.91fr);
     }
-    .nd-current-games-table :is(thead tr, .nd-row09) {
+    .nd-table.nd-current-games-table :is(thead tr, .nd-row09) {
         grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.125fr) minmax(0, 0.85fr) minmax(0, 0.9fr) minmax(80px, 0.5fr) minmax(150px, 0.925fr);
     }
 
     /* Finished games: icon | name | players | options | last activity */
-    .nd-lobby-games-table.nd-finished-games-table :is(thead tr, .nd-row09) {
+    .nd-table.nd-lobby-games-table.nd-finished-games-table :is(thead tr, .nd-row09) {
         grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px 255px;
     }
 
     /* Header centering */
-    .nd-lobby-games-table thead th {
+    .nd-table.nd-lobby-games-table thead th {
         font-size: 13px;
         text-align: center;
     }
