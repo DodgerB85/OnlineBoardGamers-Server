@@ -1,4 +1,4 @@
-{% extends "Lobby/_nd_help_shell.html" %}
+{% extends "Lobby/_help_shell.html" %}
 {% load static %}
 {% load i18n %}
 {% static 'TGZ/The_Great_Zimbabwe_rules.pdf' as rules_pdf %}
@@ -9,7 +9,7 @@
 {% block page_title %}
   {% translate "The Great Zimbabwe Help" %}
 {% endblock page_title %}
-{% block nd_body %}
+{% block content %}
   <div class="nd-card nd-section">
     <h2>{% translate "Rules" %}</h2>
     <div class="nd-help-qa">
@@ -375,4 +375,4 @@
            height="30" />
     </p>
   </div>
-{% endblock nd_body %}
+{% endblock content %}

@@ -26,8 +26,8 @@
     {% endcompress %}
     
     <div class="nd-page" id="lobbyPage">
-        {% include 'Lobby/_nd_messages.html' %}
-        {% include 'Lobby/_nd_map_editor_forms.html' %}
+        {% include 'Lobby/_messages.html' %}
+        {% include 'Lobby/_map_editor_forms.html' %}
         <div id="learningGameConfirmDiv">
             <b>Note:</b>
             The creator has requested a Learning Game.
@@ -70,7 +70,7 @@
                     </div>
                 </div>
             {% else %}
-                {% include "Lobby/_nd_empty.html" with message="No Available Games" %}
+                {% include "Lobby/_empty.html" with message="No Available Games" %}
             {% endif %}
             {% url "lobbyHelp" as the_url %}
             <p class="" style="font-size:13px; margin-top: 12px;">

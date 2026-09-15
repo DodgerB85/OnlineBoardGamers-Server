@@ -1,4 +1,4 @@
-{% extends "Lobby/_nd_help_shell.html" %}
+{% extends "Lobby/_help_shell.html" %}
 {% load static %}
 {% load i18n %}
 {% block page_id_attr %}
@@ -11,7 +11,7 @@
   <a class="nd-button nd-button-sm nd-button-ghost"
      href="{% url 'helpTournaments' %}">{% translate "Tournaments Help" %} →</a>
 {% endblock page_action %}
-{% block nd_body %}
+{% block content %}
   <div class="nd-card nd-section">
     <div class="nd-help-qa">
       <p>
@@ -118,4 +118,4 @@
            height="30" />
     </p>
   </div>
-{% endblock nd_body %}
+{% endblock content %}

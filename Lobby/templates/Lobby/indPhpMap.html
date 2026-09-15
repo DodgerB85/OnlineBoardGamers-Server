@@ -13,7 +13,7 @@
     <input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value="">
   </form>
   <div class="nd-page nd-page-narrow">
-    {% include 'Lobby/_nd_messages.html' %}
+    {% include 'Lobby/_messages.html' %}
     <div class="nd-page-header">
       <h1 class="nd-page-title">Indonesia - Php Games</h1>
     </div>
@@ -39,7 +39,7 @@
         </table>
       </div>
     {% else %}
-      {% include "Lobby/_nd_empty.html" with message="No Available Games" %}
+      {% include "Lobby/_empty.html" with message="No Available Games" %}
     {% endif %}
     {% if activeGames %}
       <h2>{% translate "Active Games" %}</h2>
@@ -62,7 +62,7 @@
         </table>
       </div>
     {% else %}
-      {% include "Lobby/_nd_empty.html" with message="No Current Games" %}
+      {% include "Lobby/_empty.html" with message="No Current Games" %}
     {% endif %}
     {% if finishedGames %}
       <h2>{% translate "Finished Games" %}</h2>
@@ -129,7 +129,7 @@
           }
       </script>
     {% else %}
-      {% include "Lobby/_nd_empty.html" with message="No Finished Games" %}
+      {% include "Lobby/_empty.html" with message="No Finished Games" %}
     {% endif %}
   </div>
 {% endblock %}
