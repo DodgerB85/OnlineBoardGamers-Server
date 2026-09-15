@@ -2470,7 +2470,8 @@ iframe {
    picks it up without loading lobby-specific CSS. */
 
 /* grid rows shrink td to content width, fragmenting the default td border */
-.nd-row09 > td {
+.nd-table tbody tr.nd-row09 td {
+    border-top: none;
     border-bottom: none;
 }
 
