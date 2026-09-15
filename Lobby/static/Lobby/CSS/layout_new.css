@@ -217,7 +217,7 @@
 }
 /** END HAMBURGER MENU */
 
-{
+body {
     background-color: var(--color-page-bg);
     padding: 0;
     margin: 0;
