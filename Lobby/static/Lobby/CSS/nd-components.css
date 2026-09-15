@@ -2469,6 +2469,11 @@ iframe {
    Defined here (rather than lobby_new.css) so the stats page ten-games list
    picks it up without loading lobby-specific CSS. */
 
+/* grid rows shrink td to content width, fragmenting the default td border */
+.nd-row09 > td {
+    border-bottom: none;
+}
+
 /* The 09-row variant (stats ten-games list) renders rows as a grid where
    the first .nd-row09 row acts as the visual header. The original <thead>
    is therefore hidden on those tables only — other nd-table consumers
