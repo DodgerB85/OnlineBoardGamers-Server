@@ -10,26 +10,26 @@
         <script src="{% static 'Lobby/common.js' %}"></script>
     {% endcompress %}
     
-        <div class="nd-page" id="playerInfoPage">
-            {% include "Lobby/_messages.html" %}
-            <div class="nd-player-header">
-                <div class="nd-player-title">
-                    <h1 class="nd-player-name">{{ usernameToProfile }}</h1>
-                    {% if trophyHTML %}<div class="nd-trophy-row">{{ trophyHTML|safe }}</div>{% endif %}
+        <div class="page" id="playerInfoPage">
+            {% include "Lobby/messages.html" %}
+            <div class="player-header">
+                <div class="player-title">
+                    <h1 class="player-name">{{ usernameToProfile }}</h1>
+                    {% if trophyHTML %}<div class="trophy-row">{{ trophyHTML|safe }}</div>{% endif %}
                 </div>
             </div>
-            {% if trophyDetailHTML %}<div class="nd-trophy-detail">{{ trophyDetailHTML|safe }}</div>{% endif %}
+            {% if trophyDetailHTML %}<div class="trophy-detail">{{ trophyDetailHTML|safe }}</div>{% endif %}
             {# ── Player Stats ── #}
-            <div class="nd-card" style="margin-bottom: 16px;">
-                <div class="nd-card-header">
-                    <h2 class="nd-card-title">{% translate "Player Stats" %}</h2>
+            <div class="card" style="margin-bottom: 16px;">
+                <div class="card-header">
+                    <h2 class="card-title">{% translate "Player Stats" %}</h2>
                 </div>
-                <div class="tab nd-tabs">{% include "Lobby/_game_tabs.html" %}</div>
-                <div class="nd-player-stats">
+                <div class="tab tabs">{% include "Lobby/game_tabs.html" %}</div>
+                <div class="player-stats">
                     {% for game in allGamesArr %}
                         <div id="playerStatsDiv{{ forloop.counter0 }}" class="playerStatsDiv">
-                            <div class="nd-table-scroll">
-                                <table class="nd-table playerInfoStatsTable">
+                            <div class="table-scroll">
+                                <table class="table playerInfoStatsTable">
                                     <thead>
                                         <tr>
                                             <th>{% translate "Players" %}</th>
@@ -80,30 +80,30 @@
                             </div>
                         </div>
                     {% endfor %}
-                    <div class="nd-stats-grid" style="margin-top: 14px;">
-                        <div class="nd-stats-tile">
-                            <div class="nd-stats-tile-num">{{ kickedOutGamesLastYear }}</div>
-                            <div class="nd-stats-tile-label">{% translate "Kickouts (last year)" %}</div>
+                    <div class="stats-grid" style="margin-top: 14px;">
+                        <div class="stats-tile">
+                            <div class="stats-tile-num">{{ kickedOutGamesLastYear }}</div>
+                            <div class="stats-tile-label">{% translate "Kickouts (last year)" %}</div>
                         </div>
-                        <div class="nd-stats-tile">
-                            <div class="nd-stats-tile-num">{{ fairPlayLastYear }}%</div>
-                            <div class="nd-stats-tile-label">{% translate "Fair Play Rating" %}</div>
+                        <div class="stats-tile">
+                            <div class="stats-tile-num">{{ fairPlayLastYear }}%</div>
+                            <div class="stats-tile-label">{% translate "Fair Play Rating" %}</div>
                         </div>
                     </div>
                 </div>
             </div>
-            {% include "Lobby/_map_editor_forms.html" %}
+            {% include "Lobby/map_editor_forms.html" %}
             {# ── Joint Games ── #}
             {% if activeJointGames or finishedJointGames %}
-                <div class="nd-card" style="margin-bottom: 16px;">
-                    <div class="nd-card-header">
-                        <h2 class="nd-card-title">{% translate "Joint Games" %}</h2>
+                <div class="card" style="margin-bottom: 16px;">
+                    <div class="card-header">
+                        <h2 class="card-title">{% translate "Joint Games" %}</h2>
                     </div>
                     {% if activeJointGames %}
-                        <div class="nd-player-sub">{% translate "Joint Current Games" %} ({{ activeJointGames|length }})</div>
-                        <div class="nd-game-list">
-                            <div class="nd-table-wrap">
-                                <table class="nd-table gamesTable">
+                        <div class="player-sub">{% translate "Joint Current Games" %} ({{ activeJointGames|length }})</div>
+                        <div class="game-list">
+                            <div class="table-wrap">
+                                <table class="table gamesTable">
                                     <thead>
                                     <tr>
                                         <th></th>
@@ -124,24 +124,24 @@
                             </div>
                         </div>
                     {% else %}
-                        <p class="nd-empty">{% translate "No Joint Current Games" %}</p>
+                        <p class="empty">{% translate "No Joint Current Games" %}</p>
                     {% endif %}
                     {% if finishedJointGames %}
-                        <div class="nd-player-sub">
+                        <div class="player-sub">
                             <br />
                             {% translate "Joint Finished Games" %} ({{ finishedJointGames|length }}) - {% translate "Wins" %}: {{ jointWinTotal }}/{{ finishedJointGames|length }} ({{ jointWinPercentage }}%)
                         </div>
-                        <div class="nd-joint-summary">
+                        <div class="joint-summary">
                             {% for gameRow in jointGameStats %}
-                                <span class="nd-game-stat">
+                                <span class="game-stat">
                                     {% include "Lobby/gameDisplay/gameIcons.html" with gameCode=gameRow.0 %}
                                     {{ gameRow.1 }}/{{ gameRow.2 }} ({{ gameRow.3 }}%)
                                 </span>
                             {% endfor %}
                         </div>
-                        <div class="nd-game-list">
-                            <div class="nd-table-wrap">
-                                <table class="nd-table gamesTable nd-finished-games-table">
+                        <div class="game-list">
+                            <div class="table-wrap">
+                                <table class="table gamesTable finished-games-table">
                                     <thead>
                                         <tr>
                                             <th></th>
@@ -160,19 +160,19 @@
                             </div>
                         </div>
                     {% else %}
-                        <p class="nd-empty">{% translate "No Joint Finished Games" %}</p>
+                        <p class="empty">{% translate "No Joint Finished Games" %}</p>
                     {% endif %}
                 </div>
             {% endif %}
             {# ── Current Games ── #}
             {% if activeOtherGames %}
-                <div class="nd-card" style="margin-bottom: 16px;">
-                    <div class="nd-card-header">
-                        <h2 class="nd-card-title">{% translate "Current Games" %} ({{ activeOtherGames|length }})</h2>
+                <div class="card" style="margin-bottom: 16px;">
+                    <div class="card-header">
+                        <h2 class="card-title">{% translate "Current Games" %} ({{ activeOtherGames|length }})</h2>
                     </div>
-                    <div class="nd-game-list">
-                        <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable">
+                    <div class="game-list">
+                        <div class="table-wrap">
+                            <table class="table gamesTable">
                                 <thead>
                                     <tr>
                                         <th></th>
@@ -194,17 +194,17 @@
                     </div>
                 </div>
             {% else %}
-                <p class="nd-empty">{% translate "No Current Games" %}</p>
+                <p class="empty">{% translate "No Current Games" %}</p>
             {% endif %}
             {# ── Finished Games ── #}
             {% if finishedOtherGames %}
-                <div class="nd-card" style="margin-bottom: 16px;">
-                    <div class="nd-card-header">
-                        <h2 class="nd-card-title">{% translate "Finished Games" %} ({{ finishedOtherGames|length }})</h2>
+                <div class="card" style="margin-bottom: 16px;">
+                    <div class="card-header">
+                        <h2 class="card-title">{% translate "Finished Games" %} ({{ finishedOtherGames|length }})</h2>
                     </div>
-                    <div class="nd-game-list">
-                        <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable nd-finished-games-table">
+                    <div class="game-list">
+                        <div class="table-wrap">
+                            <table class="table gamesTable finished-games-table">
                                 <thead>
                                     <tr>
                                         <th></th>
@@ -224,7 +224,7 @@
                     </div>
                 </div>
             {% else %}
-                <p class="nd-empty">{% translate "No Finished Games" %}</p>
+                <p class="empty">{% translate "No Finished Games" %}</p>
             {% endif %}
         </div>
     

@@ -6,40 +6,40 @@
 {% endblock %}
 {% block body %}
 
-  <div class="nd-page">
-    <div class="nd-page-header">
+  <div class="page">
+    <div class="page-header">
       <div>
-        <h1 class="nd-page-title">{% translate "Start a new game" %}</h1>
-        <a class="nd-button nd-button-outline nd-button-sm" href="{% url 'newMiniTournaments' %}" style="margin-top:8px">
+        <h1 class="page-title">{% translate "Start a new game" %}</h1>
+        <a class="button button-outline button-sm" href="{% url 'newMiniTournaments' %}" style="margin-top:8px">
           {% translate "Create a Mini Tournament" %}
         </a>
       </div>
-      <a class="nd-button nd-button-ghost" href="{% url 'index' %}">&#8592; {% translate "Lobby" %}</a>
+      <a class="button button-ghost" href="{% url 'index' %}">&#8592; {% translate "Lobby" %}</a>
     </div>
 
-    <section class="nd-section">
-      <h2 class="nd-section-title">{% translate "Games" %}</h2>
-      <div class="nd-card-grid nd-card-grid-wide">
-        {% include "Lobby/_create_tile.html" with url="createFCMpage" title="Food Chain Magnate" img="FCM/images/fcm-box.jpg" %}
-        {% include "Lobby/_create_tile.html" with url="createRNBpage" title="Roads & Boats" img="RNB/images/RNBbox.jpg" %}
-        {% include "Lobby/_create_tile.html" with url="createHLCpage" title="Horseless Carriage" img="HLC/images/hlc-box.jpg" %}
-        {% include "Lobby/_create_tile.html" with url="createTGZpage" title="The Great Zimbabwe" img="TGZ/images/TGZ_box.jpg" %}
-        {% include "Lobby/_create_tile.html" with url="createINDpage" title="Indonesia" img="IND/images/INDbox.jpg" %}
-        {% include "Lobby/_create_tile.html" with url="createAQYpage" title="Antiquity" img="AQY/images/AQYbox.jpg" %}
-        {% include "Lobby/_create_tile.html" with url="createBUSpage" title="Bus" img="BUS/images/bus-box.jpg" %}
-        {% include "Lobby/_create_tile.html" with url="createCNSpage" title="Cannes" img="CNS/images/CNSbox.jpg" %}
-        {% include "Lobby/_create_tile.html" with url="createWEBpage" title="Web" img="WEB/images/WEBbox.jpg" %}
-        {% include "Lobby/_create_tile.html" with url="createKFWpage" title="Keyflower" img="KFW/images/KFWbox.jpg" %}
+    <section class="section">
+      <h2 class="section-title">{% translate "Games" %}</h2>
+      <div class="card-grid card-grid-wide">
+        {% include "Lobby/create_tile.html" with url="createFCMpage" title="Food Chain Magnate" img="FCM/images/fcm-box.jpg" %}
+        {% include "Lobby/create_tile.html" with url="createRNBpage" title="Roads & Boats" img="RNB/images/RNBbox.jpg" %}
+        {% include "Lobby/create_tile.html" with url="createHLCpage" title="Horseless Carriage" img="HLC/images/hlc-box.jpg" %}
+        {% include "Lobby/create_tile.html" with url="createTGZpage" title="The Great Zimbabwe" img="TGZ/images/TGZ_box.jpg" %}
+        {% include "Lobby/create_tile.html" with url="createINDpage" title="Indonesia" img="IND/images/INDbox.jpg" %}
+        {% include "Lobby/create_tile.html" with url="createAQYpage" title="Antiquity" img="AQY/images/AQYbox.jpg" %}
+        {% include "Lobby/create_tile.html" with url="createBUSpage" title="Bus" img="BUS/images/bus-box.jpg" %}
+        {% include "Lobby/create_tile.html" with url="createCNSpage" title="Cannes" img="CNS/images/CNSbox.jpg" %}
+        {% include "Lobby/create_tile.html" with url="createWEBpage" title="Web" img="WEB/images/WEBbox.jpg" %}
+        {% include "Lobby/create_tile.html" with url="createKFWpage" title="Keyflower" img="KFW/images/KFWbox.jpg" %}
       </div>
     </section>
 
-    <section class="nd-section">
-      <h2 class="nd-section-title">{% translate "Map editors" %}</h2>
-      <div class="nd-card-grid nd-map-editor-grid">
-        {% include "Lobby/_create_tile.html" with url="FCMmapEditor" title="FCM Map Editor" img="Lobby/images/createMap.jpg" %}
-        {% include "Lobby/_create_tile.html" with url="RNB:RNBmapEditor" title="R&B Map Editor" img="Lobby/images/createMapRNB.jpg" %}
-        {% include "Lobby/_create_tile.html" with url="TGZmapEditor" title="TGZ Map Editor" img="Lobby/images/createMapTGZ.jpg" %}
-        {% include "Lobby/_create_tile.html" with url="AQYmapEditor" title="Antiquity Map Editor" img="Lobby/images/createMapAQY.jpg" %}
+    <section class="section">
+      <h2 class="section-title">{% translate "Map editors" %}</h2>
+      <div class="card-grid map-editor-grid">
+        {% include "Lobby/create_tile.html" with url="FCMmapEditor" title="FCM Map Editor" img="Lobby/images/createMap.jpg" %}
+        {% include "Lobby/create_tile.html" with url="RNB:RNBmapEditor" title="R&B Map Editor" img="Lobby/images/createMapRNB.jpg" %}
+        {% include "Lobby/create_tile.html" with url="TGZmapEditor" title="TGZ Map Editor" img="Lobby/images/createMapTGZ.jpg" %}
+        {% include "Lobby/create_tile.html" with url="AQYmapEditor" title="Antiquity Map Editor" img="Lobby/images/createMapAQY.jpg" %}
       </div>
     </section>
   </div>

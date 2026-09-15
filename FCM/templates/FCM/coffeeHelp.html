@@ -7,10 +7,10 @@
 {% endblock %}
 {% block body %}
   
-    <div class="nd-page">
-      <div class="nd-page-header">
-        <h1 class="nd-page-title">{% translate "Coffee Help" %}</h1>
-        <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'FCM:FCMhelp' %}">&#8592; {% trans "FCM Help" %}</a>
+    <div class="page">
+      <div class="page-header">
+        <h1 class="page-title">{% translate "Coffee Help" %}</h1>
+        <a class="button button-ghost button-sm" href="{% url 'FCM:FCMhelp' %}">&#8592; {% trans "FCM Help" %}</a>
       </div>
     
       {% if messages %}
@@ -21,7 +21,7 @@
         </div>
       {% endif %}
       
-          <div class="nd-card nd-section">
+          <div class="card section">
           
           
           <div class="coffeeHelpSection">
@@ -330,7 +330,7 @@
           {% endblocktranslate %}
         </div>
         
-          <div class="nd-card nd-section">
+          <div class="card section">
             <h2>{% translate "Further Help" %}</h2>
             <p>
               <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>

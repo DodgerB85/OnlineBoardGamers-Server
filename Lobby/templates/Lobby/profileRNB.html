@@ -7,20 +7,20 @@
 {% block body %}
     
     <script src="{% url 'javascript-catalog' %}"></script>
-    <div class="nd-page nd-page-profile">
-        {% include 'Lobby/_messages.html' %}
-        <div class="nd-page-header">
-            <h1 class="nd-page-title">{% translate "Roads & Boats Preferences" %}</h1>
-            <a class="nd-button nd-button-ghost" href="{% url 'profile' %}">&#8592; {% translate "Profile" %}</a>
+    <div class="page page-profile">
+        {% include 'Lobby/messages.html' %}
+        <div class="page-header">
+            <h1 class="page-title">{% translate "Roads & Boats Preferences" %}</h1>
+            <a class="button button-ghost" href="{% url 'profile' %}">&#8592; {% translate "Profile" %}</a>
         </div>
         <p class="" style="margin-bottom:16px;">{% trans "Note: These settings are cosmetic and do not affect gameplay. Refresh any open games for these settings to take effect." %}</p>
-        <div class="nd-card">
+        <div class="card">
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" id="action" name="action" value="updateProfileFavourites">
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "Favourite Colour" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                <div class="form-row">
+                    <label class="form-label">{% translate "Favourite Colour" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favRestChoice">
                             <label for="rnbRadM1"><b>{% translate "None" %}</b></label>
                             <input type="radio" id="rnbRadM1" name="rnbColour" value="-1" {% if colour == -1 %}checked{% endif %} />
@@ -57,10 +57,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "Player Aid" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
-                        <div class="nd-form-help" style="flex-basis:100%;padding-left:0;">{% trans "This will be displayed below the map" %}</div>
+                <div class="form-row">
+                    <label class="form-label">{% translate "Player Aid" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                        <div class="form-help" style="flex-basis:100%;padding-left:0;">{% trans "This will be displayed below the map" %}</div>
                         <div class="favRestChoice">
                             <b>None</b>
                             <input type="radio" id="playerAid0" name="playerAid" value="0" {% if playerAid == 0 %}checked{% endif %} />
@@ -82,10 +82,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="nd-form-row" style="border-bottom:none;">
-                    <label class="nd-form-label">{% translate "Colour Overlay" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
-                        <div class="nd-form-help" style="flex-basis:100%;padding-left:0;">{% trans "Enhance colours if you have visual difficulties" %}</div>
+                <div class="form-row" style="border-bottom:none;">
+                    <label class="form-label">{% translate "Colour Overlay" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                        <div class="form-help" style="flex-basis:100%;padding-left:0;">{% trans "Enhance colours if you have visual difficulties" %}</div>
                         <div class="favRestChoice">
                             <label for="colourOverlay0"><img src="{% static 'RNB/help/colourOverlay_none.jpg' %}" width="189" height="120" alt="None" /></label>
                             <b>None (Recommended)</b>
@@ -104,7 +104,7 @@
                     </div>
                 </div>
                 <div style="margin-top:16px;">
-                    <button type="submit" class="nd-button nd-button-primary">{% translate "Update Roads & Boats Preferences" %}</button>
+                    <button type="submit" class="button button-primary">{% translate "Update Roads & Boats Preferences" %}</button>
                 </div>
             </form>
         </div>

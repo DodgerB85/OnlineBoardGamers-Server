@@ -1,0 +1,7 @@
+{% if messages %}
+<div style="margin-bottom: 12px;">
+  {% for message in messages %}
+  <div class="pill {% if message.tags == 'success' %}pill-positive{% elif message.tags == 'error' %}pill-danger{% endif %}" style="display:inline-block; margin-bottom: 4px;">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}

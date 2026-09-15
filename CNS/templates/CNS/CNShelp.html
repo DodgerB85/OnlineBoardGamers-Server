@@ -1,13 +1,13 @@
-{% extends "Lobby/_help_shell.html" %}
+{% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
 {% block page_title %}
   {% translate "Cannes Help" %}
 {% endblock page_title %}
 {% block content %}
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Rules" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% static 'CNS/Cannes_Rules.pdf' as cannes_rules_url %}
         {% blocktranslate trimmed %}
@@ -47,9 +47,9 @@
       <p>{% translate "How to play guide example.... Not Available. Please see Rules / Examples above" %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "How do I use the website?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         <img class="CNShelpImg"
              src="{% static 'CNS/help_image.jpg' %}"
@@ -68,9 +68,9 @@
       </ul>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "How does resource storage work?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate trimmed %}
           You can store up to 5 resources. As soon as you have 5 or fewer resources, they are automatically stored.
@@ -84,9 +84,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "How does table size and table junk work?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate trimmed %}
           Tables come in small, medium, and large sizes.
@@ -125,9 +125,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Why can/can’t I remove a link?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>{% translate "Please check the rules." %}</p>
       <p>
         {% blocktranslate trimmed %}
@@ -156,9 +156,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "How does hidden information stay hidden?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate trimmed %}
           Firstly, when looking at a replay, all the "Drawn Tiles" will remain hidden.
@@ -194,13 +194,13 @@
       <p>{% translate "A single rewind if you realise you just messed up your turn is usually OK." %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "When can I resign?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>{% translate "You can resign during your \"place tiles\" phase." %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Further Help" %}</h2>
     <p>
       <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>

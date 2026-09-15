@@ -14,15 +14,15 @@
     {% csrf_token %}
     <input type="hidden" id="mapDataTGZ" name="mapDataTGZ" value="">
   </form>
-  <div class="nd-page nd-page-narrow">
-    {% include 'Lobby/_messages.html' %}
-    <div class="nd-page-header">
-      <h1 class="nd-page-title">Schism Games</h1>
+  <div class="page page-narrow">
+    {% include 'Lobby/messages.html' %}
+    <div class="page-header">
+      <h1 class="page-title">Schism Games</h1>
     </div>
     {% if availableGames %}
       <h2>{% translate "Available Games (non-private)" %}</h2>
-      <div class="nd-table-wrap">
-        <table class="nd-table gamesTable">
+      <div class="table-wrap">
+        <table class="table gamesTable">
           <thead>
             <tr class="headingRow">
               <td class="joinHeader"></td>
@@ -41,12 +41,12 @@
         </table>
       </div>
     {% else %}
-      {% include "Lobby/_empty.html" with message="No Available Games" %}
+      {% include "Lobby/empty.html" with message="No Available Games" %}
     {% endif %}
     {% if activeGames %}
       <h2>{% translate "Active Games" %}</h2>
-      <div id="gamesListView" class="nd-table-wrap">
-        <table class="nd-table gamesTable">
+      <div id="gamesListView" class="table-wrap">
+        <table class="table gamesTable">
           <thead>
             <tr class="headingRow">
               <td class="nameHeaderCurrent">{% translate "Name" %}</td>
@@ -64,7 +64,7 @@
         </table>
       </div>
     {% else %}
-      {% include "Lobby/_empty.html" with message="No Current Games" %}
+      {% include "Lobby/empty.html" with message="No Current Games" %}
     {% endif %}
     {% if finishedGames %}
       <h2>{% translate "Finished Games" %}</h2>
@@ -84,8 +84,8 @@
           {% endif %}
         </span>
       </div>
-      <div id="gamesListView" class="nd-table-wrap">
-        <table class="nd-table gamesTable">
+      <div id="gamesListView" class="table-wrap">
+        <table class="table gamesTable">
           <thead>
             <tr class="headingRow">
               <td class="nameHeaderCurrent">{% translate "Name" %}</td>
@@ -131,7 +131,7 @@
           }
       </script>
     {% else %}
-      {% include "Lobby/_empty.html" with message="No Finished Games" %}
+      {% include "Lobby/empty.html" with message="No Finished Games" %}
     {% endif %}
   </div>
 {% endblock body %}

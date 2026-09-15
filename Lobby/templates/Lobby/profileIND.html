@@ -7,14 +7,14 @@
 {% block body %}
     
     <script src="{% url 'javascript-catalog' %}"></script>
-    <div class="nd-page nd-page-profile">
-        {% include 'Lobby/_messages.html' %}
-        <div class="nd-page-header">
-            <h1 class="nd-page-title">{% translate "Indonesia Preferences" %}</h1>
-            <a class="nd-button nd-button-ghost" href="{% url 'profile' %}">&#8592; {% translate "Profile" %}</a>
+    <div class="page page-profile">
+        {% include 'Lobby/messages.html' %}
+        <div class="page-header">
+            <h1 class="page-title">{% translate "Indonesia Preferences" %}</h1>
+            <a class="button button-ghost" href="{% url 'profile' %}">&#8592; {% translate "Profile" %}</a>
         </div>
         <p class="" style="margin-bottom:16px;">{% trans "Note: These settings are cosmetic and do not affect gameplay. Refresh any open games for these settings to take effect." %}</p>
-        <div class="nd-card">
+        <div class="card">
             <svg class="defsSVG">
                 <defs>
                 <filter id="f_black" x="-50%" y="-50%" width="200%" height="200%">
@@ -50,9 +50,9 @@
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" id="action" name="action" value="updateProfileFavourites">
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "Favourite Colour" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                <div class="form-row">
+                    <label class="form-label">{% translate "Favourite Colour" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favRestChoice">
                             <label for="indRadM1"><b>{% translate "None" %}</b></label>
                             <input type="radio" id="indRadM1" name="indColour" value="-1" {% if colour == -1 %}checked{% endif %} />
@@ -119,10 +119,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "Map Display Type" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
-                        <div class="nd-form-help" style="flex-basis:100%;padding-left:0;">{% trans "Choose the 2nd edition map, 3rd edition map, or a hex style map" %}</div>
+                <div class="form-row">
+                    <label class="form-label">{% translate "Map Display Type" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                        <div class="form-help" style="flex-basis:100%;padding-left:0;">{% trans "Choose the 2nd edition map, 3rd edition map, or a hex style map" %}</div>
                         <div class="favRestChoice">
                             <label for="indMap0"><img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon.jpg' %}" width="230" height="152" alt="2nd Edition" /></label>
                             <b>2nd Edition</b>
@@ -140,9 +140,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "City Size Colours" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                <div class="form-row">
+                    <label class="form-label">{% translate "City Size Colours" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favRestChoice">
                             <label for="indCitySize0"><div class="cityMarker greenCity"></div><div class="cityMarker orangeCity"></div><div class="cityMarker redCity"></div></label>
                             <b>Green &gt; Orange &gt; Red</b>
@@ -155,9 +155,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "Ship Icon Style" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                <div class="form-row">
+                    <label class="form-label">{% translate "Ship Icon Style" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favRestChoice">
                             <label for="shipIcon0"><img src="{% static 'Lobby/images/INDprofile/shipsSimple.jpg' %}" width="448" height="152" alt="Simple Ships" /></label>
                             <b>Simple Ships</b>
@@ -170,9 +170,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "Goods Icon Style" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                <div class="form-row">
+                    <label class="form-label">{% translate "Goods Icon Style" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favRestChoice">
                             <label for="goodsIcon1"><img src="{% static 'Lobby/images/INDprofile/icons1e.jpg' %}" width="187" height="152" alt="1st Edition" /></label>
                             <b>1st Edition</b>
@@ -185,9 +185,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "Territory Outline" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                <div class="form-row">
+                    <label class="form-label">{% translate "Territory Outline" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favRestChoice">
                             <label for="indOutline0"><img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon_outline.jpg' %}" width="230" height="152" alt="Show Outline" /></label>
                             <b>Show Outline</b>
@@ -200,9 +200,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="nd-form-row" style="border-bottom:none;">
-                    <label class="nd-form-label">{% translate "Player Table Style" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                <div class="form-row" style="border-bottom:none;">
+                    <label class="form-label">{% translate "Player Table Style" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favRestChoice">
                             <label for="playerTableStyle0"><img src="{% static 'Lobby/images/INDprofile/playerTableStyle0.jpg' %}" width="145" height="191" alt="Icons" /></label>
                             <b>Icons</b>
@@ -216,7 +216,7 @@
                     </div>
                 </div>
                 <div style="margin-top:16px;">
-                    <button type="submit" class="nd-button nd-button-primary">{% translate "Update Indonesia Preferences" %}</button>
+                    <button type="submit" class="button button-primary">{% translate "Update Indonesia Preferences" %}</button>
                 </div>
             </form>
         </div>

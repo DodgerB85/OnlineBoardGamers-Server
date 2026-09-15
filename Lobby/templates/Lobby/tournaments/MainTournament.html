@@ -9,11 +9,11 @@
     <script src="{% static 'Lobby/Main_Tournament.js' %}"></script>
   {% endcompress %}
   
-    <div class="nd-page">
-      <div class="nd-mt-layout">
+    <div class="page">
+      <div class="mt-layout">
       
         <div id="wholeMTchat"
-             class="nd-mt-chat-sticky">
+             class="mt-chat-sticky">
           <div id="MTchatBox">
             <h2>{% translate "Send a message" %}</h2>
             <div>
@@ -34,8 +34,8 @@
             </div>
           {% endif %}
           
-            <div class="nd-page-header">
-              <h1 class="nd-page-title">
+            <div class="page-header">
+              <h1 class="page-title">
                 {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=gameCode %}
                 {{ tournament.tournamentName }}
               </h1>
@@ -47,8 +47,8 @@
                         font-style:italic">{{ tournament.tournamentDescription }}</p>
             {% endif %}
             {% if startingOptionsHTML != "" %}
-              <div class="nd-card nd-section" style="padding:12px 14px;">
-                <div class="nd-mod-list-mobile nd-row-flex" style="gap:10px;">{{ startingOptionsHTML|safe }}</div>
+              <div class="card section" style="padding:12px 14px;">
+                <div class="mod-list-mobile row-flex" style="gap:10px;">{{ startingOptionsHTML|safe }}</div>
               </div>
             {% endif %}
           
@@ -61,7 +61,7 @@
             <h3>{% translate "Tournament Format" %}: {{ tournament.get_tournamentType_display }}</h3>
             <div class="tournamentSignupContainer">
               <div class="MTallRoundHolder">
-                <table class="nd-table">
+                <table class="table">
                   <thead>
                     <tr>
                       <th>#</th>
@@ -89,7 +89,7 @@
             </div>
           {% elif tournament.tournamentStatus == "OP" or tournament.tournamentStatus == "PR" %}
             
-              <div class="nd-card nd-section">
+              <div class="card section">
                 <h2>{% translate "Join Tournament" %}</h2>
                 <p style="font-size:14px;color:var(--color-muted);margin-bottom:8px;">
                   {% blocktranslate trimmed %}
@@ -101,7 +101,7 @@
                   {% translate "Max Players" %}: {{ tournament.maxTournamentPlayers }} &middot; {% translate "Players per game" %}: {{ tournament.maxGamePlayers }} &middot; {% translate "Tournament Format" %}: {{ tournament.get_tournamentType_display }}
                 </p>
                 <div class="tournamentSignupContainer">
-                  <table class="nd-table">
+                  <table class="table">
                     <thead>
                       <tr>
                         <th>#</th>
@@ -143,8 +143,8 @@
                         I understand: 12hr per turn + 24hr flex bank (used when I exceed 12hr; if it runs out I can be kicked)
                       </label>
                     </div>
-                    <div class="nd-row-flex" style="gap:8px;">
-                      <button class="nd-button nd-button-primary" type="submit">
+                    <div class="row-flex" style="gap:8px;">
+                      <button class="button button-primary" type="submit">
                         {% if isInvitedPlayer %}
                           Accept Invite &amp; Join Tournament
                         {% else %}
@@ -152,7 +152,7 @@
                         {% endif %}
                       </button>
                       {% if isInvitedPlayer %}
-                        <button class="nd-button"
+                        <button class="button"
                                 type="submit"
                                 name="declineInvite"
                                 value="true"
@@ -174,7 +174,7 @@
                   {% for round in playersData.allMGdata %}
                     {% if round.0.0 == "Round 1" %}
                       <h2>{{ round.0.0 }}</h2>
-                      <table class="nd-table nd-mt-mg-table top14green">
+                      <table class="table mt-mg-table top14green">
                         <thead>
                           <tr>
                             <th>{{ round.1.0 }}</th>
@@ -236,7 +236,7 @@
                             Group B
                           {% endif %}
                         </h3>
-                        <table class="nd-table nd-mt-mg-table top2green">
+                        <table class="table mt-mg-table top2green">
                           <thead>
                             <tr>
                               <th>{{ groupData.0.0 }}</th>
@@ -291,7 +291,7 @@
                       {% endfor %}
                     {% elif round.0.0 == "Round 3" %}
                       <h2>Final</h2>
-                      <table class="nd-table nd-mt-mg-table top1green">
+                      <table class="table mt-mg-table top1green">
                         <thead>
                           <tr>
                             <th>{{ round.1.0 }}</th>
@@ -355,7 +355,7 @@
                     <h2>{% translate "Result" %}</h2>
                     <div class="MTallRoundHolder">
                       <div class="MTroundTableDiv">
-                        <table class="nd-table">
+                        <table class="table">
                           <thead>
                             <tr>
                               <th>{% translate "Position" %}</th>
@@ -408,7 +408,7 @@
                                 Group B
                               {% endif %}
                             </h3>
-                            <table class="nd-table">
+                            <table class="table">
                               <thead>
                                 <tr>
                                   <th>Game</th>
@@ -440,7 +440,7 @@
                             </table>
                           {% endfor %}
                         {% else %}
-                          <table class="nd-table">
+                          <table class="table">
                             <thead>
                               <tr>
                                 <th>Game</th>
@@ -482,7 +482,7 @@
                 <div class="IPleftColumn">
                   {% if tournament.tournamentType == "PT" %}
                     <h2>Points</h2>
-                    <table class="nd-table">
+                    <table class="table">
                       <thead>
                         <tr>
                           <th>{% translate "Position" %}</th>
@@ -507,7 +507,7 @@
                     </table>
                   {% endif %}
                   <h2>{% translate "Players" %}</h2>
-                  <table class="nd-table">
+                  <table class="table">
                     <thead>
                       <tr>
                         <th>{{ playersData.headingRow.0 }}</th>
@@ -533,7 +533,7 @@
                     <h2>{% translate "Result" %}</h2>
                     <div class="MTallRoundHolder">
                       <div class="MTroundTableDiv">
-                        <table class="nd-table">
+                        <table class="table">
                           <thead>
                             <tr>
                               <th>{% translate "Position" %}</th>
@@ -570,7 +570,7 @@
                     {% for round in roundsData %}
                       <div class="MTroundTableDiv">
                         <h2>{{ round.roundTitle }}</h2>
-                        <table class="nd-table">
+                        <table class="table">
                           <thead>
                             <tr>
                               <th>Game</th>

@@ -17,8 +17,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 })
 
-// Game-row decorative separators for the new design (`/nd/`).
-// Shared here so every `/nd/` page that renders `.nd-row09` game rows (lobby,
+// Game-row decorative separators for game rows.
+// Shared here so every page that renders `.row09` game rows (lobby,
 // player info, stats, ...) gets the same row separators as the lobby table.
 const rowDividerResources = {
 	FCM: ["/static/FCM/images/burger.png", "/static/FCM/images/coke.png", "/static/FCM/images/coffee.png", "/static/FCM/images/pizza.png"],
@@ -35,7 +35,7 @@ const rowDividerResources = {
 
 function addGameRowDividers() {
 	//return
-	document.querySelectorAll(".nd-row09").forEach((row) => {
+	document.querySelectorAll(".row09").forEach((row) => {
 		const gameIcon = row.querySelector(".gameIcon")
 		const gameCode = gameIcon?.src.match(/\/static\/([^/]+)\//)?.[1]
 		const resources = rowDividerResources[gameCode]
@@ -45,21 +45,21 @@ function addGameRowDividers() {
 		for (const character of row.id || gameCode) seed = (seed * 31 + character.charCodeAt(0)) >>> 0
 
 		const divider = document.createElement("div")
-		divider.className = "nd-row-divider"
-		divider.classList.add(`nd-row-divider-${gameCode.toLowerCase()}`)
+		divider.className = "row-divider"
+		divider.classList.add(`row-divider-${gameCode.toLowerCase()}`)
 		divider.setAttribute("aria-hidden", "true")
-		divider.style.setProperty("--nd-divider-count", 3 + (seed % 3))
+		divider.style.setProperty("--divider-count", 3 + (seed % 3))
 		for (let index = 0; index < 3 + (seed % 3); index++) {
 			const icon = document.createElement("span")
-			icon.className = "nd-row-divider-icon"
+			icon.className = "row-divider-icon"
 			const resource = resources[(seed + index * 7) % resources.length]
-			if (resource.endsWith(".jpg")) icon.classList.add("nd-row-divider-tile")
-			icon.style.setProperty("--nd-divider-icon", `url("${resource}")`)
-			icon.style.setProperty("--nd-divider-size", `${16 + ((seed >>> (index * 3)) % 5)}px`)
-			icon.style.setProperty("--nd-divider-rotation", `${((seed >>> (index * 4)) % 17) - 8}deg`)
+			if (resource.endsWith(".jpg")) icon.classList.add("row-divider-tile")
+			icon.style.setProperty("--divider-icon", `url("${resource}")`)
+			icon.style.setProperty("--divider-size", `${16 + ((seed >>> (index * 3)) % 5)}px`)
+			icon.style.setProperty("--divider-rotation", `${((seed >>> (index * 4)) % 17) - 8}deg`)
 			divider.append(icon)
 		}
-		row.querySelector(".nd-col-icon")?.append(divider)
+		row.querySelector(".col-icon")?.append(divider)
 	})
 }
 

@@ -1,0 +1,13 @@
+{% load i18n %}
+<div class="empty-card">
+  <p class="empty-msg">{{ message|default:"Nothing here yet." }}</p>
+  {% if showNewGame %}
+    <a class="button button-primary empty-cta" href="{% url 'newGamesPage' %}">{% translate "Start a new game" %}</a>
+  {% endif %}
+  <p class="empty-hint">
+    {% url 'lobbyHelp' as help_url %}
+    {% blocktranslate trimmed %}
+      Need a refresher on the icons? <a href="{{ help_url }}">See Help</a>.
+    {% endblocktranslate %}
+  </p>
+</div>

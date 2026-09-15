@@ -7,81 +7,81 @@
   {% compress js %}
     <script src="{% static 'Lobby/common.js' %}"></script>
   {% endcompress %}
-  <div class="nd-page nd-page-narrow" id="changelogPage">
+  <div class="page page-narrow" id="changelogPage">
   
 
-    <div class="nd-page-header">
-      <h1 class="nd-page-title">Updates</h1>
-      <a class="nd-button nd-button-ghost" href="https://discord.gg/hCU7Fr77yV" target="_blank" rel="noopener">Join Discord for discussion ↗</a>
+    <div class="page-header">
+      <h1 class="page-title">Updates</h1>
+      <a class="button button-ghost" href="https://discord.gg/hCU7Fr77yV" target="_blank" rel="noopener">Join Discord for discussion ↗</a>
     </div>
 
     {% if user.username == 'admin' %}
-      <div class="nd-card nd-section">
-        <div class="nd-card-header"><h3 class="nd-card-title">Add Update</h3></div>
+      <div class="card section">
+        <div class="card-header"><h3 class="card-title">Add Update</h3></div>
         <form method="post" style="padding: 4px 0;">
           {% csrf_token %}
           {% for field in changelogFormVar %}{{ field }}<br /><br />{% endfor %}
           <input type="hidden" id="action" name="action" value="dooby">
-          <button type="submit" class="nd-button nd-button-primary">Add Update</button>
+          <button type="submit" class="button button-primary">Add Update</button>
         </form>
       </div>
     {% endif %}
 
-    <div class="nd-card nd-section">
+    <div class="card section">
       {% if allChanges %}
         {% for change in allChanges %}
-          <div class="nd-log-entry">
-            <div class="nd-log-date"><span class="timeToConvertSpan">{{ change.timestamp }}</span></div>
-            <div class="nd-log-text">{{ change.update }}</div>
+          <div class="log-entry">
+            <div class="log-date"><span class="timeToConvertSpan">{{ change.timestamp }}</span></div>
+            <div class="log-text">{{ change.update }}</div>
           </div>
         {% endfor %}
       {% else %}
         {# Demo entries — shown when no real updates exist yet #}
-        <div class="nd-log-entry">
-          <div class="nd-log-date">May 2026</div>
-          <div class="nd-log-text">
+        <div class="log-entry">
+          <div class="log-date">May 2026</div>
+          <div class="log-text">
             <strong>Site redesign complete.</strong> New visual design — cleaner lobby, better mobile layout, Outfit font throughout. Feedback welcome on Discord.
           </div>
         </div>
-        <div class="nd-log-entry">
-          <div class="nd-log-date">Apr 2026</div>
-          <div class="nd-log-text">
+        <div class="log-entry">
+          <div class="log-date">Apr 2026</div>
+          <div class="log-text">
             <strong>Roads &amp; Boats: canals and bridges expansion options added.</strong> New creation options for the advanced map variants. Thanks to vraid and Benkyo for the extended playtesting.
           </div>
         </div>
-        <div class="nd-log-entry">
-          <div class="nd-log-date">Mar 2026</div>
-          <div class="nd-log-text">
+        <div class="log-entry">
+          <div class="log-date">Mar 2026</div>
+          <div class="log-text">
             <strong>Keyflower: winter tile rule clarification fixed.</strong> A corner case in the scoring of winter tiles with meeples was being resolved incorrectly. All current and future games use the corrected logic; finished games are unaffected.
           </div>
         </div>
-        <div class="nd-log-entry">
-          <div class="nd-log-date">Feb 2026</div>
-          <div class="nd-log-text">
+        <div class="log-entry">
+          <div class="log-date">Feb 2026</div>
+          <div class="log-text">
             <strong>FCM: new Ketchup expansion options.</strong> The Ketchup expansion pack is now selectable at game creation. Includes Luxury Meals, Outdoor Seating, and the full set of 24 new staff cards. See Help for a summary of the new rules.
           </div>
         </div>
-        <div class="nd-log-entry">
-          <div class="nd-log-date">Jan 2026</div>
-          <div class="nd-log-text">
+        <div class="log-entry">
+          <div class="log-date">Jan 2026</div>
+          <div class="log-text">
             <strong>Tournament system update.</strong> Main Tournaments can now have invited-player lists set at creation time. Invited players see an Accept / Decline prompt when they visit the tournament page. Mini Tournaments are unchanged.
           </div>
         </div>
-        <div class="nd-log-entry">
-          <div class="nd-log-date">Nov 2025</div>
-          <div class="nd-log-text">
+        <div class="log-entry">
+          <div class="log-date">Nov 2025</div>
+          <div class="log-text">
             <strong>Notification improvements.</strong> Email and browser notifications now batch moves made within a short window so you receive one message per turn sequence rather than one per move. Opt-out remains available in profile settings.
           </div>
         </div>
-        <div class="nd-log-entry">
-          <div class="nd-log-date">Sep 2025</div>
-          <div class="nd-log-text">
+        <div class="log-entry">
+          <div class="log-date">Sep 2025</div>
+          <div class="log-text">
             <strong>Indonesia: ship transfer rules tightened.</strong> A bug allowed ships to be transferred to a player who already owned the maximum allowed in a single transaction. This is now correctly blocked.
           </div>
         </div>
-        <div class="nd-log-entry">
-          <div class="nd-log-date">Aug 2025</div>
-          <div class="nd-log-text">
+        <div class="log-entry">
+          <div class="log-date">Aug 2025</div>
+          <div class="log-text">
             <strong>Antiquity: city growth display.</strong> The city tile adjacency highlight was not showing correctly for all map seeds. Fixed. Also: the famine track now stays visible in the sidebar throughout the whole game rather than disappearing after round 3.
           </div>
         </div>

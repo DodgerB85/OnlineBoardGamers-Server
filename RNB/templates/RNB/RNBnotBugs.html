@@ -5,7 +5,7 @@
   <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
 {% endblock head %}
 {% block body %}
-  <div class="nd-page">
+  <div class="page">
     {% if messages %}
       <div class="messages">
         {% for message in messages %}
@@ -13,10 +13,10 @@
         {% endfor %}
       </div>
     {% endif %}
-    <div class="nd-page-header">
-      <h1 class="nd-page-title">{% translate "Not bugs" %}</h1>
+    <div class="page-header">
+      <h1 class="page-title">{% translate "Not bugs" %}</h1>
     </div>
-    <div class="nd-card nd-section" id="RNBhelpPage">
+    <div class="card section" id="RNBhelpPage">
       - You cannot drop a boat into a docked location from a river location
       - You cannot drop a boat into a docked location from a sea hex
       <br />

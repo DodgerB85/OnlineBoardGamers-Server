@@ -6,7 +6,7 @@
   <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
 {% endblock head %}
 {% block body %}
-  <div class="nd-page nd-page-narrow"
+  <div class="page page-narrow"
        {% block page_id_attr %}{% endblock page_id_attr %}>
     {% if messages %}
       <div class="messages">
@@ -16,13 +16,13 @@
       </div>
     {% endif %}
     
-      <div class="nd-page-header">
-        <h1 class="nd-page-title">
+      <div class="page-header">
+        <h1 class="page-title">
           {% block page_title %}
           {% endblock page_title %}
         </h1>
         {% block page_action %}
-          <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'lobbyHelp' %}">&#8592; {% trans "Help" %}</a>
+          <a class="button button-ghost button-sm" href="{% url 'lobbyHelp' %}">&#8592; {% trans "Help" %}</a>
         {% endblock page_action %}
       </div>
       {% block content %}

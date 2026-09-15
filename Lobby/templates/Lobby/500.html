@@ -6,9 +6,9 @@
 {% endblock head %}
 {% block body %}
     
-        <div class="nd-page nd-page-narrow" style="margin-top: 24px;">
-            {% include 'Lobby/_messages.html' %}
-            <div class="nd-card nd-center">
+        <div class="page page-narrow" style="margin-top: 24px;">
+            {% include 'Lobby/messages.html' %}
+            <div class="card center">
                 <h1>{% translate "Sorry, the page you are requesting cannot be delivered" %}</h1>
                 <p style="color: var(--color-ink-soft); font-size: 16px; margin: 12px auto 16px;">
                     {% translate "It appears to be a proper page, but the server is having trouble rendering it" %}
@@ -31,7 +31,7 @@
                      height="200"
                      alt="Error"
                      style="margin: 8px auto 20px; display: block;">
-                <a class="nd-button nd-button-primary" href="{% url 'index' %}">{% translate "Home" %}</a>
+                <a class="button button-primary" href="{% url 'index' %}">{% translate "Home" %}</a>
             </div>
         </div>
     

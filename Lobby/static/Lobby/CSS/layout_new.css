@@ -1,7 +1,7 @@
-/* layout_new.css — /nd/ design shell.
+/* layout_new.css — design shell.
    Mirrors layout.css structure so the topbar/hamburger look the same.
    Differences from layout.css:
-   - Colours pulled from nd-components.css tokens via var(--...).
+   - Colours pulled from components.css tokens via var(--...).
    - Body is a flex column with min-height: 100vh so .footer is pinned to the
      viewport bottom on short pages (sticky-footer pattern).
    - .mainLayout uses flex: 1 instead of magic min-height/margin numbers.
@@ -47,7 +47,7 @@
 		margin-right: 50px;
 	}
 
-	body.ndAuthed {
+	body.authed {
 		padding-top: 100px;
 	}
 
@@ -76,11 +76,11 @@
 		border-right: 0;
 	}
 
-	body.ndAuthed .mobileQuickNav ~ .hamburgerMenu.active {
+	body.authed .mobileQuickNav ~ .hamburgerMenu.active {
 		transform: translateY(100px);
 	}
 
-	body.ndAuthed .mobileQuickNav ~ .mainLayout {
+	body.authed .mobileQuickNav ~ .mainLayout {
 		margin-top: 44px;
 	}
 }
@@ -331,32 +331,32 @@ body {
    thinner. We flex-centre its left/right regions vertically instead of the
    manual margin-top:25px hack, so everything stays centred at the shorter
    height. */
-body.ndAuthed .topBar {
+body.authed .topBar {
     height: 56px;
 }
-body.ndAuthed {
+body.authed {
     padding-top: 56px;
 }
-body.ndAuthed .hamburgerMenu.active {
+body.authed .hamburgerMenu.active {
     transform: translateY(56px);
 }
-body.ndAuthed #leftLoggedInLinks {
+body.authed #leftLoggedInLinks {
     margin: 0 10px;
     height: 56px;
     align-items: center;
 }
-body.ndAuthed #leftLoggedInAsInfo {
+body.authed #leftLoggedInAsInfo {
     font-size: 13px;
 }
-body.ndAuthed #logoLoggedIn {
+body.authed #logoLoggedIn {
     margin-top: 0;
 }
-body.ndAuthed #rightLinksLoggedIn {
+body.authed #rightLinksLoggedIn {
     margin-top: 0;
     height: 56px;
 }
 /* keep the hamburger centred (no big vertical margin) in the slim bar */
-body.ndAuthed #rightLinksLoggedIn .hamburger {
+body.authed #rightLinksLoggedIn .hamburger {
     margin: 0 16px;
 }
 /** END TOP BAR */
@@ -390,7 +390,7 @@ body.ndAuthed #rightLinksLoggedIn .hamburger {
     line-height: 1;
 }
 
-/* The "Login" submit in the top bar uses the same nd-button-primary style as
+/* The "Login" submit in the top bar uses the same button-primary style as
    the landing page's Log in CTA so the two match visually. The shared button
    rules expect flex parents; this lives in a flex row already via #loginForm
    but its padding needs a slight nudge so it sits flush with the inputs. */
@@ -404,7 +404,7 @@ body.ndAuthed #rightLinksLoggedIn .hamburger {
 }
 
 /* centre the logged-out login row vertically within the taller guest bar */
-body.ndGuest .topBar {
+body.guest .topBar {
     display: flex;
     align-items: center;
 }
@@ -442,12 +442,12 @@ body.ndGuest .topBar {
     color: var(--color-brand-blue);
 }
 
-.nd-footer-text {
+.footer-text {
     color: var(--color-brand-blue);
 }
 
 /* Support strip: donate + sponsor side by side, vertically centred */
-.nd-support-strip {
+.support-strip {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -524,7 +524,7 @@ body.ndGuest .topBar {
     }
     /* slim logged-in bar: keep lang-select + hamburger on one centred row so
        they fit the 56px height instead of stacking into a column */
-    body.ndAuthed #rightLinksLoggedIn {
+    body.authed #rightLinksLoggedIn {
         flex-direction: row;
         align-items: center;
         margin-top: 0;
@@ -566,12 +566,12 @@ html {
     .topBar { font-size: 22px; }
     .topBarLink { font-size: 19px; }
     #registerLink a { font-size: 19px; }
-    body.ndAuthed #leftLoggedInAsInfo { font-size: 15px; }
+    body.authed #leftLoggedInAsInfo { font-size: 15px; }
     #leftLoggedInAsInfo { font-size: 18px; }
     #langSelectLoggedIn select,
     #langSelectLoggedOut select { font-size: 16px; }
     .footer { font-size: 15px; }
-    .nd-footer-text { font-size: 15px; }
+    .footer-text { font-size: 15px; }
 }
 
 /* Guest-bar hamburger mode: the lang-select + hamburger cluster is the only

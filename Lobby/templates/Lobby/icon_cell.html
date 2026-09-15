@@ -7,8 +7,8 @@
    extra_img   — optional second image (used by KFW info-level cells){% endcomment %}
 {% load static %}
 {% load i18n %}
-<div class="nd-icon-cell">
+<div class="icon-cell">
   <img class="startingOptionHelpImg" alt="{{ alt|default:"Icon" }}" width="50" height="50" src="{% static img %}" title="{{ title }}">
   {% if extra_img %}<img class="startingOptionHelpImg" alt="{{ alt|default:"Icon" }}" width="50" height="50" src="{% static extra_img %}" title="{{ title }}">{% endif %}
-  <span class="nd-icon-cell-label">{{ label }}</span>
+  <span class="icon-cell-label">{{ label }}</span>
 </div>

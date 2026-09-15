@@ -1,16 +1,16 @@
-{% extends "Lobby/_help_shell.html" %}
+{% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
 {% block page_title %}
   {% translate "Food Chain Magnate Help" %}
 {% endblock page_title %}
 {% block page_action %}
-  <a class="nd-button nd-button-ghost nd-button-sm" href="{% url 'lobbyHelp' %}">&#8592; {% trans "Help" %}</a>
+  <a class="button button-ghost button-sm" href="{% url 'lobbyHelp' %}">&#8592; {% trans "Help" %}</a>
 {% endblock page_action %}
 {% block content %}
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Rules Help" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       {% url 'FCM:FCMchinaHelp' as fcm_china_help_url %}
       {% blocktranslate trimmed %}
         Food Chain Magnate rules available <a href="https://www.qugs.org/rules/r175914.pdf" target="_blank">here</a>
@@ -25,9 +25,9 @@
       {% endblocktranslate %}
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Game Play" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <b><u>{% translate "How exactly does coffee work?" %}</u></b>
       <p>
         {% url "FCM:coffeeHelp" as the_url %}
@@ -96,7 +96,7 @@
       <p>{% translate "You can resign during the \"Restructuring\" phase." %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Further Help" %}</h2>
     <p>
       <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>

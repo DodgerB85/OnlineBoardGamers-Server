@@ -1,4 +1,4 @@
-{% extends "Lobby/_help_shell.html" %}
+{% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
 {% block page_id_attr %}
@@ -8,12 +8,12 @@
   {% translate "Mini Tournaments" %}
 {% endblock page_title %}
 {% block page_action %}
-  <a class="nd-button nd-button-sm nd-button-ghost"
+  <a class="button button-sm button-ghost"
      href="{% url 'helpTournaments' %}">{% translate "Tournaments Help" %} →</a>
 {% endblock page_action %}
 {% block content %}
-  <div class="nd-card nd-section">
-    <div class="nd-help-qa">
+  <div class="card section">
+    <div class="help-qa">
       <p>
         {% url 'helpTournaments' as tournaments_help_url %}
         {% blocktranslate trimmed %}
@@ -36,9 +36,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "What are the formats?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <b><u>{% translate "Rounds" %}</u></b>
       <p>
         {% blocktranslate trimmed %}
@@ -58,9 +58,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "How are game players decided?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       {% blocktranslate trimmed %}
         Initially game players are drawn randomly. After this, players are ranked by number of wins /
         (or points in a points. tournament). In 2p, players will play the closest people to them that
@@ -79,18 +79,18 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "How do kickouts work?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       {% blocktranslate trimmed %}
         If someone is kicked out then they are ejected from the tournament.
         They will lose both lives in Two Lives, and be removed from a Rounds/Points tournament.
       {% endblocktranslate %}
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "What else should I know?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>{% translate "Players will not play the same person again until there's no other option." %}</p>
       <p>{% translate "Players will not receive two \"byes\" until there's no other option." %}</p>
       <p>
@@ -107,7 +107,7 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Further Help" %}</h2>
     <p>
       <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>

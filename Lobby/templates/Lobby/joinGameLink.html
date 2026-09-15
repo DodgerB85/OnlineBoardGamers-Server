@@ -25,9 +25,9 @@
         <script src="{% static 'Lobby/common.js' %}"></script>
     {% endcompress %}
     
-    <div class="nd-page" id="lobbyPage">
-        {% include 'Lobby/_messages.html' %}
-        {% include 'Lobby/_map_editor_forms.html' %}
+    <div class="page" id="lobbyPage">
+        {% include 'Lobby/messages.html' %}
+        {% include 'Lobby/map_editor_forms.html' %}
         <div id="learningGameConfirmDiv">
             <b>Note:</b>
             The creator has requested a Learning Game.
@@ -43,14 +43,14 @@
             <div id="learningCancel"
                  class="buttonDiv Leave learningGameConfirmButtons">{% translate "Cancel" %}</div>
         </div>
-        <div class="nd-page-header">
-            <h2 class="nd-page-title">{% translate "The link allows you to join the following game:" %}</h2>
+        <div class="page-header">
+            <h2 class="page-title">{% translate "The link allows you to join the following game:" %}</h2>
         </div>
         <div id="availableGamesListView">
             {% if availableGamesList %}
-                <div class="nd-game-list">
-                    <div class="nd-table-wrap">
-                        <table class="nd-table gamesTable">
+                <div class="game-list">
+                    <div class="table-wrap">
+                        <table class="table gamesTable">
                             <thead>
                                 <tr class="headingRow">
                                     <th></th>
@@ -70,7 +70,7 @@
                     </div>
                 </div>
             {% else %}
-                {% include "Lobby/_empty.html" with message="No Available Games" %}
+                {% include "Lobby/empty.html" with message="No Available Games" %}
             {% endif %}
             {% url "lobbyHelp" as the_url %}
             <p class="" style="font-size:13px; margin-top: 12px;">

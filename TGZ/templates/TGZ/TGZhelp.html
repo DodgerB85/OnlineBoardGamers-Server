@@ -1,4 +1,4 @@
-{% extends "Lobby/_help_shell.html" %}
+{% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
 {% static 'TGZ/The_Great_Zimbabwe_rules.pdf' as rules_pdf %}
@@ -10,9 +10,9 @@
   {% translate "The Great Zimbabwe Help" %}
 {% endblock page_title %}
 {% block content %}
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Rules" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate trimmed %}
           The Great Zimbabwe rules available <a href="{{ rules_pdf }}" target="_blank">here</a>
@@ -30,9 +30,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "What are the symbols on the map?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       {% blocktranslate %}
             In The Great Zimbabwe Online the following symbols can help you whilst positioning tiles or raising
             monuments<br />
@@ -59,9 +59,9 @@
           {% endblocktranslate %}
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "What are the lines on the map as I move a new item?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         <img class="TGZhelpImg"
              src="{% static 'TGZ/images/help/help_range.jpg' %}"
@@ -77,9 +77,9 @@
       <p>{% translate "NOTE: On touch devices, you can LONG PRESS in order to see this information." %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "How can I view players' moves?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate trimmed %}
           Click on "History" from the top menu to open the history. All information is available in the history entry to see
@@ -91,9 +91,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "How Can I Replay the Game / Copy to a New Game?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         <img class="TGZhelpImg"
              src="{% static 'TGZ/images/help/help_replay.jpg' %}"
@@ -121,9 +121,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "What is the difference between Rewind and Replay?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         <b>REWIND</b> {% translate "will literally roll the game back by one player turn." %}
       </p>
@@ -143,9 +143,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "What is the Map Inspector?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         <img class="TGZhelpImg"
              src="{% static 'TGZ/images/help/help_MI.jpg' %}"
@@ -167,9 +167,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Where can I view available / taken items?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         <img class="TGZhelpImg"
              src="{% static 'TGZ/images/help/help_reserve.jpg' %}"
@@ -184,9 +184,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "What is the information when bidding?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         <img class="TGZhelpImg"
              src="{% static 'TGZ/images/help/help_bid.jpg' %}"
@@ -205,9 +205,9 @@
       <p>{% translate "If you adore Elegua, eligible bids will also be marked with your total cost after this bonus." %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Why did I miss my bidding turn?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate trimmed %}
           Turns where you cannot do anything are skipped, For example if you do not have enough cows to make an increased
@@ -217,9 +217,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "What is the change with Dziva?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>{% translate "Dziva is considered a bit of a weak choice with the bonus as published." %}</p>
       <p>
         {% translate "Therefore, there is a small change to allow you alter prices when you choose Dziva as well as at the start of your turn." %}
@@ -233,17 +233,17 @@
       <p>{% translate "Dziva will always have this little extra ability." %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "What Hotkeys are there?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>{% translate "R / r = Rotate" %}</p>
       <p>{% translate "Left Arrow Key = Back one step in Replay" %}</p>
       <p>{% translate "Right Arrow Key = Forward one step in Replay" %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "How can I score points?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         <img class="TGZhelpImg"
              src="{% static 'TGZ/images/help/help_scoring.jpg' %}"
@@ -255,9 +255,9 @@
       <p>{% translate "In addition, you get Victory Points for each Craftsman you build." %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Who wins? (And what about Xango?)" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>{% translate "Your Victory Requirement (VR) starts at 20 points." %}</p>
       <p>
         {% translate "Taking gods, specialists, and technologies increases your VR, so you will need more points to win." %}
@@ -289,15 +289,15 @@
       </ul>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "When can I resign?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>{% translate "You can resign during your actions phase; as long as no one has exceeded their VR." %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Examples of Play" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>The following examples of play are from TGZ Tournament Games</p>
       <p>
         <b>2024 Autumn Final</b>
@@ -364,7 +364,7 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Further Help" %}</h2>
     <p>
       <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>

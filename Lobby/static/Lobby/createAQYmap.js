@@ -12,7 +12,7 @@ var playerCount = 2
 function resizeMapForEditor() {
 	let board = document.getElementById("boardAQYcanvas")
 	let scaleContainer = board.parentElement
-	if (!scaleContainer.classList.contains("nd-map-editor-board-scale")) return
+	if (!scaleContainer.classList.contains("map-editor-board-scale")) return
 
 	let boardArea = scaleContainer.parentElement
 	let areaStyle = window.getComputedStyle(boardArea)

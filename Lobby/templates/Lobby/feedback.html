@@ -6,7 +6,7 @@
 {% endblock head %}
 {% block body %}
   
-    <div class="nd-page nd-page-narrow">
+    <div class="page page-narrow">
     
       {% if messages %}
         <div class="messages">
@@ -16,32 +16,32 @@
         </div>
       {% endif %}
       
-        <div class="nd-page-header">
-          <h1 class="nd-page-title">{% translate "Feedback" %}</h1>
+        <div class="page-header">
+          <h1 class="page-title">{% translate "Feedback" %}</h1>
         </div>
-        <div class="nd-card nd-section">
+        <div class="card section">
           <p>{% translate "We'd love to hear your thoughts on the new lobby design!" %}</p>
-          <div class="nd-form-actions"
+          <div class="form-actions"
                style="justify-content: center;
                       margin: 20px 0">
             <a href="{% url 'discordInviteLink' %}"
-               class="nd-button nd-button-primary"
+               class="button button-primary"
                target="_blank">{% translate "Join the Discord" %}</a>
           </div>
           <form method="post"
-                class="nd-stacked-form"
+                class="stacked-form"
                 onsubmit="const b=this.querySelector('button[type=submit]'); b.disabled=true; b.textContent='Sending feedback......';">
             {% csrf_token %}
-            <div class="nd-form-row">
-              <label for="feedback" class="nd-form-label">{% translate "Your Feedback" %}</label>
+            <div class="form-row">
+              <label for="feedback" class="form-label">{% translate "Your Feedback" %}</label>
               <textarea id="feedback"
                         name="feedback"
                         rows="6"
                         required
                         placeholder="{% translate 'Tell us what you think about the new lobby design...' %}"></textarea>
             </div>
-            <div class="nd-form-actions">
-              <button type="submit" class="nd-button nd-button-primary">{% translate "Send Feedback" %}</button>
+            <div class="form-actions">
+              <button type="submit" class="button button-primary">{% translate "Send Feedback" %}</button>
             </div>
           </form>
         </div>

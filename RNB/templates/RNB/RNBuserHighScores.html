@@ -64,7 +64,7 @@
     {% endcompress %}
 {% endblock head %}
 {% block body %}
-    <div class="nd-page">
+    <div class="page">
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}
@@ -72,8 +72,8 @@
                 {% endfor %}
             </div>
         {% endif %}
-        <div class="nd-page-header" id="playerInfoNameDiv">
-            <h1 class="nd-page-title">{{ username }}</h1>
+        <div class="page-header" id="playerInfoNameDiv">
+            <h1 class="page-title">{{ username }}</h1>
         </div>
         <div class="panelHeader">{% translate "Search Another Player" %}</div>
         <input type="text"
@@ -84,11 +84,11 @@
         <button id="searchUserButton"
                 class="searchUserButton"
                 onclick="searchUserScores()">{% translate "Search Player" %}</button>
-        <h2 class="nd-section-title">{% translate "All Highscores for" %} {{ username }}</h2>
+        <h2 class="section-title">{% translate "All Highscores for" %} {{ username }}</h2>
         <div id="loadingMessage" class="loadingMessage" style="display: none;">{% translate "Loading highscores..." %}</div>
-        <div class="nd-card">
-            <div class="nd-table-scroll">
-                <table class="nd-table">
+        <div class="card">
+            <div class="table-scroll">
+                <table class="table">
                     <thead>
                         <tr>
                             <th>{% translate "Map" %}</th>
@@ -104,7 +104,7 @@
             </div>
         </div>
         <p id="noUserScoresMessage"
-           class="nd-empty"
+           class="empty"
            style="display: none">{% translate "No highscores recorded for this player yet." %}</p>
     </div>
     {% block script %}

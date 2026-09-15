@@ -12,16 +12,16 @@
 {% endblock head %}
 {% block body %}
     
-        <div class="nd-page">
+        <div class="page">
         
             
-                <div class="nd-page-header">
+                <div class="page-header">
                     <div>
-                        <h1 class="nd-page-title">{% translate "Mini Tournaments" %}</h1>
-                        <a class="nd-button nd-button-primary nd-button-sm"
+                        <h1 class="page-title">{% translate "Mini Tournaments" %}</h1>
+                        <a class="button button-primary button-sm"
                            href="{% url 'newMiniTournaments' %}">Create Mini Tournament</a>
                     </div>
-                    <a class="nd-button nd-button-ghost" href="{% url 'AllTournaments' %}">&#8592; {% trans "Tournaments" %}</a>
+                    <a class="button button-ghost" href="{% url 'AllTournaments' %}">&#8592; {% trans "Tournaments" %}</a>
                 </div>
                 <p style="font-size:14px; color:var(--color-muted); margin-bottom:16px;">
                     Faster-paced tournaments with a smaller player pool. Anyone can create or join.
@@ -29,12 +29,12 @@
             
             {% if available_MT %}
                 
-                    <div class="nd-section-title" style="margin-top:8px;">Available</div>
+                    <div class="section-title" style="margin-top:8px;">Available</div>
                 
                 
-                    <div class="nd-card">
+                    <div class="card">
                     
-                        <table class="nd-table">
+                        <table class="table">
                             <thead>
                                 <tr class="headingRow">
                                     <th></th>
@@ -55,12 +55,12 @@
                 {% endif %}
                 {% if current_MT %}
                     
-                        <div class="nd-section-title" style="margin-top:20px;">In Progress</div>
+                        <div class="section-title" style="margin-top:20px;">In Progress</div>
                     
                     
-                        <div class="nd-card">
+                        <div class="card">
                         
-                            <table class="nd-table">
+                            <table class="table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
@@ -81,12 +81,12 @@
                     {% endif %}
                     {% if finished_MT %}
                         
-                            <div class="nd-section-title" style="margin-top:20px;">Finished</div>
+                            <div class="section-title" style="margin-top:20px;">Finished</div>
                         
                         
-                            <div class="nd-card">
+                            <div class="card">
                             
-                                <table class="nd-table">
+                                <table class="table">
                                     <thead>
                                         <tr class="headingRow">
                                             <th></th>

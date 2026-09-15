@@ -5,7 +5,7 @@
 {% endblock head %}
 {% block body %}
   
-    <div class="nd-page nd-page-narrow">
+    <div class="page page-narrow">
     
       {% if messages %}
         <div class="messages">
@@ -15,12 +15,12 @@
         </div>
       {% endif %}
       
-        <div class="nd-page-header">
-          <h1 class="nd-page-title">{% translate "Register" %}</h1>
+        <div class="page-header">
+          <h1 class="page-title">{% translate "Register" %}</h1>
         </div>
-        <div class="nd-card nd-section">
+        <div class="card section">
           <div id="btWarning"
-               class="nd-callout nd-callout-warn"
+               class="callout callout-warn"
                style="display:none">
             CAUTION: BtInternet is rejecting my emails as spam. Please add
             <img id="contactEmailImg"
@@ -30,7 +30,7 @@
                  height="30">
             to your safe senders / whitelist / allowed emails
           </div>
-          <div id="registerEmailInfoDiv" class="nd-callout nd-callout-info">
+          <div id="registerEmailInfoDiv" class="callout callout-info">
             A genuine email address is required to activate your account
             <br />
             Please check your spam folder, and add
@@ -42,15 +42,15 @@
             to your safe senders / whitelist / allowed emails
           </div>
         </div>
-        <div class="nd-card nd-section">
-          <form method="post" class="nd-register-form">
+        <div class="card section">
+          <form method="post" class="register-form">
             {% csrf_token %}
             {{ form.as_p }}
-            <div class="nd-form-actions">
-              <button type="submit" class="nd-button nd-button-primary">{% translate "Register" %}</button>
+            <div class="form-actions">
+              <button type="submit" class="button button-primary">{% translate "Register" %}</button>
             </div>
           </form>
-          <p class="nd-form-footer-link">
+          <p class="form-footer-link">
             {% translate "Already have an account?" %} <a href="{% url 'myLogin' %}">{% translate "Log In here" %}</a>.
           </p>
         </div>

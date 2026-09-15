@@ -1,13 +1,13 @@
-{% extends "Lobby/_help_shell.html" %}
+{% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
 {% block page_title %}
   {% translate "Antiquity Help" %}
 {% endblock page_title %}
 {% block content %}
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Rules" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate trimmed %}
           Antiquity Rules Available <a class="linkOther"
@@ -18,9 +18,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Playing the Game" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% translate "To switch between City and Country views, click on any player icon" %}
         <img id="clickPlayers"
@@ -102,9 +102,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Rewind / Replay" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <b><u>{% translate "Rewind" %}</u></b>
       <p>
         {% blocktranslate trimmed %}
@@ -126,9 +126,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Gameplay by Phase" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <b><u>{% translate "First city:" %}</u></b>
       <p>
         {% blocktranslate trimmed %}
@@ -186,9 +186,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Player trades" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       {% blocktranslate trimmed %}
         Player trades should be negotiated using the in game chat.
         Resources and promises can be traded. Promises should only be traded if there is genuine intention to keep them; otherwise the whole thing is pointless.
@@ -200,9 +200,9 @@
       {% endblocktranslate %}
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Rule points" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% translate "Initial cities placed over water break up the continuous water. Therefore, any water tiles will be replaced with grass" %}
       </p>
@@ -210,13 +210,13 @@
       <p>{% translate "Cathedrals with graves on will stop your saint power and prevent you from winning" %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "When can I resign?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>{% translate "You can resign during your \"City Build\" phase." %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Further Help" %}</h2>
     <p>
       <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>

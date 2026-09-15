@@ -73,12 +73,12 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap"
               rel="stylesheet">
-        <link href="{% static 'Lobby/CSS/nd-components.css' %}?v=23"
+        <link href="{% static 'Lobby/CSS/components.css' %}?v=23"
               rel="stylesheet">
         <link href="{% static 'Lobby/CSS/layout_new.css' %}" rel="stylesheet">
         {% block head %}{% endblock %}
     </head>
-    <body class="nd {% if user.is_authenticated %}ndAuthed{% else %}ndGuest{% endif %}">
+    <body class="{% if user.is_authenticated %}authed{% else %}guest{% endif %}">
         <div class="topBar">
             {% if user.is_authenticated %}
                 <!-- LOGGED IN TOP BAR -->
@@ -156,7 +156,7 @@
                                    placeholder="{% translate " Password" %}"
                                    required>
                             <input type="hidden" name="next" value="{{ request.GET.next }}" />
-                            <input class="nd-button nd-button-primary loginSubmit"
+                            <input class="button button-primary loginSubmit"
                                    type="submit"
                                    value="{% translate " Login" %}">
                         </form>
@@ -263,12 +263,12 @@
             {% block body %}{% endblock %}
         </main>
         <footer class="footer">
-            <div class="nd-support-strip">
+            <div class="support-strip">
                 {% include "Lobby/donate/donateBanner.html" %}
                 {% include "Lobby/splotterconSponsor.html" %}
             </div>
             <div class="content">
-                <p class="nd-footer-text">
+                <p class="footer-text">
                     {% blocktranslate trimmed %}
                         Food Chain Magnate, Horseless Carriage, Bus, The Great Zimbabwe, Cannes, Antiquity, Indonesia, and Roads & Boats are board games by Jeroen Doumen
                         and Joris Wiersinga, published by
@@ -283,7 +283,7 @@
                 </p>
             </div>
         </footer>
-        <script src="{% static 'Lobby/js/ndTooltips.js' %}"></script>
+        <script src="{% static 'Lobby/js/tooltips.js' %}"></script>
         <script>
         document.addEventListener('DOMContentLoaded', function () {
             const hamburger = document.querySelector(".hamburger");

@@ -9,7 +9,7 @@
           type="text/css" />
 {% endblock %}
 {% block body %}
-    <div class="nd-page nd-page-narrow">
+    <div class="page page-narrow">
     
 
       {% if messages %}
@@ -20,17 +20,17 @@
         </div>
       {% endif %}
 
-      <div class="nd-page-header">
-        <h1 class="nd-page-title">{% translate "Support OBG" %}</h1>
+      <div class="page-header">
+        <h1 class="page-title">{% translate "Support OBG" %}</h1>
       </div>
 
-      <div class="nd-card nd-section">
+      <div class="card section">
         <p>{% translate "Thank you for taking the time to look at the donation page." %} {% translate "All support is gratefully received, and will go towards the costs of hosting, supporting, and maintaining this website, and enabling new features." %}</p>
         <p style="margin-top: 10px; color: var(--color-muted); font-size: 14px;">{% translate "Donating does not grant any special privileges — but suggestions for improvements are always welcome via email or Discord." %}</p>
       </div>
 
-      <div class="nd-card nd-section">
-        <div class="nd-card-header"><h2 class="nd-card-title">{% translate "Donate" %}</h2></div>
+      <div class="card section">
+        <div class="card-header"><h2 class="card-title">{% translate "Donate" %}</h2></div>
         <p style="font-size:14px; margin-bottom: 16px;">
           {% static 'Lobby/images/emailDonate.png' as donate_email_url %}
           {% translate "You can donate via the options below, or send directly to" %}
@@ -38,9 +38,9 @@
           <br><span style="font-size:13px; color:var(--color-muted); margin-top:4px; display:block;">{% translate "If you are unsure how much, €5.00 or $5.00 is a great place to start." %}</span>
         </p>
 
-        <div class="nd-donate-options">
-          <div class="nd-donate-option">
-            <span class="nd-donate-option-label">PayPal</span>
+        <div class="donate-options">
+          <div class="donate-option">
+            <span class="donate-option-label">PayPal</span>
             <form action="https://www.paypal.com/donate" method="post" target="_top">
               <input type="hidden" name="hosted_button_id" value="SMKSLMCJHWZ8G" />
               <input id="donateButton"
@@ -54,8 +54,8 @@
             </form>
           </div>
 
-          <div class="nd-donate-option">
-            <span class="nd-donate-option-label">Ko-fi <span style="font-weight:400;">(works in China)</span></span>
+          <div class="donate-option">
+            <span class="donate-option-label">Ko-fi <span style="font-weight:400;">(works in China)</span></span>
             <a href="https://ko-fi.com/Q5Q3ZVWMJ"
                title="Support me on ko-fi.com"
                class="kofi-button"
@@ -68,8 +68,8 @@
             </a>
           </div>
 
-          <div class="nd-donate-option">
-            <span class="nd-donate-option-label">Patreon</span>
+          <div class="donate-option">
+            <span class="donate-option-label">Patreon</span>
             <a href="https://www.patreon.com/c/OnlineBoardGamers"
                class="patreon-button"
                target="_blank">Support me on Patreon</a>

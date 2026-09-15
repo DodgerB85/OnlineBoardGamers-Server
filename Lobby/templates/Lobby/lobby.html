@@ -8,62 +8,62 @@
         <script src="{% static 'Lobby/Lobby.js' %}"></script>
         <script src="{% static 'Lobby/common.js' %}"></script>
     {% endcompress %}
-    <div class="nd-lobby" id="lobbyPage">
+    <div class="lobby" id="lobbyPage">
         {% if messages %}
-            <div class="nd-messages">
+            <div class="messages">
                 {% for message in messages %}
                     <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
                 {% endfor %}
             </div>
         {% endif %}
-        <div class="nd-notice">
+        <div class="notice">
             <span>Splotter Con Gand Final Pitts Bus Match <a href="/BUS/34571/spoilerFree/">Here!</a></span>
         </div>
         {% if availableTournaments|length > 0 %}
-            <div class="nd-notice">
+            <div class="notice">
                 {% for game in availableTournaments %}
                     {% if game == "FCM" %}
                         <img src="{% static 'FCM/images/burger_board.png' %}"
                              alt="FCM"
                              width="28"
                              height="28"
-                             class="nd-notice-icon" />
+                             class="notice-icon" />
                     {% elif game == "HLC" %}
                         <img src="{% static 'HLC/images/icon_car.png' %}"
                              alt="HLC"
                              width="32"
                              height="28"
-                             class="nd-notice-icon" />
+                             class="notice-icon" />
                     {% elif game == "BUS" %}
                         <img src="{% static 'BUS/images/bus_icon.png' %}"
                              alt="Bus"
                              width="28"
                              height="28"
-                             class="nd-notice-icon" />
+                             class="notice-icon" />
                     {% elif game == "TGZ" %}
                         <img src="{% static 'TGZ/images/tgz_icon.png' %}"
                              alt="TGZ"
                              width="28"
                              height="28"
-                             class="nd-notice-icon" />
+                             class="notice-icon" />
                     {% elif game == "AQY" %}
                         <img src="{% static 'AQY/images/aqy_icon.png' %}"
                              alt="AQY"
                              width="28"
                              height="28"
-                             class="nd-notice-icon" />
+                             class="notice-icon" />
                     {% elif game == "IND" %}
                         <img src="{% static 'IND/images/ind_icon.png' %}"
                              alt="IND"
                              width="28"
                              height="28"
-                             class="nd-notice-icon" />
+                             class="notice-icon" />
                     {% elif game == "RNB" %}
                         <img src="{% static 'RNB/images/rnb_icon.png' %}"
                              alt="RNB"
                              width="28"
                              height="28"
-                             class="nd-notice-icon" />
+                             class="notice-icon" />
                     {% endif %}
                 {% endfor %}
                 <span>
@@ -75,58 +75,58 @@
                 </span>
             </div>
         {% endif %}
-        <div class="nd-news-banner" id="rnbAnnounceBanner">
+        <div class="news-banner" id="rnbAnnounceBanner">
             <span>Roads &amp; Boats is here! Map editor available — see the <a href="{% url 'newGamesPage' %}">New Game</a> page.</span>
-            <button class="nd-news-dismiss"
+            <button class="news-dismiss"
                     aria-label="Dismiss"
                     onclick="document.getElementById('rnbAnnounceBanner').style.display='none'; try{localStorage.setItem('rnb_announce_dismissed','1');}catch(e){}">
                 &#x2715;
             </button>
         </div>
         <script>try{if(localStorage.getItem('rnb_announce_dismissed')==='1')document.getElementById('rnbAnnounceBanner').style.display='none';}catch(e){}</script>
-        <div class="nd-news-banner">
+        <div class="news-banner">
             <span>New Design Active! All feedback being processed. Please let us know what improvements you would like.</span>
-            <a href="{% url 'feedback' %}" class="nd-button nd-button-sm nd-button-primary" style="margin-left:8px;">Feedback</a>
+            <a href="{% url 'feedback' %}" class="button button-sm button-primary" style="margin-left:8px;">Feedback</a>
         </div>
         <!-- hidden map editor forms (required by Lobby.js) -->
-        {% include 'Lobby/_map_editor_forms.html' %}
+        {% include 'Lobby/map_editor_forms.html' %}
         <!-- TABS -->
-        <div class="nd-tabs">
-            <button class="nd-tab tablinks" id="available" data-nd-tab="available">
-                <span class="nd-tab-label">{% translate "Available" %}</span>
-                <span class="nd-tab-count">({{ availableCount }})</span>
+        <div class="tabs">
+            <button class="tab tablinks" id="available" data-tab="available">
+                <span class="tab-label">{% translate "Available" %}</span>
+                <span class="tab-count">({{ availableCount }})</span>
             </button>
-            <button class="nd-tab tablinks" id="current" data-nd-tab="current">
+            <button class="tab tablinks" id="current" data-tab="current">
                 {% if currentChat %}
-                    <img class="tabChatIcon nd-chat-ping"
+                    <img class="tabChatIcon chat-ping"
                          alt="New chat"
                          width="18"
                          height="18"
                          src="{% static "Lobby/images/icon-chat-lobby.svg" %}"
                          title="New Chat Message" />
                 {% endif %}
-                <span class="nd-tab-label">{% translate "Current" %}</span>
-                <span class="nd-tab-count" id="currentCount">({{ currentCount }})</span>
+                <span class="tab-label">{% translate "Current" %}</span>
+                <span class="tab-count" id="currentCount">({{ currentCount }})</span>
             </button>
-            <button class="nd-tab tablinks" id="waiting" data-nd-tab="waiting">
-                <span class="nd-tab-label">{% translate "Waiting" %}</span>
-                <span class="nd-tab-count">({{ waitingCount }})</span>
+            <button class="tab tablinks" id="waiting" data-tab="waiting">
+                <span class="tab-label">{% translate "Waiting" %}</span>
+                <span class="tab-count">({{ waitingCount }})</span>
             </button>
-            <button class="nd-tab tablinks" id="invitations" data-nd-tab="invitations">
-                <span class="nd-tab-label">{% translate "Invitations" %}</span>
-                <span class="nd-tab-count">({{ invitationsCount }})</span>
+            <button class="tab tablinks" id="invitations" data-tab="invitations">
+                <span class="tab-label">{% translate "Invitations" %}</span>
+                <span class="tab-count">({{ invitationsCount }})</span>
             </button>
-            <button class="nd-tab tablinks" id="finished" data-nd-tab="finished">
+            <button class="tab tablinks" id="finished" data-tab="finished">
                 {% if finishedChat %}
-                    <img class="tabChatIcon nd-chat-ping"
+                    <img class="tabChatIcon chat-ping"
                          alt="New chat"
                          width="18"
                          height="18"
                          src="{% static "Lobby/images/icon-chat-lobby.svg" %}"
                          title="New Chat Message" />
                 {% endif %}
-                <span class="nd-tab-label">{% translate "Finished" %}</span>
-                <span class="nd-tab-count" id="finishedCount">({{ finishedCount }})</span>
+                <span class="tab-label">{% translate "Finished" %}</span>
+                <span class="tab-count" id="finishedCount">({{ finishedCount }})</span>
             </button>
         </div>
         <!-- learning game confirmation (used by Lobby.js) -->
@@ -145,9 +145,9 @@
                  class="buttonDiv Leave learningGameConfirmButtons">{% translate "Cancel" %}</div>
         </div>
         <!-- PANELS -->
-        <div class="nd-panels">
+        <div class="panels">
             <!-- Available (square view — kept for Lobby.js; hidden via CSS) -->
-            <div id="availableGamesListSquares" class="nd-panel-hidden">
+            <div id="availableGamesListSquares" class="panel-hidden">
                 {% if availableGamesList %}
                     {% for game in availableGamesList %}
                         {% include "Lobby/gameDisplay/availableGameSq.html" with game=game %}
@@ -158,8 +158,8 @@
             <div id="availableGamesListView">
                 {% if availableGamesList or available_MT %}
                     {% if availableGamesList %}
-                        <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable nd-lobby-games-table">
+                        <div class="table-wrap">
+                            <table class="table gamesTable lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
@@ -178,12 +178,12 @@
                             </table>
                         </div>
                     {% else %}
-                        <p class="nd-empty">{% translate "No Available Games" %}</p>
+                        <p class="empty">{% translate "No Available Games" %}</p>
                     {% endif %}
                     {% if available_MT %}
-                        <p class="nd-section-label">Available Mini Tournaments</p>
-                        <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable nd-lobby-games-table">
+                        <p class="section-label">Available Mini Tournaments</p>
+                        <div class="table-wrap">
+                            <table class="table gamesTable lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
@@ -202,21 +202,21 @@
                             </table>
                         </div>
                     {% else %}
-                        <p class="nd-empty">{% translate "No Available Mini Tournaments" %}</p>
+                        <p class="empty">{% translate "No Available Mini Tournaments" %}</p>
                     {% endif %}
                 {% else %}
-                    {% include "Lobby/_empty.html" with message="No available games or mini tournaments right now." showNewGame=True %}
+                    {% include "Lobby/empty.html" with message="No available games or mini tournaments right now." showNewGame=True %}
                 {% endif %}
             </div>
             <!-- Current -->
             <div id="currentGamesListView">
                 {% if currentGamesList or current_MT %}
                     {% if currentGamesList %}
-                        <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable nd-lobby-games-table nd-current-games-table">
+                        <div class="table-wrap">
+                            <table class="table gamesTable lobby-games-table current-games-table">
                                 <thead>
                                     <tr class="headingRow">
-                                        <th class="nd-col-game" colspan="2">{% translate "Game Name" %}</th>
+                                        <th class="col-game" colspan="2">{% translate "Game Name" %}</th>
                                         <th>{% translate "Current player" %}</th>
                                         <th>{% translate "Current Turn" %}</th>
                                         <th>{% translate "Players" %}</th>
@@ -232,18 +232,18 @@
                             </table>
                             {% if myMoveGamesData|length > 0 %}
                                 <button id="openAllMyMoveGamesButton"
-                                        class="nd-open-all-btn openAllMyMoveGamesButton">
+                                        class="open-all-btn openAllMyMoveGamesButton">
                                     {% translate "Open All Games (My Turn)" %}
                                 </button>
                             {% endif %}
                         </div>
                     {% else %}
-                        <p class="nd-empty">{% translate "No Current Games" %}</p>
+                        <p class="empty">{% translate "No Current Games" %}</p>
                     {% endif %}
                     {% if current_MT %}
-                        <p class="nd-section-label">Current Mini Tournaments</p>
-                        <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable nd-lobby-games-table">
+                        <p class="section-label">Current Mini Tournaments</p>
+                        <div class="table-wrap">
+                            <table class="table gamesTable lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
@@ -263,17 +263,17 @@
                         </div>
                     {% endif %}
                 {% else %}
-                    {% include "Lobby/_empty.html" with message="No current games or mini tournaments." showNewGame=True %}
+                    {% include "Lobby/empty.html" with message="No current games or mini tournaments." showNewGame=True %}
                 {% endif %}
-                <div class="nd-colour-guide colourGuideDiv">
-                    <strong class="nd-colour-guide-title">{% translate "Colour Guide" %}</strong>
-                    <div class="nd-colour-guide-grid">
-                        <span class="nd-colour-guide-item myMove">{% translate "It is your move" %}</span>
-                        <span class="nd-colour-guide-item">{% translate "Waiting for other players to move" %}</span>
-                        <span class="nd-colour-guide-item myMove kickoutRequired1">{% translate "Need to move - using Flexi-Time" %}</span>
-                        <span class="nd-colour-guide-item myMove kickoutRequired2">{% translate "Need to move - could be kicked out" %}</span>
-                        <span class="nd-colour-guide-item kickoutRequired1">{% translate "Current Player is using Flex-Time" %}</span>
-                        <span class="nd-colour-guide-item kickoutRequired2">{% translate "Enter game to kickout inactive player" %}</span>
+                <div class="colour-guide colourGuideDiv">
+                    <strong class="colour-guide-title">{% translate "Colour Guide" %}</strong>
+                    <div class="colour-guide-grid">
+                        <span class="colour-guide-item myMove">{% translate "It is your move" %}</span>
+                        <span class="colour-guide-item">{% translate "Waiting for other players to move" %}</span>
+                        <span class="colour-guide-item myMove kickoutRequired1">{% translate "Need to move - using Flexi-Time" %}</span>
+                        <span class="colour-guide-item myMove kickoutRequired2">{% translate "Need to move - could be kicked out" %}</span>
+                        <span class="colour-guide-item kickoutRequired1">{% translate "Current Player is using Flex-Time" %}</span>
+                        <span class="colour-guide-item kickoutRequired2">{% translate "Enter game to kickout inactive player" %}</span>
                     </div>
                 </div>
             </div>
@@ -281,8 +281,8 @@
             <div id="waitingGamesListView">
                 {% if waitingGamesList or waiting_MT %}
                     {% if waitingGamesList %}
-                        <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable nd-lobby-games-table">
+                        <div class="table-wrap">
+                            <table class="table gamesTable lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
@@ -307,9 +307,9 @@
                         {% endif %}
                     {% endif %}
                     {% if waiting_MT %}
-                        <p class="nd-section-label">Waiting Mini Tournaments</p>
-                        <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable nd-lobby-games-table">
+                        <p class="section-label">Waiting Mini Tournaments</p>
+                        <div class="table-wrap">
+                            <table class="table gamesTable lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
@@ -329,15 +329,15 @@
                         </div>
                     {% endif %}
                 {% else %}
-                    {% include "Lobby/_empty.html" with message="No waiting games." %}
+                    {% include "Lobby/empty.html" with message="No waiting games." %}
                 {% endif %}
             </div>
             <!-- Invitations -->
             <div id="invitationGamesListView">
                 {% if invitaionsGamesList or invitations_MT %}
                     {% if invitaionsGamesList %}
-                        <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable nd-lobby-games-table">
+                        <div class="table-wrap">
+                            <table class="table gamesTable lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
@@ -357,9 +357,9 @@
                         </div>
                     {% endif %}
                     {% if invitations_MT %}
-                        <p class="nd-section-label">Invited Mini Tournaments</p>
-                        <div class="nd-table-wrap">
-                            <table class="nd-table gamesTable nd-lobby-games-table">
+                        <p class="section-label">Invited Mini Tournaments</p>
+                        <div class="table-wrap">
+                            <table class="table gamesTable lobby-games-table">
                                 <thead>
                                     <tr class="headingRow">
                                         <th></th>
@@ -379,14 +379,14 @@
                         </div>
                     {% endif %}
                 {% else %}
-                    {% include "Lobby/_empty.html" with message="No invitations." %}
+                    {% include "Lobby/empty.html" with message="No invitations." %}
                 {% endif %}
             </div>
             <!-- Finished -->
             <div id="finishedGamesListView">
                 {% if finishedGamesList %}
-                    <div class="nd-table-wrap">
-                        <table class="nd-table gamesTable nd-lobby-games-table nd-finished-games-table">
+                    <div class="table-wrap">
+                        <table class="table gamesTable lobby-games-table finished-games-table">
                             <thead>
                                 <tr class="headingRow">
                                     <th></th>
@@ -403,20 +403,20 @@
                             </tbody>
                         </table>
                     </div>
-                    <p class="nd-help-note">
+                    <p class="help-note">
                         {% url "playerInfo" user.username as the_url %}
                         {% blocktranslate trimmed %}
                             Check your <a href="{{ the_url }}">Game Profile</a> to see all of your finished games
                         {% endblocktranslate %}
                     </p>
                 {% else %}
-                    {% include "Lobby/_empty.html" with message="No finished games." %}
+                    {% include "Lobby/empty.html" with message="No finished games." %}
                 {% endif %}
             </div>
         </div>
-        <!-- end nd-panels -->
+        <!-- end panels -->
     </div>
-    <!-- end nd-lobby -->
+    <!-- end lobby -->
     {% block script %}
         <script>
         var global = {};
@@ -452,15 +452,15 @@
         (function () {
             var lobby = document.getElementById('lobbyPage') || document.body;
             if (typeof MutationObserver === 'undefined') return;
-            if (!window.ndWrapTooltips) return;
+            if (!window.wrapTooltips) return;
             var mo = new MutationObserver(function (mutations) {
                 mutations.forEach(function (m) {
                     m.addedNodes.forEach(function (n) {
                         if (n.nodeType !== 1) return;
                         if (n.classList && n.classList.contains('startingOption')) {
-                            window.ndWrapTooltips(n.parentNode);
+                            window.wrapTooltips(n.parentNode);
                         } else {
-                            window.ndWrapTooltips(n);
+                            window.wrapTooltips(n);
                         }
                     });
                 });

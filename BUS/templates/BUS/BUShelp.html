@@ -1,13 +1,13 @@
-{% extends "Lobby/_help_shell.html" %}
+{% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
 {% block page_title %}
   {% translate "Bus Help" %}
 {% endblock page_title %}
 {% block content %}
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Rules" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% static 'BUS/Bus_Rules.pdf' as bus_rules_url %}
         {% blocktranslate trimmed %}
@@ -27,9 +27,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Playing the Game" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <ul>
         {% url 'profile' as profile_url %}
         {% blocktranslate trimmed %}
@@ -73,9 +73,9 @@
       </ul>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "How can I find other players' moves?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate trimmed %}
           Click on History from the top menu to open the history, and then click on an entry to highlight where it happened on the board.
@@ -84,9 +84,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Why did I miss my turn?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate trimmed %}
           Turns where you cannot do anything are skipped. For example, during VRROOOMM if you either have no possible destination buildings, or no available passengers to move.
@@ -97,13 +97,13 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "When can I resign?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>{% translate "You can resign during your \"Choose Actions\" phase." %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Further Help" %}</h2>
     <p>
       <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>

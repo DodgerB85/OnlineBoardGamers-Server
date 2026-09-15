@@ -1,13 +1,13 @@
-{% extends "Lobby/_help_shell.html" %}
+{% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
 {% block page_title %}
   {% translate "Horseless Carriage Help" %}
 {% endblock page_title %}
 {% block content %}
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Rules" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate trimmed %}
           Horseless Carriage rules available
@@ -22,9 +22,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Playing the Game" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <ul>
         <li>{% translate "The active player has a yellow highlight" %}</li>
         <li>
@@ -71,9 +71,9 @@
       </ul>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "How can I see which Market Windows have been placed?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate trimmed %}
           Any dealership with sales potential will be shown under the player names. Clicking on a dealership with a placed Market Window will show you the remaining squares it can sell to.
@@ -87,11 +87,11 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>
       {% translate "I am second in Engineering Focus. Why can't I build techs from people with lower Engineering Focus?" %}
     </h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate trimmed %}
           From the rulebook: "The player with the second highest engineering focus has access to every technology researched by at least two players; the third, to any researched by
@@ -108,9 +108,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Why do I have to have a set focus turn if there is only one slot left?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate trimmed %}
           You are probably missing a crucial point; you are now in the situation where if you were to go over 10 Gantt and there is only 1 clock left, then you can decide if the game ends or goes another round. Pretty important really! So I decided to leave the game as per the actual rules, rather than making a skip.
@@ -128,13 +128,13 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "When can I resign?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>{% translate "You can resign during the Research phase." %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Further Help" %}</h2>
     <p>
       <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>

@@ -6,9 +6,9 @@
 {% endblock head %}
 {% block body %}
     
-        <div class="nd-page nd-page-narrow" style="margin-top: 24px;">
-            {% include 'Lobby/_messages.html' %}
-            <div class="nd-card nd-center">
+        <div class="page page-narrow" style="margin-top: 24px;">
+            {% include 'Lobby/messages.html' %}
+            <div class="card center">
                 <h1>{% translate "Sorry, the page you are requesting does not exist" %}</h1>
                 <h1>{% translate "Check there is a '/' at the end of the URL" %}</h1>
                 <p style="color: var(--color-muted); font-size: 15px; max-width: 520px; margin: 16px auto;">
@@ -29,7 +29,7 @@
                      height="200"
                      alt="Error"
                      style="margin: 8px auto 20px; display: block;">
-                <a class="nd-button nd-button-primary" href="{% url 'index' %}">{% translate "Home" %}</a>
+                <a class="button button-primary" href="{% url 'index' %}">{% translate "Home" %}</a>
             </div>
         </div>
     

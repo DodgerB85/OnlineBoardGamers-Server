@@ -1,13 +1,13 @@
-{% extends "Lobby/_help_shell.html" %}
+{% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
 {% block page_title %}
   {% translate "Roads & Boats Help" %}
 {% endblock page_title %}
 {% block content %}
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Rules" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate %}Roads & Boats Rules Available <a class='linkOther' href='https://www.splotter.nl/downloads/RB3Erules.pdf' target='_blank' download>here</a>{% endblocktranslate %}
       </p>
@@ -19,9 +19,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Playing the Game" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       {% blocktranslate trimmed %}
         Roads & Boats has a lot of complex interactions with the goods, transporters, and buildings.
         To remove the need for lots of pointless and tedious interactions,
@@ -32,7 +32,7 @@
       {% endblocktranslate %}
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Gameplay by Phase" %}</h2>
     <p>
       <img src="{% static 'RNB/help/transporterSelectHelp.jpg' %}"
@@ -41,7 +41,7 @@
            height="443"
            style="max-width:100%">
     </p>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <b><u>{% translate "All Phases:" %}</u></b>
       <p>
         {% blocktranslate trimmed %}
@@ -182,18 +182,18 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Conflict" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       {% blocktranslate trimmed %}
         After playing any main phase, you must pre-set a conflict phase. You may select the option “Wait & See” if you wish to decide whether or not to call conflict later. As soon as any player calls conflict, then each player will make their decisions about praying and turn order.
         If no one calls conflict then the game will move to the next main phase.
       {% endblocktranslate %}
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Presetting phases" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% static 'RNB/help/pseudoResHelp.jpg' as pseudo_img_url %}
         {% blocktranslate trimmed %}
@@ -226,13 +226,13 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "When can I resign?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>{% translate "You can resign during any of your Production turns (but not when presetting it)." %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Further Help" %}</h2>
     <p>
       <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>

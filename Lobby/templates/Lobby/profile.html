@@ -10,27 +10,27 @@
         <script src="{% static 'Lobby/profile.js' %}"></script>
     {% endcompress %}
     
-    <div class="nd-page nd-page-profile">
-        {% include 'Lobby/_messages.html' %}
-        <div class="nd-page-header">
+    <div class="page page-profile">
+        {% include 'Lobby/messages.html' %}
+        <div class="page-header">
             <div>
-                <h1 class="nd-page-title">{{ username }}</h1>
-                <p class="nd-page-subtitle">{{ email }}</p>
+                <h1 class="page-title">{{ username }}</h1>
+                <p class="page-subtitle">{{ email }}</p>
             </div>
         </div>
 
         {# ── Card 1: Notifications ── #}
-        <div class="nd-card" style="margin-bottom: 16px;">
-            <div class="nd-card-header">
-                <h2 class="nd-card-title">{% translate "Notifications" %}</h2>
+        <div class="card" style="margin-bottom: 16px;">
+            <div class="card-header">
+                <h2 class="card-title">{% translate "Notifications" %}</h2>
             </div>
             <form method="post" id="notificationForm">
                 {% csrf_token %}
                 <input type="hidden" id="action" name="action" value="updateProfileNotifications" />
 
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "Live notification sound" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap: wrap; gap: 16px; align-items: center;">
+                <div class="form-row">
+                    <label class="form-label">{% translate "Live notification sound" %}</label>
+                    <div class="field row-flex" style="flex-wrap: wrap; gap: 16px; align-items: center;">
                         <label for="notif0" style="display:flex; align-items:center; gap:6px; cursor:pointer;">
                             <input type="radio" id="notif0" name="liveNotif" value="0" {% if liveNotification == 0 %}checked{% endif %}>
                             <img class="notifIamge" src="{% static 'Lobby/images/notif_noSound.svg' %}" style="width:24px; height:24px;">
@@ -49,12 +49,12 @@
                     </div>
                 </div>
 
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "Discord DMs" %}</label>
-                    <div class="nd-field">
-                        <div class="nd-row-flex" style="flex-wrap:wrap; margin-bottom: 6px;">
+                <div class="form-row">
+                    <label class="form-label">{% translate "Discord DMs" %}</label>
+                    <div class="field">
+                        <div class="row-flex" style="flex-wrap:wrap; margin-bottom: 6px;">
                             <button type="button"
-                                    class="nd-button nd-button-primary nd-button-sm"
+                                    class="button button-primary button-sm"
                                     onclick="window.location.href='https://discord.com/api/oauth2/authorize?client_id={{ discord_client_id }}&redirect_uri=https%3A%2F%2Fwww.onlineboardgamers.com%2Fdiscord%2Fcallback%2F&response_type=code&scope=identify%20guilds.join'">
                                 <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle; margin-right:4px;">
                                     <path fill="currentColor" d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
@@ -63,7 +63,7 @@
                             </button>
                             {% if discord_id %}
                                 <button type="button"
-                                        class="nd-button nd-button-danger nd-button-sm"
+                                        class="button button-danger button-sm"
                                         onclick="window.location.href='{% url 'stop_discord_dms' %}'">
                                     {% translate "Stop Discord DMs" %}
                                 </button>
@@ -77,11 +77,11 @@
                     </div>
                 </div>
 
-                <div class="nd-form-row" style="border-bottom: none;">
-                    <label class="nd-form-label">{% translate "Browser Notifications" %}</label>
-                    <div class="nd-field">
+                <div class="form-row" style="border-bottom: none;">
+                    <label class="form-label">{% translate "Browser Notifications" %}</label>
+                    <div class="field">
                         <button type="button"
-                                class="nd-button nd-button-ghost nd-button-sm"
+                                class="button button-ghost button-sm"
                                 style="margin-bottom: 6px;"
                                 onclick="askForBrowserNotifications()">
                             {% translate "Request Browser Notifications" %}
@@ -98,9 +98,9 @@
                         Select which emails you'd like to receive. Add admin[at]onlineboardgamers.com to your whitelist and check spam if emails are missing.
                     {% endblocktranslate %}
                 </p>
-                <button id="stopEmailsButton" class="nd-button nd-button-ghost nd-button-sm" type="button" style="margin-bottom: 10px; display: none;"></button>
-                <div class="nd-table-scroll">
-                    <table class="nd-table emailSelectTable">
+                <button id="stopEmailsButton" class="button button-ghost button-sm" type="button" style="margin-bottom: 10px; display: none;"></button>
+                <div class="table-scroll">
+                    <table class="table emailSelectTable">
                         <thead>
                             <tr>
                                 <th>{% translate "Category" %}</th>
@@ -111,13 +111,13 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td><span class="nd-pill nd-pill-accent">{% translate "Your turn" %}</span></td>
+                                <td><span class="pill pill-accent">{% translate "Your turn" %}</span></td>
                                 <td>{% translate "Your turn" %}</td>
                                 <td><input type="radio" class="myCheckbox" name="yourTurnEmail" value="1" {% if yourTurnEmail == 1 %}checked{% endif %}></td>
                                 <td><input type="radio" class="myCheckbox" name="yourTurnEmail" value="0" {% if yourTurnEmail == 0 %}checked{% endif %}></td>
                             </tr>
                             <tr>
-                                <td><span class="nd-pill nd-pill-danger">{% translate "Essential" %}</span></td>
+                                <td><span class="pill pill-danger">{% translate "Essential" %}</span></td>
                                 <td>{% translate "Game Invite" %}</td>
                                 <td><input type="radio" class="myCheckbox" name="gameInviteEmail" value="1" {% if gameInviteEmail == 1 %}checked{% endif %}></td>
                                 <td><input type="radio" class="myCheckbox" name="gameInviteEmail" value="0" {% if gameInviteEmail == 0 %}checked{% endif %}></td>
@@ -141,7 +141,7 @@
                                 <td><input type="radio" class="myCheckbox" name="tournamentWinEmail" value="0" {% if tournamentWinEmail == 0 %}checked{% endif %}></td>
                             </tr>
                             <tr>
-                                <td><span class="nd-pill nd-pill-positive">{% translate "Information" %}</span></td>
+                                <td><span class="pill pill-positive">{% translate "Information" %}</span></td>
                                 <td>{% translate "Invite Decline" %}</td>
                                 <td><input type="radio" class="myCheckbox" name="inviteDeclineEmail" value="1" {% if inviteDeclineEmail == 1 %}checked{% endif %}></td>
                                 <td><input type="radio" class="myCheckbox" name="inviteDeclineEmail" value="0" {% if inviteDeclineEmail == 0 %}checked{% endif %}></td>
@@ -171,7 +171,7 @@
                                 <td><input type="radio" class="myCheckbox" name="tournamentOpenEmail" value="0" {% if tournamentOpenEmail == 0 %}checked{% endif %}></td>
                             </tr>
                             <tr>
-                                <td><span class="nd-pill nd-pill-warn">{% translate "Daily" %}</span></td>
+                                <td><span class="pill pill-warn">{% translate "Daily" %}</span></td>
                                 <td>{% translate "Reminder if not moved for over 24 hrs" %}</td>
                                 <td><input type="radio" class="myCheckbox" name="dailyReminderEmail" value="1" {% if dailyReminderEmail == 1 %}checked{% endif %}></td>
                                 <td><input type="radio" class="myCheckbox" name="dailyReminderEmail" value="0" {% if dailyReminderEmail == 0 %}checked{% endif %}></td>
@@ -181,22 +181,22 @@
                 </div>
                 <input type="hidden" id="submissionSource" name="submissionSource" value="" />
                 <div style="margin-top: 16px;">
-                    <button type="submit" class="nd-button nd-button-primary">{% translate "Save Notification Preferences" %}</button>
+                    <button type="submit" class="button button-primary">{% translate "Save Notification Preferences" %}</button>
                 </div>
             </form>
         </div>
 
         {# ── Card 2: Webhooks ── #}
-        <div class="nd-card" style="margin-bottom: 16px;">
-            <div class="nd-card-header">
-                <h2 class="nd-card-title">{% translate "Webhooks" %}</h2>
+        <div class="card" style="margin-bottom: 16px;">
+            <div class="card-header">
+                <h2 class="card-title">{% translate "Webhooks" %}</h2>
             </div>
             <p class="" style="font-size: 13px; margin: 0 0 10px;">
                 {% translate "For help adding webhook notifications, see" %}
                 <a href="{% url 'lobbyHelp' %}" target="_blank">{% translate "Help" %}</a>.
             </p>
-            <div class="nd-table-scroll">
-                <table class="nd-table profileTable">
+            <div class="table-scroll">
+                <table class="table profileTable">
                     <thead>
                         <tr>
                             <th>{% translate "Notification Type" %}</th>
@@ -220,11 +220,11 @@
                                             <input type="hidden" name="webhookUserID" value="{{ notification.2 }}" />
                                             <button type="button"
                                                     id="webhookTestButton{{ forloop.counter0 }}"
-                                                    class="nd-button nd-button-ghost nd-button-sm"
+                                                    class="button button-ghost button-sm"
                                                     onclick="testWebhook(this.id, {{ notification }})">
                                                 {% translate "Test" %}
                                             </button>
-                                            <button class="nd-button nd-button-danger nd-button-sm" type="submit">{% translate "Delete" %}</button>
+                                            <button class="button button-danger button-sm" type="submit">{% translate "Delete" %}</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -256,7 +256,7 @@
                                     <span class="telegramInfo"><a href="https://t.me/OnlineBoardGamers_Bot?start=OBG" target="_blank">{% translate "Open OBG Telegram Bot" %}</a></span>
                                 </td>
                                 <td>
-                                    <button class="nd-button nd-button-primary nd-button-sm" type="submit">{% translate "Add Webhook" %}</button>
+                                    <button class="button button-primary button-sm" type="submit">{% translate "Add Webhook" %}</button>
                                 </td>
                             </tr>
                         </form>
@@ -266,17 +266,17 @@
         </div>
 
         {# ── Card 3: Game Preferences ── #}
-        <div class="nd-card" style="margin-bottom: 16px;">
-            <div class="nd-card-header">
-                <h2 class="nd-card-title">{% translate "Game Preferences" %}</h2>
+        <div class="card" style="margin-bottom: 16px;">
+            <div class="card-header">
+                <h2 class="card-title">{% translate "Game Preferences" %}</h2>
             </div>
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" id="action" name="action" value="updateProfileFavourites" />
 
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "FCM Restaurant" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                <div class="form-row">
+                    <label class="form-label">{% translate "FCM Restaurant" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favRestChoice">
                             <label for="fcmRadM1">{% translate "None" %}</label>
                             <input type="radio" id="fcmRadM1" name="fcmResto" value="-1"
@@ -310,9 +310,9 @@
                     </div>
                 </div>
 
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "FCM High Contrast" %}</label>
-                    <div class="nd-field">
+                <div class="form-row">
+                    <label class="form-label">{% translate "FCM High Contrast" %}</label>
+                    <div class="field">
                         <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                             <input type="checkbox" class="myCheckbox" id="highContrastBoardItems" name="highContrastBoardItems"
                                    value="highContrastBoardItems" {% if highContrastBoardItems %}checked{% endif %} />
@@ -321,9 +321,9 @@
                     </div>
                 </div>
 
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "HLC Colour" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                <div class="form-row">
+                    <label class="form-label">{% translate "HLC Colour" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favHLCchoice">
                             <label for="hcRadM1">{% translate "None" %}</label>
                             <input type="radio" id="hcRadM1" name="hcColour" value="-1"
@@ -353,9 +353,9 @@
                     </div>
                 </div>
 
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "Bus Colour" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                <div class="form-row">
+                    <label class="form-label">{% translate "Bus Colour" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favBusColour">
                             <label for="busRadM1">{% translate "None" %}</label>
                             <input type="radio" id="busRadM1" name="busColour" value="-1"
@@ -385,9 +385,9 @@
                     </div>
                 </div>
 
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "Bus Board" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                <div class="form-row">
+                    <label class="form-label">{% translate "Bus Board" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favBusMap">
                             <label for="BusBoard0"><img src="{% static 'BUS/images/Board_orig.jpg' %}" /></label>
                             <input type="radio" id="BusBoard0" name="BusBoard" value="1" {% if preferredBusBoard == 1 %}checked{% endif %} />
@@ -403,9 +403,9 @@
                     </div>
                 </div>
 
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "TGZ Colour" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                <div class="form-row">
+                    <label class="form-label">{% translate "TGZ Colour" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favTGZchoice">
                             <label for="tgzRadM1">{% translate "None" %}</label>
                             <input type="radio" id="tgzRadM1" name="tgzColour" value="-1"
@@ -435,9 +435,9 @@
                     </div>
                 </div>
 
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "TGZ Minimal Text" %}</label>
-                    <div class="nd-field">
+                <div class="form-row">
+                    <label class="form-label">{% translate "TGZ Minimal Text" %}</label>
+                    <div class="field">
                         <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                             <input type="checkbox" class="myCheckbox" id="TGZminimalText" name="TGZminimalText"
                                    value="TGZminimalText" {% if TGZminimalText %}checked{% endif %} />
@@ -446,9 +446,9 @@
                     </div>
                 </div>
 
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "Cannes Colour" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                <div class="form-row">
+                    <label class="form-label">{% translate "Cannes Colour" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favCNSchoice">
                             <label for="cnsRadM1">{% translate "None" %}</label>
                             <input type="radio" id="cnsRadM1" name="cnsColour" value="-1"
@@ -474,9 +474,9 @@
                     </div>
                 </div>
 
-                <div class="nd-form-row">
-                    <label class="nd-form-label">{% translate "Keyflower Colour" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                <div class="form-row">
+                    <label class="form-label">{% translate "Keyflower Colour" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favKFWchoice">
                             <label for="kfwRadM1">{% translate "None" %}</label>
                             <input type="radio" id="kfwRadM1" name="kfwColour" value="-1"
@@ -510,9 +510,9 @@
                     </div>
                 </div>
 
-                <div class="nd-form-row" style="border-bottom: none;">
-                    <label class="nd-form-label">{% translate "Web Colour" %}</label>
-                    <div class="nd-field nd-row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                <div class="form-row" style="border-bottom: none;">
+                    <label class="form-label">{% translate "Web Colour" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favWEBchoice">
                             <label for="webRadM1">{% translate "None" %}</label>
                             <input type="radio" id="webRadM1" name="webColour" value="-1"
@@ -539,63 +539,63 @@
                 </div>
 
                 <div style="margin-top: 16px; margin-bottom: 16px;">
-                    <button type="submit" class="nd-button nd-button-primary">{% translate "Save Game Preferences" %}</button>
+                    <button type="submit" class="button button-primary">{% translate "Save Game Preferences" %}</button>
                 </div>
             </form>
-            <div class="nd-profile-game-preferences">
-                <div class="nd-card-header">
-                    <h2 class="nd-card-title">{% translate "Individual Game Preferences" %}</h2>
+            <div class="profile-game-preferences">
+                <div class="card-header">
+                    <h2 class="card-title">{% translate "Individual Game Preferences" %}</h2>
                 </div>
                 <p class="" style="font-size:13px;margin:0 0 12px;">
                     {% translate "Click these buttons to set up more detailed preferences for the following games:" %}
                 </p>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <a class="nd-button nd-button-ghost" href="{% url 'profileAQY' %}">{% translate "Antiquity Preferences" %} &rarr;</a>
-                    <a class="nd-button nd-button-ghost" href="{% url 'profileIND' %}">{% translate "Indonesia Preferences" %} &rarr;</a>
-                    <a class="nd-button nd-button-ghost" href="{% url 'profileRNB' %}">{% translate "Roads & Boats Preferences" %} &rarr;</a>
+                    <a class="button button-ghost" href="{% url 'profileAQY' %}">{% translate "Antiquity Preferences" %} &rarr;</a>
+                    <a class="button button-ghost" href="{% url 'profileIND' %}">{% translate "Indonesia Preferences" %} &rarr;</a>
+                    <a class="button button-ghost" href="{% url 'profileRNB' %}">{% translate "Roads & Boats Preferences" %} &rarr;</a>
                 </div>
             </div>
         </div>
 
         {# ── Card 4: Account ── #}
-        <div class="nd-card" style="margin-bottom: 16px;">
-            <div class="nd-card-header">
-                <h2 class="nd-card-title">{% translate "Change Password" %}</h2>
+        <div class="card" style="margin-bottom: 16px;">
+            <div class="card-header">
+                <h2 class="card-title">{% translate "Change Password" %}</h2>
             </div>
-            <form method="post" class="nd-stacked-form">
+            <form method="post" class="stacked-form">
                 {% csrf_token %}
                 {% for field in form2 %}
-                    <div class="nd-form-row">
-                        <label class="nd-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    <div class="form-row">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
                         {{ field }}
                         {% if field.errors %}<p style="flex-basis:100%; margin:0; font-size:12px; color:var(--color-danger);">{{ field.errors }}</p>{% endif %}
                     </div>
                 {% endfor %}
                 <input type="hidden" id="action" name="action" value="changePassword" />
                 <div style="margin-top: 16px;">
-                    <button type="submit" class="nd-button nd-button-primary">{% translate "Change Password" %}</button>
+                    <button type="submit" class="button button-primary">{% translate "Change Password" %}</button>
                 </div>
             </form>
         </div>
 
         {# ── Card 5: Privacy / Blacklist ── #}
-        <div class="nd-card">
-            <div class="nd-card-header">
-                <h2 class="nd-card-title">{% translate "Player Blacklist" %}</h2>
-                <span class="nd-pill nd-pill-warn">{% translate "Privacy" %}</span>
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">{% translate "Player Blacklist" %}</h2>
+                <span class="pill pill-warn">{% translate "Privacy" %}</span>
             </div>
             <p style="font-size: 13px; color: var(--color-ink-soft); margin: 0 0 12px;">
                 {% translate "Blacklisted players cannot join your Available Games, and you won't see games they create." %}
             </p>
             <span id="blacklistError" style="color:var(--color-danger); font-size:13px;"></span>
             <span id="blacklistSuccess" style="color:var(--color-positive); font-size:13px;"></span>
-            <div class="nd-row-flex" style="margin-bottom: 12px; flex-wrap: nowrap;">
+            <div class="row-flex" style="margin-bottom: 12px; flex-wrap: nowrap;">
                 <div class="autocomplete" style="flex:1; min-width: 0; max-width: 300px;">
                     <input type="text" name="blacklistPlayer" id="blacklistPlayer"
                            class="textInput" style="width:100%;"
                            placeholder="{% translate "Enter player name" %}" autocomplete="off" />
                 </div>
-                <button type="submit" id="addBlacklistButton" class="nd-button nd-button-primary nd-button-sm"
+                <button type="submit" id="addBlacklistButton" class="button button-primary button-sm"
                         style="padding-left: 14px; padding-right: 14px; margin-left: 10px; flex-shrink: 0;"
                         onclick="event.preventDefault(); addPlayerToBlacklist();">
                     {% translate "Blacklist player" %}
@@ -605,9 +605,9 @@
                 <div style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">{% translate "Blacklisted Players" %}</div>
                 {% if blacklistedPlayers %}
                     {% for player in blacklistedPlayers %}
-                        <div class="blacklistedPlayer nd-row-flex" id="BL{{ player }}" style="padding: 4px 0;">
+                        <div class="blacklistedPlayer row-flex" id="BL{{ player }}" style="padding: 4px 0;">
                             <span>{{ player }}</span>
-                            <button class="nd-button nd-button-ghost nd-button-sm"
+                            <button class="button button-ghost button-sm"
                                     onclick="event.preventDefault(); removePlayerFromBlacklist('{{ player }}')">✕</button>
                         </div>
                     {% endfor %}

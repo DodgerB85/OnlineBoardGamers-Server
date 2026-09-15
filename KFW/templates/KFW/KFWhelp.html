@@ -1,13 +1,13 @@
-{% extends "Lobby/_help_shell.html" %}
+{% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
 {% block page_title %}
   {% translate "Keyflower Help" %}
 {% endblock page_title %}
 {% block content %}
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Rules" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate %}Keyflower Rules Available <a class='linkOther' href='https://fgbradleys.com/wp-content/uploads/rules/Keyflower%20-%20rules.pdf?srsltid=AfmBOop3dONhZoXgiTeHUqHDAex0gC7guoM19D3yA91RXA1Txe2VfQbf' target='_blank' downlod>here</a>{% endblocktranslate %}
       </p>
@@ -19,9 +19,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Playing the Game" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         <img src="{% static 'KFW/images/icon-box.svg' %}"
              alt="Reserve"
@@ -79,9 +79,9 @@
       </div>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Hidden Information" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate trimmed %}
           During a game of Keyflower, players will have a number of hidden workers and skill tiles.
@@ -146,9 +146,9 @@
       </div>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Gameplay by Phase" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <b><u>{% translate "Bidding & Actions:" %}</u></b>
       <p>
         {% blocktranslate trimmed %}
@@ -190,9 +190,9 @@
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Included Promo Tiles" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>{% translate "Spring" %}</p>
       <div class="hexHelpDiv">
         {% translate "Storyteller" %}
@@ -437,15 +437,15 @@
 </div>
 </div>
 </div>
-<div class="nd-card nd-section">
+<div class="card section">
   <h2>{% translate "When can I resign?" %}</h2>
-  <div class="nd-help-qa">
+  <div class="help-qa">
     <p>
       {% translate "You can resign during your \"Bidding and Actions\" phase, as long as at least one other player hasn't passed yet." %}
     </p>
   </div>
 </div>
-<div class="nd-card nd-section">
+<div class="card section">
   <h2>{% translate "Further Help" %}</h2>
   <p>
     <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>

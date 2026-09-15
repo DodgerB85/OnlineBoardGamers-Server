@@ -179,28 +179,28 @@ document.addEventListener("DOMContentLoaded", function () {
 						fadeOutAndRemove(gameRow)
 						if (result.gameStatus === "ACTIVE") {
 							setTimeout(function () {
-								var tbody = document.querySelector("#currentGamesListView .nd-current-games-table tbody")
+								var tbody = document.querySelector("#currentGamesListView .current-games-table tbody")
 								if (!tbody || tbody.rows.length === 0) {
-									var wrap = document.querySelector("#currentGamesListView .nd-table-wrap")
+									var wrap = document.querySelector("#currentGamesListView .table-wrap")
 									if (wrap) wrap.remove()
-									var emptyP = document.querySelector("#currentGamesListView > p.nd-empty")
+									var emptyP = document.querySelector("#currentGamesListView > p.empty")
 									if (emptyP) emptyP.remove()
 									var view = document.getElementById("currentGamesListView")
-									var colourGuide = view.querySelector(".nd-colour-guide, .colourGuideDiv")
+									var colourGuide = view.querySelector(".colour-guide, .colourGuideDiv")
 									if (colourGuide) {
 										var card = document.createElement("div")
-										card.className = "nd-empty-card"
+										card.className = "empty-card"
 										var msg = document.createElement("p")
-										msg.className = "nd-empty-msg"
+										msg.className = "empty-msg"
 										msg.textContent = "No current games or mini tournaments."
 										card.appendChild(msg)
 										var link = document.createElement("a")
-										link.className = "nd-empty-cta"
+										link.className = "empty-cta"
 										link.href = "/newGames/"
 										link.textContent = "Start a new game"
 										card.appendChild(link)
 										var hint = document.createElement("p")
-										hint.className = "nd-empty-hint"
+										hint.className = "empty-hint"
 										hint.innerHTML = 'Need a refresher on the icons? <a href="/help/">See Help</a>.'
 										card.appendChild(hint)
 										view.insertBefore(card, colourGuide)
@@ -587,7 +587,7 @@ function clearPressTimer() {
 // END TFZ INFO
 
 function fadeOutAndRemove(element) {
-	if (element.classList.contains("nd-row09")) {
+	if (element.classList.contains("row09")) {
 		const currentHeight = element.offsetHeight
 		const duration = 500
 

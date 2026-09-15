@@ -73,14 +73,14 @@
 	overflow: auto;
 }
 
-.nd-mt-layout {
+.mt-layout {
 	display: grid;
 	grid-template-columns: minmax(280px, min(32vw, 500px)) minmax(0, 1fr);
 	gap: 20px;
 	align-items: start;
 }
 
-.nd-mt-layout .right-column {
+.mt-layout .right-column {
 	grid-column: 2;
 	grid-row: 1;
 	min-width: 0;
@@ -106,7 +106,7 @@
 	max-height: none !important;
 }
 
-.nd-mt-chat-sticky#wholeMTchat {
+.mt-chat-sticky#wholeMTchat {
 	position: sticky;
 	top: 90px;
 }
@@ -207,18 +207,18 @@
 }
 
 @media (max-width: 768px) {
-	.nd-mt-layout {
+	.mt-layout {
 		grid-template-columns: 1fr;
 	}
 
-	.nd-mt-layout .right-column,
+	.mt-layout .right-column,
 	#wholeMTchat {
 		grid-column: auto;
 		grid-row: auto;
 		max-width: none;
 	}
 
-	.nd-mt-chat-sticky#wholeMTchat {
+	.mt-chat-sticky#wholeMTchat {
 		position: static !important;
 		top: auto;
 	}
@@ -237,16 +237,16 @@
 	}
 
 	/* MG (multi-game) tables: collapse rows into stacked cards */
-	.nd-mt-mg-table {
+	.mt-mg-table {
 		display: block;
 	}
-	.nd-mt-mg-table thead {
+	.mt-mg-table thead {
 		display: none;
 	}
-	.nd-mt-mg-table tbody {
+	.mt-mg-table tbody {
 		display: block;
 	}
-	.nd-mt-mg-table tbody tr {
+	.mt-mg-table tbody tr {
 		display: block;
 		background: var(--color-surface);
 		border: 1px solid var(--color-border);
@@ -254,13 +254,13 @@
 		padding: 12px;
 		margin-bottom: 8px;
 	}
-	.nd-mt-mg-table tbody tr td {
+	.mt-mg-table tbody tr td {
 		display: block;
 		border: none;
 		padding: 4px 0;
 		font-size: 13px;
 	}
-	.nd-mt-mg-table tbody tr td.IPplayerNameTD {
+	.mt-mg-table tbody tr td.IPplayerNameTD {
 		font-weight: 600;
 		font-size: 15px;
 		padding-bottom: 6px;
@@ -271,14 +271,14 @@
 		overflow: visible;
 		text-overflow: clip;
 	}
-	.nd-mt-mg-table tbody tr td.IPpointsTD {
+	.mt-mg-table tbody tr td.IPpointsTD {
 		max-width: none !important;
 		padding: 4px 0 !important;
 		display: flex;
 		justify-content: space-between;
 	}
 	/* Label cells (columns beyond name/position) get a label prefix */
-	.nd-mt-mg-table tbody tr td.IPpointsTD::before {
+	.mt-mg-table tbody tr td.IPpointsTD::before {
 		content: attr(data-label);
 		font-size: 11px;
 		font-weight: 600;
@@ -289,7 +289,7 @@
 
 /* MiniTournament PT mode: single column on small screens */
 @media (max-width: 600px) {
-	.nd-mini-pt-grid {
+	.mini-pt-grid {
 		grid-template-columns: 1fr !important;
 	}
 }
@@ -391,30 +391,30 @@
 
 /* New-design tournament tables get the same accent thead as the lobby /
    stats games tables. */
-.nd-table thead tr {
+.table thead tr {
 	background: var(--color-accent);
 }
-.nd-table thead th {
+.table thead th {
 	text-align: center;
 }
 
-/* AllMiniTournaments list uses .nd-row09 rows, which the shared rules turn
+/* AllMiniTournaments list uses .row09 rows, which the shared rules turn
    into cards and hide the thead. Restore the header grid like the lobby /
    stats games tables. Grid columns/gap/padding/border already come from the
-   shared .nd-table:has(.nd-row09) rules in nd-components.css — only the
+   shared .table:has(.row09) rules in components.css — only the
    tournaments-specific display/colour/alignment are overridden here. */
-.nd-table:has(.nd-row09) thead {
+.table:has(.row09) thead {
 	display: block;
 }
-.nd-table:has(.nd-row09) thead tr {
+.table:has(.row09) thead tr {
 	background: var(--color-accent);
 }
-.nd-table:has(.nd-row09) thead th {
+.table:has(.row09) thead th {
 	text-align: center;
 }
 
 @media (max-width: 980px) {
-	.nd-table:has(.nd-row09) thead {
+	.table:has(.row09) thead {
 		display: none;
 	}
 }

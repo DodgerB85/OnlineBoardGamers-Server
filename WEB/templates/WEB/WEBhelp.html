@@ -1,27 +1,27 @@
-{% extends "Lobby/_help_shell.html" %}
+{% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
 {% block page_title %}
   {% translate "Web Help" %}
 {% endblock page_title %}
 {% block content %}
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Rules" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>
         {% blocktranslate %}Web Rules Available <a class='linkOther' href='/static/WEB/Web_Rules.pdf' target='_blank' downlod>here</a>{% endblocktranslate %}
       </p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Playing the Game" %}</h2>
-    <div class="nd-help-qa">
-      <p class="nd-help-icon-line">
+    <div class="help-qa">
+      <p class="help-icon-line">
         <img src="{% static 'WEB/images/icon-box.svg' %}"
              alt="Reserve"
              width="50"
              height="50"
-             class="nd-help-menu-icon topMenuIconForHelp imageWithTextIconImg">
+             class="help-menu-icon topMenuIconForHelp imageWithTextIconImg">
         {% blocktranslate trimmed %}
           You can view unused tiles in the Reserve.
         {% endblocktranslate %}
@@ -36,12 +36,12 @@
           You can also view each players remaining flex time.
         {% endblocktranslate %}
       </p>
-      <p class="nd-help-icon-line">
+      <p class="help-icon-line">
         <img src="{% static 'WEB/images/icon-rewind.svg' %}"
              alt="Rewind"
              width="50"
              height="50"
-             class="nd-help-menu-icon topMenuIconForHelp imageWithTextIconImg">
+             class="help-menu-icon topMenuIconForHelp imageWithTextIconImg">
         {% blocktranslate trimmed %}
           Any player can rewind the game at any time.
         {% endblocktranslate %}
@@ -77,9 +77,9 @@
       </div>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Gameplay" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <b><u>{% translate "Game End:" %}</u></b>
       <p>
         {% translate "The game will end when EITHER one supply pile runs out, OR only 1 player has tiles left in their supply." %}
@@ -88,13 +88,13 @@
       <p>{% translate "If scores are tied at the end of the game, all tied player will jointly win." %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "When can I resign?" %}</h2>
-    <div class="nd-help-qa">
+    <div class="help-qa">
       <p>{% translate "You can resign before adding a tile to the grid." %}</p>
     </div>
   </div>
-  <div class="nd-card nd-section">
+  <div class="card section">
     <h2>{% translate "Further Help" %}</h2>
     <p>
       <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>

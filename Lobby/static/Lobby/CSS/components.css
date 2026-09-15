@@ -1,6 +1,5 @@
-/* nd-components.css — shared design tokens + components for /nd/ design.
-   All component rules scoped under so the old design is untouched.
-   Loaded once from layout_new.html. */
+/* components.css — shared design tokens + components.
+   Loaded once from layout.html. */
 
 :root {
     --color-brand-blue: #a8dadc;
@@ -77,7 +76,7 @@ hr {
 
 
 /* ---------- PAGE CONTAINERS ---------- */
-.nd-page {
+.page {
     width: 100%;
     max-width: 1320px;
     margin: 0 auto;
@@ -85,23 +84,23 @@ hr {
     box-sizing: border-box;
 }
 
-.nd-page-narrow {
+.page-narrow {
     max-width: 720px;
 }
 
-.nd-page-profile {
+.page-profile {
     max-width: 80%;
 }
 
 /* On tablets and below the 80% cap just wastes horizontal space and squeezes
    the form fields; let the profile use the full width earlier. */
 @media (max-width: 900px) {
-    .nd-page-profile {
+    .page-profile {
         max-width: 100%;
     }
 }
 
-.nd-page-header {
+.page-header {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
@@ -110,20 +109,20 @@ hr {
     margin: 4px 0 16px;
 }
 
-.nd-page-title {
+.page-title {
     margin: 0;
 }
 
-.nd-page-subtitle {
+.page-subtitle {
     font-weight: 600;
     font-size: 14px;
 }
 
-.nd-section {
+.section {
     margin: 0 0 24px;
 }
 
-.nd-section-title {
+.section-title {
     font-size: 13px;
     font-weight: 800;
     text-transform: uppercase;
@@ -132,7 +131,7 @@ hr {
 }
 
 /* ---------- CARDS ---------- */
-.nd-card {
+.card {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
@@ -141,21 +140,21 @@ hr {
     box-sizing: border-box;
 }
 
-.nd-card + .nd-card {
+.card + .card {
     margin-top: 16px;
 }
 
-.nd-card-grid .nd-card,
-.nd-features .nd-card,
-.nd-map-editor-grid .nd-card {
+.card-grid .card,
+.features .card,
+.map-editor-grid .card {
     margin-top: 0;
 }
 
-.nd-card-soft {
+.card-soft {
     background: var(--color-surface-soft);
 }
 
-.nd-card-header {
+.card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -163,34 +162,34 @@ hr {
     margin: -4px 0 12px;
 }
 
-.nd-card-title {
+.card-title {
     margin: 0;
 }
 
-.nd-card-grid {
+.card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 16px;
 }
 
-.nd-card-grid-wide {
+.card-grid-wide {
     /* 5 cards per row at 1280px+ so the 10-card game list lands in 2
        even rows. */
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
-.nd-map-editor-grid {
+.map-editor-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
 }
 
 /* ---------- BUTTONS ---------- */
-.nd-button,
-a.nd-button,
-button.nd-button,
-input.nd-button,
-.nd-create-page .registerbtn,
-.nd-create-page .createNewGameButton,
-.nd-create-page input[type="submit"] {
+.button,
+a.button,
+button.button,
+input.button,
+.create-page .registerbtn,
+.create-page .createNewGameButton,
+.create-page input[type="submit"] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -214,17 +213,17 @@ input.nd-button,
 }
 
 @media (hover: hover) {
-    .nd-button:hover,
-    .nd-create-page .registerbtn:hover,
-    .nd-create-page .createNewGameButton:hover,
-    .nd-create-page input[type="submit"]:hover {
+    .button:hover,
+    .create-page .registerbtn:hover,
+    .create-page .createNewGameButton:hover,
+    .create-page input[type="submit"]:hover {
         background: var(--color-accent-strong);
         border-color: var(--color-accent-strong);
         color: #fff;
     }
 }
 
-.nd-button-primary {
+.button-primary {
     background: var(--color-accent);
     border: 1px solid rgba(0, 0, 0, 0.15);
     color: var(--color-accent-ink);
@@ -232,17 +231,17 @@ input.nd-button,
 }
 
 @media (hover: hover) {
-    .nd-button-primary:hover {
+    .button-primary:hover {
         background: var(--color-accent-strong);
         border-color: rgba(0, 0, 0, 0.15);
         color: #fff;
     }
 }
 
-.nd-button:disabled,
-.nd-create-page .registerbtn:disabled,
-.nd-create-page .createNewGameButton:disabled,
-.nd-create-page input[type="submit"]:disabled {
+.button:disabled,
+.create-page .registerbtn:disabled,
+.create-page .createNewGameButton:disabled,
+.create-page input[type="submit"]:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     background: var(--color-surface-soft);
@@ -250,10 +249,10 @@ input.nd-button,
 }
 
 @media (hover: hover) {
-    .nd-button:disabled:hover,
-    .nd-create-page .registerbtn:disabled:hover,
-    .nd-create-page .createNewGameButton:disabled:hover,
-    .nd-create-page input[type="submit"]:disabled:hover {
+    .button:disabled:hover,
+    .create-page .registerbtn:disabled:hover,
+    .create-page .createNewGameButton:disabled:hover,
+    .create-page input[type="submit"]:disabled:hover {
         background: var(--color-surface-soft);
         border-color: #cbd3db;
         cursor: not-allowed;
@@ -261,48 +260,48 @@ input.nd-button,
 }
 
 /* "Ghost" / reverse-nav links render as the same white/secondary button as
-   .nd-button — no separate borderless style. The distinct ghost look was
+   .button — no separate borderless style. The distinct ghost look was
    redundant (identical at rest, only an unwanted underline on hover). The
    class is kept so existing template markup needs no churn. */
-.nd-button-ghost {
+.button-ghost {
     background: var(--color-surface);
     border-color: #b8c2cc;
     color: var(--color-ink);
 }
 
 @media (hover: hover) {
-    .nd-button-ghost:hover {
+    .button-ghost:hover {
         background: var(--color-surface);
         border-color: var(--color-accent-strong);
         color: var(--color-accent-strong);
     }
 }
 
-.nd-button-danger {
+.button-danger {
     background: var(--color-danger-bg);
     border: 1px solid rgba(181, 64, 64, 0.5);
     color: var(--color-danger);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
-/* Destructive buttons keep a red hover — without this, the base .nd-button:hover
+/* Destructive buttons keep a red hover — without this, the base .button:hover
    would turn them teal, breaking the "red = destructive" cue. */
 @media (hover: hover) {
-    .nd-button-danger:hover {
+    .button-danger:hover {
         background: rgba(220, 80, 80, 0.24);
         border-color: var(--color-danger);
         color: var(--color-danger);
     }
 }
 
-.nd-button-sm {
+.button-sm {
     padding: 8px 10px;
     min-height: 36px;
     font-size: 13px;
 }
 
 /* ---------- BASELINE INPUTS ---------- *
-   Cheap baseline styling for forms that haven't been migrated to .nd-form-row
+   Cheap baseline styling for forms that haven't been migrated to .form-row
    yet (createXYZ pages). Specific component selectors win over these. */
 input[type="text"],
 input[type="email"],
@@ -339,7 +338,7 @@ button {
 }
 
 /* ---------- FORM ELEMENTS ---------- */
-.nd-form-row {
+.form-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -348,28 +347,28 @@ button {
     border-bottom: 1px solid var(--color-border);
 }
 
-.nd-form-row:last-child {
+.form-row:last-child {
     border-bottom: none;
 }
 
-.nd-form-row > label,
-.nd-form-label {
+.form-row > label,
+.form-label {
     flex: 0 0 220px;
     color: var(--color-ink);
     font-weight: 600;
     font-size: 14px;
 }
 
-.nd-form-row .nd-form-help {
+.form-row .form-help {
     flex-basis: 100%;
     font-size: 13px;
     margin: 0;
     padding-left: 232px;
 }
-.nd-page-profile .nd-field > .nd-form-help {
+.page-profile .field > .form-help {
     font-size: 14px;
 }
-.nd-profile-game-preferences {
+.profile-game-preferences {
     margin-top: 24px;
     padding: 16px;
     background: var(--color-surface-soft);
@@ -377,12 +376,12 @@ button {
     border-radius: var(--radius-md);
 }
 
-.nd-form-row > input[type="text"],
-.nd-form-row > input[type="email"],
-.nd-form-row > input[type="password"],
-.nd-form-row > input[type="number"],
-.nd-form-row > select,
-.nd-form-row > textarea {
+.form-row > input[type="text"],
+.form-row > input[type="email"],
+.form-row > input[type="password"],
+.form-row > input[type="number"],
+.form-row > select,
+.form-row > textarea {
     flex: 1 1 220px;
     padding: 8px 10px;
     margin: 0;
@@ -395,28 +394,28 @@ button {
     box-sizing: border-box;
 }
 
-.nd-field {
+.field {
     flex: 1 1 220px;
 }
 
-.nd-form-row > input:focus,
-.nd-form-row > select:focus,
-.nd-form-row > textarea:focus {
+.form-row > input:focus,
+.form-row > select:focus,
+.form-row > textarea:focus {
     outline: 2px solid var(--color-accent);
     outline-offset: 1px;
     border-color: var(--color-accent-strong);
 }
 
-.nd-form-row > textarea {
+.form-row > textarea {
     min-height: 80px;
     resize: vertical;
 }
 
-.nd-register-form p {
+.register-form p {
     margin: 0 0 12px;
 }
 
-.nd-register-form label {
+.register-form label {
     display: block;
     margin-bottom: 4px;
     color: var(--color-ink);
@@ -424,22 +423,22 @@ button {
     font-size: 14px;
 }
 
-.nd-register-form input[type="text"],
-.nd-register-form input[type="email"],
-.nd-register-form input[type="password"] {
+.register-form input[type="text"],
+.register-form input[type="email"],
+.register-form input[type="password"] {
     width: 100%;
     box-sizing: border-box;
     padding: 8px 10px;
 }
 
-.nd-register-form .helptext {
+.register-form .helptext {
     display: block;
     margin-top: 4px;
     font-size: 12px;
     line-height: 1.4;
 }
 
-.nd-register-form .errorlist {
+.register-form .errorlist {
     margin: 0 0 8px;
     padding-left: 18px;
     color: var(--color-danger);
@@ -447,47 +446,47 @@ button {
 }
 
 @media (max-width: 640px) {
-    .nd-form-row {
+    .form-row {
         flex-direction: column;
         align-items: stretch;
     }
-    .nd-form-row > label,
-    .nd-form-label {
+    .form-row > label,
+    .form-label {
         flex: 0 0 auto;
     }
-    .nd-form-row .nd-form-help {
+    .form-row .form-help {
         padding-left: 0;
     }
     /* In column-flex context flex-basis becomes min-height; override to content sizing */
-    .nd-field,
-    .nd-form-row > input[type="text"],
-    .nd-form-row > input[type="email"],
-    .nd-form-row > input[type="password"],
-    .nd-form-row > input[type="number"],
-    .nd-form-row > select,
-    .nd-form-row > textarea {
+    .field,
+    .form-row > input[type="text"],
+    .form-row > input[type="email"],
+    .form-row > input[type="password"],
+    .form-row > input[type="number"],
+    .form-row > select,
+    .form-row > textarea {
         flex: 0 0 auto;
         width: 100%;
     }
 }
 
 /* ---------- TABLES ---------- */
-.nd-table {
+.table {
     display: block;
     width: 100%;
     border-collapse: collapse;
     font-size: 16px;
 }
 
-.nd-table th,
-.nd-table td {
+.table th,
+.table td {
     text-align: left;
     padding: 8px 10px;
     border-bottom: 1px solid var(--color-border);
 }
 
-.nd-table th,
-.nd-table .headingRow td {
+.table th,
+.table .headingRow td {
     background: transparent;
     color: #fff;
     font-size: 12px;
@@ -497,24 +496,24 @@ button {
 }
 
 @media (hover: hover) {
-    .nd-table tbody tr:hover {
+    .table tbody tr:hover {
         background: var(--color-surface-soft);
     }
 }
 
-.nd-table-scroll {
+.table-scroll {
     overflow-x: auto;
 }
 
 /* Constrain game and starting-option icons rendered inside table cells */
-.nd-table td .gameIcon {
+.table td .gameIcon {
     width: 50px;
     height: 50px;
     vertical-align: middle;
 }
 
 
-.nd-table td .startingOption {
+.table td .startingOption {
     width: 40px;
     height: 40px;
     vertical-align: middle;
@@ -522,21 +521,21 @@ button {
 }
 
 /* Changelog entry layout */
-.nd-log-entry {
+.log-entry {
     padding: 14px 0;
     border-bottom: 1px solid var(--color-border);
 }
-.nd-log-entry:last-child {
+.log-entry:last-child {
     border-bottom: none;
 }
-.nd-log-date {
+.log-date {
     font-size: 12px;
     font-weight: 600;
     margin-bottom: 6px;
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
-.nd-log-text {
+.log-text {
     font-size: 14px;
     line-height: 1.65;
     color: var(--color-ink);
@@ -544,11 +543,11 @@ button {
 
 /* Credits list (About page) — each row has the role on the left and the
    name on the right. Wraps on narrow screens. */
-.nd-credits {
+.credits {
     font-size: 14px;
     line-height: 1.7;
 }
-.nd-credits .nd-credits-row {
+.credits .credits-row {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
@@ -557,18 +556,18 @@ button {
     border-bottom: 1px solid var(--color-border);
     flex-wrap: wrap;
 }
-.nd-credits .nd-credits-row:last-child {
+.credits .credits-row:last-child {
     border-bottom: none;
 }
-.nd-credits-label {
+.credits-label {
     color: var(--color-ink);
 }
-.nd-credits-value {
+.credits-value {
     color: var(--color-accent-strong);
     font-weight: 600;
     text-align: right;
 }
-.nd-thanks {
+.thanks {
     background: var(--color-surface-soft);
     border-radius: var(--radius-sm);
     padding: 8px 12px;
@@ -576,20 +575,20 @@ button {
 }
 
 /* Donate payment options row */
-.nd-donate-options {
+.donate-options {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
     margin-top: 4px;
 }
-.nd-donate-option {
+.donate-option {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
     min-width: 160px;
 }
-.nd-donate-option-label {
+.donate-option-label {
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
@@ -599,7 +598,7 @@ button {
 /* ---------- CALLOUTS (info / warn / alert boxes used inside cards) ----------
    Soft-fill box with an accent left bar. Drop into any card to highlight
    a notice that belongs inline with the surrounding content. */
-.nd-callout {
+.callout {
     background: var(--color-surface-soft);
     border: 1px solid var(--color-border);
     border-left: 3px solid var(--color-accent);
@@ -610,35 +609,35 @@ button {
     font-size: 14px;
     line-height: 1.55;
 }
-.nd-callout:last-child {
+.callout:last-child {
     margin-bottom: 0;
 }
-.nd-callout-warn {
+.callout-warn {
     border-left-color: var(--color-amber);
     background: rgba(216, 164, 74, 0.08);
 }
-.nd-callout-alert {
+.callout-alert {
     border-left-color: var(--color-danger);
     background: var(--color-danger-bg);
 }
-.nd-callout-info {
+.callout-info {
     border-left-color: var(--color-accent);
 }
 
 /* Form action bar (right-aligned submit) and footer-link line. */
-.nd-form-actions {
+.form-actions {
     display: flex;
     justify-content: flex-end;
     margin-top: 12px;
 }
-.nd-form-footer-link {
+.form-footer-link {
     font-size: 14px;
     margin-top: 14px;
     margin-bottom: 0;
 }
 
 /* ---------- PILLS ---------- */
-.nd-pill {
+.pill {
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -650,32 +649,32 @@ button {
     border: 1px solid var(--color-border);
     white-space: nowrap;
 }
-.nd-pill-positive {
+.pill-positive {
     background: var(--color-positive-bg);
     color: var(--color-positive);
     border-color: transparent;
 }
 
-.nd-pill-warn {
+.pill-warn {
     background: var(--color-warn-bg);
     color: var(--color-warn);
     border-color: transparent;
 }
 
-.nd-pill-danger {
+.pill-danger {
     background: var(--color-danger-bg);
     color: var(--color-danger);
     border-color: transparent;
 }
 
-.nd-pill-accent {
+.pill-accent {
     background: rgba(147, 213, 208, 0.22);
     color: var(--color-accent-strong);
     border-color: transparent;
 }
 
 /* ---------- TABS (09 dense-scoreboard look) ---------- */
-.nd-tabs {
+.tabs {
     display: flex;
     align-items: stretch;
     gap: 0;
@@ -688,7 +687,7 @@ button {
     border-bottom: none;
 }
 
-.nd-tab {
+.tab {
     background: var(--color-surface);
     color: var(--color-ink);
     border: none;
@@ -706,42 +705,42 @@ button {
     white-space: nowrap;
     font-family: inherit;
 }
-.nd-tab:last-child { border-right: none; }
+.tab:last-child { border-right: none; }
 
-.nd-tab.tablinks {
+.tab.tablinks {
     border: 1px solid var(--color-accent);
 }
 
 @media (hover: hover) {
-    .nd-tab:hover {
+    .tab:hover {
         color: #fff;
         background: var(--color-accent-strong);
     }
 }
 
-.nd-tab.active,
-.nd-tab.tablinks.active {
+.tab.active,
+.tab.tablinks.active {
     color: #fff;
     background: var(--color-accent);
 }
 
-.nd-tab-count {
+.tab-count {
     font-size: 13px;
     font-weight: 700;
     color: inherit;
     opacity: 0.85;
 }
 
-.nd-tab.active .nd-tab-count {
+.tab.active .tab-count {
     opacity: 1;
 }
 
 @media (max-width: 768px) {
-    .nd-tabs {
+    .tabs {
         gap: 1px;
         flex-wrap: wrap;
     }
-    .nd-tab {
+    .tab {
         padding: 8px 10px 6px;
         font-size: 13px;
         flex: 1 0 0%;
@@ -749,7 +748,7 @@ button {
 }
 
 @media (max-width: 480px) {
-    .nd-tab {
+    .tab {
         padding: 8px 8px 6px;
         font-size: 12px;
         flex: 1 0 0%;
@@ -759,14 +758,14 @@ button {
 /* ---------- MODULE-ICON TOOLTIPS ---------- */
 /* Wrapper around .startingOption so hover shows the title on desktop and a
    readable label on mobile (where hover doesn't exist). */
-.nd-mod-wrap {
+.mod-wrap {
     position: relative;
     display: inline-block;
     line-height: 0;
 }
 
-.nd-mod-wrap .startingOption,
-.nd-mod-wrap > img {
+.mod-wrap .startingOption,
+.mod-wrap > img {
     display: inline-block;
     vertical-align: middle;
     width: 38px;
@@ -777,7 +776,7 @@ button {
     box-sizing: border-box;
 }
 
-.nd-mod-wrap::after {
+.mod-wrap::after {
     content: attr(data-label);
     position: absolute;
     top: calc(100% + 4px);
@@ -797,20 +796,20 @@ button {
     z-index: 30;
 }
 
-.nd-mod-wrap:hover::after,
-.nd-mod-wrap:focus-within::after {
+.mod-wrap:hover::after,
+.mod-wrap:focus-within::after {
     opacity: 1;
 }
 
 @media (hover: none) {
     /* Touch fallback: render the label inline under the icon when there's room. */
-    .nd-mod-list-mobile .nd-mod-wrap {
+    .mod-list-mobile .mod-wrap {
         display: inline-flex;
         flex-direction: column;
         align-items: center;
         gap: 2px;
     }
-    .nd-mod-list-mobile .nd-mod-wrap::after {
+    .mod-list-mobile .mod-wrap::after {
         position: static;
         transform: none;
         opacity: 1;
@@ -821,49 +820,49 @@ button {
 }
 
 /* ---------- LANDING / HERO ---------- */
-.nd-landing {
+.landing {
     padding: 8px 0 16px;
 }
 
-.nd-hero {
+.hero {
     padding: 24px;
     margin-bottom: 28px;
 }
 
-.nd-hero-title {
+.hero-title {
     font-size: 30px;
     line-height: 1.2;
     max-width: 760px;
     margin: 0 0 10px;
 }
 
-.nd-hero-sub {
+.hero-sub {
     font-size: 15px;
     color: var(--color-ink-soft);
     max-width: 760px;
     margin: 0 0 16px;
 }
 
-.nd-hero-actions {
+.hero-actions {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
 }
 
-.nd-features {
+.features {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     align-items: stretch;
     gap: 12px;
 }
 
-/* .nd-feature cards: flex column so h3 sits at top, body fills the rest.
-   Grid (not flex) on .nd-features above sizes every column track equally
+/* .feature cards: flex column so h3 sits at top, body fills the rest.
+   Grid (not flex) on .features above sizes every column track equally
    regardless of how many cards land in a row, avoiding the flex-wrap quirk
    where a lone item on its own row stretches to fill it. min-height is
    a safety net so the row picks the tallest natural content as the
    baseline even if the browser collapses the grid container's height. */
-.nd-feature {
+.feature {
     display: flex;
     flex-direction: column;
     min-height: 152px;
@@ -871,12 +870,12 @@ button {
     box-sizing: border-box;
 }
 
-.nd-feature-title {
+.feature-title {
     margin: 0 0 4px;
     color: var(--color-accent-strong);
 }
 
-.nd-feature-text {
+.feature-text {
     margin: 0;
     font-size: 14px;
     color: var(--color-ink-soft);
@@ -885,14 +884,14 @@ button {
     flex: 1 0 auto;
 }
 
-.nd-game-card {
+.game-card {
     padding: 0;
     overflow: hidden;
     display: flex;
     flex-direction: column;
 }
 
-.nd-game-card-img {
+.game-card-img {
     height: 220px;
     overflow: hidden;
     flex-shrink: 0;
@@ -904,7 +903,7 @@ button {
     background-size: contain;
 }
 
-.nd-game-card-img img {
+.game-card-img img {
     /* Hide the visual image — background-image above paints it. Kept in the
        DOM so right-click and the Game Icons template can read src/title. */
     display: block;
@@ -914,28 +913,28 @@ button {
     pointer-events: none;
 }
 
-.nd-game-card-body {
+.game-card-body {
     padding: 12px 14px 14px;
 }
 
-.nd-game-card-title {
+.game-card-title {
     margin: 0 0 2px;
 }
 
-.nd-game-card-text {
+.game-card-text {
     margin: 4px 0 0;
     font-size: 13px;
     color: var(--color-ink-soft);
 }
 
-a.nd-create-tile {
+a.create-tile {
     text-decoration: none;
     color: inherit;
     transition: transform 0.1s, box-shadow 0.1s, border-color 0.1s;
 }
 
 @media (hover: hover) {
-    a.nd-create-tile:hover {
+    a.create-tile:hover {
         transform: translateY(-3px);
         box-shadow: var(--shadow-md);
         border-color: var(--color-accent-strong);
@@ -943,8 +942,8 @@ a.nd-create-tile {
 }
 
 /* Game card as <button> (landing-page expansion toggle). Reset button
-   defaults so the card visual matches the .nd-game-card div variant. */
-.nd-game-card-btn {
+   defaults so the card visual matches the .game-card div variant. */
+.game-card-btn {
     border: 1px solid var(--color-border);
     cursor: pointer;
     text-align: left;
@@ -953,19 +952,19 @@ a.nd-create-tile {
     transition: transform 0.1s, box-shadow 0.1s, border-color 0.1s;
     padding: 0;
 }
-.nd-game-card-btn:focus-visible {
+.game-card-btn:focus-visible {
     outline: 3px solid var(--color-accent-strong);
     outline-offset: 3px;
 }
 @media (hover: hover) {
-    .nd-game-card-btn:hover {
+    .game-card-btn:hover {
         transform: translateY(-3px);
         box-shadow: var(--shadow-md);
         border-color: var(--color-accent-strong);
     }
 }
 
-.nd-create-tile-label {
+.create-tile-label {
     padding: 10px 14px;
     font-weight: 600;
     font-size: 14px;
@@ -975,15 +974,15 @@ a.nd-create-tile {
     text-overflow: ellipsis;
 }
 
-.nd-map-editor-grid .nd-game-card-img {
+.map-editor-grid .game-card-img {
     height: 130px;
 }
 
-.nd-map-editor-grid .nd-game-card-img img {
+.map-editor-grid .game-card-img img {
     height: 130px;
 }
 
-.nd-map-editor-grid .nd-create-tile-label {
+.map-editor-grid .create-tile-label {
     font-size: 13px;
     font-weight: 500;
     color: var(--color-ink-soft);
@@ -991,48 +990,48 @@ a.nd-create-tile {
 }
 
 /* ---------- MAP EDITORS ---------- */
-.nd-map-editor {
+.map-editor {
     max-width: 1440px;
     /* Match old-design `.container { text-align: center }` so the map board
-       and its fit-content children center on the /nd/ map-editor page. */
+       and its fit-content children center on the map-editor page. */
     text-align: center;
 }
 
-.nd-map-editor-workspace {
+.map-editor-workspace {
     display: grid;
     grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
     align-items: start;
     gap: 16px;
 }
 
-.nd-map-editor-sidebar,
-.nd-map-editor-main {
+.map-editor-sidebar,
+.map-editor-main {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 16px;
     min-width: 0;
 }
 
-.nd-map-editor-main > .nd-card {
+.map-editor-main > .card {
     min-width: 0;
 }
 
-.nd-map-editor-section-title {
+.map-editor-section-title {
     margin: 0 0 10px;
     font-size: 16px;
     font-weight: 700;
     color: var(--color-ink);
 }
 
-.nd-map-editor-player-picker {
+.map-editor-player-picker {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 6px;
 }
 
-.nd-map-editor-player-picker .playerCountFixed,
-.nd-map-editor-player-picker .playerCount {
+.map-editor-player-picker .playerCountFixed,
+.map-editor-player-picker .playerCount {
     width: 44px;
     height: 44px;
     padding: 2px;
@@ -1040,34 +1039,34 @@ a.nd-create-tile {
     box-sizing: border-box;
 }
 
-.nd-map-editor-player-picker .playerCount {
+.map-editor-player-picker .playerCount {
     cursor: pointer;
 }
 
 @media (hover: hover) {
-    .nd-map-editor-player-picker .playerCount:hover {
+    .map-editor-player-picker .playerCount:hover {
         background: rgba(147, 213, 208, 0.12);
     }
 }
 
-.nd-map-editor-actions {
+.map-editor-actions {
     display: grid;
     gap: 8px;
 }
 
-.nd-map-editor-actions .nd-button,
-.nd-map-editor-actions .nd-button input {
+.map-editor-actions .button,
+.map-editor-actions .button input {
     width: 100%;
 }
 
-.nd-map-editor-help,
-.nd-map-editor-note {
+.map-editor-help,
+.map-editor-note {
     margin: 0;
     font-size: 14px;
     line-height: 1.45;
 }
 
-.nd-map-editor #availableMapTiles {
+.map-editor #availableMapTiles {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -1080,19 +1079,19 @@ a.nd-create-tile {
     border-radius: var(--radius-sm);
 }
 
-.nd-map-editor #availableMapTiles img {
+.map-editor #availableMapTiles img {
     padding: 6px;
     border-radius: var(--radius-sm);
 }
 
 @media (hover: hover) {
-    .nd-map-editor #availableMapTiles img:hover {
+    .map-editor #availableMapTiles img:hover {
         box-shadow: 0 0 0 2px var(--color-accent);
     }
 }
 
-.nd-map-editor #boardArea,
-.nd-map-editor #boardAreaAQY {
+.map-editor #boardArea,
+.map-editor #boardAreaAQY {
     margin: 0;
     padding: 16px;
     height: auto;
@@ -1105,66 +1104,66 @@ a.nd-create-tile {
     box-shadow: none;
 }
 
-.nd-map-editor #boardArea {
+.map-editor #boardArea {
     overflow-x: auto;
     overflow-y: hidden;
 }
 
-.nd-map-editor #board {
+.map-editor #board {
     flex: 0 0 auto;
     background-color: var(--color-surface);
     border: 2px solid var(--color-border-strong);
     border-radius: var(--radius-sm);
 }
 
-.nd-map-editor #boardAQYcanvas {
+.map-editor #boardAQYcanvas {
     flex: 0 0 auto;
 }
 
-.nd-map-editor-board-scale {
+.map-editor-board-scale {
     flex: 0 0 auto;
     position: relative;
 }
 
-.nd-map-editor .boardTile {
+.map-editor .boardTile {
     border-radius: var(--radius-sm);
 }
 
-.nd-map-editor .boardTile.over {
+.map-editor .boardTile.over {
     border-color: var(--color-accent);
     box-shadow: 0 0 0 2px var(--color-accent-strong);
 }
 
-.nd-map-editor #board .tileDiv,
-.nd-map-editor .availableTileAQY {
+.map-editor #board .tileDiv,
+.map-editor .availableTileAQY {
     border-radius: var(--radius-sm);
     overflow: hidden;
 }
 
-.nd-map-editor .AQYavailableTileFieldset {
+.map-editor .AQYavailableTileFieldset {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     background: var(--color-surface);
     box-shadow: var(--shadow-sm);
 }
 
-.nd-map-editor .boardHex {
+.map-editor .boardHex {
     stroke: var(--color-border-strong);
     stroke-width: 12px;
 }
 
-.nd-map-editor .boardHexSelectable:hover,
-.nd-map-editor .yellowBoardHexOutlineHover {
+.map-editor .boardHexSelectable:hover,
+.map-editor .yellowBoardHexOutlineHover {
     stroke: var(--color-amber);
 }
 
-.nd-map-editor .boardHex.over,
-.nd-map-editor .yellowBoardHexOutlineHoverEmpty {
+.map-editor .boardHex.over,
+.map-editor .yellowBoardHexOutlineHoverEmpty {
     stroke: var(--color-accent);
 }
 
-.nd-map-editor #invalidMapCautionSpanAQY,
-.nd-map-editor #BGHerrorSpan {
+.map-editor #invalidMapCautionSpanAQY,
+.map-editor #BGHerrorSpan {
     color: var(--color-danger);
     background: var(--color-danger-bg);
     border-radius: var(--radius-sm);
@@ -1173,105 +1172,105 @@ a.nd-create-tile {
     font-weight: 600;
 }
 
-.nd-map-editor .BGHoptionsDiv {
+.map-editor .BGHoptionsDiv {
     display: grid;
     gap: 6px;
     margin-top: 14px;
 }
 
-.nd-map-editor .BGHoptionMainTitle {
+.map-editor .BGHoptionMainTitle {
     font-size: 16px;
     font-weight: 700;
 }
 
-.nd-map-editor .BGHoptionTitle {
+.map-editor .BGHoptionTitle {
     color: var(--color-ink-soft);
 }
 
-.nd-map-editor .BGHstatsDiv {
+.map-editor .BGHstatsDiv {
     line-height: 1.6;
 }
 
-.nd-map-editor .BGH_drinkSpot {
+.map-editor .BGH_drinkSpot {
     width: 26px;
     height: 26px;
     vertical-align: middle;
 }
 
 @media (max-width: 800px) {
-    .nd-map-editor-workspace {
+    .map-editor-workspace {
         grid-template-columns: 1fr;
     }
 
 }
 
 @media (max-width: 480px) {
-    .nd-page-profile {
+    .page-profile {
         max-width: 100%;
     }
     /* Tighten the inline-gap (16px) radio/option rows so they don't feel
        cramped wrapping on narrow phones. !important beats the inline style. */
-    .nd-row-flex {
+    .row-flex {
         gap: 8px !important;
     }
-    .nd-card-grid-wide,
-    .nd-map-editor-grid {
+    .card-grid-wide,
+    .map-editor-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
     }
 
-    .nd-game-card-img {
+    .game-card-img {
         height: 140px;
         max-height: 140px;
     }
 
-    .nd-game-card-img img {
+    .game-card-img img {
         height: 140px;
     }
 
-    .nd-map-editor-grid .nd-game-card-img {
+    .map-editor-grid .game-card-img {
         height: 110px;
         max-height: 110px;
     }
 
-    .nd-map-editor-grid .nd-game-card-img img {
+    .map-editor-grid .game-card-img img {
         height: 110px;
     }
 
-    .nd-create-tile-label {
+    .create-tile-label {
         padding: 8px 10px;
         font-size: 12px;
     }
 }
 
 @media (max-width: 640px) {
-    .nd-hero {
+    .hero {
         padding: 18px;
         margin-bottom: 24px;
     }
-    .nd-hero-title {
+    .hero-title {
         font-size: 24px;
     }
-    .nd-hero-sub {
+    .hero-sub {
         font-size: 15px;
     }
 }
 
 /* ---------- UTILITY ---------- */
-.nd-center { text-align: center; }
+.center { text-align: center; }
 
 /* Existing game-creation forms keep their established IDs and client-side hooks. */
-.nd-create-page {
+.create-page {
     width: min(1320px, calc(100% - 32px));
     margin: 28px auto 40px;
 }
 
-.nd-create-page .messages {
+.create-page .messages {
     margin-bottom: 16px;
 }
 
-.nd-create-page .messages > div,
-.nd-create-page #invalidForm {
+.create-page .messages > div,
+.create-page #invalidForm {
     display: block;
     margin-bottom: 8px;
     padding: 10px 14px;
@@ -1281,18 +1280,18 @@ a.nd-create-tile {
     color: var(--color-ink);
 }
 
-.nd-create-page .messages .error,
-.nd-create-page #invalidForm.error {
+.create-page .messages .error,
+.create-page #invalidForm.error {
     border-color: var(--color-danger);
     background: var(--color-danger-bg);
     color: var(--color-danger);
 }
 
-.nd-create-page #allOptions {
+.create-page #allOptions {
     width: 100%;
 }
 
-.nd-create-page .topOfNewGameSpan {
+.create-page .topOfNewGameSpan {
     display: block;
     margin: 0 0 16px;
     padding: 12px 14px;
@@ -1303,15 +1302,15 @@ a.nd-create-tile {
     font-size: 14px;
 }
 
-.nd-create-page .topOfNewGameOptionsDiv {
+.create-page .topOfNewGameOptionsDiv {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     align-items: start;
     gap: 16px;
 }
 
-.nd-create-page .optionsGroupTop,
-.nd-create-page .optionsGroupModules {
+.create-page .optionsGroupTop,
+.create-page .optionsGroupModules {
     min-width: 0;
     margin: 0;
     padding: 0;
@@ -1321,8 +1320,8 @@ a.nd-create-tile {
     overflow: hidden;
 }
 
-.nd-create-page .optionsGroupTop > legend,
-.nd-create-page .optionsGroupModules > legend {
+.create-page .optionsGroupTop > legend,
+.create-page .optionsGroupModules > legend {
     box-sizing: border-box;
     width: 100%;
     margin: 0;
@@ -1334,10 +1333,10 @@ a.nd-create-tile {
     font-weight: 700;
 }
 
-.nd-create-page .singleChoiceDiv,
-.nd-create-page .singleChoiceWithTextDiv,
-.nd-create-page .singleChoiceDivText,
-.nd-create-page .FCMsingleChoiceDiv {
+.create-page .singleChoiceDiv,
+.create-page .singleChoiceWithTextDiv,
+.create-page .singleChoiceDivText,
+.create-page .FCMsingleChoiceDiv {
     display: flex;
     align-items: flex-start;
     gap: 12px;
@@ -1348,20 +1347,20 @@ a.nd-create-tile {
     color: var(--color-ink);
 }
 
-.nd-create-page .singleChoiceDiv > br,
-.nd-create-page .singleChoiceWithTextDiv > br,
-.nd-create-page .singleChoiceDivText > br,
-.nd-create-page .FCMsingleChoiceDiv > br {
+.create-page .singleChoiceDiv > br,
+.create-page .singleChoiceWithTextDiv > br,
+.create-page .singleChoiceDivText > br,
+.create-page .FCMsingleChoiceDiv > br {
     display: none;
 }
 
-.nd-create-page .optionsGroupTop > :last-child,
-.nd-create-page .optionsGroupModules > :last-child {
+.create-page .optionsGroupTop > :last-child,
+.create-page .optionsGroupModules > :last-child {
     border-bottom: 0;
 }
 
-.nd-create-page .choiceLabel,
-.nd-create-page .choiceLabelText {
+.create-page .choiceLabel,
+.create-page .choiceLabelText {
     flex: 0 0 145px;
     margin: 0;
     color: var(--color-ink);
@@ -1369,18 +1368,18 @@ a.nd-create-tile {
     font-weight: 600;
 }
 
-.nd-create-page .optionSelection,
-.nd-create-page .optionSelectionText,
-.nd-create-page .autocomplete {
+.create-page .optionSelection,
+.create-page .optionSelectionText,
+.create-page .autocomplete {
     flex: 1 1 180px;
     min-width: 0;
 }
 
-.nd-create-page .autocomplete {
+.create-page .autocomplete {
     position: relative;
 }
 
-.nd-create-page .autocomplete-items {
+.create-page .autocomplete-items {
     position: absolute;
     z-index: 20;
     top: 100%;
@@ -1393,57 +1392,57 @@ a.nd-create-tile {
     box-shadow: var(--shadow-md);
 }
 
-.nd-create-page .autocomplete-items div {
+.create-page .autocomplete-items div {
     padding: 8px 10px;
     border-bottom: 1px solid var(--color-border);
     cursor: pointer;
 }
 
-.nd-create-page .autocomplete-items div:last-child {
+.create-page .autocomplete-items div:last-child {
     border-bottom: 0;
 }
 
-.nd-create-page .autocomplete-items div:hover,
-.nd-create-page .autocomplete-active {
+.create-page .autocomplete-items div:hover,
+.create-page .autocomplete-active {
     background: var(--color-positive-bg);
 }
 
-.nd-create-page .optionSelection input[type="text"],
-.nd-create-page .optionSelectionText input[type="text"],
-.nd-create-page .autocomplete input[type="text"] {
+.create-page .optionSelection input[type="text"],
+.create-page .optionSelectionText input[type="text"],
+.create-page .autocomplete input[type="text"] {
     box-sizing: border-box;
     width: 100%;
 }
 
-.nd-create-page .choiceLabel > input,
-.nd-create-page .singleChoiceDiv > input[type="checkbox"],
-.nd-create-page .singleChoiceDiv > input[type="radio"],
-.nd-create-page .singleChoiceWithTextDiv > input[type="checkbox"] {
+.create-page .choiceLabel > input,
+.create-page .singleChoiceDiv > input[type="checkbox"],
+.create-page .singleChoiceDiv > input[type="radio"],
+.create-page .singleChoiceWithTextDiv > input[type="checkbox"] {
     flex: 0 0 auto;
     margin-top: 3px;
 }
 
-.nd-create-page .inlineHelp,
-.nd-create-page .optionHelp {
+.create-page .inlineHelp,
+.create-page .optionHelp {
     flex: 1 0 calc(100% - 28px);
     margin-left: 28px;
     font-size: 13px;
     font-style: normal;
 }
 
-.nd-create-page .singleChoiceDiv:has(.choiceLabel) .inlineHelp,
-.nd-create-page .singleChoiceWithTextDiv:has(.choiceLabelText) .inlineHelp {
+.create-page .singleChoiceDiv:has(.choiceLabel) .inlineHelp,
+.create-page .singleChoiceWithTextDiv:has(.choiceLabelText) .inlineHelp {
     margin-left: 157px;
 }
 
-.nd-create-page .notEnoughExperience {
+.create-page .notEnoughExperience {
     padding: 2px 4px;
     border-radius: var(--radius-sm);
     background: var(--color-warn-bg);
     color: var(--color-warn);
 }
 
-.nd-page .paceHelpIcon {
+.page .paceHelpIcon {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -1459,7 +1458,7 @@ a.nd-create-tile {
     flex-shrink: 0;
 }
 
-.nd-page .paceHelpIcon .paceTooltip {
+.page .paceHelpIcon .paceTooltip {
     visibility: hidden;
     width: 300px;
     background: #333;
@@ -1482,7 +1481,7 @@ a.nd-create-tile {
     pointer-events: auto;
 }
 
-.nd-page .paceHelpIcon .paceTooltip::after {
+.page .paceHelpIcon .paceTooltip::after {
     content: "";
     position: absolute;
     bottom: 100%;
@@ -1492,29 +1491,29 @@ a.nd-create-tile {
     border-bottom-color: #333;
 }
 
-.nd-page .paceHelpIcon .paceTooltip b {
+.page .paceHelpIcon .paceTooltip b {
     color: #fff;
 }
 
-.nd-page .paceHelpIcon.is-open .paceTooltip {
+.page .paceHelpIcon.is-open .paceTooltip {
     visibility: visible;
     opacity: 1;
 }
 
 @media (hover: hover) {
-    .nd-page .paceHelpIcon:hover:not(.is-dismissed) .paceTooltip {
+    .page .paceHelpIcon:hover:not(.is-dismissed) .paceTooltip {
         visibility: visible;
         opacity: 1;
     }
 }
 
-.nd-page .paceHelpIcon:focus-visible {
+.page .paceHelpIcon:focus-visible {
     outline: 2px solid var(--color-accent-strong, #5875f8);
     outline-offset: 2px;
 }
 
 @media (max-width: 720px) {
-    .nd-page .paceHelpIcon .paceTooltip {
+    .page .paceHelpIcon .paceTooltip {
         position: fixed;
         top: 50%;
         right: 16px;
@@ -1526,39 +1525,39 @@ a.nd-create-tile {
         overflow-y: auto;
         transform: translateY(-50%);
     }
-    .nd-page .paceHelpIcon .paceTooltip::after {
+    .page .paceHelpIcon .paceTooltip::after {
         display: none;
     }
 }
 
-.nd-create-page .registerbtn,
-.nd-create-page .createNewGameButton,
-.nd-create-page input[type="submit"] {
+.create-page .registerbtn,
+.create-page .createNewGameButton,
+.create-page input[type="submit"] {
     display: flex;
     width: fit-content;
     max-width: 100%;
     margin: 20px auto;
 }
 
-.nd-create-page input[type="checkbox"],
-.nd-create-page input[type="radio"] {
+.create-page input[type="checkbox"],
+.create-page input[type="radio"] {
     accent-color: var(--color-accent-strong);
 }
 
-.nd-create-page input:disabled,
-.nd-create-page select:disabled,
-.nd-create-page textarea:disabled {
+.create-page input:disabled,
+.create-page select:disabled,
+.create-page textarea:disabled {
     cursor: not-allowed;
     opacity: 0.45;
 }
 
-.nd-create-page input:disabled + label,
-.nd-create-page label:has(input:disabled),
-.nd-create-page input:disabled ~ .inlineHelp {
+.create-page input:disabled + label,
+.create-page label:has(input:disabled),
+.create-page input:disabled ~ .inlineHelp {
     opacity: 0.6;
 }
 
-.nd-create-page .actionsLineButton {
+.create-page .actionsLineButton {
     padding: 7px 10px;
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-sm);
@@ -1567,149 +1566,149 @@ a.nd-create-tile {
     font: inherit;
 }
 
-.nd-create-page .cautionText,
-.nd-create-page .errorText {
+.create-page .cautionText,
+.create-page .errorText {
     color: var(--color-danger);
 }
 
-.nd-create-page textarea {
+.create-page textarea {
     box-sizing: border-box;
     max-width: 100%;
 }
 
-.nd-create-page #blitzWarningSpan {
+.create-page #blitzWarningSpan {
     display: none;
     padding: 12px 16px;
     color: var(--color-warn);
     font-weight: 600;
 }
 
-.nd-create-page #invalidForm {
+.create-page #invalidForm {
     display: none;
 }
 
-.nd-create-rnb #mapPreviewContainer,
-.nd-create-rnb #mapPreviewContent {
+.create-rnb #mapPreviewContainer,
+.create-rnb #mapPreviewContent {
     max-width: 100%;
 }
 
-.nd-create-rnb #mapPreviewContainer {
+.create-rnb #mapPreviewContainer {
     overflow: auto;
 }
 
-.nd-create-rnb #hexDIV {
+.create-rnb #hexDIV {
     max-width: 100%;
 }
 
-.nd-create-rnb .topOfNewGameOptionsDiv > fieldset:last-child {
+.create-rnb .topOfNewGameOptionsDiv > fieldset:last-child {
     grid-column: span 2;
 }
 
 @media (max-width: 720px) {
-    .nd-create-page {
+    .create-page {
         width: min(100% - 20px, 1320px);
         margin-top: 16px;
     }
 
-    .nd-create-page .topOfNewGameOptionsDiv {
+    .create-page .topOfNewGameOptionsDiv {
         grid-template-columns: minmax(0, 1fr);
         gap: 12px;
     }
 
-    .nd-create-page .singleChoiceDiv,
-    .nd-create-page .singleChoiceWithTextDiv,
-    .nd-create-page .singleChoiceDivText,
-    .nd-create-page .FCMsingleChoiceDiv {
+    .create-page .singleChoiceDiv,
+    .create-page .singleChoiceWithTextDiv,
+    .create-page .singleChoiceDivText,
+    .create-page .FCMsingleChoiceDiv {
         flex-wrap: wrap;
         gap: 8px;
         margin-inline: 12px;
     }
 
-    .nd-create-page .choiceLabel,
-    .nd-create-page .choiceLabelText {
+    .create-page .choiceLabel,
+    .create-page .choiceLabelText {
         flex-basis: 100%;
     }
 
-    .nd-create-page .optionSelection,
-    .nd-create-page .optionSelectionText,
-    .nd-create-page .autocomplete {
+    .create-page .optionSelection,
+    .create-page .optionSelectionText,
+    .create-page .autocomplete {
         flex-basis: 100%;
     }
 
-    .nd-create-page .inlineHelp,
-    .nd-create-page .singleChoiceDiv:has(.choiceLabel) .inlineHelp,
-    .nd-create-page .singleChoiceWithTextDiv:has(.choiceLabelText) .inlineHelp {
+    .create-page .inlineHelp,
+    .create-page .singleChoiceDiv:has(.choiceLabel) .inlineHelp,
+    .create-page .singleChoiceWithTextDiv:has(.choiceLabelText) .inlineHelp {
         flex-basis: 100%;
         margin-left: 0;
     }
 
-    .nd-create-page .registerbtn,
-    .nd-create-page .createNewGameButton,
-    .nd-create-page input[type="submit"] {
+    .create-page .registerbtn,
+    .create-page .createNewGameButton,
+    .create-page input[type="submit"] {
         width: 100%;
     }
 
-    .nd-create-rnb .topOfNewGameOptionsDiv > fieldset:last-child {
+    .create-rnb .topOfNewGameOptionsDiv > fieldset:last-child {
         grid-column: auto;
     }
 }
 
 /* ---------- CREATE-PAGE ALIGNMENT (FCM direction) ---------- */
 
-/* D1 disabled rows: match .nd-check-label:has(input:disabled) shading */
-.nd-create-page .singleChoiceDiv:has(input:disabled),
-.nd-create-page .singleChoiceWithTextDiv:has(input:disabled),
-.nd-create-page .singleChoiceDivText:has(input:disabled),
-.nd-create-page .FCMsingleChoiceDiv:has(input:disabled) {
+/* D1 disabled rows: match .check-label:has(input:disabled) shading */
+.create-page .singleChoiceDiv:has(input:disabled),
+.create-page .singleChoiceWithTextDiv:has(input:disabled),
+.create-page .singleChoiceDivText:has(input:disabled),
+.create-page .FCMsingleChoiceDiv:has(input:disabled) {
     background: var(--color-surface-soft);
     border-radius: var(--radius-sm);
 }
 
 /* D4 bare checkbox/radio label rows inside a fieldset (not singleChoiceDiv) */
-.nd-create-page .optionsGroupTop > input[type="checkbox"],
-.nd-create-page .optionsGroupTop > input[type="radio"],
-.nd-create-page .optionsGroupModules > input[type="checkbox"],
-.nd-create-page .optionsGroupModules > input[type="radio"] {
+.create-page .optionsGroupTop > input[type="checkbox"],
+.create-page .optionsGroupTop > input[type="radio"],
+.create-page .optionsGroupModules > input[type="checkbox"],
+.create-page .optionsGroupModules > input[type="radio"] {
     margin-top: 8px;
 }
-.nd-create-page .optionsGroupTop > input[type="checkbox"] + label.checkboxLabel {
+.create-page .optionsGroupTop > input[type="checkbox"] + label.checkboxLabel {
     display: flex;
     align-items: center;
     gap: 8px;
     margin: 8px 0;
 }
-.nd-create-page .optionsGroupTop > input[type="radio"] + label.checkboxLabel {
+.create-page .optionsGroupTop > input[type="radio"] + label.checkboxLabel {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     margin: 8px 16px 8px 0;
 }
 /* Disabled bare rows: FCM shading + dim */
-.nd-create-page .optionsGroupTop > input[type="checkbox"]:disabled + label.checkboxLabel,
-.nd-create-page .optionsGroupTop > input[type="radio"]:disabled + label.checkboxLabel {
+.create-page .optionsGroupTop > input[type="checkbox"]:disabled + label.checkboxLabel,
+.create-page .optionsGroupTop > input[type="radio"]:disabled + label.checkboxLabel {
     background: var(--color-surface-soft);
     border-radius: var(--radius-sm);
     padding: 2px 6px;
     opacity: 0.8;
 }
 /* Legacy first-radio indent (CNS table size / junk) */
-.nd-create-page #tableJunkRadio1,
-.nd-create-page #tableSizeRadio1 {
+.create-page #tableJunkRadio1,
+.create-page #tableSizeRadio1 {
     margin-left: 2px;
 }
 
 /* D3 TGZ Expert Options: flex stepper rows + disabled shading + scroll */
-.nd-create-page .expertTGZoptions .valueContainer {
+.create-page .expertTGZoptions .valueContainer {
     display: flex;
     align-items: center;
     gap: 6px;
     padding: 6px 0;
     border-bottom: 1px solid var(--color-border);
 }
-.nd-create-page .expertTGZoptions .valueContainer:last-child {
+.create-page .expertTGZoptions .valueContainer:last-child {
     border-bottom: none;
 }
-.nd-create-page .expertTGZoptions .valueContainer:has(input:disabled) {
+.create-page .expertTGZoptions .valueContainer:has(input:disabled) {
     background: #fccdb0;
     border-radius: var(--radius-sm);
 }
@@ -1732,10 +1731,10 @@ a.nd-create-tile {
     color: var(--color-muted);
     opacity: 0.5;
 }
-.nd-create-page .expertTGZoptions .valueField {
+.create-page .expertTGZoptions .valueField {
     width: 34px;
 }
-.nd-create-page .expertTGZoptions .valueContainer button {
+.create-page .expertTGZoptions .valueContainer button {
     padding: 2px 8px;
     min-height: 28px;
     border: 1px solid var(--color-border-strong);
@@ -1745,34 +1744,34 @@ a.nd-create-tile {
     font-size: 13px;
     cursor: pointer;
 }
-.nd-create-page .expertTGZoptions .valueContainer button:disabled {
+.create-page .expertTGZoptions .valueContainer button:disabled {
     cursor: not-allowed;
     opacity: 0.45;
 }
-.nd-create-page .expertTGZoptions .expertSummarySpan {
+.create-page .expertTGZoptions .expertSummarySpan {
     display: block;
     font-size: 14px;
     font-weight: 700;
     color: var(--color-ink);
     margin: 6px 0;
 }
-.nd-create-page .expertTGZoptions {
+.create-page .expertTGZoptions {
     max-height: 370px;
     overflow-y: auto;
     overflow-x: hidden;
 }
-.nd-create-page .expertTGZoptions > hr {
+.create-page .expertTGZoptions > hr {
     margin: 8px 0;
     border: none;
     border-top: 1px solid var(--color-border);
 }
 
 /* D1b disabled option labels */
-.nd-create-page label:has(input:disabled) {
+.create-page label:has(input:disabled) {
     cursor: not-allowed;
 }
-.nd-spacer { flex: 1; }
-.nd-row-flex {
+.spacer { flex: 1; }
+.row-flex {
     display: flex;
     gap: 12px;
     align-items: center;
@@ -1784,17 +1783,17 @@ a.nd-create-tile {
    <details> is hidden when JS-disabled would be unusable; default is open
    so the SEO copy is visible. The 1-line summary inside the card stays
    short. Always laid out in a single column. */
-.nd-game-flavour {
+.game-flavour {
     margin-top: 24px;
     display: grid;
     grid-template-columns: 1fr;
     align-items: start;
     gap: 8px 16px;
 }
-.nd-game-flavour > .nd-section-title {
+.game-flavour > .section-title {
     grid-column: 1 / -1;
 }
-.nd-game-flavour details {
+.game-flavour details {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
@@ -1805,7 +1804,7 @@ a.nd-create-tile {
        underneath it. */
     scroll-margin-top: 100px;
 }
-.nd-game-flavour details summary {
+.game-flavour details summary {
     cursor: pointer;
     font-weight: 600;
     font-size: 15px;
@@ -1816,8 +1815,8 @@ a.nd-create-tile {
     align-items: center;
     gap: 6px;
 }
-.nd-game-flavour details summary::-webkit-details-marker { display: none; }
-.nd-game-flavour details summary::before {
+.game-flavour details summary::-webkit-details-marker { display: none; }
+.game-flavour details summary::before {
     content: "▸";
     color: var(--color-muted);
     font-size: 12px;
@@ -1825,80 +1824,80 @@ a.nd-create-tile {
     display: inline-block;
     width: 12px;
 }
-.nd-game-flavour details[open] summary::before {
+.game-flavour details[open] summary::before {
     transform: rotate(90deg);
 }
-.nd-game-flavour .nd-flavour-body {
+.game-flavour .flavour-body {
     padding: 6px 0 4px;
     font-size: 14px;
     line-height: 1.6;
     color: var(--color-ink-soft);
 }
-.nd-game-flavour .nd-flavour-body p {
+.game-flavour .flavour-body p {
     margin: 0 0 10px;
 }
-.nd-game-flavour .nd-flavour-body p:last-child {
+.game-flavour .flavour-body p:last-child {
     margin-bottom: 0;
 }
 /* A short hint sits under the "Games available" title telling users they can
    click a card to read more about it. */
-.nd-section-hint {
+.section-hint {
     margin: -6px 0 14px;
     color: var(--color-muted);
 }
 
 /* ---------- GAME HELP CONTENT ---------- */
-.nd-fcm-china-help {
+.fcm-china-help {
     font-size: 15px;
     line-height: 1.6;
 }
 
-.nd-fcm-china-help-title {
+.fcm-china-help-title {
     border-top: 1px solid var(--color-border);
     margin-top: 18px;
     padding-top: 16px;
 }
 
-.nd-fcm-china-help-title:first-of-type {
+.fcm-china-help-title:first-of-type {
     border-top: none;
     margin-top: 0;
     padding-top: 0;
 }
 
-.nd-fcm-china-help .FCMhelpSection br {
+.fcm-china-help .FCMhelpSection br {
     display: none;
 }
 
-.nd-fcm-china-help b u {
+.fcm-china-help b u {
     margin: 10px 0 6px;
 }
 
-.nd-fcm-china-help img {
+.fcm-china-help img {
     max-width: 100%;
     height: auto;
 }
 
-.nd-fcm-china-help .helpEmployeeImg {
+.fcm-china-help .helpEmployeeImg {
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-md);
     margin: 6px 8px 8px 0;
 }
 
 /* Stacked form: label above input instead of side-by-side */
-.nd-stacked-form .nd-form-row {
+.stacked-form .form-row {
     flex-direction: column;
     align-items: stretch;
 }
-.nd-stacked-form .nd-form-label {
+.stacked-form .form-label {
     flex: 0 0 auto;
     margin-bottom: 4px;
 }
-.nd-stacked-form .nd-form-row > input[type="text"],
-.nd-stacked-form .nd-form-row > input[type="email"],
-.nd-stacked-form .nd-form-row > input[type="password"],
-.nd-stacked-form .nd-form-row > input[type="number"],
-.nd-stacked-form .nd-form-row > select,
-.nd-stacked-form .nd-form-row > textarea {
+.stacked-form .form-row > input[type="text"],
+.stacked-form .form-row > input[type="email"],
+.stacked-form .form-row > input[type="password"],
+.stacked-form .form-row > input[type="number"],
+.stacked-form .form-row > select,
+.stacked-form .form-row > textarea {
     flex: 0 0 auto;
     width: 100%;
 }
@@ -1948,7 +1947,7 @@ a.nd-create-tile {
 }
 
 /* Checkbox/radio option rows used in create-game forms */
-.nd-check-label {
+.check-label {
     display: flex;
     align-items: flex-start;
     gap: 8px;
@@ -1958,35 +1957,35 @@ a.nd-create-tile {
     padding: 4px 0;
     line-height: 1.4;
 }
-.nd-check-label input[type=checkbox],
-.nd-check-label input[type=radio] {
+.check-label input[type=checkbox],
+.check-label input[type=radio] {
     flex-shrink: 0;
     margin-top: 3px;
     accent-color: var(--color-accent);
 }
 /* Disabled checkbox rows: dim text, add row shading, show not-allowed */
-.nd-check-label:has(input:disabled) {
+.check-label:has(input:disabled) {
     cursor: not-allowed;
     background: var(--color-surface-soft);
     border-radius: var(--radius-sm);
 }
-.nd-check-label input[type=checkbox]:disabled ~ div,
-.nd-check-label input[type=radio]:disabled ~ div {
+.check-label input[type=checkbox]:disabled ~ div,
+.check-label input[type=radio]:disabled ~ div {
     opacity: 0.5;
 }
-.nd-check-label input[type=checkbox]:disabled,
-.nd-check-label input[type=radio]:disabled {
+.check-label input[type=checkbox]:disabled,
+.check-label input[type=radio]:disabled {
     cursor: not-allowed;
 }
-#FCMallOptions #nonExpertOptions .nd-check-label:has(input:disabled) {
+#FCMallOptions #nonExpertOptions .check-label:has(input:disabled) {
     background: transparent;
 }
-.nd-opt-help {
+.opt-help {
     font-size: 12px;
     margin-top: 2px;
     line-height: 1.4;
 }
-.nd-opts-section {
+.opts-section {
     padding: 10px 12px;
     border-radius: var(--radius-sm);
     border-left: 3px solid transparent;
@@ -1997,42 +1996,42 @@ a.nd-create-tile {
    2 on tablet, 3 on desktop. The first 3 sections (Game / Ketchup / Map)
    then sit on a single row at typical laptop widths. align-items:stretch
    so cells in a row match the tallest sibling's height. */
-.nd-opts-grid {
+.opts-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 12px;
     align-items: stretch;
 }
 @media (min-width: 720px) {
-    .nd-opts-grid {
+    .opts-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    .nd-opts-grid .nd-opts-section:nth-last-child(1):nth-child(odd) {
+    .opts-grid .opts-section:nth-last-child(1):nth-child(odd) {
         grid-column: 1 / -1;
         justify-self: center;
         width: calc(50% - 6px);
     }
 }
 @media (min-width: 1100px) {
-    .nd-opts-grid {
+    .opts-grid {
         grid-template-columns: repeat(3, 1fr);
     }
-    .nd-opts-grid .nd-opts-section:nth-last-child(1):nth-child(odd) {
+    .opts-grid .opts-section:nth-last-child(1):nth-child(odd) {
         grid-column: auto;
         justify-self: auto;
         width: auto;
     }
-    .nd-opts-grid .nd-opts-section:nth-last-child(1):nth-child(3n + 1) {
+    .opts-grid .opts-section:nth-last-child(1):nth-child(3n + 1) {
         grid-column: 2;
     }
 }
-.nd-opts-grid .nd-opts-section {
+.opts-grid .opts-section {
     margin-bottom: 0;
 }
 
 /* Setup/Common/Expert cards on the create-game form, laid out the same way
-   as .nd-opts-grid: 1 column narrow, 2 tablet, 3 desktop. */
-.nd-setup-cards-grid {
+   as .opts-grid: 1 column narrow, 2 tablet, 3 desktop. */
+.setup-cards-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 16px;
@@ -2043,10 +2042,10 @@ a.nd-create-tile {
     align-items: stretch;
 }
 @media (min-width: 720px) {
-    .nd-setup-cards-grid {
+    .setup-cards-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    .nd-setup-cards-grid .nd-card:nth-last-child(1):nth-child(odd) {
+    .setup-cards-grid .card:nth-last-child(1):nth-child(odd) {
         grid-column: 1 / -1;
         justify-self: center;
         width: calc(50% - 8px);
@@ -2055,29 +2054,29 @@ a.nd-create-tile {
        full grid), so Game Options lands alone in row 2. Center it the same way
        as a lone last card. Sized to a 4-card grid only, so it never touches
        the 3-card or other layouts. */
-    .nd-setup-cards-grid .nd-card:nth-child(3):nth-last-child(2) {
+    .setup-cards-grid .card:nth-child(3):nth-last-child(2) {
         grid-column: 1 / -1;
         justify-self: center;
         width: calc(50% - 8px);
     }
 }
 @media (min-width: 1100px) {
-    .nd-setup-cards-grid {
+    .setup-cards-grid {
         grid-template-columns: repeat(3, 1fr);
     }
-    .nd-setup-cards-grid .nd-card:nth-last-child(1):nth-child(odd) {
+    .setup-cards-grid .card:nth-last-child(1):nth-child(odd) {
         grid-column: auto;
         justify-self: auto;
         width: auto;
     }
-    .nd-setup-cards-grid .nd-card:nth-child(3):nth-last-child(2) {
+    .setup-cards-grid .card:nth-child(3):nth-last-child(2) {
         grid-column: auto;
         justify-self: auto;
         width: auto;
     }
 }
-.nd-setup-cards-grid .nd-card,
-.nd-setup-cards-grid .nd-card + .nd-card {
+.setup-cards-grid .card,
+.setup-cards-grid .card + .card {
     margin-top: 0;
 }
 
@@ -2095,75 +2094,75 @@ a.nd-create-tile {
    several columns on desktop. Cap the simple form controls so they don't
    stretch absurdly wide on the now-wider page (the option grid still spans
    full width). */
-#FCMallOptions .nd-form-row > input[type="text"],
-#FCMallOptions .nd-form-row > input[type="email"],
-#FCMallOptions .nd-form-row > input[type="password"],
-#FCMallOptions .nd-form-row > input[type="number"],
-#FCMallOptions .nd-form-row > select,
-#FCMallOptions .nd-form-row > textarea {
+#FCMallOptions .form-row > input[type="text"],
+#FCMallOptions .form-row > input[type="email"],
+#FCMallOptions .form-row > input[type="password"],
+#FCMallOptions .form-row > input[type="number"],
+#FCMallOptions .form-row > select,
+#FCMallOptions .form-row > textarea {
     max-width: 520px;
 }
 
 /* Per-section color accents — match the original create-game form palette
    (basicOptions yellow, expertOptions salmon, ketchup lightgreen, etc.) so
    the redesigned form is visually familiar to existing users. */
-.nd-opts-slate  { background: #faf2d9; border-left-color: rgba(180,160,80,0.7);   }
-.nd-opts-red    { background: #c8e6c9; border-left-color: rgba(80,145,80,0.7);   }
-.nd-opts-green  { background: #e0e0e0; border-left-color: rgba(120,120,120,0.7); }
-.nd-opts-amber  { background: #d8e3c0; border-left-color: rgba(110,140,60,0.7);  }
-.nd-opts-blue   { background: #cde7e9; border-left-color: rgba(80,140,150,0.7);  }
-.nd-opts-purple { background: #ffffff; border-left-color: rgba(160,160,160,0.7); }
-.nd-opts-orange { background: #ffffff; border-left-color: rgba(160,160,160,0.7); }
+.opts-slate  { background: #faf2d9; border-left-color: rgba(180,160,80,0.7);   }
+.opts-red    { background: #c8e6c9; border-left-color: rgba(80,145,80,0.7);   }
+.opts-green  { background: #e0e0e0; border-left-color: rgba(120,120,120,0.7); }
+.opts-amber  { background: #d8e3c0; border-left-color: rgba(110,140,60,0.7);  }
+.opts-blue   { background: #cde7e9; border-left-color: rgba(80,140,150,0.7);  }
+.opts-purple { background: #ffffff; border-left-color: rgba(160,160,160,0.7); }
+.opts-orange { background: #ffffff; border-left-color: rgba(160,160,160,0.7); }
 
-.nd-expert-options {
+.expert-options {
     background: #fbc19d;
     border-left: 3px solid #f89c62;
 }
 /* Disabled rows get their own tint, not the default gray surface */
-.nd-expert-options .nd-check-label:has(input:disabled) {
+.expert-options .check-label:has(input:disabled) {
     background: #fccdb0;
 }
 /* Disabled text stays opaque in expert card; tinted bg marks unavailability */
-.nd-expert-options label:has(input:disabled),
-.nd-expert-options .nd-check-label input:disabled ~ div {
+.expert-options label:has(input:disabled),
+.expert-options .check-label input:disabled ~ div {
     opacity: 1;
 }
 
-/* Full-width checkbox list — use instead of nd-form-row when there is no label column */
-.nd-check-list {
+/* Full-width checkbox list — use instead of form-row when there is no label column */
+.check-list {
     padding: 4px 0;
 }
-.nd-check-list > .nd-check-label {
+.check-list > .check-label {
     padding: 10px 0;
     border-bottom: 1px solid var(--color-border);
 }
-.nd-check-list > .nd-check-label:last-child {
+.check-list > .check-label:last-child {
     border-bottom: none;
 }
 
 /* D4c TGZ Schism expansion sub-options: tree-branch connector under the
    "Use Schism Expansion" checkbox. The 3 schism radios are wrapped in
-   .nd-schism-suboptions, so they are no longer children of .nd-check-list and
+   .schism-suboptions, so they are no longer children of .check-list and
    lose the direct-child row divider; replicate that row look here. */
-.nd-check-list > .nd-schism-suboptions > .nd-check-label {
+.check-list > .schism-suboptions > .check-label {
     padding: 10px 0;
     border-bottom: 1px solid var(--color-border);
 }
-.nd-check-list > .nd-schism-suboptions > .nd-check-label:last-child {
+.check-list > .schism-suboptions > .check-label:last-child {
     border-bottom: none;
 }
 /* Neutralize the UA default radio margin so the tick anchor edge is fixed. */
-.nd-check-list > .nd-schism-suboptions > .nd-check-label > input[type=radio] {
+.check-list > .schism-suboptions > .check-label > input[type=radio] {
     margin-left: 0;
     position: relative;
 }
 /* Indent the sub-options and reserve space for the connector line. */
-.nd-check-list > .nd-schism-suboptions {
+.check-list > .schism-suboptions {
     position: relative;
     padding-left: 24px;
 }
 /* Vertical connector line + top notch, only while the schism checkbox is on. */
-.nd-check-list:has(#useSchism:checked) > .nd-schism-suboptions::before {
+.check-list:has(#useSchism:checked) > .schism-suboptions::before {
     content: "";
     position: absolute;
     background: var(--color-border-strong);
@@ -2172,7 +2171,7 @@ a.nd-create-tile {
     bottom: 0;
     width: 2px;
 }
-.nd-check-list:has(#useSchism:checked) > .nd-schism-suboptions::after {
+.check-list:has(#useSchism:checked) > .schism-suboptions::after {
     content: "";
     position: absolute;
     background: var(--color-border-strong);
@@ -2182,7 +2181,7 @@ a.nd-create-tile {
     height: 2px;
 }
 /* Horizontal tick from the vertical line into each radio row. */
-.nd-check-list:has(#useSchism:checked) > .nd-schism-suboptions > .nd-check-label > input[type=radio]::before {
+.check-list:has(#useSchism:checked) > .schism-suboptions > .check-label > input[type=radio]::before {
     content: "";
     position: absolute;
     left: -12px;
@@ -2194,23 +2193,23 @@ a.nd-create-tile {
 }
 
 /* Help page Q&A — readable type for the long, mostly-text help sections. */
-.nd-help-qa {
+.help-qa {
     font-size: 15px;
     line-height: 1.65;
     color: var(--color-ink);
 }
-.nd-help-qa p {
+.help-qa p {
     margin: 0 0 12px;
 }
-.nd-help-qa p:last-child {
+.help-qa p:last-child {
     margin-bottom: 0;
 }
-.nd-help-icon-line {
+.help-icon-line {
     display: flex;
     align-items: center;
     gap: 10px;
 }
-.nd-help-menu-icon {
+.help-menu-icon {
     flex: 0 0 50px;
     width: 50px;
     height: 50px;
@@ -2220,7 +2219,7 @@ a.nd-create-tile {
     background: #111111;
     border-radius: 5px;
 }
-.nd-help-qa b u {
+.help-qa b u {
     display: block;
     margin: 22px 0 8px;
     font-size: 17px;
@@ -2230,28 +2229,28 @@ a.nd-create-tile {
     padding-left: 10px;
     text-decoration: none;
 }
-.nd-help-qa b u:first-child {
+.help-qa b u:first-child {
     margin-top: 0;
 }
-.nd-help-qa ul {
+.help-qa ul {
     margin: 6px 0 12px;
     padding-left: 22px;
     line-height: 1.55;
 }
-.nd-help-kickouts {
+.help-kickouts {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 8px 16px;
     margin: 8px 0 12px;
     font-size: 14px;
 }
-.nd-help-kickouts .helpStartingOptionSpan {
+.help-kickouts .helpStartingOptionSpan {
     display: flex;
     align-items: center;
     gap: 8px;
     white-space: nowrap;
 }
-.nd-help-kickouts .startingOptionHelpImg {
+.help-kickouts .startingOptionHelpImg {
     width: 36px;
     height: 36px;
 }
@@ -2263,55 +2262,55 @@ a.nd-create-tile {
 }
 
 /* Stats page tiles (numbers above the per-game / fairplay / etc tabs) */
-.nd-stats-grid {
+.stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 10px;
     margin: 8px 0 4px;
 }
-.nd-stats-tile {
+.stats-tile {
     background: var(--color-surface-soft);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     padding: 12px 14px;
     text-align: center;
 }
-.nd-stats-tile-num {
+.stats-tile-num {
     font-size: 24px;
     font-weight: 700;
     color: var(--color-accent-strong);
     line-height: 1.2;
 }
-.nd-stats-tile-label {
+.stats-tile-label {
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     margin-top: 4px;
 }
-.nd-stats-gamebreak {
+.stats-gamebreak {
     line-height: 1.8;
 }
 
 /* Each game icon + "N active / N finished" cell: align icon vertically
    with the text baseline so the row reads cleanly. */
-.nd-stats-gamebreak .gameIcon,
-.nd-stats-gamebreak .gameStatIcon {
+.stats-gamebreak .gameIcon,
+.stats-gamebreak .gameStatIcon {
     vertical-align: -2px;
     margin-right: 4px;
 }
-.nd-stats-gamebreak > .nd-game-stat {
+.stats-gamebreak > .game-stat {
     display: inline-flex;
     align-items: center;
     gap: 4px;
     white-space: nowrap;
 }
-.nd-stats-gamebreak > .nd-game-stat-sep {
+.stats-gamebreak > .game-stat-sep {
     color: var(--color-border-strong);
     margin: 0 8px;
 }
 
 /* Empty-state text — small, not bold. */
-.nd-empty {
+.empty {
     font-size: 14px;
     font-weight: 400;
     margin: 8px 0;
@@ -2320,51 +2319,51 @@ a.nd-create-tile {
 /* Help page Game Help Pages — 4 columns for the first row, 3 columns for
    the next two rows (4-3-3 split for 10 games). Implemented with flex so
    the row rhythm is exact, not a grid auto-flow artifact. */
-.nd-help-pills {
+.help-pills {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 6px;
 }
-.nd-help-pills .nd-button {
+.help-pills .button {
     flex: 0 0 calc(25% - 6px);
     text-align: center;
     box-sizing: border-box;
     width: auto;
 }
-.nd-help-pills .nd-help-pill-wide {
+.help-pills .help-pill-wide {
     flex-basis: calc(33.333% - 6px);
 }
 @media (max-width: 520px) {
-    .nd-help-pills .nd-button {
+    .help-pills .button {
         flex-basis: calc(50% - 4px);
     }
-    .nd-help-pills .nd-help-pill-wide {
+    .help-pills .help-pill-wide {
         flex-basis: calc(50% - 4px);
     }
 }
 @media (max-width: 320px) {
-    .nd-help-pills .nd-button,
-    .nd-help-pills .nd-help-pill-wide {
+    .help-pills .button,
+    .help-pills .help-pill-wide {
         flex-basis: 100%;
     }
 }
 
 /* Help page icon legend — table-like grid where each cell holds an icon and
    a label side by side. Columns scale with the page width. */
-.nd-icon-legend-title {
+.icon-legend-title {
     font-size: 15px;
     color: var(--color-accent-strong);
     margin: 0 0 4px;
 }
-.nd-icon-legend-subtitle {
+.icon-legend-subtitle {
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     margin: 16px 0 8px;
     font-weight: 600;
 }
-.nd-icon-grid {
+.icon-grid {
     display: grid;
     /* Two-cell rows: icon (fixed) + label (fills). auto-fit so narrow pages
        (mobile) collapse to a single column. */
@@ -2373,15 +2372,15 @@ a.nd-create-tile {
     align-items: center;
     margin-bottom: 8px;
 }
-.nd-icon-cell {
+.icon-cell {
     display: flex;
     align-items: center;
     gap: 10px;
     min-width: 0;
 }
-.nd-icon-cell .startingOptionHelpImg,
-.nd-icon-cell .gameIcon,
-.nd-icon-cell .gameStatIcon {
+.icon-cell .startingOptionHelpImg,
+.icon-cell .gameIcon,
+.icon-cell .gameStatIcon {
     width: 38px;
     height: 38px;
     border-radius: var(--radius-sm);
@@ -2391,7 +2390,7 @@ a.nd-create-tile {
     display: block;
     flex-shrink: 0;
 }
-.nd-icon-cell-label {
+.icon-cell-label {
     font-size: 13px;
     color: var(--color-ink);
     line-height: 1.4;
@@ -2399,7 +2398,7 @@ a.nd-create-tile {
 
 /* The KFW cells that carry two images (one cell for High/Med knowledge) sit
    side-by-side in their cell before the text. */
-.nd-icon-cell img + img {
+.icon-cell img + img {
     margin-left: 4px;
 }
 
@@ -2410,13 +2409,13 @@ iframe {
 }
 
 /* Responsive iframe wrappers used in help pages */
-.nd-help-qa div[style*="position:relative"] {
+.help-qa div[style*="position:relative"] {
     position: relative !important;
     width: 100% !important;
     max-width: 100% !important;
 }
 
-.nd-help-qa iframe[style*="position:absolute"] {
+.help-qa iframe[style*="position:absolute"] {
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
@@ -2465,24 +2464,24 @@ iframe {
 }
 
 /* ---------- 09 ROW GRID (shared — lobby + stats) ---------- */
-/* Row anatomy used by every .nd-table that emits rows with class .nd-row09.
+/* Row anatomy used by every .table that emits rows with class .row09.
    Defined here (rather than lobby_new.css) so the stats page ten-games list
    picks it up without loading lobby-specific CSS. */
 
 /* grid rows shrink td to content width, fragmenting the default td border */
-.nd-table tbody tr.nd-row09 td {
+.table tbody tr.row09 td {
     border-top: none;
     border-bottom: none;
 }
 
 /* The 09-row variant (stats ten-games list) renders rows as a grid where
-   the first .nd-row09 row acts as the visual header. The original <thead>
-   is therefore hidden on those tables only — other nd-table consumers
+   the first .row09 row acts as the visual header. The original <thead>
+   is therefore hidden on those tables only — other table consumers
    (tournament lists, help pages) keep a normal visible thead. */
-.nd-table:has(.nd-row09) thead {
+.table:has(.row09) thead {
     display: none;
 }
-.nd-table:has(.nd-row09) thead tr {
+.table:has(.row09) thead tr {
     display: grid;
     grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
     gap: 12px;
@@ -2490,7 +2489,7 @@ iframe {
     background: var(--color-surface-soft);
     border-bottom: 2px solid var(--color-border-strong);
 }
-.nd-table:has(.nd-row09) thead th {
+.table:has(.row09) thead th {
     display: block;
     padding: 0;
     font-size: 11px;
@@ -2502,21 +2501,21 @@ iframe {
 }
 
 /* ---- 09 Six-column row grid ---- */
-.nd-table tbody {
+.table tbody {
     display: block;
 }
-/* Revert to normal table layout for tables that don't use nd-row09 (MT rows,
+/* Revert to normal table layout for tables that don't use row09 (MT rows,
    tournament list tables). display:block on the table turns tr/td cells into
    anonymous inline-table boxes sized to content rather than stretching to
    100% width. */
-.nd-table:not(:has(.nd-row09)) {
+.table:not(:has(.row09)) {
     display: table;
 }
-.nd-table:not(:has(.nd-row09)) tbody {
+.table:not(:has(.row09)) tbody {
     display: table-row-group;
 }
 
-.nd-row09 {
+.row09 {
     display: grid;
     grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
     gap: 12px;
@@ -2526,120 +2525,120 @@ iframe {
     background: var(--color-surface);
     transition: background 0.1s;
 }
-.nd-row-divider {
+.row-divider {
     position: absolute;
     left: 0;
     right: 0;
     bottom: -10px;
     height: 20px;
     display: grid;
-    grid-template-columns: repeat(var(--nd-divider-count), 20px);
+    grid-template-columns: repeat(var(--divider-count), 20px);
     justify-content: center;
     column-gap: clamp(12px, 2vw, 24px);
     align-items: center;
     pointer-events: none;
     z-index: 1;
 }
-.nd-row-divider::before {
+.row-divider::before {
     content: "";
     position: absolute;
     left: 0;
     right: 0;
     top: 50%;
     height: 1px;
-    background: var(--nd-divider-color, var(--color-ink));
+    background: var(--divider-color, var(--color-ink));
     opacity: 0.25;
 }
-.nd-row-divider-icon {
+.row-divider-icon {
     justify-self: center;
-    width: var(--nd-divider-size);
-    height: var(--nd-divider-size);
-    background: var(--nd-divider-color, var(--color-ink));
-    -webkit-mask: var(--nd-divider-icon) center / contain no-repeat;
-    mask: var(--nd-divider-icon) center / contain no-repeat;
-    transform: rotate(var(--nd-divider-rotation));
+    width: var(--divider-size);
+    height: var(--divider-size);
+    background: var(--divider-color, var(--color-ink));
+    -webkit-mask: var(--divider-icon) center / contain no-repeat;
+    mask: var(--divider-icon) center / contain no-repeat;
+    transform: rotate(var(--divider-rotation));
 }
-.nd-row-divider-tile {
+.row-divider-tile {
     -webkit-mask: none;
     mask: none;
-    background-color: var(--nd-divider-color, var(--color-ink));
-    background-image: linear-gradient(var(--nd-divider-color, var(--color-ink)), var(--nd-divider-color, var(--color-ink))), var(--nd-divider-icon);
+    background-color: var(--divider-color, var(--color-ink));
+    background-image: linear-gradient(var(--divider-color, var(--color-ink)), var(--divider-color, var(--color-ink))), var(--divider-icon);
     background-size: cover;
     background-blend-mode: color;
     border-radius: 2px;
 }
-.nd-row-divider-ind .nd-row-divider-icon {
-    transform: translateY(-5px) rotate(var(--nd-divider-rotation));
+.row-divider-ind .row-divider-icon {
+    transform: translateY(-5px) rotate(var(--divider-rotation));
 }
-.nd-row09.myMove .nd-row-divider { --nd-divider-color: var(--color-positive); }
-.nd-row09.kickoutRequired1 .nd-row-divider { --nd-divider-color: var(--color-warn); }
-.nd-row09.kickoutRequired2 .nd-row-divider { --nd-divider-color: var(--color-danger); }
+.row09.myMove .row-divider { --divider-color: var(--color-positive); }
+.row09.kickoutRequired1 .row-divider { --divider-color: var(--color-warn); }
+.row09.kickoutRequired2 .row-divider { --divider-color: var(--color-danger); }
 @media (hover: hover) {
-    .nd-row09:hover {
+    .row09:hover {
         background: var(--color-surface-soft);
     }
 }
-.nd-row09 > td {
+.row09 > td {
     display: block;
     padding: 0;
     border: none;
     min-width: 0;
 }
-.nd-col-icon img {
+.col-icon img {
     width: 52px;
     height: 52px;
     border-radius: 6px;
     object-fit: contain;
     padding: 2px;
 }
-.nd-col-game-name {
+.col-game-name {
     color: var(--color-ink);
 }
-.nd-col-game-note {
+.col-game-note {
     font-size: 14px;
     line-height: 1.4;
 }
-.nd-col-game a { color: #0B275B; text-decoration: none; }
-.nd-col-game a:hover { text-decoration: underline; }
-.nd-col-players {
+.col-game a { color: #0B275B; text-decoration: none; }
+.col-game a:hover { text-decoration: underline; }
+.col-players {
     color: var(--color-ink-soft);
     line-height: 1.4;
 }
-.nd-col-players a {
+.col-players a {
     color: #0B275B;
     text-decoration: none;
 }
-.nd-col-players a:hover { text-decoration: underline; }
-.nd-col-status {
+.col-players a:hover { text-decoration: underline; }
+.col-status {
     text-align: center;
     color: var(--color-ink-soft);
     line-height: 1.4;
 }
-.nd-col-status a {
+.col-status a {
     color: #0B275B;
     text-decoration: none;
 }
-.nd-col-status a:hover { text-decoration: underline; }
-.nd-col-status .nd-status-wrap {
+.col-status a:hover { text-decoration: underline; }
+.col-status .status-wrap {
     /* Names are already joined with a ", " separator in the markup
        (<a>FcmBot</a>, <a>BotKickStarter</a>, ...), so render them as normal
        inline flow. Making this a flex container drops the space after the
        comma and adds a gap on both sides of it. */
     text-align: center;
 }
-.nd-col-options {
+.col-options {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
     align-items: center;
 }
-.nd-col-options img.startingMap {
+.col-options img.startingMap {
     width: 36px;
     height: 36px;
     border-radius: 4px;
     cursor: pointer;
 }
-.nd-col-cta {
+.col-cta {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -2650,18 +2649,18 @@ iframe {
 
 /* State backgrounds on the whole row. Keep these separate from the old td
    cell-fill rules so the color reads as one continuous row state. */
-.nd-row09.myMove { background: #BFE2B6; }
-.nd-row09.kickoutRequired1 { background: #FFE1AD; }
-.nd-row09.kickoutRequired2 { background: #F2BABA; }
-.nd-row09.pendingFinish {
+.row09.myMove { background: #BFE2B6; }
+.row09.kickoutRequired1 { background: #FFE1AD; }
+.row09.kickoutRequired2 { background: #F2BABA; }
+.row09.pendingFinish {
   background-image: repeating-conic-gradient(#c8c8c8 0% 25%, #f0f0f0 0% 50%);
   background-size: 14px 14px;
 }
 @media (hover: hover) {
-    .nd-row09.myMove:hover { background: #D9EED3; }
-    .nd-row09.kickoutRequired1:hover { background: #ffeacc; }
-    .nd-row09.kickoutRequired2:hover { background: #f6cdcd; }
-    .nd-row09.pendingFinish:hover {
+    .row09.myMove:hover { background: #D9EED3; }
+    .row09.kickoutRequired1:hover { background: #ffeacc; }
+    .row09.kickoutRequired2:hover { background: #f6cdcd; }
+    .row09.pendingFinish:hover {
       background-image: repeating-conic-gradient(#b8b8b8 0% 25%, #e4e4e4 0% 50%);
       background-size: 14px 14px;
     }
@@ -2669,50 +2668,50 @@ iframe {
 
 /* Mobile collapse (per 09 prototype) */
 @media (max-width: 980px) {
-    .nd-row09 {
+    .row09 {
         grid-template-columns: 56px minmax(0, 1fr);
         gap: 8px 10px;
         padding: 12px;
     }
-    .nd-col-icon img { width: 50px; height: 50px; }
-    .nd-col-players,
-    .nd-col-options,
-    .nd-col-status,
-    .nd-col-cta {
+    .col-icon img { width: 50px; height: 50px; }
+    .col-players,
+    .col-options,
+    .col-status,
+    .col-cta {
         grid-column: 1 / -1;
     }
-    .nd-col-cta {
+    .col-cta {
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: flex-end;
     }
     /* thead uses the same 6-col grid; hide it when rows collapse to 2-col */
-    .nd-table:has(.nd-row09) thead {
+    .table:has(.row09) thead {
         display: none;
     }
 }
 
 /* ---------- GAME LIST (shared mobile data-label treatment) ----------
-   On narrow screens .nd-row09 tables become stacked cards, so metadata
+   On narrow screens .row09 tables become stacked cards, so metadata
    cells pull compact uppercase labels from their data-label attribute. */
-.nd-game-list .nd-table-wrap {
+.game-list .table-wrap {
     border-radius: 0 0 var(--radius-md) var(--radius-md);
     overflow: hidden;
 }
 
-.nd-row09 .nd-col-options {
+.row09 .col-options {
     row-gap: 4px;
     position: relative;
     z-index: 2;
 }
 
-.nd-row09 .nd-col-options img.startingMap {
+.row09 .col-options img.startingMap {
     width: 40px;
     height: 40px;
 }
 
 @media (max-width: 720px) {
-    .nd-row09 > td[data-label]:not(.nd-col-game)::before {
+    .row09 > td[data-label]:not(.col-game)::before {
         content: attr(data-label);
         display: block;
         font-size: 11px;
@@ -2721,26 +2720,26 @@ iframe {
         letter-spacing: 0.04em;
         margin-bottom: 4px;
     }
-    .nd-game-list .nd-row09 {
+    .game-list .row09 {
         padding: 12px;
     }
-    .nd-row09 .nd-col-options {
+    .row09 .col-options {
         flex-wrap: wrap;
     }
-    .nd-row09 .nd-col-options img.startingMap {
+    .row09 .col-options img.startingMap {
         width: 40px;
         height: 40px;
     }
-    .nd-row09 .nd-col-status {
+    .row09 .col-status {
         text-align: left;
     }
-    .nd-row09 .nd-col-cta {
+    .row09 .col-cta {
         justify-content: flex-start;
     }
 }
 
 @media (min-width: 721px) {
-    .nd-row09 > td[data-label]::before {
+    .row09 > td[data-label]::before {
         content: none;
         display: none;
     }
@@ -2797,7 +2796,7 @@ iframe {
 .TGZinfoContainer:focus-within .TGZinfoPopup {
     display: block !important;
 }
-.nd-row09 .nd-col-options:has(.TGZinfoContainer:hover) {
+.row09 .col-options:has(.TGZinfoContainer:hover) {
     z-index: 3;
 }
 
@@ -2813,18 +2812,18 @@ iframe {
 }
 
 /* TGZ customisation detail page */
-.nd-tgz-options {
+.tgz-options {
     display: flex;
     flex-wrap: wrap;
     gap: 14px;
     align-items: flex-start;
 }
 
-.nd-tgz-options > br,
-.nd-tgz-options .godAndVRdiv > br {
+.tgz-options > br,
+.tgz-options .godAndVRdiv > br {
     display: none;
 }
-.nd-tgz-options .godAndVRdiv {
+.tgz-options .godAndVRdiv {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2834,13 +2833,13 @@ iframe {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
 }
-.nd-tgz-options .godOptionImg {
+.tgz-options .godOptionImg {
     width: 100px !important;
     height: 152px !important;
     object-fit: cover;
     border-radius: var(--radius-sm);
 }
-.nd-tgz-options .diffVR {
+.tgz-options .diffVR {
 	margin-top: 6px;
 	color: var(--color-danger);
 	font-size: 14px;
@@ -2854,16 +2853,16 @@ iframe {
 	h2 { font-size: 22px; }
 	h3 { font-size: 19px; }
 	h4 { font-size: 17px; }
-	.nd-page-subtitle { font-size: 16px; }
-	.nd-section-title { font-size: 15px; }
-	.nd-button,
-	a.nd-button,
-	button.nd-button,
-	input.nd-button,
-	.nd-create-page .registerbtn,
-	.nd-create-page .createNewGameButton,
-	.nd-create-page input[type="submit"] { font-size: 16px; }
-	.nd-button-sm { font-size: 15px; }
+	.page-subtitle { font-size: 16px; }
+	.section-title { font-size: 15px; }
+	.button,
+	a.button,
+	button.button,
+	input.button,
+	.create-page .registerbtn,
+	.create-page .createNewGameButton,
+	.create-page input[type="submit"] { font-size: 16px; }
+	.button-sm { font-size: 15px; }
 	input[type="text"],
 	input[type="email"],
 	input[type="password"],
@@ -2874,110 +2873,110 @@ iframe {
 	input[type="date"],
 	textarea,
 	select { font-size: 16px; }
-	.nd-form-row > label,
-	.nd-form-label { font-size: 16px; }
-	.nd-form-row .nd-form-help { font-size: 14px; }
-	.nd-form-row > input[type="text"],
-	.nd-form-row > input[type="email"],
-	.nd-form-row > input[type="password"],
-	.nd-form-row > input[type="number"],
-	.nd-form-row > select,
-	.nd-form-row > textarea { font-size: 16px; }
-	.nd-register-form label { font-size: 16px; }
-	.nd-register-form .helptext { font-size: 14px; }
-	.nd-register-form .errorlist { font-size: 15px; }
-	.nd-table { font-size: 18px; }
-	.nd-table th { font-size: 14px; }
-	.nd-log-date { font-size: 14px; }
-	.nd-log-text { font-size: 16px; }
-	.nd-credits { font-size: 16px; }
-	.nd-donate-option-label { font-size: 14px; }
-	.nd-callout { font-size: 16px; }
-	.nd-form-footer-link { font-size: 16px; }
-	.nd-pill { font-size: 15px; }
-	.nd-tab { font-size: 17px; }
-	.nd-tab-count { font-size: 15px; }
-	.nd-mod-wrap::after { font-size: 14px; }
+	.form-row > label,
+	.form-label { font-size: 16px; }
+	.form-row .form-help { font-size: 14px; }
+	.form-row > input[type="text"],
+	.form-row > input[type="email"],
+	.form-row > input[type="password"],
+	.form-row > input[type="number"],
+	.form-row > select,
+	.form-row > textarea { font-size: 16px; }
+	.register-form label { font-size: 16px; }
+	.register-form .helptext { font-size: 14px; }
+	.register-form .errorlist { font-size: 15px; }
+	.table { font-size: 18px; }
+	.table th { font-size: 14px; }
+	.log-date { font-size: 14px; }
+	.log-text { font-size: 16px; }
+	.credits { font-size: 16px; }
+	.donate-option-label { font-size: 14px; }
+	.callout { font-size: 16px; }
+	.form-footer-link { font-size: 16px; }
+	.pill { font-size: 15px; }
+	.tab { font-size: 17px; }
+	.tab-count { font-size: 15px; }
+	.mod-wrap::after { font-size: 14px; }
 	@media (hover: none) {
-		.nd-mod-list-mobile .nd-mod-wrap::after { font-size: 13px; }
+		.mod-list-mobile .mod-wrap::after { font-size: 13px; }
 	}
-	.nd-hero-title { font-size: 30px; }
-	.nd-hero-sub { font-size: 17px; }
-	.nd-feature-text { font-size: 16px; }
-	.nd-game-card-text { font-size: 15px; }
-	.nd-create-tile-label { font-size: 16px; }
-	.nd-map-editor-grid .nd-create-tile-label { font-size: 15px; }
-	.nd-game-flavour details summary { font-size: 17px; }
-	.nd-game-flavour details summary::before { font-size: 14px; }
-	.nd-game-flavour .nd-flavour-body { font-size: 16px; }
-	.nd-fcm-china-help { font-size: 17px; }
-	.nd-check-label { font-size: 16px; }
-	.nd-opt-help { font-size: 14px; }
-	.nd-help-qa { font-size: 17px; }
-	.nd-help-qa b u { font-size: 19px; }
-	.nd-help-kickouts { font-size: 16px; }
-	.nd-stats-tile-num { font-size: 26px; }
-	.nd-stats-tile-label { font-size: 14px; }
-	.nd-empty { font-size: 16px; }
-	.nd-icon-legend-title { font-size: 17px; }
-	.nd-icon-legend-subtitle { font-size: 15px; }
-	.nd-icon-cell-label { font-size: 15px; }
+	.hero-title { font-size: 30px; }
+	.hero-sub { font-size: 17px; }
+	.feature-text { font-size: 16px; }
+	.game-card-text { font-size: 15px; }
+	.create-tile-label { font-size: 16px; }
+	.map-editor-grid .create-tile-label { font-size: 15px; }
+	.game-flavour details summary { font-size: 17px; }
+	.game-flavour details summary::before { font-size: 14px; }
+	.game-flavour .flavour-body { font-size: 16px; }
+	.fcm-china-help { font-size: 17px; }
+	.check-label { font-size: 16px; }
+	.opt-help { font-size: 14px; }
+	.help-qa { font-size: 17px; }
+	.help-qa b u { font-size: 19px; }
+	.help-kickouts { font-size: 16px; }
+	.stats-tile-num { font-size: 26px; }
+	.stats-tile-label { font-size: 14px; }
+	.empty { font-size: 16px; }
+	.icon-legend-title { font-size: 17px; }
+	.icon-legend-subtitle { font-size: 15px; }
+	.icon-cell-label { font-size: 15px; }
 	.TGZinfoPopup { font-size: 15px; }
 	.TGZinfoPopup .diffVR { font-size: 16px; }
-	.nd-tgz-options .diffVR { font-size: 16px; }
-	.nd-help-pills .nd-button { font-size: 16px; }
-	.nd-page-header .nd-page-subtitle { font-size: 16px; }
-	.nd-hero-actions .nd-button { font-size: 16px; }
-	.nd-profile-game-preferences .nd-form-label { font-size: 16px; }
-	.nd-opts-section .nd-check-label { font-size: 15px; }
+	.tgz-options .diffVR { font-size: 16px; }
+	.help-pills .button { font-size: 16px; }
+	.page-header .page-subtitle { font-size: 16px; }
+	.hero-actions .button { font-size: 16px; }
+	.profile-game-preferences .form-label { font-size: 16px; }
+	.opts-section .check-label { font-size: 15px; }
 
 	/* Column width adjustments */
-	.nd-table:has(.nd-row09) thead tr {
+	.table:has(.row09) thead tr {
 		grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.99fr) minmax(90px, 0.55fr) minmax(120px, 0.91fr);
 	}
-	.nd-row09 {
+	.row09 {
 		grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.99fr) minmax(90px, 0.55fr) minmax(120px, 0.91fr);
 	}
 
 	/* Header centering */
-	.nd-table:has(.nd-row09) thead th {
+	.table:has(.row09) thead th {
 		font-size: 13px;
 		text-align: center;
 	}
 
 	/* Row cell centering */
-	.nd-row09 > td {
+	.row09 > td {
 		text-align: center;
 	}
-	.nd-col-game-name {
+	.col-game-name {
 		display: block;
 	}
-	.nd-col-game-note {
+	.col-game-note {
 		font-size: 16px;
 		display: block;
 	}
-	.nd-col-players {
+	.col-players {
 		text-align: center;
 	}
-	.nd-col-options {
+	.col-options {
 		justify-content: center;
 	}
 
 	/* Last-move flex (centered, handles missing icon) */
-	.nd-last-move {
+	.last-move {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
 		justify-content: center;
 		gap: 4px;
 	}
-	.nd-last-move-text {
+	.last-move-text {
 		text-align: center;
 	}
 }
 
 @media (min-width: 1100px) {
-	.nd-lobby-games-table .nd-col-options {
+	.lobby-games-table .col-options {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
 		gap: 4px;

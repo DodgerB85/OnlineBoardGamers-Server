@@ -4,19 +4,19 @@
         if (img.classList.contains('startingMap')) return;
         if (img.closest('.TGZinfoContainer')) return;
         var parent = img.parentNode;
-        if (!parent || (parent.classList && parent.classList.contains('nd-mod-wrap'))) return;
+        if (!parent || (parent.classList && parent.classList.contains('mod-wrap'))) return;
         var wrap = document.createElement('span');
-        wrap.className = 'nd-mod-wrap';
+        wrap.className = 'mod-wrap';
         wrap.setAttribute('data-label', img.title);
         parent.insertBefore(wrap, img);
         wrap.appendChild(img);
     }
-    window.ndWrapTooltips = function (root) {
+    window.wrapTooltips = function (root) {
         if (!root || !root.querySelectorAll) return;
         root.querySelectorAll('.startingOption').forEach(wrapOne);
     };
     function start() {
-        window.ndWrapTooltips(document.getElementById('lobbyPage') || document.body);
+        window.wrapTooltips(document.getElementById('lobbyPage') || document.body);
     }
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', start);

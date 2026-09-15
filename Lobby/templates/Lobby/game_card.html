@@ -1,0 +1,11 @@
+{% load static i18n %}
+<button type="button" class="card game-card game-card-btn" data-game-card="{{ full_id|default:'' }}" aria-expanded="false">
+  <div class="game-card-img" style="background-image:url('{% static img %}');">
+    <img src="{% static img %}" alt="{{ title }}">
+  </div>
+  <div class="game-card-body">
+    <h3 class="game-card-title">{{ title }}</h3>
+    <p class="game-card-text">{{ players }} {% translate "players" %}</p>
+    <p class="game-card-text">{{ tagline }}</p>
+  </div>
+</button>
