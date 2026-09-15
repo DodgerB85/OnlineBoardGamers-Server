@@ -73,20 +73,20 @@
 	overflow: auto;
 }
 
-body.nd .nd-mt-layout {
+.nd-mt-layout {
 	display: grid;
 	grid-template-columns: minmax(280px, min(32vw, 500px)) minmax(0, 1fr);
 	gap: 20px;
 	align-items: start;
 }
 
-body.nd .nd-mt-layout .right-column {
+.nd-mt-layout .right-column {
 	grid-column: 2;
 	grid-row: 1;
 	min-width: 0;
 }
 
-body.nd #wholeMTchat {
+#wholeMTchat {
 	grid-column: 1;
 	grid-row: 1;
 	background: var(--color-surface) !important;
@@ -106,20 +106,20 @@ body.nd #wholeMTchat {
 	max-height: none !important;
 }
 
-body.nd .nd-mt-chat-sticky#wholeMTchat {
+.nd-mt-chat-sticky#wholeMTchat {
 	position: sticky;
 	top: 90px;
 }
 
-body.nd #MTchatBox {
+#MTchatBox {
 	background: transparent !important;
 	border: none !important;
 	padding: 0 !important;
 	text-align: left;
 }
 
-body.nd #MTchatBox h2,
-body.nd #MTchatBox h3 {
+#MTchatBox h2,
+#MTchatBox h3 {
 	font-size: 12px !important;
 	font-weight: 600 !important;
 	text-transform: uppercase;
@@ -127,7 +127,7 @@ body.nd #MTchatBox h3 {
 	margin: 0 0 8px !important;
 }
 
-body.nd #chatMessage {
+#chatMessage {
 	width: 100% !important;
 	box-sizing: border-box !important;
 	background: var(--color-surface) !important;
@@ -141,7 +141,7 @@ body.nd #chatMessage {
 	margin-bottom: 8px !important;
 }
 
-body.nd #sendMessageButton {
+#sendMessageButton {
 	display: block !important;
 	width: 100% !important;
 	background: var(--color-accent) !important;
@@ -157,21 +157,21 @@ body.nd #sendMessageButton {
 }
 
 @media (hover: hover) {
-	body.nd #sendMessageButton:hover {
+	#sendMessageButton:hover {
 		background: var(--color-accent-strong) !important;
 		border-color: var(--color-accent-strong) !important;
 		color: #fff !important;
 	}
 }
 
-body.nd #messageList {
+#messageList {
 	margin-top: 12px;
 	max-height: 400px;
 	overflow-y: auto;
 	background: transparent !important;
 }
 
-body.nd #messageList .chatentry {
+#messageList .chatentry {
 	background: var(--color-surface-soft);
 	border: 1px solid var(--color-border);
 	border-radius: var(--radius-sm);
@@ -180,7 +180,7 @@ body.nd #messageList .chatentry {
 	font-size: 13px;
 }
 
-body.nd #messageList .chatentry .header {
+#messageList .chatentry .header {
 	display: flex;
 	justify-content: space-between;
 	align-items: baseline;
@@ -189,64 +189,64 @@ body.nd #messageList .chatentry .header {
 	border-bottom: none;
 }
 
-body.nd #messageList .chatentry .header .bold {
+#messageList .chatentry .header .bold {
 	font-weight: 600;
 	color: var(--color-ink);
 	font-size: 13px;
 }
 
-body.nd #messageList .chatentry .header .date {
+#messageList .chatentry .header .date {
 	font-size: 11px;
 	float: none;
 	font-style: normal;
 }
 
-body.nd #messageList .chatentry .body {
+#messageList .chatentry .body {
 	color: var(--color-ink-soft);
 	line-height: 1.5;
 }
 
 @media (max-width: 768px) {
-	body.nd .nd-mt-layout {
+	.nd-mt-layout {
 		grid-template-columns: 1fr;
 	}
 
-	body.nd .nd-mt-layout .right-column,
-	body.nd #wholeMTchat {
+	.nd-mt-layout .right-column,
+	#wholeMTchat {
 		grid-column: auto;
 		grid-row: auto;
 		max-width: none;
 	}
 
-	body.nd .nd-mt-chat-sticky#wholeMTchat {
+	.nd-mt-chat-sticky#wholeMTchat {
 		position: static !important;
 		top: auto;
 	}
 
 	/* IP (In Progress) layout: collapse fixed-width left column to full width */
-	body.nd .IPcontainer {
+	.IPcontainer {
 		flex-direction: column;
 	}
-	body.nd .IPleftColumn,
-	body.nd .IPleftColumnMG {
+	.IPleftColumn,
+	.IPleftColumnMG {
 		width: 100% !important;
 		box-sizing: border-box;
 	}
-	body.nd .IPrightColumn {
+	.IPrightColumn {
 		padding: 12px 0;
 	}
 
 	/* MG (multi-game) tables: collapse rows into stacked cards */
-	body.nd .nd-mt-mg-table {
+	.nd-mt-mg-table {
 		display: block;
 	}
-	body.nd .nd-mt-mg-table thead {
+	.nd-mt-mg-table thead {
 		display: none;
 	}
-	body.nd .nd-mt-mg-table tbody {
+	.nd-mt-mg-table tbody {
 		display: block;
 	}
-	body.nd .nd-mt-mg-table tbody tr {
+	.nd-mt-mg-table tbody tr {
 		display: block;
 		background: var(--color-surface);
 		border: 1px solid var(--color-border);
@@ -254,13 +254,13 @@ body.nd #messageList .chatentry .body {
 		padding: 12px;
 		margin-bottom: 8px;
 	}
-	body.nd .nd-mt-mg-table tbody tr td {
+	.nd-mt-mg-table tbody tr td {
 		display: block;
 		border: none;
 		padding: 4px 0;
 		font-size: 13px;
 	}
-	body.nd .nd-mt-mg-table tbody tr td.IPplayerNameTD {
+	.nd-mt-mg-table tbody tr td.IPplayerNameTD {
 		font-weight: 600;
 		font-size: 15px;
 		padding-bottom: 6px;
@@ -271,14 +271,14 @@ body.nd #messageList .chatentry .body {
 		overflow: visible;
 		text-overflow: clip;
 	}
-	body.nd .nd-mt-mg-table tbody tr td.IPpointsTD {
+	.nd-mt-mg-table tbody tr td.IPpointsTD {
 		max-width: none !important;
 		padding: 4px 0 !important;
 		display: flex;
 		justify-content: space-between;
 	}
 	/* Label cells (columns beyond name/position) get a label prefix */
-	body.nd .nd-mt-mg-table tbody tr td.IPpointsTD::before {
+	.nd-mt-mg-table tbody tr td.IPpointsTD::before {
 		content: attr(data-label);
 		font-size: 11px;
 		font-weight: 600;
@@ -289,7 +289,7 @@ body.nd #messageList .chatentry .body {
 
 /* MiniTournament PT mode: single column on small screens */
 @media (max-width: 600px) {
-	body.nd .nd-mini-pt-grid {
+	.nd-mini-pt-grid {
 		grid-template-columns: 1fr !important;
 	}
 }
@@ -391,20 +391,20 @@ body.nd #messageList .chatentry .body {
 
 /* New-design tournament tables get the same accent thead as the lobby /
    stats games tables. */
-body.nd .nd-table thead tr {
+.nd-table thead tr {
 	background: var(--color-accent);
 }
-body.nd .nd-table thead th {
+.nd-table thead th {
 	text-align: center;
 }
 
 /* AllMiniTournaments list uses .nd-row09 rows, which the shared rules turn
    into cards and hide the thead. Restore the header grid like the lobby /
    stats games tables. */
-body.nd .nd-table:has(.nd-row09) thead {
+.nd-table:has(.nd-row09) thead {
 	display: block;
 }
-body.nd .nd-table:has(.nd-row09) thead tr {
+.nd-table:has(.nd-row09) thead tr {
 	display: grid;
 	grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
 	gap: 12px;
@@ -412,7 +412,7 @@ body.nd .nd-table:has(.nd-row09) thead tr {
 	background: var(--color-accent);
 	border-bottom: 2px solid var(--color-border-strong);
 }
-body.nd .nd-table:has(.nd-row09) thead th {
+.nd-table:has(.nd-row09) thead th {
 	display: block;
 	padding: 0;
 	border: none;
@@ -420,7 +420,7 @@ body.nd .nd-table:has(.nd-row09) thead th {
 }
 
 @media (max-width: 980px) {
-	body.nd .nd-table:has(.nd-row09) thead {
+	.nd-table:has(.nd-row09) thead {
 		display: none;
 	}
 }

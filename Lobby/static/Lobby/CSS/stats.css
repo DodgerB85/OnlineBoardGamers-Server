@@ -27,7 +27,7 @@
    .playerStatsDiv but must stay visible. */
 .playerInfoStatsContainer.largeTableContainer > .playerStatsDiv,
 /* unused? no template/JS reference found — verify before removing */
-body.nd .nd-player-stats > .playerStatsDiv {
+.nd-player-stats > .playerStatsDiv {
 	display: none;
 }
 
@@ -157,32 +157,32 @@ body.nd .nd-player-stats > .playerStatsDiv {
 /* Top Players data sections — fair play / win totals / win %.
    These live inside the "Top Players" nd-card, so they appear as
    sections separated by a border rather than individual cards. */
-body.nd .nd-stats-section {
+.nd-stats-section {
 	border-top: 1px solid var(--color-border);
 	padding-top: 16px;
 	margin-top: 16px;
 }
 
 /* Pair of tables (Win Totals | Win Percentages) — 2-col on desktop. */
-body.nd .nd-stats-section .playerStatsContainer {
+.nd-stats-section .playerStatsContainer {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 16px;
 	margin-bottom: 0;
 }
 
-body.nd .nd-stats-section .playerStatsDiv {
+.nd-stats-section .playerStatsDiv {
 	flex: none;
 	margin: 0;
 	min-width: 0;
 }
 
-body.nd .nd-stats-section .playerStatsDiv:first-child {
+.nd-stats-section .playerStatsDiv:first-child {
 	margin-right: 0;
 }
 
 /* Sub-section label (Win Totals / Win Percentages). */
-body.nd .nd-stats-section h2 {
+.nd-stats-section h2 {
 	font-size: 13px;
 	font-weight: 700;
 	text-transform: uppercase;
@@ -191,28 +191,28 @@ body.nd .nd-stats-section h2 {
 }
 
 /* "Win stats are calculated hourly..." footnote. */
-body.nd .nd-stats-hint {
+.nd-stats-hint {
 	font-size: 12px;
 	margin: 10px 0 0;
 	padding: 0;
 	line-height: 1.45;
 }
 
-body.nd .nd-stats-section .nd-table {
+.nd-stats-section .nd-table {
 	min-width: 220px;
 	font-size: 13px;
 }
 
-body.nd .nd-stats-section .nd-table thead tr {
+.nd-stats-section .nd-table thead tr {
 	background: var(--color-accent);
 }
-body.nd .nd-stats-section .nd-table th,
-body.nd .nd-stats-section .nd-table td {
+.nd-stats-section .nd-table th,
+.nd-stats-section .nd-table td {
 	padding: 6px 8px;
 }
 
 @media (max-width: 720px) {
-	body.nd .nd-stats-section .playerStatsContainer {
+	.nd-stats-section .playerStatsContainer {
 		grid-template-columns: 1fr;
 		gap: 12px;
 	}
@@ -221,30 +221,30 @@ body.nd .nd-stats-section .nd-table td {
 /* ============================================================
    FCM stats page — /nd/ wrapper around legacy chart/table content
    ============================================================ */
-body.nd #FCMstatsPage.nd-fcm-stats {
+#FCMstatsPage.nd-fcm-stats {
 	font-size: 14px;
 	line-height: 1.55;
 }
 
-body.nd .nd-fcm-stats-summary {
+.nd-fcm-stats-summary {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 	gap: 12px;
 	margin-bottom: 14px;
 }
 
-body.nd .nd-fcm-stats-title {
+.nd-fcm-stats-title {
 	margin-top: 16px;
 }
 
-body.nd .nd-fcm-stats .bar_canvas {
+.nd-fcm-stats .bar_canvas {
 	display: block;
 	max-width: 100% !important;
 	height: auto !important;
 	margin: 12px auto 24px;
 }
 
-body.nd .nd-fcm-stats .tab {
+.nd-fcm-stats .tab {
 	display: flex;
 	align-items: stretch;
 	flex-wrap: wrap;
@@ -256,7 +256,7 @@ body.nd .nd-fcm-stats .tab {
 	border-radius: 8px 8px 0 0;
 }
 
-body.nd .nd-fcm-stats .tablinks {
+.nd-fcm-stats .tablinks {
 	background: var(--color-surface);
 	color: var(--color-ink);
 	border: none;
@@ -269,12 +269,12 @@ body.nd .nd-fcm-stats .tablinks {
 	padding: 8px 12px;
 }
 
-body.nd .nd-fcm-stats .tablinks.active {
+.nd-fcm-stats .tablinks.active {
 	background: var(--color-accent);
 	color: #fff;
 }
 
-body.nd .nd-fcm-stats .FCMstatsDiv {
+.nd-fcm-stats .FCMstatsDiv {
 	background: var(--color-surface-soft);
 	border: 1px solid var(--color-border);
 	border-radius: 0 0 var(--radius-md) var(--radius-md);
@@ -283,7 +283,7 @@ body.nd .nd-fcm-stats .FCMstatsDiv {
 	padding: 12px;
 }
 
-body.nd .nd-fcm-stats .FCMstatsTable {
+.nd-fcm-stats .FCMstatsTable {
 	background: var(--color-surface);
 	border-collapse: collapse;
 	font-size: 13px;
@@ -292,22 +292,22 @@ body.nd .nd-fcm-stats .FCMstatsTable {
 	width: 100%;
 }
 
-body.nd .nd-fcm-stats .FCMstatsTable th,
-body.nd .nd-fcm-stats .FCMstatsTable td {
+.nd-fcm-stats .FCMstatsTable th,
+.nd-fcm-stats .FCMstatsTable td {
 	border: 1px solid var(--color-border);
 	padding: 6px 8px;
 }
 
-body.nd .nd-fcm-stats .FCMstatsTable th {
+.nd-fcm-stats .FCMstatsTable th {
 	background: var(--color-surface-soft);
 	color: var(--color-ink);
 }
 
-body.nd .nd-fcm-stats .clickableStatTD:hover {
+.nd-fcm-stats .clickableStatTD:hover {
 	background: var(--color-positive-bg);
 }
 
-body.nd .nd-fcm-stats ul {
+.nd-fcm-stats ul {
 	margin: 8px 0 12px;
 	padding-left: 22px;
 }
@@ -315,30 +315,30 @@ body.nd .nd-fcm-stats ul {
 /* ============================================================
    TGZ stats page — /nd/ wrapper around legacy chart/table content
    ============================================================ */
-body.nd #TGZstatsPage.nd-tgz-stats {
+#TGZstatsPage.nd-tgz-stats {
 	font-size: 14px;
 	line-height: 1.55;
 }
 
-body.nd .nd-tgz-stats-summary {
+.nd-tgz-stats-summary {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 	gap: 12px;
 	margin-bottom: 14px;
 }
 
-body.nd .nd-tgz-stats-title {
+.nd-tgz-stats-title {
 	margin-top: 16px;
 }
 
-body.nd .nd-tgz-stats .bar_canvas {
+.nd-tgz-stats .bar_canvas {
 	display: block;
 	max-width: 100% !important;
 	height: auto !important;
 	margin: 12px auto 24px;
 }
 
-body.nd .nd-tgz-stats .tab {
+.nd-tgz-stats .tab {
 	display: flex;
 	align-items: stretch;
 	flex-wrap: wrap;
@@ -350,7 +350,7 @@ body.nd .nd-tgz-stats .tab {
 	border-radius: 8px 8px 0 0;
 }
 
-body.nd .nd-tgz-stats .tablinks {
+.nd-tgz-stats .tablinks {
 	background: var(--color-surface);
 	color: var(--color-ink);
 	border: none;
@@ -363,13 +363,13 @@ body.nd .nd-tgz-stats .tablinks {
 	padding: 8px 12px;
 }
 
-body.nd .nd-tgz-stats .tablinks.active {
+.nd-tgz-stats .tablinks.active {
 	background: var(--color-accent);
 	color: #fff;
 }
 
-body.nd .nd-tgz-stats .statsDiv,
-body.nd .nd-tgz-stats .statsDiv_schism {
+.nd-tgz-stats .statsDiv,
+.nd-tgz-stats .statsDiv_schism {
 	background: var(--color-surface-soft);
 	border: 1px solid var(--color-border);
 	border-radius: 0 0 var(--radius-md) var(--radius-md);
@@ -378,7 +378,7 @@ body.nd .nd-tgz-stats .statsDiv_schism {
 	padding: 12px;
 }
 
-body.nd .nd-tgz-stats .TGZstatsTable {
+.nd-tgz-stats .TGZstatsTable {
 	background: var(--color-surface);
 	border-collapse: collapse;
 	font-size: 13px;
@@ -387,57 +387,57 @@ body.nd .nd-tgz-stats .TGZstatsTable {
 	width: 100%;
 }
 
-body.nd .nd-tgz-stats .TGZstatsTable th,
-body.nd .nd-tgz-stats .TGZstatsTable td {
+.nd-tgz-stats .TGZstatsTable th,
+.nd-tgz-stats .TGZstatsTable td {
 	border: 1px solid var(--color-border);
 	padding: 6px 8px;
 }
 
-body.nd .nd-tgz-stats .TGZstatsTable th {
+.nd-tgz-stats .TGZstatsTable th {
 	background: var(--color-surface-soft);
 	color: var(--color-ink);
 }
 
-body.nd .nd-tgz-stats .clickableStatTD:hover {
+.nd-tgz-stats .clickableStatTD:hover {
 	background: var(--color-positive-bg);
 }
 
-body.nd .nd-tgz-stats ul {
+.nd-tgz-stats ul {
 	margin: 8px 0 12px;
 	padding-left: 22px;
 }
 
-body.nd .nd-tgz-stats .specNoteSpan {
+.nd-tgz-stats .specNoteSpan {
 	font-size: 13px;
 }
 
 /* ============================================================
    AQY stats page — /nd/ wrapper around legacy chart/table content
    ============================================================ */
-body.nd #AQYstatsPage.nd-aqy-stats {
+#AQYstatsPage.nd-aqy-stats {
 	font-size: 14px;
 	line-height: 1.55;
 }
 
-body.nd .nd-aqy-stats-summary {
+.nd-aqy-stats-summary {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 	gap: 12px;
 	margin-bottom: 14px;
 }
 
-body.nd .nd-aqy-stats-title {
+.nd-aqy-stats-title {
 	margin-top: 16px;
 }
 
-body.nd .nd-aqy-stats .bar_canvas {
+.nd-aqy-stats .bar_canvas {
 	display: block;
 	max-width: 100% !important;
 	height: auto !important;
 	margin: 12px auto 24px;
 }
 
-body.nd .nd-aqy-stats .tab {
+.nd-aqy-stats .tab {
 	display: flex;
 	align-items: stretch;
 	flex-wrap: wrap;
@@ -449,7 +449,7 @@ body.nd .nd-aqy-stats .tab {
 	border-radius: 8px 8px 0 0;
 }
 
-body.nd .nd-aqy-stats .tablinks {
+.nd-aqy-stats .tablinks {
 	background: var(--color-surface);
 	color: var(--color-ink);
 	border: none;
@@ -462,12 +462,12 @@ body.nd .nd-aqy-stats .tablinks {
 	padding: 8px 12px;
 }
 
-body.nd .nd-aqy-stats .tablinks.active {
+.nd-aqy-stats .tablinks.active {
 	background: var(--color-accent);
 	color: #fff;
 }
 
-body.nd .nd-aqy-stats .statsDiv {
+.nd-aqy-stats .statsDiv {
 	background: var(--color-surface-soft);
 	border: 1px solid var(--color-border);
 	border-radius: 0 0 var(--radius-md) var(--radius-md);
@@ -476,7 +476,7 @@ body.nd .nd-aqy-stats .statsDiv {
 	padding: 12px;
 }
 
-body.nd .nd-aqy-stats .generalTable {
+.nd-aqy-stats .generalTable {
 	background: var(--color-surface);
 	border-collapse: collapse;
 	font-size: 13px;
@@ -485,18 +485,18 @@ body.nd .nd-aqy-stats .generalTable {
 	width: 100%;
 }
 
-body.nd .nd-aqy-stats .generalTable th,
-body.nd .nd-aqy-stats .generalTable td {
+.nd-aqy-stats .generalTable th,
+.nd-aqy-stats .generalTable td {
 	border: 1px solid var(--color-border);
 	padding: 6px 8px;
 }
 
-body.nd .nd-aqy-stats .generalTable th {
+.nd-aqy-stats .generalTable th {
 	background: var(--color-surface-soft);
 	color: var(--color-ink);
 }
 
-body.nd .nd-aqy-stats .clickableStatTD:hover {
+.nd-aqy-stats .clickableStatTD:hover {
 	background: var(--color-positive-bg);
 }
 
@@ -516,16 +516,16 @@ body.nd .nd-aqy-stats .clickableStatTD:hover {
 
 /* On desktop the labels are hidden — the restored thead above the table
    shows the column names. */
-body.nd .nd-ten-games .nd-table-wrap {
+.nd-ten-games .nd-table-wrap {
 	border-radius: 0 0 var(--radius-md) var(--radius-md);
 	overflow: hidden;
 }
 
-body.nd .nd-ten-games .nd-table:has(.nd-row09) thead {
+.nd-ten-games .nd-table:has(.nd-row09) thead {
 	display: block;
 }
 
-body.nd .nd-ten-games .nd-table:has(.nd-row09) thead tr {
+.nd-ten-games .nd-table:has(.nd-row09) thead tr {
 	display: grid;
 	grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
 	gap: 12px;
@@ -534,7 +534,7 @@ body.nd .nd-ten-games .nd-table:has(.nd-row09) thead tr {
 	border-bottom: 2px solid var(--color-border-strong);
 }
 
-body.nd .nd-ten-games .nd-table:has(.nd-row09) thead th {
+.nd-ten-games .nd-table:has(.nd-row09) thead th {
 	display: block;
 	padding: 0;
 	border: none;
@@ -544,11 +544,11 @@ body.nd .nd-ten-games .nd-table:has(.nd-row09) thead th {
 /* The starting-options icons sit side-by-side in a 36px grid. On
    mobile they still need to fit — give the row a small wrap + shrink
    the icon slightly so 4-5 icons don't push the row past the card. */
-body.nd .nd-ten-games .nd-col-options {
+.nd-ten-games .nd-col-options {
 	row-gap: 4px;
 }
 
-body.nd .nd-ten-games .nd-col-options img.startingMap {
+.nd-ten-games .nd-col-options img.startingMap {
 	width: 32px;
 	height: 32px;
 }
@@ -559,7 +559,7 @@ body.nd .nd-ten-games .nd-col-options img.startingMap {
    small uppercase label from the data-label attribute on each
    non-icon cell. Skip nd-col-icon (the icon doesn't need a label). */
 @media (max-width: 980px) {
-	body.nd .nd-ten-games .nd-row09 > td[data-label]::before {
+	.nd-ten-games .nd-row09 > td[data-label]::before {
 		content: attr(data-label);
 		display: block;
 		font-size: 11px;
@@ -570,24 +570,24 @@ body.nd .nd-ten-games .nd-col-options img.startingMap {
 	}
 	/* Tighten the row a bit on mobile so the labels don't push the
 	   icons into awkward positions. */
-	body.nd .nd-ten-games .nd-row09 {
+	.nd-ten-games .nd-row09 {
 		padding: 12px;
 	}
 	/* The starting options icons already live in a flex-wrap row; let
 	   them flow to a second line if the label pushes them down. */
-	body.nd .nd-ten-games .nd-col-options {
+	.nd-ten-games .nd-col-options {
 		flex-wrap: wrap;
 	}
-	body.nd .nd-ten-games .nd-col-options img.startingMap {
+	.nd-ten-games .nd-col-options img.startingMap {
 		width: 28px;
 		height: 28px;
 	}
 	/* Status pill is a single short label, so center it and trim
 	   vertical space. */
-	body.nd .nd-ten-games .nd-col-status {
+	.nd-ten-games .nd-col-status {
 		text-align: left;
 	}
-	body.nd .nd-ten-games .nd-table:has(.nd-row09) thead {
+	.nd-ten-games .nd-table:has(.nd-row09) thead {
 		display: none;
 	}
 }
@@ -596,7 +596,7 @@ body.nd .nd-ten-games .nd-col-options img.startingMap {
    data-label pseudo-labels would be redundant with the visible
    thead. Explicitly suppress them on wider screens. */
 @media (min-width: 981px) {
-	body.nd .nd-ten-games .nd-row09 > td[data-label]::before {
+	.nd-ten-games .nd-row09 > td[data-label]::before {
 		content: none;
 		display: none;
 	}
@@ -609,7 +609,7 @@ body.nd .nd-ten-games .nd-col-options img.startingMap {
    ============================================================ */
 
 /* Player header: name + trophy row. */
-body.nd .nd-player-header {
+.nd-player-header {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
@@ -618,10 +618,10 @@ body.nd .nd-player-header {
 	margin: 4px 0 16px;
 	text-align: center;
 }
-body.nd .nd-player-name {
+.nd-player-name {
 	margin: 0;
 }
-body.nd .nd-player-title {
+.nd-player-title {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
@@ -630,7 +630,7 @@ body.nd .nd-player-title {
 }
 
 /* Inline row of big gold/silver/bronze tally trophies. */
-body.nd .nd-trophy-row {
+.nd-trophy-row {
 	display: flex;
 	gap: 8px;
 	align-items: center;
@@ -639,7 +639,7 @@ body.nd .nd-trophy-row {
 
 /* Per-game trophy breakdown strip. Soft-fill card so the game icon +
    medal counts read as a grouped summary rather than loose floats. */
-body.nd .nd-trophy-detail {
+.nd-trophy-detail {
 	margin: 0 0 16px;
 	padding: 12px 14px;
 	background: var(--color-surface-soft);
@@ -651,17 +651,17 @@ body.nd .nd-trophy-detail {
 	align-items: center;
 	justify-content: center;
 }
-body.nd .nd-trophy-detail .trophyGameIcon {
+.nd-trophy-detail .trophyGameIcon {
 	width: 40px;
 	height: 40px;
 	vertical-align: middle;
 }
-body.nd .nd-trophy-detail .trophyHolderSummaryDiv,
-body.nd .nd-trophy-detail .trophyIMGsummary {
+.nd-trophy-detail .trophyHolderSummaryDiv,
+.nd-trophy-detail .trophyIMGsummary {
 	height: 40px;
 	width: 40px;
 }
-body.nd .nd-trophy-detail .trophyNumberSummaryDiv {
+.nd-trophy-detail .trophyNumberSummaryDiv {
 	font-size: 30px;
 	top: 0;
 	left: 11px;
@@ -670,19 +670,19 @@ body.nd .nd-trophy-detail .trophyNumberSummaryDiv {
 /* Per-game stat table (Players/Games/Wins/Win%) on the player profile page.
    Bespoke class, not scoped through an ancestor + generic .nd-table — a
    change here can't leak onto any other table. */
-body.nd .playerInfoStatsTable thead tr {
+.playerInfoStatsTable thead tr {
 	background: var(--color-accent);
 }
-body.nd .playerInfoStatsTable th,
-body.nd .playerInfoStatsTable td {
+.playerInfoStatsTable th,
+.playerInfoStatsTable td {
 	padding: 6px 10px;
 }
 
-body.nd #playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead {
+#playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead {
 	display: block;
 }
 
-body.nd #playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead tr {
+#playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead tr {
 	display: grid;
 	grid-template-columns: 58px minmax(0, 1.2fr) minmax(0, 1fr) minmax(40px, 0.4fr) minmax(0, 1fr) minmax(172px, 0.5fr) minmax(110px, 0.7fr);
 	gap: 12px;
@@ -691,14 +691,14 @@ body.nd #playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead tr {
 	border-bottom: 2px solid var(--color-border-strong);
 }
 
-body.nd #playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead th {
+#playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead th {
 	display: block;
 	padding: 0;
 	border: none;
 	text-align: center;
 }
 
-body.nd #playerInfoPage .nd-game-list .nd-table.nd-finished-games-table thead tr {
+#playerInfoPage .nd-game-list .nd-table.nd-finished-games-table thead tr {
 	display: grid;
 	grid-template-columns: 58px minmax(0, 1.2fr) minmax(0, 1fr) minmax(172px, 0.5fr) minmax(110px, 0.7fr);
 	gap: 12px;
@@ -707,32 +707,32 @@ body.nd #playerInfoPage .nd-game-list .nd-table.nd-finished-games-table thead tr
 	border-bottom: 2px solid var(--color-border-strong);
 }
 
-body.nd #playerInfoPage .nd-game-list .nd-table:has(.nd-row09) tbody tr.nd-row09 {
+#playerInfoPage .nd-game-list .nd-table:has(.nd-row09) tbody tr.nd-row09 {
 	border-bottom: 2px solid #0B275B;
 	grid-template-columns: 58px minmax(0, 1.2fr) minmax(0, 1fr) minmax(40px, 0.4fr) minmax(0, 1fr) minmax(172px, 0.5fr) minmax(110px, 0.7fr);
 }
 
-body.nd #playerInfoPage .nd-game-list .nd-table.nd-finished-games-table tbody tr.nd-row09 {
+#playerInfoPage .nd-game-list .nd-table.nd-finished-games-table tbody tr.nd-row09 {
 	grid-template-columns: 58px minmax(0, 1.2fr) minmax(0, 1fr) minmax(172px, 0.5fr) minmax(110px, 0.7fr);
 }
 
 /* Sub-section labels inside the Joint Games card. */
-body.nd .nd-player-sub {
+.nd-player-sub {
 	font-size: 13px;
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
 	margin: 0 0 8px;
 }
-body.nd .nd-player-sub:first-child {
+.nd-player-sub:first-child {
 	margin-top: 0;
 }
-body.nd .nd-player-sub + .nd-player-sub {
+.nd-player-sub + .nd-player-sub {
 	margin-top: 14px;
 }
 
 /* Joint finished summary line ("Wins: X/Y (Z%)"). */
-body.nd .nd-joint-summary {
+.nd-joint-summary {
 	font-size: 13px;
 	color: var(--color-ink-soft);
 	margin: 0 0 10px;
@@ -741,7 +741,7 @@ body.nd .nd-joint-summary {
 	gap: 4px 10px;
 	align-items: center;
 }
-body.nd .nd-joint-summary .gameIcon {
+.nd-joint-summary .gameIcon {
 	width: 24px;
 	height: 24px;
 	vertical-align: middle;
@@ -751,15 +751,15 @@ body.nd .nd-joint-summary .gameIcon {
    dominate. The number is absolutely positioned; recenter for the
    smaller box. */
 @media (max-width: 480px) {
-	body.nd .nd-player-header {
+	.nd-player-header {
 		align-items: center;
 	}
-	body.nd .nd-trophy-row .trophyHolderDiv,
-	body.nd .nd-trophy-row .trophyIMG {
+	.nd-trophy-row .trophyHolderDiv,
+	.nd-trophy-row .trophyIMG {
 		height: 72px;
 		width: 72px;
 	}
-	body.nd .nd-trophy-row .trophyNumberDiv {
+	.nd-trophy-row .trophyNumberDiv {
 		font-size: 28px;
 		left: 28px;
 		top: 4px;
@@ -767,7 +767,7 @@ body.nd .nd-joint-summary .gameIcon {
 }
 
 @media (max-width: 980px) {
-	body.nd #playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead {
+	#playerInfoPage .nd-game-list .nd-table:has(.nd-row09) thead {
 		display: none;
 	}
 }
