@@ -525,19 +525,14 @@
 	display: block;
 }
 
+/* Grid columns/gap/padding/border already come from the shared
+   .nd-table:has(.nd-row09) rules in nd-components.css — only the
+   ten-games-specific colour/alignment are overridden here. */
 .nd-ten-games .nd-table:has(.nd-row09) thead tr {
-	display: grid;
-	grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
-	gap: 12px;
-	padding: 6px 14px;
 	background: var(--color-accent);
-	border-bottom: 2px solid var(--color-border-strong);
 }
 
 .nd-ten-games .nd-table:has(.nd-row09) thead th {
-	display: block;
-	padding: 0;
-	border: none;
 	text-align: center;
 }
 
