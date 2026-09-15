@@ -9,7 +9,11 @@
     {% if Mini_Tournament.tournamentDescription %}<br><small class="col-game-note"><i>{{ Mini_Tournament.tournamentDescription }}</i></small>{% endif %}
   </td>
   <td class="col-players" data-label="{% translate "Players" %}">
-    {{ Mini_Tournament.maxTournamentPlayers }} total · {{ Mini_Tournament.maxGamePlayers }} per game
+    {% if Mini_Tournament.tournamentStatus == "IP" %}
+      {{ Mini_Tournament.gamesFinished }}/{{ Mini_Tournament.totalGames }}<br>{{ Mini_Tournament.maxGamePlayers }} per game
+    {% else %}
+      {{ Mini_Tournament.signupCount }}/{{ Mini_Tournament.maxTournamentPlayers }}<br>{{ Mini_Tournament.maxGamePlayers }} per game
+    {% endif %}
   </td>
   <td class="col-options" data-label="{% translate "Options" %}">
     {% if Mini_Tournament.gameCode != "TGZ" and not Mini_Tournament.startingOptionsHTML or Mini_Tournament.gameCode != "TGZ" and Mini_Tournament.startingOptionsHTML == "[None]" %}<span class="no-options">{% translate "No options" %}</span>{% else %}{{ Mini_Tournament.startingOptionsHTML|safe }}{% endif %}

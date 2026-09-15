@@ -249,10 +249,13 @@ def SR_getAnyTournamentRoundsData(tournament):
             roundTitle += " (KO)"
         currentRound["roundTitle"] = roundTitle
 
+        gamesFinished = 0
+        totalGames = 0
         for row in TPDA[i]:
             if row[0] == "BYEPLAYERS":
                 currentRound["byesNames"] = row[1:]
             else:
+                totalGames += 1
                 # winner = row[2][0] if len(row[2]) > 0 else []
                 currentGame = {}
                 currentGame["players"] = row[0]
@@ -263,7 +266,11 @@ def SR_getAnyTournamentRoundsData(tournament):
                 else:
                     currentGame["gameName"] = "[no name]"
                 gamesData.append(currentGame)
+                if len(row[2]) >= 1:
+                    gamesFinished += 1
         currentRound["gamesData"] = gamesData
+        currentRound["gamesFinished"] = gamesFinished
+        currentRound["totalGames"] = totalGames
         # ret.insert(0, currentRound)
         ret.append(currentRound)
 

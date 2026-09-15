@@ -196,7 +196,7 @@
                                 </thead>
                                 <tbody>
                                     {% for Mini_Tournament in available_MT %}
-                                        {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
+                                        {% include "Lobby/gameDisplay/general_MT_row.html" with Mini_Tournament=Mini_Tournament %}
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -256,7 +256,7 @@
                                 </thead>
                                 <tbody>
                                     {% for Mini_Tournament in current_MT %}
-                                        {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
+                                        {% include "Lobby/gameDisplay/general_MT_row.html" with Mini_Tournament=Mini_Tournament %}
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -322,7 +322,7 @@
                                 </thead>
                                 <tbody>
                                     {% for Mini_Tournament in waiting_MT %}
-                                        {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
+                                        {% include "Lobby/gameDisplay/general_MT_row.html" with Mini_Tournament=Mini_Tournament %}
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -372,7 +372,7 @@
                                 </thead>
                                 <tbody>
                                     {% for Mini_Tournament in invitations_MT %}
-                                        {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
+                                        {% include "Lobby/gameDisplay/general_MT_row.html" with Mini_Tournament=Mini_Tournament %}
                                     {% endfor %}
                                 </tbody>
                             </table>

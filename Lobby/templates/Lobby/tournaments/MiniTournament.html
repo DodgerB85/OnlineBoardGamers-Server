@@ -222,7 +222,12 @@
             {% endif %}
             {% for round in roundsData %}
               <div class="card" style="margin-bottom: 12px;">
-                <h3 style="margin-bottom: 10px;">{{ round.roundTitle }}</h3>
+                <h3 style="margin-bottom: 10px;">
+                  {{ round.roundTitle }}
+                  {% if tournament.tournamentStatus == "IP" and round.gamesFinished < round.totalGames %}
+                    <small style="font-weight:normal;color:var(--color-muted);">({{ round.gamesFinished }}/{{ round.totalGames }} finished)</small>
+                  {% endif %}
+                </h3>
                 <table class="table">
                   <thead>
                     <tr>

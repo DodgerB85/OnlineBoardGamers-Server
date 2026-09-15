@@ -46,7 +46,7 @@
                                 </tr>
                             </thead>
                             {% for Mini_Tournament in available_MT %}
-                                {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
+                                {% include "Lobby/gameDisplay/general_MT_row.html" with Mini_Tournament=Mini_Tournament %}
                             {% endfor %}
                         </table>
                     </div>
@@ -72,7 +72,7 @@
                                     </tr>
                                 </thead>
                                 {% for Mini_Tournament in current_MT %}
-                                    {% include "Lobby/gameDisplay/available_MT_row.html" with Mini_Tournament=Mini_Tournament %}
+                                    {% include "Lobby/gameDisplay/general_MT_row.html" with Mini_Tournament=Mini_Tournament %}
                                 {% endfor %}
                             </table>
                         </div>

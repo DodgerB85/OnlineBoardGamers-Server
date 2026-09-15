@@ -397,6 +397,9 @@
                           {% else %}
                             {{ round.roundTitle }}
                           {% endif %}
+                          {% if tournament.tournamentStatus == "IP" and round.gamesFinished < round.totalGames %}
+                            <small style="font-weight:normal;color:var(--color-muted);">({{ round.gamesFinished }}/{{ round.totalGames }} finished)</small>
+                          {% endif %}
                         </h2>
                         <!-- R2 split into groups -->
                         {% if round.roundTitle == "Round 2" %}
@@ -569,7 +572,12 @@
                   <div class="MTallRoundHolder">
                     {% for round in roundsData %}
                       <div class="MTroundTableDiv">
-                        <h2>{{ round.roundTitle }}</h2>
+                        <h2>
+                          {{ round.roundTitle }}
+                          {% if tournament.tournamentStatus == "IP" and round.gamesFinished < round.totalGames %}
+                            <small style="font-weight:normal;color:var(--color-muted);">({{ round.gamesFinished }}/{{ round.totalGames }} finished)</small>
+                          {% endif %}
+                        </h2>
                         <table class="table">
                           <thead>
                             <tr>

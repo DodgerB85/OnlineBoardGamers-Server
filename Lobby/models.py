@@ -252,12 +252,25 @@ class Tournament(models.Model):
         if startingOptionsHTML == "":
             startingOptionsHTML = "[None]"
 
+        signupCount = self.startingPlayers.count()
+        gamesFinished = 0
+        totalGames = 0
+        if self.tournamentStatus == "IP" and self.tournamentProgressionData:
+            TPDA = json.loads(self.tournamentProgressionData)
+            for roundData in TPDA:
+                for row in roundData:
+                    if row[0] != "BYEPLAYERS":
+                        totalGames += 1
+                        if len(row[2]) >= 1:
+                            gamesFinished += 1
+
         return {
             "Tournament_id": self.id,
             "tournamentName": self.tournamentName,
             "tournamentDescription": self.tournamentDescription,
             "tournamentType": self.get_tournamentType_display(),
             "tournamentCategory": self.tournamentCategory,
+            "tournamentStatus": self.tournamentStatus,
             "maxTournamentPlayers": self.maxTournamentPlayers,
             "maxGamePlayers": self.maxGamePlayers,
             "startingOptionsHTML": startingOptionsHTML,
@@ -266,6 +279,9 @@ class Tournament(models.Model):
             "gameCode": self.gameCode,
             "tournamentID": self.id,
             "tournamentLink": f"/MainTournament/{self.id}/",
+            "signupCount": signupCount,
+            "gamesFinished": gamesFinished,
+            "totalGames": totalGames,
         }
 
 
