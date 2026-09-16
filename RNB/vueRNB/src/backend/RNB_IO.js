@@ -38,9 +38,27 @@ export async function sendDiscordWebhook(message) {
 		})
 }
 
+// A pending (pseudo-simul) player's pre-set move gets performed locally by loadCurrentMove()
+// purely as a preview - it is only made canonical via saveStackMove's turn-order-aware
+// transaction. saveGame()/saveConflictMove() export the WHOLE client model regardless of who
+// triggered the save (eg a bystander clicking a kickout button, or the admin "Save Game"
+// button), so a lingering preview must be undone first. Otherwise the previewer's move gets
+// baked into the shared gameData while their turnOrder slot is untouched, and they get an
+// extra "ghost" turn later when it's genuinely their turn. See issue #106.
+export function clearUnfinalizedPreMoveBeforeExport() {
+	const store = useModelStore()
+	if (store.stackControl.loadedPreMove && store.gameflow.phase !== rf.PHASE_GAME_OVER) {
+		const savedWonderTurnOrder = [...store.gameflow.wonderTurnOrder]
+		context.resetWholeTurn()
+		store.gameflow.wonderTurnOrder = savedWonderTurnOrder
+	}
+}
+
 export async function saveGame(saveRewind, saveContext = false) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+
+	clearUnfinalizedPreMoveBeforeExport()
 
 	let wsConnecting = null
 	if (personal.liveWS) {
@@ -497,6 +515,8 @@ export async function saveConflictMove(saveRewind = true, overrideBKSN = null, o
 	const store = useModelStore()
 	const personal = usePersonalStore()
 
+	clearUnfinalizedPreMoveBeforeExport()
+
 	let wsConnecting = null
 	if (personal.liveWS) {
 		wsConnecting = WS.StartWebSocket() // No 'await'! Starts in background.
@@ -945,6 +965,8 @@ export async function savePrePhaseMain() {
 export async function saveAndUpdateNotifictionsAfterStack(currentPlayerNeedsToFixMove, finalize = false /*phaseChanged*/) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+
+	clearUnfinalizedPreMoveBeforeExport()
 
 	personal.haltPlay = true
 	store.viewSettings.showLoader = true
