@@ -114,23 +114,22 @@
   var initData = {};
   
   // Core game data
-  initData.gameID = {{ gameID }};
-  initData.gameName = "{{ gameName }}";
-  initData.gameData = '{{ gameData|safe }}';
-  initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
-  initData.myZoomLevel = {{ myZoomLevel }};
-  initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
-  initData.startingOptions = {{startingOptionsLiteral}};
-  initData.startingOptionsHTML = `{{startingOptionsHTML | safe}}`;
-  initData.playerNames = {{ allPlayerListBySeat | safe }};
-  initData.currentPlayers = '{{ currentPlayers }}'
+  initData.gameID = {{ gameID|default:0 }};
+  initData.gameName = "{{ gameName|default:"" }}";
+  initData.gameData = '{{ gameData|default:""|safe }}';
+  initData.gameCreationTimestamp = {{ gameCreationTimestamp|default:0 }};
+  initData.myZoomLevel = {{ myZoomLevel|default:"" }};
+  initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe|default:"[]"}};
+  initData.startingOptions = {{startingOptionsLiteral|default:"{}"}};
+  initData.startingOptionsHTML = `{{startingOptionsHTML|default:""| safe}}`;
+  initData.playerNames = {{ allPlayerListBySeat|safe|default:"[]" }};
+  initData.currentPlayers = '{{ currentPlayers|default:"" }}'
   initData.pov = {{ pov }};
-  initData.turn = {{turn}};
-  initData.deleteVotesData = {{ deleteVotesData | safe }};
-  initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
-  initData.startingMap = {{ startingMap }}
-  initData.moveData = '{{ moveData }}'
-  initData.playerNames = {{ allPlayerListBySeat | safe }};
+  initData.turn = {{turn|default:0}};
+  initData.deleteVotesData = {{ deleteVotesData|safe|default:"{}" }};
+  initData.statsExcludeVotesData = {{ statsExcludeVotesData|safe|default:"{}" }};
+  initData.startingMap = {{ startingMap|default:"[]" }}
+  initData.moveData = '{{ moveData|default:"" }}'
 
   // Game state
   {% if finishedGame %}
@@ -169,9 +168,9 @@
 
   // Additional variables from original GameTemplate.html
   {% if gameData and phase == 13 %}initData.startingOptions = {{ startingOptionsLiteral }};{% endif %}
-  initData.assistance = {{ showAssistance }};
-  {% if currentPlayers %}initData.currentPlayersArray = {{ currentPlayers | safe }};{% endif %}
-  initData.preferedColor = {{ preferredColour }};
+  initData.assistance = {{ showAssistance|default:1 }};
+  {% if currentPlayers %}initData.currentPlayersArray = {{ currentPlayers|safe|default:"[]" }};{% endif %}
+  initData.preferedColor = {{ preferredColour|default:-1 }};
   {% if highContrastBoardItems %}initData.highContrastBoardItems = true;{% endif %}
   {% if secondsToNextKickout %}initData.secondsToNextKickout = {{ secondsToNextKickout }};{% endif %}
   {% if currentNotes %}initData.currentNotes = '{{ currentNotes | safe }}';{% endif %}
@@ -181,10 +180,10 @@
   {% if myZoomLevel %}initData.zoomLevel = {{ myZoomLevel }};{% endif %}
   {% if liveNotification %}initData.liveNotification = {{ liveNotification }};{% endif %}
   {% if tournamentGame %}initData.tournamentGame = true;{% endif %}
-  initData.rewindPanelType = {{ rewindPanelType }};
-  initData.rewindHostPossible = {{ rewindHostPossible|lower }};
-  initData.rewindHostHTML = '{{ rewindHostHTML|addslashes|safe }}';
-  initData.currentRewindConsent = {{ currentRewindConsent }};
+  initData.rewindPanelType = {{ rewindPanelType|default:0 }};
+  initData.rewindHostPossible = {{ rewindHostPossible|default:0|lower }};
+  initData.rewindHostHTML = '{{ rewindHostHTML|default:""|addslashes|safe }}';
+  initData.currentRewindConsent = {{ currentRewindConsent|default:0 }};
   
   // Static initialization variables
   initData.saveRewind = true;
