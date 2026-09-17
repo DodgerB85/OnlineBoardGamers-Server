@@ -207,7 +207,8 @@ def showGame(request, game_id):
                 "moveData": "",
             }
         )
-        return render(request, "FCM/GameTemplate.html", returnData)
+        fcm_template = "FCM/GameTemplate_new.html" if getattr(request, "use_new_design", False) else "FCM/GameTemplate.html"
+        return render(request, fcm_template, returnData)
 
     # Logged in
     user_profile = result["user_profile"]
@@ -299,9 +300,10 @@ def showGame(request, game_id):
                 player_gp.save()
             currentNotes = ""
 
+    fcm_template = "FCM/GameTemplate_new.html" if getattr(request, "use_new_design", False) else "FCM/GameTemplate.html"
     return render(
         request,
-        "FCM/GameTemplate.html",
+        fcm_template,
         {
             "gameCreationTimestamp": currentGame.created,
             "now": now,
@@ -398,7 +400,7 @@ def showGameVue(request, game_id):
                 "moveData": "",
             }
         )
-        return render(request, "FCM/gameTemplateVue.html", returnData)
+        return render(request, "FCM/showFCMgame.html", returnData)
 
     # Logged in - same logic as original showGame but for Vue template
     user_profile = result["user_profile"]
@@ -491,7 +493,7 @@ def showGameVue(request, game_id):
 
     return render(
         request,
-        "FCM/gameTemplateVue.html",
+        "FCM/showFCMgame.html",
         {
             "turn": currentGame.turn,
             "gameCreationTimestamp": currentGame.created,
@@ -921,7 +923,7 @@ def _processTurn(request):
         oldData = currentGame.gameData
         if len(currentRewindDataArray) == 0 or currentRewindDataArray[-1] != oldData:
             currentRewindDataArray.append(oldData)
-        currentGame.rewindData = json.dumps(currentRewindDataArray, separators=(",", ":"))
+        # NB: rewindData is serialized later (before the single final save)
 
         currentGame.gameData = jsonData["gameData"]
 
@@ -997,7 +999,7 @@ def _processTurn(request):
         # Phase first otherwise MOVE payday skip overwrites with phase 7
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        currentGame.save()
+        # NB: currentGame.save() is deferred to the single final save below
 
         # reset notifs - SAVE NORMAL
         if jsonData["phase"] == rfFCM.PHASE_WORKING_DAY or oldPhase == rfFCM.PHASE_WORKING_DAY:
@@ -1113,7 +1115,7 @@ def _processTurn(request):
                 # MAYBE ADD AN INDENT TO THIS LINE????
                 # currentRewindData = json.dumps(currentRewindDataArray)
 
-        currentGame.rewindData = json.dumps(currentRewindDataArray)
+        currentGame.rewindData = json.dumps(currentRewindDataArray, separators=(",", ":"))
 
         ################ END REWIND EVERY SAVE #######################
 
@@ -1469,7 +1471,7 @@ def _processTurn(request):
             # But this load data needs to be moved to temp
             # SKIP FIX ATTEMPT
             # currentRewindDataArray.append(loadData)
-            currentGame.rewindData = json.dumps(currentRewindDataArray)
+            currentGame.rewindData = json.dumps(currentRewindDataArray, separators=(",", ":"))
             ####################################
 
             # SKIP FIX ATTEMPT
@@ -1502,7 +1504,7 @@ def _processTurn(request):
         # SKIP FIX ATTEMPT
         # currentRewindDataArray.append(loadData)
 
-        currentGame.rewindData = json.dumps(currentRewindDataArray)
+        currentGame.rewindData = json.dumps(currentRewindDataArray, separators=(",", ":"))
 
         if jsonData["RSRP"]:
             presenter.removeSingleRewindPermission()
