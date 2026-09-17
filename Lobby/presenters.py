@@ -705,7 +705,7 @@ class WEBpresenter(GamePresenter):
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
-        names = self.getAllPlayersOrderedySeatInArray(False)
+        names = self.getAllPlayersOrderedySeatInArray(True)
         winnerNamesArray = []
         for playerIndex in _winner:
             winner_user = User.objects.get(username=names[playerIndex])
@@ -801,7 +801,7 @@ class AQYpresenter(GamePresenter):
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
-        names = self.getAllPlayersOrderedySeatInArray(False)
+        names = self.getAllPlayersOrderedySeatInArray(True)
         winnerNamesArray = []
         for playerIndex in _winner:
             winner_user = User.objects.get(username=names[playerIndex])
@@ -2776,7 +2776,7 @@ class KFWpresenter(GamePresenter):
         self.gameObj.kickoutFlexiData = ""
         self.gameObj.gameStatus = "FINISHED"
 
-        names = self.getAllPlayersOrderedySeatInArray(False)
+        names = self.getAllPlayersOrderedySeatInArray(True)
         winnerNamesArray = []
         for playerIndex in _winner:
             winner_user = User.objects.get(username=names[playerIndex])
