@@ -292,7 +292,8 @@ def showGame(request, game_id):
         allPlayerListBySeat = presenter.getAllPlayersOrderedySeatInArray(False, False)
         myMove = presenter.isMyMove(request.user.username)
 
-        myZoomLevel = currentGame.zoomLevels[pov * 3 : pov * 3 + 3]
+        if pov >= 0:
+            myZoomLevel = currentGame.zoomLevels[pov * 3 : pov * 3 + 3] or myZoomLevel
         if currentGame.gameData == "" and "SHADOW" in presenter.getAllPlayersOrderedySeatInArray(False, False):
             displayNames = player_gp.notes if player_gp else ""
             if player_gp:
@@ -483,7 +484,8 @@ def showGameVue(request, game_id):
         allPlayerListBySeat = presenter.getAllPlayersOrderedySeatInArray(False, False)
         myMove = presenter.isMyMove(request.user.username)
 
-        myZoomLevel = currentGame.zoomLevels[pov * 3 : pov * 3 + 3]
+        if pov >= 0:
+            myZoomLevel = currentGame.zoomLevels[pov * 3 : pov * 3 + 3] or myZoomLevel
         if currentGame.gameData == "" and "SHADOW" in presenter.getAllPlayersOrderedySeatInArray(False, False):
             displayNames = player_gp.notes if player_gp else ""
             if player_gp:

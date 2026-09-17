@@ -118,7 +118,7 @@
   initData.gameName = "{{ gameName|default:"" }}";
   initData.gameData = '{{ gameData|default:""|safe }}';
   initData.gameCreationTimestamp = {{ gameCreationTimestamp|default:0 }};
-  initData.myZoomLevel = {{ myZoomLevel|default:"" }};
+  initData.myZoomLevel = {{ myZoomLevel|default:200 }};
   initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe|default:"[]"}};
   initData.startingOptions = {{startingOptionsLiteral|default:"{}"}};
   initData.startingOptionsHTML = `{{startingOptionsHTML|default:""| safe}}`;
