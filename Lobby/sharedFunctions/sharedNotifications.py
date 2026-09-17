@@ -28,16 +28,21 @@ from Lobby.models import Profile, User
 
 # Website Bots / AI / Shadow
 USERNAMES_NOT_TO_NOTIFY = [
+    # Bots / AI
     "FcmBot",
     "FcmAI",
     "HcBot",
+    "HlcBot",
     "BusBot",
     "TgzBot",
     "CnsBot",
     "AqyBot",
     "IndBot",
     "RnbBot",
+    "WebBot",
+    "KfwBot",
     "SHADOW",
+    # Shadows
     "SHADOW_2",
     "SHADOW_3",
     "SHADOW_4",
