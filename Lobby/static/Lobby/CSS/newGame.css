@@ -927,3 +927,17 @@
 
 
 /*** END MT STUFF ***/
+
+/*** MAP EDITOR MIN WIDTHS ***/
+
+#fcmMapEditor {
+	min-width: 1200px;
+}
+
+#aqyMapEditor {
+	min-width: 1205px;
+}
+
+#tgzMapEditor {
+	min-width: 1210px;
+}
