@@ -42,9 +42,9 @@ USE_NEW_CODE = False
 
 logger = logging.getLogger(__name__)
 
-# This wrapper is a bit pointless. 
+# This wrapper is a bit pointless.
 # BUT it does handily keep the loggin in one wrapper!
-# So this could easily be changed back to webhooks, or all sent to a different log, etc. 
+# So this could easily be changed back to webhooks, or all sent to a different log, etc.
 def log_expected_sync_reject(message):
     logger.warning(message)
 
@@ -614,6 +614,9 @@ def _processTurn(request):
                 # Not used at the moment, in // comment
                 "currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+                "kickoutRequired": presenter.kickoutRequired(),
+                "kickoutVotesData": json.dumps(presenter.getKickoutVotesData()),
+                "kickoutVoteThreshold": presenter.getKickoutVoteThreshold(),
                 "specialData": currentMove,
                 "latestUpdate": currentGame.latestUpdate,
                 "startingMap": currentGame.startingMap if currentGame.startingMap else [],
@@ -975,7 +978,7 @@ def _processTurn(request):
             presenter.clearAllMoveDataV2()
 
         # If you are saving into turn order, return all players OOB preferences
-        if oldPhase == rfFCM.PHASE_TURN_ORDER and jsonData["phase"] == rfFCM.PHASE_TURN_ORDER and rfFCM.SO_STRICT_PAYDAY_FRIDGE not in starting_options:
+        if jsonData["phase"] == rfFCM.PHASE_TURN_ORDER and rf.SO_TRAINING_GAME not in starting_options:
             returnOOBpreferences = True
 
         # If the stored game is not payday, and the new data IS payday, then we need to return payday preturns
@@ -1410,10 +1413,13 @@ def _processTurn(request):
             log_expected_sync_reject(message)
             return JsonResponse({"syncError": True}, safe=False)
 
-        # Add turn/phase validation to prevent backward saves
-        # if jsonData.get("turn", 0) < currentGame.turn or (jsonData.get("turn", 0) == currentGame.turn and jsonData.get("phase", 0) < currentGame.phase):
-        #    SN_sendAdminErrorMessage(f"BACKWARD SAVE DETECTED - User: {request.user.username} gameID: {currentGame.id}")
-        # return JsonResponse({"syncError": True}, safe=False)
+        # Voting layer: 3p+ games need a majority vote to kick, unless the
+        # requester's own vote for this target is more than 2 days old.
+        # If the vote is only recorded, return straight away without kicking.
+        kickout_vote_result = presenter.processKickoutVote(request.user.username, jsonData["kickedName"])
+        if kickout_vote_result["voteCast"]:
+            currentGame.save()
+            return JsonResponse(kickout_vote_result, safe=False)
 
         _missingPlayer = User.objects.get(username=jsonData["kickedName"])
         presenter.addMissingPlayer(_missingPlayer)
