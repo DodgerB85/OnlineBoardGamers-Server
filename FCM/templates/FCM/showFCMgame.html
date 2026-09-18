@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=1050, initial-scale=1.0" />
     <meta name="title" content="Online Board Gamers - Food Chain Magnate">
     <meta name="description"
           content="Play Food Chain Magnate Online for free with others, or solo!">
@@ -158,7 +158,7 @@
   {% if kickoutRequired > 0 and not myMove %}
   initData.kickoutRequired = {{kickoutRequired}};
   {% endif %}
-  initData.notes = '{{ currentNotes | safe }}';
+  initData.notes = '{{ currentNotes | escapejs }}';
   {% if not gameData %}
   {% if displayNames %}
   initData.displayNames = {{ displayNames | safe }};
@@ -173,7 +173,7 @@
   initData.preferedColor = {{ preferredColour|default:-1 }};
   {% if highContrastBoardItems %}initData.highContrastBoardItems = true;{% endif %}
   {% if secondsToNextKickout %}initData.secondsToNextKickout = {{ secondsToNextKickout }};{% endif %}
-  {% if currentNotes %}initData.currentNotes = '{{ currentNotes | safe }}';{% endif %}
+  {% if currentNotes %}initData.currentNotes = '{{ currentNotes | escapejs }}';{% endif %}
   {% if nextURL %}initData.nextURLGlobal = "{{ nextURL|safe }}";{% endif %}
   {% if chatNotification %}initData.notification = true;{% endif %}
   {% if kickoutRequired > 0 and not myMove %}initData.kickoutRequiredGlobal = {{kickoutRequired}};{% endif %}
