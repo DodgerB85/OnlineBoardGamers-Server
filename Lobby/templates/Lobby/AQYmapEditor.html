@@ -1,5 +1,7 @@
 {% extends "Lobby/layout.html" %}
 {% load static i18n compress %}
+{% block viewport %}width=1205{% endblock %}
+{% block body_class %}map-editor-page-aqy{% endblock %}
 {% block head %}
        
        <link href="{% static 'Lobby/CSS/newGame.css' %}" rel="stylesheet">

@@ -48,7 +48,7 @@
         <meta name="language" content="English">
         <meta name="revisit-after" content="2 days">
         <meta name="author" content="Online Board Gamers">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="{% block viewport %}width=device-width, initial-scale=1.0{% endblock %}">
         <!-- Browser Icons -->
         <link rel="icon"
               type="image/png"
@@ -78,7 +78,7 @@
         <link href="{% static 'Lobby/CSS/layout_new.css' %}" rel="stylesheet">
         {% block head %}{% endblock %}
     </head>
-    <body class="{% if user.is_authenticated %}authed{% else %}guest{% endif %}">
+    <body class="{% if user.is_authenticated %}authed{% else %}guest{% endif %} {% block body_class %}{% endblock %}">
         <div class="topBar">
             {% if user.is_authenticated %}
                 <!-- LOGGED IN TOP BAR -->

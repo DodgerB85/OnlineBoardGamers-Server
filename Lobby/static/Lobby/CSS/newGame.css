@@ -941,3 +941,15 @@
 #tgzMapEditor {
 	min-width: 1210px;
 }
+
+body.map-editor-page-fcm .footer {
+	min-width: 1200px;
+}
+
+body.map-editor-page-aqy .footer {
+	min-width: 1205px;
+}
+
+body.map-editor-page-tgz .footer {
+	min-width: 1210px;
+}
