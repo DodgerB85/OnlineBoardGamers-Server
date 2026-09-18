@@ -1061,7 +1061,7 @@ def _processTurn(request):
                 playerListToNotify.remove("FcmAI")
 
             # If you are saving into phase 4, and the next player has OOB, remove them from notifications
-            if jsonData["phase"] == rfFCM.PHASE_TURN_ORDER and presenter.hasValidActualMoveData(jsonData["nextPlayer"][0]):
+            if jsonData["phase"] == rfFCM.PHASE_TURN_ORDER and jsonData["nextPlayer"][0] in playerListToNotify and presenter.hasValidActualMoveData(jsonData["nextPlayer"][0]):
                 playerListToNotify.remove(jsonData["nextPlayer"][0])
 
             if len(playerListToNotify) > 0:
