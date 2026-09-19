@@ -520,6 +520,15 @@ button {
     display: inline-block;
 }
 
+/* Fallback so startingOption icons reserve their layout size before load
+   even outside .table td / .mod-wrap containers (e.g. MainTournament page) */
+.startingOption {
+    width: 40px;
+    height: 40px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
 /* Changelog entry layout */
 .log-entry {
     padding: 14px 0;
@@ -2598,17 +2607,18 @@ iframe {
     font-size: 14px;
     line-height: 1.4;
 }
-.col-game a { color: #0B275B; text-decoration: none; }
-.col-game a:hover { text-decoration: underline; }
+.col-game a { color: #0B275B; text-decoration: underline; text-decoration-color: rgba(11, 39, 91, 0.35); }
+.col-game a:hover { text-decoration-color: currentColor; }
 .col-players {
     color: var(--color-ink-soft);
     line-height: 1.4;
 }
 .col-players a {
     color: #0B275B;
-    text-decoration: none;
+    text-decoration: underline;
+    text-decoration-color: rgba(11, 39, 91, 0.35);
 }
-.col-players a:hover { text-decoration: underline; }
+.col-players a:hover { text-decoration-color: currentColor; }
 .col-status {
     text-align: center;
     color: var(--color-ink-soft);
@@ -2616,9 +2626,10 @@ iframe {
 }
 .col-status a {
     color: #0B275B;
-    text-decoration: none;
+    text-decoration: underline;
+    text-decoration-color: rgba(11, 39, 91, 0.35);
 }
-.col-status a:hover { text-decoration: underline; }
+.col-status a:hover { text-decoration-color: currentColor; }
 .col-status .status-wrap {
     /* Names are already joined with a ", " separator in the markup
        (<a>FcmBot</a>, <a>BotKickStarter</a>, ...), so render them as normal
@@ -2982,5 +2993,11 @@ iframe {
 		gap: 4px;
 		justify-items: center;
 		align-items: center;
+	}
+}
+
+@media (min-width: 1370px) {
+	.lobby-games-table .col-options {
+		grid-template-columns: repeat(4, 1fr);
 	}
 }
