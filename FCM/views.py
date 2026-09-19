@@ -334,6 +334,8 @@ def showGame(request, game_id):
             "rewindHostPossible": rewindHostPossible,
             "currentRewindConsent": currentRewindConsent,
             "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+            "kickoutVoteThreshold": presenter.getKickoutVoteThreshold(),
+            "kickoutVotesData": json.dumps(presenter.getKickoutVotesData()),
             "tournamentGame": tournamentGame,
             "highContrastBoardItems": highContrastBoardItems,
             "startingOptionsHTML": startingOptionsHTML,
@@ -526,6 +528,8 @@ def showGameVue(request, game_id):
             "rewindHostPossible": rewindHostPossible,
             "currentRewindConsent": currentRewindConsent,
             "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+            "kickoutVoteThreshold": presenter.getKickoutVoteThreshold(),
+            "kickoutVotesData": json.dumps(presenter.getKickoutVotesData()),
             "tournamentGame": tournamentGame,
             "highContrastBoardItems": highContrastBoardItems,
             "startingOptionsHTML": startingOptionsHTML,
@@ -626,7 +630,7 @@ def _processTurn(request):
         )
 
     # Reset move data to blank
-    elif jsonData["action"] == "unlockRestructure" or jsonData["action"] == "unlockPayday":
+    elif jsonData["action"] in ("unlockRestructure", "unlockPayday", "unlockCleanup"):
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present

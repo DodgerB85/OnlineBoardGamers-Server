@@ -165,6 +165,8 @@
   {% endif %}
   {% endif %}
   {% endif %}
+  initData.kickoutVoteThreshold = {{ kickoutVoteThreshold|default:1 }};
+  initData.kickoutVotesData = {{ kickoutVotesData|safe|default:"{}" }};
 
   // Additional variables from original GameTemplate.html
   {% if gameData and phase == 13 %}initData.startingOptions = {{ startingOptionsLiteral }};{% endif %}

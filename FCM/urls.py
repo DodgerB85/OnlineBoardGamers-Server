@@ -9,7 +9,7 @@ app_name = "FCM"
 
 
 def redirect_old_url(request, original_id):
-    """Redirect old FCM_Game URLs to new Game Game URLs"""
+    """Redirect old FCM_Game URLs to Game URLs"""
     try:
         game = Game.objects.get(gameCode="FCM", original_id=original_id)
         return redirect("FCM:showFCMgame", game_id=game.id)
@@ -26,8 +26,8 @@ urlpatterns = [
     path("coffeeHelp/", views.coffeeHelp, name="coffeeHelp"),
     path("test/", views.test, name="test"),
     path("gameAdmin/", views.gameAdmin, name="gameAdmin"),
-    path("<int:game_id>/show/", views.showGame, name="showFCMgame"),
-    path("<int:game_id>/show2/", views.showGameVue, name="showFCMgameVue"),
+    path("<int:game_id>/show2/", views.showGame, name="showFCMgame"),
+    path("<int:game_id>/show/", views.showGameVue, name="showFCMgameVue"),
     path("<int:original_id>/", redirect_old_url, name="redirect_old_url"),
     path("FCMstats/", views.FCMstats, name="FCMstats"),
     path("FCMstatGames/", views.FCMstatGames, name="FCMstatGames"),
