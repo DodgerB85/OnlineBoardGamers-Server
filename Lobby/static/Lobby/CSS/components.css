@@ -2984,3 +2984,9 @@ iframe {
 		align-items: center;
 	}
 }
+
+@media (min-width: 1370px) {
+	.lobby-games-table .col-options {
+		grid-template-columns: repeat(4, 1fr);
+	}
+}
