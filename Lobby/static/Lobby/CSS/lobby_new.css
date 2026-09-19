@@ -350,6 +350,7 @@
     gap: 6px;
     padding: 10px 12px;
     min-height: 44px;
+    min-width: 96px;
     border-radius: 4px;
     font-size: 13px;
     font-weight: 600;
@@ -372,7 +373,17 @@
 }
 /* Join / Accept now share the same look as Copy Link (white secondary). */
 .col-cta .buttonDiv.Join,
-.col-cta .buttonDiv.availableLink {
+.col-cta .buttonDiv.availableLink,
+.col-cta .buttonDiv.Leave {
+    /* Re-declared here (not just the color/border) because the legacy
+       .buttonDiv.Join/.Leave rule below has equal specificity and comes
+       later in the file, so it otherwise wins on display/padding/margin
+       and breaks vertical centering (inline-block instead of flex). */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 12px;
+    margin: 0;
     background: var(--color-surface);
     border: 2px solid #b8c2cc;
     color: var(--color-ink);
@@ -380,7 +391,8 @@
 }
 @media (hover: hover) {
     .col-cta .buttonDiv.Join:hover,
-    .col-cta .buttonDiv.availableLink:hover {
+    .col-cta .buttonDiv.availableLink:hover,
+    .col-cta .buttonDiv.Leave:hover {
         border-color: var(--color-accent-strong);
         color: var(--color-accent-strong);
     }
