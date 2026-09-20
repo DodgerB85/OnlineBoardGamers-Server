@@ -271,6 +271,8 @@ function copyToClipboard(text, event) {
 	popup.style.padding = "10px"
 	popup.style.border = "2px solid #5875f8"
 	popup.style.borderRadius = "4px"
+	popup.style.boxShadow = "0 4px 14px rgba(0, 0, 0, 0.25)"
+	popup.style.zIndex = "9999"
 	popup.style.opacity = "1"
 	popup.style.transition = "opacity 1s"
 

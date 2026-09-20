@@ -137,17 +137,17 @@
 }
 .table.lobby-games-table thead tr {
     display: grid;
-    grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px minmax(90px, 0.55fr) minmax(120px, 0.8fr);
+    grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(140px, 0.9fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
     gap: 12px;
     padding: 8px 14px 6px;
     background: var(--color-accent);
     border-bottom: 2px solid var(--color-border-strong);
 }
 .table.lobby-games-table.finished-games-table thead tr {
-    grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px 255px;
+    grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(140px, 0.9fr) 255px;
 }
 .table.current-games-table :is(thead tr, .row09) {
-    grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(110px, 0.7fr);
+    grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(140px, 0.6fr) minmax(110px, 0.7fr);
 }
 .table.current-games-table thead .col-game {
     grid-column: span 2;
@@ -240,15 +240,15 @@
    column clustered on the left while the six-column header remains visible. */
 @media (min-width: 721px) and (max-width: 980px) {
     .table.lobby-games-table .row09 {
-    grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px minmax(90px, 0.55fr) minmax(120px, 0.8fr);
+    grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(140px, 0.9fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr);
         gap: 12px;
         padding: 7px 14px;
     }
     .table.lobby-games-table.finished-games-table .row09 {
-        grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px 255px;
+        grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(140px, 0.9fr) 255px;
     }
     .table.current-games-table .row09 {
-    grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(80px, 0.5fr) minmax(110px, 0.7fr);
+    grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(140px, 0.6fr) minmax(110px, 0.7fr);
     }
     .lobby-games-table .col-players,
     .lobby-games-table .col-turn,
@@ -257,7 +257,7 @@
     .lobby-games-table .col-cta {
         grid-column: auto;
     }
-    .lobby-games-table .row09 > td[data-label]::before {
+    .table.gamesTable.lobby-games-table .row09 > td[data-label]::before {
         content: none;
         display: none;
     }
@@ -350,6 +350,7 @@
     gap: 6px;
     padding: 10px 12px;
     min-height: 44px;
+    min-width: 96px;
     border-radius: 4px;
     font-size: 13px;
     font-weight: 600;
@@ -372,7 +373,17 @@
 }
 /* Join / Accept now share the same look as Copy Link (white secondary). */
 .col-cta .buttonDiv.Join,
-.col-cta .buttonDiv.availableLink {
+.col-cta .buttonDiv.availableLink,
+.col-cta .buttonDiv.Leave {
+    /* Re-declared here (not just the color/border) because the legacy
+       .buttonDiv.Join/.Leave rule below has equal specificity and comes
+       later in the file, so it otherwise wins on display/padding/margin
+       and breaks vertical centering (inline-block instead of flex). */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 12px;
+    margin: 0;
     background: var(--color-surface);
     border: 2px solid #b8c2cc;
     color: var(--color-ink);
@@ -380,7 +391,8 @@
 }
 @media (hover: hover) {
     .col-cta .buttonDiv.Join:hover,
-    .col-cta .buttonDiv.availableLink:hover {
+    .col-cta .buttonDiv.availableLink:hover,
+    .col-cta .buttonDiv.Leave:hover {
         border-color: var(--color-accent-strong);
         color: var(--color-accent-strong);
     }
@@ -624,7 +636,7 @@
 }
 
 /* ---- Mobile overrides ---- */
-@media (max-width: 768px) {
+@media (max-width: 804px) {
     .new-game-btn {
         padding: 6px 10px;
         font-size: 12px;
@@ -649,8 +661,8 @@
     }
 }
 
-/* Desktop-only (≥769px) font bump, centering, column adjustments */
-@media (min-width: 769px) {
+/* Desktop-only (≥805px) font bump, centering, column adjustments */
+@media (min-width: 805px) {
     .notice { font-size: 16px; }
     .news-banner { font-size: 16px; }
     .news-dismiss { font-size: 18px; }
@@ -673,15 +685,15 @@
 
     /* Desktop current-games column widths */
     .table.lobby-games-table :is(thead tr, .row09) {
-        grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px minmax(90px, 0.55fr) minmax(120px, 0.91fr);
+        grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(140px, 0.9fr) minmax(90px, 0.55fr) minmax(120px, 0.91fr);
     }
     .table.current-games-table :is(thead tr, .row09) {
-        grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.125fr) minmax(0, 0.85fr) minmax(0, 0.9fr) minmax(80px, 0.5fr) minmax(150px, 0.925fr);
+        grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.125fr) minmax(0, 0.85fr) minmax(0, 0.9fr) minmax(140px, 0.6fr) minmax(150px, 0.925fr);
     }
 
     /* Finished games: icon | name | players | options | last activity */
     .table.lobby-games-table.finished-games-table :is(thead tr, .row09) {
-        grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) 128px 255px;
+        grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(140px, 0.9fr) 255px;
     }
 
     /* Header centering */
