@@ -73,6 +73,10 @@ def RNBhelp(request):
     return render(request, "RNB/RNBhelp.html")
 
 
+def RNBmapHelp(request):
+    return render(request, "RNB/RNBmapHelp.html")
+
+
 def createRNBgame(request):
     # Creating a game must be via POST
     if request.method != "POST":

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, cast
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.db.models import F
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.utils.translation import gettext
@@ -24,6 +25,7 @@ if TYPE_CHECKING:
     from Lobby.presenters import RNBpresenter
 
 from . import RNBconstants as rfRNB
+from .models import RNBmap
 
 
 @login_required()
@@ -193,6 +195,16 @@ def create_rnb_game(
             new_game.relatedMiniTournament = tournamentObj
 
         new_game.save()
+
+        # Increment map playCount
+        if starting_map:
+            try:
+                map_data = json.loads(starting_map)
+                unique_id = map_data[-1].get("UK")
+                if unique_id is not None:
+                    RNBmap.objects.filter(uniqueID=unique_id).update(playCount=F("playCount") + 1)
+            except (json.JSONDecodeError, IndexError, KeyError):
+                pass
 
         # Add invited players M2M
         for player in invited_usernames_objs:

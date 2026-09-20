@@ -31,6 +31,8 @@ class RNBmap(models.Model):
         null=True,
     )
 
+    playCount = models.IntegerField(default=0)
+
     # Manual checkbox for verified maps to be part of the official collection
     isVerified = models.BooleanField(default=False)
 

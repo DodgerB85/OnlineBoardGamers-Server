@@ -20,6 +20,15 @@
     </div>
   </div>
   <div class="card section">
+    <h2>{% translate "Map Editor" %}</h2>
+    <div class="help-qa">
+      {% url 'RNB:RNBmapHelp' as map_help_url %}
+      <p>
+        {% blocktranslate trimmed %}Map Editor Help &amp; Map Verification Info Available <a class="linkOther" href="{{ map_help_url }}">here</a>{% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+  <div class="card section">
     <h2>{% translate "Playing the Game" %}</h2>
     <div class="help-qa">
       {% blocktranslate trimmed %}
