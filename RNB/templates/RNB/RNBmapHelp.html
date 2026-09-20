@@ -1,0 +1,93 @@
+{% extends "Lobby/help_shell.html" %}
+{% load static %}
+{% load i18n %}
+{% block page_title %}
+  {% translate "Roads & Boats Map Editor Help" %}
+{% endblock page_title %}
+{% block page_action %}
+  <a class="button button-ghost button-sm"
+     href="{% url 'RNB:RNBmapEditor' %}">&#8592; {% trans "Map Editor" %}</a>
+{% endblock page_action %}
+{% block content %}
+  <div class="card section">
+    <h2>{% translate "Map Verification" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% blocktranslate trimmed %}
+          When you create a map in the Map Editor, it starts out as an <b>unverified</b> map.
+          .
+        {% endblocktranslate %}
+      </p>
+      <p>
+        {% blocktranslate trimmed %}
+          Verification is performed manually by me.
+          Verified maps are marked with a green <b>[Verified]</b> label.
+        {% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+  <div class="card section">
+    <h2>{% translate "Creating a Map" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% blocktranslate trimmed %}
+          To create a new map, use the hex tile palette at the top of the Map Editor to select terrain tiles and place them on the grid.
+          Give your map a name and description, then click the save button.
+          Your map will be saved to the database as an unverified map.
+        {% endblocktranslate %}
+      </p>
+      <p>
+        {% blocktranslate trimmed %}
+          Only the map creator (or the admin) can replace or update an unverified map.
+          Once a map is verified, only the admin can modify it to protect the official map collection.
+        {% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+  <div class="card section">
+    <h2>{% translate "Map Validation Rules" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% translate "The Map Editor will prevent you from saving a map that does not meet these minimum requirements:" %}
+      </p>
+      <ul>
+        <li>{% translate "The map must have at least as many hexes as the player count multiplied by 3." %}</li>
+        <li>
+          {% translate "All hexes on the map must be connected (no isolated hex groups) - use the void hexes to create map breaks." %}
+        </li>
+        <li>{% translate "All river connections between hexes must be properly matched." %}</li>
+        <li>{% translate "The map must have a name and description." %}</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card section">
+    <h2>{% translate "How to Get a Map Verified" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% blocktranslate trimmed %}
+          I will review the map list periodically to verify maps.
+          Please ensure your map has a good name, and includes the designer credit in the description.
+          Please use some variation in similar hexes, ie for a big sea area, use a variety of sea hexes, not just the same one.
+          Same goes for pastures / woods / etc.
+          If you are still working on a map, then please include it in the description, eg 'test' or 'draft'.
+          To help me identify maps that are ready for release, please add "FINAL" to the end of the name. I will then review the map
+          and remove the 'FINAL' from the title.
+          <br />
+          <br />
+          There are no paritcular 'rules' as to how a map must 'be'. Any map that looks playable can get verified!
+        {% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+  <div class="card section">
+    <h2>{% translate "Further Help" %}</h2>
+    <p>
+      <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>
+      <img id="contactEmailImg"
+           src="{% static 'Lobby/email.png' %}"
+           alt="Email Address"
+           width="400"
+           height="30" />
+    </p>
+  </div>
+{% endblock content %}

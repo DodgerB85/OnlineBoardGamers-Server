@@ -338,6 +338,8 @@ const errorText = computed(() => {
 
 <template>
 	<div id="wholeArea">
+		<div class="mapEditorBanner">For map verification info see <a href="/RNB/RNBmapHelp/" target="_blank">Here</a></div>
+
 		<!-- Available Hexes to Place -->
 		<div id="hexOptionDiv">
 			<div v-for="(hexTerrainID, idx) in hexTerrainIDs" :key="idx" class="newSingleHexDiv" :class="{ voidHexContainer: hexTerrainID === String(rf.BLANK_1) }">
@@ -443,6 +445,25 @@ const errorText = computed(() => {
 </template>
 
 <style scoped>
+.mapEditorBanner {
+	text-align: center;
+	padding: 6px;
+	background-color: #2c3e50;
+	color: white;
+	font-weight: bold;
+	margin-bottom: 6px;
+	border-radius: 4px;
+}
+
+.mapEditorBanner a {
+	color: #3498db;
+	text-decoration: underline;
+}
+
+.mapEditorBanner a:hover {
+	color: #5dade2;
+}
+
 .newHexRotateDiv {
 	position: absolute;
 	bottom: 0px;
