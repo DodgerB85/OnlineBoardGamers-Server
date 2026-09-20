@@ -144,7 +144,7 @@
     border-bottom: 2px solid var(--color-border-strong);
 }
 .table.lobby-games-table.finished-games-table thead tr {
-    grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(140px, 0.9fr) 255px;
+    grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 1fr) minmax(140px, 0.9fr) 255px;
 }
 .table.current-games-table :is(thead tr, .row09) {
     grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(140px, 0.6fr) minmax(110px, 0.7fr);
@@ -219,10 +219,6 @@
         justify-self: center;
     }
 }
-.no-options {
-    display: none;
-}
-
 @media (max-width: 980px) {
     .table.gamesTable .row09 > td[data-label]::before {
         content: attr(data-label);
@@ -245,7 +241,7 @@
         padding: 7px 14px;
     }
     .table.lobby-games-table.finished-games-table .row09 {
-        grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(140px, 0.9fr) 255px;
+        grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 1fr) minmax(140px, 0.9fr) 255px;
     }
     .table.current-games-table .row09 {
     grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.25fr) minmax(0, 0.85fr) minmax(0, 1fr) minmax(140px, 0.6fr) minmax(110px, 0.7fr);
@@ -269,9 +265,6 @@
 /* On phones the rows become cards. Their visible data labels are the column
    headers; a separate six-column header would be unreadable and misaligned. */
 @media (max-width: 720px) {
-    .no-options {
-        display: inline;
-    }
     .table.lobby-games-table thead {
         display: none;
     }
@@ -314,8 +307,14 @@
     .lobby-games-table .col-cta {
         text-align: center;
     }
-    .lobby-games-table .row09 > .col-options[data-label]::before,
-    .lobby-games-table .row09 > .last-move[data-label]::before {
+    /* Options needs the full card width, not half of a 2-col grid, so 2-3
+       icons sit on one line instead of stacking into a tower. */
+    .lobby-games-table .col-options {
+        grid-column: 1 / -1;
+        justify-content: center;
+    }
+    /* Column names are inferred from context on phones; drop every label. */
+    .lobby-games-table .row09 > td[data-label]::before {
         content: none;
         display: none;
     }
@@ -691,9 +690,9 @@
         grid-template-columns: 58px minmax(0, 1.15fr) minmax(0, 1.125fr) minmax(0, 0.85fr) minmax(0, 0.9fr) minmax(140px, 0.6fr) minmax(150px, 0.925fr);
     }
 
-    /* Finished games: icon | name | players | options | last activity */
+    /* Finished games: icon | name | winner | players | options | last activity */
     .table.lobby-games-table.finished-games-table :is(thead tr, .row09) {
-        grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 1fr) minmax(140px, 0.9fr) 255px;
+        grid-template-columns: 58px minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 1fr) minmax(140px, 0.9fr) 255px;
     }
 
     /* Header centering */
