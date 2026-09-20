@@ -25,7 +25,7 @@ class RNBMapScoreForm(forms.ModelForm):
 # Register your models here.
 @admin.register(RNBmap)
 class RNBmapAdmin(admin.ModelAdmin):
-    list_display = ('name', 'playerCount', 'isVerified', 'id')
+    list_display = ('name', 'playerCount', 'playCount', 'isVerified', 'id')
     list_filter = ('playerCount', 'isVerified')
     search_fields = ('name', 'description')
     autocomplete_fields = ("creator",)
@@ -35,7 +35,7 @@ class RNBmapAdmin(admin.ModelAdmin):
             'fields': ('name', 'description', 'playerCount')
         }),
         ('Map Data', {
-            'fields': ('hexData', 'uniqueID', 'isVerified', 'creator')
+            'fields': ('hexData', 'uniqueID', 'isVerified', 'playCount', 'creator')
         }),
         ('System', {
             'fields': ('id',),
