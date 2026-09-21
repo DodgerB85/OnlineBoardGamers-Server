@@ -810,6 +810,7 @@ function replayStackReshaftMine(stackAction) {
 }
 
 function replayStackManualProduction(stackAction, playerIndex) {
+	const store = useModelStore()
 	// 	let stackAction = [rf.STACK_MANUAL_PRODUCTION, building.id, transporterID, [...stackLocation]]
 	const buildingID = stackAction[1]
 	const transporterID = stackAction[2]

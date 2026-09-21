@@ -211,6 +211,10 @@ def _processTGZturn(request):
 
     jsonData = json.loads(request.body)
 
+    action = jsonData.get("action")
+    if not action:
+        return JsonResponse({"error": "Missing 'action' field."}, status=400)
+
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
         presenter = cast("TGZpresenter", currentGame.presenter())
@@ -223,7 +227,7 @@ def _processTGZturn(request):
         next_usernames = [name.strip() for name in next_player_str.split(",") if name.strip()] if next_player_str else []
         presenter.setCurrentPlayersFromArrInTurnOrder(next_usernames, acting_username=acting_username, old_latest_update=old_latest_update)
 
-    if jsonData["action"] == "setAutoPass":
+    if action == "setAutoPass":
         playerIndex = jsonData["playerNumber"]
         autoPass = jsonData["autoPass"]
         if not autoPass and currentGame.autoMoves is None:
@@ -237,7 +241,7 @@ def _processTGZturn(request):
         currentGame.save()
         return JsonResponse({"setAutoPassSuccess": True})
 
-    elif jsonData["action"] == "simpleSave":
+    elif action == "simpleSave":
         # Check if old version is older than DB version, and if so, return
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")
@@ -270,7 +274,7 @@ def _processTGZturn(request):
 
         return JsonResponse(response_data, safe=False)
 
-    elif jsonData["action"] == "replaceExternalTournamentPlayer":
+    elif action == "replaceExternalTournamentPlayer":
         # Check if old version is older than DB version, and if so, return
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")
@@ -334,7 +338,7 @@ def _processTGZturn(request):
 
         return JsonResponse(response_data, safe=False)
 
-    elif jsonData["action"] == "save":
+    elif action == "save":
         # Check if old version is older than DB version, and if so, return
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")
@@ -487,7 +491,7 @@ def _processTGZturn(request):
 
     # END SAVE / CREATE
 
-    elif jsonData["action"] == "resign":
+    elif action == "resign":
         # Always do this
         usernameToUse = request.user.username
         if usernameToUse == "BotKickStarter":
@@ -509,7 +513,7 @@ def _processTGZturn(request):
             safe=False,
         )
 
-    elif jsonData["action"] == "loadRewind":
+    elif action == "loadRewind":
         if len(currentGame.rewindData) == 0:
             return JsonResponse(
                 {"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")},
@@ -551,7 +555,7 @@ def _processTGZturn(request):
         )
     # ENd LOAD REWIND
 
-    elif jsonData["action"] == "updateDataFromLoadRewind":
+    elif action == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
         set_current_players(jsonData["nextPlayer"])
@@ -588,7 +592,7 @@ def _processTGZturn(request):
             safe=False,
         )
 
-    elif jsonData["action"] == "kickout":
+    elif action == "kickout":
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):  # and not jsonData["ignoreSync"]:
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
@@ -658,7 +662,7 @@ def _sendChatMessage(request):
 
     jsonData = json.loads(request.body)
 
-    if jsonData["action"] == "sendChatMessage":
+    if jsonData.get("action") == "sendChatMessage":
         try:
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
         except Game.DoesNotExist:
@@ -781,7 +785,7 @@ def createTGZspinoff(request):
 
     jsonData = json.loads(request.body)
 
-    if jsonData["action"] == "copyGame":
+    if jsonData.get("action") == "copyGame":
         try:
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="TGZ")
         except Game.DoesNotExist:

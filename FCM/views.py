@@ -588,6 +588,10 @@ def _processTurn(request):
 
     jsonData = json.loads(request.body)
 
+    action = jsonData.get("action")
+    if not action:
+        return JsonResponse({"error": "Missing 'action' field."}, status=400)
+
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="FCM")
     except Game.DoesNotExist:
@@ -599,7 +603,7 @@ def _processTurn(request):
         FCMsuperUsers.append("FCMtourneyAdmin")
 
     # loads the latest game and updates latest-Update
-    if jsonData["action"] == "loadNew":
+    if action == "loadNew":
         # NB finished game should trigger a location.reload, but this is here as a reminder
         if currentGame.gameStatus == "FINISHED":
             user_gp = currentGame.players.filter(player=request.user).first()
@@ -630,7 +634,7 @@ def _processTurn(request):
         )
 
     # Reset move data to blank
-    elif jsonData["action"] in ("unlockRestructure", "unlockPayday", "unlockCleanup"):
+    elif action in ("unlockRestructure", "unlockPayday", "unlockCleanup"):
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
@@ -659,7 +663,7 @@ def _processTurn(request):
         return JsonResponse({"unlockStatus": True}, safe=False)
 
     # save OOB preference
-    elif jsonData["action"] == "saveOOBpreference":
+    elif action == "saveOOBpreference":
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
@@ -677,7 +681,7 @@ def _processTurn(request):
         currentGame.save()
         return JsonResponse({"OOBsaved": setCorrectly}, safe=False)
 
-    elif jsonData["action"] == "deleteMoveData":
+    elif action == "deleteMoveData":
         phase = jsonData["phase"]
         # This is the "new phase" you are just moving into
         # If moving into TO, don't clear the moves (save pre-selectiongs), EXCEPT on turn 1 when there's no pre-selection
@@ -698,7 +702,7 @@ def _processTurn(request):
             safe=False,
         )
 
-    elif jsonData["action"] == "saveInProgressMap":
+    elif action == "saveInProgressMap":
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
@@ -778,7 +782,7 @@ def _processTurn(request):
             safe=False,
         )
 
-    elif jsonData["action"] == "saveModuleSelection":
+    elif action == "saveModuleSelection":
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
@@ -867,7 +871,7 @@ def _processTurn(request):
         )
 
     # NEW
-    elif jsonData["action"] == "saveNormal":
+    elif action == "saveNormal":
         save_start_time = time.time()
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
@@ -1168,7 +1172,7 @@ def _processTurn(request):
     # END SAVE-NORM
 
     # NEW
-    elif jsonData["action"] == "saveSimulMove":
+    elif action == "saveSimulMove":
         notRequiedPlayerNames = jsonData.get("notRequiedPlayerNames", [])
         continueFromStalledGame = jsonData.get("continueFromStalledGame", False)
 
@@ -1263,7 +1267,7 @@ def _processTurn(request):
         return JsonResponse(response, safe=False)
 
     ################### PRE TURN
-    elif jsonData["action"] == "preTurn":
+    elif action == "preTurn":
         # Check if old version is older than DB version, and if so, return
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
@@ -1302,7 +1306,7 @@ def _processTurn(request):
 
     ################### END PRE TURN
 
-    elif jsonData["action"] == "resign":
+    elif action == "resign":
         # Always do this
         _missingPlayer = User.objects.get(username=request.user.username)
         presenter.addMissingPlayer(_missingPlayer)
@@ -1329,7 +1333,7 @@ def _processTurn(request):
         # use this return only to wipe data if resigining during work day and there is payday skip data
         # not used for anything else yet.
 
-    elif jsonData["action"] == "saveAfterKickout":
+    elif action == "saveAfterKickout":
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
@@ -1405,7 +1409,7 @@ def _processTurn(request):
             safe=False,
         )
 
-    elif jsonData["action"] == "kickout":
+    elif action == "kickout":
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
@@ -1447,7 +1451,7 @@ def _processTurn(request):
             safe=False,
         )
 
-    elif jsonData["action"] == "loadRewind":
+    elif action == "loadRewind":
         # If working day, clear move data now, to get rid of pre-prepared SALARY phase
         if jsonData["phase"] == rfFCM.PHASE_WORKING_DAY:
             presenter.clearAllMoveDataV2()
@@ -1542,7 +1546,7 @@ def _processTurn(request):
         )
     # ENd LOAD REWIND
 
-    elif jsonData["action"] == "updateDataFromLoadRewind":
+    elif action == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
         presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
@@ -1579,7 +1583,7 @@ def _processTurn(request):
             safe=False,
         )
 
-    elif jsonData["action"] == "adminKickout":
+    elif action == "adminKickout":
         # Check if old version is older than DB version, and if so, return
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
@@ -1627,7 +1631,7 @@ def _processTurn(request):
 
         return JsonResponse(response_data, safe=False)
 
-    elif jsonData["action"] == "simpleSave":
+    elif action == "simpleSave":
         currentGame.gameData = jsonData["data"]
         currentGame.save()
         return JsonResponse(
@@ -1637,7 +1641,7 @@ def _processTurn(request):
             safe=False,
         )
 
-    elif jsonData["action"] == "saveAndUpdateNotifictions":
+    elif action == "saveAndUpdateNotifictions":
         currentGame.gameData = jsonData["data"]
         # referringPhase = jsonData["referringPhase"]
 
@@ -1694,7 +1698,7 @@ def _processTurn(request):
             safe=False,
         )
 
-    print(f"* * * ERROR: {jsonData['action']} -- Game: {currentGame.gameName} -- ID: {currentGame.id}")
+    print(f"* * * ERROR: {action} -- Game: {currentGame.gameName} -- ID: {currentGame.id}")
     return HttpResponse(status=204)  # No Content
 
 
@@ -1719,7 +1723,7 @@ def _sendChatMessage(request):
 
     jsonData = json.loads(request.body)
 
-    if jsonData["action"] == "sendChatMessage":
+    if jsonData.get("action") == "sendChatMessage":
         game_id = jsonData["gameID"]
         new_entry = jsonData["newEntry"]
 
@@ -1766,7 +1770,7 @@ def changeAssistance(request):
 
     jsonData = json.loads(request.body)
 
-    if jsonData["action"] == "assistance":
+    if jsonData.get("action") == "assistance":
         try:
             profile = Profile.objects.get(user=request.user)
             profile.showAssistance = jsonData["changeAssistance"]
@@ -1781,7 +1785,7 @@ def changeAssistance(request):
             }
         )
 
-    elif jsonData["action"] == "zoom":
+    elif jsonData.get("action") == "zoom":
         try:
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="FCM")
         except Game.DoesNotExist:
@@ -1831,8 +1835,12 @@ def gameAdminGetMoveData(request):
         return JsonResponse({"error": "Wrong request."}, status=400)
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
-
     jsonData = json.loads(request.body)
+
+    action = jsonData.get("action")
+    if not action:
+        return JsonResponse({"error": "Missing 'action' field."}, status=400)
+
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="FCM")
     except Game.DoesNotExist:
