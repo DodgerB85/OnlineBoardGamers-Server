@@ -8,7 +8,6 @@
     <a href="/{{ game.gameCode }}/{{ game.gameID }}/show/"><strong class="col-game-name">{{ game.gameName }}</strong></a>
     {% if game.gameDescription %}<small class="game-desc col-game-note"><i>{{ game.gameDescription }}</i></small>{% endif %}
   </td>
-  <td class="col-winner" data-label="{% translate "Winner" %}">{{ game.winner }}</td>
   <td class="col-players" data-label="{% translate "Players" %}">
     {% for player in game.allPlayers %}<a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
   </td>
@@ -26,5 +25,6 @@
       <span class="timeToConvertSpan">{{ game.latestUpdate }}</span>
     {% endif %}
   </td>
+  <td class="col-winner" data-label="{% translate "Winner" %}">{{ game.winner }}</td>
 </tr>
 

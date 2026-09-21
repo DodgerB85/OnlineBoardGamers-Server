@@ -146,10 +146,10 @@
                                         <tr>
                                             <th></th>
                                             <th>{% translate "Name" %}</th>
-                                            <th>{% translate "Winner" %}</th>
                                             <th>{% translate "Players" %}</th>
                                             <th>{% translate "Options" %}</th>
                                             <th>{% translate "Last Activity" %}</th>
+                                            <th>{% translate "Winner" %}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -207,17 +207,17 @@
                         <div class="table-wrap">
                             <table class="table gamesTable lobby-games-table finished-games-table">
                                 <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th>{% translate "Name" %}</th>
-                                        <th>{% translate "Winner" %}</th>
-                                        <th>{% translate "Players" %}</th>
-                                        <th>{% translate "Options" %}</th>
-                                        <th>{% translate "Last Activity" %}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for game in finishedOtherGames %}
+                                        <tr>
+                                            <th></th>
+                                            <th>{% translate "Name" %}</th>
+                                            <th>{% translate "Players" %}</th>
+                                            <th>{% translate "Options" %}</th>
+                                            <th>{% translate "Last Activity" %}</th>
+                                            <th>{% translate "Winner" %}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for game in finishedOtherGames %}
                                         {% include "Lobby/gameDisplay/finishedGameRow.html" with game=game %}
                                     {% endfor %}
                                 </tbody>
