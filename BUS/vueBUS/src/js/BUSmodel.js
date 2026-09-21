@@ -546,8 +546,11 @@ function applyPittJunctionRules(localPossibilities) {
 	// If only bridge option exists and bridge markers are available, force bridge
 	if (bridgeOnlyOption && !hasNonBridgeOption && store.remainingBridgeMarkers > 0) {
 		localPossibilities = [bridgeOnlyOption]
-	} else if (bridgeOnlyOption && !hasNonBridgeOption && store.remainingBridgeMarkers === 0) {
-		// No bridge markers available, standard rules apply (already have localPossibilities)
+	}
+
+	// No bridge markers available, remove all bridge options
+	if (store.remainingBridgeMarkers === 0) {
+		localPossibilities = localPossibilities.filter((lineID) => !rf.PITTS_BRIDGE_LINE_IDS.includes(lineID))
 	}
 
 	return localPossibilities
