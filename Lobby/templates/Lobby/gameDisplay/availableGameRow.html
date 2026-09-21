@@ -53,11 +53,7 @@
              data-game="RNB"
              data-gameID="{{ game.gameID }}">
       {% endif %}
-      {% if game.gameCode != "TGZ" and not game.startingMap and not game.startingOptionsHTML or game.gameCode != "TGZ" and not game.startingMap and game.startingOptionsHTML == "[None]" %}
-        <span class="no-options">{% translate "No options" %}</span>
-      {% else %}
-        {{ game.startingOptionsHTML|safe }}
-      {% endif %}
+      {% if game.startingOptionsHTML and game.startingOptionsHTML != "[None]" %}{{ game.startingOptionsHTML|safe }}{% endif %}
       {% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}
     </td>
     <td class="col-status" data-label="{% translate "Created" %}">

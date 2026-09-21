@@ -1173,7 +1173,7 @@
             <div id="tenGamesListView">
               {% if tenGames %}
                 <div class="table-wrap">
-                  <table class="table">
+                  <table class="table gamesTable lobby-games-table">
                     <thead>
                       <tr>
                         <th></th>
@@ -1202,11 +1202,12 @@
             <div id="tenGamesListView">
               {% if tenGamesFinished %}
                 <div class="table-wrap">
-                  <table class="table">
+                  <table class="table gamesTable lobby-games-table finished-games-table">
                     <thead>
                       <tr>
                         <th></th>
                         <th>{% translate "Name" %}</th>
+                        <th>{% translate "Winner" %}</th>
                         <th>{% translate "Players" %}</th>
                         <th>{% translate "Options" %}</th>
                         <th>{% translate "Last Activity" %}</th>
