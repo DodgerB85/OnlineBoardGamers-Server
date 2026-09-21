@@ -32,6 +32,7 @@
     {% if game.startingMap and game.gameCode == "RNB" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapRNB.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="RNB" data-gameID="{{ game.gameID }}">{% endif %}
     {% if game.startingOptionsHTML and game.startingOptionsHTML != "[None]" %}{{ game.startingOptionsHTML|safe }}{% endif %}
     {% if game.maxPlayers != 1 and 'SHADOW' not in game.allPlayers %}{% include 'Lobby/gameDisplay/kickoutHTML.html' with kickoutDuration=game.kickoutDuration %}{% endif %}
+    {% if not game.startingMap or game.gameCode != "FCM" and game.gameCode != "TGZ" and game.gameCode != "AQY" and game.gameCode != "RNB" %}{% if not game.startingOptionsHTML or game.startingOptionsHTML == "[None]" %}{% if game.maxPlayers == 1 or 'SHADOW' in game.allPlayers %}<span class="no-options">[None]</span>{% endif %}{% endif %}{% endif %}
   </td>
   <td class="col-cta last-move" data-label="{% translate "Last Move" %}">
     <span class="last-move-text">

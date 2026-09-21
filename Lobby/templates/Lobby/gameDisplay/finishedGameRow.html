@@ -17,6 +17,7 @@
     {% if game.startingMap and game.gameCode == "AQY" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapAQY.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="AQY">{% endif %}
     {% if game.startingMap and game.gameCode == "RNB" %}<img class="startingOption startingMap" alt="Map" src="{% static "Lobby/images/createMapRNB.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="RNB" data-gameID="{{ game.gameID }}">{% endif %}
     {% if game.startingOptionsHTML and game.startingOptionsHTML != "[None]" %}{{ game.startingOptionsHTML|safe }}{% endif %}
+    {% if not game.startingMap or game.gameCode != "FCM" and game.gameCode != "TGZ" and game.gameCode != "AQY" and game.gameCode != "RNB" %}{% if not game.startingOptionsHTML or game.startingOptionsHTML == "[None]" %}<span class="no-options">[None]</span>{% endif %}{% endif %}
   </td>
   <td class="col-cta" data-label="{% translate "Last Activity" %}">
     {% if game.deleteableGame %}
