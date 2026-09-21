@@ -2993,3 +2993,15 @@ iframe {
 
 /* ponytail: col-options stays flex+wrap (tight) at every width instead of
    switching to an evenly-spread grid above 1100/1370px, which read as loose. */
+
+/* ---------- :has() COMPAT FALLBACK ----------
+   Browsers without :has() support (e.g. Quark/Quarkium) can't evaluate
+   .table:has(.row09) or .table:not(:has(.row09)), so the tbody { display:block }
+   rule fires for every .table and the restoration rule never fires.
+   Revert tbody to normal table layout; .row09 rows still get display:grid
+   from the .row09 rule below, which works inside a normal table-row-group. */
+@supports not selector(:has(*)) {
+    .table tbody {
+        display: table-row-group;
+    }
+}
