@@ -25,6 +25,8 @@
       <span class="timeToConvertSpan">{{ game.latestUpdate }}</span>
     {% endif %}
   </td>
-  <td class="col-winner" data-label="{% translate "Winner" %}">{{ game.winner }}</td>
+  <td class="col-winner" data-label="{% translate "Winner" %}">
+    {% if game.winner %}<a href="{% url 'playerInfo' usernameToProfile=game.winner %}"><strong>{{ game.winner }}</strong></a>{% endif %}
+  </td>
 </tr>
 
