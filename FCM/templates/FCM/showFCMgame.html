@@ -123,7 +123,7 @@
   initData.startingOptions = {{startingOptionsLiteral|default:"{}"}};
   initData.startingOptionsHTML = `{{startingOptionsHTML|default:""| safe}}`;
   initData.playerNames = {{ allPlayerListBySeat|safe|default:"[]" }};
-  initData.currentPlayers = '{{ currentPlayers|default:"" }}'
+  initData.currentPlayers = {{ currentPlayers|safe|default:"[]" }}
   initData.pov = {{ pov }};
   initData.turn = {{turn|default:0}};
   initData.deleteVotesData = {{ deleteVotesData|safe|default:"{}" }};
