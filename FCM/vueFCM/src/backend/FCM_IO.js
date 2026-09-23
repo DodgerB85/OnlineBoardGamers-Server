@@ -3,8 +3,8 @@ import * as WS from "./FCMwebsocket.js"
 import * as controller from "../js/FCMcontroller.js"
 import * as rf from "../js/FCMreference.js"
 import * as model from "../js/FCMmodel.js"
+import * as context from "../js/FCMcontext.js"
 import i18n from "../i18n.js"
-import * as Bot from "../js/FCMbot.js"
 import * as rules from "../js/FCMrules.js"
 import * as map from "../js/FCMmap.js"
 import * as plyr from "../js/FCMplayer.js"
@@ -213,6 +213,25 @@ export async function loadGame() {
 			funcs.importFCMmodel(loadDataString, false, false)
 			personal.moveDataRaw = result.specialData
 			if (personal.pov >= 0) store.players[personal.pov].OOBpreference = result.OOBpreference
+			// Match fresh page load: wipe highlights / toasts / client-only fire state from the previous snapshot
+			context.clearAllHighlights()
+			store.context.justFired.splice(0)
+			store.clearMessages()
+			// Restore pending move visuals like initGame (before startPlayerTurn: canPlay clears it for a fresh move;
+			// !canPlay early-outs so a submitted move stays visible)
+			if (personal.pov >= 0 && result.specialData) {
+				if (store.gameflow.phase >= rf.PHASE_WORKING_DAY && store.gameflow.phase !== rf.PHASE_CLEAN_UP) {
+					let decompressedData = funcs.decompressData(result.specialData)
+					if (decompressedData && decompressedData[0] === store.players[personal.pov].name) store.context.preMoveData = decompressedData[3]
+				} else if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) {
+					let decompressedData = funcs.decompressData(result.specialData)
+					if (decompressedData && decompressedData[0] === store.players[personal.pov].name) {
+						store.players[personal.pov].beach = [...decompressedData[3][0]]
+						store.players[personal.pov].employees = [...decompressedData[3][1]]
+						if (decompressedData[3][2]) store.players[personal.pov].OOBpreference = decompressedData[3][2]
+					}
+				}
+			}
 
 			if (store.gameflow.phase !== rf.PHASE_SETUP_MODULES) personal.haltPlay = false
 			controller.startPlayerTurn(false)
@@ -1162,6 +1181,7 @@ export async function updateDataFromLoadRewind() {
 
 /* BELOW IS OTHER FUNCTIONS NOT USING -- processTurn -- IE BUG, CHAT, NOTES, REWIND_CONSENT, CHANGE_ASSISTANCE, ZOOM */
 export async function checkForLatestData() {
+	const store = useModelStore()
 	const personal = usePersonalStore()
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -1190,6 +1210,12 @@ export async function checkForLatestData() {
 			//let suppressActions = false
 			//if (data.specialData) suppressActions = true
 			funcs.importFCMmodel(loadDataString)
+			// Match fresh page load / old C.reloadModel: clear stale highlights + fire state, then rebuild turn UI
+			// (import zeros summary totals; without startPlayerTurn, hire.total stays 0 → hired.length === total+1)
+			context.clearAllHighlights()
+			store.context.justFired.splice(0)
+			store.clearMessages()
+			if (personal.pov >= 0) controller.startPlayerTurn(true)
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error)

@@ -46,6 +46,14 @@ export function resetContext() {
 	store.context.newRestaurantIndex = -1
 	store.context.secondCampaignManager = false
 	store.context.massMarketersOnly = -1
+	store.context.newRestaurantAction = ""
+	store.context.noMoreRestaurants = false
+	store.context.lobbyistMilestoneActive = false
+	store.context.freewaySidesFalse.splice(0)
+	store.context.freewaySidesTrue.splice(0)
+	store.context.freewayHighlightSets = null
+	store.context.houseIndex = -1
+	store.context.buildingType = 0
 
 	store.context.campaign = -1 // Pass to view, applies to any marketing
 	store.context.double = false
@@ -55,7 +63,6 @@ export function resetContext() {
 	store.context.duration = 1
 	store.context.secondGood = -1
 	store.context.selectedBuildingManager = -1
-	store.context.newRestaurantAction = ""
 	store.context.newLobbyistTile = -1
 	store.context.nextUrbanPlanningTile = -1
 	store.context.rotation = 0 // This is used for many objects rotation
