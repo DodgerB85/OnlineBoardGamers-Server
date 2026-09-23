@@ -45,6 +45,7 @@ if (props.mode === "payday") {
 }
 if (props.mode === "cleanup") {
 	store.context.preMoveData[1].splice(0)
+	playerObj.value.resources = playerObj.value.resources.filter((r) => r !== rf.COFFEE)
 }
 
 // --- PAYDAY PRE-PHASE ---

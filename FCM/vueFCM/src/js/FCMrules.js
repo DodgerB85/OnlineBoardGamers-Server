@@ -2704,7 +2704,7 @@ export function kimchiFridgeCollision(playerIndex) {
 
 	// 3. Check for multiple resource types including Kimchi
 	// Set automatically handles uniqueness and has O(1) lookups
-	const distinctSet = new Set(playerObj.resources)
+	const distinctSet = new Set(playerObj.resources.filter((r) => r !== rf.COFFEE))
 
 	return distinctSet.has(rf.KIMCHI) && distinctSet.size > 1
 }

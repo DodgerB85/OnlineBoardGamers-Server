@@ -39,7 +39,7 @@ const hasKimchiFridgeCollision = computed(() => {
 })
 const showSalarySection = computed(() => personal.canPlay() && due.value > 0 && !enoughMoney.value && !hasBeerMS.value)
 const showFoodPaySection = computed(() => personal.canPlay() && due.value > 0 && hasBeerMS.value && !hasFridge.value && hasNonCoffeeResources.value)
-const showCleanupSection = computed(() => personal.canPlay() && isWorkingDayPhase.value && hasFridge.value && playerObj.value && playerObj.value.resources.length > 0 && !hasKimchiFridgeCollision.value)
+const showCleanupSection = computed(() => personal.canPlay() && isWorkingDayPhase.value && hasFridge.value && hasNonCoffeeResources.value && !hasKimchiFridgeCollision.value)
 const showEodOptions = computed(() => showSalarySection.value || showFoodPaySection.value || showCleanupSection.value)
 
 // --- OOB (turn order) preference options (pre-move) ---
@@ -240,7 +240,7 @@ function keepAllCleanup() {
 				<p>
 					Clean Up:
 					<template v-if="!hasFridge">No fridge - all items will be thrown away</template>
-					<template v-else-if="playerObj && playerObj.resources.length === 0">No items to store</template>
+					<template v-else-if="!hasNonCoffeeResources">No items to store</template>
 					<template v-else>
 						<template v-if="hasCleanupPreset">
 							<span class="preMoveDataSpan">
