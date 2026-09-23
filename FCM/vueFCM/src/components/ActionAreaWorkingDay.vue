@@ -84,6 +84,43 @@ const computedTrainableOptions = computed(() => {
 
 const computedTrainingData = computed(() => rules.getTrainingPoints(controller.currentPlayerIndex(), store.context.justTrained))
 
+const eodCurrentSalary = computed(() => rules.salary(controller.currentPlayerIndex()))
+const eodPlayerMoney = computed(() => controller.currentPlayerObj().money)
+const eodHasBeerMS = computed(() => plyr.hasMilestone(controller.currentPlayerIndex(), rf.FIRST_BEER_SOLD))
+const eodIsLastOrShort = computed(() => store.gameflow.turnOrder.length === 1 || store.startingOptions.shortGame === true)
+const eodTriButton = computed(() => {
+	if (store.gameflow.turn === 1 && eodCurrentSalary.value === 0) return false
+	if (eodIsLastOrShort.value) return false
+	if ((eodCurrentSalary.value === 0 && store.gameflow.turn <= 2) || store.startingOptions.strictPaydayFridge) return false
+	return eodPlayerMoney.value >= eodCurrentSalary.value && !eodHasBeerMS.value
+})
+
+function endTurnPlayPayday() {
+	const idx = controller.currentPlayerIndex()
+	let paydayFlag = -9
+	let cleanupFlag = -9
+	const radio0 = store.context.EODradioSelections[0]
+	const radio1 = store.context.EODradioSelections[1]
+	if (radio0 === -3) paydayFlag = plyr.hasMilestone(idx, rf.FIRST_TRAINER_USED) ? -5 : -3
+	else if (radio0 === -4) paydayFlag = -4
+	if (radio1 === -1) cleanupFlag = -1
+	store.context.preMoveData = [[[paydayFlag], []], [cleanupFlag]]
+	controller.endPlayerTurn(false, false)
+}
+
+function endTurnAutoPay() {
+	const idx = controller.currentPlayerIndex()
+	const playerObj = controller.currentPlayerObj()
+	const salary = rules.salary(idx)
+	let paydayFlag = -9
+	let cleanupFlag = -9
+	if (salary === 0 && !store.startingOptions.strictPaydayFridge) paydayFlag = -1
+	else if (playerObj.money >= salary && !store.startingOptions.strictPaydayFridge && !plyr.hasMilestone(idx, rf.FIRST_BEER_SOLD)) paydayFlag = -2
+	if (store.context.EODradioSelections[1] === -1) cleanupFlag = -1
+	store.context.preMoveData = [[[paydayFlag], []], [cleanupFlag]]
+	controller.endPlayerTurn(false, false)
+}
+
 const computedOptionsToTrainToByLevel = computed(() => {
 	const fromEmployee = store.context.selectedEmployeeToTrainData.employee
 	const fromBeach = store.context.selectedEmployeeToTrainData.origin === 0
@@ -824,8 +861,37 @@ const computedProducers = computed(() => {
 				</table>
 			</div>
 
-		<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">Reset Working Day</button>
-		<button class="actionsLineButton" @click="controller.endPlayerTurn()">End Turn</button>
+			<p>You are about to confirm the whole Working Day</p>
+
+			<template v-if="store.gameflow.turn === 1 && eodCurrentSalary === 0">
+				<p v-if="controller.currentPlayerObj().beach.length === 0"><b>WARNING: YOU HAVE NOT HIRED ANYONE</b></p>
+				<button class="actionsLineButton" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
+				<button class="actionsLineButton" @click="endTurnPlayPayday">End Turn</button>
+			</template>
+
+			<template v-else-if="eodIsLastOrShort">
+				<button class="actionsLineButton" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
+				<button class="actionsLineButton" @click="endTurnPlayPayday">End Turn</button>
+			</template>
+
+			<template v-else-if="(eodCurrentSalary === 0 && store.gameflow.turn <= 2) || store.startingOptions.strictPaydayFridge">
+				<p v-if="eodCurrentSalary === 0 && store.gameflow.turn <= 2 && !store.startingOptions.strictPaydayFridge">Payday will be skipped as you have no salary to pay and it is turn 1 or 2</p>
+				<p v-else>Payday will be played in turn order</p>
+				<button class="actionsLineButton" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
+				<button class="actionsLineButton" @click="endTurnPlayPayday">End Turn</button>
+			</template>
+
+			<template v-else-if="eodTriButton">
+				<p>You have <b>enough money</b> to keep all your employees. You can decide now to keep all of them in order to save time</p>
+				<button class="actionsLineButton" @click="controller.resetWholeTurn()">Reset the whole working day</button>
+				<button class="actionsLineButton" @click="endTurnPlayPayday">End Turn. Play Payday Phase</button>
+				<button class="actionsLineButton" @click="endTurnAutoPay">End Turn. Auto-pay salaries and keep all employees</button>
+			</template>
+
+			<template v-else>
+				<button class="actionsLineButton" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
+				<button class="actionsLineButton" @click="endTurnPlayPayday">End Turn</button>
+			</template>
 		</div>
 	</template>
 </template>

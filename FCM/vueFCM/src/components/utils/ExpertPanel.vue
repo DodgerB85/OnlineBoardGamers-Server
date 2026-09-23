@@ -75,7 +75,7 @@ const isPostMove = computed(() => {
 })
 
 
-const showPostMovePanel = computed(() => isPostMove.value)
+const showPostMovePanel = computed(() => isPostMove.value && !(isEndOfWorkingDay.value && personal.canPlay()))
 
 const activePreset = computed(() => {
 	const pd = store.context.preMoveData
