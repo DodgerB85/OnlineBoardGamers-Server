@@ -37,9 +37,10 @@ const hasNonCoffeeResources = computed(() => {
 const hasKimchiFridgeCollision = computed(() => {
 	return personal.pov >= 0 && rules.kimchiFridgeCollision(personal.pov)
 })
-const showSalarySection = computed(() => personal.canPlay() && due.value > 0 && !enoughMoney.value && !hasBeerMS.value)
-const showFoodPaySection = computed(() => personal.canPlay() && due.value > 0 && hasBeerMS.value && !hasFridge.value && hasNonCoffeeResources.value)
-const showCleanupSection = computed(() => personal.canPlay() && isWorkingDayPhase.value && hasFridge.value && hasNonCoffeeResources.value && !hasKimchiFridgeCollision.value)
+const isEndOfWorkingDay = computed(() => store.gameflow.phase === rf.PHASE_WORKING_DAY && store.gameflow.subphase === rf.SUBPHASE_CONFIRM_END_TURN)
+const showSalarySection = computed(() => personal.canPlay() && !isEndOfWorkingDay.value && due.value > 0 && !enoughMoney.value && !hasBeerMS.value)
+const showFoodPaySection = computed(() => personal.canPlay() && !isEndOfWorkingDay.value && due.value > 0 && hasBeerMS.value && !hasFridge.value && hasNonCoffeeResources.value)
+const showCleanupSection = computed(() => personal.canPlay() && !isEndOfWorkingDay.value && isWorkingDayPhase.value && hasFridge.value && hasNonCoffeeResources.value && !hasKimchiFridgeCollision.value)
 const showEodOptions = computed(() => showSalarySection.value || showFoodPaySection.value || showCleanupSection.value)
 
 // --- OOB (turn order) preference options (pre-move) ---
@@ -62,7 +63,6 @@ const showOOBOptions = computed(() => {
 })
 
 // --- Post-move preset display (shown when NOT your turn, or during EOD summary) ---
-const isEndOfWorkingDay = computed(() => store.gameflow.phase === rf.PHASE_WORKING_DAY && store.gameflow.subphase === rf.SUBPHASE_CONFIRM_END_TURN)
 const isPostMove = computed(() => {
 	if (personal.pov < 0) return false
 	if (!isEndOfWorkingDay.value && personal.canPlay()) return false

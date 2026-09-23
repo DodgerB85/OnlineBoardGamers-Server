@@ -35,6 +35,11 @@ function startPrePhase(mode) {
 function closePrePhase() {
 	prePhaseMode.value = null
 }
+// Close any open pre-phase modal when the board phase/subphase advances (stale HMR / turn change)
+watch(
+	() => [store.gameflow.phase, store.gameflow.subphase],
+	() => closePrePhase()
+)
 
 const currentPlayerObj = computed(() => controller.currentPlayerObj())
 const timedOutPlayerIndex = computed(() => (store.gameflow.turnOrder.length > 0 ? store.gameflow.turnOrder[0] : -1))
@@ -1009,11 +1014,12 @@ function skipModuleAndEndTurn() {
 			</template>
 		</div>
 
-		<!-- Expert Panel: independent of canPlay, shows preset after player has moved -->
+		<!-- Expert Panel: independent of canPlay, shows preset after player has moved.
+		     Hidden during your actual working day turn and during end-turn confirm. -->
 		<template v-if="prePhaseMode && !(store.gameflow.phase === rf.PHASE_WORKING_DAY && store.gameflow.subphase === rf.SUBPHASE_CONFIRM_END_TURN && !isOnlyHumanLeft)">
 			<ActionAreaPrePhase :mode="prePhaseMode" @close="closePrePhase" />
 		</template>
-		<template v-else-if="store.gameflow.phase !== rf.PHASE_WORKING_DAY || store.gameflow.subphase !== rf.SUBPHASE_CONFIRM_END_TURN">
+		<template v-else-if="!(store.gameflow.phase === rf.PHASE_WORKING_DAY && (personal.canPlay() || store.gameflow.subphase === rf.SUBPHASE_CONFIRM_END_TURN))">
 			<ExpertPanel @startPrePhase="startPrePhase" />
 		</template>
 	</div>

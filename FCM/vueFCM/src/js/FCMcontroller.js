@@ -2174,10 +2174,13 @@ export function startPlayerTurn(startingMidPhase) {
 	} else if (store.gameflow.phase === rf.PHASE_TURN_ORDER) {
 		// No action needed
 	} else if (store.gameflow.phase === rf.PHASE_WORKING_DAY) {
-		// Save the current player's EOD preset before resetting for next player
+		// Save the current player's EOD preset before resetting for next player;
+		// clear it when there is no live preset so a previous turn cannot leak in
 		const pd = store.context.preMoveData
 		if (pd[0].length > 0 && pd[0][0].length > 0 && pd[0][0][0] !== -9) {
 			store.context.savedEODpreset = JSON.parse(JSON.stringify(pd))
+		} else {
+			store.context.savedEODpreset = null
 		}
 		// Make sure the pre move data is reset in the context
 		store.context.preMoveData = [[[-9], []], [-9]]

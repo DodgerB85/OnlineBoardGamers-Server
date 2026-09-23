@@ -1922,7 +1922,13 @@ function processCoffee(houseNum, winner, usedFryChefs, coffeeEarnings, histoHous
 		}
 	}
 
-	let highlightSqs = restoIndexes.length === 0 ? [...lookedAtSquares, ...tempSalesLocations].map((idx) => funcs.exportIndex(idx)) : [[...lookedAtSquares].map((idx) => funcs.exportIndex(idx)), [...restoIndexes].map((idx) => funcs.exportIndex(idx))]
+	// Group format: [routeSquares, restaurantBaseIndexes, coffeeShopIndexes]
+	// Coffee shops are 1x1 leftovers after the 2x2 resto extraction — keep them
+	// as singles so More Information can highlight shops that also sold.
+	let highlightSqs =
+		restoIndexes.length === 0
+			? [...lookedAtSquares, ...tempSalesLocations].map((idx) => funcs.exportIndex(idx))
+			: [[...lookedAtSquares].map((idx) => funcs.exportIndex(idx)), [...restoIndexes].map((idx) => funcs.exportIndex(idx)), [...tempSalesLocations].map((idx) => funcs.exportIndex(idx))]
 
 	historyForCoffeeHouse.push(highlightSqs) // Index 2: Highlight squares
 

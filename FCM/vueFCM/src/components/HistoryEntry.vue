@@ -172,23 +172,25 @@ function showHawkerRoute(routeIndexes) {
 	else store.highlights.indexesToHighlightPath = routeIndexes
 }
 
-// Expand a coffee block's exported highlight squares (flat array, or
-// [[route singles], [restaurant indexes]]) into board indexes 
-function coffeeHighlightSquares(exported) {
-	const squares = []
-	if (!exported || exported.length === 0) return squares
-	if (typeof exported[0] === "number") {
-		for (const idx of exported) squares.push(funcs.importIndex(idx))
-	} else {
-		const W = rf.ssW
-		for (const idx of exported[0] || []) squares.push(funcs.importIndex(idx))
-		for (const idx of exported[1] || []) {
-			const r = funcs.importIndex(idx)
-			squares.push(r, r + 1, r + W, r + W + 1)
+	// Expand a coffee block's exported highlight squares (flat array, or
+	// [[route singles], [restaurant indexes], [coffee shop singles]]) into board indexes 
+	function coffeeHighlightSquares(exported) {
+		const squares = []
+		if (!exported || exported.length === 0) return squares
+		if (typeof exported[0] === "number") {
+			for (const idx of exported) squares.push(funcs.importIndex(idx))
+		} else {
+			const W = rf.ssW
+			for (const idx of exported[0] || []) squares.push(funcs.importIndex(idx))
+			for (const idx of exported[1] || []) {
+				const r = funcs.importIndex(idx)
+				squares.push(r, r + 1, r + W, r + W + 1)
+			}
+			// Coffee shop sales are singles (1x1), not 2x2 footprints
+			for (const idx of exported[2] || []) squares.push(funcs.importIndex(idx))
 		}
+		return squares
 	}
-	return squares
-}
 
 // Toggle the coffee route highlight + the info panel in the action area
 function toggleCoffeeInfo(bi) {
