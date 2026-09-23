@@ -768,13 +768,8 @@ function skipModuleAndEndTurn() {
 				<!-- Working Day Subphases -->
 				<template v-if="store.gameflow.phase === rf.PHASE_WORKING_DAY">
 					<ActionAreaWorkingDay />
-					<template v-if="store.gameflow.subphase === rf.SUBPHASE_CONFIRM_END_TURN && !isOnlyHumanLeft">
-						<template v-if="prePhaseMode">
-							<ActionAreaPrePhase :mode="prePhaseMode" @close="closePrePhase" />
-						</template>
-						<template v-else>
-							<ExpertPanel @startPrePhase="startPrePhase" />
-						</template>
+					<template v-if="prePhaseMode && store.gameflow.subphase === rf.SUBPHASE_CONFIRM_END_TURN && !isOnlyHumanLeft">
+						<ActionAreaPrePhase :mode="prePhaseMode" @close="closePrePhase" />
 					</template>
 				</template>
 
@@ -1018,7 +1013,7 @@ function skipModuleAndEndTurn() {
 		<template v-if="prePhaseMode && !(store.gameflow.phase === rf.PHASE_WORKING_DAY && store.gameflow.subphase === rf.SUBPHASE_CONFIRM_END_TURN && !isOnlyHumanLeft)">
 			<ActionAreaPrePhase :mode="prePhaseMode" @close="closePrePhase" />
 		</template>
-		<template v-else-if="store.gameflow.phase !== rf.PHASE_WORKING_DAY || !personal.canPlay()">
+		<template v-else-if="store.gameflow.phase !== rf.PHASE_WORKING_DAY || store.gameflow.subphase !== rf.SUBPHASE_CONFIRM_END_TURN">
 			<ExpertPanel @startPrePhase="startPrePhase" />
 		</template>
 	</div>
