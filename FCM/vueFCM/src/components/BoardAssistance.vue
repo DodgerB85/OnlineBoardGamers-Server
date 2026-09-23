@@ -13,12 +13,13 @@ import * as IO from "../backend/FCM_IO"
 import { useModelStore } from "../stores/FCMstore.js"
 import { usePersonalStore } from "../stores/FCMpersonal.js"
 import { computed, ref } from "vue"
+import i18n from "../i18n"
 
 const store = useModelStore()
 const personal = usePersonalStore()
 
 const assistanceOn = computed(() => store.viewSettings.assistance)
-const assistanceToggleText = computed(() => (assistanceOn.value ? "Hide Summary" : "Show Summary"))
+const assistanceToggleText = computed(() => (assistanceOn.value ? i18n.global.t("assistance.hideSummary") : i18n.global.t("assistance.showSummary")))
 
 function toggleAssistance() {
 	store.viewSettings.assistance = !store.viewSettings.assistance
@@ -62,14 +63,14 @@ function sandboxHire() {
 	const emp = sandboxHireSelected.value ?? sandboxHireChoices.value[0]
 	if (emp == null) return
 	controller.sandboxHireEmployee(emp)
-	showSandboxResult("You have hired " + sandboxEmpTitle(emp))
+	showSandboxResult(i18n.global.t("assistance.hired", { name: sandboxEmpTitle(emp) }))
 }
 
 function sandboxFire() {
 	const emp = sandboxFireSelected.value ?? sandboxFireChoices.value[0]
 	if (emp == null) return
 	controller.sandboxFireEmployee(emp)
-	showSandboxResult("You have fired " + sandboxEmpTitle(emp))
+	showSandboxResult(i18n.global.t("assistance.fired", { name: sandboxEmpTitle(emp) }))
 }
 
 // Resolve a [good, count] into the "Nx" + plain food-image form 
@@ -424,29 +425,29 @@ const phaseSegments = computed(() => {
 	const segs = []
 	const push = (label, glow) => segs.push({ label, glow })
 
-	if (phase === rf.PHASE_SETUP_MODULES) push("Choose Modules", true)
+	if (phase === rf.PHASE_SETUP_MODULES) push(i18n.global.t("assistance.phaseChooseModules"), true)
 
-	if (phase === rf.PHASE_URBAN_PLANNING) push("Urban Planning" + (store.startingOptions.urbanPlanningPlus ? "+" : ""), true)
+	if (phase === rf.PHASE_URBAN_PLANNING) push(i18n.global.t("assistance.phaseUrbanPlanning", { plus: store.startingOptions.urbanPlanningPlus ? "+" : "" }), true)
 
 	if (phase === rf.PHASE_SETUP_MODULES || phase === rf.PHASE_URBAN_PLANNING || phase === rf.PHASE_SETUP_RESTAURANT1 || phase === rf.PHASE_SETUP_RESTAURANT2 || phase === rf.PHASE_SETUP_RESERVE) {
-		push("Setup - Restaurants", phase === rf.PHASE_SETUP_RESTAURANT1 || phase === rf.PHASE_SETUP_RESTAURANT2)
-		push("Setup - Reserve Cards", phase === rf.PHASE_SETUP_RESERVE)
+		push(i18n.global.t("assistance.phaseSetupRestaurants"), phase === rf.PHASE_SETUP_RESTAURANT1 || phase === rf.PHASE_SETUP_RESTAURANT2)
+		push(i18n.global.t("assistance.phaseSetupReserveCards"), phase === rf.PHASE_SETUP_RESERVE)
 	}
 
-	push("Restructuring", phase === rf.PHASE_RESTRUCTURING)
-	push("Order of Business", phase === rf.PHASE_TURN_ORDER)
-	push("Working 9:00-5:00", phase === rf.PHASE_WORKING_DAY)
-	push("Dinnertime", phase === rf.PHASE_DINNERTIME)
+	push(i18n.global.t("assistance.phaseRestructuring"), phase === rf.PHASE_RESTRUCTURING)
+	push(i18n.global.t("assistance.phaseOrderOfBusiness"), phase === rf.PHASE_TURN_ORDER)
+	push(i18n.global.t("assistance.phaseWorking"), phase === rf.PHASE_WORKING_DAY)
+	push(i18n.global.t("assistance.phaseDinnertime"), phase === rf.PHASE_DINNERTIME)
 
-	if (phase === rf.PHASE_PIZZA_BOMB) push("PIzza Milestone", true)
+	if (phase === rf.PHASE_PIZZA_BOMB) push(i18n.global.t("assistance.phasePizzaMilestone"), true)
 
-	if (phase === rf.PHASE_CHOOSE_CEO_BONUS) push("Choose CEO Bonus", true)
+	if (phase === rf.PHASE_CHOOSE_CEO_BONUS) push(i18n.global.t("assistance.phaseChooseCeoBonus"), true)
 
-	push("Payday", phase === rf.PHASE_PAYDAY)
-	push("Marketing Campaigns", phase === rf.PHASE_MARKETING_CAMPAIGNS)
-	push("Clean up", phase === rf.PHASE_CLEAN_UP)
+	push(i18n.global.t("assistance.phasePayday"), phase === rf.PHASE_PAYDAY)
+	push(i18n.global.t("assistance.phaseMarketingCampaigns"), phase === rf.PHASE_MARKETING_CAMPAIGNS)
+	push(i18n.global.t("assistance.phaseCleanUp"), phase === rf.PHASE_CLEAN_UP)
 
-	if (phase === rf.PHASE_COFFE_SHOP_MS) push("Coffee MS", true)
+	if (phase === rf.PHASE_COFFE_SHOP_MS) push(i18n.global.t("assistance.phaseCoffeeMs"), true)
 
 	return segs
 })
@@ -477,11 +478,11 @@ const playerRows = computed(() => {
 <template>
 	<div id="assistance">
 		<div id="assistanceSummary">
-			<h4>Summary</h4>
+			<h4>{{ $t("assistance.summary") }}</h4>
 			<div id="assistanceBoard">
 				<template v-if="assistanceOn">
 					<span v-if="totalBoardNeeds.length > 0">
-						<span>Total demand on board:</span>
+						<span>{{ $t("assistance.totalDemandOnBoard") }}</span>
 						<span class="food_list groupAid">
 							<span class="groupAid singleLine" v-for="(fd, fi) in totalBoardNeeds" :key="fi">
 								<span class="food_labelAid">{{ fd.count }}x</span>
@@ -489,7 +490,7 @@ const playerRows = computed(() => {
 							</span>
 						</span>
 					</span>
-					<span v-else>No demand on board</span>
+					<span v-else>{{ $t("assistance.noDemandOnBoard") }}</span>
 				</template>
 				<div class="changeAssistanceButtonDiv">
 					<button id="changeAssistanceButton" class="actionsLineButton" v-html="assistanceToggleText" @click="toggleAssistance"></button>
@@ -501,7 +502,7 @@ const playerRows = computed(() => {
 			<div class="playerEntry" :class="{ played: row.played }" :style="{ backgroundImage: 'url(' + row.bgUrl + ')' }" v-for="(row, ri) in playerRows" :key="ri">
 				<!-- Price / discount -->
 				<div class="playerLine first">
-					<span class="title">Price</span>
+					<span class="title">{{ $t("assistance.price") }}</span>
 					<span>:</span>
 					<template v-for="(chip, ci) in row.discount.chips" :key="ci">
 						<span v-if="chip.count">{{ chip.count }}</span>
@@ -511,7 +512,7 @@ const playerRows = computed(() => {
 
 				<!-- Stock -->
 				<div class="playerLine">
-					<span class="title">Stock</span>
+					<span class="title">{{ $t("assistance.stock") }}</span>
 					<span>:</span>
 					<span v-if="row.stock.hasResources">
 						<span class="food_list groupAid">
@@ -521,13 +522,13 @@ const playerRows = computed(() => {
 							</span>
 						</span>
 					</span>
-					<span v-else>No resources</span>
+					<span v-else>{{ $t("assistance.noResources") }}</span>
 				</div>
 
 				<!-- Production -->
 				<div class="playerLine">
 					<template v-if="row.production.show">
-						<span class="title">Prod</span>
+						<span class="title">{{ $t("assistance.prod") }}</span>
 						<span>:</span>
 						<span class="food_list groupAid">
 							<span class="groupAid singleLine" v-for="(fd, fi) in row.production.goods" :key="'g' + fi">
@@ -539,7 +540,7 @@ const playerRows = computed(() => {
 							<span v-if="chip.count" v-html="chip.count"></span>
 							<span :class="chip.cls">{{ chip.label }}</span>
 						</template>
-						<span v-if="row.production.none">None</span>
+						<span v-if="row.production.none">{{ $t("assistance.none") }}</span>
 						<br v-if="row.production.showNSM" />
 						<span v-if="row.production.showNSM">
 							<span>{{ row.production.nsmTitle }}:</span>
@@ -551,7 +552,7 @@ const playerRows = computed(() => {
 						</span>
 					</template>
 					<template v-else>
-						<span class="title">Prod</span>
+						<span class="title">{{ $t("assistance.prod") }}</span>
 						<span>....</span>
 					</template>
 				</div>
@@ -559,7 +560,7 @@ const playerRows = computed(() => {
 				<!-- Marketers -->
 				<div class="playerLine">
 					<template v-if="!row.marketers.empty">
-						<span class="title">Marketers</span>
+						<span class="title">{{ $t("assistance.marketers") }}</span>
 						:
 						<span class="food_list groupAid">
 							<span class="groupAid singleLine" v-for="(m, mi) in row.marketers.items" :key="mi">
@@ -575,8 +576,8 @@ const playerRows = computed(() => {
 						</span>
 					</template>
 					<template v-else>
-						<span class="title">Marketers</span>
-						: No Marketers
+						<span class="title">{{ $t("assistance.marketers") }}</span>
+						: {{ $t("assistance.noMarketers") }}
 					</template>
 				</div>
 			</div>
@@ -596,13 +597,13 @@ const playerRows = computed(() => {
 					</div>
 				</div>
 			</template>
-			<template v-else>No Active Gourmet Food Critics</template>
+			<template v-else>{{ $t("assistance.noActiveGourmetFoodCritics") }}</template>
 		</div>
 
 		<!-- HAWKER TRUCKS -->
 		<div id="hawkerMarketerActiveDisplay" v-if="useHawkerTrucks">
 			<template v-if="hawkerCampaigns.length > 0">
-				<div><strong>Hawker Trucks (Click to view route)</strong></div>
+				<div><strong>{{ $t("assistance.hawkerTrucks") }}</strong></div>
 				<div class="hawkerCampaign" v-for="c in hawkerCampaigns" :key="c.number" @click="showHawkerRoute(c.number)">
 					<div class="fixedCampaign">
 						<img class="campaign w3" :src="c.campaignImg" />
@@ -614,7 +615,7 @@ const playerRows = computed(() => {
 					</div>
 				</div>
 			</template>
-			<template v-else>No Active Hawker Trucks</template>
+			<template v-else>{{ $t("assistance.noActiveHawkerTrucks") }}</template>
 		</div>
 
 		<!-- RURAL MARKETING AREA -->
@@ -635,21 +636,21 @@ const playerRows = computed(() => {
 		<!-- SANDBOX MODE -->
 		<div id="sandboxDiv" v-if="sandboxMode">
 			<div>
-				<strong>Available Employees</strong>
+				<strong>{{ $t("assistance.availableEmployees") }}</strong>
 				<br />
 				<select v-model="sandboxHireSelected">
 					<option v-for="emp in sandboxHireChoices" :key="'h' + emp" :value="emp">{{ sandboxEmpTitle(emp) }}</option>
 				</select>
-				<button class="actionsLineButton" :disabled="sandboxHireChoices.length === 0" @click="sandboxHire">Hire Employee</button>
+				<button class="actionsLineButton" :disabled="sandboxHireChoices.length === 0" @click="sandboxHire">{{ $t("assistance.hireEmployee") }}</button>
 			</div>
 			<div style="margin: 20px"></div>
 			<div>
-				<strong>Current Employees</strong>
+				<strong>{{ $t("assistance.currentEmployees") }}</strong>
 				<br />
 				<select v-model="sandboxFireSelected">
 					<option v-for="(emp, idx) in sandboxFireChoices" :key="'f' + idx" :value="emp">{{ sandboxEmpTitle(emp) }}</option>
 				</select>
-				<button class="actionsLineButton" :disabled="sandboxFireChoices.length === 0" @click="sandboxFire">Fire Employee</button>
+				<button class="actionsLineButton" :disabled="sandboxFireChoices.length === 0" @click="sandboxFire">{{ $t("assistance.fireEmployee") }}</button>
 			</div>
 			<div v-if="sandboxResult !== ''" class="resultText" style="font-weight: bold">{{ sandboxResult }}</div>
 		</div>

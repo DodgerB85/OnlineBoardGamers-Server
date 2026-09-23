@@ -12,6 +12,7 @@ import * as view from "./FCMview"
 
 import { useModelStore } from "../stores/FCMstore.js"
 import { usePersonalStore } from "../stores/FCMpersonal"
+import i18n from "../i18n"
 
 export function currentPlayerObj() {
 	const store = useModelStore()
@@ -22,14 +23,14 @@ export function currentPlayerObj() {
 		else {
 			// Turn order is momentarily empty while a save is in flight and Vue
 			// re-renders; don't alarm for that transient state
-			if (!personal.haltPlay) alert("No Turn Order")
+			if (!personal.haltPlay) alert(i18n.global.t("alerts.noTurnOrder"))
 			return store.players[0]
 		}
 	}
 	if (store.gameflow.turnOrder.length > 0) return store.players[store.gameflow.turnOrder[0]]
 	else {
 		if (!store.viewSettings.showReplay && personal.pov >= 0) {
-			alert(`CPI() Erro - ALERT ADMIN - Bug report please: ${store.gameflow.turnOrder}`)
+			alert(i18n.global.t("alerts.cpiError", { turnOrder: String(store.gameflow.turnOrder) }))
 		}
 		store.gameflow.turnOrder = [0]
 		return store.players[0]
@@ -43,7 +44,7 @@ export function currentPlayerIndex() {
 	if (store.gameflow.turnOrder.length > 0) return store.gameflow.turnOrder[0]
 	else {
 		if (!store.viewSettings.showReplay && personal.pov >= 0) {
-			alert(`CPI() Erro - ALERT ADMIN - Bug report please: ${store.gameflow.turnOrder}`)
+			alert(i18n.global.t("alerts.cpiError", { turnOrder: String(store.gameflow.turnOrder) }))
 		}
 		store.gameflow.turnOrder = [0]
 		return 0

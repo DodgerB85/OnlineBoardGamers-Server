@@ -291,10 +291,10 @@ const computedProducers = computed(() => {
 			<template v-if="rules.getRemainingRecruitingPoints(controller.currentPlayerIndex()) > 0">
 				<!-- Recruiting points -->
 				<p>
-					{{ rules.getRemainingRecruitingPoints(controller.currentPlayerIndex()) }} {{ rules.getRemainingRecruitingPoints(controller.currentPlayerIndex()) === 1 ? "remaining point" : "remaining points" }}
+					{{ $t("workingDay.remainingPoints", rules.getRemainingRecruitingPoints(controller.currentPlayerIndex())) }}
 					<template v-if="rules.getRemainingRecruitPointsAvailableForDiscount(controller.currentPlayerIndex()) > 0">
 						<br />
-						{{ rules.getRemainingRecruitPointsAvailableForDiscount() }} {{ rules.getRemainingRecruitPointsAvailableForDiscount() === 1 ? "point may be used to reduce salaries by $5" : `points may be used to reduce salaries by $${rules.getRemainingRecruitPointsAvailableForDiscount() * 5}` }}
+						{{ $t("workingDay.salaryPoints", { count: rules.getRemainingRecruitPointsAvailableForDiscount(), amount: rules.getRemainingRecruitPointsAvailableForDiscount() * 5 }) }}
 					</template>
 				</p>
 
@@ -306,8 +306,8 @@ const computedProducers = computed(() => {
 				</div>
 			</template>
 
-			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">Reset Working Day</button>
-			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">Finish Recruiting</button>
+			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWorkingDay") }}</button>
+			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ $t("workingDay.finishRecruiting") }}</button>
 		</div>
 	</template>
 
@@ -317,7 +317,7 @@ const computedProducers = computed(() => {
 		<template v-if="store.context.selectedEmployeeToTrainData.employee === -1 && store.context.selectedEmployeeToTrainData.origin === 0">
 			<!-- Display just trained employees -->
 			<div v-if="store.context.justTrained.length > 0" class="reminder">
-				<p>Trained:</p>
+				<p>{{ $t("workingDay.trainedLabel") }}</p>
 				<template v-for="(entry, idx) in store.context.justTrained" :key="idx">
 					<img v-if="entry.from > -1" :src="view.getImage(`emp_${entry.from}`)" class="cardImg oldTrainedEmployee" :alt="rf.employeeName(entry.from)" />
 					<img :src="view.getImage(`emp_${entry.to}`)" class="cardImg" :class="{ newTrainedEmployee: entry.from > -1 }" :alt="rf.employeeName(entry.to)" />
@@ -325,45 +325,36 @@ const computedProducers = computed(() => {
 			</div>
 
 			<!-- NSM TEXT -->
-			<span v-if="controller.currentPlayerObj().employees.includes(rf.NIGHT_SHIFT_MANAGER)">Your Night Shift Manager allows each trainer to work twice</span>
+			<span v-if="controller.currentPlayerObj().employees.includes(rf.NIGHT_SHIFT_MANAGER)">{{ $t("workingDay.nightShiftTrainTwice") }}</span>
 
 			<!-- TRAIN INFO -->
-			<span v-if="store.context.remainingTrains > 0">
-				You can train {{ store.context.remainingTrains }}
-				<span v-if="store.context.remainingTrains === 1">employee</span>
-				<span v-else>slots</span>
-			</span>
+			<span v-if="store.context.remainingTrains > 0">{{ $t("workingDay.canTrainSlots", store.context.remainingTrains) }}</span>
 
-			<p>{{ computedTrainingData.total }} training points available</p>
+			<p>{{ $t("workingDay.trainingPointsAvailable", computedTrainingData.total) }}</p>
 
 			<!-- NOT UNLIMITEFD - BUT HAVE MULTI TRAIN -->
 			<template v-if="!computedTrainingData.unlimited">
 				<template v-if="computedTrainingData.level2 > 0">
-					<span v-if="computedTrainingData.level2 === 1">
-						You can train 1 employee up to 2 levels
-						<br />
-					</span>
-					<span v-else>
-						You can train {{ computedTrainingData.level2 }} employees up to 2 levels
+					<span>
+						{{ $t("workingDay.trainUpTo2Levels", computedTrainingData.level2) }}
 						<br />
 					</span>
 				</template>
 				<span v-if="computedTrainingData.level3 > 0">
-					You can train 1 employee up to 3 levels
+					{{ $t("workingDay.trainUpTo3Levels") }}
 					<br />
 				</span>
 			</template>
 
 			<!-- SPARE RECRUIT POINTS-->
 			<template v-if="rules.getRemainingRecruitingPoints(controller.currentPlayerIndex()) > 0">
-				<span v-if="rules.getRemainingRecruitingPoints(controller.currentPlayerIndex()) === 1">You have 1 recruiting point</span>
-				<span v-else>You have {{ rules.getRemainingRecruitingPoints(controller.currentPlayerIndex()) }} recruiting points</span>
+				<span>{{ $t("workingDay.recruitingPoints", rules.getRemainingRecruitingPoints(controller.currentPlayerIndex())) }}</span>
 			</template>
 
-			<p v-if="computedTrainingData.total > 0">Choose an employee to train</p>
+			<p v-if="computedTrainingData.total > 0">{{ $t("workingDay.chooseEmployeeToTrain") }}</p>
 
 			<span v-if="computedTrainingData.level3 > 0 || computedTrainingData.level2 > 0 || computedTrainingData.unlimited === true">
-				<small>Each employee can only be trained once, so just select the final promotion</small>
+				<small>{{ $t("workingDay.trainOnceOnly") }}</small>
 			</span>
 
 			<div class="trainingOptionsDiv">
@@ -375,12 +366,12 @@ const computedProducers = computed(() => {
 				</div>
 			</div>
 
-			<template v-if="computedTrainingData.total > 0 && computedTrainableOptions.beachTrainable.length === 0 && computedTrainableOptions.atWorkTrainable.length === 0 && rules.getRemainingRecruitingPoints(controller.currentPlayerIndex()) === 0">You have training capacity available, but no one to train</template>
+			<template v-if="computedTrainingData.total > 0 && computedTrainableOptions.beachTrainable.length === 0 && computedTrainableOptions.atWorkTrainable.length === 0 && rules.getRemainingRecruitingPoints(controller.currentPlayerIndex()) === 0">{{ $t("workingDay.trainingCapacityNoOne") }}</template>
 
 			<!-- LEMONADE MS STRUTURE TRAIN -->
 			<template v-if="plyr.hasMilestone(controller.currentPlayerIndex(), rf.FIRST_LEMONADE_SOLD)">
 				<template v-if="computedTrainableOptions.atWorkTrainable.length > 0">
-					<p>You can train staff from your working employees (preserving colour)</p>
+					<p>{{ $t("workingDay.trainFromWorkingEmployees") }}</p>
 					<div class="trainingOptionsDiv">
 						<div class="allHireableEmployeesDiv">
 							<div v-for="employee in computedTrainableOptions.atWorkTrainable" :key="employee" class="cardChoiceDiv selectable" @click="selectEmployeeToTrain(employee, 2)">
@@ -389,24 +380,24 @@ const computedProducers = computed(() => {
 						</div>
 					</div>
 				</template>
-				<p v-else>You are not able to train any of your working employees (preserving colour)</p>
+				<p v-else>{{ $t("workingDay.cannotTrainWorkingEmployees") }}</p>
 			</template>
 
-			<button v-if="rules.getRemainingRecruitingPoints(controller.currentPlayerIndex()) > 0 && computedTrainingData.total > 0" class="actionsLineButton" @click="selectEmployeeToTrain(-1, 1)">Train from hiring</button>
+			<button v-if="rules.getRemainingRecruitingPoints(controller.currentPlayerIndex()) > 0 && computedTrainingData.total > 0" class="actionsLineButton" @click="selectEmployeeToTrain(-1, 1)">{{ $t("workingDay.trainFromHiring") }}</button>
 			<br />
-			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">Reset Working Day</button>
-			<button class="actionsLineButton" @click="controller.resetSubphase()">Reset Training</button>
-			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">Finish Training</button>
+			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWorkingDay") }}</button>
+			<button class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.resetTraining") }}</button>
+			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ $t("workingDay.finishTraining") }}</button>
 		</template>
 		<!-- If mid train, show from and to -->
 		<template v-else>
 			<template v-if="store.context.selectedEmployeeToTrainData.employee > -1">
-				<p>From:</p>
+				<p>{{ $t("workingDay.fromLabel") }}</p>
 				<div class="cardSummaryDiv">
 					<img :src="view.getImage(`emp_${store.context.selectedEmployeeToTrainData.employee}`)" class="cardImg" :alt="rf.employeeName(store.context.selectedEmployeeToTrainData.employee)" />
 				</div>
 			</template>
-			<p>To:</p>
+			<p>{{ $t("workingDay.toLabel") }}</p>
 			<template v-for="(level, idx1) in computedOptionsToTrainToByLevel" :key="idx1">
 				<template v-if="level.length > 0">
 					<div v-for="(emp, idx2) in level" :key="idx2" class="cardChoiceDiv selectable" @click="controller.trainEmployee(emp, idx1 + 1)">
@@ -421,24 +412,24 @@ const computedProducers = computed(() => {
 	<!-- Coffee Shops Subphase -->
 	<template v-if="store.gameflow.subphase === rf.SUBPHASE_COFFEE_SHOPS_FROM_TRAIN">
 		<div>
-			<p v-if="store.context.baristaCoffeeShops > 0">Training a Barista allows you to place/move a coffee shop with a range of 2 - Remaining: {{ store.context.baristaCoffeeShops }}</p>
-			<p v-if="store.context.leadBaristaCoffeeShopsFromB > 0">Training a Lead Barista from a Barista allows you to place/move a coffee shop with unlimited range - Remaining: {{ store.context.leadBaristaCoffeeShopsFromB }}</p>
-			<p v-if="store.context.leadBaristaCoffeeShopsFromTB > 0">Training a Lead Barista from a Trainee Barista allows you to first place/move a coffee shop with range 2 (included above) and then another with unlimited range - Remaining: {{ store.context.leadBaristaCoffeeShopsFromTB }}</p>
+			<p v-if="store.context.baristaCoffeeShops > 0">{{ $t("workingDay.baristaCoffeeShop", store.context.baristaCoffeeShops) }}</p>
+			<p v-if="store.context.leadBaristaCoffeeShopsFromB > 0">{{ $t("workingDay.leadBaristaFromBaristaCoffeeShop", store.context.leadBaristaCoffeeShopsFromB) }}</p>
+			<p v-if="store.context.leadBaristaCoffeeShopsFromTB > 0">{{ $t("workingDay.leadBaristaFromTraineeCoffeeShop", store.context.leadBaristaCoffeeShopsFromTB) }}</p>
 
 			<p v-if="store.context.leadBaristaCoffeeShopsFromB > 0 || (store.context.justCoffeeShopped.length == 1 && store.context.leadBaristaCoffeeShopsFromTB > 0)">
-				<b>Place a coffee shop with unlimited range</b>
+				<b>{{ $t("workingDay.placeUnlimitedRangeCoffeeShop") }}</b>
 			</p>
 			<p v-else-if="store.context.baristaCoffeeShops > 0 || store.context.leadBaristaCoffeeShopsFromTB > 0">
-				<b>Place a coffee shop with range 2</b>
+				<b>{{ $t("workingDay.placeRange2CoffeeShop") }}</b>
 			</p>
 
-			<p v-if="store.context.coffeeShopAction === 'remove'">No more Coffee Shops. Select a placed Coffee Shop to move it</p>
-			<p v-else-if="store.context.coffeeShopAction === 'place'">There can only be 1 coffee shop per tile, and it must be next to a road</p>
+			<p v-if="store.context.coffeeShopAction === 'remove'">{{ $t("workingDay.noMoreCoffeeShopsMove") }}</p>
+			<p v-else-if="store.context.coffeeShopAction === 'place'">{{ $t("workingDay.coffeeShopPlacementRules") }}</p>
 
-			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">Reset the whole working day</button>
-			<button class="actionsLineButton" @click="controller.resetSubphase()">Reset</button>
-			<button v-if="store.context.baristaCoffeeShops + store.context.leadBaristaCoffeeShopsFromB + store.context.leadBaristaCoffeeShopsFromTB > 0" class="actionsLineButton" @click="controller.endWorkingDaySubphase()">Skip Coffee Shop</button>
-			<button v-else class="actionsLineButton" @click="controller.endWorkingDaySubphase()">Finish Building Coffee Shops</button>
+			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
+			<button class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.reset") }}</button>
+			<button v-if="store.context.baristaCoffeeShops + store.context.leadBaristaCoffeeShopsFromB + store.context.leadBaristaCoffeeShopsFromTB > 0" class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ $t("workingDay.skipCoffeeShop") }}</button>
+			<button v-else class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ $t("workingDay.finishCoffeeShops") }}</button>
 		</div>
 	</template>
 
@@ -446,29 +437,29 @@ const computedProducers = computed(() => {
 	<template v-if="store.gameflow.subphase === rf.SUBPHASE_MARKETING">
 		<!-- Freeway Placement (after Rural Marketeer campaign) -->
 		<template v-if="store.context.action === rf.ACT_PLACE_FREEWAY">
-			<p>Place a Highway Ramp to connect to the Rural Area. You can place it side on or end on to any edge of the board, as long as it connects to at least one road.</p>
+			<p>{{ $t("workingDay.placeHighwayRamp") }}</p>
 
 			<AddItemBox :itemBeingAdded="rf.ITEM_BOX_FREEWAY" />
 
 			<br />
-			<button class="actionsLineButton" @click="controller.resetMarketingSelection()">Skip Freeway Placement</button>
+			<button class="actionsLineButton" @click="controller.resetMarketingSelection()">{{ $t("workingDay.skipFreewayPlacement") }}</button>
 		</template>
 
 		<!-- Select which marketer to use -->
 		<template v-else-if="store.context.marketer === -1">
 			<template v-if="computedAvailableMarketers.length > 0">
-				<p>Select a marketeer to start a marketing campaign</p>
+				<p>{{ $t("workingDay.selectMarketeer") }}</p>
 				<div class="allHireableEmployeesDiv">
 					<div v-for="employee in computedAvailableMarketers" :key="employee" class="cardChoiceDiv selectable" @click="controller.selectMarketer(employee)">
 						<img :src="view.getImage(`emp_${employee}`)" class="cardImg" :alt="rf.employeeName(employee)" />
 					</div>
 				</div>
 			</template>
-			<p v-else-if="store.context.justMarketed.length === 0">No marketeers available</p>
+			<p v-else-if="store.context.justMarketed.length === 0">{{ $t("workingDay.noMarketeers") }}</p>
 
-			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">Reset the whole working day</button>
-			<button class="actionsLineButton" @click="controller.resetSubphase()">Reset</button>
-			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ store.context.justMarketed.length === 0 ? "Skip Marketing" : "Finish Marketing" }}</button>
+			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
+			<button class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.reset") }}</button>
+			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ store.context.justMarketed.length === 0 ? $t("workingDay.skipMarketing") : $t("workingDay.finishMarketing") }}</button>
 		</template>
 
 		<!-- Configure and place the campaign -->
@@ -479,36 +470,36 @@ const computedProducers = computed(() => {
 			</div>
 
 			<template v-if="store.context.campaigns.length === 0">
-				<p>There are no suitable marketing campaigns left</p>
-				<button class="actionsLineButton" @click="controller.cancelMarketer()">Never mind</button>
+				<p>{{ $t("workingDay.noMarketingCampaigns") }}</p>
+				<button class="actionsLineButton" @click="controller.cancelMarketer()">{{ $t("workingDay.neverMind") }}</button>
 			</template>
 			<template v-else>
-				<p v-if="store.context.secondCampaignManager">Choose another campaign for your Campaign Manager Milestone</p>
-				<p v-else-if="store.context.nightShift">Choose a marketing campaign for the Night Shift Manager</p>
-				<p v-else>Choose a marketing campaign</p>
-				<p v-if="!store.context.nightShift && !store.context.secondCampaignManager && controller.currentPlayerObj().employees.includes(rf.NIGHT_SHIFT_MANAGER) && store.context.marketer === rf.MARKETING_TRAINEE">Your Night Shift Manager allows your Marketing Trainee to market twice. Your trainee will be attached to the longer of the 2 campaigns</p>
+				<p v-if="store.context.secondCampaignManager">{{ $t("workingDay.chooseCampaignManagerMilestone") }}</p>
+				<p v-else-if="store.context.nightShift">{{ $t("workingDay.chooseNightShiftCampaign") }}</p>
+				<p v-else>{{ $t("workingDay.chooseMarketingCampaign") }}</p>
+				<p v-if="!store.context.nightShift && !store.context.secondCampaignManager && controller.currentPlayerObj().employees.includes(rf.NIGHT_SHIFT_MANAGER) && store.context.marketer === rf.MARKETING_TRAINEE">{{ $t("workingDay.nightShiftMarketingTrainee") }}</p>
 
 				<AddItemBox :itemBeingAdded="rf.ITEM_BOX_CAMPAIGN" />
 
 				<!-- Hawker truck: route-based placement -->
 				<template v-if="store.context.campaign >= 25 && store.context.campaign <= 27">
-					<p v-if="store.context.path.length === 0 && !store.context.hawkerRouteActive"><button class="actionsLineButton" @click="controller.startHawkerRouteSelection()">Set Hawker Route</button></p>
+					<p v-if="store.context.path.length === 0 && !store.context.hawkerRouteActive"><button class="actionsLineButton" @click="controller.startHawkerRouteSelection()">{{ $t("workingDay.setHawkerRoute") }}</button></p>
 					<template v-else-if="store.context.hawkerRouteActive">
-						<p v-if="store.context.range > 0">Set Hawker Route: {{ store.context.range }} range left</p>
-						<p v-else>Set Hawker Route: 0 range — click a highlighted square to stop</p>
-						<button class="actionsLineButton" @click="controller.stopHawkerTruck()">Done Drawing Route</button>
+						<p v-if="store.context.range > 0">{{ $t("workingDay.hawkerRouteRangeLeft", store.context.range) }}</p>
+						<p v-else>{{ $t("workingDay.hawkerRouteNoRange") }}</p>
+						<button class="actionsLineButton" @click="controller.stopHawkerTruck()">{{ $t("workingDay.doneDrawingRoute") }}</button>
 					</template>
-					<p v-else-if="store.context.path.length > 0"><button class="actionsLineButton" @click="controller.addHawkerTruck()">Add Hawker Truck</button></p>
-					<p v-else><button class="actionsLineButton" @click="controller.placeMarketingCampaign(0)">Place Campaign</button></p>
+					<p v-else-if="store.context.path.length > 0"><button class="actionsLineButton" @click="controller.addHawkerTruck()">{{ $t("workingDay.addHawkerTruck") }}</button></p>
+					<p v-else><button class="actionsLineButton" @click="controller.placeMarketingCampaign(0)">{{ $t("workingDay.placeCampaign") }}</button></p>
 				</template>
 
 				<!-- Gourmet guides / giant billboards: button placement -->
-				<p v-else-if="store.context.campaign > 16"><button class="actionsLineButton" @click="controller.placeMarketingCampaign(0)">Place Campaign</button></p>
-				<p v-else>Click a highlighted square on the map to place your campaign</p>
+				<p v-else-if="store.context.campaign > 16"><button class="actionsLineButton" @click="controller.placeMarketingCampaign(0)">{{ $t("workingDay.placeCampaign") }}</button></p>
+				<p v-else>{{ $t("workingDay.clickToPlaceCampaign") }}</p>
 
 				<br />
-				<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">Reset the whole working day</button>
-				<button class="actionsLineButton" @click="controller.resetSubphase()">Reset</button>
+				<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
+				<button class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.reset") }}</button>
 				<button v-if="store.context.nightShift" class="actionsLineButton" @click="controller.skipNightShiftManager()">{{ $t("actionArea.skipNightShiftManager") }}</button>
 			</template>
 		</template>
@@ -519,7 +510,7 @@ const computedProducers = computed(() => {
 		<div>
 			<!-- DISPLAY JUST PRODUCED -->
 			<div class="reminder">
-				<p>Produced:</p>
+				<p>{{ $t("workingDay.producedLabel") }}</p>
 				<div v-for="(emp, idx) in store.context.justProduced.team" :key="idx" class="cardSummaryDiv producedCardSummary">
 					<img :src="view.getImage(`emp_${emp}`)" class="cardImg" :alt="rf.employeeName(emp)" />
 				</div>
@@ -532,17 +523,17 @@ const computedProducers = computed(() => {
 			</div>
 
 			<template v-if="computedProducers.length > 0">
-				<p>Select a Food / Drink producer</p>
+				<p>{{ $t("workingDay.selectDrinkProducer") }}</p>
 				<template v-if="controller.currentPlayerObj().employees.includes(rf.NIGHT_SHIFT_MANAGER)">
-					<span v-if="store.startingOptions.coffee">Your Night Shift Manager allows each Barista Trainee, Errand Boy and Kitchen Trainee to work twice. They are displayed twice each below</span>
-					<span v-else>Your Night Shift Manager allows each Errand Boy and Kitchen Trainee to work twice. They are displayed twice each below</span>
+					<span v-if="store.startingOptions.coffee">{{ $t("workingDay.nightShiftProduceTwiceCoffee") }}</span>
+					<span v-else>{{ $t("workingDay.nightShiftProduceTwice") }}</span>
 				</template>
 			</template>
 
 			<!-- DRIVING A CART / TRUCK / ZEPPELIN TO COLLECT DRINKS -->
 			<template v-if="isCollectingDrinks">
-				<p>Click the highlighted squares to trace a path, then stop to collect drinks</p>
-				<button class="actionsLineButton" @click="controller.stopCollecting()">Stop and collect drinks</button>
+				<p>{{ $t("workingDay.tracePathCollectDrinks") }}</p>
+				<button class="actionsLineButton" @click="controller.stopCollecting()">{{ $t("workingDay.stopCollectDrinks") }}</button>
 			</template>
 
 			<template v-else>
@@ -557,7 +548,7 @@ const computedProducers = computed(() => {
 				<template v-if="store.context.producer !== -1">
 					<div>
 						<template v-if="store.context.producer === rf.ERRAND_BOY">
-							<p>Select Drink to produce</p>
+							<p>{{ $t("workingDay.selectDrinkToProduce") }}</p>
 							<div class="productionOptionsDiv">
 								<div v-for="(item, idx) in [rf.LEMONADE, rf.COKE, rf.BEER]" :key="idx" class="productionItemOptionsDiv" @click="controller.addProducedItemToPlayer(item)">
 									<img :src="view.getImage(`item_${item}`)" class="producerItemOptionImg" />
@@ -565,7 +556,7 @@ const computedProducers = computed(() => {
 							</div>
 						</template>
 						<template v-else-if="store.context.producer === rf.KITCHEN_TRAINEE">
-							<p>Select Food item to produce</p>
+							<p>{{ $t("workingDay.selectFoodToProduce") }}</p>
 							<div class="productionOptionsDiv">
 								<div v-for="(item, idx) in [rf.PIZZA, rf.BURGER]" :key="idx" class="productionItemOptionsDiv" @click="controller.addProducedItemToPlayer(item)">
 									<img :src="view.getImage(`item_${item}`)" class="producerItemOptionImg" />
@@ -575,9 +566,9 @@ const computedProducers = computed(() => {
 					</div>
 				</template>
 
-				<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">Reset Working Day</button>
-				<button class="actionsLineButton" @click="controller.resetSubphase()">Reset Production</button>
-				<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">Finish Production</button>
+				<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWorkingDay") }}</button>
+				<button class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.resetProduction") }}</button>
+				<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ $t("workingDay.finishProduction") }}</button>
 			</template>
 		</div>
 	</template>
@@ -588,15 +579,15 @@ const computedProducers = computed(() => {
 			<p>{{ $t("actionArea.buildHousesAndGardens") }}</p>
 
 			<template v-if="housesRemaining > 0">
-				<p>You can build new houses and gardens</p>
-				<p v-if="rules.givePossibleHousesForGarden().length === 0">No suitable houses</p>
+				<p>{{ $t("workingDay.canBuildHousesGardens") }}</p>
+				<p v-if="rules.givePossibleHousesForGarden().length === 0">{{ $t("workingDay.noSuitableHouses") }}</p>
 
 				<AddItemBox :itemBeingAdded="rf.ITEM_BOX_HOUSE" />
 			</template>
 
-			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">Reset Working Day</button>
-			<button class="actionsLineButton" @click="controller.resetSubphase()">Reset Houses & Gardens</button>
-			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">Finish Houses & Gardens</button>
+			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWorkingDay") }}</button>
+			<button class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.resetHousesGardens") }}</button>
+			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ $t("workingDay.finishHousesGardens") }}</button>
 		</div>
 	</template>
 
@@ -605,8 +596,8 @@ const computedProducers = computed(() => {
 		<div>
 			<!-- Milestone: choose and place a new board tile -->
 			<template v-if="store.context.lobbyistMilestoneActive">
-				<p>For the First Lobbyist Used milestone, you are allowed to add a new tile to the board</p>
-				<p>Choose the tile and rotation you would like, then click a highlighted square to place it</p>
+				<p>{{ $t("workingDay.lobbyistMilestoneIntro") }}</p>
+				<p>{{ $t("workingDay.lobbyistMilestoneChooseTile") }}</p>
 
 				<template v-if="computedAvailableLobbyistTiles.length > 0">
 					<!-- Tile choice -->
@@ -623,31 +614,31 @@ const computedProducers = computed(() => {
 						<img :src="view.getImage('rot_clockwise')" class="rotateButton" @click="rotateMSTile(true)" />
 					</div>
 				</template>
-				<p v-else><b>No more tiles</b></p>
+				<p v-else><b>{{ $t("workingDay.noMoreTiles") }}</b></p>
 
-				<button class="actionsLineButton" @click="controller.cancelLobbyistMilestone()">Never mind</button>
+				<button class="actionsLineButton" @click="controller.cancelLobbyistMilestone()">{{ $t("workingDay.neverMind") }}</button>
 			</template>
 
 			<!-- Normal lobbying -->
 			<template v-else>
 				<template v-if="computedLobbyistsRemaining > 0">
 					<p>
-						You can build a new road or park.
+						{{ $t("workingDay.buildRoadOrPark") }}
 						<br />
-						The lobbyist has a range of 2 but can also build next to any road that is within a range of 2.
+						{{ $t("workingDay.lobbyistRangeHint") }}
 					</p>
 
 					<template v-if="computedAvailableLobbyistItems > 0">
 						<AddItemBox :itemBeingAdded="rf.ITEM_BOX_LOBBYIST" />
 					</template>
-					<p v-else>Unfortunately there are no more roads or parks available</p>
+					<p v-else>{{ $t("workingDay.noRoadsOrParksAvailable") }}</p>
 				</template>
-				<p v-else-if="store.context.justLobbied.length === 0">No lobbyists available</p>
+				<p v-else-if="store.context.justLobbied.length === 0">{{ $t("workingDay.noLobbyistsAvailable") }}</p>
 			</template>
 
-			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">Reset Working Day</button>
-			<button class="actionsLineButton" @click="controller.resetLobbying()">Reset Lobbying</button>
-			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ store.context.justLobbied.length === 0 ? "Skip Lobbying" : "Finish Lobbying" }}</button>
+			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWorkingDay") }}</button>
+			<button class="actionsLineButton" @click="controller.resetLobbying()">{{ $t("workingDay.resetLobbying") }}</button>
+			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ store.context.justLobbied.length === 0 ? $t("workingDay.skipLobbying") : $t("workingDay.finishLobbying") }}</button>
 		</div>
 	</template>
 
@@ -656,13 +647,13 @@ const computedProducers = computed(() => {
 		<div>
 			<!-- Mailbox milestone: place a free mailbox campaign next to the new restaurant -->
 			<template v-if="store.context.restaurantMilestone">
-				<p>Choose a mailbox campaign for your 'First New Restaurant' milestone</p>
+				<p>{{ $t("workingDay.chooseMailboxCampaign") }}</p>
 
 				<AddItemBox :itemBeingAdded="rf.ITEM_BOX_CAMPAIGN" />
 
-				<p>Click a highlighted square on the map to place your campaign</p>
+				<p>{{ $t("workingDay.clickToPlaceCampaign") }}</p>
 				<br />
-				<button class="actionsLineButton" @click="controller.cancelNewRestaurantMilestone()">Never mind</button>
+				<button class="actionsLineButton" @click="controller.cancelNewRestaurantMilestone()">{{ $t("workingDay.neverMind") }}</button>
 			</template>
 
 			<!-- Choosing a restaurant to move -->
@@ -670,12 +661,12 @@ const computedProducers = computed(() => {
 				<div class="reminder">
 					<img :src="view.getImage(`emp_${store.context.selectedBuildingManager}`)" class="cardImg" alt="manager" />
 				</div>
-				<p>Choose a restaurant to move</p>
+				<p>{{ $t("workingDay.chooseRestaurantToMove") }}</p>
 			</template>
 
 			<!-- Placing a new restaurant -->
 			<template v-else-if="store.context.newRestaurantAction === 'create'">
-				<p>Click a highlighted square to place your restaurant</p>
+				<p>{{ $t("workingDay.clickToPlaceRestaurant") }}</p>
 				<AddItemBox :itemBeingAdded="rf.ITEM_BOX_RESTO" />
 			</template>
 
@@ -684,32 +675,32 @@ const computedProducers = computed(() => {
 				<div class="reminder">
 					<img :src="view.getImage(`emp_${rf.REGIONAL_MANAGER}`)" class="cardImg" alt="Regional Manager" />
 				</div>
-				<p>Move an existing restaurant or place a new one</p>
+				<p>{{ $t("workingDay.moveOrCreateRestaurant") }}</p>
 				<p>
-					<button class="actionsLineButton" @click="controller.chooseBuildAction('move')">Move</button>
-					<button class="actionsLineButton" @click="controller.chooseBuildAction('create')">Create</button>
+					<button class="actionsLineButton" @click="controller.chooseBuildAction('move')">{{ $t("workingDay.move") }}</button>
+					<button class="actionsLineButton" @click="controller.chooseBuildAction('create')">{{ $t("workingDay.create") }}</button>
 				</p>
 			</template>
 
 			<!-- Choosing a manager -->
 			<template v-else>
 				<template v-if="store.context.noMoreRestaurants">
-					<p><span class="cautionText">No more restaurants</span></p>
+					<p><span class="cautionText">{{ $t("workingDay.noMoreRestaurants") }}</span></p>
 				</template>
 				<template v-else-if="computedRemainingManagers.length > 0">
-					<p>Select a Local or Regional Manager</p>
+					<p>{{ $t("workingDay.selectLocalOrRegionalManager") }}</p>
 					<div class="allHireableEmployeesDiv">
 						<div v-for="(employee, idx) in computedRemainingManagers" :key="idx" class="cardChoiceDiv selectable" @click="controller.selectManager(employee)">
 							<img :src="view.getImage(`emp_${employee}`)" class="cardImg" :alt="rf.employeeName(employee)" />
 						</div>
 					</div>
 				</template>
-				<p v-else-if="store.context.justOpened.length === 0">No managers available to open new restaurants</p>
+				<p v-else-if="store.context.justOpened.length === 0">{{ $t("workingDay.noManagersAvailable") }}</p>
 			</template>
 
-			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">Reset Working Day</button>
-			<button class="actionsLineButton" @click="controller.resetSubphase()">Reset New Restaurants</button>
-			<button v-if="store.context.restaurantMilestone === false && store.context.newRestaurantAction === ''" class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ store.context.justOpened.length === 0 ? "Skip Expanding" : "Finish Expanding" }}</button>
+			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWorkingDay") }}</button>
+			<button class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.resetNewRestaurants") }}</button>
+			<button v-if="store.context.restaurantMilestone === false && store.context.newRestaurantAction === ''" class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ store.context.justOpened.length === 0 ? $t("workingDay.skipExpanding") : $t("workingDay.finishExpanding") }}</button>
 		</div>
 	</template>
 
@@ -722,37 +713,37 @@ const computedProducers = computed(() => {
 				<table id="EODsummaryTable">
 					<thead>
 						<tr>
-							<th>Phase</th>
-							<th>Actions Available</th>
-							<th>Actions Taken</th>
-							<th>Actions Remaining</th>
-							<th>Redo</th>
+							<th>{{ $t("workingDay.phase") }}</th>
+							<th>{{ $t("workingDay.actionsAvailable") }}</th>
+							<th>{{ $t("workingDay.actionsTaken") }}</th>
+							<th>{{ $t("workingDay.actionsRemaining") }}</th>
+							<th>{{ $t("workingDay.redo") }}</th>
 						</tr>
 					</thead>
 					<tbody>
-						<!-- HIRE -->
-						<tr>
-							<td>Recruit</td>
+					<!-- HIRE -->
+					<tr>
+						<td>{{ $t("workingDay.recruit") }}</td>
 							<td>{{ store.context.endOfDaySummaryData.hire.total }}</td>
 							<td>
 								<template v-for="(emp, idx) in store.context.endOfDaySummaryData.hire.hired" :key="idx">
-									<img v-if="emp !== -1" :src="view.getImage(`emp_${emp}`)" class="EODsummaryEmployee" />
-									<span v-else>Train</span>
+								<img v-if="emp !== -1" :src="view.getImage(`emp_${emp}`)" class="EODsummaryEmployee" />
+								<span v-else>{{ $t("workingDay.train") }}</span>
 								</template>
 							</td>
 							<td>
 							<span v-if="store.context.endOfDaySummaryData.hire.total === store.context.endOfDaySummaryData.hire.hired.length && store.context.endOfDaySummaryData.hire.salaryReductions === 0" class="EODsummaryGoodSpan">0</span>
-							<span v-else-if="store.context.endOfDaySummaryData.hire.salaryReductions > 0 && store.context.endOfDaySummaryData.hire.hired.length + store.context.endOfDaySummaryData.hire.salaryReductions >= store.context.endOfDaySummaryData.hire.total">{{ store.context.endOfDaySummaryData.hire.total - store.context.endOfDaySummaryData.hire.hired.length }} - Used to reduce salary</span>
-								<span v-else class="EODsummaryWarningSpan">
-									{{ store.context.endOfDaySummaryData.hire.total - store.context.endOfDaySummaryData.hire.hired.length }}
-									<span v-if="store.context.endOfDaySummaryData.hire.salaryReductions > 0">({{ store.context.endOfDaySummaryData.hire.salaryReductions }} can be used to reduce salary)</span>
-								</span>
+							<span v-else-if="store.context.endOfDaySummaryData.hire.salaryReductions > 0 && store.context.endOfDaySummaryData.hire.hired.length + store.context.endOfDaySummaryData.hire.salaryReductions >= store.context.endOfDaySummaryData.hire.total">{{ $t("workingDay.usedToReduceSalary", store.context.endOfDaySummaryData.hire.total - store.context.endOfDaySummaryData.hire.hired.length) }}</span>
+							<span v-else class="EODsummaryWarningSpan">
+								{{ store.context.endOfDaySummaryData.hire.total - store.context.endOfDaySummaryData.hire.hired.length }}
+								<span v-if="store.context.endOfDaySummaryData.hire.salaryReductions > 0">{{ $t("workingDay.canReduceSalary", store.context.endOfDaySummaryData.hire.salaryReductions) }}</span>
+							</span>
 							</td>
-							<td><button class="actionsLineButton" @click="controller.redoSubphase(rf.SUBPHASE_HIRING)">Redo</button></td>
+							<td><button class="actionsLineButton" @click="controller.redoSubphase(rf.SUBPHASE_HIRING)">{{ $t("workingDay.redo") }}</button></td>
 						</tr>
 						<!-- TRAIN -->
-						<tr v-if="store.context.endOfDaySummaryData.train.total > 0">
-							<td>Train</td>
+					<tr v-if="store.context.endOfDaySummaryData.train.total > 0">
+						<td>{{ $t("workingDay.train") }}</td>
 							<td>{{ store.context.endOfDaySummaryData.train.total }}</td>
 							<td>
 								<template v-for="(emp, idx) in store.context.endOfDaySummaryData.train.trained" :key="idx">
@@ -763,11 +754,11 @@ const computedProducers = computed(() => {
 								<span v-if="store.context.endOfDaySummaryData.train.unused === 0" class="EODsummaryGoodSpan">0</span>
 								<span v-else class="EODsummaryWarningSpan">{{ store.context.endOfDaySummaryData.train.unused }}</span>
 							</td>
-							<td><button class="actionsLineButton" @click="controller.redoSubphase(rf.SUBPHASE_TRAINING)">Redo</button></td>
+							<td><button class="actionsLineButton" @click="controller.redoSubphase(rf.SUBPHASE_TRAINING)">{{ $t("workingDay.redo") }}</button></td>
 						</tr>
 						<!-- MARKET -->
-						<tr v-if="store.context.endOfDaySummaryData.market.total > 0">
-							<td>Market</td>
+					<tr v-if="store.context.endOfDaySummaryData.market.total > 0">
+						<td>{{ $t("workingDay.market") }}</td>
 							<td>{{ store.context.endOfDaySummaryData.market.total }}</td>
 							<td>
 								<img v-for="(campaign, idx) in store.context.endOfDaySummaryData.market.marketed" :key="idx" :src="view.getImage(`marketing_campaign_${campaign}`)" class="EODsummaryCampaign" :style="{ width: rf.MARKETING_CAMPAIGNS[campaign].width * 20 + 'px' }" />
@@ -781,11 +772,11 @@ const computedProducers = computed(() => {
 									</template>
 								</span>
 							</td>
-							<td><button class="actionsLineButton" @click="controller.redoSubphase(rf.SUBPHASE_MARKETING)">Redo</button></td>
+							<td><button class="actionsLineButton" @click="controller.redoSubphase(rf.SUBPHASE_MARKETING)">{{ $t("workingDay.redo") }}</button></td>
 						</tr>
 						<!-- PRODUCE -->
-						<tr v-if="store.context.endOfDaySummaryData.produce.total > 0">
-							<td>Produce</td>
+					<tr v-if="store.context.endOfDaySummaryData.produce.total > 0">
+						<td>{{ $t("workingDay.produce") }}</td>
 							<td>{{ store.context.endOfDaySummaryData.produce.total }}</td>
 							<td>
 								<template v-for="(count, idx) in store.context.endOfDaySummaryData.produce.produced" :key="idx">
@@ -804,11 +795,11 @@ const computedProducers = computed(() => {
 									</template>
 								</span>
 							</td>
-							<td><button class="actionsLineButton" @click="controller.redoSubphase(rf.SUBPHASE_PRODUCE)">Redo</button></td>
+							<td><button class="actionsLineButton" @click="controller.redoSubphase(rf.SUBPHASE_PRODUCE)">{{ $t("workingDay.redo") }}</button></td>
 						</tr>
 						<!-- HOUSES -->
-						<tr v-if="store.context.endOfDaySummaryData.houses.total > 0">
-							<td>Build Houses/Gardens</td>
+					<tr v-if="store.context.endOfDaySummaryData.houses.total > 0">
+						<td>{{ $t("workingDay.buildHousesGardensRow") }}</td>
 							<td>{{ store.context.endOfDaySummaryData.houses.total }}</td>
 							<td>
 								<template v-for="(item, idx) in store.context.endOfDaySummaryData.houses.built" :key="idx">
@@ -822,11 +813,11 @@ const computedProducers = computed(() => {
 									{{ store.context.endOfDaySummaryData.houses.total - store.context.endOfDaySummaryData.houses.built.length }}
 								</span>
 							</td>
-							<td><button class="actionsLineButton" @click="controller.redoSubphase(rf.SUBPHASE_HOUSES)">Redo</button></td>
+							<td><button class="actionsLineButton" @click="controller.redoSubphase(rf.SUBPHASE_HOUSES)">{{ $t("workingDay.redo") }}</button></td>
 						</tr>
 						<!-- LOBBY -->
-						<tr v-if="store.context.endOfDaySummaryData.lobby.total > 0">
-							<td>Lobby</td>
+					<tr v-if="store.context.endOfDaySummaryData.lobby.total > 0">
+						<td>{{ $t("workingDay.lobby") }}</td>
 							<td>{{ store.context.endOfDaySummaryData.lobby.total }}</td>
 							<td>
 								<template v-for="(item, idx) in store.context.endOfDaySummaryData.lobby.built" :key="idx">
@@ -840,11 +831,11 @@ const computedProducers = computed(() => {
 									{{ store.context.endOfDaySummaryData.lobby.total - store.context.endOfDaySummaryData.lobby.built.length }}
 								</span>
 							</td>
-							<td><button class="actionsLineButton" @click="controller.redoSubphase(rf.SUBPHASE_LOBBYISTS)">Redo</button></td>
+							<td><button class="actionsLineButton" @click="controller.redoSubphase(rf.SUBPHASE_LOBBYISTS)">{{ $t("workingDay.redo") }}</button></td>
 						</tr>
 						<!-- MANAGERS (New Restaurants) -->
-						<tr v-if="store.context.endOfDaySummaryData.managers.total > 0">
-							<td>New Restaurants</td>
+					<tr v-if="store.context.endOfDaySummaryData.managers.total > 0">
+						<td>{{ $t("workingDay.newRestaurants") }}</td>
 							<td>{{ store.context.endOfDaySummaryData.managers.total }}</td>
 							<td>
 								<img v-for="(item, idx) in store.context.endOfDaySummaryData.managers.built" :key="idx" :src="view.getImage(`emp_${item}`)" class="EODsummaryEmployee" />
@@ -855,42 +846,42 @@ const computedProducers = computed(() => {
 									{{ Math.min(store.context.endOfDaySummaryData.managers.total - store.context.endOfDaySummaryData.managers.built.length, 3 - controller.currentPlayerObj().restaurants.length) }}
 								</span>
 							</td>
-							<td><button class="actionsLineButton" @click="controller.redoSubphase(rf.SUBPHASE_NEW_RESTAURANTS)">Redo</button></td>
+							<td><button class="actionsLineButton" @click="controller.redoSubphase(rf.SUBPHASE_NEW_RESTAURANTS)">{{ $t("workingDay.redo") }}</button></td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
 
-			<p>You are about to confirm the whole Working Day</p>
+			<p>{{ $t("workingDay.confirmWorkingDay") }}</p>
 
 			<template v-if="store.gameflow.turn === 1 && eodCurrentSalary === 0">
-				<p v-if="controller.currentPlayerObj().beach.length === 0"><b>WARNING: YOU HAVE NOT HIRED ANYONE</b></p>
-				<button class="actionsLineButton" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
-				<button class="actionsLineButton" @click="endTurnPlayPayday">End Turn</button>
+				<p v-if="controller.currentPlayerObj().beach.length === 0"><b>{{ $t("workingDay.warningNoHires") }}</b></p>
+				<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+				<button class="actionsLineButton" @click="endTurnPlayPayday">{{ $t("workingDay.endTurn") }}</button>
 			</template>
 
 			<template v-else-if="eodIsLastOrShort">
-				<button class="actionsLineButton" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
-				<button class="actionsLineButton" @click="endTurnPlayPayday">End Turn</button>
+				<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+				<button class="actionsLineButton" @click="endTurnPlayPayday">{{ $t("workingDay.endTurn") }}</button>
 			</template>
 
 			<template v-else-if="(eodCurrentSalary === 0 && store.gameflow.turn <= 2) || store.startingOptions.strictPaydayFridge">
-				<p v-if="eodCurrentSalary === 0 && store.gameflow.turn <= 2 && !store.startingOptions.strictPaydayFridge">Payday will be skipped as you have no salary to pay and it is turn 1 or 2</p>
-				<p v-else>Payday will be played in turn order</p>
-				<button class="actionsLineButton" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
-				<button class="actionsLineButton" @click="endTurnPlayPayday">End Turn</button>
+				<p v-if="eodCurrentSalary === 0 && store.gameflow.turn <= 2 && !store.startingOptions.strictPaydayFridge">{{ $t("workingDay.paydaySkipped") }}</p>
+				<p v-else>{{ $t("workingDay.paydayTurnOrder") }}</p>
+				<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+				<button class="actionsLineButton" @click="endTurnPlayPayday">{{ $t("workingDay.endTurn") }}</button>
 			</template>
 
 			<template v-else-if="eodTriButton">
-				<p>You have <b>enough money</b> to keep all your employees. You can decide now to keep all of them in order to save time</p>
-				<button class="actionsLineButton" @click="controller.resetWholeTurn()">Reset the whole working day</button>
-				<button class="actionsLineButton" @click="endTurnPlayPayday">End Turn. Play Payday Phase</button>
-				<button class="actionsLineButton" @click="endTurnAutoPay">End Turn. Auto-pay salaries and keep all employees</button>
+				<p v-html="$t('workingDay.enoughMoney')"></p>
+				<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
+				<button class="actionsLineButton" @click="endTurnPlayPayday">{{ $t("workingDay.endTurnPlayPayday") }}</button>
+				<button class="actionsLineButton" @click="endTurnAutoPay">{{ $t("workingDay.endTurnAutoPay") }}</button>
 			</template>
 
 			<template v-else>
-				<button class="actionsLineButton" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
-				<button class="actionsLineButton" @click="endTurnPlayPayday">End Turn</button>
+				<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+				<button class="actionsLineButton" @click="endTurnPlayPayday">{{ $t("workingDay.endTurn") }}</button>
 			</template>
 		</div>
 	</template>

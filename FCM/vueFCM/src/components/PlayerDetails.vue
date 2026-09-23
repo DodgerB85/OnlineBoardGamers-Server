@@ -59,13 +59,13 @@ const resourceCounts = computed(() => {
 					<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms].img)" :class="rf.MILESTONES_STR[ms].additionalClass ? rf.MILESTONES_STR[ms].additionalClass : ''" />
 				</span>
 			</template>
-			<template v-else>No Milestones</template>
+			<template v-else>{{ $t("playerDetails.noMilestones") }}</template>
 		</div>
 
 		<!-- PREVIEW ALL RESERVE CARDS -->
 		<template v-if="store.bankBroken === 0 && plyr.hasMilestone(playerIndexProp, rf.FIRST_100_DOL)">
 			<div class="reserveCards">
-				Reserve cards:
+				{{ $t("playerDetails.reserveCards") }}
 				<template v-for="(num, idx) in store.reserveCards" :key="idx">
 					{{ num }}
 				</template>
@@ -83,9 +83,9 @@ const resourceCounts = computed(() => {
 					</div>
 				</div>
 				<div v-if="store.startingOptions.dumplings && store.players[playerIndexProp].ceoAction !== rf.CEO_ACTION_HIRE_1" class="ceoActionText">
-					<span v-if="store.players[playerIndexProp].ceoAction === rf.CEO_ACTION_PRICE_MINUS_3">Price -3</span>
-					<span v-else-if="store.players[playerIndexProp].ceoAction === rf.CEO_ACTION_RECRUITING_MANAGER">2x: Hire 1 person or $5 less salary</span>
-					<span v-else-if="store.players[playerIndexProp].ceoAction === rf.CEO_ACTION_COACH">2 training slots. May train the same person two steps</span>
+					<span v-if="store.players[playerIndexProp].ceoAction === rf.CEO_ACTION_PRICE_MINUS_3">{{ $t("playerDetails.priceMinus3") }}</span>
+					<span v-else-if="store.players[playerIndexProp].ceoAction === rf.CEO_ACTION_RECRUITING_MANAGER">{{ $t("employees.recruitingManagerDesc") }}</span>
+					<span v-else-if="store.players[playerIndexProp].ceoAction === rf.CEO_ACTION_COACH">{{ $t("employees.coachDesc") }}</span>
 				</div>
 			</div>
 			<!-- RESERVE CARD -->
@@ -106,7 +106,7 @@ const resourceCounts = computed(() => {
 		<!-- MARKETEERS-->
 		<template v-if="store.players[playerIndexProp].marketers.length > 0">
 			<div class="marketers">
-				<p>Marketeers:</p>
+				<p>{{ $t("playerDetails.marketeers") }}</p>
 				<template v-for="(marketer, idx) in store.players[playerIndexProp].marketers" :key="idx">
 					<div class="item_marketing">
 						<img :src="view.getImage(`emp_${marketer.marketer}`)" class="card" :class="['marketerImg', { bnw: idx === store.players[playerIndexProp].additionalCampaignArrayIndex }]" />
@@ -127,8 +127,8 @@ const resourceCounts = computed(() => {
 		</template>
 
 		<!-- BEACH -->
-		<p>On the beach:</p>
-		<template v-if="store.players[playerIndexProp].beach.length === 0">Empty</template>
+		<p>{{ $t("playerDetails.onTheBeach") }}</p>
+		<template v-if="store.players[playerIndexProp].beach.length === 0">{{ $t("playerDetails.empty") }}</template>
 		<template v-else>
 			<div class="employeesLine">
 				<div class="expandedEmployeeDiv" v-for="(emp, empIdx) in store.players[playerIndexProp].beach.filter((e) => e !== rf.BLANK_EMPLOYEE_SPACE)" :key="empIdx">
@@ -154,7 +154,7 @@ const resourceCounts = computed(() => {
 
 		<!-- EMPLOYEES -->
 		<template v-if="store.players[playerIndexProp].employees.length > 0">
-			<p>At work:</p>
+			<p>{{ $t("playerDetails.atWork") }}</p>
 			<div class="employeesLine">
 				<div class="expandedEmployeeDiv" v-for="(emp, empIdx) in store.players[playerIndexProp].employees.filter((e) => e !== rf.BLANK_EMPLOYEE_SPACE)" :key="empIdx">
 					<h3 class="expandedEmployeeTitle" :class="[rf.EMPLOYEES_STR[emp].type, { inverted: rf.EMPLOYEES_STR[emp].type === 'manager' || rf.EMPLOYEES_STR[emp].type === 'restaurant' }]">

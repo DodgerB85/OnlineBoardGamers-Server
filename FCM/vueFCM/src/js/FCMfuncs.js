@@ -8,6 +8,7 @@ import * as view from "./FCMview"
 
 import { useModelStore } from "../stores/FCMstore.js"
 import { usePersonalStore } from "../stores/FCMpersonal"
+import i18n from "../i18n"
 
 export const shuffle = (array) => {
 	for (let i = array.length - 1; i > 0; i--) {
@@ -48,7 +49,7 @@ export function decompressObjectFromDB(str) {
 		let decompressedData = pako.ungzip(step1, { to: "string" })
 		step2 = JSON.parse(decompressedData)
 	} catch {
-		alert("Load Decompress Error, contact admin")
+		alert(i18n.global.t("alerts.loadDecompressError"))
 		return -9999
 	}
 
@@ -659,7 +660,7 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 		let decompressedData = pako.ungzip(step1, { to: "string" })
 		step2 = JSON.parse(decompressedData)
 	} catch {
-		alert("Load Decompress Error, contact admin")
+		alert(i18n.global.t("alerts.loadDecompressError"))
 		return -9999
 		//step1 = LZString.decompressFromEncodedURIComponent(str);
 		//step2 = JSON.parse(step1);

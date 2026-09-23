@@ -343,12 +343,12 @@ function flipLobbyist(vertical) {
 			<!-- Second good for the Brand Manager double airplane campaign -->
 			<div v-if="store.context.double && rf.MARKETING_CAMPAIGNS[store.context.campaign].type === rf.AIRPLANE" class="addBoxSection">
 				<img v-for="good in secondGoodChoices" :key="good" :src="view.getImage(`item_${good}`)" class="goodChoiceImg" :class="{ selectedGoodImg: store.context.secondGood === good }" @click="controller.chooseSecondGood(good)" :alt="good" />
-				<button class="boxRefuseSecondButton" :class="{ selectedDurationButton: store.context.secondGood === -1 }" @click="controller.chooseSecondGood(-1)">None</button>
+				<button class="boxRefuseSecondButton" :class="{ selectedDurationButton: store.context.secondGood === -1 }" @click="controller.chooseSecondGood(-1)">{{ $t("items.none") }}</button>
 			</div>
 
 			<!-- Duration -->
 			<div class="addBoxSection durationSection">
-				<span>Duration (turns):</span>
+				<span>{{ $t("items.duration") }}</span>
 				<!-- When infinite, ONLY the always-selected infinite button shows, with no hover highlight -->
 				<button v-if="controller.campaignDurationInfinite()" class="durationButton infiniteDurationButton selectedDurationButton">&infin;</button>
 				<template v-else>
@@ -416,10 +416,10 @@ function flipLobbyist(vertical) {
 						<span class="numberHolder">{{ houseNum }}</span>
 					</span>
 				</template>
-				<span v-else class="noMoreSpan">No More Houses</span>
+				<span v-else class="noMoreSpan">{{ $t("items.noMoreHouses") }}</span>
 
 				<img v-if="rules.availableGardens() > 0" :src="view.getImage('garden')" class="gardenBuildChoice" :class="{ selected: store.context.selectedBuilding === -1 }" @click="controller.selectGardenToBuild()" alt="Garden" />
-				<span v-else class="noMoreSpan">No More Gardens</span>
+				<span v-else class="noMoreSpan">{{ $t("items.noMoreGardens") }}</span>
 			</div>
 
 			<!-- Rotate + selected item -->
@@ -431,7 +431,7 @@ function flipLobbyist(vertical) {
 				</div>
 				<img v-if="store.context.selectedBuilding !== -1" :src="view.getImage('rot_clockwise')" class="rotateButton" @click="rotateClockwise" />
 				<p v-if="store.context.selectedBuilding === -1" class="gardenHintText">
-					{{ store.context.edges.length > 0 ? "Choose an edge for the garden" : "Choose a house to add a garden" }}
+					{{ store.context.edges.length > 0 ? $t("items.chooseEdgeForGarden") : $t("items.chooseHouseForGarden") }}
 				</p>
 			</div>
 		</template>
@@ -443,12 +443,12 @@ function flipLobbyist(vertical) {
 				<template v-if="computedAvailableRoads.length > 0">
 					<img :src="view.getImage('road_0_UC')" class="selectable lobbyistTypeRoad" :class="{ selectedChoice: store.context.buildingType === 0 }" @click="controller.selectLobbyistBuilding(0)" alt="Road" />
 				</template>
-				<span v-else class="noMoreSpan">No More Roads</span>
+				<span v-else class="noMoreSpan">{{ $t("items.noMoreRoads") }}</span>
 
 				<template v-if="computedAvailableParks.length > 0">
 					<img :src="view.getImage('park_0')" class="selectable lobbyistTypePark" :class="{ selectedChoice: store.context.buildingType === 1 }" @click="controller.selectLobbyistBuilding(1)" alt="Park" />
 				</template>
-				<span v-else class="noMoreSpan">No More Parks</span>
+				<span v-else class="noMoreSpan">{{ $t("items.noMoreParks") }}</span>
 			</div>
 
 			<!-- Variety sub-types - vertically centered -->

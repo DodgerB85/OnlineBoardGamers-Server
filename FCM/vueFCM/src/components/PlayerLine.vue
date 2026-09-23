@@ -42,7 +42,7 @@ function showCurrentPlayerGlow(playerIndex) {
 			<span class="playerNameSpan" :class="{ currentPlayerNameGlow: playerIndex === store.gameflow.turnOrder[0] }">{{ store.players[playerIndex].displayName }}</span>
 			<br />
 			${{ store.players[playerIndex].money }}
-			<span v-if="plyr.doesPlayerHaveDriveIn(playerIndex)" class="drive">Drive in</span>
+			<span v-if="plyr.doesPlayerHaveDriveIn(playerIndex)" class="drive">{{ $t("playerLine.driveIn") }}</span>
 		</div>
 	</div>
 </template>

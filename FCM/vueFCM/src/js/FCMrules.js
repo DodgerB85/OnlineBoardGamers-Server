@@ -10,7 +10,7 @@ import { useModelStore } from "../stores/FCMstore.js"
 
 const DRINK_TYPES = new Set([rf.DRINK_BEER, rf.DRINK_COKE, rf.DRINK_LEMONADE])
 
-function getOffsetForRotation(rotation) {
+export function getOffsetForRotation(rotation) {
 	if (rotation === 0) return 1
 	if (rotation === 1) return rf.ssW + 1
 	if (rotation === 2) return rf.ssW
@@ -861,92 +861,45 @@ export function givePossibleHousesForGarden() {
 export function givePossibleStartsFromRestaurants(anyIndex) {
 	const store = useModelStore()
 	const playerObj = controller.currentPlayerObj()
-	const mapWidth = rf.ssW
-
-	// Use a Set to store unique tile indexes directly
 	const resultSet = new Set()
 
-	// 1. Process Restaurants
-	for (const resto of playerObj.restaurants) {
-		let minRota = 0
-		let maxRota = 4
-
-		if (!plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())) {
-			minRota = resto.rotation
-			maxRota = resto.rotation + 1
-		}
-
-		for (let rota = minRota; rota < maxRota; rota++) {
-			let offset = 0
-			if (rota === 0) offset = 1
-			else if (rota === 1) offset = mapWidth + 1
-			else if (rota === 2) offset = mapWidth
-
-			const idx = resto.index + offset
-
-			// Get neighbors based on the anyIndex flag
-			const neighbors = anyIndex ? map.neighbours(idx) : map.nextRoadNeighbours(idx, -1, false, true)
-
-			// Add each found neighbor to the Set (Set handles uniqueness automatically)
-			for (const n of neighbors) {
-				resultSet.add(n)
-			}
+	// openOnly: false — rules historically ignore resto.open (unlike model entrances)
+	for (const idx of model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: false })) {
+		const neighbors = anyIndex ? map.neighbours(idx) : map.nextRoadNeighbours(idx, -1, false, true)
+		for (const n of neighbors) {
+			resultSet.add(n)
 		}
 	}
 
-	// 2. Process Coffee Shops
+	// Coffee always uses road neighbours, even when anyIndex picks plain neighbours for doors
 	if (store.startingOptions.coffee && playerObj.coffeeShops.length > 0) {
 		for (const shopIdx of playerObj.coffeeShops) {
-			const neighbors = map.nextRoadNeighbours(shopIdx, -1, false, true)
-			for (const n of neighbors) {
+			for (const n of map.nextRoadNeighbours(shopIdx, -1, false, true)) {
 				resultSet.add(n)
 			}
 		}
 	}
 
-	// Return as a flat array of unique integers
 	return Array.from(resultSet)
 }
 
 export function firstStartIsFromTheSameTile(index) {
 	const store = useModelStore()
 	const playerObj = controller.currentPlayerObj()
-	const mapWidth = rf.ssW
 
-	// 1. Use a Set for O(1) vicinity lookups
 	const vicinity = new Set(map.neighbours(index))
 
-	// 2. Check Restaurants
-	// Using labeled loops to "break" early out of nested structures
-	for (const resto of playerObj.restaurants) {
-		let minRota = 0
-		let maxRota = 4
-
-		if (!plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())) {
-			minRota = resto.rotation
-			maxRota = resto.rotation + 1
-		}
-
-		for (let rota = minRota; rota < maxRota; rota++) {
-			let offset = 0
-			if (rota === 0) offset = 1
-			else if (rota === 1) offset = mapWidth + 1
-			else if (rota === 2) offset = mapWidth
-
-			const doorIdx = resto.index + offset
-
-			// Check if this door is a neighbor AND on the same tile
-			if (vicinity.has(doorIdx) && map.onTheSameTile(index, doorIdx)) {
-				return true // 🚀 Found it! Exit immediately.
-			}
+	// openOnly: false — matches givePossibleStartsFromRestaurants
+	for (const doorIdx of model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: false })) {
+		if (vicinity.has(doorIdx) && map.onTheSameTile(index, doorIdx)) {
+			return true
 		}
 	}
 
-	// 3. Check Coffee Shops
 	if (store.startingOptions.coffee && playerObj.coffeeShops.length > 0) {
 		for (const coffeeIdx of playerObj.coffeeShops) {
 			if (vicinity.has(coffeeIdx) && map.onTheSameTile(index, coffeeIdx)) {
-				return true // 🚀 Found it! Exit immediately.
+				return true
 			}
 		}
 	}
@@ -1097,34 +1050,19 @@ export function giveDrinkSquaresOnTiles(tiles) {
 export function givePossibleStartsFromRestaurantsForZeppelin() {
 	const store = useModelStore()
 	const playerObj = controller.currentPlayerObj()
-	// Using a Set ensures all tile numbers are unique automatically
 	const uniqueTiles = new Set()
 
-	// 1. Process Restaurants
-	for (const resto of playerObj.restaurants) {
-		let minRota = 0
-		let maxRota = 4
-
-		// Drive-in allows all 4 entrances; otherwise, only the current rotation
-		if (!plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())) {
-			minRota = resto.rotation
-			maxRota = resto.rotation + 1
-		}
-
-		for (let rota = minRota; rota < maxRota; rota++) {
-			const doorIndex = resto.index + getOffsetForRotation(rota)
-			uniqueTiles.add(map.giveTileNumber(doorIndex))
-		}
+	// openOnly: false — matches the other rules-side entrance walks
+	for (const doorIndex of model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: false })) {
+		uniqueTiles.add(map.giveTileNumber(doorIndex))
 	}
 
-	// 2. Process Coffee Shops
 	if (store.startingOptions.coffee && playerObj.coffeeShops.length > 0) {
 		for (const shopIndex of playerObj.coffeeShops) {
 			uniqueTiles.add(map.giveTileNumber(shopIndex))
 		}
 	}
 
-	// Return as a clean array
 	return Array.from(uniqueTiles)
 }
 

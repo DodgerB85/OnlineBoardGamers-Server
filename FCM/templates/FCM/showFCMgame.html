@@ -1,6 +1,8 @@
 {% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE|default:'en-gb' }}">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -88,10 +90,10 @@
   </head>
   <body>
     <noscript>
-      <strong>Please enable Javascript to continue.</strong>
+      <strong>{% translate "Please enable Javascript to continue." %}</strong>
     </noscript>
     <div id="app">
-      <div id="loadingText">Food Chain Magnate is loading........</div>
+      <div id="loadingText">{% translate "Food Chain Magnate is loading........" %}</div>
       <div id="loadingContainer">
         <img class="foodIcon"
              src="{% static 'FCM/images/burger.png' %}"
@@ -112,7 +114,8 @@
   </body>
   <script>
   var initData = {};
-  
+  initData.locale = "{{ LANGUAGE_CODE|default:'en-gb' }}";
+
   // Core game data
   initData.gameID = {{ gameID|default:0 }};
   initData.gameName = "{{ gameName|default:"" }}";

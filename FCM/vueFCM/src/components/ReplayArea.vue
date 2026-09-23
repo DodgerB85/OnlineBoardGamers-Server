@@ -1,6 +1,7 @@
 <script setup>
 
 import * as replay from '../js/FCMreplay'
+import i18n from '../i18n'
 
 import HistoryEntry from './HistoryEntry.vue'
 
@@ -14,7 +15,7 @@ import { ref } from 'vue';
 
 const spinoffSuccessText = ref('')
 const spinoffErrorText = ref('')
-const copyMessage = ref('https://www.onlineboardgamers.com/FCM/110/replay/5 Copied to Clipboard');
+const copyMessage = ref(i18n.global.t("replay.copiedToClipboard", { url: "https://www.onlineboardgamers.com/FCM/110/replay/5" }));
 
 
 function performStep(amount) {
@@ -25,7 +26,7 @@ function performStep(amount) {
 }
 
 async function localCopyGameToPracticeGame2() {
-    store.gameMessages.rewindErrorText = "Not implemented yet"
+    store.gameMessages.rewindErrorText = i18n.global.t("replay.notImplementedYet")
 }
 
 function copyToClipboard() {
@@ -37,7 +38,7 @@ function copyToClipboard() {
 
     navigator.clipboard.writeText(textToCopy);
 
-    copyMessage.value = textToCopy + " Copied to Clipboard"
+    copyMessage.value = i18n.global.t("replay.copiedToClipboard", { url: textToCopy })
 
     const button = document.getElementById("copyURLbutton");
     const popup = document.getElementById("popup");
@@ -72,7 +73,7 @@ function copyToClipboard() {
 <template>
     <template v-if="store.viewSettings.showReplay">
         <button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="store.replayStep === 0"
-            @click="performStep(-999)">Back to my last move</button>
+            @click="performStep(-999)">{{ $t("replay.backToMyLastMove") }}</button>
         <button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-99)">|&lt;</button>
         <button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-9)">&lt;&lt;</button>
         <button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-1)">&lt;</button>
@@ -85,18 +86,14 @@ function copyToClipboard() {
             @click="performStep(99)">&gt;|</button>
 
         <div class="copyGameButtonDiv" v-if="personal.name">
-            <button @click="localCopyGameToPracticeGame2()" class="actionsLineButton">
-                Copy This Game<br />To New Game
-            </button>
+            <button @click="localCopyGameToPracticeGame2()" class="actionsLineButton"
+                v-html="$t('replay.copyThisGame')"></button>
             <button @click="store.viewSettings.replayAtBottom = !store.viewSettings.replayAtBottom"
-                class="actionsLineButton">
-                <template v-if="!store.viewSettings.replayAtBottom">Move UI<br />to Bottom <b>▼</b></template>
-                <template v-if="store.viewSettings.replayAtBottom">Move UI<br />to Top <b>▲</b></template>
-            </button>
+                class="actionsLineButton"
+                v-html="store.viewSettings.replayAtBottom ? $t('replay.moveUiToTop') : $t('replay.moveUiToBottom')"></button>
         </div>
-        <br />Use the arrows to step through the game. This will not alter the current game in any way
-        <br /><button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">Copy URL to this move to
-            clipboard</button>
+        <br />{{ $t("replay.arrowsHint") }}
+        <br /><button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">{{ $t("replay.copyUrlToClipboard") }}</button>
         <div id="popup" class="popup">{{ copyMessage }}</div>
 
         <div v-if="spinoffSuccessText !== ''" class="spinoffSuccessText" v-html="spinoffSuccessText"></div>

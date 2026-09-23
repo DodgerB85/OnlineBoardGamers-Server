@@ -203,37 +203,37 @@ function saveCleanup() {
 			<!-- SCREEN 1: FIRE EMPLOYEES -->
 			<template v-if="paydayFlow !== 'beer'">
 				<div>
-					<p>You can pre-select which employees to fire. If you do not have enough money after this, you will play the phase as normal</p>
+					<p>{{ $t('prePhase.preSelectFireHint') }}</p>
 
 					<div v-if="unfireableMarketers.length > 0" class="reminder">
-						<p>Marketing employees you can't fire:</p>
+						<p>{{ $t('actionArea.marketersCantFire') }}</p>
 						<div v-for="m in unfireableMarketers" :key="m.marketer" class="cardSummaryDiv">
 							<img :src="view.getImage('emp_' + m.marketer)" class="cardImg" :alt="rf.employeeName(m.marketer)" />
 						</div>
 					</div>
 
 					<p v-if="canPayWithFood">
-						You need to pay: ${{ currentSalary }} or {{ nbPays }} resource tokens (or a mix of both)
+						{{ $t('prePhase.needToPayWithFood', { currentSalary, nbPays }) }}
 					</p>
 					<p v-else>
-						You need to pay: ${{ currentSalary }}
+						{{ $t('prePhase.needToPay', { currentSalary }) }}
 					</p>
 
 					<p v-if="!canAfford && hasTrainerMS" style="color: #f00">
-						You cannot afford to pay all of your employees! However, your
-						<i>First Trainer Used</i>
-						milestone allows you to keep everyone.
+						<i18n-t keypath="prePhase.cantAffordTrainer" tag="span" scope="global">
+							<template #trainer><i>{{ $t('prePhase.firstTrainerUsed') }}</i></template>
+						</i18n-t>
 						<br />
-						If you wish, you
-						<b>may</b>
-						click on employees to fire them anyway
+						<i18n-t keypath="prePhase.fireAnyway" tag="span" scope="global">
+							<template #may><b>{{ $t('prePhase.may') }}</b></template>
+						</i18n-t>
 					</p>
-					<p v-else-if="!canAfford" style="color: #f00">You cannot pay for all of your employees - You must fire employees until you can pay for the remainder</p>
+					<p v-else-if="!canAfford" style="color: #f00">{{ $t('prePhase.cantPayEmployees') }}</p>
 
 					<!-- Just fired reminder -->
 					<div v-if="actualFiredEmployees.length > 0" class="reminder fireLine">
 						<img v-for="(emp, i) in actualFiredEmployees" :key="'fired-'+i" :src="view.getImage('emp_' + emp)" class="cardSummaryDiv selectable" :title="$t('actionArea.clickToUnfire')" :alt="rf.employeeName(emp)" @click="unFireEmployee(emp)" />
-						<b>You're Fired!&nbsp;</b>
+						<b>{{ $t('actionArea.youreFired') }}&nbsp;</b>
 						<img :src="view.getImage('fired')" class="firedImg" />
 					</div>
 
@@ -250,16 +250,19 @@ function saveCleanup() {
 			<template v-if="paydayFlow === 'beer'">
 				<template v-if="leftToPay > 0">
 					<p>
-						You have to pay for {{ nbPays }} employee{{ nbPays !== 1 ? 's' : '' }}.
-						Choose the item{{ leftToPay !== 1 ? 's' : '' }} you want to use:
+						{{ $t('prePhase.payForEmployees', nbPays) }}
+						{{ $t('prePhase.chooseItemsToUse', leftToPay) }}
 					</p>
 				</template>
-				<p v-else>All employees are covered by food items</p>
+				<p v-else>{{ $t('prePhase.allCoveredByFood') }}</p>
 				<div v-if="store.context.preMoveData[0][1].length > 0" class="reminder fireLine">
 					<img :src="view.getImage(rf.MILESTONES_STR[rf.FIRST_THROW_AWAY].img)" class="payBinIcon" alt="bin" />
 					<img v-for="(food, i) in store.context.preMoveData[0][1]" :key="'paid-'+i" :src="view.getImage('item_' + food)" class="payFoodToken paidToken" :alt="food" @click="undoPaySalaryWithResource(i)" />
 				</div>
-				<p>You are currently paying <b>${{ Math.max(0, currentSalary - store.context.preMoveData[0][1].length * unitarySalary) }}</b> and <b>{{ store.context.preMoveData[0][1].length }}</b> item{{ store.context.preMoveData[0][1].length !== 1 ? 's' : '' }}</p>
+				<i18n-t keypath="prePhase.currentlyPaying" tag="p" scope="global" :plural="store.context.preMoveData[0][1].length">
+					<template #money><b>${{ Math.max(0, currentSalary - store.context.preMoveData[0][1].length * unitarySalary) }}</b></template>
+					<template #items><b>{{ store.context.preMoveData[0][1].length }}</b></template>
+				</i18n-t>
 				<div>
 					<img v-for="(food, i) in sortedFoodResources" :key="'food-'+i" :src="view.getImage('item_' + food)" class="payFoodToken selectable" :alt="food" @click="useResourceToPaySalary(food)" />
 				</div>
@@ -269,22 +272,22 @@ function saveCleanup() {
 		<!-- ========== CLEANUP PRE-PHASE ========== -->
 		<template v-if="mode === 'cleanup'">
 			<template v-if="hasFridge && hasKimchiFridgeCollision">
-				<p>You can store either Kimchi or other types of food/drink in a fridge</p>
-				<p>Your items:</p>
+				<p>{{ $t('prePhase.fridgeEitherKimchi') }}</p>
+				<p>{{ $t('prePhase.yourItems') }}</p>
 				<div class="fridgeItems">
 					<img v-for="(food, i) in fridgeItems" :key="'cki-'+i" :src="view.getImage('item_' + food)" class="payFoodToken" :alt="food" />
 				</div>
-				<button class="actionsLineButton choice-button" @click="chooseKimchi">Store Kimchi</button>
-				<button class="actionsLineButton choice-button" @click="chooseRest">Store other items</button>
+				<button class="actionsLineButton choice-button" @click="chooseKimchi">{{ $t('prePhase.storeKimchi') }}</button>
+				<button class="actionsLineButton choice-button" @click="chooseRest">{{ $t('prePhase.storeOtherItems') }}</button>
 			</template>
 			<template v-else-if="fridgeItems.length > 0 || store.context.preMoveData[1].length > 0">
-				<p>Your fridge can store up to 10 items. Some may be sold during the Dinnertime phase.</p>
-				<p>Click items in the priority you would like them to be stored</p>
+				<p>{{ $t('prePhase.fridgeUpTo10') }}</p>
+				<p>{{ $t('prePhase.clickPriorityStore') }}</p>
 
 				<div v-if="store.context.preMoveData[1].length > 0">
-					Highest Priority to store &gt;
+					{{ $t('prePhase.highestPriorityToStore') }} &gt;
 					<img v-for="(item, i) in store.context.preMoveData[1]" :key="'prior-'+i" :src="view.getImage('item_' + item)" class="preTurnFoodImg" :alt="item" />
-					&lt; Lowest Priority to store
+					&lt; {{ $t('prePhase.lowestPriorityToStore') }}
 				</div>
 
 				<div class="fridgeItems">
@@ -292,26 +295,26 @@ function saveCleanup() {
 				</div>
 			</template>
 			<template v-else>
-				<p>No items to store</p>
+				<p>{{ $t('prePhase.noItemsToStore') }}</p>
 			</template>
 		</template>
 
 		<!-- ========== COMMON BUTTONS ========== -->
 		<div>
 			<br />
-			<button class="actionsLineButton" @click="cancel">Cancel Pre-{{ mode === 'payday' ? 'Payday' : 'Fridge' }}</button>
-			<button class="actionsLineButton" @click="reset">Reset {{ mode === 'payday' ? 'Payday' : 'Clean Up' }}</button>
+			<button class="actionsLineButton" @click="cancel">{{ mode === 'payday' ? $t('prePhase.cancelPrePayday') : $t('prePhase.cancelPreFridge') }}</button>
+			<button class="actionsLineButton" @click="reset">{{ mode === 'payday' ? $t('prePhase.resetPayday') : $t('prePhase.resetCleanUp') }}</button>
 			<template v-if="mode === 'payday'">
 				<template v-if="paydayFlow !== 'beer'">
-					<button v-if="hasBeerMS && canPayWithFood" class="actionsLineButton" @click="paydayFlow = 'beer'">Choose payment type</button>
-					<button v-else class="actionsLineButton" @click="savePayday">Save Payday Turn</button>
+					<button v-if="hasBeerMS && canPayWithFood" class="actionsLineButton" @click="paydayFlow = 'beer'">{{ $t('prePhase.choosePaymentType') }}</button>
+					<button v-else class="actionsLineButton" @click="savePayday">{{ $t('prePhase.savePaydayTurn') }}</button>
 				</template>
 				<template v-if="paydayFlow === 'beer'">
-					<button class="actionsLineButton" @click="savePaydayWithFood">Pay the rest in $$$ - Save Payday Turn</button>
+					<button class="actionsLineButton" @click="savePaydayWithFood">{{ $t('prePhase.payRestInMoney') }}</button>
 				</template>
 			</template>
 			<template v-if="mode === 'cleanup'">
-				<button class="actionsLineButton" @click="saveCleanup">Save Fridge Turn</button>
+				<button class="actionsLineButton" @click="saveCleanup">{{ $t('prePhase.saveFridgeTurn') }}</button>
 			</template>
 		</div>
 	</div>

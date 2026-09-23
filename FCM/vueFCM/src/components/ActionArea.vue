@@ -369,7 +369,7 @@ function skipModuleAndEndTurn() {
 
 <template>
 	<div v-if="store.viewSettings.showGameLoader" id="fLoadingBar">
-		Saving Game.... Please Wait....
+		{{ $t("actionArea.savingGame") }}
 		<br />
 		<img :src="view.getImage('loading-bar-black')" />
 	</div>
@@ -378,11 +378,10 @@ function skipModuleAndEndTurn() {
 		<!-- LOGGED OUT TEXT -->
 		<template v-if="personal.pov === -99">
 			<div id="loggedOutText">
-				Please
-				<a href="/register">REGISTER</a>
-				or
-				<a href="/login">LOGIN</a>
-				to play a game
+				<i18n-t keypath="actionArea.loggedOutPrompt" tag="span" scope="global">
+					<template #register><a href="/register">{{ $t("actionArea.register") }}</a></template>
+					<template #login><a href="/login">{{ $t("actionArea.login") }}</a></template>
+				</i18n-t>
 				<br />
 			</div>
 			<br />
@@ -390,119 +389,123 @@ function skipModuleAndEndTurn() {
 
 		<!-- RESIGN -->
 		<template v-if="store.context.action === rf.ACT_CONFIRM_RESIGN">
-			Are you sure you want to resign?
+			{{ $t("actionArea.resignConfirm") }}
 			<br />
-			Resigning will unbalance the game for the remaining players
+			{{ $t("actionArea.resignUnbalance") }}
 			<br />
-			Please carry on playing if that is at all possible
+			{{ $t("actionArea.resignCarryOn") }}
 			<br />
-			Even if you think you can't win, you can still aim for longest road / most walls / etc
+			{{ $t("actionArea.resignStillCompete") }}
 			<br />
 			<img class="resignImg" :src="view.getImage('resign')" />
 			<br />
-			<button class="actionsLineButton" @click="resetWholeTurn">Carry On Playing</button>
-			<button class="actionsLineButton" @click="Bot.actionResign">Confirm Resignation</button>
+			<button class="actionsLineButton" @click="resetWholeTurn">{{ $t("actionArea.carryOnPlaying") }}</button>
+			<button class="actionsLineButton" @click="Bot.actionResign">{{ $t("actionArea.confirmResignation") }}</button>
 		</template>
 
 		<div v-if="store.context.action !== rf.ACT_CONFIRM_RESIGN">
 			<template v-if="personal.kickoutRequired > 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER && store.gameflow.turnOrder[0] !== personal.pov">
 				<div v-if="personal.kickoutRequired == 1" id="kickoutDiv">
-					Player
-					<b>{{ currentPlayerObj.name }}</b>
-					has used all the standard kickout time.
+					<i18n-t keypath="actionArea.playerUsedAllKickoutTime" tag="div" scope="global">
+						<template #name><b>{{ currentPlayerObj.name }}</b></template>
+					</i18n-t>
 					<br />
 					<br />
-					Remaining Flex-Time:
+					{{ $t("actionArea.remainingFlexTime") }}
 					<span id="flexiKickoutTimerSpan">{{ view.getFlexiKickoutTImerText() }}</span>
 					<br />
 					<br />
-					For more information see
-					<b><a href="/help/" target="_blank">Help</a></b>
+					<i18n-t keypath="actionArea.forMoreInfoSeeHelp" tag="div" scope="global">
+						<template #help><b><a href="/help/" target="_blank">{{ $t("actionArea.help") }}</a></b></template>
+					</i18n-t>
 				</div>
 				<div v-else id="kickoutDiv">
 					<br />
 					<template v-if="canKickoutNow()">
 						<template v-if="store.context.action !== rf.ACT_CONFIRM_KICKOUT">
-							Player
-							<b>{{ currentPlayerObj.name }}</b>
-							has timed out
+							<i18n-t keypath="actionArea.playerTimedOut" tag="div" scope="global">
+								<template #name><b>{{ currentPlayerObj.name }}</b></template>
+							</i18n-t>
 							<br />
-							To kick out
-							<b>{{ currentPlayerObj.name }}</b>
-							press Confirm Kickout
+							<i18n-t keypath="actionArea.toKickoutPressConfirm" tag="div" scope="global">
+								<template #name><b>{{ currentPlayerObj.name }}</b></template>
+							</i18n-t>
 							<br />
-							All other players will be allowed to move again in this phase
+							{{ $t("actionArea.allPlayersCanMoveAgain") }}
 							<br />
 							<br />
-							Otherwise you can allow
-							<b>{{ currentPlayerObj.name }}</b>
-							more time - reload the page to initiate kickout again
+							<i18n-t keypath="actionArea.allowMoreTimeReload" tag="div" scope="global">
+								<template #name><b>{{ currentPlayerObj.name }}</b></template>
+							</i18n-t>
 							<br />
 
 							<br />
-							<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
+							<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("actionArea.notNowAllowMoreTime") }}</button></span>
 							<span v-if="store.gameflow.phase !== rf.PHASE_SETUP_RESTAURANT1 && store.gameflow.phase !== rf.PHASE_SETUP_RESTAURANT2">
-								<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ currentPlayerObj.name }} in the game - but end their current turn</button>
+								<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("actionArea.keepName", { name: currentPlayerObj.name }) }}</button>
 							</span>
-							<span><button class="actionsLineButton" id="confirmKickoutButton" @click="store.context.action = rf.ACT_CONFIRM_KICKOUT">Confirm Kickout</button></span>
+							<span><button class="actionsLineButton" id="confirmKickoutButton" @click="store.context.action = rf.ACT_CONFIRM_KICKOUT">{{ $t("actionArea.confirmKickout") }}</button></span>
 						</template>
 						<template v-if="store.context.action === rf.ACT_CONFIRM_KICKOUT">
-							This will permanently remove
-							<b>{{ currentPlayerObj.name }}</b>
-							from the game
+							<i18n-t keypath="actionArea.permanentlyRemove" tag="div" scope="global">
+								<template #name><b>{{ currentPlayerObj.name }}</b></template>
+							</i18n-t>
 							<br />
-							<b>It cannot be undone</b>
+							<b>{{ $t("actionArea.cannotBeUndone") }}</b>
 							<br />
 							<br />
-							Try checking the chat in case they have given a reason for any temporary absence
+							{{ $t("actionArea.checkChatAbsence") }}
 							<br />
-							Please consider giving them a short grace period, in case they are just delayed
+							{{ $t("actionArea.gracePeriodNote") }}
 
 							<br />
-							<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
+							<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("actionArea.notNowAllowMoreTime") }}</button></span>
 							<span>
-								<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout(timedOutPlayerIndex)">Permanently Kickout {{ currentPlayerObj.name }}</button>
+								<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout(timedOutPlayerIndex)">{{ $t("actionArea.permanentlyKickout", { name: currentPlayerObj.name }) }}</button>
 							</span>
 						</template>
 					</template>
 					<template v-else>
 						<br />
-						Player
-						<b>{{ currentPlayerObj.name }}</b>
-						has timed out
+						<i18n-t keypath="actionArea.playerTimedOut" tag="div" scope="global">
+							<template #name><b>{{ currentPlayerObj.name }}</b></template>
+						</i18n-t>
 						<br />
-						A vote from the other players is needed to kick out
-						<b>{{ currentPlayerObj.name }}</b>
+						<i18n-t keypath="actionArea.voteNeededKickout" tag="div" scope="global">
+							<template #name><b>{{ currentPlayerObj.name }}</b></template>
+						</i18n-t>
 						<br />
 						<br />
-						Votes: {{ kickoutVoteCount() }}/{{ store.kickoutVoteThreshold }} ({{ kickoutVoters() }})
+						{{ $t("actionArea.votesLine", { count: kickoutVoteCount(), threshold: store.kickoutVoteThreshold, voters: kickoutVoters() }) }}
 						<br />
 						<br />
 						<span v-if="!myKickoutVote()">
 							<template v-if="isLastVoteRequired()">
-								This will permanently remove
-								<b>{{ currentPlayerObj.name }}</b>
-								from the game
+								<i18n-t keypath="actionArea.permanentlyRemove" tag="div" scope="global">
+									<template #name><b>{{ currentPlayerObj.name }}</b></template>
+								</i18n-t>
 								<br />
-								<b>It cannot be undone</b>
+								<b>{{ $t("actionArea.cannotBeUndone") }}</b>
 								<br />
 								<br />
 							</template>
-							<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout(timedOutPlayerIndex)">Vote to Kickout {{ currentPlayerObj.name }}</button>
+							<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout(timedOutPlayerIndex)">{{ $t("actionArea.voteToKickout", { name: currentPlayerObj.name }) }}</button>
 						</span>
 						<span v-else>
-							You have voted to kick out
-							<b>{{ currentPlayerObj.name }}</b>
+							<i18n-t keypath="actionArea.youHaveVotedKickout" tag="div" scope="global">
+								<template #name><b>{{ currentPlayerObj.name }}</b></template>
+							</i18n-t>
 							<br />
-							If the other players do not also vote, you will be able to kick them out directly in
-							{{ soloKickoutCountdown }}
+							<i18n-t keypath="actionArea.kickDirectlyIn" tag="div" scope="global">
+								<template #countdown>{{ soloKickoutCountdown }}</template>
+							</i18n-t>
 							<br />
 						</span>
 						<span>
-							<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button>
+							<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("actionArea.notNowAllowMoreTime") }}</button>
 						</span>
 						<span v-if="store.gameflow.phase !== rf.PHASE_SETUP_RESTAURANT1 && store.gameflow.phase !== rf.PHASE_SETUP_RESTAURANT2">
-							<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ currentPlayerObj.name }} in the game - but end their current turn</button>
+							<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("actionArea.keepName", { name: currentPlayerObj.name }) }}</button>
 						</span>
 					</template>
 				</div>
@@ -525,15 +528,15 @@ function skipModuleAndEndTurn() {
 				<!-- ASSUME FULL-TO IS SORTED WITH WINNER AT INDEX 0 -->
 				<div id="gameEndDiv">
 					<h2>
-						{{ $t("The winner is:") }}
+						{{ $t("actionArea.theWinnerIs") }}
 						<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[store.gameflow.fullTurnOrder[0]].colour)">{{ store.players[store.gameflow.fullTurnOrder[0]].displayName }}</span>
 					</h2>
 					<template v-if="store.players[store.gameflow.fullTurnOrder[0]].name === personal.name">
-						<h1>{{ $t("CONGRATULATIONS!") }}</h1>
+						<h1>{{ $t("actionArea.congratulations") }}</h1>
 					</template>
 					<br />
-					{{ $t("Fancy a") }}
-					<a :href="'/createFCMpage/' + String(personal.gameID) + '/'">{{ $t("rematch") }}</a>
+					{{ $t("actionArea.fancyA") }}
+					<a :href="'/createFCMpage/' + String(personal.gameID) + '/'">{{ $t("actionArea.rematch") }}</a>
 					?
 					<br />
 					<br />
@@ -553,7 +556,7 @@ function skipModuleAndEndTurn() {
 								<div class="playerTurnOrderDiv emptyTurnOrderDiv">
 									{{ idx + 1 }}
 									<br />
-									Empty
+									{{ $t("playerDetails.empty") }}
 								</div>
 							</span>
 						</template>
@@ -596,7 +599,7 @@ function skipModuleAndEndTurn() {
 						<div class="moduleDraftSection">
 							<b>{{ $t("actionArea.draftedModules") }}</b>
 							<div class="moduleDraftRow moduleDraftRowCentered">
-								<template v-if="computedDraftedModules.length === 0">[None]</template>
+								<template v-if="computedDraftedModules.length === 0">[{{ $t("items.none") }}]</template>
 								<template v-for="modId in computedDraftedModules" :key="'drafted-' + modId">
 									<img class="startingOption" :style="{ border: '3px solid black' }" :src="view.getImage(MODULE_IMGS[modId][0])" :alt="MODULE_IMGS[modId][1]" />
 								</template>
@@ -624,8 +627,8 @@ function skipModuleAndEndTurn() {
 								<div class="moduleSelectedCol">
 									<img class="startingOption" :src="view.getImage(MODULE_IMGS[computedAvailableModules[store.context.selectedModuleIndex]][0])" :alt="MODULE_IMGS[computedAvailableModules[store.context.selectedModuleIndex]][1]" />
 									<div class="moduleSelectedInfo">
-										<b>{{ MODULE_IMGS[computedAvailableModules[store.context.selectedModuleIndex]][1] }}</b><br/>
-										<span>{{ MODULE_DESCRIPTIONS[computedAvailableModules[store.context.selectedModuleIndex]] }}</span>
+										<b>{{ $t("actionArea.moduleNames." + computedAvailableModules[store.context.selectedModuleIndex]) }}</b><br/>
+										<span>{{ MODULE_DESCRIPTIONS[computedAvailableModules[store.context.selectedModuleIndex]] !== undefined ? $t("actionArea.moduleDescs." + computedAvailableModules[store.context.selectedModuleIndex]) : "" }}</span>
 									</div>
 								</div>
 							</div>
@@ -644,7 +647,7 @@ function skipModuleAndEndTurn() {
 							<br />
 							{{ $t("welcome.contact") }}
 							<img :src="view.getImage('email')" width="400" height="30" />
-							. Thanks!
+							. {{ $t("actionArea.thanks") }}
 						</h2>
 
 						<div id="listDiv">
@@ -671,8 +674,8 @@ function skipModuleAndEndTurn() {
 
 						<AddItemBox :itemBeingAdded="rf.ITEM_BOX_RESTO" />
 
-						<button v-if="!personal.trainingGame" class="actionsLineButton" @click="localClickResign">Resign</button>
-						<button v-if="store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 && store.gameflow.turnOrder.length > 1" class="actionsLineButton" @click="localConfirmDelay">Delay Placing your Restaurant for One Round & End Turn</button>
+						<button v-if="!personal.trainingGame" class="actionsLineButton" @click="localClickResign">{{ $t("actionArea.resign") }}</button>
+						<button v-if="store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 && store.gameflow.turnOrder.length > 1" class="actionsLineButton" @click="localConfirmDelay">{{ $t("actionArea.delayRestaurantRound") }}</button>
 					</div>
 				</template>
 
@@ -682,9 +685,9 @@ function skipModuleAndEndTurn() {
 						<p v-if="store.gameflow.phase === rf.PHASE_SETUP_RESERVE">{{ $t("actionArea.chooseReserveCard") }}</p>
 						<p v-else>
 							<b>
-								To save time, you may choose your reserve card early
+								{{ $t("actionArea.reserveEarly") }}
 								<br />
-								You can always choose your reserve card after all restaurants have been placed
+								{{ $t("actionArea.reserveEarlyNote") }}
 							</b>
 						</p>
 						<p v-if="store.startingOptions.useMilestones && store.startingOptions.newMilestones">
@@ -701,8 +704,8 @@ function skipModuleAndEndTurn() {
 
 						<template v-if="store.context.selectedReserveCard !== rf.RES_CARD_NONE">
 							<br />
-							<button class="actionsLineButton" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
-							<button class="actionsLineButton" @click="localEndTurn">End Turn</button>
+							<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+							<button class="actionsLineButton" @click="localEndTurn">{{ $t("workingDay.endTurn") }}</button>
 						</template>
 					</div>
 				</template>
@@ -712,15 +715,15 @@ function skipModuleAndEndTurn() {
 					<template v-if="store.context.action === rf.ACT_CONFIRM_NO_MORE_EMPLOYEES">
 						<p>{{ $t("actionArea.confirmNoMoreEmployees") }}</p>
 
-						<button v-if="!personal.trainingGame" class="actionsLineButton" @click="localClickResign">Resign</button>
-						<button class="actionsLineButton" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
-						<button class="actionsLineButton" @click="controller.endPlayerTurn(true, false)">End Turn</button>
+						<button v-if="!personal.trainingGame" class="actionsLineButton" @click="localClickResign">{{ $t("actionArea.resign") }}</button>
+						<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+						<button class="actionsLineButton" @click="controller.endPlayerTurn(true, false)">{{ $t("workingDay.endTurn") }}</button>
 					</template>
 					<div v-else>
 						<p>{{ $t("actionArea.chooseEmployeesToWork") }}</p>
 						<!-- MINI BEACH -->
 						<div class="beachChoiceMini">
-							<div class="beachTitleMini">BEACH</div>
+							<div class="beachTitleMini">{{ $t("actionArea.beach") }}</div>
 							<div v-for="(emp, idx) in currentPlayerObj.beach" :key="idx" @click="plyr.addToStructureFromMiniBeach(emp, ceoEmployees.includes(rf.BLANK_EMPLOYEE_SPACE), idx)" class="beachMiniEmployeeDiv" :class="[{ selectable: rf.MANAGERS.includes(emp) && ceoEmployees.includes(rf.BLANK_EMPLOYEE_SPACE) > 0 }, { selectable: !rf.MANAGERS.includes(emp) && currentPlayerObj.employees.includes(rf.BLANK_EMPLOYEE_SPACE) }]">
 								<img :src="view.getImage(`emp_${emp}`)" class="cardImg" :alt="rf.employeeName(emp)" />
 							</div>
@@ -734,20 +737,20 @@ function skipModuleAndEndTurn() {
 						<!-- BIG BEACH OPTIONS -->
 						<template v-if="store.context.selectedEmployeeIndexForRestructuring >= 0">
 							<div class="mainBeachDiv">
-								<div class="mainBeachTitle">BEACH</div>
+								<div class="mainBeachTitle">{{ $t("actionArea.beach") }}</div>
 								<div v-for="(emp, idx) in filteredBeach" :key="idx" @click="plyr.setEmployeeInIndex(controller.currentPlayerIndex(), emp, store.context.selectedEmployeeIndexForRestructuring)" class="normalSlotDiv selectable">
 									<img :src="view.getImage(`emp_${emp}`)" class="cardImg" :alt="rf.employeeName(emp)" />
 								</div>
 								<br />
-								<button v-if="canReturnIndexToBeach(store.context.selectedEmployeeIndexForRestructuring)" @click="returnIndexToBeach(store.context.selectedEmployeeIndexForRestructuring)" class="actionsLineButton">Return to the beach</button>
-								<button class="actionsLineButton" @click="store.context.selectedEmployeeIndexForRestructuring = -1">Close</button>
+								<button v-if="canReturnIndexToBeach(store.context.selectedEmployeeIndexForRestructuring)" @click="returnIndexToBeach(store.context.selectedEmployeeIndexForRestructuring)" class="actionsLineButton">{{ $t("actionArea.returnToBeach") }}</button>
+								<button class="actionsLineButton" @click="store.context.selectedEmployeeIndexForRestructuring = -1">{{ $t("topMenuViews.close") }}</button>
 							</div>
 						</template>
 
 						<!-- CEO SLOTS -->
 						<template v-for="(emp, idx) in ceoEmployees" :key="idx">
 							<div v-if="emp === rf.BLANK_EMPLOYEE_SPACE" @click="store.context.selectedEmployeeIndexForRestructuring = idx" class="ceoSlotDiv selectable">
-								<div class="ceoSlotTextDiv">CEO SLOT</div>
+								<div class="ceoSlotTextDiv">{{ $t("actionArea.ceoSlot") }}</div>
 							</div>
 							<div v-else class="ceoSlotDiv" :class="{ selectable: canSelectCardInCEOslot(emp) }" @click="clickedIndxInCEOslots(idx)">
 								<img :src="view.getImage(`emp_${emp}`)" class="cardImg" :alt="rf.employeeName(emp)" />
@@ -763,10 +766,10 @@ function skipModuleAndEndTurn() {
 						</template>
 						<br />
 
-						<button v-if="!personal.trainingGame" class="actionsLineButton" @click="localClickResign">Resign</button>
-						<button class="actionsLineButton" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
-						<button class="actionsLineButton" @click="controller.autoFillEmployees()">Auto-fill Structure</button>
-						<button class="actionsLineButton" @click="localEndTurn">End Turn</button>
+						<button v-if="!personal.trainingGame" class="actionsLineButton" @click="localClickResign">{{ $t("actionArea.resign") }}</button>
+						<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+						<button class="actionsLineButton" @click="controller.autoFillEmployees()">{{ $t("actionArea.autoFillStructure") }}</button>
+						<button class="actionsLineButton" @click="localEndTurn">{{ $t("workingDay.endTurn") }}</button>
 					</div>
 				</template>
 
@@ -781,15 +784,15 @@ function skipModuleAndEndTurn() {
 				<!-- Pizza Bomb Phase -->
 				<template v-if="store.gameflow.phase === rf.PHASE_PIZZA_BOMB">
 					<div>
-						<p><b>Pizza Milestone</b></p>
+						<p><b>{{ $t("actionArea.pizzaMilestone") }}</b></p>
 						<template v-if="store.firstPizzas.length >= 3 && store.firstPizzas[2] === controller.currentPlayerIndex()">
-							<p v-if="store.highlights.indexesToHighlightYellow.length > 0">Choose a space on the tile of house #{{ store.firstPizzas[1] }}</p>
-							<p v-else>There is no space left for your pizza radio for house #{{ store.firstPizzas[1] }}</p>
-							<button v-if="store.highlights.indexesToHighlightYellow.length === 0" class="actionsLineButton" @click="controller.skipPizzaBombMarketer()">Never mind</button>
+							<p v-if="store.highlights.indexesToHighlightYellow.length > 0">{{ $t("actionArea.chooseSpaceForHouse", { house: store.firstPizzas[1] }) }}</p>
+							<p v-else>{{ $t("actionArea.noSpaceForPizzaRadio", { house: store.firstPizzas[1] }) }}</p>
+							<button v-if="store.highlights.indexesToHighlightYellow.length === 0" class="actionsLineButton" @click="controller.skipPizzaBombMarketer()">{{ $t("workingDay.neverMind") }}</button>
 						</template>
 						<template v-else>
-							<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
-							<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">End Turn</button>
+							<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+							<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("workingDay.endTurn") }}</button>
 						</template>
 					</div>
 				</template>
@@ -807,11 +810,11 @@ function skipModuleAndEndTurn() {
 							</div>
 						</div>
 						<p v-if="currentPlayerObj.ceoAction === rf.CEO_ACTION_HIRE_1">{{ $t("actionArea.ceoMustChoose") }}</p>
-						<p v-else-if="currentPlayerObj.ceoAction === rf.CEO_ACTION_PRICE_MINUS_3">Price -3</p>
-						<p v-else-if="currentPlayerObj.ceoAction === rf.CEO_ACTION_RECRUITING_MANAGER">2x: Hire 1 person or $5 less salary</p>
-						<p v-else-if="currentPlayerObj.ceoAction === rf.CEO_ACTION_COACH">2 training slots. May train the same person two steps</p>
+						<p v-else-if="currentPlayerObj.ceoAction === rf.CEO_ACTION_PRICE_MINUS_3">{{ $t("playerDetails.priceMinus3") }}</p>
+						<p v-else-if="currentPlayerObj.ceoAction === rf.CEO_ACTION_RECRUITING_MANAGER">{{ $t("actionArea.ceoLabelRecruiting") }}</p>
+						<p v-else-if="currentPlayerObj.ceoAction === rf.CEO_ACTION_COACH">{{ $t("employees.coachDesc") }}</p>
 						<div v-if="currentPlayerObj.ceoAction !== rf.CEO_ACTION_HIRE_1" class="endOfTurnButtons">
-							<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">End Turn</button>
+							<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("workingDay.endTurn") }}</button>
 						</div>
 					</div>
 				</template>
@@ -820,14 +823,14 @@ function skipModuleAndEndTurn() {
 				<template v-if="store.gameflow.phase === rf.PHASE_COFFE_SHOP_MS">
 					<div>
 						<p>
-							<b>The "First Coffee Sold" Milestone allows you to place a coffee shop with unlimited range</b>
+							<b>{{ $t("actionArea.coffeeMsUnlimitedRange") }}</b>
 							<br />
-							There can only be 1 coffee shop per tile, and it must be next to a road
+							{{ $t("workingDay.coffeeShopPlacementRules") }}
 						</p>
-						<p v-if="store.context.coffeeShopMSAction === 'remove'">No more Coffee Shops. Select a placed Coffee Shop to move it</p>
-						<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
-						<button class="actionsLineButton" @click="controller.skipCoffeeMS()">Skip Coffee Milestone</button>
-						<button v-if="store.context.coffeeShopMSAction === ''" class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">End Turn</button>
+						<p v-if="store.context.coffeeShopMSAction === 'remove'">{{ $t("workingDay.noMoreCoffeeShopsMove") }}</p>
+						<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+						<button class="actionsLineButton" @click="controller.skipCoffeeMS()">{{ $t("actionArea.skipCoffeeMilestone") }}</button>
+						<button v-if="store.context.coffeeShopMSAction === ''" class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("workingDay.endTurn") }}</button>
 					</div>
 				</template>
 
@@ -837,8 +840,8 @@ function skipModuleAndEndTurn() {
 					<div v-if="paydayFlow === 'beer'">
 						<template v-if="computedPaysLeft > 0">
 							<p>
-								{{ `You have to pay for ${computedNumPays} ${computedNumPays === 1 ? "employee" : "employees"}.` }}
-								{{ computedPaysLeft === 1 ? "Choose the item you want to use:" : `Choose the ${computedPaysLeft} items you want to use:` }}
+								{{ $t("prePhase.payForEmployees", computedNumPays) }}
+								{{ $t("actionArea.chooseItemsToUse", computedPaysLeft) }}
 							</p>
 
 							<div class="reminder fireLine">
@@ -848,29 +851,26 @@ function skipModuleAndEndTurn() {
 								</template>
 							</div>
 
-							<p>
-								You are currently paying
-								<b>${{ computedMoneyUsed }}</b>
-								and
-								<b>{{ paidItemsCount }}</b>
-								item{{ paidItemsCount === 1 ? "" : "s" }}
-							</p>
+							<i18n-t keypath="prePhase.currentlyPaying" tag="p" scope="global" :plural="paidItemsCount">
+								<template #money><b>${{ computedMoneyUsed }}</b></template>
+								<template #items><b>{{ paidItemsCount }}</b></template>
+							</i18n-t>
 
 							<div>
 								<img v-for="resource in computedPayResources" :key="resource" :src="view.getImage(`item_${resource}`)" class="payFoodToken selectable" @click="paySalaryWithResource(resource)" />
 							</div>
 
 							<div v-if="rules.canPayWithMoney(controller.currentPlayerIndex(), computedPaysLeft)">
-								<button class="actionsLineButton paydayResetButton" @click="resetWholeTurn()">Reset Whole Turn</button>
-								<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">Pay the rest in $$$</button>
+								<button class="actionsLineButton paydayResetButton" @click="resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+								<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("actionArea.payRestInMoney") }}</button>
 							</div>
 						</template>
 						<template v-else>
 							<div class="reminder fireLine">
 								<img v-for="(resource, idx) in store.context.preMoveData[0][1]" :key="idx" :src="view.getImage(`item_${resource}`)" class="payFoodToken paidToken" @click="undoPaySalaryWithResource(idx)" />
 							</div>
-							<button class="actionsLineButton paydayResetButton" @click="resetWholeTurn()">Reset Whole Turn</button>
-							<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">End Turn</button>
+							<button class="actionsLineButton paydayResetButton" @click="resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+							<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("workingDay.endTurn") }}</button>
 						</template>
 					</div>
 
@@ -885,22 +885,22 @@ function skipModuleAndEndTurn() {
 							</div>
 						</div>
 
-						<p v-if="computedCanPayWithFood">You need to pay: ${{ computedTotalSalary }} or {{ computedNumPays }} resource tokens (or a mix of both)</p>
-						<p v-else>You need to pay: ${{ computedTotalSalary }}</p>
+						<p v-if="computedCanPayWithFood">{{ $t("prePhase.needToPayWithFood", { currentSalary: computedTotalSalary, nbPays: computedNumPays }) }}</p>
+						<p v-else>{{ $t("prePhase.needToPay", { currentSalary: computedTotalSalary }) }}</p>
 
 						<template v-if="!computedCanAffordPayDay">
 							<p v-if="plyr.hasMilestone(controller.currentPlayerIndex(), rf.FIRST_TRAINER_USED)">
 								<span style="color: #f00">
-									You cannot afford to pay all of your employees! However, your
-									<i>First Trainer Used</i>
-									milestone allows you to keep everyone
+									<i18n-t keypath="prePhase.cantAffordTrainer" tag="span" scope="global">
+										<template #trainer><i>{{ $t("prePhase.firstTrainerUsed") }}</i></template>
+									</i18n-t>
 								</span>
 								<br />
-								If you wish, you
-								<b>may</b>
-								click on employees to fire them anyway
+								<i18n-t keypath="prePhase.fireAnyway" tag="span" scope="global">
+									<template #may><b>{{ $t("prePhase.may") }}</b></template>
+								</i18n-t>
 							</p>
-							<p v-else style="color: #f00">You cannot pay for all of your employees - You must fire employees until you can pay for the remainder</p>
+							<p v-else style="color: #f00">{{ $t("prePhase.cantPayEmployees") }}</p>
 						</template>
 
 						<!-- Just fired reminder -->
@@ -918,10 +918,10 @@ function skipModuleAndEndTurn() {
 						</div>
 
 						<br />
-						<button class="actionsLineButton paydayResetButton" @click="resetWholeTurn()">Reset Whole Turn</button>
-						<button v-if="!computedCanAffordPayDay && plyr.hasMilestone(controller.currentPlayerIndex(), rf.FIRST_TRAINER_USED)" class="actionsLineButton" @click="confirmTrainerKeepAll()">Ok, thank you very much</button>
-						<button v-else-if="computedCanAffordPayDay && plyr.hasMilestone(controller.currentPlayerIndex(), rf.FIRST_BEER_SOLD)" class="actionsLineButton" @click="chooseBeerPayment()">Choose payment type</button>
-						<button v-else-if="computedCanAffordPayDay" class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">End Turn</button>
+						<button class="actionsLineButton paydayResetButton" @click="resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+						<button v-if="!computedCanAffordPayDay && plyr.hasMilestone(controller.currentPlayerIndex(), rf.FIRST_TRAINER_USED)" class="actionsLineButton" @click="confirmTrainerKeepAll()">{{ $t("actionArea.okThankYou") }}</button>
+						<button v-else-if="computedCanAffordPayDay && plyr.hasMilestone(controller.currentPlayerIndex(), rf.FIRST_BEER_SOLD)" class="actionsLineButton" @click="chooseBeerPayment()">{{ $t("prePhase.choosePaymentType") }}</button>
+						<button v-else-if="computedCanAffordPayDay" class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("workingDay.endTurn") }}</button>
 					</div>
 
 					<!-- Nothing left to fire -->
@@ -931,9 +931,9 @@ function skipModuleAndEndTurn() {
 							<b>{{ $t("actionArea.youreFired") }}&nbsp;</b>
 							<img :src="view.getImage('fired')" class="firedImg" />
 						</div>
-						<p v-if="store.context.justFired.length > 0" style="color: #f00"><b>CAUTION: Do you really want to fire all your employees?</b></p>
-						<button class="actionsLineButton paydayResetButton" @click="resetWholeTurn()">Reset Whole Turn</button>
-						<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">End Turn</button>
+						<p v-if="store.context.justFired.length > 0" style="color: #f00"><b>{{ $t("actionArea.cautionFireAll") }}</b></p>
+						<button class="actionsLineButton paydayResetButton" @click="resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+						<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("workingDay.endTurn") }}</button>
 					</div>
 				</template>
 
@@ -942,30 +942,30 @@ function skipModuleAndEndTurn() {
 					<div>
 						<!-- No fridge: everything is thrown away -->
 						<div v-if="!cleanupHasFridge">
-							<p>You have no fridge - all items will be thrown away</p>
-							<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">End Turn</button>
+							<p>{{ $t("actionArea.noFridgeAllThrown") }}</p>
+							<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("workingDay.endTurn") }}</button>
 						</div>
 
 						<!-- Kimchi collision: choose to store kimchi or the rest -->
 						<div v-else-if="cleanupKimchiCollision">
-							<p>You can store either Kimchi or other types of food/drink in a fridge</p>
-							<p>Your items:</p>
+							<p>{{ $t("prePhase.fridgeEitherKimchi") }}</p>
+							<p>{{ $t("prePhase.yourItems") }}</p>
 							<div class="fridgeItems">
 								<img v-for="(resource, idx) in cleanupResources" :key="idx" :src="view.getImage(`item_${resource}`)" class="payFoodToken" :alt="resource" />
 							</div>
-							<button class="actionsLineButton choice-button" @click="controller.chooseFridgeType('kimchi')">Store Kimchi</button>
-							<button class="actionsLineButton choice-button" @click="controller.chooseFridgeType('rest')">Store other items</button>
+							<button class="actionsLineButton choice-button" @click="controller.chooseFridgeType('kimchi')">{{ $t("prePhase.storeKimchi") }}</button>
+							<button class="actionsLineButton choice-button" @click="controller.chooseFridgeType('rest')">{{ $t("prePhase.storeOtherItems") }}</button>
 						</div>
 
 						<!-- Normal fridge: click items to bin them, keep up to 10 -->
 						<div v-else-if="cleanupResources.length > 0 || cleanupBinned.length > 0">
-							<p v-if="cleanupResources.length > 10">You may keep up to 10 items. Choose the items you want to throw away</p>
-							<p v-else>You may keep all remaining items, or click on items to throw them away:</p>
+							<p v-if="cleanupResources.length > 10">{{ $t("actionArea.keepUpTo10") }}</p>
+							<p v-else>{{ $t("actionArea.keepRemainingOrClick") }}</p>
 
 							<!-- Binned items shown next to the bin, above the clickable line -->
 							<div v-if="cleanupBinned.length > 0" class="fridgeBinnedLine">
 								<img :src="view.getImage(rf.MILESTONES_STR[rf.FIRST_THROW_AWAY].img)" class="fridgeBinIcon" :alt="'bin'" />
-								<img v-for="(resource, idx) in cleanupBinned" :key="idx" :src="view.getImage(`item_${resource}`)" class="fridgeBinned fridgeSelectable" :alt="resource" :title="'Click to keep'" @click="controller.unbinResource(resource)" />
+								<img v-for="(resource, idx) in cleanupBinned" :key="idx" :src="view.getImage(`item_${resource}`)" class="fridgeBinned fridgeSelectable" :alt="resource" :title="$t('actionArea.clickToKeep')" @click="controller.unbinResource(resource)" />
 							</div>
 
 							<!-- Remaining items (click to bin) -->
@@ -974,42 +974,42 @@ function skipModuleAndEndTurn() {
 							</div>
 
 							<div class="fridgeButtons">
-								<button class="actionsLineButton" @click="resetWholeTurn()">Reset Whole Turn</button>
-								<button v-if="cleanupResources.length <= 10" class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">End Turn</button>
+								<button class="actionsLineButton" @click="resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+								<button v-if="cleanupResources.length <= 10" class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("workingDay.endTurn") }}</button>
 							</div>
 						</div>
 
 						<!-- No items to manage -->
 						<div v-else>
-							<p>No items to manage</p>
-							<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">End Turn</button>
+							<p>{{ $t("actionArea.noItemsToManage") }}</p>
+							<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("workingDay.endTurn") }}</button>
 						</div>
 					</div>
 				</template>
 
 				<!-- CONFIRM END TURN -->
 				<template v-if="store.context.action === rf.ACT_CONFORM_END_TURN">
-					<button class="actionsLineButton" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
-					<button class="actionsLineButton" @click="localEndTurn">End Turn</button>
+					<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+					<button class="actionsLineButton" @click="localEndTurn">{{ $t("workingDay.endTurn") }}</button>
 				</template>
 
 				<!-- COFFEE HISTORY INFO (toggled by the coffee "More Information" button) -->
 				<div v-if="store.viewSettings.showCoffeeHistoryInfo" id="historyCoffeeInfodiv">
-					<b>What are the highlighted restaurants / coffee shops?</b>
+					<b>{{ $t("actionArea.coffeeHelpHeading1") }}</b>
 					<br />
-					Restaurants / coffee shops that are highlighted indicate where coffee was sold along the route taken by this house.
-					<br />
-					<br />
-					<b>What are the highlighted road squares?</b>
-					<br />
-					If there is only one valid coffee route from the house to the restaurant, it will be shown. If there are multiple valid routes, the road squares common to all valid coffee routes will be shown.
+					{{ $t("actionArea.coffeeHelpBody1") }}
 					<br />
 					<br />
-					<b>I'm still confused?</b>
+					<b>{{ $t("actionArea.coffeeHelpHeading2") }}</b>
 					<br />
-					Don't worry; coffee can be quite complicated. Please read more help
-					<a href="/FCM/coffeeHelp/" target="_blank">here</a>
-					.
+					{{ $t("actionArea.coffeeHelpBody2") }}
+					<br />
+					<br />
+					<b>{{ $t("actionArea.coffeeHelpConfused") }}</b>
+					<br />
+					<i18n-t keypath="actionArea.coffeeHelpReadMore" tag="span" scope="global">
+						<template #here><a href="/FCM/coffeeHelp/" target="_blank">{{ $t("topMenuViews.hereLower") }}</a></template>
+					</i18n-t>
 				</div>
 			</template>
 		</div>

@@ -12,6 +12,7 @@ import { usePersonalStore } from "../../stores/FCMpersonal.js"
 const personal = usePersonalStore()
 
 import { computed, watch } from "vue"
+import i18n from "../../i18n"
 
 const emit = defineEmits(["startPrePhase"])
 
@@ -96,12 +97,12 @@ const hasCleanupPreset = computed(() => {
 const currentSalary = computed(() => personal.pov >= 0 ? rules.salary(personal.pov) : 0)
 
 const keepAllButtonText = computed(() => {
-	if (!playerObj.value) return "Keep All"
-	if (hasBeerMS.value && !hasFridge.value) return "Pay salary with items then money"
-	if (currentSalary.value === 0) return "Keep All (No Salary to pay)"
-	if (playerObj.value.money >= currentSalary.value) return "Keep All (Enough Money)"
-	if (hasTrainerMS.value && playerObj.value.money < currentSalary.value) return "Keep All (First Trainer Used MS)"
-	return "Keep All (If you earn Enough Money)"
+	if (!playerObj.value) return i18n.global.t("expert.keepAll")
+	if (hasBeerMS.value && !hasFridge.value) return i18n.global.t("expert.keepAllItemsThenMoney")
+	if (currentSalary.value === 0) return i18n.global.t("expert.keepAllNoSalary")
+	if (playerObj.value.money >= currentSalary.value) return i18n.global.t("expert.keepAllEnoughMoney")
+	if (hasTrainerMS.value && playerObj.value.money < currentSalary.value) return i18n.global.t("expert.keepAllTrainerMs")
+	return i18n.global.t("expert.keepAllIfEarnEnough")
 })
 
 const showKeepAllButton = computed(() => {
@@ -128,9 +129,9 @@ const showRedoButton = computed(() => {
 	return phase === rf.PHASE_CLEAN_UP && !store.startingOptions.strictPaydayFridge
 })
 const redoButtonText = computed(() => {
-	if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) return "Redo Restructuring"
-	if (store.gameflow.phase === rf.PHASE_PAYDAY) return "Redo Payday"
-	return "Redo Cleanup"
+	if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) return i18n.global.t("expert.redoRestructuring")
+	if (store.gameflow.phase === rf.PHASE_PAYDAY) return i18n.global.t("expert.redoPayday")
+	return i18n.global.t("expert.redoCleanup")
 })
 const showAnyOptions = computed(() => showRedoButton.value || (!personal.trainingGame && !isBot.value && (showEodOptions.value || showOOBOptions.value || showPostMovePanel.value)))
 
@@ -191,7 +192,7 @@ function keepAllCleanup() {
 
 <template>
 	<div v-if="showAnyOptions" class="expertPanel">
-		<b>Expert Options</b>
+		<b>{{ $t("expert.title") }}</b>
 
 		<template v-if="showRedoButton">
 			<div class="expertPanelSection">
@@ -204,32 +205,32 @@ function keepAllCleanup() {
 		<template v-if="showPostMovePanel">
 			<div v-if="store.gameflow.phase < rf.PHASE_PAYDAY" class="expertPanelSection">
 				<p>
-					Payday:
+					{{ $t("expert.payday") }}
 					<template v-if="hasPaydayPreset">
 						<span class="preMoveDataSpan">
-							<template v-if="activePreset[0][0][0] === -1">No Salary - Skip Payday</template>
-							<template v-else-if="activePreset[0][0][0] === -2">Enough money - Pay Everyone</template>
-							<template v-else-if="activePreset[0][0][0] === -3">Pay Everyone if Enough Money</template>
-							<template v-else-if="activePreset[0][0][0] === -4">Keep everyone - Pay with items then with $$$</template>
-							<template v-else-if="activePreset[0][0][0] === -5">Keep everyone - Trainer MS</template>
-							<template v-else-if="activePreset[0][0].length === 0 || activePreset[0][0][0] === -8">Keep Everyone</template>
+							<template v-if="activePreset[0][0][0] === -1">{{ $t("expert.noSalarySkipPayday") }}</template>
+							<template v-else-if="activePreset[0][0][0] === -2">{{ $t("expert.enoughMoneyPayEveryone") }}</template>
+							<template v-else-if="activePreset[0][0][0] === -3">{{ $t("expert.payEveryoneIfEnoughMoney") }}</template>
+							<template v-else-if="activePreset[0][0][0] === -4">{{ $t("expert.keepEveryonePayWithItems") }}</template>
+							<template v-else-if="activePreset[0][0][0] === -5">{{ $t("expert.keepEveryoneTrainerMs") }}</template>
+							<template v-else-if="activePreset[0][0].length === 0 || activePreset[0][0][0] === -8">{{ $t("expert.keepEveryone") }}</template>
 							<template v-else>
-								Fire:
+								{{ $t("expert.fire") }}
 								<img v-for="(emp, i) in activePreset[0][0]" :key="'fired-'+i"
 									class="preFiredEmployee" :src="view.getImage('emp_' + emp)" :alt="rf.employeeName(emp)" />
 							</template>
 							<template v-if="activePreset[0][1] && activePreset[0][1].length > 0">
-								Pay with:
+								{{ $t("expert.payWith") }}
 								<img v-for="(food, i) in activePreset[0][1]" :key="'pay-'+i"
 									class="preTurnSummaryFoodImg" :src="view.getImage('item_' + food)" :alt="'item_' + food" />
 							</template>
 						</span>
-						<button class="actionsLineButton" @click="cancelPaydayMove">Cancel Move</button>
+						<button class="actionsLineButton" @click="cancelPaydayMove">{{ $t("expert.cancelMove") }}</button>
 					</template>
 					<template v-else>
-						<span class="preMoveDataSpan">No Move Set</span>
+						<span class="preMoveDataSpan">{{ $t("expert.noMoveSet") }}</span>
 					</template>
-					<button class="actionsLineButton" @click="emit('startPrePhase', 'payday')">Pre-set Payday</button>
+					<button class="actionsLineButton" @click="emit('startPrePhase', 'payday')">{{ $t("expert.preSetPayday") }}</button>
 					<template v-if="showKeepAllButton">
 						<button class="actionsLineButton" @click="setPaydayFlag">{{ keepAllButtonText }}</button>
 					</template>
@@ -238,27 +239,27 @@ function keepAllCleanup() {
 			</div>
 			<div class="expertPanelSection">
 				<p>
-					Clean Up:
-					<template v-if="!hasFridge">No fridge - all items will be thrown away</template>
-					<template v-else-if="!hasNonCoffeeResources">No items to store</template>
+					{{ $t("expert.cleanUp") }}
+					<template v-if="!hasFridge">{{ $t("expert.noFridge") }}</template>
+					<template v-else-if="!hasNonCoffeeResources">{{ $t("expert.noItemsToStore") }}</template>
 					<template v-else>
 						<template v-if="hasCleanupPreset">
 							<span class="preMoveDataSpan">
-								<template v-if="activePreset[1][0] === -1">Keep all items if possible</template>
+								<template v-if="activePreset[1][0] === -1">{{ $t("expert.keepAllItemsIfPossible") }}</template>
 								<template v-else-if="activePreset[1][0] === -2">
-									Keep items in the following priority order:
+									{{ $t("expert.keepPriorityOrder") }}
 									<img v-for="(food, i) in activePreset[1].slice(1)" :key="'clean-'+i"
 										class="preTurnSummaryFoodImg" :src="view.getImage('item_' + food)" :alt="'item_' + food" />
 								</template>
-								<template v-else>No Move Set</template>
+								<template v-else>{{ $t("expert.noMoveSet") }}</template>
 							</span>
-							<button class="actionsLineButton" @click="cancelCleanupMove">Cancel Move</button>
+							<button class="actionsLineButton" @click="cancelCleanupMove">{{ $t("expert.cancelMove") }}</button>
 						</template>
 						<template v-else>
-							<span class="preMoveDataSpan">No Move Set</span>
+							<span class="preMoveDataSpan">{{ $t("expert.noMoveSet") }}</span>
 						</template>
-						<button class="actionsLineButton" @click="emit('startPrePhase', 'cleanup')">Pre-set Clean Up</button>
-						<button class="actionsLineButton" @click="keepAllCleanup">Keep All (If you have 10 or fewer items)</button>
+						<button class="actionsLineButton" @click="emit('startPrePhase', 'cleanup')">{{ $t("expert.preSetCleanUp") }}</button>
+						<button class="actionsLineButton" @click="keepAllCleanup">{{ $t("expert.keepAllIf10OrFewer") }}</button>
 					</template>
 				</p>
 			</div>
@@ -267,66 +268,66 @@ function keepAllCleanup() {
 		<!-- === PRE-MOVE: OOB Turn Order Preference === -->
 		<template v-if="showOOBOptions">
 			<br />
-			Indicate your preference in turn order:
+			{{ $t("expert.oobPrompt") }}
 			<div class="radioRow">
 				<label class="expertPanelLabelInline">
 					<input type="radio" :value="1" :checked="playerObj.OOBpreference === 1" @change="oobRadioChange(1)" />
-					Earliest possible
+					{{ $t("expert.earliestPossible") }}
 				</label>
 				<label class="expertPanelLabelInline">
 					<input type="radio" :value="0" :checked="playerObj.OOBpreference === 0" @change="oobRadioChange(0)" />
-					Choose normally
+					{{ $t("expert.chooseNormally") }}
 				</label>
 				<label class="expertPanelLabelInline">
 					<input type="radio" :value="2" :checked="playerObj.OOBpreference === 2" @change="oobRadioChange(2)" />
-					Latest possible
+					{{ $t("expert.latestPossible") }}
 				</label>
 			</div>
-			<button v-if="showOOBSubmit" class="actionsLineButton" @click="submitOOB">Save Preference</button>
+			<button v-if="showOOBSubmit" class="actionsLineButton" @click="submitOOB">{{ $t("expert.savePreference") }}</button>
 		</template>
 
 		<!-- === PRE-MOVE: Working Day EOD Salary Section === -->
 		<div v-if="showSalarySection" class="expertPanelSection">
-			<p>You do not have enough money currently to pay your salary. Do you wish to autopay everyone if you have enough after the dinnertime phase?</p>
+			<p>{{ $t("expert.salaryNote") }}</p>
 			<label class="expertPanelLabel">
 				<input type="radio" :value="-3" v-model="store.context.EODradioSelections[0]" @change="eodRadioChange" />
-				Pay all salary if possible
+				{{ $t("expert.payAllSalaryIfPossible") }}
 			</label>
 			<label class="expertPanelLabel">
 				<input type="radio" :value="0" v-model="store.context.EODradioSelections[0]" @change="eodRadioChange" />
-				Choose normally
+				{{ $t("expert.chooseNormally") }}
 			</label>
-			<p v-if="hasTrainerMS">Note: If you select "Pay all salary if possible" and still cannot pay, your Trainer milestone will be used and you will skip payday.</p>
+			<p v-if="hasTrainerMS">{{ $t("expert.trainerNote") }}</p>
 		</div>
 
 		<!-- === PRE-MOVE: Working Day EOD Food Pay Section === -->
 		<div v-if="showFoodPaySection" class="expertPanelSection">
-			<p>You have the Beer milestone. Do you wish to pay salary with food items first, then money?</p>
+			<p>{{ $t("expert.beerMilestoneNote") }}</p>
 			<label class="expertPanelLabel">
 				<input type="radio" :value="-4" v-model="store.context.EODradioSelections[0]" @change="eodRadioChange" />
-				Pay salary with as many items as possible and then money
+				{{ $t("expert.paySalaryItemsThenMoney") }}
 			</label>
 			<label class="expertPanelLabel">
 				<input type="radio" :value="0" v-model="store.context.EODradioSelections[0]" @change="eodRadioChange" />
-				Choose normally
+				{{ $t("expert.chooseNormally") }}
 			</label>
 		</div>
 
 		<!-- === PRE-MOVE: Working Day EOD Cleanup Section === -->
 		<div v-if="showCleanupSection" class="expertPanelSection">
-			<p>You have a fridge. Do you wish to keep all items if you have 10 or fewer?</p>
+			<p>{{ $t("expert.fridgeKeepAllQuestion") }}</p>
 			<label class="expertPanelLabel">
 				<input type="radio" :value="-1" v-model="store.context.EODradioSelections[1]" @change="eodRadioChange" />
-				Keep all items if less than 10
+				{{ $t("expert.keepAllIfLessThan10") }}
 			</label>
 			<label class="expertPanelLabel">
 				<input type="radio" :value="0" v-model="store.context.EODradioSelections[1]" @change="eodRadioChange" />
-				Choose normally
+				{{ $t("expert.chooseNormally") }}
 			</label>
 		</div>
 
 		<p v-if="showEodOptions" class="expertPanelNote">
-			You will have the option to change / play full payday / fridge phases after you end your turn
+			{{ $t("expert.eodNote") }}
 		</p>
 	</div>
 </template>

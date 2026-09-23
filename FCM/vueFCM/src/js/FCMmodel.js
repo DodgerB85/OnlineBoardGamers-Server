@@ -12,6 +12,7 @@ import * as view from "./FCMview"
 
 import { useModelStore } from "../stores/FCMstore.js"
 import { usePersonalStore } from "../stores/FCMpersonal"
+import i18n from "../i18n"
 
 export async function initGame() {
 	const store = useModelStore()
@@ -48,7 +49,7 @@ export async function initGame() {
 		// Create the <h1> element
 		var heading = document.createElement("h1")
 		// Set the text content of the <h1> element
-		heading.textContent = "The game has not yet started"
+			heading.textContent = i18n.global.t("FCM_IO.gameNotStarted")
 		// Get a reference to the body element
 		var body = document.body
 		// Append the <h1> element to the body
@@ -243,7 +244,7 @@ export async function initGame() {
 		if (store.gameflow.phase >= rf.PHASE_WORKING_DAY && window.initData.moveData !== "") {
 			let decompressedData = funcs.decompressData(window.initData.moveData)
 			if (decompressedData[0] !== window.initData.name) {
-				alert("NAME MATCH ERROR IMPORTING MOVE >= WD")
+				alert(i18n.global.t("alerts.nameMatchError"))
 			} else {
 				store.context.preMoveData = decompressedData[3]
 				// Restore autoFridge from preMoveData cleanup skip flag
@@ -254,7 +255,7 @@ export async function initGame() {
 		} else if (store.gameflow.phase === rf.PHASE_RESTRUCTURING && window.initData.moveData !== "") {
 			let decompressedData = funcs.decompressData(window.initData.moveData)
 			if (decompressedData[0] !== window.initData.name) {
-				alert("NAME MATCH ERROR IMPORTING MOVE >= WD")
+				alert(i18n.global.t("alerts.nameMatchError"))
 			} else {
 				store.players[personal.pov].beach = [...decompressedData[3][0]]
 				store.players[personal.pov].employees = [...decompressedData[3][1]]
@@ -310,7 +311,7 @@ export function setInternalStartingOptions(startingOptionsArray) {
 		if (opts[i] === rf.SO_NO_CEO_MILESTONE) store.startingOptions.noCeoMilestone = true
 		if (opts[i] === rf.SO_ALLOW_SURRENDER) store.startingOptions.allowSurrender = true
 		if (opts[i] === rf.SO_NO_RADIO_MILESTONE) store.startingOptions.noRadioMilestone = true
-		if (String(opts[i]).length > 2 && String(opts[i])[0] === "7") alert("Unknown starting option")
+		if (String(opts[i]).length > 2 && String(opts[i])[0] === "7") alert(i18n.global.t("alerts.unknownStartingOption"))
 
 		if (opts[i] === rf.SO_HARD_CHOICES) store.startingOptions.hardChoices = true
 		if (opts[i] === rf.SO_FRY_CHEFS) store.startingOptions.fryChefs = true
@@ -786,6 +787,30 @@ export function clearForNewTurn() {
 	store.context.justOpened.length = 0
 }
 
+// Door squares for one player's open restaurants.
+// Drive-in → all 4 rotations; otherwise just the restaurant's current rotation.
+export function giveRestaurantDoorIndices(playerIndex, { openOnly = true } = {}) {
+	const store = useModelStore()
+	const playerObj = store.players[playerIndex]
+	if (!playerObj) return []
+
+	const hasDriveIn = plyr.doesPlayerHaveDriveIn(playerIndex)
+	const res = []
+
+	for (const resto of playerObj.restaurants) {
+		if (openOnly && !resto.open) continue
+
+		const rotationStart = hasDriveIn ? 0 : resto.rotation
+		const rotationEnd = hasDriveIn ? 4 : resto.rotation + 1
+
+		for (let rotation = rotationStart; rotation < rotationEnd; rotation++) {
+			res.push(resto.index + rules.getOffsetForRotation(rotation))
+		}
+	}
+
+	return res
+}
+
 // This is literally the square OF the entrace / coffee shop
 export function giveAllPlayerRestaurantEntrances(withCoffeeShops) {
 	const store = useModelStore()
@@ -793,40 +818,14 @@ export function giveAllPlayerRestaurantEntrances(withCoffeeShops) {
 
 	for (let i = 0; i < store.players.length; i++) {
 		const player = store.players[i]
-		// 1. Process Restaurants
-		for (const resto of player.restaurants) {
-			if (resto.open) {
-				// If they have a drive-in, check all 4 rotations;
-				// otherwise, just the restaurant's current rotation.
-				const isDriveIn = plyr.doesPlayerHaveDriveIn(i)
-				const minRota = isDriveIn ? 0 : resto.rotation
-				const maxRota = isDriveIn ? 4 : resto.rotation + 1
 
-				for (let rota = minRota; rota < maxRota; rota++) {
-					let offset = 0
-					// Optimized offset calculation
-					if (rota === 0) offset = 1
-					else if (rota === 1) offset = rf.ssW + 1
-					else if (rota === 2) offset = rf.ssW
-					// Case 3 (rotation 3) offset is 0, so no 'else' needed
-
-					res.push({
-						playerIndex: i,
-						colour: player.colour,
-						index: resto.index + offset,
-					})
-				}
-			}
+		for (const index of giveRestaurantDoorIndices(i)) {
+			res.push({ playerIndex: i, colour: player.colour, index })
 		}
 
-		// 2. Process Coffee Shops
 		if (withCoffeeShops && store.startingOptions.coffee && player.coffeeShops.length > 0) {
-			for (const idx of player.coffeeShops) {
-				res.push({
-					playerIndex: i,
-					colour: player.colour,
-					index: idx,
-				})
+			for (const index of player.coffeeShops) {
+				res.push({ playerIndex: i, colour: player.colour, index })
 			}
 		}
 	}
@@ -841,36 +840,15 @@ export function giveCurrentPlayerRestaurantEntrances(withCS) {
 	const playerObj = controller.currentPlayerObj()
 	if (!playerObj) return res
 
-	// Optimization: Check once per function call instead of inside the resto loop
-	const hasDriveIn = plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())
-	const playerColour = playerObj.colour
+	const colour = playerObj.colour
 
-	// 1. Process Restaurants
-	for (const resto of playerObj.restaurants) {
-		if (resto.open) {
-			// Determine rotation range
-			const minRota = hasDriveIn ? 0 : resto.rotation
-			const maxRota = hasDriveIn ? 4 : resto.rotation + 1
-
-			for (let rota = minRota; rota < maxRota; rota++) {
-				let offset = 0
-				// Optimized offset logic
-				if (rota === 0) offset = 1
-				else if (rota === 1) offset = rf.ssW + 1
-				else if (rota === 2) offset = rf.ssW
-
-				res.push({
-					colour: playerColour,
-					index: resto.index + offset,
-				})
-			}
-		}
+	for (const index of giveRestaurantDoorIndices(controller.currentPlayerIndex())) {
+		res.push({ colour, index })
 	}
 
-	// 2. Process Coffee Shops
 	if (withCS && store.startingOptions.coffee && playerObj.coffeeShops.length > 0) {
-		for (const idx of playerObj.coffeeShops) {
-			res.push({ colour: playerColour, index: idx })
+		for (const index of playerObj.coffeeShops) {
+			res.push({ colour, index })
 		}
 	}
 
@@ -878,29 +856,7 @@ export function giveCurrentPlayerRestaurantEntrances(withCS) {
 }
 
 export function getSinglePlayerRestaurantEntrances(playerIndex) {
-	const store = useModelStore()
-	const playerObj = store.players[playerIndex]
-
-	const res = []
-	const hasDriveIn = plyr.doesPlayerHaveDriveIn(playerIndex)
-
-	// Pre-calculating offsets for O(1) lookup inside the loop
-	const offsets = [1, rf.ssW + 1, rf.ssW, 0]
-
-	for (const resto of playerObj.restaurants) {
-		if (resto.open) {
-			// Determine rotation range based on drive-in status
-			const minRota = hasDriveIn ? 0 : resto.rotation
-			const maxRota = hasDriveIn ? 4 : resto.rotation + 1
-
-			for (let rota = minRota; rota < maxRota; rota++) {
-				// Direct array access is faster than switch/if-else
-				res.push(resto.index + offsets[rota])
-			}
-		}
-	}
-
-	return res
+	return giveRestaurantDoorIndices(playerIndex)
 }
 
 export function getAvailableCoffee(returnArray) {

@@ -10,6 +10,7 @@ import * as funcs from "../js/FCMfuncs"
 import * as view from "../js/FCMview"
 import * as rf from "../js/FCMreference"
 import * as rules from "../js/FCMrules.js"
+import i18n from "../i18n"
 
 import { ref, computed } from "vue"
 
@@ -190,7 +191,7 @@ async function submitBug() {
 	store.gameMessages.bugSuccessText = ""
 
 	if (bugReportText.value.length === 0) {
-		store.gameMessages.bugErrorText = "Please enter a bug report"
+		store.gameMessages.bugErrorText = i18n.global.t("topMenuViews.bugErrorRequired")
 		submittingBug.value = false
 		return
 	}
@@ -206,11 +207,12 @@ function getRewindPanelLeft() {
 // Shared vote tally: votes cast and comma-joined voter names (stats-exclude / delete-game votes)
 function getVoteCounts(data, returnPlayers = false) {
 	let votes = 0
-	let players = "None"
+	const noneText = i18n.global.t("topMenuViews.none")
+	let players = noneText
 	for (const player in data) {
 		if (data[player] === true) {
 			votes += 1
-			players = players === "None" ? String(player) : players + ", " + player
+			players = players === noneText ? String(player) : players + ", " + player
 		}
 	}
 	return returnPlayers ? players : votes
@@ -399,7 +401,7 @@ const sortedCampaigns = computed(() => {
 	<!-- BUG REPORT -->
 	<transition name="slideBug">
 		<div id="bugReport" v-if="store.viewSettings.showBug">
-			<h1>Bug Report</h1>
+			<h1>{{ $t('topMenuViews.bugReportTitle') }}</h1>
 			<template v-if="store.gameMessages.bugErrorText !== ''">
 				<h2 id="bugErrorText" v-html="store.gameMessages.bugErrorText"></h2>
 			</template>
@@ -407,48 +409,49 @@ const sortedCampaigns = computed(() => {
 				<h2 id="bugSuccessText" v-html="store.gameMessages.bugSuccessText"></h2>
 			</template>
 			<p>
-				Please submit a bug report if you encounter any issues, giving as much detail as possbile.
+				{{ $t('topMenuViews.bugIntro') }}
 				<br />
-				The game data will be submitted along with your report.
+				{{ $t('topMenuViews.bugGameData') }}
 				<br />
-				You can also report it on the OBG discord. Click
-				<a href="https://discord.gg/hCU7Fr77yV" class="linkOther" target="_blank">Here</a>
-				to join
+				<i18n-t keypath="topMenuViews.discordInvite" tag="span" scope="global">
+					<template #link><a href="https://discord.gg/hCU7Fr77yV" class="linkOther" target="_blank">{{ $t('topMenuViews.here') }}</a></template>
+				</i18n-t>
 			</p>
 
-			<p><b>Do you think there are too many 1x Luxury Managers? Please note that COFFEE, KIMCHI, SUSHI, and NOODLES add one extra</b></p>
-			<p><b>Please note: Cart / Truck drivers can drive around a 'roundabout' on the same tile as many times as they like. Drinks will only be collected once</b></p>
-			<p><b>Please note: In New MS you need to actually USE an employee to get their Milestone</b></p>
+			<p><b>{{ $t('topMenuViews.luxuryManagersNote') }}</b></p>
+			<p><b>{{ $t('topMenuViews.roundaboutNote') }}</b></p>
+			<p><b>{{ $t('topMenuViews.newMSNote') }}</b></p>
 
 			<div v-if="store.startingOptions.coffee" id="coffeeBugDiv">
-				<b>Is your bug to do with coffee?</b>
+				<b>{{ $t('topMenuViews.coffeeBugQuestion') }}</b>
 				<br />
 				<br />
-				Please first read the
-				<a href="/FCM/coffeeHelp/" target="_blank">coffee help page</a>
-				.
+				<i18n-t keypath="topMenuViews.coffeeHelpFirst" tag="span" scope="global">
+					<template #link><a href="/FCM/coffeeHelp/" target="_blank">{{ $t('topMenuViews.coffeeHelpPage') }}</a></template>
+				</i18n-t>
 				<br />
-				Please also make sure you fully understand the coffee rules and example in the official rules, found
-				<a href="https://www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf" target="_blank">here</a>
+				<i18n-t keypath="topMenuViews.coffeeRulesFound" tag="span" scope="global">
+					<template #link><a href="https://www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf" target="_blank">{{ $t('topMenuViews.hereLower') }}</a></template>
+				</i18n-t>
 				<br />
 				<br />
-				If you still think there is a bug, please check carefully:
+				{{ $t('topMenuViews.coffeeCheckIntro') }}
 				<ul>
-					<li>Which players had coffee and how much</li>
-					<li>If you think a route has not been considered, could it sell the same amount of coffee as the route chosen?</li>
-					<li>Remmeber that any part of the coffee route that could have multiple paths each selling the same amount of coffee (even if it's to the same player) will be skipped</li>
+					<li>{{ $t('topMenuViews.coffeeListPlayers') }}</li>
+					<li>{{ $t('topMenuViews.coffeeListRoute') }}</li>
+					<li>{{ $t('topMenuViews.coffeeListSkip') }}</li>
 				</ul>
-				If you still think there is a problem, please submit a bug report
+				{{ $t('topMenuViews.coffeeStillProblem') }}
 				<br />
 			</div>
 
 			<div><textarea cols="150" rows="10" name="bugContent" id="bugContent" v-model="bugReportText"></textarea></div>
 			<div>
 				<button class="actionsLineButton" id="submitBug" @click="submitBug" :disabled="submittingBug">
-					<span v-if="submittingBug">Submitting Bug Report...</span>
-					<span v-else>Submit</span>
+					<span v-if="submittingBug">{{ $t('topMenuViews.submittingBugReport') }}</span>
+					<span v-else>{{ $t('topMenuViews.submit') }}</span>
 				</button>
-				<button class="actionsLineButton" id="resetBug" @click="toggleBug">Cancel</button>
+				<button class="actionsLineButton" id="resetBug" @click="toggleBug">{{ $t('topMenuViews.cancel') }}</button>
 			</div>
 		</div>
 	</transition>
@@ -456,13 +459,13 @@ const sortedCampaigns = computed(() => {
 	<!-- NOTES -->
 	<transition name="slideNotes">
 		<div id="notesBox" v-if="store.viewSettings.showNotes">
-			<h2>Personal game notes</h2>
-			<p>Only you can see these notes</p>
+			<h2>{{ $t('topMenuViews.notesTitle') }}</h2>
+			<p>{{ $t('topMenuViews.notesPrivate') }}</p>
 			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes" maxlength="5000"></textarea></div>
 			<div>
-				<button class="actionsLineButton" @click="IO.saveNotes">Save</button>
-				<button class="actionsLineButton" @click="clearNotes">Clear</button>
-				<button class="actionsLineButton" @click="toggleNotes">Close</button>
+				<button class="actionsLineButton" @click="IO.saveNotes">{{ $t('topMenuViews.save') }}</button>
+				<button class="actionsLineButton" @click="clearNotes">{{ $t('topMenuViews.clear') }}</button>
+				<button class="actionsLineButton" @click="toggleNotes">{{ $t('topMenuViews.close') }}</button>
 			</div>
 		</div>
 	</transition>
@@ -471,9 +474,9 @@ const sortedCampaigns = computed(() => {
 	<transition name="fade">
 		<div id="wholeChat" v-if="store.viewSettings.showChat">
 			<div id="chatBox">
-				<h2>Send a message</h2>
+				<h2>{{ $t('topMenuViews.chatTitle') }}</h2>
 				<div><textarea rows="6" name="chatMessage" id="chatMessage" v-model="chatMessage"></textarea></div>
-				<div><button class="actionsLineButton" @click="sendChatMessage()">Send</button></div>
+				<div><button class="actionsLineButton" @click="sendChatMessage()">{{ $t('topMenuViews.send') }}</button></div>
 			</div>
 			<div id="messageList">
 				<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
@@ -499,78 +502,78 @@ const sortedCampaigns = computed(() => {
 			}">
 			<!-- NON-HOST PANEL (panelType == 1) -->
 			<template v-if="store.viewSettings.rewindPanelType === 1">
-				<b><u>Trial Feature</u></b>
+				<b><u>{{ $t('topMenuViews.trialFeature') }}</u></b>
 				<br />
-				Anyone may rewind the game at any point EXCEPT during turn order, and the first person working 9-5.
+				{{ $t('topMenuViews.rewindAnyone') }}
 				<br />
-				This is because the most important hidden information is during restructuring.
+				{{ $t('topMenuViews.rewindWhy') }}
 				<br />
 				<br />
 				<span class="topMenuItem" @click="loadRewind()">
 					<img :src="view.getImage('icon-rewind')" />
-					<span>Rewind</span>
+					<span>{{ $t('topMenuViews.rewind') }}</span>
 				</span>
 				<hr />
-				You can give permission for the host to rewind the game back to the start of the restructuring phase.
-				All players must give permission before the host is able to rewind the game.
+				{{ $t('topMenuViews.permissionIntro1') }}
+				{{ $t('topMenuViews.permissionIntro2') }}
 				<br />
 				<br />
 				<label>
 					<input type="radio" :value="1" v-model="consentLevel" :disabled="personal.currentRewindConsent === 2" />
-					Permission up to last Restructuring
+					{{ $t('topMenuViews.permissionUpToLast') }}
 				</label>
 				<br />
 				<label>
 					<input type="radio" :value="2" v-model="consentLevel" :disabled="personal.currentRewindConsent === 2" />
-					Permanent Permission
+					{{ $t('topMenuViews.permanentPermission') }}
 				</label>
 				<br />
-				<button v-if="personal.currentRewindConsent !== 2" class="actionsLineButton" @click="submitRewindConsent()">Give Permission</button>
+				<button v-if="personal.currentRewindConsent !== 2" class="actionsLineButton" @click="submitRewindConsent()">{{ $t('topMenuViews.givePermission') }}</button>
 			</template>
 
 			<!-- HOST PANEL (panelType == 2) -->
 			<template v-else-if="store.viewSettings.rewindPanelType === 2">
-				<b><u>Trial Feature</u></b>
+				<b><u>{{ $t('topMenuViews.trialFeature') }}</u></b>
 				<br />
-				Anyone may rewind the game at any point EXCEPT during turn order, and the first person working 9-5.
+				{{ $t('topMenuViews.rewindAnyone') }}
 				<br />
-				This is because the most important hidden information is during restructuring.
+				{{ $t('topMenuViews.rewindWhy') }}
 				<br />
 				<br />
 				<span class="topMenuItem" @click="loadRewind()">
 					<img :src="view.getImage('icon-rewind')" />
-					<span>Rewind</span>
+					<span>{{ $t('topMenuViews.rewind') }}</span>
 				</span>
 				<hr />
-				As the game host, you must wait for all players to give permission.
-				They can allow you to rewind once, or as much as you like.
-				Try asking in chat for permission if you wish to rewind.
-				Current Permissions:
+				{{ $t('topMenuViews.hostIntro1') }}
+				{{ $t('topMenuViews.hostIntro2') }}
+				{{ $t('topMenuViews.hostIntro3') }}
+				{{ $t('topMenuViews.currentPermissions') }}
 				<br />
 				<br />
 				<div v-html="store.viewSettings.rewindHostHTML"></div>
 				<br />
 				<span v-if="store.viewSettings.rewindHostPossible" class="topMenuItem" @click="loadHostRewind()">
 					<img :src="view.getImage('icon-rewind')" />
-					<span>Rewind</span>
+					<span>{{ $t('topMenuViews.rewind') }}</span>
 				</span>
-				<span v-else>Please wait for all players to give permission</span>
+				<span v-else>{{ $t('topMenuViews.waitForPermission') }}</span>
 			</template>
 
 			<hr />
 			<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
-				If all players agree, this game can be excluded from the stats (won't count towards wins/losses)
+				{{ $t('topMenuViews.statsExcludeIntro') }}
 				<br />
- Votes: {{ getVoteCounts(store.statsExcludeVotesData, false) }} - Players: {{ getVoteCounts(store.statsExcludeVotesData, true) }}
+				{{ $t('topMenuViews.votesPlayers', { votes: getVoteCounts(store.statsExcludeVotesData, false), players: getVoteCounts(store.statsExcludeVotesData, true) }) }}
 				<br />
-				<button v-if="!personal.votedToExclude" class="actionsLineButton" @click="IO.castVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">Vote to Exclude Game from Stats</button>
+				<button v-if="!personal.votedToExclude" class="actionsLineButton" @click="IO.castVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">{{ $t('topMenuViews.voteExclude') }}</button>
 			</div>
 			<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
-				If all players agree, this game will be deleted
+				{{ $t('topMenuViews.deleteGameIntro') }}
 				<br />
- Votes: {{ getVoteCounts(store.deleteVotesData, false) }} - Players: {{ getVoteCounts(store.deleteVotesData, true) }}
+				{{ $t('topMenuViews.votesPlayers', { votes: getVoteCounts(store.deleteVotesData, false), players: getVoteCounts(store.deleteVotesData, true) }) }}
 				<br />
-				<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="IO.castVote(rf.DELETE_VOTE_TOPIC)">Vote to Delete Game</button>
+				<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="IO.castVote(rf.DELETE_VOTE_TOPIC)">{{ $t('topMenuViews.voteDelete') }}</button>
 			</div>
 		</div>
 	</transition>
@@ -578,28 +581,28 @@ const sortedCampaigns = computed(() => {
 	<!-- RESERVE -->
 	<transition name="slideRes">
 		<div id="reserveDiv" v-if="store.viewSettings.showReserve">
-			<h2 id="reserveTitle">Reserve</h2>
+			<h2 id="reserveTitle">{{ $t('topMenuViews.reserveTitle') }}</h2>
 			<!-- SELECTED MODULES -->
 			<template v-if="store.startingOptionsHTML !== ''">
-				<h3><b>Selected Modules</b></h3>
+				<h3><b>{{ $t('topMenuViews.selectedModules') }}</b></h3>
 				<div class="selectedModules" v-html="store.startingOptionsHTML"></div>
 			</template>
 
 			<!-- HARD CHOICES ICONS -->
 			<div v-if="store.startingOptions.hardChoices && store.gameflow.turn < 4" class="hardChoicesIcons">
-				<img :src="view.getImage('hardChoice2_icon')" class="hc-icon" title="The Red Border MS are removed after turn 2" />
-				<img :src="view.getImage('hardChoice3_icon')" class="hc-icon" title="First to Hire 3 MS removed after turn 3" />
+				<img :src="view.getImage('hardChoice2_icon')" class="hc-icon" :title="$t('topMenuViews.hcTooltipTurn2')" />
+				<img :src="view.getImage('hardChoice3_icon')" class="hc-icon" :title="$t('topMenuViews.hcTooltipTurn3')" />
 			</div>
 			<div v-else-if="store.startingOptions.newMilestones && store.gameflow.turn < 3" class="hardChoicesIcons">
-				<img :src="view.getImage('hardChoice2_icon')" class="hc-icon" title="The Red Border MS are removed after turn 2" />
+				<img :src="view.getImage('hardChoice2_icon')" class="hc-icon" :title="$t('topMenuViews.hcTooltipTurn2')" />
 			</div>
 
 			<!-- MILESTONES -->
 			<div class="milestonesHolderDiv" v-if="store.startingOptions.useMilestones">
 				<p>
-					Current Milestones:
+					{{ $t('topMenuViews.currentMilestones') }}
 					<button class="actionsLineButton" @click="showExpandedMS = !showExpandedMS">
-						{{ showExpandedMS ? "Collapse Milestones &#9650;" : "Expand Milestones &#9660;" }}
+						{{ showExpandedMS ? $t('topMenuViews.collapseMilestones') : $t('topMenuViews.expandMilestones') }}
 					</button>
 				</p>
 				<template v-if="store.availableMilestones.length > 0">
@@ -627,8 +630,8 @@ const sortedCampaigns = computed(() => {
 					</InfoPopup>
 				</template>
 				</template>
-				<p v-else>None Available</p>
-				<p>Taken Milestones:</p>
+				<p v-else>{{ $t('topMenuViews.noneAvailable') }}</p>
+				<p>{{ $t('topMenuViews.takenMilestones') }}</p>
 				<template v-if="showExpandedMS">
 					<span class="fullMilestoneSpan" :class="[rf.MILESTONES_STR[ms[0]].type, milestoneHCclass(ms[0])]" v-for="(ms, idx) in takenMilestones" :key="idx">
 						<div class="milestoneTitle">{{ rf.MILESTONES_STR[ms[0]].title.toUpperCase() }}</div>
@@ -663,9 +666,9 @@ const sortedCampaigns = computed(() => {
 					width: showExpandedEmployees ? '800px' : 'auto',
 				}">
 				<p>
-					Employees:
+					{{ $t('topMenuViews.employees') }}
 					<button class="actionsLineButton" @click="showExpandedEmployees = !showExpandedEmployees">
-						{{ showExpandedEmployees ? "Collapse Employees &#9650;" : "Expand Employees &#9660;" }}
+						{{ showExpandedEmployees ? $t('topMenuViews.collapseEmployees') : $t('topMenuViews.expandEmployees') }}
 					</button>
 				</p>
 				<template v-if="showExpandedEmployees">
@@ -724,7 +727,7 @@ const sortedCampaigns = computed(() => {
 
 			<!-- MARKETING CAMPAIGNS -->
 			<div class="reserve_campaigns">
-				<p><b>Available marketing campaigns</b></p>
+				<p><b>{{ $t('topMenuViews.availableMarketing') }}</b></p>
 				<template v-if="sortedCampaigns.length > 0">
 					<div
 						v-for="(campaignNum, idx) in sortedCampaigns"
@@ -737,22 +740,22 @@ const sortedCampaigns = computed(() => {
 						<img :src="view.getImage(`campaign_${campaignNum}${campaignNum === 4 ? '-icon' : ''}`)" class="campaignImg" />
 					</div>
 				</template>
-				<template v-else>No Marketing Campaigns</template>
+				<template v-else>{{ $t('topMenuViews.noMarketing') }}</template>
 			</div>
 
 			<!-- FREEWAYS -->
 			<div v-if="store.startingOptions.ruralMarketers" class="reserve_campaigns">
-				<p><b>Available freeways</b></p>
+				<p><b>{{ $t('topMenuViews.availableFreeways') }}</b></p>
 				<span class="parkRoadReserveHolder">
 					<img class="centerAlign" :src="view.getImage('freeway')" width="125" />
 					<span><b> x {{ 3 - store.freeways.length }}</b></span>
-					<span v-if="3 - store.freeways.length !== 0 && !store.availableMilestones.includes(rf.FIRST_RURAL_MARKETEER_USED)"> (but the Milestone is no longer available)</span>
+					<span v-if="3 - store.freeways.length !== 0 && !store.availableMilestones.includes(rf.FIRST_RURAL_MARKETEER_USED)"> {{ $t('topMenuViews.milestoneNoLongerAvailable') }}</span>
 				</span>
 			</div>
 
 			<!-- HOUSES & GARDENS -->
 			<div v-if="rules.availableHouses().length > 0 || rules.availableGardens() > 0" class="reserveSection">
-				<p><b>Available houses & gardens:</b></p>
+				<p><b>{{ $t('topMenuViews.availableHousesGardens') }}</b></p>
 				<div class="housesContainer">
 					<span v-for="houseNum in rules.availableHouses()" :key="'house-' + houseNum" class="houseHolder">
 						<span class="reserveHouseSpan">#{{ houseNum }}</span>
@@ -766,7 +769,7 @@ const sortedCampaigns = computed(() => {
 
 			<!-- PARKS -->
 			<div v-if="rules.availableParks(store).length > 0" class="reserveSection">
-				<p><b>Available Parks:</b></p>
+				<p><b>{{ $t('topMenuViews.availableParks') }}</b></p>
 				<div class="parksContainer">
 					<span v-for="(parkType, index) in getParkCounts()" :key="'park-' + index" class="parkRoadReserveHolder">
 						<!-- TODO: Display park image based on type -->
@@ -777,7 +780,7 @@ const sortedCampaigns = computed(() => {
 
 			<!-- ROADS -->
 			<div v-if="rules.availableNewRoads(store).length > 0" class="reserveSection">
-				<p><b>Available Roads:</b></p>
+				<p><b>{{ $t('topMenuViews.availableRoads') }}</b></p>
 				<div class="roadsContainer">
 					<span v-for="(roadType, index) in getRoadCounts()" :key="'road-' + index" class="parkRoadReserveHolder">
 						<!-- TODO: Display road image based on type -->
@@ -788,7 +791,7 @@ const sortedCampaigns = computed(() => {
 
 			<!-- LOBBYIST TILES -->
 			<div v-if="store.startingOptions && store.startingOptions.lobbyists" class="reserveSection">
-				<p><b>Available Tiles for Lobbyist Milestone:</b></p>
+				<p><b>{{ $t('topMenuViews.availableLobbyistTiles') }}</b></p>
 				<div id="allTileChoiceDivRes">
 					<!-- TODO: Display available lobbyist tiles -->
 				</div>
@@ -796,14 +799,14 @@ const sortedCampaigns = computed(() => {
 
 			<!-- FLEXI-TIMES -->
 			<div id="timesDiv">
-				Flexi-Times:
+				{{ $t('topMenuViews.flexiTimes') }}
 				<span v-for="(player, idx) in store.players" :key="idx">{{ player.displayName }}: {{ getFlexiTimeString(player.name) }}&nbsp;&nbsp;&nbsp;</span>
 				&nbsp;&nbsp;&nbsp;
 			</div>
 
 			<!-- CLOSE -->
 			<div class="reserveCloseButtonDiv">
-				<button class="actionsLineButton" @click="store.viewSettings.showReserve = false">Close</button>
+				<button class="actionsLineButton" @click="store.viewSettings.showReserve = false">{{ $t('topMenuViews.close') }}</button>
 			</div>
 		</div>
 	</transition>

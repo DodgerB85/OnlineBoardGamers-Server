@@ -80,12 +80,12 @@ export function deleteMoveData() {
 			if (result.result === 2) {
 				//store.gameMessages.successText = "<b>Save Successful</b> "
 			} else {
-				store.gameMessages.errorText = "An Error Occured During Save (SST-DMD)"
+				store.gameMessages.errorText = i18n.global.t("FCM_IO.saveErrorSST")
 			}
 			store.viewSettings.showGameLoader = false
 		})
 		.catch((error) => {
-			store.gameMessages.errorText = "ERROR OCCURRED: " + error
+			store.gameMessages.errorText = i18n.global.t("FCM_IO.errorOccurred", { error: String(error) })
 			store.viewSettings.showGameLoader = false
 		})
 }
@@ -126,7 +126,7 @@ export async function unlockTurn(type) {
 		let result = await response.json()
 
 		if (result.syncError) {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = i18n.global.t("FCM_IO.olderVersionRefresh")
 			store.viewSettings.showGameLoader = false
 			return
 		}
@@ -136,7 +136,7 @@ export async function unlockTurn(type) {
 		window.location.reload()
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.errorText = "ERROR OCCURRED: " + error
+		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorOccurred", { error: String(error) })
 		store.viewSettings.showGameLoader = false
 	}
 }
@@ -174,7 +174,7 @@ export async function saveAndUpdateNotifictions(playerIndexesToNotify, referring
 
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.errorText = "Error saving the game - Send all this to admin (eg on discord/email)"
+		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
 		const payloadInfo = `referringPhase=${referringPhase}, LU=${personal.latestUpdate}`
 		const gameInfo = `Game ${personal.gameID} - User ${personal.name || "unknown"} - ${payloadInfo}`
 		const errorName = error && error.name ? error.name : "Error"
@@ -415,7 +415,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 	//let phase = store.gameflow.phase
 	let phase = store.gameflow.phase
 
-	if (!phase && phase !== 0) alert(`Please contact admin: missing phase : error code: ${phase}`)
+	if (!phase && phase !== 0) alert(i18n.global.t("alerts.missingPhase", { phase }))
 
 	let nextPlayer = [controller.currentPlayerObj().name]
 	// If you are saving FROM non simul, and next phase IS simul, construct the whole list
@@ -682,7 +682,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 	} catch (error) {
 		console.error("Error fetching data:", error)
 		personal.haltPlay = false
-		store.gameMessages.errorText = "Error saving the game - Send all this to admin (eg on discord/email)"
+		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
 		const payloadInfo = `turn=${store.gameflow.turn}, phase=${store.gameflow.phase}, LU=${postData.latestUpdate}, nextPlayer=${postData.nextPlayer?.[0] || "none"}`
 		const gameInfo = `Game ${personal.gameID} - User ${personal.name || "unknown"} - ${payloadInfo}`
 		const errorName = error && error.name ? error.name : "Error"
@@ -730,7 +730,7 @@ export async function savePreTurn(preMoveDataRaw) {
 		//controller.addAfterWorkingDayExpertPanel()
 	} catch (error) {
 		console.error("Error saving pre-move:", error)
-		store.gameMessages.errorText = "Error saving the pre-move"
+		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingPreMove")
 	}
 }
 
@@ -765,15 +765,15 @@ export async function saveOOBpreference() {
 			return false
 		}
 		if (result.OOBsaved) {
-			store.gameMessages.successText = "Preference saved"
+			store.gameMessages.successText = i18n.global.t("FCM_IO.preferenceSaved")
 			return true
 		}
-		store.gameMessages.errorText = "Error saving turn order preference"
+		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingTurnOrderPreference")
 		return false
 	} catch (error) {
 		console.error("Error saving OOB preference:", error)
 		store.viewSettings.showGameLoader = false
-		store.gameMessages.errorText = "Error saving turn order preference"
+		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingTurnOrderPreference")
 		return false
 	}
 }
@@ -910,7 +910,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false) {
 	} catch (error) {
 		console.error("Error fetching data:", error)
 		personal.haltPlay = false
-		store.gameMessages.errorText = "Error saving the game - Send all this to admin (eg on discord/email)"
+		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
 		const payloadInfo = `LU=${personal.latestUpdate}`
 		const gameInfo = `Game ${personal.gameID} - User ${personal.name || "unknown"} - ${payloadInfo}`
 		const errorName = error && error.name ? error.name : "Error"
@@ -973,7 +973,7 @@ export async function kickout(kickedPlayerIndex) {
 	} catch (error) {
 		console.error("Error kicking:", error)
 		store.viewSettings.showGameLoader = false
-		store.gameMessages.errorText = "Error Kicking"
+		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorKicking")
 		return null
 	}
 }
@@ -1027,12 +1027,12 @@ export async function loadUnlockedRewind() {
 	const store = useModelStore()
 	if (store.gameflow.phase === rf.PHASE_TURN_ORDER) {
 		store.viewSettings.performingRewind = false
-		store.gameMessages.errorText = "You cannot use this rewind during Turn Order"
+		store.gameMessages.errorText = i18n.global.t("FCM_IO.rewindNotAllowedTurnOrder")
 		return
 	}
 	if (store.gameflow.phase === rf.PHASE_WORKING_DAY && store.gameflow.fullTurnOrder.indexOf(controller.currentPlayerIndex()) === 0) {
 		store.viewSettings.performingRewind = false
-		store.gameMessages.errorText = "You cannot use this rewind as the first player in the working day"
+		store.gameMessages.errorText = i18n.global.t("FCM_IO.rewindNotAllowedWorkingDayFirst")
 		return
 	}
 	loadRewind(controller, true)
@@ -1245,17 +1245,17 @@ export async function submitBug(bugContent) {
 		}
 		const data = await response.json()
 		if (data.bugEntrySuccess) {
-			store.gameMessages.successText = "Your bug report has been submitted"
+			store.gameMessages.successText = i18n.global.t("FCM_IO.bugReportSubmitted")
 			store.viewSettings.showBug = false
 			return true
 		} else {
-			store.gameMessages.bugErrorText = "Sorry, there was a problem.<br/>Please email the webmaster directly or report on the Discord"
+			store.gameMessages.bugErrorText = i18n.global.t("FCM_IO.bugErrorHtml")
 			store.viewSettings.showGameLoader = false
 			return false
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.bugErrorText = "Sorry, there was a problem.<br/>Please email the webmaster directly or report on the Discord"
+		store.gameMessages.bugErrorText = i18n.global.t("FCM_IO.bugErrorHtml")
 		store.viewSettings.showGameLoader = false
 		return false
 	}
@@ -1288,7 +1288,7 @@ export async function sendChatMessage(newEntry) {
 		.then((response) => response.json())
 		.then((result) => {
 			if (!result.chatData) {
-				store.gameMessages.errorText = "Sorry, there was a problem. Please email the webmaster directly"
+				store.gameMessages.errorText = i18n.global.t("FCM_IO.problemEmailWebmaster")
 				return
 			}
 			store.chatData = funcs.decompressChatData(result.chatData)
@@ -1363,13 +1363,13 @@ export async function saveNotes() {
 			throw new Error("Network response was not ok")
 		}
 		if (!data.notePosted) {
-			store.gameMessages.errorText = "Sorry, there was a problem. Please email the webmaster directly"
+			store.gameMessages.errorText = i18n.global.t("FCM_IO.problemEmailWebmaster")
 			return
 		}
 		store.viewSettings.showGameLoader = false
 	} catch (error) {
 		console.error("Error saving Notes:", error)
-		store.gameMessages.errorText = "Error saving Notes"
+		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingNotes")
 	}
 }
 
@@ -1394,7 +1394,7 @@ export async function saveAssistance(assistance) {
 export async function submitRewindConsent(consentLevel) {
 	const store = useModelStore()
 	if (consentLevel === 0) {
-		store.gameMessages.errorText = "Please select a permission option first"
+		store.gameMessages.errorText = i18n.global.t("FCM_IO.tickPermissionFirst")
 		return
 	}
 	castVote(rf.REWIND_CONSENT_VOTE_TOPIC, consentLevel)
@@ -1463,7 +1463,7 @@ export async function castVote(topic, choice) {
 			headers: { "X-CSRFToken": csrftoken },
 		})
 		if (!response.ok) {
-			store.gameMessages.errorText = "Error saving vote"
+			store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingVote")
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
@@ -1476,7 +1476,7 @@ export async function castVote(topic, choice) {
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.errorText = "Error saving vote"
+		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingVote")
 		return false
 	}
 }
@@ -1497,11 +1497,11 @@ export function processSimulMoveData(data) {
 			}
 			// Check if there's any dodgy data
 			if (!decompressedData[i][1].includes(rf.PHASE_SETUP_RESERVE)) {
-				store.gameMessages.errorText = `Contact Admin - Bug report - phase mismatch in SETUP_RESERVE`
+				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminPhaseMismatchSetupReserve")
 				sendDiscordWebhook(`JS ERROR: phase mismatch in SETUP_RESERVE - gameID: ${personal.gameID} player: ${store.players[i].name} phase: ${store.gameflow.phase} decompressedData: ${JSON.stringify(decompressedData)}`)
 			}
 			if (!decompressedData[i][0] === store.players[i].name && store.players[i].name !== rf.TOURNAMENT_ADMIN_NAME) {
-				store.gameMessages.errorText = `Contact Admin - Bug report - player name mismatch in SETUP_RESERVE`
+				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminNameMismatchSetupReserve")
 				sendDiscordWebhook(`JS ERROR: player name mismatch in SETUP_RESERVE - gameID: ${personal.gameID} player: ${store.players[i].name} decompressedData: ${JSON.stringify(decompressedData)}`)
 			}
 
@@ -1520,7 +1520,7 @@ export function processSimulMoveData(data) {
 	} else if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) {
 		let histEntries = []
 		if (decompressedData.length !== store.players.length) {
-			store.gameMessages.errorText = `Contact Admin - Bug report - RESTRUCTURE - data-len: ${decompressedData.length} players-len: ${store.players.length} data: ${JSON.stringify(data)}`
+			store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminRestructureDataLen", { dataLen: decompressedData.length, playersLen: store.players.length, data: JSON.stringify(data) })
 			sendDiscordWebhook(`JS ERROR: RESTRUCTURE - data-len: ${decompressedData.length} players-len: ${store.players.length} data: ${JSON.stringify(data)}`)
 		}
 		for (let i = 0; i < decompressedData.length; i++) {
@@ -1552,15 +1552,15 @@ export function processSimulMoveData(data) {
 				}
 			}
 			if (!_phasesArray.includes(rf.PHASE_RESTRUCTURING)) {
-				store.gameMessages.errorText = `Contact Admin - Bug report - phase mismatch in PHASE_RESTRUCTURING`
+				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminPhaseMismatchRestructuring")
 				sendDiscordWebhook(`JS ERROR: phase mismatch in PHASE_RESTRUCTURING - gameID: ${personal.gameID} player: ${store.players[i].name} phase: ${store.gameflow.phase} decompressedData: ${JSON.stringify(decompressedData)}`)
 			}
 			if (_name !== store.players[i].name && _name !== rf.TOURNAMENT_ADMIN_NAME) {
-				store.gameMessages.errorText = `Contact Admin - Bug report - player name mismatch in PHASE_RESTRUCTURING`
+				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminNameMismatchRestructuring")
 				sendDiscordWebhook(`JS ERROR: player name mismatch in PHASE_RESTRUCTURING - gameID: ${personal.gameID} player: ${store.players[i].name} decompressedData: ${JSON.stringify(decompressedData)}`)
 			}
 			if (content.length !== 3) {
-				store.gameMessages.errorText = `Contact Admin - Bug report - data-error in PHASE_RESTRUCTURING`
+				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminDataErrorRestructuring")
 				sendDiscordWebhook(`JS ERROR: data-error in PHASE_RESTRUCTURING - gameID: ${personal.gameID} player: ${store.players[i].name} decompressedData: ${JSON.stringify(decompressedData)}`)
 			}
 
@@ -1702,7 +1702,7 @@ export function processSimulMoveData(data) {
 				}
 				// Safety: ensure at most 10 resources remain
 				if (playerObj.resources.length > 10) {
-					store.gameMessages.errorText = "Too many items. Please bug report & contact admin. Code: IOPSMD"
+					store.gameMessages.errorText = i18n.global.t("FCM_IO.tooManyItems")
 					sendDiscordWebhook(`489: JS ERROR: Too many items - gameID: ${personal.gameID} player: ${playerObj.name} resources: ${JSON.stringify(playerObj.resources)}`)
 					playerObj.resources.splice(10)
 				}
@@ -1856,7 +1856,7 @@ export function checkFridgeDataValid(playerIndex, fridgeData) {
 	// If you have kimchi plus others, it must be a manual move
 	if (playerObj.resources.includes(rf.KIMCHI) && playerObj.resources.some((x) => x !== rf.KIMCHI)) return 9
 	if (fridgeData.length === 1 && fridgeData[0] === -8 && playerObj.resources.length > 10) {
-		store.gameMessages.errorText = `PLEASE SUBMIT BUG REPORT: CODE 10R -- name: ${playerObj.name}`
+		store.gameMessages.errorText = i18n.global.t("FCM_IO.bugReport10R", { name: playerObj.name })
 		return 9
 	} else if (fridgeData.length === 1 && fridgeData[0] === -8 && playerObj.resources.length <= 10) return 1
 
@@ -1872,6 +1872,6 @@ export function checkFridgeDataValid(playerIndex, fridgeData) {
 	// otherwise, the move is what you are binning
 	if (playerObj.resources.length - fridgeData.length <= 10) return 1
 
-	store.gameMessages.errorText = `SUBMIT BUG REPORT: CODE FOOD-B -- name: ${playerObj.name}`
+	store.gameMessages.errorText = i18n.global.t("FCM_IO.bugReportFoodB", { name: playerObj.name })
 	return 9
 }

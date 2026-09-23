@@ -1,5 +1,6 @@
 import { useModelStore } from "../stores/FCMstore.js"
 import { usePersonalStore } from "../stores/FCMpersonal.js"
+import i18n from "../i18n"
 
 import * as IO from "./FCM_IO"
 //import * as funcs from "../js/FCMfuncs"
@@ -130,7 +131,7 @@ async function FCMwebSocketOnInfo(IncomingInfo) {
 						let decodedGameName = tempElement.textContent
 
 						Notification.requestPermission(function () {
-							const title = "It is your turn in Food Chain Magnate"
+							const title = i18n.global.t("alerts.yourTurnNotification")
 
 							const options = {
 								body: "" + decodedGameName + ": " + store.gameflow.turn + " - " + view.phaseStr(store.gameflow.phase),

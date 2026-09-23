@@ -19,6 +19,8 @@ const personal = usePersonalStore()
 
 import { computed } from "vue"
 
+import i18n from "../i18n"
+
 import InfoPopup from "./utils/InfoPopup.vue"
 
 const props = defineProps({
@@ -41,26 +43,25 @@ function clickedHistoryEntry(action, entry3, entry_id) {
 	else if (replay.goToReplayStep) replay.goToReplayStep(entry_id)
 }
 
-const ORDINAL_WORDS = ["first", "second", "third", "fourth", "fifth", "sixth"]
-const NUM_ORDINALS = ["1st", "2nd", "3rd", "4th", "5th", "6th"]
+const ORDINAL_KEYS = ["first", "second", "third", "fourth", "fifth", "sixth"]
 const UNROTATABLE_CAMPAIGNS = [1, 2, 3, 7, 8, 9, 10, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27]
 
 const MODULE_IMGS = {
-	8: ["so_hardchoices2", "Hard Choices"],
-	20: ["so_ketchupMS", "Ketchup Milestone"],
-	23: ["so_reservePrice", "New Reserve Cards"],
-	14: ["so_movieStars", "Movie Stars"],
-	15: ["so_massMarketeers", "Mass Marketeers"],
-	13: ["so_GFC", "Gourmet Food Critics"],
-	17: ["so_rural", "Rural Marketeers"],
-	22: ["so_lobbyists", "Lobbyists"],
-	16: ["so_nightShift", "Night Shift Manager"],
-	19: ["so_coffee", "Coffee"],
-	9: ["so_fryChef", "Fry Chef"],
-	10: ["so_kimchi", "Kimchi"],
-	11: ["so_sushi", "Sushi"],
-	12: ["so_noodles", "Noodles"],
-	999: ["so_skip", "Skip Module"],
+	8: ["so_hardchoices2", "hardChoices"],
+	20: ["so_ketchupMS", "ketchupMilestone"],
+	23: ["so_reservePrice", "newReserveCards"],
+	14: ["so_movieStars", "movieStars"],
+	15: ["so_massMarketeers", "massMarketeers"],
+	13: ["so_GFC", "gourmetFoodCritics"],
+	17: ["so_rural", "ruralMarketeers"],
+	22: ["so_lobbyists", "lobbyists"],
+	16: ["so_nightShift", "nightShiftManager"],
+	19: ["so_coffee", "coffee"],
+	9: ["so_fryChef", "fryChef"],
+	10: ["so_kimchi", "kimchi"],
+	11: ["so_sushi", "sushi"],
+	12: ["so_noodles", "noodles"],
+	999: ["so_skip", "skipModule"],
 }
 
 function translateApartmentNumber(number) {
@@ -81,15 +82,15 @@ function getFacingDirection(rotation) {
 }
 
 function getOrdinalWord(n) {
-	return ORDINAL_WORDS[n] ?? String(n + 1)
+	return ORDINAL_KEYS[n] ? i18n.global.t("history.ordinals." + ORDINAL_KEYS[n]) : String(n + 1)
 }
 
 function giveNumOrdinal(n) {
-	return NUM_ORDINALS[n] ?? String(n + 1)
+	return ORDINAL_KEYS[n] ? i18n.global.t("history.numOrdinals." + ORDINAL_KEYS[n]) : String(n + 1)
 }
 
 function playerName(playerIndex) {
-	return store.players[playerIndex]?.displayName ?? "System"
+	return store.players[playerIndex]?.displayName ?? i18n.global.t("history.system")
 }
 
 function playerIconSrc(colour) {
@@ -100,11 +101,11 @@ function empTitle(employee, training = false) {
 	if (rf.EMPLOYEES_STR[employee] == null) return "?"
 	let nameString = rf.EMPLOYEES_STR[employee].title
 	if (training) {
-		if (nameString === "New Business Developer") nameString = "New Biz Dev"
-		else if (nameString === "Executive Vice President") nameString = "Executive VP"
-		else if (nameString === "Senior Vice President") nameString = "Senior VP"
-		else if (nameString === "Recruiting Manager") nameString = "Recruiting Mgr"
-		else if (nameString === "Jazz Musician") nameString = "Jazz M"
+		if (nameString === i18n.global.t("employees.newBusinessDeveloper")) nameString = i18n.global.t("history.abbr.newBizDev")
+		else if (nameString === i18n.global.t("employees.executiveVicePresident")) nameString = i18n.global.t("history.abbr.executiveVP")
+		else if (nameString === i18n.global.t("employees.seniorVicePresident")) nameString = i18n.global.t("history.abbr.seniorVP")
+		else if (nameString === i18n.global.t("employees.recruitingManager")) nameString = i18n.global.t("history.abbr.recruitingMgr")
+		else if (nameString === i18n.global.t("employees.jazzMusician")) nameString = i18n.global.t("history.abbr.jazzM")
 	}
 	return nameString
 }
@@ -131,7 +132,7 @@ function goodClass(good) {
 }
 
 function salaryPayText(salaryArr) {
-	if (salaryArr.length > 1) return `${salaryArr[0]} and ${salaryArr[1]} item${salaryArr[1] > 1 ? "s" : ""}`
+	if (salaryArr.length > 1) return i18n.global.t("history.salaryPay", { amount: salaryArr[0], count: salaryArr[1] })
 	return String(salaryArr[0])
 }
 
@@ -276,8 +277,8 @@ const computedEntry3 = computed(() => {
 
 		let rotString = ""
 		if (!UNROTATABLE_CAMPAIGNS.includes(ret.campaignNumber)) {
-			rotString = campaignRotated == 1 ? "vertically" : "horizontally"
-			if (ret.campaignNumber === 4) rotString = campaignRotated == 1 ? "horizontally" : "vertically"
+			rotString = campaignRotated == 1 ? i18n.global.t("history.vertically") : i18n.global.t("history.horizontally")
+			if (ret.campaignNumber === 4) rotString = campaignRotated == 1 ? i18n.global.t("history.horizontally") : i18n.global.t("history.vertically")
 		}
 		ret.orientationStr = rotString
 	} else if (entry[0] === rf.HIST_PRODUCE_FOOD_DRINKS) {
@@ -291,21 +292,21 @@ const computedEntry3 = computed(() => {
 		;[ret.Xcoord, ret.Ycoord] = getCoordinates(houseIndex)
 		ret.houseNumber = param[1]
 		const houseRot = param.length > 2 ? param[2] : 1
-		ret.orientationStr = houseRot === 1 || houseRot === 3 ? "horizontally" : "vertically"
+		ret.orientationStr = houseRot === 1 || houseRot === 3 ? i18n.global.t("history.horizontally") : i18n.global.t("history.vertically")
 	} else if (entry[0] === rf.HIST_BUILD_GARDEN) {
 		const gardenIndex = funcs.importIndex(param[0])
 		;[ret.Xcoord, ret.Ycoord] = getCoordinates(gardenIndex)
 		ret.houseNumber = param[1]
-		ret.orientationStr = param.length > 2 && param[2] === 0 ? "horizontally" : "vertically"
+		ret.orientationStr = param.length > 2 && param[2] === 0 ? i18n.global.t("history.horizontally") : i18n.global.t("history.vertically")
 	} else if (entry[0] === rf.HIST_ADD_FREEWAY) {
 		const freewayIndex = funcs.importIndex(param[0])
 		;[ret.Xcoord, ret.Ycoord] = getCoordinates(freewayIndex)
 		let rotString = ""
-		if (param[1] == 1) rotString = "vertically"
-		else rotString = "horizontally"
+		if (param[1] == 1) rotString = i18n.global.t("history.vertically")
+		else rotString = i18n.global.t("history.horizontally")
 		if (param[2] === 0) {
-			if (param[1] == 0) rotString = "horizontally"
-			else rotString = "vertically"
+			if (param[1] == 0) rotString = i18n.global.t("history.horizontally")
+			else rotString = i18n.global.t("history.vertically")
 		}
 		ret.orientationStr = rotString
 	} else if (entry[0] === rf.HIST_OPEN_RESTAURANT) {
@@ -331,9 +332,9 @@ const computedEntry3 = computed(() => {
 		const parkIndex = funcs.importIndex(param[0])
 		ret.parkVariety = param[1]
 		;[ret.Xcoord, ret.Ycoord] = getCoordinates(parkIndex)
-		let variety = "a 4 length park"
-		if (ret.parkVariety == 1) variety = "a T shaped park"
-		if (ret.parkVariety == 2) variety = "an L shaped park"
+		let variety = i18n.global.t("history.park4")
+		if (ret.parkVariety == 1) variety = i18n.global.t("history.parkT")
+		if (ret.parkVariety == 2) variety = i18n.global.t("history.parkL")
 
 		let rotation = 0
 		let flipped = 0
@@ -355,7 +356,7 @@ const computedEntry3 = computed(() => {
 			"2-2f": "┘",
 			"2-3f": "L",
 		}
-		let rotString = (rotation == 1 ? "vertically" : "horizontally") + " "
+		let rotString = " " + (rotation == 1 ? i18n.global.t("history.vertically") : i18n.global.t("history.horizontally")) + " "
 		const glyph = PARK_GLYPHS[ret.parkVariety + "-" + rotation + (flipped === 1 ? "f" : "")]
 		if (glyph) rotString = glyph
 
@@ -367,12 +368,12 @@ const computedEntry3 = computed(() => {
 		if (param.length >= 3) roadRotation = param[2]
 		;[ret.Xcoord, ret.Ycoord] = getCoordinates(roadIndex)
 
-		let roadVarStr = "2 length road"
-		if (roadVariety == 1) roadVarStr = "4 length road"
-		if (roadVariety == 2) roadVarStr = "corner road"
+		let roadVarStr = i18n.global.t("history.road2")
+		if (roadVariety == 1) roadVarStr = i18n.global.t("history.road4")
+		if (roadVariety == 2) roadVarStr = i18n.global.t("history.roadCorner")
 
-		let roadRotStr = "horizontally "
-		if (roadRotation === 1) roadRotStr = "vertically "
+		let roadRotStr = " " + i18n.global.t("history.horizontally") + " "
+		if (roadRotation === 1) roadRotStr = " " + i18n.global.t("history.vertically") + " "
 		if (roadVariety == 2) roadRotStr = ["┌", "┓", "┘", "└"][roadRotation]
 
 		ret.roadDetails = roadVarStr + roadRotStr
@@ -396,8 +397,8 @@ const computedEntry3 = computed(() => {
 		const nsCampaignIndex = funcs.importIndex(param[1])
 		ret.durationNum = param[3]
 		let nsRotString = ""
-		if (param.length >= 4 && param[4] == 1) nsRotString = "vertically"
-		else if (param.length >= 4 && param[4] == 0) nsRotString = "horizontally"
+		if (param.length >= 4 && param[4] == 1) nsRotString = i18n.global.t("history.vertically")
+		else if (param.length >= 4 && param[4] == 0) nsRotString = i18n.global.t("history.horizontally")
 		ret.orientationStr = nsRotString
 		ret.isRotatable = rf.ROTATABLE_CAMPAIGNS.includes(ret.campaignNumber)
 		;[ret.Xcoord, ret.Ycoord] = getCoordinates(nsCampaignIndex)
@@ -543,9 +544,9 @@ const computedEntry3 = computed(() => {
 		if (!ret.none && store.startingOptions.massMarketers) {
 			if (typeof param.slice(-1)[0] !== "number") {
 				const hasMass = store.players.some((p) => p.employees.includes(rf.MASS_MARKETEER))
-				if (hasMass) ret.massRoundHeader = "Normal Advertising Round"
+				if (hasMass) ret.massRoundHeader = i18n.global.t("history.normalAdvertisingRound")
 			} else {
-				ret.massRoundHeader = "Mass Marketeer Round " + param.slice(-1)[0]
+				ret.massRoundHeader = i18n.global.t("history.massMarketeerRound", { num: param.slice(-1)[0] })
 				marketingParam = param.slice(0, -1)
 			}
 		}
@@ -574,7 +575,7 @@ const computedEntry3 = computed(() => {
 			})
 			const uniqBuildings = [...new Set(pEarnings[0])]
 			let buildingsStr
-			if (uniqBuildings.includes(rf.RURAL_MARKETING_AREA)) buildingsStr = uniqBuildings.map((b) => (b === rf.RURAL_MARKETING_AREA ? " [Rural Area]" : " " + b)).toString()
+			if (uniqBuildings.includes(rf.RURAL_MARKETING_AREA)) buildingsStr = uniqBuildings.map((b) => (b === rf.RURAL_MARKETING_AREA ? " [" + i18n.global.t("history.ruralArea") + "]" : " " + b)).toString()
 			else buildingsStr = uniqBuildings.toString()
 			ret.earningRows.push({
 				colour: store.players[p]?.colour,
@@ -614,7 +615,7 @@ const computedEntry3 = computed(() => {
 	} else if (entry[0] === rf.HIST_SALARY_STRICT) {
 		const dollarAmount = param[0]
 		const itemsAmount = param.length > 1 ? param[1] : 0
-		ret.payStr = itemsAmount > 0 ? dollarAmount + " and " + itemsAmount + " item" + (itemsAmount > 1 ? "s" : "") : String(dollarAmount)
+		ret.payStr = itemsAmount > 0 ? i18n.global.t("history.salaryPay", { amount: dollarAmount, count: itemsAmount }) : String(dollarAmount)
 	} else if (entry[0] === rf.HIST_DISPLAY_RESERVE) {
 		ret.reserveCards = param.map((v) => {
 			if (store.startingOptions.reservePrice) {
@@ -640,9 +641,9 @@ const computedEntry3 = computed(() => {
 	} else if (entry[0] === rf.HIST_NEW_MILESTONE) {
 		ret.ms = rf.MILESTONES_STR[param[0]]
 	} else if (entry[0] === rf.HIST_CEO_BONUS_CHOSEN) {
-		if (param[0] === rf.CEO_ACTION_PRICE_MINUS_3) ret.ceoText = "Price -3"
-		else if (param[0] === rf.CEO_ACTION_RECRUITING_MANAGER) ret.ceoText = "2x: Hire 1 person or $5 less salary"
-		else if (param[0] === rf.CEO_ACTION_COACH) ret.ceoText = "2 training slots. May train the same person two steps"
+		if (param[0] === rf.CEO_ACTION_PRICE_MINUS_3) ret.ceoText = "playerDetails.priceMinus3"
+		else if (param[0] === rf.CEO_ACTION_RECRUITING_MANAGER) ret.ceoText = "employees.recruitingManagerDesc"
+		else if (param[0] === rf.CEO_ACTION_COACH) ret.ceoText = "employees.coachDesc"
 		else ret.ceoText = ""
 	} else if (entry[0] === rf.HIST_CHOOSE_MODULE) {
 		ret.moduleChoice = MODULE_IMGS[param[0]] ?? null
@@ -663,171 +664,245 @@ const computedEntry3 = computed(() => {
 
 		<!-- HIST_CHOOSE_RESTAURANT_STARTING_POSITION: player picks their starting restaurant location -->
 		<template v-if="entry[0] === rf.HIST_CHOOSE_RESTAURANT_STARTING_POSITION">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> chooses their starting restaurant at co-ordinates ({{ computedEntry3.Xcoord }}, {{ computedEntry3.Ycoord }}) facing {{ computedEntry3.facingStr }}
+			<i18n-t keypath="history.chooseStartPos" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #x>{{ computedEntry3.Xcoord }}</template>
+				<template #y>{{ computedEntry3.Ycoord }}</template>
+				<template #facing>{{ $t("history.facing." + computedEntry3.facingStr) }}</template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_DELAY_SETUP: player delays their first restaurant -->
 		<template v-else-if="entry[0] === rf.HIST_DELAY_SETUP">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> chooses to delay their first restaurant
+			<i18n-t keypath="history.delaySetup" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_CHOOSE_RESERVE_CARD: player picks their reserve card -->
 		<template v-else-if="entry[0] === rf.HIST_CHOOSE_RESERVE_CARD">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> chooses their reserve card
+			<i18n-t keypath="history.chooseReserveCard" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_CHOOSE_TURN_ORDER: player chooses their turn order -->
 		<template v-else-if="entry[0] === rf.HIST_CHOOSE_TURN_ORDER">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> chooses to play {{ getOrdinalWord(entry[3][0]) }}
+			<i18n-t keypath="history.chooseTurnOrder" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #ordinal>{{ getOrdinalWord(entry[3][0]) }}</template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_CHOOSE_TURN_ORDER_FORCED: player is forced to a turn order -->
 		<template v-else-if="entry[0] === rf.HIST_CHOOSE_TURN_ORDER_FORCED">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> has to play {{ getOrdinalWord(entry[3][0]) }}
+			<i18n-t keypath="history.hasToPlayTurnOrder" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #ordinal>{{ getOrdinalWord(entry[3][0]) }}</template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_CHOOSE_TURN_ORDER_AUTO_EARLY: player auto-chooses to play early -->
 		<template v-else-if="entry[0] === rf.HIST_CHOOSE_TURN_ORDER_AUTO_EARLY">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> chooses to play {{ getOrdinalWord(entry[3][0]) }} (auto early)
+			<i18n-t keypath="history.chooseTurnOrderAutoEarly" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #ordinal>{{ getOrdinalWord(entry[3][0]) }}</template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_CHOOSE_TURN_ORDER_AUTO_LATE: player auto-chooses to play late -->
 		<template v-else-if="entry[0] === rf.HIST_CHOOSE_TURN_ORDER_AUTO_LATE">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> chooses to play {{ getOrdinalWord(entry[3][0]) }} (auto late)
+			<i18n-t keypath="history.chooseTurnOrderAutoLate" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #ordinal>{{ getOrdinalWord(entry[3][0]) }}</template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_CHOOSE_STRUCTURE: player chooses which employees go to work -->
 		<template v-else-if="entry[0] === rf.HIST_CHOOSE_STRUCTURE">
-			<span v-if="!computedEntry3.hasEmployees && !computedEntry3.hasBeach"><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> has no employees</span>
-			<div v-else-if="computedEntry3.hasEmployees"><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> sends to work:
-				<InfoPopup v-for="(e, i) in computedEntry3.employees" :key="i" type="employee" :employeeId="e">
-					<span class="compact" :class="empClass(e)">{{ empTitle(e) }}</span>
-				</InfoPopup>
+			<i18n-t v-if="!computedEntry3.hasEmployees && !computedEntry3.hasBeach" keypath="history.hasNoEmployees" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t>
+			<div v-else-if="computedEntry3.hasEmployees"><i18n-t keypath="history.sendsToWork" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t> <InfoPopup v-for="(e, i) in computedEntry3.employees" :key="i" type="employee" :employeeId="e">
+				<span class="compact" :class="empClass(e)">{{ empTitle(e) }}</span>
+			</InfoPopup>
 			</div>
-			<div v-else><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> sends no one to work</div>
+			<div v-else><i18n-t keypath="history.sendsNoOneToWork" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t></div>
 		</template>
 
 		<!-- HIST_HIRE: player hires employees -->
 		<template v-else-if="entry[0] === rf.HIST_HIRE">
-			<div v-if="entry[3].length > 0"><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> hires:
-				<InfoPopup v-for="(e, i) in entry[3]" :key="i" type="employee" :employeeId="e">
-					<span class="compact" :class="empClass(e)">{{ empTitle(e) }}</span>
-				</InfoPopup>
+			<div v-if="entry[3].length > 0"><i18n-t keypath="history.hires" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t> <InfoPopup v-for="(e, i) in entry[3]" :key="i" type="employee" :employeeId="e">
+				<span class="compact" :class="empClass(e)">{{ empTitle(e) }}</span>
+			</InfoPopup>
 			</div>
-			<span v-else><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> hires no one</span>
+			<i18n-t v-else keypath="history.hiresNoOne" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_TRAIN: player trains employees -->
 		<template v-else-if="entry[0] === rf.HIST_TRAIN">
-			<div v-if="entry[3].length > 0 && entry[3].length % 2 == 0"><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> trains:
-				<template v-for="(t, i) in computedEntry3.trainedInfo" :key="i">
-					<br />
-					<template v-if="t.fromHiring">[From Hiring] <b>{{ t.numTrainsStr }}</b> <InfoPopup type="employee" :employeeId="t.to"><span class="compact" :class="empClass(t.to)">{{ empTitle(t.to, true) }}</span></InfoPopup></template>
-					<template v-else-if="t.fromStructure">[From Structure]<InfoPopup type="employee" :employeeId="t.from"><span class="compact" :class="empClass(t.from)">{{ empTitle(t.from) }}</span></InfoPopup> <b>{{ t.numTrainsStr }}</b> <InfoPopup type="employee" :employeeId="t.to"><span class="compact" :class="empClass(t.to)">{{ empTitle(t.to, true) }}</span></InfoPopup></template>
-					<template v-else><InfoPopup type="employee" :employeeId="t.from"><span class="compact" :class="empClass(t.from)">{{ empTitle(t.from) }}</span></InfoPopup> <b>{{ t.numTrainsStr }}</b> <InfoPopup type="employee" :employeeId="t.to"><span class="compact" :class="empClass(t.to)">{{ empTitle(t.to, true) }}</span></InfoPopup></template>
-				</template>
+			<div v-if="entry[3].length > 0 && entry[3].length % 2 == 0"><i18n-t keypath="history.trains" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t> <template v-for="(t, i) in computedEntry3.trainedInfo" :key="i">
+				<br />
+				<template v-if="t.fromHiring">{{ $t("history.fromHiring") + " " }}<b>{{ t.numTrainsStr }}</b> <InfoPopup type="employee" :employeeId="t.to"><span class="compact" :class="empClass(t.to)">{{ empTitle(t.to, true) }}</span></InfoPopup></template>
+				<template v-else-if="t.fromStructure">{{ $t("history.fromStructure") }}<InfoPopup type="employee" :employeeId="t.from"><span class="compact" :class="empClass(t.from)">{{ empTitle(t.from) }}</span></InfoPopup> <b>{{ t.numTrainsStr }}</b> <InfoPopup type="employee" :employeeId="t.to"><span class="compact" :class="empClass(t.to)">{{ empTitle(t.to, true) }}</span></InfoPopup></template>
+				<template v-else><InfoPopup type="employee" :employeeId="t.from"><span class="compact" :class="empClass(t.from)">{{ empTitle(t.from) }}</span></InfoPopup> <b>{{ t.numTrainsStr }}</b> <InfoPopup type="employee" :employeeId="t.to"><span class="compact" :class="empClass(t.to)">{{ empTitle(t.to, true) }}</span></InfoPopup></template>
+			</template>
 			</div>
-			<span v-else><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> trains no one</span>
+			<i18n-t v-else keypath="history.trainsNoOne" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_START_MARKETING_CAMPAIGN: player starts a marketing campaign -->
 		<template v-else-if="entry[0] === rf.HIST_START_MARKETING_CAMPAIGN">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> started marketing campaign #{{ computedEntry3.campaignNumber }} with
-			<InfoPopup type="employee" :employeeId="computedEntry3.campaignEmployee"><span class="compact" :class="empClass(computedEntry3.campaignEmployee)">{{ empTitle(computedEntry3.campaignEmployee) }}</span></InfoPopup>,
-			<template v-if="!computedEntry3.noCoords">{{ computedEntry3.orientationStr }}at co-ordinates ({{ computedEntry3.Xcoord }}, {{ computedEntry3.Ycoord }}), </template>advertising:
+			<i18n-t keypath="history.campaignStart" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #num>{{ computedEntry3.campaignNumber }}</template>
+				<template #employee><InfoPopup type="employee" :employeeId="computedEntry3.campaignEmployee"><span class="compact" :class="empClass(computedEntry3.campaignEmployee)">{{ empTitle(computedEntry3.campaignEmployee) }}</span></InfoPopup></template>
+			</i18n-t> <template v-if="!computedEntry3.noCoords">{{ computedEntry3.orientationStr ? $t("history.orientAtCoords", { orient: computedEntry3.orientationStr, x: computedEntry3.Xcoord, y: computedEntry3.Ycoord }) : $t("history.atCoords", { x: computedEntry3.Xcoord, y: computedEntry3.Ycoord }) }}</template>{{ $t("history.advertising") + " " }}
 			<img v-for="(g, gi) in computedEntry3.campaignGoods" :key="gi" class="foodTokenImg" :class="goodClass(g)" :src="goodSrc(g)" alt="" />
 			<img v-if="computedEntry3.radioDouble" class="foodTokenImg" :class="goodClass(computedEntry3.campaignGoods[0])" :src="goodSrc(computedEntry3.campaignGoods[0])" alt="" />
-			{{ computedEntry3.durationNum === 9 ? "eternally" : "for " + computedEntry3.durationNum + (computedEntry3.durationNum > 1 ? " turns" : " turn") }}
+			{{ computedEntry3.durationNum === 9 ? $t("history.eternally") : $t("history.forTurns", computedEntry3.durationNum) }}
 			<br v-if="computedEntry3.isHawker" />
-			<input v-if="computedEntry3.isHawker" type="button" class="actionsLineButton" value="Show Route" @click.stop="showHawkerRoute(computedEntry3.routeIndexes)" />
+			<input v-if="computedEntry3.isHawker" type="button" class="actionsLineButton" :value="$t('history.showRoute')" @click.stop="showHawkerRoute(computedEntry3.routeIndexes)" />
 		</template>
 
 		<!-- HIST_START_NS_CAMPAIGN: Night Shift Manager restarts a campaign -->
 		<template v-else-if="entry[0] === rf.HIST_START_NS_CAMPAIGN">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> used their
-			<InfoPopup type="employee" :employeeId="rf.MARKETING_TRAINEE"><span class="compact" :class="empClass(rf.MARKETING_TRAINEE)">{{ empTitle(rf.MARKETING_TRAINEE) }}</span></InfoPopup> again with their
-			<InfoPopup type="employee" :employeeId="rf.NIGHT_SHIFT_MANAGER"><span class="compact" :class="empClass(rf.NIGHT_SHIFT_MANAGER)">{{ empTitle(rf.NIGHT_SHIFT_MANAGER) }}</span></InfoPopup> to start marketing campaign #{{ computedEntry3.campaignNumber }},
-			<template v-if="computedEntry3.isRotatable">{{ computedEntry3.orientationStr }} </template>at co-ordinates ({{ computedEntry3.Xcoord }}, {{ computedEntry3.Ycoord }}), advertising:
-			<img class="foodTokenImg" :class="goodClass(entry[3][2])" :src="goodSrc(entry[3][2])" alt="" />
-			{{ computedEntry3.durationNum === 9 ? "eternally" : "for " + computedEntry3.durationNum + (computedEntry3.durationNum > 1 ? " turns" : " turn") }}
+			<i18n-t keypath="history.nsCampaign" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #trainee><InfoPopup type="employee" :employeeId="rf.MARKETING_TRAINEE"><span class="compact" :class="empClass(rf.MARKETING_TRAINEE)">{{ empTitle(rf.MARKETING_TRAINEE) }}</span></InfoPopup></template>
+				<template #nsm><InfoPopup type="employee" :employeeId="rf.NIGHT_SHIFT_MANAGER"><span class="compact" :class="empClass(rf.NIGHT_SHIFT_MANAGER)">{{ empTitle(rf.NIGHT_SHIFT_MANAGER) }}</span></InfoPopup></template>
+				<template #num>{{ computedEntry3.campaignNumber }}</template>
+			</i18n-t> <template v-if="computedEntry3.isRotatable">{{ $t("history.orientAtCoordsAd", { orient: computedEntry3.orientationStr, x: computedEntry3.Xcoord, y: computedEntry3.Ycoord }) }}</template><template v-else>{{ $t("history.atCoordsAd", { x: computedEntry3.Xcoord, y: computedEntry3.Ycoord }) }}</template> <img class="foodTokenImg" :class="goodClass(entry[3][2])" :src="goodSrc(entry[3][2])" alt="" />
+			{{ computedEntry3.durationNum === 9 ? $t("history.eternally") : $t("history.forTurns", computedEntry3.durationNum) }}
 		</template>
 
 		<!-- HIST_RESTO_MAILBOX_MS: restaurant milestone starts a permanent campaign -->
 		<template v-else-if="entry[0] === rf.HIST_RESTO_MAILBOX_MS">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> started marketing campaign #{{ computedEntry3.campaignNumber }} (no marketer is used for the Restaurant Milestone), at co-ordinates ({{ computedEntry3.Xcoord }}, {{ computedEntry3.Ycoord }}), advertising:
-			<img class="foodTokenImg" :class="goodClass(entry[3][2])" :src="goodSrc(entry[3][2])" alt="" /> eternally
+			<i18n-t keypath="history.mailboxCampaign" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #num>{{ computedEntry3.campaignNumber }}</template>
+				<template #x>{{ computedEntry3.Xcoord }}</template>
+				<template #y>{{ computedEntry3.Ycoord }}</template>
+				<template #good><img class="foodTokenImg" :class="goodClass(entry[3][2])" :src="goodSrc(entry[3][2])" alt="" /></template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_PRODUCE_FOOD_DRINKS: employees produce or collect food/drinks -->
 		<template v-else-if="entry[0] === rf.HIST_PRODUCE_FOOD_DRINKS">
-			<div><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> uses:
-				<InfoPopup v-for="(e, i) in entry[3][0]" :key="'e' + i" type="employee" :employeeId="e">
+			<div><i18n-t keypath="history.usesProduce" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #employees><InfoPopup v-for="(e, i) in entry[3][0]" :key="'e' + i" type="employee" :employeeId="e">
 					<span class="compact" :class="empClass(e)">{{ empTitle(e) }}</span>
-				</InfoPopup>
-				to produce/collect:
-				<template v-for="(pi, i) in computedEntry3.producedItems" :key="i">{{ i > 0 ? ", " : "" }}{{ pi.count }} <img class="foodTokenImg" :class="goodClass(pi.good)" :src="goodSrc(pi.good)" alt="" /></template>
+				</InfoPopup></template>
+			</i18n-t> <template v-for="(pi, i) in computedEntry3.producedItems" :key="i">{{ i > 0 ? ", " : "" }}{{ pi.count }} <img class="foodTokenImg" :class="goodClass(pi.good)" :src="goodSrc(pi.good)" alt="" /></template>
 			</div>
 		</template>
 
 		<!-- HIST_PRODUCE_KIMCHI: Kimchi Master produces kimchi during cleanup -->
 		<template v-else-if="entry[0] === rf.HIST_PRODUCE_KIMCHI">
-			<div><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> uses:
-				<InfoPopup type="employee" :employeeId="rf.KIMCHI_MASTER"><span class="compact" :class="empClass(rf.KIMCHI_MASTER)">{{ empTitle(rf.KIMCHI_MASTER) }}</span></InfoPopup>
-				during cleanup to produce: 1 <img class="foodTokenImg" :src="goodSrc(rf.KIMCHI)" alt="" />
+			<div><i18n-t keypath="history.kimchiProduce" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #emp><InfoPopup type="employee" :employeeId="rf.KIMCHI_MASTER"><span class="compact" :class="empClass(rf.KIMCHI_MASTER)">{{ empTitle(rf.KIMCHI_MASTER) }}</span></InfoPopup></template>
+			</i18n-t> <img class="foodTokenImg" :src="goodSrc(rf.KIMCHI)" alt="" />
 			</div>
 		</template>
 
 		<!-- HIST_BUILD_HOUSE: player builds a house -->
 		<template v-else-if="entry[0] === rf.HIST_BUILD_HOUSE">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> builds house #{{ computedEntry3.houseNumber }} {{ computedEntry3.orientationStr }} at co-ordinates ({{ computedEntry3.Xcoord }}, {{ computedEntry3.Ycoord }})
+			<i18n-t keypath="history.buildHouse" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #num>{{ computedEntry3.houseNumber }}</template>
+				<template #orient>{{ computedEntry3.orientationStr }}</template>
+				<template #x>{{ computedEntry3.Xcoord }}</template>
+				<template #y>{{ computedEntry3.Ycoord }}</template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_BUILD_GARDEN: player builds a garden for a house -->
 		<template v-else-if="entry[0] === rf.HIST_BUILD_GARDEN">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> builds a garden for house #{{ computedEntry3.houseNumber }} {{ computedEntry3.orientationStr }} at co-ordinates ({{ computedEntry3.Xcoord }}, {{ computedEntry3.Ycoord }})
+			<i18n-t keypath="history.buildGarden" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #num>{{ computedEntry3.houseNumber }}</template>
+				<template #orient>{{ computedEntry3.orientationStr }}</template>
+				<template #x>{{ computedEntry3.Xcoord }}</template>
+				<template #y>{{ computedEntry3.Ycoord }}</template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_ADD_FREEWAY: player builds a freeway -->
 		<template v-else-if="entry[0] === rf.HIST_ADD_FREEWAY">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> builds a Freeway {{ computedEntry3.orientationStr }} at co-ordinates ({{ computedEntry3.Xcoord }}, {{ computedEntry3.Ycoord }})
+			<i18n-t keypath="history.buildFreeway" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #orient>{{ computedEntry3.orientationStr }}</template>
+				<template #x>{{ computedEntry3.Xcoord }}</template>
+				<template #y>{{ computedEntry3.Ycoord }}</template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_OPEN_RESTAURANT: player opens a new restaurant -->
 		<template v-else-if="entry[0] === rf.HIST_OPEN_RESTAURANT">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-			<template v-if="computedEntry3.isLocalManager"> builds a new restaurant at co-ordinates ({{ computedEntry3.Xcoord }}, {{ computedEntry3.Ycoord }}) facing {{ computedEntry3.facingStr }}, opening next turn</template>
-			<template v-else> opens a new restaurant at co-ordinates ({{ computedEntry3.Xcoord }}, {{ computedEntry3.Ycoord }}) facing {{ computedEntry3.facingStr }}</template>
+			<i18n-t v-if="computedEntry3.isLocalManager" keypath="history.openRestaurantLocal" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #x>{{ computedEntry3.Xcoord }}</template>
+				<template #y>{{ computedEntry3.Ycoord }}</template>
+				<template #facing>{{ $t("history.facing." + computedEntry3.facingStr) }}</template>
+			</i18n-t>
+			<i18n-t v-else keypath="history.openRestaurant" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #x>{{ computedEntry3.Xcoord }}</template>
+				<template #y>{{ computedEntry3.Ycoord }}</template>
+				<template #facing>{{ $t("history.facing." + computedEntry3.facingStr) }}</template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_MOVE_RESTAURANT: player moves an existing restaurant -->
 		<template v-else-if="entry[0] === rf.HIST_MOVE_RESTAURANT">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> moves a restaurant from co-ordinates ({{ computedEntry3.Xcoord }}, {{ computedEntry3.Ycoord }}) to co-ordinates ({{ computedEntry3.Xcoord2 }}, {{ computedEntry3.Ycoord2 }}) facing {{ computedEntry3.facingStr }}
+			<i18n-t keypath="history.moveRestaurant" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #x1>{{ computedEntry3.Xcoord }}</template>
+				<template #y1>{{ computedEntry3.Ycoord }}</template>
+				<template #x2>{{ computedEntry3.Xcoord2 }}</template>
+				<template #y2>{{ computedEntry3.Ycoord2 }}</template>
+				<template #facing>{{ $t("history.facing." + computedEntry3.facingStr) }}</template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_DINNER_TIME: evening sales round with providers and prices -->
 		<template v-else-if="entry[0] === rf.HIST_DINNER_TIME">
-			<p v-if="computedEntry3.noSalesAtAll">Dinner time: No sales occurred, either due to lack of demand or lack of items</p>
+			<p v-if="computedEntry3.noSalesAtAll">{{ $t("history.noSalesAtAll") }}</p>
 			<div v-else>
-				<h4>Dinner time</h4>
+				<h4>{{ $t("history.dinnerTime") }}</h4>
 				<template v-for="(block, bi) in computedEntry3.blocks" :key="bi">
 					<div v-if="block.kind === 'sale'" class="house">
-						<span v-if="!block.isApartment && !block.isRural">House #{{ block.buildingNumber }}: </span>
-						<span v-else-if="block.isApartment">Apartment #{{ translateApartmentNumber(block.buildingNumber) }}: </span>
-						<span v-else>Rural Area: </span>
+						<span v-if="!block.isApartment && !block.isRural">{{ $t("history.houseLabel", { num: block.buildingNumber }) }}</span>
+						<span v-else-if="block.isApartment">{{ $t("history.apartmentLabel", { num: translateApartmentNumber(block.buildingNumber) }) }}</span>
+						<span v-else>{{ $t("history.ruralLabel") }}</span>
 						<img v-for="(g, gi) in block.goods" :key="gi" class="foodTokenImg dinnerGoodsImg" :class="goodClass(g)" :src="goodSrc(g)" alt="" />
 						<template v-if="block.noSale">
-							: No one can fulfill these demands
+							{{ " " + $t("history.noFulfillDemands") }}
 						</template>
 						<template v-else>
-							<div v-if="block.roadworksNote">Houses required to travel over a roadworks marker this turn add +1 distance per roadworks</div>
+							<div v-if="block.roadworksNote">{{ $t("history.roadworksNote") }}</div>
 							<template v-if="block.multipleProviders">
-								<div>Players who can fulfill this demand: </div>
+								<div>{{ $t("history.playersCanFulfill") }}</div>
 								<ul>
 									<li v-for="(pr, pri) in block.providers" :key="pri">
 										<img class="playerImage" :src="playerIconSrc(pr.colour)" alt="" />:
 										<span>
-											${{ pr.price }}, distance {{ pr.distance }},
-											<template v-if="pr.jazz !== null">{{ pr.jazz }} <InfoPopup type="employee" :employeeId="rf.JAZZ_MUSICIAN"><span class="compact" :class="empClass(rf.JAZZ_MUSICIAN)">{{ empTitle(rf.JAZZ_MUSICIAN, true) }}</span></InfoPopup>, </template>{{ pr.waitresses }} <InfoPopup type="employee" :employeeId="rf.WAITRESS"><span class="compact" :title="empTitle(rf.WAITRESS)">{{ empTitle(rf.WAITRESS) }}</span></InfoPopup>, {{ giveNumOrdinal(pr.order) }} player
+											{{ $t("history.providerPriceDistance", { price: pr.price, distance: pr.distance }) }}
+											<template v-if="pr.jazz !== null">{{ pr.jazz }} <InfoPopup type="employee" :employeeId="rf.JAZZ_MUSICIAN"><span class="compact" :class="empClass(rf.JAZZ_MUSICIAN)">{{ empTitle(rf.JAZZ_MUSICIAN, true) }}</span></InfoPopup>, </template>{{ pr.waitresses }} <InfoPopup type="employee" :employeeId="rf.WAITRESS"><span class="compact" :title="empTitle(rf.WAITRESS)">{{ empTitle(rf.WAITRESS) }}</span></InfoPopup>, {{ $t("history.playerOrdinal", { ordinal: giveNumOrdinal(pr.order) }) }}
 											<template v-if="pr.star === 1">, <InfoPopup type="employee" :employeeId="rf.B_MOVIE_STAR"><span class="compact" :title="empTitle(rf.B_MOVIE_STAR)">{{ empTitle(rf.B_MOVIE_STAR) }}</span></InfoPopup></template>
 											<template v-else-if="pr.star === 2">, <InfoPopup type="employee" :employeeId="rf.C_MOVIE_STAR"><span class="compact" :title="empTitle(rf.C_MOVIE_STAR)">{{ empTitle(rf.C_MOVIE_STAR) }}</span></InfoPopup></template>
 											<template v-else-if="pr.star === 3">, <InfoPopup type="employee" :employeeId="rf.D_MOVIE_STAR"><span class="compact" :title="empTitle(rf.D_MOVIE_STAR)">{{ empTitle(rf.D_MOVIE_STAR) }}</span></InfoPopup></template>
@@ -835,43 +910,55 @@ const computedEntry3 = computed(() => {
 									</li>
 								</ul>
 							</template>
-							<template v-else>
-								: Only <img class="playerImage" :src="playerIconSrc(block.singleProviderColour)" alt="" /> can fulfill these demands
+							<template v-else>: <i18n-t keypath="history.canFulfill" tag="span" scope="global">
+								<template #player><img class="playerImage" :src="playerIconSrc(block.singleProviderColour)" alt="" /></template>
+							</i18n-t>
 							</template>
 							<div v-if="block.sale">
-								<template v-if="block.isApartment">Apartment #{{ translateApartmentNumber(block.buildingNumber) }} goes to <img class="playerImage" :src="playerIconSrc(block.sale.winnerColour)" alt="" /> for ${{ block.sale.finalSaleAmount }}</template>
-								<template v-else-if="block.isRural">Rural Area goes to <img class="playerImage" :src="playerIconSrc(block.sale.winnerColour)" alt="" /> for ${{ block.sale.finalSaleAmount }}</template>
-								<template v-else>House #{{ block.buildingNumber }} goes to <img class="playerImage" :src="playerIconSrc(block.sale.winnerColour)" alt="" /> for ${{ block.sale.finalSaleAmount }}</template>
-								<span> Base price ${{ block.sale.basePrice }} x {{ block.sale.numItems }} item{{ block.sale.numItems == 1 ? "" : "s" }}.</span>
-								<span v-if="block.sale.gardenParkStatus === 1"> The base price is doubled, because the house has a garden.</span>
-								<span v-else-if="block.sale.gardenParkStatus === 2 && block.isApartment"> The base price is doubled, because the apartment is adjacent to a park.</span>
-								<span v-else-if="block.sale.gardenParkStatus === 2"> The base price is doubled, because the house is adjacent to a park.</span>
-								<span v-else-if="block.sale.gardenParkStatus === 3"> The base price is tripled, because the house is adjacent to a park and has a garden.</span>
-								<span v-if="block.sale.bonusAmount > 0"> The player has a bonus of ${{ block.sale.bonusAmount }}.</span>
-								<span v-if="block.sale.numFryChefs > 0"> {{ block.sale.numFryChefs === 1 ? "A Fry Chef adds a bonus of $" + block.sale.numFryChefs * 10 : "Fry Chefs add a bonus of $" + block.sale.numFryChefs * 10 }}</span>
+								<i18n-t v-if="block.isApartment" keypath="history.apartmentGoesTo" tag="span" scope="global">
+									<template #num>{{ translateApartmentNumber(block.buildingNumber) }}</template>
+									<template #player><img class="playerImage" :src="playerIconSrc(block.sale.winnerColour)" alt="" /></template>
+									<template #amount>{{ block.sale.finalSaleAmount }}</template>
+								</i18n-t>
+								<i18n-t v-else-if="block.isRural" keypath="history.ruralGoesTo" tag="span" scope="global">
+									<template #player><img class="playerImage" :src="playerIconSrc(block.sale.winnerColour)" alt="" /></template>
+									<template #amount>{{ block.sale.finalSaleAmount }}</template>
+								</i18n-t>
+								<i18n-t v-else keypath="history.houseGoesTo" tag="span" scope="global">
+									<template #num>{{ block.buildingNumber }}</template>
+									<template #player><img class="playerImage" :src="playerIconSrc(block.sale.winnerColour)" alt="" /></template>
+									<template #amount>{{ block.sale.finalSaleAmount }}</template>
+								</i18n-t>
+								<span>{{ " " + $t("history.basePriceItems", { price: block.sale.basePrice, count: block.sale.numItems }) }}</span>
+								<span v-if="block.sale.gardenParkStatus === 1">{{ " " + $t("history.doubledGarden") }}</span>
+								<span v-else-if="block.sale.gardenParkStatus === 2 && block.isApartment">{{ " " + $t("history.doubledParkApartment") }}</span>
+								<span v-else-if="block.sale.gardenParkStatus === 2">{{ " " + $t("history.doubledParkHouse") }}</span>
+								<span v-else-if="block.sale.gardenParkStatus === 3">{{ " " + $t("history.tripledParkGarden") }}</span>
+								<span v-if="block.sale.bonusAmount > 0">{{ " " + $t("history.bonusOf", { amount: block.sale.bonusAmount }) }}</span>
+								<span v-if="block.sale.numFryChefs > 0">{{ $t("history.fryChefBonus", { amount: block.sale.numFryChefs * 10, count: block.sale.numFryChefs }) }}</span>
 								<br v-if="block.sale.milestoneNote" />
-								<span v-if="block.sale.milestoneNote" class="distance">Distance reduced due to Milestone</span>
+								<span v-if="block.sale.milestoneNote" class="distance">{{ $t("history.distanceReducedMilestone") }}</span>
 							</div>
 						</template>
 					</div>
 					<div v-else-if="block.kind === 'coffee'" class="coffeeDiv">
-						<span v-if="!block.isApartment && !block.isRural">Coffee sales for house #{{ block.buildingNumber }}: </span>
-						<span v-else-if="block.isApartment">Coffee sales for apartment #{{ translateApartmentNumber(block.buildingNumber) }}: </span>
-						<span v-else>Coffee sales for Rural Area: </span>
+						<span v-if="!block.isApartment && !block.isRural">{{ $t("history.coffeeSalesHouse", { num: block.buildingNumber }) }}</span>
+						<span v-else-if="block.isApartment">{{ $t("history.coffeeSalesApartment", { num: translateApartmentNumber(block.buildingNumber) }) }}</span>
+						<span v-else>{{ $t("history.coffeeSalesRural") }}</span>
 						<ul v-if="block.anySales">
 							<li v-for="(row, ri) in block.rows" :key="ri">
 								<img class="playerImage" :src="playerIconSrc(row.colour)" alt="" />:
 								<span>
-									{{ row.count }} x <img class="foodTokenImg" :class="goodClass(rf.COFFEE)" :src="goodSrc(rf.COFFEE)" alt="" /> Total Income: ${{ row.finalSaleAmount }} (Base price ${{ row.baseCoffeePrice }}.
-									<template v-if="block.gardenParkStatus === 1"> The base price is doubled, because the house has a garden.</template>
-									<template v-else-if="block.gardenParkStatus === 2"> The base price is doubled, because the house is adjacent to a park.</template>
-									<template v-else-if="block.gardenParkStatus === 3"> The base price is tripled, because the house is adjacent to a park and has a garden.</template>
-									<template v-if="row.numFryChefs > 0"> {{ row.numFryChefs === 1 ? "A Fry Chef adds a bonus of $" + row.numFryChefs * 10 : "Fry Chefs add a bonus of $" + row.numFryChefs * 10 }}</template>
+									{{ row.count }} x <img class="foodTokenImg" :class="goodClass(rf.COFFEE)" :src="goodSrc(rf.COFFEE)" alt="" />{{ " " + $t("history.totalIncomeBase", { amount: row.finalSaleAmount, price: row.baseCoffeePrice }) }}
+									<template v-if="block.gardenParkStatus === 1">{{ " " + $t("history.doubledGarden") }}</template>
+									<template v-else-if="block.gardenParkStatus === 2">{{ " " + $t("history.doubledParkHouse") }}</template>
+									<template v-else-if="block.gardenParkStatus === 3">{{ " " + $t("history.tripledParkGarden") }}</template>
+									<template v-if="row.numFryChefs > 0">{{ $t("history.fryChefBonus", { amount: row.numFryChefs * 10, count: row.numFryChefs }) }}</template>
 								)</span>
 							</li>
 						</ul>
-						<span v-if="!block.anySales">No coffee sold</span>
-						<button v-if="block.anySales && block.highlightSqs && block.highlightSqs.length > 0" class="actionsLineButton coffeeHistButton" @click.stop="toggleCoffeeInfo(bi)">More Information</button>
+						<span v-if="!block.anySales">{{ $t("history.noCoffeeSold") }}</span>
+						<button v-if="block.anySales && block.highlightSqs && block.highlightSqs.length > 0" class="actionsLineButton coffeeHistButton" @click.stop="toggleCoffeeInfo(bi)">{{ $t("history.moreInformation") }}</button>
 					</div>
 				</template>
 			</div>
@@ -879,18 +966,18 @@ const computedEntry3 = computed(() => {
 
 		<!-- HIST_INCOME: per-player income breakdown -->
 		<template v-else-if="entry[0] === rf.HIST_INCOME">
-			<p v-if="computedEntry3.none">No income</p>
+			<p v-if="computedEntry3.none">{{ $t("history.noIncome") }}</p>
 			<div v-else>
-				<h4>Income</h4>
+				<h4>{{ $t("history.incomeHeader") }}</h4>
 				<table>
 					<thead>
 						<tr>
-							<td>Player</td>
-							<td>Sales</td>
+							<td>{{ $t("history.playerHeader") }}</td>
+							<td>{{ $t("history.salesHeader") }}</td>
 							<td v-if="computedEntry3.jazzTable"><InfoPopup type="employee" :employeeId="rf.JAZZ_MUSICIAN"><span class="compact" :class="empType(rf.JAZZ_MUSICIAN)">{{ empTitle(rf.JAZZ_MUSICIAN, true) }}</span></InfoPopup></td>
 							<td><InfoPopup type="employee" :employeeId="rf.WAITRESS"><span class="compact" :class="empType(rf.WAITRESS)">{{ empTitle(rf.WAITRESS) }}</span></InfoPopup></td>
-							<td>CFO bonus</td>
-							<td>Total</td>
+							<td>{{ $t("history.cfoBonusHeader") }}</td>
+							<td>{{ $t("history.totalHeader") }}</td>
 						</tr>
 					</thead>
 					<tbody>
@@ -909,9 +996,9 @@ const computedEntry3 = computed(() => {
 
 		<!-- HIST_SALARY: per-player salary payments -->
 		<template v-else-if="entry[0] === rf.HIST_SALARY">
-			<p v-if="computedEntry3.none">No salaries</p>
+			<p v-if="computedEntry3.none">{{ $t("history.noSalaries") }}</p>
 			<div v-else>
-				<h4>Salaries</h4>
+				<h4>{{ $t("history.salariesHeader") }}</h4>
 				<ul>
 					<li v-for="(r, i) in computedEntry3.salaryRows" :key="i"><img class="playerImage" :src="playerIconSrc(r.colour)" alt="" />: ${{ r.payStr }}</li>
 				</ul>
@@ -920,20 +1007,36 @@ const computedEntry3 = computed(() => {
 
 		<!-- HIST_SALARY_STRICT: single player pays strict salary -->
 		<template v-else-if="entry[0] === rf.HIST_SALARY_STRICT">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> pays salaries: ${{ computedEntry3.payStr }}
+			<i18n-t keypath="history.paysSalaries" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #pay>{{ computedEntry3.payStr }}</template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_MARKETING_CAMPAIGN_PHASE: marketing phase resolution summary -->
 		<template v-else-if="entry[0] === rf.HIST_MARKETING_CAMPAIGN_PHASE">
-			<p v-if="computedEntry3.none">No marketing campaigns</p>
+			<p v-if="computedEntry3.none">{{ $t("history.noMarketingCampaigns") }}</p>
 			<div v-else>
-				<h4>Marketing Campaigns</h4>
+				<h4>{{ $t("history.marketingCampaignsHeader") }}</h4>
 				<div v-if="computedEntry3.massRoundHeader"><b>{{ computedEntry3.massRoundHeader }}</b></div>
 				<div v-for="(c, ci) in computedEntry3.campaigns" :key="ci">
-					<div v-if="c.houses.length > 0">#{{ c.num }} put <img class="foodTokenImg" :class="goodClass(c.good)" :src="goodSrc(c.good)" alt="" /> on house{{ c.houses.length > 1 ? "s" : "" }} {{ JSON.stringify(c.houses) }}</div>
-					<div v-if="c.apartments.length > 0">#{{ c.num }} put 2x <img class="foodTokenImg" :class="goodClass(c.good)" :src="goodSrc(c.good)" alt="" /> on apartment{{ c.apartments.length > 1 ? "s" : "" }} {{ JSON.stringify(c.apartments) }}</div>
-					<div v-if="c.rma">#Giant Billboard put 2x <img class="foodTokenImg" :class="goodClass(c.good)" :src="goodSrc(c.good)" alt="" /> on the Rural Area</div>
-					<div v-if="c.houses.length === 0 && c.apartments.length === 0 && !c.rma">#{{ c.num }} was not able to market <img class="foodTokenImg" :class="goodClass(c.good)" :src="goodSrc(c.good)" alt="" /></div>
+					<i18n-t v-if="c.houses.length > 0" keypath="history.campaignHouses" tag="div" scope="global" :plural="c.houses.length">
+						<template #num>{{ c.num }}</template>
+						<template #good><img class="foodTokenImg" :class="goodClass(c.good)" :src="goodSrc(c.good)" alt="" /></template>
+						<template #list>{{ JSON.stringify(c.houses) }}</template>
+					</i18n-t>
+					<i18n-t v-if="c.apartments.length > 0" keypath="history.campaignApartments" tag="div" scope="global" :plural="c.apartments.length">
+						<template #num>{{ c.num }}</template>
+						<template #good><img class="foodTokenImg" :class="goodClass(c.good)" :src="goodSrc(c.good)" alt="" /></template>
+						<template #list>{{ JSON.stringify(c.apartments) }}</template>
+					</i18n-t>
+					<i18n-t v-if="c.rma" keypath="history.giantBillboard" tag="div" scope="global">
+						<template #good><img class="foodTokenImg" :class="goodClass(c.good)" :src="goodSrc(c.good)" alt="" /></template>
+					</i18n-t>
+					<i18n-t v-if="c.houses.length === 0 && c.apartments.length === 0 && !c.rma" keypath="history.campaignFailed" tag="div" scope="global">
+						<template #num>{{ c.num }}</template>
+						<template #good><img class="foodTokenImg" :class="goodClass(c.good)" :src="goodSrc(c.good)" alt="" /></template>
+					</i18n-t>
 				</div>
 			</div>
 		</template>
@@ -941,11 +1044,10 @@ const computedEntry3 = computed(() => {
 		<!-- HIST_MARKETING_EARNING: marketers' earnings summary -->
 		<template v-else-if="entry[0] === rf.HIST_MARKETING_EARNING">
 			<div v-if="computedEntry3.earningRows.length > 0">
-				<h4>Marketeers earnings</h4>
+				<h4>{{ $t("history.marketeersEarnings") }}</h4>
 				<ul>
 					<li v-for="(r, i) in computedEntry3.earningRows" :key="i">
-						<img class="playerImage" :src="playerIconSrc(r.colour)" alt="" />
-						earned ${{ r.amount }} for {{ r.numItems }} item{{ r.numItems === 1 ? "" : "s" }} on {{ r.singleBuilding ? "building" : "buildings" }} {{ r.buildingsStr }}
+						<img class="playerImage" :src="playerIconSrc(r.colour)" alt="" />{{ " " + $t("history.earnedForItems", { amount: r.amount, count: r.numItems }) + " " }}{{ $t(r.singleBuilding ? "history.building" : "history.buildings") + " " }}{{ r.buildingsStr }}
 					</li>
 				</ul>
 			</div>
@@ -953,32 +1055,40 @@ const computedEntry3 = computed(() => {
 
 		<!-- HIST_DISPLAY_RESERVE: shows the reserve cards in play -->
 		<template v-else-if="entry[0] === rf.HIST_DISPLAY_RESERVE">
-			<p>The reserve cards are: </p>
+			<p>{{ $t("history.reserveCardsAre") }}</p>
 			<div><img v-for="(k, i) in computedEntry3.reserveCards" :key="i" class="cardImg" :src="view.getImage(k)" alt="" /></div>
-			<p v-if="store.startingOptions.reservePrice">The new base price is: ${{ computedEntry3.basePrice }}</p>
+			<p v-if="store.startingOptions.reservePrice">{{ $t("history.newBasePrice", { amount: computedEntry3.basePrice }) }}</p>
 		</template>
 
 		<!-- HIST_FIRE: player fires employees -->
 		<template v-else-if="entry[0] === rf.HIST_FIRE">
-			<div v-if="entry[3].length > 0"><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> fires:
-				<InfoPopup v-for="(e, i) in entry[3]" :key="i" type="employee" :employeeId="e">
-					<span class="compact" :class="empClass(e)">{{ empTitle(e) }}</span>
-				</InfoPopup>
+			<div v-if="entry[3].length > 0"><i18n-t keypath="history.fires" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t> <InfoPopup v-for="(e, i) in entry[3]" :key="i" type="employee" :employeeId="e">
+				<span class="compact" :class="empClass(e)">{{ empTitle(e) }}</span>
+			</InfoPopup>
 			</div>
-			<span v-else><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> fires no employees</span>
+			<i18n-t v-else keypath="history.firesNoEmployees" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_FRIDGE_RESOURCES: player keeps fridge resources -->
 		<template v-else-if="entry[0] === rf.HIST_FRIDGE_RESOURCES">
-			<div v-if="entry[3].length > 0"><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> keeps:
-				<img v-for="(g, i) in entry[3]" :key="i" class="foodTokenImg" :class="goodClass(g)" :src="goodSrc(g)" alt="" />
+			<div v-if="entry[3].length > 0"><i18n-t keypath="history.keeps" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t> <img v-for="(g, i) in entry[3]" :key="i" class="foodTokenImg" :class="goodClass(g)" :src="goodSrc(g)" alt="" />
 			</div>
-			<div v-else><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> keeps nothing</div>
+			<i18n-t v-else keypath="history.keepsNothing" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_NEW_MILESTONE: player earns a new milestone -->
 		<template v-else-if="entry[0] === rf.HIST_NEW_MILESTONE">
-			<span><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> received a new milestone: </span>
+			<span><i18n-t keypath="history.newMilestone" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t> </span>
 			<span v-if="computedEntry3.ms" class="fullMilestoneSpan" :class="computedEntry3.ms.type">
 				<div class="milestoneTitle">{{ computedEntry3.ms.title.toUpperCase() }}</div>
 				<div class="milestoneText">{{ computedEntry3.ms.description }}</div>
@@ -990,22 +1100,25 @@ const computedEntry3 = computed(() => {
 
 		<!-- HIST_CEO_BONUS_CHOSEN: player picks a CEO action -->
 		<template v-else-if="entry[0] === rf.HIST_CEO_BONUS_CHOSEN">
-			<span><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> chose a new CEO action:</span>
+			<span><i18n-t keypath="history.ceoAction" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t></span>
 			<br />
-			{{ computedEntry3.ceoText }}
+			{{ computedEntry3.ceoText ? $t(computedEntry3.ceoText) : "" }}
 		</template>
 
 		<!-- HIST_CHOOSE_MODULE: player picks a starting module -->
 		<template v-else-if="entry[0] === rf.HIST_CHOOSE_MODULE">
-			<div><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> chooses:
-				<img v-if="computedEntry3.moduleChoice" class="startingOption" :src="view.getImage(computedEntry3.moduleChoice[0])" :title="computedEntry3.moduleChoice[1]" alt="" />
-				{{ computedEntry3.moduleChoice ? computedEntry3.moduleChoice[1] : "?" }}
+			<div><i18n-t keypath="history.choosesModule" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t> <img v-if="computedEntry3.moduleChoice" class="startingOption" :src="view.getImage(computedEntry3.moduleChoice[0])" :title="$t('history.modules.' + computedEntry3.moduleChoice[1])" alt="" />
+				{{ computedEntry3.moduleChoice ? $t("history.modules." + computedEntry3.moduleChoice[1]) : "?" }}
 			</div>
 		</template>
 
 		<!-- HIST_SETUP_GAME: game start, welcome players -->
 		<template v-else-if="entry[0] === rf.HIST_SETUP_GAME">
-			<div class="new_turn">Welcome to Food Chain Magnate<br />
+			<div class="new_turn">{{ $t("history.welcome") }}<br />
 				<span v-for="(p, i) in store.players" :key="i" class="newTurnBank"> <img class="playerImage" :src="playerIconSrc(p.colour)" alt="" /> {{ p.name }} </span>
 			</div>
 		</template>
@@ -1013,21 +1126,23 @@ const computedEntry3 = computed(() => {
 		<!-- HIST_NEW_TURN: start of turn with bank and player money -->
 		<template v-else-if="entry[0] === rf.HIST_NEW_TURN">
 			<div class="new_turn">
-				Start of turn {{ entry[3][0] }}<br />
-				<span class="newTurnBank">Bank: ${{ entry[3][1] }}</span><br />
+				{{ $t("history.startOfTurn", { num: entry[3][0] }) }}<br />
+				<span class="newTurnBank">{{ $t("history.bankAmount", { amount: entry[3][1] }) }}</span><br />
 				<span v-for="(money, i) in entry[3][2]" :key="i" class="newTurnBank"> <img class="playerImage" :src="playerIconSrc(store.players[i]?.colour)" alt="" /> ${{ money }} </span>
 			</div>
 		</template>
 
 		<!-- HIST_END_GAME: game over and winner announcement -->
 		<template v-else-if="entry[0] === rf.HIST_END_GAME">
-			<div class="new_turn">Game Over</div>
-			<div class="new_turn">The winner is: <span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][0]].colour)">{{ store.players[entry[3][0]].displayName }}</span></div>
+			<div class="new_turn">{{ $t("history.gameOver") }}</div>
+			<i18n-t keypath="history.winnerIs" tag="div" scope="global" class="new_turn">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][0]].colour)">{{ store.players[entry[3][0]].displayName }}</span></template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_REMOVE_HC_MS: milestones removed by hardChoices -->
 		<template v-else-if="entry[0] === rf.HIST_REMOVE_HC_MS">
-			<span>Milestones removed - Hard Choices: </span>
+			<span>{{ $t("history.milestonesRemoved") }}</span>
 			<template v-for="(ms, i) in entry[1]" :key="i">
 				<span class="fullMilestoneSpan milestoneHC2span" :class="rf.MILESTONES_STR[ms].type">
 					<div class="milestoneTitle">{{ rf.MILESTONES_STR[ms].title.toUpperCase() }}</div>
@@ -1040,73 +1155,99 @@ const computedEntry3 = computed(() => {
 
 		<!-- HIST_REWIND: game rewound by a player or admin -->
 		<template v-else-if="entry[0] === rf.HIST_REWIND">
-			<div class="rewind">Game rewound to here by {{ entry[1] >= 0 ? playerName(entry[1]) : "admin" }}</div>
+			<div class="rewind">{{ $t("history.rewindBy", { name: entry[1] >= 0 ? playerName(entry[1]) : $t("history.admin") }) }}</div>
 		</template>
 
 		<!-- HIST_RESIGN: player resigns from the game -->
 		<template v-else-if="entry[0] === rf.HIST_RESIGN">
-			<div class="rewind">{{ playerName(entry[1]) }} Resigns</div>
+			<div class="rewind">{{ $t("history.resigns", { name: playerName(entry[1]) }) }}</div>
 		</template>
 
 		<!-- HIST_KICKOUT: player was kicked out of the game -->
 		<template v-else-if="entry[0] === rf.HIST_KICKOUT">
-			<div class="rewind">{{ playerName(entry[3][0]) }} was kicked out</div>
+			<div class="rewind">{{ $t("history.kickedOut", { name: playerName(entry[3][0]) }) }}</div>
 		</template>
 
 		<!-- HIST_BANK_BREAK: the bank was refilled -->
 		<template v-else-if="entry[0] === rf.HIST_BANK_BREAK">
-			<div>The bank broke. Refill: ${{ entry[3][0] }}</div>
+			<div>{{ $t("history.bankBroke", { amount: entry[3][0] }) }}</div>
 		</template>
 
 		<!-- HIST_BANKRUPT: a player went bankrupt -->
 		<template v-else-if="entry[0] === rf.HIST_BANKRUPT">
-			<div>Bankrupted!</div>
+			<div>{{ $t("history.bankrupted") }}</div>
 		</template>
 
 		<!-- HIST_TOTAL_BANKRUPT: all players went bankrupt, game over -->
 		<template v-else-if="entry[0] === rf.HIST_TOTAL_BANKRUPT">
-			<div>All players went bankrupted! Game over</div>
+			<div>{{ $t("history.allBankrupt") }}</div>
 		</template>
 
 		<!-- HIST_ONE_LEFT: only one player left, game over -->
 		<template v-else-if="entry[0] === rf.HIST_ONE_LEFT">
-			<div>Only one player left! Game over</div>
+			<div>{{ $t("history.oneLeft") }}</div>
 		</template>
 
 		<!-- HIST_DISCOUNT_MILESTONE: bank reduced by First Discount Manager Used -->
 		<template v-else-if="entry[0] === rf.HIST_DISCOUNT_MILESTONE">
-			<div>$100 has been removed from the bank due to the First Discount Manager Used milestone</div>
+			<div>{{ $t("history.discountMilestone") }}</div>
 		</template>
 
 		<!-- HIST_PIZZA_BOMB: First Pizza Sold triggers a free radio campaign -->
 		<template v-else-if="entry[0] === rf.HIST_PIZZA_BOMB">
-			<div><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> starts radio campaign #{{ computedEntry3.radioNum }} at co-ordinates ({{ computedEntry3.Xcoord }}, {{ computedEntry3.Ycoord }}) due to the First Pizza Sold milestone</div>
+			<i18n-t keypath="history.pizzaBomb" tag="div" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #num>{{ computedEntry3.radioNum }}</template>
+				<template #x>{{ computedEntry3.Xcoord }}</template>
+				<template #y>{{ computedEntry3.Ycoord }}</template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_LOBBYIST_PARK: lobbyist places a park -->
 		<template v-else-if="entry[0] === rf.HIST_LOBBYIST_PARK">
-			<div><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> uses a lobbyist to place {{ computedEntry3.parkDetails }}at co-ordinates ({{ computedEntry3.Xcoord }}, {{ computedEntry3.Ycoord }})</div>
+			<i18n-t keypath="history.lobbyistPark" tag="div" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #details>{{ computedEntry3.parkDetails }}</template>
+				<template #x>{{ computedEntry3.Xcoord }}</template>
+				<template #y>{{ computedEntry3.Ycoord }}</template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_LOBBYIST_ROAD: lobbyist places a road -->
 		<template v-else-if="entry[0] === rf.HIST_LOBBYIST_ROAD">
-			<div><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> uses a lobbyist to place a {{ computedEntry3.roadDetails }}at co-ordinates ({{ computedEntry3.Xcoord }}, {{ computedEntry3.Ycoord }})</div>
+			<i18n-t keypath="history.lobbyistRoad" tag="div" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #details>{{ computedEntry3.roadDetails }}</template>
+				<template #x>{{ computedEntry3.Xcoord }}</template>
+				<template #y>{{ computedEntry3.Ycoord }}</template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_NEW_TILE: a new map tile is added -->
 		<template v-else-if="entry[0] === rf.HIST_NEW_TILE">
-			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> adds a new Tile at co-ordinates ({{ computedEntry3.Xcoord }}, {{ computedEntry3.Ycoord }})
-			<img class="tileImg" :class="'r' + computedEntry3.tileRotation" :src="view.getImage(computedEntry3.tileImgKey)" alt="" />
+			<i18n-t keypath="history.addsTile" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #x>{{ computedEntry3.Xcoord }}</template>
+				<template #y>{{ computedEntry3.Ycoord }}</template>
+			</i18n-t> <img class="tileImg" :class="'r' + computedEntry3.tileRotation" :src="view.getImage(computedEntry3.tileImgKey)" alt="" />
 		</template>
 
 		<!-- HIST_COFFE_SHOP_BUILD: a coffee shop is built -->
 		<template v-else-if="entry[0] === rf.HIST_COFFE_SHOP_BUILD">
-			<div><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> builds a coffee shop at co-ordinates ({{ computedEntry3.Xcoord }}, {{ computedEntry3.Ycoord }})</div>
+			<i18n-t keypath="history.buildsCoffeeShop" tag="div" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #x>{{ computedEntry3.Xcoord }}</template>
+				<template #y>{{ computedEntry3.Ycoord }}</template>
+			</i18n-t>
 		</template>
 
 		<!-- HIST_COFFE_SHOP_REMOVE: a coffee shop is removed -->
 		<template v-else-if="entry[0] === rf.HIST_COFFE_SHOP_REMOVE">
-			<div><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span> removes a coffee shop from co-ordinates ({{ computedEntry3.Xcoord }}, {{ computedEntry3.Ycoord }})</div>
+			<i18n-t keypath="history.removesCoffeeShop" tag="div" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #x>{{ computedEntry3.Xcoord }}</template>
+				<template #y>{{ computedEntry3.Ycoord }}</template>
+			</i18n-t>
 		</template>
 
 		<!-- UNKNOWN: fallback for unrecognized history entries -->

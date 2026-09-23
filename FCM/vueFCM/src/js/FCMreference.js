@@ -792,6 +792,8 @@ export function sortEmployees(employees) {
 	return employees
 }
 
+// ponytail: translated once at module load (initData.locale is set before this runs);
+// rebuild these as getters if in-app locale switching is ever added without a page reload
 export const MILESTONES_STR = [
 	{ text: t('milestones.firstToHire3'), type: "waitress", title: t('milestones.firstToHire3Title'), description: t('milestones.firstToHire3Desc'), img: "m_icon29.png" },
 	{ text: t('milestones.firstToThrowAway'), type: "waitress", title: t('milestones.firstToThrowAwayTitle'), description: t('milestones.firstToThrowAwayDesc'), img: "m_icon27.png", additionalClass: "vertical" },
