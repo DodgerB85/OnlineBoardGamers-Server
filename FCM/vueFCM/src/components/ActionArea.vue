@@ -1012,15 +1012,6 @@ function skipModuleAndEndTurn() {
 					.
 				</div>
 			</template>
-
-			<!-- Redo Restructuring / Redo Payday: shown when player already submitted during simul phase -->
-			<template v-if="personal.pov >= 0 && !personal.canPlay() && (store.gameflow.phase === rf.PHASE_RESTRUCTURING || store.gameflow.phase === rf.PHASE_PAYDAY || (store.gameflow.phase === rf.PHASE_CLEAN_UP && !store.startingOptions.strictPaydayFridge))">
-				<div class="expertPanel">
-					<b>{{ $t("Expert Option") }}:</b>
-					<br />
-					<button class="actionsLineButton" @click="IO.unlockTurn(store.gameflow.phase)">{{ store.gameflow.phase === rf.PHASE_RESTRUCTURING ? $t("Redo Restructuring") : store.gameflow.phase === rf.PHASE_PAYDAY ? $t("Redo Payday") : $t("Redo Cleanup") }}</button>
-				</div>
-			</template>
 		</div>
 
 		<!-- Expert Panel: independent of canPlay, shows preset after player has moved -->
@@ -1037,15 +1028,6 @@ function skipModuleAndEndTurn() {
 #actionAreaDiv {
 	font-weight: bolder;
 	font-family: Arial, Helvetica, sans-serif;
-}
-.expertPanel {
-	border: 2px solid darkblue;
-	background-color: lightsalmon;
-	font-weight: bolder;
-	width: fit-content;
-	height: fit-content;
-	padding: 10px;
-	margin: auto;
 }
 
 .resignImg {

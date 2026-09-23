@@ -282,11 +282,12 @@ function getCurrentPlayerNames() {
 		<div id="topInfos">
 			<div class="infoSpanDiv">
 				<span id="infoSpan">
-					<span id="bankIcon" :class="{ bankBroken: store.bankBroken !== 0 }">🏦</span><span>Bank: ${{ store.bank }}</span>
-					|
+					<span id="bankIcon" :class="{ bankBroken: store.bankBroken !== 0 }">🏦</span>
+					<span>Bank: ${{ store.bank }}</span>
+					&nbsp;|&nbsp;
 					<span class="gameNameSpan" v-html="store.gameName"></span>
-					| {{ store.gameflow.turn }}: {{ view.phaseStr(store.gameflow.phase) }}
-					<span v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER">| {{ getCurrentPlayerNames() }}</span>
+					&nbsp;|&nbsp; {{ store.gameflow.turn }}: {{ view.phaseStr(store.gameflow.phase) }}
+					<span v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER">&nbsp;|&nbsp; {{ getCurrentPlayerNames() }}</span>
 				</span>
 			</div>
 			<div id="playerLineDiv">

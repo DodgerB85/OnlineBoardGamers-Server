@@ -44,10 +44,13 @@ const showEodOptions = computed(() => showSalarySection.value || showFoodPaySect
 
 // --- OOB (turn order) preference options (pre-move) ---
 const showOOBOptions = computed(() => {
-	if (!personal.canPlay()) return false
 	const phase = store.gameflow.phase
-	if (phase === rf.PHASE_RESTRUCTURING) return true
+	if (phase === rf.PHASE_RESTRUCTURING) {
+		if (store.viewSettings.showReplay) return false
+		return personal.pov >= 0
+	}
 	if (phase === rf.PHASE_TURN_ORDER) {
+		if (!personal.canPlay()) return false
 		if (store.gameflow.turnOrder[0] === personal.pov) return false
 		if (store.gameflow.newTurnOrder.includes(personal.pov)) return false
 		if (store.gameflow.turnOrder[store.gameflow.turnOrder.length - 1] === personal.pov) return false
@@ -118,7 +121,18 @@ function restoreRadioSelections() {
 }
 
 const isBot = computed(() => personal.pov >= 0 && store.players[personal.pov].displayName === rf.BOT_NAME)
-const showAnyOptions = computed(() => !personal.trainingGame && !isBot.value && (showEodOptions.value || showOOBOptions.value || showPostMovePanel.value))
+const showRedoButton = computed(() => {
+	if (personal.pov < 0 || personal.canPlay()) return false
+	const phase = store.gameflow.phase
+	if (phase === rf.PHASE_RESTRUCTURING || phase === rf.PHASE_PAYDAY) return true
+	return phase === rf.PHASE_CLEAN_UP && !store.startingOptions.strictPaydayFridge
+})
+const redoButtonText = computed(() => {
+	if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) return "Redo Restructuring"
+	if (store.gameflow.phase === rf.PHASE_PAYDAY) return "Redo Payday"
+	return "Redo Cleanup"
+})
+const showAnyOptions = computed(() => showRedoButton.value || (!personal.trainingGame && !isBot.value && (showEodOptions.value || showOOBOptions.value || showPostMovePanel.value)))
 
 watch(showAnyOptions, (visible) => {
 	if (visible) restoreRadioSelections()
@@ -135,7 +149,12 @@ function oobRadioChange(value) {
 	playerObj.value.OOBpreference = parseInt(value)
 }
 
-const showOOBSubmit = computed(() => store.gameflow.phase === rf.PHASE_TURN_ORDER || store.gameflow.phase === rf.PHASE_RESTRUCTURING)
+// During restructuring: no submit while the turn is open (pref goes with the turn); once submitted, Save is the only way to change it
+const showOOBSubmit = computed(() => {
+	if (store.gameflow.phase === rf.PHASE_TURN_ORDER) return true
+	if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) return personal.moveDataRaw !== ""
+	return false
+})
 
 async function submitOOB() {
 	await IO.saveOOBpreference()
@@ -173,6 +192,13 @@ function keepAllCleanup() {
 <template>
 	<div v-if="showAnyOptions" class="expertPanel">
 		<b>Expert Options</b>
+
+		<template v-if="showRedoButton">
+			<div class="expertPanelSection">
+				<button class="actionsLineButton" @click="IO.unlockTurn(store.gameflow.phase)">{{ redoButtonText }}</button>
+			</div>
+			<hr v-if="showOOBOptions" />
+		</template>
 
 		<!-- === POST-MOVE PRESET DISPLAY === -->
 		<template v-if="showPostMovePanel">

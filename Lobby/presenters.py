@@ -2387,7 +2387,7 @@ class FCMpresenter(GamePresenter):
             return 0
 
         # Finally, check it is valid
-        if self.isThisValidActualMoveArrForPhase(self.gameObj.phase, playerMoveArr) and self.gameObj.phase == rfFCM.PHASE_TURN_ORDER:
+        if self.gameObj.phase in (rfFCM.PHASE_TURN_ORDER, rfFCM.PHASE_RESTRUCTURING) and self.isThisValidActualMoveArrForPhase(self.gameObj.phase, playerMoveArr):
             return playerMoveArr[3][2]
 
         return 0
@@ -2413,7 +2413,7 @@ class FCMpresenter(GamePresenter):
             playerMoveArr[1] = [3, 4]
 
         # Finally, check it is valid
-        if self.gameObj.phase == rfFCM.PHASE_TURN_ORDER:
+        if self.gameObj.phase in (rfFCM.PHASE_TURN_ORDER, rfFCM.PHASE_RESTRUCTURING):
             while len(playerMoveArr[3]) < 2:
                 playerMoveArr[3].append([])
             if len(playerMoveArr[3]) < 3:
