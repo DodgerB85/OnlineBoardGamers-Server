@@ -2259,6 +2259,7 @@ export function startPlayerWorkingDaySubphase(subphase) {
 			if (emp === rf.HR_DIRECTOR) return total + 4
 			return total
 		}, 0)
+		if (playerObj.ceoAction === rf.CEO_ACTION_RECRUITING_MANAGER) summary.hire.salaryReductions += 2
 
 		store.wholeTurnResetData = funcs.simpleExportWholeFCMmodel()
 	}

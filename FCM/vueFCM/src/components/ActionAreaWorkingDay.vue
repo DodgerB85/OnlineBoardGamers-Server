@@ -741,8 +741,8 @@ const computedProducers = computed(() => {
 								</template>
 							</td>
 							<td>
-								<span v-if="store.context.endOfDaySummaryData.hire.total === store.context.endOfDaySummaryData.hire.hired.length && store.context.endOfDaySummaryData.hire.salaryReductions === 0" class="EODsummaryGoodSpan">0</span>
-								<span v-else-if="store.context.endOfDaySummaryData.hire.hired.length + store.context.endOfDaySummaryData.hire.salaryReductions >= store.context.endOfDaySummaryData.hire.total">{{ store.context.endOfDaySummaryData.hire.total - store.context.endOfDaySummaryData.hire.hired.length }} - Used to reduce salary</span>
+							<span v-if="store.context.endOfDaySummaryData.hire.total === store.context.endOfDaySummaryData.hire.hired.length && store.context.endOfDaySummaryData.hire.salaryReductions === 0" class="EODsummaryGoodSpan">0</span>
+							<span v-else-if="store.context.endOfDaySummaryData.hire.salaryReductions > 0 && store.context.endOfDaySummaryData.hire.hired.length + store.context.endOfDaySummaryData.hire.salaryReductions >= store.context.endOfDaySummaryData.hire.total">{{ store.context.endOfDaySummaryData.hire.total - store.context.endOfDaySummaryData.hire.hired.length }} - Used to reduce salary</span>
 								<span v-else class="EODsummaryWarningSpan">
 									{{ store.context.endOfDaySummaryData.hire.total - store.context.endOfDaySummaryData.hire.hired.length }}
 									<span v-if="store.context.endOfDaySummaryData.hire.salaryReductions > 0">({{ store.context.endOfDaySummaryData.hire.salaryReductions }} can be used to reduce salary)</span>
