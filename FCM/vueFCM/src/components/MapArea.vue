@@ -94,7 +94,8 @@ const campaignDisplays = computed(() => {
 			}
 		}
 
-		const player = model.findPlayerForCampaign(c.number)
+		const playerIndex = model.findPlayerForCampaign(c.number)
+		const player = playerIndex === -1 ? -1 : store.players[playerIndex]
 		const secondGood = player !== -1 && player.additionalMarketedGood.length > 0 && player.additionalMarketedGood[0] == c.number ? player.additionalMarketedGood[1] : -1
 
 		let imgName = "campaign_" + c.number

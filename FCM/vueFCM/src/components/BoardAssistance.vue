@@ -168,7 +168,7 @@ function buildMarketers(playerIndex, player) {
 				entry.goods.push({ good: campaignObj.good, copies: 1 })
 			}
 		} else {
-			let secondGood = player.additionalMarketedGood[0] === campaignObj.number ? player.additionalMarketedGood[1] : -1
+			let secondGood = player.additionalMarketedGood?.[0] === campaignObj.number ? player.additionalMarketedGood[1] : -1
 			if (secondGood === -1 && plyr.hasMilestone(playerIndex, rf.FIRST_RADIO_CAMPAIGN)) {
 				if (rf.MARKETING_CAMPAIGNS[campaignObj.number].type === rf.RADIO) secondGood = campaignObj.good
 			}

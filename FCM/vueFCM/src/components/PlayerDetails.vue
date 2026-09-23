@@ -22,7 +22,7 @@ function marketerGoods(playerIndex, marketer) {
 		goods.push(campaignObj.good)
 		if (plyr.hasMilestone(playerIndex, rf.FIRST_RADIO_CAMPAIGN) && rf.MARKETING_CAMPAIGNS[campaignObj.number].type === rf.RADIO) goods.push(campaignObj.good)
 	} else {
-		let secondGood = player.additionalMarketedGood[0] === campaignObj.number ? player.additionalMarketedGood[1] : -1
+		let secondGood = player.additionalMarketedGood?.[0] === campaignObj.number ? player.additionalMarketedGood[1] : -1
 		if (secondGood === -1 && plyr.hasMilestone(playerIndex, rf.FIRST_RADIO_CAMPAIGN) && rf.MARKETING_CAMPAIGNS[campaignObj.number].type === rf.RADIO) secondGood = campaignObj.good
 		goods.push(campaignObj.good)
 		if (secondGood !== -1) goods.push(secondGood)
