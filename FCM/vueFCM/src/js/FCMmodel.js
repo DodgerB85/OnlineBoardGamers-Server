@@ -968,16 +968,22 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 
 	// Efficiently filter subsets by sorting by length descending
 	possibleRoutes.sort((a, b) => b.length - a.length)
-	const uniqueRoutes = possibleRoutes.filter((route, i) => {
+	let uniqueRoutes = possibleRoutes.filter((route, i) => {
 		for (let j = 0; j < possibleRoutes.length; j++) {
-			if (i !== j && checker(possibleRoutes[j], route)) return false
+			if (i === j) continue
+			if (checker(possibleRoutes[j], route)) {
+				// route is contained in another: drop strict subsets, but among
+				// identical routes keep the first one
+				if (possibleRoutes[j].length === route.length && i < j) continue
+				return false
+			}
 		}
 		return true
 	})
 
 	// 3. Sales Potential Analysis
 	const allEntrancesIdx = new Set(giveAllPlayerRestaurantEntrances(true).map((s) => s.index))
-	const uniqueRoutesPotentialSales = []
+	let uniqueRoutesPotentialSales = []
 
 	for (const route of uniqueRoutes) {
 		let availableCoffee = getAvailableCoffee(true)
@@ -1020,6 +1026,26 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 		uniqueRoutesPotentialSales.push(salesEntry)
 	}
 
+	// Remove routes whose potential sales locations are a complete subset of
+	// another route's sales locations
+	const salesSubsetKeep = new Set(uniqueRoutes.map((_, i) => i))
+	for (let i = 0; i < uniqueRoutesPotentialSales.length; i++) {
+		const locsI = uniqueRoutesPotentialSales[i].map((x) => x[0])
+		for (let j = 0; j < uniqueRoutesPotentialSales.length; j++) {
+			if (i === j) continue
+			const locsJ = uniqueRoutesPotentialSales[j].map((x) => x[0])
+			if (locsI.length <= locsJ.length) {
+				const isSubset = locsI.every((loc) => locsJ.includes(loc))
+				if (isSubset && (locsI.length < locsJ.length || i > j)) {
+					salesSubsetKeep.delete(i)
+					break
+				}
+			}
+		}
+	}
+	uniqueRoutes = uniqueRoutes.filter((_, idx) => salesSubsetKeep.has(idx))
+	uniqueRoutesPotentialSales = uniqueRoutesPotentialSales.filter((_, idx) => salesSubsetKeep.has(idx))
+
 	// 4. Calculate Max Sales and Cleanup
 	let maxPotentialSales = 0
 	const totalAvailable = getAvailableCoffee(true).reduce((sum, a) => sum + a, 0)
@@ -1053,9 +1079,6 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 	// 5. Finalize Common Components
 	const coffeeSalesByColour = Array(6).fill(maxPotentialSales)
 	if (finalSales.length > 0) {
-		const salesStats = Array(6).fill(0)
-		finalSales[0].forEach(([_, p]) => salesStats[p]++) // Seed with first route
-
 		// Find minimum common sales across all strands
 		finalSales.forEach((routeSales) => {
 			const currentStrand = Array(6).fill(0)
@@ -1065,8 +1088,6 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 			})
 		})
 	}
-
-	const actualCoffeeSales = store.players.map((p) => coffeeSalesByColour[p.colour])
 
 	// Convert restaurant entrance indexes to base indexes for common index matching
 	for (const entry of finalSales) {
@@ -1081,20 +1102,30 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 
 	const commonSquares = finalRoutes.length > 0 ? finalRoutes[0].filter((sq) => finalRoutes.every((r) => r.includes(sq))) : []
 
-	const salesIndexes = new Set()
+	// Sales locations common to every surviving route (old model.js:1576-1592)
+	const commonSales = []
 	if (finalSales.length > 0) {
-		finalSales[0].forEach(([idx, _player]) => {
-			if (finalSales.every((fs) => fs.some((pair) => pair[0] === idx))) {
-				// If it's a restaurant, add the whole zone
-				const coord = store.mapData.coords[idx]
-				if (coord >= 140 && coord <= 149) {
-					map.getRestaurantZoneFromAnyIndex(idx).forEach((zIdx) => salesIndexes.add(zIdx))
-				} else {
-					salesIndexes.add(idx)
-				}
-			}
+		finalSales[0].forEach((pair) => {
+			if (finalSales.every((fs) => fs.some((other) => other[0] === pair[0]))) commonSales.push(pair)
 		})
 	}
+
+	// A sale only stands if it appears in every surviving route: when a route
+	// splits and the branches sell at different spots, the sales cancel out
+	// (old model.js:1594-1598)
+	const commonSalesByColour = Array(6).fill(0)
+	commonSales.forEach(([, p]) => commonSalesByColour[p]++)
+	const actualCoffeeSales = store.players.map((p) => Math.min(coffeeSalesByColour[p.colour], commonSalesByColour[p.colour]))
+
+	const salesIndexes = new Set()
+	commonSales.forEach(([idx]) => {
+		const coord = store.mapData.coords[idx]
+		if (coord >= 140 && coord <= 149) {
+			map.getRestaurantZoneFromAnyIndex(idx).forEach((zIdx) => salesIndexes.add(zIdx))
+		} else {
+			salesIndexes.add(idx)
+		}
+	})
 
 	return [actualCoffeeSales, commonSquares, Array.from(salesIndexes)]
 }

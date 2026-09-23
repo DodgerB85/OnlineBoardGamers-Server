@@ -770,8 +770,8 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 		// 2. Check for nearby restaurants from current road
 		for (const neighbor of neighbours(currentIdx)) {
 			if (restoSet.has(neighbor)) {
-				const finalRange = onTheSameTile(currentIdx, neighbor) ? currentRange : currentRange + 1
-				if (finalRange <= winningRange) {
+				// same-tile entrance is always valid; crossing a tile costs +1 range (old map.js)
+				if (onTheSameTile(currentIdx, neighbor) || currentRange + 1 <= winningRange) {
 					coffeeRoutes.push([...path])
 				}
 			}
@@ -782,11 +782,13 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 
 		for (const next of nextRoads) {
 			let nextRange = currentRange
-			if (!onTheSameTile(currentIdx, next)) nextRange++
+			const crossed = !onTheSameTile(currentIdx, next)
+			if (crossed) nextRange++
 			if (rwSet.has(next)) nextRange++
 
-			// 4. Validity Checks (Pruning)
-			if (nextRange > winningRange) continue
+			// 4. Validity Checks (Pruning) - only tile crossings and roadworks
+			// consume range; same-tile steps may continue even past it (old map.js)
+			if (nextRange > winningRange && (crossed || rwSet.has(next))) continue
 
 			const isSecondVisit = path.includes(next)
 			if (isSecondVisit) {
@@ -807,9 +809,7 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 
 	// Start the search for each starting road
 	for (const start of startNodes) {
-		if (start.range <= winningRange) {
-			findPaths(start.index, start.from, start.range, [start.index], new Set())
-		}
+		findPaths(start.index, start.from, start.range, [start.index], new Set())
 	}
 
 	return coffeeRoutes

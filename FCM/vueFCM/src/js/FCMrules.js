@@ -1932,8 +1932,10 @@ function processCoffee(houseNum, winner, usedFryChefs, coffeeEarnings, histoHous
 		const amount = salesByIndex[sellerIdx]
 		if (amount > 0) {
 			let price = amount * plyr.playersPrice(sellerIdx)
-			if (model.hasGarden(houseNum)) price *= 2
-			if (model.adjacentToPark(houseNum)) price *= 2 // Logic matches your Part 3
+			let multiplier = 1
+			if (model.hasGarden(houseNum)) multiplier++
+			if (model.adjacentToPark(houseNum)) multiplier++
+			price *= multiplier
 
 			const chefs = seller.employees.filter((e) => e === rf.FRY_CHEF).length
 			price += 10 * chefs
