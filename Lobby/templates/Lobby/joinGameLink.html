@@ -17,7 +17,7 @@
           content="{{ availableGamesList.0.gameName }} - {{ availableGamesList.0.gameDescription }}" />
 {% endblock canonical %}
 {% block head %}
-    
+    <link href="{% static 'Lobby/CSS/lobby_new.css' %}?v=9" rel="stylesheet" />
 {% endblock head %}
 {% block body %}
     {% compress js %}
@@ -25,7 +25,7 @@
         <script src="{% static 'Lobby/common.js' %}"></script>
     {% endcompress %}
     
-    <div class="page" id="lobbyPage">
+    <div class="page join-link-page" id="lobbyPage">
         {% include 'Lobby/messages.html' %}
         {% include 'Lobby/map_editor_forms.html' %}
         <div id="learningGameConfirmDiv">
@@ -44,17 +44,17 @@
                  class="buttonDiv Leave learningGameConfirmButtons">{% translate "Cancel" %}</div>
         </div>
         <div class="page-header">
-            <h2 class="page-title">{% translate "The link allows you to join the following game:" %}</h2>
+            <h1 class="page-title">{% translate "The link allows you to join the following game:" %}</h1>
         </div>
         <div id="availableGamesListView">
             {% if availableGamesList %}
                 <div class="game-list">
                     <div class="table-wrap">
-                        <table class="table gamesTable">
+                        <table class="table gamesTable lobby-games-table">
                             <thead>
                                 <tr class="headingRow">
                                     <th></th>
-                                    <th>{% translate "Name" %}</th>
+                                    <th>{% translate "Game Name" %}</th>
                                     <th>{% translate "Players" %}</th>
                                     <th>{% translate "Options" %}</th>
                                     <th>{% translate "Created" %}</th>
@@ -73,7 +73,7 @@
                 {% include "Lobby/empty.html" with message="No Available Games" %}
             {% endif %}
             {% url "lobbyHelp" as the_url %}
-            <p class="" style="font-size:13px; margin-top: 12px;">
+            <p class="join-help">
                 {% blocktranslate trimmed %}
                     For icon explanations see
                     <a href="{{ the_url }}">Help</a>

@@ -634,6 +634,17 @@
     font-size: 14px;
 }
 
+/* ---- Standalone join-link page ---- */
+.join-link-page .page-header {
+    justify-content: center;
+    text-align: center;
+}
+.join-link-page .join-help {
+    font-size: 13px;
+    margin-top: 12px;
+    text-align: center;
+}
+
 /* ---- Mobile overrides ---- */
 @media (max-width: 804px) {
     .new-game-btn {
