@@ -133,7 +133,10 @@ const redoButtonText = computed(() => {
 	if (store.gameflow.phase === rf.PHASE_PAYDAY) return i18n.global.t("expert.redoPayday")
 	return i18n.global.t("expert.redoCleanup")
 })
-const showAnyOptions = computed(() => showRedoButton.value || (!personal.trainingGame && !isBot.value && (showEodOptions.value || showOOBOptions.value || showPostMovePanel.value)))
+const showAnyOptions = computed(() => {
+	if (personal.trainingGame || personal.haltPlay || isBot.value) return false
+	return showRedoButton.value || showEodOptions.value || showOOBOptions.value || showPostMovePanel.value
+})
 
 watch(showAnyOptions, (visible) => {
 	if (visible) restoreRadioSelections()
