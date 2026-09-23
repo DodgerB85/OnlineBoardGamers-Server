@@ -366,6 +366,11 @@
 	margin: auto;
 }
 
+/* same accent header band as lobby/stats/tournaments tables; keeps the shared white th text */
+.emailSelectTable thead tr {
+	background: var(--color-accent);
+}
+
 .yourTurnTR {
 	background-color: rgb(198, 184, 226) !important;
 }
