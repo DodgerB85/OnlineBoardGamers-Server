@@ -130,6 +130,7 @@
   initData.statsExcludeVotesData = {{ statsExcludeVotesData|safe|default:"{}" }};
   initData.startingMap = {{ startingMap|default:"[]" }}
   initData.moveData = '{{ moveData|default:"" }}'
+  initData.highContrastBoardItems = {% if highContrastBoardItems %}true{% else %}false{% endif %};
 
   // Game state
   {% if finishedGame %}
@@ -173,7 +174,6 @@
   initData.assistance = {{ showAssistance|default:1 }};
   {% if currentPlayers %}initData.currentPlayersArray = {{ currentPlayers|safe|default:"[]" }};{% endif %}
   initData.preferedColor = {{ preferredColour|default:-1 }};
-  {% if highContrastBoardItems %}initData.highContrastBoardItems = true;{% endif %}
   {% if secondsToNextKickout %}initData.secondsToNextKickout = {{ secondsToNextKickout }};{% endif %}
   {% if currentNotes %}initData.currentNotes = '{{ currentNotes | escapejs }}';{% endif %}
   {% if nextURL %}initData.nextURLGlobal = "{{ nextURL|safe }}";{% endif %}

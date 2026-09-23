@@ -44,7 +44,6 @@ Lobby/sharedFunctions/emailCounter.txt
 
 # Exclude any folder found anywhere in subdirectories
 vuePPF/
-vueFCM/
 staticfiles/
 
 # Handle stats carefully and specifically
@@ -82,6 +81,3 @@ siteUtils/client_secrets.json
 live.sql
 .codeiumignore
 /scratchpad/
-
-# Generated fixture DB for the visual snapshot harness; rebuild with snapshot_fixture/build.py.
-/snapshot_fixture/db.sqlite3
