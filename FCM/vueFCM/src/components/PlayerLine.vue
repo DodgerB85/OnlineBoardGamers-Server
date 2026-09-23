@@ -85,6 +85,7 @@ function showCurrentPlayerGlow(playerIndex) {
 	width: 120px;
 	min-width: 40px;
 	height: 98px;
+	line-height: 16px;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	font-weight: bolder;
