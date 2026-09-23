@@ -2112,8 +2112,8 @@ class FCMpresenter(GamePresenter):
                 message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase5 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
                 SN_sendAdminErrorMessage(message)
                 return False
-            # First arr must be an arr then an arr
-            if not isinstance(moveData[0][0], list) or not isinstance(moveData[0][1], list):
+            # First arr must be two arrays: [[fired/pay flags], [paid food]]
+            if len(moveData[0]) < 2 or not isinstance(moveData[0][0], list) or not isinstance(moveData[0][1], list):
                 message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase6 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
                 SN_sendAdminErrorMessage(message)
                 return False
@@ -2123,8 +2123,9 @@ class FCMpresenter(GamePresenter):
                 SN_sendAdminErrorMessage(message)
                 return False
 
-            # Now there is valid data, so check it is an ACTUAL move
-            if phase == rfFCM.PHASE_PAYDAY and moveData[0][0][0] == -9:
+            # Now there is valid data, so check it is an ACTUAL move.
+            # Empty fired list is treated the same as -9 (no payday move yet).
+            if phase == rfFCM.PHASE_PAYDAY and (len(moveData[0][0]) < 1 or moveData[0][0][0] == -9):
                 return False
             return not (phase == rfFCM.PHASE_CLEAN_UP and moveData[1][0] == -9)
 

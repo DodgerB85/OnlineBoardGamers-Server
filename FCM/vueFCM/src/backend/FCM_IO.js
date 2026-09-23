@@ -700,7 +700,10 @@ export async function savePreTurn(preMoveDataRaw) {
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
-	
+	// Empty payday fire list would fail server validation (treated as no move)
+	if (Array.isArray(preMoveDataRaw) && Array.isArray(preMoveDataRaw[0]) && Array.isArray(preMoveDataRaw[0][0]) && preMoveDataRaw[0][0].length === 0) {
+		preMoveDataRaw[0][0] = [-9]
+	}
 
 	let postData = {
 		action: "preTurn",
