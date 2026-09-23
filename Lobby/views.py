@@ -3104,7 +3104,10 @@ def joinGame(request, gameType):
 
     # Leave your own waiting game -- they are already AVAILABLE
     elif action == "vacate":
-        if currentGame.gameStatus == "ACTIVE":
+        if request.user not in current_players_list:
+            # Stale page: you already left (or were never in this game) -- do not touch the game
+            messages.error(request, (gettext("Error: You are not in that game")))
+        elif currentGame.gameStatus == "ACTIVE":
             messages.error(request, (gettext("The game has already started")))
         else:
             currentGame.players.filter(player=request.user).delete()
