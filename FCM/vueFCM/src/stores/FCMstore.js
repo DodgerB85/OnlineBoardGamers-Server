@@ -109,6 +109,7 @@ export const useModelStore = defineStore("store", () => {
 	const availableMarketingCampaigns = reactive([])
 	// set stuff
 	const ceoLevel = ref(3)
+	const bank = ref(0)
 	const bankBroken = ref(0)
 	const reserveCards = reactive([])
 	const coffeeShopMSplayers = reactive([])
@@ -396,6 +397,7 @@ export const useModelStore = defineStore("store", () => {
 		parks,
 		newRoads,
 		reserveCards,
+		bank,
 		bankBroken,
 		availableEmployees,
 		availableMarketingCampaigns,

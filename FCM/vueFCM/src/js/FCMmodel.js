@@ -21,7 +21,12 @@ export async function initGame() {
 	personal.haltPlay = true
 
 	// set up starting options
-	if (window.initData.startingOptions) setInternalStartingOptions(window.initData.startingOptions)
+	if (window.initData.startingOptions) {
+		setInternalStartingOptions(window.initData.startingOptions)
+		// Seed the raw list so draft UI / module list survive a reload
+		store.externalStartingOptions.splice(0)
+		for (const opt of window.initData.startingOptions) store.externalStartingOptions.push(parseInt(opt, 10))
+	}
 	store.startingOptionsHTML = window.initData.startingOptionsHTML || ""
 
 	// Set up all Data
@@ -345,11 +350,10 @@ export function setInternalStartingOptions(startingOptionsArray) {
 		if (opts[i] === rf.SO_SANDBOX_MODE) store.startingOptions.sandboxMode = true
 
 		if (opts[i] === rf.SO_DRAFT_MODULES) store.startingOptions.draftModules = true
-		// NB ALWAYS STOP IF DRAFT MODULES HAVE BEEN FOUND, OTHERWISE IMPORT BREAKS
-		if (opts[i] === rf.SO_DRAFT_MODULE_BREAKER) {
-			store.startingOptions.draftModules = true
-			return
-		}
+		// 300 marks draft-module mode; flags for options AFTER 300 (already-drafted
+		// modules like lobbylist/coffee) must still apply — stopping here made
+		// export/include-lobby-tiles disagree with import on reload
+		if (opts[i] === rf.SO_DRAFT_MODULE_BREAKER) store.startingOptions.draftModules = true
 	}
 }
 
