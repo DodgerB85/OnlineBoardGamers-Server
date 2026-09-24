@@ -772,7 +772,7 @@ const sortedCampaigns = computed(() => {
 				<p><b>{{ $t('topMenuViews.availableParks') }}</b></p>
 				<div class="parksContainer">
 					<span v-for="(parkType, index) in getParkCounts()" :key="'park-' + index" class="parkRoadReserveHolder">
-						<!-- TODO: Display park image based on type -->
+						<img :src="view.getImage('park_' + parkType.type)" :style="{ width: parkType.type === 0 ? '133px' : '100px', transform: parkType.type === 0 ? 'none' : 'rotate(180deg)' }" alt="" />
 						<span>x {{ parkType.count }}</span>
 					</span>
 				</div>
@@ -783,7 +783,7 @@ const sortedCampaigns = computed(() => {
 				<p><b>{{ $t('topMenuViews.availableRoads') }}</b></p>
 				<div class="roadsContainer">
 					<span v-for="(roadType, index) in getRoadCounts()" :key="'road-' + index" class="parkRoadReserveHolder">
-						<!-- TODO: Display road image based on type -->
+						<img :src="view.getImage('road_' + roadType.type + '_UC')" :style="{ width: roadType.type === 1 ? '150px' : '75px', transform: roadType.type === 2 ? 'rotate(270deg)' : 'none' }" alt="" />
 						<span>x {{ roadType.count }}</span>
 					</span>
 				</div>
@@ -793,7 +793,9 @@ const sortedCampaigns = computed(() => {
 			<div v-if="store.startingOptions && store.startingOptions.lobbyists" class="reserveSection">
 				<p><b>{{ $t('topMenuViews.availableLobbyistTiles') }}</b></p>
 				<div id="allTileChoiceDivRes">
-					<!-- TODO: Display available lobbyist tiles -->
+					<div v-for="tile in rules.availableLobbyistTiles()" :key="'restile-' + tile">
+						<img :src="view.getImage('map' + String(tile + 1).padStart(2, '0'))" class="reserveTileImg" :alt="'Tile ' + (tile + 1)" />
+					</div>
 				</div>
 			</div>
 
@@ -1015,6 +1017,30 @@ const sortedCampaigns = computed(() => {
 #reserveTitle {
 	font-size: 30px;
 	font-weight: bolder;
+}
+
+.parkRoadReserveHolder {
+	display: inline-block;
+	padding: 5px;
+	vertical-align: middle;
+}
+
+.parkRoadReserveHolder img {
+	vertical-align: middle;
+}
+
+#allTileChoiceDivRes {
+	display: inline-block;
+	width: 100%;
+}
+
+#allTileChoiceDivRes div {
+	display: inline-block;
+	padding: 15px;
+}
+
+.reserveTileImg {
+	width: 100px;
 }
 
 /** MILESTONES */
