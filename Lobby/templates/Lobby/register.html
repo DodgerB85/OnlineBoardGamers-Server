@@ -22,24 +22,24 @@
           <div id="btWarning"
                class="callout callout-warn"
                style="display:none">
-            CAUTION: BtInternet is rejecting my emails as spam. Please add
+            {% translate "CAUTION: BtInternet is rejecting my emails as spam. Please add" %}
             <img id="contactEmailImg"
                  src="{% static 'Lobby/email.png' %}"
                  alt="{% translate "Email Address" %}"
                  width="400"
                  height="30">
-            to your safe senders / whitelist / allowed emails
+            {% translate "to your safe senders / whitelist / allowed emails" %}
           </div>
           <div id="registerEmailInfoDiv" class="callout callout-info">
-            A genuine email address is required to activate your account
+            {% translate "A genuine email address is required to activate your account" %}
             <br />
-            Please check your spam folder, and add
+            {% translate "Please check your spam folder, and add" %}
             <img id="contactEmailImg"
                  src="{% static 'Lobby/email.png' %}"
                  alt="{% translate "Email Address" %}"
                  width="400"
                  height="30">
-            to your safe senders / whitelist / allowed emails
+            {% translate "to your safe senders / whitelist / allowed emails" %}
           </div>
         </div>
         <div class="card section">

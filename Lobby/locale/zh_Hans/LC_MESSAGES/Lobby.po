@@ -106,7 +106,7 @@ msgstr "Bus"
 
 #: .\sharedFunctions\sharedNotifications.py:58
 msgid "Your Great Zimbabwe game has finished"
-msgstr "你的 The Great Zimbabwe 游戏已结束"
+msgstr "你的 大津巴布韦 游戏已结束"
 
 #: .\sharedFunctions\sharedNotifications.py:59
 #: .\sharedFunctions\sharedNotifications.py:155
@@ -115,7 +115,7 @@ msgstr "你的 The Great Zimbabwe 游戏已结束"
 #: .\templates\Lobby\about.html:22 .\templates\Lobby\index.html:86
 #: .\templates\Lobby\newGames.html:8
 msgid "The Great Zimbabwe"
-msgstr "The Great Zimbabwe"
+msgstr "大津巴布韦"
 
 #: .\sharedFunctions\sharedNotifications.py:61
 msgid "Your Cannes game has finished"
@@ -207,7 +207,7 @@ msgstr "轮到你在 TGZ 行动"
 #: .\sharedFunctions\sharedNotifications.py:463
 #| msgid "Click here to play Horseless Carriage"
 msgid "Click here to play The Great Zimbabwe"
-msgstr "点击开始 The Great Zimbabwe 游戏"
+msgstr "点击开始 大津巴布韦 游戏"
 
 #: .\sharedFunctions\sharedNotifications.py:158
 #| msgid "It is your move"
@@ -340,7 +340,7 @@ msgstr ""
 #: .\sharedFunctions\sharedNotifications.py:460
 #| msgid "You have joined the game and the game has started"
 msgid "Your Great Zimbabwe game has started!"
-msgstr "你的 The Great Zimbabwe 游戏已开始！"
+msgstr "你的 大津巴布韦 游戏已开始！"
 
 #: .\sharedFunctions\sharedNotifications.py:462
 #, python-format
@@ -348,7 +348,7 @@ msgid ""
 "Your Great Zimbabwe game has started!\n"
 "%(gameName)s - Starting Player:  %(currentPlayer)s."
 msgstr ""
-"你的 The Great Zimbabwe 游戏已开始！\n"
+"你的 大津巴布韦 游戏已开始！\n"
 "%(gameName)s - 先手玩家：%(currentPlayer)s。"
 
 #: .\sharedFunctions\sharedNotifications.py:514
@@ -1820,11 +1820,11 @@ msgstr "Xango（第二决胜条件）"
 
 #: .\templates\Lobby\createTGZ.html:385
 msgid " Create And Start The Great Zimbabwe Tournament Game"
-msgstr " 创建并开始 The Great Zimbabwe 锦标赛游戏"
+msgstr " 创建并开始 大津巴布韦 锦标赛游戏"
 
 #: .\templates\Lobby\createTGZ.html:387
 msgid " Create The Great Zimbabwe Game"
-msgstr " 创建 The Great Zimbabwe 游戏"
+msgstr " 创建 大津巴布韦 游戏"
 
 #: .\templates\Lobby\donate\donate.html:20
 msgid "Thank you"
@@ -2561,7 +2561,7 @@ msgid ""
 "their choice."
 msgstr ""
 "来自 <a href=\"https://www.splottershop.com/\" "
-"target=\"_blank\">Splotter's</a> 网站：<br /> <i>The Great Zimbabwe "
+"target=\"_blank\">Splotter's</a> 网站：<br /> <i>大津巴布韦 "
 "是一款关于在古代非洲建立贸易文明的游戏。灵感来自南非世界遗产大津巴布韦周边的古老王国。<br/> "
 "与我们的其他游戏一样，我们以这段历史为灵感；但首要目标是创造一款极具可玩性和重玩价值的 Splotter "
 "游戏，因此在许多历史名称、时期和美术上做了艺术加工。<br/>游戏中，玩家努力为自己选择的神建造最令人印象深刻的纪念碑。十二位神各有独特祝福，但获胜所需的工作量也各不相同。建造纪念碑需要发展横跨该地区的物流网络。通过该网络，玩家生产和获取仪式物品，升起纪念碑，为所选之神带来荣耀。"
@@ -2668,8 +2668,8 @@ msgid ""
 "href=\"https://www.splottershop.com/\" target=\"_blank\">Splotter "
 "Spellen</a>. Permission Provided."
 msgstr ""
-"Food Chain Magnate、Horseless Carriage、Bus 和 The Great Zimbabwe 是 Jeroen "
-"Doumen 与 Joris Wiersinga 设计、由 <a href=\"https://www.splottershop.com/\" "
+"Food Chain Magnate、Horseless Carriage、Bus 和 大津巴布韦 是 Jeroen Doumen 与 Joris "
+"Wiersinga 设计、由 <a href=\"https://www.splottershop.com/\" "
 "target=\"_blank\">Splotter Spellen</a> 出版的桌游。已获授权。"
 
 #: .\templates\Lobby\lobby.html:95
@@ -2783,7 +2783,7 @@ msgstr "Bus 帮助页面"
 
 #: .\templates\Lobby\lobbyHelp.html:26
 msgid "The Great Zimbabwe Help Page"
-msgstr "The Great Zimbabwe 帮助页面"
+msgstr "大津巴布韦 帮助页面"
 
 #: .\templates\Lobby\lobbyHelp.html:29
 msgid "Website Help"
@@ -3117,8 +3117,8 @@ msgstr ""
 "人及以上局不鼓励认输。认输可能打破剩余玩家的平衡，因此强烈建议留在游戏中并尝试达成替代目标（例如别垫底、卖出最多卡车、用完所有营销员等）。<br "
 "/><b><u>Food Chain Magnate</b></u>：4 "
 "回合后可认输。也可在放置初始餐厅时的确认选项中认输，用于退出非本意加入的游戏。仍会计为负场。<br /><b><u>Horseless "
-"Carriage</b></u>：研究阶段可认输。<br /><b><u>Bus</b></u>：“选择行动”阶段可认输。<br /><b><u>The"
-" Great Zimbabwe</b></u>：行动阶段且无人超过 VR 时可认输，游戏无论如何会在本回合结束。<br "
+"Carriage</b></u>：研究阶段可认输。<br /><b><u>Bus</b></u>：“选择行动”阶段可认输。<br "
+"/><b><u>大津巴布韦</b></u>：行动阶段且无人超过 VR 时可认输，游戏无论如何会在本回合结束。<br "
 "/><b><u>Cannes</b></u>：“放置板块”阶段可认输。"
 
 #: .\templates\Lobby\lobbyHelp.html:206
@@ -3213,7 +3213,7 @@ msgstr ""
 #| msgid "What are the icons next to Food Chain Magnate games?"
 msgid ""
 "What are the icons next to Food Chain Magnate / The Great Zimbabwe games?"
-msgstr "Food Chain Magnate / The Great Zimbabwe 游戏旁的图标是什么？"
+msgstr "Food Chain Magnate / 大津巴布韦 游戏旁的图标是什么？"
 
 #: .\templates\Lobby\lobby_icons.html:6
 msgid ""
@@ -3416,7 +3416,7 @@ msgstr "Bus 最喜爱的颜色和棋盘"
 #: .\templates\Lobby\profile.html:418
 #| msgid "Favourite Horseless Carriage Colour"
 msgid "Favourite The Great Zimbabwe Colour"
-msgstr "The Great Zimbabwe 最喜爱的颜色"
+msgstr "大津巴布韦 最喜爱的颜色"
 
 #: .\templates\Lobby\profile.html:486
 msgid "Minimal Description Text in the UI"

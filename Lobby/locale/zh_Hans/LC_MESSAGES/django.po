@@ -26,7 +26,7 @@ msgstr "你的训练游戏已开始"
 
 #: .\AQY\templates\AQY\AQYhelp.html:5
 msgid "Antiquity Help"
-msgstr "Antiquity 帮助"
+msgstr "中世纪 帮助"
 
 #: .\AQY\templates\AQY\AQYhelp.html:9 .\CNS\templates\CNS\CNShelp.html:9
 #: .\IND\templates\IND\INDhelp.html:9 .\KFW\templates\KFW\KFWhelp.html:9
@@ -41,7 +41,7 @@ msgid ""
 "href=\"https://tesera.ru/images/items/188574/Antiquity_Rules.pdf\" "
 "target=\"_blank\" download>here</a>"
 msgstr ""
-"Antiquity 规则见 <a class=\"linkOther\" "
+"中世纪 规则见 <a class=\"linkOther\" "
 "href=\"https://tesera.ru/images/items/188574/Antiquity_Rules.pdf\" "
 "target=\"_blank\" download>此处</a>"
 
@@ -108,7 +108,7 @@ msgstr "接下来是当前饥荒等级，以及 3 个地图选项。可更改六
 
 #: .\AQY\templates\AQY\AQYhelp.html:76
 msgid "These can be set permanently in your Antiquity Preferences."
-msgstr "可在你的 Antiquity 偏好中永久设置。"
+msgstr "可在你的 中世纪 偏好中永久设置。"
 
 #: .\AQY\templates\AQY\AQYhelp.html:77
 msgid ""
@@ -141,7 +141,7 @@ msgstr "别忘了设置你的"
 #: .\Lobby\templates\Lobby\profileAQY.html:13
 #| msgid "Update Notification Preferences"
 msgid "Antiquity Preferences"
-msgstr "Antiquity 偏好"
+msgstr "中世纪 偏好"
 
 #: .\AQY\templates\AQY\AQYhelp.html:106
 msgid "Rewind / Replay"
@@ -294,7 +294,7 @@ msgid ""
 "victory condition, then you will simply lose, along with all other players "
 "who did not achieve theirs. Times were tough in Antiquity!"
 msgstr ""
-"游戏结束检查。仅在此回合时点进行结束检查。若多名玩家达成圣人胜利条件，则控制区内未污染六边形最多者获胜；若仍平则并列获胜。若未达成圣人条件，则你与所有未达成者一起失败。Antiquity"
+"游戏结束检查。仅在此回合时点进行结束检查。若多名玩家达成圣人胜利条件，则控制区内未污染六边形最多者获胜；若仍平则并列获胜。若未达成圣人条件，则你与所有未达成者一起失败。中世纪"
 " 的岁月很艰难！"
 
 #: .\AQY\templates\AQY\AQYhelp.html:190
@@ -386,7 +386,7 @@ msgstr "如有任何问题/意见/建议，请联系"
 
 #: .\AQY\templates\AQY\AQYstats.html:22
 msgid "Antiquity Stats"
-msgstr "Antiquity 统计"
+msgstr "中世纪 统计"
 
 #: .\AQY\templates\AQY\AQYstats.html:24 .\TGZ\templates\TGZ\TGZstats.html:24
 msgid "Back to Main Stats"
@@ -407,7 +407,7 @@ msgid ""
 "These are historical stats. They show what has happened in previous games, "
 "but Antiquity still rewards reading and responding to the current game "
 "state."
-msgstr "这些是历史统计，反映以往对局情况，但 Antiquity 仍奖励读懂并响应当前局势。"
+msgstr "这些是历史统计，反映以往对局情况，但 中世纪 仍奖励读懂并响应当前局势。"
 
 #: .\AQY\templates\AQY\AQYstats.html:42
 msgid "Saint Statistics"
@@ -730,7 +730,7 @@ msgstr "错误：不能添加自己"
 #: .\IND\templates\IND\INDhelp.html:5
 #| msgid "Website Help"
 msgid "Indonesia Help"
-msgstr "Indonesia 帮助"
+msgstr "印度尼西亚 帮助"
 
 #: .\IND\templates\IND\INDhelp.html:12
 msgid ""
@@ -738,7 +738,7 @@ msgid ""
 "href=\"https://tesera.ru/images/items/174714/indonesia_E.pdf\" "
 "target=\"_blank\" download>here</a>"
 msgstr ""
-"Indonesia 规则见 <a class=\"linkOther\" "
+"印度尼西亚 规则见 <a class=\"linkOther\" "
 "href=\"https://tesera.ru/images/items/174714/indonesia_E.pdf\" "
 "target=\"_blank\" download>此处</a>"
 
@@ -761,7 +761,7 @@ msgstr "可用旁边的按钮展开/折叠玩家表格"
 #: .\Lobby\templates\Lobby\profileIND.html:13
 #| msgid "Update Colour Preferences"
 msgid "Indonesia Preferences"
-msgstr "Indonesia 偏好"
+msgstr "印度尼西亚 偏好"
 
 #: .\IND\templates\IND\INDhelp.html:82
 msgid "There is an option to play the game with hidden money."
@@ -975,7 +975,7 @@ msgstr "你可以在“回合顺序竞标”阶段认输。"
 
 #: .\KFW\templates\KFW\KFWhelp.html:5
 msgid "Keyflower Help"
-msgstr "Keyflower 帮助"
+msgstr "大五月花号 帮助"
 
 #: .\KFW\templates\KFW\KFWhelp.html:12
 #, python-format
@@ -985,7 +985,7 @@ msgid ""
 "content/uploads/rules/Keyflower%%20-%%20rules.pdf?srsltid=AfmBOop3dONhZoXgiTeHUqHDAex0gC7guoM19D3yA91RXA1Txe2VfQbf'"
 " target='_blank' downlod>here</a>"
 msgstr ""
-"Keyflower 规则见 <a class='linkOther' href='https://fgbradleys.com/wp-"
+"大五月花号 规则见 <a class='linkOther' href='https://fgbradleys.com/wp-"
 "content/uploads/rules/Keyflower%%20-%%20rules.pdf?srsltid=AfmBOop3dONhZoXgiTeHUqHDAex0gC7guoM19D3yA91RXA1Txe2VfQbf'"
 " target='_blank' downlod>此处</a>"
 
@@ -997,7 +997,7 @@ msgid ""
 "anhliyskoiu.pdf?srsltid=AfmBOoqdQ5gNb_S1UiibHd5OppCC1BSVMJCRFmvAgvX9vIQYOEcldCZX'"
 " target='_blank' downlod>here</a>"
 msgstr ""
-"Keyflower 商人扩展规则见 <a class='linkOther' href='https://store.pakufuda.com/wp-"
+"大五月花号 商人扩展规则见 <a class='linkOther' href='https://store.pakufuda.com/wp-"
 "content/uploads/2022/08/Keyflower_Merchants_Pravyla-"
 "anhliyskoiu.pdf?srsltid=AfmBOoqdQ5gNb_S1UiibHd5OppCC1BSVMJCRFmvAgvX9vIQYOEcldCZX'"
 " target='_blank' downlod>此处</a>"
@@ -1060,7 +1060,7 @@ msgid ""
 "game, there are 3 options for displaying this hidden information, chosen "
 "when the game was created."
 msgstr ""
-"Keyflower "
+"大五月花号 "
 "对局中玩家有若干隐藏工人与技能板块。这些物品的确切类型可能在某些时点已知，例如收到绿工人或从船收集资源时。训练游戏中你扮演所有玩家，无隐藏信息。正常游戏创建时有"
 " 3 种隐藏信息显示选项。"
 
@@ -1644,22 +1644,22 @@ msgstr "Bus - 收到迷你锦标赛邀请"
 #: .\Lobby\templates\Lobby\stats.html:31
 #: .\Lobby\templates\Lobby\tournamentsHelp.html:53
 msgid "The Great Zimbabwe"
-msgstr "The Great Zimbabwe"
+msgstr "大津巴布韦"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:124
 #| msgid "You have joined the game and the game has started"
 msgid "Your The Great Zimbabwe game has finished"
-msgstr "你的 The Great Zimbabwe 游戏已结束"
+msgstr "你的 大津巴布韦 游戏已结束"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:125
 #| msgid "It is your move"
 msgid "It is your turn in The Great Zimbabwe"
-msgstr "轮到你在 The Great Zimbabwe 行动"
+msgstr "轮到你在 大津巴布韦 行动"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:126
 #| msgid "Click here to play Horseless Carriage"
 msgid "Click here to play The Great Zimbabwe"
-msgstr "点击开始 The Great Zimbabwe 游戏"
+msgstr "点击开始 大津巴布韦 游戏"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:127
 msgid "TGZ Bug Report"
@@ -1668,31 +1668,31 @@ msgstr "TGZ Bug 报告"
 #: .\Lobby\sharedFunctions\sharedNotifications.py:128
 #| msgid "Food Chain Magnate - Game Invitation Received"
 msgid "The Great Zimbabwe - Invitation Received"
-msgstr "The Great Zimbabwe - 收到游戏邀请"
+msgstr "大津巴布韦 - 收到游戏邀请"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:129
 #| msgid "You have joined the game and the game has started"
 msgid "The Great Zimbabwe - Tournament Game Started"
-msgstr "The Great Zimbabwe - 锦标赛游戏已开始"
+msgstr "大津巴布韦 - 锦标赛游戏已开始"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:130
 #| msgid "You have joined the game and the game has started"
 msgid "The Great Zimbabwe - Mini Tournament Game Started"
-msgstr "The Great Zimbabwe - 迷你锦标赛游戏已开始"
+msgstr "大津巴布韦 - 迷你锦标赛游戏已开始"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:131
 #| msgid "Favourite Horseless Carriage Colour"
 msgid "The Great Zimbabwe - Tournament Won!"
-msgstr "The Great Zimbabwe - 赢得锦标赛！"
+msgstr "大津巴布韦 - 赢得锦标赛！"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:132
 msgid "The Great Zimbabwe - Mini Tournament Won!"
-msgstr "The Great Zimbabwe - 赢得迷你锦标赛！"
+msgstr "大津巴布韦 - 赢得迷你锦标赛！"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:133
 #| msgid "You have joined the game and the game has started"
 msgid "Your Great Zimbabwe game has started"
-msgstr "你的 The Great Zimbabwe 游戏已开始"
+msgstr "你的 大津巴布韦 游戏已开始"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:134
 msgid "A player has declined your invitation for TGZ"
@@ -1700,21 +1700,21 @@ msgstr "有玩家拒绝了你的 TGZ 游戏邀请"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:135
 msgid "The Great Zimbabwe - Less than 2 hours to move"
-msgstr "The Great Zimbabwe - 不足 2 小时需要行动"
+msgstr "大津巴布韦 - 不足 2 小时需要行动"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:136
 #| msgid "Favourite Horseless Carriage Colour"
 msgid "The Great Zimbabwe - Turn Expired"
-msgstr "The Great Zimbabwe - 回合已超时"
+msgstr "大津巴布韦 - 回合已超时"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:137
 msgid "The Great Zimbabwe - Tournament Open for Signup"
-msgstr "The Great Zimbabwe - 锦标赛开放报名"
+msgstr "大津巴布韦 - 锦标赛开放报名"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:138
 #| msgid "Horseless Carriage - Game Invitation Received"
 msgid "The Great Zimbabwe - Mini Tournament Invitation Received"
-msgstr "The Great Zimbabwe - 收到迷你锦标赛邀请"
+msgstr "大津巴布韦 - 收到迷你锦标赛邀请"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:142
 #: .\Lobby\sharedFunctions\sharedRefs.py:35
@@ -1805,22 +1805,22 @@ msgstr "Cannes - 收到迷你锦标赛邀请"
 #: .\Lobby\templates\Lobby\stats.html:32
 #: .\Lobby\templates\Lobby\tournamentsHelp.html:33
 msgid "Antiquity"
-msgstr "Antiquity"
+msgstr "中世纪"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:162
 #| msgid "Create Food Chain Magnate Game"
 msgid "Your Antiquity game has finished"
-msgstr "你的 Antiquity 游戏已结束"
+msgstr "你的 中世纪 游戏已结束"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:163
 #| msgid "It is your move"
 msgid "It is your turn in Antiquity"
-msgstr "轮到你在 Antiquity 行动"
+msgstr "轮到你在 中世纪 行动"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:164
 #| msgid "Click here to play Food Chain Magnate"
 msgid "Click here to play Antiquity"
-msgstr "点击开始 Antiquity 游戏"
+msgstr "点击开始 中世纪 游戏"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:165
 msgid "AQY Bug Report"
@@ -1829,49 +1829,49 @@ msgstr "AQY Bug 报告"
 #: .\Lobby\sharedFunctions\sharedNotifications.py:166
 #| msgid "Food Chain Magnate - Game Invitation Received"
 msgid "Antiquity - Invitation Received"
-msgstr "Antiquity - 收到游戏邀请"
+msgstr "中世纪 - 收到游戏邀请"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:167
 msgid "Antiquity - Tournament Game Started"
-msgstr "Antiquity - 锦标赛游戏已开始"
+msgstr "中世纪 - 锦标赛游戏已开始"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:168
 msgid "Antiquity - Mini Tournament Game Started"
-msgstr "Antiquity - 迷你锦标赛游戏已开始"
+msgstr "中世纪 - 迷你锦标赛游戏已开始"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:169
 msgid "Antiquity - Tournament Won!"
-msgstr "Antiquity - 赢得锦标赛！"
+msgstr "中世纪 - 赢得锦标赛！"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:170
 msgid "Antiquity - Mini Tournament Won!"
-msgstr "Antiquity - 赢得迷你锦标赛！"
+msgstr "中世纪 - 赢得迷你锦标赛！"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:171
 #| msgid "The game has already started"
 msgid "Your Antiquity game has started"
-msgstr "你的 Antiquity 游戏已开始"
+msgstr "你的 中世纪 游戏已开始"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:172
 msgid "A player has declined your invitation for Antiquity"
-msgstr "有玩家拒绝了你的 Antiquity 游戏邀请"
+msgstr "有玩家拒绝了你的 中世纪 游戏邀请"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:173
 msgid "Antiquity - Less than 2 hours to move"
-msgstr "Antiquity - 不足 2 小时需要行动"
+msgstr "中世纪 - 不足 2 小时需要行动"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:174
 msgid "Antiquity - Turn Expired"
-msgstr "Antiquity - 回合已超时"
+msgstr "中世纪 - 回合已超时"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:175
 msgid "Antiquity - Tournament Open for Signup"
-msgstr "Antiquity - 锦标赛开放报名"
+msgstr "中世纪 - 锦标赛开放报名"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:176
 #| msgid "Food Chain Magnate - Game Invitation Received"
 msgid "Antiquity - Mini Tournament Invitation Received"
-msgstr "Antiquity - 收到迷你锦标赛邀请"
+msgstr "中世纪 - 收到迷你锦标赛邀请"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:180
 #: .\Lobby\sharedFunctions\sharedRefs.py:37
@@ -1885,22 +1885,22 @@ msgstr "Antiquity - 收到迷你锦标赛邀请"
 #: .\Lobby\templates\Lobby\newGames.html:27
 #: .\Lobby\templates\Lobby\tournamentsHelp.html:37
 msgid "Indonesia"
-msgstr "Indonesia"
+msgstr "印度尼西亚"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:181
 #| msgid "Create Horseless Carriage Game"
 msgid "Your Indonesia game has finished"
-msgstr "你的 Indonesia 游戏已结束"
+msgstr "你的 印度尼西亚 游戏已结束"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:182
 #| msgid "It is your move"
 msgid "It is your turn in Indonesia"
-msgstr "轮到你在 Indonesia 行动"
+msgstr "轮到你在 印度尼西亚 行动"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:183
 #| msgid "Click here to play Food Chain Magnate"
 msgid "Click here to play Indonesia"
-msgstr "点击开始 Indonesia 游戏"
+msgstr "点击开始 印度尼西亚 游戏"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:184
 msgid "IND Bug Report"
@@ -1909,50 +1909,50 @@ msgstr "IND Bug 报告"
 #: .\Lobby\sharedFunctions\sharedNotifications.py:185
 #| msgid "Food Chain Magnate - Game Invitation Received"
 msgid "Indonesia - Invitation Received"
-msgstr "Indonesia - 收到游戏邀请"
+msgstr "印度尼西亚 - 收到游戏邀请"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:186
 msgid "Indonesia - Tournament Game Started"
-msgstr "Indonesia - 锦标赛游戏已开始"
+msgstr "印度尼西亚 - 锦标赛游戏已开始"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:187
 msgid "Indonesia - Mini Tournament Game Started"
-msgstr "Indonesia - 迷你锦标赛游戏已开始"
+msgstr "印度尼西亚 - 迷你锦标赛游戏已开始"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:188
 #| msgid "Join Tournament"
 msgid "Indonesia - Tournament Won!"
-msgstr "Indonesia - 赢得锦标赛！"
+msgstr "印度尼西亚 - 赢得锦标赛！"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:189
 msgid "Indonesia - Mini Tournament Won!"
-msgstr "Indonesia - 赢得迷你锦标赛！"
+msgstr "印度尼西亚 - 赢得迷你锦标赛！"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:190
 #| msgid "The game has already started"
 msgid "Your Indonesia game has started"
-msgstr "你的 Indonesia 游戏已开始"
+msgstr "你的 印度尼西亚 游戏已开始"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:191
 msgid "A player has declined your invitation for Indonesia"
-msgstr "有玩家拒绝了你的 Indonesia 游戏邀请"
+msgstr "有玩家拒绝了你的 印度尼西亚 游戏邀请"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:192
 msgid "Indonesia - Less than 2 hours to move"
-msgstr "Indonesia - 不足 2 小时需要行动"
+msgstr "印度尼西亚 - 不足 2 小时需要行动"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:193
 msgid "Indonesia - Turn Expired"
-msgstr "Indonesia - 回合已超时"
+msgstr "印度尼西亚 - 回合已超时"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:194
 msgid "Indonesia - Tournament Open for Signup"
-msgstr "Indonesia - 锦标赛开放报名"
+msgstr "印度尼西亚 - 锦标赛开放报名"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:195
 #| msgid "Food Chain Magnate - Game Invitation Received"
 msgid "Indonesia - Mini Tournament Invitation Received"
-msgstr "Indonesia - 收到迷你锦标赛邀请"
+msgstr "印度尼西亚 - 收到迷你锦标赛邀请"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:199
 #: .\Lobby\sharedFunctions\sharedRefs.py:38
@@ -1964,73 +1964,73 @@ msgstr "Indonesia - 收到迷你锦标赛邀请"
 #: .\Lobby\templates\Lobby\lobby_icons.html:107
 #: .\Lobby\templates\Lobby\newGames.html:32
 msgid "Keyflower"
-msgstr "Keyflower"
+msgstr "大五月花号"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:200
 #| msgid "Create Horseless Carriage Game"
 msgid "Your Keyflower game has finished"
-msgstr "你的 Keyflower 游戏已结束"
+msgstr "你的 大五月花号 游戏已结束"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:201
 #| msgid "It is your move"
 msgid "It is your turn in Keyflower"
-msgstr "轮到你在 Keyflower 行动"
+msgstr "轮到你在 大五月花号 行动"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:202
 #| msgid "Click here to play Food Chain Magnate"
 msgid "Click here to play Keyflower"
-msgstr "点击开始 Keyflower 游戏"
+msgstr "点击开始 大五月花号 游戏"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:203
 msgid "Keyflower Bug Report"
-msgstr "Keyflower Bug 报告"
+msgstr "大五月花号 Bug 报告"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:204
 #| msgid "Food Chain Magnate - Game Invitation Received"
 msgid "Keyflower - Invitation Received"
-msgstr "Keyflower - 收到游戏邀请"
+msgstr "大五月花号 - 收到游戏邀请"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:205
 msgid "Keyflower - Tournament Game Started"
-msgstr "Keyflower - 锦标赛游戏已开始"
+msgstr "大五月花号 - 锦标赛游戏已开始"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:206
 msgid "Keyflower - Mini Tournament Game Started"
-msgstr "Keyflower - 迷你锦标赛游戏已开始"
+msgstr "大五月花号 - 迷你锦标赛游戏已开始"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:207
 msgid "Keyflower - Tournament Won!"
-msgstr "Keyflower - 赢得锦标赛！"
+msgstr "大五月花号 - 赢得锦标赛！"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:208
 msgid "Keyflower - Mini Tournament Won!"
-msgstr "Keyflower - 赢得迷你锦标赛！"
+msgstr "大五月花号 - 赢得迷你锦标赛！"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:209
 #| msgid "The game has already started"
 msgid "Your Keyflower game has started"
-msgstr "你的 Keyflower 游戏已开始"
+msgstr "你的 大五月花号 游戏已开始"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:210
 msgid "A player has declined your invitation for Keyflower"
-msgstr "有玩家拒绝了你的 Keyflower 游戏邀请"
+msgstr "有玩家拒绝了你的 大五月花号 游戏邀请"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:211
 msgid "Keyflower - Less than 2 hours to move"
-msgstr "Keyflower - 不足 2 小时需要行动"
+msgstr "大五月花号 - 不足 2 小时需要行动"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:212
 msgid "Keyflower - Turn Expired"
-msgstr "Keyflower - 回合已超时"
+msgstr "大五月花号 - 回合已超时"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:213
 msgid "Keyflower - Tournament Open for Signup"
-msgstr "Keyflower - 锦标赛开放报名"
+msgstr "大五月花号 - 锦标赛开放报名"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:214
 #| msgid "Food Chain Magnate - Game Invitation Received"
 msgid "Keyflower - Mini Tournament Invitation Received"
-msgstr "Keyflower - 收到迷你锦标赛邀请"
+msgstr "大五月花号 - 收到迷你锦标赛邀请"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:218
 #: .\Lobby\sharedFunctions\sharedRefs.py:39
@@ -2120,22 +2120,22 @@ msgstr "Web - 收到迷你锦标赛邀请"
 #: .\Lobby\templates\Lobby\lobby_icons.html:20
 #: .\Lobby\templates\Lobby\newGames.html:24
 msgid "Roads & Boats"
-msgstr "Roads & Boats"
+msgstr "路与船"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:238
 #| msgid "Create Food Chain Magnate Game"
 msgid "Your Roads & Boats game has finished"
-msgstr "你的 Roads & Boats 游戏已结束"
+msgstr "你的 路与船 游戏已结束"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:239
 #| msgid "It is your move"
 msgid "It is your turn in Roads & Boats"
-msgstr "轮到你在 Roads & Boats 行动"
+msgstr "轮到你在 路与船 行动"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:240
 #| msgid "Click here to play Horseless Carriage"
 msgid "Click here to play Roads & Boats"
-msgstr "点击开始 Roads & Boats 游戏"
+msgstr "点击开始 路与船 游戏"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:241
 msgid "RNB Bug Report"
@@ -2144,28 +2144,28 @@ msgstr "RNB Bug 报告"
 #: .\Lobby\sharedFunctions\sharedNotifications.py:242
 #| msgid "Food Chain Magnate - Game Invitation Received"
 msgid "Roads & Boats - Invitation Received"
-msgstr "Roads & Boats - 收到游戏邀请"
+msgstr "路与船 - 收到游戏邀请"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:243
 msgid "Roads & Boats - Tournament Game Started"
-msgstr "Roads & Boats - 锦标赛游戏已开始"
+msgstr "路与船 - 锦标赛游戏已开始"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:244
 msgid "Roads & Boats - Mini Tournament Game Started"
-msgstr "Roads & Boats - 迷你锦标赛游戏已开始"
+msgstr "路与船 - 迷你锦标赛游戏已开始"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:245
 msgid "Roads & Boats - Tournament Won!"
-msgstr "Roads & Boats - 赢得锦标赛！"
+msgstr "路与船 - 赢得锦标赛！"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:246
 msgid "Roads & Boats - Mini Tournament Won!"
-msgstr "Roads & Boats - 赢得迷你锦标赛！"
+msgstr "路与船 - 赢得迷你锦标赛！"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:247
 #| msgid "The game has already started"
 msgid "Your Roads & Boats game has started"
-msgstr "你的 Roads & Boats 游戏已开始"
+msgstr "你的 路与船 游戏已开始"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:248
 msgid "A player has declined your invitation for R&B"
@@ -2173,28 +2173,28 @@ msgstr "有玩家拒绝了你的 R&B 游戏邀请"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:249
 msgid "Roads & Boats - Less than 2 hours to move"
-msgstr "Roads & Boats - 不足 2 小时需要行动"
+msgstr "路与船 - 不足 2 小时需要行动"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:250
 msgid "Roads & Boats - Turn Expired"
-msgstr "Roads & Boats - 回合已超时"
+msgstr "路与船 - 回合已超时"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:251
 msgid "Roads & Boats - Tournament Open for Signup"
-msgstr "Roads & Boats - 锦标赛开放报名"
+msgstr "路与船 - 锦标赛开放报名"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:252
 #| msgid "Food Chain Magnate - Game Invitation Received"
 msgid "Roads & Boats - Mini Tournament Invitation Received"
-msgstr "Roads & Boats - 收到迷你锦标赛邀请"
+msgstr "路与船 - 收到迷你锦标赛邀请"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:254
 msgid "You can set a move in Roads & Boats"
-msgstr "你可以在 Roads & Boats 预设行动"
+msgstr "你可以在 路与船 预设行动"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:255
 msgid "You need to fix your move in Roads & Boats"
-msgstr "你需要修正在 Roads & Boats 的行动"
+msgstr "你需要修正在 路与船 的行动"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:260
 #: .\Lobby\sharedFunctions\sharedRefs.py:334
@@ -3265,7 +3265,7 @@ msgstr "这似乎是一个正确的页面，但服务器在渲染它时遇到了
 #: .\Lobby\templates\Lobby\newGames.html:42
 #| msgid "Map Editor"
 msgid "Antiquity Map Editor"
-msgstr "Antiquity 地图编辑器"
+msgstr "中世纪 地图编辑器"
 
 #: .\Lobby\templates\Lobby\AQYmapEditor.html:137
 #: .\Lobby\templates\Lobby\FCMmapEditor.html:16
@@ -3397,7 +3397,7 @@ msgstr "板块选项"
 msgid ""
 "Antiquity had a print run with mirrored tiles. Enable this option to include"
 " them."
-msgstr "Antiquity 有一版印刷含镜像板块。启用此选项以包含它们。"
+msgstr "中世纪 有一版印刷含镜像板块。启用此选项以包含它们。"
 
 #: .\Lobby\templates\Lobby\AQYmapEditor.html:168
 msgid ""
@@ -3539,16 +3539,16 @@ msgstr "地图如何平衡？统计是什么意思？"
 #: .\Lobby\templates\Lobby\TGZmapEditor.html:15
 #| msgid "Favourite Horseless Carriage Colour"
 msgid "The Great Zimbabwe Map Editor"
-msgstr "The Great Zimbabwe 地图编辑器"
+msgstr "大津巴布韦 地图编辑器"
 
 #: .\Lobby\templates\Lobby\TGZtournaments.html:20
 #| msgid "Favourite Horseless Carriage Colour"
 msgid "The Great Zimbabwe Tournaments"
-msgstr "The Great Zimbabwe 锦标赛"
+msgstr "大津巴布韦 锦标赛"
 
 #: .\Lobby\templates\Lobby\TGZtournaments.html:23
 msgid "The Great Zimbabwe Tournaments are run externally."
-msgstr "The Great Zimbabwe 锦标赛在外站举行。"
+msgstr "大津巴布韦 锦标赛在外站举行。"
 
 #: .\Lobby\templates\Lobby\TGZtournaments.html:26
 msgid "Current tournament information can be found"
@@ -3806,27 +3806,27 @@ msgstr "Cannes 编程协助"
 
 #: .\Lobby\templates\Lobby\about.html:74
 msgid "Antiquity Coding"
-msgstr "Antiquity 编程"
+msgstr "中世纪 编程"
 
 #: .\Lobby\templates\Lobby\about.html:77
 msgid "Antiquity Chief Playtester"
-msgstr "Antiquity 首席试玩员"
+msgstr "中世纪 首席试玩员"
 
 #: .\Lobby\templates\Lobby\about.html:80
 msgid "Antiquity Additional Playtesters"
-msgstr "Antiquity 额外试玩员"
+msgstr "中世纪 额外试玩员"
 
 #: .\Lobby\templates\Lobby\about.html:83
 msgid "Indonesia Coding Consultant"
-msgstr "Indonesia 编程顾问"
+msgstr "印度尼西亚 编程顾问"
 
 #: .\Lobby\templates\Lobby\about.html:86
 msgid "Indonesia Ship Icons"
-msgstr "Indonesia 船只图标"
+msgstr "印度尼西亚 船只图标"
 
 #: .\Lobby\templates\Lobby\about.html:89
 msgid "Keyflower Additional Coding"
-msgstr "Keyflower 额外编程"
+msgstr "大五月花号 额外编程"
 
 #: .\Lobby\templates\Lobby\about.html:92
 msgid "Web playtester"
@@ -3967,7 +3967,7 @@ msgid ""
 "incorrectly. All current and future games use the corrected logic; finished "
 "games are unaffected."
 msgstr ""
-"<strong>Keyflower：冬季板块规则澄清已修复。</strong>冬季板块带米宝计分的一个边界情况此前处理有误。所有当前与未来对局使用修正逻辑；已完成对局不受影响。"
+"<strong>大五月花号：冬季板块规则澄清已修复。</strong>冬季板块带米宝计分的一个边界情况此前处理有误。所有当前与未来对局使用修正逻辑；已完成对局不受影响。"
 
 #: .\Lobby\templates\Lobby\changelog.html:67
 msgid ""
@@ -4003,8 +4003,7 @@ msgid ""
 "ships to be transferred to a player who already owned the maximum allowed in"
 " a single transaction. This is now correctly blocked."
 msgstr ""
-"<strong>Indonesia：船舶转移规则已收紧。</strong> "
-"原先存在漏洞，允许将船舶转移给在单次交易中已达到持有上限的玩家。现已正确阻止。"
+"<strong>印度尼西亚：船舶转移规则已收紧。</strong> 原先存在漏洞，允许将船舶转移给在单次交易中已达到持有上限的玩家。现已正确阻止。"
 
 #: .\Lobby\templates\Lobby\changelog.html:99
 msgid ""
@@ -4013,7 +4012,7 @@ msgid ""
 "famine track now stays visible in the sidebar throughout the whole game "
 "rather than disappearing after round 3."
 msgstr ""
-"<strong>Antiquity：城市成长显示。</strong>城市板块相邻高亮在部分地图种子下显示不正确，已修复。另外：饥荒轨现在整局保持在侧边栏可见，而非第"
+"<strong>中世纪：城市成长显示。</strong>城市板块相邻高亮在部分地图种子下显示不正确，已修复。另外：饥荒轨现在整局保持在侧边栏可见，而非第"
 " 3 回合后消失。"
 
 #: .\Lobby\templates\Lobby\changelog.html:105
@@ -4053,7 +4052,7 @@ msgstr "新游戏"
 
 #: .\Lobby\templates\Lobby\createAQY.html:25
 msgid "New to Antiquity? For Rules, How to Play, and Game Guide, please see "
-msgstr "初次游玩 Antiquity？规则、玩法与指南请见 "
+msgstr "初次游玩 中世纪？规则、玩法与指南请见 "
 
 #: .\Lobby\templates\Lobby\createAQY.html:25
 #: .\Lobby\templates\Lobby\createBUS.html:30
@@ -4599,7 +4598,7 @@ msgstr "使用相同地图"
 #: .\Lobby\templates\Lobby\createAQY.html:144
 #| msgid "Practice Game"
 msgid "Create Antiquity Game"
-msgstr "创建 Antiquity 游戏"
+msgstr "创建 中世纪 游戏"
 
 #: .\Lobby\templates\Lobby\createAQY.html:156
 #: .\Lobby\templates\Lobby\createBUS.html:292
@@ -4620,7 +4619,7 @@ msgstr "你可以更改其他玩家的游戏内名称"
 #: .\Lobby\templates\Lobby\createAQY.html:168
 #| msgid "Practice Game"
 msgid "Creating Antiquty Game..."
-msgstr "正在创建 Antiquity 游戏…"
+msgstr "正在创建 中世纪 游戏…"
 
 #: .\Lobby\templates\Lobby\createBUS.html:30
 msgid "New to Bus? For Rules, How to Play, and Game Guide, please see "
@@ -5252,7 +5251,7 @@ msgstr "正在创建 Horseless Carriage 游戏…"
 msgid ""
 "New to Indonesia? For Rules, How to Play, and Game Guide, please see <a "
 "class='linkOther' href='/help/'>Help</a>"
-msgstr "初次游玩 Indonesia？规则、玩法与指南请见 <a class='linkOther' href='/help/'>帮助</a>"
+msgstr "初次游玩 印度尼西亚？规则、玩法与指南请见 <a class='linkOther' href='/help/'>帮助</a>"
 
 #: .\Lobby\templates\Lobby\createIND.html:148
 #: .\Lobby\templates\Lobby\createIND2.html:148
@@ -5281,13 +5280,13 @@ msgstr "游玩粉丝制作的爱琴海地图！不计入统计"
 #: .\Lobby\templates\Lobby\createIND2.html:195
 #| msgid "Practice Game"
 msgid "Create Indonesia Game"
-msgstr "创建 Indonesia 游戏"
+msgstr "创建 印度尼西亚 游戏"
 
 #: .\Lobby\templates\Lobby\createIND.html:189
 #: .\Lobby\templates\Lobby\createIND2.html:219
 #| msgid "Practice Game"
 msgid "Creating Indonesia Game..."
-msgstr "正在创建 Indonesia 游戏…"
+msgstr "正在创建 印度尼西亚 游戏…"
 
 #: .\Lobby\templates\Lobby\createIND2.html:156
 msgid "Map Options - Aegean"
@@ -5316,7 +5315,7 @@ msgstr "见 <a href=\"%(rules_url)s\" target=\"_blank\">菲律宾规则</a>"
 msgid ""
 "New to Keyflower? For Rules, How to Play, and Game Guide, please see <a "
 "class='linkOther' href='/help/'>Help</a>"
-msgstr "初次游玩 Keyflower？规则、玩法与指南请见 <a class='linkOther' href='/help/'>帮助</a>"
+msgstr "初次游玩 大五月花号？规则、玩法与指南请见 <a class='linkOther' href='/help/'>帮助</a>"
 
 #: .\Lobby\templates\Lobby\createKFW.html:54
 msgid ""
@@ -5348,17 +5347,17 @@ msgstr "中−"
 #: .\Lobby\templates\Lobby\createKFW.html:175
 #| msgid "Practice Game"
 msgid "Create Keyflower Game"
-msgstr "创建 Keyflower 游戏"
+msgstr "创建 大五月花号 游戏"
 
 #: .\Lobby\templates\Lobby\createKFW.html:199
 msgid "Creating Keyflower Game..."
-msgstr "正在创建 Keyflower 游戏…"
+msgstr "正在创建 大五月花号 游戏…"
 
 #: .\Lobby\templates\Lobby\createRNB.html:84
 #: .\Lobby\templates\Lobby\createRNB2.html:84
 msgid ""
 "New to Roads & Boats? For Rules, How to Play, and Game Guide, please see "
-msgstr "初次游玩 Roads & Boats？规则、玩法与指南请见 "
+msgstr "初次游玩 路与船？规则、玩法与指南请见 "
 
 #: .\Lobby\templates\Lobby\createRNB.html:214
 #: .\Lobby\templates\Lobby\createRNB2.html:214
@@ -5412,12 +5411,12 @@ msgstr "选择地图预览"
 #: .\Lobby\templates\Lobby\createRNB2.html:314
 #| msgid "Practice Game"
 msgid "Create Roads & Boats Game"
-msgstr "创建 Roads & Boats 游戏"
+msgstr "创建 路与船 游戏"
 
 #: .\Lobby\templates\Lobby\createRNB.html:281
 #: .\Lobby\templates\Lobby\createRNB2.html:336
 msgid "Creating Roads & Boats Game..."
-msgstr "正在创建 Roads & Boats 游戏…"
+msgstr "正在创建 路与船 游戏…"
 
 #: .\Lobby\templates\Lobby\createRNB2.html:221
 msgid "Electricity"
@@ -5467,7 +5466,7 @@ msgstr "跳跃启动"
 msgid ""
 "New to The Great Zimbabwe? For Rules, How to Play, and Game Guide, please "
 "see <a href=\"%(help_url)s\">Help</a>"
-msgstr "初次游玩 The Great Zimbabwe？规则、玩法与指南请见 <a href=\"%(help_url)s\">帮助</a>"
+msgstr "初次游玩 大津巴布韦？规则、玩法与指南请见 <a href=\"%(help_url)s\">帮助</a>"
 
 #: .\Lobby\templates\Lobby\createTGZ.html:52
 #| msgid "Setup Options"
@@ -5670,17 +5669,17 @@ msgstr "建造者"
 #: .\Lobby\templates\Lobby\createTGZ.html:528
 #| msgid "Favourite Horseless Carriage Colour"
 msgid "Create And Start The Great Zimbabwe Tournament Game"
-msgstr " 创建并开始 The Great Zimbabwe 锦标赛游戏"
+msgstr " 创建并开始 大津巴布韦 锦标赛游戏"
 
 #: .\Lobby\templates\Lobby\createTGZ.html:528
 #| msgid "Favourite Horseless Carriage Colour"
 msgid "Create The Great Zimbabwe Mini Tournament"
-msgstr "创建 The Great Zimbabwe 迷你锦标赛"
+msgstr "创建 大津巴布韦 迷你锦标赛"
 
 #: .\Lobby\templates\Lobby\createTGZ.html:528
 #| msgid "Favourite Horseless Carriage Colour"
 msgid "Create The Great Zimbabwe Game"
-msgstr "创建 The Great Zimbabwe 游戏"
+msgstr "创建 大津巴布韦 游戏"
 
 #: .\Lobby\templates\Lobby\createWEB.html:25
 msgid "New to Web? For Rules, How to Play, and Game Guide, please see "
@@ -7045,7 +7044,7 @@ msgstr "玩家"
 
 #: .\Lobby\templates\Lobby\indPhpMap.html:18
 msgid "Indonesia - Php Games"
-msgstr "Indonesia - Php 游戏"
+msgstr "印度尼西亚 - Php 游戏"
 
 #: .\Lobby\templates\Lobby\indPhpMap.html:21
 #: .\Lobby\templates\Lobby\schism.html:23
@@ -7110,8 +7109,7 @@ msgid ""
 "Indonesia, Bus, Cannes, Web, Roads & Boats and Keyflower — live updates, "
 "replays, stats, and regular tournaments."
 msgstr ""
-"快餐连锁大亨、Horseless Carriage、The Great "
-"Zimbabwe、Antiquity、Indonesia、Bus、Cannes、Web、Roads & Boats 与 Keyflower — "
+"快餐连锁大亨、Horseless Carriage、大津巴布韦、中世纪、印度尼西亚、Bus、Cannes、Web、路与船 与 大五月花号 — "
 "实时更新、回放、统计与定期锦标赛。"
 
 #: .\Lobby\templates\Lobby\index.html:121
@@ -7300,7 +7298,7 @@ msgid ""
 "Before you know it, someone else might settle in your place and take over "
 "your hard work!"
 msgstr ""
-"在《公路与船》中，每位玩家像在许多其他游戏中一样，经年累月建立自己的文明。然而与大多数游戏不同，重点不在战争、人口增长、城市建设或国家建设，而在物流，或者更准确地说：运输。每位玩家开局只有三头驴、一堆木板、若干石头和两只鹅。凭借这些少量资源，你试图建造伐木场、道路、船只、矿场、交易所等各种东西——但要小心！本游戏没有领土概念：你不能拥有土地，也永远保不住它。不知不觉间，别人可能就在你的地盘定居并夺走你的劳动成果！"
+"在《路与船》中，每位玩家像在许多其他游戏中一样，经年累月建立自己的文明。然而与大多数游戏不同，重点不在战争、人口增长、城市建设或国家建设，而在物流，或者更准确地说：运输。每位玩家开局只有三头驴、一堆木板、若干石头和两只鹅。凭借这些少量资源，你试图建造伐木场、道路、船只、矿场、交易所等各种东西——但要小心！本游戏没有领土概念：你不能拥有土地，也永远保不住它。不知不觉间，别人可能就在你的地盘定居并夺走你的劳动成果！"
 
 #: .\Lobby\templates\Lobby\index.html:197
 #| msgid ""
@@ -7408,7 +7406,7 @@ msgid ""
 "last round of operations (selling/shipping goods) counts double, so it can "
 "be important to control the timing."
 msgstr ""
-"《印尼》是一款 2-5 "
+"《印度尼西亚》是一款 2-5 "
 "名玩家共建经济、争夺最多金钱的游戏。玩家获取生产公司与航运公司，向城市运送货物。城市收到货物后会成长并提高需求。生产公司为其所在城市收到的每种货物赚钱（不超过城市容量），但必须向航运公司支付里程费用，即使最终亏钱。玩家可以研究优势，如更大航运容量或合并公司的能力，并可能通过收购其他玩家来夺取利润丰厚的种植园或航运航线的所有权。<br"
 " "
 "/>玩家隐藏自己的资金，力争在第三时代结束时积累最多。当只剩一种公司时，新时代结束。新时代带来新城市、新公司和新货物类型。第三时代结束时，资金最多的玩家获胜。然而，最后一轮经营（销售/运输货物）所得资金翻倍，因此掌控时机很重要。"
@@ -7434,9 +7432,10 @@ msgid ""
 "raw materials -- until finally, there is no more land left to farm. Let's "
 "hope one of you has won the game before that time!"
 msgstr ""
-"《远古》是一款 2-4 人策略游戏，背景大致以中世纪晚期的意大利为蓝本。玩家自选胜利条件：通过选择守护圣人，专注于人口增长、贸易、征服或城市建设。<br"
-" /><br />每种策略需要完全不同的玩法。或者你也可以选择崇拜万圣之圣 Santa "
-"Maria——但你将被期待建立比任何其他玩家都壮观一倍的文明。<br /><br "
+"《中世纪》是一款 2-4 "
+"人策略游戏，背景大致以中世纪晚期的意大利为蓝本。玩家自选胜利条件：通过选择守护圣人，专注于人口增长、贸易、征服或城市建设。<br /><br "
+"/>每种策略需要完全不同的玩法。或者你也可以选择崇拜万圣之圣 Santa Maria——但你将被期待建立比任何其他玩家都壮观一倍的文明。<br "
+"/><br "
 "/>随着你的经济不断改善、越来越先进的城市每回合带来新选择，城市周围的土地却慢慢耗尽，迫使你走越来越远去采集原料——直到最终再无可耕之地。希望在那之前你们中已有人获胜！"
 
 #: .\Lobby\templates\Lobby\index.html:259
@@ -7546,9 +7545,9 @@ msgid ""
 "to the opportunities to best utilize their various resources, transport and "
 "upgrade capability, skills and workers."
 msgstr ""
-"春、夏、秋三季，更多工人会登上 Keyflower "
+"春、夏、秋三季，更多工人会登上 大五月花号 "
 "及其姐妹船，其中一些工人掌握加工铁、石、木等关键资源的技能。每个季节都会随机摆出村庄板块进行拍卖。冬季没有新工人到来，玩家从开局获得的板块中选择村庄板块进行竞拍。每块冬季村庄板块为特定的资源、技能与工人组合提供"
-" VP。村庄与工人产出最多 VP 的玩家获胜。<br /><br />Keyflower "
+" VP。村庄与工人产出最多 VP 的玩家获胜。<br /><br />大五月花号 "
 "给玩家带来许多不同挑战，且每局因出现的村庄板块组合不同而不同。整局游戏中，玩家需要敏锐把握机会，最好地利用各种资源、运输与升级能力、技能和工人。"
 
 #: .\Lobby\templates\Lobby\index.html:323
@@ -7595,7 +7594,7 @@ msgid ""
 "Online for free with others, or solo!"
 msgstr ""
 "Online Board Gamers - 免费在线游玩 Splotter 的 Food Chain Magnate、Horseless "
-"Carriage、The Great Zimbabwe、Indonesia、Antiquity、Bus、Cannes 与 Web，可与他人或单人！"
+"Carriage、大津巴布韦、印度尼西亚、中世纪、Bus、Cannes 与 Web，可与他人或单人！"
 
 #: .\Lobby\templates\Lobby\layout.html:44
 msgid ""
@@ -7603,8 +7602,8 @@ msgid ""
 "Indonesia, Antiquity, Bus, Cannes, and Web Online for free with others, or "
 "solo!"
 msgstr ""
-"免费在线游玩 Splotter 的 Food Chain Magnate、Horseless Carriage、The Great "
-"Zimbabwe、Indonesia、Antiquity、Bus、Cannes 与 Web，可与他人或单人！"
+"免费在线游玩 Splotter 的 Food Chain Magnate、Horseless "
+"Carriage、大津巴布韦、印度尼西亚、中世纪、Bus、Cannes 与 Web，可与他人或单人！"
 
 #: .\Lobby\templates\Lobby\layout.html:90
 #: .\Lobby\templates\Lobby\profileAQY.html:14
@@ -7682,10 +7681,10 @@ msgid ""
 "published by <a href=\"https://uk.linkedin.com/in/richard-breese-34153b13\" "
 "target=\"_blank\">R&D Games</a>. Permission Provided."
 msgstr ""
-"Food Chain Magnate、Horseless Carriage、Bus、The Great "
-"Zimbabwe、Cannes、Antiquity、Indonesia 与 Roads & Boats 是 Jeroen Doumen 与 Joris "
-"Wiersinga 设计、由 <a href=\"https://www.splottershop.com/\" "
-"target=\"_blank\">Splotter Spellen</a> 出版的桌游。<br /> Keyflower 由 <a "
+"Food Chain Magnate、Horseless Carriage、Bus、大津巴布韦、Cannes、中世纪、印度尼西亚 与 路与船 是 "
+"Jeroen Doumen 与 Joris Wiersinga 设计、由 <a "
+"href=\"https://www.splottershop.com/\" target=\"_blank\">Splotter "
+"Spellen</a> 出版的桌游。<br /> 大五月花号 由 <a "
 "href=\"https://uk.linkedin.com/in/richard-breese-34153b13\" "
 "target=\"_blank\">R&D Games</a> 设计并出版。已获授权。"
 
@@ -7991,7 +7990,7 @@ msgstr ""
 msgid ""
 "<b>Note:</b> There are no specific starting options for Horseless Carriage, "
 "Bus, and Antiquity"
-msgstr "<b>注意：</b>《无马马车》《巴士》和《远古》没有特定起始选项"
+msgstr "<b>注意：</b>《无马马车》《巴士》和《中世纪》没有特定起始选项"
 
 #: .\Lobby\templates\Lobby\lobbyHelp.html:135
 #| msgid "What are the game columns?"
@@ -8183,7 +8182,7 @@ msgstr "需要已完成的非训练游戏"
 
 #: .\Lobby\templates\Lobby\lobbyHelp.html:336
 msgid "Roads and Boats"
-msgstr "Roads and Boats"
+msgstr "路与船"
 
 #: .\Lobby\templates\Lobby\lobbyHelp.html:342
 msgid ""
@@ -9054,7 +9053,7 @@ msgstr "Cannes 颜色"
 
 #: .\Lobby\templates\Lobby\profile.html:478
 msgid "Keyflower Colour"
-msgstr "Keyflower 颜色"
+msgstr "大五月花号 颜色"
 
 #: .\Lobby\templates\Lobby\profile.html:514
 msgid "Web Colour"
@@ -9080,7 +9079,7 @@ msgstr "点击这些按钮为以下游戏设置更详细的偏好："
 #: .\Lobby\templates\Lobby\profileRNB.html:13
 #| msgid "Update Colour Preferences"
 msgid "Roads & Boats Preferences"
-msgstr "Roads & Boats 偏好"
+msgstr "路与船 偏好"
 
 #: .\Lobby\templates\Lobby\profile.html:584
 #| msgid "Player Stats"
@@ -9236,7 +9235,7 @@ msgstr "整洁费用排列"
 #: .\Lobby\templates\Lobby\profileAQY.html:153
 #| msgid "Update Notification Preferences"
 msgid "Update Antiquity Preferences"
-msgstr "更新 Antiquity 偏好"
+msgstr "更新 中世纪 偏好"
 
 #: .\Lobby\templates\Lobby\profileIND.html:16
 #: .\Lobby\templates\Lobby\profileRNB.html:16
@@ -9322,7 +9321,7 @@ msgstr "文本"
 #: .\Lobby\templates\Lobby\profileIND.html:219
 #| msgid "Update Colour Preferences"
 msgid "Update Indonesia Preferences"
-msgstr "更新 Indonesia 偏好"
+msgstr "更新 印度尼西亚 偏好"
 
 #: .\Lobby\templates\Lobby\profileRNB.html:30
 msgid "Black"
@@ -9390,7 +9389,7 @@ msgstr "完全"
 #: .\Lobby\templates\Lobby\profileRNB.html:107
 #| msgid "Update Colour Preferences"
 msgid "Update Roads & Boats Preferences"
-msgstr "更新 Roads & Boats 偏好"
+msgstr "更新 路与船 偏好"
 
 #: .\Lobby\templates\Lobby\register.html:54
 msgid "Already have an account?"
@@ -9969,8 +9968,8 @@ msgid ""
 "Antiquity, and The Great Zimbabwe. See <a href=\"%(help_url)s\">Tournaments "
 "Help</a> or check Discord for upcoming events."
 msgstr ""
-"常规锦标赛涵盖 FCM、无马马车、巴士、印尼、远古和大津巴布韦。即将举行的赛事见<a href=\"%(help_url)s\">锦标赛帮助</a>或 "
-"Discord。"
+"常规锦标赛涵盖 FCM、无马马车、巴士、印度尼西亚、中世纪和大津巴布韦。即将举行的赛事见<a "
+"href=\"%(help_url)s\">锦标赛帮助</a>或 Discord。"
 
 #: .\Lobby\templates\Lobby\tournaments\AllMainTournaments.html:51
 msgid "Players per Game"
@@ -10276,12 +10275,12 @@ msgstr "您的通知选项已成功更新"
 #: .\Lobby\views.py:1934
 #| msgid "Your notification preferences have been updated successfully"
 msgid "Your Antiquity preferences have been updated successfully"
-msgstr "你的 Antiquity 偏好已成功更新"
+msgstr "你的 中世纪 偏好已成功更新"
 
 #: .\Lobby\views.py:1979
 #| msgid "Your notification preferences have been updated successfully"
 msgid "Your Indonesia preferences have been updated successfully"
-msgstr "你的 Indonesia 偏好已成功更新"
+msgstr "你的 印度尼西亚 偏好已成功更新"
 
 #: .\Lobby\views.py:2026
 #| msgid "Your colour preferences have been updated successfully"
@@ -10430,7 +10429,7 @@ msgid ""
 msgstr ""
 "经验不足。请查看<a class=\"linkOther\" "
 "href=\"/help/#navGameType\">帮助</a><br/>当前经验要求：<br/><br/>FCM：2 局<br/>HLC：1 "
-"局<br/>Bus：1 局<br/>TGZ：2 局<br/>Cannes：2 局<br/>Antiquity：2 局<br/><br/>你可以<a "
+"局<br/>Bus：1 局<br/>TGZ：2 局<br/>Cannes：2 局<br/>中世纪：2 局<br/><br/>你可以<a "
 "class=\"linkOther\" href=\"/newGames/\">在此</a>自己开局"
 
 #: .\Lobby\views.py:3329
@@ -10547,7 +10546,7 @@ msgstr "你的单人挑战已开始"
 
 #: .\RNB\templates\RNB\RNBhelp.html:5
 msgid "Roads & Boats Help"
-msgstr "Roads & Boats 帮助"
+msgstr "路与船 帮助"
 
 #: .\RNB\templates\RNB\RNBhelp.html:12
 msgid ""
@@ -10555,7 +10554,7 @@ msgid ""
 "href='https://www.splotter.nl/downloads/RB3Erules.pdf' target='_blank' "
 "download>here</a>"
 msgstr ""
-"Roads & Boats 规则见 <a class='linkOther' "
+"路与船 规则见 <a class='linkOther' "
 "href='https://www.splotter.nl/downloads/RB3Erules.pdf' target='_blank' "
 "download>此处</a>"
 
@@ -10601,7 +10600,7 @@ msgid ""
 "already full, and then allow you to immediately drop it on the other side of"
 " the river. Such shortcuts are given in each of the phase sections below."
 msgstr ""
-"《公路与船》中货物、运输单位和建筑之间有大量复杂交互。为避免大量无意义的繁琐操作，加入了一些快捷方式以改善体验。例如，即使运输单位已满，你也可以选择想用船渡河的货物，并立即把它放到河对岸。以下各阶段章节会给出此类快捷方式。"
+"《路与船》中货物、运输单位和建筑之间有大量复杂交互。为避免大量无意义的繁琐操作，加入了一些快捷方式以改善体验。例如，即使运输单位已满，你也可以选择想用船渡河的货物，并立即把它放到河对岸。以下各阶段章节会给出此类快捷方式。"
 
 #: .\RNB\templates\RNB\RNBhelp.html:54
 #| msgid "All Players"
@@ -10971,7 +10970,7 @@ msgstr "该地图尚无排行榜记录。"
 
 #: .\RNB\templates\RNB\RNBmapHelp.html:5
 msgid "Roads & Boats Map Editor Help"
-msgstr "Roads & Boats 地图编辑器帮助"
+msgstr "路与船 地图编辑器帮助"
 
 #: .\RNB\templates\RNB\RNBmapHelp.html:13
 #| msgid "Email Notifications"
@@ -11099,14 +11098,14 @@ msgstr "你的训练游戏已开始"
 #: .\TGZ\templates\TGZ\TGZhelp.html:10
 #| msgid "Favourite Horseless Carriage Colour"
 msgid "The Great Zimbabwe Help"
-msgstr "The Great Zimbabwe 帮助"
+msgstr "大津巴布韦 帮助"
 
 #: .\TGZ\templates\TGZ\TGZhelp.html:17
 #, python-format
 msgid ""
 "The Great Zimbabwe rules available <a href=\"%(rules_pdf)s\" "
 "target=\"_blank\">here</a>"
-msgstr "The Great Zimbabwe 规则见 <a href=\"%(rules_pdf)s\" target=\"_blank\">此处</a>"
+msgstr "大津巴布韦 规则见 <a href=\"%(rules_pdf)s\" target=\"_blank\">此处</a>"
 
 #: .\TGZ\templates\TGZ\TGZhelp.html:22
 #, python-format
@@ -11498,7 +11497,7 @@ msgstr "更多对局分析视频见"
 #: .\TGZ\templates\TGZ\TGZstats.html:22
 #| msgid "Favourite Horseless Carriage Colour"
 msgid "The Great Zimbabwe Stats"
-msgstr "The Great Zimbabwe 统计"
+msgstr "大津巴布韦 统计"
 
 #: .\TGZ\templates\TGZ\TGZstats.html:37
 #| msgid "No Milestones"
@@ -11514,7 +11513,7 @@ msgid ""
 "These are historical stats. They show what has happened in previous games, "
 "but The Great Zimbabwe still rewards reading and responding to the current "
 "game state."
-msgstr "这些是历史统计，反映以往对局情况，但 The Great Zimbabwe 仍奖励读懂并响应当前局势。"
+msgstr "这些是历史统计，反映以往对局情况，但 大津巴布韦 仍奖励读懂并响应当前局势。"
 
 #: .\TGZ\templates\TGZ\TGZstats.html:50
 msgid "God and Specialist Statistics"
@@ -11646,6 +11645,23 @@ msgstr "游戏结束时分数相同的所有玩家共同获胜。"
 #: .\templates\admin\base_site.html:10
 msgid "Django site admin"
 msgstr "Django 站点管理"
+
+#: .\Lobby\templates\Lobby\register.html:34
+msgid "A genuine email address is required to activate your account"
+msgstr "需要真实有效的电子邮箱地址才能激活你的账户"
+
+#: .\Lobby\templates\Lobby\register.html:36
+msgid "Please check your spam folder, and add"
+msgstr "请检查你的垃圾邮件文件夹，并将"
+
+#: .\Lobby\templates\Lobby\register.html:31
+#: .\Lobby\templates\Lobby\register.html:42
+msgid "to your safe senders / whitelist / allowed emails"
+msgstr "加入你的安全发件人 / 白名单 / 允许的邮件列表"
+
+#: .\Lobby\templates\Lobby\register.html:25
+msgid "CAUTION: BtInternet is rejecting my emails as spam. Please add"
+msgstr "注意：BtInternet 正将我的邮件判为垃圾邮件。请将"
 
 #~ msgid "Click here to play Food Chain Magnate"
 #~ msgstr "单击此处开始快餐连锁大亨"
