@@ -636,7 +636,7 @@ function tileRotationClass(tileData) {
 						top: getTilePos(index)[0] + 'px',
 						left: getTilePos(index)[1] + 'px',
 					}">
-					<img class="mapTileImg" :src="view.getImage('map' + String(tileData[0] + 1))" alt="Map Tile" />
+					<img class="mapTileImg" :src="view.getImage('map' + String(tileData[0] + 1))" :alt="$t('items.mapTile')" />
 				</div>
 				<!-- No Tile placeholder (urban planning unfilled slots) -->
 				<div
@@ -684,7 +684,7 @@ function tileRotationClass(tileData) {
 
 			<!-- Display natural board houses -->
 			<template v-for="(h, hIdx) in naturalHouseDisplays" :key="'nh' + hIdx">
-				<img class="boardHouseImg" :src="view.getImage('house_small')" :style="{ left: h.x + 'px', top: h.y + 'px', width: h.width + 'px' }" alt="House" />
+				<img class="boardHouseImg" :src="view.getImage('house_small')" :style="{ left: h.x + 'px', top: h.y + 'px', width: h.width + 'px' }" :alt="$t('items.house')" />
 				<span class="houseNumberSpan" :style="{ left: h.numX + 'px', top: h.numY + 'px', 'font-size': h.fontSize }">{{ h.number }}</span>
 			</template>
 
@@ -696,7 +696,7 @@ function tileRotationClass(tileData) {
 
 			<!-- Display built houses -->
 			<template v-for="(h, hIdx) in houseDisplays" :key="'bh' + hIdx">
-				<img class="boardHouseImg" :src="view.getImage('house_garden')" :class="h.rotationClass" :style="{ left: h.x + 'px', top: h.y + 'px', width: h.width + 'px' }" alt="House" />
+				<img class="boardHouseImg" :src="view.getImage('house_garden')" :class="h.rotationClass" :style="{ left: h.x + 'px', top: h.y + 'px', width: h.width + 'px' }" :alt="$t('items.house')" />
 				<span class="houseNumberSpan" :class="h.numClass" :style="{ left: h.numX + 'px', top: h.numY + 'px', 'font-size': h.fontSize }">{{ h.number }}</span>
 			</template>
 

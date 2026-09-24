@@ -67,6 +67,9 @@ welcome: {
   chooseRestaurant: "Choose your restaurant direction, and then its location on the board",
   newMilestones: "Remember: you are using the <b>New Milestones</b>",
   originalMilestones: "Remember: you are using the <b>Original Milestones</b>",
+  originalBoxAlt: "Original FCM box",
+  expansionBoxAlt: "FCM Expansion Box",
+  welcomeBot: "Welcome to Food Chain Magnate Online!\n\nIf you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!",
 },
 
 // Phases

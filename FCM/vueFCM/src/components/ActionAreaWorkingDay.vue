@@ -262,7 +262,7 @@ const computedProducers = computed(() => {
 					</p>
 					<p v-if="store.startingOptions.useMilestones && !store.startingOptions.newMilestones">
 						<span v-html="$t('welcome.originalMilestones')"></span>
-						<img class="boxReminderImg" :src="view.getImage('FCMbox')" alt="Original FCM box" />
+						<img class="boxReminderImg" :src="view.getImage('FCMbox')" :alt="$t('welcome.originalBoxAlt')" />
 					</p>
 				</template>
 

@@ -665,11 +665,11 @@ function skipModuleAndEndTurn() {
 						<p>{{ $t("welcome.chooseRestaurant") }}</p>
 						<p v-if="store.startingOptions.useMilestones && store.startingOptions.newMilestones">
 							<span v-html="$t('welcome.newMilestones')"></span>
-							<img class="boxReminderImg" :src="view.getImage('FCMbox2')" alt="FCM Expansion Box" />
+							<img class="boxReminderImg" :src="view.getImage('FCMbox2')" :alt="$t('welcome.expansionBoxAlt')" />
 						</p>
 						<p v-else-if="store.startingOptions.useMilestones && !store.startingOptions.newMilestones">
 							<span v-html="$t('welcome.originalMilestones')"></span>
-							<img class="boxReminderImg" :src="view.getImage('FCMbox')" alt="Original FCM box" />
+							<img class="boxReminderImg" :src="view.getImage('FCMbox')" :alt="$t('welcome.originalBoxAlt')" />
 						</p>
 
 						<AddItemBox :itemBeingAdded="rf.ITEM_BOX_RESTO" />
@@ -696,7 +696,7 @@ function skipModuleAndEndTurn() {
 						</p>
 						<p v-if="store.startingOptions.useMilestones && !store.startingOptions.newMilestones">
 							<span v-html="$t('welcome.originalMilestones')"></span>
-							<img class="boxReminderImg" :src="view.getImage('FCMbox')" alt="Original FCM box" />
+							<img class="boxReminderImg" :src="view.getImage('FCMbox')" :alt="$t('welcome.originalBoxAlt')" />
 						</p>
 						<div v-for="resCardNum in [rf.RES_CARD_OG_2_SLOTS, rf.RES_CARD_OG_3_SLOTS, rf.RES_CARD_OG_4_SLOTS]" :key="resCardNum" @click="store.context.selectedReserveCard = resCardNum" class="resCardChoiceDiv selectable" :class="{ selected: store.context.selectedReserveCard === resCardNum }">
 							<img class="cardImg" :src="view.getImage(view.getReserveCardImageKey(resCardNum))" />

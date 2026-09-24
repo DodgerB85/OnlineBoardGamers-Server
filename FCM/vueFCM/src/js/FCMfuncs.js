@@ -140,7 +140,7 @@ export function decompressChatData(data) {
 		chatArray[i][1] = currentFullTime
 	}
 
-	chatArray.push(["WelcomeBot", personal.gameCreationTimestamp, "Welcome to Food Chain Magnate Online!\n\nIf you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"])
+	chatArray.push(["WelcomeBot", personal.gameCreationTimestamp, i18n.global.t("welcome.welcomeBot")])
 
 	return chatArray
 }

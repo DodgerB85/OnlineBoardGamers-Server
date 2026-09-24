@@ -412,7 +412,7 @@ function flipLobbyist(vertical) {
 			<div class="addBoxSection">
 				<template v-if="rules.availableHouses().length > 0">
 					<span v-for="houseNum in rules.availableHouses()" :key="'buildHouse-' + houseNum" class="houseHolder" :class="{ selected: store.context.selectedBuilding === houseNum }" @click="controller.selectHouseToBuild(houseNum)">
-						<img :src="view.getImage('house_garden')" alt="House" />
+						<img :src="view.getImage('house_garden')" :alt="$t('items.house')" />
 						<span class="numberHolder">{{ houseNum }}</span>
 					</span>
 				</template>

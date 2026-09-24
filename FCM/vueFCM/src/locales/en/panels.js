@@ -85,6 +85,8 @@
   items: {
     none: "None",
     duration: "Duration (turns):",
+    mapTile: "Map Tile",
+    house: "House",
     noMoreHouses: "No More Houses",
     noMoreGardens: "No More Gardens",
     noMoreRoads: "No More Roads",
