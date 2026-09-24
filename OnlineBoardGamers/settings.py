@@ -421,8 +421,7 @@ STORAGES = {
 
 
 # Keep i18n if needed
-if DEBUG or LOCAL_USER:
-    STATICI18N_ROOT = BASE_DIR / "i18n" / "static"
+STATICI18N_ROOT = BASE_DIR / "i18n" / "static"
 
 # Where ViteJS assets are built.
 # DJANGO_VITE_ASSETS_PATH = BASE_DIR / "static" / "dist"

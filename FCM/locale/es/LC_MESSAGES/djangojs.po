@@ -2578,7 +2578,6 @@ msgid "First to have $100"
 msgstr "Primero en tener $ 100"
 
 #: .\static\FCM\JS\reference.js:598
-#, javascript-format
 msgid "Your CEO counts as CFO (+50% cash earned). May not have a CFO"
 msgstr ""
 "Su CEO cuenta como CFO (50% de efectivo ganado). Su CEO cuenta como CFO "
