@@ -44,6 +44,7 @@
     congratulations: "CONGRATULATIONS!",
     fancyA: "Fancy a",
     rematch: "rematch",
+    rematchSuffix: "?",
 
     // Setup / reserve
     delayRestaurantRound: "Delay Placing your Restaurant for One Round & End Turn",

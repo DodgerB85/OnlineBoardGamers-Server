@@ -537,7 +537,7 @@ function skipModuleAndEndTurn() {
 					<br />
 					{{ $t("actionArea.fancyA") }}
 					<a :href="'/createFCMpage/' + String(personal.gameID) + '/'">{{ $t("actionArea.rematch") }}</a>
-					?
+					{{ $t("actionArea.rematchSuffix") }}
 					<br />
 					<br />
 				</div>
