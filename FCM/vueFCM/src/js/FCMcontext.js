@@ -39,7 +39,8 @@ export function resetContext() {
 	// NB: justFired is NOT cleared here — it is cleared in startPlayerTurn (payday)
 	// and the strict payday path of endPlayerTurn. Clearing it here would destroy
 	// the player's firing decisions before endPlayerTurn can read them for simul payday.
-	store.context.justBinned.splice(0)
+	// NB: justBinned is likewise NOT cleared here — endPlayerTurn reads it for simul
+	// cleanup moveData. It is cleared in startPlayerTurn (cleanup/payday).
 
 	store.context.isNewRestoMSmailbox = false // THIS MAY NEED TO BE SEPERATE?
 	store.context.alreadyDoneMailboxMS = false

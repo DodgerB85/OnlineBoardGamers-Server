@@ -1703,13 +1703,14 @@ export function processSimulMoveData(data) {
 			// So anything that isn't a -ve flag is being thrown out
 			if (turnDataArray[0] !== -2) {
 				for (let j = 0; j < turnDataArray.length; j++) {
-					// Active players resources have already been removed -- BUT MAYBE NOT IF THEY DID A PRE-TURN????
-					if (i !== personal.pov && turnDataArray[j] >= 0) plyr.removeResourcesFromPlayer(i, turnDataArray[j], 1)
+					// POV interactive play already removed binned items via binResource;
+					// a pre-turn never did, so still apply removals while over the limit.
+					if (turnDataArray[j] >= 0 && (i !== personal.pov || playerObj.resources.length > 10)) plyr.removeResourcesFromPlayer(i, turnDataArray[j], 1)
 				}
 				// Safety: ensure at most 10 resources remain
 				if (playerObj.resources.length > 10) {
 					store.gameMessages.errorText = i18n.global.t("FCM_IO.tooManyItems")
-					sendDiscordWebhook(`489: JS ERROR: Too many items - gameID: ${personal.gameID} player: ${playerObj.name} resources: ${JSON.stringify(playerObj.resources)}`)
+					sendDiscordWebhook(`489: JS ERROR: Too many items - gameID: ${personal.gameID} player: ${playerObj.name} resources: ${JSON.stringify(playerObj.resources)} turnData: ${JSON.stringify(turnDataArray)} pov: ${personal.pov} isPov: ${i === personal.pov}`)
 					playerObj.resources.splice(10)
 				}
 			}
