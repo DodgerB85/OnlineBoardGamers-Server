@@ -1698,6 +1698,21 @@ export function addElement(type, number, index, rotated, emptying) {
 
 // Compute roadwork indexes on-the-fly from newRoads and current turn.
 //  only roads where turnAdded === currentTurn get roadwork markers on adjacent existing roads.
+//
+// ponytail: this checks each candidate square against the CURRENT (final) board
+// state, not the board state at the exact moment that road was placed, unlike
+// legacy which marks roadwork inline as each road is placed (map.js's addRoad).
+// These agree for the vast majority of real games (checked against ~934 real
+// coffee-sale-during-roadwork cases across 199 distinct game/turns — see
+// FCM/vueFCM/src/js/coffee.roadwork.test.js), and confirmed to never change an
+// actual sale even in the one case found where it disagreed (a lobbyist game
+// where a later same-turn action changed a candidate square's type after an
+// earlier road's roadwork check had already run against it in the real game).
+// Fully replicating legacy here would mean reconstructing per-road board state
+// mid-turn (chronological coords replay), which is real complexity for a gap
+// with zero observed gameplay impact. Upgrade path if that ever changes:
+// process store.newRoads in order for the current turn, incrementally building
+// up the coords each one actually saw, instead of reading the final coords once.
 export function getRoadworkIndexes() {
 	const store = useModelStore()
 	const result = []
@@ -1706,7 +1721,7 @@ export function getRoadworkIndexes() {
 	for (const road of store.newRoads) {
 		if (road.turnAdded !== store.gameflow.turn) continue
 
-		const index = road.index
+		let index = road.index
 		const variety = road.variety
 		const rotation = road.rotation
 
@@ -1720,6 +1735,17 @@ export function getRoadworkIndexes() {
 				if (store.mapData.coords[index + tW * sqw] === rf.ROAD) result.push(index + tW * sqw)
 			}
 		} else {
+			// addNewRoad's corner placement shifts index by -1 for rotation 2
+			// (the only corner roadModel with roadModel[0][0]===0 — see addNewRoad
+			// below) before placing coords; the stored road.index is the ORIGINAL,
+			// pre-shift value passed in, so that same shift must be reapplied here
+			// to land on the squares addNewRoad actually placed the road at.
+			// Legacy computes both in the same function scope on the same
+			// already-shifted local `index`, so this divergence was invisible
+			// there; missing it here mismarked/missed roadwork squares for every
+			// rotation-2 corner road (confirmed against real games: off-by-one
+			// and spurious extra squares, fixed by this line).
+			if (rotation === 2) index -= 1
 			if (rotation === 0 && store.mapData.coords[index + 2] === rf.ROAD) result.push(index + 2)
 			if (rotation === 0 && store.mapData.coords[index + tW * 2] === rf.ROAD) result.push(index + tW * 2)
 			if (rotation === 1 && store.mapData.coords[index - 1] === rf.ROAD) result.push(index - 1)
