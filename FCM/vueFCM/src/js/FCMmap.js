@@ -754,6 +754,52 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	const rwSet = new Set(getRoadworkIndexes())
 	const coffeeRoutes = []
 
+	// Admissible A*-style prune (restored from legacy map.js:899-900,
+	// giveMinTileDistance): a tile crossing can never lead anywhere if the
+	// current range plus the straight-line tile distance to the NEAREST
+	// destination tile already exceeds winningRange. This never rules out a
+	// real route (the true cost can only be >= this lower bound), it only
+	// cuts dead branches early. This is the fix for the reported lobbyist
+	// slowdown: without it, every dead-end junction gets walked to its full
+	// depth instead of being rejected on arrival.
+	const destTiles = []
+	{
+		const seen = new Set()
+		for (const r of restaurants) {
+			const tx = Math.floor((r % rf.ssW) / 5)
+			const ty = Math.floor(Math.floor(r / rf.ssW) / 5)
+			const key = ty * rf.ssW + tx
+			if (!seen.has(key)) {
+				seen.add(key)
+				destTiles.push([tx, ty])
+			}
+		}
+	}
+	const minTileDist = (idx) => {
+		const x = Math.floor((idx % rf.ssW) / 5)
+		const y = Math.floor(Math.floor(idx / rf.ssW) / 5)
+		let min = Infinity
+		for (const [dx, dy] of destTiles) {
+			const d = Math.abs(x - dx) + Math.abs(y - dy)
+			if (d < min) min = d
+		}
+		return min
+	}
+
+	// nextRoadNeighbours only depends on coords/roadworks, both static for
+	// the duration of this call, so the same (index, from) pair is safe to
+	// memoize - and gets re-hit constantly once lobbyist roads create loops.
+	const roadCache = new Map()
+	const cachedNextRoads = (idx, from) => {
+		const key = idx * 100000 + from
+		let v = roadCache.get(key)
+		if (v === undefined) {
+			v = nextRoadNeighbours(idx, from)
+			roadCache.set(key, v)
+		}
+		return v
+	}
+
 	// 1. Get initial road neighbors to start paths
 	const startNodes = neighbours(index)
 		.filter((n) => rf.ROADS.includes(store.mapData.coords[n]))
@@ -766,7 +812,7 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	/**
 	 * Recursive DFS to find all valid paths
 	 */
-	const findPaths = (currentIdx, fromIdx, currentRange, path, visitedTwice) => {
+	const findPaths = (currentIdx, fromIdx, currentRange, path, pathSet, visitedTwice) => {
 		// 2. Check for nearby restaurants from current road
 		for (const neighbor of neighbours(currentIdx)) {
 			if (restoSet.has(neighbor)) {
@@ -778,7 +824,7 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 		}
 
 		// 3. Find next road segments
-		const nextRoads = nextRoadNeighbours(currentIdx, fromIdx)
+		const nextRoads = cachedNextRoads(currentIdx, fromIdx)
 
 		for (const next of nextRoads) {
 			let nextRange = currentRange
@@ -789,27 +835,32 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 			// 4. Validity Checks (Pruning) - only tile crossings and roadworks
 			// consume range; same-tile steps may continue even past it (old map.js)
 			if (nextRange > winningRange && (crossed || rwSet.has(next))) continue
+			// Admissible heuristic prune (see destTiles/minTileDist above) - only
+			// applies when crossing, matching legacy's map.js:899-900.
+			if (crossed && currentRange + minTileDist(next) > winningRange) continue
 
-			const isSecondVisit = path.includes(next)
+			const isSecondVisit = pathSet.has(next)
 			if (isSecondVisit) {
 				if (visitedTwice.has(next)) continue // Already visited twice, stop
 			}
 
 			// 5. Recurse
 			path.push(next)
+			pathSet.add(next)
 			if (isSecondVisit) visitedTwice.add(next)
 
-			findPaths(next, currentIdx, nextRange, path, visitedTwice)
+			findPaths(next, currentIdx, nextRange, path, pathSet, visitedTwice)
 
 			// 6. Backtrack (Cleanup for the next branch)
 			path.pop()
+			if (!isSecondVisit) pathSet.delete(next)
 			if (isSecondVisit) visitedTwice.delete(next)
 		}
 	}
 
 	// Start the search for each starting road
 	for (const start of startNodes) {
-		findPaths(start.index, start.from, start.range, [start.index], new Set())
+		findPaths(start.index, start.from, start.range, [start.index], new Set([start.index]), new Set())
 	}
 
 	return coffeeRoutes
@@ -1085,18 +1136,35 @@ export function giveAdjacentTiles(tileNumber, diagonal) {
 	return res
 }
 
+// rf.ssW/5 is the tile-grid width (17 tiles), same constant as
+// store.mapData.dimensions[0] - which is never reassigned anywhere in this
+// codebase, so it's used directly here rather than going through the store
+// (giveTileNumber sits under onTheSameTile, called twice per check in the
+// coffee-route DFS hot path; a store lookup per call isn't worth it for a
+// value that's always the same).
+const TILES_WIDE = rf.ssW / 5
+
+// Canonical tile id: y * (tile-grid width) + x, matching legacy's
+// giveTileNumber (map.js:1345) exactly. Previously multiplied by rf.ssW (85,
+// the SQUARE-grid width) instead of the tile-grid width (17), so ids didn't
+// match legacy's numbering - harmless today (every caller only used the
+// result as an opaque equality/Set key, and giveStartingIndexForTile used
+// the same wrong base, so the encode/decode round-trip was self-consistent),
+// but a landmine for any future distance math or cross-referencing against
+// legacy tile ids. Fixed here; giveStartingIndexForTile is its inverse and
+// must use the same base.
 export function giveTileNumber(index) {
 	let xTile1 = Math.floor((index % rf.ssW) / 5)
 	let yTile1 = Math.floor(Math.floor(index / rf.ssW) / 5)
-	let tile1 = yTile1 * rf.ssW + xTile1
+	let tile1 = yTile1 * TILES_WIDE + xTile1
 
 	return tile1
 }
 
 
 export function giveStartingIndexForTile(number) {
-	let xTile = number % rf.ssW
-	let yTile = Math.floor(number / rf.ssW)
+	let xTile = number % TILES_WIDE
+	let yTile = Math.floor(number / TILES_WIDE)
 	return xTile * 5 + yTile * 5 * rf.ssW
 }
 

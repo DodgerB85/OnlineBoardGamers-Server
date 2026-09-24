@@ -925,19 +925,39 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 		possibleRoutes.push(...map.getCoffeeRoutesFromBldgSquare(space, restaurantSquares, winningRange))
 	}
 
-	const checker = (arr, target) => target.every((v) => arr.includes(v))
+	// The DFS may reach the exact same set of squares via routes of different
+	// RAW length (it allows revisiting a square once, so the same coverage
+	// can come padded with different amounts of harmless backtracking - see
+	// getCoffeeRoutesFromBldgSquare). Raw length is therefore not a valid
+	// "these are the same route" key: two routes covering identical squares
+	// but with different lengths would each see the other as a superset and
+	// eliminate each other, and with 3+ length-variants of the same coverage
+	// this can wipe out every route sharing that coverage, including cases
+	// where it was the ONLY maximal coverage - dropping a real sale to zero.
+	// Legacy avoids this because it never sorts/compares by length at all; it
+	// dedupes by DFS emission order (model.js:1274-1306). Reproduce that:
+	// collapse to one representative per distinct square-set (earliest found,
+	// same preference as legacy's position-based dedup) before ranking by
+	// size, so no two survivors of the dedup pass can ever be equal-sized.
+	const bySignature = new Map()
+	for (const route of possibleRoutes) {
+		const sig = [...new Set(route)].sort((a, b) => a - b).join(",")
+		if (!bySignature.has(sig)) bySignature.set(sig, route)
+	}
+	const dedupedRoutes = [...bySignature.values()]
 
-	// Efficiently filter subsets by sorting by length descending
-	possibleRoutes.sort((a, b) => b.length - a.length)
-	let uniqueRoutes = possibleRoutes.filter((route, i) => {
-		for (let j = 0; j < possibleRoutes.length; j++) {
+	// Now keep only maximal routes: drop any whose squares are a subset of
+	// another's. No tie-break is needed - exact-coverage duplicates were
+	// already collapsed above, so two distinct survivors can never be subsets
+	// of each other (that would make them equal, contradicting distinctness).
+	// Set membership turns each "is route ⊆ other" check from O(L)
+	// (Array.includes) into O(1) per element - this loop is O(R²), so it
+	// matters once R gets into the hundreds (lobbyist road networks).
+	const routeSets = dedupedRoutes.map((r) => new Set(r))
+	let uniqueRoutes = dedupedRoutes.filter((route, i) => {
+		for (let j = 0; j < dedupedRoutes.length; j++) {
 			if (i === j) continue
-			if (checker(possibleRoutes[j], route)) {
-				// route is contained in another: drop strict subsets, but among
-				// identical routes keep the first one
-				if (possibleRoutes[j].length === route.length && i < j) continue
-				return false
-			}
+			if (route.every((v) => routeSets[j].has(v))) return false
 		}
 		return true
 	})
@@ -988,15 +1008,20 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 	}
 
 	// Remove routes whose potential sales locations are a complete subset of
-	// another route's sales locations
+	// another route's sales locations. Same O(R²) shape as the route-square
+	// filter above - precompute the location lists and their Sets once
+	// instead of re-deriving them (and re-scanning with .includes) on every
+	// pairwise comparison.
 	const salesSubsetKeep = new Set(uniqueRoutes.map((_, i) => i))
+	const salesLocs = uniqueRoutesPotentialSales.map((entry) => entry.map((x) => x[0]))
+	const salesLocSets = salesLocs.map((locs) => new Set(locs))
 	for (let i = 0; i < uniqueRoutesPotentialSales.length; i++) {
-		const locsI = uniqueRoutesPotentialSales[i].map((x) => x[0])
+		const locsI = salesLocs[i]
 		for (let j = 0; j < uniqueRoutesPotentialSales.length; j++) {
 			if (i === j) continue
-			const locsJ = uniqueRoutesPotentialSales[j].map((x) => x[0])
+			const locsJ = salesLocs[j]
 			if (locsI.length <= locsJ.length) {
-				const isSubset = locsI.every((loc) => locsJ.includes(loc))
+				const isSubset = locsI.every((loc) => salesLocSets[j].has(loc))
 				if (isSubset && (locsI.length < locsJ.length || i > j)) {
 					salesSubsetKeep.delete(i)
 					break
