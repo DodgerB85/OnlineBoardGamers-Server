@@ -115,7 +115,8 @@ export async function initGame() {
 		if (gameData === "") {
 			/************************* SETUP GAME *************************/
 			if (window.initData.startingMap.length > 0) {
-				store.mapData.tiles = window.initData.startingMap
+				// startingMap is compact (tile,rotation pairs) unless already expanded - same guard as old Map constructor
+				store.mapData.tiles = window.initData.startingMap.length < 400 ? map.expandMapToFullGrid(window.initData.startingMap, window.initData.playerNames.length) : window.initData.startingMap
 			} else {
 				store.mapData.tiles = map.generateRandomMap(window.initData.playerNames.length)
 			}
