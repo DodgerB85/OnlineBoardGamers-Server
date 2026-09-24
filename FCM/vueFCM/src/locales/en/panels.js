@@ -95,7 +95,7 @@
 
   playerDetails: {
     noMilestones: "No Milestones",
-    reserveCards: "Reserve cards:",
+    reserveCards: "Reserve Cards (From first to $20 milestone):",
     priceMinus3: "Price -3",
     marketeers: "Marketeers:",
     onTheBeach: "On the beach:",

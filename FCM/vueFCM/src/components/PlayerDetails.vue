@@ -63,12 +63,12 @@ const resourceCounts = computed(() => {
 		</div>
 
 		<!-- PREVIEW ALL RESERVE CARDS -->
-		<template v-if="store.bankBroken === 0 && plyr.hasMilestone(playerIndexProp, rf.FIRST_100_DOL)">
+		<template v-if="store.bankBroken === 0 && plyr.hasMilestone(playerIndexProp, rf.FIRST_20_DOL) && (playerIndexProp === personal.pov || personal.trainingGame)">
 			<div class="reserveCards">
-				{{ $t("playerDetails.reserveCards") }}
-				<template v-for="(num, idx) in store.reserveCards" :key="idx">
-					{{ num }}
-				</template>
+				<p>{{ $t("playerDetails.reserveCards") }}</p>
+				<div class="cardSummaryDiv" v-for="(num, idx) in store.reserveCards" :key="idx">
+					<img class="cardImg" :src="view.getImage(view.getReserveCardImageKey(num))" />
+				</div>
 			</div>
 		</template>
 
