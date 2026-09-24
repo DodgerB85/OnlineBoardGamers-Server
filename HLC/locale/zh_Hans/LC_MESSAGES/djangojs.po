@@ -59,20 +59,17 @@ msgstr "重置"
 #: .\static\HC\JS\HCcontroller.js:253
 msgid ""
 "Welcome to Horseless Carriage Online!</b><BR/>If you have any suggestions, "
-"questions or comments, then please do contact the webmaster at <img src='/"
-"static/Lobby/email.png' width='400px' height='30px'>. Thanks!"
+"questions or comments, then please do contact the webmaster at <img "
+"src='/static/Lobby/email.png' width='400px' height='30px'>. Thanks!"
 msgstr ""
-"欢迎来到Horseless Carriage线上游戏！</b><BR/>如果您有任何建议、问题或意见，那"
-"么请与网站管理员联系：<img src='/static/Lobby/email.png' width='400px' "
-"height='30px'> 。谢谢!"
+"欢迎来到Horseless Carriage线上游戏！</b><BR/>如果您有任何建议、问题或意见，那么请与网站管理员联系：<img "
+"src='/static/Lobby/email.png' width='400px' height='30px'> 。谢谢!"
 
 #: .\static\HC\JS\HCcontroller.js:261
 msgid ""
 "In this practice game You will play all 3 players. Submit a bug report to "
 "report errors and game data to the webmaster. Thanks!"
-msgstr ""
-"在这个练习游戏中，你将操控所有3个玩家进行游戏。提交错误报告，向网站管理员报告"
-"错误和游戏数据。谢谢!"
+msgstr "在这个练习游戏中，你将操控所有3个玩家进行游戏。提交错误报告，向网站管理员报告错误和游戏数据。谢谢!"
 
 #: .\static\HC\JS\HCcontroller.js:266
 msgid "Orientate your main fatory tile"
@@ -97,39 +94,38 @@ msgstr "提高你的装配容量或任意玩家的研究"
 msgid ""
 "NOTE: Bot players do not restrict tech access. So the first human player in "
 "Eng order will have access to all techs"
-msgstr ""
+msgstr "注意：机器人玩家不限制科技访问。因此工程顺序中第一位真人玩家可访问所有科技"
 
 #: .\static\HC\JS\HCcontroller.js:374
-#, fuzzy
 #| msgid "Design"
 msgid "Resign"
-msgstr "设计"
+msgstr "认输"
 
 #: .\static\HC\JS\HCcontroller.js:382
 msgid "Are you sure you want to resign?"
-msgstr ""
+msgstr "确定要认输吗？"
 
 #: .\static\HC\JS\HCcontroller.js:387
 msgid "Resigning will unbalance the game for the remaining playes."
-msgstr ""
+msgstr "认输会使剩余玩家的对局失去平衡。"
 
 #: .\static\HC\JS\HCcontroller.js:393
 msgid "Please carry on playing if that is at all possible."
-msgstr ""
+msgstr "若可能，请继续游戏。"
 
 #: .\static\HC\JS\HCcontroller.js:399
 msgid ""
 "Even if you think you can't win, you could still aim for 2nd place / not "
 "last place / funny factory layout / etc."
-msgstr ""
+msgstr "即使觉得赢不了，你仍可争取第二名/别垫底/有趣的工厂布局等。"
 
 #: .\static\HC\JS\HCcontroller.js:413
 msgid "Yes, I still want to resign"
-msgstr ""
+msgstr "是的，我仍要认输"
 
 #: .\static\HC\JS\HCcontroller.js:415
 msgid "Carry on playing"
-msgstr ""
+msgstr "继续游戏"
 
 #: .\static\HC\JS\HCcontroller.js:428
 msgid "Research points remaining:"
@@ -138,7 +134,7 @@ msgstr "剩余研究点数："
 #: .\static\HC\JS\HCcontroller.js:620
 msgid ""
 "You moved %(playerName)s %(playerToken)s to %(techTrack)s %(newPosition)s"
-msgstr ""
+msgstr "你将 %(playerName)s 的 %(playerToken)s 移到 %(techTrack)s %(newPosition)s"
 
 #: .\static\HC\JS\HCcontroller.js:719
 msgid "Previous Focus Order"
@@ -148,9 +144,7 @@ msgstr "上一个焦点顺位"
 msgid ""
 "Spend all Gantt to choose focus, or keep your Gantt. Remember: reaching 10 "
 "Gantt will reduce the punch clock by 1"
-msgstr ""
-"支付所有甘特点数来选择焦点顺位，或者保留你的甘特点数。记住：抵达10甘特点数时"
-"将会降低1点考勤钟"
+msgstr "支付所有甘特点数来选择焦点顺位，或者保留你的甘特点数。记住：抵达10甘特点数时将会降低1点考勤钟"
 
 #: .\static\HC\JS\HCcontroller.js:771
 msgid "Pass & Keep Gantt"
@@ -181,8 +175,7 @@ msgstr "你作为当前玩家。你可以使用任意可用组件"
 msgid ""
 "You are not the current player. If previous players use up components that "
 "you also use, you will need to modify your factory"
-msgstr ""
-"你不是当前玩家。如果上一位玩家用光了你也在使用的组件，则你必须修整你的工厂"
+msgstr "你不是当前玩家。如果上一位玩家用光了你也在使用的组件，则你必须修整你的工厂"
 
 #: .\static\HC\JS\HCcontroller.js:893 .\static\HC\JS\HCcontroller.js:1054
 msgid "Remove Last Component"
@@ -233,9 +226,7 @@ msgid ""
 "Choose a dealership, place a Market Window, then if possible, sell to a "
 "niche<BR/>Once you select a dealership, you can rotate the market window "
 "using the buttons that appear underneath the dealerships"
-msgstr ""
-"选择1个经销商，放置市场窗口，然后如果有可能的话，向利基市场销售<BR/>选择经销"
-"商后，可以使用经销商下方的按钮旋转市场窗口"
+msgstr "选择1个经销商，放置市场窗口，然后如果有可能的话，向利基市场销售<BR/>选择经销商后，可以使用经销商下方的按钮旋转市场窗口"
 
 #: .\static\HC\JS\HCcontroller.js:1497
 msgid "No sales possible"
@@ -282,20 +273,18 @@ msgid "%(playerName)s sets up factory"
 msgstr "设置工厂"
 
 #: .\static\HC\JS\HChistory.js:129
-#, fuzzy
 #| msgid "Game rewound to here by"
 msgid "Game rewound to here by %(playerName)s"
-msgstr "游戏回放到这里"
+msgstr "游戏被 %(playerName)s 回退到这里"
 
 #: .\static\HC\JS\HChistory.js:145
-#, fuzzy
 #| msgid "was kicked out"
 msgid "%(playerName)s was kicked out"
-msgstr "被踢出"
+msgstr "%(playerName)s 被踢出"
 
 #: .\static\HC\JS\HChistory.js:159
 msgid "%(resignedPlayer)s Resigns"
-msgstr ""
+msgstr "%(resignedPlayer)s 认输"
 
 #: .\static\HC\JS\HChistory.js:178
 msgid "moves"
@@ -306,14 +295,13 @@ msgid "to"
 msgstr "到"
 
 #: .\static\HC\JS\HChistory.js:212
-#, fuzzy
 #| msgid "passes and keeps their Gantt"
 msgid "%(playerName)s passes and keeps their Gantt"
-msgstr "略过并保留甘特点数"
+msgstr "%(playerName)s 过牌并保留甘特点"
 
 #: .\static\HC\JS\HChistory.js:224
 msgid "%(playerName)s spends all Gantt to choose position: %(position)s"
-msgstr ""
+msgstr "%(playerName)s 花光甘特点选择位置：%(position)s"
 
 #: .\static\HC\JS\HChistory.js:240 .\static\HC\JS\HChistory.js:256
 msgid "builds"
@@ -321,45 +309,40 @@ msgstr "建造"
 
 #: .\static\HC\JS\HChistory.js:301
 msgid "%(playerName)s passes: %(reason)s"
-msgstr ""
+msgstr "%(playerName)s 过牌：%(reason)s"
 
 #: .\static\HC\JS\HChistory.js:312
 msgid "Gantt Increases"
 msgstr "增加甘特点数"
 
 #: .\static\HC\JS\HChistory.js:315
-#, fuzzy
 #| msgid "gains %(numberOfGantt)s Gantt"
 msgid "%(playerName)s gains %(numberOfGantt)s Gantt"
-msgstr "获得 %(numberOfGantt)s 甘特点数"
+msgstr "%(playerName)s 获得 %(numberOfGantt)s 甘特点"
 
 #: .\static\HC\JS\HChistory.js:347
-#, fuzzy
 #| msgid "places %(dealershipName)s but cannot make any sales"
 msgid "%(playerName)s places %(dealershipName)s but cannot make any sales"
-msgstr "放置 %(dealershipName)s 但不能进行任何销售"
+msgstr "%(playerName)s 放置 %(dealershipName)s 但无法销售"
 
 #: .\static\HC\JS\HChistory.js:348
-#, fuzzy
 #| msgid "places %(dealershipName)s but cannot make any sales"
 msgid "%(playerName)s uses %(dealershipName)s but cannot make any sales"
-msgstr "放置 %(dealershipName)s 但不能进行任何销售"
+msgstr "%(playerName)s 使用 %(dealershipName)s 但无法销售"
 
 #: .\static\HC\JS\HChistory.js:351
-#, fuzzy
 #| msgid "places %(dealershipName)s to sell:"
 msgid "%(playerName)s places %(dealershipName)s to sell:"
-msgstr "放置 %(dealershipName)s 来销售："
+msgstr "%(playerName)s 放置 %(dealershipName)s 以销售："
 
 #: .\static\HC\JS\HChistory.js:352
-#, fuzzy
 #| msgid "places %(dealershipName)s to sell:"
 msgid "%(playerName)s uses %(dealershipName)s to sell"
-msgstr "放置 %(dealershipName)s 来销售："
+msgstr "%(playerName)s 使用 %(dealershipName)s 销售"
 
 #: .\static\HC\JS\HChistory.js:352
 msgid "(automatically)"
-msgstr ""
+msgstr "（自动）"
 
 #: .\static\HC\JS\HChistory.js:382
 msgid "%(carAmount)s Car for $%(eachSaleAmount)s"
@@ -414,8 +397,7 @@ msgid ""
 "%(techTrackName)s: %(innovationLevel)s - Furthest from Min Marker:  "
 "%(furtehstFromMin)s"
 msgstr ""
-"%(techTrackName)s: %(innovationLevel)s - 距离最小标记最远:  "
-"%(furtehstFromMin)s"
+"%(techTrackName)s: %(innovationLevel)s - 距离最小标记最远:  %(furtehstFromMin)s"
 
 #: .\static\HC\JS\HChistory.js:467
 msgid "New Tech Track Introduced:"
@@ -434,10 +416,9 @@ msgid "Right"
 msgstr "对了"
 
 #: .\static\HC\JS\HChistory.js:494
-#, fuzzy
 #| msgid "plays a card"
 msgid "%(playerName)s plays a card"
-msgstr "打出一张卡牌"
+msgstr "%(playerName)s 打出一张卡"
 
 #: .\static\HC\JS\HChistory.js:505
 msgid "Game Ended by: Punch Clock"
@@ -503,7 +484,7 @@ msgstr "展示所有历史记录"
 msgid ""
 "Something went wrong. Please reload the page. If the problem persists, "
 "please contact the webmaster"
-msgstr ""
+msgstr "出现问题。请刷新页面。若问题持续，请联系站长"
 
 #: .\static\HC\JS\HCio.js:158 .\static\HC\JS\HCio.js:323
 #: .\static\HC\JS\HCio.js:419 .\static\HC\JS\HCio.js:489
@@ -543,10 +524,9 @@ msgid "Permission Changed"
 msgstr "权限已更改"
 
 #: .\static\HC\JS\HCio.js:943
-#, fuzzy
 #| msgid "Please tick ths box first"
 msgid "Please tick to exclude from stats first"
-msgstr "请首先勾选这个方框"
+msgstr "请先勾选以从统计中排除"
 
 #: .\static\HC\JS\HCio.js:968
 msgid "Excluded from Stats"
@@ -565,28 +545,27 @@ msgstr "请<a href='/register'>注册</a> or <a href='/login'>登入</a>来进�
 #: .\static\HC\JS\HCmain.js:183
 msgid ""
 "Player <b>%(playerToKickName)s</b> has used all the standard kickout time."
-msgstr ""
+msgstr "玩家 <b>%(playerToKickName)s</b> 已用完全部标准踢出时间。"
 
 #: .\static\HC\JS\HCmain.js:185
 msgid "Remaining Flex-Time:"
-msgstr ""
+msgstr "剩余弹性时间："
 
 #: .\static\HC\JS\HCmain.js:188
-msgid ""
-"For more information see <b><a href=\"/help/\" target=\"_blank\">Help</a></b>"
-msgstr ""
+msgid "For more information see <b><a href=\"/help/\" target=\"_blank\">Help</a></b>"
+msgstr "更多信息见 <b><a href=\"/help/\" target=\"_blank\">帮助</a></b>"
 
 #: .\static\HC\JS\HCmain.js:223
 msgid ""
-"Player <b>%(playerToKickName)s</b> has timed out<BR/>To kick out <B>"
-"%(playerToKickName)s</b> press Confirm Kickout<BR/>The game will proceed to "
-"the next player/phase/turn<BR/><BR/>Otherwise you can allow <b>"
-"%(playerToKickName)s</b> more time - reload the page to initiate kickout "
+"Player <b>%(playerToKickName)s</b> has timed out<BR/>To kick out "
+"<B>%(playerToKickName)s</b> press Confirm Kickout<BR/>The game will proceed "
+"to the next player/phase/turn<BR/><BR/>Otherwise you can allow "
+"<b>%(playerToKickName)s</b> more time - reload the page to initiate kickout "
 "again<BR/>"
 msgstr ""
 "玩家<b>%(playerToKickName)s</b> 已超时<BR/>被踢出<B>%(playerToKickName)s</b> "
-"按确认退出<BR/>游戏将进行到下一个玩家/阶段/回合<BR/><BR/>否则，您可以允许 <b>"
-"%(playerToKickName)s</b> 更多时间-重新加载页面以再次启动限位<BR/>"
+"按确认退出<BR/>游戏将进行到下一个玩家/阶段/回合<BR/><BR/>否则，您可以允许 <b>%(playerToKickName)s</b> "
+"更多时间-重新加载页面以再次启动限位<BR/>"
 
 #: .\static\HC\JS\HCmain.js:232
 msgid "Not now - allow more time"
@@ -832,7 +811,7 @@ msgstr "机器人玩家"
 
 #: .\static\HC\JS\HCreference.js:736
 msgid "Final sale processed automatically"
-msgstr ""
+msgstr "最终销售已自动处理"
 
 #: .\static\HC\JS\HCreference.js:753
 msgid "Factory Setup"
@@ -1228,13 +1207,12 @@ msgstr "市场需求:"
 
 #: .\static\HC\JS\HCview.js:1708
 msgid "Adding a new tech caused: %(componentName)s - %(componentError)s"
-msgstr ""
+msgstr "添加新技术导致：%(componentName)s - %(componentError)s"
 
 #: .\static\HC\JS\HCview.js:1727
-#, fuzzy
 #| msgid "previous players already took this"
 msgid "Please remove: %(componentName)s - previous players already took this"
-msgstr "之前的玩家已经拿过这个"
+msgstr "请移除：%(componentName)s——之前的玩家已拿过"
 
 #: .\static\HC\JS\HCview.js:1828
 msgid "Enter Sandbox Mode"
@@ -1274,13 +1252,12 @@ msgstr "利基市场方格超过了经销商的规格"
 
 #: .\static\HC\JS\HCview.js:2885
 msgid "Below Min Spec"
-msgstr ""
+msgstr "低于最低规格"
 
 #: .\static\HC\JS\HCview.js:2942
-#, fuzzy
 #| msgid "Remove Last Component"
 msgid "Nudge Component"
-msgstr "移除最后一个组件"
+msgstr "轻推组件"
 
 #: .\static\HC\JS\HCview.js:3002
 msgid "Quick Spec Pick"
@@ -1291,20 +1268,17 @@ msgid "Your bug report has been submitted"
 msgstr "您的错误报告已提交"
 
 #: .\static\HC\JS\HCview.js:3619
-#, fuzzy
 #| msgid ""
-#| "Welcome to Horseless Carriage Online!</b><BR/>If you have any "
-#| "suggestions, questions or comments, then please do contact the webmaster "
-#| "at <img src='/static/Lobby/email.png' width='400px' height='30px'>. "
-#| "Thanks!"
+#| "Welcome to Horseless Carriage Online!</b><BR/>If you have any suggestions, "
+#| "questions or comments, then please do contact the webmaster at <img "
+#| "src='/static/Lobby/email.png' width='400px' height='30px'>. Thanks!"
 msgid ""
 "Welcome to Horseless Carriage Online!=-NEWLINE-==-NEWLINE-=If you have any "
 "suggestions, questions or comments, then please do contact the webmaster at "
 "the email address in Contact (top right in the lobby). Thanks!"
 msgstr ""
-"欢迎来到Horseless Carriage线上游戏！</b><BR/>如果您有任何建议、问题或意见，那"
-"么请与网站管理员联系：<img src='/static/Lobby/email.png' width='400px' "
-"height='30px'> 。谢谢!"
+"欢迎来到 Horseless Carriage "
+"在线版！=-NEWLINE-==-NEWLINE-=如有建议、问题或意见，请通过大厅右上角“联系”中的邮箱联系站长。谢谢！"
 
 #: .\static\HC\JS\HCview.js:3762
 msgid "D'MENTS"
@@ -1312,9 +1286,9 @@ msgstr "D的单位"
 
 #: .\static\HC\JS\HCview.js:3793
 msgid ""
-"The person having the visual colour:: %(visualColour)s has the original game "
-"cards in colour: %(originalColour)s"
-msgstr ""
+"The person having the visual colour:: %(visualColour)s has the original game"
+" cards in colour: %(originalColour)s"
+msgstr "视觉颜色为 %(visualColour)s 的人，原版游戏卡牌颜色为 %(originalColour)s"
 
 #: .\static\HC\JS\HCwebsocket.js:35
 msgid "Connected"

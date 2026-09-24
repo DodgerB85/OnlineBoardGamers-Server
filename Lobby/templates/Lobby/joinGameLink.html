@@ -29,15 +29,13 @@
         {% include 'Lobby/messages.html' %}
         {% include 'Lobby/map_editor_forms.html' %}
         <div id="learningGameConfirmDiv">
-            <b>Note:</b>
-            The creator has requested a Learning Game.
-            <br />
-            You will be expected to help / teach the other player.
-            <br />
-            This game will be excluded from stats.
-            <br />
-            <br />
-            Are you sure you want to join?
+            {% blocktranslate trimmed %}
+              <b>Note:</b>
+              The creator has requested a Learning Game.
+              You will be expected to help / teach the other player.
+              This game will be excluded from stats.
+              Are you sure you want to join?
+            {% endblocktranslate %}
             <br />
             <div id="learningJoin" class="buttonDiv Join learningGameConfirmButtons">{% translate "Join" %}</div>
             <div id="learningCancel"
@@ -70,7 +68,7 @@
                     </div>
                 </div>
             {% else %}
-                {% include "Lobby/empty.html" with message="No Available Games" %}
+                {% include "Lobby/empty.html" with message=_("No Available Games") %}
             {% endif %}
             {% url "lobbyHelp" as the_url %}
             <p class="join-help">

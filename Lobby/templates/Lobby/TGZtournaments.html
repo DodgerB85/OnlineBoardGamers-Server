@@ -17,17 +17,18 @@
             </div>
         {% endif %}
         <div class="page-header">
-            <h1 class="page-title">The Great Zimbabwe Tournaments</h1>
+            <h1 class="page-title">{% translate "The Great Zimbabwe Tournaments" %}</h1>
         </div>
         <p style="font-size:14px; color:var(--color-muted);">
-            The Great Zimbabwe Tournaments are run externally.
+            {% translate "The Great Zimbabwe Tournaments are run externally." %}
         </p>
         <p style="font-size:14px; color:var(--color-muted);">
-            Current tournament information can be found <a href="https://boardgamegeek.com/thread/3521841/tgz-summer-2025-async-tournament-main-thread" target="_blank">here</a>
+            {% translate "Current tournament information can be found" %}
+            <a href="https://boardgamegeek.com/thread/3521841/tgz-summer-2025-async-tournament-main-thread" target="_blank">{% translate "here" %}</a>
         </p>
-        <p><a href="{% url 'TGZtournamentFixedSummer25' %}">Summer 25 Tournament Link</a></p>
-        <p><a href="{% url 'TGZtournamentFixedAutumn24' %}">Autumn 24 Tournament Link</a></p>
-        <p><a href="{% url 'TGZtournamentFixedSpring24' %}">Spring 24 Tournament Link</a></p>
+        <p><a href="{% url 'TGZtournamentFixedSummer25' %}">{% translate "Summer 25 Tournament Link" %}</a></p>
+        <p><a href="{% url 'TGZtournamentFixedAutumn24' %}">{% translate "Autumn 24 Tournament Link" %}</a></p>
+        <p><a href="{% url 'TGZtournamentFixedSpring24' %}">{% translate "Spring 24 Tournament Link" %}</a></p>
         {% if activeGames %}
             <h2 class="section-title">{% translate "Current Games - for Tournament Moderator info. Check a tournament link for tournament info" %}</h2>
             <div class="card">

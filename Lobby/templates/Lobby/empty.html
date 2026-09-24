@@ -1,6 +1,10 @@
 {% load i18n %}
 <div class="empty-card">
-  <p class="empty-msg">{{ message|default:"Nothing here yet." }}</p>
+  {% if message %}
+    <p class="empty-msg">{{ message }}</p>
+  {% else %}
+    <p class="empty-msg">{% translate "Nothing here yet." %}</p>
+  {% endif %}
   {% if showNewGame %}
     <a class="button button-primary empty-cta" href="{% url 'newGamesPage' %}">{% translate "Start a new game" %}</a>
   {% endif %}

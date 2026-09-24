@@ -2,13 +2,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Game Search</title>
+    <title>{% translate "Game Search" %}</title>
     <script src="{% static 'Lobby/admin/DBO.js' %}"></script>
     <link href="{% static 'Lobby/admin/DBO.css' %}" rel="stylesheet">
   </head>
   <body>
-    <h1>Game Search</h1>
-    <label for="gameSelect">Select a game:</label>
+    <h1>{% translate "Game Search" %}</h1>
+    <label for="gameSelect">{% translate "Select a game:" %}</label>
     <select id="gameSelect">
       <option value="FCM">FCM</option>
       <option value="HLC">HLC</option>
@@ -16,14 +16,14 @@
       <option value="TGZ">TGZ</option>
     </select>
     <br />
-    <label for="practiceCheckbox">Practice games only:</label>
+    <label for="practiceCheckbox">{% translate "Practice games only:" %}</label>
     <input type="checkbox" id="practiceCheckbox">
     <br />
-    <label for="updatedWithinCheckbox">Updated within 3 months:</label>
+    <label for="updatedWithinCheckbox">{% translate "Updated within 3 months:" %}</label>
     <input type="checkbox" id="updatedWithinCheckbox">
     <br />
     <br />
-    <button onclick="searchGames()">Search</button>
+    <button onclick="searchGames()">{% translate "Search" %}</button>
     <div id="results"></div>
     <br />
     {% if messages %}
@@ -68,7 +68,7 @@
                        width="50"
                        height="50"
                        src="{% static "Lobby/images/icon-chat-lobby.svg" %}"
-                       title="New Chat Message">
+                       title="{% translate "New Chat Message" %}">
                 {% endif %}
                 {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}
                 <a target="_blank"
@@ -82,7 +82,7 @@
                        width="50"
                        height="50"
                        src="{% static "Lobby/images/createMap.jpg" %}"
-                       title="Click to View Map"
+                       title="{% translate "Click to View Map" %}"
                        data-map="{{ game.startingMap }}"
                        data-game="FCM">
                 {% endif %}
@@ -92,7 +92,7 @@
                        width="50"
                        height="50"
                        src="{% static "Lobby/images/createMapTGZ.jpg" %}"
-                       title="Click to View Map"
+                       title="{% translate "Click to View Map" %}"
                        data-map="{{ game.startingMap }}"
                        data-game="TGZ">
                 {% endif %}

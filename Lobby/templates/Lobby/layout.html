@@ -30,16 +30,18 @@
             {% block title %}
                 {% if user.is_authenticated %}
                     {% if myMoveGames %}({{ myMoveGames }}){% endif %}
-                    Online Board Gamers
+                    {% translate "Online Board Gamers" %}
                 {% else %}
-                    Online Board Gamers - Play Splotter's Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Indonesia, Antiquity, Bus, Cannes, and Web Online for free with others, or solo!
+                    {% blocktranslate trimmed %}
+                        Online Board Gamers - Play Splotter's Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Indonesia, Antiquity, Bus, Cannes, and Web Online for free with others, or solo!
+                    {% endblocktranslate %}
                 {% endif %}
             {% endblock %}
         </title>
-        <meta name="title" content="Online Board Gamers">
+        <meta name="title" content="{% translate "Online Board Gamers" %}">
         {% block description %}
             <meta name="description"
-                  content="Play Splotter's Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Indonesia, Antiquity, Bus, Cannes, and Web Online for free with others, or solo!">
+                  content="{% blocktranslate trimmed %}Play Splotter's Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Indonesia, Antiquity, Bus, Cannes, and Web Online for free with others, or solo!{% endblocktranslate %}">
         {% endblock %}
         <meta name="keywords"
               content="Food,Chain,Magnate,Online,Play,Board,Game,Games,Gamers,Horseless,Carriage,Bus,Great,Zimbabwe,Cannes,Antiquity,Indonesia,Keyflower,Web">

@@ -125,17 +125,17 @@
                         <div class="form-help" style="flex-basis:100%;padding-left:0;">{% trans "Choose the 2nd edition map, 3rd edition map, or a hex style map" %}</div>
                         <div class="favRestChoice">
                             <label for="indMap0"><img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon.jpg' %}" width="230" height="152" alt="2nd Edition" /></label>
-                            <b>2nd Edition</b>
+                            <b>{% translate "2nd Edition" %}</b>
                             <input type="radio" id="indMap0" name="mapType" value="0" {% if mapType == 0 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="indMap05"><img src="{% static 'Lobby/images/INDprofile/OM_map_3e_icon.jpg' %}" width="230" height="152" alt="3rd Edition" /></label>
-                            <b>3rd Edition</b>
+                            <b>{% translate "3rd Edition" %}</b>
                             <input type="radio" id="indMap05" name="mapType" value="4" {% if mapType == 4 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="indMap1"><img src="{% static 'Lobby/images/INDprofile/OM_map_hex_icon.jpg' %}" width="230" height="152" alt="Hex map" /></label>
-                            <b>Hex map</b>
+                            <b>{% translate "Hex map" %}</b>
                             <input type="radio" id="indMap1" name="mapType" value="2" {% if mapType == 2 %}checked{% endif %} />
                         </div>
                     </div>
@@ -145,12 +145,12 @@
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favRestChoice">
                             <label for="indCitySize0"><div class="cityMarker greenCity"></div><div class="cityMarker orangeCity"></div><div class="cityMarker redCity"></div></label>
-                            <b>Green &gt; Orange &gt; Red</b>
+                            <b>{% translate "Green &gt; Orange &gt; Red" %}</b>
                             <input type="radio" id="indCitySize0" name="citySizeColour" value="0" {% if citySizeColour == 0 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="indCitySize1"><div class="cityMarker orangeCity"></div><div class="cityMarker greenCity"></div><div class="cityMarker redCity"></div></label>
-                            <b>Orange &gt; Green &gt; Red</b>
+                            <b>{% translate "Orange &gt; Green &gt; Red" %}</b>
                             <input type="radio" id="indCitySize1" name="citySizeColour" value="1" {% if citySizeColour == 1 %}checked{% endif %} />
                         </div>
                     </div>
@@ -160,12 +160,12 @@
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favRestChoice">
                             <label for="shipIcon0"><img src="{% static 'Lobby/images/INDprofile/shipsSimple.jpg' %}" width="448" height="152" alt="Simple Ships" /></label>
-                            <b>Simple Ships</b>
+                            <b>{% translate "Simple Ships" %}</b>
                             <input type="radio" id="shipIcon0" name="shipIcon" value="0" {% if shipIcon == 0 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="shipIcon1"><img src="{% static 'Lobby/images/INDprofile/shipsFancy.jpg' %}" width="448" height="152" alt="Fancy Ships" /></label>
-                            <b>Fancy Ships</b>
+                            <b>{% translate "Fancy Ships" %}</b>
                             <input type="radio" id="shipIcon1" name="shipIcon" value="1" {% if shipIcon == 1 %}checked{% endif %} />
                         </div>
                     </div>
@@ -175,12 +175,12 @@
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favRestChoice">
                             <label for="goodsIcon1"><img src="{% static 'Lobby/images/INDprofile/icons1e.jpg' %}" width="187" height="152" alt="1st Edition" /></label>
-                            <b>1st Edition</b>
+                            <b>{% translate "1st Edition" %}</b>
                             <input type="radio" id="goodsIcon1" name="goodsIcon" value="1" {% if goodsIcon == 1 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="goodsIcon2"><img src="{% static 'Lobby/images/INDprofile/icons2e.jpg' %}" width="187" height="152" alt="2nd Edition" /></label>
-                            <b>2nd Edition</b>
+                            <b>{% translate "2nd Edition" %}</b>
                             <input type="radio" id="goodsIcon2" name="goodsIcon" value="2" {% if goodsIcon == 2 %}checked{% endif %} />
                         </div>
                     </div>
@@ -190,12 +190,12 @@
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favRestChoice">
                             <label for="indOutline0"><img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon_outline.jpg' %}" width="230" height="152" alt="Show Outline" /></label>
-                            <b>Show Outline</b>
+                            <b>{% translate "Show Outline" %}</b>
                             <input type="radio" id="indOutline0" name="indOutline" value="1" {% if indOutline == 1 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="indOutline1"><img src="{% static 'Lobby/images/INDprofile/OM_map_1e2e_icon.jpg' %}" width="230" height="152" alt="Hide Outline" /></label>
-                            <b>Hide Outline</b>
+                            <b>{% translate "Hide Outline" %}</b>
                             <input type="radio" id="indOutline1" name="indOutline" value="0" {% if indOutline == 0 %}checked{% endif %} />
                         </div>
                     </div>
@@ -205,12 +205,12 @@
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favRestChoice">
                             <label for="playerTableStyle0"><img src="{% static 'Lobby/images/INDprofile/playerTableStyle0.jpg' %}" width="145" height="191" alt="Icons" /></label>
-                            <b>Icons</b>
+                            <b>{% translate "Icons" %}</b>
                             <input type="radio" id="playerTableStyle0" name="playerTableStyle" value="0" {% if playerTableStyle == 0 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="playerTableStyle1"><img src="{% static 'Lobby/images/INDprofile/playerTableStyle1.jpg' %}" width="145" height="191" alt="Text" /></label>
-                            <b>Text</b>
+                            <b>{% translate "Text" %}</b>
                             <input type="radio" id="playerTableStyle1" name="playerTableStyle" value="1" {% if playerTableStyle == 1 %}checked{% endif %} />
                         </div>
                     </div>

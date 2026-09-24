@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-07 02:32+0800\n"
+"POT-Creation-Date: 2026-09-24 14:20+0800\n"
 "PO-Revision-Date: 2023-10-07 20:13+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,674 +18,1047 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 3.3.2\n"
 
-#: .\models.py:50
-msgid "Open"
-msgstr "开放中"
+#: .\FCM\common.py:216
+#| msgid "What are the Expert Options?"
+msgid "Please Select an Expert Option"
+msgstr "请选择专家选项"
 
-#: .\models.py:51 .\models.py:323
-msgid "In Progress"
-msgstr "进行中"
+#: .\FCM\common.py:238
+msgid "Error: You cannot add yourself"
+msgstr "错误：不能添加自己"
 
-#: .\models.py:52
-msgid "Finished"
-msgstr "已完成"
+#: .\FCM\common.py:404
+msgid "Your Practice game has been started"
+msgstr "你的练习局已开始"
 
-#: .\models.py:65
-msgid "Rounds"
-msgstr "回合制"
+#: .\FCM\common.py:409
+msgid "Your AI game has been started"
+msgstr "你的 AI 对局已开始"
 
-#: .\models.py:66
-msgid "Knockout"
-msgstr "淘汰制"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:18
+msgid "China Expansion Help"
+msgstr "中国扩展帮助"
 
-#: .\models.py:67
-msgid "Two Lives"
-msgstr "双败制"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:19
+#: .\FCM\templates\FCM\coffeeHelp.html:13
+#| msgid "Coffee Help"
+msgid "FCM Help"
+msgstr "FCM 帮助"
 
-#: .\models.py:196
-msgid "Food Chain Magnate - Tournament Game Started"
-msgstr "快餐连锁大亨 - 锦标赛比赛开始"
-
-#: .\models.py:207
-#, python-format
+#: .\FCM\templates\FCM\FCMchinaHelp.html:25
 msgid ""
-"A Tournament Game has started\n"
-"%(gameName)s - %(maxPlayers)s players"
+"These modules are from the Chinese kickstarter (Modian) release from "
+"publisher Yikeguang (一刻馆). Splotter was unaware that these existed before I "
+"contacted them! Therefore you could consider these modules as \"semi-"
+"official\" but unsanctioned by Splotter. <br /> Games with these modules "
+"will therefore be excluded from the stats (except Urban Planning / Urban "
+"Planning Plus). <br /> The rules also don't cover all possiblities. "
+"Therefore, I have made a few judgment calls to tighten up the rules a bit. "
+"In addition, as this content was not designed by Splotter, I'm not sure the "
+"playtesting/balancing was quite as thorough!"
 msgstr ""
-"一个锦标赛游戏已经开始了\n"
-"%(gameName)s - %(maxPlayers)s 名玩家"
+"这些模块来自出版方一刻馆的中国摩点众筹版本。在我联系 Splotter 之前他们并不知道这些存在！因此你可将这些模块视为“半官方”但未经 "
+"Splotter 认可。<br /> 含这些模块的对局将排除出统计（城市规划/城市规划加强版除外）。<br /> "
+"规则也未涵盖所有可能性，因此我做了一些判断来收紧规则。另外，由于内容非 Splotter 设计，我不确定测试/平衡是否同样充分！"
 
-#: .\models.py:209 .\models.py:276
-msgid "Click here to play Food Chain Magnate"
-msgstr "单击此处开始快餐连锁大亨"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:37
+msgid "Urban Planning"
+msgstr "城市规划"
 
-#: .\models.py:265
-msgid "Food Chain Magnate - Tournament Won"
-msgstr "快餐连锁大亨 - 锦标赛获胜"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:38
+#: .\FCM\templates\FCM\FCMchinaHelp.html:63
+#: .\FCM\templates\FCM\FCMchinaHelp.html:90
+#: .\FCM\templates\FCM\FCMchinaHelp.html:135
+#: .\FCM\templates\FCM\FCMchinaHelp.html:177
+#: .\FCM\templates\FCM\FCMchinaHelp.html:220
+msgid "Overview"
+msgstr "概览"
 
-#: .\models.py:274
-#, python-format
+#: .\FCM\templates\FCM\FCMchinaHelp.html:40
 msgid ""
-"You have won a tournament! \n"
-"%(tournamentName)s"
+"Random maps can have a huge amount of variance, producing isolated islands "
+"as well as large residential areas. This module allows players to influence "
+"map construction and thus the characteristics of the map to be used."
+msgstr "随机地图差异可能很大，既会产生孤立岛屿也会产生大片住宅区。本模块允许玩家影响地图构建，从而影响所用地图的特征。"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:48
+msgid ""
+"In turn order, each player may rotate the next tile to be placed, according "
+"to the sequence below. Note you can only rotate the next tile - you cannot "
+"select or change which tile that is."
+msgstr "按回合顺序，每位玩家可按下列顺序旋转下一个要放置的板块。注意只能旋转下一个板块——不能选择或更换是哪一个板块。"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:53
+msgid ""
+"After all tiles have been placed, turn order will reset to the same order as"
+" when the game started."
+msgstr "所有板块放置完毕后，回合顺序将重置为游戏开始时的顺序。"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:62
+msgid "Urban Planning Plus"
+msgstr "城市规划加强版"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:65
+msgid ""
+"People have asked me in the past about some kind of map tile drafting "
+"option. With the addition of the Urban Planning module, which only allows "
+"players to rotate the next tile, I decided to add this option as well."
+msgstr "过去有人问过是否有某种地图板块选抽选项。随着只允许旋转下一板块的城市规划模块加入，我决定也加上这个选项。"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:73
+msgid ""
+"Same as Urban Planning, except you may now also choose which tile to place, "
+"as well as the rotation."
+msgstr "与城市规划相同，只是你现在还可以选择放置哪个板块及其旋转。"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:78
+msgid ""
+"For 6p games then the expansion tiles will be added regardless of whether "
+"New Districts has been selected or not."
+msgstr "6 人局时，无论是否选择新城区，都会加入扩展板块。"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:83
+msgid "Jazz Musicians"
+msgstr "爵士乐手"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:92
+msgid ""
+"Jazz originated in the United States in the late 19th and early 20th "
+"centuries. This moving music caused people to linger longer. Whenever you "
+"have such music in your restaurants, it will cause people to give more "
+"generous tips."
+msgstr "爵士乐起源于 19 世纪末 20 世纪初的美国。这种动人的音乐让人流连忘返。只要你的餐厅有这种音乐，人们就会给更丰厚的小费。"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:100
+msgid ""
+"A Jazz Musician can be trained from a Waitress, and requires a salary. There"
+" are 6 Jazz Musicians in the game."
+msgstr "爵士乐手可由女服务生培训而来，需要薪水。游戏中有 6 名爵士乐手。"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:105
+msgid ""
+"Each Jazz Musician will generate $15 in tips during the Dinnertime phase."
+msgstr "每位爵士乐手在晚餐阶段产生 $15 小费。"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:110
+msgid ""
+"Jazz Musicians act as a reverse tie-breaker; ie the person with FEWEST "
+"musicians will win ties - so if you have any Jazz Musicians you will lose "
+"ties to anyone with fewer Jazz Musicians."
+msgstr "爵士乐手起反向平局判定作用；即乐手最少的人赢得平局——因此若你有任何爵士乐手，会输给乐手更少的玩家。"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:123
+msgid ""
+"As always, employees need to actually be in your structure to count towards "
+"tie breakers."
+msgstr "一如既往，员工必须实际在你的组织结构中才计入平局判定。"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:128
+msgid "Delivery Drivers"
+msgstr "配送司机"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:137
+msgid ""
+"Takeout! Takeout! Finally we can eat at home. Of course, the emergence of "
+"takeout has made the price war more intense."
+msgstr "外卖！外卖！终于可以在家吃了。当然，外卖的出现让价格战更加激烈。"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:145
+msgid ""
+"The Delivery Driver is a base level employee that can be directly hired, and"
+" requires a salary."
+msgstr "外卖司机是可直接雇佣的基础员工，需要薪水。"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:150
+msgid ""
+"Note that it is not a 1x employee, but you may only ever have one Delivery "
+"Driver in your organisation."
+msgstr "注意它不是 1x 员工，但你的组织中始终只能有一名外卖司机。"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:155
+msgid ""
+"If a residence has 2 or more demand tokens on it, then any restaurant with a"
+" working Delivery Driver will reduce the distance to 0."
+msgstr "若住宅有 2 个或更多需求标记，则任何有在岗外卖司机的餐厅会将距离减至 0。"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:160
+msgid ""
+"If you have a Milestone that reduces distance, and it is more favourable to "
+"ignore the Delivery Driver, then the Delivery Driver won't be used. EG if "
+"you are on the same tile as a house, and have the Ketchup Milestone, your "
+"distance will still count as -1; you won't be penalised by having the "
+"distance increased to 0 if using a Delivery Driver. So any net positive "
+"distance will be reduced to 0."
 msgstr ""
-"您获得了一场锦标赛的冠军！\n"
-"%(tournamentName)s"
+"若你有降低距离的里程碑，且忽略外卖司机更有利，则不会使用外卖司机。例如你与房屋同板块且有番茄酱里程碑，距离仍计为 -1；使用外卖司机导致距离变为 0 "
+"也不会惩罚你。因此任何净正距离都会减至 0。"
 
-#: .\models.py:321
-msgid "OPEN FOR SIGNUP"
-msgstr "开放注册"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:165
+msgid "Dumplings"
+msgstr "饺子"
 
-#: .\models.py:326
-msgid "1st:"
-msgstr "1："
+#: .\FCM\templates\FCM\FCMchinaHelp.html:179
+msgid "Dumplings are one of China's classic foods."
+msgstr "饺子是中国经典食物之一。"
 
-#: .\models.py:333
-msgid "2nd:"
-msgstr "2："
+#: .\FCM\templates\FCM\FCMchinaHelp.html:187
+msgid ""
+"Marketing Dumplings: You cannot directly market dumplings. Instead, they are"
+" so tasty that ANY marketed item will also add demand for dumplings. "
+"Immediately after a marketing campaign has run, it will run again except the"
+" second time it will add Dumplings demand instead of its original item."
+msgstr ""
+"饺子营销：不能直接营销饺子。相反，它们太好吃了，任何被营销的物品都会额外增加饺子需求。营销活动运行后会立即再运行一次，只是第二次增加的是饺子需求而非原物品。"
 
-#: .\models.py:340
-msgid "3rd:"
-msgstr "3："
+#: .\FCM\templates\FCM\FCMchinaHelp.html:192
+msgid ""
+"The dumpling marketing happens immediately. So if billboards are marketing "
+"item A and item B to the same house, the house will add demand for item A, "
+"then dumpling due billboard A, and then item B. This would normally cause "
+"the maximum demand to be reached, so the dumpling from advertising item B "
+"would only be added if the house has a garden."
+msgstr ""
+"饺子营销立即生效。因此若广告牌向同一房屋营销物品 A 和 B，房屋会先加 A 需求，再因广告牌 A 加饺子，然后加 "
+"B。这通常会达到最大需求，因此广告物品 B 带来的饺子只有房屋有花园时才会加入。"
 
-#: .\models.py:380
-msgid "Points"
-msgstr "积分"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:197
+msgid ""
+"Dumplings are produced by Dumpling Cooks and Dumpling Chefs. There are 6 "
+"cooks, each producing.3 dumplings. The chef Is a 1x employee, and will "
+"produce 8 dumplings."
+msgstr "饺子由饺子厨师与饺子主厨生产。共有 6 名厨师，各产 .3 个饺子。主厨是 1x 员工，将生产 8 个饺子。"
 
-#: .\models.py:403
-msgid "Round"
-msgstr "回合"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:202
+msgid ""
+"There is a new Milestone for First Dumpling Sold. After Dinnertime, each "
+"player who has gained this milestone will choose a new action for their CEO."
+" Their CEO will lose its original action (Hire 1) and replace it with one of"
+" the following: <ul> <li>2x Hire 1 Employee or $5 salary reduction (the same"
+" as a Recruiting Manager)</li> <li>Get 2 training points; you may train one "
+"employee by 2 levels (the same as a Coach)</li> <li>Reduce your base price "
+"by $3 (the same as a permanent Discount Manager.</li> </ul>"
+msgstr ""
+"有新的“首个饺子售出”里程碑。晚餐后，获得此里程碑的每位玩家为 CEO 选择新行动。CEO 将失去原行动（雇佣 1），并替换为以下之一：<ul> "
+"<li>2x 雇佣 1 名员工或减薪 $5（同招聘经理）</li> <li>获得 2 培训点；可将一名员工提升 2 级（同教练）</li> "
+"<li>基础价格降低 $3（同永久折扣经理）</li> </ul>"
 
-#: .\models.py:407
-msgid "Game"
-msgstr "游戏"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:213
+msgid "Hawker Marketing"
+msgstr "小贩营销"
 
-#: .\models.py:408
-msgid "Winner"
-msgstr "获胜者"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:222
+msgid ""
+"Hawker trucks driving by, with their loud and engaging music, can't help but"
+" attract people's attention to their goods."
+msgstr "驶过的小贩卡车伴着响亮动听的音乐，不禁吸引人们对其货物的注意。"
 
-#: .\models.py:436
-msgid "BYES:"
-msgstr "淘汰："
+#: .\FCM\templates\FCM\FCMchinaHelp.html:230
+msgid ""
+"The Hawker Marketeer is a new marketing employee that can be trained from "
+"the Marketing Trainee. The Hawker Marketeer requires a salary. There are 6 "
+"in the game."
+msgstr "小贩营销员是可由营销实习生培训的新营销员工，需要薪水。游戏中有 6 名。"
 
-#: .\models.py:1012
-msgid "No Permission"
-msgstr "没有权限"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:235
+msgid ""
+"The Hawker Marketeer has a range of 2 and is played in the same way as a "
+"Cart Operator - you need to drive this marketeer out of a restaurant and "
+"along roads up to a range of 2. You can choose campaign number #21 #22 or "
+"#23, and a duration of 1, 2, or 3 turns."
+msgstr ""
+"小贩营销员范围为 2，玩法与手推车操作员相同——你需要将该营销员从餐厅开出，沿道路最远 2 格。可选择活动编号 #21 #22 或 #23，以及 1、2"
+" 或 3 回合时长。"
 
-#: .\models.py:1016
-msgid "Single Permission"
-msgstr "单回合许可"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:240
+msgid ""
+"When the marketing campaign activates, it will advertise to any residence "
+"directly connected to its route - <b><u>connections through parks or gardens"
+" do not count</u></b>."
+msgstr "营销活动激活时，会向与其路线直接相连的任何住宅做广告——<b><u>经公园或花园的连接不计</u></b>。"
 
-#: .\models.py:1020 .\templates\FCM\GameTemplate.html:144
-msgid "Permanent Permission"
-msgstr "永久许可"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:245
+msgid ""
+"This is the only time the precise orientation of new houses actually "
+"matters. Therefore, when using this module, the New Business Developer can "
+"place new houses with the garden at the bottom/left/top/right, rather than "
+"just horizontally or vertically."
+msgstr "这是新房屋精确朝向真正重要的唯一时刻。因此使用本模块时，新业务开发商可将新房屋的花园放在下/左/上/右，而非仅水平或垂直。"
 
-#: .\templates\FCM\FCMhelp.html:18
+#: .\FCM\templates\FCM\FCMchinaHelp.html:250
+msgid ""
+"To use a Hawker Marketeer, click the employee as usual. Then you can set a "
+"route, and once you are happy, deploy the marketing campaign using the \"Add"
+" Hawker Truck\" button. You must use all range if possible. If you need to "
+"stop manually because the last tile contains a loop, click the \"Set Hawker "
+"Route\" button again."
+msgstr ""
+"要使用小贩营销员，像平常一样点击该员工。然后设置路线，满意后用“添加小贩卡车”按钮部署营销活动。可能的话必须用尽范围。若因最后一格有环路需手动停止，再次点击“设置小贩路线”按钮。"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:255
+msgid ""
+"You can see the truck route by clicking \"Show Route\" in history, or "
+"clicking the marketing token in the hawker marketing area (to the right of "
+"the map)"
+msgstr "可在历史中点击“显示路线”，或点击小贩营销区（地图右侧）的营销标记查看卡车路线"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:264
+#: .\FCM\templates\FCM\FCMhelp.html:100
+#: .\FCM\templates\FCM\coffeeHelp.html:334
+#| msgid "Rules Help"
+msgid "Further Help"
+msgstr "更多帮助"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:266
+#: .\FCM\templates\FCM\FCMhelp.html:102
+#: .\FCM\templates\FCM\coffeeHelp.html:336
+msgid "For any questions / comments / suggestions, please contact"
+msgstr "如有问题/意见/建议，请联系"
+
+#: .\FCM\templates\FCM\FCMhelp.html:5
+#| msgid "Food Chain Magnate - Tournament Won"
+msgid "Food Chain Magnate Help"
+msgstr "Food Chain Magnate 帮助"
+
+#: .\FCM\templates\FCM\FCMhelp.html:8
+msgid "Help"
+msgstr "帮助"
+
+#: .\FCM\templates\FCM\FCMhelp.html:12
 msgid "Rules Help"
 msgstr "规则帮助"
 
-#: .\templates\FCM\FCMhelp.html:19
-#, fuzzy
+#: .\FCM\templates\FCM\FCMhelp.html:15
+#, python-format
 #| msgid ""
-#| "Food Chain Magnate rules available <a href=\"https://www.qugs.org/rules/"
-#| "r175914.pdf\" target=\"_blank\">here</a> <BR /> Ketchup Expansion rules "
-#| "available <a href=\"https://www.boardgamehelpers.com/FoodChainMagnate/"
-#| "Images/FCM_ketchup_Regels_Eng_web.pdf\" target=\"_blank\">here</a>"
+#| "Food Chain Magnate rules available <a "
+#| "href=\"https://www.qugs.org/rules/r175914.pdf\" target=\"_blank\">here</a> "
+#| "<BR /> Ketchup Expansion rules available <a "
+#| "href=\"https://www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf\""
+#| " target=\"_blank\">here</a>"
 msgid ""
-"Food Chain Magnate rules available <a href=\"https://www.qugs.org/rules/"
-"r175914.pdf\" target=\"_blank\">here</a> <br /> Ketchup Expansion rules "
-"available <a href=\"https://www.boardgamehelpers.com/FoodChainMagnate/Images/"
-"FCM_ketchup_Regels_Eng_web.pdf\" target=\"_blank\">here</a>"
+"Food Chain Magnate rules available <a "
+"href=\"https://www.qugs.org/rules/r175914.pdf\" target=\"_blank\">here</a> "
+"<br /> Ketchup Expansion rules available <a "
+"href=\"https://www.boardgamehelpers.com/FoodChainMagnate/images/FCM_ketchup_Regels_Eng_web.pdf\""
+" target=\"_blank\">here</a> <br /> China Expansion rules available <a "
+"href=\"%(fcm_china_help_url)s\" target=\"_blank\">here</a> <br /> How to "
+"play guide example <a href=\"https://www.myboardgameguides.com/game-"
+"strategy/game-specific-strategy/food-chain-magnate-strategy-guide/\" "
+"target=\"_blank\">here</a>"
 msgstr ""
-"《快餐连锁大亨》的规则可以在<a href=\"https://www.qugs.org/rules/r175914.pdf"
-"\" target=\"_blank\">这里</a>找到。番茄酱扩展的规则可以在<a href=\"https://"
-"www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web."
-"pdf\" target=\"_blank\">这里</a>找到"
+"Food Chain Magnate 规则见 <a href=\"https://www.qugs.org/rules/r175914.pdf\" "
+"target=\"_blank\">此处</a> <br /> 番茄酱扩展规则见 <a "
+"href=\"https://www.boardgamehelpers.com/FoodChainMagnate/images/FCM_ketchup_Regels_Eng_web.pdf\""
+" target=\"_blank\">此处</a> <br /> 中国扩展规则见 <a href=\"%(fcm_china_help_url)s\" "
+"target=\"_blank\">此处</a> <br /> 玩法示例见 <a "
+"href=\"https://www.myboardgameguides.com/game-strategy/game-specific-"
+"strategy/food-chain-magnate-strategy-guide/\" target=\"_blank\">此处</a>"
 
-#: .\templates\FCM\FCMhelp.html:28
+#: .\FCM\templates\FCM\FCMhelp.html:29
 msgid "Game Play"
 msgstr "游戏帮助"
 
-#: .\templates\FCM\FCMhelp.html:30
+#: .\FCM\templates\FCM\FCMhelp.html:31
 msgid "How exactly does coffee work?"
 msgstr "咖啡究竟是如何工作的？"
 
-#: .\templates\FCM\FCMhelp.html:32
+#: .\FCM\templates\FCM\FCMhelp.html:34
 #, python-format
-msgid ""
-"Please see the dedicated Coffee help page <a href=\"%(the_url)s\">Here</a>"
+msgid "Please see the dedicated Coffee help page <a href=\"%(the_url)s\">Here</a>"
 msgstr "查看咖啡模组的帮助页面，请<a href=\"%(the_url)s\">单击此处</a>"
 
-#: .\templates\FCM\FCMhelp.html:38
+#: .\FCM\templates\FCM\FCMhelp.html:38
 msgid "What are the Expert Options?"
 msgstr "什么是专家选项？"
 
-#: .\templates\FCM\FCMhelp.html:39
-#, fuzzy
-#| msgid ""
-#| "Expert options appear in an orange panel. They are meant to allow players "
-#| "to automate decisions that are obvious choices to make, and thus allow "
-#| "games to progress a bit faster.<BR/> You can select your preference for "
-#| "Order Of Business during restructuring. A note is added in history as "
-#| "turn order is resolved if the decision was automatic. Of course, it is "
-#| "very possible to select \"Earliest possible\" and stll end up in last "
-#| "position - this just meant that everyone else had more open slots or an "
-#| "earlier turn order than you, and also chose to go early in turn order. "
-#| "<BR/> You can select to autopay salary even if you don't have enough "
-#| "money, if you do end up having enough money after dinnertime. Similarly, "
-#| "if you have the Beer Milestone but no fridge, you can choose to pay in as "
-#| "much food as possible, and then money. You also have the option of "
-#| "keeping all remaining food if you have a fridge and end up with less than "
-#| "10 items.<BR/> <b>Note: </b>Even if you select an expert option, you "
-#| "still might end up playing that phase. For example, if you don't have "
-#| "enough money for salary, you will need to fire someone, and so must play "
-#| "the salary phase. Also, if you end up with kimchi plus other items, you "
-#| "will be required to play the Cleanup phase. Game rewinds and player "
-#| "kickouts can also result in phases needing to be played that you had "
-#| "selected to skip."
+#: .\FCM\templates\FCM\FCMhelp.html:40
 msgid ""
-"Expert options appear in an orange panel. They are meant to allow players to "
-"automate decisions that are obvious choices to make, and thus allow games to "
-"progress a bit faster.<br/> You can select your preference for Order Of "
-"Business during restructuring. A note is added in history as turn order is "
-"resolved if the decision was automatic. Of course, it is very possible to "
-"select \"Earliest possible\" and stll end up in last position - this just "
-"meant that everyone else had more open slots or an earlier turn order than "
-"you, and also chose to go early in turn order. <br/> You can select to "
-"autopay salary even if you don't have enough money, if you do end up having "
-"enough money after dinnertime. Similarly, if you have the Beer Milestone but "
-"no fridge, you can choose to pay in as much food as possible, and then "
-"money. You also have the option of keeping all remaining food if you have a "
-"fridge and end up with less than 10 items.<br/> <b>Note: </b>Even if you "
-"select an expert option, you still might end up playing that phase. For "
-"example, if you don't have enough money for salary, you will need to fire "
-"someone, and so must play the salary phase. Also, if you end up with kimchi "
-"plus other items, you will be required to play the Cleanup phase. Game "
-"rewinds and player kickouts can also result in phases needing to be played "
-"that you had selected to skip."
-msgstr ""
-"专家选项会出现在橙色的面板中。它们旨在允许玩家自动进行那些明显的决策，从而加"
-"快游戏进度。<BR/>您可以在重组期间选择您的业务顺序偏好。如果决策是自动的，当回"
-"合顺序确定时，历史记录中会添加一条注释。当然，即使您选择“尽可能早”的选项，最"
-"终可能仍然是最后一个执行，这只是意味着其他所有人都有更多的空位或更早的回合顺"
-"序，并且也选择了尽早执行。<BR/>如果您在薪水支付时没有足够的钱，您也可以选择自"
-"动支付，如果您在晚餐后有足够的钱的话。类似地，如果您拥有啤酒里程碑但没有冰"
-"箱，您可以选择尽可能多地用食物支付，然后用钱支付。如果您拥有冰箱并且剩余物品"
-"少于10个，您还可以选择保留所有剩余的食物。<BR/> <b>注意：</b>即使您选择了专家"
-"选项，您仍然可能需要进行该阶段的操作。例如，如果您没有足够的钱支付薪水，您将"
-"需要解雇某人，因此必须进行薪水阶段。此外，如果您最终拥有泡菜和其他物品，您将"
-"需要进行清理阶段。游戏倒退和玩家踢出也可能导致需要进行您选择跳过的阶段。"
+"Expert options appear in an orange panel. They are meant to allow players to"
+" automate decisions that are obvious choices to make, and thus allow games "
+"to progress a bit faster."
+msgstr "专家选项出现在橙色面板中。它们用于自动完成明显的选择，让游戏更快推进。"
 
-#: .\templates\FCM\FCMhelp.html:51
+#: .\FCM\templates\FCM\FCMhelp.html:45
+msgid ""
+"You can select your preference for Order Of Business during restructuring. A"
+" note is added in history as turn order is resolved if the decision was "
+"automatic. Of course, it is very possible to select \"Earliest possible\" "
+"and stll end up in last position - this just meant that everyone else had "
+"more open slots or an earlier turn order than you, and also chose to go "
+"early in turn order."
+msgstr ""
+"你可以在重组期间选择事务顺序偏好。若决定是自动的，回合顺序结算时会在历史中加注。当然，选“尽可能早”仍可能最后一名——这只意味着其他人有更多空位或更早的回合顺序，且也选择尽早行动。"
+
+#: .\FCM\templates\FCM\FCMhelp.html:51
+msgid ""
+"You can select to autopay salary even if you don't have enough money, if you"
+" do end up having enough money after dinnertime. Similarly, if you have the "
+"Beer Milestone but no fridge, you can choose to pay in as much food as "
+"possible, and then money. You also have the option of keeping all remaining "
+"food if you have a fridge and end up with less than 10 items."
+msgstr ""
+"你可以选择即使钱不够也自动付薪，只要晚餐后钱够即可。类似地，若有啤酒里程碑但没冰箱，可选择先用尽可能多的食物付，再用钱。若有冰箱且最终不足 10 "
+"件，也可选择保留全部剩余食物。"
+
+#: .\FCM\templates\FCM\FCMhelp.html:57 .\FCM\templates\FCM\FCMhelp.html:79
+#: .\FCM\templates\FCM\FCMhelp.html:82 .\FCM\templates\FCM\FCMhelp.html:89
+msgid "Note:"
+msgstr "注意："
+
+#: .\FCM\templates\FCM\FCMhelp.html:58
+msgid ""
+"Even if you select an expert option, you still might end up playing that "
+"phase. For example, if you don't have enough money for salary, you will need"
+" to fire someone, and so must play the salary phase. Also, if you end up "
+"with kimchi plus other items, you will be required to play the Cleanup "
+"phase. Game rewinds and player kickouts can also result in phases needing to"
+" be played that you had selected to skip."
+msgstr ""
+"即使选择了专家选项，你仍可能需要游玩该阶段。例如，薪水不够就必须有人被解雇，因此必须进行薪水阶段。若最后剩泡菜加其他物品，还需进行清理阶段。游戏回退和玩家踢出也可能导致你本想跳过的阶段必须进行。"
+
+#: .\FCM\templates\FCM\FCMhelp.html:64
 msgid "Where do the scenarios come from?"
-msgstr ""
+msgstr "场景从哪里来？"
 
-#: .\templates\FCM\FCMhelp.html:52
+#: .\FCM\templates\FCM\FCMhelp.html:65
 msgid "They are suggested in the Ketchup Expansion manual."
-msgstr ""
+msgstr "它们是在番茄酱扩展手册中建议的。"
 
-#: .\templates\FCM\FCMhelp.html:57
+#: .\FCM\templates\FCM\FCMhelp.html:66
 msgid "What is Sandbox Mode?"
-msgstr ""
+msgstr "什么是沙盒模式？"
 
-#: .\templates\FCM\FCMhelp.html:58
+#: .\FCM\templates\FCM\FCMhelp.html:68
 msgid ""
 "Sandbox mode is the answer to questions such as \"Can I have an option so "
 "that new MS trainer gives a coach instead of a trainer?\" and \"What if the "
-"1x employees were actually unlimited?\". <br/> Sandbox mode unlocks a panel "
-"under the player summaries allowing you to add and remove employees at will "
-"on your turn. <br/> <b>Note:</b> You must have 'Aid' turned on to view this."
-"<br/> <b>Note:</b> This game will be automatically excluded from stats. "
-"There is no record in History of using the Sandbox panel. There is no built "
-"in limit on anyone doing anything with the Sandbox panel. Try to make it "
-"clear in the game description what you are after if you select this option."
-"<br/> <b>Note:</b> Employees gained this way will not necesserily be saved "
-"if in the middle of a simultaneous move (eg choosing reserve cards). But no "
-"worries, it's Sandbox Mode. So just give yourself the employee again. If you "
-"gain an employee this way during restructuring and place the employee in "
-"your structure, then it will be saved. <br/>"
+"1x employees were actually unlimited?\"."
+msgstr "沙盒模式回答诸如“能否让新 MS 培训师给教练而非培训师？”以及“若 1x 员工实际无限制会怎样？”之类的问题。"
+
+#: .\FCM\templates\FCM\FCMhelp.html:74
+msgid ""
+"Sandbox mode unlocks a panel under the player summaries allowing you to add "
+"and remove employees at will on your turn."
+msgstr "沙盒模式在玩家摘要下方解锁一个面板，让你在回合中随意增减员工。"
+
+#: .\FCM\templates\FCM\FCMhelp.html:79
+msgid "You must have 'Aid' turned on to view this."
+msgstr "你必须开启“辅助”才能查看此内容。"
+
+#: .\FCM\templates\FCM\FCMhelp.html:83
+msgid ""
+"This game will be automatically excluded from stats. There is no record in "
+"History of using the Sandbox panel. There is no built in limit on anyone "
+"doing anything with the Sandbox panel. Try to make it clear in the game "
+"description what you are after if you select this option."
+msgstr "本局将自动排除出统计。历史中不记录使用沙盒面板。沙盒面板操作没有内置限制。若选择此项，请尽量在游戏描述中写清你的目的。"
+
+#: .\FCM\templates\FCM\FCMhelp.html:90
+msgid ""
+"Employees gained this way will not necesserily be saved if in the middle of "
+"a simultaneous move (eg choosing reserve cards). But no worries, it's "
+"Sandbox Mode. So just give yourself the employee again. If you gain an "
+"employee this way during restructuring and place the employee in your "
+"structure, then it will be saved."
 msgstr ""
+"若处于同时行动中途（如选择储备卡），以此方式获得的员工不一定能保存。别担心，这是沙盒模式，再给自己一次即可。若在重组期间以此获得员工并放入组织结构，则会保存。"
 
-#: .\templates\FCM\FCMhelp.html:73 .\templates\FCM\coffeeHelp.html:272
-msgid "For further help contact"
-msgstr "如需进一步帮助，请联系"
+#: .\FCM\templates\FCM\FCMhelp.html:95
+#| msgid "When can I resign?"
+msgid "When Can I resign?"
+msgstr "我什么时候可以认输？"
 
-#: .\templates\FCM\FCMhelp.html:78 .\templates\FCM\GameTemplate.html:20
-#: .\templates\FCM\GameTemplate.html:74 .\templates\FCM\coffeeHelp.html:275
+#: .\FCM\templates\FCM\FCMhelp.html:96
+msgid "You can resign during the \\"
+msgstr "你可以在 \\ 阶段认输"
+
+#: .\FCM\templates\FCM\FCMstats.html:22
+#| msgid "Food Chain Magnate - Tournament Won"
+msgid "Food Chain Magnate Stats"
+msgstr "Food Chain Magnate 统计"
+
+#: .\FCM\templates\FCM\FCMstats.html:23
+msgid "Back to Main Stats"
+msgstr "返回主统计"
+
+#: .\FCM\templates\FCM\FCMstats.html:31
+#| msgid "Finished"
+msgid "Finished games"
+msgstr "已完成游戏"
+
+#: .\FCM\templates\FCM\FCMstats.html:35
+msgid "Original MS games"
+msgstr "原版 MS 对局"
+
+#: .\FCM\templates\FCM\FCMstats.html:39
+msgid "Avg turns Original MS"
+msgstr "原版 MS 平均回合数"
+
+#: .\FCM\templates\FCM\FCMstats.html:43
+msgid "New MS games"
+msgstr "新 MS 对局"
+
+#: .\FCM\templates\FCM\FCMstats.html:47
+msgid "Avg turns New MS"
+msgstr "新 MS 平均回合数"
+
+#: .\FCM\templates\FCM\FCMstats.html:51
+msgid ""
+"Any game with a resigned/kicked player is not considered for these stats."
+msgstr "有认输/被踢玩家的对局不计入这些统计。"
+
+#: .\FCM\templates\FCM\FCMstats.html:54
+msgid ""
+"These are historical stats. They show what has happened in previous games, "
+"but Food Chain Magnate still rewards reading and responding to the current "
+"game state."
+msgstr "这些是历史统计，展示以往对局的情况，但 Food Chain Magnate 仍奖励读懂并应对当前局势。"
+
+#: .\FCM\templates\FCM\FCMstats.html:56
+#| msgid "Hard Choices"
+msgid "Module Choices"
+msgstr "模块选择"
+
+#: .\FCM\templates\FCM\FCMstats.html:57
+msgid ""
+"This shows how often a module or option is selected. Original MS vs New MS "
+"can be read from the finished game counts above."
+msgstr "这显示模块或选项被选择的频率。原版 MS 与新 MS 可从上方完成对局数读出。"
+
+#: .\FCM\templates\FCM\FCMstats.html:346
+msgid "All Players"
+msgstr "所有游戏"
+
+#: .\FCM\templates\FCM\FCMstats.html:347
+msgid "2 Player"
+msgstr "2 人游戏"
+
+#: .\FCM\templates\FCM\FCMstats.html:348
+msgid "3 Player"
+msgstr "3 人游戏"
+
+#: .\FCM\templates\FCM\FCMstats.html:349
+msgid "4 Player"
+msgstr "4 人游戏"
+
+#: .\FCM\templates\FCM\FCMstats.html:350
+msgid "5 Player"
+msgstr "5 人游戏"
+
+#: .\FCM\templates\FCM\FCMstats.html:351
+msgid "6 Player"
+msgstr "6 人游戏"
+
+#: .\FCM\templates\FCM\FCMstats.html:357 .\FCM\templates\FCM\FCMstats.html:430
+#: .\FCM\templates\FCM\FCMstats.html:497 .\FCM\templates\FCM\FCMstats.html:562
+#: .\FCM\templates\FCM\FCMstats.html:629 .\FCM\templates\FCM\FCMstats.html:694
+#: .\FCM\templates\FCM\FCMstats.html:761 .\FCM\templates\FCM\FCMstats.html:826
+#: .\FCM\templates\FCM\FCMstats.html:893 .\FCM\templates\FCM\FCMstats.html:958
+#: .\FCM\templates\FCM\FCMstats.html:1025
+#: .\FCM\templates\FCM\FCMstats.html:1090
+#| msgid "Open"
+msgid "Opening"
+msgstr "开局"
+
+#: .\FCM\templates\FCM\FCMstats.html:358 .\FCM\templates\FCM\FCMstats.html:431
+#: .\FCM\templates\FCM\FCMstats.html:498 .\FCM\templates\FCM\FCMstats.html:563
+#: .\FCM\templates\FCM\FCMstats.html:630 .\FCM\templates\FCM\FCMstats.html:695
+#: .\FCM\templates\FCM\FCMstats.html:762 .\FCM\templates\FCM\FCMstats.html:827
+#: .\FCM\templates\FCM\FCMstats.html:894 .\FCM\templates\FCM\FCMstats.html:959
+#: .\FCM\templates\FCM\FCMstats.html:1026
+#: .\FCM\templates\FCM\FCMstats.html:1091
+msgid "# Wins"
+msgstr "# 胜场"
+
+#: .\FCM\templates\FCM\FCMstats.html:359 .\FCM\templates\FCM\FCMstats.html:432
+#: .\FCM\templates\FCM\FCMstats.html:499 .\FCM\templates\FCM\FCMstats.html:564
+#: .\FCM\templates\FCM\FCMstats.html:631 .\FCM\templates\FCM\FCMstats.html:696
+#: .\FCM\templates\FCM\FCMstats.html:763 .\FCM\templates\FCM\FCMstats.html:828
+#: .\FCM\templates\FCM\FCMstats.html:895 .\FCM\templates\FCM\FCMstats.html:960
+#: .\FCM\templates\FCM\FCMstats.html:1027
+#: .\FCM\templates\FCM\FCMstats.html:1092
+msgid "# Losses"
+msgstr "# 负场"
+
+#: .\FCM\templates\FCM\FCMstats.html:360 .\FCM\templates\FCM\FCMstats.html:433
+#: .\FCM\templates\FCM\FCMstats.html:500 .\FCM\templates\FCM\FCMstats.html:565
+#: .\FCM\templates\FCM\FCMstats.html:632 .\FCM\templates\FCM\FCMstats.html:697
+#: .\FCM\templates\FCM\FCMstats.html:764 .\FCM\templates\FCM\FCMstats.html:829
+#: .\FCM\templates\FCM\FCMstats.html:896 .\FCM\templates\FCM\FCMstats.html:961
+#: .\FCM\templates\FCM\FCMstats.html:1028
+#: .\FCM\templates\FCM\FCMstats.html:1093
+msgid "Win to Loss Ratio"
+msgstr "胜负比"
+
+#: .\FCM\templates\FCM\FCMstats.html:363 .\FCM\templates\FCM\FCMstats.html:503
+#: .\FCM\templates\FCM\FCMstats.html:635 .\FCM\templates\FCM\FCMstats.html:767
+#: .\FCM\templates\FCM\FCMstats.html:899
+#: .\FCM\templates\FCM\FCMstats.html:1031
+#| msgid "6 - Marketing Campaigns"
+msgid "Marketing Trainee"
+msgstr "营销实习生"
+
+#: .\FCM\templates\FCM\FCMstats.html:381 .\FCM\templates\FCM\FCMstats.html:517
+#: .\FCM\templates\FCM\FCMstats.html:649 .\FCM\templates\FCM\FCMstats.html:781
+#: .\FCM\templates\FCM\FCMstats.html:913
+#: .\FCM\templates\FCM\FCMstats.html:1045
+msgid "Recruiting Girl"
+msgstr "招聘女孩"
+
+#: .\FCM\templates\FCM\FCMstats.html:399 .\FCM\templates\FCM\FCMstats.html:464
+#: .\FCM\templates\FCM\FCMstats.html:531 .\FCM\templates\FCM\FCMstats.html:596
+#: .\FCM\templates\FCM\FCMstats.html:663 .\FCM\templates\FCM\FCMstats.html:728
+#: .\FCM\templates\FCM\FCMstats.html:795 .\FCM\templates\FCM\FCMstats.html:860
+#: .\FCM\templates\FCM\FCMstats.html:927 .\FCM\templates\FCM\FCMstats.html:992
+#: .\FCM\templates\FCM\FCMstats.html:1059
+#: .\FCM\templates\FCM\FCMstats.html:1124
+msgid "Trainer"
+msgstr "培训师"
+
+#: .\FCM\templates\FCM\FCMstats.html:413 .\FCM\templates\FCM\FCMstats.html:478
+#: .\FCM\templates\FCM\FCMstats.html:545 .\FCM\templates\FCM\FCMstats.html:610
+#: .\FCM\templates\FCM\FCMstats.html:677 .\FCM\templates\FCM\FCMstats.html:742
+#: .\FCM\templates\FCM\FCMstats.html:809 .\FCM\templates\FCM\FCMstats.html:874
+#: .\FCM\templates\FCM\FCMstats.html:941
+#: .\FCM\templates\FCM\FCMstats.html:1006
+#: .\FCM\templates\FCM\FCMstats.html:1073
+#: .\FCM\templates\FCM\FCMstats.html:1138
+msgid "None of the above"
+msgstr "以上都不是"
+
+#: .\FCM\templates\FCM\FCMstats.html:436 .\FCM\templates\FCM\FCMstats.html:568
+#: .\FCM\templates\FCM\FCMstats.html:700 .\FCM\templates\FCM\FCMstats.html:832
+#: .\FCM\templates\FCM\FCMstats.html:964
+#: .\FCM\templates\FCM\FCMstats.html:1096
+msgid "First Train AND First Hire 3"
+msgstr "首次培训 且 首次雇佣 3 名"
+
+#: .\FCM\templates\FCM\FCMstats.html:450 .\FCM\templates\FCM\FCMstats.html:582
+#: .\FCM\templates\FCM\FCMstats.html:714 .\FCM\templates\FCM\FCMstats.html:846
+#: .\FCM\templates\FCM\FCMstats.html:978
+#: .\FCM\templates\FCM\FCMstats.html:1110
+msgid "First Hire 3 Only"
+msgstr "仅首次雇佣 3 名"
+
+#: .\FCM\templates\FCM\GameTemplate.html:31
 msgid "Home"
 msgstr "首页"
 
-#: .\templates\FCM\GameTemplate.html:24 .\templates\FCM\GameTemplate.html:78
-msgid "Help"
-msgstr ""
+#: .\FCM\templates\FCM\GameTemplate.html:44
+#| msgid "Rules Help"
+msgid "Rules"
+msgstr "规则"
 
-#: .\templates\FCM\GameTemplate.html:28
-msgid "Bug"
-msgstr ""
-
-#: .\templates\FCM\GameTemplate.html:33
-msgid "Rewind"
-msgstr ""
-
-#: .\templates\FCM\GameTemplate.html:38
-msgid "Notes"
-msgstr ""
-
-#: .\templates\FCM\GameTemplate.html:47 .\templates\FCM\GameTemplate.html:82
-msgid "History"
-msgstr ""
-
-#: .\templates\FCM\GameTemplate.html:51
-msgid "Chat"
-msgstr ""
-
-#: .\templates\FCM\GameTemplate.html:55 .\templates\FCM\GameTemplate.html:86
-#, fuzzy
+#: .\FCM\templates\FCM\GameTemplate.html:48
 #| msgid "Reset"
 msgid "Reserve"
-msgstr "复位"
+msgstr "储备"
 
-#: .\templates\FCM\GameTemplate.html:59 .\templates\FCM\GameTemplate.html:90
-msgid "Replay"
-msgstr ""
+#: .\FCM\templates\FCM\GameTemplate.html:54
+#: .\FCM\templates\FCM\GameTemplate.html:56
+msgid "Rewind"
+msgstr "回退"
 
-#: .\templates\FCM\GameTemplate.html:63
+#: .\FCM\templates\FCM\GameTemplate.html:60
+#: .\FCM\templates\FCM\GameTemplate.html:101
 msgid "Aid"
-msgstr ""
+msgstr "辅助"
 
-#: .\templates\FCM\GameTemplate.html:96
+#: .\FCM\templates\FCM\GameTemplate.html:69
+msgid "Chat"
+msgstr "聊天"
+
+#: .\FCM\templates\FCM\GameTemplate.html:77
+msgid "Bug"
+msgstr "缺陷"
+
+#: .\FCM\templates\FCM\GameTemplate.html:86
+msgid "Notes"
+msgstr "笔记"
+
+#: .\FCM\templates\FCM\GameTemplate.html:93
+msgid "History"
+msgstr "历史"
+
+#: .\FCM\templates\FCM\GameTemplate.html:98
+msgid "Replay"
+msgstr "回放"
+
+#: .\FCM\templates\FCM\GameTemplate.html:107
 msgid "Connecting to server....."
 msgstr "正在连接到服务器......"
 
-#: .\templates\FCM\GameTemplate.html:99
+#: .\FCM\templates\FCM\GameTemplate.html:110
 msgid "Logged in as:"
 msgstr "登录为："
 
-#: .\templates\FCM\GameTemplate.html:102
+#: .\FCM\templates\FCM\GameTemplate.html:113
 msgid "Time to next kickout:"
 msgstr "下一次踢除时间："
 
-#: .\templates\FCM\GameTemplate.html:106
-msgid "ZOOM"
-msgstr "缩放"
+#: .\FCM\templates\FCM\GameTemplate.html:123
+#: .\FCM\templates\FCM\GameTemplate.html:186
+#| msgid "Game End"
+msgid "Game Options"
+msgstr "游戏选项"
 
-#: .\templates\FCM\GameTemplate.html:114 .\templates\FCM\GameTemplate.html:187
-msgid "Rewind Game Info"
-msgstr "回退信息"
-
-#: .\templates\FCM\GameTemplate.html:116
+#: .\FCM\templates\FCM\GameTemplate.html:126
+#: .\FCM\templates\FCM\GameTemplate.html:189
 msgid ""
-"You can give permission for the host to rewind the game back to the start of "
-"the restructuring phase. All players must give permission before the host is "
-"able to rewind the game."
+"<b><u>Trial Feature</b></u> <br /> Anyone may rewind the game at any point "
+"EXCEPT during turn order, and the first person working 9-5. <br /> This is "
+"because the most important hidden information is during restructuring."
 msgstr ""
-"您可以允许主持人将游戏回退到重组阶段的开始。在主持人能够回退游戏之前，所有玩"
-"家必须给予许可。"
+"<b><u>试验功能</b></u> <br /> 除回合顺序与第一个朝九晚五行动的人之外，任何人可在任意时刻回退游戏。 <br /> "
+"这是因为最重要的隐藏信息出现在重组期间。"
 
-#: .\templates\FCM\GameTemplate.html:123
+#: .\FCM\templates\FCM\GameTemplate.html:138
+#: .\FCM\templates\FCM\GameTemplate.html:202
+#: .\FCM\templates\FCM\GameTemplate.html:231
+msgid "REWIND"
+msgstr "回退"
+
+#: .\FCM\templates\FCM\GameTemplate.html:144
+msgid ""
+"You can give permission for the host to rewind the game back to the start of"
+" the restructuring phase. All players must give permission before the host "
+"is able to rewind the game."
+msgstr "您可以允许主持人将游戏回退到重组阶段的开始。在主持人能够回退游戏之前，所有玩家必须给予许可。"
+
+#: .\FCM\templates\FCM\GameTemplate.html:151
 msgid ""
 "Tournament games are a bit more competitive, so rewinds should not be "
 "expected"
 msgstr "锦标赛游戏比普通游戏更具竞争性，因此不应期待可以进行回退操作"
 
-#: .\templates\FCM\GameTemplate.html:136
+#: .\FCM\templates\FCM\GameTemplate.html:163
 msgid "Permission up to last Restructuring"
-msgstr ""
+msgstr "权限至上次重组"
 
-#: .\templates\FCM\GameTemplate.html:150
+#: .\FCM\templates\FCM\GameTemplate.html:171
+msgid "Permanent Permission"
+msgstr "永久许可"
+
+#: .\FCM\templates\FCM\GameTemplate.html:177
 msgid "Give Permission"
 msgstr "授予权限"
 
-#: .\templates\FCM\GameTemplate.html:163 .\templates\FCM\GameTemplate.html:226
-msgid "Exclude game from stats"
-msgstr "本局游戏不计入统计数据"
-
-#: .\templates\FCM\GameTemplate.html:167 .\templates\FCM\GameTemplate.html:230
-msgid "Exclude From Stats"
-msgstr "本局游戏不计入统计数据"
-
-#: .\templates\FCM\GameTemplate.html:170 .\templates\FCM\GameTemplate.html:233
-msgid "Excluded from Stats"
-msgstr "不计入统计数据"
-
-#: .\templates\FCM\GameTemplate.html:173 .\templates\FCM\GameTemplate.html:236
-msgid "Waiting for other players"
-msgstr "等待其他玩家"
-
-#: .\templates\FCM\GameTemplate.html:177 .\templates\FCM\GameTemplate.html:240
+#: .\FCM\templates\FCM\GameTemplate.html:209
 msgid ""
-"If all non-bot players tick and confirm this option, this game won't count "
-"in any win/loss stats. You can use this if you simply wish to have a \"less "
-"competitive\" game, or you wish to exclude it for other reasons (EG multiple "
-"player kickouts)"
-msgstr ""
-"如果所有尚未退出的玩家都勾选并确认了此选项，则此局游戏不会计入任何胜利/失败统"
-"计数据。如果您希望拥有一个“竞争不那么激烈”的游戏，或者出于其他原因希望将其排"
-"除在外（例如多个玩家被踢出），可以使用此选项。"
-
-#: .\templates\FCM\GameTemplate.html:189
-msgid ""
-"As the game host, you must wait for all players to give permission. They can "
-"allow you to rewind once, or as much as you like. Try asking in chat for "
+"As the game host, you must wait for all players to give permission. They can"
+" allow you to rewind once, or as much as you like. Try asking in chat for "
 "permission if you wish to rewind. Current Permissions:"
-msgstr ""
-"作为游戏主持人，您必须等待所有玩家都同意。他们可以允许您回退一次或多次。如果"
-"您想回退，请在聊天中请求许可。当前权限："
+msgstr "作为游戏主持人，您必须等待所有玩家都同意。他们可以允许您回退一次或多次。如果您想回退，请在聊天中请求许可。当前权限："
 
-#: .\templates\FCM\GameTemplate.html:199
+#: .\FCM\templates\FCM\GameTemplate.html:219
 msgid "Reload the whole page to refresh permissions"
 msgstr "重载整个页面刷新权限"
 
-#: .\templates\FCM\GameTemplate.html:204
+#: .\FCM\templates\FCM\GameTemplate.html:224
 msgid ""
 "Tournament games are a bit more competitive, so you should not feel "
 "obligated to accept a rewind request"
 msgstr "锦标赛游戏更具竞争性，因此您不应该认为有接受回退请求的义务"
 
-#: .\templates\FCM\GameTemplate.html:211
-msgid "REWIND"
-msgstr "回退"
-
-#: .\templates\FCM\GameTemplate.html:214
+#: .\FCM\templates\FCM\GameTemplate.html:234
 msgid "Please wait for all players to give permission"
 msgstr "请等待所有玩家给予许可"
 
-#: .\templates\FCM\GameTemplate.html:253
+#: .\FCM\templates\FCM\GameTemplate.html:246
 msgid "Game:"
 msgstr "游戏："
 
-#: .\templates\FCM\GameTemplate.html:256
+#: .\FCM\templates\FCM\GameTemplate.html:249
 msgid "Bank:"
 msgstr "银行余额："
 
-#: .\templates\FCM\GameTemplate.html:257
+#: .\FCM\templates\FCM\GameTemplate.html:250
 msgid "Turn:"
 msgstr "回合："
 
-#: .\templates\FCM\GameTemplate.html:258
+#: .\FCM\templates\FCM\GameTemplate.html:251
 msgid "Phase:"
 msgstr "阶段:"
 
-#: .\templates\FCM\GameTemplate.html:259
+#: .\FCM\templates\FCM\GameTemplate.html:252
 msgid "Current player:"
 msgstr "当前玩家："
 
-#: .\templates\FCM\GameTemplate.html:267
+#: .\FCM\templates\FCM\GameTemplate.html:260
 msgid "Bug Report"
 msgstr "错误报告"
 
-#: .\templates\FCM\GameTemplate.html:268
+#: .\FCM\templates\FCM\GameTemplate.html:261
 msgid ""
 "Please submit a bug report if you encounter any issues, giving as much "
 "detail as possbile."
 msgstr "如果您遇到任何问题，请提交一个错误报告，并尽可能提供详细信息。"
 
-#: .\templates\FCM\GameTemplate.html:273 .\templates\FCM\GameTemplate.html:284
+#: .\FCM\templates\FCM\GameTemplate.html:263
+msgid ""
+"Do you think there are too many 1x Luxury Managers? Please note that COFFEE,"
+" KIMCHI, SUSHI, and NOODLES add one extra"
+msgstr "你觉得 1x 奢侈品经理太多了吗？请注意咖啡、泡菜、寿司和面条会各额外增加一名"
+
+#: .\FCM\templates\FCM\GameTemplate.html:266
+msgid ""
+"Please note: Cart / Truck drivers can drive around a 'roundabout' on the "
+"same tile as many times as they like. Drinks will only be collected once"
+msgstr "请注意：手推车/卡车司机可在同一板块的“环岛”上随意绕行。饮料只会收取一次"
+
+#: .\FCM\templates\FCM\GameTemplate.html:269
+msgid ""
+"Please note: In New MS you need to actually USE an employee to get their "
+"Milestone"
+msgstr "请注意：在新 MS 中需要实际使用员工才能获得其里程碑"
+
+#: .\FCM\templates\FCM\GameTemplate.html:275
 msgid "Submit"
 msgstr "提交"
 
-#: .\templates\FCM\GameTemplate.html:274
+#: .\FCM\templates\FCM\GameTemplate.html:276
 msgid "Reset"
 msgstr "复位"
 
-#: .\templates\FCM\GameTemplate.html:278
+#: .\FCM\templates\FCM\GameTemplate.html:280
 msgid "Personal game notes"
 msgstr "个人游戏笔记"
 
-#: .\templates\FCM\GameTemplate.html:279
+#: .\FCM\templates\FCM\GameTemplate.html:281
 msgid "Only you can see these notes"
 msgstr "只有您能看到这些笔记"
 
-#: .\templates\FCM\GameTemplate.html:285
+#: .\FCM\templates\FCM\GameTemplate.html:286
+msgid "Save"
+msgstr "保存"
+
+#: .\FCM\templates\FCM\GameTemplate.html:287
 msgid "Clear"
 msgstr "清除"
 
-#: .\templates\FCM\GameTemplate.html:286
+#: .\FCM\templates\FCM\GameTemplate.html:288
 msgid "Close"
 msgstr "关闭"
 
-#: .\templates\FCM\GameTemplate.html:291
+#: .\FCM\templates\FCM\GameTemplate.html:293
 msgid "Send a message"
 msgstr "发送消息"
 
-#: .\templates\FCM\GameTemplate.html:296
+#: .\FCM\templates\FCM\GameTemplate.html:298
 msgid "Send"
 msgstr "发送"
 
-#: .\templates\FCM\GameTemplate.html:303
+#: .\FCM\templates\FCM\GameTemplate.html:305
 msgid "Oldest First"
 msgstr "旧记录在上"
 
-#: .\templates\FCM\GameTemplate.html:308
+#: .\FCM\templates\FCM\GameTemplate.html:310
 msgid "Newest First"
 msgstr "新记录在上"
 
-#: .\templates\FCM\GameTemplate.html:324
+#: .\FCM\templates\FCM\GameTemplate.html:331
 msgid "Summary"
 msgstr "总结"
 
-#: .\templates\FCM\GameTemplate.html:340
+#: .\FCM\templates\FCM\GameTemplate.html:350
 msgid "Open in Map Editor"
 msgstr "在地图编辑器中打开"
 
-#: .\templates\FCM\coffeeHelp.html:18
+#: .\FCM\templates\FCM\coffeeHelp.html:12
 msgid "Coffee Help"
 msgstr "咖啡模组帮助"
 
-#: .\templates\FCM\coffeeHelp.html:22
-#, fuzzy
+#: .\FCM\templates\FCM\coffeeHelp.html:29
 #| msgid ""
-#| "Finding the correct coffee route can be quite tricky! First of all, "
-#| "please read the coffee section of the expansion rules.<BR/> Make sure you "
-#| "fully understand the example and the reasons why each route was chosen. "
-#| "<BR/> The Ketchup Expansion rules are available <a href=\"https://www."
-#| "boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web."
-#| "pdf\" target=\"_blank\">here</a>."
+#| "Finding the correct coffee route can be quite tricky! First of all, please "
+#| "read the coffee section of the expansion rules.<BR/> Make sure you fully "
+#| "understand the example and the reasons why each route was chosen. <BR/> The "
+#| "Ketchup Expansion rules are available <a "
+#| "href=\"https://www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf\""
+#| " target=\"_blank\">here</a>."
 msgid ""
 "Finding the correct coffee route can be quite tricky! First of all, please "
-"read the coffee section of the expansion rules.<br/> Make sure you fully "
-"understand the example and the reasons why each route was chosen. <br/> The "
-"Ketchup Expansion rules are available <a href=\"https://www.boardgamehelpers."
-"com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf\" target=\"_blank"
-"\">here</a>."
+"read the coffee section of the expansion rules. <br /> Make sure you fully "
+"understand the example and the reasons why each route was chosen. <br /> The"
+" Ketchup Expansion rules are available <a "
+"href=\"https://www.boardgamehelpers.com/FoodChainMagnate/images/FCM_ketchup_Regels_Eng_web.pdf\""
+" target=\"_blank\">here</a>."
 msgstr ""
-"为了找到正确的咖啡路线可能会有些棘手！首先，请阅读扩展规则中的咖啡部分。确保"
-"您完全理解示例以及选择每条路线的原因。<BR/>Ketchup扩展规则可在<a href="
-"\"https://www.boardgamehelpers.com/FoodChainMagnate/Images/"
-"FCM_ketchup_Regels_Eng_web.pdf\" target=\"_blank\">此处</a>找到。"
+"找到正确的咖啡路线可能相当棘手！首先请阅读扩展规则的咖啡部分。<br /> 确保完全理解示例以及选择每条路线的原因。<br /> 番茄酱扩展规则见 <a"
+" "
+"href=\"https://www.boardgamehelpers.com/FoodChainMagnate/images/FCM_ketchup_Regels_Eng_web.pdf\""
+" target=\"_blank\">此处</a>。"
 
-#: .\templates\FCM\coffeeHelp.html:33
+#: .\FCM\templates\FCM\coffeeHelp.html:41
 msgid "What goes into finding a valid coffee route?"
 msgstr "如何找到有效的咖啡路线？"
 
-#: .\templates\FCM\coffeeHelp.html:36
-#, fuzzy
+#: .\FCM\templates\FCM\coffeeHelp.html:44
 #| msgid ""
 #| "Remember the following:<BR/> <li>Players actually need to have coffee in "
 #| "stock for a sale to be considered</li> <li>A house can travel along any "
-#| "route to get to the winning restaurant, as long as the <b>tile distance</"
-#| "b> does not go above the minimum required to get to the restaurant</li> "
-#| "<li>If the route splits, the house will choose the route that sells the "
-#| "most coffee <ul><li>For example, if the route splits and one route sells "
-#| "a coffee to players A and B, and the other route sells a coffee to player "
-#| "C only, then the path selling only to player C will be <b>completely "
-#| "ignored</b> because there is an alternative valid route that sells more "
-#| "coffee, and the house will take the route that sells the most possible "
-#| "coffee</b></li></ul> </li> <li>If the route splits and each possible "
-#| "split would sell the <b>same</b> amount of coffee, then <b>no</b> coffee "
-#| "is sold along this split part of the route <ul><li>This applies even if "
-#| "each path would sell the same amount of coffee to the same player. Why? "
-#| "Because that's what the designer has said! You can think of it as the "
-#| "house arguing about <i>which</i> of the coffee selling places is better, "
-#| "to the point where they end up skipping all of them, even if they belong "
-#| "to the same chain.</li> </li> <li>Consider the example above with one "
-#| "path selling to players A and B, and the other path only to player C. "
-#| "What would happen if player B had no coffee? You would now be in the "
-#| "situation where one route woulf sell to player A and the other route to "
-#| "player C. Both routes would now sell the same amount of coffe, and so now "
-#| "<b>both</b> routes are skipped. </li>"
+#| "route to get to the winning restaurant, as long as the <b>tile distance</b> "
+#| "does not go above the minimum required to get to the restaurant</li> <li>If "
+#| "the route splits, the house will choose the route that sells the most coffee"
+#| " <ul><li>For example, if the route splits and one route sells a coffee to "
+#| "players A and B, and the other route sells a coffee to player C only, then "
+#| "the path selling only to player C will be <b>completely ignored</b> because "
+#| "there is an alternative valid route that sells more coffee, and the house "
+#| "will take the route that sells the most possible coffee</b></li></ul> </li> "
+#| "<li>If the route splits and each possible split would sell the <b>same</b> "
+#| "amount of coffee, then <b>no</b> coffee is sold along this split part of the"
+#| " route <ul><li>This applies even if each path would sell the same amount of "
+#| "coffee to the same player. Why? Because that's what the designer has said! "
+#| "You can think of it as the house arguing about <i>which</i> of the coffee "
+#| "selling places is better, to the point where they end up skipping all of "
+#| "them, even if they belong to the same chain.</li> </li> <li>Consider the "
+#| "example above with one path selling to players A and B, and the other path "
+#| "only to player C. What would happen if player B had no coffee? You would now"
+#| " be in the situation where one route woulf sell to player A and the other "
+#| "route to player C. Both routes would now sell the same amount of coffe, and "
+#| "so now <b>both</b> routes are skipped. </li>"
 msgid ""
-"Remember the following:<br/> <li>Players actually need to have coffee in "
-"stock for a sale to be considered</li> <li>A house can travel along any "
+"Remember the following: <br /> <li>Players actually need to have coffee in "
+"stock for a sale to be considered</li> <li> A house can travel along any "
 "route to get to the winning restaurant, as long as the <b>tile distance</b> "
-"does not go above the minimum required to get to the restaurant</li> <li>If "
-"the route splits, the house will choose the route that sells the most coffee "
-"<ul><li>For example, if the route splits and one route sells a coffee to "
-"players A and B, and the other route sells a coffee to player C only, then "
-"the path selling only to player C will be <b>completely ignored</b> because "
-"there is an alternative valid route that sells more coffee, and the house "
-"will take the route that sells the most possible coffee</li></ul> </li> "
-"<li>If the route splits and each possible split would sell the <b>same</b> "
-"amount of coffee, then <b>no</b> coffee is sold along this split part of the "
-"route <ul><li>This applies even if each path would sell the same amount of "
-"coffee to the same player. Why? Because that's what the designer has said! "
-"You can think of it as the house arguing about <i>which</i> of the coffee "
-"selling places is better, to the point where they end up skipping all of "
-"them, even if they belong to the same chain.</li> </li> <li>Consider the "
-"example above with one path selling to players A and B, and the other path "
-"only to player C. What would happen if player B had no coffee? You would now "
-"be in the situation where one route woulf sell to player A and the other "
-"route to player C. Both routes would now sell the same amount of coffe, and "
-"so now <b>both</b> routes are skipped. </li>"
+"does not go above the minimum required to get to the restaurant </li> <li> "
+"If the route splits, the house will choose the route that sells the most "
+"coffee <ul> <li> For example, if the route splits and one route sells a "
+"coffee to players A and B, and the other route sells a coffee to player C "
+"only, then the path selling only to player C will be <b>completely "
+"ignored</b> because there is an alternative valid route that sells more "
+"coffee, and the house will take the route that sells the most possible "
+"coffee </li> </ul> </li> <li> If the route splits and each possible split "
+"would sell the <b>same</b> amount of coffee, then <b>no</b> coffee is sold "
+"along this split part of the route <ul> <li> This applies even if each path "
+"would sell the same amount of coffee to the same player. Why? Because that's"
+" what the designer has said! You can think of it as the house arguing about "
+"<i>which</i> of the coffee selling places is better, to the point where they"
+" end up skipping all of them, even if they belong to the same chain. </li> "
+"</li> <li> Consider the example above with one path selling to players A and"
+" B, and the other path only to player C. What would happen if player B had "
+"no coffee? You would now be in the situation where one route woulf sell to "
+"player A and the other route to player C. Both routes would now sell the "
+"same amount of coffe, and so now <b>both</b> routes are skipped. </li>"
 msgstr ""
-"请记住以下内容：<BR/> <li>玩家需要实际拥有咖啡库存才能被视为销售</li> <li>只"
-"要<b>地块距离</b>不超过到达餐厅所需的最低距离，顾客就可以沿着任何路线前往获胜"
-"的餐厅</li> <li>如果路线分岔，顾客将选择销售最多咖啡的路线 <ul><li>例如，如果"
-"路线分岔，一条路线从玩家A和B销售一杯咖啡，另一条路线只从玩家C销售一杯咖啡，则"
-"只销售给玩家C的路线将被<b>完全忽略</b>，因为有一个可以销售更多咖啡的备选有效"
-"路线，顾客将选择可能销售最多咖啡的路线</li></ul> </li> <li>如果路线分岔，每个"
-"可能的分岔都会销售相同数量的咖啡，则沿着此分岔路线<b>没有</b>咖啡被销售 "
-"<ul><li>即使每条路径都从同一玩家销售相同数量的咖啡，这也适用。为什么？因为这"
-"就是设计师所说的！您可以认为顾客在争论应该选择哪一个卖咖啡的地方，最终他们跳"
-"过了所有这些地方，即使它们属于同一连锁店。</li> </li> <li>考虑上面的例子，一"
-"条路径从玩家A和B销售，另一条路径只从玩家C销售。如果玩家B没有咖啡会怎么样？现"
-"在您会处于这样一种情况，其中一条路线将从玩家A销售，另一条路线将从玩家C销售。"
-"现在两条路线都将销售相同数量的咖啡，所以现在<b>全部</b>跳过这两条路线。 </li>"
+"请记住以下几点：<br /> <li>玩家必须实际有咖啡库存才计销售</li> <li> "
+"房屋可走任意路线到达获胜餐厅，只要<b>板块距离</b>不超过到达餐厅的最低要求 </li> <li> 若路线分岔，房屋会选择卖出最多咖啡的路线 "
+"<ul> <li> 例如一条路线向玩家 A 和 B 各卖一杯，另一条只向 C 卖一杯，则只向 C "
+"卖的路径会被<b>完全忽略</b>，因为存在卖出更多咖啡的有效替代路线，房屋会走卖出最多的路线 </li> </ul> </li> <li> "
+"若分岔后各可能分岔卖出的咖啡<b>相同</b>，则该分岔段<b>不</b>卖任何咖啡 <ul> <li> "
+"即使各路径向同一玩家卖出相同数量也适用。为何？设计师就是这么说的！可以理解为房屋在争论<i>哪个</i>卖咖啡的地方更好，结果全部跳过，即使属于同一连锁。"
+" </li> </li> <li> 考虑上面一条路径卖给 A 和 B、另一条只卖给 C 的例子。若玩家 B 没有咖啡会怎样？现在一条卖给 A、另一条卖给"
+" C，两边卖出相同，因此<b>两条</b>都被跳过。 </li>"
 
-#: .\templates\FCM\coffeeHelp.html:68
+#: .\FCM\templates\FCM\coffeeHelp.html:84
 msgid ""
-"When I click \"More Information\" in the coffee section in \"History\", what "
-"exactly are the non-road highlights?"
-msgstr ""
-"当我在“历史记录”中的咖啡部分点击“更多信息”时，非路线上的高亮部分指什么？"
+"When I click \"More Information\" in the coffee section in \"History\", what"
+" exactly are the non-road highlights?"
+msgstr "当我在“历史记录”中的咖啡部分点击“更多信息”时，非路线上的高亮部分指什么？"
 
-#: .\templates\FCM\coffeeHelp.html:70
-#, fuzzy
+#: .\FCM\templates\FCM\coffeeHelp.html:87
 #| msgid ""
 #| "Restaurants / coffee shops that are highlighted indicate where coffee was "
 #| "actually sold along the route taken by this house.<BR/> Note that the "
-#| "squares highlighted correspond to where the restaurants / coffee shops "
-#| "were on this turn, not where they are now if they were moved later.<BR/> "
-#| "So if a non-road square has a highlight but does not contain a restaurant "
-#| "or coffee shop, then it must have been moved after this turn."
+#| "squares highlighted correspond to where the restaurants / coffee shops were "
+#| "on this turn, not where they are now if they were moved later.<BR/> So if a "
+#| "non-road square has a highlight but does not contain a restaurant or coffee "
+#| "shop, then it must have been moved after this turn."
 msgid ""
 "Restaurants / coffee shops that are highlighted indicate where coffee was "
-"actually sold along the route taken by this house.<br/> Note that the "
+"actually sold along the route taken by this house. <br /> Note that the "
 "squares highlighted correspond to where the restaurants / coffee shops were "
-"on this turn, not where they are now if they were moved later.<br/> So if a "
-"non-road square has a highlight but does not contain a restaurant or coffee "
-"shop, then it must have been moved after this turn."
+"on this turn, not where they are now if they were moved later. <br /> So if "
+"a non-road square has a highlight but does not contain a restaurant or "
+"coffee shop, then it must have been moved after this turn."
 msgstr ""
-"被突出显示的餐厅/咖啡店表示此房子行进路线上实际售出咖啡的地点。<BR/>请注意，"
-"被突出显示的方格对应于本回合餐厅/咖啡店的位置，而不是它们在之后被移动后的位"
-"置。<BR/>因此，如果一个非道路方格被突出显示，但不包含餐厅或咖啡店，则肯定是在"
-"本回合之后被移动了。"
+"高亮的餐厅/咖啡店表示本房屋路线上实际售出咖啡的位置。<br /> 注意高亮方格对应的是本回合餐厅/咖啡店的位置，而非其后来被移动后的位置。<br />"
+" 因此若非道路方格有高亮却不含餐厅或咖啡店，则它一定是在本回合之后被移动的。"
 
-#: .\templates\FCM\coffeeHelp.html:82
+#: .\FCM\templates\FCM\coffeeHelp.html:102
 msgid ""
-"When I click \"More Information\" in the coffee section in \"History\", what "
-"exactly are the road highlights?"
-msgstr ""
-"当我在“历史记录”中的“咖啡”部分点击“更多信息”时，路线上的高亮区域具体是指什"
-"么？"
+"When I click \"More Information\" in the coffee section in \"History\", what"
+" exactly are the road highlights?"
+msgstr "当我在“历史记录”中的“咖啡”部分点击“更多信息”时，路线上的高亮区域具体是指什么？"
 
-#: .\templates\FCM\coffeeHelp.html:84
-#, fuzzy
+#: .\FCM\templates\FCM\coffeeHelp.html:105
 #| msgid ""
-#| "If there is only one valid coffee route from the house to the restaurant, "
-#| "it will be shown.<BR/> If there are multiple valid routes, the road "
-#| "squares common to all valid coffee routes will be shown. <BR/> This "
-#| "should help you to work out how the sales occurred. Remember distance is "
-#| "only measured in map tiles, not road squares. So if the house could "
-#| "travel one tile right and then one tile down, OR one tile down and then "
-#| "one tile right, AND both choices would sell the same amount of coffee "
-#| "(which would make both valid choices), then none of this section will be "
-#| "highlighted. If however only one of those routes sold coffee, then as "
-#| "both are the same distance, and the house will always choose the route "
-#| "that sells the most coffee, then both the route and the location where "
-#| "the coffee sale occurred should have a highlight. <BR/> A route will go "
-#| "all round a tile, if possible, as long as it stays on the same tile and "
-#| "does not make a U-turn. For example, if the route includes the triple "
-#| "lemonade tile from the expansion, or the tile with house 5 on it, then "
-#| "the route will always include all road squares on these tiles"
+#| "If there is only one valid coffee route from the house to the restaurant, it"
+#| " will be shown.<BR/> If there are multiple valid routes, the road squares "
+#| "common to all valid coffee routes will be shown. <BR/> This should help you "
+#| "to work out how the sales occurred. Remember distance is only measured in "
+#| "map tiles, not road squares. So if the house could travel one tile right and"
+#| " then one tile down, OR one tile down and then one tile right, AND both "
+#| "choices would sell the same amount of coffee (which would make both valid "
+#| "choices), then none of this section will be highlighted. If however only one"
+#| " of those routes sold coffee, then as both are the same distance, and the "
+#| "house will always choose the route that sells the most coffee, then both the"
+#| " route and the location where the coffee sale occurred should have a "
+#| "highlight. <BR/> A route will go all round a tile, if possible, as long as "
+#| "it stays on the same tile and does not make a U-turn. For example, if the "
+#| "route includes the triple lemonade tile from the expansion, or the tile with"
+#| " house 5 on it, then the route will always include all road squares on these"
+#| " tiles"
 msgid ""
-"If there is only one valid coffee route from the house to the restaurant, it "
-"will be shown.<br/> If there are multiple valid routes, the road squares "
-"common to all valid coffee routes will be shown. <br/> This should help you "
-"to work out how the sales occurred. Remember distance is only measured in "
-"map tiles, not road squares. So if the house could travel one tile right and "
-"then one tile down, OR one tile down and then one tile right, AND both "
+"If there is only one valid coffee route from the house to the restaurant, it"
+" will be shown. <br /> If there are multiple valid routes, the road squares "
+"common to all valid coffee routes will be shown. <br /> This should help you"
+" to work out how the sales occurred. Remember distance is only measured in "
+"map tiles, not road squares. So if the house could travel one tile right and"
+" then one tile down, OR one tile down and then one tile right, AND both "
 "choices would sell the same amount of coffee (which would make both valid "
-"choices), then none of this section will be highlighted. If however only one "
-"of those routes sold coffee, then as both are the same distance, and the "
-"house will always choose the route that sells the most coffee, then both the "
-"route and the location where the coffee sale occurred should have a "
-"highlight. <br/> A route will go all round a tile, if possible, as long as "
+"choices), then none of this section will be highlighted. If however only one"
+" of those routes sold coffee, then as both are the same distance, and the "
+"house will always choose the route that sells the most coffee, then both the"
+" route and the location where the coffee sale occurred should have a "
+"highlight. <br /> A route will go all round a tile, if possible, as long as "
 "it stays on the same tile and does not make a U-turn. For example, if the "
-"route includes the triple lemonade tile from the expansion, or the tile with "
-"house 5 on it, then the route will always include all road squares on these "
-"tiles"
+"route includes the triple lemonade tile from the expansion, or the tile with"
+" house 5 on it, then the route will always include all road squares on these"
+" tiles"
 msgstr ""
-"如果顾客到餐厅的路径只有一条是有效的，那么它将被显示出来。<BR/>如果有多条有效"
-"路径，则会显示所有有效咖啡路径共同经过的道路。<BR/>这应该有助于您了解销售是如"
-"何进行的。请注意，距离仅以地图板块数量而不是道路方块数来衡量。因此，如果房子"
-"可以先向右移动一个板块，然后向下移动一个图板块，或者先向下移动一个板块，然后"
-"向右移动一个板块，且两个选择都会卖出相同的咖啡（这将使两个选择均有效），则此"
-"部分将不会被高亮显示。然而，如果这两条路线中只有一条销售咖啡，那么由于它们的"
-"距离相同，而顾客将始终选择卖出最多咖啡的路线，那么这条路线和售卖咖啡的位置都"
-"应该被高亮显示。<BR/>如果可能的话，路径将包含一个板块上的所有道路，只要所有的"
-"道路都在同一个板块上且不掉头往回走。例如，如果路线包括扩展包中的3个柠檬水板块"
-"或5号房子所在的板块，则该路线将始终包括这些板块上的所有道路方块"
+"若从房屋到餐厅只有一条有效咖啡路线，将显示该路线。<br /> 若有多条有效路线，将显示所有有效路线共有的道路方格。<br /> "
+"这应有助于你弄清销售如何发生。注意距离只按地图板块计，不按道路方格计。因此若房屋可先右移一板块再下移一板块，或先下移再右移，且两种选择卖出的咖啡相同（两者均有效），则本部分不会高亮。若只有一条路线卖了咖啡，由于距离相同且房屋总会选择卖出最多咖啡的路线，则该路线与销售地点都应高亮。<br"
+" /> 可能的话，路线会绕板块一整圈，只要停留在同一板块且不掉头。例如若路线包含扩展中的三倍柠檬水板块，或有 5 "
+"号房屋的板块，则总是包含这些板块上的所有道路方格"
 
-#: .\templates\FCM\coffeeHelp.html:104
+#: .\FCM\templates\FCM\coffeeHelp.html:128
 msgid ""
 "Please consider the following examples to understand better how Coffee "
 "Selling works"
 msgstr "请考虑以下示例以更好地了解售卖咖啡的正确方式"
 
-#: .\templates\FCM\coffeeHelp.html:106
-#, fuzzy
+#: .\FCM\templates\FCM\coffeeHelp.html:130
 #| msgid ""
 #| "In the following examples, the building with the lemonade makes a sale. "
 #| "Assume all players have 6 coffees. <BR/> Xango Blues (green colour) makes "
 #| "the sale, without a drive-thru. Can you work out which locations sell "
-#| "coffee?<BR/> In the answers, the locations that sell are circled in "
-#| "green, and the locations that don't sell in red.<BR/> Common road squares "
-#| "show the green highlight, and blue lines indicate where there is more "
-#| "than one possible path."
+#| "coffee?<BR/> In the answers, the locations that sell are circled in green, "
+#| "and the locations that don't sell in red.<BR/> Common road squares show the "
+#| "green highlight, and blue lines indicate where there is more than one "
+#| "possible path."
 msgid ""
 "In the following examples, the building with the lemonade makes a sale. "
-"Assume all players have 6 coffees. <br/> Xango Blues (green colour) makes "
-"the sale, without a drive-thru. Can you work out which locations sell coffee?"
-"<br/> In the answers, the locations that sell are circled in green, and the "
-"locations that don't sell in red.<br/> Common road squares show the green "
-"highlight, and blue lines indicate where there is more than one possible "
-"path."
+"Assume all players have 6 coffees. <br /> Xango Blues (green colour) makes "
+"the sale, without a drive-thru. Can you work out which locations sell "
+"coffee? <br /> In the answers, the locations that sell are circled in green,"
+" and the locations that don't sell in red. <br /> Common road squares show "
+"the green highlight, and blue lines indicate where there is more than one "
+"possible path."
 msgstr ""
-"在以下的例子中，一栋有柠檬水需求的房子进行销售。假设所有的玩家都有6杯咖啡。"
-"<BR/> Xango Blues（绿色）的连锁店没有免下车服务，他们卖掉了柠檬水。您能够找出"
-"哪些地方卖掉了咖啡吗？<BR/> 在答案中，卖咖啡的地方用绿色圈出，无法卖咖啡的地"
-"方用红色圈出。<BR/> 共同的路口用绿色高亮显示，蓝色线条表示有多条可能的路径。"
+"在以下示例中，有柠檬水的建筑完成销售。假设所有玩家都有 6 杯咖啡。<br /> Xango "
+"Blues（绿色）完成销售，且无得来速。你能算出哪些位置卖了咖啡吗？<br /> 答案中，售出位置用绿色圈出，未售出用红色圈出。<br /> "
+"共同道路方格显示绿色高亮，蓝线表示存在多条可能路径。"
 
-#: .\templates\FCM\coffeeHelp.html:115
+#: .\FCM\templates\FCM\coffeeHelp.html:141
 msgid "Example 1"
 msgstr "例1"
 
-#: .\templates\FCM\coffeeHelp.html:134
+#: .\FCM\templates\FCM\coffeeHelp.html:170
 msgid "Answer 1"
 msgstr "回答1"
 
-#: .\templates\FCM\coffeeHelp.html:136
+#: .\FCM\templates\FCM\coffeeHelp.html:172
 msgid ""
 "One coffee is sold to Gluttony and one to Xango. The house can travel all "
 "the way around the triple lemonade square. It can travel on squares it has "
@@ -695,20 +1068,19 @@ msgid ""
 "bottom left square or top right square, so this part of the route counts as "
 "\"undecided\", and no coffee sales would occur along here."
 msgstr ""
-"Gluttony 和 Xango 各卖了一杯咖啡。顾客可以绕着3个柠檬水广场一直行走。只要不掉"
-"头，他们可以在已经走过的方格上行走。<b>卖咖啡的地点不一定在路径所在的相同板块"
-"上，它们只需要在道路相邻的位置。</b> 10号房子里的顾客可以从左下方或右上方的方"
-"格出门，因此这部分路线被视为“未决定的”，不会出售任何咖啡。"
+"Gluttony 和 Xango "
+"各卖了一杯咖啡。顾客可以绕着3个柠檬水广场一直行走。只要不掉头，他们可以在已经走过的方格上行走。<b>卖咖啡的地点不一定在路径所在的相同板块上，它们只需要在道路相邻的位置。</b>"
+" 10号房子里的顾客可以从左下方或右上方的方格出门，因此这部分路线被视为“未决定的”，不会出售任何咖啡。"
 
-#: .\templates\FCM\coffeeHelp.html:147
+#: .\FCM\templates\FCM\coffeeHelp.html:182
 msgid "Example 2"
 msgstr "例2"
 
-#: .\templates\FCM\coffeeHelp.html:166
+#: .\FCM\templates\FCM\coffeeHelp.html:211
 msgid "Answer 2"
 msgstr "回答2"
 
-#: .\templates\FCM\coffeeHelp.html:168
+#: .\FCM\templates\FCM\coffeeHelp.html:213
 msgid ""
 "Santa Maria sells 2 coffees. House 12 will use any route that doesn't "
 "increase tile distance. So they come out onto the road square next to the "
@@ -716,50 +1088,45 @@ msgid ""
 "mutually exclusive valid routes, each of which would sell one coffee. So "
 "both of these coffee shops will be skipped. Note that <b>although there is "
 "no green highlighted road directly adjacent to the Santa Maria coffee shop "
-"in this section, BOTH (all) valid coffee routes must pass adjacent to it, no "
-"matter which route is taken, and so one sale will always occur here as well."
-"</b>"
+"in this section, BOTH (all) valid coffee routes must pass adjacent to it, no"
+" matter which route is taken, and so one sale will always occur here as "
+"well.</b>"
 msgstr ""
-"Santa Maria 咖啡厅售卖了2杯咖啡。12号房子里的顾客将使用任何不增加板块距离的路"
-"线。因此，他们从高架桥旁的道路方块出来，并卖给了 Santa Maria。红圈标出的咖啡"
-"店在互斥的有效路径上，每条路径都会卖出一杯咖啡。因此，这两家咖啡店都将被跳"
-"过。<b>请注意，尽管没有绿色高亮路径直接毗邻 Santa Maria 咖啡店，但无论采用哪"
-"条路线，所有有效咖啡路线都必须经过其相邻的道路，因此在此处始终会发生一次咖啡"
-"销售</b>"
+"Santa Maria 咖啡厅售卖了2杯咖啡。12号房子里的顾客将使用任何不增加板块距离的路线。因此，他们从高架桥旁的道路方块出来，并卖给了 Santa"
+" Maria。红圈标出的咖啡店在互斥的有效路径上，每条路径都会卖出一杯咖啡。因此，这两家咖啡店都将被跳过。<b>请注意，尽管没有绿色高亮路径直接毗邻 "
+"Santa Maria 咖啡店，但无论采用哪条路线，所有有效咖啡路线都必须经过其相邻的道路，因此在此处始终会发生一次咖啡销售</b>"
 
-#: .\templates\FCM\coffeeHelp.html:182
+#: .\FCM\templates\FCM\coffeeHelp.html:226
 msgid "Example 3"
 msgstr "例3"
 
-#: .\templates\FCM\coffeeHelp.html:201
+#: .\FCM\templates\FCM\coffeeHelp.html:255
 msgid "Answer 3"
 msgstr "回答3"
 
-#: .\templates\FCM\coffeeHelp.html:203
-#, fuzzy
+#: .\FCM\templates\FCM\coffeeHelp.html:257
 #| msgid ""
-#| "One coffee is sold by Santa Maria from the middle right tile. This one is "
-#| "a bit more complicated! Remember that the \"winning distance\" for the "
+#| "One coffee is sold by Santa Maria from the middle right tile. This one is a "
+#| "bit more complicated! Remember that the \"winning distance\" for the "
 #| "lemonade sale is 4. So you can never cross more than 4 tile boundaries. "
 #| "Whichever routes you pick at the start, there are essentially the higher "
-#| "route and lower route. The higher route would sell to Santa Maria twice "
-#| "and the lower route to Xango twice. So all of these sales are skipped. "
-#| "Interestingly, there are no road tiles highlighted anywhere near the "
-#| "green circled Santa Maria, but <b>every</b> valid route does pass by it. "
-#| "Remember that a valid route must try to sell as much coffee as possible. "
-#| "So for the house to exit the centre tile to the bottom, it must first go "
-#| "all the way around the tile, passing by the Santa Maria coffee shop, "
-#| "before exiting to the bottom. If the house instead moves onto the right "
-#| "(onto the triple lemonade tile), then it will travel around the entire "
-#| "tile before exiting to the bottom, thus also passing this Santa Maria "
-#| "coffee shop. The same will happen if the house travels along the top and "
-#| "then down onto the triple lemonade tile. So no matter which valid route "
-#| "the house chooses, it will <b>always</b> pass by one Santa Maria coffee "
-#| "shop, but never more than 2 of the other 3 shops, and so these are all "
-#| "skipped. <BR/><BR/> Note that there are technically a lot more valid "
-#| "routes than are shown with the blue lines; for example you can exit the "
-#| "apartment tile down onto the central tile from any of the 5 bottom road "
-#| "squares. But in all cases, the outcome is the same."
+#| "route and lower route. The higher route would sell to Santa Maria twice and "
+#| "the lower route to Xango twice. So all of these sales are skipped. "
+#| "Interestingly, there are no road tiles highlighted anywhere near the green "
+#| "circled Santa Maria, but <b>every</b> valid route does pass by it. Remember "
+#| "that a valid route must try to sell as much coffee as possible. So for the "
+#| "house to exit the centre tile to the bottom, it must first go all the way "
+#| "around the tile, passing by the Santa Maria coffee shop, before exiting to "
+#| "the bottom. If the house instead moves onto the right (onto the triple "
+#| "lemonade tile), then it will travel around the entire tile before exiting to"
+#| " the bottom, thus also passing this Santa Maria coffee shop. The same will "
+#| "happen if the house travels along the top and then down onto the triple "
+#| "lemonade tile. So no matter which valid route the house chooses, it will "
+#| "<b>always</b> pass by one Santa Maria coffee shop, but never more than 2 of "
+#| "the other 3 shops, and so these are all skipped. <BR/><BR/> Note that there "
+#| "are technically a lot more valid routes than are shown with the blue lines; "
+#| "for example you can exit the apartment tile down onto the central tile from "
+#| "any of the 5 bottom road squares. But in all cases, the outcome is the same."
 msgid ""
 "One coffee is sold by Santa Maria from the middle right tile. This one is a "
 "bit more complicated! Remember that the \"winning distance\" for the "
@@ -773,40 +1140,35 @@ msgid ""
 "house to exit the centre tile to the bottom, it must first go all the way "
 "around the tile, passing by the Santa Maria coffee shop, before exiting to "
 "the bottom. If the house instead moves onto the right (onto the triple "
-"lemonade tile), then it will travel around the entire tile before exiting to "
-"the bottom, thus also passing this Santa Maria coffee shop. The same will "
+"lemonade tile), then it will travel around the entire tile before exiting to"
+" the bottom, thus also passing this Santa Maria coffee shop. The same will "
 "happen if the house travels along the top and then down onto the triple "
 "lemonade tile. So no matter which valid route the house chooses, it will "
 "<b>always</b> pass by one Santa Maria coffee shop, but never more than 2 of "
-"the other 3 shops, and so these are all skipped. <br/><br/> Note that there "
-"are technically a lot more valid routes than are shown with the blue lines; "
-"for example you can exit the apartment tile down onto the central tile from "
-"any of the 5 bottom road squares. But in all cases, the outcome is the same."
+"the other 3 shops, and so these are all skipped. <br /> <br /> Note that "
+"there are technically a lot more valid routes than are shown with the blue "
+"lines; for example you can exit the apartment tile down onto the central "
+"tile from any of the 5 bottom road squares. But in all cases, the outcome is"
+" the same."
 msgstr ""
-"在这个例子中，Santa Maria 在右边中间板块的咖啡店卖出了一杯咖啡。这个例子比较"
-"复杂！请记住，柠檬水销售的“获胜距离”是4。因此，您不能跨越超过4个版图的距离。"
-"无论您在开始时选择哪些路线，基本上都有上面路线和下面路线。上面路线会从 Santa "
-"Maria 购买两次咖啡，而下面路线则会从 Xango 购买两次咖啡。因此，所有这些销售都"
-"被跳过了。有趣的是，Santa Maria 咖啡店周围几乎没有任何绿色高亮的道路板块，但"
-"是<b>每条</b>有效路线都必须经过它旁边的道路。请记住，有效路线必须尽可能地卖出"
-"更多的咖啡。因此，对于顾客从中央板块走到底部中间板块的情况，它必须先绕整个板"
-"块走一圈，经过 Santa Maria 咖啡店，然后才能走向底部中间板块。如果顾客走到右边"
-"中间板块（进入三个柠檬水板块），则它将在走向右边底部板块之前绕整个右边中间板"
-"块走一圈，从而也经过这个Santa Maria咖啡店。如果顾客沿着上边板块走下来，然后沿"
-"着上边板块走到三倍柠檬水图块，也会发生同样的情况。因此，无论顾客选择哪条有效"
-"路线，它都将<b>始终</b>经过 Santa Maria 咖啡店，而其他路线存在冲突，因此这些"
-"商店都被跳过了。<BR/><BR/>请注意，实际上有比蓝色线条所示更多的有效路线；例"
-"如，您可以走左边板块。但在所有情况下，结果都是相同的。"
+"Santa Maria 从右边中间板块卖出一杯咖啡。这个例子更复杂！记住柠檬水销售的“获胜距离”是 4，因此永远不能跨越超过 4 "
+"个板块边界。无论一开始选哪些路线，本质上只有上方路线和下方路线。上方路线会向 Santa Maria 卖两次，下方路线向 Xango "
+"卖两次，因此所有这些销售都被跳过。有趣的是，绿色圈出的 Santa Maria "
+"附近没有高亮道路板块，但<b>每条</b>有效路线都经过它。记住有效路线必须尽可能多卖咖啡。因此房屋要从中心板块下方出去，必须先绕板块一整圈经过 "
+"Santa Maria 咖啡店再向下。若房屋改向右（进入三倍柠檬水板块），也会绕完整板块后再向下，同样经过这家 Santa "
+"Maria。若房屋沿顶部再下到三倍柠檬水板块也是如此。所以无论选择哪条有效路线，都会<b>始终</b>经过一家 Santa Maria "
+"咖啡店，但绝不会经过其他三家中的两家以上，因此这些全被跳过。<br /> <br /> 注意实际上有效路线比蓝线显示的多得多；例如可从底部 5 "
+"个道路方格任一处从公寓板块下到中心板块。但所有情况下结果相同。"
 
-#: .\templates\FCM\coffeeHelp.html:227
+#: .\FCM\templates\FCM\coffeeHelp.html:281
 msgid "Example 4"
 msgstr "例4"
 
-#: .\templates\FCM\coffeeHelp.html:246
+#: .\FCM\templates\FCM\coffeeHelp.html:310
 msgid "Answer 4"
 msgstr "回答4"
 
-#: .\templates\FCM\coffeeHelp.html:248
+#: .\FCM\templates\FCM\coffeeHelp.html:312
 msgid ""
 "Siap Faji will sell one coffee. Although both blue routes would each sell "
 "one coffee to Siap Faji, both locations are skipped, as per the designer's "
@@ -817,63 +1179,188 @@ msgid ""
 "in order to be a valid route (because it wouldn't increase the tile "
 "distance), and so that location would also sell one coffee."
 msgstr ""
-"Siap Faji 将会卖出一杯咖啡。尽管两条蓝色线路都会分别向 Siap Faji 售出一杯咖"
-"啡，但两个咖啡店都被跳过了，根据设计师的规定。可以想象成顾客正在争论哪个咖啡"
-"店更好（尽管它们属于同一家连锁店！），因此这两个咖啡店都被跳过了。请注意，如"
-"果您用一家咖啡店取代 Xango 对面的啤酒采购点，则为了成为有效的路线，所有路线现"
-"在都必须经过这个位置（因为它不会增加板块距离），因此该位置也会售出一杯咖啡。"
+"Siap Faji 将会卖出一杯咖啡。尽管两条蓝色线路都会分别向 Siap Faji "
+"售出一杯咖啡，但两个咖啡店都被跳过了，根据设计师的规定。可以想象成顾客正在争论哪个咖啡店更好（尽管它们属于同一家连锁店！），因此这两个咖啡店都被跳过了。请注意，如果您用一家咖啡店取代"
+" Xango 对面的啤酒采购点，则为了成为有效的路线，所有路线现在都必须经过这个位置（因为它不会增加板块距离），因此该位置也会售出一杯咖啡。"
 
-#: .\templates\FCM\coffeeHelp.html:257
+#: .\FCM\templates\FCM\coffeeHelp.html:320
 msgid "I disagree with something on this page?"
 msgstr "我不同意此页面上的某些内容？"
 
-#: .\templates\FCM\coffeeHelp.html:259
-#, fuzzy
+#: .\FCM\templates\FCM\coffeeHelp.html:322
 #| msgid ""
 #| "Coffee is complicated! I had to rewrite the algorithm several times as my "
 #| "understanding of the finer points of the rules changed as I went through "
-#| "development. Any things I wasn't certain of I found clarifications from "
-#| "the game designer on Board Game Geek. I have had a big input from my "
-#| "playtester as well, ensuring that the rules are strictly followed and any "
-#| "ambiguities from the rulebook follow the designer's rulings on BGG. <BR/> "
-#| "<BR/> If you are unsure, I would strongly urge you to ask in the Board "
-#| "Game Geek forums about it, and if the answer is different to something on "
-#| "this page, please contact me."
+#| "development. Any things I wasn't certain of I found clarifications from the "
+#| "game designer on Board Game Geek. I have had a big input from my playtester "
+#| "as well, ensuring that the rules are strictly followed and any ambiguities "
+#| "from the rulebook follow the designer's rulings on BGG. <BR/> <BR/> If you "
+#| "are unsure, I would strongly urge you to ask in the Board Game Geek forums "
+#| "about it, and if the answer is different to something on this page, please "
+#| "contact me."
 msgid ""
 "Coffee is complicated! I had to rewrite the algorithm several times as my "
 "understanding of the finer points of the rules changed as I went through "
 "development. Any things I wasn't certain of I found clarifications from the "
 "game designer on Board Game Geek. I have had a big input from my playtester "
 "as well, ensuring that the rules are strictly followed and any ambiguities "
-"from the rulebook follow the designer's rulings on BGG. <br/> <br/> If you "
-"are unsure, I would strongly urge you to ask in the Board Game Geek forums "
+"from the rulebook follow the designer's rulings on BGG. <br /> <br /> If you"
+" are unsure, I would strongly urge you to ask in the Board Game Geek forums "
 "about it, and if the answer is different to something on this page, please "
 "contact me."
 msgstr ""
-"咖啡很复杂！在开发过程中，我不断地重新编写算法，因为我对规则的一些细节理解不"
-"清，需要在 Board Game Geek 上向游戏设计师寻求澄清。我的游戏测试员也对此做出了"
-"很大的贡献，确保规则严格遵循，而规则书中的任何歧义都遵循 BGG 设计师的裁决。"
-"<BR/> <BR/> 如果您不确定，强烈建议您在 Board Game Geek 论坛上进行提问，如果答"
-"案与本页上的内容不同，请与我联系。"
+"咖啡很复杂！开发过程中随着我对规则细节理解的变化，我不得不多次重写算法。任何不确定之处，我都在 Board Game Geek "
+"向游戏设计师求证。我的测试员也提供了很大帮助，确保严格遵循规则，规则书中的歧义以 BGG 设计师裁定为准。<br /> <br /> "
+"若不确定，强烈建议你在 Board Game Geek 论坛提问；若答案与本页不同，请联系我。"
 
-#: .\views.py:79 .\views.py:105 .\views.py:364 .\views.py:904 .\views.py:979
-#: .\views.py:1019 .\views.py:1039 .\views.py:1060 .\views.py:1107
+#: .\FCM\templates\FCM\showFCMgame.html:93
+msgid "Please enable Javascript to continue."
+msgstr "请启用 JavaScript 以继续。"
+
+#: .\FCM\templates\FCM\showFCMgame.html:96
+#| msgid "Food Chain Magnate - Tournament Won"
+msgid "Food Chain Magnate is loading........"
+msgstr "Food Chain Magnate 加载中........"
+
+#: .\FCM\views.py:557 .\FCM\views.py:594 .\FCM\views.py:1729
+#: .\FCM\views.py:1788
 msgid "Game does not exist"
 msgstr "游戏不存在"
 
-#: .\views.py:109
-msgid "The game is not Active"
-msgstr "游戏未激活"
-
-#: .\views.py:715
+#: .\FCM\views.py:1457
 msgid ""
-"No rewind data. Rewind limit reached. Please play on to generate more rewind "
-"data"
+"No rewind data. Rewind limit reached. Please play on to generate more rewind"
+" data"
 msgstr "无法回退。已达到回退极限。请继续游戏以供回退"
 
-#: .\views.py:717
+#: .\FCM\views.py:1467
 msgid "Permissions missing. Please reload the page and check again"
 msgstr "缺少权限，请刷新页面并重新尝试"
+
+#~ msgid "In Progress"
+#~ msgstr "进行中"
+
+#~ msgid "Rounds"
+#~ msgstr "回合制"
+
+#~ msgid "Knockout"
+#~ msgstr "淘汰制"
+
+#~ msgid "Two Lives"
+#~ msgstr "双败制"
+
+#~ msgid "Food Chain Magnate - Tournament Game Started"
+#~ msgstr "快餐连锁大亨 - 锦标赛比赛开始"
+
+#, python-format
+#~ msgid ""
+#~ "A Tournament Game has started\n"
+#~ "%(gameName)s - %(maxPlayers)s players"
+#~ msgstr ""
+#~ "一个锦标赛游戏已经开始了\n"
+#~ "%(gameName)s - %(maxPlayers)s 名玩家"
+
+#~ msgid "Click here to play Food Chain Magnate"
+#~ msgstr "单击此处开始快餐连锁大亨"
+
+#, python-format
+#~ msgid ""
+#~ "You have won a tournament! \n"
+#~ "%(tournamentName)s"
+#~ msgstr ""
+#~ "您获得了一场锦标赛的冠军！\n"
+#~ "%(tournamentName)s"
+
+#~ msgid "OPEN FOR SIGNUP"
+#~ msgstr "开放注册"
+
+#~ msgid "1st:"
+#~ msgstr "1："
+
+#~ msgid "2nd:"
+#~ msgstr "2："
+
+#~ msgid "3rd:"
+#~ msgstr "3："
+
+#~ msgid "Points"
+#~ msgstr "积分"
+
+#~ msgid "Round"
+#~ msgstr "回合"
+
+#~ msgid "Game"
+#~ msgstr "游戏"
+
+#~ msgid "Winner"
+#~ msgstr "获胜者"
+
+#~ msgid "BYES:"
+#~ msgstr "淘汰："
+
+#~ msgid "No Permission"
+#~ msgstr "没有权限"
+
+#~ msgid "Single Permission"
+#~ msgstr "单回合许可"
+
+#, fuzzy
+#~ msgid ""
+#~ "Expert options appear in an orange panel. They are meant to allow players to"
+#~ " automate decisions that are obvious choices to make, and thus allow games "
+#~ "to progress a bit faster.<br/> You can select your preference for Order Of "
+#~ "Business during restructuring. A note is added in history as turn order is "
+#~ "resolved if the decision was automatic. Of course, it is very possible to "
+#~ "select \"Earliest possible\" and stll end up in last position - this just "
+#~ "meant that everyone else had more open slots or an earlier turn order than "
+#~ "you, and also chose to go early in turn order. <br/> You can select to "
+#~ "autopay salary even if you don't have enough money, if you do end up having "
+#~ "enough money after dinnertime. Similarly, if you have the Beer Milestone but"
+#~ " no fridge, you can choose to pay in as much food as possible, and then "
+#~ "money. You also have the option of keeping all remaining food if you have a "
+#~ "fridge and end up with less than 10 items.<br/> <b>Note: </b>Even if you "
+#~ "select an expert option, you still might end up playing that phase. For "
+#~ "example, if you don't have enough money for salary, you will need to fire "
+#~ "someone, and so must play the salary phase. Also, if you end up with kimchi "
+#~ "plus other items, you will be required to play the Cleanup phase. Game "
+#~ "rewinds and player kickouts can also result in phases needing to be played "
+#~ "that you had selected to skip."
+#~ msgstr ""
+#~ "专家选项会出现在橙色的面板中。它们旨在允许玩家自动进行那些明显的决策，从而加快游戏进度。<BR/>您可以在重组期间选择您的业务顺序偏好。如果决策是自动的，当回合顺序确定时，历史记录中会添加一条注释。当然，即使您选择“尽可能早”的选项，最终可能仍然是最后一个执行，这只是意味着其他所有人都有更多的空位或更早的回合顺序，并且也选择了尽早执行。<BR/>如果您在薪水支付时没有足够的钱，您也可以选择自动支付，如果您在晚餐后有足够的钱的话。类似地，如果您拥有啤酒里程碑但没有冰箱，您可以选择尽可能多地用食物支付，然后用钱支付。如果您拥有冰箱并且剩余物品少于10个，您还可以选择保留所有剩余的食物。<BR/>"
+#~ " "
+#~ "<b>注意：</b>即使您选择了专家选项，您仍然可能需要进行该阶段的操作。例如，如果您没有足够的钱支付薪水，您将需要解雇某人，因此必须进行薪水阶段。此外，如果您最终拥有泡菜和其他物品，您将需要进行清理阶段。游戏倒退和玩家踢出也可能导致需要进行您选择跳过的阶段。"
+
+#~ msgid "For further help contact"
+#~ msgstr "如需进一步帮助，请联系"
+
+#~ msgid "ZOOM"
+#~ msgstr "缩放"
+
+#~ msgid "Rewind Game Info"
+#~ msgstr "回退信息"
+
+#~ msgid "Exclude game from stats"
+#~ msgstr "本局游戏不计入统计数据"
+
+#~ msgid "Exclude From Stats"
+#~ msgstr "本局游戏不计入统计数据"
+
+#~ msgid "Excluded from Stats"
+#~ msgstr "不计入统计数据"
+
+#~ msgid "Waiting for other players"
+#~ msgstr "等待其他玩家"
+
+#~ msgid ""
+#~ "If all non-bot players tick and confirm this option, this game won't count "
+#~ "in any win/loss stats. You can use this if you simply wish to have a \"less "
+#~ "competitive\" game, or you wish to exclude it for other reasons (EG multiple"
+#~ " player kickouts)"
+#~ msgstr ""
+#~ "如果所有尚未退出的玩家都勾选并确认了此选项，则此局游戏不会计入任何胜利/失败统计数据。如果您希望拥有一个“竞争不那么激烈”的游戏，或者出于其他原因希望将其排除在外（例如多个玩家被踢出），可以使用此选项。"
+
+#~ msgid "The game is not Active"
+#~ msgstr "游戏未激活"
 
 #~ msgid "Blitz Dual"
 #~ msgstr "闪电战"
@@ -891,7 +1378,6 @@ msgstr "缺少权限，请刷新页面并重新尝试"
 #~ msgstr "慢速"
 
 #, fuzzy
-#~| msgid "Setup - Restaurants"
 #~ msgid "Setup - Draft Modules"
 #~ msgstr "设置 - 餐厅"
 
@@ -916,14 +1402,8 @@ msgstr "缺少权限，请刷新页面并重新尝试"
 #~ msgid "5 - Payday"
 #~ msgstr "5 - 发放薪水"
 
-#~ msgid "6 - Marketing Campaigns"
-#~ msgstr "6 - 营销活动"
-
 #~ msgid "7 - Clean up"
 #~ msgstr "7 - 清理现场"
-
-#~ msgid "Game End"
-#~ msgstr "游戏结束"
 
 #~ msgid "4 - Pizza Milestone"
 #~ msgstr "4 - 披萨里程碑"
@@ -978,13 +1458,10 @@ msgstr "缺少权限，请刷新页面并重新尝试"
 #~ msgstr "最后一轮"
 
 #~ msgid ""
-#~ "Welcome to Food Chain Magnate Online!=-NEWLINE-==-NEWLINE-=If you have "
-#~ "any suggestions, questions or comments, then please do contact the "
-#~ "webmaster at the email address in Contact (top right in the lobby). "
-#~ "Thanks!"
-#~ msgstr ""
-#~ "欢迎来到《快餐连锁大亨》在线版！如果您有任何建议、问题或意见，请在大厅右上"
-#~ "方的联系方式中通过电子邮件联系网站管理员。谢谢！"
+#~ "Welcome to Food Chain Magnate Online!=-NEWLINE-==-NEWLINE-=If you have any "
+#~ "suggestions, questions or comments, then please do contact the webmaster at "
+#~ "the email address in Contact (top right in the lobby). Thanks!"
+#~ msgstr "欢迎来到《快餐连锁大亨》在线版！如果您有任何建议、问题或意见，请在大厅右上方的联系方式中通过电子邮件联系网站管理员。谢谢！"
 
 #~ msgid "A Food Chain Magnate game has finished"
 #~ msgstr "一局快餐连锁大亨游戏结束"
@@ -996,8 +1473,7 @@ msgstr "缺少权限，请刷新页面并重新尝试"
 #~ msgid ""
 #~ "FCM Game Over!\n"
 #~ " In %(gameName)s you came: %(result)s."
-#~ msgstr ""
-#~ "《快餐连锁大亨》游戏结束！在 %(gameName)s 中，您的成绩是：%(result)s。"
+#~ msgstr "《快餐连锁大亨》游戏结束！在 %(gameName)s 中，您的成绩是：%(result)s。"
 
 #~ msgid "Click here to view the game"
 #~ msgstr "点此查看游戏"
@@ -1013,9 +1489,6 @@ msgstr "缺少权限，请刷新页面并重新尝试"
 
 #~ msgid "No Radio Milestone"
 #~ msgstr "不使用广播里程碑"
-
-#~ msgid "Hard Choices"
-#~ msgstr "艰难的抉择"
 
 #~ msgid "New Milestones"
 #~ msgstr "新里程碑"
@@ -1065,51 +1538,41 @@ msgstr "缺少权限，请刷新页面并重新尝试"
 #~ msgid "Strict Payday/Fridge"
 #~ msgstr "严格的发薪/冰箱"
 
-#~ msgid "When can I resign?"
-#~ msgstr "我什么时候可以投降？"
-
 #~ msgid ""
-#~ "In order to resign, you must have played at least 4 turns. After 4 turns "
-#~ "you can resign during any restructuring phase. All other players will be "
-#~ "allowed to restructure again to take into account the removal of a "
-#~ "player. If players have enabled notifications in their profile, then they "
-#~ "will receive a notificaion that it is their turn. <BR /> Resignation is "
-#~ "now available in all games. Please note that at Online Board Gamers, "
-#~ "players will never be penalised if they choose to resign. Sometimes it is "
-#~ "a valid (and best!) option. This is slightly different to timing out and "
-#~ "being kicked out of a game, which actually has no penalty at the moment, "
-#~ "but I might add restrictions on joining games if you've been kicked out a "
-#~ "certain number of times within a certain time period. <BR /> Note: You "
-#~ "can also resign at the confirmation options when placing your initial "
-#~ "restaurant. This will allow you to exit games you didn't mean to join, or "
-#~ "have changed your mind over right away. It will still count as a loss in "
-#~ "your statistics."
+#~ "In order to resign, you must have played at least 4 turns. After 4 turns you"
+#~ " can resign during any restructuring phase. All other players will be "
+#~ "allowed to restructure again to take into account the removal of a player. "
+#~ "If players have enabled notifications in their profile, then they will "
+#~ "receive a notificaion that it is their turn. <BR /> Resignation is now "
+#~ "available in all games. Please note that at Online Board Gamers, players "
+#~ "will never be penalised if they choose to resign. Sometimes it is a valid "
+#~ "(and best!) option. This is slightly different to timing out and being "
+#~ "kicked out of a game, which actually has no penalty at the moment, but I "
+#~ "might add restrictions on joining games if you've been kicked out a certain "
+#~ "number of times within a certain time period. <BR /> Note: You can also "
+#~ "resign at the confirmation options when placing your initial restaurant. "
+#~ "This will allow you to exit games you didn't mean to join, or have changed "
+#~ "your mind over right away. It will still count as a loss in your statistics."
 #~ msgstr ""
-#~ "您必须至少玩了4个回合后才可以选择投降。在4个回合后，您可以在任何重组阶段投"
-#~ "降。其他所有玩家都将被允许重新进行重组，以考虑移除玩家的影响。如果玩家在其"
-#~ "个人资料中启用了通知，则将收到提示其轮次的通知。<BR />现在所有游戏均可投"
-#~ "降。请注意，在Online Board Gamers上，如果玩家选择投降，他们永远不会受到处"
-#~ "罚。有时这是一个有效（也是最好的！）选项。这与超时和被踢出游戏稍有不同，目"
-#~ "前实际上没有惩罚，但我可能会增加在一定时间内被踢出游戏一定次数后限制加入游"
-#~ "戏的限制。<BR />注意：您还可以在放置您的初始餐厅时的确认选项中投降。这将允"
-#~ "许您退出您不想加入或立即改变主意的游戏。在您的统计数据中，这仍将算作失败。"
+#~ "您必须至少玩了4个回合后才可以选择投降。在4个回合后，您可以在任何重组阶段投降。其他所有玩家都将被允许重新进行重组，以考虑移除玩家的影响。如果玩家在其个人资料中启用了通知，则将收到提示其轮次的通知。<BR"
+#~ " />现在所有游戏均可投降。请注意，在Online Board "
+#~ "Gamers上，如果玩家选择投降，他们永远不会受到处罚。有时这是一个有效（也是最好的！）选项。这与超时和被踢出游戏稍有不同，目前实际上没有惩罚，但我可能会增加在一定时间内被踢出游戏一定次数后限制加入游戏的限制。<BR"
+#~ " />注意：您还可以在放置您的初始餐厅时的确认选项中投降。这将允许您退出您不想加入或立即改变主意的游戏。在您的统计数据中，这仍将算作失败。"
 
 #~ msgid "How do kickouts work?"
 #~ msgstr "踢出游戏如何运作？"
 
 #~ msgid ""
-#~ "If someone is inactive for longer than the kickout duration set during "
-#~ "game creation, then the game will have a yellow highlight in your "
-#~ "\"Current Games\" list. You can click on the game to enter it, and will "
-#~ "then be asked if you wish to kick the player, or allow them more time. If "
-#~ "you do kickout the player, they will keep their employees, but simply "
-#~ "pass all of their future turns. <BR /> If someone leaves the game, the "
-#~ "host will gain permanent rewind permissions."
+#~ "If someone is inactive for longer than the kickout duration set during game "
+#~ "creation, then the game will have a yellow highlight in your \"Current "
+#~ "Games\" list. You can click on the game to enter it, and will then be asked "
+#~ "if you wish to kick the player, or allow them more time. If you do kickout "
+#~ "the player, they will keep their employees, but simply pass all of their "
+#~ "future turns. <BR /> If someone leaves the game, the host will gain "
+#~ "permanent rewind permissions."
 #~ msgstr ""
-#~ "如果有玩家的闲置的时间超过了游戏创建时设置的踢出时长，那么该游戏将在您"
-#~ "的“当前游戏”列表中突出显示为黄色。您可以点击进入游戏，并会被询问是否要踢出"
-#~ "玩家或允许他们使用更多时间。如果您踢出了该玩家，他们将保留员工，但会跳过未"
-#~ "来所有回合。<BR />如果有人离开游戏，主持人将获得他永久回退权限。"
+#~ "如果有玩家的闲置的时间超过了游戏创建时设置的踢出时长，那么该游戏将在您的“当前游戏”列表中突出显示为黄色。您可以点击进入游戏，并会被询问是否要踢出玩家或允许他们使用更多时间。如果您踢出了该玩家，他们将保留员工，但会跳过未来所有回合。<BR"
+#~ " />如果有人离开游戏，主持人将获得他永久回退权限。"
 
 #~ msgid "HOME"
 #~ msgstr "首页"

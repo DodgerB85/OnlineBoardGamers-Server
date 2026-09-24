@@ -4,7 +4,7 @@
     <td class="nameTDcurrent tdWithBox">
         {% if game_player.chatNotification %}
             <img class="startingOption" alt="Str Opt" width="50" height="50" src="{% static "Lobby/images/icon-chat-lobby.svg" %}"
-                 title="New Chat Message">
+                 title="{% translate "New Chat Message" %}">
         {% endif %}
 
         {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode=game.gameCode %}
@@ -13,16 +13,16 @@
         {% if game.gameDescription %} - <i>{{ game.gameDescription }}</i>{% endif %}
       {% if game.startingMap and game.gameCode == "FCM" %}
       <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/images/createMap.jpg" %}"
-      title="Click to View Map"
+      title="{% translate "Click to View Map" %}"
         data-map="{{game.startingMap}}" data-game="FCM">
         {% endif %}
         {% if game.startingMap and game.gameCode == "TGZ" %}
         <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/images/createMapTGZ.jpg" %}"
-        title="Click to View Map"
+        title="{% translate "Click to View Map" %}"
           data-map="{{game.startingMap}}" data-game="TGZ">
           {% endif %}
           {% if game.startingMap and game.gameCode == "AQY" %}
-          <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/images/createMapAQY.jpg" %}" title="Click to View Map" data-map="{{ game.startingMap }}" data-game="AQY">
+          <img class="startingOption startingMap" alt="Map" width="50" height="50" src="{% static "Lobby/images/createMapAQY.jpg" %}" title="{% translate "Click to View Map" %}" data-map="{{ game.startingMap }}" data-game="AQY">
         {% endif %}
       {% comment %}
         TODO implement this

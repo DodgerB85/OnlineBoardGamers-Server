@@ -27,32 +27,32 @@
                         </div>
                         <div class="favRestChoice">
                             <label for="rnbRad0"><img src="{% static 'RNB/images/transporters/transport_donkey_black.png' %}" width="100" height="100" alt="Black" /></label>
-                            <b>Black</b>
+                            <b>{% translate "Black" %}</b>
                             <input type="radio" id="rnbRad0" name="rnbColour" value="0" {% if colour == 0 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="rnbRad1"><img src="{% static 'RNB/images/transporters/transport_donkey_blue.png' %}" width="100" height="100" alt="Blue" /></label>
-                            <b>Blue</b>
+                            <b>{% translate "Blue" %}</b>
                             <input type="radio" id="rnbRad1" name="rnbColour" value="1" {% if colour == 1 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="rnbRad2"><img src="{% static 'RNB/images/transporters/transport_donkey_green.png' %}" width="100" height="100" alt="Green" /></label>
-                            <b>Green</b>
+                            <b>{% translate "Green" %}</b>
                             <input type="radio" id="rnbRad2" name="rnbColour" value="2" {% if colour == 2 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="rnbRad3"><img src="{% static 'RNB/images/transporters/transport_donkey_grey.png' %}" width="100" height="100" alt="Grey" /></label>
-                            <b>Grey</b>
+                            <b>{% translate "Grey" %}</b>
                             <input type="radio" id="rnbRad3" name="rnbColour" value="3" {% if colour == 3 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="rnbRad4"><img src="{% static 'RNB/images/transporters/transport_donkey_red.png' %}" width="100" height="100" alt="Red" /></label>
-                            <b>Red</b>
+                            <b>{% translate "Red" %}</b>
                             <input type="radio" id="rnbRad4" name="rnbColour" value="4" {% if colour == 4 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="rnbRad5"><img src="{% static 'RNB/images/transporters/transport_donkey_yellow.png' %}" width="100" height="100" alt="Yellow" /></label>
-                            <b>Yellow</b>
+                            <b>{% translate "Yellow" %}</b>
                             <input type="radio" id="rnbRad5" name="rnbColour" value="5" {% if colour == 5 %}checked{% endif %} />
                         </div>
                     </div>
@@ -62,22 +62,22 @@
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="form-help" style="flex-basis:100%;padding-left:0;">{% trans "This will be displayed below the map" %}</div>
                         <div class="favRestChoice">
-                            <b>None</b>
+                            <b>{% translate "None" %}</b>
                             <input type="radio" id="playerAid0" name="playerAid" value="0" {% if playerAid == 0 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="playerAid1"><img src="{% static 'Lobby/images/RNBprofile/playerAid_OG_icon.jpg' %}" width="230" height="126" alt="Original" /></label>
-                            <b>Original</b>
+                            <b>{% translate "Original" %}</b>
                             <input type="radio" id="playerAid1" name="playerAid" value="1" {% if playerAid == 1 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="playerAid2"><img src="{% static 'Lobby/images/RNBprofile/playerAid_colour_icon.jpg' %}" width="230" height="120" alt="Colour" /></label>
-                            <b>Colour</b>
+                            <b>{% translate "Colour" %}</b>
                             <input type="radio" id="playerAid2" name="playerAid" value="2" {% if playerAid == 2 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="playerAid3"><img src="{% static 'Lobby/images/RNBprofile/playerAid_colour_etc_icon.jpg' %}" width="230" height="175" alt="Colour &c" /></label>
-                            <b>Colour &amp;c</b>
+                            <b>{% translate "Colour &amp;c" %}</b>
                             <input type="radio" id="playerAid3" name="playerAid" value="3" {% if playerAid == 3 %}checked{% endif %} />
                         </div>
                     </div>
@@ -88,17 +88,17 @@
                         <div class="form-help" style="flex-basis:100%;padding-left:0;">{% trans "Enhance colours if you have visual difficulties" %}</div>
                         <div class="favRestChoice">
                             <label for="colourOverlay0"><img src="{% static 'RNB/help/colourOverlay_none.jpg' %}" width="189" height="120" alt="None" /></label>
-                            <b>None (Recommended)</b>
+                            <b>{% translate "None (Recommended)" %}</b>
                             <input type="radio" id="colourOverlay0" name="colourOverlay" value="0" {% if colourOverlay == 0 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="colourOverlay1"><img src="{% static 'RNB/help/colourOverlay_transparent.jpg' %}" width="189" height="120" alt="Transparent" /></label>
-                            <b>Transparent</b>
+                            <b>{% translate "Transparent" %}</b>
                             <input type="radio" id="colourOverlay1" name="colourOverlay" value="1" {% if colourOverlay == 1 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="colourOverlay2"><img src="{% static 'RNB/help/colourOverlay_full.jpg' %}" width="189" height="120" alt="Full" /></label>
-                            <b>Full</b>
+                            <b>{% translate "Full" %}</b>
                             <input type="radio" id="colourOverlay2" name="colourOverlay" value="2" {% if colourOverlay == 2 %}checked{% endif %} />
                         </div>
                     </div>

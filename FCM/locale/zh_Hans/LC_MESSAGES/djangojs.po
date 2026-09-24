@@ -26,15 +26,15 @@ msgstr "投降"
 msgid ""
 "You may not resign from a tournament game. Please carry on playing. <br/>If "
 "you must leave, you may prompt the tournament admin"
-msgstr ""
+msgstr "锦标赛对局不能认输。请继续游戏。<br/>若必须离开，可提醒锦标赛管理员"
 
 #: .\static\FCM\JS\controller.js:56
 msgid "Alert Tournament Admin"
-msgstr ""
+msgstr "提醒锦标赛管理员"
 
 #: .\static\FCM\JS\controller.js:56
 msgid "Keep playing"
-msgstr ""
+msgstr "继续游戏"
 
 #: .\static\FCM\JS\controller.js:60
 msgid "Are you sure you want to resign?"
@@ -59,7 +59,7 @@ msgstr "重置"
 
 #: .\static\FCM\JS\controller.js:81
 msgid "Auto-fill Structure"
-msgstr ""
+msgstr "自动填充组织"
 
 #: .\static\FCM\JS\controller.js:87
 msgid "Confirm"
@@ -78,9 +78,7 @@ msgstr "您可以派遣更多员工去工作。您确定吗？"
 msgid ""
 "You have not used all your producers. Make sure you click on each one in "
 "order to produce. Continue anyway?"
-msgstr ""
-"您没有使用所有可以制作食物的员工，请确保按顺序点击每一个可以制作的员工以进行"
-"制作。仍要继续吗？"
+msgstr "您没有使用所有可以制作食物的员工，请确保按顺序点击每一个可以制作的员工以进行制作。仍要继续吗？"
 
 #: .\static\FCM\JS\controller.js:173 .\static\FCM\JS\controller.js:182
 msgid "Yes, continue anyway"
@@ -91,27 +89,22 @@ msgid "No, restart production phase"
 msgstr "否，重置制作阶段"
 
 #: .\static\FCM\JS\controller.js:182
-#, fuzzy
 #| msgid ""
 #| "You have not used all your producers. Make sure you click on each one in "
 #| "order to produce. Continue anyway?"
 msgid "You have not used all your training points. Continue anyway?"
-msgstr ""
-"您没有使用所有可以制作食物的员工，请确保按顺序点击每一个可以制作的员工以进行"
-"制作。仍要继续吗？"
+msgstr "你未用完所有培训点。仍要继续吗？"
 
 #: .\static\FCM\JS\controller.js:182
-#, fuzzy
 #| msgid "Yes, continue anyway"
 msgid "No, continue training"
-msgstr "是的，继续"
+msgstr "不，继续培训"
 
 #: .\static\FCM\JS\controller.js:310
 msgid ""
 "<b>Expert Options</b>: If unsure leave on \"Choose Normally\"<BR/>Indicate "
 "your preference in turn order:"
-msgstr ""
-"<b>专家选项</b>：如果不确定，请保持“正常选择”。<BR/>选择您偏好的回合顺序："
+msgstr "<b>专家选项</b>：如果不确定，请保持“正常选择”。<BR/>选择您偏好的回合顺序："
 
 #: .\static\FCM\JS\controller.js:313
 msgid "Earliest possible"
@@ -134,9 +127,7 @@ msgstr "<b>专家选项</b>：如果不确定请选择“正常选择”"
 msgid ""
 "You <b>do not have enough money currently</b> to pay your salary. Do you "
 "wish to autopay everyone if you have enough after the dinnertime phase?"
-msgstr ""
-"您<b>目前没有足够的资金</b>支付薪水。如果晚餐时间过后您有足够的资金，是否希望"
-"自动支付所有员工的薪水？"
+msgstr "您<b>目前没有足够的资金</b>支付薪水。如果晚餐时间过后您有足够的资金，是否希望自动支付所有员工的薪水？"
 
 #: .\static\FCM\JS\controller.js:355
 msgid "Pay all salary if possible"
@@ -147,8 +138,7 @@ msgid ""
 "You have the <b>First Beer Sold Milestone</b> and <b>no Fridge</b>. Do you "
 "wish to autopay everyone with available food and then with money?"
 msgstr ""
-"您已经达成了<b>首个卖出啤酒里程碑</b>，且<b>没有冰箱</b>。您是否希望自动使用"
-"所有可用的食物支付薪水，然后再用现金支付剩余的薪水？"
+"您已经达成了<b>首个卖出啤酒里程碑</b>，且<b>没有冰箱</b>。您是否希望自动使用所有可用的食物支付薪水，然后再用现金支付剩余的薪水？"
 
 #: .\static\FCM\JS\controller.js:362
 msgid "Pay salary with as much food as possible and then money"
@@ -174,37 +164,34 @@ msgstr "不"
 
 #: .\static\FCM\JS\controller.js:474
 msgid "Expert Option"
-msgstr ""
+msgstr "专家选项"
 
 #: .\static\FCM\JS\controller.js:476
-#, fuzzy
 #| msgid "1 - Restructuring"
 msgid "Redo Restructuring"
-msgstr "1 - 重组结构"
+msgstr "重做重组"
 
 #: .\static\FCM\JS\controller.js:476
-#, fuzzy
 #| msgid "5 - Payday"
 msgid "Redo Payday"
-msgstr "5 - 发放薪水"
+msgstr "重做发薪日"
 
 #: .\static\FCM\JS\controller.js:497
-#, fuzzy
 #| msgid "Select a road to add to the map"
 msgid "Choose a module to add to the game"
-msgstr "选择要添加到地图的道路"
+msgstr "选择要添加到游戏的模块"
 
 #: .\static\FCM\JS\controller.js:497
 msgid "Total Modules: 6 for 2p, 6 for 3p, 4 for 4p, 5 for 5p, 6 for 6p"
-msgstr ""
+msgstr "模块总数：2人6个，3人6个，4人4个，5人5个，6人6个"
 
 #: .\static\FCM\JS\controller.js:501
 msgid "Add Module to Game and End Turn"
-msgstr ""
+msgstr "添加模块并结束回合"
 
 #: .\static\FCM\JS\controller.js:507
 msgid "Skip Module and End Turn"
-msgstr ""
+msgstr "跳过模块并结束回合"
 
 #: .\static\FCM\JS\controller.js:527
 msgid ""
@@ -213,53 +200,50 @@ msgid ""
 "<img src=\"/static/Lobby/email.png\" width=\"400px\" height=\"30px\">. "
 "Thanks!"
 msgstr ""
-"<b>欢迎来到《快餐连锁大亨》在线版！</b><BR/>如果您有任何建议、问题或评论，请"
-"通过<img src=\"/static/Lobby/email.png\" width=\"400px\" height=\"30px\">联系"
-"管理员。谢谢！"
+"<b>欢迎来到《快餐连锁大亨》在线版！</b><BR/>如果您有任何建议、问题或评论，请通过<img "
+"src=\"/static/Lobby/email.png\" width=\"400px\" height=\"30px\">联系管理员。谢谢！"
 
 #: .\static\FCM\JS\controller.js:529
 msgid ""
-"To place an item on the board, click any of the squares that are highlighted "
-"in red"
-msgstr ""
+"To place an item on the board, click any of the squares that are highlighted"
+" in red"
+msgstr "要在版图上放置物品，请点击任一红色高亮方格"
 
 #: .\static\FCM\JS\controller.js:529
 msgid ""
 "To rotate an item, use the arrows displayed next to the item just above the "
 "board"
-msgstr ""
+msgstr "要旋转物品，请使用版图上方物品旁显示的箭头"
 
 #: .\static\FCM\JS\controller.js:529
 msgid ""
 "To see any player's employees and current structure, click on their name in "
 "the black bar at the top of the screen"
-msgstr ""
+msgstr "要查看任何玩家的员工与当前组织，点击屏幕顶部黑条中的其名字"
 
 #: .\static\FCM\JS\controller.js:529
 msgid ""
-"To see the remaining employees, milestones, and other items, click \"Reserve"
-"\" in the menu at the top"
-msgstr ""
+"To see the remaining employees, milestones, and other items, click "
+"\"Reserve\" in the menu at the top"
+msgstr "要查看剩余员工、里程碑及其他物品，点击顶部菜单中的“储备”"
 
 #: .\static\FCM\JS\controller.js:529
 msgid ""
 "You will always have the option to reset the current phase / whole working "
 "day before you end your turn"
-msgstr ""
+msgstr "结束回合前，你始终可重置当前阶段/整个工作日"
 
 #: .\static\FCM\JS\controller.js:532
 msgid ""
 "Welcome to this practice game<BR/>If you wish to rewind your game, use the "
 "button in the top left<BR/>Each rewind will move the game back by one step"
-msgstr ""
-"欢迎来到练习模式的游戏<BR/>如果您希望使用回退功能，请使用左上角的按钮<BR/>每"
-"次使用都会将游戏回退一步"
+msgstr "欢迎来到练习模式的游戏<BR/>如果您希望使用回退功能，请使用左上角的按钮<BR/>每次使用都会将游戏回退一步"
 
 #: .\static\FCM\JS\controller.js:535
 msgid ""
 "Lower expectations! This is AI v 0.1 - It has some vague intelligence.<br/> "
 "Contact me if you're interested in helping develop an AI"
-msgstr ""
+msgstr "降低期望！这是 AI v 0.1——有一定模糊智能。<br/> 若有意协助开发 AI 请联系我们"
 
 #: .\static\FCM\JS\controller.js:539
 msgid "Choose your restaurant direction, and then its location on the board"
@@ -284,10 +268,9 @@ msgid "Are you sure you want to delay placing your restaurant?"
 msgstr "您确定要延迟放置您的餐厅吗？"
 
 #: .\static\FCM\JS\controller.js:591
-#, fuzzy
 #| msgid "Choose your reserve card"
 msgid "To save time, you may choose your reserve card early"
-msgstr "选择您的储备卡"
+msgstr "为节省时间，你可以提前选择储备卡"
 
 #: .\static\FCM\JS\controller.js:592
 msgid "Choose your reserve card"
@@ -332,9 +315,7 @@ msgstr "您的夜班经理允许每个人力资源专员工作两次"
 msgid ""
 "At least one base employee is no longer available. Keep recruiting points "
 "for the training phase if you wish to train an employee directly"
-msgstr ""
-"至少有一名基础员工不再可用。如果您希望直接培训已不再可用的员工，请保留雇佣点"
-"数以进行雇佣后培训"
+msgstr "至少有一名基础员工不再可用。如果您希望直接培训已不再可用的员工，请保留雇佣点数以进行雇佣后培训"
 
 #: .\static\FCM\JS\controller.js:992
 msgid "%(recruitingAmountLeft)s remaining point"
@@ -401,43 +382,35 @@ msgstr "培训："
 msgid ""
 "Training a Barista allows you to place/move a coffee shop with a range of 2 "
 "- Remaining: %(baristaCoffeeShops)s"
-msgstr ""
-"培训一名见习咖啡师将允许您放置/移动一个范围为2的咖啡厅——剩余："
-"%(baristaCoffeeShops)s 个"
+msgstr "培训一名见习咖啡师将允许您放置/移动一个范围为2的咖啡厅——剩余：%(baristaCoffeeShops)s 个"
 
 #: .\static\FCM\JS\controller.js:1325
 msgid ""
 "Training a Lead Barista from a Barista allows you to place/move a coffee "
 "shop with unlimited range - Remaining: %(leadBaristaCoffeeShopsFromB)s"
 msgstr ""
-"从一名咖啡师培训为一名首席咖啡师将允许您放置/移动一个咖啡厅（无距离限制）——剩"
-"余：%(leadBaristaCoffeeShopsFromB)s 个"
+"从一名咖啡师培训为一名首席咖啡师将允许您放置/移动一个咖啡厅（无距离限制）——剩余：%(leadBaristaCoffeeShopsFromB)s 个"
 
 #: .\static\FCM\JS\controller.js:1326
 msgid ""
-"Training a Lead Barista from a Trainee Barista allows you to <B>first place/"
-"move a coffee shop with range 2 (included above) and then another with "
-"unlimited range</b> - Remaining: %(leadBaristaCoffeeShopsFromTB)s"
+"Training a Lead Barista from a Trainee Barista allows you to <B>first "
+"place/move a coffee shop with range 2 (included above) and then another with"
+" unlimited range</b> - Remaining: %(leadBaristaCoffeeShopsFromTB)s"
 msgstr ""
-"从一名见习咖啡师培训为一名首席咖啡师将允许您<b>首先放置/移动一个范围为2（包括"
-"2）的咖啡厅，然后再放置/移动另一个无限范围的咖啡厅</b>——剩余："
-"%(leadBaristaCoffeeShopsFromTB)s 个"
+"从一名见习咖啡师培训为一名首席咖啡师将允许您<b>首先放置/移动一个范围为2（包括2）的咖啡厅，然后再放置/移动另一个无限范围的咖啡厅</b>——剩余：%(leadBaristaCoffeeShopsFromTB)s"
+" 个"
 
 #: .\static\FCM\JS\controller.js:1329
 msgid ""
 "<b>Place a coffee shop with unlimited range</b><BR/>There can only be 1 "
 "coffee shop per tile, and it must be next to a road"
-msgstr ""
-"<b>放置一个咖啡厅（无距离限制）</b><BR/>每个板块只能有一个咖啡厅，并且必须靠"
-"近道路"
+msgstr "<b>放置一个咖啡厅（无距离限制）</b><BR/>每个板块只能有一个咖啡厅，并且必须靠近道路"
 
 #: .\static\FCM\JS\controller.js:1331
 msgid ""
 "<b>Place a coffee shop with range 2</b><BR/>There can only be 1 coffee shop "
 "per tile, and it must be next to a road"
-msgstr ""
-"<b>在距离2以内放置一个咖啡厅</b><BR/>每个板块只能有一个咖啡厅，并且必须靠近道"
-"路"
+msgstr "<b>在距离2以内放置一个咖啡厅</b><BR/>每个板块只能有一个咖啡厅，并且必须靠近道路"
 
 #: .\static\FCM\JS\controller.js:1347 .\static\FCM\JS\controller.js:4012
 msgid "No more Coffee Shops. Select a placed Coffee Shop to move it"
@@ -468,8 +441,7 @@ msgstr "没有合适的营销板块了"
 msgid ""
 "There are no available campaigns. EIther there is no space for it on the "
 "board, or no mailboxes left"
-msgstr ""
-"没有可用的营销板块。可能是因为版图上没有空间，或是没有多余的邮箱营销板块了"
+msgstr "没有可用的营销板块。可能是因为版图上没有空间，或是没有多余的邮箱营销板块了"
 
 #: .\static\FCM\JS\controller.js:1519 .\static\FCM\JS\controller.js:3153
 #: .\static\FCM\JS\controller.js:3949
@@ -477,10 +449,9 @@ msgid "Never mind"
 msgstr "没关系"
 
 #: .\static\FCM\JS\controller.js:1542
-#, fuzzy
 #| msgid "First billboard"
 msgid "Place Giant Billboard"
-msgstr "首个广告牌"
+msgstr "放置巨型广告牌"
 
 #: .\static\FCM\JS\controller.js:1545
 msgid "Choose a marketing campaign for the Night Shift Manager"
@@ -492,27 +463,24 @@ msgstr "选择营销板块"
 
 #: .\static\FCM\JS\controller.js:1548
 msgid ""
-"Your Night Shift Manager allows your Marketing Trainee to market twice. Your "
-"trainee will be attached to the longer of the 2 campaigns"
-msgstr ""
-"您的夜班经理使您的营销实习生能够进行两次市场营销。您的营销实习生将附属于这两"
-"次营销活动中持续时间更长的那一个"
+"Your Night Shift Manager allows your Marketing Trainee to market twice. Your"
+" trainee will be attached to the longer of the 2 campaigns"
+msgstr "您的夜班经理使您的营销实习生能够进行两次市场营销。您的营销实习生将附属于这两次营销活动中持续时间更长的那一个"
 
 #: .\static\FCM\JS\controller.js:1571
 msgid "Skip the NSM marketing"
 msgstr "跳过夜班经理营销"
 
 #: .\static\FCM\JS\controller.js:1572
-#, fuzzy
 #| msgid "Place house or garden"
 msgid "Place Gourmet Guide"
-msgstr "放置房屋或花园"
+msgstr "放置美食指南"
 
 #: .\static\FCM\JS\controller.js:1589
-#, fuzzy
-#| msgid "Choose a mailbox campaign for your 'First New Restaurant' milestone"
+#| msgid ""
+#| "Choose a mailbox campaign for your 'First New Restaurant' milestone"
 msgid "Choose a mailbox campaign for the Campaign Manager Milestone"
-msgstr "为您的“首个放置新餐厅”里程碑选择一个邮箱营销板块"
+msgstr "为营销经理里程碑选择邮箱营销活动"
 
 #: .\static\FCM\JS\controller.js:1623
 msgid "Skip the Milestone Bonus"
@@ -523,19 +491,16 @@ msgid ""
 "Place a Highway Ramp to connect to the Rural Area<BR/>You can place it side "
 "on or end on to any edge of the board, as long as it connects to at least "
 "one road"
-msgstr ""
-"放置一条高速公路匝道来连接到乡村地区。<BR/>您可以将其横放或竖放到版图的任何边"
-"缘，只要它连接至少一条道路"
+msgstr "放置一条高速公路匝道来连接到乡村地区。<BR/>您可以将其横放或竖放到版图的任何边缘，只要它连接至少一条道路"
 
 #: .\static\FCM\JS\controller.js:2066
 msgid "Skip Freeway Placement"
-msgstr ""
+msgstr "跳过高速公路放置"
 
 #: .\static\FCM\JS\controller.js:2069
-#, fuzzy
 #| msgid "There are no more freeways left. Click the image to Continue"
 msgid "There are no more freeways left."
-msgstr "没有更多的高速公路匝道了"
+msgstr "没有更多高速公路了。"
 
 #: .\static\FCM\JS\controller.js:2207
 msgid "Select the Food / Drink producer"
@@ -549,11 +514,9 @@ msgstr "您的夜班经理可以让每个跑腿小弟和见习厨师工作两次
 
 #: .\static\FCM\JS\controller.js:2210
 msgid ""
-"Your Night Shift Manager allows each Barista Trainee, Errand Boy and Kitchen "
-"Trainee to work twice. They are displayed twice each below"
-msgstr ""
-"您的夜班经理让每个见习咖啡师、跑腿小弟和见习厨师工作两次。他们会在下面出现两"
-"次"
+"Your Night Shift Manager allows each Barista Trainee, Errand Boy and Kitchen"
+" Trainee to work twice. They are displayed twice each below"
+msgstr "您的夜班经理让每个见习咖啡师、跑腿小弟和见习厨师工作两次。他们会在下面出现两次"
 
 #: .\static\FCM\JS\controller.js:2288
 msgid "Select Drink to produce"
@@ -572,16 +535,13 @@ msgid "You can build new houses and gardens"
 msgstr "您可以建造新的房子和花园"
 
 #: .\static\FCM\JS\controller.js:2698
-#, fuzzy
 #| msgid ""
 #| "Select a park to add to the map<BR/>The lobbyist has a range of 2 but can "
 #| "also place parks next to any road that is within a range of 2"
 msgid ""
 "You can build a new road or park<BR>The lobbyist has a range of 2 but can "
 "also build next to any road that is within a range of 2"
-msgstr ""
-"选择一个公园添加到地图上。<BR/>提案人的范围为2，但也可以将公园放置在距离2以内"
-"的任何道路旁"
+msgstr "你可以建造新道路或公园<BR>提案人范围为 2，但也可在范围 2 内的任何道路旁建造"
 
 #: .\static\FCM\JS\controller.js:2704
 msgid "Unfortunately there are no more roads or parks available"
@@ -599,8 +559,8 @@ msgstr "由于首个使用提案人里程碑，您可以在游戏版图上添加
 
 #: .\static\FCM\JS\controller.js:3049
 msgid ""
-"Choose the tile and rotation you would like, and then add it to a completely "
-"free map edge"
+"Choose the tile and rotation you would like, and then add it to a completely"
+" free map edge"
 msgstr "选择您想要的板块并旋转，然后将其添加到地图边缘"
 
 #: .\static\FCM\JS\controller.js:3147
@@ -616,10 +576,9 @@ msgid "Select a Local or Regional manager"
 msgstr "选择区域或大区经理"
 
 #: .\static\FCM\JS\controller.js:3296
-#, fuzzy
 #| msgid "First restaurant"
 msgid "No more restaurants"
-msgstr "首个餐厅"
+msgstr "没有更多餐厅"
 
 #: .\static\FCM\JS\controller.js:3306
 msgid "Move an existing restaurant or place a new one"
@@ -662,16 +621,14 @@ msgid ""
 "everyone</p>If you wish, you <b>may</b> click on employees to fire them "
 "anyway"
 msgstr ""
-"<p style='color:#f00'>您无法支付所有员工的薪水！但是，您的<i>首个使用培训讲师"
-"</i>里程碑允许您保留所有员工</p>如果您愿意，您<b>可以</b>点击员工将他们解雇"
+"<p "
+"style='color:#f00'>您无法支付所有员工的薪水！但是，您的<i>首个使用培训讲师</i>里程碑允许您保留所有员工</p>如果您愿意，您<b>可以</b>点击员工将他们解雇"
 
 #: .\static\FCM\JS\controller.js:3487
 msgid ""
 "<p style='color:#f00'>You cannot pay for all of your employees - You must "
 "fire employees until you can pay for the remainder"
-msgstr ""
-"<p style='color:#f00'>您无法支付所有员工的薪水 - 您必须解雇员工，直到您能够支"
-"付剩余员工的薪水"
+msgstr "<p style='color:#f00'>您无法支付所有员工的薪水 - 您必须解雇员工，直到您能够支付剩余员工的薪水"
 
 #: .\static\FCM\JS\controller.js:3507
 msgid "Ok, thank you very much"
@@ -692,16 +649,17 @@ msgstr[0] "您需要支付 %(employeesToPayFor)s 位员工的薪水。"
 
 #: .\static\FCM\JS\controller.js:3607
 msgid "Choose the item you want to use:"
-msgid_plural "Choose the %(remainingEmployeesToPayFor)s items you want to use:"
+msgid_plural ""
+"Choose the %(remainingEmployeesToPayFor)s items you want to use:"
 msgstr[0] "请选择 %(remainingEmployeesToPayFor)s 个您想用来支付的物品："
 
 #: .\static\FCM\JS\controller.js:3622
 msgid ""
 "You are currently paying <b>$%(moneyUsed)s</b> and <b>%(itemsUsed)s</b> item"
 msgid_plural ""
-"You are currently paying <b>$%(moneyUsed)s</b> and <b>%(itemsUsed)s</b> items"
-msgstr[0] ""
-"您正在使用 <b>$%(moneyUsed)s</b> 和 <b>%(itemsUsed)s </b> 个物品进行支付"
+"You are currently paying <b>$%(moneyUsed)s</b> and <b>%(itemsUsed)s</b> "
+"items"
+msgstr[0] "您正在使用 <b>$%(moneyUsed)s</b> 和 <b>%(itemsUsed)s </b> 个物品进行支付"
 
 #: .\static\FCM\JS\controller.js:3655
 msgid "Pay the rest with $$$"
@@ -726,12 +684,13 @@ msgstr "存放其他物品"
 #: .\static\FCM\JS\controller.js:3709
 msgid "You may keep up to 10 items. Choose the item you want to throw away"
 msgid_plural ""
-"You may keep up to 10 items. Choose the %(remainingItems)s items you want to "
-"throw away"
-msgstr[0] "您最多可以保留10个物品。请选择您想要丢弃的 %(remainingItems) 物品"
+"You may keep up to 10 items. Choose the %(remainingItems)s items you want to"
+" throw away"
+msgstr[0] "您最多可以保留10个物品。请选择您想要丢弃的 %(remainingItems)s 物品"
 
 #: .\static\FCM\JS\controller.js:3745
-msgid "You may keep all remaining items, or click on items to throw them away:"
+msgid ""
+"You may keep all remaining items, or click on items to throw them away:"
 msgstr "您可以保留所有剩余的物品，或点击物品将它们扔掉："
 
 #: .\static\FCM\JS\controller.js:3862 .\static\FCM\JS\controller.js:3868
@@ -747,9 +706,7 @@ msgstr "警告：您还没有雇佣任何人"
 msgid ""
 "You have no salary to pay this turn. You can decide now to keep all of your "
 "employees in order to save time during the next phase"
-msgstr ""
-"这个阶段您没有薪资需要支付。您可以决定现在保留所有员工，以便在下一个阶段节省"
-"时间"
+msgstr "这个阶段您没有薪资需要支付。您可以决定现在保留所有员工，以便在下一个阶段节省时间"
 
 #: .\static\FCM\JS\controller.js:3880 .\static\FCM\JS\controller.js:3893
 msgid "No thanks, I would like to play the payday phase"
@@ -763,8 +720,7 @@ msgstr "是的，我不会解雇任何人，请跳过我的发放薪水阶段"
 msgid ""
 "You have <b>enough money</b> to keep all your employees. You can decide now "
 "to keep all of them in order to save time"
-msgstr ""
-"您有<b>足够的钱</b>来支付所有员工的薪水。您可以决定现在保留所有员工以节省时间"
+msgstr "您有<b>足够的钱</b>来支付所有员工的薪水。您可以决定现在保留所有员工以节省时间"
 
 #: .\static\FCM\JS\controller.js:3895
 msgid "Yes I won't fire anybody, please auto-pay my salaries"
@@ -783,16 +739,13 @@ msgid ""
 "<b>The \"First Coffee Sold\" Milestone allows you to place a coffee shop "
 "with unlimited range </b><BR/>There can only be 1 coffee shop per tile, and "
 "it must be next to a road"
-msgstr ""
-"<b>“首个卖出咖啡”里程碑允许您放置一个咖啡厅（无距离限制）</b><BR/>每个板块上"
-"只能有1家咖啡厅，并且必须靠近道路"
+msgstr "<b>“首个卖出咖啡”里程碑允许您放置一个咖啡厅（无距离限制）</b><BR/>每个板块上只能有1家咖啡厅，并且必须靠近道路"
 
 #: .\static\FCM\JS\controller.js:3998 .\static\FCM\JS\controller.js:4014
 msgid "Skip Coffee Milestone"
 msgstr "跳过咖啡里程碑"
 
 #: .\static\FCM\JS\controller.js:4001
-#, fuzzy
 #| msgid "Skip Coffee Milestone"
 msgid "Skip Coffee Milestone222"
 msgstr "跳过咖啡里程碑"
@@ -821,9 +774,7 @@ msgstr "西北"
 msgid ""
 "%(playerName)s chooses their starting restaurant at co-ordinates "
 "(%(Xcoord)s, %(Ycoord)s) facing %(direction)s"
-msgstr ""
-"%(playerName)s 选择了他们的起始餐厅坐标为（%(Xcoord)s，%(Ycoord)s），面"
-"向%(direction)s"
+msgstr "%(playerName)s 选择了他们的起始餐厅坐标为（%(Xcoord)s，%(Ycoord)s），面向%(direction)s"
 
 #: .\static\FCM\JS\history.js:155
 msgid "%(playerName)s chooses to delay their first restaurant"
@@ -874,10 +825,9 @@ msgid "%(playerName)s trains:"
 msgstr "%(playerName)s 培训："
 
 #: .\static\FCM\JS\history.js:225
-#, fuzzy
 #| msgid "from hiring"
 msgid "[From Hiring]"
-msgstr "从雇佣"
+msgstr "[来自雇佣]"
 
 #: .\static\FCM\JS\history.js:234
 msgid "%(playerName)s trains no one"
@@ -898,7 +848,6 @@ msgid "horizontally"
 msgstr "水平"
 
 #: .\static\FCM\JS\history.js:250
-#, fuzzy
 #| msgid ""
 #| "%(player)s started marketing campaign #%(marketingCampaignNumber)s with "
 #| "%(employee)s, %(orientation)s at co-ordinates (%(Xcoord)s, %(Ycoord)s), "
@@ -906,10 +855,7 @@ msgstr "水平"
 msgid ""
 "%(player)s started marketing campaign #%(marketingCampaignNumber)s with "
 "%(employee)s, advertising:"
-msgstr ""
-"%(player)s 开始了第 %(marketingCampaignNumber)s 号营销活动，员工为 "
-"%(employee)s，朝向 %(orientation)s，坐标为 (%(Xcoord)s, %(Ycoord)s)，营销内容"
-"为："
+msgstr "%(player)s 用 %(employee)s 发起第 %(marketingCampaignNumber)s 号营销活动，广告内容："
 
 #: .\static\FCM\JS\history.js:251
 msgid ""
@@ -917,9 +863,8 @@ msgid ""
 "%(employee)s, %(orientation)s at co-ordinates (%(Xcoord)s, %(Ycoord)s), "
 "advertising:"
 msgstr ""
-"%(player)s 开始了第 %(marketingCampaignNumber)s 号营销活动，员工为 "
-"%(employee)s，朝向 %(orientation)s，坐标为 (%(Xcoord)s, %(Ycoord)s)，营销内容"
-"为："
+"%(player)s 开始了第 %(marketingCampaignNumber)s 号营销活动，员工为 %(employee)s，朝向 "
+"%(orientation)s，坐标为 (%(Xcoord)s, %(Ycoord)s)，营销内容为："
 
 #: .\static\FCM\JS\history.js:256
 msgid "eternally"
@@ -950,48 +895,43 @@ msgid ""
 "%(player)s builds a garden for house #%(houseNumber)s %(orientation)s at co-"
 "ordinates (%(Xcoord)s, %(Ycoord)s)"
 msgstr ""
-"%(player)s 在坐标（%(Xcoord)s，%(Ycoord)s）为房屋 #%(houseNumber)s 建造了一个"
-"花园，朝向为 %(orientation)s。"
+"%(player)s 在坐标（%(Xcoord)s，%(Ycoord)s）为房屋 #%(houseNumber)s 建造了一个花园，朝向为 "
+"%(orientation)s。"
 
 #: .\static\FCM\JS\history.js:315
-#, fuzzy
 #| msgid ""
 #| "%(player)s builds house #%(houseNumber)s %(orientation)s at co-ordinates "
 #| "(%(Xcoord)s, %(Ycoord)s)"
 msgid ""
 "%(player)s builds a Freeway %(orientation)s at co-ordinates (%(Xcoord)s, "
 "%(Ycoord)s)"
-msgstr ""
-"%(player)s 在坐标 (%(Xcoord)s,%(Ycoord)s) 建造房屋 #%(houseNumber)s，朝向 "
-"%(orientation)s。"
+msgstr "%(player)s 在坐标 (%(Xcoord)s, %(Ycoord)s) 建造 %(orientation)s 高速公路"
 
 #: .\static\FCM\JS\history.js:330
 msgid ""
 "%(player)s builds a new restaurant at co-ordinates (%(Xcoord)s, %(Ycoord)s) "
 "facing %(orientation)s, opening next turn"
 msgstr ""
-"%(player)s 在坐标（%(Xcoord)s，%(Ycoord)s）处开设了一家新的餐厅，面向 "
-"%(orientation)s，下一回合开业"
+"%(player)s 在坐标（%(Xcoord)s，%(Ycoord)s）处开设了一家新的餐厅，面向 %(orientation)s，下一回合开业"
 
 #: .\static\FCM\JS\history.js:331
 msgid ""
 "%(player)s opens a new restaurant at co-ordinates (%(Xcoord)s, %(Ycoord)s) "
 "facing %(orientation)s"
-msgstr ""
-"%(player)s 在坐标（%(Xcoord)s，%(Ycoord)s）开了一家新餐厅，朝向 "
-"%(orientation)s"
+msgstr "%(player)s 在坐标（%(Xcoord)s，%(Ycoord)s）开了一家新餐厅，朝向 %(orientation)s"
 
 #: .\static\FCM\JS\history.js:352
 msgid ""
 "%(player)s moves a restaurant from co-ordinates (%(Xcoord)s, %(Ycoord)s) to "
 "co-ordinates (%(Xcoord2)s, %(Ycoord2)s) facing %(orientation)s"
 msgstr ""
-"%(player)s 将一家餐厅从坐标 (%(Xcoord)s, %(Ycoord)s) 移动到坐标 "
-"(%(Xcoord2)s, %(Ycoord2)s) 朝向 %(orientation)s"
+"%(player)s 将一家餐厅从坐标 (%(Xcoord)s, %(Ycoord)s) 移动到坐标 (%(Xcoord2)s, "
+"%(Ycoord2)s) 朝向 %(orientation)s"
 
 #: .\static\FCM\JS\history.js:358
 msgid ""
-"Dinner time: No sales occurred, either due to lack of demand or lack of items"
+"Dinner time: No sales occurred, either due to lack of demand or lack of "
+"items"
 msgstr "晚餐时间：没有销售，可能是由于缺乏需求或缺少物品"
 
 #: .\static\FCM\JS\history.js:361 .\static\FCM\JS\history.js:546
@@ -1038,14 +978,11 @@ msgstr "没有人能满足这些需求"
 
 #: .\static\FCM\JS\history.js:412
 msgid "House #%(houseNumber)s goes to %(player)s for $%(saleAmount)s"
-msgstr ""
-"房屋 #%(houseNumber)s 的顾客前往 %(player)s 餐厅就餐，消费了 $%(saleAmount)s"
+msgstr "房屋 #%(houseNumber)s 的顾客前往 %(player)s 餐厅就餐，消费了 $%(saleAmount)s"
 
 #: .\static\FCM\JS\history.js:415
 msgid "Apartment #%(apartmentNumber)s goes to %(player)s for $%(saleAmount)s"
-msgstr ""
-"公寓 #%(apartmentNumber)s 的顾客前往 %(player)s 餐厅就餐，消费了 $"
-"%(saleAmount)s"
+msgstr "公寓 #%(apartmentNumber)s 的顾客前往 %(player)s 餐厅就餐，消费了 $%(saleAmount)s"
 
 #: .\static\FCM\JS\history.js:418
 msgid "Rural Area goes to %(player)s for $%(saleAmount)s"
@@ -1064,7 +1001,8 @@ msgid "The base price is doubled, because the house has a garden."
 msgstr "基础价格翻倍，因为这栋房屋带花园。"
 
 #: .\static\FCM\JS\history.js:423 .\static\FCM\JS\history.js:475
-msgid "The base price is doubled, because the apartment is adjacent to a park."
+msgid ""
+"The base price is doubled, because the apartment is adjacent to a park."
 msgstr "基础价格翻倍，因为公寓毗邻公园。"
 
 #: .\static\FCM\JS\history.js:424 .\static\FCM\JS\history.js:476
@@ -1073,8 +1011,8 @@ msgstr "基础价格翻倍，因为房屋毗邻公园。"
 
 #: .\static\FCM\JS\history.js:425 .\static\FCM\JS\history.js:478
 msgid ""
-"The base price is tripled, because the house is adjacent to a park and has a "
-"garden."
+"The base price is tripled, because the house is adjacent to a park and has a"
+" garden."
 msgstr "基础价格翻了三倍，因为它毗邻公园并带有花园。"
 
 #: .\static\FCM\JS\history.js:427
@@ -1122,8 +1060,7 @@ msgstr "这里的高亮餐厅/咖啡厅表示什么？"
 msgid ""
 "Restaurants / coffee shops that are highlighted indicate where coffee was "
 "sold along the route taken by this house."
-msgstr ""
-"被高亮显示的餐厅/咖啡厅指示了沿着该房屋的顾客所走的路线出售咖啡的地点。"
+msgstr "被高亮显示的餐厅/咖啡厅指示了沿着该房屋的顾客所走的路线出售咖啡的地点。"
 
 #: .\static\FCM\JS\history.js:526
 msgid "What are the highlighed road squares?"
@@ -1131,12 +1068,10 @@ msgstr "高亮显示的道路方块是什么？"
 
 #: .\static\FCM\JS\history.js:527
 msgid ""
-"If there is only one valid coffee route from the house to the restaurant, it "
-"will be shown.<BR/>If there are multiple valid routes, the road squares "
+"If there is only one valid coffee route from the house to the restaurant, it"
+" will be shown.<BR/>If there are multiple valid routes, the road squares "
 "common to all valid coffee routes will be shown."
-msgstr ""
-"如果从房屋到餐厅只有一条有效的咖啡路线，它将会被显示。<BR/>如果有多条有效的路"
-"线，则会显示所有有效咖啡路线共有的道路方块。"
+msgstr "如果从房屋到餐厅只有一条有效的咖啡路线，它将会被显示。<BR/>如果有多条有效的路线，则会显示所有有效咖啡路线共有的道路方块。"
 
 #: .\static\FCM\JS\history.js:529
 msgid "I'm still confused?"
@@ -1147,8 +1082,7 @@ msgid ""
 "Don't worry; coffee can be quite complicated. Please read more help <a "
 "href='/FCM/coffeeHelp/' target='_blank'>here</a>."
 msgstr ""
-"不用担心，咖啡可能会很复杂。请在<a href='/FCM/coffeeHelp/' target='_blank'>这"
-"里</a>阅读更多帮助信息。"
+"不用担心，咖啡可能会很复杂。请在<a href='/FCM/coffeeHelp/' target='_blank'>这里</a>阅读更多帮助信息。"
 
 #: .\static\FCM\JS\history.js:551
 msgid "CFO bonus"
@@ -1190,16 +1124,15 @@ msgstr "大众营销 第%(round)s轮"
 #: .\static\FCM\JS\history.js:628
 msgid "#%(campaignNumber)s put %(item)s on house %(affectedHouses)s"
 msgid_plural "#%(campaignNumber)s put %(item)s on houses %(affectedHouses)s"
-msgstr[0] ""
-"第 %(campaignNumber)s 号营销板块将 %(item)s 放在房屋 %(affectedHouses)s 上"
+msgstr[0] "第 %(campaignNumber)s 号营销板块将 %(item)s 放在房屋 %(affectedHouses)s 上"
 
 #: .\static\FCM\JS\history.js:655
-msgid "#%(campaignNumber)s put 2x %(item)s on apartment %(affectedApartments)s"
+msgid ""
+"#%(campaignNumber)s put 2x %(item)s on apartment %(affectedApartments)s"
 msgid_plural ""
 "#%(campaignNumber)s put 2x %(item)s on apartments %(affectedApartments)s"
 msgstr[0] ""
-"第 #%(campaignNumber)s 个营销板块 在公寓 %(affectedApartments)s 上投放了2倍"
-"的 %(item)s"
+"第 #%(campaignNumber)s 个营销板块 在公寓 %(affectedApartments)s 上投放了2倍的 %(item)s"
 
 #: .\static\FCM\JS\history.js:666
 msgid "#Giant Billboard put 2x %(item)s on the Rural Area"
@@ -1242,10 +1175,9 @@ msgid "Bank:"
 msgstr "银行储备金："
 
 #: .\static\FCM\JS\history.js:760
-#, fuzzy
 #| msgid "%(playerName)s chooses to play %(position)s"
 msgid "%(playerName)s chooses: %(moduleChoiceImg)s %(moduleChoice)s"
-msgstr "%(playerName)s 选择 %(position)s 行动"
+msgstr "%(playerName)s 选择：%(moduleChoiceImg)s %(moduleChoice)s"
 
 #: .\static\FCM\JS\history.js:771
 msgid "Game rewound to here by %(rewindingPlayer)s"
@@ -1289,8 +1221,7 @@ msgid ""
 msgid_plural ""
 "earned $%(earnings)s for %(numberOfItems)s items on building %(building)s"
 msgstr[0] ""
-"获得了 $%(earnings)s 的收入，因为在建筑物 %(buildings)s 上推销了 "
-"%(numberOfItems)s 个物品"
+"获得了 $%(earnings)s 的收入，因为在建筑物 %(building)s 上推销了 %(numberOfItems)s 个物品"
 
 #: .\static\FCM\JS\history.js:860
 msgid ""
@@ -1298,8 +1229,7 @@ msgid ""
 msgid_plural ""
 "earned $%(earnings)s for %(numberOfItems)s items on buildings %(buildings)s"
 msgstr[0] ""
-"获得了 $%(earnings)s 的收益，因为在建筑物 %(buildings)s 上推销了 "
-"%(numberOfItems)s 个物品"
+"获得了 $%(earnings)s 的收益，因为在建筑物 %(buildings)s 上推销了 %(numberOfItems)s 个物品"
 
 #: .\static\FCM\JS\history.js:873
 msgid "Marketeers earnings"
@@ -1310,8 +1240,7 @@ msgid ""
 "%(player)s starts radio campaign #%(radioNumber)s at co-ordinates "
 "(%(Xcoord)s, %(Ycoord)s) due to the First Pizza Sold milestone"
 msgstr ""
-"%(player)s 因首个销售披萨里程碑，在坐标(%(Xcoord)s, %(Ycoord)s) 处开始 #"
-"%(radioNumber)s 广播营销"
+"%(player)s 因首个销售披萨里程碑，在坐标(%(Xcoord)s, %(Ycoord)s) 处开始 #%(radioNumber)s 广播营销"
 
 #: .\static\FCM\JS\history.js:892
 msgid ""
@@ -1335,8 +1264,7 @@ msgstr "L型公园"
 msgid ""
 "%(player)s uses a lobbyist to place %(parkDetails)s at co-ordinates "
 "(%(Xcoord)s, %(Ycoord)s)"
-msgstr ""
-"%(player)s 使用提案人在坐标 (%(Xcoord)s, %(Ycoord)s) 处放置 %(parkDetails)s。"
+msgstr "%(player)s 使用提案人在坐标 (%(Xcoord)s, %(Ycoord)s) 处放置 %(parkDetails)s。"
 
 #: .\static\FCM\JS\history.js:934
 msgid "2 length road"
@@ -1354,16 +1282,13 @@ msgstr "拐角道路"
 msgid ""
 "%(player)s uses a lobbyist to place a %(roadDetails)s at co-ordinates "
 "(%(Xcoord)s, %(Ycoord)s)"
-msgstr ""
-"%(player)s 使用提案人在坐标 (%(Xcoord)s, %(Ycoord)s) 处修建了 "
-"%(roadDetails)s。"
+msgstr "%(player)s 使用提案人在坐标 (%(Xcoord)s, %(Ycoord)s) 处修建了 %(roadDetails)s。"
 
 #: .\static\FCM\JS\history.js:959
-#, fuzzy
 #| msgid ""
 #| "%(player)s builds a coffee shop at co-ordinates (%(Xcoord)s, %(Ycoord)s)"
 msgid "%(player)s adds a new Tile at co-ordinates (%(Xcoord)s, %(Ycoord)s)"
-msgstr "%(player)s 在坐标（%(Xcoord)s，%(Ycoord)s）处建造了一家咖啡厅。"
+msgstr "%(player)s 在坐标 (%(Xcoord)s, %(Ycoord)s) 添加新板块"
 
 #: .\static\FCM\JS\history.js:975
 msgid ""
@@ -1377,44 +1302,38 @@ msgstr "%(player)s 从坐标（%(Xcoord)s，%(Ycoord)s）处拆除了一家咖�
 
 #: .\static\FCM\JS\history.js:1077 .\static\FCM\JS\view.js:375
 msgid "Hard Choices"
-msgstr ""
+msgstr "艰难的抉择"
 
 #: .\static\FCM\JS\history.js:1078 .\static\FCM\JS\view.js:376
 msgid "Ketchup Milestone"
 msgstr "已用里程碑"
 
 #: .\static\FCM\JS\history.js:1079 .\static\FCM\JS\view.js:377
-#, fuzzy
 #| msgid "Setup - Reserve Cards"
 msgid "New Reserve Cards"
-msgstr "设置 - 储备卡"
+msgstr "新的储备卡"
 
 #: .\static\FCM\JS\history.js:1080 .\static\FCM\JS\view.js:378
-#, fuzzy
 #| msgid "B-Movie Star"
 msgid "Movie Stars"
-msgstr "B-电影明星"
+msgstr "电影明星"
 
 #: .\static\FCM\JS\history.js:1081 .\static\FCM\JS\view.js:379
-#, fuzzy
 #| msgid "Mass Marketeer"
 msgid "Mass Marketeers"
-msgstr "大众推销员"
+msgstr "大众营销员"
 
 #: .\static\FCM\JS\history.js:1082 .\static\FCM\JS\view.js:380
-#, fuzzy
 #| msgid "Gourmet Food Critic"
 msgid "Gourmet Food Critics"
 msgstr "美食评论家"
 
 #: .\static\FCM\JS\history.js:1083 .\static\FCM\JS\view.js:381
-#, fuzzy
 #| msgid "Rural Marketeer"
 msgid "Rural Marketeers"
-msgstr "乡村推销员"
+msgstr "乡村营销员"
 
 #: .\static\FCM\JS\history.js:1084 .\static\FCM\JS\view.js:382
-#, fuzzy
 #| msgid "Lobbyist"
 msgid "Lobbyists"
 msgstr "提案人"
@@ -1426,7 +1345,7 @@ msgstr "夜班经理"
 
 #: .\static\FCM\JS\history.js:1086 .\static\FCM\JS\view.js:384
 msgid "Coffee"
-msgstr ""
+msgstr "咖啡"
 
 #: .\static\FCM\JS\history.js:1087 .\static\FCM\JS\view.js:385
 #: .\static\FCM\JS\view.js:5968
@@ -1434,26 +1353,23 @@ msgid "Fry Chef"
 msgstr "炸薯条主厨"
 
 #: .\static\FCM\JS\history.js:1088 .\static\FCM\JS\view.js:386
-#, fuzzy
 #| msgid "Store Kimchi"
 msgid "Kimchi"
-msgstr "存放泡菜"
+msgstr "泡菜"
 
 #: .\static\FCM\JS\history.js:1089 .\static\FCM\JS\view.js:387
-#, fuzzy
 #| msgid "Sushi Cook"
 msgid "Sushi"
-msgstr "寿司厨师"
+msgstr "寿司"
 
 #: .\static\FCM\JS\history.js:1090 .\static\FCM\JS\view.js:388
-#, fuzzy
 #| msgid "Noodle Cook"
 msgid "Noodles"
-msgstr "面条厨师"
+msgstr "面条"
 
 #: .\static\FCM\JS\history.js:1091 .\static\FCM\JS\view.js:389
 msgid "Skip Module"
-msgstr ""
+msgstr "跳过模块"
 
 #: .\static\FCM\JS\history.js:1166
 msgid "Show all history"
@@ -1513,10 +1429,9 @@ msgid "You cannot rewind a finished game"
 msgstr "您不能回退已完成的游戏"
 
 #: .\static\FCM\JS\io.js:911
-#, fuzzy
 #| msgid "You cannot rewind a finished game"
 msgid "You cannot rewind during replay"
-msgstr "您不能回退已完成的游戏"
+msgstr "回放期间无法回退"
 
 #: .\static\FCM\JS\io.js:947
 msgid "Game Rewound"
@@ -1555,26 +1470,25 @@ msgstr "请<a href='/register'>注册</a>或<a href='/login'>登录</a>以开始
 #: .\static\FCM\JS\main.js:249
 msgid ""
 "Player <b>%(playerToKickName)s</b> has used all the standard kickout time."
-msgstr ""
+msgstr "玩家 <b>%(playerToKickName)s</b> 已用完全部标准踢出时间。"
 
 #: .\static\FCM\JS\main.js:251
 msgid "Remaining Flex-Time:"
-msgstr ""
+msgstr "剩余弹性时间："
 
 #: .\static\FCM\JS\main.js:254
-msgid ""
-"For more information see <b><a href=\"/help/\" target=\"_blank\">Help</a></b>"
-msgstr ""
+msgid "For more information see <b><a href=\"/help/\" target=\"_blank\">Help</a></b>"
+msgstr "更多信息见 <b><a href=\"/help/\" target=\"_blank\">帮助</a></b>"
 
 #: .\static\FCM\JS\main.js:287
 msgid "As this is a tournament game, you cannot kick other player"
-msgstr ""
+msgstr "这是锦标赛对局，你无法踢出其他玩家"
 
 #: .\static\FCM\JS\main.js:290
 msgid ""
 "Please use the button below to alert the tournament admins, who will "
 "continue to make moves for this player"
-msgstr ""
+msgstr "请使用下方按钮提醒锦标赛管理员，他们将继续代该玩家走子"
 
 #: .\static\FCM\JS\main.js:294 .\static\FCM\JS\main.js:315
 msgid "Not now - allow more time"
@@ -1582,15 +1496,14 @@ msgstr "不是现在——再等一会"
 
 #: .\static\FCM\JS\main.js:295
 msgid "Alert Admins"
-msgstr ""
+msgstr "提醒管理员"
 
 #: .\static\FCM\JS\main.js:308
 msgid ""
-"Player <b>%(playerToKickName)s</b> has timed out<BR/>To kick out <b>"
-"%(playerToKickName)s</b> press Confirm Kickout"
+"Player <b>%(playerToKickName)s</b> has timed out<BR/>To kick out "
+"<b>%(playerToKickName)s</b> press Confirm Kickout"
 msgstr ""
-"玩家 <b>%(playerToKickName)s</b> 超时<BR/>要踢出 <b>%(playerToKickName)s</b> "
-"请按确认踢出"
+"玩家 <b>%(playerToKickName)s</b> 超时<BR/>要踢出 <b>%(playerToKickName)s</b> 请按确认踢出"
 
 #: .\static\FCM\JS\main.js:311
 msgid "All other players will be allowed to move again in this phase"
@@ -1604,8 +1517,7 @@ msgstr "游戏将进行到下一个玩家/阶段/回合"
 msgid ""
 "Otherwise you can allow <b>%(playerToKickName)s</b> more time - reload the "
 "page to initiate kickout again<BR/>"
-msgstr ""
-"否则您可以给<b>%(playerToKickName)s</b>更多时间 - 重新加载页面以再次发起踢出"
+msgstr "否则您可以给<b>%(playerToKickName)s</b>更多时间 - 重新加载页面以再次发起踢出"
 
 #: .\static\FCM\JS\main.js:316
 msgid "Confirm Kickout"
@@ -1627,35 +1539,31 @@ msgstr "您的bug和咖啡有关吗？"
 
 #: .\static\FCM\JS\main.js:499
 msgid ""
-"Please first read the <a href='/FCM/coffeeHelp/' target='_blank'>coffee help "
-"page</a>."
-msgstr ""
-"请首先阅读<a href='/FCM/coffeeHelp/' target='_blank'>咖啡帮助页面</a>。"
+"Please first read the <a href='/FCM/coffeeHelp/' target='_blank'>coffee help"
+" page</a>."
+msgstr "请首先阅读<a href='/FCM/coffeeHelp/' target='_blank'>咖啡帮助页面</a>。"
 
 #: .\static\FCM\JS\main.js:500
 msgid ""
 "Please also make sure you fully understand the coffee rules and example in "
-"the official rules, found <a href='https://www.boardgamehelpers.com/"
-"FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf' "
-"target='_blank'>here</a>"
+"the official rules, found <a "
+"href='https://www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf'"
+" target='_blank'>here</a>"
 msgstr ""
-"请确保您已经完全理解了官方规则中的咖啡规则和示例，您可以在<a href='https://"
-"www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web."
-"pdf' target='_blank'>这里</a>找到它们"
+"请确保您已经完全理解了官方规则中的咖啡规则和示例，您可以在<a "
+"href='https://www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf'"
+" target='_blank'>这里</a>找到它们"
 
 #: .\static\FCM\JS\main.js:501
 msgid ""
 "If you still think there is a bug, please check carefully:<ul><li>Which "
 "players had coffee and how much</li><li>If you think a route has not been "
-"considered, could it sell the same amount of coffee as the route chosen?</"
-"li><li>Remmeber that any part of the coffee route that could have multiple "
-"paths each selling the same amount of coffee (even if it's to the same "
-"player) will be skipped</li></ul>"
+"considered, could it sell the same amount of coffee as the route "
+"chosen?</li><li>Remmeber that any part of the coffee route that could have "
+"multiple paths each selling the same amount of coffee (even if it's to the "
+"same player) will be skipped</li></ul>"
 msgstr ""
-"如果您仍然认为存在错误，请仔细检查以下几点：<ul><li>哪些玩家拥有咖啡以及数量"
-"</li><li>如果您认为某条路径没有被考虑到，是否可以售出与所选路线相同数量的咖"
-"啡？</li><li>请记住，咖啡路线的任何部分，如果存在多条路径可以每条路径售出相同"
-"数量的咖啡（即使是卖给同一位玩家），都将被跳过</li></ul>"
+"如果您仍然认为存在错误，请仔细检查以下几点：<ul><li>哪些玩家拥有咖啡以及数量</li><li>如果您认为某条路径没有被考虑到，是否可以售出与所选路线相同数量的咖啡？</li><li>请记住，咖啡路线的任何部分，如果存在多条路径可以每条路径售出相同数量的咖啡（即使是卖给同一位玩家），都将被跳过</li></ul>"
 
 #: .\static\FCM\JS\main.js:502
 msgid "If you still think there is a problem, please submit a bug report"
@@ -1667,133 +1575,124 @@ msgstr "提交"
 
 #: .\static\FCM\JS\view.js:527
 msgid "Drafted Modules:"
-msgstr ""
+msgstr "已选模块："
 
 #: .\static\FCM\JS\view.js:540
-#, fuzzy
 #| msgid "Available Roads:"
 msgid "Available Modules:"
-msgstr "可用道路："
+msgstr "可用模块："
 
 #: .\static\FCM\JS\view.js:567
 msgid "Selected Module:"
-msgstr ""
+msgstr "已选模块："
 
 #: .\static\FCM\JS\view.js:574
 msgid "First to train / First to market good disappear after 2 turns"
-msgstr ""
+msgstr "首个培训 / 首个营销的物品 2 回合后消失"
 
 #: .\static\FCM\JS\view.js:574
-#, fuzzy
 #| msgid "First to Hire 3 people in 1 turn"
 msgid "First to hire 3 disappears after 3 turns"
-msgstr "首个在一回合内雇佣3名员工"
+msgstr "首个雇佣 3 名 3 回合后消失"
 
 #: .\static\FCM\JS\view.js:575
 msgid ""
 "Milestone: The first time someone else sells<BR /> your demand, gain a "
 "permanent -1 to distance"
-msgstr ""
+msgstr "里程碑：首次有他人售出你的需求时，获得永久 -1 距离"
 
 #: .\static\FCM\JS\view.js:576
 msgid "When the bank breaks, add $200 per player."
-msgstr ""
+msgstr "银行破产时，每位玩家加 $200。"
 
 #: .\static\FCM\JS\view.js:576
 msgid ""
 "The base price changes to whichever is <BR /> selected most, from $5, $10, "
 "or $20.<BR /> In a tie, $20 beats $10 and $5, and $5 beats $10"
-msgstr ""
+msgstr "基础价格变为被选最多的 $5、$10 或 $20。<BR /> 平局时 $20 胜 $10 和 $5，$5 胜 $10"
 
 #: .\static\FCM\JS\view.js:577
 msgid "Houses prioritise a restaurant with their demands + kimchi"
-msgstr ""
+msgstr "房屋优先选择提供其需求 + 泡菜的餐厅"
 
 #: .\static\FCM\JS\view.js:578
-msgid "Noodles count as any demand item, but only if no one else can supply it"
-msgstr ""
+msgid ""
+"Noodles count as any demand item, but only if no one else can supply it"
+msgstr "面条可算作任意需求物品，但仅当无人能供应时"
 
 #: .\static\FCM\JS\view.js:579
 msgid "Houses with gardens will try to replace all demand with Sushi"
-msgstr ""
+msgstr "有花园的房屋会尝试用寿司替换全部需求"
 
 #: .\static\FCM\JS\view.js:580
 msgid "Sell coffee along the route travelled by a house"
-msgstr ""
+msgstr "沿着顾客经过的路线卖咖啡"
 
 #: .\static\FCM\JS\view.js:581
-#, fuzzy
 #| msgid "Select a road to add to the map"
 msgid "Add new roads and parks to the map"
-msgstr "选择要添加到地图的道路"
+msgstr "向地图添加新道路和公园"
 
 #: .\static\FCM\JS\view.js:582
-#, fuzzy
 #| msgid "Bonus: +$10 per sale"
 msgid "Adds $10 per total sale"
-msgstr "奖励：卖出每单+$10"
+msgstr "每笔总销售额加 $10"
 
 #: .\static\FCM\JS\view.js:583
 msgid "Repeat marketing phase for each Mass Marketeer"
-msgstr ""
+msgstr "每位大众营销员重复一次营销阶段"
 
 #: .\static\FCM\JS\view.js:584
 msgid "Markets to the Rural Area - accessed by freeway ramps"
-msgstr ""
+msgstr "向乡村地区营销——经高速匝道进入"
 
 #: .\static\FCM\JS\view.js:585
-#, fuzzy
 #| msgid "Market to all houses with a garden. Max duration 3"
 msgid "Markets to all houses with a garden"
-msgstr "向所有带花园的房屋进行推销，最大持续时长为3回合"
+msgstr "向所有有花园的房屋营销"
 
 #: .\static\FCM\JS\view.js:586
 msgid "Decide turn order and break ties"
-msgstr ""
+msgstr "决定回合顺序并打破平局"
 
 #: .\static\FCM\JS\view.js:587
 msgid ""
 "Must be put in a management slot<BR /> All unsalaried employees work twice "
 "during 9-5"
-msgstr ""
+msgstr "必须放在管理位<BR /> 所有无薪员工在朝九晚五期间工作两次"
 
 #: .\static\FCM\JS\view.js:875
 msgid "Duration (turns):"
 msgstr "%(duration)s 个回合:"
 
 #: .\static\FCM\JS\view.js:1133
-#, fuzzy
 #| msgid "No more tiles"
 msgid "No More Roads"
-msgstr "没有更多的板块"
+msgstr "没有更多道路"
 
 #: .\static\FCM\JS\view.js:1164
-#, fuzzy
 #| msgid "No more tiles"
 msgid "No More Parks"
-msgstr "没有更多的板块"
+msgstr "没有更多公园"
 
 #: .\static\FCM\JS\view.js:1668
-#, fuzzy
 #| msgid "No more tiles"
 msgid "No More Houses"
-msgstr "没有更多的板块"
+msgstr "没有更多房屋"
 
 #: .\static\FCM\JS\view.js:1697
-#, fuzzy
 #| msgid "No more tiles"
 msgid "No More Gardens"
-msgstr "没有更多的板块"
+msgstr "没有更多花园"
 
 #: .\static\FCM\JS\view.js:1761
-#, fuzzy
 #| msgid "Select a house for the garden"
 msgid "Choose a house to add a garden"
-msgstr "选择一所房子新建花园"
+msgstr "选择一所房屋添加花园"
 
 #: .\static\FCM\JS\view.js:1783
 msgid "No suitable houses"
-msgstr ""
+msgstr "没有合适的房屋"
 
 #: .\static\FCM\JS\view.js:1828
 msgid "No Available Space"
@@ -1840,20 +1739,18 @@ msgid "Your bug report has been submitted"
 msgstr "您的错误报告已提交"
 
 #: .\static\FCM\JS\view.js:4649
-#, fuzzy
 #| msgid ""
 #| "<b>Welcome to Food Chain Magnate Online!</b><BR/>If you have any "
-#| "suggestions, questions or comments, then please do contact the webmaster "
-#| "at <img src=\"/static/Lobby/email.png\" width=\"400px\" height=\"30px\">. "
+#| "suggestions, questions or comments, then please do contact the webmaster at "
+#| "<img src=\"/static/Lobby/email.png\" width=\"400px\" height=\"30px\">. "
 #| "Thanks!"
 msgid ""
 "Welcome to Food Chain Magnate Online!=-NEWLINE-==-NEWLINE-=If you have any "
 "suggestions, questions or comments, then please do contact the webmaster at "
 "the email address in Contact (top right in the lobby). Thanks!"
 msgstr ""
-"<b>欢迎来到《快餐连锁大亨》在线版！</b><BR/>如果您有任何建议、问题或评论，请"
-"通过<img src=\"/static/Lobby/email.png\" width=\"400px\" height=\"30px\">联系"
-"管理员。谢谢！"
+"欢迎来到 Food Chain Magnate "
+"在线版！=-NEWLINE-==-NEWLINE-=如有建议、问题或意见，请通过大厅右上角“联系”中的邮箱联系站长。谢谢！"
 
 #: .\static\FCM\JS\view.js:4709
 msgid "More details"
@@ -2758,10 +2655,9 @@ msgid "7 - Coffee Selling Milestone"
 msgstr "7 - 咖啡里程碑"
 
 #: .\static\FCM\JS\view.js:6002
-#, fuzzy
 #| msgid "Setup - Restaurants"
 msgid "Setup - Draft Modules"
-msgstr "设置 - 餐厅"
+msgstr "设置 - 选抽模块"
 
 #: .\static\FCM\JS\websocket.js:37
 msgid "Connected"
@@ -2803,10 +2699,9 @@ msgstr "错误"
 #~ msgstr "选择一个方向"
 
 #~ msgid ""
-#~ "NOTE: The NSM will be attached to your first campaign as they must have "
-#~ "the shorter duration"
-#~ msgstr ""
-#~ "注意：夜班经理将附加到您的首个营销活动中，因此他们必须拥有较短的持续时间"
+#~ "NOTE: The NSM will be attached to your first campaign as they must have the "
+#~ "shorter duration"
+#~ msgstr "注意：夜班经理将附加到您的首个营销活动中，因此他们必须拥有较短的持续时间"
 
 #~ msgid "Top / bottom of map"
 #~ msgstr "地图的顶部/底部"

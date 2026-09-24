@@ -1,13 +1,15 @@
 {% extends "Lobby/layout.html" %}
 {% load static i18n compress %}
-{% block head %}
-  
+  {% block head %}
+
   <link href="{% static 'Lobby/CSS/tournaments.css' %}" rel="stylesheet">
 {% endblock head %}
 {% block body %}
   {% compress js %}
     <script src="{% static 'Lobby/common.js' %}"></script>
   {% endcompress %}
+  {% url 'helpTournaments' as help_url %}
+
   
     <div class="page">
     
@@ -25,13 +27,15 @@ If anything does happen then I will keep the tournament going if at all possible
         <div class="page-header">
           <div>
             <h1 class="page-title">{% translate "Tournaments" %}</h1>
-            <a class="button button-ghost button-sm" href="{% url 'MiniTournaments' %}">Mini Tournaments &#8594;</a>
+            <a class="button button-ghost button-sm" href="{% url 'MiniTournaments' %}">{% translate "Mini Tournaments" %} &#8594;</a>
           </div>
           <a class="button button-ghost" href="{% url 'index' %}">&#8592; {% translate "Lobby" %}</a>
         </div>
         <p style="font-size:14px; color:var(--color-muted); margin-bottom:16px;">
-          Regular tournaments run for FCM, Horseless Carriage, Bus, Indonesia, Antiquity, and The Great Zimbabwe.
-          See <a href="{% url 'helpTournaments' %}">Tournaments Help</a> or check Discord for upcoming events.
+          {% blocktranslate trimmed %}
+            Regular tournaments run for FCM, Horseless Carriage, Bus, Indonesia, Antiquity, and The Great Zimbabwe.
+            See <a href="{{ help_url }}">Tournaments Help</a> or check Discord for upcoming events.
+          {% endblocktranslate %}
         </p>
       
       
@@ -85,9 +89,10 @@ If anything does happen then I will keep the tournament going if at all possible
               </div>
             
         <p style="font-size:13px;color:var(--color-muted);margin-top:12px;">
-          
-          Old TGZ Tournaments were run externally. View them on the <a href="{% url 'TGZtournaments' %}"
-    >Old TGZ Tournaments Page</a>
+          {% url 'TGZtournaments' as tgz_url %}
+          {% blocktranslate trimmed %}
+            Old TGZ Tournaments were run externally. View them on the <a href="{{ tgz_url }}">Old TGZ Tournaments Page</a>
+          {% endblocktranslate %}
         </p>
         <br />
         <br />

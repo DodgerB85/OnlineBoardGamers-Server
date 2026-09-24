@@ -49,17 +49,17 @@
                         <div class="form-help" style="flex-basis:100%;padding-left:0;">{% trans "Choose the Original Map, Original Map with a coloured overlay (Hybrid), or Solid Colours" %}</div>
                         <div class="favRestChoice">
                             <label for="aqyMap0"><img src="{% static 'Lobby/images/AQYprofile/map_original.jpg' %}" width="230" height="152" alt="Original" /></label>
-                            <b>Original</b>
+                            <b>{% translate "Original" %}</b>
                             <input type="radio" id="aqyMap0" name="mapType" value="0" {% if mapType == 0 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="aqyMap05"><img src="{% static 'Lobby/images/AQYprofile/map_hybrid.jpg' %}" width="230" height="152" alt="Hybrid" /></label>
-                            <b>Hybrid</b>
+                            <b>{% translate "Hybrid" %}</b>
                             <input type="radio" id="aqyMap05" name="mapType" value="1" {% if mapType == 1 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="aqyMap1"><img src="{% static 'Lobby/images/AQYprofile/map_solid.jpg' %}" width="230" height="152" alt="Solid Colour" /></label>
-                            <b>Solid Colour</b>
+                            <b>{% translate "Solid Colour" %}</b>
                             <input type="radio" id="aqyMap1" name="mapType" value="2" {% if mapType == 2 %}checked{% endif %} />
                         </div>
                     </div>
@@ -70,12 +70,12 @@
                         <div class="form-help" style="flex-basis:100%;padding-left:0;">{% trans "Choose Original icons, or add a Solid Colour Border" %}</div>
                         <div class="favRestChoice">
                             <label for="aqyRes0"><img src="{% static 'Lobby/images/AQYprofile/res_original.jpg' %}" width="147" height="143" alt="Original" /></label>
-                            <b>Original</b>
+                            <b>{% translate "Original" %}</b>
                             <input type="radio" id="aqyRes0" name="resIcon" value="0" {% if resIcon == 0 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="aqyRes1"><img src="{% static 'Lobby/images/AQYprofile/res_border.jpg' %}" width="147" height="143" alt="Solid Colour" /></label>
-                            <b>Colour Border</b>
+                            <b>{% translate "Colour Border" %}</b>
                             <input type="radio" id="aqyRes1" name="resIcon" value="1" {% if resIcon == 1 %}checked{% endif %} />
                         </div>
                     </div>
@@ -86,12 +86,12 @@
                         <div class="form-help" style="flex-basis:100%;padding-left:0;">{% trans "Choose to have resources centered, or pulled towards the Worker" %}</div>
                         <div class="favRestChoice">
                             <label for="aqyPull0"><img src="{% static 'Lobby/images/AQYprofile/pull_none.jpg' %}" width="190" height="159" alt="Original" /></label>
-                            <b>Keep Centered</b>
+                            <b>{% translate "Keep Centered" %}</b>
                             <input type="radio" id="aqyPull0" name="pullResToMan" value="0" {% if pullResToMan == 0 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="aqyPull1"><img src="{% static 'Lobby/images/AQYprofile/pull_man.jpg' %}" width="190" height="159" alt="Solid Colour" /></label>
-                            <b>Pull Resources</b>
+                            <b>{% translate "Pull Resources" %}</b>
                             <input type="radio" id="aqyPull1" name="pullResToMan" value="1" {% if pullResToMan == 1 %}checked{% endif %} />
                         </div>
                     </div>
@@ -102,12 +102,12 @@
                         <div class="form-help" style="flex-basis:100%;padding-left:0;">{% trans "Choose to keep or remove the forest underneath a wood resource" %}</div>
                         <div class="favRestChoice">
                             <label for="aqyWood0"><img src="{% static 'Lobby/images/AQYprofile/forest_under_res.jpg' %}" width="124" height="125" alt="Keep Forest" /></label>
-                            <b>Keep Forest</b>
+                            <b>{% translate "Keep Forest" %}</b>
                             <input type="radio" id="aqyWood0" name="keepForestUnderWoodRes" value="1" {% if keepForestUnderWoodRes == 1 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="aqyWood1"><img src="{% static 'Lobby/images/AQYprofile/forest_under_res_none.jpg' %}" width="124" height="125" alt="Remove Forest" /></label>
-                            <b>Remove Forest</b>
+                            <b>{% translate "Remove Forest" %}</b>
                             <input type="radio" id="aqyWood1" name="keepForestUnderWoodRes" value="0" {% if keepForestUnderWoodRes == 0 %}checked{% endif %} />
                         </div>
                     </div>
@@ -118,12 +118,12 @@
                         <div class="form-help" style="flex-basis:100%;padding-left:0;">{% trans "Choose to show or hide pollution underneath a resource" %}</div>
                         <div class="favRestChoice">
                             <label for="aqyPollution0"><img src="{% static 'Lobby/images/AQYprofile/pollution_under_res.jpg' %}" width="124" height="124" alt="Show Pollution" /></label>
-                            <b>Show Pollution</b>
+                            <b>{% translate "Show Pollution" %}</b>
                             <input type="radio" id="aqyPollution0" name="showPollutionUnderRes" value="1" {% if showPollutionUnderRes == 1 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="aqyPollution1"><img src="{% static 'Lobby/images/AQYprofile/pollution_under_res_none.jpg' %}" width="124" height="124" alt="Hide Pollution" /></label>
-                            <b>Hide Pollution</b>
+                            <b>{% translate "Hide Pollution" %}</b>
                             <input type="radio" id="aqyPollution1" name="showPollutionUnderRes" value="0" {% if showPollutionUnderRes == 0 %}checked{% endif %} />
                         </div>
                     </div>
@@ -134,17 +134,17 @@
                         <div class="form-help" style="flex-basis:100%;padding-left:0;">{% trans "Choose to have houses arranged by Cost or Number" %}</div>
                         <div class="favRestChoice">
                             <label for="aqyHouse0"><img src="{% static 'Lobby/images/AQYprofile/houses_goods.jpg' %}" width="248" height="150" alt="By Cost" /></label>
-                            <b>Arrange By Cost</b>
+                            <b>{% translate "Arrange By Cost" %}</b>
                             <input type="radio" id="aqyHouse0" name="housesInNumOrder" value="0" {% if housesInNumOrder == 0 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="aqyHouse1"><img src="{% static 'Lobby/images/AQYprofile/houses_numbers.jpg' %}" width="243" height="212" alt="By Number" /></label>
-                            <b>Arrange By Number</b>
+                            <b>{% translate "Arrange By Number" %}</b>
                             <input type="radio" id="aqyHouse1" name="housesInNumOrder" value="1" {% if housesInNumOrder == 1 %}checked{% endif %} />
                         </div>
                         <div class="favRestChoice">
                             <label for="aqyHouse2"><img src="{% static 'Lobby/images/AQYprofile/houses_no_coords.jpg' %}" width="243" height="212" alt="Clean Cost" /></label>
-                            <b>Clean Cost Arrangement</b>
+                            <b>{% translate "Clean Cost Arrangement" %}</b>
                             <input type="radio" id="aqyHouse2" name="housesInNumOrder" value="2" {% if housesInNumOrder == 2 %}checked{% endif %} />
                         </div>
                     </div>

@@ -22,14 +22,14 @@
                     {% translate "If there is still a problem please email" %}
                     <img id="contactEmailImg"
                          src="{% static 'Lobby/email.png' %}"
-                         alt="Email Address"
+                         alt="{% translate "Email Address" %}"
                          width="400"
                          height="30">
                 </p>
                 <img src="{% static 'FCM/images/m_icon05.png' %}"
                      width="200"
                      height="200"
-                     alt="Error"
+                     alt="{% translate "Error" %}"
                      style="margin: 8px auto 20px; display: block;">
                 <a class="button button-primary" href="{% url 'index' %}">{% translate "Home" %}</a>
             </div>

@@ -28,20 +28,20 @@
           <div class="card" style="margin-bottom: 16px;">
             <div style="display: flex; flex-wrap: wrap; gap: 20px;">
               <div>
-                <div class="section-title">Creator</div>
+                <div class="section-title">{% translate "Creator" %}</div>
                 <div>{{ creator }}</div>
               </div>
               <div>
-                <div class="section-title">Format</div>
+                <div class="section-title">{% translate "Format" %}</div>
                 <div>{{ tournament.get_tournamentType_display }}</div>
               </div>
               <div>
-                <div class="section-title">Players</div>
-                <div>{{ tournament.maxTournamentPlayers }} total · {{ tournament.maxGamePlayers }} per game</div>
+                <div class="section-title">{% translate "Players" %}</div>
+                <div>{{ tournament.maxTournamentPlayers }} {% translate "total" %} · {{ tournament.maxGamePlayers }} {% translate "per game" %}</div>
               </div>
               {% if startingOptionsHTML != "" %}
                 <div>
-                  <div class="section-title">Options</div>
+                  <div class="section-title">{% translate "Options" %}</div>
                   <div>{{ startingOptionsHTML|safe }}</div>
                 </div>
               {% endif %}
@@ -101,12 +101,12 @@
                            id="understand_movement"
                            name="understand_movement"
                            required>
-                    <span>I understand I need to move several times a day</span>
+                    <span>{% translate "I understand I need to move several times a day" %}</span>
                   </label>
                   <br>
                   <input class="button button-primary"
                          type="submit"
-                         value="{% if isInvitedPlayer %}Accept Invite &amp; Join Mini Tournament{% else %}{% translate "Join Mini Tournament" %}{% endif %}" />
+                         value="{% if isInvitedPlayer %}{% translate "Accept Invite & Join Mini Tournament" %}{% else %}{% translate "Join Mini Tournament" %}{% endif %}" />
                 </form>
                 {% if isInvitedPlayer %}
                   <form action="{% url 'MiniTournament' Mini_Tournament_id=MT_ID %}"
@@ -225,14 +225,14 @@
                 <h3 style="margin-bottom: 10px;">
                   {{ round.roundTitle }}
                   {% if tournament.tournamentStatus == "IP" and round.gamesFinished < round.totalGames %}
-                    <small style="font-weight:normal;color:var(--color-muted);">({{ round.gamesFinished }}/{{ round.totalGames }} finished)</small>
+                    <small style="font-weight:normal;color:var(--color-muted);">({{ round.gamesFinished }}/{{ round.totalGames }} {% translate "finished" %})</small>
                   {% endif %}
                 </h3>
                 <table class="table">
                   <thead>
                     <tr>
-                      <th>Game</th>
-                      <th>Winner</th>
+                      <th>{% translate "Game" %}</th>
+                      <th>{% translate "Winner" %}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -256,7 +256,7 @@
                     {% if round.byesNames %}
                       <tr>
                         <td colspan="2" style="color: var(--color-muted);">
-                          Byes:
+                          {% translate "Byes" %}:
                           {% for player in round.byesNames %}
                             <a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>
                           {% endfor %}

@@ -19,17 +19,17 @@
                     <div>
                         <h1 class="page-title">{% translate "Mini Tournaments" %}</h1>
                         <a class="button button-primary button-sm"
-                           href="{% url 'newMiniTournaments' %}">Create Mini Tournament</a>
+                           href="{% url 'newMiniTournaments' %}">{% translate "Create Mini Tournament" %}</a>
                     </div>
                     <a class="button button-ghost" href="{% url 'AllTournaments' %}">&#8592; {% trans "Tournaments" %}</a>
                 </div>
                 <p style="font-size:14px; color:var(--color-muted); margin-bottom:16px;">
-                    Faster-paced tournaments with a smaller player pool. Anyone can create or join.
+                    {% translate "Faster-paced tournaments with a smaller player pool. Anyone can create or join." %}
                 </p>
             
             {% if available_MT %}
                 
-                    <div class="section-title" style="margin-top:8px;">Available</div>
+                    <div class="section-title" style="margin-top:8px;">{% translate "Available" %}</div>
                 
                 
                     <div class="card">
@@ -55,7 +55,7 @@
                 {% endif %}
                 {% if current_MT %}
                     
-                        <div class="section-title" style="margin-top:20px;">In Progress</div>
+                        <div class="section-title" style="margin-top:20px;">{% translate "In Progress" %}</div>
                     
                     
                         <div class="card">
@@ -81,7 +81,7 @@
                     {% endif %}
                     {% if finished_MT %}
                         
-                            <div class="section-title" style="margin-top:20px;">Finished</div>
+                            <div class="section-title" style="margin-top:20px;">{% translate "Finished" %}</div>
                         
                         
                             <div class="card">
