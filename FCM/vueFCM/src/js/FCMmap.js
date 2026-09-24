@@ -754,6 +754,9 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	const rwSet = new Set(getRoadworkIndexes())
 	const coffeeRoutes = []
 
+	// tiles of restaurant entrances
+	const destinationTiles = [...new Set(restaurants.map((r) => giveTileNumber(r)))]
+
 	// 1. Get initial road neighbors to start paths
 	const startNodes = neighbours(index)
 		.filter((n) => rf.ROADS.includes(store.mapData.coords[n]))
@@ -789,6 +792,9 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 			// 4. Validity Checks (Pruning) - only tile crossings and roadworks
 			// consume range; same-tile steps may continue even past it (old map.js)
 			if (nextRange > winningRange && (crossed || rwSet.has(next))) continue
+			// crossing toward a square whose min tile distance to any restaurant
+			// already blows the budget can never sell (old map.js:906)
+			if (crossed && currentRange + giveMinTileDistance(next, destinationTiles) > winningRange) continue
 
 			const isSecondVisit = path.includes(next)
 			if (isSecondVisit) {
@@ -813,6 +819,22 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	}
 
 	return coffeeRoutes
+}
+
+// Min tile distance from index's tile to any of the given tile numbers
+// (old map.js giveMinTileDistance). Vue tile numbers are y * rf.ssW + x
+// (see giveTileNumber), so the row stride is rf.ssW, not the legacy dense 17.
+function giveMinTileDistance(index, tiles) {
+	const baseTile = giveTileNumber(index)
+	let minDist = 99
+	for (const t of tiles) {
+		let tile1 = baseTile
+		let tile2 = t
+		if (tile1 > tile2) [tile1, tile2] = [tile2, tile1]
+		const dist = Math.floor(tile2 / rf.ssW) - Math.floor(tile1 / rf.ssW) + Math.abs((tile2 % rf.ssW) - (tile1 % rf.ssW))
+		if (dist < minDist) minDist = dist
+	}
+	return minDist
 }
 
 
