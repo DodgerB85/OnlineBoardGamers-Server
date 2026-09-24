@@ -294,6 +294,7 @@ export async function generateReplayData(spoilerFree = false) {
 		else if (action === rf.HIST_INCOME) replayIncome(i, playerIdx, param)
 		else if (action === rf.HIST_BANK_BREAK) replayBankBreak(i, playerIdx, param)
 		else if (action === rf.HIST_PRODUCE_KIMCHI) replayProduceKimchi(i, playerIdx, param)
+		else if (action === rf.HIST_END_GAME) replayEndGame(i, playerIdx, param)
 
 		store.replayData.push(funcs.simpleExportWholeFCMmodel())
 
@@ -531,6 +532,24 @@ export function replayBankBreak(historyIndex, playerIndex, param) {
 	const store = useModelStore()
 	// TODO change ceo slots?
 	store.bank += param[0]
+}
+
+export function replayEndGame(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	// Match the finished-game page: sort by money (tie: previous order), winner first
+	store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder].sort((a, b) => {
+		const moneyDiff = store.players[b].money - store.players[a].money
+		if (moneyDiff !== 0) return moneyDiff
+		return store.gameflow.fullTurnOrder.indexOf(a) - store.gameflow.fullTurnOrder.indexOf(b)
+	})
+	store.gameflow.fullTurnOrder = [...store.gameflow.turnOrder]
+	const winnerIdx = param[0]
+	if (typeof winnerIdx === "number" && winnerIdx > -1 && store.gameflow.fullTurnOrder[0] !== winnerIdx) {
+		const idxInOrder = store.gameflow.fullTurnOrder.indexOf(winnerIdx)
+		store.gameflow.fullTurnOrder.splice(idxInOrder, 1)
+		store.gameflow.fullTurnOrder.unshift(winnerIdx)
+		store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
+	}
 }
 
 export function replayAddCoffeeShop(historyIndex, playerIndex, param) {
