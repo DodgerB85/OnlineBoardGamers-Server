@@ -1478,6 +1478,13 @@ export async function castVote(topic, choice) {
 		if (data.voteChanged === true) {
 			if (topic === rf.REWIND_CONSENT_VOTE_TOPIC) {
 				personal.currentRewindConsent = choice
+			} else if (topic === rf.DELETE_VOTE_TOPIC) {
+				personal.votedToDelete = true
+				store.deleteVotesData = JSON.parse(data.votesData)
+				if (data.redirect_url) window.location.href = data.redirect_url
+			} else if (topic === rf.STATS_EXCLUDE_VOTE_TOPIC) {
+				personal.votedToExclude = true
+				store.statsExcludeVotesData = JSON.parse(data.votesData)
 			}
 		}
 	} catch (error) {

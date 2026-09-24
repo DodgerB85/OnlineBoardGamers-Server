@@ -107,6 +107,11 @@ export async function initGame() {
 		// Load kickout vote data
 		if (window.initData.kickoutVotesData) store.kickoutVotesData = typeof window.initData.kickoutVotesData === "string" ? JSON.parse(window.initData.kickoutVotesData) : window.initData.kickoutVotesData
 		store.kickoutVoteThreshold = window.initData.kickoutVoteThreshold
+		// Load delete / stats-exclude votes and whether I have already voted
+		store.deleteVotesData = typeof window.initData.deleteVotesData === "string" ? JSON.parse(window.initData.deleteVotesData) : window.initData.deleteVotesData || {}
+		store.statsExcludeVotesData = typeof window.initData.statsExcludeVotesData === "string" ? JSON.parse(window.initData.statsExcludeVotesData) : window.initData.statsExcludeVotesData || {}
+		personal.votedToDelete = store.deleteVotesData[personal.name] || false
+		personal.votedToExclude = store.statsExcludeVotesData[personal.name] || false
 		personal.notes = funcs.htmlUnescape(window.initData.notes)
 
 		if (window.initData.chatNotification) store.viewSettings.showChat = true

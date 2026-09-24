@@ -44,6 +44,8 @@ export const usePersonalStore = defineStore("personal", () => {
 	var preferredColour = -1
 	var moveDataRaw = ""
 	var currentRewindConsent = 0
+	var votedToExclude = false
+	var votedToDelete = false
 
 
 	function canPlay() {
@@ -145,6 +147,8 @@ export const usePersonalStore = defineStore("personal", () => {
 		preferredColour,
 		moveDataRaw,
 		currentRewindConsent,
+		votedToExclude,
+		votedToDelete,
 		getCorrectedColourHexForRestoBorder,
 	}
 })
