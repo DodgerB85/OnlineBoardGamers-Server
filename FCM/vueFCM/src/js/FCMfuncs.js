@@ -981,7 +981,11 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	} else {
 		store.coffeeShopMSplayers.splice(0)
 		store.firstPizzas.splice(0)
-		store.reserveCards.splice(0)
+		// reserveCards aren't exported for game-over saves - rebuild from history
+		store.reserveCards = Array.from({ length: store.players.length }, () => -1)
+		for (const h of store.history) {
+			if (h[0] === rf.HIST_CHOOSE_RESERVE_CARD && h[1] >= 0 && h[1] < store.reserveCards.length) store.reserveCards[h[1]] = h[3][0]
+		}
 		// Other unstored vars
 	}
 
