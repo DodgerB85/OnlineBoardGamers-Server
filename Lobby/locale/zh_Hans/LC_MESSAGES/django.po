@@ -10799,15 +10799,17 @@ msgid ""
 msgstr "拾取货物时同理，若货物可驳运到你的位置拾取，会高亮以便直接拾取。"
 
 #: .\RNB\templates\RNB\RNBhelp.html:143
-msgid "You may also \\"
-msgstr "你也可以 \\"
+msgid ""
+"You may also \"steal\" goods direcly from your OWN transporters, as a "
+"shortcut to dropping a good on the tile and then picking it up again"
+msgstr "你也可以直接从你自己的运输单位上“偷取”货物，这样比先在地块上放下货物再捡起来更省事。"
 
 #: .\RNB\templates\RNB\RNBhelp.html:146
 msgid ""
 "You can only unload a transporter at the start of the Movement Phase. "
 "However, the game will allow you to drop a transporter that has been picked "
-"up but not moved, as that is the equivalent of just \\"
-msgstr "你只能在移动阶段开始时卸载运输单位。不过，游戏允许放下已拾取但未移动的运输单位，因为这等同于只放下货物。"
+"up but not moved, as that is the equivalent of just \"undoing\" the action."
+msgstr "你只能在移动阶段开始时卸下运输单位。不过，若你已拾取运输单位但尚未移动，游戏仍允许你放下它，因为这等同于只是“撤销”该操作。"
 
 #: .\RNB\templates\RNB\RNBhelp.html:149
 msgid ""
@@ -11214,8 +11216,10 @@ msgid "How Can I Replay the Game / Copy to a New Game?"
 msgstr "如何回放游戏 / 复制到新游戏？"
 
 #: .\TGZ\templates\TGZ\TGZhelp.html:104
-msgid "Select \\"
-msgstr "选择 \\"
+msgid ""
+"Select \"Replay\" from the top menu to go through a \"live\" replay of the "
+"game at any point."
+msgstr "在顶部菜单选择“Replay”，即可随时进行“实时”回放。"
 
 #: .\TGZ\templates\TGZ\TGZhelp.html:106
 msgid ""
@@ -11224,8 +11228,9 @@ msgid ""
 msgstr "你可以使用屏幕上的箭头，或键盘左/右方向键在游戏中前后步进。"
 
 #: .\TGZ\templates\TGZ\TGZhelp.html:108
-msgid "You can also select any entry in \\"
-msgstr "你也可以在 \\ 中选择任意条目"
+msgid ""
+"You can also select any entry in \"History\" to jump to that point in time."
+msgstr "你也可以在“History”中选择任意条目，跳转到该时间点。"
 
 #: .\TGZ\templates\TGZ\TGZhelp.html:110
 msgid ""
@@ -11430,8 +11435,8 @@ msgstr "你按上述方式获得胜利点数，成绩格式为 VP / VR。"
 #: .\TGZ\templates\TGZ\TGZhelp.html:267
 msgid ""
 "When your VP equal or exceed your VR, you can win the game. This is checked "
-"during the \\"
-msgstr "当你的 VP 等于或超过 VR 时即可获胜。此检查在 \\ 阶段进行"
+"during the \"Let Us Compare Mythologies\" phase."
+msgstr "当你的 VP 等于或超过 VR 时，你就能赢得比赛。这会在“Let Us Compare Mythologies”阶段进行检查。"
 
 #: .\TGZ\templates\TGZ\TGZhelp.html:270
 msgid ""
@@ -11481,6 +11486,10 @@ msgstr "只要无人超过 VR，你可以在行动阶段认输。"
 #: .\TGZ\templates\TGZ\TGZhelp.html:299
 msgid "Examples of Play"
 msgstr "对局示例"
+
+#: .\TGZ\templates\TGZ\TGZhelp.html:301
+msgid "The following examples of play are from TGZ Tournament Games"
+msgstr "以下对局示例来自 TGZ 锦标赛"
 
 #: .\TGZ\templates\TGZ\TGZhelp.html:363
 msgid "For more game analysis videos see"
