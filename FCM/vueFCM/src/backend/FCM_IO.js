@@ -449,6 +449,9 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 
 	// You always want to save a rewind, even at the END of a pointless move
 	// But if it is pointless, you want to delete the PREVIOUS rewind point
+	// Never save a rewind point while FcmBot is the active player; loading it after a kick would strand the bot as current. ponytail: whole-turnOrder scan if multi-bot simul needs finer control.
+	if (saveRewind && store.gameflow.turnOrder.length > 0 && store.players[store.gameflow.turnOrder[0]].displayName === rf.BOT_NAME) saveRewind = false
+
 	let postData = {
 		action: "saveNormal",
 		latestUpdate: personal.latestUpdate,
