@@ -26,6 +26,7 @@ export default {
 		"reserveEarly": "选择您的储备卡",
 		"reserveEarlyNote": "所有餐厅放置完毕后，您仍然可以选择储备卡",
 		"returnToBeach": "回到休假",
+		"autoFillStructure": "自动填充结构",
 		"chooseSpaceForHouse": "选择房屋 #{houseNumber} 板块上的一个空地",
 		"noSpaceForPizzaRadio": "房屋 #{houseNumber} 周围没有空间放您的披萨广播了",
 		"skipCoffeeMilestone": "跳过咖啡里程碑",
