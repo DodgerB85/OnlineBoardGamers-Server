@@ -1742,14 +1742,15 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 	const store = useModelStore()
 	const histoIncome = []
 	store.players.forEach((p, playerIndex) => {
-		let total = earnings[playerIndex] + (store.startingOptions.coffee ? coffeeEarnings[playerIndex] : 0)
+		const salesIncome = earnings[playerIndex] + (store.startingOptions.coffee ? coffeeEarnings[playerIndex] : 0)
+		let total = salesIncome
 		const waitressVal = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS) ? 5 : 3
 
 		const waitressInc = plyr.numberOfWaitress(playerIndex) * waitressVal
 		const musicianInc = plyr.numberOfMusicians(playerIndex) * 15
 		total += waitressInc + musicianInc
 
-		const hI = [earnings[playerIndex], store.startingOptions.jazzMusicians ? [plyr.numberOfWaitress(playerIndex), plyr.numberOfMusicians(playerIndex)] : plyr.numberOfWaitress(playerIndex)]
+		const hI = [salesIncome, store.startingOptions.jazzMusicians ? [plyr.numberOfWaitress(playerIndex), plyr.numberOfMusicians(playerIndex)] : plyr.numberOfWaitress(playerIndex)]
 
 		if (p.employees.includes(rf.CFO) || plyr.hasMilestone(playerIndex, rf.FIRST_100_DOL)) {
 			const supplement = Math.ceil(total / 2)
