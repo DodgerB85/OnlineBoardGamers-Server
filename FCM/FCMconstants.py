@@ -61,6 +61,9 @@ SO_SANDBOX_MODE = 103
 SO_RANDOM_MODULES = 200
 SO_RANDOM_MODULES_OLD_MS = 201
 SO_RANDOM_MODULES_NEW_MS = 202
+# Marker only: add Chinese expansion modules to the random pool at startGame.
+# Not shown as a starting-option icon.
+SO_RANDOM_MODULES_CHINESE = 203
 SO_DRAFT_MODULES = 205
 SO_MIN_RANDOM_MODULES = 210
 SO_MAX_RANDOM_MODULES = 211

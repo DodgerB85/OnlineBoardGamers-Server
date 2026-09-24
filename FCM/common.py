@@ -49,12 +49,8 @@ def buildFCMstartingOptions(post_data):
             maxStr = f"{rfFCM.SO_MAX_RANDOM_MODULES}{max_modules}"
             optionsArr.extend([int(minStr), int(maxStr)])
             if "includeChineseExpansion" in post_data:
-                optionsArr.extend([
-                    rfFCM.SO_JAZZ_MUSICIANS,
-                    rfFCM.SO_DUMPLINGS,
-                    rfFCM.SO_DELIVERY_DRIVERS,
-                    rfFCM.SO_HAWKERS
-                ])
+                # Marker only — actual Chinese modules are rolled in startGame
+                optionsArr.append(rfFCM.SO_RANDOM_MODULES_CHINESE)
         if "draftModules" in post_data:
             if post_data.get("draft_MS") == "302":
                 optionsArr.append(rfFCM.SO_NEW_MS)
@@ -261,19 +257,10 @@ def create_fcm_game(
         starting_options = buildFCMstartingOptions(
             request.POST
         )  # Use the extracted function
-        # Now exclude stats if any china expansion is in starting options
+        # Exclude stats if Chinese expansion modules are always enabled
+        # (picked individually, not via the random pool). Random-pool Chinese
+        # modules are decided in FCMpresenter.startGame after the roll.
         if any(
-            x in starting_options
-            for x in [
-                rfFCM.SO_JAZZ_MUSICIANS,
-                rfFCM.SO_DUMPLINGS,
-                rfFCM.SO_DELIVERY_DRIVERS,
-                rfFCM.SO_HAWKERS,
-            ]
-        ):
-            stats_excluded_game = True
-        # Also exclude stats if includeChineseExpansion is in the random pool
-        if rfFCM.SO_RANDOM_MODULES in starting_options and any(
             x in starting_options
             for x in [
                 rfFCM.SO_JAZZ_MUSICIANS,

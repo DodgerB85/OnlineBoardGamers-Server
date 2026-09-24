@@ -1850,6 +1850,26 @@ class FCMpresenter(GamePresenter):
                 rfFCM.SO_MOVIE_STARS,
                 rfFCM.SO_NIGHT_SHIFT,
             ]
+            # Chinese expansion: create-time only writes the pool marker (203).
+            # Legacy games may already have the four module flags pre-written —
+            # strip those too and treat them as pool candidates either way.
+            chineseFlags = [
+                rfFCM.SO_JAZZ_MUSICIANS,
+                rfFCM.SO_DUMPLINGS,
+                rfFCM.SO_DELIVERY_DRIVERS,
+                rfFCM.SO_HAWKERS,
+            ]
+            chineseInPool = (
+                rfFCM.SO_RANDOM_MODULES_CHINESE in starting_options
+                or any(x in starting_options for x in chineseFlags)
+            )
+            starting_options = [
+                x
+                for x in starting_options
+                if x != rfFCM.SO_RANDOM_MODULES_CHINESE and x not in chineseFlags
+            ]
+            if chineseInPool:
+                availableModules.extend(chineseFlags)
             # Add hard choices only with original MS
             if rfFCM.SO_NEW_MS not in starting_options:
                 availableModules.append(rfFCM.SO_HARD_CHOICES)
@@ -1881,7 +1901,9 @@ class FCMpresenter(GamePresenter):
                 chosenDistOption = distOptions[currentIndex]
                 if chosenDistOption > 0:
                     selectedModules.append(chosenDistOption)
-            starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
+            # Only exclude stats if a Chinese module actually made the roll
+            if chineseInPool and any(x in selectedModules for x in chineseFlags):
+                self.gameObj.statsExcludedGame = True
             starting_options.extend(selectedModules)
             self.gameObj.startingOptions = json.dumps(starting_options, separators=(",", ":"))
             # self.startingOptions = (
