@@ -1,28 +1,16 @@
 /**
- * Regression tests for getCoffeeRoute's maximal-route filter (FCMmodel.js).
+ * getCoffeeRoute's maximal-route filter (FCMmodel.js) used to sort routes by
+ * raw array length and use "equal length" as its duplicate tie-break. The
+ * DFS allows revisiting a square once, so identical square coverage can
+ * come at different raw lengths - two such routes would each see the other
+ * as a superset and eliminate each other, wiping out an entire coverage
+ * family (real sale included) even when it was the only maximal one.
  *
- * This isn't just a perf pass. The prior implementation sorted routes by RAW
- * array length and used "equal raw length" as its duplicate tie-break. That
- * key is invalid: getCoffeeRoutesFromBldgSquare's DFS allows revisiting a
- * square once, so the exact same set of squares can be found via routes of
- * different raw lengths (padded with harmless backtracking). Two routes
- * covering identical squares but with different lengths would each see the
- * other as a "superset" and eliminate each other - and with 3+ length
- * variants of the same coverage, ALL of them can wipe each other out, even
- * when that coverage was the only maximal one. Result: zero surviving
- * routes where a real sale existed.
- *
- * Verified against real games from ~/personal/FCM's replay corpus (real
- * finished coffee+lobbyist games, legacy's own two-pass filter as the
- * oracle - it dedupes by DFS emission order, never by length, so it doesn't
- * have this bug): across 2,016 real captured cases with at least one route,
- * the OLD filter matched legacy on only 1,289 (64%) - and 513 of those
- * (25.5% of all cases) were the zero-sale failure mode: old filter said 0
- * survivors where legacy found a real sale. The fixed filter (dedupe by
- * square-SET signature first, keeping the earliest-found route per set -
- * same preference legacy's emission-order dedupe gives - then filter
- * maximality with no tie-break needed, since exact-set duplicates are
- * already gone) matched legacy on all 2,016/2,016.
+ * Against 2,016 real captured cases (legacy's position-based dedupe as the
+ * oracle - it never sorts by length, so it doesn't have this bug), the old
+ * filter matched legacy on 64% (25.5% were the zero-sale failure mode). The
+ * fix - dedupe by square-set signature first, then filter maximality with
+ * no tie-break needed - matches 2,016/2,016.
  */
 import { describe, it, expect } from "vitest"
 import fs from "node:fs"

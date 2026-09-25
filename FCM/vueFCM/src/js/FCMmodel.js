@@ -925,20 +925,14 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 		possibleRoutes.push(...map.getCoffeeRoutesFromBldgSquare(space, restaurantSquares, winningRange))
 	}
 
-	// The DFS may reach the exact same set of squares via routes of different
-	// RAW length (it allows revisiting a square once, so the same coverage
-	// can come padded with different amounts of harmless backtracking - see
-	// getCoffeeRoutesFromBldgSquare). Raw length is therefore not a valid
-	// "these are the same route" key: two routes covering identical squares
-	// but with different lengths would each see the other as a superset and
-	// eliminate each other, and with 3+ length-variants of the same coverage
-	// this can wipe out every route sharing that coverage, including cases
-	// where it was the ONLY maximal coverage - dropping a real sale to zero.
-	// Legacy avoids this because it never sorts/compares by length at all; it
-	// dedupes by DFS emission order (model.js:1274-1306). Reproduce that:
-	// collapse to one representative per distinct square-set (earliest found,
-	// same preference as legacy's position-based dedup) before ranking by
-	// size, so no two survivors of the dedup pass can ever be equal-sized.
+	// The DFS may reach the same set of squares via routes of different RAW
+	// length (it allows revisiting a square once - see
+	// getCoffeeRoutesFromBldgSquare), so raw length is not a valid "same
+	// route" key: two routes with identical squares but different lengths
+	// would each see the other as a superset and eliminate each other.
+	// Legacy avoids this by deduping on DFS emission order instead of length
+	// (model.js:1274-1306); reproduce that by collapsing to one
+	// earliest-found representative per distinct square-set first.
 	const bySignature = new Map()
 	for (const route of possibleRoutes) {
 		const sig = [...new Set(route)].sort((a, b) => a - b).join(",")
@@ -946,13 +940,10 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 	}
 	const dedupedRoutes = [...bySignature.values()]
 
-	// Now keep only maximal routes: drop any whose squares are a subset of
-	// another's. No tie-break is needed - exact-coverage duplicates were
-	// already collapsed above, so two distinct survivors can never be subsets
-	// of each other (that would make them equal, contradicting distinctness).
-	// Set membership turns each "is route ⊆ other" check from O(L)
-	// (Array.includes) into O(1) per element - this loop is O(R²), so it
-	// matters once R gets into the hundreds (lobbyist road networks).
+	// Keep only maximal routes: drop any whose squares are a subset of
+	// another's. No tie-break needed - distinct survivors of the dedup above
+	// can never be subsets of each other. Set membership (O(1) vs
+	// Array.includes' O(L)) matters once R gets into the hundreds.
 	const routeSets = dedupedRoutes.map((r) => new Set(r))
 	let uniqueRoutes = dedupedRoutes.filter((route, i) => {
 		for (let j = 0; j < dedupedRoutes.length; j++) {

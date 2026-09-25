@@ -754,14 +754,11 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	const rwSet = new Set(getRoadworkIndexes())
 	const coffeeRoutes = []
 
-	// Admissible A*-style prune (restored from legacy map.js:899-900,
-	// giveMinTileDistance): a tile crossing can never lead anywhere if the
-	// current range plus the straight-line tile distance to the NEAREST
-	// destination tile already exceeds winningRange. This never rules out a
-	// real route (the true cost can only be >= this lower bound), it only
-	// cuts dead branches early. This is the fix for the reported lobbyist
-	// slowdown: without it, every dead-end junction gets walked to its full
-	// depth instead of being rejected on arrival.
+	// Admissible A*-style prune (legacy map.js:899-900, giveMinTileDistance):
+	// reject a tile crossing whose current range plus straight-line tile
+	// distance to the nearest destination already exceeds winningRange. Never
+	// rules out a real route (true cost >= this lower bound) - only cuts dead
+	// branches early.
 	const destTiles = []
 	{
 		const seen = new Set()
@@ -1136,22 +1133,14 @@ export function giveAdjacentTiles(tileNumber, diagonal) {
 	return res
 }
 
-// rf.ssW/5 is the tile-grid width (17 tiles), same constant as
-// store.mapData.dimensions[0] - which is never reassigned anywhere in this
-// codebase, so it's used directly here rather than going through the store
-// (giveTileNumber sits under onTheSameTile, called twice per check in the
-// coffee-route DFS hot path; a store lookup per call isn't worth it for a
-// value that's always the same).
+// Tile-grid width (17 tiles), same value as store.mapData.dimensions[0]
+// (never reassigned in this codebase) - used directly to avoid a store
+// lookup in giveTileNumber, called twice per onTheSameTile check in the
+// coffee-route DFS hot path.
 const TILES_WIDE = rf.ssW / 5
 
 // Canonical tile id: y * (tile-grid width) + x, matching legacy's
-// giveTileNumber (map.js:1345) exactly. Previously multiplied by rf.ssW (85,
-// the SQUARE-grid width) instead of the tile-grid width (17), so ids didn't
-// match legacy's numbering - harmless today (every caller only used the
-// result as an opaque equality/Set key, and giveStartingIndexForTile used
-// the same wrong base, so the encode/decode round-trip was self-consistent),
-// but a landmine for any future distance math or cross-referencing against
-// legacy tile ids. Fixed here; giveStartingIndexForTile is its inverse and
+// giveTileNumber (map.js:1345). giveStartingIndexForTile is its inverse and
 // must use the same base.
 export function giveTileNumber(index) {
 	let xTile1 = Math.floor((index % rf.ssW) / 5)
@@ -1696,23 +1685,18 @@ export function addElement(type, number, index, rotated, emptying) {
 	}
 }
 
-// Compute roadwork indexes on-the-fly from newRoads and current turn.
-//  only roads where turnAdded === currentTurn get roadwork markers on adjacent existing roads.
+// Compute roadwork indexes on-the-fly from newRoads and current turn - only
+// roads where turnAdded === currentTurn get roadwork markers on adjacent
+// existing roads.
 //
-// ponytail: this checks each candidate square against the CURRENT (final) board
-// state, not the board state at the exact moment that road was placed, unlike
-// legacy which marks roadwork inline as each road is placed (map.js's addRoad).
-// These agree for the vast majority of real games (checked against ~934 real
-// coffee-sale-during-roadwork cases across 199 distinct game/turns — see
-// FCM/vueFCM/src/js/coffee.roadwork.test.js), and confirmed to never change an
-// actual sale even in the one case found where it disagreed (a lobbyist game
-// where a later same-turn action changed a candidate square's type after an
-// earlier road's roadwork check had already run against it in the real game).
-// Fully replicating legacy here would mean reconstructing per-road board state
-// mid-turn (chronological coords replay), which is real complexity for a gap
-// with zero observed gameplay impact. Upgrade path if that ever changes:
-// process store.newRoads in order for the current turn, incrementally building
-// up the coords each one actually saw, instead of reading the final coords once.
+// ponytail: checks each candidate against the CURRENT (final) board state,
+// not the state at the exact moment that road was placed, unlike legacy
+// which marks roadwork inline as each road is placed (map.js's addRoad).
+// Matches legacy except when a later same-turn action changes a candidate
+// square's type after an earlier road's check already ran against it (see
+// coffee.roadwork.test.js's documented exception). Upgrade path: process
+// store.newRoads in turn order, building up coords incrementally instead of
+// reading the final board once.
 export function getRoadworkIndexes() {
 	const store = useModelStore()
 	const result = []
@@ -1735,16 +1719,10 @@ export function getRoadworkIndexes() {
 				if (store.mapData.coords[index + tW * sqw] === rf.ROAD) result.push(index + tW * sqw)
 			}
 		} else {
-			// addNewRoad's corner placement shifts index by -1 for rotation 2
-			// (the only corner roadModel with roadModel[0][0]===0 — see addNewRoad
-			// below) before placing coords; the stored road.index is the ORIGINAL,
-			// pre-shift value passed in, so that same shift must be reapplied here
-			// to land on the squares addNewRoad actually placed the road at.
-			// Legacy computes both in the same function scope on the same
-			// already-shifted local `index`, so this divergence was invisible
-			// there; missing it here mismarked/missed roadwork squares for every
-			// rotation-2 corner road (confirmed against real games: off-by-one
-			// and spurious extra squares, fixed by this line).
+			// addNewRoad shifts index by -1 for rotation 2 before placing coords
+			// (the only corner roadModel with roadModel[0][0]===0, see below);
+			// road.index is the pre-shift value, so reapply the same shift to
+			// land on the squares actually placed.
 			if (rotation === 2) index -= 1
 			if (rotation === 0 && store.mapData.coords[index + 2] === rf.ROAD) result.push(index + 2)
 			if (rotation === 0 && store.mapData.coords[index + tW * 2] === rf.ROAD) result.push(index + tW * 2)
