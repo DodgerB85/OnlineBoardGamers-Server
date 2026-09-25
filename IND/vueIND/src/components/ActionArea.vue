@@ -1038,14 +1038,13 @@ function selectC0() {
 						You can then select eligible ships, or a city if it is connected to the current ship
 						<br />
 						<br />
-						You must ship: {{ store.context.maxPoss - (store.context.historyObj.length - 1) }}
-						<span v-if="store.context.maxPoss - (store.context.historyObj.length - 1) !== 1">goods</span>
-						<span v-else>good</span>
-						<br />
-						(Total {{ store.context.maxPoss }}
+						You must ship a total of: {{ store.context.maxPoss }}
 						<span v-if="store.context.maxPoss !== 1">goods</span>
 						<span v-else>good</span>
-						)
+						<br />
+						You still need to ship: {{ store.context.maxPoss - (store.context.historyObj.length - 1) }}
+						<span v-if="store.context.maxPoss - (store.context.historyObj.length - 1) !== 1">goods</span>
+						<span v-else>good</span>
 
 						<br />
 						<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
