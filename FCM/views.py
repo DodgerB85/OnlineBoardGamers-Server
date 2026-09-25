@@ -1434,6 +1434,10 @@ def _processTurn(request):
 
         presenter.clearAllMoveDataV2()
 
+        # Cannot rewind past a kickout
+        currentGame.rewindData = ""
+        currentGame.rewindTempData = ""
+
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 

@@ -449,6 +449,9 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 
 	// You always want to save a rewind, even at the END of a pointless move
 	// But if it is pointless, you want to delete the PREVIOUS rewind point
+	// Never save a rewind point while FcmBot is the active player; loading it after a kick would strand the bot as current. ponytail: whole-turnOrder scan if multi-bot simul needs finer control.
+	if (saveRewind && store.gameflow.turnOrder.length > 0 && store.players[store.gameflow.turnOrder[0]].displayName === rf.BOT_NAME) saveRewind = false
+
 	let postData = {
 		action: "saveNormal",
 		latestUpdate: personal.latestUpdate,
@@ -1475,6 +1478,13 @@ export async function castVote(topic, choice) {
 		if (data.voteChanged === true) {
 			if (topic === rf.REWIND_CONSENT_VOTE_TOPIC) {
 				personal.currentRewindConsent = choice
+			} else if (topic === rf.DELETE_VOTE_TOPIC) {
+				personal.votedToDelete = true
+				store.deleteVotesData = JSON.parse(data.votesData)
+				if (data.redirect_url) window.location.href = data.redirect_url
+			} else if (topic === rf.STATS_EXCLUDE_VOTE_TOPIC) {
+				personal.votedToExclude = true
+				store.statsExcludeVotesData = JSON.parse(data.votesData)
 			}
 		}
 	} catch (error) {
@@ -1700,13 +1710,14 @@ export function processSimulMoveData(data) {
 			// So anything that isn't a -ve flag is being thrown out
 			if (turnDataArray[0] !== -2) {
 				for (let j = 0; j < turnDataArray.length; j++) {
-					// Active players resources have already been removed -- BUT MAYBE NOT IF THEY DID A PRE-TURN????
-					if (i !== personal.pov && turnDataArray[j] >= 0) plyr.removeResourcesFromPlayer(i, turnDataArray[j], 1)
+					// POV interactive play already removed binned items via binResource;
+					// a pre-turn never did, so still apply removals while over the limit.
+					if (turnDataArray[j] >= 0 && (i !== personal.pov || playerObj.resources.length > 10)) plyr.removeResourcesFromPlayer(i, turnDataArray[j], 1)
 				}
 				// Safety: ensure at most 10 resources remain
 				if (playerObj.resources.length > 10) {
 					store.gameMessages.errorText = i18n.global.t("FCM_IO.tooManyItems")
-					sendDiscordWebhook(`489: JS ERROR: Too many items - gameID: ${personal.gameID} player: ${playerObj.name} resources: ${JSON.stringify(playerObj.resources)}`)
+					sendDiscordWebhook(`489: JS ERROR: Too many items - gameID: ${personal.gameID} player: ${playerObj.name} resources: ${JSON.stringify(playerObj.resources)} turnData: ${JSON.stringify(turnDataArray)} pov: ${personal.pov} isPov: ${i === personal.pov}`)
 					playerObj.resources.splice(10)
 				}
 			}

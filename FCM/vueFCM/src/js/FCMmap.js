@@ -863,7 +863,6 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	return coffeeRoutes
 }
 
-
 // This is run for an INDEX (which is a square of a building)
 // So first step is to go from the index to all adjacent roads, and go from there
 // ONLY USE THIS FOR DINNERTIME

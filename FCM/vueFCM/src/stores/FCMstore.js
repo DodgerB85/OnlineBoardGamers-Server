@@ -70,6 +70,7 @@ export const useModelStore = defineStore("store", () => {
 	const refSize = ref(200) // default 200
 
 	const deleteVotesData = ref({})
+	const statsExcludeVotesData = ref({})
 	const kickoutVotesData = ref({})
 	const kickoutVoteThreshold = ref(1)
 
@@ -384,6 +385,7 @@ export const useModelStore = defineStore("store", () => {
 		clearMessages,
 		computedHistory,
 		deleteVotesData,
+		statsExcludeVotesData,
 		kickoutVotesData,
 		kickoutVoteThreshold,
 		startingOptions,
