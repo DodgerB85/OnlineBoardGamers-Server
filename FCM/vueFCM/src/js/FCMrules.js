@@ -1826,7 +1826,7 @@ function finalizeMilestones(firstPizzas, possiblePizzaBomb) {
 	}
 }
 
-function processCoffee(houseNum, winner, usedFryChefs, coffeeEarnings, histoHouses, possibleCoffeeMS) {
+export function processCoffee(houseNum, winner, usedFryChefs, coffeeEarnings, histoHouses, possibleCoffeeMS) {
 	const store = useModelStore()
 	const winnerIdx = winner.playerIndex
 	let coffeeDist = winner.distance

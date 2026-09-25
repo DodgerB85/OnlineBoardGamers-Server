@@ -930,19 +930,30 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 		possibleRoutes.push(...map.getCoffeeRoutesFromBldgSquare(space, restaurantSquares, winningRange))
 	}
 
-	const checker = (arr, target) => target.every((v) => arr.includes(v))
+	// The DFS may reach the same set of squares via routes of different RAW
+	// length (it allows revisiting a square once - see
+	// getCoffeeRoutesFromBldgSquare), so raw length is not a valid "same
+	// route" key: two routes with identical squares but different lengths
+	// would each see the other as a superset and eliminate each other.
+	// Legacy avoids this by deduping on DFS emission order instead of length
+	// (model.js:1274-1306); reproduce that by collapsing to one
+	// earliest-found representative per distinct square-set first.
+	const bySignature = new Map()
+	for (const route of possibleRoutes) {
+		const sig = [...new Set(route)].sort((a, b) => a - b).join(",")
+		if (!bySignature.has(sig)) bySignature.set(sig, route)
+	}
+	const dedupedRoutes = [...bySignature.values()]
 
-	// Efficiently filter subsets by sorting by length descending
-	possibleRoutes.sort((a, b) => b.length - a.length)
-	let uniqueRoutes = possibleRoutes.filter((route, i) => {
-		for (let j = 0; j < possibleRoutes.length; j++) {
+	// Keep only maximal routes: drop any whose squares are a subset of
+	// another's. No tie-break needed - distinct survivors of the dedup above
+	// can never be subsets of each other. Set membership (O(1) vs
+	// Array.includes' O(L)) matters once R gets into the hundreds.
+	const routeSets = dedupedRoutes.map((r) => new Set(r))
+	let uniqueRoutes = dedupedRoutes.filter((route, i) => {
+		for (let j = 0; j < dedupedRoutes.length; j++) {
 			if (i === j) continue
-			if (checker(possibleRoutes[j], route)) {
-				// route is contained in another: drop strict subsets, but among
-				// identical routes keep the first one
-				if (possibleRoutes[j].length === route.length && i < j) continue
-				return false
-			}
+			if (route.every((v) => routeSets[j].has(v))) return false
 		}
 		return true
 	})
@@ -993,15 +1004,20 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 	}
 
 	// Remove routes whose potential sales locations are a complete subset of
-	// another route's sales locations
+	// another route's sales locations. Same O(R²) shape as the route-square
+	// filter above - precompute the location lists and their Sets once
+	// instead of re-deriving them (and re-scanning with .includes) on every
+	// pairwise comparison.
 	const salesSubsetKeep = new Set(uniqueRoutes.map((_, i) => i))
+	const salesLocs = uniqueRoutesPotentialSales.map((entry) => entry.map((x) => x[0]))
+	const salesLocSets = salesLocs.map((locs) => new Set(locs))
 	for (let i = 0; i < uniqueRoutesPotentialSales.length; i++) {
-		const locsI = uniqueRoutesPotentialSales[i].map((x) => x[0])
+		const locsI = salesLocs[i]
 		for (let j = 0; j < uniqueRoutesPotentialSales.length; j++) {
 			if (i === j) continue
-			const locsJ = uniqueRoutesPotentialSales[j].map((x) => x[0])
+			const locsJ = salesLocs[j]
 			if (locsI.length <= locsJ.length) {
-				const isSubset = locsI.every((loc) => locsJ.includes(loc))
+				const isSubset = locsI.every((loc) => salesLocSets[j].has(loc))
 				if (isSubset && (locsI.length < locsJ.length || i > j)) {
 					salesSubsetKeep.delete(i)
 					break

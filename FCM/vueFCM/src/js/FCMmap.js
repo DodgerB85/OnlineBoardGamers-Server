@@ -754,8 +754,48 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	const rwSet = new Set(getRoadworkIndexes())
 	const coffeeRoutes = []
 
-	// tiles of restaurant entrances
-	const destinationTiles = [...new Set(restaurants.map((r) => giveTileNumber(r)))]
+	// Admissible A*-style prune (legacy map.js:899-900, giveMinTileDistance):
+	// reject a tile crossing whose current range plus straight-line tile
+	// distance to the nearest destination already exceeds winningRange. Never
+	// rules out a real route (true cost >= this lower bound) - only cuts dead
+	// branches early.
+	const destTiles = []
+	{
+		const seen = new Set()
+		for (const r of restaurants) {
+			const tx = Math.floor((r % rf.ssW) / 5)
+			const ty = Math.floor(Math.floor(r / rf.ssW) / 5)
+			const key = ty * rf.ssW + tx
+			if (!seen.has(key)) {
+				seen.add(key)
+				destTiles.push([tx, ty])
+			}
+		}
+	}
+	const minTileDist = (idx) => {
+		const x = Math.floor((idx % rf.ssW) / 5)
+		const y = Math.floor(Math.floor(idx / rf.ssW) / 5)
+		let min = Infinity
+		for (const [dx, dy] of destTiles) {
+			const d = Math.abs(x - dx) + Math.abs(y - dy)
+			if (d < min) min = d
+		}
+		return min
+	}
+
+	// nextRoadNeighbours only depends on coords/roadworks, both static for
+	// the duration of this call, so the same (index, from) pair is safe to
+	// memoize - and gets re-hit constantly once lobbyist roads create loops.
+	const roadCache = new Map()
+	const cachedNextRoads = (idx, from) => {
+		const key = idx * 100000 + from
+		let v = roadCache.get(key)
+		if (v === undefined) {
+			v = nextRoadNeighbours(idx, from)
+			roadCache.set(key, v)
+		}
+		return v
+	}
 
 	// 1. Get initial road neighbors to start paths
 	const startNodes = neighbours(index)
@@ -769,7 +809,7 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	/**
 	 * Recursive DFS to find all valid paths
 	 */
-	const findPaths = (currentIdx, fromIdx, currentRange, path, visitedTwice) => {
+	const findPaths = (currentIdx, fromIdx, currentRange, path, pathSet, visitedTwice) => {
 		// 2. Check for nearby restaurants from current road
 		for (const neighbor of neighbours(currentIdx)) {
 			if (restoSet.has(neighbor)) {
@@ -781,7 +821,7 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 		}
 
 		// 3. Find next road segments
-		const nextRoads = nextRoadNeighbours(currentIdx, fromIdx)
+		const nextRoads = cachedNextRoads(currentIdx, fromIdx)
 
 		for (const next of nextRoads) {
 			let nextRange = currentRange
@@ -792,51 +832,36 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 			// 4. Validity Checks (Pruning) - only tile crossings and roadworks
 			// consume range; same-tile steps may continue even past it (old map.js)
 			if (nextRange > winningRange && (crossed || rwSet.has(next))) continue
-			// crossing toward a square whose min tile distance to any restaurant
-			// already blows the budget can never sell (old map.js:906)
-			if (crossed && currentRange + giveMinTileDistance(next, destinationTiles) > winningRange) continue
+			// Admissible heuristic prune (see destTiles/minTileDist above) - only
+			// applies when crossing, matching legacy's map.js:899-900.
+			if (crossed && currentRange + minTileDist(next) > winningRange) continue
 
-			const isSecondVisit = path.includes(next)
+			const isSecondVisit = pathSet.has(next)
 			if (isSecondVisit) {
 				if (visitedTwice.has(next)) continue // Already visited twice, stop
 			}
 
 			// 5. Recurse
 			path.push(next)
+			pathSet.add(next)
 			if (isSecondVisit) visitedTwice.add(next)
 
-			findPaths(next, currentIdx, nextRange, path, visitedTwice)
+			findPaths(next, currentIdx, nextRange, path, pathSet, visitedTwice)
 
 			// 6. Backtrack (Cleanup for the next branch)
 			path.pop()
+			if (!isSecondVisit) pathSet.delete(next)
 			if (isSecondVisit) visitedTwice.delete(next)
 		}
 	}
 
 	// Start the search for each starting road
 	for (const start of startNodes) {
-		findPaths(start.index, start.from, start.range, [start.index], new Set())
+		findPaths(start.index, start.from, start.range, [start.index], new Set([start.index]), new Set())
 	}
 
 	return coffeeRoutes
 }
-
-// Min tile distance from index's tile to any of the given tile numbers
-// (old map.js giveMinTileDistance). Vue tile numbers are y * rf.ssW + x
-// (see giveTileNumber), so the row stride is rf.ssW, not the legacy dense 17.
-function giveMinTileDistance(index, tiles) {
-	const baseTile = giveTileNumber(index)
-	let minDist = 99
-	for (const t of tiles) {
-		let tile1 = baseTile
-		let tile2 = t
-		if (tile1 > tile2) [tile1, tile2] = [tile2, tile1]
-		const dist = Math.floor(tile2 / rf.ssW) - Math.floor(tile1 / rf.ssW) + Math.abs((tile2 % rf.ssW) - (tile1 % rf.ssW))
-		if (dist < minDist) minDist = dist
-	}
-	return minDist
-}
-
 
 // This is run for an INDEX (which is a square of a building)
 // So first step is to go from the index to all adjacent roads, and go from there
@@ -1107,18 +1132,27 @@ export function giveAdjacentTiles(tileNumber, diagonal) {
 	return res
 }
 
+// Tile-grid width (17 tiles), same value as store.mapData.dimensions[0]
+// (never reassigned in this codebase) - used directly to avoid a store
+// lookup in giveTileNumber, called twice per onTheSameTile check in the
+// coffee-route DFS hot path.
+const TILES_WIDE = rf.ssW / 5
+
+// Canonical tile id: y * (tile-grid width) + x, matching legacy's
+// giveTileNumber (map.js:1345). giveStartingIndexForTile is its inverse and
+// must use the same base.
 export function giveTileNumber(index) {
 	let xTile1 = Math.floor((index % rf.ssW) / 5)
 	let yTile1 = Math.floor(Math.floor(index / rf.ssW) / 5)
-	let tile1 = yTile1 * rf.ssW + xTile1
+	let tile1 = yTile1 * TILES_WIDE + xTile1
 
 	return tile1
 }
 
 
 export function giveStartingIndexForTile(number) {
-	let xTile = number % rf.ssW
-	let yTile = Math.floor(number / rf.ssW)
+	let xTile = number % TILES_WIDE
+	let yTile = Math.floor(number / TILES_WIDE)
 	return xTile * 5 + yTile * 5 * rf.ssW
 }
 
@@ -1650,8 +1684,18 @@ export function addElement(type, number, index, rotated, emptying) {
 	}
 }
 
-// Compute roadwork indexes on-the-fly from newRoads and current turn.
-//  only roads where turnAdded === currentTurn get roadwork markers on adjacent existing roads.
+// Compute roadwork indexes on-the-fly from newRoads and current turn - only
+// roads where turnAdded === currentTurn get roadwork markers on adjacent
+// existing roads.
+//
+// ponytail: checks each candidate against the CURRENT (final) board state,
+// not the state at the exact moment that road was placed, unlike legacy
+// which marks roadwork inline as each road is placed (map.js's addRoad).
+// Matches legacy except when a later same-turn action changes a candidate
+// square's type after an earlier road's check already ran against it (see
+// coffee.roadwork.test.js's documented exception). Upgrade path: process
+// store.newRoads in turn order, building up coords incrementally instead of
+// reading the final board once.
 export function getRoadworkIndexes() {
 	const store = useModelStore()
 	const result = []
@@ -1660,7 +1704,7 @@ export function getRoadworkIndexes() {
 	for (const road of store.newRoads) {
 		if (road.turnAdded !== store.gameflow.turn) continue
 
-		const index = road.index
+		let index = road.index
 		const variety = road.variety
 		const rotation = road.rotation
 
@@ -1674,6 +1718,11 @@ export function getRoadworkIndexes() {
 				if (store.mapData.coords[index + tW * sqw] === rf.ROAD) result.push(index + tW * sqw)
 			}
 		} else {
+			// addNewRoad shifts index by -1 for rotation 2 before placing coords
+			// (the only corner roadModel with roadModel[0][0]===0, see below);
+			// road.index is the pre-shift value, so reapply the same shift to
+			// land on the squares actually placed.
+			if (rotation === 2) index -= 1
 			if (rotation === 0 && store.mapData.coords[index + 2] === rf.ROAD) result.push(index + 2)
 			if (rotation === 0 && store.mapData.coords[index + tW * 2] === rf.ROAD) result.push(index + tW * 2)
 			if (rotation === 1 && store.mapData.coords[index - 1] === rf.ROAD) result.push(index - 1)
