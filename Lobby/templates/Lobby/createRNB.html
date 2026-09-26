@@ -28,6 +28,76 @@
         #mapPreviewContent .loading-text {
             display: none;
         }
+
+        /* Gallery display */
+        .galleryPlayerIcon {
+            width: 44px;
+            height: 44px;
+            padding: 2px;
+            box-sizing: border-box;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .galleryPlayerIcon:hover {
+            background: rgba(147, 213, 208, 0.12);
+        }
+
+        .galleryPlayerIcon svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .galleryMapGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 300px);
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .galleryMapTile {
+            width: 300px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            background: var(--color-surface);
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .galleryMapTile:hover {
+            border-color: yellow;
+            box-shadow: 0 0 0 2px yellow;
+        }
+
+        .galleryMapTile.selected,
+        .galleryMapTile.selected:hover {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 2px var(--color-accent);
+        }
+
+        .galleryMapThumb {
+            width: 300px;
+            height: 150px;
+            background-color: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .galleryMapThumb svg {
+            display: block;
+        }
+
+        .galleryMapLabel {
+            padding: 6px 8px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     </style>
     {% if settingsDebug %}
         <script type="module" src="http://localhost:3042/static/@vite/client"></script>
@@ -221,34 +291,52 @@
 
                 <div class="card" style="grid-column:1 / -1">
                     <div class="card-header"><h2 class="card-title">{% translate "Map Selection" %}</h2></div>
-                    <div class="form-row">
-                        <label class="form-label" for="mapSelection">{% translate "Select Map" %}</label>
-                        <a id="viewHighscoresBtn" href="#" style="display:none;margin-left:10px;width:auto;padding:6px 12px;font-size:14px;text-decoration:none" class="button button-ghost button-sm">{% translate "View Highscores" %}</a>
-                        <div class="field">
-                            <select name="mapSelection" id="mapSelection" onchange="onMapSelectionChange();" oninvalid="this.setCustomValidity('{% translate "Please Select a Map" %}')" oninput="this.setCustomValidity('')" required style="width:100%">
-                                <option value="">{% translate "Select Map (sorted by player count)" %}</option>
-                            </select>
-                            <div class="mapFilterToggle" style="margin-top:8px">
-                                <label class="check-label">
-                                    <input type="checkbox" id="isVerifiedToggle" onchange="clearMapSelection(); loadMaps();">
-                                    {% translate "Verified maps only" %}
-                                </label>
-                            </div>
-                        </div>
+                    <div class="tabs" style="margin-bottom:12px">
+                        <button type="button" class="tab tablinks active" id="mapListTab" onclick="showMapDisplay('list');">{% translate "List Display" %}</button>
+                        <button type="button" class="tab tablinks" id="mapGalleryTab" onclick="showMapDisplay('gallery');">{% translate "Gallery Display" %}</button>
                     </div>
-                    <div style="margin-top:8px">
-                        <div id="mapInfoDisplay" style="display:none;margin-bottom:10px">
-                            <div style="font-weight:bold;font-size:16px;margin-bottom:5px" id="selectedMapName"></div>
-                            <div style="color:#666;font-size:14px;line-height:1.4;white-space:pre-line" id="selectedMapDescription"></div>
-                        </div>
-                        <div id="mapPreviewContainer" style="min-height:300px;border:1px solid #ccc;background-color:#f9f9f9;display:flex;align-items:center;justify-content:center">
-                            <div id="mapPreviewPlaceholder">{% translate "Select a map to preview" %}</div>
-                            <div id="mapPreviewContent" style="display:none;width:100%;height:100%">
-                                <div id="app" style="width:100%;height:100%;">
-                                    <div id="loadingText">Loading Map........</div>
+                    <div id="mapListView">
+                        <div class="form-row">
+                            <label class="form-label" for="mapSelection">{% translate "Select Map" %}</label>
+                            <a id="viewHighscoresBtn" href="#" style="display:none;margin-left:10px;width:auto;padding:6px 12px;font-size:14px;text-decoration:none" class="button button-ghost button-sm">{% translate "View Highscores" %}</a>
+                            <div class="field">
+                                <select name="mapSelection" id="mapSelection" onchange="onMapSelectionChange();" oninvalid="this.setCustomValidity('{% translate "Please Select a Map" %}')" oninput="this.setCustomValidity('')" required style="width:100%">
+                                    <option value="">{% translate "Select Map (sorted by player count)" %}</option>
+                                </select>
+                                <div class="mapFilterToggle" style="margin-top:8px">
+                                    <label class="check-label">
+                                        <input type="checkbox" id="isVerifiedToggle" onchange="clearMapSelection(); loadMaps();">
+                                        {% translate "Verified maps only" %}
+                                    </label>
                                 </div>
                             </div>
                         </div>
+                        <div style="margin-top:8px">
+                            <div id="mapInfoDisplay" style="display:none;margin-bottom:10px">
+                                <div style="font-weight:bold;font-size:16px;margin-bottom:5px" id="selectedMapName"></div>
+                                <div style="color:#666;font-size:14px;line-height:1.4;white-space:pre-line" id="selectedMapDescription"></div>
+                            </div>
+                            <div id="mapPreviewContainer" style="min-height:300px;border:1px solid #ccc;background-color:#f9f9f9;display:flex;align-items:center;justify-content:center">
+                                <div id="mapPreviewPlaceholder">{% translate "Select a map to preview" %}</div>
+                                <div id="mapPreviewContent" style="display:none;width:100%;height:100%">
+                                    <div id="app" style="width:100%;height:100%;">
+                                        <div id="loadingText">Loading Map........</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="mapGalleryView" style="display:none">
+                        <div class="map-editor-player-picker" id="galleryPlayerPicker">
+                            <span class="galleryPlayerIcon" data-players="1" title="{% translate '1 player' %}"></span>
+                            <span class="galleryPlayerIcon" data-players="2" title="{% translate '2 players' %}"></span>
+                            <span class="galleryPlayerIcon" data-players="3" title="{% translate '3 players' %}"></span>
+                            <span class="galleryPlayerIcon" data-players="4" title="{% translate '4 players' %}"></span>
+                            <span class="galleryPlayerIcon" data-players="5" title="{% translate '5 players' %}"></span>
+                            <span class="galleryPlayerIcon" data-players="6" title="{% translate '6 players' %}"></span>
+                        </div>
+                        <div class="form-help" style="padding-left:0">{% translate "Click an icon to filter maps by player count (green = matches game player count). Click a map to select it." %}</div>
+                        <div id="galleryGrid" class="galleryMapGrid"></div>
                     </div>
                 </div>
             </div>

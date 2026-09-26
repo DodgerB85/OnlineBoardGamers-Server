@@ -467,6 +467,7 @@ function selectPlayers() {
 
 	updateHighscoresButton()
 	updateMapPlayerCountWarning()
+	syncGalleryFilterToPlayerCount()
 }
 
 function autocomplete(inp) {
@@ -637,10 +638,11 @@ function loadMaps() {
 	return fetch(`/RNB/getRNBmaps/?isVerified=${isVerified}`)
 		.then((response) => response.json())
 		.then((data) => {
-			if (data.success) {
-				loadedMaps = data.maps // Store maps globally
-				populateMapDropdown(data.maps)
-				return data.maps // Return maps for chaining
+		if (data.success) {
+			loadedMaps = data.maps // Store maps globally
+			populateMapDropdown(data.maps)
+			renderMapGallery()
+			return data.maps // Return maps for chaining
 			} else {
 				console.error("Error loading maps:", data.error)
 				throw new Error(data.error)
@@ -809,6 +811,7 @@ function onMapSelectionChange() {
 
 	updateHighscoresButton()
 	updateMapPlayerCountWarning()
+	updateGallerySelection()
 }
 
 function clearMapSelection() {
@@ -845,4 +848,188 @@ function clearMapSelection() {
 	}
 
 	updateMapPlayerCountWarning()
+	updateGallerySelection()
+}
+
+
+/*** GALLERY DISPLAY */
+// ponytail: standalone hex-art thumbnails (plain SVG, mirrors RNBhex layout). No extra Vue app mounts; hex art only - add scenario pieces later if needed
+const MEEPLE_PATH_D = "M 13.91,32.62 C 14.29,25.85 12.91,18.78 20.57,15.26 C 18.95,11.61 17.07,7.68 21.30,4.43 C 22.44,3.54 25.21,3.29 25.00,3.29 C 24.79,3.29 27.56,3.54 28.70,4.43 C 32.93,7.68 31.05,11.61 29.43,15.26 C 37.09,18.78 35.71,25.85 36.09,32.62 L 32.13,33.28 L 30.62,48.80 L 19.38,48.80 L 17.87,33.28 L 13.91,32.62 Z"
+const GALLERY_HEX_POINTS = "0,-100.344 86.6,-50.172 86.6,50.172 0,100.344 -86.6,50.172 -86.6,-50.172"
+let galleryPlayerFilter = null
+let galleryLastPlayerCount = null
+let galleryThumbSeq = 0
+
+document.addEventListener("DOMContentLoaded", function () {
+	const picker = document.getElementById("galleryPlayerPicker")
+	if (picker) picker.addEventListener("click", galleryPlayerIconClicked)
+	const grid = document.getElementById("galleryGrid")
+	if (grid) grid.addEventListener("click", galleryGridClicked)
+	// Make the required map validation reachable while the gallery tab is showing
+	const mapSelectEl = document.getElementById("mapSelection")
+	if (mapSelectEl)
+		mapSelectEl.addEventListener("invalid", function () {
+			showMapDisplay("list")
+		})
+	syncGalleryFilterToPlayerCount()
+})
+
+function showMapDisplay(type) {
+	var tablinks = document.getElementsByClassName("tablinks")
+	for (let i = 0; i < tablinks.length; i++) {
+		tablinks[i].className = tablinks[i].className.replace(" active", "")
+	}
+	document.getElementById(type === "gallery" ? "mapGalleryTab" : "mapListTab").classList.add("active")
+	document.getElementById("mapListView").style.display = type === "gallery" ? "none" : "block"
+	document.getElementById("mapGalleryView").style.display = type === "gallery" ? "block" : "none"
+	if (type === "gallery") renderMapGallery()
+}
+
+// Gallery filter presets to, and follows, the main Number of players dropdown
+function syncGalleryFilterToPlayerCount() {
+	const mainCount = document.getElementById("playerNumber").value
+	if (mainCount === galleryLastPlayerCount) return
+	galleryLastPlayerCount = mainCount
+	galleryPlayerFilter = parseInt(mainCount, 10)
+	renderGalleryPlayerIcons()
+	renderMapGallery()
+}
+
+function renderGalleryPlayerIcons() {
+	const picker = document.getElementById("galleryPlayerPicker")
+	if (!picker) return
+	const mainCount = document.getElementById("playerNumber").value
+	let color = "#333"
+	if (galleryPlayerFilter !== null) color = String(galleryPlayerFilter) === String(mainCount) ? "green" : "red"
+	picker.querySelectorAll(".galleryPlayerIcon").forEach((icon) => {
+		const n = parseInt(icon.dataset.players, 10)
+		const filled = galleryPlayerFilter !== null && n <= galleryPlayerFilter
+		icon.style.color = color
+		icon.innerHTML = `<svg viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg"><path d="${MEEPLE_PATH_D}" fill="${filled ? "currentColor" : "none"}" ${filled ? "" : 'stroke="currentColor" stroke-width="1"'} stroke-linejoin="round" stroke-linecap="round"/></svg>`
+	})
+}
+
+function galleryPlayerIconClicked(e) {
+	const icon = e.target.closest(".galleryPlayerIcon")
+	if (!icon) return
+	const n = parseInt(icon.dataset.players, 10)
+	galleryPlayerFilter = galleryPlayerFilter === n ? null : n
+	renderGalleryPlayerIcons()
+	renderMapGallery()
+}
+
+function buildMapThumbnailSVG(hexData) {
+	if (!Array.isArray(hexData) || hexData.length < 2) return ""
+	const last = hexData[hexData.length - 1]
+	const setup = Array.isArray(last) ? null : last
+	const hexes = (setup ? hexData.slice(0, -1) : hexData).filter((e) => Array.isArray(e) && e.length >= 3)
+	if (!hexes.length) return ""
+	const flat = !!setup && setup.ST === 1
+	const hasPolder = hexes.some((e) => e[2] >= 90 && e[2] <= 94)
+	const S = 100
+	let minX = Infinity,
+		maxX = -Infinity,
+		minY = Infinity,
+		maxY = -Infinity
+	const centres = hexes.map((e) => {
+		const q = e[0],
+			r = e[1]
+		const c = flat ? [1.5 * q * S, Math.sqrt(3) * (r + q / 2) * S] : [Math.sqrt(3) * (q + r / 2) * S, 1.5 * r * S]
+		minX = Math.min(minX, c[0] - 1.05 * S)
+		maxX = Math.max(maxX, c[0] + 1.05 * S)
+		minY = Math.min(minY, c[1] - 1.05 * S)
+		maxY = Math.max(maxY, c[1] + 1.05 * S)
+		return c
+	})
+	const pad = 8
+	const vbX = minX - pad,
+		vbY = minY - pad,
+		vbW = maxX - minX + 2 * pad,
+		vbH = maxY - minY + 2 * pad
+	const uid = "gt" + ++galleryThumbSeq
+	const seen = {}
+	let defs = "",
+		body = ""
+	hexes.forEach((e, i) => {
+		const id = e[2]
+		let file
+		if (id === 95) file = "hex_blank_1"
+		else if (id === 96) file = "hex_blank_2"
+		else {
+			file = "hex_" + String(id).padStart(2, "0")
+			if (hasPolder && id >= 90 && id <= 94) file += "_f"
+		}
+		if (!seen[file]) {
+			seen[file] = true
+			defs += `<pattern id="${uid}_${file}" patternUnits="objectBoundingBox" patternContentUnits="objectBoundingBox" width="1" height="1"><image href="/static/RNB/images/hexes/${file}.jpg" x="0" y="0" width="1" height="1" preserveAspectRatio="none"/></pattern>`
+		}
+		const rot = e.length > 3 ? e[3] : 0
+		const c = centres[i]
+		body += `<g transform="translate(${c[0]} ${c[1]})${flat ? " rotate(30)" : ""}"><polygon points="${GALLERY_HEX_POINTS}" transform="rotate(${rot * 60})" fill="url(#${uid}_${file})" stroke="black" stroke-width="6"/></g>`
+	})
+	return `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="${vbX} ${vbY} ${vbW} ${vbH}" preserveAspectRatio="xMidYMid meet"><rect x="${vbX}" y="${vbY}" width="${vbW}" height="${vbH}" fill="#f9f9f9"/><defs>${defs}</defs>${body}</svg>`
+}
+
+function escapeGalleryHTML(str) {
+	return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+}
+
+function getSelectedMapUniqueID() {
+	const mapSelect = document.getElementById("mapSelection")
+	if (!mapSelect || !mapSelect.value) return null
+	try {
+		return JSON.parse(mapSelect.value).uniqueID
+	} catch (e) {
+		return null
+	}
+}
+
+function updateGallerySelection() {
+	const uniqueID = getSelectedMapUniqueID()
+	document.querySelectorAll(".galleryMapTile").forEach((tile) => {
+		tile.classList.toggle("selected", uniqueID !== null && parseInt(tile.dataset.uniqueid, 10) === uniqueID)
+	})
+}
+
+function renderMapGallery() {
+	const grid = document.getElementById("galleryGrid")
+	if (!grid) return
+	const maps = loadedMaps.filter((map) => galleryPlayerFilter === null || map.playerCount === galleryPlayerFilter)
+	const playerCountOrder = [2, 3, 4, 5, 6, 1]
+	maps.sort((a, b) => {
+		const orderA = playerCountOrder.indexOf(a.playerCount)
+		const orderB = playerCountOrder.indexOf(b.playerCount)
+		if (orderA !== orderB) return orderA - orderB
+		if (a.isVerified !== b.isVerified) return b.isVerified - a.isVerified
+		return a.name.localeCompare(b.name)
+	})
+	grid.innerHTML = maps
+		.map((map) => {
+			const playerText = map.playerCount === 1 ? "Solo" : map.playerCount + "p"
+			const label = escapeGalleryHTML(`${map.name} (${playerText})${map.isVerified ? " \u2713" : ""}`)
+			return `<div class="galleryMapTile" data-uniqueid="${map.uniqueID}" title="${label}"><div class="galleryMapThumb">${buildMapThumbnailSVG(map.hexData)}</div><div class="galleryMapLabel">${label}</div></div>`
+		})
+		.join("")
+	updateGallerySelection()
+}
+
+function galleryGridClicked(e) {
+	const tile = e.target.closest(".galleryMapTile")
+	if (!tile) return
+	const uniqueID = parseInt(tile.dataset.uniqueid, 10)
+	if (isNaN(uniqueID)) return
+	const mapSelect = document.getElementById("mapSelection")
+	for (let i = 0; i < mapSelect.options.length; i++) {
+		const value = mapSelect.options[i].value
+		if (!value) continue
+		try {
+			if (JSON.parse(value).uniqueID === uniqueID) {
+				mapSelect.selectedIndex = i
+				onMapSelectionChange()
+				break
+			}
+		} catch (err) {
+			// ignore parse errors
+		}
+	}
 }
