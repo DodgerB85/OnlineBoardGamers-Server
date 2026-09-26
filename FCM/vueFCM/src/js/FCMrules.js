@@ -176,29 +176,33 @@ export function giveMaxRangeForMarketer(marketer) {
 
 
 
+// The draftable pool. Module 8 is only draftable when the old milestones are in play.
+const MODULE_POOL = [20, 23, 10, 12, 11, 19, 22, 9, 15, 17, 13, 14, 16]
+const MODULE_IDS = new Set([...MODULE_POOL, 8])
+
 export function getAvailableModules(returnAlreadyDrafted) {
 	const store = useModelStore()
 
 	// 1. Define the base pool of modules
-	let availableModules = [20, 23, 10, 12, 11, 19, 22, 9, 15, 17, 13, 14, 16]
+	let availableModules = [...MODULE_POOL]
 
-	// 2. Safely get starting options from initData
+	// 2. Only real module IDs count as drafted. Starting options (18/300/120/...),
+	// the 999 skip marker and any duplicate of an already-drafted module share this
+	// list, and counting them inflates the draft count so the end-of-draft check
+	// never matches and drafting runs forever.
 	const rawDrafted = store.externalStartingOptions
+	const draftedModules = [...new Set(rawDrafted.filter((mod) => MODULE_IDS.has(mod)))]
 
-	// 3. Filter out meta-modules/system IDs using a Set for O(1) speed
-	const IGNORED_MODS = new Set([5, 205, 300, 21, 18, 181, 183, 101, 102, 110, 120])
-	const draftedModules = rawDrafted.filter((mod) => !IGNORED_MODS.has(mod))
-
-	// 4. Return early if we only need the cleaned drafted list
+	// 3. Return early if we only need the cleaned drafted list
 	if (returnAlreadyDrafted) return draftedModules
 
-	// 5. Handle special Milestone 8 logic
+	// 4. Handle special Milestone 8 logic
 	const hasMilestone8 = draftedModules.includes(8)
 	if (!store.startingOptions.newMilestones && !hasMilestone8) {
 		availableModules.unshift(8)
 	}
 
-	// 6. Return available modules that haven't been drafted yet
+	// 5. Return available modules that haven't been drafted yet
 	const draftedSet = new Set(draftedModules)
 	return availableModules.filter((mod) => !draftedSet.has(mod))
 }

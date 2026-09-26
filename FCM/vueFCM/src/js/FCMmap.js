@@ -810,12 +810,19 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	 * Recursive DFS to find all valid paths
 	 */
 	const findPaths = (currentIdx, fromIdx, currentRange, path, pathSet, visitedTwice) => {
+		const stats = globalThis.__coffeeStats
+		if (stats) {
+			stats.nodes++
+			if (stats.nodes > (stats.cap || 5e6)) throw new Error("DFS cap " + JSON.stringify(stats) + " routes=" + coffeeRoutes.length)
+			if (stats.nodes % 1e6 === 0) console.log("DFSSTATS", JSON.stringify(stats), "routes", coffeeRoutes.length, "pathlen", path.length)
+		}
 		// 2. Check for nearby restaurants from current road
 		for (const neighbor of neighbours(currentIdx)) {
 			if (restoSet.has(neighbor)) {
 				// same-tile entrance is always valid; crossing a tile costs +1 range (old map.js)
 				if (onTheSameTile(currentIdx, neighbor) || currentRange + 1 <= winningRange) {
 					coffeeRoutes.push([...path])
+					if (stats) stats.emitted++
 				}
 			}
 		}
@@ -831,14 +838,23 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 
 			// 4. Validity Checks (Pruning) - only tile crossings and roadworks
 			// consume range; same-tile steps may continue even past it (old map.js)
-			if (nextRange > winningRange && (crossed || rwSet.has(next))) continue
+			if (nextRange > winningRange && (crossed || rwSet.has(next))) {
+				if (stats) stats.prunedRange++
+				continue
+			}
 			// Admissible heuristic prune (see destTiles/minTileDist above) - only
 			// applies when crossing, matching legacy's map.js:899-900.
-			if (crossed && currentRange + minTileDist(next) > winningRange) continue
+			if (crossed && currentRange + minTileDist(next) > winningRange) {
+				if (stats) stats.prunedHeur++
+				continue
+			}
 
 			const isSecondVisit = pathSet.has(next)
 			if (isSecondVisit) {
-				if (visitedTwice.has(next)) continue // Already visited twice, stop
+				if (visitedTwice.has(next)) {
+					if (stats) stats.prunedVisit++
+					continue // Already visited twice, stop
+				}
 			}
 
 			// 5. Recurse

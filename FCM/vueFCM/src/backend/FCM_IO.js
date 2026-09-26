@@ -341,12 +341,14 @@ export async function saveModuleSelection(moduleIndex) {
 
 	let draftedModules = rules.getAvailableModules(true)
 	let nextPhase = false
+	// >= not === : a count that has already overshot the target (old buggy drafts)
+	// must still be able to end the phase, otherwise drafting never finishes
 	const pLen = store.players.length
-	if (pLen === 2 && draftedModules.length === 6) nextPhase = true
-	if (pLen === 3 && draftedModules.length === 6) nextPhase = true
-	if (pLen === 4 && draftedModules.length === 4) nextPhase = true
-	if (pLen === 5 && draftedModules.length === 5) nextPhase = true
-	if (pLen === 6 && draftedModules.length === 6) nextPhase = true
+	if (pLen === 2 && draftedModules.length >= 6) nextPhase = true
+	if (pLen === 3 && draftedModules.length >= 6) nextPhase = true
+	if (pLen === 4 && draftedModules.length >= 4) nextPhase = true
+	if (pLen === 5 && draftedModules.length >= 5) nextPhase = true
+	if (pLen === 6 && draftedModules.length >= 6) nextPhase = true
 
 	if (nextPhase) {
 		let index300 = store.externalStartingOptions.indexOf(300)
@@ -1208,6 +1210,10 @@ export async function checkForLatestData() {
 		const data = await response.json()
 		if (data.gameDoesNotExist === true) location.reload()
 		if (data.latest === true) return
+		// Module drafting state only arrives with the HTML, so a plain model import
+		// would leave externalStartingOptions stale (already-drafted modules look
+		// available again). Reload like FCMwebsocket does for phase 13.
+		else if (store.gameflow.phase === rf.PHASE_SETUP_MODULES) location.reload()
 		else {
 			let loadDataString = String(data.loadData)
 			personal.latestUpdate = String(data.latestUpdate)
