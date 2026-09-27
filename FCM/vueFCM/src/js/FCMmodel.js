@@ -306,6 +306,14 @@ export async function initGame() {
 	}
 	// Allow play
 	personal.haltPlay = false
+	// Stalled simul phase: every move is in, but the phase never advanced (eg the client
+	// that submitted the last move never got its response). The server then reports no
+	// current players, so turnOrder is empty and nobody can act. Re-submit an empty move
+	// with continueFromStalledGame so the server hands the move data back and we finish
+	// the phase off (this is the legacy main.js workaround, ported)
+	if (personal.pov >= 0 && !personal.finishedGame && !store.viewSettings.showReplay && controller.isSimulPhase(store.gameflow.phase) && store.gameflow.turnOrder.length === 0) {
+		await IO.saveSimulMove([0, 0, 0, 0], true)
+	}
 	// This must be the last item
 	if (personal.canPlay()) controller.startPlayerTurn()
 } // end initGame
