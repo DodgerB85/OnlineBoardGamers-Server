@@ -796,10 +796,11 @@ function changeGhost(index, add, event) {
 	animation: glow 0.6s infinite alternate;
 }
 
-/* Drink spots passed on the route - lightgreen */
+/* Drink spots collected on the route (or by the hovered preview) - lightgreen,
+   above the preview/path layers (same fill) but below the clickable highlights */
 .higlightSquareDrinks {
 	position: absolute;
-	z-index: 92;
+	z-index: 96;
 	fill: lightgreen;
 	opacity: 0.6;
 	box-sizing: border-box;
