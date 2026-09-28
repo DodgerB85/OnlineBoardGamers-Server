@@ -23,7 +23,7 @@ export function resetContext() {
 	resetEndOfDaySummaryData()
 
 	store.context.action = rf.ACT_NONE
-	store.context.selectedReserveCard = rf.RES_CARD_NONE
+	store.context.selectedReserveCard = rf.RES_CARD_NOT_CHOSEN
 	store.context.selectedEmployeeIndexForRestructuring = -1
 	store.context.selectedEmployeeToTrainData.employee = -1
 	store.context.selectedEmployeeToTrainData.origin = 0

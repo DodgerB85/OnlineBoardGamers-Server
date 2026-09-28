@@ -180,8 +180,13 @@ function savePayday() {
 function savePaydayWithFood() {
 	playerObj.value.beach = [...savedBeach.value]
 	playerObj.value.employees = [...savedEmployees.value]
-	playerObj.value.resources = [...savedResources.value]
-	if (store.context.preMoveData[0][0].length === 0) store.context.preMoveData[0][0].push(-4)
+	// NB: do NOT restore resources. The food chosen here has already left the player's
+	// hand, and the payday apply step counts preMoveData[0][1] without removing it again.
+	if (store.context.preMoveData[0][0].length === 0) {
+		// No firing: a manual food pick must be saved as a manual move (-8), otherwise
+		// -4 makes the server auto-pick from (now reduced) resources and over-consume.
+		store.context.preMoveData[0][0].push(store.context.preMoveData[0][1].length > 0 ? -8 : -4)
+	}
 	IO.savePreTurn(store.context.preMoveData)
 	emit("close")
 }

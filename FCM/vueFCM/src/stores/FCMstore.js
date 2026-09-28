@@ -131,7 +131,7 @@ export const useModelStore = defineStore("store", () => {
 
 	const context = reactive({
 		action: rf.ACT_NONE,
-		selectedReserveCard: rf.RES_CARD_NONE,
+		selectedReserveCard: rf.RES_CARD_NOT_CHOSEN,
 		selectedEmployeeIndexForRestructuring: -1,
 		justHired: [],
 		selectedEmployeeToTrainData: {

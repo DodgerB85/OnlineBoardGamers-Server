@@ -12,13 +12,12 @@ import { usePersonalStore } from "../stores/FCMpersonal.js"
 export function getReserveCardImageKey(cardValue) {
 	const store = useModelStore()
 	if (store.startingOptions.reservePrice) {
-		if (cardValue === -1) return "res_card_0"
 		if (cardValue === 1) return "res_card_5"
 		if (cardValue === 2) return "res_card_10"
 		if (cardValue === 3) return "res_card_20"
 		return "res_card_0"
 	}
-	return cardValue === -1 ? "res_card_0" : `res_card_${cardValue}`
+	return cardValue >= 1 && cardValue <= 3 ? `res_card_${cardValue}` : "res_card_0"
 }
 
 export function getFlexiKickoutTImerText() {

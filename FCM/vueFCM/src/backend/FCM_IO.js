@@ -1510,8 +1510,8 @@ export function processSimulMoveData(data) {
 		let reserve = []
 		for (let i = 0; i < decompressedData.length; i++) {
 			if (store.players[i].displayName === rf.BOT_NAME) {
-				// Add a dud entry to preserve POV indexing
-				reserve.push(-1)
+				// Bots never take a reserve card; dud entry to preserve POV indexing
+				reserve.push(rf.RES_CARD_NONE)
 				continue
 			}
 			// Check if there's any dodgy data
@@ -1525,7 +1525,8 @@ export function processSimulMoveData(data) {
 			}
 
 			let content = decompressedData[i][3]
-			let reserveCard = -1
+			// Only called once all moves are in, so an empty entry means this seat has no card
+			let reserveCard = rf.RES_CARD_NONE
 			if (content.length > 0) reserveCard = content[0]
 			histEntries.push([rf.HIST_CHOOSE_RESERVE_CARD, reserveCard, i, Math.floor(decompressedData[i][2] / 1000)])
 			reserve.push(reserveCard)

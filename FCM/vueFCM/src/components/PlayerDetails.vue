@@ -90,7 +90,7 @@ const resourceCounts = computed(() => {
 			</div>
 			<!-- RESERVE CARD -->
 			<template v-if="store.bankBroken !== 0 || (store.bankBroken === 0 && (personal.trainingGame || playerIndexProp === personal.pov))">
-				<div v-if="store.reserveCards[playerIndexProp] !== -1" class="cardSummaryDiv">
+				<div v-if="store.reserveCards[playerIndexProp] >= 1 && store.reserveCards[playerIndexProp] <= 3" class="cardSummaryDiv">
 					<img class="cardImg" :src="view.getImage(view.getReserveCardImageKey(store.reserveCards[playerIndexProp]))" />
 				</div>
 			</template>
