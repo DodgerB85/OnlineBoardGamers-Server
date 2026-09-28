@@ -765,20 +765,10 @@ function onMapSelectionChange() {
 				mapDataInput.value = JSON.stringify(selectedMap.hexData)
 			}
 
-			// 2. Use global store reference we created in Step 1
-			if (window.mapStore) {
-				// This triggers all your computed properties in the Vue app
-				// ADD TO CHANGE PLAYER
-				window.mapStore.mapData.externalMapData = selectedMap.hexData
-
-				// If you have player count logic in the store
-				if (selectedMap.playerCount) {
-					// ADD TO CHANGE PLAYER
-					window.mapStore.playerCount = selectedMap.playerCount
-				}
-			} else {
-				console.error("Vue Store not initialized yet")
-			}
+			// 2. Draw the map with the same lightweight builder the gallery uses,
+			// so the page never has to boot the whole RNB app for a preview
+			const mapPreviewThumb = document.getElementById("mapPreviewThumb")
+			if (mapPreviewThumb) mapPreviewThumb.innerHTML = buildMapThumbnailSVG(selectedMap.hexData)
 
 			// 3. Show map info
 			if (mapInfoDisplay) {
@@ -787,7 +777,7 @@ function onMapSelectionChange() {
 				selectedMapDescription.textContent = selectedMap.description || "No description available"
 			}
 
-			// 4. Show the Vue container
+			// 4. Show the map preview
 			mapPreviewPlaceholder.style.display = "none"
 			mapPreviewContent.style.display = "block"
 		} catch (error) {
@@ -842,10 +832,9 @@ function clearMapSelection() {
 		mapDataInput.value = ""
 	}
 
-	// Update Vue store if available
-	if (window.mapStore) {
-		window.mapStore.mapData.externalMapData = null
-	}
+	// Clear the thumbnail preview
+	const mapPreviewThumb = document.getElementById("mapPreviewThumb")
+	if (mapPreviewThumb) mapPreviewThumb.innerHTML = ""
 
 	updateMapPlayerCountWarning()
 	updateGallerySelection()

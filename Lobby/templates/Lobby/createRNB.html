@@ -98,39 +98,22 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+        /* List display map preview: plain SVG thumbnail, no RNB app needed */
+        #mapPreviewThumb {
+            width: 100%;
+        }
+
+        #mapPreviewThumb svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 350px;
+        }
     </style>
-    {% if settingsDebug %}
-        <script type="module" src="http://localhost:3042/static/@vite/client"></script>
-        <script type="module" src="http://localhost:3042/static/main.js"></script>
-    {% else %}
-        <link href="{% static 'RNB/RNBvuedist/main.css' %}?" rel="stylesheet" />
-        <script type="module"
-                crossorigin=""
-                src="{% static 'RNB/RNBvuedist/main.js' %}"></script>
-    {% endif %}
-    
-        <style>
-            body.nd {
-                width: 100%;
-                min-width: 0;
-                overflow-x: hidden;
-                background-color: var(--color-page-bg);
-                font-family: 'Outfit', system-ui, -apple-system, sans-serif;
-                font-size: 16px;
-            }
-        </style>
-    
     {% compress js %}
         <script src="{% static 'Lobby/createRNB.js' %}"></script>
     {% endcompress %}
-    <script>
-    window.initData = {
-        showMapOnly: true,
-        gameID: -1,
-        startingMap: [],
-        gameName: "{{ gameName|escapejs }}"
-    };
-    </script>
 {% endblock head %}
 {% block body %}
     {{ request.user.id|json_script:"user_id" }}
@@ -318,10 +301,8 @@
                             </div>
                             <div id="mapPreviewContainer" style="min-height:300px;border:1px solid #ccc;background-color:#f9f9f9;display:flex;align-items:center;justify-content:center">
                                 <div id="mapPreviewPlaceholder">{% translate "Select a map to preview" %}</div>
-                                <div id="mapPreviewContent" style="display:none;width:100%;height:100%">
-                                    <div id="app" style="width:100%;height:100%;">
-                                        <div id="loadingText">Loading Map........</div>
-                                    </div>
+                                <div id="mapPreviewContent" style="display:none;width:100%">
+                                    <div id="mapPreviewThumb"></div>
                                 </div>
                             </div>
                         </div>
