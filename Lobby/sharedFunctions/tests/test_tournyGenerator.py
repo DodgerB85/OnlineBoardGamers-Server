@@ -8,6 +8,14 @@ from Lobby.sharedFunctions.tournyGenerator import (
     multiGamePlayers4p,
     multiGamePlayersRound2,
 )
+from Lobby.sharedFunctions.availabilityMatchmaking import (
+    availability_profile,
+    build_matchup_counts,
+    multigame_round_one_indices,
+    multigame_round_two_indices,
+    optimize_disjoint_groups,
+    optimize_multigame_order,
+)
 
 
 class PrintSuccessTestCase(TestCase):
@@ -195,3 +203,55 @@ class TestComputeGameGroups(PrintSuccessTestCase):
 
         self.assertFalse(appended)
         self.assertEqual(len(games), 1)
+
+
+class TestAvailabilityMatchmaking(PrintSuccessTestCase):
+    def test_empty_observations_use_uniform_prior(self):
+        profile = availability_profile([], [])
+
+        self.assertEqual(profile, (0.125,) * 24)
+
+    def test_standard_optimizer_preserves_group_sizes_and_players(self):
+        groups = [["A", "B"], ["C", "D"]]
+        profiles = {player: availability_profile([], []) for player in "ABCD"}
+
+        optimized = optimize_disjoint_groups(groups, profiles, {}, "test-seed")
+
+        self.assertEqual([len(group) for group in optimized], [2, 2])
+        self.assertEqual(sorted(player for group in optimized for player in group), list("ABCD"))
+
+    def test_mg_optimizers_preserve_schedule_shape_and_round_two_groups(self):
+        profiles = {f"P{index}": availability_profile([], []) for index in range(20)}
+        first_round = [f"P{index}" for index in range(20)]
+        optimized_first_round = optimize_multigame_order(
+            first_round,
+            multigame_round_one_indices(len(first_round)),
+            profiles,
+            {},
+            "mg-r1",
+        )
+        first_round_games = multiGamePlayers4p(optimized_first_round)
+        self.assertEqual(len(first_round_games), 20)
+        self.assertTrue(all(len(game) == 4 for game in first_round_games))
+        self.assertEqual(Counter(player for game in first_round_games for player in game), Counter({player: 4 for player in first_round}))
+
+        second_round = [f"P{index}" for index in range(14)]
+        indices = multigame_round_two_indices()
+        optimized_second_round = optimize_multigame_order(
+            second_round[:7], indices[:7], profiles, {}, "mg-r2-a"
+        ) + optimize_multigame_order(
+            second_round[7:], [[index - 7 for index in game] for game in indices[7:]], profiles, {}, "mg-r2-b"
+        )
+        second_round_games = multiGamePlayersRound2(optimized_second_round)
+        self.assertEqual(len(second_round_games), 14)
+        self.assertTrue(all(len(game) == 4 for game in second_round_games))
+        self.assertTrue(all(set(game) <= set(second_round[:7]) for game in second_round_games[:7]))
+        self.assertTrue(all(set(game) <= set(second_round[7:]) for game in second_round_games[7:]))
+
+    def test_rematch_counts_ignore_byes(self):
+        tpda = [_make_tpda_round([["A", "B", "C", "D"]]) + [["BYEPLAYERS", "E"]]]
+
+        counts = build_matchup_counts(tpda)
+
+        self.assertEqual(counts[frozenset({"A", "B"})], 1)
+        self.assertEqual(counts[frozenset({"A", "E"})], 0)
