@@ -51,7 +51,7 @@ describe.skipIf(games.length === 0 || !hasPako)("processCoffee vs real legacy co
 	beforeAll(async () => {
 		if (!globalThis.pako) {
 			const pakoSrc = fs.readFileSync(PAKO_FILE, "utf8")
-			// eslint-disable-next-line no-eval
+			 
 			;(0, eval)(pakoSrc)
 		}
 		globalThis.alert = () => {}

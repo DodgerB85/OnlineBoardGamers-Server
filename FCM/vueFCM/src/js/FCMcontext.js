@@ -32,9 +32,10 @@ export function resetContext() {
 	store.context.justMarketed.splice(0)
 	store.context.remainingProducers.splice(0)
 	store.context.justProduced.team.splice(0)
-	let addedLen = 8 + (store.startingOptions.dumplings ? 2 : 0)
-	if (store.startingOptions.friedChicken) addedLen = 11
-	store.context.justProduced.added = new Array(addedLen).fill(0)
+	// Always full item length (LEMONADE..FRIED_CHICKEN); slots for items not in this
+	// game just stay 0 (display checks > 0, so they are invisible). Export trims
+	// trailing zeros; import pads back to full length.
+	store.context.justProduced.added = Array(rf.FRIED_CHICKEN + 1).fill(0)
 	store.context.justBuilt.splice(0)
 	store.context.justLobbied.splice(0)
 	store.context.justOpened.splice(0)
@@ -129,7 +130,7 @@ export function resetEndOfDaySummaryData() {
 	store.context.endOfDaySummaryData.market.unused.splice(0)
 
 	store.context.endOfDaySummaryData.produce.total = 0
-	store.context.endOfDaySummaryData.produce.produced = new Array(store.startingOptions.friedChicken ? 11 : 9).fill(0)
+	store.context.endOfDaySummaryData.produce.produced = Array(rf.FRIED_CHICKEN + 1).fill(0)
 	store.context.endOfDaySummaryData.produce.unused.splice(0)
 
 	store.context.endOfDaySummaryData.houses.total = 0

@@ -362,8 +362,8 @@ export function importPlayer(inputArr) {
 		newPlayer.marketers.push(entry)
 	}
 
-	// 8. Resources (Reconstructing from counts)
-	const resourceCounts = inputArr[8]
+	// 8. Resources (Reconstructing from counts; arrays are trimmed on export)
+	const resourceCounts = padItemCounts(inputArr[8])
 	resourceCounts.forEach((count, typeIndex) => {
 		for (let j = 0; j < count; j++) {
 			newPlayer.resources.push(typeIndex)
@@ -435,13 +435,9 @@ export function exportPlayer(playerIndex) {
 	)
 
 	// 8 - Resources (Optimized counter)
-	const exportResources = Array(11).fill(0)
+	const exportResources = Array(ITEM_COUNT_LEN).fill(0)
 	playerObj.resources.forEach((type) => exportResources[type]++)
-
-	// Trim trailing zeros efficiently
-	let lastIdx = exportResources.length
-	while (lastIdx > 0 && exportResources[lastIdx - 1] === 0) lastIdx--
-	res.push(exportResources.slice(0, lastIdx))
+	res.push(trimTrailingZeros(exportResources))
 
 	// New Milestones Logic
 	if (store.startingOptions.newMilestones) {
@@ -463,6 +459,23 @@ export function exportPlayer(playerIndex) {
 	}
 
 	return res
+}
+
+// Produce-count arrays (justProduced.added, EOD produce.produced, player resources)
+// live at full item length (LEMONADE..FRIED_CHICKEN) with unused items as 0.
+// Trim trailing zeros for storage; pad back to full length on import.
+const ITEM_COUNT_LEN = rf.FRIED_CHICKEN + 1
+
+function trimTrailingZeros(arr) {
+	let last = arr.length
+	while (last > 0 && arr[last - 1] === 0) last--
+	return arr.slice(0, last)
+}
+
+function padItemCounts(arr) {
+	if (!Array.isArray(arr)) return Array(ITEM_COUNT_LEN).fill(0)
+	while (arr.length < ITEM_COUNT_LEN) arr.push(0)
+	return arr
 }
 
 /** 
@@ -495,6 +508,7 @@ export function exportPlayer(playerIndex) {
 			26 - newRoads
 			27 - coffeeShopMSplayers
 	 */
+
 export function exportFCMmodel(forGameOver, includeContext) {
 	const store = useModelStore()
 	const temp = []
@@ -643,7 +657,12 @@ export function exportFCMmodel(forGameOver, includeContext) {
 		temp.push(JSON.parse(JSON.stringify(store.coffeeShopMSplayers)))
 		temp.push(JSON.parse(JSON.stringify(store.firstPizzas)))
 		temp.push(JSON.parse(JSON.stringify(store.reserveCards)))
-		if (includeContext) temp.push(JSON.stringify(store.context))
+		if (includeContext) {
+			const contextCopy = JSON.parse(JSON.stringify(store.context))
+			contextCopy.justProduced.added = trimTrailingZeros(contextCopy.justProduced.added)
+			contextCopy.endOfDaySummaryData.produce.produced = trimTrailingZeros(contextCopy.endOfDaySummaryData.produce.produced)
+			temp.push(JSON.stringify(contextCopy))
+		}
 	}
 
 	let step1 = JSON.stringify(temp)
@@ -984,8 +1003,11 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 
 		if (includeContext) {
 			// 17?? - context
-			store.context.splice(0)
-			Object.assign(store.context, JSON.parse(inputArr[IMPORT_INDEX]))
+			const contextData = JSON.parse(inputArr[IMPORT_INDEX])
+			// Produce-count arrays were trimmed for storage; pad back to full item length
+			if (contextData.justProduced) contextData.justProduced.added = padItemCounts(contextData.justProduced.added)
+			if (contextData.endOfDaySummaryData?.produce) contextData.endOfDaySummaryData.produce.produced = padItemCounts(contextData.endOfDaySummaryData.produce.produced)
+			Object.assign(store.context, contextData)
 			IMPORT_INDEX++
 		} else context.resetContext()
 	} else {
