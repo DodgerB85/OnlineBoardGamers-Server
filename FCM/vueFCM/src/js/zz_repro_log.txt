@@ -1,0 +1,20 @@
+F inputs [13,0,5]
+F entrances [3696]
+F dfs zone 2842 routes 0 152.7ms {"nodes":533307,"emitted":0,"prunedRange":0,"prunedHeur":72000,"prunedVisit":211102,"cap":2000000}
+F dfs zone 2926 CAPPED:DFS cap {"nodes":2000001,"emitted":78,"prunedRange":0,"prunedHeur":105854,"prunedVisit":623090,"cap":2000000} routes=78 505.1ms {"nodes":2000001,"emitted":78,"prunedRange":0,"prunedHeur":105854,"prunedVisit":623090,"cap":2000000}
+F dfs zone 2927 CAPPED:DFS cap {"nodes":2000001,"emitted":112462,"prunedRange":0,"prunedHeur":150898,"prunedVisit":288680,"cap":2000000} routes=112462 607.2ms {"nodes":2000001,"emitted":112462,"prunedRange":0,"prunedHeur":150898,"prunedVisit":288680,"cap":2000000}
+F dfs zone 2841 routes 0 140.8ms {"nodes":533307,"emitted":0,"prunedRange":0,"prunedHeur":72000,"prunedVisit":211102,"cap":2000000}
+F dfs total 1405.7ms
+phase 5 turn 3 newRoads 5
+needs [{"number":13,"needs":[[0,1]]}]
+rwIndexes []
+ranges 13 [5,0]
+E doDinnerTime (coffee stubbed) 10.2ms calls: [[13,0,5]]
+F inputs [13,0,5]
+F entrances [3696]
+F dfs zone 2842 routes 0 159.2ms {"nodes":533307,"emitted":0,"prunedRange":0,"prunedHeur":72000,"prunedVisit":211102,"cap":2000000}
+F dfs zone 2926 CAPPED:DFS cap {"nodes":2000001,"emitted":78,"prunedRange":0,"prunedHeur":105854,"prunedVisit":623090,"cap":2000000} routes=78 534.5ms {"nodes":2000001,"emitted":78,"prunedRange":0,"prunedHeur":105854,"prunedVisit":623090,"cap":2000000}
+F dfs zone 2927 CAPPED:DFS cap {"nodes":2000001,"emitted":112462,"prunedRange":0,"prunedHeur":150898,"prunedVisit":288680,"cap":2000000} routes=112462 696.5ms {"nodes":2000001,"emitted":112462,"prunedRange":0,"prunedHeur":150898,"prunedVisit":288680,"cap":2000000}
+F dfs zone 2841 routes 0 146.9ms {"nodes":533307,"emitted":0,"prunedRange":0,"prunedHeur":72000,"prunedVisit":211102,"cap":2000000}
+F dfs total 1537.2ms
+G getCoffeeRoute 0.1ms [0,0]

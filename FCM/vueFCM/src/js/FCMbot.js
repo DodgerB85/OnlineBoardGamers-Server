@@ -75,7 +75,11 @@ export function passKickout() {
 		moveData = store.reserveCards[timedOutPlayerIndex]
 	} else if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) {
 		let p = store.players[timedOutPlayerIndex]
-		moveData = [[...p.beach], [...p.employees], parseInt(p.OOBpreference) || 0]
+		// Strip blank slots, exactly as endPlayerTurn does: a kicked player who never
+		// placed anyone still has [BLANK_EMPLOYEE_SPACE x ceoSlots] in employees, and
+		// saving those poisons the move data for every client that renders the
+		// CHOOSE_STRUCTURE history entry
+		moveData = [[...p.beach], p.employees.filter((e) => e !== rf.BLANK_EMPLOYEE_SPACE), parseInt(p.OOBpreference) || 0]
 	} else if (store.gameflow.phase === rf.PHASE_PAYDAY) {
 		let paydayMove = generatePaydayDefaultMove(timedOutPlayerIndex)
 		moveData = [paydayMove, [-9]]

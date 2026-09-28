@@ -304,6 +304,18 @@ export async function initGame() {
 			console.log("WebSocket background task initialized.")
 		})
 	}
+	// Stalled simul phase: every move is in, but the phase never advanced (eg the client
+	// that submitted the last move never got its response). The server then reports no
+	// current players, so turnOrder is empty and nobody can act. Re-submit an empty move
+	// with continueFromStalledGame so the server hands the move data back and we finish
+	// the phase off (this is the legacy main.js workaround, ported).
+	// NB keep haltPlay true here: saveSimulMove renders while the turn order is still
+	// empty, and currentPlayerObj() must not alarm about that transient state.
+	// pov >= -9 means logged in (players, superusers and logged-in spectators all can
+	// unstick a game); -99 is an anonymous viewer, which must never write.
+	if (personal.pov >= -9 && !personal.finishedGame && !store.viewSettings.showReplay && controller.isSimulPhase(store.gameflow.phase) && store.gameflow.turnOrder.length === 0) {
+		await IO.saveSimulMove([0, 0, 0, 0], true)
+	}
 	// Allow play
 	personal.haltPlay = false
 	// This must be the last item

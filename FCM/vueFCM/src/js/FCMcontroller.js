@@ -2720,6 +2720,8 @@ export function setDrivingPreview(index) {
 	const store = useModelStore()
 	if (store.context.producer === rf.ZEPPELIN_PILOT) {
 		const tile = map.giveTileNumber(index)
+		// Drink squares this click would collect (visited tiles + the hovered one)
+		store.highlights.indexesToHighlightDrinks = rules.giveDrinkSquaresOnTiles([...store.context.path, tile])
 		// At the end of the zeppelin's range there are no more options to preview
 		if (store.context.path.length >= store.context.range) {
 			store.highlights.tilesToHighlightPreview.splice(0)
@@ -2729,6 +2731,7 @@ export function setDrivingPreview(index) {
 	} else {
 		const nextRoad = rules.nextRoadPossibilities(index, store.context.from, store.context.range)
 		store.highlights.indexesToHighlightPreview = nextRoad.path
+		store.highlights.indexesToHighlightDrinks = rules.giveDrinkSquaresAlongPath([...store.context.path, ...nextRoad.path])
 	}
 }
 
@@ -2736,6 +2739,12 @@ export function clearDrivingPreview() {
 	const store = useModelStore()
 	store.highlights.indexesToHighlightPreview.splice(0)
 	store.highlights.tilesToHighlightPreview.splice(0)
+	// Drop back to just the drinks already collected by the committed path
+	if (store.context.producer === rf.ZEPPELIN_PILOT) {
+		store.highlights.indexesToHighlightDrinks = rules.giveDrinkSquaresOnTiles(store.context.path)
+	} else if (store.context.producer === rf.CART_OPERATOR || store.context.producer === rf.TRUCK_DRIVER) {
+		store.highlights.indexesToHighlightDrinks = rules.giveDrinkSquaresAlongPath(store.context.path)
+	}
 }
 
 // Clicked a highlighted tile while flying the zeppelin

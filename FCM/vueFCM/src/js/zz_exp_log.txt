@@ -1,0 +1,9 @@
+zone2927 baseline ERR cap {"nodes":2000001,"memoHits":0,"emitted":112462,"heurPruned":0}
+zone2927 heuristic ERR cap {"nodes":2000001,"memoHits":0,"emitted":144223,"heurPruned":45768}
+zone2927 heur+memo ERR cap {"nodes":5000001,"memoHits":137399,"emitted":354880,"heurPruned":120092}
+zone2927 baseline ERR cap {"nodes":2000001,"memoHits":0,"emitted":112462,"heurPruned":0}
+zone2927 heuristic ERR cap {"nodes":2000001,"memoHits":0,"emitted":144223,"heurPruned":45768}
+zone2927 heur+memo ERR cap {"nodes":5000001,"memoHits":137399,"emitted":354880,"heurPruned":120092}
+zone2926 heur+memo ERR cap {"nodes":5000001,"memoHits":137797,"emitted":354682,"heurPruned":120328}
+zone2842 heur+memo 1 nodes, emitted 0, sets 0, heurPruned 3, memoHits 0, 3ms
+zone2841 heur+memo 1 nodes, emitted 0, sets 0, heurPruned 2, memoHits 0, 2ms

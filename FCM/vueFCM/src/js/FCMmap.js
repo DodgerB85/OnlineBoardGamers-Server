@@ -838,7 +838,9 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 
 			const isSecondVisit = pathSet.has(next)
 			if (isSecondVisit) {
-				if (visitedTwice.has(next)) continue // Already visited twice, stop
+				if (visitedTwice.has(next)) {
+					continue // Already visited twice, stop
+				}
 			}
 
 			// 5. Recurse
@@ -1088,43 +1090,41 @@ export function giveAdjacentTiles(tileNumber, diagonal) {
 	const store = useModelStore()
 	let res = []
 
-	// Tile numbers use the rf.ssW-wide space (see giveTileNumber), but mapData.tiles
-	// is laid out with store.mapData.dimensions[0] tiles per row. Translate for the checks.
-	const tileAt = (num) => {
-		const row = Math.floor(num / rf.ssW)
-		const col = num % rf.ssW
-		return store.mapData.tiles[(row * store.mapData.dimensions[0] + col) * 2] != -1
-	}
+	// Tile ids are y * TILES_WIDE + x (see giveTileNumber), so the stride here
+	// must be the tile-grid width, not rf.ssW. mapData.tiles is indexed by
+	// tile id, 2 entries per tile.
+	const W = store.mapData.dimensions[0]
+	const H = store.mapData.dimensions[1]
+	const tileAt = (num) => store.mapData.tiles[num * 2] != -1
 
-	if (tileNumber >= rf.ssW) {
-		if (tileAt(tileNumber - rf.ssW)) res.push(tileNumber - rf.ssW)
+	if (tileNumber >= W) {
+		if (tileAt(tileNumber - W)) res.push(tileNumber - W)
 	}
-	if (Math.floor(tileNumber / rf.ssW) < store.mapData.dimensions[1] - 1) {
-		if (tileAt(tileNumber + rf.ssW)) res.push(tileNumber + rf.ssW)
+	if (Math.floor(tileNumber / W) < H - 1) {
+		if (tileAt(tileNumber + W)) res.push(tileNumber + W)
 	}
-	if (tileNumber % rf.ssW > 0) {
+	if (tileNumber % W > 0) {
 		if (tileAt(tileNumber - 1)) res.push(tileNumber - 1)
 	}
-	if (tileNumber % rf.ssW < rf.ssW - 1) {
+	if (tileNumber % W < W - 1) {
 		if (tileAt(tileNumber + 1)) res.push(tileNumber + 1)
 	}
 
-	// NOT FIXED - never used?
 	if (diagonal === true) {
-		if (tileNumber >= rf.ssW) {
-			if (tileNumber % rf.ssW > 0) {
-				if (tileAt(tileNumber - rf.ssW - 1)) res.push(tileNumber - rf.ssW - 1)
+		if (tileNumber >= W) {
+			if (tileNumber % W > 0) {
+				if (tileAt(tileNumber - W - 1)) res.push(tileNumber - W - 1)
 			}
-			if (tileNumber % rf.ssW < rf.ssW - 1) {
-				if (tileAt(tileNumber - rf.ssW + 1)) res.push(tileNumber - rf.ssW + 1)
+			if (tileNumber % W < W - 1) {
+				if (tileAt(tileNumber - W + 1)) res.push(tileNumber - W + 1)
 			}
 		}
-		if (Math.floor(tileNumber / rf.ssW) < store.mapData.dimensions[1] - 1) {
-			if (tileNumber % rf.ssW > 0) {
-				if (tileAt(tileNumber + rf.ssW - 1)) res.push(tileNumber + rf.ssW - 1)
+		if (Math.floor(tileNumber / W) < H - 1) {
+			if (tileNumber % W > 0) {
+				if (tileAt(tileNumber + W - 1)) res.push(tileNumber + W - 1)
 			}
-			if (tileNumber % rf.ssW < rf.ssW - 1) {
-				if (tileAt(tileNumber + rf.ssW + 1)) res.push(tileNumber + rf.ssW + 1)
+			if (tileNumber % W < W - 1) {
+				if (tileAt(tileNumber + W + 1)) res.push(tileNumber + W + 1)
 			}
 		}
 	}
@@ -1434,11 +1434,10 @@ export function giveUsedDimension() {
 	return [usedRowCol[1].length, usedRowCol[0].length]
 }
 
+// index is a tile id (see giveTileNumber); mapData.tiles is 2 entries per tile
 export function giveTileAtPosition(index) {
 	const store = useModelStore()
-	const row = Math.floor(index / rf.ssW)
-	const col = index % rf.ssW
-	return store.mapData.tiles[(row * store.mapData.dimensions[0] + col) * 2]
+	return store.mapData.tiles[index * 2]
 }
 
 export function giveCoord(index, isTile) {
