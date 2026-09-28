@@ -84,7 +84,7 @@ function foodSumGoods(sumArr) {
 
 /* ---------------- Board demand summary ---------------- */
 const totalBoardNeeds = computed(() => {
-	const sums = Array(10).fill(0)
+	const sums = Array(11).fill(0)
 	for (const need of store.needs) {
 		for (const n of need.needs) sums[n[0]]++
 	}
@@ -147,7 +147,7 @@ function buildDiscount(playerIndex, player) {
 }
 
 function buildStock(player) {
-	const sums = Array(10).fill(0)
+	const sums = Array(11).fill(0)
 	for (const r of player.resources) sums[r]++
 	return { goods: foodSumGoods(sums), hasResources: player.resources.length > 0 }
 }
@@ -198,7 +198,8 @@ function buildProduction(playerIndex, player) {
 		numNoodles = 0,
 		numDumplings = 0,
 		numKimchi = 0,
-		numCoffee = 0
+		numCoffee = 0,
+		numFriedChicken = 0
 
 	const nsm = player.employees.includes(rf.NIGHT_SHIFT_MANAGER)
 	for (const employee of ref) {
@@ -231,7 +232,7 @@ function buildProduction(playerIndex, player) {
 	}
 
 	if (phase < rf.PHASE_DINNERTIME) {
-		const productionArr = Array(10).fill(0)
+		const productionArr = Array(11).fill(0)
 		productionArr[rf.PIZZA] = numPizza
 		productionArr[rf.BURGER] = numBurger
 		productionArr[rf.COFFEE] = numCoffee
@@ -239,6 +240,7 @@ function buildProduction(playerIndex, player) {
 		productionArr[rf.SUSHI] = numSushi
 		productionArr[rf.KIMCHI] = numKimchi
 		productionArr[rf.DUMPLING] = numDumplings
+		productionArr[rf.FRIED_CHICKEN] = numFriedChicken
 		const goods = foodSumGoods(productionArr)
 
 		const chips = []

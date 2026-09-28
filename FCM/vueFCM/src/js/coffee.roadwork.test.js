@@ -47,7 +47,7 @@ describe.skipIf(!hasFixture || !hasPako)("getCoffeeRoute vs real legacy output, 
 		cases = JSON.parse(fs.readFileSync(FIXTURE_FILE, "utf8"))
 		if (!globalThis.pako) {
 			const pakoSrc = fs.readFileSync(PAKO_FILE, "utf8")
-			// eslint-disable-next-line no-eval
+			 
 			;(0, eval)(pakoSrc)
 		}
 		globalThis.alert = () => {}

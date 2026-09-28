@@ -819,6 +819,22 @@ const computedEntry3 = computed(() => {
 			</div>
 		</template>
 
+		<!-- HIST_FLIP_TO_FRIED_CHICKEN: unserved demand flips to fried chicken (Fried Chicken mod) -->
+		<template v-else-if="entry[0] === rf.HIST_FLIP_TO_FRIED_CHICKEN">
+			<div><i18n-t keypath="history.flipToFriedChicken" tag="span" scope="global">
+				<template #houses>{{ entry[3].map((f) => f[0]).join(", ") }}</template>
+			</i18n-t> <img class="foodTokenImg" :src="goodSrc(rf.FRIED_CHICKEN)" alt="" />
+			</div>
+		</template>
+
+		<!-- HIST_HOUSE_MOVED_OUT: houses gave up on this neighbourhood (Fried Chicken mod) -->
+		<template v-else-if="entry[0] === rf.HIST_HOUSE_MOVED_OUT">
+			<div><i18n-t keypath="history.houseMovedOut" tag="span" scope="global">
+				<template #houses>{{ entry[3].join(", ") }}</template>
+			</i18n-t>
+			</div>
+		</template>
+
 		<!-- HIST_BUILD_HOUSE: player builds a house -->
 		<template v-else-if="entry[0] === rf.HIST_BUILD_HOUSE">
 			<i18n-t keypath="history.buildHouse" tag="span" scope="global">

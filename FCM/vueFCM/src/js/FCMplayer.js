@@ -388,6 +388,8 @@ export function playerBonus(playerIndex, goods) {
 			base += 5
 		} else if (drinks.includes(good) && hasMilestone(playerIndex, rf.FIRST_DRINK_MARKETED)) {
 			base += 5
+		} else if (good === rf.FRIED_CHICKEN && hasMilestone(playerIndex, rf.FIRST_FRIED_CHICKEN_SOLD)) {
+			base += 5
 		}
 	})
 

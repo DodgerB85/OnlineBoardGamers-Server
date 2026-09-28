@@ -53,6 +53,7 @@ export function oneLevelAbove(employee, preservingColour) {
 			break
 		case rf.KITCHEN_TRAINEE:
 			level = [rf.BURGER_COOK, rf.PIZZA_COOK, rf.NOODLE_COOK, rf.SUSHI_COOK, rf.DUMPLING_COOK]
+			if (store.startingOptions.friedChicken) level.push(rf.FRIED_CHICKEN_COOK)
 			break
 		case rf.BURGER_COOK:
 			level = [rf.BURGER_CHEF]
@@ -68,6 +69,9 @@ export function oneLevelAbove(employee, preservingColour) {
 			break
 		case rf.DUMPLING_COOK:
 			level = [rf.DUMPLING_CHEF]
+			break
+		case rf.FRIED_CHICKEN_COOK:
+			level = [rf.FRIED_CHICKEN_CHEF]
 			break
 		case rf.WAITRESS:
 			level = [rf.B_MOVIE_STAR, rf.C_MOVIE_STAR, rf.D_MOVIE_STAR, rf.JAZZ_MUSICIAN]
@@ -1437,6 +1441,7 @@ export function givePossibleFoodDrinksChoice(employee) {
 	else if (employee === rf.NOODLE_COOK || employee === rf.NOODLE_CHEF) return [rf.NOODLES]
 	else if (employee === rf.BARISTA_TRAINEE || employee === rf.BARISTA || employee === rf.LEAD_BARISTA) return [rf.COFFEE]
 	else if (employee === rf.DUMPLING_COOK || employee === rf.DUMPLING_CHEF) return [rf.DUMPLING]
+	else if (employee === rf.FRIED_CHICKEN_COOK || employee === rf.FRIED_CHICKEN_CHEF) return [rf.FRIED_CHICKEN]
 	else return []
 }
 
@@ -1597,10 +1602,26 @@ export function doDinnerTime(replayOnly) {
 
 	const firstPizzas = []
 
+	// Fried Chicken mod: track flips & move-outs for history
+	const flippedHouses = []
+	const movedOutHouses = store.movedOutHouses
+	movedOutHouses.splice(0) // reset for this settlement
+	const fcMod = store.startingOptions.friedChicken
+
 	// --- PHASE 1: WORK THROUGH NEEDS ---
 	const sortedNeeds = [...store.needs].sort((a, b) => a.number - b.number)
 
 	for (const need of sortedNeeds) {
+		// Fried Chicken mod: condemned (pendingMoveOut) houses move out before any matching
+		if (fcMod && need.pendingMoveOut && need.number !== rf.RURAL_MARKETING_AREA) {
+			need.movedOut = true
+			need.pendingMoveOut = false
+			need.needs = []
+			movedOutHouses.push(need.number)
+			continue
+		}
+		if (fcMod && need.movedOut) continue
+
 		// [number, needs, historyOfCompetitors]
 		let histoH = [need.number, need.needs.map((sub) => (sub.length > 0 ? sub[0] : -1)), []]
 
@@ -1684,6 +1705,34 @@ export function doDinnerTime(replayOnly) {
 			}
 		} else {
 			histoH.splice(2) // No one sold
+
+			// Fried Chicken mod: unserved demand flips / condemns the house
+			if (fcMod && need.number !== rf.RURAL_MARKETING_AREA && need.needs.length > 0) {
+				let flippedCount = 0
+				let hasFlippedChicken = false
+				let hasMarketedChicken = false
+				for (const sub of need.needs) {
+					if (sub[0] === rf.FRIED_CHICKEN) {
+						// Rule 2: fried chicken doesn't flip again
+						if (sub[1] !== -1) hasMarketedChicken = true // strict liability of the Fried Chicken King
+						else hasFlippedChicken = true // second life used up -> house moves out
+					} else {
+						// Rule 1: unmet normal demand flips to ownerless fried chicken
+						sub[0] = rf.FRIED_CHICKEN
+						sub[1] = -1
+						flippedCount++
+					}
+				}
+				if (flippedCount > 0) flippedHouses.push([need.number, flippedCount])
+				// Rule 2: flipped chicken unmet at its second settlement -> house moves out now
+				if (hasFlippedChicken) {
+					need.movedOut = true
+					need.needs = []
+					movedOutHouses.push(need.number)
+				}
+				// Strict liability: marketed chicken unmet -> house moves out at next settlement, no matching
+				else if (hasMarketedChicken) need.pendingMoveOut = true
+			}
 		}
 
 		if (histoH.length > 2 && histoH[2].length === 1) histoH[2][0].splice(2)
@@ -1730,12 +1779,20 @@ export function doDinnerTime(replayOnly) {
 		}
 	})
 
-	// Give MS for selling
+	// Give MS for selling — AFTER bonus calc so the sale that EARNED the milestone
+	// doesn't itself get the +$5 perk; perks apply from the next sale onward
 	sold.forEach((sale) => {
 		if (!replayOnly) giveSalesMilestones(sale.playerIndex, sale.needs)
 	})
 
 	if (!replayOnly) model.addHistory(rf.HIST_DINNER_TIME, histoHouses, -1, 0)
+
+	// Fried Chicken mod: record flips & move-outs (state itself was already applied above and
+	// recomputes identically on replay, so the handlers only drive UI highlighting)
+	if (fcMod && !replayOnly) {
+		if (flippedHouses.length > 0) model.addHistory(rf.HIST_FLIP_TO_FRIED_CHICKEN, flippedHouses, -1, 0)
+		if (movedOutHouses.length > 0) model.addHistory(rf.HIST_HOUSE_MOVED_OUT, movedOutHouses, -1, 0)
+	}
 
 	// --- PHASE 4: PAYOUTS & BANK BREAK ---
 	finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayOnly)
@@ -2463,6 +2520,8 @@ export function doMarketingCampaigns(replayOnly) {
 
 				const tryAddNeed = (good, history) => {
 					const needs = store.needs.find((n) => n.number === houseId)
+					// Fried Chicken mod: moved-out houses accept no marketing at all
+					if (needs?.movedOut) return false
 					if (isInfiniteHouse || (needs?.needs.length || 0) < limit) {
 						model.addNeedToHouse(good, houseId, playerIndex)
 						if (isApt) model.addNeedToHouse(good, houseId, playerIndex)
@@ -2697,6 +2756,9 @@ export function giveSalesMilestones(playerIndex, needs) {
 	}
 	if (needs.indexOf(rf.DUMPLING) > -1) {
 		plyr.awardMilestone(playerIndex, rf.FIRST_DUMPLING_SOLD)
+	}
+	if (needs.indexOf(rf.FRIED_CHICKEN) > -1) {
+		plyr.awardMilestone(playerIndex, rf.FIRST_FRIED_CHICKEN_SOLD)
 	}
 }
 

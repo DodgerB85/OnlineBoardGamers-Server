@@ -351,7 +351,7 @@ const svgInstructions = computed(() => {
 	addLine(currentLeft, currentTop, currentLeft + horizontalShift * 2, currentTop)
 	lines.push(generatePath(currentLeft, currentTop, -1, 1)) // P Cook
 
-	const extraCooks = actualArr.filter((id) => [rf.SUSHI_COOK, rf.NOODLE_COOK, rf.DUMPLING_COOK].includes(id)).length
+	const extraCooks = actualArr.filter((id) => [rf.SUSHI_COOK, rf.NOODLE_COOK, rf.DUMPLING_COOK, rf.FRIED_CHICKEN_COOK].includes(id)).length
 
 	for (let i = 0; i < extraCooks; i++) {
 		lines.push(generatePath(currentLeft, currentTop, -1, i + 2))

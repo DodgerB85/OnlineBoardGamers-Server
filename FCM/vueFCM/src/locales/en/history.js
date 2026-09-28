@@ -101,6 +101,10 @@
     usesProduce: "{name} uses: {employees} to produce/collect:",
     kimchiProduce: "{name} uses: {emp} during cleanup to produce: 1",
 
+    // Fried Chicken mod
+    flipToFriedChicken: "Unserved demand at house(s) {houses} flips to fried chicken:",
+    houseMovedOut: "House(s) {houses} moved out of the neighbourhood",
+
     // Building
     buildHouse: "{name} builds house #{num} {orient} at co-ordinates ({x}, {y})",
     buildGarden: "{name} builds a garden for house #{num} {orient} at co-ordinates ({x}, {y})",

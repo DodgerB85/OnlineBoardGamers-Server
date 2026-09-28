@@ -248,7 +248,10 @@ export default {
 		"firstCampaignManagerDesc": "本回合可放置1个营销板块（相同时长、类型和范围）",
 		"firstDumplingSold": "首个卖出饺子",
 		"firstDumplingSoldTitle": "首个卖出饺子",
-		"firstDumplingSoldDesc": "您的CEO获得一个奖励"
+		"firstDumplingSoldDesc": "您的CEO获得一个奖励",
+		"firstFriedChickenSold": "首个卖出炸鸡",
+		"firstFriedChickenSoldTitle": "首个卖出炸鸡",
+		"firstFriedChickenSoldDesc": "可营销炸鸡；每卖出 1 份 +$5"
 	},
 	"employees": {
 		"waitress": "服务员",
@@ -358,7 +361,11 @@ export default {
 		"nightShiftManager": "夜班经理",
 		"nightShiftManagerDesc": "你所有无需支付薪水的员工全都工作两次",
 		"ruralMarketeer": "乡村推销员",
-		"ruralMarketeerDesc": "在乡村地区板块旁放置一个巨型广告牌"
+		"ruralMarketeerDesc": "在乡村地区板块旁放置一个巨型广告牌",
+		"friedChickenCook": "炸鸡厨师",
+		"friedChickenCookDesc": "制作3份炸鸡",
+		"friedChickenChef": "炸鸡主厨",
+		"friedChickenChefDesc": "制作8份炸鸡"
 	},
 	"FCM_IO": {
 		"olderVersionRefresh": "看起来您使用的是游戏的旧版本，请刷新页面",
@@ -628,6 +635,8 @@ export default {
 		},
 		"system": "系统",
 		"admin": "admin",
+		"flipToFriedChicken": "房屋 {houses} 未被满足的需求翻面成炸鸡：",
+		"houseMovedOut": "房屋 {houses} 搬家了（本局不再接受任何广告）",
 		"ruralArea": "乡村地区",
 		"vertically": "垂直",
 		"horizontally": "水平",

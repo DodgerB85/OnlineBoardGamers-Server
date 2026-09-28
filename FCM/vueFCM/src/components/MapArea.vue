@@ -530,6 +530,21 @@ const needDisplays = computed(() => {
 
 	for (const need of store.needs) {
 		if (need.number === rf.RURAL_MARKETING_AREA) continue
+		if (need.movedOut) {
+			// Fried chicken mod: house has moved out — show SOLD sign on house/apartment
+			const houseObj = model.findHouse(need.number)
+			if (houseObj !== -1 && houseObj.index > -1) {
+				const [x, y] = view.getXYforSmallSquare(houseObj.index)
+				res.push({ type: "movedOut", x: x + sqSize * 0.5, y: y + sqSize * 0.5, width: store.refSize / 4 })
+			} else {
+				const apartment = model.findApartment(need.number)
+				if (apartment !== -1 && apartment.index > -1) {
+					const [x, y] = view.getXYforSmallSquare(apartment.index)
+					res.push({ type: "movedOut", x: x + sqSize, y: y + sqSize, width: store.refSize / 4 })
+				}
+			}
+			continue
+		}
 		if (!need.needs || need.needs.length === 0) continue
 
 		// House needs
@@ -733,6 +748,7 @@ function tileRotationClass(tileData) {
 			<!-- Display needs -->
 			<template v-for="(n, nIdx) in needDisplays" :key="'need' + nIdx">
 				<img v-if="n.type === 'token'" class="boardTokenImg needTokenImg" :src="view.giveBoardFoodTokenImage(n.good)" :style="tokenStyle(n)" :alt="n.good" />
+				<img v-else-if="n.type === 'movedOut'" class="boardTokenImg needTokenImg" :src="view.getImage('movedOut')" :style="tokenStyle(n)" alt="moved out" />
 				<div v-else class="apartmentDemandDiv" :style="{ left: n.x + 'px', top: n.y + 'px', 'font-size': n.fontSize, height: n.boxSize + 'px', width: n.boxSize + 'px' }">
 					<span class="apartmentDemandNumber">{{ n.count }}</span>
 					<img class="apartmentDemandImg" :src="view.giveBoardFoodTokenImage(n.good)" :style="apartmentTokenStyle(n)" :alt="n.good" />

@@ -63,6 +63,9 @@ export const useModelStore = defineStore("store", () => {
 		dumplings: false,
 		deliveryDrivers: false,
 		hawkers: false,
+
+		// Fried Chicken mod
+		friedChicken: false,
 	}
 
 	// This var affects the ZOOM level
@@ -122,6 +125,7 @@ export const useModelStore = defineStore("store", () => {
 	const freeways = reactive([])
 	const parks = reactive([])
 	const newRoads = reactive([])
+	const movedOutHouses = reactive([])
 
 	/*************************************** UNSAVED - TEMP VARS -- these do not need to be stored or saved */
 
@@ -139,7 +143,7 @@ export const useModelStore = defineStore("store", () => {
 		remainingProducers: [],
 		justProduced: {
 			team: [],
-			added: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+			added: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		},
 		justBuilt: [],
 		justLobbied: [],
@@ -229,7 +233,7 @@ export const useModelStore = defineStore("store", () => {
 			},
 			produce: {
 				total: 0,
-				produced: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+				produced: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 				unused: [],
 			},
 			houses: {
@@ -398,6 +402,7 @@ export const useModelStore = defineStore("store", () => {
 		freeways,
 		parks,
 		newRoads,
+		movedOutHouses,
 		reserveCards,
 		bank,
 		bankBroken,
