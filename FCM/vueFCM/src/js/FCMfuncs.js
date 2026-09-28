@@ -435,7 +435,7 @@ export function exportPlayer(playerIndex) {
 	)
 
 	// 8 - Resources (Optimized counter)
-	const exportResources = Array(10).fill(0)
+	const exportResources = Array(11).fill(0)
 	playerObj.resources.forEach((type) => exportResources[type]++)
 
 	// Trim trailing zeros efficiently
@@ -577,6 +577,9 @@ export function exportFCMmodel(forGameOver, includeContext) {
 			.filter((h) => h.needs != null)
 			.map((h) => {
 				const entry = [h.number]
+				// Fried Chicken mod: persist movedOut flag as a bare `1` marker (needs are
+				// always arrays in the legacy format, so this is unambiguous)
+				if (h.movedOut) entry.push(1)
 				const needsData = forGameOver ? h.needs.map((n) => n[0]) : h.needs
 				return entry.concat(needsData)
 			})
@@ -848,17 +851,24 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	// 8? - needs
 	store.needs = inputArr[IMPORT_INDEX].map((house) => {
 		const number = house[0]
+		let movedOut = false
+		let sliceStart = 1
+		// Fried Chicken mod: detect bare `1` marker after house number (movedOut)
+		if (house.length > 1 && house[1] === 1) {
+			movedOut = true
+			sliceStart = 2
+		}
 		let needs = []
 
 	if (store.gameflow.phase !== rf.PHASE_GAME_OVER) {
 			// Standard Import: Extract all needs data directly
-			needs = house.slice(1)
+			needs = house.slice(sliceStart)
 		} else {
 			// Game Over Import: Convert flat goods list to [good, -1] format
-			needs = house.slice(1).map((good) => [good, -1])
+			needs = house.slice(sliceStart).map((good) => [good, -1])
 		}
 
-		return { number, needs }
+		return { number, needs, ...(movedOut ? { movedOut: true } : {}) }
 	})
 
 	IMPORT_INDEX++

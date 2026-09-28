@@ -11997,6 +11997,19 @@ msgstr "注意：BtInternet 正将我的邮件判为垃圾邮件。请将"
 
 #~ msgid "Sorry, someone else joined the game and it is full"
 #~ msgstr "抱歉，有人加入游戏，游戏已满"
+#: .\sharedFunctions\sharedRefs.py:787
+msgid ""
+"Fried Chicken - Unmet demand flips to Fried Chicken; unserved Fried Chicken "
+"means the house moves out"
+msgstr "炸鸡模组 - 未满足的需求翻面成炸鸡；炸鸡仍未满足则该房屋搬家"
+
+#: .\templates\Lobby\fcm_options_grid2.html:9
+msgid "Use Fried Chicken"
+msgstr "使用炸鸡模组"
+
+#: .\templates\Lobby\fcm_options_grid2.html:10
+msgid "Unmet demand flips to Fried Chicken; unserved Fried Chicken means the house moves out"
+msgstr "未满足的需求翻面成炸鸡；炸鸡仍未满足则该房屋搬家"
 
 #~ msgid "Basic Options"
 #~ msgstr "基本选项"

@@ -3,6 +3,7 @@ import * as rf from "../../js/FCMreference"
 import * as view from "../../js/FCMview"
 import * as controller from "../../js/FCMcontroller"
 import * as rules from "../../js/FCMrules"
+import * as plyr from "../../js/FCMplayer"
 import * as IO from "../../backend/FCM_IO"
 
 import { useModelStore } from "../../stores/FCMstore.js"
@@ -172,7 +173,14 @@ const computedRotatableCampaign = computed(() => {
 	return campaignData.width !== campaignData.height && campaignData.type !== rf.GIANT_BILLBOARD
 })
 
-const secondGoodChoices = computed(() => [0, 1, 2, 3, 4].filter((good) => good !== store.context.good))
+const secondGoodChoices = computed(() => mainGoodChoices.value.filter((good) => good !== store.context.good))
+
+// Fried Chicken mod: only the holder of the First Fried Chicken Sold milestone may market fried chicken
+const mainGoodChoices = computed(() => {
+	const base = [0, 1, 2, 3, 4]
+	if (store.startingOptions.friedChicken && plyr.hasMilestone(controller.currentPlayerIndex(), rf.FIRST_FRIED_CHICKEN_SOLD)) base.push(rf.FRIED_CHICKEN)
+	return base
+})
 
 const computedCampaignPreviewSrc = computed(() => {
 	const campaignData = rf.MARKETING_CAMPAIGNS[store.context.campaign]
@@ -337,7 +345,7 @@ function flipLobbyist(vertical) {
 
 			<!-- Main good -->
 			<div class="addBoxSection">
-				<img v-for="good in [0, 1, 2, 3, 4]" :key="good" :src="view.getImage(`item_${good}`)" class="goodChoiceImg" :class="{ selectedGoodImg: store.context.good === good }" @click="controller.chooseGood(good)" :alt="good" />
+				<img v-for="good in mainGoodChoices" :key="good" :src="view.getImage(`item_${good}`)" class="goodChoiceImg" :class="{ selectedGoodImg: store.context.good === good }" @click="controller.chooseGood(good)" :alt="good" />
 			</div>
 
 			<!-- Second good for the Brand Manager double airplane campaign -->

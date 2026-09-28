@@ -131,6 +131,11 @@ export function replaySetupKetchupExpansion(playerNumber) {
 		store.availableMarketingCampaigns.push(25, 26, 27)
 		store.availableEmployees[rf.HAWKER_MARKETEER] = 6
 	}
+	if (store.startingOptions.friedChicken) {
+		store.availableEmployees[rf.FRIED_CHICKEN_COOK] = 6
+		store.availableEmployees[rf.FRIED_CHICKEN_CHEF] = max
+		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_FRIED_CHICKEN_SOLD)
+	}
 }
 
 export function resetDataForReplay() {
@@ -295,6 +300,8 @@ export async function generateReplayData(spoilerFree = false) {
 		else if (action === rf.HIST_BANK_BREAK) replayBankBreak(i, playerIdx, param)
 		else if (action === rf.HIST_PRODUCE_KIMCHI) replayProduceKimchi(i, playerIdx, param)
 		else if (action === rf.HIST_END_GAME) replayEndGame(i, playerIdx, param)
+		else if (action === rf.HIST_FLIP_TO_FRIED_CHICKEN) replayFriedChickenHouse(i, playerIdx, param, false)
+		else if (action === rf.HIST_HOUSE_MOVED_OUT) replayFriedChickenHouse(i, playerIdx, param, true)
 
 		store.replayData.push(funcs.simpleExportWholeFCMmodel())
 
@@ -318,6 +325,23 @@ export async function generateReplayData(spoilerFree = false) {
 
 export function replayProduceKimchi(historyIndex, playerIndex, param) {
 	plyr.addResources(playerIndex, rf.KIMCHI, 1)
+}
+
+// Fried Chicken mod: state is recomputed by replayDinnerTime -> doDinnerTime(true),
+// so these handlers only reproduce the board highlights
+export function replayFriedChickenHouse(historyIndex, playerIndex, param, movedOut) {
+	const store = useModelStore()
+	for (let h = 0; h < param.length; h++) {
+		const houseNumber = movedOut ? param[h] : param[h][0]
+		const houseIndex = map.findIndexForHouse(houseNumber)
+		if (houseIndex === -1) continue
+		const houseData = store.houses.find((hs) => hs.number === houseNumber)
+		const rotation = houseData ? houseData.rotated : 1
+		const sideways = rotation === 1 || rotation === 3
+		const height = sideways ? 2 : 3
+		const width = sideways ? 3 : 2
+		for (let i = 0; i < height; i++) for (let j = 0; j < width; j++) store.context.highlightHistorySquares.push(houseIndex + j + rf.ssW * i)
+	}
 }
 
 export function replayNewTile(historyIndex, playerIndex, param) {

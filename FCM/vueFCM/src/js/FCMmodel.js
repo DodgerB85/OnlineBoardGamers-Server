@@ -362,6 +362,8 @@ export function setInternalStartingOptions(startingOptionsArray) {
 		if (opts[i] === rf.SO_DUMPLINGS) store.startingOptions.dumplings = true
 		if (opts[i] === rf.SO_DELIVERY_DRIVERS) store.startingOptions.deliveryDrivers = true
 		if (opts[i] === rf.SO_HAWKERS) store.startingOptions.hawkers = true
+		// Fried Chicken mod
+		if (opts[i] === rf.SO_FRIED_CHICKEN) store.startingOptions.friedChicken = true
 
 		if (opts[i] === rf.SO_STRICT_PAYDAY_FRIDGE) store.startingOptions.strictPaydayFridge = true
 		if (opts[i] === rf.SO_TRAINING_GAME) store.startingOptions.trainingGame = true
@@ -460,6 +462,12 @@ export function setupKetchupExpansion(playerNumber) {
 	if (store.startingOptions.hawkers) {
 		store.availableEmployees[rf.HAWKER_MARKETEER] = 6
 		store.availableMarketingCampaigns.push(25, 26, 27)
+	}
+	// Fried Chicken mod
+	if (store.startingOptions.friedChicken) {
+		store.availableEmployees[rf.FRIED_CHICKEN_COOK] = 6
+		store.availableEmployees[rf.FRIED_CHICKEN_CHEF] = max
+		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_FRIED_CHICKEN_SOLD)
 	}
 }
 
@@ -634,11 +642,15 @@ export function addNeedToHouse(good, house, ownerIndex) {
 		store.needs.push(houseObj)
 	}
 
+	// Fried Chicken mod: a house that has moved out never accepts marketing again
+	if (houseObj.movedOut) return false
+
 	// 3. Ensure the needs array exists (defensive check)
 	houseObj.needs = houseObj.needs || []
 
 	// 4. Push the new data
 	houseObj.needs.push([good, ownerIndex])
+	return true
 }
 
 export function findHouse(number) {

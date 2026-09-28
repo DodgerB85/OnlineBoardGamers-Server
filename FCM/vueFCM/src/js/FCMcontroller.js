@@ -2616,17 +2616,20 @@ export function clickedProducer(producer) {
 			if (producer == rf.BURGER_COOK || producer == rf.PIZZA_COOK || producer == rf.DUMPLING_COOK) amount = 3
 			if (producer == rf.SUSHI_COOK) amount = 2
 			if (producer == rf.NOODLE_COOK) amount = 6
+			if (producer == rf.FRIED_CHICKEN_COOK) amount = 3
 
 			if (producer == rf.BURGER_CHEF || producer == rf.PIZZA_CHEF || producer == rf.DUMPLING_CHEF) amount = 8
 			if (producer == rf.SUSHI_CHEF || producer == rf.LEAD_BARISTA) amount = 5
 
 			if (producer == rf.NOODLE_CHEF) amount = 16
+			if (producer == rf.FRIED_CHICKEN_CHEF) amount = 8
 
 			if (producer == rf.BURGER_COOK || producer == rf.BURGER_CHEF) item = rf.BURGER
 			if (producer == rf.PIZZA_COOK || producer == rf.PIZZA_CHEF) item = rf.PIZZA
 			if (producer == rf.SUSHI_COOK || producer == rf.SUSHI_CHEF) item = rf.SUSHI
 			if (producer == rf.NOODLE_COOK || producer == rf.NOODLE_CHEF) item = rf.NOODLES
 			if (producer == rf.DUMPLING_COOK || producer == rf.DUMPLING_CHEF) item = rf.DUMPLING
+			if (producer == rf.FRIED_CHICKEN_COOK || producer == rf.FRIED_CHICKEN_CHEF) item = rf.FRIED_CHICKEN
 
 			if (producer == rf.BARISTA_TRAINEE || producer == rf.BARISTA || producer == rf.LEAD_BARISTA) item = rf.COFFEE
 

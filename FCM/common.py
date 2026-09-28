@@ -96,6 +96,7 @@ def buildFCMstartingOptions(post_data):
         "dumplings",
         "deliveryDrivers",
         "hawkers",
+        "friedChicken",
         "allowRewind",
     ]
     optionsArr.extend(int(post_data[opt]) for opt in option_names if opt in post_data)
@@ -267,6 +268,7 @@ def create_fcm_game(
                 rfFCM.SO_DUMPLINGS,
                 rfFCM.SO_DELIVERY_DRIVERS,
                 rfFCM.SO_HAWKERS,
+                rfFCM.SO_FRIED_CHICKEN,
             ]
         ):
             stats_excluded_game = True

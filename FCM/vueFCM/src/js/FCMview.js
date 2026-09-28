@@ -263,6 +263,8 @@ export function getImage(image) {
 	else if (image === `emp_${rf.JAZZ_MUSICIAN}`) return new URL(`../../../static/FCM/images/e_jazz_musician.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.DUMPLING_COOK}`) return new URL(`../../../static/FCM/images/e_dumpling_cook.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.DUMPLING_CHEF}`) return new URL(`../../../static/FCM/images/e_dumpling_chef.jpg`, import.meta.url).href
+	else if (image === `emp_${rf.FRIED_CHICKEN_COOK}`) return new URL(`../../../static/FCM/images/e_fried_chicken_cook.jpg`, import.meta.url).href
+	else if (image === `emp_${rf.FRIED_CHICKEN_CHEF}`) return new URL(`../../../static/FCM/images/e_fried_chicken_chef.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.DELIVERY_DRIVER}`) return new URL(`../../../static/FCM/images/e_delivery_driver.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.HAWKER_MARKETEER}`) return new URL(`../../../static/FCM/images/e_hawker_marketeer.jpg`, import.meta.url).href
 	// MS icons - 29 icons
@@ -314,6 +316,7 @@ export function getImage(image) {
 	else if (image === `item_${rf.SUSHI}`) return new URL(`../../../static/FCM/images/sushi.png`, import.meta.url).href
 	else if (image === `item_${rf.KIMCHI}`) return new URL(`../../../static/FCM/images/kimchi.png`, import.meta.url).href
 	else if (image === `item_${rf.DUMPLING}`) return new URL(`../../../static/FCM/images/dumpling.png`, import.meta.url).href
+	else if (image === `item_${rf.FRIED_CHICKEN}`) return new URL(`../../../static/FCM/images/fried_chicken.png`, import.meta.url).href
 	// HOUSES
 	else if (image === "house_garden") return new URL(`../../../static/FCM/images/house_garden.jpg`, import.meta.url).href
 	else if (image === "house_small") return new URL(`../../../static/FCM/images/house.jpg`, import.meta.url).href
@@ -372,9 +375,11 @@ export function getImage(image) {
 	else if (image === "so_fryChef") return new URL(`../../../static/FCM/images/so_fryChef.svg`, import.meta.url).href
 	else if (image === "so_kimchi") return new URL(`../../../static/FCM/images/so_kimchi.svg`, import.meta.url).href
 	else if (image === "so_sushi") return new URL(`../../../static/FCM/images/so_sushi.svg`, import.meta.url).href
+	else if (image === "so_friedChicken") return new URL(`../../../static/FCM/images/so_friedChicken.png`, import.meta.url).href
 	else if (image === "so_noodles") return new URL(`../../../static/FCM/images/so_noodles.svg`, import.meta.url).href
 	else if (image === "so_skip") return new URL(`../../../static/FCM/images/so_skip.jpg`, import.meta.url).href
 	// HOUSES & GARDEN
+	else if (image === "movedOut") return new URL(`../../../static/FCM/images/moved_out.png`, import.meta.url).href
 	else if (image === "garden") return new URL(`../../../static/FCM/images/garden.jpg`, import.meta.url).href
 	// ROADS (lobbyist - under construction while turnAdded is the current turn)
 	else if (image === "roadUC") return new URL(`../../../static/FCM/images/roadUC.jpg`, import.meta.url).href
@@ -486,6 +491,9 @@ export function giveBoardFoodTokenImage(good) {
 			case rf.DUMPLING:
 				name = "dumpling_board.png"
 				break
+			case rf.FRIED_CHICKEN:
+				name = "fried_chicken_board.png"
+				break
 		}
 	} else {
 		switch (good) {
@@ -518,6 +526,9 @@ export function giveBoardFoodTokenImage(good) {
 				break
 			case rf.DUMPLING:
 				name = "dumpling_board.png"
+				break
+			case rf.FRIED_CHICKEN:
+				name = "fried_chicken_board.png"
 				break
 		}
 	}

@@ -53,7 +53,7 @@ export default defineConfig(({ command }) => ({
         ? [{ find: '@static', replacement: fileURLToPath(new URL('./src', import.meta.url)) }]
         : [{ find: '@static', replacement: fileURLToPath(new URL('../static', import.meta.url)) }]
   },
-   base: command === 'serve' ? '/static/' : 'https://www.onlineboardgamers.com/static/FCM',
+   base: command === 'serve' ? '/static/' : (process.env.VITE_PUBLIC_BASE || 'https://www.onlineboardgamers.com/static/FCM'),
   build: {
     outDir: resolve('../static/FCM/FCMvuedist'),
     assetsDir: './assets',

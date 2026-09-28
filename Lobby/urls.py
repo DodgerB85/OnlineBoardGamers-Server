@@ -46,6 +46,7 @@ urlpatterns = [
     path("fcmNewCode/", views.fcmNewCode, name="fcmNewCode"),
     path("createFCMpage/", views.createFCMpage, name="createFCMpage"),
     path("createFCMpage/<int:gameID>/", views.createFCMpage, name="createFCMpage"),
+    path("createFCM2/", views.createFCM2page, name="createFCM2page"),
     path(
         "createFCMminiTournament/",
         views.createFCMminiTournament,

@@ -63,6 +63,12 @@ export const useModelStore = defineStore("store", () => {
 		dumplings: false,
 		deliveryDrivers: false,
 		hawkers: false,
+
+		// Fried Chicken mod
+		friedChicken: false,
+
+		// In-game state for Fried Chicken mod (survives via export)
+		movedOutHouses: [],
 	}
 
 	// This var affects the ZOOM level
@@ -139,7 +145,7 @@ export const useModelStore = defineStore("store", () => {
 		remainingProducers: [],
 		justProduced: {
 			team: [],
-			added: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+			added: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		},
 		justBuilt: [],
 		justLobbied: [],
@@ -229,7 +235,7 @@ export const useModelStore = defineStore("store", () => {
 			},
 			produce: {
 				total: 0,
-				produced: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+				produced: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 				unused: [],
 			},
 			houses: {

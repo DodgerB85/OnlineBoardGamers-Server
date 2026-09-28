@@ -252,7 +252,11 @@ milestones: {
   
   firstDumplingSold: "First dumpling sold",
   firstDumplingSoldTitle: "First dumpling sold",
-  firstDumplingSoldDesc: "Your CEO gets a bonus"
+  firstDumplingSoldDesc: "Your CEO gets a bonus",
+
+  firstFriedChickenSold: "First fried chicken sold",
+  firstFriedChickenSoldTitle: "First fried chicken sold",
+  firstFriedChickenSoldDesc: "May market fried chicken; +$5 each sold",
 },
 
 // Employees
@@ -417,7 +421,13 @@ employees: {
   deliveryDriverDesc: "Distance from any residence with 2+ demand is 0",
   
   jazzMusician: "Jazz Musician",
-  jazzMusicianDesc: "Get $15 cash. Lose ties against restaurants with fewer musicians"
+  jazzMusicianDesc: "Get $15 cash. Lose ties against restaurants with fewer musicians",
+
+  friedChickenCook: "Fried Chicken Cook",
+  friedChickenCookDesc: "Produce 3 fried chicken",
+
+  friedChickenChef: "Fried Chicken Chef",
+  friedChickenChefDesc: "Produce 8 fried chicken"
 },
 
 // FCM_IO messages
