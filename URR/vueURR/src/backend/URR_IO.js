@@ -26,18 +26,17 @@ export function getNextCurrentPlayers() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 
-	if (personal.trainingGame) {
+	if (personal.trainingGame && store.gameflow.turnOrder.length > 0) {
 		return {
 			allIsCurrentPlayers: [personal.name],
 			allRemainingPlayersInTurnOrder: [personal.name],
-			pendingPlayersArr: [],
 		}
 	}
 
 	const allIsCurrentPlayers = []
 	if (store.gameflow.turnOrder.length > 0) allIsCurrentPlayers.push(store.players[store.gameflow.turnOrder[0]].name)
 	const allRemainingPlayersInTurnOrder = store.gameflow.turnOrder.map((idx) => store.players[idx].name)
-	return { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, pendingPlayersArr: [] }
+	return { allIsCurrentPlayers, allRemainingPlayersInTurnOrder }
 }
 
 export async function saveGame(saveRewind = true) {
@@ -50,7 +49,7 @@ export async function saveGame(saveRewind = true) {
 	personal.haltPlay = true
 	store.viewSettings.showLoader = true
 
-	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, pendingPlayersArr } = getNextCurrentPlayers()
+	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder } = getNextCurrentPlayers()
 
 	let postData = {
 		action: "saveGame",
@@ -63,15 +62,15 @@ export async function saveGame(saveRewind = true) {
 		saveRewind: saveRewind,
 		allIsCurrentPlayers: allIsCurrentPlayers,
 		allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
-		pendingPlayersArr: pendingPlayersArr,
 	}
 
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
 		postData.status = "FINISHED"
 		postData.saveRewind = false
-		postData.finalPositions = [...store.gameflow.fullTurnOrder]
-		postData.winnerUsername = store.players[store.gameflow.fullTurnOrder[0]].name
-		postData.tournamentData = store.gameflow.fullTurnOrder.map((playerIdx, i) => (i === 0 ? [store.players[playerIdx].name] : [store.players[playerIdx].name, store.players[playerIdx].score]))
+		const positions = store.gameflow.finalPositions || Array.from(store.players.keys()).sort((a, b) => store.players[b].score - store.players[a].score)
+		postData.finalPositions = [...positions]
+		postData.winnerUsername = store.players[positions[0]].name
+		postData.tournamentData = positions.map((playerIdx, i) => (i === 0 ? [store.players[playerIdx].name] : [store.players[playerIdx].name, store.players[playerIdx].score]))
 	}
 
 	try {
@@ -101,12 +100,6 @@ export async function saveGame(saveRewind = true) {
 		store.viewSettings.showLoader = false
 		personal.haltPlay = false
 	}
-}
-
-// Alias used by the generic post-stack save flow. The scaffold has no server
-// side stack processing, so this behaves exactly like a normal save.
-export async function saveAndUpdateNotifictionsAfterStack() {
-	return saveGame(false)
 }
 
 export async function sendChatMessage(newEntry) {
@@ -368,7 +361,7 @@ export async function loadRewind() {
 async function updateDataFromLoadRewind() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, pendingPlayersArr } = getNextCurrentPlayers()
+	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder } = getNextCurrentPlayers()
 	try {
 		const response = await fetch("/URR/processURRturn/", {
 			method: "POST",
@@ -377,7 +370,6 @@ async function updateDataFromLoadRewind() {
 				turn: store.gameflow.turn,
 				allIsCurrentPlayers: allIsCurrentPlayers,
 				allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
-				pendingPlayersArr: pendingPlayersArr,
 				gameID: personal.gameID,
 				phase: store.gameflow.phase,
 				gameData: JSON.stringify(model.exportGameData()),

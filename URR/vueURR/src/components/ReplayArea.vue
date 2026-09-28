@@ -4,6 +4,7 @@
  * Replace this with a proper replay of the real game state as you build URR.
  */
 import { ref } from "vue"
+import { restoreState } from "../js/URRmodel.js"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
 
@@ -19,10 +20,10 @@ function applyStep() {
 	try {
 		const snapshot = JSON.parse(entry[2])
 		if (snapshot && snapshot.players) {
-			store.players.splice(0, store.players.length, ...snapshot.players)
+			restoreState(snapshot)
 		}
 	} catch (e) {
-		// ignore malformed snapshot
+		console.error("Unable to restore URR replay snapshot:", e)
 	}
 }
 

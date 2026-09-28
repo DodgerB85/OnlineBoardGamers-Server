@@ -67,7 +67,6 @@
     initData.turn = {{ turn }};
     initData.phase = {{ phase }};
     initData.finishedGame = {{ finishedGame|lower }};
-    initData.transactionID = "{{ transactionID }}";
 
     {% if spoilerFree %}
     initData.spoilerFree = true;
@@ -85,8 +84,6 @@
     initData.kickoutVotesData = {{ kickoutVotesData|default:'{}'|safe }};
     initData.kickoutVoteThreshold = {{ kickoutVoteThreshold|default:'0' }};
     {% if involvedPlayer %}
-    initData.currentMoveData = {{ currentMoveData|safe }};
-    initData.allMyMoveData = {{ allMyMoveData|safe }};
     initData.statsExcludedGame = {{ statsExcludedGame|lower }};
     initData.secondsToNextKickout = {{ secondsToNextKickout }};
     {% if kickoutRequired > 0 and not myMove %}

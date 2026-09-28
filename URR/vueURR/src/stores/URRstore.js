@@ -12,6 +12,15 @@ export const useModelStore = defineStore("store", () => {
 	var gameName = "Game Name"
 
 	const players = reactive([])
+	const version = ref(rf.GAME_DATA_VERSION)
+	const states = ref([])
+	const nations = ref([])
+	const board = ref({ areas: [], canals: [], stateOrder: [], markerLimit: null })
+	const landPrices = ref([...rf.LAND_COLONIZATION_PRICES])
+	const era = ref(1)
+	const cardSupply = ref({ ...rf.ERA_CARD_COUNTS })
+	const rain = ref({ step: null, outflow: null, harvestOrder: [] })
+	const nextDiggerId = ref(0)
 
 	const gameflow = reactive({
 		turn: 1,
@@ -65,6 +74,7 @@ export const useModelStore = defineStore("store", () => {
 	return {
 		gameName,
 		players,
+		version, states, nations, board, landPrices, era, cardSupply, rain, nextDiggerId,
 		gameflow,
 		chatData,
 		history,

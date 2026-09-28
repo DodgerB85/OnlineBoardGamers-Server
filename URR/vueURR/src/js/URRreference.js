@@ -98,3 +98,11 @@ export function doAdminAlrt(msg) {
 export function doAdminConsolLg(msg) {
 	console.log(msg)
 }
+
+// Rulebook p.16; the Millennium supply is unlimited, regardless of printed cards.
+export const ERA_CARD_COUNTS = { 1: 10, 2: 8, 3: 7, 4: 5 }
+// Printed land-price chart (URR/tempAssets/BGG/ur_1830_bc_all_files/chart.pdf).
+export const LAND_PRICE_TRACK = [5, 10, 18, 25, 32, 39, 46, 53, 60, 67, 71, 76, 82, 90, 100, 112, 126, 142, 160, 180, 200, 225, 250, 275, 300, 325]
+export const LAND_INTERVENTION_PRICE = 46
+export const HIST_ACTION = 3
+export const GAME_DATA_VERSION = 1

@@ -1,11 +1,3 @@
-/**
- * Turn / phase control.
- *
- * The scaffold uses a simple sequential turn model: every player moves once
- * per turn (in turnOrder), then the turn increments. Replace this with the
- * real UR: 1830 BC flow as you implement it.
- */
-
 import * as rf from "./URRreference"
 import * as model from "./URRmodel"
 import * as IO from "../backend/URR_IO"
@@ -22,10 +14,6 @@ export function isMyTurn() {
 	return personal.canPlay() && currentPlayerIndex() === personal.pov
 }
 
-export function isSimulPhase() {
-	return false
-}
-
 export function startPlayerTurn() {
 	const personal = usePersonalStore()
 	const store = useModelStore()
@@ -37,20 +25,27 @@ export function startPlayerTurn() {
 	model.rebuildTurnOrder()
 }
 
-export function endPlayerTurn() {
+// The UI can submit explicit rule actions without owning any game logic.
+export async function submitAction(action) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	if (!personal.canPlay()) return
-
-	if (store.gameflow.turnOrder.length > 0) store.gameflow.turnOrder.shift()
-
-	if (store.gameflow.turnOrder.length === 0) {
-		store.gameflow.turn += 1
-		store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
+	if (!personal.canPlay()) return false
+	const player = personal.trainingGame || rf.SUPER_USERS.includes(personal.name) ? currentPlayerIndex() : personal.pov
+	try {
+		model.performAction(player, action)
+		store.gameMessages.actionError = ""
+	} catch (error) {
+		store.gameMessages.actionError = error.message
+		return false
 	}
+	await IO.saveGame(true)
+	return true
+}
 
-	model.addHistory(rf.HIST_END_TURN, personal.pov, model.snapshotState())
-	IO.saveGame(true)
+export function endPlayerTurn() {
+	const store = useModelStore()
+	const type = store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep !== "eridu" ? "endDevelopment" : "pass"
+	return submitAction({ type })
 }
 
 export function timedOutPlayerObj() {

@@ -109,12 +109,6 @@ def showURRgame(request, game_id=1, spoilerFree=False, replayStep=1):
         return render(request, "URR/showURRgame.html", returnData)
 
     returnData.update(result["involved_data"])
-    returnData.update(
-        {
-            "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
-            "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
-        }
-    )
 
     return render(request, "URR/showURRgame.html", returnData)
 
@@ -140,13 +134,6 @@ def _processURRturn(request):
     presenter = cast("URRpresenter", currentGame.presenter())
 
     if jsonData["action"] == "saveGame":
-        return performSaveURRGame(request, currentGame, jsonData)
-
-    elif jsonData["action"] == "saveAndUpdateNotifictionsAfterStack":
-        # Generic alias: the scaffold has no server-side stack processing, so
-        # this is just a normal save that also releases any transaction lock.
-        if currentGame.transactionID and jsonData.get("transactionID", "") == currentGame.transactionID:
-            currentGame.transactionID = ""
         return performSaveURRGame(request, currentGame, jsonData)
 
     elif jsonData["action"] == "resign":
@@ -196,7 +183,6 @@ def _processURRturn(request):
         if not currentRewindDataArray:
             return JsonResponse({"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")}, safe=False)
 
-        PwipeAllMoveData(currentGame)
         loadData = currentRewindDataArray.pop() if currentRewindDataArray else ""
         while len(currentRewindDataArray) > 0 and loadData == currentGame.gameData:
             loadData = currentRewindDataArray.pop()
@@ -434,9 +420,6 @@ def URRdata(request, dataType=1):
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "finishedGame": currentGame.gameStatus == "FINISHED",
                 "latestUpdate": currentGame.latestUpdate,
-                "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
-                "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
-                "transactionID": currentGame.transactionID,
             }
         )
     elif dataType == 2:
@@ -455,26 +438,10 @@ def URRdata(request, dataType=1):
                 "gameData": currentGame.gameData if currentGame.gameData else "{}",
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
-                "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
-                "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
-                "transactionID": currentGame.transactionID,
             }
         )
 
     return HttpResponse(status=204)  # No Content
-
-
-#########################################################
-#
-#   MOVE DATA HELPERS
-#
-#########################################################
-
-
-def PwipeAllMoveData(currentGame):
-    for gp in currentGame.players.all():
-        gp.moveDataJSON = None
-        gp.save(update_fields=["moveDataJSON"])
 
 
 @login_required()
