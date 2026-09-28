@@ -1604,7 +1604,8 @@ export function doDinnerTime(replayOnly) {
 
 	// Fried Chicken mod: track flips & move-outs for history
 	const flippedHouses = []
-	const movedOutHouses = []
+	const movedOutHouses = store.movedOutHouses
+	movedOutHouses.splice(0) // reset for this settlement
 	const fcMod = store.startingOptions.friedChicken
 
 	// --- PHASE 1: WORK THROUGH NEEDS ---

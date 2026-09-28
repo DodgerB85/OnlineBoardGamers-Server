@@ -784,7 +784,7 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
         rfFCM.SO_DUMPLINGS: ("so_dumplings.svg", "Dumplings"),
         rfFCM.SO_DELIVERY_DRIVERS: ("so_delivery.svg", "Delivery Drivers"),
         rfFCM.SO_HAWKERS: ("so_hawkers.svg", "Hawkers"),
-        rfFCM.SO_FRIED_CHICKEN: ("so_friedChicken.png", "Fried Chicken - Unmet demand flips to Fried Chicken; unserved Fried Chicken means the house moves out"),
+        rfFCM.SO_FRIED_CHICKEN: ("so_friedChicken.svg", "Fried Chicken - Unmet demand flips to Fried Chicken; unserved Fried Chicken means the house moves out"),
         rfFCM.SO_STRICT_PAYDAY_FRIDGE: ("so_strict.svg", "Turn Order Payday/Fridge"),
         rfFCM.SO_DRAFT_MODULE_BREAKER: ("so_draftMods.jpg", "Draft Modules"),
         rfFCM.SO_DRAFT_SKIP_MODULE: ("so_skip.jpg", "Skip Module"),

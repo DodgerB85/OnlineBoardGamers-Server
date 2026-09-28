@@ -375,7 +375,7 @@ export function getImage(image) {
 	else if (image === "so_fryChef") return new URL(`../../../static/FCM/images/so_fryChef.svg`, import.meta.url).href
 	else if (image === "so_kimchi") return new URL(`../../../static/FCM/images/so_kimchi.svg`, import.meta.url).href
 	else if (image === "so_sushi") return new URL(`../../../static/FCM/images/so_sushi.svg`, import.meta.url).href
-	else if (image === "so_friedChicken") return new URL(`../../../static/FCM/images/so_friedChicken.png`, import.meta.url).href
+	else if (image === "so_friedChicken") return new URL(`../../../static/FCM/images/so_friedChicken.svg`, import.meta.url).href
 	else if (image === "so_noodles") return new URL(`../../../static/FCM/images/so_noodles.svg`, import.meta.url).href
 	else if (image === "so_skip") return new URL(`../../../static/FCM/images/so_skip.jpg`, import.meta.url).href
 	// HOUSES & GARDEN

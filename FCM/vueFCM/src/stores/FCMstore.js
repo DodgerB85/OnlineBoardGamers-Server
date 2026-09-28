@@ -66,9 +66,6 @@ export const useModelStore = defineStore("store", () => {
 
 		// Fried Chicken mod
 		friedChicken: false,
-
-		// In-game state for Fried Chicken mod (survives via export)
-		movedOutHouses: [],
 	}
 
 	// This var affects the ZOOM level
@@ -128,6 +125,7 @@ export const useModelStore = defineStore("store", () => {
 	const freeways = reactive([])
 	const parks = reactive([])
 	const newRoads = reactive([])
+	const movedOutHouses = reactive([])
 
 	/*************************************** UNSAVED - TEMP VARS -- these do not need to be stored or saved */
 
@@ -404,6 +402,7 @@ export const useModelStore = defineStore("store", () => {
 		freeways,
 		parks,
 		newRoads,
+		movedOutHouses,
 		reserveCards,
 		bank,
 		bankBroken,
