@@ -1,0 +1,24 @@
+{% extends "Lobby/help_shell.html" %}
+{% load static %}
+{% load i18n %}
+{% block page_title %}
+  {% translate "UR: 1830 BC Help" %}
+{% endblock page_title %}
+{% block content %}
+  <div class="card section">
+    <h2>{% translate "Rules" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% blocktranslate %}UR: 1830 BC is a board game by Jeroen Doumen and Joris Wiersinga, published by <a class="linkOther" href="https://www.splottershop.com/" target="_blank">Splotter Spellen</a>.{% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+  <div class="card section">
+    <h2>{% translate "Playing the Game" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% translate "This game is still being implemented. Help content will be added here." %}
+      </p>
+    </div>
+  </div>
+{% endblock content %}

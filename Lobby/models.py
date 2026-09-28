@@ -26,6 +26,7 @@ from .presenters import (
     AQYpresenter,
     BUSpresenter,
     CNSpresenter,
+    DDLpresenter,
     FCMpresenter,
     GamePresenter,
     HLCpresenter,
@@ -33,6 +34,7 @@ from .presenters import (
     KFWpresenter,
     RNBpresenter,
     TGZpresenter,
+    URRpresenter,
     WEBpresenter,
 )
 from .sharedFunctions.sharedRefs import (
@@ -445,6 +447,8 @@ class Game(BaseGame):
         "BUS": BUSpresenter,
         "FCM": FCMpresenter,
         "RNB": RNBpresenter,
+        "URR": URRpresenter,
+        "DDL": DDLpresenter,
         "HLC": HLCpresenter,
         "KFW": KFWpresenter,
     }

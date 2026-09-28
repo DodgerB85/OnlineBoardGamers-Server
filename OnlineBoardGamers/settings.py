@@ -130,6 +130,8 @@ INSTALLED_APPS = [
     "PPF",
     "WEB",
     "RNB",
+    "URR",
+    "DDL",
     "statici18n",
     "i18n",
 ]

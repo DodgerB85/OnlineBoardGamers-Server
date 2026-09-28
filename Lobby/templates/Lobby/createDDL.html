@@ -1,0 +1,189 @@
+{% extends "Lobby/layout.html" %}
+{% load static i18n compress %}
+{% block head %}
+{% endblock %}
+{% block body %}
+    {{ request.user.id|json_script:"user_id" }}
+    {{ request.user.username|json_script:"username" }}
+
+    <div class="page">
+        <div class="page-header">
+            <h1 class="page-title">{% translate "Duck Dealer" %}</h1>
+            <a class="button button-ghost button-sm" href="{% url 'newGamesPage' %}">&#8592; {% translate "New Game" %}</a>
+        </div>
+
+        {% if messages %}
+        <div style="margin-bottom:16px">
+            {% for message in messages %}
+            <div class="pill {% if message.tags == 'error' %}pill-danger{% elif message.tags == 'success' %}pill-positive{% else %}pill-accent{% endif %}" style="display:block;padding:10px 14px;border-radius:var(--radius-md);margin-bottom:8px">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="card card-soft" style="border-left:3px solid var(--color-accent);margin-bottom:16px">
+            <span style="font-size:14px">{% translate "New to Duck Dealer? For Rules, How to Play, and Game Guide, please see " %}<a href="{% url 'DDL:DDLhelp' %}">{% translate "Help" %}</a>.</span>
+        </div>
+
+        <form id="gameCreationForm" autocomplete="off" action="{% url 'DDL:createDDLgame' %}" method="post">
+            {% csrf_token %}
+
+            <div class="setup-cards-grid">
+                <div class="card">
+                    <div class="card-header"><h2 class="card-title">{% translate "Setup Options" %}</h2></div>
+                    <div class="form-row">
+                        <label class="form-label" for="name">{% translate "Name" %}</label>
+                        <input type="text" name="gameName" id="name" placeholder="{% translate " Game name" %}" maxlength="100">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label" for="description">{% translate "Description" %}</label>
+                        <input type="text" name="gameDescription" id="description" placeholder="{% translate "Optional, eg fast EST time zone" %}" maxlength="100">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label" for="pace">{% translate "Playing Speed" %}</label>
+                        <select name="pace" id="pace">
+                            <option value="10">{% translate "Live: Play the game in one session" %}</option>
+                            <option value="20">{% translate "Fast: Several moves per day" %}</option>
+                            <option value="30" selected>{% translate "Standard: 1-2+ moves a day" %}</option>
+                            <option value="40">{% translate "Slow: At least one move a day" %}</option>
+                            <option value="50">{% translate "Casual: Just take your time" %}</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label" for="playerNumber">{% translate "Number of players" %}</label>
+                        <select name="playerNumber" id="playerNumber" onchange="selectPlayers();">
+                            <option value="2" selected="selected">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <div class="form-row" id="selPlayer2">
+                        <label class="form-label" for="player2">{% translate "Player 2" %}</label>
+                        <div class="field">
+                            <input type="text" id="player2" name="player2" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                            <span id="player2help" style="display:block;margin-top:4px;font-size:13px;color:var(--color-muted)">{% translate "Leave blank to invite anybody" %}</span>
+                        </div>
+                    </div>
+                    <div class="form-row" id="selPlayer3" style="display:none">
+                        <label class="form-label" for="player3">{% translate "Player 3" %}</label>
+                        <div class="field">
+                            <input type="text" id="player3" name="player3" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                        </div>
+                    </div>
+                    <div class="form-row" id="selPlayer4" style="display:none">
+                        <label class="form-label" for="player4">{% translate "Player 4" %}</label>
+                        <div class="field">
+                            <input type="text" id="player4" name="player4" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                        </div>
+                    </div>
+                    <div class="form-row" id="selPlayer5" style="display:none">
+                        <label class="form-label" for="player5">{% translate "Player 5" %}</label>
+                        <div class="field">
+                            <input type="text" id="player5" name="player5" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                        </div>
+                    </div>
+                    <div class="form-row" id="selPlayer6" style="display:none">
+                        <label class="form-label" for="player6">{% translate "Player 6" %}</label>
+                        <div class="field">
+                            <input type="text" id="player6" name="player6" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h2 class="card-title">{% translate "Common Options" %}</h2></div>
+                    <div class="form-row">
+                        <label class="form-label" for="kickoutDuration">{% translate "Kickout available after:" %}</label>
+                        <select name="kickoutDuration" id="kickoutDuration" style="flex:0 0 auto;width:auto">
+                            <option value="100">{% translate "1 day" %}</option>
+                            <option value="200" selected="selected">{% translate "2 days" %}</option>
+                            <option value="300">{% translate "3 days" %}</option>
+                            <option value="500">{% translate "5 days" %}</option>
+                        </select>
+                    </div>
+                    <div class="check-list">
+                        {% url "lobbyHelp" as the_url %}
+                        <label class="check-label">
+                            <input type="checkbox" class="myCheckbox" id="trainingGame" name="trainingGame" value="102">
+                            <div>
+                                <div>{% translate "Practice Game" %}</div>
+                                <div class="opt-help">{% blocktranslate trimmed %}Play all seats on the same device. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" class="myCheckbox" id="privateGame" name="privateGame" value="1">
+                            <div>
+                                <div>{% translate "Private Game" %}</div>
+                                <div class="opt-help">{% translate "Players can only join with invite or link" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" class="myCheckbox" id="learningGame" name="learningGame" value="110">
+                            <div>
+                                <div>{% translate "Request Learning Game" %}</div>
+                                <div class="opt-help">{% blocktranslate trimmed %}Request help to learn the game. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" class="myCheckbox" id="experiencedGame" name="experiencedGame" value="120" disabled>
+                            <div>
+                                <div>{% translate "Experienced Game" %}</div>
+                                <div class="opt-help">{% blocktranslate trimmed %}Minimum Experience Level. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
+                                {% if not experienced %}<div style="font-size:12px;color:var(--color-danger);margin-top:2px">{% translate "You do not have enough experience" %}</div>{% endif %}
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h2 class="card-title">{% translate "Game Options" %}</h2></div>
+                    <div class="check-list">
+                        <div class="opt-help">{% translate "Game options will be added here as the game is implemented." %}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin-top:8px">
+                <input type="submit" class="button button-primary createNewGameButton" value="{% translate "Create Duck Dealer Game" %}">
+            </div>
+        </form>
+    </div>
+
+    <script>
+    function selectPlayers() {
+        var maxPlayers = parseInt(document.getElementById("playerNumber").value);
+        for (var i = 2; i <= 6; i++) {
+            var row = document.getElementById("selPlayer" + i);
+            if (row) row.style.display = i < maxPlayers ? "block" : "none";
+        }
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+        selectPlayers();
+        var form = document.getElementById("gameCreationForm");
+        if (form) {
+            form.addEventListener("submit", function (event) {
+                var btn = event.submitter || this.querySelector(".createNewGameButton");
+                if (btn) {
+                    btn.value = "{% translate 'Creating Duck Dealer Game...' %}";
+                    btn.disabled = true;
+                    btn.style.backgroundColor = "#cccccc";
+                    btn.style.cursor = "not-allowed";
+                }
+            });
+        }
+        {% if fillData %}
+        document.getElementById("name").value = "{{ gameName|escapejs }}";
+        document.getElementById("description").value = "{{ gameDescription|escapejs }}";
+        document.getElementById("pace").value = "{{ gamePace }}";
+        document.getElementById("kickoutDuration").value = "{{ kickoutDuration }}";
+        document.getElementById("playerNumber").value = "{{ playerNumber }}";
+        var names = {{ playerNames|safe }};
+        for (var i = 0; i < names.length; i++) {
+            var input = document.getElementById("player" + (i + 2));
+            if (input) input.value = names[i];
+        }
+        selectPlayers();
+        {% endif %}
+    });
+    </script>
+{% endblock body %}

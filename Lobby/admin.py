@@ -14,6 +14,7 @@ from .modelProxies import (
     BUSMainTournament,
     BUSMiniTournament,
     CNSgame,
+    DDLgame,
     FCMgame,
     FCMMainTournament,
     FCMMiniTournament,
@@ -30,6 +31,7 @@ from .modelProxies import (
     TGZgame,
     TGZMainTournament,
     TGZMiniTournament,
+    URRgame,
     WEBgame,
 )
 
@@ -549,6 +551,24 @@ class RNBgameAdmin(GameAdmin):
 
     class Meta:
         app_label = "RNB"
+
+
+@admin.register(URRgame)
+class URRgameAdmin(GameAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="URR")
+
+    class Meta:
+        app_label = "URR"
+
+
+@admin.register(DDLgame)
+class DDLgameAdmin(GameAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="DDL")
+
+    class Meta:
+        app_label = "DDL"
 
 
 @admin.register(HLCgame)

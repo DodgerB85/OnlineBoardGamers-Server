@@ -251,3 +251,21 @@ class RNBgame(Game):
         app_label = "RNB"
         verbose_name = "RNB_Game"
         verbose_name_plural = "RNB_Games"
+
+
+# URR
+class URRgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "URR"
+        verbose_name = "URR_Game"
+        verbose_name_plural = "URR_Games"
+
+
+# DDL
+class DDLgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "DDL"
+        verbose_name = "DDL_Game"
+        verbose_name_plural = "DDL_Games"
