@@ -997,8 +997,9 @@ def SF_createNextRoundGamesSetup(tournamentObj):
 
 
 def _get_tournament_availability_profiles(usernames):
-    profiles = {}
-    for profile in Profile.objects.filter(user__username__in=set(usernames)).select_related("user"):
+    usernames = set(usernames)
+    profiles = {username: availability_profile([], []) for username in usernames}
+    for profile in Profile.objects.filter(user__username__in=usernames).select_related("user"):
         profiles[profile.user.username] = availability_profile(
             profile.availabilityMoveCounts,
             profile.availabilityTurnCounts,

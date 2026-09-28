@@ -135,7 +135,7 @@ def _anneal(initial_state, make_groups, profiles, matchup_counts, seed, swap_slo
 
 def optimize_disjoint_groups(groups, profiles, matchup_counts, seed):
     """Swap players between standard tournament games while retaining game sizes."""
-    if len(groups) < 2 or any(player not in profiles for group in groups for player in group):
+    if len(groups) < 2:
         return groups
 
     group_sizes = [len(group) for group in groups]
@@ -161,7 +161,7 @@ def optimize_disjoint_groups(groups, profiles, matchup_counts, seed):
 
 def optimize_multigame_order(players, game_indices, profiles, matchup_counts, seed):
     """Optimize player placement in a fixed MG schedule without changing its design."""
-    if not game_indices or any(player not in profiles for player in players):
+    if not game_indices:
         return players
 
     def make_groups(order):
