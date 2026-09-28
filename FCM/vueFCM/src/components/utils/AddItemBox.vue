@@ -177,7 +177,7 @@ const secondGoodChoices = computed(() => mainGoodChoices.value.filter((good) => 
 
 // Fried Chicken mod: only the holder of the First Fried Chicken Sold milestone may market fried chicken
 const mainGoodChoices = computed(() => {
-	const base = [0, 1, 2, 3, 4]
+	const base = [rf.LEMONADE, rf.COKE, rf.BEER, rf.PIZZA, rf.BURGER]
 	if (store.startingOptions.friedChicken && plyr.hasMilestone(controller.currentPlayerIndex(), rf.FIRST_FRIED_CHICKEN_SOLD)) base.push(rf.FRIED_CHICKEN)
 	return base
 })
