@@ -108,7 +108,6 @@ export function resetContext() {
 	store.context.brandManagerMS = false
 	store.context.componentBeingAdded = -1
 	store.context.EODradioSelections = [0, 0]
-	store.context.preMoveData = [[[-9], []], [-9]]
 	store.context.savedEODpreset = null
 
 	// Replay

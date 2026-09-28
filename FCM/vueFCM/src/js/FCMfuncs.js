@@ -1039,6 +1039,7 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	if (store.startingOptions.useMilestones === false) {
 		store.availableMilestones.splice(0)
 	} else {
+		store.availableMilestones.splice(0)
 		Object.assign(store.availableMilestones, rf.BASE_GAME_MILESTONES)
 		if (store.startingOptions.noCeoMilestone === true) {
 			store.availableMilestones.splice(store.availableMilestones.indexOf(rf.FIRST_100_DOL), 1)

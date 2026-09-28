@@ -1070,9 +1070,8 @@ export function rangeToRestaurantsFromIndex(index, restaurants) {
 			// Standard tile boundary penalty
 			if (!onTheSameTile(currIdx, nextIdx)) nextRange++
 
-			// RW Penalty: Your original logic "pauses" and increments.
-			// In a Dijkstra approach, we simply add the weight.
-			if (rwSet.has(nextIdx)) nextRange++
+			// RW Penalty: charge when leaving the roadworks square (matches legacy pause/resume).
+			if (isRW) nextRange++
 
 			queue.push({
 				index: nextIdx,
@@ -1466,12 +1465,11 @@ function buildReachabilitySet(playerObj, lobbyist, lobbyistData) {
 	const reachSet = new Set()
 	const range = 2
 	const sources = [...playerObj.restaurants]
-	if (useModelStore().startingOptions.coffee) sources.push(...playerObj.coffeeShops.map((idx) => ({ index: idx, isCoffee: true })))
 
 	for (const s of sources) {
 		let minR = 0,
 			maxR = 4
-		if (!s.isCoffee && !plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())) {
+		if (!plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())) {
 			minR = s.rotation
 			maxR = s.rotation + 1
 		}
@@ -1480,6 +1478,13 @@ function buildReachabilitySet(playerObj, lobbyist, lobbyistData) {
 			let off = r === 0 ? 1 : r === 1 ? rf.ssW + 1 : r === 2 ? rf.ssW : 0
 			emptySpacesAdjacentToRoadsWithinRange(s.index + off, range, lobbyist, lobbyistData).forEach((idx) => reachSet.add(idx))
 		}
+	}
+
+	// Coffee shops measure from their own square (no restaurant rotation offsets)
+	if (useModelStore().startingOptions.coffee) {
+		playerObj.coffeeShops.forEach((idx) => {
+			emptySpacesAdjacentToRoadsWithinRange(idx, range, lobbyist, lobbyistData).forEach((i) => reachSet.add(i))
+		})
 	}
 	return reachSet
 }

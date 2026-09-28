@@ -743,19 +743,23 @@ export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, 
 
 		// Build reachability map using Sets (O(1) lookup)
 		const sources = [...player.restaurants]
-		if (store.startingOptions.coffee && player.coffeeShops.length > 0) {
-			player.coffeeShops.forEach((idx) => sources.push({ index: idx, isCoffee: true }))
-		}
 
 		for (const s of sources) {
-			const driveIn = s.isCoffee ? false : plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())
-			const minR = !s.isCoffee && !driveIn ? s.rotation : 0
-			const maxR = !s.isCoffee && !driveIn ? s.rotation + 1 : 4
+			const driveIn = plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())
+			const minR = !driveIn ? s.rotation : 0
+			const maxR = !driveIn ? s.rotation + 1 : 4
 
 			for (let r = minR; r < maxR; r++) {
 				let off = r === 0 ? 1 : r === 1 ? mapWidth + 1 : r === 2 ? mapWidth : 0
 				map.emptySpacesAdjacentToRoadsWithinRange(s.index + off, range, false, null).forEach((idx) => reachSet.add(idx))
 			}
+		}
+
+		// Coffee shops measure from their own square (no restaurant rotation offsets)
+		if (store.startingOptions.coffee) {
+			player.coffeeShops.forEach((idx) => {
+				map.emptySpacesAdjacentToRoadsWithinRange(idx, range, false, null).forEach((i) => reachSet.add(i))
+			})
 		}
 
 		// Final intersection filter
@@ -1828,14 +1832,14 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 			p.bankrupt = true
 			if (p.displayName !== rf.BOT_NAME && !replayOnly) model.addHistory(rf.HIST_BANKRUPT, [], playerIndex, 0)
 		}
-		if (!replayOnly) {
-			if (p.money >= 100) {
-				plyr.awardMilestone(playerIndex, rf.FIRST_100_DOL)
-				if (p.employees.includes(rf.CFO) && plyr.hasMilestone(playerIndex, rf.FIRST_100_DOL)) {
-					plyr.fireEmployee(playerIndex, rf.CFO)
-					store.availableEmployees[rf.CFO]++
-				}
+		if (p.money >= 100) {
+			if (!replayOnly) plyr.awardMilestone(playerIndex, rf.FIRST_100_DOL)
+			if (p.employees.includes(rf.CFO) && plyr.hasMilestone(playerIndex, rf.FIRST_100_DOL)) {
+				plyr.fireEmployee(playerIndex, rf.CFO)
+				store.availableEmployees[rf.CFO]++
 			}
+		}
+		if (!replayOnly) {
 			if (p.money >= 20) plyr.awardMilestone(playerIndex, rf.FIRST_20_DOL)
 			if (p.employees.includes(rf.WAITRESS)) plyr.awardMilestone(playerIndex, rf.FIRST_WAITRESS_USED)
 		}
@@ -2540,8 +2544,11 @@ export function doMarketingCampaigns(replayOnly) {
 				// Standard Good 2
 				if (h2) tryAddNeed(good2, h2)
 
-				// Expansion: Dumplings
-				if (store.startingOptions.dumplings) tryAddNeed(rf.DUMPLING, hDumpling)
+				// Expansion: Dumplings (twice when a second good is marketed)
+				if (store.startingOptions.dumplings) {
+					tryAddNeed(rf.DUMPLING, hDumpling)
+					if (h2) tryAddNeed(rf.DUMPLING, h2)
+				}
 			}
 
 			// Rural Marketing Logic (Campaigns 21-24)
@@ -2612,11 +2619,6 @@ function processEarnings(earnedByPlayers, currentHist, mmLoop, totalMM, replayOn
 	if (!replayOnly) {
 		const histObj = earningsByPlayerIndex.map((e) => e[0].length > 0 ? e : [])
 		model.addHistory(rf.HIST_MARKETING_EARNING, histObj, -1, 0)
-	}
-
-	// Bank Break Logic
-	if (store.bank < 0 && !store.startingOptions.shortGame && store.bankBroken === 0) {
-		handleBankBreak()
 	}
 }
 
@@ -2838,7 +2840,7 @@ export function givePossiblePositionsForRadioPizzaBomb(houseNumber) {
 				occupiedIndexes.push(garden.rotated ? garden.index + mapWidth : garden.index + 1)
 			}
 		}
-	} else if (model.hasGarden(houseNumber)) {
+	} else {
 		// Handle non-natural house garden placement (landscape only for rot 1/3)
 		if (house.rotated === 1 || house.rotated === 3 || house.rotated === true) {
 			occupiedIndexes.push(house.index + 2, house.index + mapWidth + 2)

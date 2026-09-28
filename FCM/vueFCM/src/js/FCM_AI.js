@@ -106,12 +106,13 @@ export async function makeAImove() {
 			const train = rules.getTrainingPoints(playerIndex, store.context.justTrained)
 			const recruitPoints = rules.getRemainingRecruitingPoints(playerIndex)
 
-			const trainedTo = store.context.justTrained.map((t) => t.to)
+			let trainedTo = store.context.justTrained.map((t) => t.to)
 
 			const hasUpgrades = playerObj.beach.some((emp) => rules.possibleUpgrades(store.availableEmployees, playerIndex, emp, train.total, train.level2, train.level3, train.unlimited, trainedTo).flat().length > 0)
 
 			if (hasUpgrades || recruitPoints > 0) {
 				while (train.total > 0) {
+					trainedTo = store.context.justTrained.map((t) => t.to)
 					let possibleBeach = playerObj.beach.filter((emp) => {
 						const upgrades = rules.possibleUpgrades(store.availableEmployees, playerIndex, emp, train.total, train.level2, train.level3, train.unlimited, trainedTo).flat()
 						return upgrades.length > 0
@@ -226,8 +227,11 @@ export async function makeAImove() {
 					else if (plyr.hasMilestone(playerIndex, rf.FIRST_BURGER_MARKETED)) good = rf.BURGER
 				}
 
-				const hasBillboardMS = plyr.hasMilestone(playerIndex, rf.FIRST_BILLBOARD) || store.availableMilestones.includes(rf.FIRST_BILLBOARD)
-				const isInfinite = (hasBillboardMS && campaignData.type === rf.BILLBOARD) || (plyr.hasMilestone(playerIndex, rf.FIRST_BRAND_DIRECTOR_USED) && campaignData.type === rf.RADIO) || campaignData.type === rf.GIANT_BILLBOARD
+				const isInfinite =
+					(store.availableMilestones.includes(rf.FIRST_BILLBOARD) && campaignData.type === rf.BILLBOARD) ||
+					plyr.hasMilestone(playerIndex, rf.FIRST_BILLBOARD) ||
+					(plyr.hasMilestone(playerIndex, rf.FIRST_BRAND_DIRECTOR_USED) && campaignData.type === rf.RADIO) ||
+					campaignData.type === rf.GIANT_BILLBOARD
 
 				const duration = isInfinite ? 9 : 1
 
@@ -291,6 +295,10 @@ export async function makeAImove() {
 				[rf.SUSHI_CHEF]: [5, rf.SUSHI],
 				[rf.NOODLE_COOK]: [6, rf.NOODLES],
 				[rf.NOODLE_CHEF]: [16, rf.NOODLES],
+				[rf.DUMPLING_COOK]: [3, rf.DUMPLING],
+				[rf.DUMPLING_CHEF]: [8, rf.DUMPLING],
+				[rf.FRIED_CHICKEN_COOK]: [3, rf.FRIED_CHICKEN],
+				[rf.FRIED_CHICKEN_CHEF]: [8, rf.FRIED_CHICKEN],
 				[rf.ERRAND_BOY]: [1, rf.LEMONADE],
 				[rf.KITCHEN_TRAINEE]: [1, null],
 			}

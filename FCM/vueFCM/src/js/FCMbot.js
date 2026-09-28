@@ -135,7 +135,7 @@ export async function actionPlayerKickout() {
 export function actionResign() {
     const store = useModelStore()
     const personal = usePersonalStore()
-	const playerIndex = personal.pov
+	const playerIndex = personal.pov >= 0 ? personal.pov : store.gameflow.turnOrder[0]
 	let player = store.players[playerIndex]
 	model.addHistory(rf.HIST_RESIGN, [], playerIndex, 0)
 	makeBot(player)

@@ -737,7 +737,7 @@ export function updateLobbyistHighlights() {
 		if (v === 0) {
 			store.highlights.indexesToHighlightYellow = rules.givePossiblePositionsForSimpleObject(4, 1, 2, rot, true, false, lobbyistData)
 		} else {
-			store.highlights.indexesToHighlightYellow = map.locationForWeirdObject(parkModel, true, false, "park", lobbyistData)
+			store.highlights.indexesToHighlightYellow = map.locationForWeirdObject(parkModel, true, true, "park", null)
 		}
 	}
 }
@@ -1630,7 +1630,7 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 	// Check for last man standing game over here
 	let numNonPlayers = 0
 	for (let i = 0; i < store.players.length; i++) if (store.players[i].displayName === rf.BOT_NAME) numNonPlayers++
-	if (numNonPlayers === store.players.length - 1) {
+	if (numNonPlayers === store.players.length - 1 || (personal.trainingGame && numNonPlayers > 0 && personal.name !== "admin" && personal.name !== "BotKickStarter")) {
 		model.endGame()
 		return
 	}
@@ -1662,7 +1662,9 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 				store.context.action = rf.ACT_CONFIRM_NO_MORE_EMPLOYEES
 				return
 			}
-		} else if (personal.trainingGame) {
+		}
+
+		if (personal.trainingGame) {
 			currentPlayerObj().employees = currentPlayerObj().employees.filter((emp) => emp !== rf.BLANK_EMPLOYEE_SPACE)
 			model.addHistory(rf.HIST_CHOOSE_STRUCTURE, [[...currentPlayerObj().employees], [...currentPlayerObj().beach]], currentPlayerIndex(), 0)
 			if (currentPlayerObj().employees.indexOf(rf.DISCOUNT_MANAGER) > -1) {
@@ -2264,8 +2266,6 @@ export function startPlayerWorkingDaySubphase(subphase) {
 			return total
 		}, 0)
 		if (playerObj.ceoAction === rf.CEO_ACTION_RECRUITING_MANAGER) summary.hire.salaryReductions += 2
-
-		store.wholeTurnResetData = funcs.simpleExportWholeFCMmodel()
 	}
 
 	// --- SUBPHASE: TRAINING ---

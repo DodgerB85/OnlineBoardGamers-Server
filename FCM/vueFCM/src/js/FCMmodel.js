@@ -291,7 +291,7 @@ export async function initGame() {
 		if (window.initData.spoilerFree) {
 			// Enter replay mode at step 1
 			store.viewSettings.showReplay = true
-			store.replayResetData = funcs.exportFCMmodel(true) // FIZ
+			store.replayResetData = funcs.simpleExportWholeFCMmodel()
 
 			// TURM ON
 			await replay.generateReplayData(true)
