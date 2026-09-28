@@ -959,6 +959,7 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 		return true
 	})
 	if (steps <= COFFEE_DFS_BUDGET) return coffeeRoutes
+	console.log("getCoffeeRoutesFromBldgSquare: DFS budget hit, using two-phase calculation", { index, restaurants, winningRange, steps })
 	coffeeRoutes.length = 0
 
 	// Phase 1: unvisited-first order finds big sets early, so the bound bites.
