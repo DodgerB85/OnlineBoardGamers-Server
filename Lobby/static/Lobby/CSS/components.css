@@ -2670,7 +2670,7 @@ iframe {
 .row09.kickoutRequired2 { background: #F2BABA; }
 .row09.pendingFinish {
   background-image: repeating-conic-gradient(#c8c8c8 0% 25%, #f0f0f0 0% 50%);
-  background-size: 14px 14px;
+  background-size: 56px 56px;
 }
 @media (hover: hover) {
     .row09.myMove:hover { background: #D9EED3; }
@@ -2678,7 +2678,7 @@ iframe {
     .row09.kickoutRequired2:hover { background: #f6cdcd; }
     .row09.pendingFinish:hover {
       background-image: repeating-conic-gradient(#b8b8b8 0% 25%, #e4e4e4 0% 50%);
-      background-size: 14px 14px;
+      background-size: 56px 56px;
     }
 }
 
