@@ -270,7 +270,7 @@
             <div class="card-header">
                 <h2 class="card-title">{% translate "Game Preferences" %}</h2>
             </div>
-            <form method="post">
+            <form method="post" id="gamePreferencesForm">
                 {% csrf_token %}
                 <input type="hidden" id="action" name="action" value="updateProfileFavourites" />
 
@@ -562,7 +562,7 @@
             <div class="card-header">
                 <h2 class="card-title">{% translate "Change Password" %}</h2>
             </div>
-            <form method="post" class="stacked-form">
+            <form method="post" id="changePasswordForm" class="stacked-form">
                 {% csrf_token %}
                 {% for field in form2 %}
                     <div class="form-row">
