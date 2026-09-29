@@ -315,7 +315,11 @@ export function getEveryLocationWithinSingleHex(hexID, playerIndex) {
 			if (edgeId >= 0) {
 				const edge = store.mapData.edgeData[edgeId]
 				const otherHex = model.getHexByID(edge.edgeHexIDs[edge.edgeHexIDs[0] === hexID ? 1 : 0])
-				if (otherHex.currentTerrain === rf.TERR_SEA && [playerIndex, -1].includes(edge.wall[1])) {
+				// Sea and flooded polders act like water (matching the movement graph's coast rule), and a
+				// drained polder still forms the shore the boat docked against. Either way the dock stays
+				// on THIS land hex, so a land transporter here must still be able to reach and pick it up.
+				const otherHexIsDockable = rf.TERR_ACTS_LIKE_WATER.includes(otherHex.currentTerrain) || rf.TERR_IS_POLDER.includes(otherHex.currentTerrain)
+				if (otherHexIsDockable && [playerIndex, -1].includes(edge.wall[1])) {
 					if (hex.sideNodeIds[n] >= 0) {
 						eligibleLocations = eligibleLocations.concat(util.indexArray(3).map((offset) => setDockedLocation(hexID, n, rf.BANK_NONE, offset)))
 					} else {
