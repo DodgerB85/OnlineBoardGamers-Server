@@ -622,7 +622,7 @@ function getAtelierRecipeGfx(recipeIdx) {
 									:height="bldg.height * store.RATIO"
 									:fill="`url(#pattern_${bldg.img})`"
 									:style="{
-										strokeWidth: highlight.shouldHighlightItem(rf.ITEM_BUILT_BUILDING, bldg.id) ? 20 * store.RATIO : bldg.strengthened ? 12 * store.RATIO : 2 * store.RATIO,
+										strokeWidth: highlight.shouldHighlightItem(rf.ITEM_BUILT_BUILDING, bldg.id) ? 20 * store.RATIO : bldg.strengthened ? 30 * store.RATIO : 2 * store.RATIO,
 									}" />
 							</g>
 						</g>
@@ -643,7 +643,7 @@ function getAtelierRecipeGfx(recipeIdx) {
 							<circle class="mineSVGcircle" :cx="hex.mineData[1][0] * store.RATIO" :cy="hex.mineData[1][1] * store.RATIO" :r="115 * store.RATIO" fill="gray" :stroke="store.context.buildingIDsToHighlight.includes(hex.mineData[0]) ? 'yellow' : '#734A36'" :stroke-width="(store.context.buildingIDsToHighlight.includes(hex.mineData[0]) ? 70 : 50) * store.RATIO" filter="url(#f_mineDrop)" />
 
 							<!-- Outer rim - thick brown when strengthened, else bright white -->
-							<circle :cx="hex.mineData[1][0] * store.RATIO" :cy="hex.mineData[1][1] * store.RATIO" :r="145 * store.RATIO" fill="none" :stroke="hex.mineData[3] ? '#8B4513' : 'rgba(255,255,255,0.85)'" :stroke-width="(hex.mineData[3] ? 28 : 10) * store.RATIO" />
+							<circle :cx="hex.mineData[1][0] * store.RATIO" :cy="hex.mineData[1][1] * store.RATIO" :r="145 * store.RATIO" fill="none" :stroke="hex.mineData[3] ? '#8B4513' : 'rgba(255,255,255,0.85)'" :stroke-width="(hex.mineData[3] ? 45 : 10) * store.RATIO" />
 
 							<!-- Iron Number -->
 							<text :x="hex.mineData[1][0] * store.RATIO - (hex.mineData[2][1] >= 10 ? 55 : 40) * store.RATIO" :y="hex.mineData[1][1] * store.RATIO + 20 * store.RATIO" text-anchor="middle" dominant-baseline="middle" :style="{ 'font-size': (hex.mineData[2][1] >= 10 ? 100 : 175) * store.RATIO + 'px', fill: 'red', 'font-weight': 900, stroke: 'black', 'stroke-width': (hex.mineData[2][1] >= 10 ? 6 : 10) * store.RATIO + 'px' }">
@@ -1040,7 +1040,7 @@ function getAtelierRecipeGfx(recipeIdx) {
 								<img :src="view.getImage(`res_${rf.RES_BOMB}`)" class="researchBubbleImg" />
 								<span v-if="!bombBubbleInfo.strengthened" class="bombSparkle">&#10022;</span>
 							</span>
-							<span class="researchBubbleText">{{ bombBubbleInfo.strengthened ? "(Building Strengthened)" : "Blow up Building" }}</span>
+							<span class="researchBubbleText">{{ bombBubbleInfo.strengthened ? "Building too strong" : "Blow up Building" }}</span>
 						</div>
 					</div>
 				</div>
@@ -1197,6 +1197,11 @@ function getAtelierRecipeGfx(recipeIdx) {
 }
 
 /* Bombs: bomb bubble */
+.bombBubble .researchBubbleImg {
+	width: 22px;
+	height: 22px;
+}
+
 .bombBubble .researchBubbleText {
 	width: 66px;
 	white-space: normal;
@@ -1220,7 +1225,6 @@ function getAtelierRecipeGfx(recipeIdx) {
 }
 
 .bombBubbleDisabled {
-	opacity: 0.5;
 	filter: grayscale(100%);
 	border-color: grey;
 	cursor: default;
@@ -1229,6 +1233,10 @@ function getAtelierRecipeGfx(recipeIdx) {
 .bombBubbleDisabled:hover {
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 	border-color: grey;
+}
+
+.bombBubbleDisabled:hover .researchBubbleContent {
+	transform: none;
 }
 
 @keyframes bombSparkle {

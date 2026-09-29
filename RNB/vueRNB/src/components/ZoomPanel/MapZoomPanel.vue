@@ -795,14 +795,14 @@ const computedMaxNeutralBricks = computed(() => {
 							:height="bldg.height / 1.5"
 							:fill="`url(#pattern_${bldg.img})`"
 							:style="{
-								strokeWidth: store.context.buildingIDsToHighlight.includes(bldg.id) ? 20 * store.RATIO : bldg.strengthened ? 12 * store.RATIO : 2 * store.RATIO,
+								strokeWidth: store.context.buildingIDsToHighlight.includes(bldg.id) ? 20 * store.RATIO : bldg.strengthened ? 60 * store.RATIO : 2 * store.RATIO,
 							}" />
 					</g>
 					<!-- MINE -->
 					<g v-if="computedZoomData.mineData.length > 0" @click="map.clickedBuilding(computedZoomData.mineData[0])">
 						<circle class="mineSVGcircle" :cx="computedZoomData.mineData[1][0]" :cy="computedZoomData.mineData[1][1]" :r="rf.DEFAULT_BLDG_WIDTH / 1.5 / 2" fill="gray" :stroke="store.context.buildingIDsToHighlight.includes(computedZoomData.mineData[0]) ? 'yellow' : '#734A36'" :stroke-width="(store.context.buildingIDsToHighlight.includes(computedZoomData.mineData[0]) ? 70 : 50) * store.RATIO" />
 						<!-- Thick brown outline when strengthened -->
-						<circle v-if="computedZoomData.mineData[3]" :cx="computedZoomData.mineData[1][0]" :cy="computedZoomData.mineData[1][1]" :r="rf.DEFAULT_BLDG_WIDTH / 1.5 / 2 + 30" fill="none" stroke="#8B4513" :stroke-width="24" />
+						<circle v-if="computedZoomData.mineData[3]" :cx="computedZoomData.mineData[1][0]" :cy="computedZoomData.mineData[1][1]" :r="rf.DEFAULT_BLDG_WIDTH / 1.5 / 2 + 30" fill="none" stroke="#8B4513" :stroke-width="90 * store.RATIO" />
 						<!-- Iron Number -->
 						<text :x="computedZoomData.mineData[1][0] - (computedZoomData.mineData[2][1] >= 10 ? 55 : 40)" :y="computedZoomData.mineData[1][1] + 20" text-anchor="middle" dominant-baseline="middle" class="mineText ironText" :style="{ fontSize: computedZoomData.mineData[2][1] >= 10 ? '100px' : '175px', strokeWidth: computedZoomData.mineData[2][1] >= 10 ? '6px' : '10px' }">{{ computedZoomData.mineData[2][1] }}</text>
 						<!-- Gold Number -->

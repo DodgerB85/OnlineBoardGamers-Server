@@ -582,7 +582,7 @@ function transporterLimitIssue() {
 }
 
 .buildingOnHexSummaryImgStrengthened {
-	border: 4px solid #8B4513;
+	border: 7.5px solid #8B4513;
 }
 
 .buildingOnHexSummaryImgHighlight {

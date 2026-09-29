@@ -779,10 +779,11 @@ export function clickedBombOption(buildingID) {
 	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
 	// A bomb destroys every building on the hex (a city can hold 2), but strengthened ones survive
 	const hexID = buildingObj.location[1]
+	const bucketID = buildingObj.location[2]
 	const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && !b.strengthened)
 	for (const b of buildingsOnHex) model.removeBuildingByID(b.id)
 	// Add to stack
-	let stackAction = [rf.STACK_BOMB_BUILDING, stack.getTransIDtoUse(transporterObj), buildingObj.type, hexID, buildingObj.location[2]]
+	let stackAction = [rf.STACK_BOMB_BUILDING, stack.getTransIDtoUse(transporterObj), buildingObj.type, hexID, bucketID]
 	stack.addItemToStack({
 		action: rf.STACK_BOMB_BUILDING,
 		historyEntry: stackAction,
