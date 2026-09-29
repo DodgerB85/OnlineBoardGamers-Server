@@ -125,6 +125,24 @@ function clickedNewBuilding(bldgNum) {
 	// First, build the NORMAL building
 	if (bldgNum < rf.BLDG_PSEUDO_INDEX) map.checkAddingBuildingToMap(bldgNum)
 	else if (bldgNum === rf.BLDG_PSEUDO_RESHAFT_MINE) map.reshaftMine(true)
+	// CITY: Road & Bridge - offer the unbuilt moat bridges of neighbouring city tiles
+	else if (bldgNum === rf.BLDG_PSEUDO_ROAD_BRIDGE) {
+		store.context.hexPiecesToHighlight.splice(0)
+		store.context.eligibleWallsToBuild.splice(0)
+		store.context.eligibleBridgesToBuild.splice(0)
+		store.context.eligibleWallsToDemolish.splice(0)
+		store.context.eligibleBuildingsToBuild.splice(0)
+		const transporterID = store.context.selectedTransporterIDforTM
+		const transporterObj = model.getTransporterByID(transporterID)
+		const hexID = transporterObj.location[1]
+		const cityBridges = map.getEligibleCityNeighbourBridges(hexID)
+		if (cityBridges.length === 0) {
+			rf.doAdminAlrt("No city moat bridge available")
+			return
+		}
+		for (const cityBridge of cityBridges) context.addEligibleBridgeToBuild([cityBridge.cityHexID, [...cityBridge.bridgeArr]])
+		store.context.action = rf.ACT_BUILD_ROAD_BRIDGE_SELECT
+	}
 	// Else If it's a pseudo building, set up the highlights EG WALL / ROAD / ETC
 	else if (bldgNum >= rf.BLDG_PSEUDO_INDEX) {
 		store.context.hexPiecesToHighlight.splice(0)
@@ -431,6 +449,8 @@ function transporterLimitIssue() {
 					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_BOMB">Destroy a building</template>
 					<!-- STRENGTHEN TEXT -->
 					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_STRENGTHEN">Make bomb-proof</template>
+					<!-- ROAD & BRIDGE (CITY) TEXT -->
+					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_ROAD_BRIDGE">Bridge the city moat</template>
 				</div>
 			</div>
 		</div>

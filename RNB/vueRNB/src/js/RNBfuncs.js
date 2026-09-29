@@ -1107,6 +1107,18 @@ export function importRNBmodel(input, forGameOver) {
 						const hexID = stackAction[3]
 						strengthenedBuildings.push([buildingType, hexID])
 					}
+					// Road & Bridge (city): add the bridge and the road
+					else if (stackAction[0] === rf.STACK_BUILD_ROAD_BRIDGE) {
+						const cityHexID = stackAction[2]
+						const bridgeArr = stackAction[3]
+						const fromLocation = stack.decompressLocation(stackAction[4])
+						const toLocation = stack.decompressLocation(stackAction[5])
+						newBridges.push([cityHexID, bridgeArr])
+						newRoads.push([
+							[fromLocation[1], fromLocation[2]],
+							[toLocation[1], toLocation[2]],
+						])
+					}
 					if (stackAction[0] === rf.STACK_DO_RESEARCH) {
 						const researchIdx = stackAction[2]
 						store.players[entry[1]].RnD[researchIdx] = 1

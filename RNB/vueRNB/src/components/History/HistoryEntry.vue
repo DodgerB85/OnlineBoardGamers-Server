@@ -822,6 +822,24 @@ const computedEntry3 = computed(() => {
 				Object.assign(thisStepHist, getHighlightData([[rf.LOCATION_BUCKET, hexID, bucketID]]))
 			}
 			//
+			else if (stackAction[0] === rf.STACK_BUILD_ROAD_BRIDGE) {
+				// stackAction = [STACK_BUILD_ROAD_BRIDGE, transporterID, cityHexID, bridgeArr, compressedFromLoc, compressedToLoc]
+				const transporterID = stackAction[1]
+				const cityHexID = stackAction[2]
+				const bridgeArr = stackAction[3]
+				const fromLocation = stack.decompressLocation(stackAction[4])
+				const toLocation = stack.decompressLocation(stackAction[5])
+				thisStepHist.action = rf.STACK_BUILD_ROAD_BRIDGE
+				thisStepHist.hexID = cityHexID
+				const transporterObj = history.getTransporterByID_HIST(transporterID)
+				thisStepHist.transporterGfx = `transporter_${transporterObj.type}_${personal.getCorrectedColour(store.players[transporterObj.ownerIndex].colour)}`
+				thisStepHist.bridgeHighlight = [[cityHexID, [...bridgeArr]]]
+				thisStepHist.fromData = {}
+				thisStepHist.toData = {}
+				Object.assign(thisStepHist.fromData, getHighlightData([fromLocation]))
+				Object.assign(thisStepHist.toData, getHighlightData([toLocation]))
+			}
+			//
 			/********************************************************* PRODUCTION ********************************************************* */
 			else if (stackAction[0] === rf.STACK_MANUAL_PRODUCTION) {
 				//	let stackAction = [rf.STACK_MANUAL_PRODUCTION, building.id, transporterID, building.location.slice(1) ]
@@ -1514,6 +1532,14 @@ const computedEntry3 = computed(() => {
 							<MiniHex :hexID="stackEntry.hexID" :bridgehighlight="stackEntry.bridgeHighlight" />
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
 							Builds Bridge
+						</div>
+					</template>
+					<!-- BUILD ROAD & BRIDGE (CITY) -->
+					<template v-if="stackEntry.action === rf.STACK_BUILD_ROAD_BRIDGE">
+						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], [], [], [], [], stackEntry.bridgeHighlight)">
+							<MiniHex :hexID="stackEntry.hexID" :bridgehighlight="stackEntry.bridgeHighlight" />
+							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
+							Builds Road &amp; Bridge
 						</div>
 					</template>
 					<!-- BUILD WALL -->

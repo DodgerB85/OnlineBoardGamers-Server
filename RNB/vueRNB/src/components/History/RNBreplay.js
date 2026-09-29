@@ -263,6 +263,7 @@ export const HIST_CONFLICT_TURN_ORDER = 6
 				else if (stackAction[0] === rf.STACK_BUILD_ROAD) replayStackBuildRoad(stackAction)
 				else if (stackAction[0] === rf.STACK_BUILD_POWER_LINE) replayStackBuildPowerLine(stackAction)
 				else if (stackAction[0] === rf.STACK_BUILD_BRIDGE) replayStackBuildBridge(stackAction)
+				else if (stackAction[0] === rf.STACK_BUILD_ROAD_BRIDGE) replayStackBuildRoadBridge(stackAction)
 				else if (stackAction[0] === rf.STACK_BUILD_WALL) replayStackBuildWall(stackAction, store.computedHistory[i][1])
 				else if (stackAction[0] === rf.STACK_DEMOLISH_WALL) replayStackDemolishWall(stackAction, store.computedHistory[i][1])
 				else if (stackAction[0] === rf.STACK_BUILD_BUILDING) replayStackBuildBuilding(stackAction, store.computedHistory[i][1])
@@ -762,6 +763,17 @@ function replayStackBuildBridge(stackAction) {
 	}
 
 	map.addBridgeToMap_core(hexID, transporterID, bridgeArr, true)
+}
+
+function replayStackBuildRoadBridge(stackAction) {
+	const transporterID = stackAction[1]
+	const cityHexID = stackAction[2]
+	const bridgeArr = stackAction[3]
+	const fromLocation = stack.decompressLocation(stackAction[4])
+	const toLocation = stack.decompressLocation(stackAction[5])
+	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_STONE, rf.RES_STONE], false)
+	map.addBridgeToMap_core(cityHexID, transporterID, bridgeArr, false)
+	map.addRoadToMap_core([fromLocation[1], fromLocation[2]], [toLocation[1], toLocation[2]], transporterID, false)
 }
 
 function replayStackBuildWall(stackAction, playerIndex) {

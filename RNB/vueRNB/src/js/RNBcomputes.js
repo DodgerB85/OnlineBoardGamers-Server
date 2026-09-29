@@ -212,6 +212,7 @@ export const computedHexes = computed(() => {
 					const hex = hexes[j]
 					const side = hexSides[j]
 					const entryNode = hex.sideNodeIds[side]
+					if (entryNode === -1) continue
 					//hex.roadSegments.push([hex.nodeVertexDefinitions[entryNode], coord.relative([side, 0.5, 0])].map(toXY))
 					hex.roadSegments.push([hex.nodeVertexDefinitions[entryNode], coord.relative([side, 0.5, 0])].map((c) => toXY(c, true)))
 				}

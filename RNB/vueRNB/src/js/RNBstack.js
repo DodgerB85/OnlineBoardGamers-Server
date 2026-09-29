@@ -1686,7 +1686,7 @@ export function verifySingleStackAction(stackActionData) {
 		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, requiredRes, true)
 		if (errorFlag > 0) return errorFlag + 10
 		// Check there are not already too many buildings
-		const maxBuildings = hexObj.terrainID === rf.CITY ? 2 : 1
+		const maxBuildings = hexObj.hexTerrainID === rf.CITY ? 2 : 1
 		const buildingsOnTile = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
 		const spaceForBuilding = buildingsOnTile.length < maxBuildings
 		if (!spaceForBuilding) return 2
@@ -1865,6 +1865,25 @@ export function verifySingleStackAction(stackActionData) {
 		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
 		const targetBldg = buildingsOnHex.find((b) => b.type === buildingType && !b.strengthened)
 		if (!targetBldg) return 20
+		return 0
+	}
+	// BUILD ROAD & BRIDGE (CITY)
+	else if (action === rf.STACK_BUILD_ROAD_BRIDGE) {
+		// stackAction = [STACK_BUILD_ROAD_BRIDGE, transporterID, cityHexID, bridgeArr, compressedFromLoc, compressedToLoc]
+		const transporterID = stackAction[1]
+		const cityHexID = stackAction[2]
+		const bridgeArr = stackAction[3]
+		const fromLocation = decompressLocation(stackAction[4])
+		const transporterObj = model.getTransporterByID(transporterID)
+		const cityHex = model.getHexByID(cityHexID)
+		// Transporter must be on the neighbouring tile
+		if (transporterObj.location[1] !== fromLocation[1]) return 1
+		// The bridge must be a valid, unbuilt city bridge
+		if (!util.includesArray(cityHex.bridges, bridgeArr)) return 2
+		if (util.includesArray(cityHex.builtBridges, bridgeArr)) return 3
+		// Must have 2 stone (bridge + road)
+		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_STONE, rf.RES_STONE], true)
+		if (errorFlag > 0) return errorFlag + 10
 		return 0
 	}
 	// WONDER
@@ -2622,6 +2641,23 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
 		const targetBldg = buildingsOnHex.find((b) => b.type === buildingType)
 		if (targetBldg) targetBldg.strengthened = true
+	}
+	// BUILD ROAD & BRIDGE (CITY)
+	else if (action === rf.STACK_BUILD_ROAD_BRIDGE) {
+		let transporterID = stackAction[1]
+		if (swapIDs && typeof transporterID === "string") {
+			stackAction[1] = model.getTransporterByID(transporterID).id
+			transporterID = stackAction[1]
+		}
+		const cityHexID = stackAction[2]
+		const bridgeArr = stackAction[3]
+		const fromLocation = decompressLocation(stackAction[4])
+		const toLocation = decompressLocation(stackAction[5])
+		// Remove 2 stone (bridge + road)
+		model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_STONE, rf.RES_STONE], false)
+		// Build the bridge and the road
+		map.addBridgeToMap_core(cityHexID, transporterID, bridgeArr, false)
+		map.addRoadToMap_core([fromLocation[1], fromLocation[2]], [toLocation[1], toLocation[2]], transporterID, false)
 	}
 	// WONDER
 	else if (action === rf.STACK_ADD_WONDER_BRICKS) {

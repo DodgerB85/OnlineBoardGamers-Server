@@ -52,7 +52,10 @@ export function addNewEdge(hexIds) {
 	let otherHexData = model.getHexByID(hexIds[1])
 	let joiningSide = hd.getJoiningSide(hexData.coord, otherHexData.coord)
 	let otherSide = (joiningSide + 3) % 6
-	let hasRiver = hexData.sideRiverVertexIds[joiningSide] >= 0
+	// CITY: the moat is internal to the city, so its edges are land-to-land. The road
+	// enters the city at the outer side node, and the bridge crosses the moat behind it.
+	const involvesCity = hexData.hexTerrainID === rf.CITY || otherHexData.hexTerrainID === rf.CITY
+	let hasRiver = !involvesCity && (hexData.sideRiverVertexIds[joiningSide] >= 0 || otherHexData.sideRiverVertexIds[otherSide] >= 0)
 	// Find out the direction we're going in
 	let firstOppositeVertex = (joiningSide + 4) % 6
 	let secondOppositeVertex = (firstOppositeVertex + 5) % 6
@@ -756,6 +759,11 @@ export function addPowerLineToMap_core([fromHexID, fromBucketId], [toHexID, toBu
 export function clickedBridgeOption(entry) {
 	const store = useModelStore()
 	const hexID = entry[0]
+	// CITY: the Road & Bridge pseudo-building - build the moat bridge and the road together
+	if (store.context.action === rf.ACT_BUILD_ROAD_BRIDGE_SELECT) {
+		addRoadBridgeToMap(hexID, entry[1])
+		return
+	}
 	// Add a bridge
 	if (store.context.action === rf.ACT_TM_BUILD_SELECT_BRIDGE_ROAD_WALL_BUILDING_RES_PICKUP_DROP) {
 		addBridgeToMap(hexID, entry[1], true)
@@ -764,6 +772,78 @@ export function clickedBridgeOption(entry) {
 		addBridgeToMap(hexID, entry[1], false)
 		store.context.eligibleBridgesToBuild.splice(0)
 	}
+}
+
+// CITY: list of unbuilt city-moat bridges reachable from the given (neighbouring) hex
+export function getEligibleCityNeighbourBridges(neighbourHexID) {
+	const store = useModelStore()
+	const neighbourHex = model.getHexByID(neighbourHexID)
+	let res = []
+	for (const side of util.indexArray(6)) {
+		const cityHexID = neighbourHex.hexLookup[side]
+		if (cityHexID === -1) continue
+		const cityHex = model.getHexByID(cityHexID)
+		if (cityHex.hexTerrainID !== rf.CITY) continue
+		const citySide = (side + 3) % 6
+		const bridgeArr = cityHex.cornerNodeIds[citySide]
+		if (!bridgeArr || bridgeArr[0] === -1) continue
+		if (!util.includesArray(cityHex.bridges, bridgeArr)) continue
+		if (util.includesArray(cityHex.builtBridges, bridgeArr)) continue
+		// Don't offer if this edge already has a road
+		const edge = store.mapData.edgeData[neighbourHex.edgeLookup[side]]
+		if (edge && (edge.hasRoad.length === 1 ? edge.hasRoad[0] : edge.hasRoad.some((r) => r))) continue
+		res.push({ neighborHexID: neighbourHexID, cityHexID, side, citySide, bridgeArr })
+	}
+	return res
+}
+
+// CITY: build a bridge across a city moat plus the road into the city, for 2 stone
+export function addRoadBridgeToMap(cityHexID, bridgeArr) {
+	const store = useModelStore()
+	const transporterID = store.context.selectedTransporterIDforTM
+	const transporterObj = model.getTransporterByID(transporterID)
+	const cityHex = model.getHexByID(cityHexID)
+	// Find which world side this bridge is on. NB the `bridges` array order does not
+	// follow rotation, but `cornerNodeIds` does - so match against cornerNodeIds.
+	const citySide = cityHex.cornerNodeIds.findIndex((cn) => util.arraysEqual(cn, bridgeArr))
+	if (citySide === -1) {
+		rf.doAdminAlrt("addRoadBridgeToMap: bridge not found on city")
+		return
+	}
+	const neighbourHexID = cityHex.hexLookup[citySide]
+	if (neighbourHexID === -1) {
+		rf.doAdminAlrt("addRoadBridgeToMap: no neighbouring tile to build the road onto")
+		return
+	}
+	// The transporter must be on the neighbouring tile
+	if (transporterObj.location[1] !== neighbourHexID) return
+	// Need 2 stone (1 for the bridge, 1 for the road)
+	let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_STONE, rf.RES_STONE], true)
+	if (errorFlag !== 0) return
+	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_STONE, rf.RES_STONE], false)
+
+	const fromBucket = loc.getBucketIDfromAnyHexIDandVertex(neighbourHexID, transporterObj.location[2])
+	const fromLocation = [rf.LOCATION_BUCKET, neighbourHexID, fromBucket]
+	const toLocation = [rf.LOCATION_BUCKET, cityHexID, 0]
+
+	// Build the bridge (no resource deduction - already done)
+	addBridgeToMap_core(cityHexID, transporterID, bridgeArr, false)
+	// Build the road (no resource deduction - already done)
+	addRoadToMap_core([fromLocation[1], fromLocation[2]], [toLocation[1], toLocation[2]], transporterID, false)
+
+	// Add to the stack
+	const compressedFromLocation = stack.compressLocation(fromLocation)
+	const compressedToLocation = stack.compressLocation(toLocation)
+	let stackAction = [rf.STACK_BUILD_ROAD_BRIDGE, stack.getTransIDtoUse(transporterObj), cityHexID, [...bridgeArr], [...compressedFromLocation], [...compressedToLocation]]
+	stack.addItemToStack({
+		action: rf.STACK_BUILD_ROAD_BRIDGE,
+		historyEntry: stackAction,
+		playerIndex: controller.currentPlayerIndex(),
+	})
+
+	// Reset the context
+	highlight.updateAllHighlightsForTransporterMode()
+	context.createUndoPoint()
 }
 
 export function clickedBombOption(buildingID) {
@@ -1278,6 +1358,9 @@ export function allLandVertexBucketsWithoutRoadsAdjacentTo(hexID, bucketIds) {
 		const edge = store.mapData.edgeData[hex.edgeLookup[side]]
 		const otherHexId = hex.hexLookup[side]
 		const otherHex = model.getHexByID(otherHexId)
+		// CITY: a road into a city must cross the moat, so it is built via the
+		// Road & Bridge pseudo-building (2 stone), not a normal 1-stone road.
+		if (otherHex.hexTerrainID === rf.CITY) continue
 		if (rf.TERR_ANY_LAND.includes(hex.currentTerrain) && rf.TERR_ANY_LAND.includes(otherHex.currentTerrain)) {
 			function addRes(nodeId) {
 				const otherBucketId = otherHex.bucketIdsInitial[otherHex.nodeBucketIds[nodeId]]

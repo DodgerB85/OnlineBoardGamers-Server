@@ -163,6 +163,9 @@ export function createInternalGraph(hexId, playerIndex, ignoreWalls) {
 	const sideExists = hex.hexLookup.map((i) => i >= 0) // Does this side have a neighboring hex?
 	const sideIsCoast = sideIndices.map((i) => sideExists[i] && rf.TERR_ACTS_LIKE_WATER.includes(model.getHexByID(hex.hexLookup[i]).currentTerrain)) // Does this side border sea or wet polder?
 	const sideHasRiver = hex.sideRiverVertexIds.map((i) => i >= 0) // Does this side have a river?
+	// CITY: a city has a moat all around it, so boats interact with it via the river
+	// and never dock. Suppress all docked nodes for a city.
+	const isCityHex = hex.hexTerrainID === rf.CITY
 
 	/**
 	 * Checks if a side is blocked by a wall owned by another player
@@ -191,7 +194,7 @@ export function createInternalGraph(hexId, playerIndex, ignoreWalls) {
 	let dockedLocations = []
 	let dockExists = []
 	for (const bank of [rf.BANK_NONE, rf.BANK_LEFT, rf.BANK_RIGHT]) {
-		const sideDockExists = sideIndices.map((i) => sideExists[i] && sideIsCoast[i] && (bank == rf.BANK_NONE ? !sideHasRiver[i] : sideHasRiver[i]))
+		const sideDockExists = sideIndices.map((i) => sideExists[i] && sideIsCoast[i] && !isCityHex && (bank == rf.BANK_NONE ? !sideHasRiver[i] : sideHasRiver[i]))
 		// NEW DOCKS: add all offsets
 		for (const offset of [rf.DOCKED_OFFSET_NONE, rf.DOCKED_OFFSET_ACW, rf.DOCKED_OFFSET_CW]) {
 			dockedLocations = dockedLocations.concat(sideIndices.map((i) => loc.setDockedLocation(hexId, i, bank, offset)))
@@ -219,7 +222,8 @@ export function createInternalGraph(hexId, playerIndex, ignoreWalls) {
 			}
 
 			// If this is a coast side, add connections to docked positions
-			if (sideIsCoast[i]) {
+			// CITY: a city never docks (boats interact via the moat), so skip docks
+			if (sideIsCoast[i] && !isCityHex) {
 				if (sideHasRiver[i]) {
 					for (const offset of [rf.DOCKED_OFFSET_NONE, rf.DOCKED_OFFSET_ACW, rf.DOCKED_OFFSET_CW]) {
 						edgeData.push([[rf.NODE_COAST, i, rf.BANK_LEFT, offset], left])
@@ -457,6 +461,8 @@ export function createCompleteGraph(hexData, edgeData, playerIndex, ignoreWalls,
 
 			// Check if edge is blocked by a wall
 			const blockedByWall = ![playerIndex, -1].includes(edge.wall[1])
+			// CITY: a city is ringed by a moat, so land movement across its edge needs a bridge+road
+			const involvesCity = hexes.some((h) => h.hexTerrainID === rf.CITY)
 
 			// Determine what types of hexes are connected
 			let hasSea = hexTypes.some((t) => rf.TERR_ACTS_LIKE_WATER.includes(t))
@@ -482,8 +488,26 @@ export function createCompleteGraph(hexData, edgeData, playerIndex, ignoreWalls,
 						}
 					}
 				} else if (bothLand) {
+					if (involvesCity) {
+						// CITY: boats may still move between a neighbouring river and the
+						// city moat (the moat acts as a river all around the tile)
+						const riversConnect = sideData[hexIds[0]].hasRiver[sides[0]] && sideData[hexIds[1]].hasRiver[sides[1]]
+						if (riversConnect) {
+							addEdge(
+								rf.MOVE_WATER,
+								[0, 1].map((k) => hexOffset[k] + sideData[hexIds[k]].riverVertexIndex[sides[k]])
+							)
+						}
+						// ...but land transporters may only cross where a bridge + road exists
+						if (hasRoad[0]) {
+							addEdge(
+								rf.MOVE_ROAD,
+								[0, 1].map((k) => hexOffset[k] + hexSideNodes[k])
+							)
+						}
+					}
 					// river edge
-					if (sideData[hexIds[0]].hasRiver[sides[0]]) {
+					else if (sideData[hexIds[0]].hasRiver[sides[0]]) {
 						addEdge(
 							rf.MOVE_WATER,
 							[0, 1].map((k) => hexOffset[k] + sideData[hexIds[k]].riverVertexIndex[sides[k]])
@@ -512,11 +536,14 @@ export function createCompleteGraph(hexData, edgeData, playerIndex, ignoreWalls,
 					let landHexSide = sides[landHex]
 					const seaCornerNodes = hexCornerNodes[seaHex]
 					const hasValidCorners = seaCornerNodes[0] !== -1 && seaCornerNodes[1] !== -1
+					// CITY: a city is encircled by its moat, so a boat can move onto the
+					// moat (river) and interact with the city - it never docks.
+					const isCityLandHex = hexes[landHex].hexTerrainID === rf.CITY
 					// Only create sea-to-docked edges if this side is actually a coast
 					if (sideData[landHexId].hasRiver[landHexSide]) {
 						// dual-bank docking plus river
 						addEdge(rf.MOVE_WATER, [seaHexOffset + seaSideNode, landHexOffset + sideData[landHexId].riverVertexIndex[landHexSide]])
-						if (hasValidCorners) {
+						if (hasValidCorners && !isCityLandHex) {
 							for (let offset = 0; offset < 3; offset++) {
 								for (const seaNode of [seaSideNode, seaCornerNodes[0]]) {
 									addEdge(rf.MOVE_WATER, [seaHexOffset + seaNode, landHexOffset + vertexCount[landHex] + NODE_OFFSET_LEFT_BANK + landHexSide + 6 * offset])
@@ -526,7 +553,7 @@ export function createCompleteGraph(hexData, edgeData, playerIndex, ignoreWalls,
 								}
 							}
 						}
-					} else {
+					} else if (!isCityLandHex) {
 						// docking, no river
 						for (let offset = 0; offset < 3; offset++) {
 							addEdge(rf.MOVE_WATER, [seaHexOffset + seaSideNode, landHexOffset + vertexCount[landHex] + NODE_OFFSET_COAST + landHexSide + 6 * offset])

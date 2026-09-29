@@ -53,6 +53,11 @@ export function setEligibleItemsToBuild(playerIndex, transporterID) {
 		}
 	}
 
+	// CITY: Road & Bridge into a neighbouring city (costs 2 stone - a bridge over the moat + the road)
+	if (stoneOnHex >= 2 && map.getEligibleCityNeighbourBridges(hexID).length > 0) {
+		if (!store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_ROAD_BRIDGE)) store.context.eligibleBuildingsToBuild.push(rf.BLDG_PSEUDO_ROAD_BRIDGE)
+	}
+
 	// Is wall build/demolish possible
 	if (stoneOnHex >= 1 || boardsOnHex >= 2) {
 		// Find reachable side
@@ -120,7 +125,7 @@ export function getEligibleMainBuildingsToBuildWithTransporterID(transporterID) 
 	let buildingsOnTile = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
 
 	// Don't return early if no space - need to return other data, plus possibility of new shaft
-	const maxBuildings = hexObj.terrainID === rf.CITY ? 2 : 1
+	const maxBuildings = hexObj.hexTerrainID === rf.CITY ? 2 : 1
 	const spaceForBuilding = buildingsOnTile.length < maxBuildings
 
 	if (hexID < 0) {

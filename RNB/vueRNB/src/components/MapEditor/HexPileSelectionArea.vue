@@ -95,7 +95,7 @@ function rotateNewHexTile(hexIndex, dir, fromSingleHex) {
 }
 
 function setHexOptions() {
-	hexTerrainIDs.value = rf.GROUP_DESERT.concat(rf.GROUP_DESERT_RIVERS).concat(rf.GROUP_PASTURE).concat(rf.GROUP_PASTURE_RIVERS).concat(rf.GROUP_ROCK).concat(rf.GROUP_ROCK_RIVERS).concat(rf.GROUP_WOODS).concat(rf.GROUP_WOODS_RIVERS).concat(rf.GROUP_MOUNTAIN).concat(rf.GROUP_MOUNTAIN_RIVERS).concat(rf.GROUP_SEA).concat(rf.GROUP_POLDER).concat(rf.GROUP_BLANK) //.concat(rf.GROUP_CITY)
+	hexTerrainIDs.value = rf.GROUP_DESERT.concat(rf.GROUP_DESERT_RIVERS).concat(rf.GROUP_PASTURE).concat(rf.GROUP_PASTURE_RIVERS).concat(rf.GROUP_ROCK).concat(rf.GROUP_ROCK_RIVERS).concat(rf.GROUP_WOODS).concat(rf.GROUP_WOODS_RIVERS).concat(rf.GROUP_MOUNTAIN).concat(rf.GROUP_MOUNTAIN_RIVERS).concat(rf.GROUP_SEA).concat(rf.GROUP_POLDER).concat(rf.GROUP_CITY).concat(rf.GROUP_BLANK)
 	// Convert to string, make at least length 2
 	hexTerrainIDs.value = hexTerrainIDs.value.map((x) => String(x).padStart(2, "0"))
 	hexRotations.splice(0)
@@ -295,6 +295,9 @@ const errorText = computed(() => {
 		for (let side = 0; side < 6; side++) {
 			const riverVertexId = hex.sideRiverVertexIds[side]
 			if (riverVertexId >= 0) {
+				// CITY: the moat is a river ring inside the city hex, so it is fine for
+				// it to sit next to land (no neighbouring river is required)
+				if (hex.hexTerrainID === rf.CITY) continue
 				// This side has a river, check if it's properly connected
 				const neighborHexId = hex.hexLookup[side]
 

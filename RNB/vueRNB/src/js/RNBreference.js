@@ -220,6 +220,7 @@ export const ACT_TM_DECIDE_ON_TRANSPORTER_PICKUP_OR_SELECT = 32
 // Building
 export const ACT_TM_BUILD_SELECT_BRIDGE_ROAD_WALL_BUILDING_RES_PICKUP_DROP = 40
 export const ACT_TM_CHOOSE_BUILDING_SEGMENT = 41
+export const ACT_BUILD_ROAD_BRIDGE_SELECT = 42 // CITY: picking which city moat bridge to build a road over
 
 export const ACT_CONFIRM_RESIGN = 97
 export const ACT_CONFIRM_KICKOUT = 98
@@ -264,6 +265,7 @@ export const STACK_BUILD_POWER_LINE = 26
 export const STACK_EXHIBITION = 27
 export const STACK_BOMB_BUILDING = 28
 export const STACK_STRENGTHEN_BUILDING = 29
+export const STACK_BUILD_ROAD_BRIDGE = 35 // CITY: build a bridge over the moat plus a road in one action
 
 // PRODUCTION ACTIONS
 export const STACK_MANUAL_PRODUCTION = 30
@@ -609,6 +611,7 @@ export const BLDG_PSEUDO_DEMOLISH_WALL = 105
 export const BLDG_PSEUDO_POWER_LINE = 106
 export const BLDG_PSEUDO_BOMB = 107
 export const BLDG_PSEUDO_STRENGTHEN = 108
+export const BLDG_PSEUDO_ROAD_BRIDGE = 109
 
 export const ALL_BUILDINGS = [BLDG_WOODCUTTER, BLDG_SAWMILL, BLDG_PAPERMILL, BLDG_CLAY_PIT, BLDG_STONE_FACTORY, BLDG_QUARRY, BLDG_OILRIG, BLDG_COAL_BURNER, BLDG_MINE, BLDG_MINT, BLDG_STOCK_EXCHANGE, BLDG_WAGON_FACTORY, BLDG_TRUCK_FACTORY, BLDG_RAFT_FACTORY, BLDG_ROWBOAT_FACTORY, BLDG_STEAMER_FACTORY, BLDG_AEROPORT, BLDG_BOMB_FACTORY, BLDG_POWER_PLANT, BLDG_PEARL_FISHERY, BLDG_ATELIER, ...ALL_MBA_BUILDINGS]
 
@@ -616,7 +619,7 @@ export const ALL_TRANSPORTER_FACTORIES = [BLDG_WAGON_FACTORY, BLDG_TRUCK_FACTORY
 // NB Wagon factory REMOVES and ADDS
 export const ALL_TRANSPORTER_ADDING_BUILDINGS = [BLDG_TRUCK_FACTORY, BLDG_RAFT_FACTORY, BLDG_ROWBOAT_FACTORY, BLDG_STEAMER_FACTORY, BLDG_ATELIER, BLDG_AEROPORT]
 export const ALL_WATER_TRANSPORTER_BUILDINGS = [BLDG_RAFT_FACTORY, BLDG_ROWBOAT_FACTORY, BLDG_STEAMER_FACTORY]
-export const ALL_PSEUDO_BUILDINGS = [BLDG_PSEUDO_RESHAFT_MINE, BLDG_PSEUDO_ROAD, BLDG_PSEUDO_BRIDGE, BLDG_PSEUDO_WALL, BLDG_PSEUDO_DEMOLISH_WALL, BLDG_PSEUDO_POWER_LINE, BLDG_PSEUDO_BOMB, BLDG_PSEUDO_STRENGTHEN]
+export const ALL_PSEUDO_BUILDINGS = [BLDG_PSEUDO_RESHAFT_MINE, BLDG_PSEUDO_ROAD, BLDG_PSEUDO_BRIDGE, BLDG_PSEUDO_WALL, BLDG_PSEUDO_DEMOLISH_WALL, BLDG_PSEUDO_POWER_LINE, BLDG_PSEUDO_BOMB, BLDG_PSEUDO_STRENGTHEN, BLDG_PSEUDO_ROAD_BRIDGE]
 
 // NB ONLY USED IN ADMIN ACTION SELECT
 export const ALL_BUILDING_STRINGS = ["Woodcutter", "Sawmill", "Papermill", "Clay Pit", "Stone Factory", "Quarry", "Oil Rig", "Coal Burner", "Mine", "Mint", "Stock Exchange", "Wagon Factory", "Truck Factory", "Raft Factory", "Rowboat Factory", "Steamer Factory", "Airport", "Bomb Factory", "Power Plant", "Pearl Fisher", "Atelier", "MBA (Woods)", "MBA (Mountain)", "MBA (Rock)", "MBA (Pasture)", "MBA (Coast)", "MBA (Desert)"]
@@ -3018,16 +3021,18 @@ export const ALL_HEX_DATA = UNIFORM_HEX_DATA.concat([
 		homeMarkerFallbackPositions: [null, null, null, null, null, null, null],
 	},
 	{
-		// TODO - make this river thing work
-		// River vertices and pathfinding work! :)
-		// But the road building code needs to change to come with a bridge.
-		// Probably need some special gfx as well
+		// CITY: a pasture island surrounded by a moat (a river ring).
+		// The moat works as a river for boats (river vertices/edges below).
+		// The land is a single bucket (0). Six inner "gate" nodes sit on the land,
+		// six outer "gate" nodes sit just inside the hex edge, and six bridges span
+		// the moat between each inner/outer pair. A bridge must be built to get in
+		// (from a neighbouring tile) - see BLDG_PSEUDO_ROAD_BRIDGE.
 		hexTerrainID: CITY,
 		baseTerrain: TERR_PASTURE,
 		riverType: RIVER_CITY,
 		hexGfx: "hex_22",
 		rotatable: true,
-		riverAdjacencies: [[0, 1]],
+		riverAdjacencies: [[0]],
 
 		riverVertexRiverIds: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		riverStoppingVertex: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
@@ -3061,50 +3066,84 @@ export const ALL_HEX_DATA = UNIFORM_HEX_DATA.concat([
 			[11, 0],
 		],
 
-		nodeBucketIds: [0, 0, 0, 0, 0, 0, 0, 0],
+		// 0 = centre, 1-6 = inner gates (side 0-5), 7-12 = outer gates (side 0-5)
+		nodeBucketIds: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		nodeVertexDefinitions: [
-			[0, 0.5, 0.3],
-			[1, 0.5, 0.4],
-			[2, 0.5, 0.3],
-			[3, 0.5, 0.2],
-			[4, 0.2, 0.3],
-			[4, 0.5, 0.3],
-			[5, RSA, 0.2],
-			[5, 1 - RSA, 0.2],
+			[0, 0.5, 1],
+			[0, 0.5, 0.35],
+			[1, 0.5, 0.35],
+			[2, 0.5, 0.35],
+			[3, 0.5, 0.35],
+			[4, 0.5, 0.35],
+			[5, 0.5, 0.35],
+			[0, 0.5, 0.05],
+			[1, 0.5, 0.05],
+			[2, 0.5, 0.05],
+			[3, 0.5, 0.05],
+			[4, 0.5, 0.05],
+			[5, 0.5, 0.05],
 		].map(coord.relative),
 		nodeEdges: [
+			[0, 1],
+			[0, 2],
+			[0, 3],
 			[0, 4],
-			[1, 4],
-			[4, 5],
-			[2, 5],
-			[3, 5],
-			[6, 7],
-			[7, 8],
-			[8, 9],
+			[0, 5],
+			[0, 6],
 		],
 		cornerBucketIds: [0, 0, 0, 0, 0, 0],
-		sideNodeIds: [-1, -1, -1, -1, -1, -1],
+		// CITY: the edge to a neighbour is land-to-land (the moat is internal), so the
+		// road enters at a side node = the outer gate. The bridge spans inner<->outer.
+		sideNodeIds: [7, 8, 9, 10, 11, 12],
+		// Each river side has two banks: [inner gate, outer gate]
 		cornerNodeIds: [
-			[3, 6],
-			[3, 6],
-			[3, 6],
-			[3, 6],
-			[3, 6],
-			[3, 6],
+			[1, 7],
+			[2, 8],
+			[3, 9],
+			[4, 10],
+			[5, 11],
+			[6, 12],
 		],
-		roadAnchors: [4, 5, 7, 8],
-		/******* BRIDGES ***********/
-		bridges: [[4, 7]],
+		roadAnchors: [0, 1, 2, 3, 4, 5, 6],
+		/******* BRIDGES - one per side, spanning the moat between inner and outer gate *******/
+		bridges: [
+			[1, 7],
+			[2, 8],
+			[3, 9],
+			[4, 10],
+			[5, 11],
+			[6, 12],
+		],
 		bridgeRiverLines: [
 			[
-				[-126.49604, 0.54423],
-				[63.97923, 72.38062],
+				[230.8, -263.31],
+				[109.2, -332.69],
+			].map(coord.absolute),
+			[
+				[346.6, 72],
+				[347.4, -68],
+			].map(coord.absolute),
+			[
+				[144.12, 336.37],
+				[259.88, 257.63],
+			].map(coord.absolute),
+			[
+				[-241.2, 269.28],
+				[-120.8, 340.72],
+			].map(coord.absolute),
+			[
+				[-366.38, -68],
+				[-365.62, 72],
+			].map(coord.absolute),
+			[
+				[-145.65, -330.14],
+				[-260.35, -249.86],
 			].map(coord.absolute),
 		],
-		chitLocationBucketIds: [0, 0, 0, 0, 0, 0],
-		chitLocationBuildingEligible: [true, true, true, true, true, true],
+		chitLocationBucketIds: [0, 0, 0, 0, 0, 0, 0],
+		chitLocationBuildingEligible: [true, true, true, true, true, true, true],
 		chitLocations: halfwayCorners,
-		homeMarkerFallbackPositions: [null, null, null, null, null, null],
+		homeMarkerFallbackPositions: [null, null, null, null, null, null, null],
 	},
 ])
 
@@ -3638,6 +3677,20 @@ export const BUILDING_STATS = [
 		bldg_name_summary: "Strengthen",
 		isValidTerrain: terrainIsType(TERR_ANY_LAND),
 		cost: [RES_STONE],
+		inputRes: [[]],
+		outputRes: [],
+		makesTransporter: false,
+		maxConversions: 99,
+		startingOptionRequired: SO_BASE_GAME,
+		requiredResearchIndex: -1,
+	},
+	{
+		// CITY: build a bridge across the city moat and a road into the city in one action. Costs 2 stone.
+		building: BLDG_PSEUDO_ROAD_BRIDGE,
+		bldg_name: "Road & Bridge",
+		bldg_name_summary: "Road & Bridge",
+		isValidTerrain: terrainIsType(TERR_ANY_LAND),
+		cost: [RES_STONE, RES_STONE],
 		inputRes: [[]],
 		outputRes: [],
 		makesTransporter: false,
