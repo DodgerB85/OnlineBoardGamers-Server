@@ -436,7 +436,9 @@ function addPlayerToBlacklist() {
 				// Create a new blacklisted player div
 				let newPlayerDiv = document.createElement("div")
 				newPlayerDiv.classList.add("blacklistedPlayer")
+				newPlayerDiv.classList.add("row-flex")
 				newPlayerDiv.id = "BL" + blackListPlayer
+				newPlayerDiv.style.padding = "4px 0"
 
 				// Create a span for the player name
 				let playerNameSpan = document.createElement("span")
@@ -444,8 +446,10 @@ function addPlayerToBlacklist() {
 
 				// Create a button to remove the player
 				let removeButton = document.createElement("button")
-				removeButton.classList.add("removePlayerBtn")
-				removeButton.textContent = "❌"
+				removeButton.classList.add("button")
+				removeButton.classList.add("button-ghost")
+				removeButton.classList.add("button-sm")
+				removeButton.textContent = "✕"
 				removeButton.onclick = function () {
 					event.preventDefault()
 					removePlayerFromBlacklist(blackListPlayer)
@@ -455,9 +459,8 @@ function addPlayerToBlacklist() {
 				newPlayerDiv.appendChild(playerNameSpan)
 				newPlayerDiv.appendChild(removeButton)
 
-				// Append the new player div to the blacklistedPlayers section
-				var blacklistedPlayersSection = document.querySelector(".blacklistedPlayers")
-				blacklistedPlayersSection.appendChild(newPlayerDiv)
+				// Append the new player div to the blacklist list
+				document.getElementById("blacklistedPlayersList").appendChild(newPlayerDiv)
 			}
 		})
 		.catch((error) => {
