@@ -75,16 +75,6 @@
                 </span>
             </div>
         {% endif %}
-        {% url 'newGamesPage' as new_game_url %}
-        <div class="news-banner" id="rnbAnnounceBanner">
-            <span>{% blocktranslate trimmed %}Roads &amp; Boats is here! Map editor available — see the <a href="{{ new_game_url }}">New Game</a> page.{% endblocktranslate %}</span>
-            <button class="news-dismiss"
-                    aria-label="{% translate "Dismiss" %}"
-                    onclick="document.getElementById('rnbAnnounceBanner').style.display='none'; try{localStorage.setItem('rnb_announce_dismissed','1');}catch(e){}">
-                &#x2715;
-            </button>
-        </div>
-        <script>try{if(localStorage.getItem('rnb_announce_dismissed')==='1')document.getElementById('rnbAnnounceBanner').style.display='none';}catch(e){}</script>
         <div class="news-banner">
             <span>{% translate "New Design Active! All feedback being processed. Please let us know what improvements you would like." %}</span>
             <a href="{% url 'feedback' %}" class="button button-sm button-primary" style="margin-left:8px;">{% translate "Feedback" %}</a>

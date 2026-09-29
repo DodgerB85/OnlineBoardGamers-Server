@@ -245,6 +245,13 @@
                 </div>
             </div>
         {% else %}
+            <!-- Quick nav not logged in -->
+            <nav class="mobileQuickNav"
+                 aria-label="{% translate "Primary navigation" %}">
+                <a class="topBarLink" href="{% url 'index' %}">{% translate "Home" %}</a>
+                <a class="topBarLink" href="{% url 'register' %}">{% translate "Register" %}</a>
+                <a class="topBarLink" href="{% url 'password_reset' %}">{% translate "Forgot Password" %}</a>
+            </nav>
             <!-- Hamburger not logged in -->
             <div class="hamburgerMenu">
                 <div class="hamburgerLinkDiv">
