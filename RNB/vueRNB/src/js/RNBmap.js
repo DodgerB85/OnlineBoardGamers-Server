@@ -1221,23 +1221,23 @@ export function addWallToMap_core(transporterID, hex1ID, hex2ID, playerIndex, de
 		if (deductResources) {
 			const hex1 = model.getHexByID(id1)
 			const hex2 = model.getHexByID(id2)
-			const hex1isSea = hex1.currentTerrain === rf.TERR_SEA
-			const hex2isSea = hex2.currentTerrain === rf.TERR_SEA
-			// XOR logic: Only run if exactly one hex is sea (land-water border)
-			if (hex1isSea !== hex2isSea) {
-				const landIdx = hex1isSea ? 1 : 0
+			const hex1isWater = rf.TERR_ACTS_LIKE_WATER.includes(hex1.currentTerrain)
+			const hex2isWater = rf.TERR_ACTS_LIKE_WATER.includes(hex2.currentTerrain)
+			// XOR logic: Only run if exactly one hex acts like water (land-water border, including wet polders)
+			if (hex1isWater !== hex2isWater) {
+				const landIdx = hex1isWater ? 1 : 0
 				const landHexID = edgeEntry.edgeHexIDs[landIdx]
 				const joiningSide = edgeEntry.joiningSides[landIdx]
 				const dockedBoats = model.getAllInGameTransporters().filter((t) => loc.isDockedLocation(t.location) && t.location[1] === landHexID && t.location[2] === joiningSide)
 
 				if (dockedBoats.length > 0) {
-					const seaHexID = hex1isSea ? id1 : id2
-					const seaBucketLocation = loc.setBucketLocation(seaHexID, 0)
+					const waterHexID = hex1isWater ? id1 : id2
+					const waterBucketLocation = loc.setBucketLocation(waterHexID, 0)
 					// For each boat, if it isn't the currentPlayerIndex, move them out to see
 					dockedBoats.forEach((boat) => {
 						if (boat.ownerIndex !== playerIndex) {
 							// Pick a distinct sea vertex near where the boat enters the sea hex, avoiding vertices other boats already occupy
-							const newSeaLocation = loc.getVisualLocationFromBucketLocation(seaBucketLocation, boat.location, boat.type)
+							const newSeaLocation = loc.getVisualLocationFromBucketLocation(waterBucketLocation, boat.location, boat.type)
 							boat.location = newSeaLocation
 							shiftedBoatIDs.push(boat.id)
 							// Keep the boat's visual position in sync and move any carried transporters too
