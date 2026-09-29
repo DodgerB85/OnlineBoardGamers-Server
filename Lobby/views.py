@@ -2676,15 +2676,6 @@ def createFCMpage(request, gameID=None):
         )
 
 
-@login_required
-def createFCM2page(request):
-    # Unofficial mods create page: same layout as createFCMpage but includes the
-    # unofficial mods options grid (fried chicken mod etc.). Games created with
-    # these options are automatically excluded from stats in FCM.common.
-    experienced = SF_hasRequiredExperience(request, "FCM", Game)
-    return render(request, "Lobby/createFCM2.html", {"experienced": experienced})
-
-
 class registerView(View):
     form_class = NewUserForm
     template_name = "Lobby/register.html"

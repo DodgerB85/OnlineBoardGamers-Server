@@ -217,4 +217,15 @@
     </div>
   </label>
 </div>
+
+<div class="opts-section opts-amber">
+  <div class="section-title">{% trans "Unofficial Mods" %}</div>
+  <label class="check-label">
+    <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt222" id="friedChicken" name="friedChicken" value="46" />
+    <div>
+      <div style="color:#d97706">{% trans "Use Fried Chicken" %} (MOD) &mdash; {% trans "See" %} <a href="{% url 'FCM:fanExpansionsHelp' %}" target="_blank">{% trans "Help" %}</a></div>
+      <div class="opt-help">{% trans "Unmet demand flips to Fried Chicken; unserved Fried Chicken means the house moves out" %}</div>
+    </div>
+  </label>
+</div>
 </div>

@@ -12,6 +12,7 @@
     <h2>{% translate "Rules Help" %}</h2>
     <div class="help-qa">
       {% url 'FCM:FCMchinaHelp' as fcm_china_help_url %}
+      {% url 'FCM:fanExpansionsHelp' as fcm_fan_help_url %}
       {% blocktranslate trimmed %}
         Food Chain Magnate rules available <a href="https://www.qugs.org/rules/r175914.pdf" target="_blank">here</a>
         <br />
@@ -19,6 +20,8 @@
     target="_blank">here</a>
         <br />
         China Expansion rules available <a href="{{ fcm_china_help_url }}" target="_blank">here</a>
+        <br />
+        Fan Expansions rules available <a href="{{ fcm_fan_help_url }}" target="_blank">here</a>
         <br />
         How to play guide example <a href="https://www.myboardgameguides.com/game-strategy/game-specific-strategy/food-chain-magnate-strategy-guide/"
     target="_blank">here</a>
