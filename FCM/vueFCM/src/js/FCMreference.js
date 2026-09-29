@@ -130,7 +130,9 @@ export const ACT_CONFIRM_DELAY_FIRST_RESTO = 104
 export const ACT_CONFIRM_NO_MORE_EMPLOYEES = 105
 
 // RES CARDS
-export const RES_CARD_NONE = -1
+// 9 = player has no reserve card. Distinct from -1, which means "not chosen yet".
+export const RES_CARD_NONE = 9
+export const RES_CARD_NOT_CHOSEN = -1
 export const RES_CARD_OG_2_SLOTS = 1
 export const RES_CARD_OG_3_SLOTS = 2
 export const RES_CARD_OG_4_SLOTS = 3

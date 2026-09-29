@@ -86,16 +86,12 @@ export function setEligibleItemsToBuild(playerIndex, transporterID) {
 			if (eitherIsPolder && (hex1IsPolder && hex2IsPolder)) continue
 			if (eitherIsPolder && (hex1IsSea || hex2IsSea)) continue
 
-			// Polder cost modifier: +2 stone/boards when building from/demolishing from a polder
-			let polderCostModifier = 0
-			if (store.gameOptions.usePolders && eitherIsPolder) polderCostModifier = 2
-
 			// If you own it or it's neutral, and you have level+1 stones, you can build there
-			if (!ownedByOpponent && stoneOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater + polderCostModifier) {
+			if (!ownedByOpponent && stoneOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater) {
 				if (!store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_WALL)) store.context.eligibleBuildingsToBuild.push(rf.BLDG_PSEUDO_WALL)
 			}
 			// If you don't own it,you need 1+level boards to demolish
-			else if (ownedByOpponent && boardsOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater + polderCostModifier) {
+			else if (ownedByOpponent && boardsOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater) {
 				if (!store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_DEMOLISH_WALL)) store.context.eligibleBuildingsToBuild.push(rf.BLDG_PSEUDO_DEMOLISH_WALL)
 			}
 		}

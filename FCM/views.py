@@ -68,6 +68,10 @@ def coffeeHelp(request):
     return render(request, "FCM/coffeeHelp.html")
 
 
+def fanExpansionsHelp(request):
+    return render(request, "FCM/fanExpansionsHelp.html")
+
+
 @login_required
 def FCMstats(request):
     with open("./FCM/FCMstats/FCM_stats.json") as f:

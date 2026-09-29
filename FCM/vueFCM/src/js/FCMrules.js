@@ -117,6 +117,10 @@ export function oneLevelAbove(employee, preservingColour) {
 			case rf.SUSHI_COOK:
 				level.push(rf.FRY_CHEF)
 				break
+			// Fried Chicken mod
+			case rf.FRIED_CHICKEN_COOK:
+				if (store.startingOptions.friedChicken) level.push(rf.FRY_CHEF)
+				break
 		}
 	}
 
@@ -2633,13 +2637,14 @@ function handleBankBreak(replayOnly) {
 	if (store.bankBroken === 0) {
 		store.bankBroken = 1
 
-		if (!replayOnly) model.addHistory(rf.HIST_DISPLAY_RESERVE, store.reserveCards.filter((card) => card !== -1), -1, 0)
+		if (!replayOnly) model.addHistory(rf.HIST_DISPLAY_RESERVE, store.reserveCards.filter((card) => card !== rf.RES_CARD_NOT_CHOSEN && card !== rf.RES_CARD_NONE), -1, 0)
 
 		const reserve = [0, 0, 0]
 		let total = 0
 
 		store.reserveCards.forEach((card) => {
-			if (card === -1) return
+			// RES_CARD_NOT_CHOSEN = not chosen, RES_CARD_NONE = no reserve card: neither counts at bank break
+			if (card === rf.RES_CARD_NOT_CHOSEN || card === rf.RES_CARD_NONE) return
 			total += card * 100
 			reserve[card - 1]++
 		})
@@ -2648,7 +2653,7 @@ function handleBankBreak(replayOnly) {
 		store.ceoLevel = reserve.lastIndexOf(maxVal) + 2
 
 		if (store.startingOptions.reservePrice) {
-			total = 200 * store.reserveCards.length
+			total = 200 * store.reserveCards.filter((card) => card !== rf.RES_CARD_NOT_CHOSEN && card !== rf.RES_CARD_NONE).length
 			store.ceoLevel = 3
 		}
 

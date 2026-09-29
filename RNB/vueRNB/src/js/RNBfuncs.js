@@ -581,6 +581,8 @@ export async function simpleImportWholeRNBmodelNoCompression(inputModel, keepHis
 		const transporterStats = rf.getTransporterStats(transporterObj.type)
 		transporterObj.rawTransporterXY = map.getTransporterPositionFromLocation(transporterLocation, transporterStats, transporterObj.id)
 	}
+
+	wonder.resolveAllTransportersForCurrentTerrain()
 }
 
 export async function simpleImportWholeRNBmodel(inputBase64, keepHistory = false) {
@@ -690,6 +692,8 @@ export async function simpleImportWholeRNBmodel(inputBase64, keepHistory = false
 
 	// Sync polder state to match the loaded wonder brick count
 	wonder.syncPoldersToBrickCount()
+	// Fix any boat left on terrain that polder syncing just invalidated
+	wonder.resolveAllTransportersForCurrentTerrain()
 }
 
 export function exportRNBmodel(forGameOver) {
@@ -923,6 +927,9 @@ export function importRNBmodel(input, forGameOver) {
 		let rawTransporterXY = map.getTransporterPositionFromLocation(transporterLocation, transporterStats, transporterObj.id)
 		transporterObj.rawTransporterXY = rawTransporterXY
 	}
+
+	// Polders may have flipped since this state was saved, so fix any boat left on invalid terrain
+	wonder.resolveAllTransportersForCurrentTerrain()
 
 	// 3 - Res
 	store.ALL_RESOURCES.splice(0)
@@ -1183,6 +1190,9 @@ export function exportLandTransporterLocation(inputLocation) {
 	else if (loc.isOnAnyTransporter(inputLocation)) return [inputLocation[1]]
 	// Land vertex is length 2, hex ID and vertex ID
 	else if (loc.isLandVertexLocation(inputLocation)) return [inputLocation[1], inputLocation[2]]
+	// Sea vertex (a land mover marooned on a flooded polder) uses the same length-2 encoding;
+	// the vertex type is re-derived from the terrain on import
+	else if (loc.isSeaVertexLocation(inputLocation)) return [inputLocation[1], inputLocation[2]]
 	else rf.doAdminAlrt(`landTransporterLocation error: ${inputLocation}`)
 }
 
@@ -1204,6 +1214,9 @@ export function exportWaterTransporterLocation(inputLocation) {
 	else if (loc.isOnAnyTransporter(inputLocation)) return [-1, inputLocation[1]]
 	// If on water vertex, use hexID and vertex length 3  flag -1
 	else if (loc.isWaterVertexLocation(inputLocation)) return [-1, inputLocation[1], inputLocation[2]]
+	// Land vertex (a boat marooned on a drained polder) reuses the -1 length-3 encoding; the
+	// vertex type is re-derived from the terrain on import
+	else if (loc.isLandVertexLocation(inputLocation)) return [-1, inputLocation[1], inputLocation[2]]
 	else if (loc.isDockedLocation(inputLocation)) {
 		const hexID = inputLocation[1]
 		const side = inputLocation[2]

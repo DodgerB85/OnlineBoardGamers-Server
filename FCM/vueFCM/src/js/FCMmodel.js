@@ -155,7 +155,7 @@ export async function initGame() {
 					OOBpreference: 0, // Only used to store result of checkboz, then compressed into moveData
 				})
 				// Add a reserve card space
-				store.reserveCards.push(-1)
+				store.reserveCards.push(rf.RES_CARD_NOT_CHOSEN)
 			} // End looping and inserting player names
 
 			// Now insert display names
@@ -212,7 +212,7 @@ export async function initGame() {
 			for (let i = 0; i < store.players.length; to[i] = i++);
 
 			store.ceoLevel = 3
-			store.reserveCards = Array.from({ length: store.players.length }, () => -1)
+			store.reserveCards = Array.from({ length: store.players.length }, () => rf.RES_CARD_NOT_CHOSEN)
 
 			// INTERNAL OPTIONS NEED TO BE SET BEFORE THIS
 			setupKetchupExpansion(store.players.length)
@@ -768,7 +768,7 @@ export function isItemOnBottomOfBoard() {
 export function alreadyChosenReserveCard() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	if (store.reserveCards[personal.pov] !== -1) return true
+	if (store.reserveCards[personal.pov] !== rf.RES_CARD_NOT_CHOSEN) return true
 	return false
 }
 

@@ -1237,6 +1237,50 @@ msgstr "无法回退。已达到回退极限。请继续游戏以供回退"
 msgid "Permissions missing. Please reload the page and check again"
 msgstr "缺少权限，请刷新页面并重新尝试"
 
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid "Fan Expansions Help"
+msgstr "玩家扩展帮助"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid "These modules are fan-made expansions. They are not official Splotter Spellen content. <br /> Games with these modules are therefore excluded from the stats. <br /> Fan modules can be enabled in the options when creating a new FCM game."
+msgstr "这些模组为玩家自制扩展，并非 Splotter Spellen 官方内容。使用这些模组的游戏不计入统计数据。玩家自制模组可在创建新 FCM 游戏时的选项中开启。"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid "Fried Chicken"
+msgstr "炸鸡"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid "Fried chicken is a new food born from unhappy customers. When regular demand goes unserved, frustrated residents start craving fried chicken - and if nobody delivers, they eventually move out of the neighbourhood. Selling the very first fried chicken grants a lucrative but risky monopoly."
+msgstr "炸鸡是一种由失望顾客催生的新食物。当普通需求得不到满足时，烦躁的居民开始渴望炸鸡——如果始终无人供应，他们最终会搬离社区。卖出第一份炸鸡将获得一份利润丰厚但风险不小的垄断权。"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid "Flipping: At Dinnertime, if none of a house's regular demand can be served (every restaurant is too far away, sold out, or too expensive), each unserved regular demand token flips into ownerless demand for Fried Chicken."
+msgstr "翻面：晚餐结算时，若一栋房子的需求无法被满足，则每个未被满足的需求标记都会翻面为炸鸡需求。"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid "Moving out: If flipped Fried Chicken demand is still unserved at its second Dinnertime, the residents move out. All demand is removed, a SOLD sign is placed on the house, and it will not accept any marketing for the rest of the game."
+msgstr "搬家：若翻面产生的炸鸡需求在第二次晚餐结算时仍未被满足，居民将搬走（认为城镇没有好吃的食物，太过失望而离开）。所有需求被移除，房子上放置一块 SOLD（已售）牌，且本局游戏不再接受任何营销。"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid "Origin of demand: Fried Chicken demand is normally only created by flipping - marketing employees cannot create it. Fried Chicken is otherwise a normal food item: it is sold at your normal price, matched by nearest and cheapest as usual, and may be stored in the fridge."
+msgstr "需求来源：炸鸡需求通常只能由翻面产生——营销员工无法创造炸鸡需求。除此之外，炸鸡是一种正常食物：按你的正常价格出售，按“最近+最便宜”规则匹配，也可以放进冰箱。"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid "Milestone \"First fried chicken sold\": The first player to sell Fried Chicken gains this Milestone, which grants two permanent perks: 1) the exclusive right to market Fried Chicken (no other player may ever add it to a campaign), and 2) a brand premium of +$5 for every Fried Chicken sold. The premium applies from the sale after the Milestone is earned, so the milestone-earning sale itself does not get the bonus."
+msgstr "里程碑「首个卖出炸鸡」：第一个卖出炸鸡的玩家获得该里程碑，包含两项永久特权：1) 炸鸡独家营销权（在营销活动中加入炸鸡）；2) 品牌溢价：每卖出一份炸鸡 +$5。溢价从获得里程碑之后的销售开始生效，触发里程碑的这次销售本身不享受加成。"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid "Strict liability: Fried Chicken marketed by the Milestone player has only one life. If any marketed Fried Chicken is unserved at Dinnertime, that house moves out at the very next Dinnertime settlement - before any matching takes place and with no flip as a buffer. Regular demand gets two lives (original demand, then flip); marketed Fried Chicken gets just one."
+msgstr "严格责任：由里程碑玩家营销的炸鸡只有一条命。若晚餐结算时有任何被营销的炸鸡未被满足，该房子将在下一次晚餐结算时直接搬走。普通需求有两条命（原始需求 + 翻面）；被营销的炸鸡只有一条。"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid "Employees: Fried Chicken is produced by the Fried Chicken Cook (3 per turn, trained from a Kitchen Trainee; there are 6 in the game) and the Fried Chicken Chef (8 per turn, trained from a Fried Chicken Cook; a 1x employee). A Kitchen Trainee cannot produce Fried Chicken directly. Salaries and training follow the standard employee tiers. When the Fry Chefs module is in use, a Fried Chicken Cook may also be trained into a Fry Chef."
+msgstr "员工：炸鸡由炸鸡厨师（每轮制作 3 份，由厨房学徒培训而来；全场共 6 张）和炸鸡主厨（每轮制作 8 份，由炸鸡厨师培训而来；1x 员工）制作。厨房学徒不能直接制作炸鸡。工资和培训遵循标准员工层级。启用炸薯条主厨模组时，炸鸡厨师也可以升级为炸薯条主厨。"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid "Rural exemption: The Rural Marketing Area never flips and never moves out."
+msgstr "乡村豁免：乡村营销区不在城镇之内，所以需求不会翻面，也永远不会搬走。"
+
 #~ msgid "In Progress"
 #~ msgstr "进行中"
 

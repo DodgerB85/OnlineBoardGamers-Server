@@ -217,7 +217,7 @@ export function resetDataForReplay() {
 	store.houses.splice(0)
 	store.needs.splice(0)
 	store.reserveCards.splice(0)
-	for (let i = 0; i < store.players.length; i++) store.reserveCards.push(-1)
+	for (let i = 0; i < store.players.length; i++) store.reserveCards.push(rf.RES_CARD_NOT_CHOSEN)
 	store.freeways.splice(0)
 	store.firstPizzas.splice(0)
 	store.parks.splice(0)

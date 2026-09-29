@@ -2207,9 +2207,15 @@ class FCMpresenter(GamePresenter):
         if moveArr[3] == []:
             return False
 
-        # Res card is single array of length one, containing 1,2,or 3
+        # Res card is a single array of length one containing 1/2/3, or 9 (RES_CARD_NONE = no card).
+        # A bare -1 / [-1] is the client's "not chosen yet" placeholder: not a completed move,
+        # but not corrupt data either, so it must not raise an admin error.
         if phase <= rfFCM.PHASE_SETUP_RESERVE:
             data = moveArr[3]
+            if data in (-1, [-1]):
+                return False
+            if data in (9, [9]):
+                return True
             if not isinstance(data, list) or len(data) != 1 or data[0] not in [1, 2, 3]:
                 message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase2 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
                 SN_sendAdminErrorMessage(message)

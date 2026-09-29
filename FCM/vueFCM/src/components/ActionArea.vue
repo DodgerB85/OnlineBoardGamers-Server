@@ -136,7 +136,7 @@ function localClickResign() {
 
 function localEndTurn() {
 	// If choosing res card, set that on the player
-	if (store.context.selectedReserveCard !== rf.RES_CARD_NONE) {
+	if (store.context.selectedReserveCard !== rf.RES_CARD_NOT_CHOSEN) {
 		if (personal.trainingGame) store.reserveCards[controller.currentPlayerIndex()] = store.context.selectedReserveCard
 		else store.reserveCards[personal.pov] = store.context.selectedReserveCard
 	}
@@ -702,7 +702,7 @@ function skipModuleAndEndTurn() {
 							<img class="cardImg" :src="view.getImage(view.getReserveCardImageKey(resCardNum))" />
 						</div>
 
-						<template v-if="store.context.selectedReserveCard !== rf.RES_CARD_NONE">
+						<template v-if="store.context.selectedReserveCard !== rf.RES_CARD_NOT_CHOSEN">
 							<br />
 							<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
 							<button class="actionsLineButton" @click="localEndTurn">{{ $t("workingDay.endTurn") }}</button>

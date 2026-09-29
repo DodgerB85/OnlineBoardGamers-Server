@@ -72,7 +72,12 @@ export function passKickout() {
 
 	let moveData = []
 	if (store.gameflow.phase === rf.PHASE_SETUP_RESERVE) {
-		moveData = store.reserveCards[timedOutPlayerIndex]
+		// A timed-out player never chose a reserve card. Give them the explicit
+		// RES_CARD_NONE (RES_CARD_NOT_CHOSEN stays reserved for "not chosen"), and always
+		// wrap in an array so the saved move matches the shape the server and
+		// processSimulMoveData expect.
+		if (store.reserveCards[timedOutPlayerIndex] === rf.RES_CARD_NOT_CHOSEN) store.reserveCards[timedOutPlayerIndex] = rf.RES_CARD_NONE
+		moveData = [store.reserveCards[timedOutPlayerIndex]]
 	} else if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) {
 		let p = store.players[timedOutPlayerIndex]
 		// Strip blank slots, exactly as endPlayerTurn does: a kicked player who never

@@ -1603,20 +1603,17 @@ export function verifySingleStackAction(stackActionData) {
 		const transporterLocation = transporterObj.location
 		let resIncreaseDueBuildingFromWater = 0
 		if (loc.isWaterVertexLocation(transporterLocation)) resIncreaseDueBuildingFromWater = 2
-		// Polder cost modifier: +2 stone when building from/to a polder
-		let polderCostModifier = 0
-		if (store.gameOptions.usePolders && (hex1IsPolder || hex2IsPolder)) polderCostModifier = 2
 		let requiredResources = []
 		//let stoneUsed = true
 		// At level 0, you are building the first wall
 		if (currentWallLevel === 0) {
 			requiredResources = [rf.RES_STONE]
-			for (let i = 0; i < resIncreaseDueBuildingFromWater + polderCostModifier; i++) requiredResources.push(rf.RES_STONE)
+			for (let i = 0; i < resIncreaseDueBuildingFromWater; i++) requiredResources.push(rf.RES_STONE)
 		}
 		// Else if you own it, OR are building up a demolished wall, need lvl+1 stone
 		else if (currentWallOwner === transporterOwnerIndex || currentWallOwner === -1) {
 			for (let i = 0; i <= currentWallLevel; i++) requiredResources.push(rf.RES_STONE)
-			for (let i = 0; i < resIncreaseDueBuildingFromWater + polderCostModifier; i++) requiredResources.push(rf.RES_STONE)
+			for (let i = 0; i < resIncreaseDueBuildingFromWater; i++) requiredResources.push(rf.RES_STONE)
 		}
 		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, requiredResources, true)
 		if (errorFlag > 0) return errorFlag + 10
@@ -1657,14 +1654,11 @@ export function verifySingleStackAction(stackActionData) {
 		const transporterLocation = transporterObj.location
 		let resIncreaseDueBuildingFromWater = 0
 		if (loc.isWaterVertexLocation(transporterLocation)) resIncreaseDueBuildingFromWater = 2
-		// Polder cost modifier: +2 boards when demolishing from/to a polder
-		let polderCostModifier = 0
-		if (store.gameOptions.usePolders && (hex1IsPolder || hex2IsPolder)) polderCostModifier = 2
 		let requiredResources = []
 		//  to demolish it, need boards + level
 		requiredResources.splice(0)
 		for (let i = 0; i <= currentWallLevel; i++) requiredResources.push(rf.RES_BOARDS)
-		for (let i = 0; i < resIncreaseDueBuildingFromWater + polderCostModifier; i++) requiredResources.push(rf.RES_BOARDS)
+		for (let i = 0; i < resIncreaseDueBuildingFromWater; i++) requiredResources.push(rf.RES_BOARDS)
 
 		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, requiredResources, true)
 		if (errorFlag > 0) return errorFlag + 10

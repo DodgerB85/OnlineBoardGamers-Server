@@ -619,13 +619,12 @@ const computedEntry3 = computed(() => {
 	} else if (entry[0] === rf.HIST_DISPLAY_RESERVE) {
 		ret.reserveCards = param.map((v) => {
 			if (store.startingOptions.reservePrice) {
-				if (v === -1) return "res_card_0"
 				if (v === 1) return "res_card_5"
 				if (v === 2) return "res_card_10"
 				if (v === 3) return "res_card_20"
 				return "res_card_0"
 			}
-			return v === -1 ? "res_card_0" : `res_card_${v}`
+			return v >= 1 && v <= 3 ? `res_card_${v}` : "res_card_0"
 		})
 		// New base price from the most frequent reserve card
 		ret.basePrice = 10

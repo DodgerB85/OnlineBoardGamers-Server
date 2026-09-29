@@ -1,0 +1,108 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+
+{% endblock %}
+{% block body %}
+  <div class="page page-narrow">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+      <div class="page-header">
+        <h1 class="page-title">{% translate "Fan Expansions Help" %}</h1>
+        <a class="button button-ghost button-sm" href="{% url 'FCM:FCMhelp' %}">&#8592; {% trans "FCM Help" %}</a>
+      </div>
+
+    <div id="FCMhelpPage"
+         class="card section help-qa fcm-china-help">
+
+      {% blocktranslate trimmed %}
+        These modules are fan-made expansions. They are not official Splotter Spellen content.
+        <br />
+        Games with these modules are therefore excluded from the stats.
+        <br />
+        Fan modules can be enabled in the options when creating a new FCM game.
+      {% endblocktranslate %}
+      <div class="FCMhelpSection">
+        <h2 class="fcm-china-help-title">{% translate "Fried Chicken" %}</h2>
+        <img class="helpEmployeeImg"
+             src="{% static 'FCM/images/e_fried_chicken_cook.jpg' %}"
+             alt="Fried Chicken Cook"
+             width="145"
+             height="225" />
+        <img class="helpEmployeeImg"
+             src="{% static 'FCM/images/e_fried_chicken_chef.jpg' %}"
+             alt="Fried Chicken Chef"
+             width="145"
+             height="225" />
+        <br />
+        <b><u>{% translate "Overview" %}</b></u>
+          <br />
+          {% blocktranslate trimmed %}
+            Fried chicken is a new food born from unhappy customers. When regular demand goes unserved, frustrated residents start craving fried chicken - and if nobody delivers, they eventually move out of the neighbourhood. Selling the very first fried chicken grants a lucrative but risky monopoly.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          <b><u>Rules</u></b>
+          <ul>
+            <li>
+              {% blocktranslate trimmed %}
+                Flipping: At Dinnertime, if none of a house's regular demand can be served (every restaurant is too far away, sold out, or too expensive), each unserved regular demand token flips into ownerless demand for Fried Chicken.
+              {% endblocktranslate %}
+            </li>
+            <li>
+              {% blocktranslate trimmed %}
+                Moving out: If flipped Fried Chicken demand is still unserved at its second Dinnertime, the residents move out. All demand is removed, a SOLD sign is placed on the house, and it will not accept any marketing for the rest of the game.
+              {% endblocktranslate %}
+            </li>
+            <li>
+              {% blocktranslate trimmed %}
+                Origin of demand: Fried Chicken demand is normally only created by flipping - marketing employees cannot create it. Fried Chicken is otherwise a normal food item: it is sold at your normal price, matched by nearest and cheapest as usual, and may be stored in the fridge.
+              {% endblocktranslate %}
+            </li>
+            <li>
+              {% blocktranslate trimmed %}
+                Milestone "First fried chicken sold": The first player to sell Fried Chicken gains this Milestone, which grants two permanent perks: 1) the exclusive right to market Fried Chicken (no other player may ever add it to a campaign), and 2) a brand premium of +$5 for every Fried Chicken sold. The premium applies from the sale after the Milestone is earned, so the milestone-earning sale itself does not get the bonus.
+              {% endblocktranslate %}
+            </li>
+            <li>
+              {% blocktranslate trimmed %}
+                Strict liability: Fried Chicken marketed by the Milestone player has only one life. If any marketed Fried Chicken is unserved at Dinnertime, that house moves out at the very next Dinnertime settlement - before any matching takes place and with no flip as a buffer. Regular demand gets two lives (original demand, then flip); marketed Fried Chicken gets just one.
+              {% endblocktranslate %}
+            </li>
+            <li>
+              {% blocktranslate trimmed %}
+                Employees: Fried Chicken is produced by the Fried Chicken Cook (3 per turn, trained from a Kitchen Trainee; there are 6 in the game) and the Fried Chicken Chef (8 per turn, trained from a Fried Chicken Cook; a 1x employee). A Kitchen Trainee cannot produce Fried Chicken directly. Salaries and training follow the standard employee tiers. When the Fry Chefs module is in use, a Fried Chicken Cook may also be trained into a Fry Chef.
+              {% endblocktranslate %}
+            </li>
+            <li>
+              {% blocktranslate trimmed %}
+                Rural exemption: The Rural Marketing Area never flips and never moves out.
+              {% endblocktranslate %}
+            </li>
+          </ul>
+          </div>
+          <br />
+
+            <div class="card section">
+              <h2 class="fcm-china-help-title">{% translate "Further Help" %}</h2>
+              <p>
+                <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>
+                <img id="contactEmailImg"
+                     src="{% static 'Lobby/email.png' %}"
+                     alt="Email Address"
+                     width="400"
+                     height="30" />
+              </p>
+            </div>
+
+        </div>
+
+      </div>
+{% endblock %}
