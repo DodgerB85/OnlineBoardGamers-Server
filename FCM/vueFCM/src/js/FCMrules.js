@@ -117,6 +117,10 @@ export function oneLevelAbove(employee, preservingColour) {
 			case rf.SUSHI_COOK:
 				level.push(rf.FRY_CHEF)
 				break
+			// Fried Chicken mod
+			case rf.FRIED_CHICKEN_COOK:
+				if (store.startingOptions.friedChicken) level.push(rf.FRY_CHEF)
+				break
 		}
 	}
 

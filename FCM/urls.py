@@ -24,6 +24,11 @@ urlpatterns = [
     path("help/", views.FCMhelp, name="FCMhelp"),
     path("chinaHelp/", views.FCMchinaHelp, name="FCMchinaHelp"),
     path("coffeeHelp/", views.coffeeHelp, name="coffeeHelp"),
+    path(
+        "fanExpansionsHelp/",
+        views.fanExpansionsHelp,
+        name="fanExpansionsHelp",
+    ),
     path("test/", views.test, name="test"),
     path("gameAdmin/", views.gameAdmin, name="gameAdmin"),
     path("<int:game_id>/show2/", views.showGame, name="showFCMgame"),
