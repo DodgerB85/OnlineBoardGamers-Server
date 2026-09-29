@@ -4073,6 +4073,7 @@ msgstr "初次游玩 中世纪？规则、玩法与指南请见 "
 #: .\Lobby\templates\Lobby\lobby_icons.html:27
 #: .\Lobby\templates\Lobby\lobby_icons.html:31
 #: .\Lobby\templates\Lobby\profile.html:196
+#: .\Lobby\templates\Lobby\fcm_options_grid.html:226
 #: .\RNB\templates\RNB\RNBmapHelp.html:9
 msgid "Help"
 msgstr "帮助"
@@ -8379,6 +8380,7 @@ msgstr ""
 "请注意，虽然 3 人及以上局不鼓励认输，但在 Online Board Gamers 选择认输从不受罚。有时这是有效（甚至是最佳）选择。会计为负场。"
 
 #: .\Lobby\templates\Lobby\lobbyHelp.html:472
+#: .\Lobby\templates\Lobby\fcm_options_grid.html:226
 #| msgid "Speed"
 msgid "See"
 msgstr "见"
@@ -12003,13 +12005,17 @@ msgid ""
 "means the house moves out"
 msgstr "炸鸡模组 - 未满足的需求翻面成炸鸡；炸鸡仍未满足则该房屋搬家"
 
-#: .\templates\Lobby\fcm_options_grid2.html:9
+#: .\templates\Lobby\fcm_options_grid.html:226
 msgid "Use Fried Chicken"
 msgstr "使用炸鸡模组"
 
-#: .\templates\Lobby\fcm_options_grid2.html:10
+#: .\templates\Lobby\fcm_options_grid.html:227
 msgid "Unmet demand flips to Fried Chicken; unserved Fried Chicken means the house moves out"
 msgstr "未满足的需求翻面成炸鸡；炸鸡仍未满足则该房屋搬家"
+
+#: .\templates\Lobby\fcm_options_grid.html:222
+msgid "Unofficial Mods"
+msgstr "非官方模组"
 
 #~ msgid "Basic Options"
 #~ msgstr "基本选项"
