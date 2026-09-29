@@ -407,7 +407,28 @@ export function replayFridgeResources(historyIndex, playerIndex, param) {
 }
 
 export function replayDinnerTime(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	// Live play logs sales milestones immediately BEFORE the dinner entry but awards them
+	// AFTER the dinner's bonus calc (FCMrules doDinnerTime), so the sale that earns a
+	// milestone never gets its own perk. On replay the milestone would already be active
+	// here (replayGetMS ran on the preceding history entry), so the first fried chicken
+	// sale wrongly picks up the FIRST_FRIED_CHICKEN_SOLD +$5 bonus. Temporarily hide any
+	// fried chicken milestone logged for this dinner so the recomputed bonus matches live.
+	const suppressedFC = []
+	for (let idx = historyIndex - 1; idx >= 0; idx--) {
+		const entry = store.computedHistory[idx]
+		if (entry[0] !== rf.HIST_NEW_MILESTONE) break
+		if (!entry[3] || entry[3][0] !== rf.FIRST_FRIED_CHICKEN_SOLD) continue
+		const playerObj = store.players[entry[1]]
+		if (!playerObj) continue
+		const pos = playerObj.milestones.indexOf(rf.FIRST_FRIED_CHICKEN_SOLD)
+		if (pos > -1) {
+			playerObj.milestones.splice(pos, 1)
+			suppressedFC.push(playerObj)
+		}
+	}
 	rules.doDinnerTime(true)
+	suppressedFC.forEach((playerObj) => playerObj.milestones.push(rf.FIRST_FRIED_CHICKEN_SOLD))
 }
 
 export function replayTrain(historyIndex, playerObj, param) {
