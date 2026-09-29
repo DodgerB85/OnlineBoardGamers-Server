@@ -187,7 +187,7 @@ export function convertLocationToVertex(inputLocation) {
 	if (!bucketID && bucketID !== 0) rf.doAdminAlrt(`CLtV no bucket ${JSON.stringify(inputLocation)}`)
 	const vertex = getAnyVertexInHexIDbucketID(hexID, bucketID)
 	let newLocation = [rf.LOCATION_LAND_VERTEX, hexID, vertex]
-	if (hexObj.baseTerrain === rf.TERR_SEA) newLocation = [rf.LOCATION_SEA_VERTEX, hexID, vertex]
+	if (rf.TERR_ACTS_LIKE_WATER.includes(hexObj.currentTerrain)) newLocation = [rf.LOCATION_SEA_VERTEX, hexID, vertex]
 	return newLocation
 }
 
@@ -301,7 +301,7 @@ export function getEveryLocationWithinSingleHex(hexID, playerIndex) {
 	const bucketLocations = hex.bucketIdsInitial.map((i) => setBucketLocation(hexID, i))
 	// TODO check this
 	// const bucketLocations = hex.bucketIdsInitial.map((i) => setBucketLocation(hexID, i)).concat(indexArrayOfRiverIdsDontRememberExactlyHowItLooks.map((i) => setRiverBucketLocation(hexID, i))
-	if (hex.currentTerrain === rf.TERR_SEA) {
+	if (rf.TERR_ACTS_LIKE_WATER.includes(hex.currentTerrain)) {
 		return bucketLocations.concat(util.indexArray(hex.nodeBucketIds.length).map((i) => setSeaVertexLocation(hexID, i)))
 	} else {
 		let eligibleLocations = bucketLocations.concat(
@@ -890,12 +890,9 @@ export function getSeaVertexForNewTransporterFromHexIDandBucketID(hexID, bucketI
 	const vertex = getAnyVertexInHexIDbucketID(hexID, bucketID)
 	const locationFrom = [rf.LOCATION_SEA_VERTEX, hexID, vertex]
 
-	let availableVertexes = getEligibleLocationsForInteractionWithinHexFromSingleLocation(locationFrom, false)
-		.filter((l) => l[0] === rf.LOCATION_SEA_VERTEX)
+	const availableVertexes = getEligibleLocationsForInteractionWithinHexFromSingleLocation(locationFrom, false)
+		.filter((l) => l[0] === rf.LOCATION_SEA_VERTEX && locationAllowsStop(l))
 		.map((l) => l[2])
-	availableVertexes = availableVertexes.filter((verteID) => verteID >= 7)
-	// Try to not put a trans in the center, which is where a building might be
-	if (availableVertexes[0] === 0) availableVertexes.push(availableVertexes.shift())
 
 	const usedVertices = model
 		.getAllInGameTransporters()
@@ -971,7 +968,7 @@ export function getVisualLocationFromBucketLocation(inputLocation, startingLocat
 	const hexID = inputLocation[1]
 	const bucketID = inputLocation[2]
 	const hexObj = model.getHexByID(hexID)
-	const hexIsSea = hexObj.currentTerrain === rf.TERR_SEA
+	const hexIsSea = rf.TERR_ACTS_LIKE_WATER.includes(hexObj.currentTerrain)
 
 	// First, handle docked locations
 	if (isDockedLocation(inputLocation)) {

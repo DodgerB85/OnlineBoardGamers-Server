@@ -233,11 +233,8 @@ function clickedNewBuilding(bldgNum) {
 				const hex2IsPolder = rf.TERR_IS_POLDER.includes(hex2.currentTerrain)
 				if (hex1IsPolder && hex2IsPolder) continue
 				if ((hex1IsPolder || hex2IsPolder) && (hex1.currentTerrain === rf.TERR_SEA || hex2.currentTerrain === rf.TERR_SEA)) continue
-				// Polder cost modifier: +2 stone when building from/to a polder
-				let polderCostModifier = 0
-				if (store.gameOptions.usePolders && (hex1IsPolder || hex2IsPolder)) polderCostModifier = 2
 				// If you own it or it's neutral, and you have level+1 stones, you can build there
-				if (!ownedByOpponent && stoneOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater + polderCostModifier) {
+				if (!ownedByOpponent && stoneOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater) {
 					context.addEligibleWallToBuild(hexIds)
 				}
 			}
@@ -261,11 +258,8 @@ function clickedNewBuilding(bldgNum) {
 				const hex2IsPolder = rf.TERR_IS_POLDER.includes(hex2.currentTerrain)
 				if (hex1IsPolder && hex2IsPolder) continue
 				if ((hex1IsPolder || hex2IsPolder) && (hex1.currentTerrain === rf.TERR_SEA || hex2.currentTerrain === rf.TERR_SEA)) continue
-				// Polder cost modifier: +2 boards when demolishing from/to a polder
-				let polderCostModifier = 0
-				if (store.gameOptions.usePolders && (hex1IsPolder || hex2IsPolder)) polderCostModifier = 2
 				// If you don't own it, you need 1+level boards to demolish
-				if (ownedByOpponent && boardsOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater + polderCostModifier) {
+				if (ownedByOpponent && boardsOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater) {
 					store.context.eligibleWallsToDemolish.push(hexIds)
 				}
 			}

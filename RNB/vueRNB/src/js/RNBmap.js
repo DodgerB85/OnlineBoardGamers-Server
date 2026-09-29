@@ -1183,35 +1183,28 @@ export function addWallToMap_core(transporterID, hex1ID, hex2ID, playerIndex, de
 	let currentOwner = edgeEntry.wall[1]
 	// First make sure you can deduct the resources. This flag can be set false for map creation / debug
 	if (deductResources) {
-		const store = useModelStore()
 		const transporterObj = model.getTransporterByID(transporterID)
 		const transporterLocation = transporterObj.location
 		let resIncreaseDueBuildingFromWater = 0
 		if (loc.isWaterVertexLocation(transporterLocation)) resIncreaseDueBuildingFromWater = 2
-		// Polder cost modifier: +2 stone/boards when building from/demolishing from a polder
-		const hex1 = model.getHexByID(id1)
-		const hex2 = model.getHexByID(id2)
-		const eitherIsPolder = rf.TERR_IS_POLDER.includes(hex1.currentTerrain) || rf.TERR_IS_POLDER.includes(hex2.currentTerrain)
-		let polderCostModifier = 0
-		if (store.gameOptions.usePolders && eitherIsPolder) polderCostModifier = 2
 		let requiredResources = []
 		let stoneUsed = true
 		// At level 0, you are building the first wall
 		if (currentLevel === 0) {
 			requiredResources = [rf.RES_STONE]
-			for (let i = 0; i < resIncreaseDueBuildingFromWater + polderCostModifier; i++) requiredResources.push(rf.RES_STONE)
+			for (let i = 0; i < resIncreaseDueBuildingFromWater; i++) requiredResources.push(rf.RES_STONE)
 		}
 		// Else if you own it, OR are building up a demolished wall, need lvl+1 stone
 		else if (currentOwner === playerIndex || currentOwner === -1) {
 			for (let i = 0; i <= currentLevel; i++) requiredResources.push(rf.RES_STONE)
-			for (let i = 0; i < resIncreaseDueBuildingFromWater + polderCostModifier; i++) requiredResources.push(rf.RES_STONE)
+			for (let i = 0; i < resIncreaseDueBuildingFromWater; i++) requiredResources.push(rf.RES_STONE)
 		}
 		// Otherwise to demolish it, need boards + level
 		else {
 			requiredResources.splice(0)
 			stoneUsed = false
 			for (let i = 0; i <= currentLevel; i++) requiredResources.push(rf.RES_BOARDS)
-			for (let i = 0; i < resIncreaseDueBuildingFromWater + polderCostModifier; i++) requiredResources.push(rf.RES_BOARDS)
+			for (let i = 0; i < resIncreaseDueBuildingFromWater; i++) requiredResources.push(rf.RES_BOARDS)
 		}
 		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, requiredResources)
 		if (errorFlag === 1) {

@@ -219,51 +219,71 @@ export function syncPoldersToBrickCount() {
 	})
 }
 
-function togglePoldersIfNewRow(prevBrickCount, newBrickCount) {
+function togglePoldersIfNewRow(prevBrickCount, _newBrickCount) {
 	const store = useModelStore()
 	for (const rowStart of WONDER_ROW_STARTS) {
 		if (rowStart > 0 && prevBrickCount === rowStart) {
 			for (let i = 0; i < store.mapData.hexData.length; i++) {
 				const hex = store.mapData.hexData[i]
 				if (hex.baseTerrain === rf.TERR_POLDER) {
-					const wasDry = hex.currentTerrain === rf.TERR_POLDER_DRY
 					hex.currentTerrain = hex.currentTerrain === rf.TERR_POLDER_WET ? rf.TERR_POLDER_DRY : rf.TERR_POLDER_WET
 					const baseGfx = "hex_" + hex.hexTerrainID
-				hex.hexGfx = hex.currentTerrain === rf.TERR_POLDER_WET ? baseGfx + "_f" : baseGfx
-				// When polder becomes wet (dry→wet), move any docked boats onto the hex as sea transporters
-				if (wasDry && hex.currentTerrain === rf.TERR_POLDER_WET) {
-					const dockedBoats = model.getAllInGameTransporters().filter(
-						(t) => loc.isDockedLocation(t.location) && t.location[1] === hex.hexID
-					)
-					// Use land vertices 1-6 for positioning (polders only have 7 vertices, no sea vertices 7-12)
-					const landVertices = [1, 2, 3, 4, 5, 6]
-					const usedVertices = new Set(
-						model.getAllInGameTransporters()
-							.filter((t) => loc.isSeaVertexLocation(t.location) && t.location[1] === hex.hexID)
-							.map((t) => t.location[2])
-					)
-					let vertexIdx = 0
-					dockedBoats.forEach((boat) => {
-						while (vertexIdx < landVertices.length && usedVertices.has(landVertices[vertexIdx])) vertexIdx++
-						const vertex = vertexIdx < landVertices.length ? landVertices[vertexIdx] : landVertices[0]
-						vertexIdx++
-						const newSeaLocation = loc.setSeaVertexLocation(hex.hexID, vertex)
-						boat.location = newSeaLocation
-						const boatStats = rf.getTransporterStats(boat.type)
-						const newPos = map.getTransporterPositionFromLocation(newSeaLocation, boatStats, boat.id)
-						boat.rawTransporterXY = newPos
-						model.transportersOnTransporter(boat.id).forEach((carried) => {
-							const carriedStats = rf.getTransporterStats(carried.type)
-							carried.rawTransporterXY = map.getTransporterPositionFromLocation(carried.location, carriedStats, carried.id)
-						})
-					})
-				}
+					hex.hexGfx = hex.currentTerrain === rf.TERR_POLDER_WET ? baseGfx + "_f" : baseGfx
 				}
 			}
+			// Flipping land/water can leave boats floating on now-dry land, or docked on now-flooded
+			// hexes. Reconcile every boat against the new terrain before handing back to the player.
+			resolveAllTransportersForCurrentTerrain()
 			return
 		}
 	}
 }
+
+// Updates a transporter's stored screen position (and anything it carries) after its location changed.
+function repositionTransporter(transporterObj) {
+	const transporterStats = rf.getTransporterStats(transporterObj.type)
+	transporterObj.rawTransporterXY = map.getTransporterPositionFromLocation(transporterObj.location, transporterStats, transporterObj.id)
+	model.transportersOnTransporter(transporterObj.id).forEach((carried) => {
+		const carriedStats = rf.getTransporterStats(carried.type)
+		carried.rawTransporterXY = map.getTransporterPositionFromLocation(carried.location, carriedStats, carried.id)
+	})
+}
+
+// Puts a boat on a free water vertex on the given hex (which must act like water).
+function placeBoatOnWaterHex(boat, hexID) {
+	const vertex = loc.getSeaVertexForNewTransporterFromHexIDandBucketID(hexID, 0)
+	if (vertex === undefined || vertex === null) return false
+	boat.location = loc.setSeaVertexLocation(hexID, vertex)
+	repositionTransporter(boat)
+	return true
+}
+
+// Reconciles transporters with the current polder terrain. Polders flip between land and water in
+// the Wonder phase. A transporter caught on the wrong terrain is marooned: it keeps its spot but
+// cannot move until the polder flips back. To stay pick-up-able it sits on a LAND vertex while the
+// polder is dry and a SEA vertex while it is wet, regardless of whether it is a boat or a land
+// mover. Runs both after a live toggle (togglePoldersIfNewRow) and after every import/replay, so
+// preset-only and real-time games cannot diverge.
+export function resolveAllTransportersForCurrentTerrain() {
+	const transporters = model.getAllInGameTransporters()
+	for (const transporterObj of transporters) {
+		const location = transporterObj.location
+		if (loc.isOOBlocation(location) || loc.isOnAnyTransporter(location) || loc.isFollowingAnyTransporter(location)) continue
+		const hexID = location[1]
+		const hexIsWater = rf.TERR_ACTS_LIKE_WATER.includes(model.getHexByID(hexID).currentTerrain)
+		if (loc.isDockedLocation(location)) {
+			// A dock only exists on land; once the hex floods, put the boat onto the polder itself.
+			if (hexIsWater && !placeBoatOnWaterHex(transporterObj, hexID)) rf.doAdminAlrt(`No free water vertex to move docked transporter ${transporterObj.id} onto flooded hex ${hexID}`)
+		} else if (loc.isNonRiverVertexLocation(location)) {
+			const desiredType = hexIsWater ? rf.LOCATION_SEA_VERTEX : rf.LOCATION_LAND_VERTEX
+			if (loc.getLocationType(location) !== desiredType) {
+				transporterObj.location = [desiredType, hexID, location[2]]
+				repositionTransporter(transporterObj)
+			}
+		}
+	}
+}
+
 
 export function requiredResourcesForWonderBrick(playerIndex, extraBricks = 0) {
 	const store = useModelStore()
