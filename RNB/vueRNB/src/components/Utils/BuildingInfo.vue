@@ -320,14 +320,10 @@ function transporterLimitIssue() {
 				<template v-if="!rf.ALL_PSEUDO_BUILDINGS.includes(buildingStats.building)">
 					<!-- NORMAL BUILDING-->
 					<div v-if="(props.bldg !== undefined && props.bldg.type !== rf.BLDG_MINE) || (props.bldgNum !== undefined && props.bldgNum !== rf.BLDG_MINE)" style="position: relative; display: inline-block;">
-						<img class="buildingOnHexSummaryImg" :class="{ buildingOnHexSummaryImgHighlight: isHighlighted }" @click="props.bldg !== undefined ? map.clickedBuilding(props.bldg.id) : ''" :src="view.getImage(getBuildingGfx())" />
-						<!-- Strengthened indicator: wooden cube -->
-						<svg v-if="props.bldg !== undefined && props.bldg.strengthened" style="position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; pointer-events: none;">
-							<rect x="2" y="2" width="14" height="14" rx="2" fill="#8B6914" stroke="#5C4A0E" stroke-width="1.5" />
-						</svg>
+						<img class="buildingOnHexSummaryImg" :class="{ buildingOnHexSummaryImgStrengthened: props.bldg !== undefined && props.bldg.strengthened, buildingOnHexSummaryImgHighlight: isHighlighted }" @click="props.bldg !== undefined ? map.clickedBuilding(props.bldg.id) : ''" :src="view.getImage(getBuildingGfx())" />
 					</div>
 					<!-- MINE -->
-					<svg v-else viewBox="-110 -110 220 220" class="buildingOnHexSummaryImg">
+					<svg v-else viewBox="-110 -110 220 220" class="buildingOnHexSummaryImg" :class="{ buildingOnHexSummaryImgStrengthened: props.bldg !== undefined && props.bldg.strengthened, buildingOnHexSummaryImgHighlight: isHighlighted }" @click="props.bldg !== undefined ? map.clickedBuilding(props.bldg.id) : ''">
 						<circle cx="0" cy="0" r="100" fill="gray" stroke="#734A36" stroke-width="20" />
 						<text x="-40" y="10" class="mineText redMineText">
 							<tspan v-if="props.highlightWholeBuilding">
@@ -583,6 +579,10 @@ function transporterLimitIssue() {
 	margin-right: 2px;
 	border: 2px solid black;
 	box-sizing: border-box;
+}
+
+.buildingOnHexSummaryImgStrengthened {
+	border: 4px solid #8B4513;
 }
 
 .buildingOnHexSummaryImgHighlight {

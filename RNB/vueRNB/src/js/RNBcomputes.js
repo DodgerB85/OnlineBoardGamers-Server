@@ -106,6 +106,7 @@ export const computedHexes = computed(() => {
 					computedHexes[i].mineData.push(building.id)
 					computedHexes[i].mineData.push(bucketBuildingLocations[0])
 					computedHexes[i].mineData.push(building.remainingMineContent)
+					computedHexes[i].mineData.push(building.strengthened === true)
 					continue
 				} // Mines are SVG, not images
 				let buildingGfx = {}
@@ -114,6 +115,7 @@ export const computedHexes = computed(() => {
 				buildingGfx.width = rf.DEFAULT_BLDG_WIDTH
 				buildingGfx.height = rf.DEFAULT_BLDG_HEIGHT
 				buildingGfx.pos = bucketBuildingLocations[0]
+				buildingGfx.strengthened = building.strengthened === true
 
 				// NO! DO NOT SET IT HERE! CAUSES RECURSIONS!
 				//building.location = [rf.LOCATION_LAND_VERTEX, hex.hexID, buildingVertexes[k]]

@@ -790,6 +790,38 @@ const computedEntry3 = computed(() => {
 				Object.assign(thisStepHist, getHighlightData([fullLocation]))
 			}
 			//
+			else if (stackAction[0] === rf.STACK_BOMB_BUILDING) {
+				// stackAction = [STACK_BOMB_BUILDING, transporterID, buildingType, hexID, bucketID]
+				const transporterID = stackAction[1]
+				const buildingType = stackAction[2]
+				const hexID = stackAction[3]
+				const bucketID = stackAction[4]
+				thisStepHist.action = rf.STACK_BOMB_BUILDING
+				thisStepHist.hexID = hexID
+				thisStepHist.buildingType = buildingType
+				const transporterObj = history.getTransporterByID_HIST(transporterID)
+				thisStepHist.transporterGfx = `transporter_${transporterObj.type}_${personal.getCorrectedColour(store.players[transporterObj.ownerIndex].colour)}`
+				thisStepHist.bldgGfx = `bldg_${buildingType}`
+				thisStepHist.buildingsToHighlight = [[buildingType, hexID, bucketID]]
+				Object.assign(thisStepHist, getHighlightData([[rf.LOCATION_BUCKET, hexID, bucketID]]))
+			}
+			//
+			else if (stackAction[0] === rf.STACK_STRENGTHEN_BUILDING) {
+				// stackAction = [STACK_STRENGTHEN_BUILDING, transporterID, buildingType, hexID, bucketID]
+				const transporterID = stackAction[1]
+				const buildingType = stackAction[2]
+				const hexID = stackAction[3]
+				const bucketID = stackAction[4]
+				thisStepHist.action = rf.STACK_STRENGTHEN_BUILDING
+				thisStepHist.hexID = hexID
+				thisStepHist.buildingType = buildingType
+				const transporterObj = history.getTransporterByID_HIST(transporterID)
+				thisStepHist.transporterGfx = `transporter_${transporterObj.type}_${personal.getCorrectedColour(store.players[transporterObj.ownerIndex].colour)}`
+				thisStepHist.bldgGfx = `bldg_${buildingType}`
+				thisStepHist.buildingsToHighlight = [[buildingType, hexID, bucketID]]
+				Object.assign(thisStepHist, getHighlightData([[rf.LOCATION_BUCKET, hexID, bucketID]]))
+			}
+			//
 			/********************************************************* PRODUCTION ********************************************************* */
 			else if (stackAction[0] === rf.STACK_MANUAL_PRODUCTION) {
 				//	let stackAction = [rf.STACK_MANUAL_PRODUCTION, building.id, transporterID, building.location.slice(1) ]
@@ -1542,6 +1574,24 @@ const computedEntry3 = computed(() => {
 									{{ stackEntry.mineContent[0] }}
 								</text>
 							</svg>
+						</div>
+					</template>
+					<!-- STACK_BOMB_BUILDING -->
+					<template v-if="stackEntry.action === rf.STACK_BOMB_BUILDING">
+						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, [], [], [], [], [], stackEntry.buildingsToHighlight)">
+							<MiniHex :hexID="stackEntry.hexID" :hexPiecesToOutline="stackEntry.hexPiecesToOutline" />
+							<img class="buildingProductionTransporterImg" :src="view.getImage(stackEntry.transporterGfx)" />
+							Bombs
+							<img class="buildingProductionSummaryImg" :src="view.getImage(stackEntry.bldgGfx)" />
+						</div>
+					</template>
+					<!-- STACK_STRENGTHEN_BUILDING -->
+					<template v-if="stackEntry.action === rf.STACK_STRENGTHEN_BUILDING">
+						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, [], [], [], [], [], stackEntry.buildingsToHighlight)">
+							<MiniHex :hexID="stackEntry.hexID" :hexPiecesToOutline="stackEntry.hexPiecesToOutline" />
+							<img class="buildingProductionTransporterImg" :src="view.getImage(stackEntry.transporterGfx)" />
+							Strengthens
+							<img class="buildingProductionSummaryImg" :src="view.getImage(stackEntry.bldgGfx)" />
 						</div>
 					</template>
 					<!-- MANUAL PRODUCTION -->

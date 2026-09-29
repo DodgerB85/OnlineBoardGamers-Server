@@ -198,6 +198,25 @@ const shouldShowLandBubble = computed(() => {
 	return store.context.planeInFlight
 })
 
+// Bombs: show a bubble above the selected transporter when it can blow up a building
+// on its hex (or when the building there has been strengthened, so it can't)
+const bombBubbleInfo = computed(() => {
+	if (!rf.PHASE_BUILDINGS.includes(store.gameflow.phase)) return null
+	if (store.context.selectedTransporterIDforTM === -1) return null
+	const transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
+	if (!transporterObj || !loc.isAnyHexLocation(transporterObj.location)) return null
+	// The transporter must have a bomb it can use
+	const hasBomb = loc.getAllResourcesAccessibleToTransporter(transporterObj.id, true).some((res) => res.type === rf.RES_BOMB)
+	if (!hasBomb) return null
+	const hexID = transporterObj.location[1]
+	const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
+	if (buildingsOnHex.length === 0) return null
+	const bombables = buildingsOnHex.filter((b) => !b.strengthened)
+	return { strengthened: bombables.length === 0, bombables }
+})
+
+const shouldShowBombBubble = computed(() => bombBubbleInfo.value !== null)
+
 // Planes & Aeroports: check if taxi is disabled (plane carrying goods)
 const isTaxiDisabled = computed(() => {
 	if (store.context.selectedTransporterIDforTM === -1) return false
@@ -208,7 +227,7 @@ const isTaxiDisabled = computed(() => {
 
 const transporterScreenPosition = computed(() => {
 	if (store.context.selectedTransporterIDforTM === -1 && !shouldShowAtelierRecipeBubbles.value) return null
-	if (!shouldShowResearchBubbles.value && !shouldShowBuildingOptions.value && !shouldShowPickupSelectBubbles.value && !shouldShowAtelierRecipeBubbles.value && !shouldShowPlaneModeBubbles.value && !shouldShowLandBubble.value) return null
+	if (!shouldShowResearchBubbles.value && !shouldShowBuildingOptions.value && !shouldShowPickupSelectBubbles.value && !shouldShowAtelierRecipeBubbles.value && !shouldShowPlaneModeBubbles.value && !shouldShowLandBubble.value && !shouldShowBombBubble.value) return null
 	let transporterObj
 	if (shouldShowAtelierRecipeBubbles.value) transporterObj = model.getTransporterByID(store.context.atelierTransporterID)
 	else if (shouldShowPickupSelectBubbles.value) transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforPickupOrSelection)
@@ -314,6 +333,18 @@ function getPlaneModeBubblePosition(type) {
 // Planes & Aeroports: position Land bubble (single bubble, above plane)
 function getLandBubblePosition() {
 	return { transform: `translate(0px, -60px)` }
+}
+
+// Bombs: position the bomb bubble above the transporter
+function getBombBubblePosition() {
+	return { transform: `translate(0px, -70px)` }
+}
+
+// Bombs: blow up every (non-strengthened) building on the transporter's hex
+function handleBombBubbleClick() {
+	const info = bombBubbleInfo.value
+	if (!info || info.strengthened) return
+	map.clickedBombOption(info.bombables[0].id)
 }
 
 // Planes & Aeroports: handle Taxi mode selection
@@ -583,7 +614,7 @@ function getAtelierRecipeGfx(recipeIdx) {
 
 								<!-- The Building -->
 								<rect
-									:class="highlight.shouldHighlightItem(rf.ITEM_BUILT_BUILDING, bldg.id) ? 'bldgHighlight' : 'bldgNormal'"
+									:class="highlight.shouldHighlightItem(rf.ITEM_BUILT_BUILDING, bldg.id) ? 'bldgHighlight' : bldg.strengthened ? 'bldgStrengthened' : 'bldgNormal'"
 									@click="map.clickedBuilding(bldg.id)"
 									:x="vec.scaleBy(store.RATIO, vec.sum(bldg.pos, vec.scaleBy(-0.5, [bldg.width, bldg.height])))[0]"
 									:y="vec.scaleBy(store.RATIO, vec.sum(bldg.pos, vec.scaleBy(-0.5, [bldg.width, bldg.height])))[1]"
@@ -591,7 +622,7 @@ function getAtelierRecipeGfx(recipeIdx) {
 									:height="bldg.height * store.RATIO"
 									:fill="`url(#pattern_${bldg.img})`"
 									:style="{
-										strokeWidth: highlight.shouldHighlightItem(rf.ITEM_BUILT_BUILDING, bldg.id) ? 20 * store.RATIO : 2 * store.RATIO,
+										strokeWidth: highlight.shouldHighlightItem(rf.ITEM_BUILT_BUILDING, bldg.id) ? 20 * store.RATIO : bldg.strengthened ? 12 * store.RATIO : 2 * store.RATIO,
 									}" />
 							</g>
 						</g>
@@ -600,6 +631,7 @@ function getAtelierRecipeGfx(recipeIdx) {
 						<g
 							v-plop
 							v-if="hex.mineData.length > 0"
+							@click="map.clickedBuilding(hex.mineData[0])"
 							:style="{
 								'--cx': hex.mineData[1][0] * store.RATIO + 'px',
 								'--cy': hex.mineData[1][1] * store.RATIO + 'px',
@@ -608,10 +640,10 @@ function getAtelierRecipeGfx(recipeIdx) {
 							<circle class="city-ripple" :cx="hex.mineData[1][0] * store.RATIO" :cy="hex.mineData[1][1] * store.RATIO" :r="115 * store.RATIO" />
 
 							<!-- The Mine Circle -->
-							<circle class="mineSVGcircle" :cx="hex.mineData[1][0] * store.RATIO" :cy="hex.mineData[1][1] * store.RATIO" :r="115 * store.RATIO" fill="gray" stroke="#734A36" :stroke-width="50 * store.RATIO" filter="url(#f_mineDrop)" />
+							<circle class="mineSVGcircle" :cx="hex.mineData[1][0] * store.RATIO" :cy="hex.mineData[1][1] * store.RATIO" :r="115 * store.RATIO" fill="gray" :stroke="store.context.buildingIDsToHighlight.includes(hex.mineData[0]) ? 'yellow' : '#734A36'" :stroke-width="(store.context.buildingIDsToHighlight.includes(hex.mineData[0]) ? 70 : 50) * store.RATIO" filter="url(#f_mineDrop)" />
 
-							<!-- Outer bright rim (outside the brown stroke) -->
-							<circle :cx="hex.mineData[1][0] * store.RATIO" :cy="hex.mineData[1][1] * store.RATIO" :r="145 * store.RATIO" fill="none" stroke="rgba(255,255,255,0.85)" :stroke-width="10 * store.RATIO" />
+							<!-- Outer rim - thick brown when strengthened, else bright white -->
+							<circle :cx="hex.mineData[1][0] * store.RATIO" :cy="hex.mineData[1][1] * store.RATIO" :r="145 * store.RATIO" fill="none" :stroke="hex.mineData[3] ? '#8B4513' : 'rgba(255,255,255,0.85)'" :stroke-width="(hex.mineData[3] ? 28 : 10) * store.RATIO" />
 
 							<!-- Iron Number -->
 							<text :x="hex.mineData[1][0] * store.RATIO - (hex.mineData[2][1] >= 10 ? 55 : 40) * store.RATIO" :y="hex.mineData[1][1] * store.RATIO + 20 * store.RATIO" text-anchor="middle" dominant-baseline="middle" :style="{ 'font-size': (hex.mineData[2][1] >= 10 ? 100 : 175) * store.RATIO + 'px', fill: 'red', 'font-weight': 900, stroke: 'black', 'stroke-width': (hex.mineData[2][1] >= 10 ? 6 : 10) * store.RATIO + 'px' }">
@@ -999,6 +1031,21 @@ function getAtelierRecipeGfx(recipeIdx) {
 				</div>
 			</transition>
 
+			<!-- Bombs: Blow up Building / Building Strengthened Bubble -->
+			<transition name="fade">
+				<div v-if="shouldShowBombBubble && transporterScreenPosition" class="researchBubblesOverlay" :style="{ left: transporterScreenPosition.x + 'px', top: transporterScreenPosition.y + 'px' }">
+					<div class="researchBubble bombBubble" :class="{ bombBubbleDisabled: bombBubbleInfo.strengthened }" @click="handleBombBubbleClick" :style="getBombBubblePosition()">
+						<div class="researchBubbleContent">
+							<span class="bombIconWrap">
+								<img :src="view.getImage(`res_${rf.RES_BOMB}`)" class="researchBubbleImg" />
+								<span v-if="!bombBubbleInfo.strengthened" class="bombSparkle">&#10022;</span>
+							</span>
+							<span class="researchBubbleText">{{ bombBubbleInfo.strengthened ? "(Building Strengthened)" : "Blow up Building" }}</span>
+						</div>
+					</div>
+				</div>
+			</transition>
+
 			<!-- Building Options Card -->
 			<BuildingOptionsCard v-if="store.context.eligibleBuildingsToBuild.length > 0 && store.context.selectedTransporterIDforTM !== -1" :position="transporterScreenPosition" />
 		</div>
@@ -1149,6 +1196,52 @@ function getAtelierRecipeGfx(recipeIdx) {
 	max-width: 60px;
 }
 
+/* Bombs: bomb bubble */
+.bombBubble .researchBubbleText {
+	width: 66px;
+	white-space: normal;
+}
+
+.bombIconWrap {
+	position: relative;
+	display: inline-flex;
+}
+
+.bombSparkle {
+	position: absolute;
+	top: -9px;
+	right: -9px;
+	font-size: 16px;
+	line-height: 1;
+	color: gold;
+	text-shadow: 0 0 5px orange;
+	pointer-events: none;
+	animation: bombSparkle 0.5s ease-in-out infinite alternate;
+}
+
+.bombBubbleDisabled {
+	opacity: 0.5;
+	filter: grayscale(100%);
+	border-color: grey;
+	cursor: default;
+}
+
+.bombBubbleDisabled:hover {
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+	border-color: grey;
+}
+
+@keyframes bombSparkle {
+	from {
+		opacity: 0.3;
+		transform: scale(0.8) rotate(-10deg);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1.25) rotate(10deg);
+	}
+}
+
 #hexDIV {
 	position: relative;
 	/*float: left;*/
@@ -1203,6 +1296,10 @@ function getAtelierRecipeGfx(recipeIdx) {
 
 .bldgNormal {
 	stroke: aliceblue;
+}
+
+.bldgStrengthened {
+	stroke: #8B4513;
 }
 
 .homeMarkerRect {

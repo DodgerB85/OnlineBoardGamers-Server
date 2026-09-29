@@ -1836,19 +1836,16 @@ export function verifySingleStackAction(stackActionData) {
 	else if (action === rf.STACK_BOMB_BUILDING) {
 		// stackAction = [STACK_BOMB_BUILDING, transporterID, buildingType, hexID, bucketID]
 		const transporterID = stackAction[1]
-		const buildingType = stackAction[2]
 		const hexID = stackAction[3]
-		const bucketID = stackAction[4]
 		const transporterObj = model.getTransporterByID(transporterID)
 		// Transporter must be on the correct hex
 		if (transporterObj.location[1] !== hexID) return 1
 		// Must have a bomb accessible
 		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], true)
 		if (errorFlag > 0) return errorFlag + 10
-		// Must be a non-strengthened building on the hex
+		// Must be at least one non-strengthened building on the hex (a bomb clears the whole hex)
 		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
-		const targetBldg = buildingsOnHex.find((b) => b.type === buildingType && !b.strengthened)
-		if (!targetBldg) return 20
+		if (!buildingsOnHex.some((b) => !b.strengthened)) return 20
 		return 0
 	}
 	// STRENGTHEN BUILDING
@@ -2602,15 +2599,12 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 			stackAction[1] = model.getTransporterByID(transporterID).id
 			transporterID = stackAction[1]
 		}
-		const buildingType = stackAction[2]
 		const hexID = stackAction[3]
-		const bucketID = stackAction[4]
 		// Remove the bomb from the transporter
 		model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
-		// Find and remove the building
-		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
-		const targetBldg = buildingsOnHex.find((b) => b.type === buildingType)
-		if (targetBldg) model.removeBuildingByID(targetBldg.id)
+		// Remove every non-strengthened building on the hex
+		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && !b.strengthened)
+		for (const b of buildingsOnHex) model.removeBuildingByID(b.id)
 	}
 	// STRENGTHEN BUILDING
 	else if (action === rf.STACK_STRENGTHEN_BUILDING) {

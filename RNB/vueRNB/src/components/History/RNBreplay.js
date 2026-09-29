@@ -266,6 +266,8 @@ export const HIST_CONFLICT_TURN_ORDER = 6
 				else if (stackAction[0] === rf.STACK_BUILD_WALL) replayStackBuildWall(stackAction, store.computedHistory[i][1])
 				else if (stackAction[0] === rf.STACK_DEMOLISH_WALL) replayStackDemolishWall(stackAction, store.computedHistory[i][1])
 				else if (stackAction[0] === rf.STACK_BUILD_BUILDING) replayStackBuildBuilding(stackAction, store.computedHistory[i][1])
+				else if (stackAction[0] === rf.STACK_BOMB_BUILDING) replayStackBombBuilding(stackAction)
+				else if (stackAction[0] === rf.STACK_STRENGTHEN_BUILDING) replayStackStrengthenBuilding(stackAction)
 				else if (stackAction[0] === rf.STACK_RESHAFT_MINE) replayStackReshaftMine(stackAction, store.computedHistory[i][1])
 				else if (stackAction[0] === rf.STACK_MANUAL_PRODUCTION) replayStackManualProduction(stackAction, store.computedHistory[i][1])
 				else if (stackAction[0] === rf.STACK_REMOVE_EXCESS_TRANSPORTER_AT_FACTORY) replayStackRemoveExcessTransporterAtFactory(stackAction, store.computedHistory[i][1])
@@ -789,6 +791,27 @@ function replayStackBuildBuilding(stackAction, playerIndex) {
 	if (errorFound === 9) {
 		requestReplayStop("replayStackBuildBuilding errorFound === 9")
 	}
+}
+
+function replayStackBombBuilding(stackAction) {
+	const transporterID = stackAction[1]
+	const hexID = stackAction[3]
+	// Remove the bomb
+	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
+	// Remove every non-strengthened building on the hex
+	const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && !b.strengthened)
+	for (const b of buildingsOnHex) model.removeBuildingByID(b.id)
+}
+
+function replayStackStrengthenBuilding(stackAction) {
+	const transporterID = stackAction[1]
+	const buildingType = stackAction[2]
+	const hexID = stackAction[3]
+	// Remove the stone
+	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_STONE], false)
+	// Strengthen the building
+	const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && b.type === buildingType)
+	if (buildingsOnHex.length > 0) buildingsOnHex[0].strengthened = true
 }
 
 function replayStackReshaftMine(stackAction) {

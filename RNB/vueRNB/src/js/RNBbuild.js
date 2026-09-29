@@ -97,13 +97,8 @@ export function setEligibleItemsToBuild(playerIndex, transporterID) {
 		}
 	}
 
-	// Bomb pseudo-building: need bombs enabled, a bomb on the hex, and a non-strengthened building on the hex
-	if (store.gameOptions.useBombs && resourceOnHex[rf.RES_BOMB] > 0) {
-		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
-		if (buildingsOnHex.some((b) => !b.strengthened)) {
-			if (!store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_BOMB)) store.context.eligibleBuildingsToBuild.push(rf.BLDG_PSEUDO_BOMB)
-		}
-	}
+	// Bombing is done via the bomb bubble on the transporter (see MapArea.vue), not a
+	// building option. Strengthening remains a pseudo-building option below.
 
 	// Strengthen pseudo-building: need bombs enabled, stone on hex, and a non-strengthened building on the hex
 	if (store.gameOptions.useBombs && stoneOnHex >= 1) {

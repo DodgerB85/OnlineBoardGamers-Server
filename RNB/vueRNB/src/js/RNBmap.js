@@ -777,16 +777,19 @@ export function clickedBombOption(buildingID) {
 	if (errorFlag !== 0) return
 	// Remove the bomb for real
 	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
-	// Remove the building
-	model.removeBuildingByID(buildingID)
+	// A bomb destroys every building on the hex (a city can hold 2), but strengthened ones survive
+	const hexID = buildingObj.location[1]
+	const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && !b.strengthened)
+	for (const b of buildingsOnHex) model.removeBuildingByID(b.id)
 	// Add to stack
-	let stackAction = [rf.STACK_BOMB_BUILDING, stack.getTransIDtoUse(transporterObj), buildingObj.type, buildingObj.location[1], buildingObj.location[2]]
+	let stackAction = [rf.STACK_BOMB_BUILDING, stack.getTransIDtoUse(transporterObj), buildingObj.type, hexID, buildingObj.location[2]]
 	stack.addItemToStack({
 		action: rf.STACK_BOMB_BUILDING,
 		historyEntry: stackAction,
 		playerIndex: controller.currentPlayerIndex(),
 	})
 	store.context.eligibleBuildingsToBomb.splice(0)
+	highlight.updateAllHighlightsForTransporterMode()
 	context.createUndoPoint()
 }
 
@@ -811,6 +814,7 @@ export function clickedStrengthenOption(buildingID) {
 		playerIndex: controller.currentPlayerIndex(),
 	})
 	store.context.eligibleBuildingsToStrengthen.splice(0)
+	highlight.updateAllHighlightsForTransporterMode()
 	context.createUndoPoint()
 }
 
