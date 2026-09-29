@@ -1,7 +1,7 @@
 {% extends "Lobby/layout.html" %}
 {% load static i18n compress %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/lobby_new.css' %}?v=9" rel="stylesheet" />
+    <link href="{% static 'Lobby/CSS/lobby_new.css' %}?v=14" rel="stylesheet" />
 {% endblock head %}
 {% block body %}
     {% compress js %}
@@ -16,8 +16,8 @@
                 {% endfor %}
             </div>
         {% endif %}
-        <div class="notice">
-            <span>Splotter Con Gand Final Pitts Bus Match <a href="/BUS/34571/spoilerFree/">Here!</a></span>
+        <div class="lobby-social">
+            {% include "Lobby/socialButtons.html" %}
         </div>
         {% if availableTournaments|length > 0 %}
             <div class="notice">
@@ -273,6 +273,7 @@
                         <span class="colour-guide-item myMove kickoutRequired2">{% translate "Need to move - could be kicked out" %}</span>
                         <span class="colour-guide-item kickoutRequired1">{% translate "Current Player is using Flex-Time" %}</span>
                         <span class="colour-guide-item kickoutRequired2">{% translate "Enter game to kickout inactive player" %}</span>
+                        <span class="colour-guide-item pendingFinish">{% translate "Finished - result not yet viewed" %}</span>
                     </div>
                 </div>
             </div>

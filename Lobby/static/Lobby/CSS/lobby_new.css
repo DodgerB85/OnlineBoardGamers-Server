@@ -25,6 +25,42 @@
 .notice a { color: var(--color-accent-strong); font-weight: 600; }
 .notice-icon { vertical-align: middle; }
 
+/* Double-sized Discord / GitHub buttons at the top of the lobby */
+.lobby-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 12px;
+}
+.lobby-social a {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 32px;
+    border: 2px solid currentColor;
+    border-radius: 999px;
+    color: var(--color-nav-bg);
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: 600;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+.lobby-social svg {
+    height: 40px;
+    width: 40px;
+    fill: currentColor;
+    display: block;
+    flex-shrink: 0;
+}
+@media (hover: hover) {
+    .lobby-social a:hover {
+        background-color: var(--color-nav-bg);
+        color: var(--color-brand-blue);
+    }
+}
+
 .news-banner {
     display: flex;
     align-items: center;
@@ -58,8 +94,8 @@
     background: rgba(25, 52, 60, 0.1);
     color: var(--color-ink);
 }
-/* Hide the colour guide inside lobby panels inside lobby — lobbyHelp has the full legend */
-.colourGuideDiv { display: none; }
+/* Show the colour guide inside the lobby panels */
+.colourGuideDiv { display: block; }
 
 .messages { margin-bottom: 10px; }
 
@@ -576,6 +612,7 @@
     border: 1px solid var(--color-border);
     border-radius: 8px;
     font-size: 13px;
+    text-align: center;
 }
 .colour-guide-title {
     display: block;
@@ -588,6 +625,7 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
+    align-items: center;
 }
 .colour-guide-item {
     padding: 4px 8px;
@@ -603,6 +641,10 @@
 }
 .colour-guide-item.kickoutRequired2 {
     background: var(--color-danger-bg);
+}
+.colour-guide-item.pendingFinish {
+    background-image: repeating-conic-gradient(#c8c8c8 0% 25%, #f0f0f0 0% 50%);
+    background-size: 14px 14px;
 }
 
 /* ---- Learning game confirm dialog ---- */
