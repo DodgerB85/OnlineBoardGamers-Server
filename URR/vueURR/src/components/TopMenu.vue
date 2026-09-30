@@ -27,7 +27,17 @@ function toggleNotes() {
 
 function toggleChat() {
 	store.viewSettings.showHistory = false
-	store.viewSettings.showChat = !store.viewSettings.showChat
+	if (store.viewSettings.showChat) store.viewSettings.showChat = false
+	else {
+		store.viewSettings.showChat = true
+		setTimeout(function () {
+			var el = document.getElementById("wholeChat")
+			var cs = getComputedStyle(el)
+			var b = document.getElementById("footer").getBoundingClientRect().top
+			var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+			el.style["max-height"] = String(parseInt(b - a)) + "px"
+		}, 50)
+	}
 }
 
 function toggleInfo() {
@@ -37,7 +47,17 @@ function toggleInfo() {
 function toggleHistory() {
 	store.viewSettings.showChat = false
 	store.viewSettings.showInfo = false
-	store.viewSettings.showHistory = !store.viewSettings.showHistory
+	if (store.viewSettings.showHistory) store.viewSettings.showHistory = false
+	else {
+		store.viewSettings.showHistory = true
+		setTimeout(function () {
+			var el = document.getElementById("history")
+			var cs = getComputedStyle(el)
+			var b = document.getElementById("footer").getBoundingClientRect().top
+			var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+			el.style["max-height"] = String(parseInt(b - a)) + "px"
+		}, 50)
+	}
 }
 
 function toggleReplay() {
