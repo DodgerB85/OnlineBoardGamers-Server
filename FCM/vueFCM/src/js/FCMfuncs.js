@@ -670,7 +670,7 @@ export function exportFCMmodel(forGameOver, includeContext) {
 
 	// 18 - Stadium mod (appended last; the importer detects it by shape so
 	// older saves without this slot still load)
-	temp.push(JSON.parse(JSON.stringify(store.stadium)))
+	temp.push(exportStadiumSlot())
 
 	let step1 = JSON.stringify(temp)
 	// eslint-disable-next-line no-undef
@@ -1170,6 +1170,35 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	restoreStadiumState(inputArr)
 }
 
+// Stadium mod wire slot: [gamesPlayed] or [gamesPlayed, announcement].
+function exportStadiumSlot() {
+	const store = useModelStore()
+	const slot = [store.stadium.gamesPlayed]
+	if (store.stadium.announcement !== null) slot.push(store.stadium.announcement)
+	return slot
+}
+
+// Reads a stadium slot in the compact array format or the older full JSON copy.
+// Returns false when the slot is missing or unrecognised, so callers can rebuild
+// from history instead. The shape checks reject the other slots that may end an
+// older export (reserve cards, timestamps, context, ...).
+function applyStadiumSlot(slot) {
+	const store = useModelStore()
+	if (Array.isArray(slot)) {
+		if (!Number.isInteger(slot[0]) || slot[0] < 0 || slot[0] > 100) return false
+		if (slot.length > 2) return false
+		if (slot.length === 2 && (typeof slot[1] !== "object" || Array.isArray(slot[1]))) return false
+		store.stadium.gamesPlayed = slot[0]
+		store.stadium.announcement = slot.length === 2 ? slot[1] : null
+		return true
+	}
+	if (slot && typeof slot === "object" && slot.gamesPlayed !== undefined) {
+		Object.assign(store.stadium, slot)
+		return true
+	}
+	return false
+}
+
 // Stadium mod: restore state from the trailing wire-format slot (shape-detected).
 // For saves that predate the slot, rebuild from history: gamesPlayed from the
 // result entries, and the last announcement if it is still for an upcoming game.
@@ -1177,11 +1206,7 @@ export function restoreStadiumState(inputArr) {
 	const store = useModelStore()
 	store.stadium.gamesPlayed = 0
 	store.stadium.announcement = null
-	const last = inputArr[inputArr.length - 1]
-	if (last && typeof last === "object" && !Array.isArray(last) && last.gamesPlayed !== undefined) {
-		Object.assign(store.stadium, last)
-		return
-	}
+	if (applyStadiumSlot(inputArr[inputArr.length - 1])) return
 	for (let i = 0; i < store.history.length; i++) {
 		if (store.history[i][0] === rf.HIST_STADIUM_RESULT) store.stadium.gamesPlayed++
 	}
@@ -1327,7 +1352,7 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	// 21 - Stadium mod (older snapshots predate this slot)
 	store.stadium.gamesPlayed = 0
 	store.stadium.announcement = null
-	if (inputModel.length > 21) Object.assign(store.stadium, inputModel[21])
+	if (inputModel.length > 21) applyStadiumSlot(inputModel[21])
 
 	// Adjust CEOs with dumpling MS, using history
 	if (store.startingOptions.dumplings) {

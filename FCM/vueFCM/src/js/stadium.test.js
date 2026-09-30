@@ -277,8 +277,8 @@ describe("stadium wire-format persistence", () => {
 		const b64 = funcs.exportFCMmodel(false, false)
 		const decoded = JSON.parse(pako.ungzip(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { to: "string" }))
 		const last = decoded[decoded.length - 1]
-		expect(last.gamesPlayed).toBe(1)
-		expect(last.announcement.gameNumber).toBe(2)
+		expect(last[0]).toBe(1)
+		expect(last[1].gameNumber).toBe(2)
 
 		// Restore into a clean store
 		const store2 = freshGame()
@@ -287,6 +287,36 @@ describe("stadium wire-format persistence", () => {
 		expect(store2.stadium.gamesPlayed).toBe(1)
 		expect(store2.stadium.announcement.gameNumber).toBe(2)
 		expect(store2.stadium.announcement.food).toBe(rf.NOODLES)
+	})
+
+	it("exports a bare [gamesPlayed] slot when there is no announcement", () => {
+		const store = freshGame()
+		store.stadium.gamesPlayed = 2
+		store.stadium.announcement = null
+
+		const b64 = funcs.exportFCMmodel(false, false)
+		const decoded = JSON.parse(pako.ungzip(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { to: "string" }))
+		expect(decoded[decoded.length - 1]).toEqual([2])
+
+		funcs.restoreStadiumState(decoded)
+		expect(store.stadium.gamesPlayed).toBe(2)
+		expect(store.stadium.announcement).toBeNull()
+	})
+
+	it("restoreStadiumState still reads the older full JSON slot", () => {
+		const store = freshGame()
+		funcs.restoreStadiumState(["legacy", "save", { gamesPlayed: 3, announcement: { gameNumber: 4, food: rf.PIZZA, units: 10 } }])
+		expect(store.stadium.gamesPlayed).toBe(3)
+		expect(store.stadium.announcement.gameNumber).toBe(4)
+		expect(store.stadium.announcement.units).toBe(10)
+	})
+
+	it("restoreStadiumState ignores slots it does not recognise", () => {
+		const store = freshGame()
+		store.history.push([rf.HIST_STADIUM_RESULT, 0, 0, [0, rf.PIZZA, 6]])
+		funcs.restoreStadiumState(["legacy", "save", [0, 5000]])
+		expect(store.stadium.gamesPlayed).toBe(1)
+		expect(store.stadium.announcement).toBeNull()
 	})
 
 	it("restoreStadiumState rebuilds gamesPlayed and a pending announcement from history for older saves", () => {
