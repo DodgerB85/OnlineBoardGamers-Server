@@ -105,6 +105,11 @@
     flipToFriedChicken: "Unserved demand at house(s) {houses} flips to fried chicken:",
     houseMovedOut: "House(s) {houses} moved out of the neighbourhood",
 
+    // Stadium mod
+    stadiumAnnounce: "The stadium announces a game on turn {turn}: it will demand {units} \u00D7 {good}",
+    stadiumWinner: "{name} feeds the whole stadium, selling {units} \u00D7 {good}",
+    stadiumNobody: "Nobody could supply the stadium - the demand of {units} \u00D7 {good} clears at day's end:",
+
     // Building
     buildHouse: "{name} builds house #{num} {orient} at co-ordinates ({x}, {y})",
     buildGarden: "{name} builds a garden for house #{num} {orient} at co-ordinates ({x}, {y})",

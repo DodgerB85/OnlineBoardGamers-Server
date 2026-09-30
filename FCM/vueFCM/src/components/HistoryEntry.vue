@@ -834,6 +834,31 @@ const computedEntry3 = computed(() => {
 			</div>
 		</template>
 
+		<!-- HIST_STADIUM_ANNOUNCE: the next stadium game is announced (Stadium mod) -->
+		<template v-else-if="entry[0] === rf.HIST_STADIUM_ANNOUNCE">
+			<div><i18n-t keypath="history.stadiumAnnounce" tag="span" scope="global">
+				<template #turn>{{ 3 * entry[3][0] + 2 }}</template>
+				<template #units>{{ entry[3][2] }}</template>
+				<template #good><img class="foodTokenImg" :class="goodClass(entry[3][1])" :src="goodSrc(entry[3][1])" alt="" /></template>
+			</i18n-t>
+			</div>
+		</template>
+
+		<!-- HIST_STADIUM_RESULT: stadium game day resolved - one winner or a clear-out (Stadium mod) -->
+		<template v-else-if="entry[0] === rf.HIST_STADIUM_RESULT">
+			<div v-if="entry[3][0] > -1"><i18n-t keypath="history.stadiumWinner" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][0]].colour)">{{ store.players[entry[3][0]].displayName }}</span></template>
+				<template #units>{{ entry[3][2] }}</template>
+				<template #good><img class="foodTokenImg" :class="goodClass(entry[3][1])" :src="goodSrc(entry[3][1])" alt="" /></template>
+			</i18n-t>
+			</div>
+			<div v-else><i18n-t keypath="history.stadiumNobody" tag="span" scope="global">
+				<template #units>{{ entry[3][2] }}</template>
+				<template #good><img class="foodTokenImg" :class="goodClass(entry[3][1])" :src="goodSrc(entry[3][1])" alt="" /></template>
+			</i18n-t>
+			</div>
+		</template>
+
 		<!-- HIST_BUILD_HOUSE: player builds a house -->
 		<template v-else-if="entry[0] === rf.HIST_BUILD_HOUSE">
 			<i18n-t keypath="history.buildHouse" tag="span" scope="global">

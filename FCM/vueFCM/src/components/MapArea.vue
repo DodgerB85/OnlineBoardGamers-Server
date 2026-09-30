@@ -599,6 +599,25 @@ const needDisplays = computed(() => {
 			}
 		}
 	}
+
+	// Stadium mod - on game day, show the announced demand on the arena itself.
+	// Derived from the announcement: the injected need only exists inside
+	// doDinnerTime's synchronous run, so it can never drive the display.
+	if (store.startingOptions.stadium && store.stadium.announcement !== null && store.gameflow.turn === 5 + store.stadium.gamesPlayed * 3) {
+		const idx = map.findIndexForHouse(rf.STADIUM)
+		if (idx > -1) {
+			const [x, y] = view.getXYforSmallSquare(idx)
+			res.push({
+				type: "demand",
+				count: store.stadium.announcement.units,
+				good: store.stadium.announcement.food,
+				x: x + 0.25 * store.refSize,
+				y: y + 0.25 * store.refSize,
+				fontSize: store.refSize / 4 + "px",
+				boxSize: sqSize,
+			})
+		}
+	}
 	return res
 })
 

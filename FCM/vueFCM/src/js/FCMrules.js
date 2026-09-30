@@ -1616,6 +1616,16 @@ export function doDinnerTime(replayOnly) {
 	movedOutHouses.splice(0) // reset for this settlement
 	const fcMod = store.startingOptions.friedChicken
 
+	// Stadium mod: game-day demand injection (deterministic, recomputed on replay)
+	const stadiumMod = store.startingOptions.stadium
+	let stadiumResult = null
+	if (stadiumMod && store.stadium.announcement !== null && !store.needs.some((n) => n.number === rf.STADIUM) && store.gameflow.turn === 5 + store.stadium.gamesPlayed * 3) {
+		const a = store.stadium.announcement
+		const subNeeds = []
+		for (let i = 0; i < a.units; i++) subNeeds.push([a.food, -1])
+		store.needs.push({ number: rf.STADIUM, needs: subNeeds })
+	}
+
 	// --- PHASE 1: WORK THROUGH NEEDS ---
 	const sortedNeeds = [...store.needs].sort((a, b) => a.number - b.number)
 
@@ -1638,7 +1648,8 @@ export function doDinnerTime(replayOnly) {
 
 		let winningCompetitors = []
 		let finalGoods = need.needs.map((x) => x[0])
-		const prioritizedNeeds = selectNeedsPriority(finalGoods, model.hasGarden(need.number))
+		// Stadium mod: no substitutions (kimchi combos / noodle or sushi swaps never apply)
+		const prioritizedNeeds = need.number === rf.STADIUM ? [finalGoods] : selectNeedsPriority(finalGoods, model.hasGarden(need.number))
 
 		// Find which tier of needs someone can fulfill
 		for (const intermediateNeed of prioritizedNeeds) {
@@ -1715,7 +1726,7 @@ export function doDinnerTime(replayOnly) {
 			histoH.splice(2) // No one sold
 
 			// Fried Chicken mod: unserved demand flips / condemns the house
-			if (fcMod && need.number !== rf.RURAL_MARKETING_AREA && need.needs.length > 0) {
+			if (fcMod && need.number !== rf.RURAL_MARKETING_AREA && need.number !== rf.STADIUM && need.needs.length > 0) {
 				let flippedCount = 0
 				let hasFlippedChicken = false
 				let hasMarketedChicken = false
@@ -1746,9 +1757,18 @@ export function doDinnerTime(replayOnly) {
 		if (histoH.length > 2 && histoH[2].length === 1) histoH[2][0].splice(2)
 		histoHouses.push(histoH)
 
+		// Stadium mod: record the game result - winner takes all or the day clears
+		if (need.number === rf.STADIUM) {
+			stadiumResult = {
+				winner: winningCompetitors.length > 0 ? winningCompetitors[0].playerIndex : -1,
+				food: need.needs[0][0],
+				units: need.needs.length,
+			}
+		}
+
 		// Coffee block must come AFTER the house's regular block,
 		// so the history UI can attribute it to the correct house
-		if (winningCompetitors.length > 0 && store.startingOptions.coffee && model.getAvailableCoffee(false)) {
+		if (winningCompetitors.length > 0 && need.number !== rf.STADIUM && store.startingOptions.coffee && model.getAvailableCoffee(false)) {
 			processCoffee(need.number, winningCompetitors[0], usedFryChefs, coffeeEarnings, histoHouses, possibleCoffeeMS)
 		}
 	}
@@ -1800,6 +1820,20 @@ export function doDinnerTime(replayOnly) {
 	if (fcMod && !replayOnly) {
 		if (flippedHouses.length > 0) model.addHistory(rf.HIST_FLIP_TO_FRIED_CHICKEN, flippedHouses, -1, 0)
 		if (movedOutHouses.length > 0) model.addHistory(rf.HIST_HOUSE_MOVED_OUT, movedOutHouses, -1, 0)
+	}
+
+	// Stadium mod: settle the game day - the need clears either way (winner
+	// consumed it via removeResources; nobody qualified means it clears to zero).
+	// State changes run on replay too; history and milestone are guarded.
+	if (stadiumResult !== null) {
+		const sIdx = store.needs.findIndex((n) => n.number === rf.STADIUM)
+		if (sIdx > -1) store.needs.splice(sIdx, 1)
+		store.stadium.gamesPlayed++
+		store.stadium.announcement = null
+		if (!replayOnly) {
+			model.addHistory(rf.HIST_STADIUM_RESULT, [stadiumResult.winner, stadiumResult.food, stadiumResult.units], -1, 0)
+			if (stadiumResult.winner > -1) plyr.awardMilestone(stadiumResult.winner, rf.FIRST_STADIUM_SOLD)
+		}
 	}
 
 	// --- PHASE 4: PAYOUTS & BANK BREAK ---
@@ -2384,6 +2418,48 @@ export function payingWithGoodsRequireAction(playerIndex) {
 	return false
 }
 
+// --- Stadium mod ---
+
+// The First Stadium Supplier milestone hears announcements 1 turn earlier
+function stadiumAnnouncementLead() {
+	const store = useModelStore()
+	for (let i = 0; i < store.players.length; i++) {
+		if (plyr.hasMilestone(i, rf.FIRST_STADIUM_SOLD)) return 3
+	}
+	return 2
+}
+
+// Called at the end of a turn (after Dinnertime, during clean-up) with the turn
+// that just ended. Creates the announcement for the next game when it is due.
+// With the First Stadium Supplier milestone the announcement is rolled one turn
+// early, but the shared history entry (what everyone else sees) waits until the
+// normal 2-turn lead - the holder's early knowledge stays private.
+export function stadiumEndOfTurn(turnJustEnded) {
+	const store = useModelStore()
+	if (!store.startingOptions.stadium) return
+	const nextGameTurn = 5 + store.stadium.gamesPlayed * 3
+
+	// Roll the next game's demand at the earliest lead that applies (3 with the milestone, else 2)
+	if (store.stadium.announcement === null && turnJustEnded >= nextGameTurn - stadiumAnnouncementLead()) {
+		const gameNumber = store.stadium.gamesPlayed + 1
+		const pool = [rf.PIZZA, rf.BURGER]
+		if (store.startingOptions.noodles) pool.push(rf.NOODLES)
+		if (store.startingOptions.dumplings) pool.push(rf.DUMPLING)
+		if (store.startingOptions.friedChicken) pool.push(rf.FRIED_CHICKEN)
+		const food = pool[Math.floor(Math.random() * pool.length)]
+		const units = gameNumber === 1 ? 6 : gameNumber === 2 ? 12 : 16
+		store.stadium.announcement = { gameNumber: gameNumber, food: food, units: units }
+	}
+
+	// The announcement becomes public (shared history) at the normal 2-turn lead
+	if (store.stadium.announcement !== null && turnJustEnded >= nextGameTurn - 2) {
+		const a = store.stadium.announcement
+		if (!store.history.some((h) => h[0] === rf.HIST_STADIUM_ANNOUNCE && h[3][0] === a.gameNumber)) {
+			model.addHistory(rf.HIST_STADIUM_ANNOUNCE, [a.gameNumber, a.food, a.units], -1, 0)
+		}
+	}
+}
+
 export function housesAffectedByMarketingCampaign(campaign) {
 	const store = useModelStore()
 	const campaignData = rf.MARKETING_CAMPAIGNS[campaign.number]
@@ -2460,7 +2536,8 @@ export function housesAffectedByMarketingCampaign(campaign) {
 				// Handle floating point IDs if necessary
 				houseId = Math.round((tileValue - rf.HOUSE + Number.EPSILON) * 100) / 100
 			}
-			affectedHouses.add(houseId)
+			// Stadium mod: the stadium is never affected by marketing
+			if (houseId !== rf.STADIUM) affectedHouses.add(houseId)
 		}
 		// Garden Check (Gardens trigger the house they are attached to)
 		else if (tileValue === rf.GARDEN) {

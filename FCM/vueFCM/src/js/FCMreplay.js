@@ -136,6 +136,9 @@ export function replaySetupKetchupExpansion(playerNumber) {
 		store.availableEmployees[rf.FRIED_CHICKEN_CHEF] = max
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_FRIED_CHICKEN_SOLD)
 	}
+	if (store.startingOptions.stadium) {
+		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
+	}
 }
 
 export function resetDataForReplay() {
@@ -302,6 +305,7 @@ export async function generateReplayData(spoilerFree = false) {
 		else if (action === rf.HIST_END_GAME) replayEndGame(i, playerIdx, param)
 		else if (action === rf.HIST_FLIP_TO_FRIED_CHICKEN) replayFriedChickenHouse(i, playerIdx, param, false)
 		else if (action === rf.HIST_HOUSE_MOVED_OUT) replayFriedChickenHouse(i, playerIdx, param, true)
+		else if (action === rf.HIST_STADIUM_ANNOUNCE) replayStadiumAnnounce(i, playerIdx, param)
 
 		store.replayData.push(funcs.simpleExportWholeFCMmodel())
 
@@ -325,6 +329,12 @@ export async function generateReplayData(spoilerFree = false) {
 
 export function replayProduceKimchi(historyIndex, playerIndex, param) {
 	plyr.addResources(playerIndex, rf.KIMCHI, 1)
+}
+
+// Stadium mod: restore the announcement from history (no RNG on replay)
+export function replayStadiumAnnounce(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	store.stadium.announcement = { gameNumber: param[0], food: param[1], units: param[2] }
 }
 
 // Fried Chicken mod: state is recomputed by replayDinnerTime -> doDinnerTime(true),

@@ -251,7 +251,10 @@ export default {
 		"firstDumplingSoldDesc": "您的CEO获得一个奖励",
 		"firstFriedChickenSold": "首个卖出炸鸡",
 		"firstFriedChickenSoldTitle": "首个卖出炸鸡",
-		"firstFriedChickenSoldDesc": "可营销炸鸡；每卖出 1 份 +$5"
+		"firstFriedChickenSoldDesc": "可营销炸鸡；每卖出 1 份 +$5",
+		"firstStadiumSold": "首个体育馆供应商",
+		"firstStadiumSoldTitle": "首个体育馆供应商",
+		"firstStadiumSoldDesc": "之后每场比赛提前 3 回合收到公告"
 	},
 	"employees": {
 		"waitress": "服务员",
@@ -637,6 +640,9 @@ export default {
 		"admin": "admin",
 		"flipToFriedChicken": "房屋 {houses} 未被满足的需求翻面成炸鸡：",
 		"houseMovedOut": "房屋 {houses} 搬家了（本局不再接受任何广告）",
+		"stadiumAnnounce": "体育馆公告：第 {turn} 回合举办比赛，需要 {units} 份 {good}",
+		"stadiumWinner": "{name} 独家供应体育馆，卖出 {units} 份 {good}",
+		"stadiumNobody": "无人备齐体育馆需求——{units} 份 {good} 当天清零：",
 		"ruralArea": "乡村地区",
 		"vertically": "垂直",
 		"horizontally": "水平",
@@ -839,6 +845,8 @@ export default {
 		"fired": "您已解雇 {name}",
 		"hawkerTrucks": "小贩货车（点击查看路线）",
 		"noActiveHawkerTrucks": "没有活跃的小贩货车",
+		"stadiumTitle": "体育馆",
+		"stadiumGame": "第 {turn} 回合比赛，需要 {units} 份",
 		"availableEmployees": "可用员工",
 		"hireEmployee": "雇佣员工",
 		"currentEmployees": "当前员工",

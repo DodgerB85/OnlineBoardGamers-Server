@@ -364,6 +364,8 @@ export function setInternalStartingOptions(startingOptionsArray) {
 		if (opts[i] === rf.SO_HAWKERS) store.startingOptions.hawkers = true
 		// Fried Chicken mod
 		if (opts[i] === rf.SO_FRIED_CHICKEN) store.startingOptions.friedChicken = true
+		// Stadium mod
+		if (opts[i] === rf.SO_STADIUM) store.startingOptions.stadium = true
 
 		if (opts[i] === rf.SO_STRICT_PAYDAY_FRIDGE) store.startingOptions.strictPaydayFridge = true
 		if (opts[i] === rf.SO_TRAINING_GAME) store.startingOptions.trainingGame = true
@@ -468,6 +470,10 @@ export function setupKetchupExpansion(playerNumber) {
 		store.availableEmployees[rf.FRIED_CHICKEN_COOK] = 6
 		store.availableEmployees[rf.FRIED_CHICKEN_CHEF] = max
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_FRIED_CHICKEN_SOLD)
+	}
+	// Stadium mod
+	if (store.startingOptions.stadium) {
+		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
 	}
 }
 
@@ -1293,8 +1299,9 @@ export function getHousesAffectedByHawkerTruck(campaignNumber) {
 export function hasGarden(house) {
 	const store = useModelStore()
 	// 1. Check if the house is a standard player-built house.
-	// If it's not a Board House, not an Apartment, and not Rural Marketing, it has a garden by default.
-	if (!rf.BOARD_HOUSES.includes(house) && !rf.APARTMENTS.includes(house) && house !== rf.RURAL_MARKETING_AREA) {
+	// If it's not a Board House, not an Apartment, not Rural Marketing, and not the
+	// Stadium pseudo-house, it has a garden by default.
+	if (!rf.BOARD_HOUSES.includes(house) && !rf.APARTMENTS.includes(house) && house !== rf.RURAL_MARKETING_AREA && house !== rf.STADIUM) {
 		return true
 	}
 

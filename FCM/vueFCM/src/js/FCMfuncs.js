@@ -229,6 +229,9 @@ export function simpleExportWholeFCMmodel() {
 	// 20 - context
 	temp.push(JSON.parse(JSON.stringify(store.context)))
 
+	// 21 - Stadium mod
+	temp.push(JSON.parse(JSON.stringify(store.stadium)))
+
 	let step1 = JSON.stringify(temp)
 	// eslint-disable-next-line no-undef
 	let step2 = pako.gzip(step1)
@@ -664,6 +667,10 @@ export function exportFCMmodel(forGameOver, includeContext) {
 			temp.push(JSON.stringify(contextCopy))
 		}
 	}
+
+	// 18 - Stadium mod (appended last; the importer detects it by shape so
+	// older saves without this slot still load)
+	temp.push(JSON.parse(JSON.stringify(store.stadium)))
 
 	let step1 = JSON.stringify(temp)
 	// eslint-disable-next-line no-undef
@@ -1158,6 +1165,33 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 			}
 		}
 	}
+
+	// Stadium mod (trailing slot; falls back to history for older saves)
+	restoreStadiumState(inputArr)
+}
+
+// Stadium mod: restore state from the trailing wire-format slot (shape-detected).
+// For saves that predate the slot, rebuild from history: gamesPlayed from the
+// result entries, and the last announcement if it is still for an upcoming game.
+export function restoreStadiumState(inputArr) {
+	const store = useModelStore()
+	store.stadium.gamesPlayed = 0
+	store.stadium.announcement = null
+	const last = inputArr[inputArr.length - 1]
+	if (last && typeof last === "object" && !Array.isArray(last) && last.gamesPlayed !== undefined) {
+		Object.assign(store.stadium, last)
+		return
+	}
+	for (let i = 0; i < store.history.length; i++) {
+		if (store.history[i][0] === rf.HIST_STADIUM_RESULT) store.stadium.gamesPlayed++
+	}
+	for (let i = store.history.length - 1; i >= 0; i--) {
+		if (store.history[i][0] === rf.HIST_STADIUM_ANNOUNCE) {
+			const a = store.history[i][3]
+			if (a[0] === store.stadium.gamesPlayed + 1) store.stadium.announcement = { gameNumber: a[0], food: a[1], units: a[2] }
+			break
+		}
+	}
 }
 
 export function simpleImportWholeFCMmodel(inputBase64) {
@@ -1289,6 +1323,11 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 
 	// 20 - context
 	Object.assign(store.context, inputModel[20])
+
+	// 21 - Stadium mod (older snapshots predate this slot)
+	store.stadium.gamesPlayed = 0
+	store.stadium.announcement = null
+	if (inputModel.length > 21) Object.assign(store.stadium, inputModel[21])
 
 	// Adjust CEOs with dumpling MS, using history
 	if (store.startingOptions.dumplings) {
