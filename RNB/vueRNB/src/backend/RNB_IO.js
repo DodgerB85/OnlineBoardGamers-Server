@@ -1570,6 +1570,8 @@ export async function kickout() {
 		gameID: personal.gameID,
 		kickedName: kickedPlayerObj.name,
 		latestUpdate: personal.latestUpdate,
+		// A super-user (BotKickStarter) votes as the seat it is currently POV-ing
+		BKSN: personal.pov >= 0 ? store.players[personal.pov].name : personal.name,
 	}
 
 	try {
