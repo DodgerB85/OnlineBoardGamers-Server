@@ -12076,6 +12076,53 @@ msgstr "隔离：体育馆需求不会翻面成炸鸡，也不会搬家。它不
 msgid "Milestone \"First stadium supplier\": The first player to win a stadium game gains this Milestone. Reward: future announcements reach this player 3 turns before the game instead of 2 - privately, one turn before everyone else learns."
 msgstr "里程碑「首个体育馆供应商」：第一个在比赛中胜出的玩家获得此里程碑。奖励：之后的公告对该玩家提前 3 回合送达（而非 2 回合）——私密可见，比其他所有人早一个回合。"
 
+#: .\sharedFunctions\sharedRefs.py:820
+msgid ""
+"Second Bailout - When the bank breaks the second time, the city rescues it: "
+"the bank gains $300 per player and each player gets one free L2 marketing "
+"employee; the third break ends the game"
+msgstr "二次注资模组 - 银行第二次破产时城市出手救市：银行获得每位玩家 $300 的注资，每位玩家免费获赠一名二级营销员工；第三次破产游戏结束"
+
+#: .\templates\Lobby\fcm_options_grid.html:16
+msgid "Use Second Bailout"
+msgstr "使用二次注资模组"
+
+#: .\templates\Lobby\fcm_options_grid.html:17
+msgid "When the bank breaks the second time, the city rescues it: the bank gains $300 per player and each player gets one free L2 marketing employee; the third break ends the game"
+msgstr "银行第二次破产时城市出手救市：银行获得每位玩家 $300 的注资，每位玩家免费获赠一名二级营销员工；第三次破产游戏结束"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Second Bailout"
+msgstr "二次注资"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "In the base game the bank only breaks once. With this module the city steps in the second time: the bank gets a fresh cash injection and every player receives a free marketing employee. The game only ends for good on the third break."
+msgstr "基础游戏中银行只会破产一次。启用本模组后，第二次破产时城市出手：银行获得一笔新注资，每位玩家免费获赠一名营销员工。直到第三次破产游戏才真正结束。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "First break: unchanged - reserve cards are cashed in (or prices re-picked with the price-changing reserve cards) exactly as in the base game."
+msgstr "第一次破产：照旧——储备卡按基础规则变现（启用价格重定储备卡变体则重定价格）。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Second break: the city bails the bank out. The bank immediately receives $300 per player (e.g. +$600 in a 2-player game, +$1500 with 5 players)."
+msgstr "第二次破产：城市救市。银行立即获得每位玩家 $300 的注资（如 2 人局 +$600，5 人局 +$1500）。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "The gift: on the night of the bailout, players pick one free level-2 marketing employee each, in turn order, first come first served: Campaign Manager (always), plus Rural Marketeer, Mass Marketeer, Gourmet Food Critic or Hawker Marketeer if the matching module is enabled in this game. A card that is sold out in the talent market cannot be picked; if nothing is left when your turn comes, you get nothing. You may also decline."
+msgstr "赠送：救市当夜，玩家按行动顺序轮流免费挑选一名二级营销员工，先挑先得：活动经理（永远可选）；乡村营销员、大众营销员、美食评论家、小贩营销员则看本局是否启用对应模组。人才市场售罄的卡不可选；轮到你时一种都不剩则空手；也可以主动放弃。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "The gift is not a hire: it does not trigger \"first to hire 3 employees\" style milestones. The employee joins your beach and is paid like any other employee - getting them onto the schedule and affording their salary is your problem. Module milestones (e.g. \"first Rural Marketeer used\") still trigger normally the first time you market with them."
+msgstr "赠送不算雇佣：不触发「首次雇佣 3 人」类里程碑。员工进入你的休假区并像其他员工一样领工资——能否排班上岗、付得起工资由你自行负责。模组里程碑（如「首次使用乡村营销员」）在你首次派其营销时照常触发。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Third break: the game ends immediately - there is only one bailout."
+msgstr "第三次破产：游戏立即结束——救市只有一次。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Short games are unaffected: the first break already ends them, so the bailout never happens."
+msgstr "短局不受影响：第一次破产即终局，救市永远不会发生。"
+
 #~ msgid "Basic Options"
 #~ msgstr "基本选项"
 

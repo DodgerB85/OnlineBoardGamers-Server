@@ -156,6 +156,57 @@
           </div>
           <br />
 
+          <div class="FCMhelpSection">
+            <h2 class="fcm-china-help-title">{% translate "Second Bailout" %}</h2>
+            <img class="helpEmployeeImg"
+                 src="{% static 'FCM/images/so_bailout.svg' %}"
+                 alt="Second Bailout"
+                 width="150"
+                 height="150" />
+            <br />
+            <b><u>{% translate "Overview" %}</b></u>
+            <br />
+            {% blocktranslate trimmed %}
+              In the base game the bank only breaks once. With this module the city steps in the second time: the bank gets a fresh cash injection and every player receives a free marketing employee. The game only ends for good on the third break.
+            {% endblocktranslate %}
+            <br />
+            <br />
+            <b><u>Rules</u></b>
+            <ul>
+              <li>
+                {% blocktranslate trimmed %}
+                  First break: unchanged - reserve cards are cashed in (or prices re-picked with the price-changing reserve cards) exactly as in the base game.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  Second break: the city bails the bank out. The bank immediately receives $300 per player (e.g. +$600 in a 2-player game, +$1500 with 5 players).
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  The gift: on the night of the bailout, players pick one free level-2 marketing employee each, in turn order, first come first served: Campaign Manager (always), plus Rural Marketeer, Mass Marketeer, Gourmet Food Critic or Hawker Marketeer if the matching module is enabled in this game. A card that is sold out in the talent market cannot be picked; if nothing is left when your turn comes, you get nothing. You may also decline.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  The gift is not a hire: it does not trigger "first to hire 3 employees" style milestones. The employee joins your beach and is paid like any other employee - getting them onto the schedule and affording their salary is your problem. Module milestones (e.g. "first Rural Marketeer used") still trigger normally the first time you market with them.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  Third break: the game ends immediately - there is only one bailout.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  Short games are unaffected: the first break already ends them, so the bailout never happens.
+                {% endblocktranslate %}
+              </li>
+            </ul>
+          </div>
+          <br />
+
             <div class="card section">
               <h2 class="fcm-china-help-title">{% translate "Further Help" %}</h2>
               <p>

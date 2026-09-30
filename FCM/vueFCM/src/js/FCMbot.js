@@ -17,6 +17,13 @@ export function makeBot(player) {
 export function removeBotPlayers() {
     const store = useModelStore()
 	store.gameflow.turnOrder = store.gameflow.turnOrder.filter((idx) => store.players[idx].displayName != rf.BOT_NAME)
+	// Second Bailout mod: bots never claim their gift - auto-decline so the
+	// claim night cannot get stuck on an abandoned player
+	if (store.bailout.pending) {
+		store.bailout.order.forEach((idx) => {
+			if (store.players[idx].displayName === rf.BOT_NAME && store.bailout.claims[idx] === undefined) rules.claimBailoutEmployee(idx, -1)
+		})
+	}
 }
 
 function generatePaydayDefaultMove(playerIndex) {

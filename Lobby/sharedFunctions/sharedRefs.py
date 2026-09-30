@@ -783,6 +783,7 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
         rfFCM.SO_HAWKERS,
         rfFCM.SO_FRIED_CHICKEN,
         rfFCM.SO_STADIUM,
+        rfFCM.SO_SECOND_BAILOUT,
     ]
 
     options_map = {
@@ -817,6 +818,7 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
         rfFCM.SO_HAWKERS: ("so_hawkers.svg", "Hawkers"),
         rfFCM.SO_FRIED_CHICKEN: ("so_friedChicken.svg", "Fried Chicken - Unmet demand flips to Fried Chicken; unserved Fried Chicken means the house moves out"),
         rfFCM.SO_STADIUM: ("so_stadium.svg", "Stadium - A 2-tile arena hosts a game every 3 turns (the first game is on turn 5); the demand is announced 2 turns ahead and is always mass-market food (never sushi)"),
+        rfFCM.SO_SECOND_BAILOUT: ("so_bailout.svg", "Second Bailout - When the bank breaks the second time, the city rescues it: the bank gains $300 per player and each player gets one free L2 marketing employee; the third break ends the game"),
         rfFCM.SO_STRICT_PAYDAY_FRIDGE: ("so_strict.svg", "Turn Order Payday/Fridge"),
         rfFCM.SO_DRAFT_MODULE_BREAKER: ("so_draftMods.jpg", "Draft Modules"),
         rfFCM.SO_DRAFT_SKIP_MODULE: ("so_skip.jpg", "Skip Module"),

@@ -2703,7 +2703,7 @@ function processEarnings(earnedByPlayers, currentHist, mmLoop, totalMM, replayOn
 	}
 }
 
-function handleBankBreak(replayOnly) {
+export function handleBankBreak(replayOnly) {
 	const store = useModelStore()
 
 	if (store.startingOptions.shortGame) {
@@ -2741,8 +2741,65 @@ function handleBankBreak(replayOnly) {
 		if (store.bank < 0) {
 			if (!replayOnly) model.endGame()
 		}
+	} else if (store.startingOptions.secondBailout && store.bankBroken === 1) {
+		// Second Bailout mod: the second break triggers a city bailout instead of ending the game
+		const amount = 300 * store.players.length
+		store.bankBroken = 2
+		if (!replayOnly) {
+			store.bank += amount
+			model.addHistory(rf.HIST_BANK_BAILOUT, [amount], -1, 0)
+			// Set up the claim night: pool snapshot + claim order (fullTurnOrder: turnOrder is
+			// already empty by the time the last player's payday breaks the bank)
+			store.bailout.pending = true
+			store.bailout.pool = bailoutPool()
+			store.bailout.claims = {}
+			store.bailout.order = [...store.gameflow.fullTurnOrder]
+			// Nothing left to claim? Then the bailout has no gift phase
+			if (Object.values(store.bailout.pool).every((n) => n <= 0)) {
+				store.bailout.order.forEach((pi) => (store.bailout.claims[pi] = -1))
+				store.bailout.pending = false
+			}
+		}
+		if (store.bank < 0) {
+			if (!replayOnly) model.endGame()
+		}
 	} else {
 		if (!replayOnly) model.endGame()
+	}
+}
+
+// Second Bailout mod: the enabled L2 marketers and how many are left in the talent market
+function bailoutPool() {
+	const store = useModelStore()
+	const pool = { [rf.CAMPAIGN_MANAGER]: store.availableEmployees[rf.CAMPAIGN_MANAGER] }
+	if (store.startingOptions.ruralMarketers) pool[rf.RURAL_MARKETEER] = store.availableEmployees[rf.RURAL_MARKETEER]
+	if (store.startingOptions.massMarketers) pool[rf.MASS_MARKETEER] = store.availableEmployees[rf.MASS_MARKETEER]
+	if (store.startingOptions.gourmet) pool[rf.GOURMET_FOOD_CRITIC] = store.availableEmployees[rf.GOURMET_FOOD_CRITIC]
+	if (store.startingOptions.hawkers) pool[rf.HAWKER_MARKETEER] = store.availableEmployees[rf.HAWKER_MARKETEER]
+	return pool
+}
+
+// Second Bailout mod: a player claims one free L2 marketer (or -1 to decline).
+// The gift is NOT a hire: no hire milestones, the employee goes to the beach and
+// joins the payroll like any normal employee.
+export function claimBailoutEmployee(playerIndex, employeeId) {
+	const store = useModelStore()
+	if (!store.bailout.pending) return
+	if (store.bailout.claims[playerIndex] !== undefined) return
+	if (!store.bailout.order.includes(playerIndex)) return
+
+	if (employeeId !== -1) {
+		if (!(store.bailout.pool[employeeId] > 0)) return
+		store.bailout.pool[employeeId]--
+		store.availableEmployees[employeeId]--
+		store.players[playerIndex].beach.push(employeeId)
+	}
+
+	store.bailout.claims[playerIndex] = employeeId
+	model.addHistory(rf.HIST_BAILOUT_CLAIM, [employeeId], playerIndex, 0)
+
+	if (store.bailout.order.every((pi) => store.bailout.claims[pi] !== undefined)) {
+		store.bailout.pending = false
 	}
 }
 

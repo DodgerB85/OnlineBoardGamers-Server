@@ -234,5 +234,12 @@
       <div class="opt-help">{% trans "A 2-tile arena hosts a game every 3 turns (the first game is on turn 5); the demand is announced 2 turns ahead and is always mass-market food (never sushi)" %}</div>
     </div>
   </label>
+  <label class="check-label">
+    <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt222" id="secondBailout" name="secondBailout" value="48" />
+    <div>
+      <div style="color:#d97706">{% trans "Use Second Bailout" %} (MOD) &mdash; {% trans "See" %} <a href="{% url 'FCM:fanExpansionsHelp' %}" target="_blank">{% trans "Help" %}</a></div>
+      <div class="opt-help">{% trans "When the bank breaks the second time, the city rescues it: the bank gains $300 per player and each player gets one free L2 marketing employee; the third break ends the game" %}</div>
+    </div>
+  </label>
 </div>
 </div>
