@@ -13,6 +13,7 @@ import * as hd from "../js/RNBhex"
 import * as funcs from "../js/RNBfuncs"
 import * as replay from "../components/History/RNBreplay"
 import * as context from "../js/RNBcontext"
+import * as highlight from "../js/RNBhighlight"
 //import * as model from "../js/RNBmodel"
 
 import { useModelStore } from "../stores/RNBstore.js"
@@ -95,7 +96,11 @@ function clickedLoggedInDiv() {
 		personal.pov++
 		if (personal.pov === store.players.length) personal.pov = 0
 		store.gameName = String(personal.pov) + "  :  " + store.players[personal.pov].name
-		// controller.startPlayerTurn()
+		// Recompute highlights for the new POV. Do NOT call startPlayerTurn here -
+		// that also resets transporters / action stack / undo points.
+		context.resetContextAndHighlights()
+		if (store.gameflow.phase === rf.PHASE_CHOOSE_HOME_TILE) highlight.higlightTilesForStartTile()
+		else highlight.updateAllHighlightsForTransporterMode()
 	}
 }
 
