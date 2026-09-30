@@ -1310,11 +1310,15 @@ export function kickoutFlexiTimerTicker() {
 		return
 	} else {
 		personal.flexiSecondsToNextKickout--
-		if (personal.flexiSecondsToNextKickout < 60) {
-			// toggle the red class on and off
-			if (document.getElementById("flexiKickoutTimerSpan").classList.contains("redText")) document.getElementById("flexiKickoutTimerSpan").classList.remove("redText")
-			else document.getElementById("flexiKickoutTimerSpan").classList.add("redText")
-		} else document.getElementById("flexiKickoutTimerSpan").classList.remove("redText")
+		// The span only renders when the kickout info box is showing, so may be absent
+		const span = document.getElementById("flexiKickoutTimerSpan")
+		if (span) {
+			if (personal.flexiSecondsToNextKickout < 60) {
+				// toggle the red class on and off
+				if (span.classList.contains("redText")) span.classList.remove("redText")
+				else span.classList.add("redText")
+			} else span.classList.remove("redText")
+		}
 
 		if (personal.flexiSecondsToNextKickout < 0) personal.flexiSecondsToNextKickout = 0
 	}
@@ -1329,11 +1333,15 @@ export function kickoutTimerTicker() {
 		clearInterval(personal.kickoutCountdownIntervalTimer) // FIXXXXXXXXXXXXXXXX
 	} else {
 		personal.secondsToNextKickout--
-		if (personal.secondsToNextKickout < 60) {
-			// toggle the red class on and off
-			if (document.getElementById("kickoutTimerSpan").classList.contains("redText")) document.getElementById("kickoutTimerSpan").classList.remove("redText")
-			else document.getElementById("kickoutTimerSpan").classList.add("redText")
-		} else document.getElementById("kickoutTimerSpan").classList.remove("redText")
+		// The span only renders when pov is a seat and the game is not over, so may be absent
+		const span = document.getElementById("kickoutTimerSpan")
+		if (span) {
+			if (personal.secondsToNextKickout < 60) {
+				// toggle the red class on and off
+				if (span.classList.contains("redText")) span.classList.remove("redText")
+				else span.classList.add("redText")
+			} else span.classList.remove("redText")
+		}
 
 		if (personal.secondsToNextKickout < 0) personal.secondsToNextKickout = 0
 	}
