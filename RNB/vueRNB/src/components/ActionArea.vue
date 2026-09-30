@@ -298,7 +298,8 @@ function currentKickoutTarget() {
 }
 function myKickoutVote() {
 	if (personal.pov < 0) return false
-	return store.kickoutVotesData[personal.name]
+	// A super-user (BotKickStarter) votes as the seat it is currently POV-ing
+	return store.kickoutVotesData[store.players[personal.pov].name]
 }
 function canKickoutNow() {
 	const target = currentKickoutTarget()
@@ -350,7 +351,7 @@ function updateSoloKickoutCountdown() {
 	}
 }
 watch(
-	() => personal.pov >= 0 ? store.kickoutVotesData[personal.name] : false,
+	() => personal.pov >= 0 ? store.kickoutVotesData[store.players[personal.pov].name] : false,
 	() => {
 		if (personal.pov < 0) return
 		updateSoloKickoutCountdown()
