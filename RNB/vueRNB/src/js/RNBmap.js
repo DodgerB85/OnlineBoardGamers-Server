@@ -1363,6 +1363,8 @@ export function allLandVertexBucketsWithoutRoadsAdjacentTo(hexID, bucketIds) {
 		if (otherHex.hexTerrainID === rf.CITY) continue
 		if (rf.TERR_ANY_LAND.includes(hex.currentTerrain) && rf.TERR_ANY_LAND.includes(otherHex.currentTerrain)) {
 			function addRes(nodeId) {
+				// Skip invalid nodes - polders have no corner nodes and river sides have no side node
+				if (nodeId < 0) return
 				const otherBucketId = otherHex.bucketIdsInitial[otherHex.nodeBucketIds[nodeId]]
 				res.push([otherHexId, [otherBucketId]])
 			}
@@ -1414,6 +1416,8 @@ export function allVertexBucketsWithoutPowerLinesAdjacentTo(hexID, bucketIds) {
 		// Rivers may only be crossed where a bridge exists on the boundary
 		if (edge.hasRiver && !riverCrossingAllowed(hex, side, otherHex, (side + 3) % 6)) continue
 		function addRes(nodeId) {
+			// Skip invalid nodes - polders have no corner nodes and river sides have no side node
+			if (nodeId < 0) return
 			const otherBucketId = otherHex.bucketIdsInitial[otherHex.nodeBucketIds[nodeId]]
 			res.push([otherHexId, [otherBucketId]])
 		}

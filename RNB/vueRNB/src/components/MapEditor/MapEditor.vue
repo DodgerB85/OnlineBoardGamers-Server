@@ -115,6 +115,12 @@ const hexesWithInvalidRivers = computed(() => {
 					continue
 				}
 
+				// Case 4: Polders have no river of their own; a river may end at a
+				// polder (it connects to the polder only while it is flooded)
+				if (neighborHex && rf.TERR_IS_POLDER.includes(neighborHex.currentTerrain)) {
+					continue
+				}
+
 				// If none of the above, river is improperly connected
 				invalidHexIds.add(hexId)
 				break // Mark this hex as invalid and move to next hex

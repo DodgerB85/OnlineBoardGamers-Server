@@ -506,6 +506,24 @@ export function createCompleteGraph(hexData, edgeData, playerIndex, ignoreWalls,
 							)
 						}
 					}
+					// POLDER: a river side may border a polder. A flooded polder acts like
+					// water (handled in the sea/coast branch below). A drained polder blocks
+					// boats - no water hop onto the polder, no docking against it - but a land
+					// transporter on the polder may cross the dike onto the river hex, reaching
+					// either bank of the river.
+					else if (hexes.some((hex) => rf.TERR_IS_POLDER.includes(hex.currentTerrain)) && (sideData[hexIds[0]].hasRiver[sides[0]] || sideData[hexIds[1]].hasRiver[sides[1]])) {
+						const polderIdx = rf.TERR_IS_POLDER.includes(hexTypes[0]) ? 0 : 1
+						const riverIdx = [1, 0][polderIdx]
+						const polderNode = hexSideNodes[polderIdx] // polder side nodes are its mid-side vertices
+						const riverBanks = hexCornerNodes[riverIdx]
+						for (let j = 0; j < 2; j++) {
+							if (polderNode === -1 || riverBanks[j] === -1) continue
+							addEdge(
+								hasRoad[j] ? rf.MOVE_ROAD : rf.MOVE_DONKEY,
+								[hexOffset[polderIdx] + polderNode, hexOffset[riverIdx] + riverBanks[j]]
+							)
+						}
+					}
 					// river edge
 					else if (sideData[hexIds[0]].hasRiver[sides[0]]) {
 						addEdge(

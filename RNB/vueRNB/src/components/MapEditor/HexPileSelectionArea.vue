@@ -321,6 +321,12 @@ const errorText = computed(() => {
 					continue
 				}
 
+				// Case 4: Polders have no river of their own; a river may end at a
+				// polder (it connects to the polder only while it is flooded)
+				if (rf.TERR_IS_POLDER.includes(neighborHex.currentTerrain)) {
+					continue
+				}
+
 				// If none of the above, river is improperly connected
 				if (neighborHex.baseTerrain === rf.TERR_VOID) return "Rivers cannot connect to void"
 				return "Rivers cannot connect to land"
