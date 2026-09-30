@@ -57,6 +57,7 @@ export const SO_DELIVERY_DRIVERS = 44
 export const SO_HAWKERS = 45
 // Custom mod
 export const SO_FRIED_CHICKEN = 46
+export const SO_STADIUM = 47
 // Other options
 export const SO_STRICT_PAYDAY_FRIDGE = 101
 export const SO_TRAINING_GAME = 102
@@ -195,6 +196,9 @@ export const HIST_REMOVE_HC_MS = 48
 // Fried Chicken mod
 export const HIST_FLIP_TO_FRIED_CHICKEN = 64
 export const HIST_HOUSE_MOVED_OUT = 65
+// Stadium mod
+export const HIST_STADIUM_ANNOUNCE = 66
+export const HIST_STADIUM_RESULT = 67
 
 export const LEMONADE = 0
 export const COKE = 1
@@ -578,6 +582,7 @@ export const SOMEONE_SELLS_YOUR_DEMAND = 37 // module
 export const FIRST_LOBBYIST_USED = 38 // module
 export const FIRST_DUMPLING_SOLD = 39 // module
 export const FIRST_FRIED_CHICKEN_SOLD = 40 // module
+export const FIRST_STADIUM_SOLD = 41 // module
 
 export const BASE_GAME_MILESTONES = [FIRST_HIRE_3, FIRST_THROW_AWAY, FIRST_WAITRESS, FIRST_20_DOL, FIRST_100_DOL, FIRST_LOWER_PRICES, FIRST_TRAIN, FIRST_BURGER_PRODUCED, FIRST_PIZZA_PRODUCED, FIRST_ERRAND_BOY, FIRST_CART_OPERATOR, FIRST_20_SALARIES, FIRST_BILLBOARD, FIRST_BURGER_MARKETED, FIRST_PIZZA_MARKETED, FIRST_DRINK_MARKETED, FIRST_AIRPLANE_CAMPAIGN, FIRST_RADIO_CAMPAIGN]
 export const KETCHUP_NEW_MILESTONES = [FIRST_MARKETEER_USED, FIRST_MARKETING_TRAINEE_USED, FIRST_CAMPAIGN_MANAGER_USED, FIRST_BRAND_MANAGER_USED, FIRST_BRAND_DIRECTOR_USED, FIRST_BURGER_SOLD, FIRST_PIZZA_SOLD, FIRST_LEMONADE_SOLD, FIRST_BEER_SOLD, FIRST_COKE_SOLD, FIRST_RECRUITING_GIRL_USED, FIRST_TRAINER_USED, FIRST_DISCOUNT_MANAGER_USED, FIRST_HOUSE_BUILT, FIRST_NEW_RESTAURANT, FIRST_WAITRESS_USED, FIRST_CART_OPERATOR_USED]
@@ -700,6 +705,9 @@ export const TILES = [
 	[1, 1, 1, 1, 1, 1, 19.7, 19.7, 19.7, 1, 1, 19.7, 19.7, 19.7, 1, 1, 19.7, 19.7, 19.7, 0, 1, 1, 1, 0, 0],
 	[7, 7, 1, 0, 0, 7, 7, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 7, 7, 0, 0, 1, 7, 7],
 	[-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+	// Stadium mod - 2 complementary half-tiles forming one arena: 27 = left/top half, 28 = right/bottom half
+	[1, 1, 1, 1, 1, 1, 10.1, 10.1, 10.1, 10.1, 1, 10.1, 10.1, 10.1, 10.1, 1, 10.1, 10.1, 10.1, 10.1, 1, 1, 1, 1, 1], //27
+	[1, 1, 1, 1, 1, 10.1, 10.1, 10.1, 10.1, 1, 10.1, 10.1, 10.1, 10.1, 1, 10.1, 10.1, 10.1, 10.1, 1, 1, 1, 1, 1, 1], //28
 ]
 
 export const HOUSE_SQS = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 35]
@@ -709,6 +717,8 @@ export const BOARD_HOUSES = [2, 4, 5, 7, 8, 10, 12, 13, 15, 16, 18, 21, 22] // N
 export const APARTMENT_3 = 3.2
 export const APARTMENT_9 = 9.7
 export const APARTMENTS = [APARTMENT_3, APARTMENT_9]
+// Stadium mod - pseudo house number; sorts first at Dinnertime (priority 0)
+export const STADIUM = 0.1
 export const AVAILABLE_HOUSES = [1, 3, 6, 9, 11, 14, 17, 19]
 export const RURAL_MARKETING_AREA = 26
 // No 20,23,24
@@ -857,6 +867,7 @@ export const MILESTONES_STR = [
 	{ text: t('milestones.firstLobbyist'), type: "waitress", title: t('milestones.firstLobbyistTitle'), description: t('milestones.firstLobbyistDesc'), img: "m_icon20.png", additionalClass: "higher" },
 	{ text: t('milestones.firstDumplingSold'), type: "food", title: t('milestones.firstDumplingSoldTitle'), description: t('milestones.firstDumplingSoldDesc'), img: "m_icon01.png", additionalClass: "higher" }, // TODO class? Icon?
 	{ text: t('milestones.firstFriedChickenSold'), type: "food", title: t('milestones.firstFriedChickenSoldTitle'), description: t('milestones.firstFriedChickenSoldDesc'), img: "m_icon01.png", additionalClass: "higher" }, // TODO class? Icon?
+	{ text: t('milestones.firstStadiumSold'), type: "waitress", title: t('milestones.firstStadiumSoldTitle'), description: t('milestones.firstStadiumSoldDesc'), img: "m_icon15.png" },
 ]
 
 export const EMPLOYEES_STR = [

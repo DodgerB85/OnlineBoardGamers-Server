@@ -66,6 +66,9 @@ export const useModelStore = defineStore("store", () => {
 
 		// Fried Chicken mod
 		friedChicken: false,
+
+		// Stadium mod
+		stadium: false,
 	}
 
 	// This var affects the ZOOM level
@@ -126,6 +129,11 @@ export const useModelStore = defineStore("store", () => {
 	const parks = reactive([])
 	const newRoads = reactive([])
 	const movedOutHouses = reactive([])
+	// Stadium mod - runtime state, NEVER in startingOptions
+	const stadium = reactive({
+		gamesPlayed: 0, // matches already resolved
+		announcement: null, // { gameNumber, food, units } for the upcoming game
+	})
 
 	/*************************************** UNSAVED - TEMP VARS -- these do not need to be stored or saved */
 
@@ -403,6 +411,7 @@ export const useModelStore = defineStore("store", () => {
 		parks,
 		newRoads,
 		movedOutHouses,
+		stadium,
 		reserveCards,
 		bank,
 		bankBroken,

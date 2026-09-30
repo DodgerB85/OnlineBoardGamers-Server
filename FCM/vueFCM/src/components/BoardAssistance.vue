@@ -341,6 +341,21 @@ function showHawkerRoute(campaignNumber) {
 	}
 }
 
+/* ---------------- Stadium ---------------- */
+const useStadium = computed(() => store.startingOptions.stadium)
+
+// Hidden until the announcement becomes public to this player:
+// the milestone holder sees it 1 turn earlier than everyone else.
+const stadiumAnnouncement = computed(() => {
+	const a = store.stadium.announcement
+	if (a === null) return null
+	const gameTurn = 5 + store.stadium.gamesPlayed * 3
+	let lead = 2
+	if (personal.pov >= 0 && plyr.hasMilestone(personal.pov, rf.FIRST_STADIUM_SOLD)) lead = 3
+	if (store.gameflow.turn < gameTurn - lead + 1) return null
+	return { turn: gameTurn, units: a.units, foodImg: view.getImage("item_" + a.food) }
+})
+
 /* ---------------- Rural Marketing Area ---------------- */
 const useRuralMarketers = computed(() => store.startingOptions.ruralMarketers)
 
@@ -635,6 +650,15 @@ const playerRows = computed(() => {
 			</template>
 		</div>
 
+		<!-- STADIUM -->
+		<div id="stadiumAnnouncementDisplay" v-if="useStadium && stadiumAnnouncement !== null">
+			<strong>{{ $t("assistance.stadiumTitle") }}</strong>
+			<div class="stadiumAnnouncement">
+				{{ $t("assistance.stadiumGame", { turn: stadiumAnnouncement.turn, units: stadiumAnnouncement.units }) }}
+				<img class="stadiumItemImg" :src="stadiumAnnouncement.foodImg" />
+			</div>
+		</div>
+
 		<!-- SANDBOX MODE -->
 		<div id="sandboxDiv" v-if="sandboxMode">
 			<div>
@@ -899,6 +923,21 @@ const playerRows = computed(() => {
 	margin: 4px;
 	position: relative;
 	z-index: 1;
+}
+
+/* Stadium */
+#stadiumAnnouncementDisplay {
+	width: 392px;
+	border: #000 1px solid;
+	margin: 0 auto;
+	margin-top: 5px;
+	padding: 3px;
+	text-align: left;
+}
+
+.stadiumAnnouncement .stadiumItemImg {
+	height: 22px;
+	vertical-align: bottom;
 }
 
 /* Hawker Trucks */

@@ -12017,6 +12017,65 @@ msgstr "未满足的需求翻面成炸鸡；炸鸡仍未满足则该房屋搬家
 msgid "Unofficial Mods"
 msgstr "非官方模组"
 
+#: .\sharedFunctions\sharedRefs.py:819
+msgid ""
+"Stadium - A 2-tile arena hosts a game every 3 turns (the first game is on "
+"turn 5); the demand is announced 2 turns ahead and is always mass-market food "
+"(never sushi)"
+msgstr "体育馆模组 - 一座 2 格体育馆每 3 回合举办一场比赛（首场在第 5 回合）；提前 2 回合公告需求，只需求大众食物（不会需要寿司）"
+
+#: .\templates\Lobby\fcm_options_grid.html:16
+msgid "Use Stadium"
+msgstr "使用体育馆模组"
+
+#: .\templates\Lobby\fcm_options_grid.html:17
+msgid "A 2-tile arena hosts a game every 3 turns (the first game is on turn 5); the demand is announced 2 turns ahead and is always mass-market food (never sushi)"
+msgstr "一座 2 格体育馆每 3 回合举办一场比赛（首场在第 5 回合）；提前 2 回合公告需求，只需求大众食物（不会需要寿司）"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Stadium"
+msgstr "体育馆"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Overview"
+msgstr "概览"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "The Stadium is a giant building spanning two map tiles. On game day the whole city turns into one huge customer: a big crowd with a big appetite for exactly one food. Games are held every 3 turns and announced well in advance - stocking up and pricing become a battle for a winner-takes-all jackpot. Recommended for games with 3 or more players."
+msgstr "体育馆是一座横跨两个板块的巨建筑。比赛日整座城市变成一位巨大的顾客：一大群观众只想吃同一种食物。比赛每 3 回合举办一场并提前公告——囤货和定价因此成为赢家通吃大奖的争夺战。建议 3 人以上的游戏使用。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "The building: When this module is enabled, the Stadium replaces two adjacent map tiles at game start, at a random position and orientation, and stays fixed for the whole game. It is all stadium and surrounding road - no building lots and no houses, so it produces no regular demand. Its value is the road network and game day."
+msgstr "建筑：启用本模组后，体育馆在开局时替换两个相邻板块，位置与朝向随机，整局固定不变。它整个是体育馆和外环马路——没有空位也没有房屋，因此不产生常规需求。它的价值在于路网枢纽和比赛日。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Schedule: Games are played on turns 5, 8, 11, ... - every 3 turns, starting with turn 5."
+msgstr "赛程：比赛在第 5、8、11…… 回合进行——每 3 回合一场，首场在第 5 回合。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "The announcement: At the end of a turn, 2 turns before each game, an announcement reveals which single food the crowd wants. The food is always mass-market: pizza or burgers, plus noodles, dumplings or fried chicken if that module is enabled in the same game - never sushi, never drinks or kimchi."
+msgstr "公告：每场比赛提前 2 回合，在回合结束时公告观众想吃的唯一一种食物。食物只需求大众食品：披萨或汉堡，以及当局同时启用面条、饺子或炸鸡模组时的对应食物——绝不会是寿司，也不含饮料和泡菜。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Crowd size: 6 units at the first game, 12 at the second, and 16 from the third game onward."
+msgstr "观众规模：第一场 6 份，第二场 12 份，第三场起固定 16 份。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Dinnertime on game day: The Stadium (house number 0.1) eats before every house. Standard matching rules apply: among the restaurants that have the full amount in stock, the nearest one wins, ties broken by cheapest price. The winner sells all units in a single sale."
+msgstr "比赛日结算：体育馆（房号 0.1）先于所有房屋用餐。匹配规则照旧：在备齐全量库存的餐厅中，最近者胜，同距取最便宜。赢家以单笔交易卖出全部份数。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "One-day event: If no restaurant can supply the full amount, the demand disappears at Dinnertime - the game is not postponed."
+msgstr "一日赛事：若没有任何餐厅备齐全量，该需求在晚餐结算时直接消失——比赛不会延期。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Isolation: Stadium demand never flips into Fried Chicken and never moves out. It cannot be targeted by marketing campaigns, and substitution effects (noodle or sushi replacements, kimchi combos) do not apply. Units sold count normally towards \"first sold\" milestones."
+msgstr "隔离：体育馆需求不会翻面成炸鸡，也不会搬家。它不能被营销广告定向投放，替换机制（面条/寿司替换、泡菜组合）也不适用。卖出的份数照常计入「首个卖出 X」里程碑。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Milestone \"First stadium supplier\": The first player to win a stadium game gains this Milestone. Reward: future announcements reach this player 3 turns before the game instead of 2 - privately, one turn before everyone else learns."
+msgstr "里程碑「首个体育馆供应商」：第一个在比赛中胜出的玩家获得此里程碑。奖励：之后的公告对该玩家提前 3 回合送达（而非 2 回合）——私密可见，比其他所有人早一个回合。"
+
 #~ msgid "Basic Options"
 #~ msgstr "基本选项"
 

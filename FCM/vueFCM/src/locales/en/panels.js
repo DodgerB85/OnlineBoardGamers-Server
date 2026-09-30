@@ -17,6 +17,8 @@
     noActiveGourmetFoodCritics: "No Active Gourmet Food Critics",
     hawkerTrucks: "Hawker Trucks (Click to view route)",
     noActiveHawkerTrucks: "No Active Hawker Trucks",
+    stadiumTitle: "Stadium",
+    stadiumGame: "Game on turn {turn} - {units} x",
     availableEmployees: "Available Employees",
     hireEmployee: "Hire Employee",
     currentEmployees: "Current Employees",

@@ -90,6 +90,72 @@
           </div>
           <br />
 
+          <div class="FCMhelpSection">
+            <h2 class="fcm-china-help-title">{% translate "Stadium" %}</h2>
+            <img class="helpEmployeeImg"
+                 src="{% static 'FCM/images/map28.jpg' %}"
+                 alt="Stadium tile"
+                 width="225"
+                 height="225" />
+            <img class="helpEmployeeImg"
+                 src="{% static 'FCM/images/map29.jpg' %}"
+                 alt="Stadium tile"
+                 width="225"
+                 height="225" />
+            <br />
+            <b><u>{% translate "Overview" %}</b></u>
+            <br />
+            {% blocktranslate trimmed %}
+              The Stadium is a giant building spanning two map tiles. On game day the whole city turns into one huge customer: a big crowd with a big appetite for exactly one food. Games are held every 3 turns and announced well in advance - stocking up and pricing become a battle for a winner-takes-all jackpot. Recommended for games with 3 or more players.
+            {% endblocktranslate %}
+            <br />
+            <br />
+            <b><u>Rules</u></b>
+            <ul>
+              <li>
+                {% blocktranslate trimmed %}
+                  The building: When this module is enabled, the Stadium replaces two adjacent map tiles at game start, at a random position and orientation, and stays fixed for the whole game. It is all stadium and surrounding road - no building lots and no houses, so it produces no regular demand. Its value is the road network and game day.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  Schedule: Games are played on turns 5, 8, 11, ... - every 3 turns, starting with turn 5.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  The announcement: At the end of a turn, 2 turns before each game, an announcement reveals which single food the crowd wants. The food is always mass-market: pizza or burgers, plus noodles, dumplings or fried chicken if that module is enabled in the same game - never sushi, never drinks or kimchi.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  Crowd size: 6 units at the first game, 12 at the second, and 16 from the third game onward.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  Dinnertime on game day: The Stadium (house number 0.1) eats before every house. Standard matching rules apply: among the restaurants that have the full amount in stock, the nearest one wins, ties broken by cheapest price. The winner sells all units in a single sale.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  One-day event: If no restaurant can supply the full amount, the demand disappears at Dinnertime - the game is not postponed.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  Isolation: Stadium demand never flips into Fried Chicken and never moves out. It cannot be targeted by marketing campaigns, and substitution effects (noodle or sushi replacements, kimchi combos) do not apply. Units sold count normally towards "first sold" milestones.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  Milestone "First stadium supplier": The first player to win a stadium game gains this Milestone. Reward: future announcements reach this player 3 turns before the game instead of 2 - privately, one turn before everyone else learns.
+                {% endblocktranslate %}
+              </li>
+            </ul>
+          </div>
+          <br />
+
             <div class="card section">
               <h2 class="fcm-china-help-title">{% translate "Further Help" %}</h2>
               <p>

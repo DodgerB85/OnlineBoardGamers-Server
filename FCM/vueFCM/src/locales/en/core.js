@@ -257,6 +257,10 @@ milestones: {
   firstFriedChickenSold: "First fried chicken sold",
   firstFriedChickenSoldTitle: "First fried chicken sold",
   firstFriedChickenSoldDesc: "May market fried chicken; +$5 each sold",
+
+  firstStadiumSold: "First stadium supplier",
+  firstStadiumSoldTitle: "First stadium supplier",
+  firstStadiumSoldDesc: "Stadium announcements arrive 3 turns ahead",
 },
 
 // Employees

@@ -2053,6 +2053,9 @@ export async function endCurrentPhase() {
 
 		model.clearForNewTurn()
 
+		// Stadium mod: end-of-turn announcement check (after Dinnertime, turn not yet incremented)
+		rules.stadiumEndOfTurn(store.gameflow.turn)
+
 		kimchiIdxs.forEach((idx) => {
 			plyr.addResources(idx, rf.KIMCHI, 1)
 			model.addHistory(rf.HIST_PRODUCE_KIMCHI, [], idx, 0)
