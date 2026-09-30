@@ -118,11 +118,7 @@ export function getImage(image) {
 	else if (image === "rot_anticlockwise") return new URL(`../../../static/FCM/images/rot_anticlockwise.svg`, import.meta.url).href
 	else if (image === "rot_clockwise") return new URL(`../../../static/FCM/images/rot_clockwise.svg`, import.meta.url).href
 	else if (image === "flip_h") return new URL(`../../../static/FCM/images/flip_h.svg`, import.meta.url).href
-	// Map tiles (for lobbyist milestone tile selector)
-	else if (image.startsWith("map") && /^\d{2}$/.test(image.slice(3))) {
-		const tileNum = parseInt(image.slice(3))
-		return new URL(`../../../static/FCM/images/map${String(tileNum).padStart(2, "0")}.jpg`, import.meta.url).href
-	} else if (image === "FCMbox") return new URL(`../../../static/FCM/images/fcm-box.jpg`, import.meta.url).href
+ else if (image === "FCMbox") return new URL(`../../../static/FCM/images/fcm-box.jpg`, import.meta.url).href
 	else if (image === "FCMbox2") return new URL(`../../../static/FCM/images/fcm-box2.jpg`, import.meta.url).href
 	else if (image === "email") return new URL(`../../../static/FCM/images/email.png`, import.meta.url).href
 	else if (image === "fired") return new URL(`../../../static/FCM/images/fired.jpg`, import.meta.url).href
@@ -192,6 +188,15 @@ export function getImage(image) {
 	else if (image === "map24") return new URL(`../../../static/FCM/images/map24.jpg`, import.meta.url).href
 	else if (image === "map25") return new URL(`../../../static/FCM/images/map25.jpg`, import.meta.url).href
 	else if (image === "map26") return new URL(`../../../static/FCM/images/map26.jpg`, import.meta.url).href
+		// Stadium arena halves (tile 27/28) - must precede the dynamic map lookup below,
+	// whose Vite glob only contains files present when it was first scanned
+	else if (image === "map28") return new URL(`../../../static/FCM/images/map28.jpg`, import.meta.url).href
+	else if (image === "map29") return new URL(`../../../static/FCM/images/map29.jpg`, import.meta.url).href
+	// Map tiles (for lobbyist milestone tile selector)
+	else if (image.startsWith("map") && /^\d{2}$/.test(image.slice(3))) {
+		const tileNum = parseInt(image.slice(3))
+		return new URL(`../../../static/FCM/images/map${String(tileNum).padStart(2, "0")}.jpg`, import.meta.url).href
+	}
 	// Reserve cards
 	else if (image === `res_card_${rf.RES_CARD_OG_2_SLOTS}`) return new URL(`../../../static/FCM/images/reserve100.jpg`, import.meta.url).href
 	else if (image === `res_card_${rf.RES_CARD_OG_3_SLOTS}`) return new URL(`../../../static/FCM/images/reserve200.jpg`, import.meta.url).href

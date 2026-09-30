@@ -1058,6 +1058,60 @@ export const UNIFORM_HEX_DATA = [
 			)
 	)
 
+// CITY: the moat ring's 12 river vertices (gap of side i = index 2i)
+const CITY_MOAT_RING = [
+	[170, -298],
+	[301, -181],
+	[347, 2],
+	[307, 165],
+	[202, 297],
+	[12, 340],
+	[-181, 305],
+	[-278, 168],
+	[-366, 2],
+	[-283, -162],
+	[-203, -290],
+	[-12, -341],
+]
+
+// CITY: nodes 13-24 are the moat bank nodes, 2 per side (25% then 75% along the
+// side): node 13+2i is side i's 25% node, 14+2i its 75% node. Bank bridges span
+// inner gate -> bank node, aligning with the two banks of a river on the
+// neighbouring hex (the centre bridge is only for sides without a river).
+export const CITY_BANK_NODE_BASE = 13
+
+// CITY: bridge-river lines for the 12 bank bridges - a short chord of the moat
+// ring near each bank crossing, parallel to the side, so the bridge gfx centres
+// on the moat at the 25%/75% points
+const CITY_BANK_BRIDGE_RIVER_LINES = util
+	.indexArray(6)
+	.flatMap((i) => {
+		const G = CITY_MOAT_RING[2 * i]
+		const A = CITY_MOAT_RING[(2 * i + 11) % 12]
+		const B = CITY_MOAT_RING[(2 * i + 1) % 12]
+		const gl = Math.hypot(G[0], G[1])
+		const project = (p) => {
+			const pl = Math.hypot(p[0], p[1]) || 1
+			return [(p[0] * gl) / pl, (p[1] * gl) / pl]
+		}
+		const c25 = project([(A[0] + G[0]) / 2, (A[1] + G[1]) / 2])
+		const c75 = project([(G[0] + B[0]) / 2, (G[1] + B[1]) / 2])
+		const dl = Math.hypot(B[0] - A[0], B[1] - A[1]) || 1
+		const ux = ((B[0] - A[0]) / dl) * 60
+		const uy = ((B[1] - A[1]) / dl) * 60
+		return [
+			[
+				[c25[0] - ux, c25[1] - uy],
+				[c25[0] + ux, c25[1] + uy],
+			],
+			[
+				[c75[0] - ux, c75[1] - uy],
+				[c75[0] + ux, c75[1] + uy],
+			],
+		]
+	})
+	.map((line) => line.map(coord.absolute))
+
 export const ALL_HEX_DATA = UNIFORM_HEX_DATA.concat([
 	/**
 	 * RIVER HEXES ---- see hex_02 for example hex
@@ -3037,20 +3091,7 @@ export const ALL_HEX_DATA = UNIFORM_HEX_DATA.concat([
 		riverVertexRiverIds: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		riverStoppingVertex: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
 		sideRiverVertexIds: [0, 2, 4, 6, 8, 10],
-		riverVertexDefinitions: [
-			["absolute", 170, -298],
-			["absolute", 301, -181],
-			["absolute", 347, 2],
-			["absolute", 307, 165],
-			["absolute", 202, 297],
-			["absolute", 12, 340],
-			["absolute", -181, 305],
-			["absolute", -278, 168],
-			["absolute", -366, 2],
-			["absolute", -283, -162],
-			["absolute", -203, -290],
-			["absolute", -12, -341],
-		],
+		riverVertexDefinitions: CITY_MOAT_RING.map(coord.absolute),
 		riverVertexEdges: [
 			[0, 1],
 			[1, 2],
@@ -3066,8 +3107,9 @@ export const ALL_HEX_DATA = UNIFORM_HEX_DATA.concat([
 			[11, 0],
 		],
 
-		// 0 = centre, 1-6 = inner gates (side 0-5), 7-12 = outer gates (side 0-5)
-		nodeBucketIds: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		// 0 = centre, 1-6 = inner gates (side 0-5), 7-12 = outer gates (side 0-5),
+		// 13-24 = moat bank nodes (side i: 13+2i at 25%, 14+2i at 75%)
+		nodeBucketIds: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		nodeVertexDefinitions: [
 			[0, 0.5, 1],
 			[0, 0.5, 0.35],
@@ -3082,6 +3124,19 @@ export const ALL_HEX_DATA = UNIFORM_HEX_DATA.concat([
 			[3, 0.5, 0.05],
 			[4, 0.5, 0.05],
 			[5, 0.5, 0.05],
+			// Bank nodes (2 per side, at the 25% and 75% points)
+			[0, 0.25, 0.05],
+			[0, 0.75, 0.05],
+			[1, 0.25, 0.05],
+			[1, 0.75, 0.05],
+			[2, 0.25, 0.05],
+			[2, 0.75, 0.05],
+			[3, 0.25, 0.05],
+			[3, 0.75, 0.05],
+			[4, 0.25, 0.05],
+			[4, 0.75, 0.05],
+			[5, 0.25, 0.05],
+			[5, 0.75, 0.05],
 		].map(coord.relative),
 		nodeEdges: [
 			[0, 1],
@@ -3105,7 +3160,8 @@ export const ALL_HEX_DATA = UNIFORM_HEX_DATA.concat([
 			[6, 12],
 		],
 		roadAnchors: [0, 1, 2, 3, 4, 5, 6],
-		/******* BRIDGES - one per side, spanning the moat between inner and outer gate *******/
+		/******* BRIDGES - one per side spanning the moat at the centre, plus 2 bank
+		 * bridges per side (25%/75%) for sides joined to a river *******/
 		bridges: [
 			[1, 7],
 			[2, 8],
@@ -3113,6 +3169,19 @@ export const ALL_HEX_DATA = UNIFORM_HEX_DATA.concat([
 			[4, 10],
 			[5, 11],
 			[6, 12],
+			// Bank bridges: [inner gate, 25% node], [inner gate, 75% node] per side
+			[1, 13],
+			[1, 14],
+			[2, 15],
+			[2, 16],
+			[3, 17],
+			[3, 18],
+			[4, 19],
+			[4, 20],
+			[5, 21],
+			[5, 22],
+			[6, 23],
+			[6, 24],
 		],
 		bridgeRiverLines: [
 			[
@@ -3139,6 +3208,7 @@ export const ALL_HEX_DATA = UNIFORM_HEX_DATA.concat([
 				[-145.65, -330.14],
 				[-260.35, -249.86],
 			].map(coord.absolute),
+			...CITY_BANK_BRIDGE_RIVER_LINES,
 		],
 		chitLocationBucketIds: [0, 0, 0, 0, 0, 0, 0],
 		chitLocationBuildingEligible: [true, true, true, true, true, true, true],

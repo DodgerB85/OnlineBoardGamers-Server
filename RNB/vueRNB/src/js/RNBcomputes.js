@@ -223,7 +223,14 @@ export const computedHexes = computed(() => {
 					const hex = hexes[j]
 					const side = hexSides[j]
 					const lr = j === 0 ? k : (k + 1) % 2
-					const entryNode = hex.cornerNodeIds[side][lr]
+					// CITY: on city-river edges the road attaches at the bank node matching
+					// slot k; other city edges at the centre outer gate
+					let entryNode = hex.cornerNodeIds[side][lr]
+					if (hex.hexTerrainID === rf.CITY) {
+						const gi = hex.cornerNodeIds[side][0] - 1
+						const bankNodes = [rf.CITY_BANK_NODE_BASE + 2 * gi, rf.CITY_BANK_NODE_BASE + 2 * gi + 1]
+						entryNode = edge.hasRoad.length === 2 ? bankNodes[(k + j) % 2] : hex.sideNodeIds[side]
+					}
 					//hex.roadSegments.push([hex.nodeVertexDefinitions[entryNode], coord.relative([side, rf.ROAD_SIDE_ALIGNMENT + (1 - 2 * rf.ROAD_SIDE_ALIGNMENT) * lr, 0])].map(toXY))
 					hex.roadSegments.push(
 						[hex.nodeVertexDefinitions[entryNode], coord.relative([side, rf.ROAD_SIDE_ALIGNMENT + (1 - 2 * rf.ROAD_SIDE_ALIGNMENT) * lr, 0])].map((c) => toXY(c, true)) // Explicitly forcing Pointy
@@ -249,8 +256,16 @@ export const computedHexes = computed(() => {
 					const lr = j === 0 ? k : (k + 1) % 2
 					const entryNode = hex.cornerNodeIds[side][lr]
 					if (entryNode !== -1) {
+						// CITY: on city-river edges the power line attaches at the bank node
+						// matching slot k; other city edges at the centre outer gate
+						let cityEntryNode = entryNode
+						if (hex.hexTerrainID === rf.CITY) {
+							const gi = hex.cornerNodeIds[side][0] - 1
+							const bankNodes = [rf.CITY_BANK_NODE_BASE + 2 * gi, rf.CITY_BANK_NODE_BASE + 2 * gi + 1]
+							cityEntryNode = edge.hasPowerLine.length === 2 ? bankNodes[(k + j) % 2] : hex.sideNodeIds[side]
+						}
 						hex.powerLineSegments.push(
-							[hex.nodeVertexDefinitions[entryNode], coord.relative([side, rf.ROAD_SIDE_ALIGNMENT + (1 - 2 * rf.ROAD_SIDE_ALIGNMENT) * lr, 0])].map((c) => toXY(c, true))
+							[hex.nodeVertexDefinitions[cityEntryNode], coord.relative([side, rf.ROAD_SIDE_ALIGNMENT + (1 - 2 * rf.ROAD_SIDE_ALIGNMENT) * lr, 0])].map((c) => toXY(c, true))
 						)
 					}
 				}

@@ -135,7 +135,11 @@ function clickedNewBuilding(bldgNum) {
 		const transporterID = store.context.selectedTransporterIDforTM
 		const transporterObj = model.getTransporterByID(transporterID)
 		const hexID = transporterObj.location[1]
-		const cityBridges = map.getEligibleCityNeighbourBridges(hexID)
+		// CITY: from a neighbouring city, or from the city itself out to a neighbour.
+		// Restrict river-side options to the bank the transporter stands on.
+		const onCity = model.getHexByID(hexID).hexTerrainID === rf.CITY
+		const builderBuckets = [...new Set([model.hexCurrentBucketToInitial(hexID, loc.getBucketIDfromAnyHexIDandVertex(hexID, transporterObj.location[2]))])]
+		const cityBridges = onCity ? map.getEligibleCityExitBridges(hexID) : map.getEligibleCityNeighbourBridges(hexID, builderBuckets)
 		if (cityBridges.length === 0) {
 			rf.doAdminAlrt("No city moat bridge available")
 			return
@@ -224,11 +228,20 @@ function clickedNewBuilding(bldgNum) {
 			store.context.newRoadInfo.push([hexID, bucketIds])
 			context.setHexPiecesToHighlight(adjacentPieces)
 		} else if (bldgNum === rf.BLDG_PSEUDO_BRIDGE) {
-			for (let i = 0; i < hexObj.bridges.length; i++) {
-				const bridge = hexObj.bridges[i]
-				if (!util.includesArray(hexObj.builtBridges, bridge) && (reachableVertexes.includes(bridge[0]) || reachableVertexes.includes(bridge[1]))) {
-					context.addEligibleBridgeToBuild([hexObj.hexID, [...bridge]])
+			if (hexObj.hexTerrainID === rf.CITY) {
+				// CITY: centre bridge on plain sides, one per bank on river sides
+				for (const option of map.getCityBridgeOptions(hexID)) context.addEligibleBridgeToBuild([hexID, [...option.bridgeArr]])
+			} else {
+				for (let i = 0; i < hexObj.bridges.length; i++) {
+					const bridge = hexObj.bridges[i]
+					if (!util.includesArray(hexObj.builtBridges, bridge) && (reachableVertexes.includes(bridge[0]) || reachableVertexes.includes(bridge[1]))) {
+						context.addEligibleBridgeToBuild([hexObj.hexID, [...bridge]])
+					}
 				}
+			}
+			// CITY: the moat bridge of a neighbouring city can also be built from here
+			for (const [cityHexID, bridgeArr] of map.getCityBridgesBuildableFrom(hexID, bucketIds)) {
+				context.addEligibleBridgeToBuild([cityHexID, [...bridgeArr]])
 			}
 		} else if (bldgNum === rf.BLDG_PSEUDO_WALL) {
 			// Find reachable side
@@ -251,8 +264,11 @@ function clickedNewBuilding(bldgNum) {
 				const hex2IsPolder = rf.TERR_IS_POLDER.includes(hex2.currentTerrain)
 				if (hex1IsPolder && hex2IsPolder) continue
 				if ((hex1IsPolder || hex2IsPolder) && (hex1.currentTerrain === rf.TERR_SEA || hex2.currentTerrain === rf.TERR_SEA)) continue
+				// CITY: on a city tile, walls may only be BUILT on sides that already have a
+				// bridge and road crossing the moat (demolition is unaffected)
+				const cityWallSideOK = hexObj.hexTerrainID !== rf.CITY || map.cityEdgeHasBridgeAndRoad(hexID, edgeEntry)
 				// If you own it or it's neutral, and you have level+1 stones, you can build there
-				if (!ownedByOpponent && stoneOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater) {
+				if (!ownedByOpponent && cityWallSideOK && stoneOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater) {
 					context.addEligibleWallToBuild(hexIds)
 				}
 			}
