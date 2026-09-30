@@ -498,8 +498,25 @@ export function createCompleteGraph(hexData, edgeData, playerIndex, ignoreWalls,
 								[0, 1].map((k) => hexOffset[k] + sideData[hexIds[k]].riverVertexIndex[sides[k]])
 							)
 						}
-						// ...but land transporters may only cross where a bridge + road exists
-						if (hasRoad[0]) {
+						const cityIdx = hexes[0].hexTerrainID === rf.CITY ? 0 : hexes[1].hexTerrainID === rf.CITY ? 1 : -1
+						const otherIdx = [1, 0][cityIdx] ?? 0
+						if (cityIdx >= 0 && hexes[otherIdx].hexTerrainID !== rf.CITY && sideData[hexIds[otherIdx]].hasRiver[sides[otherIdx]]) {
+							// CITY river neighbour: one road edge per built bank - the city
+							// road attaches at the bank node (25%/75%) matching that bank
+							// and crosses to the bank's corner node (same pairing as
+							// addRoadToMap_core). Slot k's bank depends on the edge's hex order.
+							const cityHexObj = hexes[cityIdx]
+							const gi = cityHexObj.cornerNodeIds[sides[cityIdx]][0] - 1
+							const bankNodes = [rf.CITY_BANK_NODE_BASE + 2 * gi, rf.CITY_BANK_NODE_BASE + 2 * gi + 1]
+							for (const k of [0, 1]) {
+								if (hasRoad.length !== 2 || !hasRoad[k]) continue
+								const riverCornerIdx = otherIdx === 0 ? k : (k + 1) % 2
+								const riverCorners = hexes[otherIdx].cornerNodeIds[sides[otherIdx]]
+								addEdge(rf.MOVE_ROAD, [hexOffset[cityIdx] + bankNodes[(k + cityIdx) % 2], hexOffset[otherIdx] + riverCorners[riverCornerIdx]])
+							}
+						} else if (hasRoad[0] && hexSideNodes[0] !== -1 && hexSideNodes[1] !== -1) {
+							// ...but land transporters may only cross where a bridge + road exists.
+							// River exit sides have no side node (-1), so no road edge can exist there.
 							addEdge(
 								rf.MOVE_ROAD,
 								[0, 1].map((k) => hexOffset[k] + hexSideNodes[k])
@@ -556,8 +573,7 @@ export function createCompleteGraph(hexData, edgeData, playerIndex, ignoreWalls,
 					const hasValidCorners = seaCornerNodes[0] !== -1 && seaCornerNodes[1] !== -1
 					// CITY: a city is encircled by its moat, so a boat can move onto the
 					// moat (river) and interact with the city - it never docks.
-					const isCityLandHex = hexes[landHex].hexTerrainID === rf.CITY
-					// Only create sea-to-docked edges if this side is actually a coast
+					const isCityLandHex = hexes[landHex].hexTerrainID === rf.CITY// Only create sea-to-docked edges if this side is actually a coast
 					if (sideData[landHexId].hasRiver[landHexSide]) {
 						// dual-bank docking plus river
 						addEdge(rf.MOVE_WATER, [seaHexOffset + seaSideNode, landHexOffset + sideData[landHexId].riverVertexIndex[landHexSide]])

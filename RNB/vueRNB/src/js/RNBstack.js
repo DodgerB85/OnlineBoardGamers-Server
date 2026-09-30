@@ -1490,6 +1490,10 @@ export function verifySingleStackAction(stackActionData) {
 		// If there is only 1 road option, then build the road
 		if (edgeData.hasRoad.length === 1) {
 			if (edgeData.hasRoad[0]) return 3
+			// CITY: a road to/from a city requires the moat bridge on that side
+			for (const [i, h] of hexes.entries()) {
+				if (h.hexTerrainID === rf.CITY && !util.includesArray(h.builtBridges, h.cornerNodeIds[hexSides[i]])) return 4
+			}
 		}
 		// Otherwise we need to find which side of the river the road should be
 		else {
@@ -1498,6 +1502,13 @@ export function verifySingleStackAction(stackActionData) {
 			const oppositeCorner = hexes[0].nodeBucketIds[firstHexCorner] !== bucketIds[0] || hexes[1].nodeBucketIds[secondHexCorner] !== bucketIds[1]
 			const actual = oppositeCorner ? 1 : 0
 			if (edgeData.hasRoad[actual]) return 3
+			// CITY: a road to/from a city requires the moat bridge on that side.
+			// On city-river edges (two road slots) it's the bank bridge for this slot.
+			for (const [i, h] of hexes.entries()) {
+				if (h.hexTerrainID !== rf.CITY) continue
+				const requiredBridge = edgeData.hasRoad.length === 2 ? [h.cornerNodeIds[hexSides[i]][0], map.cityBankNodeForEdgeSlot(h, hexSides[i], edgeData, actual)] : h.cornerNodeIds[hexSides[i]]
+				if (!util.includesArray(h.builtBridges, requiredBridge)) return 4
+			}
 		}
 		return 0
 	}
@@ -1539,6 +1550,10 @@ export function verifySingleStackAction(stackActionData) {
 		// If there is only 1 power line option, then build the power line
 		if (edgeData.hasPowerLine.length === 1) {
 			if (edgeData.hasPowerLine[0]) return 3
+			// CITY: a power line to/from a city requires the moat bridge on that side
+			for (const [i, h] of hexes.entries()) {
+				if (h.hexTerrainID === rf.CITY && !util.includesArray(h.builtBridges, h.cornerNodeIds[hexSides[i]])) return 4
+			}
 		}
 		// Otherwise we need to find which side of the river the power line should be
 		else {
@@ -1547,6 +1562,13 @@ export function verifySingleStackAction(stackActionData) {
 			const oppositeCorner = hexes[0].nodeBucketIds[firstHexCorner] !== bucketIds[0] || hexes[1].nodeBucketIds[secondHexCorner] !== bucketIds[1]
 			const actual = oppositeCorner ? 1 : 0
 			if (edgeData.hasPowerLine[actual]) return 3
+			// CITY: a power line to/from a city requires the moat bridge on that side.
+			// On city-river edges (two slots) it's the bank bridge for this slot.
+			for (const [i, h] of hexes.entries()) {
+				if (h.hexTerrainID !== rf.CITY) continue
+				const requiredBridge = edgeData.hasPowerLine.length === 2 ? [h.cornerNodeIds[hexSides[i]][0], map.cityBankNodeForEdgeSlot(h, hexSides[i], edgeData, actual)] : h.cornerNodeIds[hexSides[i]]
+				if (!util.includesArray(h.builtBridges, requiredBridge)) return 4
+			}
 		}
 		return 0
 	}
@@ -1562,7 +1584,49 @@ export function verifySingleStackAction(stackActionData) {
 
 		const transporterObj = model.getTransporterByID(transporterID)
 		const validLocations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(transporterObj.location, false, "sbb")
-		if (!util.includesArray(validLocations, [rf.LOCATION_LAND_VERTEX, hexID, bridgeArr[0]]) && !util.includesArray(validLocations, [rf.LOCATION_LAND_VERTEX, hexID, bridgeArr[1]])) return 1
+		let bridgeReachable = util.includesArray(validLocations, [rf.LOCATION_LAND_VERTEX, hexID, bridgeArr[0]]) || util.includesArray(validLocations, [rf.LOCATION_LAND_VERTEX, hexID, bridgeArr[1]])
+		// CITY: a moat bridge may also be built from a neighbouring hex facing the crossing
+		if (!bridgeReachable && hexObj.hexTerrainID === rf.CITY && loc.isAnyHexLocation(transporterObj.location)) {
+			const transHex = model.getHexByID(transporterObj.location[1])
+			if (transHex && transHex.hexTerrainID !== rf.CITY) {
+				for (const side of util.indexArray(6)) {
+					if (transHex.hexLookup[side] !== hexID) continue
+					const citySide = (side + 3) % 6
+					// centre bridge: any position on the facing side
+					if (util.arraysEqual(hexObj.cornerNodeIds[citySide], bridgeArr)) {
+						bridgeReachable = true
+						break
+					}
+					// bank bridge: the transporter must be on the aligned bank
+					const bankNodes = map.cityBankNodesForSide(hexObj, citySide)
+					const bankIdx = bridgeArr[1] === bankNodes[0] ? 0 : bridgeArr[1] === bankNodes[1] ? 1 : -1
+					if (bankIdx === -1) continue
+					const corner = transHex.cornerNodeIds[side][(bankIdx + 1) % 2]
+					if (corner === -1) continue
+					const bankBucket = transHex.bucketIdsInitial[transHex.nodeBucketIds[corner]]
+					const transBuckets = validLocations.filter((l) => loc.isBucketLocation(l)).flatMap((l) => model.hexCurrentBucketToInitial(transHex.hexID, l[2]))
+					if (transBuckets.includes(bankBucket)) {
+						bridgeReachable = true
+						break
+					}
+				}
+			}
+		}
+		if (!bridgeReachable) return 1
+		// CITY: a moat bridge may not be built on a side facing sea or void
+		if (hexObj.hexTerrainID === rf.CITY && !map.cityBridgeSideIsBuildable(hexObj, bridgeArr)) return 5
+		// CITY: centre bridges only on sides without a river, bank bridges only on
+		// sides joined to a river (never a centre bridge across a river side)
+		if (hexObj.hexTerrainID === rf.CITY) {
+			const citySide = map.citySideOfBridge(hexObj, bridgeArr)
+			if (citySide >= 0) {
+				const neighbour = model.getHexByID(hexObj.hexLookup[citySide])
+				const sideIsRiver = neighbour.sideRiverVertexIds[(citySide + 3) % 6] >= 0
+				const isCentre = util.arraysEqual(hexObj.cornerNodeIds[citySide], bridgeArr)
+				if (isCentre && sideIsRiver) return 5
+				if (!isCentre && !sideIsRiver) return 5
+			}
+		}
 		const reachableResources = loc.getAllResourcesAccessibleToTransporter(transporterID, true)
 		// Check you can reach a stone for building
 		if (!reachableResources.some((res) => res.type === rf.RES_STONE)) return 2
