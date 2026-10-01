@@ -277,6 +277,12 @@ class TestSFserializeGame(PrintSuccessTestCase):
 
 
 class TestTournamentSharedFunctions(PrintSuccessTestCase):
+    def setUp(self):
+        super().setUp()
+        time_limit_patch = patch("Lobby.sharedFunctions.availabilityMatchmaking.ANNEALING_TIME_LIMIT_SECONDS", 0.02)
+        self.addCleanup(time_limit_patch.stop)
+        time_limit_patch.start()
+
     def _create_users(self, count):
         return [User.objects.create_user(username=f"P{i}", password="testpass123") for i in range(count)]
 
@@ -329,6 +335,33 @@ class TestTournamentSharedFunctions(PrintSuccessTestCase):
         self.assertEqual(len(result["gamesPlayers"]), 1)
         self.assertEqual(len(result["gamesPlayers"][0]), 4)
         self.assertFalse(set(result["byePlayers"]).intersection(result["gamesPlayers"][0]))
+
+    def test_create_next_round_mg_first_round_preserves_four_appearances(self):
+        users = self._create_users(20)
+        tournament = self._create_tournament(users, tournament_type="MG", category="Main")
+
+        result = SF_createNextRoundGamesSetup(tournament)
+
+        appearance_counts = {}
+        for game in result["gamesPlayers"]:
+            self.assertEqual(len(game), 4)
+            for username in game:
+                appearance_counts[username] = appearance_counts.get(username, 0) + 1
+        self.assertEqual(appearance_counts, {user.username: 4 for user in users})
+
+    def test_create_next_round_mg_round_two_keeps_players_in_their_group(self):
+        users = self._create_users(14)
+        tournament = self._create_tournament(users, tournament_type="MG", category="Main")
+        tournament.tournamentPointsData = json.dumps([
+            [[user.username, 0, 0] for user in users]
+        ])
+        tournament.save()
+
+        result = SF_createNextRoundGamesSetup(tournament)
+
+        self.assertEqual(len(result["gamesPlayers"]), 14)
+        self.assertTrue(all(set(game) <= {user.username for user in users[:7]} for game in result["gamesPlayers"][:7]))
+        self.assertTrue(all(set(game) <= {user.username for user in users[7:]} for game in result["gamesPlayers"][7:]))
 
     def test_set_next_round_multi_game_players_selects_top_14_and_groups_by_seed(self):
         users = self._create_users(16)
