@@ -56,7 +56,8 @@ export const usePersonalStore = defineStore('personal', () => {
     if (
       store.gameflow.phase === rf.PHASE_ADD_PAX &&
       (store.context.passengersLeftToPlace === 0 ||
-        (store.remainingPassengers <= 0 && pitts.designerArrivedThisRound()))
+        (store.remainingPassengers <= 0 &&
+          (selectedBoard.value !== rf.BOARD_PITTS || pitts.designerArrivedThisRound())))
     )
       return true
     if (

@@ -330,6 +330,7 @@ export function startPlayerTurn() {
 	// Add Pax
 	else if (store.gameflow.phase === rf.PHASE_ADD_PAX) {
 		store.context.passengersLeftToPlace = model.maxBuses() - (store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length)
+		if (store.remainingPassengers <= 0 && (personal.selectedBoard !== rf.BOARD_PITTS || !pitts.canStillPlaceDesigner())) store.context.turnEndingErrorMessage = "No More Passengers"
 	}
 	// Add Bldgs
 	else if (store.gameflow.phase === rf.PHASE_ADD_BLDGS) {
@@ -428,7 +429,7 @@ export function endPlayerTurn() {
 	if (store.gameflow.phase === rf.PHASE_ADD_PAX && store.remainingPassengers <= 0 && store.gameflow.turnOrder.length > 0) {
 		do {
 			const paxCount = model.maxBuses() - (store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length)
-			const canPlaceDesigner = paxCount >= 2 && !pitts.designerArrivedThisRound() && (store.jeroenStatus === rf.DESIGNER_NOT_ARRIVED || store.jorisStatus === rf.DESIGNER_NOT_ARRIVED)
+			const canPlaceDesigner = personal.selectedBoard === rf.BOARD_PITTS && paxCount >= 2 && !pitts.designerArrivedThisRound() && (store.jeroenStatus === rf.DESIGNER_NOT_ARRIVED || store.jorisStatus === rf.DESIGNER_NOT_ARRIVED)
 			if (canPlaceDesigner) break
 			store.history.push([rf.HIST_ADD_PAX, store.gameflow.turnOrder[0], Math.round(new Date().getTime() / 1000 - personal.gameCreationTimestamp), [-1]])
 			store.gameflow.turnOrder.shift()
@@ -617,7 +618,7 @@ export function endCurrentPhase() {
 	else if (store.gameflow.phase === rf.PHASE_ADD_PAX && store.remainingPassengers <= 0 && store.gameflow.turnOrder.length > 0) {
 		do {
 			const paxCount = model.maxBuses() - (store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length)
-			const canPlaceDesigner = paxCount >= 2 && !pitts.designerArrivedThisRound() && (store.jeroenStatus === rf.DESIGNER_NOT_ARRIVED || store.jorisStatus === rf.DESIGNER_NOT_ARRIVED)
+			const canPlaceDesigner = personal.selectedBoard === rf.BOARD_PITTS && paxCount >= 2 && !pitts.designerArrivedThisRound() && (store.jeroenStatus === rf.DESIGNER_NOT_ARRIVED || store.jorisStatus === rf.DESIGNER_NOT_ARRIVED)
 			if (canPlaceDesigner) break
 			store.history.push([rf.HIST_ADD_PAX, store.gameflow.turnOrder[0], Math.round(new Date().getTime() / 1000 - personal.gameCreationTimestamp), [-1]])
 			store.gameflow.turnOrder.shift()
