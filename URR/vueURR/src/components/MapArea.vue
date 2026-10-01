@@ -7,6 +7,7 @@ import * as boardRules from "../js/URRmap"
 import { mapImage } from "../js/URRassets"
 import * as rf from "../js/URRreference"
 import * as view from "../js/URRview"
+import * as debug from "../js/URRdebug"
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
 const store = useModelStore()
@@ -35,6 +36,11 @@ function inspectHex(hex) {
 }
 function inspectArea(id) {
 	selectedHex.value = id
+	if (store.debug.tool && debug.canDebug()) {
+		const position = actualAreas.value.find((entry) => entry.area.id === id)?.position || boardDisplay.PRINTED_HEXES.find((hex) => hex.id === id)
+		debug.placeAtArea(id, position)
+		return
+	}
 	if (!previewOpen.value || draftPath.value[draftPath.value.length - 1] === id) return
 	draftPath.value.push(id)
 	validateDraft()
@@ -71,13 +77,14 @@ function markerLabel(area) { return area.owner === null ? "" : store.players[are
 			</svg>
 		</div>
 		<div class="inspection" v-if="selectedArea"><b>{{ selectedArea.id }}</b><template v-if="selectedArea.landType !== undefined"> · {{ rf.LAND_NAMES[selectedArea.landType] }} · {{ rf.STATE_NAMES[selectedArea.state] }}</template><template v-else> · printed board area</template></div>
+		<div class="inspection" v-if="store.debug.tool && debug.canDebug()">Debug: {{ store.debug.tool }} — click the map to place. <button @click="store.debug.tool = ''; store.debug.path = []">Stop placement</button></div>
 		<div class="controls"><button @click="previewOpen = !previewOpen">{{ previewOpen ? "Hide" : "Visual" }} preview</button><template v-if="previewOpen"><span>Click areas to sketch a canal.</span><button @click="undoDraft" :disabled="!draftPath.length">Undo</button><button @click="clearDraft" :disabled="!draftPath.length">Clear</button><label><input type="checkbox" v-model="previewWater" :disabled="draftPath.length < 2" /> Flow water</label></template><template v-if="personal.canPlay()"><button class="actionsLineButton" @click="endTurn">End Turn</button></template><template v-else-if="personal.pov >= 0"><span>Waiting for {{ currentPlayerName() }}...</span></template><button v-if="personal.pov >= 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER" class="dangerButton" @click="endGame">End Game</button></div>
 		<div v-if="previewError" class="previewError">{{ previewError }}</div>
 	</div>
 </template>
 
 <style scoped>
-#mapArea { display: flex; flex-direction: column; align-items: center; min-width: 0; }.boardHeading { width: 100%; display: flex; justify-content: space-between; gap: 12px; box-sizing: border-box; padding: 5px 8px; background: #f7edc7; border: 2px solid #8e805e; border-radius: 7px 7px 0 0; font-size: 14px; }.mapSurface { width: min(100%, 920px); line-height: 0; box-shadow: 0 2px 5px #6b614a; }.mapSurface svg { width: 100%; height: auto; display: block; }
+#mapArea { width: 100%; display: flex; flex-direction: column; align-items: center; min-width: 0; }.boardHeading { width: 100%; display: flex; justify-content: space-between; gap: 12px; box-sizing: border-box; padding: 5px 8px; background: #f7edc7; border: 2px solid #8e805e; border-radius: 7px 7px 0 0; font-size: 14px; }.mapSurface { width: min(100%, 920px); line-height: 0; box-shadow: 0 2px 5px #6b614a; }.mapSurface svg { width: 100%; height: auto; display: block; }
 .printedHexes polygon { fill: #fff; fill-opacity: .001; stroke: transparent; stroke-width: 5; cursor: pointer; }.printedHexes polygon:hover, .printedHexes polygon.selected { fill: #fff57a; fill-opacity: .32; stroke: #7e6400; }.printedHexes polygon.drafting { stroke: #1165bb; fill-opacity: .17; }.savedCanal { fill: none; stroke: #2269ad; stroke-width: 10; stroke-linecap: round; }.draftCanal { fill: none; stroke: #1f75ce; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; opacity: .82; }.waterPreviewPath { fill: none; stroke: #aef4ff; stroke-width: 6; stroke-dasharray: 12 12; }.waterPreviewDot { fill: #35d6ff; stroke: #fff; stroke-width: 3; }.areaHit { fill: transparent; cursor: pointer; }.ownerMarker { stroke: #fff; stroke-width: 3; pointer-events: none; }.markerText { text-anchor: middle; fill: #fff; font-weight: bold; font-size: 18px; pointer-events: none; }.waterworkMarker { fill: #d8edf0; stroke: #154e62; stroke-width: 4; pointer-events: none; }
 .inspection { min-height: 20px; padding: 3px 8px; background: #fff9df; border: 1px solid #bcae85; font-size: 13px; }.controls { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; padding: 8px; font-size: 13px; }.controls button { cursor: pointer; }.actionsLineButton { border: 2px solid #247422; border-radius: 5px; font-weight: bold; padding: 5px 12px; }.dangerButton { border: 1px solid #a33333; color: #8b1111; }.previewError { color: #a40000; font-weight: bold; font-size: 13px; } @media (prefers-reduced-motion: reduce) { .waterPreviewDot animateMotion { display: none; } }
 </style>

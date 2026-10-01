@@ -8,7 +8,7 @@
  */
 
 import * as model from "./js/URRmodel"
-import * as view from "./js/URRview"
+import * as rf from "./js/URRreference"
 
 import TopMenu from "./components/TopMenu.vue"
 import TopMenuViews from "./components/TopMenuViews.vue"
@@ -30,7 +30,7 @@ const personal = usePersonalStore()
 model.initGame()
 
 function showDebug() {
-	return personal.name === "admin" || personal.name === "BotKickStarter"
+	return rf.SUPER_USERS.includes(personal.name) || rf.DEBUG_USERS.includes(personal.name)
 }
 </script>
 
@@ -48,8 +48,8 @@ function showDebug() {
 					<MapArea />
 				</div>
 				<TerrainMarket />
-				<DebugArea v-if="showDebug()" />
 			</div>
+			<DebugArea v-if="showDebug()" />
 			<PlayerTable />
 		</template>
 	</div>
@@ -66,20 +66,19 @@ body {
 	background-color: #d4eafd;
 	font-family: Arial, sans-serif;
 	font-size: 16px;
-	width: fit-content;
-	min-width: 100%;
 }
 
 #wholeMiddleArea {
 	width: 100%;
-	min-width: 900px;
 	text-align: center;
 	min-height: 500px;
 }
 
 #mainAreaLessHistory {
 	min-height: 60px;
-	min-width: 620px;
+	max-width: 1346px;
+	padding: 0 8px;
+	box-sizing: border-box;
 	display: flex;
 	align-items: flex-start;
 	justify-content: center;
@@ -91,12 +90,14 @@ body {
 	display: flex;
 	justify-content: center;
 	min-width: 0;
-	flex: 1 1 920px;
+	flex: 0 1 920px;
 }
+
+#mainAreaLessHistory > aside { flex-shrink: 0; }
 
 @media (max-width: 1120px) {
 	#mainAreaLessHistory { flex-wrap: wrap; }
-	.mapContainer { order: -1; flex-basis: 100%; }
+	.mapContainer { order: -1; flex-basis: 100%; max-width: 920px; }
 }
 
 #loaderOverlay {

@@ -21,6 +21,8 @@ export const useModelStore = defineStore("store", () => {
 	const cardSupply = ref({ ...rf.ERA_CARD_COUNTS })
 	const rain = ref({ step: null, outflow: null, harvestOrder: [] })
 	const nextDiggerId = ref(0)
+	// Local debug controls are deliberately excluded from saved game data.
+	const debug = reactive({ tool: "", player: 0, state: 0, era: 1, landType: rf.LAND_SAVANNAH, path: [], undo: [] })
 
 	const gameflow = reactive({
 		turn: 1,
@@ -74,7 +76,7 @@ export const useModelStore = defineStore("store", () => {
 	return {
 		gameName,
 		players,
-		version, states, nations, board, landPrices, era, cardSupply, rain, nextDiggerId,
+		version, states, nations, board, landPrices, era, cardSupply, rain, nextDiggerId, debug,
 		gameflow,
 		chatData,
 		history,
