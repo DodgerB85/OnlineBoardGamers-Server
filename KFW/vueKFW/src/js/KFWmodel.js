@@ -332,6 +332,7 @@ export async function initGame() {
 		// If you have a move, import that too for the visuals
 		if (window.initData.move !== "" && personal.pov >= 0) {
 			if (store.gameflow.phase === rf.PHASE_VILLAGE_EXPANDING || store.gameflow.phase === rf.PRE_PHASE_VILLAGE_EXPANDING || store.gameflow.phase === rf.PHASE_COLLECT_BOAT_RESOURCES) funcs.importPlayerVIllageMoveData(personal.pov, window.initData.move)
+			else if (store.gameflow.phase === rf.PHASE_FINAL_SCORING) funcs.importPlayerFinalScoringMoveData(personal.pov, funcs.decompressData(window.initData.move))
 		}
 		// get current players
 		if (controller.isSimulPhase(store.gameflow.phase) || store.gameflow.phase === rf.PHASE_FINAL_SCORING) {

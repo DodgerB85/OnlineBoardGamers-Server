@@ -164,6 +164,9 @@ export function importCompressedGameData13(gameData1, gameData3, forGameOver) {
 	window.initData.gameData1 = gameData1
 	window.initData.gameData3 = gameData3
 
+	// The server sends "" when the game's hidden/server data isn't initialised yet - keep the store defaults
+	if (gameData1 === "" || gameData3 === "") return
+
 	let data1Uncompressed = decompressData(gameData1)
 	let data3Uncompressed = decompressData(gameData3)
 	if (personal.pov >= 0 || personal.adminDataInspection) {
@@ -355,7 +358,8 @@ export function importPlayerFinalScoringMoveData(playerIndex, moveData) {
 	playeObj.finalScore = moveData[1]
 	if (store.useMerchantsExpansion) importContractsForFinalScoring(playerIndex, moveData[2])
 
-	model.scoreAutoProcessingTilesAndMoveResources(playerIndex)
+	// Recomputes auto tiles AND manual-action tiles (Sea Bastion / Delivery Man) from the restored scoredRoute
+	model.calculateTotalFinalScore(playerIndex)
 	store.context.action = rf.ACT_CHOOSE_SCORING_AREAS
 }
 
