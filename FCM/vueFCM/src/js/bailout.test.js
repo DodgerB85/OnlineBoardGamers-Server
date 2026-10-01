@@ -290,7 +290,7 @@ describe("bailout wire-format persistence", () => {
 		expect(lastIsBailoutSlot(decoded)).toBe(false)
 
 		const store2 = freshGame(2)
-		funcs.restoreBailoutState(decoded, true)
+		funcs.restoreBailoutState(decoded, decoded.length - 1, true)
 		expect(store2.bailout.pending).toBe(false)
 	})
 
@@ -311,12 +311,25 @@ describe("bailout wire-format persistence", () => {
 		expect(decoded[decoded.length - 1][0]).toEqual([0, 1]) // bailout order
 
 		const store2 = freshGame(2, ["47", "49"])
-		funcs.restoreStadiumState(decoded)
-		funcs.restoreBailoutState(decoded)
+		// The import passes the next unread slot index for both: stadium sits
+		// there directly, the bailout scan skips past it.
+		const importIndex = decoded.length - 2
+		funcs.restoreStadiumState(decoded, importIndex)
+		funcs.restoreBailoutState(decoded, importIndex)
 		expect(store2.stadium.gamesPlayed).toBe(1)
 		expect(store2.bailout.pending).toBe(true)
 		expect(store2.bailout.order).toEqual([0, 1])
 		expect(store2.bailout.claims).toEqual({})
+	})
+
+	it("skips a leftover stadium slot from an older save when the stadium module is off", () => {
+		const store = freshGame(2)
+		// Older saves pushed the stadium slot unconditionally, so the bailout
+		// slot can sit one position past the next unread index.
+		const bailoutSlot = [[0, 1], [rf.CAMPAIGN_MANAGER, 5], [0, rf.CAMPAIGN_MANAGER]]
+		funcs.restoreBailoutState([[0], bailoutSlot], 0)
+		expect(store.bailout.pending).toBe(true)
+		expect(store.bailout.claims[0]).toBe(rf.CAMPAIGN_MANAGER)
 	})
 
 	it("a missing slot resets the bailout state (older saves)", () => {

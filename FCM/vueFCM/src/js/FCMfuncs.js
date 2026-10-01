@@ -1170,34 +1170,46 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 		}
 	}
 
-	// Stadium mod (only when the module was chosen; falls back to history for older saves)
-	restoreStadiumState(inputArr)
-	// Second Bailout mod (only while a claim night can still be open)
-	restoreBailoutState(inputArr, forGameOver)
+	// Stadium mod (next slot when the module was chosen; falls back to history for older saves)
+	restoreStadiumState(inputArr, IMPORT_INDEX)
+	// Second Bailout mod (trails the stadium slot when that module is chosen)
+	restoreBailoutState(inputArr, IMPORT_INDEX, forGameOver)
 }
 
-// Second Bailout mod: restore the claim-night state. The slot is only exported
-// for chosen-module, mid-game saves while a night is open, so a missing slot
-// just means "no bailout state". `forGameOver` covers the callers that omit it.
-export function restoreBailoutState(inputArr, forGameOver) {
+// Shape check for both bailout slot formats: the older full object and the
+// compact [order, poolPairs, claimPairs] array. Used to reject whatever slot
+// actually sits at a given position.
+function isBailoutSlot(el) {
+	if (Array.isArray(el)) return el.length === 3 && Array.isArray(el[0]) && Array.isArray(el[1]) && Array.isArray(el[2])
+	return Boolean(el && typeof el === "object" && el.claims !== undefined && el.pool !== undefined)
+}
+
+// Second Bailout mod: restore the claim-night state (shape-detected). `index`
+// is the next unread import position; the slot sits there, or one ahead when
+// an older save also carried the stadium slot while that module was off. The
+// slot is only exported for chosen-module, mid-game saves while a night is
+// open, so a missing slot just means "no bailout state". `forGameOver` covers
+// the callers that omit it.
+export function restoreBailoutState(inputArr, index = inputArr.length - 1, forGameOver) {
 	const store = useModelStore()
 	store.bailout.pending = false
 	store.bailout.pool = {}
 	store.bailout.claims = {}
 	store.bailout.order = []
 	if (forGameOver || store.gameflow.phase === rf.PHASE_GAME_OVER || !store.startingOptions.secondBailout) return
-	const slot = inputArr[inputArr.length - 1]
-	// Older saves stored the full object
-	if (slot && typeof slot === "object" && !Array.isArray(slot) && slot.claims !== undefined && slot.pool !== undefined) {
-		Object.assign(store.bailout, slot)
-		return
-	}
-	// [order, poolPairs, claimPairs] - flat key/value pairs
-	if (Array.isArray(slot) && slot.length === 3 && Array.isArray(slot[0]) && Array.isArray(slot[1]) && Array.isArray(slot[2])) {
+	let slot = null
+	if (index >= 0 && index < inputArr.length && isBailoutSlot(inputArr[index])) slot = inputArr[index]
+	else if (isBailoutSlot(inputArr[index + 1])) slot = inputArr[index + 1]
+	else return
+	if (Array.isArray(slot)) {
+		// [order, poolPairs, claimPairs] - flat key/value pairs
 		store.bailout.order = [...slot[0]]
 		for (let i = 0; i < slot[1].length; i += 2) store.bailout.pool[slot[1][i]] = slot[1][i + 1]
 		for (let i = 0; i < slot[2].length; i += 2) store.bailout.claims[slot[2][i]] = slot[2][i + 1]
 		store.bailout.pending = true
+	} else {
+		// Older saves stored the full object
+		Object.assign(store.bailout, slot)
 	}
 }
 
@@ -1244,20 +1256,17 @@ function applyStadiumSlot(slot) {
 }
 
 // Stadium mod: restore state from the trailing wire-format slot (shape-detected).
-// The slot is only scanned when the module was chosen - other games never store
-// it, so their saves load without it. For saves that predate the slot, rebuild
-// from history: gamesPlayed from the result entries, and the last announcement
-// if it is still for an upcoming game.
-export function restoreStadiumState(inputArr) {
+// `index` is the next unread import position - the stadium slot sits there
+// whenever the module was chosen (it is pushed before the bailout slot, so no
+// offset is needed). The slot is only scanned when the module was chosen -
+// other games never store it, so their saves load without it. For saves that
+// predate the slot, rebuild from history: gamesPlayed from the result entries,
+// and the last announcement if it is still for an upcoming game.
+export function restoreStadiumState(inputArr, index = inputArr.length - 1) {
 	const store = useModelStore()
 	store.stadium.gamesPlayed = 0
 	store.stadium.announcement = null
-	if (store.startingOptions.stadium) {
-		// With the Second Bailout mod enabled the bailout slot trails the stadium
-		// slot, so check the last and second-to-last position.
-		if (applyStadiumSlot(inputArr[inputArr.length - 1])) return
-		if (applyStadiumSlot(inputArr[inputArr.length - 2])) return
-	}
+	if (store.startingOptions.stadium && index >= 0 && index < inputArr.length && applyStadiumSlot(inputArr[index])) return
 	for (let i = 0; i < store.history.length; i++) {
 		if (store.history[i][0] === rf.HIST_STADIUM_RESULT) store.stadium.gamesPlayed++
 	}
