@@ -12096,8 +12096,8 @@ msgid "Second Bailout"
 msgstr "二次注资"
 
 #: .\templates\FCM\fanExpansionsHelp.html
-msgid "In the base game the bank only breaks once. With this module the city steps in the second time: the bank gets a fresh cash injection and every player receives a free marketing employee. The game only ends for good on the third break."
-msgstr "基础游戏中银行只会破产一次。启用本模组后，第二次破产时城市出手：银行获得一笔新注资，每位玩家免费获赠一名营销员工。直到第三次破产游戏才真正结束。"
+msgid "In the base game the bank only breaks once. With this module the city steps in the second time: the bank gets a fresh cash injection and every player receives a free level-2 marketing employee. The game only ends for good on the third break."
+msgstr "基础游戏中银行只会破产一次。启用本模组后，第二次破产时城市出手：银行获得一笔新注资，每位玩家免费获赠一名二级营销员工。直到第三次破产游戏才真正结束。"
 
 #: .\templates\FCM\fanExpansionsHelp.html
 msgid "First break: unchanged - reserve cards are cashed in (or prices re-picked with the price-changing reserve cards) exactly as in the base game."

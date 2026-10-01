@@ -33,7 +33,7 @@ beforeAll(async () => {
 	;({ useModelStore } = await import("../stores/FCMstore.js"))
 })
 
-function freshGame(playerCount = 2, opts = ["48"]) {
+function freshGame(playerCount = 2, opts = ["49"]) {
 	setActivePinia(createPinia())
 	const store = useModelStore()
 	model.setInternalStartingOptions(opts)
@@ -108,7 +108,7 @@ describe("bank break stages", () => {
 	})
 
 	it("the pool includes every L2 marketer whose module is enabled", () => {
-		const store = freshGame(2, ["48", "17", "13", "15", "45"])
+		const store = freshGame(2, ["49", "17", "13", "15", "45"])
 		store.availableEmployees[rf.RURAL_MARKETEER] = 6
 		store.availableEmployees[rf.GOURMET_FOOD_CRITIC] = 6
 		store.availableEmployees[rf.MASS_MARKETEER] = 6
@@ -151,7 +151,7 @@ describe("bank break stages", () => {
 	})
 
 	it("short games end on the first break regardless of the module", () => {
-		const store = freshGame(2, ["48", "1"])
+		const store = freshGame(2, ["49", "1"])
 		store.bank = -10
 
 		rules.handleBankBreak(false)
