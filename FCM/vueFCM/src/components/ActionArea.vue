@@ -44,6 +44,20 @@ watch(
 const currentPlayerObj = computed(() => controller.currentPlayerObj())
 const timedOutPlayerIndex = computed(() => (store.gameflow.turnOrder.length > 0 ? store.gameflow.turnOrder[0] : -1))
 
+// Second Bailout mod: card choices left in the pool, and whether the current
+// player still has to claim their gift (blocks all other actions)
+const computedBailoutPool = computed(() =>
+	Object.keys(store.bailout.pool)
+		.filter((id) => store.bailout.pool[id] > 0)
+		.map(Number)
+)
+const bailoutClaimRequired = computed(
+	() => store.bailout.pending && store.bailout.order.includes(controller.currentPlayerIndex()) && store.bailout.claims[controller.currentPlayerIndex()] === undefined
+)
+function claimBailout(employeeId) {
+	rules.claimBailoutEmployee(controller.currentPlayerIndex(), employeeId)
+}
+
 const isOnlyHumanLeft = computed(() => {
 	const humans = store.players.filter((p) => p.displayName !== rf.BOT_NAME)
 	return humans.length <= 1
@@ -577,6 +591,21 @@ function skipModuleAndEndTurn() {
 
 			<!-- CURRENT PLAYER ONLY-->
 			<template v-if="personal.canPlay()">
+				<!-- Second Bailout mod: forced gift claim, blocks all other actions -->
+				<template v-if="bailoutClaimRequired">
+					<div class="bailoutClaimDiv">
+						<p><img class="bailoutSafeIcon" :src="view.getImage('so_bailout')" alt="" /> <b>{{ $t("actionArea.bailoutTitle") }}</b></p>
+						<p>{{ $t("actionArea.bailoutBody") }}</p>
+						<div v-if="computedBailoutPool.length > 0">
+							<div v-for="employee in computedBailoutPool" :key="employee" class="cardSummaryDiv selectable" @click="claimBailout(employee)">
+								<img :src="view.getImage(`emp_${employee}`)" class="cardImg" :alt="rf.employeeName(employee)" />
+							</div>
+						</div>
+						<p v-else>{{ $t("actionArea.bailoutNothingLeft") }}</p>
+						<button class="actionsLineButton" @click="claimBailout(-1)">{{ $t("actionArea.bailoutDecline") }}</button>
+					</div>
+				</template>
+				<template v-else>
 				<!-- CHOOSE RESTO -->
 				<template v-if="store.gameflow.phase === rf.PHASE_URBAN_PLANNING">
 					<div>
@@ -1011,6 +1040,7 @@ function skipModuleAndEndTurn() {
 						<template #here><a href="/FCM/coffeeHelp/" target="_blank">{{ $t("topMenuViews.hereLower") }}</a></template>
 					</i18n-t>
 				</div>
+				</template>
 			</template>
 		</div>
 
@@ -1039,6 +1069,23 @@ function skipModuleAndEndTurn() {
 }
 
 /* Coffee "More Information" panel */
+/* Second Bailout mod: claim panel */
+.bailoutClaimDiv {
+	background-color: #a1cfa8;
+	border: 2px solid black;
+	width: 70%;
+	height: fit-content;
+	padding: 10px;
+	margin: 10px auto;
+	text-align: center;
+}
+
+.bailoutSafeIcon {
+	width: 30px;
+	height: 30px;
+	vertical-align: middle;
+}
+
 #historyCoffeeInfodiv {
 	background-color: #a1cfa8;
 	border: 2px solid black;

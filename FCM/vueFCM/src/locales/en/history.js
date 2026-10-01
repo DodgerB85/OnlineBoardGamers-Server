@@ -110,6 +110,11 @@
     stadiumWinner: "{name} feeds the whole stadium, selling {units} \u00D7 {good}",
     stadiumNobody: "Nobody could supply the stadium - the demand of {units} \u00D7 {good} clears at day's end:",
 
+    // Second Bailout mod
+    bankBailout: "The city bails the bank out a second time: the bank receives ${amount} and every player gets one free marketing employee",
+    bailoutClaim: "{name} receives: {card}",
+    bailoutDecline: "{name} declines the gifted employee",
+
     // Building
     buildHouse: "{name} builds house #{num} {orient} at co-ordinates ({x}, {y})",
     buildGarden: "{name} builds a garden for house #{num} {orient} at co-ordinates ({x}, {y})",

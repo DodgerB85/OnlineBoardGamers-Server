@@ -69,6 +69,9 @@ export const useModelStore = defineStore("store", () => {
 
 		// Stadium mod
 		stadium: false,
+
+		// Second Bailout mod
+		secondBailout: false,
 	}
 
 	// This var affects the ZOOM level
@@ -133,6 +136,13 @@ export const useModelStore = defineStore("store", () => {
 	const stadium = reactive({
 		gamesPlayed: 0, // matches already resolved
 		announcement: null, // { gameNumber, food, units } for the upcoming game
+	})
+	// Second Bailout mod - claim state during the bailout night
+	const bailout = reactive({
+		pending: false, // true between bailout announcement and all claims done
+		pool: {}, // employeeId -> remaining count (snapshot at bailout time)
+		claims: {}, // playerId -> employeeId claimed, or -1 for declined
+		order: [], // playerIds in claim order (= turn order at bailout time)
 	})
 
 	/*************************************** UNSAVED - TEMP VARS -- these do not need to be stored or saved */
@@ -412,6 +422,7 @@ export const useModelStore = defineStore("store", () => {
 		newRoads,
 		movedOutHouses,
 		stadium,
+		bailout,
 		reserveCards,
 		bank,
 		bankBroken,

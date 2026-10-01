@@ -276,9 +276,11 @@ describe("stadium wire-format persistence", () => {
 
 		const b64 = funcs.exportFCMmodel(false, false)
 		const decoded = JSON.parse(pako.ungzip(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { to: "string" }))
+		// The bailout slot is appended after the stadium slot - find by shape
 		const last = decoded[decoded.length - 1]
-		expect(last[0]).toBe(1)
-		expect(last[1].gameNumber).toBe(2)
+		const stadiumSlot = Array.isArray(last) ? last : decoded[decoded.length - 2]
+		expect(stadiumSlot[0]).toBe(1)
+		expect(stadiumSlot[1].gameNumber).toBe(2)
 
 		// Restore into a clean store
 		const store2 = freshGame()
@@ -296,7 +298,9 @@ describe("stadium wire-format persistence", () => {
 
 		const b64 = funcs.exportFCMmodel(false, false)
 		const decoded = JSON.parse(pako.ungzip(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { to: "string" }))
-		expect(decoded[decoded.length - 1]).toEqual([2])
+		// The bailout slot trails the stadium slot - find by shape
+		const last = decoded[decoded.length - 1]
+		expect(Array.isArray(last) ? last : decoded[decoded.length - 2]).toEqual([2])
 
 		funcs.restoreStadiumState(decoded)
 		expect(store.stadium.gamesPlayed).toBe(2)

@@ -232,6 +232,9 @@ export function simpleExportWholeFCMmodel() {
 	// 21 - Stadium mod
 	temp.push(JSON.parse(JSON.stringify(store.stadium)))
 
+	// 22 - Second Bailout mod
+	temp.push(JSON.parse(JSON.stringify(store.bailout)))
+
 	let step1 = JSON.stringify(temp)
 	// eslint-disable-next-line no-undef
 	let step2 = pako.gzip(step1)
@@ -672,6 +675,9 @@ export function exportFCMmodel(forGameOver, includeContext) {
 	// older saves without this slot still load)
 	temp.push(exportStadiumSlot())
 
+	// 19 - Second Bailout mod (trailing, shape-detected like the Stadium slot)
+	temp.push(JSON.parse(JSON.stringify(store.bailout)))
+
 	let step1 = JSON.stringify(temp)
 	// eslint-disable-next-line no-undef
 	let step2B = pako.gzip(step1)
@@ -1037,6 +1043,7 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	// INFER m.bankBroken = inputArr[12]
 	store.bankBroken = 0
 	if (store.history.some((h) => h[0] === rf.HIST_DISPLAY_RESERVE)) store.bankBroken = 1
+	if (store.history.some((h) => h[0] === rf.HIST_BANK_BAILOUT)) store.bankBroken = 2
 
 	// 3 - availableEmployees
 	//m.availableEmployees = inputArr[3]
@@ -1168,6 +1175,25 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 
 	// Stadium mod (trailing slot; falls back to history for older saves)
 	restoreStadiumState(inputArr)
+	// Second Bailout mod (trailing slot; shape-detected like Stadium)
+	restoreBailoutState(inputArr)
+}
+
+// Second Bailout mod: restore the claim-night state. Any game with this mod
+// enabled exports the slot, so a missing slot just means "no bailout state".
+export function restoreBailoutState(inputArr) {
+	const store = useModelStore()
+	store.bailout.pending = false
+	store.bailout.pool = {}
+	store.bailout.claims = {}
+	store.bailout.order = []
+	for (let i = inputArr.length - 1; i >= inputArr.length - 3 && i >= 0; i--) {
+		const el = inputArr[i]
+		if (el && typeof el === "object" && !Array.isArray(el) && el.claims !== undefined && el.pool !== undefined) {
+			Object.assign(store.bailout, el)
+			return
+		}
+	}
 }
 
 // Stadium mod wire slot: [gamesPlayed] or [gamesPlayed, announcement].
@@ -1206,7 +1232,10 @@ export function restoreStadiumState(inputArr) {
 	const store = useModelStore()
 	store.stadium.gamesPlayed = 0
 	store.stadium.announcement = null
+	// With the Second Bailout mod enabled the bailout slot trails the stadium
+	// slot, so check the last and second-to-last position.
 	if (applyStadiumSlot(inputArr[inputArr.length - 1])) return
+	if (applyStadiumSlot(inputArr[inputArr.length - 2])) return
 	for (let i = 0; i < store.history.length; i++) {
 		if (store.history[i][0] === rf.HIST_STADIUM_RESULT) store.stadium.gamesPlayed++
 	}
@@ -1353,6 +1382,13 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	store.stadium.gamesPlayed = 0
 	store.stadium.announcement = null
 	if (inputModel.length > 21) applyStadiumSlot(inputModel[21])
+
+	// 22 - Second Bailout mod (older snapshots predate this slot)
+	store.bailout.pending = false
+	store.bailout.pool = {}
+	store.bailout.claims = {}
+	store.bailout.order = []
+	if (inputModel.length > 22) Object.assign(store.bailout, inputModel[22])
 
 	// Adjust CEOs with dumpling MS, using history
 	if (store.startingOptions.dumplings) {
