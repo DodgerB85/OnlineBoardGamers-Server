@@ -1,6 +1,7 @@
 <script setup>
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
+import { getPlayerMarkerImage } from "../js/URRassets"
 const store = useModelStore()
 const personal = usePersonalStore()
 
@@ -16,7 +17,7 @@ function isCurrent(index) {
 <template>
 	<div id="playerTable" :class="{ minimise: minimiseInfoForMainScreen }">
 		<div class="playerRow" v-for="(player, idx) in store.players" :key="idx" :class="{ currentPlayer: isCurrent(idx), me: idx === personal.pov }">
-			<span class="colourSwatch" :style="{ backgroundColor: personal.getCorrectedColourHex(player.colour) }"></span>
+			<img class="colourSwatch" :src="getPlayerMarkerImage(idx)" alt="Ownership marker" />
 			<span class="playerName">{{ player.displayName }}</span>
 			<span class="playerScore">{{ player.score }}</span>
 		</div>
@@ -26,6 +27,7 @@ function isCurrent(index) {
 <style scoped>
 #playerTable {
 	display: flex;
+	flex-wrap: wrap;
 	justify-content: center;
 	gap: 6px;
 	padding: 6px;
@@ -47,8 +49,8 @@ function isCurrent(index) {
 	font-weight: bold;
 }
 .colourSwatch {
-	width: 14px;
-	height: 14px;
+	width: 22px;
+	height: 22px;
 	border: 1px solid black;
 	display: inline-block;
 }

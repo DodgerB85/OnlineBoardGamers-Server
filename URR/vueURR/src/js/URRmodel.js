@@ -3,6 +3,8 @@ import { usePersonalStore } from "../stores/URRpersonal.js"
 import * as rf from "./URRreference"
 import * as funcs from "./URRfuncs"
 import { createGame, applyAction } from "./URRgame.js"
+import { createPrintedBoard } from "./URRboard.js"
+import { createBoard } from "./URRmap.js"
 
 const STATE_FIELDS = ["version", "players", "gameflow", "states", "nations", "board", "landPrices", "era", "cardSupply", "rain", "nextDiggerId"]
 
@@ -50,7 +52,7 @@ export function initGame() {
 	}
 }
 
-export function initGameFresh(playerNames, boardDefinition = null) {
+export function initGameFresh(playerNames, boardDefinition) {
 	const store = useModelStore()
 	restoreState(createGame(playerNames, boardDefinition))
 	store.history.splice(0)
@@ -93,6 +95,8 @@ export function importGameData(obj) {
 		return
 	}
 	if (data.version !== rf.GAME_DATA_VERSION) throw new Error("Unsupported URR save version")
+	// Earlier rules saves had no board. Preserve their economy and turn order.
+	if (data.board?.areas.length === 0) data.board = createBoard(createPrintedBoard())
 	restoreState(data)
 	store.history.splice(0, store.history.length, ...JSON.parse(JSON.stringify(data.history || [])))
 }
@@ -109,11 +113,13 @@ export function snapshotState() {
 export function performAction(playerIndex, action) {
 	const next = applyAction(snapshotState(), playerIndex, action)
 	restoreState(next)
-	addHistory(next.gameflow.phase === rf.PHASE_GAME_OVER ? rf.HIST_GAME_END : rf.HIST_ACTION, playerIndex)
+	addHistory(next.gameflow.phase === rf.PHASE_GAME_OVER ? rf.HIST_GAME_END : rf.HIST_ACTION, playerIndex, undefined, action)
 }
 
-export function addHistory(event, playerIndex, snapshot) {
-	useModelStore().history.push([event, playerIndex, JSON.stringify(snapshot === undefined ? snapshotState() : snapshot)])
+export function addHistory(event, playerIndex, snapshot, action = null) {
+	const entry = [event, playerIndex, JSON.stringify(snapshot === undefined ? snapshotState() : snapshot)]
+	if (action) entry.push(JSON.parse(JSON.stringify(action)))
+	useModelStore().history.push(entry)
 }
 
 export function getPlayerByIndex(index) {

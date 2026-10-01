@@ -1,36 +1,28 @@
 <script setup>
-import { computed } from "vue"
 import * as rf from "../js/URRreference"
-import { getTerrainImage } from "../js/URRassets"
+import { getTerrainImage, landPriceTrackImage } from "../js/URRassets"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
-
-const priceGroups = computed(() => {
-	const groups = new Map()
-	for (const type of rf.ALL_LAND_TYPES) {
-		const price = store.landPrices[type]
-		if (!groups.has(price)) groups.set(price, [])
-		groups.get(price).push(type)
-	}
-	return [...groups.entries()].map(([price, types]) => ({ price, types })).sort((a, b) => b.price - a.price)
-})
+function markerPosition(type) {
+	const index = rf.LAND_PRICE_TRACK.length - 1 - rf.LAND_PRICE_TRACK.indexOf(store.landPrices[type])
+	const overlap = rf.ALL_LAND_TYPES.filter((other) => other < type && store.landPrices[other] === store.landPrices[type]).length
+	return { x: 29 + (index % 13) * 126 + overlap * 18, y: (index < 13 ? 28 : 280) + overlap * 12 }
+}
 </script>
 
 <template>
-	<aside class="marketPanel">
-		<h3>Land market</h3>
-		<div class="marketNote">Current sale price</div>
-		<div class="priceGroup" v-for="group in priceGroups" :key="group.price"><span class="tokenStack"><span v-for="(type, index) in group.types" :key="type" class="terrainToken" :style="{ left: `${index * 9}px`, backgroundImage: `url(${getTerrainImage(type)})` }" :title="rf.LAND_NAMES[type]"></span></span><b>{{ group.price }}</b> SPL</div>
-		<div class="ipo"><b>IPO / colonization</b><div v-for="type in rf.ALL_LAND_TYPES" :key="type"><span class="terrainToken mini" :style="{ backgroundImage: `url(${getTerrainImage(type)})` }"></span>{{ rf.LAND_NAMES[type] }} {{ rf.LAND_COLONIZATION_PRICES[type] }}</div></div>
-		<details><summary>City prices</summary><div v-for="type in rf.ALL_LAND_TYPES" :key="type">{{ rf.LAND_NAMES[type] }}: IPO {{ rf.LAND_CITY_COLONIZATION_PRICES[type] }}, sale follows next higher marker</div></details>
-	</aside>
+	<section class="marketPanel" aria-label="Land market">
+		<div class="marketHeading"><b>Land market</b><span>Sale prices · markers move on the printed track</span></div>
+		<svg viewBox="0 0 1650 515" aria-label="Current land sale prices">
+			<image :href="landPriceTrackImage" width="1650" height="515" />
+			<image v-for="type in rf.ALL_LAND_TYPES" :key="type" :href="getTerrainImage(type)" :x="markerPosition(type).x" :y="markerPosition(type).y" width="76" height="76"><title>{{ rf.LAND_NAMES[type] }}: {{ store.landPrices[type] }} SPL</title></image>
+		</svg>
+		<div class="colonization"><b>Colonization</b><span v-for="type in rf.ALL_LAND_TYPES" :key="type"><img :src="getTerrainImage(type)" alt="" />{{ rf.LAND_NAMES[type] }} {{ rf.LAND_COLONIZATION_PRICES[type] }} <small>City {{ rf.LAND_CITY_COLONIZATION_PRICES[type] }}</small></span></div>
+	</section>
 </template>
 
 <style scoped>
-.marketPanel { width: 205px; box-sizing: border-box; background: #fff9df; border: 2px solid #8e805e; border-radius: 7px; padding: 8px; text-align: left; font-size: 13px; align-self: flex-start; }
-h3 { margin: 0; font-size: 16px; }.marketNote { color: #5e5746; margin: 3px 0; }
-.priceGroup { display: flex; align-items: center; min-height: 30px; gap: 5px; border-bottom: 1px solid #ddd1aa; }
-.tokenStack { width: 57px; height: 25px; position: relative; }.terrainToken { position: absolute; top: 1px; width: 23px; height: 23px; border: 1px solid #483f2e; box-shadow: 1px 1px 1px #776; background-size: cover; background-position: center; }
-.ipo { border-top: 2px solid #9a8d69; margin-top: 6px; padding-top: 5px; display: grid; gap: 2px; }.mini { display: inline-block; position: static; width: 12px; height: 12px; margin-right: 5px; vertical-align: -2px; }
-details { margin-top: 6px; font-size: 11px; } summary { cursor: pointer; }
+.marketPanel { width: 100%; background: #fff9e9; border: 1px solid #aa9b77; border-radius: 5px; overflow: hidden; text-align: left; box-sizing: border-box; }
+.marketHeading { display: flex; justify-content: space-between; gap: 8px; padding: 7px 10px; font-size: 13px; }.marketHeading span { color: #736950; font-size: 11px; }
+svg { display: block; width: 100%; }.colonization { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 8px 10px; font-size: 12px; }.colonization span { display: inline-flex; align-items: center; gap: 4px; }.colonization img { width: 23px; height: 23px; }.colonization small { color: #736950; }
 </style>

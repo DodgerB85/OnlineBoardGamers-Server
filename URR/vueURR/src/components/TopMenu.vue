@@ -179,6 +179,7 @@ function getKickoutTimerText() {
 .WSdisconnected { background-color: darkred; }
 
 #top {
+	overflow-x: auto;
 	background-color: #333;
 	color: white;
 	padding: 0px;

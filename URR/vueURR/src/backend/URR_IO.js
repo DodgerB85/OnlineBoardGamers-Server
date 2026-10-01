@@ -83,7 +83,8 @@ export async function saveGame(saveRewind = true) {
 		const data = await response.json()
 		if (data.syncError === true) {
 			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
-			return
+			store.viewSettings.showLoader = false
+			return false
 		}
 		personal.latestUpdate = data.latestUpdate
 		window.initData.latestUpdate = data.latestUpdate
@@ -94,11 +95,12 @@ export async function saveGame(saveRewind = true) {
 		store.viewSettings.showLoader = false
 		personal.haltPlay = false
 		controller.startPlayerTurn()
+		return true
 	} catch (error) {
 		console.error("Error saving game:", error)
-		store.gameMessages.errorText = "Error saving the game"
+		store.gameMessages.errorText = "Unable to confirm that the move was saved. Refresh the page before playing again."
 		store.viewSettings.showLoader = false
-		personal.haltPlay = false
+		return false
 	}
 }
 

@@ -2,7 +2,7 @@
 import { computed, ref, watch } from "vue"
 import * as rf from "../js/URRreference"
 import * as rules from "../js/URRrules"
-import { getTerrainImage } from "../js/URRassets"
+import { getTerrainImage, getNationCardImage, getPlayerMarkerImage } from "../js/URRassets"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
 const inspectedPlayer = ref(null)
@@ -10,7 +10,7 @@ const inspectedPlayer = ref(null)
 const activePlayer = computed(() => inspectedPlayer.value ?? store.gameflow.turnOrder[0] ?? 0)
 const player = computed(() => store.players[activePlayer.value])
 const land = computed(() => rf.ALL_LAND_TYPES.map((type) => ({ type, count: store.board.areas.filter((area) => area.owner === activePlayer.value && area.landType === type).length })))
-const nations = computed(() => store.nations.filter((nation) => nation.ownerType === "player" && nation.owner === activePlayer.value))
+const nations = computed(() => store.nations.filter((nation) => !nation.isRemoved && nation.ownerType === "player" && nation.owner === activePlayer.value))
 const states = computed(() => store.states.filter((state) => state.king === activePlayer.value))
 const markers = computed(() => store.board.areas.filter((area) => area.markerOwner === activePlayer.value).length)
 
@@ -22,11 +22,13 @@ function reset() { inspectedPlayer.value = null }
 
 <template>
 	<aside class="holdingsPanel">
-		<div class="panelTitle"><b>{{ player?.displayName || "Player" }}</b><button v-if="inspectedPlayer !== null" @click="reset">Follow turn</button></div>
+		<div class="panelTitle"><b><img class="playerMarker" :src="getPlayerMarkerImage(activePlayer)" alt="Ownership marker" /> {{ player?.displayName || "Player" }}</b><button v-if="inspectedPlayer !== null" @click="reset">Follow turn</button></div>
 		<div class="money">Private treasury: {{ player?.money ?? 0 }} SPL</div>
 		<div class="terrainRow" v-for="entry in land" :key="entry.type"><span class="terrainChip" :style="{ backgroundImage: `url(${getTerrainImage(entry.type)})` }"></span>{{ rf.LAND_NAMES[entry.type] }} <b>{{ entry.count }}</b></div>
 		<div>States ruled: {{ states.map((state) => rf.STATE_NAMES[state.id]).join(", ") || "None" }}</div>
 		<div>Nations: {{ nations.map((nation) => rf.NATION_NAMES[nation.id]).join(", ") || "None" }}</div>
+		<details v-for="nation in nations" :key="nation.id"><summary>{{ rf.NATION_NAMES[nation.id] }} · {{ rf.NATION_INCOMES[nation.id] }} SPL/round</summary><div class="nationArtwork"><img :src="getNationCardImage(nation.id)" :alt="rf.NATION_NAMES[nation.id]" /></div></details>
+		<div v-if="store.gameflow.primogeniture !== undefined">Primogeniture: {{ store.players[store.gameflow.primogenitureBid?.player ?? store.gameflow.primogeniture]?.displayName }}</div>
 		<div v-if="store.board.markerLimit">Markers: {{ markers }}/{{ store.board.markerLimit }}</div>
 		<div class="assetLine">Assets: {{ player ? rules.playerAssets(store, activePlayer) : 0 }} SPL</div>
 		<div class="playerChoices"><button v-for="(entry, index) in store.players" :key="index" :class="{ selected: index === activePlayer }" @click="inspect(index)">{{ entry.displayName }}</button></div>
@@ -44,4 +46,5 @@ function reset() { inspectedPlayer.value = null }
 .terrainChip { background-size: cover; background-position: center; }
 .playerChoices { display: flex; flex-wrap: wrap; gap: 3px; border-top: 1px solid #c4b894; padding-top: 5px; }
 .playerChoices .selected { outline: 2px solid #45a7df; }
+.playerMarker { width: 22px; height: 22px; vertical-align: middle; }.nationArtwork { aspect-ratio: 1.95; overflow: hidden; }.nationArtwork img { width: 100%; }summary { cursor: pointer; }
 </style>

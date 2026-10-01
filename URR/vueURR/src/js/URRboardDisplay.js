@@ -1,9 +1,4 @@
-/** Display-only coordinates for the printed UR board.
- *
- * The rules board will eventually provide stable area IDs and exact display
- * coordinates. Until then, these hexes make the supplied board artwork
- * inspectable and provide a safe surface for local route previews.
- */
+/** Printed board coordinates shared by URRboard's transcription and the map UI. */
 export const MAP_WIDTH = 1216
 export const MAP_HEIGHT = 986
 

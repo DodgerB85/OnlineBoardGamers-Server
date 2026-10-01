@@ -1,6 +1,7 @@
 import * as rf from "./URRreference"
 import * as model from "./URRmodel"
 import * as IO from "../backend/URR_IO"
+import { canExchangeBarahshum } from "./URRrules.js"
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
 
@@ -29,8 +30,13 @@ export function startPlayerTurn() {
 export async function submitAction(action) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	if (!personal.canPlay()) return false
-	const player = personal.trainingGame || rf.SUPER_USERS.includes(personal.name) ? currentPlayerIndex() : personal.pov
+	let player = personal.trainingGame || rf.SUPER_USERS.includes(personal.name) ? currentPlayerIndex() : personal.pov
+	if (action.type === "exchangeBarahshum") {
+		if (personal.haltPlay || store.viewSettings.showReplay || personal.pov < 0) return false
+		const nation = store.nations[rf.NATION_BARAHSHUM]
+		if ((personal.trainingGame || rf.SUPER_USERS.includes(personal.name)) && nation.ownerType === "player") player = nation.owner
+		if (!canExchangeBarahshum(store, player)) return false
+	} else if (!personal.canPlay()) return false
 	try {
 		model.performAction(player, action)
 		store.gameMessages.actionError = ""
@@ -38,13 +44,12 @@ export async function submitAction(action) {
 		store.gameMessages.actionError = error.message
 		return false
 	}
-	await IO.saveGame(true)
-	return true
+	return await IO.saveGame(true)
 }
 
 export function endPlayerTurn() {
 	const store = useModelStore()
-	const type = store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep !== "eridu" ? "endDevelopment" : "pass"
+	const type = store.gameflow.developmentStep === "betweenStates" ? "beginDevelopment" : store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep !== "eridu" ? "endDevelopment" : "pass"
 	return submitAction({ type })
 }
 

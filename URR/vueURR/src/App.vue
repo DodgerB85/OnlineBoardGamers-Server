@@ -18,6 +18,7 @@ import PlayerTable from "./components/PlayerTable.vue"
 import StateStrip from "./components/StateStrip.vue"
 import PlayerHoldings from "./components/PlayerHoldings.vue"
 import TerrainMarket from "./components/TerrainMarket.vue"
+import NationMarket from "./components/NationMarket.vue"
 import DebugArea from "./components/DebugArea.vue"
 import HistoryTab from "./components/HistoryTab.vue"
 import ReplayArea from "./components/ReplayArea.vue"
@@ -41,13 +42,13 @@ function showDebug() {
 		<HistoryTab />
 		<ReplayArea v-if="store.viewSettings.showReplay" />
 		<template v-if="!store.viewSettings.showReplay">
-			<StateStrip />
 			<div id="mainAreaLessHistory">
-				<PlayerHoldings />
+				<aside class="stateSidebar"><PlayerHoldings /><StateStrip /></aside>
 				<div class="mapContainer">
 					<MapArea />
+					<TerrainMarket />
 				</div>
-				<TerrainMarket />
+				<aside class="nationSidebar" v-if="store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS"><NationMarket /></aside>
 			</div>
 			<DebugArea v-if="showDebug()" />
 			<PlayerTable />
@@ -74,30 +75,18 @@ body {
 	min-height: 500px;
 }
 
-#mainAreaLessHistory {
-	min-height: 60px;
-	max-width: 1346px;
-	padding: 0 8px;
-	box-sizing: border-box;
-	display: flex;
-	align-items: flex-start;
-	justify-content: center;
-	gap: 8px;
-	margin: 0 auto;
-}
-
-.mapContainer {
-	display: flex;
-	justify-content: center;
-	min-width: 0;
-	flex: 0 1 920px;
-}
-
-#mainAreaLessHistory > aside { flex-shrink: 0; }
-
-@media (max-width: 1120px) {
-	#mainAreaLessHistory { flex-wrap: wrap; }
-	.mapContainer { order: -1; flex-basis: 100%; max-width: 920px; }
+#mainAreaLessHistory { max-width: 1510px; padding: 12px; box-sizing: border-box; display: flex; align-items: flex-start; justify-content: center; gap: 12px; margin: 0 auto; }
+.mapContainer { display: flex; flex-direction: column; gap: 12px; min-width: 0; flex: 1 1 920px; max-width: 920px; }
+.stateSidebar { flex: 0 0 235px; display: flex; flex-direction: column; gap: 12px; }
+.stateSidebar .holdingsPanel { width: 100%; }
+.nationSidebar { flex: 0 0 270px; padding: 12px; box-sizing: border-box; background: #fff9e9; border: 1px solid #aa9b77; border-radius: 5px; }
+.gameActions button, .nationMarket button { padding: 5px 9px; border: 1px solid #998a67; border-radius: 3px; background: #fffdf4; color: #263b32; }
+.gameActions button:hover:enabled, .nationMarket button:hover:enabled { background: #e3eddb; border-color: #547751; }
+.gameActions button:disabled, .nationMarket button:disabled { opacity: .5; }
+@media (max-width: 1050px) {
+ #mainAreaLessHistory { flex-wrap: wrap; }
+ .mapContainer { order: -1; flex-basis: 100%; }
+ .stateSidebar, .nationSidebar { flex: 1 1 240px; max-width: 460px; min-width: 0; }
 }
 
 #loaderOverlay {

@@ -2,9 +2,11 @@
  * never partly spend money or alter the board. The Vue model owns persistence. */
 import * as rf from "./URRreference.js"
 import * as rules from "./URRrules.js"
+import { createPrintedBoard } from "./URRboard.js"
+import { startWaterRouting, allocateWater } from "./URRwater.js"
 import { requireRule, createBoard, getArea, getCanalCost, canCrewDig, isNationLandClosed } from "./URRmap.js"
 
-export function createGame(playerNames, boardDefinition = null) {
+export function createGame(playerNames, boardDefinition = createPrintedBoard()) {
 	requireRule(playerNames.length >= 3 && playerNames.length <= 6, "UR: 1830 BC requires 3–6 players")
 	return {
 		version: rf.GAME_DATA_VERSION,
@@ -42,7 +44,7 @@ function awardNation(game, nation, player, amount) {
 	if (nation.id === rf.NATION_FIRST_AKKADIANS) {
 		const lands = game.board.areas.filter((area) => area.nation === nation.id)
 		requireRule(lands.length === 3 && lands.every((area) => area.state === rf.STATE_AKKAD && area.landType === rf.LAND_SAVANNAH && !area.isRiver && area.owner === null), "Configure the three First Akkadian savannah areas before awarding this nation")
-		requireRule(game.board.areas.filter((area) => area.markerOwner === player).length + 3 <= game.board.markerLimit, "Not enough ownership markers")
+		requireRule(game.board.markerLimit === null || game.board.areas.filter((area) => area.markerOwner === player).length + 3 <= game.board.markerLimit, "Not enough ownership markers")
 		for (const area of lands) area.owner = area.markerOwner = player
 		game.states[rf.STATE_AKKAD].money += amount
 		game.states[rf.STATE_AKKAD].king = rules.getKing(game, rf.STATE_AKKAD)
@@ -79,7 +81,7 @@ function resolveNegotiatedNations(game) {
 			continue
 		}
 		const high = nation.bids.reduce((best, bid) => bid.amount > best.amount ? bid : best)
-		const bidders = nation.bids.map((bid) => bid.player).sort((a, b) => a - b)
+		const bidders = nation.bids.map((bid) => bid.player)
 		flow.auction = { nation: nation.id, bidders, highPlayer: high.player, amount: high.amount }
 		flow.turnOrder = [bidders[(bidders.indexOf(high.player) + 1) % bidders.length]]
 		return
@@ -91,6 +93,7 @@ function nationAction(game, player, action) {
 	if (flow.auction) {
 		const auction = flow.auction
 		const nation = game.nations[auction.nation]
+		const currentAuctionOrder = [...auction.bidders]
 		if (action.type === "pass") {
 			auction.bidders = auction.bidders.filter((index) => index !== player)
 			nation.bids = nation.bids.filter((bid) => bid.player !== player)
@@ -107,9 +110,13 @@ function nationAction(game, player, action) {
 			flow.auction = null
 			resolveNegotiatedNations(game)
 		} else {
-			let candidate = player
-			do { candidate = (candidate + 1) % game.players.length } while (!auction.bidders.includes(candidate) || candidate === auction.highPlayer)
-			flow.turnOrder = [candidate]
+			const order = nation.bids.map((bid) => bid.player)
+			// A withdrawal removes the current marker; its former successor is
+			// found in the auction's order before it was removed.
+			const previousOrder = currentAuctionOrder
+			let index = previousOrder.indexOf(player)
+			do { index = (index + 1) % previousOrder.length } while (!order.includes(previousOrder[index]) || previousOrder[index] === auction.highPlayer)
+			flow.turnOrder = [previousOrder[index]]
 		}
 		return
 	}
@@ -130,8 +137,8 @@ function nationAction(game, player, action) {
 		const oldBid = nation.bids.find((bid) => bid.player === player)
 		const released = oldBid?.amount === highest ? oldBid.amount : 0
 		requireRule(rules.availableMoney(game, player) + released >= action.amount, "Not enough unreserved money")
-		if (oldBid) oldBid.amount = action.amount
-		else nation.bids.push({ player, amount: action.amount })
+		if (oldBid) nation.bids = nation.bids.filter((bid) => bid.player !== player)
+		nation.bids.push({ player, amount: action.amount })
 		flow.passes = 0
 		nextPlayer(game)
 	} else {
@@ -169,6 +176,7 @@ function sellLand(game, player, ids) {
 	requireRule(Array.isArray(ids) && new Set(ids).size === ids.length, "List each land sale once")
 	const lands = ids.map((id) => getArea(game, id))
 	requireRule(lands.every((area) => area.owner === player), "You may only sell your own land")
+	requireRule(new Set(lands.map((area) => area.landType)).size <= 1, "Each sale batch must contain one terrain type")
 	for (const state of game.states) {
 		const selling = lands.filter((area) => area.state === state.id).length
 		if (selling > 0) requireRule(rules.ownedLand(game, state.id).length > selling, "The last player-owned land in a state cannot be sold")
@@ -182,6 +190,11 @@ function sellLand(game, player, ids) {
 	}
 	for (const type of rf.ALL_LAND_TYPES) game.landPrices[type] = rules.priceAfterSale(game.landPrices[type], lands.filter((area) => area.landType === type).length)
 	for (const state of game.states) state.king = rules.getKing(game, state.id)
+}
+
+function sellLandBatches(game, player, sales) {
+	// Flat lists remain compatible with earlier action callers.
+	for (const batch of sales.length > 0 && Array.isArray(sales[0]) ? sales : [sales]) sellLand(game, player, batch)
 }
 
 function beginDevelopment(game) {
@@ -222,7 +235,7 @@ function settlementAction(game, player, action) {
 		const before = action.sellBefore || []
 		const after = action.sellAfter || []
 		requireRule(before.length + after.length > 0 || action.buy !== undefined, "An empty trade is not an action")
-		sellLand(game, player, before)
+		sellLandBatches(game, player, before)
 		if (action.buy !== undefined) {
 			if (action.exchangeDer) {
 				const nation = game.nations[rf.NATION_DER]
@@ -232,7 +245,7 @@ function settlementAction(game, player, action) {
 			}
 			buyLand(game, player, action.buy, !!action.exchangeDer)
 		}
-		sellLand(game, player, after)
+		sellLandBatches(game, player, after)
 	}
 	flow.passes = 0
 	nextPlayer(game)
@@ -246,6 +259,7 @@ function beginStateTurn(game) {
 		flow.turnOrder = []
 		game.rain = { step: "routing", outflow: null, harvestOrder: [] }
 		for (const area of game.board.areas) area.irrigatedBy = null
+		if (game.board.riverDownstream && startWaterRouting(game)) finishWaterRouting(game, game.rain.routing.outflow)
 		return
 	}
 	flow.developmentStep = "digging"
@@ -268,11 +282,12 @@ function consumeCard(game, era) {
 	if (era >= 4) for (const nation of game.nations) nation.isRemoved = true
 }
 
-function buyCard(game, state, action, consentingPlayer = null) {
+function buyCard(game, state, action, consentingPlayer = null, isFree = false) {
 	const era = rules.nextCardEra(game)
 	const data = rf.ERA_CARD_DATA[era][action.kind]
 	requireRule(data, "Choose a digger, pump, or reservoir")
-	const [capacity, price] = data
+	const [capacity, printedPrice] = data
+	const price = isFree ? 0 : printedPrice
 	const shortfall = Math.max(0, price - state.money)
 	if (shortfall > 0) {
 		requireRule(action.kind === "digger" && !rules.hasMaintenanceCrew(game, state.id), "Private funds may only fund a mandatory first crew")
@@ -298,6 +313,68 @@ function buyCard(game, state, action, consentingPlayer = null) {
 	state.money = Math.max(0, state.money - price)
 	game.players[state.king].money -= shortfall
 	consumeCard(game, era)
+}
+
+function exchangeCalah(game, state, action, consentingPlayer = null) {
+	const nation = game.nations[rf.NATION_CALAH]
+	requireRule(!nation.isRemoved && nation.ownerType === "state" && nation.owner === state.id, "This state does not own Calah")
+	requireRule(action.kind === "pump" || action.kind === "reservoir", "Calah must be exchanged for a waterwork")
+	const area = getArea(game, action.area)
+	const homeland = game.board.areas.filter((land) => land.nation === rf.NATION_CALAH)
+	requireRule((area.nation === rf.NATION_CALAH && area.landType === rf.LAND_HILLS) || homeland.some((land) => land.neighbours.includes(area.id)), "Calah's free waterwork must be on its hills or adjacent to Calah")
+	buyCard(game, state, action, consentingPlayer, true)
+	nation.isRemoved = true
+}
+
+function exchangeBarahshum(game, player, action) {
+	requireRule(rules.canExchangeBarahshum(game, player), "Barahshum cannot be exchanged now")
+	const from = getArea(game, action.from)
+	const to = getArea(game, action.to)
+	requireRule(from.nation === rf.NATION_BARAHSHUM && from.neighbours.includes(to.id), "Dig from Barahshum to an adjacent area")
+	requireRule(!game.board.canals.some(([a, b]) => (a === from.id && b === to.id) || (a === to.id && b === from.id)), "Canal already exists")
+	game.nations[rf.NATION_BARAHSHUM].isRemoved = true
+	requireRule(!isNationLandClosed(game, to), "Independent nation land is closed to digging")
+	game.board.canals.push([from.id, to.id])
+}
+
+function resolveMaintenance(game, state, action) {
+	requireRule(!rules.hasMaintenanceCrew(game, state.id), "This state already has a maintenance crew")
+	const player = state.king
+	const sales = action.sales || []
+	const prices = []
+	for (const batch of sales) {
+		requireRule(game.players[player].money < rules.maintenanceShortfall(game, state.id), "Stop selling as soon as the mandatory crew can be paid for")
+		requireRule(Array.isArray(batch) && batch.length > 0, "Choose a nonempty sale batch")
+		for (const id of batch) {
+			const area = getArea(game, id)
+			requireRule(!rules.getMaintenanceSaleError(game, player, area, state.id), rules.getMaintenanceSaleError(game, player, area, state.id))
+			prices.push(rules.landPrice(game, area))
+		}
+		sellLand(game, player, batch)
+		requireRule(state.king === player, "Maintenance sales must preserve the current throne")
+	}
+	const shortfall = rules.maintenanceShortfall(game, state.id)
+	if (game.players[player].money >= shortfall) {
+		requireRule(prices.length === 0 || game.players[player].money - shortfall < Math.min(...prices), "The cash left after hiring must be less than the cheapest land sold")
+		buyCard(game, state, { kind: "digger" })
+		game.gameflow.developmentStep = "purchasing"
+		return
+	}
+	requireRule(!game.board.areas.some((area) => !rules.getMaintenanceSaleError(game, player, area, state.id)), "Sell the remaining eligible land before declaring a revolution")
+	game.players[player].money = 0
+	state.hasRevolted = true
+	game.gameflow.endReason = "revolution"
+	endStateTurn(game)
+}
+
+function endStateTurn(game) {
+	const flow = game.gameflow
+	flow.stateIndex++
+	const barahshum = game.nations[rf.NATION_BARAHSHUM]
+	if (!barahshum.isRemoved && barahshum.ownerType === "player") {
+		flow.developmentStep = "betweenStates"
+		flow.turnOrder = [flow.stateIndex < flow.stateOrder.length ? game.states[flow.stateOrder[flow.stateIndex]].king : flow.primogeniture]
+	} else beginStateTurn(game)
 }
 
 function assimilateNation(game, state, action) {
@@ -328,11 +405,13 @@ function requestConsent(game, state, action) {
 		requireRule(action.kind === "pump" || action.kind === "reservoir", "Only waterworks need landowner consent")
 		owner = getArea(game, action.area).owner
 		const preview = JSON.parse(JSON.stringify(game))
-		buyCard(preview, preview.states[state.id], action, owner)
+		if (action.type === "exchangeCalah") exchangeCalah(preview, preview.states[state.id], action, owner)
+		else buyCard(preview, preview.states[state.id], action, owner)
 	}
 	game.gameflow.developmentStep = "purchasing"
 	if (owner === null || owner === state.king) {
 		if (action.type === "offerNation") assimilateNation(game, state, action)
+		else if (action.type === "exchangeCalah") exchangeCalah(game, state, action, owner)
 		else buyCard(game, state, action, owner)
 	} else {
 		game.gameflow.pendingOffer = { state: state.id, action, returnPlayer: state.king }
@@ -346,6 +425,7 @@ function respondToOffer(game, player, action) {
 	if (action.accept) {
 		const state = game.states[offer.state]
 		if (offer.action.type === "offerNation") assimilateNation(game, state, offer.action)
+		else if (offer.action.type === "exchangeCalah") exchangeCalah(game, state, offer.action, player)
 		else buyCard(game, state, offer.action, player)
 	}
 	game.gameflow.pendingOffer = null
@@ -354,6 +434,11 @@ function respondToOffer(game, player, action) {
 
 function developmentAction(game, action) {
 	const flow = game.gameflow
+	if (flow.developmentStep === "betweenStates") {
+		requireRule(action.type === "beginDevelopment", "Start the next state's turn")
+		beginStateTurn(game)
+		return
+	}
 	if (flow.developmentStep === "eridu") {
 		requireRule(action.type === "digEridu" || action.type === "pass", "Use Eridu's crew or pass")
 		if (action.type === "digEridu") digCanal(game, 2, action.path)
@@ -367,27 +452,36 @@ function developmentAction(game, action) {
 		requireRule(crew && !crew.hasDug, "Choose an unused digging crew")
 		digCanal(game, crew.capacity, action.path)
 		crew.hasDug = true
-	} else if (action.type === "offerNation" || action.type === "requestWaterwork") {
+	} else if (action.type === "offerNation" || action.type === "requestWaterwork" || action.type === "exchangeCalah") {
 		requestConsent(game, state, action)
+	} else if (action.type === "resolveMaintenance") {
+		resolveMaintenance(game, state, action)
 	} else if (action.type === "buyCard") {
 		buyCard(game, state, action)
 		flow.developmentStep = "purchasing"
 	} else {
 		requireRule(action.type === "endDevelopment", "Dig, purchase a card, or end this state's turn")
 		requireRule(rules.hasMaintenanceCrew(game, state.id), "An active state must have a maintenance crew")
-		flow.stateIndex++
-		beginStateTurn(game)
+		endStateTurn(game)
 	}
 }
 
 export function applyAction(current, player, action) {
 	const game = JSON.parse(JSON.stringify(current))
 	requireRule(game.version === rf.GAME_DATA_VERSION, "Unsupported game data version")
-	requireRule(Number.isInteger(player) && game.gameflow.turnOrder[0] === player, "It is not this player's turn")
+	requireRule(Number.isInteger(player) && game.players[player], "Unknown player")
+	if (action.type === "exchangeBarahshum") {
+		exchangeBarahshum(game, player, action)
+		return game
+	}
+	requireRule(game.gameflow.turnOrder[0] === player, "It is not this player's turn")
 	if (game.gameflow.pendingOffer) respondToOffer(game, player, action)
 	else if (game.gameflow.phase === rf.PHASE_DIVIDING_NATIONS) nationAction(game, player, action)
 	else if (game.gameflow.phase === rf.PHASE_SETTLEMENT) settlementAction(game, player, action)
 	else if (game.gameflow.phase === rf.PHASE_DEVELOPMENT) developmentAction(game, action)
+	else if (game.gameflow.phase === rf.PHASE_RAINY_SEASON && game.rain.step === "routing") {
+		if (allocateWater(game, action)) finishWaterRouting(game, game.rain.routing.outflow)
+	}
 	else if (game.gameflow.phase === rf.PHASE_RAINY_SEASON && game.rain.step === "harvest") harvestAction(game, action)
 	else throw new Error("Water routing must be implemented before rainy-season turns can be submitted")
 	return game
@@ -405,7 +499,7 @@ export function finishWaterRouting(game, outflow) {
 	game.rain.outflow = outflow
 	game.rain.step = "harvest"
 	game.rain.harvestOrder = [...game.gameflow.stateOrder]
-	if (outflow === 0) game.gameflow.endReason = "invasion"
+	if (outflow === 0 && !game.gameflow.endReason) game.gameflow.endReason = "invasion"
 	setHarvestTurn(game)
 }
 
@@ -419,6 +513,7 @@ function setHarvestTurn(game) {
 		const index = rf.LAND_PRICE_TRACK.indexOf(game.landPrices[type])
 		game.landPrices[type] = rf.LAND_PRICE_TRACK[Math.min(rf.LAND_PRICE_TRACK.length - 1, index + counts[type])]
 	}
+	for (const area of game.board.areas) area.irrigatedBy = null
 	game.rain.step = "complete"
 	if (game.gameflow.endReason) {
 		for (let player = 0; player < game.players.length; player++) game.players[player].score = rules.playerAssets(game, player)

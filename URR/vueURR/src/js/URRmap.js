@@ -24,13 +24,13 @@ export function isNationLandClosed(game, area) {
 export function createBoard(definition) {
 	if (!definition) return { areas: [], canals: [], stateOrder: [], markerLimit: null }
 	const board = JSON.parse(JSON.stringify(definition))
-	requireRule(Number.isInteger(board.markerLimit) && board.markerLimit > 0, "Supply the ownership marker count per player")
+	requireRule(board.markerLimit === null || (Number.isInteger(board.markerLimit) && board.markerLimit > 0), "Invalid ownership marker count")
 	requireRule(board.stateOrder?.length === 6 && new Set(board.stateOrder).size === 6 && board.stateOrder.every((id) => rf.ALL_STATES.includes(id)), "Supply the printed state order")
 	requireRule(Array.isArray(board.areas) && board.areas.length > 0, "Supply board areas")
 	const ids = new Set(board.areas.map((area) => area.id))
 	requireRule(ids.size === board.areas.length && !ids.has(undefined) && !ids.has(null), "Area IDs must be unique")
 	board.areas = board.areas.map((area) => {
-		requireRule(rf.ALL_STATES.includes(area.state), "Every area needs a state")
+		requireRule(area.isRiver ? area.state === null || rf.ALL_STATES.includes(area.state) : rf.ALL_STATES.includes(area.state), "Land areas need a state")
 		requireRule(typeof area.isRiver === "boolean" && typeof area.isCity === "boolean", "Specify river and city flags")
 		requireRule(area.isRiver || (rf.ALL_LAND_TYPES.includes(area.landType) && area.region !== undefined), "Land needs terrain and a region ID")
 		requireRule(Array.isArray(area.neighbours) && area.neighbours.every((id) => ids.has(id) && id !== area.id), "Invalid neighbouring area")
@@ -48,6 +48,26 @@ export function createBoard(definition) {
 		requireRule(!edges.has(key), "Duplicate canal")
 		edges.add(key)
 	}
+	if (board.riverDownstream) {
+		const rivers = board.areas.filter((area) => area.isRiver)
+		requireRule(board.riverSources?.length === 3 && new Set(board.riverSources).size === 3, "Supply three distinct river sources")
+		for (const river of rivers) {
+			const next = board.riverDownstream[river.id]
+			requireRule(next === null || (river.neighbours.includes(next) && rivers.some((area) => area.id === next)), "River flow must reach an adjacent river area or the southern outflow")
+		}
+		const reached = new Set()
+		for (const source of board.riverSources) {
+			const path = new Set()
+			let next = source
+			while (next !== null) {
+				requireRule(rivers.some((area) => area.id === next) && !path.has(next), "Invalid river source or cyclic river flow")
+				path.add(next)
+				reached.add(next)
+				next = board.riverDownstream[next]
+			}
+		}
+		requireRule(reached.size === rivers.length, "Every river area must be downstream of a source")
+	}
 	return board
 }
 
@@ -56,6 +76,7 @@ export function createBoard(definition) {
 export function getCanalCost(game, path) {
 	requireRule(Array.isArray(path) && path.length >= 2 && new Set(path).size === path.length, "A canal must be a simple path")
 	const areas = path.map((id) => getArea(game, id))
+	requireRule(areas.length !== 2 || !areas.every((area) => area.isRiver), "A single canal cannot connect two river areas")
 	requireRule(areas[0].isRiver || canalNeighbours(game, path[0]).length > 0, "Start at an existing river or canal")
 	let junctions = 0
 	for (let i = 0; i < areas.length; i++) {
