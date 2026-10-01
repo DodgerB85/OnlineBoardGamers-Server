@@ -10,8 +10,8 @@ from collections import defaultdict
 # Three 40-player cohorts from Result_availability.csv: 72 reduced historical repeat-pairs
 # from 18 to 5 while keeping the mean slowest-table score within 3% of the speed-only search.
 REMATCH_PENALTY = 72.0
-ANNEALING_STEPS = 400
-ANNEALING_TIME_LIMIT_SECONDS = 3.0
+ANNEALING_CYCLE_STEPS = 400
+ANNEALING_TIME_LIMIT_SECONDS = 30.0
 
 
 def availability_profile(move_counts, turn_counts):
@@ -39,37 +39,39 @@ def _normalize_counts(counts):
     return normalized + [0] * (24 - len(normalized))
 
 
+def expected_response_wait(profile):
+    """Average hours until a response, including repeated missed days."""
+    waits = []
+    for hour in range(24):
+        expected_wait = 0.0
+        probability_of_waiting = 1.0
+        for offset in range(1, 25):
+            move_probability = profile[(hour + offset) % 24]
+            expected_wait += move_probability * offset * probability_of_waiting
+            probability_of_waiting *= 1 - move_probability
+        # Each missed day restarts the same wait, so include all subsequent days.
+        waits.append((expected_wait + probability_of_waiting * 24) / (1 - probability_of_waiting))
+    return sum(waits) / 24
+
+
 def expected_game_duration(profiles):
-    """Port metricsN.expected_game_duration using its current weights (1, 21)."""
+    """Score sequential and simultaneous response waits with weights (1, 21)."""
     if not profiles:
         return 0.0
 
-    single_waits = []
-    for profile in profiles:
-        waits = []
-        for hour in range(24):
-            expected_wait = 0.0
-            probability_of_waiting = 1.0
-            for offset in range(1, 24):
-                move_probability = profile[(hour + offset) % 24]
-                expected_wait += move_probability * offset * probability_of_waiting
-                probability_of_waiting *= 1 - move_probability
-            waits.append(expected_wait + probability_of_waiting * 24)
-        single_waits.append(sum(waits) / 24)
-
-    simultaneous_wait = 0.0
-    for hour in range(24):
-        for_waiting_past_hour = 0.0
-        for horizon in range(24):
-            all_players_available = 1.0
-            for profile in profiles:
-                missed_probability = 1.0
-                for offset in range(1, horizon + 1):
-                    missed_probability *= 1 - profile[(hour + offset) % 24]
-                all_players_available *= 1 - missed_probability
-            for_waiting_past_hour += 1 - all_players_available
-        simultaneous_wait += for_waiting_past_hour
-    simultaneous_wait /= 24
+    single_waits = [expected_response_wait(profile) for profile in profiles]
+    group_wait_terms = single_waits[:]
+    # Inclusion-exclusion turns waits for the first response in each subset into
+    # the wait for everyone's response: add singles, subtract pairs, add triples, etc.
+    for subset_size in range(2, len(profiles) + 1):
+        sign = 1 if subset_size % 2 else -1
+        for subset in itertools.combinations(profiles, subset_size):
+            first_response_profile = tuple(
+                1 - math.prod(1 - profile[hour] for profile in subset)
+                for hour in range(24)
+            )
+            group_wait_terms.append(sign * expected_response_wait(first_response_profile))
+    simultaneous_wait = math.fsum(group_wait_terms)
 
     return sum(single_waits) + 21 * simultaneous_wait
 
@@ -108,20 +110,25 @@ def _anneal(initial_state, make_groups, profiles, matchup_counts, seed, swap_slo
     current = initial_state[:]
     best = current[:]
     duration_cache = {}
+    started = time.monotonic()
     current_score = _schedule_score(make_groups(current), profiles, matchup_counts, duration_cache)
     best_score = current_score
-    started = time.monotonic()
     initial_temperature = max(1.0, current_score * 0.08)
+    cycle_step = 0
 
-    for step in range(ANNEALING_STEPS):
-        if time.monotonic() - started >= ANNEALING_TIME_LIMIT_SECONDS:
-            break
+    while time.monotonic() - started < ANNEALING_TIME_LIMIT_SECONDS:
+        # Repeat the benchmarked cooling cycle from the best schedule found.
+        if cycle_step == ANNEALING_CYCLE_STEPS:
+            current = best[:]
+            current_score = best_score
+            initial_temperature = max(1.0, current_score * 0.08)
+            cycle_step = 0
 
         candidate = current[:]
         first_slot, second_slot = swap_slots(rng, candidate)
         candidate[first_slot], candidate[second_slot] = candidate[second_slot], candidate[first_slot]
         candidate_score = _schedule_score(make_groups(candidate), profiles, matchup_counts, duration_cache)
-        temperature = initial_temperature * (1 - step / ANNEALING_STEPS) ** 2
+        temperature = initial_temperature * (1 - cycle_step / ANNEALING_CYCLE_STEPS) ** 2
 
         if candidate_score < current_score or (temperature > 0 and rng.random() < math.exp((current_score - candidate_score) / temperature)):
             current = candidate
@@ -129,6 +136,7 @@ def _anneal(initial_state, make_groups, profiles, matchup_counts, seed, swap_slo
         if candidate_score < best_score:
             best = candidate
             best_score = candidate_score
+        cycle_step += 1
 
     return best
 

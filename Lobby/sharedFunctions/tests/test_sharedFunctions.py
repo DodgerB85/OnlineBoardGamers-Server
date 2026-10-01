@@ -277,6 +277,12 @@ class TestSFserializeGame(PrintSuccessTestCase):
 
 
 class TestTournamentSharedFunctions(PrintSuccessTestCase):
+    def setUp(self):
+        super().setUp()
+        time_limit_patch = patch("Lobby.sharedFunctions.availabilityMatchmaking.ANNEALING_TIME_LIMIT_SECONDS", 0.02)
+        self.addCleanup(time_limit_patch.stop)
+        time_limit_patch.start()
+
     def _create_users(self, count):
         return [User.objects.create_user(username=f"P{i}", password="testpass123") for i in range(count)]
 

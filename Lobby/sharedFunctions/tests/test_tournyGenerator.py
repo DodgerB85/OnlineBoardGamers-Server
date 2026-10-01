@@ -1,5 +1,7 @@
 from collections import Counter
 from itertools import combinations
+from math import prod
+from unittest.mock import Mock, patch
 
 from django.test import TestCase
 
@@ -9,8 +11,10 @@ from Lobby.sharedFunctions.tournyGenerator import (
     multiGamePlayersRound2,
 )
 from Lobby.sharedFunctions.availabilityMatchmaking import (
+    _anneal,
     availability_profile,
     build_matchup_counts,
+    expected_game_duration,
     multigame_round_one_indices,
     multigame_round_two_indices,
     optimize_disjoint_groups,
@@ -206,10 +210,98 @@ class TestComputeGameGroups(PrintSuccessTestCase):
 
 
 class TestAvailabilityMatchmaking(PrintSuccessTestCase):
+    def setUp(self):
+        super().setUp()
+        time_limit_patch = patch("Lobby.sharedFunctions.availabilityMatchmaking.ANNEALING_TIME_LIMIT_SECONDS", 0.02)
+        self.addCleanup(time_limit_patch.stop)
+        time_limit_patch.start()
+
     def test_empty_observations_use_uniform_prior(self):
         profile = availability_profile([], [])
 
         self.assertEqual(profile, (0.125,) * 24)
+
+    def test_single_player_wait_includes_days_without_a_response(self):
+        profile = (0.01,) * 24
+        single_wait = 100.0
+        group_wait = single_wait
+
+        self.assertAlmostEqual(expected_game_duration([profile]), single_wait + 21 * group_wait)
+
+    def test_single_player_daily_window_includes_repeated_missed_days(self):
+        for available_hour in (0, 3, 23):
+            with self.subTest(available_hour=available_hour):
+                profile = tuple(0.6 if hour == available_hour else 0.0 for hour in range(24))
+                # Average first opportunity is 12.5 hours; missed days add 24 * 0.4 / 0.6.
+                single_wait = 28.5
+                group_wait = single_wait
+
+                self.assertAlmostEqual(expected_game_duration([profile]), single_wait + 21 * group_wait)
+
+    def test_group_wait_allows_responses_in_different_hours(self):
+        even_hour_player = tuple(1.0 if hour % 2 == 0 else 0.0 for hour in range(24))
+        odd_hour_player = tuple(1.0 if hour % 2 == 1 else 0.0 for hour in range(24))
+
+        # Each player averages 1.5 hours; both have responded after exactly 2 hours.
+        single_wait_sum = 3.0
+        group_wait = 2.0
+
+        self.assertAlmostEqual(
+            expected_game_duration([even_hour_player, odd_hour_player]),
+            single_wait_sum + 21 * group_wait,
+        )
+
+    def test_six_player_group_wait_includes_responses_after_one_day(self):
+        hourly_probabilities = (0.01, 0.02, 0.03, 0.04, 0.05, 0.06)
+        profiles = [(probability,) * 24 for probability in hourly_probabilities]
+        single_wait_sum = sum(1 / probability for probability in hourly_probabilities)
+        # Sum the chance someone is still missing after each hour. At 5,000 hours,
+        # even the slowest player's remaining chance is below 2e-22.
+        group_wait = sum(
+            1 - prod(1 - (1 - probability) ** hours for probability in hourly_probabilities)
+            for hours in range(5000)
+        )
+
+        self.assertAlmostEqual(expected_game_duration(profiles), single_wait_sum + 21 * group_wait)
+
+    def test_six_player_daily_window_includes_repeated_missed_days(self):
+        profile = (0.6,) + (0.0,) * 23
+        single_wait_sum = 6 * 28.5
+        # The first daily window averages 12.5 hours away. Add a day whenever
+        # at least one player has missed every window so far.
+        group_wait = 12.5 + 24 * sum(1 - (1 - 0.4 ** days) ** 6 for days in range(1, 200))
+
+        self.assertAlmostEqual(expected_game_duration([profile] * 6), single_wait_sum + 21 * group_wait)
+
+    def test_annealing_restarts_from_best_and_improves_after_400_swaps(self):
+        initial = ["A", "B", "C", "D"]
+        choose_slots = Mock(side_effect=[(0, 1)] + [(2, 3)] * 399 + [(1, 2)])
+        rng = Mock()
+        rng.random.return_value = 0.0
+        # The first swap finds a better state, then accepted worse swaps leave
+        # the current state elsewhere. Swap 401 improves from the saved best.
+        scores = {
+            ("A", "B", "C", "D"): 100.0,
+            ("B", "A", "C", "D"): 50.0,
+            ("B", "A", "D", "C"): 50.01,
+            ("B", "C", "A", "D"): 40.0,
+            ("B", "D", "A", "C"): 200.0,
+        }
+        clock = [0.0] * 402 + [30.0]
+
+        with (
+            patch("Lobby.sharedFunctions.availabilityMatchmaking.ANNEALING_TIME_LIMIT_SECONDS", 30.0),
+            patch("Lobby.sharedFunctions.availabilityMatchmaking.time.monotonic", side_effect=clock),
+            patch("Lobby.sharedFunctions.availabilityMatchmaking.random.Random", return_value=rng),
+            patch("Lobby.sharedFunctions.availabilityMatchmaking._schedule_score", side_effect=lambda groups, profiles, counts, cache: scores[tuple(groups[0])]) as score,
+        ):
+            optimized = _anneal(initial, lambda players: [players], {}, {}, "cycles", choose_slots)
+
+        self.assertEqual(choose_slots.call_count, 401)
+        self.assertEqual(score.call_count, 402)
+        self.assertEqual(score.call_args_list[401].args[0], [["B", "C", "A", "D"]])
+        self.assertEqual(optimized, ["B", "C", "A", "D"])
+        self.assertEqual(initial, ["A", "B", "C", "D"])
 
     def test_standard_optimizer_preserves_group_sizes_and_players(self):
         groups = [["A", "B"], ["C", "D"]]
