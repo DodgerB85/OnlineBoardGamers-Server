@@ -834,7 +834,8 @@ def SF_createNextRoundGamesSetup(tournamentObj):
 
     # Load tournament data
     TPDA = json.loads(tournamentObj.tournamentProgressionData)
-    roundNumberString = gettext("Round") + f" {len(TPDA) + 1}"
+    # Deliberately NOT translated: round names are stored in the game name and should stay English
+    roundNumberString = "Round" + f" {len(TPDA) + 1}"
 
     # Get players sorted by points (weakest first) for RR, PT, or TL
     # This first call ist just for KO - it gets overwritten later for RR / TL / PT
@@ -865,7 +866,8 @@ def SF_createNextRoundGamesSetup(tournamentObj):
 
     # Set final round label if exactly maxGamePlayers remain
     if len(allPlayersList) == tournamentObj.maxGamePlayers:
-        roundNumberString = gettext("Final Round") + (" (KO)" if tournamentType == "RR" and len(TPDA) >= tournamentObj.roundsBeforeKnockout else "")
+        # Deliberately NOT translated: round names are stored in the game name and should stay English
+        roundNumberString = "Final Round" + (" (KO)" if tournamentType == "RR" and len(TPDA) >= tournamentObj.roundsBeforeKnockout else "")
 
     # 1. CALCULATE HOW MANY BYES ARE REQUIRED
     num_players = len(allPlayersList)
