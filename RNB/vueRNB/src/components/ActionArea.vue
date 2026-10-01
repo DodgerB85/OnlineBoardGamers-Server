@@ -15,6 +15,7 @@ import * as view from "../js/RNBview"
 import * as produce from "../js/RNBproduce"
 import * as highlight from "../js/RNBhighlight"
 import * as loc from "../js/RNBlocation"
+import * as stack from "../js/RNBstack"
 import * as wonder from "../js/RNBwonder"
 import * as Bot from "../js/RNBbot"
 import * as build from "../js/RNBbuild"
@@ -46,6 +47,50 @@ function chosenStartTileIsFloodedPolder() {
 	const hex = model.getHexByID(homeLoc[1])
 	return hex.currentTerrain === rf.TERR_POLDER_WET
 }
+
+// Pre-set home tile spots from the map (setupData.HM), minus any already taken.
+const remainingStartSpots = computed(() => {
+	const hm = store.mapData.setupData && store.mapData.setupData.HM
+	if (!hm || hm.length === 0) return []
+	const usedHexIDs = store.ALL_HOME_MARKERS.map((m) => m.location[1])
+	return hm.map((m) => stack.decompressLocation(m)).filter((spotLoc) => spotLoc && !usedHexIDs.includes(spotLoc[1]))
+})
+
+// Coarse location of a hex on the map, as a compass region (upper-left, centre, lower-right...)
+function describeMapRegion(hexID) {
+	const hex = model.getHexByID(hexID)
+	if (!hex || !hex.rawXY) return ""
+	let minX = Infinity
+	let maxX = -Infinity
+	let minY = Infinity
+	let maxY = -Infinity
+	for (const h of store.mapData.hexData) {
+		if (!h.rawXY) continue
+		minX = Math.min(minX, h.rawXY[0])
+		maxX = Math.max(maxX, h.rawXY[0])
+		minY = Math.min(minY, h.rawXY[1])
+		maxY = Math.max(maxY, h.rawXY[1])
+	}
+	const fx = (hex.rawXY[0] - minX) / (maxX - minX || 1)
+	const fy = (hex.rawXY[1] - minY) / (maxY - minY || 1)
+	const vLabel = fy < 0.34 ? "upper" : fy > 0.66 ? "lower" : "middle"
+	const hLabel = fx < 0.34 ? "left" : fx > 0.66 ? "right" : "middle"
+	if (vLabel === "middle" && hLabel === "middle") return "centre"
+	if (vLabel === "middle") return hLabel
+	if (hLabel === "middle") return vLabel
+	return `${vLabel}-${hLabel}`
+}
+
+const startSpotRegionsText = computed(() => {
+	const regions = []
+	for (const spot of remainingStartSpots.value) {
+		const region = describeMapRegion(spot[1])
+		if (region && !regions.includes(region)) regions.push(region)
+	}
+	if (regions.length === 0) return ""
+	if (regions.length === 1) return regions[0]
+	return regions.slice(0, -1).join(", ") + " and " + regions[regions.length - 1]
+})
 
 function finishActions(stopActionChange = false, event = null) {
 	// Save the "Go Back" stats
@@ -745,6 +790,13 @@ const getGameOverReason = computed(() => {
 				</template>
 				<br />
 				Choose your home tile
+				<div v-if="remainingStartSpots.length > 0" class="setStartSpotsBox">
+					<b>This map has set start spots.</b>
+					<br />
+					There {{ remainingStartSpots.length === 1 ? "is" : "are" }} <b>{{ remainingStartSpots.length }}</b> start spot{{ remainingStartSpots.length === 1 ? "" : "s" }} left.
+					<br />
+					They are highlighted on the map, around the <b>{{ startSpotRegionsText }}</b>.
+				</div>
 				<template v-if="store.context.action === rf.ACT_CONFIRM_END_TURN">
 					<template v-if="chosenStartTileIsPolder()">
 						<br />
@@ -1222,6 +1274,19 @@ const getGameOverReason = computed(() => {
 	text-align: center;
 	background-color: lightgoldenrodyellow;
 	color: darkred;
+}
+
+.setStartSpotsBox {
+	width: 100%;
+	box-sizing: border-box;
+	margin: 10px 0;
+	padding: 8px;
+	border: 3px solid darkgreen;
+	border-radius: 6px;
+	background-color: lightyellow;
+	color: darkgreen;
+	font-weight: bold;
+	text-align: center;
 }
 
 .blankInputRes {

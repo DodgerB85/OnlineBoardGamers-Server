@@ -117,7 +117,17 @@ async function initGame() {
 		} // END KICKOUT REQUIRED
 		personal.notes = funcs.htmlUnescape(window.initData.notes)
 	} // end involved player
-	if (window.initData.chatNotification) store.topMenuViews.showChat = true
+	if (window.initData.chatNotification) {
+		store.topMenuViews.showChat = true
+		setTimeout(function () {
+			var el = document.getElementById("wholeChat")
+			if (!el) return
+			var cs = getComputedStyle(el)
+			var b = document.getElementById("footer").getBoundingClientRect().top
+			var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+			el.style["max-height"] = String(parseInt(b - a)) + "px"
+		}, 500)
+	}
 
 	// Set AQY options
 	let options = window.initData.preferredAQYoptions

@@ -73,7 +73,17 @@ function toggleNotes() {
 function toggleChat() {
 	store.topMenuViews.showHistory = false
 	document.getElementById("boardContainer").classList.remove("slideRight")
-	store.topMenuViews.showChat = !store.topMenuViews.showChat
+	if (store.topMenuViews.showChat) store.topMenuViews.showChat = false
+	else {
+		store.topMenuViews.showChat = true
+		setTimeout(function () {
+			var el = document.getElementById("wholeChat")
+			var cs = getComputedStyle(el)
+			var b = document.getElementById("footer").getBoundingClientRect().top
+			var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+			el.style["max-height"] = String(parseInt(b - a)) + "px"
+		}, 50)
+	}
 }
 
 function toggleHistory() {
@@ -85,9 +95,11 @@ function toggleHistory() {
 	} else {
 		store.topMenuViews.showHistory = true
 		setTimeout(function () {
+			var el = document.getElementById("history")
+			var cs = getComputedStyle(el)
 			var b = document.getElementById("footer").getBoundingClientRect().top
-			var a = 130
-			document.getElementById("history").style["max-height"] = String(parseInt(b - a)) + "px"
+			var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+			el.style["max-height"] = String(parseInt(b - a)) + "px"
 			var offsets = document.getElementById("boardContainer").getBoundingClientRect()
 			if (offsets.left < 460) document.getElementById("boardContainer").classList.add("slideRight")
 		}, 50)
