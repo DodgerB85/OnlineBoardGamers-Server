@@ -71,9 +71,11 @@ function historyToggle() {
 		else document.getElementById("historyMainDiv").classList.add("reverseHistory")
 
 		//document.getElementById('boardContainer').classList.add('historyShowing');
+		var el = document.getElementById("history")
+		var cs = getComputedStyle(el)
 		var b = document.getElementById("footer").getBoundingClientRect().top
-		var a = 69
-		document.getElementById("history").style["max-height"] = String(parseInt(b - a)) + "px"
+		var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+		el.style["max-height"] = String(parseInt(b - a)) + "px"
 	}, 400)
 }
 
