@@ -139,6 +139,7 @@ export function replaySetupKetchupExpansion(playerNumber) {
 	if (store.startingOptions.stadium) {
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
 	}
+	if (store.startingOptions.laborMarket) model.setupLaborMarketExpansion()
 }
 
 export function resetDataForReplay() {
@@ -306,6 +307,9 @@ export async function generateReplayData(spoilerFree = false) {
 		else if (action === rf.HIST_FLIP_TO_FRIED_CHICKEN) replayFriedChickenHouse(i, playerIdx, param, false)
 		else if (action === rf.HIST_HOUSE_MOVED_OUT) replayFriedChickenHouse(i, playerIdx, param, true)
 		else if (action === rf.HIST_STADIUM_ANNOUNCE) replayStadiumAnnounce(i, playerIdx, param)
+		else if (action === rf.HIST_TEMPORARY_WORKER) replayTemporaryWorker(i, playerIdx, param)
+		else if (action === rf.HIST_HEADHUNT) replayHeadhunt(i, playerIdx, param)
+		else if (action === rf.HIST_UNION_ORGANIZER) replayUnionOrganizer(i, playerIdx, param)
 
 		store.replayData.push(funcs.simpleExportWholeFCMmodel())
 
@@ -329,6 +333,59 @@ export async function generateReplayData(spoilerFree = false) {
 
 export function replayProduceKimchi(historyIndex, playerIndex, param) {
 	plyr.addResources(playerIndex, rf.KIMCHI, 1)
+}
+
+export function replayTemporaryWorker(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	if (param.length >= 4) {
+		store.laborMarket.temporaryCampaignOwners[param[3]] = playerIndex
+		const effect = store.laborMarket.dailyTemporaryEffects[playerIndex]
+		if (effect) effect.usedByRole[rf.MARKETING_TRAINEE] = param[2]
+		return
+	}
+	if (Array.isArray(param[0])) {
+		store.laborMarket.dailyTemporaryEffects[playerIndex] = { roles: [...param[0]], limit: param[1], usedByRole: { ...param[2] } }
+	} else {
+		const roles = Array.from({ length: Math.max(0, param[1] || 0) }, () => param[0])
+		const usedByRole = param[2] > 0 ? { [param[0]]: param[2] } : {}
+		store.laborMarket.dailyTemporaryEffects[playerIndex] = { roles, limit: param[1], usedByRole }
+	}
+	const index = store.players[playerIndex].employees.indexOf(rf.TEMPORARY_WORKER)
+	if (index > -1) store.players[playerIndex].employees.splice(index, 1)
+	store.laborMarket.removedTemporaryWorkers++
+}
+
+export function replayHeadhunt(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	const [targetPlayerIndex, employee, cost, deferredSalary] = param
+	const target = store.players[targetPlayerIndex]
+	const actor = store.players[playerIndex]
+	const index = target?.beach.indexOf(employee) ?? -1
+	if (!actor || !target || index < 0) return
+	target.beach.splice(index, 1)
+	actor.beach.push(employee)
+	if (deferredSalary === 1) {
+		if (!Array.isArray(store.laborMarket.pendingHeadhuntSalaries[playerIndex])) store.laborMarket.pendingHeadhuntSalaries[playerIndex] = []
+		store.laborMarket.pendingHeadhuntSalaries[playerIndex].push({ employee, cost })
+	} else {
+		// Histories created before Labor Market save version 3 used immediate payment.
+		actor.money -= cost
+		target.money += cost
+	}
+}
+
+export function replayUnionOrganizer(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	for (const player of store.players) {
+		player.beach = player.beach.filter((employee) => employee !== rf.UNION_ORGANIZER)
+		player.employees = player.employees.filter((employee) => employee !== rf.UNION_ORGANIZER)
+	}
+	store.laborMarket.workedCounts = Array.isArray(param[2]) ? [...param[2]] : []
+	const nextHolders = Array.isArray(param[1]) ? param[1] : (param[1] >= 0 ? [param[1]] : [])
+	store.laborMarket.unionHolders = [...nextHolders]
+	store.laborMarket.pendingUnionHolders = [...nextHolders]
+	for (const holder of nextHolders) if (store.players[holder]) store.players[holder].beach.push(rf.UNION_ORGANIZER)
+	store.availableEmployees[rf.UNION_ORGANIZER] = Math.max(0, store.players.length - nextHolders.length)
 }
 
 // Stadium mod: restore the announcement from history (no RNG on replay)
@@ -386,6 +443,7 @@ export function replaySalary(historyIndex, playerIndex, param) {
 			store.players[i].money = 0
 		}
 		store.bank += due
+		clearPendingHeadhuntSalary(i)
 	}
 }
 
@@ -399,8 +457,14 @@ export function replaySalary_strict(historyIndex, playerIndex, param) {
 		store.players[playerIndex].money = 0
 	}
 	store.bank += due
+	clearPendingHeadhuntSalary(playerIndex)
 	// NB the paid in food exact items are never stored, just the amount
 	// Nothing needs doing here; just the net money adjusting
+}
+
+function clearPendingHeadhuntSalary(playerIndex) {
+	const store = useModelStore()
+	if (Array.isArray(store.laborMarket.pendingHeadhuntSalaries)) store.laborMarket.pendingHeadhuntSalaries[playerIndex] = []
 }
 
 export function replayIncome(historyIndex, playerIndex, param) {
@@ -637,7 +701,7 @@ export function replayFire(historyIndex, playerIndex, param) {
 	const store = useModelStore()
 	for (let i = 0; i < param.length; i++) {
 		plyr.fireEmployee(playerIndex, param[i])
-		store.availableEmployees[param[i]]++
+		store.availableEmployees[rf.decodeFiredEmployee(param[i])]++
 	}
 }
 
@@ -737,8 +801,15 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 	if (store.computedHistory[historyIndex - 1][0] === rf.HIST_NEW_MILESTONE && store.computedHistory[historyIndex - 1][3][0] === rf.FIRST_CAMPAIGN_MANAGER_USED) {
 		restoMS = true
 	}
-	if (restoMS) plyr.addCampaignToMarketer(playerIndex, campaignEmployee, campaignNumber)
-	else plyr.sendPlayerMarketerToMarket(playerIndex, campaignEmployee, campaignNumber, false, false)
+	// A Temporary Worker campaign has no physical marketer to move. Its
+	// ownership history is emitted immediately before the ordinary campaign
+	// entry, so the replay can distinguish it without changing the legacy
+	// campaign-history payload.
+	const temporaryCampaign = store.laborMarket.temporaryCampaignOwners[campaignNumber] === playerIndex
+	if (!temporaryCampaign) {
+		if (restoMS) plyr.addCampaignToMarketer(playerIndex, campaignEmployee, campaignNumber)
+		else plyr.sendPlayerMarketerToMarket(playerIndex, campaignEmployee, campaignNumber, false, false)
+	}
 
 	let height = rf.MARKETING_CAMPAIGNS[campaignNumber].height
 	let width = rf.MARKETING_CAMPAIGNS[campaignNumber].width
@@ -883,6 +954,7 @@ export function replayNewTurn(historyIndex, playerIndex, param) {
 	}
 
 	model.clearForNewTurn()
+	model.startLaborMarketTurn()
 	store.gameflow.turn++
 }
 
@@ -937,4 +1009,6 @@ export function setgameflowVars(playerIndex, action) {
 	else if (action === rf.HIST_NEW_TURN) store.gameflow.phase = rf.PHASE_RESTRUCTURING
 	else if (action === rf.HIST_PIZZA_BOMB) store.gameflow.phase = rf.PHASE_PIZZA_BOMB
 	else if (action === rf.HIST_CHOOSE_MODULE) store.gameflow.phase = rf.PHASE_SETUP_MODULES
+	else if (action === rf.HIST_TEMPORARY_WORKER || action === rf.HIST_HEADHUNT) store.gameflow.phase = rf.PHASE_WORKING_DAY
+	else if (action === rf.HIST_UNION_ORGANIZER) store.gameflow.phase = rf.PHASE_CLEAN_UP
 }

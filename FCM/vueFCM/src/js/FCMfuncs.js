@@ -231,6 +231,8 @@ export function simpleExportWholeFCMmodel() {
 
 	// 21 - Stadium mod
 	temp.push(JSON.parse(JSON.stringify(store.stadium)))
+	// 22 - Labor Market mod
+	temp.push(exportLaborMarketSlot())
 
 	let step1 = JSON.stringify(temp)
 	// eslint-disable-next-line no-undef
@@ -668,8 +670,9 @@ export function exportFCMmodel(forGameOver, includeContext) {
 		}
 	}
 
-	// 18 - Stadium mod (appended last; the importer detects it by shape so
-	// older saves without this slot still load)
+	// 18 - Labor Market mod (tagged so older and mixed-module saves remain detectable)
+	temp.push(exportLaborMarketSlot())
+	// 19 - Stadium mod remains the final slot for legacy readers/tests.
 	temp.push(exportStadiumSlot())
 
 	let step1 = JSON.stringify(temp)
@@ -1168,6 +1171,7 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 
 	// Stadium mod (trailing slot; falls back to history for older saves)
 	restoreStadiumState(inputArr)
+	restoreLaborMarketState(inputArr)
 }
 
 // Stadium mod wire slot: [gamesPlayed] or [gamesPlayed, announcement].
@@ -1206,7 +1210,9 @@ export function restoreStadiumState(inputArr) {
 	const store = useModelStore()
 	store.stadium.gamesPlayed = 0
 	store.stadium.announcement = null
-	if (applyStadiumSlot(inputArr[inputArr.length - 1])) return
+	let stadiumIndex = inputArr.length - 1
+	if (inputArr[stadiumIndex]?.kind === "laborMarket") stadiumIndex--
+	if (applyStadiumSlot(inputArr[stadiumIndex])) return
 	for (let i = 0; i < store.history.length; i++) {
 		if (store.history[i][0] === rf.HIST_STADIUM_RESULT) store.stadium.gamesPlayed++
 	}
@@ -1217,6 +1223,68 @@ export function restoreStadiumState(inputArr) {
 			break
 		}
 	}
+}
+
+export function exportLaborMarketSlot() {
+	const store = useModelStore()
+	return {
+		kind: "laborMarket",
+		version: 4,
+		removedTemporaryWorkers: store.laborMarket.removedTemporaryWorkers,
+		removedTemporaryWorkersAtTurnStart: store.laborMarket.removedTemporaryWorkersAtTurnStart,
+		unionHolders: [...store.laborMarket.unionHolders],
+		pendingUnionHolders: [...store.laborMarket.pendingUnionHolders],
+		workedCounts: [...store.laborMarket.workedCounts],
+		temporaryCampaignOwners: { ...store.laborMarket.temporaryCampaignOwners },
+		dailyTemporaryEffects: store.laborMarket.dailyTemporaryEffects.map((effect) => effect ? { ...effect, roles: [...effect.roles], usedByRole: { ...effect.usedByRole } } : null),
+		pendingHeadhuntSalaries: store.laborMarket.pendingHeadhuntSalaries.map((entries) => Array.isArray(entries) ? entries.map((entry) => ({ ...entry })) : []),
+	}
+}
+
+export function restoreLaborMarketState(inputArr) {
+	const store = useModelStore()
+	const slot = [...inputArr].reverse().find((entry) => entry?.kind === "laborMarket")
+	const supported = slot?.version === 1 || slot?.version === 2 || slot?.version === 3 || slot?.version === 4
+	const savedPlayerCount = Math.max(store.players.length, Array.isArray(slot?.workedCounts) ? slot.workedCounts.length : 0)
+	const validHolders = (holders) => [...new Set(Array.isArray(holders) ? holders : [])].filter((holder) => Number.isInteger(holder) && holder >= 0 && (savedPlayerCount === 0 || holder < savedPlayerCount))
+	store.laborMarket.removedTemporaryWorkers = supported ? Math.max(0, slot.removedTemporaryWorkers || 0) : 0
+	store.laborMarket.unionHolders = slot?.version >= 2 ? validHolders(slot.unionHolders) : validHolders([slot?.unionHolder])
+	store.laborMarket.pendingUnionHolders = slot?.version >= 2 ? validHolders(slot.pendingUnionHolders) : validHolders([slot?.pendingUnionHolder])
+	store.laborMarket.workedCounts = supported && Array.isArray(slot.workedCounts) ? [...slot.workedCounts] : []
+	store.laborMarket.temporaryCampaignOwners = supported && slot.temporaryCampaignOwners ? { ...slot.temporaryCampaignOwners } : {}
+	const normalizeTemporaryEffect = (effect) => {
+		if (!effect) return null
+		if (Array.isArray(effect.roles)) {
+			const roles = effect.roles.filter((role) => rf.TEMPORARY_WORKER_ROLES.includes(role)).slice(0, Math.max(0, effect.limit || 0))
+			const usedByRole = {}
+			for (const role of rf.TEMPORARY_WORKER_ROLES) {
+				const used = Math.max(0, Math.min(roles.filter((selectedRole) => selectedRole === role).length, effect.usedByRole?.[role] || 0))
+				if (used > 0) usedByRole[role] = used
+			}
+			return { roles, limit: Math.max(0, effect.limit || 0), usedByRole }
+		}
+		if (rf.TEMPORARY_WORKER_ROLES.includes(effect.role)) {
+			const limit = Math.max(0, effect.limit || 0)
+			return { roles: Array.from({ length: limit }, () => effect.role), limit, usedByRole: effect.used > 0 ? { [effect.role]: Math.min(limit, effect.used) } : {} }
+		}
+		return null
+	}
+	store.laborMarket.dailyTemporaryEffects = supported && Array.isArray(slot.dailyTemporaryEffects) ? slot.dailyTemporaryEffects.map(normalizeTemporaryEffect) : Array(store.players.length).fill(null)
+	const consumedThisTurn = store.laborMarket.dailyTemporaryEffects.reduce((total, effect, playerIndex) => {
+		if (!effect) return total
+		const player = store.players[playerIndex]
+		const stillOwnsTemporaryWorker = player?.employees?.includes(rf.TEMPORARY_WORKER) || player?.beach?.includes(rf.TEMPORARY_WORKER)
+		return total + (stillOwnsTemporaryWorker ? 0 : 1)
+	}, 0)
+	store.laborMarket.removedTemporaryWorkersAtTurnStart = slot?.version === 4
+		? Math.max(0, Math.min(store.laborMarket.removedTemporaryWorkers, slot.removedTemporaryWorkersAtTurnStart || 0))
+		: Math.max(0, store.laborMarket.removedTemporaryWorkers - consumedThisTurn)
+	store.laborMarket.pendingHeadhuntSalaries = slot?.version >= 3 && Array.isArray(slot.pendingHeadhuntSalaries)
+		? Array.from({ length: savedPlayerCount }, (_, playerIndex) => Array.isArray(slot.pendingHeadhuntSalaries[playerIndex])
+			? slot.pendingHeadhuntSalaries[playerIndex].filter((entry) => Number.isInteger(entry?.employee) && Number.isFinite(entry?.cost) && entry.cost >= 0).map((entry) => ({ employee: entry.employee, cost: entry.cost }))
+			: [])
+		: Array.from({ length: savedPlayerCount }, () => [])
+	if (store.startingOptions.laborMarket) store.availableEmployees[rf.UNION_ORGANIZER] = Math.max(0, store.players.length - store.laborMarket.unionHolders.length)
 }
 
 export function simpleImportWholeFCMmodel(inputBase64) {
@@ -1353,6 +1421,8 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	store.stadium.gamesPlayed = 0
 	store.stadium.announcement = null
 	if (inputModel.length > 21) applyStadiumSlot(inputModel[21])
+	// 22 - Labor Market mod (older snapshots predate this slot)
+	restoreLaborMarketState(inputModel.length > 22 ? [inputModel[22]] : [])
 
 	// Adjust CEOs with dumpling MS, using history
 	if (store.startingOptions.dumplings) {

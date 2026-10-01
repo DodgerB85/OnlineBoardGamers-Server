@@ -35,6 +35,10 @@ export async function makeAImove() {
 		await controller.endPlayerTurn(true, false)
 	} else if (phase === rf.PHASE_RESTRUCTURING) {
 		rf.sortEmployees(playerObj.beach)
+		if (store.startingOptions.laborMarket && store.laborMarket.unionHolders.includes(playerIndex) && playerObj.beach.includes(rf.UNION_ORGANIZER)) {
+			const unionSlot = playerObj.employees.slice(0, playerObj.ceoSlots).indexOf(rf.BLANK_EMPLOYEE_SPACE)
+			if (unionSlot > -1) plyr.setEmployeeInIndex(playerIndex, rf.UNION_ORGANIZER, unionSlot)
+		}
 		if (playerObj.AIlevel === 0) {
 			for (let i = 0; i < playerObj.ceoSlots; i++) {
 				if (playerObj.employees[i] === rf.BLANK_EMPLOYEE_SPACE && playerObj.beach.length > 0) plyr.setEmployeeInIndex(playerIndex, playerObj.beach[0], i)
@@ -98,7 +102,10 @@ export async function makeAImove() {
 
 		await controller.endPlayerTurn(true, false)
 	} else if (phase === rf.PHASE_WORKING_DAY) {
-		if (subphase === rf.SUBPHASE_HIRING) {
+		if (subphase === rf.SUBPHASE_TEMPORARY_WORKER) {
+			controller.chooseTemporaryWorkerRole(rf.RECRUITING_GIRL)
+			await makeAImove()
+		} else if (subphase === rf.SUBPHASE_HIRING) {
 			actionHires(playerIndex)
 			await controller.endWorkingDaySubphase()
 			await makeAImove()
@@ -202,6 +209,16 @@ export async function makeAImove() {
 			}
 
 			await controller.endWorkingDaySubphase()
+			await makeAImove()
+		}
+		else if (subphase === rf.SUBPHASE_HEADHUNTING) {
+			const totalActions = controller.currentPlayerObj().employees.filter((employee) => employee === rf.HEADHUNTER).length
+			while (store.context.headhunterActionsUsed < totalActions) {
+				const targets = rules.getHeadhuntTargets(controller.currentPlayerIndex()).sort((a, b) => a.cost - b.cost || a.owner - b.owner || a.employee - b.employee)
+				if (targets.length === 0) break
+				controller.headhuntEmployee(controller.currentPlayerIndex(), targets[0].owner, targets[0].beachIndex)
+			}
+			controller.endWorkingDaySubphase()
 			await makeAImove()
 		}
 
@@ -443,26 +460,28 @@ export async function makeAImove() {
 		}
 		await controller.endPlayerTurn(false, false)
 	} else if (phase === rf.PHASE_PAYDAY) {
+		if (plyr.hasMilestone(playerIndex, rf.FIRST_TRAINER_USED) && !rules.canAffordPayDay(playerIndex)) {
+			await controller.endPlayerTurn(true, false)
+			return
+		}
 		let emergnecyCheck = 0
 		while (rules.salary(playerIndex) > playerObj.money && emergnecyCheck <= 50) {
-			let fireOptions = rules.fireableEmployees(playerIndex)
+			let fireOptions = rules.fireableEmployeeChoices(playerIndex)
 			if (playerObj.AIlevel === 0) {
 				for (let i = 0; i < fireOptions.length; i++) {
-					let employee = fireOptions[i]
-					if (rf.REQUIRE_SALARY.includes(employee)) {
-						plyr.fireEmployee(playerIndex, employee)
-
-						store.context.justFired.push(employee)
+					let choice = fireOptions[i]
+					if (rf.REQUIRE_SALARY.includes(choice.employee) || choice.headhunted) {
+						plyr.fireEmployee(playerIndex, choice.fireToken)
+						store.context.justFired.push(choice.fireToken)
 						break
 					}
 				}
 			} else if (playerObj.AIlevel === 1) {
 				for (let i = 0; i < fireOptions.length; i++) {
-					let employee = fireOptions[i]
-					if (rf.REQUIRE_SALARY.includes(employee) && !rf.MANAGERS.includes(employee)) {
-						plyr.fireEmployee(playerIndex, employee)
-
-						store.context.justFired.push(employee)
+					let choice = fireOptions[i]
+					if ((rf.REQUIRE_SALARY.includes(choice.employee) || choice.headhunted) && !rf.MANAGERS.includes(choice.employee)) {
+						plyr.fireEmployee(playerIndex, choice.fireToken)
+						store.context.justFired.push(choice.fireToken)
 						break
 					}
 				}
@@ -471,13 +490,13 @@ export async function makeAImove() {
 		}
 		emergnecyCheck = 0
 		while (rules.salary(playerIndex) > playerObj.money && emergnecyCheck <= 50) {
-			let fireOptions = rules.fireableEmployees(playerIndex)
+			let fireOptions = rules.fireableEmployeeChoices(playerIndex)
 			if (playerObj.AIlevel === 1) {
 				for (let i = 0; i < fireOptions.length; i++) {
-					let employee = fireOptions[i]
-					if (rf.REQUIRE_SALARY.includes(employee)) {
-						plyr.fireEmployee(playerIndex, employee)
-						store.context.justFired.push(employee)
+					let choice = fireOptions[i]
+					if (rf.REQUIRE_SALARY.includes(choice.employee) || choice.headhunted) {
+						plyr.fireEmployee(playerIndex, choice.fireToken)
+						store.context.justFired.push(choice.fireToken)
 						break
 					}
 				}
@@ -487,8 +506,11 @@ export async function makeAImove() {
 		for (let i = playerObj.marketers.length - 1; i >= 0; i--) {
 			let employee = playerObj.marketers[i].marketer
 			if (rf.REQUIRE_SALARY.includes(employee)) {
-				playerObj.marketers.splice(i, 1)
-				store.context.justFired.push(employee)
+				const choice = rules.fireableEmployeeChoices(playerIndex).find((candidate) => candidate.employee === employee)
+				if (choice) {
+					plyr.fireEmployee(playerIndex, choice.fireToken)
+					store.context.justFired.push(choice.fireToken)
+				}
 				if (rules.salary(playerIndex) <= playerObj.money) break
 			}
 		}

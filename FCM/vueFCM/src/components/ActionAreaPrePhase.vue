@@ -4,6 +4,7 @@ import * as rules from "../js/FCMrules"
 import * as plyr from "../js/FCMplayer"
 import * as view from "../js/FCMview"
 import * as IO from "../backend/FCM_IO"
+import HeadhuntSalaryNotice from "./HeadhuntSalaryNotice.vue"
 
 import { useModelStore } from "../stores/FCMstore.js"
 const store = useModelStore()
@@ -28,6 +29,7 @@ const savedEmployees = ref([])
 const savedResources = ref([])
 const savedPreMoveData = ref(null)
 const savedJustFired = ref([])
+const savedPendingHeadhuntSalaries = ref([])
 
 function saveState() {
 	savedBeach.value = [...playerObj.value.beach]
@@ -35,6 +37,7 @@ function saveState() {
 	savedResources.value = [...playerObj.value.resources]
 	savedPreMoveData.value = JSON.parse(JSON.stringify(store.context.preMoveData))
 	savedJustFired.value = [...store.context.justFired]
+	savedPendingHeadhuntSalaries.value = [...(store.laborMarket.pendingHeadhuntSalaries[playerIndex.value] || [])].map((entry) => ({ ...entry }))
 }
 saveState()
 
@@ -54,10 +57,10 @@ const paydayFlow = ref("")
 
 const sortedFireableEmployees = computed(() => {
 	if (props.mode !== "payday") return []
-	const b = rules.fireableEmployees(playerIndex.value)
+	const b = rules.fireableEmployeeChoices(playerIndex.value)
 	return [...b].sort((a, b) => {
-		const aRequires = salaryRequired.has(a) ? 0 : 1
-		const bRequires = salaryRequired.has(b) ? 0 : 1
+		const aRequires = salaryRequired.has(a.employee) ? 0 : 1
+		const bRequires = salaryRequired.has(b.employee) ? 0 : 1
 		return aRequires - bRequires
 	})
 })
@@ -78,7 +81,7 @@ const hasTrainerMS = computed(() => plyr.hasMilestone(playerIndex.value, rf.FIRS
 const hasBeerMS = computed(() => plyr.hasMilestone(playerIndex.value, rf.FIRST_BEER_SOLD))
 const hasWaitressMS = computed(() => plyr.hasMilestone(playerIndex.value, rf.FIRST_WAITRESS_USED))
 const unitarySalary = computed(() => hasWaitressMS.value ? 3 : 5)
-const nbPays = computed(() => Math.ceil(currentSalary.value / unitarySalary.value))
+const nbPays = computed(() => rules.numPayNeeded(playerIndex.value))
 const leftToPay = computed(() => nbPays.value - store.context.preMoveData[0][1].length)
 
 const sortedFoodResources = computed(() => {
@@ -87,7 +90,7 @@ const sortedFoodResources = computed(() => {
 })
 
 function preFireEmployee(employee) {
-	plyr.fireEmployee(playerIndex.value, employee)
+	if (!plyr.fireEmployee(playerIndex.value, employee)) return
 	store.context.preMoveData[0][0].push(employee)
 }
 
@@ -95,10 +98,11 @@ function unFireEmployee(employee) {
 	const idx = store.context.preMoveData[0][0].indexOf(employee)
 	if (idx === -1) return
 	store.context.preMoveData[0][0].splice(idx, 1)
-	playerObj.value.beach.push(employee)
+	plyr.restoreFiredEmployee(playerIndex.value, employee)
 }
 
 function useResourceToPaySalary(good) {
+	if (store.context.preMoveData[0][1].length >= nbPays.value) return
 	const idx = playerObj.value.resources.indexOf(good)
 	if (idx > -1) playerObj.value.resources.splice(idx, 1)
 	store.context.preMoveData[0][1].push(good)
@@ -154,6 +158,7 @@ function cancel() {
 	playerObj.value.resources = [...savedResources.value]
 	store.context.preMoveData = JSON.parse(JSON.stringify(savedPreMoveData.value))
 	store.context.justFired.splice(0)
+	store.laborMarket.pendingHeadhuntSalaries[playerIndex.value] = savedPendingHeadhuntSalaries.value.map((entry) => ({ ...entry }))
 	emit("close")
 }
 
@@ -163,6 +168,7 @@ function reset() {
 	playerObj.value.resources = [...savedResources.value]
 	store.context.justFired.splice(0)
 	store.context.preMoveData[0] = [[], []]
+	store.laborMarket.pendingHeadhuntSalaries[playerIndex.value] = savedPendingHeadhuntSalaries.value.map((entry) => ({ ...entry }))
 	if (props.mode === "cleanup") {
 		store.context.preMoveData[1] = []
 	}
@@ -205,6 +211,7 @@ function saveCleanup() {
 	<div>
 		<!-- ========== PAYDAY PRE-PHASE ========== -->
 		<template v-if="mode === 'payday'">
+			<HeadhuntSalaryNotice :player-index="playerIndex" />
 			<!-- SCREEN 1: FIRE EMPLOYEES -->
 			<template v-if="paydayFlow !== 'beer'">
 				<div>
@@ -237,15 +244,16 @@ function saveCleanup() {
 
 					<!-- Just fired reminder -->
 					<div v-if="actualFiredEmployees.length > 0" class="reminder fireLine">
-						<img v-for="(emp, i) in actualFiredEmployees" :key="'fired-'+i" :src="view.getImage('emp_' + emp)" class="cardSummaryDiv selectable" :title="$t('actionArea.clickToUnfire')" :alt="rf.employeeName(emp)" @click="unFireEmployee(emp)" />
+						<img v-for="(emp, i) in actualFiredEmployees" :key="'fired-'+i" :src="view.getImage('emp_' + rf.decodeFiredEmployee(emp))" class="cardSummaryDiv selectable" :title="$t('actionArea.clickToUnfire')" :alt="rf.employeeName(rf.decodeFiredEmployee(emp))" @click="unFireEmployee(emp)" />
 						<b>{{ $t('actionArea.youreFired') }}&nbsp;</b>
 						<img :src="view.getImage('fired')" class="firedImg" />
 					</div>
 
 					<!-- Fireable employees -->
 					<div>
-						<div v-for="emp in sortedFireableEmployees" :key="emp" class="fireCardChoiceDiv selectable" @click="preFireEmployee(emp)">
-							<img :src="view.getImage('emp_' + emp)" class="cardImg" :alt="rf.employeeName(emp)" />
+						<div v-for="choice in sortedFireableEmployees" :key="choice.key" class="fireCardChoiceDiv selectable" @click="preFireEmployee(choice.fireToken)">
+							<img :src="view.getImage('emp_' + choice.employee)" class="cardImg" :alt="rf.employeeName(choice.employee)" />
+							<div v-if="choice.headhunted" class="jobSwitchFireBadge">{{ $t('prePhase.headhuntedEmployeeBadge', { amount: choice.switchSalary }) }}</div>
 						</div>
 					</div>
 				</div>
@@ -332,6 +340,7 @@ function saveCleanup() {
 }
 
 .fireCardChoiceDiv {
+	position: relative;
 	border-radius: 10px;
 	box-sizing: border-box;
 	width: 160px;
@@ -339,6 +348,20 @@ function saveCleanup() {
 	margin: 5px;
 	display: inline-block;
 	overflow: hidden;
+}
+
+.jobSwitchFireBadge {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	padding: 5px 3px;
+	background: #8b0000;
+	color: white;
+	font-size: 13px;
+	font-weight: bold;
+	line-height: 1.15;
+	text-align: center;
 }
 
 .fireLine {

@@ -69,6 +69,9 @@ export const useModelStore = defineStore("store", () => {
 
 		// Stadium mod
 		stadium: false,
+
+		// Labor Market mod
+		laborMarket: false,
 	}
 
 	// This var affects the ZOOM level
@@ -134,6 +137,16 @@ export const useModelStore = defineStore("store", () => {
 		gamesPlayed: 0, // matches already resolved
 		announcement: null, // { gameNumber, food, units } for the upcoming game
 	})
+	const laborMarket = reactive({
+		removedTemporaryWorkers: 0,
+		removedTemporaryWorkersAtTurnStart: 0,
+		unionHolders: [],
+		pendingUnionHolders: [],
+		workedCounts: [],
+		temporaryCampaignOwners: {},
+		dailyTemporaryEffects: [],
+		pendingHeadhuntSalaries: [],
+	})
 
 	/*************************************** UNSAVED - TEMP VARS -- these do not need to be stored or saved */
 
@@ -158,6 +171,9 @@ export const useModelStore = defineStore("store", () => {
 		justOpened: [],
 		justFired: [],
 		justBinned: [],
+		headhunterActionsUsed: 0,
+		justHeadhunted: [],
+		temporaryMarketer: false,
 
 		isNewRestoMSmailbox: false,
 		alreadyDoneMailboxMS: false,
@@ -339,6 +355,7 @@ export const useModelStore = defineStore("store", () => {
 
 	const wholeTurnResetData = ref("")
 	const subphaseResetData = ref("")
+	const recruitingResetData = ref(null)
 	const subphaseSnapshots = reactive({})
 	const replayResetData = ref("")
 
@@ -388,6 +405,7 @@ export const useModelStore = defineStore("store", () => {
 		chatData,
 
 		subphaseResetData,
+		recruitingResetData,
 		subphaseSnapshots,
 
 		replayResetData,
@@ -412,6 +430,7 @@ export const useModelStore = defineStore("store", () => {
 		newRoads,
 		movedOutHouses,
 		stadium,
+		laborMarket,
 		reserveCards,
 		bank,
 		bankBroken,

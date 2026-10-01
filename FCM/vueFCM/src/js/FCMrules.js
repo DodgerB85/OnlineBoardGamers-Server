@@ -23,6 +23,7 @@ export function oneLevelAbove(employee, preservingColour) {
 	switch (employee) {
 		case rf.MANAGEMENT_TRAINEE:
 			level = [rf.JUNIOR_VICE_PRESIDENT, rf.NEW_BUSINESS_DEVELOPER, rf.LUXURIES_MANAGER]
+			if (store.startingOptions.laborMarket) level.push(rf.HEADHUNTER)
 			break
 		case rf.JUNIOR_VICE_PRESIDENT:
 			level = [rf.VICE_PRESIDENT, rf.LOCAL_MANAGER, rf.DISCOUNT_MANAGER, rf.RECRUITING_MANAGER, rf.COACH]
@@ -125,6 +126,168 @@ export function oneLevelAbove(employee, preservingColour) {
 	}
 
 	return level
+}
+
+export function temporaryWorkerActionCount(removedCount) {
+	return 1 + Math.max(0, Number.isFinite(removedCount) ? Math.floor(removedCount) : 0)
+}
+
+export function temporaryWorkerEffect(playerIndex) {
+	const store = useModelStore()
+	return store.startingOptions.laborMarket && store.laborMarket.dailyTemporaryEffects[playerIndex]
+		? store.laborMarket.dailyTemporaryEffects[playerIndex]
+		: { roles: [], limit: 0, usedByRole: {} }
+}
+
+export function temporaryWorkerRoleCount(playerIndex, role) {
+	return temporaryWorkerEffect(playerIndex).roles.filter((selectedRole) => selectedRole === role).length
+}
+
+export function temporaryWorkerUsedActions(playerIndex, role) {
+	return temporaryWorkerEffect(playerIndex).usedByRole[role] || 0
+}
+
+export function temporaryWorkerRemainingActions(playerIndex, role) {
+	return Math.max(0, temporaryWorkerRoleCount(playerIndex, role) - temporaryWorkerUsedActions(playerIndex, role))
+}
+
+export function temporaryWorkerUsesAction(playerIndex, role) {
+	const effect = temporaryWorkerEffect(playerIndex)
+	const used = effect.usedByRole[role] || 0
+	if (used >= temporaryWorkerRoleCount(playerIndex, role)) return false
+	effect.usedByRole[role] = used + 1
+	return true
+}
+
+export function availableProducers(playerIndex, usedTeam = []) {
+	const store = useModelStore()
+	const playerObj = store.players[playerIndex]
+	if (!playerObj) return []
+	let producers = playerObj.employees.filter((employee) => rf.PRODUCERS.includes(employee))
+	if (playerObj.employees.includes(rf.NIGHT_SHIFT_MANAGER)) {
+		producers.push(...producers.filter((employee) => [rf.ERRAND_BOY, rf.KITCHEN_TRAINEE, rf.BARISTA_TRAINEE].includes(employee)))
+	}
+	const temporaryRoles = temporaryWorkerEffect(playerIndex).roles.filter((role) => role === rf.ERRAND_BOY || role === rf.KITCHEN_TRAINEE)
+	producers.push(...temporaryRoles)
+	for (const used of usedTeam) {
+		const index = producers.indexOf(used)
+		if (index > -1) producers.splice(index, 1)
+	}
+	return producers
+}
+
+function trainingTargetsForLevel(employee) {
+	return oneLevelAbove(employee)
+}
+
+export function getEmployeeLevel(employee) {
+	if (rf.HIREABLE_EMPLOYEES.includes(employee)) return 1
+	const visited = new Set(rf.HIREABLE_EMPLOYEES)
+	let frontier = [...rf.HIREABLE_EMPLOYEES]
+	let level = 1
+	while (frontier.length > 0 && level < 10) {
+		level++
+		const next = []
+		for (const current of frontier) {
+			for (const target of trainingTargetsForLevel(current)) {
+				if (target === employee) return level
+				if (!visited.has(target)) {
+					visited.add(target)
+					next.push(target)
+				}
+			}
+		}
+		frontier = next
+	}
+	return 0
+}
+
+export function headhuntCost(employee) {
+	const level = getEmployeeLevel(employee)
+	return level > 0 ? level * 10 : 0
+}
+
+export function resolveUnionHolders(workedCounts, minimum = 5) {
+	if (!Array.isArray(workedCounts) || workedCounts.length === 0) return []
+	const eligible = workedCounts.map((count, index) => ({ count, index })).filter(({ count }) => Number.isFinite(count) && count >= minimum)
+	if (eligible.length === 0) return []
+	const max = Math.max(...eligible.map(({ count }) => count))
+	return eligible.filter(({ count }) => count === max).map(({ index }) => index)
+}
+
+export function canHeadhunt(playerIndex, targetPlayerIndex, beachIndex) {
+	const store = useModelStore()
+	if (!store.startingOptions.laborMarket || playerIndex === targetPlayerIndex) return false
+	const player = store.players[playerIndex]
+	const target = store.players[targetPlayerIndex]
+	if (!player || !target || !Number.isInteger(beachIndex) || beachIndex < 0 || beachIndex >= target.beach.length) return false
+	const employee = target.beach[beachIndex]
+	if (rf.NON_TRANSFERABLE_EMPLOYEES.includes(employee)) return false
+	const level = getEmployeeLevel(employee)
+	if (level < 1) return false
+	if ((rf.UNIQUE_CARDS.includes(employee) || employee === rf.DELIVERY_DRIVER) && plyr.hasEmployee(playerIndex, employee)) return false
+	return true
+}
+
+export function getHeadhuntTargets(playerIndex) {
+	const store = useModelStore()
+	const result = []
+	for (let owner = 0; owner < store.players.length; owner++) {
+		for (let beachIndex = 0; beachIndex < store.players[owner].beach.length; beachIndex++) {
+			if (!canHeadhunt(playerIndex, owner, beachIndex)) continue
+			const employee = store.players[owner].beach[beachIndex]
+			result.push({ owner, beachIndex, employee, level: getEmployeeLevel(employee), cost: headhuntCost(employee) })
+		}
+	}
+	return result
+}
+
+export function snapshotWorkedCount(playerIndex) {
+	const store = useModelStore()
+	const player = store.players[playerIndex]
+	if (!player) return 0
+	const count = player.employees.filter((employee) => employee !== rf.BLANK_EMPLOYEE_SPACE && employee !== rf.UNION_ORGANIZER).length
+	store.laborMarket.workedCounts[playerIndex] = count
+	return count
+}
+
+export function activeHeadhuntSalaryEntries(playerIndex) {
+	const store = useModelStore()
+	if (!store.startingOptions.laborMarket) return []
+	const player = store.players[playerIndex]
+	const pending = store.laborMarket.pendingHeadhuntSalaries[playerIndex]
+	if (!player || !Array.isArray(pending)) return []
+	const ownedCounts = new Map()
+	for (const employee of [...player.employees, ...player.beach, ...player.marketers.map((entry) => entry.marketer)]) {
+		ownedCounts.set(employee, (ownedCounts.get(employee) || 0) + 1)
+	}
+	return pending.filter((entry) => {
+		const remaining = ownedCounts.get(entry.employee) || 0
+		if (remaining <= 0) return false
+		ownedCounts.set(entry.employee, remaining - 1)
+		return true
+	})
+}
+
+export function effectiveHeadhuntSalaryEntries(playerIndex) {
+	let remainingDiscount = 0
+	if (plyr.hasMilestone(playerIndex, rf.FIRST_TRAIN)) {
+		remainingDiscount = Math.max(0, 15 - baseSalary(playerIndex, false))
+	}
+	return activeHeadhuntSalaryEntries(playerIndex).map((entry) => {
+		const discount = Math.min(entry.cost, remainingDiscount)
+		remainingDiscount -= discount
+		return { ...entry, originalCost: entry.cost, cost: entry.cost - discount }
+	})
+}
+
+export function headhuntSalaryDue(playerIndex) {
+	return effectiveHeadhuntSalaryEntries(playerIndex).reduce((total, entry) => total + entry.cost, 0)
+}
+
+export function clearHeadhuntSalaries(playerIndex) {
+	const store = useModelStore()
+	store.laborMarket.pendingHeadhuntSalaries[playerIndex] = []
 }
 
 export function allowedCampaigns(marketer) {
@@ -1182,6 +1345,7 @@ export function getRemainingRecruitingPoints(playerIndex) {
 			base += 4
 		}
 	}
+	base += temporaryWorkerRemainingActions(playerIndex, rf.RECRUITING_GIRL)
 
 	// 3. Subtract points for hires already made this turn
 	base -= store.context.justHired.length
@@ -1271,6 +1435,7 @@ export function getTrainingPoints(playerIndex, trainingDone) {
 			numLevel3++
 		}
 	}
+	total += temporaryWorkerRemainingActions(playerIndex, rf.TRAINER)
 
 	// 3. Subtract spent training points
 	for (const training of trainingDone) {
@@ -1368,6 +1533,7 @@ export function possibleUpgrades(availabilities, playerIndex, employees, numTrai
 	if (typeof employees === "number") {
 		let upgradeLevelLimit = unlimited ? 9 : canTrain3 > 0 ? 3 : canTrain2 > 0 ? 2 : 1
 		upgradeLevelLimit = Math.min(upgradeLevelLimit, numTrain)
+		if (rf.NON_FIREABLE_EMPLOYEES.includes(employees)) return Array.from({ length: upgradeLevelLimit }, () => [])
 
 		let resultsByLevel = []
 		let currentLevelEmployees = [employees]
@@ -2091,7 +2257,7 @@ export function winner(returnIndexOnly) {
 	return winningPerson
 }
 
-export function salary(playerIndex) {
+export function baseSalary(playerIndex, applyFirstTrainDiscount = true) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
 	// Bots should not be paying back into the bank
@@ -2109,7 +2275,7 @@ export function salary(playerIndex) {
 
 	due = paidEmployees.length * unitarySalary
 
-	if (plyr.hasMilestone(playerIndex, rf.FIRST_TRAIN)) {
+	if (applyFirstTrainDiscount && plyr.hasMilestone(playerIndex, rf.FIRST_TRAIN)) {
 		due -= 15
 	}
 
@@ -2149,6 +2315,10 @@ export function salary(playerIndex) {
 
 	due = Math.max(due, 0)
 	return due
+}
+
+export function salary(playerIndex) {
+	return baseSalary(playerIndex) + headhuntSalaryDue(playerIndex)
 }
 
 export function employeesRequiringASalary(playerIndex) {
@@ -2201,7 +2371,9 @@ export function doesEmployeeRequireSalary(playerIndex, employee) {
 export function canAffordPayDay(playerIndex) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
-	const due = salary(playerIndex)
+	const normalDue = baseSalary(playerIndex)
+	const switchDue = headhuntSalaryDue(playerIndex)
+	const due = normalDue + switchDue
 
 	// 1. Check for immediate total affordability
 	if (due === 0 || due <= playerObj.money) return true
@@ -2209,18 +2381,16 @@ export function canAffordPayDay(playerIndex) {
 	// 2. Calculate the "gap" in coverage
 	// Milestone reduces the cost of firing an employee from $5 to $3
 	const firingPenalty = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
-	const unpaidAmount = due - playerObj.money
-	const requiredCoverage = Math.ceil(unpaidAmount / firingPenalty)
-
 	// 3. First Beer Sold Milestone Logic
-	// Allows paying salary with resources instead of cash (excluding Coffee)
+	// Resources can replace normal salary, but not the one-time job-switch salary.
 	if (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD)) {
 		// Count how many non-coffee resources the player has
 		const validResourcesCount = playerObj.resources.reduce((acc, item) => {
 			return item !== rf.COFFEE ? acc + 1 : acc
 		}, 0)
 
-		return requiredCoverage <= validResourcesCount
+		const resourceCoverage = Math.min(normalDue, validResourcesCount * firingPenalty)
+		return playerObj.money + resourceCoverage >= due
 	}
 
 	return false
@@ -2229,14 +2399,14 @@ export function canAffordPayDay(playerIndex) {
 export function canPayWithFood(playerIndex) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
-	return plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) && playerObj.resources.length > 0
+	return baseSalary(playerIndex) > 0 && plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) && playerObj.resources.some((resource) => resource !== rf.COFFEE)
 }
 
 export function canPayWithMoney(playerIndex, n) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
 	let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
-	return Math.floor(playerObj.money / unitarySalary) >= n
+	return Math.floor(Math.max(0, playerObj.money - headhuntSalaryDue(playerIndex)) / unitarySalary) >= n
 }
 
 export function paySalaries(foodPayements) {
@@ -2253,7 +2423,9 @@ export function paySalaries(foodPayements) {
 			store.availableEmployees[rf.CFO]++
 		}
 
-		let due = salary(i)
+		const normalDue = baseSalary(i)
+		const switchDue = headhuntSalaryDue(i)
+		let due = normalDue + switchDue
 		let preMoney = player.money
 
 		if (due >= 20) {
@@ -2262,8 +2434,8 @@ export function paySalaries(foodPayements) {
 
 		if (plyr.hasMilestone(i, rf.FIRST_BEER_SOLD) && foodPayement.length > 0) {
 			let unitarySalary = plyr.hasMilestone(i, rf.FIRST_WAITRESS_USED) ? 3 : 5
-			due -= unitarySalary * foodPayement.length
-			due = Math.max(due, 0)
+			const normalAfterFood = Math.max(normalDue - unitarySalary * foodPayement.length, 0)
+			due = normalAfterFood + switchDue
 		}
 
 		//if (!Rules.canAffordPayDay(player) && plyr.hasMilestone(i, FIRST_TRAINER_USED)) {
@@ -2286,6 +2458,7 @@ export function paySalaries(foodPayements) {
 			}
 			console.log(`[PAY] ${player.displayName}: due=${due} PRE=$${preMoney} → money=$${player.money}`)
 		}
+		clearHeadhuntSalaries(i)
 	}
 	let anySalary = false
 	for (let i = 0; i < histo.length; i++) {
@@ -2304,10 +2477,11 @@ export function fireableEmployees(playerIndex) {
 	const salarySet = new Set(rf.REQUIRE_SALARY)
 	const employees = playerObj.employees
 	const beach = playerObj.beach
+	const canBeFired = (employee) => !rf.NON_FIREABLE_EMPLOYEES.includes(employee)
 
 	// 1. If player is solvent, they can fire anyone
 	if (canAffordPayDay(playerIndex)) {
-		return [...employees, ...beach]
+		return [...employees, ...beach].filter(canBeFired)
 	}
 
 	// 2. If insolvent, check if specific marketers MUST be fired first
@@ -2316,14 +2490,33 @@ export function fireableEmployees(playerIndex) {
 	if (marketersToFire.length > 0) {
 		// Filter out any employees who require a salary (must keep unpaid ones)
 		// Replaces _.filter + indexOf
-		const freeEmployees = employees.filter((e) => !salarySet.has(e))
-		const freeBeach = beach.filter((e) => !salarySet.has(e))
+		const freeEmployees = employees.filter((e) => !salarySet.has(e) && canBeFired(e))
+		const freeBeach = beach.filter((e) => !salarySet.has(e) && canBeFired(e))
 
 		return [...freeEmployees, ...freeBeach, ...marketersToFire]
 	}
 
 	// 3. Fallback: return all if no specific marketers are flagged
-	return [...employees, ...beach]
+	return [...employees, ...beach].filter(canBeFired)
+}
+
+export function fireableEmployeeChoices(playerIndex) {
+	const pendingByEmployee = new Map()
+	for (const entry of effectiveHeadhuntSalaryEntries(playerIndex)) {
+		if (!pendingByEmployee.has(entry.employee)) pendingByEmployee.set(entry.employee, [])
+		pendingByEmployee.get(entry.employee).push(entry)
+	}
+	return fireableEmployees(playerIndex).map((employee, index) => {
+		const pending = pendingByEmployee.get(employee)?.shift()
+		const headhunted = pending !== undefined
+		return {
+			employee,
+			headhunted,
+			fireToken: rf.encodeFiredEmployee(employee, headhunted),
+			switchSalary: pending?.cost ?? 0,
+			key: `${employee}-${headhunted ? "headhunted" : "native"}-${index}`,
+		}
+	})
 }
 
 export function needFiringMarketers(playerIndex) {
@@ -2341,20 +2534,14 @@ export function marketersNeedingFiring(playerIndex) {
 		return []
 	}
 
-	// 2. Calculate the "Debt Gap" (how many employees must be fired)
+	// 2. Calculate the cash gap. Resources may cover normal salaries only.
 	const penalty = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
 	const currentSalary = salary(playerIndex)
 	const availableCash = Math.max(0, playerObj.money)
-
-	let numToFire = Math.floor(currentSalary / penalty) - Math.floor(availableCash / penalty)
-
-	// Beer Milestone allows paying with resources
-	if (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD)) {
-		numToFire -= playerObj.resources.length
-	}
-
-	// If no one needs to be fired, exit early
-	if (numToFire <= 0) return []
+	const validResources = plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) ? playerObj.resources.filter((resource) => resource !== rf.COFFEE).length : 0
+	const resourceCoverage = Math.min(baseSalary(playerIndex), validResources * penalty)
+	const shortfall = currentSalary - availableCash - resourceCoverage
+	if (shortfall <= 0) return []
 
 	// 3. Count paid staff on Beach and in active structure
 	const countPaid = (list) => {
@@ -2372,9 +2559,11 @@ export function marketersNeedingFiring(playerIndex) {
 		totalPaidStaff--
 	}
 
-	// 4. Identify Marketers to fire only if other staff cannot cover the debt
+	// 4. Identify Marketers only when firing every eligible non-marketer still cannot
+	// cover the gap. Firing a newly headhunted employee also removes its switch salary.
 	const result = []
-	if (numToFire > totalPaidStaff && playerObj.marketers.length > 0) {
+	const nonMarketerRelief = totalPaidStaff * penalty + headhuntSalaryDue(playerIndex)
+	if (shortfall > nonMarketerRelief && playerObj.marketers.length > 0) {
 		playerObj.marketers.forEach((entry, i) => {
 			const emp = entry.marketer
 			// Ignore the marketer in the additional campaign slot
@@ -2389,7 +2578,7 @@ export function marketersNeedingFiring(playerIndex) {
 
 export function numPayNeeded(playerIndex) {
 	let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
-	let due = salary(playerIndex)
+	let due = baseSalary(playerIndex)
 	return Math.ceil(due / unitarySalary)
 }
 
@@ -2404,7 +2593,7 @@ export function payingWithGoodsRequireAction(playerIndex) {
 
 	// 2. Calculate if the player has more payment options than debt
 	// (Cash coverage + Resource count)
-	const cashSlots = Math.floor(playerObj.money / penalty)
+	const cashSlots = Math.floor(Math.max(0, playerObj.money - headhuntSalaryDue(playerIndex)) / penalty)
 	const totalPaymentOptions = cashSlots + playerObj.resources.length
 
 	// 3. If they have more options than debt, they must CHOOSE which to use.

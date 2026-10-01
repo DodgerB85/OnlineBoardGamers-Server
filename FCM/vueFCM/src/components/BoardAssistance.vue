@@ -34,7 +34,7 @@ const sandboxEmpTitle = (emp) => rf.EMPLOYEES_STR[emp]?.title ?? emp
 const sandboxHireChoices = computed(() => {
 	const possible = []
 	for (let i = 0; i < store.availableEmployees.length; i++) {
-		if (store.availableEmployees[i] !== -1) possible.push(i)
+		if (store.availableEmployees[i] !== -1 && ![rf.TEMPORARY_WORKER, rf.UNION_ORGANIZER].includes(i)) possible.push(i)
 	}
 	rf.sortEmployees(possible)
 	return possible
@@ -45,7 +45,7 @@ const sandboxFireChoices = computed(() => {
 	let current = [...playerObj.beach]
 	if (playerObj.employees.length > 0) current = current.concat(playerObj.employees)
 	rf.sortEmployees(current)
-	return current.filter((employee) => employee !== rf.BLANK_EMPLOYEE_SPACE)
+	return current.filter((employee) => employee !== rf.BLANK_EMPLOYEE_SPACE && !rf.NON_FIREABLE_EMPLOYEES.includes(employee))
 })
 
 const sandboxHireSelected = ref(sandboxHireChoices.value[0])

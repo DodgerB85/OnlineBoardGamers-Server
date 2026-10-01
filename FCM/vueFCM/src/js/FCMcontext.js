@@ -39,6 +39,9 @@ export function resetContext() {
 	store.context.justBuilt.splice(0)
 	store.context.justLobbied.splice(0)
 	store.context.justOpened.splice(0)
+	store.context.headhunterActionsUsed = 0
+	store.context.justHeadhunted.splice(0)
+	store.context.temporaryMarketer = false
 	// NB: justFired is NOT cleared here — it is cleared in startPlayerTurn (payday)
 	// and the strict payday path of endPlayerTurn. Clearing it here would destroy
 	// the player's firing decisions before endPlayerTurn can read them for simul payday.

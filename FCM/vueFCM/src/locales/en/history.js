@@ -53,6 +53,7 @@
       kimchi: "Kimchi",
       sushi: "Sushi",
       noodles: "Noodles",
+      laborMarket: "Labor Market",
       skipModule: "Skip Module",
     },
     abbr: {
@@ -109,6 +110,15 @@
     stadiumAnnounce: "The stadium announces a game on turn {turn}: it will demand {units} \u00D7 {good}",
     stadiumWinner: "{name} feeds the whole stadium, selling {units} \u00D7 {good}",
     stadiumNobody: "Nobody could supply the stadium - the demand of {units} \u00D7 {good} clears at day's end:",
+
+    temporaryWorkerChosen: "{name} assigns their Temporary Worker as {employee} with {count} available action(s); {used} immediate action(s) apply.",
+    temporaryWorkerChoices: "{name} assigns {selected}/{count} Temporary Worker action(s): {employees}.",
+    temporaryWorkerCampaign: "{name}'s Temporary Worker starts campaign #{num} (action {used} of {count}).",
+    none: "none",
+    headhunts: "{name} headhunts {employee} from {owner}'s Beach and pays ${amount}.",
+    headhuntsDeferred: "{name} headhunts {employee} from {owner}'s Beach; keeping it costs ${amount} at Payday.",
+    unionAssigned: "Union Organizers go to {names}; each tied for the largest eligible workforce with {count} workers.",
+    unionUnassigned: "No company reached the 5-worker Union Organizer threshold.",
 
     // Building
     buildHouse: "{name} builds house #{num} {orient} at co-ordinates ({x}, {y})",
