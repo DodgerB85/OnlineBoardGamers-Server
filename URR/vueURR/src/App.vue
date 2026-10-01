@@ -15,6 +15,9 @@ import TopMenuViews from "./components/TopMenuViews.vue"
 import FooterBar from "./components/FooterBar.vue"
 import MapArea from "./components/MapArea.vue"
 import PlayerTable from "./components/PlayerTable.vue"
+import StateStrip from "./components/StateStrip.vue"
+import PlayerHoldings from "./components/PlayerHoldings.vue"
+import TerrainMarket from "./components/TerrainMarket.vue"
 import DebugArea from "./components/DebugArea.vue"
 import HistoryTab from "./components/HistoryTab.vue"
 import ReplayArea from "./components/ReplayArea.vue"
@@ -38,13 +41,16 @@ function showDebug() {
 		<HistoryTab />
 		<ReplayArea v-if="store.viewSettings.showReplay" />
 		<template v-if="!store.viewSettings.showReplay">
+			<StateStrip />
 			<div id="mainAreaLessHistory">
-				<PlayerTable />
+				<PlayerHoldings />
 				<div class="mapContainer">
 					<MapArea />
 				</div>
+				<TerrainMarket />
 				<DebugArea v-if="showDebug()" />
 			</div>
+			<PlayerTable />
 		</template>
 	</div>
 	<FooterBar />
@@ -74,12 +80,23 @@ body {
 #mainAreaLessHistory {
 	min-height: 60px;
 	min-width: 620px;
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	gap: 8px;
+	margin: 0 auto;
 }
 
 .mapContainer {
 	display: flex;
 	justify-content: center;
-	margin: auto;
+	min-width: 0;
+	flex: 1 1 920px;
+}
+
+@media (max-width: 1120px) {
+	#mainAreaLessHistory { flex-wrap: wrap; }
+	.mapContainer { order: -1; flex-basis: 100%; }
 }
 
 #loaderOverlay {
