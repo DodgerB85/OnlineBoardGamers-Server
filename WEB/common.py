@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext
 
@@ -13,53 +14,27 @@ from Lobby.models import Game, GamePlayer, User
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getGameCreationJsonReturn,
     SF_setupTrainingGameShadows,
-    SF_validatePlayers,
 )
-from Lobby.sharedFunctions.sharedRefs import (
-    SR_getTimeNow,
-)  # Replace 'somewhere' with actual module
+from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 if TYPE_CHECKING:
-    from Lobby.presenters import BUSpresenter
+    from Lobby.presenters import WEBpresenter
 
 
 @login_required()
-def create_bus_game(
+def create_web_game(
     request,
     tournamentObj=None,
     tournamentGameName=None,
     current_players_usernames=None,
 ):
+    """Create a WEB game, either for a tournament or regular play."""
     is_main_tournament = tournamentObj and tournamentObj.tournamentCategory == "Main"
     is_mini_tournament = tournamentObj and tournamentObj.tournamentCategory == "Mini"
-    """
-    Create a Bus game, either for a tournament or regular play (training/non-training).
-    Args:
-        request: Django request object.
-        is_main_tournament: Boolean indicating if this is a maintournament game.
-        is_mini_tournament: Boolean indicating if this is a mini-tournament game.
-        tournament: Tournament object (if applicable).
-        tournamentGameName: String indicating the round number (if applicable).
-        current_players_usernames: List of usernames for pre-assigned players (if applicable).
-    Returns:
-        JsonResponse or HttpResponseRedirect based on the request type and outcome.
-    """
+
     if not is_main_tournament and not is_mini_tournament and request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
-    def get_max_players(post_data):
-        """Determine max players based on playerNumber or tournament."""
-        if "playerNumber" in post_data:
-            return int(post_data.get("playerNumber", 3))
-        if tournamentObj is not None and (is_main_tournament or is_mini_tournament):
-            return tournamentObj.maxGamePlayers
-        return 3
-
-    #############################################
-    #
-    # Regular game creation
-    #
-    ###############################################
     # Initialize game parameters
     game_name = ""
     game_description = ""
@@ -71,16 +46,12 @@ def create_bus_game(
     max_players = 2
     game_status = "AVAILABLE"
     kickout_duration = 100
-    starting_map = ""
     shadowNameNotes = ""
     usernames_to_notify = []
-    invited_usernames = []
+    invited_usernames_objs = []
     stats_exclude = False
     player_order_seed = random.randint(1000, 32767)
     all_players = []
-    invited_usernames_objs = []
-
-    max_players = get_max_players(request.POST)
 
     # Setup Tournament Options
     if is_main_tournament or is_mini_tournament:
@@ -97,57 +68,71 @@ def create_bus_game(
         game_status = "ACTIVE"
 
         # Mini tournament games can have fewer players than maxGamePlayers
-        # (eg when the last game is short), so size the game to the actual players
-        if is_mini_tournament and current_players_usernames:
-            max_players = len(current_players_usernames)
+        max_players = len(current_players_usernames) if is_mini_tournament and current_players_usernames else tournamentObj.maxGamePlayers
 
         all_players = [User.objects.get(username=username) for username in (current_players_usernames or []) if username]
-        # NB tournament games return before using this
-        usernames_to_notify = [username for username in (current_players_usernames or []) if username]
 
     # Else setup normal Options
     else:
-        game_name = request.POST.get("gameName", "")
-        game_description = request.POST.get("gameDescription", "")
-        creator = request.user
-        host = request.user
-        starting_map = request.POST.get("mapData", "")
-        game_pace = request.POST.get("pace", 40)
-        kickout_duration = request.POST.get("kickoutDuration", 100)
-        invited_usernames = [request.POST.get(f"player{i}") for i in range(2, 6) if request.POST.get(f"player{i}")]
+        players = ["player2", "player3", "player4"]
+        usernames = []
+        for player in players:
+            username = request.POST.get(player)
+            if username:
+                usernames.append(username)
 
         if "trainingGame" not in request.POST:
-            invited_usernames_objs = SF_validatePlayers(request, invited_usernames, max_players, allow_creator=False)
-            # If no invited playerrs, get []. If error, get None
-            if invited_usernames_objs is None:
-                return HttpResponseRedirect(reverse("createBUSpage"))
+            existing_users = User.objects.filter(username__in=usernames)
+            existing_usernames = set(user.username for user in existing_users)
+            for username in usernames:
+                if username not in existing_usernames:
+                    messages.error(request, gettext(f"Error: {username} does not exist"))
+                    return HttpResponseRedirect(reverse("createWEBpage"))
+                if username == request.user.username:
+                    messages.error(request, gettext("Error: You cannot add yourself"))
+                    return HttpResponseRedirect(reverse("createWEBpage"))
 
-            # invited_players = [get_object_or_404(User, username=username) for username in invited_usernames]
-            if len(invited_usernames_objs) > 0:
-                game_status = "WAITING"
-                usernames_to_notify = [user.username for user in invited_usernames_objs]
+        game_description = request.POST["gameDescription"]
+        max_players = int(request.POST.get("playerNumber", "2"))
+        game_pace = request.POST["pace"]
+        creator = request.user
+        host = request.user
+        game_name = request.POST["gameName"]
+        kickout_duration = request.POST["kickoutDuration"]
 
         if "trainingGame" in request.POST:
             starting_options.append(int(request.POST["trainingGame"]))
+        if "learningGame" in request.POST:
+            starting_options.append(int(request.POST.get("learningGame")))
+        if "experiencedGame" in request.POST:
+            starting_options.append(int(request.POST.get("experiencedGame")))
+
+        if "trainingGame" in request.POST:
             game_status = "ACTIVE"
             stats_exclude = True
             shadow_users, shadowNameNotes = SF_setupTrainingGameShadows(request, max_players)
+            all_players.append(request.user)
             all_players.extend(shadow_users)
-        elif "learningGame" in request.POST:
-            starting_options.append(int(request.POST.get("learningGame")))
-            stats_exclude = True
-        elif "experiencedGame" in request.POST:
-            starting_options.append(int(request.POST.get("experiencedGame")))
+        else:
+            all_players.append(request.user)
+            for i in range(2, max_players + 1):
+                player_username = request.POST.get(f"player{i}", "")
+                if player_username:
+                    newPlayer = get_object_or_404(User, username=player_username)
+                    invited_usernames_objs.append(newPlayer)
+                    usernames_to_notify.append(newPlayer.username)
+            if usernames_to_notify:
+                game_status = "WAITING"
 
-        if "usePittsburghMap" in request.POST:
-            starting_options.append(int(request.POST["usePittsburghMap"]))
+        if "learningGame" in request.POST:
             stats_exclude = True
 
-        all_players.append(request.user)
+    if "privateGame" in request.POST:
+        game_status = "PRIVATE"
 
     with transaction.atomic():
         new_game = Game(
-            gameCode="BUS",
+            gameCode="WEB",
             gameName=game_name,
             gameDescription=game_description,
             creator=creator,
@@ -160,14 +145,11 @@ def create_bus_game(
             maxPlayers=max_players,
             gameStatus=game_status,
             kickoutDuration=kickout_duration,
-            zoomLevels=json.dumps([120] * max_players),
+            zoomLevels=json.dumps([0] * max_players),
             statsExcludedGame=stats_exclude,
-            startingMap=starting_map,
             startingOptions=json.dumps(starting_options),
             playerOrderSeed=player_order_seed,
         )
-        if "privateGame" in request.POST:
-            new_game.gameStatus = "PRIVATE"
 
         if is_main_tournament:
             new_game.relatedMainTournament = tournamentObj
@@ -191,29 +173,26 @@ def create_bus_game(
 
         # Start pre-populated games
         if is_main_tournament or is_mini_tournament or "trainingGame" in request.POST:
-            presenter = cast("BUSpresenter", new_game.presenter())
+            presenter = cast("WEBpresenter", new_game.presenter())
             presenter.startGame(request)
 
-    # Tournament Notifications and redirects and return
+    # Tournament games return the game id
     if is_main_tournament or is_mini_tournament:
-        # Use the game start notifications rather than a generic tournament one
         return new_game.id
 
-    # THE BELOW IS JUST FOR NORMAL GAMES - TOURNAMENT GAMES RETURN ABOVE
     # Normal Game Notifications
     if usernames_to_notify:
-        presenter = cast("BUSpresenter", new_game.presenter())
+        presenter = cast("WEBpresenter", new_game.presenter())
         presenter.sendInviteNotifications(
             usernames_to_notify,
             new_game.presenter().getGameName(),
             max_players,
-            "BUS",
+            "WEB",
         )
 
     if "trainingGame" in request.POST:
         messages.success(request, gettext("Your Practice game has started"))
         return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
 
-    # Otherwise, return normal game creation
-    messages.success(request, SF_getGameCreationJsonReturn("BUS", new_game.id))
+    messages.success(request, SF_getGameCreationJsonReturn("WEB", new_game.id))
     return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))

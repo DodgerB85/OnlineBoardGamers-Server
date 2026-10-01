@@ -95,6 +95,11 @@ def create_aqy_game(
 
         game_status = "ACTIVE"
 
+        # Mini tournament games can have fewer players than maxGamePlayers
+        # (eg when the last game is short), so size the game to the actual players
+        if is_mini_tournament and current_players_usernames:
+            max_players = len(current_players_usernames)
+
         all_players = [User.objects.get(username=username) for username in (current_players_usernames or []) if username]
         # NB tournament games return before using this
         usernames_to_notify = [username for username in (current_players_usernames or []) if username]

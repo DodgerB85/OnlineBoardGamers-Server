@@ -709,10 +709,14 @@ def start_next_any_tournament_round(
 ):
     from AQY.common import create_aqy_game
     from BUS.common import create_bus_game
+    from CNS.common import create_cns_game
     from FCM.common import create_fcm_game
     from HLC.common import create_hlc_game
     from IND.common import create_ind_game
+    from KFW.common import create_kfw_game
+    from RNB.common import create_rnb_game
     from TGZ.common import create_tgz_game
+    from WEB.common import create_web_game
 
     # MG tournaments don't add next round players dynamically
     # End T check checks for not enough next round players
@@ -808,6 +812,14 @@ def start_next_any_tournament_round(
             newGameID = create_aqy_game(request, tournamentObj, tournamentGameName, currentPlayers)
         elif tournamentObj.gameCode == "IND":
             newGameID = create_ind_game(request, tournamentObj, tournamentGameName, currentPlayers)
+        elif tournamentObj.gameCode == "RNB":
+            newGameID = create_rnb_game(request, tournamentObj, tournamentGameName, currentPlayers)
+        elif tournamentObj.gameCode == "CNS":
+            newGameID = create_cns_game(request, tournamentObj, tournamentGameName, currentPlayers)
+        elif tournamentObj.gameCode == "WEB":
+            newGameID = create_web_game(request, tournamentObj, tournamentGameName, currentPlayers)
+        elif tournamentObj.gameCode == "KFW":
+            newGameID = create_kfw_game(request, tournamentObj, tournamentGameName, currentPlayers)
         else:
             # LEGACY CODE FOR SEPERARTE TOURNAMENT MODELS
             # THIS WILL FAIL! THIS FUNCTION NO LONGER EXISTS
