@@ -347,3 +347,79 @@ describe("bailout wire-format persistence", () => {
 		expect(store.bailout.pool[rf.CAMPAIGN_MANAGER]).toBe(5)
 	})
 })
+
+describe("saves from older exportFCMmodel versions still import", () => {
+	// Only the tail of the wire format changed over time: #119-era saves pushed
+	// [gamesPlayed, announcementObject] plus the full bailout object, and saves
+	// from before the stadium mod have no trailing slots at all. Rebuild those
+	// tails on top of a current export and load them through importFCMmodel.
+	const STARTING_MAP = [17, 0, 4, 0, 19, 3, 18, 0, 12, 2, 24, 2, 9, 0, 0, 2, 13, 2]
+
+	function decodeExport(b64) {
+		return JSON.parse(pako.ungzip(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { to: "string" }))
+	}
+	function encodeArr(arr) {
+		return btoa(String.fromCharCode(...new Uint8Array(pako.gzip(JSON.stringify(arr)))))
+	}
+	function importInto(decoded, opts, forGameOver = false) {
+		globalThis.window.initData = { startingOptions: opts, startingMap: STARTING_MAP, playerNames: ["P0", "P1"] }
+		const store = freshGame(2, opts)
+		const result = funcs.importFCMmodel(encodeArr(decoded), forGameOver, false)
+		expect(result).not.toBe(-9999)
+		return store
+	}
+
+	it("loads a #119-era save (object announcement stadium slot + full bailout object)", () => {
+		freshGame(2, ["47", "49"])
+		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
+		// Replace the current tail with what #119 exported
+		decoded[decoded.length - 1] = [1, { gameNumber: 2, food: rf.PIZZA, units: 8 }]
+		decoded.push({ pending: true, pool: { [rf.CAMPAIGN_MANAGER]: 5 }, claims: { 0: rf.CAMPAIGN_MANAGER }, order: [0, 1] })
+
+		const store = importInto(decoded, ["47", "49"])
+		expect(store.stadium.gamesPlayed).toBe(1)
+		expect(store.stadium.announcement).toEqual({ gameNumber: 2, food: rf.PIZZA, units: 8 })
+		expect(store.bailout.pending).toBe(true)
+		expect(store.bailout.claims[0]).toBe(rf.CAMPAIGN_MANAGER)
+		expect(store.bailout.pool[rf.CAMPAIGN_MANAGER]).toBe(5)
+		expect(store.bailout.order).toEqual([0, 1])
+	})
+
+	it("loads a stadium-era save (stadium slot, no bailout slot)", () => {
+		freshGame(2, ["47"])
+		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
+		decoded[decoded.length - 1] = [1, { gameNumber: 2, food: rf.PIZZA, units: 8 }]
+
+		const store = importInto(decoded, ["47"])
+		expect(store.stadium.gamesPlayed).toBe(1)
+		expect(store.stadium.announcement).toEqual({ gameNumber: 2, food: rf.PIZZA, units: 8 })
+		expect(store.bailout.pending).toBe(false)
+	})
+
+	it("loads a pre-stadium save (no trailing module slots)", () => {
+		freshGame(2, [])
+		// Flags off: the current export already ends where the old exports did
+		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
+
+		const store = importInto(decoded, [])
+		expect(store.stadium.gamesPlayed).toBe(0)
+		expect(store.stadium.announcement).toBeNull()
+		expect(store.bailout.pending).toBe(false)
+	})
+
+	it("loads an old game-over save (no slots 14-16, stadium + full bailout object at the end)", () => {
+		const game = freshGame(2, ["47", "49"])
+		// The winner check at game over reads the last history entry's param[0]
+		game.history.push([rf.HIST_NEW_TURN, 0, 0, [0]])
+		// Game-over exports skip slots 14-16; the old tail is appended after slot 13
+		const decoded = decodeExport(funcs.exportFCMmodel(true, false))
+		decoded[decoded.length - 1] = [1, { gameNumber: 2, food: rf.PIZZA, units: 8 }]
+		decoded.push({ pending: true, pool: { [rf.CAMPAIGN_MANAGER]: 5 }, claims: { 0: rf.CAMPAIGN_MANAGER }, order: [0, 1] })
+
+		const store = importInto(decoded, ["47", "49"], true)
+		expect(store.stadium.gamesPlayed).toBe(1)
+		expect(store.stadium.announcement).toEqual({ gameNumber: 2, food: rf.PIZZA, units: 8 })
+		// Claim state never applies once the game is over
+		expect(store.bailout.pending).toBe(false)
+	})
+})
