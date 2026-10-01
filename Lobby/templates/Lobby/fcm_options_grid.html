@@ -235,6 +235,13 @@
     </div>
   </label>
   <label class="check-label">
+    <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt222" id="laborMarket" name="laborMarket" value="48" />
+    <div>
+      <div style="color:#d97706">{% trans "Use Labor Market" %} (MOD) &mdash; {% trans "See" %} <a href="{% url 'FCM:fanExpansionsHelp' %}" target="_blank">{% trans "Help" %}</a></div>
+      <div class="opt-help">{% trans "Adds Temporary Workers, Headhunters and Union Organizers" %}</div>
+    </div>
+  </label>
+  <label class="check-label">
     <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt222" id="secondBailout" name="secondBailout" value="49" />
     <div>
       <div style="color:#d97706">{% trans "Use Second Bailout" %} (MOD) &mdash; {% trans "See" %} <a href="{% url 'FCM:fanExpansionsHelp' %}" target="_blank">{% trans "Help" %}</a></div>

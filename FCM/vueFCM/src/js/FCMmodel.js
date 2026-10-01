@@ -216,6 +216,7 @@ export async function initGame() {
 
 			// INTERNAL OPTIONS NEED TO BE SET BEFORE THIS
 			setupKetchupExpansion(store.players.length)
+			setupLaborMarketExpansion()
 
 			let pInfos = []
 			for (let i = 0; i < store.players.length; i++) {
@@ -366,6 +367,8 @@ export function setInternalStartingOptions(startingOptionsArray) {
 		if (opts[i] === rf.SO_FRIED_CHICKEN) store.startingOptions.friedChicken = true
 		// Stadium mod
 		if (opts[i] === rf.SO_STADIUM) store.startingOptions.stadium = true
+		// Labor Market mod
+		if (opts[i] === rf.SO_LABOR_MARKET) store.startingOptions.laborMarket = true
 		// Second Bailout mod
 		if (opts[i] === rf.SO_SECOND_BAILOUT) store.startingOptions.secondBailout = true
 
@@ -477,10 +480,38 @@ export function setupKetchupExpansion(playerNumber) {
 	if (store.startingOptions.stadium) {
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
 	}
+	if (store.startingOptions.laborMarket) store.availableEmployees[rf.HEADHUNTER] = 6
+}
+
+export function setupLaborMarketExpansion() {
+	const store = useModelStore()
+	if (!store.startingOptions.laborMarket) return
+	store.availableEmployees[rf.TEMPORARY_WORKER] = -1
+	store.availableEmployees[rf.HEADHUNTER] = 6
+	store.availableEmployees[rf.UNION_ORGANIZER] = store.players.length
+	store.laborMarket.removedTemporaryWorkers = 0
+	store.laborMarket.removedTemporaryWorkersAtTurnStart = 0
+	store.laborMarket.unionHolders = []
+	store.laborMarket.pendingUnionHolders = []
+	store.laborMarket.workedCounts = Array(store.players.length).fill(0)
+	store.laborMarket.temporaryCampaignOwners = {}
+	store.laborMarket.dailyTemporaryEffects = Array(store.players.length).fill(null)
+	store.laborMarket.pendingHeadhuntSalaries = Array.from({ length: store.players.length }, () => [])
+	for (const player of store.players) {
+		if (!player.beach.includes(rf.TEMPORARY_WORKER) && !player.employees.includes(rf.TEMPORARY_WORKER)) player.beach.push(rf.TEMPORARY_WORKER)
+	}
+}
+
+export function startLaborMarketTurn() {
+	const store = useModelStore()
+	if (!store.startingOptions.laborMarket) return
+	store.laborMarket.removedTemporaryWorkersAtTurnStart = store.laborMarket.removedTemporaryWorkers
+	store.laborMarket.dailyTemporaryEffects = Array(store.players.length).fill(null)
 }
 
 export function findPlayerForCampaign(number) {
 	const store = useModelStore()
+	if (Number.isInteger(store.laborMarket.temporaryCampaignOwners[number])) return store.laborMarket.temporaryCampaignOwners[number]
 	for (let i = 0; i < store.players.length; i++) {
 		for (let j = 0; j < store.players[i].marketers.length; j++) {
 			if (store.players[i].marketers[j].campaign === number) return i
@@ -583,6 +614,7 @@ export function removeMarketingCampaign(number) {
 	const campaign = store.campaigns.find((c) => c.number === number)
 
 	if (!campaign) return // Guard clause if campaign doesn't exist
+	delete store.laborMarket.temporaryCampaignOwners[number]
 
 	// 2. Remove the campaign
 	store.campaigns = store.campaigns.filter((c) => c.number !== number)

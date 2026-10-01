@@ -1587,6 +1587,7 @@ export function processSimulMoveData(data) {
 			store.players[i].beach = content[0]
 			store.players[i].employees = content[1]
 			store.players[i].OOBpreference = content[2]
+			if (store.startingOptions.laborMarket) rules.snapshotWorkedCount(i)
 			//alert(`name: ${store.players[i].name} beach: ${store.players[i].beach} employees: ${store.players[i].employees} OOBpreference: ${store.players[i].OOBpreference}`)
 			//alert(`_name: ${_name} _phasesArray: ${_phasesArray} _timestamp: ${_timestamp} content: ${content}`)
 			if (store.players[i].employees.indexOf(rf.DISCOUNT_MANAGER) > -1) {
@@ -1632,7 +1633,8 @@ export function processSimulMoveData(data) {
 			// Still need to check for processing with BEER MS- PAY WITH FOOD THEN MONEY
 			if (turnDataArray[0].length > 0 && turnDataArray[0][0] === -4) {
 				turnDataArray[1].splice(0)
-				let due = rules.salary(i)
+				// Food may replace normal salary only; job-switch salary is cash-only.
+				let due = rules.baseSalary(i)
 				let unitarySalary = plyr.hasMilestone(i, rf.FIRST_WAITRESS_USED) ? 3 : 5
 				// Remove any coffee
 				playerObj.resources = funcs.removeItemAll(playerObj.resources, rf.COFFEE)
@@ -1650,7 +1652,7 @@ export function processSimulMoveData(data) {
 					if (i !== personal.pov) {
 						// The current player's firing and returning is done in real time
 						plyr.fireEmployee(i, turnDataArray[0][j])
-						store.availableEmployees[turnDataArray[0][j]]++
+						store.availableEmployees[rf.decodeFiredEmployee(turnDataArray[0][j])]++
 					}
 				}
 				histAdded = true

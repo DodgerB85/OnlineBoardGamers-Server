@@ -31,6 +31,7 @@ STATS_EXCLUDED_OPTIONS = [
     rfFCM.SO_HAWKERS,
     rfFCM.SO_FRIED_CHICKEN,
     rfFCM.SO_STADIUM,
+    rfFCM.SO_LABOR_MARKET,
     rfFCM.SO_SECOND_BAILOUT,
 ]
 
@@ -112,6 +113,7 @@ def buildFCMstartingOptions(post_data):
         "hawkers",
         "friedChicken",
         "stadium",
+        "laborMarket",
         "secondBailout",
         "allowRewind",
     ]

@@ -290,6 +290,7 @@ const svgInstructions = computed(() => {
 	addLine(initialLeft, currentTop, initialLeft + horizontalShift * 4, currentTop)
 
 	lines.push(generatePath(initialLeft, currentTop, 1, 1)) // NBD
+	if (actualArr.includes(rf.HEADHUNTER)) lines.push(generatePath(initialLeft, currentTop, -1, 1)) // Headhunter
 	lines.push(generatePath(initialLeft, currentTop, -1, 3)) // Lux Mgr
 
 	currentLeft += horizontalShift // VP
@@ -1306,4 +1307,5 @@ const sortedCampaigns = computed(() => {
 .centerAlign {
 	vertical-align: middle;
 }
+
 </style>

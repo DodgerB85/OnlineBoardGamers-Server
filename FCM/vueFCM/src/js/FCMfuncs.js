@@ -231,8 +231,10 @@ export function simpleExportWholeFCMmodel() {
 
 	// 21 - Stadium mod
 	temp.push(JSON.parse(JSON.stringify(store.stadium)))
+	// 22 - Labor Market mod
+	temp.push(exportLaborMarketSlot())
 
-	// 22 - Second Bailout mod
+	// 23 - Second Bailout mod
 	temp.push(JSON.parse(JSON.stringify(store.bailout)))
 
 	let step1 = JSON.stringify(temp)
@@ -664,10 +666,13 @@ export function exportFCMmodel(forGameOver, includeContext) {
 		}
 	}
 
-	// 18 - Stadium mod (only when the module was chosen; shape-detected on load)
+	// 18 - Labor Market mod (only when chosen; tagged for shape detection)
+	if (store.startingOptions.laborMarket) temp.push(exportLaborMarketSlot())
+
+	// 19 - Stadium mod (only when the module was chosen; shape-detected on load)
 	if (store.startingOptions.stadium) temp.push(exportStadiumSlot())
 
-	// 19 - Second Bailout mod: only while a claim night is open, and never on
+	// 20 - Second Bailout mod: only while a claim night is open, and never on
 	// game-over saves. Stored as [order, pool pairs, claim pairs] - flat, compact,
 	// and nothing is written when the mod is chosen but no night is running.
 	if (!forGameOver && store.startingOptions.secondBailout && store.bailout.pending) {
@@ -1170,10 +1175,14 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 		}
 	}
 
+	// Labor Market mod (tagged optional slot)
+	restoreLaborMarketState(inputArr)
+	let moduleImportIndex = IMPORT_INDEX
+	if (inputArr[moduleImportIndex]?.kind === "laborMarket") moduleImportIndex++
 	// Stadium mod (next slot when the module was chosen; falls back to history for older saves)
-	restoreStadiumState(inputArr, IMPORT_INDEX)
+	restoreStadiumState(inputArr, moduleImportIndex)
 	// Second Bailout mod (trails the stadium slot when that module is chosen)
-	restoreBailoutState(inputArr, IMPORT_INDEX, forGameOver)
+	restoreBailoutState(inputArr, moduleImportIndex, forGameOver)
 }
 
 // Shape check for both bailout slot formats: the older full object and the
@@ -1277,6 +1286,68 @@ export function restoreStadiumState(inputArr, index = inputArr.length - 1) {
 			break
 		}
 	}
+}
+
+export function exportLaborMarketSlot() {
+	const store = useModelStore()
+	return {
+		kind: "laborMarket",
+		version: 4,
+		removedTemporaryWorkers: store.laborMarket.removedTemporaryWorkers,
+		removedTemporaryWorkersAtTurnStart: store.laborMarket.removedTemporaryWorkersAtTurnStart,
+		unionHolders: [...store.laborMarket.unionHolders],
+		pendingUnionHolders: [...store.laborMarket.pendingUnionHolders],
+		workedCounts: [...store.laborMarket.workedCounts],
+		temporaryCampaignOwners: { ...store.laborMarket.temporaryCampaignOwners },
+		dailyTemporaryEffects: store.laborMarket.dailyTemporaryEffects.map((effect) => effect ? { ...effect, roles: [...effect.roles], usedByRole: { ...effect.usedByRole } } : null),
+		pendingHeadhuntSalaries: store.laborMarket.pendingHeadhuntSalaries.map((entries) => Array.isArray(entries) ? entries.map((entry) => ({ ...entry })) : []),
+	}
+}
+
+export function restoreLaborMarketState(inputArr) {
+	const store = useModelStore()
+	const slot = [...inputArr].reverse().find((entry) => entry?.kind === "laborMarket")
+	const supported = slot?.version === 1 || slot?.version === 2 || slot?.version === 3 || slot?.version === 4
+	const savedPlayerCount = Math.max(store.players.length, Array.isArray(slot?.workedCounts) ? slot.workedCounts.length : 0)
+	const validHolders = (holders) => [...new Set(Array.isArray(holders) ? holders : [])].filter((holder) => Number.isInteger(holder) && holder >= 0 && (savedPlayerCount === 0 || holder < savedPlayerCount))
+	store.laborMarket.removedTemporaryWorkers = supported ? Math.max(0, slot.removedTemporaryWorkers || 0) : 0
+	store.laborMarket.unionHolders = slot?.version >= 2 ? validHolders(slot.unionHolders) : validHolders([slot?.unionHolder])
+	store.laborMarket.pendingUnionHolders = slot?.version >= 2 ? validHolders(slot.pendingUnionHolders) : validHolders([slot?.pendingUnionHolder])
+	store.laborMarket.workedCounts = supported && Array.isArray(slot.workedCounts) ? [...slot.workedCounts] : []
+	store.laborMarket.temporaryCampaignOwners = supported && slot.temporaryCampaignOwners ? { ...slot.temporaryCampaignOwners } : {}
+	const normalizeTemporaryEffect = (effect) => {
+		if (!effect) return null
+		if (Array.isArray(effect.roles)) {
+			const roles = effect.roles.filter((role) => rf.TEMPORARY_WORKER_ROLES.includes(role)).slice(0, Math.max(0, effect.limit || 0))
+			const usedByRole = {}
+			for (const role of rf.TEMPORARY_WORKER_ROLES) {
+				const used = Math.max(0, Math.min(roles.filter((selectedRole) => selectedRole === role).length, effect.usedByRole?.[role] || 0))
+				if (used > 0) usedByRole[role] = used
+			}
+			return { roles, limit: Math.max(0, effect.limit || 0), usedByRole }
+		}
+		if (rf.TEMPORARY_WORKER_ROLES.includes(effect.role)) {
+			const limit = Math.max(0, effect.limit || 0)
+			return { roles: Array.from({ length: limit }, () => effect.role), limit, usedByRole: effect.used > 0 ? { [effect.role]: Math.min(limit, effect.used) } : {} }
+		}
+		return null
+	}
+	store.laborMarket.dailyTemporaryEffects = supported && Array.isArray(slot.dailyTemporaryEffects) ? slot.dailyTemporaryEffects.map(normalizeTemporaryEffect) : Array(store.players.length).fill(null)
+	const consumedThisTurn = store.laborMarket.dailyTemporaryEffects.reduce((total, effect, playerIndex) => {
+		if (!effect) return total
+		const player = store.players[playerIndex]
+		const stillOwnsTemporaryWorker = player?.employees?.includes(rf.TEMPORARY_WORKER) || player?.beach?.includes(rf.TEMPORARY_WORKER)
+		return total + (stillOwnsTemporaryWorker ? 0 : 1)
+	}, 0)
+	store.laborMarket.removedTemporaryWorkersAtTurnStart = slot?.version === 4
+		? Math.max(0, Math.min(store.laborMarket.removedTemporaryWorkers, slot.removedTemporaryWorkersAtTurnStart || 0))
+		: Math.max(0, store.laborMarket.removedTemporaryWorkers - consumedThisTurn)
+	store.laborMarket.pendingHeadhuntSalaries = slot?.version >= 3 && Array.isArray(slot.pendingHeadhuntSalaries)
+		? Array.from({ length: savedPlayerCount }, (_, playerIndex) => Array.isArray(slot.pendingHeadhuntSalaries[playerIndex])
+			? slot.pendingHeadhuntSalaries[playerIndex].filter((entry) => Number.isInteger(entry?.employee) && Number.isFinite(entry?.cost) && entry.cost >= 0).map((entry) => ({ employee: entry.employee, cost: entry.cost }))
+			: [])
+		: Array.from({ length: savedPlayerCount }, () => [])
+	if (store.startingOptions.laborMarket) store.availableEmployees[rf.UNION_ORGANIZER] = Math.max(0, store.players.length - store.laborMarket.unionHolders.length)
 }
 
 export function simpleImportWholeFCMmodel(inputBase64) {
@@ -1413,13 +1484,11 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	store.stadium.gamesPlayed = 0
 	store.stadium.announcement = null
 	if (inputModel.length > 21) applyStadiumSlot(inputModel[21])
-
-	// 22 - Second Bailout mod (older snapshots predate this slot)
-	store.bailout.pending = false
-	store.bailout.pool = {}
-	store.bailout.claims = {}
-	store.bailout.order = []
-	if (inputModel.length > 22) Object.assign(store.bailout, inputModel[22])
+	// 22-23 - Optional Labor Market and Second Bailout state. Shape detection
+	// preserves snapshots made before either module existed and snapshots where
+	// Second Bailout occupied slot 22 before Labor Market was added.
+	restoreLaborMarketState(inputModel.slice(21))
+	restoreBailoutState(inputModel.slice(21))
 
 	// Adjust CEOs with dumpling MS, using history
 	if (store.startingOptions.dumplings) {

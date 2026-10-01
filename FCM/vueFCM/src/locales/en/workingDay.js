@@ -1,9 +1,23 @@
 ﻿export default {
   workingDay: {
+    chooseTemporaryWorker: "Choose up to {count} entry-employee actions. You may mix abilities or choose the same one repeatedly; unused actions may be forfeited.",
+    temporaryWorkerSelected: "Selected actions ({selected}/{count}):",
+    clickToRemoveTemporaryWorker: "Click to remove this action",
+    resetTemporaryWorker: "Reset Temporary Worker",
+    confirmTemporaryWorker: "Confirm Temporary Worker",
+    temporaryAction: "Temporary Worker action",
+    noHeadhuntTargets: "No legal employees are currently available on another player's Beach.",
+    headhunterIntro: "Choose up to {count} employee(s) from opponents' live Beaches. A kept employee's displayed job-switch salary is paid to the bank at Payday.",
+    headhuntFrom: "From {player}'s Beach",
+    headhuntSalary: "${amount} at Payday",
+    headhuntTargetLabel: "Headhunt {employee} from {player}'s Beach; ${amount} at Payday",
+    headhuntedLabel: "Headhunted:",
+    finishHeadhunting: "Finish Headhunting",
     // Hiring
     remainingPoints: "{count} remaining point | {count} remaining points",
     salaryPoints: "1 point may be used to reduce salaries by $5 | {count} points may be used to reduce salaries by ${amount}",
     resetWorkingDay: "Reset Working Day",
+    resetRecruiting: "Reset Recruiting",
     finishRecruiting: "Finish Recruiting",
 
     // Training

@@ -12206,3 +12206,8 @@ msgstr "短局不受影响：第一次破产即终局，救市永远不会发生
 #~ "在OnlineBoardGamers网站上的游戏邀请\n"
 #~ "%(gameName)s - 最多%(maxPlayers)s个玩家\n"
 #~ "[点击这里玩 Horseless Carriage](https://www.OnlineBoardGamers.com/)"
+msgid "Use Labor Market"
+msgstr "使用劳动力市场"
+
+msgid "Adds Temporary Workers, Headhunters and Union Organizers"
+msgstr "增加临时工、猎头和工会组织者"

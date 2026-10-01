@@ -19,6 +19,7 @@ import AddItemBox from "./utils/AddItemBox.vue"
 import ExpertPanel from "./utils/ExpertPanel.vue"
 import ActionAreaWorkingDay from "./ActionAreaWorkingDay.vue"
 import ActionAreaPrePhase from "./ActionAreaPrePhase.vue"
+import HeadhuntSalaryNotice from "./HeadhuntSalaryNotice.vue"
 
 import { useModelStore } from "../stores/FCMstore.js"
 const store = useModelStore()
@@ -183,9 +184,9 @@ const computedMoneyUsed = computed(() => {
 const computedNeedFiringMarketers = computed(() => rules.needFiringMarketers(controller.currentPlayerIndex()))
 
 const computedFireableEmployees = computed(() =>
-	[...rules.fireableEmployees(controller.currentPlayerIndex())].sort((a, b) => {
-		const rankA = rf.REQUIRE_SALARY.indexOf(a) > -1 ? a : a + 100
-		const rankB = rf.REQUIRE_SALARY.indexOf(b) > -1 ? b : b + 100
+	[...rules.fireableEmployeeChoices(controller.currentPlayerIndex())].sort((a, b) => {
+		const rankA = rf.REQUIRE_SALARY.indexOf(a.employee) > -1 ? a.employee : a.employee + 100
+		const rankB = rf.REQUIRE_SALARY.indexOf(b.employee) > -1 ? b.employee : b.employee + 100
 		return rankA - rankB
 	})
 )
@@ -206,17 +207,17 @@ const ceoBonuses = [
 
 const computedPayResources = computed(() => [...controller.currentPlayerObj().resources].sort().filter((resource) => resource !== rf.COFFEE))
 
-function localFireEmployee(employee) {
-	plyr.fireEmployee(controller.currentPlayerIndex(), employee)
-	store.availableEmployees[employee]++
-	store.context.justFired.push(employee)
+function localFireEmployee(fireToken) {
+	if (!plyr.fireEmployee(controller.currentPlayerIndex(), fireToken)) return
+	store.availableEmployees[rf.decodeFiredEmployee(fireToken)]++
+	store.context.justFired.push(fireToken)
 }
 
-function localUnfireEmployee(employee) {
-	const idx = store.context.justFired.indexOf(employee)
+function localUnfireEmployee(fireToken) {
+	const idx = store.context.justFired.indexOf(fireToken)
 	if (idx === -1) return
+	const employee = plyr.restoreFiredEmployee(controller.currentPlayerIndex(), fireToken)
 	store.availableEmployees[employee]--
-	controller.currentPlayerObj().beach.push(employee)
 	store.context.justFired.splice(idx, 1)
 }
 
@@ -225,6 +226,7 @@ function chooseBeerPayment() {
 }
 
 function paySalaryWithResource(resource) {
+	if (store.context.preMoveData[0][1].length >= computedNumPays.value) return
 	plyr.removeResourcesFromPlayer(controller.currentPlayerIndex(), resource, 1)
 	store.context.preMoveData[0][1].push(resource)
 }
@@ -750,6 +752,9 @@ function skipModuleAndEndTurn() {
 					</template>
 					<div v-else>
 						<p>{{ $t("actionArea.chooseEmployeesToWork") }}</p>
+						<p v-if="store.startingOptions.laborMarket && store.laborMarket.unionHolders.includes(controller.currentPlayerIndex()) && currentPlayerObj.beach.includes(rf.UNION_ORGANIZER)" class="reminder">
+							{{ $t("laborMarket.unionMustWork") }}
+						</p>
 						<!-- MINI BEACH -->
 						<div class="beachChoiceMini">
 							<div class="beachTitleMini">{{ $t("actionArea.beach") }}</div>
@@ -865,6 +870,7 @@ function skipModuleAndEndTurn() {
 
 				<!-- Payday Phase -->
 				<template v-if="store.gameflow.phase === rf.PHASE_PAYDAY">
+					<HeadhuntSalaryNotice :player-index="controller.currentPlayerIndex()" />
 					<!-- BEER MILESTONE - choose payment type -->
 					<div v-if="paydayFlow === 'beer'">
 						<template v-if="computedPaysLeft > 0">
@@ -934,15 +940,16 @@ function skipModuleAndEndTurn() {
 
 						<!-- Just fired reminder -->
 						<div v-if="store.context.justFired.length > 0" class="reminder fireLine">
-							<img v-for="(employee, idx) in store.context.justFired" :key="idx" :src="view.getImage(`emp_${employee}`)" class="cardSummaryDiv selectable" :title="$t('actionArea.clickToUnfire')" @click="localUnfireEmployee(employee)" />
+							<img v-for="(fireToken, idx) in store.context.justFired" :key="idx" :src="view.getImage(`emp_${rf.decodeFiredEmployee(fireToken)}`)" class="cardSummaryDiv selectable" :title="$t('actionArea.clickToUnfire')" @click="localUnfireEmployee(fireToken)" />
 							<b>{{ $t("actionArea.youreFired") }}&nbsp;</b>
 							<img :src="view.getImage('fired')" class="firedImg" />
 						</div>
 
 						<!-- Fireable employees -->
 						<div>
-							<div v-for="employee in computedFireableEmployees" :key="employee" class="fireCardChoiceDiv selectable" @click="localFireEmployee(employee)">
-								<img :src="view.getImage(`emp_${employee}`)" class="cardImg" :alt="rf.employeeName(employee)" />
+							<div v-for="choice in computedFireableEmployees" :key="choice.key" class="fireCardChoiceDiv selectable" @click="localFireEmployee(choice.fireToken)">
+								<img :src="view.getImage(`emp_${choice.employee}`)" class="cardImg" :alt="rf.employeeName(choice.employee)" />
+								<div v-if="choice.headhunted" class="jobSwitchFireBadge">{{ $t("prePhase.headhuntedEmployeeBadge", { amount: choice.switchSalary }) }}</div>
 							</div>
 						</div>
 
@@ -956,7 +963,7 @@ function skipModuleAndEndTurn() {
 					<!-- Nothing left to fire -->
 					<div v-else>
 						<div v-if="store.context.justFired.length > 0" class="reminder fireLine">
-							<img v-for="(employee, idx) in store.context.justFired" :key="idx" :src="view.getImage(`emp_${employee}`)" class="cardSummaryDiv selectable" :title="$t('actionArea.clickToUnfire')" @click="localUnfireEmployee(employee)" />
+							<img v-for="(fireToken, idx) in store.context.justFired" :key="idx" :src="view.getImage(`emp_${rf.decodeFiredEmployee(fireToken)}`)" class="cardSummaryDiv selectable" :title="$t('actionArea.clickToUnfire')" @click="localUnfireEmployee(fireToken)" />
 							<b>{{ $t("actionArea.youreFired") }}&nbsp;</b>
 							<img :src="view.getImage('fired')" class="firedImg" />
 						</div>
@@ -1184,6 +1191,7 @@ function skipModuleAndEndTurn() {
 }
 
 .fireCardChoiceDiv {
+	position: relative;
 	border-radius: 10px;
 	box-sizing: border-box;
 	width: 160px;
@@ -1191,6 +1199,19 @@ function skipModuleAndEndTurn() {
 	margin: 5px;
 	display: inline-block;
 	overflow: hidden;
+}
+
+.jobSwitchFireBadge {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	padding: 5px 3px;
+	background: #8b0000;
+	color: white;
+	font-size: 13px;
+	font-weight: bold;
+	line-height: 1.15;
 }
 
 .fireLine {

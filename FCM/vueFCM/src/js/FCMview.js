@@ -219,7 +219,12 @@ export function getImage(image) {
 	else if (image === `emp_${rf.LOCAL_MANAGER}`) return new URL(`../../../static/FCM/images/e_local_manager.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.REGIONAL_MANAGER}`) return new URL(`../../../static/FCM/images/e_regional_manager.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.CFO}`) return new URL(`../../../static/FCM/images/e_cfo.jpg`, import.meta.url).href
-	else if (image === `emp_${rf.MANAGEMENT_TRAINEE}`) return new URL(`../../../static/FCM/images/e_management_trainee.jpg`, import.meta.url).href
+	else if (image === `emp_${rf.MANAGEMENT_TRAINEE}`) {
+		const store = useModelStore()
+		return store.startingOptions.laborMarket
+			? `/static/FCM/images/e_management_trainee_labor_market.png`
+			: new URL(`../../../static/FCM/images/e_management_trainee.jpg`, import.meta.url).href
+	}
 	else if (image === `emp_${rf.JUNIOR_VICE_PRESIDENT}`) return new URL(`../../../static/FCM/images/e_junior_vp.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.VICE_PRESIDENT}`) return new URL(`../../../static/FCM/images/e_vice_president.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.SENIOR_VICE_PRESIDENT}`) return new URL(`../../../static/FCM/images/e_senior_vp.jpg`, import.meta.url).href
@@ -271,6 +276,9 @@ export function getImage(image) {
 	else if (image === `emp_${rf.FRIED_CHICKEN_CHEF}`) return new URL(`../../../static/FCM/images/e_fried_chicken_chef.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.DELIVERY_DRIVER}`) return new URL(`../../../static/FCM/images/e_delivery_driver.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.HAWKER_MARKETEER}`) return new URL(`../../../static/FCM/images/e_hawker_marketeer.jpg`, import.meta.url).href
+	else if (image === `emp_${rf.TEMPORARY_WORKER}`) return `/static/FCM/images/e_temporary_worker.png`
+	else if (image === `emp_${rf.HEADHUNTER}`) return `/static/FCM/images/e_headhunter.png`
+	else if (image === `emp_${rf.UNION_ORGANIZER}`) return `/static/FCM/images/e_union_organizer.png`
 	// MS icons - 29 icons
 	else if (image === "m_icon01.png") return new URL(`../../../static/FCM/images/m_icon01.png`, import.meta.url).href
 	else if (image === "m_icon02.png") return new URL(`../../../static/FCM/images/m_icon02.png`, import.meta.url).href
@@ -380,6 +388,7 @@ export function getImage(image) {
 	else if (image === "so_kimchi") return new URL(`../../../static/FCM/images/so_kimchi.svg`, import.meta.url).href
 	else if (image === "so_sushi") return new URL(`../../../static/FCM/images/so_sushi.svg`, import.meta.url).href
 	else if (image === "so_friedChicken") return new URL(`../../../static/FCM/images/so_friedChicken.svg`, import.meta.url).href
+	else if (image === "so_laborMarket") return `/static/FCM/images/so_laborMarket.png`
 	else if (image === "so_stadium") return new URL(`../../../static/FCM/images/so_stadium.svg`, import.meta.url).href
 	else if (image === "so_bailout") return new URL(`../../../static/FCM/images/so_bailout.svg`, import.meta.url).href
 	else if (image === "so_noodles") return new URL(`../../../static/FCM/images/so_noodles.svg`, import.meta.url).href

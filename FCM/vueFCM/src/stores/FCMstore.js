@@ -70,6 +70,8 @@ export const useModelStore = defineStore("store", () => {
 		// Stadium mod
 		stadium: false,
 
+		// Labor Market mod
+		laborMarket: false,
 		// Second Bailout mod
 		secondBailout: false,
 	}
@@ -137,6 +139,17 @@ export const useModelStore = defineStore("store", () => {
 		gamesPlayed: 0, // matches already resolved
 		announcement: null, // { gameNumber, food, units } for the upcoming game
 	})
+	const laborMarket = reactive({
+		removedTemporaryWorkers: 0,
+		removedTemporaryWorkersAtTurnStart: 0,
+		unionHolders: [],
+		pendingUnionHolders: [],
+		workedCounts: [],
+		temporaryCampaignOwners: {},
+		dailyTemporaryEffects: [],
+		pendingHeadhuntSalaries: [],
+	})
+
 	// Second Bailout mod - claim state during the bailout night
 	const bailout = reactive({
 		pending: false, // true between bailout announcement and all claims done
@@ -168,6 +181,9 @@ export const useModelStore = defineStore("store", () => {
 		justOpened: [],
 		justFired: [],
 		justBinned: [],
+		headhunterActionsUsed: 0,
+		justHeadhunted: [],
+		temporaryMarketer: false,
 
 		isNewRestoMSmailbox: false,
 		alreadyDoneMailboxMS: false,
@@ -349,6 +365,7 @@ export const useModelStore = defineStore("store", () => {
 
 	const wholeTurnResetData = ref("")
 	const subphaseResetData = ref("")
+	const recruitingResetData = ref(null)
 	const subphaseSnapshots = reactive({})
 	const replayResetData = ref("")
 
@@ -398,6 +415,7 @@ export const useModelStore = defineStore("store", () => {
 		chatData,
 
 		subphaseResetData,
+		recruitingResetData,
 		subphaseSnapshots,
 
 		replayResetData,
@@ -422,6 +440,7 @@ export const useModelStore = defineStore("store", () => {
 		newRoads,
 		movedOutHouses,
 		stadium,
+		laborMarket,
 		bailout,
 		reserveCards,
 		bank,

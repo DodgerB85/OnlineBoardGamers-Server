@@ -347,6 +347,7 @@ const resourceCounts = computed(() => {
 	position: relative;
 	z-index: 6;
 	display: inline-block;
+	vertical-align: top;
 	width: 130px;
 	height: 130px;
 	background-color: #ffffff;
