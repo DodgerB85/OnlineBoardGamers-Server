@@ -60,6 +60,8 @@ describe("Labor Market persistence", () => {
 
 	it("carries Labor Market state through the compressed save wire used for reconnects", () => {
 		const store = useModelStore()
+		store.startingOptions.laborMarket = true
+		store.startingOptions.secondBailout = true
 		store.laborMarket.removedTemporaryWorkers = 4
 		store.laborMarket.removedTemporaryWorkersAtTurnStart = 3
 		store.laborMarket.unionHolders = [1, 2]
@@ -78,9 +80,11 @@ describe("Labor Market persistence", () => {
 		const wire = JSON.parse(globalThis.pako.ungzip(compressed, { to: "string" }))
 		const slot = wire.find((entry) => entry?.kind === "laborMarket")
 		expect(slot).toEqual(funcs.exportLaborMarketSlot())
-		expect(wire.find((entry) => entry?.pool?.[rf.CAMPAIGN_MANAGER] === 4)).toEqual(store.bailout)
+		expect(wire.at(-1)).toEqual([[0, 1, 2], [rf.CAMPAIGN_MANAGER, 4], [0, rf.CAMPAIGN_MANAGER]])
 
 		setActivePinia(createPinia())
+		useModelStore().startingOptions.laborMarket = true
+		useModelStore().startingOptions.secondBailout = true
 		funcs.restoreLaborMarketState(wire)
 		funcs.restoreBailoutState(wire)
 		const restoredStore = useModelStore()

@@ -5,6 +5,7 @@
  * 3. doDinnerTime injects game-day demand, settles winner-takes-all (or clears
  *    to zero), advances the schedule and awards the First Stadium Supplier MS.
  */
+/* global pako */
 import { describe, it, expect, beforeAll } from "vitest"
 import { createPinia, setActivePinia } from "pinia"
 import fs from "node:fs"
@@ -276,11 +277,9 @@ describe("stadium wire-format persistence", () => {
 
 		const b64 = funcs.exportFCMmodel(false, false)
 		const decoded = JSON.parse(pako.ungzip(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { to: "string" }))
-		// The bailout slot is appended after the stadium slot - find by shape
-		const last = decoded[decoded.length - 1]
-		const stadiumSlot = Array.isArray(last) ? last : decoded[decoded.length - 2]
-		expect(stadiumSlot[0]).toBe(1)
-		expect(stadiumSlot[1].gameNumber).toBe(2)
+		// The bailout module isn't chosen in these games, so the stadium slot is last
+		const stadiumSlot = decoded[decoded.length - 1]
+		expect(stadiumSlot).toEqual([1, [2, rf.NOODLES, 12]])
 
 		// Restore into a clean store
 		const store2 = freshGame()
@@ -298,13 +297,25 @@ describe("stadium wire-format persistence", () => {
 
 		const b64 = funcs.exportFCMmodel(false, false)
 		const decoded = JSON.parse(pako.ungzip(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { to: "string" }))
-		// The bailout slot trails the stadium slot - find by shape
-		const last = decoded[decoded.length - 1]
-		expect(Array.isArray(last) ? last : decoded[decoded.length - 2]).toEqual([2])
+		expect(decoded[decoded.length - 1]).toEqual([2])
 
 		funcs.restoreStadiumState(decoded)
 		expect(store.stadium.gamesPlayed).toBe(2)
 		expect(store.stadium.announcement).toBeNull()
+	})
+
+	it("omits the slot when the stadium module was not chosen", () => {
+		const store = freshGame(2, []) // stadium flag off
+		store.stadium.gamesPlayed = 5
+
+		const b64 = funcs.exportFCMmodel(false, false)
+		const decoded = JSON.parse(pako.ungzip(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { to: "string" }))
+		expect(decoded[decoded.length - 1]).not.toEqual([5])
+
+		// ...and a stray slot in someone else's save is ignored (no scan without the flag)
+		const store2 = freshGame(2, [])
+		funcs.restoreStadiumState([...decoded, [5]])
+		expect(store2.stadium.gamesPlayed).toBe(0)
 	})
 
 	it("restoreStadiumState still reads the older full JSON slot", () => {

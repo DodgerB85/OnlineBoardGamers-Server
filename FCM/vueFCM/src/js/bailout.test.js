@@ -6,6 +6,7 @@
  *    served; declining is final; the last claim closes the night.
  * 3. Wire-format persistence of the bailout state.
  */
+/* global pako */
 import { describe, it, expect, beforeAll } from "vitest"
 import { createPinia, setActivePinia } from "pinia"
 import fs from "node:fs"
@@ -242,23 +243,93 @@ describe("claim night", () => {
 })
 
 describe("bailout wire-format persistence", () => {
+	function decodeExport(b64) {
+		return JSON.parse(pako.ungzip(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { to: "string" }))
+	}
+
+	// The slot, when exported, is always the last element: [order, poolPairs, claimPairs]
+	function lastIsBailoutSlot(decoded) {
+		const last = decoded[decoded.length - 1]
+		return Array.isArray(last) && last.length === 3 && Array.isArray(last[0]) && Array.isArray(last[1]) && Array.isArray(last[2])
+	}
+
 	it("exportFCMmodel carries the bailout state and restoreBailoutState reads it back", () => {
 		const store = freshGame(2)
 		store.bankBroken = 1
 		rules.handleBankBreak(false)
 		rules.claimBailoutEmployee(0, rf.CAMPAIGN_MANAGER)
 
-		const b64 = funcs.exportFCMmodel(false, false)
-		const decoded = JSON.parse(pako.ungzip(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { to: "string" }))
-		const last = decoded[decoded.length - 1]
-		expect(last.pending).toBe(true)
-		expect(last.claims[0]).toBe(rf.CAMPAIGN_MANAGER)
+		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
+		expect(decoded[decoded.length - 1]).toEqual([[0, 1], [rf.CAMPAIGN_MANAGER, 5], [0, rf.CAMPAIGN_MANAGER]])
 
 		const store2 = freshGame(2)
 		funcs.restoreBailoutState(decoded)
 		expect(store2.bailout.pending).toBe(true)
 		expect(store2.bailout.claims[0]).toBe(rf.CAMPAIGN_MANAGER)
 		expect(store2.bailout.pool[rf.CAMPAIGN_MANAGER]).toBe(5)
+		expect(store2.bailout.order).toEqual([0, 1])
+	})
+
+	it("omits the slot when no claim night is open", () => {
+		freshGame(2) // module chosen, but idle
+		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
+		expect(lastIsBailoutSlot(decoded)).toBe(false)
+
+		const store2 = freshGame(2)
+		funcs.restoreBailoutState(decoded)
+		expect(store2.bailout.pending).toBe(false)
+	})
+
+	it("omits the slot on game-over saves even while a night is open", () => {
+		const store = freshGame(2)
+		store.bankBroken = 1
+		rules.handleBankBreak(false)
+		expect(store.bailout.pending).toBe(true)
+
+		const decoded = decodeExport(funcs.exportFCMmodel(true, false))
+		expect(lastIsBailoutSlot(decoded)).toBe(false)
+
+		const store2 = freshGame(2)
+		funcs.restoreBailoutState(decoded, decoded.length - 1, true)
+		expect(store2.bailout.pending).toBe(false)
+	})
+
+	it("omits the slot when the module was not chosen", () => {
+		freshGame(2, []) // secondBailout flag off
+		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
+		expect(lastIsBailoutSlot(decoded)).toBe(false)
+	})
+
+	it("trails the stadium slot when both modules are chosen", () => {
+		const store = freshGame(2, ["47", "49"])
+		store.stadium.gamesPlayed = 1
+		store.bankBroken = 1
+		rules.handleBankBreak(false)
+
+		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
+		expect(decoded[decoded.length - 2]).toEqual([1]) // bare stadium slot
+		expect(decoded[decoded.length - 1][0]).toEqual([0, 1]) // bailout order
+
+		const store2 = freshGame(2, ["47", "49"])
+		// The import passes the next unread slot index for both: stadium sits
+		// there directly, the bailout scan skips past it.
+		const importIndex = decoded.length - 2
+		funcs.restoreStadiumState(decoded, importIndex)
+		funcs.restoreBailoutState(decoded, importIndex)
+		expect(store2.stadium.gamesPlayed).toBe(1)
+		expect(store2.bailout.pending).toBe(true)
+		expect(store2.bailout.order).toEqual([0, 1])
+		expect(store2.bailout.claims).toEqual({})
+	})
+
+	it("skips a leftover stadium slot from an older save when the stadium module is off", () => {
+		const store = freshGame(2)
+		// Older saves pushed the stadium slot unconditionally, so the bailout
+		// slot can sit one position past the next unread index.
+		const bailoutSlot = [[0, 1], [rf.CAMPAIGN_MANAGER, 5], [0, rf.CAMPAIGN_MANAGER]]
+		funcs.restoreBailoutState([[0], bailoutSlot], 0)
+		expect(store.bailout.pending).toBe(true)
+		expect(store.bailout.claims[0]).toBe(rf.CAMPAIGN_MANAGER)
 	})
 
 	it("a missing slot resets the bailout state (older saves)", () => {
@@ -266,5 +337,13 @@ describe("bailout wire-format persistence", () => {
 		funcs.restoreBailoutState([{}, {}, {}])
 		expect(store.bailout.pending).toBe(false)
 		expect(store.bailout.claims).toEqual({})
+	})
+
+	it("still reads the older full-object slot", () => {
+		const store = freshGame(2)
+		funcs.restoreBailoutState([[0, 1], { pending: true, pool: { [rf.CAMPAIGN_MANAGER]: 5 }, claims: { 0: rf.CAMPAIGN_MANAGER }, order: [0, 1] }])
+		expect(store.bailout.pending).toBe(true)
+		expect(store.bailout.claims[0]).toBe(rf.CAMPAIGN_MANAGER)
+		expect(store.bailout.pool[rf.CAMPAIGN_MANAGER]).toBe(5)
 	})
 })

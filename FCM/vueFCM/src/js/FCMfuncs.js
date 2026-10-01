@@ -486,35 +486,28 @@ function padItemCounts(arr) {
 	return arr
 }
 
-/** 
-			0 - shortGame
-			1 - useMilestones
-			2 - board
-			3 - players
-			4 - availableMarketingCampaigns
-			5 - availableEmployees
-			6 - availableMilestones
-			7 - amount left in bank
-			8 - gameflow information
-			9 - active marketing
-			10 - used gardens
-			11 - used houses
-			12 - global CEO level
-			13 - board needs
-			14 - reserve
-			15 - context
-			16 - bankBroken
-			17 - history
-			18 - history timestamps
-			19 - allow surrender
-			20 - ketchup options
-			21 - strict payday fridge
-			22 - training game
-			23 - freeway
-			24 - first pizzas
-			25 - parks
-			26 - newRoads
-			27 - coffeeShopMSplayers
+/**
+			Wire slots (module-dependent slots are only pushed when chosen):
+			0 - map tiles (lobbyists)
+			1 - players
+			2 - bank
+			3 - gameflow (omitted on game over)
+			4 - active marketing campaigns
+			5 - gardens
+			6 - houses
+			7 - CEO level
+			8 - needs
+			9 - history
+			10 - history timestamps
+			11 - freeways (rural marketers)
+			12 - parks (lobbyists)
+			13 - new roads (lobbyists)
+			14 - coffeeShopMSplayers (mid-game)
+			15 - first pizzas (mid-game)
+			16 - reserve cards (mid-game)
+			17 - context (mid-game + includeContext)
+			18 - stadium (stadium module chosen)
+			19 - second bailout (module chosen, claim night open, mid-game)
 	 */
 
 export function exportFCMmodel(forGameOver, includeContext) {
@@ -673,13 +666,19 @@ export function exportFCMmodel(forGameOver, includeContext) {
 		}
 	}
 
-	// 18 - Labor Market mod (tagged so older and mixed-module saves remain detectable)
-	temp.push(exportLaborMarketSlot())
-	// 19 - Stadium mod
-	temp.push(exportStadiumSlot())
+	// 18 - Labor Market mod (only when chosen; tagged for shape detection)
+	if (store.startingOptions.laborMarket) temp.push(exportLaborMarketSlot())
 
-	// 20 - Second Bailout mod (trailing and shape-detected)
-	temp.push(JSON.parse(JSON.stringify(store.bailout)))
+	// 19 - Stadium mod (only when the module was chosen; shape-detected on load)
+	if (store.startingOptions.stadium) temp.push(exportStadiumSlot())
+
+	// 20 - Second Bailout mod: only while a claim night is open, and never on
+	// game-over saves. Stored as [order, pool pairs, claim pairs] - flat, compact,
+	// and nothing is written when the mod is chosen but no night is running.
+	if (!forGameOver && store.startingOptions.secondBailout && store.bailout.pending) {
+		// Object.entries stringifies the numeric keys - map them back to numbers
+		temp.push([[...store.bailout.order], Object.entries(store.bailout.pool).flat().map(Number), Object.entries(store.bailout.claims).flat().map(Number)])
+	}
 
 	let step1 = JSON.stringify(temp)
 	// eslint-disable-next-line no-undef
@@ -1176,35 +1175,61 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 		}
 	}
 
-	// Stadium mod (trailing slot; falls back to history for older saves)
-	restoreStadiumState(inputArr)
+	// Labor Market mod (tagged optional slot)
 	restoreLaborMarketState(inputArr)
-	// Second Bailout mod (trailing slot; shape-detected like Stadium)
-	restoreBailoutState(inputArr)
+	let moduleImportIndex = IMPORT_INDEX
+	if (inputArr[moduleImportIndex]?.kind === "laborMarket") moduleImportIndex++
+	// Stadium mod (next slot when the module was chosen; falls back to history for older saves)
+	restoreStadiumState(inputArr, moduleImportIndex)
+	// Second Bailout mod (trails the stadium slot when that module is chosen)
+	restoreBailoutState(inputArr, moduleImportIndex, forGameOver)
 }
 
-// Second Bailout mod: restore the claim-night state. Any game with this mod
-// enabled exports the slot, so a missing slot just means "no bailout state".
-export function restoreBailoutState(inputArr) {
+// Shape check for both bailout slot formats: the older full object and the
+// compact [order, poolPairs, claimPairs] array. Used to reject whatever slot
+// actually sits at a given position.
+function isBailoutSlot(el) {
+	if (Array.isArray(el)) return el.length === 3 && Array.isArray(el[0]) && Array.isArray(el[1]) && Array.isArray(el[2])
+	return Boolean(el && typeof el === "object" && el.claims !== undefined && el.pool !== undefined)
+}
+
+// Second Bailout mod: restore the claim-night state (shape-detected). `index`
+// is the next unread import position; the slot sits there, or one ahead when
+// an older save also carried the stadium slot while that module was off. The
+// slot is only exported for chosen-module, mid-game saves while a night is
+// open, so a missing slot just means "no bailout state". `forGameOver` covers
+// the callers that omit it.
+export function restoreBailoutState(inputArr, index = inputArr.length - 1, forGameOver) {
 	const store = useModelStore()
 	store.bailout.pending = false
 	store.bailout.pool = {}
 	store.bailout.claims = {}
 	store.bailout.order = []
-	for (let i = inputArr.length - 1; i >= inputArr.length - 3 && i >= 0; i--) {
-		const el = inputArr[i]
-		if (el && typeof el === "object" && !Array.isArray(el) && el.claims !== undefined && el.pool !== undefined) {
-			Object.assign(store.bailout, el)
-			return
-		}
+	if (forGameOver || store.gameflow.phase === rf.PHASE_GAME_OVER || !store.startingOptions.secondBailout) return
+	let slot = null
+	if (index >= 0 && index < inputArr.length && isBailoutSlot(inputArr[index])) slot = inputArr[index]
+	else if (isBailoutSlot(inputArr[index + 1])) slot = inputArr[index + 1]
+	else return
+	if (Array.isArray(slot)) {
+		// [order, poolPairs, claimPairs] - flat key/value pairs
+		store.bailout.order = [...slot[0]]
+		for (let i = 0; i < slot[1].length; i += 2) store.bailout.pool[slot[1][i]] = slot[1][i + 1]
+		for (let i = 0; i < slot[2].length; i += 2) store.bailout.claims[slot[2][i]] = slot[2][i + 1]
+		store.bailout.pending = true
+	} else {
+		// Older saves stored the full object
+		Object.assign(store.bailout, slot)
 	}
 }
 
-// Stadium mod wire slot: [gamesPlayed] or [gamesPlayed, announcement].
+// Stadium mod wire slot: [gamesPlayed] or [gamesPlayed, [gameNumber, food, units]].
 function exportStadiumSlot() {
 	const store = useModelStore()
 	const slot = [store.stadium.gamesPlayed]
-	if (store.stadium.announcement !== null) slot.push(store.stadium.announcement)
+	if (store.stadium.announcement !== null) {
+		const a = store.stadium.announcement
+		slot.push([a.gameNumber, a.food, a.units])
+	}
 	return slot
 }
 
@@ -1217,9 +1242,19 @@ function applyStadiumSlot(slot) {
 	if (Array.isArray(slot)) {
 		if (!Number.isInteger(slot[0]) || slot[0] < 0 || slot[0] > 100) return false
 		if (slot.length > 2) return false
-		if (slot.length === 2 && (typeof slot[1] !== "object" || Array.isArray(slot[1]))) return false
+		let announcement = null
+		if (slot.length === 2) {
+			if (Array.isArray(slot[1])) {
+				// Compact announcement: [gameNumber, food, units]
+				if (slot[1].length !== 3 || !slot[1].every(Number.isInteger)) return false
+				announcement = { gameNumber: slot[1][0], food: slot[1][1], units: slot[1][2] }
+			} else if (slot[1] && typeof slot[1] === "object") {
+				// Older saves stored the announcement object as-is
+				announcement = slot[1]
+			} else return false
+		}
 		store.stadium.gamesPlayed = slot[0]
-		store.stadium.announcement = slot.length === 2 ? slot[1] : null
+		store.stadium.announcement = announcement
 		return true
 	}
 	if (slot && typeof slot === "object" && slot.gamesPlayed !== undefined) {
@@ -1230,17 +1265,17 @@ function applyStadiumSlot(slot) {
 }
 
 // Stadium mod: restore state from the trailing wire-format slot (shape-detected).
-// For saves that predate the slot, rebuild from history: gamesPlayed from the
-// result entries, and the last announcement if it is still for an upcoming game.
-export function restoreStadiumState(inputArr) {
+// `index` is the next unread import position - the stadium slot sits there
+// whenever the module was chosen (it is pushed before the bailout slot, so no
+// offset is needed). The slot is only scanned when the module was chosen -
+// other games never store it, so their saves load without it. For saves that
+// predate the slot, rebuild from history: gamesPlayed from the result entries,
+// and the last announcement if it is still for an upcoming game.
+export function restoreStadiumState(inputArr, index = inputArr.length - 1) {
 	const store = useModelStore()
 	store.stadium.gamesPlayed = 0
 	store.stadium.announcement = null
-	// Optional Labor Market and Second Bailout slots may surround the Stadium
-	// slot, so shape-detect among the final three entries.
-	for (let i = inputArr.length - 1; i >= inputArr.length - 3 && i >= 0; i--) {
-		if (applyStadiumSlot(inputArr[i])) return
-	}
+	if (store.startingOptions.stadium && index >= 0 && index < inputArr.length && applyStadiumSlot(inputArr[index])) return
 	for (let i = 0; i < store.history.length; i++) {
 		if (store.history[i][0] === rf.HIST_STADIUM_RESULT) store.stadium.gamesPlayed++
 	}
