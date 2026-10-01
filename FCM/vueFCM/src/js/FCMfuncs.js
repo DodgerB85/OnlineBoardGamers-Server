@@ -234,6 +234,9 @@ export function simpleExportWholeFCMmodel() {
 	// 22 - Labor Market mod
 	temp.push(exportLaborMarketSlot())
 
+	// 23 - Second Bailout mod
+	temp.push(JSON.parse(JSON.stringify(store.bailout)))
+
 	let step1 = JSON.stringify(temp)
 	// eslint-disable-next-line no-undef
 	let step2 = pako.gzip(step1)
@@ -672,8 +675,11 @@ export function exportFCMmodel(forGameOver, includeContext) {
 
 	// 18 - Labor Market mod (tagged so older and mixed-module saves remain detectable)
 	temp.push(exportLaborMarketSlot())
-	// 19 - Stadium mod remains the final slot for legacy readers/tests.
+	// 19 - Stadium mod
 	temp.push(exportStadiumSlot())
+
+	// 20 - Second Bailout mod (trailing and shape-detected)
+	temp.push(JSON.parse(JSON.stringify(store.bailout)))
 
 	let step1 = JSON.stringify(temp)
 	// eslint-disable-next-line no-undef
@@ -1040,6 +1046,7 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	// INFER m.bankBroken = inputArr[12]
 	store.bankBroken = 0
 	if (store.history.some((h) => h[0] === rf.HIST_DISPLAY_RESERVE)) store.bankBroken = 1
+	if (store.history.some((h) => h[0] === rf.HIST_BANK_BAILOUT)) store.bankBroken = 2
 
 	// 3 - availableEmployees
 	//m.availableEmployees = inputArr[3]
@@ -1172,6 +1179,25 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	// Stadium mod (trailing slot; falls back to history for older saves)
 	restoreStadiumState(inputArr)
 	restoreLaborMarketState(inputArr)
+	// Second Bailout mod (trailing slot; shape-detected like Stadium)
+	restoreBailoutState(inputArr)
+}
+
+// Second Bailout mod: restore the claim-night state. Any game with this mod
+// enabled exports the slot, so a missing slot just means "no bailout state".
+export function restoreBailoutState(inputArr) {
+	const store = useModelStore()
+	store.bailout.pending = false
+	store.bailout.pool = {}
+	store.bailout.claims = {}
+	store.bailout.order = []
+	for (let i = inputArr.length - 1; i >= inputArr.length - 3 && i >= 0; i--) {
+		const el = inputArr[i]
+		if (el && typeof el === "object" && !Array.isArray(el) && el.claims !== undefined && el.pool !== undefined) {
+			Object.assign(store.bailout, el)
+			return
+		}
+	}
 }
 
 // Stadium mod wire slot: [gamesPlayed] or [gamesPlayed, announcement].
@@ -1210,9 +1236,11 @@ export function restoreStadiumState(inputArr) {
 	const store = useModelStore()
 	store.stadium.gamesPlayed = 0
 	store.stadium.announcement = null
-	let stadiumIndex = inputArr.length - 1
-	if (inputArr[stadiumIndex]?.kind === "laborMarket") stadiumIndex--
-	if (applyStadiumSlot(inputArr[stadiumIndex])) return
+	// Optional Labor Market and Second Bailout slots may surround the Stadium
+	// slot, so shape-detect among the final three entries.
+	for (let i = inputArr.length - 1; i >= inputArr.length - 3 && i >= 0; i--) {
+		if (applyStadiumSlot(inputArr[i])) return
+	}
 	for (let i = 0; i < store.history.length; i++) {
 		if (store.history[i][0] === rf.HIST_STADIUM_RESULT) store.stadium.gamesPlayed++
 	}
@@ -1421,8 +1449,11 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	store.stadium.gamesPlayed = 0
 	store.stadium.announcement = null
 	if (inputModel.length > 21) applyStadiumSlot(inputModel[21])
-	// 22 - Labor Market mod (older snapshots predate this slot)
-	restoreLaborMarketState(inputModel.length > 22 ? [inputModel[22]] : [])
+	// 22-23 - Optional Labor Market and Second Bailout state. Shape detection
+	// preserves snapshots made before either module existed and snapshots where
+	// Second Bailout occupied slot 22 before Labor Market was added.
+	restoreLaborMarketState(inputModel.slice(21))
+	restoreBailoutState(inputModel.slice(21))
 
 	// Adjust CEOs with dumpling MS, using history
 	if (store.startingOptions.dumplings) {

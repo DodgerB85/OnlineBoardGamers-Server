@@ -1248,6 +1248,24 @@ const computedEntry3 = computed(() => {
 			<div>{{ $t("history.bankBroke", { amount: entry[3][0] }) }}</div>
 		</template>
 
+		<!-- HIST_BANK_BAILOUT: second break - the city rescues the bank (Second Bailout mod) -->
+		<template v-else-if="entry[0] === rf.HIST_BANK_BAILOUT">
+			<div><img class="bailoutSafeIcon" :src="view.getImage('so_bailout')" alt="" /> {{ $t("history.bankBailout", { amount: entry[3][0] }) }}</div>
+		</template>
+
+		<!-- HIST_BAILOUT_CLAIM: player claims a free marketer or declines (Second Bailout mod) -->
+		<template v-else-if="entry[0] === rf.HIST_BAILOUT_CLAIM">
+			<div v-if="entry[3][0] !== -1"><i18n-t keypath="history.bailoutClaim" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #card><img class="foodTokenImg" :src="view.getImage('emp_' + entry[3][0])" :alt="rf.employeeName(entry[3][0])" /></template>
+			</i18n-t>
+			</div>
+			<div v-else><i18n-t keypath="history.bailoutDecline" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t>
+			</div>
+		</template>
+
 		<!-- HIST_BANKRUPT: a player went bankrupt -->
 		<template v-else-if="entry[0] === rf.HIST_BANKRUPT">
 			<div>{{ $t("history.bankrupted") }}</div>
@@ -1609,5 +1627,12 @@ img.milestoneIcon.plane {
 
 .foodTokenMed {
 	width: 17px !important;
+}
+
+/* Second Bailout mod: safe icon next to the bailout history entry */
+.bailoutSafeIcon {
+	width: 20px;
+	height: 20px;
+	vertical-align: middle;
 }
 </style>

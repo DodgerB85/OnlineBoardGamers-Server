@@ -310,6 +310,8 @@ export async function generateReplayData(spoilerFree = false) {
 		else if (action === rf.HIST_TEMPORARY_WORKER) replayTemporaryWorker(i, playerIdx, param)
 		else if (action === rf.HIST_HEADHUNT) replayHeadhunt(i, playerIdx, param)
 		else if (action === rf.HIST_UNION_ORGANIZER) replayUnionOrganizer(i, playerIdx, param)
+		else if (action === rf.HIST_BANK_BAILOUT) replayBankBailout(i, playerIdx, param)
+		else if (action === rf.HIST_BAILOUT_CLAIM) replayBailoutClaim(i, playerIdx, param)
 
 		store.replayData.push(funcs.simpleExportWholeFCMmodel())
 
@@ -392,6 +394,22 @@ export function replayUnionOrganizer(historyIndex, playerIndex, param) {
 export function replayStadiumAnnounce(historyIndex, playerIndex, param) {
 	const store = useModelStore()
 	store.stadium.announcement = { gameNumber: param[0], food: param[1], units: param[2] }
+}
+
+// Second Bailout mod: apply the city's cash injection (bankBroken already set by handleBankBreak)
+export function replayBankBailout(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	store.bank += param[0]
+}
+
+// Second Bailout mod: grant the claimed employee (or nothing on decline). Not a hire.
+export function replayBailoutClaim(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	const employeeId = param[0]
+	if (employeeId !== -1) {
+		store.availableEmployees[employeeId]--
+		store.players[playerIndex].beach.push(employeeId)
+	}
 }
 
 // Fried Chicken mod: state is recomputed by replayDinnerTime -> doDinnerTime(true),

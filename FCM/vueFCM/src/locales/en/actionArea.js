@@ -46,6 +46,12 @@
     rematch: "rematch",
     rematchSuffix: "?",
 
+    // Second Bailout mod
+    bailoutTitle: "The city bails the bank out!",
+    bailoutBody: "Choose one free L2 marketing employee (first come, first served). The gift does not count as hiring - the employee joins your beach and is paid like any other employee.",
+    bailoutNothingLeft: "Nothing left to claim.",
+    bailoutDecline: "Decline the gift",
+
     // Setup / reserve
     delayRestaurantRound: "Delay Placing your Restaurant for One Round & End Turn",
     reserveEarly: "To save time, you may choose your reserve card early",

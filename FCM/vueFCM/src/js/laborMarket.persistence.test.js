@@ -68,16 +68,23 @@ describe("Labor Market persistence", () => {
 		store.laborMarket.temporaryCampaignOwners = { 5: 1 }
 		store.laborMarket.dailyTemporaryEffects = [null, { roles: [rf.MARKETING_TRAINEE, rf.MARKETING_TRAINEE, rf.MARKETING_TRAINEE], limit: 5, usedByRole: { [rf.MARKETING_TRAINEE]: 3 } }, null]
 		store.laborMarket.pendingHeadhuntSalaries = [[], [{ employee: rf.TRAINER, cost: 10 }], []]
+		store.bailout.pending = true
+		store.bailout.pool = { [rf.CAMPAIGN_MANAGER]: 4 }
+		store.bailout.claims = { 0: rf.CAMPAIGN_MANAGER }
+		store.bailout.order = [0, 1, 2]
 
 		const encoded = funcs.exportFCMmodel(false, false)
 		const compressed = Uint8Array.from(atob(encoded), (char) => char.charCodeAt(0))
 		const wire = JSON.parse(globalThis.pako.ungzip(compressed, { to: "string" }))
 		const slot = wire.find((entry) => entry?.kind === "laborMarket")
 		expect(slot).toEqual(funcs.exportLaborMarketSlot())
+		expect(wire.find((entry) => entry?.pool?.[rf.CAMPAIGN_MANAGER] === 4)).toEqual(store.bailout)
 
 		setActivePinia(createPinia())
 		funcs.restoreLaborMarketState(wire)
-		const restored = useModelStore().laborMarket
+		funcs.restoreBailoutState(wire)
+		const restoredStore = useModelStore()
+		const restored = restoredStore.laborMarket
 		expect(restored.removedTemporaryWorkers).toBe(4)
 		expect(restored.removedTemporaryWorkersAtTurnStart).toBe(3)
 		expect(restored.unionHolders).toEqual([1, 2])
@@ -85,6 +92,12 @@ describe("Labor Market persistence", () => {
 		expect(restored.temporaryCampaignOwners).toEqual({ 5: 1 })
 		expect(restored.dailyTemporaryEffects).toEqual([null, { roles: [rf.MARKETING_TRAINEE, rf.MARKETING_TRAINEE, rf.MARKETING_TRAINEE], limit: 5, usedByRole: { [rf.MARKETING_TRAINEE]: 3 } }, null])
 		expect(restored.pendingHeadhuntSalaries).toEqual([[], [{ employee: rf.TRAINER, cost: 10 }], []])
+		expect(restoredStore.bailout).toEqual({
+			pending: true,
+			pool: { [rf.CAMPAIGN_MANAGER]: 4 },
+			claims: { 0: rf.CAMPAIGN_MANAGER },
+			order: [0, 1, 2],
+		})
 	})
 
 	it("loads an old save without a Labor Market slot using safe defaults", () => {

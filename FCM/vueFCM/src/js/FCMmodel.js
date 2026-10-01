@@ -369,6 +369,8 @@ export function setInternalStartingOptions(startingOptionsArray) {
 		if (opts[i] === rf.SO_STADIUM) store.startingOptions.stadium = true
 		// Labor Market mod
 		if (opts[i] === rf.SO_LABOR_MARKET) store.startingOptions.laborMarket = true
+		// Second Bailout mod
+		if (opts[i] === rf.SO_SECOND_BAILOUT) store.startingOptions.secondBailout = true
 
 		if (opts[i] === rf.SO_STRICT_PAYDAY_FRIDGE) store.startingOptions.strictPaydayFridge = true
 		if (opts[i] === rf.SO_TRAINING_GAME) store.startingOptions.trainingGame = true

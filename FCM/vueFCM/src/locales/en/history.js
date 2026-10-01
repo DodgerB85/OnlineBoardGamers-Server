@@ -119,6 +119,10 @@
     headhuntsDeferred: "{name} headhunts {employee} from {owner}'s Beach; keeping it costs ${amount} at Payday.",
     unionAssigned: "Union Organizers go to {names}; each tied for the largest eligible workforce with {count} workers.",
     unionUnassigned: "No company reached the 5-worker Union Organizer threshold.",
+    // Second Bailout mod
+    bankBailout: "The city bails the bank out a second time: the bank receives ${amount} and every player gets one free marketing employee",
+    bailoutClaim: "{name} receives: {card}",
+    bailoutDecline: "{name} declines the gifted employee",
 
     // Building
     buildHouse: "{name} builds house #{num} {orient} at co-ordinates ({x}, {y})",

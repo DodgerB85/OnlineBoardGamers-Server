@@ -59,6 +59,7 @@ export const SO_HAWKERS = 45
 export const SO_FRIED_CHICKEN = 46
 export const SO_STADIUM = 47
 export const SO_LABOR_MARKET = 48
+export const SO_SECOND_BAILOUT = 49
 // Other options
 export const SO_STRICT_PAYDAY_FRIDGE = 101
 export const SO_TRAINING_GAME = 102
@@ -205,6 +206,9 @@ export const HIST_STADIUM_RESULT = 67
 export const HIST_TEMPORARY_WORKER = 68
 export const HIST_HEADHUNT = 69
 export const HIST_UNION_ORGANIZER = 70
+// Second Bailout mod
+export const HIST_BANK_BAILOUT = 71
+export const HIST_BAILOUT_CLAIM = 72
 
 export const LEMONADE = 0
 export const COKE = 1

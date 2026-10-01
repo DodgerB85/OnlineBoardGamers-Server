@@ -72,6 +72,8 @@ export const useModelStore = defineStore("store", () => {
 
 		// Labor Market mod
 		laborMarket: false,
+		// Second Bailout mod
+		secondBailout: false,
 	}
 
 	// This var affects the ZOOM level
@@ -146,6 +148,14 @@ export const useModelStore = defineStore("store", () => {
 		temporaryCampaignOwners: {},
 		dailyTemporaryEffects: [],
 		pendingHeadhuntSalaries: [],
+	})
+
+	// Second Bailout mod - claim state during the bailout night
+	const bailout = reactive({
+		pending: false, // true between bailout announcement and all claims done
+		pool: {}, // employeeId -> remaining count (snapshot at bailout time)
+		claims: {}, // playerId -> employeeId claimed, or -1 for declined
+		order: [], // playerIds in claim order (= turn order at bailout time)
 	})
 
 	/*************************************** UNSAVED - TEMP VARS -- these do not need to be stored or saved */
@@ -431,6 +441,7 @@ export const useModelStore = defineStore("store", () => {
 		movedOutHouses,
 		stadium,
 		laborMarket,
+		bailout,
 		reserveCards,
 		bank,
 		bankBroken,
