@@ -40,7 +40,7 @@ describe("Labor Market static model", () => {
 		expect(view.getImage(`emp_${rf.TEMPORARY_WORKER}`)).toBe("/static/FCM/images/e_temporary_worker.png")
 		expect(view.getImage(`emp_${rf.HEADHUNTER}`)).toBe("/static/FCM/images/e_headhunter.png")
 		expect(view.getImage(`emp_${rf.UNION_ORGANIZER}`)).toBe("/static/FCM/images/e_union_organizer.png")
-		expect(view.getImage("so_laborMarket")).toBe("/static/FCM/images/so_laborMarket.png")
+		expect(view.getImage("so_laborMarket")).toBe("/static/FCM/images/so_laborMarket.svg")
 	})
 })
 

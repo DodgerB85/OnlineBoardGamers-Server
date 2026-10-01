@@ -819,7 +819,7 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
         rfFCM.SO_HAWKERS: ("so_hawkers.svg", "Hawkers"),
         rfFCM.SO_FRIED_CHICKEN: ("so_friedChicken.svg", "Fried Chicken"),
         rfFCM.SO_STADIUM: ("so_stadium.svg", "Stadium"),
-        rfFCM.SO_LABOR_MARKET: ("so_laborMarket.png", "Labor Market"),
+        rfFCM.SO_LABOR_MARKET: ("so_laborMarket.svg", "Labor Market"),
         rfFCM.SO_SECOND_BAILOUT: ("so_bailout.svg", "Second Bailout"),
         rfFCM.SO_STRICT_PAYDAY_FRIDGE: ("so_strict.svg", "Turn Order Payday/Fridge"),
         rfFCM.SO_DRAFT_MODULE_BREAKER: ("so_draftMods.jpg", "Draft Modules"),
