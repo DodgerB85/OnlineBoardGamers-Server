@@ -780,7 +780,7 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 	/*
 		0 = campaign Number
 		1 = index
-		2 = good - EITHER num OR array if MS
+		2 = good - EITHER num OR [secondGood, good] if MS
 		3? = employee - IF IT CANNOT BE INFERRED, if campaign number >=4 <=16
 		4? = rotation
 		5 = duration IF NOT INFINITE
@@ -790,8 +790,9 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 	let good = -1
 	let secondGood = -1
 	if (typeof param[2] === "object") {
-		good = param[2][0]
-		secondGood = param[2][1]
+		// Live play logs [secondGood, good] (see FCMcontroller placeMarketingCampaign)
+		good = param[2][1]
+		secondGood = param[2][0]
 	} else good = param[2]
 	let paramIdx = 3
 	let campaignEmployee = -1
