@@ -749,14 +749,11 @@ function skipModuleAndEndTurn() {
 
 						<button v-if="!personal.trainingGame" class="actionsLineButton" @click="localClickResign">{{ $t("actionArea.resign") }}</button>
 						<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
-						<p v-if="unionOrganizerPlacementRequired" class="blockingActionMessage">{{ $t("laborMarket.unionMustWork") }}</p>
+						<span v-if="unionOrganizerPlacementRequired" class="blockingActionMessage">{{ $t("laborMarket.unionMustWork") }}</span>
 						<button v-else class="actionsLineButton" @click="controller.endPlayerTurn(true, false)">{{ $t("workingDay.endTurn") }}</button>
 					</template>
 					<div v-else>
 						<p>{{ $t("actionArea.chooseEmployeesToWork") }}</p>
-						<p v-if="unionOrganizerPlacementRequired" class="blockingActionMessage">
-							{{ $t("laborMarket.unionMustWork") }}
-						</p>
 						<!-- MINI BEACH -->
 						<div class="beachChoiceMini">
 							<div class="beachTitleMini">{{ $t("actionArea.beach") }}</div>
@@ -805,7 +802,8 @@ function skipModuleAndEndTurn() {
 						<button v-if="!personal.trainingGame" class="actionsLineButton" @click="localClickResign">{{ $t("actionArea.resign") }}</button>
 						<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
 						<button class="actionsLineButton" @click="controller.autoFillEmployees()">{{ $t("actionArea.autoFillStructure") }}</button>
-						<button v-if="!unionOrganizerPlacementRequired" class="actionsLineButton" @click="localEndTurn">{{ $t("workingDay.endTurn") }}</button>
+						<span v-if="unionOrganizerPlacementRequired" class="blockingActionMessage">{{ $t("laborMarket.unionMustWork") }}</span>
+						<button v-else class="actionsLineButton" @click="localEndTurn">{{ $t("workingDay.endTurn") }}</button>
 					</div>
 				</template>
 
@@ -1413,9 +1411,12 @@ function skipModuleAndEndTurn() {
 }
 
 .blockingActionMessage {
+	display: inline-block;
+	margin: 0 5px;
 	color: #b00020;
 	font-size: 1.1rem;
 	font-weight: 700;
+	vertical-align: middle;
 }
 
 .ceoSlotDiv {
