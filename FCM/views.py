@@ -1940,6 +1940,7 @@ def FCMdata(request, dataType):
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "specialData": specialData,
                 "latestUpdate": currentGame.latestUpdate,
+                "startingMap": currentGame.startingMap if currentGame.startingMap else [],
             },
             safe=False,
         )

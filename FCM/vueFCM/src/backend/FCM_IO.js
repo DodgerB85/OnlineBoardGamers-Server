@@ -206,7 +206,9 @@ export async function loadGame() {
 			if (result.kickoutRequired != null) personal.kickoutRequired = result.kickoutRequired
 			if (result.kickoutVotesData) store.kickoutVotesData = typeof result.kickoutVotesData === "string" ? JSON.parse(result.kickoutVotesData) : result.kickoutVotesData
 			if (result.kickoutVoteThreshold != null) store.kickoutVoteThreshold = result.kickoutVoteThreshold
-			store.mapData.startingMap = JSON.parse(result.startingMap)
+			// Keep the snapshot importFCMmodel rebuilds the grid from (FCMfuncs) up to
+			// date, or live updates resurrect the page-load map (stale UP tile slots)
+			window.initData.startingMap = Array.isArray(result.startingMap) ? result.startingMap : JSON.parse(result.startingMap)
 			//let suppressActions = false
 			//if (result.specialData) suppressActions = true
 			// Do this to update the top line info / green player highlights
@@ -1221,6 +1223,7 @@ export async function checkForLatestData() {
 			restartKickoutTimers()
 			//let suppressActions = false
 			//if (data.specialData) suppressActions = true
+			if (data.startingMap != null) window.initData.startingMap = Array.isArray(data.startingMap) ? data.startingMap : JSON.parse(data.startingMap)
 			funcs.importFCMmodel(loadDataString)
 			// Match fresh page load / old C.reloadModel: clear stale highlights + fire state, then rebuild turn UI
 			// (import zeros summary totals; without startPlayerTurn, hire.total stays 0 → hired.length === total+1)
