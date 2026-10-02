@@ -1177,8 +1177,8 @@ const sortedCampaigns = computed(() => {
 	width: 220px;
 }
 
-.nonHireableEmployeeCard {
-	height: 152px;
+.expandedEmployeeDiv.nonHireableEmployeeCard {
+	height: 172px;
 }
 
 .nonHireableEmployeeLabel,

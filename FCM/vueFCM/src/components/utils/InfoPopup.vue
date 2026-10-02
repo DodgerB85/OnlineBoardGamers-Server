@@ -73,8 +73,8 @@ const show = ref(false)
 	position: relative;
 }
 
-.nonHireableEmployeeCard {
-	height: 152px;
+.expandedEmployeeDiv.nonHireableEmployeeCard {
+	height: 172px;
 }
 
 .nonHireableEmployeeLabel {
