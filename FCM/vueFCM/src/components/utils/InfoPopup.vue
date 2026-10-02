@@ -18,6 +18,7 @@ const show = ref(false)
 		<div v-if="show" class="infoPopup">
 			<!-- Employee card -->
 			<div v-if="type === 'employee' && employeeId > -1" class="expandedEmployeeDiv" :class="{ nonHireableEmployeeCard: employeeId === rf.UNION_ORGANIZER }">
+				<div v-if="employeeId === rf.UNION_ORGANIZER" class="nonHireableEmployeeLabel">{{ $t('topMenuViews.nonHireable') }}</div>
 				<h3 class="expandedEmployeeTitle" :class="[rf.EMPLOYEES_STR[employeeId].type, { inverted: rf.EMPLOYEES_STR[employeeId].type === 'manager' || rf.EMPLOYEES_STR[employeeId].type === 'restaurant' }]">
 					{{ rf.EMPLOYEES_STR[employeeId].title }}
 				</h3>
@@ -72,17 +73,21 @@ const show = ref(false)
 	position: relative;
 }
 
-.nonHireableEmployeeCard::after {
-	content: "";
-	position: absolute;
-	left: -1px;
-	right: -1px;
-	bottom: -8px;
+.nonHireableEmployeeCard {
+	height: 152px;
+}
+
+.nonHireableEmployeeLabel {
+	color: #fff;
+	background-color: #e21616;
+	font-weight: 700;
 	height: 20px;
-	border: 7px solid #ff4757;
-	border-radius: 4px;
-	box-sizing: border-box;
-	pointer-events: none;
+	line-height: 20px;
+	border-radius: 5px 5px 0 0;
+}
+
+.nonHireableEmployeeCard .expandedEmployeeTitle {
+	border-radius: 0;
 }
 
 .expandedEmployeeTitle {

@@ -689,7 +689,8 @@ const sortedCampaigns = computed(() => {
 									<div class="expandedEmployeeAmountDiv">
 										<span>{{ store.availableEmployees[emp] }}</span>
 									</div>
-									<div class="expandedEmployeeDiv" :class="{ nonHireableEmployeeCard: emp === rf.UNION_ORGANIZER }" :title="emp === rf.UNION_ORGANIZER ? $t('topMenuViews.nonHireableEmployees') : undefined">
+									<div class="expandedEmployeeDiv" :class="{ nonHireableEmployeeCard: emp === rf.UNION_ORGANIZER }">
+										<div v-if="emp === rf.UNION_ORGANIZER" class="nonHireableEmployeeLabel">{{ $t('topMenuViews.nonHireable') }}</div>
 										<h3 class="expandedEmployeeTitle" :class="[rf.EMPLOYEES_STR[emp].type, { inverted: rf.EMPLOYEES_STR[emp].type === 'manager' || rf.EMPLOYEES_STR[emp].type === 'restaurant' }]">
 											{{ rf.EMPLOYEES_STR[emp].title }}
 										</h3>
@@ -717,7 +718,7 @@ const sortedCampaigns = computed(() => {
 				<template v-for="(line, idx1) in computedEmployeeArrangementForDisplay" :key="idx1">
 					<template v-for="(emp, idx2) in line" :key="idx2">
 						<InfoPopup v-if="emp > -1" type="employee" :employeeId="emp">
-							<span class="empSpan" :class="[rf.EMPLOYEES_STR[emp].type, { inverted: rf.EMPLOYEES_STR[emp].type === 'manager' || rf.EMPLOYEES_STR[emp].type === 'restaurant' }, { noMoreEmployees: store.availableEmployees[emp] === 0 }, { nonHireableEmployeeCompact: emp === rf.UNION_ORGANIZER }]" :title="emp === rf.UNION_ORGANIZER ? $t('topMenuViews.nonHireableEmployees') : undefined">{{ rf.EMPLOYEES_STR[emp].title }} ({{ store.availableEmployees[emp] }})</span>
+							<span class="empSpan" :class="[rf.EMPLOYEES_STR[emp].type, { inverted: rf.EMPLOYEES_STR[emp].type === 'manager' || rf.EMPLOYEES_STR[emp].type === 'restaurant' }, { noMoreEmployees: store.availableEmployees[emp] === 0 }, { nonHireableEmployeeCompact: emp === rf.UNION_ORGANIZER }]" :data-non-hireable="emp === rf.UNION_ORGANIZER ? $t('topMenuViews.nonHireable') : undefined">{{ rf.EMPLOYEES_STR[emp].title }} ({{ store.availableEmployees[emp] }})</span>
 						</InfoPopup>
 						<span v-else class="empSpan"></span>
 					</template>
@@ -1176,22 +1177,28 @@ const sortedCampaigns = computed(() => {
 	width: 220px;
 }
 
-.nonHireableEmployeeCard::after {
-	content: "";
-	position: absolute;
-	left: -1px;
-	right: -1px;
-	bottom: -8px;
-	height: 20px;
-	border: 7px solid #ff4757;
-	border-radius: 4px;
-	box-sizing: border-box;
-	pointer-events: none;
+.nonHireableEmployeeCard {
+	height: 152px;
 }
 
-.nonHireableEmployeeCompact {
-	border-bottom: 5px solid #ff4757;
-	box-sizing: border-box;
+.nonHireableEmployeeLabel,
+.nonHireableEmployeeCompact::before {
+	color: #fff;
+	background-color: #e21616;
+	font-weight: 700;
+	height: 20px;
+	line-height: 20px;
+	border-radius: 5px 5px 0 0;
+}
+
+.nonHireableEmployeeCard .expandedEmployeeTitle {
+	border-radius: 0;
+}
+
+.nonHireableEmployeeCompact::before {
+	content: attr(data-non-hireable);
+	display: block;
+	margin: -2px -5px 2px;
 }
 
 .inverted {

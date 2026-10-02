@@ -614,7 +614,7 @@ export default {
 		"noneAvailable": "没有可用的",
 		"takenMilestones": "已用里程碑:",
 		"employees": "雇员:",
-		"nonHireableEmployees": "不可招聘的员工",
+		"nonHireable": "不可招聘",
 		"collapseEmployees": "收起雇员 ▲",
 		"expandEmployees": "展开雇员 ▼",
 		"availableMarketing": "可用的营销活动",
