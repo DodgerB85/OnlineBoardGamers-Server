@@ -683,14 +683,13 @@ const sortedCampaigns = computed(() => {
 						</g>
 					</svg>
 					<template v-for="(line, idx1) in computedEmployeeArrangementForDisplay" :key="idx1">
-						<p v-if="line.includes(rf.UNION_ORGANIZER)" class="nonHireableEmployeesLabel">{{ $t('topMenuViews.nonHireableEmployees') }}</p>
 						<div class="employeeLine">
 							<template v-for="(emp, idx2) in line" :key="idx2">
 								<div v-if="emp > -1" class="expandedEmployeeAreaDiv">
 									<div class="expandedEmployeeAmountDiv">
 										<span>{{ store.availableEmployees[emp] }}</span>
 									</div>
-									<div class="expandedEmployeeDiv">
+									<div class="expandedEmployeeDiv" :class="{ nonHireableEmployeeCard: emp === rf.UNION_ORGANIZER }" :title="emp === rf.UNION_ORGANIZER ? $t('topMenuViews.nonHireableEmployees') : undefined">
 										<h3 class="expandedEmployeeTitle" :class="[rf.EMPLOYEES_STR[emp].type, { inverted: rf.EMPLOYEES_STR[emp].type === 'manager' || rf.EMPLOYEES_STR[emp].type === 'restaurant' }]">
 											{{ rf.EMPLOYEES_STR[emp].title }}
 										</h3>
@@ -716,10 +715,9 @@ const sortedCampaigns = computed(() => {
 				</template>
 			<template v-else>
 				<template v-for="(line, idx1) in computedEmployeeArrangementForDisplay" :key="idx1">
-					<p v-if="line.includes(rf.UNION_ORGANIZER)" class="nonHireableEmployeesLabel">{{ $t('topMenuViews.nonHireableEmployees') }}</p>
 					<template v-for="(emp, idx2) in line" :key="idx2">
 						<InfoPopup v-if="emp > -1" type="employee" :employeeId="emp">
-							<span class="empSpan" :class="[rf.EMPLOYEES_STR[emp].type, { inverted: rf.EMPLOYEES_STR[emp].type === 'manager' || rf.EMPLOYEES_STR[emp].type === 'restaurant' }, { noMoreEmployees: store.availableEmployees[emp] === 0 }]">{{ rf.EMPLOYEES_STR[emp].title }} ({{ store.availableEmployees[emp] }})</span>
+							<span class="empSpan" :class="[rf.EMPLOYEES_STR[emp].type, { inverted: rf.EMPLOYEES_STR[emp].type === 'manager' || rf.EMPLOYEES_STR[emp].type === 'restaurant' }, { noMoreEmployees: store.availableEmployees[emp] === 0 }, { nonHireableEmployeeCompact: emp === rf.UNION_ORGANIZER }]" :title="emp === rf.UNION_ORGANIZER ? $t('topMenuViews.nonHireableEmployees') : undefined">{{ rf.EMPLOYEES_STR[emp].title }} ({{ store.availableEmployees[emp] }})</span>
 						</InfoPopup>
 						<span v-else class="empSpan"></span>
 					</template>
@@ -1169,11 +1167,6 @@ const sortedCampaigns = computed(() => {
 	height: 190px;
 }
 
-.nonHireableEmployeesLabel {
-	margin: 12px 0 4px;
-	font-weight: 700;
-}
-
 .empSpan {
 	font-weight: bold;
 	padding: 2px 5px;
@@ -1181,6 +1174,24 @@ const sortedCampaigns = computed(() => {
 	display: inline-block;
 	cursor: default;
 	width: 220px;
+}
+
+.nonHireableEmployeeCard::after {
+	content: "";
+	position: absolute;
+	left: -1px;
+	right: -1px;
+	bottom: -8px;
+	height: 20px;
+	border: 7px solid #ff4757;
+	border-radius: 4px;
+	box-sizing: border-box;
+	pointer-events: none;
+}
+
+.nonHireableEmployeeCompact {
+	border-bottom: 5px solid #ff4757;
+	box-sizing: border-box;
 }
 
 .inverted {
