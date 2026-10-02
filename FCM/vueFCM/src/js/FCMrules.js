@@ -2749,16 +2749,21 @@ export function housesAffectedByMarketingCampaign(campaign) {
 }
 
 // PHASE_MARKETING_CAMPAIGNS -- fire off marketing campaigns
-export function doMarketingCampaigns(replayOnly) {
+// replayFinalPass: replay only. Live play repeats the whole phase once per Mass
+// Marketeer and only ticks campaign durations down on the last repeat. The replay
+// runs a single pass per recorded history entry, so the caller has to say whether
+// this entry was that last repeat (see replayMarketingCampaigns).
+export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 	const store = useModelStore()
 	for (let i = 0; i < store.players.length; i++) {
 		plyr.recallMassMarketeers(i)
 	}
 
+	const massMarketeers = store.players.reduce((acc, p) => acc + p.employees.filter((x) => x === rf.MASS_MARKETEER).length, 0)
 	let totalMassMarketers = 0
-	if (!replayOnly) {
-		totalMassMarketers = store.players.reduce((acc, p) => acc + p.employees.filter((x) => x === rf.MASS_MARKETEER).length, 0)
-	}
+	if (!replayOnly) totalMassMarketers = massMarketeers
+	// No mass marketers means a single pass, which is always the final one
+	const replayExpires = massMarketeers === 0 || replayFinalPass !== false
 
 	// Phase Loop (Runs once normally, or multiple times for Mass Marketers)
 	for (let mmLoop = totalMassMarketers; mmLoop >= 0; mmLoop--) {
@@ -2844,7 +2849,7 @@ export function doMarketingCampaigns(replayOnly) {
 			if (hDumpling[1].length > 0) histObj.push(hDumpling)
 
 			// Cleanup: Expire or decrement campaign duration
-			if (mmLoop === 0) {
+			if (replayOnly ? replayExpires : mmLoop === 0) {
 				if (campaign.duration === 1) {
 					model.removeMarketingCampaign(campaign.number)
 					for (let i = 0; i < store.players.length; i++) {

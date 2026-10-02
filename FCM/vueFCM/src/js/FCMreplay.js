@@ -196,6 +196,12 @@ export function resetDataForReplay() {
 	if (store.startingOptions.shortGame === true) store.bank = store.players.length * 75
 	else store.bank = store.players.length * 50
 
+	// Reset the break state. importFCMmodel infers bankBroken from the loaded
+	// (finished) history, so without this the whole replay runs pre-broken:
+	// basePrice collapses to the reserve-card price and handleBankBreak takes
+	// its end-of-game branch instead of paying the break out.
+	store.bankBroken = 0
+
 	// Reset gameflow
 	let to = []
 	for (let i = 0; i < store.players.length; to[i] = i++);
@@ -673,6 +679,7 @@ export function replayBankBreak(historyIndex, playerIndex, param) {
 
 export function replayEndGame(historyIndex, playerIndex, param) {
 	const store = useModelStore()
+	store.gameflow.phase = rf.PHASE_GAME_OVER
 	// Match the finished-game page: sort by money (tie: previous order), winner first
 	store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder].sort((a, b) => {
 		const moneyDiff = store.players[b].money - store.players[a].money
@@ -772,7 +779,12 @@ export function replayAddFreeway(historyIndex, playerIndex, param) {
 }
 
 export function replayMarketingCampaigns(historyIndex, playerIndex, param) {
-	rules.doMarketingCampaigns(true)
+	// Live play repeats the whole phase once per Mass Marketeer and only ticks
+	// campaign durations down on the final repeat; it tags every earlier repeat's
+	// history payload with a bare loop index. Every campaign entry in the payload
+	// is an array, so a trailing number means "not the final pass".
+	const isFinalPass = !param || param.length === 0 || !Array.isArray(param[param.length - 1])
+	rules.doMarketingCampaigns(true, isFinalPass)
 }
 
 export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
@@ -964,12 +976,15 @@ export function replayNewTurn(historyIndex, playerIndex, param) {
 	for (let i = 0; i < store.players.length; i++) store.gameflow.newTurnOrder.push(-1)
 
 	for (let i = 0; i < store.players.length; i++) {
-		// Remove food if no fridge
+		// No fridge: live play throws the fridge away at the payday -> cleanup
+		// transition (before HIST_PRODUCE_KIMCHI), so all that survives here is
+		// the kimchi that entry already added. Fridge owners keep everything, so
+		// wiping (and re-adding kimchi) for them would duplicate items.
+		if (plyr.hasFridge(i)) continue
 		funcs.removeItemAll(store.players[i].resources, rf.COFFEE)
-		let kimchi = false
-		if (plyr.playerHasResources(i, rf.KIMCHI)) kimchi = true
-		if (!plyr.hasFridge(i)) store.players[i].resources.splice(0)
-		if (kimchi) plyr.addResources(i, rf.KIMCHI)
+		const hadKimchi = plyr.playerHasResources(i, rf.KIMCHI)
+		store.players[i].resources.splice(0)
+		if (hadKimchi) plyr.addResources(i, rf.KIMCHI)
 	}
 
 	model.clearForNewTurn()
