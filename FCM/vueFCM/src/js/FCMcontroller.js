@@ -1706,8 +1706,7 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 			store.context.chosenResCard = -1
 		}
 	} else if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) {
-		const unionIndex = playerObj.employees.indexOf(rf.UNION_ORGANIZER)
-		if (store.startingOptions.laborMarket && store.laborMarket.unionHolders.includes(playerIndex) && (unionIndex < 0 || unionIndex >= playerObj.ceoSlots)) {
+		if (rules.unionOrganizerPlacementRequired(playerIndex)) {
 			store.gameMessages.actionError = i18n.global.t("laborMarket.unionMustWork")
 			return
 		}

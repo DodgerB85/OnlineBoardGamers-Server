@@ -442,7 +442,7 @@ employees: {
 },
 
 laborMarket: {
-  unionMustWork: "The Union Organizer must occupy a slot directly under the CEO before restructuring can end.",
+  unionMustWork: "You must employ the Union Organizer",
 },
 
 // FCM_IO messages

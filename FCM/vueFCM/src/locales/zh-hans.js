@@ -381,7 +381,7 @@ export default {
 		"unionOrganizerDesc": "5人起算，最多者各得1张。占CEO直属槽，无行动，工资$5。"
 	},
 	"laborMarket": {
-		"unionMustWork": "结束重组前，必须将工会组织者放入CEO下方的直属槽位。"
+		"unionMustWork": "你必须安排工会组织者上班"
 	},
 	"FCM_IO": {
 		"olderVersionRefresh": "看起来您使用的是游戏的旧版本，请刷新页面",
@@ -614,6 +614,7 @@ export default {
 		"noneAvailable": "没有可用的",
 		"takenMilestones": "已用里程碑:",
 		"employees": "雇员:",
+		"nonHireableEmployees": "不可招聘的员工",
 		"collapseEmployees": "收起雇员 ▲",
 		"expandEmployees": "展开雇员 ▼",
 		"availableMarketing": "可用的营销活动",

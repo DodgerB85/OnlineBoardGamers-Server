@@ -251,6 +251,14 @@ export function snapshotWorkedCount(playerIndex) {
 	return count
 }
 
+export function unionOrganizerPlacementRequired(playerIndex) {
+	const store = useModelStore()
+	const player = store.players[playerIndex]
+	if (!player || !store.startingOptions.laborMarket || !store.laborMarket.unionHolders.includes(playerIndex)) return false
+	const unionIndex = player.employees.indexOf(rf.UNION_ORGANIZER)
+	return unionIndex < 0 || unionIndex >= player.ceoSlots
+}
+
 export function activeHeadhuntSalaryEntries(playerIndex) {
 	const store = useModelStore()
 	if (!store.startingOptions.laborMarket) return []

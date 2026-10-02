@@ -683,6 +683,7 @@ const sortedCampaigns = computed(() => {
 						</g>
 					</svg>
 					<template v-for="(line, idx1) in computedEmployeeArrangementForDisplay" :key="idx1">
+						<p v-if="line.includes(rf.UNION_ORGANIZER)" class="nonHireableEmployeesLabel">{{ $t('topMenuViews.nonHireableEmployees') }}</p>
 						<div class="employeeLine">
 							<template v-for="(emp, idx2) in line" :key="idx2">
 								<div v-if="emp > -1" class="expandedEmployeeAreaDiv">
@@ -715,6 +716,7 @@ const sortedCampaigns = computed(() => {
 				</template>
 			<template v-else>
 				<template v-for="(line, idx1) in computedEmployeeArrangementForDisplay" :key="idx1">
+					<p v-if="line.includes(rf.UNION_ORGANIZER)" class="nonHireableEmployeesLabel">{{ $t('topMenuViews.nonHireableEmployees') }}</p>
 					<template v-for="(emp, idx2) in line" :key="idx2">
 						<InfoPopup v-if="emp > -1" type="employee" :employeeId="emp">
 							<span class="empSpan" :class="[rf.EMPLOYEES_STR[emp].type, { inverted: rf.EMPLOYEES_STR[emp].type === 'manager' || rf.EMPLOYEES_STR[emp].type === 'restaurant' }, { noMoreEmployees: store.availableEmployees[emp] === 0 }]">{{ rf.EMPLOYEES_STR[emp].title }} ({{ store.availableEmployees[emp] }})</span>
@@ -1165,6 +1167,11 @@ const sortedCampaigns = computed(() => {
 
 .employeeLine {
 	height: 190px;
+}
+
+.nonHireableEmployeesLabel {
+	margin: 12px 0 4px;
+	font-weight: 700;
 }
 
 .empSpan {
