@@ -3,12 +3,18 @@
  * Minimal replay: steps through the snapshots stored in the history entries.
  * Replace this with a proper replay of the real game state as you build URR.
  */
-import { ref } from "vue"
-import { restoreState } from "../js/URRmodel.js"
+import { onMounted, onBeforeUnmount, ref } from "vue"
+import { restoreState, snapshotState } from "../js/URRmodel.js"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
 
 const step = ref(0)
+const liveSnapshot = snapshotState()
+
+onMounted(applyStep)
+// The menu can close replay without reloading; never leave a historical
+// position available for live moves.
+onBeforeUnmount(() => restoreState(liveSnapshot))
 
 function maxStep() {
 	return store.history.length - 1

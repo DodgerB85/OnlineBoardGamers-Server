@@ -54,7 +54,7 @@ export async function saveGame(saveRewind = true) {
 	let postData = {
 		action: "saveGame",
 		latestUpdate: personal.latestUpdate,
-		gameData: JSON.stringify(model.exportGameData()),
+		gameDataCompressed: funcs.compressData64(model.exportGameData()),
 		turn: store.gameflow.turn,
 		phase: store.gameflow.phase,
 		status: "ACTIVE",
@@ -374,7 +374,7 @@ async function updateDataFromLoadRewind() {
 				allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
 				gameID: personal.gameID,
 				phase: store.gameflow.phase,
-				gameData: JSON.stringify(model.exportGameData()),
+				gameDataCompressed: funcs.compressData64(model.exportGameData()),
 			}),
 			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
 		})

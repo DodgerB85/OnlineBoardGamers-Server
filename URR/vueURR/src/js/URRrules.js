@@ -38,7 +38,8 @@ export function getLandPurchaseError(game, player, area) {
 	if (game.players[player].soldLandTypes.includes(area.landType)) return "You sold this terrain during this settlement"
 	if (game.players[player].soldEmergingStates.includes(area.state)) return "You sold land in this emerging state"
 	const used = game.board.areas.filter((land) => land.markerOwner === player).length
-	if (game.board.markerLimit !== null && used >= game.board.markerLimit) return "No ownership markers remain"
+	// Rebuying one's own sold land returns that flipped marker before placing it.
+	if (game.board.markerLimit !== null && used >= game.board.markerLimit && area.markerOwner !== player) return "No ownership markers remain"
 	if (availableMoney(game, player) < landPrice(game, area, area.markerOwner === null)) return "Not enough private money"
 	return ""
 }

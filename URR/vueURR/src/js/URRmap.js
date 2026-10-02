@@ -77,7 +77,9 @@ export function getCanalCost(game, path) {
 	requireRule(Array.isArray(path) && path.length >= 2 && new Set(path).size === path.length, "A canal must be a simple path")
 	const areas = path.map((id) => getArea(game, id))
 	requireRule(areas.length !== 2 || !areas.every((area) => area.isRiver), "A single canal cannot connect two river areas")
-	requireRule(areas[0].isRiver || canalNeighbours(game, path[0]).length > 0, "Start at an existing river or canal")
+	// A stretch may be selected from either end; one end must already hold water.
+	const watered = (area) => area.isRiver || canalNeighbours(game, area.id).length > 0
+	requireRule(watered(areas[0]) || watered(areas.at(-1)), "Start at an existing river or canal")
 	let junctions = 0
 	for (let i = 0; i < areas.length; i++) {
 		const area = areas[i]

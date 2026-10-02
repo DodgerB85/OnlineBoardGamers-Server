@@ -123,6 +123,10 @@ def _processURRturn(request):
         return JsonResponse({"error": "POST request required."}, status=400)
 
     jsonData = json.loads(request.body)
+    if "gameDataCompressed" in jsonData:
+        # Compress only the transfer: saved positions and legacy callers retain
+        # the plain JSON format used by show pages, history, and rewind.
+        jsonData["gameData"] = gzip.decompress(base64.b64decode(jsonData["gameDataCompressed"])).decode("utf-8")
     game_id = jsonData["gameID"]
     latest_update = str(jsonData.get("latestUpdate", 0))
 
@@ -183,9 +187,9 @@ def _processURRturn(request):
         if not currentRewindDataArray:
             return JsonResponse({"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")}, safe=False)
 
-        loadData = currentRewindDataArray.pop() if currentRewindDataArray else ""
+        loadData = decompressRewindPoint(currentRewindDataArray.pop()) if currentRewindDataArray else ""
         while len(currentRewindDataArray) > 0 and loadData == currentGame.gameData:
-            loadData = currentRewindDataArray.pop()
+            loadData = decompressRewindPoint(currentRewindDataArray.pop())
 
         currentGame.gameData = loadData if loadData != "" else ""
         currentGame.rewindTempData = loadData
@@ -302,13 +306,28 @@ def performSaveURRGame(request, currentGame, jsonData):
     )
 
 
+def compressRewindPoint(point):
+    if point.startswith("gzip:"):
+        return point
+    return "gzip:" + base64.b64encode(gzip.compress(point.encode("utf-8"), mtime=0)).decode("ascii")
+
+
+def decompressRewindPoint(point):
+    if point.startswith("gzip:"):
+        return gzip.decompress(base64.b64decode(point[5:])).decode("utf-8")
+    return point
+
+
 def doSaveRewind(currentGame, jsonData):
-    new_point = jsonData["gameData"]
+    # Each point includes the complete replay history. Keeping twenty plain
+    # copies makes normal games unnecessarily expensive to save and profile.
+    new_point = compressRewindPoint(jsonData["gameData"])
 
     if currentGame.rewindData:
         try:
-            currentRewindData = json.loads(currentGame.rewindData)
+            currentRewindData = [compressRewindPoint(point) for point in json.loads(currentGame.rewindData)]
             if currentRewindData and currentRewindData[-1] == new_point:
+                currentGame.rewindData = json.dumps(currentRewindData)
                 return
         except json.JSONDecodeError:
             currentRewindData = []
@@ -316,8 +335,9 @@ def doSaveRewind(currentGame, jsonData):
         currentRewindData = []
 
     if currentGame.rewindTempData:
-        if not currentRewindData or currentRewindData[-1] != currentGame.rewindTempData:
-            currentRewindData.append(currentGame.rewindTempData)
+        temp_point = compressRewindPoint(currentGame.rewindTempData)
+        if not currentRewindData or currentRewindData[-1] != temp_point:
+            currentRewindData.append(temp_point)
         currentGame.rewindTempData = ""
 
     if not currentRewindData or currentRewindData[-1] != new_point:

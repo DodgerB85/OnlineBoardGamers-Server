@@ -8,10 +8,10 @@ import { PRINTED_HEXES } from "./URRboardDisplay.js"
 // A/B/E/P/S/U = Akkad/Babylon/Elam/Persia/Sumer/Urartu.
 const ROWS = [
 	"HU HU FU HU R HP H*P FP FP DP",
-	"R R HU F*U HU R HP FA FP HP",
+	"R R HU F*U HU R HA FA FP HP",
 	"HU R FU FA HA R F*A HP HP HP",
 	"FU HU R FB FA FA R R R R",
-	"FB FB R SA SA SA R FE FE R",
+	"FB FB R SA SA SA R FA FP R",
 	"D*B DB SB R SS SS R FE DE D*E",
 	"DB S*B R R R R R SE DE DE",
 	"DB DB SS R SS D*S SS SE DE D*E",
@@ -34,7 +34,11 @@ const RIVERS = [
 	[[4, 9], [3, 9], [3, 8], [3, 7], [4, 6]],
 ]
 
-export function createPrintedBoard(markerLimit = null) {
+// Original component count: 30 ownership markers per player
+// (URR/tempAssets/BGG/ur_1830_bc_all_files/README.txt).
+export const PRINTED_MARKER_LIMIT = 30
+
+export function createPrintedBoard(markerLimit = PRINTED_MARKER_LIMIT) {
 	const areas = ROWS.flatMap((row, rowIndex) => row.split(" ").map((cell, column) => {
 		const areaId = id(rowIndex, column)
 		return {

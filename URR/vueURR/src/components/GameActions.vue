@@ -73,7 +73,7 @@ function preview(action) {
 }
 function resetTrade() { purchase.value = null; before.value = [[]]; after.value = [[]]; exchangeDer.value = false }
 function queueSale(batches) {
-	if (!area.value || area.value.owner !== actor.value) return
+	if (!area.value || (area.value.owner !== actor.value && !(batches === after.value && area.value.id === purchase.value))) return
 	if ([...before.value, ...after.value, ...maintenanceSales.value].some((batch) => batch.includes(area.value.id))) return
 	const last = batches.at(-1)
 	if (last.length && store.board.areas.find((entry) => entry.id === last[0]).landType !== area.value.landType) batches.push([])
@@ -121,7 +121,7 @@ watch(removable, (ids) => { if (!ids.includes(removeWaterwork.value)) removeWate
 		<fieldset v-else-if="store.gameflow.phase === rf.PHASE_SETTLEMENT" :disabled="!personal.canPlay()">
 			<legend>Settlement · {{ store.players[actor]?.displayName }}</legend>
 			<p>Click land on the map to queue one purchase and any sales. Each sale batch is priced before its terrain markers move.</p>
-			<div class="buttonRow"><button :disabled="!area || area.isRiver || area.owner !== null" @click="purchase = area.id">Queue purchase {{ area ? label(area.id) : '' }}</button><button :disabled="!area || area.owner !== actor" @click="queueSale(before)">Sell selected before buying</button><button :disabled="!area || area.owner !== actor" @click="queueSale(after)">Sell selected after buying</button></div>
+			<div class="buttonRow"><button :disabled="!area || area.isRiver || area.owner !== null" @click="purchase = area.id">Queue purchase {{ area ? label(area.id) : '' }}</button><button :disabled="!area || area.owner !== actor" @click="queueSale(before)">Sell selected before buying</button><button :disabled="!area || (area.owner !== actor && area.id !== purchase)" @click="queueSale(after)">Sell selected after buying</button></div>
 			<div v-if="purchase !== null">Buy {{ label(purchase) }} <button @click="purchase = null; exchangeDer = false">Remove purchase</button><label v-if="ownedDer"><input type="checkbox" v-model="exchangeDer" /> Exchange Der for a free forest</label></div>
 			<div v-for="(batches, timing) in { Before: before, After: after }" :key="timing" class="saleGroup">
 				<template v-for="(batch, index) in batches" :key="index"><div v-if="batch.length">{{ timing }} buying, batch {{ index + 1 }}: <button v-for="id in batch" :key="id" @click="removeSale(batches, index, id)">{{ label(id) }} ×</button></div></template>

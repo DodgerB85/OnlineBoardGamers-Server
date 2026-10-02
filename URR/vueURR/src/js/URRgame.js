@@ -287,6 +287,9 @@ function buyCard(game, state, action, consentingPlayer = null, isFree = false) {
 	const data = rf.ERA_CARD_DATA[era][action.kind]
 	requireRule(data, "Choose a digger, pump, or reservoir")
 	const [capacity, printedPrice] = data
+	// The first purchase starts its era immediately, including crew departures,
+	// before deciding whether private funds may cover mandatory maintenance.
+	consumeCard(game, era)
 	const price = isFree ? 0 : printedPrice
 	const shortfall = Math.max(0, price - state.money)
 	if (shortfall > 0) {
@@ -312,7 +315,6 @@ function buyCard(game, state, action, consentingPlayer = null, isFree = false) {
 	}
 	state.money = Math.max(0, state.money - price)
 	game.players[state.king].money -= shortfall
-	consumeCard(game, era)
 }
 
 function exchangeCalah(game, state, action, consentingPlayer = null) {
@@ -321,7 +323,10 @@ function exchangeCalah(game, state, action, consentingPlayer = null) {
 	requireRule(action.kind === "pump" || action.kind === "reservoir", "Calah must be exchanged for a waterwork")
 	const area = getArea(game, action.area)
 	const homeland = game.board.areas.filter((land) => land.nation === rf.NATION_CALAH)
-	requireRule((area.nation === rf.NATION_CALAH && area.landType === rf.LAND_HILLS) || homeland.some((land) => land.neighbours.includes(area.id)), "Calah's free waterwork must be on its hills or adjacent to Calah")
+	// Calah's own forest is neither "the hills of Calah" nor adjacent to Calah.
+	const onHills = area.nation === rf.NATION_CALAH && area.landType === rf.LAND_HILLS
+	const adjacent = area.nation !== rf.NATION_CALAH && homeland.some((land) => land.neighbours.includes(area.id))
+	requireRule(onHills || adjacent, "Calah's free waterwork must be on its hills or adjacent to Calah")
 	buyCard(game, state, action, consentingPlayer, true)
 	nation.isRemoved = true
 }
@@ -408,8 +413,8 @@ function requestConsent(game, state, action) {
 		if (action.type === "exchangeCalah") exchangeCalah(preview, preview.states[state.id], action, owner)
 		else buyCard(preview, preview.states[state.id], action, owner)
 	}
-	game.gameflow.developmentStep = "purchasing"
 	if (owner === null || owner === state.king) {
+		game.gameflow.developmentStep = "purchasing"
 		if (action.type === "offerNation") assimilateNation(game, state, action)
 		else if (action.type === "exchangeCalah") exchangeCalah(game, state, action, owner)
 		else buyCard(game, state, action, owner)
@@ -422,7 +427,9 @@ function requestConsent(game, state, action) {
 function respondToOffer(game, player, action) {
 	requireRule(action.type === "respondOffer" && typeof action.accept === "boolean", "Accept or decline the pending offer")
 	const offer = game.gameflow.pendingOffer
+	// A declined request buys nothing, so the state may still dig.
 	if (action.accept) {
+		game.gameflow.developmentStep = "purchasing"
 		const state = game.states[offer.state]
 		if (offer.action.type === "offerNation") assimilateNation(game, state, offer.action)
 		else if (offer.action.type === "exchangeCalah") exchangeCalah(game, state, offer.action, player)
