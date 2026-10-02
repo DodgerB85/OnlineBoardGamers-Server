@@ -68,7 +68,7 @@
                         </div>
                         <div class="form-row">
                             <label class="form-label" for="playersPerGameMT">{% translate "Players Per Game" %}</label>
-                            <select name="playersPerGameMT" id="playersPerGameMT" onchange="validateOptions(this.id);">
+                            <select name="playersPerGameMT" id="playersPerGameMT" onchange="mtPlayersPerGameChanged()">
                                 <option value=3 selected="selected">3</option>
                                 <option value=4>4</option>
                                 <option value=5>5</option>
@@ -368,6 +368,7 @@
     {% block script %}
         {% compress js %}
             <script src="{% static 'Lobby/createBUS.js' %}"></script>
+            <script src="{% static 'Lobby/miniTournament.js' %}"></script>
         {% endcompress %}
         <script>
     var global = {};

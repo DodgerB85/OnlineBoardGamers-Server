@@ -113,6 +113,7 @@
     </style>
     {% compress js %}
         <script src="{% static 'Lobby/createRNB.js' %}"></script>
+        <script src="{% static 'Lobby/miniTournament.js' %}"></script>
     {% endcompress %}
 {% endblock head %}
 {% block body %}
@@ -173,7 +174,7 @@
                     </div>
                     <div class="form-row">
                         <label class="form-label" for="playersPerGameMT">{% translate "Players Per Game" %}</label>
-                        <select name="playersPerGameMT" id="playersPerGameMT" onchange="rnbMTPlayerCountChanged();">
+                        <select name="playersPerGameMT" id="playersPerGameMT" onchange="mtPlayersPerGameChanged(); rnbMTPlayerCountChanged();">
                             <option value="2">2</option>
                             <option value="3" selected="selected">3</option>
                             <option value="4">4</option>
