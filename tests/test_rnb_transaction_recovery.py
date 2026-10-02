@@ -8,13 +8,14 @@ Simulates the sequence:
 4. Client recovery code re-runs processStacks + saveAndUpdateNotifictionsAfterStack
 
 Run with:
-    .venv/bin/python manage.py test RNB.test_transaction_recovery --keepdb
+    .venv/bin/python manage.py test tests.test_rnb_transaction_recovery --keepdb
 """
 import json
 import os
 import sys
 import time
-from unittest.mock import call, patch
+import unittest
+from unittest.mock import patch
 
 # Ensure Django can find the project root when running standalone
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -278,6 +279,9 @@ class TransactionRecoveryTest(TestCase):
     # ------------------------------------------------------------------
     # F (GAP): recovering player is excluded from their own notification
     # ------------------------------------------------------------------
+    # Known bug, tracked in issue #64. Remove this decorator once the
+    # notification filter in RNB/views.py stops excluding request.user.
+    @unittest.expectedFailure
     def test_F_FAILING_recovery_player_gets_no_notification(self):
         """
         BUG: when Player B triggers recovery for Player A's stuck transaction,

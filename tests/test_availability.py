@@ -23,6 +23,8 @@ class AvailabilityTrackingTests(TestCase):
             gameCode="CNS",
             gameStatus="ACTIVE",
             maxPlayers=2,
+            creator=self.player_one,
+            host=self.player_one,
             latestUpdate=str(int(datetime(2026, 1, 1, 22, 30, tzinfo=datetime_timezone.utc).timestamp() * 1000)),
             startingOptions=json.dumps([]),
         )

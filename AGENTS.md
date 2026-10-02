@@ -119,7 +119,7 @@ This repository is a Django-backed online board gaming site where most game logi
 
 ## Tests And Verification
 
-- The automated test footprint is currently very light. Many `tests.py` files are still placeholders.
+- The automated test footprint is currently modest. All tests live in the root `/tests/` package (see `/docs/UNIT_TESTS.md` for an inventory and how to run them). Apps no longer contain per-app `tests.py` files.
 - Default rule: do not add tests unless there is already a meaningful nearby pattern to follow, or the user explicitly asks for tests.
 - Do not introduce a new testing approach as part of a small feature or bugfix.
 - Prefer targeted verification:

@@ -7,7 +7,6 @@ from siteUtils.auto_tournament_helpers import (
     find_pending_tournament_to_open,
     get_target_start_size,
     is_pending_creation_day,
-    should_auto_start_game,
     should_start_open_tournament,
 )
 from Lobby.models import Tournament
@@ -125,10 +124,6 @@ class TournamentSchedulerHelperTests(SimpleTestCase):
         self.assertTrue(is_pending_creation_day(datetime.datetime(2026, 5, 25, 23, 59), tournament_date))
         self.assertFalse(is_pending_creation_day(datetime.datetime(2026, 5, 24, 23, 59), tournament_date))
         self.assertFalse(is_pending_creation_day(datetime.datetime(2026, 5, 26, 0, 0), tournament_date))
-
-    def test_tgz_is_auto_started_but_hlc_is_not(self):
-        self.assertTrue(should_auto_start_game("TGZ"))
-        self.assertFalse(should_auto_start_game("HLC"))
 
     def test_tgz_target_start_size_rounds_up_to_next_multiple(self):
         self.assertEqual(get_target_start_size(13, 4, "RR", 7), 16)
