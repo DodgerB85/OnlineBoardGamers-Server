@@ -74,7 +74,7 @@ const show = ref(false)
 }
 
 .expandedEmployeeDiv.nonHireableEmployeeCard {
-	height: 172px;
+	height: 150px;
 }
 
 .nonHireableEmployeeLabel {
