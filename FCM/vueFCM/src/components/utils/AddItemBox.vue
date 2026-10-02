@@ -144,6 +144,10 @@ function selectUrbanPlanningTile(tile) {
 function confirmUrbanPlanning() {
 	const idx = currentUPTileIndex()
 	if (idx !== -1) store.mapData.tiles[idx + 1] = store.context.rotation
+	// Committed: MapArea must render it from the stored rotation, not the live
+	// context.rotation (saveInProgressMap resets that to 0, and startPlayerTurn
+	// won't advance the pointer on your own client because your turn has passed)
+	store.context.nextUrbanPlanningTile = -1
 	view.setMapDisplayTiles()
 	IO.saveInProgressMap()
 }
