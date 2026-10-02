@@ -38,6 +38,10 @@ if TYPE_CHECKING:
     from Lobby.presenters import FCMpresenter
 
 FCMsuperUsers = ["BotKickStarter"]
+# Accounts allowed to drive developer tooling. Same set the gameAdmin views gate
+# on - kept here so the "Reset AI" board-replacement path cannot be reached by an
+# ordinary player's save.
+FCMadminUsers = ["admin", "DodgerB"]
 USE_NEW_CODE = False
 
 logger = logging.getLogger(__name__)
@@ -919,7 +923,14 @@ def _processTurn(request):
         if currentGame.gameStatus == "FINISHED":
             return JsonResponse({"syncError": True}, safe=False)
 
-        if "mapTiles" in jsonData and jsonData["mapTiles"] and currentGame.startingMap != "":
+        # Developer "Reset AI" rebuilds the game on a brand new board. The map
+        # sync check below exists to catch a client whose map has silently drifted
+        # from the server's, so it rightly rejects a different map - but a
+        # deliberate reset has to be able to replace startingMap, so it carries its
+        # own flag and is restricted to admin accounts.
+        isGameReset = bool(jsonData.get("resetGame")) and (request.user.username in FCMsuperUsers or request.user.username in FCMadminUsers)
+
+        if "mapTiles" in jsonData and jsonData["mapTiles"] and currentGame.startingMap != "" and not isGameReset:
             incomingTiles = jsonData["mapTiles"]
             currentTiles = json.loads(currentGame.startingMap)
             if len(incomingTiles) != len(currentTiles):
@@ -947,7 +958,7 @@ def _processTurn(request):
                         safe=False,
                     )
 
-        if "mapTiles" in jsonData and jsonData["mapTiles"] and currentGame.startingMap == "":
+        if "mapTiles" in jsonData and jsonData["mapTiles"] and (currentGame.startingMap == "" or isGameReset):
             currentGame.startingMap = json.dumps(jsonData["mapTiles"], separators=(",", ":"))
 
         nameToUse = request.user.username
@@ -966,6 +977,11 @@ def _processTurn(request):
         # it burns one of the 20 slots. Callers passing False are the kickout /
         # resign / reset paths, which already clear or ignore the stack.
         currentRewindDataArray = load_rewind_data(currentGame)
+        if isGameReset:
+            # Rewind points belong to the game being thrown away - leaving them
+            # would let a rewind restore it.
+            currentRewindDataArray = []
+            currentGame.rewindTempData = ""
         if jsonData["saveRewind"]:
             oldData = currentGame.gameData
             if len(currentRewindDataArray) == 0 or currentRewindDataArray[-1] != oldData:

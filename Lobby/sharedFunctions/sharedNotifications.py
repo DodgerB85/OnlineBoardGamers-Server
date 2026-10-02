@@ -1741,6 +1741,20 @@ def SN_sendDiscordDM(discordID, message_text, urlText, urlRaw):
 
 
 def SN_sendAdminErrorMessage(message):
+    # Never reach Discord from the test suite. Several error paths call this on
+    # purpose - FCM's map-sync guard rejects saves that a test deliberately makes
+    # mismatched, for one - and each one posts to the real admin webhook, so a
+    # test run spams the channel with genuine-looking traffic. Django points the
+    # default connection at test_<dbname> while testing, so that is the cheapest
+    # reliable signal available here.
+    try:
+        from django.db import connection
+
+        if str(connection.settings_dict.get("NAME", "")).startswith("test_"):
+            return
+    except Exception:
+        pass
+
     try:
         requests.post(
             f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",

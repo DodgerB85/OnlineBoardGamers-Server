@@ -43,8 +43,10 @@ Notes:
 | `test_rnb_transaction_recovery.py` | 10 | RNB transaction-recovery contract: `saveStackMove` sets `transactionID`, `RNBdata` exposes it, matching ID clears the lock, wrong/missing ID keeps it, Django-Q stuck-notification scheduling and no-op, stale `latestUpdate` rejection |
 | `test_robots.py` | 2 | `/robots.txt` GET/POST |
 | `test_fcm_rewind.py` | 6 | FCM `saveNormal` rewind stack: `saveRewind=True` records the pre-save state, `saveRewind=False` records nothing at all, one save makes exactly one rewind point, repeated AI-style saves never grow the stack, and rewinding after your own move returns *your* turn rather than the next player's (FcmAI's) |
+| `test_fcm_reset.py` | 5 | Admin "Reset AI": a reset-flagged save replaces `startingMap` and clears the discarded game's rewind stack; the map-sync drift guard still rejects a changed board on an ordinary save, and still rejects a non-admin claiming `resetGame` |
+| `test_admin_webhook_guard.py` | 2 | `SN_sendAdminErrorMessage` never posts to the admin Discord webhook while Django is on a test database — directly, and via the FCM map-sync rejection path that prompted it |
 
-195 tests total (git count may drift slightly as tests are added).
+202 tests total (git count may drift slightly as tests are added).
 
 ## Conventions
 
@@ -53,6 +55,7 @@ Notes:
 - `PrintSuccessTestCase` (in `test_shared_functions.py` / `test_tourny_generator.py`) prints a `PASS:` line per test so progress is visible in long runs.
 - Time-dependent logic is pinned with `unittest.mock.patch` on `time.time`.
 - Add new files as `tests/test_<topic>.py` in `/tests/`; the module path for running is `tests.<file_name>`.
+- Tests must never reach Discord. `SN_sendAdminErrorMessage` short-circuits when Django is on a `test_` database, and `tests/test_admin_webhook_guard.py` enforces it. Several error paths call it deliberately (FCM's map-sync guard is one), so without that guard a suite run posts to the real admin webhook.
 
 ## Known expected failure
 

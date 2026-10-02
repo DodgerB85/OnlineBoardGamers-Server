@@ -410,7 +410,10 @@ export async function saveModuleSelection(moduleIndex) {
 }
 
 // At the END of simul turns, we want a rewind pointt
-export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointlessMove) {
+// extraPostData is merged into the POST body. Used by the admin "Reset AI" to
+// carry resetGame:true, which tells the server the incoming mapTiles are a
+// deliberate replacement rather than map drift.
+export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointlessMove, extraPostData) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.clearMessages()
@@ -480,6 +483,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 		gameData: gameData,
 		IPM: isPointlessMove,
 		mapTiles: map.getOriginalTiles(false),
+		...extraPostData,
 	}
 
 	if ((window.initData.gameData === "" || !window.initData.gameData) && store.gameflow.turn === 0) {

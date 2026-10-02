@@ -47,7 +47,9 @@ export async function resetGameForAI() {
 	// saveRewind=false on purpose. The server seeds its rewind array from the
 	// gameData it currently holds, which after a reset is the game we just threw
 	// away - so saving a rewind here would leave a rewind point that resurrects it.
-	await IO.saveGameNormal(false, false, false)
+	// resetGame:true is what lets the incoming mapTiles replace the server's
+	// startingMap; without it the map-sync guard rejects the new board.
+	await IO.saveGameNormal(false, false, false, { resetGame: true })
 
 	personal.haltPlay = false
 	return true
