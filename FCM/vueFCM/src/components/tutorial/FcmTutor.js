@@ -42,18 +42,18 @@ function tutorPlaceRestaurant() {
 	const possible = rules.givePossibleStartingRestaurantsPosition(0)
 	if (possible.length === 0) return null
 	model.addRestaurant(TUTOR_INDEX, possible[possible.length - 1], 0, true)
-	return "Puts their restaurant on empty squares with the entrance against a road. That is the whole placement rule - everything else on the board comes later."
+	return "Puts their restaurant on empty squares with the entrance against a road, and on a tile no other restaurant's entrance is on. That is the whole of the first-placement rule; later in the game they may share a tile."
 }
 
 function tutorChooseReserveCard() {
 	useModelStore().reserveCards[TUTOR_INDEX] = 3
-	return "Puts a reserve card face down by the bank. Its money only goes into the bank when the bank breaks, and it sets how many cards every CEO gets - but the holder earns nothing."
+	return "Puts a reserve card face down by the bank. Its money only goes into the bank when the bank first breaks, and the open slots it shows decide how many slots every CEO gets from the next turn - the most common number, or the highest on a tie. The holder earns nothing."
 }
 
 function tutorRestructure() {
 	controller.autoFillEmployees()
 	const working = useModelStore().players[TUTOR_INDEX].employees.filter((e) => e !== rf.BLANK_EMPLOYEE_SPACE)
-	return `Puts everyone to work: ${working.map(employeeName).join(", ") || "nobody yet"}. Anyone left on the beach is doing nothing at all, so they get moved into the structure.`
+	return `Puts everyone to work: ${working.map(employeeName).join(", ") || "nobody yet"}. Cards left on the beach are not in the structure, so they are idle - but not free: they can still be trained, and they still cost salary.`
 }
 
 function tutorChooseTurnOrder() {
@@ -80,7 +80,7 @@ function tutorHire() {
 	}
 	if (hired.length === 0) return "Has no recruitment actions left, so they hire nobody."
 	if (hired.length === 1) return `Recruits a ${employeeName(hired[0])}. Note it lands on the beach, not at work - new hires only start working after the next restructuring.`
-	return `Recruits ${hired.map(employeeName).join(" and ")}. Both land on the beach and wait for the next restructuring phase.`
+	return `Recruits ${hired.map(employeeName).join(", ")}. They all land on the beach and wait for the next restructuring phase.`
 }
 
 function tutorTrain() {
@@ -107,7 +107,7 @@ function tutorTrain() {
 		if (!moved) break
 	}
 	if (notes.length === 0) return null
-	return `Trains ${notes.join(", ")}. Each training action turns one beach card one step, and only cards printed on the beach can be trained.`
+	return `Trains ${notes.join(", ")}. One training action turns one beach card one step - a coach can take the same card two steps, a guru three - and only cards on the beach can be trained.`
 }
 
 function tutorMarket() {
@@ -128,6 +128,12 @@ function tutorProduce() {
 	const producer = store.players[TUTOR_INDEX].employees.find((emp) => rf.PRODUCERS.includes(emp))
 	if (producer === undefined) return null
 
+	// A Zeppelin Pilot is reachable by training (Errand Boy -> Cart -> Truck -> Zeppelin)
+	// but its route is chosen tile by tile with selectNextTile, not square by square, and
+	// it produces no food. The tutorial only runs two turns so it never gets there - bail
+	// rather than half-starting a route that is never finished.
+	if (producer === rf.ZEPPELIN_PILOT) return null
+
 	controller.clickedProducer(producer)
 
 	// Driving producers need a route picked one square at a time
@@ -138,7 +144,10 @@ function tutorProduce() {
 			steps++
 		}
 		if (store.context.producer === producer) controller.stopCollecting()
-		return `Drives out with the ${employeeName(producer)} and lifts every drink symbol beside the road within range. The cart reaches two tiles and takes two drinks per symbol.`
+		// NB the cart and the truck have different numbers, and this one sentence covers both.
+		const range = producer === rf.TRUCK_DRIVER ? 3 : 2
+		const perSymbol = producer === rf.TRUCK_DRIVER ? 3 : 2
+		return `Drives out with the ${employeeName(producer)} and lifts every drink symbol beside the road within range. The ${range === 3 ? "truck" : "cart"} reaches ${range} tiles and takes ${perSymbol} drinks per symbol, with no U-turns and no need to get back.`
 	}
 
 	const choices = rules.givePossibleFoodDrinksChoice(producer)
@@ -157,7 +166,7 @@ function tutorBuild() {
 		controller.clickedHouseSquare(map.findIndexForHouse(house))
 		// Houses with more than one free edge need a second click to pick the side
 		if (store.context.edges.length > 0) controller.clickedHouseSquare(store.highlights.indexesToHighlightYellow[0])
-		return `Puts a garden on house ${house}. It has to touch that house along two squares, and a house with a garden earns double the unit price.`
+		return `Puts a garden on house ${house}. It has to touch that house along two squares, and whichever chain wins that house then earns double the unit price on it.`
 	}
 	const houses = rules.availableHouses()
 	const possible = rules.givePossiblePositionsForBlock(2, 3)
@@ -207,10 +216,10 @@ export async function playTutorSubphase() {
 		}
 		controller.endWorkingDaySubphase()
 	} else if (phase === rf.PHASE_PAYDAY) {
-		said = "Puts their hand in their pocket and pays every employee who demands a salary."
+		said = "Puts their hand in their pocket and pays $5 for every salary card in their structure and on their beach - the wages go back into the bank."
 		await controller.endPlayerTurn(true, false)
 	} else if (phase === rf.PHASE_CLEAN_UP) {
-		said = "Takes stock of the fridge and bins whatever will not fit through the week."
+		said = "Takes stock of everything they own. Without the first-to-throw-away milestone all of it has to go in the bin; with it, ten tokens can sit in the freezer."
 		await controller.endPlayerTurn(true, false)
 	}
 

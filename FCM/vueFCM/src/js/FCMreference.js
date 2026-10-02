@@ -12,6 +12,9 @@ export const XANGO_BLUES = 4
 export const SIAP_FAJI = 5
 
 export const BOT_NAME = "FcmBot"
+// Seat name of the in-game AI. Distinct from BOT_NAME: a BOT_NAME seat is a
+// human who was kicked out or resigned, an AI_NAME seat plays itself.
+export const AI_NAME = "FcmAI"
 export const TOURNAMENT_ADMIN_NAME = "FCMtourneyAdmin"
 export const DELETE_VOTE_TOPIC = "delete_game_votes"
 export const STATS_EXCLUDE_VOTE_TOPIC = "stats_exclude_votes"
