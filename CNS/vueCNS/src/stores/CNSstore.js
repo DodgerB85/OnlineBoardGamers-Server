@@ -115,6 +115,7 @@ export const useModelStore = defineStore('store', () => {
     showBug: false,
     showHistory: false,
     showReserve: false,
+    showTileInfo: false,
     showLoader: false,
     showRewindPanel: false,
     performingRewind: false,
