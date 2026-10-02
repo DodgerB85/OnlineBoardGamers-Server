@@ -694,7 +694,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 
 		if (personal.liveWS) WS.broadcastGameUpdate()
 
-		if (controller.currentPlayerObj().name === "FcmAI" && store.gameflow.phase != rf.PHASE_GAME_OVER) makeAImove()
+		if (controller.currentPlayerObj().name === rf.AI_NAME && store.gameflow.phase != rf.PHASE_GAME_OVER) makeAImove()
 	} catch (error) {
 		console.error("Error fetching data:", error)
 		personal.haltPlay = false

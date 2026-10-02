@@ -1806,7 +1806,13 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 
 		// You always want to save a rewind, even at the END of a pointless move
 		// But if it is pointless, you want to delete the PREVIOUS rewind point
-		await IO.saveGameNormal(true, false, isPointlessMove)
+		// ...except when the AI is the one ending its turn. The server stores the
+		// PREVIOUS gameData, so the entry a save creates is "the state at the start
+		// of the mover's turn". For the AI that is a state a human cannot act on
+		// (the AI just plays it again) and it burns one of the 20 rewind slots, so
+		// skip it. Matches the FcmBot suppression in FCM_IO.saveGameNormal.
+		const moverIsAi = store.players[playerIndex]?.name === rf.AI_NAME
+		await IO.saveGameNormal(!moverIsAi, false, isPointlessMove)
 		// In case it is your turn again right away, run startPlayerTurn
 		// If it isn't then you get returned from that function anyway
 		if (rf.SUPER_USERS.includes(personal.name)) personal.pov = -1

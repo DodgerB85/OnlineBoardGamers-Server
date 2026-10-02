@@ -9,9 +9,10 @@
  */
 import { useModelStore } from "../../stores/FCMstore.js"
 import * as map from "../FCMmap"
+import * as rf from "../FCMreference"
 import * as view from "../FCMview"
 
-export const AI_PLAYER_NAME = "FcmAI"
+export const AI_PLAYER_NAME = rf.AI_NAME
 
 /** Resolver for the AI currently parked at the gate, if any. */
 let gate = null

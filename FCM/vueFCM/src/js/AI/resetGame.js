@@ -44,7 +44,10 @@ export async function resetGameForAI() {
 	store.clearHistoryHelpers()
 	store.clearMessages()
 
-	await IO.saveGameNormal(true, false, false)
+	// saveRewind=false on purpose. The server seeds its rewind array from the
+	// gameData it currently holds, which after a reset is the game we just threw
+	// away - so saving a rewind here would leave a rewind point that resurrects it.
+	await IO.saveGameNormal(false, false, false)
 
 	personal.haltPlay = false
 	return true
