@@ -10,7 +10,7 @@
  */
 import { computed } from "vue"
 import * as aiDebug from "../js/AI/aiDebug"
-import { W_SAME_TILE_HOUSE, W_ADJACENT_TILE_HOUSE, W_DRIVE_THRU, W_TILE_BOUNDARY, W_OVERPASS_DUAL_NETWORK } from "../js/AI/restaurantHeatMap"
+import { W_SAME_TILE_HOUSE, W_ADJACENT_TILE_HOUSE, W_DRIVE_THRU, W_TILE_BOUNDARY, W_OVERPASS_DUAL_NETWORK, W_NO_ROAD_EXIT } from "../js/AI/restaurantHeatMap"
 
 import { useModelStore } from "../stores/FCMstore.js"
 const store = useModelStore()
@@ -42,7 +42,9 @@ function chosenBreakdown(chosen) {
 	if (b.adjacentTileHouses) bits.push(b.adjacentTileHouses + " next-tile house x" + W_ADJACENT_TILE_HOUSE)
 	if (b.driveThru) bits.push("drive-thru x" + W_DRIVE_THRU)
 	if (b.tileBoundaries) bits.push(b.tileBoundaries + " tile boundary x" + W_TILE_BOUNDARY)
-	if (b.overpassDualNetwork) bits.push("overpass both networks x" + W_OVERPASS_DUAL_NETWORK)
+	else bits.push("NO road exit off this tile " + W_NO_ROAD_EXIT)
+	if (b.overpassDualNetwork) bits.push("door touches both flyover networks x" + W_OVERPASS_DUAL_NETWORK)
+	else if (b.entranceNetworks > 1) bits.push("door touches " + b.entranceNetworks + " networks")
 	return bits.join(" + ")
 }
 

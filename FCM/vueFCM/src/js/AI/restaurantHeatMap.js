@@ -31,16 +31,26 @@ export const W_SAME_TILE_HOUSE = 100 // house on the entrance's tile, road-conne
 export const W_ADJACENT_TILE_HOUSE = 30 // house one tile crossing away, road-connected
 export const W_DRIVE_THRU = 40 // footprint straddles a tile edge AND touches a road on the far tile
 export const W_TILE_BOUNDARY = 10 // per unique tile boundary the adjacent road system crosses
-// Not in the original spec, which only said "can also be a strong move". Priced
-// between one adjacent house and the drive-thru bonus: it should beat merely
-// reaching a neighbouring tile, but not beat a genuinely good corner.
-export const W_OVERPASS_DUAL_NETWORK = 60
+
+// A restaurant whose road system never leaves its own tile can never widen its
+// reach - the whole building is on one tile and the road only feeds that tile.
+// That's a trap rather than merely a weaker spot, so it takes a real penalty
+// instead of just scoring 0 on the boundary term.
+export const W_NO_ROAD_EXIT = -150
+
+// Not in the original spec, which only said the overpass spot "can also be a
+// strong move". Priced above a same-tile house: a 2x2 footprint confined to one
+// tile that touches BOTH sides of an overpass reaches two tiles of road from a
+// single building, and overpasses cannot be re-created once the tile is built
+// around. That is the strongest positioning available in the base game.
+export const W_OVERPASS_DUAL_NETWORK = 120
 
 // Range handed to areaRoad: 1 = own tile plus one crossing. Raise to 2 for a
 // three-tier house weighting, at roughly double the cost.
 const SEARCH_RANGE = 1
 
 const ROAD_IDS = new Set(rf.ROADS)
+const BRIDGE_IDS = new Set(rf.BRIDGES)
 const HOUSE_IDS = new Set(rf.HOUSE_SQS)
 
 /**
@@ -90,15 +100,11 @@ export function existingEntrances() {
  *
  * @param {number} entrance empty square the restaurant door would sit on
  * @param {number[]} footprint the four squares of the 2x2
- * @returns {{entries: {index: number, range: number}[], adjacentRoads: number[], boundaries: Set<string>, straddles: boolean}}
+ * @returns {{entries: {index: number, range: number}[], boundaries: Set<string>, straddles: boolean}}
  */
 function readRoadSystem(entrance, footprint) {
 	const store = useModelStore()
 	const coords = store.mapData.coords
-
-	// Roads touching any part of the footprint; reused by the drive-thru and
-	// overpass checks.
-	const adjacentRoads = map.neighbours(footprint).filter((sq) => ROAD_IDS.has(coords[sq]))
 
 	const entries = map.areaRoad(entrance, SEARCH_RANGE, false)
 
@@ -114,7 +120,75 @@ function readRoadSystem(entrance, footprint) {
 		}
 	}
 
-	return { entries, adjacentRoads, boundaries, straddles: new Set(footprint.map((sq) => map.giveTileNumber(sq))).size > 1 }
+	return { entries, boundaries, straddles: new Set(footprint.map((sq) => map.giveTileNumber(sq))).size > 1 }
+}
+
+/**
+ * A road's connected network, keyed by its lowest square index so any two roads
+ * on the same network produce the same id.
+ *
+ * Written out longhand rather than reusing map.areaRoad: areaRoad seeds its
+ * neighbours with comingFrom = -1, and nextRoadNeighbours then asks "which axis
+ * did we arrive on?" of that sentinel. For a seed that is ITSELF a bridge the
+ * answer is garbage, so the walk silently truncates and one real network gets
+ * reported as two. That is precisely the case at a flyover, where the door sits
+ * beside the bridge, so it cannot be used here.
+ *
+ * The rule being reproduced is nextRoadNeighbours': while standing on a bridge
+ * you may only carry on along the axis you arrived on. Leaving the seed square
+ * either axis is allowed, since a bridge is a straight segment and there is no
+ * arrival direction yet.
+ *
+ * @param {number} startRoad a road square to walk from
+ * @returns {number} canonical id for the network it belongs to
+ */
+function networkIdFrom(startRoad) {
+	const store = useModelStore()
+	const coords = store.mapData.coords
+
+	const seen = new Set([startRoad])
+	const queue = [{ sq: startRoad, horizontal: null }]
+	let head = 0
+
+	while (head < queue.length) {
+		const { sq, horizontal } = queue[head++]
+		const onBridge = BRIDGE_IDS.has(coords[sq])
+
+		for (const n of map.giveNeighbours(sq)) {
+			if (!ROAD_IDS.has(coords[n]) || seen.has(n)) continue
+
+			const nextIsHorizontal = Math.abs(n - sq) === 1
+			if (onBridge && horizontal !== null && nextIsHorizontal !== horizontal) continue
+
+			seen.add(n)
+			queue.push({ sq: n, horizontal: nextIsHorizontal })
+		}
+	}
+
+	return Math.min(...seen)
+}
+
+/**
+ * How many DISTINCT road networks touch the entrance square.
+ *
+ * Customers only come through the single door, so a flyover is only worth having
+ * if the door itself sits against roads on both sides of it. Touching the second
+ * network somewhere else along the building does not count - the entrance may
+ * well point away from it.
+ *
+ * @param {number} entrance
+ * @returns {number} 1 normally, 2+ when the door straddles a flyover
+ */
+function networksAtEntrance(entrance) {
+	const store = useModelStore()
+	const coords = store.mapData.coords
+
+	const ids = new Set()
+	for (const sq of map.giveNeighbours(entrance)) {
+		if (ROAD_IDS.has(coords[sq])) ids.add(networkIdFrom(sq))
+	}
+
+	return Math.max(1, ids.size)
 }
 
 /**
@@ -209,25 +283,30 @@ export function generatePlacementHeatMap(opponentEntrances = existingEntrances()
 
 			const houses = countHouses(sys.entries)
 
-			// Overpass case: sit wholly on the bridging tile with roads from BOTH
-			// sides of the overpass in reach of the footprint.
-			const reachable = new Set(sys.entries.map((entry) => entry.index))
-			const unreachable = sys.adjacentRoads.filter((sq) => !reachable.has(sq)).length
-			const overpassDualNetwork = !sys.straddles && bridges.has(entranceTile) && unreachable > 0 && sys.adjacentRoads.length - unreachable > 0
+			// Overpass case: sit wholly on the bridging tile with the DOOR touching
+			// roads on both sides of the flyover. Short-circuits so the extra
+			// areaRoad calls only run for straddling-free placements on a tile that
+			// actually has a bridge.
+			const onBridgeTile = bridges.has(entranceTile)
+			const entranceNetworks = onBridgeTile && !sys.straddles ? networksAtEntrance(entrance) : 1
+			const overpassDualNetwork = entranceNetworks >= 2
 
 			const breakdown = {
 				sameTileHouses: houses.sameTile,
 				adjacentTileHouses: houses.adjacentTile,
 				driveThru: hasDriveThru(footprint, entranceTile),
 				tileBoundaries: sys.boundaries.size,
+				entranceNetworks,
 				overpassDualNetwork,
 			}
+
+			const boundaries = sys.boundaries.size
 
 			const score =
 				breakdown.sameTileHouses * W_SAME_TILE_HOUSE +
 				breakdown.adjacentTileHouses * W_ADJACENT_TILE_HOUSE +
 				(breakdown.driveThru ? W_DRIVE_THRU : 0) +
-				breakdown.tileBoundaries * W_TILE_BOUNDARY +
+				(boundaries > 0 ? boundaries * W_TILE_BOUNDARY : W_NO_ROAD_EXIT) +
 				(breakdown.overpassDualNetwork ? W_OVERPASS_DUAL_NETWORK : 0)
 
 			const [x, y] = map.giveCoord(index)
@@ -239,17 +318,39 @@ export function generatePlacementHeatMap(opponentEntrances = existingEntrances()
 }
 
 /**
- * Highest scoring placement in a heat map.
+ * Rank two placements that scored the same. Ties are common - on a typical 2p
+ * board several spots share the top score - and picking between them at random
+ * produced visibly silly results (the same square in rotation 0 beating or losing
+ * to rotation 3 on a coin toss). So ties resolve on what actually differs:
+ *
+ *   1. road reach      - how much of the map the entrance can actually serve
+ *   2. overpass access - touching both sides of a flyover beats touching one
+ *   3. drive-thru      - straddling a tile border
+ *   4. rotation, then index, purely so the result is stable between runs
+ *
+ * @param {object} a
+ * @param {object} b
+ * @returns {boolean} true if a should be preferred
+ */
+function outranks(a, b) {
+	if (a.score !== b.score) return a.score > b.score
+	if (a.breakdown.tileBoundaries !== b.breakdown.tileBoundaries) return a.breakdown.tileBoundaries > b.breakdown.tileBoundaries
+	if (a.breakdown.overpassDualNetwork !== b.breakdown.overpassDualNetwork) return a.breakdown.overpassDualNetwork
+	if (a.breakdown.driveThru !== b.breakdown.driveThru) return a.breakdown.driveThru
+	if (a.rotation !== b.rotation) return a.rotation < b.rotation
+	return a.index < b.index
+}
+
+/**
+ * Highest scoring placement in a heat map. Deterministic.
  *
  * @param {Map<string, object>} heatMap
- * @param {() => number} [tieBreak] random number in [0,1), used to break ties so
- *   the AI is not deterministic.
  * @returns {{index: number, rotation: number, score: number, breakdown: object}|null}
  */
-export function findBestPlacement(heatMap, tieBreak = Math.random) {
+export function findBestPlacement(heatMap) {
 	let best = null
 	for (const entry of heatMap.values()) {
-		if (best === null || entry.score > best.score || (entry.score === best.score && tieBreak() < 0.5)) best = entry
+		if (best === null || outranks(entry, best)) best = entry
 	}
 	return best
 }
