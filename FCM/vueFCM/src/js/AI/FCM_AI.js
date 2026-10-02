@@ -1,12 +1,13 @@
-import * as rf from "./FCMreference"
-import * as model from "./FCMmodel"
-import * as map from "./FCMmap"
-import * as funcs from "./FCMfuncs"
-import * as rules from "./FCMrules"
-import * as context from "./FCMcontext"
-import * as controller from "./FCMcontroller"
-import * as plyr from "./FCMplayer"
-import { useModelStore } from "../stores/FCMstore.js"
+import * as rf from "../FCMreference"
+import * as model from "../FCMmodel"
+import * as map from "../FCMmap"
+import * as funcs from "../FCMfuncs"
+import * as rules from "../FCMrules"
+import * as context from "../FCMcontext"
+import * as controller from "../FCMcontroller"
+import * as plyr from "../FCMplayer"
+import { generatePlacementHeatMap, findBestPlacement } from "./restaurantHeatMap"
+import { useModelStore } from "../../stores/FCMstore.js"
 
 export async function makeAImove() {
 	const store = useModelStore()
@@ -23,8 +24,21 @@ export async function makeAImove() {
 
 	if (phase === rf.PHASE_SETUP_RESTAURANT1) {
 		let rotation = Math.floor(Math.random() * 4)
-		let possibleSqs = rules.givePossibleStartingRestaurantsPosition(rotation)
-		let index = possibleSqs[Math.floor(Math.random() * possibleSqs.length)]
+		let index = null
+
+		if (playerObj.AIlevel >= 2) {
+			const best = findBestPlacement(generatePlacementHeatMap())
+			if (best !== null) {
+				index = best.index
+				rotation = best.rotation
+			}
+		}
+
+		if (index === null) {
+			const possibleSqs = rules.givePossibleStartingRestaurantsPosition(rotation)
+			index = possibleSqs[Math.floor(Math.random() * possibleSqs.length)]
+		}
+
 		model.addRestaurant_core(playerIndex, index, rotation, true)
 		if (rotation !== 3) model.addHistory(rf.HIST_CHOOSE_RESTAURANT_STARTING_POSITION, [funcs.exportIndex(index), rotation], controller.currentPlayerIndex(), 0)
 		else model.addHistory(rf.HIST_CHOOSE_RESTAURANT_STARTING_POSITION, [funcs.exportIndex(index)], controller.currentPlayerIndex(), 0)
@@ -35,10 +49,6 @@ export async function makeAImove() {
 		await controller.endPlayerTurn(true, false)
 	} else if (phase === rf.PHASE_RESTRUCTURING) {
 		rf.sortEmployees(playerObj.beach)
-		if (store.startingOptions.laborMarket && store.laborMarket.unionHolders.includes(playerIndex) && playerObj.beach.includes(rf.UNION_ORGANIZER)) {
-			const unionSlot = playerObj.employees.slice(0, playerObj.ceoSlots).indexOf(rf.BLANK_EMPLOYEE_SPACE)
-			if (unionSlot > -1) plyr.setEmployeeInIndex(playerIndex, rf.UNION_ORGANIZER, unionSlot)
-		}
 		if (playerObj.AIlevel === 0) {
 			for (let i = 0; i < playerObj.ceoSlots; i++) {
 				if (playerObj.employees[i] === rf.BLANK_EMPLOYEE_SPACE && playerObj.beach.length > 0) plyr.setEmployeeInIndex(playerIndex, playerObj.beach[0], i)
@@ -102,10 +112,7 @@ export async function makeAImove() {
 
 		await controller.endPlayerTurn(true, false)
 	} else if (phase === rf.PHASE_WORKING_DAY) {
-		if (subphase === rf.SUBPHASE_TEMPORARY_WORKER) {
-			controller.chooseTemporaryWorkerRole(rf.RECRUITING_GIRL)
-			await makeAImove()
-		} else if (subphase === rf.SUBPHASE_HIRING) {
+		if (subphase === rf.SUBPHASE_HIRING) {
 			actionHires(playerIndex)
 			await controller.endWorkingDaySubphase()
 			await makeAImove()
@@ -194,31 +201,6 @@ export async function makeAImove() {
 			}
 
 			await controller.endWorkingDaySubphase()
-			await makeAImove()
-		}
-
-		else if (subphase === rf.SUBPHASE_COFFEE_SHOPS_FROM_TRAIN) {
-			while (
-				playerObj.coffeeShops.length < 3 &&
-				store.context.baristaCoffeeShops + store.context.leadBaristaCoffeeShopsFromB + store.context.leadBaristaCoffeeShopsFromTB > 0
-			) {
-				const unlimited = store.context.leadBaristaCoffeeShopsFromB > 0 || (store.context.justCoffeeShopped.length === 1 && store.context.leadBaristaCoffeeShopsFromTB > 0)
-				const indexes = rules.givePossiblePositionsForCoffeeShop(unlimited ? 99 : 2)
-				if (indexes.length === 0) break
-				controller.placeCoffeeShop(indexes[Math.floor(Math.random() * indexes.length)])
-			}
-
-			await controller.endWorkingDaySubphase()
-			await makeAImove()
-		}
-		else if (subphase === rf.SUBPHASE_HEADHUNTING) {
-			const totalActions = controller.currentPlayerObj().employees.filter((employee) => employee === rf.HEADHUNTER).length
-			while (store.context.headhunterActionsUsed < totalActions) {
-				const targets = rules.getHeadhuntTargets(controller.currentPlayerIndex()).sort((a, b) => a.cost - b.cost || a.owner - b.owner || a.employee - b.employee)
-				if (targets.length === 0) break
-				controller.headhuntEmployee(controller.currentPlayerIndex(), targets[0].owner, targets[0].beachIndex)
-			}
-			controller.endWorkingDaySubphase()
 			await makeAImove()
 		}
 
