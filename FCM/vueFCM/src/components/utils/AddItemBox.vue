@@ -1,3 +1,19 @@
+<script>
+// Module scope, deliberately separate from <script setup> below: every AddItemBox
+// instance shares ONE key listener, which calls whichever instance is currently
+// mounted. Attaching the listener per-instance would rotate once per visible box.
+// (This module is only ever loaded once for the lifetime of the page, so the
+// listener is never removed.)
+let activeRotate = null
+
+function rotateKeyHandler(event) {
+	if (event.key !== "r" && event.key !== "R") return
+	if (activeRotate) activeRotate()
+}
+
+if (typeof document !== "undefined") document.addEventListener("keyup", rotateKeyHandler)
+</script>
+
 <script setup>
 import * as rf from "../../js/FCMreference"
 import * as view from "../../js/FCMview"
@@ -12,7 +28,7 @@ const store = useModelStore()
 import { usePersonalStore } from "../../stores/FCMpersonal.js"
 const personal = usePersonalStore()
 
-import { ref, computed, watch, nextTick } from "vue"
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from "vue"
 
 // --- Props & Emits ---
 const props = defineProps({
@@ -110,6 +126,22 @@ function rotateAntiClockwise() {
 	currentDegrees.value -= 90
 	if (isLobbyist) nextTick(() => controller.updateLobbyistHighlights())
 }
+
+// "r" shortcut for the two rotate arrows above. Lives here rather than in App.vue
+// because everything item-specific (2 vs 4 rotations, campaign orientation,
+// re-highlighting the legal squares) is only correct from in here.
+function rotateFromKeyboard() {
+	if (store.viewSettings.showChat) return // do not rotate while typing in chat
+	rotateClockwise()
+}
+
+onMounted(() => {
+	activeRotate = rotateFromKeyboard
+})
+
+onUnmounted(() => {
+	if (activeRotate === rotateFromKeyboard) activeRotate = null
+})
 
 /*** END Rotation ***/
 

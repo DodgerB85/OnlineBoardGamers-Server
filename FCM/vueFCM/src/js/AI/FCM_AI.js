@@ -7,6 +7,7 @@ import * as context from "../FCMcontext"
 import * as controller from "../FCMcontroller"
 import * as plyr from "../FCMplayer"
 import { generatePlacementHeatMap, findBestPlacement } from "./restaurantHeatMap"
+import { think } from "./aiDebug"
 import { useModelStore } from "../../stores/FCMstore.js"
 
 export async function makeAImove() {
@@ -18,16 +19,19 @@ export async function makeAImove() {
 	let subphase = store.gameflow.subphase
 	let playerIndex = store.gameflow.turnOrder[0]
 	let playerObj = store.players[playerIndex]
-	playerObj.AIlevel = 1
+	playerObj.AIlevel = 2
 
 	console.log(`making AI move: phase -  ${phase}, subphase - ${subphase}, playerIndex = ${playerIndex}`)
 
 	if (phase === rf.PHASE_SETUP_RESTAURANT1) {
 		let rotation = Math.floor(Math.random() * 4)
 		let index = null
+		let heatMap = null
+		let best = null
 
 		if (playerObj.AIlevel >= 2) {
-			const best = findBestPlacement(generatePlacementHeatMap())
+			heatMap = generatePlacementHeatMap()
+			best = findBestPlacement(heatMap)
 			if (best !== null) {
 				index = best.index
 				rotation = best.rotation
@@ -39,12 +43,26 @@ export async function makeAImove() {
 			index = possibleSqs[Math.floor(Math.random() * possibleSqs.length)]
 		}
 
+		// Calculation is done, nothing has been written to the model yet: this is
+		// where "Pause on AI" parks so the heat map and reasoning can be read.
+		await think({
+			summary: "Placing starting restaurant (level " + playerObj.AIlevel + ")",
+			reasons:
+				best === null
+					? ["Level <2, or no legal placement scored: random legal spot", "Rotation " + rotation]
+					: ["Highest scoring of the legal placements", "x " + best.x + ", y " + best.y + ", rotation " + best.rotation],
+			heatMap: heatMap === null ? [] : [...heatMap.values()],
+			heatMapRotation: rotation,
+			chosen: { index, rotation, score: best === null ? 0 : best.score, breakdown: best === null ? null : best.breakdown },
+		})
+
 		model.addRestaurant_core(playerIndex, index, rotation, true)
 		if (rotation !== 3) model.addHistory(rf.HIST_CHOOSE_RESTAURANT_STARTING_POSITION, [funcs.exportIndex(index), rotation], controller.currentPlayerIndex(), 0)
 		else model.addHistory(rf.HIST_CHOOSE_RESTAURANT_STARTING_POSITION, [funcs.exportIndex(index)], controller.currentPlayerIndex(), 0)
 
 		await controller.endPlayerTurn(true, false)
 	} else if (phase === rf.PHASE_SETUP_RESERVE) {
+		await think({ summary: "Taking reserve card 3" })
 		store.reserveCards[playerIndex] = 3
 		await controller.endPlayerTurn(true, false)
 	} else if (phase === rf.PHASE_RESTRUCTURING) {
@@ -96,6 +114,12 @@ export async function makeAImove() {
 				}
 			}
 		}
+
+		await think({
+			summary: "Restructuring: filling " + playerObj.ceoSlots + " CEO slots and " + slots2 + " sub-slots from the beach",
+			reasons: ["Managers fill CEO slots first, skipping " + rf.JUNIOR_VICE_PRESIDENT, "Beach shuffled each sub-slot" + (playerObj.AIlevel === 1 ? ", pizza chef preferred" : "")],
+		})
+
 		await controller.endPlayerTurn(true, false)
 	} else if (phase === rf.PHASE_TURN_ORDER) {
 		let pos = 0
@@ -106,6 +130,8 @@ export async function makeAImove() {
 			}
 		}
 
+		await think({ summary: "Choosing turn order slot " + pos, reasons: ["Takes the first free slot"] })
+
 		store.gameflow.newTurnOrder[pos] = playerIndex
 
 		model.addHistory(rf.HIST_CHOOSE_TURN_ORDER, [pos], playerIndex, 0)
@@ -113,6 +139,7 @@ export async function makeAImove() {
 		await controller.endPlayerTurn(true, false)
 	} else if (phase === rf.PHASE_WORKING_DAY) {
 		if (subphase === rf.SUBPHASE_HIRING) {
+			await think({ summary: "Hiring", reasons: ["Recruiting points: " + rules.getRemainingRecruitingPoints(playerIndex)] })
 			actionHires(playerIndex)
 			await controller.endWorkingDaySubphase()
 			await makeAImove()
@@ -200,6 +227,11 @@ export async function makeAImove() {
 				}
 			}
 
+			await think({
+				summary: "Training " + store.context.justTrained.length + " employee(s) with " + train.total + " point(s) left",
+				reasons: store.context.justTrained.map((t) => t.from + " -> " + t.to + " (" + t.spent + " pts)"),
+			})
+
 			await controller.endWorkingDaySubphase()
 			await makeAImove()
 		}
@@ -208,6 +240,11 @@ export async function makeAImove() {
 			plyr.sendMassMarketeers(playerIndex)
 
 			const possibleMarketers = playerObj.employees.filter((emp) => rf.MARKETERS.includes(emp))
+
+			await think({
+				summary: "Marketing with " + possibleMarketers.length + " marketer(s)",
+				reasons: possibleMarketers.map((m) => "Campaign " + (rules.possibleMarketingCampaigns(store.availableMarketingCampaigns, m)[0] ?? "none") + " via " + m),
+			})
 
 			for (const marketer of possibleMarketers) {
 				const campaigns = rules.possibleMarketingCampaigns(store.availableMarketingCampaigns, marketer)
@@ -336,18 +373,30 @@ export async function makeAImove() {
 						plyr.addResources(playerIndex, good, 1)
 					}
 
-					for (let j = 0; j < number; j++) {
-						plyr.addResources(playerIndex, good, 1)
-					}
+				for (let j = 0; j < number; j++) {
+					plyr.addResources(playerIndex, good, 1)
 				}
 			}
+			}
+
+			await think({
+				summary: "Producing with " + producers.length + " producer(s)",
+				reasons: producers.map((p) => (rules.givePossibleFoodDrinksChoice(p)[0] !== undefined ? p + " -> " + (productionMap[p] ? productionMap[p][1] : "choice") : p + " -> no legal good")),
+			})
 
 			await controller.endWorkingDaySubphase()
 			await makeAImove()
 		}
 
+
 		else if (subphase === rf.SUBPHASE_HOUSES) {
 			const possibleGardenHouses = rules.givePossibleHousesForGarden()
+			const freeHouses = rules.availableHouses()
+
+			await think({
+				summary: possibleGardenHouses.length > 0 ? "Building a garden" : "Building house " + (freeHouses[0] ?? "-"),
+				reasons: [possibleGardenHouses.length + " garden option(s), " + freeHouses.length + " house(s) available"],
+			})
 
 			if (possibleGardenHouses.length > 0) {
 				const indexes = possibleGardenHouses.map((h) => map.findIndexForHouse(h))
@@ -369,7 +418,7 @@ export async function makeAImove() {
 			}
 
 			else {
-				const houses = rules.availableHouses()
+				const houses = freeHouses
 				if (houses.length > 0) {
 					const selectedBuilding = houses[Math.floor(Math.random() * houses.length)]
 					const rotation = Math.floor(Math.random() * 2)
@@ -402,6 +451,11 @@ export async function makeAImove() {
 		else if (subphase === rf.SUBPHASE_NEW_RESTAURANTS) {
 			const managers = playerObj.employees.filter((emp) => rf.CAN_BUILD_RESTAURANT.includes(emp))
 
+			await think({
+				summary: "Opening restaurant(s) with " + managers.length + " capable manager(s)",
+				reasons: ["Already has " + playerObj.restaurants.length + "/3 restaurant(s)"],
+			})
+
 			for (const manager of managers) {
 				if (playerObj.restaurants.length >= 3) break
 
@@ -431,15 +485,25 @@ export async function makeAImove() {
 	} else if (phase === rf.PHASE_PIZZA_BOMB) {
 		while (store.firstPizzas.length >= 3 && store.firstPizzas[2] === playerIndex) {
 			const spaces = rules.givePossiblePositionsForRadioPizzaBomb(store.firstPizzas[1]).filter((value) => map.adjacentToRoad(value))
+
+			await think({
+				summary: "Pizza bomb milestone: " + (spaces.length > 0 ? "placing radio" : "no road-adjacent spot, skipping"),
+				reasons: [spaces.length + " legal square(s)"],
+			})
+
 			if (spaces.length > 0) controller.choosePizzaBombMarketer(spaces[0])
 			else controller.skipPizzaBombMarketer()
 		}
 
 	} else if (phase === rf.PHASE_COFFE_SHOP_MS) {
-		if (playerObj.coffeeShops.length < 3) {
-			const spaces = rules.givePossiblePositionsForCoffeeShop(99)
-			if (spaces.length > 0) controller.placeCoffeeShopMS(spaces[Math.floor(Math.random() * spaces.length)])
-		}
+		const spaces = playerObj.coffeeShops.length < 3 ? rules.givePossiblePositionsForCoffeeShop(99) : []
+
+		await think({
+			summary: "Coffee shop milestone: " + (spaces.length > 0 ? "placing shop" : "no space / already at 3"),
+			reasons: ["Has " + playerObj.coffeeShops.length + "/3 coffee shops"],
+		})
+
+		if (spaces.length > 0) controller.placeCoffeeShopMS(spaces[Math.floor(Math.random() * spaces.length)])
 		await controller.endPlayerTurn(false, false)
 	} else if (phase === rf.PHASE_PAYDAY) {
 		if (plyr.hasMilestone(playerIndex, rf.FIRST_TRAINER_USED) && !rules.canAffordPayDay(playerIndex)) {
@@ -497,10 +561,22 @@ export async function makeAImove() {
 			}
 		}
 
+		await think({
+			summary: "Payday: salary " + rules.salary(playerIndex) + " vs money " + playerObj.money,
+			reasons: ["Fired " + store.context.justFired.length + " employee(s) to cover the bill", "Non-managers fired first" + (playerObj.AIlevel === 1 ? "" : " (level 0: any salary-requiring employee)")],
+		})
+
 		await controller.endPlayerTurn(true, false)
 	}
 	else if (phase === rf.PHASE_CLEAN_UP) {
-		if (!plyr.hasFridge(playerIndex)) await controller.endPlayerTurn(true, false)
+		const fridge = plyr.hasFridge(playerIndex)
+
+		await think({
+			summary: !fridge ? "Clean up: no fridge, discarding resources" : "Clean up: discarding down to 10 resources",
+			reasons: ["Holding " + playerObj.resources.length + " resource(s)"],
+		})
+
+		if (!fridge) await controller.endPlayerTurn(true, false)
 		else if (playerObj.resources.length <= 10) {
 			await controller.endPlayerTurn()
 		} else {

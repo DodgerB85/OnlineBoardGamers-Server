@@ -22,6 +22,7 @@ def redirect_old_url(request, original_id):
 urlpatterns = [
     path("", views.index, name="index"),
     path("help/", views.FCMhelp, name="FCMhelp"),
+    path("tutorial/", views.tutorial, name="tutorial"),
     path("chinaHelp/", views.FCMchinaHelp, name="FCMchinaHelp"),
     path("coffeeHelp/", views.coffeeHelp, name="coffeeHelp"),
     path(

@@ -6,6 +6,7 @@ import * as model from "../js/FCMmodel"
 import * as controller from "../js/FCMcontroller"
 import * as context from "../js/FCMcontext"
 import * as rules from "../js/FCMrules"
+import * as aiDebug from "../js/AI/aiDebug"
 import { ref, computed, watch } from "vue"
 
 import { useModelStore } from "../stores/FCMstore.js"
@@ -44,6 +45,7 @@ const squareHighlightLayers = computed(() => [
 	{ list: store.highlights.indexesToHighlightPreview, cls: "higlightSquarePreview", key: "preview" },
 	{ list: store.highlights.indexesToHighlightDrinks, cls: "higlightSquareDrinks", key: "drinks" },
 	{ list: store.highlights.indexesToHighlightHouses, cls: "higlightSquareHouses", key: "houses" },
+	{ list: store.highlights.indexesToHighlightTutorial, cls: "higlightSquareTutorial", key: "tutorial" },
 ])
 
 // Freeway placement highlights: precompute x/y for the whole batch with a single
@@ -55,6 +57,18 @@ const freewayHighlights = computed(() => {
 		return { index, x, y }
 	})
 })
+
+// AI placement heat map, already reduced to the rotation being considered and
+// positioned. Rebuilt whenever the AI records a new decision.
+const aiHeatMap = computed(() => aiDebug.overlaySquares(store.aiThinking.heatMap, store.aiThinking.heatMapRotation))
+
+// Fade weak scores so the strong squares stand out without a legend.
+const aiBestScore = computed(() => (aiHeatMap.value.length > 0 ? Math.max(...aiHeatMap.value.map((s) => s.score)) : 0))
+
+function heatOpacity(score) {
+	if (aiBestScore.value <= 0) return 0.15
+	return Math.min(0.75, 0.15 + 0.6 * (score / aiBestScore.value))
+}
 
 function clickedOnSquare(index) {
 	ghostImgRef.value.style.display = "none"
@@ -700,6 +714,28 @@ function changeGhost(index, add, event) {
 		</svg>
 	</template>
 
+	<!-- AI PLACEMENT HEAT MAP (admin debug). Scores for the rotation the AI is
+	     currently considering, with its pick outlined. -->
+	<template v-if="store.viewSettings.showAiDebug && aiHeatMap.length > 0">
+		<svg
+			v-for="sq in aiHeatMap"
+			:key="'aihm' + sq.index"
+			class="higlightSquareAIHeat"
+			:class="{ aiHeatChosen: sq.chosen }"
+			:style="{
+				width: store.refSize / 5 + 'px',
+				height: store.refSize / 5 + 'px',
+				top: sq.y + 'px',
+				left: sq.x + 'px',
+				opacity: heatOpacity(sq.score),
+			}">
+			<rect style="width: 100%; height: 100%" />
+			<text class="aiHeatScore" :style="{ fontSize: store.refSize / 34 + 'px' }" x="50%" y="50%" text-anchor="middle" dominant-baseline="central">
+				{{ sq.score }}
+			</text>
+		</svg>
+	</template>
+
 	<img class="ghostImg" ref="ghostImgRef" src="" alt="GI Image" oncontextmenu="return false" />
 	<img
 		v-for="(rwIdx, rwKey) in ghostRoadworkIndexes"
@@ -817,22 +853,74 @@ function changeGhost(index, add, event) {
 	animation: glow 0.6s infinite alternate;
 }
 
+/* Tutorial spotlight. Sits ABOVE the yellow legal-move squares (z-index 100) so the
+   pulse actually reads, and relies on pointer-events:none - NOT on a low z-index -
+   to let clicks reach the square underneath. Layering it below instead just tinted it
+   with 50%-opaque yellow and killed the animation. */
+.higlightSquareTutorial {
+	position: absolute;
+	z-index: 101;
+	opacity: 0.85;
+	fill: #ff8c00;
+	box-sizing: border-box;
+	pointer-events: none;
+	animation: glowTutorial 0.6s infinite alternate;
+}
+
 @keyframes glow {
 	to {
 		opacity: 0.5;
 	}
 }
 
+@keyframes glowTutorial {
+	from {
+		opacity: 0.9;
+	}
+	to {
+		opacity: 0.3;
+	}
+}
+
+/* AI placement heat map. Sits above the legal-move squares but is purely
+   decorative, so pointer-events:none keeps clicks reaching the board. */
+.higlightSquareAIHeat {
+	position: absolute;
+	z-index: 104;
+	fill: #ff6f00;
+	box-sizing: border-box;
+	pointer-events: none;
+}
+
+.higlightSquareAIHeat.aiHeatChosen {
+	fill: #2e7d32;
+	stroke: #000;
+	stroke-width: 3;
+}
+
+.aiHeatScore {
+	fill: #fff;
+	font-weight: bold;
+	paint-order: stroke;
+	stroke: rgba(0, 0, 0, 0.65);
+	stroke-width: 3;
+	pointer-events: none;
+}
+
 .ghostImg,
 .ghostDiv {
 	position: absolute;
 	display: none;
-	z-index: 50;
+	z-index: 102;
 }
 
+/* Ghost sits above the tutorial spotlight (101) so the placement preview is never
+   hidden by it. It is purely decorative, so pointer-events:none keeps clicks going
+   to the legal-move squares underneath (100) - which is what layering used to do. */
 .ghostImg {
 	box-sizing: border-box;
 	border: solid black;
+	pointer-events: none;
 }
 
 .ghostImg.r1 {
@@ -853,7 +941,8 @@ function changeGhost(index, add, event) {
 .ghostHouseNumber {
 	position: absolute;
 	display: none;
-	z-index: 51;
+	z-index: 103;
+	pointer-events: none;
 	color: #fff;
 	font-weight: bold;
 	text-shadow:

@@ -9,6 +9,19 @@
 {% endblock page_action %}
 {% block content %}
   <div class="card section">
+    <h2>{% translate "Interactive Tutorial" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% url "FCM:tutorial" as the_tutorial_url %}
+        {% blocktranslate trimmed %}
+          New to the game? Play the interactive tutorial <a href="{{ the_tutorial_url }}">here</a>.
+          It walks you through a real two-turn game against FcmTutor, who explains every move they make.
+          Nothing is saved and nothing is added to your lobby.
+        {% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+  <div class="card section">
     <h2>{% translate "Rules Help" %}</h2>
     <div class="help-qa">
       {% url 'FCM:FCMchinaHelp' as fcm_china_help_url %}

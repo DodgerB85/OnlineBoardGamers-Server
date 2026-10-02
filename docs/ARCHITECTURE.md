@@ -80,6 +80,15 @@ From then on the browser talks to the API:
 2. When the local player makes a move, the client computes the new state locally and **POSTs** it as JSON to `processXXXturn/` — including the new `turn`, `phase`, `status`, next-player list and the serialised game data.
 3. The server persists it, updates `latestUpdate`, computes `is_current` seats, and queues notifications.
 
+### Exception: the FCM tutorial
+
+`/FCM/tutorial/` is the one game page that is **not** backed by a `Game` row. `FCM/views.py::tutorial` skips `build_show_game_data` entirely and renders its own template with a hardcoded init payload (`pov = 0`, `playerNames = [you, "FcmTutor"]`, `startingOptions = [SO_STRICT_PAYDAY_FRIDGE, SO_TRAINING_GAME]`, a fixed 2-player `startingMap`). Consequences:
+
+- The whole game lives in the browser, so it never appears in the lobby and refreshing throws it away.
+- `personal.tutorial` is set in `FCMmodel.initGame` and short-circuits every mutating function in `FCM_IO.js` (and skips the websocket), so the client never posts to `processTurn/`.
+- `SO_TRAINING_GAME` makes it hotseat (no simul phases) and `SO_STRICT_PAYDAY_FRIDGE` makes Payday/Clean-up resolve in `endPlayerTurn` rather than via `savePreTurn`, which is what keeps it off the server. Real Practice games use the same pair.
+- `src/components/tutorial/` drives it: `tutorialScript.js` is the readable step list, `FcmTutor.js` the scripted opponent, `FcmTutorial.js` the engine, `TutorialPanel.vue` the overlay.
+
 ## Turn processing and stale-write protection
 
 Every mutating endpoint goes through `process_game_with_mutex(request, handler, mutex_prefix=...)` (`Lobby/gameViewHelpers.py`):

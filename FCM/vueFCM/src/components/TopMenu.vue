@@ -14,6 +14,8 @@ import * as controller from "../js/FCMcontroller"
 import * as funcs from "../js/FCMfuncs"
 //import * as model from "../js/FCMmodel"
 import * as replay from "../js/FCMreplay"
+import * as aiDebug from "../js/AI/aiDebug"
+import { resetGameForAI } from "../js/AI/resetGame"
 
 import PlayerLine from "./PlayerLine.vue"
 
@@ -26,6 +28,27 @@ const personal = usePersonalStore()
 
 function testButton() {
 	for (let i = 0; i < 10; i++) store.highlights.indexesToHighlightYellow.push(i + 2580)
+}
+
+// Admin-only AI helpers, shown under DEBUG when a bot seat exists.
+const showAiButtons = computed(() => rf.DEBUG_USERS.includes(personal.name) && aiDebug.aiInGame())
+const pauseLabel = computed(() => (store.viewSettings.pauseOnAi ? "Pause on AI: True" : "Pause on AI: False"))
+
+let resetting = false
+
+async function resetAiButton() {
+	if (resetting) return
+	resetting = true
+	try {
+		// Release any parked AI first, otherwise a pending gate outlives the game.
+		aiDebug.resume()
+		await resetGameForAI()
+	} catch (err) {
+		console.error("AI reset failed", err)
+		store.gameMessages.errorText = "AI reset failed: " + err.message
+	} finally {
+		resetting = false
+	}
 }
 
 function debugButton() {
@@ -288,6 +311,12 @@ function getCurrentPlayerNames() {
 				<br />
 				<button v-if="rf.DEBUG_USERS.includes(personal.name)" @click="testButton" class="actionsLineButton">Test</button>
 				<button v-if="rf.DEBUG_USERS.includes(personal.name)" @click="debugButton" class="actionsLineButton">DEBUG</button>
+				<template v-if="showAiButtons">
+					<br />
+					<button @click="store.viewSettings.showAiDebug = !store.viewSettings.showAiDebug" class="actionsLineButton">AI Debug: {{ store.viewSettings.showAiDebug ? "on" : "off" }}</button>
+					<button @click="aiDebug.togglePause()" class="actionsLineButton">{{ pauseLabel }}</button>
+					<button @click="resetAiButton" class="actionsLineButton" :disabled="resetting">{{ resetting ? "Resetting..." : "Reset AI" }}</button>
+				</template>
 			</div>
 		</div>
 

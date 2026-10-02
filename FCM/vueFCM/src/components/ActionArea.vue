@@ -670,8 +670,9 @@ function skipModuleAndEndTurn() {
 					</div>
 				</template>
 
-				<!-- Starting Restaurant Phase -->
-				<template v-if="(store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 || store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT2) && store.context.action !== rf.ACT_CONFORM_END_TURN && (personal.trainingGame && personal.canPlay() ? currentPlayerObj.restaurants.length === 0 : store.players[personal.pov].restaurants.length === 0)">
+				<!-- Starting Restaurant Phase. NB store.viewSettings.suppressTutorialSetupPanel
+				     is tutorial-only and false everywhere else, so normal games are unaffected. -->
+				<template v-if="!store.viewSettings.suppressTutorialSetupPanel && (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 || store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT2) && store.context.action !== rf.ACT_CONFORM_END_TURN && (personal.trainingGame && personal.canPlay() ? currentPlayerObj.restaurants.length === 0 : store.players[personal.pov].restaurants.length === 0)">
 					<div>
 						<h2>
 							<b>{{ $t("welcome.title") }}</b>
@@ -706,7 +707,7 @@ function skipModuleAndEndTurn() {
 						<AddItemBox :itemBeingAdded="rf.ITEM_BOX_RESTO" />
 
 						<button v-if="!personal.trainingGame" class="actionsLineButton" @click="localClickResign">{{ $t("actionArea.resign") }}</button>
-						<button v-if="store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 && store.gameflow.turnOrder.length > 1" class="actionsLineButton" @click="localConfirmDelay">{{ $t("actionArea.delayRestaurantRound") }}</button>
+						<button v-if="store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 && store.gameflow.turnOrder.length > 1 && !personal.tutorial" class="actionsLineButton" @click="localConfirmDelay">{{ $t("actionArea.delayRestaurantRound") }}</button>
 					</div>
 				</template>
 

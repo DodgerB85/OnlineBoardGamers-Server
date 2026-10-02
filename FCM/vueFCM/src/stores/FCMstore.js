@@ -296,6 +296,9 @@ export const useModelStore = defineStore("store", () => {
 		indexesToHighlightHouses: [],
 		tilesToHighlight: [],
 		tilesToHighlightPreview: [],
+		// Tutorial only: squares the tutorial wants to draw attention to. NB deliberately
+		// not in clearAllHighlights() - the tutorial engine owns this list's lifecycle.
+		indexesToHighlightTutorial: [],
 	})
 
 	const viewSettings = reactive({
@@ -324,6 +327,35 @@ export const useModelStore = defineStore("store", () => {
 		currentGhostIndex: -1,
 		showCoffeeHistoryInfo: false, // Coffee "More Information" panel in the action area
 		coffeeInfoShownBlock: -1, // Which coffee history block opened the panel
+
+		// Tutorial only: hides the starting-restaurant panel (and with it AddItemBox's
+		// rotate arrows + preview) until the tutorial asks for a placement. Stays false
+		// in normal games, so it never affects them.
+		suppressTutorialSetupPanel: false,
+
+		// --- AI debugging (admin only, never exported/saved) ---
+		// Pause the FcmAI between finishing its calculation and applying the move,
+		// so the thinking panel and board heat map can be read first.
+		pauseOnAi: false,
+		showAiDebug: false,
+	})
+
+	// What the AI is doing right now, and why. Written by aiDebug.think() from
+	// FCM_AI.js and read by AIDebugPanel.vue. Debug-only: not part of the saved
+	// model, so it never reaches the server.
+	const aiThinking = reactive({
+		waiting: false, // true while the AI is parked at the gate
+		turn: 0,
+		phase: -1,
+		subphase: -1,
+		aiLevel: 0,
+		summary: "", // one line: what it is about to do
+		reasons: [], // bullet lines explaining the choice
+		// Placement heat map, when the current decision has one. Each entry is
+		// { index, x, y, rotation, score, chosen, breakdown }.
+		heatMap: [],
+		heatMapRotation: -1,
+		chosen: null, // { index, rotation, score }
 	})
 
 	const gameMessages = reactive({
@@ -451,6 +483,7 @@ export const useModelStore = defineStore("store", () => {
 		externalStartingOptions,
 		startingOptionsHTML,
 		ceoLevel,
-		highlights
+		highlights,
+		aiThinking
 	}
 })

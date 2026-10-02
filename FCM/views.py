@@ -64,6 +64,33 @@ def FCMchinaHelp(request):
     return render(request, "FCM/FCMchinaHelp.html")
 
 
+# Interactive tutorial. Deliberately does NOT touch the DB: the game is built
+# entirely in the browser by the Vue app, so nothing here is ever persisted and
+# the game never appears in the lobby. Login is not required.
+#   SO_STRICT_PAYDAY_FRIDGE (101) + SO_TRAINING_GAME (102) makes it hotseat and
+#   resolves Payday/Clean-up client-side, the same combo real Practice games use.
+TUTORIAL_STARTING_MAP = [11, 0, 18, 0, 8, 0, 1, 0, 6, 0, 0, 3, 9, 2, 4, 0, 10, 2]
+TUTORIAL_STARTING_OPTIONS = [
+    rfFCM.SO_STRICT_PAYDAY_FRIDGE,
+    rf.SO_TRAINING_GAME,
+]
+
+
+def tutorial(request):
+    return render(
+        request,
+        "FCM/showFCMgameTutorial.html",
+        {
+            "tutorial": True,
+            "tutorName": "FcmTutor",
+            "playerName": request.user.username if request.user.is_authenticated else "You",
+            "startingMap": TUTORIAL_STARTING_MAP,
+            "startingOptions": TUTORIAL_STARTING_OPTIONS,
+            "settingsDebug": config("FCM_USE_SOURCE_CODE", default=False, cast=bool),
+        },
+    )
+
+
 def coffeeHelp(request):
     return render(request, "FCM/coffeeHelp.html")
 

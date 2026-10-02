@@ -11,7 +11,7 @@ import * as plyr from "../js/FCMplayer.js"
 import * as view from "../js/FCMview.js"
 
 import { useModelStore } from "../stores/FCMstore.js"
-import { makeAImove } from "../js/FCM_AI.js"
+import { makeAImove } from "../js/AI/FCM_AI.js"
 
 import { usePersonalStore } from "../stores/FCMpersonal.js"
 
@@ -144,6 +144,7 @@ export async function unlockTurn(type) {
 export async function saveAndUpdateNotifictions(playerIndexesToNotify, referringPhase) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	if (personal.tutorial) return // Tutorial game is never persisted
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	store.viewSettings.showGameLoader = true
@@ -415,6 +416,14 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 	store.clearMessages()
 	store.viewSettings.showGameLoader = true
 	personal.haltPlay = true
+
+	// Tutorial game: the whole model lives in the browser, so there is nothing to
+	// POST. Drop the loader and let play continue, exactly as a successful save would.
+	if (personal.tutorial) {
+		store.viewSettings.showGameLoader = false
+		personal.haltPlay = false
+		return
+	}
 
 	//let phase = store.gameflow.phase
 	let phase = store.gameflow.phase
@@ -703,6 +712,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 export async function savePreTurn(preMoveDataRaw) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	if (personal.tutorial) return // Tutorial game is never persisted
 	store.viewSettings.showGameLoader = true
 
 	let csrftoken = funcs.getCookie("csrftoken")
@@ -747,6 +757,7 @@ export async function savePreTurn(preMoveDataRaw) {
 export async function saveOOBpreference() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	if (personal.tutorial) return // Tutorial game is never persisted
 	store.viewSettings.showGameLoader = true
 
 	let OOBpreference = 0
@@ -789,6 +800,7 @@ export async function saveOOBpreference() {
 }
 
 export async function saveSimulMove(moveData, continueFromStalledGame = false) {
+	if (usePersonalStore().tutorial) return // Tutorial game is never persisted
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.viewSettings.showGameLoader = true
@@ -1279,6 +1291,7 @@ export async function submitBug(bugContent) {
 export async function sendChatMessage(newEntry) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	if (personal.tutorial) return // Tutorial game is never persisted
 	store.viewSettings.showGameLoader = true
 
 	/*function removeEmojis(str) {

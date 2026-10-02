@@ -30,6 +30,7 @@ export const usePersonalStore = defineStore("personal", () => {
 	var gameCreationTimestamp = 0
 	var finishedGame = false // Tells the game how to load the compressed data
 	var trainingGame = false // Same as Practice game, IE single player mode (NOT solo)
+	var tutorial = false // Bespoke /FCM/tutorial/ game. Never saved, never sent to the server.
 	var liveWS = false // Basically always set to true, IE open a live connection
 	var name = "Guest" // your username
 	var latestUpdate = "-1" // -1 = not yet received from server
@@ -133,6 +134,7 @@ export const usePersonalStore = defineStore("personal", () => {
 		gameCreationTimestamp,
 		finishedGame,
 		trainingGame,
+		tutorial,
 		liveWS,
 		name,
 		latestUpdate,
