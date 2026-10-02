@@ -47,7 +47,7 @@ function chosenBreakdown(chosen) {
 }
 
 function close() {
-	store.viewSettings.showAiDebug = false
+	aiDebug.closePanel()
 }
 </script>
 
@@ -87,7 +87,8 @@ function close() {
 			</div>
 
 			<div v-if="t.waiting" class="aiGate">
-				<button class="actionsLineButton" @click="aiDebug.resume()">Let the AI move</button>
+				<button class="actionsLineButton" @click="aiDebug.resume()">End Turn - let the AI play this</button>
+				<span class="aiGateHint">The AI is stopped here until you click.</span>
 			</div>
 		</template>
 	</div>
@@ -216,5 +217,11 @@ function close() {
 
 .aiGate {
 	margin-top: 10px;
+}
+
+.aiGateHint {
+	margin-left: 6px;
+	color: #777;
+	font-style: italic;
 }
 </style>

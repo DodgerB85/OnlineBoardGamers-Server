@@ -2197,7 +2197,12 @@ export function startPlayerTurn(startingMidPhase) {
 	const personal = usePersonalStore()
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return
 
-	if (!personal.canPlay()) {
+	// tutorialAlwaysPrepare: prepare the turn even when personal.canPlay() is false.
+	// Needed only by the /FCM/tutorial/ opponent: personal.canPlay() is deliberately
+	// false while it is FcmTutor's turn (so the player cannot act for them), which
+	// would otherwise skip this setup and leave a stale context.justHired behind.
+	const tutorialAlwaysPrepare = personal.tutorial && store.gameflow.turnOrder[0] !== 0
+	if (!personal.canPlay() && !tutorialAlwaysPrepare) {
 		return
 	}
 	if (store.gameflow.phase === rf.PHASE_URBAN_PLANNING) {

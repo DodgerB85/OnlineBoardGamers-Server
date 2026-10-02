@@ -143,6 +143,52 @@ describe("tutorial flow", () => {
 		expect(store.viewSettings.suppressTutorialSetupPanel).toBe(false)
 	}, 30000)
 
+	it("does not let the player act on FcmTutor's turn", async () => {
+		// Regression: personal.trainingGame makes canPlay() return true for both seats
+		// (correct for hotseat Practice games), which let the player click the reserve
+		// card panel and set the TUTOR's card.
+		vi.useFakeTimers()
+		tutorial.startTutorial()
+
+		// Drive to the reserve phase, letting the engine handle the tutor's restaurant
+		let guard = 0
+		while (store.gameflow.phase !== rf.PHASE_SETUP_RESERVE && guard++ < 400) {
+			await vi.advanceTimersByTimeAsync(250)
+			const step = STEPS[tutorial.stepIndex.value]
+			if (step.kind === "talk") tutorial.nextStep()
+			else if (store.gameflow.turnOrder[0] === 0 && !personal.haltPlay) fakeUser()
+		}
+		expect(store.gameflow.phase).toBe(rf.PHASE_SETUP_RESERVE)
+
+		// The tutor goes first in this phase (the full turn order is reversed)
+		expect(store.gameflow.turnOrder[0]).toBe(1)
+		expect(personal.canPlay()).toBe(false)
+
+		// Player's own turn: allowed again, so the tutorial is still playable
+		store.gameflow.turnOrder.shift()
+		store.gameflow.turnOrder.unshift(0)
+		expect(personal.canPlay()).toBe(true)
+	}, 30000)
+
+	// The player must be first in the working day. The script's order is
+		// [user's subphases] -> tutorDay, which only holds if the user picks turn-order
+		// slot 1. The tutor acts first in Turn Order (full turn order is reversed) and
+		// takes the LAST free slot so the player ends up in front.
+	it("puts the player first in the working day", async () => {
+		vi.useFakeTimers()
+		tutorial.startTutorial()
+
+		let guard = 0
+		while (store.gameflow.phase !== rf.PHASE_WORKING_DAY && guard++ < 600) {
+			await vi.advanceTimersByTimeAsync(250)
+			const step = STEPS[tutorial.stepIndex.value]
+			if (step.kind === "talk") tutorial.nextStep()
+			else if (store.gameflow.turnOrder[0] === 0 && !personal.haltPlay) fakeUser()
+		}
+		expect(store.gameflow.phase).toBe(rf.PHASE_WORKING_DAY)
+		expect(store.gameflow.turnOrder[0]).toBe(0)
+	}, 30000)
+
 	it("runs a full two-turn game from an unsaved start and reaches the handover step", async () => {
 		expect(personal.tutorial).toBe(true)
 		expect(personal.trainingGame).toBe(true)
@@ -189,6 +235,15 @@ describe("tutorial flow", () => {
 
 		// Nothing was left behind on the board for the tutorial to draw on
 		expect(store.highlights.indexesToHighlightTutorial).toEqual([])
+
+		// The tutor must have worked more than one day. This guards personal.canPlay()
+		// returning false on the tutor's turn - controller.startPlayerTurn() bails on
+		// !canPlay(), so a turn setup that never ran would leave them idle.
+		const tutorHireEntries = store.history.filter((h) => h[0] === rf.HIST_HIRE && h[1] === 1)
+		expect(tutorHireEntries.length).toBeGreaterThanOrEqual(2)
+		// NB HIST_HIRE stores the whole running justHired list, so a longer later entry
+		// means the tutor took on more people rather than standing still.
+		expect(tutorHireEntries[1][3].length).toBeGreaterThan(tutorHireEntries[0][3].length)
 	}, 60000)
 
 	it("never asks the server for anything", async () => {

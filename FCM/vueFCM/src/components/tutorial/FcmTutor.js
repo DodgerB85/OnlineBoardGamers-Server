@@ -42,12 +42,12 @@ function tutorPlaceRestaurant() {
 	const possible = rules.givePossibleStartingRestaurantsPosition(0)
 	if (possible.length === 0) return null
 	model.addRestaurant(TUTOR_INDEX, possible[possible.length - 1], 0, true)
-	return "Puts their restaurant down in a 2x2 block next to a road. That is the whole placement rule - everything else on the board comes later."
+	return "Puts their restaurant on empty squares with the entrance against a road. That is the whole placement rule - everything else on the board comes later."
 }
 
 function tutorChooseReserveCard() {
 	useModelStore().reserveCards[TUTOR_INDEX] = 3
-	return "Takes reserve card 3. Reserve cards only pay out if the game ends while the card is still in reserve, so they are cheap to hold."
+	return "Puts a reserve card face down by the bank. Its money only goes into the bank when the bank breaks, and it sets how many cards every CEO gets - but the holder earns nothing."
 }
 
 function tutorRestructure() {
@@ -58,10 +58,14 @@ function tutorRestructure() {
 
 function tutorChooseTurnOrder() {
 	const store = useModelStore()
-	const pos = store.gameflow.newTurnOrder.indexOf(-1)
+	// Take the LAST free slot, so the player is first in the working day. If the tutor
+	// grabbed slot 1 they would play their whole day before the player had done
+	// anything, and every "now it's your turn" step would be out of order.
+	let pos = -1
+	for (let i = 0; i < store.gameflow.newTurnOrder.length; i++) if (store.gameflow.newTurnOrder[i] === -1) pos = i
 	if (pos === -1) return null
 	controller.chooseTurnOrderPosition(pos)
-	return "Takes the first slot in the turn order, so they go before you. Turn order decides who acts first next turn - it is a real decision, not a formality."
+	return `Takes the last slot, ${pos + 1}, so you go first. Turn order is re-picked every turn - the player with the most open slots chooses first.`
 }
 
 function tutorHire() {
@@ -74,7 +78,7 @@ function tutorHire() {
 		controller.hireEmployee(next)
 		hired.push(next)
 	}
-	if (hired.length === 0) return "Has no recruiting points left, so they hire nobody."
+	if (hired.length === 0) return "Has no recruitment actions left, so they hire nobody."
 	if (hired.length === 1) return `Recruits a ${employeeName(hired[0])}. Note it lands on the beach, not at work - new hires only start working after the next restructuring.`
 	return `Recruits ${hired.map(employeeName).join(" and ")}. Both land on the beach and wait for the next restructuring phase.`
 }
@@ -103,7 +107,7 @@ function tutorTrain() {
 		if (!moved) break
 	}
 	if (notes.length === 0) return null
-	return `Trains ${notes.join(", ")}. Training costs training points, and it is how a trainee turns into an employee who actually does something.`
+	return `Trains ${notes.join(", ")}. Each training action turns one beach card one step, and only cards printed on the beach can be trained.`
 }
 
 function tutorMarket() {
@@ -116,7 +120,7 @@ function tutorMarket() {
 	if (possible.length === 0) return null
 	controller.chooseGood(rf.PIZZA)
 	controller.placeMarketingCampaign(possible[possible.length - 1])
-	return `Sends the ${employeeName(marketer)} out with a ${CAMPAIGN_TYPE_NAMES[rf.MARKETING_CAMPAIGNS[campaign].type]} advertising pizza. The campaign sits on the board all turn and only scores at Dinnertime.`
+	return `Sends the ${employeeName(marketer)} out with a ${CAMPAIGN_TYPE_NAMES[rf.MARKETING_CAMPAIGNS[campaign].type]} advertising pizza. It sells nothing itself - in Phase 6 it drops demand tokens on the houses it reaches.`
 }
 
 function tutorProduce() {
@@ -134,14 +138,14 @@ function tutorProduce() {
 			steps++
 		}
 		if (store.context.producer === producer) controller.stopCollecting()
-		return `Drives out with the ${employeeName(producer)} and collects every drinks crate within range of the route. Driving is how you pick up drinks.`
+		return `Drives out with the ${employeeName(producer)} and lifts every drink symbol beside the road within range. The cart reaches two tiles and takes two drinks per symbol.`
 	}
 
 	const choices = rules.givePossibleFoodDrinksChoice(producer)
 	if (choices.length === 0) return null
 	const good = choices[choices.length - 1]
 	controller.addProducedItemToPlayer(good)
-	return `Produces a ${GOOD_NAMES[good] || "good"} with the ${employeeName(producer)}. It goes into the fridge, not onto the board.`
+	return `Takes a ${GOOD_NAMES[good] || "good"} from the general stock with the ${employeeName(producer)}. It sits in front of them for every restaurant in their chain - it is not on the board.`
 }
 
 function tutorBuild() {
@@ -153,7 +157,7 @@ function tutorBuild() {
 		controller.clickedHouseSquare(map.findIndexForHouse(house))
 		// Houses with more than one free edge need a second click to pick the side
 		if (store.context.edges.length > 0) controller.clickedHouseSquare(store.highlights.indexesToHighlightYellow[0])
-		return `Puts a garden on house ${house}. A garden is one extra housing unit on an existing house - and only houses already on the board can take one.`
+		return `Puts a garden on house ${house}. It has to touch that house along two squares, and a house with a garden earns double the unit price.`
 	}
 	const houses = rules.availableHouses()
 	const possible = rules.givePossiblePositionsForBlock(2, 3)
@@ -161,7 +165,7 @@ function tutorBuild() {
 	const house = houses[houses.length - 1]
 	controller.selectHouseToBuild(house)
 	controller.clickedHouseSquare(possible[possible.length - 1])
-	return `Builds house ${house}. A new house must sit next to a road, otherwise the beer can never reach it.`
+	return `Builds house ${house}. It must be connected to a road, but there is no range limit - and it comes with its own garden already attached.`
 }
 
 // --- dispatcher -------------------------------------------------------------

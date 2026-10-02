@@ -61,6 +61,12 @@ export const usePersonalStore = defineStore("personal", () => {
 		if (store.viewSettings.showReplay) return false
 		if (this.pov === -1) return false
 		if (this.haltPlay === true) return false
+		// Tutorial: FcmTutor (seat 1) is played by the tutorial engine, so the player may
+		// only act on their own turn - otherwise the UI happily lets them choose the
+		// tutor's reserve card, place their restaurant, and so on. NB this must sit
+		// BEFORE the trainingGame check below, which returns true for both seats (that
+		// is correct for real hotseat Practice games, and the reason this went unnoticed).
+		if (this.tutorial && store.gameflow.turnOrder[0] !== 0) return false
 		if (this.trainingGame) return true
 		if (this.superuser) return true
 		//if (store..tournamentGame && this.name === rf.TOURNAMENT_ADMIN_NAME) return true

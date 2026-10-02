@@ -54,12 +54,18 @@ export async function think(info) {
 	store.aiThinking.heatMapRotation = info.heatMapRotation ?? -1
 	store.aiThinking.chosen = info.chosen || null
 
-	if (!store.viewSettings.pauseOnAi) return
+	// Gate whenever the AI is being watched, not just when "Pause on AI" is on:
+	// turning the debug panel on is a request to see each decision, so the AI has
+	// to stop and wait rather than playing through unobserved. Pause is the
+	// explicit override for when you want the panel without stopping.
+	if (!store.viewSettings.pauseOnAi && !store.viewSettings.showAiDebug) return
 
 	// Overwrite any previous gate rather than queueing a second waiter - the AI
 	// is single threaded, so only one thought can ever be pending.
 	resume()
 
+	// Never park invisibly: if the AI stopped, its reasoning is on screen.
+	store.viewSettings.showAiDebug = true
 	store.aiThinking.waiting = true
 	await new Promise((resolve) => {
 		gate = resolve
@@ -79,7 +85,22 @@ export function resume() {
 export function togglePause() {
 	const store = useModelStore()
 	store.viewSettings.pauseOnAi = !store.viewSettings.pauseOnAi
-	if (!store.viewSettings.pauseOnAi) resume()
+	// Switching pausing off must never leave the AI parked with nothing to click.
+	if (!store.viewSettings.pauseOnAi) {
+		store.viewSettings.showAiDebug = false
+		resume()
+	}
+}
+
+/**
+ * Close the debug panel. If the AI is parked this also releases it - the panel
+ * is the only way to un-park, so hiding it has to let the AI through or the game
+ * deadlocks.
+ */
+export function closePanel() {
+	const store = useModelStore()
+	store.viewSettings.showAiDebug = false
+	resume()
 }
 
 /** Blank the panel out, e.g. after a reset. */

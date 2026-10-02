@@ -34,6 +34,13 @@ function testButton() {
 const showAiButtons = computed(() => rf.DEBUG_USERS.includes(personal.name) && aiDebug.aiInGame())
 const pauseLabel = computed(() => (store.viewSettings.pauseOnAi ? "Pause on AI: True" : "Pause on AI: False"))
 
+// Switching the panel off has to go through closePanel(), not a raw flag flip:
+// if the AI is parked, the panel is the only thing that can release it.
+function toggleAiDebug() {
+	if (store.viewSettings.showAiDebug) aiDebug.closePanel()
+	else store.viewSettings.showAiDebug = true
+}
+
 let resetting = false
 
 async function resetAiButton() {
@@ -313,7 +320,7 @@ function getCurrentPlayerNames() {
 				<button v-if="rf.DEBUG_USERS.includes(personal.name)" @click="debugButton" class="actionsLineButton">DEBUG</button>
 				<template v-if="showAiButtons">
 					<br />
-					<button @click="store.viewSettings.showAiDebug = !store.viewSettings.showAiDebug" class="actionsLineButton">AI Debug: {{ store.viewSettings.showAiDebug ? "on" : "off" }}</button>
+					<button @click="toggleAiDebug" class="actionsLineButton">AI Debug: {{ store.viewSettings.showAiDebug ? "on" : "off" }}</button>
 					<button @click="aiDebug.togglePause()" class="actionsLineButton">{{ pauseLabel }}</button>
 					<button @click="resetAiButton" class="actionsLineButton" :disabled="resetting">{{ resetting ? "Resetting..." : "Reset AI" }}</button>
 				</template>

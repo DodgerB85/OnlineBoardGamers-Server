@@ -254,7 +254,7 @@ const cleanupBinned = computed(() => [...store.context.justBinned])
 /** END CLEANUP */
 
 /** RESERVE CARDS */
-const showReserveCards = computed(() => store.gameflow.phase === rf.PHASE_SETUP_RESERVE || (!personal.trainingGame && (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 || store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT2) && personal.moveDataRaw === "" && store.players[personal.pov].restaurants.length > 0 && !store.startingOptions.shortGame && personal.pov !== store.gameflow.turnOrder[0]))
+const showReserveCards = computed(() => (store.gameflow.phase === rf.PHASE_SETUP_RESERVE && personal.canPlay()) || (!personal.trainingGame && (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 || store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT2) && personal.moveDataRaw === "" && store.players[personal.pov].restaurants.length > 0 && !store.startingOptions.shortGame && personal.pov !== store.gameflow.turnOrder[0]))
 /** END RESERVE CARDS */
 
 // Auto-sort beach
