@@ -42,8 +42,9 @@ Notes:
 | `test_kfw.py` | 1 | Issue #53: village expansion phase auto-finishes when every builder has already prebuilt |
 | `test_rnb_transaction_recovery.py` | 10 | RNB transaction-recovery contract: `saveStackMove` sets `transactionID`, `RNBdata` exposes it, matching ID clears the lock, wrong/missing ID keeps it, Django-Q stuck-notification scheduling and no-op, stale `latestUpdate` rejection |
 | `test_robots.py` | 2 | `/robots.txt` GET/POST |
+| `test_fcm_rewind.py` | 6 | FCM `saveNormal` rewind stack: `saveRewind=True` records the pre-save state, `saveRewind=False` records nothing at all, one save makes exactly one rewind point, repeated AI-style saves never grow the stack, and rewinding after your own move returns *your* turn rather than the next player's (FcmAI's) |
 
-189 tests total (git count may drift slightly as tests are added).
+195 tests total (git count may drift slightly as tests are added).
 
 ## Conventions
 

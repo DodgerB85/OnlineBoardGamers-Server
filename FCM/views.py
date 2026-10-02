@@ -958,11 +958,18 @@ def _processTurn(request):
                 nameToUse = name_parts[1] if len(name_parts) > 1 else nameToUse
 
         # Before updating the gameData, we need to make sure the latest is
-        # saved into the rewind stack
+        # saved into the rewind stack. saveRewind=False means this save must not
+        # create a rewind point AT ALL - this append used to be unconditional, so
+        # every save pushed a rewind point and the flag below only ever added a
+        # second one. That defeated the flag for FcmAI turns, where the state
+        # saved is the start of the AI's own turn: nothing a human can act on, and
+        # it burns one of the 20 slots. Callers passing False are the kickout /
+        # resign / reset paths, which already clear or ignore the stack.
         currentRewindDataArray = load_rewind_data(currentGame)
-        oldData = currentGame.gameData
-        if len(currentRewindDataArray) == 0 or currentRewindDataArray[-1] != oldData:
-            currentRewindDataArray.append(oldData)
+        if jsonData["saveRewind"]:
+            oldData = currentGame.gameData
+            if len(currentRewindDataArray) == 0 or currentRewindDataArray[-1] != oldData:
+                currentRewindDataArray.append(oldData)
         # NB: rewindData is serialized later (before the single final save)
 
         currentGame.gameData = jsonData["gameData"]
@@ -1128,32 +1135,16 @@ def _processTurn(request):
             currentGame.rewindTempData = ""
 
         if jsonData["saveRewind"]:  # and not jsonData["IPM"]:  # and jsonData["phase"] != 9:
-            # If tempData isn't already onthe end, AND isn't the same as currentGameData then add it on, and wipe the temp storage
-            # if len(currentGame.rewindTempData) > 0:
-            #    if (
-            #        currentRewindDataArray[-1] != currentGame.rewindTempData
-            #        and jsonData["gameData"] != currentGame.rewindTempData
-            #    ):
-            #        # add to RWdata and RWdata[]
-            #        currentRewindData = (
-            #            currentRewindData + "'SPLIT'" + currentGame.rewindTempData
-            #        )
-            #        currentRewindDataArray.append(currentGame.rewindTempData)
-            #
-            #    currentGame.rewindTempData = ""
-
-            # If no rewind data, then start it with this data
-            if len(currentRewindDataArray) == 0:
-                currentRewindDataArray = [currentGame.gameData]
-            else:
-                # else check last one isn't same as cufrent, and if not then add
-                if currentRewindDataArray[-1] != currentGame.gameData:
-                    currentRewindDataArray.append(currentGame.gameData)
-                    # Limit to 20 rewind points by removing oldest
-                    while len(currentRewindDataArray) > 20:
-                        currentRewindDataArray.pop(0)
-                # MAYBE ADD AN INDENT TO THIS LINE????
-                # currentRewindData = json.dumps(currentRewindDataArray)
+            # The PRE-save state was already pushed above, under this same flag.
+            # This block used to push again - but currentGame.gameData was
+            # reassigned to jsonData["gameData"] above, so what it appended was
+            # the POST-save state, i.e. the start of the NEXT player's turn. That
+            # second point is what a rewind lands on: place a restaurant, rewind,
+            # and you arrive on FcmAI's turn. One save, one rewind point - the
+            # state the mover started their turn from. Trim to the cap here, since
+            # this was the only place it was applied.
+            while len(currentRewindDataArray) > 20:
+                currentRewindDataArray.pop(0)
 
         currentGame.rewindData = json.dumps(currentRewindDataArray, separators=(",", ":"))
 
@@ -1555,7 +1546,10 @@ def _processTurn(request):
 
         currentGame.rewindData = json.dumps(currentRewindDataArray, separators=(",", ":"))
 
-        if jsonData["RSRP"]:
+        # NB .get(), not ["RSRP"]: this is an optional flag, and a client that omits it
+        # (stale cached bundle, or a hand-rolled POST) used to 500 the whole endpoint.
+        # Absent means "not set", same as False - do not touch the consent votes.
+        if jsonData.get("RSRP"):
             presenter.removeSingleRewindPermission()
 
         presenter.clearAllMoveDataV2()
