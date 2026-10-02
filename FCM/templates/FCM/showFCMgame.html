@@ -142,7 +142,7 @@
 
   {% if spoilerFree %}
   initData.spoilerFree = true;
-  initData.replayStep = {{replayStep}}-1;
+  initData.replayStep = {{replayStep|default:1}}-1;
   {% endif %}
 
   // User data

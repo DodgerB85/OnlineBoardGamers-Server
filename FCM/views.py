@@ -389,7 +389,7 @@ def showGame(request, game_id):
     )
 
 
-def showGameVue(request, game_id):
+def showGameVue(request, game_id, spoilerFree=False, replayStep=1):
     result = build_show_game_data(
         request,
         game_id,
@@ -436,6 +436,8 @@ def showGameVue(request, game_id):
                 "preferredColour": -1,
                 "OOBpreference": OOBpreference,
                 "moveData": "",
+                "spoilerFree": spoilerFree,
+                "replayStep": replayStep,
             }
         )
         return render(request, "FCM/showFCMgame.html", returnData)
@@ -579,6 +581,8 @@ def showGameVue(request, game_id):
             "statsExcludeVotesData": result["base_data"]["statsExcludeVotesData"],
             "deleteVotesData": result["base_data"]["deleteVotesData"],
             "settingsDebug": result["base_data"]["settingsDebug"],
+            "spoilerFree": spoilerFree,
+            "replayStep": replayStep,
         },
     )
 
