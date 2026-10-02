@@ -660,7 +660,7 @@ def _processTurn(request):
             currentPlayersArr.append(request.user.username)  # This updates the list directly
             presenter.setCurrentPlayersFromArrInTurnOrder(currentPlayersArr)
         currentGame.save()
-        return JsonResponse({"unlockStatus": True}, safe=False)
+        return JsonResponse({"unlockStatus": True, "latestUpdate": currentGame.latestUpdate}, safe=False)
 
     # save OOB preference
     elif jsonData["action"] == "saveOOBpreference":
@@ -1839,8 +1839,13 @@ def gameAdminGetMoveData(request):
         return JsonResponse({"error": "Wrong request."}, status=400)
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
-
     jsonData = json.loads(request.body)
+
+    # JSON.stringify omits keys whose value is undefined, so a client that lost
+    # its latestUpdate posts no key at all. Default it so the sync checks below
+    # reject cleanly (syncError -> refresh) instead of KeyError -> 500.
+    jsonData.setdefault("latestUpdate", None)
+
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="FCM")
     except Game.DoesNotExist:
