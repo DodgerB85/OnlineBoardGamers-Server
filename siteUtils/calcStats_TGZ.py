@@ -81,6 +81,68 @@ BUILDER = 4
 POSITION_TITLES = ["1st", "2nd", "3rd", "4th", "5th", "6th"]
 
 
+# Every game is fetched once per run (all player counts at once) rather than once per player count
+FETCHED_GAMES = {}  # {schism_games: (rows, game_data, winner_seats)}
+
+
+def is_schism_game(starting_options):
+    """A schism game has a top-level 7, 8 or 9 in startingOptions."""
+    try:
+        loaded_options = json.loads(starting_options) if starting_options else []
+    except (json.JSONDecodeError, TypeError):
+        return False
+    return isinstance(loaded_options, list) and any(option in (7, 8, 9) for option in loaded_options)
+
+
+def fetch_games_to_analyse(schism_games):
+    """Fetches every game to analyse for a run in one pass, shared by all player counts (each query is a full scan of the finished TGZ games)."""
+
+    if schism_games in FETCHED_GAMES:
+        return FETCHED_GAMES[schism_games]
+
+    shadowUser = User.objects.get(username="SHADOW")
+
+    query = (
+        Q(gameCode="TGZ") & Q(gameStatus="FINISHED") & ~Q(players__player=shadowUser) & ~Q(statsExcludedGame=True) & Q(turn__gte=4)  # Add the turns >= 4 condition
+        # & Q(missingPlayers__isnull=True)
+    )
+
+    if schism_games:
+        query = (
+            Q(gameCode="TGZ") & Q(gameStatus="FINISHED") & ~Q(players__player=shadowUser) & Q(turn__gte=4) & Q(created__gte="1742571597000")
+            # & Q(missingPlayers__isnull=True)
+        )
+
+    # Fetch the initial queryset based on the query
+    # Remove any game with missing players here
+    # Only small columns here (no gameData), so this join & DISTINCT stays cheap - gameData is fetched separately below
+    rows = list(
+        Game.objects.filter(query)
+        .filter(players__winner=True)  # Ensures game has a winner & picks that specific user
+        .exclude(players__is_missing=True)  # Drops game if ANY player is missing
+        .values_list("id", "players__player__username", "maxPlayers", "startingOptions", "externalTournamentGame", "relatedMainTournament_id")
+        .distinct()
+        .order_by("id")
+    )
+
+    if schism_games:
+        # Filter to schism games: a top-level 7, 8 or 9 in startingOptions
+        rows = [row for row in rows if is_schism_game(row[3])]
+
+    all_game_ids = {row[0] for row in rows}
+
+    game_data = dict(Game.objects.filter(id__in=all_game_ids).values_list("id", "gameData"))
+
+    # {game_id: winning seat} for every analysed game, fetched in one go instead of per game
+    winner_seats = {}
+    for gp in GamePlayer.objects.filter(game_id__in=all_game_ids, winner=True).exclude(is_kicked=True).order_by("id"):
+        winner_seats.setdefault(gp.game_id, gp.seat_order)
+
+    FETCHED_GAMES[schism_games] = (rows, game_data, winner_seats)
+
+    return FETCHED_GAMES[schism_games]
+
+
 def analyze_games(player_count_index, schism_games=False, external_tournament_or_4p_tournament=False):
     """Analyzes game data for a given player count."""
 
@@ -101,70 +163,28 @@ def analyze_games(player_count_index, schism_games=False, external_tournament_or
     seat_wins_4pT = [0] * playerCount  # Initialize array to track seat wins (tournament games)
     seat_wins_4pT_ids = [[] for _ in range(playerCount)]  # Initialize array to store game IDs for each seat (tournament games)
 
-    shadowUser = User.objects.get(username="SHADOW")
+    rows, game_data, winner_seats = fetch_games_to_analyse(schism_games)
 
-    query = (
-        Q(gameCode="TGZ") & Q(gameStatus="FINISHED") & ~Q(players__player=shadowUser) & ~Q(statsExcludedGame=True) & Q(turn__gte=4)  # Add the turns >= 4 condition
-        # & Q(missingPlayers__isnull=True)
-    )
-
-    if schism_games:
-        query = (
-            Q(gameCode="TGZ") & Q(gameStatus="FINISHED") & ~Q(players__player=shadowUser) & Q(turn__gte=4) & Q(created__gte="1742571597000")
-            # & Q(missingPlayers__isnull=True)
-        )
-
-    if external_tournament_or_4p_tournament:
-        if schism_games:
-            query = query & Q(relatedMainTournament__isnull=False) & Q(maxPlayers=4)
-        else:
-            query = query & (Q(externalTournamentGame=True) | (Q(relatedMainTournament__isnull=False) & Q(maxPlayers=4)))
-    else:
-        query = query & Q(maxPlayers=playerCount)
-
-    # Fetch the initial queryset based on the query
-    # Remove any game with missing players here
-    queryset = Game.objects.filter(query).exclude(players__is_missing=True).distinct()  # Define queryset here
-
-    if schism_games:
-        # Filter to schism games: a top-level 7, 8 or 9 in startingOptions
-        schism_game_ids = []
-        for game_id, starting_options in queryset.values_list("id", "startingOptions"):
-            try:
-                loaded_options = json.loads(starting_options) if starting_options else []
-            except (json.JSONDecodeError, TypeError):
+    # Pick this player count's games out of the single fetch - the same conditions as before, applied in Python
+    dataSet = []
+    for row in rows:
+        maxPlayers, externalTournamentGame, relatedMainTournament_id = row[2], row[4], row[5]
+        if external_tournament_or_4p_tournament:
+            if schism_games:
+                if relatedMainTournament_id is None or maxPlayers != 4:
+                    continue
+            elif not (externalTournamentGame or (relatedMainTournament_id is not None and maxPlayers == 4)):
                 continue
-            if isinstance(loaded_options, list) and any(option in (7, 8, 9) for option in loaded_options):
-                schism_game_ids.append(game_id)
+        elif maxPlayers != playerCount:
+            continue
+        dataSet.append(row)
 
-        # Apply values_list to the filtered queryset
-        dataSet = (
-            Game.objects.filter(id__in=schism_game_ids)
-            .filter(players__winner=True)  # Ensures game has a winner & picks that specific user
-            .exclude(players__is_missing=True)  # Drops game if ANY player is missing
-            .values_list("gameData", "players__player__username", "id")
-            .distinct()
-        )
-
-    else:
-        # Apply values_list to the queryset directly
-        # dataSet = Game.objects.exclude(players__is_missing=True).distinct().filter(query).values_list("gameData", "winner__username", "id")
-        dataSet = (
-            Game.objects.filter(query)
-            .filter(players__winner=True)  # Ensures game has a winner & picks that specific user
-            .exclude(players__is_missing=True)  # Drops game if ANY player is missing
-            .values_list("gameData", "players__player__username", "id")
-            .distinct()
-        )
     finishedGamesCount = len(dataSet)
-    all_game_ids = [row[2] for row in dataSet]
+    all_game_ids = [row[0] for row in dataSet]
 
-    # {game_id: winning seat} for every analysed game, fetched in one go instead of per game
-    winner_seats = {}
-    for gp in GamePlayer.objects.filter(game_id__in=all_game_ids, winner=True).exclude(is_kicked=True).order_by("id"):
-        winner_seats.setdefault(gp.game_id, gp.seat_order)
-
-    for game_data_encoded, winner_username, game_id in dataSet:
+    for row in dataSet:
+        game_id, winner_username = row[0], row[1]
+        game_data_encoded = game_data[game_id]
         try:
             byte_array = bytearray(base64.b64decode(game_data_encoded))
             decompressed_data = gzip.decompress(byte_array)

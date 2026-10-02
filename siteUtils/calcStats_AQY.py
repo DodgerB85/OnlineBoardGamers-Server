@@ -151,6 +151,40 @@ def merge_player_counts(data_dict, keys_to_combine, new_key):
 
 ## END UTILS
 
+PLAYER_COUNTS = [2, 3, 4]
+
+
+def fetch_games_to_analyse():
+    """Fetches every game to analyse for a run in one pass, shared by all player counts.
+
+    Each player count used to run its own full scan of the finished AQY games, so the same
+    rows (and the same decompression work) were repeated per player count. One query for all
+    of them, split by maxPlayers in Python - order_by("id") matches the order the per-player
+    count queries returned, so the game id lists in the output are unchanged.
+    """
+    query = Q(
+        gameStatus="FINISHED",
+        statsExcludedGame=False,
+        turn__gte=4,
+        maxPlayers__in=PLAYER_COUNTS,
+        gameCode="AQY",
+    )
+    query &= ~Q(players__player__username="SHADOW")
+    query &= ~Q(players__is_missing=True)
+
+    rows_by_player_count = {playerCount: [] for playerCount in PLAYER_COUNTS}
+    for game_data_encoded, game_id, game_turn, max_players in (
+        Game.objects.filter(query)
+        .order_by("id")
+        .values_list("gameData", "id", "turn", "maxPlayers")
+    ):
+        rows_by_player_count[max_players].append((game_data_encoded, game_id, game_turn))
+
+    return rows_by_player_count
+
+
+FETCHED_GAMES = fetch_games_to_analyse()
+
 
 def analyze_games(player_count_index):
     """Analyzes game data for a given player count."""
@@ -166,25 +200,7 @@ def analyze_games(player_count_index):
 
     playerCount = player_count_index
 
-    query = Q(
-        gameStatus="FINISHED",
-        statsExcludedGame=False,
-        turn__gte=4,
-        maxPlayers=playerCount,
-        gameCode="AQY",  # Added directly here
-    )
-    # (use ~ separately for clarity)
-    query &= ~Q(players__player__username="SHADOW")
-    query &= ~Q(players__is_missing=True)
-
-    # if player_count_index == 4.5:
-    #    query = query & Q(externalTournamentGame=True)
-
-    # Fetch the initial queryset based on the query
-    # queryset = AQY_Game.objects.filter(query)  # Define queryset here
-
-    # Apply values_list to the queryset directly
-    dataSet = Game.objects.filter(query).values_list("gameData", "id", "turn")
+    dataSet = FETCHED_GAMES[playerCount]
 
     finishedGamesCount = len(dataSet)
 
@@ -359,7 +375,7 @@ def generate_stats_data():
 
     ALL_DATA["player_counts"] = {}
 
-    for playerCountIndex in [2, 3, 4]:
+    for playerCountIndex in PLAYER_COUNTS:
         (
             finishedGamesCount,
             SAINTS_NOT_PICKED,

@@ -124,64 +124,47 @@ query_new_code = (
     & ~Q(players__is_missing=True)
 )
 
-base_queryset = (
+# The counts + module usage below only need id & startingOptions, so they are fetched once per code
+# era as plain rows instead of running a scan (with a startingOptions LIKE) per module per era.
+# order_by("id") matches the order those scans returned, so the id lists are unchanged.
+dataSet_old_code = list(
     Game.objects.filter(gameCode="FCM")
-    .prefetch_related(winner_prefetch)
-    # .select_related("winner")
-    .only("id", "gameData", "startingOptions", "turn", "gameStatus")
-).distinct()
-
-dataSet_old_code = base_queryset.filter(query_old_code)
-dataSet_new_code = base_queryset.filter(query_new_code)
+    .filter(query_old_code)
+    .order_by("id")
+    .values_list("id", "startingOptions")
+)
+dataSet_new_code = list(
+    Game.objects.filter(gameCode="FCM")
+    .filter(query_new_code)
+    .order_by("id")
+    .values_list("id", "startingOptions")
+)
 
 # dataSet_old_code = FCM_Game.objects.filter(query_old_code)
 # dataSet_new_code = FCM_Game.objects.filter(query_new_code)
 
-finishedGames_all = dataSet_old_code.count() + dataSet_new_code.count()
+finishedGames_all = len(dataSet_old_code) + len(dataSet_new_code)
 
 
-def filter_by_starting_options(queryset, new_ms_value, include):
-    """Filters a queryset based on the presence of NEW_MS in startingOptions."""
-    """Filters a JSON string in a TextField using common JSON delimiters."""
-    # We check for the number:
-    # 1. As the only item: [10]
-    # 2. At the start: [10,
-    # 3. In the middle: , 10,
-    # 4. At the end: , 10]
+def has_option(starting_options, new_ms_value):
+    """Does startingOptions (the JSON list string) contain new_ms_value?
 
-    q = (
-        Q(startingOptions__contains=f"[{new_ms_value}]")
-        | Q(startingOptions__contains=f"[{new_ms_value},")
-        | Q(startingOptions__contains=f", {new_ms_value},")
-        | Q(startingOptions__contains=f",{new_ms_value},")
-        | Q(startingOptions__contains=f", {new_ms_value}]")
-        | Q(startingOptions__contains=f",{new_ms_value}]")
+    Same check the old `startingOptions__contains` DB filter did: the number has to sit behind a
+    JSON delimiter, so we look for it as the only item, at the start, in the middle or at the end:
+    1. As the only item: [10]
+    2. At the start: [10,
+    3. In the middle: , 10,
+    4. At the end: , 10]
+    """
+    return any(
+        pattern.format(new_ms_value) in starting_options
+        for pattern in ("[{0}]", "[{0},", ", {0},", ",{0},", ", {0}]", ",{0}]")
     )
 
-    return queryset.filter(q) if include else queryset.exclude(q)
-    # This regex looks for your value:
-    # 1. After a bracket or comma: [\[,]
-    # 2. Followed by optional whitespace: \s*
-    # 3. Followed by your value
-    # 4. Followed by optional whitespace: \s*
-    # 5. Followed by a comma or closing bracket: [,\\]]
 
-    # pattern = rf"[\[,]\s*{new_ms_value}\s*[,\\]]"
-
-    # q = (
-    #    Q(startingOptions=str(new_ms_value))
-    #    | Q(startingOptions__startswith=str(new_ms_value) + ",")
-    #    | Q(startingOptions__endswith="," + str(new_ms_value))
-    #    | Q(startingOptions__contains="," + str(new_ms_value) + ",")
-    # )
-    # if include:
-    #    return queryset.filter(q)
-    # else:
-    #    return queryset.exclude(q)
-    # if include:
-    #    return queryset.filter(startingOptions__iregex=pattern)
-    # else:
-    #    return queryset.exclude(startingOptions__iregex=pattern)
+def filter_by_starting_options(rows, new_ms_value, include):
+    """Same filter as before, but over the pre-fetched (id, startingOptions) rows (0 DB hits)."""
+    return [row for row in rows if has_option(row[1] or "", new_ms_value) == include]
 
 
 def calculate_average_turn(queryset):
@@ -194,22 +177,14 @@ def calculate_average_turn(queryset):
 
 
 # --- Filter by NEW_MS ---
-dataset_oldMS_old_code = filter_by_starting_options(
-    dataSet_old_code, NEW_MS, include=False
-)
-dataset_newMS_old_code = filter_by_starting_options(
-    dataSet_old_code, NEW_MS, include=True
-)
+dataset_oldMS_old_code = filter_by_starting_options(dataSet_old_code, NEW_MS, include=False)
+dataset_newMS_old_code = filter_by_starting_options(dataSet_old_code, NEW_MS, include=True)
 
-dataset_oldMS_new_code = filter_by_starting_options(
-    dataSet_new_code, NEW_MS, include=False
-)
-dataset_newMS_new_code = filter_by_starting_options(
-    dataSet_new_code, NEW_MS, include=True
-)
+dataset_oldMS_new_code = filter_by_starting_options(dataSet_new_code, NEW_MS, include=False)
+dataset_newMS_new_code = filter_by_starting_options(dataSet_new_code, NEW_MS, include=True)
 
-finishedGames_oldMS = dataset_oldMS_old_code.count() + dataset_oldMS_new_code.count()
-finishedGames_newMS = dataset_newMS_old_code.count() + dataset_newMS_new_code.count()
+finishedGames_oldMS = len(dataset_oldMS_old_code) + len(dataset_oldMS_new_code)
+finishedGames_newMS = len(dataset_newMS_old_code) + len(dataset_newMS_new_code)
 
 
 def analyze_ms_usage(queryset, is_old_ms, is_old_code):
@@ -928,8 +903,8 @@ for num_players in range(2, 7):
     )
 
 
-def count_module_usage(queryset):
-    """Counts the usage of different modules in a queryset of games."""
+def count_module_usage(rows):
+    """Counts the usage of different modules in the (id, startingOptions) rows of a code era."""
     module_counts = {}
     modules = {
         "RANDOM_MODULES": RANDOM_MODULES,
@@ -955,16 +930,12 @@ def count_module_usage(queryset):
         "NIGHT_SHIFT_MANAGER": NIGHT_SHIFT_MANAGER,
     }
     for module_name, module_value in modules.items():
-        # module_counts[f"finished_games_{module_name}"] = filter_by_starting_options(
-        #    queryset, module_value, include=True
-        # ).count()
-        filtered_queryset = filter_by_starting_options(
-            queryset, module_value, include=True
-        )
-        module_counts[f"finished_games_{module_name}"] = filtered_queryset.count()
-        module_counts[f"game_ids_{module_name}"] = list(
-            filtered_queryset.values_list("id", flat=True)
-        )  # Get a list of game IDs
+        game_ids = [
+            row[0]
+            for row in filter_by_starting_options(rows, module_value, include=True)
+        ]
+        module_counts[f"finished_games_{module_name}"] = len(game_ids)
+        module_counts[f"game_ids_{module_name}"] = game_ids  # Get a list of game IDs
 
     return module_counts
 
