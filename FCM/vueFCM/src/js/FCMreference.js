@@ -980,7 +980,7 @@ export const EMPLOYEES_STR = [
 	// Labor Market mod
 	{ title: t('employees.temporaryWorker'), description: t('employees.temporaryWorkerDesc'), type: "hiring" },
 	{ title: t('employees.headhunter'), description: t('employees.headhunterDesc'), type: "hiring" },
-	{ title: t('employees.unionOrganizer'), description: t('employees.unionOrganizerDesc'), type: "hiring" },
+	{ title: t('employees.unionOrganizer'), description: t('employees.unionOrganizerDesc'), type: "manager" },
 ]
 
 export function employeeName(emp) {

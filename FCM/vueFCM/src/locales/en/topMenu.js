@@ -84,6 +84,7 @@
     noneAvailable: "None Available",
     takenMilestones: "Taken Milestones:",
     employees: "Employees:",
+    nonHireable: "Cannot be hired",
     collapseEmployees: "Collapse Employees ▲",
     expandEmployees: "Expand Employees ▼",
     availableMarketing: "Available marketing campaigns",

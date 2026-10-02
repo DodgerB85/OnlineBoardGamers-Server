@@ -19,6 +19,7 @@ describe("Labor Market static model", () => {
 		expect(rf.REQUIRE_SALARY).toContain(rf.HEADHUNTER)
 		expect(rf.REQUIRE_SALARY).not.toContain(rf.TEMPORARY_WORKER)
 		expect(rf.REQUIRE_SALARY).toContain(rf.UNION_ORGANIZER)
+		expect(rf.EMPLOYEES_STR[rf.UNION_ORGANIZER].type).toBe("manager")
 	})
 
 	it("parses Labor Market independently and exposes the Management Trainee branch only when enabled", () => {
@@ -64,5 +65,22 @@ describe("Labor Market core rules", () => {
 		expect(rules.resolveUnionHolders([5, 5, 4])).toEqual([0, 1])
 		expect(rules.resolveUnionHolders([6, 5, 5])).toEqual([0])
 		expect(rules.resolveUnionHolders([6, 6, 5])).toEqual([0, 1])
+	})
+
+	it("requires each holder to place the Union Organizer directly under the CEO", () => {
+		const store = useModelStore()
+		store.startingOptions.laborMarket = true
+		store.players = [
+			{
+				ceoSlots: 2,
+				employees: [rf.WAITRESS, rf.BLANK_EMPLOYEE_SPACE, rf.UNION_ORGANIZER],
+				beach: [],
+			},
+		]
+		store.laborMarket.unionHolders = [0]
+
+		expect(rules.unionOrganizerPlacementRequired(0)).toBe(true)
+		store.players[0].employees = [rf.WAITRESS, rf.UNION_ORGANIZER]
+		expect(rules.unionOrganizerPlacementRequired(0)).toBe(false)
 	})
 })

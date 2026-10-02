@@ -44,6 +44,7 @@ watch(
 
 const currentPlayerObj = computed(() => controller.currentPlayerObj())
 const timedOutPlayerIndex = computed(() => (store.gameflow.turnOrder.length > 0 ? store.gameflow.turnOrder[0] : -1))
+const unionOrganizerPlacementRequired = computed(() => rules.unionOrganizerPlacementRequired(controller.currentPlayerIndex()))
 
 // Second Bailout mod: card choices left in the pool, and whether the current
 // player still has to claim their gift (blocks all other actions)
@@ -749,13 +750,11 @@ function skipModuleAndEndTurn() {
 
 						<button v-if="!personal.trainingGame" class="actionsLineButton" @click="localClickResign">{{ $t("actionArea.resign") }}</button>
 						<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
-						<button class="actionsLineButton" @click="controller.endPlayerTurn(true, false)">{{ $t("workingDay.endTurn") }}</button>
+						<span v-if="unionOrganizerPlacementRequired" class="blockingActionMessage">{{ $t("laborMarket.unionMustWork") }}</span>
+						<button v-else class="actionsLineButton" @click="controller.endPlayerTurn(true, false)">{{ $t("workingDay.endTurn") }}</button>
 					</template>
 					<div v-else>
 						<p>{{ $t("actionArea.chooseEmployeesToWork") }}</p>
-						<p v-if="store.startingOptions.laborMarket && store.laborMarket.unionHolders.includes(controller.currentPlayerIndex()) && currentPlayerObj.beach.includes(rf.UNION_ORGANIZER)" class="reminder">
-							{{ $t("laborMarket.unionMustWork") }}
-						</p>
 						<!-- MINI BEACH -->
 						<div class="beachChoiceMini">
 							<div class="beachTitleMini">{{ $t("actionArea.beach") }}</div>
@@ -804,7 +803,8 @@ function skipModuleAndEndTurn() {
 						<button v-if="!personal.trainingGame" class="actionsLineButton" @click="localClickResign">{{ $t("actionArea.resign") }}</button>
 						<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
 						<button class="actionsLineButton" @click="controller.autoFillEmployees()">{{ $t("actionArea.autoFillStructure") }}</button>
-						<button class="actionsLineButton" @click="localEndTurn">{{ $t("workingDay.endTurn") }}</button>
+						<span v-if="unionOrganizerPlacementRequired" class="blockingActionMessage">{{ $t("laborMarket.unionMustWork") }}</span>
+						<button v-else class="actionsLineButton" @click="localEndTurn">{{ $t("workingDay.endTurn") }}</button>
 					</div>
 				</template>
 
@@ -1409,6 +1409,15 @@ function skipModuleAndEndTurn() {
 	border: #000 1px solid;
 	box-sizing: border-box;
 	border-radius: 5px;
+}
+
+.blockingActionMessage {
+	display: inline-block;
+	margin: 0 5px;
+	color: #b00020;
+	font-size: 1.1rem;
+	font-weight: 700;
+	vertical-align: middle;
 }
 
 .ceoSlotDiv {
