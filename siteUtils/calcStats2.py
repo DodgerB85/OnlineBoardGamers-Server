@@ -141,29 +141,43 @@ def get_won_games(game_code, time_limit=None, player_count=None):
 
 
 # First, calculate each game serperately, and save the data
+
+# Fetch ALL games in ONE query instead of 10 separate ones (each per-game query
+# scans the full finished-games set, as there is no index on gameCode)
+query = Q(game__gameCode__in=GAME_CODES, game__gameStatus="FINISHED") & ~Q(game__statsExcludedGame=True)
+
+query_time = time.perf_counter()
+all_game_data = list(
+    GamePlayer.objects.filter(query)
+    .exclude(player__username__in=EXCLUDE_USERS)
+    .values(
+        "player__id",
+        "player__username",
+        "game__gameCode",
+        "game__maxPlayers",
+        "game__latestUpdate",
+        "winner",
+        "is_kicked",
+    )
+)
+
+# Group rows by game code, preserving row order (identical per-game order to the old per-game queries,
+# both ordered by seat_order, which is unique within each game)
+games_data_by_code = {gameCode: [] for gameCode in GAME_CODES}
+for record in all_game_data:
+    # RNB previously filtered maxPlayers > 1 in the DB query
+    if record["game__gameCode"] == "RNB" and record["game__maxPlayers"] <= 1:
+        continue
+    games_data_by_code[record["game__gameCode"]].append(record)
+
+if PRINT_TIME:
+    print(f"****** all games data fetched: {time.perf_counter() - query_time:.6f}s   rows: {len(all_game_data)}")
+
 for gameCode in GAME_CODES:
     game_start_calc_time = time.perf_counter()
     print(f"Calculating stats for {gameCode}...")
 
-    # MAJOR OPTIMIZATION: Fetch ALL game data in ONE query instead of 20+ queries
-    # This single query gets all finished games for this game code with all needed fields
-    query = Q(game__gameCode=gameCode, game__gameStatus="FINISHED") & ~Q(game__statsExcludedGame=True)
-    if gameCode == "RNB":
-        query &= Q(game__maxPlayers__gt=1)
-
-    all_game_data = list(
-        GamePlayer.objects.filter(query)
-        .exclude(player__username__in=EXCLUDE_USERS)
-        .select_related("player", "game")
-        .values(
-            "player__id",
-            "player__username",
-            "game__maxPlayers",
-            "game__latestUpdate",
-            "winner",
-            "is_kicked",
-        )
-    )
+    all_game_data = games_data_by_code[gameCode]
 
     # Now process this data in Python to build all the statistics
     # Initialize dictionaries to accumulate counts
