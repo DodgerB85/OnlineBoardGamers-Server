@@ -583,6 +583,9 @@ var replay = {
 
 	goToReplayStep: function (step) {
 		if (this.replayData.length === 0) return
+		// A history row click can carry an index from a longer log than this, so clamp like performStep does
+		if (step < 0) step = 0
+		if (step > this.replayData.length - 1) step = this.replayData.length - 1
 		this.replayStep = step
 		this.loadModel(this.replayData[step])
 		this.updateReplayArea()

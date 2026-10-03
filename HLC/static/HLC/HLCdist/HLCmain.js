@@ -10936,7 +10936,8 @@ $(".piece").on("click", function (e) {
 			M.historyObjV2.push([0, -1, -1])
 		} else {
 			M.historyObj.push(e.data.dealership[MW_IDX][0])
-			M.historyObjV2.push(this.model.makeMWHistoryParam(1, e.data.dealership[MW_IDX][0], e.data.dealership[MW_IDX][2], e.data.dealership[MW_IDX][1]))
+			// NB this is a jQuery handler, so this is the div - go via M
+			M.historyObjV2.push(M.makeMWHistoryParam(1, e.data.dealership[MW_IDX][0], e.data.dealership[MW_IDX][2], e.data.dealership[MW_IDX][1]))
 
 			C.enableSellingForDealership(e.data.dealership)
 		}
@@ -11211,7 +11212,8 @@ $(".piece").on("click", function (e) {
 		var player = C.currentPlayer()
 		var cardIndex = C.currentPlayer.pcap
 
-		this.actionPlayCard(player, Q, cardName, cardIndex)
+		// NB this is a jQuery handler, so this is the div - go via C
+		C.actionPlayCard(player, Q, cardName, cardIndex)
 
 		delete C.currentPlayer.pcap
 
@@ -14734,6 +14736,9 @@ var replay = {
 
 	goToReplayStep: function (step) {
 		if (this.replayData.length === 0) return
+		// A history row click can carry an index from a longer log than this, so clamp like performStep does
+		if (step < 0) step = 0
+		if (step > this.replayData.length - 1) step = this.replayData.length - 1
 		this.replayStep = step
 		this.loadModel(this.replayData[step])
 		this.updateReplayArea()
