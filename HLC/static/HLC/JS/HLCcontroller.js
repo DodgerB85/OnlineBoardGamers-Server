@@ -642,7 +642,8 @@ $(".piece").on("click", function (e) {
 			//$("#QSPdiv").remove(); NO EFFECT - JUST GETS READDED!
 			// BEFORE WE EXPAND, NEED TO CAPTURE WHAT WAS ADDED THIS TURN
 			if (!M.trainingGame) {
-				var factory = M.players[global.pov].factory
+				// NB In a training game the one person plays every seat, so global.pov is not the acting player
+				var factory = C.currentPlayer().factory
 				factory.factoryComponentNamesAddedThisTurn = factory.factoryComponentNamesAddedThisTurn.splice(0, factory.factoryComponenetIndexesAddedThisTurn.length)
 				for (i = 0; i < factory.factoryComponenetIndexesAddedThisTurn.length; i++) {
 					var arrayIndex = _.findIndex(
@@ -1268,13 +1269,15 @@ $(".piece").on("click", function (e) {
 
 		// Log action
 		if (this.model.gameFlow.phase === PHASE_FACTORY_SETUP) {
-			var setupFactory = this.model.players[global.pov].factory
+			// NB In a training game the one person plays every seat, so global.pov is not the acting player.
+			// In a real game turn zero is simultaneous, so the acting player is not turnOrder[0] either
+			var setupPlayer = this.currentPlayer()
+			var setupFactory = setupPlayer.factory
 			// [mainFactoryRotation, placements[], (1 only when the main factory is flipped)]
 			var setupParam = [setupFactory.mainFactoryRotation, setupFactory.getPlacementsAddedThisTurn()]
 			if (setupFactory.mainFactoryFlipped === 1) setupParam.push(1)
 			setupFactory.factoryComponenetIndexesAddedThisTurn.splice(0, setupFactory.factoryComponenetIndexesAddedThisTurn.length)
-			// Turn zero setup is simultaneous, so the acting player is not turnOrder[0]
-			this.model.log(Log.FACTORY_SETUP, setupParam, global.pov)
+			this.model.log(Log.FACTORY_SETUP, setupParam, setupPlayer.arrayPos)
 		} else if (this.model.gameFlow.phase === PHASE_RESEARCH) {
 			this.model.log(Log.RESEARCH, [...this.model.historyObj], this.model.gameFlow.turnOrder[0])
 			this.model.historyObj.splice(0, this.model.historyObj.length)

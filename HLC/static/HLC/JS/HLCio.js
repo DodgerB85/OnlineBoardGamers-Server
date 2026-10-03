@@ -181,12 +181,15 @@ var IO = {
 		})
 			.then((response) => response.json())
 			.then((result) => {
-				global.latestUpdate = String(result.latestUpdate)
-				global.saveRewind = true
+				// NB the response only carries latestUpdate if the save was accepted. Assigning it
+				// unconditionally would poison it with undefined / "undefined" and make every later
+				// poll fail on the server
 				if (result.syncError) {
 					alert(gettext("It appears you have an older version of the game. Please refresh the page"))
 					return
 				}
+				global.latestUpdate = String(result.latestUpdate)
+				global.saveRewind = true
 
 				hideLoader()
 				if (model.trainingGame) {
@@ -692,7 +695,9 @@ var IO = {
 		})
 			.then((response) => response.json())
 			.then((result) => {
-				global.latestUpdate = result.latestUpdate
+				// NB when the rewind buffer is empty the server replies with just a message and no
+				// latestUpdate, so only take it when it is actually there
+				if (result.latestUpdate != undefined) global.latestUpdate = result.latestUpdate
 				$("#dropdown").hide()
 				if (result.message != undefined) {
 					$("#wholeMainArea").fadeIn("slow")
