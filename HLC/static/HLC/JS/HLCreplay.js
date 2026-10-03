@@ -25,6 +25,8 @@ var replay = {
 		this.endReplayResetData = ""
 		this.replayError = ""
 		this.setupDone = []
+		this.desyncCount = 0
+		this.setupDone = []
 		return this
 	},
 
@@ -83,6 +85,7 @@ var replay = {
 	generateReplayData: async function () {
 		this.replayData = []
 		this.setupDone = []
+		this.desyncCount = 0
 		this.originalLogs = M.logs
 		if (this.originalLogs.length === 0) return
 
@@ -487,8 +490,14 @@ var replay = {
 		} else if (action === Log.RESEARCH || action === Log.SET_FOCUS || action === Log.PLAY_CARD || action === Log.NO_CARDS) {
 			// Sequential phase, so the acting player is done and leaves the queue.
 			// FACTORY_SETUP is not here - it is handled in replayFactorySetup so the duplicate
-			// entries from moveToNextPhase cannot remove the same player twice
-			if (to.indexOf(playerIndex) === -1) return
+			// entries from moveToNextPhase cannot remove the same player twice.
+			// The entry says who acted, so if that is not the front of the queue the turn order has
+			// drifted - count it rather than quietly rotating past it
+			if (to.indexOf(playerIndex) === -1) {
+				this.desyncCount++
+				return
+			}
+			if (to[0] !== playerIndex) this.desyncCount++
 			while (to[0] !== playerIndex) to.push(to.shift())
 			to.splice(0, 1)
 		}
@@ -506,9 +515,30 @@ var replay = {
 		M = m
 		C.model = m
 		this.model = m
-		C.view.reloadModel(m)
+		// We know who acted on this step. The live game gets this from Rules.canPlay(), which stands
+		// down during the replay, so set it here - it drives the current player glow and is a handy
+		// cross check that the turn order has not drifted
+		var entry = this.originalLogs[this.replayStep]
+		if (entry != undefined && isUsablePlayerIndex(entry.player)) m.gameFlow.currentPlayer = entry.player
+
+		C.view.reloadModel(m, this.getViewItem())
 		Log.refreshHistory(m)
-		V.render()
+	},
+
+	// V.render() with no argument picks turnOrder[0], but the acting player has already been taken off
+	// the queue by the time their entry is shown, so that points one player too far on. Show the
+	// factory of whoever the current entry belongs to instead. undefined lets the view decide, which is
+	// what we want during the market board phases and for entries with no player
+	getViewItem: function () {
+		if (M.gameEnded > 0) return undefined
+		if (MARKET_BOARD_PHASES.includes(M.gameFlow.phase)) return undefined
+
+		var entry = this.originalLogs[this.replayStep]
+		if (entry == undefined || !isUsablePlayerIndex(entry.player)) return undefined
+
+		var item = M.gameFlow.unalteredTurnOrder.indexOf(entry.player)
+		if (item === -1) return undefined
+		return item
 	},
 
 	performStep: function (e) {
@@ -627,6 +657,7 @@ var replay = {
 			if (M.players[i].factory.factoryComponents.length !== live.players[i].factory.factoryComponents.length) problems.push("factory")
 		}
 
+		if (this.desyncCount > 0) problems.push("turn order (" + this.desyncCount + " out of step)")
 		this.replayError = problems.length === 0 ? "" : gettext("Game data does not match - please submit a bug report") + " (" + problems.join(", ") + ")"
 	},
 }
