@@ -26,7 +26,7 @@ var replay = {
 		this.replayError = ""
 		this.setupDone = []
 		this.desyncCount = 0
-		this.setupDone = []
+		this.lastPlayerIndex = -1
 		return this
 	},
 
@@ -519,7 +519,10 @@ var replay = {
 		// down during the replay, so set it here - it drives the current player glow and is a handy
 		// cross check that the turn order has not drifted
 		var entry = this.originalLogs[this.replayStep]
-		if (entry != undefined && isUsablePlayerIndex(entry.player)) m.gameFlow.currentPlayer = entry.player
+		if (entry != undefined && isUsablePlayerIndex(entry.player)) {
+			m.gameFlow.currentPlayer = entry.player
+			this.lastPlayerIndex = entry.player
+		}
 
 		C.view.reloadModel(m, this.getViewItem())
 		Log.refreshHistory(m)
@@ -527,16 +530,18 @@ var replay = {
 
 	// V.render() with no argument picks turnOrder[0], but the acting player has already been taken off
 	// the queue by the time their entry is shown, so that points one player too far on. Show the
-	// factory of whoever the current entry belongs to instead. undefined lets the view decide, which is
-	// what we want during the market board phases and for entries with no player
+	// factory of whoever the current entry belongs to instead.
+	// Entries with no player (neutral cards, expectations, end of turn) come between player actions, and
+	// turnOrder is empty by then, so hold the last acting player rather than dropping to the market board
 	getViewItem: function () {
 		if (M.gameEnded > 0) return undefined
 		if (MARKET_BOARD_PHASES.includes(M.gameFlow.phase)) return undefined
 
 		var entry = this.originalLogs[this.replayStep]
-		if (entry == undefined || !isUsablePlayerIndex(entry.player)) return undefined
+		var playerIndex = entry != undefined && isUsablePlayerIndex(entry.player) ? entry.player : this.lastPlayerIndex
+		if (!isUsablePlayerIndex(playerIndex)) return undefined
 
-		var item = M.gameFlow.unalteredTurnOrder.indexOf(entry.player)
+		var item = M.gameFlow.unalteredTurnOrder.indexOf(playerIndex)
 		if (item === -1) return undefined
 		return item
 	},

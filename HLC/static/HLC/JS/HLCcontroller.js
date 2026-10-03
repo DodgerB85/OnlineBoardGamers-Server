@@ -110,7 +110,11 @@ var Controller = function (_model, _view) {
 	this.currentPlayer = function () {
 		if (M.sandboxMode) return this.model.players[global.pov]
 		// turnOrder is legitimately empty between phases (and while the replay is stepping through them)
-		if (this.model.gameFlow.turnOrder.length === 0) return this.model.players[this.model.gameFlow.currentPlayer]
+		if (this.model.gameFlow.turnOrder.length === 0) {
+			var fallback = this.model.gameFlow.currentPlayer
+			if (fallback == undefined || fallback < 0 || fallback >= this.model.players.length) fallback = 0
+			return this.model.players[fallback]
+		}
 		if (M.trainingGame) return this.model.players[this.model.gameFlow.turnOrder[0]]
 
 		if (!Rules.isSimulPhase()) return this.model.players[this.model.gameFlow.turnOrder[0]]

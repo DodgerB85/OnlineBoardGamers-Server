@@ -741,6 +741,8 @@ var Log = {
 	getPlayerSpan: function (name) {
 		var index = M.players.map((item) => item.name).indexOf(name)
 		if (index === -1) index = M.players.map((item) => item.originalName).indexOf(name)
+		// The player may not be in the model at all (eg a log entry for a player who has gone)
+		if (index === -1) return $("<span></span>").append(String(name))
 		var colour = getCorrectedColour(M.players[index].colour)
 
 		var span = $("<span></span>")
