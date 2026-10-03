@@ -1,5 +1,6 @@
 <script setup>
 import ArtworkCard from "./ArtworkCard.vue"
+import { timestampToString } from "../js/URRfuncs"
 import StateLeadership from "./StateLeadership.vue"
 import { computed } from "vue"
 import * as rf from "../js/URRreference"
@@ -22,8 +23,6 @@ const action = computed(() => props.entry[3])
 const isAutomaticStep = computed(() => action.value && before.value && getAutomaticAction(before.value)?.type === action.value.type)
 const isCurrentReplay = computed(() => store.viewSettings.showReplay && store.replayStep.index === props.index)
 const stateId = computed(() => before.value ? currentStateId(before.value) : null)
-const startsEra = computed(() => after.value?.era > before.value?.era)
-const hasIrrigationPayment = computed(() => ["allocateWater", "advanceWater"].includes(action.value?.type) && before.value?.rain.step === "routing" && after.value?.rain.step !== "routing" && after.value?.board.areas.some((area) => area.irrigatedBy !== null))
 const waterDestination = computed(() => action.value?.type === "allocateWater" ? before.value?.board.areas.find((area) => area.id === action.value.area) : null)
 const eventArtwork = computed(() => {
 	if (action.value?.type === "harvest" && stateId.value !== null) return { src: getStateOrderImage(stateId.value), alt: `${rf.STATE_NAMES[stateId.value]} harvest` }
@@ -54,6 +53,7 @@ const nationAwards = computed(() => {
 })
 const leadershipChanges = computed(() => getLeadershipChanges(before.value, after.value))
 const phaseHeading = computed(() => {
+	if (props.entry.administration) return ""
 	const flow = before.value?.gameflow
 	const adjacentFlow = (props.newestFirst ? after.value?.gameflow : snapshot(store.history[props.index - 2])?.gameflow) || flow
 	const isFirstVisible = props.newestFirst ? props.index === store.history.length - 1 : props.index === 0
@@ -148,10 +148,6 @@ const actionImages = computed(() => {
 function jumpToEntry() {
 	if (!store.viewSettings.showReplay) return
 	store.replayStep.index = props.index
-	if (window.matchMedia("(max-width: 1050px)").matches) {
-		store.viewSettings.showHistory = false
-		store.clearHistoryHelpers()
-	}
 }
 </script>
 
@@ -159,15 +155,26 @@ function jumpToEntry() {
 	<div class="historyGroup">
 		<div v-if="phaseHeading" class="phaseHeading">{{ phaseHeading }}</div>
 		<div class="log" :class="{ selectableHistory: store.viewSettings.showReplay, currentReplay: isCurrentReplay, automaticStep: isAutomaticStep }" :aria-current="isCurrentReplay ? 'step' : undefined" :role="store.viewSettings.showReplay ? 'button' : undefined" :tabindex="store.viewSettings.showReplay ? 0 : undefined" @click="jumpToEntry" @keydown.enter.prevent="jumpToEntry" @keydown.space.prevent="jumpToEntry">
+			<div class="historyTimestamp">{{ entry[4] != null ? timestampToString(entry[4]) : 'Time not recorded' }}</div>
 			<span v-if="isCurrentReplay" class="replayPosition">Current replay position</span>
-			<div v-if="entry[0] === rf.HIST_NEW_GAME" class="new_turn">{{ eventText }}</div>
+			<template v-if="entry.administration">
+				<div class="administrationHeading">{{ entry.administration.title }}</div>
+				<p class="administrationExplanation">{{ entry.administration.text }}</p>
+				<div class="administrationDetails" v-if="entry.administration.details.length">
+					<div v-for="(detail, detailIndex) in entry.administration.details" :key="detailIndex">
+						<img v-if="detail.player !== undefined" :src="getPlayerMarkerImage(detail.player)" alt="" />
+						<img v-else-if="detail.state !== undefined" :src="getStateOrderImage(detail.state)" alt="" />
+						<img v-else-if="detail.terrain !== undefined" :src="getTerrainImage(detail.terrain)" alt="" />
+						<button v-if="detail.area" @click.stop="store.viewSettings.historyArea = detail.area" :aria-label="`Find ${detail.label} on the board`">{{ detail.label }}</button><span>{{ detail.text }}</span>
+					</div>
+				</div>
+			</template>
+			<div v-else-if="entry[0] === rf.HIST_NEW_GAME" class="new_turn">{{ eventText }}</div>
 			<template v-else>
 				<div class="header" v-if="player && !isAutomaticStep"><img :src="getPlayerMarkerImage(entry[1])" alt="" /><b>{{ player.displayName }}</b></div>
 				<div class="eventDescription"><img v-if="eventArtwork" :src="eventArtwork.src" :alt="eventArtwork.alt" :title="eventArtwork.alt" /><span>{{ eventText }}</span></div>
 				<div v-for="award in nationAwards" :key="award.id" class="nationAwardNotice"><img :src="getPlayerMarkerImage(award.owner)" alt="" /><span>{{ after.players[award.owner].displayName }} acquired {{ rf.NATION_NAMES[award.id] }} for {{ award.price }} SPL</span></div>
 				<StateLeadership v-for="change in leadershipChanges" :key="change.id" :change="change" />
-				<div v-if="startsEra" class="eraNotice"><b>Era {{ after.era === 5 ? 'M' : after.era }} begins</b><span v-if="after.era >= 3">Era {{ after.era - 2 }} crews retire.<template v-if="after.era === 4"> Independent nations dissolve.</template></span></div>
-				<div v-if="hasIrrigationPayment" class="routingNotice">Water routing complete · irrigation income paid</div>
 				<details class="balanceDetails" v-if="balanceChanges.length" @click.stop @keydown.enter.stop @keydown.space.stop><summary class="balanceChanges" aria-label="Show cash balances before and after"><span v-for="change in balanceChanges" :key="change.label" :title="change.label"><img :src="change.src" :alt="change.label" /><b>{{ change.amount > 0 ? '+' : '' }}{{ change.amount }} SPL</b></span></summary><div class="balanceBreakdown"><div v-for="change in balanceChanges" :key="change.label"><img :src="change.src" alt="" /><span>{{ change.label }}</span></div></div></details>
 				<div class="actionImages" :class="{ multipleCards: actionImages.filter((asset) => asset.card).length > 1 }" v-if="actionImages.length"><template v-for="(asset, idx) in actionImages" :key="idx"><div v-if="asset.card" class="historyCard"><ArtworkCard :src="asset.src" :alt="asset.alt" /></div><img v-else :src="asset.src" :alt="asset.alt" :title="asset.alt" /></template></div>
 				<div v-if="entry[0] === rf.HIST_GAME_END" class="new_turn">Game ended<template v-if="after?.gameflow.endReason === 'invasion'"> · The Southern Peoples invade</template><template v-else-if="after?.gameflow.endReason === 'revolution'"> · Revolution</template></div>
@@ -178,13 +185,13 @@ function jumpToEntry() {
 
 <style scoped>
 .log { margin: 5px; border: 1px solid black; padding: 5px; background-color: #d4eafd; text-align: left; font-size: 14px; line-height: 23px; }
+.historyTimestamp { font-size: 12px; text-align: right; color: #53616a; }.administrationHeading { padding: 6px; background: #303030; color: white; text-align: center; font-weight: bold; }.administrationExplanation { margin: 8px 3px; }.administrationDetails { display: grid; gap: 5px; }.administrationDetails > div { display: flex; align-items: center; gap: 6px; padding: 4px; background: #edf6fd; }.administrationDetails img { width: 30px; height: 30px; flex-shrink: 0; }.administrationDetails span { min-width: 0; overflow-wrap: anywhere; }.administrationDetails button { flex-shrink: 0; min-height: 32px; padding: 4px 6px; border: 1px solid #177daf; border-radius: 3px; background: #fffdf4; font: inherit; cursor: pointer; }
 .header { display: flex; align-items: center; gap: 5px; font-size: 13px; }.header b { min-width: 0; overflow-wrap: anywhere; }.header img { width: 23px; height: 23px; }
 .new_turn, .phaseHeading { background: black; color: white; text-align: center; font-weight: bold; padding: 8px; }.phaseHeading { margin: 5px; font-size: 14px; }
 .selectableHistory { cursor: pointer; }.selectableHistory:hover, .selectableHistory:focus-visible { border-color: #c79e00; outline: 1px solid #c79e00; }
 .log.currentReplay { box-shadow: inset 3px 0 #177daf; background: #e5f3ff; }.replayPosition { display: block; color: #12628c; font-size: 12px; font-weight: bold; }
 .actionImages { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }.actionImages img { width: 30px; height: 30px; object-fit: contain; }.historyCard { width: 185px; max-width: 100%; }
 .actionImages.multipleCards .historyCard { width: calc((100% - 4px) / 2); max-width: 185px; }
-.eraNotice, .routingNotice { display: grid; margin-top: 4px; padding: 3px 6px; background: #edf6fd; border-left: 3px solid #177daf; font-size: 12px; }
 .nationAwardNotice { display: flex; align-items: center; gap: 5px; margin-top: 4px; padding: 3px 6px; background: #edf6fd; border-left: 3px solid #177daf; font-size: 12px; }.nationAwardNotice img { width: 23px; height: 23px; flex-shrink: 0; }.nationAwardNotice span { min-width: 0; overflow-wrap: anywhere; }
 .eventDescription { display: flex; align-items: center; gap: 6px; }.eventDescription img { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; }.eventDescription span { min-width: 0; overflow-wrap: anywhere; }
 .balanceChanges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }.balanceChanges span { display: inline-flex; align-items: center; gap: 4px; padding: 2px 5px; background: #edf6fd; border: 1px solid #adc2d0; font-size: 12px; }.balanceChanges img { width: 22px; height: 22px; }

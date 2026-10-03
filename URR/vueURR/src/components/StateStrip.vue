@@ -100,7 +100,6 @@ function crewTiles(capacity) { return capacity === "1+1" ? ["1", "1"] : [capacit
 .treasury { left: 1%; }.diggers { left: 35%; flex-direction: row; flex-wrap: wrap; align-content: flex-start; }.harvest { right: 1%; }.chartColumn b { font-size: 25px; }.crewTile { position: relative; width: 29px; height: 29px; }.crewTile img { width: 100%; height: 100%; object-fit: contain; }.crewTile span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 11px; font-weight: bold; text-shadow: 0 1px 2px white, 1px 0 white, -1px 0 white; }.crewTile.used { opacity: .5; }.crewTile.splitCrew { display: flex; gap: 2px; flex: 0 1 42px; width: 42px; max-width: 100%; min-width: 0; }.crewTile.splitCrew img { width: calc(50% - 1px); }.stateFoot, .inactiveDetails { padding: 5px 7px; color: #53616a; }.inactiveDetails { border-top: 1px solid #ded9cc; }
 .currentState { box-shadow: 0 0 0 2px #45a7df; }.stateDetails { border-top: 1px solid #ded9cc; }
 .stateNations { display: grid; gap: 5px; padding: 0 6px; }.stateNations img { width: 100%; }.stateCard > summary:focus-visible { outline: 2px solid #177daf; outline-offset: -2px; }
-@media (max-width: 1050px) { .stateNations { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); } }
 .nationInventory { margin: 0 6px; border-top: 1px solid #ded9cc; }.nationInventory > summary { cursor: pointer; padding: 6px 0; }.nationInventory .stateNations { padding: 0 0 6px; }
 .followState { margin-left: auto; font: inherit; font-size: 11px; cursor: pointer; }
 .stateCard[open] .summaryTreasury { display: none; }

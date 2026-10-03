@@ -5,8 +5,10 @@
  */
 
 import { defineStore } from "pinia"
-import { reactive, ref } from "vue"
+import { computed, reactive, ref } from "vue"
 import * as rf from "../js/URRreference"
+import { usePersonalStore } from "./URRpersonal.js"
+import { computeHistory } from "../js/URRhistory.js"
 
 export const useModelStore = defineStore("store", () => {
 	var gameName = "Game Name"
@@ -33,8 +35,12 @@ export const useModelStore = defineStore("store", () => {
 
 	const chatData = reactive([])
 	const history = reactive([])
+	// Display-only entries and metadata belong here, not in exported history.
+	const computedHistory = computed(() => computeHistory(history, usePersonalStore().gameCreationTimestamp))
 
 	const viewSettings = reactive({
+		boardZoom: 1,
+		historyArea: null,
 		showNotes: false,
 		showChat: false,
 		showBug: false,
@@ -77,7 +83,7 @@ export const useModelStore = defineStore("store", () => {
 	}
 
 	function clearHistoryHelpers() {
-		// Placeholder: game-specific replay highlight data can be cleared here.
+		viewSettings.historyArea = null
 	}
 
 	return {
@@ -87,6 +93,7 @@ export const useModelStore = defineStore("store", () => {
 		gameflow,
 		chatData,
 		history,
+		computedHistory,
 		viewSettings,
 		gameMessages,
 		deleteVotesData,

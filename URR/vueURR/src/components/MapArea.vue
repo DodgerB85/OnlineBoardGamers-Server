@@ -15,7 +15,6 @@ const store = useModelStore()
 const selectedHex = ref(null)
 const focusedHex = ref(null)
 const boardElement = ref(null)
-const boardZoom = ref(1)
 const showCoordinates = ref(false)
 const previewOpen = ref(false)
 const previewWater = ref(false)
@@ -31,6 +30,17 @@ const savedCanals = computed(() => store.board.canals.map(([from, to]) => {
 	const b = actualAreas.value.find((entry) => entry.area.id === to)?.position
 	return a && b ? `${a.x},${a.y} ${b.x},${b.y}` : null
 }).filter(Boolean))
+const riverPaths = computed(() => (store.board.riverSources || []).map((source) => {
+	const positions = []
+	let id = source
+	while (id !== null && id !== undefined) {
+		const position = actualAreas.value.find((entry) => entry.area.id === id)?.position
+		if (position) positions.push(`${position.x},${position.y}`)
+		id = store.board.riverDownstream[id]
+	}
+	return positions.join(" ")
+}))
+const waterReport = computed(() => [...store.computedHistory].reverse().find((entry) => (!store.viewSettings.showReplay || entry.historyIndex <= store.replayStep.index) && ["riverStart", "riverComplete"].includes(entry.administration?.kind))?.administration)
 const selectedArea = computed(() => store.board.areas.find((area) => area.id === selectedHex.value))
 const reachable = computed(() => selectedArea.value?.waterwork ? boardRules.getWaterworkReach(store, selectedArea.value.id) : [])
 const waterDestinations = computed(() => waterChoices(store).map((choice) => choice.area))
@@ -112,10 +122,8 @@ function focusArea(id) {
 	nextTick(() => {
 		const hex = [...boardElement.value.querySelectorAll(".areaHit")].find((hex) => hex.dataset.areaId === tabArea.value)
 		hex.focus()
-		if (!window.matchMedia("(max-width: 1050px)").matches) return
 		const rect = hex.getBoundingClientRect()
-		const drawer = document.querySelector(".actionSidebar:not(.isFinished)")?.getBoundingClientRect()
-		if (rect.top < 0 || rect.bottom > (drawer ? drawer.top : window.innerHeight)) revealAboveActions(hex, "instant")
+		if (rect.top < 0 || rect.bottom > window.innerHeight || rect.left < 0 || rect.right > window.innerWidth) revealAboveActions(hex, "instant")
 	})
 }
 function validateDraft() {
@@ -158,8 +166,7 @@ function revealSelection() {
 	revealAboveActions(hex)
 }
 function revealAboveActions(hex, behavior = "smooth") {
-	const drawer = document.querySelector(".actionSidebar:not(.isFinished)")?.getBoundingClientRect()
-	const visibleHeight = drawer ? drawer.top : window.innerHeight
+	const visibleHeight = window.innerHeight
 	const rect = hex.getBoundingClientRect()
 	if (rect.top >= 12 && rect.bottom <= visibleHeight - 12) return
 	window.scrollBy({ top: rect.top + rect.height / 2 - visibleHeight / 2, behavior })
@@ -171,7 +178,7 @@ async function locateArea(id, shouldSelect = false) {
 	await nextTick()
 	const hex = boardElement.value.querySelector(`[data-area-id="${id}"]`)
 	hex.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" })
-	if (window.matchMedia("(max-width: 1050px)").matches) revealAboveActions(hex)
+	revealAboveActions(hex)
 }
 function locateDecision() { return locateArea(decisionArea.value) }
 defineExpose({ startDig, finishDig, revealSelection, revealBoard, locateArea, isTracing: previewOpen })
@@ -180,11 +187,13 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 
 <template>
 	<div id="mapArea" ref="boardElement">
-		<div class="boardHeading"><b>Game board</b><span class="mapHint">{{ mapHint }}</span><div class="mapZoom"><button v-if="decisionArea" @click="locateDecision">{{ decisionLabel }}</button><button :aria-pressed="showCoordinates" @click="showCoordinates = !showCoordinates" title="Show coordinates on every hex">Hex labels</button><button :disabled="boardZoom <= 1" @click="boardZoom = Math.max(1, boardZoom - .25)" aria-label="Zoom out">−</button><button @click="boardZoom = 1" title="Fit the board">{{ Math.round(boardZoom * 100) }}%</button><button :disabled="boardZoom >= 2" @click="boardZoom = Math.min(2, boardZoom + .25)" aria-label="Zoom in">+</button></div></div>
+		<div class="boardHeading"><b>Game board</b><span class="mapHint">{{ mapHint }}</span><div class="mapZoom"><button v-if="decisionArea" @click="locateDecision">{{ decisionLabel }}</button><button :aria-pressed="showCoordinates" @click="showCoordinates = !showCoordinates" title="Show coordinates on every hex">Hex labels</button></div></div>
+		<div v-if="waterReport" class="riverStatus" role="status"><span><b>River flow · Turn {{ waterReport.turn }}</b> · {{ waterReport.waterTotal }} water from upstream<template v-if="waterReport.kind === 'riverComplete'"> · {{ waterReport.irrigatedCount }} wet hexes · {{ waterReport.outflow }} water flows off the board<template v-if="!waterReport.irrigatedCount"> · No irrigation income</template></template><template v-else> · Routing in progress</template></span><button @click="store.viewSettings.showHistory = true">Flow history</button></div>
 		<div class="controls" v-if="previewOpen"><b>Canal path:</b><span>{{ draftPath.map((id) => store.board.areas.find((area) => area.id === id)?.label || id).join(' → ') || 'Click the starting river or canal area.' }}</span><button @click="undoDraft" :disabled="!draftPath.length">Undo</button><button @click="clearDraft" :disabled="!draftPath.length">Clear</button><button @click="stopSelectingPath">{{ draftPath.length >= 2 ? 'Review canal' : 'Stop selecting path' }}</button><label><input type="checkbox" v-model="previewWater" :disabled="draftPath.length < 2" /> Animate draft</label></div>
-		<div class="mapSurface" :class="{ isZoomed: boardZoom > 1 }">
-			<svg :style="{ width: `${boardZoom * 100}%` }" :viewBox="`0 0 ${boardDisplay.MAP_WIDTH} ${boardDisplay.MAP_HEIGHT}`" aria-label="UR: 1830 BC game board"><title>Use arrow keys to move between adjacent hexes, and Enter or Space to select.</title>
+		<div class="mapSurface">
+			<svg :viewBox="`0 0 ${boardDisplay.MAP_WIDTH} ${boardDisplay.MAP_HEIGHT}`" aria-label="UR: 1830 BC game board"><title>Use arrow keys to move between adjacent hexes, and Enter or Space to select.</title>
 				<image :href="mapImage" x="0" y="0" :width="boardDisplay.MAP_WIDTH" :height="boardDisplay.MAP_HEIGHT" />
+				<g v-if="store.gameflow.phase === rf.PHASE_RAINY_SEASON" class="flowingRivers"><polyline v-for="(path, index) in riverPaths" :key="index" :points="path" /></g>
 				<g v-if="!actualAreas.length" class="printedHexes"><polygon v-for="hex in boardDisplay.PRINTED_HEXES" :key="hex.id" :points="boardDisplay.hexPoints(hex.x, hex.y)" @click="inspectArea(hex.id)" /></g>
 				<polyline v-for="(canal, index) in savedCanals" :key="`canal-${index}`" :points="canal" class="savedCanal" />
 				<polyline v-if="draftLine" :points="draftLine" class="draftCanal" />
@@ -193,14 +202,18 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 				<g v-for="entry in actualAreas" :key="entry.area.id" class="boardArea" :class="{ showLabel: showCoordinates || selectedHex === entry.area.id || queuedPurchase === entry.area.id || queuedSales.includes(entry.area.id) || chosenRemoval === entry.area.id || draftPath.includes(entry.area.id) }">
 					<polygon :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="areaHit" :class="{ selected: selectedHex === entry.area.id, drafting: draftPath.includes(entry.area.id), reachable: reachable.includes(entry.area.id), waterDestination: waterDestinations.includes(entry.area.id), routing: routingArea === entry.area.id, maintenanceSale: maintenanceLand.includes(entry.area.id), barahshumSite: barahshumSites.includes(entry.area.id), calahSite: calahSites.includes(entry.area.id), harvestRemovalSite: harvestRemovalSites.includes(entry.area.id), removalTarget: chosenRemoval === entry.area.id, tradePurchase: queuedPurchase === entry.area.id, tradeSale: queuedSales.includes(entry.area.id), offerTarget: store.gameflow.pendingOffer?.action.area === entry.area.id }" role="button" :tabindex="tabArea === entry.area.id ? 0 : -1" :data-area-id="entry.area.id" :aria-label="areaDescription(entry.area)" @focus="focusedHex = entry.area.id" @keydown="moveFocus($event, entry)" @click="inspectArea(entry.area.id)" @keydown.enter.prevent="inspectArea(entry.area.id)" @keydown.space.prevent="inspectArea(entry.area.id)"><title>{{ areaDescription(entry.area) }}</title></polygon>
 					<polygon v-if="queuedPurchase === entry.area.id && queuedSales.includes(entry.area.id)" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="purchaseSaleOutline" />
-					<image v-if="entry.area.markerOwner !== null" :href="getPlayerMarkerImage(entry.area.markerOwner)" :x="entry.position.x - 22" :y="entry.position.y - 22" width="44" height="44" class="ownerMarker" :class="{ sold: entry.area.owner === null }" />
-					<rect v-if="entry.area.owner === null && entry.area.markerOwner !== null" :x="entry.position.x - 22" :y="entry.position.y - 22" width="44" height="44" class="saleMarkerFrame" />
+					<polygon v-if="entry.area.irrigatedBy !== null" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="wetHex" />
+					<polygon v-if="entry.area.id === store.viewSettings.historyArea" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="historyOutline" />
+					<image v-if="entry.area.owner !== null" :href="getPlayerMarkerImage(entry.area.markerOwner)" :x="entry.position.x - 22" :y="entry.position.y - 22" width="44" height="44" class="ownerMarker" />
+					<rect v-if="entry.area.markerOwner !== null" :x="entry.position.x - 22" :y="entry.position.y - 22" width="44" height="44" class="tokenFrame" :class="{ saleMarkerFrame: entry.area.owner === null }" />
 					<text :x="entry.position.x" :y="entry.position.y + 41" class="areaLabel">{{ entry.area.label || entry.area.id }}</text>
 					<image v-if="entry.area.waterwork" :href="getWaterworkImage(entry.area.waterwork.state, entry.area.waterwork.capacity)" :x="entry.position.x + 10" :y="entry.position.y - 40" width="32" height="32" class="waterworkMarker"><title>{{ rf.STATE_NAMES[entry.area.waterwork.state] }} {{ entry.area.waterwork.kind }} · {{ waterworkMeasure(entry.area.waterwork) }}</title></image>
+					<rect v-if="entry.area.waterwork" :x="entry.position.x + 10" :y="entry.position.y - 40" width="32" height="32" class="tokenFrame" />
 					<circle v-if="entry.area.irrigatedBy !== null" :cx="entry.position.x + 24" :cy="entry.position.y + 20" r="10" class="irrigationMarker"><title>Irrigated by {{ rf.STATE_NAMES[entry.area.irrigatedBy] }}</title></circle>
 				</g>
 			</svg>
 		</div>
+		<div class="boardLegend">White square: sold land · River number: reservoir water capacity · Land number: pump reach in canals</div>
 		<div class="inspection" v-if="selectedArea">
 			<b>{{ selectedArea.label || selectedArea.id }}</b>
 			<span v-if="selectedArea.nation !== null">{{ rf.NATION_NAMES[selectedArea.nation] }} homeland</span>
@@ -233,12 +246,15 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 </template>
 
 <style scoped>
-#mapArea { width: 100%; display: flex; flex-direction: column; align-items: center; min-width: 0; }.boardHeading { width: 100%; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; box-sizing: border-box; padding: 5px 8px; background: #f7edc7; border: 2px solid #8e805e; border-radius: 7px 7px 0 0; font-size: 14px; }.mapSurface { width: min(100%, 920px); line-height: 0; box-shadow: 0 2px 5px #6b614a; }.mapSurface svg { width: 100%; height: auto; display: block; }
+.boardLegend { font-size: 13px; line-height: 1.4; padding: 6px 8px; text-align: left; }
+#mapArea { width: 100%; display: flex; flex-direction: column; align-items: center; min-width: 0; }.boardHeading { width: 100%; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; box-sizing: border-box; padding: 5px 8px; background: #f7edc7; border: 2px solid #8e805e; border-radius: 7px 7px 0 0; font-size: 14px; }.mapSurface { width: 100%; line-height: 0; box-shadow: 0 2px 5px #6b614a; }.mapSurface svg { width: 100%; height: auto; display: block; }
 .printedHexes polygon, .areaHit { fill: #fff; fill-opacity: .001; stroke: transparent; stroke-width: 5; cursor: pointer; }.areaHit.maintenanceSale { fill: #ffd894; fill-opacity: .2; stroke: #b76400; }.areaHit.harvestRemovalSite { fill: #ffd894; fill-opacity: .22; stroke: #b76400; }.areaHit.barahshumSite, .areaHit.calahSite { fill: #d9b7ed; fill-opacity: .28; stroke: #8758a8; }.areaHit.reachable { fill: #bf9dff; fill-opacity: .24; }.areaHit.waterDestination { fill: #74e9ff; fill-opacity: .3; stroke: #008cb3; }.areaHit.routing { stroke: #006dca; stroke-width: 8; }.areaHit:hover, .areaHit:focus, .areaHit.selected { fill: #fff57a; fill-opacity: .32; stroke: #7e6400; }.areaHit.drafting { stroke: #1165bb; fill-opacity: .17; }
-.savedCanal { fill: none; stroke: #2269ad; stroke-width: 10; stroke-linecap: round; pointer-events: none; }.draftCanal { fill: none; stroke: #1f75ce; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; opacity: .82; pointer-events: none; }.waterPreviewPath { fill: none; stroke: #aef4ff; stroke-width: 6; stroke-dasharray: 12 12; pointer-events: none; }.waterPreviewDot, .irrigationMarker { fill: #35d6ff; stroke: #fff; stroke-width: 3; pointer-events: none; }.ownerMarker, .waterworkMarker, .areaLabel { pointer-events: none; }.ownerMarker.sold { opacity: .7; }.saleMarkerFrame { fill: none; stroke: #605640; stroke-width: 3; stroke-dasharray: 5 3; pointer-events: none; }.areaLabel { opacity: 0; text-anchor: middle; fill: #333; font-weight: bold; font-size: 13px; paint-order: stroke; stroke: #fff; stroke-width: 3; }
+.savedCanal { fill: none; stroke: #2269ad; stroke-width: 10; stroke-linecap: round; pointer-events: none; }.draftCanal { fill: none; stroke: #1f75ce; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; opacity: .82; pointer-events: none; }.waterPreviewPath { fill: none; stroke: #aef4ff; stroke-width: 6; stroke-dasharray: 12 12; pointer-events: none; }.waterPreviewDot, .irrigationMarker { fill: #35d6ff; stroke: #fff; stroke-width: 3; pointer-events: none; }.ownerMarker, .waterworkMarker, .areaLabel { pointer-events: none; }.areaLabel { opacity: 0; text-anchor: middle; fill: #333; font-weight: bold; font-size: 13px; paint-order: stroke; stroke: #fff; stroke-width: 3; }
+.tokenFrame { fill: none; stroke: #000; stroke-width: 2; pointer-events: none; }.saleMarkerFrame { fill: #fff; }.irrigationMarker { stroke: #000; stroke-width: 2; }
+.riverStatus { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 8px; box-sizing: border-box; background: #def5ff; font-size: 14px; line-height: 1.4; }.riverStatus button { flex-shrink: 0; padding: 6px; font: inherit; border: 1px solid #177daf; border-radius: 3px; background: #fffdf4; cursor: pointer; }.flowingRivers { fill: none; stroke: #16a9db; stroke-width: 6; stroke-dasharray: 12 9; pointer-events: none; animation: riverFlow 1s linear infinite; }.wetHex { fill: #35d6ff; fill-opacity: .22; stroke: #008cb3; stroke-width: 3; pointer-events: none; }.historyOutline { fill: none; stroke: #177daf; stroke-width: 8; pointer-events: none; }@keyframes riverFlow { to { stroke-dashoffset: -21; } }@media (prefers-reduced-motion: reduce) { .flowingRivers { animation: none; } }
 .boardArea:hover .areaLabel, .boardArea:focus-within .areaLabel, .boardArea.showLabel .areaLabel { opacity: 1; }
 .inspection { overflow-wrap: anywhere; width: 100%; box-sizing: border-box; min-height: 20px; padding: 6px 8px; background: #fff9df; border: 1px solid #bcae85; font-size: 13px; text-align: left; }.controls { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; padding: 8px; font-size: 13px; }.controls button { cursor: pointer; }.previewError { color: #a40000; font-weight: bold; font-size: 13px; } @media (prefers-reduced-motion: reduce) { .waterPreviewDot { display: none; } }
-.mapZoom { display: inline-flex; gap: 2px; }.mapZoom button { min-width: 28px; min-height: 25px; font: inherit; font-size: 12px; background: #fff9df; border: 1px solid #bcae85; border-radius: 3px; cursor: pointer; }.mapZoom button:disabled { opacity: .4; cursor: default; }.mapSurface { overflow: auto; }.mapSurface.isZoomed { max-height: max(180px, calc(100vh - 290px)); }@media (max-width: 1050px) { .mapSurface.isZoomed { max-height: 65vh; } }
+.mapZoom { display: inline-flex; gap: 2px; }.mapZoom button { min-width: 28px; min-height: 25px; font: inherit; font-size: 12px; background: #fff9df; border: 1px solid #bcae85; border-radius: 3px; cursor: pointer; }.mapZoom button:disabled { opacity: .4; cursor: default; }
 .areaHit.tradePurchase { stroke: #177daf; stroke-width: 8; stroke-dasharray: 12 6; }.areaHit.tradeSale { stroke: #aa3d2e; stroke-width: 8; stroke-dasharray: 12 6; }
 .areaHit.tradePurchase.tradeSale { stroke: #177daf; stroke-dasharray: 12 12; }.purchaseSaleOutline { fill: none; stroke: #aa3d2e; stroke-width: 8; stroke-dasharray: 12 12; stroke-dashoffset: 12; pointer-events: none; }
 .areaHit.removalTarget { stroke: #b76400; stroke-width: 8; }
@@ -246,11 +262,8 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 .mapZoom button[aria-pressed=true] { background: #e1edf5; border-color: #177daf; color: #145575; }
 .areaLabel { font-size: 22px; }
 .mapHint { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
-@media (min-width: 1051px) and (max-width: 1250px), (min-width: 1051px) and (max-height: 800px) { .areaLabel { font-size: 28px; } }
-@media (max-width: 500px), (max-width: 1050px) and (max-height: 600px) { .areaLabel { font-size: 36px; stroke-width: 5px; } }
-@media (max-width: 1050px) { .mapZoom button { min-width: 40px; min-height: 40px; } }
+.mapZoom button { min-width: 40px; min-height: 40px; }
 .inspection { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }.inspection img { width: 25px; height: 25px; object-fit: contain; }.inspectionOwner, .inspectionWork { display: inline-flex; align-items: center; gap: 4px; }.inspectionOwner { min-width: 0; overflow-wrap: anywhere; }
 .controls button { min-height: 30px; border: 1px solid #998a67; border-radius: 3px; background: #fffdf4; color: #302f27; font: inherit; padding: 4px 8px; }.controls button:disabled { opacity: .5; cursor: default; }@media (max-width: 1050px) { .controls button { min-height: 40px; } }
 .controls label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }.controls input[type=checkbox] { width: 18px; height: 18px; margin: 0; }@media (max-width: 1050px) { .controls label { min-height: 40px; } }
-@media (max-width: 1050px) and (max-height: 600px) { .mapSurface { width: min(100%, calc((100vh - 160px) * 1.2333)); } }
 </style>

@@ -118,7 +118,8 @@ export function performAction(playerIndex, action) {
 
 export function addHistory(event, playerIndex, snapshot, action = null) {
 	const entry = [event, playerIndex, JSON.stringify(snapshot === undefined ? snapshotState() : snapshot)]
-	if (action) entry.push(JSON.parse(JSON.stringify(action)))
+	entry.push(action ? JSON.parse(JSON.stringify(action)) : null)
+	entry.push(event === rf.HIST_NEW_GAME ? usePersonalStore().gameCreationTimestamp || Math.floor(Date.now() / 1000) : Math.floor(Date.now() / 1000))
 	useModelStore().history.push(entry)
 }
 

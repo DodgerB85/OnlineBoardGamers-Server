@@ -8,7 +8,14 @@ export function getAutomaticAction(game) {
 	if (game.gameflow.phase === rf.PHASE_DIVIDING_NATIONS && game.gameflow.auction && availableMoney(game, game.gameflow.turnOrder[0]) < game.gameflow.auction.amount + 5) return { type: "pass" }
 	if (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "betweenStates" && !canExchangeBarahshum(game, game.nations[rf.NATION_BARAHSHUM].owner)) return { type: "beginDevelopment" }
 	if (game.gameflow.phase !== rf.PHASE_RAINY_SEASON) return null
-	if (game.rain.step === "routing" && currentWaterFrame(game) && waterChoices(game).length === 0) return { type: "advanceWater" }
+	if (game.rain.step === "routing" && currentWaterFrame(game)) {
+		const frame = currentWaterFrame(game)
+		const choices = waterChoices(game)
+		if (choices.length === 0) return { type: "advanceWater" }
+		// A quantity choice at a pump can affect the downstream monarch's options.
+		// Direct irrigation is forced only when no destination must be sacrificed.
+		if ((choices.length === 1 && (choices[0].kind === "irrigate" || frame.water === 1)) || (choices.every((choice) => choice.kind === "irrigate") && frame.water >= choices.length)) return { type: "allocateWater", area: choices[0].area, amount: 1 }
+	}
 	if (game.rain.step === "harvest") {
 		const state = game.states[game.rain.harvestOrder[0]]
 		if (harvestAmount(game, state.id) === 0 || state.hasRevolted) return { type: "harvest", choice: "distribute" }

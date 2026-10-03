@@ -1,16 +1,23 @@
 <script setup>
-import { computed, nextTick, ref, watch } from "vue"
+import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue"
 import { useModelStore } from "../stores/URRstore.js"
 import HistoryEntry from "./HistoryEntry.vue"
 const store = useModelStore()
 const newestFirst = ref(true)
+const toggleNewestFirst = ref(true)
+let sortTimer = null
 const historyPanel = ref(null)
 let previousFocus = null
 const orderedEntries = computed(() => {
-	const entries = store.history.map((entry, index) => ({ entry, index }))
+	const entries = store.computedHistory.map((entry) => ({ entry, index: entry.historyIndex }))
 	return newestFirst.value ? entries.reverse() : entries
 })
 watch(newestFirst, () => historyPanel.value?.scrollTo({ top: 0 }), { flush: "post" })
+watch(toggleNewestFirst, (value) => {
+	clearTimeout(sortTimer)
+	sortTimer = setTimeout(() => { newestFirst.value = value }, 400)
+})
+onBeforeUnmount(() => clearTimeout(sortTimer))
 watch(() => store.viewSettings.showHistory, (isOpen) => {
 	if (!isOpen) return
 	previousFocus = document.activeElement
@@ -38,20 +45,20 @@ function findReplayPosition() {
 		<div id="history" ref="historyPanel" v-if="store.viewSettings.showHistory" aria-label="Game history" @keydown.esc.stop.prevent="close">
 			<div class="historyControls"><div id="historyToggleDiv">
 				<span>Oldest First</span>
-				<label class="switch"><input type="checkbox" v-model="newestFirst" aria-label="Newest first" /><span class="slider round"></span></label>
+				<label class="switch"><input type="checkbox" v-model="toggleNewestFirst" aria-label="Newest first" /><span class="slider round"></span></label>
 				<span>Newest First</span>
 				<button class="closeHistory" @click="close" aria-label="Close history">×</button>
 			</div>
 			<p v-if="store.viewSettings.showReplay" class="replayHint"><span>Select a move to replay.</span><button @click="findReplayPosition">Find current move</button></p></div>
 			<div id="historyMainDiv">
-				<HistoryEntry v-for="{ entry, index } in orderedEntries" :key="index" :entry="entry" :index="index" :newest-first="newestFirst" />
+				<HistoryEntry v-for="{ entry, index } in orderedEntries" :key="entry.historyKey" :entry="entry" :index="index" :newest-first="newestFirst" />
 			</div>
 		</div>
 	</transition>
 </template>
 
 <style scoped>
-#history { position: fixed; left: 2px; top: var(--urr-menu-height, 60px); width: 450px; max-width: calc(100vw - 8px); max-height: calc(100vh - var(--urr-menu-height, 60px) - 12px); box-sizing: border-box; z-index: 9999; border: 2px solid black; background-color: #d4eafd; overflow-y: auto; text-align: center; }
+#history { position: absolute; left: 2px; top: var(--urr-menu-height, 60px); width: 450px; max-height: calc(100vh - var(--urr-menu-height, 60px) - 12px); box-sizing: border-box; z-index: 9999; border: 2px solid black; background-color: #d4eafd; overflow-y: auto; text-align: center; }
 #history { scroll-padding-top: 60px; scroll-padding-bottom: 8px; }
 .historyControls { position: sticky; top: 0; z-index: 1; background: #d4eafd; }
 #historyToggleDiv { display: flex; align-items: center; justify-content: center; padding: 5px; background: #d4eafd; font-size: 13px; }

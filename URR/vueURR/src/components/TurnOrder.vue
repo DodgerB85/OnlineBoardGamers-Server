@@ -49,10 +49,6 @@ function browseEmergingStates(event) {
 	emit("browseStates")
 	nextTick(() => {
 		details.scrollIntoView({ block: "nearest", behavior: "instant" })
-		if (!window.matchMedia("(max-width: 1050px)").matches) return
-		const drawer = document.querySelector(".actionSidebar:not(.isFinished)")?.getBoundingClientRect()
-		const bottom = details.getBoundingClientRect().bottom
-		if (drawer && bottom > drawer.top) window.scrollBy({ top: bottom - drawer.top + 8, behavior: "smooth" })
 	})
 }
 watch([() => store.gameflow.turnOrder[0], () => store.gameflow.phase, () => currentState.value], () => {
@@ -91,6 +87,4 @@ watch([() => store.gameflow.turnOrder[0], () => store.gameflow.phase, () => curr
 @media (max-width: 1050px) { .orderRow button { min-height: 40px; }.emergingStates summary { min-height: 40px; box-sizing: border-box; padding: 12px 5px; } }
 .orderRow button.completed { background: #eeeadf; }.orderRow button .doneMark { flex-shrink: 0; color: #527349; font-size: 14px; }
 .finalRound { display: inline-block; margin-left: 8px; padding: 2px 6px; border: 1px solid #a75a24; border-radius: 3px; background: #f6e3cf; color: #663716; font-size: 12px; }
-@media (max-width: 650px) { .orderRow:first-child button > span:not(.position) { max-width: 90px; }.orderRow { gap: 4px; }.orderRow:first-child .orderLabel { display: none; }.orderRow button { font-size: 12px; padding: 4px; }.orderRow button.current { padding: 3px; }.orderRow button img { width: 24px; height: 24px; }.orderRow button .birthright { width: 26px; }.position { display: none; }.orderLabel { width: auto; }.phaseLabel { width: 100%; margin: 3px 0 0; font-size: 12px; }.emptyOrder { font-size: 11px; }.emergingStates { font-size: 11px; } }
-@media (max-width: 350px) { .orderRow:first-child button { gap: 3px; }.orderRow:first-child button > span:not(.position) { max-width: 60px; }.orderRow:first-child button img { width: 20px; height: 20px; }.orderRow:first-child button .birthright { width: 22px; } }
 </style>

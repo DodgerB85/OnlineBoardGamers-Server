@@ -30,15 +30,6 @@ const land = computed(() => rf.ALL_LAND_TYPES.map((type) => {
 	return { type, count: areas.length, cityCount: areas.filter((area) => area.isCity).length, value: areas.reduce((sum, area) => sum + rules.landPrice(store, area), 0) }
 }))
 const nations = computed(() => store.nations.filter((nation) => !nation.isRemoved && nation.ownerType === "player" && nation.owner === activePlayer.value))
-const relevantNations = computed(() => {
-	if (inspectedPlayer.value !== null || store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS) return nations.value
-	if (store.gameflow.pendingOffer?.action.type === "offerNation") return nations.value.filter((nation) => nation.id === store.gameflow.pendingOffer.action.nation)
-	if (isSettlement.value) return nations.value.filter((nation) => [rf.NATION_DER, rf.NATION_BARAHSHUM].includes(nation.id))
-	if (store.gameflow.developmentStep === "eridu") return nations.value.filter((nation) => nation.id === rf.NATION_ERIDU)
-	if (store.gameflow.developmentStep === "betweenStates") return nations.value.filter((nation) => nation.id === rf.NATION_BARAHSHUM)
-	return []
-})
-const otherNations = computed(() => nations.value.filter((nation) => !relevantNations.value.includes(nation)))
 const nationIncome = computed(() => nations.value.reduce((sum, nation) => sum + rf.NATION_INCOMES[nation.id], 0))
 const states = computed(() => store.states.filter((state) => state.isActive && state.king === activePlayer.value))
 const emergingStates = computed(() => store.states.filter((state) => !state.isActive && state.king === activePlayer.value))
@@ -59,8 +50,7 @@ function reset() { inspectedPlayer.value = null }
 		<div class="ruledStates" v-if="states.length" aria-label="States ruled"><span v-for="state in states" :key="state.id" :title="rf.STATE_NAMES[state.id]"><img :src="getStateOrderImage(state.id)" alt="" />{{ rf.STATE_NAMES[state.id] }}</span></div>
 		<div class="ruledStates emergingStates" v-if="isSettlement && emergingStates.length" aria-label="Leading ownership in emerging states"><small>Leading in</small><span v-for="state in emergingStates" :key="state.id" :title="`${rf.STATE_NAMES[state.id]}: current ownership leader; ${colonized(state.id)}/${rf.LAND_FOR_STATE_TO_ACTIVATE} colonized lands`"><img :src="getStateOrderImage(state.id)" alt="" />{{ rf.STATE_NAMES[state.id] }} · {{ colonized(state.id) }}/{{ rf.LAND_FOR_STATE_TO_ACTIVATE }}</span></div>
 		<div class="nationIncome" v-if="nations.length && (isSettlement || store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS)">Nation income<b>{{ nationIncome }} SPL / round</b></div>
-		<div v-if="relevantNations.length" class="relevantNationArtwork" :class="{ multipleNations: relevantNations.length > 1 }"><div class="nationArtwork" v-for="nation in relevantNations" :key="nation.id"><ArtworkCard :src="getNationCardImage(nation.id)" :alt="rf.NATION_NAMES[nation.id]" /></div></div>
-		<details v-if="otherNations.length"><summary>{{ relevantNations.length ? 'Other nations' : 'Independent nations' }} · {{ otherNations.length }}</summary><div class="nationArtwork" v-for="nation in otherNations" :key="nation.id"><ArtworkCard :src="getNationCardImage(nation.id)" :alt="rf.NATION_NAMES[nation.id]" /></div></details>
+		<div v-if="nations.length" class="relevantNationArtwork" :class="{ multipleNations: nations.length > 1 }" aria-label="Owned nations"><div class="nationArtwork" v-for="nation in nations" :key="nation.id"><ArtworkCard :src="getNationCardImage(nation.id)" :alt="rf.NATION_NAMES[nation.id]" /></div></div>
 		<div class="primogeniture" v-if="isSettlement"><img :src="primogenitureImage" alt="Primogeniture" /><span>{{ store.gameflow.primogenitureBid ? 'Primogeniture bid' : 'Primogeniture' }}<b>{{ store.players[store.gameflow.primogenitureBid?.player ?? store.gameflow.primogeniture]?.displayName }}<template v-if="store.gameflow.primogenitureBid"> · {{ store.gameflow.primogenitureBid.amount }} SPL</template></b></span></div>
 		<div v-if="isSettlement && store.board.markerLimit" class="markerCount" :title="`${markers} markers in use; ${soldMarkers} on sold land. Markers on sold land return when it is bought.`"><img class="playerMarker" :src="getPlayerMarkerImage(activePlayer)" alt="Land markers" /><span><b>{{ store.board.markerLimit - markers }} free</b> · {{ markers }}/{{ store.board.markerLimit }} used</span></div>
 		<div class="assetLine" v-if="isSettlement || store.gameflow.phase === rf.PHASE_GAME_OVER">Assets: {{ player ? rules.playerAssets(store, activePlayer) : 0 }} SPL</div>
@@ -83,6 +73,5 @@ summary { cursor: pointer; padding: 4px 0; }
 .markerCount { display: flex; align-items: center; gap: 6px; font-size: 12px; }
 .emergingStates { align-items: center; font-size: 12px; }.emergingStates small { font-size: 12px; color: #655a42; }
 .relevantNationArtwork { display: grid; gap: 5px; }
-@media (max-width: 1050px) { .relevantNationArtwork.multipleNations { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 1050px) { .panelTitle button { min-height: 40px; font-size: 12px; padding: 4px 8px; }summary { min-height: 40px; box-sizing: border-box; padding: 12px 0; } }
 </style>

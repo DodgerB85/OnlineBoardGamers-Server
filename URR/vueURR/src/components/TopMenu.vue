@@ -165,6 +165,11 @@ function getKickoutTimerText() {
 					<span id="kickoutTimerSpan">Time to next kickout: <span id="kickoutTimerTimer">{{ getKickoutTimerText() }}</span></span>
 				</template>
 			</div>
+			<div id="zoomDiv" class="mapZoom">
+				<button @click="store.viewSettings.boardZoom = Math.min(3, store.viewSettings.boardZoom + .25)" :disabled="store.viewSettings.boardZoom >= 3" aria-label="Zoom in">🔍+</button>
+				<button @click="store.viewSettings.boardZoom = Math.max(.5, store.viewSettings.boardZoom - .25)" :disabled="store.viewSettings.boardZoom <= .5" aria-label="Zoom out">🔍−</button>
+				<button @click="store.viewSettings.boardZoom = 1" title="Fit the board">{{ Math.round(store.viewSettings.boardZoom * 100) }}%</button>
+			</div>
 		</div>
 	</div>
 </template>
@@ -188,6 +193,7 @@ function getKickoutTimerText() {
 	color: white;
 	padding: 0px;
 	width: 100%;
+	min-width: 1400px;
 	height: 60px;
 	top: 0px;
 	z-index: 2;
@@ -227,28 +233,10 @@ function getKickoutTimerText() {
 .topMenuItem span { font-size: 14px; font-weight: bold; display: block; }
 
 #topRight { flex-shrink: 0; height: 100%; font-size: 14px; text-align: center; margin-right: 5px; }
+#zoomDiv { display: flex; justify-content: flex-end; gap: 4px; margin-top: 3px; }#zoomDiv button { min-height: 25px; font: inherit; font-size: 12px; cursor: pointer; }#zoomDiv button:disabled { opacity: .4; cursor: default; }
 #topInfos { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; min-width: fit-content; flex-shrink: 0; margin: 0 auto; }
 .menuDivider { display: inline-block; width: 5px; height: 50px; background-color: darkgray; margin: 0px 10px 0px 10px; }
 .turnOrderSpan { display: inline-block; padding: 5px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
 .gameInfoSpan { white-space: nowrap; }
 .playerLineDiv { white-space: nowrap; }
-@media (max-width: 1050px) {
-	#top { height: auto; overflow: visible; flex-wrap: wrap; white-space: normal; }
-	#menu { display: flex; flex-wrap: wrap; width: 100%; align-items: center; }
-	#menu > a, #menu > .topMenuItem { flex: 1 0 52px; }
-	.topMenuItem { width: 100%; height: 48px; padding-top: 3px; box-sizing: border-box; }
-	.topMenuItem img { width: 30px; height: 30px; }
-	.topMenuItem span { font-size: 12px; line-height: 14px; }
-	.menuDivider, #topInfos { display: none; }
-	#topRight { width: 100%; margin: 0; height: auto; font-size: 11px; padding: 2px 4px; box-sizing: border-box; text-align: right; overflow-wrap: anywhere; }
-	#WSstatus { width: 9px; height: 9px; }
-	#loggedInDiv > br { display: none; }
-	#kickoutTimerSpan { margin-left: 8px; }
-}
-@media (max-width: 650px) {
-	#menu > a, #menu > .topMenuItem { flex-basis: 40px; }
-	.topMenuItem { height: 44px; }
-	.topMenuItem img { width: 26px; height: 26px; }
-	.topMenuItem span { font-size: 10px; line-height: 12px; }
-}
 </style>

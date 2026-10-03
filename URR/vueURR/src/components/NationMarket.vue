@@ -105,5 +105,4 @@ ol { padding-left: 18px; margin: 4px 0; color: #52616a; }form { display: flex; g
 .bidAdjustment { min-width: 40px; padding: 5px; }
 .marketControls { position: sticky; bottom: 0; background: #fff9e9; padding: 6px 0 0; border-top: 1px solid #c8c2b4; z-index: 1; }
 .treatyControls { display: flex; gap: 6px; align-items: stretch; }.treatyControls > button { flex: 1; min-width: 0; margin: 0; }.treatyControls .passButton { width: auto; flex: 0 0 auto; }.treatyControls small { display: block; margin-top: 3px; font-size: 12px; }
-@media (max-width: 1050px) { .auctionControls form { display: inline-flex; }.auctionControls .passButton { width: auto; margin: 0 0 0 6px; } }
 </style>

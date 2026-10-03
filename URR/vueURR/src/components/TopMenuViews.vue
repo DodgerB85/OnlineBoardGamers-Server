@@ -236,7 +236,6 @@ function localCastVote(topic) {
 .topMenuItem img { width: 38px; height: 38px; }
 .topMenuItem span { font-size: 14px; font-weight: bold; display: block; }
 .utilityHeading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }.utilityHeading button { border: 0; background: none; color: inherit; font-size: 26px; cursor: pointer; }.topMenuItem { border: 0; background: #303030; color: white; border-radius: 3px; }.topMenuItem:disabled { opacity: .5; cursor: default; }
-@media (max-width: 1050px) { #rewindPanel { position: fixed; left: 2px; width: 400px; max-width: calc(100vw - 4px); max-height: calc(100vh - var(--urr-menu-height, 60px) - 4px); overflow: auto; box-sizing: border-box; font-size: 14px; overflow-wrap: anywhere; } }
 .infoHeading { position: sticky; top: 0; z-index: 2; background: lightblue; padding: 4px 12px; border-bottom: 1px solid #adc2d0; text-align: left; }
 @media (max-width: 1050px) { .chatHeading button, .utilityHeading button { min-width: 44px; min-height: 44px; box-sizing: border-box; } }
 </style>
