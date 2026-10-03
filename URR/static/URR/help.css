@@ -2,6 +2,9 @@
 .urrHelpRow:last-child { border-bottom: 0; }
 .urrHelpImages { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; flex: 0 0 160px; }
 .urrHelpImages img { width: 64px; max-height: 100px; object-fit: contain; }
+/* Menu icons are white artwork drawn for the dark TopMenu bar, so each needs its
+   own dark chip here to be visible on the light help page. */
+.urrMenuIcons .urrHelpImages img { background: #333; border-radius: 3px; padding: 6px; }
 .urrHelpRow p { margin: 0; min-width: 0; }
 .urrHelpSwatch { display: inline-block; width: 18px; height: 18px; margin-right: 8px; vertical-align: middle; border: 2px solid; }
 .urrHelpSwatch.selected { background: #fff57a; border-color: #7e6400; }
