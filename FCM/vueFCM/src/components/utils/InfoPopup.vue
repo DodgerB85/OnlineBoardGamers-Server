@@ -17,8 +17,8 @@ const show = ref(false)
 		<slot />
 		<div v-if="show" class="infoPopup">
 			<!-- Employee card -->
-			<div v-if="type === 'employee' && employeeId > -1" class="expandedEmployeeDiv" :class="{ nonHireableEmployeeCard: employeeId === rf.UNION_ORGANIZER }">
-				<div v-if="employeeId === rf.UNION_ORGANIZER" class="nonHireableEmployeeLabel">{{ $t('topMenuViews.nonHireable') }}</div>
+			<div v-if="type === 'employee' && employeeId > -1" class="expandedEmployeeDiv" :class="{ nonHireableEmployeeCard: employeeId === rf.UNION_ORGANIZER || employeeId === rf.TEMPORARY_WORKER }">
+				<div v-if="employeeId === rf.UNION_ORGANIZER || employeeId === rf.TEMPORARY_WORKER" class="nonHireableEmployeeLabel">{{ $t('topMenuViews.nonHireable') }}</div>
 				<h3 class="expandedEmployeeTitle" :class="[rf.EMPLOYEES_STR[employeeId].type, { inverted: rf.EMPLOYEES_STR[employeeId].type === 'manager' || rf.EMPLOYEES_STR[employeeId].type === 'restaurant' }]">
 					{{ rf.EMPLOYEES_STR[employeeId].title }}
 				</h3>
