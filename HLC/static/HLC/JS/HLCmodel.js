@@ -163,12 +163,13 @@ Model = function () {
 
 			this.players = []
 
+			// NB global.displayNames is only on the create page, so the replay has to pass them in
+			let displayNamesArr = options.displayNames != undefined ? options.displayNames : global.displayNames
+
 			playersName = options.players
 			for (i = 0; i < playersName.length; i++) {
 				var d = undefined
-				if (this.trainingGame) {
-					let displayNames = global.displayNames
-					let displayNamesArr = displayNames//displayNames.split(/,/)
+				if (this.trainingGame && displayNamesArr != undefined) {
 					if (playersName[i] === "SHADOW") d = displayNamesArr[0]
 					if (playersName[i] === "SHADOW_2") d = displayNamesArr[1]
 					if (playersName[i] === "SHADOW_3") d = displayNamesArr[2]

@@ -140,8 +140,12 @@ var replay = {
 			for (i = 0; i < 5; i++) trackColours.push(setupParam[2 + playerCount * 2 + i])
 		} else trackColours = this.unwindTechTracks()
 
+		// global.displayNames is only set on the create page, so take them off the live players instead
+		var displayNames = []
+		for (i = 0; i < playerCount; i++) displayNames.push(this.liveModel.players[i].displayName)
+
 		var m = new Model()
-		m.start({ players: names, colours: colours, trackColours: trackColours })
+		m.start({ players: names, colours: colours, trackColours: trackColours, displayNames: displayNames })
 		// The walk starts with an empty history, and grows it one entry per step
 		m.logs = []
 
