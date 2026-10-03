@@ -464,9 +464,9 @@ export const EMPLOYEE_ARRANGEMENT = [
 	LEAD_BARISTA,
 	-1,
 	-1,
-	// Labor Market public special card supply
+	// Labor Market special cards
+	TEMPORARY_WORKER,
 	UNION_ORGANIZER,
-	-1,
 	-1,
 	-1,
 	-1,
