@@ -57,6 +57,18 @@ function toggleReplay() {
 	store.viewSettings.showReplay = !store.viewSettings.showReplay
 }
 
+// Practice games have no votes to cast, so rewind straight from the menu.
+function loadRewind() {
+	if (!personal.trainingGame) store.viewSettings.showRewindPanel = !store.viewSettings.showRewindPanel
+	else {
+		if (store.viewSettings.performingRewind) return
+		store.viewSettings.performingRewind = true
+		setTimeout(() => {
+			IO.loadRewind()
+		}, 500)
+	}
+}
+
 function nextGame() {
 	window.location.href = window.initData.nextURL
 }
@@ -133,7 +145,7 @@ function getKickoutTimerText() {
 
 			<div class="menuDivider"></div>
 
-			<button type="button" v-if="personal.pov >= 0 && !personal.trainingGame" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showRewindPanel }]" :aria-expanded="store.viewSettings.showRewindPanel" @click="store.viewSettings.showRewindPanel = !store.viewSettings.showRewindPanel">
+			<button type="button" v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showRewindPanel }]" :aria-expanded="store.viewSettings.showRewindPanel" @click="loadRewind()">
 				<img :src="view.getImage('icon-rewind')" alt="" />
 				<span>Rewind</span>
 			</button>

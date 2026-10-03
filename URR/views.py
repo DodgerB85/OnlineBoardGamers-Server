@@ -163,6 +163,10 @@ def _processURRturn(request):
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
 
+        # Cannot rewind past a kickout
+        currentGame.rewindData = ""
+        currentGame.rewindTempData = ""
+
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
         currentGame.save()
@@ -253,6 +257,7 @@ def performSaveURRGame(request, currentGame, jsonData):
     if check_name:
         nameToUse = check_name
 
+    previous_game_data = currentGame.gameData
     currentGame.gameData = jsonData["gameData"]
     currentGame.turn = jsonData["turn"]
     currentGame.phase = jsonData["phase"]
@@ -292,7 +297,7 @@ def performSaveURRGame(request, currentGame, jsonData):
                 presenter.sendYourTurnNotification("URR", playerListToNotify, currentGame.id, presenter.getGameName(), currentGame, oldVer)
 
     if jsonData.get("saveRewind", True):
-        doSaveRewind(currentGame, jsonData)
+        doSaveRewind(currentGame, jsonData, previous_game_data)
 
     presenter.clearKickoutVotes()
     currentGame.save()
@@ -318,32 +323,53 @@ def decompressRewindPoint(point):
     return point
 
 
-def doSaveRewind(currentGame, jsonData):
-    # Each point includes the complete replay history. Keeping twenty plain
-    # copies makes normal games unnecessarily expensive to save and profile.
-    new_point = compressRewindPoint(jsonData["gameData"])
+def openingPosition(gameData):
+    """Rebuild the start of the game from a save's own first history entry.
 
+    The client creates the opening position, so a game that has never been
+    saved has no earlier position on the server yet. Without this the first
+    rewind of a game would have nothing to go back to.
+    """
+    try:
+        history = json.loads(gameData).get("history") or []
+        if not history:
+            return ""
+        opening = json.loads(history[0][2])
+        opening["history"] = [history[0]]
+        return json.dumps(opening)
+    except (json.JSONDecodeError, IndexError, TypeError):
+        return ""
+
+
+def doSaveRewind(currentGame, jsonData, previousGameData):
+    # Each point holds the complete replay history, so keep them gzipped.
+    # Points are the positions from *before* each move: the position after the
+    # latest move is already currentGame.gameData, and storing it too would
+    # leave the first rewind of a game with nothing to step back to.
+    currentRewindData = []
     if currentGame.rewindData:
         try:
             currentRewindData = [compressRewindPoint(point) for point in json.loads(currentGame.rewindData)]
-            if currentRewindData and currentRewindData[-1] == new_point:
-                currentGame.rewindData = json.dumps(currentRewindData)
-                return
         except json.JSONDecodeError:
             currentRewindData = []
-    else:
-        currentRewindData = []
 
     if currentGame.rewindTempData:
+        # Put back the position we rewound to, so playing on from it does not
+        # lose the ability to rewind there again.
         temp_point = compressRewindPoint(currentGame.rewindTempData)
         if not currentRewindData or currentRewindData[-1] != temp_point:
             currentRewindData.append(temp_point)
         currentGame.rewindTempData = ""
 
-    if not currentRewindData or currentRewindData[-1] != new_point:
-        currentRewindData.append(new_point)
-        if len(currentRewindData) > 20:
-            currentRewindData = currentRewindData[-20:]
+    if not previousGameData:
+        previousGameData = openingPosition(jsonData["gameData"])
+    if previousGameData:
+        previous_point = compressRewindPoint(previousGameData)
+        if not currentRewindData or currentRewindData[-1] != previous_point:
+            currentRewindData.append(previous_point)
+
+    if len(currentRewindData) > 20:
+        currentRewindData = currentRewindData[-20:]
 
     currentGame.rewindData = json.dumps(currentRewindData)
 
