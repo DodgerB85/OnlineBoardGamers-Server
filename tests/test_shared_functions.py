@@ -1,10 +1,12 @@
 import json
 from unittest.mock import patch
 
+from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.test import RequestFactory
 from django.test import TestCase
 
+import Lobby.sharedFunctions.constants as rf
 from Lobby.models import Game, GamePlayer, Tournament, User
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_M_ProcessAnyTournamentEndGame,
@@ -397,3 +399,60 @@ class TestSharedGameCreationHelpers(PrintSuccessTestCase):
 
         self.assertEqual([user.username for user in shadow_users], ["SHADOW", "SHADOW_2"])
         self.assertEqual(shadow_name_notes, '["Bot A","Bot B"]')
+
+    def _messages(self):
+        return [str(m) for m in get_messages(self.request)]
+
+    def test_validate_players_empty_list_returns_empty_without_message(self):
+        result = SF_validatePlayers(self.request, [], 4)
+
+        self.assertEqual(result, [])
+        self.assertEqual(self._messages(), [])
+
+    def test_validate_players_returns_users_in_order_and_allows_creator_by_default(self):
+        alpha = User.objects.create_user(username="alpha", password="testpass123")
+        beta = User.objects.create_user(username="beta", password="testpass123")
+
+        result = SF_validatePlayers(self.request, ["beta", "alpha"], 4)
+
+        self.assertEqual(result, [beta, alpha])
+        # allow_creator defaults to True, so the creator is a legal invite
+        self.assertEqual(SF_validatePlayers(self.request, ["creator"], 4), [self.request.user])
+
+    def test_validate_players_rejects_too_many_players(self):
+        User.objects.create_user(username="alpha", password="testpass123")
+        User.objects.create_user(username="beta", password="testpass123")
+
+        result = SF_validatePlayers(self.request, ["alpha", "beta"], 2)
+
+        self.assertIsNone(result)
+        self.assertIn("Too many players", " ".join(self._messages()))
+
+    def test_validate_players_dedupes_duplicate_usernames(self):
+        alpha = User.objects.create_user(username="alpha", password="testpass123")
+
+        # Three copies of the same name used to count as three players (and could
+        # trip the cap); they should collapse to one.
+        result = SF_validatePlayers(self.request, ["alpha", "alpha", "alpha"], 2)
+
+        self.assertEqual(result, [alpha])
+        self.assertEqual(self._messages(), [])
+
+    def test_setup_training_game_shadows_defaults_to_shared_shadow_names(self):
+        for name in rf.SHADOW_PLAYER_NAMES:
+            User.objects.create_user(username=name, password="testpass123")
+        request = self.factory.post("/", data={})
+
+        shadow_users, shadow_name_notes = SF_setupTrainingGameShadows(request, 3)
+
+        self.assertEqual([user.username for user in shadow_users], ["SHADOW", "SHADOW_2"])
+        self.assertEqual(shadow_name_notes, '["SHADOW","SHADOW_2"]')
+
+    def test_setup_training_game_shadows_two_players_creates_one_shadow(self):
+        User.objects.create_user(username="SHADOW", password="testpass123")
+        request = self.factory.post("/", data={"player2": "Bot"})
+
+        shadow_users, shadow_name_notes = SF_setupTrainingGameShadows(request, 2)
+
+        self.assertEqual([user.username for user in shadow_users], ["SHADOW"])
+        self.assertEqual(shadow_name_notes, '["Bot"]')

@@ -33,9 +33,11 @@ Notes:
 | `test_lobby.py` | 15 | `BGH_API` JSON parsing (trailing commas); tournament matchmaking (`_compute_game_groups` rematch avoidance, leftovers, ordering); auto-tournament scheduler helpers (pending-creation day, target start size, exact-multiple start trigger) and `find_pending_tournament_to_open` DB queries |
 | `test_models.py` | 14 | `User`/`Profile`/`Lock`/`Game`/`GamePlayer` models: `__str__`, profile auto-creation and defaults, lock expiry, `Game` field defaults, `GamePlayer` unique game+player constraint and seat-ordering |
 | `test_middleware.py` | 8 | `ForceTrailingSlashMiddleware`: redirects game codes / login / profile / index, no redirect when slash already present or path not covered |
-| `test_game_creation.py` | 5 | End-to-end RNB game creation via `POST RNB:createRNBgame`: cannot invite yourself; cannot invite a nonexistent player; solo game (`playerNumber=1`) auto-starts `ACTIVE`; practice game auto-starts with `SHADOW` bots and stats excluded; valid invite produces a `WAITING` game with the invite recorded |
+| `test_game_creation.py` | 14 | End-to-end RNB game creation via `POST RNB:createRNBgame`: cannot invite yourself; cannot invite a nonexistent player; solo game (`playerNumber=1`) auto-starts `ACTIVE` and ignores a supplied invite; practice game auto-starts with `SHADOW` bots and stats excluded; valid invite produces a `WAITING` game with the invite recorded; GET rejected; anonymous redirected to login; `privateGame` → `PRIVATE`; too-many invites rejected; module/learning options recorded; 4-player practice seats 3 shadows with display-name notes; `zoomLevels` resized to the actual player count |
+| `test_game_creation_all_games.py` | 6 | The same creation rules across all 10 games on the create-new-game page (FCM, RNB, HLC, TGZ, IND, AQY, BUS, CNS, WEB, KFW), each with its own create endpoint: valid invite → `WAITING`; no self-invite; no nonexistent invite; too-many invites rejected (games using `SF_validatePlayers`); practice game auto-starts `ACTIVE` with shadows; GET rejected. Extra per-game POST fields are held in a per-game config. |
+| `test_join_game.py` | 10 | `joinGame` lifecycle for RNB: GET rejected; joining a missing game; already joined; creator blacklist; full invite-only `WAITING` game rejects a stranger; joining the last seat starts the game `ACTIVE`; `vacate` deletes the game when the last player leaves but is refused on an `ACTIVE` game; `decline` of the last invite returns the game to `AVAILABLE`; `deleteTrgGame` is creator-only. `django_q.tasks.async_task` is patched. |
 | `test_availability.py` | 10 | `record_player_availability_for_turn_change` and friends: hour bucketing across midnight, partial-start-hour exclusion, actor-only credit, rewind/redo handling, anchor advance, training-game exclusion |
-| `test_shared_functions.py` | 32 | Kickout / flexi-time maths, `SF_serializeGame` flags, tournament round creation (byes, MG top-14 selection, TL lives), shared game-creation helpers (`SF_validatePlayers`, `SF_setupTrainingGameShadows`) |
+| `test_shared_functions.py` | 38 | Kickout / flexi-time maths, `SF_serializeGame` flags, tournament round creation (byes, MG top-14 selection, TL lives), shared game-creation helpers (`SF_validatePlayers` empty/order/cap/creator/duplicate handling, `SF_setupTrainingGameShadows` default + explicit names) |
 | `test_shared_notifications.py` | 7 | `shouldSendEmail`: shadow/bot rejection, unconfirmed email, turn-email suppression for live games, stop-email windows, per-notification-type preferences |
 | `test_shared_refs.py` | 47 | Tournament round names, winner HTML, pace strings, points-for-position tables, elapsed-time formatting, round-data sorting |
 | `test_tourny_generator.py` | 15 | `tournyGenerator`: multi-game 4p schedules (unique pairings), round-2 group splitting (first/last 7 of 14), `_compute_game_groups` grouping + mini leftovers |
@@ -46,7 +48,7 @@ Notes:
 | `test_fcm_reset.py` | 5 | Admin "Reset AI": a reset-flagged save replaces `startingMap` and clears the discarded game's rewind stack; the map-sync drift guard still rejects a changed board on an ordinary save, and still rejects a non-admin claiming `resetGame` |
 | `test_admin_webhook_guard.py` | 2 | `SN_sendAdminErrorMessage` never posts to the admin Discord webhook while Django is on a test database — directly, and via the FCM map-sync rejection path that prompted it |
 
-202 tests total (git count may drift slightly as tests are added).
+233 tests total (git count may drift slightly as tests are added).
 
 ## Conventions
 

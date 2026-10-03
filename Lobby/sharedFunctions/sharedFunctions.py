@@ -1295,6 +1295,9 @@ def SF_validatePlayers(request, usernames, max_players, allow_creator=True):
 
     if not usernames:
         return []
+    # De-duplicate first so a username typed into two invite boxes is not counted
+    # twice towards the cap or invited twice.
+    usernames = list(dict.fromkeys(usernames))
     existing_users = User.objects.filter(username__in=usernames)
     existing_usernames = set(user.username for user in existing_users)
     valid_players = []
