@@ -154,7 +154,7 @@
         var maxPlayers = parseInt(document.getElementById("playerNumber").value);
         for (var i = 2; i <= 6; i++) {
             var row = document.getElementById("selPlayer" + i);
-            if (row) row.style.display = i < maxPlayers ? "block" : "none";
+            if (row) row.style.display = i <= maxPlayers ? "block" : "none";
         }
     }
     document.addEventListener("DOMContentLoaded", function () {
