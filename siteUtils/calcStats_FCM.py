@@ -951,11 +951,22 @@ def count_module_usage(rows):
         "MOVIE_STARS": MOVIE_STARS,
         "NIGHT_SHIFT_MANAGER": NIGHT_SHIFT_MANAGER,
     }
-    for module_name, module_value in modules.items():
-        game_ids = [
-            row[0]
-            for row in filter_by_starting_options(rows, module_value, include=True)
-        ]
+    # One pass over the rows instead of one scan per module (the old code walked the full row
+    # list 21 times). The set of matching modules is cached per distinct startingOptions string,
+    # and ids are still appended in row order, so the output lists are unchanged.
+    game_ids_by_module = {module_name: [] for module_name in modules}
+    matches_cache = {}
+    for row in rows:
+        starting_options = row[1] or ""
+        matched = matches_cache.get(starting_options)
+        if matched is None:
+            matched = [name for name, value in modules.items() if has_option(starting_options, value)]
+            matches_cache[starting_options] = matched
+        game_id = row[0]
+        for module_name in matched:
+            game_ids_by_module[module_name].append(game_id)
+
+    for module_name, game_ids in game_ids_by_module.items():
         module_counts[f"finished_games_{module_name}"] = len(game_ids)
         module_counts[f"game_ids_{module_name}"] = game_ids  # Get a list of game IDs
 
