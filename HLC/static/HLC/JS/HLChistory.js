@@ -836,6 +836,7 @@ var Log = {
 						var logIndex = model.logs.indexOf(item)
 						div.attr("id", "entry" + String(logIndex))
 						div.addClass("logReplay")
+						if (logIndex === replay.replayStep) div.addClass("logReplayCurrent")
 						div.on("click", { logIndex: logIndex }, function () {
 							replay.goToReplayStep(logIndex)
 						})

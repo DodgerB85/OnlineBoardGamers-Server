@@ -1,5 +1,18 @@
 // Rebuilds the game from the stored history, one log entry at a time, and lets you step through it.
 // Only the *_core functions are used here, so nothing depends on the current player or the live board.
+// The player index on a stored entry can be null or -1 - the server writes those, and the history
+// renderer has always tolerated it. NB null >= 0 is true, so it has to be checked explicitly
+function isUsablePlayerIndex(playerIndex) {
+	if (playerIndex == null) return false
+	if (playerIndex < 0 || playerIndex >= M.players.length) return false
+	return true
+}
+
+function getLogPlayerName(playerIndex) {
+	if (!isUsablePlayerIndex(playerIndex)) return ""
+	return M.players[playerIndex].name
+}
+
 var replay = {
 	init: function (model) {
 		this.model = model
@@ -38,13 +51,15 @@ var replay = {
 			await this.generateReplayData()
 
 			this.updateReplayArea()
-			$("body").addClass("replayMode")
+			$("body").addClass("greyBackground")
+			$("body").removeClass("blueBackground")
 
 			this.generatingData = false
 		} else {
 			this.showingReplay = false
 			this.replayData.splice(0)
-			$("body").removeClass("replayMode")
+			$("body").removeClass("greyBackground")
+			$("body").addClass("blueBackground")
 			$("#replayArea").empty()
 
 			M = Model.import(decompressObjectFromDB(this.endReplayResetData))
@@ -89,8 +104,6 @@ var replay = {
 				this.advanceTurnOrder(entry.action, entry.player)
 			}
 
-			// Keep a growing history so every snapshot only holds the entries up to this point
-			M.logs.push({ player: entry.player, action: entry.action, param: entry.param, timestamp: entry.timestamp })
 			this.replayData.push(compressObjectToDB(M.export()))
 
 			if (i % 5 === 0 && pBarEl != null) {
@@ -112,7 +125,6 @@ var replay = {
 			this.setgameflowVars(entry.action)
 			this.performReplayAction(entry.action, entry.player, entry.param)
 			this.advanceTurnOrder(entry.action, entry.player)
-			M.logs.push({ player: entry.player, action: entry.action, param: entry.param, timestamp: entry.timestamp })
 		}
 	},
 
@@ -146,8 +158,9 @@ var replay = {
 
 		var m = new Model()
 		m.start({ players: names, colours: colours, trackColours: trackColours, displayNames: displayNames })
-		// The walk starts with an empty history, and grows it one entry per step
-		m.logs = []
+// The history is kept whole for the whole replay, so the history tab always shows the game.
+			// Only the board state steps. Copied because the walk must not be able to alter it
+			m.logs = [...this.originalLogs]
 
 		M = m
 		C.model = m
@@ -254,6 +267,10 @@ var replay = {
 	// Each action is handled by the same model mutation the live game uses, just without the history or the UI
 	performReplayAction: function (action, playerIndex, param) {
 		var i = 0
+
+		// These act on one specific player, so a bad index means there is nothing to replay for them
+		var PLAYER_ACTIONS = [Log.FACTORY_SETUP, Log.RESEARCH, Log.SET_FOCUS, Log.FACTORY_BUILD, Log.PLAY_CARD, Log.SALES_V2, Log.SALES]
+		if (PLAYER_ACTIONS.includes(action) && !isUsablePlayerIndex(playerIndex)) return
 
 		if (action === Log.FACTORY_SETUP) this.replayFactorySetup(playerIndex, param)
 		else if (action === Log.RESEARCH) this.replayResearch(playerIndex, param)
@@ -584,7 +601,7 @@ var replay = {
 		// Show what this step is
 		var entry = this.originalLogs[this.replayStep]
 		var entryDiv = $('<div class="replayHistoryEntry">')
-		var entryName = entry.player >= 0 && entry.player < M.players.length ? M.players[entry.player].name : ""
+		var entryName = getLogPlayerName(entry.player)
 		entryDiv.append(Log.giveFullText(entryName, entry.action, entry.param))
 		$("#replayArea").append(entryDiv)
 	},

@@ -1320,11 +1320,26 @@ body.noassistance #assistancePlayers {
 	border: 1px dashed black;
 }
 
-body.replayMode #actions {
+.greyBackground {
+	background-color: lightgray;
+	transition: background-color 1s ease-in-out;
+}
+
+.blueBackground {
+	background-color: #d4eafd;
+	transition: background-color 1s ease-in-out;
+}
+
+body.greyBackground #actions {
 	display: none;
 }
 
 #history .logReplay:hover {
 	cursor: pointer;
 	background-color: lightyellow;
+}
+
+#history .logReplayCurrent {
+	border: 2px solid darkgreen;
+	background-color: #e8f5e9;
 }
