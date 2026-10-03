@@ -84,36 +84,40 @@ function localCastVote(topic) {
 
 <template>
 	<!-- BUG REPORT -->
-	<div id="bugReport" v-if="store.viewSettings.showBug">
-		<h1>Bug Report</h1>
-		<h2 class="errorText" v-if="store.gameMessages.bugErrorText !== ''" v-html="store.gameMessages.bugErrorText"></h2>
-		<p>
-			Please submit a bug report if you encounter any issues, giving as much detail as possible.
-			<br />
-			The game data will be submitted along with your report.
-		</p>
-		<div><textarea cols="150" rows="10" v-model="bugReportText"></textarea></div>
-		<div>
-			<button class="actionsLineButton" @click="submitBug" :disabled="submittingBug">
-				<span v-if="submittingBug">Submitting Bug Report...</span>
-				<span v-else>Submit</span>
-			</button>
-			<button class="actionsLineButton" @click="toggleBug">Cancel</button>
+	<transition name="slidePanel">
+		<div id="bugReport" v-if="store.viewSettings.showBug">
+			<h1>Bug Report</h1>
+			<h2 class="errorText" v-if="store.gameMessages.bugErrorText !== ''" v-html="store.gameMessages.bugErrorText"></h2>
+			<p>
+				Please submit a bug report if you encounter any issues, giving as much detail as possible.
+				<br />
+				The game data will be submitted along with your report.
+			</p>
+			<div><textarea cols="150" rows="10" v-model="bugReportText"></textarea></div>
+			<div>
+				<button class="actionsLineButton" @click="submitBug" :disabled="submittingBug">
+					<span v-if="submittingBug">Submitting Bug Report...</span>
+					<span v-else>Submit</span>
+				</button>
+				<button class="actionsLineButton" @click="toggleBug">Cancel</button>
+			</div>
 		</div>
-	</div>
+	</transition>
 
 	<!-- NOTES -->
-	<div id="notesBox" v-if="store.viewSettings.showNotes">
-		<h2>Personal game notes</h2>
-		<p>Only you can see these notes</p>
-		<p v-if="store.gameMessages.notesErrorText" class="errorText" role="alert">{{ store.gameMessages.notesErrorText }}</p>
-		<div><textarea cols="120" rows="10" v-model="personal.notes" maxlength="5000" aria-label="Personal game notes"></textarea></div>
-		<div>
-			<button class="actionsLineButton" :disabled="store.viewSettings.isSavingNotes" @click="IO.saveNotes">{{ store.viewSettings.isSavingNotes ? 'Saving…' : 'Save' }}</button>
-			<button class="actionsLineButton" :disabled="store.viewSettings.isSavingNotes" @click="clearNotes">Clear</button>
-			<button class="actionsLineButton" @click="toggleNotes">Close</button>
+	<transition name="slidePanel">
+		<div id="notesBox" v-if="store.viewSettings.showNotes">
+			<h2>Personal game notes</h2>
+			<p>Only you can see these notes</p>
+			<p v-if="store.gameMessages.notesErrorText" class="errorText" role="alert">{{ store.gameMessages.notesErrorText }}</p>
+			<div><textarea cols="120" rows="10" v-model="personal.notes" maxlength="5000" aria-label="Personal game notes"></textarea></div>
+			<div>
+				<button class="actionsLineButton" :disabled="store.viewSettings.isSavingNotes" @click="IO.saveNotes">{{ store.viewSettings.isSavingNotes ? 'Saving…' : 'Save' }}</button>
+				<button class="actionsLineButton" :disabled="store.viewSettings.isSavingNotes" @click="clearNotes">Clear</button>
+				<button class="actionsLineButton" @click="toggleNotes">Close</button>
+			</div>
 		</div>
-	</div>
+	</transition>
 
 	<!-- CHAT -->
 	<div id="wholeChat" v-if="store.viewSettings.showChat" role="region" aria-label="Game chat">
@@ -158,11 +162,13 @@ function localCastVote(topic) {
 	</div>
 
 	<!-- Info -->
-	<div id="info" v-if="store.viewSettings.showInfo">
-		<div class="utilityHeading infoHeading"><b>Game information</b><button @click="store.viewSettings.showInfo = false" aria-label="Close game information">×</button></div>
-		<PlayerTable :minimiseInfoForMainScreen="false" />
-		<p><b>Game name:</b> {{ store.gameName }}</p>
-	</div>
+	<transition name="slidePanel">
+		<div id="info" v-if="store.viewSettings.showInfo">
+			<div class="utilityHeading infoHeading"><b>Game information</b><button @click="store.viewSettings.showInfo = false" aria-label="Close game information">×</button></div>
+			<PlayerTable :minimiseInfoForMainScreen="false" />
+			<p><b>Game name:</b> {{ store.gameName }}</p>
+		</div>
+	</transition>
 </template>
 
 <style scoped>
@@ -188,6 +194,19 @@ function localCastVote(topic) {
 	margin-bottom: 10px;
 	border: 2px solid black;
 	background-color: lightblue;
+}
+/* max-height rather than a fixed height, so the variable-height panels (info)
+   cannot be clipped by a magic number. */
+.slidePanel-enter-active,
+.slidePanel-leave-active {
+	transition: all 0.2s ease-in-out, opacity 0.2s ease-in-out;
+	overflow: hidden;
+	max-height: 2000px;
+}
+.slidePanel-enter-from,
+.slidePanel-leave-to {
+	opacity: 0;
+	max-height: 0;
 }
 #wholeChat {
 	position: fixed;
