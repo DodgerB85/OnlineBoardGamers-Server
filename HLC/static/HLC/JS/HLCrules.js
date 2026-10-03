@@ -23,6 +23,7 @@ var Rules = (function () {
 	var self = {}
 
 	self.isSimulPhase = function () {
+		if (replay.showingReplay) return false
 		if (M.trainingGame) return false
 		if (M.gameFlow.turn === 0) return true
 		else if (M.gameFlow.phase === PHASE_BUILD_FACTORY) return true
@@ -30,6 +31,7 @@ var Rules = (function () {
 	}
 
 	self.canPlay = function () {
+		if (replay.showingReplay) return false
 		if (global.haltPlay === true) return false
 		if (global.name === "BotKickStarter") {
 			M.gameFlow.currentPlayer = global.pov

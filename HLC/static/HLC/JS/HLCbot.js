@@ -103,19 +103,7 @@ var Bot = (function () {
 				M.gameEnded = 3
 
 				// Find winner. Sort players by sakes focus, then move highgest money to front
-				M.gameFlow.turnOrder = [...M.gameFlow.unalteredTurnOrder]
-				var moneyInSalesOrder = []
-				for (i = 0; i < M.gameFlow.turnOrder.length; i++) {
-					moneyInSalesOrder.push([M.gameFlow.turnOrder[i], M.players[M.gameFlow.turnOrder[i]].money])
-				}
-				moneyInSalesOrder.sort(function (a, b) {
-					return b[1] - a[1]
-				})
-
-				for (i = 0; i < M.players.length; i++) {
-					M.gameFlow.unalteredTurnOrder[i] = moneyInSalesOrder[i][0]
-					M.gameFlow.turnOrder[i] = moneyInSalesOrder[i][0]
-				}
+				C.actionSortPlayersByMoney_core()
 
 				M.log(Log.GAME_END, [M.players[M.gameFlow.unalteredTurnOrder[0]].name, M.gameEnded])
 				global.winner = M.players[M.gameFlow.unalteredTurnOrder[0]].name
@@ -187,19 +175,7 @@ var Bot = (function () {
 			M.gameEnded = 3
 
 			// Find winner. Sort players by sakes focus, then move highgest money to front
-			M.gameFlow.turnOrder = [...M.gameFlow.unalteredTurnOrder]
-			var moneyInSalesOrder = []
-			for (i = 0; i < M.gameFlow.turnOrder.length; i++) {
-				moneyInSalesOrder.push([M.gameFlow.turnOrder[i], M.players[M.gameFlow.turnOrder[i]].money])
-			}
-			moneyInSalesOrder.sort(function (a, b) {
-				return b[1] - a[1]
-			})
-
-			for (i = 0; i < M.players.length; i++) {
-				M.gameFlow.unalteredTurnOrder[i] = moneyInSalesOrder[i][0]
-				M.gameFlow.turnOrder[i] = moneyInSalesOrder[i][0]
-			}
+			C.actionSortPlayersByMoney_core()
 
 			M.log(Log.GAME_END, [M.players[M.gameFlow.unalteredTurnOrder[0]].name, M.gameEnded])
 			global.winner = M.players[M.gameFlow.unalteredTurnOrder[0]].name

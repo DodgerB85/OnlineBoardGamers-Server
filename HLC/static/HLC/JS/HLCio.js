@@ -316,6 +316,8 @@ var IO = {
 
 		var FCIATT = player.factory.factoryComponenetIndexesAddedThisTurn
 		var FCNATT = player.factory.factoryComponentNamesAddedThisTurn
+		// [placements[], expansion[]] - only used for the replay, so the server just copies it into the history
+		var factoryDetail = [player.factory.factoryPlacementsAddedThisTurn, player.factory.factoryExpansionAddedThisTurn]
 		var FDBEdeco = decompressObjectFromDB(player.factory.factoryDataBeforeExpansion)
 		var FDBE = []
 		var ThisAC = []
@@ -340,7 +342,7 @@ var IO = {
 			body: JSON.stringify({
 				latestUpdate: global.latestUpdate, // USED
 				action: "saveFactoryMove", // USED
-				other: compressObjectToDB([FDBE, FCIATT, FCNATT, ThisAC]),
+				other: compressObjectToDB([FDBE, FCIATT, FCNATT, ThisAC, factoryDetail]),
 				data: compressObjectToDB(player.factory.export()), // USED
 				idx: idxToUse,
 				gameID: global.gameID,
@@ -667,6 +669,10 @@ var IO = {
 
 	loadRewind: function (controller) {
 		if (global.alreadyRewinding) return
+		if (replay.showingReplay) {
+			if ($("#replayArea").html().slice(0, 8) !== "You cann") $("#replayArea").prepend(gettext("You cannot rewind during replay") + "<BR/>")
+			return
+		}
 		global.alreadyRewinding = true
 		if (M.gameEnded > 0) {
 			$("#wholeMainArea").fadeIn("slow")

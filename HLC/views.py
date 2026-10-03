@@ -182,6 +182,8 @@ def _processHLCturn(request):
         FCIATT = other[1]
         FCNATT = other[2]
         ThisAC = other[3]
+        # Compressed replay detail [placements, expansion]. Absent on older clients
+        FACTORY_DETAIL = other[4] if len(other) > 4 else None
 
         # CHECK IF WE CAN ACCEPT THE AVAILABLE COMPONENTS FROM THE PLAYER
         # if the player's name is at idx 0 of currnet players in game AND in DB
@@ -224,7 +226,7 @@ def _processHLCturn(request):
                 # otherwise it is valid
 
         # Now it is valid for this time, so store the data
-        dataToInsert = [FDBE, FCIATT, FCNATT, incomingFactoryDataRaw]
+        dataToInsert = [FDBE, FCIATT, FCNATT, incomingFactoryDataRaw, FACTORY_DETAIL]
         presenter.updateSingleMove(name, LZS.compressToEncodedURIComponent(json.dumps(dataToInsert)))
 
         currentGame.save()
@@ -263,6 +265,8 @@ def _processHLCturn(request):
                 FCIATT = moveData[1]
                 FCNATT = moveData[2]
                 FAC_DATA_RAW = moveData[3]
+                # Compressed replay detail. Absent on older clients
+                FACTORY_DETAIL = moveData[4] if len(moveData) > 4 else None
                 # Reset the component amounts
                 DBavailableComponents = DBgameDataRaw[0].copy()
 
@@ -294,24 +298,27 @@ def _processHLCturn(request):
                 DBgameDataRaw[0] = DBavailableComponents
 
                 # INSERT HISTORY
-                # STORES PLACE IN factpryComponents ARRAY TO ALLOW HIGHLIGHTING LATER
-                # store the length of FCNATT, and subtract that from the length of facComp to get index. Or store current length
-                # 3 = players           X = select player                       0 =fac
-                # THIS LINE WAS REMOVED FOR BEING USELESS
-                # DBgameDataRaw[3][presenter.seatPosition(currentPlayersList[0])][0][4]
-
-                # DBgameDataRaw[3][seatPosition][0][4]
-
-                DBgameDataRaw[15].append(
-                    [
-                        presenter.seatPosition(currentPlayersList[0]),
-                        13,
+                # New style stores the compressed placement detail so the game can be replayed.
+                # Old style only stores the component counts, which is enough to display the entry.
+                if FACTORY_DETAIL is not None:
+                    DBgameDataRaw[15].append(
                         [
-                            len(FCNATT),
-                            len(DBgameDataRaw[3][presenter.seatPosition(currentPlayersList[0])][0][4]),
-                        ],
-                    ]
-                )
+                            presenter.seatPosition(currentPlayersList[0]),
+                            13,
+                            FACTORY_DETAIL,
+                        ]
+                    )
+                else:
+                    DBgameDataRaw[15].append(
+                        [
+                            presenter.seatPosition(currentPlayersList[0]),
+                            13,
+                            [
+                                len(FCNATT),
+                                len(DBgameDataRaw[3][presenter.seatPosition(currentPlayersList[0])][0][4]),
+                            ],
+                        ]
+                    )
                 # DBgameDataRaw[16].append((int(time.time())*1000 - (2*len(currentPlayersList)) )- DBgameDataRaw[15][0])
                 DBgameDataRaw[16].append(DBgameDataRaw[16][len(DBgameDataRaw[16]) - 1] + (15 - len(currentPlayersList)))
 

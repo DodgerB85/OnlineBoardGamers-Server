@@ -109,6 +109,8 @@ var Controller = function (_model, _view) {
 
 	this.currentPlayer = function () {
 		if (M.sandboxMode) return this.model.players[global.pov]
+		// turnOrder is legitimately empty between phases (and while the replay is stepping through them)
+		if (this.model.gameFlow.turnOrder.length === 0) return this.model.players[this.model.gameFlow.currentPlayer]
 		if (M.trainingGame) return this.model.players[this.model.gameFlow.turnOrder[0]]
 
 		if (!Rules.isSimulPhase()) return this.model.players[this.model.gameFlow.turnOrder[0]]
@@ -330,53 +332,13 @@ var Controller = function (_model, _view) {
 				}
 			})
 
-			$(".piece").on("click", function (e) {
-				if (!M.piecesUsedInResearch.includes(this.id) && !(this.id.slice(0, 3) === "ACT" && parseInt(this.id.slice(4, 5)) !== C.currentPlayer().colour)) {
-					if (!(this.id.slice(0, 3) === "ACT" && parseInt(this.id.slice(3, 4)) === 4) && !(this.id.slice(0, 3) !== "ACT" && parseInt(this.id.slice(3, 4)) === 6)) {
-						var id = this.id
-						var track = this.id.slice(0, 3)
-						var originalPos = parseInt(this.id.slice(3, 4))
-						var colour = parseInt(this.id.slice(4, 5))
-						var trackToUse
-						if (track.slice(0, 2) === "TT") trackToUse = M.techTracks[parseInt(track.slice(2, 3))]
-						if (track === "ACT") trackToUse = M.assemblyCapacityTrack
-						// Remove from old pos
-						trackToUse[originalPos] = trackToUse[originalPos].filter(function (item) {
-							return item !== colour
-						})
-
-						// Add to new pos
-						trackToUse[originalPos + 1].push(colour)
-						M.piecesUsedInResearch.push(track + String(originalPos + 1) + String(colour))
-						$(".piece").off()
-
-						// Do punch clock
-						if (track !== "ACT" && originalPos + 1 === 4) M.punchClockNumber--
-						if (track !== "ACT" && originalPos + 1 === 6) M.punchClockNumber--
-						if (track === "ACT" && originalPos + 1 === 4) M.punchClockNumber--
-
-						// Recalc Stocks
-						if (track === "ACT") {
-							// Add stock back in to display dealerships
-							for (let i = 0; i < M.players.length; i++) {
-								// Each players dealershup produces vehicles accoeding to the assem capac track -- this is simply set to the correct max value
-								let factory = M.players[i].factory
-								for (let j = 0; j < factory.factoryComponents.length; j++) {
-									if (MAINLINES.includes(factory.factoryComponents[j][0])) {
-										for (let k = 0; k < M.assemblyCapacityTrack.length; k++) if (M.assemblyCapacityTrack[k].indexOf(M.players[i].colour) > -1) factory.factoryComponents[j][SL_IDX] = k + 1
-									}
-								}
-							}
+$(".piece").on("click", function (e) {
+					if (!M.piecesUsedInResearch.includes(this.id) && !(this.id.slice(0, 3) === "ACT" && parseInt(this.id.slice(4, 5)) !== C.currentPlayer().colour)) {
+						if (!(this.id.slice(0, 3) === "ACT" && parseInt(this.id.slice(3, 4)) === 4) && !(this.id.slice(0, 3) !== "ACT" && parseInt(this.id.slice(3, 4)) === 6)) {
+							C.actionPlaceResearchPiece(this.id.slice(0, 3), parseInt(this.id.slice(3, 4)), parseInt(this.id.slice(4, 5)))
 						}
-
-						// Add to history object
-						// colour of piece being moved, TT0 < index, or ACT < track
-						M.historyObj.push([colour, C.getTrackCompressedNumberFromID(track.slice(0, 3)), originalPos + 1, M.punchClockNumber])
-
-						V.render(-1)
 					}
-				}
-			})
+				})
 		}
 
 		// For any moved pieces, indicate whether it was yours or others
@@ -448,6 +410,44 @@ var Controller = function (_model, _view) {
 		if (researchPonts === 0 || global.debug) {
 			this.addFinishTurnButton(this.model.gameFlow.turn, this.model.gameFlow.phase, gettext("End Turn"))
 			$("#finishTurnButton").show()
+		}
+	}
+
+	this.actionPlaceResearchPiece = function (track, originalPos, colour) {
+		this.actionPlaceResearchPiece_core(track, originalPos, colour)
+
+		$(".piece").off()
+
+		// Add to history object
+		// colour of piece being moved, TT0 < index, or ACT < track
+		M.historyObj.push([colour, this.getTrackCompressedNumberFromID(track), originalPos + 1, M.punchClockNumber])
+
+		V.render(-1)
+	}
+
+	// track is TT0-TT4 or ACT. originalPos is the position the piece is leaving. Used by the replay.
+	this.actionPlaceResearchPiece_core = function (track, originalPos, colour) {
+		var trackToUse
+		if (track.slice(0, 2) === "TT") trackToUse = M.techTracks[parseInt(track.slice(2, 3))]
+		if (track === "ACT") trackToUse = M.assemblyCapacityTrack
+		// Remove from old pos
+		trackToUse[originalPos] = trackToUse[originalPos].filter(function (item) {
+			return item !== colour
+		})
+
+		// Add to new pos
+		trackToUse[originalPos + 1].push(colour)
+		M.piecesUsedInResearch.push(track + String(originalPos + 1) + String(colour))
+
+		// Do punch clock
+		if (track !== "ACT" && originalPos + 1 === 4) M.punchClockNumber--
+		if (track !== "ACT" && originalPos + 1 === 6) M.punchClockNumber--
+		if (track === "ACT" && originalPos + 1 === 4) M.punchClockNumber--
+
+		// Recalc Stocks
+		if (track === "ACT") {
+			// Add stock back in to display dealerships
+			this.actionRefreshMainlineStock_core()
 		}
 	}
 
@@ -571,12 +571,22 @@ var Controller = function (_model, _view) {
 		var c = e.data.controller
 		var pos = $(e.currentTarget).data("position")
 		var player = c.currentPlayer()
-		player.gantt = 0
-		c.model.newEngFocusOrder[pos] = player.arrayPos
-		M.alreadySetFocus = 1
-		M.log(Log.SET_FOCUS, pos)
+
+		c.actionChooseFocus(player, pos)
 
 		C.startActions()
+	}
+
+	this.actionChooseFocus = function (player, pos) {
+		this.actionChooseFocus_core(player, pos)
+		M.log(Log.SET_FOCUS, pos)
+	}
+
+	// The player is passed in, so this does not need currentPlayer(). Used by the replay.
+	this.actionChooseFocus_core = function (player, pos) {
+		player.gantt = 0
+		this.model.newEngFocusOrder[pos] = player.arrayPos
+		M.alreadySetFocus = 1
 	}
 
 	/**************************************************************************************************************
@@ -649,6 +659,8 @@ var Controller = function (_model, _view) {
 						// Do nothing
 					}
 				}
+				// Compressed replay detail. MUST be captured here, while the indexes are still the pre expansion ones
+				factory.factoryPlacementsAddedThisTurn = factory.getPlacementsAddedThisTurn()
 				if (factory.factoryDataBeforeExpansion.length === 0) {
 					factory.factoryDataBeforeExpansion.push(factory.export())
 					factory.factoryDataBeforeExpansion.push([...M.availableComponents])
@@ -931,14 +943,7 @@ var Controller = function (_model, _view) {
 			M.historyObjV2.push([0, -1, -1])
 		} else {
 			M.historyObj.push(e.data.dealership[MW_IDX][0])
-			let HISTindex = e.data.dealership[MW_IDX][0]
-			const MWsize = e.data.dealership[MW_IDX][2]
-			if (MWsize === 0 && e.data.dealership[MW_IDX][1] === 1) HISTindex--
-			else if (MWsize === 0 && e.data.dealership[MW_IDX][1] === 2) HISTindex -= 8
-			else if (MWsize === 1) HISTindex--
-			else if (MWsize === 2) HISTindex -= 2
-			M.historyObjV2.push([1, HISTindex, MWsize])
-			if (MWsize === 0 && ![0, 2].includes(e.data.dealership[MW_IDX][1])) M.historyObjV2[M.historyObjV2.length - 1].push(1)
+			M.historyObjV2.push(this.model.makeMWHistoryParam(1, e.data.dealership[MW_IDX][0], e.data.dealership[MW_IDX][2], e.data.dealership[MW_IDX][1]))
 
 			C.enableSellingForDealership(e.data.dealership)
 		}
@@ -1053,6 +1058,55 @@ var Controller = function (_model, _view) {
 
 	this.actionSales = function (MBindex, dealership, autoSale) {
 		var p = C.currentPlayer()
+		var res = this.actionSales_core(p, MBindex, dealership)
+		var histSales = res[0]
+		var histTotalIncome = res[1]
+
+		// NEEDED TO SOLVE ENDLESS LOOP ISSUE (but this alone can prevent final sale. Fix in RULES skip)
+		if (histTotalIncome === 0) autoSale = false
+
+		if (autoSale) {
+			// Must come from a placed MW
+			M.historyObj.push(dealership[0])
+			M.historyObj.push(dealership[MW_IDX][0])
+			M.historyObjV2.push(dealership[0])
+			M.historyObjV2.push(this.model.makeMWHistoryParam(1, dealership[MW_IDX][0], dealership[MW_IDX][2], dealership[MW_IDX][1]))
+		}
+		M.historyObj.push(histSales)
+		M.historyObj.push(histTotalIncome)
+		M.historyObjV2.push(histSales)
+		M.historyObjV2.push(histTotalIncome)
+
+		// If auto selling, add the history now
+		if (autoSale) {
+			M.historyObj.push(1)
+			M.historyObjV2.push(1)
+			//M.log(Log.SALES, [...M.historyObj], M.gameFlow.turnOrder[0])
+			M.log(Log.SALES_V2, [...M.historyObjV2], M.gameFlow.turnOrder[0])
+			M.historyObj.splice(0, M.historyObj.length)
+			M.historyObjV2.splice(0)
+			M.justAutoSold = true
+		}
+
+		// End turn / undo
+		V.render()
+
+		// remove highlights
+		$(".marketSelectable").remove()
+		$(".marketSelectable").off()
+		$(".marketIneligible").remove()
+		$(".marketIneligible").off()
+
+		$("#actions").empty()
+		$("#actions").append("Sales Complete")
+
+		C.addResetButton()
+
+		C.addFinishTurnButton(M.gameFlow.turn, M.gameFlow.phase, gettext("End turn"))
+	}
+
+	// The player is passed in, so this does not need currentPlayer(). Returns [histSales, histTotalIncome]. Used by the replay.
+	this.actionSales_core = function (p, MBindex, dealership) {
 		var stock = p.factory.getStockForDealership(dealership)
 
 		var histTotalIncome = 0
@@ -1098,55 +1152,7 @@ var Controller = function (_model, _view) {
 			}
 		}
 
-		// NEEDED TO SOLVE ENDLESS LOOP ISSUE (but this alone can prevent final sale. Fix in RULES skip)
-		if (histTotalIncome === 0) autoSale = false
-
-		if (autoSale) {
-			// Must come from a placed MW
-			M.historyObj.push(dealership[0])
-			M.historyObj.push(dealership[MW_IDX][0])
-			M.historyObjV2.push(dealership[0])
-			let HISTindex = dealership[MW_IDX][0]
-			const MWsize = dealership[MW_IDX][2]
-			if (MWsize === 0 && dealership[MW_IDX][1] === 1) HISTindex--
-			else if (MWsize === 0 && dealership[MW_IDX][1] === 2) HISTindex -= 8
-			else if (MWsize === 1) HISTindex--
-			else if (MWsize === 2) HISTindex -= 2
-
-			M.historyObjV2.push([1, HISTindex, MWsize])
-			if (MWsize === 0 && ![0, 2].includes(dealership[MW_IDX][1])) M.historyObjV2[M.historyObjV2.length - 1].push(1)
-		}
-		M.historyObj.push(histSales)
-		M.historyObj.push(histTotalIncome)
-		M.historyObjV2.push(histSales)
-		M.historyObjV2.push(histTotalIncome)
-
-		// If auto selling, add the history now
-		if (autoSale) {
-			M.historyObj.push(1)
-			M.historyObjV2.push(1)
-			//M.log(Log.SALES, [...M.historyObj], M.gameFlow.turnOrder[0])
-			M.log(Log.SALES_V2, [...M.historyObjV2], M.gameFlow.turnOrder[0])
-			M.historyObj.splice(0, M.historyObj.length)
-			M.historyObjV2.splice(0)
-			M.justAutoSold = true
-		}
-
-		// End turn / undo
-		V.render()
-
-		// remove highlights
-		$(".marketSelectable").remove()
-		$(".marketSelectable").off()
-		$(".marketIneligible").remove()
-		$(".marketIneligible").off()
-
-		$("#actions").empty()
-		$("#actions").append("Sales Complete")
-
-		C.addResetButton()
-
-		C.addFinishTurnButton(M.gameFlow.turn, M.gameFlow.phase, gettext("End turn"))
+		return [histSales, histTotalIncome]
 	}
 
 	/**************************************************************************************************************
@@ -1209,13 +1215,11 @@ var Controller = function (_model, _view) {
 	this.clickedOnQ = function (e) {
 		var Q = parseInt(this.id.slice(1, 2))
 		var cardName = $(e.currentTarget).data("card").slice(4)
-		var cardData = getCardDataFromCardName(cardName)
-		M.alreadyPlayedCards.push([C.currentPlayer().colour, Q, cardData, cardName])
-		// Remove card from player
+		var player = C.currentPlayer()
+		var cardIndex = C.currentPlayer.pcap
 
-		M.log(Log.PLAY_CARD, [Q])
+		this.actionPlayCard(player, Q, cardName, cardIndex)
 
-		C.currentPlayer().playerCards.splice(C.currentPlayer.pcap, 1)
 		delete C.currentPlayer.pcap
 
 		V.render(-1)
@@ -1228,6 +1232,23 @@ var Controller = function (_model, _view) {
 		C.addResetButton()
 
 		C.addFinishTurnButton(M.gameFlow.turn, M.gameFlow.phase, gettext("End Turn"))
+	}
+
+	this.actionPlayCard = function (player, Q, cardName, cardIndex) {
+		var cardNum = player.playerCards[cardIndex]
+
+		this.actionPlayCard_core(player, Q, cardName, cardIndex)
+
+		// The cardNum is only needed by the replay
+		M.log(Log.PLAY_CARD, [Q, cardNum])
+	}
+
+	// The player and card index are passed in, so this does not need currentPlayer(). Used by the replay.
+	this.actionPlayCard_core = function (player, Q, cardName, cardIndex) {
+		var cardData = getCardDataFromCardName(cardName)
+		M.alreadyPlayedCards.push([player.colour, Q, cardData, cardName])
+		// Remove card from player
+		player.playerCards.splice(cardIndex, 1)
 	}
 
 	/**************************************************************************************************************
@@ -1247,8 +1268,13 @@ var Controller = function (_model, _view) {
 
 		// Log action
 		if (this.model.gameFlow.phase === PHASE_FACTORY_SETUP) {
-			this.model.players[global.pov].factory.factoryComponenetIndexesAddedThisTurn.splice(0, this.model.players[global.pov].factory.factoryComponenetIndexesAddedThisTurn.length)
-			this.model.log(Log.FACTORY_SETUP, [])
+			var setupFactory = this.model.players[global.pov].factory
+			// [mainFactoryRotation, placements[], (1 only when the main factory is flipped)]
+			var setupParam = [setupFactory.mainFactoryRotation, setupFactory.getPlacementsAddedThisTurn()]
+			if (setupFactory.mainFactoryFlipped === 1) setupParam.push(1)
+			setupFactory.factoryComponenetIndexesAddedThisTurn.splice(0, setupFactory.factoryComponenetIndexesAddedThisTurn.length)
+			// Turn zero setup is simultaneous, so the acting player is not turnOrder[0]
+			this.model.log(Log.FACTORY_SETUP, setupParam, global.pov)
 		} else if (this.model.gameFlow.phase === PHASE_RESEARCH) {
 			this.model.log(Log.RESEARCH, [...this.model.historyObj], this.model.gameFlow.turnOrder[0])
 			this.model.historyObj.splice(0, this.model.historyObj.length)
@@ -1351,11 +1377,189 @@ var Controller = function (_model, _view) {
 		} else this.startActions()
 	}
 
+	/**************************************************************************************************************
+	 *
+	 * SHARED MODEL MUTATIONS - pure model changes, used by the live game and by the replay
+	 *
+	 **************************************************************************************************************/
+
+	// Each players dealershup produces vehicles accoeding to the assem capac track
+	// this is simply set to the correct max value
+	this.actionRefreshMainlineStock_core = function () {
+		for (var i = 0; i < M.players.length; i++) {
+			var factory = M.players[i].factory
+			for (var j = 0; j < factory.factoryComponents.length; j++) {
+				if (MAINLINES.includes(factory.factoryComponents[j][0])) {
+					for (var k = 0; k < M.assemblyCapacityTrack.length; k++) if (M.assemblyCapacityTrack[k].indexOf(M.players[i].colour) > -1) factory.factoryComponents[j][SL_IDX] = k + 1
+				}
+			}
+		}
+	}
+
+	// Which of the off board tech tracks wins the innovation contest.
+	// Returns [winnerIndex, innovations, maxPastMinMarker]
+	this.getWinningOffBoardTrack_core = function () {
+		var i = 0
+		var j = 0
+		var innovations = [0, 0, 0, 0, 0]
+		var maxPastMinMarker = [0, 0, 0, 0, 0]
+		for (i = 2; i <= 4; i++) {
+			var minTech = M.techTracks[i][7][1]
+			for (j = minTech + 1; j < M.techTracks[i].length - 1; j++) {
+				innovations[i] += M.techTracks[i][j].length * (j - minTech)
+				if (M.techTracks[i][j].length > 0) maxPastMinMarker[i] = j - M.techTracks[i][7][1]
+			}
+		}
+
+		var max = Math.max(...innovations)
+		var res = []
+		innovations.forEach(function (item, index) {
+			if (item === max && index >= 2) res.push(index)
+		})
+
+		if (res.length != 1) {
+			for (i = 0; i < maxPastMinMarker.length; i++) {
+				if (!res.includes(i)) maxPastMinMarker[i] = 0
+			}
+
+			var maxMaxPastMinMarker = Math.max(...maxPastMinMarker)
+			for (i = 0; i < res.length; i++) {
+				if (maxPastMinMarker[res[i]] < maxMaxPastMinMarker) res[i] = -1
+			}
+		}
+		// Now remove the -1s
+		res = res.filter(function (val) {
+			return val !== -1
+		})
+		if (res.length > 1) return [Math.min(...res), innovations, maxPastMinMarker]
+		return [res[0], innovations, maxPastMinMarker]
+	}
+
+	// Remove all market windows, bump the min demand of the obsolescence track and swap in the winning track.
+	// Returns the pieces needed to build the history entry
+	this.actionAdvanceExpectations_core = function () {
+		var i = 0
+		var j = 0
+
+		// Remove old sales windows from model
+		for (i = 0; i < M.players.length; i++) {
+			for (j = 0; j < M.players[i].factory.factoryComponents.length; j++) {
+				var component = M.players[i].factory.factoryComponents[j]
+				if (DEALERSHIPS.includes(component[0])) {
+					// reset sales window data
+					component[MW_IDX][0] = -1
+					component[MW_IDX][1] = -1
+					component[MW_IDX][2] = -1
+				}
+			}
+		}
+
+		var res = this.getWinningOffBoardTrack_core()
+		var winner = res[0]
+		var innovations = res[1]
+		var maxPastMinMarker = res[2]
+
+		var historyParam = []
+		// the colour of the old TT 0
+		historyParam.push(M.techTracks[M.obsolescenceMarkerDirection][7][0])
+		// the new value of the min demand
+		historyParam.push(M.techTracks[M.obsolescenceMarkerDirection][7][1] + 1)
+		// the off board innovation levels
+		historyParam.push([
+			[innovations[2], M.techTracks[2][7][0], maxPastMinMarker[2]],
+			[innovations[3], M.techTracks[3][7][0], maxPastMinMarker[3]],
+			[innovations[4], M.techTracks[4][7][0], maxPastMinMarker[4]],
+		])
+		// the colour of the winning tech track
+		historyParam.push(M.techTracks[winner][7][0])
+
+		// Now increase the min demand of the obs one by 1
+		M.techTracks[M.obsolescenceMarkerDirection][7][1]++
+
+		// Now swap the winning TT with the obs one
+		;[M.techTracks[M.obsolescenceMarkerDirection], M.techTracks[winner]] = [M.techTracks[winner], M.techTracks[M.obsolescenceMarkerDirection]]
+		// now push the old TT to the end (now in winner position)
+		M.techTracks.push([...M.techTracks[winner]])
+
+		// Now splice out the old one in the winner position
+		M.techTracks.splice(winner, 1)
+
+		// switch the obs marker
+		if (M.obsolescenceMarkerDirection === 1) M.obsolescenceMarkerDirection = 0
+		else M.obsolescenceMarkerDirection = 1
+
+		// the new obsmarker direction
+		historyParam.push(M.obsolescenceMarkerDirection)
+
+		return historyParam
+	}
+
+	// Apply the sparks from the cards played this turn, then convert every spark into demand.
+	// Returns the number of punch clocks used
+	this.actionShowCards_core = function (alreadyPlayedCards) {
+		var i = 0
+		var j = 0
+		var totalClocks = 0
+		for (i = 0; i < alreadyPlayedCards.length; i++) {
+			var clocks = alreadyPlayedCards[i][2][0]
+			// Take away clocks
+			M.punchClockNumber -= clocks
+			totalClocks += clocks
+
+			var Q = alreadyPlayedCards[i][1]
+			var cardData = alreadyPlayedCards[i][2]
+			for (j = 1; j < cardData.length; j++) {
+				var Xcoord = 0
+				var Ycoord = 0
+				if (Q === 1) Ycoord = 4
+				if (Q === 4) Xcoord = 4
+				if (Q === 2) {
+					Xcoord = 4
+					Ycoord = 4
+				}
+				Xcoord = Xcoord + cardData[j][0]
+				Ycoord = Ycoord + cardData[j][1]
+				var index = M.getIndexForMBcoord([Xcoord, Ycoord])
+				M.marketBoard[index][cardData[j][2]]++
+			}
+		}
+
+		// Sparks add Demand
+		for (i = 0; i < M.marketBoard.length; i++) {
+			for (j = 0; j < 3; j++) {
+				var vehiclesToAdd = M.marketBoard[i][j]
+				var maxVehicles = M.marketBoard[i][j] * 2
+				while (M.marketBoard[i][j + 3] < maxVehicles && vehiclesToAdd > 0) {
+					M.marketBoard[i][j + 3]++
+					vehiclesToAdd--
+				}
+			}
+		}
+
+		return totalClocks
+	}
+
+	// Sort the players into sales order (highest money first). The winner is now turnOrder[0]
+	this.actionSortPlayersByMoney_core = function () {
+		var i = 0
+		M.gameFlow.turnOrder = [...M.gameFlow.unalteredTurnOrder]
+		var moneyInSalesOrder = []
+		for (i = 0; i < M.gameFlow.turnOrder.length; i++) {
+			moneyInSalesOrder.push([M.gameFlow.turnOrder[i], M.players[M.gameFlow.turnOrder[i]].money])
+		}
+		moneyInSalesOrder.sort(function (a, b) {
+			return b[1] - a[1]
+		})
+
+		for (i = 0; i < M.players.length; i++) {
+			M.gameFlow.unalteredTurnOrder[i] = moneyInSalesOrder[i][0]
+			M.gameFlow.turnOrder[i] = moneyInSalesOrder[i][0]
+		}
+	}
+
 	this.moveToNextPhase = function () {
 		var i = 0
 		var j = 0
-		var k = 0
-		var factory
 
 		// clear all ready players
 		this.model.gameFlow.ready.splice(0, this.model.gameFlow.ready.length)
@@ -1440,14 +1644,8 @@ var Controller = function (_model, _view) {
 					this.model.punchClockNumber -= clockReduction
 					ganttHist.push([this.model.players[i].name, Rules.getNumberOfPlanningOffices(this.model.players[i]), clockReduction])
 				}
-				// Each players dealershup produces vehicles accoeding to the assem capac track
-				factory = this.model.players[i].factory
-				for (j = 0; j < factory.factoryComponents.length; j++) {
-					if (MAINLINES.includes(factory.factoryComponents[j][0])) {
-						for (k = 0; k < this.model.assemblyCapacityTrack.length; k++) if (this.model.assemblyCapacityTrack[k].indexOf(this.model.players[i].colour) > -1) factory.factoryComponents[j][SL_IDX] = k + 1
-					}
-				}
 			}
+			this.actionRefreshMainlineStock_core()
 			this.model.log(Log.INCREASE_GANTT, [...ganttHist], -1)
 
 			// Each players dealershup produces car
@@ -1542,19 +1740,7 @@ var Controller = function (_model, _view) {
 
 			if (this.model.gameEnded > 0) {
 				// Find winner. Sort players by sakes focus, then move highgest money to front
-				this.model.gameFlow.turnOrder = [...this.model.gameFlow.unalteredTurnOrder]
-				var moneyInSalesOrder = []
-				for (i = 0; i < this.model.gameFlow.turnOrder.length; i++) {
-					moneyInSalesOrder.push([this.model.gameFlow.turnOrder[i], this.model.players[this.model.gameFlow.turnOrder[i]].money])
-				}
-				moneyInSalesOrder.sort(function (a, b) {
-					return b[1] - a[1]
-				})
-
-				for (i = 0; i < this.model.players.length; i++) {
-					this.model.gameFlow.unalteredTurnOrder[i] = moneyInSalesOrder[i][0]
-					this.model.gameFlow.turnOrder[i] = moneyInSalesOrder[i][0]
-				}
+				this.actionSortPlayersByMoney_core()
 
 				this.model.log(Log.GAME_END, [this.model.players[this.model.gameFlow.unalteredTurnOrder[0]].name, this.model.gameEnded])
 				global.winner = this.model.players[this.model.gameFlow.unalteredTurnOrder[0]].name
@@ -1565,86 +1751,7 @@ var Controller = function (_model, _view) {
 			this.model.gameFlow.phase = PHASE_ADVANCE_EXPECTATIONS
 			this.model.historyObj.splice(0, this.model.historyObj.length)
 
-			// Remove old sales windows from model
-			for (i = 0; i < this.model.players.length; i++) {
-				for (j = 0; j < this.model.players[i].factory.factoryComponents.length; j++) {
-					var component = this.model.players[i].factory.factoryComponents[j]
-					if (DEALERSHIPS.includes(component[0])) {
-						// reset sales window data
-						component[MW_IDX][0] = -1
-						component[MW_IDX][1] = -1
-						component[MW_IDX][2] = -1
-					}
-				}
-			}
-
-			// Find the new TT from the off board ones
-			var innovations = [0, 0, 0, 0, 0]
-			var maxPastMinMarker = [0, 0, 0, 0, 0]
-			for (i = 2; i <= 4; i++) {
-				var minTech = this.model.techTracks[i][7][1]
-				for (j = minTech + 1; j < this.model.techTracks[i].length - 1; j++) {
-					innovations[i] += this.model.techTracks[i][j].length * (j - minTech)
-					if (this.model.techTracks[i][j].length > 0) maxPastMinMarker[i] = j - this.model.techTracks[i][7][1]
-				}
-			}
-
-			var max = Math.max(...innovations)
-			var res = []
-			var winner = -1
-			innovations.forEach((item, index) => (item === max && index >= 2 ? res.push(index) : null))
-
-			if (res.length != 1) {
-				for (i = 0; i < maxPastMinMarker.length; i++) {
-					if (!res.includes(i)) maxPastMinMarker[i] = 0
-				}
-
-				var maxMaxPastMinMarker = Math.max(...maxPastMinMarker)
-				for (i = 0; i < res.length; i++) {
-					if (maxPastMinMarker[res[i]] < maxMaxPastMinMarker) res[i] = -1
-				}
-			}
-			// Now remove the -1s
-			res = res.filter(function (val) {
-				return val !== -1
-			})
-			if (res.length > 1) {
-				winner = Math.min(...res)
-			} else winner = res[0]
-
-			// log the colour of the old TT 0
-			this.model.historyObj.push(this.model.techTracks[this.model.obsolescenceMarkerDirection][7][0])
-
-			// log the new value of the min demand 1
-			this.model.historyObj.push(this.model.techTracks[this.model.obsolescenceMarkerDirection][7][1] + 1)
-
-			// Add the off board innovation levels
-			this.model.historyObj.push([
-				[innovations[2], this.model.techTracks[2][7][0], maxPastMinMarker[2]],
-				[innovations[3], this.model.techTracks[3][7][0], maxPastMinMarker[3]],
-				[innovations[4], this.model.techTracks[4][7][0], maxPastMinMarker[4]],
-			])
-
-			// log the colour of the winning tech track 2
-			this.model.historyObj.push(this.model.techTracks[winner][7][0])
-
-			// Now increase the min demand of the obs one by 1
-			this.model.techTracks[this.model.obsolescenceMarkerDirection][7][1]++
-
-			// Now swap the winning TT with the obs one
-			;[this.model.techTracks[this.model.obsolescenceMarkerDirection], this.model.techTracks[winner]] = [this.model.techTracks[winner], this.model.techTracks[this.model.obsolescenceMarkerDirection]]
-			// now push the old TT to the end (now in winner position)
-			this.model.techTracks.push([...this.model.techTracks[winner]])
-
-			// Now splice out the old one in the winner position
-			this.model.techTracks.splice(winner, 1)
-
-			// switch the obs marker
-			if (this.model.obsolescenceMarkerDirection === 1) this.model.obsolescenceMarkerDirection = 0
-			else this.model.obsolescenceMarkerDirection = 1
-
-			// log the new obsmarker direction
-			this.model.historyObj.push(this.model.obsolescenceMarkerDirection)
+			this.model.historyObj = this.actionAdvanceExpectations_core()
 
 			this.model.log(Log.ADVANCE_EXPECTATIONS, [...this.model.historyObj], -1)
 			this.model.historyObj.splice(0, this.model.historyObj.length)
@@ -1654,15 +1761,7 @@ var Controller = function (_model, _view) {
 			this.model.gameFlow.turnOrder = [...this.model.gameFlow.unalteredTurnOrder]
 
 			// Add stock back in to display dealerships
-			for (i = 0; i < this.model.players.length; i++) {
-				// Each players dealershup produces vehicles accoeding to the assem capac track -- this is simply set to the correct max value
-				factory = this.model.players[i].factory
-				for (j = 0; j < factory.factoryComponents.length; j++) {
-					if (MAINLINES.includes(factory.factoryComponents[j][0])) {
-						for (k = 0; k < this.model.assemblyCapacityTrack.length; k++) if (this.model.assemblyCapacityTrack[k].indexOf(this.model.players[i].colour) > -1) factory.factoryComponents[j][SL_IDX] = k + 1
-					}
-				}
-			}
+			this.actionRefreshMainlineStock_core()
 			V.render(-1)
 
 			// Check for any skips
@@ -1675,46 +1774,10 @@ var Controller = function (_model, _view) {
 				}
 			}
 		} else if (oldPhase === PHASE_GROW_DEMANDS) {
-			// Add sparks to model, take away clocks
-			var totalClocks = 0
-			for (i = 0; i < this.model.alreadyPlayedCards.length; i++) {
-				var clocks = this.model.alreadyPlayedCards[i][2][0]
-				// Take away clocks
-				this.model.punchClockNumber -= clocks
-				totalClocks += clocks
-
-				var Q = this.model.alreadyPlayedCards[i][1]
-				var cardData = this.model.alreadyPlayedCards[i][2]
-				for (j = 1; j < cardData.length; j++) {
-					var Xcoord = 0
-					var Ycoord = 0
-					if (Q === 1) Ycoord = 4
-					if (Q === 4) Xcoord = 4
-					if (Q === 2) {
-						Xcoord = 4
-						Ycoord = 4
-					}
-					Xcoord = Xcoord + cardData[j][0]
-					Ycoord = Ycoord + cardData[j][1]
-					var index = this.model.getIndexForMBcoord([Xcoord, Ycoord])
-					this.model.marketBoard[index][cardData[j][2]]++
-				}
-			}
-			this.model.log(Log.SHOW_CARDS, [totalClocks, [...this.model.alreadyPlayedCards]], -1)
+			// Add sparks to model, take away clocks, and convert sparks to demand
+			this.model.log(Log.SHOW_CARDS, [this.actionShowCards_core(this.model.alreadyPlayedCards), [...this.model.alreadyPlayedCards]], -1)
 			//remove data
 			this.model.alreadyPlayedCards.splice(0, this.model.alreadyPlayedCards.length)
-
-			// Sparks add Demand
-			for (i = 0; i < this.model.marketBoard.length; i++) {
-				for (j = 0; j < 3; j++) {
-					var vehiclesToAdd = this.model.marketBoard[i][j]
-					var maxVehicles = this.model.marketBoard[i][j] * 2
-					while (this.model.marketBoard[i][j + 3] < maxVehicles && vehiclesToAdd > 0) {
-						this.model.marketBoard[i][j + 3]++
-						vehiclesToAdd--
-					}
-				}
-			}
 
 			// Add neutral cards
 			Rules.playNeutralCards()

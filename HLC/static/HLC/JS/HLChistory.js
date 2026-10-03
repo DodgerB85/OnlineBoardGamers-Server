@@ -40,6 +40,18 @@ var Log = {
 
 	TECH_LOGS: [0],
 
+	// The param format has been extended over time. New style is detected from the shape/length of the
+	// param, so games stored before each change still display (and replay) correctly.
+	isNewStyle: function (action, param) {
+		if (param == undefined) return false
+		if (action === this.SETUP_GAME) return param.length > 2 + 2 * M.players.length
+		if (action === this.FACTORY_SETUP) return param.length >= 2
+		if (action === this.FACTORY_BUILD) return Array.isArray(param[0])
+		if (action === this.PLAY_CARD) return param.length > 1
+		if (action === this.SALES_V2) return param[1] != undefined && param[1].length >= 5
+		return false
+	},
+
 	log: function (model, player, action, param, timestamp) {
 		if (timestamp == undefined) timestamp = Math.round((new Date().getTime() - IO.timeOffset) / 1000)
 		if (timestamp < 0) timestamp = 0
@@ -58,8 +70,9 @@ var Log = {
 	},
 
 	history: function (model, player, action, param, timestamp) {
+		var div = null
 		if (this.TECH_LOGS.indexOf(action) == -1) {
-			var div = $('<div class="log">')
+			div = $('<div class="log">')
 
 			var strPlayer = ""
 			if (player > -1 && player < 63 && player != null && player != undefined) {
@@ -77,6 +90,7 @@ var Log = {
 				$("#history").prepend(histTogDiv)
 			} else $("#history").append(div)
 		}
+		return div
 	},
 
 	giveFullText: function (player, action, param) {
@@ -103,9 +117,6 @@ var Log = {
 		//res.append(JSON.stringify(param))
 		var str = ""
 		if (action == this.FACTORY_SETUP) {
-			/*res.append(playerSpan);
-			res.append(gettext("  sets up factory"));*/
-
 			res.append(
 				interpolate(
 					gettext("%(playerName)s sets up factory"),
@@ -245,10 +256,17 @@ var Log = {
 			var componentNameNumbers = []
 
 			var playerIndex = M.players.findIndex((obj) => obj.name === player)
+			var newStyle = this.isNewStyle(action, param)
 
-			for (i = param[1] - param[0]; i < param[1]; i++) {
+			if (newStyle) {
+				// The exact placements are stored, so they can be listed and replayed
+				for (i = 0; i < param[0].length; i++) componentNameNumbers.push(param[0][i][0])
+				if (param[1] != undefined) componentNameNumbers.push(FACTORY_EXPANSION_TILE)
+			} else {
 				// undefined check as crash caused? possibly by not building anything?
-				if (M.players[playerIndex].factory.factoryComponents[i] != undefined) componentNameNumbers.push(M.players[playerIndex].factory.factoryComponents[i][0])
+				for (i = param[1] - param[0]; i < param[1]; i++) {
+					if (M.players[playerIndex].factory.factoryComponents[i] != undefined) componentNameNumbers.push(M.players[playerIndex].factory.factoryComponents[i][0])
+				}
 			}
 
 			_.each(
@@ -280,7 +298,7 @@ var Log = {
 					border: "1px solid yellow",
 				})
 			})
-			res.on("click", { playerIndex: playerIndex, p0: param[0], p1: param[1] }, Log.clickedOnBuildHistory)
+			res.on("click", { playerIndex: playerIndex, p0: param[0], p1: param[1], placements: param[0], newStyle: newStyle }, Log.clickedOnBuildHistory)
 		} else if (action == this.SALES_SKIP) {
 			//res.append(playerSpan);
 			//res.append("  " + gettext("passes:") + " " + skipStrings[param]);
@@ -705,8 +723,12 @@ var Log = {
 
 		// Find all indexes required to be highlighted
 		var componentIndexes = []
-		for (i = e.data.p1 - e.data.p0; i < e.data.p1; i++) {
-			componentIndexes.push(M.players[e.data.playerIndex].factory.factoryComponents[i][1])
+		if (e.data.newStyle) {
+			for (i = 0; i < e.data.placements.length; i++) componentIndexes.push(e.data.placements[i][1])
+		} else {
+			for (i = e.data.p1 - e.data.p0; i < e.data.p1; i++) {
+				componentIndexes.push(M.players[e.data.playerIndex].factory.factoryComponents[i][1])
+			}
 		}
 		// Find all the needed squares
 		var squaresToHighlight = []
@@ -805,8 +827,19 @@ var Log = {
 			_.each(
 				t,
 				function (item) {
-					if (item.timestamp > 0) this.history(model, item.player, item.action, item.param, item.timestamp)
-					else this.history(model, item.player, item.action, item.param, -item.timestamp)
+					var div
+					if (item.timestamp > 0) div = this.history(model, item.player, item.action, item.param, item.timestamp)
+					else div = this.history(model, item.player, item.action, item.param, -item.timestamp)
+
+					if (div != null && replay.showingReplay) {
+						// t is sorted by timestamp, but the replay steps in logs array order, so map back to that
+						var logIndex = model.logs.indexOf(item)
+						div.attr("id", "entry" + String(logIndex))
+						div.addClass("logReplay")
+						div.on("click", { logIndex: logIndex }, function () {
+							replay.goToReplayStep(logIndex)
+						})
+					}
 				},
 				this
 			)

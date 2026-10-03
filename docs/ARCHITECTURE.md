@@ -89,6 +89,17 @@ From then on the browser talks to the API:
 - `SO_TRAINING_GAME` makes it hotseat (no simul phases) and `SO_STRICT_PAYDAY_FRIDGE` makes Payday/Clean-up resolve in `endPlayerTurn` rather than via `savePreTurn`, which is what keeps it off the server. Real Practice games use the same pair.
 - `src/components/tutorial/` drives it: `tutorialScript.js` is the readable step list, `FcmTutor.js` the scripted opponent, `FcmTutorial.js` the engine, `TutorialPanel.vue` the overlay.
 
+## Replay
+
+Games that offer a replay rebuild the game in the browser from the stored history, one entry at a time, and store a full snapshot per entry so stepping is O(1). The pattern is the same everywhere: reset the model to a seed derived from the first history entry plus the immutable per-player identity, walk the remaining entries calling the same model mutations live play uses, and snapshot after each.
+
+- `FCM/static/FCM/JS/FCMreplay.js` (raw JS) and `TGZ/vueTGZ/src/js/TGZreplay.js` (Vue).
+- `HLC/static/HLC/JS/HLCreplay.js` (raw JS).
+
+The mutations are split into `XXX` and `XXX_core`: `XXX` is the live wrapper and may read in-the-moment state (current player, what is being placed right now), logs the history and paints the UI. `XXX_core` takes the player index and everything else it needs as arguments, touches no DOM and never logs, so the replay can call it without a live board. Replay-specific flags (`showingReplay` etc.) make the shared `Rules`/`canPlay` helpers stand down while stepping.
+
+History entries have been extended over time, so every reader detects old vs new style from the shape of the stored param rather than a version field - old games keep working unchanged.
+
 ## Turn processing and stale-write protection
 
 Every mutating endpoint goes through `process_game_with_mutex(request, handler, mutex_prefix=...)` (`Lobby/gameViewHelpers.py`):

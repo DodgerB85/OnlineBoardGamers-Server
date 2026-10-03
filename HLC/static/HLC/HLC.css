@@ -1283,3 +1283,48 @@ body.noassistance #assistancePlayers {
 .MWhistImg {
 	vertical-align: middle;
 }
+/* REPLAY */
+#replayArea {
+	text-align: center;
+}
+
+#replayArea .progress-bar {
+	height: 20px;
+	width: 300px;
+	margin: 5px auto;
+	background-color: lightgray;
+	border: 1px solid black;
+}
+
+#replayArea .progress-bar div {
+	height: 100%;
+	width: 0%;
+	background-color: darkgreen;
+}
+
+#replayArea .progress-bar span {
+	display: block;
+	text-align: center;
+	font-size: 12px;
+}
+
+#replayArea .replayButtonsDiv button {
+	margin: 2px;
+}
+
+#replayArea .replayHistoryEntry {
+	display: inline-block;
+	max-width: 900px;
+	margin: 5px auto;
+	padding: 5px;
+	border: 1px dashed black;
+}
+
+body.replayMode #actions {
+	display: none;
+}
+
+#history .logReplay:hover {
+	cursor: pointer;
+	background-color: lightyellow;
+}

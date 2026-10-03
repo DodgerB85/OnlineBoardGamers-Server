@@ -56,14 +56,17 @@
                       <span class="topMenuItem" data-type="4" id="menuButtonHistory">
                         <img src="{% static 'FCM/images/scroll-unfurled.svg' %}">
                         <span class="topMenuItem-label">{% translate "History" %}</span></span>
-                        <div class="menuDivider"></div>
-                        {% if involvedPlayer %}
-                          <span class="topMenuItem" data-type="10">
-                            <img src="{% static 'FCM/images/rewind.svg' %}">
-                            <span class="topMenuItem-label">{% translate "Rewind" %}</span></span>
-                          {% endif %}
-                          <!--<span class="topMenuItem" data-type="9" id="assistanceMenuButton"><img id="assistIcon" src="{% static 'FCM/images/assistance.svg' %}"><span>AID</span></span>-->
-                        </div>
+<div class="menuDivider"></div>
+                      {% if involvedPlayer %}
+                        <span class="topMenuItem" data-type="10">
+                          <img src="{% static 'FCM/images/rewind.svg' %}">
+                          <span class="topMenuItem-label">{% translate "Rewind" %}</span></span>
+                        {% endif %}
+                        <span class="topMenuItem" data-type="11" id="replayMenuButton">
+                          <img src="{% static 'FCM/images/replay.svg' %}">
+                          <span class="topMenuItem-label">{% translate "Replay" %}</span></span>
+                        <!--<span class="topMenuItem" data-type="9" id="assistanceMenuButton"><img id="assistIcon" src="{% static 'FCM/images/assistance.svg' %}"><span>AID</span></span>-->
+                      </div>
                         <div id="topRight">
                           <span class="live"></span>
                           <div id="liveDiv">{% translate "Connecting to server" %}.....</div>
@@ -239,6 +242,7 @@
                           </div>
                           <div id="playerLineDiv"></div>
                           <div id="actions"></div>
+                          <div id="replayArea"></div>
                           <div id="loader">
                             <img src="{% static 'FCM/images/loading-bar-black.gif' %}" />
                           </div>
@@ -406,6 +410,7 @@
                       <script src="/static/HLC/JS/HLCio.js"></script>
                       <script src="/static/HLC/JS/HLCbot.js"></script>
                       <script src="/static/HLC/JS/HLCwebsocket.js"></script>
+                      <script src="/static/HLC/JS/HLCreplay.js"></script>
                       <script src="/static/HLC/JS/HLCmain.js"></script>
                       <script src="/static/HLC/JS/HLCtest.js"></script>
                     {% else %}

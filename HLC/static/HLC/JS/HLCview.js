@@ -50,8 +50,11 @@ var View = function (model) {
 				item = this.model.gameFlow.unalteredTurnOrder.indexOf(global.pov)
 			} else if (MARKET_BOARD_PHASES.includes(this.model.gameFlow.phase)) item = -1
 			else {
-				if (!Rules.isSimulPhase()) item = this.model.gameFlow.turnOrder[0]
-				else item = this.model.gameFlow.unalteredTurnOrder.indexOf(this.model.gameFlow.currentPlayer)
+				// turnOrder can legitimately be empty between phases (and while the replay is stepping through them)
+				if (!Rules.isSimulPhase()) {
+					if (this.model.gameFlow.turnOrder.length > 0) item = this.model.gameFlow.turnOrder[0]
+					else item = -1
+				} else item = this.model.gameFlow.unalteredTurnOrder.indexOf(this.model.gameFlow.currentPlayer)
 				if (M.trainingGame) {
 					item = this.model.players.length - this.model.gameFlow.turnOrder.length
 				}
@@ -4052,6 +4055,8 @@ var View = function (model) {
 					IO.loadRewind(C)
 				})
 			}
+		} else if (item === 11) {
+			replay.toggleReplayMode()
 		} else if (item === 99) {
 			if (M.trainingGame) {
 			} else {
