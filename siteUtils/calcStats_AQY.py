@@ -206,9 +206,7 @@ def analyze_games(player_count_index):
 
     for game_data_encoded, game_id, game_turn in dataSet:
         try:
-            byte_array = bytearray(base64.b64decode(game_data_encoded))
-            decompressed_data = gzip.decompress(byte_array)
-            decompressed_string = decompressed_data.decode("utf-8")
+            decompressed_string = gzip.decompress(base64.b64decode(game_data_encoded)).decode("utf-8")
             raw_data = json.loads(decompressed_string)
         except Exception as e:
             print(f"Game ERROR - COULD NOT DECOMPRESS: {e}")

@@ -186,9 +186,7 @@ def analyze_games(player_count_index, schism_games=False, external_tournament_or
         game_id, winner_username = row[0], row[1]
         game_data_encoded = game_data[game_id]
         try:
-            byte_array = bytearray(base64.b64decode(game_data_encoded))
-            decompressed_data = gzip.decompress(byte_array)
-            decompressed_string = decompressed_data.decode("utf-8")
+            decompressed_string = gzip.decompress(base64.b64decode(game_data_encoded)).decode("utf-8")
             raw_data = json.loads(decompressed_string)
         except Exception as e:
             print(f"Game ERROR - COULD NOT DECOMPRESS: {e}")
@@ -203,7 +201,8 @@ def analyze_games(player_count_index, schism_games=False, external_tournament_or
             except (IndexError, KeyError):
                 print(f"ERROR: God index out of range: {god_index} in game {game_id}")
         for player in playerData:
-            player_god = player[7][0] if isinstance(player[7][0], (int, float)) else player[7][0][0]
+            god = player[7][0]
+            player_god = god if isinstance(god, (int, float)) else god[0]
             player_specs = player[8]
             num_specs = len(player_specs)
 
