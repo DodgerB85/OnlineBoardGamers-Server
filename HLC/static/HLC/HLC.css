@@ -1320,6 +1320,10 @@ body.noassistance #assistancePlayers {
 	border: 1px dashed black;
 }
 
+#replayArea .replayWarning {
+	color: #8a6d00;
+}
+
 .greyBackground {
 	background-color: lightgray;
 	transition: background-color 1s ease-in-out;

@@ -13,6 +13,11 @@ function getLogPlayerName(playerIndex) {
 	return M.players[playerIndex].name
 }
 
+// The replay detail (factory placements, card identities, raw market window placement) only started
+// being stored on this date. Games created before it cannot be replayed exactly, so say so instead of
+// reporting a mismatch. global.gameCreationTimestamp is epoch milliseconds, as a string
+var REPLAY_DATA_CAPTURED_FROM = Date.UTC(2026, 9, 4)
+
 var replay = {
 	init: function (model) {
 		this.model = model
@@ -589,7 +594,7 @@ var replay = {
 
 		var div = $('<div class="replayButtonsDiv">')
 		div.append(gettext("Use the arrows to step through the game. Click an entry in the history tab to jump to that point in time."))
-		if (this.replayError !== "") div.append("<BR/><B>" + this.replayError + "</B>")
+		if (this.replayError !== "") div.append("<BR/><B class='replayWarning'>" + this.replayError + "</B>")
 		div.append("<BR/>")
 
 		if (global.pov != undefined && global.pov >= 0) {
@@ -647,6 +652,12 @@ var replay = {
 		var live = this.liveModel
 		var problems = []
 		var i = 0
+
+		// Old games never stored the detail the replay needs, so a mismatch is expected rather than a bug
+		if (global.gameCreationTimestamp != undefined && parseInt(global.gameCreationTimestamp) < REPLAY_DATA_CAPTURED_FROM) {
+			this.replayError = gettext("Caution: This game was created before all the replay data was captured. Replay may not match actual game")
+			return
+		}
 		if (live == undefined || live.players == undefined) return
 
 		if (M.punchClockNumber !== live.punchClockNumber) problems.push("punch clock")
