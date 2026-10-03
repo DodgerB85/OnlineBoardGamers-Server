@@ -4,6 +4,10 @@
 {% block page_title %}
   {% translate "UR: 1830 BC Help" %}
 {% endblock page_title %}
+{% block head %}
+  {{ block.super }}
+  <link href="{% static 'URR/help.css' %}" rel="stylesheet">
+{% endblock head %}
 {% block content %}
   <div class="card section">
     <h2>{% translate "Rules" %}</h2>
@@ -15,6 +19,98 @@
         <a class="linkOther" href="{% static 'URR/rules/ur-1830-bc.pdf' %}" target="_blank" rel="noopener">{% translate "Open the full rulebook (PDF)" %}</a>
         · <a class="linkOther" href="{% static 'URR/rules/player-aid.pdf' %}" target="_blank" rel="noopener">{% translate "Open the player aid (PDF)" %}</a>
       </p>
+    </div>
+  </div>
+  <div class="card section">
+    <h2>{% translate "Icons and pieces" %}</h2>
+    <div class="help-qa urrIconGuide">
+      <div class="urrHelpRow">
+        <div class="urrHelpImages">
+          <img src="{% static 'URR/images/terrain-hills.png' %}" alt="{% translate "Terrain hills" %}" loading="lazy">
+          <img src="{% static 'URR/images/terrain-forest.png' %}" alt="{% translate "Terrain forest" %}" loading="lazy">
+          <img src="{% static 'URR/images/terrain-savannah.png' %}" alt="{% translate "Terrain savannah" %}" loading="lazy">
+          <img src="{% static 'URR/images/terrain-desert.png' %}" alt="{% translate "Terrain desert" %}" loading="lazy">
+        </div>
+        <p><strong>{% translate "Terrain" %}</strong><br>{% translate "Hills, forest, savannah, and desert, in that order. The same pictures identify terrain in the land market, holdings, and sale plans." %}</p>
+      </div>
+      <div class="urrHelpRow">
+        <div class="urrHelpImages">
+          <img src="{% static 'URR/images/city-hills.png' %}" alt="{% translate "City hills" %}" loading="lazy">
+          <img src="{% static 'URR/images/city-forest.png' %}" alt="{% translate "City forest" %}" loading="lazy">
+          <img src="{% static 'URR/images/city-savannah.png' %}" alt="{% translate "City savannah" %}" loading="lazy">
+          <img src="{% static 'URR/images/city-desert.png' %}" alt="{% translate "City desert" %}" loading="lazy">
+        </div>
+        <p><strong>{% translate "Cities" %}</strong><br>{% translate "City artwork distinguishes city land from ordinary fields. In holdings, the small city picture counts cities already included in the terrain total." %}</p>
+      </div>
+      <div class="urrHelpRow">
+        <div class="urrHelpImages">
+          <img src="{% static 'URR/images/ownership-marker-orange.png' %}" alt="{% translate "Ownership marker orange" %}" loading="lazy">
+          <img src="{% static 'URR/images/ownership-marker-green.png' %}" alt="{% translate "Ownership marker green" %}" loading="lazy">
+          <img src="{% static 'URR/images/ownership-marker-teal.png' %}" alt="{% translate "Ownership marker teal" %}" loading="lazy">
+        </div>
+        <p><strong>{% translate "Player markers" %}</strong><br>{% translate "Player colours identify landowners and payment recipients. On the map, a faded marker inside a dashed frame means the land has been sold and is available to buy." %}</p>
+      </div>
+      <div class="urrHelpRow">
+        <div class="urrHelpImages">
+          <img src="{% static 'URR/images/state-order-akkad.png' %}" alt="{% translate "State order akkad" %}" loading="lazy">
+          <img src="{% static 'URR/images/state-treasury-akkad.png' %}" alt="{% translate "State treasury akkad" %}" loading="lazy">
+        </div>
+        <p><strong>{% translate "State and treasury" %}</strong><br>{% translate "The state badge identifies a state; the treasury board shows its money, crews, and harvest. State colours on equipment identify its owning state. Private cash and state treasury money are separate." %}</p>
+      </div>
+      <div class="urrHelpRow">
+        <div class="urrHelpImages">
+          <img src="{% static 'URR/images/primogeniture.png' %}" alt="{% translate "Primogeniture" %}" loading="lazy">
+        </div>
+        <p><strong>{% translate "Primogeniture" %}</strong><br>{% translate "This marker identifies the player with primogeniture. A pending bid reserves private cash; Available shows the amount left to spend." %}</p>
+      </div>
+      <div class="urrHelpRow">
+        <div class="urrHelpImages">
+          <img src="{% static 'URR/images/waterwork-akkad-1.png' %}" alt="{% translate "Waterwork akkad 1" %}" loading="lazy">
+          <img src="{% static 'URR/images/waterwork-akkad-2.png' %}" alt="{% translate "Waterwork akkad 2" %}" loading="lazy">
+          <img src="{% static 'URR/images/waterwork-akkad-unlimited.png' %}" alt="{% translate "Waterwork akkad unlimited" %}" loading="lazy">
+        </div>
+        <p><strong>{% translate "Waterworks and crews" %}</strong><br>{% translate "The number on a piece is its capacity. For pumps it is canal reach; for reservoirs it is water capacity. M means unlimited. In the crew panel, the number is digging capacity; two pieces represent a split crew, and faded crews have already dug." %}</p>
+      </div>
+      <div class="urrHelpRow">
+        <div class="urrHelpImages">
+          <img src="{% static 'URR/images/equipment-era-1.png' %}" alt="{% translate "Equipment era 1" %}" loading="lazy">
+        </div>
+        <p><strong>{% translate "Equipment cards" %}</strong><br>{% translate "The equipment card shows the current capacities and prices. Select it to enlarge it. The crew, pump, and reservoir buttons show the action and cost before you confirm." %}</p>
+      </div>
+      <div class="urrHelpRow">
+        <div class="urrHelpImages">
+          <img src="{% static 'URR/images/nation-calah.svg' %}" alt="{% translate "Nation calah" %}" loading="lazy">
+        </div>
+        <p><strong>{% translate "Nation cards" %}</strong><br>{% translate "Select a nation card to read it at full size. Map locates its homeland. Player or state badges beside a nation show its owner." %}</p>
+      </div>
+    </div>
+  </div>
+  <div class="card section">
+    <h2>{% translate "Map highlights" %}</h2>
+    <div class="help-qa">
+      <ul>
+        <li><span class="urrHelpSwatch selected"></span><strong>{% translate "Yellow:" %}</strong> {% translate "The selected or focused hex. Its details appear below the map." %}</li>
+        <li><span class="urrHelpSwatch exchange"></span><strong>{% translate "Purple:" %}</strong> {% translate "An available Calah waterwork site or Barahshum canal destination. The map hint and hex description identify the exchange." %}</li>
+        <li><span class="urrHelpSwatch maintenance"></span><strong>{% translate "Amber:" %}</strong> {% translate "Land eligible for a mandatory crew funding sale, or a waterwork eligible for removal when storing harvest. Select a hex to see which applies." %}</li>
+        <li><span class="urrHelpSwatch water"></span><strong>{% translate "Cyan outline:" %}</strong> {% translate "An available water-routing destination. A small cyan dot on a hex marks irrigation." %}</li>
+        <li><span class="urrHelpSwatch canal"></span><strong>{% translate "Blue lines:" %}</strong> {% translate "Canals. The thicker line is the canal path you are drafting. The moving cyan dot previews the selected water route." %}</li>
+      </ul>
+      <p>{% translate "Select a hex to read its owner, terrain, waterwork, and current role; you do not need to identify a highlight by colour alone." %}</p>
+    </div>
+  </div>
+  <div class="card section">
+    <h2>{% translate "Menu icons" %}</h2>
+    <div class="help-qa urrIconGuide">
+      <div class="urrHelpRow"><div class="urrHelpImages"><img src="{% static 'URR/images/icon-rulebook.svg' %}" alt="" loading="lazy"></div><p><strong>{% translate "Rules" %}</strong><br>{% translate "Opens this interface guide, the rulebook, and the player aid in a new tab." %}</p></div>
+      <div class="urrHelpRow"><div class="urrHelpImages"><img src="{% static 'URR/images/icon-info.svg' %}" alt="" loading="lazy"></div><p><strong>{% translate "Info" %}</strong><br>{% translate "Game information and options." %}</p></div>
+      <div class="urrHelpRow"><div class="urrHelpImages"><img src="{% static 'URR/images/icon-chat.svg' %}" alt="" loading="lazy"></div><p><strong>{% translate "Chat" %}</strong><br>{% translate "Messages shared with the other players." %}</p></div>
+      <div class="urrHelpRow"><div class="urrHelpImages"><img src="{% static 'URR/images/icon-notebook.svg' %}" alt="" loading="lazy"></div><p><strong>{% translate "Notes" %}</strong><br>{% translate "Your private notes." %}</p></div>
+      <div class="urrHelpRow"><div class="urrHelpImages"><img src="{% static 'URR/images/icon-scroll.svg' %}" alt="" loading="lazy"></div><p><strong>{% translate "History" %}</strong><br>{% translate "The move log, including payments and leadership changes." %}</p></div>
+      <div class="urrHelpRow"><div class="urrHelpImages"><img src="{% static 'URR/images/icon-replay.svg' %}" alt="" loading="lazy"></div><p><strong>{% translate "Replay" %}</strong><br>{% translate "Inspect earlier positions, then Exit Replay to return to the live game." %}</p></div>
+      <div class="urrHelpRow"><div class="urrHelpImages"><img src="{% static 'URR/images/icon-rewind.svg' %}" alt="" loading="lazy"></div><p><strong>{% translate "Rewind" %}</strong><br>{% translate "Request a rewind to an earlier position." %}</p></div>
+      <div class="urrHelpRow"><div class="urrHelpImages"><img src="{% static 'URR/images/icon-stop.svg' %}" alt="" loading="lazy"></div><p><strong>{% translate "Bug" %}</strong><br>{% translate "Report a problem with the current game." %}</p></div>
+      <div class="urrHelpRow"><div class="urrHelpImages"><img src="{% static 'URR/images/icon-nextGame.svg' %}" alt="" loading="lazy"></div><p><strong>{% translate "Next" %}</strong><br>{% translate "Go to your next game." %}</p></div>
+      <div class="urrHelpRow"><div class="urrHelpImages"><img src="{% static 'URR/images/icon-house.svg' %}" alt="" loading="lazy"></div><p><strong>{% translate "Home" %}</strong><br>{% translate "Return to the lobby." %}</p></div>
     </div>
   </div>
   <div class="card section">

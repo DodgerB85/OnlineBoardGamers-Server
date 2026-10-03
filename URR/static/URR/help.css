@@ -1,0 +1,12 @@
+.urrHelpRow { display: flex; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid #ded9cc; }
+.urrHelpRow:last-child { border-bottom: 0; }
+.urrHelpImages { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; flex: 0 0 160px; }
+.urrHelpImages img { width: 64px; max-height: 100px; object-fit: contain; }
+.urrHelpRow p { margin: 0; min-width: 0; }
+.urrHelpSwatch { display: inline-block; width: 18px; height: 18px; margin-right: 8px; vertical-align: middle; border: 2px solid; }
+.urrHelpSwatch.selected { background: #fff57a; border-color: #7e6400; }
+.urrHelpSwatch.exchange { background: #d9b7ed; border-color: #8758a8; }
+.urrHelpSwatch.maintenance { background: #ffd894; border-color: #b76400; }
+.urrHelpSwatch.water { background: #74e9ff; border-color: #008cb3; }
+.urrHelpSwatch.canal { height: 4px; background: #2269ad; border-color: #2269ad; }
+@media (max-width: 600px) { .urrHelpRow { align-items: flex-start; gap: 10px; } .urrHelpImages { flex-basis: 76px; } .urrHelpImages img { width: 34px; max-height: 64px; } }

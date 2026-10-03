@@ -107,8 +107,7 @@ export function barahshumDestinations(game) {
 }
 
 export function isCalahWaterworkLocation(game, area) {
-	// Calah's own forest is neither its hills nor land adjacent to Calah.
-	return area.nation === rf.NATION_CALAH ? area.landType === rf.LAND_HILLS : game.board.areas.some((land) => land.nation === rf.NATION_CALAH && land.neighbours.includes(area.id))
+	return game.board.areas.some((land) => land.nation === rf.NATION_CALAH && land.landType === rf.LAND_HILLS && (land.id === area.id || land.neighbours.includes(area.id)))
 }
 
 export function canExchangeBarahshum(game, player) {
@@ -124,6 +123,7 @@ export function harvestAmount(game, stateId) {
 }
 
 export function harvestDistribution(game, stateId, amount = harvestAmount(game, stateId)) {
+	// Only player-owned fields share the harvest; unowned fields do not dilute payments.
 	const counts = Array.from(game.players.keys(), (index) => ownedLand(game, stateId, index).length)
 	const total = counts.reduce((sum, count) => sum + count, 0)
 	const soleOwner = counts.filter((count) => count > 0).length === 1

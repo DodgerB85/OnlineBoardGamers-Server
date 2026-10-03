@@ -12,6 +12,7 @@ const personal = usePersonalStore()
 const emit = defineEmits(["locateNation"])
 const amounts = reactive({})
 const showAcquired = ref(false)
+const isWelcomeDismissed = ref(false)
 const acquiredNations = computed(() => store.nations.filter((nation) => nation.ownerType !== null))
 const displayedNations = computed(() => [...store.nations.filter((nation) => nation.ownerType === null && (!auction.value || nation.id === auction.value.nation)), ...(showAcquired.value ? acquiredNations.value : [])])
 const treaty = computed(() => store.nations.find((nation) => nation.ownerType === null))
@@ -44,6 +45,11 @@ watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.val
 
 <template>
 	<section class="nationMarket" aria-label="Independent nations">
+		<div v-if="store.gameflow.turn === 1 && store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS && !store.viewSettings.showReplay && !isWelcomeDismissed" class="welcomeHelper">
+			<div><b>Welcome to UR: 1830 BC!</b><button type="button" aria-label="Dismiss welcome" @click="isWelcomeDismissed = true">×</button></div>
+			<p>Select a hex to inspect it, or a card to enlarge it. Your available actions are shown here.</p>
+			<p><a href="/URR/help/" target="_blank" rel="noopener">Icons and interface help</a> is also available from Rules in the menu. Enjoy the game!</p>
+		</div>
 		<div v-if="store.gameMessages.actionError || store.gameMessages.errorText" role="alert">{{ store.gameMessages.actionError || store.gameMessages.errorText }}</div>
 		<p class="marketHeading"><b>{{ auction ? `Auction: ${rf.NATION_NAMES[auction.nation]}` : "Independent nations" }}</b><span>{{ available }} SPL</span></p>
 		<p v-if="auction" class="auctionInfo">High bid {{ auction.amount }} SPL · {{ store.players[auction.highPlayer].displayName }}</p>
@@ -90,6 +96,10 @@ watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.val
 ol { padding-left: 18px; margin: 4px 0; color: #52616a; }form { display: flex; gap: 4px; align-items: center; }form label { font-size: 11px; }input { width: 58px; min-width: 0; }button { cursor: pointer; }button:disabled { cursor: default; }.passButton { width: 100%; margin-top: 3px; }
 .nationBids { padding-left: 0; list-style: none; }.nationBids li { display: flex; align-items: center; gap: 5px; padding: 3px; }.nationBids img { width: 22px; height: 22px; }.nationBids span { min-width: 0; overflow-wrap: anywhere; }.nationBids b { margin-left: auto; white-space: nowrap; }.nationBids .currentBidder { background: #edf5e4; border-left: 3px solid #527349; }
 .marketHint { color: #52616a; font-size: 12px; }
+.welcomeHelper { margin-bottom: 10px; padding: 8px; background: #edf5e4; border: 1px solid #c1cdb1; border-radius: 4px; }
+.welcomeHelper > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.welcomeHelper button { flex-shrink: 0; min-width: 40px; min-height: 40px; font: inherit; font-size: 20px; }
+.welcomeHelper a { color: #235e88; }
 .auctionInfo { overflow-wrap: anywhere; }
 .amountError { color: #a40000; font-size: 12px; }
 .bidAdjustment { min-width: 40px; padding: 5px; }

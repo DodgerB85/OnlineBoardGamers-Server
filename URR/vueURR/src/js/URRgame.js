@@ -223,7 +223,7 @@ function beginDevelopment(game) {
 	if (!eridu.isRemoved && eridu.ownerType !== null) {
 		flow.developmentStep = "eridu"
 		flow.turnOrder = [eridu.ownerType === "player" ? eridu.owner : game.states[eridu.owner].king]
-	} else beginStateTurn(game)
+	} else pauseBetweenStates(game)
 }
 
 function settlementAction(game, player, action) {
@@ -332,7 +332,7 @@ function exchangeCalah(game, state, action, consentingPlayer = null) {
 	requireRule(!nation.isRemoved && nation.ownerType === "state" && nation.owner === state.id, "This state does not own Calah")
 	requireRule(action.kind === "pump" || action.kind === "reservoir", "Calah must be exchanged for a waterwork")
 	const area = getArea(game, action.area)
-	requireRule(rules.isCalahWaterworkLocation(game, area), "Calah's free waterwork must be on its hills or adjacent to Calah")
+	requireRule(rules.isCalahWaterworkLocation(game, area), "Calah's free waterwork must be on or adjacent to its hills")
 	buyCard(game, state, action, consentingPlayer, true)
 	nation.isRemoved = true
 }
@@ -381,6 +381,11 @@ function resolveMaintenance(game, state, action) {
 function endStateTurn(game) {
 	const flow = game.gameflow
 	flow.stateIndex++
+	pauseBetweenStates(game)
+}
+
+function pauseBetweenStates(game) {
+	const flow = game.gameflow
 	const barahshum = game.nations[rf.NATION_BARAHSHUM]
 	if (!barahshum.isRemoved && barahshum.ownerType === "player" && rules.barahshumDestinations(game).length) {
 		flow.developmentStep = "betweenStates"
@@ -455,7 +460,7 @@ function developmentAction(game, action) {
 	if (flow.developmentStep === "eridu") {
 		requireRule(action.type === "digEridu" || action.type === "pass", "Use Eridu's crew or pass")
 		if (action.type === "digEridu") digCanal(game, 2, action.path)
-		beginStateTurn(game)
+		pauseBetweenStates(game)
 		return
 	}
 	const state = game.states[flow.stateOrder[flow.stateIndex]]
