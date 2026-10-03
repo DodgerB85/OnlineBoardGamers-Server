@@ -57,7 +57,12 @@ var replay = {
 
 			await this.generateReplayData()
 
+			// The walk leaves the view showing whatever resetDataForReplay rendered at the start, so
+			// load the final step to actually display it
+			this.goToReplayStep(this.replayStep)
+			// goToReplayStep bails out before touching the area when there is nothing to step through
 			this.updateReplayArea()
+
 			$("body").addClass("greyBackground")
 			$("body").removeClass("blueBackground")
 
