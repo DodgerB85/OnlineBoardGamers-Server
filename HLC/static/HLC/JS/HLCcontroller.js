@@ -644,10 +644,15 @@ $(".piece").on("click", function (e) {
 		$("#actions").append(endBuildingButton)
 		endBuildingButton.on("click", function () {
 			//$("#QSPdiv").remove(); NO EFFECT - JUST GETS READDED!
+			// NB In a training game the one person plays every seat, so global.pov is not the acting player
+			var factory = C.currentPlayer().factory
+
+			// Compressed replay detail. MUST be captured here, while the indexes are still the pre expansion
+			// ones. Needed in training games too, as they never go through saveFactoryMove
+			factory.factoryPlacementsAddedThisTurn = factory.getPlacementsAddedThisTurn()
+
 			// BEFORE WE EXPAND, NEED TO CAPTURE WHAT WAS ADDED THIS TURN
 			if (!M.trainingGame) {
-				// NB In a training game the one person plays every seat, so global.pov is not the acting player
-				var factory = C.currentPlayer().factory
 				factory.factoryComponentNamesAddedThisTurn = factory.factoryComponentNamesAddedThisTurn.splice(0, factory.factoryComponenetIndexesAddedThisTurn.length)
 				for (i = 0; i < factory.factoryComponenetIndexesAddedThisTurn.length; i++) {
 					var arrayIndex = _.findIndex(
@@ -664,8 +669,6 @@ $(".piece").on("click", function (e) {
 						// Do nothing
 					}
 				}
-				// Compressed replay detail. MUST be captured here, while the indexes are still the pre expansion ones
-				factory.factoryPlacementsAddedThisTurn = factory.getPlacementsAddedThisTurn()
 				if (factory.factoryDataBeforeExpansion.length === 0) {
 					factory.factoryDataBeforeExpansion.push(factory.export())
 					factory.factoryDataBeforeExpansion.push([...M.availableComponents])
@@ -680,6 +683,16 @@ $(".piece").on("click", function (e) {
 
 		V.render()
 		V.updateQSPdiv(this.currentPlayer())
+	}
+
+	// PvP games get this entry written by the server in saveFactoryMove, because the build phase is
+// simultaneous and the server validates the components. A training game saves straight through
+// IO.saveGame instead, so the client has to write it
+this.actionLogFactoryBuild = function (player) {
+		var param = [[...player.factory.factoryPlacementsAddedThisTurn], [...player.factory.factoryExpansionAddedThisTurn]]
+		player.factory.factoryPlacementsAddedThisTurn = []
+		player.factory.factoryExpansionAddedThisTurn = []
+		this.model.log(Log.FACTORY_BUILD, param, player.arrayPos)
 	}
 
 	this.clickedOnRemoveLastComponent = function () {
@@ -1289,6 +1302,8 @@ $(".piece").on("click", function (e) {
 			this.model.historyObj.splice(0, this.model.historyObj.length)
 		} else if (this.model.gameFlow.phase === PHASE_BUILD_FACTORY) {
 			// Need to finish off the expansion process
+			// A training game never calls saveFactoryMove, so the server never writes this entry
+			if (M.trainingGame) this.actionLogFactoryBuild(this.currentPlayer())
 			this.currentPlayer().factory.collapseFactoryAfterExpansion()
 			// needs a render, but this is done at the end
 		} 
