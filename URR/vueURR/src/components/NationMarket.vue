@@ -67,22 +67,24 @@ watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.val
 					</form>
 					<p v-if="!auction && treaty?.id !== nation.id && amountError(nation)" class="amountError" role="status">{{ amountError(nation) }}</p>
 				</template>
-
+				<div v-if="!auction && treaty?.id === nation.id" class="marketControls treatyControls">
+					<button class="primaryAction" :disabled="!personal.canPlay() || available < price(nation)" @click="controller.submitAction({ type: 'buyNation', nation: nation.id })">Buy for {{ price(nation) }} SPL<small>{{ rf.NATION_NAMES[nation.id] }}</small></button>
+					<button class="passButton" :disabled="!personal.canPlay()" @click="controller.submitAction({ type: 'pass' })">Pass</button>
+				</div>
+				<div v-if="isAuction(nation)" class="marketControls auctionControls">
+					<form @submit.prevent="bid(nation)">
+						<label :for="`nation-bid-${nation.id}`">Bid SPL</label>
+						<button type="button" class="bidAdjustment" aria-label="Lower bid by 5 SPL" :disabled="!personal.canPlay() || amount(nation) <= minimum(nation)" @click="adjustBid(nation, -5)">−5</button>
+						<input :id="`nation-bid-${nation.id}`" type="number" inputmode="numeric" :value="amount(nation)" @input="amounts[nation.id] = Number($event.target.value)" :min="minimum(nation)" :max="moneyForBid(nation)" step="1" required :disabled="!personal.canPlay()" />
+						<button type="button" class="bidAdjustment" aria-label="Raise bid by 5 SPL" :disabled="!personal.canPlay() || amount(nation) >= moneyForBid(nation)" @click="adjustBid(nation, 5)">+5</button>
+						<button class="primaryAction" :disabled="!personal.canPlay() || amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)">Bid</button>
+					</form>
+					<p v-if="amountError(nation)" class="amountError" role="status">{{ amountError(nation) }}</p>
+					<button class="passButton" :disabled="!personal.canPlay()" @click="controller.submitAction({ type: 'pass' })">Withdraw</button>
+				</div>
 			</details>
 		</div>
 		<button v-if="acquiredNations.length" class="acquiredToggle" @click="showAcquired = !showAcquired">{{ showAcquired ? 'Hide' : 'Show' }} acquired nations ({{ acquiredNations.length }})</button>
-		<div class="marketControls" :class="{ auctionControls: auction, treatyControls: !auction }">
-			<button v-if="!auction && treaty" class="primaryAction" :disabled="!personal.canPlay() || available < price(treaty)" @click="controller.submitAction({ type: 'buyNation', nation: treaty.id })">Buy for {{ price(treaty) }} SPL<small>{{ rf.NATION_NAMES[treaty.id] }}</small></button>
-			<form v-if="auction" @submit.prevent="bid(store.nations[auction.nation])">
-				<label :for="`nation-bid-${auction.nation}`">Bid SPL</label>
-				<button type="button" class="bidAdjustment" aria-label="Lower bid by 5 SPL" :disabled="!personal.canPlay() || amount(store.nations[auction.nation]) <= minimum(store.nations[auction.nation])" @click="adjustBid(store.nations[auction.nation], -5)">−5</button>
-				<input :id="`nation-bid-${auction.nation}`" type="number" inputmode="numeric" :value="amount(store.nations[auction.nation])" @input="amounts[auction.nation] = Number($event.target.value)" :min="minimum(store.nations[auction.nation])" :max="moneyForBid(store.nations[auction.nation])" step="1" required :disabled="!personal.canPlay()" />
-				<button type="button" class="bidAdjustment" aria-label="Raise bid by 5 SPL" :disabled="!personal.canPlay() || amount(store.nations[auction.nation]) >= moneyForBid(store.nations[auction.nation])" @click="adjustBid(store.nations[auction.nation], 5)">+5</button>
-				<button class="primaryAction" :disabled="!personal.canPlay() || amount(store.nations[auction.nation]) < minimum(store.nations[auction.nation]) || amount(store.nations[auction.nation]) > moneyForBid(store.nations[auction.nation])">Bid</button>
-			</form>
-			<button class="passButton" :disabled="!personal.canPlay()" @click="controller.submitAction({ type: 'pass' })">{{ auction ? "Withdraw" : "Pass" }}</button>
-			<p v-if="auction && amountError(store.nations[auction.nation])" class="amountError" role="status">{{ amountError(store.nations[auction.nation]) }}</p>
-		</div>
 	</section>
 </template>
 
@@ -103,6 +105,6 @@ ol { padding-left: 18px; margin: 4px 0; color: #52616a; }form { display: flex; g
 .auctionInfo { overflow-wrap: anywhere; }
 .amountError { color: #a40000; font-size: 12px; }
 .bidAdjustment { min-width: 40px; padding: 5px; }
-.marketControls { position: sticky; bottom: 0; background: #fff9e9; padding: 6px 0 0; border-top: 1px solid #c8c2b4; z-index: 1; }
+.marketControls { margin-top: 7px; padding-top: 6px; border-top: 1px solid #c8c2b4; }
 .treatyControls { display: flex; gap: 6px; align-items: stretch; }.treatyControls > button { flex: 1; min-width: 0; margin: 0; }.treatyControls .passButton { width: auto; flex: 0 0 auto; }.treatyControls small { display: block; margin-top: 3px; font-size: 12px; }
 </style>
