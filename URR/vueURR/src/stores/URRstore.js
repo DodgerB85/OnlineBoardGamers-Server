@@ -41,6 +41,11 @@ export const useModelStore = defineStore("store", () => {
 		showHistory: false,
 		showInfo: false,
 		showLoader: false,
+		isSaving: false,
+		isSendingChat: false,
+		isSavingNotes: false,
+		inspectedPlayer: null,
+		inspectedState: null,
 		showRewindPanel: false,
 		performingRewind: false,
 		showReplay: false,
@@ -51,6 +56,8 @@ export const useModelStore = defineStore("store", () => {
 		successText: "",
 		errorText: "",
 		bugErrorText: "",
+		chatErrorText: "",
+		notesErrorText: "",
 	})
 
 	const deleteVotesData = ref({})

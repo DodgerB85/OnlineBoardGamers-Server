@@ -47,7 +47,7 @@ export async function saveGame(saveRewind = true) {
 	if (personal.liveWS) wsConnecting = WS.StartWebSocket()
 
 	personal.haltPlay = true
-	store.viewSettings.showLoader = true
+	store.viewSettings.isSaving = true
 
 	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder } = getNextCurrentPlayers()
 
@@ -83,7 +83,6 @@ export async function saveGame(saveRewind = true) {
 		const data = await response.json()
 		if (data.syncError === true) {
 			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
-			store.viewSettings.showLoader = false
 			return false
 		}
 		personal.latestUpdate = data.latestUpdate
@@ -92,22 +91,24 @@ export async function saveGame(saveRewind = true) {
 
 		if (personal.liveWS) WS.broadcastGameUpdate(wsConnecting)
 
-		store.viewSettings.showLoader = false
 		personal.haltPlay = false
 		controller.startPlayerTurn()
 		return true
 	} catch (error) {
 		console.error("Error saving game:", error)
 		store.gameMessages.errorText = "Unable to confirm that the move was saved. Refresh the page before playing again."
-		store.viewSettings.showLoader = false
 		return false
+	} finally {
+		store.viewSettings.isSaving = false
+		if (!personal.haltPlay) WS.refreshPendingGameUpdate()
 	}
 }
 
 export async function sendChatMessage(newEntry) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	store.viewSettings.showLoader = true
+	store.viewSettings.isSendingChat = true
+	store.gameMessages.chatErrorText = ""
 	try {
 		const response = await fetch("/URR/sendChatMessageURR/", {
 			method: "POST",
@@ -118,11 +119,14 @@ export async function sendChatMessage(newEntry) {
 		const data = await response.json()
 		store.chatData = funcs.decompressChatData(data.chatData)
 		if (personal.liveWS) WS.broadcastChatUpdate()
+		return true
 	} catch (error) {
 		console.error("Error sending chat:", error)
-		store.gameMessages.errorText = "Error sending chat message"
+		store.gameMessages.chatErrorText = "Error sending chat message"
+		return false
+	} finally {
+		store.viewSettings.isSendingChat = false
 	}
-	store.viewSettings.showLoader = false
 }
 
 export async function reloadChatData() {
@@ -146,6 +150,8 @@ export async function reloadChatData() {
 export async function reloadGameData() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	if (store.viewSettings.showReplay || store.viewSettings.isSaving || store.viewSettings.performingRewind) return
+	const requestedUpdate = personal.latestUpdate
 	store.viewSettings.showLoader = true
 	try {
 		const response = await fetch("/URR/data/1/", {
@@ -155,6 +161,7 @@ export async function reloadGameData() {
 		})
 		if (!response.ok) throw new Error("Network response was not ok")
 		const data = await response.json()
+		if (store.viewSettings.showReplay || store.viewSettings.isSaving || store.viewSettings.performingRewind || personal.latestUpdate !== requestedUpdate) return
 		model.importGameData(data.gameData)
 		model.rebuildTurnOrder()
 		personal.secondsToNextKickout = data.secondsToNextKickout
@@ -162,15 +169,16 @@ export async function reloadGameData() {
 		window.initData.latestUpdate = data.latestUpdate
 	} catch (error) {
 		console.error("Error fetching game data:", error)
+	} finally {
+		store.viewSettings.showLoader = false
 	}
-	store.viewSettings.showLoader = false
 }
 
 export async function saveNotes() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	store.viewSettings.showLoader = true
-	store.gameMessages.errorText = ""
+	store.viewSettings.isSavingNotes = true
+	store.gameMessages.notesErrorText = ""
 	try {
 		const response = await fetch("/URR/saveNotesURR/", {
 			method: "POST",
@@ -179,20 +187,20 @@ export async function saveNotes() {
 		})
 		const data = await response.json()
 		if (data.error) {
-			store.gameMessages.errorText = data.error
-			store.viewSettings.showLoader = false
+			store.gameMessages.notesErrorText = data.error
 			return
 		}
 		if (!response.ok) throw new Error("Network response was not ok")
 		if (!data.notePosted) {
-			store.gameMessages.errorText = "Sorry, there was a problem. Please email the webmaster directly"
+			store.gameMessages.notesErrorText = "Sorry, there was a problem. Please email the webmaster directly"
 			return
 		}
 	} catch (error) {
 		console.error("Error saving notes:", error)
-		store.gameMessages.errorText = "Error saving notes"
+		store.gameMessages.notesErrorText = "Error saving notes"
+	} finally {
+		store.viewSettings.isSavingNotes = false
 	}
-	store.viewSettings.showLoader = false
 }
 
 export async function resign() {
@@ -207,11 +215,14 @@ export async function resign() {
 		})
 		if (!response.ok) throw new Error("Network response was not ok")
 		await response.json()
+		return true
 	} catch (error) {
 		console.error("Error resigning:", error)
 		store.gameMessages.errorText = "Error resigning"
+		return false
+	} finally {
+		store.viewSettings.showLoader = false
 	}
-	store.viewSettings.showLoader = false
 }
 
 export async function kickout() {
@@ -279,6 +290,8 @@ export async function castVote(topic) {
 export async function checkForLatestData() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	if (store.viewSettings.showReplay || store.viewSettings.isSaving || store.viewSettings.performingRewind) return
+	const requestedUpdate = personal.latestUpdate
 	try {
 		const response = await fetch("/URR/data/3/", {
 			method: "POST",
@@ -287,6 +300,7 @@ export async function checkForLatestData() {
 		})
 		if (!response.ok) throw new Error("Network response was not ok")
 		const data = await response.json()
+		if (store.viewSettings.showReplay || store.viewSettings.isSaving || store.viewSettings.performingRewind || personal.latestUpdate !== requestedUpdate) return
 		if (data.gameDoesNotExist === true) {
 			location.reload()
 			return
@@ -329,7 +343,12 @@ export async function submitBug(bugContent) {
 export async function loadRewind() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	const wasHalted = personal.haltPlay
+	personal.haltPlay = true
+	store.viewSettings.performingRewind = true
 	store.viewSettings.showLoader = true
+	store.gameMessages.errorText = ""
+	store.gameMessages.successText = ""
 	try {
 		const response = await fetch("/URR/processURRturn/", {
 			method: "POST",
@@ -344,19 +363,23 @@ export async function loadRewind() {
 		}
 		if (data.errorMessage) {
 			store.gameMessages.errorText = data.errorMessage
+			personal.haltPlay = wasHalted
 			return
 		}
 		model.importGameData(data.gameData)
 		personal.latestUpdate = data.latestUpdate
 		window.initData.latestUpdate = data.latestUpdate
-		await updateDataFromLoadRewind()
-		store.gameMessages.successText = "Game loaded from rewind"
+		if (await updateDataFromLoadRewind()) {
+			store.gameMessages.successText = "Game loaded from rewind"
+			store.viewSettings.showRewindPanel = false
+		}
 	} catch (error) {
 		console.error("Error rewinding:", error)
-		store.gameMessages.errorText = "Error rewinding the game"
+		store.gameMessages.errorText = "Unable to confirm the rewind. Refresh the page before playing again."
 	} finally {
 		store.viewSettings.showLoader = false
 		store.viewSettings.performingRewind = false
+		if (!personal.haltPlay) WS.refreshPendingGameUpdate()
 	}
 }
 
@@ -385,7 +408,11 @@ async function updateDataFromLoadRewind() {
 		personal.secondsToNextKickout = data.secondsToNextKickout
 		if (personal.liveWS) WS.broadcastGameUpdate()
 		controller.startPlayerTurn()
+		return true
 	} catch (error) {
 		console.error("Error updating after rewind:", error)
+		personal.haltPlay = true
+		store.gameMessages.errorText = "Unable to confirm the rewound game. Refresh the page before playing again."
+		return false
 	}
 }

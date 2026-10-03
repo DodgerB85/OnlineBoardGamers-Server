@@ -2,7 +2,8 @@
 import assert from "node:assert/strict"
 import * as rf from "./src/js/URRreference.js"
 import * as rules from "./src/js/URRrules.js"
-import { createGame, applyAction } from "./src/js/URRgame.js"
+import { createGame, applyAction, finishWaterRouting } from "./src/js/URRgame.js"
+import { startWaterRouting, allocateWater, waterChoices } from "./src/js/URRwater.js"
 import { getCanalCost } from "./src/js/URRmap.js"
 
 const fresh = () => createGame(["A", "B", "C"])
@@ -67,6 +68,261 @@ const area = (game, areaId) => game.board.areas.find((entry) => entry.id === are
 	assert.deepEqual(getCanalCost(game, [dry.id, river.id]), getCanalCost(game, [river.id, dry.id]))
 	const isolated = game.board.areas.find((entry) => !entry.isRiver && entry.neighbours.every((neighbour) => !area(game, neighbour).isRiver))
 	assert.throws(() => getCanalCost(game, [isolated.id, isolated.neighbours[0]]), /existing river or canal/)
+}
+
+// Skip empty harvests before and after a real harvest, preserving its choice and payouts.
+{
+	let game = fresh()
+	Object.assign(game.gameflow, { phase: rf.PHASE_RAINY_SEASON, stateOrder: [0, 1, 2] })
+	game.rain.step = "routing"
+	for (const state of game.states.slice(0, 3)) Object.assign(state, { isActive: true, king: state.id })
+	const land = game.board.areas.find((entry) => !entry.isRiver && !entry.isCity && entry.state === 1)
+	land.owner = land.markerOwner = 1
+	land.irrigatedBy = 1
+	finishWaterRouting(game, 3 * rf.ERA_WATER_PER_RIVER[game.era] - 1)
+	assert.deepEqual(game.rain.harvestOrder, [1, 2])
+	assert.deepEqual(game.gameflow.turnOrder, [1])
+	assert.equal(game.gameflow.phase, rf.PHASE_RAINY_SEASON)
+	assert.equal(game.players[1].money, 605)
+	game = applyAction(game, 1, { type: "harvest", choice: "distribute" })
+	assert.equal(game.players[1].money, 625)
+	assert.equal(game.gameflow.phase, rf.PHASE_SETTLEMENT)
+	assert.equal(game.gameflow.turn, 2)
+	assert.deepEqual(game.rain.harvestOrder, [])
+}
+
+// Finishing development without irrigation needs no harvest confirmations.
+{
+	const game = fresh()
+	Object.assign(game.gameflow, { phase: rf.PHASE_DEVELOPMENT, stateOrder: [0], stateIndex: 0, developmentStep: "digging", turnOrder: [0] })
+	Object.assign(game.states[0], { isActive: true, king: 0, diggers: [{ id: 0, era: 1, capacity: "1+1", hasDug: false }] })
+	const next = applyAction(game, 0, { type: "endDevelopment" })
+	assert.equal(next.gameflow.phase, rf.PHASE_SETTLEMENT)
+	assert.equal(next.gameflow.turn, 2)
+	assert.equal(next.states[0].money, game.states[0].money)
+	assert.deepEqual(next.players.map((player) => player.money), game.players.map((player) => player.money))
+}
+
+// A revolting state distributes automatically, still paying out and scoring the game.
+{
+	const game = fresh()
+	Object.assign(game.gameflow, { phase: rf.PHASE_RAINY_SEASON, stateOrder: [0], endReason: "revolution" })
+	Object.assign(game.states[0], { isActive: true, king: 0, hasRevolted: true })
+	game.rain.step = "routing"
+	const land = game.board.areas.find((entry) => !entry.isRiver && !entry.isCity && entry.state === 0)
+	land.owner = land.markerOwner = 0
+	land.irrigatedBy = 0
+	finishWaterRouting(game, 3 * rf.ERA_WATER_PER_RIVER[game.era] - 1)
+	assert.equal(game.players[0].money, 625)
+	assert.equal(game.gameflow.phase, rf.PHASE_GAME_OVER)
+	assert.deepEqual(game.gameflow.turnOrder, [])
+	assert.equal(game.players[0].score, rules.playerAssets(game, 0))
+}
+
+// Barahshum's between-state opportunity remains a player decision.
+{
+	const game = fresh()
+	Object.assign(game.gameflow, { phase: rf.PHASE_DEVELOPMENT, stateOrder: [0], stateIndex: 0, developmentStep: "digging", turnOrder: [0] })
+	Object.assign(game.states[0], { isActive: true, king: 0, diggers: [{ id: 0, era: 1, capacity: "1+1", hasDug: false }] })
+	Object.assign(game.nations[rf.NATION_BARAHSHUM], { ownerType: "player", owner: 1 })
+	const next = applyAction(game, 0, { type: "endDevelopment" })
+	assert.equal(next.gameflow.developmentStep, "betweenStates")
+	assert.equal(rules.canExchangeBarahshum(next, 1), true)
+	assert.equal(rules.getAutomaticAction(next), null)
+	const home = next.board.areas.find((land) => land.nation === rf.NATION_BARAHSHUM)
+	const destination = home.neighbours.find((areaId) => area(next, areaId).nation === null && !next.board.canals.some(([from, to]) => (from === home.id && to === areaId) || (to === home.id && from === areaId)))
+	const action = { type: "exchangeBarahshum", from: home.id, to: destination }
+	const exchanged = applyAction(next, 1, action)
+	assert.equal(exchanged.nations[rf.NATION_BARAHSHUM].isRemoved, true)
+	assert.equal(exchanged.gameflow.phase, rf.PHASE_SETTLEMENT)
+	assert.equal(exchanged.gameflow.turn, 2)
+	Object.assign(next.gameflow, { stateOrder: [0, 2], stateIndex: 1 })
+	Object.assign(next.states[2], { isActive: true, king: 2 })
+	const handoff = applyAction(next, 1, action)
+	assert.equal(handoff.gameflow.phase, rf.PHASE_DEVELOPMENT)
+	assert.equal(handoff.gameflow.developmentStep, "digging")
+	assert.deepEqual(handoff.gameflow.turnOrder, [2])
+	assert.equal(handoff.gameflow.stateIndex, 1)
+	Object.assign(next.gameflow, { phase: rf.PHASE_SETTLEMENT, turnOrder: [0] })
+	assert.deepEqual(applyAction(next, 1, action).gameflow.turnOrder, [0])
+	Object.assign(next.gameflow, { phase: rf.PHASE_DEVELOPMENT, stateOrder: [0], stateIndex: 0, developmentStep: "digging" })
+	Object.assign(next.nations[rf.NATION_BARAHSHUM], { ownerType: "state", owner: 0 })
+	const stateExchange = applyAction(next, 0, action)
+	assert.equal(stateExchange.gameflow.developmentStep, "digging")
+	assert.equal(stateExchange.gameflow.stateIndex, 0)
+	Object.assign(next.nations[rf.NATION_BARAHSHUM], { ownerType: "player", owner: 1 })
+	for (const neighbour of home.neighbours) {
+		if (!next.board.canals.some(([from, to]) => (from === home.id && to === neighbour) || (to === home.id && from === neighbour))) next.board.canals.push([home.id, neighbour])
+	}
+	assert.deepEqual(rules.barahshumDestinations(next), [])
+	Object.assign(next.gameflow, { developmentStep: "betweenStates", stateOrder: [0, 2], stateIndex: 1 })
+	assert.equal(rules.canExchangeBarahshum(next, 1), false)
+	assert.deepEqual(rules.getAutomaticAction(next), { type: "beginDevelopment" })
+	Object.assign(next.gameflow, { developmentStep: "digging", stateIndex: 0, turnOrder: [0] })
+	const skippedExchange = applyAction(next, 0, { type: "endDevelopment" })
+	assert.equal(skippedExchange.gameflow.developmentStep, "digging")
+	assert.equal(skippedExchange.gameflow.stateIndex, 1)
+	assert.deepEqual(skippedExchange.gameflow.turnOrder, [2])
+	assert.equal(skippedExchange.nations[rf.NATION_BARAHSHUM].isRemoved, false)
+}
+
+// Earlier saves may already be paused at an empty harvest; preserve the next real choice.
+{
+	const game = fresh()
+	Object.assign(game.gameflow, { phase: rf.PHASE_RAINY_SEASON, stateOrder: [0, 2], turnOrder: [0] })
+	Object.assign(game.states[0], { isActive: true, king: 0 })
+	Object.assign(game.states[2], { isActive: true, king: 2 })
+	const land = game.board.areas.find((entry) => entry.state === 2 && entry.nation === null)
+	Object.assign(land, { owner: 2, markerOwner: 2, irrigatedBy: 2 })
+	Object.assign(game.rain, { step: "harvest", harvestOrder: [0, 2], outflow: 3 * rf.ERA_WATER_PER_RIVER[game.era] - 1 })
+	const action = rules.getAutomaticAction(game)
+	assert.deepEqual(action, { type: "harvest", choice: "distribute" })
+	const next = applyAction(game, 0, action)
+	assert.deepEqual(next.rain.harvestOrder, [2])
+	assert.deepEqual(next.gameflow.turnOrder, [2])
+	assert.equal(rules.getAutomaticAction(next), null)
+	next.states[2].hasRevolted = true
+	assert.deepEqual(rules.getAutomaticAction(next), { type: "harvest", choice: "distribute" })
+}
+
+// Resume an older exhausted routing step, but never bypass an available destination.
+{
+	const game = fresh()
+	const river = area(game, game.board.riverSources[0])
+	const pump = river.neighbours.map((neighbour) => area(game, neighbour)).find((entry) => !entry.isRiver && entry.nation === null)
+	river.waterwork = { state: 0, kind: "reservoir", capacity: 2 }
+	pump.waterwork = { state: 0, kind: "pump", capacity: 1 }
+	game.board.canals.push([river.id, pump.id])
+	Object.assign(game.gameflow, { phase: rf.PHASE_RAINY_SEASON, stateOrder: [0], turnOrder: [0] })
+	Object.assign(game.states[0], { isActive: true, king: 0 })
+	game.rain.step = "routing"
+	game.rain.routing = { sourceIndex: 1, river: null, arrivals: {}, outflow: 0, stack: [{ area: river.id, water: 2, downstreamWater: rf.ERA_WATER_PER_RIVER[game.era] - 2, visited: [river.id], originReservoir: river.id }] }
+	const action = rules.getAutomaticAction(game)
+	assert.deepEqual(action, { type: "advanceWater" })
+	const next = applyAction(game, 0, action)
+	assert.equal(next.rain.outflow, 3 * rf.ERA_WATER_PER_RIVER[game.era])
+	assert.equal(next.gameflow.turn, 2)
+	assert.equal(next.gameflow.phase, rf.PHASE_SETTLEMENT)
+	pump.owner = pump.markerOwner = 0
+	assert.equal(rules.getAutomaticAction(game), null)
+	assert.throws(() => applyAction(game, 0, action), /Choose where to send/)
+}
+
+// Ending development hires mandatory maintenance directly when no sales are needed.
+{
+	const game = fresh()
+	Object.assign(game.gameflow, { phase: rf.PHASE_DEVELOPMENT, stateOrder: [0], stateIndex: 0, developmentStep: "digging", turnOrder: [0] })
+	Object.assign(game.states[0], { isActive: true, king: 0, money: 30 })
+	const next = applyAction(game, 0, { type: "endDevelopment" })
+	assert.equal(next.states[0].diggers.length, 1)
+	assert.equal(next.states[0].money, 0)
+	assert.equal(next.players[0].money, 580)
+	assert.equal(next.gameflow.phase, rf.PHASE_SETTLEMENT)
+	assert.equal(game.states[0].diggers.length, 0)
+	game.players[0].money = 0
+	assert.throws(() => applyAction(game, 0, { type: "endDevelopment" }), /sell land or resolve a revolution/)
+}
+
+// Exhausted pumps do not request water again; surplus still flows downstream.
+{
+	const game = fresh()
+	const river = area(game, id(4, 2))
+	const pump = area(game, id(4, 3))
+	Object.assign(game.states[0], { isActive: true, king: 0 })
+	river.waterwork = { state: 0, kind: "reservoir", capacity: 2 }
+	pump.waterwork = { state: 0, kind: "pump", capacity: 1 }
+	pump.owner = pump.markerOwner = 0
+	game.board.canals.push([river.id, pump.id])
+	game.rain.step = "routing"
+	assert.equal(startWaterRouting(game), false)
+	assert.deepEqual(waterChoices(game), [{ area: pump.id, kind: "pump" }])
+	assert.equal(allocateWater(game, { type: "allocateWater", area: pump.id, amount: 1 }), true)
+	assert.equal(pump.irrigatedBy, 0)
+	assert.equal(game.rain.routing.outflow, 3 * rf.ERA_WATER_PER_RIVER[game.era] - 1)
+}
+
+// An irrigated pump is still a real choice when it can serve other land.
+{
+	const game = fresh()
+	const river = area(game, id(4, 2))
+	const pump = area(game, id(4, 3))
+	const land = area(game, id(4, 4))
+	Object.assign(game.states[0], { isActive: true, king: 0 })
+	river.waterwork = { state: 0, kind: "reservoir", capacity: 2 }
+	pump.waterwork = { state: 0, kind: "pump", capacity: 1 }
+	pump.owner = pump.markerOwner = land.owner = land.markerOwner = 0
+	pump.irrigatedBy = 0
+	game.board.canals.push([river.id, pump.id], [pump.id, land.id])
+	assert.equal(startWaterRouting(game), false)
+	assert.deepEqual(waterChoices(game), [{ area: pump.id, kind: "pump" }])
+	assert.equal(allocateWater(game, { type: "allocateWater", area: pump.id, amount: 1 }), false)
+	assert.deepEqual(waterChoices(game), [{ area: land.id, kind: "irrigate" }])
+}
+
+// 3: auction turns retain marker order and skip bidders without an affordable raise.
+{
+	let game = createGame(["A", "B", "C", "D"])
+	game.nations[rf.NATION_BARAHSHUM].bids = [{ player: 0, amount: 45 }, { player: 1, amount: 75 }, { player: 2, amount: 55 }, { player: 3, amount: 60 }]
+	Object.assign(game.gameflow, { auction: { nation: rf.NATION_BARAHSHUM, bidders: [0, 1, 2, 3], highPlayer: 1, amount: 75 }, turnOrder: [2], treatyResumePlayer: 3 })
+	game.players[0].money = 84
+	game.players[3].money = 79
+	game = applyAction(game, 2, { type: "pass" })
+	assert.deepEqual(game.gameflow.turnOrder, [0])
+	assert.deepEqual(game.gameflow.auction.bidders, [0, 1])
+	assert.equal(game.players[3].money, 79)
+	game = applyAction(game, 0, { type: "bidNation", nation: rf.NATION_BARAHSHUM, amount: 80 })
+	assert.deepEqual(game.gameflow.turnOrder, [1])
+	const winnerBefore = game.players[1].money
+	game = applyAction(game, 1, { type: "bidNation", nation: rf.NATION_BARAHSHUM, amount: 85 })
+	assert.equal(game.gameflow.auction, null)
+	assert.equal(game.nations[rf.NATION_BARAHSHUM].owner, 1)
+	assert.equal(game.players[1].money, winnerBefore - 85)
+	assert.equal(game.players[0].money, 84)
+	assert.deepEqual(game.gameflow.turnOrder, [3])
+}
+
+// 3: the next auction respects money reserved for later nations, including an exact minimum bid.
+{
+	let game = fresh()
+	game.players[0].money = 50
+	game.players[1].money = 225
+	game.nations[rf.NATION_BARAHSHUM].bids = [{ player: 0, amount: 45 }, { player: 1, amount: 50 }, { player: 2, amount: 55 }]
+	game.nations[rf.NATION_ERIDU].bids = [{ player: 1, amount: 165 }]
+	game = applyAction(game, 0, { type: "buyNation", nation: rf.NATION_ASHUR })
+	assert.deepEqual(game.gameflow.turnOrder, [1])
+	assert.deepEqual(game.gameflow.auction.bidders, [1, 2])
+	assert.equal(rules.availableMoney(game, 1), 60)
+	assert.equal(rules.getAutomaticAction(game), null)
+	game = applyAction(game, 1, { type: "bidNation", nation: rf.NATION_BARAHSHUM, amount: 60 })
+	assert.deepEqual(game.gameflow.turnOrder, [2])
+	assert.deepEqual(game.nations[rf.NATION_ERIDU].bids, [{ player: 1, amount: 165 }])
+}
+
+// 3: opening an auction with no affordable challenger awards the existing high bid immediately.
+{
+	let game = fresh()
+	game.players[0].money = 50
+	game.players[1].money = 220
+	game.nations[rf.NATION_BARAHSHUM].bids = [{ player: 0, amount: 45 }, { player: 1, amount: 50 }, { player: 2, amount: 55 }]
+	game.nations[rf.NATION_ERIDU].bids = [{ player: 1, amount: 165 }]
+	game = applyAction(game, 0, { type: "buyNation", nation: rf.NATION_ASHUR })
+	assert.equal(game.gameflow.auction, null)
+	assert.equal(game.nations[rf.NATION_BARAHSHUM].owner, 2)
+	assert.equal(game.players[2].money, 545)
+	assert.equal(game.players[0].money, 30)
+	assert.equal(game.players[1].money, 220)
+	assert.deepEqual(game.gameflow.turnOrder, [1])
+	assert.deepEqual(game.nations[rf.NATION_ERIDU].bids, [{ player: 1, amount: 165 }])
+}
+
+// Stored positions which already stopped on an unaffordable bidder also resolve automatically.
+{
+	const game = fresh()
+	game.players[0].money = 54
+	Object.assign(game.gameflow, { auction: { nation: rf.NATION_BARAHSHUM, bidders: [0, 1], highPlayer: 1, amount: 50 }, turnOrder: [0] })
+	assert.deepEqual(rules.getAutomaticAction(game), { type: "pass" })
+	game.players[0].money = 55
+	assert.equal(rules.getAutomaticAction(game), null)
 }
 
 console.log("URR rule checks passed")

@@ -11,14 +11,26 @@
       <p>
         {% blocktranslate %}UR: 1830 BC is a board game by Jeroen Doumen and Joris Wiersinga, published by <a class="linkOther" href="https://www.splottershop.com/" target="_blank">Splotter Spellen</a>.{% endblocktranslate %}
       </p>
+      <p>
+        <a class="linkOther" href="{% static 'URR/rules/ur-1830-bc.pdf' %}" target="_blank" rel="noopener">{% translate "Open the full rulebook (PDF)" %}</a>
+        · <a class="linkOther" href="{% static 'URR/rules/player-aid.pdf' %}" target="_blank" rel="noopener">{% translate "Open the player aid (PDF)" %}</a>
+      </p>
     </div>
   </div>
   <div class="card section">
     <h2>{% translate "Playing the Game" %}</h2>
     <div class="help-qa">
-      <p>
-        {% translate "This game is still being implemented. Help content will be added here." %}
-      </p>
+      <p>{% translate "The rows above the board show player order and active state order. Select a player or state to inspect its holdings; the status panels otherwise follow the current decision." %}</p>
+      <p>{% translate "Land prices show the current market price in bold and the fixed colonization cost below it. The second row uses city artwork for city prices. Market after plan previews price changes from queued sales before you confirm. Small city markers in a player's holdings count cities included in the terrain totals." %}</p>
+      <ol>
+        <li><strong>{% translate "Independent nations:" %}</strong> {% translate "Buy the current treaty nation, or expand another nation's row to make an offer. Map locates that nation's homeland. Select the artwork to read a card at full size; use its zoom controls to enlarge it further. During an auction, bid or withdraw from the current nation. Bidders who cannot afford the minimum withdraw automatically." %}</li>
+        <li><strong>{% translate "Settlement:" %}</strong> {% translate "Select land on the board. Queue a purchase and any sales, review the cash and any leadership changes after trade, then complete the trade. Sales before and after buying are separate batches. Pass when finished, or bid for primogeniture." %}</li>
+        <li><strong>{% translate "Development:" %}</strong> {% translate "States dig canals before purchasing equipment. Select an unused crew and trace adjacent areas on the map. Then hire crews or select a site for a pump or reservoir. Another landowner may need to accept your proposal. Private cash and state treasuries are separate. If a required crew needs land sales, select the highlighted sites and review the final cash and any leadership changes before confirming." %}</li>
+        <li><strong>{% translate "Rainy season:" %}</strong> {% translate "Select a highlighted destination to route water. At harvest, review the payouts before distributing it, or store it in the state treasury and remove a waterwork when required. Empty harvests resolve automatically." %}</li>
+      </ol>
+      <p>{% translate "On a small screen, Show actions opens the drawer at the bottom of the screen. It closes while tracing a canal. Selecting a player or state brings its status into view; Back to board returns to the map. Use the zoom controls to enlarge the map, and select the percentage to fit it again." %}</p>
+      <p>{% translate "For keyboard play, Tab focuses the board. Arrow keys move between adjacent hexes; Enter or Space selects a hex. Tab moves on to the other controls." %}</p>
+      <p>{% translate "History records moves, treasury changes, state emergence, and leadership changes. Escape closes a card preview or the history panel. In Replay, select a history entry or use the step controls to inspect earlier positions. Exit Replay returns to the live game." %}</p>
     </div>
   </div>
 {% endblock content %}

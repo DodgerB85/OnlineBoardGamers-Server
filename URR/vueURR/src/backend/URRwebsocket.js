@@ -9,6 +9,7 @@ import * as IO from "./URR_IO"
 export var URRwebSocket
 
 let connectionPromise = null
+let latestAnnouncedUpdate = 0
 let retryCount = 0
 const MAX_RETRIES = 13
 const BASE_RETRY_DELAY = 2000
@@ -90,14 +91,18 @@ async function URRwebSocketOnInfo(IncomingInfo) {
 		if (IncomingInfo.data.slice(9, -13) == personal.gameID) {
 			let newTS = parseInt(IncomingInfo.data.slice(-13))
 			if (newTS > personal.latestUpdate) {
-				personal.haltPlay = true
-				personal.latestUpdate = newTS
-				window.initData.latestUpdate = newTS
-				await IO.reloadGameData()
-				personal.haltPlay = false
+				latestAnnouncedUpdate = Math.max(latestAnnouncedUpdate, newTS)
+				// Advance the version only when the matching live position is imported.
+				// Replay and pending saves defer this refresh without losing the update.
+				await IO.checkForLatestData()
 			} else URRwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
 		}
 	}
+}
+
+export async function refreshPendingGameUpdate() {
+	const personal = usePersonalStore()
+	if (latestAnnouncedUpdate > personal.latestUpdate) await IO.checkForLatestData()
 }
 
 export async function broadcastGameUpdate(existingPromise = null) {

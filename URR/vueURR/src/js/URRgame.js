@@ -3,7 +3,7 @@
 import * as rf from "./URRreference.js"
 import * as rules from "./URRrules.js"
 import { createPrintedBoard } from "./URRboard.js"
-import { startWaterRouting, allocateWater } from "./URRwater.js"
+import { startWaterRouting, advanceWaterRouting, allocateWater } from "./URRwater.js"
 import { requireRule, createBoard, getArea, getCanalCost, canCrewDig, isNationLandClosed } from "./URRmap.js"
 
 export function createGame(playerNames, boardDefinition = createPrintedBoard()) {
@@ -83,9 +83,31 @@ function resolveNegotiatedNations(game) {
 		const high = nation.bids.reduce((best, bid) => bid.amount > best.amount ? bid : best)
 		const bidders = nation.bids.map((bid) => bid.player)
 		flow.auction = { nation: nation.id, bidders, highPlayer: high.player, amount: high.amount }
-		flow.turnOrder = [bidders[(bidders.indexOf(high.player) + 1) % bidders.length]]
+		setAuctionTurn(game, high.player, bidders)
 		return
 	}
+}
+
+function setAuctionTurn(game, previousPlayer, previousOrder) {
+	const flow = game.gameflow
+	const auction = flow.auction
+	const nation = game.nations[auction.nation]
+	let index = previousOrder.indexOf(previousPlayer)
+	while (auction.bidders.length > 1) {
+		// Keep the former successor after withdrawals; the high bidder never raises their own bid.
+		do { index = (index + 1) % previousOrder.length } while (!auction.bidders.includes(previousOrder[index]) || previousOrder[index] === auction.highPlayer)
+		const player = previousOrder[index]
+		if (rules.availableMoney(game, player) >= auction.amount + 5) {
+			flow.turnOrder = [player]
+			return
+		}
+		// With no affordable raise, withdrawal is the only legal auction action.
+		auction.bidders = auction.bidders.filter((bidder) => bidder !== player)
+		nation.bids = nation.bids.filter((bid) => bid.player !== player)
+	}
+	awardNation(game, nation, auction.highPlayer, auction.amount)
+	flow.auction = null
+	resolveNegotiatedNations(game)
 }
 
 function nationAction(game, player, action) {
@@ -105,19 +127,7 @@ function nationAction(game, player, action) {
 			auction.highPlayer = player
 			auction.amount = action.amount
 		}
-		if (auction.bidders.length === 1) {
-			awardNation(game, nation, auction.highPlayer, auction.amount)
-			flow.auction = null
-			resolveNegotiatedNations(game)
-		} else {
-			const order = nation.bids.map((bid) => bid.player)
-			// A withdrawal removes the current marker; its former successor is
-			// found in the auction's order before it was removed.
-			const previousOrder = currentAuctionOrder
-			let index = previousOrder.indexOf(player)
-			do { index = (index + 1) % previousOrder.length } while (!order.includes(previousOrder[index]) || previousOrder[index] === auction.highPlayer)
-			flow.turnOrder = [previousOrder[index]]
-		}
+		setAuctionTurn(game, player, currentAuctionOrder)
 		return
 	}
 	const treaty = game.nations.find((nation) => nation.ownerType === null)
@@ -322,11 +332,7 @@ function exchangeCalah(game, state, action, consentingPlayer = null) {
 	requireRule(!nation.isRemoved && nation.ownerType === "state" && nation.owner === state.id, "This state does not own Calah")
 	requireRule(action.kind === "pump" || action.kind === "reservoir", "Calah must be exchanged for a waterwork")
 	const area = getArea(game, action.area)
-	const homeland = game.board.areas.filter((land) => land.nation === rf.NATION_CALAH)
-	// Calah's own forest is neither "the hills of Calah" nor adjacent to Calah.
-	const onHills = area.nation === rf.NATION_CALAH && area.landType === rf.LAND_HILLS
-	const adjacent = area.nation !== rf.NATION_CALAH && homeland.some((land) => land.neighbours.includes(area.id))
-	requireRule(onHills || adjacent, "Calah's free waterwork must be on its hills or adjacent to Calah")
+	requireRule(rules.isCalahWaterworkLocation(game, area), "Calah's free waterwork must be on its hills or adjacent to Calah")
 	buyCard(game, state, action, consentingPlayer, true)
 	nation.isRemoved = true
 }
@@ -376,7 +382,7 @@ function endStateTurn(game) {
 	const flow = game.gameflow
 	flow.stateIndex++
 	const barahshum = game.nations[rf.NATION_BARAHSHUM]
-	if (!barahshum.isRemoved && barahshum.ownerType === "player") {
+	if (!barahshum.isRemoved && barahshum.ownerType === "player" && rules.barahshumDestinations(game).length) {
 		flow.developmentStep = "betweenStates"
 		flow.turnOrder = [flow.stateIndex < flow.stateOrder.length ? game.states[flow.stateOrder[flow.stateIndex]].king : flow.primogeniture]
 	} else beginStateTurn(game)
@@ -468,7 +474,8 @@ function developmentAction(game, action) {
 		flow.developmentStep = "purchasing"
 	} else {
 		requireRule(action.type === "endDevelopment", "Dig, purchase a card, or end this state's turn")
-		requireRule(rules.hasMaintenanceCrew(game, state.id), "An active state must have a maintenance crew")
+		// Ending development commits to the mandatory crew when no land sales are needed.
+		if (!rules.hasMaintenanceCrew(game, state.id)) buyCard(game, state, { kind: "digger" })
 		endStateTurn(game)
 	}
 }
@@ -479,6 +486,7 @@ export function applyAction(current, player, action) {
 	requireRule(Number.isInteger(player) && game.players[player], "Unknown player")
 	if (action.type === "exchangeBarahshum") {
 		exchangeBarahshum(game, player, action)
+		if (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "betweenStates") beginStateTurn(game)
 		return game
 	}
 	requireRule(game.gameflow.turnOrder[0] === player, "It is not this player's turn")
@@ -487,7 +495,12 @@ export function applyAction(current, player, action) {
 	else if (game.gameflow.phase === rf.PHASE_SETTLEMENT) settlementAction(game, player, action)
 	else if (game.gameflow.phase === rf.PHASE_DEVELOPMENT) developmentAction(game, action)
 	else if (game.gameflow.phase === rf.PHASE_RAINY_SEASON && game.rain.step === "routing") {
-		if (allocateWater(game, action)) finishWaterRouting(game, game.rain.routing.outflow)
+		let finished
+		if (action.type === "advanceWater") {
+			requireRule(rules.getAutomaticAction(game)?.type === "advanceWater", "Choose where to send the available water")
+			finished = advanceWaterRouting(game)
+		} else finished = allocateWater(game, action)
+		if (finished) finishWaterRouting(game, game.rain.routing.outflow)
 	}
 	else if (game.gameflow.phase === rf.PHASE_RAINY_SEASON && game.rain.step === "harvest") harvestAction(game, action)
 	else throw new Error("Water routing must be implemented before rainy-season turns can be submitted")
@@ -512,7 +525,13 @@ export function finishWaterRouting(game, outflow) {
 
 function setHarvestTurn(game) {
 	if (game.rain.harvestOrder.length > 0) {
-		game.gameflow.turnOrder = [game.states[game.rain.harvestOrder[0]].king]
+		const state = game.states[game.rain.harvestOrder[0]]
+		// No decision remains for an empty harvest or a state that must distribute.
+		if (rules.harvestAmount(game, state.id) === 0 || state.hasRevolted) {
+			harvestAction(game, { type: "harvest", choice: "distribute" })
+			return
+		}
+		game.gameflow.turnOrder = [state.king]
 		return
 	}
 	const counts = rules.irrigatedRegionCounts(game)

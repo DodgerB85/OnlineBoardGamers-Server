@@ -1,6 +1,20 @@
 /** Rule queries and economic calculations. All state is explicit and serializable. */
 import * as rf from "./URRreference.js"
-import { requireRule, isNationLandClosed } from "./URRmap.js"
+import { requireRule, isNationLandClosed, getArea, canalNeighbours } from "./URRmap.js"
+import { currentWaterFrame, waterChoices } from "./URRwater.js"
+
+export function getAutomaticAction(game) {
+	if (game.gameflow.pendingOffer) return null
+	if (game.gameflow.phase === rf.PHASE_DIVIDING_NATIONS && game.gameflow.auction && availableMoney(game, game.gameflow.turnOrder[0]) < game.gameflow.auction.amount + 5) return { type: "pass" }
+	if (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "betweenStates" && !canExchangeBarahshum(game, game.nations[rf.NATION_BARAHSHUM].owner)) return { type: "beginDevelopment" }
+	if (game.gameflow.phase !== rf.PHASE_RAINY_SEASON) return null
+	if (game.rain.step === "routing" && currentWaterFrame(game) && waterChoices(game).length === 0) return { type: "advanceWater" }
+	if (game.rain.step === "harvest") {
+		const state = game.states[game.rain.harvestOrder[0]]
+		if (harvestAmount(game, state.id) === 0 || state.hasRevolted) return { type: "harvest", choice: "distribute" }
+	}
+	return null
+}
 
 export function ownedLand(game, stateId, player = null) {
 	return game.board.areas.filter((area) => area.state === stateId && area.owner !== null && (player === null || area.owner === player))
@@ -86,9 +100,21 @@ export function getMaintenanceSaleError(game, player, area, stateId) {
 	return ""
 }
 
+export function barahshumDestinations(game) {
+	const home = game.board.areas.find((area) => area.nation === rf.NATION_BARAHSHUM)
+	const connected = canalNeighbours(game, home.id)
+	return home.neighbours.filter((id) => !connected.includes(id) && !isNationLandClosed(game, getArea(game, id)))
+}
+
+export function isCalahWaterworkLocation(game, area) {
+	// Calah's own forest is neither its hills nor land adjacent to Calah.
+	return area.nation === rf.NATION_CALAH ? area.landType === rf.LAND_HILLS : game.board.areas.some((land) => land.nation === rf.NATION_CALAH && land.neighbours.includes(area.id))
+}
+
 export function canExchangeBarahshum(game, player) {
 	const nation = game.nations[rf.NATION_BARAHSHUM]
 	if (!nation || nation.isRemoved || nation.ownerType === null) return false
+	if (!barahshumDestinations(game).length) return false
 	if (nation.ownerType === "player") return nation.owner === player && (game.gameflow.phase === rf.PHASE_SETTLEMENT || (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "betweenStates"))
 	return game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.stateOrder[game.gameflow.stateIndex] === nation.owner && game.states[nation.owner].king === player && ["digging", "purchasing"].includes(game.gameflow.developmentStep) && !game.gameflow.pendingOffer
 }

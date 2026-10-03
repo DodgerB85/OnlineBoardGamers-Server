@@ -8,12 +8,24 @@ export function currentWaterFrame(game) {
 	return game.rain.routing?.stack.at(-1) ?? null
 }
 
+function hasIrrigationTarget(game, pumpId, visited) {
+	const pump = getArea(game, pumpId)
+	if (pump.owner !== null && pump.irrigatedBy === null) return true
+	const path = [...visited, pumpId]
+	return getWaterworkReach(game, pumpId).some((id) => {
+		const area = getArea(game, id)
+		if (area.waterwork) return !path.includes(id) && hasIrrigationTarget(game, id, path)
+		return area.owner !== null && area.irrigatedBy === null
+	})
+}
+
 export function waterChoices(game) {
 	const frame = currentWaterFrame(game)
 	if (!frame || frame.water === 0) return []
 	return getWaterworkReach(game, frame.area).flatMap((id) => {
 		const area = getArea(game, id)
-		if (area.waterwork) return frame.visited.includes(id) ? [] : [{ area: id, kind: "pump" }]
+		// Sending water into an exhausted branch only returns it unchanged.
+		if (area.waterwork) return frame.visited.includes(id) || !hasIrrigationTarget(game, id, frame.visited) ? [] : [{ area: id, kind: "pump" }]
 		return area.owner !== null && area.irrigatedBy === null ? [{ area: id, kind: "irrigate" }] : []
 	})
 }
