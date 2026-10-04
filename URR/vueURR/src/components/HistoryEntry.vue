@@ -154,7 +154,7 @@ function jumpToEntry() {
 <template>
 	<div class="historyGroup">
 		<div v-if="phaseHeading" class="phaseHeading">{{ phaseHeading }}</div>
-		<div class="log" :class="{ selectableHistory: store.viewSettings.showReplay, currentReplay: isCurrentReplay, automaticStep: isAutomaticStep }" :aria-current="isCurrentReplay ? 'step' : undefined" :role="store.viewSettings.showReplay ? 'button' : undefined" :tabindex="store.viewSettings.showReplay ? 0 : undefined" @click="jumpToEntry" @keydown.enter.prevent="jumpToEntry" @keydown.space.prevent="jumpToEntry">
+		<div class="log" :class="{ selectableHistory: store.viewSettings.showReplay, currentReplay: isCurrentReplay, automaticStep: isAutomaticStep, separator: entry[0] === rf.HIST_NEW_GAME || entry[0] === rf.HIST_GAME_END }" :aria-current="isCurrentReplay ? 'step' : undefined" :role="store.viewSettings.showReplay ? 'button' : undefined" :tabindex="store.viewSettings.showReplay ? 0 : undefined" @click="jumpToEntry" @keydown.enter.prevent="jumpToEntry" @keydown.space.prevent="jumpToEntry">
 			<div class="historyTimestamp">{{ entry[4] != null ? timestampToString(entry[4]) : 'Time not recorded' }}</div>
 			<span v-if="isCurrentReplay" class="replayPosition">Current replay position</span>
 			<template v-if="entry.administration">
@@ -171,8 +171,7 @@ function jumpToEntry() {
 			</template>
 			<div v-else-if="entry[0] === rf.HIST_NEW_GAME" class="new_turn">{{ eventText }}</div>
 			<template v-else>
-				<div class="header" v-if="player && !isAutomaticStep"><img :src="getPlayerMarkerImage(entry[1])" alt="" /><b>{{ player.displayName }}</b></div>
-				<div class="eventDescription"><img v-if="eventArtwork" :src="eventArtwork.src" :alt="eventArtwork.alt" :title="eventArtwork.alt" /><span>{{ eventText }}</span></div>
+				<div class="container"><span class="header" v-if="player && !isAutomaticStep"><img :src="getPlayerMarkerImage(entry[1])" alt="" /><b>{{ player.displayName }}</b></span><img v-if="eventArtwork" :src="eventArtwork.src" :alt="eventArtwork.alt" :title="eventArtwork.alt" /><span>{{ eventText }}</span></div>
 				<div v-for="award in nationAwards" :key="award.id" class="nationAwardNotice"><img :src="getPlayerMarkerImage(award.owner)" alt="" /><span>{{ after.players[award.owner].displayName }} acquired {{ rf.NATION_NAMES[award.id] }} for {{ award.price }} SPL</span></div>
 				<StateLeadership v-for="change in leadershipChanges" :key="change.id" :change="change" />
 				<details class="balanceDetails" v-if="balanceChanges.length" @click.stop @keydown.enter.stop @keydown.space.stop><summary class="balanceChanges" aria-label="Show cash balances before and after"><span v-for="change in balanceChanges" :key="change.label" :title="change.label"><img :src="change.src" :alt="change.label" /><b>{{ change.amount > 0 ? '+' : '' }}{{ change.amount }} SPL</b></span></summary><div class="balanceBreakdown"><div v-for="change in balanceChanges" :key="change.label"><img :src="change.src" alt="" /><span>{{ change.label }}</span></div></div></details>
@@ -184,16 +183,18 @@ function jumpToEntry() {
 </template>
 
 <style scoped>
-.log { margin: 5px; border: 1px solid black; padding: 5px; background-color: #d4eafd; text-align: left; font-size: 14px; line-height: 23px; }
-.historyTimestamp { font-size: 12px; text-align: right; color: #53616a; }.administrationHeading { padding: 6px; background: #303030; color: white; text-align: center; font-weight: bold; }.administrationExplanation { margin: 8px 3px; }.administrationDetails { display: grid; gap: 5px; }.administrationDetails > div { display: flex; align-items: center; gap: 6px; padding: 4px; background: #edf6fd; }.administrationDetails img { width: 30px; height: 30px; flex-shrink: 0; }.administrationDetails span { min-width: 0; overflow-wrap: anywhere; }.administrationDetails button { flex-shrink: 0; min-height: 32px; padding: 4px 6px; border: 1px solid #177daf; border-radius: 3px; background: #fffdf4; font: inherit; cursor: pointer; }
-.header { display: flex; align-items: center; gap: 5px; font-size: 13px; }.header b { min-width: 0; overflow-wrap: anywhere; }.header img { width: 23px; height: 23px; }
-.new_turn, .phaseHeading { background: black; color: white; text-align: center; font-weight: bold; padding: 8px; }.phaseHeading { margin: 5px; font-size: 14px; }
-.selectableHistory { cursor: pointer; }.selectableHistory:hover, .selectableHistory:focus-visible { border-color: #c79e00; outline: 1px solid #c79e00; }
+.container { display: flex; align-items: center; }
+.log { direction: ltr; margin: 5px; border: #000 1px solid; text-align: left; padding: 3px; background-color: #d4eafd; z-index: 30; line-height: 25px; }
+.log.separator { padding: 3px; }
+.historyTimestamp { font-size: 0.8em; }.administrationHeading { padding: 6px; background: #303030; color: white; text-align: center; font-weight: bold; }.administrationExplanation { margin: 8px 3px; }.administrationDetails { display: grid; gap: 5px; }.administrationDetails > div { display: flex; align-items: center; gap: 6px; padding: 4px; background: #edf6fd; }.administrationDetails img { width: 30px; height: 30px; flex-shrink: 0; }.administrationDetails span { min-width: 0; overflow-wrap: anywhere; }.administrationDetails button { flex-shrink: 0; min-height: 32px; padding: 4px 6px; border: 1px solid #177daf; border-radius: 3px; background: #fffdf4; font: inherit; cursor: pointer; }
+.header { display: inline-flex; align-items: center; gap: 5px; }.header b { min-width: 0; overflow-wrap: anywhere; }.header img { width: 23px; height: 23px; }
+.new_turn { background: black; color: white; text-align: center; font-weight: bold; font-size: 1.2em; padding: 8px; }.phaseHeading { background: black; color: white; text-align: center; font-weight: bold; font-size: 1.2em; padding: 8px; margin: 5px; }
+.selectableHistory { cursor: pointer; }.selectableHistory:hover { border: 1px solid yellow; }.selectableHistory:focus-visible { outline: 2px solid yellow; outline-offset: -2px; }
 .log.currentReplay { box-shadow: inset 3px 0 #177daf; background: #e5f3ff; }.replayPosition { display: block; color: #12628c; font-size: 12px; font-weight: bold; }
 .actionImages { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }.actionImages img { width: 30px; height: 30px; object-fit: contain; }.historyCard { width: 185px; max-width: 100%; }
 .actionImages.multipleCards .historyCard { width: calc((100% - 4px) / 2); max-width: 185px; }
 .nationAwardNotice { display: flex; align-items: center; gap: 5px; margin-top: 4px; padding: 3px 6px; background: #edf6fd; border-left: 3px solid #177daf; font-size: 12px; }.nationAwardNotice img { width: 23px; height: 23px; flex-shrink: 0; }.nationAwardNotice span { min-width: 0; overflow-wrap: anywhere; }
-.eventDescription { display: flex; align-items: center; gap: 6px; }.eventDescription img { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; }.eventDescription span { min-width: 0; overflow-wrap: anywhere; }
+.container > img { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; margin-right: 6px; }.container > span:last-child { min-width: 0; overflow-wrap: anywhere; }
 .balanceChanges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }.balanceChanges span { display: inline-flex; align-items: center; gap: 4px; padding: 2px 5px; background: #edf6fd; border: 1px solid #adc2d0; font-size: 12px; }.balanceChanges img { width: 22px; height: 22px; }
 .balanceChanges { cursor: pointer; align-items: center; list-style: none; }.balanceChanges::-webkit-details-marker { display: none; }.balanceChanges::before { content: '▸'; font-size: 14px; }.balanceDetails[open] .balanceChanges::before { content: '▾'; }.balanceChanges:focus-visible { outline: 2px solid #177daf; outline-offset: 2px; }.balanceBreakdown { display: grid; gap: 3px; margin-top: 5px; padding: 5px; background: #edf6fd; font-size: 12px; }.balanceBreakdown > div { display: flex; align-items: center; gap: 5px; }.balanceBreakdown img { width: 22px; height: 22px; flex-shrink: 0; }.balanceBreakdown span { min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 1050px) { .balanceChanges { min-height: 40px; } }

@@ -58,7 +58,7 @@ function findReplayPosition() {
 </template>
 
 <style scoped>
-#history { position: absolute; left: 2px; top: var(--urr-menu-height, 60px); width: 450px; max-height: calc(100vh - var(--urr-menu-height, 60px) - 12px); box-sizing: border-box; z-index: 9999; border: 2px solid black; background-color: #d4eafd; overflow-y: auto; text-align: center; }
+#history { position: absolute; padding-top: 5px; left: 2px; top: var(--urr-menu-height, 60px); width: 450px; max-height: calc(100vh - var(--urr-menu-height, 60px) - 12px); box-sizing: border-box; z-index: 9999; border: 2px solid black; background-color: #d4eafd; overflow-y: scroll; text-align: center; }
 #history { scroll-padding-top: 60px; scroll-padding-bottom: 8px; }
 .historyControls { position: sticky; top: 0; z-index: 1; background: #d4eafd; }
 #historyToggleDiv { display: flex; align-items: center; justify-content: center; padding: 5px; background: #d4eafd; font-size: 13px; }
@@ -70,7 +70,7 @@ input:checked + .slider:before { transform: translateX(26px); }
 input:focus-visible + .slider { outline: 2px solid black; outline-offset: 2px; }
 .closeHistory { margin-left: auto; font-size: 22px; background: none; border: 0; cursor: pointer; }
 .replayHint { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin: 0; padding: 6px 8px; font-size: 13px; font-weight: bold; }.replayHint button { font: inherit; font-weight: normal; padding: 6px 8px; border: 1px solid #177daf; border-radius: 3px; background: #edf6fd; cursor: pointer; }
-.fade-enter-active, .fade-leave-active { transition: opacity .3s ease-in-out; }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.5s ease-in-out; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 @media (max-width: 1050px) { .closeHistory { min-width: 44px; min-height: 44px; padding: 0; }.replayHint button { min-height: 40px; }.switch { height: 40px; }.slider { top: 3px; bottom: 3px; } }
 </style>
