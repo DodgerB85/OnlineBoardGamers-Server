@@ -39,6 +39,9 @@ else
 
     # Load default users
     echo "Adding default users via data migration..."
+    # initial_users.json ships placeholder password hashes, so rewrite them from
+    # the admin hash first. Must run before loaddata, or the bad hashes get loaded.
+    python quick_setup_update_user_passwords.py
     python manage.py loaddata initial_users.json
 
     echo "Initial setup commands complete."

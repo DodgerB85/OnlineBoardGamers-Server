@@ -49,7 +49,7 @@ You should be able to browse around the logged-out pages, eg about, help, etc.
 7) Run this intial DB setup inside the container using `./setup_db.bat` or `docker-compose exec obs sh ./setup_db_script.sh`
 8) To fix migrate errors saying a table doesn't exist, try migrating that specific table, eg `docker-compose exec obs python manage.py migrate WEB`
 
-The compose has also created a superuser for the server - "admin" - "password" along with all required util users (eg SHADOW). All the pre-built users have their password set to their username - however the hash will be incorrect so in practice you'll need to edit in a password in the admin panel, although in practice you won't ever really need to login as any of these users anyway.
+The compose has also created a superuser for the server - "admin" - "password" along with all required util users (eg SHADOW). The `admin` login works as soon as setup finishes. The other pre-built users (SHADOW through to SHADOW_5, the bots, and `user1`) are only usable if setup was able to rewrite their password hashes - the `initial_users.json` fixture ships placeholder hashes, so if any of them is rejected at the login prompt, set a password for it in the admin panel. In practice you won't ever really need to login as any of these users anyway.
 
 9) Go back to the website, and create a normal user for yourself (Eg "DodgerB") using the "Register New Account" link
 10) Now test your admin access; go to `http://localhost:8000/admin/` and login with the superuser. Find the user you made and tick them active in the User DB. Also tick Email Confirmed in their profile.
