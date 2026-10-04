@@ -10,7 +10,10 @@ def redirect_old_url(request, original_id):
     """Redirect old IND game URLs to new Game format"""
     from Lobby.models import Game
 
-    game = get_object_or_404(Game, gameCode="IND", original_id=original_id)
+    game = Game.objects.filter(gameCode="IND", original_id=original_id).first()
+    if game is None:
+        # If not found by original_id, try by direct id (might already be a new game)
+        game = get_object_or_404(Game, id=original_id, gameCode="IND")
     return redirect("IND:showINDgame", game_id=game.id)
 
 

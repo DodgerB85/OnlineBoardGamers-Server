@@ -7,7 +7,7 @@ import lzstring
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import render  # , redirect
+from django.shortcuts import get_object_or_404, render  # , redirect
 from django.urls import reverse
 
 # from django.contrib.sites.shortcuts import get_current_site
@@ -48,9 +48,10 @@ def redirectLegacyTGZ(request, original_id):
     """Redirect from old /TGZ/:original_id format to new /TGZ/:id/show format"""
     try:
         game = Game.objects.get(gameCode="TGZ", original_id=original_id)
-        return HttpResponseRedirect(reverse("TGZ:showTGZgame", args=[game.id]))
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist")) from None
+        # If not found by original_id, try by direct id (might already be a new game)
+        game = get_object_or_404(Game, id=original_id, gameCode="TGZ")
+    return HttpResponseRedirect(reverse("TGZ:showTGZgame", args=[game.id]))
 
 
 def TGZhelp(request):
@@ -107,8 +108,7 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
         is_involved = True
 
     returnData.update(result["auth_data"])
-    # TGZ has trailing / on nextURL
-    returnData["nextURL"] = f"/nextGame?current_id={currentGame.id}&current_code={presenter.getGameCode()}/"
+    returnData["nextURL"] = f"/nextGame?current_id={currentGame.id}&current_code={presenter.getGameCode()}"
     returnData["TGZminimalText"] = result["user_profile"].TGZminimalText
 
     if not is_involved:

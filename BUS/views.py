@@ -49,7 +49,10 @@ def BUShelp(request):
 
 def redirect_old_url(request, original_id):
     """Redirect old BUS_Game URLs to new Game Game URLs"""
-    game = get_object_or_404(Game, gameCode="BUS", original_id=original_id)
+    game = Game.objects.filter(gameCode="BUS", original_id=original_id).first()
+    if game is None:
+        # If not found by original_id, try by direct id (might already be a new game)
+        game = get_object_or_404(Game, id=original_id, gameCode="BUS")
     return redirect("BUS:showBUSgame", game_id=game.id)
 
 

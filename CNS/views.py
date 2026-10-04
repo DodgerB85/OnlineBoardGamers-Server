@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, cast
 
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import gettext
 
@@ -37,9 +37,10 @@ def redirectLegacyCNS(request, original_id):
     """Redirect from old /CNS/:original_id format to new /CNS/:id/show format"""
     try:
         game = Game.objects.get(gameCode="CNS", original_id=original_id)
-        return HttpResponseRedirect(reverse("CNS:showCNSgame", args=[game.id]))
     except Game.DoesNotExist:
-        raise Http404(gettext("Game does not exist")) from None
+        # If not found by original_id, try by direct id (might already be a new game)
+        game = get_object_or_404(Game, id=original_id, gameCode="CNS")
+    return HttpResponseRedirect(reverse("CNS:showCNSgame", args=[game.id]))
 
 
 def CNShelp(request):

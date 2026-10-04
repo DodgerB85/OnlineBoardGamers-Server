@@ -9,7 +9,10 @@ app_name = "KFW"
 
 
 def redirect_old_url(request, original_id):
-    game = get_object_or_404(Game, gameCode="KFW", original_id=original_id)
+    game = Game.objects.filter(gameCode="KFW", original_id=original_id).first()
+    if game is None:
+        # If not found by original_id, try by direct id (might already be a new game)
+        game = get_object_or_404(Game, id=original_id, gameCode="KFW")
     return redirect("KFW:showKFWgame", game_id=game.id)
 
 

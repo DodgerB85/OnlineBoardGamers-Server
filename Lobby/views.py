@@ -812,6 +812,7 @@ def handler404(request, exception):
         {
             # "exception": exception
         },
+        status=404,
     )
 
 

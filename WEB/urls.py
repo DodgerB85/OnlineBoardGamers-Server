@@ -10,7 +10,10 @@ app_name = "WEB"
 
 def redirect_old_url(request, original_id):
     """Redirect from old /WEB/123/ URL to new /WEB/456/show/ URL"""
-    game = get_object_or_404(Game, gameCode="WEB", original_id=original_id)
+    game = Game.objects.filter(gameCode="WEB", original_id=original_id).first()
+    if game is None:
+        # If not found by original_id, try by direct id (might already be a new game)
+        game = get_object_or_404(Game, id=original_id, gameCode="WEB")
     return redirect("WEB:showWEBgame", game_id=game.id)
 
 
