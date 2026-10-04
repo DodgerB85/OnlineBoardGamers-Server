@@ -53,8 +53,23 @@ echo KFW server started.
 start "Vue WEB" /D "%OBG_HOME%\WEB\vueWEB" cmd /c "call npm run dev"
 echo WEB server started.
 
-start "Vue TGZ" /D "%OBG_HOME%\TGZ\vueTGZ" npm run dev
+start "Vue TGZ" /D "%OBG_HOME%\TGZ\vueTGZ" cmd /c "call npm run dev"
 echo TGZ server started.
+
+start "Vue IND" /D "%OBG_HOME%\IND\vueIND" cmd /c "call npm run dev"
+echo IND server started.
+
+start "Vue RNB" /D "%OBG_HOME%\RNB\vueRNB" cmd /c "call npm run dev"
+echo RNB server started.
+
+start "Vue DDL" /D "%OBG_HOME%\DDL\vueDDL" cmd /c "call npm run dev"
+echo DDL server started.
+
+start "Vue FCM" /D "%OBG_HOME%\FCM\vueFCM" cmd /c "call npm run dev"
+echo FCM server started.
+
+start "Vue URR" /D "%OBG_HOME%\URR\vueURR" cmd /c "call npm run dev"
+echo URR server started.
 
 echo.
 echo ==================================================
