@@ -319,7 +319,9 @@ export function getEveryLocationWithinSingleHex(hexID, playerIndex) {
 				// drained polder still forms the shore the boat docked against. Either way the dock stays
 				// on THIS land hex, so a land transporter here must still be able to reach and pick it up.
 				const otherHexIsDockable = rf.TERR_ACTS_LIKE_WATER.includes(otherHex.currentTerrain) || rf.TERR_IS_POLDER.includes(otherHex.currentTerrain)
-				if (otherHexIsDockable && [playerIndex, -1].includes(edge.wall[1])) {
+				// CITY: a city is ringed by its moat, so a boat interacts with it via the
+				// river - it never docks into the city.
+				if (hex.hexTerrainID !== rf.CITY && otherHexIsDockable && [playerIndex, -1].includes(edge.wall[1])) {
 					if (hex.sideNodeIds[n] >= 0) {
 						eligibleLocations = eligibleLocations.concat(util.indexArray(3).map((offset) => setDockedLocation(hexID, n, rf.BANK_NONE, offset)))
 					} else {

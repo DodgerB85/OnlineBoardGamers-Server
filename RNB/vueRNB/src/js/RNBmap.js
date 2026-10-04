@@ -52,7 +52,15 @@ export function addNewEdge(hexIds) {
 	let otherHexData = model.getHexByID(hexIds[1])
 	let joiningSide = hd.getJoiningSide(hexData.coord, otherHexData.coord)
 	let otherSide = (joiningSide + 3) % 6
-	let hasRiver = hexData.sideRiverVertexIds[joiningSide] >= 0
+	// CITY: the moat is internal to the city, so its edges are land-to-land. The road
+	// enters the city at the outer side node, and the bridge crosses the moat behind it.
+	const hexIsCity = hexData.hexTerrainID === rf.CITY
+	const otherIsCity = otherHexData.hexTerrainID === rf.CITY
+	const involvesCity = hexIsCity || otherIsCity
+	let hasRiver = !involvesCity && (hexData.sideRiverVertexIds[joiningSide] >= 0 || otherHexData.sideRiverVertexIds[otherSide] >= 0)
+	// CITY: a city edge to a river side behaves like a river edge for roads/power
+	// lines - two options, one per bank of the neighbouring river (not city-to-city)
+	const cityRiverNeighbour = involvesCity && !(hexIsCity && otherIsCity) && (hexIsCity ? otherHexData.sideRiverVertexIds[otherSide] >= 0 : hexData.sideRiverVertexIds[joiningSide] >= 0)
 	// Find out the direction we're going in
 	let firstOppositeVertex = (joiningSide + 4) % 6
 	let secondOppositeVertex = (firstOppositeVertex + 5) % 6
@@ -69,8 +77,8 @@ export function addNewEdge(hexIds) {
 			[joiningSide, firstOppositeVertex],
 			[(joiningSide + 1) % 6, secondOppositeVertex],
 		],
-		hasRoad: hasRiver ? [false, false] : [false], // Road either side of the river,
-		hasPowerLine: hasRiver ? [false, false] : [false], // Power line either side of the river,
+		hasRoad: hasRiver || cityRiverNeighbour ? [false, false] : [false], // Road either side of the river,
+		hasPowerLine: hasRiver || cityRiverNeighbour ? [false, false] : [false], // Power line either side of the river,
 		hasRiver: hasRiver,
 	})
 
@@ -148,7 +156,12 @@ export function existingEntryPoints(hexId) {
 			} else {
 				let offset = hexId === edge.edgeHexIDs[0] ? 0 : 1
 				for (const k of [0, 1].filter((k) => edge.hasRoad[k])) {
-					isEntryPoint[hex.cornerNodeIds[side][(k + offset) % 2]] = true
+					// CITY: city-river edges attach per bank (25%/75% nodes); other city
+					// edges at the centre outer gate
+					if (hex.hexTerrainID === rf.CITY) {
+						const node = edge.hasRoad.length === 2 ? cityBankNodeForEdgeSlot(hex, side, edge, k) : hex.sideNodeIds[side]
+						isEntryPoint[node] = true
+					} else isEntryPoint[hex.cornerNodeIds[side][(k + offset) % 2]] = true
 				}
 			}
 		}
@@ -169,7 +182,12 @@ export function existingPowerLineEntryPoints(hexId) {
 			} else {
 				let offset = hexId === edge.edgeHexIDs[0] ? 0 : 1
 				for (const k of [0, 1].filter((k) => edge.hasPowerLine[k])) {
-					isEntryPoint[hex.cornerNodeIds[side][(k + offset) % 2]] = true
+					// CITY: city-river edges attach per bank (25%/75% nodes); other city
+					// edges at the centre outer gate
+					if (hex.hexTerrainID === rf.CITY) {
+						const node = edge.hasPowerLine.length === 2 ? cityBankNodeForEdgeSlot(hex, side, edge, k) : hex.sideNodeIds[side]
+						isEntryPoint[node] = true
+					} else isEntryPoint[hex.cornerNodeIds[side][(k + offset) % 2]] = true
 				}
 			}
 		}
@@ -672,6 +690,11 @@ export function addRoadToMap_core([fromHexID, fromBucketId], [toHexID, toBucketI
 		const actual = oppositeCorner ? 1 : 0
 		edgeData.hasRoad[actual] = true
 		entryNodes = [0, 1].map((k) => hexes[k].cornerNodeIds[hexSides[k]][(actual + k) % 2])
+		// CITY: on city-river edges the city road attaches at the bank node matching
+		// the chosen bank (not the centre outer gate)
+		for (const k of [0, 1]) {
+			if (hexes[k].hexTerrainID === rf.CITY) entryNodes[k] = cityBankNodeForEdgeSlot(hexes[k], hexSides[k], edgeData, actual)
+		}
 	}
 	for (const k of [0, 1]) {
 		updateHexInternalRoads(hexIds[k], [entryNodes[k]])
@@ -747,6 +770,11 @@ export function addPowerLineToMap_core([fromHexID, fromBucketId], [toHexID, toBu
 		const actual = oppositeCorner ? 1 : 0
 		edgeData.hasPowerLine[actual] = true
 		entryNodes = [0, 1].map((k) => hexes[k].cornerNodeIds[hexSides[k]][(actual + k) % 2])
+		// CITY: on city-river edges the city power line attaches at the bank node
+		// matching the chosen bank (not the centre outer gate)
+		for (const k of [0, 1]) {
+			if (hexes[k].hexTerrainID === rf.CITY) entryNodes[k] = cityBankNodeForEdgeSlot(hexes[k], hexSides[k], edgeData, actual)
+		}
 	}
 	for (const k of [0, 1]) {
 		updateHexInternalPowerLines(hexIds[k], [entryNodes[k]])
@@ -756,6 +784,11 @@ export function addPowerLineToMap_core([fromHexID, fromBucketId], [toHexID, toBu
 export function clickedBridgeOption(entry) {
 	const store = useModelStore()
 	const hexID = entry[0]
+	// CITY: the Road & Bridge pseudo-building - build the moat bridge and the road together
+	if (store.context.action === rf.ACT_BUILD_ROAD_BRIDGE_SELECT) {
+		addRoadBridgeToMap(hexID, entry[1])
+		return
+	}
 	// Add a bridge
 	if (store.context.action === rf.ACT_TM_BUILD_SELECT_BRIDGE_ROAD_WALL_BUILDING_RES_PICKUP_DROP) {
 		addBridgeToMap(hexID, entry[1], true)
@@ -764,6 +797,284 @@ export function clickedBridgeOption(entry) {
 		addBridgeToMap(hexID, entry[1], false)
 		store.context.eligibleBridgesToBuild.splice(0)
 	}
+}
+
+// CITY: the two moat-bank nodes on the given side (25% and 75% along the side),
+// aligned with the two banks of a river on the neighbouring hex. Derived from the
+// inner gate id (1-6) so it stays correct after rotation.
+export function cityBankNodesForSide(cityHex, side) {
+	const gi = cityHex.cornerNodeIds[side][0] - 1 // unrotated side index of this side
+	return [rf.CITY_BANK_NODE_BASE + 2 * gi, rf.CITY_BANK_NODE_BASE + 2 * gi + 1]
+}
+
+// CITY: which side of a city a bridge (centre or bank) belongs to
+export function citySideOfBridge(cityHex, bridgeArr) {
+	for (const side of util.indexArray(6)) {
+		const innerGate = cityHex.cornerNodeIds[side][0]
+		if (util.arraysEqual(cityHex.cornerNodeIds[side], bridgeArr)) return side
+		for (const bankNode of cityBankNodesForSide(cityHex, side)) {
+			if (util.arraysEqual(bridgeArr, [innerGate, bankNode])) return side
+		}
+	}
+	return -1
+}
+
+// CITY: every bridge currently buildable on this city (1 stone each): the centre
+// bridge on plain sides, one per river bank on sides joined to a river. Never on
+// sides facing sea/void, never the centre bridge on a river side.
+export function getCityBridgeOptions(cityHexID) {
+	const cityHex = model.getHexByID(cityHexID)
+	if (cityHex.hexTerrainID !== rf.CITY) return []
+	const res = []
+	for (const side of util.indexArray(6)) {
+		const neighbourID = cityHex.hexLookup[side]
+		if (neighbourID === -1) continue
+		const neighbour = model.getHexByID(neighbourID)
+		if (neighbour.hexTerrainID === rf.TERR_VOID || neighbour.currentTerrain === rf.TERR_SEA) continue
+		const innerGate = cityHex.cornerNodeIds[side][0]
+		if (neighbour.sideRiverVertexIds[(side + 3) % 6] >= 0) {
+			for (const bankNode of cityBankNodesForSide(cityHex, side)) {
+				const bridgeArr = [innerGate, bankNode]
+				if (!util.includesArray(cityHex.builtBridges, bridgeArr)) res.push({ cityHexID, side, bridgeArr, isBankBridge: true })
+			}
+		} else {
+			const bridgeArr = [...cityHex.cornerNodeIds[side]]
+			if (bridgeArr[0] === -1) continue
+			if (!util.includesArray(cityHex.builtBridges, bridgeArr)) res.push({ cityHexID, side, bridgeArr, isBankBridge: false })
+		}
+	}
+	return res
+}
+
+// CITY: list of unbuilt city-moat bridges reachable from the given (neighbouring) hex.
+// reachableBucketIds (optional) = the builder's reachable initial buckets; on river
+// sides only the bank bridge aligned with the builder's bank is offered.
+export function getEligibleCityNeighbourBridges(neighbourHexID, reachableBucketIds = null) {
+	const store = useModelStore()
+	const neighbourHex = model.getHexByID(neighbourHexID)
+	// CITY: no bridge or road is built from sea into a city
+	if (neighbourHex.currentTerrain === rf.TERR_SEA) return []
+	let res = []
+	for (const side of util.indexArray(6)) {
+		const cityHexID = neighbourHex.hexLookup[side]
+		if (cityHexID === -1) continue
+		const cityHex = model.getHexByID(cityHexID)
+		if (cityHex.hexTerrainID !== rf.CITY) continue
+		const citySide = (side + 3) % 6
+		// Don't offer if this edge already has a road
+		const edge = store.mapData.edgeData[neighbourHex.edgeLookup[side]]
+		if (edge && (edge.hasRoad.length === 1 ? edge.hasRoad[0] : edge.hasRoad.some((r) => r))) continue
+		// River side flowing into the moat: one bank bridge per river bank, aligned
+		// with the bank the builder stands on (25% node pairs with river corner[1],
+		// 75% node with corner[0])
+		if (neighbourHex.sideRiverVertexIds[side] >= 0) {
+			const bankNodes = cityBankNodesForSide(cityHex, citySide)
+			for (const [bankIdx, bankNode] of bankNodes.entries()) {
+				const bridgeArr = [cityHex.cornerNodeIds[citySide][0], bankNode]
+				if (util.includesArray(cityHex.builtBridges, bridgeArr)) continue
+				const corner = neighbourHex.cornerNodeIds[side][(bankIdx + 1) % 2]
+				if (corner === -1) continue
+				if (reachableBucketIds && !reachableBucketIds.includes(neighbourHex.bucketIdsInitial[neighbourHex.nodeBucketIds[corner]])) continue
+				res.push({ neighborHexID: neighbourHexID, cityHexID, side, citySide, bridgeArr, bankIdx })
+			}
+			continue
+		}
+		// The road of a bridge+road enters at the neighbour's side node; river exit
+		// sides have none (-1), so no bridge+road can be built from there
+		if (neighbourHex.sideNodeIds[side] === -1) continue
+		res.push({ neighborHexID: neighbourHexID, cityHexID, side, citySide, bridgeArr: [...cityHex.cornerNodeIds[citySide]], bankIdx: -1 })
+	}
+	return res
+}
+
+// CITY: list of unbuilt moat bridges on a city itself, for building a bridge+road
+// FROM the city out to a neighbouring hex (mirror of getEligibleCityNeighbourBridges).
+// River-neighbour sides return one option per bank (bankIdx 0/1); other sides one
+// option with bankIdx -1. Sea neighbours are never offered.
+export function getEligibleCityExitBridges(cityHexID) {
+	const store = useModelStore()
+	const cityHex = model.getHexByID(cityHexID)
+	if (cityHex.hexTerrainID !== rf.CITY) return []
+	let res = []
+	for (const option of getCityBridgeOptions(cityHexID)) {
+		const citySide = option.side
+		const neighbourHexID = cityHex.hexLookup[citySide]
+		const neighbourHex = model.getHexByID(neighbourHexID)
+		const edge = store.mapData.edgeData[cityHex.edgeLookup[citySide]]
+		const neighbourSide = (citySide + 3) % 6
+		if (option.isBankBridge) {
+			const bankIdx = option.bridgeArr[1] === cityBankNodesForSide(cityHex, citySide)[0] ? 0 : 1
+			const cityIdx = edge.edgeHexIDs[0] === cityHexID ? 0 : 1
+			// this bank's road slot
+			if (edge.hasRoad[(bankIdx + cityIdx) % 2]) continue
+			// the bank node aligns with the river corner one index over
+			const corner = neighbourHex.cornerNodeIds[neighbourSide][(bankIdx + 1) % 2]
+			if (corner === -1) continue
+			const toBucket = neighbourHex.bucketIdsInitial[neighbourHex.nodeBucketIds[corner]]
+			res.push({ cityHexID, citySide, bridgeArr: [...option.bridgeArr], bankIdx, toHexID: neighbourHexID, toBucketId: toBucket })
+		} else {
+			// Don't offer if this edge already has a road
+			if (edge.hasRoad.length === 1 ? edge.hasRoad[0] : edge.hasRoad.some((r) => r)) continue
+			const node = neighbourHex.sideNodeIds[neighbourSide]
+			if (node === -1) continue
+			const toBucket = neighbourHex.bucketIdsInitial[neighbourHex.nodeBucketIds[node]]
+			res.push({ cityHexID, citySide, bridgeArr: [...option.bridgeArr], bankIdx: -1, toHexID: neighbourHexID, toBucketId: toBucket })
+		}
+	}
+	return res
+}
+
+// CITY: unbuilt moat bridges of adjacent city hexes, buildable (bridge only, 1 stone)
+// from hexID. On river sides only the bank bridge aligned with the builder's bank
+// is offered; on plain sides any touch on the facing side suffices.
+export function getCityBridgesBuildableFrom(hexID, bucketIds) {
+	const hex = model.getHexByID(hexID)
+	// CITY: no bridge or road is built from sea into a city
+	if (hex.currentTerrain === rf.TERR_SEA) return []
+	let res = []
+	for (const side of util.indexArray(6)) {
+		const cityHexID = hex.hexLookup[side]
+		if (cityHexID === -1) continue
+		const cityHex = model.getHexByID(cityHexID)
+		if (cityHex.hexTerrainID !== rf.CITY) continue
+		const citySide = (side + 3) % 6
+		if (hex.sideRiverVertexIds[side] >= 0) {
+			const bankNodes = cityBankNodesForSide(cityHex, citySide)
+			for (const [bankIdx, bankNode] of bankNodes.entries()) {
+				const bridgeArr = [cityHex.cornerNodeIds[citySide][0], bankNode]
+				if (util.includesArray(cityHex.builtBridges, bridgeArr)) continue
+				const corner = hex.cornerNodeIds[side][(bankIdx + 1) % 2]
+				if (corner === -1) continue
+				if (!bucketIds.includes(hex.bucketIdsInitial[hex.nodeBucketIds[corner]])) continue
+				res.push([cityHexID, [...bridgeArr]])
+			}
+			continue
+		}
+		const bridgeArr = cityHex.cornerNodeIds[citySide]
+		if (!bridgeArr || bridgeArr[0] === -1) continue
+		if (util.includesArray(cityHex.builtBridges, bridgeArr)) continue
+		const sideNodes = [hex.sideNodeIds[side], ...hex.cornerNodeIds[side]]
+		const touches = sideNodes.some((n) => n >= 0 && bucketIds.includes(hex.bucketIdsInitial[hex.nodeBucketIds[n]]))
+		if (!touches) continue
+		res.push([cityHexID, [...bridgeArr]])
+	}
+	return res
+}
+
+// CITY: a moat bridge may not be built on a side facing sea or void - there is
+// nothing to bridge to
+export function cityBridgeSideIsBuildable(cityHex, bridgeArr) {
+	const citySide = citySideOfBridge(cityHex, bridgeArr)
+	if (citySide === -1) return false
+	const neighbourID = cityHex.hexLookup[citySide]
+	if (neighbourID === -1) return false
+	const neighbour = model.getHexByID(neighbourID)
+	return neighbour.hexTerrainID !== rf.TERR_VOID && neighbour.currentTerrain !== rf.TERR_SEA
+}
+
+// CITY: the bank node (25%/75% along the side) that road/power-line slot k of the
+// given city-river edge attaches to. Slot k's bank depends on the edge's hex order.
+export function cityBankNodeForEdgeSlot(cityHex, citySide, edge, k) {
+	const cityIdx = edge.edgeHexIDs[0] === cityHex.hexID ? 0 : 1
+	const bankNodes = cityBankNodesForSide(cityHex, citySide)
+	return bankNodes[(k + cityIdx) % 2]
+}
+
+// CITY: a wall on a city's edge may only be built on a side where a bridge AND road
+// already cross the moat (the wall stands on a built-up gate, not on the water).
+// On city-river edges one bank having both its bridge and road is enough.
+export function cityEdgeHasBridgeAndRoad(cityHexID, edge) {
+	const cityHex = model.getHexByID(cityHexID)
+	const sideIdx = edge.edgeHexIDs[0] === cityHexID ? 0 : 1
+	const citySide = edge.joiningSides[sideIdx]
+	const innerGate = cityHex.cornerNodeIds[citySide][0]
+	if (edge.hasRoad.length === 2) {
+		const bankNodes = cityBankNodesForSide(cityHex, citySide)
+		return bankNodes.some((node, bankIdx) => util.includesArray(cityHex.builtBridges, [innerGate, node]) && edge.hasRoad[(bankIdx + sideIdx) % 2])
+	}
+	return util.includesArray(cityHex.builtBridges, cityHex.cornerNodeIds[citySide]) && edge.hasRoad.some(Boolean)
+}
+
+// CITY: build a bridge across a city moat plus the road into the city, for 2 stone.
+// A bank bridge (25%/75%) roads to the aligned bank of a neighbouring river; the
+// centre bridge roads to the neighbouring side node.
+export function addRoadBridgeToMap(cityHexID, bridgeArr) {
+	const store = useModelStore()
+	const transporterID = store.context.selectedTransporterIDforTM
+	const transporterObj = model.getTransporterByID(transporterID)
+	const cityHex = model.getHexByID(cityHexID)
+	const citySide = citySideOfBridge(cityHex, bridgeArr)
+	if (citySide === -1) {
+		rf.doAdminAlrt("addRoadBridgeToMap: bridge not found on city")
+		return
+	}
+	const neighbourHexID = cityHex.hexLookup[citySide]
+	if (neighbourHexID === -1) {
+		rf.doAdminAlrt("addRoadBridgeToMap: no neighbouring tile to build the road onto")
+		return
+	}
+	const neighbourHex = model.getHexByID(neighbourHexID)
+	// The transporter must be on the neighbouring tile or on the city itself
+	if (![neighbourHexID, cityHexID].includes(transporterObj.location[1])) return
+	// Need 2 stone (1 for the bridge, 1 for the road)
+	let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_STONE, rf.RES_STONE], true)
+	if (errorFlag !== 0) return
+	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_STONE, rf.RES_STONE], false)
+
+	let fromLocation
+	let toLocation
+	if (transporterObj.location[1] === cityHexID) {
+		const bankNodes = cityBankNodesForSide(cityHex, citySide)
+		const bankIdx = bridgeArr[1] === bankNodes[0] ? 0 : bridgeArr[1] === bankNodes[1] ? 1 : -1
+		if (bankIdx >= 0) {
+			// Bank bridge: the road runs to the aligned bank of the neighbouring river
+			// (25% node pairs with river corner[1], 75% node with corner[0])
+			const riverCornerIdx = (bankIdx + 1) % 2
+			const corner = neighbourHex.cornerNodeIds[(citySide + 3) % 6][riverCornerIdx]
+			if (corner === -1) {
+				rf.doAdminAlrt("addRoadBridgeToMap: no river bank node on the neighbouring side")
+				return
+			}
+			const toBucket = neighbourHex.bucketIdsInitial[neighbourHex.nodeBucketIds[corner]]
+			fromLocation = [rf.LOCATION_BUCKET, cityHexID, 0]
+			toLocation = [rf.LOCATION_BUCKET, neighbourHexID, toBucket]
+		} else {
+			// Centre bridge: the road runs from the city (bucket 0) out to the
+			// neighbouring hex's side bucket
+			const neighbourSide = (citySide + 3) % 6
+			const neighbourNode = neighbourHex.sideNodeIds[neighbourSide]
+			if (neighbourNode === -1) {
+				rf.doAdminAlrt("addRoadBridgeToMap: neighbouring side has no road node")
+				return
+			}
+			const toBucket = neighbourHex.bucketIdsInitial[neighbourHex.nodeBucketIds[neighbourNode]]
+			fromLocation = [rf.LOCATION_BUCKET, cityHexID, 0]
+			toLocation = [rf.LOCATION_BUCKET, neighbourHexID, toBucket]
+		}
+	} else {
+		const fromBucket = loc.getBucketIDfromAnyHexIDandVertex(neighbourHexID, transporterObj.location[2])
+		fromLocation = [rf.LOCATION_BUCKET, neighbourHexID, fromBucket]
+		toLocation = [rf.LOCATION_BUCKET, cityHexID, 0]
+	}
+
+	// Build the bridge (no resource deduction - already done)
+	addBridgeToMap_core(cityHexID, transporterID, bridgeArr, false)
+	// Build the road (no resource deduction - already done)
+	addRoadToMap_core([fromLocation[1], fromLocation[2]], [toLocation[1], toLocation[2]], transporterID, false)
+
+	// Add to the stack
+	const compressedFromLocation = stack.compressLocation(fromLocation)
+	const compressedToLocation = stack.compressLocation(toLocation)
+	let stackAction = [rf.STACK_BUILD_ROAD_BRIDGE, stack.getTransIDtoUse(transporterObj), cityHexID, [...bridgeArr], [...compressedFromLocation], [...compressedToLocation]]
+	stack.addItemToStack({
+		action: rf.STACK_BUILD_ROAD_BRIDGE,
+		historyEntry: stackAction,
+		playerIndex: controller.currentPlayerIndex(),
+	})
+
+	// Reset the context
+	highlight.updateAllHighlightsForTransporterMode()
+	context.createUndoPoint()
 }
 
 export function clickedBombOption(buildingID) {
@@ -777,16 +1088,20 @@ export function clickedBombOption(buildingID) {
 	if (errorFlag !== 0) return
 	// Remove the bomb for real
 	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
-	// Remove the building
-	model.removeBuildingByID(buildingID)
+	// A bomb destroys every building on the hex (a city can hold 2), but strengthened ones survive
+	const hexID = buildingObj.location[1]
+	const bucketID = buildingObj.location[2]
+	const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && !b.strengthened)
+	for (const b of buildingsOnHex) model.removeBuildingByID(b.id)
 	// Add to stack
-	let stackAction = [rf.STACK_BOMB_BUILDING, stack.getTransIDtoUse(transporterObj), buildingObj.type, buildingObj.location[1], buildingObj.location[2]]
+	let stackAction = [rf.STACK_BOMB_BUILDING, stack.getTransIDtoUse(transporterObj), buildingObj.type, hexID, bucketID]
 	stack.addItemToStack({
 		action: rf.STACK_BOMB_BUILDING,
 		historyEntry: stackAction,
 		playerIndex: controller.currentPlayerIndex(),
 	})
 	store.context.eligibleBuildingsToBomb.splice(0)
+	highlight.updateAllHighlightsForTransporterMode()
 	context.createUndoPoint()
 }
 
@@ -811,6 +1126,7 @@ export function clickedStrengthenOption(buildingID) {
 		playerIndex: controller.currentPlayerIndex(),
 	})
 	store.context.eligibleBuildingsToStrengthen.splice(0)
+	highlight.updateAllHighlightsForTransporterMode()
 	context.createUndoPoint()
 }
 
@@ -1221,23 +1537,23 @@ export function addWallToMap_core(transporterID, hex1ID, hex2ID, playerIndex, de
 		if (deductResources) {
 			const hex1 = model.getHexByID(id1)
 			const hex2 = model.getHexByID(id2)
-			const hex1isSea = hex1.currentTerrain === rf.TERR_SEA
-			const hex2isSea = hex2.currentTerrain === rf.TERR_SEA
-			// XOR logic: Only run if exactly one hex is sea (land-water border)
-			if (hex1isSea !== hex2isSea) {
-				const landIdx = hex1isSea ? 1 : 0
+			const hex1isWater = rf.TERR_ACTS_LIKE_WATER.includes(hex1.currentTerrain)
+			const hex2isWater = rf.TERR_ACTS_LIKE_WATER.includes(hex2.currentTerrain)
+			// XOR logic: Only run if exactly one hex acts like water (land-water border, including wet polders)
+			if (hex1isWater !== hex2isWater) {
+				const landIdx = hex1isWater ? 1 : 0
 				const landHexID = edgeEntry.edgeHexIDs[landIdx]
 				const joiningSide = edgeEntry.joiningSides[landIdx]
 				const dockedBoats = model.getAllInGameTransporters().filter((t) => loc.isDockedLocation(t.location) && t.location[1] === landHexID && t.location[2] === joiningSide)
 
 				if (dockedBoats.length > 0) {
-					const seaHexID = hex1isSea ? id1 : id2
-					const seaBucketLocation = loc.setBucketLocation(seaHexID, 0)
+					const waterHexID = hex1isWater ? id1 : id2
+					const waterBucketLocation = loc.setBucketLocation(waterHexID, 0)
 					// For each boat, if it isn't the currentPlayerIndex, move them out to see
 					dockedBoats.forEach((boat) => {
 						if (boat.ownerIndex !== playerIndex) {
 							// Pick a distinct sea vertex near where the boat enters the sea hex, avoiding vertices other boats already occupy
-							const newSeaLocation = loc.getVisualLocationFromBucketLocation(seaBucketLocation, boat.location, boat.type)
+							const newSeaLocation = loc.getVisualLocationFromBucketLocation(waterBucketLocation, boat.location, boat.type)
 							boat.location = newSeaLocation
 							shiftedBoatIDs.push(boat.id)
 							// Keep the boat's visual position in sync and move any carried transporters too
@@ -1273,13 +1589,34 @@ export function allLandVertexBucketsWithoutRoadsAdjacentTo(hexID, bucketIds) {
 		const edge = store.mapData.edgeData[hex.edgeLookup[side]]
 		const otherHexId = hex.hexLookup[side]
 		const otherHex = model.getHexByID(otherHexId)
+		const otherSide = (side + 3) % 6
+		// CITY: a city side joined to a river side is gated per bank (each road slot
+		// needs that bank's moat bridge); other city sides need the centre bridge
+		const cityRiverEdge = (hex.hexTerrainID === rf.CITY && otherHex.sideRiverVertexIds[otherSide] >= 0) || (otherHex.hexTerrainID === rf.CITY && hex.sideRiverVertexIds[side] >= 0)
+		if (!cityRiverEdge) {
+			if (hex.hexTerrainID === rf.CITY && !util.includesArray(hex.builtBridges, hex.cornerNodeIds[side])) continue
+			if (otherHex.hexTerrainID === rf.CITY && !util.includesArray(otherHex.builtBridges, otherHex.cornerNodeIds[otherSide])) continue
+		}
 		if (rf.TERR_ANY_LAND.includes(hex.currentTerrain) && rf.TERR_ANY_LAND.includes(otherHex.currentTerrain)) {
 			function addRes(nodeId) {
+				// Skip invalid nodes - polders have no corner nodes and river sides have no side node
+				if (nodeId < 0) return
 				const otherBucketId = otherHex.bucketIdsInitial[otherHex.nodeBucketIds[nodeId]]
 				res.push([otherHexId, [otherBucketId]])
 			}
-			const otherSide = (side + 3) % 6
-			if (hex.sideNodeIds[side] !== -1 && !edge.hasRoad[0]) {
+			if (cityRiverEdge && edge.hasRoad.length === 2) {
+				// CITY: one road option per river bank, each gated on that bank's bridge
+				const cornerSide = edge.edgeHexIDs[0] === hexID ? [0, 1] : [1, 0]
+				const otherCornerSide = cornerSide.map((i) => (i + 1) % 2)
+				const cityHexObj = hex.hexTerrainID === rf.CITY ? hex : otherHex
+				const citySide = hex.hexTerrainID === rf.CITY ? side : otherSide
+				for (const k of [0, 1].filter((k) => !edge.hasRoad[k])) {
+					const bankNode = cityBankNodeForEdgeSlot(cityHexObj, citySide, edge, k)
+					if (!util.includesArray(cityHexObj.builtBridges, [cityHexObj.cornerNodeIds[citySide][0], bankNode])) continue
+					const touches = hex.hexTerrainID === rf.CITY ? inBucket(hex.sideNodeIds[side]) : inBucket(hex.cornerNodeIds[side][cornerSide[k]])
+					if (touches) addRes(otherHex.cornerNodeIds[otherSide][otherCornerSide[k]])
+				}
+			} else if (hex.sideNodeIds[side] !== -1 && !edge.hasRoad[0]) {
 				if (inBucket(hex.sideNodeIds[side])) {
 					addRes(otherHex.sideNodeIds[otherSide])
 				}
@@ -1325,12 +1662,33 @@ export function allVertexBucketsWithoutPowerLinesAdjacentTo(hexID, bucketIds) {
 		if (!rf.TERR_ANY.includes(hex.currentTerrain) || !rf.TERR_ANY.includes(otherHex.currentTerrain)) continue
 		// Rivers may only be crossed where a bridge exists on the boundary
 		if (edge.hasRiver && !riverCrossingAllowed(hex, side, otherHex, (side + 3) % 6)) continue
+		const otherSide = (side + 3) % 6
+		// CITY: a city side joined to a river side is gated per bank (each power line
+		// slot needs that bank's moat bridge); other city sides need the centre bridge
+		const cityRiverEdge = (hex.hexTerrainID === rf.CITY && otherHex.sideRiverVertexIds[otherSide] >= 0) || (otherHex.hexTerrainID === rf.CITY && hex.sideRiverVertexIds[side] >= 0)
+		if (!cityRiverEdge) {
+			if (hex.hexTerrainID === rf.CITY && !util.includesArray(hex.builtBridges, hex.cornerNodeIds[side])) continue
+			if (otherHex.hexTerrainID === rf.CITY && !util.includesArray(otherHex.builtBridges, otherHex.cornerNodeIds[otherSide])) continue
+		}
 		function addRes(nodeId) {
+			// Skip invalid nodes - polders have no corner nodes and river sides have no side node
+			if (nodeId < 0) return
 			const otherBucketId = otherHex.bucketIdsInitial[otherHex.nodeBucketIds[nodeId]]
 			res.push([otherHexId, [otherBucketId]])
 		}
-		const otherSide = (side + 3) % 6
-		if (hex.sideNodeIds[side] !== -1 && !edge.hasPowerLine[0]) {
+		if (cityRiverEdge && edge.hasPowerLine.length === 2) {
+			// CITY: one power line option per river bank, each gated on that bank's bridge
+			const cornerSide = edge.edgeHexIDs[0] === hexID ? [0, 1] : [1, 0]
+			const otherCornerSide = cornerSide.map((i) => (i + 1) % 2)
+			const cityHexObj = hex.hexTerrainID === rf.CITY ? hex : otherHex
+			const citySide = hex.hexTerrainID === rf.CITY ? side : otherSide
+			for (const k of [0, 1].filter((k) => !edge.hasPowerLine[k])) {
+				const bankNode = cityBankNodeForEdgeSlot(cityHexObj, citySide, edge, k)
+				if (!util.includesArray(cityHexObj.builtBridges, [cityHexObj.cornerNodeIds[citySide][0], bankNode])) continue
+				const touches = hex.hexTerrainID === rf.CITY ? inBucket(hex.sideNodeIds[side]) : inBucket(hex.cornerNodeIds[side][cornerSide[k]])
+				if (touches) addRes(otherHex.cornerNodeIds[otherSide][otherCornerSide[k]])
+			}
+		} else if (hex.sideNodeIds[side] !== -1 && !edge.hasPowerLine[0]) {
 			if (inBucket(hex.sideNodeIds[side])) {
 				addRes(otherHex.sideNodeIds[otherSide])
 			}

@@ -13,6 +13,7 @@ import * as hd from "../js/RNBhex"
 import * as funcs from "../js/RNBfuncs"
 import * as replay from "../components/History/RNBreplay"
 import * as context from "../js/RNBcontext"
+import * as highlight from "../js/RNBhighlight"
 //import * as model from "../js/RNBmodel"
 
 import { useModelStore } from "../stores/RNBstore.js"
@@ -57,7 +58,17 @@ function toggleChat() {
 		store.clearHistoryHelpers()
 	}
 	document.getElementById("boardContainer").classList.remove("slideRight")
-	store.viewSettings.showChat = !store.viewSettings.showChat
+	if (store.viewSettings.showChat) store.viewSettings.showChat = false
+	else {
+		store.viewSettings.showChat = true
+		setTimeout(function () {
+			var el = document.getElementById("wholeChat")
+			var cs = getComputedStyle(el)
+			var b = document.getElementById("footer").getBoundingClientRect().top
+			var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+			el.style["max-height"] = String(parseInt(b - a)) + "px"
+		}, 50)
+	}
 	// WS.StartRNBSocket()
 }
 
@@ -70,9 +81,11 @@ function toggleHistory() {
 	} else {
 		store.viewSettings.showHistory = true
 		setTimeout(function () {
+			var el = document.getElementById("history")
+			var cs = getComputedStyle(el)
 			var b = document.getElementById("footer").getBoundingClientRect().top
-			var a = 130
-			document.getElementById("history").style["max-height"] = String(parseInt(b - a)) + "px"
+			var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+			el.style["max-height"] = String(parseInt(b - a)) + "px"
 			var offsets = document.getElementById("boardContainer").getBoundingClientRect()
 			if (offsets.left < 460) document.getElementById("boardContainer").classList.add("slideRight")
 		}, 50)
@@ -95,7 +108,11 @@ function clickedLoggedInDiv() {
 		personal.pov++
 		if (personal.pov === store.players.length) personal.pov = 0
 		store.gameName = String(personal.pov) + "  :  " + store.players[personal.pov].name
-		// controller.startPlayerTurn()
+		// Recompute highlights for the new POV. Do NOT call startPlayerTurn here -
+		// that also resets transporters / action stack / undo points.
+		context.resetContextAndHighlights()
+		if (store.gameflow.phase === rf.PHASE_CHOOSE_HOME_TILE) highlight.higlightTilesForStartTile()
+		else highlight.updateAllHighlightsForTransporterMode()
 	}
 }
 

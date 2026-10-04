@@ -3086,6 +3086,8 @@ class KFWpresenter(GamePresenter):
     #####################################################################
 
     def anyMoveData(self):
+        if self.gameObj.KFWplayersMoveData == "":
+            return False
         playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
         return any(playerMoveData[2] != "" for playerMoveData in playersMoveDataArr)
 
@@ -3223,10 +3225,14 @@ class KFWpresenter(GamePresenter):
         return bool(player_move != "" and player_time != "" and player_time != "MID_PHASE" and player_time != "PRE_MOVE")
 
     def clearAllMoveData(self):
-        playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
-        for i in range(len(playersMoveDataArr)):
-            playersMoveDataArr[i][1] = ""
-            playersMoveDataArr[i][2] = ""
+        if self.gameObj.KFWplayersMoveData == "":
+            # Move data was never scaffolded (or was wiped) - rebuild it with all moves empty
+            playersMoveDataArr = [[name, "", ""] for name in self.getAllPlayersOrderedySeatInArray(True)]
+        else:
+            playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
+            for i in range(len(playersMoveDataArr)):
+                playersMoveDataArr[i][1] = ""
+                playersMoveDataArr[i][2] = ""
 
         self.gameObj.KFWplayersMoveData = json.dumps(playersMoveDataArr)
 

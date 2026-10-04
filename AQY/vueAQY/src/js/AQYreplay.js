@@ -220,6 +220,18 @@ function replayCityPlayerTrade(historyIndex, playerIndex, entry3) {
 function replayCityBuild(historyIndex, playerIndex, entry3) {
 	const store = useModelStore()
 
+	// RAZED CATHEDRAL is entry3[6].
+	// NB this has to run BEFORE the build loop below, and NOT next to the saint.
+	// entry3 is a whole-turn aggregate, not a chronological log: entry3[5] (saint
+	// chosen) and entry3[6] (cathedral razed) are independent flags collected across
+	// the turn. When a player razes and rebuilds to swap saints, both land in the same
+	// entry and the real order was raze -> rebuild -> choose saint. Applying the saint
+	// first and the raze last (as this used to) destroyed the rebuilt cathedral AND
+	// wiped the new saint, because razeCathedral_core() sets player.saint = SAINT_NONE.
+	// Razing first also puts the cathedral back in availableBuildings, which is where
+	// the build loop expects to take it from.
+	if (entry3[6] === 1) city.razeCathedral_core(playerIndex)
+
 	// BUILD is in entry3[0]
 	for (let i = 0; i < entry3[0].length; i++) {
 		// j is the CITY INDEX
@@ -386,10 +398,8 @@ function replayCityBuild(historyIndex, playerIndex, entry3) {
 	}
 
 	// CHOOSE SAINT is entry3[5]
+	// NB must stay AFTER the raze above - razeCathedral_core() clears player.saint.
 	if (entry3[5] !== rf.SAINT_NONE) store.players[playerIndex].saint = entry3[5]
-
-	// RAZED CATHRDRAL is entry3[6]
-	if (entry3[6] === 1) city.razeCathedral_core(playerIndex)
 }
 
 function replayCityFountains(historyIndex, playerIndex, entry3) {

@@ -141,123 +141,110 @@ def get_won_games(game_code, time_limit=None, player_count=None):
 
 
 # First, calculate each game serperately, and save the data
+
+# Fetch ALL games in ONE query instead of 10 separate ones (each per-game query
+# scans the full finished-games set, as there is no index on gameCode)
+query = Q(game__gameCode__in=GAME_CODES, game__gameStatus="FINISHED") & ~Q(game__statsExcludedGame=True)
+
+query_time = time.perf_counter()
+# values_list (tuples) rather than values (dicts): a few hundred thousand rows are built here,
+# and tuples are markedly cheaper to create and read than one dict per row.
+all_game_data = list(
+    GamePlayer.objects.filter(query)
+    .exclude(player__username__in=EXCLUDE_USERS)
+    .values_list(
+        "player__id",
+        "player__username",
+        "game__gameCode",
+        "game__maxPlayers",
+        "game__latestUpdate",
+        "winner",
+        "is_kicked",
+    )
+)
+
+row_count = len(all_game_data)
+
+# Group rows by game code, preserving row order (identical per-game order to the old per-game queries,
+# both ordered by seat_order, which is unique within each game)
+games_data_by_code = {gameCode: [] for gameCode in GAME_CODES}
+for player_id, username, game_code, max_players, latest_update, winner, is_kicked in all_game_data:
+    # RNB previously filtered maxPlayers > 1 in the DB query
+    if game_code == "RNB" and max_players <= 1:
+        continue
+    games_data_by_code[game_code].append((player_id, username, max_players, latest_update, winner, is_kicked))
+
+if PRINT_TIME:
+    print(f"****** all games data fetched: {time.perf_counter() - query_time:.6f}s   rows: {row_count}")
+
+# The grouped lists hold everything still needed, so drop the full list before the per-game loop
+del all_game_data
+
+
+def by_player_count(counter):
+    """Turns the (player_count, period) counters into [[[{pid: count} per period]] for "all", 2p-6p]."""
+    return [[dict(counter[(player_count, period)]) for period in (0, 1, 2)] for player_count in ["all", 2, 3, 4, 5, 6]]
+
+
 for gameCode in GAME_CODES:
     game_start_calc_time = time.perf_counter()
     print(f"Calculating stats for {gameCode}...")
 
-    # MAJOR OPTIMIZATION: Fetch ALL game data in ONE query instead of 20+ queries
-    # This single query gets all finished games for this game code with all needed fields
-    query = Q(game__gameCode=gameCode, game__gameStatus="FINISHED") & ~Q(game__statsExcludedGame=True)
-    if gameCode == "RNB":
-        query &= Q(game__maxPlayers__gt=1)
-
-    all_game_data = list(
-        GamePlayer.objects.filter(query)
-        .exclude(player__username__in=EXCLUDE_USERS)
-        .select_related("player", "game")
-        .values(
-            "player__id",
-            "player__username",
-            "game__maxPlayers",
-            "game__latestUpdate",
-            "winner",
-            "is_kicked",
-        )
-    )
+    all_game_data = games_data_by_code[gameCode]
 
     # Now process this data in Python to build all the statistics
     # Initialize dictionaries to accumulate counts
 
     # Fair play data (1 year)
-    games_played_1y = defaultdict(lambda: {"username": "", "count": 0})
+    games_played_1y = defaultdict(int)
     kicks_1y = defaultdict(int)
 
-    # Games played by player count and time period
-    # Structure: [all_time, 3_months, 1_month] for each player count (all, 2p, 3p, 4p, 5p, 6p)
-    games_played = defaultdict(lambda: defaultdict(lambda: {"username": "", "count": 0}))
-    games_won = defaultdict(lambda: defaultdict(lambda: {"username": "", "count": 0}))
+    # Games played / won, keyed by (player_count, period) where player_count is "all" or 2-6 and
+    # period is 0 = all time, 1 = last 3 months, 2 = last month, giving {player_id: count}.
+    # Plain int counters: the previous nested defaultdict-of-dicts allocated a fresh dict per
+    # player per bucket and rewrote the username into it for every single game record.
+    games_played = defaultdict(lambda: defaultdict(int))
+    games_won = defaultdict(lambda: defaultdict(int))
+
+    # Only needed for the output, and constant per player id, so collected once here
+    usernames = {}
 
     # Process each game record once
-    for record in all_game_data:
-        player_id = record["player__id"]
-        username = record["player__username"]
-        max_players = record["game__maxPlayers"]
-        latest_update = int(record["game__latestUpdate"]) if record["game__latestUpdate"] else 0
-        is_winner = record["winner"]
-        is_kicked = record["is_kicked"]
+    for player_id, username, max_players, game_latest_update, is_winner, is_kicked in all_game_data:
+        usernames[player_id] = username
+        latest_update = int(game_latest_update) if game_latest_update else 0
 
         # Fair play tracking (1 year)
         if latest_update >= one_year_ago:
-            games_played_1y[player_id]["username"] = username
-            games_played_1y[player_id]["count"] += 1
+            games_played_1y[player_id] += 1
             if is_kicked:
                 kicks_1y[player_id] += 1
 
-        # Determine time period keys
-        time_keys = ["all"]
+        # Which time periods this game falls into
+        periods = [0]
         if latest_update >= three_months_ago:
-            time_keys.append("3m")
-        if latest_update >= one_month_ago:
-            time_keys.append("1m")
+            periods.append(1)
+            if latest_update >= one_month_ago:
+                periods.append(2)
 
-        # Track games played and won for all player counts and time periods
-        for time_key in time_keys:
+        for period in periods:
             # All player counts
-            key = ("all", time_key)
-            games_played[key][player_id]["username"] = username
-            games_played[key][player_id]["count"] += 1
+            games_played[("all", period)][player_id] += 1
             if is_winner:
-                games_won[key][player_id]["username"] = username
-                games_won[key][player_id]["count"] += 1
+                games_won[("all", period)][player_id] += 1
 
             # Specific player count
-            key = (max_players, time_key)
-            games_played[key][player_id]["username"] = username
-            games_played[key][player_id]["count"] += 1
+            games_played[(max_players, period)][player_id] += 1
             if is_winner:
-                games_won[key][player_id]["username"] = username
-                games_won[key][player_id]["count"] += 1
+                games_won[(max_players, period)][player_id] += 1
 
     # Convert to the format expected by the rest of the code
     # Build dictionaries matching the old structure
-    allFinishedGames1year_E_dict = {pid: data["count"] for pid, data in games_played_1y.items()}
+    finishedGamesByPlayerCount_dict = by_player_count(games_played)
+    wonGamesByPlayerCount_dict = by_player_count(games_won)
+
+    allFinishedGames1year_E_dict = games_played_1y
     allKickedGames1year_E_dict = kicks_1y
-
-    finishedGamesByPlayerCount_dict = []
-    wonGamesByPlayerCount_dict = []
-
-    # All player counts
-    finishedGamesByPlayerCount_dict.append(
-        [
-            {pid: data["count"] for pid, data in games_played[("all", "all")].items()},
-            {pid: data["count"] for pid, data in games_played[("all", "3m")].items()},
-            {pid: data["count"] for pid, data in games_played[("all", "1m")].items()},
-        ]
-    )
-    wonGamesByPlayerCount_dict.append(
-        [
-            {pid: data["count"] for pid, data in games_won[("all", "all")].items()},
-            {pid: data["count"] for pid, data in games_won[("all", "3m")].items()},
-            {pid: data["count"] for pid, data in games_won[("all", "1m")].items()},
-        ]
-    )
-
-    # Specific player counts (2-6)
-    for player_count in range(2, 7):
-        finishedGamesByPlayerCount_dict.append(
-            [
-                {pid: data["count"] for pid, data in games_played[(player_count, "all")].items()},
-                {pid: data["count"] for pid, data in games_played[(player_count, "3m")].items()},
-                {pid: data["count"] for pid, data in games_played[(player_count, "1m")].items()},
-            ]
-        )
-        wonGamesByPlayerCount_dict.append(
-            [
-                {pid: data["count"] for pid, data in games_won[(player_count, "all")].items()},
-                {pid: data["count"] for pid, data in games_won[(player_count, "3m")].items()},
-                {pid: data["count"] for pid, data in games_won[(player_count, "1m")].items()},
-            ]
-        )
 
     # This gets us a whole load of querysets with [{'allPlayers': 1, 'total_games': 61},...]
 
@@ -311,16 +298,35 @@ for gameCode in GAME_CODES:
     winPercentagesThreeMonths6p_E = []
     winTotalsThreeMonths6p_E = []
 
-    # Build a set of all relevant user IDs and usernames for this game
+    # Index tables for the lists above: [player count index 0-5][period index 0-2]. Each cell
+    # holds the same list object, so appending through the table is the same append the old
+    # 216 explicit if/append pairs did - just without testing i and j over and over.
+    WIN_TOTALS = [
+        [winTotals_E, winTotalsThreeMonths_E, winTotalsMonth_E],
+        [winTotals2p_E, winTotalsThreeMonths2p_E, winTotalsMonth2p_E],
+        [winTotals3p_E, winTotalsThreeMonths3p_E, winTotalsMonth3p_E],
+        [winTotals4p_E, winTotalsThreeMonths4p_E, winTotalsMonth4p_E],
+        [winTotals5p_E, winTotalsThreeMonths5p_E, winTotalsMonth5p_E],
+        [winTotals6p_E, winTotalsThreeMonths6p_E, winTotalsMonth6p_E],
+    ]
+    WIN_PERCENTAGES = [
+        [winPercentages_E, winPercentagesThreeMonths_E, winPercentagesMonth_E],
+        [winPercentages2p_E, winPercentagesThreeMonths2p_E, winPercentagesMonth2p_E],
+        [winPercentages3p_E, winPercentagesThreeMonths3p_E, winPercentagesMonth3p_E],
+        [winPercentages4p_E, winPercentagesThreeMonths4p_E, winPercentagesMonth4p_E],
+        [winPercentages5p_E, winPercentagesThreeMonths5p_E, winPercentagesMonth5p_E],
+        [winPercentages6p_E, winPercentagesThreeMonths6p_E, winPercentagesMonth6p_E],
+    ]
+
+    # Only 1 year players first, then everyone else in first-seen order - matching the old scan
+    # over the 1y / played / won buckets, so the later sorts keep their existing tie order.
+    # finishedGamesByPlayerCount_dict[0][0] is the all-players all-time dict, whose key order is
+    # the order the players were first seen in, and which holds every player in this game.
     relevant_users = {}
-    for pid, data in games_played_1y.items():
-        relevant_users[pid] = data["username"]
-    for key_data in games_played.values():
-        for pid, data in key_data.items():
-            relevant_users[pid] = data["username"]
-    for key_data in games_won.values():
-        for pid, data in key_data.items():
-            relevant_users[pid] = data["username"]
+    for pid in games_played_1y:
+        relevant_users[pid] = usernames[pid]
+    for pid in finishedGamesByPlayerCount_dict[0][0]:
+        relevant_users[pid] = usernames[pid]
 
     # Iterate only over users who have data for this game
     for user_id, username in relevant_users.items():
@@ -340,48 +346,7 @@ for gameCode in GAME_CODES:
                 games_won_count = wonGamesByPlayerCount_dict[i][j].get(user_id, 0)
 
                 if games_won_count > 0:
-                    # All players
-                    if i == 0 and j == 0:
-                        winTotals_E.append([username, games_won_count])
-                    if i == 0 and j == 1:
-                        winTotalsThreeMonths_E.append([username, games_won_count])
-                    if i == 0 and j == 2:
-                        winTotalsMonth_E.append([username, games_won_count])
-                    # 2p
-                    if i == 1 and j == 0:
-                        winTotals2p_E.append([username, games_won_count])
-                    if i == 1 and j == 1:
-                        winTotalsThreeMonths2p_E.append([username, games_won_count])
-                    if i == 1 and j == 2:
-                        winTotalsMonth2p_E.append([username, games_won_count])
-                    # 3p
-                    if i == 2 and j == 0:
-                        winTotals3p_E.append([username, games_won_count])
-                    if i == 2 and j == 1:
-                        winTotalsThreeMonths3p_E.append([username, games_won_count])
-                    if i == 2 and j == 2:
-                        winTotalsMonth3p_E.append([username, games_won_count])
-                    # 4p
-                    if i == 3 and j == 0:
-                        winTotals4p_E.append([username, games_won_count])
-                    if i == 3 and j == 1:
-                        winTotalsThreeMonths4p_E.append([username, games_won_count])
-                    if i == 3 and j == 2:
-                        winTotalsMonth4p_E.append([username, games_won_count])
-                    # 5p
-                    if i == 4 and j == 0:
-                        winTotals5p_E.append([username, games_won_count])
-                    if i == 4 and j == 1:
-                        winTotalsThreeMonths5p_E.append([username, games_won_count])
-                    if i == 4 and j == 2:
-                        winTotalsMonth5p_E.append([username, games_won_count])
-                    # 6p
-                    if i == 5 and j == 0:
-                        winTotals6p_E.append([username, games_won_count])
-                    if i == 5 and j == 1:
-                        winTotalsThreeMonths6p_E.append([username, games_won_count])
-                    if i == 5 and j == 2:
-                        winTotalsMonth6p_E.append([username, games_won_count])
+                    WIN_TOTALS[i][j].append([username, games_won_count])
 
                 if games_played_count >= 5 and games_won_count > 0:
                     games_won_percent = round((games_won_count / games_played_count) * 100, 2)
@@ -392,156 +357,13 @@ for gameCode in GAME_CODES:
                         if games_played_count_three_months == 0:
                             games_won_percent = 80.00
                             games_won_percent_str = "80*"
-                    # All players
-                    if i == 0 and j == 0:
-                        winPercentages_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    if i == 0 and j == 1:
-                        winPercentagesThreeMonths_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    if i == 0 and j == 2:
-                        winPercentagesMonth_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    # 2p
-                    if i == 1 and j == 0:
-                        winPercentages2p_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    if i == 1 and j == 1:
-                        winPercentagesThreeMonths2p_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    if i == 1 and j == 2:
-                        winPercentagesMonth2p_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    # 3p
-                    if i == 2 and j == 0:
-                        winPercentages3p_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    if i == 2 and j == 1:
-                        winPercentagesThreeMonths3p_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    if i == 2 and j == 2:
-                        winPercentagesMonth3p_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    # 4p
-                    if i == 3 and j == 0:
-                        winPercentages4p_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    if i == 3 and j == 1:
-                        winPercentagesThreeMonths4p_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    if i == 3 and j == 2:
-                        winPercentagesMonth4p_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    # 5p
-                    if i == 4 and j == 0:
-                        winPercentages5p_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    if i == 4 and j == 1:
-                        winPercentagesThreeMonths5p_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    if i == 4 and j == 2:
-                        winPercentagesMonth5p_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    # 6p
-                    if i == 5 and j == 0:
-                        winPercentages6p_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    if i == 5 and j == 1:
-                        winPercentagesThreeMonths6p_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
-                    if i == 5 and j == 2:
-                        winPercentagesMonth6p_E.append(
-                            [
-                                username,
-                                games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
-                                games_won_percent,
-                            ]
-                        )
+                    WIN_PERCENTAGES[i][j].append(
+                        [
+                            username,
+                            games_won_percent_str + " %  ( " + str(games_won_count) + " / " + str(games_played_count) + " )",
+                            games_won_percent,
+                        ]
+                    )
 
     fairPlayLeague_E = sorted(fairPlayLeague_E, key=lambda x: x[2], reverse=True)
     fairPlayLeague_E = sorted(fairPlayLeague_E, key=lambda x: x[1], reverse=True)

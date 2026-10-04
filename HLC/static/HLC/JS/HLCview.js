@@ -50,8 +50,12 @@ var View = function (model) {
 				item = this.model.gameFlow.unalteredTurnOrder.indexOf(global.pov)
 			} else if (MARKET_BOARD_PHASES.includes(this.model.gameFlow.phase)) item = -1
 			else {
-				if (!Rules.isSimulPhase()) item = this.model.gameFlow.turnOrder[0]
-				else item = this.model.gameFlow.unalteredTurnOrder.indexOf(this.model.gameFlow.currentPlayer)
+				// turnOrder can legitimately be empty between phases (and while the replay is stepping through them)
+				if (!Rules.isSimulPhase()) {
+					// item is an index into unalteredTurnOrder, not a seat
+					if (this.model.gameFlow.turnOrder.length > 0) item = this.model.gameFlow.unalteredTurnOrder.indexOf(this.model.gameFlow.turnOrder[0])
+					else item = -1
+				} else item = this.model.gameFlow.unalteredTurnOrder.indexOf(this.model.gameFlow.currentPlayer)
 				if (M.trainingGame) {
 					item = this.model.players.length - this.model.gameFlow.turnOrder.length
 				}
@@ -192,8 +196,11 @@ var View = function (model) {
 			playerDiv.addClass("playerDiv")
 			var num = this.model.gameFlow.unalteredTurnOrder[i]
 
-			if (!Rules.isSimulPhase()) {
-				if (this.model.gameFlow.turnOrder[0] === num) playerDiv.addClass("playerTurn")
+			// The replay has already taken the acting player off the queue, so the glow has to come
+			// from currentPlayer rather than turnOrder[0]
+			var turnGlow = replay.showingReplay ? this.model.gameFlow.currentPlayer : this.model.gameFlow.turnOrder[0]
+			if (!Rules.isSimulPhase() || replay.showingReplay) {
+				if (turnGlow === num) playerDiv.addClass("playerTurn")
 			} else {
 				// simul phase
 				if (global.currentPlayers.includes(this.model.players[this.model.gameFlow.unalteredTurnOrder[i]].name)) playerDiv.addClass("playerTurn")
@@ -4052,6 +4059,8 @@ var View = function (model) {
 					IO.loadRewind(C)
 				})
 			}
+		} else if (item === 11) {
+			replay.toggleReplayMode()
 		} else if (item === 99) {
 			if (M.trainingGame) {
 			} else {
@@ -4450,9 +4459,9 @@ var View = function (model) {
 	var Qhighlight
 	var P_CARD_AREA
 
-	this.reloadModel = function (model) {
+	this.reloadModel = function (model, item) {
 		this.model = model
-		this.render()
+		this.render(item)
 	}
 
 	init.call(this)

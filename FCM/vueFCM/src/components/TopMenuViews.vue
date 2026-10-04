@@ -29,6 +29,11 @@ const showExpandedMS = ref(false)
 const showExpandedEmployees = ref(false)
 const consentLevel = ref(0)
 
+function reserveEmployeeCount(employee) {
+	if (employee === rf.TEMPORARY_WORKER) return store.players.length - (store.laborMarket?.removedTemporaryWorkers || 0)
+	return store.availableEmployees[employee]
+}
+
 function milestoneHCclass(ms) {
 	if (store.startingOptions.hardChoices) {
 		if (rf.HC_OLD_MS_LEAVE_END_TURN_2.includes(ms)) return "milestoneHC2span"
@@ -246,6 +251,11 @@ const computedEmployeeArrangementForDisplay = computed(() => {
 
 	// Remove from the general display any employee not in the game
 	for (let i = 0; i < employeeArrangement.length; i++) {
+		// Temporary Workers are player-owned cards, not part of the hireable supply.
+		if (employeeArrangement[i] === rf.TEMPORARY_WORKER) {
+			if (!store.startingOptions.laborMarket) employeeArrangement[i] = -1
+			continue
+		}
 		if (employeeArrangement[i] > -1 && store.availableEmployees[employeeArrangement[i]] === -1) {
 			employeeArrangement[i] = -1
 		}
@@ -290,6 +300,7 @@ const svgInstructions = computed(() => {
 	addLine(initialLeft, currentTop, initialLeft + horizontalShift * 4, currentTop)
 
 	lines.push(generatePath(initialLeft, currentTop, 1, 1)) // NBD
+	if (actualArr.includes(rf.HEADHUNTER)) lines.push(generatePath(initialLeft, currentTop, -1, 1)) // Headhunter
 	lines.push(generatePath(initialLeft, currentTop, -1, 3)) // Lux Mgr
 
 	currentLeft += horizontalShift // VP
@@ -684,11 +695,12 @@ const sortedCampaigns = computed(() => {
 					<template v-for="(line, idx1) in computedEmployeeArrangementForDisplay" :key="idx1">
 						<div class="employeeLine">
 							<template v-for="(emp, idx2) in line" :key="idx2">
-								<div v-if="emp > -1" class="expandedEmployeeAreaDiv">
+								<div v-if="emp > -1" class="expandedEmployeeAreaDiv" :class="{ nonHireableEmployeeArea: emp === rf.UNION_ORGANIZER || emp === rf.TEMPORARY_WORKER }">
 									<div class="expandedEmployeeAmountDiv">
-										<span>{{ store.availableEmployees[emp] }}</span>
+										<span>{{ reserveEmployeeCount(emp) }}</span>
 									</div>
-									<div class="expandedEmployeeDiv">
+									<div class="expandedEmployeeDiv" :class="{ nonHireableEmployeeCard: emp === rf.UNION_ORGANIZER || emp === rf.TEMPORARY_WORKER }">
+										<div v-if="emp === rf.UNION_ORGANIZER || emp === rf.TEMPORARY_WORKER" class="nonHireableEmployeeLabel">{{ $t('topMenuViews.nonHireable') }}</div>
 										<h3 class="expandedEmployeeTitle" :class="[rf.EMPLOYEES_STR[emp].type, { inverted: rf.EMPLOYEES_STR[emp].type === 'manager' || rf.EMPLOYEES_STR[emp].type === 'restaurant' }]">
 											{{ rf.EMPLOYEES_STR[emp].title }}
 										</h3>
@@ -716,7 +728,7 @@ const sortedCampaigns = computed(() => {
 				<template v-for="(line, idx1) in computedEmployeeArrangementForDisplay" :key="idx1">
 					<template v-for="(emp, idx2) in line" :key="idx2">
 						<InfoPopup v-if="emp > -1" type="employee" :employeeId="emp">
-							<span class="empSpan" :class="[rf.EMPLOYEES_STR[emp].type, { inverted: rf.EMPLOYEES_STR[emp].type === 'manager' || rf.EMPLOYEES_STR[emp].type === 'restaurant' }, { noMoreEmployees: store.availableEmployees[emp] === 0 }]">{{ rf.EMPLOYEES_STR[emp].title }} ({{ store.availableEmployees[emp] }})</span>
+							<span class="empSpan" :class="[rf.EMPLOYEES_STR[emp].type, { inverted: rf.EMPLOYEES_STR[emp].type === 'manager' || rf.EMPLOYEES_STR[emp].type === 'restaurant' }, { noMoreEmployees: reserveEmployeeCount(emp) === 0 }, { nonHireableEmployeeCompact: emp === rf.UNION_ORGANIZER || emp === rf.TEMPORARY_WORKER }]" :data-non-hireable="emp === rf.UNION_ORGANIZER || emp === rf.TEMPORARY_WORKER ? $t('topMenuViews.nonHireable') : undefined">{{ rf.EMPLOYEES_STR[emp].title }} ({{ reserveEmployeeCount(emp) }})</span>
 						</InfoPopup>
 						<span v-else class="empSpan"></span>
 					</template>
@@ -1175,6 +1187,35 @@ const sortedCampaigns = computed(() => {
 	width: 220px;
 }
 
+.expandedEmployeeDiv.nonHireableEmployeeCard {
+	height: 150px;
+	vertical-align: top;
+}
+
+.nonHireableEmployeeArea {
+	vertical-align: top;
+}
+
+.nonHireableEmployeeLabel,
+.nonHireableEmployeeCompact::before {
+	color: #fff;
+	background-color: #e21616;
+	font-weight: 700;
+	height: 20px;
+	line-height: 20px;
+	border-radius: 5px 5px 0 0;
+}
+
+.nonHireableEmployeeCard .expandedEmployeeTitle {
+	border-radius: 0;
+}
+
+.nonHireableEmployeeCompact::before {
+	content: attr(data-non-hireable);
+	display: block;
+	margin: -2px -5px 2px;
+}
+
 .inverted {
 	color: white;
 }
@@ -1306,4 +1347,5 @@ const sortedCampaigns = computed(() => {
 .centerAlign {
 	vertical-align: middle;
 }
+
 </style>

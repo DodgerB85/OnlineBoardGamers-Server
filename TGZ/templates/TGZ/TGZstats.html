@@ -381,113 +381,25 @@ var bar_chart = new Chart(bar_ctx, {
               </tr>
             {% endfor %}
           </table>
-          {% if playerCount == 4 %}
-            <canvas class="bar_canvas" id="seat_wins_4pT"  width="1000"></canvas>
+          {% if row.seat_wins %}
+            <canvas class="bar_canvas" id="seat_wins_{{ playerCount }}"  width="1000"></canvas>
             <script>
-        var ctx = document.getElementById("seat_wins_4pT").getContext('2d');
-        
+        var ctx = document.getElementById("seat_wins_{{ playerCount }}").getContext('2d');
+
         var data = {
-            labels: ["1st", "2nd", "3rd", "4th",],
+            labels: [{% for entry in row.seat_wins %}"{{ entry.0 }}",{% endfor %}],
             datasets: [
             {
                     label: "Wins",
                     borderColor: "blue",
-                    data: [
-                      {{ row.seat_wins.0.1 }},
-                      {{ row.seat_wins.1.1 }},
-                      {{ row.seat_wins.2.1 }},
-                      {{ row.seat_wins.3.1 }},
-                    ],
+                    data: [{% for entry in row.seat_wins %}{{ entry.1 }},{% endfor %}],
                     fill: false,
                     pointStyle: 'cross',
                     lineTension: 0
                 },
-               
-               
-               
             ]
           };
-        
-            var oldMSchart = new Chart(ctx, {
-                type: 'line',
-                data: data,
-                options: {
-                  responsive: false,
-                maintainAspectRatio: true,
-                  title: {
-              display: true,
-              text: 'Win from starting position',
-              fontColor: 'black', // Set the color of the title
-              fontSize: 25, // Set the font size of the title
-              fontStyle: 'bold' // Set the font weight of the title to bold
-            },
-            legend: {
-                labels: {
-                    fontSize: 20, // Set the font size of the legend labels
-                    fontStyle: 'bold' // Set the font weight of the legend labels to bold
-                }
-            },
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }],
-                xAxes: [{
-                    ticks: {
-                        fontSize: 25, // Set the font size of the labels on the x-axis
-                        fontStyle: 'bold' // Set the font weight of the labels on the x-axis to bold
-                    }
-                }]
-            },
-                  elements: {
-                  point: {
-                    radius: 8, // Increase the size of the points
-                      hoverRadius: 10 // Increase the size of the points on hover
-                  }
-            }
-        }
-            });
-            </script>
-            <table class="generalTable TGZstatsTable">
-              <tr>
-                <th>{% translate "Starting Position" %}</th>
-                <th>{% translate "Wins" %}</th>
-              </tr>
-              {% for entry in row.seat_wins %}
-                <tr onclick="openGameIdsPage({{ entry.2 }})">
-                  <td>{{ entry.0 }}</td>
-                  <td>{{ entry.1 }}</td>
-                </tr>
-              {% endfor %}
-            </table>
-          {% elif playerCount == "45" %}
-            <canvas class="bar_canvas" id="seat_wins_4p"  width="1000"></canvas>
-            <script>
-        var ctx = document.getElementById("seat_wins_4p").getContext('2d');
-        
-        var data = {
-            labels: ["1st", "2nd", "3rd", "4th",],
-            datasets: [
-            {
-                    label: "Wins",
-                    borderColor: "blue",
-                    data: [
-                      {{ row.seat_wins.0.1 }},
-                      {{ row.seat_wins.1.1 }},
-                      {{ row.seat_wins.2.1 }},
-                      {{ row.seat_wins.3.1 }},
-                    ],
-                    fill: false,
-                    pointStyle: 'cross',
-                    lineTension: 0
-                },
-               
-               
-               
-            ]
-          };
-        
+
             var oldMSchart = new Chart(ctx, {
                 type: 'line',
                 data: data,

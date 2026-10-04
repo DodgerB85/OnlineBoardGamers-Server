@@ -101,7 +101,17 @@ async function initGame() {
 		}
 
 		personal.notes = funcs.htmlUnescape(window.initData.notes)
-		if (window.initData.chatNotification) store.topMenuViews.showChat = true
+		if (window.initData.chatNotification) {
+			store.topMenuViews.showChat = true
+			setTimeout(function () {
+				var el = document.getElementById("wholeChat")
+				if (!el) return
+				var cs = getComputedStyle(el)
+				var b = document.getElementById("footer").getBoundingClientRect().top
+				var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+				el.style["max-height"] = String(parseInt(b - a)) + "px"
+			}, 500)
+		}
 		personal.preferredColour = window.initData.preferredCNScolour
 		personal.yourTurnAudioType = window.initData.yourTurnAudioType
 		if (window.initData.startingOptions.includes(102)) personal.trainingGame = true

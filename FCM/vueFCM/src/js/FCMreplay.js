@@ -136,6 +136,10 @@ export function replaySetupKetchupExpansion(playerNumber) {
 		store.availableEmployees[rf.FRIED_CHICKEN_CHEF] = max
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_FRIED_CHICKEN_SOLD)
 	}
+	if (store.startingOptions.stadium) {
+		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
+	}
+	if (store.startingOptions.laborMarket) model.setupLaborMarketExpansion()
 }
 
 export function resetDataForReplay() {
@@ -191,6 +195,12 @@ export function resetDataForReplay() {
 	// Reset bank
 	if (store.startingOptions.shortGame === true) store.bank = store.players.length * 75
 	else store.bank = store.players.length * 50
+
+	// Reset the break state. importFCMmodel infers bankBroken from the loaded
+	// (finished) history, so without this the whole replay runs pre-broken:
+	// basePrice collapses to the reserve-card price and handleBankBreak takes
+	// its end-of-game branch instead of paying the break out.
+	store.bankBroken = 0
 
 	// Reset gameflow
 	let to = []
@@ -302,6 +312,12 @@ export async function generateReplayData(spoilerFree = false) {
 		else if (action === rf.HIST_END_GAME) replayEndGame(i, playerIdx, param)
 		else if (action === rf.HIST_FLIP_TO_FRIED_CHICKEN) replayFriedChickenHouse(i, playerIdx, param, false)
 		else if (action === rf.HIST_HOUSE_MOVED_OUT) replayFriedChickenHouse(i, playerIdx, param, true)
+		else if (action === rf.HIST_STADIUM_ANNOUNCE) replayStadiumAnnounce(i, playerIdx, param)
+		else if (action === rf.HIST_TEMPORARY_WORKER) replayTemporaryWorker(i, playerIdx, param)
+		else if (action === rf.HIST_HEADHUNT) replayHeadhunt(i, playerIdx, param)
+		else if (action === rf.HIST_UNION_ORGANIZER) replayUnionOrganizer(i, playerIdx, param)
+		else if (action === rf.HIST_BANK_BAILOUT) replayBankBailout(i, playerIdx, param)
+		else if (action === rf.HIST_BAILOUT_CLAIM) replayBailoutClaim(i, playerIdx, param)
 
 		store.replayData.push(funcs.simpleExportWholeFCMmodel())
 
@@ -325,6 +341,81 @@ export async function generateReplayData(spoilerFree = false) {
 
 export function replayProduceKimchi(historyIndex, playerIndex, param) {
 	plyr.addResources(playerIndex, rf.KIMCHI, 1)
+}
+
+export function replayTemporaryWorker(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	if (param.length >= 4) {
+		store.laborMarket.temporaryCampaignOwners[param[3]] = playerIndex
+		const effect = store.laborMarket.dailyTemporaryEffects[playerIndex]
+		if (effect) effect.usedByRole[rf.MARKETING_TRAINEE] = param[2]
+		return
+	}
+	if (Array.isArray(param[0])) {
+		store.laborMarket.dailyTemporaryEffects[playerIndex] = { roles: [...param[0]], limit: param[1], usedByRole: { ...param[2] } }
+	} else {
+		const roles = Array.from({ length: Math.max(0, param[1] || 0) }, () => param[0])
+		const usedByRole = param[2] > 0 ? { [param[0]]: param[2] } : {}
+		store.laborMarket.dailyTemporaryEffects[playerIndex] = { roles, limit: param[1], usedByRole }
+	}
+	const index = store.players[playerIndex].employees.indexOf(rf.TEMPORARY_WORKER)
+	if (index > -1) store.players[playerIndex].employees.splice(index, 1)
+	store.laborMarket.removedTemporaryWorkers++
+}
+
+export function replayHeadhunt(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	const [targetPlayerIndex, employee, cost, deferredSalary] = param
+	const target = store.players[targetPlayerIndex]
+	const actor = store.players[playerIndex]
+	const index = target?.beach.indexOf(employee) ?? -1
+	if (!actor || !target || index < 0) return
+	target.beach.splice(index, 1)
+	actor.beach.push(employee)
+	if (deferredSalary === 1) {
+		if (!Array.isArray(store.laborMarket.pendingHeadhuntSalaries[playerIndex])) store.laborMarket.pendingHeadhuntSalaries[playerIndex] = []
+		store.laborMarket.pendingHeadhuntSalaries[playerIndex].push({ employee, cost })
+	} else {
+		// Histories created before Labor Market save version 3 used immediate payment.
+		actor.money -= cost
+		target.money += cost
+	}
+}
+
+export function replayUnionOrganizer(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	for (const player of store.players) {
+		player.beach = player.beach.filter((employee) => employee !== rf.UNION_ORGANIZER)
+		player.employees = player.employees.filter((employee) => employee !== rf.UNION_ORGANIZER)
+	}
+	store.laborMarket.workedCounts = Array.isArray(param[2]) ? [...param[2]] : []
+	const nextHolders = Array.isArray(param[1]) ? param[1] : (param[1] >= 0 ? [param[1]] : [])
+	store.laborMarket.unionHolders = [...nextHolders]
+	store.laborMarket.pendingUnionHolders = [...nextHolders]
+	for (const holder of nextHolders) if (store.players[holder]) store.players[holder].beach.push(rf.UNION_ORGANIZER)
+	store.availableEmployees[rf.UNION_ORGANIZER] = Math.max(0, store.players.length - nextHolders.length)
+}
+
+// Stadium mod: restore the announcement from history (no RNG on replay)
+export function replayStadiumAnnounce(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	store.stadium.announcement = { gameNumber: param[0], food: param[1], units: param[2] }
+}
+
+// Second Bailout mod: apply the city's cash injection (bankBroken already set by handleBankBreak)
+export function replayBankBailout(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	store.bank += param[0]
+}
+
+// Second Bailout mod: grant the claimed employee (or nothing on decline). Not a hire.
+export function replayBailoutClaim(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	const employeeId = param[0]
+	if (employeeId !== -1) {
+		store.availableEmployees[employeeId]--
+		store.players[playerIndex].beach.push(employeeId)
+	}
 }
 
 // Fried Chicken mod: state is recomputed by replayDinnerTime -> doDinnerTime(true),
@@ -376,6 +467,7 @@ export function replaySalary(historyIndex, playerIndex, param) {
 			store.players[i].money = 0
 		}
 		store.bank += due
+		clearPendingHeadhuntSalary(i)
 	}
 }
 
@@ -389,8 +481,14 @@ export function replaySalary_strict(historyIndex, playerIndex, param) {
 		store.players[playerIndex].money = 0
 	}
 	store.bank += due
+	clearPendingHeadhuntSalary(playerIndex)
 	// NB the paid in food exact items are never stored, just the amount
 	// Nothing needs doing here; just the net money adjusting
+}
+
+function clearPendingHeadhuntSalary(playerIndex) {
+	const store = useModelStore()
+	if (Array.isArray(store.laborMarket.pendingHeadhuntSalaries)) store.laborMarket.pendingHeadhuntSalaries[playerIndex] = []
 }
 
 export function replayIncome(historyIndex, playerIndex, param) {
@@ -407,7 +505,28 @@ export function replayFridgeResources(historyIndex, playerIndex, param) {
 }
 
 export function replayDinnerTime(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	// Live play logs sales milestones immediately BEFORE the dinner entry but awards them
+	// AFTER the dinner's bonus calc (FCMrules doDinnerTime), so the sale that earns a
+	// milestone never gets its own perk. On replay the milestone would already be active
+	// here (replayGetMS ran on the preceding history entry), so the first fried chicken
+	// sale wrongly picks up the FIRST_FRIED_CHICKEN_SOLD +$5 bonus. Temporarily hide any
+	// fried chicken milestone logged for this dinner so the recomputed bonus matches live.
+	const suppressedFC = []
+	for (let idx = historyIndex - 1; idx >= 0; idx--) {
+		const entry = store.computedHistory[idx]
+		if (entry[0] !== rf.HIST_NEW_MILESTONE) break
+		if (!entry[3] || entry[3][0] !== rf.FIRST_FRIED_CHICKEN_SOLD) continue
+		const playerObj = store.players[entry[1]]
+		if (!playerObj) continue
+		const pos = playerObj.milestones.indexOf(rf.FIRST_FRIED_CHICKEN_SOLD)
+		if (pos > -1) {
+			playerObj.milestones.splice(pos, 1)
+			suppressedFC.push(playerObj)
+		}
+	}
 	rules.doDinnerTime(true)
+	suppressedFC.forEach((playerObj) => playerObj.milestones.push(rf.FIRST_FRIED_CHICKEN_SOLD))
 }
 
 export function replayTrain(historyIndex, playerObj, param) {
@@ -560,6 +679,7 @@ export function replayBankBreak(historyIndex, playerIndex, param) {
 
 export function replayEndGame(historyIndex, playerIndex, param) {
 	const store = useModelStore()
+	store.gameflow.phase = rf.PHASE_GAME_OVER
 	// Match the finished-game page: sort by money (tie: previous order), winner first
 	store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder].sort((a, b) => {
 		const moneyDiff = store.players[b].money - store.players[a].money
@@ -606,7 +726,7 @@ export function replayFire(historyIndex, playerIndex, param) {
 	const store = useModelStore()
 	for (let i = 0; i < param.length; i++) {
 		plyr.fireEmployee(playerIndex, param[i])
-		store.availableEmployees[param[i]]++
+		store.availableEmployees[rf.decodeFiredEmployee(param[i])]++
 	}
 }
 
@@ -659,7 +779,12 @@ export function replayAddFreeway(historyIndex, playerIndex, param) {
 }
 
 export function replayMarketingCampaigns(historyIndex, playerIndex, param) {
-	rules.doMarketingCampaigns(true)
+	// Live play repeats the whole phase once per Mass Marketeer and only ticks
+	// campaign durations down on the final repeat; it tags every earlier repeat's
+	// history payload with a bare loop index. Every campaign entry in the payload
+	// is an array, so a trailing number means "not the final pass".
+	const isFinalPass = !param || param.length === 0 || !Array.isArray(param[param.length - 1])
+	rules.doMarketingCampaigns(true, isFinalPass)
 }
 
 export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
@@ -667,7 +792,7 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 	/*
 		0 = campaign Number
 		1 = index
-		2 = good - EITHER num OR array if MS
+		2 = good - EITHER num OR [secondGood, good] if MS
 		3? = employee - IF IT CANNOT BE INFERRED, if campaign number >=4 <=16
 		4? = rotation
 		5 = duration IF NOT INFINITE
@@ -677,8 +802,9 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 	let good = -1
 	let secondGood = -1
 	if (typeof param[2] === "object") {
-		good = param[2][0]
-		secondGood = param[2][1]
+		// Live play logs [secondGood, good] (see FCMcontroller placeMarketingCampaign)
+		good = param[2][1]
+		secondGood = param[2][0]
 	} else good = param[2]
 	let paramIdx = 3
 	let campaignEmployee = -1
@@ -706,8 +832,15 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 	if (store.computedHistory[historyIndex - 1][0] === rf.HIST_NEW_MILESTONE && store.computedHistory[historyIndex - 1][3][0] === rf.FIRST_CAMPAIGN_MANAGER_USED) {
 		restoMS = true
 	}
-	if (restoMS) plyr.addCampaignToMarketer(playerIndex, campaignEmployee, campaignNumber)
-	else plyr.sendPlayerMarketerToMarket(playerIndex, campaignEmployee, campaignNumber, false, false)
+	// A Temporary Worker campaign has no physical marketer to move. Its
+	// ownership history is emitted immediately before the ordinary campaign
+	// entry, so the replay can distinguish it without changing the legacy
+	// campaign-history payload.
+	const temporaryCampaign = store.laborMarket.temporaryCampaignOwners[campaignNumber] === playerIndex
+	if (!temporaryCampaign) {
+		if (restoMS) plyr.addCampaignToMarketer(playerIndex, campaignEmployee, campaignNumber)
+		else plyr.sendPlayerMarketerToMarket(playerIndex, campaignEmployee, campaignNumber, false, false)
+	}
 
 	let height = rf.MARKETING_CAMPAIGNS[campaignNumber].height
 	let width = rf.MARKETING_CAMPAIGNS[campaignNumber].width
@@ -843,15 +976,19 @@ export function replayNewTurn(historyIndex, playerIndex, param) {
 	for (let i = 0; i < store.players.length; i++) store.gameflow.newTurnOrder.push(-1)
 
 	for (let i = 0; i < store.players.length; i++) {
-		// Remove food if no fridge
+		// No fridge: live play throws the fridge away at the payday -> cleanup
+		// transition (before HIST_PRODUCE_KIMCHI), so all that survives here is
+		// the kimchi that entry already added. Fridge owners keep everything, so
+		// wiping (and re-adding kimchi) for them would duplicate items.
+		if (plyr.hasFridge(i)) continue
 		funcs.removeItemAll(store.players[i].resources, rf.COFFEE)
-		let kimchi = false
-		if (plyr.playerHasResources(i, rf.KIMCHI)) kimchi = true
-		if (!plyr.hasFridge(i)) store.players[i].resources.splice(0)
-		if (kimchi) plyr.addResources(i, rf.KIMCHI)
+		const hadKimchi = plyr.playerHasResources(i, rf.KIMCHI)
+		store.players[i].resources.splice(0)
+		if (hadKimchi) plyr.addResources(i, rf.KIMCHI)
 	}
 
 	model.clearForNewTurn()
+	model.startLaborMarketTurn()
 	store.gameflow.turn++
 }
 
@@ -906,4 +1043,6 @@ export function setgameflowVars(playerIndex, action) {
 	else if (action === rf.HIST_NEW_TURN) store.gameflow.phase = rf.PHASE_RESTRUCTURING
 	else if (action === rf.HIST_PIZZA_BOMB) store.gameflow.phase = rf.PHASE_PIZZA_BOMB
 	else if (action === rf.HIST_CHOOSE_MODULE) store.gameflow.phase = rf.PHASE_SETUP_MODULES
+	else if (action === rf.HIST_TEMPORARY_WORKER || action === rf.HIST_HEADHUNT) store.gameflow.phase = rf.PHASE_WORKING_DAY
+	else if (action === rf.HIST_UNION_ORGANIZER) store.gameflow.phase = rf.PHASE_CLEAN_UP
 }

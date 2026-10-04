@@ -327,22 +327,18 @@ msgstr "帮助"
 msgid "Rules Help"
 msgstr "规则帮助"
 
-#: .\FCM\templates\FCM\FCMhelp.html:15
+#: .\FCM\templates\FCM\FCMhelp.html:16
 #, python-format
-#| msgid ""
-#| "Food Chain Magnate rules available <a "
-#| "href=\"https://www.qugs.org/rules/r175914.pdf\" target=\"_blank\">here</a> "
-#| "<BR /> Ketchup Expansion rules available <a "
-#| "href=\"https://www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf\""
-#| " target=\"_blank\">here</a>"
 msgid ""
 "Food Chain Magnate rules available <a "
 "href=\"https://www.qugs.org/rules/r175914.pdf\" target=\"_blank\">here</a> "
 "<br /> Ketchup Expansion rules available <a "
 "href=\"https://www.boardgamehelpers.com/FoodChainMagnate/images/FCM_ketchup_Regels_Eng_web.pdf\""
 " target=\"_blank\">here</a> <br /> China Expansion rules available <a "
-"href=\"%(fcm_china_help_url)s\" target=\"_blank\">here</a> <br /> How to "
-"play guide example <a href=\"https://www.myboardgameguides.com/game-"
+"href=\"%(fcm_china_help_url)s\" target=\"_blank\">here</a> <br /> Fan "
+"Expansions rules available <a href=\"%(fcm_fan_help_url)s\" "
+"target=\"_blank\">here</a> <br /> How to play guide example <a "
+"href=\"https://www.myboardgameguides.com/game-"
 "strategy/game-specific-strategy/food-chain-magnate-strategy-guide/\" "
 "target=\"_blank\">here</a>"
 msgstr ""
@@ -350,6 +346,7 @@ msgstr ""
 "target=\"_blank\">此处</a> <br /> 番茄酱扩展规则见 <a "
 "href=\"https://www.boardgamehelpers.com/FoodChainMagnate/images/FCM_ketchup_Regels_Eng_web.pdf\""
 " target=\"_blank\">此处</a> <br /> 中国扩展规则见 <a href=\"%(fcm_china_help_url)s\" "
+"target=\"_blank\">此处</a> <br /> 玩家扩展规则见 <a href=\"%(fcm_fan_help_url)s\" "
 "target=\"_blank\">此处</a> <br /> 玩法示例见 <a "
 "href=\"https://www.myboardgameguides.com/game-strategy/game-specific-"
 "strategy/food-chain-magnate-strategy-guide/\" target=\"_blank\">此处</a>"
@@ -1711,3 +1708,35 @@ msgstr "乡村豁免：乡村营销区不在城镇之内，所以需求不会翻
 
 #~ msgid "Permanent permission"
 #~ msgstr "永久许可"
+msgid "Labor Market"
+msgstr "劳动力市场"
+
+msgid "Labor Market turns staffing from private engine-building into a shared contest. Each company has one Temporary Worker whose value rises as rivals use theirs; Headhunters turn idle talent on the Beach into both an opportunity and a liability; and Union Organizers make the largest active workforces pay for their scale. These pressures overlap: sending more people to work protects valuable staff but risks attracting a union, while resting them limits company size but exposes them to competitors. Temporary Workers offer a third path by producing more actions without adding more workers."
+msgstr "劳动力市场把原本各自经营的员工体系变成一场共同参与的人才竞争。每家公司只有1名临时工，而且会随着其他玩家使用临时工而变强；猎头让休假区里的成熟人才同时成为机会与风险；工会组织者则让上班人数最多的公司为规模付出代价。这些压力彼此交织：让更多员工上班可以保护人才，却可能招来工会；让员工休假可以控制公司规模，却会把他们暴露给竞争对手；临时工则提供了以更少人数换取更多行动的第三条路。"
+
+msgid "Temporary Worker: Every player starts with one on their Beach. At the start of each turn, its action limit is frozen at 1 plus the number of Temporary Workers removed before that turn. Before hiring, assign each action to Waitress, Pricing Manager, Recruiting Girl, Trainer, Errand Boy, Marketing Trainee or Kitchen Trainee. Different actions may copy different employees, and the same employee may be chosen repeatedly. It is never doubled by Night Shift, earns no salary and is permanently removed after that player's Working Day. Unassigned or unused actions are forfeited."
+msgstr "临时工：每名玩家开局时在休假区获得1张。每回合开始时，其行动上限冻结为1加该回合开始前已移除的临时工数。招聘前，为每次行动分别选择女服务员、定价经理、招聘专员、培训师、跑腿伙计、营销实习生或厨房实习生；可混选不同员工，也可重复选择同一员工。临时工不受夜班经理翻倍、不领工资，并在该玩家工作日后永久移除；未分配或未使用的行动视为放弃。"
+
+msgid "Temporary Worker example: Two Temporary Workers had been removed before the current turn, so every Temporary Worker used this turn receives 3 actions. You may choose Trainer, Trainer and Recruiting Girl for two training actions and one recruiting action. A rival using theirs later in the same turn also receives 3 actions, even after yours has been removed."
+msgstr "临时工示例：本回合开始前已有2名临时工被移除，因此本回合使用的每名临时工都获得3次行动。你可以选择培训师、培训师和招聘专员，从而获得2次培训行动和1次招聘行动。即使你的临时工先被移除，同回合稍后使用临时工的对手也仍然只有相同的3次行动。"
+
+msgid "Temporary campaigns: A Temporary Worker acting as a Marketing Trainee creates a normal campaign, but no employee card is attached and nothing returns to the Beach when it expires."
+msgstr "临时广告：临时工模仿营销实习生时建立正常广告，但不会有员工卡附着其上，广告到期后也不会有员工返回休假区。"
+
+msgid "Headhunter: Train one level from a Management Trainee. It is a level-2 salaried employee. Each working Headhunter may take one legal employee from another player's current Beach. If that employee is still employed at Payday, pay its normal salary, if any, plus a one-time job-switch salary of $10 per employee level to the bank. If it is fired before Payday, no job-switch salary is due. Temporary Workers, Headhunters, Union Organizers and other non-transferable employees are illegal targets."
+msgstr "猎头：由管理培训生培训1级获得，是需要支付工资的2级员工。每名上班的猎头可从另一名玩家当前休假区取得1名合法员工。若该员工在发薪时仍未被解雇，除其正常工资（如有）外，还须向银行一次性支付员工等级乘$10的跳槽薪水；若发薪前解雇，则不支付跳槽薪水。临时工、猎头、工会组织者和其他不可转移员工不能成为目标。"
+
+msgid "Headhunter example: You take a level-4 Senior Vice President from an opponent's Beach. If you keep it until Payday, you pay its normal $5 salary plus a one-time $40 job-switch salary to the bank, for $45 total. If you fire it before Payday, neither payment is due for that employee."
+msgstr "猎头示例：你从对手的休假区挖走一名4级高级副总裁。若将其保留到发薪阶段，需要支付正常的$5工资，并向银行额外支付一次性$40跳槽薪水，合计$45；若在发薪前将其解雇，则不必为该员工支付这两项费用。"
+
+msgid "Unique employees and salary milestones: A Headhunter cannot take a unique employee when the hiring player already owns the same unique employee. The Headhunter action does not require cash on hand. The First to train someone milestone reduces the combined normal and job-switch salaries by $15. The First Trainer Used milestone protects all employees when the company still cannot pay, following the normal bankruptcy rule. A job-switch salary is removed after that Payday and is never charged again."
+msgstr "唯一员工与工资里程碑：如果猎头玩家已拥有同名唯一员工，则不能再挖走该员工；执行猎头行动时无需持有足够现金。首个培训员工里程碑会从正常工资与跳槽薪水的合计金额中减免$15。若公司仍无法支付，首个使用培训师里程碑按原破产规则保护全部员工。跳槽薪水在本次发薪结算后移除，之后不再支付。"
+
+msgid "Union Organizer: The game uses one card per player, with inactive cards in the public supply. After all Working Days, ignore companies with fewer than 5 workers, then give one Organizer to every company tied for the largest eligible workforce. All other Organizer cards return to the public supply."
+msgstr "工会组织者：每名玩家对应1张卡，未生效的卡留在公共供应区。所有玩家工作日结束后，先排除少于5名上班员工的公司，再给所有并列最大的合格公司各1张。其他工会组织者返回公共供应区。"
+
+msgid "Union Organizer example: Companies A, B and C send 6, 6 and 5 employees to work. All three meet the 5-worker threshold, but only A and B are tied for the largest workforce, so each receives an Organizer for the next Working Day; C receives none."
+msgstr "工会组织者示例：A、B、C公司本轮分别安排6名、6名和5名员工上班。三家公司都达到5人门槛，但只有A和B并列上班人数最多，因此下一工作日A、B各获得1名工会组织者，C不获得。"
+
+msgid "Each Union Organizer must occupy one slot directly under the CEO on the next Working Day, provides no action or subordinate slots, and costs $5 at Payday. It cannot be hired, trained, fired or headhunted, and it is excluded from workforce counts. A working Temporary Worker counts as one employee regardless of its number of actions."
+msgstr "每名工会组织者在下一工作日必须占用CEO下方的1个直属槽位，不提供行动或下属槽位，并在发薪时支付$5。它不能招聘、培训、解雇或被猎头挖走，且不计入员工规模。无论临时工执行多少次行动，上班时都只计1名员工。"

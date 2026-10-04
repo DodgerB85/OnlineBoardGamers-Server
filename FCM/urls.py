@@ -22,6 +22,7 @@ def redirect_old_url(request, original_id):
 urlpatterns = [
     path("", views.index, name="index"),
     path("help/", views.FCMhelp, name="FCMhelp"),
+    path("tutorial/", views.tutorial, name="tutorial"),
     path("chinaHelp/", views.FCMchinaHelp, name="FCMchinaHelp"),
     path("coffeeHelp/", views.coffeeHelp, name="coffeeHelp"),
     path(
@@ -33,6 +34,18 @@ urlpatterns = [
     path("gameAdmin/", views.gameAdmin, name="gameAdmin"),
     path("<int:game_id>/show2/", views.showGame, name="showFCMgame"),
     path("<int:game_id>/show/", views.showGameVue, name="showFCMgameVue"),
+    path(
+        "<int:game_id>/spoilerFree/",
+        views.showGameVue,
+        {"spoilerFree": True},
+        name="showFCMgameSpoilerFree",
+    ),
+    path(
+        "<int:game_id>/replay/<int:replayStep>/",
+        views.showGameVue,
+        {"spoilerFree": True},
+        name="showFCMreplayStep",
+    ),
     path("<int:original_id>/", redirect_old_url, name="redirect_old_url"),
     path("FCMstats/", views.FCMstats, name="FCMstats"),
     path("FCMstatGames/", views.FCMstatGames, name="FCMstatGames"),

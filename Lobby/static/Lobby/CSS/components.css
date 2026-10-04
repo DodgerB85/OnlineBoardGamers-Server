@@ -2670,7 +2670,7 @@ iframe {
 .row09.kickoutRequired2 { background: #F2BABA; }
 .row09.pendingFinish {
   background-image: repeating-conic-gradient(#c8c8c8 0% 25%, #f0f0f0 0% 50%);
-  background-size: 14px 14px;
+  background-size: 56px 56px;
 }
 @media (hover: hover) {
     .row09.myMove:hover { background: #D9EED3; }
@@ -2678,7 +2678,7 @@ iframe {
     .row09.kickoutRequired2:hover { background: #f6cdcd; }
     .row09.pendingFinish:hover {
       background-image: repeating-conic-gradient(#b8b8b8 0% 25%, #e4e4e4 0% 50%);
-      background-size: 14px 14px;
+      background-size: 56px 56px;
     }
 }
 
@@ -2686,8 +2686,8 @@ iframe {
 @media (max-width: 980px) {
     .row09 {
         grid-template-columns: 56px minmax(0, 1fr);
-        gap: 8px 10px;
-        padding: 12px;
+        gap: 4px 10px;
+        padding: 8px;
     }
     .col-icon img { width: 50px; height: 50px; }
     .col-players,
@@ -2707,9 +2707,9 @@ iframe {
     }
 }
 
-/* ---------- GAME LIST (shared mobile data-label treatment) ----------
-   On narrow screens .row09 tables become stacked cards, so metadata
-   cells pull compact uppercase labels from their data-label attribute. */
+/* ---------- GAME LIST (shared mobile stacked cards) ----------
+   On narrow screens .row09 tables become stacked cards with no header,
+   so cells carry no prefix labels — the values stand on their own. */
 .game-list .table-wrap {
     border-radius: 0 0 var(--radius-md) var(--radius-md);
     overflow: hidden;
@@ -2727,17 +2727,8 @@ iframe {
 }
 
 @media (max-width: 720px) {
-    .row09 > td[data-label]:not(.col-game)::before {
-        content: attr(data-label);
-        display: block;
-        font-size: 11px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        margin-bottom: 4px;
-    }
     .game-list .row09 {
-        padding: 12px;
+        padding: 8px;
     }
     .row09 .col-options {
         flex-wrap: wrap;
@@ -2751,13 +2742,6 @@ iframe {
     }
     .row09 .col-cta {
         justify-content: flex-start;
-    }
-}
-
-@media (min-width: 721px) {
-    .row09 > td[data-label]::before {
-        content: none;
-        display: none;
     }
 }
 

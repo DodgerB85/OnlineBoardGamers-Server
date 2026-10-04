@@ -232,6 +232,8 @@ function init() {
 
 	C = new Controller(M, V)
 
+	replay.init(M)
+
 	if (global.load != undefined && !global.HLCgameSummary) Log.refreshHistory(M)
 
 	if (global.liveWS) {
@@ -364,6 +366,14 @@ function init() {
 
 	$(document).keydown(function (event) {
 		//if (event.altKey && event.which === 82)
+
+		// left / right = step through the replay
+		if (replay.showingReplay && (event.which === 37 || event.which === 39)) {
+			if ($("#bugContent").is(":focus") || $("#chatMessage").is(":focus") || $("#notes").is(":focus")) return
+			event.preventDefault()
+			replay.performStep({ data: { replay: replay, amount: event.which === 37 ? -1 : 1 } })
+			return
+		}
 
 		// r = rotate
 		if (event.which === 82) {

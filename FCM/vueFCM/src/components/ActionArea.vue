@@ -19,6 +19,7 @@ import AddItemBox from "./utils/AddItemBox.vue"
 import ExpertPanel from "./utils/ExpertPanel.vue"
 import ActionAreaWorkingDay from "./ActionAreaWorkingDay.vue"
 import ActionAreaPrePhase from "./ActionAreaPrePhase.vue"
+import HeadhuntSalaryNotice from "./HeadhuntSalaryNotice.vue"
 
 import { useModelStore } from "../stores/FCMstore.js"
 const store = useModelStore()
@@ -43,6 +44,21 @@ watch(
 
 const currentPlayerObj = computed(() => controller.currentPlayerObj())
 const timedOutPlayerIndex = computed(() => (store.gameflow.turnOrder.length > 0 ? store.gameflow.turnOrder[0] : -1))
+const unionOrganizerPlacementRequired = computed(() => rules.unionOrganizerPlacementRequired(controller.currentPlayerIndex()))
+
+// Second Bailout mod: card choices left in the pool, and whether the current
+// player still has to claim their gift (blocks all other actions)
+const computedBailoutPool = computed(() =>
+	Object.keys(store.bailout.pool)
+		.filter((id) => store.bailout.pool[id] > 0)
+		.map(Number)
+)
+const bailoutClaimRequired = computed(
+	() => store.bailout.pending && store.bailout.order.includes(controller.currentPlayerIndex()) && store.bailout.claims[controller.currentPlayerIndex()] === undefined
+)
+function claimBailout(employeeId) {
+	rules.claimBailoutEmployee(controller.currentPlayerIndex(), employeeId)
+}
 
 const isOnlyHumanLeft = computed(() => {
 	const humans = store.players.filter((p) => p.displayName !== rf.BOT_NAME)
@@ -169,9 +185,9 @@ const computedMoneyUsed = computed(() => {
 const computedNeedFiringMarketers = computed(() => rules.needFiringMarketers(controller.currentPlayerIndex()))
 
 const computedFireableEmployees = computed(() =>
-	[...rules.fireableEmployees(controller.currentPlayerIndex())].sort((a, b) => {
-		const rankA = rf.REQUIRE_SALARY.indexOf(a) > -1 ? a : a + 100
-		const rankB = rf.REQUIRE_SALARY.indexOf(b) > -1 ? b : b + 100
+	[...rules.fireableEmployeeChoices(controller.currentPlayerIndex())].sort((a, b) => {
+		const rankA = rf.REQUIRE_SALARY.indexOf(a.employee) > -1 ? a.employee : a.employee + 100
+		const rankB = rf.REQUIRE_SALARY.indexOf(b.employee) > -1 ? b.employee : b.employee + 100
 		return rankA - rankB
 	})
 )
@@ -192,17 +208,17 @@ const ceoBonuses = [
 
 const computedPayResources = computed(() => [...controller.currentPlayerObj().resources].sort().filter((resource) => resource !== rf.COFFEE))
 
-function localFireEmployee(employee) {
-	plyr.fireEmployee(controller.currentPlayerIndex(), employee)
-	store.availableEmployees[employee]++
-	store.context.justFired.push(employee)
+function localFireEmployee(fireToken) {
+	if (!plyr.fireEmployee(controller.currentPlayerIndex(), fireToken)) return
+	store.availableEmployees[rf.decodeFiredEmployee(fireToken)]++
+	store.context.justFired.push(fireToken)
 }
 
-function localUnfireEmployee(employee) {
-	const idx = store.context.justFired.indexOf(employee)
+function localUnfireEmployee(fireToken) {
+	const idx = store.context.justFired.indexOf(fireToken)
 	if (idx === -1) return
+	const employee = plyr.restoreFiredEmployee(controller.currentPlayerIndex(), fireToken)
 	store.availableEmployees[employee]--
-	controller.currentPlayerObj().beach.push(employee)
 	store.context.justFired.splice(idx, 1)
 }
 
@@ -211,6 +227,7 @@ function chooseBeerPayment() {
 }
 
 function paySalaryWithResource(resource) {
+	if (store.context.preMoveData[0][1].length >= computedNumPays.value) return
 	plyr.removeResourcesFromPlayer(controller.currentPlayerIndex(), resource, 1)
 	store.context.preMoveData[0][1].push(resource)
 }
@@ -238,7 +255,7 @@ const cleanupBinned = computed(() => [...store.context.justBinned])
 /** END CLEANUP */
 
 /** RESERVE CARDS */
-const showReserveCards = computed(() => store.gameflow.phase === rf.PHASE_SETUP_RESERVE || (!personal.trainingGame && (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 || store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT2) && personal.moveDataRaw === "" && store.players[personal.pov].restaurants.length > 0 && !store.startingOptions.shortGame && personal.pov !== store.gameflow.turnOrder[0]))
+const showReserveCards = computed(() => (store.gameflow.phase === rf.PHASE_SETUP_RESERVE && personal.canPlay()) || (!personal.trainingGame && (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 || store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT2) && personal.moveDataRaw === "" && store.players[personal.pov].restaurants.length > 0 && !store.startingOptions.shortGame && personal.pov !== store.gameflow.turnOrder[0]))
 /** END RESERVE CARDS */
 
 // Auto-sort beach
@@ -577,6 +594,21 @@ function skipModuleAndEndTurn() {
 
 			<!-- CURRENT PLAYER ONLY-->
 			<template v-if="personal.canPlay()">
+				<!-- Second Bailout mod: forced gift claim, blocks all other actions -->
+				<template v-if="bailoutClaimRequired">
+					<div class="bailoutClaimDiv">
+						<p><img class="bailoutSafeIcon" :src="view.getImage('so_bailout')" alt="" /> <b>{{ $t("actionArea.bailoutTitle") }}</b></p>
+						<p>{{ $t("actionArea.bailoutBody") }}</p>
+						<div v-if="computedBailoutPool.length > 0">
+							<div v-for="employee in computedBailoutPool" :key="employee" class="cardSummaryDiv selectable" @click="claimBailout(employee)">
+								<img :src="view.getImage(`emp_${employee}`)" class="cardImg" :alt="rf.employeeName(employee)" />
+							</div>
+						</div>
+						<p v-else>{{ $t("actionArea.bailoutNothingLeft") }}</p>
+						<button class="actionsLineButton" @click="claimBailout(-1)">{{ $t("actionArea.bailoutDecline") }}</button>
+					</div>
+				</template>
+				<template v-else>
 				<!-- CHOOSE RESTO -->
 				<template v-if="store.gameflow.phase === rf.PHASE_URBAN_PLANNING">
 					<div>
@@ -639,8 +671,9 @@ function skipModuleAndEndTurn() {
 					</div>
 				</template>
 
-				<!-- Starting Restaurant Phase -->
-				<template v-if="(store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 || store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT2) && store.context.action !== rf.ACT_CONFORM_END_TURN && (personal.trainingGame && personal.canPlay() ? currentPlayerObj.restaurants.length === 0 : store.players[personal.pov].restaurants.length === 0)">
+				<!-- Starting Restaurant Phase. NB store.viewSettings.suppressTutorialSetupPanel
+				     is tutorial-only and false everywhere else, so normal games are unaffected. -->
+				<template v-if="!store.viewSettings.suppressTutorialSetupPanel && (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 || store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT2) && store.context.action !== rf.ACT_CONFORM_END_TURN && (personal.trainingGame && personal.canPlay() ? currentPlayerObj.restaurants.length === 0 : store.players[personal.pov].restaurants.length === 0)">
 					<div>
 						<h2>
 							<b>{{ $t("welcome.title") }}</b>
@@ -675,7 +708,7 @@ function skipModuleAndEndTurn() {
 						<AddItemBox :itemBeingAdded="rf.ITEM_BOX_RESTO" />
 
 						<button v-if="!personal.trainingGame" class="actionsLineButton" @click="localClickResign">{{ $t("actionArea.resign") }}</button>
-						<button v-if="store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 && store.gameflow.turnOrder.length > 1" class="actionsLineButton" @click="localConfirmDelay">{{ $t("actionArea.delayRestaurantRound") }}</button>
+						<button v-if="store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 && store.gameflow.turnOrder.length > 1 && !personal.tutorial" class="actionsLineButton" @click="localConfirmDelay">{{ $t("actionArea.delayRestaurantRound") }}</button>
 					</div>
 				</template>
 
@@ -717,7 +750,8 @@ function skipModuleAndEndTurn() {
 
 						<button v-if="!personal.trainingGame" class="actionsLineButton" @click="localClickResign">{{ $t("actionArea.resign") }}</button>
 						<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
-						<button class="actionsLineButton" @click="controller.endPlayerTurn(true, false)">{{ $t("workingDay.endTurn") }}</button>
+						<span v-if="unionOrganizerPlacementRequired" class="blockingActionMessage">{{ $t("laborMarket.unionMustWork") }}</span>
+						<button v-else class="actionsLineButton" @click="controller.endPlayerTurn(true, false)">{{ $t("workingDay.endTurn") }}</button>
 					</template>
 					<div v-else>
 						<p>{{ $t("actionArea.chooseEmployeesToWork") }}</p>
@@ -769,7 +803,8 @@ function skipModuleAndEndTurn() {
 						<button v-if="!personal.trainingGame" class="actionsLineButton" @click="localClickResign">{{ $t("actionArea.resign") }}</button>
 						<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
 						<button class="actionsLineButton" @click="controller.autoFillEmployees()">{{ $t("actionArea.autoFillStructure") }}</button>
-						<button class="actionsLineButton" @click="localEndTurn">{{ $t("workingDay.endTurn") }}</button>
+						<span v-if="unionOrganizerPlacementRequired" class="blockingActionMessage">{{ $t("laborMarket.unionMustWork") }}</span>
+						<button v-else class="actionsLineButton" @click="localEndTurn">{{ $t("workingDay.endTurn") }}</button>
 					</div>
 				</template>
 
@@ -836,6 +871,7 @@ function skipModuleAndEndTurn() {
 
 				<!-- Payday Phase -->
 				<template v-if="store.gameflow.phase === rf.PHASE_PAYDAY">
+					<HeadhuntSalaryNotice :player-index="controller.currentPlayerIndex()" />
 					<!-- BEER MILESTONE - choose payment type -->
 					<div v-if="paydayFlow === 'beer'">
 						<template v-if="computedPaysLeft > 0">
@@ -905,15 +941,16 @@ function skipModuleAndEndTurn() {
 
 						<!-- Just fired reminder -->
 						<div v-if="store.context.justFired.length > 0" class="reminder fireLine">
-							<img v-for="(employee, idx) in store.context.justFired" :key="idx" :src="view.getImage(`emp_${employee}`)" class="cardSummaryDiv selectable" :title="$t('actionArea.clickToUnfire')" @click="localUnfireEmployee(employee)" />
+							<img v-for="(fireToken, idx) in store.context.justFired" :key="idx" :src="view.getImage(`emp_${rf.decodeFiredEmployee(fireToken)}`)" class="cardSummaryDiv selectable" :title="$t('actionArea.clickToUnfire')" @click="localUnfireEmployee(fireToken)" />
 							<b>{{ $t("actionArea.youreFired") }}&nbsp;</b>
 							<img :src="view.getImage('fired')" class="firedImg" />
 						</div>
 
 						<!-- Fireable employees -->
 						<div>
-							<div v-for="employee in computedFireableEmployees" :key="employee" class="fireCardChoiceDiv selectable" @click="localFireEmployee(employee)">
-								<img :src="view.getImage(`emp_${employee}`)" class="cardImg" :alt="rf.employeeName(employee)" />
+							<div v-for="choice in computedFireableEmployees" :key="choice.key" class="fireCardChoiceDiv selectable" @click="localFireEmployee(choice.fireToken)">
+								<img :src="view.getImage(`emp_${choice.employee}`)" class="cardImg" :alt="rf.employeeName(choice.employee)" />
+								<div v-if="choice.headhunted" class="jobSwitchFireBadge">{{ $t("prePhase.headhuntedEmployeeBadge", { amount: choice.switchSalary }) }}</div>
 							</div>
 						</div>
 
@@ -927,7 +964,7 @@ function skipModuleAndEndTurn() {
 					<!-- Nothing left to fire -->
 					<div v-else>
 						<div v-if="store.context.justFired.length > 0" class="reminder fireLine">
-							<img v-for="(employee, idx) in store.context.justFired" :key="idx" :src="view.getImage(`emp_${employee}`)" class="cardSummaryDiv selectable" :title="$t('actionArea.clickToUnfire')" @click="localUnfireEmployee(employee)" />
+							<img v-for="(fireToken, idx) in store.context.justFired" :key="idx" :src="view.getImage(`emp_${rf.decodeFiredEmployee(fireToken)}`)" class="cardSummaryDiv selectable" :title="$t('actionArea.clickToUnfire')" @click="localUnfireEmployee(fireToken)" />
 							<b>{{ $t("actionArea.youreFired") }}&nbsp;</b>
 							<img :src="view.getImage('fired')" class="firedImg" />
 						</div>
@@ -1011,6 +1048,7 @@ function skipModuleAndEndTurn() {
 						<template #here><a href="/FCM/coffeeHelp/" target="_blank">{{ $t("topMenuViews.hereLower") }}</a></template>
 					</i18n-t>
 				</div>
+				</template>
 			</template>
 		</div>
 
@@ -1039,6 +1077,23 @@ function skipModuleAndEndTurn() {
 }
 
 /* Coffee "More Information" panel */
+/* Second Bailout mod: claim panel */
+.bailoutClaimDiv {
+	background-color: #a1cfa8;
+	border: 2px solid black;
+	width: 70%;
+	height: fit-content;
+	padding: 10px;
+	margin: 10px auto;
+	text-align: center;
+}
+
+.bailoutSafeIcon {
+	width: 30px;
+	height: 30px;
+	vertical-align: middle;
+}
+
 #historyCoffeeInfodiv {
 	background-color: #a1cfa8;
 	border: 2px solid black;
@@ -1137,6 +1192,7 @@ function skipModuleAndEndTurn() {
 }
 
 .fireCardChoiceDiv {
+	position: relative;
 	border-radius: 10px;
 	box-sizing: border-box;
 	width: 160px;
@@ -1144,6 +1200,19 @@ function skipModuleAndEndTurn() {
 	margin: 5px;
 	display: inline-block;
 	overflow: hidden;
+}
+
+.jobSwitchFireBadge {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	padding: 5px 3px;
+	background: #8b0000;
+	color: white;
+	font-size: 13px;
+	font-weight: bold;
+	line-height: 1.15;
 }
 
 .fireLine {
@@ -1340,6 +1409,15 @@ function skipModuleAndEndTurn() {
 	border: #000 1px solid;
 	box-sizing: border-box;
 	border-radius: 5px;
+}
+
+.blockingActionMessage {
+	display: inline-block;
+	margin: 0 5px;
+	color: #b00020;
+	font-size: 1.1rem;
+	font-weight: 700;
+	vertical-align: middle;
 }
 
 .ceoSlotDiv {

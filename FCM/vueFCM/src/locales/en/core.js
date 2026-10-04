@@ -257,6 +257,10 @@ milestones: {
   firstFriedChickenSold: "First fried chicken sold",
   firstFriedChickenSoldTitle: "First fried chicken sold",
   firstFriedChickenSoldDesc: "May market fried chicken; +$5 each sold",
+
+  firstStadiumSold: "First stadium supplier",
+  firstStadiumSoldTitle: "First stadium supplier",
+  firstStadiumSoldDesc: "Stadium announcements arrive 3 turns ahead",
 },
 
 // Employees
@@ -427,7 +431,18 @@ employees: {
   friedChickenCookDesc: "Produce 3 fried chicken",
 
   friedChickenChef: "Fried Chicken Chef",
-  friedChickenChefDesc: "Produce 8 fried chicken"
+  friedChickenChefDesc: "Produce 8 fried chicken",
+
+  temporaryWorker: "Temporary Worker",
+  temporaryWorkerDesc: "Each use copies 1 entry employee. Uses = 1 + turn-start removed temps. Remove after work.",
+  headhunter: "Headhunter",
+  headhunterDesc: "Take 1 legal employee from an opponent's Beach. If kept, pay a one-time $10 per level at Payday.",
+  unionOrganizer: "Union Organizer",
+  unionOrganizerDesc: "5+ workers: each largest company gets one. CEO-direct slot; no action; $5 salary."
+},
+
+laborMarket: {
+  unionMustWork: "You must employ the Union Organizer",
 },
 
 // FCM_IO messages

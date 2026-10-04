@@ -1107,6 +1107,18 @@ export function importRNBmodel(input, forGameOver) {
 						const hexID = stackAction[3]
 						strengthenedBuildings.push([buildingType, hexID])
 					}
+					// Road & Bridge (city): add the bridge and the road
+					else if (stackAction[0] === rf.STACK_BUILD_ROAD_BRIDGE) {
+						const cityHexID = stackAction[2]
+						const bridgeArr = stackAction[3]
+						const fromLocation = stack.decompressLocation(stackAction[4])
+						const toLocation = stack.decompressLocation(stackAction[5])
+						newBridges.push([cityHexID, bridgeArr])
+						newRoads.push([
+							[fromLocation[1], fromLocation[2]],
+							[toLocation[1], toLocation[2]],
+						])
+					}
 					if (stackAction[0] === rf.STACK_DO_RESEARCH) {
 						const researchIdx = stackAction[2]
 						store.players[entry[1]].RnD[researchIdx] = 1
@@ -1132,9 +1144,9 @@ export function importRNBmodel(input, forGameOver) {
 		}
 	}
 	// Apply bomb and strengthen operations after buildings are created
-	for (const [buildingType, hexID] of bombedBuildings) {
-		const bldgsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && b.type === buildingType)
-		if (bldgsOnHex.length > 0) model.removeBuildingByID(bldgsOnHex[0].id)
+	for (const [, hexID] of bombedBuildings) {
+		const bldgsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && !b.strengthened)
+		for (const bldg of bldgsOnHex) model.removeBuildingByID(bldg.id)
 	}
 	for (const [buildingType, hexID] of strengthenedBuildings) {
 		const bldgsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && b.type === buildingType)

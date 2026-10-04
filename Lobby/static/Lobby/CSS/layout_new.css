@@ -83,6 +83,20 @@
 	body.authed .mobileQuickNav ~ .mainLayout {
 		margin-top: 44px;
 	}
+
+	/* Guest bar is 80px tall (holds the login form + logo), so the quick nav
+	   sits below that and the hamburger menu below the quick nav. */
+	body.guest .mobileQuickNav {
+		top: 80px;
+	}
+
+	body.guest .mobileQuickNav ~ .hamburgerMenu.active {
+		transform: translateY(124px);
+	}
+
+	body.guest .mobileQuickNav ~ .mainLayout {
+		margin-top: 44px;
+	}
 }
 
 @media only screen and (max-width: 1100px) {

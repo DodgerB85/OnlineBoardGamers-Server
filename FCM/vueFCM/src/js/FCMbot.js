@@ -17,6 +17,13 @@ export function makeBot(player) {
 export function removeBotPlayers() {
     const store = useModelStore()
 	store.gameflow.turnOrder = store.gameflow.turnOrder.filter((idx) => store.players[idx].displayName != rf.BOT_NAME)
+	// Second Bailout mod: bots never claim their gift - auto-decline so the
+	// claim night cannot get stuck on an abandoned player
+	if (store.bailout.pending) {
+		store.bailout.order.forEach((idx) => {
+			if (store.players[idx].displayName === rf.BOT_NAME && store.bailout.claims[idx] === undefined) rules.claimBailoutEmployee(idx, -1)
+		})
+	}
 }
 
 function generatePaydayDefaultMove(playerIndex) {
@@ -28,18 +35,20 @@ function generatePaydayDefaultMove(playerIndex) {
 
 	let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
 	let fired = []
+	const payableWithFood = rules.baseSalary(playerIndex)
 	let remaining = due
 
 	if (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD)) {
 		let itemCount = playerObj.resources.filter((r) => r !== rf.COFFEE).length
-		remaining = Math.max(remaining - itemCount * unitarySalary, 0)
+		remaining = rules.headhuntSalaryDue(playerIndex) + Math.max(payableWithFood - itemCount * unitarySalary, 0)
 	}
 
 	while (remaining > playerObj.money && playerObj.employees.length > 0) {
 		let emp = playerObj.employees.pop()
 		if (emp !== rf.BLANK_EMPLOYEE_SPACE) {
 			fired.push(emp)
-			remaining = Math.max(remaining - unitarySalary, 0)
+			const normalAfterFood = Math.max(rules.baseSalary(playerIndex) - (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) ? playerObj.resources.filter((r) => r !== rf.COFFEE).length * unitarySalary : 0), 0)
+			remaining = rules.headhuntSalaryDue(playerIndex) + normalAfterFood
 		}
 	}
 

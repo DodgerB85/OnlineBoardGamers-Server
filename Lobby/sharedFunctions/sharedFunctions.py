@@ -709,10 +709,14 @@ def start_next_any_tournament_round(
 ):
     from AQY.common import create_aqy_game
     from BUS.common import create_bus_game
+    from CNS.common import create_cns_game
     from FCM.common import create_fcm_game
     from HLC.common import create_hlc_game
     from IND.common import create_ind_game
+    from KFW.common import create_kfw_game
+    from RNB.common import create_rnb_game
     from TGZ.common import create_tgz_game
+    from WEB.common import create_web_game
 
     # MG tournaments don't add next round players dynamically
     # End T check checks for not enough next round players
@@ -808,6 +812,14 @@ def start_next_any_tournament_round(
             newGameID = create_aqy_game(request, tournamentObj, tournamentGameName, currentPlayers)
         elif tournamentObj.gameCode == "IND":
             newGameID = create_ind_game(request, tournamentObj, tournamentGameName, currentPlayers)
+        elif tournamentObj.gameCode == "RNB":
+            newGameID = create_rnb_game(request, tournamentObj, tournamentGameName, currentPlayers)
+        elif tournamentObj.gameCode == "CNS":
+            newGameID = create_cns_game(request, tournamentObj, tournamentGameName, currentPlayers)
+        elif tournamentObj.gameCode == "WEB":
+            newGameID = create_web_game(request, tournamentObj, tournamentGameName, currentPlayers)
+        elif tournamentObj.gameCode == "KFW":
+            newGameID = create_kfw_game(request, tournamentObj, tournamentGameName, currentPlayers)
         else:
             # LEGACY CODE FOR SEPERARTE TOURNAMENT MODELS
             # THIS WILL FAIL! THIS FUNCTION NO LONGER EXISTS
@@ -834,7 +846,8 @@ def SF_createNextRoundGamesSetup(tournamentObj):
 
     # Load tournament data
     TPDA = json.loads(tournamentObj.tournamentProgressionData)
-    roundNumberString = gettext("Round") + f" {len(TPDA) + 1}"
+    # Deliberately NOT translated: round names are stored in the game name and should stay English
+    roundNumberString = "Round" + f" {len(TPDA) + 1}"
 
     # Get players sorted by points (weakest first) for RR, PT, or TL
     # This first call ist just for KO - it gets overwritten later for RR / TL / PT
@@ -865,7 +878,8 @@ def SF_createNextRoundGamesSetup(tournamentObj):
 
     # Set final round label if exactly maxGamePlayers remain
     if len(allPlayersList) == tournamentObj.maxGamePlayers:
-        roundNumberString = gettext("Final Round") + (" (KO)" if tournamentType == "RR" and len(TPDA) >= tournamentObj.roundsBeforeKnockout else "")
+        # Deliberately NOT translated: round names are stored in the game name and should stay English
+        roundNumberString = "Final Round" + (" (KO)" if tournamentType == "RR" and len(TPDA) >= tournamentObj.roundsBeforeKnockout else "")
 
     # 1. CALCULATE HOW MANY BYES ARE REQUIRED
     num_players = len(allPlayersList)
@@ -1281,6 +1295,9 @@ def SF_validatePlayers(request, usernames, max_players, allow_creator=True):
 
     if not usernames:
         return []
+    # De-duplicate first so a username typed into two invite boxes is not counted
+    # twice towards the cap or invited twice.
+    usernames = list(dict.fromkeys(usernames))
     existing_users = User.objects.filter(username__in=usernames)
     existing_usernames = set(user.username for user in existing_users)
     valid_players = []

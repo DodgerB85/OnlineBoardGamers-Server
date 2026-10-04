@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-04 10:25+0800\n"
+"POT-Creation-Date: 2026-09-30 00:43+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,10 +18,5586 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: .\static\Lobby\Lobby.js:355
-msgid "A test message has been sent. Please check your Discord channel"
-msgstr ""
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:979
+msgid "2 - Order of Business"
+msgstr "2 - Ordre des travaux"
 
-#: .\static\Lobby\Lobby.js:356
-msgid "A test message has been sent. Please check your Slack"
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:980
+msgid "3 - Working 9:00-5:00"
+msgstr "3 - Travailler de 9h00 à 17h00"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:985
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:863
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:865
+msgid "Game End"
+msgstr "Fin du jeu"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:986
+msgid "4 - Pizza Milestone"
+msgstr "4 - Pizza étape importante"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:987
+msgid "7 - Coffee Selling Milestone"
+msgstr "7 – Jalon de vente de café"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:994
+msgid "First to Hire 3"
+msgstr "Premier à embaucher 3"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:994
+msgid "+ 2 Management Trainees"
+msgstr "+ 2 stagiaires en gestion"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:995
+msgid "First to throw away food/drink"
+msgstr "Premier à jeter de la nourriture/des boissons"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:996
+#: .\Private\Z_Deployment\FCMbigString.js:1027
+msgid "First waitress"
+msgstr "Première serveuse"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1000
+msgid "First to train"
+msgstr "Premier à s'entraîner"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1000
+msgid "First to train someone"
+msgstr "D'abord former quelqu'un"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1002
+msgid "First pizza produced"
+msgstr "Première pizza produite"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1003
+msgid "First errand boy played"
+msgstr "Le premier garçon de courses a joué"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1005
+msgid "First to pay $20 in salaries"
+msgstr "Premier à payer 20 $ de salaire"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1006
+msgid "No salaries for marketeers; Eternal marketing"
 msgstr ""
+"Pas de salaire pour les spécialistes du marketing ; Commercialisation "
+"éternelle"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1007
+msgid "First burger marketed"
+msgstr "Premier burger commercialisé"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1009
+msgid "First drink marketed"
+msgstr "Premier verre commercialisé"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1011
+msgid "First radio"
+msgstr "Première radio"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1011
+msgid "First radio campaign"
+msgstr "Première campagne radio"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1011
+msgid "Your radios market 2 goods per turn instead of 1"
+msgstr "Vos radios commercialisent 2 marchandises par tour au lieu de 1"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1012
+msgid "First marketeer"
+msgstr "Premier marketeur"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1013
+msgid "Get a free kitchen trainee and an errand boy"
+msgstr "Obtenez un stagiaire en cuisine gratuit et un garçon de courses"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1014
+msgid "First campaign manager"
+msgstr "Premier directeur de campagne"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1014
+msgid "First campaign manager used"
+msgstr "Premier gestionnaire de campagne utilisé"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1015
+msgid "First brand manager"
+msgstr "Premier chef de marque"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1015
+msgid "First brand manager used"
+msgstr "Premier gestionnaire de marque utilisé"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1017
+msgid "First burger sold"
+msgstr "Premier burger vendu"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1018
+msgid "First pizza sold"
+msgstr "Première pizza vendue"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1019
+msgid "Any employee can be trained on the job, preserving color"
+msgstr "Tout employé peut être formé sur le tas, en préservant la couleur"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1020
+msgid "May pay salary with food/drink"
+msgstr "Peut payer le salaire avec de la nourriture/des boissons"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1021
+msgid "First coke sold"
+msgstr "Premier coca vendu"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1023
+msgid "First trainer used"
+msgstr "Premier entraîneur utilisé"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1023
+msgid "Get a free trainer; no longer need to fire employees if broke"
+msgstr ""
+"Obtenez un entraîneur gratuit ; plus besoin de licencier des employés en cas"
+" de faillite"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1024
+msgid "First discount manager"
+msgstr "Premier gestionnaire de rabais"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1025
+msgid "First house"
+msgstr "Première maison"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1026
+msgid "First new restaurant"
+msgstr "Premier nouveau restaurant"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1026
+msgid "Place a permanent mailbox in restaurant area"
+msgstr "Placer une boîte aux lettres permanente dans la zone du restaurant"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1004
+#: .\Private\Z_Deployment\FCMbigString.js:1028
+msgid "First cart operator"
+msgstr "Premier opérateur de chariot"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1029
+msgid "First rural marketeer used"
+msgstr "Premier spécialiste du marketing rural utilisé"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1030
+msgid "First coffee sold"
+msgstr "Premier café vendu"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1031
+msgid "Someone sells your demand"
+msgstr "Quelqu'un vend votre demande"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1038
+msgid "New Business Developer"
+msgstr "Développeur de nouvelles affaires"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1039
+msgid "Local Manager"
+msgstr "Responsable local"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1040
+msgid "Regional Manager"
+msgstr "Directeur régional"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1042
+msgid "2 slots"
+msgstr "2 emplacements"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1044
+msgid "4 slots"
+msgstr "4 emplacements"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1045
+msgid "Senior Vice President"
+msgstr "Vice-président principal"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1046
+msgid "10 slots"
+msgstr "10 emplacements"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1049
+msgid "Discount Manager"
+msgstr "Gestionnaire de rabais"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1050
+msgid "Marketing Trainee"
+msgstr "Stagiaire en Marketing"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1051
+msgid "Place mailbox or lower, max duration 3"
+msgstr "Placer une boîte aux lettres ou inférieure, durée maximale 3"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1053
+msgid "Place radio or lower, max duration 5"
+msgstr "Placer la radio ou moins, durée maximale 5"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1056
+msgid "2x Hire 1 person or $5 less salary"
+msgstr "2x Embaucher 1 personne ou 5$ de moins de salaire"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1057
+msgid "4x Hire 1 person or $5 less salary"
+msgstr "4x Embaucher 1 personne ou 5$ de salaire en moins"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1058
+msgid "Trainer"
+msgstr "Entraîneur"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1058
+msgid "Train 1 person"
+msgstr "Former 1 personne"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1059
+msgid "Coach"
+msgstr "Entraîneur"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1059
+#: .\Private\Z_Deployment\FCMbigString.js:14561
+#: .\Private\Z_Deployment\FCMbigString.js:21551
+#: .\Private\Z_Deployment\FCMbigString.js:23208
+msgid "2 training slots. May train the same person two steps"
+msgstr "2 créneaux de formation. Peut former la même personne en deux étapes"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1061
+msgid "Errand Boy"
+msgstr "Garçon de courses"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1061
+msgid "Get 1 drink of any type"
+msgstr "Obtenez 1 boisson de n'importe quel type"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1063
+msgid "Truck Driver"
+msgstr "Chauffeur de camion"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1063
+msgid "Get 3 drinks from each source on route"
+msgstr "Obtenez 3 boissons de chaque source sur l'itinéraire"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1064
+msgid "Zeppelin Pilot"
+msgstr "Pilote de Zeppelin"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1066
+msgid "Kitchen Trainee"
+msgstr "Stagiaire en cuisine"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1066
+msgid "Produce 1 burger or 1 pizza"
+msgstr "Produire 1 burger ou 1 pizza"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1069
+msgid "Produce 3 pizzas"
+msgstr "Produire 3 pizzas"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1071
+msgid "Bonus: +$10 per sale"
+msgstr "Bonus : +10$ par vente"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1075
+msgid "Sushi Cook"
+msgstr "Cuisinier de sushis"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1075
+msgid "Produce 2 sushi"
+msgstr "Produire 2 sushis"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1077
+msgid "Produce 1 coffee"
+msgstr "Produire 1 café"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1081
+msgid "C-Movie Star"
+msgstr "Star du cinéma C"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1083
+msgid "Market to all houses with a garden. Max duration 3"
+msgstr "Marché à toutes les maisons disposant d'un jardin. Durée maximale 3"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1084
+msgid "Place 1 road or park"
+msgstr "Placer 1 route ou parc"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1086
+#: .\Private\Z_Deployment\FCMbigString.js:10638
+#: .\Private\Z_Deployment\FCMbigString.js:23612
+msgid "Night Shift Manager"
+msgstr "Chef d'équipe de nuit"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1086
+msgid "All employees who don't require a salary work twice"
+msgstr ""
+"Tous les salariés qui n'ont pas besoin de salaire travaillent deux fois"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:10606
+#: .\Private\Z_Deployment\FCMbigString.js:23580
+msgid "Hard Choices"
+msgstr "Des choix difficiles"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:10622
+#: .\Private\Z_Deployment\FCMbigString.js:23596
+msgid "Mass Marketeers"
+msgstr "Spécialistes du marketing de masse"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:10626
+#: .\Private\Z_Deployment\FCMbigString.js:23600
+msgid "Gourmet Food Critics"
+msgstr "Critiques gastronomiques"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:10630
+#: .\Private\Z_Deployment\FCMbigString.js:23604
+msgid "Rural Marketeers"
+msgstr "Commercialisateurs ruraux"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:10654
+#: .\Private\Z_Deployment\FCMbigString.js:23628
+msgid "Sushi"
+msgstr "Sushis"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:10658
+#: .\Private\Z_Deployment\FCMbigString.js:23632
+msgid "Noodles"
+msgstr "Nouilles"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:10662
+#: .\Private\Z_Deployment\FCMbigString.js:23636
+msgid "Skip Module"
+msgstr "Passer le module"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:10971
+msgid "When the bank breaks, add $200 per player."
+msgstr "Lorsque la banque fait faillite, ajoutez 200 $ par joueur."
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:10978
+msgid "Repeat marketing phase for each Mass Marketeer"
+msgstr "Répéter la phase de marketing pour chaque Mass Marketeer"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:12314
+msgid "No suitable houses"
+msgstr "Pas de maisons adaptées"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:12353
+msgid "No Available Space"
+msgstr "Aucun espace disponible"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:13315
+#: .\Private\Z_Deployment\FCMbigString.js:13485
+msgid "No Active Gourmet Food Critics"
+msgstr "Pas de critiques gastronomiques actives"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:13319
+msgid "No Active Hawker Trucks"
+msgstr "Aucun camion Hawker actif"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:1055
+#: .\Private\Z_Deployment\FCMbigString.js:14558
+msgid "Hire 1 person"
+msgstr "Embaucher 1 personne"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:14560
+#: .\Private\Z_Deployment\FCMbigString.js:21550
+#: .\Private\Z_Deployment\FCMbigString.js:23207
+msgid "2x: Hire 1 person or $5 less salary"
+msgstr "2x : Embauchez 1 personne ou 5 $ de salaire en moins"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:14861
+#: .\Private\Z_Deployment\FCMbigString.js:14864
+msgid "Fancy a <a href='/createFCMpage/%(gameID)s/'>rematch</a>?"
+msgstr "Envie d'un <a href='/createFCMpage/%(gameID)s/'>rematch</a> ?"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:14977
+msgid "Urban Planning"
+msgstr "Urbanisme"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:15385
+msgid "Selected Modules"
+msgstr "Modules sélectionnés"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:15439
+msgid "Available houses & gardens:"
+msgstr "Maisons et jardins disponibles :"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:15607
+msgid "Collapse Milestones"
+msgstr "Réduire les jalons"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:15917
+msgid "Employees:"
+msgstr "Employés:"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:16394
+msgid "No resources"
+msgstr "Aucune ressource"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:16403
+#: .\Private\Z_Deployment\FCMbigString.js:16448
+msgid "Marketers"
+msgstr "Les spécialistes du marketing"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:16512
+#: .\Private\Z_Deployment\FCMbigString.js:16577
+msgid "Prod"
+msgstr "Produit"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:16549
+#: .\Private\Z_Deployment\HLCbigString.js:14109
+msgid "None"
+msgstr "Aucun"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:16806
+msgid "Place Giant Billboard"
+msgstr "Placez un panneau d'affichage géant"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:16827
+msgid "Skip the Lobbyist Milestone Bonus"
+msgstr "Évitez le bonus d'étape pour les lobbyistes"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:16940
+#: .\Private\Z_Deployment\FCMbigString.js:17027
+msgid "Yes, continue anyway"
+msgstr "Oui, continue quand même"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:17124
+msgid ""
+"You could send more employees to work. Are you sure you want to confirm?"
+msgstr ""
+"Vous pourriez envoyer plus d’employés travailler. Êtes-vous sûr de vouloir "
+"confirmer ?"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:17960
+msgid ""
+"<b>Expert Options</b>: If unsure leave on \"Choose Normally\"<BR/>Indicate "
+"your preference in turn order:"
+msgstr ""
+"<b>Options expertes</b> : En cas de doute, laissez sur \"Choisir "
+"normalement\"<BR/>Indiquez votre préférence dans l'ordre du tour :"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:17963
+msgid "Earliest possible"
+msgstr "Le plus tôt possible"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:17965
+#: .\Private\Z_Deployment\FCMbigString.js:18014
+#: .\Private\Z_Deployment\FCMbigString.js:18023
+#: .\Private\Z_Deployment\FCMbigString.js:18034
+msgid "Choose normally"
+msgstr "Choisissez normalement"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:17967
+msgid "Latest possible"
+msgstr "Dernier possible"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18006
+msgid ""
+"You <b>do not have enough money currently</b> to pay your salary. Do you "
+"wish to autopay everyone if you have enough after the dinnertime phase?"
+msgstr ""
+"Vous n'avez pas assez d'argent actuellement pour payer votre salaire. "
+"Souhaitez-vous payer automatiquement tout le monde si vous en avez assez "
+"après la phase du dîner ?"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18011
+msgid ". The <b>First Trainer Used</b> MS allows you to keep everyone"
+msgstr ". Le <b>First Trainer Used</b> MS vous permet de garder tout le monde"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18018
+msgid ""
+"You have the <b>First Beer Sold Milestone</b> and <b>no Fridge</b>. Do you "
+"wish to autopay everyone with available food and then with money?"
+msgstr ""
+"Vous avez le <b>Première étape de la vente de bière</b> et le <b>Pas de "
+"réfrigérateur</b>. Souhaitez-vous payer automatiquement tout le monde avec "
+"la nourriture disponible, puis avec de l'argent ?"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18021
+msgid "Pay salary with as many items as possible and then money"
+msgstr ""
+"Payer le salaire avec autant d'articles que possible, puis de l'argent"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18078
+msgid "No"
+msgstr "Non"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18166
+msgid "Choose a rotation for the next tile"
+msgstr "Choisissez une rotation pour la tuile suivante"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18167
+msgid "Choose a new tile and rotation"
+msgstr "Choisissez une nouvelle vignette et une nouvelle rotation"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18223
+msgid ""
+"<b>Welcome to Food Chain Magnate Online!</b><BR/>If you have any "
+"suggestions, questions or comments, then please do contact the webmaster at "
+"<img src=\"/static/Lobby/email.png\" width=\"400px\" height=\"30px\">. "
+"Thanks!"
+msgstr ""
+"<b>Bienvenue sur Food Chain Magnate Online !</b><BR/>Si vous avez des "
+"suggestions, des questions ou des commentaires, veuillez contacter le "
+"webmaster au <img src=\"/static/Lobby/email.png\" width=\"400px\" "
+"height=\"30px\">. Merci!"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18234
+msgid "Choose your restaurant direction, and then its location on the board"
+msgstr ""
+"Choisissez la direction de votre restaurant, puis son emplacement sur le "
+"tableau"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18236
+#: .\Private\Z_Deployment\FCMbigString.js:18304
+#: .\Private\Z_Deployment\FCMbigString.js:18766
+msgid "Remember: you are using the <b>Original Milestones</b>"
+msgstr "N'oubliez pas : vous utilisez les <b>Jalons originaux</b>"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18253
+#: .\Private\Z_Deployment\FCMbigString.js:18459
+msgid ""
+"You may not resign from a tournament game. Please carry on playing. <br/>If "
+"you must leave, you may prompt the tournament admin"
+msgstr ""
+"Vous ne pouvez pas abandonner une partie de tournoi. S'il vous plaît, "
+"continuez à jouer. <br/>Si vous devez partir, vous pouvez demander à "
+"l'administrateur du tournoi"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18254
+#: .\Private\Z_Deployment\FCMbigString.js:18460
+msgid "No, I want to keep playing"
+msgstr "Non, je veux continuer à jouer"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18300
+msgid "To save time, you may choose your reserve card early"
+msgstr ""
+"Pour gagner du temps, vous pouvez choisir votre carte de réserve à l'avance"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18246
+#: .\Private\Z_Deployment\FCMbigString.js:18453
+#: .\Private\Z_Deployment\HCbigString.js:10095
+#: .\Private\Z_Deployment\HLCbigString.js:10145
+msgid "Resign"
+msgstr "Démissionner"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18254
+#: .\Private\Z_Deployment\FCMbigString.js:18460
+#: .\Private\Z_Deployment\HCbigString.js:10102
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:10152
+msgid "Are you sure you want to resign?"
+msgstr "Etes-vous sûr de vouloir démissionner ?"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:16891
+#: .\Private\Z_Deployment\FCMbigString.js:18465
+#: .\Private\Z_Deployment\FCMbigString.js:18737
+#: .\Private\Z_Deployment\FCMbigString.js:20646
+#: .\Private\Z_Deployment\FCMbigString.js:20800
+#: .\Private\Z_Deployment\FCMbigString.js:20823
+#: .\Private\Z_Deployment\FCMbigString.js:20921
+#: .\Private\Z_Deployment\FCMbigString.js:21493
+#: .\Private\Z_Deployment\FCMbigString.js:21588
+msgid "Reset Whole Turn"
+msgstr "Réinitialiser un tour entier"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18475
+msgid "Confirm & End Turn"
+msgstr "Confirmer et terminer le tour"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18763
+msgid "After the first turn, you won't be asked to fire anyone"
+msgstr "Après le premier tour, il ne vous sera demandé de renvoyer personne"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18782
+msgid ""
+"At least one base employee is no longer available. Keep recruiting points "
+"for the training phase if you wish to train an employee directly"
+msgstr ""
+"Au moins un employé de base n'est plus disponible. Continuez à recruter des "
+"points pour la phase de formation si vous souhaitez former directement un "
+"collaborateur"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18831
+msgid "Your CEO has a new action - you have no recruiting points"
+msgstr ""
+"Votre PDG a une nouvelle action - vous n'avez aucun point de recrutement"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:18900
+msgid "You can train 1 employee up to 3 levels"
+msgstr "Vous pouvez former 1 employé jusqu'à 3 niveaux"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:19111
+msgid "Trained:"
+msgstr "Qualifié:"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:19197
+#: .\Private\Z_Deployment\FCMbigString.js:21600
+msgid "No more Coffee Shops. Select a placed Coffee Shop to move it"
+msgstr "Fini les cafés. Sélectionnez un café placé pour le déplacer"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:19339
+msgid "Choose a mailbox campaign for your 'First New Restaurant' milestone"
+msgstr ""
+"Choisissez une campagne de boîte aux lettres pour votre étape « Premier "
+"nouveau restaurant »"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:19402
+msgid ""
+"Your Night Shift Manager allows your Marketing Trainee to market twice. Your"
+" trainee will be attached to the longer of the 2 campaigns"
+msgstr ""
+"Votre Night Shift Manager permet à votre stagiaire en marketing de "
+"commercialiser deux fois. Votre stagiaire sera rattaché à la plus longue des"
+" 2 campagnes"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:19448
+msgid "Choose a mailbox campaign for the Campaign Manager Milestone"
+msgstr ""
+"Choisissez une campagne de boîte aux lettres pour le jalon Campaign Manager"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:20263
+msgid ""
+"Choose the tile and rotation you would like, and then add it to a completely"
+" free map edge"
+msgstr ""
+"Choisissez la tuile et la rotation que vous souhaitez, puis ajoutez-la à un "
+"bord de carte entièrement libre"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:20274
+msgid "No more tiles"
+msgstr "Plus de tuiles"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:20390
+msgid "Select a Local or Regional Manager"
+msgstr "Sélectionnez un responsable local ou régional"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:20430
+msgid "No more restaurants"
+msgstr "Plus de restaurants"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:20439
+msgid "Move an existing restaurant or place a new one"
+msgstr "Déplacer un restaurant existant ou en créer un nouveau"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:20444
+msgid "Create"
+msgstr "Créer"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:20622
+#: .\Private\Z_Deployment\FCMbigString.js:21895
+msgid ""
+"<p style='color:#f00'>You cannot pay for all of your employees - You must "
+"fire employees until you can pay for the remainder"
+msgstr ""
+"<p style='color:#f00'>Vous ne pouvez pas payer pour tous vos employés - Vous"
+" devez licencier des employés jusqu'à ce que vous puissiez payer le reste"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:20701
+#: .\Private\Z_Deployment\FCMbigString.js:21992
+msgid "You're Fired!"
+msgstr "Vous êtes viré !"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:20867
+#: .\Private\Z_Deployment\FCMbigString.js:22222
+msgid "Store Kimchi"
+msgstr "Magasiner Kimchi"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:20884
+msgid ""
+"You may keep all remaining items, or click on items to throw them away:"
+msgstr ""
+"Vous pouvez conserver tous les éléments restants ou cliquer sur les éléments"
+" pour les jeter :"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:21067
+msgid "<br/>Payday will be played in turn order"
+msgstr "<br/>Payday sera joué dans l'ordre du tour"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:21227
+msgid "Produce"
+msgstr "Produire"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:21269
+msgid "Build Houses/Gardens"
+msgstr "Construire des maisons/jardins"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:21446
+msgid "There is no space left for your pizza radio for house #%(houseNumber)s"
+msgstr ""
+"Il n'y a plus de place pour votre radio à pizza pour la maison "
+"#%(houseNumber)s"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:21450
+msgid "Choose a space on the tile of house #%(houseNumber)s"
+msgstr "Choisissez un espace sur la tuile de la maison #%(houseNumber)s"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:14559
+#: .\Private\Z_Deployment\FCMbigString.js:21549
+#: .\Private\Z_Deployment\FCMbigString.js:23206
+msgid "Price -3"
+msgstr "Prix ​​-3"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:21568
+msgid ""
+"<b>The \"First Coffee Sold\" Milestone allows you to place a coffee shop "
+"with unlimited range </b><BR/>There can only be 1 coffee shop per tile, and "
+"it must be next to a road"
+msgstr ""
+"<b>Le jalon « Premier café vendu » vous permet de placer un café avec une "
+"portée illimitée. </b><BR/>Il ne peut y avoir qu'un seul café par tuile, et "
+"il doit être à côté d'une route."
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:21594
+msgid "Skip Coffee Milestone"
+msgstr "Passer l'étape du café"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:21669
+#: .\Private\Z_Deployment\FCMbigString.js:21670
+#: .\Private\Z_Deployment\FCMbigString.js:21738
+#: .\Private\Z_Deployment\FCMbigString.js:21739
+msgid "No Move Set"
+msgstr "Aucun mouvement défini"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:21671
+msgid "No Salary - Skip Payday"
+msgstr "Pas de salaire - Sauter le jour de paie"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:21689
+msgid "Pay with: "
+msgstr "Payez avec :"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:21708
+msgid "Pay salary with items then money"
+msgstr "Payer le salaire avec des objets puis de l'argent"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:20613
+#: .\Private\Z_Deployment\FCMbigString.js:21886
+msgid "You need to pay: $%(salaryAmount)s"
+msgstr "Vous devez payer : %(salaryAmount)s $"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:20620
+#: .\Private\Z_Deployment\FCMbigString.js:21893
+msgid ""
+"<p style='color:#f00'>You cannot afford to pay all of your employees! "
+"However, your <i>First Trainer Used</i> milestone allows you to keep "
+"everyone</p>If you wish, you <b>may</b> click on employees to fire them "
+"anyway"
+msgstr ""
+"<p style='color:#f00'>Vous ne pouvez pas vous permettre de payer tous vos "
+"employés ! Cependant, votre jalon <i>Premier formateur utilisé</i> vous "
+"permet de garder tout le monde</p>. Si vous le souhaitez, vous <b>pouvez</b>"
+" cliquer sur les employés pour les licencier quand même."
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:21923
+#: .\Private\Z_Deployment\FCMbigString.js:22096
+#: .\Private\Z_Deployment\FCMbigString.js:22150
+msgid "Cancel Pre-Payday"
+msgstr "Annuler le pré-salaire"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:21939
+#: .\Private\Z_Deployment\FCMbigString.js:22112
+#: .\Private\Z_Deployment\FCMbigString.js:22166
+msgid "Reset Payday"
+msgstr "Réinitialiser le jour de paie"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:20854
+#: .\Private\Z_Deployment\FCMbigString.js:22209
+msgid "You can store either Kimchi or other types of food/drink in a fridge"
+msgstr ""
+"Vous pouvez conserver du Kimchi ou d'autres types d'aliments/boissons dans "
+"un réfrigérateur."
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:20867
+#: .\Private\Z_Deployment\FCMbigString.js:22222
+msgid "Store other items"
+msgstr "Stocker d'autres objets"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22229
+msgid "Click items in the priority you would like them to be stored"
+msgstr ""
+"Cliquez sur les éléments dans la priorité dans laquelle vous souhaitez "
+"qu'ils soient stockés"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22475
+#: .\Private\Z_Deployment\FCMbigString.js:22756
+#: .\Private\Z_Deployment\FCMbigString.js:22780
+msgid "NW"
+msgstr "NO"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22477
+#: .\Private\Z_Deployment\FCMbigString.js:22757
+#: .\Private\Z_Deployment\FCMbigString.js:22781
+msgid "NE"
+msgstr "NE"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22478
+#: .\Private\Z_Deployment\FCMbigString.js:22758
+#: .\Private\Z_Deployment\FCMbigString.js:22782
+msgid "SE"
+msgstr "SE"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22479
+#: .\Private\Z_Deployment\FCMbigString.js:22759
+#: .\Private\Z_Deployment\FCMbigString.js:22783
+msgid "SW"
+msgstr "Logiciel"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22488
+#: .\Private\Z_Deployment\FCMbigString.js:22494
+#: .\Private\Z_Deployment\FCMbigString.js:22499
+msgid "%(playerName)s chooses to play %(position)s"
+msgstr "%(playerName)s choisit de jouer %(position)s"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22491
+msgid "%(playerName)s has to play %(position)s"
+msgstr "%(playerName)s doit jouer %(position)s"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22529
+msgid "%(playerName)s hires:"
+msgstr "%(playerName)s embauches :"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22541
+msgid "%(playerName)s hires no one"
+msgstr "%(playerName)s n'engage personne"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22562
+msgid "%(playerName)s trains no one"
+msgstr "%(playerName)s n’entraîne personne"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22603
+#: .\Private\Z_Deployment\FCMbigString.js:22606
+#: .\Private\Z_Deployment\FCMbigString.js:22651
+#: .\Private\Z_Deployment\FCMbigString.js:22722
+#: .\Private\Z_Deployment\FCMbigString.js:22730
+#: .\Private\Z_Deployment\FCMbigString.js:22740
+#: .\Private\Z_Deployment\FCMbigString.js:22744
+#: .\Private\Z_Deployment\FCMbigString.js:23388
+#: .\Private\Z_Deployment\FCMbigString.js:23427
+msgid "vertically"
+msgstr "verticalement"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22604
+#: .\Private\Z_Deployment\FCMbigString.js:22605
+#: .\Private\Z_Deployment\FCMbigString.js:22652
+#: .\Private\Z_Deployment\FCMbigString.js:22721
+#: .\Private\Z_Deployment\FCMbigString.js:22731
+#: .\Private\Z_Deployment\FCMbigString.js:22741
+#: .\Private\Z_Deployment\FCMbigString.js:22743
+#: .\Private\Z_Deployment\FCMbigString.js:23389
+#: .\Private\Z_Deployment\FCMbigString.js:23426
+msgid "horizontally"
+msgstr "horizontalement"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22610
+msgid ""
+"%(player)s started marketing campaign #%(marketingCampaignNumber)s with "
+"%(employee)s, advertising:"
+msgstr ""
+"%(player)s a commencé la campagne marketing n°%(marketingCampaignNumber)s "
+"avec %(employee)s, publicité :"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22631
+msgid "Show Route"
+msgstr "Afficher l'itinéraire"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22622
+#: .\Private\Z_Deployment\FCMbigString.js:22663
+#: .\Private\Z_Deployment\FCMbigString.js:22680
+msgid "eternally"
+msgstr "éternellement"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22710
+msgid "during cleanup to produce:"
+msgstr "pendant le nettoyage pour produire :"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22723
+msgid ""
+"%(player)s builds house #%(houseNumber)s %(orientation)s at co-ordinates "
+"(%(Xcoord)s, %(Ycoord)s)"
+msgstr ""
+"%(player)s construit la maison #%(houseNumber)s %(orientation)s aux "
+"coordonnées (%(Xcoord)s, %(Ycoord)s)"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22746
+msgid ""
+"%(player)s builds a Freeway %(orientation)s at co-ordinates (%(Xcoord)s, "
+"%(Ycoord)s)"
+msgstr ""
+"%(player)s construit une autoroute %(orientation)s aux coordonnées "
+"(%(Xcoord)s, %(Ycoord)s)"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22761
+msgid ""
+"%(player)s builds a new restaurant at co-ordinates (%(Xcoord)s, %(Ycoord)s) "
+"facing %(orientation)s, opening next turn"
+msgstr ""
+"%(player)s construit un nouveau restaurant aux coordonnées (%(Xcoord)s, "
+"%(Ycoord)s) face à %(orientation)s, ouverture au prochain tour"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22785
+msgid ""
+"%(player)s moves a restaurant from co-ordinates (%(Xcoord)s, %(Ycoord)s) to "
+"co-ordinates (%(Xcoord2)s, %(Ycoord2)s) facing %(orientation)s"
+msgstr ""
+"%(player)s déplace un restaurant des coordonnées (%(Xcoord)s, %(Ycoord)s) "
+"aux coordonnées (%(Xcoord2)s, %(Ycoord2)s) face à %(orientation)s"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22822
+#: .\Private\Z_Deployment\FCMbigString.js:23324
+msgid "Rural Area"
+msgstr "Zone rurale"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22848
+msgid "Players who can fulfill this demand:"
+msgstr "Joueurs pouvant répondre à cette demande :"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22892
+msgid "House #%(houseNumber)s goes to %(player)s for $%(saleAmount)s"
+msgstr "La maison n°%(houseNumber)s va à %(player)s pour %(saleAmount)s $"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22896
+msgid "item"
+msgstr "article"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22897
+#: .\Private\Z_Deployment\FCMbigString.js:22965
+msgid "The base price is doubled, because the house has a garden."
+msgstr "Le prix de base est doublé car la maison dispose d'un jardin."
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22899
+#: .\Private\Z_Deployment\FCMbigString.js:22967
+msgid "The base price is doubled, because the house is adjacent to a park."
+msgstr "Le prix de base est doublé car la maison est adjacente à un parc."
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22916
+msgid "The Fry Chef bonus was already added to the coffee sale."
+msgstr "Le bonus Fry Chef était déjà ajouté à la vente de café."
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22900
+#: .\Private\Z_Deployment\FCMbigString.js:22968
+msgid ""
+"The base price is tripled, because the house is adjacent to a park and has a"
+" garden."
+msgstr ""
+"Le prix de base est triplé car la maison est adjacente à un parc et dispose "
+"d'un jardin."
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:23026
+msgid ""
+"Restaurants / coffee shops that are highlighted indicate where coffee was "
+"sold along the route taken by this house."
+msgstr ""
+"Les restaurants/cafés mis en avant indiquent où le café était vendu le long "
+"du parcours emprunté par cette maison."
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:22793
+#: .\Private\Z_Deployment\FCMbigString.js:23045
+msgid "Dinner time"
+msgstr "Heure du dîner"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:23052
+#: .\Private\Z_Deployment\FCMbigString.js:23053
+#: .\Private\Z_Deployment\HCbigString.js:11962
+#: .\Private\Z_Deployment\HLCbigString.js:12152
+msgid "Total"
+msgstr "Total"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:23239
+msgid "%(player)s fires:"
+msgstr "%(player)s incendies :"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:23254
+msgid "%(player)s keeps:"
+msgstr "%(player)s conserve :"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:23288
+msgid "Game rewound to here by %(rewindingPlayer)s"
+msgstr "Jeu rembobiné ici par %(rewindingPlayer)s"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:23295
+msgid "Game Over"
+msgstr "Jeu terminé"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:23349
+msgid ""
+"earned $%(earnings)s for %(numberOfItems)s item on buildings %(buildings)s"
+msgid_plural ""
+"earned $%(earnings)s for %(numberOfItems)s items on buildings %(buildings)s"
+msgstr[0] ""
+"gagné %(earnings)s $ pour %(numberOfItems)s objet sur les bâtiments "
+"%(buildings)s"
+msgstr[1] ""
+"gagné %(earnings)s $ pour %(numberOfItems)s objets sur les bâtiments "
+"%(buildings)s"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:23448
+msgid "%(player)s adds a new Tile at co-ordinates (%(Xcoord)s, %(Ycoord)s)"
+msgstr ""
+"%(player)s ajoute une nouvelle tuile aux coordonnées (%(Xcoord)s, "
+"%(Ycoord)s)"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:23472
+msgid ""
+"%(player)s removes a coffee shop from co-ordinates (%(Xcoord)s, %(Ycoord)s)"
+msgstr "%(player)s supprime un café des coordonnées (%(Xcoord)s, %(Ycoord)s)"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:10610
+#: .\Private\Z_Deployment\FCMbigString.js:23584
+msgid "Ketchup Milestone"
+msgstr "Étape importante du ketchup"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:10618
+#: .\Private\Z_Deployment\FCMbigString.js:23592
+msgid "Movie Stars"
+msgstr "Stars de cinéma"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:23771
+msgid "first"
+msgstr "d'abord"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:23774
+msgid "second"
+msgstr "deuxième"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:23777
+msgid "third"
+msgstr "troisième"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:23799
+msgid "2nd"
+msgstr "2ème"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:23808
+msgid "5th"
+msgstr "5ème"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:24210
+#: .\Private\Z_Deployment\FCMbigString.js:24288
+#: .\Private\Z_Deployment\FCMbigString.js:24455
+#: .\Private\Z_Deployment\FCMbigString.js:24648
+#: .\Private\Z_Deployment\FCMbigString.js:24748
+#: .\Private\Z_Deployment\FCMbigString.js:24911
+#: .\Private\Z_Deployment\FCMbigString.js:24970
+#: .\Private\Z_Deployment\FCMbigString.js:25020
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:12464
+#: .\Private\Z_Deployment\HCbigString.js:12641
+#: .\Private\Z_Deployment\HCbigString.js:12726
+#: .\Private\Z_Deployment\HCbigString.js:12793
+#: .\Private\Z_Deployment\HCbigString.js:12825
+#: .\Private\Z_Deployment\HLCbigString.js:12655
+#: .\Private\Z_Deployment\HLCbigString.js:12824
+#: .\Private\Z_Deployment\HLCbigString.js:12909
+#: .\Private\Z_Deployment\HLCbigString.js:12951
+#: .\Private\Z_Deployment\HLCbigString.js:13011
+#: .\Private\Z_Deployment\HLCbigString.js:13043
+msgid ""
+"It appears you have an older version of the game. Please refresh the page"
+msgstr ""
+"Il semble que vous ayez une ancienne version du jeu. Veuillez actualiser la "
+"page"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:25087
+#: .\Private\Z_Deployment\HCbigString.js:12313
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12503
+msgid ""
+"Something went wrong. Please reload the page. If the problem persists, "
+"please contact the webmaster"
+msgstr ""
+"Quelque chose s'est mal passé. Veuillez recharger la page. Si le problème "
+"persiste, veuillez contacter le webmaster"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:25099
+msgid "You cannot use this rewind as the first player in the working day"
+msgstr ""
+"Vous ne pouvez pas utiliser ce retour en arrière en tant que premier joueur "
+"de la journée de travail"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:25582
+#: .\Private\Z_Deployment\FCMbigString.js:25589
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:12340
+#: .\Private\Z_Deployment\HCbigString.js:13293
+#: .\Private\Z_Deployment\HCbigString.js:13300
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12530
+#: .\Private\Z_Deployment\HLCbigString.js:13475
+#: .\Private\Z_Deployment\HLCbigString.js:13482
+msgid "Vote Saved"
+msgstr "Vote enregistré"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:28086
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:13632
+#: .\Private\Z_Deployment\HLCbigString.js:13866
+msgid "Connected"
+msgstr "Connecté"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:28399
+#: .\Private\Z_Deployment\HCbigString.js:13851
+#: .\Private\Z_Deployment\HLCbigString.js:14281
+msgid "If all players agree, this game will be deleted"
+msgstr "Si tous les joueurs sont d'accord, ce jeu sera supprimé"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:28498
+#: .\Private\Z_Deployment\HCbigString.js:13934
+#: .\Private\Z_Deployment\HLCbigString.js:14045
+msgid "For more information see <b><a href=\"/help/\" target=\"_blank\">Help</a></b>"
+msgstr ""
+"Pour plus d'informations, voir <b><a href=\"/help/\" "
+"target=\"_blank\">Aide</a></b>"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:28538
+msgid "Alert Admins"
+msgstr "Alerter les administrateurs"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:28759
+msgid ""
+"Please submit a bug report if you encounter any issues, giving as much "
+"detail as possbile"
+msgstr ""
+"Veuillez soumettre un rapport de bug si vous rencontrez des problèmes, en "
+"donnant autant de détails que possible."
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:28763
+msgid ""
+"Please note: In New MS you need to actually USE an employee to get their "
+"Milestone"
+msgstr ""
+"Veuillez noter : dans New MS, vous devez réellement UTILISER un employé pour"
+" obtenir son jalon."
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:28765
+msgid ""
+"Please first read the <a href='/FCM/coffeeHelp/' target='_blank'>coffee help"
+" page</a>."
+msgstr ""
+"Veuillez d'abord lire la page d'aide <a href='/FCM/coffeeHelp/' "
+"target='_blank'>café</a>."
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:28767
+msgid ""
+"If you still think there is a bug, please check carefully:<ul><li>Which "
+"players had coffee and how much</li><li>If you think a route has not been "
+"considered, could it sell the same amount of coffee as the route "
+"chosen?</li><li>Remmeber that any part of the coffee route that could have "
+"multiple paths each selling the same amount of coffee (even if it's to the "
+"same player) will be skipped</li></ul>"
+msgstr ""
+"Si vous pensez toujours qu'il y a un bug, veuillez vérifier "
+"attentivement :<ul><li>Quels joueurs ont bu du café et combien</li><li>Si "
+"vous pensez qu'un itinéraire n'a pas été envisagé, pourrait-il vendre la "
+"même quantité de café que l'itinéraire choisi ?</li><li>N'oubliez pas que "
+"toute partie de l'itinéraire du café qui pourrait avoir plusieurs "
+"itinéraires vendant chacun la même quantité de café (même si c'est pour le "
+"même joueur) sera ignoré</li></ul>"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:28772
+msgid "Submit"
+msgstr "Soumettre"
+
+#: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\FCMbigString.js:16794
+#: .\Private\Z_Deployment\FCMbigString.js:28772
+#: .\Private\Z_Deployment\HCbigString.js:9970
+#: .\Private\Z_Deployment\HLCbigString.js:10020
+msgid "Reset"
+msgstr "Réinitialiser"
+
+#: .\Private\Z_Deployment\FCMbigString.js:975
+#: .\Private\Z_Deployment\FCMbigString.js:14985
+msgid "Setup - Restaurants"
+msgstr "Configuration - Restaurants"
+
+#: .\Private\Z_Deployment\FCMbigString.js:976
+msgid "Setup - Restaurants Round 2"
+msgstr "Mise en place - Restaurants Round 2"
+
+#: .\Private\Z_Deployment\FCMbigString.js:977
+#: .\Private\Z_Deployment\FCMbigString.js:14987
+msgid "Setup - Reserve Cards"
+msgstr "Configuration - Cartes de réserve"
+
+#: .\Private\Z_Deployment\FCMbigString.js:978
+msgid "1 - Restructuring"
+msgstr "1 - Restructuration"
+
+#: .\Private\Z_Deployment\FCMbigString.js:981
+msgid "4 - Dinnertime"
+msgstr "4 - L'heure du dîner"
+
+#: .\Private\Z_Deployment\FCMbigString.js:982
+msgid "5 - Payday"
+msgstr "5 - Jour de paie"
+
+#: .\Private\Z_Deployment\FCMbigString.js:983
+msgid "6 - Marketing Campaigns"
+msgstr "6 - Campagnes marketing"
+
+#: .\Private\Z_Deployment\FCMbigString.js:984
+msgid "7 - Clean up"
+msgstr "7 - Nettoyer"
+
+#: .\Private\Z_Deployment\FCMbigString.js:988
+msgid "Setup - Draft Modules"
+msgstr "Configuration – Modules de brouillon"
+
+#: .\Private\Z_Deployment\FCMbigString.js:989
+msgid "Setup - Urban Planning"
+msgstr "Mise en place - Urbanisme"
+
+#: .\Private\Z_Deployment\FCMbigString.js:990
+#: .\Private\Z_Deployment\FCMbigString.js:15022
+msgid "Choose CEO Bonus"
+msgstr "Choisissez le bonus du PDG"
+
+#: .\Private\Z_Deployment\FCMbigString.js:994
+msgid "First to Hire 3 people in 1 turn"
+msgstr "Premier à embaucher 3 personnes en 1 tour"
+
+#: .\Private\Z_Deployment\FCMbigString.js:995
+msgid "First to throw away"
+msgstr "Premier à jeter"
+
+#: .\Private\Z_Deployment\FCMbigString.js:995
+msgid "Get a freezer that stores 10 items (food/drink or kimchi)"
+msgstr ""
+"Procurez-vous un congélateur pouvant stocker 10 articles (nourriture/boisson"
+" ou kimchi)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:996
+msgid "First waitress played"
+msgstr "La première serveuse a joué"
+
+#: .\Private\Z_Deployment\FCMbigString.js:996
+msgid "Each Waitress +$2 ($5 total)"
+msgstr "Chaque serveuse +2 $ (5 $ au total)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:997
+msgid "First to have $20"
+msgstr "Premier à avoir 20 $"
+
+#: .\Private\Z_Deployment\FCMbigString.js:997
+msgid "May see bank reserve cards"
+msgstr "Peut voir des cartes de réserve bancaire"
+
+#: .\Private\Z_Deployment\FCMbigString.js:998
+msgid "First to have $100"
+msgstr "Premier à avoir 100 $"
+
+#: .\Private\Z_Deployment\FCMbigString.js:998
+msgid "Your CEO counts as CFO (+50% cash earned). May not have a CFO"
+msgstr ""
+"Votre CEO compte comme CFO (+50% de cash gagné). Peut ne pas avoir de "
+"directeur financier"
+
+#: .\Private\Z_Deployment\FCMbigString.js:999
+msgid "First to lower prices"
+msgstr "Premier à baisser les prix"
+
+#: .\Private\Z_Deployment\FCMbigString.js:999
+msgid "First to lower price"
+msgstr "Premier à baisser le prix"
+
+#: .\Private\Z_Deployment\FCMbigString.js:999
+#: .\Private\Z_Deployment\FCMbigString.js:1047
+msgid "Price -$1"
+msgstr "Prix ​​-1$"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1000
+msgid "$15 discount on salaries"
+msgstr "15$ de rabais sur les salaires"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1001
+msgid "First burger produced"
+msgstr "Premier burger produit"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1001
+msgid "+1 Burger Cook"
+msgstr "+1 cuisinier de hamburgers"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1002
+msgid "+1 Pizza Cook"
+msgstr "+1 cuisinier de pizza"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1003
+msgid "First errand boy"
+msgstr "Premier garçon de courses"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1003
+msgid "All buyers get + 1 drink from each source"
+msgstr "Tous les acheteurs reçoivent + 1 boisson de chaque source"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1004
+msgid "First cart operator played"
+msgstr "Le premier opérateur de charrette a joué"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1004
+msgid "Buyers get range +1"
+msgstr "Les acheteurs obtiennent une portée +1"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1005
+#: .\Private\Z_Deployment\FCMbigString.js:1025
+msgid "May use multiple trainers on the same person"
+msgstr "Peut utiliser plusieurs entraîneurs sur la même personne"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1006
+msgid "First billboard"
+msgstr "Premier panneau d'affichage"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1006
+msgid "First billboard placed"
+msgstr "Premier panneau publicitaire posé"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1007
+msgid "+ $5 for every burger sold"
+msgstr "+ 5$ pour chaque burger vendu"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1008
+msgid "First pizza marketed"
+msgstr "Première pizza commercialisée"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1008
+msgid "+ $5 for every pizza sold"
+msgstr "+ 5$ pour chaque pizza vendue"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1009
+msgid "+ $5 for every drink sold"
+msgstr "+ 5$ pour chaque boisson vendue"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1010
+msgid "First airplane"
+msgstr "Premier avion"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1010
+msgid "First airplane campaign"
+msgstr "Première campagne aérienne"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1010
+msgid "Count +2 open slots when determining order of play"
+msgstr "Comptez +2 emplacements ouverts pour déterminer l'ordre de jeu"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1012
+msgid "First marketeer used"
+msgstr "Premier marketeur utilisé"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1012
+msgid "Get $5 for every good your marketeers market. Distance -2"
+msgstr ""
+"Obtenez 5 $ pour chaque bien commercialisé par vos spécialistes du "
+"marketing. Distance -2"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1013
+msgid "First marketing trainee"
+msgstr "Premier stagiaire en marketing"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1013
+msgid "First marketing trainee used"
+msgstr "Premier stagiaire en marketing utilisé"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1014
+msgid ""
+"This turn, may place 1 marketing tile with same type, duration and range"
+msgstr ""
+"Ce tour-ci, vous pouvez placer 1 tuile marketing de même type, durée et "
+"portée."
+
+#: .\Private\Z_Deployment\FCMbigString.js:1015
+msgid "This turn, may place 2 different goods on 1 plane"
+msgstr "Ce tour-ci, vous pouvez placer 2 marchandises différentes sur 1 plan"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1016
+msgid "First brand director"
+msgstr "Premier directeur de marque"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1016
+msgid "First brand director used"
+msgstr "Premier directeur de marque utilisé"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1016
+msgid "Your radio is permanent"
+msgstr "Votre radio est permanente"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1017
+msgid "Your CEO always has 4 slots (regardless of reserve cards)"
+msgstr ""
+"Votre PDG dispose toujours de 4 emplacements (quelles que soient les cartes "
+"de réserve)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1018
+msgid "Place radio (pizza, 2 turns) on tile of each house that bought pizza"
+msgstr ""
+"Placez la radio (pizza, 2 tours) sur la tuile de chaque maison qui a acheté "
+"une pizza"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1019
+msgid "First lemonade sold"
+msgstr "Première limonade vendue"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1020
+msgid "First beer sold"
+msgstr "Première bière vendue"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1021
+msgid "Get a freezer that stores 10 items"
+msgstr "Procurez-vous un congélateur pouvant stocker 10 articles"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1022
+msgid "First recruiting girl"
+msgstr "Première fille qui recrute"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1022
+msgid "First recruiting girl used"
+msgstr "Première fille de recrutement utilisée"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1022
+msgid "Get a free executive vice president; pay no salary for him"
+msgstr ""
+"Obtenez un vice-président exécutif gratuit ; ne lui verse aucun salaire"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1023
+msgid "First trainer"
+msgstr "Premier entraîneur"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1024
+msgid "First discount manager used"
+msgstr "Premier gestionnaire de remises utilisé"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1024
+msgid "Remove $100 from bank each round you discount by $3 or more"
+msgstr ""
+"Retirez 100 $ de la banque à chaque tour pour lequel vous effectuez une "
+"remise de 3 $ ou plus."
+
+#: .\Private\Z_Deployment\FCMbigString.js:1025
+msgid "First house built"
+msgstr "Première maison construite"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1026
+msgid "First restaurant"
+msgstr "Premier restaurant"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1027
+msgid "First waitress used"
+msgstr "Première serveuse utilisée"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1027
+msgid "Your salaries are $3 each"
+msgstr "Vos salaires sont de 3 $ chacun"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1028
+msgid "First cart operator used"
+msgstr "Premier opérateur de chariot utilisé"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1028
+msgid "Double the amount of drinks hauled by cart/truck/zeppelin"
+msgstr ""
+"Doublez la quantité de boissons transportées par chariot/camion/zeppelin"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1029
+msgid "First rural marketeer"
+msgstr "Premier commerçant rural"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1029
+msgid "Place highway offramp"
+msgstr "Placer la sortie d'autoroute"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1030
+msgid "Build one coffee shop in the next clean up phase"
+msgstr "Construisez un café lors de la prochaine phase de nettoyage"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1031
+msgid "Distance -1"
+msgstr "Distance -1"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1032
+msgid "First lobbyist"
+msgstr "Premier lobbyiste"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1032
+msgid "First lobbyist used"
+msgstr "Premier lobbyiste utilisé"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1032
+msgid "Add tile to city"
+msgstr "Ajouter une tuile à la ville"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1033
+msgid "First dumpling sold"
+msgstr "Première boulette vendue"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1033
+msgid "Your CEO gets a bonus"
+msgstr "Votre PDG reçoit un bonus"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1037
+msgid "Waitress"
+msgstr "Serveuse"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1037
+msgid "Get $3 cash. Win ties against restaurants with fewer waitresses"
+msgstr ""
+"Obtenez 3 $ en espèces. Remportez des égalités contre des restaurants avec "
+"moins de serveuses"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1038
+msgid "Place house or garden"
+msgstr "Placer la maison ou le jardin"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1039
+msgid "Place new restaurant, \"COMING SOON\". Drive-in available"
+msgstr "Place au nouveau restaurant, \"COMING BIENTÔT\". Drive-in disponible"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1040
+msgid "Place or move restaurant, opens immediately. Drive-in available"
+msgstr ""
+"Placer ou déplacer le restaurant, ouvre immédiatement. Drive-in disponible"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1041
+msgid "CFO"
+msgstr "Directeur financier"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1041
+msgid "Add +50% to cash earned this round"
+msgstr "Ajoutez +50 % à l'argent gagné lors de ce tour"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1042
+msgid "Management Trainee"
+msgstr "Stagiaire en gestion"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1043
+msgid "Junior Vice President"
+msgstr "Vice-président junior"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1043
+msgid "3 slots"
+msgstr "3 emplacements"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1044
+msgid "Vice President"
+msgstr "vice-président"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1045
+msgid "5 slots"
+msgstr "5 emplacements"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1046
+msgid "Executive Vice President"
+msgstr "Vice-président exécutif"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1047
+msgid "Pricing Manager"
+msgstr "Responsable des prix"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1048
+msgid "Luxuries Manager"
+msgstr "Responsable Luxe"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1048
+msgid "Price +$10"
+msgstr "Prix ​​+10$"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1049
+msgid "Price -$3"
+msgstr "Prix ​​-3$"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1050
+msgid "Place billboard, max duration 2"
+msgstr "Placer un panneau d'affichage, durée maximale 2"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1051
+msgid "Campaign Manager"
+msgstr "Gestionnaire de campagne"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1052
+msgid "Brand Manager"
+msgstr "Chef de marque"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1052
+msgid "Place airplane or lower, max duration 4"
+msgstr "Placer un avion ou moins, durée maximale 4"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1053
+msgid "Brand Director"
+msgstr "Directeur de marque"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1055
+msgid "Recruiting Girl"
+msgstr "Fille de recrutement"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1056
+msgid "Recruiting Manager"
+msgstr "Responsable du recrutement"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1057
+msgid "HR Director"
+msgstr "Directeur RH"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1060
+msgid "Guru"
+msgstr "Gourou"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1060
+msgid "3 training slots. May train the same person up to three steps"
+msgstr ""
+"3 créneaux de formation. Peut former la même personne jusqu'à trois étapes"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1062
+msgid "Cart Operator"
+msgstr "Opérateur de chariot"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1062
+msgid "Get 2 drinks from each source on route"
+msgstr "Obtenez 2 boissons de chaque source sur l'itinéraire"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1064
+msgid "Get 2 drinks from each source on route, ignore roads"
+msgstr ""
+"Obtenez 2 boissons de chaque source sur l'itinéraire, ignorez les routes"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1067
+msgid "Burger Cook"
+msgstr "Cuisinier de hamburgers"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1067
+msgid "Produce 3 burgers"
+msgstr "Produire 3 burgers"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1068
+msgid "Burger Chef"
+msgstr "Chef de hamburgers"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1068
+msgid "Produce 8 burgers"
+msgstr "Produire 8 burgers"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1069
+msgid "Pizza Cook"
+msgstr "Cuisinier de pizza"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1070
+msgid "Pizza Chef"
+msgstr "Pizzaiolo"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1070
+msgid "Produce 8 pizzas"
+msgstr "Produire 8 pizzas"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1071
+#: .\Private\Z_Deployment\FCMbigString.js:10646
+#: .\Private\Z_Deployment\FCMbigString.js:23620
+msgid "Fry Chef"
+msgstr "Chef de friture"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1072
+msgid "Kimchi Master"
+msgstr "Maître Kimchi"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1072
+msgid "Produce 1 kimchi at end of cleanup phase"
+msgstr "Produire 1 kimchi à la fin de la phase de nettoyage"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1073
+msgid "Noodle Cook"
+msgstr "Cuisinier de nouilles"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1073
+msgid "Produce 6 noodles"
+msgstr "Produire 6 nouilles"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1074
+msgid "Noodle Chef"
+msgstr "Chef de nouilles"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1074
+msgid "Produce 16 noodles"
+msgstr "Produire 16 nouilles"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1076
+msgid "Sushi Chef"
+msgstr "Chef de sushis"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1076
+msgid "Produce 5 sushi"
+msgstr "Produire 5 sushis"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1077
+msgid "Barista Trainee"
+msgstr "Stagiaire barista"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1078
+msgid "Barista"
+msgstr "Barista"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1078
+msgid "Produce 2 coffee"
+msgstr "Produire 2 cafés"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1079
+msgid "Lead Barista"
+msgstr "Barista en chef"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1079
+msgid "Produce 5 coffee"
+msgstr "Produire 5 cafés"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1080
+msgid "B-Movie Star"
+msgstr "Star de cinéma B"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1080
+msgid "Win all ties; first choice in turn order"
+msgstr "Gagnez toutes les égalités ; premier choix dans l'ordre du tour"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1081
+msgid "Win all ties; first choice in turn order (unless B at work)"
+msgstr ""
+"Gagnez toutes les égalités ; premier choix dans l'ordre du tour (sauf si B "
+"au travail)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1082
+msgid "D-Movie Star"
+msgstr "Star de cinéma D"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1082
+msgid "Win all ties; first choice in turn order (unless B or C at work)"
+msgstr ""
+"Gagnez toutes les égalités ; premier choix dans l'ordre du tour (sauf si B "
+"ou C au travail)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1083
+msgid "Gourmet Food Critic"
+msgstr "Critique gastronomique"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1084
+msgid "Lobbyist"
+msgstr "Lobbyiste"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1085
+msgid "Mass Marketeer"
+msgstr "Spécialiste du marketing de masse"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1085
+msgid ""
+"Play an extra marketing phase this turn. Do not remove an extra duration "
+"token"
+msgstr ""
+"Jouez une phase marketing supplémentaire ce tour-ci. Ne supprimez pas un "
+"jeton de durée supplémentaire"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1087
+msgid "Rural Marketeer"
+msgstr "Spécialiste du marketing rural"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1087
+msgid "Place a giant billboard next to the rural area tile"
+msgstr "Placez un panneau d'affichage géant à côté de la tuile zone rurale."
+
+#: .\Private\Z_Deployment\FCMbigString.js:1090
+msgid "Dumpling Cook"
+msgstr "Cuisinier de boulettes"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1090
+msgid "Produce 3 dumplings"
+msgstr "Produire 3 dumplings"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1091
+msgid "Dumpling Chef"
+msgstr "Chef de boulettes"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1091
+msgid "Produce 8 dumplings"
+msgstr "Produire 8 boulettes"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1092
+msgid "Hawker Marketeer"
+msgstr "Agent de marketing Hawker"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1092
+msgid "Place a hawker marketing campaign"
+msgstr "Lancez une campagne de marketing ambulant"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1093
+msgid "Delivery Driver"
+msgstr "Chauffeur-livreur"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1093
+msgid "Distance from any residence with 2+ demand is 0"
+msgstr "La distance de toute résidence avec une demande de 2+ est de 0"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1094
+msgid "Jazz Musician"
+msgstr "Musicien de jazz"
+
+#: .\Private\Z_Deployment\FCMbigString.js:1094
+msgid "Get $15 cash. Lose ties against restaurants with fewer musicians"
+msgstr ""
+"Obtenez 15 $ en espèces. Perdre les liens contre les restaurants avec moins "
+"de musiciens"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10614
+#: .\Private\Z_Deployment\FCMbigString.js:23588
+msgid "New Reserve Cards"
+msgstr "Nouvelles cartes de réserve"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10634
+#: .\Private\Z_Deployment\FCMbigString.js:23608
+msgid "Lobbyists"
+msgstr "Les lobbyistes"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10642
+#: .\Private\Z_Deployment\FCMbigString.js:23616
+msgid "Coffee"
+msgstr "Café"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10650
+#: .\Private\Z_Deployment\FCMbigString.js:23624
+msgid "Kimchi"
+msgstr "Kimchi"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10924
+msgid "Drafted Modules:"
+msgstr "Modules rédigés :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10936
+msgid "Available Modules:"
+msgstr "Modules disponibles :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10962
+msgid "Selected Module:"
+msgstr "Module sélectionné :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10969
+msgid "First to train / First to market good disappear after 2 turns"
+msgstr ""
+"Premier à s'entraîner / Premier à commercialiser le bien disparaît après 2 "
+"tours"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10969
+msgid "First to hire 3 disappears after 3 turns"
+msgstr "Le premier à en embaucher 3 disparaît après 3 tours"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10970
+msgid ""
+"Milestone: The first time someone else sells<BR /> your demand, gain a "
+"permanent -1 to distance"
+msgstr ""
+"Jalon : La première fois que quelqu'un d'autre vend votre demande, gagnez un"
+" -1 permanent à la distance"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10971
+msgid ""
+"The base price changes to whichever is <BR /> selected most, from $5, $10, "
+"or $20.<BR /> In a tie, $20 beats $10 and $5, and $5 beats $10"
+msgstr ""
+"Le prix de base change selon celui qui est le plus sélectionné, de 5 $, 10 $"
+" ou 20 $.<BR /> En cas d'égalité, 20 $ bat 10 $ et 5 $, et 5 $ bat 10 $."
+
+#: .\Private\Z_Deployment\FCMbigString.js:10972
+msgid "Houses prioritise a restaurant with their demands + kimchi"
+msgstr ""
+"Les maisons donnent la priorité à un restaurant avec leurs revendications + "
+"kimchi"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10973
+msgid ""
+"Noodles count as any demand item, but only if no one else can supply it"
+msgstr ""
+"Les nouilles comptent comme n'importe quel article de demande, mais "
+"seulement si personne d'autre ne peut les fournir."
+
+#: .\Private\Z_Deployment\FCMbigString.js:10974
+msgid "Houses with gardens will try to replace all demand with Sushi"
+msgstr ""
+"Les maisons avec jardins tenteront de remplacer toute la demande par des "
+"sushis"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10975
+msgid "Sell coffee along the route travelled by a house"
+msgstr "Vendre du café le long du parcours parcouru par une maison"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10976
+msgid "Add new roads and parks to the map"
+msgstr "Ajouter de nouvelles routes et parcs à la carte"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10977
+msgid "Adds $10 per total sale"
+msgstr "Ajoute 10 $ par vente totale"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10979
+msgid "Markets to the Rural Area - accessed by freeway ramps"
+msgstr "Marchés de la zone rurale - accessibles par les rampes d'autoroute"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10980
+msgid "Markets to all houses with a garden"
+msgstr "Marchés à toutes les maisons avec jardin"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10981
+msgid "Decide turn order and break ties"
+msgstr "Décidez de l'ordre du tour et rompez les égalités"
+
+#: .\Private\Z_Deployment\FCMbigString.js:10982
+msgid ""
+"Must be put in a management slot<BR /> All unsalaried employees work twice "
+"during 9-5"
+msgstr ""
+"Doit être placé dans un créneau de direction<BR /> Tous les employés non "
+"salariés travaillent deux fois entre 9h et 17h."
+
+#: .\Private\Z_Deployment\FCMbigString.js:11260
+msgid "Duration (turns):"
+msgstr "Durée (tours) :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:11353
+msgid "Set Hawker Route"
+msgstr "Définir l'itinéraire Hawker"
+
+#: .\Private\Z_Deployment\FCMbigString.js:11481
+msgid "No More Roads"
+msgstr "Plus de routes"
+
+#: .\Private\Z_Deployment\FCMbigString.js:11510
+msgid "No More Parks"
+msgstr "Plus de parcs"
+
+#: .\Private\Z_Deployment\FCMbigString.js:12201
+msgid "No More Houses"
+msgstr "Plus de maisons"
+
+#: .\Private\Z_Deployment\FCMbigString.js:12229
+msgid "No More Gardens"
+msgstr "Plus de jardins"
+
+#: .\Private\Z_Deployment\FCMbigString.js:12288
+msgid "Choose a house to add a garden"
+msgstr "Choisissez une maison pour ajouter un jardin"
+
+#: .\Private\Z_Deployment\FCMbigString.js:13318
+msgid "Hawker Trucks (Click to view route)"
+msgstr "Hawker Trucks (Cliquez pour voir l'itinéraire)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:14544
+msgid "Reserve cards:"
+msgstr "Cartes de réserve :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:14557
+msgid "CEO action:"
+msgstr "Action du PDG :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:14588
+msgid "Marketeers:"
+msgstr "Les spécialistes du marketing :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:14625
+msgid "On the beach:"
+msgstr "Sur la plage :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:14633
+msgid "At work:"
+msgstr "Au travail:"
+
+#: .\Private\Z_Deployment\FCMbigString.js:14640
+#: .\Private\Z_Deployment\FCMbigString.js:15373
+#: .\Private\Z_Deployment\FCMbigString.js:15569
+#: .\Private\Z_Deployment\FCMbigString.js:18568
+msgid "Close"
+msgstr "Fermer"
+
+#: .\Private\Z_Deployment\FCMbigString.js:14857
+#: .\Private\Z_Deployment\HCbigString.js:12045
+#: .\Private\Z_Deployment\HLCbigString.js:12235
+msgid "The winner is:"
+msgstr "Le gagnant est :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:14859
+msgid "CONGRATULATIONS!"
+msgstr "FÉLICITATIONS!"
+
+#: .\Private\Z_Deployment\FCMbigString.js:14888
+msgid "Drive in"
+msgstr "Entrez en voiture"
+
+#: .\Private\Z_Deployment\FCMbigString.js:14971
+msgid "Choose Modules"
+msgstr "Choisissez des modules"
+
+#: .\Private\Z_Deployment\FCMbigString.js:14994
+msgid "Restructuring"
+msgstr "Restructuration"
+
+#: .\Private\Z_Deployment\FCMbigString.js:14999
+msgid "Order of Business"
+msgstr "Ordre des travaux"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15004
+msgid "Working 9:00-5:00"
+msgstr "Travail de 9h00 à 17h00"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15009
+msgid "Dinnertime"
+msgstr "L'heure du dîner"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15015
+msgid "PIzza Milestone"
+msgstr "PIzza étape importante"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15028
+msgid "Payday"
+msgstr "Jour de paie"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15033
+#: .\Private\Z_Deployment\FCMbigString.js:23118
+msgid "Marketing Campaigns"
+msgstr "Campagnes marketing"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15038
+msgid "Clean up"
+msgstr "Nettoyer"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15045
+msgid "Coffee MS"
+msgstr "Café MS"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15304
+#: .\Private\Z_Deployment\HCbigString.js:9550
+#: .\Private\Z_Deployment\HLCbigString.js:9600
+msgid "Your bug report has been submitted"
+msgstr "Votre rapport de bug a été soumis"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15379
+msgid "Reserve"
+msgstr "Réserve"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15404
+msgid "Available marketing campaigns"
+msgstr "Campagnes marketing disponibles"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15419
+msgid "Available freeways"
+msgstr "Autoroutes disponibles"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15430
+msgid " (but the Milestone is no longer available)"
+msgstr "(mais le Milestone n'est plus disponible)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15467
+msgid "Available Parks:"
+msgstr "Parcs disponibles :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15503
+msgid "Available Roads:"
+msgstr "Routes disponibles :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15536
+msgid "Available Tiles for Lobbyist Milestone:"
+msgstr "Tuiles disponibles pour le jalon du lobbyiste :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15605
+#: .\Private\Z_Deployment\FCMbigString.js:15757
+msgid "Current Milestones:"
+msgstr "Jalons actuels :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15709
+#: .\Private\Z_Deployment\FCMbigString.js:15807
+msgid "Taken Milestones:"
+msgstr "Étapes franchies :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15759
+msgid "Expand Milestones"
+msgstr "Développer les jalons"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15919
+msgid "Expand Employees"
+msgstr "Développer les employés"
+
+#: .\Private\Z_Deployment\FCMbigString.js:15920
+msgid "Collapse Employees"
+msgstr "Réduire les employés"
+
+#: .\Private\Z_Deployment\FCMbigString.js:16213
+msgid "Total demand on board:"
+msgstr "Demande totale à bord :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:16217
+msgid "No demand on board"
+msgstr "Aucune demande à bord"
+
+#: .\Private\Z_Deployment\FCMbigString.js:16391
+#: .\Private\Z_Deployment\FCMbigString.js:16394
+msgid "Stock"
+msgstr "Action"
+
+#: .\Private\Z_Deployment\FCMbigString.js:16448
+msgid "No Marketers"
+msgstr "Pas de spécialistes du marketing"
+
+#: .\Private\Z_Deployment\FCMbigString.js:16786
+#: .\Private\Z_Deployment\FCMbigString.js:21079
+msgid "Reset the whole working day"
+msgstr "Réinitialiser toute la journée de travail"
+
+#: .\Private\Z_Deployment\FCMbigString.js:16802
+msgid "Skip Freeway Placement"
+msgstr "Passer le placement sur l'autoroute"
+
+#: .\Private\Z_Deployment\FCMbigString.js:16810
+msgid "Skip Night Shift Manager"
+msgstr "Sauter le chef de quart de nuit"
+
+#: .\Private\Z_Deployment\FCMbigString.js:16814
+msgid "Place Gourmet Guide"
+msgstr "Place Guide Gourmand"
+
+#: .\Private\Z_Deployment\FCMbigString.js:16818
+msgid "Set Route to Add Hawker Truck"
+msgstr "Définir un itinéraire pour ajouter un camion Hawker"
+
+#: .\Private\Z_Deployment\FCMbigString.js:16822
+msgid "Skip Second Campaign Manager"
+msgstr "Ignorer le deuxième gestionnaire de campagne"
+
+#: .\Private\Z_Deployment\FCMbigString.js:16833
+msgid "Skip the New Restaurant Milestone Bonus"
+msgstr "Évitez le bonus d'étape du nouveau restaurant"
+
+#: .\Private\Z_Deployment\FCMbigString.js:16837
+msgid "Skip Creating Restaurants"
+msgstr "Ignorer la création de restaurants"
+
+#: .\Private\Z_Deployment\FCMbigString.js:16940
+msgid "You have not used all your training points. Continue anyway?"
+msgstr ""
+"Vous n'avez pas utilisé tous vos points d'entraînement. Continuer quand même"
+" ?"
+
+#: .\Private\Z_Deployment\FCMbigString.js:16940
+msgid "No, continue training"
+msgstr "Non, continuez la formation"
+
+#: .\Private\Z_Deployment\FCMbigString.js:17027
+msgid ""
+"You have not used all your producers. Make sure you click on each one in "
+"order to produce. Continue anyway?"
+msgstr ""
+"Vous n'avez pas utilisé tous vos producteurs. Assurez-vous de cliquer sur "
+"chacun d'eux afin de produire. Continuer quand même ?"
+
+#: .\Private\Z_Deployment\FCMbigString.js:17027
+msgid "No, restart production phase"
+msgstr "Non, redémarrez la phase de production"
+
+#: .\Private\Z_Deployment\FCMbigString.js:17120
+msgid "There is no one at work. Are you sure you want to confirm?"
+msgstr "Il n'y a personne au travail. Êtes-vous sûr de vouloir confirmer ?"
+
+#: .\Private\Z_Deployment\FCMbigString.js:17969
+msgid "Save Preference"
+msgstr "Enregistrer la préférence"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18003
+msgid "<b>Expert Options</b>: If unsure leave on \"Choose Normally\""
+msgstr ""
+"<b>Options expertes</b> : En cas de doute, laissez sur « Choisir "
+"normalement »"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18010
+msgid "Pay all salary if possible"
+msgstr "Payer tout le salaire si possible"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18028
+msgid ""
+"You have a <b>Fridge</b>. Do you wish to automatically keep everything if "
+"you have less than 10 items?"
+msgstr ""
+"Vous disposez d'un <b>Réfrigérateur</b>. Vous souhaitez tout conserver "
+"automatiquement si vous avez moins de 10 éléments ?"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18032
+msgid "Keep all items if less than 10"
+msgstr "Conservez tous les articles s'il y en a moins de 10"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18077
+msgid "Yes"
+msgstr "Oui"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18146
+msgid "Expert Option"
+msgstr "Option Expert"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18148
+msgid "Redo Restructuring"
+msgstr "Refaire la restructuration"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18148
+msgid "Redo Payday"
+msgstr "Refaire le jour de paie"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18173
+msgid "Add Tile and End Turn"
+msgstr "Ajouter une tuile et terminer le tour"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18193
+msgid "Choose a module to add to the game"
+msgstr "Choisissez un module à ajouter au jeu"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18193
+msgid "Total Modules: 6 for 2p, 6 for 3p, 4 for 4p, 5 for 5p, 6 for 6p"
+msgstr ""
+"Total de modules : 6 pour 2p, 6 pour 3p, 4 pour 4p, 5 pour 5p, 6 pour 6p"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18197
+msgid "Add Module to Game and End Turn"
+msgstr "Ajouter un module au jeu et terminer le tour"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18203
+msgid "Skip Module and End Turn"
+msgstr "Passer le module et terminer le tour"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18226
+msgid ""
+"To place an item on the board, click any of the squares that are highlighted"
+" in red"
+msgstr ""
+"Pour placer un élément sur le tableau, cliquez sur l'un des carrés surlignés"
+" en rouge."
+
+#: .\Private\Z_Deployment\FCMbigString.js:18226
+msgid ""
+"To rotate an item, use the arrows displayed next to the item just above the "
+"board"
+msgstr ""
+"Pour faire pivoter un élément, utilisez les flèches affichées à côté de "
+"l'élément juste au-dessus du tableau."
+
+#: .\Private\Z_Deployment\FCMbigString.js:18226
+msgid ""
+"To see any player's employees and current structure, click on their name in "
+"the black bar at the top of the screen"
+msgstr ""
+"Pour voir les employés et la structure actuelle d'un joueur, cliquez sur son"
+" nom dans la barre noire en haut de l'écran."
+
+#: .\Private\Z_Deployment\FCMbigString.js:18226
+msgid ""
+"To see the remaining employees, milestones, and other items, click "
+"\"Reserve\" in the menu at the top"
+msgstr ""
+"Pour voir les employés restants, les jalons et autres éléments, cliquez sur "
+"« Réserver » dans le menu en haut."
+
+#: .\Private\Z_Deployment\FCMbigString.js:18226
+msgid ""
+"You will always have the option to reset the current phase / whole working "
+"day before you end your turn"
+msgstr ""
+"Vous aurez toujours la possibilité de réinitialiser la phase en cours/la "
+"journée entière de travail avant de terminer votre tour."
+
+#: .\Private\Z_Deployment\FCMbigString.js:18229
+msgid ""
+"Welcome to this practice game<BR/>If you wish to rewind your game, use the "
+"button in the top left<BR/>Each rewind will move the game back by one step"
+msgstr ""
+"Bienvenue dans ce jeu d'entraînement<BR/>Si vous souhaitez rembobiner votre "
+"partie, utilisez le bouton en haut à gauche<BR/>Chaque rembobinage fera "
+"reculer la partie d'un pas"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18231
+msgid ""
+"Lower expectations! This is AI v 0.1 - It has some vague intelligence.<br/> "
+"Contact me if you're interested in helping develop an AI"
+msgstr ""
+"Des attentes inférieures ! Il s'agit de l'IA v 0.1 - Elle a une vague "
+"intelligence.<br/> Contactez-moi si vous souhaitez aider à développer une IA"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18235
+#: .\Private\Z_Deployment\FCMbigString.js:18303
+#: .\Private\Z_Deployment\FCMbigString.js:18765
+msgid "Remember: you are using the <b>New Milestones</b>"
+msgstr "N'oubliez pas : vous utilisez les <b>Nouveaux jalons</b>"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18253
+#: .\Private\Z_Deployment\FCMbigString.js:18459
+msgid "Alert Tournament Admin"
+msgstr "Administrateur du tournoi d’alerte"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18253
+#: .\Private\Z_Deployment\FCMbigString.js:18459
+msgid "Keep playing"
+msgstr "Continue à jouer"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18254
+#: .\Private\Z_Deployment\FCMbigString.js:18460
+msgid "Yes I want to resign"
+msgstr "Oui, je veux démissionner"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18259
+msgid "Delay placing your restaurant for one round"
+msgstr "Retardez le placement de votre restaurant d'un tour"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18281
+msgid "Are you sure you want to delay placing your restaurant?"
+msgstr "Êtes-vous sûr de vouloir retarder le placement de votre restaurant ?"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18300
+msgid ""
+"You can always choose your reserve card after all restaurants have been "
+"placed"
+msgstr ""
+"Vous pouvez toujours choisir votre carte de réserve une fois que tous les "
+"restaurants ont été placés"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18302
+msgid "Choose your reserve card"
+msgstr "Choisissez votre carte de réserve"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18352
+msgid ""
+"Choose your employees to send to work - select a slot, or choose an employee"
+" directly from the beach"
+msgstr ""
+"Choisissez vos employés à envoyer au travail - sélectionnez un créneau ou "
+"choisissez un employé directement depuis la plage"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18471
+msgid "Auto-fill Structure"
+msgstr "Structure de remplissage automatique"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18565
+msgid "Return to the beach"
+msgstr "Retour à la plage"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18670
+msgid "Choose your position in turn order:"
+msgstr "Choisissez votre position dans l'ordre du tour :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18743
+#: .\Private\Z_Deployment\FCMbigString.js:20668
+#: .\Private\Z_Deployment\FCMbigString.js:20927
+#: .\Private\Z_Deployment\FCMbigString.js:21500
+#: .\Private\Z_Deployment\HCbigString.js:2895
+#: .\Private\Z_Deployment\HCbigString.js:10064
+#: .\Private\Z_Deployment\HCbigString.js:10288
+#: .\Private\Z_Deployment\HCbigString.js:10546
+#: .\Private\Z_Deployment\HCbigString.js:11038
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:2933
+#: .\Private\Z_Deployment\HLCbigString.js:10114
+#: .\Private\Z_Deployment\HLCbigString.js:10338
+#: .\Private\Z_Deployment\HLCbigString.js:10599
+#: .\Private\Z_Deployment\HLCbigString.js:11119
+msgid "End Turn"
+msgstr "Fin du tour"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18764
+msgid ""
+"After the first turn, you won't be asked to fire anyone (as long as you "
+"don't hire a salaried level 0 employee)"
+msgstr ""
+"Après le premier tour, il ne vous sera demandé de licencier personne (tant "
+"que vous n'embauchez pas un employé salarié de niveau 0)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18768
+msgid "You can recruit new employees"
+msgstr "Vous pouvez recruter de nouveaux employés"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18769
+msgid "Your Night Shift Manager allows each recruiting girl to work twice"
+msgstr ""
+"Votre Night Shift Manager permet à chaque recruteuse de travailler deux fois"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18793
+msgid "%(recruitingAmountLeft)s remaining point"
+msgid_plural "%(recruitingAmountLeft)s remaining points"
+msgstr[0] "%(recruitingAmountLeft)s points restants"
+msgstr[1] "%(recruitingAmountLeft)s points restants"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18802
+msgid "(%(discountPoints)s point may be used to reduce salaries by $5)"
+msgid_plural ""
+"(%(discountPoints)s points may be used to reduce salaries by "
+"$%(discountAmount)s)"
+msgstr[0] ""
+"(%(discountPoints)s point peut être utilisé pour réduire les salaires de "
+"5 $)"
+msgstr[1] ""
+"(%(discountPoints)s points peuvent être utilisés pour réduire les salaires "
+"de %(discountAmount)s $)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18883
+msgid "Your Night Shift Manager allows each trainer to work twice"
+msgstr ""
+"Votre Night Shift Manager permet à chaque formateur de travailler deux fois"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18888
+msgid "You can train %(trainingAmountLeft)s employee"
+msgid_plural "You can train up to  %(trainingAmountLeft)s slots"
+msgstr[0] "Vous pouvez former %(trainingAmountLeft)s employé"
+msgstr[1] "Vous pouvez entraîner jusqu'à %(trainingAmountLeft)s emplacements"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18897
+msgid "You can train %(train2amount)s employee up to 2 levels. "
+msgid_plural "You can train up to %(train2amount)s employees up to 2 level. "
+msgstr[0] "Vous pouvez former %(train2amount)s employé jusqu'à 2 niveaux."
+msgstr[1] ""
+"Vous pouvez former jusqu'à %(train2amount)s collaborateurs jusqu'au niveau "
+"2."
+
+#: .\Private\Z_Deployment\FCMbigString.js:18906
+msgid "You have %(recruitingAmountLeft)s recruiting point remaining"
+msgid_plural "You have %(recruitingAmountLeft)s recruiting points remaining"
+msgstr[0] "Il vous reste %(recruitingAmountLeft)s points de recrutement"
+msgstr[1] "Il vous reste %(recruitingAmountLeft)s points de recrutement"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18911
+msgid "Please choose an employee to train"
+msgstr "Veuillez choisir un employé à former"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18914
+msgid ""
+"Each employee can only be trained once, so just select the final promotion"
+msgstr ""
+"Chaque employé ne peut être formé qu'une seule fois, il suffit donc de "
+"sélectionner la promotion finale"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18939
+msgid "Train from hiring"
+msgstr "Se former dès l'embauche"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18946
+msgid "You have training capacity available, but no one to train"
+msgstr ""
+"Vous disposez de capacités de formation disponibles, mais personne pour "
+"former"
+
+#: .\Private\Z_Deployment\FCMbigString.js:18952
+msgid "You can train staff from your working employees (preserving colour):"
+msgstr ""
+"Vous pouvez former le personnel de vos collaborateurs en activité (en "
+"préservant la couleur) :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19006
+msgid "From:"
+msgstr "Depuis:"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19011
+msgid "To:"
+msgstr "À:"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19138
+msgid ""
+"Training a Barista allows you to place/move a coffee shop with a range of 2 "
+"- Remaining: %(baristaCoffeeShops)s"
+msgstr ""
+"Former un Barista vous permet de placer/déplacer un café avec une portée de "
+"2 - Restant : %(baristaCoffeeShops)s"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19143
+msgid ""
+"Training a Lead Barista from a Barista allows you to place/move a coffee "
+"shop with unlimited range - Remaining: %(leadBaristaCoffeeShopsFromB)s"
+msgstr ""
+"Former un Lead Barista à partir d'un Barista vous permet de placer/déplacer "
+"un café avec une portée illimitée - Restant : "
+"%(leadBaristaCoffeeShopsFromB)s"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19155
+msgid ""
+"Training a Lead Barista from a Trainee Barista allows you to <B>first "
+"place/move a coffee shop with range 2 (included above) and then another with"
+" unlimited range</b> - Remaining: %(leadBaristaCoffeeShopsFromTB)s"
+msgstr ""
+"Former un Lead Barista à partir d'un Trainee Barista vous permet de "
+"<B>placer/déplacer d'abord un café avec une portée 2 (inclus ci-dessus) puis"
+" un autre avec une portée illimitée</b> - Restant : "
+"%(leadBaristaCoffeeShopsFromTB)s"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19165
+msgid ""
+"<b>Place a coffee shop with unlimited range</b><BR/>There can only be 1 "
+"coffee shop per tile, and it must be next to a road"
+msgstr ""
+"<b>Placez un café avec une portée illimitée</b><BR/>Il ne peut y avoir qu'un"
+" seul café par tuile, et il doit être à côté d'une route"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19166
+msgid ""
+"<b>Place a coffee shop with range 2</b><BR/>There can only be 1 coffee shop "
+"per tile, and it must be next to a road"
+msgstr ""
+"<b>Placez un café de portée 2</b><BR/>Il ne peut y avoir qu'un seul café par"
+" tuile, et il doit être à côté d'une route"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19275
+msgid "Select a marketeer to start a marketing campaign"
+msgstr ""
+"Sélectionnez un spécialiste du marketing pour lancer une campagne marketing"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19373
+msgid "There are no suitable marketing campaigns left"
+msgstr "Il n’existe plus de campagnes marketing adaptées"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19374
+msgid ""
+"There are no available campaigns. EIther there is no space for it on the "
+"board, or no mailboxes left"
+msgstr ""
+"Il n'y a aucune campagne disponible. Soit il n'y a plus de place pour cela "
+"sur le tableau, soit il n'y a plus de boîte aux lettres"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19375
+#: .\Private\Z_Deployment\FCMbigString.js:20275
+#: .\Private\Z_Deployment\FCMbigString.js:21447
+msgid "Never mind"
+msgstr "Pas grave"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19399
+msgid "Choose a marketing campaign for the Night Shift Manager"
+msgstr "Choisissez une campagne marketing pour le Night Shift Manager"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19401
+msgid "Choose a marketing campaign"
+msgstr "Choisissez une campagne marketing"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19690
+msgid ""
+"Place a Highway Ramp to connect to the Rural Area<BR/>You can place it side "
+"on or end on to any edge of the board, as long as it connects to at least "
+"one road"
+msgstr ""
+"Placez une rampe d'autoroute pour vous connecter à la zone rurale<BR/>Vous "
+"pouvez la placer d'un côté ou se terminer sur n'importe quel bord du "
+"plateau, à condition qu'elle soit reliée à au moins une route."
+
+#: .\Private\Z_Deployment\FCMbigString.js:19697
+msgid "There are no more freeways left."
+msgstr "Il n'y a plus d'autoroutes."
+
+#: .\Private\Z_Deployment\FCMbigString.js:19789
+msgid "Select the Food / Drink producer"
+msgstr "Sélectionnez le producteur d'aliments/boissons"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19791
+msgid ""
+"Your Night Shift Manager allows each Errand Boy and Kitchen Trainee to work "
+"twice. They are displayed twice each below"
+msgstr ""
+"Votre responsable de nuit permet à chaque garçon de courses et stagiaire en "
+"cuisine de travailler deux fois. Ils sont affichés deux fois chacun ci-"
+"dessous"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19792
+msgid ""
+"Your Night Shift Manager allows each Barista Trainee, Errand Boy and Kitchen"
+" Trainee to work twice. They are displayed twice each below"
+msgstr ""
+"Votre responsable de nuit permet à chaque stagiaire barista, garçon de "
+"courses et stagiaire en cuisine de travailler deux fois. Ils sont affichés "
+"deux fois chacun ci-dessous"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19877
+msgid "Select Drink to produce"
+msgstr "Sélectionnez la boisson à produire"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19878
+msgid "Select Food item to produce"
+msgstr "Sélectionnez l'aliment à produire"
+
+#: .\Private\Z_Deployment\FCMbigString.js:19953
+msgid "Stop and collect drinks"
+msgstr "Arrêtez-vous et récupérez les boissons"
+
+#: .\Private\Z_Deployment\FCMbigString.js:20087
+msgid "You can build new houses and gardens"
+msgstr "Vous pouvez construire de nouvelles maisons et jardins"
+
+#: .\Private\Z_Deployment\FCMbigString.js:20185
+msgid ""
+"You can build a new road or park<BR>The lobbyist has a range of 2 but can "
+"also build next to any road that is within a range of 2"
+msgstr ""
+"Vous pouvez construire une nouvelle route ou un nouveau parc<BR>Le lobbyiste"
+" a une portée de 2 mais peut également construire à côté de n'importe quelle"
+" route qui se trouve dans une portée de 2."
+
+#: .\Private\Z_Deployment\FCMbigString.js:20191
+msgid "Unfortunately there are no more roads or parks available"
+msgstr "Malheureusement, il n'y a plus de routes ni de parcs disponibles"
+
+#: .\Private\Z_Deployment\FCMbigString.js:20192
+msgid "Ok, Move to the next phase"
+msgstr "Ok, passez à la phase suivante"
+
+#: .\Private\Z_Deployment\FCMbigString.js:20262
+msgid ""
+"For the First Lobbyist Used milestone, you are allowed to add a new tile to "
+"the board"
+msgstr ""
+"Pour le jalon Premier lobbyiste utilisé, vous êtes autorisé à ajouter une "
+"nouvelle tuile au tableau."
+
+#: .\Private\Z_Deployment\FCMbigString.js:20441
+msgid "Move"
+msgstr "Se déplacer"
+
+#: .\Private\Z_Deployment\FCMbigString.js:20474
+msgid "Choose a restaurant to move"
+msgstr "Choisissez un restaurant pour déménager"
+
+#: .\Private\Z_Deployment\FCMbigString.js:20583
+msgid "You can fire any available employees"
+msgstr "Vous pouvez licencier tous les employés disponibles"
+
+#: .\Private\Z_Deployment\FCMbigString.js:20587
+#: .\Private\Z_Deployment\FCMbigString.js:21861
+msgid "Marketing employees you can't fire:"
+msgstr "Employés marketing que vous ne pouvez pas licencier :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:20602
+#: .\Private\Z_Deployment\FCMbigString.js:21875
+msgid ""
+"You need to pay: $%(salaryAmount)s or %(itemsAmount)s resource tokens (or a "
+"mix of both)"
+msgstr ""
+"Vous devez payer : %(salaryAmount)s $ ou %(itemsAmount)s jetons de "
+"ressources (ou un mélange des deux)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:20657
+msgid "Ok, thank you very much"
+msgstr "D'accord, merci beaucoup"
+
+#: .\Private\Z_Deployment\FCMbigString.js:20662
+#: .\Private\Z_Deployment\FCMbigString.js:21955
+msgid "Choose payment type"
+msgstr "Choisissez le type de paiement"
+
+#: .\Private\Z_Deployment\FCMbigString.js:20750
+#: .\Private\Z_Deployment\FCMbigString.js:22041
+msgid "You have to pay for %(employeesToPayFor)s employee."
+msgid_plural "You have to pay for %(employeesToPayFor)s employees."
+msgstr[0] "Vous devez payer pour %(employeesToPayFor)s employé."
+msgstr[1] "Vous devez payer pour %(employeesToPayFor)s employés."
+
+#: .\Private\Z_Deployment\FCMbigString.js:20756
+#: .\Private\Z_Deployment\FCMbigString.js:22047
+msgid "Choose the item you want to use:"
+msgid_plural ""
+"Choose the %(remainingEmployeesToPayFor)s items you want to use:"
+msgstr[0] "Choisissez l'élément que vous souhaitez utiliser :"
+msgstr[1] ""
+"Choisissez les %(remainingEmployeesToPayFor)s éléments que vous souhaitez "
+"utiliser :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:20766
+#: .\Private\Z_Deployment\FCMbigString.js:22062
+msgid ""
+"You are currently paying <b>$%(moneyUsed)s</b> and <b>%(itemsUsed)s</b> item"
+msgid_plural ""
+"You are currently paying <b>$%(moneyUsed)s</b> and <b>%(itemsUsed)s</b> "
+"items"
+msgstr[0] ""
+"Vous payez actuellement <b>$%(moneyUsed)s</b> et <b>%(itemsUsed)s</b> "
+"article"
+msgstr[1] ""
+"Vous payez actuellement <b>$%(moneyUsed)s</b> et <b>%(itemsUsed)s</b> "
+"articles"
+
+#: .\Private\Z_Deployment\FCMbigString.js:20854
+#: .\Private\Z_Deployment\FCMbigString.js:22209
+msgid "Your items:"
+msgstr "Vos articles :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:20880
+msgid "You may keep up to 10 items. Choose the item you want to throw away"
+msgid_plural ""
+"You may keep up to 10 items. Choose the %(remainingItems)s items you want to"
+" throw away"
+msgstr[0] ""
+"Vous pouvez conserver jusqu'à 10 éléments. Choisissez l'article que vous "
+"souhaitez jeter"
+msgstr[1] ""
+"Vous pouvez conserver jusqu'à 10 éléments. Choisissez les %(remainingItems)s"
+" objets que vous souhaitez jeter"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21047
+#: .\Private\Z_Deployment\FCMbigString.js:21097
+msgid "You are about to confirm the whole Working Day"
+msgstr "Vous êtes sur le point de confirmer toute la journée ouvrable"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21051
+msgid "WARNING: YOU HAVE NOT HIRED ANYONE"
+msgstr "ATTENTION : VOUS N'AVEZ ENGAGÉ PERSONNE"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21066
+msgid ""
+"<br/>Payday will be skipped as you have no salary to pay and it is turn 1 or"
+" 2"
+msgstr ""
+"<br/>Le jour de paie sera ignoré car vous n'avez pas de salaire à payer et "
+"c'est le tour 1 ou 2"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21077
+msgid ""
+"You have <b>enough money</b> to keep all your employees. You can decide now "
+"to keep all of them in order to save time"
+msgstr ""
+"Vous disposez de <b>assez d’argent</b> pour garder tous vos employés. Vous "
+"pouvez décider dès maintenant de tous les conserver afin de gagner du temps"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21081
+msgid "End Turn. Play Payday Phase"
+msgstr "Fin du tour. Jouer à la phase de paie"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21084
+msgid "End Turn. Auto-pay salaries and keep all employees"
+msgstr ""
+"Fin du tour. Payez automatiquement les salaires et gardez tous les employés"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21121
+msgid "Recruit"
+msgstr "Recruter"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21144
+msgid "Used to reduce salary"
+msgstr "Utilisé pour réduire le salaire"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21151
+msgid "can be used to reduce salary"
+msgstr "peut être utilisé pour réduire le salaire"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21159
+msgid "Train"
+msgstr "Former"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21189
+msgid "Market"
+msgstr "Marché"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21304
+msgid "Lobby"
+msgstr "Hall d'entrée"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21345
+msgid "New Restaurants"
+msgstr "Nouveaux restaurants"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21515
+msgid "Choose a bonus to replace your CEO's action"
+msgstr "Choisissez un bonus pour remplacer l'action de votre PDG"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21548
+msgid "You must choose a new action for your CEO"
+msgstr "Vous devez choisir une nouvelle action pour votre PDG"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21662
+msgid "<b>Expert Options</b>"
+msgstr "<b>Options expertes</b>"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21672
+msgid "Enough money - Pay Everyone"
+msgstr "Assez d'argent - Payez tout le monde"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21673
+msgid "Pay Everyone if Enough Money"
+msgstr "Payez tout le monde si assez d’argent"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21674
+msgid "Keep everyone - Pay with items then with $$$"
+msgstr "Gardez tout le monde - Payez avec des articles puis avec $$$"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21675
+msgid "Keep everyone - Trainer MS"
+msgstr "Gardez tout le monde - Trainer MS"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21678
+msgid "Keep Everyone"
+msgstr "Gardez tout le monde"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21679
+msgid "Keep everyone: "
+msgstr "Gardez tout le monde :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21681
+msgid "Fire:"
+msgstr "Feu:"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21700
+#: .\Private\Z_Deployment\FCMbigString.js:21756
+msgid "Cancel Move"
+msgstr "Annuler le déplacement"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21702
+msgid "Pre-set Payday"
+msgstr "Jour de paie prédéfini"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21710
+msgid "Keep All (No Salary to pay)"
+msgstr "Gardez tout (Aucun salaire à payer)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21712
+msgid "Keep All (Enough Money)"
+msgstr "Gardez tout (assez d'argent)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21714
+msgid "Keep All (First Trainer Used MS)"
+msgstr "Tout garder (premier entraîneur utilisé MS)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21716
+msgid "Keep All (If you earn Enough Money)"
+msgstr "Gardez tout (si vous gagnez suffisamment d'argent)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21740
+msgid "Keep all items if possible"
+msgstr "Conservez tous les objets si possible"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21743
+msgid "Keep items in the folowing priority order: "
+msgstr "Conservez les éléments dans l’ordre de priorité suivant :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21750
+msgid "Discard everything - keep nothing"
+msgstr "Jetez tout - ne gardez rien"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21758
+msgid "Pre-set Clean Up"
+msgstr "Nettoyage prédéfini"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21761
+msgid "Keep All (If you have 10 or fewer items)"
+msgstr "Gardez tout (si vous avez 10 éléments ou moins)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21857
+msgid ""
+"You can pre-select which employees to fire. If you do not have enough money "
+"after this, you will play the phase as normal"
+msgstr ""
+"Vous pouvez présélectionner les employés à licencier. Si vous n'avez pas "
+"assez d'argent après cela, vous jouerez la phase normalement."
+
+#: .\Private\Z_Deployment\FCMbigString.js:21915
+msgid "There are no employees you can choose to pre-fire"
+msgstr "Il n'y a aucun employé que vous pouvez choisir de pré-licencier"
+
+#: .\Private\Z_Deployment\FCMbigString.js:21959
+#: .\Private\Z_Deployment\FCMbigString.js:22180
+msgid "Save Payday Turn"
+msgstr "Enregistrer le tour de paie"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22054
+msgid ""
+"IF ANY ITEM IS NO LONGER AVAILABLE AFTER PAYDAY THEN MONEY WILL BE USED "
+"INSTEAD"
+msgstr ""
+"SI UN ARTICLE N'EST PLUS DISPONIBLE APRÈS LE JOUR DE PAYAGE, ALORS L'ARGENT "
+"SERA UTILISÉ À LA LIEU"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22127
+msgid "Pay the rest in $$$ - Save Payday Turn"
+msgstr "Payez le reste en $$$ - Économisez Payday Turn"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22228
+msgid ""
+"Your fridge can store up to 10 items. Some may be sold during the Dinnertime"
+" phase."
+msgstr ""
+"Votre réfrigérateur peut stocker jusqu'à 10 articles. Certains peuvent être "
+"vendus pendant la phase Dinnertime."
+
+#: .\Private\Z_Deployment\FCMbigString.js:22233
+msgid "Highest Priority to store > "
+msgstr "Priorité la plus élevée à stocker >"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22241
+msgid " < Lowest Priority to store"
+msgstr "< Priorité la plus basse pour stocker"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22280
+msgid "Cancel Pre-Cleanup"
+msgstr "Annuler le pré-nettoyage"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22293
+msgid "Reset Cleanup"
+msgstr "Réinitialiser le nettoyage"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22304
+msgid "Save Clean Up Turn"
+msgstr "Enregistrer le tour de nettoyage"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22482
+msgid ""
+"%(playerName)s chooses their starting restaurant at co-ordinates "
+"(%(Xcoord)s, %(Ycoord)s) facing %(direction)s"
+msgstr ""
+"%(playerName)s choisit son restaurant de départ aux coordonnées (%(Xcoord)s,"
+" %(Ycoord)s) face à %(direction)s"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22484
+msgid "%(playerName)s chooses to delay their first restaurant"
+msgstr "%(playerName)s choisit de retarder son premier restaurant"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22486
+msgid "%(playerName)s chooses their reserve card"
+msgstr "%(playerName)s choisit sa carte de réserve"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22495
+msgid "(auto early)"
+msgstr "(auto-tôt)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22500
+msgid "(auto late)"
+msgstr "(retard automatique)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22509
+msgid "%(playerName)s has no employees"
+msgstr "%(playerName)s n'a aucun employé"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22512
+msgid "%(playerName)s sends to work:"
+msgstr "%(playerName)s envoie au travail :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22523
+msgid "%(playerName)s sends no one to work"
+msgstr "%(playerName)s n'envoie personne au travail"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22545
+msgid "%(playerName)s trains:"
+msgstr "%(playerName)s trains :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22551
+msgid "[From Hiring]"
+msgstr "[De l'embauche]"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22554
+msgid "[From Structure]"
+msgstr "[Depuis la structure]"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22611
+msgid ""
+"%(player)s started marketing campaign #%(marketingCampaignNumber)s with "
+"%(employee)s, %(orientation)s at co-ordinates (%(Xcoord)s, %(Ycoord)s), "
+"advertising:"
+msgstr ""
+"%(player)s a lancé la campagne marketing n°%(marketingCampaignNumber)s avec "
+"%(employee)s, %(orientation)s aux coordonnées (%(Xcoord)s, %(Ycoord)s), "
+"publicité :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22624
+#: .\Private\Z_Deployment\FCMbigString.js:22664
+msgid "for %(turnLength)s turns"
+msgstr "pendant %(turnLength)s tours"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22625
+#: .\Private\Z_Deployment\FCMbigString.js:22665
+msgid "for %(turnLength)s turn"
+msgstr "pendant %(turnLength)s tour"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22659
+msgid ""
+"%(player)s used their %(marketingTrainee)s again with their "
+"%(NightShiftManager)s to start marketing campaign "
+"#%(marketingCampaignNumber)s at co-ordinates (%(Xcoord)s, %(Ycoord)s), "
+"advertising:"
+msgstr ""
+"%(player)s a de nouveau utilisé son %(marketingTrainee)s avec son "
+"%(NightShiftManager)s pour lancer la campagne marketing "
+"#%(marketingCampaignNumber)s aux coordonnées (%(Xcoord)s, %(Ycoord)s), "
+"publicité :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22660
+msgid ""
+"%(player)s used their %(marketingTrainee)s again with their "
+"%(NightShiftManager)s to start marketing campaign "
+"#%(marketingCampaignNumber)s, %(orientation)s at co-ordinates (%(Xcoord)s, "
+"%(Ycoord)s), advertising:"
+msgstr ""
+"%(player)s a de nouveau utilisé son %(marketingTrainee)s avec son "
+"%(NightShiftManager)s pour lancer la campagne marketing "
+"#%(marketingCampaignNumber)s, %(orientation)s aux coordonnées (%(Xcoord)s, "
+"%(Ycoord)s), publicité :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22678
+msgid ""
+"%(player)s started marketing campaign #%(marketingCampaignNumber)s (no "
+"marketer is used for the Restaurant Milestone), at co-ordinates (%(Xcoord)s,"
+" %(Ycoord)s), advertising:"
+msgstr ""
+"%(player)s a lancé la campagne marketing n°%(marketingCampaignNumber)s "
+"(aucun spécialiste du marketing n'est utilisé pour le Restaurant Milestone),"
+" aux coordonnées (%(Xcoord)s, %(Ycoord)s), publicité :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22684
+#: .\Private\Z_Deployment\FCMbigString.js:22706
+msgid "%(player)s uses: "
+msgstr "%(player)s utilise :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22694
+msgid "to produce/collect:"
+msgstr "produire/collecter :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22732
+msgid ""
+"%(player)s builds a garden for house #%(houseNumber)s %(orientation)s at co-"
+"ordinates (%(Xcoord)s, %(Ycoord)s)"
+msgstr ""
+"%(player)s construit un jardin pour la maison #%(houseNumber)s "
+"%(orientation)s aux coordonnées (%(Xcoord)s, %(Ycoord)s)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22762
+msgid ""
+"%(player)s opens a new restaurant at co-ordinates (%(Xcoord)s, %(Ycoord)s) "
+"facing %(orientation)s"
+msgstr ""
+"%(player)s ouvre un nouveau restaurant aux coordonnées (%(Xcoord)s, "
+"%(Ycoord)s) face à %(orientation)s"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22790
+msgid ""
+"Dinner time: No sales occurred, either due to lack of demand or lack of "
+"items"
+msgstr ""
+"Heure du dîner : aucune vente n'a eu lieu, soit en raison du manque de "
+"demande, soit du manque d'articles."
+
+#: .\Private\Z_Deployment\FCMbigString.js:22820
+msgid "House"
+msgstr "Maison"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22821
+msgid "Apartment"
+msgstr "Appartement"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22832
+msgid "No one can fulfill these demands"
+msgstr "Personne ne peut répondre à ces demandes"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22845
+msgid ""
+"Houses required to travel over a roadworks marker this turn add +1 distance "
+"per roadworks"
+msgstr ""
+"Les maisons qui doivent traverser un marqueur de travaux routiers ce tour "
+"ajoutent +1 distance par travaux routiers."
+
+#: .\Private\Z_Deployment\FCMbigString.js:22855
+#: .\Private\Z_Deployment\FCMbigString.js:22856
+msgid "distance"
+msgstr "distance"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22855
+#: .\Private\Z_Deployment\FCMbigString.js:22856
+msgid "player"
+msgstr "joueur"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22872
+msgid "Only %(player)s can fulfill these demands"
+msgstr "Seuls %(player)s peuvent répondre à ces demandes"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22893
+msgid "Apartment #%(apartmentNumber)s goes to %(player)s for $%(saleAmount)s"
+msgstr ""
+"L'appartement #%(apartmentNumber)s va au %(player)s pour %(saleAmount)s$"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22894
+msgid "Rural Area goes to %(player)s for $%(saleAmount)s"
+msgstr "La zone rurale va à %(player)s pour %(saleAmount)s $"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22896
+#: .\Private\Z_Deployment\FCMbigString.js:22964
+msgid "Base price"
+msgstr "Prix ​​de base"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22898
+#: .\Private\Z_Deployment\FCMbigString.js:22966
+msgid ""
+"The base price is doubled, because the apartment is adjacent to a park."
+msgstr "Le prix de base est doublé car l'appartement est adjacent à un parc."
+
+#: .\Private\Z_Deployment\FCMbigString.js:22902
+msgid "The player has a bonus of $%(bonusAmount)s"
+msgstr "Le joueur a un bonus de %(bonusAmount)s$"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22913
+#: .\Private\Z_Deployment\FCMbigString.js:22976
+msgid "A Fry Chef adds a bonus of $%(fryChefsBonus)s"
+msgid_plural "Fry Chefs add a bonus of $%(fryChefsBonus)s"
+msgstr[0] "Un Fry Chef ajoute un bonus de %(fryChefsBonus)s $"
+msgstr[1] "Les Fry Chefs ajoutent un bonus de %(fryChefsBonus)s $"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22923
+msgid "Distance reduced due to Milestone"
+msgstr "Distance réduite en raison de Milestone"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22948
+msgid "Coffee sales for house #%(houseNumber)s:"
+msgstr "Ventes de café pour la maison #%(houseNumber)s :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22949
+msgid "Coffee sales for apartment #%(apartmentNumber)s:"
+msgstr "Ventes de café pour l'appartement #%(apartmentNumber)s :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22950
+msgid "Coffee sales for Rural Area:"
+msgstr "Ventes de café pour les zones rurales :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22964
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:11958
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12044
+#: .\Private\Z_Deployment\HLCbigString.js:12148
+msgid "Total Income:"
+msgstr "Revenu total :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22985
+msgid "No coffee sold"
+msgstr "Aucun café vendu"
+
+#: .\Private\Z_Deployment\FCMbigString.js:22991
+msgid "More Information"
+msgstr "Plus d'informations"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23025
+msgid "What are the highlighted restaurants / coffee shops?"
+msgstr "Quels sont les restaurants/cafés mis en avant ?"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23028
+msgid "What are the highlighed road squares?"
+msgstr "Quelles sont les places routières mises en évidence ?"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23029
+msgid ""
+"If there is only one valid coffee route from the house to the restaurant, it"
+" will be shown.<BR/>If there are multiple valid routes, the road squares "
+"common to all valid coffee routes will be shown."
+msgstr ""
+"S'il n'y a qu'un seul itinéraire de café valide de la maison au restaurant, "
+"il sera affiché.<BR/>S'il existe plusieurs itinéraires valides, les cases de"
+" route communes à tous les itinéraires de café valides seront affichées."
+
+#: .\Private\Z_Deployment\FCMbigString.js:23031
+msgid "I'm still confused?"
+msgstr "Je suis toujours confus ?"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23032
+msgid ""
+"Don't worry; coffee can be quite complicated. Please read more help <a "
+"href='/FCM/coffeeHelp/' target='_blank'>here</a>."
+msgstr ""
+"Ne t'inquiète pas; le café peut être assez compliqué. Veuillez lire plus "
+"d'aide <a href='/FCM/coffeeHelp/' target='_blank'>ici</a>."
+
+#: .\Private\Z_Deployment\FCMbigString.js:23049
+msgid "No income"
+msgstr "Aucun revenu"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23052
+#: .\Private\Z_Deployment\FCMbigString.js:23053
+msgid "CFO bonus"
+msgstr "Prime au directeur financier"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23072
+msgid "Income"
+msgstr "Revenu"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23076
+msgid "No salaries"
+msgstr "Pas de salaires"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23086
+#: .\Private\Z_Deployment\FCMbigString.js:23108
+msgid "%(dollarAmount)s and %(itemsAmount)s item"
+msgid_plural "%(dollarAmount)s and %(itemsAmount)s items"
+msgstr[0] "Article %(dollarAmount)s et %(itemsAmount)s"
+msgstr[1] "Articles %(dollarAmount)s et %(itemsAmount)s"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23093
+msgid "Salaries"
+msgstr "Salaires"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23116
+msgid "No marketing campaigns"
+msgstr "Aucune campagne marketing"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23123
+msgid "Normal Advertising Round"
+msgstr "Tour de publicité normal"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23125
+msgid "Mass Marketeer Round %(round)s"
+msgstr "Cycle de marketing de masse %(round)s"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23165
+msgid "#%(campaignNumber)s put %(item)s on house %(affectedHouses)s"
+msgid_plural "#%(campaignNumber)s put %(item)s on houses %(affectedHouses)s"
+msgstr[0] "#%(campaignNumber)s mets %(item)s sur la maison %(affectedHouses)s"
+msgstr[1] ""
+"#%(campaignNumber)s mettez %(item)s sur les maisons %(affectedHouses)s"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23183
+msgid ""
+"#%(campaignNumber)s put 2x %(item)s on apartment %(affectedApartments)s"
+msgid_plural ""
+"#%(campaignNumber)s put 2x %(item)s on apartments %(affectedApartments)s"
+msgstr[0] ""
+"#%(campaignNumber)s mettez 2x %(item)s sur l'appartement "
+"%(affectedApartments)s"
+msgstr[1] ""
+"#%(campaignNumber)s mettez 2x %(item)s sur les appartements "
+"%(affectedApartments)s"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23188
+msgid "#Giant Billboard put 2x %(item)s on the Rural Area"
+msgstr "#Giant Billboard a mis 2x %(item)s sur la zone rurale"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23190
+msgid "#%(campaignNumber)s was not able to market %(item)s"
+msgstr "#%(campaignNumber)s n'a pas pu commercialiser %(item)s"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23199
+msgid "%(player)s received a new milestone:"
+msgstr "%(player)s a reçu un nouveau jalon :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23204
+msgid "%(player)s chose a new CEO action:"
+msgstr "%(player)s a choisi une nouvelle action du PDG :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23211
+msgid "The reserve cards are:"
+msgstr "Les cartes de réserve sont :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23236
+msgid "%(player)s fires no employees"
+msgstr "%(player)s ne licencie aucun employé"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23268
+msgid "%(player)s keeps nothing"
+msgstr "%(player)s ne garde rien"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23273
+msgid "Welcome to Food Chain Magnate"
+msgstr "Bienvenue chez le magnat de la chaîne alimentaire"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23278
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:12050
+#: .\Private\Z_Deployment\HLCbigString.js:12240
+msgid "Start of turn %(turnNumber)s"
+msgstr "Début du tour %(turnNumber)s"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23278
+msgid "Bank:"
+msgstr "Banque:"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23284
+msgid "%(playerName)s chooses: %(moduleChoiceImg)s %(moduleChoice)s"
+msgstr "%(playerName)s choisit : %(moduleChoiceImg)s %(moduleChoice)s"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23289
+msgid "Game rewound to here by admin"
+msgstr "Jeu rembobiné ici par l'administrateur"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23291
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:11713
+#: .\Private\Z_Deployment\HLCbigString.js:11798
+msgid "%(resignedPlayer)s Resigns"
+msgstr "%(resignedPlayer)s Démissionne"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23293
+msgid "%(kickedPlayer)s was kicked out"
+msgstr "%(kickedPlayer)s a été expulsé"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23296
+msgid "The winner is: %(winner)s"
+msgstr "Le gagnant est : %(winner)s"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23299
+msgid "The bank broke. Refill: $%(refillAmount)s"
+msgstr "La banque a fait faillite. Recharge :%(refillAmount)s$"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23302
+msgid "Bankrupted!"
+msgstr "En faillite !"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23304
+msgid "All players went bankrupted! Game over"
+msgstr "Tous les joueurs ont fait faillite ! Jeu terminé"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23306
+msgid "Only one player left! Game over"
+msgstr "Il ne reste plus qu'un joueur ! Jeu terminé"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23340
+msgid ""
+"earned $%(earnings)s for %(numberOfItems)s item on building %(building)s"
+msgid_plural ""
+"earned $%(earnings)s for %(numberOfItems)s items on building %(building)s"
+msgstr[0] ""
+"gagné %(earnings)s $ pour %(numberOfItems)s objet du bâtiment %(building)s"
+msgstr[1] ""
+"gagné %(earnings)s $ pour %(numberOfItems)s objets du bâtiment %(building)s"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23355
+msgid "Marketeers earnings"
+msgstr "Gains des spécialistes du marketing"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23367
+msgid ""
+"%(player)s starts radio campaign #%(radioNumber)s at co-ordinates "
+"(%(Xcoord)s, %(Ycoord)s) due to the First Pizza Sold milestone"
+msgstr ""
+"%(player)s lance la campagne radio #%(radioNumber)s aux coordonnées "
+"(%(Xcoord)s, %(Ycoord)s) en raison du jalon de la première pizza vendue"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23370
+msgid ""
+"$100 has been removed from the bank due to the First Discount Manager Used "
+"milestone"
+msgstr ""
+"100 $ ont été retirés de la banque en raison du jalon du premier "
+"gestionnaire de remises utilisé"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23378
+msgid "a 4 length park"
+msgstr "un parc de 4 longueurs"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23379
+msgid "a T shaped park"
+msgstr "un parc en forme de T"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23380
+msgid "an L shaped park"
+msgstr "un parc en forme de L"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23409
+msgid ""
+"%(player)s uses a lobbyist to place %(parkDetails)s at co-ordinates "
+"(%(Xcoord)s, %(Ycoord)s)"
+msgstr ""
+"%(player)s utilise un lobbyiste pour placer %(parkDetails)s aux coordonnées "
+"(%(Xcoord)s, %(Ycoord)s)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23422
+msgid "2 length road"
+msgstr "route en 2 longueurs"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23423
+msgid "4 length road"
+msgstr "Route à 4 longueurs"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23424
+msgid "corner road"
+msgstr "coin de route"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23436
+msgid ""
+"%(player)s uses a lobbyist to place a %(roadDetails)s at co-ordinates "
+"(%(Xcoord)s, %(Ycoord)s)"
+msgstr ""
+"%(player)s utilise un lobbyiste pour placer un %(roadDetails)s aux "
+"coordonnées (%(Xcoord)s, %(Ycoord)s)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23463
+msgid ""
+"%(player)s builds a coffee shop at co-ordinates (%(Xcoord)s, %(Ycoord)s)"
+msgstr "%(player)s construit un café aux coordonnées (%(Xcoord)s, %(Ycoord)s)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23722
+msgid "Show all history"
+msgstr "Afficher tout l'historique"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23780
+msgid "fourth"
+msgstr "quatrième"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23783
+msgid "fifth"
+msgstr "cinquième"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23786
+msgid "sixth"
+msgstr "sixième"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23796
+msgid "1st"
+msgstr "1er"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23802
+msgid "3rd"
+msgstr "3ème"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23805
+msgid "4th"
+msgstr "4ème"
+
+#: .\Private\Z_Deployment\FCMbigString.js:23811
+msgid "6th"
+msgstr "6ème"
+
+#: .\Private\Z_Deployment\FCMbigString.js:24450
+msgid ""
+"The game is no longer active; perhaps you have been removed for being "
+"inactive"
+msgstr ""
+"Le jeu n'est plus actif ; peut-être avez-vous été supprimé parce que vous "
+"êtes inactif"
+
+#: .\Private\Z_Deployment\FCMbigString.js:25094
+msgid "You cannot use this rewind during Turn Order"
+msgstr "Vous ne pouvez pas utiliser ce rembobinage pendant l'ordre du tour."
+
+#: .\Private\Z_Deployment\FCMbigString.js:25111
+#: .\Private\Z_Deployment\HCbigString.js:12944
+#: .\Private\Z_Deployment\HLCbigString.js:13141
+msgid "You cannot rewind a finished game"
+msgstr "Vous ne pouvez pas rembobiner un jeu terminé"
+
+#: .\Private\Z_Deployment\FCMbigString.js:25117
+msgid "You cannot rewind during replay"
+msgstr "Vous ne pouvez pas rembobiner pendant la relecture"
+
+#: .\Private\Z_Deployment\FCMbigString.js:25160
+#: .\Private\Z_Deployment\HCbigString.js:12975
+#: .\Private\Z_Deployment\HLCbigString.js:13172
+msgid "Game Rewound"
+msgstr "Jeu rembobiné"
+
+#: .\Private\Z_Deployment\FCMbigString.js:25183
+#: .\Private\Z_Deployment\HCbigString.js:12995
+#: .\Private\Z_Deployment\HLCbigString.js:13192
+msgid "Could not rewind"
+msgstr "Impossible de rembobiner"
+
+#: .\Private\Z_Deployment\FCMbigString.js:25421
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:13206
+#: .\Private\Z_Deployment\HLCbigString.js:13388
+msgid "Please tick a permission option first"
+msgstr "Veuillez d'abord cocher une option d'autorisation"
+
+#: .\Private\Z_Deployment\FCMbigString.js:25568
+#: .\Private\Z_Deployment\HCbigString.js:13279
+#: .\Private\Z_Deployment\HLCbigString.js:13461
+msgid "Permission Changed"
+msgstr "Autorisation modifiée"
+
+#: .\Private\Z_Deployment\FCMbigString.js:26148
+msgid "You cannot replay during urban planning"
+msgstr "Vous ne pouvez pas rejouer pendant l'urbanisme"
+
+#: .\Private\Z_Deployment\FCMbigString.js:28093
+#: .\Private\Z_Deployment\HCbigString.js:13637
+#: .\Private\Z_Deployment\HCbigString.js:13649
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:13794
+#: .\Private\Z_Deployment\HLCbigString.js:13821
+#: .\Private\Z_Deployment\HLCbigString.js:13871
+#: .\Private\Z_Deployment\HLCbigString.js:13883
+msgid "Disconnected"
+msgstr "Déconnecté"
+
+#: .\Private\Z_Deployment\FCMbigString.js:28101
+#: .\Private\Z_Deployment\HCbigString.js:13642
+#: .\Private\Z_Deployment\HLCbigString.js:13876
+msgid "Error"
+msgstr "Erreur"
+
+#: .\Private\Z_Deployment\FCMbigString.js:28377
+#: .\Private\Z_Deployment\HCbigString.js:13829
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:14259
+msgid ""
+"If all players agree, this game can be excluded from the stats<br/>(won't "
+"count towards wins/losses)"
+msgstr ""
+"Si tous les joueurs sont d'accord, ce jeu peut être exclu des "
+"statistiques<br/> (ne comptera pas dans les victoires/défaites)"
+
+#: .\Private\Z_Deployment\FCMbigString.js:28482
+#: .\Private\Z_Deployment\HCbigString.js:13890
+#: .\Private\Z_Deployment\HLCbigString.js:14320
+msgid ""
+"Please <a href='/register'>REGISTER</a> or <a href='/login'>LOGIN</a> to "
+"play a game"
+msgstr ""
+"Veuillez <a href='/register'>INSCRIPTION</a> ou <a "
+"href='/login'>CONNEXION</a> pour jouer à un jeu"
+
+#: .\Private\Z_Deployment\FCMbigString.js:28493
+#: .\Private\Z_Deployment\HCbigString.js:13929
+#: .\Private\Z_Deployment\HLCbigString.js:14040
+msgid ""
+"Player <b>%(playerToKickName)s</b> has used all the standard kickout time."
+msgstr ""
+"Le joueur <b>%(playerToKickName)s</b> a utilisé tout le temps de retrait "
+"standard."
+
+#: .\Private\Z_Deployment\FCMbigString.js:28495
+#: .\Private\Z_Deployment\HCbigString.js:13931
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:14042
+msgid "Remaining Flex-Time:"
+msgstr "Temps flexible restant :"
+
+#: .\Private\Z_Deployment\FCMbigString.js:28530
+msgid "As this is a tournament game, you cannot kick other player"
+msgstr ""
+"Comme il s'agit d'un jeu de tournoi, vous ne pouvez pas expulser un autre "
+"joueur."
+
+#: .\Private\Z_Deployment\FCMbigString.js:28533
+msgid ""
+"Please use the button below to alert the tournament admins, who will "
+"continue to make moves for this player"
+msgstr ""
+"Veuillez utiliser le bouton ci-dessous pour alerter les administrateurs du "
+"tournoi, qui continueront à effectuer des actions pour ce joueur."
+
+#: .\Private\Z_Deployment\FCMbigString.js:28537
+#: .\Private\Z_Deployment\FCMbigString.js:28557
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:13967
+#: .\Private\Z_Deployment\HCbigString.js:13981
+#: .\Private\Z_Deployment\HLCbigString.js:14080
+#: .\Private\Z_Deployment\HLCbigString.js:14094
+#: .\Private\Z_Deployment\HLCbigString.js:14120
+#: .\Private\Z_Deployment\HLCbigString.js:14131
+msgid "Not now - allow more time"
+msgstr "Pas maintenant - accordez plus de temps"
+
+#: .\Private\Z_Deployment\FCMbigString.js:28550
+msgid ""
+"Player <b>%(playerToKickName)s</b> has timed out<BR/>To kick out "
+"<b>%(playerToKickName)s</b> press Confirm Kickout"
+msgstr ""
+"Le joueur <b>%(playerToKickName)s</b> a expiré<BR/>Pour expulser "
+"<b>%(playerToKickName)s</b>, appuyez sur Confirmer l'expulsion."
+
+#: .\Private\Z_Deployment\FCMbigString.js:28553
+msgid "All other players will be allowed to move again in this phase"
+msgstr ""
+"Tous les autres joueurs seront autorisés à se déplacer à nouveau dans cette "
+"phase"
+
+#: .\Private\Z_Deployment\FCMbigString.js:28554
+msgid "The game will proceed to the next player/phase/turn"
+msgstr "Le jeu passera au joueur/phase/tour suivant"
+
+#: .\Private\Z_Deployment\FCMbigString.js:28556
+msgid ""
+"Otherwise you can allow <b>%(playerToKickName)s</b> more time - reload the "
+"page to initiate kickout again<BR/>"
+msgstr ""
+"Sinon, vous pouvez accorder <b>%(playerToKickName)s</b> de temps "
+"supplémentaire - rechargez la page pour lancer à nouveau le kickout<BR/>"
+
+#: .\Private\Z_Deployment\FCMbigString.js:28558
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:13968
+#: .\Private\Z_Deployment\HCbigString.js:13982
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:14081
+#: .\Private\Z_Deployment\HLCbigString.js:14095
+msgid "Confirm Kickout"
+msgstr "Confirmer l'expulsion"
+
+#: .\Private\Z_Deployment\FCMbigString.js:28759
+msgid "Bug Report"
+msgstr "Rapport de bug"
+
+#: .\Private\Z_Deployment\FCMbigString.js:28761
+msgid ""
+"Do you think there are too many 1x Luxury Managers? Please note that COFFEE,"
+" KIMCHI, SUSHI, and NOODLES add one extra"
+msgstr ""
+"Pensez-vous qu'il y a trop de 1x Luxury Managers ? Veuillez noter que CAFÉ, "
+"KIMCHI, SUSHI et NOODLES ajoutent un supplément"
+
+#: .\Private\Z_Deployment\FCMbigString.js:28762
+msgid ""
+"Please note: Cart / Truck drivers can drive around a 'roundabout' on the "
+"same tile as many times as they like. Drinks will only be collected once"
+msgstr ""
+"Attention : les conducteurs de charrettes/camions peuvent faire le tour d'un"
+" « rond-point » sur la même tuile autant de fois qu'ils le souhaitent. Les "
+"boissons ne seront récupérées qu'une seule fois"
+
+#: .\Private\Z_Deployment\FCMbigString.js:28765
+msgid "Is your bug to do with coffee?"
+msgstr "Votre bug est-il lié au café ?"
+
+#: .\Private\Z_Deployment\FCMbigString.js:28766
+msgid ""
+"Please also make sure you fully understand the coffee rules and example in "
+"the official rules, found <a "
+"href='https://www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf'"
+" target='_blank'>here</a>"
+msgstr ""
+"Veuillez également vous assurer de bien comprendre les règles du café et "
+"l'exemple du règlement officiel, disponible <a "
+"href='https://www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf'"
+" target='_blank'>ici</a>"
+
+#: .\Private\Z_Deployment\FCMbigString.js:28768
+msgid "If you still think there is a problem, please submit a bug report"
+msgstr ""
+"Si vous pensez toujours qu'il y a un problème, veuillez soumettre un rapport"
+" de bug"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Chassis"
+msgstr "Châssis"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Dashboard"
+msgstr "Tableau de bord"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Paint"
+msgstr "Peinture"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Fuel Tank"
+msgstr "Réservoir à carburant"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Steering Wheel"
+msgstr "Volant"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Windshield"
+msgstr "Pare-brise"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Spec (Design A)"
+msgstr "Spécification (conception A)"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Spec (Reliability B)"
+msgstr "Spécification (fiabilité B)"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Spec (Reliability C)"
+msgstr "Spécification (fiabilité C)"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Spec (Speed C)"
+msgstr "Spécification (vitesse C)"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Marketing Deparment"
+msgstr "Département Marketing"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:832
+#: .\Private\Z_Deployment\HLCbigString.js:834
+msgid "Duplicate Tech in Connection"
+msgstr "Technologie en double dans la connexion"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:834
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:836
+msgid "No connection to Mainline"
+msgstr "Aucune connexion à la ligne principale"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:836
+#: .\Private\Z_Deployment\HLCbigString.js:838
+msgid "You must place One Research Department and One Planning Department"
+msgstr ""
+"Vous devez placer un département de recherche et un département de "
+"planification"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:846
+#: .\Private\Z_Deployment\HLCbigString.js:848
+msgid "No Dealerships"
+msgstr "Aucun concessionnaire"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:846
+#: .\Private\Z_Deployment\HLCbigString.js:848
+msgid "Bot player"
+msgstr "Joueur de robots"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:863
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:865
+msgid "Factory Setup"
+msgstr "Configuration d'usine"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:874
+#: .\Private\Z_Deployment\HLCbigString.js:876
+msgid ""
+"B - Brake\n"
+"2 x 2"
+msgstr ""
+"B - Frein\n"
+"2 x 2"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:877
+#: .\Private\Z_Deployment\HLCbigString.js:879
+msgid ""
+"A - Bumper\n"
+"4 x 1\n"
+"Also Reliability 4"
+msgstr ""
+"A - Pare-chocs\n"
+"4 x 1\n"
+"Également Fiabilité 4"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:884
+#: .\Private\Z_Deployment\HLCbigString.js:886
+msgid ""
+"A - Body\n"
+"3 x 3\n"
+"Also Design 5"
+msgstr ""
+"A - Corps\n"
+"3 x 3\n"
+"Également conception 5"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:885
+#: .\Private\Z_Deployment\HLCbigString.js:887
+msgid ""
+"A - Bumper\n"
+"4 x 1\n"
+"Also Safety 4"
+msgstr ""
+"A - Pare-chocs\n"
+"4 x 1\n"
+"Également sécurité 4"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:887
+#: .\Private\Z_Deployment\HLCbigString.js:889
+msgid ""
+"A - Chassis\n"
+"3 x 4\n"
+"Also Reliability 2"
+msgstr ""
+"A - Châssis\n"
+"3 x 4\n"
+"Également Fiabilité 2"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:890
+#: .\Private\Z_Deployment\HLCbigString.js:892
+msgid ""
+"B - Engine\n"
+"4 x 4\n"
+"Also Speed 1 Reliability 5"
+msgstr ""
+"B - Moteur\n"
+"4 x 4\n"
+"Également Vitesse 1 Fiabilité 5"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:895
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:897
+msgid ""
+"B - Gears\n"
+"3 x 4\n"
+"Also Speed 3"
+msgstr ""
+"B - Vitesses\n"
+"3 x 4\n"
+"Également vitesse 3"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:900
+#: .\Private\Z_Deployment\HLCbigString.js:902
+msgid ""
+"B - Gears\n"
+"3 x 4\n"
+"Also Range 6"
+msgstr ""
+"B - Vitesses\n"
+"3 x 4\n"
+"Également gamme 6"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:903
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:905
+msgid ""
+"C - Dashboard\n"
+"4 x 2\n"
+"Also Design 4"
+msgstr ""
+"C - Tableau de bord\n"
+"4 x 2\n"
+"Également design 4"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:907
+#: .\Private\Z_Deployment\HLCbigString.js:909
+msgid ""
+"A - Door\n"
+"2 x 2"
+msgstr ""
+"A - Porte\n"
+"2 x 2"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:908
+#: .\Private\Z_Deployment\HLCbigString.js:910
+msgid ""
+"D - Headlights\n"
+"2 x 3\n"
+"Also Safety 5"
+msgstr ""
+"D - Phares\n"
+"2 x 3\n"
+"Également sécurité 5"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:909
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:911
+msgid ""
+"C - Dashboard\n"
+"4 x 2\n"
+"Also Speed 6"
+msgstr ""
+"C - Tableau de bord\n"
+"4 x 2\n"
+"Également vitesse 6"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:5446
+#: .\Private\Z_Deployment\HLCbigString.js:5495
+msgid "Game ended by Factory Expansions"
+msgstr "Jeu terminé par Factory Expansions"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:5532
+#: .\Private\Z_Deployment\HCbigString.js:5587
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:5581
+#: .\Private\Z_Deployment\HLCbigString.js:5636
+msgid "Engineering"
+msgstr "Ingénierie"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:6354
+#: .\Private\Z_Deployment\HLCbigString.js:6403
+msgid "Phases"
+msgstr "Phases"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:6356
+#: .\Private\Z_Deployment\HLCbigString.js:6405
+msgid "(Most Gantt &#x2192; Least Gantt)"
+msgstr "(Le plus grand Gantt → Le moins Gantt)"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:6203
+#: .\Private\Z_Deployment\HCbigString.js:6639
+#: .\Private\Z_Deployment\HCbigString.js:6657
+#: .\Private\Z_Deployment\HCbigString.js:7473
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:6252
+#: .\Private\Z_Deployment\HLCbigString.js:6689
+#: .\Private\Z_Deployment\HLCbigString.js:6707
+#: .\Private\Z_Deployment\HLCbigString.js:7523
+msgid "Show Pieces"
+msgstr "Afficher les pièces"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:6185
+#: .\Private\Z_Deployment\HCbigString.js:6203
+#: .\Private\Z_Deployment\HCbigString.js:6204
+#: .\Private\Z_Deployment\HCbigString.js:6657
+#: .\Private\Z_Deployment\HCbigString.js:6658
+#: .\Private\Z_Deployment\HCbigString.js:7455
+#: .\Private\Z_Deployment\HCbigString.js:7473
+#: .\Private\Z_Deployment\HCbigString.js:7474
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:6234
+#: .\Private\Z_Deployment\HLCbigString.js:6252
+#: .\Private\Z_Deployment\HLCbigString.js:6253
+#: .\Private\Z_Deployment\HLCbigString.js:6707
+#: .\Private\Z_Deployment\HLCbigString.js:6708
+#: .\Private\Z_Deployment\HLCbigString.js:7505
+#: .\Private\Z_Deployment\HLCbigString.js:7523
+#: .\Private\Z_Deployment\HLCbigString.js:7524
+msgid "Hide Pieces"
+msgstr "Masquer les pièces"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:7982
+#: .\Private\Z_Deployment\HCbigString.js:9694
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:8032
+#: .\Private\Z_Deployment\HLCbigString.js:9744
+msgid "A LINES"
+msgstr "UNE LIGNES"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:7986
+#: .\Private\Z_Deployment\HCbigString.js:9698
+#: .\Private\Z_Deployment\HLCbigString.js:8036
+#: .\Private\Z_Deployment\HLCbigString.js:9748
+msgid "B LINES"
+msgstr "LIGNES B"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:7998
+#: .\Private\Z_Deployment\HLCbigString.js:8048
+msgid "DEPARTMENTS"
+msgstr "DÉPARTEMENTS"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:8002
+#: .\Private\Z_Deployment\HCbigString.js:9714
+#: .\Private\Z_Deployment\HLCbigString.js:8052
+#: .\Private\Z_Deployment\HLCbigString.js:9764
+msgid "DEALERSHIPS"
+msgstr "CONCESSIONNAIRES"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:7994
+#: .\Private\Z_Deployment\HCbigString.js:9706
+#: .\Private\Z_Deployment\HLCbigString.js:8044
+#: .\Private\Z_Deployment\HLCbigString.js:9756
+msgid "D LINES"
+msgstr "LIGNES D"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:10103
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:10153
+msgid "Resigning will unbalance the game for the remaining players."
+msgstr "Démissionner déséquilibrera le jeu pour les joueurs restants."
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:10116
+#: .\Private\Z_Deployment\HLCbigString.js:10166
+msgid "Carry on playing"
+msgstr "Continue à jouer"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:10128
+#: .\Private\Z_Deployment\HLCbigString.js:10178
+msgid "Research points remaining:"
+msgstr "Points de recherche restants :"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:10446
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:10497
+msgid "You are the current player. You can use any available component"
+msgstr ""
+"Vous êtes le joueur actuel. Vous pouvez utiliser n'importe quel composant "
+"disponible"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:10530
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:10583
+msgid "Reset Whole Factory"
+msgstr "Réinitialiser toute l'usine"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:10453
+#: .\Private\Z_Deployment\HCbigString.js:10559
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:10504
+#: .\Private\Z_Deployment\HLCbigString.js:10612
+msgid "Remove Last Component"
+msgstr "Supprimer le dernier composant"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:10576
+#: .\Private\Z_Deployment\HLCbigString.js:10629
+msgid "Expand Factory"
+msgstr "Agrandir l'usine"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:10584
+#: .\Private\Z_Deployment\HCbigString.js:10607
+#: .\Private\Z_Deployment\HLCbigString.js:10637
+#: .\Private\Z_Deployment\HLCbigString.js:10660
+msgid "Exit Sandbox Mode"
+msgstr "Quitter le mode bac à sable"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:11686
+#: .\Private\Z_Deployment\HLCbigString.js:11771
+msgid "Game rewound to here by %(playerName)s"
+msgstr "Jeu rembobiné ici par %(playerName)s"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:11702
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:11787
+msgid "%(playerName)s was kicked out"
+msgstr "%(playerName)s a été expulsé"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:11733
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:11818
+msgid "to"
+msgstr "à"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:11852
+#: .\Private\Z_Deployment\HLCbigString.js:11938
+msgid "%(playerName)s passes: %(reason)s"
+msgstr "%(playerName)s passes : %(reason)s"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:11898
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:11984
+msgid "%(playerName)s places %(dealershipName)s but cannot make any sales"
+msgstr ""
+"%(playerName)s place %(dealershipName)s mais ne peut réaliser aucune vente"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:11941
+#: .\Private\Z_Deployment\HLCbigString.js:12027
+msgid "%(truckAmount)s Truck for $%(eachSaleAmount)s plus bonus $1"
+msgid_plural ""
+"%(truckAmount)s Trucks, each for $%(eachSaleAmount)s plus bonus $1"
+msgstr[0] "%(truckAmount)s Camion pour %(eachSaleAmount)s$ plus bonus de 1$"
+msgstr[1] ""
+"%(truckAmount)s Camions, chacun pour %(eachSaleAmount)s $ plus un bonus de "
+"1 $"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:11993
+#: .\Private\Z_Deployment\HCbigString.js:11994
+#: .\Private\Z_Deployment\HCbigString.js:11995
+#: .\Private\Z_Deployment\HLCbigString.js:12183
+#: .\Private\Z_Deployment\HLCbigString.js:12184
+#: .\Private\Z_Deployment\HLCbigString.js:12185
+msgid ""
+"%(techTrackName)s: %(innovationLevel)s - Furthest from Min Marker:  "
+"%(furtehstFromMin)s"
+msgstr ""
+"%(techTrackName)s : %(innovationLevel)s - Le plus éloigné du marqueur Min : "
+"%(furtehstFromMin)s"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:11998
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12188
+msgid "Up"
+msgstr "En haut"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:12041
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12231
+msgid "Game Ended by: Punch Clock"
+msgstr "Jeu terminé par : Pointeur"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:12219
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12409
+msgid "Assembly Capacity Track"
+msgstr "Suivi de la capacité d'assemblage"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:12221
+#: .\Private\Z_Deployment\HLCbigString.js:12411
+msgid "Speed Tech"
+msgstr "Technologie de vitesse"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:12222
+#: .\Private\Z_Deployment\HLCbigString.js:12412
+msgid "Range Tech"
+msgstr "Technologie de portée"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:12224
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12414
+msgid "Reliability Tech"
+msgstr "Technologie de fiabilité"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:12564
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12747
+msgid "Your factory has been saved"
+msgstr "Votre usine a été sauvegardée"
+
+#: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HCbigString.js:12684
+#: .\Private\Z_Deployment\HLCbigString.js:12867
+msgid ""
+"Your factory has been saved. It will be verified again when it's your turn"
+msgstr ""
+"Votre usine a été sauvegardée. Il sera vérifié à nouveau quand ce sera votre"
+" tour"
+
+#: .\Private\Z_Deployment\HCbigString.js:255
+#: .\Private\Z_Deployment\HLCbigString.js:257
+msgid "Speed"
+msgstr "Vitesse"
+
+#: .\Private\Z_Deployment\HCbigString.js:255
+#: .\Private\Z_Deployment\HLCbigString.js:257
+msgid "Range"
+msgstr "Gamme"
+
+#: .\Private\Z_Deployment\HCbigString.js:255
+#: .\Private\Z_Deployment\HLCbigString.js:257
+msgid "Design"
+msgstr "Conception"
+
+#: .\Private\Z_Deployment\HCbigString.js:255
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:257
+msgid "Reliability"
+msgstr "Fiabilité"
+
+#: .\Private\Z_Deployment\HCbigString.js:255
+#: .\Private\Z_Deployment\HLCbigString.js:257
+msgid "Safety"
+msgstr "Sécurité"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Factory Expansion"
+msgstr "Agrandissement de l'usine"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Car Mainline"
+msgstr "Ligne principale de voiture"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Truck Mainline"
+msgstr "Ligne principale de camion"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Sports Mainline"
+msgstr "Ligne principale du sport"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Research Department"
+msgstr "Département de recherche"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Planning Department"
+msgstr "Département de planification"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Body"
+msgstr "Corps"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Radiator"
+msgstr "Radiateur"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Door"
+msgstr "Porte"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Bumper"
+msgstr "Pare-chocs"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Battery"
+msgstr "Batterie"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Engine"
+msgstr "Moteur"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Gears"
+msgstr "Engrenages"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Brake"
+msgstr "Frein"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Tire"
+msgstr "Pneu"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Headlights"
+msgstr "Phares"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Claxon"
+msgstr "Claxon"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Spec (Design B)"
+msgstr "Spécification (conception B)"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Spec (Design C)"
+msgstr "Spécification (conception C)"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Spec (Design D)"
+msgstr "Spécification (conception D)"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Spec (Reliability A)"
+msgstr "Spécification (fiabilité A)"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Spec (Speed B)"
+msgstr "Spécification (vitesse B)"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Spec (Speed D)"
+msgstr "Spécification (vitesse D)"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Spec (Safety A)"
+msgstr "Spécification (sécurité A)"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Spec (Safety B)"
+msgstr "Spécification (sécurité B)"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Spec (Safety D)"
+msgstr "Spécification (Sécurité D)"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Spec (Range A)"
+msgstr "Spécification (gamme A)"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Spec (Range B)"
+msgstr "Spécification (gamme B)"
+
+#: .\Private\Z_Deployment\HCbigString.js:449
+#: .\Private\Z_Deployment\HLCbigString.js:451
+msgid "Spec (Range D)"
+msgstr "Spécification (gamme D)"
+
+#: .\Private\Z_Deployment\HCbigString.js:829
+#: .\Private\Z_Deployment\HLCbigString.js:831
+msgid "No connection to loading bay"
+msgstr "Pas de connexion au quai de chargement"
+
+#: .\Private\Z_Deployment\HCbigString.js:830
+#: .\Private\Z_Deployment\HLCbigString.js:832
+msgid "Not Adjacent to Dealership"
+msgstr "Non adjacent au concessionnaire"
+
+#: .\Private\Z_Deployment\HCbigString.js:831
+#: .\Private\Z_Deployment\HLCbigString.js:833
+msgid "Not Adjacent to Mainline"
+msgstr "Non adjacent à la ligne principale"
+
+#: .\Private\Z_Deployment\HCbigString.js:833
+#: .\Private\Z_Deployment\HLCbigString.js:835
+msgid "No Spec Indicator Attached"
+msgstr "Aucun indicateur de spécification attaché"
+
+#: .\Private\Z_Deployment\HCbigString.js:835
+#: .\Private\Z_Deployment\HLCbigString.js:837
+msgid "Unknown"
+msgstr "Inconnu"
+
+#: .\Private\Z_Deployment\HCbigString.js:846
+#: .\Private\Z_Deployment\HLCbigString.js:848
+msgid "No stock"
+msgstr "Pas de stock"
+
+#: .\Private\Z_Deployment\HCbigString.js:846
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:848
+msgid "No Min Spec Dealerships"
+msgstr "Aucune spécification minimale"
+
+#: .\Private\Z_Deployment\HCbigString.js:846
+#: .\Private\Z_Deployment\HLCbigString.js:848
+msgid "No more sales possible"
+msgstr "Plus de ventes possibles"
+
+#: .\Private\Z_Deployment\HCbigString.js:846
+#: .\Private\Z_Deployment\HLCbigString.js:848
+msgid "Final sale processed automatically"
+msgstr "Vente finale traitée automatiquement"
+
+#: .\Private\Z_Deployment\HCbigString.js:863
+#: .\Private\Z_Deployment\HLCbigString.js:865
+msgid "Research"
+msgstr "Recherche"
+
+#: .\Private\Z_Deployment\HCbigString.js:863
+#: .\Private\Z_Deployment\HLCbigString.js:865
+msgid "Set Focus"
+msgstr "Définir le focus"
+
+#: .\Private\Z_Deployment\HCbigString.js:863
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:865
+msgid "Build Factory"
+msgstr "Construire une usine"
+
+#: .\Private\Z_Deployment\HCbigString.js:863
+#: .\Private\Z_Deployment\HLCbigString.js:865
+msgid "Print Sales Brochures"
+msgstr "Imprimer des brochures commerciales"
+
+#: .\Private\Z_Deployment\HCbigString.js:863
+#: .\Private\Z_Deployment\HLCbigString.js:865
+msgid "Sell"
+msgstr "Vendre"
+
+#: .\Private\Z_Deployment\HCbigString.js:863
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:865
+msgid "Increase Expectations"
+msgstr "Augmenter les attentes"
+
+#: .\Private\Z_Deployment\HCbigString.js:863
+#: .\Private\Z_Deployment\HLCbigString.js:865
+msgid "Grow Demands"
+msgstr "Augmenter les demandes"
+
+#: .\Private\Z_Deployment\HCbigString.js:875
+#: .\Private\Z_Deployment\HLCbigString.js:877
+msgid ""
+"D - Windshield\n"
+"4 x 2"
+msgstr ""
+"D - Pare-brise\n"
+"4 x 2"
+
+#: .\Private\Z_Deployment\HCbigString.js:876
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:878
+msgid ""
+"B - Steering Wheel\n"
+"3 x 3\n"
+"Also Design 6"
+msgstr ""
+"B - Volant\n"
+"3 x 3\n"
+"Également Design 6"
+
+#: .\Private\Z_Deployment\HCbigString.js:878
+#: .\Private\Z_Deployment\HLCbigString.js:880
+msgid ""
+"D - Headlights\n"
+"2 x 3\n"
+"Also Design 3"
+msgstr ""
+"D - Phares\n"
+"2 x 3\n"
+"Également Design 3"
+
+#: .\Private\Z_Deployment\HCbigString.js:879
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:881
+msgid ""
+"D - Tire\n"
+"3 x 3\n"
+"Also Range 3 Speed 4"
+msgstr ""
+"D - Pneu\n"
+"3 x 3\n"
+"Également Gamme 3 Vitesse 4"
+
+#: .\Private\Z_Deployment\HCbigString.js:882
+#: .\Private\Z_Deployment\HLCbigString.js:884
+msgid ""
+"C - Battery\n"
+"2 x 2"
+msgstr ""
+"C - Batterie\n"
+"2 x 2"
+
+#: .\Private\Z_Deployment\HCbigString.js:883
+#: .\Private\Z_Deployment\HLCbigString.js:885
+msgid ""
+"A - Chassis\n"
+"3 x 4\n"
+"Also Reliability 6"
+msgstr ""
+"A - Châssis\n"
+"3 x 4\n"
+"Également Fiabilité 6"
+
+#: .\Private\Z_Deployment\HCbigString.js:886
+#: .\Private\Z_Deployment\HLCbigString.js:888
+msgid ""
+"B - Engine\n"
+"4 x 4\n"
+"Also Speed 1 Range 1"
+msgstr ""
+"B - Moteur\n"
+"4 x 4\n"
+"Également Vitesse 1 Plage 1"
+
+#: .\Private\Z_Deployment\HCbigString.js:891
+#: .\Private\Z_Deployment\HLCbigString.js:893
+msgid ""
+"A - Radiator\n"
+"2 x 3\n"
+"Also Range 5"
+msgstr ""
+"A - Radiateur\n"
+"2 x 3\n"
+"Également Cuisinière 5"
+
+#: .\Private\Z_Deployment\HCbigString.js:892
+#: .\Private\Z_Deployment\HLCbigString.js:894
+msgid ""
+"D - Tire\n"
+"3 x 3\n"
+"Also Speed 4 Safety 6"
+msgstr ""
+"D - Pneu\n"
+"3 x 3\n"
+"Également Vitesse 4 Sécurité 6"
+
+#: .\Private\Z_Deployment\HCbigString.js:893
+#: .\Private\Z_Deployment\HLCbigString.js:895
+msgid ""
+"B - Fuel Tank\n"
+"4 x 2\n"
+"Also Speed 5"
+msgstr ""
+"B - Réservoir de carburant\n"
+"4 x 2\n"
+"Également vitesse 5"
+
+#: .\Private\Z_Deployment\HCbigString.js:894
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:896
+msgid ""
+"A - Radiator\n"
+"2 x 3\n"
+"Also Range 2"
+msgstr ""
+"A - Radiateur\n"
+"2 x 3\n"
+"Également Cuisinière 2"
+
+#: .\Private\Z_Deployment\HCbigString.js:898
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:900
+msgid ""
+"B - Engine\n"
+"4 x 4\n"
+"Also Range 1 Reliability 5"
+msgstr ""
+"B - Moteur\n"
+"4 x 4\n"
+"Également Autonomie 1 Fiabilité 5"
+
+#: .\Private\Z_Deployment\HCbigString.js:899
+#: .\Private\Z_Deployment\HLCbigString.js:901
+msgid ""
+"D - Claxon\n"
+"2 x 2"
+msgstr ""
+"D - Claxon\n"
+"2 x 2"
+
+#: .\Private\Z_Deployment\HCbigString.js:901
+#: .\Private\Z_Deployment\HLCbigString.js:903
+msgid ""
+"D - Tire\n"
+"3 x 3\n"
+"Also Range 3 Safety 6"
+msgstr ""
+"D - Pneu\n"
+"3 x 3\n"
+"Également Gamme 3 Sécurité 6"
+
+#: .\Private\Z_Deployment\HCbigString.js:902
+#: .\Private\Z_Deployment\HLCbigString.js:904
+msgid ""
+"B - Fuel Tank\n"
+"4 x 2\n"
+"Also Range 4"
+msgstr ""
+"B - Réservoir de carburant\n"
+"4 x 2\n"
+"Également gamme 4"
+
+#: .\Private\Z_Deployment\HCbigString.js:906
+#: .\Private\Z_Deployment\HLCbigString.js:908
+msgid ""
+"C - Paint\n"
+"2 x 3"
+msgstr ""
+"C - Peinture\n"
+"2 x 3"
+
+#: .\Private\Z_Deployment\HCbigString.js:910
+#: .\Private\Z_Deployment\HLCbigString.js:912
+msgid ""
+"A - Body\n"
+"3 x 3\n"
+"Also Reliability 3"
+msgstr ""
+"A - Corps\n"
+"3 x 3\n"
+"Également Fiabilité 3"
+
+#: .\Private\Z_Deployment\HCbigString.js:911
+#: .\Private\Z_Deployment\HLCbigString.js:913
+msgid ""
+"B - Steering Wheel\n"
+"3 x 3\n"
+"Also Safety 3"
+msgstr ""
+"B - Volant\n"
+"3 x 3\n"
+"Également sécurité 3"
+
+#: .\Private\Z_Deployment\HCbigString.js:2297
+#: .\Private\Z_Deployment\HCbigString.js:2673
+#: .\Private\Z_Deployment\HLCbigString.js:2335
+#: .\Private\Z_Deployment\HLCbigString.js:2711
+msgid "No Space"
+msgstr "Pas d'espace"
+
+#: .\Private\Z_Deployment\HCbigString.js:2451
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:2489
+msgid "Not pointing at suitable tech"
+msgstr "Ne pointe pas vers une technologie appropriée"
+
+#: .\Private\Z_Deployment\HCbigString.js:2476
+#: .\Private\Z_Deployment\HLCbigString.js:2514
+msgid "Tech level too low for Spec"
+msgstr "Niveau technologique trop bas pour Spec"
+
+#: .\Private\Z_Deployment\HCbigString.js:2723
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:2761
+msgid "Not Adjacent to Factory"
+msgstr "Non adjacent à l'usine"
+
+#: .\Private\Z_Deployment\HCbigString.js:2790
+#: .\Private\Z_Deployment\HLCbigString.js:2828
+msgid "Blocking Factory Loading Bay"
+msgstr "Blocage du quai de chargement d'usine"
+
+#: .\Private\Z_Deployment\HCbigString.js:2858
+#: .\Private\Z_Deployment\HLCbigString.js:2896
+msgid "New Expansion Loading Bay Blocked"
+msgstr "Nouveau quai de chargement d'extension bloqué"
+
+#: .\Private\Z_Deployment\HCbigString.js:5445
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:5494
+msgid "Game ended by Punch Clock"
+msgstr "Partie terminée par Punch Clock"
+
+#: .\Private\Z_Deployment\HCbigString.js:5447
+#: .\Private\Z_Deployment\HLCbigString.js:5496
+msgid "Game ended by King of the Hill"
+msgstr "Jeu terminé par King of the Hill"
+
+#: .\Private\Z_Deployment\HCbigString.js:5504
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:5553
+msgid "View Market Board"
+msgstr "Voir le tableau du marché"
+
+#: .\Private\Z_Deployment\HCbigString.js:5529
+#: .\Private\Z_Deployment\HLCbigString.js:5578
+msgid "Most Gantt"
+msgstr "La plupart des Gantt"
+
+#: .\Private\Z_Deployment\HCbigString.js:5530
+#: .\Private\Z_Deployment\HCbigString.js:5589
+#: .\Private\Z_Deployment\HCbigString.js:10397
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:5579
+#: .\Private\Z_Deployment\HLCbigString.js:5638
+#: .\Private\Z_Deployment\HLCbigString.js:10448
+msgid "Sales"
+msgstr "Ventes"
+
+#: .\Private\Z_Deployment\HCbigString.js:5531
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:5580
+msgid "Winner"
+msgstr "Gagnant"
+
+#: .\Private\Z_Deployment\HCbigString.js:5586
+#: .\Private\Z_Deployment\HLCbigString.js:5635
+msgid "Least Gantt"
+msgstr "Le moins de Gantt"
+
+#: .\Private\Z_Deployment\HCbigString.js:5588
+#: .\Private\Z_Deployment\HLCbigString.js:5637
+msgid "Stuck in Traffic"
+msgstr "Coincé dans le trafic"
+
+#: .\Private\Z_Deployment\HCbigString.js:6355
+#: .\Private\Z_Deployment\HCbigString.js:6357
+#: .\Private\Z_Deployment\HCbigString.js:6362
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:6404
+#: .\Private\Z_Deployment\HLCbigString.js:6406
+#: .\Private\Z_Deployment\HLCbigString.js:6411
+msgid "(E &#x2192; S)"
+msgstr "(E → S)"
+
+#: .\Private\Z_Deployment\HCbigString.js:6359
+#: .\Private\Z_Deployment\HLCbigString.js:6408
+msgid "(S &#x2192; E)"
+msgstr "(S → E)"
+
+#: .\Private\Z_Deployment\HCbigString.js:6569
+#: .\Private\Z_Deployment\HLCbigString.js:6619
+msgid "Market Demand:"
+msgstr "Demande du marché :"
+
+#: .\Private\Z_Deployment\HCbigString.js:7051
+#: .\Private\Z_Deployment\HLCbigString.js:7101
+msgid "Adding a new tech caused: %(componentName)s - %(componentError)s"
+msgstr ""
+"L'ajout d'une nouvelle technologie a provoqué : %(componentName)s - "
+"%(componentError)s"
+
+#: .\Private\Z_Deployment\HCbigString.js:7071
+#: .\Private\Z_Deployment\HLCbigString.js:7121
+msgid "Please remove: %(componentName)s - previous players already took this"
+msgstr ""
+"Veuillez supprimer : %(componentName)s - les joueurs précédents ont déjà "
+"pris ceci"
+
+#: .\Private\Z_Deployment\HCbigString.js:7182
+#: .\Private\Z_Deployment\HLCbigString.js:7232
+msgid "Enter Sandbox Mode"
+msgstr "Passer en mode bac à sable"
+
+#: .\Private\Z_Deployment\HCbigString.js:7978
+#: .\Private\Z_Deployment\HCbigString.js:9690
+#: .\Private\Z_Deployment\HLCbigString.js:8028
+#: .\Private\Z_Deployment\HLCbigString.js:9740
+msgid "MAINLINES"
+msgstr "LIGNES PRINCIPALES"
+
+#: .\Private\Z_Deployment\HCbigString.js:7990
+#: .\Private\Z_Deployment\HCbigString.js:9702
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:8040
+#: .\Private\Z_Deployment\HLCbigString.js:9752
+msgid "C LINES"
+msgstr "LIGNES C"
+
+#: .\Private\Z_Deployment\HCbigString.js:8165
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:8215
+msgid "Niche Square exceeds Sepcs of Dealership"
+msgstr "Niche Square dépasse Sepcs de concession"
+
+#: .\Private\Z_Deployment\HCbigString.js:8851
+#: .\Private\Z_Deployment\HLCbigString.js:8901
+msgid "Below Min Spec"
+msgstr "En dessous des spécifications minimales"
+
+#: .\Private\Z_Deployment\HCbigString.js:8908
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:8958
+msgid "Nudge Component"
+msgstr "Composant de déplacement"
+
+#: .\Private\Z_Deployment\HCbigString.js:8968
+#: .\Private\Z_Deployment\HLCbigString.js:9018
+msgid "Quick Spec Pick"
+msgstr "Sélection rapide des spécifications"
+
+#: .\Private\Z_Deployment\HCbigString.js:9560
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:9610
+msgid ""
+"Welcome to Horseless Carriage Online!=-NEWLINE-==-NEWLINE-=If you have any "
+"suggestions, questions or comments, then please do contact the webmaster at "
+"the email address in Contact (top right in the lobby). Thanks!"
+msgstr ""
+"Bienvenue sur Horseless Carriage Online !=-NEWLINE-==-NEWLINE-=Si vous avez "
+"des suggestions, des questions ou des commentaires, veuillez contacter le "
+"webmaster à l'adresse e-mail dans Contact (en haut à droite dans le hall). "
+"Merci!"
+
+#: .\Private\Z_Deployment\HCbigString.js:9710
+#: .\Private\Z_Deployment\HLCbigString.js:9760
+msgid "D'MENTS"
+msgstr "D'MENTS"
+
+#: .\Private\Z_Deployment\HCbigString.js:9741
+#: .\Private\Z_Deployment\HLCbigString.js:9791
+msgid ""
+"The person having the visual colour:: %(visualColour)s has the original game"
+" cards in colour: %(originalColour)s"
+msgstr ""
+"La personne ayant le visuel de couleur : : %(visualColour)s possède les "
+"cartes de jeu originales en couleur : %(originalColour)s"
+
+#: .\Private\Z_Deployment\HCbigString.js:9872
+#: .\Private\Z_Deployment\HCbigString.js:10334
+#: .\Private\Z_Deployment\HLCbigString.js:9922
+#: .\Private\Z_Deployment\HLCbigString.js:10385
+msgid ""
+"These players have passed and will be inserted in leftover spaces in this "
+"order:"
+msgstr ""
+"Ces joueurs ont réussi et seront insérés dans les espaces restants dans cet "
+"ordre :"
+
+#: .\Private\Z_Deployment\HCbigString.js:9880
+#: .\Private\Z_Deployment\HLCbigString.js:9930
+msgid "Previous Focus Order:"
+msgstr "Ordre de mise au point précédent :"
+
+#: .\Private\Z_Deployment\HCbigString.js:9887
+#: .\Private\Z_Deployment\HLCbigString.js:9937
+msgid "New Focus Order:"
+msgstr "Nouvel ordre de mise au point :"
+
+#: .\Private\Z_Deployment\HCbigString.js:10024
+#: .\Private\Z_Deployment\HLCbigString.js:10074
+msgid ""
+"Welcome to Horseless Carriage Online!</b><BR/>If you have any suggestions, "
+"questions or comments, then please do contact the webmaster at <img "
+"src='/static/Lobby/email.png' width='400px' height='30px'>. Thanks!"
+msgstr ""
+"Bienvenue sur Horseless Carriage Online !</b><BR/>Si vous avez des "
+"suggestions, des questions ou des commentaires, veuillez contacter le "
+"webmaster au <img src='/static/Lobby/email.png' width='400px' "
+"height='30px'>. Merci!"
+
+#: .\Private\Z_Deployment\HCbigString.js:10026
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:10076
+msgid ""
+"In this practice game You will play all 3 players. Submit a bug report to "
+"report errors and game data to the webmaster. Thanks!"
+msgstr ""
+"Dans ce jeu d'entraînement, vous jouerez les 3 joueurs. Soumettez un rapport"
+" de bug pour signaler les erreurs et les données de jeu au webmaster. Merci!"
+
+#: .\Private\Z_Deployment\HCbigString.js:10028
+#: .\Private\Z_Deployment\HLCbigString.js:10078
+msgid "Orientate your main factory tile"
+msgstr "Orientez votre tuile d'usine principale"
+
+#: .\Private\Z_Deployment\HCbigString.js:10048
+#: .\Private\Z_Deployment\HLCbigString.js:10098
+msgid "Place one Research Department and one Planning Department"
+msgstr "Placer un département de recherche et un département de planification"
+
+#: .\Private\Z_Deployment\HCbigString.js:10087
+#: .\Private\Z_Deployment\HLCbigString.js:10137
+msgid "Advance your Assembly Capacity or any player's Research"
+msgstr ""
+"Améliorez votre capacité d'assemblage ou la recherche de n'importe quel "
+"joueur"
+
+#: .\Private\Z_Deployment\HCbigString.js:10091
+#: .\Private\Z_Deployment\HCbigString.js:10351
+#: .\Private\Z_Deployment\HCbigString.js:10441
+#: .\Private\Z_Deployment\HLCbigString.js:10141
+#: .\Private\Z_Deployment\HLCbigString.js:10402
+#: .\Private\Z_Deployment\HLCbigString.js:10492
+msgid ""
+"NOTE: Bot players do not restrict tech access. So the first human player in "
+"Eng order will have access to all techs"
+msgstr ""
+"REMARQUE : les joueurs de robots ne restreignent pas l'accès à la "
+"technologie. Ainsi, le premier joueur humain dans l'ordre anglais aura accès"
+" à toutes les technologies."
+
+#: .\Private\Z_Deployment\HCbigString.js:10104
+#: .\Private\Z_Deployment\HLCbigString.js:10154
+msgid "Please carry on playing if that is at all possible."
+msgstr "Veuillez continuer à jouer si cela est possible."
+
+#: .\Private\Z_Deployment\HCbigString.js:10105
+#: .\Private\Z_Deployment\HLCbigString.js:10155
+msgid ""
+"Even if you think you can't win, you could still aim for 2nd place / not "
+"last place / funny factory layout / etc."
+msgstr ""
+"Même si vous pensez que vous ne pouvez pas gagner, vous pouvez toujours "
+"viser la 2ème place / pas la dernière place / un aménagement d'usine amusant"
+" / etc."
+
+#: .\Private\Z_Deployment\HCbigString.js:10115
+#: .\Private\Z_Deployment\HLCbigString.js:10165
+msgid "Yes, I still want to resign"
+msgstr "Oui, je veux toujours démissionner"
+
+#: .\Private\Z_Deployment\HCbigString.js:10262
+#: .\Private\Z_Deployment\HLCbigString.js:10312
+msgid ""
+"You moved %(playerName)s %(playerToken)s to %(techTrack)s %(newPosition)s"
+msgstr ""
+"Vous avez déplacé %(playerName)s %(playerToken)s vers %(techTrack)s "
+"%(newPosition)s"
+
+#: .\Private\Z_Deployment\HCbigString.js:10342
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:10393
+msgid "Previous Focus Order"
+msgstr "Ordre de mise au point précédent"
+
+#: .\Private\Z_Deployment\HCbigString.js:10355
+#: .\Private\Z_Deployment\HLCbigString.js:10406
+msgid ""
+"Spend all Gantt to choose focus, or keep your Gantt. Remember: reaching 10 "
+"Gantt will reduce the punch clock by 1"
+msgstr ""
+"Dépensez tout le Gantt pour choisir le focus ou conservez votre Gantt. "
+"N'oubliez pas : atteindre 10 Gantt réduira le pointage de 1"
+
+#: .\Private\Z_Deployment\HCbigString.js:10373
+#: .\Private\Z_Deployment\HLCbigString.js:10424
+msgid "Pass & Keep Gantt"
+msgstr "Passer et conserver le Gantt"
+
+#: .\Private\Z_Deployment\HCbigString.js:10394
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:10445
+msgid "Eng"
+msgstr "Fra"
+
+#: .\Private\Z_Deployment\HCbigString.js:10431
+#: .\Private\Z_Deployment\HCbigString.js:12660
+#: .\Private\Z_Deployment\HLCbigString.js:10482
+#: .\Private\Z_Deployment\HLCbigString.js:12843
+msgid "Previous players used up the components. Please rearrange your factory"
+msgstr ""
+"Les joueurs précédents ont utilisé les composants. Veuillez réorganiser "
+"votre usine"
+
+#: .\Private\Z_Deployment\HCbigString.js:10433
+#: .\Private\Z_Deployment\HLCbigString.js:10484
+msgid ""
+"IT IS NOT YET YOUR TURN. You will be able to fix your factory on your turn"
+msgstr ""
+"CE N'EST PAS ENCORE VOTRE TOUR. Vous pourrez réparer votre usine à votre "
+"tour"
+
+#: .\Private\Z_Deployment\HCbigString.js:10436
+#: .\Private\Z_Deployment\HCbigString.js:10557
+#: .\Private\Z_Deployment\HLCbigString.js:10487
+#: .\Private\Z_Deployment\HLCbigString.js:10610
+msgid "Place components into your factory"
+msgstr "Placez des composants dans votre usine"
+
+#: .\Private\Z_Deployment\HCbigString.js:10447
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:10498
+msgid ""
+"You are not the current player. If previous players use up components that "
+"you also use, you will need to modify your factory"
+msgstr ""
+"Vous n'êtes pas le joueur actuel. Si les joueurs précédents utilisent des "
+"composants que vous utilisez également, vous devrez modifier votre usine"
+
+#: .\Private\Z_Deployment\HCbigString.js:10459
+#: .\Private\Z_Deployment\HLCbigString.js:10510
+msgid "Save Without Ending Turn"
+msgstr "Enregistrer sans terminer le tour"
+
+#: .\Private\Z_Deployment\HCbigString.js:10466
+#: .\Private\Z_Deployment\HLCbigString.js:10517
+msgid "Finish Building"
+msgstr "Terminer le bâtiment"
+
+#: .\Private\Z_Deployment\HCbigString.js:10528
+#: .\Private\Z_Deployment\HCbigString.js:10605
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:10581
+#: .\Private\Z_Deployment\HLCbigString.js:10658
+msgid "Expand your Factory"
+msgstr "Agrandissez votre usine"
+
+#: .\Private\Z_Deployment\HCbigString.js:10532
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:10585
+msgid "Go back to Factory Building"
+msgstr "Retournez au bâtiment de l'usine"
+
+#: .\Private\Z_Deployment\HCbigString.js:10555
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:10608
+msgid "SANDBOX MODE - USE THE BUTTON TO EXIT SANDBOX MODE"
+msgstr "MODE SANDBOX - UTILISEZ LE BOUTON POUR QUITTER LE MODE SANDBOX"
+
+#: .\Private\Z_Deployment\HCbigString.js:10603
+#: .\Private\Z_Deployment\HLCbigString.js:10656
+msgid "SANDBOX MODE - REFRESH THE PAGE OR USE THE BUTTON TO EXIT SANDBOX MODE"
+msgstr ""
+"MODE SANDBOX - RAFRAÎCHISSEZ LA PAGE OU UTILISEZ LE BOUTON POUR QUITTER LE "
+"MODE SANDBOX"
+
+#: .\Private\Z_Deployment\HCbigString.js:10624
+#: .\Private\Z_Deployment\HLCbigString.js:10677
+msgid "Start Building Again"
+msgstr "Recommencer à construire"
+
+#: .\Private\Z_Deployment\HCbigString.js:10653
+#: .\Private\Z_Deployment\HLCbigString.js:10706
+msgid ""
+"Choose a dealership, place a Market Window, then if possible, sell to a "
+"niche<BR/>Once you select a dealership, you can rotate the market window "
+"using the buttons that appear underneath the dealerships"
+msgstr ""
+"Choisissez un concessionnaire, placez une fenêtre de marché, puis si "
+"possible, vendez à une niche<BR/>Une fois que vous avez sélectionné un "
+"concessionnaire, vous pouvez faire pivoter la fenêtre de marché à l'aide des"
+" boutons qui apparaissent sous les concessionnaires."
+
+#: .\Private\Z_Deployment\HCbigString.js:10857
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:10922
+msgid "No sales possible"
+msgstr "Aucune vente possible"
+
+#: .\Private\Z_Deployment\HCbigString.js:10862
+#: .\Private\Z_Deployment\HCbigString.js:10957
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:10927
+#: .\Private\Z_Deployment\HLCbigString.js:11038
+msgid "End turn"
+msgstr "Fin du tour"
+
+#: .\Private\Z_Deployment\HCbigString.js:10977
+#: .\Private\Z_Deployment\HLCbigString.js:11058
+msgid "Choose a card, then select the quadrant you wish to add it to"
+msgstr ""
+"Choisissez une carte, puis sélectionnez le quadrant auquel vous souhaitez "
+"l'ajouter"
+
+#: .\Private\Z_Deployment\HCbigString.js:11050
+#: .\Private\Z_Deployment\HCbigString.js:11121
+#: .\Private\Z_Deployment\HLCbigString.js:11131
+#: .\Private\Z_Deployment\HLCbigString.js:11199
+msgid "You are in sandbox mode. Please refresh the page"
+msgstr "Vous êtes en mode bac à sable. Veuillez actualiser la page"
+
+#: .\Private\Z_Deployment\HCbigString.js:11674
+#: .\Private\Z_Deployment\HLCbigString.js:11759
+msgid "%(playerName)s sets up factory"
+msgstr "%(playerName)s installe l'usine"
+
+#: .\Private\Z_Deployment\HCbigString.js:11730
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:11815
+msgid "moves"
+msgstr "bouge"
+
+#: .\Private\Z_Deployment\HCbigString.js:11763
+#: .\Private\Z_Deployment\HLCbigString.js:11848
+msgid "%(playerName)s passes and keeps their Gantt"
+msgstr "%(playerName)s passe et conserve son Gantt"
+
+#: .\Private\Z_Deployment\HCbigString.js:11774
+#: .\Private\Z_Deployment\HLCbigString.js:11859
+msgid "%(playerName)s spends all Gantt to choose position: %(position)s"
+msgstr ""
+"%(playerName)s dépense tout le Gantt pour choisir la position : %(position)s"
+
+#: .\Private\Z_Deployment\HCbigString.js:11788
+#: .\Private\Z_Deployment\HCbigString.js:11806
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:11873
+#: .\Private\Z_Deployment\HLCbigString.js:11891
+msgid "builds"
+msgstr "construit"
+
+#: .\Private\Z_Deployment\HCbigString.js:11861
+#: .\Private\Z_Deployment\HLCbigString.js:11947
+msgid "Gantt Increases"
+msgstr "Augmentations du Gantt"
+
+#: .\Private\Z_Deployment\HCbigString.js:11866
+#: .\Private\Z_Deployment\HLCbigString.js:11952
+msgid "%(playerName)s gains %(numberOfGantt)s Gantt"
+msgstr "%(playerName)s gains %(numberOfGantt)s Gantt"
+
+#: .\Private\Z_Deployment\HCbigString.js:11899
+#: .\Private\Z_Deployment\HLCbigString.js:11985
+msgid "%(playerName)s uses %(dealershipName)s but cannot make any sales"
+msgstr ""
+"%(playerName)s utilise %(dealershipName)s mais ne peut réaliser aucune vente"
+
+#: .\Private\Z_Deployment\HCbigString.js:11901
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:11987
+msgid "%(playerName)s places %(dealershipName)s to sell:"
+msgstr "%(playerName)s emplacements %(dealershipName)s à vendre :"
+
+#: .\Private\Z_Deployment\HCbigString.js:11902
+#: .\Private\Z_Deployment\HLCbigString.js:11988
+msgid "%(playerName)s uses %(dealershipName)s to sell"
+msgstr "%(playerName)s utilise %(dealershipName)s pour vendre"
+
+#: .\Private\Z_Deployment\HCbigString.js:11902
+#: .\Private\Z_Deployment\HLCbigString.js:11988
+msgid "(automatically)"
+msgstr "(automatiquement)"
+
+#: .\Private\Z_Deployment\HCbigString.js:11930
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12016
+msgid "%(carAmount)s Car for $%(eachSaleAmount)s"
+msgid_plural "%(carAmount)s Cars, each for $%(eachSaleAmount)s"
+msgstr[0] "%(carAmount)s Voiture pour %(eachSaleAmount)s$"
+msgstr[1] "%(carAmount)s Voitures, chacune pour %(eachSaleAmount)s $"
+
+#: .\Private\Z_Deployment\HCbigString.js:11952
+#: .\Private\Z_Deployment\HLCbigString.js:12038
+msgid "%(sportsAmount)s Sports Car for $%(eachSaleAmount)s plus bonus $2"
+msgid_plural ""
+"%(sportsAmount)s Sports Cars, each for $%(eachSaleAmount)s plus bonus $2"
+msgstr[0] ""
+"%(sportsAmount)s Voiture de sport pour %(eachSaleAmount)s $ plus un bonus de"
+" 2 $"
+msgstr[1] ""
+"%(sportsAmount)s Voitures de sport, chacune pour %(eachSaleAmount)s $ plus "
+"un bonus de 2 $"
+
+#: .\Private\Z_Deployment\HCbigString.js:11961
+#: .\Private\Z_Deployment\HLCbigString.js:12151
+msgid "Sales Summary"
+msgstr "Résumé des ventes"
+
+#: .\Private\Z_Deployment\HCbigString.js:11987
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12177
+msgid "Expectations Advance:"
+msgstr "Avancement des attentes :"
+
+#: .\Private\Z_Deployment\HCbigString.js:11988
+#: .\Private\Z_Deployment\HLCbigString.js:12178
+msgid "%(techTrackName)s has a new min value of %(minValue)s"
+msgstr "%(techTrackName)s a une nouvelle valeur minimale de %(minValue)s"
+
+#: .\Private\Z_Deployment\HCbigString.js:11991
+#: .\Private\Z_Deployment\HLCbigString.js:12181
+msgid "Innovation Levels:"
+msgstr "Niveaux d'innovation :"
+
+#: .\Private\Z_Deployment\HCbigString.js:11997
+#: .\Private\Z_Deployment\HLCbigString.js:12187
+msgid "New Tech Track Introduced:"
+msgstr "Nouvelle piste technologique introduite :"
+
+#: .\Private\Z_Deployment\HCbigString.js:11998
+#: .\Private\Z_Deployment\HLCbigString.js:12188
+msgid "Obsolesence Marker points:"
+msgstr "Points de marqueur d'obsolescence :"
+
+#: .\Private\Z_Deployment\HCbigString.js:11998
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12188
+msgid "Right"
+msgstr "Droite"
+
+#: .\Private\Z_Deployment\HCbigString.js:12022
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12212
+msgid "%(playerName)s plays a card"
+msgstr "%(playerName)s joue une carte"
+
+#: .\Private\Z_Deployment\HCbigString.js:12033
+#: .\Private\Z_Deployment\HLCbigString.js:12223
+msgid "%(playerName)s has no more cards"
+msgstr "%(playerName)s n'a plus de carte"
+
+#: .\Private\Z_Deployment\HCbigString.js:12042
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12232
+msgid "Game Ended by: Turn 7"
+msgstr "Partie terminée par : Tour 7"
+
+#: .\Private\Z_Deployment\HCbigString.js:12043
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12233
+msgid "Game Ended by: King of the Hill"
+msgstr "Jeu terminé par : Roi de la Colline"
+
+#: .\Private\Z_Deployment\HCbigString.js:12047
+#: .\Private\Z_Deployment\HLCbigString.js:12237
+msgid "Click here to see game summary stats"
+msgstr "Cliquez ici pour voir les statistiques récapitulatives du jeu"
+
+#: .\Private\Z_Deployment\HCbigString.js:12053
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12243
+msgid "Punch Clock decreases by: %(amount)s"
+msgstr "L'horloge de pointage diminue de : %(amount)s"
+
+#: .\Private\Z_Deployment\HCbigString.js:12111
+#: .\Private\Z_Deployment\HLCbigString.js:12301
+msgid "Neutral Cards:"
+msgstr "Cartes neutres :"
+
+#: .\Private\Z_Deployment\HCbigString.js:12223
+#: .\Private\Z_Deployment\HLCbigString.js:12413
+msgid "Design Tech"
+msgstr "Technologie de conception"
+
+#: .\Private\Z_Deployment\HCbigString.js:12225
+#: .\Private\Z_Deployment\HLCbigString.js:12415
+msgid "Safety Tech"
+msgstr "Technologie de sécurité"
+
+#: .\Private\Z_Deployment\HCbigString.js:12256
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12446
+msgid "Show full history"
+msgstr "Afficher l'historique complet"
+
+#: .\Private\Z_Deployment\HCbigString.js:13965
+#: .\Private\Z_Deployment\HLCbigString.js:14078
+msgid ""
+"Player <b>%(playerToKickName)s</b> has timed out<BR/>To kick out "
+"<B>%(playerToKickName)s</b> press Confirm Kickout<BR/>The game will proceed "
+"to the next player/phase/turn<BR/><BR/>Otherwise you can allow "
+"<b>%(playerToKickName)s</b> more time - reload the page to initiate kickout "
+"again<BR/>"
+msgstr ""
+"Le joueur <b>%(playerToKickName)s</b> a expiré<BR/>Pour expulser "
+"<B>%(playerToKickName)s</b>, appuyez sur Confirmer l'expulsion<BR/>Le jeu "
+"passera au joueur/phase/tour suivant<BR/><BR/>Sinon, vous pouvez autoriser "
+"<b>%(playerToKickName)s</b> plus de temps - rechargez la page pour lancer à "
+"nouveau le kickout<BR/>"
+
+#: .\Private\Z_Deployment\HCbigString.js:13979
+#: .\Private\Z_Deployment\HLCbigString.js:14092
+msgid ""
+"This will permanently remove <b>%(playerToKickName)s</b> from the "
+"game<br/><b>It cannot be undone</b><br/><br/>Try checking the chat in case "
+"they have given a reason for any temporary absence<br/>Please consider "
+"giving them a short grace period, in case they are just delayed<br/>"
+msgstr ""
+"Cela supprimera définitivement <b>%(playerToKickName)s</b> du "
+"jeu<br/><b>Cela ne peut pas être annulé</b><br/><br/>Essayez de vérifier le "
+"chat au cas où ils auraient donné une raison pour une absence "
+"temporaire<br/>Veuillez envisager de leur accorder un court délai de grâce, "
+"au cas où ils seraient simplement retardés<br/>"
+
+#: .\Private\Z_Deployment\HCgameSummary-obfuscated.js:1
+#: .\Private\Z_Deployment\HCgameSummary.js:42
+#: .\Private\Z_Deployment\HLCgameSummary.js:42
+msgid "Income On Each Turn"
+msgstr "Revenu à chaque tour"
+
+#: .\Private\Z_Deployment\HCgameSummary.js:37
+#: .\Private\Z_Deployment\HLCgameSummary.js:37
+msgid "Turn"
+msgstr "Tourner"
+
+#: .\Private\Z_Deployment\HCgameSummary.js:38
+#: .\Private\Z_Deployment\HLCgameSummary.js:38
+msgid "Turn Income"
+msgstr "Transformer le revenu"
+
+#: .\Private\Z_Deployment\HCgameSummary.js:39
+#: .\Private\Z_Deployment\HLCgameSummary.js:39
+msgid "Total Money"
+msgstr "Argent total"
+
+#: .\Private\Z_Deployment\HCgameSummary.js:41
+#: .\Private\Z_Deployment\HLCgameSummary-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCgameSummary.js:41
+msgid "Total Money VS Turn"
+msgstr "Argent total contre tour"
+
+#: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
+#: .\Private\Z_Deployment\HLCbigString.js:12097
+msgid " at position (%(xcoord)s, %(ycoord)s) "
+msgstr "à la position (%(xcoord)s, %(ycoord)s)"
+
+#: .\Private\Z_Deployment\HLCbigString.js:12069
+msgid "%(playerName)s places %(dealershipName)s "
+msgstr "%(playerName)s places %(dealershipName)s"
+
+#: .\Private\Z_Deployment\HLCbigString.js:12071
+msgid "%(playerName)s uses %(dealershipName)s "
+msgstr "%(playerName)s utilise %(dealershipName)s"
+
+#: .\Private\Z_Deployment\HLCbigString.js:12100
+msgid "but cannot make any sales"
+msgstr "mais je ne peux faire aucune vente"
+
+#: .\Private\Z_Deployment\HLCbigString.js:12103
+msgid "to sell: "
+msgstr "vendre:"
+
+#: .\Private\Z_Deployment\HLCbigString.js:12116
+msgid "%(carAmount)s Car for $%(eachSaleAmount)s (%(xCoord)s,%(yCoord)s)"
+msgid_plural ""
+"%(carAmount)s Cars, each for $%(eachSaleAmount)s (%(xCoord)s,%(yCoord)s)"
+msgstr[0] ""
+"Voiture %(carAmount)s pour %(eachSaleAmount)s $ (%(xCoord)s,%(yCoord)s)"
+msgstr[1] ""
+"%(carAmount)s Voitures, chacune pour %(eachSaleAmount)s $ "
+"(%(xCoord)s,%(yCoord)s)"
+
+#: .\Private\Z_Deployment\HLCbigString.js:12129
+msgid ""
+"%(truckAmount)s Truck for $%(eachSaleAmount)s plus bonus $1 "
+"(%(xCoord)s,%(yCoord)s)"
+msgid_plural ""
+"%(truckAmount)s Trucks, each for $%(eachSaleAmount)s plus bonus $1 "
+"(%(xCoord)s,%(yCoord)s)"
+msgstr[0] ""
+"Camion %(truckAmount)s pour %(eachSaleAmount)s $ plus bonus de 1 $ "
+"(%(xCoord)s,%(yCoord)s)"
+msgstr[1] ""
+"%(truckAmount)s Camions, chacun pour %(eachSaleAmount)s $ plus un bonus de "
+"1 $ (%(xCoord)s,%(yCoord)s)"
+
+#: .\Private\Z_Deployment\HLCbigString.js:12142
+msgid ""
+"%(sportsAmount)s Sports Car for $%(eachSaleAmount)s plus bonus $2 "
+"(%(xCoord)s,%(yCoord)s)"
+msgid_plural ""
+"%(sportsAmount)s Sports Cars, each for $%(eachSaleAmount)s plus bonus $2 "
+"(%(xCoord)s,%(yCoord)s)"
+msgstr[0] ""
+"%(sportsAmount)s Voiture de sport pour %(eachSaleAmount)s $ plus un bonus de"
+" 2 $ (%(xCoord)s,%(yCoord)s)"
+msgstr[1] ""
+"%(sportsAmount)s Voitures de sport, chacune pour %(eachSaleAmount)s $ plus "
+"un bonus de 2 $ (%(xCoord)s,%(yCoord)s)"
+
+#: .\Private\Z_Deployment\HLCbigString.js:13817
+msgid "Connecting..."
+msgstr "De liaison..."
+
+#: .\Private\Z_Deployment\HLCbigString.js:14106
+msgid ""
+"Player <b>%(playerToKickName)s</b> has timed out<BR/>A vote from the other "
+"players is needed to kick out <b>%(playerToKickName)s</b><BR/>"
+msgstr ""
+"Le joueur <b>%(playerToKickName)s</b> a expiré<BR/>Un vote des autres "
+"joueurs est nécessaire pour expulser <b>%(playerToKickName)s</b><BR/>"
+
+#: .\Private\Z_Deployment\HLCbigString.js:14110
+msgid "Votes: "
+msgstr "Votes :"
+
+#: .\Private\Z_Deployment\HLCbigString.js:14114
+msgid ""
+"This will permanently remove <b>%(playerToKickName)s</b> from the "
+"game<br/><b>It cannot be undone</b><br/><br/>"
+msgstr ""
+"Cela supprimera définitivement <b>%(playerToKickName)s</b> du "
+"jeu<br/><b>Cela ne peut pas être annulé</b><br/><br/>"
+
+#: .\Private\Z_Deployment\HLCbigString.js:14116
+msgid "Vote to Kickout "
+msgstr "Votez pour l'exclusion"
+
+#: .\Private\Z_Deployment\HLCbigString.js:14126
+msgid ""
+"You have voted to kick out <b>%(playerToKickName)s</b><br/>If the other "
+"players do not also vote, you will be able to kick them out directly in "
+"<span id='soloKickoutCountdownSpan'></span>"
+msgstr ""
+"Vous avez voté pour expulser <b>%(playerToKickName)s</b><br/> Si les autres "
+"joueurs ne votent pas également, vous pourrez les expulser directement en "
+"<span id='soloKickoutCountdownSpan'></span>"

@@ -181,12 +181,15 @@ var IO = {
 		})
 			.then((response) => response.json())
 			.then((result) => {
-				global.latestUpdate = String(result.latestUpdate)
-				global.saveRewind = true
+				// NB the response only carries latestUpdate if the save was accepted. Assigning it
+				// unconditionally would poison it with undefined / "undefined" and make every later
+				// poll fail on the server
 				if (result.syncError) {
 					alert(gettext("It appears you have an older version of the game. Please refresh the page"))
 					return
 				}
+				global.latestUpdate = String(result.latestUpdate)
+				global.saveRewind = true
 
 				hideLoader()
 				if (model.trainingGame) {
@@ -316,6 +319,8 @@ var IO = {
 
 		var FCIATT = player.factory.factoryComponenetIndexesAddedThisTurn
 		var FCNATT = player.factory.factoryComponentNamesAddedThisTurn
+		// [placements[], expansion[]] - only used for the replay, so the server just copies it into the history
+		var factoryDetail = [player.factory.factoryPlacementsAddedThisTurn, player.factory.factoryExpansionAddedThisTurn]
 		var FDBEdeco = decompressObjectFromDB(player.factory.factoryDataBeforeExpansion)
 		var FDBE = []
 		var ThisAC = []
@@ -340,7 +345,7 @@ var IO = {
 			body: JSON.stringify({
 				latestUpdate: global.latestUpdate, // USED
 				action: "saveFactoryMove", // USED
-				other: compressObjectToDB([FDBE, FCIATT, FCNATT, ThisAC]),
+				other: compressObjectToDB([FDBE, FCIATT, FCNATT, ThisAC, factoryDetail]),
 				data: compressObjectToDB(player.factory.export()), // USED
 				idx: idxToUse,
 				gameID: global.gameID,
@@ -667,6 +672,10 @@ var IO = {
 
 	loadRewind: function (controller) {
 		if (global.alreadyRewinding) return
+		if (replay.showingReplay) {
+			if ($("#replayArea").html().slice(0, 8) !== "You cann") $("#replayArea").prepend(gettext("You cannot rewind during replay") + "<BR/>")
+			return
+		}
 		global.alreadyRewinding = true
 		if (M.gameEnded > 0) {
 			$("#wholeMainArea").fadeIn("slow")
@@ -686,7 +695,9 @@ var IO = {
 		})
 			.then((response) => response.json())
 			.then((result) => {
-				global.latestUpdate = result.latestUpdate
+				// NB when the rewind buffer is empty the server replies with just a message and no
+				// latestUpdate, so only take it when it is actually there
+				if (result.latestUpdate != undefined) global.latestUpdate = result.latestUpdate
 				$("#dropdown").hide()
 				if (result.message != undefined) {
 					$("#wholeMainArea").fadeIn("slow")

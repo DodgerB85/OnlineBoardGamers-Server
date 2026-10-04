@@ -258,6 +258,24 @@ function placeBoatOnWaterHex(boat, hexID) {
 	return true
 }
 
+// A boat docked on land must not stay against another player's wall once the hex on the far side of
+// that wall is water. Building the wall already ejects it when that far hex is a sea or wet polder;
+// when the polder was dry the boat sits on the wall until the polder floods (this runs on the flip).
+function ejectDockedBoatFromWalledWaterNeighbour(boat) {
+	const store = useModelStore()
+	const location = boat.location
+	const hex = model.getHexByID(location[1])
+	const otherHexID = hex.hexLookup[location[2]]
+	if (otherHexID === undefined || otherHexID < 0) return
+	const otherHex = model.getHexByID(otherHexID)
+	if (!rf.TERR_ACTS_LIKE_WATER.includes(otherHex.currentTerrain)) return
+	const edgeId = hex.edgeLookup[location[2]]
+	if (edgeId === undefined || edgeId < 0) return
+	const edge = store.mapData.edgeData[edgeId]
+	if ([boat.ownerIndex, -1].includes(edge.wall[1])) return
+	if (!placeBoatOnWaterHex(boat, otherHexID)) rf.doAdminAlrt(`No free water vertex to move docked transporter ${boat.id} off wall onto flooded hex ${otherHexID}`)
+}
+
 // Reconciles transporters with the current polder terrain. Polders flip between land and water in
 // the Wonder phase. A transporter caught on the wrong terrain is marooned: it keeps its spot but
 // cannot move until the polder flips back. To stay pick-up-able it sits on a LAND vertex while the
@@ -274,6 +292,7 @@ export function resolveAllTransportersForCurrentTerrain() {
 		if (loc.isDockedLocation(location)) {
 			// A dock only exists on land; once the hex floods, put the boat onto the polder itself.
 			if (hexIsWater && !placeBoatOnWaterHex(transporterObj, hexID)) rf.doAdminAlrt(`No free water vertex to move docked transporter ${transporterObj.id} onto flooded hex ${hexID}`)
+			else if (!hexIsWater) ejectDockedBoatFromWalledWaterNeighbour(transporterObj)
 		} else if (loc.isNonRiverVertexLocation(location)) {
 			const desiredType = hexIsWater ? rf.LOCATION_SEA_VERTEX : rf.LOCATION_LAND_VERTEX
 			if (loc.getLocationType(location) !== desiredType) {

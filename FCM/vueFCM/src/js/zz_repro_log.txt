@@ -148,3 +148,81 @@ F dfs zone 2927 routes 1 437.4ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedH
 F dfs zone 2841 routes 0 178.2ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
 F dfs total 1313.3ms
 G getCoffeeRoute 0.0ms [0,0]
+phase 5 turn 3 newRoads 5
+needs [{"number":13,"needs":[[0,1]]}]
+rwIndexes []
+ranges 13 [5,0]
+E doDinnerTime (coffee stubbed) 7.5ms calls: [[13,0,5]]
+F inputs [13,0,5]
+F entrances [3696]
+F dfs zone 2842 routes 0 154.5ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2926 routes 1 322.2ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2927 routes 1 373.6ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2841 routes 0 138.8ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs total 989.2ms
+G getCoffeeRoute 0.0ms [0,0]
+phase 5 turn 3 newRoads 5
+needs [{"number":13,"needs":[[0,1]]}]
+rwIndexes []
+ranges 13 [5,0]
+E doDinnerTime (coffee stubbed) 11.8ms calls: [[13,0,5]]
+F inputs [13,0,5]
+F entrances [3696]
+F dfs zone 2842 routes 0 192.2ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2926 routes 1 370.3ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2927 routes 1 392.9ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2841 routes 0 134.2ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs total 1089.5ms
+G getCoffeeRoute 0.0ms [0,0]
+phase 5 turn 3 newRoads 5
+needs [{"number":13,"needs":[[0,1]]}]
+rwIndexes []
+ranges 13 [5,0]
+E doDinnerTime (coffee stubbed) 11.1ms calls: [[13,0,5]]
+F inputs [13,0,5]
+F entrances [3696]
+F dfs zone 2842 routes 0 160.9ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2926 routes 1 392.8ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2927 routes 1 359.7ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2841 routes 0 143.8ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs total 1057.2ms
+G getCoffeeRoute 0.0ms [0,0]
+phase 5 turn 3 newRoads 5
+needs [{"number":13,"needs":[[0,1]]}]
+rwIndexes []
+ranges 13 [5,0]
+E doDinnerTime (coffee stubbed) 8.0ms calls: [[13,0,5]]
+F inputs [13,0,5]
+F entrances [3696]
+F dfs zone 2842 routes 0 196.2ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2926 routes 1 411.9ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2927 routes 1 378.0ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2841 routes 0 163.2ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs total 1149.4ms
+G getCoffeeRoute 0.0ms [0,0]
+phase 5 turn 3 newRoads 5
+needs [{"number":13,"needs":[[0,1]]}]
+rwIndexes []
+ranges 13 [5,0]
+E doDinnerTime (coffee stubbed) 23.4ms calls: [[13,0,5]]
+F inputs [13,0,5]
+F entrances [3696]
+F dfs zone 2842 routes 0 482.7ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2926 routes 1 978.6ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2927 routes 1 901.8ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2841 routes 0 337.0ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs total 2700.2ms
+G getCoffeeRoute 0.0ms [0,0]
+phase 5 turn 3 newRoads 5
+needs [{"number":13,"needs":[[0,1]]}]
+rwIndexes []
+ranges 13 [5,0]
+E doDinnerTime (coffee stubbed) 16.1ms calls: [[13,0,5]]
+F inputs [13,0,5]
+F entrances [3696]
+F dfs zone 2842 routes 0 303.0ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2926 routes 1 671.0ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2927 routes 1 506.7ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2841 routes 0 224.6ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs total 1705.3ms
+G getCoffeeRoute 0.0ms [0,0]

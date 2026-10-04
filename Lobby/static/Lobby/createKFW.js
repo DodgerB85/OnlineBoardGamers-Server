@@ -3,6 +3,13 @@
 function initGameCreation(fillData, setupData = {}) {
 	if (global.experienced) document.getElementById("experiencedGame").disabled = false
 
+	if (global.MT_Creation) {
+		global.invitedPlayersArr = []
+		autocomplete(document.getElementById("playerToInviteMT"))
+		document.getElementById("invitePlayerMTbutton").addEventListener("click", invitePlayerMT)
+		return
+	}
+
 	selectPlayers()
 
 	if (fillData) {
@@ -420,6 +427,64 @@ function autocomplete(inp) {
 }
 
 // get CSRF for javascript
+async function invitePlayerMT(e) {
+	e.preventDefault()
+	document.getElementById("invitedPlayersWarningSpanMT").innerText = ""
+
+	// Get the input value from the autocomplete field
+	const input = document.getElementById("playerToInviteMT")
+	const username = input.value.trim()
+
+	if (!username) {
+		document.getElementById("invitedPlayersWarningSpanMT").innerText = "Please enter a username"
+		return
+	}
+
+	const inviteButton = document.querySelector("#invitePlayerMTbutton")
+	inviteButton.disabled = true
+	inviteButton.textContent = "Adding Player...."
+
+	let csrftoken = getCookie("csrftoken")
+	try {
+		const response = await fetch("/addPlayerToMTinvites/", {
+			method: "POST",
+			body: JSON.stringify({
+				username: username,
+			}),
+			headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) {
+			throw new Error("Network response was not ok")
+		}
+		const data = await response.json()
+		if (data.success === 1) {
+			if (global.invitedPlayersArr.includes(username)) {
+				document.getElementById("invitedPlayersWarningSpanMT").innerText = "Player already invited"
+			} else {
+				global.invitedPlayersArr.push(username)
+				displayInvitedPlayersMT()
+			}
+			input.value = ""
+		} else if (data.success === 2) document.getElementById("invitedPlayersWarningSpanMT").innerText = "Player does not exist"
+		else if (data.success === 3) document.getElementById("invitedPlayersWarningSpanMT").innerText = "You will be added automatically"
+		inviteButton.textContent = "Add Player to Invite List"
+		inviteButton.disabled = false
+	} catch (error) {
+		console.error("Error fetching data:", error)
+		document.getElementById("invitedPlayersWarningSpanMT").innerText = "Error adding player to invite list"
+		inviteButton.disabled = false
+	}
+}
+
+function displayInvitedPlayersMT() {
+	let span = document.getElementById("invitedPlayersSpanMT")
+	let invitedPlayers = global.invitedPlayersArr.join(", ")
+	span.innerHTML = "<br/>Invited Players: " + invitedPlayers
+
+	let hiddenInput = document.getElementById("invtedPlayersListMT")
+	hiddenInput.value = JSON.stringify(global.invitedPlayersArr)
+}
+
 function getCookie(name) {
 	var cookieValue = null
 	if (document.cookie && document.cookie !== "") {

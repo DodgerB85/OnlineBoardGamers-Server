@@ -125,6 +125,28 @@ function clickedNewBuilding(bldgNum) {
 	// First, build the NORMAL building
 	if (bldgNum < rf.BLDG_PSEUDO_INDEX) map.checkAddingBuildingToMap(bldgNum)
 	else if (bldgNum === rf.BLDG_PSEUDO_RESHAFT_MINE) map.reshaftMine(true)
+	// CITY: Road & Bridge - offer the unbuilt moat bridges of neighbouring city tiles
+	else if (bldgNum === rf.BLDG_PSEUDO_ROAD_BRIDGE) {
+		store.context.hexPiecesToHighlight.splice(0)
+		store.context.eligibleWallsToBuild.splice(0)
+		store.context.eligibleBridgesToBuild.splice(0)
+		store.context.eligibleWallsToDemolish.splice(0)
+		store.context.eligibleBuildingsToBuild.splice(0)
+		const transporterID = store.context.selectedTransporterIDforTM
+		const transporterObj = model.getTransporterByID(transporterID)
+		const hexID = transporterObj.location[1]
+		// CITY: from a neighbouring city, or from the city itself out to a neighbour.
+		// Restrict river-side options to the bank the transporter stands on.
+		const onCity = model.getHexByID(hexID).hexTerrainID === rf.CITY
+		const builderBuckets = [...new Set([model.hexCurrentBucketToInitial(hexID, loc.getBucketIDfromAnyHexIDandVertex(hexID, transporterObj.location[2]))])]
+		const cityBridges = onCity ? map.getEligibleCityExitBridges(hexID) : map.getEligibleCityNeighbourBridges(hexID, builderBuckets)
+		if (cityBridges.length === 0) {
+			rf.doAdminAlrt("No city moat bridge available")
+			return
+		}
+		for (const cityBridge of cityBridges) context.addEligibleBridgeToBuild([cityBridge.cityHexID, [...cityBridge.bridgeArr]])
+		store.context.action = rf.ACT_BUILD_ROAD_BRIDGE_SELECT
+	}
 	// Else If it's a pseudo building, set up the highlights EG WALL / ROAD / ETC
 	else if (bldgNum >= rf.BLDG_PSEUDO_INDEX) {
 		store.context.hexPiecesToHighlight.splice(0)
@@ -206,11 +228,20 @@ function clickedNewBuilding(bldgNum) {
 			store.context.newRoadInfo.push([hexID, bucketIds])
 			context.setHexPiecesToHighlight(adjacentPieces)
 		} else if (bldgNum === rf.BLDG_PSEUDO_BRIDGE) {
-			for (let i = 0; i < hexObj.bridges.length; i++) {
-				const bridge = hexObj.bridges[i]
-				if (!util.includesArray(hexObj.builtBridges, bridge) && (reachableVertexes.includes(bridge[0]) || reachableVertexes.includes(bridge[1]))) {
-					context.addEligibleBridgeToBuild([hexObj.hexID, [...bridge]])
+			if (hexObj.hexTerrainID === rf.CITY) {
+				// CITY: centre bridge on plain sides, one per bank on river sides
+				for (const option of map.getCityBridgeOptions(hexID)) context.addEligibleBridgeToBuild([hexID, [...option.bridgeArr]])
+			} else {
+				for (let i = 0; i < hexObj.bridges.length; i++) {
+					const bridge = hexObj.bridges[i]
+					if (!util.includesArray(hexObj.builtBridges, bridge) && (reachableVertexes.includes(bridge[0]) || reachableVertexes.includes(bridge[1]))) {
+						context.addEligibleBridgeToBuild([hexObj.hexID, [...bridge]])
+					}
 				}
+			}
+			// CITY: the moat bridge of a neighbouring city can also be built from here
+			for (const [cityHexID, bridgeArr] of map.getCityBridgesBuildableFrom(hexID, bucketIds)) {
+				context.addEligibleBridgeToBuild([cityHexID, [...bridgeArr]])
 			}
 		} else if (bldgNum === rf.BLDG_PSEUDO_WALL) {
 			// Find reachable side
@@ -233,8 +264,11 @@ function clickedNewBuilding(bldgNum) {
 				const hex2IsPolder = rf.TERR_IS_POLDER.includes(hex2.currentTerrain)
 				if (hex1IsPolder && hex2IsPolder) continue
 				if ((hex1IsPolder || hex2IsPolder) && (hex1.currentTerrain === rf.TERR_SEA || hex2.currentTerrain === rf.TERR_SEA)) continue
+				// CITY: on a city tile, walls may only be BUILT on sides that already have a
+				// bridge and road crossing the moat (demolition is unaffected)
+				const cityWallSideOK = hexObj.hexTerrainID !== rf.CITY || map.cityEdgeHasBridgeAndRoad(hexID, edgeEntry)
 				// If you own it or it's neutral, and you have level+1 stones, you can build there
-				if (!ownedByOpponent && stoneOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater) {
+				if (!ownedByOpponent && cityWallSideOK && stoneOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater) {
 					context.addEligibleWallToBuild(hexIds)
 				}
 			}
@@ -320,14 +354,10 @@ function transporterLimitIssue() {
 				<template v-if="!rf.ALL_PSEUDO_BUILDINGS.includes(buildingStats.building)">
 					<!-- NORMAL BUILDING-->
 					<div v-if="(props.bldg !== undefined && props.bldg.type !== rf.BLDG_MINE) || (props.bldgNum !== undefined && props.bldgNum !== rf.BLDG_MINE)" style="position: relative; display: inline-block;">
-						<img class="buildingOnHexSummaryImg" :class="{ buildingOnHexSummaryImgHighlight: isHighlighted }" @click="props.bldg !== undefined ? map.clickedBuilding(props.bldg.id) : ''" :src="view.getImage(getBuildingGfx())" />
-						<!-- Strengthened indicator: wooden cube -->
-						<svg v-if="props.bldg !== undefined && props.bldg.strengthened" style="position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; pointer-events: none;">
-							<rect x="2" y="2" width="14" height="14" rx="2" fill="#8B6914" stroke="#5C4A0E" stroke-width="1.5" />
-						</svg>
+						<img class="buildingOnHexSummaryImg" :class="{ buildingOnHexSummaryImgStrengthened: props.bldg !== undefined && props.bldg.strengthened, buildingOnHexSummaryImgHighlight: isHighlighted }" @click="props.bldg !== undefined ? map.clickedBuilding(props.bldg.id) : ''" :src="view.getImage(getBuildingGfx())" />
 					</div>
 					<!-- MINE -->
-					<svg v-else viewBox="-110 -110 220 220" class="buildingOnHexSummaryImg">
+					<svg v-else viewBox="-110 -110 220 220" class="buildingOnHexSummaryImg" :class="{ buildingOnHexSummaryImgStrengthened: props.bldg !== undefined && props.bldg.strengthened, buildingOnHexSummaryImgHighlight: isHighlighted }" @click="props.bldg !== undefined ? map.clickedBuilding(props.bldg.id) : ''">
 						<circle cx="0" cy="0" r="100" fill="gray" stroke="#734A36" stroke-width="20" />
 						<text x="-40" y="10" class="mineText redMineText">
 							<tspan v-if="props.highlightWholeBuilding">
@@ -435,6 +465,8 @@ function transporterLimitIssue() {
 					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_BOMB">Destroy a building</template>
 					<!-- STRENGTHEN TEXT -->
 					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_STRENGTHEN">Make bomb-proof</template>
+					<!-- ROAD & BRIDGE (CITY) TEXT -->
+					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_ROAD_BRIDGE">Bridge the city moat</template>
 				</div>
 			</div>
 		</div>
@@ -583,6 +615,10 @@ function transporterLimitIssue() {
 	margin-right: 2px;
 	border: 2px solid black;
 	box-sizing: border-box;
+}
+
+.buildingOnHexSummaryImgStrengthened {
+	border: 7.5px solid #8B4513;
 }
 
 .buildingOnHexSummaryImgHighlight {

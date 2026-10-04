@@ -432,37 +432,32 @@ onUnmounted(() => {
 			For more information see
 			<b><a href="/help/" target="_blank">Help</a></b>
 		</div>
-		<div v-if="personal.kickoutRequired === 3" id="kickoutDiv">
-			Player
-			<b>{{ controller.currentPlayerObj().name }}</b>
-			has used all of flexi kickout time.
-			<br />
-			<br />
-			To kick out
-			<b>{{ controller.currentPlayerObj().name }}</b>
-			press Confirm Kickout
-			<br />
-			<br />
-			Otherwise you can allow
-			<b>{{ controller.currentPlayerObj().name }}</b>
-			more time - reload the page to initiate kickout again
-			<br />
-			<br />
-		</div>
-		<template v-if="personal.kickoutRequired === 2">
-			<div v-if="canKickoutNow()" id="kickoutDiv">
+		<div v-else id="kickoutDiv">
+			<template v-if="canKickoutNow()">
 				Player
 				<b>{{ controller.currentPlayerObj().name }}</b>
-				has used all of flexi kickout time.
+				has timed out
 				<br />
+				<br />
+				To kick out
+				<b>{{ controller.currentPlayerObj().name }}</b>
+				press Confirm Kickout
+				<br />
+				<br />
+				Otherwise you can allow
+				<b>{{ controller.currentPlayerObj().name }}</b>
+				more time - reload the page to initiate kickout again
 				<br />
 				<br />
 				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
 				<span>
-					<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">Permanently Kickout {{ controller.currentPlayerObj().name }}</button>
+					<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
 				</span>
-			</div>
-			<div v-else id="kickoutDiv">
+				<span>
+					<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">Confirm Kickout</button>
+				</span>
+			</template>
+			<template v-else>
 				Player
 				<b>{{ controller.currentPlayerObj().name }}</b>
 				has timed out
@@ -501,36 +496,8 @@ onUnmounted(() => {
 				<span>
 					<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
 				</span>
-			</div>
-		</template>
-		<template v-if="store.context.action !== 1">
-			<div id="kickoutDiv">
-				Player
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				has timed out
-				<br />
-				<br />
-				To kick out
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				press Confirm Kickout
-				<br />
-				<br />
-				Otherwise you can allow
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				more time - reload the page to initiate kickout again
-				<br />
-				<br />
-			</div>
-		</template>
-		<template v-if="store.context.action === 1">
-			<div id="kickoutDiv">
-				This will permanently remove
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				from the game
-				<br />
-				<b>It cannot be undone</b>
-			</div>
-		</template>
+			</template>
+		</div>
 	</template>
 </template>
 

@@ -102,6 +102,11 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 			const width = sideways ? 3 : 2
 			for (let i = 0; i < height; i++) for (let j = 0; j < width; j++) squares.push(houseIndex + j + rf.ssW * i)
 		}
+	} else if (action === rf.HIST_STADIUM_ANNOUNCE || action === rf.HIST_STADIUM_RESULT) {
+		// Stadium mod: highlight the arena
+		for (let i = 0; i < store.mapData.coords.length; i++) {
+			if (store.mapData.coords[i] === rf.HOUSE + rf.STADIUM) squares.push(i)
+		}
 	} else if (action === rf.HIST_NEW_TILE) {
 		const tileIndex = funcs.importIndex(entry3[0])
 		squares.push(tileIndex)

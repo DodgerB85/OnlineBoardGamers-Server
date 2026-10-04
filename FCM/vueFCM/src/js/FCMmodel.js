@@ -14,6 +14,160 @@ import { useModelStore } from "../stores/FCMstore.js"
 import { usePersonalStore } from "../stores/FCMpersonal"
 import i18n from "../i18n"
 
+/**
+ * Build a brand new game: board map, seats, employee/campaign/milestone pools,
+ * bank and turn order. Leaves the model at turn 0, PHASE_SETUP_RESTAURANT1.
+ *
+ * Shared by initGame() (when the server has no gameData yet) and the admin
+ * "Reset AI" button, which calls it again with regenerateMap to wipe an
+ * in-progress game all the way back to the start.
+ *
+ * @param {object} [opts]
+ * @param {string[]} [opts.playerNames] seat names. Defaults to window.initData.
+ * @param {string[]} [opts.displayNames] names to show for SHADOW seats
+ * @param {number[]} [opts.startingMap] compact tile/rotation list
+ * @param {boolean} [opts.regenerateMap] roll a brand new random map, ignoring startingMap
+ * @param {boolean} [opts.keepColours] give each seat its current colour back, so a reset doesn't reshuffle seats
+ */
+export function setupNewGame(opts = {}) {
+	const store = useModelStore()
+	const init = window.initData || {}
+	const playerNames = opts.playerNames || init.playerNames || []
+	const displayNamesArr = opts.displayNames || init.displayNames || ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
+	const startingMap = opts.startingMap || init.startingMap || []
+
+	/************************* SETUP GAME *************************/
+	if (!opts.regenerateMap && startingMap.length > 0) {
+		// startingMap is compact (tile,rotation pairs) unless already expanded - same guard as old Map constructor
+		store.mapData.tiles = startingMap.length < 400 ? map.expandMapToFullGrid(startingMap, playerNames.length) : startingMap
+	} else {
+		store.mapData.tiles = map.generateRandomMap(playerNames.length)
+	}
+	map.initCoords()
+	view.setMapDisplayTiles()
+
+	// Everything below is per-game state. On a fresh game these are all already
+	// empty; on a reset they hold the game being thrown away.
+	store.history.splice(0)
+	store.needs.splice(0)
+	store.houses.splice(0)
+	store.gardens.splice(0)
+	store.campaigns.splice(0)
+	store.freeways.splice(0)
+	store.parks.splice(0)
+	store.newRoads.splice(0)
+	store.movedOutHouses.splice(0)
+	store.chatData.splice(0)
+	store.coffeeShopMSplayers.splice(0)
+	store.firstPizzas.splice(0)
+	store.reserveCards.splice(0)
+	store.bankBroken = 0
+	store.clearHistoryHelpers()
+
+	// Rewind / rewind-panel buffers hold snapshots of the game being discarded -
+	// leaving them would let a rewind drag the old game back in.
+	store.wholeTurnResetData = ""
+	store.subphaseResetData = ""
+	store.recruitingResetData = null
+	for (const key of Object.keys(store.subphaseSnapshots)) delete store.subphaseSnapshots[key]
+	store.viewSettings.rewindPanelType = 0
+
+	const previousColours = opts.keepColours ? store.players.map((p) => p.colour) : []
+	const COLOURS = previousColours.length === playerNames.length ? previousColours : funcs.shuffle([rf.FRIED_GEESE_DONKEY, rf.GLUTTONY_INC, rf.DUCK_DINER, rf.SANTA_MARIA_PIZZA, rf.XANGO_BLUES, rf.SIAP_FAJI])
+
+	store.players.splice(0)
+	for (let i = 0; i < playerNames.length; i++) {
+		store.players.push({
+			name: playerNames[i],
+			displayName: "",
+			colour: COLOURS[i],
+
+			restaurants: [],
+			money: 0,
+			bankrupt: false,
+			employees: [],
+			beach: [],
+			milestones: [],
+			marketers: [],
+			resources: [],
+			additionalCampaignArrayIndex: -1,
+			additionalMarketedGood: [], //[store.context.campaign, store.context.secondGood],
+			coffeeShops: [],
+			ceoSlots: 3, // NB this is exported separately as a global entry
+			ceoAction: rf.CEO_ACTION_HIRE_1,
+			OOBpreference: 0, // Only used to store result of checkboz, then compressed into moveData
+		})
+		// Add a reserve card space
+		store.reserveCards.push(rf.RES_CARD_NOT_CHOSEN)
+	} // End looping and inserting player names
+
+	// Now insert display names
+	for (let i = 0; i < store.players.length; i++) {
+		if (store.players[i].name === "SHADOW" && displayNamesArr.length > 0) store.players[i].displayName = displayNamesArr[0]
+		else if (store.players[i].name === "SHADOW_2" && displayNamesArr.length > 1) store.players[i].displayName = displayNamesArr[1]
+		else if (store.players[i].name === "SHADOW_3" && displayNamesArr.length > 2) store.players[i].displayName = displayNamesArr[2]
+		else if (store.players[i].name === "SHADOW_4" && displayNamesArr.length > 3) store.players[i].displayName = displayNamesArr[3]
+		else if (store.players[i].name === "SHADOW_5" && displayNamesArr.length > 4) store.players[i].displayName = displayNamesArr[4]
+		else store.players[i].displayName = store.players[i].name
+	}
+
+	// Set up gameflow
+	store.gameflow.turn = 0
+	store.gameflow.fullTurnOrder = store.players.map((_, index) => index)
+	store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
+	store.gameflow.phase = rf.PHASE_SETUP_RESTAURANT1
+	store.gameflow.subphase = rf.SUBPHASE_HIRING
+	store.gameflow.newTurnOrder = []
+
+	if (store.startingOptions.draftModules) store.gameflow.phase = rf.PHASE_SETUP_MODULES
+	if (store.startingOptions.urbanPlanning || store.startingOptions.urbanPlanningPlus) store.gameflow.phase = rf.PHASE_URBAN_PLANNING
+
+	store.availableMarketingCampaigns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14]
+	if (store.players.length > 2) store.availableMarketingCampaigns.push(12)
+	if (store.players.length > 3) store.availableMarketingCampaigns.push(15)
+	if (store.players.length > 4) store.availableMarketingCampaigns.push(16)
+
+	store.availableEmployees = [...rf.ORIGINAL_AVAILABLE_EMPLOYEES]
+
+	if (store.players.length < 5) {
+		let max = maxUnique(store.players.length)
+		for (let i = 0; i < rf.BASE_UNIQUE_CARDS.length; i++) {
+			store.availableEmployees[rf.BASE_UNIQUE_CARDS[i]] = max
+		}
+	}
+
+	if (store.startingOptions.useMilestones === false) {
+		store.availableMilestones = []
+	} else {
+		store.availableMilestones = rf.BASE_GAME_MILESTONES.concat([])
+		if (store.startingOptions.noCeoMilestone === true) {
+			store.availableMilestones.splice(store.availableMilestones.indexOf(rf.FIRST_100_DOL), 1)
+		}
+		if (store.startingOptions.noRadioMilestone === true) {
+			store.availableMilestones.splice(store.availableMilestones.indexOf(rf.FIRST_RADIO_CAMPAIGN), 1)
+		}
+	}
+
+	if (store.startingOptions.shortGame === true) store.bank = store.players.length * 75
+	else store.bank = store.players.length * 50
+
+	store.ceoLevel = 3
+	store.reserveCards = Array.from({ length: store.players.length }, () => rf.RES_CARD_NOT_CHOSEN)
+
+	// INTERNAL OPTIONS NEED TO BE SET BEFORE THIS
+	setupKetchupExpansion(store.players.length)
+	setupLaborMarketExpansion()
+
+	addHistory(rf.HIST_SETUP_GAME, [], -1, 0)
+
+	if (store.mapData.tiles.indexOf(20) > -1) {
+		let rotated = 0
+		if (store.mapData.tiles[store.mapData.tiles.indexOf(20) + 1] === 1 || store.mapData.tiles[store.mapData.tiles.indexOf(20) + 1] === 3) rotated = 1
+		let index = map.findIndexForHouse(25)
+		addHouse(25, index, rotated)
+	}
+}
+
 export async function initGame() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
@@ -37,6 +191,8 @@ export async function initGame() {
 	if (window.initData.startingOptions && window.initData.startingOptions.includes(rf.SO_TRAINING_GAME)) {
 		personal.trainingGame = true
 	}
+	// Tutorial game is built entirely in the browser and is never persisted
+	personal.tutorial = !!window.initData.tutorial
 	//store.refSize = window.initData.myZoomLevel
 	store.refSize = 200
 	personal.liveWS = false
@@ -118,118 +274,7 @@ export async function initGame() {
 		personal.yourTurnAudioType = window.initData.yourTurnAudioType
 		// Set up and save new game if there's no data
 		if (gameData === "") {
-			/************************* SETUP GAME *************************/
-			if (window.initData.startingMap.length > 0) {
-				// startingMap is compact (tile,rotation pairs) unless already expanded - same guard as old Map constructor
-				store.mapData.tiles = window.initData.startingMap.length < 400 ? map.expandMapToFullGrid(window.initData.startingMap, window.initData.playerNames.length) : window.initData.startingMap
-			} else {
-				store.mapData.tiles = map.generateRandomMap(window.initData.playerNames.length)
-			}
-			map.initCoords()
-			view.setMapDisplayTiles()
-
-			let displayNamesArr = window.initData.displayNames || ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
-
-			let COLOURS = funcs.shuffle([rf.FRIED_GEESE_DONKEY, rf.GLUTTONY_INC, rf.DUCK_DINER, rf.SANTA_MARIA_PIZZA, rf.XANGO_BLUES, rf.SIAP_FAJI])
-
-			store.players.splice(0)
-			for (let i = 0; i < window.initData.playerNames.length; i++) {
-				store.players.push({
-					name: window.initData.playerNames[i],
-					displayName: "",
-					colour: COLOURS[i],
-
-					restaurants: [],
-					money: 0,
-					bankrupt: false,
-					employees: [],
-					beach: [],
-					milestones: [],
-					marketers: [],
-					resources: [],
-					additionalCampaignArrayIndex: -1,
-					additionalMarketedGood: [], //[store.context.campaign, store.context.secondGood],
-					coffeeShops: [],
-					ceoSlots: 3, // NB this is exported separately as a global entry
-					ceoAction: rf.CEO_ACTION_HIRE_1,
-					OOBpreference: 0, // Only used to store result of checkboz, then compressed into moveData
-				})
-				// Add a reserve card space
-				store.reserveCards.push(rf.RES_CARD_NOT_CHOSEN)
-			} // End looping and inserting player names
-
-			// Now insert display names
-			for (let i = 0; i < store.players.length; i++) {
-				if (store.players[i].name === "SHADOW" && displayNamesArr.length > 0) store.players[i].displayName = displayNamesArr[0]
-				else if (store.players[i].name === "SHADOW_2" && displayNamesArr.length > 1) store.players[i].displayName = displayNamesArr[1]
-				else if (store.players[i].name === "SHADOW_3" && displayNamesArr.length > 2) store.players[i].displayName = displayNamesArr[2]
-				else if (store.players[i].name === "SHADOW_4" && displayNamesArr.length > 3) store.players[i].displayName = displayNamesArr[3]
-				else if (store.players[i].name === "SHADOW_5" && displayNamesArr.length > 4) store.players[i].displayName = displayNamesArr[4]
-				else store.players[i].displayName = store.players[i].name
-			}
-
-			// Set up gameflow
-			store.gameflow.turn = 0
-			store.gameflow.fullTurnOrder = store.players.map((_, index) => index)
-			store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
-			store.gameflow.phase = rf.PHASE_SETUP_RESTAURANT1
-			store.gameflow.subphase = rf.SUBPHASE_HIRING
-			store.gameflow.newTurnOrder = []
-
-			if (store.startingOptions.draftModules) store.gameflow.phase = rf.PHASE_SETUP_MODULES
-			if (store.startingOptions.urbanPlanning || store.startingOptions.urbanPlanningPlus) store.gameflow.phase = rf.PHASE_URBAN_PLANNING
-
-			store.availableMarketingCampaigns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14]
-			if (store.players.length > 2) store.availableMarketingCampaigns.push(12)
-			if (store.players.length > 3) store.availableMarketingCampaigns.push(15)
-			if (store.players.length > 4) store.availableMarketingCampaigns.push(16)
-
-			store.availableEmployees = [...rf.ORIGINAL_AVAILABLE_EMPLOYEES]
-
-			if (store.players.length < 5) {
-				let max = maxUnique(store.players.length)
-				for (let i = 0; i < rf.BASE_UNIQUE_CARDS.length; i++) {
-					store.availableEmployees[rf.BASE_UNIQUE_CARDS[i]] = max
-				}
-			}
-
-			if (store.startingOptions.useMilestones === false) {
-				store.availableMilestones = []
-			} else {
-				store.availableMilestones = rf.BASE_GAME_MILESTONES.concat([])
-				if (store.startingOptions.noCeoMilestone === true) {
-					store.availableMilestones.splice(store.availableMilestones.indexOf(rf.FIRST_100_DOL), 1)
-				}
-				if (store.startingOptions.noRadioMilestone === true) {
-					store.availableMilestones.splice(store.availableMilestones.indexOf(rf.FIRST_RADIO_CAMPAIGN), 1)
-				}
-			}
-
-			if (store.startingOptions.shortGame === true) store.bank = store.players.length * 75
-			else store.bank = store.players.length * 50
-
-			let to = []
-			for (let i = 0; i < store.players.length; to[i] = i++);
-
-			store.ceoLevel = 3
-			store.reserveCards = Array.from({ length: store.players.length }, () => rf.RES_CARD_NOT_CHOSEN)
-
-			// INTERNAL OPTIONS NEED TO BE SET BEFORE THIS
-			setupKetchupExpansion(store.players.length)
-
-			let pInfos = []
-			for (let i = 0; i < store.players.length; i++) {
-				pInfos.push(store.players[i].name)
-			}
-
-			addHistory(rf.HIST_SETUP_GAME, [], -1, 0)
-
-			if (store.mapData.tiles.indexOf(20) > -1) {
-				let rotated = 0
-				if (store.mapData.tiles[store.mapData.tiles.indexOf(20) + 1] === 1 || store.mapData.tiles[store.mapData.tiles.indexOf(20) + 1] === 3) rotated = 1
-				let index = map.findIndexForHouse(25)
-				addHouse(25, index, rotated)
-			}
+			setupNewGame()
 
 			personal.haltPlay = true
 			await IO.saveGameNormal(true, false, false)
@@ -298,8 +343,8 @@ export async function initGame() {
 		}
 	}
 
-	// start WS
-	if (window.initData.pov >= -9) {
+	// start WS. NB the tutorial game has no Game row, so there is nothing to listen to
+	if (window.initData.pov >= -9 && !personal.tutorial) {
 		WS.StartWebSocket().catch(() => {
 			console.log("WebSocket background task initialized.")
 		})
@@ -364,6 +409,12 @@ export function setInternalStartingOptions(startingOptionsArray) {
 		if (opts[i] === rf.SO_HAWKERS) store.startingOptions.hawkers = true
 		// Fried Chicken mod
 		if (opts[i] === rf.SO_FRIED_CHICKEN) store.startingOptions.friedChicken = true
+		// Stadium mod
+		if (opts[i] === rf.SO_STADIUM) store.startingOptions.stadium = true
+		// Labor Market mod
+		if (opts[i] === rf.SO_LABOR_MARKET) store.startingOptions.laborMarket = true
+		// Second Bailout mod
+		if (opts[i] === rf.SO_SECOND_BAILOUT) store.startingOptions.secondBailout = true
 
 		if (opts[i] === rf.SO_STRICT_PAYDAY_FRIDGE) store.startingOptions.strictPaydayFridge = true
 		if (opts[i] === rf.SO_TRAINING_GAME) store.startingOptions.trainingGame = true
@@ -469,10 +520,42 @@ export function setupKetchupExpansion(playerNumber) {
 		store.availableEmployees[rf.FRIED_CHICKEN_CHEF] = max
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_FRIED_CHICKEN_SOLD)
 	}
+	// Stadium mod
+	if (store.startingOptions.stadium) {
+		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
+	}
+	if (store.startingOptions.laborMarket) store.availableEmployees[rf.HEADHUNTER] = 6
+}
+
+export function setupLaborMarketExpansion() {
+	const store = useModelStore()
+	if (!store.startingOptions.laborMarket) return
+	store.availableEmployees[rf.TEMPORARY_WORKER] = -1
+	store.availableEmployees[rf.HEADHUNTER] = 6
+	store.availableEmployees[rf.UNION_ORGANIZER] = store.players.length
+	store.laborMarket.removedTemporaryWorkers = 0
+	store.laborMarket.removedTemporaryWorkersAtTurnStart = 0
+	store.laborMarket.unionHolders = []
+	store.laborMarket.pendingUnionHolders = []
+	store.laborMarket.workedCounts = Array(store.players.length).fill(0)
+	store.laborMarket.temporaryCampaignOwners = {}
+	store.laborMarket.dailyTemporaryEffects = Array(store.players.length).fill(null)
+	store.laborMarket.pendingHeadhuntSalaries = Array.from({ length: store.players.length }, () => [])
+	for (const player of store.players) {
+		if (!player.beach.includes(rf.TEMPORARY_WORKER) && !player.employees.includes(rf.TEMPORARY_WORKER)) player.beach.push(rf.TEMPORARY_WORKER)
+	}
+}
+
+export function startLaborMarketTurn() {
+	const store = useModelStore()
+	if (!store.startingOptions.laborMarket) return
+	store.laborMarket.removedTemporaryWorkersAtTurnStart = store.laborMarket.removedTemporaryWorkers
+	store.laborMarket.dailyTemporaryEffects = Array(store.players.length).fill(null)
 }
 
 export function findPlayerForCampaign(number) {
 	const store = useModelStore()
+	if (Number.isInteger(store.laborMarket.temporaryCampaignOwners[number])) return store.laborMarket.temporaryCampaignOwners[number]
 	for (let i = 0; i < store.players.length; i++) {
 		for (let j = 0; j < store.players[i].marketers.length; j++) {
 			if (store.players[i].marketers[j].campaign === number) return i
@@ -575,6 +658,7 @@ export function removeMarketingCampaign(number) {
 	const campaign = store.campaigns.find((c) => c.number === number)
 
 	if (!campaign) return // Guard clause if campaign doesn't exist
+	delete store.laborMarket.temporaryCampaignOwners[number]
 
 	// 2. Remove the campaign
 	store.campaigns = store.campaigns.filter((c) => c.number !== number)
@@ -1293,8 +1377,9 @@ export function getHousesAffectedByHawkerTruck(campaignNumber) {
 export function hasGarden(house) {
 	const store = useModelStore()
 	// 1. Check if the house is a standard player-built house.
-	// If it's not a Board House, not an Apartment, and not Rural Marketing, it has a garden by default.
-	if (!rf.BOARD_HOUSES.includes(house) && !rf.APARTMENTS.includes(house) && house !== rf.RURAL_MARKETING_AREA) {
+	// If it's not a Board House, not an Apartment, not Rural Marketing, and not the
+	// Stadium pseudo-house, it has a garden by default.
+	if (!rf.BOARD_HOUSES.includes(house) && !rf.APARTMENTS.includes(house) && house !== rf.RURAL_MARKETING_AREA && house !== rf.STADIUM) {
 		return true
 	}
 
