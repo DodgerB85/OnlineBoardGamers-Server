@@ -110,6 +110,19 @@ def showURRgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     returnData.update(result["involved_data"])
 
+    ## NEW GAME: the shadow display names are stashed in the creator's notes on creation.
+    # Hand them over once, then clear them so they never show up as personal notes.
+    displayNames = ""
+    if currentGame.gameData == "" and "SHADOW" in presenter.getAllPlayersOrderedySeatInArray(False, False):
+        creator_gp = next((gp for gp in result["all_players"] if gp.player and gp.player.id == currentGame.creator_id), None)
+        if creator_gp:
+            displayNames = creator_gp.notes
+            creator_gp.notes = ""
+            creator_gp.save()
+            if result["user_gp"] and result["user_gp"].player_id == currentGame.creator_id:
+                returnData["notes"] = ""
+    returnData["displayNames"] = displayNames
+
     return render(request, "URR/showURRgame.html", returnData)
 
 

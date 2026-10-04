@@ -50,6 +50,20 @@ export function initGame() {
 		store.gameMessages.errorText = error.message
 		personal.haltPlay = true
 	}
+
+	applyShadowDisplayNames(initData.displayNames)
+}
+
+// The server hands over the creator's chosen names for the practice-game shadows
+// once, then clears its stash. displayName lives in players[], so it is saved
+// into gameData and survives later reloads.
+export function applyShadowDisplayNames(names) {
+	if (!names || names.length === 0) return
+	const store = useModelStore()
+	for (const [index, name] of names.entries()) {
+		const player = store.players.find((candidate) => candidate.name === rf.SHADOW_PLAYER_NAMES[index])
+		if (player && name) player.displayName = name
+	}
 }
 
 export function initGameFresh(playerNames, boardDefinition) {

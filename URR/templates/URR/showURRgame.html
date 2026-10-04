@@ -92,5 +92,9 @@
     initData.notes = '{{ notes|escapejs }}';
     initData.yourTurnAudioType = {{ yourTurnAudioType }};
     {% endif %}
+
+    {% if displayNames %}
+    initData.displayNames = {{ displayNames|safe }};
+    {% endif %}
   </script>
 </html>

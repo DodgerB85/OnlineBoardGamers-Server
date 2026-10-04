@@ -9,6 +9,10 @@ export const SUPER_USERS = ["BotKickStarter", "admin"]
 export const DEBUG_USERS = []
 export const BOT_NAME = "UrrBot"
 
+// Mirrors Lobby/sharedFunctions/constants.py SHADOW_PLAYER_NAMES. Practice-game
+// opponents, replaced by the creator's display names on the first page load.
+export const SHADOW_PLAYER_NAMES = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
+
 // Player colours used by the generic UI (index -> colour)
 export const BLACK = 0
 export const BLUE = 1

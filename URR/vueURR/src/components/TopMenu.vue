@@ -141,7 +141,7 @@ function getKickoutTimerText() {
 				</span>
 			</a>
 
-			<button type="button" v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showNotes }]" :aria-expanded="store.viewSettings.showNotes" @click="toggleNotes">
+			<button type="button" v-if="personal.pov >= 0" :class="['topMenuItem', { hasNotes: personal.notes.length > 0 }, { topMenuItemSelected: store.viewSettings.showNotes }]" :aria-expanded="store.viewSettings.showNotes" @click="toggleNotes">
 				<img :src="view.getImage('icon-notebook')" alt="" />
 				<span>Notes</span>
 			</button>
@@ -256,6 +256,9 @@ function getKickoutTimerText() {
 .topMenuItem:disabled { opacity: .45; cursor: wait; }
 .topMenuItem:hover img {
 	filter: brightness(0) saturate(100%) invert(100%) sepia(17%) saturate(6440%) hue-rotate(174deg) brightness(98%) contrast(102%);
+}
+.hasNotes {
+	filter: brightness(0) saturate(100%) invert(83%) sepia(61%) saturate(1522%) hue-rotate(359deg) brightness(105%) contrast(108%);
 }
 .topMenuItemSelected {
 	filter: brightness(0) saturate(100%) invert(100%) sepia(17%) saturate(6440%) hue-rotate(174deg) brightness(98%) contrast(102%);
