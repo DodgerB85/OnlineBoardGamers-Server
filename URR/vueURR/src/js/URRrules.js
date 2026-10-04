@@ -114,6 +114,8 @@ export function barahshumDestinations(game) {
 }
 
 export function isCalahWaterworkLocation(game, area) {
+	// 9.3: Calah's own forest stays out even though it touches Calah's hills.
+	if (area.nation === rf.NATION_CALAH && area.landType !== rf.LAND_HILLS) return false
 	return game.board.areas.some((land) => land.nation === rf.NATION_CALAH && land.landType === rf.LAND_HILLS && (land.id === area.id || land.neighbours.includes(area.id)))
 }
 

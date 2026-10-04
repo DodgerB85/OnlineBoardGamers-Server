@@ -55,7 +55,7 @@ const area = (game, areaId) => game.board.areas.find((entry) => entry.id === are
 	Object.assign(game.nations[rf.NATION_CALAH], { ownerType: "state", owner: rf.STATE_URARTU })
 	Object.assign(game, { era: 3, cardSupply: { 1: 0, 2: 0, 3: 7, 4: 5 } })
 	const exchange = (areaId) => applyAction(game, 0, { type: "exchangeCalah", kind: "pump", area: areaId })
-	assert.throws(() => exchange(id(4, 1)), /hills or adjacent/)
+	assert.throws(() => exchange(id(4, 1)), /adjacent to its hills/)
 	assert.equal(area(exchange(id(3, 1)), id(3, 1)).waterwork.capacity, 3)
 	assert.equal(area(exchange(id(4, 0)), id(4, 0)).waterwork.capacity, 3)
 }
