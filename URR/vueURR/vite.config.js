@@ -11,10 +11,23 @@ export default defineConfig(({ command }) => ({
 	root: resolve("./src"),
 	server: {
 		host: "0.0.0.0",
-		port: 3043,
+		port: 3054,
 		open: false,
+		proxy: {
+			// Static images are served by Django (:8000); the Vue app's absolute
+			// /static/URR image references resolve to the Vite dev origin (:3054) otherwise.
+			"/static/URR": {
+				target: "http://localhost:8000",
+				changeOrigin: true,
+			},
+		},
+		watch: {
+			usePolling: true,
+			disableGlobbing: false,
+			interval: 1000, // Check every 1000ms (1 second)
+		},
 		fs: {
-			allow: [resolve(".."), resolve("../.."), resolve("../../")],
+			allow: [resolve(".."), resolve("../.."), resolve("../../"), "/static"],
 		},
 	},
 	resolve: {
