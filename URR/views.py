@@ -109,12 +109,6 @@ def showURRgame(request, game_id=1, spoilerFree=False, replayStep=1):
         return render(request, "URR/showURRgame.html", returnData)
 
     returnData.update(result["involved_data"])
-    returnData.update(
-        {
-            "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
-            "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
-        }
-    )
 
     return render(request, "URR/showURRgame.html", returnData)
 
@@ -129,6 +123,10 @@ def _processURRturn(request):
         return JsonResponse({"error": "POST request required."}, status=400)
 
     jsonData = json.loads(request.body)
+    if "gameDataCompressed" in jsonData:
+        # Compress only the transfer: saved positions and legacy callers retain
+        # the plain JSON format used by show pages, history, and rewind.
+        jsonData["gameData"] = gzip.decompress(base64.b64decode(jsonData["gameDataCompressed"])).decode("utf-8")
     game_id = jsonData["gameID"]
     latest_update = str(jsonData.get("latestUpdate", 0))
 
@@ -140,13 +138,6 @@ def _processURRturn(request):
     presenter = cast("URRpresenter", currentGame.presenter())
 
     if jsonData["action"] == "saveGame":
-        return performSaveURRGame(request, currentGame, jsonData)
-
-    elif jsonData["action"] == "saveAndUpdateNotifictionsAfterStack":
-        # Generic alias: the scaffold has no server-side stack processing, so
-        # this is just a normal save that also releases any transaction lock.
-        if currentGame.transactionID and jsonData.get("transactionID", "") == currentGame.transactionID:
-            currentGame.transactionID = ""
         return performSaveURRGame(request, currentGame, jsonData)
 
     elif jsonData["action"] == "resign":
@@ -172,6 +163,10 @@ def _processURRturn(request):
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
 
+        # Cannot rewind past a kickout
+        currentGame.rewindData = ""
+        currentGame.rewindTempData = ""
+
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
         currentGame.save()
@@ -196,10 +191,9 @@ def _processURRturn(request):
         if not currentRewindDataArray:
             return JsonResponse({"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")}, safe=False)
 
-        PwipeAllMoveData(currentGame)
-        loadData = currentRewindDataArray.pop() if currentRewindDataArray else ""
+        loadData = decompressRewindPoint(currentRewindDataArray.pop()) if currentRewindDataArray else ""
         while len(currentRewindDataArray) > 0 and loadData == currentGame.gameData:
-            loadData = currentRewindDataArray.pop()
+            loadData = decompressRewindPoint(currentRewindDataArray.pop())
 
         currentGame.gameData = loadData if loadData != "" else ""
         currentGame.rewindTempData = loadData
@@ -263,6 +257,7 @@ def performSaveURRGame(request, currentGame, jsonData):
     if check_name:
         nameToUse = check_name
 
+    previous_game_data = currentGame.gameData
     currentGame.gameData = jsonData["gameData"]
     currentGame.turn = jsonData["turn"]
     currentGame.phase = jsonData["phase"]
@@ -302,7 +297,7 @@ def performSaveURRGame(request, currentGame, jsonData):
                 presenter.sendYourTurnNotification("URR", playerListToNotify, currentGame.id, presenter.getGameName(), currentGame, oldVer)
 
     if jsonData.get("saveRewind", True):
-        doSaveRewind(currentGame, jsonData)
+        doSaveRewind(currentGame, jsonData, previous_game_data)
 
     presenter.clearKickoutVotes()
     currentGame.save()
@@ -316,28 +311,65 @@ def performSaveURRGame(request, currentGame, jsonData):
     )
 
 
-def doSaveRewind(currentGame, jsonData):
-    new_point = jsonData["gameData"]
+def compressRewindPoint(point):
+    if point.startswith("gzip:"):
+        return point
+    return "gzip:" + base64.b64encode(gzip.compress(point.encode("utf-8"), mtime=0)).decode("ascii")
 
+
+def decompressRewindPoint(point):
+    if point.startswith("gzip:"):
+        return gzip.decompress(base64.b64decode(point[5:])).decode("utf-8")
+    return point
+
+
+def openingPosition(gameData):
+    """Rebuild the start of the game from a save's own first history entry.
+
+    The client creates the opening position, so a game that has never been
+    saved has no earlier position on the server yet. Without this the first
+    rewind of a game would have nothing to go back to.
+    """
+    try:
+        history = json.loads(gameData).get("history") or []
+        if not history:
+            return ""
+        opening = json.loads(history[0][2])
+        opening["history"] = [history[0]]
+        return json.dumps(opening)
+    except (json.JSONDecodeError, IndexError, TypeError):
+        return ""
+
+
+def doSaveRewind(currentGame, jsonData, previousGameData):
+    # Each point holds the complete replay history, so keep them gzipped.
+    # Points are the positions from *before* each move: the position after the
+    # latest move is already currentGame.gameData, and storing it too would
+    # leave the first rewind of a game with nothing to step back to.
+    currentRewindData = []
     if currentGame.rewindData:
         try:
-            currentRewindData = json.loads(currentGame.rewindData)
-            if currentRewindData and currentRewindData[-1] == new_point:
-                return
+            currentRewindData = [compressRewindPoint(point) for point in json.loads(currentGame.rewindData)]
         except json.JSONDecodeError:
             currentRewindData = []
-    else:
-        currentRewindData = []
 
     if currentGame.rewindTempData:
-        if not currentRewindData or currentRewindData[-1] != currentGame.rewindTempData:
-            currentRewindData.append(currentGame.rewindTempData)
+        # Put back the position we rewound to, so playing on from it does not
+        # lose the ability to rewind there again.
+        temp_point = compressRewindPoint(currentGame.rewindTempData)
+        if not currentRewindData or currentRewindData[-1] != temp_point:
+            currentRewindData.append(temp_point)
         currentGame.rewindTempData = ""
 
-    if not currentRewindData or currentRewindData[-1] != new_point:
-        currentRewindData.append(new_point)
-        if len(currentRewindData) > 20:
-            currentRewindData = currentRewindData[-20:]
+    if not previousGameData:
+        previousGameData = openingPosition(jsonData["gameData"])
+    if previousGameData:
+        previous_point = compressRewindPoint(previousGameData)
+        if not currentRewindData or currentRewindData[-1] != previous_point:
+            currentRewindData.append(previous_point)
+
+    if len(currentRewindData) > 20:
+        currentRewindData = currentRewindData[-20:]
 
     currentGame.rewindData = json.dumps(currentRewindData)
 
@@ -434,9 +466,6 @@ def URRdata(request, dataType=1):
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "finishedGame": currentGame.gameStatus == "FINISHED",
                 "latestUpdate": currentGame.latestUpdate,
-                "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
-                "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
-                "transactionID": currentGame.transactionID,
             }
         )
     elif dataType == 2:
@@ -455,26 +484,10 @@ def URRdata(request, dataType=1):
                 "gameData": currentGame.gameData if currentGame.gameData else "{}",
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
-                "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
-                "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
-                "transactionID": currentGame.transactionID,
             }
         )
 
     return HttpResponse(status=204)  # No Content
-
-
-#########################################################
-#
-#   MOVE DATA HELPERS
-#
-#########################################################
-
-
-def PwipeAllMoveData(currentGame):
-    for gp in currentGame.players.all():
-        gp.moveDataJSON = None
-        gp.save(update_fields=["moveDataJSON"])
 
 
 @login_required()

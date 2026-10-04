@@ -50,7 +50,10 @@ export function compressData64(data) {
 	let step1 = JSON.stringify(data)
 	// eslint-disable-next-line no-undef
 	let step2 = pako.gzip(step1)
-	return btoa(String.fromCharCode(...new Uint8Array(step2)))
+	let binary = ""
+	// Large histories exceed the argument limit of a single spread call.
+	for (let index = 0; index < step2.length; index += 32768) binary += String.fromCharCode(...step2.subarray(index, index + 32768))
+	return btoa(binary)
 }
 
 export function decompressData64(input) {

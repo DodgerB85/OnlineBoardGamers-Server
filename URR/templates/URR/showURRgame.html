@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
     <link rel="icon" type="image/png" href="{% static 'Lobby/favicons/favicon-96x96.png' %}" />
     <meta name="title" content="Online Board Gamers - UR: 1830 BC">
     <meta name="description" content="Play Splotter's UR: 1830 BC online for free with others.">
@@ -14,7 +14,7 @@
     <style>
       body {
         margin: 0px !important;
-        background-color: #d4eafd;
+        background-color: #e9e2d2;
         font-family: Arial, sans-serif;
       }
       #app {
@@ -67,7 +67,6 @@
     initData.turn = {{ turn }};
     initData.phase = {{ phase }};
     initData.finishedGame = {{ finishedGame|lower }};
-    initData.transactionID = "{{ transactionID }}";
 
     {% if spoilerFree %}
     initData.spoilerFree = true;
@@ -85,8 +84,6 @@
     initData.kickoutVotesData = {{ kickoutVotesData|default:'{}'|safe }};
     initData.kickoutVoteThreshold = {{ kickoutVoteThreshold|default:'0' }};
     {% if involvedPlayer %}
-    initData.currentMoveData = {{ currentMoveData|safe }};
-    initData.allMyMoveData = {{ allMyMoveData|safe }};
     initData.statsExcludedGame = {{ statsExcludedGame|lower }};
     initData.secondsToNextKickout = {{ secondsToNextKickout }};
     {% if kickoutRequired > 0 and not myMove %}

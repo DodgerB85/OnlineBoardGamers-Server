@@ -25,12 +25,12 @@ function toggleNotes() {
 	store.viewSettings.showNotes = !store.viewSettings.showNotes
 }
 
-function sendChatMessage() {
+async function sendChatMessage() {
 	if (chatMessage.value === "") return
-	let time = Math.round(new Date().getTime() / 1000 - store.chatData[0][1])
+	const latestMessageTime = store.chatData[0]?.[1] ?? personal.gameCreationTimestamp
+	let time = Math.round(new Date().getTime() / 1000 - latestMessageTime)
 	let newEntry = [personal.name, time, chatMessage.value]
-	IO.sendChatMessage([...newEntry])
-	chatMessage.value = ""
+	if (await IO.sendChatMessage([...newEntry]) && chatMessage.value === newEntry[2]) chatMessage.value = ""
 }
 
 function clearNotes() {
@@ -49,14 +49,6 @@ async function submitBug() {
 	}
 	await IO.submitBug(bugReportText.value)
 	submittingBug.value = false
-}
-
-function loadRewind() {
-	store.viewSettings.showRewindPanel = false
-	store.viewSettings.performingRewind = true
-	setTimeout(function () {
-		IO.loadRewind()
-	}, 300)
 }
 
 function getStatsExcludeVotes(returnPlayers = false) {
@@ -92,42 +84,48 @@ function localCastVote(topic) {
 
 <template>
 	<!-- BUG REPORT -->
-	<div id="bugReport" v-if="store.viewSettings.showBug">
-		<h1>Bug Report</h1>
-		<h2 class="errorText" v-if="store.gameMessages.bugErrorText !== ''" v-html="store.gameMessages.bugErrorText"></h2>
-		<p>
-			Please submit a bug report if you encounter any issues, giving as much detail as possible.
-			<br />
-			The game data will be submitted along with your report.
-		</p>
-		<div><textarea cols="150" rows="10" v-model="bugReportText"></textarea></div>
-		<div>
-			<button class="actionsLineButton" @click="submitBug" :disabled="submittingBug">
-				<span v-if="submittingBug">Submitting Bug Report...</span>
-				<span v-else>Submit</span>
-			</button>
-			<button class="actionsLineButton" @click="toggleBug">Cancel</button>
+	<transition name="slidePanel">
+		<div id="bugReport" v-if="store.viewSettings.showBug">
+			<h1>Bug Report</h1>
+			<h2 class="errorText" v-if="store.gameMessages.bugErrorText !== ''" v-html="store.gameMessages.bugErrorText"></h2>
+			<p>
+				Please submit a bug report if you encounter any issues, giving as much detail as possible.
+				<br />
+				The game data will be submitted along with your report.
+			</p>
+			<div><textarea cols="150" rows="10" v-model="bugReportText"></textarea></div>
+			<div>
+				<button class="actionsLineButton" @click="submitBug" :disabled="submittingBug">
+					<span v-if="submittingBug">Submitting Bug Report...</span>
+					<span v-else>Submit</span>
+				</button>
+				<button class="actionsLineButton" @click="toggleBug">Cancel</button>
+			</div>
 		</div>
-	</div>
+	</transition>
 
 	<!-- NOTES -->
-	<div id="notesBox" v-if="store.viewSettings.showNotes">
-		<h2>Personal game notes</h2>
-		<p>Only you can see these notes</p>
-		<div><textarea cols="120" rows="10" v-model="personal.notes" maxlength="5000"></textarea></div>
-		<div>
-			<button class="actionsLineButton" @click="IO.saveNotes">Save</button>
-			<button class="actionsLineButton" @click="clearNotes">Clear</button>
-			<button class="actionsLineButton" @click="toggleNotes">Close</button>
+	<transition name="slidePanel">
+		<div id="notesBox" v-if="store.viewSettings.showNotes">
+			<h2>Personal game notes</h2>
+			<p>Only you can see these notes</p>
+			<p v-if="store.gameMessages.notesErrorText" class="errorText" role="alert">{{ store.gameMessages.notesErrorText }}</p>
+			<div><textarea cols="120" rows="10" v-model="personal.notes" maxlength="5000" aria-label="Personal game notes"></textarea></div>
+			<div>
+				<button class="actionsLineButton" :disabled="store.viewSettings.isSavingNotes" @click="IO.saveNotes">{{ store.viewSettings.isSavingNotes ? 'Saving…' : 'Save' }}</button>
+				<button class="actionsLineButton" :disabled="store.viewSettings.isSavingNotes" @click="clearNotes">Clear</button>
+				<button class="actionsLineButton" @click="toggleNotes">Close</button>
+			</div>
 		</div>
-	</div>
+	</transition>
 
 	<!-- CHAT -->
-	<div id="wholeChat" v-if="store.viewSettings.showChat">
+	<div id="wholeChat" v-if="store.viewSettings.showChat" role="region" aria-label="Game chat">
+		<div class="chatHeading"><h2>Send a message</h2><button @click="store.viewSettings.showChat = false" aria-label="Close chat">×</button></div>
 		<div id="chatBox">
-			<h2>Send a message</h2>
-			<div><textarea rows="6" v-model="chatMessage"></textarea></div>
-			<div><button class="actionsLineButton" @click="sendChatMessage">Send</button></div>
+			<p v-if="store.gameMessages.chatErrorText" class="errorText" role="alert">{{ store.gameMessages.chatErrorText }}</p>
+			<div><textarea rows="6" v-model="chatMessage" aria-label="Chat message"></textarea></div>
+			<div><button class="actionsLineButton" :disabled="store.viewSettings.isSendingChat || !chatMessage" @click="sendChatMessage">{{ store.viewSettings.isSendingChat ? 'Sending…' : 'Send' }}</button></div>
 		</div>
 		<div id="messageList">
 			<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
@@ -139,15 +137,13 @@ function localCastVote(topic) {
 
 	<!-- REWIND PANEL -->
 	<div id="rewindPanel" v-if="store.viewSettings.showRewindPanel">
-		Any player can rewind the game at any time.
-		<br />
-		Please be courteous and rewind only if absolutely necessary - send a chat message to inform the other players.
-		<br /><br />
-		<span class="errorText">REWINDING WILL REMOVE ALL PRE-SET MOVES<br />PLEASE BE COURTEOUS WHEN REWINDING</span>
-		<span class="topMenuItem" @click="loadRewind()">
-			<img :src="view.getImage('icon-rewind')" />
+		<div class="utilityHeading"><b>Rewind and game votes</b><button @click="store.viewSettings.showRewindPanel = false" aria-label="Close rewind panel">×</button></div>
+		<p>Rewind restores the previous saved position. Please tell the other players in chat.</p>
+		<p v-if="store.gameMessages.errorText" class="errorText" role="alert">{{ store.gameMessages.errorText }}</p>
+		<button class="topMenuItem" :disabled="store.viewSettings.showLoader || store.viewSettings.isSaving || personal.haltPlay || store.viewSettings.showReplay" @click="IO.loadRewind()">
+			<img :src="view.getImage('icon-rewind')" alt="" />
 			<span>Rewind</span>
-		</span>
+		</button>
 		<hr />
 		<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
 			If all players agree, this game can be excluded from the stats (won't count towards wins/losses)
@@ -166,10 +162,13 @@ function localCastVote(topic) {
 	</div>
 
 	<!-- Info -->
-	<div id="info" v-if="store.viewSettings.showInfo">
-		<PlayerTable :minimiseInfoForMainScreen="false" />
-		<p><b>Game name:</b> {{ store.gameName }}</p>
-	</div>
+	<transition name="slidePanel">
+		<div id="info" v-if="store.viewSettings.showInfo">
+			<div class="utilityHeading infoHeading"><b>Game information</b><button @click="store.viewSettings.showInfo = false" aria-label="Close game information">×</button></div>
+			<PlayerTable :minimiseInfoForMainScreen="false" />
+			<p><b>Game name:</b> {{ store.gameName }}</p>
+		</div>
+	</transition>
 </template>
 
 <style scoped>
@@ -196,11 +195,27 @@ function localCastVote(topic) {
 	border: 2px solid black;
 	background-color: lightblue;
 }
+/* max-height rather than a fixed height, so the variable-height panels (info)
+   cannot be clipped by a magic number. */
+.slidePanel-enter-active,
+.slidePanel-leave-active {
+	transition: all 0.2s ease-in-out, opacity 0.2s ease-in-out;
+	overflow: hidden;
+	max-height: 2000px;
+}
+.slidePanel-enter-from,
+.slidePanel-leave-to {
+	opacity: 0;
+	max-height: 0;
+}
 #wholeChat {
-	position: absolute;
+	position: fixed;
 	left: 2px;
-	top: 62px;
+	top: calc(var(--urr-menu-height, 60px) + 2px);
 	width: 450px;
+	max-width: calc(100vw - 4px);
+	max-height: calc(100vh - var(--urr-menu-height, 60px) - 4px);
+	box-sizing: border-box;
 	z-index: 9999;
 	border: 2px solid black;
 	background-color: #d4eafd;
@@ -209,7 +224,11 @@ function localCastVote(topic) {
 	text-align: center;
 }
 #chatBox textarea { width: 90%; }
+.chatHeading { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 12px; background: #d4eafd; border-bottom: 1px solid #adc2d0; }.chatHeading h2 { font-size: 20px; }.chatHeading button { font-size: 26px; border: 0; background: none; cursor: pointer; padding: 5px; }
+#notesBox textarea, #bugReport textarea { max-width: 90%; box-sizing: border-box; }
+.actionsLineButton:disabled { cursor: default; opacity: .5; }@media (max-width: 1050px) { .actionsLineButton { min-height: 40px; } }
 .chatentry {
+	overflow-wrap: anywhere;
 	margin: 5px;
 	border: #000 1px solid;
 	text-align: left;
@@ -226,7 +245,7 @@ function localCastVote(topic) {
 	border: 1px solid white;
 	padding: 5px;
 	width: 400px;
-	top: 60px;
+	top: var(--urr-menu-height, 60px);
 	left: 440px;
 	font-size: 18px;
 	z-index: 10000;
@@ -235,4 +254,7 @@ function localCastVote(topic) {
 .topMenuItem { display: inline-block; width: 62px; height: 55px; cursor: pointer; text-align: center; }
 .topMenuItem img { width: 38px; height: 38px; }
 .topMenuItem span { font-size: 14px; font-weight: bold; display: block; }
+.utilityHeading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }.utilityHeading button { border: 0; background: none; color: inherit; font-size: 26px; cursor: pointer; }.topMenuItem { border: 0; background: #303030; color: white; border-radius: 3px; }.topMenuItem:disabled { opacity: .5; cursor: default; }
+.infoHeading { position: sticky; top: 0; z-index: 2; background: lightblue; padding: 4px 12px; border-bottom: 1px solid #adc2d0; text-align: left; }
+@media (max-width: 1050px) { .chatHeading button, .utilityHeading button { min-width: 44px; min-height: 44px; box-sizing: border-box; } }
 </style>

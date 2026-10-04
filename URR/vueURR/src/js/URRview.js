@@ -3,6 +3,23 @@
  */
 
 import * as rf from "./URRreference"
+import { currentWaterFrame } from "./URRwater"
+
+export function currentStateId(game) {
+	if (game.gameflow.pendingOffer) return game.gameflow.pendingOffer.state
+	if (game.gameflow.phase === rf.PHASE_DEVELOPMENT) {
+		if (game.gameflow.developmentStep === "eridu") {
+			const eridu = game.nations[rf.NATION_ERIDU]
+			return eridu.ownerType === "state" ? eridu.owner : null
+		}
+		return game.gameflow.stateOrder[game.gameflow.stateIndex] ?? null
+	}
+	if (game.gameflow.phase === rf.PHASE_RAINY_SEASON) {
+		if (game.rain.step === "harvest") return game.rain.harvestOrder[0] ?? null
+		return game.board.areas.find((area) => area.id === currentWaterFrame(game)?.area)?.waterwork?.state ?? null
+	}
+	return null
+}
 
 export function phaseStr(phase) {
 	if (phase === rf.PHASE_DIVIDING_NATIONS) return "Dividing the Independent Nations"
@@ -11,6 +28,24 @@ export function phaseStr(phase) {
 	if (phase === rf.PHASE_RAINY_SEASON) return "Rainy Season"
 	if (phase === rf.PHASE_GAME_OVER) return "Game Over"
 	return "Unknown phase - " + phase
+}
+
+export function waterworkMeasure(work) {
+	if (work.kind === "pump") return work.capacity === "M" ? "unlimited reach" : `reach: ${work.capacity} canal${Number(work.capacity) === 1 ? "" : "s"}`
+	return `capacity: ${work.capacity === "M" ? "unlimited" : work.capacity} water`
+}
+
+export function getLeadershipChanges(before, after) {
+	if (!before?.states || !after?.states) return []
+	return after.states.filter((state) => {
+		const previous = before.states[state.id]
+		return previous && (state.king !== previous.king || (state.isActive && !previous.isActive))
+	}).map((state) => ({
+		id: state.id, isActive: state.isActive, king: state.king,
+		hasEmerged: state.isActive && !before.states[state.id].isActive,
+		previousName: before.states[state.id].king === null ? "None" : before.players[before.states[state.id].king].displayName,
+		nextName: state.king === null ? "None" : after.players[state.king].displayName,
+	}))
 }
 
 export function getOrdinal(num) {

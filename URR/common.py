@@ -106,6 +106,9 @@ def create_urr_game(
         if max_players == 1:
             isTrainingGame = True
 
+        # Playtest build: only practice games exist for UR: 1830 BC.
+        isTrainingGame = True
+
         if not isTrainingGame:
             invited_usernames_objs = SF_validatePlayers(request, invited_usernames, max_players, allow_creator=False)
             if invited_usernames_objs is None:

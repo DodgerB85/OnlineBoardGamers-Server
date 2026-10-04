@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 371 234" width="371" height="234">
+	<title>First Akkadians: 220 SPL, 35 SPL income per round</title>
+	<rect x=".5" y=".5" width="370" height="233" fill="white" stroke="black" />
+	<text x="16" y="39" font-family="Georgia, 'Times New Roman', serif" font-size="23" font-weight="bold">First Akkadians</text>
+	<text x="16" y="77" font-family="Arial, sans-serif" font-size="14" fill="black">
+		<tspan x="16">Immediately acquire the three First Akkadian</tspan>
+		<tspan x="16" dy="18">savannah lands. Pay the price into Akkad's</tspan>
+		<tspan x="16" dy="18">treasury. Dissolves when Akkad hires a digging</tspan>
+		<tspan x="16" dy="18">crew. Cannot be assimilated. First Akkadian</tspan>
+		<tspan x="16" dy="18">land stays closed to buying and digging</tspan>
+		<tspan x="16" dy="18">until dissolution.</tspan>
+	</text>
+	<g font-family="Arial, sans-serif" font-size="16" font-weight="bold">
+		<text x="16" y="218">220 SPL</text>
+		<text x="354" y="218" text-anchor="end">Rev. 35 SPL</text>
+	</g>
+</svg>

@@ -26,10 +26,7 @@ export const usePersonalStore = defineStore("personal", () => {
 	var notes = ""
 	var yourTurnAudioType = 0
 	var chatNotification = false
-	var currentMoveData = {}
-	var allMyMoveData = []
 	var gameDataB64 = ""
-	var transactionID = ""
 	var votedToExclude = false
 	var votedToDelete = false
 
@@ -84,10 +81,7 @@ export const usePersonalStore = defineStore("personal", () => {
 		notes,
 		yourTurnAudioType,
 		chatNotification,
-		currentMoveData,
-		allMyMoveData,
 		gameDataB64,
-		transactionID,
 		votedToExclude,
 		votedToDelete,
 		canPlay,

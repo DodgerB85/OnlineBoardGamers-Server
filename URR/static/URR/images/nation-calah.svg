@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 371 201" width="371" height="201">
+	<title>Calah: 70 SPL, 25 SPL income per round</title>
+	<rect x=".5" y=".5" width="370" height="200" fill="white" stroke="black" />
+	<text x="16" y="39" font-family="Georgia, 'Times New Roman', serif" font-size="23" font-weight="bold">Calah</text>
+	<text x="16" y="76" font-family="Arial, sans-serif" font-size="14" fill="black">
+		<tspan x="16">Owning state may dissolve Calah during its</tspan>
+		<tspan x="16" dy="18">development turn for one free waterwork on</tspan>
+		<tspan x="16" dy="18">Calah's hills or land adjacent to Calah.</tspan>
+		<tspan x="16" dy="18">Use and discard the current equipment card;</tspan>
+		<tspan x="16" dy="18">normal construction and consent rules apply.</tspan>
+	</text>
+	<g font-family="Arial, sans-serif" font-size="16" font-weight="bold">
+		<text x="16" y="186">70 SPL</text>
+		<text x="354" y="186" text-anchor="end">Rev. 25 SPL</text>
+	</g>
+</svg>

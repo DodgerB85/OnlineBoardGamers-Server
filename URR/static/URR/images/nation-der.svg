@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 371 201" width="371" height="201">
+	<title>Der: 110 SPL, 30 SPL income per round</title>
+	<rect x=".5" y=".5" width="370" height="200" fill="white" stroke="black" />
+	<text x="16" y="39" font-family="Georgia, 'Times New Roman', serif" font-size="23" font-weight="bold">Der</text>
+	<text x="16" y="76" font-family="Arial, sans-serif" font-size="14" fill="black">
+		<tspan x="16">Owning player may dissolve Der during their</tspan>
+		<tspan x="16" dy="18">settlement turn for one available forest,</tspan>
+		<tspan x="16" dy="18">including a city, at no cost.</tspan>
+		<tspan x="16" dy="18">This is the turn's purchase. Normal purchase</tspan>
+		<tspan x="16" dy="18">rules apply; the state receives no payment.</tspan>
+	</text>
+	<g font-family="Arial, sans-serif" font-size="16" font-weight="bold">
+		<text x="16" y="186">110 SPL</text>
+		<text x="354" y="186" text-anchor="end">Rev. 30 SPL</text>
+	</g>
+</svg>

@@ -72,7 +72,7 @@ NATION_FIRST_AKKADIANS = 5
 NATION_NAMES = ["Ashur", "Barahshum", "Calah", "Der", "Eridu", "First Akkadians"]
 # (price in Splägels, income per round in Splägels)
 NATION_PRICES = [20, 40, 70, 110, 160, 220]
-NATION_INCOMES = [10, 20, 25, 30, 35, 40]
+NATION_INCOMES = [10, 20, 25, 30, 35, 35]
 ALL_NATIONS = [NATION_ASHUR, NATION_BARAHSHUM, NATION_CALAH, NATION_DER, NATION_ERIDU, NATION_FIRST_AKKADIANS]
 
 # --- Technology eras (1..5, where 5 is the Millennium era) ---

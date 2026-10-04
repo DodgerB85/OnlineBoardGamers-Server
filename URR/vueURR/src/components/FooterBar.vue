@@ -1,9 +1,11 @@
 <script setup>
+import { getAsset } from "../js/URRassets"
 </script>
 
 <template>
 	<div id="footer">
 		<div class="content">
+			<img :src="getAsset('ur-box.jpg')" class="cover" alt="UR: 1830 BC game box" />
 			<p>
 				UR: 1830 BC is a board game by Jeroen Doumen and Joris Wiersinga, published by
 				<a target="_blank" href="https://www.splottershop.com/">Splotter Spellen</a>.

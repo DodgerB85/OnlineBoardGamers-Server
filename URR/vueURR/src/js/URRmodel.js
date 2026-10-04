@@ -1,21 +1,19 @@
-/**
- * The game model (shared state).
- *
- * The whole model is serialised to / from Game.gameData as plain JSON.
- * Extend exportGameData / importGameData (and snapshotState) as you add real
- * game state so that saves, replays and rewinds keep working.
- */
-
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
 import * as rf from "./URRreference"
 import * as funcs from "./URRfuncs"
+import { createGame, applyAction } from "./URRgame.js"
+import { createPrintedBoard } from "./URRboard.js"
+import { createBoard } from "./URRmap.js"
+
+const STATE_FIELDS = ["version", "players", "gameflow", "states", "nations", "board", "landPrices", "era", "cardSupply", "rain", "nextDiggerId"]
 
 export function initGame() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	const initData = window.initData || {}
 
+	personal.name = initData.name || "Guest"
 	personal.gameID = initData.gameID
 	personal.gameCreationTimestamp = initData.gameCreationTimestamp
 	personal.pov = initData.pov !== undefined ? initData.pov : -99
@@ -44,83 +42,85 @@ export function initGame() {
 	const playerNames = initData.playerNames || []
 	const gameData = initData.gameData
 
-	if (gameData && store.players.length === 0 && gameData.players && gameData.players.length > 0) {
-		importGameData(gameData)
-	} else {
-		initGameFresh(playerNames)
+	try {
+		if (gameData && (typeof gameData === "string" || gameData.players?.length)) importGameData(gameData)
+		else initGameFresh(playerNames)
+	} catch (error) {
+		console.error("Unable to initialize URR:", error)
+		store.gameMessages.errorText = error.message
+		personal.haltPlay = true
 	}
-
-	rebuildTurnOrder()
 }
 
-export function initGameFresh(playerNames) {
+export function initGameFresh(playerNames, boardDefinition) {
 	const store = useModelStore()
-	store.players.splice(0)
-	for (let i = 0; i < playerNames.length; i++) {
-		store.players.push({
-			name: playerNames[i],
-			displayName: playerNames[i],
-			colour: rf.ALL_COLOURS[i % rf.ALL_COLOURS.length],
-			score: 0,
-		})
-	}
+	restoreState(createGame(playerNames, boardDefinition))
 	store.history.splice(0)
-	addHistory(rf.HIST_NEW_GAME, -1, snapshotState())
+	addHistory(rf.HIST_NEW_GAME, -1)
 }
 
-// Rebuild the local turn order from the server's list of current players.
+// The saved engine owns turn order, including auctions and consent requests.
+// Server names are only a fallback for the old, unversioned scaffold.
 export function rebuildTurnOrder() {
 	const store = useModelStore()
-	const initData = window.initData || {}
-	store.gameflow.fullTurnOrder = store.players.map((_, i) => i)
-	let currentNames = initData.currentPlayers || []
-	if (currentNames.length === 0) {
-		store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
-		return
+	if (store.gameflow.primogeniture !== undefined) return
+	const currentNames = window.initData?.currentPlayers || []
+	store.gameflow.fullTurnOrder = Array.from(store.players.keys())
+	store.gameflow.turnOrder = currentNames.map((name) => store.players.findIndex((player) => player.name === name)).filter((index) => index !== -1)
+}
+
+export function restoreState(snapshot) {
+	const store = useModelStore()
+	const data = JSON.parse(JSON.stringify(snapshot))
+	for (const field of STATE_FIELDS) {
+		if (data[field] === undefined) throw new Error(`Missing URR state field: ${field}`)
 	}
-	store.gameflow.turnOrder = currentNames.map((name) => store.players.findIndex((p) => p.name === name)).filter((idx) => idx !== -1)
+	store.players.splice(0, store.players.length, ...data.players)
+	for (const key of Object.keys(store.gameflow)) delete store.gameflow[key]
+	Object.assign(store.gameflow, data.gameflow)
+	for (const field of STATE_FIELDS) {
+		if (field !== "players" && field !== "gameflow") store[field] = data[field]
+	}
 }
 
 export function importGameData(obj) {
 	const store = useModelStore()
-	if (!obj) return
-	if (typeof obj === "string") {
-		try {
-			obj = JSON.parse(obj)
-		} catch {
-			return
-		}
+	const data = typeof obj === "string" ? JSON.parse(obj) : obj
+	if (!data || !data.players?.length) throw new Error("Saved URR data contains no players")
+	if (data.version === undefined) {
+		// The old scaffold stored only names, dummy turns and zero scores, not
+		// game mechanics. Never apply those dummy phases to a real position.
+		console.warn("Initializing rules state from a legacy URR scaffold save")
+		initGameFresh(data.players.map((player) => player.name))
+		return
 	}
-	if (obj.players && obj.players.length > 0) {
-		store.players.splice(0, store.players.length, ...JSON.parse(JSON.stringify(obj.players)))
-	}
-	if (obj.gameflow) {
-		store.gameflow.turn = obj.gameflow.turn
-		store.gameflow.phase = obj.gameflow.phase
-	}
-	if (obj.history) {
-		store.history.splice(0)
-		for (const entry of obj.history) store.history.push(entry)
-	}
+	if (data.version !== rf.GAME_DATA_VERSION) throw new Error("Unsupported URR save version")
+	// Earlier rules saves had no board. Preserve their economy and turn order.
+	if (data.board?.areas.length === 0) data.board = createBoard(createPrintedBoard())
+	restoreState(data)
+	store.history.splice(0, store.history.length, ...JSON.parse(JSON.stringify(data.history || [])))
 }
 
 export function exportGameData() {
-	const store = useModelStore()
-	return {
-		players: JSON.parse(JSON.stringify(store.players)),
-		gameflow: { turn: store.gameflow.turn, phase: store.gameflow.phase },
-		history: JSON.parse(JSON.stringify(store.history)),
-	}
+	return { ...snapshotState(), history: JSON.parse(JSON.stringify(useModelStore().history)) }
 }
 
 export function snapshotState() {
 	const store = useModelStore()
-	return { players: JSON.parse(JSON.stringify(store.players)) }
+	return JSON.parse(JSON.stringify(Object.fromEntries(STATE_FIELDS.map((field) => [field, store[field]]))))
 }
 
-export function addHistory(event, playerIndex, snapshot) {
-	const store = useModelStore()
-	store.history.push([event, playerIndex, JSON.stringify(snapshot !== undefined ? snapshot : snapshotState())])
+export function performAction(playerIndex, action) {
+	const next = applyAction(snapshotState(), playerIndex, action)
+	restoreState(next)
+	addHistory(next.gameflow.phase === rf.PHASE_GAME_OVER ? rf.HIST_GAME_END : rf.HIST_ACTION, playerIndex, undefined, action)
+}
+
+export function addHistory(event, playerIndex, snapshot, action = null) {
+	const entry = [event, playerIndex, JSON.stringify(snapshot === undefined ? snapshotState() : snapshot)]
+	entry.push(action ? JSON.parse(JSON.stringify(action)) : null)
+	entry.push(event === rf.HIST_NEW_GAME ? usePersonalStore().gameCreationTimestamp || Math.floor(Date.now() / 1000) : Math.floor(Date.now() / 1000))
+	useModelStore().history.push(entry)
 }
 
 export function getPlayerByIndex(index) {
