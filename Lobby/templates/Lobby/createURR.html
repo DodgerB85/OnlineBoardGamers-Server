@@ -104,12 +104,18 @@
                     <div class="check-list">
                         {% url "lobbyHelp" as the_url %}
                         <label class="check-label">
+                            {% if playtestOnly %}
+                            <input type="checkbox" checked disabled class="myCheckbox" id="trainingGame" name="trainingGame" value="102">
+                            <input type="hidden" name="trainingGame" value="102">
+                            {% else %}
                             <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="trainingGame" name="trainingGame" value="102">
+                            {% endif %}
                             <div>
                                 <div>{% translate "Practice Game" %}</div>
                                 <div class="opt-help">{% blocktranslate trimmed %}Play all seats on the same device. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
                             </div>
                         </label>
+                        {% if not playtestOnly %}
                         <label class="check-label">
                             <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="privateGame" name="privateGame" value="1">
                             <div>
@@ -132,6 +138,7 @@
                                 {% if not experienced %}<div style="font-size:12px;color:var(--color-danger);margin-top:2px">{% translate "You do not have enough experience" %}</div>{% endif %}
                             </div>
                         </label>
+                        {% endif %}
                     </div>
                 </div>
 

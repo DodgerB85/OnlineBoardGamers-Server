@@ -2445,7 +2445,7 @@ def createRNBpage2(request, gameID=0):
 def createURRpage(request, gameID=0):
     experienced = SF_hasRequiredExperience(request, "URR", Game)
     if request.method != "POST" and gameID == 0:
-        return render(request, "Lobby/createURR.html", {"experienced": experienced})
+        return render(request, "Lobby/createURR.html", {"experienced": experienced, "playtestOnly": True})
     elif request.method != "POST" and gameID != 0:
         try:
             currentGame = Game.objects.get(id=gameID, gameCode="URR")
@@ -2470,6 +2470,7 @@ def createURRpage(request, gameID=0):
                 "kickoutDuration": currentGame.kickoutDuration,
                 "startingOptions": loadedStartingOptions,
                 "experienced": experienced,
+                "playtestOnly": True,
             },
         )
 
