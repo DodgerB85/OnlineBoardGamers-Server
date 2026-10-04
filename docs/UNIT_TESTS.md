@@ -47,8 +47,9 @@ Notes:
 | `test_fcm_rewind.py` | 6 | FCM `saveNormal` rewind stack: `saveRewind=True` records the pre-save state, `saveRewind=False` records nothing at all, one save makes exactly one rewind point, repeated AI-style saves never grow the stack, and rewinding after your own move returns *your* turn rather than the next player's (FcmAI's) |
 | `test_fcm_reset.py` | 5 | Admin "Reset AI": a reset-flagged save replaces `startingMap` and clears the discarded game's rewind stack; the map-sync drift guard still rejects a changed board on an ordinary save, and still rejects a non-admin claiming `resetGame` |
 | `test_admin_webhook_guard.py` | 2 | `SN_sendAdminErrorMessage` never posts to the admin Discord webhook while Django is on a test database — directly, and via the FCM map-sync rejection path that prompted it |
+| `test_game_end.py` | 8 | `clearGeneralDataOnGameEndWithoutSave` (the shared choke point every presenter's `endGame` calls): per-player `moveDataJSON` / `currentMoveTime` / `currentMoveData` are wiped for all 12 games, the wipe is persisted rather than only in-memory, the Game-level scratch fields are still cleared, and `endGame` still marks exactly one winner. Plus vote cleanup: rewind-consent and kickout votes are refused once a game is FINISHED (delete / stats-exclude votes still allowed), rewind votes still work while ACTIVE, and an FCM `saveNormal` with `status=FINISHED` no longer re-creates `activeVotes` after `endGame` cleared it |
 
-233 tests total (git count may drift slightly as tests are added).
+241 tests total (git count may drift slightly as tests are added).
 
 ## Conventions
 

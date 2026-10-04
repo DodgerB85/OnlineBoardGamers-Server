@@ -402,6 +402,13 @@ class GamePresenter:
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = None  # Check this doesn't crash game load if game ended
         self.gameObj.transactionID = ""
 
+        # Per-player scratch state. Unlike the Game fields above, which the caller
+        # saves, nothing else writes GamePlayer once the game is over, so this has
+        # to hit the DB here. Leaving moveDataJSON behind is not harmless: the RNB
+        # client's kickstart-recovery block replays allStackData on load, so stale
+        # moves can be re-applied to an already-finished game.
+        self.gameObj.players.update(moveDataJSON=None, currentMoveTime="", currentMoveData="")
+
     def sendInviteNotifications(self, playerNames, _gameName, _maxPlayers, _gameCode):
         from django_q.tasks import async_task
 
@@ -469,6 +476,13 @@ class GamePresenter:
         Saves a specific choice for a user.
         Example: topic='rewind', choice=2
         """
+        # Rewind consent and kickout votes only mean anything while the game is
+        # live. Rejecting them here stops a late vote - a stale browser tab, or an
+        # AI bot still looping - from re-creating the activeVotes that endGame
+        # clears. Delete / stats-exclude votes are still legal once finished.
+        if self.gameObj.gameStatus == "FINISHED" and topic in (rf.REWIND_CONSENT_VOTE_TOPIC, rf.KICKOUT_VOTE_TOPIC):
+            return False
+
         # Double check player is in the game - WAIT FOR ALL PLAYERS TO MOVE HERE
         # if playerName not in [p.username for p in self.allPlayers.all()]:
         #    return False  # Player not in the game

@@ -1178,8 +1178,11 @@ def _processTurn(request):
                 jsonData["tournamentData"],
                 jsonData["gameID"],
             )
-
-        presenter.removeSingleRewindPermission()
+        else:
+            # A rewind downgrades any single-permission grants. This must NOT run
+            # after endGame: it re-creates the activeVotes that endGame just
+            # cleared, leaving a finished game with live-looking vote data.
+            presenter.removeSingleRewindPermission()
 
         currentGame.save()
 
