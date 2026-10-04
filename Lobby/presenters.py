@@ -122,6 +122,7 @@ class GamePresenter:
             "RNB": "Rnb",
             "URR": "Urr",
             "DDL": "Ddl",
+            "PAP": "Pap",
             "BOB": "Bob",
         }
         prefix = game_code_map.get(self.gameObj.gameCode, "")
@@ -1955,6 +1956,77 @@ class DDLpresenter(GamePresenter):
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists() and self.gameObj.maxPlayers > 1:
             async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "DDL", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
+
+            if self.gameObj.relatedMainTournament:
+                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMainTournament, self.gameObj, [_winnerUsername], _tournamentData)
+            if self.gameObj.relatedMiniTournament:
+                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMiniTournament, self.gameObj, [_winnerUsername], _tournamentData)
+
+
+class PAPpresenter(GamePresenter):
+    def startGame(self, request):
+        from Lobby.models import GamePlayer
+
+        self.gameObj.gameStatus = "ACTIVE"
+
+        game_players = list(self.gameObj.players.exclude(is_kicked=True))
+
+        random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)
+
+        for idx, gp in enumerate(game_players):
+            gp.seat_order = idx
+            gp.is_current = idx == 0
+
+        self.gameObj.serverCurrentPlayerNamesInTurnOrder = [gp.player.username for gp in game_players if gp.player]
+
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+        self.gameObj.save()
+
+        if not self.gameObj.players.filter(player__username="SHADOW").exists():
+            playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
+            self._sendStartGameNotification(request, playerListToNotify)
+
+    def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
+        from django_q.tasks import async_task
+
+        from Lobby.models import User
+        from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
+
+        self.clearGeneralDataOnGameEndWithoutSave()
+
+        winner_user = User.objects.get(username=_winnerUsername)
+        winner_gp = self.gameObj.players.filter(player=winner_user).first()
+        if winner_gp:
+            winner_gp.winner = True
+            winner_gp.save()
+
+        self.gameObj.save()
+        self.markPlayersPendingFinish(request)
+
+        finalPositionsArr = []
+        for seatPos in _finalPositions:
+            finalPositionsArr.append(self.getAllPlayersOrderedySeatInArray()[seatPos])
+
+        convertedFinalPositions = []
+        for pos, username in enumerate(finalPositionsArr):
+            if pos == 0:
+                posText = "1st - Congratulations!"
+            elif pos == 1:
+                posText = "2nd"
+            elif pos == 2:
+                posText = "3rd"
+            elif pos == 3:
+                posText = "4th"
+            elif pos == 4:
+                posText = "5th"
+            elif pos == 5:
+                posText = "6th"
+            else:
+                posText = "Last"
+            convertedFinalPositions.append([username, posText, pos])
+
+        if not self.gameObj.players.filter(player__username="SHADOW").exists() and self.gameObj.maxPlayers > 1:
+            async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "PAP", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
             if self.gameObj.relatedMainTournament:
                 SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMainTournament, self.gameObj, [_winnerUsername], _tournamentData)

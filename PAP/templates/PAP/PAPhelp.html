@@ -1,0 +1,25 @@
+{% extends "Lobby/help_shell.html" %}
+{% load static %}
+{% load i18n %}
+{% block page_title %}
+  {% translate "Permits and Poisons Help" %}
+{% endblock page_title %}
+{% block content %}
+  <div class="card section">
+    <h2>{% translate "Rules" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% blocktranslate %}Permits and Poisons is a board game by Mihai Anca, currently in ALPHA testing.{% endblocktranslate %}
+        {% blocktranslate %}Online Board Gamers implementation by M. Anca.{% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+  <div class="card section">
+    <h2>{% translate "Playing the Game" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% translate "This game is still being implemented. Help content will be added here." %}
+      </p>
+    </div>
+  </div>
+{% endblock content %}

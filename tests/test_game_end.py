@@ -32,7 +32,7 @@ User = get_user_model()
 
 
 # Every game with a presenter that calls the shared end-game cleanup.
-GAME_CODES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB", "URR", "DDL"]
+GAME_CODES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB", "URR", "DDL", "PAP"]
 
 # A moveDataJSON payload shaped like the ones RNB actually stores.
 STALE_MOVE = {

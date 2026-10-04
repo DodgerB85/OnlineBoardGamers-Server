@@ -32,6 +32,7 @@ from .presenters import (
     HLCpresenter,
     INDpresenter,
     KFWpresenter,
+    PAPpresenter,
     RNBpresenter,
     TGZpresenter,
     URRpresenter,
@@ -476,6 +477,7 @@ class Game(BaseGame):
         "DDL": DDLpresenter,
         "HLC": HLCpresenter,
         "KFW": KFWpresenter,
+        "PAP": PAPpresenter,
     }
 
     def presenter(self) -> GamePresenter:

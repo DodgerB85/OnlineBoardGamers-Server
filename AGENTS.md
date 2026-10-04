@@ -131,6 +131,17 @@ This repository is a Django-backed online board gaming site where most game logi
   - run a focused command if one exists
   - describe what you verified and what you could not verify
 
+## Editor / Agent Tooling
+
+- `opencode.json` (repo root) pins the LSP servers used here: `pyright` for `.py`, `vue-language-server` for `.vue`. `typescript`, `eslint` and `oxlint` are disabled as LSP servers because their output on this untyped, mixed-era codebase is mostly noise; run them as CLI tools instead when you want them.
+- `pyrightconfig.json` (repo root) points at `.venv_local`, skips migrations/venvs/built dirs, and keeps only the high-signal rules (`reportUndefinedVariable`, `reportMissingImports`, syntax errors). ORM/attribute-type rules are off on purpose: the models, presenters and reverse relations are not statically described, so those rules only produce false positives.
+- `jsconfig.json` (repo root) is the Volar project config for the Vue clients; it covers every `*/vue*/src` workspace and keeps `strictTemplates` off for the same reason.
+- Useful commands:
+  - `./node_modules/.bin/pyright` — type/diagnostic pass over the Python code
+  - `./node_modules/.bin/eslint <paths>` — lint JS/Vue sources (vendored `pakoLib.js` and built `*vuedist` output are ignored)
+  - `.venv_local/bin/python manage.py test tests` — the Python test suite
+- `django-stubs` lives in `requirements-dev.txt` because `pyrightconfig.json` expects the venv to have stubs for `django.*`.
+
 ## Code Style Notes
 
 - Python formatting is permissive here:

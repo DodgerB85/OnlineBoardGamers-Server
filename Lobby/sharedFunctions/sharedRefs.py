@@ -12,6 +12,7 @@ import AQY.AQYconstants as rfAQY
 import DDL.DDLconstants as rfDDL
 import FCM.FCMconstants as rfFCM
 import Lobby.sharedFunctions.constants as rf
+import PAP.PAPconstants as rfPAP
 import RNB.RNBconstants as rfRNB
 import URR.URRconstants as rfURR
 
@@ -42,6 +43,7 @@ SR_GAMES_CODES_AND_NAMES_CHOICES = [
     ("RNB", gettext_lazy("Roads & Boats")),
     ("URR", gettext_lazy("UR: 1830 BC")),
     ("DDL", gettext_lazy("Duck Dealer")),
+    ("PAP", gettext_lazy("Permits and Poisons")),
 ]
 
 SR_WEBHOOK_CHOICES = {
@@ -650,6 +652,17 @@ def SR_currentTurnString(gameCode, turn, phase):
         elif phase == rfDDL.PHASE_MAIN:
             currentTurnString += gettext("Main")
         elif phase == rfDDL.PHASE_GAME_OVER:
+            currentTurnString += gettext("Game End")
+
+        return currentTurnString
+
+    elif gameCode == "PAP":
+        currentTurnString = str(turn) + " - "
+        if phase == rfPAP.PHASE_SETUP:
+            currentTurnString += gettext("Setup")
+        elif phase == rfPAP.PHASE_MAIN:
+            currentTurnString += gettext("Main")
+        elif phase == rfPAP.PHASE_GAME_OVER:
             currentTurnString += gettext("Game End")
 
         return currentTurnString

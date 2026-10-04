@@ -132,6 +132,7 @@ INSTALLED_APPS = [
     "RNB",
     "URR",
     "DDL",
+    "PAP",
     "statici18n",
     "i18n",
 ]

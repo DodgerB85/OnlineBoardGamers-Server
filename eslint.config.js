@@ -16,7 +16,7 @@ module.exports = [
 	},
 	{
 		name: "app/files-to-ignore",
-		ignores: ["dist/", "dist-ssr/", "coverage/**"],
+		ignores: ["dist/", "dist-ssr/", "coverage/**", "**/node_modules/**", "**/*vuedist/**", "**/pakoLib.js"],
 	},
 	js.configs.recommended,
 	...pluginVue.configs["flat/essential"],

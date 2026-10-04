@@ -2,29 +2,41 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
+    "moduleResolution": "Bundler",
     "allowJs": true,
     "checkJs": false,
     "strict": false,
-    "jsx": "preserve"
-    // ❌ REMOVE THE "paths" BLOCK ENTIRELY FROM THIS FILE
+    "jsx": "preserve",
+    "types": []
   },
   "vueCompilerOptions": {
-    "strictTemplates": true
+    "strictTemplates": false
   },
   "include": [
-    "WEB/vueWEB/**/*"
+    "AQY/vueAQY/src/**/*",
+    "BUS/vueBUS/src/**/*",
+    "CNS/vueCNS/src/**/*",
+    "DDL/vueDDL/src/**/*",
+    "FCM/vueFCM/src/**/*",
+    "IND/vueIND/src/**/*",
+    "KFW/vueKFW/src/**/*",
+    "PAP/vuePAP/src/**/*",
+    "RNB/vueRNB/src/**/*",
+    "TGZ/vueTGZ/src/**/*",
+    "URR/vueURR/src/**/*",
+    "WEB/vueWEB/src/**/*"
   ],
-  "exclude": [    
+  "exclude": [
     "node_modules",
     "**/node_modules/*",
-    "dist",
+    "**/static/*vuedist/*",
     ".venv",
+    ".venv_local",
     "**/.venv/*",
     "bower_components",
     "tmp",
     "vendor",
     ".git",
-    "**/*.py", 
     "**/__pycache__"
   ]
 }

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "lsp": {
+    "pyright": {
+      "command": ["node_modules/.bin/pyright-langserver", "--stdio"],
+      "extensions": [".py", ".pyi"]
+    },
+    "vue": {
+      "command": ["node_modules/.bin/vue-language-server", "--stdio"],
+      "extensions": [".vue"]
+    },
+    "typescript": {
+      "disabled": true
+    },
+    "eslint": {
+      "disabled": true
+    },
+    "oxlint": {
+      "disabled": true
+    }
+  }
+}
