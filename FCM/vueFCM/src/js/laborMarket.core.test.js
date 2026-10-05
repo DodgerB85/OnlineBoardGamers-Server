@@ -37,10 +37,10 @@ describe("Labor Market static model", () => {
 	it("serves every Labor Market image from the current site's static path", () => {
 		const store = useModelStore()
 		store.startingOptions.laborMarket = true
-		expect(view.getImage(`emp_${rf.MANAGEMENT_TRAINEE}`)).toBe("/static/FCM/images/e_management_trainee_labor_market.png")
-		expect(view.getImage(`emp_${rf.TEMPORARY_WORKER}`)).toBe("/static/FCM/images/e_temporary_worker.png")
-		expect(view.getImage(`emp_${rf.HEADHUNTER}`)).toBe("/static/FCM/images/e_headhunter.png")
-		expect(view.getImage(`emp_${rf.UNION_ORGANIZER}`)).toBe("/static/FCM/images/e_union_organizer.png")
+		expect(view.getImage(`emp_${rf.MANAGEMENT_TRAINEE}`)).toBe("/static/FCM/images/e_management_trainee_labor_market.jpg")
+		expect(view.getImage(`emp_${rf.TEMPORARY_WORKER}`)).toBe("/static/FCM/images/e_temporary_worker.jpg")
+		expect(view.getImage(`emp_${rf.HEADHUNTER}`)).toBe("/static/FCM/images/e_headhunter.jpg")
+		expect(view.getImage(`emp_${rf.UNION_ORGANIZER}`)).toBe("/static/FCM/images/e_union_organizer.jpg")
 		expect(view.getImage("so_laborMarket")).toBe("/static/FCM/images/so_laborMarket.svg")
 	})
 })
