@@ -1,4 +1,5 @@
 <script setup>
+import KickoutDialog from "./KickoutDialog.vue"
 import ArtworkCard from "./ArtworkCard.vue"
 import StateLeadership from "./StateLeadership.vue"
 import MarketForecast from "./MarketForecast.vue"
@@ -223,6 +224,7 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 
 <template>
 	<section class="gameActions" aria-label="Game actions">
+		<KickoutDialog />
 		<div v-if="store.gameMessages.errorText" class="error" role="alert">{{ store.gameMessages.errorText }}</div>
 		<div v-if="store.gameMessages.actionError" class="error" role="alert">{{ store.gameMessages.actionError }}</div>
 		<div v-if="store.gameflow.endReason && store.gameflow.phase !== rf.PHASE_GAME_OVER" class="endNotice" role="status"><b>Final round.</b> {{ store.gameflow.endReason === 'invasion' ? 'No water reached the south. The game ends after these harvests.' : 'A revolution ends the game after this rainy season.' }}</div>

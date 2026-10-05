@@ -111,6 +111,7 @@ export default defineConfig(({ command }) => ({
 	},
 
 	resolve: {
+		dedupe: ["vue"],
 		alias:
 			command === "serve"
 				? [

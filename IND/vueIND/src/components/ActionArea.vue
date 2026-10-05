@@ -1,4 +1,5 @@
 <script setup>
+import TurnNudge from "../../../../Lobby/frontend/TurnNudge.vue"
 import * as rf from "../js/INDreference"
 import * as view from "../js/INDview"
 import * as model from "../js/INDmodel"
@@ -576,6 +577,7 @@ function selectC0() {
 				<br />
 				<br />
 				<br />
+				<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
 
 				<button class="actionsLineButton" @click="IO.nudgeTourneyAdmins(1)">Alert Admins</button>
@@ -601,6 +603,7 @@ function selectC0() {
 						<br />
 
 						<br />
+						<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 						<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
 						<span>
 							<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
@@ -620,6 +623,7 @@ function selectC0() {
 						Please consider giving them a short grace period, in case they are just delayed
 
 						<br />
+						<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 						<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
 						<span>
 							<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">Permanently Kickout {{ controller.currentPlayerObj().name }}</button>
@@ -660,6 +664,7 @@ function selectC0() {
 					</span>
 					<br />
 					<br />
+					<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 					<span>
 						<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button>
 					</span>

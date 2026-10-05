@@ -94,7 +94,7 @@
         <img id="TGZloadingImg" src="{% static 'TGZ/images/TGZ_Tile_Back.jpg' %}" />
       </div>
     </div>
-  {% include "Lobby/gameMomentum.html" %}
+  <div hidden>{% csrf_token %}</div>
   </body>
   <script>
   var initData = {};

@@ -49,7 +49,7 @@
     <div id="app">
       <div id="loadingText">Duck Dealer is loading........</div>
     </div>
-  {% include "Lobby/gameMomentum.html" %}
+  <div hidden>{% csrf_token %}</div>
   </body>
   <script>
     var initData = {};

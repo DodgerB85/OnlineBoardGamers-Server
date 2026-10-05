@@ -19,6 +19,10 @@ export function initGame() {
 	personal.pov = initData.pov !== undefined ? initData.pov : -99
 	personal.latestUpdate = initData.latestUpdate
 	personal.secondsToNextKickout = initData.secondsToNextKickout !== undefined ? initData.secondsToNextKickout : 99999
+	personal.kickoutSecondsRemaining = personal.secondsToNextKickout
+	personal.kickoutTimerUpdatedAt = Date.now()
+	personal.kickoutRequired = initData.kickoutRequired || 0
+	personal.kickoutFlexiData = initData.KickoutFlexiDataArray || []
 	personal.notes = initData.notes || ""
 	personal.yourTurnAudioType = initData.yourTurnAudioType || 0
 	personal.chatNotification = initData.chatNotification || false
@@ -51,6 +55,7 @@ export function initGame() {
 		personal.haltPlay = true
 	}
 
+	setMissingPlayers(initData.missingPlayers || [])
 	applyShadowDisplayNames(initData.displayNames)
 }
 
@@ -145,4 +150,12 @@ export function getPlayerByIndex(index) {
 export function getPlayerIndexByName(name) {
 	const store = useModelStore()
 	return store.players.findIndex((p) => p.name === name)
+}
+
+export function setMissingPlayers(names) {
+	const store = useModelStore()
+	for (const player of store.players) {
+		player.isMissing = names.includes(player.name)
+		if (player.isMissing) player.displayName = `${player.name} (Bot)`
+	}
 }

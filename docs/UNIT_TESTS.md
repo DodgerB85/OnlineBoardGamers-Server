@@ -55,6 +55,7 @@ Notes:
 ## Momentum and extra statistics
 
 - `tests/test_momentum.py`: shared UTC streak boundaries and resets, duplicate-day credit, practice exclusions, reminders, opt-outs, participant access, stale versions, expired-turn checks and nudge cooldowns. Queueing and delivery are mocked, so these tests do not send messages.
+- `tests/test_urr_kickout.py`: timeout/flex-time eligibility, participant and target restrictions, stale kickout requests, polling votes without a game version change, majority and two-day solo kickouts, and rewind cleanup with seat indexes preserved.
 - `tests/test_extra_stats.py`: absolute, relative and delta histories, HLC offsets, missing DDL timestamps, lobby/play/final-gap separation, action sample weighting, exclusions and the unlisted page.
 
 Run on Linux with `.venv/bin/python manage.py test tests.test_momentum tests.test_extra_stats --keepdb` (Windows uses `.venv/Scripts/python`).

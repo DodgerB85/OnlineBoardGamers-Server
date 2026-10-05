@@ -1,4 +1,5 @@
 <script setup>
+import TurnNudge from "../../../../Lobby/frontend/TurnNudge.vue"
 /** Action area - This is where you interact with the game flow.
  * Confirm actions, end turn, reset turn.
  * Also, it's where you're told what to do next
@@ -596,6 +597,7 @@ const getGameOverReason = computed(() => {
 						<br />
 
 						<br />
+						<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 						<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
 						<span>
 							<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.timedOutPlayerObj().name }} in the game - but end their current turn</button>
@@ -615,6 +617,7 @@ const getGameOverReason = computed(() => {
 						Please consider giving them a short grace period, in case they are just delayed
 
 						<br />
+						<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 						<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
 						<span>
 							<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">Permanently Kickout {{ controller.timedOutPlayerObj().name }}</button>
@@ -655,6 +658,7 @@ const getGameOverReason = computed(() => {
 					</span>
 					<br />
 					<br />
+					<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 					<span>
 						<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button>
 					</span>

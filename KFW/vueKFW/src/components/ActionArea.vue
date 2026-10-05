@@ -1,4 +1,5 @@
 <script setup>
+import TurnNudge from "../../../../Lobby/frontend/TurnNudge.vue"
 import * as rf from "../js/KFWreference"
 import * as view from "../js/KFWview"
 import * as model from "../js/KFWmodel"
@@ -334,6 +335,7 @@ function shouldShowIntroText() {
 				<br />
 				<br />
 				<br />
+				<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
 
 				<button class="actionsLineButton" @click="IO.nudgeTourneyAdmins(1)">Alert Admins</button>
@@ -358,6 +360,7 @@ function shouldShowIntroText() {
 					<br />
 
 					<br />
+					<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
 					<span>
 						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
@@ -398,6 +401,7 @@ function shouldShowIntroText() {
 					</span>
 					<br />
 					<br />
+					<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 					<span>
 						<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button>
 					</span>

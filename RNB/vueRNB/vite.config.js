@@ -53,6 +53,7 @@ export default defineConfig(({ command }) => ({
 	},
 
 	resolve: {
+		dedupe: ["vue"],
 		alias: command === "serve" ? [{ find: "@static", replacement: fileURLToPath(new URL("./src", import.meta.url)) }] : [{ find: "@static", replacement: fileURLToPath(new URL("../static", import.meta.url)) }],
 	},
 	base: command === "serve" ? "/static/" : "https://www.onlineboardgamers.com/static/RNB",

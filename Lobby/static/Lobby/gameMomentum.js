@@ -5,15 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	const targets = document.getElementById("gameMomentumTargets")
 	const streak = document.getElementById("gameMomentumStreak")
 	let currentGameID
-	let launcher
-	const pageGameID = window.initData?.tutorial ? null : Number(dialog.dataset.gameId)
-
-	function updateLauncher(data) {
-		if (!launcher) return
-		launcher.hidden = !data.isActive || !data.targets.length
-		launcher.title = "Send the overdue player a turn reminder"
-	}
-
 	async function getMomentum(gameID) {
 		const response = await fetch(`/gameMomentum/${gameID}/`, { headers: { Accept: "application/json" } })
 		if (!response.ok) throw new Error("Unable to load game momentum. You must be a player in this match.")
@@ -22,7 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	async function renderMomentum(gameID) {
 		const data = await getMomentum(gameID)
-		if (gameID === pageGameID) updateLauncher(data)
 		targets.replaceChildren()
 		document.getElementById("gameMomentumNudge").textContent = data.nudge || ""
 		streak.textContent = data.streak?.days > 0 && data.isActive ? `🔥 ${data.streak.days} day streak · Best: ${data.streak.best}. ${data.streak.hasMovedToday ? "Today's goal is met." : "One turn by anyone before midnight UTC meets today's goal."}` : ""
@@ -73,33 +63,9 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 	}
 
-	if (pageGameID) {
-		getMomentum(pageGameID).then(data => {
-			if (!data.isActive) return
-			launcher = document.createElement("button")
-			launcher.type = "button"
-			launcher.className = "game-momentum-launcher"
-			launcher.textContent = "Nudge"
-			updateLauncher(data)
-			launcher.addEventListener("click", () => openMomentum(pageGameID))
-			function attachLauncher() {
-				const kickoutButton = document.getElementById("cancelKickoutButton") || document.getElementById("confirmKickoutButton")
-				if (!kickoutButton) {
-					launcher.remove()
-					return
-				}
-				const anchor = kickoutButton.parentElement.tagName === "SPAN" ? kickoutButton.parentElement : kickoutButton
-				if (anchor.previousSibling !== launcher) anchor.before(launcher)
-			}
-			// Kickout controls can appear, disappear or be replaced during play.
-			const observer = new MutationObserver(attachLauncher)
-			observer.observe(document.body, { childList: true, subtree: true })
-			attachLauncher()
-		}).catch(error => console.debug(error.message))
-	}
+	document.addEventListener("gameMomentumOpen", event => openMomentum(event.detail.gameID))
 	setInterval(() => {
 		if (document.visibilityState !== "visible") return
 		if (dialog.open && currentGameID) renderMomentum(currentGameID).catch(error => { message.textContent = error.message })
-		else if (launcher) getMomentum(pageGameID).then(updateLauncher).catch(error => console.debug(error.message))
 	}, 60000)
 })
