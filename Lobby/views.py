@@ -1646,7 +1646,7 @@ def login_view(request):
             else:
                 response = HttpResponseRedirect(nxt)
 
-            response.set_cookie(settings.LANGUAGE_COOKIE_NAME, language_code)
+            response.set_cookie(settings.LANGUAGE_COOKIE_NAME, language_code, max_age=settings.LANGUAGE_COOKIE_AGE)
             return response
         else:
             try:

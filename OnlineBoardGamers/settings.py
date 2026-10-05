@@ -381,6 +381,11 @@ LANGUAGES = (
 
 LANGUAGE_CODE = "en-gb"
 
+# Keep the chosen language for 10 years instead of only for the browser session.
+# Without this, LANGUAGE_COOKIE_AGE is None (a session cookie) and the language
+# falls back to the browser's Accept-Language header on the next fresh session.
+LANGUAGE_COOKIE_AGE = 10 * 365 * 24 * 60 * 60
+
 LOCALE_PATHS = [
     join(BASE_DIR, "Lobby", "locale"),
     join(BASE_DIR, "FCM", "locale"),
