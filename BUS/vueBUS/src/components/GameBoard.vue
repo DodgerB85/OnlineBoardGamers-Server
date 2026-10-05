@@ -146,8 +146,8 @@ function getCorrectedBusIndex(position) {
 						width: (store.refSize * getBoardWidth()) / 100 + 'px',
 						height: (store.refSize * 732) / 100 + 'px',
 					}"
-					:class="{ rightActionSelection: store.topMenuViews.displayRightActionSelection }">
-					<img id="gameBoardImg" :src="getBoardImgSrc()" :class="{ rightActionSelection: store.topMenuViews.displayRightActionSelection }" />
+				:class="{ rightActionSelection: personal.selectedBoard !== rf.BOARD_20A_CAPSTONE }">
+				<img id="gameBoardImg" :src="getBoardImgSrc()" :class="{ rightActionSelection: personal.selectedBoard !== rf.BOARD_20A_CAPSTONE }" />
 
 					<scoreDiv />
 					<BuildingsDivs v-if="personal.selectedBoard !== rf.BOARD_OG" />

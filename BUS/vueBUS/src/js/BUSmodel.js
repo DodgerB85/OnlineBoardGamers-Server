@@ -49,8 +49,6 @@ export function initGame() {
 		} else {
 			personal.selectedBoard = window.initData.preferredBusBoard
 		}
-		if (personal.selectedBoard === rf.BOARD_20A_CAPSTONE) store.topMenuViews.displayRightActionSelection = false
-		if (personal.selectedBoard === rf.BOARD_PITTS) store.topMenuViews.displayRightActionSelection = true
 	}
 
 	// Set up Involved Player data
