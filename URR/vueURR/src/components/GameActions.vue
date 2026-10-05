@@ -269,7 +269,11 @@ watch(() => props.selectedArea, (id) => {
 watch(() => frame.value?.area, () => { waterTarget.value = null; waterAmount.value = 1 })
 watch(() => frame.value?.water, (water) => { if (water > 0 && waterAmount.value > water) waterAmount.value = water })
 watch(waterOptions, (choices) => { if (!choices.some((choice) => choice.area === waterTarget.value)) waterTarget.value = null })
-watch(() => state.value?.diggers.filter((crew) => !crew.hasDug).map((crew) => crew.id).join(","), () => {
+watch(() => state.value?.diggers.filter((crew) => !crew.hasDug).map((crew) => crew.id).join(","), (unusedCrews, previousCrews) => {
+	if (store.gameflow.developmentStep === "digging") {
+		if (unusedCrews === "") activeSection.value = "equipment"
+		else if (previousCrews === "") activeSection.value = "dig"
+	}
 	if (!state.value?.diggers.some((crew) => crew.id === selectedCrew.value && !crew.hasDug)) selectedCrew.value = state.value?.diggers.find((crew) => !crew.hasDug)?.id ?? null
 })
 watch(() => store.gameflow.developmentStep, (step) => { if (step === "purchasing") activeSection.value = "equipment" })
