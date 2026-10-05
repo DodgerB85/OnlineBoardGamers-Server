@@ -70,6 +70,7 @@ export function applyShadowDisplayNames(names) {
 export function initGameFresh(playerNames, boardDefinition) {
 	const store = useModelStore()
 	restoreState(createGame(playerNames, boardDefinition))
+	store.clearTurnDraft()
 	store.history.splice(0)
 	addHistory(rf.HIST_NEW_GAME, -1)
 }
@@ -113,6 +114,9 @@ export function importGameData(obj) {
 	// Earlier rules saves had no board. Preserve their economy and turn order.
 	if (data.board?.areas.length === 0) data.board = createBoard(createPrintedBoard())
 	const history = expandHistory(data.history || [])
+	const hadDraft = !!store.turnDraft.start
+	store.clearTurnDraft()
+	if (hadDraft) store.turnDraft.message = "The saved game was updated. Your uncommitted turn has been cleared."
 	restoreState(data)
 	store.history.splice(0, store.history.length, ...history)
 }

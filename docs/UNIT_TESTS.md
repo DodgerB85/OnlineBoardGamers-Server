@@ -68,4 +68,4 @@ Notes:
 
 ## URR frontend checks
 
-Run `node URR/vueURR/rulesCheck.mjs` from the repo root. In addition to the rule scenarios, it checks lossless replay compaction, legacy histories, phase checkpoints, inserted/deleted properties and changed arrays, input preservation, cache invalidation after branching, and invalid delta rejection.
+Run `node URR/vueURR/rulesCheck.mjs` from the repo root. In addition to the rule scenarios, it checks lossless replay compaction, legacy histories, phase checkpoints, inserted/deleted properties and changed arrays, input preservation, cache invalidation after branching, invalid delta rejection, and turn review boundaries, including successive states governed by the same king and required routing/harvest/consent choices.

@@ -9,10 +9,11 @@ import { currentWaterFrame, waterChoices } from "../js/URRwater"
 import * as rf from "../js/URRreference"
 import * as debug from "../js/URRdebug"
 import { useModelStore } from "../stores/URRstore.js"
-const emit = defineEmits(["selectArea", "changePath", "reviewDig"])
-const props = defineProps({ highlightedPlayer: { type: Number, default: null }, removalArea: { type: String, default: null }, landDraft: { type: Object, default: null }, waitingPlayerName: { type: String, default: null }, digCapacity: { type: [Number, String], default: null } })
+const emit = defineEmits(["selectArea", "changePath", "reviewDig", "confirmAction", "cancelAction"])
+const props = defineProps({ selectedHex: { type: String, default: null }, mapAction: { type: Object, default: null }, actionTargets: { type: Array, default: () => [] }, highlightedPlayer: { type: Number, default: null }, removalArea: { type: String, default: null }, landDraft: { type: Object, default: null }, waitingPlayerName: { type: String, default: null }, digCapacity: { type: [Number, String], default: null } })
 const store = useModelStore()
 const selectedHex = ref(null)
+watch(() => props.selectedHex, (id) => { selectedHex.value = id })
 const focusedHex = ref(null)
 const boardElement = ref(null)
 const showCoordinates = ref(false)
@@ -44,7 +45,7 @@ const riverPaths = computed(() => (store.board.riverSources || []).map((source) 
 }))
 const waterReport = computed(() => [...store.computedHistory].reverse().find((entry) => (!store.viewSettings.showReplay || entry.historyIndex <= store.replayStep.index) && ["riverStart", "riverComplete"].includes(entry.administration?.kind))?.administration)
 const selectedArea = computed(() => store.board.areas.find((area) => area.id === selectedHex.value))
-const reachable = computed(() => !previewOpen.value && selectedArea.value?.waterwork ? boardRules.getWaterworkReach(store, selectedArea.value.id) : [])
+const reachable = computed(() => !previewOpen.value && !store.viewSettings.actionIntent && selectedArea.value?.waterwork ? boardRules.getWaterworkReach(store, selectedArea.value.id) : [])
 const waterDestinations = computed(() => waterChoices(store).map((choice) => choice.area))
 const routingArea = computed(() => currentWaterFrame(store)?.area)
 const chosenRemoval = computed(() => !store.viewSettings.showReplay && store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === "harvest" ? props.removalArea : null)
@@ -52,17 +53,17 @@ const queuedPurchase = computed(() => !store.viewSettings.showReplay && store.ga
 const maintenanceState = computed(() => store.gameflow.phase === rf.PHASE_DEVELOPMENT && !["eridu", "betweenStates"].includes(store.gameflow.developmentStep) && !store.gameflow.pendingOffer ? store.states[currentStateId(store)] : null)
 const needsMaintenanceSales = computed(() => maintenanceState.value && store.players[maintenanceState.value.king].money < maintenanceShortfall(store, maintenanceState.value.id))
 const queuedSales = computed(() => !store.viewSettings.showReplay && (store.gameflow.phase === rf.PHASE_SETTLEMENT || needsMaintenanceSales.value) ? props.landDraft?.sales || [] : [])
-const maintenanceLand = computed(() => needsMaintenanceSales.value ? store.board.areas.filter((area) => !getMaintenanceSaleError(store, maintenanceState.value.king, area, maintenanceState.value.id)).map((area) => area.id) : [])
+const maintenanceLand = computed(() => needsMaintenanceSales.value && store.viewSettings.actionIntent === "sell" ? store.board.areas.filter((area) => !getMaintenanceSaleError(store, maintenanceState.value.king, area, maintenanceState.value.id)).map((area) => area.id) : [])
 const harvestRemovalSites = computed(() => store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === "harvest" ? removableWaterworks(store, currentStateId(store)) : [])
 const barahshumSites = computed(() => {
 	const nation = store.nations[rf.NATION_BARAHSHUM]
 	const owner = nation.ownerType === "player" ? nation.owner : store.states[nation.owner]?.king
-	return !previewOpen.value && !needsMaintenanceSales.value && canExchangeBarahshum(store, owner) ? barahshumDestinations(store) : []
+	return store.viewSettings.actionIntent === "barahshum" && !previewOpen.value && !needsMaintenanceSales.value && canExchangeBarahshum(store, owner) ? barahshumDestinations(store) : []
 })
 
 const calahSites = computed(() => {
 	const nation = store.nations[rf.NATION_CALAH]
-	if (previewOpen.value || needsMaintenanceSales.value || store.gameflow.pendingOffer || store.gameflow.phase !== rf.PHASE_DEVELOPMENT || ["eridu", "betweenStates"].includes(store.gameflow.developmentStep) || nation.isRemoved || nation.ownerType !== "state" || nation.owner !== currentStateId(store)) return []
+	if (store.viewSettings.actionIntent !== "calah" || previewOpen.value || needsMaintenanceSales.value || store.gameflow.pendingOffer || store.gameflow.phase !== rf.PHASE_DEVELOPMENT || ["eridu", "betweenStates"].includes(store.gameflow.developmentStep) || nation.isRemoved || nation.ownerType !== "state" || nation.owner !== currentStateId(store)) return []
 	return store.board.areas.filter((area) => !area.waterwork && isCalahWaterworkLocation(store, area) && !boardRules.isNationLandClosed(store, area)).map((area) => area.id)
 })
 
@@ -71,11 +72,21 @@ const inspectionTargets = computed(() => new Set(store.board.areas.filter((area)
 	(store.viewSettings.inspectedState !== null && area.state === store.viewSettings.inspectedState) ||
 	(props.highlightedPlayer !== null && area.owner === props.highlightedPlayer)
 ).map((area) => area.id)))
+const confirmationPosition = computed(() => {
+	const position = actualAreas.value.find((entry) => entry.area.id === props.mapAction?.area)?.position
+	return position ? { left: `clamp(0px, ${position.x / boardDisplay.MAP_WIDTH * 100}%, calc(100% - 220px))`, top: `min(${(position.y + 45) / boardDisplay.MAP_HEIGHT * 100}%, calc(100% - 100px))` } : null
+})
 const mapHint = computed(() => {
+	if (store.turnDraft.ready) return "Review your draft · Undo, Reset Turn, or End Turn to confirm"
+
 	if (hasMapInspection.value) return "Inspecting the map · Clear map inspection to show available actions"
 	if (store.viewSettings.showReplay) return "Historical position · click a hex to inspect"
 	if (store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === "routing") return `${props.waitingPlayerName ? `Waiting for ${props.waitingPlayerName} · ` : ""}Choose a numbered blue destination; the source has a dashed outline`
 	if (props.waitingPlayerName) return `Waiting for ${props.waitingPlayerName} · ${store.gameflow.pendingOffer?.action.area ? 'review the highlighted site' : 'click a hex to inspect'}`
+	if (store.viewSettings.actionIntent === "build") return "Choose a highlighted site to build a pump or reservoir"
+	if (store.viewSettings.actionIntent === "calah") return "Choose a highlighted site for Calah's free waterwork"
+	if (store.viewSettings.actionIntent === "barahshum") return "Choose a highlighted canal destination beside Barahshum"
+	if (store.viewSettings.actionIntent === "sell") return "Choose highlighted land to fund the required crew"
 	if (store.gameflow.pendingOffer) return store.gameflow.pendingOffer.action.type === "offerNation" ? "Review the proposed nation purchase" : "Review the proposal at the highlighted site"
 	if (queuedPurchase.value || queuedSales.value.length) return needsMaintenanceSales.value ? "Crew funding: red sites are queued sales" : "Trade draft: blue purchase · red sales"
 	if (store.gameflow.phase === rf.PHASE_SETTLEMENT) return barahshumSites.value.length ? "Select land · purple sites allow Barahshum" : "Select land to buy or sell"
@@ -212,7 +223,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 					<polygon v-if="inspectionTargets.has(entry.area.id)" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="inspectionHalo" />
 					<polygon v-if="store.viewSettings.inspectedState !== null && entry.area.state === store.viewSettings.inspectedState" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="inspectionHighlight" />
 					<polygon v-if="highlightedPlayer !== null && entry.area.owner === highlightedPlayer" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="inspectionHighlight ownedLandHighlight" />
-					<polygon :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="areaHit" :class="hasMapInspection ? {} : { digComplete: digOptions[entry.area.id] && !digOptions[entry.area.id].error && digOptions[entry.area.id].isComplete, digContinue: digOptions[entry.area.id] && !digOptions[entry.area.id].error && !digOptions[entry.area.id].isComplete, selected: selectedHex === entry.area.id, drafting: draftPath.includes(entry.area.id), reachable: reachable.includes(entry.area.id), waterDestination: waterDestinations.includes(entry.area.id), routing: routingArea === entry.area.id, maintenanceSale: maintenanceLand.includes(entry.area.id), barahshumSite: barahshumSites.includes(entry.area.id), calahSite: calahSites.includes(entry.area.id), harvestRemovalSite: harvestRemovalSites.includes(entry.area.id), removalTarget: chosenRemoval === entry.area.id, tradePurchase: queuedPurchase === entry.area.id, tradeSale: queuedSales.includes(entry.area.id), offerTarget: store.gameflow.pendingOffer?.action.area === entry.area.id }" role="button" :tabindex="tabArea === entry.area.id ? 0 : -1" :data-area-id="entry.area.id" :aria-label="areaDescription(entry.area)" @focus="focusedHex = entry.area.id" @keydown="moveFocus($event, entry)" @click="inspectArea(entry.area.id)" @keydown.enter.prevent="inspectArea(entry.area.id)" @keydown.space.prevent="inspectArea(entry.area.id)"><title>{{ areaDescription(entry.area) }}</title></polygon>
+					<polygon :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="areaHit" :class="hasMapInspection || store.turnDraft.ready ? {} : { actionSite: actionTargets.includes(entry.area.id), digComplete: digOptions[entry.area.id] && !digOptions[entry.area.id].error && digOptions[entry.area.id].isComplete, digContinue: digOptions[entry.area.id] && !digOptions[entry.area.id].error && !digOptions[entry.area.id].isComplete, selected: selectedHex === entry.area.id, drafting: draftPath.includes(entry.area.id), reachable: reachable.includes(entry.area.id), waterDestination: waterDestinations.includes(entry.area.id), routing: routingArea === entry.area.id, maintenanceSale: maintenanceLand.includes(entry.area.id), barahshumSite: barahshumSites.includes(entry.area.id), calahSite: calahSites.includes(entry.area.id), harvestRemovalSite: harvestRemovalSites.includes(entry.area.id), removalTarget: chosenRemoval === entry.area.id, tradePurchase: queuedPurchase === entry.area.id, tradeSale: queuedSales.includes(entry.area.id), offerTarget: store.gameflow.pendingOffer?.action.area === entry.area.id }" role="button" :tabindex="tabArea === entry.area.id ? 0 : -1" :data-area-id="entry.area.id" :aria-label="areaDescription(entry.area)" @focus="focusedHex = entry.area.id" @keydown="moveFocus($event, entry)" @click="inspectArea(entry.area.id)" @keydown.enter.prevent="inspectArea(entry.area.id)" @keydown.space.prevent="inspectArea(entry.area.id)"><title>{{ areaDescription(entry.area) }}</title></polygon>
 					<polygon v-if="queuedPurchase === entry.area.id && queuedSales.includes(entry.area.id)" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="purchaseSaleOutline" />
 					<polygon v-if="entry.area.irrigatedBy !== null" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="wetHex" />
 					<polygon v-if="entry.area.id === store.viewSettings.historyArea" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="historyOutline" />
@@ -222,15 +233,20 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 					<image v-if="entry.area.waterwork" :href="getWaterworkImage(entry.area.waterwork.state, entry.area.waterwork.capacity)" :x="entry.position.x + 10" :y="entry.position.y - 40" width="32" height="32" class="waterworkMarker"><title>{{ rf.STATE_NAMES[entry.area.waterwork.state] }} {{ entry.area.waterwork.kind }} · {{ waterworkMeasure(entry.area.waterwork) }}</title></image>
 					<rect v-if="entry.area.waterwork" :x="entry.position.x + 10" :y="entry.position.y - 40" width="32" height="32" class="tokenFrame" />
 					<circle v-if="entry.area.irrigatedBy !== null" :cx="entry.position.x + 24" :cy="entry.position.y + 20" r="10" class="irrigationMarker"><title>Irrigated by {{ rf.STATE_NAMES[entry.area.irrigatedBy] }}</title></circle>
-					<g v-if="!hasMapInspection && (waterDestinations.includes(entry.area.id) || routingArea === entry.area.id)" class="waterDecisionHighlight">
+					<g v-if="!hasMapInspection && !store.turnDraft.ready && (waterDestinations.includes(entry.area.id) || routingArea === entry.area.id)" class="waterDecisionHighlight">
 						<polygon :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="waterDecisionHalo" />
 						<polygon :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="waterDecisionOutline" :class="{ source: routingArea === entry.area.id, chosen: selectedHex === entry.area.id && waterDestinations.includes(entry.area.id) }" />
 						<template v-if="waterDestinations.includes(entry.area.id)"><circle :cx="entry.position.x - 28" :cy="entry.position.y - 27" r="16" class="destinationBadge" /><text :x="entry.position.x - 28" :y="entry.position.y - 27" class="destinationNumber">{{ waterDestinations.indexOf(entry.area.id) + 1 }}</text></template>
 						<template v-else><rect :x="entry.position.x - 33" :y="entry.position.y + 23" width="66" height="23" rx="4" class="sourceBadge" /><text :x="entry.position.x" :y="entry.position.y + 35" class="sourceLabel">Source</text></template>
 					</g>
+					<polygon v-if="!hasMapInspection && !store.turnDraft.ready && actionTargets.length && !actionTargets.includes(entry.area.id)" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="actionShade" />
 					<polygon v-if="hasMapInspection && !inspectionTargets.has(entry.area.id)" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="inspectionShade" />
 				</g>
 			</svg>
+			<div v-if="mapAction && confirmationPosition && !hasMapInspection && !store.turnDraft.ready" class="mapConfirmation" :style="confirmationPosition">
+				<b>{{ mapAction.label }}</b><small>{{ mapAction.detail }}</small>
+				<div><button :disabled="!mapAction.canConfirm" @click="emit('confirmAction')">Confirm</button><button @click="emit('cancelAction')">Cancel</button></div>
+			</div>
 		</div>
 		<div v-if="store.viewSettings.inspectedState !== null || highlightedPlayer !== null" class="mapInspectionCue">Inspecting <span v-if="store.viewSettings.inspectedState !== null">{{ rf.STATE_NAMES[store.viewSettings.inspectedState] }} territory</span><span v-if="store.viewSettings.inspectedState !== null && highlightedPlayer !== null"> · </span><span v-if="highlightedPlayer !== null">{{ store.players[highlightedPlayer].displayName }}’s owned land</span> · other hexes dimmed; clear inspection to show available actions<button @click="store.viewSettings.inspectedState = null; store.viewSettings.showOwnedLand = false">Clear map inspection</button></div>
 		<div class="boardLegend">White square: sold land · River number: reservoir water capacity · Land number: pump reach in canals</div>
@@ -265,6 +281,8 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 </template>
 
 <style scoped>
+.mapSurface { position: relative; }.mapConfirmation { position: absolute; width: 220px; max-width: 100%; box-sizing: border-box; padding: 8px; background: #fff9e9; border: 2px solid #177daf; border-radius: 5px; box-shadow: 0 2px 8px #0005; text-align: left; font-size: 13px; line-height: 1.4; z-index: 2; }.mapConfirmation b { display: block; }.mapConfirmation small { display: block; margin: 4px 0; }.mapConfirmation button { min-height: 36px; margin-right: 5px; font: inherit; }.mapConfirmation button:first-child { background: #d9ead1; }.areaHit.actionSite { fill: #7bdca3; fill-opacity: .35; stroke: #176a3b; stroke-width: 6; }.actionShade { fill: #fff9e9; fill-opacity: .55; pointer-events: none; }
+
 .areaHit.digComplete { fill: #7bdca3; fill-opacity: .3; stroke: #176a3b; }
 .areaHit.digContinue { fill: #c1e8ed; fill-opacity: .25; stroke: #257b89; stroke-dasharray: 10 6; }
 .digStatus, .previewError { width: 100%; box-sizing: border-box; padding: 8px; background: #fff9df; text-align: left; font-size: 13px; line-height: 1.5; }

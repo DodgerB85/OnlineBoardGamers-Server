@@ -6,7 +6,7 @@ import { currentStateId, phaseStr } from "./js/URRview"
 import { checkForLatestData } from "./backend/URR_IO"
 import { StartWebSocket } from "./backend/URRwebsocket"
 import { getAutomaticAction, canExchangeBarahshum, harvestAmount, maintenanceShortfall } from "./js/URRrules"
-import { submitAction } from "./js/URRcontroller"
+import { submitAction, endPlayerTurn } from "./js/URRcontroller"
 
 import TopMenu from "./components/TopMenu.vue"
 import TopMenuViews from "./components/TopMenuViews.vue"
@@ -15,6 +15,7 @@ import MapArea from "./components/MapArea.vue"
 import GameOverview from "./components/GameOverview.vue"
 import DevelopmentProgress from "./components/DevelopmentProgress.vue"
 import TurnOrder from "./components/TurnOrder.vue"
+import TurnControls from "./components/TurnControls.vue"
 import GameActions from "./components/GameActions.vue"
 import StateStrip from "./components/StateStrip.vue"
 import PlayerHoldings from "./components/PlayerHoldings.vue"
@@ -35,6 +36,9 @@ const holdings = ref(null)
 const statusPanels = ref(null)
 const actionPanelBody = ref(null)
 const selectedArea = ref(null)
+const gameActions = ref(null)
+const mapAction = ref(null)
+const actionTargets = ref([])
 const removalArea = ref(null)
 const landDraft = ref(null)
 const canalPath = ref([])
@@ -82,6 +86,7 @@ const showLandMarket = computed(() => {
 })
 const isBarahshumExchange = computed(() => !personal.haltPlay && !store.viewSettings.showReplay && personal.pov >= 0 && !personal.canPlay() && canExchangeBarahshum(store, personal.pov))
 const actingLabel = computed(() => {
+	if (store.turnDraft.ready) return `Reviewing: ${store.players[store.turnDraft.player]?.displayName}`
 	if (isBarahshumExchange.value) return `Acting: ${store.players[personal.pov].displayName} · Barahshum exchange`
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return ""
 	const player = store.players[store.gameflow.turnOrder[0]]
@@ -90,6 +95,7 @@ const actingLabel = computed(() => {
 	return `${context}: ${stateId === null ? '' : `${rf.STATE_NAMES[stateId]} · `}${player?.displayName || 'Automatic resolution'}`
 })
 const actionPanelTitle = computed(() => {
+	if (store.turnDraft.ready) return "Confirm your turn"
 	if (store.gameflow.pendingOffer) return "Agreement requested"
 	if (store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS) {
 		if (store.gameflow.auction) return `Auction: ${rf.NATION_NAMES[store.gameflow.auction.nation]}`
@@ -114,6 +120,9 @@ function selectArea(id) {
 	if (id !== null && store.gameflow.phase === rf.PHASE_SETTLEMENT) store.viewSettings.inspectedState = store.board.areas.find((area) => area.id === id).state
 }
 function startDig(keepPath = false) {
+	store.viewSettings.actionIntent = "dig"
+	store.viewSettings.inspectedState = null
+	store.viewSettings.showOwnedLand = false
 	map.value.startDig(keepPath)
 	nextTick(() => map.value.revealBoard())
 }
@@ -135,7 +144,19 @@ watch([() => store.gameflow.turn, () => store.gameflow.phase, () => store.gamefl
 		actionPanelBody.value.parentElement.scrollTop = 0
 	}
 })
-const automaticAction = computed(() => personal.canPlay() && !store.viewSettings.showLoader && !store.viewSettings.isSaving && !store.viewSettings.performingRewind ? getAutomaticAction(store) : null)
+watch(() => store.turnDraft.revision, () => {
+	map.value?.finishDig()
+	selectedArea.value = null
+	removalArea.value = null
+	landDraft.value = null
+	mapAction.value = null
+	actionTargets.value = []
+})
+async function finishTurn() {
+	if (gameActions.value && !store.turnDraft.ready) return gameActions.value.finishTurn()
+	return endPlayerTurn()
+}
+const automaticAction = computed(() => !store.turnDraft.pauseAutomatic && !store.turnDraft.ready && personal.canPlay() && !store.viewSettings.showLoader && !store.viewSettings.isSaving && !store.viewSettings.performingRewind ? getAutomaticAction(store) : null)
 watch(automaticAction, (action) => { if (action) submitAction(action) }, { immediate: true, flush: "post" })
 
 function showDebug() {
@@ -156,13 +177,14 @@ function showDebug() {
 			<aside ref="statusPanels" class="stateSidebar"><PlayerHoldings ref="holdings" /><StateStrip @inspect="revealStatus" /><EquipmentSupply /></aside>
 			<div class="mapContainer">
 				<TerrainMarket v-if="showLandMarket" />
-				<MapArea ref="map" :highlighted-player="store.viewSettings.showOwnedLand ? holdings?.activePlayer ?? null : null" :removal-area="removalArea" :land-draft="landDraft" :waiting-player-name="waitingPlayerName" :dig-capacity="digCapacity" @select-area="selectArea" @change-path="canalPath = $event" @review-dig="reviewDig" />
+				<MapArea ref="map" :selected-hex="selectedArea" :map-action="mapAction" :action-targets="actionTargets" @confirm-action="gameActions?.confirmMapAction()" @cancel-action="gameActions?.cancelMapAction()" :highlighted-player="store.viewSettings.showOwnedLand ? holdings?.activePlayer ?? null : null" :removal-area="removalArea" :land-draft="landDraft" :waiting-player-name="waitingPlayerName" :dig-capacity="digCapacity" @select-area="selectArea" @change-path="canalPath = $event" @review-dig="reviewDig" />
 			</div>
 			<aside v-if="!store.viewSettings.showReplay" class="actionSidebar">
 				<div class="actionPanelHeading"><small class="actingLabel">{{ actingLabel }}</small>{{ actionPanelTitle }}</div>
-				<DevelopmentProgress />
-				<div ref="actionPanelBody" class="actionPanelBody"><NationMarket v-if="store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS" @locate-nation="locateNation" />
-				<GameActions v-else :selected-area="selectedArea" :path="canalPath" @start-dig="startDig" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" @change-dig-capacity="digCapacity = $event" /></div>
+				<DevelopmentProgress v-if="!store.turnDraft.ready" />
+				<div v-if="!store.turnDraft.ready" ref="actionPanelBody" class="actionPanelBody"><NationMarket v-if="store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS" @locate-nation="locateNation" />
+				<GameActions v-else ref="gameActions" :key="store.turnDraft.revision" @select-area="selectedArea = $event" @change-map-action="mapAction = $event" @change-action-targets="actionTargets = $event" :selected-area="selectedArea" :path="canalPath" @start-dig="startDig" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" @change-dig-capacity="digCapacity = $event" /></div>
+				<TurnControls @end-turn="finishTurn" />
 			</aside>
 		</div>
 		<DebugArea v-if="showDebug() && !store.viewSettings.showReplay" />

@@ -5,6 +5,7 @@ import * as rules from "./src/js/URRrules.js"
 import { createGame, applyAction, finishWaterRouting } from "./src/js/URRgame.js"
 import { startWaterRouting, allocateWater, waterChoices } from "./src/js/URRwater.js"
 import { getCanalCost, getDigPathPreview } from "./src/js/URRmap.js"
+import { endsDecision, defaultEndAction, describeAction } from "./src/js/URRturnDraft.js"
 import { compactHistory, expandHistory } from "./src/js/URRhistoryStorage.js"
 
 const fresh = () => createGame(["A", "B", "C"])
@@ -423,4 +424,37 @@ const area = (game, areaId) => game.board.areas.find((entry) => entry.id === are
 	assert.throws(() => expandHistory([[rf.HIST_ACTION, 0, compact[1][2]]]), /Invalid URR replay delta/)
 }
 
-console.log("URR rule and replay storage checks passed")
+// Ending a state's development is a review boundary even when the same king
+// controls the next state. Buying equipment alone remains undoable in that turn.
+{
+	const game = fresh()
+	Object.assign(game.gameflow, { phase: rf.PHASE_DEVELOPMENT, stateOrder: [rf.STATE_SUMER, rf.STATE_AKKAD], stateIndex: 0, developmentStep: "digging", turnOrder: [0] })
+	for (const stateId of game.gameflow.stateOrder) {
+		game.states[stateId].king = 0
+		game.states[stateId].money = 1000
+		game.states[stateId].diggers = [{ id: stateId, capacity: 1, era: 1, hasDug: false }]
+	}
+	const purchase = { type: "buyCard", kind: "digger" }
+	const purchased = applyAction(game, 0, purchase)
+	assert.equal(endsDecision(game, purchased, purchase), false)
+	assert.equal(purchased.gameflow.developmentStep, "purchasing")
+	const end = defaultEndAction(purchased)
+	const next = applyAction(purchased, 0, end)
+	assert.equal(next.gameflow.turnOrder[0], 0)
+	assert.equal(endsDecision(purchased, next, end), true)
+	assert.match(describeAction(purchased, next, end), /End Turn to confirm/)
+	const offer = { ...game, gameflow: { ...game.gameflow, pendingOffer: { returnPlayer: 0 } } }
+	assert.throws(() => defaultEndAction(offer), /Accept or Decline/)
+}
+
+// Ending a routing or harvest turn must not invent a choice for the player.
+{
+	const game = fresh()
+	game.gameflow.phase = rf.PHASE_RAINY_SEASON
+	game.rain.step = "routing"
+	assert.throws(() => defaultEndAction(game), /remaining water/)
+	game.rain.step = "harvest"
+	assert.throws(() => defaultEndAction(game), /harvest/)
+}
+
+console.log("URR rule, replay storage, and turn boundary checks passed")

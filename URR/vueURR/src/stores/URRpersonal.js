@@ -31,7 +31,7 @@ export const usePersonalStore = defineStore("personal", () => {
 	var votedToDelete = false
 
 	function canPlay() {
-		if (this.haltPlay) return false
+		if (this.haltPlay || store.turnDraft.ready) return false
 		if (store.viewSettings.showReplay) return false
 		if (store.gameflow.phase === rf.PHASE_GAME_OVER) return false
 		if (this.pov < 0) return false

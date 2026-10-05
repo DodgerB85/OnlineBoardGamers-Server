@@ -33,6 +33,14 @@ export const useModelStore = defineStore("store", () => {
 		fullTurnOrder: [],
 	})
 
+	// Draft checkpoints are local and never exported to the server.
+	const turnDraft = reactive({ start: null, steps: [], player: null, ready: false, message: "", revision: 0, pauseAutomatic: false })
+	function clearTurnDraft() {
+		Object.assign(turnDraft, { start: null, steps: [], player: null, ready: false, message: "", pauseAutomatic: false })
+		viewSettings.actionIntent = ""
+		turnDraft.revision++
+	}
+
 	const chatData = reactive([])
 	const history = reactive([])
 	// Display-only entries and metadata belong here, not in exported history.
@@ -41,6 +49,7 @@ export const useModelStore = defineStore("store", () => {
 	const viewSettings = reactive({
 		boardZoom: 1,
 		historyArea: null,
+		actionIntent: "",
 		showNotes: false,
 		showChat: false,
 		showBug: false,
@@ -90,6 +99,7 @@ export const useModelStore = defineStore("store", () => {
 
 	return {
 		gameName,
+		turnDraft, clearTurnDraft,
 		players,
 		version, states, nations, board, landPrices, era, cardSupply, rain, nextDiggerId, debug,
 		gameflow,
