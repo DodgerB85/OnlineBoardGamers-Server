@@ -72,9 +72,9 @@ const mapDecisions = computed(() => {
 	}
 	if (previewOpen.value) {
 		for (const [id, option] of Object.entries(digOptions.value)) {
-			if (!option.error) add([id], !draftPath.value.length ? "Start" : option.isComplete ? "Finish" : "Next", option.isComplete ? "finish" : "destination", !draftPath.value.length || !option.isComplete)
+			if (!option.error) add([id], "", option.isComplete ? "finish" : "destination", !draftPath.value.length || !option.isComplete)
 		}
-		draftPath.value.forEach((id, index) => add([id], index === 0 ? "Start" : `Step ${index + 1}`, "path", index === 0))
+		draftPath.value.forEach((id, index) => add([id], index === 0 ? "Source" : "", "path", index === 0))
 	} else {
 		if (store.gameflow.phase === rf.PHASE_SETTLEMENT && !store.viewSettings.actionIntent) {
 			const actor = store.gameflow.turnOrder[0]
@@ -118,7 +118,7 @@ const mapHint = computed(() => {
 	if (store.gameflow.pendingOffer) return store.gameflow.pendingOffer.action.type === "offerNation" ? "Review the proposed nation purchase" : "Review the proposal at the highlighted site"
 	if (queuedPurchase.value || queuedSales.value.length) return needsMaintenanceSales.value ? "Crew funding: red sites are queued sales" : "Trade draft: blue purchase · red sales"
 	if (store.gameflow.phase === rf.PHASE_SETTLEMENT) return barahshumSites.value.length ? "Select land · purple sites allow Barahshum" : "Select land to buy or sell"
-	if (previewOpen.value) return "Choose a highlighted Start, Next, or Finish hex · gold marks your selection"
+	if (previewOpen.value) return "Choose a highlighted source, then extend the canal · green allows finishing; gold marks your selection"
 	if (store.gameflow.phase === rf.PHASE_DEVELOPMENT) {
 		if (store.gameflow.developmentStep === "eridu") return "Trace Eridu’s canal or skip digging"
 		if (store.gameflow.developmentStep === "betweenStates") return barahshumSites.value.length ? "Barahshum: select a highlighted canal site" : "Review the board before the next state"
@@ -265,7 +265,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 						<polygon :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="mapDecisionHalo" />
 						<polygon :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="mapDecisionOutline" :class="{ source: mapDecisions[entry.area.id].source, chosen: selectedHex === entry.area.id || chosenRemoval === entry.area.id }" />
 						<template v-if="mapDecisions[entry.area.id].number"><circle :cx="entry.position.x - 28" :cy="entry.position.y - 27" r="16" class="decisionBadge" /><text :x="entry.position.x - 28" :y="entry.position.y - 27" class="destinationNumber">{{ mapDecisions[entry.area.id].label }}</text></template>
-						<template v-else><rect :x="entry.position.x - 36" :y="entry.position.y + 23" width="72" height="23" rx="4" class="decisionBadge" /><text :x="entry.position.x" :y="entry.position.y + 35" class="decisionLabel">{{ mapDecisions[entry.area.id].label }}</text></template>
+						<template v-else-if="mapDecisions[entry.area.id].label"><rect :x="entry.position.x - 36" :y="entry.position.y + 23" width="72" height="23" rx="4" class="decisionBadge" /><text :x="entry.position.x" :y="entry.position.y + 35" class="decisionLabel">{{ mapDecisions[entry.area.id].label }}</text></template>
 					</g>
 					<polygon v-if="Object.keys(mapDecisions).length && !mapDecisions[entry.area.id]" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="actionShade" />
 					<polygon v-if="hasMapInspection && !inspectionTargets.has(entry.area.id)" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="inspectionShade" />

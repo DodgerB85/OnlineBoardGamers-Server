@@ -259,7 +259,7 @@ watch([() => store.gameflow.phase, () => actor.value, () => store.gameflow.state
 }, { immediate: true })
 watch(() => store.gameflow.primogenitureBid?.amount, (amount) => { if (primogenitureAmount.value <= (amount || 0)) primogenitureAmount.value = (amount || 0) + 1 })
 watch(() => props.selectedArea, (id) => {
-	if (id && store.gameflow.phase === rf.PHASE_DEVELOPMENT && !props.path.length && store.viewSettings.actionIntent !== "sell" && !["eridu", "betweenStates"].includes(store.gameflow.developmentStep)) {
+	if (id && store.gameflow.phase === rf.PHASE_DEVELOPMENT && !props.path.length && !["dig", "sell"].includes(store.viewSettings.actionIntent) && !["eridu", "betweenStates"].includes(store.gameflow.developmentStep)) {
 		activeSection.value = "equipment"
 		if (!["calah", "sell"].includes(store.viewSettings.actionIntent)) store.viewSettings.actionIntent = "build"
 	}
