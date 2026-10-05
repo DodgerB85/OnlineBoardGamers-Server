@@ -1629,7 +1629,15 @@ def login_view(request):
             request.session.modified = True  # Force session save
 
             profile = Profile.objects.get(user=user)
-            language_code = profile.profileLanguage
+            # The cookie is the user's live choice - they may have switched language while
+            # logged out, or on another browser. The profile only mirrors it, so that the
+            # language of notification emails matches the language of the site.
+            cookie_language = request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME)
+            supported = [code for code, name in settings.LANGUAGES]
+            language_code = cookie_language if cookie_language in supported else profile.profileLanguage
+            if language_code != profile.profileLanguage:
+                profile.profileLanguage = language_code
+                profile.save()
             translation.activate(language_code)
 
             nxt = request.POST.get("next", None)  # Use .get() to avoid KeyError
