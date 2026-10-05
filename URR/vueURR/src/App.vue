@@ -35,6 +35,7 @@ const selectedArea = ref(null)
 const removalArea = ref(null)
 const landDraft = ref(null)
 const canalPath = ref([])
+const digCapacity = ref(null)
 const mainArea = ref(null)
 const boardBaseWidth = ref(640)
 let boardObserver = null
@@ -142,12 +143,12 @@ function showDebug() {
 			<aside ref="statusPanels" class="stateSidebar"><PlayerHoldings /><StateStrip @inspect="revealStatus" /><EquipmentSupply /></aside>
 			<div class="mapContainer">
 				<TerrainMarket v-if="showLandMarket" />
-				<MapArea ref="map" :removal-area="removalArea" :land-draft="landDraft" :waiting-player-name="waitingPlayerName" @select-area="selectArea" @change-path="canalPath = $event" @review-dig="reviewDig" />
+				<MapArea ref="map" :removal-area="removalArea" :land-draft="landDraft" :waiting-player-name="waitingPlayerName" :dig-capacity="digCapacity" @select-area="selectArea" @change-path="canalPath = $event" @review-dig="reviewDig" />
 			</div>
 			<aside v-if="!store.viewSettings.showReplay" class="actionSidebar">
 				<div class="actionPanelHeading">{{ actionPanelTitle }}</div>
 				<div ref="actionPanelBody" class="actionPanelBody"><NationMarket v-if="store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS" @locate-nation="locateNation" />
-				<GameActions v-else :selected-area="selectedArea" :path="canalPath" @start-dig="startDig" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" /></div>
+				<GameActions v-else :selected-area="selectedArea" :path="canalPath" @start-dig="startDig" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" @change-dig-capacity="digCapacity = $event" /></div>
 			</aside>
 		</div>
 		<DebugArea v-if="showDebug() && !store.viewSettings.showReplay" />

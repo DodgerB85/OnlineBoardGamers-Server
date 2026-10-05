@@ -4,11 +4,68 @@ import * as rf from "./src/js/URRreference.js"
 import * as rules from "./src/js/URRrules.js"
 import { createGame, applyAction, finishWaterRouting } from "./src/js/URRgame.js"
 import { startWaterRouting, allocateWater, waterChoices } from "./src/js/URRwater.js"
-import { getCanalCost } from "./src/js/URRmap.js"
+import { getCanalCost, getDigPathPreview } from "./src/js/URRmap.js"
 
 const fresh = () => createGame(["A", "B", "C"])
 const id = (row, column) => `printed-${row}-${column}`
 const area = (game, areaId) => game.board.areas.find((entry) => entry.id === areaId)
+
+// 3.2: an outbid offer is returned; only the highest offers reserve money.
+{
+	const game = fresh()
+	game.nations[rf.NATION_DER].bids = [{ player: 1, amount: 115 }, { player: 2, amount: 120 }]
+	assert.equal(rules.availableMoney(game, 1), 600)
+	assert.equal(rules.availableMoney(game, 2), 480)
+	game.nations[rf.NATION_ERIDU].bids = [{ player: 1, amount: 175 }]
+	assert.equal(rules.availableMoney(game, 1), 425)
+}
+
+// 5.3.1.1: a confluence-area reservoir sits downstream of the meeting point.
+{
+	for (const riverId of [id(4, 6), id(7, 3)]) {
+		let game = fresh()
+		Object.assign(game.gameflow, { phase: rf.PHASE_DEVELOPMENT, stateOrder: [0], stateIndex: 0, developmentStep: "digging", turnOrder: [0] })
+		Object.assign(game.states[0], { isActive: true, king: 0, money: 500 })
+		assert.equal(Object.values(game.board.riverDownstream).filter((next) => next === riverId).length, 2)
+		game = applyAction(game, 0, { type: "requestWaterwork", kind: "reservoir", area: riverId })
+		assert.equal(area(game, riverId).waterwork.kind, "reservoir")
+	}
+}
+
+// Route selection rejects impossible prefixes, while allowing dry-end tracing.
+{
+	const game = fresh()
+	game.board.areas = [
+		{ id: "A", isRiver: true, neighbours: ["B", "R"], nation: null },
+		{ id: "B", isRiver: false, neighbours: ["A", "C"], nation: null },
+		{ id: "C", isRiver: false, neighbours: ["B", "D"], nation: null },
+		{ id: "D", isRiver: false, neighbours: ["C"], nation: null },
+		{ id: "R", isRiver: true, neighbours: ["A"], nation: null },
+	]
+	game.board.canals = []
+	assert.equal(getDigPathPreview(game, ["A"], 2).error, "")
+	assert.equal(getDigPathPreview(game, ["A", "B"], "1+1").isComplete, true)
+	assert.deepEqual(getDigPathPreview(game, ["A", "B", "C"], 3).cost, { canals: 2, junctions: 1, points: 3 })
+	assert.match(getDigPathPreview(game, ["A", "B", "C"], "1+1").error, /cannot dig/)
+	assert.match(getDigPathPreview(game, ["A", "B", "C", "D"], 3).error, /4 points/)
+	assert.equal(getDigPathPreview(game, ["A", "B", "C", "D"], "M").isComplete, true)
+	assert.match(getDigPathPreview(game, ["A", "D"], "M").error, /adjacent/)
+	assert.match(getDigPathPreview(game, ["A", "R"], "M").error, /two river/)
+	assert.match(getDigPathPreview(game, ["A", "B", "A"], "M").error, /simple path/)
+	assert.equal(getDigPathPreview(game, ["D", "C"], 4).isComplete, false)
+	assert.equal(getDigPathPreview(game, ["D", "C"], 4).error, "")
+	assert.match(getDigPathPreview(game, ["D", "C"], 3).error, /No legal route/)
+	assert.equal(getDigPathPreview(game, ["D", "C", "B", "A"], 4).isComplete, true)
+	assert.match(getDigPathPreview(game, ["D"], null).error, /Choose an unused/)
+	game.board.canals = [["B", "C"]]
+	assert.match(getDigPathPreview(game, ["A", "B", "C"], "M").error, /middle/)
+	assert.match(getDigPathPreview(game, ["B", "C"], "M").error, /already exists/)
+	area(game, "D").nation = rf.NATION_ERIDU
+	Object.assign(game.nations[rf.NATION_ERIDU], { ownerType: "player", owner: 0 })
+	assert.match(getDigPathPreview(game, ["D"], "M").error, /nation land/)
+	Object.assign(game.nations[rf.NATION_ERIDU], { ownerType: "state", owner: 0 })
+	assert.equal(getDigPathPreview(game, ["D"], 2).error, "")
+}
 
 // 6.3: 5 hill, 4 forest, 3 savannah and 4 desert regions.
 {

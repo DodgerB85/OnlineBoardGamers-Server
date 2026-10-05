@@ -97,3 +97,17 @@ Fixed after a second section-by-section rulebook review. `node rulesCheck.mjs` (
 Confirmed as already matching: seat order is shuffled by the lobby (2); the rulebook's 3.2 division example, the 4.4 sale example, the 4.7 city-price example, clockwise monarch ties and the section 10 table all replay exactly.
 
 Open interpretations, unchanged: a player-owned Barahshum may be dissolved after each state, including the last, but not between Eridu's dig and the first state. FA land stays closed to buying and digging while FA is player-owned. Forced maintenance and revolution sales preserve the throne. These rule changes have not been replayed in the browser.
+
+## Canal selection and rules review — 2026-10-05
+
+Canal tracing uses the selected unused crew's capacity (2 for Eridu). Green hexes complete a legal route; dashed hexes start or continue a route that can still reach the existing network within budget. Invalid clicks leave the draft unchanged and explain the restriction beside the map. The map shows canal and junction costs, supports Undo/Clear, and allows tracing from either end. Final submission still validates the complete path. Changing crews revalidates the draft.
+
+The rules review corrected three findings in the retired audit:
+
+- Only the highest offer on each nation reserves money: an outbid offer is returned explicitly in 3.2.
+- Reservoirs are legal in confluence areas, downstream of the meeting point (5.3.1.1). The routing engine waits for the tributaries before processing the area's reservoir.
+- Eridu is a normal 2-digger with special ownership and timing (9.5), without a homeland exception to 5.2. Player-owned nation land remains closed, including its own homeland. No authoritative online ruling overriding this reading was retrieved from the publisher's rules/errata links.
+
+`rulesCheck.mjs` covers route budgets, split and M crews, adjacency, repeated areas, existing canals/interior junctions, dry-end completion, nation closure, released offers, and confluence reservoir construction.
+
+Remaining component checks from the retired audit: confirm the full land-price track/intervention price, per-state waterwork token counts, printed state order, and 30 ownership markers against physical components. Rulebook examples alone do not establish all these values. Other report-only observations were a stale auction award for a manually corrupted save (unreachable through normal bidding), cross-state nation homelands affecting the board locator label, misleading maintenance-sale errors, and practice-game/debug access settings. These were outside the canal-selection change; maintenance already offers a revolution button.

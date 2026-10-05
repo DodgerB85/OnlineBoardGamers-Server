@@ -15,7 +15,7 @@ import { getWaterworkImage, getEquipmentCardImage, getTerrainImage, getPlayerMar
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
 const props = defineProps({ selectedArea: { type: String, default: null }, path: { type: Array, default: () => [] } })
-const emit = defineEmits(["startDig", "clearPath", "changeRemoval", "changeLandDraft"])
+const emit = defineEmits(["startDig", "clearPath", "changeRemoval", "changeLandDraft", "changeDigCapacity"])
 const store = useModelStore()
 const personal = usePersonalStore()
 const purchase = ref(null)
@@ -37,6 +37,8 @@ const primogenitureError = computed(() => preview({ type: "bidPrimogeniture", am
 const area = computed(() => store.board.areas.find((entry) => entry.id === props.selectedArea))
 const state = computed(() => store.states[currentStateId(store)])
 const chosenCrew = computed(() => state.value?.diggers.find((crew) => crew.id === selectedCrew.value))
+const digCapacity = computed(() => store.gameflow.developmentStep === "eridu" ? 2 : chosenCrew.value && !chosenCrew.value.hasDug ? chosenCrew.value.capacity : null)
+watch(digCapacity, (capacity) => emit("changeDigCapacity", capacity), { immediate: true })
 const pendingOffer = computed(() => store.gameflow.pendingOffer)
 const offeredLand = computed(() => store.board.areas.find((entry) => entry.id === pendingOffer.value?.action.area))
 const offeredLandIncome = computed(() => offeredLand.value ? rf.IRRIGATED_LANDOWNER_INCOME * (offeredLand.value.isCity ? 2 : 1) : 0)
@@ -264,7 +266,7 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 				<div v-if="store.gameflow.developmentStep === 'eridu' || (store.gameflow.developmentStep === 'digging' && state.diggers.some((crew) => !crew.hasDug))" class="actionGroup">
 					<b v-if="store.gameflow.developmentStep === 'eridu'">Eridu's free crew · 2 digging points</b>
 					<label v-if="store.gameflow.developmentStep !== 'eridu'">Digging crew <select v-model="selectedCrew"><option :value="null">Choose crew</option><option v-for="crew in state.diggers" :key="crew.id" :value="crew.id" :disabled="crew.hasDug">{{ crew.capacity }} · crew {{ crew.id + 1 }}{{ crew.hasDug ? ' (used)' : '' }}</option></select><template v-if="chosenCrew"><img v-for="(capacity, index) in String(chosenCrew.capacity).split('+')" :key="index" class="piece" :src="getWaterworkImage(state.id, capacity)" :alt="`${capacity}-point digging crew`" /></template></label>
-					<button @click="emit('startDig', path.length > 0)">{{ path.length ? 'Edit canal path on map' : 'Select canal path on map' }}</button><span>{{ path.map(label).join(' → ') }}</span>
+					<button :disabled="digCapacity === null" @click="emit('startDig', path.length > 0)">{{ path.length ? 'Edit canal path on map' : 'Select canal path on map' }}</button><span>{{ path.map(label).join(' → ') }}</span>
 					<div class="hint" role="status"><template v-if="digError">{{ digError }}</template><template v-else>Path fits: {{ digPreview.cost.canals }} canal point{{ digPreview.cost.canals === 1 ? '' : 's' }} · {{ digPreview.cost.junctions }} junction point{{ digPreview.cost.junctions === 1 ? '' : 's' }}.</template></div>
 					<div v-if="fittingCrews.length" class="buttonRow fittingCrews"><span>This path fits:</span><button v-for="crew in fittingCrews" :key="crew.id" :aria-label="`Use ${crew.capacity} digging crew ${crew.id + 1}`" @click="useFittingCrew(crew)"><img v-for="(capacity, index) in String(crew.capacity).split('+')" :key="index" class="piece" :src="getWaterworkImage(state.id, capacity)" alt="" />Use {{ crew.capacity }} crew</button></div>
 					<button ref="digButton" class="digAction" :class="{ primaryAction: !digError }" :disabled="!!digError" @click="submit(store.gameflow.developmentStep === 'eridu' ? { type: 'digEridu', path } : { type: 'dig', crew: selectedCrew, path })">Dig canal<small v-if="path.length">{{ path.map(label).join(' → ') }}</small></button>
