@@ -1791,6 +1791,9 @@ def profile(request):
             profile.liveNotification = request.POST["liveNotif"]
 
             profile.sendEmailNotificationOnTurn = "sendEmails" in request.POST
+            profile.hotStreakEnabled = "hotStreakEnabled" in request.POST
+            profile.hotStreakReminders = "hotStreakReminders" in request.POST
+            profile.receiveTurnNudges = "receiveTurnNudges" in request.POST
 
             emailNotifications = [
                 int(request.POST["yourTurnEmail"]),

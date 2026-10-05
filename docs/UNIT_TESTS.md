@@ -52,6 +52,13 @@ Notes:
 
 247 tests total (git count may drift slightly as tests are added).
 
+## Momentum and extra statistics
+
+- `tests/test_momentum.py`: shared UTC streak boundaries and resets, duplicate-day credit, practice exclusions, reminders, opt-outs, participant access, stale versions, expired-turn checks and nudge cooldowns. Queueing and delivery are mocked, so these tests do not send messages.
+- `tests/test_extra_stats.py`: absolute, relative and delta histories, HLC offsets, missing DDL timestamps, lobby/play/final-gap separation, action sample weighting, exclusions and the unlisted page.
+
+Run on Linux with `.venv/bin/python manage.py test tests.test_momentum tests.test_extra_stats --keepdb` (Windows uses `.venv/Scripts/python`).
+
 ## Conventions
 
 - `django.test.TestCase` / `SimpleTestCase`, no fixtures — data is created in `setUp` with `User.objects.create_user` etc.

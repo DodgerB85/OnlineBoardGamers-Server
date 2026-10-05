@@ -17,14 +17,17 @@ from django.template.loader import render_to_string
 
 # from django.db import close_old_connections
 # from django.core.mail import send_mail
-from django.utils.translation import activate, get_language, gettext
+from django.utils.translation import activate, get_language, gettext, override
+from django.utils import timezone
+from datetime import timedelta
 
 import Lobby.sharedFunctions.constants as rf
 
 # from django.core.mail import get_connection, EmailMessage
 # from django.urls import reverse
 # from django.http import HttpResponseRedirect
-from Lobby.models import Profile, User
+from Lobby.models import Game, Profile, User
+from Lobby.sharedFunctions.hotStreaks import get_turn_nudge_message
 
 # Website Bots / AI / Shadow
 USERNAMES_NOT_TO_NOTIFY = [
@@ -1762,3 +1765,53 @@ def SN_sendAdminErrorMessage(message):
         )
     except Exception as e:
         print("sendAdminErrorMessage ERROR: " + str(e))
+
+
+def SN_sendMomentumNotification(game, user, message, subject, is_streak=False):
+    profile = user.profile
+    if user.username in USERNAMES_NOT_TO_NOTIFY:
+        return
+    if is_streak and (not profile.hotStreakEnabled or not profile.hotStreakReminders):
+        return
+    if not is_streak and not profile.receiveTurnNudges:
+        return
+    url = f"https://www.onlineboardgamers.com/{game.gameCode}/{game.id}/show/"
+    with override(profile.profileLanguage):
+        url_text = gettext("Open game")
+        # Respect the existing turn-email preference, live-game suppression,
+        # confirmed address, and temporary email pause.
+        if profile.sendEmailNotificationOnTurn and shouldSendEmail("yourTurn", user.username, profile, game.gamePace):
+            try:
+                body = render_to_string("Lobby/gameEmails/momentumEmail.html", {"message": message, "url": url})
+                SN_sendEmail("yourTurn", subject, body, user.email)
+            except Exception as error:
+                print(f"Momentum email failed for {user.username}, game {game.id}: {error}")
+        if profile.webhooks and profile.webhooks != "[]":
+            SN_sendWebhooks(profile, message, url_text, url)
+        if profile.discord_id:
+            SN_sendDiscordDM(profile.discord_id, message, url_text, url)
+
+
+def SN_sendHotStreakReminder(game_id, last_move_date):
+    game = Game.objects.filter(pk=game_id, gameStatus="ACTIVE", streakLastMoveDate=last_move_date).first()
+    if game is None:
+        return
+    today = timezone.now().date()
+    if game.streakLastMoveDate != today - timedelta(days=1):
+        return
+    for gp in game.players.filter(is_current=True, is_kicked=False, is_missing=False, player__isnull=False).select_related("player__profile"):
+        with override(gp.player.profile.profileLanguage):
+            message = gettext("🔥 %(game)s has a shared %(days)s-day streak. Take a turn before midnight UTC to keep it alive; one turn by any player meets today's goal.") % {"game": game.presenter().getGameName(), "days": game.streakDays}
+            SN_sendMomentumNotification(game, gp.player, message, gettext("Your game's streak is about to expire"), is_streak=True)
+
+
+def SN_sendTurnNudge(game_id, target_id, sender_name, expected_update, nudged_at):
+    game = Game.objects.filter(pk=game_id, gameStatus="ACTIVE", latestUpdate=expected_update).first()
+    if game is None or game.presenter().kickoutRequired() == 0:
+        return
+    gp = game.players.filter(player_id=target_id, is_current=True, is_kicked=False, is_missing=False, lastNudgedAt=nudged_at).select_related("player__profile").first()
+    if gp is None:
+        return
+    with override(gp.player.profile.profileLanguage):
+        message = get_turn_nudge_message(game, sender_name)
+        SN_sendMomentumNotification(game, gp.player, message, gettext("A player asked you to take your turn"))

@@ -1,0 +1,8 @@
+#gameMomentumDialog { width: min(440px, calc(100% - 40px)); padding: 24px; border: 1px solid #bbb; border-radius: 12px; color: var(--color-text, #222); background: var(--color-surface, #fff); }
+#gameMomentumDialog::backdrop { background: #0006; }
+#gameMomentumDialog button { padding: 8px 14px; border-radius: 6px; border: 1px solid #aaa; cursor: pointer; margin: 4px; }
+#gameMomentumDialog button:disabled { cursor: default; opacity: .5; }
+.game-momentum-launcher { display: inline-block; vertical-align: middle; margin: 10px; padding: 5px; border: 2px solid green; border-radius: 5px; background: #f0f0f0; color: #222; font-weight: bold; cursor: pointer; }
+.game-momentum-launcher:hover { background: lightgrey; }
+.game-momentum-launcher:active { background: darkgrey; }
+.game-momentum-launcher[hidden] { display: none; }
