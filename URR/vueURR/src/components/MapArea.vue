@@ -49,13 +49,6 @@ const waterDestinations = computed(() => waterChoices(store).map((choice) => cho
 const routingArea = computed(() => currentWaterFrame(store)?.area)
 const chosenRemoval = computed(() => !store.viewSettings.showReplay && store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === "harvest" ? props.removalArea : null)
 const queuedPurchase = computed(() => !store.viewSettings.showReplay && store.gameflow.phase === rf.PHASE_SETTLEMENT ? props.landDraft?.buy : null)
-const decisionArea = computed(() => store.gameflow.pendingOffer?.action.area || (store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === "routing" ? routingArea.value : chosenRemoval.value) || selectedHex.value || queuedPurchase.value)
-const decisionLabel = computed(() => {
-	if (store.gameflow.pendingOffer) return "Find site"
-	if (store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === "routing" && routingArea.value) return "Find source"
-	if (!selectedHex.value && queuedPurchase.value) return "Find purchase"
-	return chosenRemoval.value ? "Find work" : "Find site"
-})
 const maintenanceState = computed(() => store.gameflow.phase === rf.PHASE_DEVELOPMENT && !["eridu", "betweenStates"].includes(store.gameflow.developmentStep) && !store.gameflow.pendingOffer ? store.states[currentStateId(store)] : null)
 const needsMaintenanceSales = computed(() => maintenanceState.value && store.players[maintenanceState.value.king].money < maintenanceShortfall(store, maintenanceState.value.id))
 const queuedSales = computed(() => !store.viewSettings.showReplay && (store.gameflow.phase === rf.PHASE_SETTLEMENT || needsMaintenanceSales.value) ? props.landDraft?.sales || [] : [])
@@ -195,15 +188,14 @@ async function locateArea(id, shouldSelect = false) {
 	hex.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" })
 	revealAboveActions(hex)
 }
-function locateDecision() { return locateArea(decisionArea.value) }
 defineExpose({ startDig, finishDig, revealSelection, revealBoard, locateArea, isTracing: previewOpen })
 watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.stateIndex, store.gameflow.developmentStep, store.rain.step, store.rain.harvestOrder[0], currentWaterFrame(store)?.area], () => { finishDig(); selectedHex.value = null })
 </script>
 
 <template>
 	<div id="mapArea" ref="boardElement">
-		<div class="boardHeading"><b>Game board</b><span class="mapHint">{{ mapHint }}</span><div class="mapZoom"><button v-if="decisionArea" @click="locateDecision">{{ decisionLabel }}</button><button :aria-pressed="showCoordinates" @click="showCoordinates = !showCoordinates" title="Show coordinates on every hex">Hex labels</button></div></div>
-		<div v-if="waterReport" class="riverStatus" role="status"><span><b>River flow · Turn {{ waterReport.turn }}</b> · {{ waterReport.waterTotal }} water from upstream<template v-if="waterReport.kind === 'riverComplete'"> · {{ waterReport.irrigatedCount }} wet hexes · {{ waterReport.outflow }} water flows off the board<template v-if="!waterReport.irrigatedCount"> · No irrigation income</template></template><template v-else> · Routing in progress</template></span><button @click="store.viewSettings.showHistory = true">Flow history</button></div>
+		<div class="boardHeading"><b>Game board</b><span class="mapHint">{{ mapHint }}</span><div class="mapZoom"><button :aria-pressed="showCoordinates" @click="showCoordinates = !showCoordinates" title="Show coordinates on every hex">Hex labels</button></div></div>
+		<div v-if="waterReport" class="riverStatus" role="status"><span><b>River flow · Turn {{ waterReport.turn }}</b> · {{ waterReport.waterTotal }} water from upstream<template v-if="waterReport.kind === 'riverComplete'"> · {{ waterReport.irrigatedCount }} wet hexes · {{ waterReport.outflow }} water flows off the board<template v-if="!waterReport.irrigatedCount"> · No irrigation income</template></template><template v-else> · Routing in progress</template></span></div>
 		<div class="controls" v-if="previewOpen"><b>Canal path:</b><span>{{ draftPath.map((id) => store.board.areas.find((area) => area.id === id)?.label || id).join(' → ') || 'Click a highlighted starting area.' }}</span><button @click="undoDraft" :disabled="!draftPath.length">Undo</button><button @click="clearDraft" :disabled="!draftPath.length">Clear</button><button @click="stopSelectingPath" :disabled="draftPath.length > 0 && !digPreview.isComplete">{{ draftPath.length >= 2 ? 'Review canal' : 'Stop selecting path' }}</button><label><input type="checkbox" v-model="previewWater" :disabled="draftPath.length < 2" /> Animate draft</label></div>
 		<div v-if="previewOpen" class="digStatus" role="status"><b>{{ digCapacity === null ? 'Choose an unused crew' : `${digCapacity} crew` }}</b><template v-if="digPreview.cost"> · {{ digPreview.cost.canals }} canal points + {{ digPreview.cost.junctions }} junction points = {{ digPreview.cost.points }} total</template><span v-if="draftPath.length && !digPreview.error"> · {{ digPreview.isComplete ? 'Ready to build; you may extend the route if points allow.' : draftPath.length === 1 ? 'Select an adjacent highlighted hex.' : 'Unfinished route: continue to an existing river or canal.' }}</span></div>
 		<div v-if="previewError" class="previewError" role="alert">{{ previewError }}</div>
