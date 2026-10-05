@@ -24,6 +24,12 @@ Factory = function () {
 	this.factoryComponentNamesAddedThisTurn = []
 	this.factoryDataBeforeExpansion = []
 
+	// Compressed replay detail of what was built this turn, pre expansion frame.
+	// Each entry is [componentName, index, rotation] (+ trailing 1 only when flipped)
+	this.factoryPlacementsAddedThisTurn = []
+	// [index, rotation] (+ trailing 1 only when flipped), in the pre-collapse expanded frame
+	this.factoryExpansionAddedThisTurn = []
+
 	this.componentBeingAdded = -1
 	this.componentBeingAddedRotation = -1
 	this.componentBeingAddedFlipped = 0
@@ -96,6 +102,8 @@ Factory.import = function (tab) {
 		// Add unsaved Vars
 		f.factoryComponentNamesAddedThisTurn = []
 		f.factoryDataBeforeExpansion = []
+		f.factoryPlacementsAddedThisTurn = []
+		f.factoryExpansionAddedThisTurn = []
 		f.componentBeingAdded = -1
 		f.componentBeingAddedRotation = -1
 		f.componentBeingAddedFlipped = 0
@@ -168,24 +176,53 @@ Factory.prototype.placeFactoryComponent = function (e) {
 	player.factory.actionPlaceFactoryComponent(index, player)
 }
 
-Factory.prototype.actionPlaceFactoryComponent = function (index, player) {
-	var thisFac = player.factory
-	var newComponentName = thisFac.componentBeingAdded
-	var newComponentModel = thisFac.rotateRectangle(getComponentModelFromName(newComponentName), thisFac.componentBeingAddedRotation, DIMENSIONS[newComponentName][0], DIMENSIONS[newComponentName][1], thisFac.componentBeingAddedFlipped)
-	var tableWidth = DIMENSIONS[newComponentName][0]
-	var tableHeight = DIMENSIONS[newComponentName][1]
-	if (thisFac.componentBeingAddedRotation % 2 == 1) {
-		tableWidth = DIMENSIONS[newComponentName][1]
-		tableHeight = DIMENSIONS[newComponentName][0]
+Factory.encodePlacement = function (component) {
+	var res = [component[0], component[1], component[2]]
+	if (component[3] === 1) res.push(1)
+	return res
+}
+
+// Inverse of Factory.encodePlacement
+Factory.decodePlacement = function (placement) {
+	return [placement[0], placement[1], placement[2], placement.length > 3 ? placement[3] : 0]
+}
+
+Factory.prototype.getPlacementsAddedThisTurn = function () {
+	var res = []
+	for (var i = 0; i < this.factoryComponenetIndexesAddedThisTurn.length; i++) {
+		var arrayIndex = _.findIndex(
+			this.factoryComponents,
+			function (el) {
+				return el[1] === this.factoryComponenetIndexesAddedThisTurn[i]
+			},
+			this
+		)
+		// NEEDED TO FIX GAMES BREAKING - the index may no longer be on the floor (removed, or nudged)
+		if (arrayIndex === -1) continue
+		res.push(Factory.encodePlacement(this.factoryComponents[arrayIndex]))
 	}
-	var i = 0
-	var x = 0
-	var y = 0
-	var left = 0
-	var top = 0
-	var suitableTechLevel = false
-	var arrayIndex = 0
-	var techComponentName = 0
+return res
+}
+
+Factory.prototype.actionPlaceFactoryComponent = function (index, player) {
+		var thisFac = player.factory
+		var newComponentName = thisFac.componentBeingAdded
+		var newComponentRotation = thisFac.componentBeingAddedRotation
+		var newComponentFlipped = thisFac.componentBeingAddedFlipped
+		var tableWidth = DIMENSIONS[newComponentName][0]
+		var tableHeight = DIMENSIONS[newComponentName][1]
+		if (newComponentRotation % 2 == 1) {
+			tableWidth = DIMENSIONS[newComponentName][1]
+			tableHeight = DIMENSIONS[newComponentName][0]
+		}
+		var i = 0
+		var x = 0
+		var y = 0
+		var left = 0
+		var top = 0
+		var suitableTechLevel = false
+		var arrayIndex = 0
+		var techComponentName = 0
 
 	// Check if there is enough space
 	var SpaceAvailable = true
@@ -417,64 +454,8 @@ Factory.prototype.actionPlaceFactoryComponent = function (index, player) {
 	}
 
 	// Enough Space! So add Component into model, view, and release gfx placement
-	i = 0
-	for (y = 0; y < tableHeight; y++) {
-		for (x = index; x < index + tableWidth; x++) {
-			thisFac.factoryCoords[x + y * thisFac.width] = newComponentModel[i]
-			i++
-		}
-	}
+	thisFac.actionPlaceFactoryComponent_core(player, newComponentName, index, newComponentRotation, newComponentFlipped)
 
-	if (A_TECHS.includes(thisFac.componentBeingAdded) || B_TECHS.includes(thisFac.componentBeingAdded) || C_TECHS.includes(thisFac.componentBeingAdded) || D_TECHS.includes(thisFac.componentBeingAdded)) {
-		if (ONE_SLOT_TECH.includes(thisFac.componentBeingAdded)) thisFac.factoryComponents.push([thisFac.componentBeingAdded, index, thisFac.componentBeingAddedRotation, thisFac.componentBeingAddedFlipped, [-1]])
-		else if (TWO_SLOT_TECH.includes(thisFac.componentBeingAdded)) thisFac.factoryComponents.push([thisFac.componentBeingAdded, index, thisFac.componentBeingAddedRotation, thisFac.componentBeingAddedFlipped, [-1, -1]])
-		else if (THREE_SLOT_TECH.includes(thisFac.componentBeingAdded)) thisFac.factoryComponents.push([thisFac.componentBeingAdded, index, thisFac.componentBeingAddedRotation, thisFac.componentBeingAddedFlipped, [-1, -1, -1]])
-	} else if (DEALERSHIPS.includes(thisFac.componentBeingAdded)) thisFac.factoryComponents.push([thisFac.componentBeingAdded, index, thisFac.componentBeingAddedRotation, thisFac.componentBeingAddedFlipped, [0, 0, 0, 0, 0], [-1, -1, -1], 0, 0])
-	else if (MAINLINES.includes(thisFac.componentBeingAdded)) thisFac.factoryComponents.push([thisFac.componentBeingAdded, index, thisFac.componentBeingAddedRotation, thisFac.componentBeingAddedFlipped, [0, 0, 0, 0, 0], 0, 0, 0])
-	else thisFac.factoryComponents.push([thisFac.componentBeingAdded, index, thisFac.componentBeingAddedRotation, thisFac.componentBeingAddedFlipped, [], -1])
-
-	// Add data to related tech component
-	if (ARROWS.includes(newComponentName)) {
-		// get the tech component
-		var relatedTechIndex = thisFac.checkValidityOfArrowTile([newComponentName, index, thisFac.componentBeingAddedRotation])[1]
-		arrayIndex = _.findIndex(thisFac.factoryComponents, function (el) {
-			return el[1] === relatedTechIndex
-		})
-		techComponentName = thisFac.factoryComponents[arrayIndex][0]
-
-		if (ONE_SLOT_TECH.includes(techComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-		else {
-			// FIX
-			if (techComponentName === CHASSIS && ARROWS_BLUE.includes(newComponentName) && thisFac.factoryComponents[arrayIndex][RA_IDX][0] === -1) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === CHASSIS && ARROWS_BLUE.includes(newComponentName) && thisFac.factoryComponents[arrayIndex][RA_IDX][1] === -1) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === BODY && ARROWS_BLUE.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === BODY && ARROWS_PURPLE.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			// FIX
-			else if (techComponentName === RADIATOR && ARROWS_GREEN.includes(newComponentName) && thisFac.factoryComponents[arrayIndex][RA_IDX][0] === -1) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === RADIATOR && ARROWS_GREEN.includes(newComponentName) && thisFac.factoryComponents[arrayIndex][RA_IDX][1] === -1) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === BUMPER && ARROWS_BLUE.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === BUMPER && ARROWS_YELLOW.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === DASHBOARD && ARROWS_PURPLE.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === DASHBOARD && ARROWS_RED.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === ENGINE && ARROWS_RED.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === ENGINE && ARROWS_GREEN.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === ENGINE && ARROWS_BLUE.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][2] = index
-			else if (techComponentName === GEARS && ARROWS_RED.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === GEARS && ARROWS_GREEN.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === FUEL_TANK && ARROWS_GREEN.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === FUEL_TANK && ARROWS_RED.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === STEERING_WHEEL && ARROWS_YELLOW.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === STEERING_WHEEL && ARROWS_PURPLE.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === TIRE && ARROWS_GREEN.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === TIRE && ARROWS_RED.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === TIRE && ARROWS_YELLOW.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][2] = index
-			else if (techComponentName === HEADLIGHT && ARROWS_PURPLE.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === HEADLIGHT && ARROWS_YELLOW.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-		}
-	}
-
-	thisFac.factoryComponenetIndexesAddedThisTurn.push(index)
-	M.availableComponents[thisFac.componentBeingAdded]--
 	$("#newComponentDiv").remove()
 	$("#componentValidationDiv").css("visibility", "visible")
 	V.addNudgeDiv(player)
@@ -484,6 +465,76 @@ Factory.prototype.actionPlaceFactoryComponent = function (index, player) {
 	V.displayEligibleFactoryTiles(player, eligibleFactoryTiles)
 	V.renderFactoryFloor(player)
 	V.updateQSPdiv(player)
+}
+
+// Everything is passed in, so this does not need componentBeingAdded / current player. Used by the replay.
+Factory.prototype.actionPlaceFactoryComponent_core = function (player, componentName, index, rotation, flipped) {
+	var thisFac = player.factory
+	var componentData = thisFac.rotateRectangle(getComponentModelFromName(componentName), rotation, DIMENSIONS[componentName][0], DIMENSIONS[componentName][1], flipped)
+	var tableWidth = DIMENSIONS[componentName][0]
+	var tableHeight = DIMENSIONS[componentName][1]
+	if (rotation % 2 == 1) {
+		tableWidth = DIMENSIONS[componentName][1]
+		tableHeight = DIMENSIONS[componentName][0]
+	}
+	var i = 0
+	for (var y = 0; y < tableHeight; y++) {
+		for (var x = index; x < index + tableWidth; x++) {
+			thisFac.factoryCoords[x + y * thisFac.width] = componentData[i]
+			i++
+		}
+	}
+
+	if (A_TECHS.includes(componentName) || B_TECHS.includes(componentName) || C_TECHS.includes(componentName) || D_TECHS.includes(componentName)) {
+		if (ONE_SLOT_TECH.includes(componentName)) thisFac.factoryComponents.push([componentName, index, rotation, flipped, [-1]])
+		else if (TWO_SLOT_TECH.includes(componentName)) thisFac.factoryComponents.push([componentName, index, rotation, flipped, [-1, -1]])
+		else if (THREE_SLOT_TECH.includes(componentName)) thisFac.factoryComponents.push([componentName, index, rotation, flipped, [-1, -1, -1]])
+	} else if (DEALERSHIPS.includes(componentName)) thisFac.factoryComponents.push([componentName, index, rotation, flipped, [0, 0, 0, 0, 0], [-1, -1, -1], 0, 0])
+	else if (MAINLINES.includes(componentName)) thisFac.factoryComponents.push([componentName, index, rotation, flipped, [0, 0, 0, 0, 0], 0, 0, 0])
+	else thisFac.factoryComponents.push([componentName, index, rotation, flipped, [], -1])
+
+	// Add data to related tech component
+	if (ARROWS.includes(componentName)) {
+		// get the tech component
+		var relatedTechIndex = thisFac.checkValidityOfArrowTile([componentName, index, rotation])[1]
+		var arrayIndex = _.findIndex(thisFac.factoryComponents, function (el) {
+			return el[1] === relatedTechIndex
+		})
+		var techComponentName = thisFac.factoryComponents[arrayIndex][0]
+
+		if (ONE_SLOT_TECH.includes(techComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+		else {
+			// FIX
+			if (techComponentName === CHASSIS && ARROWS_BLUE.includes(componentName) && thisFac.factoryComponents[arrayIndex][RA_IDX][0] === -1) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === CHASSIS && ARROWS_BLUE.includes(componentName) && thisFac.factoryComponents[arrayIndex][RA_IDX][1] === -1) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === BODY && ARROWS_BLUE.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === BODY && ARROWS_PURPLE.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			// FIX
+			else if (techComponentName === RADIATOR && ARROWS_GREEN.includes(componentName) && thisFac.factoryComponents[arrayIndex][RA_IDX][0] === -1) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === RADIATOR && ARROWS_GREEN.includes(componentName) && thisFac.factoryComponents[arrayIndex][RA_IDX][1] === -1) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === BUMPER && ARROWS_BLUE.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === BUMPER && ARROWS_YELLOW.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === DASHBOARD && ARROWS_PURPLE.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === DASHBOARD && ARROWS_RED.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === ENGINE && ARROWS_RED.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === ENGINE && ARROWS_GREEN.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === ENGINE && ARROWS_BLUE.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][2] = index
+			else if (techComponentName === GEARS && ARROWS_RED.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === GEARS && ARROWS_GREEN.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === FUEL_TANK && ARROWS_GREEN.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === FUEL_TANK && ARROWS_RED.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === STEERING_WHEEL && ARROWS_YELLOW.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === STEERING_WHEEL && ARROWS_PURPLE.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === TIRE && ARROWS_GREEN.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === TIRE && ARROWS_RED.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === TIRE && ARROWS_YELLOW.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][2] = index
+			else if (techComponentName === HEADLIGHT && ARROWS_PURPLE.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === HEADLIGHT && ARROWS_YELLOW.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+		}
+	}
+
+	thisFac.factoryComponenetIndexesAddedThisTurn.push(index)
+	M.availableComponents[componentName]--
 }
 
 Factory.prototype.clickedOnNudge = function (e) {
@@ -551,7 +602,6 @@ Factory.prototype.actionPlaceFactoryExpansion = function (index, player) {
 	var div
 
 	var thisFac = player.factory
-	var newExpansion = thisFac.rotateRectangle(EXPANSION_FACTORY_TILE_COMPONENT, thisFac.componentBeingAddedRotation, 6, 8, thisFac.componentBeingAddedFlipped)
 	var tableWidth = 6
 	var tableHeight = 8
 	if (thisFac.componentBeingAddedRotation % 2 == 1) {
@@ -797,16 +847,7 @@ Factory.prototype.actionPlaceFactoryExpansion = function (index, player) {
 	}
 
 	// All Good! So add into components and cooords
-	i = 0
-	thisFac.factoryExpansions.push([index, thisFac.componentBeingAddedRotation, thisFac.componentBeingAddedFlipped])
-	for (y = 0; y < tableHeight; y++) {
-		for (x = index; x < index + tableWidth; x++) {
-			thisFac.factoryCoords[x + y * thisFac.width] = newExpansion[i]
-			i++
-		}
-	}
-
-	thisFac.factoryExpansionIndexAddedThisTurn = index
+	thisFac.actionPlaceFactoryExpansion_core(player, index, thisFac.componentBeingAddedRotation, thisFac.componentBeingAddedFlipped)
 	V.addNudgeDiv(player, true)
 
 	thisFac.clearComponentBeingPlaced()
@@ -814,6 +855,31 @@ Factory.prototype.actionPlaceFactoryExpansion = function (index, player) {
 	// At end of factory expansion, so can end turn
 	if (M.sandboxMode) C.addEndExpansionSandboxButton()
 	else C.addFinishTurnButton(M.gameFlow.turn, M.gameFlow.phase, gettext("End Turn"))
+}
+
+// Everything is passed in, so this does not need componentBeingAdded. Used by the replay.
+Factory.prototype.actionPlaceFactoryExpansion_core = function (player, index, rotation, flipped) {
+	var thisFac = player.factory
+	var newExpansion = thisFac.rotateRectangle(EXPANSION_FACTORY_TILE_COMPONENT, rotation, 6, 8, flipped)
+	var tableWidth = 6
+	var tableHeight = 8
+	if (rotation % 2 == 1) {
+		tableWidth = 8
+		tableHeight = 6
+	}
+	thisFac.factoryExpansions.push([index, rotation, flipped])
+	var i = 0
+	for (var y = 0; y < tableHeight; y++) {
+		for (var x = index; x < index + tableWidth; x++) {
+			thisFac.factoryCoords[x + y * thisFac.width] = newExpansion[i]
+			i++
+		}
+	}
+
+	thisFac.factoryExpansionIndexAddedThisTurn = index
+	// Compressed replay detail - the index is in the expanded (pre collapse) frame
+	thisFac.factoryExpansionAddedThisTurn = [index, rotation]
+	if (flipped === 1) thisFac.factoryExpansionAddedThisTurn.push(1)
 }
 
 Factory.prototype.collapseFactoryAfterExpansion = function () {

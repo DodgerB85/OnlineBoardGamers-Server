@@ -82,11 +82,19 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_WEBHOOK_CHOICES,
     SR_getAnyTournamentPlayersData,
     SR_getAnyTournamentRoundsData,
+    SR_getAQYstartingOptionsHTML,
+    SR_getBUSstartingOptionsHTML,
+    SR_getCNSstartingOptionsHTML,
     SR_getFCMstartingOptionsHTML,
     SR_getgodsVRoptionsHTML,
+    SR_getHLCstartingOptionsHTML,
+    SR_getINDstartingOptionsHTML,
+    SR_getKFWstartingOptionsHTML,
     SR_getPointsForPosition,
+    SR_getRNBstartingOptionsHTML,
     SR_getTGZstartingOptionsHTML,
     SR_getTournamentTypeDisplay,
+    SR_getWEBstartingOptionsHTML,
 )
 
 from .forms import (
@@ -804,6 +812,7 @@ def handler404(request, exception):
         {
             # "exception": exception
         },
+        status=404,
     )
 
 
@@ -1620,7 +1629,15 @@ def login_view(request):
             request.session.modified = True  # Force session save
 
             profile = Profile.objects.get(user=user)
-            language_code = profile.profileLanguage
+            # The cookie is the user's live choice - they may have switched language while
+            # logged out, or on another browser. The profile only mirrors it, so that the
+            # language of notification emails matches the language of the site.
+            cookie_language = request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME)
+            supported = [code for code, name in settings.LANGUAGES]
+            language_code = cookie_language if cookie_language in supported else profile.profileLanguage
+            if language_code != profile.profileLanguage:
+                profile.profileLanguage = language_code
+                profile.save()
             translation.activate(language_code)
 
             nxt = request.POST.get("next", None)  # Use .get() to avoid KeyError
@@ -1637,7 +1654,7 @@ def login_view(request):
             else:
                 response = HttpResponseRedirect(nxt)
 
-            response.set_cookie(settings.LANGUAGE_COOKIE_NAME, language_code)
+            response.set_cookie(settings.LANGUAGE_COOKIE_NAME, language_code, max_age=settings.LANGUAGE_COOKIE_AGE)
             return response
         else:
             try:
@@ -2435,6 +2452,77 @@ def createRNBpage2(request, gameID=0):
                 "startingOptions": loadedStartingOptions,
                 "experienced": experienced,
                 "settingsDebug": settings_debug,
+            },
+        )
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
+def createURRpage(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "URR", Game)
+    if request.method != "POST" and gameID == 0:
+        return render(request, "Lobby/createURR.html", {"experienced": experienced, "playtestOnly": True})
+    elif request.method != "POST" and gameID != 0:
+        try:
+            currentGame = Game.objects.get(id=gameID, gameCode="URR")
+        except Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist")) from None
+
+        all_players = currentGame.players.exclude(player=request.user).select_related("player")
+        playerNames = [gp.player.username for gp in all_players if gp.player]
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+
+        messages.success(request, (gettext("Game creation for rematch")))
+        return render(
+            request,
+            "Lobby/createURR.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.presenter().getGameName(),
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "startingOptions": loadedStartingOptions,
+                "experienced": experienced,
+                "playtestOnly": True,
+            },
+        )
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
+def createDDLpage(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "DDL", Game)
+    if request.method != "POST" and gameID == 0:
+        return render(request, "Lobby/createDDL.html", {"experienced": experienced})
+    elif request.method != "POST" and gameID != 0:
+        try:
+            currentGame = Game.objects.get(id=gameID, gameCode="DDL")
+        except Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist")) from None
+
+        all_players = currentGame.players.exclude(player=request.user).select_related("player")
+        playerNames = [gp.player.username for gp in all_players if gp.player]
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+
+        messages.success(request, (gettext("Game creation for rematch")))
+        return render(
+            request,
+            "Lobby/createDDL.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.presenter().getGameName(),
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "startingOptions": loadedStartingOptions,
+                "experienced": experienced,
             },
         )
 
@@ -4344,6 +4432,22 @@ def MiniTournament(request, Mini_Tournament_id):
         startingOptionsHTML = SR_getFCMstartingOptionsHTML(json.loads(Mini_Tournament.startingOptions) if Mini_Tournament.startingOptions else [])
         if startingOptionsHTML == "":
             startingOptionsHTML = "(No Starting Options)"
+    elif Mini_Tournament.gameCode == "HLC":
+        startingOptionsHTML = SR_getHLCstartingOptionsHTML(json.loads(Mini_Tournament.startingOptions) if Mini_Tournament.startingOptions else [])
+    elif Mini_Tournament.gameCode == "BUS":
+        startingOptionsHTML = SR_getBUSstartingOptionsHTML(json.loads(Mini_Tournament.startingOptions) if Mini_Tournament.startingOptions else [])
+    elif Mini_Tournament.gameCode == "AQY":
+        startingOptionsHTML = SR_getAQYstartingOptionsHTML(json.loads(Mini_Tournament.startingOptions) if Mini_Tournament.startingOptions else [])
+    elif Mini_Tournament.gameCode == "IND":
+        startingOptionsHTML = SR_getINDstartingOptionsHTML(json.loads(Mini_Tournament.startingOptions) if Mini_Tournament.startingOptions else [])
+    elif Mini_Tournament.gameCode == "RNB":
+        startingOptionsHTML = SR_getRNBstartingOptionsHTML(json.loads(Mini_Tournament.startingOptions) if Mini_Tournament.startingOptions else [])
+    elif Mini_Tournament.gameCode == "CNS":
+        startingOptionsHTML = SR_getCNSstartingOptionsHTML(json.loads(Mini_Tournament.startingOptions) if Mini_Tournament.startingOptions else [])
+    elif Mini_Tournament.gameCode == "WEB":
+        startingOptionsHTML = SR_getWEBstartingOptionsHTML(json.loads(Mini_Tournament.startingOptions) if Mini_Tournament.startingOptions else [])
+    elif Mini_Tournament.gameCode == "KFW":
+        startingOptionsHTML = SR_getKFWstartingOptionsHTML(json.loads(Mini_Tournament.startingOptions) if Mini_Tournament.startingOptions else [])
     elif Mini_Tournament.gameCode == "TGZ":
         startingOptionsHTML = SR_getTGZstartingOptionsHTML(json.loads(Mini_Tournament.startingOptions) if Mini_Tournament.startingOptions else [])
 
@@ -4593,6 +4697,507 @@ def createTGZminiTournament(request):
             tournamentStatus="OP",
             tournamentType=request.POST["tournamentFormat"],
             startingOptions=startingOptions,
+            maxTournamentPlayers=request.POST["totalPlayersMT"],
+            maxGamePlayers=request.POST["playersPerGameMT"],
+            roundsBeforeKnockout=4,
+            creator=request.user,
+        )
+        newTournament.startingPlayers.add(request.user)
+        if "privateTournament" in request.POST:
+            newTournament.tournamentStatus = "PR"
+
+        for username in invitedPlayers:
+            user = User.objects.get(username=username)
+            newTournament.invitedPlayers.add(user)
+
+        newTournament.save()
+
+    from django_q.tasks import async_task
+
+    async_task(
+        "Lobby.sharedFunctions.sharedNotifications.SN_sendMiniTournamentInvite",
+        invitedPlayers,
+        newTournament.gameCode,
+        newTournament.tournamentName,
+        newTournament.tournamentDescription,
+        newTournament.maxTournamentPlayers,
+        newTournament.maxGamePlayers,
+        SR_getTournamentTypeDisplay(newTournament.tournamentType),
+        newTournament.id,
+    )
+
+    messages.success(request, SF_getMiniTournamentCreationJsonReturn(newTournament.id))
+    return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+
+
+@login_required
+def createHLCminiTournament(request):
+    if request.method != "POST":
+        return render(
+            request,
+            "Lobby/createHLC.html",
+            {
+                "experienced": False,
+                "MT_Creation": True,
+            },
+        )
+
+    # Now it is a POST response
+    startingOptions = []
+    if "limitVehicles" in request.POST:
+        if "vehicleLimitRadio" in request.POST:
+            startingOptions.append(int(request.POST["vehicleLimitRadio"]))
+        if "increaseMainlines" in request.POST:
+            startingOptions.append(int(request.POST["increaseMainlines"]))
+
+    invitedPlayers = json.loads(request.POST["invtedPlayersListMT"]) if request.POST["invtedPlayersListMT"] else []
+
+    with transaction.atomic():
+        newTournament = Tournament.objects.create(
+            tournamentCategory="Mini",
+            gameCode="HLC",
+            tournamentName=request.POST["tournamentName"],
+            tournamentDescription=request.POST["tournamentDescription"],
+            tournamentStatus="OP",
+            tournamentType=request.POST["tournamentFormat"],
+            startingOptions=json.dumps(startingOptions),
+            maxTournamentPlayers=request.POST["totalPlayersMT"],
+            maxGamePlayers=request.POST["playersPerGameMT"],
+            roundsBeforeKnockout=4,
+            creator=request.user,
+        )
+        newTournament.startingPlayers.add(request.user)
+        if "privateTournament" in request.POST:
+            newTournament.tournamentStatus = "PR"
+
+        for username in invitedPlayers:
+            user = User.objects.get(username=username)
+            newTournament.invitedPlayers.add(user)
+
+        newTournament.save()
+
+    from django_q.tasks import async_task
+
+    async_task(
+        "Lobby.sharedFunctions.sharedNotifications.SN_sendMiniTournamentInvite",
+        invitedPlayers,
+        newTournament.gameCode,
+        newTournament.tournamentName,
+        newTournament.tournamentDescription,
+        newTournament.maxTournamentPlayers,
+        newTournament.maxGamePlayers,
+        SR_getTournamentTypeDisplay(newTournament.tournamentType),
+        newTournament.id,
+    )
+
+    messages.success(request, SF_getMiniTournamentCreationJsonReturn(newTournament.id))
+    return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+
+
+@login_required
+def createBUSminiTournament(request):
+    if request.method != "POST":
+        return render(
+            request,
+            "Lobby/createBUS.html",
+            {
+                "experienced": False,
+                "MT_Creation": True,
+            },
+        )
+
+    # Now it is a POST response
+    startingOptions = []
+    if "usePittsburghMap" in request.POST:
+        startingOptions.append(int(request.POST["usePittsburghMap"]))
+
+    invitedPlayers = json.loads(request.POST["invtedPlayersListMT"]) if request.POST["invtedPlayersListMT"] else []
+
+    with transaction.atomic():
+        newTournament = Tournament.objects.create(
+            tournamentCategory="Mini",
+            gameCode="BUS",
+            tournamentName=request.POST["tournamentName"],
+            tournamentDescription=request.POST["tournamentDescription"],
+            tournamentStatus="OP",
+            tournamentType=request.POST["tournamentFormat"],
+            startingOptions=json.dumps(startingOptions),
+            maxTournamentPlayers=request.POST["totalPlayersMT"],
+            maxGamePlayers=request.POST["playersPerGameMT"],
+            roundsBeforeKnockout=4,
+            creator=request.user,
+        )
+        newTournament.startingPlayers.add(request.user)
+        if "privateTournament" in request.POST:
+            newTournament.tournamentStatus = "PR"
+
+        for username in invitedPlayers:
+            user = User.objects.get(username=username)
+            newTournament.invitedPlayers.add(user)
+
+        newTournament.save()
+
+    from django_q.tasks import async_task
+
+    async_task(
+        "Lobby.sharedFunctions.sharedNotifications.SN_sendMiniTournamentInvite",
+        invitedPlayers,
+        newTournament.gameCode,
+        newTournament.tournamentName,
+        newTournament.tournamentDescription,
+        newTournament.maxTournamentPlayers,
+        newTournament.maxGamePlayers,
+        SR_getTournamentTypeDisplay(newTournament.tournamentType),
+        newTournament.id,
+    )
+
+    messages.success(request, SF_getMiniTournamentCreationJsonReturn(newTournament.id))
+    return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+
+
+@login_required
+def createAQYminiTournament(request):
+    if request.method != "POST":
+        return render(
+            request,
+            "Lobby/createAQY.html",
+            {
+                "experienced": False,
+                "MT_Creation": True,
+            },
+        )
+
+    # Now it is a POST response
+    startingOptions = []
+
+    invitedPlayers = json.loads(request.POST["invtedPlayersListMT"]) if request.POST["invtedPlayersListMT"] else []
+
+    with transaction.atomic():
+        newTournament = Tournament.objects.create(
+            tournamentCategory="Mini",
+            gameCode="AQY",
+            tournamentName=request.POST["tournamentName"],
+            tournamentDescription=request.POST["tournamentDescription"],
+            tournamentStatus="OP",
+            tournamentType=request.POST["tournamentFormat"],
+            startingOptions=json.dumps(startingOptions),
+            maxTournamentPlayers=request.POST["totalPlayersMT"],
+            maxGamePlayers=request.POST["playersPerGameMT"],
+            roundsBeforeKnockout=4,
+            creator=request.user,
+        )
+        newTournament.startingPlayers.add(request.user)
+        if "privateTournament" in request.POST:
+            newTournament.tournamentStatus = "PR"
+
+        for username in invitedPlayers:
+            user = User.objects.get(username=username)
+            newTournament.invitedPlayers.add(user)
+
+        newTournament.save()
+
+    from django_q.tasks import async_task
+
+    async_task(
+        "Lobby.sharedFunctions.sharedNotifications.SN_sendMiniTournamentInvite",
+        invitedPlayers,
+        newTournament.gameCode,
+        newTournament.tournamentName,
+        newTournament.tournamentDescription,
+        newTournament.maxTournamentPlayers,
+        newTournament.maxGamePlayers,
+        SR_getTournamentTypeDisplay(newTournament.tournamentType),
+        newTournament.id,
+    )
+
+    messages.success(request, SF_getMiniTournamentCreationJsonReturn(newTournament.id))
+    return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+
+
+@login_required
+def createINDminiTournament(request):
+    if request.method != "POST":
+        return render(
+            request,
+            "Lobby/createIND.html",
+            {
+                "experienced": False,
+                "MT_Creation": True,
+            },
+        )
+
+    # Now it is a POST response
+    startingOptions = []
+    if "keepMoneyHidden" in request.POST:
+        startingOptions.append(int(request.POST["keepMoneyHidden"]))
+    if "useAegeanMap" in request.POST:
+        startingOptions.append(int(request.POST["useAegeanMap"]))
+
+    invitedPlayers = json.loads(request.POST["invtedPlayersListMT"]) if request.POST["invtedPlayersListMT"] else []
+
+    with transaction.atomic():
+        newTournament = Tournament.objects.create(
+            tournamentCategory="Mini",
+            gameCode="IND",
+            tournamentName=request.POST["tournamentName"],
+            tournamentDescription=request.POST["tournamentDescription"],
+            tournamentStatus="OP",
+            tournamentType=request.POST["tournamentFormat"],
+            startingOptions=json.dumps(startingOptions),
+            maxTournamentPlayers=request.POST["totalPlayersMT"],
+            maxGamePlayers=request.POST["playersPerGameMT"],
+            roundsBeforeKnockout=4,
+            creator=request.user,
+        )
+        newTournament.startingPlayers.add(request.user)
+        if "privateTournament" in request.POST:
+            newTournament.tournamentStatus = "PR"
+
+        for username in invitedPlayers:
+            user = User.objects.get(username=username)
+            newTournament.invitedPlayers.add(user)
+
+        newTournament.save()
+
+    from django_q.tasks import async_task
+
+    async_task(
+        "Lobby.sharedFunctions.sharedNotifications.SN_sendMiniTournamentInvite",
+        invitedPlayers,
+        newTournament.gameCode,
+        newTournament.tournamentName,
+        newTournament.tournamentDescription,
+        newTournament.maxTournamentPlayers,
+        newTournament.maxGamePlayers,
+        SR_getTournamentTypeDisplay(newTournament.tournamentType),
+        newTournament.id,
+    )
+
+    messages.success(request, SF_getMiniTournamentCreationJsonReturn(newTournament.id))
+    return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+
+
+@login_required
+def createRNBminiTournament(request):
+    if request.method != "POST":
+        return render(
+            request,
+            "Lobby/createRNB.html",
+            {
+                "experienced": False,
+                "MT_Creation": True,
+            },
+        )
+
+    # Now it is a POST response
+    startingOptions = []
+    if "useSoloMineRules" in request.POST:
+        startingOptions.append(int(request.POST["useSoloMineRules"]))
+
+    # RNB needs a board, so the tournament carries the chosen map
+    startingMap = request.POST.get("mapData", "")
+
+    invitedPlayers = json.loads(request.POST["invtedPlayersListMT"]) if request.POST["invtedPlayersListMT"] else []
+
+    with transaction.atomic():
+        newTournament = Tournament.objects.create(
+            tournamentCategory="Mini",
+            gameCode="RNB",
+            tournamentName=request.POST["tournamentName"],
+            tournamentDescription=request.POST["tournamentDescription"],
+            tournamentStatus="OP",
+            tournamentType=request.POST["tournamentFormat"],
+            startingOptions=json.dumps(startingOptions),
+            startingMap=startingMap,
+            maxTournamentPlayers=request.POST["totalPlayersMT"],
+            maxGamePlayers=request.POST["playersPerGameMT"],
+            roundsBeforeKnockout=4,
+            creator=request.user,
+        )
+        newTournament.startingPlayers.add(request.user)
+        if "privateTournament" in request.POST:
+            newTournament.tournamentStatus = "PR"
+
+        for username in invitedPlayers:
+            user = User.objects.get(username=username)
+            newTournament.invitedPlayers.add(user)
+
+        newTournament.save()
+
+    from django_q.tasks import async_task
+
+    async_task(
+        "Lobby.sharedFunctions.sharedNotifications.SN_sendMiniTournamentInvite",
+        invitedPlayers,
+        newTournament.gameCode,
+        newTournament.tournamentName,
+        newTournament.tournamentDescription,
+        newTournament.maxTournamentPlayers,
+        newTournament.maxGamePlayers,
+        SR_getTournamentTypeDisplay(newTournament.tournamentType),
+        newTournament.id,
+    )
+
+    messages.success(request, SF_getMiniTournamentCreationJsonReturn(newTournament.id))
+    return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+
+
+@login_required
+def createCNSminiTournament(request):
+    if request.method != "POST":
+        return render(
+            request,
+            "Lobby/createCNS.html",
+            {
+                "experienced": False,
+                "MT_Creation": True,
+            },
+        )
+
+    # Now it is a POST response
+    startingOptions = []
+    if "useExpansion" in request.POST:
+        startingOptions.append(int(request.POST["useExpansion"]))
+    if "tableSizeRadio" in request.POST:
+        startingOptions.append(int(request.POST.get("tableSizeRadio")))
+    if "tableJunkRadio" in request.POST:
+        startingOptions.append(int(request.POST.get("tableJunkRadio")))
+
+    invitedPlayers = json.loads(request.POST["invtedPlayersListMT"]) if request.POST["invtedPlayersListMT"] else []
+
+    with transaction.atomic():
+        newTournament = Tournament.objects.create(
+            tournamentCategory="Mini",
+            gameCode="CNS",
+            tournamentName=request.POST["tournamentName"],
+            tournamentDescription=request.POST["tournamentDescription"],
+            tournamentStatus="OP",
+            tournamentType=request.POST["tournamentFormat"],
+            startingOptions=json.dumps(startingOptions),
+            maxTournamentPlayers=request.POST["totalPlayersMT"],
+            maxGamePlayers=request.POST["playersPerGameMT"],
+            roundsBeforeKnockout=4,
+            creator=request.user,
+        )
+        newTournament.startingPlayers.add(request.user)
+        if "privateTournament" in request.POST:
+            newTournament.tournamentStatus = "PR"
+
+        for username in invitedPlayers:
+            user = User.objects.get(username=username)
+            newTournament.invitedPlayers.add(user)
+
+        newTournament.save()
+
+    from django_q.tasks import async_task
+
+    async_task(
+        "Lobby.sharedFunctions.sharedNotifications.SN_sendMiniTournamentInvite",
+        invitedPlayers,
+        newTournament.gameCode,
+        newTournament.tournamentName,
+        newTournament.tournamentDescription,
+        newTournament.maxTournamentPlayers,
+        newTournament.maxGamePlayers,
+        SR_getTournamentTypeDisplay(newTournament.tournamentType),
+        newTournament.id,
+    )
+
+    messages.success(request, SF_getMiniTournamentCreationJsonReturn(newTournament.id))
+    return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+
+
+@login_required
+def createWEBminiTournament(request):
+    if request.method != "POST":
+        return render(
+            request,
+            "Lobby/createWEB.html",
+            {
+                "experienced": False,
+                "MT_Creation": True,
+            },
+        )
+
+    # Now it is a POST response
+    startingOptions = []
+
+    invitedPlayers = json.loads(request.POST["invtedPlayersListMT"]) if request.POST["invtedPlayersListMT"] else []
+
+    with transaction.atomic():
+        newTournament = Tournament.objects.create(
+            tournamentCategory="Mini",
+            gameCode="WEB",
+            tournamentName=request.POST["tournamentName"],
+            tournamentDescription=request.POST["tournamentDescription"],
+            tournamentStatus="OP",
+            tournamentType=request.POST["tournamentFormat"],
+            startingOptions=json.dumps(startingOptions),
+            maxTournamentPlayers=request.POST["totalPlayersMT"],
+            maxGamePlayers=request.POST["playersPerGameMT"],
+            roundsBeforeKnockout=4,
+            creator=request.user,
+        )
+        newTournament.startingPlayers.add(request.user)
+        if "privateTournament" in request.POST:
+            newTournament.tournamentStatus = "PR"
+
+        for username in invitedPlayers:
+            user = User.objects.get(username=username)
+            newTournament.invitedPlayers.add(user)
+
+        newTournament.save()
+
+    from django_q.tasks import async_task
+
+    async_task(
+        "Lobby.sharedFunctions.sharedNotifications.SN_sendMiniTournamentInvite",
+        invitedPlayers,
+        newTournament.gameCode,
+        newTournament.tournamentName,
+        newTournament.tournamentDescription,
+        newTournament.maxTournamentPlayers,
+        newTournament.maxGamePlayers,
+        SR_getTournamentTypeDisplay(newTournament.tournamentType),
+        newTournament.id,
+    )
+
+    messages.success(request, SF_getMiniTournamentCreationJsonReturn(newTournament.id))
+    return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+
+
+@login_required
+def createKFWminiTournament(request):
+    if request.method != "POST":
+        return render(
+            request,
+            "Lobby/createKFW.html",
+            {
+                "experienced": False,
+                "MT_Creation": True,
+            },
+        )
+
+    # Now it is a POST response
+    startingOptions = []
+    if "hiddenInfoLevel" in request.POST:
+        startingOptions.append(int(request.POST["hiddenInfoLevel"]))
+    if "useMerchants" in request.POST:
+        startingOptions.append(int(request.POST["useMerchants"]))
+    if "useAllPromos" in request.POST:
+        startingOptions.append(int(request.POST["useAllPromos"]))
+
+    invitedPlayers = json.loads(request.POST["invtedPlayersListMT"]) if request.POST["invtedPlayersListMT"] else []
+
+    with transaction.atomic():
+        newTournament = Tournament.objects.create(
+            tournamentCategory="Mini",
+            gameCode="KFW",
+            tournamentName=request.POST["tournamentName"],
+            tournamentDescription=request.POST["tournamentDescription"],
+            tournamentStatus="OP",
+            tournamentType=request.POST["tournamentFormat"],
+            startingOptions=json.dumps(startingOptions),
             maxTournamentPlayers=request.POST["totalPlayersMT"],
             maxGamePlayers=request.POST["playersPerGameMT"],
             roundsBeforeKnockout=4,

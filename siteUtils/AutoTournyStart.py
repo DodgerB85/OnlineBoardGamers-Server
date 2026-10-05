@@ -1,5 +1,6 @@
 # Needs to be inside the root folder of the project, IE with manage.py
 import datetime
+import math
 import os
 import random
 import sys
@@ -149,17 +150,12 @@ def create_pending_tournament_if_missing(tournament, tournament_date):
     max_game_players = random.randrange(tournament["minPlayers"], tournament["maxPlayers"] + 1, 1)
     tournament_type = random.choice(["RR", "TL"])
 
-    max_tournament_players = 44
-    if max_game_players == 3:
-        max_tournament_players = 45
-    if max_game_players == 5:
-        max_tournament_players = 40
-    if max_game_players == 6:
-        max_tournament_players = 42
-
     if game_code == "TGZ":
         max_game_players = 4
         tournament_type = "RR"
+
+    max_tournament_players = 100 if game_code in ("FCM", "IND") else 70
+    max_tournament_players = math.ceil(max_tournament_players / max_game_players) * max_game_players
 
     new_tournament = Tournament.objects.create(
         tournamentCategory="Main",

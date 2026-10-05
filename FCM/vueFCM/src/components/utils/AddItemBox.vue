@@ -1,8 +1,25 @@
+<script>
+// Module scope, deliberately separate from <script setup> below: every AddItemBox
+// instance shares ONE key listener, which calls whichever instance is currently
+// mounted. Attaching the listener per-instance would rotate once per visible box.
+// (This module is only ever loaded once for the lifetime of the page, so the
+// listener is never removed.)
+let activeRotate = null
+
+function rotateKeyHandler(event) {
+	if (event.key !== "r" && event.key !== "R") return
+	if (activeRotate) activeRotate()
+}
+
+if (typeof document !== "undefined") document.addEventListener("keyup", rotateKeyHandler)
+</script>
+
 <script setup>
 import * as rf from "../../js/FCMreference"
 import * as view from "../../js/FCMview"
 import * as controller from "../../js/FCMcontroller"
 import * as rules from "../../js/FCMrules"
+import * as plyr from "../../js/FCMplayer"
 import * as IO from "../../backend/FCM_IO"
 
 import { useModelStore } from "../../stores/FCMstore.js"
@@ -11,7 +28,7 @@ const store = useModelStore()
 import { usePersonalStore } from "../../stores/FCMpersonal.js"
 const personal = usePersonalStore()
 
-import { ref, computed, watch, nextTick } from "vue"
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from "vue"
 
 // --- Props & Emits ---
 const props = defineProps({
@@ -110,6 +127,22 @@ function rotateAntiClockwise() {
 	if (isLobbyist) nextTick(() => controller.updateLobbyistHighlights())
 }
 
+// "r" shortcut for the two rotate arrows above. Lives here rather than in App.vue
+// because everything item-specific (2 vs 4 rotations, campaign orientation,
+// re-highlighting the legal squares) is only correct from in here.
+function rotateFromKeyboard() {
+	if (store.viewSettings.showChat) return // do not rotate while typing in chat
+	rotateClockwise()
+}
+
+onMounted(() => {
+	activeRotate = rotateFromKeyboard
+})
+
+onUnmounted(() => {
+	if (activeRotate === rotateFromKeyboard) activeRotate = null
+})
+
 /*** END Rotation ***/
 
 // --- URBAN PLANNING ---
@@ -143,6 +176,10 @@ function selectUrbanPlanningTile(tile) {
 function confirmUrbanPlanning() {
 	const idx = currentUPTileIndex()
 	if (idx !== -1) store.mapData.tiles[idx + 1] = store.context.rotation
+	// Committed: MapArea must render it from the stored rotation, not the live
+	// context.rotation (saveInProgressMap resets that to 0, and startPlayerTurn
+	// won't advance the pointer on your own client because your turn has passed)
+	store.context.nextUrbanPlanningTile = -1
 	view.setMapDisplayTiles()
 	IO.saveInProgressMap()
 }
@@ -172,7 +209,14 @@ const computedRotatableCampaign = computed(() => {
 	return campaignData.width !== campaignData.height && campaignData.type !== rf.GIANT_BILLBOARD
 })
 
-const secondGoodChoices = computed(() => [0, 1, 2, 3, 4].filter((good) => good !== store.context.good))
+const secondGoodChoices = computed(() => mainGoodChoices.value.filter((good) => good !== store.context.good))
+
+// Fried Chicken mod: only the holder of the First Fried Chicken Sold milestone may market fried chicken
+const mainGoodChoices = computed(() => {
+	const base = [rf.LEMONADE, rf.COKE, rf.BEER, rf.PIZZA, rf.BURGER]
+	if (store.startingOptions.friedChicken && plyr.hasMilestone(controller.currentPlayerIndex(), rf.FIRST_FRIED_CHICKEN_SOLD)) base.push(rf.FRIED_CHICKEN)
+	return base
+})
 
 const computedCampaignPreviewSrc = computed(() => {
 	const campaignData = rf.MARKETING_CAMPAIGNS[store.context.campaign]
@@ -337,7 +381,7 @@ function flipLobbyist(vertical) {
 
 			<!-- Main good -->
 			<div class="addBoxSection">
-				<img v-for="good in [0, 1, 2, 3, 4]" :key="good" :src="view.getImage(`item_${good}`)" class="goodChoiceImg" :class="{ selectedGoodImg: store.context.good === good }" @click="controller.chooseGood(good)" :alt="good" />
+				<img v-for="good in mainGoodChoices" :key="good" :src="view.getImage(`item_${good}`)" class="goodChoiceImg" :class="{ selectedGoodImg: store.context.good === good }" @click="controller.chooseGood(good)" :alt="good" />
 			</div>
 
 			<!-- Second good for the Brand Manager double airplane campaign -->

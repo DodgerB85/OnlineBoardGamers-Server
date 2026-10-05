@@ -17,6 +17,13 @@ export function makeBot(player) {
 export function removeBotPlayers() {
     const store = useModelStore()
 	store.gameflow.turnOrder = store.gameflow.turnOrder.filter((idx) => store.players[idx].displayName != rf.BOT_NAME)
+	// Second Bailout mod: bots never claim their gift - auto-decline so the
+	// claim night cannot get stuck on an abandoned player
+	if (store.bailout.pending) {
+		store.bailout.order.forEach((idx) => {
+			if (store.players[idx].displayName === rf.BOT_NAME && store.bailout.claims[idx] === undefined) rules.claimBailoutEmployee(idx, -1)
+		})
+	}
 }
 
 function generatePaydayDefaultMove(playerIndex) {
@@ -28,18 +35,20 @@ function generatePaydayDefaultMove(playerIndex) {
 
 	let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
 	let fired = []
+	const payableWithFood = rules.baseSalary(playerIndex)
 	let remaining = due
 
 	if (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD)) {
 		let itemCount = playerObj.resources.filter((r) => r !== rf.COFFEE).length
-		remaining = Math.max(remaining - itemCount * unitarySalary, 0)
+		remaining = rules.headhuntSalaryDue(playerIndex) + Math.max(payableWithFood - itemCount * unitarySalary, 0)
 	}
 
 	while (remaining > playerObj.money && playerObj.employees.length > 0) {
 		let emp = playerObj.employees.pop()
 		if (emp !== rf.BLANK_EMPLOYEE_SPACE) {
 			fired.push(emp)
-			remaining = Math.max(remaining - unitarySalary, 0)
+			const normalAfterFood = Math.max(rules.baseSalary(playerIndex) - (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) ? playerObj.resources.filter((r) => r !== rf.COFFEE).length * unitarySalary : 0), 0)
+			remaining = rules.headhuntSalaryDue(playerIndex) + normalAfterFood
 		}
 	}
 
@@ -72,7 +81,12 @@ export function passKickout() {
 
 	let moveData = []
 	if (store.gameflow.phase === rf.PHASE_SETUP_RESERVE) {
-		moveData = store.reserveCards[timedOutPlayerIndex]
+		// A timed-out player never chose a reserve card. Give them the explicit
+		// RES_CARD_NONE (RES_CARD_NOT_CHOSEN stays reserved for "not chosen"), and always
+		// wrap in an array so the saved move matches the shape the server and
+		// processSimulMoveData expect.
+		if (store.reserveCards[timedOutPlayerIndex] === rf.RES_CARD_NOT_CHOSEN) store.reserveCards[timedOutPlayerIndex] = rf.RES_CARD_NONE
+		moveData = [store.reserveCards[timedOutPlayerIndex]]
 	} else if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) {
 		let p = store.players[timedOutPlayerIndex]
 		// Strip blank slots, exactly as endPlayerTurn does: a kicked player who never
@@ -135,7 +149,7 @@ export async function actionPlayerKickout() {
 export function actionResign() {
     const store = useModelStore()
     const personal = usePersonalStore()
-	const playerIndex = personal.pov
+	const playerIndex = personal.pov >= 0 ? personal.pov : store.gameflow.turnOrder[0]
 	let player = store.players[playerIndex]
 	model.addHistory(rf.HIST_RESIGN, [], playerIndex, 0)
 	makeBot(player)

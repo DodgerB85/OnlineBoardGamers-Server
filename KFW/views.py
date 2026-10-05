@@ -5,15 +5,12 @@ import json
 import time
 from typing import TYPE_CHECKING, cast
 
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext
 
-import Lobby.sharedFunctions.constants as rf
 from Lobby.gameViewHelpers import (
     build_show_game_data,
     process_game_with_mutex,
@@ -21,15 +18,13 @@ from Lobby.gameViewHelpers import (
     shared_save_notes,
     shared_save_zoom,
 )
-from Lobby.models import Game, GamePlayer, User
+from Lobby.models import Game, User
 from Lobby.sharedFunctions.sharedFunctions import (
-    SF_getGameCreationJsonReturn,
     SF_updateFlexiTime,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendAdminErrorMessage,
 )
-from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 if TYPE_CHECKING:
     from Lobby.presenters import KFWpresenter
@@ -51,137 +46,9 @@ def createKFWgame(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
-    players = ["player2", "player3", "player4", "player5", "player6"]
-    usernames = []
-    for player in players:
-        username = request.POST.get(player)
-        if username:
-            usernames.append(username)
+    from KFW.common import create_kfw_game
 
-    if "trainingGame" not in request.POST:
-        existing_users = User.objects.filter(username__in=usernames)
-        existing_usernames = set(user.username for user in existing_users)
-
-        for username in usernames:
-            if username not in existing_usernames:
-                messages.error(request, gettext(f"Error: {username} does not exist"))
-                return HttpResponseRedirect(reverse("createKFWpage"))
-            if username == request.user.username:
-                messages.error(request, gettext("Error: You cannot add yourself"))
-                return HttpResponseRedirect(reverse("createKFWpage"))
-
-    _gameDescription = request.POST["gameDescription"]
-    _maxPlayers = int(request.POST.get("playerNumber", "2"))
-    _pace = request.POST["pace"]
-
-    _created = SR_getTimeNow()
-
-    with transaction.atomic():
-        newGame = Game(
-            gameCode="KFW",
-            gameDescription=_gameDescription,
-            creator=request.user,
-            host=request.user,
-            gamePace=_pace,
-            turn=0,
-            phase=0,
-            created=_created,
-            latestUpdate=_created,
-            maxPlayers=_maxPlayers,
-            gameStatus="AVAILABLE",
-        )
-        newGame.save()
-
-        _gameName = request.POST["gameName"]
-        if _gameName != "":
-            newGame.gameName = _gameName
-
-        # Create GamePlayer for creator
-        GamePlayer.objects.create(
-            game=newGame,
-            player=request.user,
-            seat_order=0,
-            is_current=False,
-        )
-
-        if "trainingGame" in request.POST:
-            newGame.gameStatus = "ACTIVE"
-            shadow_names = rf.SHADOW_PLAYER_NAMES
-            shadow_players = []
-
-            for i in range(1, _maxPlayers):
-                shadow_player = User.objects.get(username=f"{shadow_names[i - 1]}")
-                GamePlayer.objects.create(
-                    game=newGame,
-                    player=shadow_player,
-                    seat_order=i,
-                    is_current=False,
-                )
-
-                display_name = request.POST[f"player{i + 1}"] if request.POST[f"player{i + 1}"] else f"{shadow_names[i - 1]}"
-                shadow_players.append(display_name)
-
-            # Store shadow display names in creator's notes (replaces player0notes)
-            creator_gp = newGame.players.filter(player=request.user).first()
-            if creator_gp:
-                creator_gp.notes = json.dumps(shadow_players)
-                creator_gp.save()
-
-            presenter = cast("KFWpresenter", newGame.presenter())
-            presenter.startGame(request)
-        else:
-            usernamesToNotify = []
-            for i in range(2, _maxPlayers + 1):
-                player_username = request.POST.get(f"player{i}", "")
-                if player_username:
-                    newPlayer = get_object_or_404(User, username=player_username)
-                    newGame.gameStatus = "WAITING"
-                    newGame.invitedPlayers.add(newPlayer)
-                    usernamesToNotify.append(newPlayer.username)
-
-            presenter = cast("KFWpresenter", newGame.presenter())
-            presenter.sendInviteNotifications(
-                usernamesToNotify,
-                newGame.presenter().getGameName(),
-                _maxPlayers,
-                "KFW",
-            )
-
-        newGame.kickoutDuration = request.POST["kickoutDuration"]
-        zoomLevels = [0] * _maxPlayers
-        newGame.zoomLevels = json.dumps(zoomLevels)
-
-        if "trainingGame" in request.POST or "learningGame" in request.POST:
-            newGame.statsExcludedGame = True
-
-        _startingOptions = []
-        if "trainingGame" in request.POST:
-            _startingOptions.append(int(request.POST["trainingGame"]))
-        else:
-            _startingOptions.append(int(request.POST["hiddenInfoLevel"]))
-
-        if "learningGame" in request.POST:
-            _startingOptions.append(int(request.POST.get("learningGame")))
-        if "experiencedGame" in request.POST:
-            _startingOptions.append(int(request.POST.get("experiencedGame")))
-        if "useMerchants" in request.POST:
-            _startingOptions.append(int(request.POST["useMerchants"]))
-        if "useAllPromos" in request.POST:
-            _startingOptions.append(int(request.POST["useAllPromos"]))
-
-        newGame.startingOptions = json.dumps(_startingOptions)
-
-        if "privateGame" in request.POST:
-            newGame.gameStatus = "PRIVATE"
-
-        newGame.save()
-
-    if "trainingGame" in request.POST:
-        messages.success(request, gettext("Your Practice game has started"))
-        return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
-    else:
-        messages.success(request, (SF_getGameCreationJsonReturn("KFW", newGame.id)))
-        return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+    return create_kfw_game(request)
 
 
 def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):

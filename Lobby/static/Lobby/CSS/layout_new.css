@@ -83,6 +83,20 @@
 	body.authed .mobileQuickNav ~ .mainLayout {
 		margin-top: 44px;
 	}
+
+	/* Guest bar is 80px tall (holds the login form + logo), so the quick nav
+	   sits below that and the hamburger menu below the quick nav. */
+	body.guest .mobileQuickNav {
+		top: 80px;
+	}
+
+	body.guest .mobileQuickNav ~ .hamburgerMenu.active {
+		transform: translateY(124px);
+	}
+
+	body.guest .mobileQuickNav ~ .mainLayout {
+		margin-top: 44px;
+	}
 }
 
 @media only screen and (max-width: 1100px) {
@@ -444,6 +458,43 @@ body.guest .topBar {
 
 .footer-text {
     color: var(--color-brand-blue);
+}
+
+/* Social icons: Discord invite + GitHub source */
+.footer-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 4px;
+}
+
+.footer-social a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    color: var(--color-brand-blue);
+    text-decoration: none;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.footer-social svg {
+    height: 20px;
+    width: 20px;
+    fill: currentColor;
+    display: block;
+    flex-shrink: 0;
+}
+
+@media (hover: hover) {
+    .footer-social a:hover {
+        background-color: var(--color-brand-blue);
+        color: var(--color-nav-bg);
+    }
 }
 
 /* Support strip: donate + sponsor side by side, vertically centred */

@@ -1359,6 +1359,7 @@ var Rules = (function () {
 	var self = {}
 
 	self.isSimulPhase = function () {
+		if (replay.showingReplay) return false
 		if (M.trainingGame) return false
 		if (M.gameFlow.turn === 0) return true
 		else if (M.gameFlow.phase === PHASE_BUILD_FACTORY) return true
@@ -1366,6 +1367,7 @@ var Rules = (function () {
 	}
 
 	self.canPlay = function () {
+		if (replay.showingReplay) return false
 		if (global.haltPlay === true) return false
 		if (global.name === "BotKickStarter") {
 			M.gameFlow.currentPlayer = global.pov
@@ -2141,6 +2143,12 @@ Factory = function () {
 	this.factoryComponentNamesAddedThisTurn = []
 	this.factoryDataBeforeExpansion = []
 
+	// Compressed replay detail of what was built this turn, pre expansion frame.
+	// Each entry is [componentName, index, rotation] (+ trailing 1 only when flipped)
+	this.factoryPlacementsAddedThisTurn = []
+	// [index, rotation] (+ trailing 1 only when flipped), in the pre-collapse expanded frame
+	this.factoryExpansionAddedThisTurn = []
+
 	this.componentBeingAdded = -1
 	this.componentBeingAddedRotation = -1
 	this.componentBeingAddedFlipped = 0
@@ -2213,6 +2221,8 @@ Factory.import = function (tab) {
 		// Add unsaved Vars
 		f.factoryComponentNamesAddedThisTurn = []
 		f.factoryDataBeforeExpansion = []
+		f.factoryPlacementsAddedThisTurn = []
+		f.factoryExpansionAddedThisTurn = []
 		f.componentBeingAdded = -1
 		f.componentBeingAddedRotation = -1
 		f.componentBeingAddedFlipped = 0
@@ -2285,24 +2295,53 @@ Factory.prototype.placeFactoryComponent = function (e) {
 	player.factory.actionPlaceFactoryComponent(index, player)
 }
 
-Factory.prototype.actionPlaceFactoryComponent = function (index, player) {
-	var thisFac = player.factory
-	var newComponentName = thisFac.componentBeingAdded
-	var newComponentModel = thisFac.rotateRectangle(getComponentModelFromName(newComponentName), thisFac.componentBeingAddedRotation, DIMENSIONS[newComponentName][0], DIMENSIONS[newComponentName][1], thisFac.componentBeingAddedFlipped)
-	var tableWidth = DIMENSIONS[newComponentName][0]
-	var tableHeight = DIMENSIONS[newComponentName][1]
-	if (thisFac.componentBeingAddedRotation % 2 == 1) {
-		tableWidth = DIMENSIONS[newComponentName][1]
-		tableHeight = DIMENSIONS[newComponentName][0]
+Factory.encodePlacement = function (component) {
+	var res = [component[0], component[1], component[2]]
+	if (component[3] === 1) res.push(1)
+	return res
+}
+
+// Inverse of Factory.encodePlacement
+Factory.decodePlacement = function (placement) {
+	return [placement[0], placement[1], placement[2], placement.length > 3 ? placement[3] : 0]
+}
+
+Factory.prototype.getPlacementsAddedThisTurn = function () {
+	var res = []
+	for (var i = 0; i < this.factoryComponenetIndexesAddedThisTurn.length; i++) {
+		var arrayIndex = _.findIndex(
+			this.factoryComponents,
+			function (el) {
+				return el[1] === this.factoryComponenetIndexesAddedThisTurn[i]
+			},
+			this
+		)
+		// NEEDED TO FIX GAMES BREAKING - the index may no longer be on the floor (removed, or nudged)
+		if (arrayIndex === -1) continue
+		res.push(Factory.encodePlacement(this.factoryComponents[arrayIndex]))
 	}
-	var i = 0
-	var x = 0
-	var y = 0
-	var left = 0
-	var top = 0
-	var suitableTechLevel = false
-	var arrayIndex = 0
-	var techComponentName = 0
+return res
+}
+
+Factory.prototype.actionPlaceFactoryComponent = function (index, player) {
+		var thisFac = player.factory
+		var newComponentName = thisFac.componentBeingAdded
+		var newComponentRotation = thisFac.componentBeingAddedRotation
+		var newComponentFlipped = thisFac.componentBeingAddedFlipped
+		var tableWidth = DIMENSIONS[newComponentName][0]
+		var tableHeight = DIMENSIONS[newComponentName][1]
+		if (newComponentRotation % 2 == 1) {
+			tableWidth = DIMENSIONS[newComponentName][1]
+			tableHeight = DIMENSIONS[newComponentName][0]
+		}
+		var i = 0
+		var x = 0
+		var y = 0
+		var left = 0
+		var top = 0
+		var suitableTechLevel = false
+		var arrayIndex = 0
+		var techComponentName = 0
 
 	// Check if there is enough space
 	var SpaceAvailable = true
@@ -2534,64 +2573,8 @@ Factory.prototype.actionPlaceFactoryComponent = function (index, player) {
 	}
 
 	// Enough Space! So add Component into model, view, and release gfx placement
-	i = 0
-	for (y = 0; y < tableHeight; y++) {
-		for (x = index; x < index + tableWidth; x++) {
-			thisFac.factoryCoords[x + y * thisFac.width] = newComponentModel[i]
-			i++
-		}
-	}
+	thisFac.actionPlaceFactoryComponent_core(player, newComponentName, index, newComponentRotation, newComponentFlipped)
 
-	if (A_TECHS.includes(thisFac.componentBeingAdded) || B_TECHS.includes(thisFac.componentBeingAdded) || C_TECHS.includes(thisFac.componentBeingAdded) || D_TECHS.includes(thisFac.componentBeingAdded)) {
-		if (ONE_SLOT_TECH.includes(thisFac.componentBeingAdded)) thisFac.factoryComponents.push([thisFac.componentBeingAdded, index, thisFac.componentBeingAddedRotation, thisFac.componentBeingAddedFlipped, [-1]])
-		else if (TWO_SLOT_TECH.includes(thisFac.componentBeingAdded)) thisFac.factoryComponents.push([thisFac.componentBeingAdded, index, thisFac.componentBeingAddedRotation, thisFac.componentBeingAddedFlipped, [-1, -1]])
-		else if (THREE_SLOT_TECH.includes(thisFac.componentBeingAdded)) thisFac.factoryComponents.push([thisFac.componentBeingAdded, index, thisFac.componentBeingAddedRotation, thisFac.componentBeingAddedFlipped, [-1, -1, -1]])
-	} else if (DEALERSHIPS.includes(thisFac.componentBeingAdded)) thisFac.factoryComponents.push([thisFac.componentBeingAdded, index, thisFac.componentBeingAddedRotation, thisFac.componentBeingAddedFlipped, [0, 0, 0, 0, 0], [-1, -1, -1], 0, 0])
-	else if (MAINLINES.includes(thisFac.componentBeingAdded)) thisFac.factoryComponents.push([thisFac.componentBeingAdded, index, thisFac.componentBeingAddedRotation, thisFac.componentBeingAddedFlipped, [0, 0, 0, 0, 0], 0, 0, 0])
-	else thisFac.factoryComponents.push([thisFac.componentBeingAdded, index, thisFac.componentBeingAddedRotation, thisFac.componentBeingAddedFlipped, [], -1])
-
-	// Add data to related tech component
-	if (ARROWS.includes(newComponentName)) {
-		// get the tech component
-		var relatedTechIndex = thisFac.checkValidityOfArrowTile([newComponentName, index, thisFac.componentBeingAddedRotation])[1]
-		arrayIndex = _.findIndex(thisFac.factoryComponents, function (el) {
-			return el[1] === relatedTechIndex
-		})
-		techComponentName = thisFac.factoryComponents[arrayIndex][0]
-
-		if (ONE_SLOT_TECH.includes(techComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-		else {
-			// FIX
-			if (techComponentName === CHASSIS && ARROWS_BLUE.includes(newComponentName) && thisFac.factoryComponents[arrayIndex][RA_IDX][0] === -1) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === CHASSIS && ARROWS_BLUE.includes(newComponentName) && thisFac.factoryComponents[arrayIndex][RA_IDX][1] === -1) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === BODY && ARROWS_BLUE.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === BODY && ARROWS_PURPLE.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			// FIX
-			else if (techComponentName === RADIATOR && ARROWS_GREEN.includes(newComponentName) && thisFac.factoryComponents[arrayIndex][RA_IDX][0] === -1) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === RADIATOR && ARROWS_GREEN.includes(newComponentName) && thisFac.factoryComponents[arrayIndex][RA_IDX][1] === -1) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === BUMPER && ARROWS_BLUE.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === BUMPER && ARROWS_YELLOW.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === DASHBOARD && ARROWS_PURPLE.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === DASHBOARD && ARROWS_RED.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === ENGINE && ARROWS_RED.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === ENGINE && ARROWS_GREEN.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === ENGINE && ARROWS_BLUE.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][2] = index
-			else if (techComponentName === GEARS && ARROWS_RED.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === GEARS && ARROWS_GREEN.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === FUEL_TANK && ARROWS_GREEN.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === FUEL_TANK && ARROWS_RED.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === STEERING_WHEEL && ARROWS_YELLOW.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === STEERING_WHEEL && ARROWS_PURPLE.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === TIRE && ARROWS_GREEN.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === TIRE && ARROWS_RED.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-			else if (techComponentName === TIRE && ARROWS_YELLOW.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][2] = index
-			else if (techComponentName === HEADLIGHT && ARROWS_PURPLE.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
-			else if (techComponentName === HEADLIGHT && ARROWS_YELLOW.includes(newComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
-		}
-	}
-
-	thisFac.factoryComponenetIndexesAddedThisTurn.push(index)
-	M.availableComponents[thisFac.componentBeingAdded]--
 	$("#newComponentDiv").remove()
 	$("#componentValidationDiv").css("visibility", "visible")
 	V.addNudgeDiv(player)
@@ -2601,6 +2584,76 @@ Factory.prototype.actionPlaceFactoryComponent = function (index, player) {
 	V.displayEligibleFactoryTiles(player, eligibleFactoryTiles)
 	V.renderFactoryFloor(player)
 	V.updateQSPdiv(player)
+}
+
+// Everything is passed in, so this does not need componentBeingAdded / current player. Used by the replay.
+Factory.prototype.actionPlaceFactoryComponent_core = function (player, componentName, index, rotation, flipped) {
+	var thisFac = player.factory
+	var componentData = thisFac.rotateRectangle(getComponentModelFromName(componentName), rotation, DIMENSIONS[componentName][0], DIMENSIONS[componentName][1], flipped)
+	var tableWidth = DIMENSIONS[componentName][0]
+	var tableHeight = DIMENSIONS[componentName][1]
+	if (rotation % 2 == 1) {
+		tableWidth = DIMENSIONS[componentName][1]
+		tableHeight = DIMENSIONS[componentName][0]
+	}
+	var i = 0
+	for (var y = 0; y < tableHeight; y++) {
+		for (var x = index; x < index + tableWidth; x++) {
+			thisFac.factoryCoords[x + y * thisFac.width] = componentData[i]
+			i++
+		}
+	}
+
+	if (A_TECHS.includes(componentName) || B_TECHS.includes(componentName) || C_TECHS.includes(componentName) || D_TECHS.includes(componentName)) {
+		if (ONE_SLOT_TECH.includes(componentName)) thisFac.factoryComponents.push([componentName, index, rotation, flipped, [-1]])
+		else if (TWO_SLOT_TECH.includes(componentName)) thisFac.factoryComponents.push([componentName, index, rotation, flipped, [-1, -1]])
+		else if (THREE_SLOT_TECH.includes(componentName)) thisFac.factoryComponents.push([componentName, index, rotation, flipped, [-1, -1, -1]])
+	} else if (DEALERSHIPS.includes(componentName)) thisFac.factoryComponents.push([componentName, index, rotation, flipped, [0, 0, 0, 0, 0], [-1, -1, -1], 0, 0])
+	else if (MAINLINES.includes(componentName)) thisFac.factoryComponents.push([componentName, index, rotation, flipped, [0, 0, 0, 0, 0], 0, 0, 0])
+	else thisFac.factoryComponents.push([componentName, index, rotation, flipped, [], -1])
+
+	// Add data to related tech component
+	if (ARROWS.includes(componentName)) {
+		// get the tech component
+		var relatedTechIndex = thisFac.checkValidityOfArrowTile([componentName, index, rotation])[1]
+		var arrayIndex = _.findIndex(thisFac.factoryComponents, function (el) {
+			return el[1] === relatedTechIndex
+		})
+		var techComponentName = thisFac.factoryComponents[arrayIndex][0]
+
+		if (ONE_SLOT_TECH.includes(techComponentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+		else {
+			// FIX
+			if (techComponentName === CHASSIS && ARROWS_BLUE.includes(componentName) && thisFac.factoryComponents[arrayIndex][RA_IDX][0] === -1) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === CHASSIS && ARROWS_BLUE.includes(componentName) && thisFac.factoryComponents[arrayIndex][RA_IDX][1] === -1) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === BODY && ARROWS_BLUE.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === BODY && ARROWS_PURPLE.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			// FIX
+			else if (techComponentName === RADIATOR && ARROWS_GREEN.includes(componentName) && thisFac.factoryComponents[arrayIndex][RA_IDX][0] === -1) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === RADIATOR && ARROWS_GREEN.includes(componentName) && thisFac.factoryComponents[arrayIndex][RA_IDX][1] === -1) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === BUMPER && ARROWS_BLUE.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === BUMPER && ARROWS_YELLOW.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === DASHBOARD && ARROWS_PURPLE.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === DASHBOARD && ARROWS_RED.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === ENGINE && ARROWS_RED.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === ENGINE && ARROWS_GREEN.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === ENGINE && ARROWS_BLUE.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][2] = index
+			else if (techComponentName === GEARS && ARROWS_RED.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === GEARS && ARROWS_GREEN.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === FUEL_TANK && ARROWS_GREEN.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === FUEL_TANK && ARROWS_RED.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === STEERING_WHEEL && ARROWS_YELLOW.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === STEERING_WHEEL && ARROWS_PURPLE.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === TIRE && ARROWS_GREEN.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === TIRE && ARROWS_RED.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+			else if (techComponentName === TIRE && ARROWS_YELLOW.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][2] = index
+			else if (techComponentName === HEADLIGHT && ARROWS_PURPLE.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][0] = index
+			else if (techComponentName === HEADLIGHT && ARROWS_YELLOW.includes(componentName)) thisFac.factoryComponents[arrayIndex][RA_IDX][1] = index
+		}
+	}
+
+	thisFac.factoryComponenetIndexesAddedThisTurn.push(index)
+	M.availableComponents[componentName]--
 }
 
 Factory.prototype.clickedOnNudge = function (e) {
@@ -2668,7 +2721,6 @@ Factory.prototype.actionPlaceFactoryExpansion = function (index, player) {
 	var div
 
 	var thisFac = player.factory
-	var newExpansion = thisFac.rotateRectangle(EXPANSION_FACTORY_TILE_COMPONENT, thisFac.componentBeingAddedRotation, 6, 8, thisFac.componentBeingAddedFlipped)
 	var tableWidth = 6
 	var tableHeight = 8
 	if (thisFac.componentBeingAddedRotation % 2 == 1) {
@@ -2914,16 +2966,7 @@ Factory.prototype.actionPlaceFactoryExpansion = function (index, player) {
 	}
 
 	// All Good! So add into components and cooords
-	i = 0
-	thisFac.factoryExpansions.push([index, thisFac.componentBeingAddedRotation, thisFac.componentBeingAddedFlipped])
-	for (y = 0; y < tableHeight; y++) {
-		for (x = index; x < index + tableWidth; x++) {
-			thisFac.factoryCoords[x + y * thisFac.width] = newExpansion[i]
-			i++
-		}
-	}
-
-	thisFac.factoryExpansionIndexAddedThisTurn = index
+	thisFac.actionPlaceFactoryExpansion_core(player, index, thisFac.componentBeingAddedRotation, thisFac.componentBeingAddedFlipped)
 	V.addNudgeDiv(player, true)
 
 	thisFac.clearComponentBeingPlaced()
@@ -2931,6 +2974,31 @@ Factory.prototype.actionPlaceFactoryExpansion = function (index, player) {
 	// At end of factory expansion, so can end turn
 	if (M.sandboxMode) C.addEndExpansionSandboxButton()
 	else C.addFinishTurnButton(M.gameFlow.turn, M.gameFlow.phase, gettext("End Turn"))
+}
+
+// Everything is passed in, so this does not need componentBeingAdded. Used by the replay.
+Factory.prototype.actionPlaceFactoryExpansion_core = function (player, index, rotation, flipped) {
+	var thisFac = player.factory
+	var newExpansion = thisFac.rotateRectangle(EXPANSION_FACTORY_TILE_COMPONENT, rotation, 6, 8, flipped)
+	var tableWidth = 6
+	var tableHeight = 8
+	if (rotation % 2 == 1) {
+		tableWidth = 8
+		tableHeight = 6
+	}
+	thisFac.factoryExpansions.push([index, rotation, flipped])
+	var i = 0
+	for (var y = 0; y < tableHeight; y++) {
+		for (var x = index; x < index + tableWidth; x++) {
+			thisFac.factoryCoords[x + y * thisFac.width] = newExpansion[i]
+			i++
+		}
+	}
+
+	thisFac.factoryExpansionIndexAddedThisTurn = index
+	// Compressed replay detail - the index is in the expanded (pre collapse) frame
+	thisFac.factoryExpansionAddedThisTurn = [index, rotation]
+	if (flipped === 1) thisFac.factoryExpansionAddedThisTurn.push(1)
 }
 
 Factory.prototype.collapseFactoryAfterExpansion = function () {
@@ -4652,6 +4720,10 @@ Model = function () {
 				[[], [], [], [], [], [], [], [BLUE, 0]],
 				[[], [], [], [], [], [], [], [YELLOW, 0]],
 			])
+			// The replay knows the colours the shuffle produced, so use them instead of shuffling
+			if (options.trackColours != undefined) {
+				for (i = 0; i < this.techTracks.length; i++) this.techTracks[i][7][0] = options.trackColours[i]
+			}
 			//					SPARKS 	then DEMAND in car / truck / sports
 			this.marketBoard = [
 				[[], [], [], [], [], []],
@@ -4727,15 +4799,18 @@ Model = function () {
 			this.obsolescenceMarkerDirection = 1
 
 			var colours = _.shuffle([RED, GREEN, PURPLE, BLUE, YELLOW])
+			// The replay knows the colours the shuffle produced, so use them instead of shuffling
+			if (options.colours != undefined) colours = [...options.colours]
 
 			this.players = []
+
+			// NB global.displayNames is only on the create page, so the replay has to pass them in
+			let displayNamesArr = options.displayNames != undefined ? options.displayNames : global.displayNames
 
 			playersName = options.players
 			for (i = 0; i < playersName.length; i++) {
 				var d = undefined
-				if (this.trainingGame) {
-					let displayNames = global.displayNames
-					let displayNamesArr = displayNames//displayNames.split(/,/)
+				if (this.trainingGame && displayNamesArr != undefined) {
 					if (playersName[i] === "SHADOW") d = displayNamesArr[0]
 					if (playersName[i] === "SHADOW_2") d = displayNamesArr[1]
 					if (playersName[i] === "SHADOW_3") d = displayNamesArr[2]
@@ -4778,11 +4853,15 @@ Model = function () {
 
 			this.alreadyPlayedCards = []
 
-			var pInfos = []
+var pInfos = []
 			_.each(this.players, function (p) {
 				pInfos.push(p.name, p.colour)
 			})
-			this.log(Log.SETUP_GAME, _.flatten([booleanToInt(this.trainingGame), booleanToInt(this.firstGame), pInfos]))
+			// The techTracks shuffle is not recoverable from anywhere else, so store the starting colour order.
+			// Only used by the replay, and only for games created from now on.
+			var initialTrackColours = []
+			for (i = 0; i < this.techTracks.length; i++) initialTrackColours.push(this.techTracks[i][7][0])
+			this.log(Log.SETUP_GAME, [..._.flatten([booleanToInt(this.trainingGame), booleanToInt(this.firstGame), pInfos]), ...initialTrackColours])
 
 			// Now populate the components
 			// Place player markers on tech tracks
@@ -5138,24 +5217,35 @@ Model = function () {
 		return coveredIndexes
 	}
 
+	// [placeOrUse, HISTindex, MWsize, (1 only when the window is horizontal)] + [rawIndex, rotation] for the replay
+	this.makeMWHistoryParam = function (placeOrUse, index, MWsize, rotation) {
+		var HISTindex = index
+		if (MWsize === 0 && rotation === 1) HISTindex--
+		else if (MWsize === 0 && rotation === 2) HISTindex -= 8
+		else if (MWsize === 1) HISTindex--
+		else if (MWsize === 2) HISTindex -= 2
+		var res = [placeOrUse, HISTindex, MWsize]
+		if (MWsize === 0 && ![0, 2].includes(rotation)) res.push(1)
+		res.push(index, rotation)
+		return res
+	}
+
 	this.placeDealershipWindowIntoModel = function (index, dealership, MWsize) {
 		// this affects the actual dealership of the player's factoryComponents
 		this.preventMultipleDealershipUses = dealership[0]
 		$("#MWrotationDiv").remove()
 
-		dealership[MW_IDX][0] = index
-		dealership[MW_IDX][1] = this.MWrotation
-		dealership[MW_IDX][2] = MWsize
+		this.placeDealershipWindowIntoModel_core(dealership, index, this.MWrotation, MWsize)
 		V.render(-1)
-		let HISTindex = index
-		if (MWsize === 0 && this.MWrotation === 1) HISTindex--
-		else if (MWsize === 0 && this.MWrotation === 2) HISTindex-=8
-		else if (MWsize === 1) HISTindex--
-		else if (MWsize === 2) HISTindex-=2
-		M.historyObjV2[M.historyObjV2.length-1][1] = HISTindex
-		M.historyObjV2[M.historyObjV2.length-1][2] = MWsize
-		if (MWsize === 0 && ![0,2].includes(this.MWrotation)) M.historyObjV2[1].push(1)
-		
+
+		M.historyObjV2[M.historyObjV2.length - 1] = this.makeMWHistoryParam(0, index, MWsize, this.MWrotation)
+	}
+
+	// Rotation is passed in, so this does not need M.MWrotation. Used by the replay.
+	this.placeDealershipWindowIntoModel_core = function (dealership, index, rotation, MWsize) {
+		dealership[MW_IDX][0] = index
+		dealership[MW_IDX][1] = rotation
+		dealership[MW_IDX][2] = MWsize
 	}
 
 	this.log = function (action, param, playerNumber, timestamp) {
@@ -5452,8 +5542,12 @@ var View = function (model) {
 				item = this.model.gameFlow.unalteredTurnOrder.indexOf(global.pov)
 			} else if (MARKET_BOARD_PHASES.includes(this.model.gameFlow.phase)) item = -1
 			else {
-				if (!Rules.isSimulPhase()) item = this.model.gameFlow.turnOrder[0]
-				else item = this.model.gameFlow.unalteredTurnOrder.indexOf(this.model.gameFlow.currentPlayer)
+				// turnOrder can legitimately be empty between phases (and while the replay is stepping through them)
+				if (!Rules.isSimulPhase()) {
+					// item is an index into unalteredTurnOrder, not a seat
+					if (this.model.gameFlow.turnOrder.length > 0) item = this.model.gameFlow.unalteredTurnOrder.indexOf(this.model.gameFlow.turnOrder[0])
+					else item = -1
+				} else item = this.model.gameFlow.unalteredTurnOrder.indexOf(this.model.gameFlow.currentPlayer)
 				if (M.trainingGame) {
 					item = this.model.players.length - this.model.gameFlow.turnOrder.length
 				}
@@ -5594,8 +5688,11 @@ var View = function (model) {
 			playerDiv.addClass("playerDiv")
 			var num = this.model.gameFlow.unalteredTurnOrder[i]
 
-			if (!Rules.isSimulPhase()) {
-				if (this.model.gameFlow.turnOrder[0] === num) playerDiv.addClass("playerTurn")
+			// The replay has already taken the acting player off the queue, so the glow has to come
+			// from currentPlayer rather than turnOrder[0]
+			var turnGlow = replay.showingReplay ? this.model.gameFlow.currentPlayer : this.model.gameFlow.turnOrder[0]
+			if (!Rules.isSimulPhase() || replay.showingReplay) {
+				if (turnGlow === num) playerDiv.addClass("playerTurn")
 			} else {
 				// simul phase
 				if (global.currentPlayers.includes(this.model.players[this.model.gameFlow.unalteredTurnOrder[i]].name)) playerDiv.addClass("playerTurn")
@@ -9454,6 +9551,8 @@ var View = function (model) {
 					IO.loadRewind(C)
 				})
 			}
+		} else if (item === 11) {
+			replay.toggleReplayMode()
 		} else if (item === 99) {
 			if (M.trainingGame) {
 			} else {
@@ -9852,9 +9951,9 @@ var View = function (model) {
 	var Qhighlight
 	var P_CARD_AREA
 
-	this.reloadModel = function (model) {
+	this.reloadModel = function (model, item) {
 		this.model = model
-		this.render()
+		this.render(item)
 	}
 
 	init.call(this)
@@ -9998,6 +10097,12 @@ var Controller = function (_model, _view) {
 
 	this.currentPlayer = function () {
 		if (M.sandboxMode) return this.model.players[global.pov]
+		// turnOrder is legitimately empty between phases (and while the replay is stepping through them)
+		if (this.model.gameFlow.turnOrder.length === 0) {
+			var fallback = this.model.gameFlow.currentPlayer
+			if (fallback == undefined || fallback < 0 || fallback >= this.model.players.length) fallback = 0
+			return this.model.players[fallback]
+		}
 		if (M.trainingGame) return this.model.players[this.model.gameFlow.turnOrder[0]]
 
 		if (!Rules.isSimulPhase()) return this.model.players[this.model.gameFlow.turnOrder[0]]
@@ -10219,53 +10324,13 @@ var Controller = function (_model, _view) {
 				}
 			})
 
-			$(".piece").on("click", function (e) {
-				if (!M.piecesUsedInResearch.includes(this.id) && !(this.id.slice(0, 3) === "ACT" && parseInt(this.id.slice(4, 5)) !== C.currentPlayer().colour)) {
-					if (!(this.id.slice(0, 3) === "ACT" && parseInt(this.id.slice(3, 4)) === 4) && !(this.id.slice(0, 3) !== "ACT" && parseInt(this.id.slice(3, 4)) === 6)) {
-						var id = this.id
-						var track = this.id.slice(0, 3)
-						var originalPos = parseInt(this.id.slice(3, 4))
-						var colour = parseInt(this.id.slice(4, 5))
-						var trackToUse
-						if (track.slice(0, 2) === "TT") trackToUse = M.techTracks[parseInt(track.slice(2, 3))]
-						if (track === "ACT") trackToUse = M.assemblyCapacityTrack
-						// Remove from old pos
-						trackToUse[originalPos] = trackToUse[originalPos].filter(function (item) {
-							return item !== colour
-						})
-
-						// Add to new pos
-						trackToUse[originalPos + 1].push(colour)
-						M.piecesUsedInResearch.push(track + String(originalPos + 1) + String(colour))
-						$(".piece").off()
-
-						// Do punch clock
-						if (track !== "ACT" && originalPos + 1 === 4) M.punchClockNumber--
-						if (track !== "ACT" && originalPos + 1 === 6) M.punchClockNumber--
-						if (track === "ACT" && originalPos + 1 === 4) M.punchClockNumber--
-
-						// Recalc Stocks
-						if (track === "ACT") {
-							// Add stock back in to display dealerships
-							for (let i = 0; i < M.players.length; i++) {
-								// Each players dealershup produces vehicles accoeding to the assem capac track -- this is simply set to the correct max value
-								let factory = M.players[i].factory
-								for (let j = 0; j < factory.factoryComponents.length; j++) {
-									if (MAINLINES.includes(factory.factoryComponents[j][0])) {
-										for (let k = 0; k < M.assemblyCapacityTrack.length; k++) if (M.assemblyCapacityTrack[k].indexOf(M.players[i].colour) > -1) factory.factoryComponents[j][SL_IDX] = k + 1
-									}
-								}
-							}
+$(".piece").on("click", function (e) {
+					if (!M.piecesUsedInResearch.includes(this.id) && !(this.id.slice(0, 3) === "ACT" && parseInt(this.id.slice(4, 5)) !== C.currentPlayer().colour)) {
+						if (!(this.id.slice(0, 3) === "ACT" && parseInt(this.id.slice(3, 4)) === 4) && !(this.id.slice(0, 3) !== "ACT" && parseInt(this.id.slice(3, 4)) === 6)) {
+							C.actionPlaceResearchPiece(this.id.slice(0, 3), parseInt(this.id.slice(3, 4)), parseInt(this.id.slice(4, 5)))
 						}
-
-						// Add to history object
-						// colour of piece being moved, TT0 < index, or ACT < track
-						M.historyObj.push([colour, C.getTrackCompressedNumberFromID(track.slice(0, 3)), originalPos + 1, M.punchClockNumber])
-
-						V.render(-1)
 					}
-				}
-			})
+				})
 		}
 
 		// For any moved pieces, indicate whether it was yours or others
@@ -10337,6 +10402,44 @@ var Controller = function (_model, _view) {
 		if (researchPonts === 0 || global.debug) {
 			this.addFinishTurnButton(this.model.gameFlow.turn, this.model.gameFlow.phase, gettext("End Turn"))
 			$("#finishTurnButton").show()
+		}
+	}
+
+	this.actionPlaceResearchPiece = function (track, originalPos, colour) {
+		this.actionPlaceResearchPiece_core(track, originalPos, colour)
+
+		$(".piece").off()
+
+		// Add to history object
+		// colour of piece being moved, TT0 < index, or ACT < track
+		M.historyObj.push([colour, this.getTrackCompressedNumberFromID(track), originalPos + 1, M.punchClockNumber])
+
+		V.render(-1)
+	}
+
+	// track is TT0-TT4 or ACT. originalPos is the position the piece is leaving. Used by the replay.
+	this.actionPlaceResearchPiece_core = function (track, originalPos, colour) {
+		var trackToUse
+		if (track.slice(0, 2) === "TT") trackToUse = M.techTracks[parseInt(track.slice(2, 3))]
+		if (track === "ACT") trackToUse = M.assemblyCapacityTrack
+		// Remove from old pos
+		trackToUse[originalPos] = trackToUse[originalPos].filter(function (item) {
+			return item !== colour
+		})
+
+		// Add to new pos
+		trackToUse[originalPos + 1].push(colour)
+		M.piecesUsedInResearch.push(track + String(originalPos + 1) + String(colour))
+
+		// Do punch clock
+		if (track !== "ACT" && originalPos + 1 === 4) M.punchClockNumber--
+		if (track !== "ACT" && originalPos + 1 === 6) M.punchClockNumber--
+		if (track === "ACT" && originalPos + 1 === 4) M.punchClockNumber--
+
+		// Recalc Stocks
+		if (track === "ACT") {
+			// Add stock back in to display dealerships
+			this.actionRefreshMainlineStock_core()
 		}
 	}
 
@@ -10460,12 +10563,22 @@ var Controller = function (_model, _view) {
 		var c = e.data.controller
 		var pos = $(e.currentTarget).data("position")
 		var player = c.currentPlayer()
-		player.gantt = 0
-		c.model.newEngFocusOrder[pos] = player.arrayPos
-		M.alreadySetFocus = 1
-		M.log(Log.SET_FOCUS, pos)
+
+		c.actionChooseFocus(player, pos)
 
 		C.startActions()
+	}
+
+	this.actionChooseFocus = function (player, pos) {
+		this.actionChooseFocus_core(player, pos)
+		M.log(Log.SET_FOCUS, pos)
+	}
+
+	// The player is passed in, so this does not need currentPlayer(). Used by the replay.
+	this.actionChooseFocus_core = function (player, pos) {
+		player.gantt = 0
+		this.model.newEngFocusOrder[pos] = player.arrayPos
+		M.alreadySetFocus = 1
 	}
 
 	/**************************************************************************************************************
@@ -10519,9 +10632,15 @@ var Controller = function (_model, _view) {
 		$("#actions").append(endBuildingButton)
 		endBuildingButton.on("click", function () {
 			//$("#QSPdiv").remove(); NO EFFECT - JUST GETS READDED!
+			// NB In a training game the one person plays every seat, so global.pov is not the acting player
+			var factory = C.currentPlayer().factory
+
+			// Compressed replay detail. MUST be captured here, while the indexes are still the pre expansion
+			// ones. Needed in training games too, as they never go through saveFactoryMove
+			factory.factoryPlacementsAddedThisTurn = factory.getPlacementsAddedThisTurn()
+
 			// BEFORE WE EXPAND, NEED TO CAPTURE WHAT WAS ADDED THIS TURN
 			if (!M.trainingGame) {
-				var factory = M.players[global.pov].factory
 				factory.factoryComponentNamesAddedThisTurn = factory.factoryComponentNamesAddedThisTurn.splice(0, factory.factoryComponenetIndexesAddedThisTurn.length)
 				for (i = 0; i < factory.factoryComponenetIndexesAddedThisTurn.length; i++) {
 					var arrayIndex = _.findIndex(
@@ -10552,6 +10671,16 @@ var Controller = function (_model, _view) {
 
 		V.render()
 		V.updateQSPdiv(this.currentPlayer())
+	}
+
+	// PvP games get this entry written by the server in saveFactoryMove, because the build phase is
+// simultaneous and the server validates the components. A training game saves straight through
+// IO.saveGame instead, so the client has to write it
+this.actionLogFactoryBuild = function (player) {
+		var param = [[...player.factory.factoryPlacementsAddedThisTurn], [...player.factory.factoryExpansionAddedThisTurn]]
+		player.factory.factoryPlacementsAddedThisTurn = []
+		player.factory.factoryExpansionAddedThisTurn = []
+		this.model.log(Log.FACTORY_BUILD, param, player.arrayPos)
 	}
 
 	this.clickedOnRemoveLastComponent = function () {
@@ -10820,14 +10949,8 @@ var Controller = function (_model, _view) {
 			M.historyObjV2.push([0, -1, -1])
 		} else {
 			M.historyObj.push(e.data.dealership[MW_IDX][0])
-			let HISTindex = e.data.dealership[MW_IDX][0]
-			const MWsize = e.data.dealership[MW_IDX][2]
-			if (MWsize === 0 && e.data.dealership[MW_IDX][1] === 1) HISTindex--
-			else if (MWsize === 0 && e.data.dealership[MW_IDX][1] === 2) HISTindex -= 8
-			else if (MWsize === 1) HISTindex--
-			else if (MWsize === 2) HISTindex -= 2
-			M.historyObjV2.push([1, HISTindex, MWsize])
-			if (MWsize === 0 && ![0, 2].includes(e.data.dealership[MW_IDX][1])) M.historyObjV2[M.historyObjV2.length - 1].push(1)
+			// NB this is a jQuery handler, so this is the div - go via M
+			M.historyObjV2.push(M.makeMWHistoryParam(1, e.data.dealership[MW_IDX][0], e.data.dealership[MW_IDX][2], e.data.dealership[MW_IDX][1]))
 
 			C.enableSellingForDealership(e.data.dealership)
 		}
@@ -10942,6 +11065,55 @@ var Controller = function (_model, _view) {
 
 	this.actionSales = function (MBindex, dealership, autoSale) {
 		var p = C.currentPlayer()
+		var res = this.actionSales_core(p, MBindex, dealership)
+		var histSales = res[0]
+		var histTotalIncome = res[1]
+
+		// NEEDED TO SOLVE ENDLESS LOOP ISSUE (but this alone can prevent final sale. Fix in RULES skip)
+		if (histTotalIncome === 0) autoSale = false
+
+		if (autoSale) {
+			// Must come from a placed MW
+			M.historyObj.push(dealership[0])
+			M.historyObj.push(dealership[MW_IDX][0])
+			M.historyObjV2.push(dealership[0])
+			M.historyObjV2.push(this.model.makeMWHistoryParam(1, dealership[MW_IDX][0], dealership[MW_IDX][2], dealership[MW_IDX][1]))
+		}
+		M.historyObj.push(histSales)
+		M.historyObj.push(histTotalIncome)
+		M.historyObjV2.push(histSales)
+		M.historyObjV2.push(histTotalIncome)
+
+		// If auto selling, add the history now
+		if (autoSale) {
+			M.historyObj.push(1)
+			M.historyObjV2.push(1)
+			//M.log(Log.SALES, [...M.historyObj], M.gameFlow.turnOrder[0])
+			M.log(Log.SALES_V2, [...M.historyObjV2], M.gameFlow.turnOrder[0])
+			M.historyObj.splice(0, M.historyObj.length)
+			M.historyObjV2.splice(0)
+			M.justAutoSold = true
+		}
+
+		// End turn / undo
+		V.render()
+
+		// remove highlights
+		$(".marketSelectable").remove()
+		$(".marketSelectable").off()
+		$(".marketIneligible").remove()
+		$(".marketIneligible").off()
+
+		$("#actions").empty()
+		$("#actions").append("Sales Complete")
+
+		C.addResetButton()
+
+		C.addFinishTurnButton(M.gameFlow.turn, M.gameFlow.phase, gettext("End turn"))
+	}
+
+	// The player is passed in, so this does not need currentPlayer(). Returns [histSales, histTotalIncome]. Used by the replay.
+	this.actionSales_core = function (p, MBindex, dealership) {
 		var stock = p.factory.getStockForDealership(dealership)
 
 		var histTotalIncome = 0
@@ -10987,55 +11159,7 @@ var Controller = function (_model, _view) {
 			}
 		}
 
-		// NEEDED TO SOLVE ENDLESS LOOP ISSUE (but this alone can prevent final sale. Fix in RULES skip)
-		if (histTotalIncome === 0) autoSale = false
-
-		if (autoSale) {
-			// Must come from a placed MW
-			M.historyObj.push(dealership[0])
-			M.historyObj.push(dealership[MW_IDX][0])
-			M.historyObjV2.push(dealership[0])
-			let HISTindex = dealership[MW_IDX][0]
-			const MWsize = dealership[MW_IDX][2]
-			if (MWsize === 0 && dealership[MW_IDX][1] === 1) HISTindex--
-			else if (MWsize === 0 && dealership[MW_IDX][1] === 2) HISTindex -= 8
-			else if (MWsize === 1) HISTindex--
-			else if (MWsize === 2) HISTindex -= 2
-
-			M.historyObjV2.push([1, HISTindex, MWsize])
-			if (MWsize === 0 && ![0, 2].includes(dealership[MW_IDX][1])) M.historyObjV2[M.historyObjV2.length - 1].push(1)
-		}
-		M.historyObj.push(histSales)
-		M.historyObj.push(histTotalIncome)
-		M.historyObjV2.push(histSales)
-		M.historyObjV2.push(histTotalIncome)
-
-		// If auto selling, add the history now
-		if (autoSale) {
-			M.historyObj.push(1)
-			M.historyObjV2.push(1)
-			//M.log(Log.SALES, [...M.historyObj], M.gameFlow.turnOrder[0])
-			M.log(Log.SALES_V2, [...M.historyObjV2], M.gameFlow.turnOrder[0])
-			M.historyObj.splice(0, M.historyObj.length)
-			M.historyObjV2.splice(0)
-			M.justAutoSold = true
-		}
-
-		// End turn / undo
-		V.render()
-
-		// remove highlights
-		$(".marketSelectable").remove()
-		$(".marketSelectable").off()
-		$(".marketIneligible").remove()
-		$(".marketIneligible").off()
-
-		$("#actions").empty()
-		$("#actions").append("Sales Complete")
-
-		C.addResetButton()
-
-		C.addFinishTurnButton(M.gameFlow.turn, M.gameFlow.phase, gettext("End turn"))
+		return [histSales, histTotalIncome]
 	}
 
 	/**************************************************************************************************************
@@ -11098,13 +11222,12 @@ var Controller = function (_model, _view) {
 	this.clickedOnQ = function (e) {
 		var Q = parseInt(this.id.slice(1, 2))
 		var cardName = $(e.currentTarget).data("card").slice(4)
-		var cardData = getCardDataFromCardName(cardName)
-		M.alreadyPlayedCards.push([C.currentPlayer().colour, Q, cardData, cardName])
-		// Remove card from player
+		var player = C.currentPlayer()
+		var cardIndex = C.currentPlayer.pcap
 
-		M.log(Log.PLAY_CARD, [Q])
+		// NB this is a jQuery handler, so this is the div - go via C
+		C.actionPlayCard(player, Q, cardName, cardIndex)
 
-		C.currentPlayer().playerCards.splice(C.currentPlayer.pcap, 1)
 		delete C.currentPlayer.pcap
 
 		V.render(-1)
@@ -11117,6 +11240,23 @@ var Controller = function (_model, _view) {
 		C.addResetButton()
 
 		C.addFinishTurnButton(M.gameFlow.turn, M.gameFlow.phase, gettext("End Turn"))
+	}
+
+	this.actionPlayCard = function (player, Q, cardName, cardIndex) {
+		var cardNum = player.playerCards[cardIndex]
+
+		this.actionPlayCard_core(player, Q, cardName, cardIndex)
+
+		// The cardNum is only needed by the replay
+		M.log(Log.PLAY_CARD, [Q, cardNum])
+	}
+
+	// The player and card index are passed in, so this does not need currentPlayer(). Used by the replay.
+	this.actionPlayCard_core = function (player, Q, cardName, cardIndex) {
+		var cardData = getCardDataFromCardName(cardName)
+		M.alreadyPlayedCards.push([player.colour, Q, cardData, cardName])
+		// Remove card from player
+		player.playerCards.splice(cardIndex, 1)
 	}
 
 	/**************************************************************************************************************
@@ -11136,13 +11276,22 @@ var Controller = function (_model, _view) {
 
 		// Log action
 		if (this.model.gameFlow.phase === PHASE_FACTORY_SETUP) {
-			this.model.players[global.pov].factory.factoryComponenetIndexesAddedThisTurn.splice(0, this.model.players[global.pov].factory.factoryComponenetIndexesAddedThisTurn.length)
-			this.model.log(Log.FACTORY_SETUP, [])
+			// NB In a training game the one person plays every seat, so global.pov is not the acting player.
+			// In a real game turn zero is simultaneous, so the acting player is not turnOrder[0] either
+			var setupPlayer = this.currentPlayer()
+			var setupFactory = setupPlayer.factory
+			// [mainFactoryRotation, placements[], (1 only when the main factory is flipped)]
+			var setupParam = [setupFactory.mainFactoryRotation, setupFactory.getPlacementsAddedThisTurn()]
+			if (setupFactory.mainFactoryFlipped === 1) setupParam.push(1)
+			setupFactory.factoryComponenetIndexesAddedThisTurn.splice(0, setupFactory.factoryComponenetIndexesAddedThisTurn.length)
+			this.model.log(Log.FACTORY_SETUP, setupParam, setupPlayer.arrayPos)
 		} else if (this.model.gameFlow.phase === PHASE_RESEARCH) {
 			this.model.log(Log.RESEARCH, [...this.model.historyObj], this.model.gameFlow.turnOrder[0])
 			this.model.historyObj.splice(0, this.model.historyObj.length)
 		} else if (this.model.gameFlow.phase === PHASE_BUILD_FACTORY) {
 			// Need to finish off the expansion process
+			// A training game never calls saveFactoryMove, so the server never writes this entry
+			if (M.trainingGame) this.actionLogFactoryBuild(this.currentPlayer())
 			this.currentPlayer().factory.collapseFactoryAfterExpansion()
 			// needs a render, but this is done at the end
 		} 
@@ -11240,11 +11389,189 @@ var Controller = function (_model, _view) {
 		} else this.startActions()
 	}
 
+	/**************************************************************************************************************
+	 *
+	 * SHARED MODEL MUTATIONS - pure model changes, used by the live game and by the replay
+	 *
+	 **************************************************************************************************************/
+
+	// Each players dealershup produces vehicles accoeding to the assem capac track
+	// this is simply set to the correct max value
+	this.actionRefreshMainlineStock_core = function () {
+		for (var i = 0; i < M.players.length; i++) {
+			var factory = M.players[i].factory
+			for (var j = 0; j < factory.factoryComponents.length; j++) {
+				if (MAINLINES.includes(factory.factoryComponents[j][0])) {
+					for (var k = 0; k < M.assemblyCapacityTrack.length; k++) if (M.assemblyCapacityTrack[k].indexOf(M.players[i].colour) > -1) factory.factoryComponents[j][SL_IDX] = k + 1
+				}
+			}
+		}
+	}
+
+	// Which of the off board tech tracks wins the innovation contest.
+	// Returns [winnerIndex, innovations, maxPastMinMarker]
+	this.getWinningOffBoardTrack_core = function () {
+		var i = 0
+		var j = 0
+		var innovations = [0, 0, 0, 0, 0]
+		var maxPastMinMarker = [0, 0, 0, 0, 0]
+		for (i = 2; i <= 4; i++) {
+			var minTech = M.techTracks[i][7][1]
+			for (j = minTech + 1; j < M.techTracks[i].length - 1; j++) {
+				innovations[i] += M.techTracks[i][j].length * (j - minTech)
+				if (M.techTracks[i][j].length > 0) maxPastMinMarker[i] = j - M.techTracks[i][7][1]
+			}
+		}
+
+		var max = Math.max(...innovations)
+		var res = []
+		innovations.forEach(function (item, index) {
+			if (item === max && index >= 2) res.push(index)
+		})
+
+		if (res.length != 1) {
+			for (i = 0; i < maxPastMinMarker.length; i++) {
+				if (!res.includes(i)) maxPastMinMarker[i] = 0
+			}
+
+			var maxMaxPastMinMarker = Math.max(...maxPastMinMarker)
+			for (i = 0; i < res.length; i++) {
+				if (maxPastMinMarker[res[i]] < maxMaxPastMinMarker) res[i] = -1
+			}
+		}
+		// Now remove the -1s
+		res = res.filter(function (val) {
+			return val !== -1
+		})
+		if (res.length > 1) return [Math.min(...res), innovations, maxPastMinMarker]
+		return [res[0], innovations, maxPastMinMarker]
+	}
+
+	// Remove all market windows, bump the min demand of the obsolescence track and swap in the winning track.
+	// Returns the pieces needed to build the history entry
+	this.actionAdvanceExpectations_core = function () {
+		var i = 0
+		var j = 0
+
+		// Remove old sales windows from model
+		for (i = 0; i < M.players.length; i++) {
+			for (j = 0; j < M.players[i].factory.factoryComponents.length; j++) {
+				var component = M.players[i].factory.factoryComponents[j]
+				if (DEALERSHIPS.includes(component[0])) {
+					// reset sales window data
+					component[MW_IDX][0] = -1
+					component[MW_IDX][1] = -1
+					component[MW_IDX][2] = -1
+				}
+			}
+		}
+
+		var res = this.getWinningOffBoardTrack_core()
+		var winner = res[0]
+		var innovations = res[1]
+		var maxPastMinMarker = res[2]
+
+		var historyParam = []
+		// the colour of the old TT 0
+		historyParam.push(M.techTracks[M.obsolescenceMarkerDirection][7][0])
+		// the new value of the min demand
+		historyParam.push(M.techTracks[M.obsolescenceMarkerDirection][7][1] + 1)
+		// the off board innovation levels
+		historyParam.push([
+			[innovations[2], M.techTracks[2][7][0], maxPastMinMarker[2]],
+			[innovations[3], M.techTracks[3][7][0], maxPastMinMarker[3]],
+			[innovations[4], M.techTracks[4][7][0], maxPastMinMarker[4]],
+		])
+		// the colour of the winning tech track
+		historyParam.push(M.techTracks[winner][7][0])
+
+		// Now increase the min demand of the obs one by 1
+		M.techTracks[M.obsolescenceMarkerDirection][7][1]++
+
+		// Now swap the winning TT with the obs one
+		;[M.techTracks[M.obsolescenceMarkerDirection], M.techTracks[winner]] = [M.techTracks[winner], M.techTracks[M.obsolescenceMarkerDirection]]
+		// now push the old TT to the end (now in winner position)
+		M.techTracks.push([...M.techTracks[winner]])
+
+		// Now splice out the old one in the winner position
+		M.techTracks.splice(winner, 1)
+
+		// switch the obs marker
+		if (M.obsolescenceMarkerDirection === 1) M.obsolescenceMarkerDirection = 0
+		else M.obsolescenceMarkerDirection = 1
+
+		// the new obsmarker direction
+		historyParam.push(M.obsolescenceMarkerDirection)
+
+		return historyParam
+	}
+
+	// Apply the sparks from the cards played this turn, then convert every spark into demand.
+	// Returns the number of punch clocks used
+	this.actionShowCards_core = function (alreadyPlayedCards) {
+		var i = 0
+		var j = 0
+		var totalClocks = 0
+		for (i = 0; i < alreadyPlayedCards.length; i++) {
+			var clocks = alreadyPlayedCards[i][2][0]
+			// Take away clocks
+			M.punchClockNumber -= clocks
+			totalClocks += clocks
+
+			var Q = alreadyPlayedCards[i][1]
+			var cardData = alreadyPlayedCards[i][2]
+			for (j = 1; j < cardData.length; j++) {
+				var Xcoord = 0
+				var Ycoord = 0
+				if (Q === 1) Ycoord = 4
+				if (Q === 4) Xcoord = 4
+				if (Q === 2) {
+					Xcoord = 4
+					Ycoord = 4
+				}
+				Xcoord = Xcoord + cardData[j][0]
+				Ycoord = Ycoord + cardData[j][1]
+				var index = M.getIndexForMBcoord([Xcoord, Ycoord])
+				M.marketBoard[index][cardData[j][2]]++
+			}
+		}
+
+		// Sparks add Demand
+		for (i = 0; i < M.marketBoard.length; i++) {
+			for (j = 0; j < 3; j++) {
+				var vehiclesToAdd = M.marketBoard[i][j]
+				var maxVehicles = M.marketBoard[i][j] * 2
+				while (M.marketBoard[i][j + 3] < maxVehicles && vehiclesToAdd > 0) {
+					M.marketBoard[i][j + 3]++
+					vehiclesToAdd--
+				}
+			}
+		}
+
+		return totalClocks
+	}
+
+	// Sort the players into sales order (highest money first). The winner is now turnOrder[0]
+	this.actionSortPlayersByMoney_core = function () {
+		var i = 0
+		M.gameFlow.turnOrder = [...M.gameFlow.unalteredTurnOrder]
+		var moneyInSalesOrder = []
+		for (i = 0; i < M.gameFlow.turnOrder.length; i++) {
+			moneyInSalesOrder.push([M.gameFlow.turnOrder[i], M.players[M.gameFlow.turnOrder[i]].money])
+		}
+		moneyInSalesOrder.sort(function (a, b) {
+			return b[1] - a[1]
+		})
+
+		for (i = 0; i < M.players.length; i++) {
+			M.gameFlow.unalteredTurnOrder[i] = moneyInSalesOrder[i][0]
+			M.gameFlow.turnOrder[i] = moneyInSalesOrder[i][0]
+		}
+	}
+
 	this.moveToNextPhase = function () {
 		var i = 0
 		var j = 0
-		var k = 0
-		var factory
 
 		// clear all ready players
 		this.model.gameFlow.ready.splice(0, this.model.gameFlow.ready.length)
@@ -11329,14 +11656,8 @@ var Controller = function (_model, _view) {
 					this.model.punchClockNumber -= clockReduction
 					ganttHist.push([this.model.players[i].name, Rules.getNumberOfPlanningOffices(this.model.players[i]), clockReduction])
 				}
-				// Each players dealershup produces vehicles accoeding to the assem capac track
-				factory = this.model.players[i].factory
-				for (j = 0; j < factory.factoryComponents.length; j++) {
-					if (MAINLINES.includes(factory.factoryComponents[j][0])) {
-						for (k = 0; k < this.model.assemblyCapacityTrack.length; k++) if (this.model.assemblyCapacityTrack[k].indexOf(this.model.players[i].colour) > -1) factory.factoryComponents[j][SL_IDX] = k + 1
-					}
-				}
 			}
+			this.actionRefreshMainlineStock_core()
 			this.model.log(Log.INCREASE_GANTT, [...ganttHist], -1)
 
 			// Each players dealershup produces car
@@ -11431,19 +11752,7 @@ var Controller = function (_model, _view) {
 
 			if (this.model.gameEnded > 0) {
 				// Find winner. Sort players by sakes focus, then move highgest money to front
-				this.model.gameFlow.turnOrder = [...this.model.gameFlow.unalteredTurnOrder]
-				var moneyInSalesOrder = []
-				for (i = 0; i < this.model.gameFlow.turnOrder.length; i++) {
-					moneyInSalesOrder.push([this.model.gameFlow.turnOrder[i], this.model.players[this.model.gameFlow.turnOrder[i]].money])
-				}
-				moneyInSalesOrder.sort(function (a, b) {
-					return b[1] - a[1]
-				})
-
-				for (i = 0; i < this.model.players.length; i++) {
-					this.model.gameFlow.unalteredTurnOrder[i] = moneyInSalesOrder[i][0]
-					this.model.gameFlow.turnOrder[i] = moneyInSalesOrder[i][0]
-				}
+				this.actionSortPlayersByMoney_core()
 
 				this.model.log(Log.GAME_END, [this.model.players[this.model.gameFlow.unalteredTurnOrder[0]].name, this.model.gameEnded])
 				global.winner = this.model.players[this.model.gameFlow.unalteredTurnOrder[0]].name
@@ -11454,86 +11763,7 @@ var Controller = function (_model, _view) {
 			this.model.gameFlow.phase = PHASE_ADVANCE_EXPECTATIONS
 			this.model.historyObj.splice(0, this.model.historyObj.length)
 
-			// Remove old sales windows from model
-			for (i = 0; i < this.model.players.length; i++) {
-				for (j = 0; j < this.model.players[i].factory.factoryComponents.length; j++) {
-					var component = this.model.players[i].factory.factoryComponents[j]
-					if (DEALERSHIPS.includes(component[0])) {
-						// reset sales window data
-						component[MW_IDX][0] = -1
-						component[MW_IDX][1] = -1
-						component[MW_IDX][2] = -1
-					}
-				}
-			}
-
-			// Find the new TT from the off board ones
-			var innovations = [0, 0, 0, 0, 0]
-			var maxPastMinMarker = [0, 0, 0, 0, 0]
-			for (i = 2; i <= 4; i++) {
-				var minTech = this.model.techTracks[i][7][1]
-				for (j = minTech + 1; j < this.model.techTracks[i].length - 1; j++) {
-					innovations[i] += this.model.techTracks[i][j].length * (j - minTech)
-					if (this.model.techTracks[i][j].length > 0) maxPastMinMarker[i] = j - this.model.techTracks[i][7][1]
-				}
-			}
-
-			var max = Math.max(...innovations)
-			var res = []
-			var winner = -1
-			innovations.forEach((item, index) => (item === max && index >= 2 ? res.push(index) : null))
-
-			if (res.length != 1) {
-				for (i = 0; i < maxPastMinMarker.length; i++) {
-					if (!res.includes(i)) maxPastMinMarker[i] = 0
-				}
-
-				var maxMaxPastMinMarker = Math.max(...maxPastMinMarker)
-				for (i = 0; i < res.length; i++) {
-					if (maxPastMinMarker[res[i]] < maxMaxPastMinMarker) res[i] = -1
-				}
-			}
-			// Now remove the -1s
-			res = res.filter(function (val) {
-				return val !== -1
-			})
-			if (res.length > 1) {
-				winner = Math.min(...res)
-			} else winner = res[0]
-
-			// log the colour of the old TT 0
-			this.model.historyObj.push(this.model.techTracks[this.model.obsolescenceMarkerDirection][7][0])
-
-			// log the new value of the min demand 1
-			this.model.historyObj.push(this.model.techTracks[this.model.obsolescenceMarkerDirection][7][1] + 1)
-
-			// Add the off board innovation levels
-			this.model.historyObj.push([
-				[innovations[2], this.model.techTracks[2][7][0], maxPastMinMarker[2]],
-				[innovations[3], this.model.techTracks[3][7][0], maxPastMinMarker[3]],
-				[innovations[4], this.model.techTracks[4][7][0], maxPastMinMarker[4]],
-			])
-
-			// log the colour of the winning tech track 2
-			this.model.historyObj.push(this.model.techTracks[winner][7][0])
-
-			// Now increase the min demand of the obs one by 1
-			this.model.techTracks[this.model.obsolescenceMarkerDirection][7][1]++
-
-			// Now swap the winning TT with the obs one
-			;[this.model.techTracks[this.model.obsolescenceMarkerDirection], this.model.techTracks[winner]] = [this.model.techTracks[winner], this.model.techTracks[this.model.obsolescenceMarkerDirection]]
-			// now push the old TT to the end (now in winner position)
-			this.model.techTracks.push([...this.model.techTracks[winner]])
-
-			// Now splice out the old one in the winner position
-			this.model.techTracks.splice(winner, 1)
-
-			// switch the obs marker
-			if (this.model.obsolescenceMarkerDirection === 1) this.model.obsolescenceMarkerDirection = 0
-			else this.model.obsolescenceMarkerDirection = 1
-
-			// log the new obsmarker direction
-			this.model.historyObj.push(this.model.obsolescenceMarkerDirection)
+			this.model.historyObj = this.actionAdvanceExpectations_core()
 
 			this.model.log(Log.ADVANCE_EXPECTATIONS, [...this.model.historyObj], -1)
 			this.model.historyObj.splice(0, this.model.historyObj.length)
@@ -11543,15 +11773,7 @@ var Controller = function (_model, _view) {
 			this.model.gameFlow.turnOrder = [...this.model.gameFlow.unalteredTurnOrder]
 
 			// Add stock back in to display dealerships
-			for (i = 0; i < this.model.players.length; i++) {
-				// Each players dealershup produces vehicles accoeding to the assem capac track -- this is simply set to the correct max value
-				factory = this.model.players[i].factory
-				for (j = 0; j < factory.factoryComponents.length; j++) {
-					if (MAINLINES.includes(factory.factoryComponents[j][0])) {
-						for (k = 0; k < this.model.assemblyCapacityTrack.length; k++) if (this.model.assemblyCapacityTrack[k].indexOf(this.model.players[i].colour) > -1) factory.factoryComponents[j][SL_IDX] = k + 1
-					}
-				}
-			}
+			this.actionRefreshMainlineStock_core()
 			V.render(-1)
 
 			// Check for any skips
@@ -11564,46 +11786,10 @@ var Controller = function (_model, _view) {
 				}
 			}
 		} else if (oldPhase === PHASE_GROW_DEMANDS) {
-			// Add sparks to model, take away clocks
-			var totalClocks = 0
-			for (i = 0; i < this.model.alreadyPlayedCards.length; i++) {
-				var clocks = this.model.alreadyPlayedCards[i][2][0]
-				// Take away clocks
-				this.model.punchClockNumber -= clocks
-				totalClocks += clocks
-
-				var Q = this.model.alreadyPlayedCards[i][1]
-				var cardData = this.model.alreadyPlayedCards[i][2]
-				for (j = 1; j < cardData.length; j++) {
-					var Xcoord = 0
-					var Ycoord = 0
-					if (Q === 1) Ycoord = 4
-					if (Q === 4) Xcoord = 4
-					if (Q === 2) {
-						Xcoord = 4
-						Ycoord = 4
-					}
-					Xcoord = Xcoord + cardData[j][0]
-					Ycoord = Ycoord + cardData[j][1]
-					var index = this.model.getIndexForMBcoord([Xcoord, Ycoord])
-					this.model.marketBoard[index][cardData[j][2]]++
-				}
-			}
-			this.model.log(Log.SHOW_CARDS, [totalClocks, [...this.model.alreadyPlayedCards]], -1)
+			// Add sparks to model, take away clocks, and convert sparks to demand
+			this.model.log(Log.SHOW_CARDS, [this.actionShowCards_core(this.model.alreadyPlayedCards), [...this.model.alreadyPlayedCards]], -1)
 			//remove data
 			this.model.alreadyPlayedCards.splice(0, this.model.alreadyPlayedCards.length)
-
-			// Sparks add Demand
-			for (i = 0; i < this.model.marketBoard.length; i++) {
-				for (j = 0; j < 3; j++) {
-					var vehiclesToAdd = this.model.marketBoard[i][j]
-					var maxVehicles = this.model.marketBoard[i][j] * 2
-					while (this.model.marketBoard[i][j + 3] < maxVehicles && vehiclesToAdd > 0) {
-						this.model.marketBoard[i][j + 3]++
-						vehiclesToAdd--
-					}
-				}
-			}
 
 			// Add neutral cards
 			Rules.playNeutralCards()
@@ -11688,6 +11874,18 @@ var Log = {
 
 	TECH_LOGS: [0],
 
+	// The param format has been extended over time. New style is detected from the shape/length of the
+	// param, so games stored before each change still display (and replay) correctly.
+	isNewStyle: function (action, param) {
+		if (param == undefined) return false
+		if (action === this.SETUP_GAME) return param.length > 2 + 2 * M.players.length
+		if (action === this.FACTORY_SETUP) return param.length >= 2
+		if (action === this.FACTORY_BUILD) return Array.isArray(param[0])
+		if (action === this.PLAY_CARD) return param.length > 1
+		if (action === this.SALES_V2) return param[1] != undefined && param[1].length >= 5
+		return false
+	},
+
 	log: function (model, player, action, param, timestamp) {
 		if (timestamp == undefined) timestamp = Math.round((new Date().getTime() - IO.timeOffset) / 1000)
 		if (timestamp < 0) timestamp = 0
@@ -11706,8 +11904,9 @@ var Log = {
 	},
 
 	history: function (model, player, action, param, timestamp) {
+		var div = null
 		if (this.TECH_LOGS.indexOf(action) == -1) {
-			var div = $('<div class="log">')
+			div = $('<div class="log">')
 
 			var strPlayer = ""
 			if (player > -1 && player < 63 && player != null && player != undefined) {
@@ -11725,6 +11924,7 @@ var Log = {
 				$("#history").prepend(histTogDiv)
 			} else $("#history").append(div)
 		}
+		return div
 	},
 
 	giveFullText: function (player, action, param) {
@@ -11751,9 +11951,6 @@ var Log = {
 		//res.append(JSON.stringify(param))
 		var str = ""
 		if (action == this.FACTORY_SETUP) {
-			/*res.append(playerSpan);
-			res.append(gettext("  sets up factory"));*/
-
 			res.append(
 				interpolate(
 					gettext("%(playerName)s sets up factory"),
@@ -11893,10 +12090,17 @@ var Log = {
 			var componentNameNumbers = []
 
 			var playerIndex = M.players.findIndex((obj) => obj.name === player)
+			var newStyle = this.isNewStyle(action, param)
 
-			for (i = param[1] - param[0]; i < param[1]; i++) {
+			if (newStyle) {
+				// The exact placements are stored, so they can be listed and replayed
+				for (i = 0; i < param[0].length; i++) componentNameNumbers.push(param[0][i][0])
+				if (param[1] != undefined) componentNameNumbers.push(FACTORY_EXPANSION_TILE)
+			} else {
 				// undefined check as crash caused? possibly by not building anything?
-				if (M.players[playerIndex].factory.factoryComponents[i] != undefined) componentNameNumbers.push(M.players[playerIndex].factory.factoryComponents[i][0])
+				for (i = param[1] - param[0]; i < param[1]; i++) {
+					if (M.players[playerIndex].factory.factoryComponents[i] != undefined) componentNameNumbers.push(M.players[playerIndex].factory.factoryComponents[i][0])
+				}
 			}
 
 			_.each(
@@ -11928,7 +12132,7 @@ var Log = {
 					border: "1px solid yellow",
 				})
 			})
-			res.on("click", { playerIndex: playerIndex, p0: param[0], p1: param[1] }, Log.clickedOnBuildHistory)
+			res.on("click", { playerIndex: playerIndex, p0: param[0], p1: param[1], placements: param[0], newStyle: newStyle }, Log.clickedOnBuildHistory)
 		} else if (action == this.SALES_SKIP) {
 			//res.append(playerSpan);
 			//res.append("  " + gettext("passes:") + " " + skipStrings[param]);
@@ -12353,8 +12557,12 @@ var Log = {
 
 		// Find all indexes required to be highlighted
 		var componentIndexes = []
-		for (i = e.data.p1 - e.data.p0; i < e.data.p1; i++) {
-			componentIndexes.push(M.players[e.data.playerIndex].factory.factoryComponents[i][1])
+		if (e.data.newStyle) {
+			for (i = 0; i < e.data.placements.length; i++) componentIndexes.push(e.data.placements[i][1])
+		} else {
+			for (i = e.data.p1 - e.data.p0; i < e.data.p1; i++) {
+				componentIndexes.push(M.players[e.data.playerIndex].factory.factoryComponents[i][1])
+			}
 		}
 		// Find all the needed squares
 		var squaresToHighlight = []
@@ -12367,6 +12575,8 @@ var Log = {
 	getPlayerSpan: function (name) {
 		var index = M.players.map((item) => item.name).indexOf(name)
 		if (index === -1) index = M.players.map((item) => item.originalName).indexOf(name)
+		// The player may not be in the model at all (eg a log entry for a player who has gone)
+		if (index === -1) return $("<span></span>").append(String(name))
 		var colour = getCorrectedColour(M.players[index].colour)
 
 		var span = $("<span></span>")
@@ -12453,8 +12663,20 @@ var Log = {
 			_.each(
 				t,
 				function (item) {
-					if (item.timestamp > 0) this.history(model, item.player, item.action, item.param, item.timestamp)
-					else this.history(model, item.player, item.action, item.param, -item.timestamp)
+					var div
+					if (item.timestamp > 0) div = this.history(model, item.player, item.action, item.param, item.timestamp)
+					else div = this.history(model, item.player, item.action, item.param, -item.timestamp)
+
+					if (div != null && replay.showingReplay) {
+						// t is sorted by timestamp, but the replay steps in logs array order, so map back to that
+						var logIndex = model.logs.indexOf(item)
+						div.attr("id", "entry" + String(logIndex))
+						div.addClass("logReplay")
+						if (logIndex === replay.replayStep) div.addClass("logReplayCurrent")
+						div.on("click", { logIndex: logIndex }, function () {
+							replay.goToReplayStep(logIndex)
+						})
+					}
 				},
 				this
 			)
@@ -12649,12 +12871,15 @@ var IO = {
 		})
 			.then((response) => response.json())
 			.then((result) => {
-				global.latestUpdate = String(result.latestUpdate)
-				global.saveRewind = true
+				// NB the response only carries latestUpdate if the save was accepted. Assigning it
+				// unconditionally would poison it with undefined / "undefined" and make every later
+				// poll fail on the server
 				if (result.syncError) {
 					alert(gettext("It appears you have an older version of the game. Please refresh the page"))
 					return
 				}
+				global.latestUpdate = String(result.latestUpdate)
+				global.saveRewind = true
 
 				hideLoader()
 				if (model.trainingGame) {
@@ -12784,6 +13009,8 @@ var IO = {
 
 		var FCIATT = player.factory.factoryComponenetIndexesAddedThisTurn
 		var FCNATT = player.factory.factoryComponentNamesAddedThisTurn
+		// [placements[], expansion[]] - only used for the replay, so the server just copies it into the history
+		var factoryDetail = [player.factory.factoryPlacementsAddedThisTurn, player.factory.factoryExpansionAddedThisTurn]
 		var FDBEdeco = decompressObjectFromDB(player.factory.factoryDataBeforeExpansion)
 		var FDBE = []
 		var ThisAC = []
@@ -12808,7 +13035,7 @@ var IO = {
 			body: JSON.stringify({
 				latestUpdate: global.latestUpdate, // USED
 				action: "saveFactoryMove", // USED
-				other: compressObjectToDB([FDBE, FCIATT, FCNATT, ThisAC]),
+				other: compressObjectToDB([FDBE, FCIATT, FCNATT, ThisAC, factoryDetail]),
 				data: compressObjectToDB(player.factory.export()), // USED
 				idx: idxToUse,
 				gameID: global.gameID,
@@ -13135,6 +13362,10 @@ var IO = {
 
 	loadRewind: function (controller) {
 		if (global.alreadyRewinding) return
+		if (replay.showingReplay) {
+			if ($("#replayArea").html().slice(0, 8) !== "You cann") $("#replayArea").prepend(gettext("You cannot rewind during replay") + "<BR/>")
+			return
+		}
 		global.alreadyRewinding = true
 		if (M.gameEnded > 0) {
 			$("#wholeMainArea").fadeIn("slow")
@@ -13154,7 +13385,9 @@ var IO = {
 		})
 			.then((response) => response.json())
 			.then((result) => {
-				global.latestUpdate = result.latestUpdate
+				// NB when the rewind buffer is empty the server replies with just a message and no
+				// latestUpdate, so only take it when it is actually there
+				if (result.latestUpdate != undefined) global.latestUpdate = result.latestUpdate
 				$("#dropdown").hide()
 				if (result.message != undefined) {
 					$("#wholeMainArea").fadeIn("slow")
@@ -13667,19 +13900,7 @@ var Bot = (function () {
 				M.gameEnded = 3
 
 				// Find winner. Sort players by sakes focus, then move highgest money to front
-				M.gameFlow.turnOrder = [...M.gameFlow.unalteredTurnOrder]
-				var moneyInSalesOrder = []
-				for (i = 0; i < M.gameFlow.turnOrder.length; i++) {
-					moneyInSalesOrder.push([M.gameFlow.turnOrder[i], M.players[M.gameFlow.turnOrder[i]].money])
-				}
-				moneyInSalesOrder.sort(function (a, b) {
-					return b[1] - a[1]
-				})
-
-				for (i = 0; i < M.players.length; i++) {
-					M.gameFlow.unalteredTurnOrder[i] = moneyInSalesOrder[i][0]
-					M.gameFlow.turnOrder[i] = moneyInSalesOrder[i][0]
-				}
+				C.actionSortPlayersByMoney_core()
 
 				M.log(Log.GAME_END, [M.players[M.gameFlow.unalteredTurnOrder[0]].name, M.gameEnded])
 				global.winner = M.players[M.gameFlow.unalteredTurnOrder[0]].name
@@ -13751,19 +13972,7 @@ var Bot = (function () {
 			M.gameEnded = 3
 
 			// Find winner. Sort players by sakes focus, then move highgest money to front
-			M.gameFlow.turnOrder = [...M.gameFlow.unalteredTurnOrder]
-			var moneyInSalesOrder = []
-			for (i = 0; i < M.gameFlow.turnOrder.length; i++) {
-				moneyInSalesOrder.push([M.gameFlow.turnOrder[i], M.players[M.gameFlow.turnOrder[i]].money])
-			}
-			moneyInSalesOrder.sort(function (a, b) {
-				return b[1] - a[1]
-			})
-
-			for (i = 0; i < M.players.length; i++) {
-				M.gameFlow.unalteredTurnOrder[i] = moneyInSalesOrder[i][0]
-				M.gameFlow.turnOrder[i] = moneyInSalesOrder[i][0]
-			}
+			C.actionSortPlayersByMoney_core()
 
 			M.log(Log.GAME_END, [M.players[M.gameFlow.unalteredTurnOrder[0]].name, M.gameEnded])
 			global.winner = M.players[M.gameFlow.unalteredTurnOrder[0]].name
@@ -13957,6 +14166,693 @@ async function broadcastGameUpdate(existingPromise = null) {
 	}
 }
 
+// Rebuilds the game from the stored history, one log entry at a time, and lets you step through it.
+// Only the *_core functions are used here, so nothing depends on the current player or the live board.
+// The player index on a stored entry can be null or -1 - the server writes those, and the history
+// renderer has always tolerated it. NB null >= 0 is true, so it has to be checked explicitly
+function isUsablePlayerIndex(playerIndex) {
+	if (playerIndex == null) return false
+	if (playerIndex < 0 || playerIndex >= M.players.length) return false
+	return true
+}
+
+function getLogPlayerName(playerIndex) {
+	if (!isUsablePlayerIndex(playerIndex)) return ""
+	return M.players[playerIndex].name
+}
+
+// The replay detail (factory placements, card identities, raw market window placement) only started
+// being stored on this date. Games created before it cannot be replayed exactly, so say so instead of
+// reporting a mismatch. global.gameCreationTimestamp is epoch milliseconds, as a string
+var REPLAY_DATA_CAPTURED_FROM = Date.UTC(2026, 9, 4)
+
+var replay = {
+	init: function (model) {
+		this.model = model
+		this.liveModel = model
+		this.originalLogs = []
+		this.replayData = []
+		this.replayStep = 0
+		this.showingReplay = false
+		this.generatingData = false
+		this.endReplayResetData = ""
+		this.replayError = ""
+		this.setupDone = []
+		this.desyncCount = 0
+		this.lastPlayerIndex = -1
+		return this
+	},
+
+	/**************************************************************************************************************
+	 *
+	 * ENTER / EXIT
+	 *
+	 **************************************************************************************************************/
+
+	toggleReplayMode: async function () {
+		if (this.generatingData) return
+
+		if (!this.showingReplay) {
+			this.showingReplay = true
+			this.generatingData = true
+			this.replayError = ""
+			this.endReplayResetData = compressObjectToDB(M.export())
+			this.liveModel = M
+
+			$("#actions").empty()
+			$("#replayArea").empty()
+			$("#replayArea").html('<div class="progress-bar"><div></div><span></span></div>')
+
+			await this.generateReplayData()
+
+			// The walk leaves the view showing whatever resetDataForReplay rendered at the start, so
+			// load the final step to actually display it
+			this.goToReplayStep(this.replayStep)
+			// goToReplayStep bails out before touching the area when there is nothing to step through
+			this.updateReplayArea()
+
+			$("body").addClass("greyBackground")
+			$("body").removeClass("blueBackground")
+
+			this.generatingData = false
+		} else {
+			this.showingReplay = false
+			this.replayData.splice(0)
+			$("body").removeClass("greyBackground")
+			$("body").addClass("blueBackground")
+			$("#replayArea").empty()
+
+			M = Model.import(decompressObjectFromDB(this.endReplayResetData))
+			C.model = M
+			this.model = M
+			C.view.reloadModel(M)
+			Log.refreshHistory(M)
+			C.startActions()
+
+			// A replay must never let the same action be taken twice, so reset back to the start of the turn
+			if (global.fullreset != undefined) C.reset(true)
+		}
+	},
+
+	/**************************************************************************************************************
+	 *
+	 * BUILD THE GAME AGAIN
+	 *
+	 **************************************************************************************************************/
+
+	generateReplayData: async function () {
+		this.replayData = []
+		this.setupDone = []
+		this.desyncCount = 0
+		this.originalLogs = M.logs
+		if (this.originalLogs.length === 0) return
+
+		this.resetDataForReplay()
+
+		var pBarEl = document.querySelector(".progress-bar div")
+		var pBarTextEl = document.querySelector(".progress-bar span")
+
+		for (var i = 0; i < this.originalLogs.length; i++) {
+			var entry = this.originalLogs[i]
+
+			if (entry.action === Log.REWIND) {
+				// The game was replaced by an earlier saved state, so rebuild up to that point instead
+				this.resetDataForReplay()
+				this.walkLogs(0, i)
+			} else {
+				this.setgameflowVars(entry.action)
+				this.performReplayAction(entry.action, entry.player, entry.param)
+				this.advanceTurnOrder(entry.action, entry.player)
+			}
+
+			this.replayData.push(compressObjectToDB(M.export()))
+
+			if (i % 5 === 0 && pBarEl != null) {
+				var percent = (i / this.originalLogs.length) * 100
+				pBarEl.style.width = percent + "%"
+				pBarTextEl.innerText = Math.round(percent) + "%"
+				await sleep(0)
+			}
+		}
+
+		this.replayStep = this.replayData.length - 1
+		this.integrityCheck()
+	},
+
+	// Applies entries [from, to) without storing snapshots. Only used after a rewind
+	walkLogs: function (from, to) {
+		for (var i = from; i < to; i++) {
+			var entry = this.originalLogs[i]
+			this.setgameflowVars(entry.action)
+			this.performReplayAction(entry.action, entry.player, entry.param)
+			this.advanceTurnOrder(entry.action, entry.player)
+		}
+	},
+
+	// Start again from the very beginning. Everything except the random shuffles is worked out from
+	// logs[0] (SETUP_GAME), the player count and the starting options already on the page
+	resetDataForReplay: function () {
+		this.setupDone = []
+
+		var setupParam = this.originalLogs[0].param
+		var n = setupParam.length - 2
+		// New style entries have 5 extra track colours on the end
+		var playerCount = n % 2 === 0 ? n / 2 : (n - 5) / 2
+		var hasTrackColours = n % 2 !== 0
+
+		var names = []
+		var colours = []
+		var i = 0
+		for (i = 0; i < playerCount; i++) {
+			names.push(setupParam[2 + i * 2])
+			colours.push(setupParam[3 + i * 2])
+		}
+
+		var trackColours = []
+		if (hasTrackColours) {
+			for (i = 0; i < 5; i++) trackColours.push(setupParam[2 + playerCount * 2 + i])
+		} else trackColours = this.unwindTechTracks()
+
+		// global.displayNames is only set on the create page, so take them off the live players instead
+		var displayNames = []
+		for (i = 0; i < playerCount; i++) displayNames.push(this.liveModel.players[i].displayName)
+
+		var m = new Model()
+		m.start({ players: names, colours: colours, trackColours: trackColours, displayNames: displayNames })
+// The history is kept whole for the whole replay, so the history tab always shows the game.
+			// Only the board state steps. Copied because the walk must not be able to alter it
+			m.logs = [...this.originalLogs]
+
+		M = m
+		C.model = m
+		this.model = m
+		C.view.reloadModel(m)
+	},
+
+	// Games stored before SETUP_GAME held the tech track colours do not have them anywhere, so work them
+	// out by undoing every ADVANCE_EXPECTATIONS rotation, backwards from the current techTracks.
+	// Each rotation removes the obsolescence track from the array and copies it to the end, then flips the
+	// obsolescence marker, so the removed track is always the last entry and the winner is always in slot 2-4
+	unwindTechTracks: function () {
+		var tracks = []
+		var i = 0
+		var l = 0
+		for (i = 0; i < this.liveModel.techTracks.length; i++) tracks.push([this.liveModel.techTracks[i][7][0], this.liveModel.techTracks[i][7][1]])
+
+		for (l = this.originalLogs.length - 1; l >= 0; l--) {
+			if (this.originalLogs[l].action !== Log.ADVANCE_EXPECTATIONS) continue
+			var param = this.originalLogs[l].param
+			var oldObsColour = param[0]
+			var newMin = param[1]
+			var winnerColour = param[3]
+			var obsDir = param[4] === 1 ? 0 : 1
+
+			// param[2] holds [innovation, colour, furthestFromMin] for tracks 2, 3 and 4, so the index that won
+			// is the one whose colour is the winning colour
+			var winner = -1
+			for (i = 0; i < param[2].length; i++) {
+				if (param[2][i][1] === winnerColour) winner = i + 2
+			}
+			if (winner === -1) break
+
+			// The splice removed the obsolescence track from index winner, and a copy of it was pushed to the end
+			var q = []
+			for (i = 0; i < winner; i++) q.push(tracks[i])
+			q.push(tracks[4])
+			for (i = winner; i <= 3; i++) q.push(tracks[i])
+
+			if (q[obsDir][0] !== winnerColour) break
+			if (q[winner][0] !== oldObsColour) break
+			if (q[winner][1] !== newMin) break
+
+			// Undo the min demand bump, then the swap
+			q[winner][1] = q[winner][1] - 1
+			var tmp = q[obsDir]
+			q[obsDir] = q[winner]
+			q[winner] = tmp
+			tracks = q
+		}
+
+		var res = []
+		for (i = 0; i < tracks.length; i++) res.push(tracks[i][0])
+		return res
+	},
+
+	// Two phase transitions log nothing, so they are triggered by the first entry of the next phase
+	setgameflowVars: function (action) {
+		var i = 0
+		var j = 0
+
+		if (action === Log.SET_FOCUS) {
+			// RESEARCH -> SET FOCUS
+			if (M.gameFlow.phase !== PHASE_RESEARCH) return
+			M.gameFlow.phase = PHASE_SET_FOCUS
+
+			M.prevEngFocusOrder.splice(0, M.prevEngFocusOrder.length)
+			M.newEngFocusOrder.splice(0, M.newEngFocusOrder.length)
+			M.prevEngFocusOrder = [...M.gameFlow.unalteredTurnOrder]
+			for (i = 0; i < M.players.length; i++) M.newEngFocusOrder.push(-1)
+
+			var ganttOrder = []
+			for (i = 0; i < M.prevEngFocusOrder.length; i++) {
+				ganttOrder.push([M.prevEngFocusOrder[i], M.players[M.prevEngFocusOrder[i]].gantt])
+			}
+			ganttOrder.sort(function (a, b) {
+				return b[1] - a[1]
+			})
+
+			M.gameFlow.turnOrder.splice(0, M.gameFlow.turnOrder.length)
+			for (i = 0; i < ganttOrder.length; i++) M.gameFlow.turnOrder.push(ganttOrder[i][0])
+			M.gameFlow.unalteredTurnOrder = [...M.gameFlow.turnOrder]
+			Bot.correctTurnOrderForBots(M)
+		} else if (action === Log.FACTORY_BUILD) {
+			// SET FOCUS -> BUILD FACTORY
+			if (M.gameFlow.phase !== PHASE_SET_FOCUS) return
+
+			// Fill up new eng focus with leftover people. It just works in reverse
+			for (i = M.newEngFocusOrder.length - 1; i >= 0; i--) {
+				if (M.newEngFocusOrder[i] === -1) {
+					for (j = 0; j < M.prevEngFocusOrder.length; j++) {
+						if (!M.newEngFocusOrder.includes(M.prevEngFocusOrder[j])) M.newEngFocusOrder[i] = M.prevEngFocusOrder[j]
+					}
+				}
+			}
+
+			M.gameFlow.phase = PHASE_BUILD_FACTORY
+			M.gameFlow.turnOrder = [...M.newEngFocusOrder]
+			M.gameFlow.unalteredTurnOrder = [...M.gameFlow.turnOrder]
+			Bot.correctTurnOrderForBots(M)
+		}
+	},
+
+	// Each action is handled by the same model mutation the live game uses, just without the history or the UI
+	performReplayAction: function (action, playerIndex, param) {
+		var i = 0
+
+		// These act on one specific player, so a bad index means there is nothing to replay for them
+		var PLAYER_ACTIONS = [Log.FACTORY_SETUP, Log.RESEARCH, Log.SET_FOCUS, Log.FACTORY_BUILD, Log.PLAY_CARD, Log.SALES_V2, Log.SALES]
+		if (PLAYER_ACTIONS.includes(action) && !isUsablePlayerIndex(playerIndex)) return
+
+		if (action === Log.FACTORY_SETUP) this.replayFactorySetup(playerIndex, param)
+		else if (action === Log.RESEARCH) this.replayResearch(playerIndex, param)
+		else if (action === Log.SET_FOCUS) this.replaySetFocus(playerIndex, param)
+		else if (action === Log.FACTORY_BUILD) this.replayFactoryBuild(playerIndex, param)
+		else if (action === Log.PLAY_CARD) this.replayPlayCard(playerIndex, param)
+		else if (action === Log.SALES_V2) this.replaySales(playerIndex, param)
+		else if (action === Log.SALES) this.replayLegacySales(playerIndex, param)
+		else if (action === Log.INCREASE_GANTT) this.replayIncreaseGantt()
+		else if (action === Log.SHOW_CARDS) this.replayShowCards(param)
+		else if (action === Log.NEUTRAL_CARDS) this.replayNeutralCards(param)
+		else if (action === Log.ADVANCE_EXPECTATIONS) this.replayAdvanceExpectations()
+		else if (action === Log.NEW_TURN) this.replayNewTurn(param)
+		else if (action === Log.GAME_END) this.replayGameEnd(param)
+		else if (action === Log.RESIGN || action === Log.KICKOUT) this.replayKickout(param)
+
+		if (action === Log.FACTORY_SETUP || action === Log.FACTORY_BUILD || action === Log.SALES_V2) {
+			for (i = 0; i < M.players.length; i++) M.players[i].factory.checkDealershipLevels()
+		}
+	},
+
+	replayFactorySetup: function (playerIndex, param) {
+		// moveToNextPhase logs a FACTORY_SETUP for every player as well, so only handle the first of each
+		if (this.setupDone.includes(playerIndex)) return
+		this.setupDone.push(playerIndex)
+
+		// Turn zero setup is simultaneous, so each player only removes themselves from the queue
+		var to = M.gameFlow.turnOrder
+		var setupIndex = to.indexOf(playerIndex)
+		if (setupIndex > -1) to.splice(setupIndex, 1)
+
+		if (!Log.isNewStyle(Log.FACTORY_SETUP, param)) return
+
+		var factory = M.players[playerIndex].factory
+		factory.mainFactoryRotation = param[0]
+		factory.mainFactoryFlipped = param.length > 2 ? param[2] : 0
+		factory.factoryCoords = factory.rotateSquare(MAIN_FACTORY_TILE_COMPONENT, factory.mainFactoryRotation, 12, factory.mainFactoryFlipped)
+
+		for (var i = 0; i < param[1].length; i++) {
+			var placement = Factory.decodePlacement(param[1][i])
+			factory.actionPlaceFactoryComponent_core(M.players[playerIndex], placement[0], placement[1], placement[2], placement[3])
+		}
+	},
+
+	replayResearch: function (playerIndex, param) {
+		for (var i = 0; i < param.length; i++) {
+			if (param[i].length < 3) continue
+			// A compressed track number is the colour of the track, and 5 is the assembly capacity track
+			if (param[i][1] === 5) {
+				C.actionPlaceResearchPiece_core("ACT", param[i][2] - 1, param[i][0])
+				continue
+			}
+			for (var t = 0; t < M.techTracks.length; t++) {
+				if (M.techTracks[t][7][0] === param[i][1]) C.actionPlaceResearchPiece_core("TT" + String(t), param[i][2] - 1, param[i][0])
+			}
+		}
+	},
+
+	replaySetFocus: function (playerIndex, param) {
+		// -1 means the player passed and kept their gantt
+		if (parseInt(param) === -1) return
+		C.actionChooseFocus_core(M.players[playerIndex], parseInt(param))
+	},
+
+	replayFactoryBuild: function (playerIndex, param) {
+		// Old entries only stored how many components were added, so there is nothing to place
+		if (!Log.isNewStyle(Log.FACTORY_BUILD, param)) return
+
+		var player = M.players[playerIndex]
+		for (var i = 0; i < param[0].length; i++) {
+			var placement = Factory.decodePlacement(param[0][i])
+			player.factory.actionPlaceFactoryComponent_core(player, placement[0], placement[1], placement[2], placement[3])
+		}
+
+		if (param[1] != undefined && param[1].length > 0) {
+			player.factory.expandFactoryArea(8, 8)
+			player.factory.actionPlaceFactoryExpansion_core(player, param[1][0], param[1][1], param[1].length > 2 ? param[1][2] : 0)
+			player.factory.collapseFactoryAfterExpansion()
+		}
+	},
+
+	replayPlayCard: function (playerIndex, param) {
+		var player = M.players[playerIndex]
+		// Old entries did not store which card, so nothing to play
+		if (param.length < 2) return
+
+		var cardIndex = player.playerCards.indexOf(param[1])
+		if (cardIndex === -1) return
+		var cardName = getCardIDcorrectedFromColourAndNumber(player.colour, param[1], false).slice(4)
+		C.actionPlayCard_core(player, param[0], cardName, cardIndex)
+	},
+
+	replaySales: function (playerIndex, param) {
+		var newStyle = Log.isNewStyle(Log.SALES_V2, param)
+		var mw = param[1]
+		var dealership = this.getDealership(playerIndex, param[0])
+		if (dealership == null) return
+
+		// mw[0] 0 = a new market window was placed, 1 = an existing one was used.
+		// The raw index and rotation are only on new style entries
+		if (newStyle && mw[0] === 0) M.placeDealershipWindowIntoModel_core(dealership, mw[4], mw[5], mw[2])
+
+		// Every vehicle type was sold into the same niche, so any type that sold gives us the index
+		if (param[2] !== -1) {
+			for (var i = 0; i < param[2].length; i++) {
+				if (param[2][i][0] > 0) {
+					C.actionSales_core(M.players[playerIndex], param[2][i][2], dealership)
+					break
+				}
+			}
+		}
+	},
+
+	// Games from before SALES_V2 did not store where the market window went, so only the sale itself can be replayed
+	replayLegacySales: function (playerIndex, param) {
+		if (param[2] === -1) return
+		var dealership = this.getDealership(playerIndex, param[0])
+		if (dealership == null) return
+		for (var i = 0; i < param[2].length; i++) {
+			if (param[2][i][0] > 0 && param[2][i][2] != undefined) {
+				C.actionSales_core(M.players[playerIndex], param[2][i][2], dealership)
+				break
+			}
+		}
+	},
+
+	replayIncreaseGantt: function () {
+		for (var i = 0; i < M.players.length; i++) {
+			if (M.players[i].autoplay === true) continue
+			var offices = Rules.getNumberOfPlanningOffices(M.players[i])
+			var clockReduction = 0
+			if (M.players[i].gantt < 10 && M.players[i].gantt + offices >= 10) clockReduction = 1
+
+			M.players[i].gantt = Math.min(20, M.players[i].gantt + offices)
+			M.punchClockNumber -= clockReduction
+		}
+		C.actionRefreshMainlineStock_core()
+
+		M.gameFlow.phase = PHASE_SELL
+		M.gameFlow.unalteredTurnOrder.reverse()
+		M.gameFlow.turnOrder = [...M.gameFlow.unalteredTurnOrder]
+	},
+
+	replayShowCards: function (param) {
+		C.actionShowCards_core(param[1])
+		M.alreadyPlayedCards.splice(0, M.alreadyPlayedCards.length)
+	},
+
+	replayNeutralCards: function (param) {
+		for (var i = 0; i < param.length; i++) Rules.playSingleNeutralCard(param[i][0], param[i][1])
+	},
+
+	replayAdvanceExpectations: function () {
+		M.gameFlow.phase = PHASE_ADVANCE_EXPECTATIONS
+		C.actionAdvanceExpectations_core()
+		M.gameFlow.phase = PHASE_GROW_DEMANDS
+		M.gameFlow.unalteredTurnOrder.reverse()
+		M.gameFlow.turnOrder = [...M.gameFlow.unalteredTurnOrder]
+		C.actionRefreshMainlineStock_core()
+		Bot.correctTurnOrderForBots(M)
+	},
+
+	replayNewTurn: function (param) {
+		Rules.setCurrentMarketBoardPrices()
+		M.gameFlow.turn = param[0]
+		M.gameFlow.phase = PHASE_RESEARCH
+		M.gameFlow.turnOrder = [...M.gameFlow.unalteredTurnOrder]
+		M.gameFlow.currentPlayer = M.gameFlow.turnOrder.length > 0 ? M.gameFlow.turnOrder[0] : 0
+		M.alreadyPlayedCards.splice(0, M.alreadyPlayedCards.length)
+		M.piecesUsedInResearch.splice(0, M.piecesUsedInResearch.length)
+		Bot.correctTurnOrderForBots(M)
+	},
+
+	replayGameEnd: function (param) {
+		M.gameFlow.phase = PHASE_GAME_END_CHECK
+		M.gameEnded = param[1]
+		C.actionSortPlayersByMoney_core()
+		global.winner = M.players[M.gameFlow.unalteredTurnOrder[0]].name
+	},
+
+	replayKickout: function (param) {
+		var idx = M.players.map((p) => p.name).indexOf(param[0])
+		if (idx === -1) return
+
+		var player = M.players[idx]
+		player.name = "HcBot"
+		player.autoplay = true
+		if (player.money > 0) player.money *= -1
+		else player.money = -1
+		player.gantt = -1
+
+		Bot.correctTurnOrderForBots(M)
+	},
+
+	getDealership: function (playerIndex, componentName) {
+		var components = M.players[playerIndex].factory.factoryComponents
+		for (var i = 0; i < components.length; i++) {
+			if (components[i][0] === componentName) return components[i]
+		}
+		return null
+	},
+
+	// Keep turnOrder in step with the live game, so every handler knows who the acting player is
+	advanceTurnOrder: function (action, playerIndex) {
+		var to = M.gameFlow.turnOrder
+		if (to.length === 0) return
+
+		if (action === Log.SALES_V2 || action === Log.SALES) {
+			// The acting player has sold, so goes to the back of the queue
+			to.push(to.shift())
+		} else if (action === Log.SALES_SKIP) {
+			// Cannot sell at all, so leaves the queue for this round
+			to.splice(0, 1)
+		} else if (action === Log.RESEARCH || action === Log.SET_FOCUS || action === Log.PLAY_CARD || action === Log.NO_CARDS) {
+			// Sequential phase, so the acting player is done and leaves the queue.
+			// FACTORY_SETUP is not here - it is handled in replayFactorySetup so the duplicate
+			// entries from moveToNextPhase cannot remove the same player twice.
+			// The entry says who acted, so if that is not the front of the queue the turn order has
+			// drifted - count it rather than quietly rotating past it
+			if (to.indexOf(playerIndex) === -1) {
+				this.desyncCount++
+				return
+			}
+			if (to[0] !== playerIndex) this.desyncCount++
+			while (to[0] !== playerIndex) to.push(to.shift())
+			to.splice(0, 1)
+		}
+	},
+
+	/**************************************************************************************************************
+	 *
+	 * STEP THROUGH
+	 *
+	 **************************************************************************************************************/
+
+	loadModel: function (strModel) {
+		var m = Model.import(decompressObjectFromDB(strModel))
+		m.historyObj.splice(0, m.historyObj.length)
+		M = m
+		C.model = m
+		this.model = m
+		// We know who acted on this step. The live game gets this from Rules.canPlay(), which stands
+		// down during the replay, so set it here - it drives the current player glow and is a handy
+		// cross check that the turn order has not drifted
+		var entry = this.originalLogs[this.replayStep]
+		if (entry != undefined && isUsablePlayerIndex(entry.player)) {
+			m.gameFlow.currentPlayer = entry.player
+			this.lastPlayerIndex = entry.player
+		}
+
+		C.view.reloadModel(m, this.getViewItem())
+		Log.refreshHistory(m)
+	},
+
+	// V.render() with no argument picks turnOrder[0], but the acting player has already been taken off
+	// the queue by the time their entry is shown, so that points one player too far on. Show the
+	// factory of whoever the current entry belongs to instead.
+	// Entries with no player (neutral cards, expectations, end of turn) come between player actions, and
+	// turnOrder is empty by then, so hold the last acting player rather than dropping to the market board
+	getViewItem: function () {
+		if (M.gameEnded > 0) return undefined
+		if (MARKET_BOARD_PHASES.includes(M.gameFlow.phase)) return undefined
+
+		var entry = this.originalLogs[this.replayStep]
+		var playerIndex = entry != undefined && isUsablePlayerIndex(entry.player) ? entry.player : this.lastPlayerIndex
+		if (!isUsablePlayerIndex(playerIndex)) return undefined
+
+		var item = M.gameFlow.unalteredTurnOrder.indexOf(playerIndex)
+		if (item === -1) return undefined
+		return item
+	},
+
+	performStep: function (e) {
+		var r = e.data.replay
+		var amount = e.data.amount
+
+		if (amount === -99) r.replayStep = 0
+		if (amount === -9) r.replayStep -= 5
+		if (amount === -1) r.replayStep--
+		if (amount === 1) r.replayStep++
+		if (amount === 9) r.replayStep += 5
+		if (amount === 99) r.replayStep = r.replayData.length - 1
+
+		if (r.replayStep < 0) r.replayStep = 0
+		if (r.replayStep > r.replayData.length - 1) r.replayStep = r.replayData.length - 1
+
+		// Performing back to my last
+		if (amount === -999) {
+			var idx = r.replayStep
+			idx--
+			while (idx > 0) {
+				if (r.originalLogs[idx].player === global.pov) {
+					r.replayStep = idx
+					break
+				}
+				idx--
+			}
+		}
+
+		r.goToReplayStep(r.replayStep)
+	},
+
+	goToReplayStep: function (step) {
+		if (this.replayData.length === 0) return
+		// A history row click can carry an index from a longer log than this, so clamp like performStep does
+		if (step < 0) step = 0
+		if (step > this.replayData.length - 1) step = this.replayData.length - 1
+		this.replayStep = step
+		this.loadModel(this.replayData[step])
+		this.updateReplayArea()
+	},
+
+	updateReplayArea: function () {
+		$("#replayArea").empty()
+		if (this.replayData.length === 0) return
+
+		var div = $('<div class="replayButtonsDiv">')
+		div.append(gettext("Use the arrows to step through the game. Click an entry in the history tab to jump to that point in time."))
+		if (this.replayError !== "") div.append("<BR/><B class='replayWarning'>" + this.replayError + "</B>")
+		div.append("<BR/>")
+
+		if (global.pov != undefined && global.pov >= 0) {
+			var buttonPOVback = $('<button class="actionsLineButton">' + gettext("Back to my last turn") + "</button>")
+			buttonPOVback.on("click", { amount: -999, replay: this }, this.performStep)
+			div.append(buttonPOVback)
+			div.append("<BR/>")
+		}
+
+		var buttons = [
+			["|<", -99],
+			["<<", -9],
+			["<", -1],
+		]
+		for (var i = 0; i < buttons.length; i++) {
+			var b = $('<button class="actionsLineButton">' + buttons[i][0] + "</button>")
+			if (this.replayStep === 0) b.prop("disabled", true)
+			b.on("click", { amount: buttons[i][1], replay: this }, this.performStep)
+			div.append(b)
+		}
+		div.append("&nbsp;" + String(this.replayStep + 1) + " / " + String(this.replayData.length) + "&nbsp;")
+		buttons = [
+			[">", 1],
+			[">>", 9],
+			[">|", 99],
+		]
+		for (i = 0; i < buttons.length; i++) {
+			var b2 = $('<button class="actionsLineButton">' + buttons[i][0] + "</button>")
+			if (this.replayStep + 1 === this.replayData.length) b2.prop("disabled", true)
+			b2.on("click", { amount: buttons[i][1], replay: this }, this.performStep)
+			div.append(b2)
+		}
+
+		var exitReplayButtonDiv = $('<div class="exitReplayButtonDiv">')
+		var exitButton = $('<button class="actionsLineButton">' + gettext("Exit Replay Mode") + "</button>")
+		exitButton.on("click", function () {
+			replay.toggleReplayMode()
+		})
+		exitReplayButtonDiv.append(exitButton)
+		div.append(exitReplayButtonDiv)
+
+		$("#replayArea").append(div)
+
+		// Show what this step is
+		var entry = this.originalLogs[this.replayStep]
+		var entryDiv = $('<div class="replayHistoryEntry">')
+		var entryName = getLogPlayerName(entry.player)
+		entryDiv.append(Log.giveFullText(entryName, entry.action, entry.param))
+		$("#replayArea").append(entryDiv)
+	},
+
+	// The replay must land on exactly the same game as the live one. If it does not, the history was
+	// missing something, so say so rather than silently showing the wrong game
+	integrityCheck: function () {
+		var live = this.liveModel
+		var problems = []
+		var i = 0
+
+		// Old games never stored the detail the replay needs, so a mismatch is expected rather than a bug
+		if (global.gameCreationTimestamp != undefined && parseInt(global.gameCreationTimestamp) < REPLAY_DATA_CAPTURED_FROM) {
+			this.replayError = gettext("Caution: This game was created before all the replay data was captured. Replay may not match actual game")
+			return
+		}
+		if (live == undefined || live.players == undefined) return
+
+		if (M.punchClockNumber !== live.punchClockNumber) problems.push("punch clock")
+		if (M.gameFlow.turn !== live.gameFlow.turn) problems.push("turn")
+		if (M.priceBand.join() !== live.priceBand.join()) problems.push("prices")
+		if (M.availableComponents.join() !== live.availableComponents.join()) problems.push("components")
+		for (i = 0; i < M.techTracks.length; i++) {
+			if (M.techTracks[i][7][1] !== live.techTracks[i][7][1]) problems.push("tech tracks")
+		}
+		for (i = 0; i < M.players.length; i++) {
+			if (M.players[i].money !== live.players[i].money) problems.push("money")
+			if (M.players[i].gantt !== live.players[i].gantt) problems.push("gantt")
+			if (M.players[i].factory.factoryComponents.length !== live.players[i].factory.factoryComponents.length) problems.push("factory")
+		}
+
+		if (this.desyncCount > 0) problems.push("turn order (" + this.desyncCount + " out of step)")
+		this.replayError = problems.length === 0 ? "" : gettext("Game data does not match - please submit a bug report") + " (" + problems.join(", ") + ")"
+	},
+}
 /* exported imagePreURL */
 var imagePreURL = "/static/HLC/images/"
 /* exported soundPreURL */
@@ -14191,6 +15087,8 @@ function init() {
 
 	C = new Controller(M, V)
 
+	replay.init(M)
+
 	if (global.load != undefined && !global.HLCgameSummary) Log.refreshHistory(M)
 
 	if (global.liveWS) {
@@ -14323,6 +15221,14 @@ function init() {
 
 	$(document).keydown(function (event) {
 		//if (event.altKey && event.which === 82)
+
+		// left / right = step through the replay
+		if (replay.showingReplay && (event.which === 37 || event.which === 39)) {
+			if ($("#bugContent").is(":focus") || $("#chatMessage").is(":focus") || $("#notes").is(":focus")) return
+			event.preventDefault()
+			replay.performStep({ data: { replay: replay, amount: event.which === 37 ? -1 : 1 } })
+			return
+		}
 
 		// r = rotate
 		if (event.which === 82) {

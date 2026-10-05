@@ -63,6 +63,17 @@ export const useModelStore = defineStore("store", () => {
 		dumplings: false,
 		deliveryDrivers: false,
 		hawkers: false,
+
+		// Fried Chicken mod
+		friedChicken: false,
+
+		// Stadium mod
+		stadium: false,
+
+		// Labor Market mod
+		laborMarket: false,
+		// Second Bailout mod
+		secondBailout: false,
 	}
 
 	// This var affects the ZOOM level
@@ -122,12 +133,36 @@ export const useModelStore = defineStore("store", () => {
 	const freeways = reactive([])
 	const parks = reactive([])
 	const newRoads = reactive([])
+	const movedOutHouses = reactive([])
+	// Stadium mod - runtime state, NEVER in startingOptions
+	const stadium = reactive({
+		gamesPlayed: 0, // matches already resolved
+		announcement: null, // { gameNumber, food, units } for the upcoming game
+	})
+	const laborMarket = reactive({
+		removedTemporaryWorkers: 0,
+		removedTemporaryWorkersAtTurnStart: 0,
+		unionHolders: [],
+		pendingUnionHolders: [],
+		workedCounts: [],
+		temporaryCampaignOwners: {},
+		dailyTemporaryEffects: [],
+		pendingHeadhuntSalaries: [],
+	})
+
+	// Second Bailout mod - claim state during the bailout night
+	const bailout = reactive({
+		pending: false, // true between bailout announcement and all claims done
+		pool: {}, // employeeId -> remaining count (snapshot at bailout time)
+		claims: {}, // playerId -> employeeId claimed, or -1 for declined
+		order: [], // playerIds in claim order (= turn order at bailout time)
+	})
 
 	/*************************************** UNSAVED - TEMP VARS -- these do not need to be stored or saved */
 
 	const context = reactive({
 		action: rf.ACT_NONE,
-		selectedReserveCard: rf.RES_CARD_NONE,
+		selectedReserveCard: rf.RES_CARD_NOT_CHOSEN,
 		selectedEmployeeIndexForRestructuring: -1,
 		justHired: [],
 		selectedEmployeeToTrainData: {
@@ -139,13 +174,16 @@ export const useModelStore = defineStore("store", () => {
 		remainingProducers: [],
 		justProduced: {
 			team: [],
-			added: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+			added: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		},
 		justBuilt: [],
 		justLobbied: [],
 		justOpened: [],
 		justFired: [],
 		justBinned: [],
+		headhunterActionsUsed: 0,
+		justHeadhunted: [],
+		temporaryMarketer: false,
 
 		isNewRestoMSmailbox: false,
 		alreadyDoneMailboxMS: false,
@@ -229,7 +267,7 @@ export const useModelStore = defineStore("store", () => {
 			},
 			produce: {
 				total: 0,
-				produced: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+				produced: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 				unused: [],
 			},
 			houses: {
@@ -258,6 +296,9 @@ export const useModelStore = defineStore("store", () => {
 		indexesToHighlightHouses: [],
 		tilesToHighlight: [],
 		tilesToHighlightPreview: [],
+		// Tutorial only: squares the tutorial wants to draw attention to. NB deliberately
+		// not in clearAllHighlights() - the tutorial engine owns this list's lifecycle.
+		indexesToHighlightTutorial: [],
 	})
 
 	const viewSettings = reactive({
@@ -286,6 +327,35 @@ export const useModelStore = defineStore("store", () => {
 		currentGhostIndex: -1,
 		showCoffeeHistoryInfo: false, // Coffee "More Information" panel in the action area
 		coffeeInfoShownBlock: -1, // Which coffee history block opened the panel
+
+		// Tutorial only: hides the starting-restaurant panel (and with it AddItemBox's
+		// rotate arrows + preview) until the tutorial asks for a placement. Stays false
+		// in normal games, so it never affects them.
+		suppressTutorialSetupPanel: false,
+
+		// --- AI debugging (admin only, never exported/saved) ---
+		// Pause the FcmAI between finishing its calculation and applying the move,
+		// so the thinking panel and board heat map can be read first.
+		pauseOnAi: false,
+		showAiDebug: false,
+	})
+
+	// What the AI is doing right now, and why. Written by aiDebug.think() from
+	// FCM_AI.js and read by AIDebugPanel.vue. Debug-only: not part of the saved
+	// model, so it never reaches the server.
+	const aiThinking = reactive({
+		waiting: false, // true while the AI is parked at the gate
+		turn: 0,
+		phase: -1,
+		subphase: -1,
+		aiLevel: 0,
+		summary: "", // one line: what it is about to do
+		reasons: [], // bullet lines explaining the choice
+		// Placement heat map, when the current decision has one. Each entry is
+		// { index, x, y, rotation, score, chosen, breakdown }.
+		heatMap: [],
+		heatMapRotation: -1,
+		chosen: null, // { index, rotation, score }
 	})
 
 	const gameMessages = reactive({
@@ -327,6 +397,7 @@ export const useModelStore = defineStore("store", () => {
 
 	const wholeTurnResetData = ref("")
 	const subphaseResetData = ref("")
+	const recruitingResetData = ref(null)
 	const subphaseSnapshots = reactive({})
 	const replayResetData = ref("")
 
@@ -376,6 +447,7 @@ export const useModelStore = defineStore("store", () => {
 		chatData,
 
 		subphaseResetData,
+		recruitingResetData,
 		subphaseSnapshots,
 
 		replayResetData,
@@ -398,6 +470,10 @@ export const useModelStore = defineStore("store", () => {
 		freeways,
 		parks,
 		newRoads,
+		movedOutHouses,
+		stadium,
+		laborMarket,
+		bailout,
 		reserveCards,
 		bank,
 		bankBroken,
@@ -407,6 +483,7 @@ export const useModelStore = defineStore("store", () => {
 		externalStartingOptions,
 		startingOptionsHTML,
 		ceoLevel,
-		highlights
+		highlights,
+		aiThinking
 	}
 })

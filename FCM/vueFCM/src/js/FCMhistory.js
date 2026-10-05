@@ -89,6 +89,24 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 			if (rotation !== 0) squares.push(roadIndex + rf.ssW + 1)
 			if (rotation !== 1) squares.push(roadIndex + rf.ssW)
 		}
+	} else if (action === rf.HIST_FLIP_TO_FRIED_CHICKEN || action === rf.HIST_HOUSE_MOVED_OUT) {
+		// Fried Chicken mod: highlight the affected house(s)
+		for (let h = 0; h < entry3.length; h++) {
+			const houseNumber = action === rf.HIST_HOUSE_MOVED_OUT ? entry3[h] : entry3[h][0]
+			const houseIndex = map.findIndexForHouse(houseNumber)
+			if (houseIndex === -1) continue
+			const houseData = store.houses.find((hs) => hs.number === houseNumber)
+			const rotation = houseData ? houseData.rotated : 1
+			const sideways = rotation === 1 || rotation === 3
+			const height = sideways ? 2 : 3
+			const width = sideways ? 3 : 2
+			for (let i = 0; i < height; i++) for (let j = 0; j < width; j++) squares.push(houseIndex + j + rf.ssW * i)
+		}
+	} else if (action === rf.HIST_STADIUM_ANNOUNCE || action === rf.HIST_STADIUM_RESULT) {
+		// Stadium mod: highlight the arena
+		for (let i = 0; i < store.mapData.coords.length; i++) {
+			if (store.mapData.coords[i] === rf.HOUSE + rf.STADIUM) squares.push(i)
+		}
 	} else if (action === rf.HIST_NEW_TILE) {
 		const tileIndex = funcs.importIndex(entry3[0])
 		squares.push(tileIndex)

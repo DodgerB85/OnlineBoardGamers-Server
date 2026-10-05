@@ -34,3 +34,23 @@ processes:
   web_ui:
     command: "npm run dev"
     working_dir: "WEB/vueWEB"
+
+  ind:
+    command: "npm run dev"
+    working_dir: "IND/vueIND"
+
+  rnb:
+    command: "npm run dev"
+    working_dir: "RNB/vueRNB"
+
+  ddl:
+    command: "npm run dev"
+    working_dir: "DDL/vueDDL"
+
+  fcm:
+    command: "npm run dev"
+    working_dir: "FCM/vueFCM"
+
+  urr:
+    command: "npm run dev"
+    working_dir: "URR/vueURR"

@@ -378,6 +378,12 @@ export function getInputForProduction(prod) {
   else if (prod === PROD_PIRATE) return [RES_SCRIPT, RES_ACTRESS, RES_SFX]
 }
 
+export function getConversionForHexRef(hexRef) {
+  const [, prod] = collectResAndProdFromHexRefs([hexRef])
+  if (prod.length === 0) return null
+  return { inputs: getInputForProduction(prod[0]), output: getOutputForProduction(prod[0]) }
+}
+
 export function getOutputForProduction(prod) {
   if (prod === PROD_FILM_CRITIC) return RES_FILM_CRITIC
   else if (prod === PROD_CIGAR) return RES_CIGAR

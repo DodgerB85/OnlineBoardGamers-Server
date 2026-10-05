@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+    <link rel="icon" type="image/png" href="{% static 'Lobby/favicons/favicon-96x96.png' %}" />
+    <meta name="title" content="Online Board Gamers - UR: 1830 BC">
+    <meta name="description" content="Play Splotter's UR: 1830 BC online for free with others.">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Online Board Gamers">
+    <title>OBG - {{ gameName }}</title>
+    <style>
+      body {
+        margin: 0px !important;
+        background-color: #e9e2d2;
+        font-family: Arial, sans-serif;
+      }
+      #app {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+      }
+      #loadingText {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 40px;
+        text-align: center;
+        padding: 0 16px;
+        box-sizing: border-box;
+      }
+    </style>
+    <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
+    {% if settingsDebug %}
+      <script type="module" src="http://localhost:3054/static/@vite/client"></script>
+      <script type="module" src="http://localhost:3054/static/main.js"></script>
+    {% else %}
+      <link href="{% static 'URR/URRvuedist/main.css' %}?" rel="stylesheet" />
+      <script type="module" crossorigin="" src="{% static 'URR/URRvuedist/main.js' %}"></script>
+    {% endif %}
+  </head>
+  <body>
+    <noscript>
+      <strong>Please enable Javascript to continue.</strong>
+    </noscript>
+    <div id="app">
+      <div id="loadingText">UR: 1830 BC is loading........</div>
+    </div>
+  </body>
+  <script>
+    var initData = {};
+    initData.gameID = {{ gameID }};
+    initData.gameName = "{{ gameName|escapejs }}";
+    initData.gameData = {{ gameData|safe }};
+    initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
+    initData.myZoomLevel = {{ myZoomLevel }};
+    initData.startingOptions = {{ startingOptions|safe }};
+    initData.KickoutFlexiDataArray = {{ KickoutFlexiDataArray|safe }};
+    initData.playerNames = {{ allPlayerListBySeat|safe }};
+    initData.currentPlayers = {{ currentPlayers|safe }};
+    initData.statsExcludeVotesData = {{ statsExcludeVotesData|safe }};
+    initData.deleteVotesData = {{ deleteVotesData|safe }};
+    initData.pov = {{ pov }};
+    initData.turn = {{ turn }};
+    initData.phase = {{ phase }};
+    initData.finishedGame = {{ finishedGame|lower }};
+
+    {% if spoilerFree %}
+    initData.spoilerFree = true;
+    initData.replayStep = {{ replayStep }}-1;
+    {% endif %}
+
+    {% if user.is_authenticated %}
+    initData.name = '{{ name|escapejs }}';
+    initData.chatData = "{{ chatData }}";
+    initData.latestUpdate = {{ latestUpdateLiteral }};
+    initData.nextURL = '{{ nextURL|safe }}';
+    initData.chatNotification = {{ chatNotification|lower }};
+    {% endif %}
+
+    initData.kickoutVotesData = {{ kickoutVotesData|default:'{}'|safe }};
+    initData.kickoutVoteThreshold = {{ kickoutVoteThreshold|default:'0' }};
+    {% if involvedPlayer %}
+    initData.statsExcludedGame = {{ statsExcludedGame|lower }};
+    initData.secondsToNextKickout = {{ secondsToNextKickout }};
+    {% if kickoutRequired > 0 and not myMove %}
+    initData.kickoutRequired = {{ kickoutRequired }};
+    {% endif %}
+    initData.notes = '{{ notes|escapejs }}';
+    initData.yourTurnAudioType = {{ yourTurnAudioType }};
+    {% endif %}
+
+    {% if displayNames %}
+    initData.displayNames = {{ displayNames|safe }};
+    {% endif %}
+  </script>
+</html>

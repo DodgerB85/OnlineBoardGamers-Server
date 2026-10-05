@@ -84,3 +84,23 @@ describe("getCoffeeRoutesFromBldgSquare", () => {
 		expect(elapsedMs).toBeLessThan(15000)
 	}, 20000)
 })
+
+// A solid paved block inside one tile: every step is free, so plain walk
+// enumeration explodes (4x4 = 583k routes, 5x5 never finished). The only
+// consumer keeps maximal square-sets, which here is the whole block.
+describe("solid road block", () => {
+	for (const w of [4, 5]) {
+		it(`${w}x${w} returns the whole block as one route, fast`, () => {
+			const store = freshBoard()
+			const r0 = 10,
+				c0 = 10
+			const block = []
+			for (let r = 0; r < w; r++) for (let c = 0; c < w; c++) block.push((r0 + r) * rf.ssW + c0 + c)
+			for (const i of block) store.mapData.coords[i] = rf.ROAD
+			const t0 = performance.now()
+			const routes = getCoffeeRoutesFromBldgSquare((r0 - 1) * rf.ssW + c0, [(r0 + w) * rf.ssW + c0 + w - 1], 3)
+			expect(performance.now() - t0).toBeLessThan(3000)
+			expect(routes.map((r) => [...new Set(r)].sort((a, b) => a - b))).toEqual([block])
+		}, 10000)
+	}
+})

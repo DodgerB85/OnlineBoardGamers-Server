@@ -1490,6 +1490,10 @@ export function verifySingleStackAction(stackActionData) {
 		// If there is only 1 road option, then build the road
 		if (edgeData.hasRoad.length === 1) {
 			if (edgeData.hasRoad[0]) return 3
+			// CITY: a road to/from a city requires the moat bridge on that side
+			for (const [i, h] of hexes.entries()) {
+				if (h.hexTerrainID === rf.CITY && !util.includesArray(h.builtBridges, h.cornerNodeIds[hexSides[i]])) return 4
+			}
 		}
 		// Otherwise we need to find which side of the river the road should be
 		else {
@@ -1498,6 +1502,13 @@ export function verifySingleStackAction(stackActionData) {
 			const oppositeCorner = hexes[0].nodeBucketIds[firstHexCorner] !== bucketIds[0] || hexes[1].nodeBucketIds[secondHexCorner] !== bucketIds[1]
 			const actual = oppositeCorner ? 1 : 0
 			if (edgeData.hasRoad[actual]) return 3
+			// CITY: a road to/from a city requires the moat bridge on that side.
+			// On city-river edges (two road slots) it's the bank bridge for this slot.
+			for (const [i, h] of hexes.entries()) {
+				if (h.hexTerrainID !== rf.CITY) continue
+				const requiredBridge = edgeData.hasRoad.length === 2 ? [h.cornerNodeIds[hexSides[i]][0], map.cityBankNodeForEdgeSlot(h, hexSides[i], edgeData, actual)] : h.cornerNodeIds[hexSides[i]]
+				if (!util.includesArray(h.builtBridges, requiredBridge)) return 4
+			}
 		}
 		return 0
 	}
@@ -1539,6 +1550,10 @@ export function verifySingleStackAction(stackActionData) {
 		// If there is only 1 power line option, then build the power line
 		if (edgeData.hasPowerLine.length === 1) {
 			if (edgeData.hasPowerLine[0]) return 3
+			// CITY: a power line to/from a city requires the moat bridge on that side
+			for (const [i, h] of hexes.entries()) {
+				if (h.hexTerrainID === rf.CITY && !util.includesArray(h.builtBridges, h.cornerNodeIds[hexSides[i]])) return 4
+			}
 		}
 		// Otherwise we need to find which side of the river the power line should be
 		else {
@@ -1547,6 +1562,13 @@ export function verifySingleStackAction(stackActionData) {
 			const oppositeCorner = hexes[0].nodeBucketIds[firstHexCorner] !== bucketIds[0] || hexes[1].nodeBucketIds[secondHexCorner] !== bucketIds[1]
 			const actual = oppositeCorner ? 1 : 0
 			if (edgeData.hasPowerLine[actual]) return 3
+			// CITY: a power line to/from a city requires the moat bridge on that side.
+			// On city-river edges (two slots) it's the bank bridge for this slot.
+			for (const [i, h] of hexes.entries()) {
+				if (h.hexTerrainID !== rf.CITY) continue
+				const requiredBridge = edgeData.hasPowerLine.length === 2 ? [h.cornerNodeIds[hexSides[i]][0], map.cityBankNodeForEdgeSlot(h, hexSides[i], edgeData, actual)] : h.cornerNodeIds[hexSides[i]]
+				if (!util.includesArray(h.builtBridges, requiredBridge)) return 4
+			}
 		}
 		return 0
 	}
@@ -1562,7 +1584,49 @@ export function verifySingleStackAction(stackActionData) {
 
 		const transporterObj = model.getTransporterByID(transporterID)
 		const validLocations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(transporterObj.location, false, "sbb")
-		if (!util.includesArray(validLocations, [rf.LOCATION_LAND_VERTEX, hexID, bridgeArr[0]]) && !util.includesArray(validLocations, [rf.LOCATION_LAND_VERTEX, hexID, bridgeArr[1]])) return 1
+		let bridgeReachable = util.includesArray(validLocations, [rf.LOCATION_LAND_VERTEX, hexID, bridgeArr[0]]) || util.includesArray(validLocations, [rf.LOCATION_LAND_VERTEX, hexID, bridgeArr[1]])
+		// CITY: a moat bridge may also be built from a neighbouring hex facing the crossing
+		if (!bridgeReachable && hexObj.hexTerrainID === rf.CITY && loc.isAnyHexLocation(transporterObj.location)) {
+			const transHex = model.getHexByID(transporterObj.location[1])
+			if (transHex && transHex.hexTerrainID !== rf.CITY) {
+				for (const side of util.indexArray(6)) {
+					if (transHex.hexLookup[side] !== hexID) continue
+					const citySide = (side + 3) % 6
+					// centre bridge: any position on the facing side
+					if (util.arraysEqual(hexObj.cornerNodeIds[citySide], bridgeArr)) {
+						bridgeReachable = true
+						break
+					}
+					// bank bridge: the transporter must be on the aligned bank
+					const bankNodes = map.cityBankNodesForSide(hexObj, citySide)
+					const bankIdx = bridgeArr[1] === bankNodes[0] ? 0 : bridgeArr[1] === bankNodes[1] ? 1 : -1
+					if (bankIdx === -1) continue
+					const corner = transHex.cornerNodeIds[side][(bankIdx + 1) % 2]
+					if (corner === -1) continue
+					const bankBucket = transHex.bucketIdsInitial[transHex.nodeBucketIds[corner]]
+					const transBuckets = validLocations.filter((l) => loc.isBucketLocation(l)).flatMap((l) => model.hexCurrentBucketToInitial(transHex.hexID, l[2]))
+					if (transBuckets.includes(bankBucket)) {
+						bridgeReachable = true
+						break
+					}
+				}
+			}
+		}
+		if (!bridgeReachable) return 1
+		// CITY: a moat bridge may not be built on a side facing sea or void
+		if (hexObj.hexTerrainID === rf.CITY && !map.cityBridgeSideIsBuildable(hexObj, bridgeArr)) return 5
+		// CITY: centre bridges only on sides without a river, bank bridges only on
+		// sides joined to a river (never a centre bridge across a river side)
+		if (hexObj.hexTerrainID === rf.CITY) {
+			const citySide = map.citySideOfBridge(hexObj, bridgeArr)
+			if (citySide >= 0) {
+				const neighbour = model.getHexByID(hexObj.hexLookup[citySide])
+				const sideIsRiver = neighbour.sideRiverVertexIds[(citySide + 3) % 6] >= 0
+				const isCentre = util.arraysEqual(hexObj.cornerNodeIds[citySide], bridgeArr)
+				if (isCentre && sideIsRiver) return 5
+				if (!isCentre && !sideIsRiver) return 5
+			}
+		}
 		const reachableResources = loc.getAllResourcesAccessibleToTransporter(transporterID, true)
 		// Check you can reach a stone for building
 		if (!reachableResources.some((res) => res.type === rf.RES_STONE)) return 2
@@ -1603,20 +1667,17 @@ export function verifySingleStackAction(stackActionData) {
 		const transporterLocation = transporterObj.location
 		let resIncreaseDueBuildingFromWater = 0
 		if (loc.isWaterVertexLocation(transporterLocation)) resIncreaseDueBuildingFromWater = 2
-		// Polder cost modifier: +2 stone when building from/to a polder
-		let polderCostModifier = 0
-		if (store.gameOptions.usePolders && (hex1IsPolder || hex2IsPolder)) polderCostModifier = 2
 		let requiredResources = []
 		//let stoneUsed = true
 		// At level 0, you are building the first wall
 		if (currentWallLevel === 0) {
 			requiredResources = [rf.RES_STONE]
-			for (let i = 0; i < resIncreaseDueBuildingFromWater + polderCostModifier; i++) requiredResources.push(rf.RES_STONE)
+			for (let i = 0; i < resIncreaseDueBuildingFromWater; i++) requiredResources.push(rf.RES_STONE)
 		}
 		// Else if you own it, OR are building up a demolished wall, need lvl+1 stone
 		else if (currentWallOwner === transporterOwnerIndex || currentWallOwner === -1) {
 			for (let i = 0; i <= currentWallLevel; i++) requiredResources.push(rf.RES_STONE)
-			for (let i = 0; i < resIncreaseDueBuildingFromWater + polderCostModifier; i++) requiredResources.push(rf.RES_STONE)
+			for (let i = 0; i < resIncreaseDueBuildingFromWater; i++) requiredResources.push(rf.RES_STONE)
 		}
 		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, requiredResources, true)
 		if (errorFlag > 0) return errorFlag + 10
@@ -1657,14 +1718,11 @@ export function verifySingleStackAction(stackActionData) {
 		const transporterLocation = transporterObj.location
 		let resIncreaseDueBuildingFromWater = 0
 		if (loc.isWaterVertexLocation(transporterLocation)) resIncreaseDueBuildingFromWater = 2
-		// Polder cost modifier: +2 boards when demolishing from/to a polder
-		let polderCostModifier = 0
-		if (store.gameOptions.usePolders && (hex1IsPolder || hex2IsPolder)) polderCostModifier = 2
 		let requiredResources = []
 		//  to demolish it, need boards + level
 		requiredResources.splice(0)
 		for (let i = 0; i <= currentWallLevel; i++) requiredResources.push(rf.RES_BOARDS)
-		for (let i = 0; i < resIncreaseDueBuildingFromWater + polderCostModifier; i++) requiredResources.push(rf.RES_BOARDS)
+		for (let i = 0; i < resIncreaseDueBuildingFromWater; i++) requiredResources.push(rf.RES_BOARDS)
 
 		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, requiredResources, true)
 		if (errorFlag > 0) return errorFlag + 10
@@ -1692,7 +1750,7 @@ export function verifySingleStackAction(stackActionData) {
 		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, requiredRes, true)
 		if (errorFlag > 0) return errorFlag + 10
 		// Check there are not already too many buildings
-		const maxBuildings = hexObj.terrainID === rf.CITY ? 2 : 1
+		const maxBuildings = hexObj.hexTerrainID === rf.CITY ? 2 : 1
 		const buildingsOnTile = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
 		const spaceForBuilding = buildingsOnTile.length < maxBuildings
 		if (!spaceForBuilding) return 2
@@ -1842,19 +1900,16 @@ export function verifySingleStackAction(stackActionData) {
 	else if (action === rf.STACK_BOMB_BUILDING) {
 		// stackAction = [STACK_BOMB_BUILDING, transporterID, buildingType, hexID, bucketID]
 		const transporterID = stackAction[1]
-		const buildingType = stackAction[2]
 		const hexID = stackAction[3]
-		const bucketID = stackAction[4]
 		const transporterObj = model.getTransporterByID(transporterID)
 		// Transporter must be on the correct hex
 		if (transporterObj.location[1] !== hexID) return 1
 		// Must have a bomb accessible
 		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], true)
 		if (errorFlag > 0) return errorFlag + 10
-		// Must be a non-strengthened building on the hex
+		// Must be at least one non-strengthened building on the hex (a bomb clears the whole hex)
 		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
-		const targetBldg = buildingsOnHex.find((b) => b.type === buildingType && !b.strengthened)
-		if (!targetBldg) return 20
+		if (!buildingsOnHex.some((b) => !b.strengthened)) return 20
 		return 0
 	}
 	// STRENGTHEN BUILDING
@@ -1874,6 +1929,25 @@ export function verifySingleStackAction(stackActionData) {
 		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
 		const targetBldg = buildingsOnHex.find((b) => b.type === buildingType && !b.strengthened)
 		if (!targetBldg) return 20
+		return 0
+	}
+	// BUILD ROAD & BRIDGE (CITY)
+	else if (action === rf.STACK_BUILD_ROAD_BRIDGE) {
+		// stackAction = [STACK_BUILD_ROAD_BRIDGE, transporterID, cityHexID, bridgeArr, compressedFromLoc, compressedToLoc]
+		const transporterID = stackAction[1]
+		const cityHexID = stackAction[2]
+		const bridgeArr = stackAction[3]
+		const fromLocation = decompressLocation(stackAction[4])
+		const transporterObj = model.getTransporterByID(transporterID)
+		const cityHex = model.getHexByID(cityHexID)
+		// Transporter must be on the neighbouring tile
+		if (transporterObj.location[1] !== fromLocation[1]) return 1
+		// The bridge must be a valid, unbuilt city bridge
+		if (!util.includesArray(cityHex.bridges, bridgeArr)) return 2
+		if (util.includesArray(cityHex.builtBridges, bridgeArr)) return 3
+		// Must have 2 stone (bridge + road)
+		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_STONE, rf.RES_STONE], true)
+		if (errorFlag > 0) return errorFlag + 10
 		return 0
 	}
 	// WONDER
@@ -2608,15 +2682,12 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 			stackAction[1] = model.getTransporterByID(transporterID).id
 			transporterID = stackAction[1]
 		}
-		const buildingType = stackAction[2]
 		const hexID = stackAction[3]
-		const bucketID = stackAction[4]
 		// Remove the bomb from the transporter
 		model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
-		// Find and remove the building
-		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
-		const targetBldg = buildingsOnHex.find((b) => b.type === buildingType)
-		if (targetBldg) model.removeBuildingByID(targetBldg.id)
+		// Remove every non-strengthened building on the hex
+		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && !b.strengthened)
+		for (const b of buildingsOnHex) model.removeBuildingByID(b.id)
 	}
 	// STRENGTHEN BUILDING
 	else if (action === rf.STACK_STRENGTHEN_BUILDING) {
@@ -2634,6 +2705,23 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
 		const targetBldg = buildingsOnHex.find((b) => b.type === buildingType)
 		if (targetBldg) targetBldg.strengthened = true
+	}
+	// BUILD ROAD & BRIDGE (CITY)
+	else if (action === rf.STACK_BUILD_ROAD_BRIDGE) {
+		let transporterID = stackAction[1]
+		if (swapIDs && typeof transporterID === "string") {
+			stackAction[1] = model.getTransporterByID(transporterID).id
+			transporterID = stackAction[1]
+		}
+		const cityHexID = stackAction[2]
+		const bridgeArr = stackAction[3]
+		const fromLocation = decompressLocation(stackAction[4])
+		const toLocation = decompressLocation(stackAction[5])
+		// Remove 2 stone (bridge + road)
+		model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_STONE, rf.RES_STONE], false)
+		// Build the bridge and the road
+		map.addBridgeToMap_core(cityHexID, transporterID, bridgeArr, false)
+		map.addRoadToMap_core([fromLocation[1], fromLocation[2]], [toLocation[1], toLocation[2]], transporterID, false)
 	}
 	// WONDER
 	else if (action === rf.STACK_ADD_WONDER_BRICKS) {

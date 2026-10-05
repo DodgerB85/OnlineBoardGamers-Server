@@ -34,7 +34,7 @@ const sandboxEmpTitle = (emp) => rf.EMPLOYEES_STR[emp]?.title ?? emp
 const sandboxHireChoices = computed(() => {
 	const possible = []
 	for (let i = 0; i < store.availableEmployees.length; i++) {
-		if (store.availableEmployees[i] !== -1) possible.push(i)
+		if (store.availableEmployees[i] !== -1 && ![rf.TEMPORARY_WORKER, rf.UNION_ORGANIZER].includes(i)) possible.push(i)
 	}
 	rf.sortEmployees(possible)
 	return possible
@@ -45,7 +45,7 @@ const sandboxFireChoices = computed(() => {
 	let current = [...playerObj.beach]
 	if (playerObj.employees.length > 0) current = current.concat(playerObj.employees)
 	rf.sortEmployees(current)
-	return current.filter((employee) => employee !== rf.BLANK_EMPLOYEE_SPACE)
+	return current.filter((employee) => employee !== rf.BLANK_EMPLOYEE_SPACE && !rf.NON_FIREABLE_EMPLOYEES.includes(employee))
 })
 
 const sandboxHireSelected = ref(sandboxHireChoices.value[0])
@@ -84,7 +84,7 @@ function foodSumGoods(sumArr) {
 
 /* ---------------- Board demand summary ---------------- */
 const totalBoardNeeds = computed(() => {
-	const sums = Array(10).fill(0)
+	const sums = Array(11).fill(0)
 	for (const need of store.needs) {
 		for (const n of need.needs) sums[n[0]]++
 	}
@@ -147,7 +147,7 @@ function buildDiscount(playerIndex, player) {
 }
 
 function buildStock(player) {
-	const sums = Array(10).fill(0)
+	const sums = Array(11).fill(0)
 	for (const r of player.resources) sums[r]++
 	return { goods: foodSumGoods(sums), hasResources: player.resources.length > 0 }
 }
@@ -198,7 +198,8 @@ function buildProduction(playerIndex, player) {
 		numNoodles = 0,
 		numDumplings = 0,
 		numKimchi = 0,
-		numCoffee = 0
+		numCoffee = 0,
+		numFriedChicken = 0
 
 	const nsm = player.employees.includes(rf.NIGHT_SHIFT_MANAGER)
 	for (const employee of ref) {
@@ -231,7 +232,7 @@ function buildProduction(playerIndex, player) {
 	}
 
 	if (phase < rf.PHASE_DINNERTIME) {
-		const productionArr = Array(10).fill(0)
+		const productionArr = Array(11).fill(0)
 		productionArr[rf.PIZZA] = numPizza
 		productionArr[rf.BURGER] = numBurger
 		productionArr[rf.COFFEE] = numCoffee
@@ -239,6 +240,7 @@ function buildProduction(playerIndex, player) {
 		productionArr[rf.SUSHI] = numSushi
 		productionArr[rf.KIMCHI] = numKimchi
 		productionArr[rf.DUMPLING] = numDumplings
+		productionArr[rf.FRIED_CHICKEN] = numFriedChicken
 		const goods = foodSumGoods(productionArr)
 
 		const chips = []
@@ -338,6 +340,21 @@ function showHawkerRoute(campaignNumber) {
 		store.context.showingHawkerRoute = campaignNumber
 	}
 }
+
+/* ---------------- Stadium ---------------- */
+const useStadium = computed(() => store.startingOptions.stadium)
+
+// Hidden until the announcement becomes public to this player:
+// the milestone holder sees it 1 turn earlier than everyone else.
+const stadiumAnnouncement = computed(() => {
+	const a = store.stadium.announcement
+	if (a === null) return null
+	const gameTurn = 5 + store.stadium.gamesPlayed * 3
+	let lead = 2
+	if (personal.pov >= 0 && plyr.hasMilestone(personal.pov, rf.FIRST_STADIUM_SOLD)) lead = 3
+	if (store.gameflow.turn < gameTurn - lead + 1) return null
+	return { turn: gameTurn, units: a.units, foodImg: view.getImage("item_" + a.food) }
+})
 
 /* ---------------- Rural Marketing Area ---------------- */
 const useRuralMarketers = computed(() => store.startingOptions.ruralMarketers)
@@ -633,6 +650,15 @@ const playerRows = computed(() => {
 			</template>
 		</div>
 
+		<!-- STADIUM -->
+		<div id="stadiumAnnouncementDisplay" v-if="useStadium && stadiumAnnouncement !== null">
+			<strong>{{ $t("assistance.stadiumTitle") }}</strong>
+			<div class="stadiumAnnouncement">
+				{{ $t("assistance.stadiumGame", { turn: stadiumAnnouncement.turn, units: stadiumAnnouncement.units }) }}
+				<img class="stadiumItemImg" :src="stadiumAnnouncement.foodImg" />
+			</div>
+		</div>
+
 		<!-- SANDBOX MODE -->
 		<div id="sandboxDiv" v-if="sandboxMode">
 			<div>
@@ -897,6 +923,21 @@ const playerRows = computed(() => {
 	margin: 4px;
 	position: relative;
 	z-index: 1;
+}
+
+/* Stadium */
+#stadiumAnnouncementDisplay {
+	width: 392px;
+	border: #000 1px solid;
+	margin: 0 auto;
+	margin-top: 5px;
+	padding: 3px;
+	text-align: left;
+}
+
+.stadiumAnnouncement .stadiumItemImg {
+	height: 22px;
+	vertical-align: bottom;
 }
 
 /* Hawker Trucks */

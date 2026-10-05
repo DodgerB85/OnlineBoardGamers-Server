@@ -1,7 +1,7 @@
 {% extends "Lobby/layout.html" %}
 {% load static i18n compress %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/lobby_new.css' %}?v=9" rel="stylesheet" />
+    <link href="{% static 'Lobby/CSS/lobby_new.css' %}?v=15" rel="stylesheet" />
 {% endblock head %}
 {% block body %}
     {% compress js %}
@@ -16,8 +16,8 @@
                 {% endfor %}
             </div>
         {% endif %}
-        <div class="notice">
-            <span>Splotter Con Gand Final Pitts Bus Match <a href="/BUS/34571/spoilerFree/">Here!</a></span>
+        <div class="lobby-social">
+            {% include "Lobby/socialButtons.html" %}
         </div>
         {% if availableTournaments|length > 0 %}
             <div class="notice">
@@ -75,16 +75,6 @@
                 </span>
             </div>
         {% endif %}
-        {% url 'newGamesPage' as new_game_url %}
-        <div class="news-banner" id="rnbAnnounceBanner">
-            <span>{% blocktranslate trimmed %}Roads &amp; Boats is here! Map editor available — see the <a href="{{ new_game_url }}">New Game</a> page.{% endblocktranslate %}</span>
-            <button class="news-dismiss"
-                    aria-label="{% translate "Dismiss" %}"
-                    onclick="document.getElementById('rnbAnnounceBanner').style.display='none'; try{localStorage.setItem('rnb_announce_dismissed','1');}catch(e){}">
-                &#x2715;
-            </button>
-        </div>
-        <script>try{if(localStorage.getItem('rnb_announce_dismissed')==='1')document.getElementById('rnbAnnounceBanner').style.display='none';}catch(e){}</script>
         <div class="news-banner">
             <span>{% translate "New Design Active! All feedback being processed. Please let us know what improvements you would like." %}</span>
             <a href="{% url 'feedback' %}" class="button button-sm button-primary" style="margin-left:8px;">{% translate "Feedback" %}</a>
@@ -273,6 +263,7 @@
                         <span class="colour-guide-item myMove kickoutRequired2">{% translate "Need to move - could be kicked out" %}</span>
                         <span class="colour-guide-item kickoutRequired1">{% translate "Current Player is using Flex-Time" %}</span>
                         <span class="colour-guide-item kickoutRequired2">{% translate "Enter game to kickout inactive player" %}</span>
+                        <span class="colour-guide-item pendingFinish">{% translate "Finished - result not yet viewed" %}</span>
                     </div>
                 </div>
             </div>

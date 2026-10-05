@@ -19,6 +19,8 @@ class ForceTrailingSlashMiddleware:
             "/PPF",
             "/WEB",
             "/RNB",
+            "/URR",
+            "/DDL",
             "/login",
             "/profile",
             "/index",

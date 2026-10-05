@@ -130,6 +130,8 @@ INSTALLED_APPS = [
     "PPF",
     "WEB",
     "RNB",
+    "URR",
+    "DDL",
     "statici18n",
     "i18n",
 ]
@@ -367,24 +369,22 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
-if DEBUG or LOCAL_USER:
-    LANGUAGES = (
-        ("en-gb", "English (United Kingdom)"),
-        # ("zh-hans", gettext_noop("Simplified Chinese")),
-        # ("zh-hans", "Simplified Chinese"),
-        ("zh-hans", "简体中文"),
-        ("es", "Spanish (Spain)"),
-        ("de", "Deutsche"),
-        # ('es', 'Spanish (Spain)'),
-    )
-else:
-    LANGUAGES = (
-        ("en-gb", "English (United Kingdom)"),
-        ("zh-hans", "简体中文"),
-    )
+LANGUAGES = (
+    ("en-gb", "English (United Kingdom)"),
+    ("zh-hans", "简体中文"),
+    ("de", "Deutsch"),
+    ("fr", "Français"),
+    ("es", "Español"),
+    ("it", "Italiano"),
+)
 
 
 LANGUAGE_CODE = "en-gb"
+
+# Keep the chosen language for 10 years instead of only for the browser session.
+# Without this, LANGUAGE_COOKIE_AGE is None (a session cookie) and the language
+# falls back to the browser's Accept-Language header on the next fresh session.
+LANGUAGE_COOKIE_AGE = 10 * 365 * 24 * 60 * 60
 
 LOCALE_PATHS = [
     join(BASE_DIR, "Lobby", "locale"),

@@ -532,10 +532,13 @@ export function createActualHex(coord, rotation, hexTerrainID) {
 		let hasRiver = reference.sideRiverVertexIds[i] >= 0
 		let cornerDefs = !util.arraysEqual(reference.cornerNodeIds[i], [-1, -1])
 		let sideDef = reference.sideNodeIds[i] !== -1
-		if (reference.baseTerrain !== rf.TERR_SEA && ((!hasRiver && cornerDefs) || (hasRiver && !cornerDefs))) {
+		// CITY: the moat is internal, so a city side has BOTH a side node (outer gate) and
+		// river vertices - skip the normal river/side exclusivity checks for it.
+		const isCity = reference.hexTerrainID === rf.CITY
+		if (!isCity && reference.baseTerrain !== rf.TERR_SEA && ((!hasRiver && cornerDefs) || (hasRiver && !cornerDefs))) {
 			rf.doAdminAlrt(`corner data error in hex: ${reference.hexGfx}`)
 		}
-		if (reference.baseTerrain !== rf.TERR_SEA && ((hasRiver && sideDef) || (!hasRiver && !sideDef))) {
+		if (!isCity && reference.baseTerrain !== rf.TERR_SEA && ((hasRiver && sideDef) || (!hasRiver && !sideDef))) {
 			rf.doAdminAlrt(`side data error in hex: ${reference.hexGfx}`)
 		}
 	}

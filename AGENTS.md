@@ -117,9 +117,13 @@ This repository is a Django-backed online board gaming site where most game logi
 - ALWAYS build the FCM frontend with `FCM/vueFCM/FCM.bat` (run from that directory), never bare `npm run build`. It runs `npm run build`, deletes the generated `FCM/static/FCM/FCMvuedist/images/` folder from the dist (that folder is not kept in the repo), then starts the dev server.
 - Some older or transitional games do not have complete source-side parity in this repo. In those cases, work with what actually exists instead of inventing a large migration.
 
+## Docs
+
+- `/docs/` holds project documentation: `ARCHITECTURE.md` (how the site works), `ADDING_A_NEW_GAME.md`, `ADDING_A_GAME_MODULE.md`, and `UNIT_TESTS.md`. Update the relevant doc when you change the things it describes.
+
 ## Tests And Verification
 
-- The automated test footprint is currently very light. Many `tests.py` files are still placeholders.
+- The automated test footprint is currently modest. All tests live in the root `/tests/` package (see `/docs/UNIT_TESTS.md` for an inventory and how to run them). Apps no longer contain per-app `tests.py` files.
 - Default rule: do not add tests unless there is already a meaningful nearby pattern to follow, or the user explicitly asks for tests.
 - Do not introduce a new testing approach as part of a small feature or bugfix.
 - Prefer targeted verification:

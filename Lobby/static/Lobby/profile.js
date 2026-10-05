@@ -65,6 +65,10 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	}
 
+	wireAsyncProfileForm("notificationForm", "Saving Notification Preferences...", "Preferences Saved")
+	wireAsyncProfileForm("gamePreferencesForm", "Saving Game Preferences...", "Preferences Saved")
+	wireAsyncProfileForm("changePasswordForm", "Changing Password...", "Password Changed")
+
 	autocomplete(document.getElementById("blacklistPlayer"))
 
 	//let ALL_GAMES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "RNB"]
@@ -102,6 +106,52 @@ document.addEventListener("DOMContentLoaded", function () {
 		})
 	})
 }) // END INIT
+
+// Submit a profile form in place: button shows a spinner + saving text, then a
+// saved text for 3s, instead of reloading the whole page and jumping to the top.
+function wireAsyncProfileForm(formId, savingText, savedText) {
+	const form = document.getElementById(formId)
+	if (!form) return
+	const button = form.querySelector('button[type="submit"]')
+	if (!button) return
+	const originalHTML = button.innerHTML
+
+	form.addEventListener("submit", async function (e) {
+		e.preventDefault()
+		button.disabled = true
+		button.innerHTML = '<span class="btn-spinner"></span>' + savingText
+
+		try {
+			const response = await fetch(form.action, {
+				method: "POST",
+				body: new FormData(form),
+				headers: { "X-CSRFToken": getCookie("csrftoken") },
+			})
+
+			const html = await response.text()
+			const errorPill = new DOMParser()
+				.parseFromString(html, "text/html")
+				.querySelector(".page-profile > div > .pill-danger")
+
+			if (!response.ok || errorPill) {
+				button.innerHTML = originalHTML
+				button.disabled = false
+				alert(errorPill ? errorPill.textContent.trim() : "Error saving preferences")
+				return
+			}
+
+			button.innerHTML = savedText
+		} catch (error) {
+			console.error("Error saving preferences:", error)
+			button.innerHTML = originalHTML
+		}
+
+		button.disabled = false
+		setTimeout(() => {
+			button.innerHTML = originalHTML
+		}, 3000)
+	})
+}
 
 function askForBrowserNotifications() {
 	Notification.requestPermission().then((permission) => {
@@ -386,7 +436,9 @@ function addPlayerToBlacklist() {
 				// Create a new blacklisted player div
 				let newPlayerDiv = document.createElement("div")
 				newPlayerDiv.classList.add("blacklistedPlayer")
+				newPlayerDiv.classList.add("row-flex")
 				newPlayerDiv.id = "BL" + blackListPlayer
+				newPlayerDiv.style.padding = "4px 0"
 
 				// Create a span for the player name
 				let playerNameSpan = document.createElement("span")
@@ -394,8 +446,10 @@ function addPlayerToBlacklist() {
 
 				// Create a button to remove the player
 				let removeButton = document.createElement("button")
-				removeButton.classList.add("removePlayerBtn")
-				removeButton.textContent = "❌"
+				removeButton.classList.add("button")
+				removeButton.classList.add("button-ghost")
+				removeButton.classList.add("button-sm")
+				removeButton.textContent = "✕"
 				removeButton.onclick = function () {
 					event.preventDefault()
 					removePlayerFromBlacklist(blackListPlayer)
@@ -405,9 +459,8 @@ function addPlayerToBlacklist() {
 				newPlayerDiv.appendChild(playerNameSpan)
 				newPlayerDiv.appendChild(removeButton)
 
-				// Append the new player div to the blacklistedPlayers section
-				var blacklistedPlayersSection = document.querySelector(".blacklistedPlayers")
-				blacklistedPlayersSection.appendChild(newPlayerDiv)
+				// Append the new player div to the blacklist list
+				document.getElementById("blacklistedPlayersList").appendChild(newPlayerDiv)
 			}
 		})
 		.catch((error) => {

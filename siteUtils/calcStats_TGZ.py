@@ -39,7 +39,7 @@ print(BASE_DIR)
 django.setup()
 start_calc_time = time.perf_counter()
 
-from Lobby.models import Game, User  # noqa: E402
+from Lobby.models import Game, GamePlayer, User  # noqa: E402
 
 # gods
 NO_god = -1
@@ -77,36 +77,28 @@ RAIN_CEREMONY = 2
 SHAMAN = 3
 BUILDER = 4
 
+# seat/starting position titles, sliced to the player count of a stats block
+POSITION_TITLES = ["1st", "2nd", "3rd", "4th", "5th", "6th"]
 
-def analyze_games(player_count_index, schism_games=False, external_tournament_or_4p_tournament=False):
-    """Analyzes game data for a given player count."""
 
-    num_gods = 25 if schism_games else 13  # Determine number of gods based on schism
-    G_AVAILABLE: dict[int, list[int]] = {i: [] for i in range(num_gods)}  # {god_index: [game_id1, game_id2, ...]}
-    G_PICKED: dict[int, list[int]] = {i: [] for i in range(num_gods)}
-    G_WON: dict[int, list[int]] = {i: [] for i in range(num_gods)}
-    SPEC_LOST: dict[int, list[int]] = {i: [] for i in range(6)}  # {spec_index: [game_id1, game_id2, ...]}
-    SPEC_WON: dict[int, list[int]] = {i: [] for i in range(6)}
+# Every game is fetched once per run (all player counts at once) rather than once per player count
+FETCHED_GAMES = {}  # {schism_games: (rows, game_data, winner_seats)}
 
-    seat_wins_4p = [0, 0, 0, 0]  # Initialize array to track seat wins
-    seat_wins_4p_ids = [
-        [],
-        [],
-        [],
-        [],
-    ]  # Initialize array to store game IDs for each seat
-    seat_wins_4pT = [0, 0, 0, 0]  # Initialize array to track seat wins
-    seat_wins_4pT_ids = [
-        [],
-        [],
-        [],
-        [],
-    ]  # Initialize array to store game IDs for each seat
 
-    playerCount = player_count_index
-    ## NB THIS WILL NEVER HAPPEN - USE external_tournament_or_4p_tournament flag instead
-    if playerCount == 4.5:
-        playerCount = 4
+def is_schism_game(starting_options):
+    """A schism game has a top-level 7, 8 or 9 in startingOptions."""
+    try:
+        loaded_options = json.loads(starting_options) if starting_options else []
+    except (json.JSONDecodeError, TypeError):
+        return False
+    return isinstance(loaded_options, list) and any(option in (7, 8, 9) for option in loaded_options)
+
+
+def fetch_games_to_analyse(schism_games):
+    """Fetches every game to analyse for a run in one pass, shared by all player counts (each query is a full scan of the finished TGZ games)."""
+
+    if schism_games in FETCHED_GAMES:
+        return FETCHED_GAMES[schism_games]
 
     shadowUser = User.objects.get(username="SHADOW")
 
@@ -121,57 +113,80 @@ def analyze_games(player_count_index, schism_games=False, external_tournament_or
             # & Q(missingPlayers__isnull=True)
         )
 
-    if external_tournament_or_4p_tournament:
-        if schism_games:
-            query = query & Q(relatedMainTournament__isnull=False) & Q(maxPlayers=4)
-        else:
-            query = query & (Q(externalTournamentGame=True) | (Q(relatedMainTournament__isnull=False) & Q(maxPlayers=4)))
-    else:
-        query = query & Q(maxPlayers=playerCount)
-
     # Fetch the initial queryset based on the query
     # Remove any game with missing players here
-    queryset = Game.objects.filter(query).exclude(players__is_missing=True).distinct()  # Define queryset here
+    # Only small columns here (no gameData), so this join & DISTINCT stays cheap - gameData is fetched separately below
+    rows = list(
+        Game.objects.filter(query)
+        .filter(players__winner=True)  # Ensures game has a winner & picks that specific user
+        .exclude(players__is_missing=True)  # Drops game if ANY player is missing
+        .values_list("id", "players__player__username", "maxPlayers", "startingOptions", "externalTournamentGame", "relatedMainTournament_id")
+        .distinct()
+        .order_by("id")
+    )
 
     if schism_games:
         # Filter to schism games: a top-level 7, 8 or 9 in startingOptions
-        schism_game_ids = []
-        for game_id, starting_options in queryset.values_list("id", "startingOptions"):
-            try:
-                loaded_options = json.loads(starting_options) if starting_options else []
-            except (json.JSONDecodeError, TypeError):
+        rows = [row for row in rows if is_schism_game(row[3])]
+
+    all_game_ids = {row[0] for row in rows}
+
+    game_data = dict(Game.objects.filter(id__in=all_game_ids).values_list("id", "gameData"))
+
+    # {game_id: winning seat} for every analysed game, fetched in one go instead of per game
+    winner_seats = {}
+    for gp in GamePlayer.objects.filter(game_id__in=all_game_ids, winner=True).exclude(is_kicked=True).order_by("id"):
+        winner_seats.setdefault(gp.game_id, gp.seat_order)
+
+    FETCHED_GAMES[schism_games] = (rows, game_data, winner_seats)
+
+    return FETCHED_GAMES[schism_games]
+
+
+def analyze_games(player_count_index, schism_games=False, external_tournament_or_4p_tournament=False):
+    """Analyzes game data for a given player count."""
+
+    num_gods = 25 if schism_games else 13  # Determine number of gods based on schism
+    G_AVAILABLE: dict[int, list[int]] = {i: [] for i in range(num_gods)}  # {god_index: [game_id1, game_id2, ...]}
+    G_PICKED: dict[int, list[int]] = {i: [] for i in range(num_gods)}
+    G_WON: dict[int, list[int]] = {i: [] for i in range(num_gods)}
+    SPEC_LOST: dict[int, list[int]] = {i: [] for i in range(6)}  # {spec_index: [game_id1, game_id2, ...]}
+    SPEC_WON: dict[int, list[int]] = {i: [] for i in range(6)}
+
+    playerCount = player_count_index
+    ## NB THIS WILL NEVER HAPPEN - USE external_tournament_or_4p_tournament flag instead
+    if playerCount == 4.5:
+        playerCount = 4
+
+    seat_wins = [0] * playerCount  # Initialize array to track seat wins
+    seat_wins_ids = [[] for _ in range(playerCount)]  # Initialize array to store game IDs for each seat
+    seat_wins_4pT = [0] * playerCount  # Initialize array to track seat wins (tournament games)
+    seat_wins_4pT_ids = [[] for _ in range(playerCount)]  # Initialize array to store game IDs for each seat (tournament games)
+
+    rows, game_data, winner_seats = fetch_games_to_analyse(schism_games)
+
+    # Pick this player count's games out of the single fetch - the same conditions as before, applied in Python
+    dataSet = []
+    for row in rows:
+        maxPlayers, externalTournamentGame, relatedMainTournament_id = row[2], row[4], row[5]
+        if external_tournament_or_4p_tournament:
+            if schism_games:
+                if relatedMainTournament_id is None or maxPlayers != 4:
+                    continue
+            elif not (externalTournamentGame or (relatedMainTournament_id is not None and maxPlayers == 4)):
                 continue
-            if isinstance(loaded_options, list) and any(option in (7, 8, 9) for option in loaded_options):
-                schism_game_ids.append(game_id)
+        elif maxPlayers != playerCount:
+            continue
+        dataSet.append(row)
 
-        # Apply values_list to the filtered queryset
-        dataSet = (
-            Game.objects.filter(id__in=schism_game_ids)
-            .filter(players__winner=True)  # Ensures game has a winner & picks that specific user
-            .exclude(players__is_missing=True)  # Drops game if ANY player is missing
-            .values_list("gameData", "players__player__username", "id")
-            .distinct()
-        )
-
-    else:
-        # Apply values_list to the queryset directly
-        # dataSet = Game.objects.exclude(players__is_missing=True).distinct().filter(query).values_list("gameData", "winner__username", "id")
-        dataSet = (
-            Game.objects.filter(query)
-            .filter(players__winner=True)  # Ensures game has a winner & picks that specific user
-            .exclude(players__is_missing=True)  # Drops game if ANY player is missing
-            .values_list("gameData", "players__player__username", "id")
-            .distinct()
-        )
     finishedGamesCount = len(dataSet)
-    all_game_ids = []
+    all_game_ids = [row[0] for row in dataSet]
 
-    for game_data_encoded, winner_username, game_id in dataSet:
-        all_game_ids.append(game_id)
+    for row in dataSet:
+        game_id, winner_username = row[0], row[1]
+        game_data_encoded = game_data[game_id]
         try:
-            byte_array = bytearray(base64.b64decode(game_data_encoded))
-            decompressed_data = gzip.decompress(byte_array)
-            decompressed_string = decompressed_data.decode("utf-8")
+            decompressed_string = gzip.decompress(base64.b64decode(game_data_encoded)).decode("utf-8")
             raw_data = json.loads(decompressed_string)
         except Exception as e:
             print(f"Game ERROR - COULD NOT DECOMPRESS: {e}")
@@ -186,7 +201,8 @@ def analyze_games(player_count_index, schism_games=False, external_tournament_or
             except (IndexError, KeyError):
                 print(f"ERROR: God index out of range: {god_index} in game {game_id}")
         for player in playerData:
-            player_god = player[7][0] if isinstance(player[7][0], (int, float)) else player[7][0][0]
+            god = player[7][0]
+            player_god = god if isinstance(god, (int, float)) else god[0]
             player_specs = player[8]
             num_specs = len(player_specs)
 
@@ -208,32 +224,25 @@ def analyze_games(player_count_index, schism_games=False, external_tournament_or
                 if num_specs == 0:
                     SPEC_WON[5].append(game_id)
 
-                # If 4p, update seat position data
-                if playerCount == 4:
-                    # Get the game
-                    game4p = Game.objects.get(id=game_id)
-                    # Get the seat of the winner
-                    # winner_seat = game4p.seatPosition(winner_username, True)
-                    all_game_players = list(game4p.players.exclude(is_kicked=True).select_related("player"))
-                    winner_gp = next((gp for gp in all_game_players if gp.winner), None)
-                    winner_seat = winner_gp.seat_order if winner_gp else -1
-                    if winner_seat == -1:
-                        print("Error: Winner's seat not found")
-                    else:
-                        if external_tournament_or_4p_tournament:
-                            # Increment the seat wins
-                            seat_wins_4pT[winner_seat] += 1
+                # Update the starting position (seat) data for the winner
+                winner_seat = winner_seats.get(game_id, -1)
+                if not isinstance(winner_seat, int) or not 0 <= winner_seat < playerCount:
+                    print("Error: Winner's seat not found")
+                elif external_tournament_or_4p_tournament:
+                    # Increment the seat wins
+                    seat_wins_4pT[winner_seat] += 1
 
-                            # Add the game ID to the corresponding seat's game IDs
-                            seat_wins_4pT_ids[winner_seat].append(game_id)
-                        else:
-                            # Increment the seat wins
-                            seat_wins_4p[winner_seat] += 1
+                    # Add the game ID to the corresponding seat's game IDs
+                    seat_wins_4pT_ids[winner_seat].append(game_id)
+                else:
+                    # Increment the seat wins
+                    seat_wins[winner_seat] += 1
 
-                            # Add the game ID to the corresponding seat's game IDs
-                            seat_wins_4p_ids[winner_seat].append(game_id)
+                    # Add the game ID to the corresponding seat's game IDs
+                    seat_wins_ids[winner_seat].append(game_id)
 
             else:
+
                 for spec in player_specs:
                     SPEC_LOST[spec[0]].append(game_id)
                 if num_specs == 0:
@@ -247,8 +256,8 @@ def analyze_games(player_count_index, schism_games=False, external_tournament_or
         SPEC_LOST,
         SPEC_WON,
         playerCount,
-        seat_wins_4p,
-        seat_wins_4p_ids,
+        seat_wins,
+        seat_wins_ids,
         seat_wins_4pT,
         seat_wins_4pT_ids,
         all_game_ids,
@@ -413,8 +422,8 @@ def generate_stats_data(schism_games=False):
             SPEC_LOST,
             SPEC_WON,
             playerCount,
-            seat_wins_4p,
-            seat_wins_4p_ids,
+            seat_wins,
+            seat_wins_ids,
             seat_wins_4pT,
             seat_wins_4pT_ids,
             all_game_ids,
@@ -438,15 +447,8 @@ def generate_stats_data(schism_games=False):
             "spec_stats": S_STATS_DATA,
         }
 
-        # Add seat win data only when playerCount is 4
-        position_titles = ["1st", "2nd", "3rd", "4th"]  # Titles for each seat
-        if playerCount == 4:
-            # player_data["seat_wins_4p"] = seat_wins_4p
-            # player_data["seat_wins_4p_ids"] = seat_wins_4p_ids
-            seat_data = []
-            for i in range(4):
-                seat_data.append([position_titles[i], seat_wins_4p[i], seat_wins_4p_ids[i]])  # Added title
-            player_data["seat_wins"] = seat_data
+        # Add seat win data for every player count
+        player_data["seat_wins"] = [[POSITION_TITLES[i], seat_wins[i], seat_wins_ids[i]] for i in range(playerCount)]  # Added title
 
         ALL_DATA["player_counts"][playerCount] = player_data
 
@@ -461,8 +463,8 @@ def generate_stats_data(schism_games=False):
         SPEC_LOST,
         SPEC_WON,
         playerCount,
-        seat_wins_4p,
-        seat_wins_4p_ids,
+        seat_wins,
+        seat_wins_ids,
         seat_wins_4pT,
         seat_wins_4pT_ids,
         all_game_ids,
@@ -492,12 +494,8 @@ def generate_stats_data(schism_games=False):
         "spec_stats": S_STATS_DATA,
     }
 
-    position_titles = ["1st", "2nd", "3rd", "4th"]  # Titles for each seat
-
-    seat_data = []
-    for i in range(4):
-        seat_data.append([position_titles[i], seat_wins_4pT[i], seat_wins_4pT_ids[i]])  # Added title
-    player_data["seat_wins"] = seat_data
+    # Tournament games are always 4p
+    player_data["seat_wins"] = [[POSITION_TITLES[i], seat_wins_4pT[i], seat_wins_4pT_ids[i]] for i in range(4)]  # Added title
 
     # player_data["seat_wins_4pT"] = seat_wins_4pT
     # player_data["seat_wins_4pT_ids"] = seat_wins_4pT_ids
@@ -508,6 +506,7 @@ def generate_stats_data(schism_games=False):
 
 
 # Generate regular stats
+
 ALL_DATA = generate_stats_data(schism_games=False)
 
 file_path = BASE_DIR / "TGZ" / "TGZstats" / "TGZ_stats.json"

@@ -28,9 +28,7 @@ app_name = ""
 urlpatterns = [
     path("", views.index, name="index"),
     path("index/<str:listType>/", views.indexListType, name="indexListType"),
-    path(
-        "indexSpecialRedirect/", views.indexSpecialRedirect, name="indexSpecialRedirect"
-    ),
+    path("indexSpecialRedirect/", views.indexSpecialRedirect, name="indexSpecialRedirect"),
     path("login/", views.login_view, name="myLogin"),
     path("logout/", views.logout_view, name="myLogout"),
     path("profile/", views.profile, name="profile"),
@@ -53,8 +51,18 @@ urlpatterns = [
     ),
     path("createHLCpage/", views.createHLCpage, name="createHLCpage"),
     path("createHLCpage/<int:gameID>/", views.createHLCpage, name="createHLCpage"),
+    path(
+        "createHLCminiTournament/",
+        views.createHLCminiTournament,
+        name="createHLCminiTournament",
+    ),
     path("createBUSpage/", views.createBUSpage, name="createBUSpage"),
     path("createBUSpage/<int:gameID>/", views.createBUSpage, name="createBUSpage"),
+    path(
+        "createBUSminiTournament/",
+        views.createBUSminiTournament,
+        name="createBUSminiTournament",
+    ),
     path("createTGZpage/", views.createTGZpage, name="createTGZpage"),
     path(
         "createTGZminiTournament/",
@@ -65,19 +73,53 @@ urlpatterns = [
     path("showTGZoptions/<int:gameID>/", views.showTGZoptions, name="showTGZoptions"),
     path("createCNSpage/", views.createCNSpage, name="createCNSpage"),
     path("createCNSpage/<int:gameID>/", views.createCNSpage, name="createCNSpage"),
+    path(
+        "createCNSminiTournament/",
+        views.createCNSminiTournament,
+        name="createCNSminiTournament",
+    ),
     path("createAQYpage/", views.createAQYpage, name="createAQYpage"),
     path("createAQYpage/<int:gameID>/", views.createAQYpage, name="createAQYpage"),
+    path(
+        "createAQYminiTournament/",
+        views.createAQYminiTournament,
+        name="createAQYminiTournament",
+    ),
     path("createINDpage/", views.createINDpage, name="createINDpage"),
     path("createINDpage2/", views.createINDpage2, name="createINDpage2"),
     path("createINDpage/<int:gameID>/", views.createINDpage, name="createINDpage"),
+    path(
+        "createINDminiTournament/",
+        views.createINDminiTournament,
+        name="createINDminiTournament",
+    ),
     path("createKFWpage/", views.createKFWpage, name="createKFWpage"),
     path("createKFWpage/<int:gameID>/", views.createKFWpage, name="createKFWpage"),
+    path(
+        "createKFWminiTournament/",
+        views.createKFWminiTournament,
+        name="createKFWminiTournament",
+    ),
     path("createWEBpage/", views.createWEBpage, name="createWEBpage"),
     path("createWEBpage/<int:gameID>/", views.createWEBpage, name="createWEBpage"),
+    path(
+        "createWEBminiTournament/",
+        views.createWEBminiTournament,
+        name="createWEBminiTournament",
+    ),
     path("createRNBpage/", views.createRNBpage, name="createRNBpage"),
     path("createRNBpage/<int:gameID>/", views.createRNBpage, name="createRNBpage"),
+    path(
+        "createRNBminiTournament/",
+        views.createRNBminiTournament,
+        name="createRNBminiTournament",
+    ),
     path("createRNBpage2/", views.createRNBpage2, name="createRNBpage2"),
     path("createRNBpage2/<int:gameID>/", views.createRNBpage2, name="createRNBpage2"),
+    path("createURRpage/", views.createURRpage, name="createURRpage"),
+    path("createURRpage/<int:gameID>/", views.createURRpage, name="createURRpage"),
+    path("createDDLpage/", views.createDDLpage, name="createDDLpage"),
+    path("createDDLpage/<int:gameID>/", views.createDDLpage, name="createDDLpage"),
     path("FCMmapEditor/", views.FCMmapEditor, name="FCMmapEditor"),
     path("TGZmapEditor/", views.TGZmapEditor, name="TGZmapEditor"),
     path("AQYmapEditor/", views.AQYmapEditor, name="AQYmapEditor"),
@@ -134,8 +176,8 @@ urlpatterns = [
     path("userStats/", views.userStats, name="userStats"),
     path("sendAdminMessage/", views.sendAdminMessage, name="sendAdminMessage"),
     # API Routes
-    path('discord/callback/', views.discord_callback, name='discord_callback'),
-    path('stop_discord_dms/', views.stop_discord_dms, name='stop_discord_dms'),
+    path("discord/callback/", views.discord_callback, name="discord_callback"),
+    path("stop_discord_dms/", views.stop_discord_dms, name="stop_discord_dms"),
     path(
         "join_discord/",
         RedirectView.as_view(url="https://discord.gg/hCU7Fr77yV", permanent=False),
@@ -145,14 +187,10 @@ urlpatterns = [
     path("addTGid/<int:TGid>", views.addTGid, name="addTGid"),
     path("nextGame", views.next_game_redirect, name="next_game"),
     path("join/<str:joinGameLink>/", views.joinGameLink, name="joinGameLink"),
-    path(
-        "autoCompleteUsername/", views.autoCompleteUsername, name="autoCompleteUsername"
-    ),
+    path("autoCompleteUsername/", views.autoCompleteUsername, name="autoCompleteUsername"),
     path("joinGame/<str:gameType>/", views.joinGame, name="joinGame"),
     path("deleteGame/<str:gameCode>/", views.deleteGame, name="deleteGame"),
-    path(
-        "addPlayerToMTinvites/", views.addPlayerToMTinvites, name="addPlayerToMTinvites"
-    ),
+    path("addPlayerToMTinvites/", views.addPlayerToMTinvites, name="addPlayerToMTinvites"),
     path("password_reset/", views.password_reset_request, name="password_reset"),
     path("testWebhook/", views.testWebhook, name="testWebhook"),
     path("blacklistPlayer/", views.blacklistPlayer, name="blacklistPlayer"),
@@ -164,9 +202,7 @@ urlpatterns = [
     path("setStopEmails/", views.setStopEmails),
     path("sendMTchatMessage/", views.sendMTchatMessage, name="sendMTchatMessage"),
     path("reloadMTchatData/", views.reloadMTchatData, name="reloadMTchatData"),
-    path(
-        "sendMainTchatMessage/", views.sendMainTchatMessage, name="sendMainTchatMessage"
-    ),
+    path("sendMainTchatMessage/", views.sendMainTchatMessage, name="sendMainTchatMessage"),
     path("reloadMainTchatData/", views.reloadMainTchatData, name="reloadMainTchatData"),
-    path('test-500-error/', views.trigger_500_error, name='test_500_error'),
+    path("test-500-error/", views.trigger_500_error, name="test_500_error"),
 ]

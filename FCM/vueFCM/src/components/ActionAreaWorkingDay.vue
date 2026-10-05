@@ -21,6 +21,27 @@ const personal = usePersonalStore()
 
 import { computed, watch, ref } from "vue"
 
+const temporarySelectedRoles = ref([])
+const temporaryWorkerActionLimit = computed(() => rules.temporaryWorkerActionCount(store.laborMarket.removedTemporaryWorkersAtTurnStart))
+
+function resetTemporaryWorkerSelection() {
+	temporarySelectedRoles.value = []
+}
+
+function addTemporaryWorkerRole(role) {
+	if (temporarySelectedRoles.value.length >= temporaryWorkerActionLimit.value) return
+	temporarySelectedRoles.value.push(role)
+}
+
+function removeTemporaryWorkerRole(index) {
+	temporarySelectedRoles.value.splice(index, 1)
+}
+
+function confirmTemporaryWorkerSelection() {
+	controller.chooseTemporaryWorkerRoles([...temporarySelectedRoles.value])
+	resetTemporaryWorkerSelection()
+}
+
 function undoHireEmployee(employee) {
 	const idx = store.context.justHired.indexOf(employee)
 	if (idx === -1) return
@@ -45,9 +66,11 @@ function lobbyItemHeight(item) {
 // MARKETING
 
 const computedAvailableMarketers = computed(() => {
-	const marketers = controller.currentPlayerObj().employees.filter((employee) => rf.MARKETERS.includes(employee))
+	const marketers = controller.currentPlayerObj().employees.filter((employee) => rf.MARKETERS.includes(employee)).map((employee) => ({ employee, temporary: false }))
+	const temporaryCount = rules.temporaryWorkerRemainingActions(controller.currentPlayerIndex(), rf.MARKETING_TRAINEE)
+	marketers.push(...Array.from({ length: temporaryCount }, () => ({ employee: rf.MARKETING_TRAINEE, temporary: true })))
 	// Mass Marketeers are sent automatically
-	return funcs.removeItemAll(marketers, rf.MASS_MARKETEER)
+	return marketers.filter((entry) => entry.employee !== rf.MASS_MARKETEER)
 })
 
 const computedTrainableOptions = computed(() => {
@@ -83,6 +106,12 @@ const computedTrainableOptions = computed(() => {
 })
 
 const computedTrainingData = computed(() => rules.getTrainingPoints(controller.currentPlayerIndex(), store.context.justTrained))
+
+const computedHeadhuntTargets = computed(() => rules.getHeadhuntTargets(controller.currentPlayerIndex()))
+const computedRemainingHeadhunters = computed(() => {
+	const total = controller.currentPlayerObj().employees.filter((employee) => employee === rf.HEADHUNTER).length
+	return Math.max(0, total - store.context.headhunterActionsUsed)
+})
 
 const eodCurrentSalary = computed(() => rules.salary(controller.currentPlayerIndex()))
 const eodPlayerMoney = computed(() => controller.currentPlayerObj().money)
@@ -219,32 +248,31 @@ watch(
 )
 
 const computedProducers = computed(() => {
-	const playerObj = controller.currentPlayerObj()
-
-	// 1. Filter original producers
-	let producers = playerObj.employees.filter((employee) => rf.PRODUCERS.includes(employee))
-
-	// 2. Add Night Shift bonuses
-	if (playerObj.employees.includes(rf.NIGHT_SHIFT_MANAGER)) {
-		const bonuses = producers.filter((e) => e === rf.ERRAND_BOY || e === rf.KITCHEN_TRAINEE || e === rf.BARISTA_TRAINEE)
-		producers = [...producers, ...bonuses]
-	}
-
-	// 3. Remove employees that just produced
-	if (store.context.justProduced.team.length > 0) {
-		store.context.justProduced.team.forEach((e) => {
-			const index = producers.indexOf(e)
-			if (index !== -1) {
-				producers.splice(index, 1)
-			}
-		})
-	}
-
-	return producers
+	return rules.availableProducers(controller.currentPlayerIndex(), store.context.justProduced.team)
 })
 </script>
 
 <template>
+	<!-- Temporary Worker choice, before hiring -->
+	<template v-if="store.gameflow.subphase === rf.SUBPHASE_TEMPORARY_WORKER">
+		<div>
+			<p>{{ $t("workingDay.chooseTemporaryWorker", { count: temporaryWorkerActionLimit }) }}</p>
+			<div v-if="temporarySelectedRoles.length > 0" class="reminder hiredLine">
+				<p>{{ $t("workingDay.temporaryWorkerSelected", { selected: temporarySelectedRoles.length, count: temporaryWorkerActionLimit }) }}</p>
+				<div v-for="(employee, index) in temporarySelectedRoles" :key="`${employee}-${index}`" class="cardSummaryDiv selectable" :title="$t('workingDay.clickToRemoveTemporaryWorker')" @click="removeTemporaryWorkerRole(index)">
+					<img :src="view.getImage(`emp_${employee}`)" class="cardImg" :alt="rf.employeeName(employee)" />
+				</div>
+			</div>
+			<div class="allHireableEmployeesDiv">
+				<div v-for="employee in rf.TEMPORARY_WORKER_ROLES" :key="employee" class="cardChoiceDiv selectable" :class="{ selectedChoice: temporarySelectedRoles.includes(employee) }" @click="addTemporaryWorkerRole(employee)">
+					<img :src="view.getImage(`emp_${employee}`)" class="cardImg" :alt="rf.employeeName(employee)" />
+				</div>
+			</div>
+			<button class="actionsLineButton resetWorkingDayButton" @click="resetTemporaryWorkerSelection">{{ $t("workingDay.resetTemporaryWorker") }}</button>
+			<button class="actionsLineButton" @click="confirmTemporaryWorkerSelection">{{ $t("workingDay.confirmTemporaryWorker") }}</button>
+		</div>
+	</template>
+
 	<!-- Hiring Subphase -->
 	<template v-if="store.gameflow.subphase === rf.SUBPHASE_HIRING">
 		<div>
@@ -307,6 +335,7 @@ const computedProducers = computed(() => {
 			</template>
 
 			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWorkingDay") }}</button>
+			<button v-if="store.startingOptions.laborMarket" class="actionsLineButton" @click="controller.resetHiringSubphase()">{{ $t("workingDay.resetRecruiting") }}</button>
 			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ $t("workingDay.finishRecruiting") }}</button>
 		</div>
 	</template>
@@ -433,6 +462,36 @@ const computedProducers = computed(() => {
 		</div>
 	</template>
 
+	<!-- Headhunter Subphase -->
+	<template v-if="store.gameflow.subphase === rf.SUBPHASE_HEADHUNTING">
+		<div>
+			<p>{{ $t("workingDay.headhunterIntro", { count: computedRemainingHeadhunters }) }}</p>
+			<div v-if="computedRemainingHeadhunters > 0 && computedHeadhuntTargets.length > 0" class="allHireableEmployeesDiv">
+				<div
+					v-for="target in computedHeadhuntTargets"
+					:key="`${target.owner}-${target.beachIndex}-${target.employee}`"
+					class="cardChoiceDiv headhuntTargetCard selectable"
+					:aria-label="$t('workingDay.headhuntTargetLabel', { employee: rf.employeeName(target.employee), player: store.players[target.owner].displayName, amount: target.cost })"
+					@click="controller.headhuntEmployee(controller.currentPlayerIndex(), target.owner, target.beachIndex)"
+				>
+					<img :src="view.getImage(`emp_${target.employee}`)" class="cardImg" :alt="rf.employeeName(target.employee)" />
+					<div class="headhuntTargetDetails">
+						<strong>{{ $t("workingDay.headhuntFrom", { player: store.players[target.owner].displayName }) }}</strong>
+						<span>L{{ target.level }} · {{ $t("workingDay.headhuntSalary", { amount: target.cost }) }}</span>
+					</div>
+				</div>
+			</div>
+			<p v-else-if="computedRemainingHeadhunters > 0">{{ $t("workingDay.noHeadhuntTargets") }}</p>
+			<div v-if="store.context.justHeadhunted.length > 0" class="reminder">
+				<p>{{ $t("workingDay.headhuntedLabel") }}</p>
+				<img v-for="(entry, idx) in store.context.justHeadhunted" :key="idx" :src="view.getImage(`emp_${entry.employee}`)" class="cardImg" :alt="rf.employeeName(entry.employee)" />
+			</div>
+			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
+			<button class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.reset") }}</button>
+			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ $t("workingDay.finishHeadhunting") }}</button>
+		</div>
+	</template>
+
 	<!-- Marketing Subphase -->
 	<template v-if="store.gameflow.subphase === rf.SUBPHASE_MARKETING">
 		<!-- Freeway Placement (after Rural Marketeer campaign) -->
@@ -450,8 +509,9 @@ const computedProducers = computed(() => {
 			<template v-if="computedAvailableMarketers.length > 0">
 				<p>{{ $t("workingDay.selectMarketeer") }}</p>
 				<div class="allHireableEmployeesDiv">
-					<div v-for="employee in computedAvailableMarketers" :key="employee" class="cardChoiceDiv selectable" @click="controller.selectMarketer(employee)">
-						<img :src="view.getImage(`emp_${employee}`)" class="cardImg" :alt="rf.employeeName(employee)" />
+					<div v-for="(entry, index) in computedAvailableMarketers" :key="`${entry.employee}-${entry.temporary}-${index}`" class="cardChoiceDiv selectable" @click="controller.selectMarketer(entry.employee, false, entry.temporary)">
+						<img :src="view.getImage(`emp_${entry.employee}`)" class="cardImg" :alt="rf.employeeName(entry.employee)" />
+						<span v-if="entry.temporary">{{ $t("workingDay.temporaryAction") }}</span>
 					</div>
 				</div>
 			</template>
@@ -972,6 +1032,40 @@ const computedProducers = computed(() => {
 	margin: 5px;
 	display: inline-block;
 	overflow: hidden;
+}
+
+.headhuntTargetCard {
+	height: auto;
+	min-height: 315px;
+	display: inline-flex;
+	flex-direction: column;
+	vertical-align: top;
+}
+
+.headhuntTargetCard > .cardImg {
+	height: 250px;
+	flex: 0 0 250px;
+}
+
+.headhuntTargetDetails {
+	box-sizing: border-box;
+	min-height: 57px;
+	padding: 5px 6px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 2px;
+	background-color: #f2f2f2;
+	color: #111;
+	font-size: 13px;
+	line-height: 1.15;
+	text-align: center;
+	overflow-wrap: anywhere;
+}
+
+.headhuntTargetDetails strong,
+.headhuntTargetDetails span {
+	display: block;
 }
 
 /** PRODUCE */

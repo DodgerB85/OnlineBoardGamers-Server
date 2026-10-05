@@ -38,6 +38,10 @@ if TYPE_CHECKING:
     from Lobby.presenters import FCMpresenter
 
 FCMsuperUsers = ["BotKickStarter"]
+# Accounts allowed to drive developer tooling. Same set the gameAdmin views gate
+# on - kept here so the "Reset AI" board-replacement path cannot be reached by an
+# ordinary player's save.
+FCMadminUsers = ["admin", "DodgerB"]
 USE_NEW_CODE = False
 
 logger = logging.getLogger(__name__)
@@ -64,8 +68,39 @@ def FCMchinaHelp(request):
     return render(request, "FCM/FCMchinaHelp.html")
 
 
+# Interactive tutorial. Deliberately does NOT touch the DB: the game is built
+# entirely in the browser by the Vue app, so nothing here is ever persisted and
+# the game never appears in the lobby. Login is not required.
+#   SO_STRICT_PAYDAY_FRIDGE (101) + SO_TRAINING_GAME (102) makes it hotseat and
+#   resolves Payday/Clean-up client-side, the same combo real Practice games use.
+TUTORIAL_STARTING_MAP = [11, 0, 18, 0, 8, 0, 1, 0, 6, 0, 0, 3, 9, 2, 4, 0, 10, 2]
+TUTORIAL_STARTING_OPTIONS = [
+    rfFCM.SO_STRICT_PAYDAY_FRIDGE,
+    rf.SO_TRAINING_GAME,
+]
+
+
+def tutorial(request):
+    return render(
+        request,
+        "FCM/showFCMgameTutorial.html",
+        {
+            "tutorial": True,
+            "tutorName": "FcmTutor",
+            "playerName": request.user.username if request.user.is_authenticated else "You",
+            "startingMap": TUTORIAL_STARTING_MAP,
+            "startingOptions": TUTORIAL_STARTING_OPTIONS,
+            "settingsDebug": config("FCM_USE_SOURCE_CODE", default=False, cast=bool),
+        },
+    )
+
+
 def coffeeHelp(request):
     return render(request, "FCM/coffeeHelp.html")
+
+
+def fanExpansionsHelp(request):
+    return render(request, "FCM/fanExpansionsHelp.html")
 
 
 @login_required
@@ -354,7 +389,7 @@ def showGame(request, game_id):
     )
 
 
-def showGameVue(request, game_id):
+def showGameVue(request, game_id, spoilerFree=False, replayStep=1):
     result = build_show_game_data(
         request,
         game_id,
@@ -401,6 +436,8 @@ def showGameVue(request, game_id):
                 "preferredColour": -1,
                 "OOBpreference": OOBpreference,
                 "moveData": "",
+                "spoilerFree": spoilerFree,
+                "replayStep": replayStep,
             }
         )
         return render(request, "FCM/showFCMgame.html", returnData)
@@ -544,6 +581,8 @@ def showGameVue(request, game_id):
             "statsExcludeVotesData": result["base_data"]["statsExcludeVotesData"],
             "deleteVotesData": result["base_data"]["deleteVotesData"],
             "settingsDebug": result["base_data"]["settingsDebug"],
+            "spoilerFree": spoilerFree,
+            "replayStep": replayStep,
         },
     )
 
@@ -656,7 +695,7 @@ def _processTurn(request):
             currentPlayersArr.append(request.user.username)  # This updates the list directly
             presenter.setCurrentPlayersFromArrInTurnOrder(currentPlayersArr)
         currentGame.save()
-        return JsonResponse({"unlockStatus": True}, safe=False)
+        return JsonResponse({"unlockStatus": True, "latestUpdate": currentGame.latestUpdate}, safe=False)
 
     # save OOB preference
     elif jsonData["action"] == "saveOOBpreference":
@@ -888,7 +927,14 @@ def _processTurn(request):
         if currentGame.gameStatus == "FINISHED":
             return JsonResponse({"syncError": True}, safe=False)
 
-        if "mapTiles" in jsonData and jsonData["mapTiles"] and currentGame.startingMap != "":
+        # Developer "Reset AI" rebuilds the game on a brand new board. The map
+        # sync check below exists to catch a client whose map has silently drifted
+        # from the server's, so it rightly rejects a different map - but a
+        # deliberate reset has to be able to replace startingMap, so it carries its
+        # own flag and is restricted to admin accounts.
+        isGameReset = bool(jsonData.get("resetGame")) and (request.user.username in FCMsuperUsers or request.user.username in FCMadminUsers)
+
+        if "mapTiles" in jsonData and jsonData["mapTiles"] and currentGame.startingMap != "" and not isGameReset:
             incomingTiles = jsonData["mapTiles"]
             currentTiles = json.loads(currentGame.startingMap)
             if len(incomingTiles) != len(currentTiles):
@@ -916,7 +962,7 @@ def _processTurn(request):
                         safe=False,
                     )
 
-        if "mapTiles" in jsonData and jsonData["mapTiles"] and currentGame.startingMap == "":
+        if "mapTiles" in jsonData and jsonData["mapTiles"] and (currentGame.startingMap == "" or isGameReset):
             currentGame.startingMap = json.dumps(jsonData["mapTiles"], separators=(",", ":"))
 
         nameToUse = request.user.username
@@ -927,11 +973,23 @@ def _processTurn(request):
                 nameToUse = name_parts[1] if len(name_parts) > 1 else nameToUse
 
         # Before updating the gameData, we need to make sure the latest is
-        # saved into the rewind stack
+        # saved into the rewind stack. saveRewind=False means this save must not
+        # create a rewind point AT ALL - this append used to be unconditional, so
+        # every save pushed a rewind point and the flag below only ever added a
+        # second one. That defeated the flag for FcmAI turns, where the state
+        # saved is the start of the AI's own turn: nothing a human can act on, and
+        # it burns one of the 20 slots. Callers passing False are the kickout /
+        # resign / reset paths, which already clear or ignore the stack.
         currentRewindDataArray = load_rewind_data(currentGame)
-        oldData = currentGame.gameData
-        if len(currentRewindDataArray) == 0 or currentRewindDataArray[-1] != oldData:
-            currentRewindDataArray.append(oldData)
+        if isGameReset:
+            # Rewind points belong to the game being thrown away - leaving them
+            # would let a rewind restore it.
+            currentRewindDataArray = []
+            currentGame.rewindTempData = ""
+        if jsonData["saveRewind"]:
+            oldData = currentGame.gameData
+            if len(currentRewindDataArray) == 0 or currentRewindDataArray[-1] != oldData:
+                currentRewindDataArray.append(oldData)
         # NB: rewindData is serialized later (before the single final save)
 
         currentGame.gameData = jsonData["gameData"]
@@ -1097,32 +1155,16 @@ def _processTurn(request):
             currentGame.rewindTempData = ""
 
         if jsonData["saveRewind"]:  # and not jsonData["IPM"]:  # and jsonData["phase"] != 9:
-            # If tempData isn't already onthe end, AND isn't the same as currentGameData then add it on, and wipe the temp storage
-            # if len(currentGame.rewindTempData) > 0:
-            #    if (
-            #        currentRewindDataArray[-1] != currentGame.rewindTempData
-            #        and jsonData["gameData"] != currentGame.rewindTempData
-            #    ):
-            #        # add to RWdata and RWdata[]
-            #        currentRewindData = (
-            #            currentRewindData + "'SPLIT'" + currentGame.rewindTempData
-            #        )
-            #        currentRewindDataArray.append(currentGame.rewindTempData)
-            #
-            #    currentGame.rewindTempData = ""
-
-            # If no rewind data, then start it with this data
-            if len(currentRewindDataArray) == 0:
-                currentRewindDataArray = [currentGame.gameData]
-            else:
-                # else check last one isn't same as cufrent, and if not then add
-                if currentRewindDataArray[-1] != currentGame.gameData:
-                    currentRewindDataArray.append(currentGame.gameData)
-                    # Limit to 20 rewind points by removing oldest
-                    while len(currentRewindDataArray) > 20:
-                        currentRewindDataArray.pop(0)
-                # MAYBE ADD AN INDENT TO THIS LINE????
-                # currentRewindData = json.dumps(currentRewindDataArray)
+            # The PRE-save state was already pushed above, under this same flag.
+            # This block used to push again - but currentGame.gameData was
+            # reassigned to jsonData["gameData"] above, so what it appended was
+            # the POST-save state, i.e. the start of the NEXT player's turn. That
+            # second point is what a rewind lands on: place a restaurant, rewind,
+            # and you arrive on FcmAI's turn. One save, one rewind point - the
+            # state the mover started their turn from. Trim to the cap here, since
+            # this was the only place it was applied.
+            while len(currentRewindDataArray) > 20:
+                currentRewindDataArray.pop(0)
 
         currentGame.rewindData = json.dumps(currentRewindDataArray, separators=(",", ":"))
 
@@ -1136,8 +1178,11 @@ def _processTurn(request):
                 jsonData["tournamentData"],
                 jsonData["gameID"],
             )
-
-        presenter.removeSingleRewindPermission()
+        else:
+            # A rewind downgrades any single-permission grants. This must NOT run
+            # after endGame: it re-creates the activeVotes that endGame just
+            # cleared, leaving a finished game with live-looking vote data.
+            presenter.removeSingleRewindPermission()
 
         currentGame.save()
 
@@ -1524,7 +1569,10 @@ def _processTurn(request):
 
         currentGame.rewindData = json.dumps(currentRewindDataArray, separators=(",", ":"))
 
-        if jsonData["RSRP"]:
+        # NB .get(), not ["RSRP"]: this is an optional flag, and a client that omits it
+        # (stale cached bundle, or a hand-rolled POST) used to 500 the whole endpoint.
+        # Absent means "not set", same as False - do not touch the consent votes.
+        if jsonData.get("RSRP"):
             presenter.removeSingleRewindPermission()
 
         presenter.clearAllMoveDataV2()
@@ -1835,8 +1883,13 @@ def gameAdminGetMoveData(request):
         return JsonResponse({"error": "Wrong request."}, status=400)
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
-
     jsonData = json.loads(request.body)
+
+    # JSON.stringify omits keys whose value is undefined, so a client that lost
+    # its latestUpdate posts no key at all. Default it so the sync checks below
+    # reject cleanly (syncError -> refresh) instead of KeyError -> 500.
+    jsonData.setdefault("latestUpdate", None)
+
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="FCM")
     except Game.DoesNotExist:
@@ -1931,6 +1984,7 @@ def FCMdata(request, dataType):
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "specialData": specialData,
                 "latestUpdate": currentGame.latestUpdate,
+                "startingMap": currentGame.startingMap if currentGame.startingMap else [],
             },
             safe=False,
         )

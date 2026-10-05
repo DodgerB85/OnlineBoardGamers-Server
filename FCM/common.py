@@ -20,6 +20,21 @@ from . import FCMconstants as rfFCM
 if TYPE_CHECKING:
     from Lobby.presenters import FCMpresenter
 
+# Options that make a game non-standard enough to exclude from stats
+# (Chinese expansion + the custom mods). Checked at create time for both
+# normal games and tournaments; random-pool Chinese modules are decided
+# later in FCMpresenter.startGame after the roll.
+STATS_EXCLUDED_OPTIONS = [
+    rfFCM.SO_JAZZ_MUSICIANS,
+    rfFCM.SO_DUMPLINGS,
+    rfFCM.SO_DELIVERY_DRIVERS,
+    rfFCM.SO_HAWKERS,
+    rfFCM.SO_FRIED_CHICKEN,
+    rfFCM.SO_STADIUM,
+    rfFCM.SO_LABOR_MARKET,
+    rfFCM.SO_SECOND_BAILOUT,
+]
+
 
 def buildFCMstartingOptions(post_data):
     """Builds the starting options string for FCM games from POST data.
@@ -96,6 +111,10 @@ def buildFCMstartingOptions(post_data):
         "dumplings",
         "deliveryDrivers",
         "hawkers",
+        "friedChicken",
+        "stadium",
+        "laborMarket",
+        "secondBailout",
         "allowRewind",
     ]
     optionsArr.extend(int(post_data[opt]) for opt in option_names if opt in post_data)
@@ -183,17 +202,9 @@ def create_fcm_game(
 
         game_status = "ACTIVE"
 
-        # Now exclude stats if any china expansion is in starting options
-        # Split the string into a list
-        if any(
-            x in starting_options
-            for x in [
-                rfFCM.SO_JAZZ_MUSICIANS,
-                rfFCM.SO_DUMPLINGS,
-                rfFCM.SO_DELIVERY_DRIVERS,
-                rfFCM.SO_HAWKERS,
-            ]
-        ):
+        # Now exclude stats if any stats-excluding option is in the
+        # tournament's starting options
+        if any(x in starting_options for x in STATS_EXCLUDED_OPTIONS):
             stats_excluded_game = True
 
         all_players = [
@@ -257,18 +268,10 @@ def create_fcm_game(
         starting_options = buildFCMstartingOptions(
             request.POST
         )  # Use the extracted function
-        # Exclude stats if Chinese expansion modules are always enabled
-        # (picked individually, not via the random pool). Random-pool Chinese
-        # modules are decided in FCMpresenter.startGame after the roll.
-        if any(
-            x in starting_options
-            for x in [
-                rfFCM.SO_JAZZ_MUSICIANS,
-                rfFCM.SO_DUMPLINGS,
-                rfFCM.SO_DELIVERY_DRIVERS,
-                rfFCM.SO_HAWKERS,
-            ]
-        ):
+        # Exclude stats if Chinese expansion / custom modules are always
+        # enabled (picked individually, not via the random pool). Random-pool
+        # Chinese modules are decided in FCMpresenter.startGame after the roll.
+        if any(x in starting_options for x in STATS_EXCLUDED_OPTIONS):
             stats_excluded_game = True
         game_pace = request.POST["pace"]
         creator = request.user

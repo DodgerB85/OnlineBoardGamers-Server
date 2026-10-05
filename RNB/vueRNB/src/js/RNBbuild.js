@@ -44,13 +44,31 @@ export function setEligibleItemsToBuild(playerIndex, transporterID) {
 
 	// Is bridge building possible
 	if (stoneOnHex > 0) {
-		for (let i = 0; i < hexObj.bridges.length; i++) {
-			const bridge = hexObj.bridges[i]
-			if (!util.includesArray(hexObj.builtBridges, bridge) && (reachableVertexes.includes(bridge[0]) || reachableVertexes.includes(bridge[1]))) {
-				if (!store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_BRIDGE)) store.context.eligibleBuildingsToBuild.push(rf.BLDG_PSEUDO_BRIDGE)
-				break
+		let bridgeOptionExists = false
+		if (hexObj.hexTerrainID === rf.CITY) {
+			// CITY: centre bridge on plain sides, one per bank on river sides
+			// (never the centre bridge on a river side, never towards sea/void)
+			bridgeOptionExists = map.getCityBridgeOptions(hexID).length > 0
+		} else {
+			for (let i = 0; i < hexObj.bridges.length; i++) {
+				const bridge = hexObj.bridges[i]
+				if (!util.includesArray(hexObj.builtBridges, bridge) && (reachableVertexes.includes(bridge[0]) || reachableVertexes.includes(bridge[1]))) {
+					bridgeOptionExists = true
+					break
+				}
 			}
 		}
+		// CITY: the moat bridge of a neighbouring city can also be built from here
+		// (bridge only - the road to/from a city needs the bridge built first)
+		if (!bridgeOptionExists && map.getCityBridgesBuildableFrom(hexID, bucketIds).length > 0) bridgeOptionExists = true
+		if (bridgeOptionExists && !store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_BRIDGE)) store.context.eligibleBuildingsToBuild.push(rf.BLDG_PSEUDO_BRIDGE)
+	}
+
+	// CITY: Road & Bridge (costs 2 stone - a bridge over the moat + the road).
+	// From a neighbouring city, or from the city itself out to a neighbouring hex.
+	const cityRoadBridges = hexObj.hexTerrainID === rf.CITY ? map.getEligibleCityExitBridges(hexID) : map.getEligibleCityNeighbourBridges(hexID, bucketIds)
+	if (stoneOnHex >= 2 && cityRoadBridges.length > 0) {
+		if (!store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_ROAD_BRIDGE)) store.context.eligibleBuildingsToBuild.push(rf.BLDG_PSEUDO_ROAD_BRIDGE)
 	}
 
 	// Is wall build/demolish possible
@@ -86,28 +104,23 @@ export function setEligibleItemsToBuild(playerIndex, transporterID) {
 			if (eitherIsPolder && (hex1IsPolder && hex2IsPolder)) continue
 			if (eitherIsPolder && (hex1IsSea || hex2IsSea)) continue
 
-			// Polder cost modifier: +2 stone/boards when building from/demolishing from a polder
-			let polderCostModifier = 0
-			if (store.gameOptions.usePolders && eitherIsPolder) polderCostModifier = 2
+			// CITY: on a city tile, walls may only be BUILT on sides that already have a
+			// bridge and road crossing the moat (demolition is unaffected)
+			const cityWallSideOK = hexObj.hexTerrainID !== rf.CITY || map.cityEdgeHasBridgeAndRoad(hexID, edgeEntry)
 
 			// If you own it or it's neutral, and you have level+1 stones, you can build there
-			if (!ownedByOpponent && stoneOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater + polderCostModifier) {
+			if (!ownedByOpponent && cityWallSideOK && stoneOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater) {
 				if (!store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_WALL)) store.context.eligibleBuildingsToBuild.push(rf.BLDG_PSEUDO_WALL)
 			}
 			// If you don't own it,you need 1+level boards to demolish
-			else if (ownedByOpponent && boardsOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater + polderCostModifier) {
+			else if (ownedByOpponent && boardsOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater) {
 				if (!store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_DEMOLISH_WALL)) store.context.eligibleBuildingsToBuild.push(rf.BLDG_PSEUDO_DEMOLISH_WALL)
 			}
 		}
 	}
 
-	// Bomb pseudo-building: need bombs enabled, a bomb on the hex, and a non-strengthened building on the hex
-	if (store.gameOptions.useBombs && resourceOnHex[rf.RES_BOMB] > 0) {
-		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
-		if (buildingsOnHex.some((b) => !b.strengthened)) {
-			if (!store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_BOMB)) store.context.eligibleBuildingsToBuild.push(rf.BLDG_PSEUDO_BOMB)
-		}
-	}
+	// Bombing is done via the bomb bubble on the transporter (see MapArea.vue), not a
+	// building option. Strengthening remains a pseudo-building option below.
 
 	// Strengthen pseudo-building: need bombs enabled, stone on hex, and a non-strengthened building on the hex
 	if (store.gameOptions.useBombs && stoneOnHex >= 1) {
@@ -129,7 +142,7 @@ export function getEligibleMainBuildingsToBuildWithTransporterID(transporterID) 
 	let buildingsOnTile = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
 
 	// Don't return early if no space - need to return other data, plus possibility of new shaft
-	const maxBuildings = hexObj.terrainID === rf.CITY ? 2 : 1
+	const maxBuildings = hexObj.hexTerrainID === rf.CITY ? 2 : 1
 	const spaceForBuilding = buildingsOnTile.length < maxBuildings
 
 	if (hexID < 0) {

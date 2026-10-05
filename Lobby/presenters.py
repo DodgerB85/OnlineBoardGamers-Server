@@ -120,6 +120,8 @@ class GamePresenter:
             "KFW": "Kfw",
             "WEB": "Web",
             "RNB": "Rnb",
+            "URR": "Urr",
+            "DDL": "Ddl",
             "BOB": "Bob",
         }
         prefix = game_code_map.get(self.gameObj.gameCode, "")
@@ -400,6 +402,13 @@ class GamePresenter:
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = None  # Check this doesn't crash game load if game ended
         self.gameObj.transactionID = ""
 
+        # Per-player scratch state. Unlike the Game fields above, which the caller
+        # saves, nothing else writes GamePlayer once the game is over, so this has
+        # to hit the DB here. Leaving moveDataJSON behind is not harmless: the RNB
+        # client's kickstart-recovery block replays allStackData on load, so stale
+        # moves can be re-applied to an already-finished game.
+        self.gameObj.players.update(moveDataJSON=None, currentMoveTime="", currentMoveData="")
+
     def sendInviteNotifications(self, playerNames, _gameName, _maxPlayers, _gameCode):
         from django_q.tasks import async_task
 
@@ -467,6 +476,13 @@ class GamePresenter:
         Saves a specific choice for a user.
         Example: topic='rewind', choice=2
         """
+        # Rewind consent and kickout votes only mean anything while the game is
+        # live. Rejecting them here stops a late vote - a stale browser tab, or an
+        # AI bot still looping - from re-creating the activeVotes that endGame
+        # clears. Delete / stats-exclude votes are still legal once finished.
+        if self.gameObj.gameStatus == "FINISHED" and topic in (rf.REWIND_CONSENT_VOTE_TOPIC, rf.KICKOUT_VOTE_TOPIC):
+            return False
+
         # Double check player is in the game - WAIT FOR ALL PLAYERS TO MOVE HERE
         # if playerName not in [p.username for p in self.allPlayers.all()]:
         #    return False  # Player not in the game
@@ -1803,6 +1819,149 @@ class RNBpresenter(GamePresenter):
         return jsonResponse
 
 
+class URRpresenter(GamePresenter):
+    def startGame(self, request):
+        from Lobby.models import GamePlayer
+
+        self.gameObj.gameStatus = "ACTIVE"
+
+        game_players = list(self.gameObj.players.exclude(is_kicked=True))
+
+        random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)
+
+        for idx, gp in enumerate(game_players):
+            gp.seat_order = idx
+            gp.is_current = idx == 0
+
+        self.gameObj.serverCurrentPlayerNamesInTurnOrder = [gp.player.username for gp in game_players if gp.player]
+
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+        self.gameObj.save()
+
+        if not self.gameObj.players.filter(player__username="SHADOW").exists():
+            playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
+            self._sendStartGameNotification(request, playerListToNotify)
+
+    def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
+        from django_q.tasks import async_task
+
+        from Lobby.models import User
+        from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
+
+        self.clearGeneralDataOnGameEndWithoutSave()
+
+        winner_user = User.objects.get(username=_winnerUsername)
+        winner_gp = self.gameObj.players.filter(player=winner_user).first()
+        if winner_gp:
+            winner_gp.winner = True
+            winner_gp.save()
+
+        self.gameObj.save()
+        self.markPlayersPendingFinish(request)
+
+        # _finalPositions is an array of seat indexes
+        finalPositionsArr = []
+        for seatPos in _finalPositions:
+            finalPositionsArr.append(self.getAllPlayersOrderedySeatInArray()[seatPos])
+
+        convertedFinalPositions = []
+        for pos, username in enumerate(finalPositionsArr):
+            if pos == 0:
+                posText = "1st - Congratulations!"
+            elif pos == 1:
+                posText = "2nd"
+            elif pos == 2:
+                posText = "3rd"
+            elif pos == 3:
+                posText = "4th"
+            elif pos == 4:
+                posText = "5th"
+            elif pos == 5:
+                posText = "6th"
+            else:
+                posText = "Last"
+            convertedFinalPositions.append([username, posText, pos])
+
+        if not self.gameObj.players.filter(player__username="SHADOW").exists() and self.gameObj.maxPlayers > 1:
+            async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "URR", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
+
+            if self.gameObj.relatedMainTournament:
+                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMainTournament, self.gameObj, [_winnerUsername], _tournamentData)
+            if self.gameObj.relatedMiniTournament:
+                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMiniTournament, self.gameObj, [_winnerUsername], _tournamentData)
+
+
+class DDLpresenter(GamePresenter):
+    def startGame(self, request):
+        from Lobby.models import GamePlayer
+
+        self.gameObj.gameStatus = "ACTIVE"
+
+        game_players = list(self.gameObj.players.exclude(is_kicked=True))
+
+        random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)
+
+        for idx, gp in enumerate(game_players):
+            gp.seat_order = idx
+            gp.is_current = idx == 0
+
+        self.gameObj.serverCurrentPlayerNamesInTurnOrder = [gp.player.username for gp in game_players if gp.player]
+
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+        self.gameObj.save()
+
+        if not self.gameObj.players.filter(player__username="SHADOW").exists():
+            playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
+            self._sendStartGameNotification(request, playerListToNotify)
+
+    def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
+        from django_q.tasks import async_task
+
+        from Lobby.models import User
+        from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
+
+        self.clearGeneralDataOnGameEndWithoutSave()
+
+        winner_user = User.objects.get(username=_winnerUsername)
+        winner_gp = self.gameObj.players.filter(player=winner_user).first()
+        if winner_gp:
+            winner_gp.winner = True
+            winner_gp.save()
+
+        self.gameObj.save()
+        self.markPlayersPendingFinish(request)
+
+        finalPositionsArr = []
+        for seatPos in _finalPositions:
+            finalPositionsArr.append(self.getAllPlayersOrderedySeatInArray()[seatPos])
+
+        convertedFinalPositions = []
+        for pos, username in enumerate(finalPositionsArr):
+            if pos == 0:
+                posText = "1st - Congratulations!"
+            elif pos == 1:
+                posText = "2nd"
+            elif pos == 2:
+                posText = "3rd"
+            elif pos == 3:
+                posText = "4th"
+            elif pos == 4:
+                posText = "5th"
+            elif pos == 5:
+                posText = "6th"
+            else:
+                posText = "Last"
+            convertedFinalPositions.append([username, posText, pos])
+
+        if not self.gameObj.players.filter(player__username="SHADOW").exists() and self.gameObj.maxPlayers > 1:
+            async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "DDL", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
+
+            if self.gameObj.relatedMainTournament:
+                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMainTournament, self.gameObj, [_winnerUsername], _tournamentData)
+            if self.gameObj.relatedMiniTournament:
+                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMiniTournament, self.gameObj, [_winnerUsername], _tournamentData)
+
+
 class FCMpresenter(GamePresenter):
     def startGame(self, request):
         from Lobby.models import GamePlayer
@@ -2062,9 +2221,15 @@ class FCMpresenter(GamePresenter):
         if moveArr[3] == []:
             return False
 
-        # Res card is single array of length one, containing 1,2,or 3
+        # Res card is a single array of length one containing 1/2/3, or 9 (RES_CARD_NONE = no card).
+        # A bare -1 / [-1] is the client's "not chosen yet" placeholder: not a completed move,
+        # but not corrupt data either, so it must not raise an admin error.
         if phase <= rfFCM.PHASE_SETUP_RESERVE:
             data = moveArr[3]
+            if data in (-1, [-1]):
+                return False
+            if data in (9, [9]):
+                return True
             if not isinstance(data, list) or len(data) != 1 or data[0] not in [1, 2, 3]:
                 message = f"BAD MOVE DATA - PHASE ERROR - isThisValidActualMoveArrForPhase2 - GameID: {self.gameObj.id} - self.phase: {self.gameObj.phase} - input phase: {phase} -- moveArr: {moveArr}"
                 SN_sendAdminErrorMessage(message)
@@ -2935,6 +3100,8 @@ class KFWpresenter(GamePresenter):
     #####################################################################
 
     def anyMoveData(self):
+        if self.gameObj.KFWplayersMoveData == "":
+            return False
         playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
         return any(playerMoveData[2] != "" for playerMoveData in playersMoveDataArr)
 
@@ -3072,10 +3239,14 @@ class KFWpresenter(GamePresenter):
         return bool(player_move != "" and player_time != "" and player_time != "MID_PHASE" and player_time != "PRE_MOVE")
 
     def clearAllMoveData(self):
-        playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
-        for i in range(len(playersMoveDataArr)):
-            playersMoveDataArr[i][1] = ""
-            playersMoveDataArr[i][2] = ""
+        if self.gameObj.KFWplayersMoveData == "":
+            # Move data was never scaffolded (or was wiped) - rebuild it with all moves empty
+            playersMoveDataArr = [[name, "", ""] for name in self.getAllPlayersOrderedySeatInArray(True)]
+        else:
+            playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
+            for i in range(len(playersMoveDataArr)):
+                playersMoveDataArr[i][1] = ""
+                playersMoveDataArr[i][2] = ""
 
         self.gameObj.KFWplayersMoveData = json.dumps(playersMoveDataArr)
 

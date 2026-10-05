@@ -135,6 +135,72 @@ class RNBMainTournament(Tournament):
         return super().get_queryset(request).filter(gameCode="RNB", tournamentCategory="Main")
 
 
+class CNSMiniTournament(Tournament):
+    class Meta:
+        proxy = True
+        app_label = "CNS"
+        verbose_name = "CNS Mini Tournament"
+        verbose_name_plural = "CNS Mini Tournaments"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="CNS", tournamentCategory="Mini")
+
+
+class CNSMainTournament(Tournament):
+    class Meta:
+        proxy = True
+        app_label = "CNS"
+        verbose_name = "CNS Main Tournament"
+        verbose_name_plural = "CNS Main Tournaments"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="CNS", tournamentCategory="Main")
+
+
+class WEBMiniTournament(Tournament):
+    class Meta:
+        proxy = True
+        app_label = "WEB"
+        verbose_name = "WEB Mini Tournament"
+        verbose_name_plural = "WEB Mini Tournaments"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="WEB", tournamentCategory="Mini")
+
+
+class WEBMainTournament(Tournament):
+    class Meta:
+        proxy = True
+        app_label = "WEB"
+        verbose_name = "WEB Main Tournament"
+        verbose_name_plural = "WEB Main Tournaments"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="WEB", tournamentCategory="Main")
+
+
+class KFWMiniTournament(Tournament):
+    class Meta:
+        proxy = True
+        app_label = "KFW"
+        verbose_name = "KFW Mini Tournament"
+        verbose_name_plural = "KFW Mini Tournaments"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="KFW", tournamentCategory="Mini")
+
+
+class KFWMainTournament(Tournament):
+    class Meta:
+        proxy = True
+        app_label = "KFW"
+        verbose_name = "KFW Main Tournament"
+        verbose_name_plural = "KFW Main Tournaments"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="KFW", tournamentCategory="Main")
+
+
 ################### Register Tournament objects when MINI to specific app
 
 
@@ -251,3 +317,21 @@ class RNBgame(Game):
         app_label = "RNB"
         verbose_name = "RNB_Game"
         verbose_name_plural = "RNB_Games"
+
+
+# URR
+class URRgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "URR"
+        verbose_name = "URR_Game"
+        verbose_name_plural = "URR_Games"
+
+
+# DDL
+class DDLgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "DDL"
+        verbose_name = "DDL_Game"
+        verbose_name_plural = "DDL_Games"

@@ -1,0 +1,109 @@
+{% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en-gb' }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=1050" />
+    <meta name="title" content="Online Board Gamers - Food Chain Magnate Tutorial">
+    <meta name="robots" content="noindex, follow">
+    <meta name="language" content="English">
+    <link rel="icon"
+          type="image/png"
+          href="{% static 'FCM/images/fcm_icon.png' %}" />
+    <title>{% translate "FCM Tutorial" %} - Online Board Gamers</title>
+    <style>
+    body {
+      margin: 0px !important;
+      background-color: #d4eafd;
+      font-family: Arial, sans-serif;
+      box-sizing: border-box;
+    }
+
+    #loadingText {
+      position: absolute;
+      font-size: 40px;
+      margin-top: 20px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      z-index: 10;
+      color: black;
+    }
+    </style>
+    <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
+    {% if settingsDebug %}
+      <script type="module" src="http://localhost:3048/static/@vite/client"></script>
+      <script type="module" src="http://localhost:3048/static/main.js"></script>
+    {% else %}
+      <link href="{% static 'FCM/FCMvuedist/main.css' %}?" rel="stylesheet" />
+      <script type="module"
+              crossorigin=""
+              src="{% static 'FCM/FCMvuedist/main.js' %}"></script>
+    {% endif %}
+  </head>
+  <body>
+    <noscript>
+      <strong>{% translate "Please enable Javascript to continue." %}</strong>
+    </noscript>
+    <div id="app">
+      <div id="loadingText">{% translate "The tutorial is loading........" %}</div>
+    </div>
+  </body>
+  <!--
+    Bespoke init payload for the tutorial. No Game row exists, so everything the
+    Vue app expects is either hardcoded here or left at a safe default.
+    startingOptions MUST be numbers: FCMmodel.initGame() uses strict
+    .includes(rf.SO_TRAINING_GAME) to switch on practice/hotseat mode.
+    gameData = "" makes the app take its fresh-game branch and build the model
+    in the browser; the server is never written to (personal.tutorial guards IO).
+  -->
+  <script>
+  var initData = {};
+  initData.locale = "{{ LANGUAGE_CODE|default:'en-gb' }}";
+  initData.tutorial = true;
+  initData.tutorName = "{{ tutorName }}";
+
+  // Identity. pov 0 puts the user in seat 0; the tutor is seat 1.
+  initData.pov = 0;
+  initData.name = "{{ playerName|escapejs }}";
+  initData.playerNames = ["{{ playerName|escapejs }}", "{{ tutorName|escapejs }}"];
+
+  // Game setup
+  initData.gameID = 0;
+  initData.gameName = "{% translate 'FCM Tutorial' %}";
+  initData.gameCreationTimestamp = 0;
+  initData.gameData = "";
+  initData.moveData = "";
+  initData.chatData = "";
+  initData.latestUpdate = 0;
+  initData.turn = 0;
+  initData.currentPlayers = ["{{ playerName|escapejs }}", "{{ tutorName|escapejs }}"];
+  initData.startingOptions = {{ startingOptions|safe }};
+  initData.startingOptionsHTML = "";
+  initData.startingMap = {{ startingMap|safe }};
+
+  // Nothing below is used by the tutorial, but initGame/TopMenu read them
+  initData.myZoomLevel = 200;
+  initData.preferedColor = -1;
+  initData.kickoutRequired = 0;
+  initData.secondsToNextKickout = 0;
+  initData.kickoutVoteThreshold = 1;
+  initData.kickoutVotesData = {};
+  initData.deleteVotesData = {};
+  initData.statsExcludeVotesData = {};
+  initData.KickoutFlexiDataArray = [];
+  initData.notes = "";
+  initData.chatNotification = false;
+  initData.liveNotification = false;
+  initData.nextURL = "";
+  initData.rewindPanelType = 0;
+  initData.rewindHostPossible = false;
+  initData.rewindHostHTML = "";
+  initData.currentRewindConsent = 0;
+  initData.highContrastBoardItems = false;
+  initData.assistance = true;
+  </script>
+</html>

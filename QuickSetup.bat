@@ -101,49 +101,37 @@ if exist "requirements-dev.txt" (
     pip install -r requirements-dev.txt
 )
 
-REM Copy docker.env to .env
-if exist ".env.docker" (
-    echo Copying docker.env to .env...
-    copy ".env.docker" ".env"
+REM Copy .env.docker to .env, but never clobber an existing one
+if not exist ".env" (
+    if exist ".env.docker" (
+        echo Copying .env.docker to .env...
+        copy ".env.docker" ".env"
+    ) else (
+        echo Warning: .env.docker not found, creating basic .env...
+        echo DEBUG=True > .env
+        echo LOCAL_USER=True >> .env
+    )
 ) else (
-    echo Warning: .env.docker not found, creating basic .env...
-    echo DEBUG=True > .env
-    echo LOCAL_USER=True >> .env
+    echo .env already exists, leaving it alone.
 )
 
 REM Set SQLite3 flag for local development
 echo Setting SQLite3 configuration...
 python -c "import fileinput; import sys; [print(line.replace('LOCAL_USER_SQLITE3=False', 'LOCAL_USER_SQLITE3=True'), end='') for line in fileinput.input('.env', inplace=True)]"
 
-REM Install Vue dependencies for all games
+REM Install Vue dependencies for every game that has a vue<CODE> workspace.
+REM Derived from the folder name rather than globbed, so node_modules is never matched.
 echo Installing Vue dependencies...
-if exist "AQY\vueAQY\package.json" (
-    cd AQY\vueAQY && call npm install && cd ..\..
-) || echo Warning: npm install failed for AQY
-if exist "BUS\vueBUS\package.json" (
-    cd BUS\vueBUS && call npm install && cd ..\..
-) || echo Warning: npm install failed for BUS
-if exist "CNS\vueCNS\package.json" (
-    cd CNS\vueCNS && call npm install && cd ..\..
-) || echo Warning: npm install failed for CNS
-REM if exist "IND\vueIND\package.json" (
-REM     cd IND\vueIND && call npm install && cd ..\..
-REM ) || echo Warning: npm install failed for IND
-if exist "KFW\vueKFW\package.json" (
-    cd KFW\vueKFW && call npm install && cd ..\..
-) || echo Warning: npm install failed for KFW
-REM if exist "PPF\vuePPF\package.json" (
-REM     cd PPF\vuePPF && call npm install && cd ..\..
-REM ) || echo Warning: npm install failed for PPF
-REM if exist "RNB\vueRNB\package.json" (
-REM     cd RNB\vueRNB && call npm install && cd ..\..
-REM ) || echo Warning: npm install failed for RNB
-if exist "TGZ\vueTGZ\package.json" (
-    cd TGZ\vueTGZ && call npm install && cd ..\..
-) || echo Warning: npm install failed for TGZ
-if exist "WEB\vueWEB\package.json" (
-    cd WEB\vueWEB && call npm install && cd ..\..
-) || echo Warning: npm install failed for WEB
+for /d %%g in (*) do (
+    set "VUE_DIR=%%g\vue%%~nxg"
+    if exist "!VUE_DIR!\package.json" (
+        echo Installing npm dependencies for !VUE_DIR!...
+        pushd "!VUE_DIR!"
+        call npm install
+        if errorlevel 1 echo Warning: npm install failed for !VUE_DIR!
+        popd
+    )
+)
 
 REM Run database migrations
 echo Running database migrations...

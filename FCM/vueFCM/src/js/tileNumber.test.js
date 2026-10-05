@@ -15,6 +15,7 @@ import { describe, it, expect } from "vitest"
 import { createPinia, setActivePinia } from "pinia"
 import { giveTileNumber, giveStartingIndexForTile, onTheSameTile, giveAdjacentTiles, giveTileAtPosition } from "./FCMmap.js"
 import { useModelStore } from "../stores/FCMstore.js"
+import * as rf from "./FCMreference.js"
 
 describe("giveTileNumber", () => {
 	it("matches legacy's canonical numbering (y * 17 + x)", () => {
@@ -41,6 +42,28 @@ describe("giveTileNumber", () => {
 			const start = giveStartingIndexForTile(tile)
 			expect(giveTileNumber(start)).toBe(tile)
 			expect(onTheSameTile(index, start)).toBe(true)
+		}
+	})
+
+	// Every tile-id consumer must agree with the square->tile codec. PR #111
+	// changed the codec and giveAdjacentTiles/giveTileAtPosition silently kept
+	// decoding the old one; this checks them against square geometry instead.
+	it("tile-id consumers agree with the square geometry for every tile", () => {
+		setActivePinia(createPinia())
+		const store = useModelStore()
+		store.mapData.tiles = Array.from({ length: 17 * 16 * 2 }, (_, i) => i)
+		const sq = (t) => giveStartingIndexForTile(t)
+		const xy = (i) => [(i % rf.ssW) / 5, Math.floor(i / rf.ssW) / 5]
+		for (let t = 0; t < 17 * 16; t++) {
+			const [x, y] = xy(sq(t))
+			// mapData.tiles is laid out row-major by tile row/col (FCMmap.js buildMap)
+			expect(giveTileAtPosition(t)).toBe((y * 17 + x) * 2)
+			const expected = []
+			for (let u = 0; u < 17 * 16; u++) {
+				const [ux, uy] = xy(sq(u))
+				if (u !== t && Math.abs(ux - x) <= 1 && Math.abs(uy - y) <= 1) expected.push(u)
+			}
+			expect([...giveAdjacentTiles(t, true)].sort((a, b) => a - b)).toEqual(expected)
 		}
 	})
 

@@ -581,6 +581,8 @@ export async function simpleImportWholeRNBmodelNoCompression(inputModel, keepHis
 		const transporterStats = rf.getTransporterStats(transporterObj.type)
 		transporterObj.rawTransporterXY = map.getTransporterPositionFromLocation(transporterLocation, transporterStats, transporterObj.id)
 	}
+
+	wonder.resolveAllTransportersForCurrentTerrain()
 }
 
 export async function simpleImportWholeRNBmodel(inputBase64, keepHistory = false) {
@@ -690,6 +692,8 @@ export async function simpleImportWholeRNBmodel(inputBase64, keepHistory = false
 
 	// Sync polder state to match the loaded wonder brick count
 	wonder.syncPoldersToBrickCount()
+	// Fix any boat left on terrain that polder syncing just invalidated
+	wonder.resolveAllTransportersForCurrentTerrain()
 }
 
 export function exportRNBmodel(forGameOver) {
@@ -924,6 +928,9 @@ export function importRNBmodel(input, forGameOver) {
 		transporterObj.rawTransporterXY = rawTransporterXY
 	}
 
+	// Polders may have flipped since this state was saved, so fix any boat left on invalid terrain
+	wonder.resolveAllTransportersForCurrentTerrain()
+
 	// 3 - Res
 	store.ALL_RESOURCES.splice(0)
 	for (let i = 0; i < inputModel[3].length; i++) {
@@ -1100,6 +1107,18 @@ export function importRNBmodel(input, forGameOver) {
 						const hexID = stackAction[3]
 						strengthenedBuildings.push([buildingType, hexID])
 					}
+					// Road & Bridge (city): add the bridge and the road
+					else if (stackAction[0] === rf.STACK_BUILD_ROAD_BRIDGE) {
+						const cityHexID = stackAction[2]
+						const bridgeArr = stackAction[3]
+						const fromLocation = stack.decompressLocation(stackAction[4])
+						const toLocation = stack.decompressLocation(stackAction[5])
+						newBridges.push([cityHexID, bridgeArr])
+						newRoads.push([
+							[fromLocation[1], fromLocation[2]],
+							[toLocation[1], toLocation[2]],
+						])
+					}
 					if (stackAction[0] === rf.STACK_DO_RESEARCH) {
 						const researchIdx = stackAction[2]
 						store.players[entry[1]].RnD[researchIdx] = 1
@@ -1125,9 +1144,9 @@ export function importRNBmodel(input, forGameOver) {
 		}
 	}
 	// Apply bomb and strengthen operations after buildings are created
-	for (const [buildingType, hexID] of bombedBuildings) {
-		const bldgsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && b.type === buildingType)
-		if (bldgsOnHex.length > 0) model.removeBuildingByID(bldgsOnHex[0].id)
+	for (const [, hexID] of bombedBuildings) {
+		const bldgsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && !b.strengthened)
+		for (const bldg of bldgsOnHex) model.removeBuildingByID(bldg.id)
 	}
 	for (const [buildingType, hexID] of strengthenedBuildings) {
 		const bldgsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && b.type === buildingType)
@@ -1183,6 +1202,9 @@ export function exportLandTransporterLocation(inputLocation) {
 	else if (loc.isOnAnyTransporter(inputLocation)) return [inputLocation[1]]
 	// Land vertex is length 2, hex ID and vertex ID
 	else if (loc.isLandVertexLocation(inputLocation)) return [inputLocation[1], inputLocation[2]]
+	// Sea vertex (a land mover marooned on a flooded polder) uses the same length-2 encoding;
+	// the vertex type is re-derived from the terrain on import
+	else if (loc.isSeaVertexLocation(inputLocation)) return [inputLocation[1], inputLocation[2]]
 	else rf.doAdminAlrt(`landTransporterLocation error: ${inputLocation}`)
 }
 
@@ -1204,6 +1226,9 @@ export function exportWaterTransporterLocation(inputLocation) {
 	else if (loc.isOnAnyTransporter(inputLocation)) return [-1, inputLocation[1]]
 	// If on water vertex, use hexID and vertex length 3  flag -1
 	else if (loc.isWaterVertexLocation(inputLocation)) return [-1, inputLocation[1], inputLocation[2]]
+	// Land vertex (a boat marooned on a drained polder) reuses the -1 length-3 encoding; the
+	// vertex type is re-derived from the terrain on import
+	else if (loc.isLandVertexLocation(inputLocation)) return [-1, inputLocation[1], inputLocation[2]]
 	else if (loc.isDockedLocation(inputLocation)) {
 		const hexID = inputLocation[1]
 		const side = inputLocation[2]

@@ -30,7 +30,7 @@ echo "Setting SQLite3 configuration..."
 sed -i 's/LOCAL_USER_SQLITE3=False/LOCAL_USER_SQLITE3=True/' .env
 
 # Vue dependencies
-for game in AQY/vueAQY BUS/vueBUS CNS/vueCNS KFW/vueKFW TGZ/vueTGZ WEB/vueWEB; do
+for game in AQY/vueAQY BUS/vueBUS CNS/vueCNS DDL/vueDDL FCM/vueFCM IND/vueIND KFW/vueKFW RNB/vueRNB TGZ/vueTGZ URR/vueURR WEB/vueWEB; do
     if [ -f "$game/package.json" ]; then
         echo "Installing npm dependencies for $game..."
         (cd "$game" && npm install) || echo "Warning: npm install failed for $game"

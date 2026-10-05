@@ -4073,6 +4073,7 @@ msgstr "初次游玩 中世纪？规则、玩法与指南请见 "
 #: .\Lobby\templates\Lobby\lobby_icons.html:27
 #: .\Lobby\templates\Lobby\lobby_icons.html:31
 #: .\Lobby\templates\Lobby\profile.html:196
+#: .\Lobby\templates\Lobby\fcm_options_grid.html:226
 #: .\RNB\templates\RNB\RNBmapHelp.html:9
 msgid "Help"
 msgstr "帮助"
@@ -8379,6 +8380,7 @@ msgstr ""
 "请注意，虽然 3 人及以上局不鼓励认输，但在 Online Board Gamers 选择认输从不受罚。有时这是有效（甚至是最佳）选择。会计为负场。"
 
 #: .\Lobby\templates\Lobby\lobbyHelp.html:472
+#: .\Lobby\templates\Lobby\fcm_options_grid.html:226
 #| msgid "Speed"
 msgid "See"
 msgstr "见"
@@ -11997,6 +11999,129 @@ msgstr "注意：BtInternet 正将我的邮件判为垃圾邮件。请将"
 
 #~ msgid "Sorry, someone else joined the game and it is full"
 #~ msgstr "抱歉，有人加入游戏，游戏已满"
+#: .\sharedFunctions\sharedRefs.py:787
+msgid ""
+"Fried Chicken - Unmet demand flips to Fried Chicken; unserved Fried Chicken "
+"means the house moves out"
+msgstr "炸鸡模组 - 未满足的需求翻面成炸鸡；炸鸡仍未满足则该房屋搬家"
+
+#: .\templates\Lobby\fcm_options_grid.html:226
+msgid "Use Fried Chicken"
+msgstr "使用炸鸡模组"
+
+#: .\templates\Lobby\fcm_options_grid.html:227
+msgid "Unmet demand flips to Fried Chicken; unserved Fried Chicken means the house moves out"
+msgstr "未满足的需求翻面成炸鸡；炸鸡仍未满足则该房屋搬家"
+
+#: .\templates\Lobby\fcm_options_grid.html:222
+msgid "Unofficial Mods"
+msgstr "非官方模组"
+
+#: .\sharedFunctions\sharedRefs.py:819
+msgid ""
+"Stadium - A 2-tile arena hosts a game every 3 turns (the first game is on "
+"turn 5); the demand is announced 2 turns ahead and is always mass-market food "
+"(never sushi)"
+msgstr "体育馆模组 - 一座 2 格体育馆每 3 回合举办一场比赛（首场在第 5 回合）；提前 2 回合公告需求，只需求大众食物（不会需要寿司）"
+
+#: .\templates\Lobby\fcm_options_grid.html:16
+msgid "Use Stadium"
+msgstr "使用体育馆模组"
+
+#: .\templates\Lobby\fcm_options_grid.html:17
+msgid "A 2-tile arena hosts a game every 3 turns (the first game is on turn 5); the demand is announced 2 turns ahead and is always mass-market food (never sushi)"
+msgstr "一座 2 格体育馆每 3 回合举办一场比赛（首场在第 5 回合）；提前 2 回合公告需求，只需求大众食物（不会需要寿司）"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Stadium"
+msgstr "体育馆"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Overview"
+msgstr "概览"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "The Stadium is a giant building spanning two map tiles. On game day the whole city turns into one huge customer: a big crowd with a big appetite for exactly one food. Games are held every 3 turns and announced well in advance - stocking up and pricing become a battle for a winner-takes-all jackpot. Recommended for games with 3 or more players."
+msgstr "体育馆是一座横跨两个板块的巨建筑。比赛日整座城市变成一位巨大的顾客：一大群观众只想吃同一种食物。比赛每 3 回合举办一场并提前公告——囤货和定价因此成为赢家通吃大奖的争夺战。建议 3 人以上的游戏使用。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "The building: When this module is enabled, the Stadium replaces two adjacent map tiles at game start, at a random position and orientation, and stays fixed for the whole game. It is all stadium and surrounding road - no building lots and no houses, so it produces no regular demand. Its value is the road network and game day."
+msgstr "建筑：启用本模组后，体育馆在开局时替换两个相邻板块，位置与朝向随机，整局固定不变。它整个是体育馆和外环马路——没有空位也没有房屋，因此不产生常规需求。它的价值在于路网枢纽和比赛日。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Schedule: Games are played on turns 5, 8, 11, ... - every 3 turns, starting with turn 5."
+msgstr "赛程：比赛在第 5、8、11…… 回合进行——每 3 回合一场，首场在第 5 回合。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "The announcement: At the end of a turn, 2 turns before each game, an announcement reveals which single food the crowd wants. The food is always mass-market: pizza or burgers, plus noodles, dumplings or fried chicken if that module is enabled in the same game - never sushi, never drinks or kimchi."
+msgstr "公告：每场比赛提前 2 回合，在回合结束时公告观众想吃的唯一一种食物。食物只需求大众食品：披萨或汉堡，以及当局同时启用面条、饺子或炸鸡模组时的对应食物——绝不会是寿司，也不含饮料和泡菜。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Crowd size: 6 units at the first game, 12 at the second, and 16 from the third game onward."
+msgstr "观众规模：第一场 6 份，第二场 12 份，第三场起固定 16 份。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Dinnertime on game day: The Stadium (house number 0.1) eats before every house. Standard matching rules apply: among the restaurants that have the full amount in stock, the nearest one wins, ties broken by cheapest price. The winner sells all units in a single sale."
+msgstr "比赛日结算：体育馆（房号 0.1）先于所有房屋用餐。匹配规则照旧：在备齐全量库存的餐厅中，最近者胜，同距取最便宜。赢家以单笔交易卖出全部份数。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "One-day event: If no restaurant can supply the full amount, the demand disappears at Dinnertime - the game is not postponed."
+msgstr "一日赛事：若没有任何餐厅备齐全量，该需求在晚餐结算时直接消失——比赛不会延期。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Isolation: Stadium demand never flips into Fried Chicken and never moves out. It cannot be targeted by marketing campaigns, and substitution effects (noodle or sushi replacements, kimchi combos) do not apply. Units sold count normally towards \"first sold\" milestones."
+msgstr "隔离：体育馆需求不会翻面成炸鸡，也不会搬家。它不能被营销广告定向投放，替换机制（面条/寿司替换、泡菜组合）也不适用。卖出的份数照常计入「首个卖出 X」里程碑。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Milestone \"First stadium supplier\": The first player to win a stadium game gains this Milestone. Reward: future announcements reach this player 3 turns before the game instead of 2 - privately, one turn before everyone else learns."
+msgstr "里程碑「首个体育馆供应商」：第一个在比赛中胜出的玩家获得此里程碑。奖励：之后的公告对该玩家提前 3 回合送达（而非 2 回合）——私密可见，比其他所有人早一个回合。"
+
+#: .\sharedFunctions\sharedRefs.py:820
+msgid ""
+"Second Bailout - When the bank breaks the second time, the city rescues it: "
+"the bank gains $300 per player and each player gets one free L2 marketing "
+"employee; the third break ends the game"
+msgstr "二次注资模组 - 银行第二次破产时城市出手救市：银行获得每位玩家 $300 的注资，每位玩家免费获赠一名二级营销员工；第三次破产游戏结束"
+
+#: .\templates\Lobby\fcm_options_grid.html:16
+msgid "Use Second Bailout"
+msgstr "使用二次注资模组"
+
+#: .\templates\Lobby\fcm_options_grid.html:17
+msgid "When the bank breaks the second time, the city rescues it: the bank gains $300 per player and each player gets one free L2 marketing employee; the third break ends the game"
+msgstr "银行第二次破产时城市出手救市：银行获得每位玩家 $300 的注资，每位玩家免费获赠一名二级营销员工；第三次破产游戏结束"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Second Bailout"
+msgstr "二次注资"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "In the base game the bank only breaks once. With this module the city steps in the second time: the bank gets a fresh cash injection and every player receives a free level-2 marketing employee. The game only ends for good on the third break."
+msgstr "基础游戏中银行只会破产一次。启用本模组后，第二次破产时城市出手：银行获得一笔新注资，每位玩家免费获赠一名二级营销员工。直到第三次破产游戏才真正结束。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "First break: unchanged - reserve cards are cashed in (or prices re-picked with the price-changing reserve cards) exactly as in the base game."
+msgstr "第一次破产：照旧——储备卡按基础规则变现（启用价格重定储备卡变体则重定价格）。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Second break: the city bails the bank out. The bank immediately receives $300 per player (e.g. +$600 in a 2-player game, +$1500 with 5 players)."
+msgstr "第二次破产：城市救市。银行立即获得每位玩家 $300 的注资（如 2 人局 +$600，5 人局 +$1500）。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "The gift: on the night of the bailout, players pick one free level-2 marketing employee each, in turn order, first come first served: Campaign Manager (always), plus Rural Marketeer, Mass Marketeer, Gourmet Food Critic or Hawker Marketeer if the matching module is enabled in this game. A card that is sold out in the talent market cannot be picked; if nothing is left when your turn comes, you get nothing. You may also decline."
+msgstr "赠送：救市当夜，玩家按行动顺序轮流免费挑选一名二级营销员工，先挑先得：活动经理（永远可选）；乡村营销员、大众营销员、美食评论家、小贩营销员则看本局是否启用对应模组。人才市场售罄的卡不可选；轮到你时一种都不剩则空手；也可以主动放弃。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "The gift is not a hire: it does not trigger \"first to hire 3 employees\" style milestones. The employee joins your beach and is paid like any other employee - getting them onto the schedule and affording their salary is your problem. Module milestones (e.g. \"first Rural Marketeer used\") still trigger normally the first time you market with them."
+msgstr "赠送不算雇佣：不触发「首次雇佣 3 人」类里程碑。员工进入你的休假区并像其他员工一样领工资——能否排班上岗、付得起工资由你自行负责。模组里程碑（如「首次使用乡村营销员」）在你首次派其营销时照常触发。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Third break: the game ends immediately - there is only one bailout."
+msgstr "第三次破产：游戏立即结束——救市只有一次。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Short games are unaffected: the first break already ends them, so the bailout never happens."
+msgstr "短局不受影响：第一次破产即终局，救市永远不会发生。"
 
 #~ msgid "Basic Options"
 #~ msgstr "基本选项"
@@ -12081,3 +12206,8 @@ msgstr "注意：BtInternet 正将我的邮件判为垃圾邮件。请将"
 #~ "在OnlineBoardGamers网站上的游戏邀请\n"
 #~ "%(gameName)s - 最多%(maxPlayers)s个玩家\n"
 #~ "[点击这里玩 Horseless Carriage](https://www.OnlineBoardGamers.com/)"
+msgid "Use Labor Market"
+msgstr "使用劳动力市场"
+
+msgid "Adds Temporary Workers, Headhunters and Union Organizers"
+msgstr "增加临时工、猎头和工会组织者"

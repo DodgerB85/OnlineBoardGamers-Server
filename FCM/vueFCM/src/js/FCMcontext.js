@@ -23,7 +23,7 @@ export function resetContext() {
 	resetEndOfDaySummaryData()
 
 	store.context.action = rf.ACT_NONE
-	store.context.selectedReserveCard = rf.RES_CARD_NONE
+	store.context.selectedReserveCard = rf.RES_CARD_NOT_CHOSEN
 	store.context.selectedEmployeeIndexForRestructuring = -1
 	store.context.selectedEmployeeToTrainData.employee = -1
 	store.context.selectedEmployeeToTrainData.origin = 0
@@ -32,10 +32,16 @@ export function resetContext() {
 	store.context.justMarketed.splice(0)
 	store.context.remainingProducers.splice(0)
 	store.context.justProduced.team.splice(0)
-	store.context.justProduced.added = store.startingOptions.dumplings ? [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] : [0, 0, 0, 0, 0, 0, 0, 0]
+	// Always full item length (LEMONADE..FRIED_CHICKEN); slots for items not in this
+	// game just stay 0 (display checks > 0, so they are invisible). Export trims
+	// trailing zeros; import pads back to full length.
+	store.context.justProduced.added = Array(rf.FRIED_CHICKEN + 1).fill(0)
 	store.context.justBuilt.splice(0)
 	store.context.justLobbied.splice(0)
 	store.context.justOpened.splice(0)
+	store.context.headhunterActionsUsed = 0
+	store.context.justHeadhunted.splice(0)
+	store.context.temporaryMarketer = false
 	// NB: justFired is NOT cleared here — it is cleared in startPlayerTurn (payday)
 	// and the strict payday path of endPlayerTurn. Clearing it here would destroy
 	// the player's firing decisions before endPlayerTurn can read them for simul payday.
@@ -105,7 +111,6 @@ export function resetContext() {
 	store.context.brandManagerMS = false
 	store.context.componentBeingAdded = -1
 	store.context.EODradioSelections = [0, 0]
-	store.context.preMoveData = [[[-9], []], [-9]]
 	store.context.savedEODpreset = null
 
 	// Replay
@@ -127,7 +132,7 @@ export function resetEndOfDaySummaryData() {
 	store.context.endOfDaySummaryData.market.unused.splice(0)
 
 	store.context.endOfDaySummaryData.produce.total = 0
-	store.context.endOfDaySummaryData.produce.produced = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+	store.context.endOfDaySummaryData.produce.produced = Array(rf.FRIED_CHICKEN + 1).fill(0)
 	store.context.endOfDaySummaryData.produce.unused.splice(0)
 
 	store.context.endOfDaySummaryData.houses.total = 0

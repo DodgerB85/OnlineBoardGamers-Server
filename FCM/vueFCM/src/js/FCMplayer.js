@@ -28,29 +28,53 @@ export function giveNbFreeSlots(playerIndex) {
 	}, playerObj.ceoSlots)
 }
 
-export function fireEmployee(playerIndex, employee) {
+export function fireEmployee(playerIndex, fireToken) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
+	const employee = rf.decodeFiredEmployee(fireToken)
+	if (rf.NON_FIREABLE_EMPLOYEES.includes(employee)) return false
+	const pending = store.laborMarket.pendingHeadhuntSalaries[playerIndex]
+	const pendingIndex = rf.isHeadhuntedFireToken(fireToken) && Array.isArray(pending)
+		? pending.findIndex((entry) => entry.employee === employee)
+		: -1
+	if (rf.isHeadhuntedFireToken(fireToken) && pendingIndex === -1) return false
+	const finishFire = () => {
+		if (pendingIndex > -1) pending.splice(pendingIndex, 1)
+		return true
+	}
 
 	// 1. Check Beach
 	const beachIndex = playerObj.beach.indexOf(employee)
 	if (beachIndex > -1) {
 		playerObj.beach.splice(beachIndex, 1)
-		return
+		return finishFire()
 	}
 
 	// 2. Check Hierarchy/Employees
 	const empIndex = playerObj.employees.indexOf(employee)
 	if (empIndex > -1) {
 		playerObj.employees.splice(empIndex, 1)
-		return
+		return finishFire()
 	}
 
 	// 3. Check Marketers
 	const marketerIndex = playerObj.marketers.findIndex((m) => m.marketer === employee)
 	if (marketerIndex > -1) {
 		playerObj.marketers.splice(marketerIndex, 1)
+		return finishFire()
 	}
+	return false
+}
+
+export function restoreFiredEmployee(playerIndex, fireToken) {
+	const store = useModelStore()
+	const employee = rf.decodeFiredEmployee(fireToken)
+	store.players[playerIndex].beach.push(employee)
+	if (rf.isHeadhuntedFireToken(fireToken)) {
+		if (!Array.isArray(store.laborMarket.pendingHeadhuntSalaries[playerIndex])) store.laborMarket.pendingHeadhuntSalaries[playerIndex] = []
+		store.laborMarket.pendingHeadhuntSalaries[playerIndex].push({ employee, cost: rules.headhuntCost(employee) })
+	}
+	return employee
 }
 
 ///////////////////////////////
@@ -121,6 +145,7 @@ export function addToStructureFromMiniBeach(emp, anyFreeCEOslots, beachIdx) {
 export function setEmployeeInIndex(playerIndex, emp, idx) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
+	if (rf.MANAGERS.includes(emp) && idx >= playerObj.ceoSlots) return false
 	const returnee = playerObj.employees[idx]
 	const employees = playerObj.employees
 	// Recover existing employee
@@ -153,6 +178,7 @@ export function setEmployeeInIndex(playerIndex, emp, idx) {
 		playerObj.beach.splice(beachIdx, 1)
 	}
 	store.context.selectedEmployeeIndexForRestructuring = -1
+	return true
 }
 
 // TODO is this used?
@@ -357,6 +383,7 @@ export function playerDiscount(playerIndex) {
 	}
 	if (hasMilestone(playerIndex, rf.FIRST_LOWER_PRICES)) discount++
 	if (playerObj.ceoAction === rf.CEO_ACTION_PRICE_MINUS_3) discount += 3
+	discount += rules.temporaryWorkerUsedActions(playerIndex, rf.PRICING_MANAGER)
 	return discount
 }
 
@@ -388,6 +415,8 @@ export function playerBonus(playerIndex, goods) {
 			base += 5
 		} else if (drinks.includes(good) && hasMilestone(playerIndex, rf.FIRST_DRINK_MARKETED)) {
 			base += 5
+		} else if (good === rf.FRIED_CHICKEN && hasMilestone(playerIndex, rf.FIRST_FRIED_CHICKEN_SOLD)) {
+			base += 5
 		}
 	})
 
@@ -405,6 +434,7 @@ export function numberOfWaitress(playerIndex) {
 	for (let i = 0; i < playerObj.employees.length; i++) if (playerObj.employees[i] === rf.WAITRESS) numWaitress++
 
 	if (playerObj.employees.includes(rf.NIGHT_SHIFT_MANAGER)) numWaitress *= 2
+	numWaitress += rules.temporaryWorkerUsedActions(playerIndex, rf.WAITRESS)
 
 	return numWaitress
 }

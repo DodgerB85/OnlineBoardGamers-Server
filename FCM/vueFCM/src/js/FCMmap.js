@@ -101,6 +101,29 @@ export function generateRandomMap(maxPlayers) {
 		}
 	}
 
+	// 6. Stadium mod - force-place the 2 arena half-tiles on a random adjacent
+	// pair of tiles, replacing 2 normal tiles. Horizontal: 27 left, 28 right, rot 0.
+	// Vertical: 27 top, 28 bottom, rot 1 (both halves rotate clockwise).
+	if (options.stadium) {
+		const dims = { 2: [3, 3], 3: [4, 3], 4: [4, 4], 5: [5, 4], 6: [6, 4] }[maxPlayers] || [3, 3]
+		const horizontal = Math.random() < 0.5
+		const rot = horizontal ? 0 : 1
+		let x, y
+		if (horizontal) {
+			x = Math.floor(Math.random() * (dims[0] - 1))
+			y = Math.floor(Math.random() * dims[1])
+		} else {
+			x = Math.floor(Math.random() * dims[0])
+			y = Math.floor(Math.random() * (dims[1] - 1))
+		}
+		const first = y * dims[0] + x
+		const second = first + (horizontal ? 1 : dims[0])
+		res[first * 2] = 27
+		res[first * 2 + 1] = rot
+		res[second * 2] = 28
+		res[second * 2 + 1] = rot
+	}
+
 	return expandMapToFullGrid(res, maxPlayers)
 }
 
@@ -745,6 +768,8 @@ export function getRestaurantZoneFromAnyIndex(index) {
 	return [restoIndex, restoIndex + 1, restoIndex + mapWidth, restoIndex + mapWidth + 1]
 }
 
+const COFFEE_DFS_BUDGET = 1e6
+
 // index - index of inside of a bldg
 // restaurants - indexes of squares inside restos
 // winning range - distant it was sold at
@@ -806,75 +831,194 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 			from: index,
 		}))
 
-	/**
-	 * Recursive DFS to find all valid paths
-	 */
-	const findPaths = (currentIdx, fromIdx, currentRange, path, pathSet, visitedTwice) => {
-		const stats = globalThis.__coffeeStats
-		if (stats) {
-			stats.nodes++
-			if (stats.nodes > (stats.cap || 5e6)) throw new Error("DFS cap " + JSON.stringify(stats) + " routes=" + coffeeRoutes.length)
-			if (stats.nodes % 1e6 === 0) console.log("DFSSTATS", JSON.stringify(stats), "routes", coffeeRoutes.length, "pathlen", path.length)
+	const canEmitAt = (idx, range) =>
+		neighbours(idx).some((n) => restoSet.has(n) && (onTheSameTile(idx, n) || range + 1 <= winningRange))
+
+	// getCoffeeRoute keeps only the first route per maximal square-set, so on a
+	// dense block (4x4 = 583k walks) we find those sets directly: phase 1 finds
+	// them branch-and-bound, phase 2 replays DFS order for the first walk of each.
+
+	// DFS range rules minus `from`/bridges/two-visit (those only remove moves). -1 = blocked.
+	const relaxedStep = (idx, range, next, visitedTwice) => {
+		if (!ROAD_IDS.has(store.mapData.coords[next]) || visitedTwice.has(next)) return -1
+		const crossed = !onTheSameTile(idx, next)
+		const rw = rwSet.has(next)
+		const nextRange = range + (crossed ? 1 : 0) + (rw ? 1 : 0)
+		if (nextRange > winningRange && (crossed || rw)) return -1
+		if (crossed && range + minTileDist(next) > winningRange) return -1
+		return nextRange
+	}
+	// Squares a continuation could still add (0-1 BFS, dead ends that can't emit
+	// stripped), plus the zero-cost zone and costly steps grouped by tile+range.
+	// Pure in its arguments, so memoized.
+	const levelCache = new Map()
+	const level = (sources, range, visitedTwice, within) => {
+		let cache = levelCache.get(within)
+		if (!cache) levelCache.set(within, (cache = new Map()))
+		const key = sources.join(",") + "|" + range + "|" + [...visitedTwice].sort().join(",")
+		let v = cache.get(key)
+		if (v) return v
+
+		const best = new Map(sources.map((s) => [s, range]))
+		const deque = [...sources]
+		while (deque.length > 0) {
+			const idx = deque.shift()
+			const r = best.get(idx)
+			for (const next of neighbours(idx)) {
+				if (within && !within.has(next)) continue
+				const nextRange = relaxedStep(idx, r, next, visitedTwice)
+				if (nextRange < 0 || (best.get(next) ?? Infinity) <= nextRange) continue
+				best.set(next, nextRange)
+				if (nextRange === r) deque.unshift(next)
+				else deque.push(next)
+			}
 		}
-		// 2. Check for nearby restaurants from current road
-		for (const neighbor of neighbours(currentIdx)) {
-			if (restoSet.has(neighbor)) {
-				// same-tile entrance is always valid; crossing a tile costs +1 range (old map.js)
-				if (onTheSameTile(currentIdx, neighbor) || currentRange + 1 <= winningRange) {
-					coffeeRoutes.push([...path])
-					if (stats) stats.emitted++
+		const useful = new Set(best.keys())
+		const srcSet = new Set(sources)
+		const leaves = [...useful]
+		while (leaves.length > 0) {
+			const x = leaves.pop()
+			if (!useful.has(x) || srcSet.has(x) || canEmitAt(x, best.get(x))) continue
+			const adj = neighbours(x).filter((n) => useful.has(n))
+			if (adj.length > 1) continue
+			useful.delete(x)
+			leaves.push(...adj)
+		}
+		const canEmit = [...useful].some((x) => canEmitAt(x, best.get(x)))
+
+		const zone = new Set(sources)
+		const groups = new Map()
+		const stack = [...sources]
+		let zoneCanEmit = false
+		while (stack.length > 0) {
+			const idx = stack.pop()
+			if (!zoneCanEmit && canEmitAt(idx, range)) zoneCanEmit = true
+			for (const next of neighbours(idx)) {
+				if (!useful.has(next)) continue
+				const nextRange = relaxedStep(idx, range, next, visitedTwice)
+				if (nextRange < 0) continue
+				if (nextRange === range) {
+					if (!zone.has(next)) {
+						zone.add(next)
+						stack.push(next)
+					}
+				} else {
+					const k = giveTileNumber(next) + "|" + nextRange
+					if (!groups.has(k)) groups.set(k, { range: nextRange, entries: new Set() })
+					groups.get(k).entries.add(next)
 				}
 			}
 		}
+		v = {
+			useful,
+			usefulArr: [...useful],
+			canEmit,
+			zoneArr: [...zone],
+			zoneCanEmit,
+			groups: [...groups.values()].map((g) => ({ range: g.range, entries: [...g.entries] })),
+		}
+		cache.set(key, v)
+		return v
+	}
 
-		// 3. Find next road segments
-		const nextRoads = cachedNextRoads(currentIdx, fromIdx)
+	// Phase 1 bound: is everything this subtree can emit inside a known maximal set?
+	const maximal = []
+	const isCovered = (squares) => maximal.some((e) => squares.every((sq) => e.has(sq)))
+	const allCovered = (prefix, sources, range, visitedTwice) => {
+		const lv = level(sources, range, visitedTwice)
+		if (!lv.canEmit) return true
+		if (maximal.length === 0) return false
+		if (isCovered([...prefix, ...lv.usefulArr])) return true
+		const zonePrefix = [...prefix, ...lv.zoneArr]
+		if (lv.zoneCanEmit && !isCovered(zonePrefix)) return false
+		const nextPrefix = new Set(zonePrefix)
+		return lv.groups.every((g) => allCovered(nextPrefix, g.entries, g.range, visitedTwice))
+	}
 
-		for (const next of nextRoads) {
-			let nextRange = currentRange
-			const crossed = !onTheSameTile(currentIdx, next)
-			if (crossed) nextRange++
-			if (rwSet.has(next)) nextRange++
+	const dfs = (visit, order) => {
+		const walk = (currentIdx, fromIdx, currentRange, path, pathSet, visitedTwice) => {
+			if (!visit(currentIdx, currentRange, path, pathSet, visitedTwice)) return
+			let nextRoads = cachedNextRoads(currentIdx, fromIdx)
+			if (order) nextRoads = order(nextRoads, pathSet)
 
-			// 4. Validity Checks (Pruning) - only tile crossings and roadworks
-			// consume range; same-tile steps may continue even past it (old map.js)
-			if (nextRange > winningRange && (crossed || rwSet.has(next))) {
-				if (stats) stats.prunedRange++
-				continue
+			for (const next of nextRoads) {
+				let nextRange = currentRange
+				const crossed = !onTheSameTile(currentIdx, next)
+				if (crossed) nextRange++
+				if (rwSet.has(next)) nextRange++
+
+				// only tile crossings and roadworks consume range; same-tile steps
+				// may continue even past it (old map.js)
+				if (nextRange > winningRange && (crossed || rwSet.has(next))) continue
+				// admissible min-tile-distance prune, legacy map.js:899-900
+				if (crossed && currentRange + minTileDist(next) > winningRange) continue
+
+				const isSecondVisit = pathSet.has(next)
+				if (isSecondVisit && visitedTwice.has(next)) continue
+
+				path.push(next)
+				pathSet.add(next)
+				if (isSecondVisit) visitedTwice.add(next)
+				walk(next, currentIdx, nextRange, path, pathSet, visitedTwice)
+				path.pop()
+				if (isSecondVisit) visitedTwice.delete(next)
+				else pathSet.delete(next)
 			}
-			// Admissible heuristic prune (see destTiles/minTileDist above) - only
-			// applies when crossing, matching legacy's map.js:899-900.
-			if (crossed && currentRange + minTileDist(next) > winningRange) {
-				if (stats) stats.prunedHeur++
-				continue
-			}
-
-			const isSecondVisit = pathSet.has(next)
-			if (isSecondVisit) {
-				if (visitedTwice.has(next)) {
-					if (stats) stats.prunedVisit++
-					continue // Already visited twice, stop
-				}
-			}
-
-			// 5. Recurse
-			path.push(next)
-			pathSet.add(next)
-			if (isSecondVisit) visitedTwice.add(next)
-
-			findPaths(next, currentIdx, nextRange, path, pathSet, visitedTwice)
-
-			// 6. Backtrack (Cleanup for the next branch)
-			path.pop()
-			if (!isSecondVisit) pathSet.delete(next)
-			if (isSecondVisit) visitedTwice.delete(next)
+		}
+		for (const start of startNodes) {
+			walk(start.index, start.from, start.range, [start.index], new Set([start.index]), new Set())
 		}
 	}
 
-	// Start the search for each starting road
-	for (const start of startNodes) {
-		findPaths(start.index, start.from, start.range, [start.index], new Set([start.index]), new Set())
-	}
+	// Fast path: plain enumeration (real games peak at ~460k steps). Only a dense
+	// block blows the budget and falls through to the two phases.
+	// ponytail: a big sparse network plus a block pays for both; fix if seen.
+	let steps = 0
+	dfs((idx, range, path) => {
+		if (++steps > COFFEE_DFS_BUDGET) return false
+		for (const n of neighbours(idx)) {
+			if (restoSet.has(n) && (onTheSameTile(idx, n) || range + 1 <= winningRange)) coffeeRoutes.push([...path])
+		}
+		return true
+	})
+	if (steps <= COFFEE_DFS_BUDGET) return coffeeRoutes
+	console.log("getCoffeeRoutesFromBldgSquare: DFS budget hit, using two-phase calculation", { index, restaurants, winningRange, steps })
+	coffeeRoutes.length = 0
+
+	// Phase 1: unvisited-first order finds big sets early, so the bound bites.
+	dfs(
+		(idx, range, path, pathSet, visitedTwice) => {
+			if (allCovered(pathSet, [idx], range, visitedTwice)) return false
+			if (canEmitAt(idx, range) && !isCovered(path)) {
+				const s = new Set(path)
+				for (let i = maximal.length - 1; i >= 0; i--) {
+					if ([...maximal[i]].every((sq) => s.has(sq))) maximal.splice(i, 1)
+				}
+				maximal.push(s)
+			}
+			return true
+		},
+		(nextRoads, pathSet) => [...nextRoads.filter((n) => !pathSet.has(n)), ...nextRoads.filter((n) => pathSet.has(n))]
+	)
+
+	// Phase 2: original order, pruned to paths that can still complete a pending set.
+	let pending = maximal
+	dfs((idx, range, path, pathSet, visitedTwice) => {
+		const alive = pending.filter((m) => {
+			if (pathSet.size > m.size || [...pathSet].some((sq) => !m.has(sq))) return false
+			const { useful } = level([idx], range, visitedTwice, m)
+			return [...m].every((sq) => pathSet.has(sq) || useful.has(sq))
+		})
+		if (alive.length === 0) return false
+		if (canEmitAt(idx, range)) {
+			const hit = alive.find((m) => m.size === pathSet.size)
+			if (hit) {
+				coffeeRoutes.push([...path])
+				pending = pending.filter((m) => m !== hit)
+			}
+		}
+		return true
+	})
 
 	return coffeeRoutes
 }
@@ -949,9 +1093,8 @@ export function rangeToRestaurantsFromIndex(index, restaurants) {
 			// Standard tile boundary penalty
 			if (!onTheSameTile(currIdx, nextIdx)) nextRange++
 
-			// RW Penalty: Your original logic "pauses" and increments.
-			// In a Dijkstra approach, we simply add the weight.
-			if (rwSet.has(nextIdx)) nextRange++
+			// RW Penalty: charge when leaving the roadworks square (matches legacy pause/resume).
+			if (isRW) nextRange++
 
 			queue.push({
 				index: nextIdx,
@@ -1345,12 +1488,11 @@ function buildReachabilitySet(playerObj, lobbyist, lobbyistData) {
 	const reachSet = new Set()
 	const range = 2
 	const sources = [...playerObj.restaurants]
-	if (useModelStore().startingOptions.coffee) sources.push(...playerObj.coffeeShops.map((idx) => ({ index: idx, isCoffee: true })))
 
 	for (const s of sources) {
 		let minR = 0,
 			maxR = 4
-		if (!s.isCoffee && !plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())) {
+		if (!plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())) {
 			minR = s.rotation
 			maxR = s.rotation + 1
 		}
@@ -1359,6 +1501,13 @@ function buildReachabilitySet(playerObj, lobbyist, lobbyistData) {
 			let off = r === 0 ? 1 : r === 1 ? rf.ssW + 1 : r === 2 ? rf.ssW : 0
 			emptySpacesAdjacentToRoadsWithinRange(s.index + off, range, lobbyist, lobbyistData).forEach((idx) => reachSet.add(idx))
 		}
+	}
+
+	// Coffee shops measure from their own square (no restaurant rotation offsets)
+	if (useModelStore().startingOptions.coffee) {
+		playerObj.coffeeShops.forEach((idx) => {
+			emptySpacesAdjacentToRoadsWithinRange(idx, range, lobbyist, lobbyistData).forEach((i) => reachSet.add(i))
+		})
 	}
 	return reachSet
 }

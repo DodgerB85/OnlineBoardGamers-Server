@@ -217,4 +217,36 @@
     </div>
   </label>
 </div>
+
+<div class="opts-section opts-amber">
+  <div class="section-title">{% trans "Unofficial Mods" %}</div>
+  <label class="check-label">
+    <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt222" id="friedChicken" name="friedChicken" value="46" />
+    <div>
+      <div style="color:#d97706">{% trans "Use Fried Chicken" %} (MOD) &mdash; {% trans "See" %} <a href="{% url 'FCM:fanExpansionsHelp' %}" target="_blank">{% trans "Help" %}</a></div>
+      <div class="opt-help">{% trans "Unmet demand flips to Fried Chicken; unserved Fried Chicken means the house moves out" %}</div>
+    </div>
+  </label>
+  <label class="check-label">
+    <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt222" id="stadium" name="stadium" value="47" />
+    <div>
+      <div style="color:#d97706">{% trans "Use Stadium" %} (MOD) &mdash; {% trans "See" %} <a href="{% url 'FCM:fanExpansionsHelp' %}" target="_blank">{% trans "Help" %}</a></div>
+      <div class="opt-help">{% trans "A 2-tile arena hosts a game every 3 turns (the first game is on turn 5); the demand is announced 2 turns ahead and is always mass-market food (never sushi)" %}</div>
+    </div>
+  </label>
+  <label class="check-label">
+    <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt222" id="laborMarket" name="laborMarket" value="48" />
+    <div>
+      <div style="color:#d97706">{% trans "Use Labor Market" %} (MOD) &mdash; {% trans "See" %} <a href="{% url 'FCM:fanExpansionsHelp' %}" target="_blank">{% trans "Help" %}</a></div>
+      <div class="opt-help">{% trans "Adds Temporary Workers, Headhunters and Union Organizers" %}</div>
+    </div>
+  </label>
+  <label class="check-label">
+    <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt222" id="secondBailout" name="secondBailout" value="49" />
+    <div>
+      <div style="color:#d97706">{% trans "Use Second Bailout" %} (MOD) &mdash; {% trans "See" %} <a href="{% url 'FCM:fanExpansionsHelp' %}" target="_blank">{% trans "Help" %}</a></div>
+      <div class="opt-help">{% trans "When the bank breaks the second time, the city rescues it: the bank gains $300 per player and each player gets one free L2 marketing employee; the third break ends the game" %}</div>
+    </div>
+  </label>
+</div>
 </div>

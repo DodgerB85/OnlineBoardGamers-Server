@@ -26,6 +26,7 @@ from .presenters import (
     AQYpresenter,
     BUSpresenter,
     CNSpresenter,
+    DDLpresenter,
     FCMpresenter,
     GamePresenter,
     HLCpresenter,
@@ -33,12 +34,21 @@ from .presenters import (
     KFWpresenter,
     RNBpresenter,
     TGZpresenter,
+    URRpresenter,
     WEBpresenter,
 )
 from .sharedFunctions.sharedRefs import (
     SR_GAMES_CODES_AND_NAMES_CHOICES,
+    SR_getAQYstartingOptionsHTML,
+    SR_getBUSstartingOptionsHTML,
+    SR_getCNSstartingOptionsHTML,
     SR_getFCMstartingOptionsHTML,
+    SR_getHLCstartingOptionsHTML,
+    SR_getINDstartingOptionsHTML,
+    SR_getKFWstartingOptionsHTML,
+    SR_getRNBstartingOptionsHTML,
     SR_getTGZstartingOptionsHTML,
+    SR_getWEBstartingOptionsHTML,
 )
 
 if TYPE_CHECKING:
@@ -193,6 +203,7 @@ class Tournament(models.Model):
     )
 
     startingOptions = models.CharField(max_length=80, blank=True, default="")
+    startingMap = models.TextField(blank=True, default="")
     startingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         related_name="startingPlayersRelName_Tournament",
@@ -246,6 +257,22 @@ class Tournament(models.Model):
         startingOptionsHTML = "[None]"
         if self.gameCode == "FCM":
             startingOptionsHTML = SR_getFCMstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
+        if self.gameCode == "HLC":
+            startingOptionsHTML = SR_getHLCstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
+        if self.gameCode == "BUS":
+            startingOptionsHTML = SR_getBUSstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
+        if self.gameCode == "AQY":
+            startingOptionsHTML = SR_getAQYstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
+        if self.gameCode == "IND":
+            startingOptionsHTML = SR_getINDstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
+        if self.gameCode == "RNB":
+            startingOptionsHTML = SR_getRNBstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
+        if self.gameCode == "CNS":
+            startingOptionsHTML = SR_getCNSstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
+        if self.gameCode == "WEB":
+            startingOptionsHTML = SR_getWEBstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
+        if self.gameCode == "KFW":
+            startingOptionsHTML = SR_getKFWstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
         if self.gameCode == "TGZ":
             startingOptionsHTML = SR_getTGZstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
 
@@ -445,6 +472,8 @@ class Game(BaseGame):
         "BUS": BUSpresenter,
         "FCM": FCMpresenter,
         "RNB": RNBpresenter,
+        "URR": URRpresenter,
+        "DDL": DDLpresenter,
         "HLC": HLCpresenter,
         "KFW": KFWpresenter,
     }

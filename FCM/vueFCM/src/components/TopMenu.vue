@@ -14,6 +14,8 @@ import * as controller from "../js/FCMcontroller"
 import * as funcs from "../js/FCMfuncs"
 //import * as model from "../js/FCMmodel"
 import * as replay from "../js/FCMreplay"
+import * as aiDebug from "../js/AI/aiDebug"
+import { resetGameForAI } from "../js/AI/resetGame"
 
 import PlayerLine from "./PlayerLine.vue"
 
@@ -26,6 +28,34 @@ const personal = usePersonalStore()
 
 function testButton() {
 	for (let i = 0; i < 10; i++) store.highlights.indexesToHighlightYellow.push(i + 2580)
+}
+
+// Admin-only AI helpers, shown under DEBUG when a bot seat exists.
+const showAiButtons = computed(() => rf.DEBUG_USERS.includes(personal.name) && aiDebug.aiInGame())
+const pauseLabel = computed(() => (store.viewSettings.pauseOnAi ? "Pause on AI: True" : "Pause on AI: False"))
+
+// Switching the panel off has to go through closePanel(), not a raw flag flip:
+// if the AI is parked, the panel is the only thing that can release it.
+function toggleAiDebug() {
+	if (store.viewSettings.showAiDebug) aiDebug.closePanel()
+	else store.viewSettings.showAiDebug = true
+}
+
+let resetting = false
+
+async function resetAiButton() {
+	if (resetting) return
+	resetting = true
+	try {
+		// Release any parked AI first, otherwise a pending gate outlives the game.
+		aiDebug.resume()
+		await resetGameForAI()
+	} catch (err) {
+		console.error("AI reset failed", err)
+		store.gameMessages.errorText = "AI reset failed: " + err.message
+	} finally {
+		resetting = false
+	}
 }
 
 function debugButton() {
@@ -103,7 +133,17 @@ function toggleChat() {
 	}
 	store.clearCoffeeHistoryInfo()
 	document.getElementById("boardContainer").classList.remove("slideRight")
-	store.viewSettings.showChat = !store.viewSettings.showChat
+	if (store.viewSettings.showChat) store.viewSettings.showChat = false
+	else {
+		store.viewSettings.showChat = true
+		setTimeout(function () {
+			var el = document.getElementById("wholeChat")
+			var cs = getComputedStyle(el)
+			var b = document.getElementById("footer").getBoundingClientRect().top
+			var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+			el.style["max-height"] = String(parseInt(b - a)) + "px"
+		}, 50)
+	}
 }
 
 function toggleHistory() {
@@ -116,9 +156,11 @@ function toggleHistory() {
 	} else {
 		store.viewSettings.showHistory = true
 		setTimeout(function () {
+			var el = document.getElementById("history")
+			var cs = getComputedStyle(el)
 			var b = document.getElementById("footer").getBoundingClientRect().top
-			var a = 130
-			document.getElementById("history").style["max-height"] = String(parseInt(b - a)) + "px"
+			var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+			el.style["max-height"] = String(parseInt(b - a)) + "px"
 			var offsets = document.getElementById("boardContainer").getBoundingClientRect()
 			if (offsets.left < 460) document.getElementById("boardContainer").classList.add("slideRight")
 		}, 50)
@@ -276,6 +318,12 @@ function getCurrentPlayerNames() {
 				<br />
 				<button v-if="rf.DEBUG_USERS.includes(personal.name)" @click="testButton" class="actionsLineButton">Test</button>
 				<button v-if="rf.DEBUG_USERS.includes(personal.name)" @click="debugButton" class="actionsLineButton">DEBUG</button>
+				<template v-if="showAiButtons">
+					<br />
+					<button @click="toggleAiDebug" class="actionsLineButton">AI Debug: {{ store.viewSettings.showAiDebug ? "on" : "off" }}</button>
+					<button @click="aiDebug.togglePause()" class="actionsLineButton">{{ pauseLabel }}</button>
+					<button @click="resetAiButton" class="actionsLineButton" :disabled="resetting">{{ resetting ? "Resetting..." : "Reset AI" }}</button>
+				</template>
 			</div>
 		</div>
 

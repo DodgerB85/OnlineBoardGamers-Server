@@ -26,6 +26,7 @@
           
           <div class="coffeeHelpSection">
             <p>
+              {% static 'FCM/rules/FCM_Ketchup_rules.pdf' as fcm_ketchup_rules_url %}
               {% blocktranslate trimmed %}
                 Finding the correct coffee route can be quite tricky! First of all, please read the coffee section of the
                 expansion
@@ -33,8 +34,7 @@
                 <br />
                 Make sure you fully understand the example and the reasons why each route was chosen.
                 <br />
-                The Ketchup Expansion rules are available <a href="https://www.boardgamehelpers.com/FoodChainMagnate/images/FCM_ketchup_Regels_Eng_web.pdf"
-    target="_blank">here</a>.
+                The Ketchup Expansion rules are available <a href="{{ fcm_ketchup_rules_url }}">here</a>.
               {% endblocktranslate %}
             </p>
           </div>

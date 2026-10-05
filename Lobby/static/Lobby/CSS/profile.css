@@ -312,6 +312,25 @@
 	vertical-align: middle;
 }
 
+/* Spinner shown inside profile submit buttons while saving */
+.btn-spinner {
+	display: inline-block;
+	width: 14px;
+	height: 14px;
+	margin-right: 8px;
+	vertical-align: -2px;
+	border: 2px solid currentColor;
+	border-top-color: transparent;
+	border-radius: 50%;
+	animation: btn-spin 0.6s linear infinite;
+}
+
+@keyframes btn-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
 /**** END PROFILE ****/
 .AQYpreferencesDiv {
 	font-size: 30px;

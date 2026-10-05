@@ -13,11 +13,13 @@ import TopMenuViews from "./components/TopMenuViews.vue"
 import MapArea from "./components/MapArea.vue"
 
 import DebugArea from "./components/DebugArea.vue"
+import AIDebugPanel from "./components/AIDebugPanel.vue"
 import FooterBar from "./components/FooterBar.vue"
 import HistoryTab from "./components/HistoryTab.vue"
 import PlayerDetails from "./components/PlayerDetails.vue"
 
 import ReplayArea from "./components/ReplayArea.vue"
+import TutorialPanel from "./components/tutorial/TutorialPanel.vue"
 
 import * as replay from "./js/FCMreplay"
 
@@ -43,33 +45,16 @@ store.wholeTestResetData = funcs.simpleExportWholeFCMmodel()
 
 /********************************* */
 
+// NB the "r = rotate" shortcut used to live here, but the whole branch was
+// commented out and referred to store.context.itemBeingAddedRotation, which no
+// longer exists. Rotation now lives where the buttons are - AddItemBox.vue, which
+// has the per-item logic (2 vs 4 rotations, campaign orientation, re-highlighting).
 document.addEventListener("keyup", function (event) {
 	if (store.viewSettings.showChat) return
-	//if (event.altKey && event.which === 82)
-	// r = rotate
-	if (event.key === "r" || event.key === "R") {
-		/*
-if (!rf.ROTATABLE_TILES.includes(store.context.itemBeingAdded)) return
-// Remove ghosts
-let ghostDivs = document.getElementsByClassName('ghostDiv')
-let ghostImgs = document.getElementsByClassName('ghostImg')
-for (let i = 0; i < ghostDivs.length; i++) ghostDivs[i].style.display = 'none'
-for (let i = 0; i < ghostImgs.length; i++) ghostImgs[i].style.display = 'none'
-store.topMenuViews.currentGhostIndex = -1
-
-store.context.itemBeingAddedRotation += 1
-if (store.context.itemBeingAddedRotation === 2) store.context.itemBeingAddedRotation = 0
-else if (store.context.itemBeingAddedRotation === -1) store.context.itemBeingAddedRotation = 1
-store.context.indexesToHighlightClick.splice(0)
-if (store.context.action === rf.ACT_BUILD_WATER) store.context.indexesToHighlightClick = map.getSpacesForResource()
-else if (store.context.action === rf.ACT_BUILD_PRI_CRAFTSMAN) store.context.indexesToHighlightClick = map.getAllowedIndexesToPlacePriCraftsman(store.context.itemBeingAdded, store.context.range, store.context.itemBeingAddedRotation)[0]
-else if (store.context.action === rf.ACT_BUILD_SEC_CRAFTSMAN) store.context.indexesToHighlightClick = map.getAllowedIndexesToPlaceSecCraftsman(store.context.itemBeingAdded, store.context.range, store.context.itemBeingAddedRotation)[0]
-*/
-	} else if (event.key == "ArrowLeft") {
+	if (event.key == "ArrowLeft") {
 		// left arrow
 		if (store.viewSettings.showReplay) replay.performStep(-1)
 	} else if (event.key == "ArrowRight") {
-		// right arrow
 		if (store.viewSettings.showReplay) replay.performStep(1)
 	}
 })
@@ -108,7 +93,13 @@ else if (store.context.action === rf.ACT_BUILD_SEC_CRAFTSMAN) store.context.inde
 		</transition>
 	</div>
 
+	<!-- Admin AI debugging: what the bot is deciding, and why -->
+	<AIDebugPanel v-if="rf.DEBUG_USERS.includes(personal.name) && store.viewSettings.showAiDebug" />
+
 	<FooterBar />
+
+	<!-- Tutorial only: /FCM/tutorial/ sets window.initData.tutorial -->
+	<TutorialPanel />
 </template>
 
 <style>

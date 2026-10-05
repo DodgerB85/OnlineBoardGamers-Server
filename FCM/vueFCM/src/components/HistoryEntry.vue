@@ -61,6 +61,7 @@ const MODULE_IMGS = {
 	10: ["so_kimchi", "kimchi"],
 	11: ["so_sushi", "sushi"],
 	12: ["so_noodles", "noodles"],
+	48: ["so_laborMarket", "laborMarket"],
 	999: ["so_skip", "skipModule"],
 }
 
@@ -93,6 +94,20 @@ function playerName(playerIndex) {
 	return store.players[playerIndex]?.displayName ?? i18n.global.t("history.system")
 }
 
+function unionHolderIndexes(value) {
+	if (Array.isArray(value)) return value
+	return Number.isInteger(value) && value >= 0 ? [value] : []
+}
+
+function unionHolderNames(value) {
+	return unionHolderIndexes(value).map(playerName).join(", ")
+}
+
+function unionWorkforceCount(entryData) {
+	const holders = unionHolderIndexes(entryData[1])
+	return holders.length > 0 ? (entryData[2]?.[holders[0]] ?? 0) : 0
+}
+
 function playerIconSrc(colour) {
 	return view.getImage("player_resto_icon_" + personal.getCorrectedColour(colour))
 }
@@ -117,6 +132,10 @@ function empType(employee) {
 function empClass(employee) {
 	const type = empType(employee)
 	return [type, type === "manager" ? "inverted" : ""].filter(Boolean)
+}
+
+function temporaryWorkerRoleNames(roles) {
+	return roles.length > 0 ? roles.map((employee) => empTitle(employee)).join(", ") : i18n.global.t("history.none")
 }
 
 function goodSrc(good) {
@@ -619,13 +638,12 @@ const computedEntry3 = computed(() => {
 	} else if (entry[0] === rf.HIST_DISPLAY_RESERVE) {
 		ret.reserveCards = param.map((v) => {
 			if (store.startingOptions.reservePrice) {
-				if (v === -1) return "res_card_0"
 				if (v === 1) return "res_card_5"
 				if (v === 2) return "res_card_10"
 				if (v === 3) return "res_card_20"
 				return "res_card_0"
 			}
-			return v === -1 ? "res_card_0" : `res_card_${v}`
+			return v >= 1 && v <= 3 ? `res_card_${v}` : "res_card_0"
 		})
 		// New base price from the most frequent reserve card
 		ret.basePrice = 10
@@ -817,6 +835,63 @@ const computedEntry3 = computed(() => {
 				<template #emp><InfoPopup type="employee" :employeeId="rf.KIMCHI_MASTER"><span class="compact" :class="empClass(rf.KIMCHI_MASTER)">{{ empTitle(rf.KIMCHI_MASTER) }}</span></InfoPopup></template>
 			</i18n-t> <img class="foodTokenImg" :src="goodSrc(rf.KIMCHI)" alt="" />
 			</div>
+		</template>
+
+		<!-- HIST_FLIP_TO_FRIED_CHICKEN: unserved demand flips to fried chicken (Fried Chicken mod) -->
+		<template v-else-if="entry[0] === rf.HIST_FLIP_TO_FRIED_CHICKEN">
+			<div><i18n-t keypath="history.flipToFriedChicken" tag="span" scope="global">
+				<template #houses>{{ entry[3].map((f) => f[0]).join(", ") }}</template>
+			</i18n-t> <img class="foodTokenImg" :src="goodSrc(rf.FRIED_CHICKEN)" alt="" />
+			</div>
+		</template>
+
+		<!-- HIST_HOUSE_MOVED_OUT: houses gave up on this neighbourhood (Fried Chicken mod) -->
+		<template v-else-if="entry[0] === rf.HIST_HOUSE_MOVED_OUT">
+			<div><i18n-t keypath="history.houseMovedOut" tag="span" scope="global">
+				<template #houses>{{ entry[3].join(", ") }}</template>
+			</i18n-t>
+			</div>
+		</template>
+
+		<!-- HIST_STADIUM_ANNOUNCE: the next stadium game is announced (Stadium mod) -->
+		<template v-else-if="entry[0] === rf.HIST_STADIUM_ANNOUNCE">
+			<div><i18n-t keypath="history.stadiumAnnounce" tag="span" scope="global">
+				<template #turn>{{ 3 * entry[3][0] + 2 }}</template>
+				<template #units>{{ entry[3][2] }}</template>
+				<template #good><img class="foodTokenImg" :class="goodClass(entry[3][1])" :src="goodSrc(entry[3][1])" alt="" /></template>
+			</i18n-t>
+			</div>
+		</template>
+
+		<!-- HIST_STADIUM_RESULT: stadium game day resolved - one winner or a clear-out (Stadium mod) -->
+		<template v-else-if="entry[0] === rf.HIST_STADIUM_RESULT">
+			<div v-if="entry[3][0] > -1"><i18n-t keypath="history.stadiumWinner" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][0]].colour)">{{ store.players[entry[3][0]].displayName }}</span></template>
+				<template #units>{{ entry[3][2] }}</template>
+				<template #good><img class="foodTokenImg" :class="goodClass(entry[3][1])" :src="goodSrc(entry[3][1])" alt="" /></template>
+			</i18n-t>
+			</div>
+			<div v-else><i18n-t keypath="history.stadiumNobody" tag="span" scope="global">
+				<template #units>{{ entry[3][2] }}</template>
+				<template #good><img class="foodTokenImg" :class="goodClass(entry[3][1])" :src="goodSrc(entry[3][1])" alt="" /></template>
+			</i18n-t>
+			</div>
+		</template>
+
+		<!-- Labor Market history -->
+		<template v-else-if="entry[0] === rf.HIST_TEMPORARY_WORKER">
+			<div v-if="entry[3].length === 3 && Array.isArray(entry[3][0])">{{ $t("history.temporaryWorkerChoices", { name: playerName(entry[1]), employees: temporaryWorkerRoleNames(entry[3][0]), selected: entry[3][0].length, count: entry[3][1] }) }}</div>
+			<div v-else-if="entry[3].length === 3">{{ $t("history.temporaryWorkerChosen", { name: playerName(entry[1]), employee: empTitle(entry[3][0]), count: entry[3][1], used: entry[3][2] }) }}</div>
+			<div v-else>{{ $t("history.temporaryWorkerCampaign", { name: playerName(entry[1]), num: entry[3][3], used: entry[3][2], count: entry[3][1] }) }}</div>
+		</template>
+
+		<template v-else-if="entry[0] === rf.HIST_HEADHUNT">
+			<div>{{ $t(entry[3][3] === 1 ? "history.headhuntsDeferred" : "history.headhunts", { name: playerName(entry[1]), employee: empTitle(entry[3][1]), owner: playerName(entry[3][0]), amount: entry[3][2] }) }}</div>
+		</template>
+
+		<template v-else-if="entry[0] === rf.HIST_UNION_ORGANIZER">
+			<div v-if="unionHolderIndexes(entry[3][1]).length === 0">{{ $t("history.unionUnassigned") }}</div>
+			<div v-else>{{ $t("history.unionAssigned", { names: unionHolderNames(entry[3][1]), count: unionWorkforceCount(entry[3]) }) }}</div>
 		</template>
 
 		<!-- HIST_BUILD_HOUSE: player builds a house -->
@@ -1064,8 +1139,8 @@ const computedEntry3 = computed(() => {
 		<template v-else-if="entry[0] === rf.HIST_FIRE">
 			<div v-if="entry[3].length > 0"><i18n-t keypath="history.fires" tag="span" scope="global">
 				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
-			</i18n-t> <InfoPopup v-for="(e, i) in entry[3]" :key="i" type="employee" :employeeId="e">
-				<span class="compact" :class="empClass(e)">{{ empTitle(e) }}</span>
+			</i18n-t> <InfoPopup v-for="(e, i) in entry[3]" :key="i" type="employee" :employeeId="rf.decodeFiredEmployee(e)">
+				<span class="compact" :class="empClass(rf.decodeFiredEmployee(e))">{{ empTitle(rf.decodeFiredEmployee(e)) }}</span>
 			</InfoPopup>
 			</div>
 			<i18n-t v-else keypath="history.firesNoEmployees" tag="span" scope="global">
@@ -1171,6 +1246,24 @@ const computedEntry3 = computed(() => {
 		<!-- HIST_BANK_BREAK: the bank was refilled -->
 		<template v-else-if="entry[0] === rf.HIST_BANK_BREAK">
 			<div>{{ $t("history.bankBroke", { amount: entry[3][0] }) }}</div>
+		</template>
+
+		<!-- HIST_BANK_BAILOUT: second break - the city rescues the bank (Second Bailout mod) -->
+		<template v-else-if="entry[0] === rf.HIST_BANK_BAILOUT">
+			<div><img class="bailoutSafeIcon" :src="view.getImage('so_bailout')" alt="" /> {{ $t("history.bankBailout", { amount: entry[3][0] }) }}</div>
+		</template>
+
+		<!-- HIST_BAILOUT_CLAIM: player claims a free marketer or declines (Second Bailout mod) -->
+		<template v-else-if="entry[0] === rf.HIST_BAILOUT_CLAIM">
+			<div v-if="entry[3][0] !== -1"><i18n-t keypath="history.bailoutClaim" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				<template #card><img class="foodTokenImg" :src="view.getImage('emp_' + entry[3][0])" :alt="rf.employeeName(entry[3][0])" /></template>
+			</i18n-t>
+			</div>
+			<div v-else><i18n-t keypath="history.bailoutDecline" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t>
+			</div>
 		</template>
 
 		<!-- HIST_BANKRUPT: a player went bankrupt -->
@@ -1535,5 +1628,11 @@ img.milestoneIcon.plane {
 .foodTokenMed {
 	width: 17px !important;
 }
-</style>
 
+/* Second Bailout mod: safe icon next to the bailout history entry */
+.bailoutSafeIcon {
+	width: 20px;
+	height: 20px;
+	vertical-align: middle;
+}
+</style>

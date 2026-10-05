@@ -67,6 +67,52 @@ export function getCurrentPlayersArray() {
 	}
 }
 
+export function chooseTemporaryWorkerRoles(roles) {
+	const store = useModelStore()
+	const playerIndex = currentPlayerIndex()
+	const playerObj = currentPlayerObj()
+	if (!store.startingOptions.laborMarket || !playerObj.employees.includes(rf.TEMPORARY_WORKER) || !Array.isArray(roles)) return false
+	if (store.laborMarket.dailyTemporaryEffects[playerIndex]) return false
+
+	const limit = rules.temporaryWorkerActionCount(store.laborMarket.removedTemporaryWorkersAtTurnStart)
+	if (roles.length > limit || roles.some((role) => !rf.TEMPORARY_WORKER_ROLES.includes(role))) return false
+	const selectedRoles = [...roles]
+	const usedByRole = {}
+	for (const role of [rf.WAITRESS, rf.PRICING_MANAGER]) {
+		const count = selectedRoles.filter((selectedRole) => selectedRole === role).length
+		if (count > 0) usedByRole[role] = count
+	}
+	store.laborMarket.dailyTemporaryEffects[playerIndex] = { roles: selectedRoles, limit, usedByRole }
+	model.addHistory(rf.HIST_TEMPORARY_WORKER, [selectedRoles, limit, usedByRole], playerIndex, 0)
+	if ((usedByRole[rf.WAITRESS] || 0) > 0) {
+		plyr.awardMilestone(playerIndex, rf.FIRST_WAITRESS)
+		plyr.awardMilestone(playerIndex, rf.FIRST_WAITRESS_USED)
+	}
+	if ((usedByRole[rf.PRICING_MANAGER] || 0) > 0) plyr.awardMilestone(playerIndex, rf.FIRST_LOWER_PRICES)
+	store.gameflow.subphase = rf.SUBPHASE_HIRING
+	setupHiringSubphase()
+	return { roles: selectedRoles, limit }
+}
+
+export function chooseTemporaryWorkerRole(role, uses = null) {
+	const store = useModelStore()
+	const limit = rules.temporaryWorkerActionCount(store.laborMarket.removedTemporaryWorkersAtTurnStart)
+	if (!rf.TEMPORARY_WORKER_ROLES.includes(role)) return false
+	const count = Number.isInteger(uses) ? Math.max(0, Math.min(limit, uses)) : limit
+	return chooseTemporaryWorkerRoles(Array(count).fill(role))
+}
+
+export function consumeTemporaryWorker(playerIndex = currentPlayerIndex()) {
+	const store = useModelStore()
+	const playerObj = store.players[playerIndex]
+	if (!store.startingOptions.laborMarket || !playerObj) return false
+	const temporaryIndex = playerObj.employees.indexOf(rf.TEMPORARY_WORKER)
+	if (temporaryIndex === -1) return false
+	playerObj.employees.splice(temporaryIndex, 1)
+	store.laborMarket.removedTemporaryWorkers++
+	return true
+}
+
 export function isSimulPhase(phase = -1) {
 	if (phase === -1) phase = useModelStore().gameflow.phase
 	const store = useModelStore()
@@ -147,13 +193,18 @@ export function endWorkingDaySubphase() {
 			store.context.justCoffeeShopped.length = 0
 			setupCoffeeShopsPhase()
 		} else {
-			setupMarketingPhase()
+			setupHeadhunterPhase()
 		}
 	}
 
 	// --- PHASE: COFFEE ---
 	else if (subphase === rf.SUBPHASE_COFFEE_SHOPS_FROM_TRAIN) {
 		store.context.coffeeShopAction = ""
+		setupHeadhunterPhase()
+	}
+
+	// --- PHASE: HEADHUNTING ---
+	else if (subphase === rf.SUBPHASE_HEADHUNTING) {
 		setupMarketingPhase()
 	}
 
@@ -168,11 +219,7 @@ export function endWorkingDaySubphase() {
 		summary.market.unused = [...currentMarketers]
 
 		// Set up producing
-		let producers = playerObj.employees.filter((e) => rf.PRODUCERS.includes(e))
-		if (playerObj.employees.includes(rf.NIGHT_SHIFT_MANAGER)) {
-			const extra = producers.filter((e) => [rf.ERRAND_BOY, rf.KITCHEN_TRAINEE, rf.BARISTA_TRAINEE].includes(e))
-			producers.push(...extra)
-		}
+		let producers = rules.availableProducers(playerIndex)
 		summary.produce.total = producers.length
 		store.context.remainingProducers = [...producers]
 
@@ -189,15 +236,7 @@ export function endWorkingDaySubphase() {
 	else if (subphase === rf.SUBPHASE_PRODUCE) {
 
 		// Compute unused producers (same logic as computedProducers in ActionAreaWorkingDay)
-		let allProducers = playerObj.employees.filter((e) => rf.PRODUCERS.includes(e))
-		if (playerObj.employees.includes(rf.NIGHT_SHIFT_MANAGER)) {
-			const extras = allProducers.filter((e) => e === rf.ERRAND_BOY || e === rf.KITCHEN_TRAINEE || e === rf.BARISTA_TRAINEE)
-			allProducers = [...allProducers, ...extras]
-		}
-		for (const used of store.context.justProduced.team) {
-			const idx = allProducers.indexOf(used)
-			if (idx !== -1) allProducers.splice(idx, 1)
-		}
+		let allProducers = rules.availableProducers(playerIndex, store.context.justProduced.team)
 		summary.produce.unused = allProducers
 		summary.houses.total = playerObj.employees.filter((e) => e === rf.NEW_BUSINESS_DEVELOPER).length
 
@@ -266,6 +305,15 @@ export function endWorkingDaySubphase() {
 	store.subphaseSnapshots[store.gameflow.subphase] = store.subphaseResetData
 }
 
+function setupHeadhunterPhase() {
+	const store = useModelStore()
+	const playerObj = currentPlayerObj()
+	store.context.headhunterActionsUsed = 0
+	store.context.justHeadhunted.splice(0)
+	store.gameflow.subphase = rf.SUBPHASE_HEADHUNTING
+	if (!store.startingOptions.laborMarket || !playerObj.employees.includes(rf.HEADHUNTER)) setupMarketingPhase()
+}
+
 // Set up the marketing subphase, auto-skipping it if there are no marketeers
 // available 
 function setupMarketingPhase() {
@@ -276,7 +324,7 @@ function setupMarketingPhase() {
 	const playerObj = currentPlayerObj()
 	const summary = store.context.endOfDaySummaryData
 	const marketers = playerObj.employees.filter((e) => rf.MARKETERS.includes(e) && e !== rf.MASS_MARKETEER)
-	summary.market.total = marketers.length
+	summary.market.total = marketers.length + rules.temporaryWorkerRemainingActions(currentPlayerIndex(), rf.MARKETING_TRAINEE)
 	if (playerObj.employees.includes(rf.NIGHT_SHIFT_MANAGER)) {
 		summary.market.total += playerObj.employees.filter((e) => e === rf.MARKETING_TRAINEE).length
 	}
@@ -285,7 +333,7 @@ function setupMarketingPhase() {
 	plyr.sendMassMarketeers(currentPlayerIndex())
 
 	let marketersCopy = funcs.removeItemAll(allMarketers, rf.MASS_MARKETEER)
-	if (marketersCopy.length === 0 && store.context.massMarketersOnly === -1) {
+	if (marketersCopy.length === 0 && rules.temporaryWorkerRemainingActions(currentPlayerIndex(), rf.MARKETING_TRAINEE) === 0 && store.context.massMarketersOnly === -1) {
 		// if you only had MM, move to next phase
 		endWorkingDaySubphase()
 	}
@@ -737,7 +785,7 @@ export function updateLobbyistHighlights() {
 		if (v === 0) {
 			store.highlights.indexesToHighlightYellow = rules.givePossiblePositionsForSimpleObject(4, 1, 2, rot, true, false, lobbyistData)
 		} else {
-			store.highlights.indexesToHighlightYellow = map.locationForWeirdObject(parkModel, true, false, "park", lobbyistData)
+			store.highlights.indexesToHighlightYellow = map.locationForWeirdObject(parkModel, true, true, "park", null)
 		}
 	}
 }
@@ -1101,15 +1149,17 @@ export function resetMarketingSelection() {
 	store.context.path.splice(0)
 	store.context.from = -1
 	store.context.range = 0
+	store.context.temporaryMarketer = false
 }
 
-export function selectMarketer(marketer, nightShift) {
+export function selectMarketer(marketer, nightShift, temporary = false) {
 	const store = useModelStore()
 	const playerIndex = currentPlayerIndex()
 	const playerObj = currentPlayerObj()
 
 	context.clearAllHighlights()
 	store.context.nightShift = nightShift === true
+	store.context.temporaryMarketer = temporary === true
 
 	// Award "used" milestones on selection
 	if (marketer === rf.BRAND_MANAGER) {
@@ -1210,6 +1260,7 @@ export function cancelMarketer() {
 	const playerObj = currentPlayerObj()
 
 	if (playerObj.employees.indexOf(store.context.marketer) !== -1) store.context.justMarketed.push(store.context.marketer)
+	store.context.temporaryMarketer = false
 	resetMarketingSelection()
 }
 
@@ -1325,6 +1376,11 @@ export function placeMarketingCampaign(index) {
 	else {
 		if (store.context.secondCampaignManager) {
 			plyr.addCampaignToMarketer(playerIndex, store.context.marketer, store.context.campaign)
+		} else if (store.context.temporaryMarketer) {
+			store.laborMarket.temporaryCampaignOwners[store.context.campaign] = playerIndex
+			rules.temporaryWorkerUsesAction(playerIndex, rf.MARKETING_TRAINEE)
+			model.addHistory(rf.HIST_TEMPORARY_WORKER, [rf.MARKETING_TRAINEE, rules.temporaryWorkerRoleCount(playerIndex, rf.MARKETING_TRAINEE), rules.temporaryWorkerUsedActions(playerIndex, rf.MARKETING_TRAINEE), store.context.campaign], playerIndex, 0)
+			store.context.endOfDaySummaryData.market.marketed.push(store.context.campaign)
 		} else {
 			plyr.sendPlayerMarketerToMarket(playerIndex, store.context.marketer, store.context.campaign, false, false)
 
@@ -1362,7 +1418,7 @@ export function placeMarketingCampaign(index) {
 			playSecondCampaignManager()
 		}
 		// NIGHT SHIFT MANAGER - the trainee markets a second time
-		else if (!store.context.nightShift && playerObj.employees.includes(rf.NIGHT_SHIFT_MANAGER) && store.context.nightShiftCampaign === false && store.context.marketer == rf.MARKETING_TRAINEE) {
+		else if (!store.context.temporaryMarketer && !store.context.nightShift && playerObj.employees.includes(rf.NIGHT_SHIFT_MANAGER) && store.context.nightShiftCampaign === false && store.context.marketer == rf.MARKETING_TRAINEE) {
 			store.context.firstCampaignDuration = store.context.duration
 			store.context.firstCampaignCampaign = store.context.campaign
 			awardCampaignTypeAndGoodMilestones(playerIndex)
@@ -1622,6 +1678,7 @@ export function chooseFridgeType(choice) {
 export async function endPlayerTurn(forced, isPointlessMove = false) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	if (store.gameflow.phase === rf.PHASE_WORKING_DAY) consumeTemporaryWorker()
 	store.clearCoffeeHistoryInfo()
 	context.resetContextAndHighlights()
 	const playerObj = currentPlayerObj()
@@ -1630,7 +1687,7 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 	// Check for last man standing game over here
 	let numNonPlayers = 0
 	for (let i = 0; i < store.players.length; i++) if (store.players[i].displayName === rf.BOT_NAME) numNonPlayers++
-	if (numNonPlayers === store.players.length - 1) {
+	if (numNonPlayers === store.players.length - 1 || (personal.trainingGame && numNonPlayers > 0 && personal.name !== "admin" && personal.name !== "BotKickStarter")) {
 		model.endGame()
 		return
 	}
@@ -1649,6 +1706,10 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 			store.context.chosenResCard = -1
 		}
 	} else if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) {
+		if (rules.unionOrganizerPlacementRequired(playerIndex)) {
+			store.gameMessages.actionError = i18n.global.t("laborMarket.unionMustWork")
+			return
+		}
 		if (playerObj.employees.length == 0 && !forced && playerObj.beach.length > 0 /*&& !isAIplayer*/) {
 			return
 		} else if (playerObj.beach.length > 0 && !forced) {
@@ -1662,7 +1723,9 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 				store.context.action = rf.ACT_CONFIRM_NO_MORE_EMPLOYEES
 				return
 			}
-		} else if (personal.trainingGame) {
+		}
+
+		if (personal.trainingGame) {
 			currentPlayerObj().employees = currentPlayerObj().employees.filter((emp) => emp !== rf.BLANK_EMPLOYEE_SPACE)
 			model.addHistory(rf.HIST_CHOOSE_STRUCTURE, [[...currentPlayerObj().employees], [...currentPlayerObj().beach]], currentPlayerIndex(), 0)
 			if (currentPlayerObj().employees.indexOf(rf.DISCOUNT_MANAGER) > -1) {
@@ -1673,6 +1736,7 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 
 		// Always do this
 		currentPlayerObj().employees = currentPlayerObj().employees.filter((emp) => emp !== rf.BLANK_EMPLOYEE_SPACE)
+		if (store.startingOptions.laborMarket) rules.snapshotWorkedCount(playerIndex)
 	} else if (store.gameflow.phase === rf.PHASE_WORKING_DAY) {
 		store.gameflow.subphase = rf.SUBPHASE_HIRING
 		// Set autoFridge from expert panel cleanup skip flag for isRequiredToPlayCleanUp
@@ -1684,14 +1748,15 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 		if (store.startingOptions.strictPaydayFridge) {
 			let histo = []
 			let paidItems = 0
-			let due = rules.salary(playerIndex)
+			const normalDue = rules.baseSalary(playerIndex)
+			const switchDue = rules.headhuntSalaryDue(playerIndex)
+			let due = normalDue + switchDue
 			if (due >= 20) plyr.awardMilestone(playerIndex, rf.FIRST_20_SALARIES)
 			if (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) && store.context.preMoveData[0][1].length > 0) {
 				let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
 				paidItems = store.context.preMoveData[0][1].length
 				store.context.preMoveData[0][1].splice(0)
-				due -= unitarySalary * paidItems
-				due = Math.max(due, 0)
+				due = Math.max(normalDue - unitarySalary * paidItems, 0) + switchDue
 			}
 			if (due > playerObj.money && plyr.hasMilestone(playerIndex, rf.FIRST_TRAINER_USED)) {
 				store.bank += playerObj.money
@@ -1711,10 +1776,11 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 			model.addHistory(rf.HIST_FIRE, [...store.context.justFired], currentPlayerIndex(), 0)
 			// re add firees to the reserve
 			store.context.justFired.forEach((returnee) => {
-				store.availableEmployees[returnee]++
+				store.availableEmployees[rf.decodeFiredEmployee(returnee)]++
 			})
 			store.context.justFired.splice(0)
 			model.addHistory(rf.HIST_SALARY_STRICT, [...histo], currentPlayerIndex(), 0)
+			rules.clearHeadhuntSalaries(playerIndex)
 		}
 	} else if (store.gameflow.phase === rf.PHASE_CLEAN_UP) {
 		if (store.startingOptions.strictPaydayFridge) model.addHistory(rf.HIST_FRIDGE_RESOURCES, [...currentPlayerObj().resources], currentPlayerIndex(), 0)
@@ -1739,7 +1805,13 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 
 		// You always want to save a rewind, even at the END of a pointless move
 		// But if it is pointless, you want to delete the PREVIOUS rewind point
-		await IO.saveGameNormal(true, false, isPointlessMove)
+		// ...except when the AI is the one ending its turn. The server stores the
+		// PREVIOUS gameData, so the entry a save creates is "the state at the start
+		// of the mover's turn". For the AI that is a state a human cannot act on
+		// (the AI just plays it again) and it burns one of the 20 rewind slots, so
+		// skip it. Matches the FcmBot suppression in FCM_IO.saveGameNormal.
+		const moverIsAi = store.players[playerIndex]?.name === rf.AI_NAME
+		await IO.saveGameNormal(!moverIsAi, false, isPointlessMove)
 		// In case it is your turn again right away, run startPlayerTurn
 		// If it isn't then you get returned from that function anyway
 		if (rf.SUPER_USERS.includes(personal.name)) personal.pov = -1
@@ -1979,6 +2051,7 @@ export async function endCurrentPhase() {
 	// --- PHASE: WORKING DAY ---
 	else if (store.gameflow.phase === rf.PHASE_WORKING_DAY) {
 		store.players.forEach((p) => (p.OOBpreference = 0))
+		if (store.startingOptions.laborMarket) store.laborMarket.pendingUnionHolders = rules.resolveUnionHolders(store.laborMarket.workedCounts)
 
 		rules.doDinnerTime()
 
@@ -2050,6 +2123,11 @@ export async function endCurrentPhase() {
 		}, [])
 
 		model.clearForNewTurn()
+		if (store.startingOptions.laborMarket) settleUnionOrganizer()
+		model.startLaborMarketTurn()
+
+		// Stadium mod: end-of-turn announcement check (after Dinnertime, turn not yet incremented)
+		rules.stadiumEndOfTurn(store.gameflow.turn)
 
 		kimchiIdxs.forEach((idx) => {
 			plyr.addResources(idx, rf.KIMCHI, 1)
@@ -2124,7 +2202,12 @@ export function startPlayerTurn(startingMidPhase) {
 	const personal = usePersonalStore()
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return
 
-	if (!personal.canPlay()) {
+	// tutorialAlwaysPrepare: prepare the turn even when personal.canPlay() is false.
+	// Needed only by the /FCM/tutorial/ opponent: personal.canPlay() is deliberately
+	// false while it is FcmTutor's turn (so the player cannot act for them), which
+	// would otherwise skip this setup and leave a stale context.justHired behind.
+	const tutorialAlwaysPrepare = personal.tutorial && store.gameflow.turnOrder[0] !== 0
+	if (!personal.canPlay() && !tutorialAlwaysPrepare) {
 		return
 	}
 	if (store.gameflow.phase === rf.PHASE_URBAN_PLANNING) {
@@ -2209,11 +2292,11 @@ export function startPlayerTurn(startingMidPhase) {
 		if (rules.needFiringMarketers(idx) && !plyr.hasMilestone(idx, rf.FIRST_TRAINER_USED)) {
 			const playerObj = currentPlayerObj()
 store.context.justFired.push(
-				...playerObj.employees.filter((e) => rf.REQUIRE_SALARY.indexOf(e) > -1),
-				...playerObj.beach.filter((e) => rf.REQUIRE_SALARY.indexOf(e) > -1)
+				...playerObj.employees.filter((e) => rf.REQUIRE_SALARY.indexOf(e) > -1 && !rf.NON_FIREABLE_EMPLOYEES.includes(e)),
+				...playerObj.beach.filter((e) => rf.REQUIRE_SALARY.indexOf(e) > -1 && !rf.NON_FIREABLE_EMPLOYEES.includes(e))
 			)			
-			playerObj.employees = playerObj.employees.filter((e) => rf.REQUIRE_SALARY.indexOf(e) === -1)
-			playerObj.beach = playerObj.beach.filter((e) => rf.REQUIRE_SALARY.indexOf(e) === -1)
+			playerObj.employees = playerObj.employees.filter((e) => rf.REQUIRE_SALARY.indexOf(e) === -1 || rf.NON_FIREABLE_EMPLOYEES.includes(e))
+			playerObj.beach = playerObj.beach.filter((e) => rf.REQUIRE_SALARY.indexOf(e) === -1 || rf.NON_FIREABLE_EMPLOYEES.includes(e))
 
 			store.context.justFired.forEach((fired) => {
 				store.availableEmployees[fired]++
@@ -2252,20 +2335,11 @@ export function startPlayerWorkingDaySubphase(subphase) {
 
 	// --- SUBPHASE: HIRING ---
 	if (subphase === rf.SUBPHASE_HIRING) {
-		store.context.justHired.length = 0
-
-		// EOD summary
-		summary.hire.total = rules.getRemainingRecruitingPoints(playerIndex)
-		summary.hire.hired.length = 0
-
-		summary.hire.salaryReductions = playerObj.employees.reduce((total, emp) => {
-			if (emp === rf.RECRUITING_MANAGER) return total + 2
-			if (emp === rf.HR_DIRECTOR) return total + 4
-			return total
-		}, 0)
-		if (playerObj.ceoAction === rf.CEO_ACTION_RECRUITING_MANAGER) summary.hire.salaryReductions += 2
-
-		store.wholeTurnResetData = funcs.simpleExportWholeFCMmodel()
+		if (store.startingOptions.laborMarket && playerObj.employees.includes(rf.TEMPORARY_WORKER) && !store.laborMarket.dailyTemporaryEffects[playerIndex]) {
+			store.gameflow.subphase = rf.SUBPHASE_TEMPORARY_WORKER
+			return
+		}
+		setupHiringSubphase()
 	}
 
 	// --- SUBPHASE: TRAINING ---
@@ -2286,6 +2360,12 @@ export function startPlayerWorkingDaySubphase(subphase) {
 		}
 		// Ensure reset happens even if phase skipped
 		store.context.justCoffeeShopped.length = 0
+	}
+
+	// --- SUBPHASE: HEADHUNTING ---
+	else if (subphase === rf.SUBPHASE_HEADHUNTING) {
+		store.context.headhunterActionsUsed = 0
+		store.context.justHeadhunted.splice(0)
 	}
 
 	// --- SUBPHASE: MARKETING ---
@@ -2346,22 +2426,27 @@ export function resetWholeTurn() {
 // Add an employee to the current player's beach
 export function sandboxHireEmployee(employee) {
 	const store = useModelStore()
+	if ([rf.TEMPORARY_WORKER, rf.UNION_ORGANIZER].includes(employee)) return false
 	currentPlayerObj().beach.push(employee)
 	store.availableEmployees[employee]--
+	return true
 }
 
 // Remove an employee from the current player
 export function sandboxFireEmployee(employee) {
 	const store = useModelStore()
 	const playerObj = currentPlayerObj()
+	if (rf.NON_FIREABLE_EMPLOYEES.includes(employee)) return false
 
 	const beachIdx = playerObj.beach.indexOf(employee)
 	if (beachIdx !== -1) playerObj.beach.splice(beachIdx, 1)
 	else {
 		const empIdx = playerObj.employees.indexOf(employee)
-		if (empIdx !== -1) playerObj.employees.splice(empIdx, 1)
+		if (empIdx === -1) return false
+		playerObj.employees.splice(empIdx, 1)
 	}
 	store.availableEmployees[employee]++
+	return true
 }
 
 // Reset just the lobbyist subphase: restore the board to the state before any
@@ -2398,6 +2483,47 @@ export function resetSubphase() {
 	startPlayerTurn(true)
 }
 
+function setupHiringSubphase() {
+	const store = useModelStore()
+	const playerIndex = currentPlayerIndex()
+	const playerObj = currentPlayerObj()
+	const summary = store.context.endOfDaySummaryData
+	store.context.justHired.length = 0
+	summary.hire.total = rules.getRemainingRecruitingPoints(playerIndex)
+	summary.hire.hired.length = 0
+	summary.hire.salaryReductions = playerObj.employees.reduce((total, emp) => {
+		if (emp === rf.RECRUITING_MANAGER) return total + 2
+		if (emp === rf.HR_DIRECTOR) return total + 4
+		return total
+	}, 0)
+	if (playerObj.ceoAction === rf.CEO_ACTION_RECRUITING_MANAGER) summary.hire.salaryReductions += 2
+	if (!store.startingOptions.laborMarket) return
+	store.recruitingResetData = {
+		playerIndex,
+		player: JSON.parse(JSON.stringify(playerObj)),
+		availableEmployees: [...store.availableEmployees],
+		availableMilestones: [...store.availableMilestones],
+		history: JSON.parse(JSON.stringify(store.history)),
+		hireSummary: JSON.parse(JSON.stringify(summary.hire)),
+	}
+}
+
+export function resetHiringSubphase() {
+	const store = useModelStore()
+	if (!store.startingOptions.laborMarket || store.gameflow.subphase !== rf.SUBPHASE_HIRING) return false
+	const snapshot = store.recruitingResetData
+	if (!snapshot || snapshot.playerIndex !== currentPlayerIndex()) return false
+	store.clearCoffeeHistoryInfo()
+	context.clearAllHighlights()
+	store.players.splice(snapshot.playerIndex, 1, JSON.parse(JSON.stringify(snapshot.player)))
+	store.availableEmployees.splice(0, store.availableEmployees.length, ...snapshot.availableEmployees)
+	store.availableMilestones.splice(0, store.availableMilestones.length, ...snapshot.availableMilestones)
+	store.history.splice(0, store.history.length, ...JSON.parse(JSON.stringify(snapshot.history)))
+	store.context.justHired.splice(0)
+	Object.assign(store.context.endOfDaySummaryData.hire, JSON.parse(JSON.stringify(snapshot.hireSummary)))
+	return true
+}
+
 // Go back to the start of a previous working day subphase from the EOD
 // summary. Recruit is the same as resetWholeTurn; the others restore the
 // snapshot taken when that subphase started.
@@ -2432,6 +2558,13 @@ export function redoSubphase(subphase) {
 
 export function autoFillEmployees() {
 	let playerObj = currentPlayerObj()
+	const store = useModelStore()
+	const playerIndex = currentPlayerIndex()
+	if (store.startingOptions.laborMarket && store.laborMarket.unionHolders.includes(playerIndex) && playerObj.beach.includes(rf.UNION_ORGANIZER)) {
+		const unionSlot = playerObj.employees.slice(0, playerObj.ceoSlots).indexOf(rf.BLANK_EMPLOYEE_SPACE)
+		if (unionSlot > -1) plyr.setEmployeeInIndex(playerIndex, rf.UNION_ORGANIZER, unionSlot)
+		else store.gameMessages.actionError = i18n.global.t("laborMarket.unionMustWork")
+	}
 	rf.sortEmployees(playerObj.beach)
 	// Fill top slots with NSM then managers then employees
 	for (let i = 0; i < playerObj.ceoSlots; i++) {
@@ -2522,7 +2655,7 @@ export function hireEmployee(emp) {
 
 	store.context.justHired.push(emp)
 
-	if (playerObj.employees.indexOf(rf.RECRUITING_GIRL) > -1) {
+	if (playerObj.employees.indexOf(rf.RECRUITING_GIRL) > -1 || rules.temporaryWorkerRoleCount(currentPlayerIndex(), rf.RECRUITING_GIRL) > 0) {
 		plyr.awardMilestone(currentPlayerIndex(), rf.FIRST_RECRUITING_GIRL_USED)
 	}
 }
@@ -2563,6 +2696,42 @@ export function trainEmployee(toEmp, steps) {
 	store.context.selectedEmployeeToTrainData.origin = 0
 }
 
+export function headhuntEmployee(playerIndex, targetPlayerIndex, beachIndex) {
+	const store = useModelStore()
+	const player = store.players[playerIndex]
+	if (!player?.employees.includes(rf.HEADHUNTER)) return false
+	const availableActions = player.employees.filter((employee) => employee === rf.HEADHUNTER).length
+	if (store.context.headhunterActionsUsed >= availableActions || !rules.canHeadhunt(playerIndex, targetPlayerIndex, beachIndex)) return false
+	const target = store.players[targetPlayerIndex]
+	const employee = target.beach[beachIndex]
+	const cost = rules.headhuntCost(employee)
+	target.beach.splice(beachIndex, 1)
+	player.beach.push(employee)
+	if (!Array.isArray(store.laborMarket.pendingHeadhuntSalaries[playerIndex])) store.laborMarket.pendingHeadhuntSalaries[playerIndex] = []
+	store.laborMarket.pendingHeadhuntSalaries[playerIndex].push({ employee, cost })
+	store.context.headhunterActionsUsed++
+	store.context.justHeadhunted.push({ from: targetPlayerIndex, employee, cost })
+	model.addHistory(rf.HIST_HEADHUNT, [targetPlayerIndex, employee, cost, 1], playerIndex, 0)
+	return { employee, cost }
+}
+
+export function settleUnionOrganizer() {
+	const store = useModelStore()
+	if (!store.startingOptions.laborMarket) return []
+	const currentHolders = [...store.laborMarket.unionHolders]
+	const nextHolders = rules.resolveUnionHolders(store.laborMarket.workedCounts)
+	for (const player of store.players) {
+		player.beach = player.beach.filter((employee) => employee !== rf.UNION_ORGANIZER)
+		player.employees = player.employees.filter((employee) => employee !== rf.UNION_ORGANIZER)
+	}
+	store.laborMarket.pendingUnionHolders = [...nextHolders]
+	store.laborMarket.unionHolders = [...nextHolders]
+	for (const holder of nextHolders) store.players[holder].beach.push(rf.UNION_ORGANIZER)
+	store.availableEmployees[rf.UNION_ORGANIZER] = Math.max(0, store.players.length - nextHolders.length)
+	model.addHistory(rf.HIST_UNION_ORGANIZER, [currentHolders, [...nextHolders], [...store.laborMarket.workedCounts]], -1, 0)
+	return [...store.laborMarket.unionHolders]
+}
+
 function completeTraining() {
 	const store = useModelStore()
 	const trained = store.context.justTrained
@@ -2589,7 +2758,7 @@ function completeTraining() {
 		plyr.awardMilestone(playerIndex, rf.FIRST_TRAIN)
 
 		// 4. Trainer Check
-		if (playerObj.employees.includes(rf.TRAINER)) {
+		if (playerObj.employees.includes(rf.TRAINER) || rules.temporaryWorkerRoleCount(playerIndex, rf.TRAINER) > 0) {
 			plyr.awardMilestone(playerIndex, rf.FIRST_TRAINER_USED)
 		}
 	}
@@ -2616,17 +2785,20 @@ export function clickedProducer(producer) {
 			if (producer == rf.BURGER_COOK || producer == rf.PIZZA_COOK || producer == rf.DUMPLING_COOK) amount = 3
 			if (producer == rf.SUSHI_COOK) amount = 2
 			if (producer == rf.NOODLE_COOK) amount = 6
+			if (producer == rf.FRIED_CHICKEN_COOK) amount = 3
 
 			if (producer == rf.BURGER_CHEF || producer == rf.PIZZA_CHEF || producer == rf.DUMPLING_CHEF) amount = 8
 			if (producer == rf.SUSHI_CHEF || producer == rf.LEAD_BARISTA) amount = 5
 
 			if (producer == rf.NOODLE_CHEF) amount = 16
+			if (producer == rf.FRIED_CHICKEN_CHEF) amount = 8
 
 			if (producer == rf.BURGER_COOK || producer == rf.BURGER_CHEF) item = rf.BURGER
 			if (producer == rf.PIZZA_COOK || producer == rf.PIZZA_CHEF) item = rf.PIZZA
 			if (producer == rf.SUSHI_COOK || producer == rf.SUSHI_CHEF) item = rf.SUSHI
 			if (producer == rf.NOODLE_COOK || producer == rf.NOODLE_CHEF) item = rf.NOODLES
 			if (producer == rf.DUMPLING_COOK || producer == rf.DUMPLING_CHEF) item = rf.DUMPLING
+			if (producer == rf.FRIED_CHICKEN_COOK || producer == rf.FRIED_CHICKEN_CHEF) item = rf.FRIED_CHICKEN
 
 			if (producer == rf.BARISTA_TRAINEE || producer == rf.BARISTA || producer == rf.LEAD_BARISTA) item = rf.COFFEE
 
@@ -2802,6 +2974,7 @@ export function addProducedItemToPlayer(item) {
 	//c.model.context.good = good
 
 	let amount = 1
+	if (store.context.producer === rf.ERRAND_BOY && rules.temporaryWorkerRoleCount(currentPlayerIndex(), rf.ERRAND_BOY) > 0) plyr.awardMilestone(currentPlayerIndex(), rf.FIRST_ERRAND_BOY)
 	if (store.context.producer == rf.ERRAND_BOY && plyr.hasMilestone(currentPlayerIndex(), rf.FIRST_ERRAND_BOY)) amount = 2
 	store.context.justProduced.team.push(store.context.producer)
 	store.context.justProduced.added[item] += amount

@@ -20,7 +20,7 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/CNSpersonal.js"
 const personal = usePersonalStore()
 
-import { ref } from "vue"
+import { ref, computed } from "vue"
 const showErrorPopup = ref(false)
 const popupPosition = ref({ x: 0, y: 0 })
 
@@ -147,6 +147,74 @@ function addPirateToParty(partyNum) {
 	model.setPirateInPartyIndex(partyNum)
 	store.gameflow.phase = -1
 	store.context.action = rf.ACT_CONFIRM_PIRATE_PLACEMENT
+}
+
+// Tile info overlay: Reserve-style [inputs] => [output] box, sized in the same
+// units getHexPoints uses so it always fits inside the hex
+function tileInfoLayout(hexRef) {
+	const conv = rf.getConversionForHexRef(hexRef)
+	if (!conv) return null
+
+	const U = (store.refSize / store.canvasSize) * 100
+	const icon = 0.15 * U
+	const gap = 0.025 * U
+	const arrowW = 0.11 * U
+	const arrowH = 0.12 * U
+	const pad = 0.02 * U
+
+	const slots = conv.inputs.map(() => false)
+	slots.push(true) // the arrow
+	slots.push(false) // the output
+
+	let width = pad * 2
+	for (let i = 0; i < slots.length; i++) {
+		width += slots[i] ? arrowW : icon
+		if (i < slots.length - 1) width += gap
+	}
+
+	const items = []
+	let x = -width / 2 + pad
+	for (let i = 0; i < slots.length; i++) {
+		if (slots[i]) {
+			items.push({ arrow: true, x: x, w: arrowW, h: arrowH })
+		} else {
+			const res = i < conv.inputs.length ? conv.inputs[i] : conv.output
+			items.push({
+				href: res === rf.RES_CIGAR ? view.getImage("cigar_u") : view.getImage("res" + String(res)),
+				x: x,
+				y: -icon / 2,
+				w: icon,
+				h: icon,
+			})
+		}
+		x += (slots[i] ? arrowW : icon) + gap
+	}
+	return { width: width, height: 0.21 * U, items: items }
+}
+
+const tileInfoOverlays = computed(() => {
+	if (!store.topMenuViews.showTileInfo) return []
+	return store.hexes
+		.map((tile) => ({ tile: tile, layout: tileInfoLayout(tile.hexRef) }))
+		.filter((o) => o.layout !== null)
+})
+
+function arrowPoints(item) {
+	const cx = item.x + item.w / 2
+	const cy = 0
+	const w = item.w
+	const h = item.h
+	return `${cx - w / 2},${cy - h * 0.15}
+		${cx + w * 0.1},${cy - h * 0.15}
+		${cx + w * 0.1},${cy - h / 2}
+		${cx + w / 2},${cy}
+		${cx + w * 0.1},${cy + h / 2}
+		${cx + w * 0.1},${cy + h * 0.15}
+		${cx - w / 2},${cy + h * 0.15}`
+}
+
+function toggleTileInfo() {
+	store.topMenuViews.showTileInfo = !store.topMenuViews.showTileInfo
 }
 </script>
 
@@ -312,6 +380,21 @@ function addPirateToParty(partyNum) {
 			<g v-if="store.pirateShipRef > 0">
 				<polygon class="boardShipPolygon" :points="pirateShipPoints()" fill="url(#patternPirateShip)"></polygon>
 			</g>
+
+			<!-- Tile info overlays (Reserve-style conversions), drawn last so they sit on top -->
+			<g
+				v-for="o in tileInfoOverlays"
+				:key="'tileInfo' + o.tile.id"
+				class="tileInfoOverlay"
+				:transform="'rotate(' + o.tile.rotation * 60 + ' ' + hexCenter(o.tile.hex, false, true) + ')' + hexCenter(o.tile.hex, false)">
+				<g :transform="'rotate(' + -o.tile.rotation * 60 + ')'">
+					<rect :x="-o.layout.width / 2" :y="-o.layout.height / 2" :width="o.layout.width" :height="o.layout.height" fill="white" fill-opacity="1" stroke="black" stroke-width="5" />
+					<g v-for="(item, idx) in o.layout.items" :key="idx">
+						<polygon v-if="item.arrow" :points="arrowPoints(item)" fill="black" />
+						<image v-else :xlink:href="item.href" :x="item.x" :y="item.y" :width="item.w" :height="item.h" />
+					</g>
+				</g>
+			</g>
 		</svg>
 
 		<!-- Add Hex Imgs -->
@@ -332,6 +415,10 @@ function addPirateToParty(partyNum) {
 
 		<MapHighlights />
 	</div>
+
+	<button class="actionsLineButton tileInfoButton" :class="{ tileInfoButtonActive: store.topMenuViews.showTileInfo }" @click="toggleTileInfo()">
+		{{ store.topMenuViews.showTileInfo ? "Hide" : "Show" }} Tile Info
+	</button>
 </template>
 
 <style scoped>
@@ -488,6 +575,20 @@ polygon {
 	opacity: 0;
 }
 
+
+.tileInfoOverlay,
+.tileInfoOverlay * {
+	pointer-events: none;
+}
+
+.tileInfoButton {
+	display: block;
+	margin: 5px auto;
+}
+
+.tileInfoButtonActive {
+	background-color: lightblue;
+}
 
 .tile-ripple {
 	fill: none;

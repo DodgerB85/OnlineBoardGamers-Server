@@ -75,7 +75,7 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap"
               rel="stylesheet">
-        <link href="{% static 'Lobby/CSS/components.css' %}?v=24"
+        <link href="{% static 'Lobby/CSS/components.css' %}?v=26"
               rel="stylesheet">
         <link href="{% static 'Lobby/CSS/layout_new.css' %}" rel="stylesheet">
         {% block head %}{% endblock %}
@@ -245,6 +245,13 @@
                 </div>
             </div>
         {% else %}
+            <!-- Quick nav not logged in -->
+            <nav class="mobileQuickNav"
+                 aria-label="{% translate "Primary navigation" %}">
+                <a class="topBarLink" href="{% url 'index' %}">{% translate "Home" %}</a>
+                <a class="topBarLink" href="{% url 'register' %}">{% translate "Register" %}</a>
+                <a class="topBarLink" href="{% url 'password_reset' %}">{% translate "Forgot Password" %}</a>
+            </nav>
             <!-- Hamburger not logged in -->
             <div class="hamburgerMenu">
                 <div class="hamburgerLinkDiv">
@@ -265,6 +272,9 @@
             {% block body %}{% endblock %}
         </main>
         <footer class="footer">
+            <div class="footer-social">
+                {% include "Lobby/socialButtons.html" %}
+            </div>
             <div class="support-strip">
                 {% include "Lobby/donate/donateBanner.html" %}
                 {% include "Lobby/splotterconSponsor.html" %}
@@ -280,7 +290,7 @@
     target="_blank">R&D Games</a>. Permission Provided.
                     {% endblocktranslate %}
                 </p>
-                <p>
+                <p class="footer-text">
                     Summary icons from <a href="https://game-icons.net/">game-icons.net</a>
                 </p>
             </div>

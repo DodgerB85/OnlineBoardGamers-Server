@@ -229,6 +229,14 @@ export function simpleExportWholeFCMmodel() {
 	// 20 - context
 	temp.push(JSON.parse(JSON.stringify(store.context)))
 
+	// 21 - Stadium mod
+	temp.push(JSON.parse(JSON.stringify(store.stadium)))
+	// 22 - Labor Market mod (only when chosen)
+	if (store.startingOptions.laborMarket) temp.push(exportLaborMarketSlot())
+
+	// 23 - Second Bailout mod
+	temp.push(JSON.parse(JSON.stringify(store.bailout)))
+
 	let step1 = JSON.stringify(temp)
 	// eslint-disable-next-line no-undef
 	let step2 = pako.gzip(step1)
@@ -362,8 +370,8 @@ export function importPlayer(inputArr) {
 		newPlayer.marketers.push(entry)
 	}
 
-	// 8. Resources (Reconstructing from counts)
-	const resourceCounts = inputArr[8]
+	// 8. Resources (Reconstructing from counts; arrays are trimmed on export)
+	const resourceCounts = padItemCounts(inputArr[8])
 	resourceCounts.forEach((count, typeIndex) => {
 		for (let j = 0; j < count; j++) {
 			newPlayer.resources.push(typeIndex)
@@ -435,13 +443,9 @@ export function exportPlayer(playerIndex) {
 	)
 
 	// 8 - Resources (Optimized counter)
-	const exportResources = Array(10).fill(0)
+	const exportResources = Array(ITEM_COUNT_LEN).fill(0)
 	playerObj.resources.forEach((type) => exportResources[type]++)
-
-	// Trim trailing zeros efficiently
-	let lastIdx = exportResources.length
-	while (lastIdx > 0 && exportResources[lastIdx - 1] === 0) lastIdx--
-	res.push(exportResources.slice(0, lastIdx))
+	res.push(trimTrailingZeros(exportResources))
 
 	// New Milestones Logic
 	if (store.startingOptions.newMilestones) {
@@ -465,36 +469,47 @@ export function exportPlayer(playerIndex) {
 	return res
 }
 
-/** 
-			0 - shortGame
-			1 - useMilestones
-			2 - board
-			3 - players
-			4 - availableMarketingCampaigns
-			5 - availableEmployees
-			6 - availableMilestones
-			7 - amount left in bank
-			8 - gameflow information
-			9 - active marketing
-			10 - used gardens
-			11 - used houses
-			12 - global CEO level
-			13 - board needs
-			14 - reserve
-			15 - context
-			16 - bankBroken
-			17 - history
-			18 - history timestamps
-			19 - allow surrender
-			20 - ketchup options
-			21 - strict payday fridge
-			22 - training game
-			23 - freeway
-			24 - first pizzas
-			25 - parks
-			26 - newRoads
-			27 - coffeeShopMSplayers
+// Produce-count arrays (justProduced.added, EOD produce.produced, player resources)
+// live at full item length (LEMONADE..FRIED_CHICKEN) with unused items as 0.
+// Trim trailing zeros for storage; pad back to full length on import.
+const ITEM_COUNT_LEN = rf.FRIED_CHICKEN + 1
+
+function trimTrailingZeros(arr) {
+	let last = arr.length
+	while (last > 0 && arr[last - 1] === 0) last--
+	return arr.slice(0, last)
+}
+
+function padItemCounts(arr) {
+	if (!Array.isArray(arr)) return Array(ITEM_COUNT_LEN).fill(0)
+	while (arr.length < ITEM_COUNT_LEN) arr.push(0)
+	return arr
+}
+
+/**
+			Wire slots (module-dependent slots are only pushed when chosen):
+			0 - map tiles (lobbyists)
+			1 - players
+			2 - bank
+			3 - gameflow (omitted on game over)
+			4 - active marketing campaigns
+			5 - gardens
+			6 - houses
+			7 - CEO level
+			8 - needs
+			9 - history
+			10 - history timestamps
+			11 - freeways (rural marketers)
+			12 - parks (lobbyists)
+			13 - new roads (lobbyists)
+			14 - coffeeShopMSplayers (mid-game)
+			15 - first pizzas (mid-game)
+			16 - reserve cards (mid-game)
+			17 - context (mid-game + includeContext)
+			18 - stadium (stadium module chosen)
+			19 - second bailout (module chosen, claim night open, mid-game)
 	 */
+
 export function exportFCMmodel(forGameOver, includeContext) {
 	const store = useModelStore()
 	const temp = []
@@ -577,6 +592,9 @@ export function exportFCMmodel(forGameOver, includeContext) {
 			.filter((h) => h.needs != null)
 			.map((h) => {
 				const entry = [h.number]
+				// Fried Chicken mod: persist movedOut flag as a bare `1` marker (needs are
+				// always arrays in the legacy format, so this is unambiguous)
+				if (h.movedOut) entry.push(1)
 				const needsData = forGameOver ? h.needs.map((n) => n[0]) : h.needs
 				return entry.concat(needsData)
 			})
@@ -640,7 +658,30 @@ export function exportFCMmodel(forGameOver, includeContext) {
 		temp.push(JSON.parse(JSON.stringify(store.coffeeShopMSplayers)))
 		temp.push(JSON.parse(JSON.stringify(store.firstPizzas)))
 		temp.push(JSON.parse(JSON.stringify(store.reserveCards)))
-		if (includeContext) temp.push(JSON.stringify(store.context))
+		if (includeContext) {
+			const contextCopy = JSON.parse(JSON.stringify(store.context))
+			contextCopy.justProduced.added = trimTrailingZeros(contextCopy.justProduced.added)
+			contextCopy.endOfDaySummaryData.produce.produced = trimTrailingZeros(contextCopy.endOfDaySummaryData.produce.produced)
+			temp.push(JSON.stringify(contextCopy))
+		}
+	}
+
+	// 18 - Labor Market mod: chosen-module games only. Mid-game saves carry the
+	// full flow state; game-over saves only need the temporary campaign owners
+	// (for the board's campaign display), so they are skipped when there are none.
+	if (store.startingOptions.laborMarket && (!forGameOver || Object.keys(store.laborMarket.temporaryCampaignOwners).length > 0)) {
+		temp.push(exportLaborMarketSlot(forGameOver))
+	}
+
+	// 19 - Stadium mod (only when the module was chosen; shape-detected on load)
+	if (store.startingOptions.stadium) temp.push(exportStadiumSlot())
+
+	// 20 - Second Bailout mod: only while a claim night is open, and never on
+	// game-over saves. Stored as [order, pool pairs, claim pairs] - flat, compact,
+	// and nothing is written when the mod is chosen but no night is running.
+	if (!forGameOver && store.startingOptions.secondBailout && store.bailout.pending) {
+		// Object.entries stringifies the numeric keys - map them back to numbers
+		temp.push([[...store.bailout.order], Object.entries(store.bailout.pool).flat().map(Number), Object.entries(store.bailout.claims).flat().map(Number)])
 	}
 
 	let step1 = JSON.stringify(temp)
@@ -848,17 +889,24 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	// 8? - needs
 	store.needs = inputArr[IMPORT_INDEX].map((house) => {
 		const number = house[0]
+		let movedOut = false
+		let sliceStart = 1
+		// Fried Chicken mod: detect bare `1` marker after house number (movedOut)
+		if (house.length > 1 && house[1] === 1) {
+			movedOut = true
+			sliceStart = 2
+		}
 		let needs = []
 
 	if (store.gameflow.phase !== rf.PHASE_GAME_OVER) {
 			// Standard Import: Extract all needs data directly
-			needs = house.slice(1)
+			needs = house.slice(sliceStart)
 		} else {
 			// Game Over Import: Convert flat goods list to [good, -1] format
-			needs = house.slice(1).map((good) => [good, -1])
+			needs = house.slice(sliceStart).map((good) => [good, -1])
 		}
 
-		return { number, needs }
+		return { number, needs, ...(movedOut ? { movedOut: true } : {}) }
 	})
 
 	IMPORT_INDEX++
@@ -974,15 +1022,18 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 
 		if (includeContext) {
 			// 17?? - context
-			store.context.splice(0)
-			Object.assign(store.context, JSON.parse(inputArr[IMPORT_INDEX]))
+			const contextData = JSON.parse(inputArr[IMPORT_INDEX])
+			// Produce-count arrays were trimmed for storage; pad back to full item length
+			if (contextData.justProduced) contextData.justProduced.added = padItemCounts(contextData.justProduced.added)
+			if (contextData.endOfDaySummaryData?.produce) contextData.endOfDaySummaryData.produce.produced = padItemCounts(contextData.endOfDaySummaryData.produce.produced)
+			Object.assign(store.context, contextData)
 			IMPORT_INDEX++
 		} else context.resetContext()
 	} else {
 		store.coffeeShopMSplayers.splice(0)
 		store.firstPizzas.splice(0)
 		// reserveCards aren't exported for game-over saves - rebuild from history
-		store.reserveCards = Array.from({ length: store.players.length }, () => -1)
+		store.reserveCards = Array.from({ length: store.players.length }, () => rf.RES_CARD_NOT_CHOSEN)
 		for (const h of store.history) {
 			if (h[0] === rf.HIST_CHOOSE_RESERVE_CARD && h[1] >= 0 && h[1] < store.reserveCards.length) store.reserveCards[h[1]] = h[3][0]
 		}
@@ -998,6 +1049,7 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	// INFER m.bankBroken = inputArr[12]
 	store.bankBroken = 0
 	if (store.history.some((h) => h[0] === rf.HIST_DISPLAY_RESERVE)) store.bankBroken = 1
+	if (store.history.some((h) => h[0] === rf.HIST_BANK_BAILOUT)) store.bankBroken = 2
 
 	// 3 - availableEmployees
 	//m.availableEmployees = inputArr[3]
@@ -1007,6 +1059,7 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	if (store.startingOptions.useMilestones === false) {
 		store.availableMilestones.splice(0)
 	} else {
+		store.availableMilestones.splice(0)
 		Object.assign(store.availableMilestones, rf.BASE_GAME_MILESTONES)
 		if (store.startingOptions.noCeoMilestone === true) {
 			store.availableMilestones.splice(store.availableMilestones.indexOf(rf.FIRST_100_DOL), 1)
@@ -1125,6 +1178,204 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 			}
 		}
 	}
+
+	// Labor Market mod: written directly before the Stadium slot for chosen-module
+	// saves, so advance the index only when the slot is actually present
+	let moduleImportIndex = IMPORT_INDEX
+	if (isLaborMarketSlot(inputArr[moduleImportIndex])) moduleImportIndex++
+	restoreLaborMarketState(inputArr, IMPORT_INDEX)
+	// Stadium mod (next slot when the module was chosen; falls back to history for older saves)
+	restoreStadiumState(inputArr, moduleImportIndex)
+	// Second Bailout mod (trails the stadium slot when that module is chosen)
+	restoreBailoutState(inputArr, moduleImportIndex, forGameOver)
+}
+
+// Shape check for both bailout slot formats: the older full object and the
+// compact [order, poolPairs, claimPairs] array. Used to reject whatever slot
+// actually sits at a given position.
+function isBailoutSlot(el) {
+	if (Array.isArray(el)) return el.length === 3 && Array.isArray(el[0]) && Array.isArray(el[1]) && Array.isArray(el[2])
+	return Boolean(el && typeof el === "object" && el.claims !== undefined && el.pool !== undefined)
+}
+
+// Second Bailout mod: restore the claim-night state (shape-detected). `index`
+// is the next unread import position; the slot sits there, or one ahead when
+// an older save also carried the stadium slot while that module was off. The
+// slot is only exported for chosen-module, mid-game saves while a night is
+// open, so a missing slot just means "no bailout state". `forGameOver` covers
+// the callers that omit it.
+export function restoreBailoutState(inputArr, index = inputArr.length - 1, forGameOver) {
+	const store = useModelStore()
+	store.bailout.pending = false
+	store.bailout.pool = {}
+	store.bailout.claims = {}
+	store.bailout.order = []
+	if (forGameOver || store.gameflow.phase === rf.PHASE_GAME_OVER || !store.startingOptions.secondBailout) return
+	let slot = null
+	if (index >= 0 && index < inputArr.length && isBailoutSlot(inputArr[index])) slot = inputArr[index]
+	else if (isBailoutSlot(inputArr[index + 1])) slot = inputArr[index + 1]
+	else return
+	if (Array.isArray(slot)) {
+		// [order, poolPairs, claimPairs] - flat key/value pairs
+		store.bailout.order = [...slot[0]]
+		for (let i = 0; i < slot[1].length; i += 2) store.bailout.pool[slot[1][i]] = slot[1][i + 1]
+		for (let i = 0; i < slot[2].length; i += 2) store.bailout.claims[slot[2][i]] = slot[2][i + 1]
+		store.bailout.pending = true
+	} else {
+		// Older saves stored the full object
+		Object.assign(store.bailout, slot)
+	}
+}
+
+// Stadium mod wire slot: [gamesPlayed] or [gamesPlayed, [gameNumber, food, units]].
+function exportStadiumSlot() {
+	const store = useModelStore()
+	const slot = [store.stadium.gamesPlayed]
+	if (store.stadium.announcement !== null) {
+		const a = store.stadium.announcement
+		slot.push([a.gameNumber, a.food, a.units])
+	}
+	return slot
+}
+
+// Reads a stadium slot in the compact array format or the older full JSON copy.
+// Returns false when the slot is missing or unrecognised, so callers can rebuild
+// from history instead. The shape checks reject the other slots that may end an
+// older export (reserve cards, timestamps, context, ...).
+function applyStadiumSlot(slot) {
+	const store = useModelStore()
+	if (Array.isArray(slot)) {
+		if (!Number.isInteger(slot[0]) || slot[0] < 0 || slot[0] > 100) return false
+		if (slot.length > 2) return false
+		let announcement = null
+		if (slot.length === 2) {
+			if (Array.isArray(slot[1])) {
+				// Compact announcement: [gameNumber, food, units]
+				if (slot[1].length !== 3 || !slot[1].every(Number.isInteger)) return false
+				announcement = { gameNumber: slot[1][0], food: slot[1][1], units: slot[1][2] }
+			} else if (slot[1] && typeof slot[1] === "object") {
+				// Older saves stored the announcement object as-is
+				announcement = slot[1]
+			} else return false
+		}
+		store.stadium.gamesPlayed = slot[0]
+		store.stadium.announcement = announcement
+		return true
+	}
+	if (slot && typeof slot === "object" && slot.gamesPlayed !== undefined) {
+		Object.assign(store.stadium, slot)
+		return true
+	}
+	return false
+}
+
+// Stadium mod: restore state from the trailing wire-format slot (shape-detected).
+// `index` is the next unread import position - the stadium slot sits there
+// whenever the module was chosen (it is pushed before the bailout slot, so no
+// offset is needed). The slot is only scanned when the module was chosen -
+// other games never store it, so their saves load without it. For saves that
+// predate the slot, rebuild from history: gamesPlayed from the result entries,
+// and the last announcement if it is still for an upcoming game.
+export function restoreStadiumState(inputArr, index = inputArr.length - 1) {
+	const store = useModelStore()
+	store.stadium.gamesPlayed = 0
+	store.stadium.announcement = null
+	if (store.startingOptions.stadium && index >= 0 && index < inputArr.length && applyStadiumSlot(inputArr[index])) return
+	for (let i = 0; i < store.history.length; i++) {
+		if (store.history[i][0] === rf.HIST_STADIUM_RESULT) store.stadium.gamesPlayed++
+	}
+	for (let i = store.history.length - 1; i >= 0; i--) {
+		if (store.history[i][0] === rf.HIST_STADIUM_ANNOUNCE) {
+			const a = store.history[i][3]
+			if (a[0] === store.stadium.gamesPlayed + 1) store.stadium.announcement = { gameNumber: a[0], food: a[1], units: a[2] }
+			break
+		}
+	}
+}
+
+// Labor Market wire slot: a compact positional array tagged with the negative
+// option code so it can be told apart from the Stadium/Bailout slots:
+//   [tag, version, removedTemporaryWorkers, removedAtTurnStart, unionHolders,
+//    pendingUnionHolders, workedCounts, campaignOwnerPairs, effects, salaryPairs]
+// Effects are null or [limit, roles, usedByRolePairs]; salaries are flat
+// [employee, cost, ...] pairs. Mid-game saves carry the full flow state; the
+// game-over form keeps only the campaign owners (nothing resumes after the end).
+export function exportLaborMarketSlot(forGameOver = false) {
+	const store = useModelStore()
+	const lm = store.laborMarket
+	const ownerPairs = Object.entries(lm.temporaryCampaignOwners).flat().map(Number)
+	if (forGameOver) return [-rf.SO_LABOR_MARKET, 1, 0, 0, [], [], [], ownerPairs, [], []]
+	return [
+		-rf.SO_LABOR_MARKET,
+		1,
+		lm.removedTemporaryWorkers,
+		lm.removedTemporaryWorkersAtTurnStart,
+		[...lm.unionHolders],
+		[...lm.pendingUnionHolders],
+		[...lm.workedCounts],
+		ownerPairs,
+		lm.dailyTemporaryEffects.map((effect) => (effect ? [effect.limit || 0, [...(effect.roles || [])], Object.entries(effect.usedByRole || {}).flat().map(Number)] : null)),
+		lm.pendingHeadhuntSalaries.map((entries) => (Array.isArray(entries) ? entries.flatMap((entry) => [entry.employee, entry.cost]) : [])),
+	]
+}
+
+// Shape check: the compact slot is an array led by the negative Labor Market tag
+function isLaborMarketSlot(el) {
+	return Array.isArray(el) && el.length >= 10 && el[0] === -rf.SO_LABOR_MARKET
+}
+
+// Reads the Labor Market slot at `index`, or (when index < 0) the one found
+// scanning backwards. Always resets to defaults first so a module-off save or a
+// stale reload cannot leak state. Only ever restores for chosen-module games.
+export function restoreLaborMarketState(inputArr, index = -1) {
+	const store = useModelStore()
+	const lm = store.laborMarket
+	const playerCount = store.players.length
+	lm.removedTemporaryWorkers = 0
+	lm.removedTemporaryWorkersAtTurnStart = 0
+	lm.unionHolders = []
+	lm.pendingUnionHolders = []
+	lm.workedCounts = []
+	lm.temporaryCampaignOwners = {}
+	lm.dailyTemporaryEffects = Array(playerCount).fill(null)
+	lm.pendingHeadhuntSalaries = Array.from({ length: playerCount }, () => [])
+	if (!store.startingOptions.laborMarket) return
+	store.availableEmployees[rf.UNION_ORGANIZER] = playerCount
+	const slot = index >= 0 ? inputArr?.[index] : [...(inputArr || [])].reverse().find(isLaborMarketSlot)
+	if (!isLaborMarketSlot(slot)) return
+	const savedPlayerCount = Math.max(playerCount, Array.isArray(slot[6]) ? slot[6].length : 0, Array.isArray(slot[8]) ? slot[8].length : 0, Array.isArray(slot[9]) ? slot[9].length : 0)
+	const validHolders = (holders) => [...new Set(Array.isArray(holders) ? holders : [])].filter((holder) => Number.isInteger(holder) && holder >= 0 && (savedPlayerCount === 0 || holder < savedPlayerCount))
+	lm.removedTemporaryWorkers = Math.max(0, slot[2] || 0)
+	lm.removedTemporaryWorkersAtTurnStart = Math.max(0, Math.min(lm.removedTemporaryWorkers, slot[3] || 0))
+	lm.unionHolders = validHolders(slot[4])
+	lm.pendingUnionHolders = validHolders(slot[5])
+	lm.workedCounts = Array.isArray(slot[6]) ? [...slot[6]] : []
+	const ownerPairs = Array.isArray(slot[7]) ? slot[7] : []
+	for (let i = 0; i + 1 < ownerPairs.length; i += 2) lm.temporaryCampaignOwners[ownerPairs[i]] = ownerPairs[i + 1]
+	const effects = Array.isArray(slot[8]) ? slot[8] : []
+	lm.dailyTemporaryEffects = Array.from({ length: savedPlayerCount }, (_, playerIndex) => {
+		const raw = effects[playerIndex]
+		if (!Array.isArray(raw)) return null
+		const limit = Math.max(0, raw[0] || 0)
+		const roles = (Array.isArray(raw[1]) ? raw[1] : []).filter((role) => rf.TEMPORARY_WORKER_ROLES.includes(role)).slice(0, limit)
+		const usedByRole = {}
+		const usedPairs = Array.isArray(raw[2]) ? raw[2] : []
+		for (let i = 0; i + 1 < usedPairs.length; i += 2) {
+			const role = usedPairs[i]
+			if (!rf.TEMPORARY_WORKER_ROLES.includes(role)) continue
+			const used = Math.max(0, Math.min(roles.filter((selectedRole) => selectedRole === role).length, usedPairs[i + 1] || 0))
+			if (used > 0) usedByRole[role] = used
+		}
+		return { roles, limit, usedByRole }
+	})
+	const salaries = Array.isArray(slot[9]) ? slot[9] : []
+	lm.pendingHeadhuntSalaries = Array.from({ length: savedPlayerCount }, (_, playerIndex) => {
+		const pairs = Array.isArray(salaries[playerIndex]) ? salaries[playerIndex] : []
+		const entries = []
+		for (let i = 0; i + 1 < pairs.length; i += 2) if (Number.isInteger(pairs[i]) && Number.isFinite(pairs[i + 1]) && pairs[i + 1] >= 0) entries.push({ employee: pairs[i], cost: pairs[i + 1] })
+		return entries
+	})
+	store.availableEmployees[rf.UNION_ORGANIZER] = Math.max(0, playerCount - lm.unionHolders.length)
 }
 
 export function simpleImportWholeFCMmodel(inputBase64) {
@@ -1256,6 +1507,15 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 
 	// 20 - context
 	Object.assign(store.context, inputModel[20])
+
+	// 21 - Stadium mod (older snapshots predate this slot)
+	store.stadium.gamesPlayed = 0
+	store.stadium.announcement = null
+	if (inputModel.length > 21) applyStadiumSlot(inputModel[21])
+	// 22-23 - Optional Labor Market and Second Bailout state. Both are located
+	// by shape so snapshots from before either module existed still load.
+	restoreLaborMarketState(inputModel)
+	restoreBailoutState(inputModel.slice(21))
 
 	// Adjust CEOs with dumpling MS, using history
 	if (store.startingOptions.dumplings) {

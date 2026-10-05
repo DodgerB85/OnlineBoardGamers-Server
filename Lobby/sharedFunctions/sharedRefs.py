@@ -9,9 +9,11 @@ from collections import Counter
 from django.utils.translation import gettext, gettext_lazy
 
 import AQY.AQYconstants as rfAQY
+import DDL.DDLconstants as rfDDL
 import FCM.FCMconstants as rfFCM
 import Lobby.sharedFunctions.constants as rf
 import RNB.RNBconstants as rfRNB
+import URR.URRconstants as rfURR
 
 SHADOW_USERNAMES = [
     "FcmAI",
@@ -38,6 +40,8 @@ SR_GAMES_CODES_AND_NAMES_CHOICES = [
     ("KFW", gettext_lazy("Keyflower")),
     ("WEB", gettext_lazy("Web")),
     ("RNB", gettext_lazy("Roads & Boats")),
+    ("URR", gettext_lazy("UR: 1830 BC")),
+    ("DDL", gettext_lazy("Duck Dealer")),
 ]
 
 SR_WEBHOOK_CHOICES = {
@@ -624,6 +628,32 @@ def SR_currentTurnString(gameCode, turn, phase):
 
         return currentTurnString
 
+    elif gameCode == "URR":
+        currentTurnString = str(turn) + " - "
+        if phase == rfURR.PHASE_DIVIDING_NATIONS:
+            currentTurnString += gettext("Dividing the Independent Nations")
+        elif phase == rfURR.PHASE_SETTLEMENT:
+            currentTurnString += gettext("Settlement")
+        elif phase == rfURR.PHASE_DEVELOPMENT:
+            currentTurnString += gettext("Development")
+        elif phase == rfURR.PHASE_RAINY_SEASON:
+            currentTurnString += gettext("Rainy Season")
+        elif phase == rfURR.PHASE_GAME_OVER:
+            currentTurnString += gettext("Game End")
+
+        return currentTurnString
+
+    elif gameCode == "DDL":
+        currentTurnString = str(turn) + " - "
+        if phase == rfDDL.PHASE_SETUP:
+            currentTurnString += gettext("Setup")
+        elif phase == rfDDL.PHASE_MAIN:
+            currentTurnString += gettext("Main")
+        elif phase == rfDDL.PHASE_GAME_OVER:
+            currentTurnString += gettext("Game End")
+
+        return currentTurnString
+
 
 def SR_gamePaceString(gamePace):
     gamePaceString = ""
@@ -751,6 +781,10 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
         rfFCM.SO_DUMPLINGS,
         rfFCM.SO_DELIVERY_DRIVERS,
         rfFCM.SO_HAWKERS,
+        rfFCM.SO_FRIED_CHICKEN,
+        rfFCM.SO_STADIUM,
+        rfFCM.SO_LABOR_MARKET,
+        rfFCM.SO_SECOND_BAILOUT,
     ]
 
     options_map = {
@@ -783,6 +817,10 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
         rfFCM.SO_DUMPLINGS: ("so_dumplings.svg", "Dumplings"),
         rfFCM.SO_DELIVERY_DRIVERS: ("so_delivery.svg", "Delivery Drivers"),
         rfFCM.SO_HAWKERS: ("so_hawkers.svg", "Hawkers"),
+        rfFCM.SO_FRIED_CHICKEN: ("so_friedChicken.svg", "Fried Chicken"),
+        rfFCM.SO_STADIUM: ("so_stadium.svg", "Stadium"),
+        rfFCM.SO_LABOR_MARKET: ("so_laborMarket.svg", "Labor Market"),
+        rfFCM.SO_SECOND_BAILOUT: ("so_bailout.svg", "Second Bailout"),
         rfFCM.SO_STRICT_PAYDAY_FRIDGE: ("so_strict.svg", "Turn Order Payday/Fridge"),
         rfFCM.SO_DRAFT_MODULE_BREAKER: ("so_draftMods.jpg", "Draft Modules"),
         rfFCM.SO_DRAFT_SKIP_MODULE: ("so_skip.jpg", "Skip Module"),

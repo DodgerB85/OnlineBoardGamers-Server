@@ -687,6 +687,8 @@ export async function reloadGameData() {
 		// Now check if we should be looking for moveData
 		if (store.gameflow.phase === rf.PHASE_VILLAGE_EXPANDING) {
 			funcs.importPlayerVIllageMoveData(personal.pov, window.initData.move)
+		} else if (store.gameflow.phase === rf.PHASE_FINAL_SCORING && window.initData.move !== "") {
+			funcs.importPlayerFinalScoringMoveData(personal.pov, funcs.decompressData(window.initData.move))
 		}
 
 		personal.secondsToNextKickout = data.secondsToNextKickout
@@ -1060,6 +1062,7 @@ export async function checkForLatestData() {
 			if (store.gameflow.phase === rf.PHASE_GAME_OVER) funcs.importKFWmodelForGameOver(data.gameData, false, true)
 			else funcs.importKFWmodel(data.gameData, false, false)
 			window.initData.move = data.move
+			if (store.gameflow.phase === rf.PHASE_FINAL_SCORING && data.move !== "") funcs.importPlayerFinalScoringMoveData(personal.pov, funcs.decompressData(data.move))
 			funcs.importCompressedGameData13(data.gameData1, data.gameData3)
 			personal.secondsToNextKickout = data.secondsToNextKickout
 			personal.latestUpdate = data.latestUpdate

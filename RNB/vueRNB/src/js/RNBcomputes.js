@@ -106,6 +106,7 @@ export const computedHexes = computed(() => {
 					computedHexes[i].mineData.push(building.id)
 					computedHexes[i].mineData.push(bucketBuildingLocations[0])
 					computedHexes[i].mineData.push(building.remainingMineContent)
+					computedHexes[i].mineData.push(building.strengthened === true)
 					continue
 				} // Mines are SVG, not images
 				let buildingGfx = {}
@@ -114,6 +115,7 @@ export const computedHexes = computed(() => {
 				buildingGfx.width = rf.DEFAULT_BLDG_WIDTH
 				buildingGfx.height = rf.DEFAULT_BLDG_HEIGHT
 				buildingGfx.pos = bucketBuildingLocations[0]
+				buildingGfx.strengthened = building.strengthened === true
 
 				// NO! DO NOT SET IT HERE! CAUSES RECURSIONS!
 				//building.location = [rf.LOCATION_LAND_VERTEX, hex.hexID, buildingVertexes[k]]
@@ -210,6 +212,7 @@ export const computedHexes = computed(() => {
 					const hex = hexes[j]
 					const side = hexSides[j]
 					const entryNode = hex.sideNodeIds[side]
+					if (entryNode === -1) continue
 					//hex.roadSegments.push([hex.nodeVertexDefinitions[entryNode], coord.relative([side, 0.5, 0])].map(toXY))
 					hex.roadSegments.push([hex.nodeVertexDefinitions[entryNode], coord.relative([side, 0.5, 0])].map((c) => toXY(c, true)))
 				}
@@ -220,7 +223,14 @@ export const computedHexes = computed(() => {
 					const hex = hexes[j]
 					const side = hexSides[j]
 					const lr = j === 0 ? k : (k + 1) % 2
-					const entryNode = hex.cornerNodeIds[side][lr]
+					// CITY: on city-river edges the road attaches at the bank node matching
+					// slot k; other city edges at the centre outer gate
+					let entryNode = hex.cornerNodeIds[side][lr]
+					if (hex.hexTerrainID === rf.CITY) {
+						const gi = hex.cornerNodeIds[side][0] - 1
+						const bankNodes = [rf.CITY_BANK_NODE_BASE + 2 * gi, rf.CITY_BANK_NODE_BASE + 2 * gi + 1]
+						entryNode = edge.hasRoad.length === 2 ? bankNodes[(k + j) % 2] : hex.sideNodeIds[side]
+					}
 					//hex.roadSegments.push([hex.nodeVertexDefinitions[entryNode], coord.relative([side, rf.ROAD_SIDE_ALIGNMENT + (1 - 2 * rf.ROAD_SIDE_ALIGNMENT) * lr, 0])].map(toXY))
 					hex.roadSegments.push(
 						[hex.nodeVertexDefinitions[entryNode], coord.relative([side, rf.ROAD_SIDE_ALIGNMENT + (1 - 2 * rf.ROAD_SIDE_ALIGNMENT) * lr, 0])].map((c) => toXY(c, true)) // Explicitly forcing Pointy
@@ -246,8 +256,16 @@ export const computedHexes = computed(() => {
 					const lr = j === 0 ? k : (k + 1) % 2
 					const entryNode = hex.cornerNodeIds[side][lr]
 					if (entryNode !== -1) {
+						// CITY: on city-river edges the power line attaches at the bank node
+						// matching slot k; other city edges at the centre outer gate
+						let cityEntryNode = entryNode
+						if (hex.hexTerrainID === rf.CITY) {
+							const gi = hex.cornerNodeIds[side][0] - 1
+							const bankNodes = [rf.CITY_BANK_NODE_BASE + 2 * gi, rf.CITY_BANK_NODE_BASE + 2 * gi + 1]
+							cityEntryNode = edge.hasPowerLine.length === 2 ? bankNodes[(k + j) % 2] : hex.sideNodeIds[side]
+						}
 						hex.powerLineSegments.push(
-							[hex.nodeVertexDefinitions[entryNode], coord.relative([side, rf.ROAD_SIDE_ALIGNMENT + (1 - 2 * rf.ROAD_SIDE_ALIGNMENT) * lr, 0])].map((c) => toXY(c, true))
+							[hex.nodeVertexDefinitions[cityEntryNode], coord.relative([side, rf.ROAD_SIDE_ALIGNMENT + (1 - 2 * rf.ROAD_SIDE_ALIGNMENT) * lr, 0])].map((c) => toXY(c, true))
 						)
 					}
 				}

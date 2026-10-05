@@ -79,6 +79,10 @@ Model = function () {
 				[[], [], [], [], [], [], [], [BLUE, 0]],
 				[[], [], [], [], [], [], [], [YELLOW, 0]],
 			])
+			// The replay knows the colours the shuffle produced, so use them instead of shuffling
+			if (options.trackColours != undefined) {
+				for (i = 0; i < this.techTracks.length; i++) this.techTracks[i][7][0] = options.trackColours[i]
+			}
 			//					SPARKS 	then DEMAND in car / truck / sports
 			this.marketBoard = [
 				[[], [], [], [], [], []],
@@ -154,15 +158,18 @@ Model = function () {
 			this.obsolescenceMarkerDirection = 1
 
 			var colours = _.shuffle([RED, GREEN, PURPLE, BLUE, YELLOW])
+			// The replay knows the colours the shuffle produced, so use them instead of shuffling
+			if (options.colours != undefined) colours = [...options.colours]
 
 			this.players = []
+
+			// NB global.displayNames is only on the create page, so the replay has to pass them in
+			let displayNamesArr = options.displayNames != undefined ? options.displayNames : global.displayNames
 
 			playersName = options.players
 			for (i = 0; i < playersName.length; i++) {
 				var d = undefined
-				if (this.trainingGame) {
-					let displayNames = global.displayNames
-					let displayNamesArr = displayNames//displayNames.split(/,/)
+				if (this.trainingGame && displayNamesArr != undefined) {
 					if (playersName[i] === "SHADOW") d = displayNamesArr[0]
 					if (playersName[i] === "SHADOW_2") d = displayNamesArr[1]
 					if (playersName[i] === "SHADOW_3") d = displayNamesArr[2]
@@ -205,11 +212,15 @@ Model = function () {
 
 			this.alreadyPlayedCards = []
 
-			var pInfos = []
+var pInfos = []
 			_.each(this.players, function (p) {
 				pInfos.push(p.name, p.colour)
 			})
-			this.log(Log.SETUP_GAME, _.flatten([booleanToInt(this.trainingGame), booleanToInt(this.firstGame), pInfos]))
+			// The techTracks shuffle is not recoverable from anywhere else, so store the starting colour order.
+			// Only used by the replay, and only for games created from now on.
+			var initialTrackColours = []
+			for (i = 0; i < this.techTracks.length; i++) initialTrackColours.push(this.techTracks[i][7][0])
+			this.log(Log.SETUP_GAME, [..._.flatten([booleanToInt(this.trainingGame), booleanToInt(this.firstGame), pInfos]), ...initialTrackColours])
 
 			// Now populate the components
 			// Place player markers on tech tracks
@@ -565,24 +576,35 @@ Model = function () {
 		return coveredIndexes
 	}
 
+	// [placeOrUse, HISTindex, MWsize, (1 only when the window is horizontal)] + [rawIndex, rotation] for the replay
+	this.makeMWHistoryParam = function (placeOrUse, index, MWsize, rotation) {
+		var HISTindex = index
+		if (MWsize === 0 && rotation === 1) HISTindex--
+		else if (MWsize === 0 && rotation === 2) HISTindex -= 8
+		else if (MWsize === 1) HISTindex--
+		else if (MWsize === 2) HISTindex -= 2
+		var res = [placeOrUse, HISTindex, MWsize]
+		if (MWsize === 0 && ![0, 2].includes(rotation)) res.push(1)
+		res.push(index, rotation)
+		return res
+	}
+
 	this.placeDealershipWindowIntoModel = function (index, dealership, MWsize) {
 		// this affects the actual dealership of the player's factoryComponents
 		this.preventMultipleDealershipUses = dealership[0]
 		$("#MWrotationDiv").remove()
 
-		dealership[MW_IDX][0] = index
-		dealership[MW_IDX][1] = this.MWrotation
-		dealership[MW_IDX][2] = MWsize
+		this.placeDealershipWindowIntoModel_core(dealership, index, this.MWrotation, MWsize)
 		V.render(-1)
-		let HISTindex = index
-		if (MWsize === 0 && this.MWrotation === 1) HISTindex--
-		else if (MWsize === 0 && this.MWrotation === 2) HISTindex-=8
-		else if (MWsize === 1) HISTindex--
-		else if (MWsize === 2) HISTindex-=2
-		M.historyObjV2[M.historyObjV2.length-1][1] = HISTindex
-		M.historyObjV2[M.historyObjV2.length-1][2] = MWsize
-		if (MWsize === 0 && ![0,2].includes(this.MWrotation)) M.historyObjV2[1].push(1)
-		
+
+		M.historyObjV2[M.historyObjV2.length - 1] = this.makeMWHistoryParam(0, index, MWsize, this.MWrotation)
+	}
+
+	// Rotation is passed in, so this does not need M.MWrotation. Used by the replay.
+	this.placeDealershipWindowIntoModel_core = function (dealership, index, rotation, MWsize) {
+		dealership[MW_IDX][0] = index
+		dealership[MW_IDX][1] = rotation
+		dealership[MW_IDX][2] = MWsize
 	}
 
 	this.log = function (action, param, playerNumber, timestamp) {

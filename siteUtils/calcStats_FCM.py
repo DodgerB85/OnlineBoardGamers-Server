@@ -108,80 +108,89 @@ winner_prefetch = Prefetch(
 )
 
 
-query_old_code = (
+# Finished // NOT admin // NOT shadow // NOT stats exclude // NOT FcmAI
+# Every multi-valued filter here becomes a NOT EXISTS subquery, so these conditions can never
+# duplicate a game row. They live in one flat Q on purpose: combining two Q objects that share
+# them (eg `t4 & old_code`) makes the SQL repeat the conditions and the DB then runs the
+# NOT EXISTS subqueries twice per game.
+base_query = (
     Q(gameStatus="FINISHED")
     & ~Q(players__player__username__in=["admin", "SHADOW", "FcmAI"])
     & ~Q(statsExcludedGame=True)
-    & Q(created__lte=new_code_timestamp_ms)
-    & Q(latestUpdate__lte=new_code_timestamp_ms)
-    & ~Q(players__is_missing=True)
-)
-query_new_code = (
-    Q(gameStatus="FINISHED")  # Corrected query
-    & ~Q(players__player__username__in=["admin", "SHADOW", "FcmAI"])
-    & ~Q(statsExcludedGame=True)
-    & Q(created__gte=new_code_timestamp_ms)
     & ~Q(players__is_missing=True)
 )
 
-base_queryset = (
+query_old_code = base_query & Q(created__lte=new_code_timestamp_ms) & Q(latestUpdate__lte=new_code_timestamp_ms)
+query_new_code = base_query & Q(created__gte=new_code_timestamp_ms)
+
+# The same two eras, plus turn > 4, for the MS analysis below
+query_old_code_t4 = base_query & Q(turn__gt=4) & Q(created__lte=new_code_timestamp_ms) & Q(latestUpdate__lte=new_code_timestamp_ms)
+query_new_code_t4 = base_query & Q(turn__gt=4) & Q(created__gte=new_code_timestamp_ms)
+
+# The counts + module usage below only need id & startingOptions, so they are fetched once per code
+# era as plain rows instead of running a scan (with a startingOptions LIKE) per module per era.
+# order_by("id") matches the order those scans returned, so the id lists are unchanged.
+dataSet_old_code = list(
     Game.objects.filter(gameCode="FCM")
-    .prefetch_related(winner_prefetch)
-    # .select_related("winner")
-    .only("id", "gameData", "startingOptions", "turn", "gameStatus")
-).distinct()
-
-dataSet_old_code = base_queryset.filter(query_old_code)
-dataSet_new_code = base_queryset.filter(query_new_code)
+    .filter(query_old_code)
+    .order_by("id")
+    .values_list("id", "startingOptions")
+)
+dataSet_new_code = list(
+    Game.objects.filter(gameCode="FCM")
+    .filter(query_new_code)
+    .order_by("id")
+    .values_list("id", "startingOptions")
+)
 
 # dataSet_old_code = FCM_Game.objects.filter(query_old_code)
 # dataSet_new_code = FCM_Game.objects.filter(query_new_code)
 
-finishedGames_all = dataSet_old_code.count() + dataSet_new_code.count()
+finishedGames_all = len(dataSet_old_code) + len(dataSet_new_code)
 
 
-def filter_by_starting_options(queryset, new_ms_value, include):
-    """Filters a queryset based on the presence of NEW_MS in startingOptions."""
-    """Filters a JSON string in a TextField using common JSON delimiters."""
-    # We check for the number:
-    # 1. As the only item: [10]
-    # 2. At the start: [10,
-    # 3. In the middle: , 10,
-    # 4. At the end: , 10]
+# startingOptions is one of a handful of distinct strings, so every "does it contain X"
+# answer is cached instead of being re-derived for each game x each module.
+option_match_cache = {}
+exact_option_cache = {}
 
-    q = (
-        Q(startingOptions__contains=f"[{new_ms_value}]")
-        | Q(startingOptions__contains=f"[{new_ms_value},")
-        | Q(startingOptions__contains=f", {new_ms_value},")
-        | Q(startingOptions__contains=f",{new_ms_value},")
-        | Q(startingOptions__contains=f", {new_ms_value}]")
-        | Q(startingOptions__contains=f",{new_ms_value}]")
-    )
 
-    return queryset.filter(q) if include else queryset.exclude(q)
-    # This regex looks for your value:
-    # 1. After a bracket or comma: [\[,]
-    # 2. Followed by optional whitespace: \s*
-    # 3. Followed by your value
-    # 4. Followed by optional whitespace: \s*
-    # 5. Followed by a comma or closing bracket: [,\\]]
+def has_option(starting_options, new_ms_value):
+    """Does startingOptions (the JSON list string) contain new_ms_value?
 
-    # pattern = rf"[\[,]\s*{new_ms_value}\s*[,\\]]"
+    Same check the old `startingOptions__contains` DB filter did: the number has to sit behind a
+    JSON delimiter, so we look for it as the only item, at the start, in the middle or at the end:
+    1. As the only item: [10]
+    2. At the start: [10,
+    3. In the middle: , 10,
+    4. At the end: , 10]
+    """
+    cache_key = (starting_options, new_ms_value)
+    match = option_match_cache.get(cache_key)
+    if match is None:
+        match = any(
+            pattern.format(new_ms_value) in starting_options
+            for pattern in ("[{0}]", "[{0},", ", {0},", ",{0},", ", {0}]", ",{0}]")
+        )
+        option_match_cache[cache_key] = match
+    return match
 
-    # q = (
-    #    Q(startingOptions=str(new_ms_value))
-    #    | Q(startingOptions__startswith=str(new_ms_value) + ",")
-    #    | Q(startingOptions__endswith="," + str(new_ms_value))
-    #    | Q(startingOptions__contains="," + str(new_ms_value) + ",")
-    # )
-    # if include:
-    #    return queryset.filter(q)
-    # else:
-    #    return queryset.exclude(q)
-    # if include:
-    #    return queryset.filter(startingOptions__iregex=pattern)
-    # else:
-    #    return queryset.exclude(startingOptions__iregex=pattern)
+
+def has_new_ms(starting_options_str, new_ms_value):
+    """The exact JSON-list membership check, cached separately because its semantics differ
+    from the delimiter match above (eg `[10.0]` matches here but not there)."""
+    cache_key = (starting_options_str, new_ms_value)
+    result = exact_option_cache.get(cache_key)
+    if result is None:
+        options = json.loads(starting_options_str) if starting_options_str else []
+        result = new_ms_value in options
+        exact_option_cache[cache_key] = result
+    return result
+
+
+def filter_by_starting_options(rows, new_ms_value, include):
+    """Same filter as before, but over the pre-fetched (id, startingOptions) rows (0 DB hits)."""
+    return [row for row in rows if has_option(row[1] or "", new_ms_value) == include]
 
 
 def calculate_average_turn(queryset):
@@ -194,22 +203,14 @@ def calculate_average_turn(queryset):
 
 
 # --- Filter by NEW_MS ---
-dataset_oldMS_old_code = filter_by_starting_options(
-    dataSet_old_code, NEW_MS, include=False
-)
-dataset_newMS_old_code = filter_by_starting_options(
-    dataSet_old_code, NEW_MS, include=True
-)
+dataset_oldMS_old_code = filter_by_starting_options(dataSet_old_code, NEW_MS, include=False)
+dataset_newMS_old_code = filter_by_starting_options(dataSet_old_code, NEW_MS, include=True)
 
-dataset_oldMS_new_code = filter_by_starting_options(
-    dataSet_new_code, NEW_MS, include=False
-)
-dataset_newMS_new_code = filter_by_starting_options(
-    dataSet_new_code, NEW_MS, include=True
-)
+dataset_oldMS_new_code = filter_by_starting_options(dataSet_new_code, NEW_MS, include=False)
+dataset_newMS_new_code = filter_by_starting_options(dataSet_new_code, NEW_MS, include=True)
 
-finishedGames_oldMS = dataset_oldMS_old_code.count() + dataset_oldMS_new_code.count()
-finishedGames_newMS = dataset_newMS_old_code.count() + dataset_newMS_new_code.count()
+finishedGames_oldMS = len(dataset_oldMS_old_code) + len(dataset_oldMS_new_code)
+finishedGames_newMS = len(dataset_newMS_old_code) + len(dataset_newMS_new_code)
 
 
 def analyze_ms_usage(queryset, is_old_ms, is_old_code):
@@ -275,6 +276,11 @@ def analyze_ms_usage(queryset, is_old_ms, is_old_code):
             results[f"winner_t_and_rg_{num_players}p_ids"] = []
             results[f"picked_t_and_rg_{num_players}p_ids"] = []
 
+    # The results keys never change per game, so build the names once instead of formatting
+    # an f-string for every player of every game.
+    ms_types = ("t_and_rg", "rg", "t", "none") if is_old_ms else ("mkt", "rg", "t", "none")
+    base_keys = {ms: (f"winner_{ms}", f"winner_{ms}_ids", f"picked_{ms}", f"picked_{ms}_ids") for ms in ms_types}
+
     for game in queryset:
         # --- NEW WINNER LOOKUP LOGIC ---
         # Since we use Prefetch(to_attr="winner_record"), it's a list on the game object.
@@ -290,9 +296,7 @@ def analyze_ms_usage(queryset, is_old_ms, is_old_code):
 
         raw_data = []
         try:
-            byte_array = bytearray(base64.b64decode(game.gameData))
-            decompressed_data = gzip.decompress(byte_array)
-            decompressed_string = decompressed_data.decode("utf-8")
+            decompressed_string = gzip.decompress(base64.b64decode(game.gameData)).decode("utf-8")
             raw_data = json.loads(decompressed_string)
         except Exception as e:
             print(f"Game ERROR - COULD NOT DECOMPRESS: {game.id} :: {e}")
@@ -313,6 +317,19 @@ def analyze_ms_usage(queryset, is_old_ms, is_old_code):
                 raw_player_index = 1
         if len(raw_data) > 0:
             playerData = raw_data[raw_player_index]
+            # Same for the player count, which is fixed for the whole game
+            num_players = len(playerData)
+            seat_keys = None
+            if 2 <= num_players <= 6:
+                seat_keys = {
+                    ms: (
+                        f"winner_{ms}_{num_players}p",
+                        f"winner_{ms}_{num_players}p_ids",
+                        f"picked_{ms}_{num_players}p",
+                        f"picked_{ms}_{num_players}p_ids",
+                    )
+                    for ms in ms_types
+                }
             for player in playerData:
                 if player[raw_ms_index] is None:
                     player[raw_ms_index] = []
@@ -346,26 +363,23 @@ def analyze_ms_usage(queryset, is_old_ms, is_old_code):
                     playerName = player[0][0]
                 is_winner = playerName == winner_username
 
+                base_win, base_win_ids, base_pick, base_pick_ids = base_keys[ms_type]
                 if is_winner:
-                    results[f"winner_{ms_type}"] += 1
-                    results[f"winner_{ms_type}_ids"].append(game.id)
+                    results[base_win] += 1
+                    results[base_win_ids].append(game.id)
                 else:
-                    results[f"picked_{ms_type}"] += 1
-                    results[f"picked_{ms_type}_ids"].append(game.id)
+                    results[base_pick] += 1
+                    results[base_pick_ids].append(game.id)
 
                 # Update player count specific stats
-                num_players = len(playerData)
-                if 2 <= num_players <= 6:
+                if seat_keys is not None:
+                    seat_win, seat_win_ids, seat_pick, seat_pick_ids = seat_keys[ms_type]
                     if is_winner:
-                        results[f"winner_{ms_type}_{num_players}p"] += 1
-                        results[f"winner_{ms_type}_{num_players}p_ids"].append(
-                            game.id
-                        )
+                        results[seat_win] += 1
+                        results[seat_win_ids].append(game.id)
                     else:
-                        results[f"picked_{ms_type}_{num_players}p"] += 1
-                        results[f"picked_{ms_type}_{num_players}p_ids"].append(
-                            game.id
-                        )
+                        results[seat_pick] += 1
+                        results[seat_pick_ids].append(game.id)
 
     return results
 
@@ -417,64 +431,47 @@ def analyze_ms_usage(queryset, is_old_ms, is_old_code):
 # )
 ####################################################
 
-query_turns_gt_4 = (
-    Q(gameStatus="FINISHED")
-    & ~Q(
-        players__player__username__in=["admin", "SHADOW", "FcmAI"]
-    )  # Updated to 'players' relation
-    & ~Q(statsExcludedGame=True)
-    & Q(turn__gt=4)
-    & ~Q(
-        players__is_missing=True
-    )  # Replaced missingPlayers__isnull=True with the GamePlayer field
-)
-
-
-# 1. Define the MS filter logic as a Python helper to avoid extra DB queries
-def has_new_ms(starting_options_str, new_ms_value):
-    if not starting_options_str:
-        return False
-    options = json.loads(starting_options_str) if starting_options_str else []
-    return new_ms_value in options
-
+# 1. The MS filter logic lives in has_new_ms above, so the split below needs no extra DB queries
 
 # 2. Fetch ALL relevant Old Code games in ONE hit
 # We use select_related to solve the N+1 winner issue and .only() to save memory
+# No .distinct() needed: every filter is a NOT EXISTS subquery, so a game yields exactly one row
+
+
+def split_by_new_ms(games):
+    """Splits a fetched list into (new MS, old MS) in one pass, so each startingOptions
+    string is only JSON parsed once per game."""
+    new_ms_games = []
+    old_ms_games = []
+    for game in games:
+        if has_new_ms(game.startingOptions, NEW_MS):
+            new_ms_games.append(game)
+        else:
+            old_ms_games.append(game)
+    return new_ms_games, old_ms_games
 
 
 old_code_games_t4 = list(
     Game.objects.filter(gameCode="FCM")
     .prefetch_related(winner_prefetch)
     .only("id", "gameData", "startingOptions", "turn")
-    .filter(query_turns_gt_4 & query_old_code)
-    .distinct()
+    .filter(query_old_code_t4)
 )
 
 # 3. Split the list in memory (0 DB hits)
-dataset_newMS_old_code_turns_gt_4 = [
-    g for g in old_code_games_t4 if has_new_ms(g.startingOptions, NEW_MS)
-]
-dataset_oldMS_old_code_turns_gt_4 = [
-    g for g in old_code_games_t4 if not has_new_ms(g.startingOptions, NEW_MS)
-]
+dataset_newMS_old_code_turns_gt_4, dataset_oldMS_old_code_turns_gt_4 = split_by_new_ms(old_code_games_t4)
 
 # 4. Fetch ALL relevant New Code games in ONE hit
 new_code_games_t4 = list(
     Game.objects.filter(gameCode="FCM")
     .prefetch_related(winner_prefetch)
     .only("id", "gameData", "startingOptions", "turn")
-    .filter(query_turns_gt_4 & query_new_code)
-    .distinct()
+    .filter(query_new_code_t4)
 )
 
 
 # 5. Split the list in memory (0 DB hits)
-dataset_newMS_new_code_turns_gt_4 = [
-    g for g in new_code_games_t4 if has_new_ms(g.startingOptions, NEW_MS)
-]
-dataset_oldMS_new_code_turns_gt_4 = [
-    g for g in new_code_games_t4 if not has_new_ms(g.startingOptions, NEW_MS)
-]
+dataset_newMS_new_code_turns_gt_4, dataset_oldMS_new_code_turns_gt_4 = split_by_new_ms(new_code_games_t4)
 
 # 6. Run your analysis (Now using pre-fetched Python lists)
 old_code_old_ms_stats = analyze_ms_usage(
@@ -928,8 +925,8 @@ for num_players in range(2, 7):
     )
 
 
-def count_module_usage(queryset):
-    """Counts the usage of different modules in a queryset of games."""
+def count_module_usage(rows):
+    """Counts the usage of different modules in the (id, startingOptions) rows of a code era."""
     module_counts = {}
     modules = {
         "RANDOM_MODULES": RANDOM_MODULES,
@@ -954,17 +951,24 @@ def count_module_usage(queryset):
         "MOVIE_STARS": MOVIE_STARS,
         "NIGHT_SHIFT_MANAGER": NIGHT_SHIFT_MANAGER,
     }
-    for module_name, module_value in modules.items():
-        # module_counts[f"finished_games_{module_name}"] = filter_by_starting_options(
-        #    queryset, module_value, include=True
-        # ).count()
-        filtered_queryset = filter_by_starting_options(
-            queryset, module_value, include=True
-        )
-        module_counts[f"finished_games_{module_name}"] = filtered_queryset.count()
-        module_counts[f"game_ids_{module_name}"] = list(
-            filtered_queryset.values_list("id", flat=True)
-        )  # Get a list of game IDs
+    # One pass over the rows instead of one scan per module (the old code walked the full row
+    # list 21 times). The set of matching modules is cached per distinct startingOptions string,
+    # and ids are still appended in row order, so the output lists are unchanged.
+    game_ids_by_module = {module_name: [] for module_name in modules}
+    matches_cache = {}
+    for row in rows:
+        starting_options = row[1] or ""
+        matched = matches_cache.get(starting_options)
+        if matched is None:
+            matched = [name for name, value in modules.items() if has_option(starting_options, value)]
+            matches_cache[starting_options] = matched
+        game_id = row[0]
+        for module_name in matched:
+            game_ids_by_module[module_name].append(game_id)
+
+    for module_name, game_ids in game_ids_by_module.items():
+        module_counts[f"finished_games_{module_name}"] = len(game_ids)
+        module_counts[f"game_ids_{module_name}"] = game_ids  # Get a list of game IDs
 
     return module_counts
 

@@ -23,6 +23,7 @@ export function oneLevelAbove(employee, preservingColour) {
 	switch (employee) {
 		case rf.MANAGEMENT_TRAINEE:
 			level = [rf.JUNIOR_VICE_PRESIDENT, rf.NEW_BUSINESS_DEVELOPER, rf.LUXURIES_MANAGER]
+			if (store.startingOptions.laborMarket) level.push(rf.HEADHUNTER)
 			break
 		case rf.JUNIOR_VICE_PRESIDENT:
 			level = [rf.VICE_PRESIDENT, rf.LOCAL_MANAGER, rf.DISCOUNT_MANAGER, rf.RECRUITING_MANAGER, rf.COACH]
@@ -53,6 +54,7 @@ export function oneLevelAbove(employee, preservingColour) {
 			break
 		case rf.KITCHEN_TRAINEE:
 			level = [rf.BURGER_COOK, rf.PIZZA_COOK, rf.NOODLE_COOK, rf.SUSHI_COOK, rf.DUMPLING_COOK]
+			if (store.startingOptions.friedChicken) level.push(rf.FRIED_CHICKEN_COOK)
 			break
 		case rf.BURGER_COOK:
 			level = [rf.BURGER_CHEF]
@@ -68,6 +70,9 @@ export function oneLevelAbove(employee, preservingColour) {
 			break
 		case rf.DUMPLING_COOK:
 			level = [rf.DUMPLING_CHEF]
+			break
+		case rf.FRIED_CHICKEN_COOK:
+			level = [rf.FRIED_CHICKEN_CHEF]
 			break
 		case rf.WAITRESS:
 			level = [rf.B_MOVIE_STAR, rf.C_MOVIE_STAR, rf.D_MOVIE_STAR, rf.JAZZ_MUSICIAN]
@@ -113,10 +118,184 @@ export function oneLevelAbove(employee, preservingColour) {
 			case rf.SUSHI_COOK:
 				level.push(rf.FRY_CHEF)
 				break
+			// Fried Chicken mod
+			case rf.FRIED_CHICKEN_COOK:
+				if (store.startingOptions.friedChicken) level.push(rf.FRY_CHEF)
+				break
 		}
 	}
 
 	return level
+}
+
+export function temporaryWorkerActionCount(removedCount) {
+	return 1 + Math.max(0, Number.isFinite(removedCount) ? Math.floor(removedCount) : 0)
+}
+
+export function temporaryWorkerEffect(playerIndex) {
+	const store = useModelStore()
+	return store.startingOptions.laborMarket && store.laborMarket.dailyTemporaryEffects[playerIndex]
+		? store.laborMarket.dailyTemporaryEffects[playerIndex]
+		: { roles: [], limit: 0, usedByRole: {} }
+}
+
+export function temporaryWorkerRoleCount(playerIndex, role) {
+	return temporaryWorkerEffect(playerIndex).roles.filter((selectedRole) => selectedRole === role).length
+}
+
+export function temporaryWorkerUsedActions(playerIndex, role) {
+	return temporaryWorkerEffect(playerIndex).usedByRole[role] || 0
+}
+
+export function temporaryWorkerRemainingActions(playerIndex, role) {
+	return Math.max(0, temporaryWorkerRoleCount(playerIndex, role) - temporaryWorkerUsedActions(playerIndex, role))
+}
+
+export function temporaryWorkerUsesAction(playerIndex, role) {
+	const effect = temporaryWorkerEffect(playerIndex)
+	const used = effect.usedByRole[role] || 0
+	if (used >= temporaryWorkerRoleCount(playerIndex, role)) return false
+	effect.usedByRole[role] = used + 1
+	return true
+}
+
+export function availableProducers(playerIndex, usedTeam = []) {
+	const store = useModelStore()
+	const playerObj = store.players[playerIndex]
+	if (!playerObj) return []
+	let producers = playerObj.employees.filter((employee) => rf.PRODUCERS.includes(employee))
+	if (playerObj.employees.includes(rf.NIGHT_SHIFT_MANAGER)) {
+		producers.push(...producers.filter((employee) => [rf.ERRAND_BOY, rf.KITCHEN_TRAINEE, rf.BARISTA_TRAINEE].includes(employee)))
+	}
+	const temporaryRoles = temporaryWorkerEffect(playerIndex).roles.filter((role) => role === rf.ERRAND_BOY || role === rf.KITCHEN_TRAINEE)
+	producers.push(...temporaryRoles)
+	for (const used of usedTeam) {
+		const index = producers.indexOf(used)
+		if (index > -1) producers.splice(index, 1)
+	}
+	return producers
+}
+
+function trainingTargetsForLevel(employee) {
+	return oneLevelAbove(employee)
+}
+
+export function getEmployeeLevel(employee) {
+	if (rf.HIREABLE_EMPLOYEES.includes(employee)) return 1
+	const visited = new Set(rf.HIREABLE_EMPLOYEES)
+	let frontier = [...rf.HIREABLE_EMPLOYEES]
+	let level = 1
+	while (frontier.length > 0 && level < 10) {
+		level++
+		const next = []
+		for (const current of frontier) {
+			for (const target of trainingTargetsForLevel(current)) {
+				if (target === employee) return level
+				if (!visited.has(target)) {
+					visited.add(target)
+					next.push(target)
+				}
+			}
+		}
+		frontier = next
+	}
+	return 0
+}
+
+export function headhuntCost(employee) {
+	const level = getEmployeeLevel(employee)
+	return level > 0 ? level * 10 : 0
+}
+
+export function resolveUnionHolders(workedCounts, minimum = 5) {
+	if (!Array.isArray(workedCounts) || workedCounts.length === 0) return []
+	const eligible = workedCounts.map((count, index) => ({ count, index })).filter(({ count }) => Number.isFinite(count) && count >= minimum)
+	if (eligible.length === 0) return []
+	const max = Math.max(...eligible.map(({ count }) => count))
+	return eligible.filter(({ count }) => count === max).map(({ index }) => index)
+}
+
+export function canHeadhunt(playerIndex, targetPlayerIndex, beachIndex) {
+	const store = useModelStore()
+	if (!store.startingOptions.laborMarket || playerIndex === targetPlayerIndex) return false
+	const player = store.players[playerIndex]
+	const target = store.players[targetPlayerIndex]
+	if (!player || !target || !Number.isInteger(beachIndex) || beachIndex < 0 || beachIndex >= target.beach.length) return false
+	const employee = target.beach[beachIndex]
+	if (rf.NON_TRANSFERABLE_EMPLOYEES.includes(employee)) return false
+	const level = getEmployeeLevel(employee)
+	if (level < 1) return false
+	if ((rf.UNIQUE_CARDS.includes(employee) || employee === rf.DELIVERY_DRIVER) && plyr.hasEmployee(playerIndex, employee)) return false
+	return true
+}
+
+export function getHeadhuntTargets(playerIndex) {
+	const store = useModelStore()
+	const result = []
+	for (let owner = 0; owner < store.players.length; owner++) {
+		for (let beachIndex = 0; beachIndex < store.players[owner].beach.length; beachIndex++) {
+			if (!canHeadhunt(playerIndex, owner, beachIndex)) continue
+			const employee = store.players[owner].beach[beachIndex]
+			result.push({ owner, beachIndex, employee, level: getEmployeeLevel(employee), cost: headhuntCost(employee) })
+		}
+	}
+	return result
+}
+
+export function snapshotWorkedCount(playerIndex) {
+	const store = useModelStore()
+	const player = store.players[playerIndex]
+	if (!player) return 0
+	const count = player.employees.filter((employee) => employee !== rf.BLANK_EMPLOYEE_SPACE && employee !== rf.UNION_ORGANIZER).length
+	store.laborMarket.workedCounts[playerIndex] = count
+	return count
+}
+
+export function unionOrganizerPlacementRequired(playerIndex) {
+	const store = useModelStore()
+	const player = store.players[playerIndex]
+	if (!player || !store.startingOptions.laborMarket || !store.laborMarket.unionHolders.includes(playerIndex)) return false
+	const unionIndex = player.employees.indexOf(rf.UNION_ORGANIZER)
+	return unionIndex < 0 || unionIndex >= player.ceoSlots
+}
+
+export function activeHeadhuntSalaryEntries(playerIndex) {
+	const store = useModelStore()
+	if (!store.startingOptions.laborMarket) return []
+	const player = store.players[playerIndex]
+	const pending = store.laborMarket.pendingHeadhuntSalaries[playerIndex]
+	if (!player || !Array.isArray(pending)) return []
+	const ownedCounts = new Map()
+	for (const employee of [...player.employees, ...player.beach, ...player.marketers.map((entry) => entry.marketer)]) {
+		ownedCounts.set(employee, (ownedCounts.get(employee) || 0) + 1)
+	}
+	return pending.filter((entry) => {
+		const remaining = ownedCounts.get(entry.employee) || 0
+		if (remaining <= 0) return false
+		ownedCounts.set(entry.employee, remaining - 1)
+		return true
+	})
+}
+
+export function effectiveHeadhuntSalaryEntries(playerIndex) {
+	let remainingDiscount = 0
+	if (plyr.hasMilestone(playerIndex, rf.FIRST_TRAIN)) {
+		remainingDiscount = Math.max(0, 15 - baseSalary(playerIndex, false))
+	}
+	return activeHeadhuntSalaryEntries(playerIndex).map((entry) => {
+		const discount = Math.min(entry.cost, remainingDiscount)
+		remainingDiscount -= discount
+		return { ...entry, originalCost: entry.cost, cost: entry.cost - discount }
+	})
+}
+
+export function headhuntSalaryDue(playerIndex) {
+	return effectiveHeadhuntSalaryEntries(playerIndex).reduce((total, entry) => total + entry.cost, 0)
+}
+
+export function clearHeadhuntSalaries(playerIndex) {
+	const store = useModelStore()
+	store.laborMarket.pendingHeadhuntSalaries[playerIndex] = []
 }
 
 export function allowedCampaigns(marketer) {
@@ -739,19 +918,23 @@ export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, 
 
 		// Build reachability map using Sets (O(1) lookup)
 		const sources = [...player.restaurants]
-		if (store.startingOptions.coffee && player.coffeeShops.length > 0) {
-			player.coffeeShops.forEach((idx) => sources.push({ index: idx, isCoffee: true }))
-		}
 
 		for (const s of sources) {
-			const driveIn = s.isCoffee ? false : plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())
-			const minR = !s.isCoffee && !driveIn ? s.rotation : 0
-			const maxR = !s.isCoffee && !driveIn ? s.rotation + 1 : 4
+			const driveIn = plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())
+			const minR = !driveIn ? s.rotation : 0
+			const maxR = !driveIn ? s.rotation + 1 : 4
 
 			for (let r = minR; r < maxR; r++) {
 				let off = r === 0 ? 1 : r === 1 ? mapWidth + 1 : r === 2 ? mapWidth : 0
 				map.emptySpacesAdjacentToRoadsWithinRange(s.index + off, range, false, null).forEach((idx) => reachSet.add(idx))
 			}
+		}
+
+		// Coffee shops measure from their own square (no restaurant rotation offsets)
+		if (store.startingOptions.coffee) {
+			player.coffeeShops.forEach((idx) => {
+				map.emptySpacesAdjacentToRoadsWithinRange(idx, range, false, null).forEach((i) => reachSet.add(i))
+			})
 		}
 
 		// Final intersection filter
@@ -1170,6 +1353,7 @@ export function getRemainingRecruitingPoints(playerIndex) {
 			base += 4
 		}
 	}
+	base += temporaryWorkerRemainingActions(playerIndex, rf.RECRUITING_GIRL)
 
 	// 3. Subtract points for hires already made this turn
 	base -= store.context.justHired.length
@@ -1259,6 +1443,7 @@ export function getTrainingPoints(playerIndex, trainingDone) {
 			numLevel3++
 		}
 	}
+	total += temporaryWorkerRemainingActions(playerIndex, rf.TRAINER)
 
 	// 3. Subtract spent training points
 	for (const training of trainingDone) {
@@ -1356,6 +1541,7 @@ export function possibleUpgrades(availabilities, playerIndex, employees, numTrai
 	if (typeof employees === "number") {
 		let upgradeLevelLimit = unlimited ? 9 : canTrain3 > 0 ? 3 : canTrain2 > 0 ? 2 : 1
 		upgradeLevelLimit = Math.min(upgradeLevelLimit, numTrain)
+		if (rf.NON_FIREABLE_EMPLOYEES.includes(employees)) return Array.from({ length: upgradeLevelLimit }, () => [])
 
 		let resultsByLevel = []
 		let currentLevelEmployees = [employees]
@@ -1437,6 +1623,7 @@ export function givePossibleFoodDrinksChoice(employee) {
 	else if (employee === rf.NOODLE_COOK || employee === rf.NOODLE_CHEF) return [rf.NOODLES]
 	else if (employee === rf.BARISTA_TRAINEE || employee === rf.BARISTA || employee === rf.LEAD_BARISTA) return [rf.COFFEE]
 	else if (employee === rf.DUMPLING_COOK || employee === rf.DUMPLING_CHEF) return [rf.DUMPLING]
+	else if (employee === rf.FRIED_CHICKEN_COOK || employee === rf.FRIED_CHICKEN_CHEF) return [rf.FRIED_CHICKEN]
 	else return []
 }
 
@@ -1597,10 +1784,36 @@ export function doDinnerTime(replayOnly) {
 
 	const firstPizzas = []
 
+	// Fried Chicken mod: track flips & move-outs for history
+	const flippedHouses = []
+	const movedOutHouses = store.movedOutHouses
+	movedOutHouses.splice(0) // reset for this settlement
+	const fcMod = store.startingOptions.friedChicken
+
+	// Stadium mod: game-day demand injection (deterministic, recomputed on replay)
+	const stadiumMod = store.startingOptions.stadium
+	let stadiumResult = null
+	if (stadiumMod && store.stadium.announcement !== null && !store.needs.some((n) => n.number === rf.STADIUM) && store.gameflow.turn === 5 + store.stadium.gamesPlayed * 3) {
+		const a = store.stadium.announcement
+		const subNeeds = []
+		for (let i = 0; i < a.units; i++) subNeeds.push([a.food, -1])
+		store.needs.push({ number: rf.STADIUM, needs: subNeeds })
+	}
+
 	// --- PHASE 1: WORK THROUGH NEEDS ---
 	const sortedNeeds = [...store.needs].sort((a, b) => a.number - b.number)
 
 	for (const need of sortedNeeds) {
+		// Fried Chicken mod: condemned (pendingMoveOut) houses move out before any matching
+		if (fcMod && need.pendingMoveOut && need.number !== rf.RURAL_MARKETING_AREA) {
+			need.movedOut = true
+			need.pendingMoveOut = false
+			need.needs = []
+			movedOutHouses.push(need.number)
+			continue
+		}
+		if (fcMod && need.movedOut) continue
+
 		// [number, needs, historyOfCompetitors]
 		let histoH = [need.number, need.needs.map((sub) => (sub.length > 0 ? sub[0] : -1)), []]
 
@@ -1609,7 +1822,8 @@ export function doDinnerTime(replayOnly) {
 
 		let winningCompetitors = []
 		let finalGoods = need.needs.map((x) => x[0])
-		const prioritizedNeeds = selectNeedsPriority(finalGoods, model.hasGarden(need.number))
+		// Stadium mod: no substitutions (kimchi combos / noodle or sushi swaps never apply)
+		const prioritizedNeeds = need.number === rf.STADIUM ? [finalGoods] : selectNeedsPriority(finalGoods, model.hasGarden(need.number))
 
 		// Find which tier of needs someone can fulfill
 		for (const intermediateNeed of prioritizedNeeds) {
@@ -1684,14 +1898,51 @@ export function doDinnerTime(replayOnly) {
 			}
 		} else {
 			histoH.splice(2) // No one sold
+
+			// Fried Chicken mod: unserved demand flips / condemns the house
+			if (fcMod && need.number !== rf.RURAL_MARKETING_AREA && need.number !== rf.STADIUM && need.needs.length > 0) {
+				let flippedCount = 0
+				let hasFlippedChicken = false
+				let hasMarketedChicken = false
+				for (const sub of need.needs) {
+					if (sub[0] === rf.FRIED_CHICKEN) {
+						// Rule 2: fried chicken doesn't flip again
+						if (sub[1] !== -1) hasMarketedChicken = true // strict liability of the Fried Chicken King
+						else hasFlippedChicken = true // second life used up -> house moves out
+					} else {
+						// Rule 1: unmet normal demand flips to ownerless fried chicken
+						sub[0] = rf.FRIED_CHICKEN
+						sub[1] = -1
+						flippedCount++
+					}
+				}
+				if (flippedCount > 0) flippedHouses.push([need.number, flippedCount])
+				// Rule 2: flipped chicken unmet at its second settlement -> house moves out now
+				if (hasFlippedChicken) {
+					need.movedOut = true
+					need.needs = []
+					movedOutHouses.push(need.number)
+				}
+				// Strict liability: marketed chicken unmet -> house moves out at next settlement, no matching
+				else if (hasMarketedChicken) need.pendingMoveOut = true
+			}
 		}
 
 		if (histoH.length > 2 && histoH[2].length === 1) histoH[2][0].splice(2)
 		histoHouses.push(histoH)
 
+		// Stadium mod: record the game result - winner takes all or the day clears
+		if (need.number === rf.STADIUM) {
+			stadiumResult = {
+				winner: winningCompetitors.length > 0 ? winningCompetitors[0].playerIndex : -1,
+				food: need.needs[0][0],
+				units: need.needs.length,
+			}
+		}
+
 		// Coffee block must come AFTER the house's regular block,
 		// so the history UI can attribute it to the correct house
-		if (winningCompetitors.length > 0 && store.startingOptions.coffee && model.getAvailableCoffee(false)) {
+		if (winningCompetitors.length > 0 && need.number !== rf.STADIUM && store.startingOptions.coffee && model.getAvailableCoffee(false)) {
 			processCoffee(need.number, winningCompetitors[0], usedFryChefs, coffeeEarnings, histoHouses, possibleCoffeeMS)
 		}
 	}
@@ -1730,12 +1981,34 @@ export function doDinnerTime(replayOnly) {
 		}
 	})
 
-	// Give MS for selling
+	// Give MS for selling — AFTER bonus calc so the sale that EARNED the milestone
+	// doesn't itself get the +$5 perk; perks apply from the next sale onward
 	sold.forEach((sale) => {
 		if (!replayOnly) giveSalesMilestones(sale.playerIndex, sale.needs)
 	})
 
 	if (!replayOnly) model.addHistory(rf.HIST_DINNER_TIME, histoHouses, -1, 0)
+
+	// Fried Chicken mod: record flips & move-outs (state itself was already applied above and
+	// recomputes identically on replay, so the handlers only drive UI highlighting)
+	if (fcMod && !replayOnly) {
+		if (flippedHouses.length > 0) model.addHistory(rf.HIST_FLIP_TO_FRIED_CHICKEN, flippedHouses, -1, 0)
+		if (movedOutHouses.length > 0) model.addHistory(rf.HIST_HOUSE_MOVED_OUT, movedOutHouses, -1, 0)
+	}
+
+	// Stadium mod: settle the game day - the need clears either way (winner
+	// consumed it via removeResources; nobody qualified means it clears to zero).
+	// State changes run on replay too; history and milestone are guarded.
+	if (stadiumResult !== null) {
+		const sIdx = store.needs.findIndex((n) => n.number === rf.STADIUM)
+		if (sIdx > -1) store.needs.splice(sIdx, 1)
+		store.stadium.gamesPlayed++
+		store.stadium.announcement = null
+		if (!replayOnly) {
+			model.addHistory(rf.HIST_STADIUM_RESULT, [stadiumResult.winner, stadiumResult.food, stadiumResult.units], -1, 0)
+			if (stadiumResult.winner > -1) plyr.awardMilestone(stadiumResult.winner, rf.FIRST_STADIUM_SOLD)
+		}
+	}
 
 	// --- PHASE 4: PAYOUTS & BANK BREAK ---
 	finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayOnly)
@@ -1771,14 +2044,14 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 			p.bankrupt = true
 			if (p.displayName !== rf.BOT_NAME && !replayOnly) model.addHistory(rf.HIST_BANKRUPT, [], playerIndex, 0)
 		}
-		if (!replayOnly) {
-			if (p.money >= 100) {
-				plyr.awardMilestone(playerIndex, rf.FIRST_100_DOL)
-				if (p.employees.includes(rf.CFO) && plyr.hasMilestone(playerIndex, rf.FIRST_100_DOL)) {
-					plyr.fireEmployee(playerIndex, rf.CFO)
-					store.availableEmployees[rf.CFO]++
-				}
+		if (p.money >= 100) {
+			if (!replayOnly) plyr.awardMilestone(playerIndex, rf.FIRST_100_DOL)
+			if (p.employees.includes(rf.CFO) && plyr.hasMilestone(playerIndex, rf.FIRST_100_DOL)) {
+				plyr.fireEmployee(playerIndex, rf.CFO)
+				store.availableEmployees[rf.CFO]++
 			}
+		}
+		if (!replayOnly) {
 			if (p.money >= 20) plyr.awardMilestone(playerIndex, rf.FIRST_20_DOL)
 			if (p.employees.includes(rf.WAITRESS)) plyr.awardMilestone(playerIndex, rf.FIRST_WAITRESS_USED)
 		}
@@ -1992,7 +2265,7 @@ export function winner(returnIndexOnly) {
 	return winningPerson
 }
 
-export function salary(playerIndex) {
+export function baseSalary(playerIndex, applyFirstTrainDiscount = true) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
 	// Bots should not be paying back into the bank
@@ -2010,7 +2283,7 @@ export function salary(playerIndex) {
 
 	due = paidEmployees.length * unitarySalary
 
-	if (plyr.hasMilestone(playerIndex, rf.FIRST_TRAIN)) {
+	if (applyFirstTrainDiscount && plyr.hasMilestone(playerIndex, rf.FIRST_TRAIN)) {
 		due -= 15
 	}
 
@@ -2050,6 +2323,10 @@ export function salary(playerIndex) {
 
 	due = Math.max(due, 0)
 	return due
+}
+
+export function salary(playerIndex) {
+	return baseSalary(playerIndex) + headhuntSalaryDue(playerIndex)
 }
 
 export function employeesRequiringASalary(playerIndex) {
@@ -2102,7 +2379,9 @@ export function doesEmployeeRequireSalary(playerIndex, employee) {
 export function canAffordPayDay(playerIndex) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
-	const due = salary(playerIndex)
+	const normalDue = baseSalary(playerIndex)
+	const switchDue = headhuntSalaryDue(playerIndex)
+	const due = normalDue + switchDue
 
 	// 1. Check for immediate total affordability
 	if (due === 0 || due <= playerObj.money) return true
@@ -2110,18 +2389,16 @@ export function canAffordPayDay(playerIndex) {
 	// 2. Calculate the "gap" in coverage
 	// Milestone reduces the cost of firing an employee from $5 to $3
 	const firingPenalty = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
-	const unpaidAmount = due - playerObj.money
-	const requiredCoverage = Math.ceil(unpaidAmount / firingPenalty)
-
 	// 3. First Beer Sold Milestone Logic
-	// Allows paying salary with resources instead of cash (excluding Coffee)
+	// Resources can replace normal salary, but not the one-time job-switch salary.
 	if (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD)) {
 		// Count how many non-coffee resources the player has
 		const validResourcesCount = playerObj.resources.reduce((acc, item) => {
 			return item !== rf.COFFEE ? acc + 1 : acc
 		}, 0)
 
-		return requiredCoverage <= validResourcesCount
+		const resourceCoverage = Math.min(normalDue, validResourcesCount * firingPenalty)
+		return playerObj.money + resourceCoverage >= due
 	}
 
 	return false
@@ -2130,14 +2407,14 @@ export function canAffordPayDay(playerIndex) {
 export function canPayWithFood(playerIndex) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
-	return plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) && playerObj.resources.length > 0
+	return baseSalary(playerIndex) > 0 && plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) && playerObj.resources.some((resource) => resource !== rf.COFFEE)
 }
 
 export function canPayWithMoney(playerIndex, n) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
 	let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
-	return Math.floor(playerObj.money / unitarySalary) >= n
+	return Math.floor(Math.max(0, playerObj.money - headhuntSalaryDue(playerIndex)) / unitarySalary) >= n
 }
 
 export function paySalaries(foodPayements) {
@@ -2154,7 +2431,9 @@ export function paySalaries(foodPayements) {
 			store.availableEmployees[rf.CFO]++
 		}
 
-		let due = salary(i)
+		const normalDue = baseSalary(i)
+		const switchDue = headhuntSalaryDue(i)
+		let due = normalDue + switchDue
 		let preMoney = player.money
 
 		if (due >= 20) {
@@ -2163,8 +2442,8 @@ export function paySalaries(foodPayements) {
 
 		if (plyr.hasMilestone(i, rf.FIRST_BEER_SOLD) && foodPayement.length > 0) {
 			let unitarySalary = plyr.hasMilestone(i, rf.FIRST_WAITRESS_USED) ? 3 : 5
-			due -= unitarySalary * foodPayement.length
-			due = Math.max(due, 0)
+			const normalAfterFood = Math.max(normalDue - unitarySalary * foodPayement.length, 0)
+			due = normalAfterFood + switchDue
 		}
 
 		//if (!Rules.canAffordPayDay(player) && plyr.hasMilestone(i, FIRST_TRAINER_USED)) {
@@ -2187,6 +2466,7 @@ export function paySalaries(foodPayements) {
 			}
 			console.log(`[PAY] ${player.displayName}: due=${due} PRE=$${preMoney} → money=$${player.money}`)
 		}
+		clearHeadhuntSalaries(i)
 	}
 	let anySalary = false
 	for (let i = 0; i < histo.length; i++) {
@@ -2205,10 +2485,11 @@ export function fireableEmployees(playerIndex) {
 	const salarySet = new Set(rf.REQUIRE_SALARY)
 	const employees = playerObj.employees
 	const beach = playerObj.beach
+	const canBeFired = (employee) => !rf.NON_FIREABLE_EMPLOYEES.includes(employee)
 
 	// 1. If player is solvent, they can fire anyone
 	if (canAffordPayDay(playerIndex)) {
-		return [...employees, ...beach]
+		return [...employees, ...beach].filter(canBeFired)
 	}
 
 	// 2. If insolvent, check if specific marketers MUST be fired first
@@ -2217,14 +2498,33 @@ export function fireableEmployees(playerIndex) {
 	if (marketersToFire.length > 0) {
 		// Filter out any employees who require a salary (must keep unpaid ones)
 		// Replaces _.filter + indexOf
-		const freeEmployees = employees.filter((e) => !salarySet.has(e))
-		const freeBeach = beach.filter((e) => !salarySet.has(e))
+		const freeEmployees = employees.filter((e) => !salarySet.has(e) && canBeFired(e))
+		const freeBeach = beach.filter((e) => !salarySet.has(e) && canBeFired(e))
 
 		return [...freeEmployees, ...freeBeach, ...marketersToFire]
 	}
 
 	// 3. Fallback: return all if no specific marketers are flagged
-	return [...employees, ...beach]
+	return [...employees, ...beach].filter(canBeFired)
+}
+
+export function fireableEmployeeChoices(playerIndex) {
+	const pendingByEmployee = new Map()
+	for (const entry of effectiveHeadhuntSalaryEntries(playerIndex)) {
+		if (!pendingByEmployee.has(entry.employee)) pendingByEmployee.set(entry.employee, [])
+		pendingByEmployee.get(entry.employee).push(entry)
+	}
+	return fireableEmployees(playerIndex).map((employee, index) => {
+		const pending = pendingByEmployee.get(employee)?.shift()
+		const headhunted = pending !== undefined
+		return {
+			employee,
+			headhunted,
+			fireToken: rf.encodeFiredEmployee(employee, headhunted),
+			switchSalary: pending?.cost ?? 0,
+			key: `${employee}-${headhunted ? "headhunted" : "native"}-${index}`,
+		}
+	})
 }
 
 export function needFiringMarketers(playerIndex) {
@@ -2242,20 +2542,14 @@ export function marketersNeedingFiring(playerIndex) {
 		return []
 	}
 
-	// 2. Calculate the "Debt Gap" (how many employees must be fired)
+	// 2. Calculate the cash gap. Resources may cover normal salaries only.
 	const penalty = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
 	const currentSalary = salary(playerIndex)
 	const availableCash = Math.max(0, playerObj.money)
-
-	let numToFire = Math.floor(currentSalary / penalty) - Math.floor(availableCash / penalty)
-
-	// Beer Milestone allows paying with resources
-	if (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD)) {
-		numToFire -= playerObj.resources.length
-	}
-
-	// If no one needs to be fired, exit early
-	if (numToFire <= 0) return []
+	const validResources = plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) ? playerObj.resources.filter((resource) => resource !== rf.COFFEE).length : 0
+	const resourceCoverage = Math.min(baseSalary(playerIndex), validResources * penalty)
+	const shortfall = currentSalary - availableCash - resourceCoverage
+	if (shortfall <= 0) return []
 
 	// 3. Count paid staff on Beach and in active structure
 	const countPaid = (list) => {
@@ -2273,9 +2567,11 @@ export function marketersNeedingFiring(playerIndex) {
 		totalPaidStaff--
 	}
 
-	// 4. Identify Marketers to fire only if other staff cannot cover the debt
+	// 4. Identify Marketers only when firing every eligible non-marketer still cannot
+	// cover the gap. Firing a newly headhunted employee also removes its switch salary.
 	const result = []
-	if (numToFire > totalPaidStaff && playerObj.marketers.length > 0) {
+	const nonMarketerRelief = totalPaidStaff * penalty + headhuntSalaryDue(playerIndex)
+	if (shortfall > nonMarketerRelief && playerObj.marketers.length > 0) {
 		playerObj.marketers.forEach((entry, i) => {
 			const emp = entry.marketer
 			// Ignore the marketer in the additional campaign slot
@@ -2290,7 +2586,7 @@ export function marketersNeedingFiring(playerIndex) {
 
 export function numPayNeeded(playerIndex) {
 	let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
-	let due = salary(playerIndex)
+	let due = baseSalary(playerIndex)
 	return Math.ceil(due / unitarySalary)
 }
 
@@ -2305,7 +2601,7 @@ export function payingWithGoodsRequireAction(playerIndex) {
 
 	// 2. Calculate if the player has more payment options than debt
 	// (Cash coverage + Resource count)
-	const cashSlots = Math.floor(playerObj.money / penalty)
+	const cashSlots = Math.floor(Math.max(0, playerObj.money - headhuntSalaryDue(playerIndex)) / penalty)
 	const totalPaymentOptions = cashSlots + playerObj.resources.length
 
 	// 3. If they have more options than debt, they must CHOOSE which to use.
@@ -2317,6 +2613,48 @@ export function payingWithGoodsRequireAction(playerIndex) {
 	}
 
 	return false
+}
+
+// --- Stadium mod ---
+
+// The First Stadium Supplier milestone hears announcements 1 turn earlier
+function stadiumAnnouncementLead() {
+	const store = useModelStore()
+	for (let i = 0; i < store.players.length; i++) {
+		if (plyr.hasMilestone(i, rf.FIRST_STADIUM_SOLD)) return 3
+	}
+	return 2
+}
+
+// Called at the end of a turn (after Dinnertime, during clean-up) with the turn
+// that just ended. Creates the announcement for the next game when it is due.
+// With the First Stadium Supplier milestone the announcement is rolled one turn
+// early, but the shared history entry (what everyone else sees) waits until the
+// normal 2-turn lead - the holder's early knowledge stays private.
+export function stadiumEndOfTurn(turnJustEnded) {
+	const store = useModelStore()
+	if (!store.startingOptions.stadium) return
+	const nextGameTurn = 5 + store.stadium.gamesPlayed * 3
+
+	// Roll the next game's demand at the earliest lead that applies (3 with the milestone, else 2)
+	if (store.stadium.announcement === null && turnJustEnded >= nextGameTurn - stadiumAnnouncementLead()) {
+		const gameNumber = store.stadium.gamesPlayed + 1
+		const pool = [rf.PIZZA, rf.BURGER]
+		if (store.startingOptions.noodles) pool.push(rf.NOODLES)
+		if (store.startingOptions.dumplings) pool.push(rf.DUMPLING)
+		if (store.startingOptions.friedChicken) pool.push(rf.FRIED_CHICKEN)
+		const food = pool[Math.floor(Math.random() * pool.length)]
+		const units = gameNumber === 1 ? 6 : gameNumber === 2 ? 12 : 16
+		store.stadium.announcement = { gameNumber: gameNumber, food: food, units: units }
+	}
+
+	// The announcement becomes public (shared history) at the normal 2-turn lead
+	if (store.stadium.announcement !== null && turnJustEnded >= nextGameTurn - 2) {
+		const a = store.stadium.announcement
+		if (!store.history.some((h) => h[0] === rf.HIST_STADIUM_ANNOUNCE && h[3][0] === a.gameNumber)) {
+			model.addHistory(rf.HIST_STADIUM_ANNOUNCE, [a.gameNumber, a.food, a.units], -1, 0)
+		}
+	}
 }
 
 export function housesAffectedByMarketingCampaign(campaign) {
@@ -2395,7 +2733,8 @@ export function housesAffectedByMarketingCampaign(campaign) {
 				// Handle floating point IDs if necessary
 				houseId = Math.round((tileValue - rf.HOUSE + Number.EPSILON) * 100) / 100
 			}
-			affectedHouses.add(houseId)
+			// Stadium mod: the stadium is never affected by marketing
+			if (houseId !== rf.STADIUM) affectedHouses.add(houseId)
 		}
 		// Garden Check (Gardens trigger the house they are attached to)
 		else if (tileValue === rf.GARDEN) {
@@ -2410,16 +2749,21 @@ export function housesAffectedByMarketingCampaign(campaign) {
 }
 
 // PHASE_MARKETING_CAMPAIGNS -- fire off marketing campaigns
-export function doMarketingCampaigns(replayOnly) {
+// replayFinalPass: replay only. Live play repeats the whole phase once per Mass
+// Marketeer and only ticks campaign durations down on the last repeat. The replay
+// runs a single pass per recorded history entry, so the caller has to say whether
+// this entry was that last repeat (see replayMarketingCampaigns).
+export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 	const store = useModelStore()
 	for (let i = 0; i < store.players.length; i++) {
 		plyr.recallMassMarketeers(i)
 	}
 
+	const massMarketeers = store.players.reduce((acc, p) => acc + p.employees.filter((x) => x === rf.MASS_MARKETEER).length, 0)
 	let totalMassMarketers = 0
-	if (!replayOnly) {
-		totalMassMarketers = store.players.reduce((acc, p) => acc + p.employees.filter((x) => x === rf.MASS_MARKETEER).length, 0)
-	}
+	if (!replayOnly) totalMassMarketers = massMarketeers
+	// No mass marketers means a single pass, which is always the final one
+	const replayExpires = massMarketeers === 0 || replayFinalPass !== false
 
 	// Phase Loop (Runs once normally, or multiple times for Mass Marketers)
 	for (let mmLoop = totalMassMarketers; mmLoop >= 0; mmLoop--) {
@@ -2463,6 +2807,8 @@ export function doMarketingCampaigns(replayOnly) {
 
 				const tryAddNeed = (good, history) => {
 					const needs = store.needs.find((n) => n.number === houseId)
+					// Fried Chicken mod: moved-out houses accept no marketing at all
+					if (needs?.movedOut) return false
 					if (isInfiniteHouse || (needs?.needs.length || 0) < limit) {
 						model.addNeedToHouse(good, houseId, playerIndex)
 						if (isApt) model.addNeedToHouse(good, houseId, playerIndex)
@@ -2481,8 +2827,11 @@ export function doMarketingCampaigns(replayOnly) {
 				// Standard Good 2
 				if (h2) tryAddNeed(good2, h2)
 
-				// Expansion: Dumplings
-				if (store.startingOptions.dumplings) tryAddNeed(rf.DUMPLING, hDumpling)
+				// Expansion: Dumplings (twice when a second good is marketed)
+				if (store.startingOptions.dumplings) {
+					tryAddNeed(rf.DUMPLING, hDumpling)
+					if (h2) tryAddNeed(rf.DUMPLING, h2)
+				}
 			}
 
 			// Rural Marketing Logic (Campaigns 21-24)
@@ -2500,7 +2849,7 @@ export function doMarketingCampaigns(replayOnly) {
 			if (hDumpling[1].length > 0) histObj.push(hDumpling)
 
 			// Cleanup: Expire or decrement campaign duration
-			if (mmLoop === 0) {
+			if (replayOnly ? replayExpires : mmLoop === 0) {
 				if (campaign.duration === 1) {
 					model.removeMarketingCampaign(campaign.number)
 					for (let i = 0; i < store.players.length; i++) {
@@ -2554,14 +2903,9 @@ function processEarnings(earnedByPlayers, currentHist, mmLoop, totalMM, replayOn
 		const histObj = earningsByPlayerIndex.map((e) => e[0].length > 0 ? e : [])
 		model.addHistory(rf.HIST_MARKETING_EARNING, histObj, -1, 0)
 	}
-
-	// Bank Break Logic
-	if (store.bank < 0 && !store.startingOptions.shortGame && store.bankBroken === 0) {
-		handleBankBreak()
-	}
 }
 
-function handleBankBreak(replayOnly) {
+export function handleBankBreak(replayOnly) {
 	const store = useModelStore()
 
 	if (store.startingOptions.shortGame) {
@@ -2572,13 +2916,14 @@ function handleBankBreak(replayOnly) {
 	if (store.bankBroken === 0) {
 		store.bankBroken = 1
 
-		if (!replayOnly) model.addHistory(rf.HIST_DISPLAY_RESERVE, store.reserveCards.filter((card) => card !== -1), -1, 0)
+		if (!replayOnly) model.addHistory(rf.HIST_DISPLAY_RESERVE, store.reserveCards.filter((card) => card !== rf.RES_CARD_NOT_CHOSEN && card !== rf.RES_CARD_NONE), -1, 0)
 
 		const reserve = [0, 0, 0]
 		let total = 0
 
 		store.reserveCards.forEach((card) => {
-			if (card === -1) return
+			// RES_CARD_NOT_CHOSEN = not chosen, RES_CARD_NONE = no reserve card: neither counts at bank break
+			if (card === rf.RES_CARD_NOT_CHOSEN || card === rf.RES_CARD_NONE) return
 			total += card * 100
 			reserve[card - 1]++
 		})
@@ -2587,7 +2932,7 @@ function handleBankBreak(replayOnly) {
 		store.ceoLevel = reserve.lastIndexOf(maxVal) + 2
 
 		if (store.startingOptions.reservePrice) {
-			total = 200 * store.reserveCards.length
+			total = 200 * store.reserveCards.filter((card) => card !== rf.RES_CARD_NOT_CHOSEN && card !== rf.RES_CARD_NONE).length
 			store.ceoLevel = 3
 		}
 
@@ -2598,8 +2943,65 @@ function handleBankBreak(replayOnly) {
 		if (store.bank < 0) {
 			if (!replayOnly) model.endGame()
 		}
+	} else if (store.startingOptions.secondBailout && store.bankBroken === 1) {
+		// Second Bailout mod: the second break triggers a city bailout instead of ending the game
+		const amount = 300 * store.players.length
+		store.bankBroken = 2
+		if (!replayOnly) {
+			store.bank += amount
+			model.addHistory(rf.HIST_BANK_BAILOUT, [amount], -1, 0)
+			// Set up the claim night: pool snapshot + claim order (fullTurnOrder: turnOrder is
+			// already empty by the time the last player's payday breaks the bank)
+			store.bailout.pending = true
+			store.bailout.pool = bailoutPool()
+			store.bailout.claims = {}
+			store.bailout.order = [...store.gameflow.fullTurnOrder]
+			// Nothing left to claim? Then the bailout has no gift phase
+			if (Object.values(store.bailout.pool).every((n) => n <= 0)) {
+				store.bailout.order.forEach((pi) => (store.bailout.claims[pi] = -1))
+				store.bailout.pending = false
+			}
+		}
+		if (store.bank < 0) {
+			if (!replayOnly) model.endGame()
+		}
 	} else {
 		if (!replayOnly) model.endGame()
+	}
+}
+
+// Second Bailout mod: the enabled L2 marketers and how many are left in the talent market
+function bailoutPool() {
+	const store = useModelStore()
+	const pool = { [rf.CAMPAIGN_MANAGER]: store.availableEmployees[rf.CAMPAIGN_MANAGER] }
+	if (store.startingOptions.ruralMarketers) pool[rf.RURAL_MARKETEER] = store.availableEmployees[rf.RURAL_MARKETEER]
+	if (store.startingOptions.massMarketers) pool[rf.MASS_MARKETEER] = store.availableEmployees[rf.MASS_MARKETEER]
+	if (store.startingOptions.gourmet) pool[rf.GOURMET_FOOD_CRITIC] = store.availableEmployees[rf.GOURMET_FOOD_CRITIC]
+	if (store.startingOptions.hawkers) pool[rf.HAWKER_MARKETEER] = store.availableEmployees[rf.HAWKER_MARKETEER]
+	return pool
+}
+
+// Second Bailout mod: a player claims one free L2 marketer (or -1 to decline).
+// The gift is NOT a hire: no hire milestones, the employee goes to the beach and
+// joins the payroll like any normal employee.
+export function claimBailoutEmployee(playerIndex, employeeId) {
+	const store = useModelStore()
+	if (!store.bailout.pending) return
+	if (store.bailout.claims[playerIndex] !== undefined) return
+	if (!store.bailout.order.includes(playerIndex)) return
+
+	if (employeeId !== -1) {
+		if (!(store.bailout.pool[employeeId] > 0)) return
+		store.bailout.pool[employeeId]--
+		store.availableEmployees[employeeId]--
+		store.players[playerIndex].beach.push(employeeId)
+	}
+
+	store.bailout.claims[playerIndex] = employeeId
+	model.addHistory(rf.HIST_BAILOUT_CLAIM, [employeeId], playerIndex, 0)
+
+	if (store.bailout.order.every((pi) => store.bailout.claims[pi] !== undefined)) {
+		store.bailout.pending = false
 	}
 }
 
@@ -2698,6 +3100,9 @@ export function giveSalesMilestones(playerIndex, needs) {
 	if (needs.indexOf(rf.DUMPLING) > -1) {
 		plyr.awardMilestone(playerIndex, rf.FIRST_DUMPLING_SOLD)
 	}
+	if (needs.indexOf(rf.FRIED_CHICKEN) > -1) {
+		plyr.awardMilestone(playerIndex, rf.FIRST_FRIED_CHICKEN_SOLD)
+	}
 }
 
 function rewardMarketingOnHouse(playerIndex, house) {
@@ -2776,7 +3181,7 @@ export function givePossiblePositionsForRadioPizzaBomb(houseNumber) {
 				occupiedIndexes.push(garden.rotated ? garden.index + mapWidth : garden.index + 1)
 			}
 		}
-	} else if (model.hasGarden(houseNumber)) {
+	} else {
 		// Handle non-natural house garden placement (landscape only for rot 1/3)
 		if (house.rotated === 1 || house.rotated === 3 || house.rotated === true) {
 			occupiedIndexes.push(house.index + 2, house.index + mapWidth + 2)

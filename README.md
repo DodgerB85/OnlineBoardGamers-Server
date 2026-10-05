@@ -24,8 +24,10 @@
 ## Quick setup (Windows) - see below for full dockerised setup, or quick setup Linux
 This will allow you to easily setup and run a home server. You can login with `admin` (super-user) or `user1` (normal user) and `password`. The easiest way to create a new user is in the Django admin panel - copy the hashed password from the `admin` user.
 - Get the source code `git clone https://github.com/DodgerB85/OnlineBoardGamers-Server`
-- Run `QuickSetup.bat`
-- After this is done, and for future runs just run `QuickStart.bat`
+- Run `QuickSetup.bat` from the root of the repo (it uses relative paths, so double-click it from a terminal in the repo root rather than from Explorer)
+- After this is done, and for future runs just run `QuickRun.bat`, also from the root of the repo
+
+`QuickSetup.bat` creates a Python virtual environment in `.venv_local`, installs the Python and Vue (npm) dependencies for every game that has a `vue<CODE>` workspace, copies `.env.docker` to `.env` if you don't already have one, runs the database migrations, and loads the `admin` and util users.
 
 ## Full dockerised setup
 I find it quite frustrating when I want to try out a project, only to find out it requires an obfuscated ton of setup, including setting up weird paid AWS services and pushing to remote server.
@@ -40,14 +42,14 @@ If you get stuck, paste the error into AI and it should help you on to the next 
 5) Navigate to the root of the repo and run `docker compose up --build` (MySQL port is mapped to 3307 so as not to conflict if you're running your own MySQL server)
 
 Now browse `http://localhost:8000/` and check there are no errors
-You should be able to browsr around the logged-out pages, eg about, help, etc.
+You should be able to browse around the logged-out pages, eg about, help, etc.
 (Or you might get some sort of database error). 
 
 6) Exit back to the command prompt. Confirm containers are running using: `docker compose up -d`
 7) Run this intial DB setup inside the container using `./setup_db.bat` or `docker-compose exec obs sh ./setup_db_script.sh`
 8) To fix migrate errors saying a table doesn't exist, try migrating that specific table, eg `docker-compose exec obs python manage.py migrate WEB`
 
-The compose has also created a superuser for the server - "admin" - "password" along with all required util users (eg SHADOW). All the pre-built users have their password set to their username - however the hash will be incorrect so in practive you'll need to edit in a pasxword in the admin panel, although in practice you won't ever really need to login as any of these users anyway.
+The compose has also created a superuser for the server - "admin" - "password" along with all required util users (eg SHADOW). The `admin` login works as soon as setup finishes. The other pre-built users (SHADOW through to SHADOW_5, the bots, and `user1`) are only usable if setup was able to rewrite their password hashes - the `initial_users.json` fixture ships placeholder hashes, so if any of them is rejected at the login prompt, set a password for it in the admin panel. In practice you won't ever really need to login as any of these users anyway.
 
 9) Go back to the website, and create a normal user for yourself (Eg "DodgerB") using the "Register New Account" link
 10) Now test your admin access; go to `http://localhost:8000/admin/` and login with the superuser. Find the user you made and tick them active in the User DB. Also tick Email Confirmed in their profile.

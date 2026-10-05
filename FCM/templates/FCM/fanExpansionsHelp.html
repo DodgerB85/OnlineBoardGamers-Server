@@ -1,0 +1,248 @@
+{% extends "Lobby/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% block head %}
+
+{% endblock %}
+{% block body %}
+  <div class="page page-narrow">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+      <div class="page-header">
+        <h1 class="page-title">{% translate "Fan Expansions Help" %}</h1>
+        <a class="button button-ghost button-sm" href="{% url 'FCM:FCMhelp' %}">&#8592; {% trans "FCM Help" %}</a>
+      </div>
+
+    <div id="FCMhelpPage"
+         class="card section help-qa fcm-china-help">
+
+      {% blocktranslate trimmed %}
+        These modules are fan-made expansions. They are not official Splotter Spellen content.
+        <br />
+        Games with these modules are therefore excluded from the stats.
+        <br />
+        Fan modules can be enabled in the options when creating a new FCM game.
+      {% endblocktranslate %}
+      <div class="FCMhelpSection">
+        <h2 class="fcm-china-help-title">{% translate "Fried Chicken" %}</h2>
+        <img class="helpEmployeeImg"
+             src="{% static 'FCM/images/e_fried_chicken_cook.jpg' %}"
+             alt="Fried Chicken Cook"
+             width="145"
+             height="225" />
+        <img class="helpEmployeeImg"
+             src="{% static 'FCM/images/e_fried_chicken_chef.jpg' %}"
+             alt="Fried Chicken Chef"
+             width="145"
+             height="225" />
+        <br />
+        <b><u>{% translate "Overview" %}</b></u>
+          <br />
+          {% blocktranslate trimmed %}
+            Fried chicken is a new food born from unhappy customers. When regular demand goes unserved, frustrated residents start craving fried chicken - and if nobody delivers, they eventually move out of the neighbourhood. Selling the very first fried chicken grants a lucrative but risky monopoly.
+          {% endblocktranslate %}
+          <br />
+          <br />
+          <b><u>Rules</u></b>
+          <ul>
+            <li>
+              {% blocktranslate trimmed %}
+                Flipping: At Dinnertime, if none of a house's regular demand can be served (every restaurant is too far away, sold out, or too expensive), each unserved regular demand token flips into ownerless demand for Fried Chicken.
+              {% endblocktranslate %}
+            </li>
+            <li>
+              {% blocktranslate trimmed %}
+                Moving out: If flipped Fried Chicken demand is still unserved at its second Dinnertime, the residents move out. All demand is removed, a SOLD sign is placed on the house, and it will not accept any marketing for the rest of the game.
+              {% endblocktranslate %}
+            </li>
+            <li>
+              {% blocktranslate trimmed %}
+                Origin of demand: Fried Chicken demand is normally only created by flipping - marketing employees cannot create it. Fried Chicken is otherwise a normal food item: it is sold at your normal price, matched by nearest and cheapest as usual, and may be stored in the fridge.
+              {% endblocktranslate %}
+            </li>
+            <li>
+              {% blocktranslate trimmed %}
+                Milestone "First fried chicken sold": The first player to sell Fried Chicken gains this Milestone, which grants two permanent perks: 1) the exclusive right to market Fried Chicken (no other player may ever add it to a campaign), and 2) a brand premium of +$5 for every Fried Chicken sold. The premium applies from the sale after the Milestone is earned, so the milestone-earning sale itself does not get the bonus.
+              {% endblocktranslate %}
+            </li>
+            <li>
+              {% blocktranslate trimmed %}
+                Strict liability: Fried Chicken marketed by the Milestone player has only one life. If any marketed Fried Chicken is unserved at Dinnertime, that house moves out at the very next Dinnertime settlement - before any matching takes place and with no flip as a buffer. Regular demand gets two lives (original demand, then flip); marketed Fried Chicken gets just one.
+              {% endblocktranslate %}
+            </li>
+            <li>
+              {% blocktranslate trimmed %}
+                Employees: Fried Chicken is produced by the Fried Chicken Cook (3 per turn, trained from a Kitchen Trainee; there are 6 in the game) and the Fried Chicken Chef (8 per turn, trained from a Fried Chicken Cook; a 1x employee). A Kitchen Trainee cannot produce Fried Chicken directly. Salaries and training follow the standard employee tiers. When the Fry Chefs module is in use, a Fried Chicken Cook may also be trained into a Fry Chef.
+              {% endblocktranslate %}
+            </li>
+            <li>
+              {% blocktranslate trimmed %}
+                Rural exemption: The Rural Marketing Area never flips and never moves out.
+              {% endblocktranslate %}
+            </li>
+          </ul>
+          </div>
+          <br />
+
+          <div class="FCMhelpSection">
+            <h2 class="fcm-china-help-title">{% translate "Stadium" %}</h2>
+            <img class="helpEmployeeImg"
+                 src="{% static 'FCM/images/map28.jpg' %}"
+                 alt="Stadium tile"
+                 width="225"
+                 height="225" />
+            <img class="helpEmployeeImg"
+                 src="{% static 'FCM/images/map29.jpg' %}"
+                 alt="Stadium tile"
+                 width="225"
+                 height="225" />
+            <br />
+            <b><u>{% translate "Overview" %}</b></u>
+            <br />
+            {% blocktranslate trimmed %}
+              The Stadium is a giant building spanning two map tiles. On game day the whole city turns into one huge customer: a big crowd with a big appetite for exactly one food. Games are held every 3 turns and announced well in advance - stocking up and pricing become a battle for a winner-takes-all jackpot. Recommended for games with 3 or more players.
+            {% endblocktranslate %}
+            <br />
+            <br />
+            <b><u>Rules</u></b>
+            <ul>
+              <li>
+                {% blocktranslate trimmed %}
+                  The building: When this module is enabled, the Stadium replaces two adjacent map tiles at game start, at a random position and orientation, and stays fixed for the whole game. It is all stadium and surrounding road - no building lots and no houses, so it produces no regular demand. Its value is the road network and game day.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  Schedule: Games are played on turns 5, 8, 11, ... - every 3 turns, starting with turn 5.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  The announcement: At the end of a turn, 2 turns before each game, an announcement reveals which single food the crowd wants. The food is always mass-market: pizza or burgers, plus noodles, dumplings or fried chicken if that module is enabled in the same game - never sushi, never drinks or kimchi.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  Crowd size: 6 units at the first game, 12 at the second, and 16 from the third game onward.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  Dinnertime on game day: The Stadium (house number 0.1) eats before every house. Standard matching rules apply: among the restaurants that have the full amount in stock, the nearest one wins, ties broken by cheapest price. The winner sells all units in a single sale.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  One-day event: If no restaurant can supply the full amount, the demand disappears at Dinnertime - the game is not postponed.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  Isolation: Stadium demand never flips into Fried Chicken and never moves out. It cannot be targeted by marketing campaigns, and substitution effects (noodle or sushi replacements, kimchi combos) do not apply. Units sold count normally towards "first sold" milestones.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  Milestone "First stadium supplier": The first player to win a stadium game gains this Milestone. Reward: future announcements reach this player 3 turns before the game instead of 2 - privately, one turn before everyone else learns.
+                {% endblocktranslate %}
+              </li>
+            </ul>
+          </div>
+          <br />
+
+          <div class="FCMhelpSection">
+            <h2 class="fcm-china-help-title">{% translate "Labor Market" %}</h2>
+            <img class="helpEmployeeImg" src="{% static 'FCM/images/e_temporary_worker.jpg' %}" alt="Temporary Worker" width="145" height="225" />
+            <img class="helpEmployeeImg" src="{% static 'FCM/images/e_headhunter.jpg' %}" alt="Headhunter" width="145" height="225" />
+            <img class="helpEmployeeImg" src="{% static 'FCM/images/e_union_organizer.jpg' %}" alt="Union Organizer" width="145" height="225" />
+            <br />
+            <b><u>{% translate "Overview" %}</u></b>
+            <p>{% blocktranslate trimmed %}Labor Market turns staffing from private engine-building into a shared contest. Each company has one Temporary Worker whose value rises as rivals use theirs; Headhunters turn idle talent on the Beach into both an opportunity and a liability; and Union Organizers make the largest active workforces pay for their scale. These pressures overlap: sending more people to work protects valuable staff but risks attracting a union, while resting them limits company size but exposes them to competitors. Temporary Workers offer a third path by producing more actions without adding more workers.{% endblocktranslate %}</p>
+            <b><u>{% translate "Rules" %}</u></b>
+            <ul>
+              <li>{% blocktranslate trimmed %}Temporary Worker: Every player starts with one on their Beach. At the start of each turn, its action limit is frozen at 1 plus the number of Temporary Workers removed before that turn. Before hiring, assign each action to Waitress, Pricing Manager, Recruiting Girl, Trainer, Errand Boy, Marketing Trainee or Kitchen Trainee. Different actions may copy different employees, and the same employee may be chosen repeatedly. It is never doubled by Night Shift, earns no salary and is permanently removed after that player's Working Day. Unassigned or unused actions are forfeited.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Temporary Worker example: Two Temporary Workers had been removed before the current turn, so every Temporary Worker used this turn receives 3 actions. You may choose Trainer, Trainer and Recruiting Girl for two training actions and one recruiting action. A rival using theirs later in the same turn also receives 3 actions, even after yours has been removed.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Temporary campaigns: A Temporary Worker acting as a Marketing Trainee creates a normal campaign, but no employee card is attached and nothing returns to the Beach when it expires.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Headhunter: Train one level from a Management Trainee. It is a level-2 salaried employee. Each working Headhunter may take one legal employee from another player's current Beach. If that employee is still employed at Payday, pay its normal salary, if any, plus a one-time job-switch salary of $10 per employee level to the bank. If it is fired before Payday, no job-switch salary is due. Temporary Workers, Headhunters, Union Organizers and other non-transferable employees are illegal targets.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Headhunter example: You take a level-4 Senior Vice President from an opponent's Beach. If you keep it until Payday, you pay its normal $5 salary plus a one-time $40 job-switch salary to the bank, for $45 total. If you fire it before Payday, neither payment is due for that employee.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Unique employees and salary milestones: A Headhunter cannot take a unique employee when the hiring player already owns the same unique employee. The Headhunter action does not require cash on hand. The First to train someone milestone reduces the combined normal and job-switch salaries by $15. The First Trainer Used milestone protects all employees when the company still cannot pay, following the normal bankruptcy rule. A job-switch salary is removed after that Payday and is never charged again.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Union Organizer: The game uses one card per player, with inactive cards in the public supply. After all Working Days, ignore companies with fewer than 5 workers, then give one Organizer to every company tied for the largest eligible workforce. All other Organizer cards return to the public supply.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Union Organizer example: Companies A, B and C send 6, 6 and 5 employees to work. All three meet the 5-worker threshold, but only A and B are tied for the largest workforce, so each receives an Organizer for the next Working Day; C receives none.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Each Union Organizer must occupy one slot directly under the CEO on the next Working Day, provides no action or subordinate slots, and costs $5 at Payday. It cannot be hired, trained, fired or headhunted, and it is excluded from workforce counts. A working Temporary Worker counts as one employee regardless of its number of actions.{% endblocktranslate %}</li>
+            </ul>
+          </div>
+          <br />
+
+          <div class="FCMhelpSection">
+            <h2 class="fcm-china-help-title">{% translate "Second Bailout" %}</h2>
+            <img class="helpEmployeeImg"
+                 src="{% static 'FCM/images/so_bailout.svg' %}"
+                 alt="Second Bailout"
+                 width="150"
+                 height="150" />
+            <br />
+            <b><u>{% translate "Overview" %}</b></u>
+            <br />
+            {% blocktranslate trimmed %}
+              In the base game the bank only breaks once. With this module the city steps in the second time: the bank gets a fresh cash injection and every player receives a free level-2 marketing employee. The game only ends for good on the third break.
+            {% endblocktranslate %}
+            <br />
+            <br />
+            <b><u>Rules</u></b>
+            <ul>
+              <li>
+                {% blocktranslate trimmed %}
+                  First break: unchanged - reserve cards are cashed in (or prices re-picked with the price-changing reserve cards) exactly as in the base game.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  Second break: the city bails the bank out. The bank immediately receives $300 per player (e.g. +$600 in a 2-player game, +$1500 with 5 players).
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  The gift: on the night of the bailout, players pick one free level-2 marketing employee each, in turn order, first come first served: Campaign Manager (always), plus Rural Marketeer, Mass Marketeer, Gourmet Food Critic or Hawker Marketeer if the matching module is enabled in this game. A card that is sold out in the talent market cannot be picked; if nothing is left when your turn comes, you get nothing. You may also decline.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  The gift is not a hire: it does not trigger "first to hire 3 employees" style milestones. The employee joins your beach and is paid like any other employee - getting them onto the schedule and affording their salary is your problem. Module milestones (e.g. "first Rural Marketeer used") still trigger normally the first time you market with them.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  Third break: the game ends immediately - there is only one bailout.
+                {% endblocktranslate %}
+              </li>
+              <li>
+                {% blocktranslate trimmed %}
+                  Short games are unaffected: the first break already ends them, so the bailout never happens.
+                {% endblocktranslate %}
+              </li>
+            </ul>
+          </div>
+          <br />
+
+            <div class="card section">
+              <h2 class="fcm-china-help-title">{% translate "Further Help" %}</h2>
+              <p>
+                <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>
+                <img id="contactEmailImg"
+                     src="{% static 'Lobby/email.png' %}"
+                     alt="Email Address"
+                     width="400"
+                     height="30" />
+              </p>
+            </div>
+
+        </div>
+
+      </div>
+{% endblock %}

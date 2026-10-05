@@ -11,7 +11,7 @@ import * as plyr from "../js/FCMplayer.js"
 import * as view from "../js/FCMview.js"
 
 import { useModelStore } from "../stores/FCMstore.js"
-import { makeAImove } from "../js/FCM_AI.js"
+import { makeAImove } from "../js/AI/FCM_AI.js"
 
 import { usePersonalStore } from "../stores/FCMpersonal.js"
 
@@ -144,6 +144,7 @@ export async function unlockTurn(type) {
 export async function saveAndUpdateNotifictions(playerIndexesToNotify, referringPhase) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	if (personal.tutorial) return // Tutorial game is never persisted
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	store.viewSettings.showGameLoader = true
@@ -206,7 +207,9 @@ export async function loadGame() {
 			if (result.kickoutRequired != null) personal.kickoutRequired = result.kickoutRequired
 			if (result.kickoutVotesData) store.kickoutVotesData = typeof result.kickoutVotesData === "string" ? JSON.parse(result.kickoutVotesData) : result.kickoutVotesData
 			if (result.kickoutVoteThreshold != null) store.kickoutVoteThreshold = result.kickoutVoteThreshold
-			store.mapData.startingMap = JSON.parse(result.startingMap)
+			// Keep the snapshot importFCMmodel rebuilds the grid from (FCMfuncs) up to
+			// date, or live updates resurrect the page-load map (stale UP tile slots)
+			window.initData.startingMap = Array.isArray(result.startingMap) ? result.startingMap : JSON.parse(result.startingMap)
 			//let suppressActions = false
 			//if (result.specialData) suppressActions = true
 			// Do this to update the top line info / green player highlights
@@ -407,12 +410,23 @@ export async function saveModuleSelection(moduleIndex) {
 }
 
 // At the END of simul turns, we want a rewind pointt
-export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointlessMove) {
+// extraPostData is merged into the POST body. Used by the admin "Reset AI" to
+// carry resetGame:true, which tells the server the incoming mapTiles are a
+// deliberate replacement rather than map drift.
+export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointlessMove, extraPostData) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.clearMessages()
 	store.viewSettings.showGameLoader = true
 	personal.haltPlay = true
+
+	// Tutorial game: the whole model lives in the browser, so there is nothing to
+	// POST. Drop the loader and let play continue, exactly as a successful save would.
+	if (personal.tutorial) {
+		store.viewSettings.showGameLoader = false
+		personal.haltPlay = false
+		return
+	}
 
 	//let phase = store.gameflow.phase
 	let phase = store.gameflow.phase
@@ -469,6 +483,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 		gameData: gameData,
 		IPM: isPointlessMove,
 		mapTiles: map.getOriginalTiles(false),
+		...extraPostData,
 	}
 
 	if ((window.initData.gameData === "" || !window.initData.gameData) && store.gameflow.turn === 0) {
@@ -683,7 +698,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 
 		if (personal.liveWS) WS.broadcastGameUpdate()
 
-		if (controller.currentPlayerObj().name === "FcmAI" && store.gameflow.phase != rf.PHASE_GAME_OVER) makeAImove()
+		if (controller.currentPlayerObj().name === rf.AI_NAME && store.gameflow.phase != rf.PHASE_GAME_OVER) makeAImove()
 	} catch (error) {
 		console.error("Error fetching data:", error)
 		personal.haltPlay = false
@@ -701,6 +716,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 export async function savePreTurn(preMoveDataRaw) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	if (personal.tutorial) return // Tutorial game is never persisted
 	store.viewSettings.showGameLoader = true
 
 	let csrftoken = funcs.getCookie("csrftoken")
@@ -745,6 +761,7 @@ export async function savePreTurn(preMoveDataRaw) {
 export async function saveOOBpreference() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	if (personal.tutorial) return // Tutorial game is never persisted
 	store.viewSettings.showGameLoader = true
 
 	let OOBpreference = 0
@@ -787,6 +804,7 @@ export async function saveOOBpreference() {
 }
 
 export async function saveSimulMove(moveData, continueFromStalledGame = false) {
+	if (usePersonalStore().tutorial) return // Tutorial game is never persisted
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.viewSettings.showGameLoader = true
@@ -1221,6 +1239,7 @@ export async function checkForLatestData() {
 			restartKickoutTimers()
 			//let suppressActions = false
 			//if (data.specialData) suppressActions = true
+			if (data.startingMap != null) window.initData.startingMap = Array.isArray(data.startingMap) ? data.startingMap : JSON.parse(data.startingMap)
 			funcs.importFCMmodel(loadDataString)
 			// Match fresh page load / old C.reloadModel: clear stale highlights + fire state, then rebuild turn UI
 			// (import zeros summary totals; without startPlayerTurn, hire.total stays 0 → hired.length === total+1)
@@ -1276,6 +1295,7 @@ export async function submitBug(bugContent) {
 export async function sendChatMessage(newEntry) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	if (personal.tutorial) return // Tutorial game is never persisted
 	store.viewSettings.showGameLoader = true
 
 	/*function removeEmojis(str) {
@@ -1510,8 +1530,8 @@ export function processSimulMoveData(data) {
 		let reserve = []
 		for (let i = 0; i < decompressedData.length; i++) {
 			if (store.players[i].displayName === rf.BOT_NAME) {
-				// Add a dud entry to preserve POV indexing
-				reserve.push(-1)
+				// Bots never take a reserve card; dud entry to preserve POV indexing
+				reserve.push(rf.RES_CARD_NONE)
 				continue
 			}
 			// Check if there's any dodgy data
@@ -1525,7 +1545,8 @@ export function processSimulMoveData(data) {
 			}
 
 			let content = decompressedData[i][3]
-			let reserveCard = -1
+			// Only called once all moves are in, so an empty entry means this seat has no card
+			let reserveCard = rf.RES_CARD_NONE
 			if (content.length > 0) reserveCard = content[0]
 			histEntries.push([rf.HIST_CHOOSE_RESERVE_CARD, reserveCard, i, Math.floor(decompressedData[i][2] / 1000)])
 			reserve.push(reserveCard)
@@ -1586,6 +1607,7 @@ export function processSimulMoveData(data) {
 			store.players[i].beach = content[0]
 			store.players[i].employees = content[1]
 			store.players[i].OOBpreference = content[2]
+			if (store.startingOptions.laborMarket) rules.snapshotWorkedCount(i)
 			//alert(`name: ${store.players[i].name} beach: ${store.players[i].beach} employees: ${store.players[i].employees} OOBpreference: ${store.players[i].OOBpreference}`)
 			//alert(`_name: ${_name} _phasesArray: ${_phasesArray} _timestamp: ${_timestamp} content: ${content}`)
 			if (store.players[i].employees.indexOf(rf.DISCOUNT_MANAGER) > -1) {
@@ -1631,7 +1653,8 @@ export function processSimulMoveData(data) {
 			// Still need to check for processing with BEER MS- PAY WITH FOOD THEN MONEY
 			if (turnDataArray[0].length > 0 && turnDataArray[0][0] === -4) {
 				turnDataArray[1].splice(0)
-				let due = rules.salary(i)
+				// Food may replace normal salary only; job-switch salary is cash-only.
+				let due = rules.baseSalary(i)
 				let unitarySalary = plyr.hasMilestone(i, rf.FIRST_WAITRESS_USED) ? 3 : 5
 				// Remove any coffee
 				playerObj.resources = funcs.removeItemAll(playerObj.resources, rf.COFFEE)
@@ -1649,7 +1672,7 @@ export function processSimulMoveData(data) {
 					if (i !== personal.pov) {
 						// The current player's firing and returning is done in real time
 						plyr.fireEmployee(i, turnDataArray[0][j])
-						store.availableEmployees[turnDataArray[0][j]]++
+						store.availableEmployees[rf.decodeFiredEmployee(turnDataArray[0][j])]++
 					}
 				}
 				histAdded = true
