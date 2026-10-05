@@ -173,7 +173,6 @@ function validateDraft() {
 	if (draftPath.value.length) previewError.value = digPreview.value.error
 }
 watch(() => props.digCapacity, validateDraft)
-watch(() => store.viewSettings.actionIntent, (intent) => { if (intent !== "dig") previewOpen.value = false })
 function undoDraft() {
 	draftPath.value.pop()
 	selectedHex.value = draftPath.value.at(-1) ?? null
