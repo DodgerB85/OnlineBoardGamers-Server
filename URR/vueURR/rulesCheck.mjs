@@ -5,6 +5,7 @@ import * as rules from "./src/js/URRrules.js"
 import { createGame, applyAction, finishWaterRouting } from "./src/js/URRgame.js"
 import { startWaterRouting, allocateWater, waterChoices } from "./src/js/URRwater.js"
 import { getCanalCost, getDigPathPreview } from "./src/js/URRmap.js"
+import { compactHistory, expandHistory } from "./src/js/URRhistoryStorage.js"
 
 const fresh = () => createGame(["A", "B", "C"])
 const id = (row, column) => `printed-${row}-${column}`
@@ -382,4 +383,44 @@ const area = (game, areaId) => game.board.areas.find((entry) => entry.id === are
 	assert.equal(rules.getAutomaticAction(game), null)
 }
 
-console.log("URR rule checks passed")
+// Replay compaction preserves every choice, including deletions and array changes.
+{
+	const history = []
+	const game = fresh()
+	const record = (action = null) => history.push([rf.HIST_ACTION, 0, JSON.stringify(game), action, 12345])
+	record()
+	game.gameflow.pendingOffer = { state: 0, action: { type: "offerNation", nation: 1, amount: 50 } }
+	game.states[0].diggers.push({ id: 0, capacity: 2, era: 1, hasDug: false })
+	record({ type: "offerNation", nation: 1, amount: 50 })
+	game.gameflow.pendingOffer.action.amount = 60
+	game.board.areas[0].irrigatedBy = 0
+	game.states[0].diggers[0].hasDug = true
+	game.players[0].money -= 10
+	record({ type: "allocateWater", area: game.board.areas[0].id, amount: 1 })
+	delete game.gameflow.pendingOffer
+	game.states[0].diggers = []
+	record()
+	game.gameflow.phase = rf.PHASE_SETTLEMENT
+	record()
+	const compact = compactHistory(history)
+	assert.equal(typeof compact[0][2], "string")
+	assert.equal(typeof compact[1][2], "object")
+	assert.equal(typeof compact.at(-1)[2], "string")
+	assert.ok(JSON.stringify(compact).length < JSON.stringify(history).length / 2)
+	const saved = JSON.stringify(compact)
+	const expanded = expandHistory(compact)
+	assert.equal(JSON.stringify(compact), saved, "Expansion must not mutate compact records")
+	for (const [index, entry] of expanded.entries()) {
+		assert.deepEqual(JSON.parse(entry[2]), JSON.parse(history[index][2]))
+		assert.deepEqual(entry.slice(3), history[index].slice(3))
+	}
+	assert.deepEqual(expandHistory(history), history, "Legacy full snapshots remain readable")
+	assert.deepEqual(compactHistory(history), compact, "Cached exports preserve the same history")
+	// A replay branch can replace a snapshot on the same history entry.
+	game.players[0].money += 30
+	history[2][2] = JSON.stringify(game)
+	assert.deepEqual(JSON.parse(expandHistory(compactHistory(history))[2][2]), game)
+	assert.throws(() => expandHistory([[rf.HIST_ACTION, 0, compact[1][2]]]), /Invalid URR replay delta/)
+}
+
+console.log("URR rule and replay storage checks passed")

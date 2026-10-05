@@ -100,6 +100,8 @@ The mutations are split into `XXX` and `XXX_core`: `XXX` is the live wrapper and
 
 History entries have been extended over time, so every reader detects old vs new style from the shape of the stored param rather than a version field - old games keep working unchanged.
 
+URR keeps full replay positions in browser memory, but saves full snapshots only at the opening and turn/phase boundaries. Other entries use tagged `urr-history-delta-v1` records containing changed property paths and values; a path without a value deletes that property. `URRhistoryStorage.js` expands these losslessly on import and caches compact records for subsequent saves. Legacy full-snapshot histories remain readable. Every confirmed move still saves the current position and creates its normal rewind point; individual replay and rewind steps are preserved. URR rewind points retain the existing `gzip:` format and use compression level 6.
+
 ## Turn processing and stale-write protection
 
 Every mutating endpoint goes through `process_game_with_mutex(request, handler, mutex_prefix=...)` (`Lobby/gameViewHelpers.py`):

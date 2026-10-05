@@ -5,6 +5,7 @@ import * as funcs from "./URRfuncs"
 import { createGame, applyAction } from "./URRgame.js"
 import { createPrintedBoard } from "./URRboard.js"
 import { createBoard } from "./URRmap.js"
+import { compactHistory, expandHistory } from "./URRhistoryStorage.js"
 
 const STATE_FIELDS = ["version", "players", "gameflow", "states", "nations", "board", "landPrices", "era", "cardSupply", "rain", "nextDiggerId"]
 
@@ -111,12 +112,13 @@ export function importGameData(obj) {
 	if (data.version !== rf.GAME_DATA_VERSION) throw new Error("Unsupported URR save version")
 	// Earlier rules saves had no board. Preserve their economy and turn order.
 	if (data.board?.areas.length === 0) data.board = createBoard(createPrintedBoard())
+	const history = expandHistory(data.history || [])
 	restoreState(data)
-	store.history.splice(0, store.history.length, ...JSON.parse(JSON.stringify(data.history || [])))
+	store.history.splice(0, store.history.length, ...history)
 }
 
 export function exportGameData() {
-	return { ...snapshotState(), history: JSON.parse(JSON.stringify(useModelStore().history)) }
+	return { ...snapshotState(), history: compactHistory(useModelStore().history) }
 }
 
 export function snapshotState() {
