@@ -92,7 +92,7 @@
         <li><span class="urrHelpSwatch selected"></span><strong>{% translate "Yellow:" %}</strong> {% translate "The selected or focused hex. Its details appear below the map." %}</li>
         <li><span class="urrHelpSwatch exchange"></span><strong>{% translate "Purple:" %}</strong> {% translate "An available Calah waterwork site or Barahshum canal destination. The map hint and hex description identify the exchange." %}</li>
         <li><span class="urrHelpSwatch maintenance"></span><strong>{% translate "Amber:" %}</strong> {% translate "Land eligible for a mandatory crew funding sale, or a waterwork eligible for removal when storing harvest. Select a hex to see which applies." %}</li>
-        <li><span class="urrHelpSwatch water"></span><strong>{% translate "Cyan outline:" %}</strong> {% translate "An available water-routing destination. A small cyan dot on a hex marks irrigation." %}</li>
+        <li><span class="urrHelpSwatch water"></span><strong>{% translate "Cyan outline:" %}</strong> {% translate "An available water-routing destination. Numbered blue badges match the destination list; the source has a dashed outline and a Source label. A small cyan dot on a hex marks irrigation." %}</li>
         <li><span class="urrHelpSwatch canal"></span><strong>{% translate "Blue lines:" %}</strong> {% translate "Canals. The thicker line is the canal path you are drafting. The moving cyan dot previews the selected water route." %}</li>
       </ul>
       <p>{% translate "Select a hex to read its owner, terrain, waterwork, and current role; you do not need to identify a highlight by colour alone." %}</p>
@@ -117,6 +117,9 @@
     <h2>{% translate "Playing the Game" %}</h2>
     <div class="help-qa">
       <p>{% translate "The rows above the board show player order and active state order. Select a player or state to inspect its holdings; the status panels otherwise follow the current decision." %}</p>
+      <p>{% translate "Overview compares state treasuries, monarchs, owned land, crews, harvest, and order, plus each player's ownership across states. Select a name to inspect its existing status panel. Stars mark monarchs or ownership leaders; sold land is excluded from ownership counts." %}</p>
+      <p>{% translate "Inspected states stand out on the map while other hexes are dimmed; current action targets stay visible. Show owned land in the player panel highlights that player's holdings in the same way. Clear map inspection removes these outlines. The action panel identifies the acting state and player separately from the inspected panels." %}</p>
+      <p>{% translate "Equipment supply shows the current era prominently. All eras expands the remaining cards. The next era begins with the first purchase from its supply. Development progress identifies optional digging and purchasing, and whether a maintenance crew is required before ending." %}</p>
       <p>{% translate "Land prices show the current market price in bold and the fixed colonization cost below it. The second row uses city artwork for city prices. Market after plan previews price changes from queued sales before you confirm. Small city markers in a player's holdings count cities included in the terrain totals." %}</p>
       <ol>
         <li><strong>{% translate "Independent nations:" %}</strong> {% translate "Buy the current treaty nation, or expand another nation's row to make an offer. Map locates that nation's homeland. Select the artwork to read a card at full size; use its zoom controls to enlarge it further. During an auction, bid or withdraw from the current nation. Bidders who cannot afford the minimum withdraw automatically." %}</li>

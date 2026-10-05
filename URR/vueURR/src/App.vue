@@ -12,6 +12,8 @@ import TopMenu from "./components/TopMenu.vue"
 import TopMenuViews from "./components/TopMenuViews.vue"
 import FooterBar from "./components/FooterBar.vue"
 import MapArea from "./components/MapArea.vue"
+import GameOverview from "./components/GameOverview.vue"
+import DevelopmentProgress from "./components/DevelopmentProgress.vue"
 import TurnOrder from "./components/TurnOrder.vue"
 import GameActions from "./components/GameActions.vue"
 import StateStrip from "./components/StateStrip.vue"
@@ -29,6 +31,7 @@ const store = useModelStore()
 const personal = usePersonalStore()
 
 const map = ref(null)
+const holdings = ref(null)
 const statusPanels = ref(null)
 const actionPanelBody = ref(null)
 const selectedArea = ref(null)
@@ -77,6 +80,15 @@ const showLandMarket = computed(() => {
 	if (store.gameflow.phase !== rf.PHASE_DEVELOPMENT || store.gameflow.developmentStep === "betweenStates" || store.gameflow.pendingOffer || stateId === null) return false
 	return store.players[store.states[stateId].king].money < maintenanceShortfall(store, stateId)
 })
+const isBarahshumExchange = computed(() => !personal.haltPlay && !store.viewSettings.showReplay && personal.pov >= 0 && !personal.canPlay() && canExchangeBarahshum(store, personal.pov))
+const actingLabel = computed(() => {
+	if (isBarahshumExchange.value) return `Acting: ${store.players[personal.pov].displayName} · Barahshum exchange`
+	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return ""
+	const player = store.players[store.gameflow.turnOrder[0]]
+	const stateId = currentStateId(store)
+	const context = store.gameflow.pendingOffer ? "Responding" : store.gameflow.developmentStep === "betweenStates" ? "Next" : "Acting"
+	return `${context}: ${stateId === null ? '' : `${rf.STATE_NAMES[stateId]} · `}${player?.displayName || 'Automatic resolution'}`
+})
 const actionPanelTitle = computed(() => {
 	if (store.gameflow.pendingOffer) return "Agreement requested"
 	if (store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS) {
@@ -84,7 +96,7 @@ const actionPanelTitle = computed(() => {
 		const treaty = store.nations.find((nation) => nation.ownerType === null)
 		if (treaty) return `Treaty: ${rf.NATION_NAMES[treaty.id]}`
 	}
-	if (!personal.haltPlay && !store.viewSettings.showReplay && personal.pov >= 0 && !personal.canPlay() && canExchangeBarahshum(store, personal.pov)) return "Barahshum · free canal"
+	if (isBarahshumExchange.value) return "Barahshum · free canal"
 	if (map.value?.isTracing) return `Canal draft · ${Math.max(0, canalPath.value.length - 1)} segment${canalPath.value.length === 2 ? "" : "s"}`
 	if (store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep === "eridu") return canalPath.value.length >= 2 ? "Eridu · canal review" : "Eridu · special digging turn"
 	const stateId = currentStateId(store)
@@ -139,14 +151,16 @@ function showDebug() {
 		<div id="gameArea">
 		<ReplayArea v-if="store.viewSettings.showReplay" />
 		<TurnOrder @inspect="revealStatus" />
+		<GameOverview @inspect="revealStatus" />
 		<div id="mainAreaLessHistory" ref="mainArea" :style="{ '--board-width': `${boardBaseWidth * store.viewSettings.boardZoom}px`, '--board-overhead': `${(showLandMarket ? 390 : 275) + (store.viewSettings.showReplay ? 60 : 0) + (map?.isTracing ? 60 : 0)}px` }">
-			<aside ref="statusPanels" class="stateSidebar"><PlayerHoldings /><StateStrip @inspect="revealStatus" /><EquipmentSupply /></aside>
+			<aside ref="statusPanels" class="stateSidebar"><PlayerHoldings ref="holdings" /><StateStrip @inspect="revealStatus" /><EquipmentSupply /></aside>
 			<div class="mapContainer">
 				<TerrainMarket v-if="showLandMarket" />
-				<MapArea ref="map" :removal-area="removalArea" :land-draft="landDraft" :waiting-player-name="waitingPlayerName" :dig-capacity="digCapacity" @select-area="selectArea" @change-path="canalPath = $event" @review-dig="reviewDig" />
+				<MapArea ref="map" :highlighted-player="store.viewSettings.showOwnedLand ? holdings?.activePlayer ?? null : null" :removal-area="removalArea" :land-draft="landDraft" :waiting-player-name="waitingPlayerName" :dig-capacity="digCapacity" @select-area="selectArea" @change-path="canalPath = $event" @review-dig="reviewDig" />
 			</div>
 			<aside v-if="!store.viewSettings.showReplay" class="actionSidebar">
-				<div class="actionPanelHeading">{{ actionPanelTitle }}</div>
+				<div class="actionPanelHeading"><small class="actingLabel">{{ actingLabel }}</small>{{ actionPanelTitle }}</div>
+				<DevelopmentProgress />
 				<div ref="actionPanelBody" class="actionPanelBody"><NationMarket v-if="store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS" @locate-nation="locateNation" />
 				<GameActions v-else :selected-area="selectedArea" :path="canalPath" @start-dig="startDig" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" @change-dig-capacity="digCapacity = $event" /></div>
 			</aside>
@@ -217,4 +231,5 @@ body {
 	transform: translate(-50%, -50%);
 	font-size: 36px;
 }
+.actingLabel { display: block; font-size: 12px; font-weight: normal; color: #655a42; margin-bottom: 5px; }
 </style>

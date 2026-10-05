@@ -50,6 +50,8 @@ export const useModelStore = defineStore("store", () => {
 		isSaving: false,
 		isSendingChat: false,
 		isSavingNotes: false,
+		showOverview: false,
+		showOwnedLand: false,
 		inspectedPlayer: null,
 		inspectedState: null,
 		showRewindPanel: false,
