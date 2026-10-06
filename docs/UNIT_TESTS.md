@@ -47,11 +47,12 @@ Notes:
 | `test_urr_rewind.py` | 5 | URR legacy and gzip rewind compatibility, mixed rewind stacks and replay branches, twenty-point retention, opening-position extraction from compact replay history, and matching the redo anchor to a client-compacted rewind position |
 | `test_fcm_rewind.py` | 6 | FCM `saveNormal` rewind stack: `saveRewind=True` records the pre-save state, `saveRewind=False` records nothing at all, one save makes exactly one rewind point, repeated AI-style saves never grow the stack, and rewinding after your own move returns *your* turn rather than the next player's (FcmAI's) |
 | `test_fcm_reset.py` | 5 | Admin "Reset AI": a reset-flagged save replaces `startingMap` and clears the discarded game's rewind stack; the map-sync drift guard still rejects a changed board on an ordinary save, and still rejects a non-admin claiming `resetGame` |
+| `test_fcm_passkickout.py` | 5 | FCM "skip turn instead of kickout": a timed-out player's auto-skip move is attributed to *them* (not the clicker) in `saveSimulMove` and `saveNormal` with correct flexi-time credit; the same attribute is refused (syncError) when the target is not the current player, when kickout isn't due, or when the target isn't a participant |
 | `test_admin_webhook_guard.py` | 2 | `SN_sendAdminErrorMessage` never posts to the admin Discord webhook while Django is on a test database — directly, and via the FCM map-sync rejection path that prompted it |
 | `test_game_end.py` | 8 | `clearGeneralDataOnGameEndWithoutSave` (the shared choke point every presenter's `endGame` calls): per-player `moveDataJSON` / `currentMoveTime` / `currentMoveData` are wiped for all 12 games, the wipe is persisted rather than only in-memory, the Game-level scratch fields are still cleared, and `endGame` still marks exactly one winner. Plus vote cleanup: rewind-consent and kickout votes are refused once a game is FINISHED (delete / stats-exclude votes still allowed), rewind votes still work while ACTIVE, and an FCM `saveNormal` with `status=FINISHED` no longer re-creates `activeVotes` after `endGame` cleared it |
 | `test_legacy_game_urls.py` | 6 | Legacy bare game URLs `/GAME/<id>/` redirect to `/GAME/<id>/show/` for BUS, CNS, TGZ, WEB, AQY, KFW, IND — both when the game has no `original_id` (the regression: these views used to query `original_id` only, so every game created after the backfill 404'd) and when it does. Also asserts a genuinely missing id is *not* redirected, that a BUS id does not resolve under CNS, and that `handler404` returns a real HTTP 404 rather than a 200 |
 
-269 tests total (git count may drift slightly as tests are added).
+274 tests total (git count may drift slightly as tests are added).
 
 ## Conventions
 

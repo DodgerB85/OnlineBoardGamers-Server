@@ -26,7 +26,7 @@ export function removeBotPlayers() {
 	}
 }
 
-function generatePaydayDefaultMove(playerIndex) {
+export function generatePaydayDefaultMove(playerIndex) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
 	const due = rules.salary(playerIndex)
@@ -43,29 +43,35 @@ function generatePaydayDefaultMove(playerIndex) {
 		remaining = rules.headhuntSalaryDue(playerIndex) + Math.max(payableWithFood - itemCount * unitarySalary, 0)
 	}
 
+	// Work on a copy: this generator also runs on the pressing client, and the
+	// real gameData is applied downstream via fireEmployee — mutating the store
+	// here would double-apply the firing on that client. baseSalary reads the
+	// live employee list, so the copy is temporarily swapped in while computing.
+	const savedEmployees = playerObj.employees
+	playerObj.employees = [...savedEmployees]
+
 	while (remaining > playerObj.money && playerObj.employees.length > 0) {
 		let emp = playerObj.employees.pop()
-		if (emp !== rf.BLANK_EMPLOYEE_SPACE) {
+		if (emp !== rf.BLANK_EMPLOYEE_SPACE && !rf.NON_FIREABLE_EMPLOYEES.includes(emp)) {
 			fired.push(emp)
 			const normalAfterFood = Math.max(rules.baseSalary(playerIndex) - (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) ? playerObj.resources.filter((r) => r !== rf.COFFEE).length * unitarySalary : 0), 0)
 			remaining = rules.headhuntSalaryDue(playerIndex) + normalAfterFood
 		}
 	}
 
+	playerObj.employees = savedEmployees
+
 	if (fired.length > 0) return [fired, [-9]]
 	if (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD)) return [[-4], [-9]]
 	return [[-8], [-9]]
 }
 
-function generateCleanupDefaultMove(playerIndex) {
+export function generateCleanupDefaultMove(playerIndex) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
-	if (!rules.isRequiredToPlayCleanUp(playerIndex)) return [[-9], [-8]]
-	if (playerObj.resources.length <= 10) return [[-9], [-1]]
-	let kept = playerObj.resources.slice(0, 10)
-	let binned = playerObj.resources.slice(10)
-	playerObj.resources = [...kept]
-	return [[-9], [...binned]]
+	if (!rules.isRequiredToPlayCleanUp(playerIndex)) return [-8]
+	if (playerObj.resources.length <= 10) return [-1]
+	return playerObj.resources.slice(10)
 }
 
 export function passKickout() {
@@ -73,9 +79,34 @@ export function passKickout() {
     const personal = usePersonalStore()
 	personal.kickoutRequired = 0
 	let timedOutPlayerIndex = store.gameflow.turnOrder[0]
+	const targetName = store.players[timedOutPlayerIndex].name
 
 	if (!controller.isSimulPhase()) {
-		controller.endPlayerTurn(true, false)
+		// The timed-out player's default move is composed on whoever clicked the
+		// kickout button. resetContext deliberately keeps preMoveData, justFired
+		// and justBinned (the simul replay path reads them), so clear them here:
+		// otherwise A's skip picks up B's leftovers and composes the wrong move.
+		store.context.preMoveData = [[[-9], []], [-9]]
+		store.context.justFired.splice(0)
+		store.context.justBinned.splice(0)
+		if (store.gameflow.phase === rf.PHASE_PAYDAY && store.startingOptions.strictPaydayFridge) {
+			// Apply the default firing for real - the strict payday path in
+			// endPlayerTurn reads justFired and the live employee list, exactly
+			// as a played turn would. Mirrors localFireEmployee.
+			const paydayMove = generatePaydayDefaultMove(timedOutPlayerIndex)
+			const fired = paydayMove[0].length > 0 && paydayMove[0][0] >= 0 ? paydayMove[0] : []
+			for (const token of fired) {
+				if (plyr.fireEmployee(timedOutPlayerIndex, token)) {
+					store.availableEmployees[rf.decodeFiredEmployee(token)]++
+					store.context.justFired.push(token)
+				}
+			}
+		} else if (store.gameflow.phase === rf.PHASE_CLEAN_UP && store.startingOptions.strictPaydayFridge) {
+			// The non-simul cleanup path has no auto-binning: a skipped player
+			// just keeps their first 10 resources and discards the rest.
+			if (rules.isRequiredToPlayCleanUp(timedOutPlayerIndex)) store.players[timedOutPlayerIndex].resources.splice(10)
+		}
+		controller.endPlayerTurn(true, false, { passKickoutFor: targetName })
 		return
 	}
 
@@ -104,7 +135,7 @@ export function passKickout() {
 	let savedPov = personal.pov
 	personal.pov = timedOutPlayerIndex
 	store.gameflow.turnOrder = store.gameflow.turnOrder.filter((idx) => idx !== timedOutPlayerIndex)
-	IO.saveSimulMove(moveData)
+	IO.saveSimulMove(moveData, false, targetName)
 	personal.pov = savedPov
 }
 

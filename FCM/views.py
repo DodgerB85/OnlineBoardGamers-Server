@@ -53,6 +53,27 @@ def log_expected_sync_reject(message):
     logger.warning(message)
 
 
+def _resolvePassKickoutTarget(request, currentGame, presenter, jsonData):
+    """Validate a normal player's "keep the timed-out player in the game" skip.
+
+    The client sends passKickoutFor (a username) so the default move lands under
+    the player who actually timed out instead of the player who clicked the
+    button. Returns (target, reject): target == "" means no pass-kickout was
+    requested; reject means the request must be refused with syncError. The
+    superuser BKSN path never comes through here.
+    """
+    target = jsonData.get("passKickoutFor", "")
+    if not target or target == request.user.username:
+        return "", False
+    is_participant = currentGame.players.filter(player__username=request.user.username).exists()
+    current_players = presenter.getArrayOfIsCurrentPlayers()
+    # target must be THE timed-out player: kickoutRequired() judges the timeout
+    # (and the flexi lookup) against getArrayOfIsCurrentPlayers()[0]
+    if not is_participant or not current_players or target != current_players[0] or presenter.kickoutRequired() != 2:
+        return "", True
+    return target, False
+
+
 FCM_DB_LOCK_NAME = "lockFCMgame_"
 
 
@@ -971,6 +992,12 @@ def _processTurn(request):
             if nameToUse.startswith("FCMtourneyAdmin/"):
                 name_parts = nameToUse.split("/", 1)
                 nameToUse = name_parts[1] if len(name_parts) > 1 else nameToUse
+        elif jsonData.get("passKickoutFor"):
+            passKickoutTarget, passKickoutReject = _resolvePassKickoutTarget(request, currentGame, presenter, jsonData)
+            if passKickoutReject:
+                return JsonResponse({"syncError": True}, safe=False)
+            if passKickoutTarget:
+                nameToUse = passKickoutTarget
 
         # Before updating the gameData, we need to make sure the latest is
         # saved into the rewind stack. saveRewind=False means this save must not
@@ -1234,6 +1261,12 @@ def _processTurn(request):
         # return JsonResponse({"syncError": True}, safe=False)
 
         if not continueFromStalledGame:
+            passKickoutTarget = ""
+            if request.user.username not in FCMsuperUsers and jsonData.get("passKickoutFor"):
+                passKickoutTarget, passKickoutReject = _resolvePassKickoutTarget(request, currentGame, presenter, jsonData)
+                if passKickoutReject:
+                    return JsonResponse({"syncError": True}, safe=False)
+
             currentGame.turn = jsonData["turn"]
             currentGame.phase = jsonData["phase"]
 
@@ -1243,6 +1276,8 @@ def _processTurn(request):
                 if nameToUpdate.startswith("FCMtourneyAdmin/"):
                     name_parts = nameToUpdate.split("/", 1)
                     nameToUse = name_parts[1] if len(name_parts) > 1 else nameToUpdate
+            elif passKickoutTarget:
+                nameToUpdate = passKickoutTarget
             phaseArr = [-1]
             if currentGame.phase == rfFCM.PHASE_SETUP_RESTAURANT1 or currentGame.phase == rfFCM.PHASE_SETUP_RESTAURANT2 or currentGame.phase == rfFCM.PHASE_SETUP_RESERVE:
                 phaseArr = [
@@ -1298,7 +1333,7 @@ def _processTurn(request):
                     currentGame.kickoutFlexiData,
                     currentGame.latestUpdate,
                     int(time.time()) * 1000,
-                    request.user.username,
+                    passKickoutTarget if passKickoutTarget else request.user.username,
                     currentGame.kickoutDuration,
                 )
 
