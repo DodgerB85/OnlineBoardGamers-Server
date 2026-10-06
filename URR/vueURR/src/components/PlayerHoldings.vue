@@ -1,6 +1,6 @@
 <script setup>
 import ArtworkCard from "./ArtworkCard.vue"
-import { computed } from "vue"
+import { computed, watch } from "vue"
 import * as rf from "../js/URRreference"
 import * as rules from "../js/URRrules"
 import { currentStateId } from "../js/URRview"
@@ -38,12 +38,16 @@ const markers = computed(() => store.board.areas.filter((area) => area.markerOwn
 const soldMarkers = computed(() => store.board.areas.filter((area) => area.markerOwner === activePlayer.value && area.owner === null).length)
 const availableMoney = computed(() => rules.availableMoney(store, activePlayer.value))
 
-function reset() { inspectedPlayer.value = null }
+watch(activePlayer, () => { store.viewSettings.showOwnedLand = false })
+defineExpose({ activePlayer })
+function reset() { inspectedPlayer.value = null; store.viewSettings.showOwnedLand = false }
 </script>
 
 <template>
 	<aside class="holdingsPanel">
+		<div v-if="inspectedPlayer !== null" class="inspectionLabel">Inspecting player</div>
 		<div class="panelTitle"><b :title="player?.displayName"><img class="playerMarker" :src="getPlayerMarkerImage(activePlayer)" alt="Ownership marker" /> {{ player?.displayName || "Player" }}</b><button v-if="inspectedPlayer !== null" @click="reset">Follow turn</button></div>
+		<button class="showOwnedLand" :aria-pressed="store.viewSettings.showOwnedLand" @click="store.viewSettings.showOwnedLand = !store.viewSettings.showOwnedLand">{{ store.viewSettings.showOwnedLand ? 'Hide owned land' : 'Show owned land' }}</button>
 		<div class="money"><span>Private treasury</span><b>{{ player?.money ?? 0 }} <small>SPL</small></b></div>
 		<div class="reservedMoney" v-if="player && availableMoney < player.money"><b>{{ availableMoney }} SPL available</b><span>{{ player.money - availableMoney }} SPL reserved for bids</span></div>
 		<div class="terrainGrid" v-if="showLand"><div class="terrainRow" v-for="entry in land" :key="entry.type" :title="`${rf.LAND_NAMES[entry.type]}: ${entry.count} lands worth ${entry.value} SPL`"><img :src="getTerrainImage(entry.type)" :alt="rf.LAND_NAMES[entry.type]" /><b>{{ entry.count }}</b><span>{{ rf.LAND_NAMES[entry.type] }}</span><span v-if="entry.cityCount" class="cityCount" :title="`${entry.cityCount} ${rf.LAND_NAMES[entry.type].toLowerCase()} ${entry.cityCount === 1 ? 'city' : 'cities'} included in ${entry.count} lands`"><img :src="getTerrainImage(entry.type, true)" alt="City" />{{ entry.cityCount }}</span><small v-if="store.gameflow.phase === rf.PHASE_GAME_OVER" class="landValue">{{ entry.value }} SPL</small></div></div>
@@ -74,4 +78,5 @@ summary { cursor: pointer; padding: 4px 0; }
 .emergingStates { align-items: center; font-size: 12px; }.emergingStates small { font-size: 12px; color: #655a42; }
 .relevantNationArtwork { display: grid; gap: 5px; }
 @media (max-width: 1050px) { .panelTitle button { min-height: 40px; font-size: 12px; padding: 4px 8px; }summary { min-height: 40px; box-sizing: border-box; padding: 12px 0; } }
+.inspectionLabel { font-size: 12px; color: #145575; }.showOwnedLand { justify-self: start; font: inherit; padding: 5px 8px; min-height: 32px; background: #fffdf5; border: 1px solid #b3a481; border-radius: 3px; cursor: pointer; }.showOwnedLand[aria-pressed=true] { background: #e1edf5; border-color: #177daf; }
 </style>

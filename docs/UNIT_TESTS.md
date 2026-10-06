@@ -44,13 +44,14 @@ Notes:
 | `test_kfw.py` | 1 | Issue #53: village expansion phase auto-finishes when every builder has already prebuilt |
 | `test_rnb_transaction_recovery.py` | 10 | RNB transaction-recovery contract: `saveStackMove` sets `transactionID`, `RNBdata` exposes it, matching ID clears the lock, wrong/missing ID keeps it, Django-Q stuck-notification scheduling and no-op, stale `latestUpdate` rejection |
 | `test_robots.py` | 2 | `/robots.txt` GET/POST |
+| `test_urr_rewind.py` | 5 | URR legacy and gzip rewind compatibility, mixed rewind stacks and replay branches, twenty-point retention, opening-position extraction from compact replay history, and matching the redo anchor to a client-compacted rewind position |
 | `test_fcm_rewind.py` | 6 | FCM `saveNormal` rewind stack: `saveRewind=True` records the pre-save state, `saveRewind=False` records nothing at all, one save makes exactly one rewind point, repeated AI-style saves never grow the stack, and rewinding after your own move returns *your* turn rather than the next player's (FcmAI's) |
 | `test_fcm_reset.py` | 5 | Admin "Reset AI": a reset-flagged save replaces `startingMap` and clears the discarded game's rewind stack; the map-sync drift guard still rejects a changed board on an ordinary save, and still rejects a non-admin claiming `resetGame` |
 | `test_admin_webhook_guard.py` | 2 | `SN_sendAdminErrorMessage` never posts to the admin Discord webhook while Django is on a test database — directly, and via the FCM map-sync rejection path that prompted it |
 | `test_game_end.py` | 8 | `clearGeneralDataOnGameEndWithoutSave` (the shared choke point every presenter's `endGame` calls): per-player `moveDataJSON` / `currentMoveTime` / `currentMoveData` are wiped for all 12 games, the wipe is persisted rather than only in-memory, the Game-level scratch fields are still cleared, and `endGame` still marks exactly one winner. Plus vote cleanup: rewind-consent and kickout votes are refused once a game is FINISHED (delete / stats-exclude votes still allowed), rewind votes still work while ACTIVE, and an FCM `saveNormal` with `status=FINISHED` no longer re-creates `activeVotes` after `endGame` cleared it |
 | `test_legacy_game_urls.py` | 6 | Legacy bare game URLs `/GAME/<id>/` redirect to `/GAME/<id>/show/` for BUS, CNS, TGZ, WEB, AQY, KFW, IND — both when the game has no `original_id` (the regression: these views used to query `original_id` only, so every game created after the backfill 404'd) and when it does. Also asserts a genuinely missing id is *not* redirected, that a BUS id does not resolve under CNS, and that `handler404` returns a real HTTP 404 rather than a 200 |
 
-264 tests total (git count may drift slightly as tests are added).
+269 tests total (git count may drift slightly as tests are added).
 
 ## Conventions
 
@@ -64,3 +65,7 @@ Notes:
 ## Known expected failure
 
 `tests/test_rnb_transaction_recovery.py::TransactionRecoveryTest::test_F_FAILING_recovery_player_gets_no_notification` is marked `@unittest.expectedFailure`: it documents the open bug in issue #64 where the notification filter in `RNB/views.py` excludes `request.user`, so the player who triggers recovery is never told it is their turn. Remove the decorator when that filter is fixed.
+
+## URR frontend checks
+
+Run `node URR/vueURR/rulesCheck.mjs` from the repo root. In addition to the rule scenarios, it checks lossless replay compaction, legacy histories, phase checkpoints, inserted/deleted properties and changed arrays, input preservation, cache invalidation after branching, invalid delta rejection, and turn review boundaries, including successive states governed by the same king and required routing/harvest/consent choices.

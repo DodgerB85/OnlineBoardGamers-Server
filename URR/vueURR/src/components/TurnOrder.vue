@@ -53,6 +53,7 @@ function browseEmergingStates(event) {
 }
 watch([() => store.gameflow.turnOrder[0], () => store.gameflow.phase, () => currentState.value], () => {
 	store.viewSettings.inspectedPlayer = null
+	store.viewSettings.showOwnedLand = false
 	store.viewSettings.inspectedState = null
 })
 </script>
@@ -64,6 +65,7 @@ watch([() => store.gameflow.turnOrder[0], () => store.gameflow.phase, () => curr
 			<button v-for="(index, position) in playerOrder" :key="index" :class="{ current: !isGameOver && store.gameflow.turnOrder[0] === index, opportunity: exchangeOwner === index, inspected: store.viewSettings.inspectedPlayer === index }" :title="exchangeOwner === index ? `${store.players[index].displayName}: optional Barahshum canal exchange` : store.players[index].displayName" :aria-current="!isGameOver && store.gameflow.turnOrder[0] === index ? 'step' : undefined" :aria-pressed="store.viewSettings.inspectedPlayer === index" @click="inspectPlayer(index)">
 				<span class="position">{{ position + 1 }}</span><img :src="getPlayerMarkerImage(index)" alt="" /><span>{{ store.players[index].displayName }}<small>{{ isGameOver ? store.players[index].score : store.players[index].money }} SPL{{ isGameOver ? ' assets' : '' }}</small><small v-if="exchangeOwner === index" class="exchangeCue">Barahshum</small></span><img v-if="!isGameOver && store.gameflow.primogeniture === index" class="birthright" :src="primogenitureImage" alt="Primogeniture" title="Primogeniture" />
 			</button>
+			<button class="overviewToggle" :aria-expanded="store.viewSettings.showOverview" @click="store.viewSettings.showOverview = !store.viewSettings.showOverview">Overview</button>
 			<span class="phaseLabel">Turn {{ store.gameflow.turn }} · {{ phaseStr(store.gameflow.phase) }} · Era {{ store.era === 5 ? 'M' : store.era }}<b v-if="store.gameflow.endReason && !isGameOver" class="finalRound">Final round</b></span>
 		</div>
 		<div class="orderRow" role="group" :aria-label="stateOrderLabel">

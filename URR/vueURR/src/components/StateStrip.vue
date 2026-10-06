@@ -56,6 +56,7 @@ function crewTiles(capacity) { return capacity === "1+1" ? ["1", "1"] : [capacit
 			<summary>
 				<span class="treasuryHeader"><img :src="getStateOrderImage(state.id)" alt="" /></span>
 				<span class="stateSummary">
+					<span v-if="store.viewSettings.inspectedState !== null" class="stateMeta inspectionLabel">Inspecting state</span>
 					<span class="stateName"><b>{{ rf.STATE_NAMES[state.id] }}</b><button v-if="store.viewSettings.inspectedState !== null" class="followState" @click.prevent="store.viewSettings.inspectedState = null">{{ currentStateId(store) === null ? 'Close' : 'Follow turn' }}</button></span>
 					<span class="stateMeta" :title="kingName(state)">{{ kingName(state) }}<template v-if="state.isActive"> · {{ landCount(state.id) }} colonized</template></span>
 					<span v-if="!state.isActive" class="stateMeta">{{ landCount(state.id) }}/{{ rf.LAND_FOR_STATE_TO_ACTIVATE }} colonized</span>
@@ -102,7 +103,7 @@ function crewTiles(capacity) { return capacity === "1+1" ? ["1", "1"] : [capacit
 .stateNations { display: grid; gap: 5px; padding: 0 6px; }.stateNations img { width: 100%; }.stateCard > summary:focus-visible { outline: 2px solid #177daf; outline-offset: -2px; }
 .nationInventory { margin: 0 6px; border-top: 1px solid #ded9cc; }.nationInventory > summary { cursor: pointer; padding: 6px 0; }.nationInventory .stateNations { padding: 0 0 6px; }
 .followState { margin-left: auto; font: inherit; font-size: 11px; cursor: pointer; }
-.stateCard[open] .summaryTreasury { display: none; }
+.stateCard[open] .summaryTreasury { display: none; }.stateMeta.inspectionLabel { color: #145575; }
 .landowners { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; padding: 6px; border-top: 1px solid #ded9cc; }.landowners small { width: 100%; color: #53616a; }.landowners button { font: inherit; color: inherit; cursor: pointer; background: #fffdf5; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #c4b894; border-radius: 3px; padding: 3px; }.landowners img { width: 25px; height: 25px; }.landowners .monarch { border-color: #527349; background: #edf5e4; }
 @media (max-width: 1050px) { .followState { min-height: 40px; font-size: 12px; padding: 4px 8px; }.landowners button { min-width: 40px; min-height: 40px; } }
 .landowners button.inspected { outline: 2px solid #177daf; }

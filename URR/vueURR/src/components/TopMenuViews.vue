@@ -140,7 +140,7 @@ function localCastVote(topic) {
 		<div class="utilityHeading"><b>Rewind and game votes</b><button @click="store.viewSettings.showRewindPanel = false" aria-label="Close rewind panel">×</button></div>
 		<p>Rewind restores the previous saved position. Please tell the other players in chat.</p>
 		<p v-if="store.gameMessages.errorText" class="errorText" role="alert">{{ store.gameMessages.errorText }}</p>
-		<button class="topMenuItem" :disabled="store.viewSettings.showLoader || store.viewSettings.isSaving || personal.haltPlay || store.viewSettings.showReplay" @click="IO.loadRewind()">
+		<button class="topMenuItem" :disabled="!!store.turnDraft.start || store.viewSettings.showLoader || store.viewSettings.isSaving || personal.haltPlay || store.viewSettings.showReplay" :title="store.turnDraft.start ? 'Reset your uncommitted turn first' : 'Rewind the previous saved turn'" @click="IO.loadRewind()">
 			<img :src="view.getImage('icon-rewind')" alt="" />
 			<span>Rewind</span>
 		</button>

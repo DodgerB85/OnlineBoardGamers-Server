@@ -97,3 +97,32 @@ Fixed after a second section-by-section rulebook review. `node rulesCheck.mjs` (
 Confirmed as already matching: seat order is shuffled by the lobby (2); the rulebook's 3.2 division example, the 4.4 sale example, the 4.7 city-price example, clockwise monarch ties and the section 10 table all replay exactly.
 
 Open interpretations, unchanged: a player-owned Barahshum may be dissolved after each state, including the last, but not between Eridu's dig and the first state. FA land stays closed to buying and digging while FA is player-owned. Forced maintenance and revolution sales preserve the throne. These rule changes have not been replayed in the browser.
+
+## Canal selection and rules review — 2026-10-05
+
+Canal tracing uses the selected unused crew's capacity (2 for Eridu). Green hexes complete a legal route; dashed hexes start or continue a route that can still reach the existing network within budget. Invalid clicks leave the draft unchanged and explain the restriction beside the map. The map shows canal and junction costs, supports Undo/Clear, and allows tracing from either end. Final submission still validates the complete path. Changing crews revalidates the draft.
+
+The rules review corrected three findings in the retired audit:
+
+- Only the highest offer on each nation reserves money: an outbid offer is returned explicitly in 3.2.
+- Reservoirs are legal in confluence areas, downstream of the meeting point (5.3.1.1). The routing engine waits for the tributaries before processing the area's reservoir.
+- Eridu is a normal 2-digger with special ownership and timing (9.5), without a homeland exception to 5.2. Player-owned nation land remains closed, including its own homeland. No authoritative online ruling overriding this reading was retrieved from the publisher's rules/errata links.
+
+`rulesCheck.mjs` covers route budgets, split and M crews, adjacency, repeated areas, existing canals/interior junctions, dry-end completion, nation closure, released offers, and confluence reservoir construction.
+
+Remaining component checks from the retired audit: confirm the full land-price track/intervention price, per-state waterwork token counts, printed state order, and 30 ownership markers against physical components. Rulebook examples alone do not establish all these values. Other report-only observations were a stale auction award for a manually corrupted save (unreachable through normal bidding), cross-state nation homelands affecting the board locator label, misleading maintenance-sale errors, and practice-game/debug access settings. These were outside the canal-selection change; maintenance already offers a revolution button.
+
+## Replay save performance — 2026-10-05
+
+`URRhistoryStorage.js` stores full snapshots at the opening and turn/phase boundaries and lossless property changes between them. Import expands the stored history back to full snapshots, so history presentation, replay stepping, and individual rewind behaviour remain unchanged. Old full-snapshot histories and mixed legacy/gzip rewind points remain supported. The later draft-turn layer below commits these compact positions on End Turn. Compact records are cached per history entry, including the preceding snapshot, so appended moves and replay branches invalidate only affected records. No game rules are re-run to reconstruct historical positions.
+
+On game 193's 384-entry sample, all reconstructed positions matched the originals. The JSON save shrank from 13,937,865 to 1,381,558 bytes; gzip level 6 shrank the payload from 1,251,388 to 133,384 bytes and measured roughly 16 ms for the compact payload in Node. In Chromium, gzip preparation fell from about 440 ms to 47 ms; compaction took 184 ms once and 2.3 ms on subsequent saves. Browser checks covered a mocked irrigation save/reload, individual replay positions, restoring the live position, and rendering every history entry without runtime exceptions. Rewind compression now uses level 6 instead of the default level 9 without changing its format. Existing rewind points are preserved; subsequent points use the compact save. `rulesCheck.mjs` covers replay storage edge cases, and `tests.test_urr_rewind` covers backend rewind compatibility.
+
+
+## Draft turns and action interface — 2026-10-05
+
+All phases now prepare local actions until End Turn commits them. Undo restores the preceding action checkpoint; Reset Turn restores the start of the current decision session and clears unsubmitted form/map drafts. These checkpoints retain state and history length rather than copying the full replay. Actor, state, phase, routing source and consent boundaries stop the draft before another decision can be taken, even when the next decision belongs to the same player. Existing forced-action rules are unchanged; Undo/Reset pauses their watcher so they cannot immediately repeat an undone action. End Turn can resume the existing forced steps, but never chooses an ambiguous routing or harvest option. Shared rewind applies to saved turns and is disabled while a local draft exists. A refresh discards the local draft; an incoming saved update clears it and explains why.
+
+Map selection and irrigation/removal dropdowns are synchronized. Irrigation has nearby confirmation/cancel controls backed by the same submission path as the sidebar. Development uses expandable digging, equipment and nation sections, with construction sites validated by existing rule previews and highlights scoped to the selected construction, sale or exchange action. The action panel reports draft transitions, shows the choices awaiting confirmation, and identifies the next player/context after saving. Shared history panel behavior remains unchanged.
+
+Verification uses the existing frontend rule check and Chromium CDP with mocked saves: recorded choices across auctions, land trades, development, consent, river flow and harvest retain their original rule results, Undo/Reset restore state and history, no action posts before End Turn, and reviewed handoffs submit once. Map/dropdown selection, inline confirmation, and stale draft invalidation are also checked without writing to a live game.

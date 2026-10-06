@@ -50,7 +50,6 @@ watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.val
 			<p>Select a hex to inspect it, or a card to enlarge it. Your available actions are shown here.</p>
 			<p><a href="/URR/help/" target="_blank" rel="noopener">Icons and interface help</a> is also available from Rules in the menu. Enjoy the game!</p>
 		</div>
-		<div v-if="store.gameMessages.actionError || store.gameMessages.errorText" role="alert">{{ store.gameMessages.actionError || store.gameMessages.errorText }}</div>
 		<p class="marketHeading"><b>{{ auction ? `Auction: ${rf.NATION_NAMES[auction.nation]}` : "Independent nations" }}</b><span>{{ available }} SPL</span></p>
 		<p v-if="auction" class="auctionInfo">High bid {{ auction.amount }} SPL · {{ store.players[auction.highPlayer].displayName }}</p>
 		<p v-else class="marketHint">Buy the current nation, or expand another to make an offer.</p>

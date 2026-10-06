@@ -4,11 +4,70 @@ import * as rf from "./src/js/URRreference.js"
 import * as rules from "./src/js/URRrules.js"
 import { createGame, applyAction, finishWaterRouting } from "./src/js/URRgame.js"
 import { startWaterRouting, allocateWater, waterChoices } from "./src/js/URRwater.js"
-import { getCanalCost } from "./src/js/URRmap.js"
+import { getCanalCost, getDigPathPreview } from "./src/js/URRmap.js"
+import { endsDecision, defaultEndAction, describeAction } from "./src/js/URRturnDraft.js"
+import { compactHistory, expandHistory } from "./src/js/URRhistoryStorage.js"
 
 const fresh = () => createGame(["A", "B", "C"])
 const id = (row, column) => `printed-${row}-${column}`
 const area = (game, areaId) => game.board.areas.find((entry) => entry.id === areaId)
+
+// 3.2: an outbid offer is returned; only the highest offers reserve money.
+{
+	const game = fresh()
+	game.nations[rf.NATION_DER].bids = [{ player: 1, amount: 115 }, { player: 2, amount: 120 }]
+	assert.equal(rules.availableMoney(game, 1), 600)
+	assert.equal(rules.availableMoney(game, 2), 480)
+	game.nations[rf.NATION_ERIDU].bids = [{ player: 1, amount: 175 }]
+	assert.equal(rules.availableMoney(game, 1), 425)
+}
+
+// 5.3.1.1: a confluence-area reservoir sits downstream of the meeting point.
+{
+	for (const riverId of [id(4, 6), id(7, 3)]) {
+		let game = fresh()
+		Object.assign(game.gameflow, { phase: rf.PHASE_DEVELOPMENT, stateOrder: [0], stateIndex: 0, developmentStep: "digging", turnOrder: [0] })
+		Object.assign(game.states[0], { isActive: true, king: 0, money: 500 })
+		assert.equal(Object.values(game.board.riverDownstream).filter((next) => next === riverId).length, 2)
+		game = applyAction(game, 0, { type: "requestWaterwork", kind: "reservoir", area: riverId })
+		assert.equal(area(game, riverId).waterwork.kind, "reservoir")
+	}
+}
+
+// Route selection rejects impossible prefixes, while allowing dry-end tracing.
+{
+	const game = fresh()
+	game.board.areas = [
+		{ id: "A", isRiver: true, neighbours: ["B", "R"], nation: null },
+		{ id: "B", isRiver: false, neighbours: ["A", "C"], nation: null },
+		{ id: "C", isRiver: false, neighbours: ["B", "D"], nation: null },
+		{ id: "D", isRiver: false, neighbours: ["C"], nation: null },
+		{ id: "R", isRiver: true, neighbours: ["A"], nation: null },
+	]
+	game.board.canals = []
+	assert.equal(getDigPathPreview(game, ["A"], 2).error, "")
+	assert.equal(getDigPathPreview(game, ["A", "B"], "1+1").isComplete, true)
+	assert.deepEqual(getDigPathPreview(game, ["A", "B", "C"], 3).cost, { canals: 2, junctions: 1, points: 3 })
+	assert.match(getDigPathPreview(game, ["A", "B", "C"], "1+1").error, /cannot dig/)
+	assert.match(getDigPathPreview(game, ["A", "B", "C", "D"], 3).error, /4 points/)
+	assert.equal(getDigPathPreview(game, ["A", "B", "C", "D"], "M").isComplete, true)
+	assert.match(getDigPathPreview(game, ["A", "D"], "M").error, /adjacent/)
+	assert.match(getDigPathPreview(game, ["A", "R"], "M").error, /two river/)
+	assert.match(getDigPathPreview(game, ["A", "B", "A"], "M").error, /simple path/)
+	assert.equal(getDigPathPreview(game, ["D", "C"], 4).isComplete, false)
+	assert.equal(getDigPathPreview(game, ["D", "C"], 4).error, "")
+	assert.match(getDigPathPreview(game, ["D", "C"], 3).error, /No legal route/)
+	assert.equal(getDigPathPreview(game, ["D", "C", "B", "A"], 4).isComplete, true)
+	assert.match(getDigPathPreview(game, ["D"], null).error, /Choose an unused/)
+	game.board.canals = [["B", "C"]]
+	assert.match(getDigPathPreview(game, ["A", "B", "C"], "M").error, /middle/)
+	assert.match(getDigPathPreview(game, ["B", "C"], "M").error, /already exists/)
+	area(game, "D").nation = rf.NATION_ERIDU
+	Object.assign(game.nations[rf.NATION_ERIDU], { ownerType: "player", owner: 0 })
+	assert.match(getDigPathPreview(game, ["D"], "M").error, /nation land/)
+	Object.assign(game.nations[rf.NATION_ERIDU], { ownerType: "state", owner: 0 })
+	assert.equal(getDigPathPreview(game, ["D"], 2).error, "")
+}
 
 // 6.3: 5 hill, 4 forest, 3 savannah and 4 desert regions.
 {
@@ -325,4 +384,77 @@ const area = (game, areaId) => game.board.areas.find((entry) => entry.id === are
 	assert.equal(rules.getAutomaticAction(game), null)
 }
 
-console.log("URR rule checks passed")
+// Replay compaction preserves every choice, including deletions and array changes.
+{
+	const history = []
+	const game = fresh()
+	const record = (action = null) => history.push([rf.HIST_ACTION, 0, JSON.stringify(game), action, 12345])
+	record()
+	game.gameflow.pendingOffer = { state: 0, action: { type: "offerNation", nation: 1, amount: 50 } }
+	game.states[0].diggers.push({ id: 0, capacity: 2, era: 1, hasDug: false })
+	record({ type: "offerNation", nation: 1, amount: 50 })
+	game.gameflow.pendingOffer.action.amount = 60
+	game.board.areas[0].irrigatedBy = 0
+	game.states[0].diggers[0].hasDug = true
+	game.players[0].money -= 10
+	record({ type: "allocateWater", area: game.board.areas[0].id, amount: 1 })
+	delete game.gameflow.pendingOffer
+	game.states[0].diggers = []
+	record()
+	game.gameflow.phase = rf.PHASE_SETTLEMENT
+	record()
+	const compact = compactHistory(history)
+	assert.equal(typeof compact[0][2], "string")
+	assert.equal(typeof compact[1][2], "object")
+	assert.equal(typeof compact.at(-1)[2], "string")
+	assert.ok(JSON.stringify(compact).length < JSON.stringify(history).length / 2)
+	const saved = JSON.stringify(compact)
+	const expanded = expandHistory(compact)
+	assert.equal(JSON.stringify(compact), saved, "Expansion must not mutate compact records")
+	for (const [index, entry] of expanded.entries()) {
+		assert.deepEqual(JSON.parse(entry[2]), JSON.parse(history[index][2]))
+		assert.deepEqual(entry.slice(3), history[index].slice(3))
+	}
+	assert.deepEqual(expandHistory(history), history, "Legacy full snapshots remain readable")
+	assert.deepEqual(compactHistory(history), compact, "Cached exports preserve the same history")
+	// A replay branch can replace a snapshot on the same history entry.
+	game.players[0].money += 30
+	history[2][2] = JSON.stringify(game)
+	assert.deepEqual(JSON.parse(expandHistory(compactHistory(history))[2][2]), game)
+	assert.throws(() => expandHistory([[rf.HIST_ACTION, 0, compact[1][2]]]), /Invalid URR replay delta/)
+}
+
+// Ending a state's development is a review boundary even when the same king
+// controls the next state. Buying equipment alone remains undoable in that turn.
+{
+	const game = fresh()
+	Object.assign(game.gameflow, { phase: rf.PHASE_DEVELOPMENT, stateOrder: [rf.STATE_SUMER, rf.STATE_AKKAD], stateIndex: 0, developmentStep: "digging", turnOrder: [0] })
+	for (const stateId of game.gameflow.stateOrder) {
+		game.states[stateId].king = 0
+		game.states[stateId].money = 1000
+		game.states[stateId].diggers = [{ id: stateId, capacity: 1, era: 1, hasDug: false }]
+	}
+	const purchase = { type: "buyCard", kind: "digger" }
+	const purchased = applyAction(game, 0, purchase)
+	assert.equal(endsDecision(game, purchased, purchase), false)
+	assert.equal(purchased.gameflow.developmentStep, "purchasing")
+	const end = defaultEndAction(purchased)
+	const next = applyAction(purchased, 0, end)
+	assert.equal(next.gameflow.turnOrder[0], 0)
+	assert.equal(endsDecision(purchased, next, end), true)
+	assert.match(describeAction(purchased, next, end), /End Turn to confirm/)
+	const offer = { ...game, gameflow: { ...game.gameflow, pendingOffer: { returnPlayer: 0 } } }
+	assert.throws(() => defaultEndAction(offer), /Accept or Decline/)
+}
+
+// Ending a routing or harvest turn must not invent a choice for the player.
+{
+	const game = fresh()
+	game.gameflow.phase = rf.PHASE_RAINY_SEASON
+	game.rain.step = "routing"
+	assert.throws(() => defaultEndAction(game), /remaining water/)
+	game.rain.step = "harvest"
+	assert.throws(() => defaultEndAction(game), /harvest/)
+}
+
+console.log("URR rule, replay storage, and turn boundary checks passed")
