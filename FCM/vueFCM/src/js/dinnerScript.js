@@ -24,6 +24,7 @@ import * as rf from "./FCMreference.js"
 import * as map from "./FCMmap.js"
 import * as model from "./FCMmodel.js"
 import * as view from "./FCMview.js"
+import * as funcs from "./FCMfuncs.js"
 import { useModelStore } from "../stores/FCMstore.js"
 import i18n from "../i18n.js"
 
@@ -194,13 +195,15 @@ export function findRoute(startZone, goalIndex) {
 
 	let head = 0
 	let foundKey = null
+	let adjacentFallbackKey = null
 	while (head < queue.length && foundKey === null) {
 		const { from, square } = queue[head++]
 		const key = from + ":" + square
-		if (square === goalIndex || map.neighbours(square).includes(goalIndex)) {
+		if (square === goalIndex) {
 			foundKey = key
 			break
 		}
+		if (adjacentFallbackKey === null && map.neighbours(square).includes(goalIndex)) adjacentFallbackKey = key
 		for (const next of map.nextRoadNeighbours(square, from)) {
 			const nextKey = square + ":" + next
 			if (parent.has(nextKey)) continue
@@ -209,6 +212,7 @@ export function findRoute(startZone, goalIndex) {
 		}
 	}
 
+	if (foundKey === null) foundKey = adjacentFallbackKey
 	if (foundKey === null) return []
 	const path = []
 	let k = foundKey
@@ -219,21 +223,37 @@ export function findRoute(startZone, goalIndex) {
 	return path.reverse()
 }
 
-// For every coffee row (a selling player), find that player's coffee shop squares.
+// Coffee-shop squares where a sale actually occurred, read from the coffee
+// block's history highlights: the grouped form's 3rd entry, or - in the flat
+// form - the squares that are not roads (route) and not restaurant footprints.
+function soldCoffeeShopSquares(coffeeBlock) {
+	const exported = coffeeBlock && coffeeBlock.highlightSqs
+	if (!exported || exported.length === 0) return []
+	const coords = useModelStore().mapData.coords
+	if (typeof exported[0] === "number") {
+		return exported.map((sq) => funcs.importIndex(sq)).filter((sq) => sq >= 0 && !rf.ROADS.includes(coords[sq]))
+	}
+	return (exported[2] || []).map((sq) => funcs.importIndex(sq)).filter((sq) => sq >= 0)
+}
+
+// One flare per coffee shop that actually sold on this house's route, priced
+// from the history row. The history is the source of truth for both location
+// and amount, so no need to re-derive stock; a shop sells at most once per
+// journey (the caller dedupes), but may sell again for a different house.
 function coffeeFlareInfos(store, coffeeBlock) {
 	const infos = []
-	if (!coffeeBlock || !coffeeBlock.rows) return infos
-	const ownerOf = new Map()
-	for (let p = 0; p < store.players.length; p++) {
-		for (const s of store.players[p]?.coffeeShops || []) ownerOf.set(s, p)
-	}
+	if (!coffeeBlock || !coffeeBlock.rows || coffeeBlock.rows.length === 0) return infos
+	const soldShops = soldCoffeeShopSquares(coffeeBlock)
+	if (soldShops.length === 0) return infos
 	for (const row of coffeeBlock.rows) {
 		const playerIndex = store.players.findIndex((p) => p.colour === row.colour)
 		if (playerIndex < 0) continue
-		for (const [square, pIndex] of ownerOf) {
-			if (pIndex !== playerIndex) continue
+		const owned = store.players[playerIndex]?.coffeeShops || []
+		const amount = Math.round((row.finalSaleAmount || 0) / (row.count || 1))
+		for (const square of soldShops) {
+			if (!owned.includes(square)) continue
 			const pos = centre(square)
-			if (pos) infos.push({ square, pos, playerIndex, amount: row.finalSaleAmount })
+			if (pos) infos.push({ square, pos, playerIndex, amount })
 		}
 	}
 	return infos
@@ -242,6 +262,61 @@ function coffeeFlareInfos(store, coffeeBlock) {
 function flaresBeside(infos, square) {
 	const nbrs = map.neighbours(square)
 	return infos.filter((c) => c.square === square || nbrs.includes(c.square))
+}
+
+// The coffee block following a sale block stores the squares common to all of
+// its valid coffee routes. In the flat export form those are the squares that
+// are road squares (the rest are restaurant/coffee-shop footprints), so filter
+// on rf.ROADS to get just the route backbone, already in drivable order.
+function storedCoffeeRouteSquares(blocks, bi) {
+	const next = blocks[bi + 1]
+	if (!next || next.kind !== "coffee" || !next.highlightSqs || next.highlightSqs.length === 0) return []
+	const exported = next.highlightSqs
+	const singles = typeof exported[0] === "number" ? exported : exported[0] || []
+	const coords = useModelStore().mapData.coords
+	return singles.map((sq) => funcs.importIndex(sq)).filter((sq) => sq >= 0 && rf.ROADS.includes(coords[sq]))
+}
+
+// Every pair of consecutive squares must be orthogonally adjacent, or the car
+// would teleport mid-drive.
+function connectedDrive(route) {
+	for (let i = 1; i < route.length; i++) {
+		if (route[i - 1] === route[i] || !map.neighbours(route[i - 1]).includes(route[i])) return false
+	}
+	return true
+}
+
+// Backbone = the stored common coffee-route squares; the car gets there from
+// the house with a BFS segment before it and drives on to the door after it.
+// Falls back to plain findRoute when the stored squares don't form a drivable
+// path (or don't connect at all).
+function mergedCoffeeRoute(zone, stored, door) {
+	const prefix = findRoute(zone, stored[0])
+	if (prefix.length === 0) return findRoute(zone, door)
+
+	// Cut the prefix at the first stored square it reaches; from there the
+	// stored backbone takes over (prefix[i-1] is adjacent to it, so the chain
+	// stays connected).
+	let cut = -1
+	let tailStart = 0
+	for (let i = 0; i < prefix.length && cut === -1; i++) {
+		const si = stored.indexOf(prefix[i])
+		if (si !== -1) {
+			cut = i
+			tailStart = si
+		}
+	}
+	const head = cut === -1 ? prefix : prefix.slice(0, cut)
+	const tail = cut === -1 ? stored : stored.slice(tailStart)
+
+	const last = tail[tail.length - 1]
+	const suffix = last === door || map.neighbours(last).includes(door) ? [] : findRoute([last], door)
+
+	const merged = []
+	for (const sq of [...head, ...tail, ...suffix]) {
+		if (merged[merged.length - 1] !== sq) merged.push(sq)
+	}
+	return connectedDrive(merged) ? merged : null
 }
 
 export function buildDinnerScript(blocks) {
@@ -266,11 +341,12 @@ export function buildDinnerScript(blocks) {
 			if (winnerIdx !== -1) {
 				const zone = buildingZone(buildingNumber, isApartment, isRural)
 				const doors = model.giveRestaurantDoorIndices(winnerIdx, { openOnly: false })
+				const stored = storedCoffeeRouteSquares(blocks, bi)
 				let route = []
 				for (const door of doors) {
-					const r = findRoute(zone, door)
-					if (r.length > 0 && (route.length === 0 || r.length < route.length)) route = r
-				}
+					const r = stored.length > 0 ? mergedCoffeeRoute(zone, stored, door) ?? findRoute(zone, door) : findRoute(zone, door)
+				if (r.length > 0 && (route.length === 0 || r.length < route.length)) route = r
+			}
 				if (route.length > 0) {
 					saleStartIndex = steps.length // the saleStart step lands right here
 					buildSaleSteps(steps, bi, blocks, demandTokens, zone, route, doors, block, sale, winnerIdx, store)
@@ -317,6 +393,9 @@ function buildSaleSteps(steps, bi, blocks, tokens, zone, route, doors, block, sa
 	const playerName = store.players[winnerIdx]?.displayName || "?"
 	const carrying = tokens.map((t) => t.good)
 	const coffeeInfos = coffeeFlareInfos(store, blocks[bi + 1]?.kind === "coffee" ? blocks[bi + 1] : null)
+	// A coffee shop sells at most once per car journey, so a shop passed more
+	// than once on this route only flashes the first time.
+	const usedShops = new Set()
 
 	steps.push({
 		type: "saleStart",
@@ -330,7 +409,7 @@ function buildSaleSteps(steps, bi, blocks, tokens, zone, route, doors, block, sa
 		textParams: { building, player: playerName },
 	})
 	if (tokens.length > 0) {
-		steps.push({ type: "pickup", tokens, carrying, car: carStart, ms: SPEED_GATHER_ITEMS, textKey: "history.animPickup", textParams: {} })
+		steps.push({ type: "pickup", tokens, carrying, car: carStart, ms: SPEED_GATHER_ITEMS, textKey: "history.animPickup", textParams: { building, player: playerName } })
 	}
 
 	for (let i = 1; i < route.length; i++) {
@@ -349,7 +428,9 @@ function buildSaleSteps(steps, bi, blocks, tokens, zone, route, doors, block, sa
 			textKey: "history.animDrive",
 			textParams: {},
 		})
-		for (const flare of flaresBeside(coffeeInfos, square)) {
+		const nearbyFlares = flaresBeside(coffeeInfos, square)
+		for (const flare of nearbyFlares) {
+			if (usedShops.has(flare.square)) continue
 			steps.push({
 				type: "coffee",
 				carrying,
@@ -362,6 +443,7 @@ function buildSaleSteps(steps, bi, blocks, tokens, zone, route, doors, block, sa
 				textKey: "history.animCoffee",
 				textParams: { player: store.players[flare.playerIndex]?.displayName || "?", amount: flare.amount },
 			})
+			usedShops.add(flare.square)
 		}
 	}
 
