@@ -3504,10 +3504,9 @@ def deleteGame(request, gameCode):
 
     jsonData = json.loads(request.body)
 
-    gameModel = GAME_NAMES_MODELS.get(gameCode)
+    # No GAME_NAMES_MODELS gate here: gameCode is matched against the row itself,
+    # so newer games (URR, DDL, ...) aren't rejected as "Already Deleted".
     try:
-        if gameModel is None:
-            return JsonResponse({"noGame": True}, safe=False)
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode=gameCode)
     except Game.DoesNotExist:
         return JsonResponse({"noGame": True}, safe=False)
