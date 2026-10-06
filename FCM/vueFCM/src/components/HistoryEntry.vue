@@ -10,12 +10,16 @@ import * as replay from "../js/FCMreplay.js"
 import * as view from "../js/FCMview.js"
 import * as map from "../js/FCMmap.js"
 import * as plyr from "../js/FCMplayer.js"
+import { buildDinnerScript } from "../js/dinnerScript.js"
 
 import { useModelStore } from "../stores/FCMstore.js"
 const store = useModelStore()
 
 import { usePersonalStore } from "../stores/FCMpersonal.js"
 const personal = usePersonalStore()
+
+import { useDinnerAnimationStore } from "../stores/dinnerAnimation.js"
+const dinner = useDinnerAnimationStore()
 
 import { computed } from "vue"
 
@@ -148,6 +152,14 @@ function goodClass(good) {
 	if (good === rf.BEER || good === rf.COKE) return "foodTokenThin"
 	if (good === rf.LEMONADE || good === rf.COFFEE) return "foodTokenMed"
 	return ""
+}
+
+// Dinner animation: only offer playback when at least one sale actually happened
+const hasDinnerSales = computed(() => computedEntry3.value.blocks?.some((b) => b.kind === "sale" && b.sale) ?? false)
+
+function startDinnerAnimation(autoplay) {
+	const script = buildDinnerScript(computedEntry3.value.blocks)
+	dinner.start(script.steps, autoplay, script.overlay)
 }
 
 function salaryPayText(salaryArr) {
@@ -959,6 +971,10 @@ const computedEntry3 = computed(() => {
 			<p v-if="computedEntry3.noSalesAtAll">{{ $t("history.noSalesAtAll") }}</p>
 			<div v-else>
 				<h4>{{ $t("history.dinnerTime") }}</h4>
+				<div v-if="hasDinnerSales" class="dinnerAnimButtons">
+					<button class="actionsLineButton" @click.stop="startDinnerAnimation(true)">{{ $t("history.animAnimate") }}</button>
+					<button class="actionsLineButton" @click.stop="startDinnerAnimation(false)">{{ $t("history.animStepThrough") }}</button>
+				</div>
 				<template v-for="(block, bi) in computedEntry3.blocks" :key="bi">
 					<div v-if="block.kind === 'sale'" class="house">
 						<span v-if="!block.isApartment && !block.isRural">{{ $t("history.houseLabel", { num: block.buildingNumber }) }}</span>

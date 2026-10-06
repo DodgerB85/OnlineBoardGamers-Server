@@ -6,13 +6,16 @@ import * as model from "../js/FCMmodel"
 
 import { useModelStore } from "../stores/FCMstore.js"
 import { usePersonalStore } from "../stores/FCMpersonal.js"
+import { useDinnerAnimationStore } from "../stores/dinnerAnimation.js"
 
 const store = useModelStore()
 const personal = usePersonalStore()
+const dinner = useDinnerAnimationStore()
 
 import { computed } from "vue"
 import MapHighlight from "./MapHighlight.vue"
 import BoardAssistance from "./BoardAssistance.vue"
+import DinnerAnimation from "./DinnerAnimation/DinnerAnimation.vue"
 
 function getTilePos(index) {
 	const cols = map.getUsedRowCol()[1].length
@@ -525,6 +528,9 @@ const GOODS_APARTMENT = [
 ]
 
 const needDisplays = computed(() => {
+	// While the dinner-time playback is running the history-time demand overlay
+	// takes over the board - don't draw the live current demand underneath it.
+	if (dinner.state.visible) return []
 	const res = []
 	const sqSize = store.refSize / 5
 
@@ -776,6 +782,9 @@ function tileRotationClass(tileData) {
 
 			<!-- Add highlights on top-->
 			<MapHighlight />
+
+			<!-- Dinner-time resolution playback overlay -->
+			<DinnerAnimation v-if="dinner.state.visible" />
 		</div>
 
 		<!-- Right-hand assistance column (board demand summary + players) -->
