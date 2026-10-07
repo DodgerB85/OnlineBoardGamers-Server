@@ -1629,7 +1629,15 @@ def login_view(request):
             request.session.modified = True  # Force session save
 
             profile = Profile.objects.get(user=user)
-            language_code = profile.profileLanguage
+            # The cookie is the user's live choice - they may have switched language while
+            # logged out, or on another browser. The profile only mirrors it, so that the
+            # language of notification emails matches the language of the site.
+            cookie_language = request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME)
+            supported = [code for code, name in settings.LANGUAGES]
+            language_code = cookie_language if cookie_language in supported else profile.profileLanguage
+            if language_code != profile.profileLanguage:
+                profile.profileLanguage = language_code
+                profile.save()
             translation.activate(language_code)
 
             nxt = request.POST.get("next", None)  # Use .get() to avoid KeyError
@@ -1646,7 +1654,7 @@ def login_view(request):
             else:
                 response = HttpResponseRedirect(nxt)
 
-            response.set_cookie(settings.LANGUAGE_COOKIE_NAME, language_code)
+            response.set_cookie(settings.LANGUAGE_COOKIE_NAME, language_code, max_age=settings.LANGUAGE_COOKIE_AGE)
             return response
         else:
             try:
@@ -3499,10 +3507,9 @@ def deleteGame(request, gameCode):
 
     jsonData = json.loads(request.body)
 
-    gameModel = GAME_NAMES_MODELS.get(gameCode)
+    # No GAME_NAMES_MODELS gate here: gameCode is matched against the row itself,
+    # so newer games (URR, DDL, ...) aren't rejected as "Already Deleted".
     try:
-        if gameModel is None:
-            return JsonResponse({"noGame": True}, safe=False)
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode=gameCode)
     except Game.DoesNotExist:
         return JsonResponse({"noGame": True}, safe=False)

@@ -370,6 +370,10 @@ export async function submitBug(bugContent) {
 
 export async function loadRewind() {
 	const store = useModelStore()
+	if (store.turnDraft.start) {
+		store.gameMessages.errorText = "Reset your uncommitted turn before rewinding a saved turn."
+		return
+	}
 	const personal = usePersonalStore()
 	const wasHalted = personal.haltPlay
 	personal.haltPlay = true

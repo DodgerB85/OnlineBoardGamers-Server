@@ -241,6 +241,10 @@ def _processURRturn(request):
         presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
         presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
         currentGame.gameData = jsonData["gameData"]
+        # The client may compact a legacy history when confirming the loaded position.
+        # Keep the redo anchor in the same representation to avoid a duplicate point.
+        if currentGame.rewindTempData:
+            currentGame.rewindTempData = currentGame.gameData
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
@@ -336,7 +340,7 @@ def performSaveURRGame(request, currentGame, jsonData):
 def compressRewindPoint(point):
     if point.startswith("gzip:"):
         return point
-    return "gzip:" + base64.b64encode(gzip.compress(point.encode("utf-8"), mtime=0)).decode("ascii")
+    return "gzip:" + base64.b64encode(gzip.compress(point.encode("utf-8"), compresslevel=6, mtime=0)).decode("ascii")
 
 
 def decompressRewindPoint(point):
@@ -379,7 +383,7 @@ def doSaveRewind(currentGame, jsonData, previousGameData):
         # Put back the position we rewound to, so playing on from it does not
         # lose the ability to rewind there again.
         temp_point = compressRewindPoint(currentGame.rewindTempData)
-        if not currentRewindData or currentRewindData[-1] != temp_point:
+        if not currentRewindData or decompressRewindPoint(currentRewindData[-1]) != decompressRewindPoint(temp_point):
             currentRewindData.append(temp_point)
         currentGame.rewindTempData = ""
 
@@ -387,7 +391,7 @@ def doSaveRewind(currentGame, jsonData, previousGameData):
         previousGameData = openingPosition(jsonData["gameData"])
     if previousGameData:
         previous_point = compressRewindPoint(previousGameData)
-        if not currentRewindData or currentRewindData[-1] != previous_point:
+        if not currentRewindData or decompressRewindPoint(currentRewindData[-1]) != decompressRewindPoint(previous_point):
             currentRewindData.append(previous_point)
 
     if len(currentRewindData) > 20:

@@ -803,7 +803,7 @@ export async function saveOOBpreference() {
 	}
 }
 
-export async function saveSimulMove(moveData, continueFromStalledGame = false) {
+export async function saveSimulMove(moveData, continueFromStalledGame = false, passKickoutFor = "") {
 	if (usePersonalStore().tutorial) return // Tutorial game is never persisted
 	const store = useModelStore()
 	const personal = usePersonalStore()
@@ -861,6 +861,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false) {
 		BKSN: BKSN,
 		notRequiedPlayerNames: notRequiedPlayerNames,
 		continueFromStalledGame: continueFromStalledGame,
+		passKickoutFor: passKickoutFor,
 	}
 
 	/* This is only used in PASS_KICKOUT function

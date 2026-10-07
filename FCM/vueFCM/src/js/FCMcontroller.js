@@ -1675,7 +1675,7 @@ export function chooseFridgeType(choice) {
 	}
 }
 
-export async function endPlayerTurn(forced, isPointlessMove = false) {
+export async function endPlayerTurn(forced, isPointlessMove = false, extraPostData = undefined) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	if (store.gameflow.phase === rf.PHASE_WORKING_DAY) consumeTemporaryWorker()
@@ -1811,7 +1811,7 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 		// (the AI just plays it again) and it burns one of the 20 rewind slots, so
 		// skip it. Matches the FcmBot suppression in FCM_IO.saveGameNormal.
 		const moverIsAi = store.players[playerIndex]?.name === rf.AI_NAME
-		await IO.saveGameNormal(!moverIsAi, false, isPointlessMove)
+		await IO.saveGameNormal(!moverIsAi, false, isPointlessMove, extraPostData)
 		// In case it is your turn again right away, run startPlayerTurn
 		// If it isn't then you get returned from that function anyway
 		if (rf.SUPER_USERS.includes(personal.name)) personal.pov = -1

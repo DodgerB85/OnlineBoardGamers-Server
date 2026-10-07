@@ -170,6 +170,27 @@
     noCoffeeSold: "No coffee sold",
     moreInformation: "More Information",
 
+    // Dinner time animation
+    animAnimate: "Animate",
+    animStepThrough: "Step through",
+    animHouseLabel: "House #{num}",
+    animApartmentLabel: "Apartment #{num}",
+    animRuralLabel: "Rural Area",
+    animDemandLeaves: "{building} sells to {player}.",
+    animPickup: "{building} sets off to {player}'s restaurant.",
+    animDrive: "The car drives on to the next road square.",
+    animCoffee: "The car passes {player}'s coffee shop — they earn +${amount}!",
+    animArrive: "{building} arrives at {player}'s restaurant. Items bought for +${income}!",
+    animRange: "Current Range: {range}",
+    animCost: "Current Distance Cost: ${cost}",
+    animPrev: "Previous",
+    animNext: "Next",
+    animStart: "Start",
+    animEnd: "End",
+    animSwitchStep: "Switch to Step Through",
+    animClose: "Close",
+    animStepOf: "{current} / {total}",
+
     // Income
     noIncome: "No income",
     incomeHeader: "Income",

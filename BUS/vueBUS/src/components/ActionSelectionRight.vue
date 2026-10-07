@@ -97,7 +97,7 @@ function getPointerCoords() {
 
 <template>
 	<div
-		v-if="store.topMenuViews.displayRightActionSelection"
+		v-if="personal.selectedBoard !== rf.BOARD_20A_CAPSTONE"
 		id="actionSelectionRight"
 		:style="{
 			width: (store.refSize * getActionSelectionWidth()) / 100 + 'px',
