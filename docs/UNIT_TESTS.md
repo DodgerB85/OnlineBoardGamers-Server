@@ -77,4 +77,4 @@ Run on Linux with `.venv/bin/python manage.py test tests.test_momentum tests.tes
 
 ## URR frontend checks
 
-Run `node URR/vueURR/rulesCheck.mjs` from the repo root. In addition to the rule scenarios, it checks lossless replay compaction, legacy histories, phase checkpoints, inserted/deleted properties and changed arrays, input preservation, cache invalidation after branching, invalid delta rejection, and turn review boundaries, including successive states governed by the same king and required routing/harvest/consent choices.
+Run `node URR/vueURR/rulesCheck.mjs` from the repo root. In addition to the rule scenarios, it checks incomplete maintenance-funding previews, input preservation, sale pricing, and throne/overselling restrictions, plus lossless replay compaction, legacy histories, phase checkpoints, inserted/deleted properties and changed arrays, input preservation, cache invalidation after branching, invalid delta rejection, and turn review boundaries, including successive states governed by the same king and required routing/harvest/consent choices.

@@ -1,4 +1,5 @@
 <script setup>
+import PlayerMarker from "./PlayerMarker.vue"
 import * as view from "../js/URRview"
 import * as rf from "../js/URRreference"
 import * as IO from "../backend/URR_IO"
@@ -53,12 +54,11 @@ async function submitBug() {
 
 function getStatsExcludeVotes(returnPlayers = false) {
 	let votes = 0
-	let players = "None"
+	const players = []
 	for (const player in store.statsExcludeVotesData) {
 		if (store.statsExcludeVotesData[player] === true) {
 			votes += 1
-			if (players === "None") players = String(player)
-			else players += ", " + player
+			players.push(player)
 		}
 	}
 	return returnPlayers ? players : votes
@@ -66,12 +66,11 @@ function getStatsExcludeVotes(returnPlayers = false) {
 
 function getDeleteVotes(returnPlayers = false) {
 	let votes = 0
-	let players = "None"
+	const players = []
 	for (const player in store.deleteVotesData) {
 		if (store.deleteVotesData[player] === true) {
 			votes += 1
-			if (players === "None") players = String(player)
-			else players += ", " + player
+			players.push(player)
 		}
 	}
 	return returnPlayers ? players : votes
@@ -129,7 +128,7 @@ function localCastVote(topic) {
 		</div>
 		<div id="messageList">
 			<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
-				<div class="header"><span class="bold">{{ message[0] }}</span><span class="date">{{ new Date(message[1] * 1000).toLocaleString() }}</span></div>
+				<div class="header"><PlayerMarker v-if="view.playerIndexByName(store, message[0]) >= 0" :index="view.playerIndexByName(store, message[0])" /><span v-else :title="message[0]">Observer</span><span class="date">{{ new Date(message[1] * 1000).toLocaleString() }}</span></div>
 				<div class="messageBody">{{ message[2] }}</div>
 			</div>
 		</div>
@@ -148,14 +147,14 @@ function localCastVote(topic) {
 		<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
 			If all players agree, this game can be excluded from the stats (won't count towards wins/losses)
 			<br />
-			Votes: {{ getStatsExcludeVotes(false) }} - Players: {{ getStatsExcludeVotes(true) }}
+			Votes: {{ getStatsExcludeVotes(false) }} - Players: <PlayerMarker v-for="name in getStatsExcludeVotes(true)" :key="name" :index="view.playerIndexByName(store, name)" /><template v-if="!getStatsExcludeVotes(false)">None</template>
 			<br />
 			<button v-if="!personal.votedToExclude" class="actionsLineButton" @click="localCastVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">Vote to Exclude Game from Stats</button>
 		</div>
 		<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
 			If all players agree, this game will be deleted
 			<br />
-			Votes: {{ getDeleteVotes(false) }} - Players: {{ getDeleteVotes(true) }}
+			Votes: {{ getDeleteVotes(false) }} - Players: <PlayerMarker v-for="name in getDeleteVotes(true)" :key="name" :index="view.playerIndexByName(store, name)" /><template v-if="!getDeleteVotes(false)">None</template>
 			<br />
 			<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="localCastVote(rf.DELETE_VOTE_TOPIC)">Vote to Delete Game</button>
 		</div>
@@ -253,7 +252,7 @@ function localCastVote(topic) {
 }
 .topMenuItem { display: inline-block; width: 62px; height: 55px; cursor: pointer; text-align: center; }
 .topMenuItem img { width: 38px; height: 38px; }
-.topMenuItem span { font-size: 14px; font-weight: bold; display: block; }
+.topMenuItem span { font-size: 16px; font-weight: bold; display: block; }
 .utilityHeading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }.utilityHeading button { border: 0; background: none; color: inherit; font-size: 26px; cursor: pointer; }.topMenuItem { border: 0; background: #303030; color: white; border-radius: 3px; }.topMenuItem:disabled { opacity: .5; cursor: default; }
 .infoHeading { position: sticky; top: 0; z-index: 2; background: lightblue; padding: 4px 12px; border-bottom: 1px solid #adc2d0; text-align: left; }
 @media (max-width: 1050px) { .chatHeading button, .utilityHeading button { min-width: 44px; min-height: 44px; box-sizing: border-box; } }

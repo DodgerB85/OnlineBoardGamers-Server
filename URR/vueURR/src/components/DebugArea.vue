@@ -1,4 +1,5 @@
 <script setup>
+import PlayerMarker from "./PlayerMarker.vue"
 import { ref } from "vue"
 import * as model from "../js/URRmodel"
 import * as rf from "../js/URRreference"
@@ -85,7 +86,7 @@ function showState() { window.alert(JSON.stringify(model.exportGameData(), null,
 		<p v-if="!store.board.areas.length">The logical board is not configured. Clicking printed hexes creates debug areas using the selected terrain and state.</p>
 		<fieldset :disabled="!debug.canDebug()">
 			<div class="debugRow">
-				<label>Player <select v-model="store.debug.player"><option v-for="(player, index) in store.players" :key="index" :value="index">{{ player.displayName }}</option></select></label>
+				<span>Player</span><button v-for="(player, index) in store.players" :key="index" :aria-pressed="store.debug.player === index" @click="store.debug.player = index"><PlayerMarker :index="index" /></button>
 				<label>State <select v-model="store.debug.state"><option v-for="id in rf.ALL_STATES" :key="id" :value="id">{{ rf.STATE_NAMES[id] }}</option></select></label>
 				<label>Card era <select v-model="store.debug.era"><option v-for="era in rf.ALL_ERAS" :key="era" :value="era">{{ era }}</option></select></label>
 				<label>Terrain <select v-model="store.debug.landType"><option v-for="type in rf.ALL_LAND_TYPES" :key="type" :value="type">{{ rf.LAND_NAMES[type] }}</option></select></label>
@@ -105,7 +106,7 @@ function showState() { window.alert(JSON.stringify(model.exportGameData(), null,
 </template>
 
 <style scoped>
-#debugArea { border: 1px dashed darkred; background: #fff3cd; padding: 8px; margin: 8px auto; max-width: 900px; text-align: left; box-sizing: border-box; font-size: 13px; }
+#debugArea { border: 1px dashed darkred; background: #fff3cd; padding: 8px; margin: 8px auto; max-width: 900px; text-align: left; box-sizing: border-box; font-size: 16px; font-weight: 600; }
 h3 { margin: 0; } p { margin: 6px 0; } fieldset { border: 0; padding: 0; min-width: 0; }
 .debugRow { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin: 6px 0; }
 button, select, input { font: inherit; } button { cursor: pointer; padding: 4px 7px; } input { width: 80px; } .selected { outline: 2px solid #247422; font-weight: bold; } .debugError { color: #a40000; }

@@ -127,7 +127,7 @@ export async function endPlayerTurn() {
 		const next = store.players[store.gameflow.turnOrder[0]]
 		const stateId = view.currentStateId(store)
 		const context = store.gameflow.pendingOffer ? "respond to the agreement request" : store.rain.step === "routing" ? "route water" : store.rain.step === "harvest" ? "choose the harvest" : view.phaseStr(store.gameflow.phase)
-		store.turnDraft.message = next ? `Turn saved. ${next.displayName}${stateId === null ? "" : ` · ${rf.STATE_NAMES[stateId]}`} · ${context}.` : "Turn saved. Game complete."
+		store.turnDraft.message = next ? `Turn saved.${stateId === null ? "" : ` · ${rf.STATE_NAMES[stateId]}`} · ${context}.` : "Turn saved. Game complete."
 	}
 	return saved
 }

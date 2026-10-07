@@ -1,4 +1,5 @@
 <script setup>
+import PlayerMarker from "./PlayerMarker.vue"
 import ArtworkCard from "./ArtworkCard.vue"
 import * as funcs from "../js/URRfuncs"
 import StateLeadership from "./StateLeadership.vue"
@@ -36,7 +37,7 @@ const balanceChanges = computed(() => {
 	const changes = []
 	for (const [index, player] of (after.value?.players || []).entries()) {
 		const privateBefore = before.value?.players[index]?.money
-		if (privateBefore !== undefined && player.money !== privateBefore) changes.push({ src: assets.getPlayerMarkerImage(index), label: `${player.displayName}: ${privateBefore} → ${player.money} SPL`, amount: player.money - privateBefore })
+		if (privateBefore !== undefined && player.money !== privateBefore) changes.push({ src: assets.getPlayerMarkerImage(index), title: player.displayName, label: `Private cash: ${privateBefore} → ${player.money} SPL`, amount: player.money - privateBefore })
 	}
 	for (const state of after.value?.states || []) {
 		const treasuryBefore = before.value?.states[state.id]?.money
@@ -74,7 +75,7 @@ const eventText = computed(() => {
 	const offerDescription = offer?.type === "offerNation" ? `${rf.NATION_NAMES[offer.nation]} for ${offer.amount} SPL` : offer ? `${offer.kind} at ${landLabel(offer.area)}` : "an offer"
 	let passDescription = "Passed"
 	if (before.value?.gameflow.phase === rf.PHASE_DEVELOPMENT && before.value.gameflow.developmentStep === "eridu") passDescription = "Skipped Eridu digging"
-	else if (before.value?.gameflow.auction) passDescription = `${isAutomaticStep.value ? `${player.value.displayName}: ` : ''}Withdrew from the ${rf.NATION_NAMES[before.value.gameflow.auction.nation]} auction${isAutomaticStep.value ? ` · cannot afford ${before.value.gameflow.auction.amount + 5} SPL` : ''}`
+	else if (before.value?.gameflow.auction) passDescription = `Withdrew from the ${rf.NATION_NAMES[before.value.gameflow.auction.nation]} auction${isAutomaticStep.value ? ` · cannot afford ${before.value.gameflow.auction.amount + 5} SPL` : ''}`
 	const labels = {
 		buyNation: `Bought ${rf.NATION_NAMES[move.nation]} for ${move.nation === rf.NATION_ASHUR ? before.value.gameflow.ashurPrice : rf.NATION_PRICES[move.nation]} SPL`,
 		bidNation: `${before.value.gameflow.auction ? 'Bid' : 'Offered'} ${move.amount} SPL for ${rf.NATION_NAMES[move.nation]}`,
@@ -162,7 +163,7 @@ function jumpToEntry() {
 				<p class="administrationExplanation">{{ entry.administration.text }}</p>
 				<div class="administrationDetails" v-if="entry.administration.details.length">
 					<div v-for="(detail, detailIndex) in entry.administration.details" :key="detailIndex">
-						<img v-if="detail.player !== undefined" :src="assets.getPlayerMarkerImage(detail.player)" alt="" />
+						<PlayerMarker v-if="detail.player !== undefined" :index="detail.player" />
 						<img v-else-if="detail.state !== undefined" :src="assets.getStateOrderImage(detail.state)" alt="" />
 						<img v-else-if="detail.terrain !== undefined" :src="assets.getTerrainImage(detail.terrain)" alt="" />
 						<button v-if="detail.area" @click.stop="store.viewSettings.historyArea = detail.area" :aria-label="`Find ${detail.label} on the board`">{{ detail.label }}</button><span>{{ detail.text }}</span>
@@ -171,10 +172,10 @@ function jumpToEntry() {
 			</template>
 			<div v-else-if="entry[0] === rf.HIST_NEW_GAME" class="new_turn">{{ eventText }}</div>
 			<template v-else>
-				<div class="container"><span class="header" v-if="player && !isAutomaticStep"><img :src="assets.getPlayerMarkerImage(entry[1])" alt="" /><b>{{ player.displayName }}</b></span><img v-if="eventArtwork" :src="eventArtwork.src" :alt="eventArtwork.alt" :title="eventArtwork.alt" /><span>{{ eventText }}</span></div>
-				<div v-for="award in nationAwards" :key="award.id" class="nationAwardNotice"><img :src="assets.getPlayerMarkerImage(award.owner)" alt="" /><span>{{ after.players[award.owner].displayName }} acquired {{ rf.NATION_NAMES[award.id] }} for {{ award.price }} SPL</span></div>
+				<div class="container"><span class="header" v-if="player"><PlayerMarker :index="entry[1]" :name="player.displayName" /></span><img v-if="eventArtwork" :src="eventArtwork.src" :alt="eventArtwork.alt" :title="eventArtwork.alt" /><span>{{ eventText }}</span></div>
+				<div v-for="award in nationAwards" :key="award.id" class="nationAwardNotice"><PlayerMarker :index="award.owner" :name="after.players[award.owner].displayName" /><span>Acquired {{ rf.NATION_NAMES[award.id] }} for {{ award.price }} SPL</span></div>
 				<StateLeadership v-for="change in leadershipChanges" :key="change.id" :change="change" />
-				<details class="balanceDetails" v-if="balanceChanges.length" @click.stop @keydown.enter.stop @keydown.space.stop><summary class="balanceChanges" aria-label="Show cash balances before and after"><span v-for="change in balanceChanges" :key="change.label" :title="change.label"><img :src="change.src" :alt="change.label" /><b>{{ change.amount > 0 ? '+' : '' }}{{ change.amount }} SPL</b></span></summary><div class="balanceBreakdown"><div v-for="change in balanceChanges" :key="change.label"><img :src="change.src" alt="" /><span>{{ change.label }}</span></div></div></details>
+				<details class="balanceDetails" v-if="balanceChanges.length" @click.stop @keydown.enter.stop @keydown.space.stop><summary class="balanceChanges" aria-label="Show cash balances before and after"><span v-for="change in balanceChanges" :key="change.label" :title="change.title || change.label"><img :src="change.src" :alt="change.label" /><b>{{ change.amount > 0 ? '+' : '' }}{{ change.amount }} SPL</b></span></summary><div class="balanceBreakdown"><div v-for="change in balanceChanges" :key="change.label"><img :src="change.src" :alt="change.title || change.label" :title="change.title || change.label" /><span>{{ change.label }}</span></div></div></details>
 				<div class="actionImages" :class="{ multipleCards: actionImages.filter((asset) => asset.card).length > 1 }" v-if="actionImages.length"><template v-for="(asset, idx) in actionImages" :key="idx"><div v-if="asset.card" class="historyCard"><ArtworkCard :src="asset.src" :alt="asset.alt" /></div><img v-else :src="asset.src" :alt="asset.alt" :title="asset.alt" /></template></div>
 				<div v-if="entry[0] === rf.HIST_GAME_END" class="new_turn">Game ended<template v-if="after?.gameflow.endReason === 'invasion'"> · The Southern Peoples invade</template><template v-else-if="after?.gameflow.endReason === 'revolution'"> · Revolution</template></div>
 			</template>
@@ -190,12 +191,12 @@ function jumpToEntry() {
 .header { display: inline-flex; align-items: center; gap: 5px; }.header b { min-width: 0; overflow-wrap: anywhere; }.header img { width: 23px; height: 23px; }
 .new_turn { background: black; color: white; text-align: center; font-weight: bold; font-size: 1.2em; padding: 8px; }.phaseHeading { background: black; color: white; text-align: center; font-weight: bold; font-size: 1.2em; padding: 8px; margin: 5px; }
 .selectableHistory { cursor: pointer; }.selectableHistory:hover { border: 1px solid yellow; }.selectableHistory:focus-visible { outline: 2px solid yellow; outline-offset: -2px; }
-.log.currentReplay { box-shadow: inset 3px 0 #177daf; background: #e5f3ff; }.replayPosition { display: block; color: #12628c; font-size: 12px; font-weight: bold; }
+.log.currentReplay { box-shadow: inset 3px 0 #177daf; background: #e5f3ff; }.replayPosition { display: block; color: #12628c; font-size: 16px; font-weight: bold; }
 .actionImages { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }.actionImages img { width: 30px; height: 30px; object-fit: contain; }.historyCard { width: 185px; max-width: 100%; }
 .actionImages.multipleCards .historyCard { width: calc((100% - 4px) / 2); max-width: 185px; }
-.nationAwardNotice { display: flex; align-items: center; gap: 5px; margin-top: 4px; padding: 3px 6px; background: #edf6fd; border-left: 3px solid #177daf; font-size: 12px; }.nationAwardNotice img { width: 23px; height: 23px; flex-shrink: 0; }.nationAwardNotice span { min-width: 0; overflow-wrap: anywhere; }
+.nationAwardNotice { display: flex; align-items: center; gap: 5px; margin-top: 4px; padding: 3px 6px; background: #edf6fd; border-left: 3px solid #177daf; font-size: 16px; font-weight: 600; }.nationAwardNotice img { width: 23px; height: 23px; flex-shrink: 0; }.nationAwardNotice span { min-width: 0; overflow-wrap: anywhere; }
 .container > img { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; margin-right: 6px; }.container > span:last-child { min-width: 0; overflow-wrap: anywhere; }
-.balanceChanges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }.balanceChanges span { display: inline-flex; align-items: center; gap: 4px; padding: 2px 5px; background: #edf6fd; border: 1px solid #adc2d0; font-size: 12px; }.balanceChanges img { width: 22px; height: 22px; }
-.balanceChanges { cursor: pointer; align-items: center; list-style: none; }.balanceChanges::-webkit-details-marker { display: none; }.balanceChanges::before { content: '▸'; font-size: 14px; }.balanceDetails[open] .balanceChanges::before { content: '▾'; }.balanceChanges:focus-visible { outline: 2px solid #177daf; outline-offset: 2px; }.balanceBreakdown { display: grid; gap: 3px; margin-top: 5px; padding: 5px; background: #edf6fd; font-size: 12px; }.balanceBreakdown > div { display: flex; align-items: center; gap: 5px; }.balanceBreakdown img { width: 22px; height: 22px; flex-shrink: 0; }.balanceBreakdown span { min-width: 0; overflow-wrap: anywhere; }
+.balanceChanges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }.balanceChanges span { display: inline-flex; align-items: center; gap: 4px; padding: 2px 5px; background: #edf6fd; border: 1px solid #adc2d0; font-size: 16px; font-weight: 600; }.balanceChanges img { width: 22px; height: 22px; }
+.balanceChanges { cursor: pointer; align-items: center; list-style: none; }.balanceChanges::-webkit-details-marker { display: none; }.balanceChanges::before { content: '▸'; font-size: 16px; font-weight: 600; }.balanceDetails[open] .balanceChanges::before { content: '▾'; }.balanceChanges:focus-visible { outline: 2px solid #177daf; outline-offset: 2px; }.balanceBreakdown { display: grid; gap: 3px; margin-top: 5px; padding: 5px; background: #edf6fd; font-size: 16px; font-weight: 600; }.balanceBreakdown > div { display: flex; align-items: center; gap: 5px; }.balanceBreakdown img { width: 22px; height: 22px; flex-shrink: 0; }.balanceBreakdown span { min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 1050px) { .balanceChanges { min-height: 40px; } }
 </style>

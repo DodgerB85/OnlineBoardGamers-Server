@@ -2,7 +2,7 @@
 import assert from "node:assert/strict"
 import * as rf from "./src/js/URRreference.js"
 import * as rules from "./src/js/URRrules.js"
-import { createGame, applyAction, finishWaterRouting } from "./src/js/URRgame.js"
+import { createGame, applyAction, finishWaterRouting, previewMaintenanceSales } from "./src/js/URRgame.js"
 import { startWaterRouting, allocateWater, waterChoices } from "./src/js/URRwater.js"
 import { getCanalCost, getDigPathPreview } from "./src/js/URRmap.js"
 import { endsDecision, defaultEndAction, describeAction } from "./src/js/URRturnDraft.js"
@@ -280,6 +280,38 @@ const area = (game, areaId) => game.board.areas.find((entry) => entry.id === are
 	assert.equal(game.states[0].diggers.length, 0)
 	game.players[0].money = 0
 	assert.throws(() => applyAction(game, 0, { type: "endDevelopment" }), /sell land or resolve a revolution/)
+}
+
+// Incomplete funding previews preserve the position and share submission's sale rules.
+{
+	const game = fresh()
+	Object.assign(game.gameflow, { phase: rf.PHASE_DEVELOPMENT, stateOrder: [0], stateIndex: 0, developmentStep: "digging", turnOrder: [0] })
+	Object.assign(game.states[0], { isActive: true, king: 0, money: 0 })
+	game.players[0].money = 0
+	game.cardSupply[1] = 0
+	game.nations.forEach((nation) => { nation.isRemoved = true })
+	const lands = game.board.areas.filter((land) => !land.isRiver && land.state === 0)
+	lands.forEach((land) => { land.owner = land.markerOwner = 0 })
+	const forests = lands.filter((land) => land.landType === rf.LAND_FOREST && !land.isCity)
+	const before = JSON.stringify(game)
+	const partial = previewMaintenanceSales(game, 0, [[forests[0].id]])
+	assert.equal(partial.players[0].money, 82)
+	assert.equal(rules.maintenanceShortfall(partial, 0) - partial.players[0].money, 18)
+	assert.equal(partial.states[0].diggers.length, 0)
+	assert.throws(() => applyAction(game, 0, { type: "resolveMaintenance", sales: [[forests[0].id]] }), /Sell the remaining eligible land/)
+	assert.equal(JSON.stringify(game), before)
+	const sales = [[forests[0].id, forests[1].id]]
+	const funded = previewMaintenanceSales(game, 0, sales)
+	const resolved = applyAction(game, 0, { type: "resolveMaintenance", sales })
+	assert.equal(funded.players[0].money, 164)
+	assert.equal(resolved.players[0].money, 64)
+	assert.equal(resolved.states[0].diggers.length, 1)
+	assert.deepEqual(funded.landPrices, resolved.landPrices)
+	assert.throws(() => previewMaintenanceSales(game, 0, [...sales, [forests[2].id]]), /Stop selling/)
+	assert.throws(() => applyAction(game, 0, { type: "resolveMaintenance", sales: [[...sales[0], forests[2].id]] }), /cash left after hiring/)
+	lands.forEach((land) => { land.owner = land.markerOwner = null })
+	forests.forEach((land, index) => { land.owner = land.markerOwner = index < 3 ? 0 : 1 })
+	assert.throws(() => previewMaintenanceSales(game, 0, [[forests[0].id, forests[1].id]]), /preserve/)
 }
 
 // Exhausted pumps do not request water again; surplus still flows downstream.

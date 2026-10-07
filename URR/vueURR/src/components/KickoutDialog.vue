@@ -1,8 +1,10 @@
 <script setup>
+import PlayerMarker from "./PlayerMarker.vue"
 import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import TurnNudge from "./utils/TurnNudge.vue"
 import * as IO from "../backend/URR_IO"
 import * as rf from "../js/URRreference"
+import * as view from "../js/URRview"
 import * as controller from "../js/URRcontroller"
 import { useModelStore } from "../stores/URRstore"
 import { usePersonalStore } from "../stores/URRpersonal"
@@ -47,22 +49,22 @@ onUnmounted(() => clearInterval(timer))
 <template>
 	<div v-if="personal.kickoutRequired > 0 && personal.pov >= 0 && !store.players[personal.pov]?.isMissing && !controller.timedOutPlayerObj().isMissing && !personal.trainingGame && !personal.canPlay() && !store.viewSettings.showReplay && store.gameflow.phase !== rf.PHASE_GAME_OVER && !isDismissed" class="kickoutDialog">
 		<template v-if="personal.kickoutRequired === 1">
-			<p>Player <b>{{ target }}</b> has used all the standard kickout time.</p>
+			<p>Player <PlayerMarker :index="view.playerIndexByName(store, target)" /> has used all the standard kickout time.</p>
 			<p>Remaining Flex-Time: {{ duration(flexSeconds) }}</p>
 			<p>For more information see <a href="/help/" target="_blank">Help</a>.</p>
 		</template>
 		<template v-else>
-			<p>Player <b>{{ target }}</b> has timed out.</p>
+			<p>Player <PlayerMarker :index="view.playerIndexByName(store, target)" /> has timed out.</p>
 			<template v-if="isConfirming">
-				<p>This will permanently remove <b>{{ target }}</b> from the game. <b>It cannot be undone.</b></p>
+				<p>This will permanently remove <PlayerMarker :index="view.playerIndexByName(store, target)" /> from the game. <b>It cannot be undone.</b></p>
 				<p>Check the chat in case they have given a reason for their absence. Please consider giving them a short grace period.</p>
-				<button type="button" class="actionsLineButton" :disabled="isSubmitting" @click="submitKickout">Permanently Kickout {{ target }}</button>
+				<button type="button" class="actionsLineButton" :disabled="isSubmitting" @click="submitKickout">Permanently Kickout <PlayerMarker :index="view.playerIndexByName(store, target)" /></button>
 			</template>
 			<button v-else-if="canKickoutNow || isLastVote" type="button" class="actionsLineButton" :disabled="isSubmitting" @click="isConfirming = true">Confirm Kickout</button>
 			<template v-else>
-				<p>Votes: {{ voters.length }}/{{ store.kickoutVoteThreshold }} ({{ voters.join(', ') || 'None' }})</p>
-				<p v-if="myVote">You have voted to kick out {{ target }}. You can kick them out directly in {{ duration(soloSeconds) }} if the other players do not also vote.</p>
-				<button v-else type="button" class="actionsLineButton" :disabled="isSubmitting" @click="submitKickout">Vote to Kickout {{ target }}</button>
+				<p>Votes: {{ voters.length }}/{{ store.kickoutVoteThreshold }} (<PlayerMarker v-for="name in voters" :key="name" :index="view.playerIndexByName(store, name)" /><template v-if="!voters.length">None</template>)</p>
+				<p v-if="myVote">You have voted to kick out <PlayerMarker :index="view.playerIndexByName(store, target)" />. You can kick them out directly in {{ duration(soloSeconds) }} if the other players do not also vote.</p>
+				<button v-else type="button" class="actionsLineButton" :disabled="isSubmitting" @click="submitKickout">Vote to Kickout <PlayerMarker :index="view.playerIndexByName(store, target)" /></button>
 			</template>
 			<TurnNudge :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 			<button type="button" class="actionsLineButton" :disabled="isSubmitting" @click="isDismissed = true">Not now - allow more time</button>

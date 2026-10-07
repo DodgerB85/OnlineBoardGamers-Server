@@ -24,6 +24,6 @@ async function revealChanges(event) {
 </template>
 
 <style scoped>
-.marketForecast { scroll-margin-bottom: 100px; margin: 6px 0; border: 1px solid #bdd5e3; border-radius: 3px; background: #edf6fd; font-size: 12px; }.marketForecast summary { padding: 6px 7px; cursor: pointer; }.priceChanges { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 6px; padding: 0 7px 7px; }.priceChanges > div { display: flex; align-items: center; gap: 5px; }.priceChanges img { width: 22px; height: 22px; flex-shrink: 0; }.priceChanges span { white-space: nowrap; }.priceChanges b { color: #12628c; }
+.marketForecast { scroll-margin-bottom: 100px; margin: 6px 0; border: 1px solid #bdd5e3; border-radius: 3px; background: #edf6fd; font-size: 16px; font-weight: 600; }.marketForecast summary { padding: 6px 7px; cursor: pointer; }.priceChanges { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 6px; padding: 0 7px 7px; }.priceChanges > div { display: flex; align-items: center; gap: 5px; }.priceChanges img { width: 22px; height: 22px; flex-shrink: 0; }.priceChanges span { white-space: nowrap; }.priceChanges b { color: #12628c; }
 @media (max-width: 1050px) { .marketForecast summary { min-height: 40px; box-sizing: border-box; padding: 12px 7px; } }
 </style>
