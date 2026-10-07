@@ -120,8 +120,6 @@ ol { padding-left: 18px; margin: 4px 0; color: #52616a; }form { display: flex; f
 .boardLayout form label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .boardLayout .nationLocation { min-height: 32px; }
 .boardLayout .bidAdjustment { min-width: 32px; padding: 4px; }
-@media (max-width: 1000px) { .boardLayout .nationList { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 480px) { .boardLayout .nationList { grid-template-columns: minmax(0, 1fr); } }
 .nationActions { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 4px; margin-top: auto; }
 .nationActions > form, .nationActions > .marketControls { flex: 1; min-width: 0; }
 .nationActions .amountError { flex-basis: 100%; }
