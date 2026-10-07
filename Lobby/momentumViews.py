@@ -42,7 +42,7 @@ def game_momentum(request, game_id):
     if not is_active_participant(game, request.user):
         return JsonResponse({"error": gettext("Only players in this game can view its momentum.")}, status=403)
     own_seat = game.players.get(player=request.user)
-    has_nudge = own_seat.is_current and own_seat.lastNudgedAt and own_seat.lastNudgedBy and own_seat.lastNudgedAt.timestamp() * 1000 >= int(game.latestUpdate)
+    has_nudge = own_seat.is_current and own_seat.lastNudgedAt and own_seat.lastNudgedAt.timestamp() * 1000 >= int(game.latestUpdate)
     return JsonResponse({"nudge": get_turn_nudge_message(game, own_seat.lastNudgedBy) if has_nudge else None, "streak": get_hot_streak(game) if request.user.profile.hotStreakEnabled else None, "isActive": game.gameStatus == "ACTIVE", "latestUpdate": game.latestUpdate, "targets": get_nudge_targets(game, request.user)})
 
 
