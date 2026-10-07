@@ -39,6 +39,16 @@ watch(advancing, (a) => {
 onMounted(schedule)
 onBeforeUnmount(() => clearTimeout(timer))
 
+// Any interaction outside the panel (closing the history, clicking the board,
+// using the menus) ends playback, same as the CLOSE button. Capture phase so
+// nothing can swallow the click before we see it.
+function outsideInteract(e) {
+	if (e.target.closest && e.target.closest(".dinnerPanel")) return
+	dinner.stop()
+}
+onMounted(() => document.addEventListener("click", outsideInteract, true))
+onBeforeUnmount(() => document.removeEventListener("click", outsideInteract, true))
+
 const tokenSize = computed(() => store.refSize / 5.5)
 
 function tokenSrc(good) {

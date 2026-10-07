@@ -252,3 +252,16 @@ F dfs zone 2927 routes 1 990.0ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedH
 F dfs zone 2841 routes 0 365.5ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
 F dfs total 3183.1ms
 G getCoffeeRoute 0.1ms [0,0]
+phase 5 turn 3 newRoads 5
+needs [{"number":13,"needs":[[0,1]]}]
+rwIndexes []
+ranges 13 [5,0]
+E doDinnerTime (coffee stubbed) 27.3ms calls: [[13,0,5]]
+F inputs [13,0,5]
+F entrances [3696]
+F dfs zone 2842 routes 0 610.5ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2926 routes 1 1167.7ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2927 routes 1 1006.4ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs zone 2841 routes 0 394.1ms {"nodes":0,"emitted":0,"prunedRange":0,"prunedHeur":0,"prunedVisit":0,"cap":2000000}
+F dfs total 3178.7ms
+G getCoffeeRoute 0.0ms [0,0]
