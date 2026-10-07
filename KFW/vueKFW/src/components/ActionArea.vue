@@ -1,5 +1,5 @@
 <script setup>
-import TurnNudge from "../../../../Lobby/frontend/TurnNudge.vue"
+import TurnNudge from "./utils/TurnNudge.vue"
 import * as rf from "../js/KFWreference"
 import * as view from "../js/KFWview"
 import * as model from "../js/KFWmodel"

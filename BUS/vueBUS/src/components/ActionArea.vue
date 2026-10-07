@@ -1,5 +1,5 @@
 <script setup>
-import TurnNudge from "../../../../Lobby/frontend/TurnNudge.vue"
+import TurnNudge from "./utils/TurnNudge.vue"
 import { ref, watch, onUnmounted } from "vue"
 import * as rf from "../js/BUSreference.js"
 import * as IO from "../backend/BUS_IO"

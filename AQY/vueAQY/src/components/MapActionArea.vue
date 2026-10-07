@@ -1,5 +1,5 @@
 <script setup>
-import TurnNudge from "../../../../Lobby/frontend/TurnNudge.vue"
+import TurnNudge from "./utils/TurnNudge.vue"
 /** This is the MAIN action area for the city
  * It should ONLY contain
  * RESET WHOLE TURN

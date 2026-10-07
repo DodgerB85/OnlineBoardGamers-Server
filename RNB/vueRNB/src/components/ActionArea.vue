@@ -1,5 +1,5 @@
 <script setup>
-import TurnNudge from "../../../../Lobby/frontend/TurnNudge.vue"
+import TurnNudge from "./Utils/TurnNudge.vue"
 /** Action area - This is where you interact with the game flow.
  * Confirm actions, end turn, reset turn.
  * Also, it's where you're told what to do next

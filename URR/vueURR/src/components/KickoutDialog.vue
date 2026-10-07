@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from "vue"
-import TurnNudge from "../../../../Lobby/frontend/TurnNudge.vue"
+import TurnNudge from "./utils/TurnNudge.vue"
 import * as IO from "../backend/URR_IO"
 import * as rf from "../js/URRreference"
 import * as controller from "../js/URRcontroller"

@@ -36,7 +36,6 @@ export default defineConfig(({ command }) => ({
 
 
     resolve: {
-		dedupe: ["vue"],
     alias:
       command === 'serve'
         ? [{ find: '@static', replacement: fileURLToPath(new URL('./src', import.meta.url)) }]

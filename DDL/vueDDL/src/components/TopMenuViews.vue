@@ -1,5 +1,5 @@
 <script setup>
-import TurnNudge from "../../../../Lobby/frontend/TurnNudge.vue"
+import TurnNudge from "./utils/TurnNudge.vue"
 import * as view from "../js/DDLview"
 import * as rf from "../js/DDLreference"
 import * as IO from "../backend/DDL_IO"

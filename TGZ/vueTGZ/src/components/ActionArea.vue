@@ -1,5 +1,5 @@
 <script setup>
-import TurnNudge from "../../../../Lobby/frontend/TurnNudge.vue"
+import TurnNudge from "./utils/TurnNudge.vue"
 import * as rf from "../js/TGZreference"
 import * as map from "../js/TGZmap"
 import * as view from "../js/TGZview"
