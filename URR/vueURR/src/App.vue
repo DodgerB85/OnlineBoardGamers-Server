@@ -2,12 +2,11 @@
 import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from "vue"
 import * as model from "./js/URRmodel"
 import * as rf from "./js/URRreference"
-import { currentStateId, phaseStr } from "./js/URRview"
-import { checkForLatestData } from "./backend/URR_IO"
-import { StartWebSocket } from "./backend/URRwebsocket"
-import { getAutomaticAction, canExchangeBarahshum, harvestAmount, maintenanceShortfall } from "./js/URRrules"
-import { submitAction, getAutomaticBotAction, canRunBotTurn, submitBotAction } from "./js/URRcontroller"
-import { submitAction, endPlayerTurn } from "./js/URRcontroller"
+import * as view from "./js/URRview"
+import * as IO from "./backend/URR_IO"
+import * as WS from "./backend/URRwebsocket"
+import * as rules from "./js/URRrules"
+import * as controller from "./js/URRcontroller"
 
 import TopMenu from "./components/TopMenu.vue"
 import TopMenuViews from "./components/TopMenuViews.vue"
@@ -65,9 +64,9 @@ onMounted(() => {
 	boardObserver.observe(mainArea.value)
 	window.addEventListener("resize", resizeBoard)
 	if (personal.gameID === undefined || personal.pov < -9) return
-	StartWebSocket()
+	WS.StartWebSocket()
 	updateTimer = window.setInterval(() => {
-		if (!document.hidden && store.gameflow.phase !== rf.PHASE_GAME_OVER) checkForLatestData()
+		if (!document.hidden && store.gameflow.phase !== rf.PHASE_GAME_OVER) IO.checkForLatestData()
 	}, 10000)
 })
 onBeforeUnmount(() => {
@@ -76,22 +75,22 @@ onBeforeUnmount(() => {
 	window.removeEventListener("resize", resizeBoard)
 })
 const waitingPlayerName = computed(() => {
-	if (personal.haltPlay || personal.canPlay() || store.gameflow.phase === rf.PHASE_GAME_OVER || canExchangeBarahshum(store, personal.pov)) return null
+	if (personal.haltPlay || personal.canPlay() || store.gameflow.phase === rf.PHASE_GAME_OVER || rules.canExchangeBarahshum(store, personal.pov)) return null
 	return store.players[store.gameflow.turnOrder[0]]?.displayName
 })
 const showLandMarket = computed(() => {
 	if (store.gameflow.phase === rf.PHASE_SETTLEMENT) return true
-	const stateId = currentStateId(store)
+	const stateId = view.currentStateId(store)
 	if (store.gameflow.phase !== rf.PHASE_DEVELOPMENT || store.gameflow.developmentStep === "betweenStates" || store.gameflow.pendingOffer || stateId === null) return false
-	return store.players[store.states[stateId].king].money < maintenanceShortfall(store, stateId)
+	return store.players[store.states[stateId].king].money < rules.maintenanceShortfall(store, stateId)
 })
-const isBarahshumExchange = computed(() => !personal.haltPlay && !store.viewSettings.showReplay && personal.pov >= 0 && !personal.canPlay() && canExchangeBarahshum(store, personal.pov))
+const isBarahshumExchange = computed(() => !personal.haltPlay && !store.viewSettings.showReplay && personal.pov >= 0 && !personal.canPlay() && rules.canExchangeBarahshum(store, personal.pov))
 const actingLabel = computed(() => {
 	if (store.turnDraft.ready) return `Reviewing: ${store.players[store.turnDraft.player]?.displayName}`
 	if (isBarahshumExchange.value) return `Acting: ${store.players[personal.pov].displayName} · Barahshum exchange`
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return ""
 	const player = store.players[store.gameflow.turnOrder[0]]
-	const stateId = currentStateId(store)
+	const stateId = view.currentStateId(store)
 	const context = store.gameflow.pendingOffer ? "Responding" : store.gameflow.developmentStep === "betweenStates" ? "Next" : "Acting"
 	return `${context}: ${stateId === null ? '' : `${rf.STATE_NAMES[stateId]} · `}${player?.displayName || 'Automatic resolution'}`
 })
@@ -106,15 +105,15 @@ const actionPanelTitle = computed(() => {
 	if (isBarahshumExchange.value) return "Barahshum · free canal"
 	if (map.value?.isTracing) return `Canal draft · ${Math.max(0, canalPath.value.length - 1)} segment${canalPath.value.length === 2 ? "" : "s"}`
 	if (store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep === "eridu") return canalPath.value.length >= 2 ? "Eridu · canal review" : "Eridu · special digging turn"
-	const stateId = currentStateId(store)
+	const stateId = view.currentStateId(store)
 	if (store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep === "digging" && canalPath.value.length >= 2) return `${rf.STATE_NAMES[stateId]} · canal review`
-	if (stateId !== null && store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep !== "betweenStates" && store.players[store.states[stateId].king].money < maintenanceShortfall(store, stateId)) return `${rf.STATE_NAMES[stateId]} · crew funding`
+	if (stateId !== null && store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep !== "betweenStates" && store.players[store.states[stateId].king].money < rules.maintenanceShortfall(store, stateId)) return `${rf.STATE_NAMES[stateId]} · crew funding`
 	if (stateId !== null && store.gameflow.phase === rf.PHASE_RAINY_SEASON) {
 		if (store.gameflow.endReason) return `${rf.STATE_NAMES[stateId]} · final ${store.rain.step === "harvest" ? "harvest" : "water"}`
-		return store.rain.step === "harvest" ? `${rf.STATE_NAMES[stateId]} · harvest ${harvestAmount(store, stateId)} SPL` : `${rf.STATE_NAMES[stateId]} · route water`
+		return store.rain.step === "harvest" ? `${rf.STATE_NAMES[stateId]} · harvest ${rules.harvestAmount(store, stateId)} SPL` : `${rf.STATE_NAMES[stateId]} · route water`
 	}
 	if (store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep === "betweenStates") return stateId === null ? "Before rainy season" : `Before ${rf.STATE_NAMES[stateId]} development`
-	return stateId === null ? phaseStr(store.gameflow.phase) : `${rf.STATE_NAMES[stateId]} · ${phaseStr(store.gameflow.phase)}`
+	return stateId === null ? view.phaseStr(store.gameflow.phase) : `${rf.STATE_NAMES[stateId]} · ${view.phaseStr(store.gameflow.phase)}`
 })
 function selectArea(id) {
 	selectedArea.value = id
@@ -138,7 +137,7 @@ function revealStatus(type) {
 	nextTick(() => statusPanels.value.querySelector(type === "player" ? ".holdingsPanel" : ".stateStrip").scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" }))
 }
 watch(() => store.viewSettings.historyArea, (id) => { if (id) map.value.locateArea(id) })
-watch([() => store.gameflow.turn, () => store.gameflow.phase, () => store.gameflow.turnOrder[0], () => currentStateId(store), () => store.gameflow.developmentStep, () => store.rain.step, () => store.gameflow.pendingOffer], async () => {
+watch([() => store.gameflow.turn, () => store.gameflow.phase, () => store.gameflow.turnOrder[0], () => view.currentStateId(store), () => store.gameflow.developmentStep, () => store.rain.step, () => store.gameflow.pendingOffer], async () => {
 	await nextTick()
 	if (actionPanelBody.value) {
 		actionPanelBody.value.scrollTop = 0
@@ -147,12 +146,13 @@ watch([() => store.gameflow.turn, () => store.gameflow.phase, () => store.gamefl
 })
 const automaticAction = computed(() => {
 	if (store.viewSettings.showLoader || store.viewSettings.isSaving || store.viewSettings.performingRewind) return null
-	return personal.canPlay() ? getAutomaticAction(store) : getAutomaticBotAction()
+	if (store.turnDraft.pauseAutomatic || store.turnDraft.ready) return null
+	return personal.canPlay() ? rules.getAutomaticAction(store) : controller.getAutomaticBotAction()
 })
 watch(automaticAction, (action) => {
 	if (!action) return
-	if (canRunBotTurn()) submitBotAction(action)
-	else submitAction(action)
+	if (controller.canRunBotTurn()) controller.submitBotAction(action)
+	else controller.submitAction(action)
 }, { immediate: true, flush: "post" })
 watch(() => store.turnDraft.revision, () => {
 	map.value?.finishDig()
@@ -164,10 +164,8 @@ watch(() => store.turnDraft.revision, () => {
 })
 async function finishTurn() {
 	if (gameActions.value && !store.turnDraft.ready) return gameActions.value.finishTurn()
-	return endPlayerTurn()
+	return controller.endPlayerTurn()
 }
-const automaticAction = computed(() => !store.turnDraft.pauseAutomatic && !store.turnDraft.ready && personal.canPlay() && !store.viewSettings.showLoader && !store.viewSettings.isSaving && !store.viewSettings.performingRewind ? getAutomaticAction(store) : null)
-watch(automaticAction, (action) => { if (action) submitAction(action) }, { immediate: true, flush: "post" })
 
 function showDebug() {
 	return rf.SUPER_USERS.includes(personal.name) || rf.DEBUG_USERS.includes(personal.name)
