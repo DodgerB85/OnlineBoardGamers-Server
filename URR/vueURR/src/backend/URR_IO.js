@@ -374,6 +374,8 @@ export async function loadRewind() {
 		store.gameMessages.errorText = "Reset your uncommitted turn before rewinding a saved turn."
 		return
 	}
+	if (store.viewSettings.performingRewind || store.viewSettings.showLoader || store.viewSettings.isSaving || store.viewSettings.showReplay) return
+	if (!window.confirm("Rewind the previous saved turn? This will undo that turn for all players.")) return
 	const personal = usePersonalStore()
 	const wasHalted = personal.haltPlay
 	personal.haltPlay = true

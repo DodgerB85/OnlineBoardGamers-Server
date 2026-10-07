@@ -1,4 +1,5 @@
 <script setup>
+import PlayerMarker from "./PlayerMarker.vue"
 import ArtworkCard from "./ArtworkCard.vue"
 import { computed } from "vue"
 import * as rf from "../js/URRreference"
@@ -17,10 +18,6 @@ const visibleStates = computed(() => {
 	return id === null ? [] : [store.states[id]]
 })
 function landCount(stateId) { return store.board.areas.filter((area) => area.state === stateId && area.markerOwner !== null).length }
-function kingName(state) {
-	if (state.king === null) return state.isActive ? "No monarch" : "No ownership leader"
-	return `${state.isActive ? '' : 'Leading: '}${store.players[state.king].displayName}`
-}
 function isCurrentState(stateId) { return view.currentStateId(store) === stateId }
 function landowners(stateId) { return store.players.map((player, index) => ({ index, name: player.displayName, count: rules.ownedLand(store, stateId, index).length })).filter((owner) => owner.count > 0).sort((a, b) => b.count - a.count) }
 
@@ -58,7 +55,7 @@ function crewTiles(capacity) { return capacity === "1+1" ? ["1", "1"] : [capacit
 				<span class="stateSummary">
 					<span v-if="store.viewSettings.inspectedState !== null" class="stateMeta inspectionLabel">Inspecting state</span>
 					<span class="stateName"><b>{{ rf.STATE_NAMES[state.id] }}</b><button v-if="store.viewSettings.inspectedState !== null" class="followState" @click.prevent="store.viewSettings.inspectedState = null">{{ view.currentStateId(store) === null ? 'Close' : 'Follow turn' }}</button></span>
-					<span class="stateMeta" :title="kingName(state)">{{ kingName(state) }}<template v-if="state.isActive"> · {{ landCount(state.id) }} colonized</template></span>
+					<span class="stateMeta"><template v-if="state.king !== null">{{ state.isActive ? 'Monarch:' : 'Leading:' }} <PlayerMarker :index="state.king" /></template><template v-else>{{ state.isActive ? 'No monarch' : 'No ownership leader' }}</template><template v-if="state.isActive"> · {{ landCount(state.id) }} colonized</template></span>
 					<span v-if="!state.isActive" class="stateMeta">{{ landCount(state.id) }}/{{ rf.LAND_FOR_STATE_TO_ACTIVATE }} colonized</span>
 					<span v-if="state.isActive" class="stateMeta summaryTreasury">Treasury {{ state.money }} SPL</span>
 				</span>
@@ -95,19 +92,19 @@ function crewTiles(capacity) { return capacity === "1+1" ? ["1", "1"] : [capacit
 
 <style scoped>
 .stateStrip { display: flex; flex-direction: column; align-items: stretch; gap: 6px; width: 100%; margin: 0; padding: 0; box-sizing: border-box; }
-.stateCard { min-width: 0; background: #f7f5ef; border: 1px solid var(--state-color, #8e805e); border-left: 3px solid var(--state-color, #8e805e); border-radius: 4px; text-align: left; font-size: 12px; overflow: hidden; }
-.stateCard > summary { display: flex; align-items: stretch; gap: 7px; min-height: 52px; list-style: none; cursor: pointer; }.stateCard > summary::-webkit-details-marker { display: none; }.treasuryHeader { flex: 0 0 36px; width: 36px; padding: 8px 0 8px 7px; }.treasuryHeader img { width: 100%; height: auto; display: block; }.stateSummary { display: flex; flex-direction: column; justify-content: center; min-width: 0; gap: 2px; padding: 4px 4px 4px 0; }.stateName { display: flex; align-items: center; gap: 4px; }.stateName b { font-size: 13px; }.stateMeta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #53616a; font-size: 11px; }.orderNumber { margin-left: auto; color: #58636a; }
+.stateCard { min-width: 0; background: #f7f5ef; border: 1px solid var(--state-color, #8e805e); border-left: 3px solid var(--state-color, #8e805e); border-radius: 4px; text-align: left; font-size: 16px; font-weight: 600; overflow: hidden; }
+.stateCard > summary { display: flex; align-items: stretch; gap: 7px; min-height: 52px; list-style: none; cursor: pointer; }.stateCard > summary::-webkit-details-marker { display: none; }.treasuryHeader { flex: 0 0 36px; width: 36px; padding: 8px 0 8px 7px; }.treasuryHeader img { width: 100%; height: auto; display: block; }.stateSummary { display: flex; flex-direction: column; justify-content: center; min-width: 0; gap: 2px; padding: 4px 4px 4px 0; }.stateName { display: flex; align-items: center; gap: 4px; }.stateName b { font-size: 16px; font-weight: 600; }.stateMeta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #53616a; font-size: 16px; font-weight: 600; }.orderNumber { margin-left: auto; color: #58636a; }
 .treasuryChart { position: relative; }.treasuryChart img { width: 100%; display: block; }.chartColumn { position: absolute; top: 38%; bottom: 5%; width: 30%; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; text-align: center; overflow: auto; }
-.treasury { left: 1%; }.diggers { left: 35%; flex-direction: row; flex-wrap: wrap; align-content: flex-start; }.harvest { right: 1%; }.chartColumn b { font-size: 25px; }.crewTile { position: relative; width: 29px; height: 29px; }.crewTile img { width: 100%; height: 100%; object-fit: contain; }.crewTile span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 11px; font-weight: bold; text-shadow: 0 1px 2px white, 1px 0 white, -1px 0 white; }.crewTile.used { opacity: .5; }.crewTile.splitCrew { display: flex; gap: 2px; flex: 0 1 42px; width: 42px; max-width: 100%; min-width: 0; }.crewTile.splitCrew img { width: calc(50% - 1px); }.stateFoot, .inactiveDetails { padding: 5px 7px; color: #53616a; }.inactiveDetails { border-top: 1px solid #ded9cc; }
+.treasury { left: 1%; }.diggers { left: 35%; flex-direction: row; flex-wrap: wrap; align-content: flex-start; }.harvest { right: 1%; }.chartColumn b { font-size: 25px; }.crewTile { position: relative; width: 29px; height: 29px; }.crewTile img { width: 100%; height: 100%; object-fit: contain; }.crewTile span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 16px; font-weight: bold; text-shadow: 0 1px 2px white, 1px 0 white, -1px 0 white; }.crewTile.used { opacity: .5; }.crewTile.splitCrew { display: flex; gap: 2px; flex: 0 1 42px; width: 42px; max-width: 100%; min-width: 0; }.crewTile.splitCrew img { width: calc(50% - 1px); }.stateFoot, .inactiveDetails { padding: 5px 7px; color: #53616a; }.inactiveDetails { border-top: 1px solid #ded9cc; }
 .currentState { box-shadow: 0 0 0 2px #45a7df; }.stateDetails { border-top: 1px solid #ded9cc; }
 .stateNations { display: grid; gap: 5px; padding: 0 6px; }.stateNations img { width: 100%; }.stateCard > summary:focus-visible { outline: 2px solid #177daf; outline-offset: -2px; }
 .nationInventory { margin: 0 6px; border-top: 1px solid #ded9cc; }.nationInventory > summary { cursor: pointer; padding: 6px 0; }.nationInventory .stateNations { padding: 0 0 6px; }
-.followState { margin-left: auto; font: inherit; font-size: 11px; cursor: pointer; }
+.followState { margin-left: auto; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }
 .stateCard[open] .summaryTreasury { display: none; }.stateMeta.inspectionLabel { color: #145575; }
 .landowners { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; padding: 6px; border-top: 1px solid #ded9cc; }.landowners small { width: 100%; color: #53616a; }.landowners button { font: inherit; color: inherit; cursor: pointer; background: #fffdf5; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #c4b894; border-radius: 3px; padding: 3px; }.landowners img { width: 25px; height: 25px; }.landowners .monarch { border-color: #527349; background: #edf5e4; }
-@media (max-width: 1050px) { .followState { min-height: 40px; font-size: 12px; padding: 4px 8px; }.landowners button { min-width: 40px; min-height: 40px; } }
+@media (max-width: 1050px) { .followState { min-height: 40px; font-size: 16px; font-weight: 600; padding: 4px 8px; }.landowners button { min-width: 40px; min-height: 40px; } }
 .landowners button.inspected { outline: 2px solid #177daf; }
-.chartColumn.diggers.crewCount { flex-direction: column; flex-wrap: nowrap; align-content: normal; overflow: hidden; }.crewInventory { margin: 0 6px; border-top: 1px solid #ded9cc; }.crewInventory summary { cursor: pointer; padding: 6px 0; }.crewInventoryGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; padding-bottom: 6px; }.crewInventoryItem { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 5px; background: #fffdf5; border: 1px solid #ded9cc; border-radius: 3px; }.crewInventoryItem small { font-size: 11px; }.crewInventoryItem .crewTile.splitCrew { flex-basis: auto; }
+.chartColumn.diggers.crewCount { flex-direction: column; flex-wrap: nowrap; align-content: normal; overflow: hidden; }.crewInventory { margin: 0 6px; border-top: 1px solid #ded9cc; }.crewInventory summary { cursor: pointer; padding: 6px 0; }.crewInventoryGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; padding-bottom: 6px; }.crewInventoryItem { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 5px; background: #fffdf5; border: 1px solid #ded9cc; border-radius: 3px; }.crewInventoryItem small { font-size: 16px; font-weight: 600; }.crewInventoryItem .crewTile.splitCrew { flex-basis: auto; }
 @media (max-width: 1050px) { .crewInventory summary { min-height: 40px; box-sizing: border-box; padding: 12px 0; } }
 @media (max-width: 1050px) { .nationInventory > summary { min-height: 40px; box-sizing: border-box; padding: 12px 0; } }
 </style>

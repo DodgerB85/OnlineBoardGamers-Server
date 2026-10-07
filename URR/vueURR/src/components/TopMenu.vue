@@ -1,4 +1,5 @@
 <script setup>
+import PlayerMarker from "./PlayerMarker.vue"
 import { onMounted, onBeforeUnmount, ref } from "vue"
 import * as rf from "../js/URRreference"
 import * as view from "../js/URRview"
@@ -77,16 +78,10 @@ function toggleReplay() {
 	store.viewSettings.showReplay = !store.viewSettings.showReplay
 }
 
-// Practice games have no votes to cast, so rewind straight from the menu.
+// Practice games have no votes to cast; loadRewind confirms before saving.
 function loadRewind() {
 	if (!personal.trainingGame) store.viewSettings.showRewindPanel = !store.viewSettings.showRewindPanel
-	else {
-		if (store.viewSettings.performingRewind) return
-		store.viewSettings.performingRewind = true
-		setTimeout(() => {
-			IO.loadRewind()
-		}, 500)
-	}
+	else IO.loadRewind()
 }
 
 function nextGame() {
@@ -182,15 +177,15 @@ function getKickoutTimerText() {
 				| Turn: {{ store.gameflow.turn }} - {{ view.phaseStr(store.gameflow.phase) }}
 			</span>
 			<div class="playerLineDiv">
-				<template v-for="(playerIndex, idx) in store.gameflow.turnOrder" :key="idx">
-					<span v-if="playerIndex !== -1" class="mainEntryPlayer turnOrderSpan" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ store.players[playerIndex].displayName }}</span>
+				<template v-for="(playerIndex, idx) in view.displayedTurnOrder(store)" :key="idx">
+					<span v-if="playerIndex !== -1" class="mainEntryPlayer turnOrderSpan" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)"><PlayerMarker :index="playerIndex" /></span>
 				</template>
 			</div>
 		</div>
 
 		<div id="topRight">
 			<div id="loggedInDiv" v-if="personal.name">
-				{{ personal.name }}
+				<PlayerMarker v-if="personal.pov >= 0" :index="personal.pov" /><span v-else :title="personal.name">Spectator</span>
 				<div id="WSstatus" v-if="personal.pov >= 0" :class="personal.WSstatus"></div>
 				<br alt="" />
 				<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
@@ -265,10 +260,10 @@ function getKickoutTimerText() {
 	color: lightblue;
 }
 .topMenuItem img { width: 38px; height: 38px; }
-.topMenuItem span { font-size: 14px; font-weight: bold; display: block; }
+.topMenuItem span { font-size: 16px; font-weight: bold; display: block; }
 
-#topRight { flex-shrink: 0; height: 100%; font-size: 14px; text-align: center; margin-right: 5px; }
-#zoomDiv { display: flex; justify-content: flex-end; gap: 4px; margin-top: 3px; }#zoomDiv button { min-height: 25px; font: inherit; font-size: 12px; cursor: pointer; }#zoomDiv button:disabled { opacity: .4; cursor: default; }
+#topRight { flex-shrink: 0; height: 100%; font-size: 16px; font-weight: 600; text-align: center; margin-right: 5px; }
+#zoomDiv { display: flex; justify-content: flex-end; gap: 4px; margin-top: 3px; }#zoomDiv button { min-height: 25px; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }#zoomDiv button:disabled { opacity: .4; cursor: default; }
 #topInfos { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; min-width: fit-content; flex-shrink: 0; margin: 0 auto; }
 .menuDivider { display: inline-block; width: 5px; height: 50px; background-color: darkgray; margin: 0px 10px 0px 10px; }
 .turnOrderSpan { display: inline-block; padding: 5px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }

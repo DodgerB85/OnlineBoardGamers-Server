@@ -24,8 +24,8 @@ function markerPosition(type) {
 
 <style scoped>
 .marketPanel { width: 100%; background: #fff9e9; border: 1px solid #aa9b77; border-radius: 5px; overflow: hidden; text-align: left; box-sizing: border-box; }
-.marketHeading { display: flex; justify-content: space-between; gap: 8px; padding: 7px 10px; font-size: 13px; }.marketHeading span { color: #736950; font-size: 11px; }
-svg { display: block; width: 100%; }.priceSummary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 0 10px 7px; }.terrainPrice { display: grid; gap: 5px; }.landPrice { display: flex; align-items: center; gap: 7px; }.terrainPrice img { width: 35px; height: 35px; border-radius: 3px; }.terrainPrice b { font-size: 18px; }.terrainPrice small { display: block; font-size: 11px; color: #736950; }.marketHeading small { font-weight: normal; }.printedTrack { border-top: 1px solid #d8ceb5; }.printedTrack summary { cursor: pointer; padding: 4px 10px; font-size: 11px; color: #736950; }
-.terrainPrice small, .marketHeading span, .printedTrack summary { font-size: 12px; }
+.marketHeading { display: flex; justify-content: space-between; gap: 8px; padding: 7px 10px; font-size: 16px; font-weight: 600; }.marketHeading span { color: #736950; font-size: 16px; font-weight: 600; }
+svg { display: block; width: 100%; }.priceSummary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 0 10px 7px; }.terrainPrice { display: grid; gap: 5px; }.landPrice { display: flex; align-items: center; gap: 7px; }.terrainPrice img { width: 35px; height: 35px; border-radius: 3px; }.terrainPrice b { font-size: 18px; }.terrainPrice small { display: block; font-size: 16px; font-weight: 600; color: #736950; }.marketHeading small { font-weight: normal; }.printedTrack { border-top: 1px solid #d8ceb5; }.printedTrack summary { cursor: pointer; padding: 4px 10px; font-size: 16px; font-weight: 600; color: #736950; }
+.terrainPrice small, .marketHeading span, .printedTrack summary { font-size: 16px; font-weight: 600; }
 @media (max-width: 1050px) { .printedTrack summary { min-height: 40px; display: flex; align-items: center; gap: 6px; box-sizing: border-box; }.printedTrack summary::before { content: '\25B8'; }.printedTrack[open] summary::before { content: '\25BE'; } }
 </style>

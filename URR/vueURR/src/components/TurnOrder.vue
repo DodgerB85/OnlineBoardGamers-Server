@@ -7,6 +7,7 @@ import * as assets from "../js/URRassets"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
 const emit = defineEmits(["inspect", "browseStates"])
+const currentPlayer = computed(() => view.displayedTurnOrder(store)[0])
 const isGameOver = computed(() => store.gameflow.phase === rf.PHASE_GAME_OVER)
 const playerOrder = computed(() => {
 	if (isGameOver.value) return store.gameflow.finalPositions
@@ -51,7 +52,7 @@ function browseEmergingStates(event) {
 		details.scrollIntoView({ block: "nearest", behavior: "instant" })
 	})
 }
-watch([() => store.gameflow.turnOrder[0], () => store.gameflow.phase, () => currentState.value], () => {
+watch([() => currentPlayer.value, () => store.gameflow.phase, () => currentState.value], () => {
 	store.viewSettings.inspectedPlayer = null
 	store.viewSettings.showOwnedLand = false
 	store.viewSettings.inspectedState = null
@@ -62,8 +63,8 @@ watch([() => store.gameflow.turnOrder[0], () => store.gameflow.phase, () => curr
 	<section class="turnOrder" aria-label="Turn order">
 		<div class="orderRow" role="group" :aria-label="isGameOver ? 'Final standings' : 'Player order'">
 			<b class="orderLabel">{{ isGameOver ? 'Standings' : 'Players' }}</b>
-			<button v-for="(index, position) in playerOrder" :key="index" :class="{ current: !isGameOver && store.gameflow.turnOrder[0] === index, opportunity: exchangeOwner === index, inspected: store.viewSettings.inspectedPlayer === index }" :title="exchangeOwner === index ? `${store.players[index].displayName}: optional Barahshum canal exchange` : store.players[index].displayName" :aria-current="!isGameOver && store.gameflow.turnOrder[0] === index ? 'step' : undefined" :aria-pressed="store.viewSettings.inspectedPlayer === index" @click="inspectPlayer(index)">
-				<span class="position">{{ position + 1 }}</span><img :src="assets.getPlayerMarkerImage(index)" alt="" /><span>{{ store.players[index].displayName }}<small>{{ isGameOver ? store.players[index].score : store.players[index].money }} SPL{{ isGameOver ? ' assets' : '' }}</small><small v-if="exchangeOwner === index" class="exchangeCue">Barahshum</small></span><img v-if="!isGameOver && store.gameflow.primogeniture === index" class="birthright" :src="assets.primogenitureImage" alt="Primogeniture" title="Primogeniture" />
+			<button v-for="(index, position) in playerOrder" :key="index" class="playerOrderButton" :class="{ current: !isGameOver && currentPlayer === index, opportunity: exchangeOwner === index, inspected: store.viewSettings.inspectedPlayer === index }" :title="exchangeOwner === index ? `${store.players[index].displayName}: optional Barahshum canal exchange` : store.players[index].displayName" :aria-current="!isGameOver && currentPlayer === index ? 'step' : undefined" :aria-pressed="store.viewSettings.inspectedPlayer === index" @click="inspectPlayer(index)">
+				<span class="position">{{ position + 1 }}</span><img :src="assets.getPlayerMarkerImage(index)" alt="" /><span>{{ store.players[index].displayName }}<small>{{ isGameOver ? store.players[index].score : store.players[index].money }} SPL{{ isGameOver ? ' assets' : '' }}</small><small v-if="store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS && rules.availableMoney(store, index) < store.players[index].money" :title="`${store.players[index].money} SPL total; only highest bids reserve money`">{{ rules.availableMoney(store, index) }} available · {{ store.players[index].money - rules.availableMoney(store, index) }} reserved</small><small v-if="exchangeOwner === index" class="exchangeCue">Barahshum</small></span><img v-if="!isGameOver && store.gameflow.primogeniture === index" class="birthright" :src="assets.primogenitureImage" alt="Primogeniture" title="Primogeniture" />
 			</button>
 			<button class="overviewToggle" :aria-expanded="store.viewSettings.showOverview" @click="store.viewSettings.showOverview = !store.viewSettings.showOverview">Overview</button>
 			<span class="phaseLabel">Turn {{ store.gameflow.turn }} · {{ view.phaseStr(store.gameflow.phase) }} · Era {{ store.era === 5 ? 'M' : store.era }}<b v-if="store.gameflow.endReason && !isGameOver" class="finalRound">Final round</b></span>
@@ -83,10 +84,13 @@ watch([() => store.gameflow.turnOrder[0], () => store.gameflow.phase, () => curr
 <style scoped>
 .turnOrder { max-width: 1510px; margin: 10px auto 0; padding: 0 12px; box-sizing: border-box; text-align: left; }
 .orderRow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 6px 8px; background: #f7f0dd; border: 1px solid #b3a481; }.orderRow:first-child { border-radius: 5px 5px 0 0; }.orderRow + .orderRow { border-top: 0; border-radius: 0 0 5px 5px; }
-.orderLabel { width: 87px; font-size: 12px; }.orderRow button { display: inline-flex; align-items: center; gap: 5px; text-align: left; font: inherit; font-size: 13px; padding: 4px 7px; border: 1px solid #b3a481; border-radius: 4px; background: #fffdf5; color: #302f27; cursor: pointer; }.orderRow button img { width: 29px; height: 29px; }.orderRow button { max-width: 100%; box-sizing: border-box; }.orderRow button > span:not(.position) { display: block; min-width: 0; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.orderRow button small { display: block; font-size: 11px; color: #625940; }.orderRow button.current { border: 2px solid #527349; background: #edf5e4; padding: 3px 6px; }.orderRow button.inspected { outline: 2px solid #177daf; }.orderRow button .birthright { width: 33px; height: 23px; object-fit: contain; }.position { font-size: 11px; color: #786d54; }.phaseLabel { margin-left: auto; font-size: 13px; }.emptyOrder { font-size: 12px; color: #786d54; }
-.emergingStates { margin-left: auto; font-size: 12px; }.emergingStates summary { cursor: pointer; padding: 5px; }.emergingStates[open] { flex-basis: 100%; }.emergingStates[open] > summary { width: max-content; margin-left: auto; }.emergingStates > div { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 0; border-top: 1px solid #b3a481; }
-.orderRow button.opportunity { border-color: #8758a8; background: #f3eafa; }.orderRow button .exchangeCue { color: #70478e; font-size: 11px; }
+.orderLabel { width: 87px; font-size: 16px; font-weight: 600; }.orderRow button { display: inline-flex; align-items: center; gap: 5px; text-align: left; font: inherit; font-size: 16px; font-weight: 600; padding: 4px 7px; border: 1px solid #b3a481; border-radius: 4px; background: #fffdf5; color: #302f27; cursor: pointer; }.orderRow button img { width: 29px; height: 29px; }.orderRow button { max-width: 100%; box-sizing: border-box; }.orderRow button > span:not(.position) { display: block; min-width: 0; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.orderRow button small { display: block; font-size: 16px; font-weight: 600; color: #625940; }.orderRow button.current { border: 2px solid #527349; background: #edf5e4; padding: 3px 6px; }.orderRow button.inspected { outline: 2px solid #177daf; }.orderRow button .birthright { width: 33px; height: 23px; object-fit: contain; }.position { font-size: 16px; font-weight: 600; color: #786d54; }.phaseLabel { margin-left: auto; font-size: 16px; font-weight: 600; }.emptyOrder { font-size: 16px; font-weight: 600; color: #786d54; }
+.emergingStates { margin-left: auto; font-size: 16px; font-weight: 600; }.emergingStates summary { cursor: pointer; padding: 5px; }.emergingStates[open] { flex-basis: 100%; }.emergingStates[open] > summary { width: max-content; margin-left: auto; }.emergingStates > div { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 0; border-top: 1px solid #b3a481; }
+.orderRow button.opportunity { border-color: #8758a8; background: #f3eafa; }.orderRow button .exchangeCue { color: #70478e; font-size: 16px; font-weight: 600; }
 @media (max-width: 1050px) { .orderRow button { min-height: 40px; }.emergingStates summary { min-height: 40px; box-sizing: border-box; padding: 12px 5px; } }
-.orderRow button.completed { background: #eeeadf; }.orderRow button .doneMark { flex-shrink: 0; color: #527349; font-size: 14px; }
-.finalRound { display: inline-block; margin-left: 8px; padding: 2px 6px; border: 1px solid #a75a24; border-radius: 3px; background: #f6e3cf; color: #663716; font-size: 12px; }
+.orderRow button.completed { background: #eeeadf; }.orderRow button .doneMark { flex-shrink: 0; color: #527349; font-size: 16px; font-weight: 600; }
+.finalRound { display: inline-block; margin-left: 8px; padding: 2px 6px; border: 1px solid #a75a24; border-radius: 3px; background: #f6e3cf; color: #663716; font-size: 16px; font-weight: 600; }
+.orderRow:first-child { align-items: stretch; }
+.orderRow .playerOrderButton { width: 220px; justify-content: flex-start; }
+.orderRow .playerOrderButton small { white-space: normal; }
 </style>

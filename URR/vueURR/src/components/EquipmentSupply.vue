@@ -30,5 +30,5 @@ const nextEra = computed(() => purchaseEra.value > store.era ? purchaseEra.value
 </template>
 
 <style scoped>
-.equipmentSupply { width: 100%; box-sizing: border-box; padding: 8px; border: 2px solid #8e805e; border-radius: 7px; background: #fff9df; text-align: left; font-size: 13px; }.eraCards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }.eraCard { min-width: 0; }.eraCard > span { display: block; margin-bottom: 4px; font-size: 11px; }.currentEra { margin-top: 8px; }.eraTrigger { font-size: 12px; line-height: 1.4; margin: 8px 0; }.allEras { border-top: 1px solid #c4b894; margin-top: 8px; }.allEras summary { padding: 8px 0; cursor: pointer; }
+.equipmentSupply { width: 100%; box-sizing: border-box; padding: 8px; border: 2px solid #8e805e; border-radius: 7px; background: #fff9df; text-align: left; font-size: 16px; font-weight: 600; }.eraCards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }.eraCard { min-width: 0; }.eraCard > span { display: block; margin-bottom: 4px; font-size: 16px; font-weight: 600; }.currentEra { margin-top: 8px; }.eraTrigger { font-size: 16px; font-weight: 600; line-height: 1.4; margin: 8px 0; }.allEras { border-top: 1px solid #c4b894; margin-top: 8px; }.allEras summary { padding: 8px 0; cursor: pointer; }
 </style>
