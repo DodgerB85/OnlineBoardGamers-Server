@@ -231,11 +231,11 @@ body {
 	font-size: 16px;
 }
 
-#app { display: flex; flex-direction: column; min-height: 100vh; }
+#app { display: flex; flex-direction: column; min-width: 1400px; min-height: 100vh; }
 #app > #footer { flex-shrink: 0; }
 
 #wholeMiddleArea {
-	flex: 1;
+	flex: 1 0 auto;
 	width: 100%;
 	min-width: 1400px;
 	text-align: center;
@@ -287,7 +287,6 @@ body {
 .welcomeHelper button { position: absolute; right: 0; }
 
 /* Nation selection uses the middle of the screen; the map remains a reference. */
-#wholeMiddleArea.nationDivision { min-width: 0; }
 .nationDivision .turnOrder .phaseLabel, .nationDivision .turnOrder > .orderRow + .orderRow { display: none; }
 #mainAreaLessHistory.nationDivisionLayout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 10px; max-width: 1800px; }
 .nationDivisionLayout .actionSidebar { grid-column: 1; grid-row: 1 / span 2; position: static; max-height: none; overflow: visible; padding: 10px; }
@@ -305,8 +304,6 @@ body {
 .mapPreviewHeader { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; margin-bottom: 8px; }
 .mapPreviewViewport { overflow: auto; min-height: 0; }
 .mapPreviewViewport:focus-visible { outline: 2px solid #177daf; }
-@media (max-width: 1100px) { #mainAreaLessHistory.nationDivisionLayout { grid-template-columns: minmax(0, 1fr) 220px; }.nationDivisionLayout .stateSidebar .relevantNationArtwork { display: none; } }
-@media (max-width: 760px) { #mainAreaLessHistory.nationDivisionLayout { grid-template-columns: minmax(0, 1fr); }.nationDivisionLayout .actionSidebar { grid-column: 1; grid-row: 1; }.nationDivisionLayout .mapContainer { grid-column: 1; grid-row: 2; max-width: 350px; }.nationDivisionLayout .stateSidebar { grid-column: 1; grid-row: 3; }.nationDivision .welcomeHelper { margin: 8px 12px 0; } }
 
 /* One appearance for action buttons across panels and previews. */
 :is(#app, dialog) button:not(.topMenuItem) { box-sizing: border-box; min-height: 34px; padding: 5px 8px; border: 1px solid #998a67; border-radius: 3px; background: #fffdf4; color: #302f27; font-family: Arial, sans-serif; font-size: 16px; font-weight: 600; line-height: 1.2; opacity: 1; cursor: pointer; }
