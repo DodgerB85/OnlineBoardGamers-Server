@@ -1,6 +1,8 @@
 import * as rf from "./URRreference"
 import * as model from "./URRmodel"
 import * as IO from "../backend/URR_IO"
+import { getBotAction } from "./URRgame.js"
+import { canExchangeBarahshum } from "./URRrules.js"
 import { currentStateId, phaseStr } from "./URRview.js"
 import { endsDecision, defaultEndAction, describeAction, actionSummary } from "./URRturnDraft.js"
 import { getAutomaticAction, canExchangeBarahshum } from "./URRrules.js"
@@ -135,4 +137,45 @@ export function timedOutPlayerObj() {
 	const store = useModelStore()
 	const idx = store.gameflow.turnOrder[0]
 	return store.players[idx] || { name: "" }
+}
+
+export function botTurnPlayerIndex() {
+	const store = useModelStore()
+	const current = currentPlayerIndex()
+	for (let offset = 1; offset <= store.players.length; offset++) {
+		const index = (current + offset) % store.players.length
+		if (!store.players[index].isMissing) return index
+	}
+	return -1
+}
+
+export function canRunBotTurn() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	return personal.pov >= 0 && !personal.haltPlay && !store.viewSettings.showReplay && store.players[currentPlayerIndex()]?.isMissing && botTurnPlayerIndex() === personal.pov
+}
+
+export function getAutomaticBotAction() {
+	if (!canRunBotTurn()) return null
+	try {
+		return getBotAction(model.snapshotState())
+	} catch (error) {
+		useModelStore().gameMessages.actionError = error.message
+		console.error("Unable to choose an abandoned seat's move:", error)
+		return null
+	}
+}
+
+export async function submitBotAction(action) {
+	if (!canRunBotTurn()) return false
+	const store = useModelStore()
+	try {
+		model.performAction(currentPlayerIndex(), action)
+		store.gameMessages.actionError = ""
+	} catch (error) {
+		store.gameMessages.actionError = error.message
+		console.error("Unable to play an abandoned seat's move:", error)
+		return false
+	}
+	return await IO.saveGame(true)
 }

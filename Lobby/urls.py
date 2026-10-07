@@ -19,6 +19,8 @@ from django.urls import path
 from django.views.generic import RedirectView
 
 from . import views
+from .extraStats import extra_stats
+from .momentumViews import game_momentum, nudge_player
 from .views import ActivateAccount, registerView
 
 # app_name = 'Lobby' # Requires Lobby:index etc after everything
@@ -131,6 +133,10 @@ urlpatterns = [
     path("contact/", views.contact, name="contact"),
     path("feedback/", views.feedback, name="feedback"),
     path("stats/", views.stats, name="stats"),
+    path("extraStats", extra_stats, name="extraStats"),
+    path("extraStats/", extra_stats),
+    path("gameMomentum/<int:game_id>/", game_momentum, name="gameMomentum"),
+    path("nudgePlayer/<int:game_id>/", nudge_player, name="nudgePlayer"),
     path("AllTournaments/", views.AllTournaments, name="AllTournaments"),
     path("TGZtournaments/", views.TGZtournaments, name="TGZtournaments"),
     path(

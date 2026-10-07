@@ -550,7 +550,7 @@ function setHarvestTurn(game) {
 		for (let player = 0; player < game.players.length; player++) game.players[player].score = rules.playerAssets(game, player)
 		game.gameflow.phase = rf.PHASE_GAME_OVER
 		game.gameflow.turnOrder = []
-		game.gameflow.finalPositions = Array.from(game.players.keys()).sort((a, b) => game.players[b].score - game.players[a].score)
+		game.gameflow.finalPositions = Array.from(game.players.keys()).filter(index => !game.players[index].isMissing).sort((a, b) => game.players[b].score - game.players[a].score)
 	} else {
 		game.gameflow.turn++
 		beginSettlement(game)
@@ -576,4 +576,41 @@ function harvestAction(game, action) {
 	}
 	game.rain.harvestOrder.shift()
 	setHarvestTurn(game)
+}
+
+// Abandoned seats keep their holdings and indexes. This policy declines optional
+// actions and delegates every mandatory action to the same rules as human moves.
+export function getBotAction(game) {
+	const flow = game.gameflow
+	if (flow.pendingOffer) return { type: "respondOffer", accept: false }
+	const automatic = rules.getAutomaticAction(game)
+	if (automatic) return automatic
+	if ([rf.PHASE_DIVIDING_NATIONS, rf.PHASE_SETTLEMENT].includes(flow.phase)) return { type: "pass" }
+	if (flow.phase === rf.PHASE_DEVELOPMENT) {
+		if (flow.developmentStep === "betweenStates") return { type: "beginDevelopment" }
+		if (flow.developmentStep === "eridu") return { type: "pass" }
+		const state = game.states[flow.stateOrder[flow.stateIndex]]
+		if (!rules.hasMaintenanceCrew(game, state.id) && game.players[state.king].money < rules.maintenanceShortfall(game, state.id)) {
+			const preview = JSON.parse(JSON.stringify(game))
+			const sales = []
+			while (preview.players[state.king].money < rules.maintenanceShortfall(preview, state.id)) {
+				const eligible = preview.board.areas.filter(area => !rules.getMaintenanceSaleError(preview, state.king, area, state.id))
+				if (!eligible.length) break
+				// Highest prices first keep the final surplus below every sale price,
+				// as required by the maintenance rule.
+				eligible.sort((a, b) => rules.landPrice(preview, b) - rules.landPrice(preview, a))
+				const batch = [eligible[0].id]
+				sellLand(preview, state.king, batch)
+				sales.push(batch)
+			}
+			return { type: "resolveMaintenance", sales }
+		}
+		return { type: "endDevelopment" }
+	}
+	if (flow.phase === rf.PHASE_RAINY_SEASON) {
+		if (game.rain.step === "harvest") return { type: "harvest", choice: "distribute" }
+		const choice = waterChoices(game)[0]
+		if (choice) return { type: "allocateWater", area: choice.area, amount: 1 }
+	}
+	return null
 }

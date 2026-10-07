@@ -6,6 +6,7 @@ import { currentStateId, phaseStr } from "./js/URRview"
 import { checkForLatestData } from "./backend/URR_IO"
 import { StartWebSocket } from "./backend/URRwebsocket"
 import { getAutomaticAction, canExchangeBarahshum, harvestAmount, maintenanceShortfall } from "./js/URRrules"
+import { submitAction, getAutomaticBotAction, canRunBotTurn, submitBotAction } from "./js/URRcontroller"
 import { submitAction, endPlayerTurn } from "./js/URRcontroller"
 
 import TopMenu from "./components/TopMenu.vue"
@@ -144,6 +145,15 @@ watch([() => store.gameflow.turn, () => store.gameflow.phase, () => store.gamefl
 		actionPanelBody.value.parentElement.scrollTop = 0
 	}
 })
+const automaticAction = computed(() => {
+	if (store.viewSettings.showLoader || store.viewSettings.isSaving || store.viewSettings.performingRewind) return null
+	return personal.canPlay() ? getAutomaticAction(store) : getAutomaticBotAction()
+})
+watch(automaticAction, (action) => {
+	if (!action) return
+	if (canRunBotTurn()) submitBotAction(action)
+	else submitAction(action)
+}, { immediate: true, flush: "post" })
 watch(() => store.turnDraft.revision, () => {
 	map.value?.finishDig()
 	selectedArea.value = null

@@ -51,6 +51,8 @@ from Lobby.sharedFunctions.tournyGenerator import (
     multiGamePlayersRound2,
 )
 
+from Lobby.sharedFunctions.hotStreaks import get_hot_streak
+
 NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND = ["FCMtourneyAdmin", "TGZtourneyAdmin"]
 
 
@@ -247,6 +249,7 @@ def SF_serializeGame(game, user, player_context):
     )
 
     return {
+        "hotStreak": get_hot_streak(game) if user and user.is_authenticated and user.profile.hotStreakEnabled and game.maxPlayers > 1 and not any(name in rf.SHADOW_USERNAMES for name in all_usernames) else None,
         "gameID": game.id,
         "gameName": gameName,
         "gameDescription": game.gameDescription,

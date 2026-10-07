@@ -23,6 +23,9 @@ export const usePersonalStore = defineStore("personal", () => {
 	var secondsToNextKickout = 99999
 	var statsExcludedGame = false
 	var kickoutRequired = 0
+	var kickoutFlexiData = []
+	var kickoutSecondsRemaining = 99999
+	var kickoutTimerUpdatedAt = 0
 	var notes = ""
 	var yourTurnAudioType = 0
 	var chatNotification = false
@@ -34,7 +37,7 @@ export const usePersonalStore = defineStore("personal", () => {
 		if (this.haltPlay || store.turnDraft.ready) return false
 		if (store.viewSettings.showReplay) return false
 		if (store.gameflow.phase === rf.PHASE_GAME_OVER) return false
-		if (this.pov < 0) return false
+		if (this.pov < 0 || store.players[this.pov]?.isMissing) return false
 		if (rf.SUPER_USERS.includes(this.name)) return true
 		if (this.trainingGame) return true
 		return this.pov === store.gameflow.turnOrder[0]
@@ -42,7 +45,7 @@ export const usePersonalStore = defineStore("personal", () => {
 
 	function canResign() {
 		if (store.gameflow.phase === rf.PHASE_GAME_OVER) return false
-		if (this.pov < 0) return false
+		if (this.pov < 0 || store.players[this.pov]?.isMissing) return false
 		if (this.trainingGame) return false
 		if (this.soloGame) return false
 		if (this.canPlay() && store.gameflow.turnOrder[0] === this.pov) return true
@@ -78,6 +81,9 @@ export const usePersonalStore = defineStore("personal", () => {
 		secondsToNextKickout,
 		statsExcludedGame,
 		kickoutRequired,
+		kickoutFlexiData,
+		kickoutSecondsRemaining,
+		kickoutTimerUpdatedAt,
 		notes,
 		yourTurnAudioType,
 		chatNotification,

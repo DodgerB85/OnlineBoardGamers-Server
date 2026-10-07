@@ -1,4 +1,5 @@
 <script setup>
+import TurnNudge from "../../../../Lobby/frontend/TurnNudge.vue"
 /** Action area - This is where you interact with the game flow.
  * Confirm actions, end turn, reset turn.
  * Also, it's where you're told what to do next
@@ -461,6 +462,7 @@ function skipModuleAndEndTurn() {
 							<br />
 
 							<br />
+							<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame && !personal.tutorial" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 							<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("actionArea.notNowAllowMoreTime") }}</button></span>
 							<span v-if="store.gameflow.phase !== rf.PHASE_SETUP_RESTAURANT1 && store.gameflow.phase !== rf.PHASE_SETUP_RESTAURANT2">
 								<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("actionArea.keepName", { name: kickoutTargetObj.name }) }}</button>
@@ -480,6 +482,7 @@ function skipModuleAndEndTurn() {
 							{{ $t("actionArea.gracePeriodNote") }}
 
 							<br />
+							<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame && !personal.tutorial" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 							<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("actionArea.notNowAllowMoreTime") }}</button></span>
 							<span>
 								<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout(timedOutPlayerIndex)">{{ $t("actionArea.permanentlyKickout", { name: kickoutTargetObj.name }) }}</button>
@@ -522,6 +525,7 @@ function skipModuleAndEndTurn() {
 							</i18n-t>
 							<br />
 						</span>
+						<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame && !personal.tutorial" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 						<span>
 							<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("actionArea.notNowAllowMoreTime") }}</button>
 						</span>

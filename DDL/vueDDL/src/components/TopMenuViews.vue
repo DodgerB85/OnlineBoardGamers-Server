@@ -1,4 +1,5 @@
 <script setup>
+import TurnNudge from "../../../../Lobby/frontend/TurnNudge.vue"
 import * as view from "../js/DDLview"
 import * as rf from "../js/DDLreference"
 import * as IO from "../backend/DDL_IO"
@@ -91,6 +92,7 @@ function localCastVote(topic) {
 </script>
 
 <template>
+		<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame && store.gameflow.phase !== rf.PHASE_GAME_OVER" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 	<!-- BUG REPORT -->
 	<div id="bugReport" v-if="store.viewSettings.showBug">
 		<h1>Bug Report</h1>

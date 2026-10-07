@@ -34,8 +34,14 @@ export function getNextCurrentPlayers() {
 	}
 
 	const allIsCurrentPlayers = []
-	if (store.gameflow.turnOrder.length > 0) allIsCurrentPlayers.push(store.players[store.gameflow.turnOrder[0]].name)
-	const allRemainingPlayersInTurnOrder = store.gameflow.turnOrder.map((idx) => store.players[idx].name)
+	if (store.gameflow.turnOrder.length > 0) {
+		const currentPlayer = store.players[store.gameflow.turnOrder[0]]
+		// One remaining player persists bot moves so concurrent clients do not race.
+		const actingPlayer = currentPlayer.isMissing ? store.players[controller.botTurnPlayerIndex()] : currentPlayer
+		if (!actingPlayer) throw new Error("No active player remains to continue this game")
+		allIsCurrentPlayers.push(actingPlayer.name)
+	}
+	const allRemainingPlayersInTurnOrder = store.gameflow.turnOrder.filter(idx => !store.players[idx].isMissing).map((idx) => store.players[idx].name)
 	return { allIsCurrentPlayers, allRemainingPlayersInTurnOrder }
 }
 
@@ -162,7 +168,9 @@ export async function reloadGameData() {
 		if (!response.ok) throw new Error("Network response was not ok")
 		const data = await response.json()
 		if (store.viewSettings.showReplay || store.viewSettings.isSaving || store.viewSettings.performingRewind || personal.latestUpdate !== requestedUpdate) return
+		updateKickoutData(data)
 		model.importGameData(data.gameData)
+		model.setMissingPlayers(data.missingPlayers)
 		model.rebuildTurnOrder()
 		personal.secondsToNextKickout = data.secondsToNextKickout
 		personal.latestUpdate = data.latestUpdate
@@ -225,6 +233,18 @@ export async function resign() {
 	}
 }
 
+function updateKickoutData(data) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	personal.kickoutRequired = data.kickoutRequired
+	personal.kickoutFlexiData = data.KickoutFlexiDataArray
+	personal.kickoutSecondsRemaining = data.secondsToNextKickout
+	personal.kickoutTimerUpdatedAt = Date.now()
+	store.kickoutVotesData = data.kickoutVotesData
+	store.kickoutVoteThreshold = data.kickoutVoteThreshold
+	model.setMissingPlayers(data.missingPlayers)
+}
+
 export async function kickout() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
@@ -236,23 +256,29 @@ export async function kickout() {
 			body: JSON.stringify({ action: "kickout", gameID: personal.gameID, kickedName: kickedPlayerObj.name, latestUpdate: personal.latestUpdate }),
 			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
 		})
-		if (!response.ok) throw new Error("Network response was not ok")
 		const data = await response.json()
+		if (!response.ok) throw new Error(data.error || "Unable to kick out player")
 		if (data.syncError) {
 			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
 			return
 		}
 		if (data.voteCast) {
-			store.kickoutVotesData = data.votesData
+			store.kickoutVotesData = JSON.parse(data.votesData)
+			store.kickoutVoteThreshold = data.threshold
 			store.gameMessages.successText = "Kickout vote recorded"
 			return data
 		}
+		personal.kickoutRequired = 0
 		personal.latestUpdate = data.latestUpdate
+		window.initData.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
+		model.setMissingPlayers(data.missingPlayers)
+		// Save the abandoned seat without creating a rewind across the kickout.
+		if (!await saveGame(false)) return
 		return data
 	} catch (error) {
 		console.error("Error kicking:", error)
-		rf.doAdminAlrt("Error kicking player")
+		store.gameMessages.errorText = error.message
 	} finally {
 		store.viewSettings.showLoader = false
 	}
@@ -305,8 +331,10 @@ export async function checkForLatestData() {
 			location.reload()
 			return
 		}
+		updateKickoutData(data)
 		if (data.latest === true) return
 		model.importGameData(data.gameData)
+		model.setMissingPlayers(data.missingPlayers)
 		model.rebuildTurnOrder()
 		personal.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout

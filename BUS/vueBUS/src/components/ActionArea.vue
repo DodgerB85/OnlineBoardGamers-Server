@@ -1,4 +1,5 @@
 <script setup>
+import TurnNudge from "../../../../Lobby/frontend/TurnNudge.vue"
 import { ref, watch, onUnmounted } from "vue"
 import * as rf from "../js/BUSreference.js"
 import * as IO from "../backend/BUS_IO"
@@ -449,6 +450,7 @@ onUnmounted(() => {
 				more time - reload the page to initiate kickout again
 				<br />
 				<br />
+				<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
 				<span>
 					<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
@@ -490,6 +492,7 @@ onUnmounted(() => {
 				</span>
 				<br />
 				<br />
+				<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 				<span>
 					<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button>
 				</span>

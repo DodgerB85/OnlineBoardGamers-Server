@@ -90,6 +90,15 @@
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <label class="form-label">{% translate "Daily momentum" %}</label>
+                    <div class="field">
+                        <label><input type="checkbox" name="hotStreakEnabled" {% if request.user.profile.hotStreakEnabled %}checked{% endif %}> {% translate "Show shared game streaks 🔥" %}</label><br>
+                        <label><input type="checkbox" name="hotStreakReminders" {% if request.user.profile.hotStreakReminders %}checked{% endif %}> {% translate "Remind me when a streak is about to expire" %}</label><br>
+                        <label><input type="checkbox" name="receiveTurnNudges" {% if request.user.profile.receiveTurnNudges %}checked{% endif %}> {% translate "Allow other players to nudge me when my turn expires" %}</label>
+                        <p class="" style="font-size: 12px; margin: 0;">{% translate "Any player's turn keeps the daily UTC streak alive. Reminders at 22:00 UTC follow your notification settings when it's your turn. Hiding streaks also disables reminders." %}</p>
+                    </div>
+                </div>
                 <div style="margin-top: 20px; margin-bottom: 8px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-muted);">
                     {% translate "Email Notifications" %}
                 </div>

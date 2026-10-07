@@ -1,0 +1,38 @@
+{% extends "Lobby/layout.html" %}
+{% load static i18n %}
+{% block head %}
+<link href="{% static 'Lobby/CSS/stats.css' %}" rel="stylesheet">
+<link href="{% static 'Lobby/CSS/extraStats.css' %}" rel="stylesheet">
+{% endblock %}
+{% block body %}
+<div class="page" id="extraStatsPage">
+  <div class="page-header"><h1 class="page-title">{% translate "Extra game stats" %}</h1></div>
+  <p><a href="?demo=FCM">{% translate "Preview FCM graphs with synthetic data" %}</a></p>
+  <p>{% translate "Finished multiplayer matches, excluding practice, shadow and stats-excluded games. Refreshed hourly." %}</p>
+  <div class="tab tabs" id="extraStatsGameTabs" role="tablist" aria-label="{% translate 'Games' %}">
+    {% include "Lobby/game_tabs.html" %}
+    <button class="tab tablinks" id="URR" type="button"><img src="{% static 'URR/images/urr_icon.svg' %}" alt="URR game" title="URR Game" class="statsIMG" width="36" height="36"></button>
+    <button class="tab tablinks" id="DDL" type="button"><img src="{% static 'DDL/images/ddl_icon.svg' %}" alt="DDL game" title="DDL Game" class="statsIMG" width="36" height="36"></button>
+  </div>
+  <section class="card section" id="extraStatsPanel" role="tabpanel">
+    <h2 id="extraStatsTitle"></h2>
+    <p id="extraStatsDemo" hidden><strong>{% translate "Synthetic FCM preview — these are example numbers, not real game statistics." %}</strong> <a href="?demo=off">{% translate "Show real data" %}</a></p>
+    <label for="extraStatsPlayers">{% translate "Players" %}</label>
+    <select id="extraStatsPlayers"></select>
+    <p id="extraStatsCoverage" class="stats-hint"></p>
+    <div id="extraStatsCharts"></div>
+    <div class="table-wrap"><table class="extra-stats-table">
+      <thead><tr><th scope="col">{% translate "Metric" %}</th><th scope="col">{% translate "Average" %}</th><th scope="col">{% translate "Median" %}</th><th scope="col">{% translate "Samples" %}</th></tr></thead>
+      <tbody id="extraStatsValues"></tbody>
+    </table></div>
+    <details class="extra-stats-notes"><summary>{% translate "How to read these numbers" %}</summary>
+      <p>{% translate "Game duration runs from the first real history timestamp to the last. Lobby wait runs from creation to the first timestamp; setup entries at creation are ignored. This is elapsed wall time, including nights and pauses." %}</p>
+      <p>{% translate "Recorded actions count history entries assigned to player seats, including automatic events assigned to a player. They are not necessarily submitted turns. Each player in each match contributes one sample; system entries have no player seat and are excluded." %}</p>
+      <p>{% translate "Action gaps use distinct player-action timestamps, so simultaneous or automatically generated entries at the same time do not inflate the sample. Gaps measure match inactivity, not an individual player's thinking time." %}</p>
+      <p>{% translate "Older or unsupported histories with missing or inconsistent timestamps are excluded from history-based timing metrics. Their action counts can still be included. DDL histories currently have no timestamps." %}</p>
+    </details>
+  </section>
+</div>
+{{ extra_stats|json_script:"extraStatsData" }}
+<script src="{% static 'Lobby/extraStats.js' %}"></script>
+{% endblock %}

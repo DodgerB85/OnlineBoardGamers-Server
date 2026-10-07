@@ -1,4 +1,5 @@
 <script setup>
+import TurnNudge from "../../../../Lobby/frontend/TurnNudge.vue"
 /** This is the MAIN action area for the city
  * It should ONLY contain
  * RESET WHOLE TURN
@@ -822,6 +823,7 @@ function flatmapResourceArray(array) {
 					<br />
 
 					<br />
+					<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow
 							more time</button></span>
 					<span>
@@ -839,6 +841,7 @@ function flatmapResourceArray(array) {
 					Please consider giving them a short grace period, in case they are just delayed
 
 					<br />
+					<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow
 							more time</button></span>
 					<span><button class="actionsLineButton" id="confirmKickoutButton"
@@ -875,6 +878,7 @@ function flatmapResourceArray(array) {
 				</span>
 				<br />
 				<br />
+				<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow
 						more time</button></span>
 				<span>
