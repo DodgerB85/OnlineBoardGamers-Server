@@ -32,6 +32,7 @@ from .modelProxies import (
     RNBgame,
     RNBMainTournament,
     RNBMiniTournament,
+    ROWgame,
     TGZgame,
     TGZMainTournament,
     TGZMiniTournament,
@@ -575,6 +576,15 @@ class DDLgameAdmin(GameAdmin):
 
     class Meta:
         app_label = "DDL"
+
+
+@admin.register(ROWgame)
+class ROWgameAdmin(GameAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="ROW")
+
+    class Meta:
+        app_label = "ROW"
 
 
 @admin.register(HLCgame)

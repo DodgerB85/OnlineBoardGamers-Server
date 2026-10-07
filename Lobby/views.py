@@ -393,6 +393,7 @@ GAME_NAMES_MODELS = {
     "KFW": "KFW",
     "WEB": "WEB",
     "RNB": "RNB",
+    "ROW": "ROW",
 }
 
 
@@ -2516,6 +2517,41 @@ def createDDLpage(request, gameID=0):
         return render(
             request,
             "Lobby/createDDL.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.presenter().getGameName(),
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "startingOptions": loadedStartingOptions,
+                "experienced": experienced,
+            },
+        )
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
+def createROWpage(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "ROW", Game)
+    if request.method != "POST" and gameID == 0:
+        return render(request, "Lobby/createROW.html", {"experienced": experienced})
+    elif request.method != "POST" and gameID != 0:
+        try:
+            currentGame = Game.objects.get(id=gameID, gameCode="ROW")
+        except Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist")) from None
+
+        all_players = currentGame.players.exclude(player=request.user).select_related("player")
+        playerNames = [gp.player.username for gp in all_players if gp.player]
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+
+        messages.success(request, (gettext("Game creation for rematch")))
+        return render(
+            request,
+            "Lobby/createROW.html",
             {
                 "fillData": True,
                 "gameName": currentGame.presenter().getGameName(),

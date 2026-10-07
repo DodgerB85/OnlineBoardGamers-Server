@@ -21,6 +21,7 @@ class ForceTrailingSlashMiddleware:
             "/RNB",
             "/URR",
             "/DDL",
+            "/ROW",
             "/login",
             "/profile",
             "/index",
