@@ -1,4 +1,4 @@
-# Great Western Trail (GWT) Core Rules Engine Specification
+# Great Western Trail (ROW) Core Rules Engine Specification
 
 This document serves as the authoritative source of truth for the game rules, legal actions, state transitions, and evaluation boundaries of Great Western Trail. It is structured specifically for ingest by an AI agent building a rule-enforcement engine.
 

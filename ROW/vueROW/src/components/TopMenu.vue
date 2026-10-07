@@ -1,274 +1,93 @@
-<script setup>
-/**
- * Ranchers of the Old West - top icon bar.
- *
- * Two lines of icons, laid out like vueFCM: a left-floated #menu holding two
- * `.menuRow` blocks of inline-block `.topMenuItem` icons, a right-floated
- * status area, and the game/player info line underneath.
- */
-import * as rf from "../js/ROWreference"
-import * as view from "../js/ROWview"
-import * as IO from "../backend/ROW_IO"
+<script setup lang="ts">
+import { computed } from "vue"
+import { useI18n } from "vue-i18n"
+import { getImage } from "../view/assets"
+import { useGameStore } from "../stores/game"
+import { usePersonalStore } from "../stores/personal"
 
-import { useModelStore } from "../stores/ROWstore.js"
-import { usePersonalStore } from "../stores/ROWpersonal.js"
-const store = useModelStore()
+const { t } = useI18n()
+const store = useGameStore()
 const personal = usePersonalStore()
 
-function clearPanels() {
-	store.gameMessages.bugErrorText = ""
-	store.gameMessages.successText = ""
-	store.gameMessages.errorText = ""
-}
-
-function toggleBug() {
-	clearPanels()
-	store.viewSettings.showNotes = false
-	store.viewSettings.showBug = !store.viewSettings.showBug
-}
-
-function toggleNotes() {
-	store.viewSettings.showBug = false
-	store.viewSettings.showNotes = !store.viewSettings.showNotes
-}
-
-function toggleChat() {
-	store.viewSettings.showHistory = false
-	if (store.viewSettings.showChat) store.viewSettings.showChat = false
-	else {
-		store.viewSettings.showChat = true
-		setTimeout(function () {
-			var el = document.getElementById("wholeChat")
-			var cs = getComputedStyle(el)
-			var b = document.getElementById("footer").getBoundingClientRect().top
-			var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
-			el.style["max-height"] = String(parseInt(b - a)) + "px"
-		}, 50)
-	}
-}
-
-function toggleInfo() {
-	store.viewSettings.showInfo = !store.viewSettings.showInfo
-}
-
-function toggleHistory() {
-	store.viewSettings.showChat = false
-	store.viewSettings.showInfo = false
-	if (store.viewSettings.showHistory) store.viewSettings.showHistory = false
-	else {
-		store.viewSettings.showHistory = true
-		setTimeout(function () {
-			var el = document.getElementById("history")
-			var cs = getComputedStyle(el)
-			var b = document.getElementById("footer").getBoundingClientRect().top
-			var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
-			el.style["max-height"] = String(parseInt(b - a)) + "px"
-		}, 50)
-	}
-}
-
-function toggleReplay() {
-	store.viewSettings.showReplay = !store.viewSettings.showReplay
+function toggle(name: "showChat" | "showNotes" | "showBug" | "showHistory" | "showInfo" | "showReplay") {
+	store.viewSettings[name] = !store.viewSettings[name]
 }
 
 function nextGame() {
-	window.location.href = window.initData.nextURL
+	if (window.initData?.nextURL) window.location.href = window.initData.nextURL
 }
 
-function loadRewind() {
-	if (store.viewSettings.performingRewind) return
-	store.viewSettings.performingRewind = true
-	setTimeout(function () {
-		IO.loadRewind()
-	}, 300)
-}
-
-function resignGame() {
-	if (!personal.canResign()) return
-	if (!window.confirm("Are you sure you want to resign? You will be treated as a missing player.")) return
-	IO.resign()
-	window.location.reload()
-}
-
-function getKickoutTimerText() {
-	if (personal.secondsToNextKickout < 0) personal.secondsToNextKickout = 0
-	let minsToGo = String(Math.floor(personal.secondsToNextKickout / 60))
-	let secsToGo = "0" + String(Math.floor(personal.secondsToNextKickout % 60))
-	return " " + minsToGo + " : " + secsToGo.slice(-2)
-}
+const kickoutText = computed(() => {
+	const s = personal.secondsToNextKickout
+	if (s > 1200) return ""
+	const m = Math.floor(s / 60)
+	const sec = String(s % 60).padStart(2, "0")
+	return `${m} : ${sec}`
+})
 </script>
 
 <template>
 	<div id="top">
 		<div id="menu">
-			<!-- Row 1 -->
 			<div class="menuRow">
 				<a href="/">
-					<span class="topMenuItem">
-						<img :src="view.getImage('icon-house')" />
-						<span>Home</span>
-					</span>
+					<span class="topMenuItem"><img :src="getImage('icon-house')" /><span>{{ t('topMenu.home') }}</span></span>
 				</a>
-
-				<span v-if="personal.name !== undefined" class="topMenuItem" @click="nextGame">
-					<img :src="view.getImage('icon-nextGame')" />
-					<span>Next</span>
-				</span>
-
+				<span class="topMenuItem" @click="nextGame"><img :src="getImage('icon-nextGame')" /><span>{{ t('topMenu.next') }}</span></span>
 				<div class="menuDivider"></div>
-
 				<a href="/ROW/help/" target="_blank">
-					<span class="topMenuItem">
-						<img :src="view.getImage('icon-rulebook')" />
-						<span>Rules</span>
-					</span>
+					<span class="topMenuItem"><img :src="getImage('icon-rulebook')" /><span>{{ t('topMenu.rules') }}</span></span>
 				</a>
-
-				<span :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showInfo }]" @click="toggleInfo">
-					<img :src="view.getImage('icon-info')" />
-					<span>Info</span>
-				</span>
-
-				<div class="menuDivider"></div>
-
-				<span v-if="personal.pov >= 0 && !personal.trainingGame" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showRewindPanel }]" @click="store.viewSettings.showRewindPanel = !store.viewSettings.showRewindPanel">
-					<img :src="view.getImage('icon-rewind')" />
-					<span>Rewind</span>
-				</span>
-
-				<span v-if="personal.canResign()" class="topMenuItem" @click="resignGame">
-					<img :src="view.getImage('resign')" />
-					<span>Resign</span>
+				<span :class="['topMenuItem', { selected: store.viewSettings.showInfo }]" @click="toggle('showInfo')">
+					<img :src="getImage('icon-info')" /><span>{{ t('topMenu.info') }}</span>
 				</span>
 			</div>
-
-			<!-- Row 2 -->
 			<div class="menuRow">
-				<span v-if="personal.name !== undefined" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showChat }]" @click="toggleChat">
-					<img :src="view.getImage('icon-chat')" />
-					<span>Chat</span>
+				<span :class="['topMenuItem', { selected: store.viewSettings.showChat }]" @click="toggle('showChat')">
+					<img :src="getImage('icon-chat')" /><span>{{ t('topMenu.chat') }}</span>
 				</span>
-
-				<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showBug }]" @click="toggleBug">
-					<img :src="view.getImage('icon-stop')" />
-					<span>Bug</span>
+				<span :class="['topMenuItem', { selected: store.viewSettings.showBug }]" @click="toggle('showBug')">
+					<img :src="getImage('icon-stop')" /><span>{{ t('topMenu.bug') }}</span>
 				</span>
-
 				<div class="menuDivider"></div>
-
-				<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showNotes }]" @click="toggleNotes">
-					<img :src="view.getImage('icon-notebook')" />
-					<span>Notes</span>
+				<span :class="['topMenuItem', { selected: store.viewSettings.showNotes }]" @click="toggle('showNotes')">
+					<img :src="getImage('icon-notebook')" /><span>{{ t('topMenu.notes') }}</span>
 				</span>
-
-				<span :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showHistory }]" @click="toggleHistory">
-					<img :src="view.getImage('icon-scroll')" />
-					<span>History</span>
+				<span :class="['topMenuItem', { selected: store.viewSettings.showHistory }]" @click="toggle('showHistory')">
+					<img :src="getImage('icon-scroll')" /><span>{{ t('topMenu.history') }}</span>
 				</span>
-
 				<div class="menuDivider"></div>
-
-				<span :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showReplay }]" @click="toggleReplay">
-					<img :src="view.getImage('icon-replay')" />
-					<span>Replay</span>
+				<span :class="['topMenuItem', { selected: store.viewSettings.showReplay }]" @click="toggle('showReplay')">
+					<img :src="getImage('icon-replay')" /><span>{{ t('topMenu.replay') }}</span>
 				</span>
 			</div>
 		</div>
 
 		<div id="topRight">
-			<div id="loggedInDiv" v-if="personal.name">
-				{{ personal.name }}
-				<div id="WSstatus" v-if="personal.pov >= 0" :class="personal.WSstatus"></div>
-				<br />
-				<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
-					<span id="kickoutTimerSpan">Time to next kickout: <span id="kickoutTimerTimer">{{ getKickoutTimerText() }}</span></span>
-				</template>
-			</div>
+			<div v-if="personal.name">{{ personal.name }}</div>
+			<div v-if="kickoutText">{{ t('topMenu.timeToNextKickout') }} {{ kickoutText }}</div>
 		</div>
 
 		<div id="topInfos">
-			<span class="gameInfoSpan">
-				<span v-html="store.gameName"></span>
-				| Turn: {{ store.gameflow.turn }} - {{ view.phaseStr(store.gameflow.phase) }}
-			</span>
-			<div class="playerLineDiv">
-				<template v-for="(playerIndex, idx) in store.gameflow.turnOrder" :key="idx">
-					<span v-if="playerIndex !== -1" class="mainEntryPlayer turnOrderSpan" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ store.players[playerIndex].displayName }}</span>
-				</template>
-			</div>
+			<span>{{ store.state?.players?.length ?? 0 }} players</span>
+			<span v-if="store.currentPlayer"> | turn by {{ store.currentPlayer }}</span>
+			<span v-if="store.gameMessages.errorText" class="error"> | {{ store.gameMessages.errorText }}</span>
 		</div>
 	</div>
 </template>
 
 <style scoped>
-#WSstatus {
-	border: 2px solid white;
-	border-radius: 100%;
-	width: 15px;
-	height: 15px;
-	display: inline-block;
-	vertical-align: middle;
-}
-.WSconnecting { background-color: #ff9900; }
-.WSconnected { background-color: green; }
-.WSdisconnected { background-color: darkred; }
-
-#top {
-	background-color: #333;
-	color: white;
-	padding: 0px;
-	width: 100%;
-	min-width: 1000px;
-	min-height: 120px;
-	top: 0px;
-	z-index: 2;
-	position: relative;
-	box-sizing: border-box;
-}
-
-#menu { float: left; color: white; padding-top: 2px; }
-#menu a { color: white; }
-#menu a:hover, #menu span:hover { color: lightblue; }
-
+#top { background: #333; color: white; width: 100%; min-width: 900px; min-height: 118px; position: relative; z-index: 2; }
+#menu { float: left; padding-top: 2px; }
+#menu a { color: white; text-decoration: none; }
 .menuRow { display: block; white-space: nowrap; }
-
-.topMenuItem {
-	display: inline-block;
-	width: 62px;
-	height: 52px;
-	border-radius: 5px;
-	cursor: pointer;
-	text-align: center;
-}
-.topMenuItem:hover img {
-	filter: brightness(0) saturate(100%) invert(100%) sepia(17%) saturate(6440%) hue-rotate(174deg) brightness(98%) contrast(102%);
-}
-.topMenuItemSelected {
-	filter: brightness(0) saturate(100%) invert(100%) sepia(17%) saturate(6440%) hue-rotate(174deg) brightness(98%) contrast(102%);
-	color: lightblue;
-}
-.topMenuItem img { width: 34px; height: 34px; }
+.topMenuItem { display: inline-block; width: 62px; height: 50px; border-radius: 5px; cursor: pointer; text-align: center; }
+.topMenuItem:hover span { color: lightblue; }
+.topMenuItem.selected span { color: lightblue; }
+.topMenuItem img { width: 32px; height: 32px; }
 .topMenuItem span { font-size: 13px; font-weight: bold; display: block; }
-
-.menuDivider {
-	display: inline-block;
-	width: 5px;
-	height: 46px;
-	background-color: darkgray;
-	margin: 2px 10px 0px 10px;
-	vertical-align: top;
-}
-
-#topRight { float: right; height: 100%; font-size: 14px; text-align: center; margin-right: 5px; }
-
-#topInfos {
-	clear: both;
-	display: block;
-	text-align: center;
-	font-size: 14px;
-	padding-top: 2px;
-}
-.turnOrderSpan { display: inline-block; padding: 3px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
-.gameInfoSpan { white-space: nowrap; }
-.playerLineDiv { white-space: nowrap; }
+.menuDivider { display: inline-block; width: 5px; height: 44px; background: darkgray; margin: 2px 10px 0 10px; vertical-align: top; }
+#topRight { float: right; font-size: 14px; text-align: center; margin-right: 6px; }
+#topInfos { clear: both; text-align: center; font-size: 14px; padding-top: 4px; }
+.error { color: #ff8080; }
 </style>

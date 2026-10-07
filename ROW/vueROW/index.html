@@ -4,43 +4,26 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="./pakoLib.js"></script>
     <style>
-      body {
-        margin: 0px !important;
-        background-color: #d4eafd;
-        font-family: Arial, sans-serif;
-      }
-      #loadingText {
-        transform: translate(-50%, 0%);
-        position: absolute;
-        font-size: 40px;
-        margin-top: 20px;
-        left: 50%;
-        white-space: nowrap;
-      }
+      body { margin: 0px !important; background-color: #d4eafd; font-family: Arial, sans-serif; }
+      #loadingText { transform: translate(-50%, 0%); position: absolute; font-size: 40px; margin-top: 20px; left: 50%; white-space: nowrap; }
     </style>
-    <script type="module" src="/src/pakoLib.js"></script>
     <title>Ranchers of the Old West App</title>
   </head>
   <body>
-    <noscript>
-      <strong>Please enable Javascript to continue.</strong>
-    </noscript>
-    <div id="app">
-      <div id="loadingText">Ranchers of the Old West is loading.........</div>
-    </div>
-    <script type="module" src="/src/main.js"></script>
+    <noscript><strong>Please enable Javascript to continue.</strong></noscript>
+    <div id="app"><div id="loadingText">Ranchers of the Old West is loading.........</div></div>
+    <script type="module" src="/src/main.ts"></script>
   </body>
   <script>
     var initData = {};
     initData.gameID = 0;
     initData.gameName = "Test Name";
-    initData.gameData = {};
+    initData.gameData = "{}";
     initData.gameCreationTimestamp = 1712906318;
     initData.finishedGame = false;
     initData.startingOptions = [];
-    initData.myZoomLevel = 16;
+    initData.myZoomLevel = 0;
     initData.pov = 0;
     initData.name = "Ross";
     initData.latestUpdate = 1712906318;
@@ -50,7 +33,6 @@
     initData.KickoutFlexiDataArray = [];
     initData.notes = "";
     initData.chatNotification = false;
-    initData.yourTurnAudioType = 1;
     initData.chatData = "";
     initData.nextURL = "";
     initData.playerNames = ["Ross", "Rachel", "Joey"];

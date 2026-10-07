@@ -1,29 +1,13 @@
-<script setup>
+<script setup lang="ts">
 </script>
 
 <template>
 	<div id="footer">
-		<div class="content">
-			<p>
-				Ranchers of the Old West is a board game by Jeroen Doumen and Joris Wiersinga, published by
-				<a target="_blank" href="https://www.splottershop.com/">Splotter Spellen</a>.
-			</p>
-			<p>Permissions provided. Menu icons from <a href="http://game-icons.net">game-icons.net</a></p>
-		</div>
+		<p>Great Western Trail is a board game by Alexander Pfister. Ported to Online Board Gamers.</p>
+		<p>Original code GPL-3.0 (Tom Wetjens / Board Game Fiesta). Artwork attribution in <code>static/ROW/artwork-license.txt</code>.</p>
 	</div>
 </template>
 
 <style scoped>
-#footer {
-	background-color: #333;
-	color: #eee;
-	margin: 0;
-	min-height: 100px;
-	height: fit-content;
-	padding: 10px;
-	position: relative;
-}
-#footer .content { width: 95%; margin: auto; text-align: left; position: relative; }
-#footer img.cover { float: left; height: 90px; margin-right: 10px; }
-#footer a { color: #d4eafd; }
+#footer { background: #333; color: #eee; min-height: 60px; padding: 10px; font-size: 12px; }
 </style>

@@ -1966,6 +1966,15 @@ class DDLpresenter(GamePresenter):
 
 
 class ROWpresenter(GamePresenter):
+    # ROW is a client-owned-rules game: the whole state (including any move data)
+    # is persisted in Game.gameData, so these server-side move-data hooks are
+    # intentionally empty. They exist so the shared show/data endpoints work.
+    def getCurrentMoveDataForPlayer(self, name):
+        return None
+
+    def getAllMyMoveDataForPlayer(self, name):
+        return []
+
     def startGame(self, request):
         from Lobby.models import GamePlayer
 

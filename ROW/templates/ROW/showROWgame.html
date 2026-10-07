@@ -38,8 +38,8 @@
       <script type="module" src="http://localhost:3045/static/@vite/client"></script>
       <script type="module" src="http://localhost:3045/static/main.js"></script>
     {% else %}
-      <link href="{% static 'ROW/ROWvuedist/main.css' %}?" rel="stylesheet" />
-      <script type="module" crossorigin="" src="{% static 'ROW/ROWvuedist/main.js' %}"></script>
+      <link href="{% get_static_prefix %}ROW/ROWvuedist/main.css" rel="stylesheet" />
+      <script type="module" crossorigin="" src="{% get_static_prefix %}ROW/ROWvuedist/main.js"></script>
     {% endif %}
   </head>
   <body>
@@ -69,6 +69,7 @@
     initData.phase = {{ phase }};
     initData.finishedGame = {{ finishedGame|lower }};
     initData.transactionID = "{{ transactionID }}";
+    initData.edition = "FIRST";
 
     {% if spoilerFree %}
     initData.spoilerFree = true;
@@ -86,8 +87,6 @@
     initData.kickoutVotesData = {{ kickoutVotesData|default:'{}'|safe }};
     initData.kickoutVoteThreshold = {{ kickoutVoteThreshold|default:'0' }};
     {% if involvedPlayer %}
-    initData.currentMoveData = {{ currentMoveData|safe }};
-    initData.allMyMoveData = {{ allMyMoveData|safe }};
     initData.statsExcludedGame = {{ statsExcludedGame|lower }};
     initData.secondsToNextKickout = {{ secondsToNextKickout }};
     {% if kickoutRequired > 0 and not myMove %}

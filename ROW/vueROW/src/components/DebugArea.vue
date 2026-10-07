@@ -1,37 +1,22 @@
-<script setup>
-import * as model from "../js/ROWmodel"
-import { useModelStore } from "../stores/ROWstore.js"
-const store = useModelStore()
+<script setup lang="ts">
+import { useGameStore } from "../stores/game"
+
+const store = useGameStore()
 
 function showState() {
-	window.alert(JSON.stringify(model.exportGameData(), null, 2))
+	window.alert(JSON.stringify(store.serialize(), null, 2))
 }
 </script>
 
 <template>
 	<div id="debugArea">
-		<h3>Debug</h3>
-		<div>Phase: {{ store.gameflow.phase }} | Turn: {{ store.gameflow.turn }}</div>
-		<div>Turn order: {{ store.gameflow.turnOrder }}</div>
-		<button class="actionsLineButton" @click="showState">Show game data</button>
+		<h4>Debug</h4>
+		<div>current: {{ store.currentPlayer }} | status: {{ store.state?.status }}</div>
+		<div>actions: {{ store.actions.join(", ") }}</div>
+		<button @click="showState">Show game data</button>
 	</div>
 </template>
 
 <style scoped>
-#debugArea {
-	border: 1px dashed darkred;
-	background-color: #fff3cd;
-	padding: 6px;
-	margin: 6px auto;
-	max-width: 700px;
-	text-align: left;
-}
-.actionsLineButton {
-	border: 2px solid green;
-	border-radius: 5px;
-	font-weight: bolder;
-	padding: 4px 10px;
-	cursor: pointer;
-	margin-top: 4px;
-}
+#debugArea { border: 1px dashed darkred; background: #fff3cd; padding: 4px; margin: 6px auto; max-width: 700px; font-size: 12px; text-align: left; }
 </style>
