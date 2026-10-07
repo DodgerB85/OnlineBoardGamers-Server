@@ -1,0 +1,24 @@
+{% extends "Lobby/help_shell.html" %}
+{% load static %}
+{% load i18n %}
+{% block page_title %}
+  {% translate "Ranchers of the Old West Help" %}
+{% endblock page_title %}
+{% block content %}
+  <div class="card section">
+    <h2>{% translate "Rules" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% blocktranslate %}Ranchers of the Old West is an online board game hosted by Online Board Gamers.{% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+  <div class="card section">
+    <h2>{% translate "Playing the Game" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% translate "This game is still being implemented. Help content will be added here." %}
+      </p>
+    </div>
+  </div>
+{% endblock content %}

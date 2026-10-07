@@ -13,6 +13,7 @@ import DDL.DDLconstants as rfDDL
 import FCM.FCMconstants as rfFCM
 import Lobby.sharedFunctions.constants as rf
 import RNB.RNBconstants as rfRNB
+import ROW.ROWconstants as rfROW
 import URR.URRconstants as rfURR
 
 SHADOW_USERNAMES = [
@@ -42,6 +43,7 @@ SR_GAMES_CODES_AND_NAMES_CHOICES = [
     ("RNB", gettext_lazy("Roads & Boats")),
     ("URR", gettext_lazy("UR: 1830 BC")),
     ("DDL", gettext_lazy("Duck Dealer")),
+    ("ROW", gettext_lazy("Ranchers of the Old West")),
 ]
 
 SR_WEBHOOK_CHOICES = {
@@ -654,6 +656,17 @@ def SR_currentTurnString(gameCode, turn, phase):
 
         return currentTurnString
 
+    elif gameCode == "ROW":
+        currentTurnString = str(turn) + " - "
+        if phase == rfROW.PHASE_SETUP:
+            currentTurnString += gettext("Setup")
+        elif phase == rfROW.PHASE_MAIN:
+            currentTurnString += gettext("Main")
+        elif phase == rfROW.PHASE_GAME_OVER:
+            currentTurnString += gettext("Game End")
+
+        return currentTurnString
+
 
 def SR_gamePaceString(gamePace):
     gamePaceString = ""
@@ -1168,6 +1181,19 @@ def SR_getWEBstartingOptionsHTML(startingOptionsArr):
             startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
         if option == rf.SO_EXPERIENCED_GAME:
             # usedOptions += 1
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
+
+    return startingOptionsHTML
+
+
+def SR_getROWstartingOptionsHTML(startingOptionsArr):
+    if not startingOptionsArr:
+        return ""
+    startingOptionsHTML = ""
+    for option in startingOptionsArr:
+        if option == rf.SO_LEARNING_GAME:
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
+        if option == rf.SO_EXPERIENCED_GAME:
             startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
 
     return startingOptionsHTML

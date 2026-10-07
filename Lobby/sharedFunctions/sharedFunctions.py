@@ -41,6 +41,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getKFWstartingOptionsHTML,
     SR_getPointsForPosition,
     SR_getRNBstartingOptionsHTML,
+    SR_getROWstartingOptionsHTML,
     SR_getTGZstartingOptionsHTML,
     SR_getWEBstartingOptionsHTML,
     getCleanedAndSortedRoundData,
@@ -232,6 +233,8 @@ def SF_serializeGame(game, user, player_context):
         startingOptionsHTML = SR_getKFWstartingOptionsHTML(startingOptionsArr)
     if game_code == "WEB":
         startingOptionsHTML = SR_getWEBstartingOptionsHTML(startingOptionsArr)
+    if game_code == "ROW":
+        startingOptionsHTML = SR_getROWstartingOptionsHTML(startingOptionsArr)
     if game_code == "RNB":
         startingOptionsHTML = SR_getRNBstartingOptionsHTML(startingOptionsArr)
 

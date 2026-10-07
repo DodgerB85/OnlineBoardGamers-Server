@@ -33,6 +33,7 @@ from .presenters import (
     INDpresenter,
     KFWpresenter,
     RNBpresenter,
+    ROWpresenter,
     TGZpresenter,
     URRpresenter,
     WEBpresenter,
@@ -47,6 +48,7 @@ from .sharedFunctions.sharedRefs import (
     SR_getINDstartingOptionsHTML,
     SR_getKFWstartingOptionsHTML,
     SR_getRNBstartingOptionsHTML,
+    SR_getROWstartingOptionsHTML,
     SR_getTGZstartingOptionsHTML,
     SR_getWEBstartingOptionsHTML,
 )
@@ -274,6 +276,8 @@ class Tournament(models.Model):
             startingOptionsHTML = SR_getCNSstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
         if self.gameCode == "WEB":
             startingOptionsHTML = SR_getWEBstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
+        if self.gameCode == "ROW":
+            startingOptionsHTML = SR_getROWstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
         if self.gameCode == "KFW":
             startingOptionsHTML = SR_getKFWstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
         if self.gameCode == "TGZ":
@@ -481,6 +485,7 @@ class Game(BaseGame):
         "RNB": RNBpresenter,
         "URR": URRpresenter,
         "DDL": DDLpresenter,
+        "ROW": ROWpresenter,
         "HLC": HLCpresenter,
         "KFW": KFWpresenter,
     }

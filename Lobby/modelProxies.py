@@ -335,3 +335,12 @@ class DDLgame(Game):
         app_label = "DDL"
         verbose_name = "DDL_Game"
         verbose_name_plural = "DDL_Games"
+
+
+# ROW
+class ROWgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "ROW"
+        verbose_name = "ROW_Game"
+        verbose_name_plural = "ROW_Games"
