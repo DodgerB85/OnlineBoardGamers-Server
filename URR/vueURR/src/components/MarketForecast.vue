@@ -1,12 +1,12 @@
 <script setup>
 import { computed, nextTick } from "vue"
 import * as rf from "../js/URRreference"
-import { landPrice } from "../js/URRrules"
-import { getTerrainImage } from "../js/URRassets"
+import * as rules from "../js/URRrules"
+import * as assets from "../js/URRassets"
 const props = defineProps({ before: { type: Object, required: true }, after: { type: Object, required: true } })
 const changes = computed(() => rf.ALL_LAND_TYPES.flatMap((type) => [false, true].map((isCity) => {
 	const area = { landType: type, isCity }
-	return { type, isCity, previous: landPrice(props.before, area), next: landPrice(props.after, area) }
+	return { type, isCity, previous: rules.landPrice(props.before, area), next: rules.landPrice(props.after, area) }
 })).filter((entry) => entry.previous !== entry.next))
 async function revealChanges(event) {
 	const details = event.currentTarget
@@ -19,7 +19,7 @@ async function revealChanges(event) {
 <template>
 	<details v-if="changes.length" class="marketForecast" @toggle="revealChanges">
 		<summary>Market after plan</summary>
-		<div class="priceChanges"><div v-for="change in changes" :key="`${change.type}-${change.isCity}`" :title="`${rf.LAND_NAMES[change.type]}${change.isCity ? ' city' : ''}: ${change.previous} → ${change.next} SPL`"><img :src="getTerrainImage(change.type, change.isCity)" :alt="`${rf.LAND_NAMES[change.type]}${change.isCity ? ' city' : ''}`" /><span>{{ change.previous }} → <b>{{ change.next }}</b> SPL</span></div></div>
+		<div class="priceChanges"><div v-for="change in changes" :key="`${change.type}-${change.isCity}`" :title="`${rf.LAND_NAMES[change.type]}${change.isCity ? ' city' : ''}: ${change.previous} → ${change.next} SPL`"><img :src="assets.getTerrainImage(change.type, change.isCity)" :alt="`${rf.LAND_NAMES[change.type]}${change.isCity ? ' city' : ''}`" /><span>{{ change.previous }} → <b>{{ change.next }}</b> SPL</span></div></div>
 	</details>
 </template>
 

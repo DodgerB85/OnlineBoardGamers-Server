@@ -2,10 +2,10 @@
 import { computed, nextTick, ref, watch } from "vue"
 import * as boardDisplay from "../js/URRboardDisplay"
 import * as boardRules from "../js/URRmap"
-import { landPrice, maintenanceShortfall, getMaintenanceSaleError, canExchangeBarahshum, barahshumDestinations, removableWaterworks } from "../js/URRrules"
-import { currentStateId, waterworkMeasure } from "../js/URRview"
-import { mapImage, getWaterworkImage, getPlayerMarkerImage, getTerrainImage, getStateOrderImage } from "../js/URRassets"
-import { currentWaterFrame, waterChoices } from "../js/URRwater"
+import * as rules from "../js/URRrules"
+import * as view from "../js/URRview"
+import * as assets from "../js/URRassets"
+import * as water from "../js/URRwater"
 import * as rf from "../js/URRreference"
 import * as debug from "../js/URRdebug"
 import { useModelStore } from "../stores/URRstore.js"
@@ -46,19 +46,19 @@ const riverPaths = computed(() => (store.board.riverSources || []).map((source) 
 const waterReport = computed(() => [...store.computedHistory].reverse().find((entry) => (!store.viewSettings.showReplay || entry.historyIndex <= store.replayStep.index) && ["riverStart", "riverComplete"].includes(entry.administration?.kind))?.administration)
 const selectedArea = computed(() => store.board.areas.find((area) => area.id === selectedHex.value))
 const reachable = computed(() => !previewOpen.value && !store.viewSettings.actionIntent && selectedArea.value?.waterwork ? boardRules.getWaterworkReach(store, selectedArea.value.id) : [])
-const waterDestinations = computed(() => waterChoices(store).map((choice) => choice.area))
-const routingArea = computed(() => currentWaterFrame(store)?.area)
+const waterDestinations = computed(() => water.waterChoices(store).map((choice) => choice.area))
+const routingArea = computed(() => water.currentWaterFrame(store)?.area)
 const chosenRemoval = computed(() => !store.viewSettings.showReplay && store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === "harvest" ? props.removalArea : null)
 const queuedPurchase = computed(() => !store.viewSettings.showReplay && store.gameflow.phase === rf.PHASE_SETTLEMENT ? props.landDraft?.buy : null)
-const maintenanceState = computed(() => store.gameflow.phase === rf.PHASE_DEVELOPMENT && !["eridu", "betweenStates"].includes(store.gameflow.developmentStep) && !store.gameflow.pendingOffer ? store.states[currentStateId(store)] : null)
-const needsMaintenanceSales = computed(() => maintenanceState.value && store.players[maintenanceState.value.king].money < maintenanceShortfall(store, maintenanceState.value.id))
+const maintenanceState = computed(() => store.gameflow.phase === rf.PHASE_DEVELOPMENT && !["eridu", "betweenStates"].includes(store.gameflow.developmentStep) && !store.gameflow.pendingOffer ? store.states[view.currentStateId(store)] : null)
+const needsMaintenanceSales = computed(() => maintenanceState.value && store.players[maintenanceState.value.king].money < rules.maintenanceShortfall(store, maintenanceState.value.id))
 const queuedSales = computed(() => !store.viewSettings.showReplay && (store.gameflow.phase === rf.PHASE_SETTLEMENT || needsMaintenanceSales.value) ? props.landDraft?.sales || [] : [])
-const maintenanceLand = computed(() => needsMaintenanceSales.value && store.viewSettings.actionIntent === "sell" ? store.board.areas.filter((area) => !getMaintenanceSaleError(store, maintenanceState.value.king, area, maintenanceState.value.id)).map((area) => area.id) : [])
-const harvestRemovalSites = computed(() => store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === "harvest" ? removableWaterworks(store, currentStateId(store)) : [])
+const maintenanceLand = computed(() => needsMaintenanceSales.value && store.viewSettings.actionIntent === "sell" ? store.board.areas.filter((area) => !rules.getMaintenanceSaleError(store, maintenanceState.value.king, area, maintenanceState.value.id)).map((area) => area.id) : [])
+const harvestRemovalSites = computed(() => store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === "harvest" ? rules.removableWaterworks(store, view.currentStateId(store)) : [])
 const barahshumSites = computed(() => {
 	const nation = store.nations[rf.NATION_BARAHSHUM]
 	const owner = nation.ownerType === "player" ? nation.owner : store.states[nation.owner]?.king
-	return store.viewSettings.actionIntent === "barahshum" && !previewOpen.value && !needsMaintenanceSales.value && canExchangeBarahshum(store, owner) ? barahshumDestinations(store) : []
+	return store.viewSettings.actionIntent === "barahshum" && !previewOpen.value && !needsMaintenanceSales.value && rules.canExchangeBarahshum(store, owner) ? rules.barahshumDestinations(store) : []
 })
 
 const calahSites = computed(() => store.viewSettings.actionIntent === "calah" ? props.actionTargets : [])
@@ -124,7 +124,7 @@ const mapHint = computed(() => {
 		if (store.gameflow.developmentStep === "betweenStates") return barahshumSites.value.length ? "Barahshum: select a highlighted canal site" : "Review the board before the next state"
 		if (needsMaintenanceSales.value) return maintenanceLand.value.length ? "Select highlighted land to fund the crew" : "Review the required revolution"
 		const exchanges = [calahSites.value.length ? "Calah" : "", barahshumSites.value.length ? "Barahshum" : ""].filter(Boolean).join(" or ")
-		if (store.gameflow.developmentStep === "digging" && store.states[currentStateId(store)]?.diggers.some((crew) => !crew.hasDug)) return `Choose a canal path or buy equipment${exchanges ? ` · purple sites allow ${exchanges}` : ""}`
+		if (store.gameflow.developmentStep === "digging" && store.states[view.currentStateId(store)]?.diggers.some((crew) => !crew.hasDug)) return `Choose a canal path or buy equipment${exchanges ? ` · purple sites allow ${exchanges}` : ""}`
 		return exchanges ? `Select a site · purple sites allow ${exchanges}` : "Select a site for a pump or reservoir"
 	}
 	if (store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === "harvest") return harvestRemovalSites.value.length ? "Harvest: choose a highlighted waterwork if storing" : "Choose how to use the harvest"
@@ -199,8 +199,8 @@ function areaDescription(area) {
 	const owner = area.owner === null ? area.markerOwner === null ? unmarkedStatus : `For sale · ${store.players[area.markerOwner].displayName}'s marker` : store.players[area.owner].displayName
 	const homeland = area.nation !== null ? ` · ${rf.NATION_NAMES[area.nation]} homeland` : ""
 	const closure = boardRules.isNationLandClosed(store, area) ? " · Nation land closed" : ""
-	const price = !area.isRiver && (store.gameflow.phase === rf.PHASE_SETTLEMENT || store.gameflow.phase === rf.PHASE_GAME_OVER || needsMaintenanceSales.value) ? ` · ${area.markerOwner === null ? 'Colonization' : 'Market'} price ${landPrice(store, area, area.markerOwner === null)} SPL` : ""
-	const waterwork = area.waterwork ? ` · ${rf.STATE_NAMES[area.waterwork.state]} ${area.waterwork.kind}, ${waterworkMeasure(area.waterwork)}` : ""
+	const price = !area.isRiver && (store.gameflow.phase === rf.PHASE_SETTLEMENT || store.gameflow.phase === rf.PHASE_GAME_OVER || needsMaintenanceSales.value) ? ` · ${area.markerOwner === null ? 'Colonization' : 'Market'} price ${rules.landPrice(store, area, area.markerOwner === null)} SPL` : ""
+	const waterwork = area.waterwork ? ` · ${rf.STATE_NAMES[area.waterwork.state]} ${area.waterwork.kind}, ${view.waterworkMeasure(area.waterwork)}` : ""
 	const irrigation = area.irrigatedBy !== null ? ` · Irrigated by ${rf.STATE_NAMES[area.irrigatedBy]}` : ""
 	return `${area.label || area.id}${digDescription}: ${area.isRiver ? 'River' : `${rf.LAND_NAMES[area.landType]}${area.isCity ? ' city' : ''}, ${rf.STATE_NAMES[area.state]}, ${owner}`}${homeland}${closure}${price}${waterwork}${irrigation}${queuedPurchase.value === area.id ? " · Queued purchase" : ""}${queuedSales.value.includes(area.id) ? " · Queued sale" : ""}${chosenRemoval.value === area.id ? " · Selected for removal if harvest is stored" : harvestRemovalSites.value.includes(area.id) ? " · Removable if harvest is stored" : ""}${calahSites.value.includes(area.id) ? " · Calah waterwork location" : ""}${barahshumSites.value.includes(area.id) ? " · Barahshum canal destination" : ""}`
 }
@@ -228,7 +228,7 @@ async function locateArea(id, shouldSelect = false) {
 	revealAboveActions(hex)
 }
 defineExpose({ startDig, finishDig, revealSelection, revealBoard, locateArea, isTracing: previewOpen })
-watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.stateIndex, store.gameflow.developmentStep, store.rain.step, store.rain.harvestOrder[0], currentWaterFrame(store)?.area], () => { finishDig(); selectedHex.value = null })
+watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.stateIndex, store.gameflow.developmentStep, store.rain.step, store.rain.harvestOrder[0], water.currentWaterFrame(store)?.area], () => { finishDig(); selectedHex.value = null })
 </script>
 
 <template>
@@ -240,7 +240,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 		<div v-if="previewError" class="previewError" role="alert">{{ previewError }}</div>
 		<div class="mapSurface">
 			<svg :viewBox="`0 0 ${boardDisplay.MAP_WIDTH} ${boardDisplay.MAP_HEIGHT}`" aria-label="UR: 1830 BC game board"><title>Use arrow keys to move between adjacent hexes, and Enter or Space to select.</title>
-				<image :href="mapImage" x="0" y="0" :width="boardDisplay.MAP_WIDTH" :height="boardDisplay.MAP_HEIGHT" />
+				<image :href="assets.mapImage" x="0" y="0" :width="boardDisplay.MAP_WIDTH" :height="boardDisplay.MAP_HEIGHT" />
 				<g v-if="store.gameflow.phase === rf.PHASE_RAINY_SEASON" class="flowingRivers"><polyline v-for="(path, index) in riverPaths" :key="index" :points="path" /></g>
 				<g v-if="!actualAreas.length" class="printedHexes"><polygon v-for="hex in boardDisplay.PRINTED_HEXES" :key="hex.id" :points="boardDisplay.hexPoints(hex.x, hex.y)" @click="inspectArea(hex.id)" /></g>
 				<polyline v-for="(canal, index) in savedCanals" :key="`canal-${index}`" :points="canal" class="savedCanal" />
@@ -255,10 +255,10 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 					<polygon v-if="mapDecisions[entry.area.id] && queuedPurchase === entry.area.id && queuedSales.includes(entry.area.id)" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="purchaseSaleOutline" />
 					<polygon v-if="entry.area.irrigatedBy !== null" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="wetHex" />
 					<polygon v-if="entry.area.id === store.viewSettings.historyArea" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="historyOutline" />
-					<image v-if="entry.area.owner !== null" :href="getPlayerMarkerImage(entry.area.markerOwner)" :x="entry.position.x - 22" :y="entry.position.y - 22" width="44" height="44" class="ownerMarker" />
+					<image v-if="entry.area.owner !== null" :href="assets.getPlayerMarkerImage(entry.area.markerOwner)" :x="entry.position.x - 22" :y="entry.position.y - 22" width="44" height="44" class="ownerMarker" />
 					<rect v-if="entry.area.markerOwner !== null" :x="entry.position.x - 22" :y="entry.position.y - 22" width="44" height="44" class="tokenFrame" :class="{ saleMarkerFrame: entry.area.owner === null }" />
 					<text :x="entry.position.x" :y="entry.position.y + 41" class="areaLabel">{{ entry.area.label || entry.area.id }}</text>
-					<image v-if="entry.area.waterwork" :href="getWaterworkImage(entry.area.waterwork.state, entry.area.waterwork.capacity)" :x="entry.position.x + 10" :y="entry.position.y - 40" width="32" height="32" class="waterworkMarker"><title>{{ rf.STATE_NAMES[entry.area.waterwork.state] }} {{ entry.area.waterwork.kind }} · {{ waterworkMeasure(entry.area.waterwork) }}</title></image>
+					<image v-if="entry.area.waterwork" :href="assets.getWaterworkImage(entry.area.waterwork.state, entry.area.waterwork.capacity)" :x="entry.position.x + 10" :y="entry.position.y - 40" width="32" height="32" class="waterworkMarker"><title>{{ rf.STATE_NAMES[entry.area.waterwork.state] }} {{ entry.area.waterwork.kind }} · {{ view.waterworkMeasure(entry.area.waterwork) }}</title></image>
 					<rect v-if="entry.area.waterwork" :x="entry.position.x + 10" :y="entry.position.y - 40" width="32" height="32" class="tokenFrame" />
 					<circle v-if="entry.area.irrigatedBy !== null" :cx="entry.position.x + 24" :cy="entry.position.y + 20" r="10" class="irrigationMarker"><title>Irrigated by {{ rf.STATE_NAMES[entry.area.irrigatedBy] }}</title></circle>
 					<g v-if="mapDecisions[entry.area.id]" class="mapDecisionHighlight" :class="mapDecisions[entry.area.id].kind">
@@ -283,14 +283,14 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 			<span v-if="selectedArea.nation !== null">{{ rf.NATION_NAMES[selectedArea.nation] }} homeland</span>
 			<span v-if="selectedArea.isRiver">River</span>
 			<template v-else>
-				<img :src="getTerrainImage(selectedArea.landType, selectedArea.isCity)" :alt="`${rf.LAND_NAMES[selectedArea.landType]}${selectedArea.isCity ? ' city' : ''}`" :title="`${rf.LAND_NAMES[selectedArea.landType]}${selectedArea.isCity ? ' city' : ''}`" />
+				<img :src="assets.getTerrainImage(selectedArea.landType, selectedArea.isCity)" :alt="`${rf.LAND_NAMES[selectedArea.landType]}${selectedArea.isCity ? ' city' : ''}`" :title="`${rf.LAND_NAMES[selectedArea.landType]}${selectedArea.isCity ? ' city' : ''}`" />
 				<span v-if="selectedArea.isCity">City</span>
-				<img :src="getStateOrderImage(selectedArea.state)" :alt="rf.STATE_NAMES[selectedArea.state]" :title="rf.STATE_NAMES[selectedArea.state]" />
-				<span class="inspectionOwner" v-if="selectedArea.owner !== null"><img :src="getPlayerMarkerImage(selectedArea.owner)" alt="" />{{ store.players[selectedArea.owner].displayName }}</span>
-				<span v-else-if="selectedArea.markerOwner !== null" class="inspectionOwner"><img :src="getPlayerMarkerImage(selectedArea.markerOwner)" alt="" />For sale · {{ store.players[selectedArea.markerOwner].displayName }}'s marker</span>
+				<img :src="assets.getStateOrderImage(selectedArea.state)" :alt="rf.STATE_NAMES[selectedArea.state]" :title="rf.STATE_NAMES[selectedArea.state]" />
+				<span class="inspectionOwner" v-if="selectedArea.owner !== null"><img :src="assets.getPlayerMarkerImage(selectedArea.owner)" alt="" />{{ store.players[selectedArea.owner].displayName }}</span>
+				<span v-else-if="selectedArea.markerOwner !== null" class="inspectionOwner"><img :src="assets.getPlayerMarkerImage(selectedArea.markerOwner)" alt="" />For sale · {{ store.players[selectedArea.markerOwner].displayName }}'s marker</span>
 				<span v-else>{{ boardRules.isNationLandClosed(store, selectedArea) ? 'Independent nation' : 'Uncolonized' }}</span>
 			</template>
-			<span class="inspectionWork" v-if="selectedArea.waterwork"><img :src="getWaterworkImage(selectedArea.waterwork.state, selectedArea.waterwork.capacity)" :alt="rf.STATE_NAMES[selectedArea.waterwork.state]" />{{ selectedArea.waterwork.kind }} · {{ waterworkMeasure(selectedArea.waterwork) }}</span>
+			<span class="inspectionWork" v-if="selectedArea.waterwork"><img :src="assets.getWaterworkImage(selectedArea.waterwork.state, selectedArea.waterwork.capacity)" :alt="rf.STATE_NAMES[selectedArea.waterwork.state]" />{{ selectedArea.waterwork.kind }} · {{ view.waterworkMeasure(selectedArea.waterwork) }}</span>
 			<span v-if="selectedArea.irrigatedBy !== null">Irrigated by {{ rf.STATE_NAMES[selectedArea.irrigatedBy] }}</span>
 			<span v-if="queuedPurchase === selectedArea.id">Queued purchase</span>
 			<span v-if="queuedSales.includes(selectedArea.id)">Queued sale</span>
@@ -299,7 +299,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 			<span v-if="calahSites.includes(selectedArea.id)">Calah free-waterwork location</span>
 			<span v-if="barahshumSites.includes(selectedArea.id)">Barahshum canal destination</span>
 			<span v-if="store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === 'routing' && selectedArea.id !== routingArea && !waterDestinations.includes(selectedArea.id)">Outside current water destinations</span>
-			<span v-if="!selectedArea.isRiver && (store.gameflow.phase === rf.PHASE_SETTLEMENT || store.gameflow.phase === rf.PHASE_GAME_OVER || needsMaintenanceSales)">{{ selectedArea.markerOwner === null ? 'Colonization' : 'Market' }} price {{ landPrice(store, selectedArea, selectedArea.markerOwner === null) }} SPL</span>
+			<span v-if="!selectedArea.isRiver && (store.gameflow.phase === rf.PHASE_SETTLEMENT || store.gameflow.phase === rf.PHASE_GAME_OVER || needsMaintenanceSales)">{{ selectedArea.markerOwner === null ? 'Colonization' : 'Market' }} price {{ rules.landPrice(store, selectedArea, selectedArea.markerOwner === null) }} SPL</span>
 			<span v-if="!selectedArea.isRiver && boardRules.isNationLandClosed(store, selectedArea) && store.gameflow.phase !== rf.PHASE_RAINY_SEASON">Nation land closed</span>
 			<span v-if="selectedArea.waterwork">{{ selectedArea.waterwork.kind === 'pump' ? 'Reach highlighted' : 'Connected destinations highlighted' }}</span>
 		</div>

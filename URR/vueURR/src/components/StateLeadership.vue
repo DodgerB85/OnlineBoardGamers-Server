@@ -1,11 +1,11 @@
 <script setup>
 import * as rf from "../js/URRreference"
-import { getStateOrderImage, getPlayerMarkerImage } from "../js/URRassets"
+import * as assets from "../js/URRassets"
 defineProps({ change: { type: Object, required: true } })
 </script>
 
 <template>
-	<div class="leadershipChange"><img :src="getStateOrderImage(change.id)" alt="" /><span>{{ rf.STATE_NAMES[change.id] }} · {{ change.hasEmerged ? 'Emerged' : change.isActive ? 'Monarch' : 'Ownership leader' }}<small v-if="change.hasEmerged">{{ change.king === null ? 'No monarch' : `${change.nextName} is monarch` }}</small><small v-else>{{ change.previousName }} → {{ change.nextName }}</small></span><img v-if="change.king !== null" :src="getPlayerMarkerImage(change.king)" :alt="change.nextName" /></div>
+	<div class="leadershipChange"><img :src="assets.getStateOrderImage(change.id)" alt="" /><span>{{ rf.STATE_NAMES[change.id] }} · {{ change.hasEmerged ? 'Emerged' : change.isActive ? 'Monarch' : 'Ownership leader' }}<small v-if="change.hasEmerged">{{ change.king === null ? 'No monarch' : `${change.nextName} is monarch` }}</small><small v-else>{{ change.previousName }} → {{ change.nextName }}</small></span><img v-if="change.king !== null" :src="assets.getPlayerMarkerImage(change.king)" :alt="change.nextName" /></div>
 </template>
 
 <style scoped>

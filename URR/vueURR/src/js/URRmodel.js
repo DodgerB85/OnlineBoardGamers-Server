@@ -2,10 +2,10 @@ import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
 import * as rf from "./URRreference"
 import * as funcs from "./URRfuncs"
-import { createGame, applyAction } from "./URRgame.js"
-import { createPrintedBoard } from "./URRboard.js"
-import { createBoard } from "./URRmap.js"
-import { compactHistory, expandHistory } from "./URRhistoryStorage.js"
+import * as game from "./URRgame.js"
+import * as board from "./URRboard.js"
+import * as boardRules from "./URRmap.js"
+import * as historyStorage from "./URRhistoryStorage.js"
 
 const STATE_FIELDS = ["version", "players", "gameflow", "states", "nations", "board", "landPrices", "era", "cardSupply", "rain", "nextDiggerId"]
 
@@ -74,7 +74,7 @@ export function applyShadowDisplayNames(names) {
 
 export function initGameFresh(playerNames, boardDefinition) {
 	const store = useModelStore()
-	restoreState(createGame(playerNames, boardDefinition))
+	restoreState(game.createGame(playerNames, boardDefinition))
 	store.clearTurnDraft()
 	store.history.splice(0)
 	addHistory(rf.HIST_NEW_GAME, -1)
@@ -117,8 +117,8 @@ export function importGameData(obj) {
 	}
 	if (data.version !== rf.GAME_DATA_VERSION) throw new Error("Unsupported URR save version")
 	// Earlier rules saves had no board. Preserve their economy and turn order.
-	if (data.board?.areas.length === 0) data.board = createBoard(createPrintedBoard())
-	const history = expandHistory(data.history || [])
+	if (data.board?.areas.length === 0) data.board = boardRules.createBoard(board.createPrintedBoard())
+	const history = historyStorage.expandHistory(data.history || [])
 	const hadDraft = !!store.turnDraft.start
 	store.clearTurnDraft()
 	if (hadDraft) store.turnDraft.message = "The saved game was updated. Your uncommitted turn has been cleared."
@@ -127,7 +127,7 @@ export function importGameData(obj) {
 }
 
 export function exportGameData() {
-	return { ...snapshotState(), history: compactHistory(useModelStore().history) }
+	return { ...snapshotState(), history: historyStorage.compactHistory(useModelStore().history) }
 }
 
 export function snapshotState() {
@@ -136,7 +136,7 @@ export function snapshotState() {
 }
 
 export function performAction(playerIndex, action) {
-	const next = applyAction(snapshotState(), playerIndex, action)
+	const next = game.applyAction(snapshotState(), playerIndex, action)
 	restoreState(next)
 	addHistory(next.gameflow.phase === rf.PHASE_GAME_OVER ? rf.HIST_GAME_END : rf.HIST_ACTION, playerIndex, undefined, action)
 }

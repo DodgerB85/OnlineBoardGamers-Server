@@ -1,11 +1,11 @@
 <script setup>
 import { computed } from "vue"
 import ArtworkCard from "./ArtworkCard.vue"
-import { getEquipmentCardImage } from "../js/URRassets"
-import { nextCardEra } from "../js/URRrules"
+import * as assets from "../js/URRassets"
+import * as rules from "../js/URRrules"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
-const purchaseEra = computed(() => nextCardEra(store))
+const purchaseEra = computed(() => rules.nextCardEra(store))
 const nextEra = computed(() => purchaseEra.value > store.era ? purchaseEra.value : store.era < 5 ? store.era + 1 : null)
 </script>
 
@@ -14,7 +14,7 @@ const nextEra = computed(() => purchaseEra.value > store.era ? purchaseEra.value
 		<b>Equipment supply</b>
 		<div class="eraCard currentEra">
 			<span><b>Era {{ store.era === 5 ? 'M' : store.era }}</b> · {{ store.era === 5 ? 'Unlimited' : `${store.cardSupply[store.era]} left` }}</span>
-			<ArtworkCard :src="getEquipmentCardImage(store.era)" :alt="`Era ${store.era === 5 ? 'M' : store.era} equipment`" />
+			<ArtworkCard :src="assets.getEquipmentCardImage(store.era)" :alt="`Era ${store.era === 5 ? 'M' : store.era} equipment`" />
 		</div>
 		<p v-if="nextEra !== null" class="eraTrigger"><template v-if="purchaseEra > store.era">Next purchase starts Era {{ nextEra === 5 ? 'M' : nextEra }}.</template><template v-else>Era {{ nextEra === 5 ? 'M' : nextEra }} starts with its first purchase, after this supply runs out.</template></p>
 		<details class="allEras">
@@ -22,7 +22,7 @@ const nextEra = computed(() => purchaseEra.value > store.era ? purchaseEra.value
 			<div class="eraCards">
 				<div v-for="era in [1, 2, 3, 4, 5].filter((era) => era !== store.era)" :key="era" class="eraCard">
 					<span><b>Era {{ era === 5 ? 'M' : era }}</b> · {{ era === 5 ? 'Unlimited' : `${store.cardSupply[era]} left` }}</span>
-					<ArtworkCard :src="getEquipmentCardImage(era)" :alt="`Era ${era === 5 ? 'M' : era} equipment`" />
+					<ArtworkCard :src="assets.getEquipmentCardImage(era)" :alt="`Era ${era === 5 ? 'M' : era} equipment`" />
 				</div>
 			</div>
 		</details>

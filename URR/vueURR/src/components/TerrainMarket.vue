@@ -1,7 +1,7 @@
 <script setup>
 import * as rf from "../js/URRreference"
-import { landPrice } from "../js/URRrules"
-import { getTerrainImage, landPriceTrackImage } from "../js/URRassets"
+import * as rules from "../js/URRrules"
+import * as assets from "../js/URRassets"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
 function markerPosition(type) {
@@ -17,8 +17,8 @@ function markerPosition(type) {
 <template>
 	<section class="marketPanel" aria-label="Land market">
 		<div class="marketHeading"><b>Land prices <small>SPL</small></b><span>Market / colonize</span></div>
-		<div class="priceSummary"><div v-for="type in rf.ALL_LAND_TYPES" :key="type" class="terrainPrice"><div class="landPrice" :title="`${rf.LAND_NAMES[type]}: market ${store.landPrices[type]} SPL; colonize ${rf.LAND_COLONIZATION_PRICES[type]} SPL`"><img :src="getTerrainImage(type)" :alt="rf.LAND_NAMES[type]" /><span><b>{{ store.landPrices[type] }}</b><small>{{ rf.LAND_COLONIZATION_PRICES[type] }}</small></span></div><div class="landPrice cityPrice" :title="`${rf.LAND_NAMES[type]} city: market ${landPrice(store, { landType: type, isCity: true })} SPL; colonize ${rf.LAND_CITY_COLONIZATION_PRICES[type]} SPL`"><img :src="getTerrainImage(type, true)" :alt="`${rf.LAND_NAMES[type]} city`" /><span><b>{{ landPrice(store, { landType: type, isCity: true }) }}</b><small>{{ rf.LAND_CITY_COLONIZATION_PRICES[type] }}</small></span></div></div></div>
-		<details class="printedTrack"><summary>Printed land market</summary><svg viewBox="0 0 1650 515" aria-label="Current land sale prices"><image :href="landPriceTrackImage" width="1650" height="515" /><image v-for="type in rf.ALL_LAND_TYPES" :key="type" :href="getTerrainImage(type)" :x="markerPosition(type).x" :y="markerPosition(type).y" :width="markerPosition(type).size" :height="markerPosition(type).size"><title>{{ rf.LAND_NAMES[type] }}: {{ store.landPrices[type] }} SPL</title></image></svg></details>
+		<div class="priceSummary"><div v-for="type in rf.ALL_LAND_TYPES" :key="type" class="terrainPrice"><div class="landPrice" :title="`${rf.LAND_NAMES[type]}: market ${store.landPrices[type]} SPL; colonize ${rf.LAND_COLONIZATION_PRICES[type]} SPL`"><img :src="assets.getTerrainImage(type)" :alt="rf.LAND_NAMES[type]" /><span><b>{{ store.landPrices[type] }}</b><small>{{ rf.LAND_COLONIZATION_PRICES[type] }}</small></span></div><div class="landPrice cityPrice" :title="`${rf.LAND_NAMES[type]} city: market ${rules.landPrice(store, { landType: type, isCity: true })} SPL; colonize ${rf.LAND_CITY_COLONIZATION_PRICES[type]} SPL`"><img :src="assets.getTerrainImage(type, true)" :alt="`${rf.LAND_NAMES[type]} city`" /><span><b>{{ rules.landPrice(store, { landType: type, isCity: true }) }}</b><small>{{ rf.LAND_CITY_COLONIZATION_PRICES[type] }}</small></span></div></div></div>
+		<details class="printedTrack"><summary>Printed land market</summary><svg viewBox="0 0 1650 515" aria-label="Current land sale prices"><image :href="assets.landPriceTrackImage" width="1650" height="515" /><image v-for="type in rf.ALL_LAND_TYPES" :key="type" :href="assets.getTerrainImage(type)" :x="markerPosition(type).x" :y="markerPosition(type).y" :width="markerPosition(type).size" :height="markerPosition(type).size"><title>{{ rf.LAND_NAMES[type] }}: {{ store.landPrices[type] }} SPL</title></image></svg></details>
 	</section>
 </template>
 

@@ -1,21 +1,21 @@
 <script setup>
 import { onMounted, onBeforeUnmount, computed, watch } from "vue"
-import { restoreState, snapshotState } from "../js/URRmodel.js"
-import { checkForLatestData } from "../backend/URR_IO.js"
+import * as model from "../js/URRmodel.js"
+import * as IO from "../backend/URR_IO.js"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
 
 store.replayStep.index = 0
 const step = computed({ get: () => store.replayStep.index, set: (index) => { store.replayStep.index = index } })
-const liveSnapshot = snapshotState()
+const liveSnapshot = model.snapshotState()
 
 onMounted(applyStep)
 watch(step, applyStep)
 // The menu can close replay without reloading; never leave a historical
 // position available for live moves.
 onBeforeUnmount(() => {
-	restoreState(liveSnapshot)
-	checkForLatestData()
+	model.restoreState(liveSnapshot)
+	IO.checkForLatestData()
 })
 
 function maxStep() {
@@ -28,7 +28,7 @@ function applyStep() {
 	try {
 		const snapshot = JSON.parse(entry[2])
 		if (snapshot && snapshot.players) {
-			restoreState(snapshot)
+			model.restoreState(snapshot)
 		}
 	} catch (e) {
 		console.error("Unable to restore URR replay snapshot:", e)

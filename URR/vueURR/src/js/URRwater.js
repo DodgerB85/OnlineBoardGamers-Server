@@ -2,18 +2,18 @@
  * unused water returns along that stack before rejoining its river.
  */
 import * as rf from "./URRreference.js"
-import { requireRule, getArea, getWaterworkReach } from "./URRmap.js"
+import * as boardRules from "./URRmap.js"
 
 export function currentWaterFrame(game) {
 	return game.rain.routing?.stack.at(-1) ?? null
 }
 
 function hasIrrigationTarget(game, pumpId, visited) {
-	const pump = getArea(game, pumpId)
+	const pump = boardRules.getArea(game, pumpId)
 	if (pump.owner !== null && pump.irrigatedBy === null) return true
 	const path = [...visited, pumpId]
-	return getWaterworkReach(game, pumpId).some((id) => {
-		const area = getArea(game, id)
+	return boardRules.getWaterworkReach(game, pumpId).some((id) => {
+		const area = boardRules.getArea(game, id)
 		if (area.waterwork) return !path.includes(id) && hasIrrigationTarget(game, id, path)
 		return area.owner !== null && area.irrigatedBy === null
 	})
@@ -22,8 +22,8 @@ function hasIrrigationTarget(game, pumpId, visited) {
 export function waterChoices(game) {
 	const frame = currentWaterFrame(game)
 	if (!frame || frame.water === 0) return []
-	return getWaterworkReach(game, frame.area).flatMap((id) => {
-		const area = getArea(game, id)
+	return boardRules.getWaterworkReach(game, frame.area).flatMap((id) => {
+		const area = boardRules.getArea(game, id)
 		// Sending water into an exhausted branch only returns it unchanged.
 		if (area.waterwork) return frame.visited.includes(id) || !hasIrrigationTarget(game, id, frame.visited) ? [] : [{ area: id, kind: "pump" }]
 		return area.owner !== null && area.irrigatedBy === null ? [{ area: id, kind: "irrigate" }] : []
@@ -31,7 +31,7 @@ export function waterChoices(game) {
 }
 
 export function startWaterRouting(game) {
-	requireRule(game.board.riverSources?.length === 3 && game.board.riverDownstream, "Configure the three rivers before routing water")
+	boardRules.requireRule(game.board.riverSources?.length === 3 && game.board.riverDownstream, "Configure the three rivers before routing water")
 	game.rain.routing = { sourceIndex: 0, river: null, arrivals: {}, stack: [], outflow: 0 }
 	return advanceWaterRouting(game)
 }
@@ -68,7 +68,7 @@ export function advanceWaterRouting(game) {
 		const frame = currentWaterFrame(game)
 		if (frame) {
 			if (waterChoices(game).length > 0) {
-				game.gameflow.turnOrder = [game.states[getArea(game, frame.area).waterwork.state].king]
+				game.gameflow.turnOrder = [game.states[boardRules.getArea(game, frame.area).waterwork.state].king]
 				return false
 			}
 			if (frame.returnedWater?.length > 0) {
@@ -109,7 +109,7 @@ export function advanceWaterRouting(game) {
 			}
 			water = arrivals.water
 		}
-		const area = getArea(game, id)
+		const area = boardRules.getArea(game, id)
 		if (area.waterwork && water > 0) {
 			const diverted = area.waterwork.capacity === "M" ? water : Math.min(water, area.waterwork.capacity)
 			routing.stack.push({ area: id, water: diverted, downstreamWater: water - diverted, visited: [id], originReservoir: id })
@@ -119,16 +119,16 @@ export function advanceWaterRouting(game) {
 }
 
 export function allocateWater(game, action) {
-	requireRule(action.type === "allocateWater", "Choose where to send the water")
+	boardRules.requireRule(action.type === "allocateWater", "Choose where to send the water")
 	const frame = currentWaterFrame(game)
 	const choice = waterChoices(game).find((entry) => entry.area === action.area)
-	requireRule(choice, "Water must go to reachable owned land or an unvisited pump")
+	boardRules.requireRule(choice, "Water must go to reachable owned land or an unvisited pump")
 	const amount = action.amount ?? 1
-	requireRule(Number.isInteger(amount) && amount > 0 && amount <= frame.water, "Choose an available amount of water")
-	const area = getArea(game, choice.area)
+	boardRules.requireRule(Number.isInteger(amount) && amount > 0 && amount <= frame.water, "Choose an available amount of water")
+	const area = boardRules.getArea(game, choice.area)
 	if (choice.kind === "irrigate") {
-		requireRule(amount === 1, "Each area uses exactly one water")
-		area.irrigatedBy = getArea(game, frame.area).waterwork.state
+		boardRules.requireRule(amount === 1, "Each area uses exactly one water")
+		area.irrigatedBy = boardRules.getArea(game, frame.area).waterwork.state
 		frame.water--
 	} else {
 		frame.water -= amount

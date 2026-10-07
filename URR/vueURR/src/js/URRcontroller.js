@@ -1,10 +1,10 @@
 import * as rf from "./URRreference"
 import * as model from "./URRmodel"
 import * as IO from "../backend/URR_IO"
-import { getBotAction } from "./URRgame.js"
-import { currentStateId, phaseStr } from "./URRview.js"
-import { endsDecision, defaultEndAction, describeAction, actionSummary } from "./URRturnDraft.js"
-import { getAutomaticAction, canExchangeBarahshum } from "./URRrules.js"
+import * as game from "./URRgame.js"
+import * as view from "./URRview.js"
+import * as turnDraft from "./URRturnDraft.js"
+import * as rules from "./URRrules.js"
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
 
@@ -38,7 +38,7 @@ export async function submitAction(action) {
 		if (store.turnDraft.ready || personal.haltPlay || store.viewSettings.showReplay || personal.pov < 0) return false
 		const nation = store.nations[rf.NATION_BARAHSHUM]
 		if ((personal.trainingGame || rf.SUPER_USERS.includes(personal.name)) && nation.ownerType === "player") player = nation.owner
-		if (!canExchangeBarahshum(store, player)) return false
+		if (!rules.canExchangeBarahshum(store, player)) return false
 	} else if (!personal.canPlay()) return false
 	const before = model.snapshotState()
 	const checkpoint = { state: before, historyLength: store.history.length }
@@ -52,9 +52,9 @@ export async function submitAction(action) {
 	const draft = store.turnDraft
 	if (!draft.start) { draft.start = checkpoint; draft.player = player }
 	const after = model.snapshotState()
-	draft.steps.push({ ...checkpoint, label: actionSummary(before, after, action) })
-	draft.ready = endsDecision(before, after, action)
-	draft.message = describeAction(before, after, action)
+	draft.steps.push({ ...checkpoint, label: turnDraft.actionSummary(before, after, action) })
+	draft.ready = turnDraft.endsDecision(before, after, action)
+	draft.message = turnDraft.describeAction(before, after, action)
 	draft.pauseAutomatic = false
 	return true
 }
@@ -64,7 +64,7 @@ export function canReviewTurn() {
 	const personal = usePersonalStore()
 	if (personal.haltPlay || store.viewSettings.showReplay || store.viewSettings.showLoader || personal.pov < 0) return false
 	if (store.turnDraft.start) return personal.trainingGame || rf.SUPER_USERS.includes(personal.name) || personal.pov === store.turnDraft.player
-	return personal.canPlay() || canExchangeBarahshum(store, personal.pov)
+	return personal.canPlay() || rules.canExchangeBarahshum(store, personal.pov)
 }
 
 function restoreCheckpoint(checkpoint) {
@@ -109,12 +109,12 @@ export async function endPlayerTurn() {
 		}
 		try {
 			// Reuse the existing forced-action rules after an Undo or Reset.
-			let automatic = getAutomaticAction(store)
+			let automatic = rules.getAutomaticAction(store)
 			while (automatic && !store.turnDraft.ready) {
 				if (!await submitAction(automatic)) return false
-				automatic = getAutomaticAction(store)
+				automatic = rules.getAutomaticAction(store)
 			}
-			if (!store.turnDraft.ready && !await submitAction(defaultEndAction(store))) return false
+			if (!store.turnDraft.ready && !await submitAction(turnDraft.defaultEndAction(store))) return false
 		} catch (error) {
 			store.gameMessages.actionError = error.message
 			return false
@@ -125,8 +125,8 @@ export async function endPlayerTurn() {
 		store.clearTurnDraft()
 		store.viewSettings.actionIntent = ""
 		const next = store.players[store.gameflow.turnOrder[0]]
-		const stateId = currentStateId(store)
-		const context = store.gameflow.pendingOffer ? "respond to the agreement request" : store.rain.step === "routing" ? "route water" : store.rain.step === "harvest" ? "choose the harvest" : phaseStr(store.gameflow.phase)
+		const stateId = view.currentStateId(store)
+		const context = store.gameflow.pendingOffer ? "respond to the agreement request" : store.rain.step === "routing" ? "route water" : store.rain.step === "harvest" ? "choose the harvest" : view.phaseStr(store.gameflow.phase)
 		store.turnDraft.message = next ? `Turn saved. ${next.displayName}${stateId === null ? "" : ` · ${rf.STATE_NAMES[stateId]}`} · ${context}.` : "Turn saved. Game complete."
 	}
 	return saved
@@ -157,7 +157,7 @@ export function canRunBotTurn() {
 export function getAutomaticBotAction() {
 	if (!canRunBotTurn()) return null
 	try {
-		return getBotAction(model.snapshotState())
+		return game.getBotAction(model.snapshotState())
 	} catch (error) {
 		useModelStore().gameMessages.actionError = error.message
 		console.error("Unable to choose an abandoned seat's move:", error)

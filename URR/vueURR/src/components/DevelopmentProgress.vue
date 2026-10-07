@@ -1,13 +1,13 @@
 <script setup>
 import { computed } from "vue"
 import * as rf from "../js/URRreference"
-import { hasMaintenanceCrew, maintenanceShortfall } from "../js/URRrules"
-import { currentStateId } from "../js/URRview"
+import * as rules from "../js/URRrules"
+import * as view from "../js/URRview"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
-const state = computed(() => store.states[currentStateId(store)])
+const state = computed(() => store.states[view.currentStateId(store)])
 const step = computed(() => store.gameflow.developmentStep)
-const needsCrew = computed(() => state.value && !hasMaintenanceCrew(store, state.value.id))
+const needsCrew = computed(() => state.value && !rules.hasMaintenanceCrew(store, state.value.id))
 </script>
 
 <template>
@@ -16,7 +16,7 @@ const needsCrew = computed(() => state.value && !hasMaintenanceCrew(store, state
 		<p v-else-if="step === 'betweenStates'">Between states · optional Barahshum exchange before development continues</p>
 		<template v-else>
 			<ol><li :class="{ current: step === 'digging', completed: step === 'purchasing' }" :aria-current="step === 'digging' ? 'step' : undefined">{{ step === 'purchasing' ? 'Digging closed' : 'Dig canals (optional)' }}</li><li :class="{ current: step === 'purchasing' }" :aria-current="step === 'purchasing' ? 'step' : undefined">Buy equipment (optional)</li><li>End development</li></ol>
-			<p v-if="needsCrew" class="crewRequirement">Crew required before ending.<template v-if="maintenanceShortfall(store, state.id)"> Private contribution: {{ maintenanceShortfall(store, state.id) }} SPL.</template><template v-else> Paid from the state treasury.</template></p>
+			<p v-if="needsCrew" class="crewRequirement">Crew required before ending.<template v-if="rules.maintenanceShortfall(store, state.id)"> Private contribution: {{ rules.maintenanceShortfall(store, state.id) }} SPL.</template><template v-else> Paid from the state treasury.</template></p>
 			<p v-else>Maintenance crew available.</p>
 		</template>
 		<p v-if="store.gameflow.pendingOffer">Awaiting agreement · development resumes after the response.</p>

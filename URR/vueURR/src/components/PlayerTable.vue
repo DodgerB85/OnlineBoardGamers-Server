@@ -1,8 +1,8 @@
 <script setup>
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
-import { getPlayerMarkerImage } from "../js/URRassets"
-import { playerAssets } from "../js/URRrules"
+import * as assets from "../js/URRassets"
+import * as rules from "../js/URRrules"
 const store = useModelStore()
 const personal = usePersonalStore()
 
@@ -18,10 +18,10 @@ function isCurrent(index) {
 <template>
 	<div id="playerTable" :class="{ minimise: minimiseInfoForMainScreen }">
 		<div class="playerRow" v-for="(player, idx) in store.players" :key="idx" :class="{ currentPlayer: isCurrent(idx), me: idx === personal.pov }">
-			<img class="colourSwatch" :src="getPlayerMarkerImage(idx)" alt="Ownership marker" />
+			<img class="colourSwatch" :src="assets.getPlayerMarkerImage(idx)" alt="Ownership marker" />
 			<span class="playerName">{{ player.displayName }}</span>
 			<span class="playerCash" title="Private treasury">{{ player.money }} SPL cash</span>
-			<span class="playerScore" title="Private cash plus the market value of owned land">{{ playerAssets(store, idx) }} SPL assets</span>
+			<span class="playerScore" title="Private cash plus the market value of owned land">{{ rules.playerAssets(store, idx) }} SPL assets</span>
 		</div>
 	</div>
 </template>

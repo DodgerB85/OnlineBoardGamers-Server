@@ -1,9 +1,9 @@
 <script setup>
 import { computed, nextTick, watch } from "vue"
 import * as rf from "../js/URRreference"
-import { getDevelopmentOrder, canExchangeBarahshum } from "../js/URRrules"
-import { currentStateId, phaseStr } from "../js/URRview"
-import { getPlayerMarkerImage, getStateOrderImage, primogenitureImage } from "../js/URRassets"
+import * as rules from "../js/URRrules"
+import * as view from "../js/URRview"
+import * as assets from "../js/URRassets"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
 const emit = defineEmits(["inspect", "browseStates"])
@@ -14,8 +14,8 @@ const playerOrder = computed(() => {
 	const first = store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS ? 0 : order.indexOf(store.gameflow.primogeniture)
 	return [...order.slice(first), ...order.slice(0, first)]
 })
-const stateOrder = computed(() => store.gameflow.phase === rf.PHASE_SETTLEMENT ? getDevelopmentOrder(store) : store.gameflow.stateOrder.filter((id) => store.states[id].isActive))
-const currentState = computed(() => currentStateId(store))
+const stateOrder = computed(() => store.gameflow.phase === rf.PHASE_SETTLEMENT ? rules.getDevelopmentOrder(store) : store.gameflow.stateOrder.filter((id) => store.states[id].isActive))
+const currentState = computed(() => view.currentStateId(store))
 const stateOrderLabel = computed(() => store.gameflow.phase === rf.PHASE_SETTLEMENT ? "Next states" : store.gameflow.phase === rf.PHASE_RAINY_SEASON ? "Harvest order" : "Active states")
 const stateOrderExplanation = computed(() => store.gameflow.phase === rf.PHASE_RAINY_SEASON ? "Harvests follow the order set when development began. Water decisions follow the river and pump branches." : store.gameflow.phase === rf.PHASE_SETTLEMENT ? "Upcoming development order: fewest player-owned lands first; ties follow the printed board order. Fixed when development begins." : "Development order was fixed at the start of the phase: fewest player-owned lands first; ties follow the printed board order.")
 function hasCompletedState(id) {
@@ -24,7 +24,7 @@ function hasCompletedState(id) {
 }
 const exchangeOwner = computed(() => {
 	const nation = store.nations[rf.NATION_BARAHSHUM]
-	return nation.ownerType === "player" && nation.owner !== store.gameflow.turnOrder[0] && canExchangeBarahshum(store, nation.owner) ? nation.owner : null
+	return 	nation.ownerType === "player" && nation.owner !== store.gameflow.turnOrder[0] && rules.canExchangeBarahshum(store, nation.owner) ? nation.owner : null
 })
 const colonized = (id) => store.board.areas.filter((area) => area.state === id && area.markerOwner !== null).length
 const readyStates = computed(() => store.states.filter((state) => !state.isActive && colonized(state.id) >= rf.LAND_FOR_STATE_TO_ACTIVATE))
@@ -63,19 +63,19 @@ watch([() => store.gameflow.turnOrder[0], () => store.gameflow.phase, () => curr
 		<div class="orderRow" role="group" :aria-label="isGameOver ? 'Final standings' : 'Player order'">
 			<b class="orderLabel">{{ isGameOver ? 'Standings' : 'Players' }}</b>
 			<button v-for="(index, position) in playerOrder" :key="index" :class="{ current: !isGameOver && store.gameflow.turnOrder[0] === index, opportunity: exchangeOwner === index, inspected: store.viewSettings.inspectedPlayer === index }" :title="exchangeOwner === index ? `${store.players[index].displayName}: optional Barahshum canal exchange` : store.players[index].displayName" :aria-current="!isGameOver && store.gameflow.turnOrder[0] === index ? 'step' : undefined" :aria-pressed="store.viewSettings.inspectedPlayer === index" @click="inspectPlayer(index)">
-				<span class="position">{{ position + 1 }}</span><img :src="getPlayerMarkerImage(index)" alt="" /><span>{{ store.players[index].displayName }}<small>{{ isGameOver ? store.players[index].score : store.players[index].money }} SPL{{ isGameOver ? ' assets' : '' }}</small><small v-if="exchangeOwner === index" class="exchangeCue">Barahshum</small></span><img v-if="!isGameOver && store.gameflow.primogeniture === index" class="birthright" :src="primogenitureImage" alt="Primogeniture" title="Primogeniture" />
+				<span class="position">{{ position + 1 }}</span><img :src="assets.getPlayerMarkerImage(index)" alt="" /><span>{{ store.players[index].displayName }}<small>{{ isGameOver ? store.players[index].score : store.players[index].money }} SPL{{ isGameOver ? ' assets' : '' }}</small><small v-if="exchangeOwner === index" class="exchangeCue">Barahshum</small></span><img v-if="!isGameOver && store.gameflow.primogeniture === index" class="birthright" :src="assets.primogenitureImage" alt="Primogeniture" title="Primogeniture" />
 			</button>
 			<button class="overviewToggle" :aria-expanded="store.viewSettings.showOverview" @click="store.viewSettings.showOverview = !store.viewSettings.showOverview">Overview</button>
-			<span class="phaseLabel">Turn {{ store.gameflow.turn }} · {{ phaseStr(store.gameflow.phase) }} · Era {{ store.era === 5 ? 'M' : store.era }}<b v-if="store.gameflow.endReason && !isGameOver" class="finalRound">Final round</b></span>
+			<span class="phaseLabel">Turn {{ store.gameflow.turn }} · {{ view.phaseStr(store.gameflow.phase) }} · Era {{ store.era === 5 ? 'M' : store.era }}<b v-if="store.gameflow.endReason && !isGameOver" class="finalRound">Final round</b></span>
 		</div>
 		<div class="orderRow" role="group" :aria-label="stateOrderLabel">
 			<b class="orderLabel" :title="stateOrderExplanation">{{ stateOrderLabel }}</b>
 			<button v-for="(id, position) in stateOrder" :key="id" :class="{ current: currentState === id, completed: hasCompletedState(id), inspected: store.viewSettings.inspectedState === id }" :aria-current="currentState === id ? 'step' : undefined" :aria-pressed="store.viewSettings.inspectedState === id" @click="inspectState(id)">
-				<span class="position">{{ position + 1 }}</span><img :src="getStateOrderImage(id)" alt="" /><span>{{ rf.STATE_NAMES[id] }}<small>{{ store.states[id].money }} SPL</small></span><span v-if="hasCompletedState(id)" class="doneMark" role="img" :aria-label="store.gameflow.phase === rf.PHASE_DEVELOPMENT ? 'Development complete' : 'Harvest complete'">✓</span>
+				<span class="position">{{ position + 1 }}</span><img :src="assets.getStateOrderImage(id)" alt="" /><span>{{ rf.STATE_NAMES[id] }}<small>{{ store.states[id].money }} SPL</small></span><span v-if="hasCompletedState(id)" class="doneMark" role="img" :aria-label="store.gameflow.phase === rf.PHASE_DEVELOPMENT ? 'Development complete' : 'Harvest complete'">✓</span>
 			</button>
-			<button v-for="state in readyStates" :key="`ready-${state.id}`" class="readyState" :class="{ inspected: store.viewSettings.inspectedState === state.id }" :aria-pressed="store.viewSettings.inspectedState === state.id" :title="`${rf.STATE_NAMES[state.id]}: emerges after settlement with ${colonized(state.id)} colonized lands`" @click="inspectState(state.id)"><img :src="getStateOrderImage(state.id)" alt="" /><span>{{ rf.STATE_NAMES[state.id] }}<small>{{ colonized(state.id) }} lands · ready</small></span></button>
+			<button v-for="state in readyStates" :key="`ready-${state.id}`" class="readyState" :class="{ inspected: store.viewSettings.inspectedState === state.id }" :aria-pressed="store.viewSettings.inspectedState === state.id" :title="`${rf.STATE_NAMES[state.id]}: emerges after settlement with ${colonized(state.id)} colonized lands`" @click="inspectState(state.id)"><img :src="assets.getStateOrderImage(state.id)" alt="" /><span>{{ rf.STATE_NAMES[state.id] }}<small>{{ colonized(state.id) }} lands · ready</small></span></button>
 			<span v-if="!stateOrder.length && !readyStates.length" class="emptyOrder">None yet · {{ rf.LAND_FOR_STATE_TO_ACTIVATE }} lands to emerge</span>
-			<details v-if="emergingStates.length" class="emergingStates" @toggle="browseEmergingStates"><summary>Emerging states</summary><div><button v-for="state in emergingStates" :key="state.id" @click="inspectEmergingState($event, state.id)"><img :src="getStateOrderImage(state.id)" alt="" />{{ rf.STATE_NAMES[state.id] }} · {{ store.board.areas.filter((area) => area.state === state.id && area.markerOwner !== null).length }}/{{ rf.LAND_FOR_STATE_TO_ACTIVATE }}</button></div></details>
+			<details v-if="emergingStates.length" class="emergingStates" @toggle="browseEmergingStates"><summary>Emerging states</summary><div><button v-for="state in emergingStates" :key="state.id" @click="inspectEmergingState($event, state.id)"><img :src="assets.getStateOrderImage(state.id)" alt="" />{{ rf.STATE_NAMES[state.id] }} · {{ store.board.areas.filter((area) => area.state === state.id && area.markerOwner !== null).length }}/{{ rf.LAND_FOR_STATE_TO_ACTIVATE }}</button></div></details>
 		</div>
 	</section>
 </template>

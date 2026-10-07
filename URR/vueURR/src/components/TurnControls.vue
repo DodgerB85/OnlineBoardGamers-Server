@@ -1,10 +1,10 @@
 <script setup>
 import { computed } from "vue"
-import { canReviewTurn, undoAction, resetTurn } from "../js/URRcontroller.js"
+import * as controller from "../js/URRcontroller.js"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
 const emit = defineEmits(["endTurn"])
-const canReview = computed(() => canReviewTurn())
+const canReview = computed(() => controller.canReviewTurn())
 </script>
 
 <template>
@@ -14,7 +14,7 @@ const canReview = computed(() => canReviewTurn())
 		<ol v-if="store.turnDraft.ready" aria-label="Choices to confirm"><li v-for="(step, index) in store.turnDraft.steps" :key="index">{{ step.label }}</li></ol>
 		<p v-if="store.turnDraft.ready">Undo or Reset Turn to change your choices.</p>
 		<p v-if="store.gameMessages.actionError || store.gameMessages.errorText" class="error" role="alert">{{ store.gameMessages.actionError || store.gameMessages.errorText }}</p>
-		<div><button :disabled="!canReview || !store.turnDraft.steps.length" @click="undoAction">Undo</button><button :disabled="!canReview" @click="resetTurn">Reset Turn</button><button class="primaryAction" :disabled="!canReview" @click="emit('endTurn')">End Turn</button></div>
+		<div><button :disabled="!canReview || !store.turnDraft.steps.length" @click="controller.undoAction">Undo</button><button :disabled="!canReview" @click="controller.resetTurn">Reset Turn</button><button class="primaryAction" :disabled="!canReview" @click="emit('endTurn')">End Turn</button></div>
 	</div>
 </template>
 

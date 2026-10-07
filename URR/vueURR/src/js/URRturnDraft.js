@@ -1,5 +1,5 @@
 import * as rf from "./URRreference.js"
-import { currentWaterFrame } from "./URRwater.js"
+import * as water from "./URRwater.js"
 
 // Buying equipment closes digging, but remains part of the same state's turn.
 export function turnContext(game) {
@@ -7,7 +7,7 @@ export function turnContext(game) {
 	return JSON.stringify([flow.turn, flow.phase, flow.turnOrder[0], flow.stateIndex,
 		["eridu", "betweenStates"].includes(flow.developmentStep) ? flow.developmentStep : null,
 		flow.auction?.nation, flow.pendingOffer, game.rain.step,
-		game.rain.step === "routing" ? currentWaterFrame(game)?.area : game.rain.harvestOrder[0]])
+		game.rain.step === "routing" ? water.currentWaterFrame(game)?.area : game.rain.harvestOrder[0]])
 }
 
 export function endsDecision(before, after, action) {
@@ -43,6 +43,6 @@ export function actionSummary(before, after, action) {
 export function describeAction(before, after, action) {
 	const message = actionSummary(before, after, action)
 	if (endsDecision(before, after, action)) return `${message} Review your choices, then End Turn to confirm.`
-	const frame = currentWaterFrame(after)
+	const frame = water.currentWaterFrame(after)
 	return `${message} ${after.rain.step === "routing" && frame ? `${frame.water} water remaining · choose another destination.` : "Continue playing, or End Turn to confirm."}`
 }

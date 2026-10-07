@@ -2,7 +2,7 @@
  * Rows run north to south; columns run west to east. Regions cross state borders.
  */
 import * as rf from "./URRreference.js"
-import { PRINTED_HEXES } from "./URRboardDisplay.js"
+import * as boardDisplay from "./URRboardDisplay.js"
 
 // H/F/S/D = hills/forest/savannah/desert; * marks a city; R = river.
 // A/B/E/P/S/U = Akkad/Babylon/Elam/Persia/Sumer/Urartu.
@@ -45,7 +45,7 @@ export function createPrintedBoard(markerLimit = PRINTED_MARKER_LIMIT) {
 			id: areaId, label: `${String.fromCharCode(65 + rowIndex)}${column + 1}`,
 			state: cell === "R" ? null : STATES[cell.at(-1)], landType: cell === "R" ? null : TERRAIN[cell[0]],
 			isRiver: cell === "R", isCity: cell.includes("*"), nation: HOMELANDS[areaId] ?? null,
-			display: { x: PRINTED_HEXES[rowIndex * 10 + column].x, y: PRINTED_HEXES[rowIndex * 10 + column].y },
+			display: { x: boardDisplay.PRINTED_HEXES[rowIndex * 10 + column].x, y: boardDisplay.PRINTED_HEXES[rowIndex * 10 + column].y },
 			neighbours: [],
 		}
 	}))

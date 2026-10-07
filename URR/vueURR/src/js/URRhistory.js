@@ -1,6 +1,6 @@
 import * as rf from "./URRreference.js"
-import { harvestAmount, harvestDistribution, irrigatedRegionCounts } from "./URRrules.js"
-import { startWaterRouting, allocateWater, advanceWaterRouting } from "./URRwater.js"
+import * as rules from "./URRrules.js"
+import * as water from "./URRwater.js"
 
 function readSnapshot(entry) {
 	if (!entry) return null
@@ -22,9 +22,9 @@ function routingSnapshot(before, after, action, startsRain) {
 	if (startsRain) {
 		for (const area of game.board.areas) area.irrigatedBy = null
 		game.rain = { step: "routing", outflow: null, harvestOrder: [] }
-		startWaterRouting(game)
-	} else if (action?.type === "allocateWater") allocateWater(game, action)
-	else if (action?.type === "advanceWater") advanceWaterRouting(game)
+		water.startWaterRouting(game)
+	} else if (action?.type === "allocateWater") water.allocateWater(game, action)
+	else if (action?.type === "advanceWater") water.advanceWaterRouting(game)
 	return game
 }
 
@@ -88,8 +88,8 @@ export function computeHistory(history, creationTimestamp) {
 		}
 		if (before.rain.step === "harvest" && action?.type === "harvest") {
 			const id = before.rain.harvestOrder[0]
-			const amount = harvestAmount(before, id)
-			const distribution = harvestDistribution(before, id, amount)
+			const amount = rules.harvestAmount(before, id)
+			const distribution = rules.harvestDistribution(before, id, amount)
 			const details = action.choice === "store" ? [{ state: id, text: `${rf.STATE_NAMES[id]} treasury receives ${amount} SPL` }] : distribution.payments.flatMap((payment, player) => payment > 0 ? [{ player, text: `${before.players[player].displayName} receives ${payment} SPL` }] : [])
 			if (action.choice !== "store") details.push({ state: id, text: `${rf.STATE_NAMES[id]} treasury keeps ${distribution.retained} SPL` })
 			addSummary("harvest", `${rf.STATE_NAMES[id]} harvest · ${amount} SPL`, action.choice === "store" ? "Harvest stored in the state treasury." : "Harvest distributed among landowners in this state, in proportion to their owned land. The treasury keeps any remainder.", details)
@@ -97,15 +97,15 @@ export function computeHistory(history, creationTimestamp) {
 		if (finishesRouting || (before.rain.step === "harvest" && action?.type === "harvest")) {
 			const candidates = finishesRouting ? before.gameflow.stateOrder : before.rain.harvestOrder.slice(1)
 			for (const id of candidates.filter((id) => !after.rain.harvestOrder.includes(id))) {
-				const amount = harvestAmount(wetGame, id)
-				const distribution = harvestDistribution(wetGame, id, amount)
+				const amount = rules.harvestAmount(wetGame, id)
+				const distribution = rules.harvestDistribution(wetGame, id, amount)
 				const details = distribution.payments.flatMap((payment, player) => payment > 0 ? [{ player, text: `${wetGame.players[player].displayName} receives ${payment} SPL` }] : [])
 				details.push({ state: id, text: `${rf.STATE_NAMES[id]} treasury keeps ${distribution.retained} SPL` })
 				addSummary(`automaticHarvest-${id}`, `${rf.STATE_NAMES[id]} · automatic harvest`, amount === 0 ? "No land was irrigated by this state. Harvest is 0 SPL; nobody receives a harvest payment." : `This state revolted and must distribute its ${amount} SPL harvest among its landowners.`, details)
 			}
 		}
 		if ((before.rain.step === "harvest" || finishesRouting) && after.rain.step === "complete") {
-			const prices = rf.ALL_LAND_TYPES.map((type) => ({ terrain: type, text: `${rf.LAND_NAMES[type]}: ${before.landPrices[type]} → ${after.landPrices[type]} SPL · ${irrigatedRegionCounts(wetGame)[type]} irrigated regions` }))
+			const prices = rf.ALL_LAND_TYPES.map((type) => ({ terrain: type, text: `${rf.LAND_NAMES[type]}: ${before.landPrices[type]} → ${after.landPrices[type]} SPL · ${rules.irrigatedRegionCounts(wetGame)[type]} irrigated regions` }))
 			addSummary("rainEnd", "Rainy season complete · land prices updated", "Each irrigated region raises its terrain's market price by one step. Dry terrain stays at the same price. Irrigation markers are cleared for the next round.", prices)
 		}
 		if (before.gameflow.phase !== rf.PHASE_GAME_OVER && after.gameflow.phase === rf.PHASE_GAME_OVER) {

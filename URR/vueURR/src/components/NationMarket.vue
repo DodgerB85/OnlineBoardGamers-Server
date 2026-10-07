@@ -4,7 +4,7 @@ import { computed, reactive, ref, watch } from "vue"
 import * as rf from "../js/URRreference"
 import * as rules from "../js/URRrules"
 import * as controller from "../js/URRcontroller"
-import { getNationCardImage, getPlayerMarkerImage, getStateOrderImage } from "../js/URRassets"
+import * as assets from "../js/URRassets"
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
 const store = useModelStore()
@@ -55,9 +55,9 @@ watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.val
 		<p v-else class="marketHint">Buy the current nation, or expand another to make an offer.</p>
 		<div class="nationList">
 			<details v-for="nation in displayedNations" :key="nation.id" class="nationRow" :open="isAuction(nation) || (!auction && treaty?.id === nation.id)" :class="{ current: isAuction(nation) || (!auction && treaty?.id === nation.id), acquired: nation.ownerType !== null, ashur: nation.id === rf.NATION_ASHUR }">
-				<summary><button type="button" class="nationLocation" :aria-label="`Find ${rf.NATION_NAMES[nation.id]} in ${rf.STATE_NAMES[nationState(nation)]} on the board`" :title="`${rf.NATION_NAMES[nation.id]} · ${rf.STATE_NAMES[nationState(nation)]}`" @click.stop.prevent="emit('locateNation', nation.id)"><img :src="getStateOrderImage(nationState(nation))" alt="" />Map</button><b>{{ rf.NATION_NAMES[nation.id] }}</b><span :class="{ nationPrice: nation.ownerType === null }">{{ nation.ownerType === null ? `${price(nation)} SPL` : owner(nation) }}</span><small>Income {{ rf.NATION_INCOMES[nation.id] }} SPL<template v-if="nation.bids.length"> · {{ nation.bids.length }} offer{{ nation.bids.length === 1 ? '' : 's' }}</template></small></summary>
-				<div class="cardHeading"><ArtworkCard :src="getNationCardImage(nation.id)" :alt="rf.NATION_NAMES[nation.id]" /></div>
-				<ol v-if="nation.bids.length" class="nationBids" aria-label="Bidding order"><li v-for="offer in nation.bids" :key="offer.player" :class="{ currentBidder: isAuction(nation) && offer.player === actor }"><img :src="getPlayerMarkerImage(offer.player)" alt="" /><span>{{ store.players[offer.player].displayName }}</span><b>{{ offer.amount }} SPL</b></li></ol>
+				<summary><button type="button" class="nationLocation" :aria-label="`Find ${rf.NATION_NAMES[nation.id]} in ${rf.STATE_NAMES[nationState(nation)]} on the board`" :title="`${rf.NATION_NAMES[nation.id]} · ${rf.STATE_NAMES[nationState(nation)]}`" @click.stop.prevent="emit('locateNation', nation.id)"><img :src="assets.getStateOrderImage(nationState(nation))" alt="" />Map</button><b>{{ rf.NATION_NAMES[nation.id] }}</b><span :class="{ nationPrice: nation.ownerType === null }">{{ nation.ownerType === null ? `${price(nation)} SPL` : owner(nation) }}</span><small>Income {{ rf.NATION_INCOMES[nation.id] }} SPL<template v-if="nation.bids.length"> · {{ nation.bids.length }} offer{{ nation.bids.length === 1 ? '' : 's' }}</template></small></summary>
+				<div class="cardHeading"><ArtworkCard :src="assets.getNationCardImage(nation.id)" :alt="rf.NATION_NAMES[nation.id]" /></div>
+				<ol v-if="nation.bids.length" class="nationBids" aria-label="Bidding order"><li v-for="offer in nation.bids" :key="offer.player" :class="{ currentBidder: isAuction(nation) && offer.player === actor }"><img :src="assets.getPlayerMarkerImage(offer.player)" alt="" /><span>{{ store.players[offer.player].displayName }}</span><b>{{ offer.amount }} SPL</b></li></ol>
 				<template v-if="nation.ownerType === null">
 					<form v-if="!auction && treaty?.id !== nation.id" @submit.prevent="bid(nation)">
 						<label :for="`nation-bid-${nation.id}`">{{ auction ? "Bid" : "Offer" }} SPL</label>

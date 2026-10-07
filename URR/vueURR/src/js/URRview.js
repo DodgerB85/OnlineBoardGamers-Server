@@ -3,7 +3,7 @@
  */
 
 import * as rf from "./URRreference"
-import { currentWaterFrame } from "./URRwater"
+import * as water from "./URRwater"
 
 export function currentStateId(game) {
 	if (game.gameflow.pendingOffer) return game.gameflow.pendingOffer.state
@@ -16,7 +16,7 @@ export function currentStateId(game) {
 	}
 	if (game.gameflow.phase === rf.PHASE_RAINY_SEASON) {
 		if (game.rain.step === "harvest") return game.rain.harvestOrder[0] ?? null
-		return game.board.areas.find((area) => area.id === currentWaterFrame(game)?.area)?.waterwork?.state ?? null
+		return game.board.areas.find((area) => area.id === water.currentWaterFrame(game)?.area)?.waterwork?.state ?? null
 	}
 	return null
 }
