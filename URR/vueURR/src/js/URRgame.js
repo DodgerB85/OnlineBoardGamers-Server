@@ -348,10 +348,8 @@ function exchangeBarahshum(game, player, action) {
 	game.board.canals.push([from.id, to.id])
 }
 
-function resolveMaintenance(game, state, action) {
-	boardRules.requireRule(!rules.hasMaintenanceCrew(game, state.id), "This state already has a maintenance crew")
+function applyMaintenanceSales(game, state, sales) {
 	const player = state.king
-	const sales = action.sales || []
 	const prices = []
 	for (const batch of sales) {
 		boardRules.requireRule(game.players[player].money < rules.maintenanceShortfall(game, state.id), "Stop selling as soon as the mandatory crew can be paid for")
@@ -364,6 +362,20 @@ function resolveMaintenance(game, state, action) {
 		sellLand(game, player, batch)
 		boardRules.requireRule(state.king === player, "Maintenance sales must preserve the current throne")
 	}
+	return prices
+}
+
+// Preview incomplete funding with the same sale validation used on submission.
+export function previewMaintenanceSales(game, stateId, sales) {
+	const preview = JSON.parse(JSON.stringify(game))
+	applyMaintenanceSales(preview, preview.states[stateId], sales)
+	return preview
+}
+
+function resolveMaintenance(game, state, action) {
+	boardRules.requireRule(!rules.hasMaintenanceCrew(game, state.id), "This state already has a maintenance crew")
+	const player = state.king
+	const prices = applyMaintenanceSales(game, state, action.sales || [])
 	const shortfall = rules.maintenanceShortfall(game, state.id)
 	if (game.players[player].money >= shortfall) {
 		boardRules.requireRule(prices.length === 0 || game.players[player].money - shortfall < Math.min(...prices), "The cash left after hiring must be less than the cheapest land sold")

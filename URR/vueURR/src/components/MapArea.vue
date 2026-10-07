@@ -8,12 +8,14 @@ import * as assets from "../js/URRassets"
 import * as water from "../js/URRwater"
 import * as rf from "../js/URRreference"
 import * as debug from "../js/URRdebug"
+import { usePersonalStore } from "../stores/URRpersonal.js"
 import { useModelStore } from "../stores/URRstore.js"
-const emit = defineEmits(["selectArea", "changePath", "reviewDig", "confirmAction", "cancelAction"])
-const props = defineProps({ selectedHex: { type: String, default: null }, mapAction: { type: Object, default: null }, actionTargets: { type: Array, default: () => [] }, highlightedPlayer: { type: Number, default: null }, removalArea: { type: String, default: null }, landDraft: { type: Object, default: null }, waitingPlayerName: { type: String, default: null }, digCapacity: { type: [Number, String], default: null } })
+const emit = defineEmits(["selectArea", "changePath", "confirmAction", "cancelAction"])
+const props = defineProps({ selectedHex: { type: String, default: null }, mapAction: { type: Object, default: null }, actionTargets: { type: Array, default: () => [] }, highlightedPlayer: { type: Number, default: null }, removalArea: { type: String, default: null }, landDraft: { type: Object, default: null }, waitingPlayerName: { type: String, default: null }, digCapacity: { type: [Number, String, Array], default: null } })
 const store = useModelStore()
-const selectedHex = ref(null)
-watch(() => props.selectedHex, (id) => { selectedHex.value = id })
+const personal = usePersonalStore()
+const selectedHexId = ref(null)
+watch(() => props.selectedHex, (id) => { selectedHexId.value = id })
 const focusedHex = ref(null)
 const boardElement = ref(null)
 const showCoordinates = ref(false)
@@ -21,8 +23,15 @@ const previewOpen = ref(false)
 const previewWater = ref(false)
 const draftPath = ref([])
 const previewError = ref("")
-const digPreview = computed(() => boardRules.getDigPathPreview(store, draftPath.value, props.digCapacity))
-const digOptions = computed(() => previewOpen.value ? Object.fromEntries(store.board.areas.map((area) => [area.id, boardRules.getDigPathPreview(store, [...draftPath.value, area.id], props.digCapacity)])) : {})
+function previewDigPath(path) {
+	const capacities = Array.isArray(props.digCapacity) ? [...new Set(props.digCapacity)] : [props.digCapacity]
+	const previews = capacities.map((capacity) => boardRules.getDigPathPreview(store, path, capacity))
+	return previews.find((preview) => !preview.error) || previews[0] || { cost: null, isComplete: false, error: "No unused digging crews remain." }
+}
+const canTrace = computed(() => personal.canPlay() && store.gameflow.phase === rf.PHASE_DEVELOPMENT && ["digging", "eridu"].includes(store.gameflow.developmentStep) && store.viewSettings.actionIntent === "dig")
+watch(canTrace, (canTrace) => { previewOpen.value = canTrace }, { immediate: true })
+const digPreview = computed(() => previewDigPath(draftPath.value))
+const digOptions = computed(() => previewOpen.value ? Object.fromEntries(store.board.areas.map((area) => [area.id, previewDigPath([...draftPath.value, area.id])])) : {})
 const actualAreas = computed(() => store.board.areas.map((area) => ({ area, position: boardDisplay.getAreaPosition(area) })).filter((entry) => entry.position))
 const tabArea = computed(() => actualAreas.value.some((entry) => entry.area.id === focusedHex.value) ? focusedHex.value : actualAreas.value[0]?.area.id)
 const draftPositions = computed(() => draftPath.value.map((id) => actualAreas.value.find((entry) => entry.area.id === id)?.position || boardDisplay.PRINTED_HEXES.find((hex) => hex.id === id)).filter(Boolean))
@@ -44,7 +53,7 @@ const riverPaths = computed(() => (store.board.riverSources || []).map((source) 
 	return positions.join(" ")
 }))
 const waterReport = computed(() => [...store.computedHistory].reverse().find((entry) => (!store.viewSettings.showReplay || entry.historyIndex <= store.replayStep.index) && ["riverStart", "riverComplete"].includes(entry.administration?.kind))?.administration)
-const selectedArea = computed(() => store.board.areas.find((area) => area.id === selectedHex.value))
+const selectedArea = computed(() => store.board.areas.find((area) => area.id === selectedHexId.value))
 const reachable = computed(() => !previewOpen.value && !store.viewSettings.actionIntent && selectedArea.value?.waterwork ? boardRules.getWaterworkReach(store, selectedArea.value.id) : [])
 const waterDestinations = computed(() => water.waterChoices(store).map((choice) => choice.area))
 const routingArea = computed(() => water.currentWaterFrame(store)?.area)
@@ -53,7 +62,7 @@ const queuedPurchase = computed(() => !store.viewSettings.showReplay && store.ga
 const maintenanceState = computed(() => store.gameflow.phase === rf.PHASE_DEVELOPMENT && !["eridu", "betweenStates"].includes(store.gameflow.developmentStep) && !store.gameflow.pendingOffer ? store.states[view.currentStateId(store)] : null)
 const needsMaintenanceSales = computed(() => maintenanceState.value && store.players[maintenanceState.value.king].money < rules.maintenanceShortfall(store, maintenanceState.value.id))
 const queuedSales = computed(() => !store.viewSettings.showReplay && (store.gameflow.phase === rf.PHASE_SETTLEMENT || needsMaintenanceSales.value) ? props.landDraft?.sales || [] : [])
-const maintenanceLand = computed(() => needsMaintenanceSales.value && store.viewSettings.actionIntent === "sell" ? store.board.areas.filter((area) => !rules.getMaintenanceSaleError(store, maintenanceState.value.king, area, maintenanceState.value.id)).map((area) => area.id) : [])
+const maintenanceLand = computed(() => needsMaintenanceSales.value && store.viewSettings.actionIntent === "sell" ? props.landDraft?.eligibleSales || [] : [])
 const harvestRemovalSites = computed(() => store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === "harvest" ? rules.removableWaterworks(store, view.currentStateId(store)) : [])
 const barahshumSites = computed(() => {
 	const nation = store.nations[rf.NATION_BARAHSHUM]
@@ -114,7 +123,7 @@ const mapHint = computed(() => {
 	if (store.viewSettings.actionIntent === "build") return "Choose a highlighted site to build a pump or reservoir"
 	if (store.viewSettings.actionIntent === "calah") return "Choose a highlighted site for Calah's free waterwork"
 	if (store.viewSettings.actionIntent === "barahshum") return "Choose a highlighted canal destination beside Barahshum"
-	if (store.viewSettings.actionIntent === "sell") return "Choose highlighted land to fund the required crew"
+	if (store.viewSettings.actionIntent === "sell") return props.landDraft?.fundingGap === 0 ? "Crew covered · finish development to save the sales" : maintenanceLand.value.length ? "Choose highlighted land to fund the required crew" : "No eligible funding land remains · review crew funding"
 	if (store.gameflow.pendingOffer) return store.gameflow.pendingOffer.action.type === "offerNation" ? "Review the proposed nation purchase" : "Review the proposal at the highlighted site"
 	if (queuedPurchase.value || queuedSales.value.length) return needsMaintenanceSales.value ? "Crew funding: red sites are queued sales" : "Trade draft: blue purchase · red sales"
 	if (store.gameflow.phase === rf.PHASE_SETTLEMENT) return barahshumSites.value.length ? "Select land · purple sites allow Barahshum" : "Select land to buy or sell"
@@ -133,13 +142,14 @@ const mapHint = computed(() => {
 
 function inspectArea(id) {
 	focusedHex.value = id
-	selectedHex.value = id
+	selectedHexId.value = id
 	if (store.debug.tool && debug.canDebug()) {
 		const position = actualAreas.value.find((entry) => entry.area.id === id)?.position || boardDisplay.PRINTED_HEXES.find((hex) => hex.id === id)
 		debug.placeAtArea(id, position)
 		return
 	}
-	if (!previewOpen.value || draftPath.value.at(-1) === id) return
+	if (canTrace.value && !previewOpen.value) previewOpen.value = true
+	if (!canTrace.value || !previewOpen.value || draftPath.value.at(-1) === id) return
 	const preview = digOptions.value[id]
 	if (preview.error) { previewError.value = preview.error; return }
 	draftPath.value.push(id)
@@ -175,19 +185,11 @@ function validateDraft() {
 watch(() => props.digCapacity, validateDraft)
 function undoDraft() {
 	draftPath.value.pop()
-	selectedHex.value = draftPath.value.at(-1) ?? null
-	if (selectedHex.value !== null) focusedHex.value = selectedHex.value
+	selectedHexId.value = draftPath.value.at(-1) ?? null
+	if (selectedHexId.value !== null) focusedHex.value = selectedHexId.value
 	validateDraft()
 }
 function clearDraft() { draftPath.value = []; previewError.value = "" }
-function startDig(keepPath = false) {
-	if (!keepPath) clearDraft()
-	previewOpen.value = true
-	const startArea = keepPath ? draftPath.value.at(-1) : tabArea.value
-	if (keepPath) selectedHex.value = startArea
-	focusArea(startArea)
-}
-function stopSelectingPath() { previewOpen.value = false; if (draftPath.value.length >= 2) emit("reviewDig") }
 function finishDig() { clearDraft(); previewOpen.value = false }
 function areaDescription(area) {
 	let digDescription = ""
@@ -202,9 +204,9 @@ function areaDescription(area) {
 	const price = !area.isRiver && (store.gameflow.phase === rf.PHASE_SETTLEMENT || store.gameflow.phase === rf.PHASE_GAME_OVER || needsMaintenanceSales.value) ? ` · ${area.markerOwner === null ? 'Colonization' : 'Market'} price ${rules.landPrice(store, area, area.markerOwner === null)} SPL` : ""
 	const waterwork = area.waterwork ? ` · ${rf.STATE_NAMES[area.waterwork.state]} ${area.waterwork.kind}, ${view.waterworkMeasure(area.waterwork)}` : ""
 	const irrigation = area.irrigatedBy !== null ? ` · Irrigated by ${rf.STATE_NAMES[area.irrigatedBy]}` : ""
-	return `${area.label || area.id}${digDescription}: ${area.isRiver ? 'River' : `${rf.LAND_NAMES[area.landType]}${area.isCity ? ' city' : ''}, ${rf.STATE_NAMES[area.state]}, ${owner}`}${homeland}${closure}${price}${waterwork}${irrigation}${queuedPurchase.value === area.id ? " · Queued purchase" : ""}${queuedSales.value.includes(area.id) ? " · Queued sale" : ""}${chosenRemoval.value === area.id ? " · Selected for removal if harvest is stored" : harvestRemovalSites.value.includes(area.id) ? " · Removable if harvest is stored" : ""}${calahSites.value.includes(area.id) ? " · Calah waterwork location" : ""}${barahshumSites.value.includes(area.id) ? " · Barahshum canal destination" : ""}`
+	return `${area.label || area.id}${digDescription}: ${area.isRiver ? 'River' : `${rf.LAND_NAMES[area.landType]}${area.isCity ? ' city' : ''}, ${rf.STATE_NAMES[area.state]}, ${owner}`}${homeland}${closure}${props.landDraft?.blocked?.[area.id] ? ` · ${props.landDraft.blocked[area.id]}` : ""}${price}${waterwork}${irrigation}${queuedPurchase.value === area.id ? " · Queued purchase" : ""}${queuedSales.value.includes(area.id) ? " · Queued sale" : ""}${chosenRemoval.value === area.id ? " · Selected for removal if harvest is stored" : harvestRemovalSites.value.includes(area.id) ? " · Removable if harvest is stored" : ""}${calahSites.value.includes(area.id) ? " · Calah waterwork location" : ""}${barahshumSites.value.includes(area.id) ? " · Barahshum canal destination" : ""}`
 }
-watch(selectedHex, (id) => emit("selectArea", id))
+watch(selectedHexId, (id) => emit("selectArea", id))
 watch(draftPath, (path) => emit("changePath", [...path]), { deep: true })
 function revealSelection() {
 	const hex = boardElement.value.querySelector(".areaHit.selected")
@@ -220,23 +222,23 @@ function revealAboveActions(hex, behavior = "smooth") {
 }
 function revealBoard() { boardElement.value.scrollIntoView({ block: "start", behavior: "smooth" }) }
 async function locateArea(id, shouldSelect = false) {
-	if (shouldSelect) selectedHex.value = id
+	if (shouldSelect) selectedHexId.value = id
 	focusArea(id)
 	await nextTick()
 	const hex = boardElement.value.querySelector(`[data-area-id="${id}"]`)
 	hex.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" })
 	revealAboveActions(hex)
 }
-defineExpose({ startDig, finishDig, revealSelection, revealBoard, locateArea, isTracing: previewOpen })
-watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.stateIndex, store.gameflow.developmentStep, store.rain.step, store.rain.harvestOrder[0], water.currentWaterFrame(store)?.area], () => { finishDig(); selectedHex.value = null })
+defineExpose({ finishDig, revealSelection, revealBoard, locateArea, isTracing: previewOpen })
+watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.stateIndex, store.gameflow.developmentStep, store.rain.step, store.rain.harvestOrder[0], water.currentWaterFrame(store)?.area], () => { finishDig(); selectedHexId.value = null; previewOpen.value = canTrace.value })
 </script>
 
 <template>
 	<div id="mapArea" ref="boardElement">
 		<div class="boardHeading"><b>Game board</b><span class="mapHint">{{ mapHint }}</span><div class="mapZoom"><button :aria-pressed="showCoordinates" @click="showCoordinates = !showCoordinates" title="Show coordinates on every hex">Hex labels</button></div></div>
 		<div v-if="waterReport" class="riverStatus" role="status"><span><b>River flow · Turn {{ waterReport.turn }}</b> · {{ waterReport.waterTotal }} water from upstream<template v-if="waterReport.kind === 'riverComplete'"> · {{ waterReport.irrigatedCount }} wet hexes · {{ waterReport.outflow }} water flows off the board<template v-if="!waterReport.irrigatedCount"> · No irrigation income</template></template><template v-else> · Routing in progress</template></span></div>
-		<div class="controls" v-if="previewOpen"><b>Canal path:</b><span>{{ draftPath.map((id) => store.board.areas.find((area) => area.id === id)?.label || id).join(' → ') || 'Click a highlighted starting area.' }}</span><button @click="undoDraft" :disabled="!draftPath.length">Undo</button><button @click="clearDraft" :disabled="!draftPath.length">Clear</button><button @click="stopSelectingPath" :disabled="draftPath.length > 0 && !digPreview.isComplete">{{ draftPath.length >= 2 ? 'Review canal' : 'Stop selecting path' }}</button><label><input type="checkbox" v-model="previewWater" :disabled="draftPath.length < 2" /> Animate draft</label></div>
-		<div v-if="previewOpen" class="digStatus" role="status"><b>{{ digCapacity === null ? 'Choose an unused crew' : `${digCapacity} crew` }}</b><template v-if="digPreview.cost"> · {{ digPreview.cost.canals }} canal points + {{ digPreview.cost.junctions }} junction points = {{ digPreview.cost.points }} total</template><span v-if="draftPath.length && !digPreview.error"> · {{ digPreview.isComplete ? 'Ready to build; you may extend the route if points allow.' : draftPath.length === 1 ? 'Select an adjacent highlighted hex.' : 'Unfinished route: continue to an existing river or canal.' }}</span></div>
+		<div class="controls" v-if="previewOpen"><b>Canal path:</b><span>{{ draftPath.map((id) => store.board.areas.find((area) => area.id === id)?.label || id).join(' → ') || 'Click a highlighted starting area.' }}</span><button @click="undoDraft" :disabled="!draftPath.length">Undo</button><button @click="clearDraft" :disabled="!draftPath.length">Clear</button><label><input type="checkbox" v-model="previewWater" :disabled="draftPath.length < 2" /> Animate draft</label></div>
+		<div v-if="previewOpen" class="digStatus" role="status"><b>{{ Array.isArray(digCapacity) ? 'Automatic crew selection' : digCapacity === null ? 'No unused crew' : `${digCapacity} crew` }}</b><template v-if="digPreview.cost"> · {{ digPreview.cost.canals }} canal points + {{ digPreview.cost.junctions }} junction points = {{ digPreview.cost.points }} total</template><span v-if="draftPath.length && !digPreview.error"> · {{ digPreview.isComplete ? 'Ready to add; a fitting crew will be used. You may extend the route.' : draftPath.length === 1 ? 'Select an adjacent highlighted hex.' : 'Unfinished route: continue to an existing river or canal.' }}</span></div>
 		<div v-if="previewError" class="previewError" role="alert">{{ previewError }}</div>
 		<div class="mapSurface">
 			<svg :viewBox="`0 0 ${boardDisplay.MAP_WIDTH} ${boardDisplay.MAP_HEIGHT}`" aria-label="UR: 1830 BC game board"><title>Use arrow keys to move between adjacent hexes, and Enter or Space to select.</title>
@@ -247,11 +249,11 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 				<polyline v-if="draftLine" :points="draftLine" class="draftCanal" />
 				<path v-if="waterPath && previewWater" :d="waterPath" class="waterPreviewPath" />
 				<circle v-if="waterPath && previewWater" r="11" class="waterPreviewDot"><animateMotion :path="waterPath" dur="2.6s" repeatCount="indefinite" /></circle>
-				<g v-for="entry in actualAreas" :key="entry.area.id" class="boardArea" :class="{ showLabel: showCoordinates || selectedHex === entry.area.id || queuedPurchase === entry.area.id || queuedSales.includes(entry.area.id) || chosenRemoval === entry.area.id || draftPath.includes(entry.area.id) }">
+				<g v-for="entry in actualAreas" :key="entry.area.id" class="boardArea" :class="{ showLabel: showCoordinates || selectedHexId === entry.area.id || queuedPurchase === entry.area.id || queuedSales.includes(entry.area.id) || chosenRemoval === entry.area.id || draftPath.includes(entry.area.id) }">
 					<polygon v-if="inspectionTargets.has(entry.area.id)" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="inspectionHalo" />
 					<polygon v-if="store.viewSettings.inspectedState !== null && entry.area.state === store.viewSettings.inspectedState" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="inspectionHighlight" />
 					<polygon v-if="highlightedPlayer !== null && entry.area.owner === highlightedPlayer" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="inspectionHighlight ownedLandHighlight" />
-					<polygon :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="areaHit" :class="hasMapInspection || store.turnDraft.ready || store.viewSettings.showReplay ? {} : { actionSite: actionTargets.includes(entry.area.id), digComplete: digOptions[entry.area.id] && !digOptions[entry.area.id].error && digOptions[entry.area.id].isComplete, digContinue: digOptions[entry.area.id] && !digOptions[entry.area.id].error && !digOptions[entry.area.id].isComplete, selected: selectedHex === entry.area.id, drafting: draftPath.includes(entry.area.id), reachable: reachable.includes(entry.area.id), waterDestination: waterDestinations.includes(entry.area.id), routing: routingArea === entry.area.id, maintenanceSale: maintenanceLand.includes(entry.area.id), barahshumSite: barahshumSites.includes(entry.area.id), calahSite: calahSites.includes(entry.area.id), harvestRemovalSite: harvestRemovalSites.includes(entry.area.id), removalTarget: chosenRemoval === entry.area.id, tradePurchase: queuedPurchase === entry.area.id, tradeSale: queuedSales.includes(entry.area.id), offerTarget: store.gameflow.pendingOffer?.action.area === entry.area.id }" role="button" :tabindex="tabArea === entry.area.id ? 0 : -1" :data-area-id="entry.area.id" :aria-label="areaDescription(entry.area)" @focus="focusedHex = entry.area.id" @keydown="moveFocus($event, entry)" @click="inspectArea(entry.area.id)" @keydown.enter.prevent="inspectArea(entry.area.id)" @keydown.space.prevent="inspectArea(entry.area.id)"><title>{{ areaDescription(entry.area) }}</title></polygon>
+					<polygon :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="areaHit" :class="[{ purchaseLocked: !store.viewSettings.showReplay && !!props.landDraft?.blocked?.[entry.area.id] }, hasMapInspection || store.turnDraft.ready || store.viewSettings.showReplay ? {} : { actionSite: actionTargets.includes(entry.area.id), digComplete: digOptions[entry.area.id] && !digOptions[entry.area.id].error && digOptions[entry.area.id].isComplete, digContinue: digOptions[entry.area.id] && !digOptions[entry.area.id].error && !digOptions[entry.area.id].isComplete, selected: selectedHexId === entry.area.id, drafting: draftPath.includes(entry.area.id), reachable: reachable.includes(entry.area.id), waterDestination: waterDestinations.includes(entry.area.id), routing: routingArea === entry.area.id, maintenanceSale: maintenanceLand.includes(entry.area.id), barahshumSite: barahshumSites.includes(entry.area.id), calahSite: calahSites.includes(entry.area.id), harvestRemovalSite: harvestRemovalSites.includes(entry.area.id), removalTarget: chosenRemoval === entry.area.id, tradePurchase: queuedPurchase === entry.area.id, tradeSale: queuedSales.includes(entry.area.id), offerTarget: store.gameflow.pendingOffer?.action.area === entry.area.id }]" role="button" :tabindex="tabArea === entry.area.id ? 0 : -1" :data-area-id="entry.area.id" :aria-label="areaDescription(entry.area)" @focus="focusedHex = entry.area.id" @keydown="moveFocus($event, entry)" @click="inspectArea(entry.area.id)" @keydown.enter.prevent="inspectArea(entry.area.id)" @keydown.space.prevent="inspectArea(entry.area.id)"><title>{{ areaDescription(entry.area) }}</title></polygon>
 					<polygon v-if="mapDecisions[entry.area.id] && queuedPurchase === entry.area.id && queuedSales.includes(entry.area.id)" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="purchaseSaleOutline" />
 					<polygon v-if="entry.area.irrigatedBy !== null" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="wetHex" />
 					<polygon v-if="entry.area.id === store.viewSettings.historyArea" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="historyOutline" />
@@ -263,7 +265,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 					<circle v-if="entry.area.irrigatedBy !== null" :cx="entry.position.x + 24" :cy="entry.position.y + 20" r="10" class="irrigationMarker"><title>Irrigated by {{ rf.STATE_NAMES[entry.area.irrigatedBy] }}</title></circle>
 					<g v-if="mapDecisions[entry.area.id]" class="mapDecisionHighlight" :class="mapDecisions[entry.area.id].kind">
 						<polygon :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="mapDecisionHalo" />
-						<polygon :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="mapDecisionOutline" :class="{ source: mapDecisions[entry.area.id].source, chosen: selectedHex === entry.area.id || chosenRemoval === entry.area.id }" />
+						<polygon :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="mapDecisionOutline" :class="{ source: mapDecisions[entry.area.id].source, chosen: selectedHexId === entry.area.id || chosenRemoval === entry.area.id }" />
 						<template v-if="mapDecisions[entry.area.id].number"><circle :cx="entry.position.x - 28" :cy="entry.position.y - 27" r="16" class="decisionBadge" /><text :x="entry.position.x - 28" :y="entry.position.y - 27" class="destinationNumber">{{ mapDecisions[entry.area.id].label }}</text></template>
 						<template v-else-if="mapDecisions[entry.area.id].label"><rect :x="entry.position.x - 36" :y="entry.position.y + 23" width="72" height="23" rx="4" class="decisionBadge" /><text :x="entry.position.x" :y="entry.position.y + 35" class="decisionLabel">{{ mapDecisions[entry.area.id].label }}</text></template>
 					</g>
@@ -309,6 +311,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 </template>
 
 <style scoped>
+.areaHit.purchaseLocked { fill: #444; fill-opacity: .35; }
 .mapSurface { position: relative; }.mapConfirmation { position: absolute; width: 220px; max-width: 100%; box-sizing: border-box; padding: 8px; background: #fff9e9; border: 2px solid #177daf; border-radius: 5px; box-shadow: 0 2px 8px #0005; text-align: left; font-size: 13px; line-height: 1.4; z-index: 2; }.mapConfirmation b { display: block; }.mapConfirmation small { display: block; margin: 4px 0; }.mapConfirmation button { min-height: 36px; margin-right: 5px; font: inherit; }.mapConfirmation button:first-child { background: #d9ead1; }.areaHit.actionSite { fill: #7bdca3; fill-opacity: .35; stroke: #176a3b; stroke-width: 6; }.actionShade { fill: #fff9e9; fill-opacity: .55; pointer-events: none; }
 
 .areaHit.digComplete { fill: #7bdca3; fill-opacity: .3; stroke: #176a3b; }

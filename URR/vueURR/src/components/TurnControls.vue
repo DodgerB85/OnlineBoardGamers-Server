@@ -1,8 +1,10 @@
 <script setup>
 import { computed } from "vue"
+import * as rf from "../js/URRreference"
 import * as controller from "../js/URRcontroller.js"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
+defineProps({ landDraft: { type: Object, default: null }, turnAction: { type: Object, default: null } })
 const emit = defineEmits(["endTurn"])
 const canReview = computed(() => controller.canReviewTurn())
 </script>
@@ -10,11 +12,12 @@ const canReview = computed(() => controller.canReviewTurn())
 <template>
 	<div class="turnControls">
 		<p v-if="store.turnDraft.message" role="status">{{ store.turnDraft.message }}</p>
-		<p v-if="store.turnDraft.start" class="draftNotice">Only End Turn saves your choices · {{ store.turnDraft.steps.length }} action{{ store.turnDraft.steps.length === 1 ? '' : 's' }}</p>
+		<p v-if="store.turnDraft.start" class="draftNotice">Only the turn confirmation saves your choices · {{ store.turnDraft.steps.length }} action{{ store.turnDraft.steps.length === 1 ? '' : 's' }}</p>
 		<ol v-if="store.turnDraft.ready" aria-label="Choices to confirm"><li v-for="(step, index) in store.turnDraft.steps" :key="index">{{ step.label }}</li></ol>
 		<p v-if="store.turnDraft.ready">Undo or Reset Turn to change your choices.</p>
+		<p v-if="turnAction?.error" class="draftNotice" role="status">{{ turnAction.error }}</p>
 		<p v-if="store.gameMessages.actionError || store.gameMessages.errorText" class="error" role="alert">{{ store.gameMessages.actionError || store.gameMessages.errorText }}</p>
-		<div><button :disabled="!canReview || !store.turnDraft.steps.length" @click="controller.undoAction">Undo</button><button :disabled="!canReview" @click="controller.resetTurn">Reset Turn</button><button class="primaryAction" :disabled="!canReview" @click="emit('endTurn')">End Turn</button></div>
+		<div><button v-if="!landDraft?.hasTrade && !turnAction?.hasPendingSales" :disabled="!canReview || !store.turnDraft.steps.length" @click="controller.undoAction">Undo</button><button v-if="!landDraft?.hasTrade && !turnAction?.hasPendingSales" :disabled="!canReview" @click="controller.resetTurn">Reset Turn</button><button class="primaryAction" :disabled="!canReview || !!landDraft?.error || !!turnAction?.error" @click="emit('endTurn')">{{ landDraft?.hasTrade ? `Complete Turn${landDraft.net === null ? '' : ` (${landDraft.net >= 0 ? '+' : ''}${landDraft.net} SPL)`}` : turnAction?.label || (store.gameflow.phase === rf.PHASE_SETTLEMENT && !store.turnDraft.start ? 'Pass' : 'End Turn') }}</button></div>
 	</div>
 </template>
 

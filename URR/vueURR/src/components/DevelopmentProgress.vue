@@ -8,12 +8,14 @@ const store = useModelStore()
 const state = computed(() => store.states[view.currentStateId(store)])
 const step = computed(() => store.gameflow.developmentStep)
 const needsCrew = computed(() => state.value && !rules.hasMaintenanceCrew(store, state.value.id))
+const needsFunding = computed(() => needsCrew.value && store.players[state.value.king].money < rules.maintenanceShortfall(store, state.value.id))
 </script>
 
 <template>
 	<div v-if="store.gameflow.phase === rf.PHASE_DEVELOPMENT" class="developmentProgress" aria-label="Development progress">
 		<p v-if="step === 'eridu'">Eridu special digging · before state development</p>
 		<p v-else-if="step === 'betweenStates'">Between states · optional Barahshum exchange before development continues</p>
+		<template v-else-if="needsFunding"><ol><li class="current" aria-current="step">Fund required crew</li><li>Finish development</li></ol></template>
 		<template v-else>
 			<ol><li :class="{ current: step === 'digging', completed: step === 'purchasing' }" :aria-current="step === 'digging' ? 'step' : undefined">{{ step === 'purchasing' ? 'Digging closed' : 'Dig canals (optional)' }}</li><li :class="{ current: step === 'purchasing' }" :aria-current="step === 'purchasing' ? 'step' : undefined">Buy equipment (optional)</li><li>End development</li></ol>
 			<p v-if="needsCrew" class="crewRequirement">Crew required before ending.<template v-if="rules.maintenanceShortfall(store, state.id)"> Private contribution: {{ rules.maintenanceShortfall(store, state.id) }} SPL.</template><template v-else> Paid from the state treasury.</template></p>

@@ -41,6 +41,7 @@ const mapAction = ref(null)
 const actionTargets = ref([])
 const removalArea = ref(null)
 const landDraft = ref(null)
+const turnAction = ref(null)
 const canalPath = ref([])
 const digCapacity = ref(null)
 const mainArea = ref(null)
@@ -119,19 +120,6 @@ function selectArea(id) {
 	selectedArea.value = id
 	if (id !== null && store.gameflow.phase === rf.PHASE_SETTLEMENT) store.viewSettings.inspectedState = store.board.areas.find((area) => area.id === id).state
 }
-function startDig(keepPath = false) {
-	store.viewSettings.actionIntent = "dig"
-	store.viewSettings.inspectedState = null
-	store.viewSettings.showOwnedLand = false
-	map.value.startDig(keepPath)
-	nextTick(() => map.value.revealBoard())
-}
-function reviewDig() {
-	nextTick(() => {
-		const control = document.querySelector(".digAction:not(:disabled)") || document.querySelector(".fittingCrews button")
-		control?.focus()
-	})
-}
 function locateNation(id) { map.value.locateArea(store.board.areas.find((area) => area.nation === id).id, true) }
 function revealStatus(type) {
 	nextTick(() => statusPanels.value.querySelector(type === "player" ? ".holdingsPanel" : ".stateStrip").scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" }))
@@ -159,6 +147,7 @@ watch(() => store.turnDraft.revision, () => {
 	selectedArea.value = null
 	removalArea.value = null
 	landDraft.value = null
+	turnAction.value = null
 	mapAction.value = null
 	actionTargets.value = []
 })
@@ -185,14 +174,14 @@ function showDebug() {
 			<aside ref="statusPanels" class="stateSidebar"><PlayerHoldings ref="holdings" /><StateStrip @inspect="revealStatus" /><EquipmentSupply /></aside>
 			<div class="mapContainer">
 				<TerrainMarket v-if="showLandMarket" />
-				<MapArea ref="map" :selected-hex="selectedArea" :map-action="mapAction" :action-targets="actionTargets" @confirm-action="gameActions?.confirmMapAction()" @cancel-action="gameActions?.cancelMapAction()" :highlighted-player="store.viewSettings.showOwnedLand ? holdings?.activePlayer ?? null : null" :removal-area="removalArea" :land-draft="landDraft" :waiting-player-name="waitingPlayerName" :dig-capacity="digCapacity" @select-area="selectArea" @change-path="canalPath = $event" @review-dig="reviewDig" />
+				<MapArea ref="map" :selected-hex="selectedArea" :map-action="mapAction" :action-targets="actionTargets" @confirm-action="gameActions?.confirmMapAction()" @cancel-action="gameActions?.cancelMapAction()" :highlighted-player="store.viewSettings.showOwnedLand ? holdings?.activePlayer ?? null : null" :removal-area="removalArea" :land-draft="landDraft" :waiting-player-name="waitingPlayerName" :dig-capacity="digCapacity" @select-area="selectArea" @change-path="canalPath = $event" />
 			</div>
 			<aside v-if="!store.viewSettings.showReplay" class="actionSidebar">
 				<div class="actionPanelHeading"><small class="actingLabel">{{ actingLabel }}</small>{{ actionPanelTitle }}</div>
 				<DevelopmentProgress v-if="!store.turnDraft.ready" />
 				<div v-if="!store.turnDraft.ready" ref="actionPanelBody" class="actionPanelBody"><NationMarket v-if="store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS" @locate-nation="locateNation" />
-				<GameActions v-else ref="gameActions" :key="store.turnDraft.revision" @select-area="selectedArea = $event" @change-map-action="mapAction = $event" @change-action-targets="actionTargets = $event" :selected-area="selectedArea" :path="canalPath" @start-dig="startDig" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" @change-dig-capacity="digCapacity = $event" /></div>
-				<TurnControls @end-turn="finishTurn" />
+				<GameActions v-else ref="gameActions" :key="store.turnDraft.revision" @select-area="selectedArea = $event" @change-map-action="mapAction = $event" @change-action-targets="actionTargets = $event" :selected-area="selectedArea" :path="canalPath" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" @change-turn-action="turnAction = $event" @change-dig-capacity="digCapacity = $event" /></div>
+				<TurnControls :turn-action="turnAction" :land-draft="landDraft" @end-turn="finishTurn" />
 			</aside>
 		</div>
 		<DebugArea v-if="showDebug() && !store.viewSettings.showReplay" />
