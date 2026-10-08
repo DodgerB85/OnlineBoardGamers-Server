@@ -162,8 +162,13 @@ export const useModelStore = defineStore("store", () => {
 
 	// Media Line mod - published headlines. Each headline is written during a
 	// working day and modifies every sale price at the NEXT turn's dinner only.
+	// Milestone 2 (First TV Announcer Used): doubleCampaign is the one campaign
+	// of the holder's that pushes 2 cards per house per night; doubleUsed is the
+	// one-shot latch (the reward applies to the holder's first TV campaign only).
 	const mediaLine = reactive({
 		headlines: [], // { turn, playerIndex, value } with value +5 / -5
+		doubleCampaign: -1,
+		doubleUsed: false,
 	})
 
 	/*************************************** UNSAVED - TEMP VARS -- these do not need to be stored or saved */

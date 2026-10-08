@@ -1797,6 +1797,19 @@ export function availableNewRoads() {
 	return res
 }
 
+// Media Line mod: B-line campaigns slot into the A-line push order with
+// decimal sort keys (serpentine interleave) - TV channels between radio and
+// airplanes, phone tokens between mailboxes. A-line keys are their raw
+// campaign numbers, untouched, so old replays stay byte-identical.
+// radio(1-3) TV-A(3.5) plane(4) TV-B(4.5) plane(5,6) phone1-6(6.5,7.5,8.5,
+// 9.5,10.5,10.6) mailbox(7-10) billboard(11-16) ...
+export function campaignSortKey(number) {
+	if (number >= 28 && number <= 29) return 3.5 + (number - 28) // TV channels: 3.5, 4.5
+	if (number >= 30 && number <= 34) return 6.5 + (number - 30) // phone slots 1-5: 6.5 - 10.5
+	if (number === 35) return 10.6 // phone slot 6
+	return number
+}
+
 // Used in dinnertime to break ties
 export function getPlaceInFullTurnOrderForPlayer(playerIndex) {
 	const store = useModelStore()
@@ -1818,6 +1831,42 @@ export function giveHeadlineTotal() {
 		if (h.turn === store.gameflow.turn - 1) sum += h.value
 	}
 	return Math.max(-10, Math.min(10, sum))
+}
+
+// Media Line mod: milestone 1 (First Telemarketer Used) - grouped all-eat
+// bonus, judged after dinner. Purity: none of the holder's own A-line
+// campaigns ran tonight (their pushed demands are what is being matched).
+// All-eat: per B-line campaign, every house it actually pushed into tonight
+// must have been sold - the WHOLE house, including demand other players'
+// ads brought - by the holder (one sale always covers a whole house).
+// Each group pays houses x $10 independently; a group with any house lost
+// to a rival (or left unsold) pays nothing.
+function settleMediaLineGroups(sold, replayOnly) {
+	const store = useModelStore()
+	const night = mediaLineNight
+	mediaLineNight = { groups: {}, aLinePushers: new Set() } // reset for the next night
+	if (!store.startingOptions.mediaLine) return
+
+	for (let i = 0; i < store.players.length; i++) {
+		if (!plyr.hasMilestone(i, rf.FIRST_TELEMARKETER_USED)) continue
+		if (night.aLinePushers.has(i)) continue // purity broken
+
+		let total = 0
+		const groups = []
+		for (const g of Object.values(night.groups)) {
+			if (g.owner !== i || g.houses.size === 0) continue
+			const allEaten = [...g.houses].every((h) => sold.some((s) => s.house === h && s.playerIndex === i))
+			if (allEaten) {
+				total += g.houses.size * 10
+				groups.push([...g.houses].sort((a, b) => a - b))
+			}
+		}
+		if (total > 0) {
+			store.players[i].money += total
+			store.bank -= total
+			if (!replayOnly) model.addHistory(rf.HIST_MEDIA_LINE_BONUS, [i, total, groups], -1, 0)
+		}
+	}
 }
 
 export function doDinnerTime(replayOnly) {
@@ -2066,6 +2115,8 @@ export function doDinnerTime(replayOnly) {
 	}
 
 	// --- PHASE 4: PAYOUTS & BANK BREAK ---
+	// Media Line mod: milestone 1 bonus (from the bank, outside sales income)
+	settleMediaLineGroups(sold, replayOnly)
 	finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayOnly)
 
 }
@@ -2812,6 +2863,16 @@ export function housesAffectedByMarketingCampaign(campaign) {
 	return Array.from(affectedHouses)
 }
 
+// Media Line mod: per-night accumulator for milestone 1 (First Telemarketer
+// Used, grouped all-eat bonus). Filled by doMarketingCampaigns (the payday
+// pushes whose needs are matched at the NEXT turn's dinner) and consumed +
+// reset by the next doDinnerTime - mirroring the live/replay call alternation.
+// groups: campaignNumber -> { owner, houses:Set } - houses the campaign
+// actually pushed demand into (houses squeezed out by the 3-card cap are
+// never added). aLinePushers: players whose own A-line campaigns ran tonight
+// (breaks purity for the milestone bonus).
+let mediaLineNight = { groups: {}, aLinePushers: new Set() }
+
 // PHASE_MARKETING_CAMPAIGNS -- fire off marketing campaigns
 // replayFinalPass: replay only. Live play repeats the whole phase once per Mass
 // Marketeer and only ticks campaign durations down on the last repeat. The replay
@@ -2831,8 +2892,9 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 
 	// Phase Loop (Runs once normally, or multiple times for Mass Marketers)
 	for (let mmLoop = totalMassMarketers; mmLoop >= 0; mmLoop--) {
-		// Sort campaigns by number
-		const sortedCampaigns = [...store.campaigns].sort((a, b) => a.number - b.number)
+		// Sort campaigns by number (Media Line mod: B-line campaigns use
+		// decimal sort keys so they interleave into the A-line order)
+		const sortedCampaigns = [...store.campaigns].sort((a, b) => campaignSortKey(a.number) - campaignSortKey(b.number))
 
 		const histObj = []
 		const earnedByPlayers = []
@@ -2845,12 +2907,30 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 			// the campaign still markets, just without a player attribution.
 			const isRadio = rf.MARKETING_CAMPAIGNS[campaign.number].type === rf.RADIO
 			const isAirplane = rf.MARKETING_CAMPAIGNS[campaign.number].type === rf.AIRPLANE
+			const isBLine = store.startingOptions.mediaLine && campaign.number >= 28 && campaign.number <= 35
+
+			// Media Line mod: nightly bookkeeping for the grouped all-eat bonus
+			if (store.startingOptions.mediaLine) {
+				if (isBLine) {
+					if (!mediaLineNight.groups[campaign.number]) mediaLineNight.groups[campaign.number] = { owner: playerIndex, houses: new Set() }
+					else mediaLineNight.groups[campaign.number].owner = playerIndex
+				} else if (playerIndex !== -1) {
+					// The player's own A-line campaign ran tonight - breaks purity
+					mediaLineNight.aLinePushers.add(playerIndex)
+				}
+			}
 
 			let good1 = campaign.good
 			let good2 = -1
 
 			// Milestone: Radio double marketing
 			if (player !== -1 && plyr.hasMilestone(playerIndex, rf.FIRST_RADIO_CAMPAIGN) && isRadio) {
+				good2 = campaign.good
+			}
+
+			// Media Line mod: milestone 2 (First TV Announcer Used) - the holder's
+			// first TV campaign pushes 2 identical cards per house per night
+			if (store.startingOptions.mediaLine && campaign.number === store.mediaLine.doubleCampaign) {
 				good2 = campaign.good
 			}
 
@@ -2886,7 +2966,7 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 				}
 
 				// Standard Good 1
-				tryAddNeed(good1, h1)
+				if (tryAddNeed(good1, h1) && isBLine) mediaLineNight.groups[campaign.number].houses.add(houseId)
 
 				// Standard Good 2
 				if (h2) tryAddNeed(good2, h2)
@@ -2919,6 +2999,9 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 					for (let i = 0; i < store.players.length; i++) {
 						plyr.recallMarketeer(i, campaign.number)
 					}
+					// Media Line mod: the doubled campaign is gone - free the slot
+					// (the one-shot latch stays, doubling never repeats)
+					if (store.mediaLine.doubleCampaign === campaign.number) store.mediaLine.doubleCampaign = -1
 				} else if (campaign.duration < 9) {
 					campaign.duration--
 				}

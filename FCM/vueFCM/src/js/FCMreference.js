@@ -216,6 +216,7 @@ export const HIST_BANK_BAILOUT = 71
 export const HIST_BAILOUT_CLAIM = 72
 // Media Line mod
 export const HIST_PUBLISH_HEADLINE = 73
+export const HIST_MEDIA_LINE_BONUS = 74
 
 export const LEMONADE = 0
 export const COKE = 1

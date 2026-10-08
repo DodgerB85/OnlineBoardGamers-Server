@@ -620,3 +620,331 @@ describe("Media Line stage 4 - headline in dinner settlement", () => {
 		expect(store.players[0].money - moneyBefore).toBe(-2)
 	})
 })
+
+describe("Media Line stage 5 - serpentine campaign order", () => {
+	it("maps B-line campaigns to decimal sort keys", () => {
+		// A-line keys are the raw campaign numbers, untouched
+		expect(rules.campaignSortKey(1)).toBe(1)
+		expect(rules.campaignSortKey(7)).toBe(7)
+		expect(rules.campaignSortKey(11)).toBe(11)
+		// TV channels slot between radio and airplanes
+		expect(rules.campaignSortKey(28)).toBe(3.5)
+		expect(rules.campaignSortKey(29)).toBe(4.5)
+		// Phone tokens interleave between the mailboxes
+		expect(rules.campaignSortKey(30)).toBe(6.5)
+		expect(rules.campaignSortKey(31)).toBe(7.5)
+		expect(rules.campaignSortKey(32)).toBe(8.5)
+		expect(rules.campaignSortKey(33)).toBe(9.5)
+		expect(rules.campaignSortKey(34)).toBe(10.5)
+		expect(rules.campaignSortKey(35)).toBe(10.6)
+	})
+
+	it("interleaves B-line pushes into the A-line order", () => {
+		const store = freshGame(2, ["50"])
+		const coords = blankCoords()
+		store.mapData.coords = coords
+		const emptyIdx = coords.indexOf(rf.EMPTY_SPACE)
+		const camp = (n) => ({ number: n, index: emptyIdx, rotated: false, good: rf.BURGER, duration: 9, houses: [] })
+		store.campaigns.push(camp(11), camp(28), camp(4), camp(7), camp(30))
+		rules.doMarketingCampaigns(false)
+		const entry = store.history.find((h) => h[0] === rf.HIST_MARKETING_CAMPAIGN_PHASE)
+		// radio(1-3) TV-A(3.5) plane(4) TV-B(4.5) ... phone(6.5) mailbox(7) ... billboard(11)
+		expect(entry[3].map((e) => e[0])).toEqual([28, 4, 30, 7, 11])
+	})
+})
+
+describe("Media Line stage 5 - milestone 1 grouped all-eat bonus", () => {
+	// Real random map + brute-force restaurant placement (stadium test pattern).
+	// A 4-player map carries enough board houses for the group tests.
+	function nightBoard() {
+		setActivePinia(createPinia())
+		const store = useModelStore()
+		model.setInternalStartingOptions(["50"])
+		store.mapData.tiles = mapMod.generateRandomMap(4)
+		mapMod.initCoords()
+		store.players.splice(0)
+		for (let i = 0; i < 2; i++) {
+			store.players.push({
+				name: "P" + i,
+				displayName: "P" + i,
+				colour: i,
+				restaurants: [],
+				money: 100,
+				bankrupt: false,
+				employees: [],
+				beach: [],
+				milestones: [],
+				marketers: [],
+				resources: [],
+				additionalCampaignArrayIndex: -1,
+				additionalMarketedGood: [],
+			})
+		}
+		store.gameflow.turn = 3
+		store.gameflow.fullTurnOrder = [0, 1]
+		store.gameflow.turnOrder = [0, 1]
+		store.availableMilestones = []
+		return store
+	}
+
+	function placeRestaurantNear(store, playerIndex, centerIndex) {
+		const colour = store.players[playerIndex].colour
+		for (let dy = -4; dy <= 4; dy++) {
+			for (let dx = -8; dx <= 8; dx++) {
+				const index = centerIndex + dy * rf.ssW + dx
+				if (index < 0 || index >= store.mapData.coords.length) continue
+				// Never overwrite existing map elements (roads/houses feed the
+				// servability logic under test)
+				if (store.mapData.coords[index] !== rf.EMPTY_SPACE || store.mapData.coords[index + 1] !== rf.EMPTY_SPACE || store.mapData.coords[index + rf.ssW] !== rf.EMPTY_SPACE || store.mapData.coords[index + rf.ssW + 1] !== rf.EMPTY_SPACE) continue
+				for (let rotation = 0; rotation < 4; rotation++) {
+					mapMod.addElement(rf.TYPE_RESTAURANT, colour, index, false)
+					store.players[playerIndex].restaurants.push({ index, rotation, open: true })
+					const distances = model.giveRestaurantRangesForHouse(store.houseUnderTest)
+					if (distances[playerIndex] !== -99 && distances[playerIndex] !== undefined) return true
+					store.players[playerIndex].restaurants.pop()
+					mapMod.addElement(rf.TYPE_RESTAURANT, colour, index, false, true)
+				}
+			}
+		}
+		return false
+	}
+
+	function servableHouses(store) {
+		const res = []
+		for (const h of rf.BOARD_HOUSES) {
+			if (mapMod.findIndexForHouse(h) < 0) continue
+			store.houseUnderTest = h
+			const d = model.giveRestaurantRangesForHouse(h)
+			if (d[0] !== -99 && d[0] !== undefined) res.push(h)
+		}
+		return res
+	}
+
+	function placeFirstRestaurant(store) {
+		for (const h of rf.BOARD_HOUSES) {
+			const idx = mapMod.findIndexForHouse(h)
+			if (idx < 0) continue
+			store.houseUnderTest = h
+			if (placeRestaurantNear(store, 0, idx)) return true
+		}
+		return false
+	}
+
+	// One restaurant rarely covers enough houses - keep adding restaurants
+	// (brute-forced near still-unservable houses) until `count` are servable
+	function ensureServable(store, count) {
+		expect(placeFirstRestaurant(store)).toBe(true)
+		for (let guard = 0; guard < 10 && servableHouses(store).length < count; guard++) {
+			const servable = new Set(servableHouses(store))
+			let placed = false
+			for (const h of rf.BOARD_HOUSES) {
+				if (servable.has(h)) continue
+				const idx = mapMod.findIndexForHouse(h)
+				if (idx < 0) continue
+				store.houseUnderTest = h
+				if (placeRestaurantNear(store, 0, idx)) {
+					placed = true
+					break
+				}
+			}
+			if (!placed) break
+		}
+		return servableHouses(store)
+	}
+
+	it("pays $10 per house for a fully eaten TV group", () => {
+		const store = nightBoard()
+		const houses = ensureServable(store, 5).slice(0, 5)
+		expect(houses).toHaveLength(5)
+
+		model.addMarketingCampaign(28, -1, false, rf.BURGER, 9, houses)
+		store.players[0].marketers.push({ campaign: 28, marketer: rf.TV_ANNOUNCER, nightShift: false })
+		store.players[0].milestones.push(rf.FIRST_TELEMARKETER_USED)
+
+		rules.doMarketingCampaigns(false)
+		for (const h of houses) {
+			expect(store.needs.find((n) => n.number === h).needs).toEqual([[rf.BURGER, 0]])
+		}
+
+		store.players[0].resources = Array(5).fill(rf.BURGER)
+		const before = store.players[0].money
+		rules.doDinnerTime(false)
+		// 5 whole-house sales x $10 + all-eat bonus 5 houses x $10
+		expect(store.players[0].money - before).toBe(100)
+		const bonusEntry = store.history.find((h) => h[0] === rf.HIST_MEDIA_LINE_BONUS)
+		expect(bonusEntry[3][0]).toBe(0)
+		expect(bonusEntry[3][1]).toBe(50)
+	})
+
+	it("an own A-line campaign still running breaks purity (no bonus)", () => {
+		const store = nightBoard()
+		const houses = ensureServable(store, 5).slice(0, 5)
+		expect(houses).toHaveLength(5)
+
+		model.addMarketingCampaign(28, -1, false, rf.BURGER, 9, houses)
+		store.players[0].marketers.push({ campaign: 28, marketer: rf.TV_ANNOUNCER, nightShift: false })
+		store.players[0].milestones.push(rf.FIRST_TELEMARKETER_USED)
+
+		// The holder also owns a lingering billboard campaign in open country:
+		// billboards only reach houses touching the token, so this one pushes
+		// nothing - purity is about owning a running A-line campaign at all
+		const quiet = store.mapData.coords.findIndex((v, i) => {
+			if (v !== rf.EMPTY_SPACE) return false
+			const x = i % rf.ssW
+			const y = Math.floor(i / rf.ssW)
+			for (let dy = -2; dy <= 2; dy++) {
+				for (let dx = -2; dx <= 2; dx++) {
+					const t = store.mapData.coords[mapMod.giveIndex(x + dx, y + dy)]
+					if (t === undefined || (t > rf.HOUSE && t < rf.HOUSE + 29)) return false
+				}
+			}
+			return true
+		})
+		expect(quiet).toBeGreaterThan(-1)
+		store.campaigns.push({ number: 11, index: quiet, rotated: false, good: rf.PIZZA, duration: 9, houses: [] })
+		store.players[0].marketers.push({ campaign: 11, marketer: -1, nightShift: false })
+
+		rules.doMarketingCampaigns(false)
+		for (const h of houses) {
+			expect(store.needs.find((n) => n.number === h).needs).toEqual([[rf.BURGER, 0]])
+		}
+		store.players[0].resources = Array(5).fill(rf.BURGER)
+		const before = store.players[0].money
+		rules.doDinnerTime(false)
+		// Sales only - purity broken by the own mailbox campaign
+		expect(store.players[0].money - before).toBe(50)
+		expect(store.history.some((h) => h[0] === rf.HIST_MEDIA_LINE_BONUS)).toBe(false)
+	})
+
+	it("a stolen house zeroes its group only, other groups still pay", () => {
+		const store = nightBoard()
+		const houses = ensureServable(store, 7)
+		expect(houses.length).toBeGreaterThanOrEqual(7)
+		const stolenFrom = houses.slice(0, 5)
+		const kept = houses.slice(5, 7)
+
+		// Rival: right next to the first target house, menu $5 (5 pricing managers)
+		store.houseUnderTest = stolenFrom[0]
+		expect(placeRestaurantNear(store, 1, mapMod.findIndexForHouse(stolenFrom[0]))).toBe(true)
+		store.houseUnderTest = stolenFrom[0]
+		const d = model.giveRestaurantRangesForHouse(stolenFrom[0])
+		expect(d[1]).not.toBe(-99)
+		store.players[1].employees.push(rf.PRICING_MANAGER, rf.PRICING_MANAGER, rf.PRICING_MANAGER, rf.PRICING_MANAGER, rf.PRICING_MANAGER)
+		store.players[1].resources = [rf.BURGER] // wins exactly one house
+
+		model.addMarketingCampaign(28, -1, false, rf.BURGER, 9, stolenFrom)
+		model.addMarketingCampaign(29, -1, false, rf.BURGER, 9, kept)
+		store.players[0].marketers.push({ campaign: 28, marketer: rf.TV_ANNOUNCER, nightShift: false }, { campaign: 29, marketer: rf.TV_ANNOUNCER, nightShift: false })
+		store.players[0].milestones.push(rf.FIRST_TELEMARKETER_USED)
+
+		rules.doMarketingCampaigns(false)
+		store.players[0].resources = Array(6).fill(rf.BURGER)
+		const before0 = store.players[0].money
+		const before1 = store.players[1].money
+		rules.doDinnerTime(false)
+		// P1 steals one house of group 28 ($5 sale); P0 sells the other 6 houses
+		// and group 29 (2 houses) still pays 2 x $10
+		expect(store.players[1].money - before1).toBe(5)
+		expect(store.players[0].money - before0).toBe(6 * 10 + 20)
+		const bonusEntry = store.history.find((h) => h[0] === rf.HIST_MEDIA_LINE_BONUS)
+		expect(bonusEntry[3][1]).toBe(20)
+	})
+
+	it("houses squeezed out by the 3-card cap are not group members", () => {
+		const store = nightBoard()
+		const houses = ensureServable(store, 5).slice(0, 5)
+		expect(houses).toHaveLength(5)
+
+		// First target house is already full (3 cards, no garden)
+		store.needs.push({ number: houses[0], needs: [[rf.PIZZA, -1], [rf.PIZZA, -1], [rf.PIZZA, -1]] })
+
+		model.addMarketingCampaign(28, -1, false, rf.BURGER, 9, houses)
+		store.players[0].marketers.push({ campaign: 28, marketer: rf.TV_ANNOUNCER, nightShift: false })
+		store.players[0].milestones.push(rf.FIRST_TELEMARKETER_USED)
+
+		rules.doMarketingCampaigns(false)
+		// The full house got no card from the campaign
+		expect(store.needs.find((n) => n.number === houses[0]).needs.every((sub) => sub[0] === rf.PIZZA)).toBe(true)
+
+		store.players[0].resources = Array(4).fill(rf.BURGER)
+		const before = store.players[0].money
+		rules.doDinnerTime(false)
+		// 4 sales x $10 + bonus for the 4 members x $10 (full house not a member,
+		// its unsold pizzas don't hurt the group)
+		expect(store.players[0].money - before).toBe(80)
+		const bonusEntry = store.history.find((h) => h[0] === rf.HIST_MEDIA_LINE_BONUS)
+		expect(bonusEntry[3][1]).toBe(40)
+	})
+})
+
+describe("Media Line stage 5 - milestone 2 first-campaign double", () => {
+	function tvBoard() {
+		const store = freshGame(2, ["50"])
+		const coords = blankCoords()
+		stamp(coords, 40, 40, 2, 2, rf.RESTAURANT_OPEN)
+		stamp(coords, 38, 40, 2, 3, rf.HOUSE + 7)
+		stamp(coords, 42, 39, 2, 3, rf.HOUSE + 1)
+		stamp(coords, 40, 36, 2, 3, rf.HOUSE + 5)
+		stamp(coords, 40, 42, 2, 3, rf.HOUSE + 2)
+		stamp(coords, 42, 42, 2, 3, rf.HOUSE + 4)
+		stamp(coords, 38, 37, 2, 3, rf.HOUSE + 6)
+		store.mapData.coords = coords
+		store.players[0].restaurants = [{ index: mapMod.giveIndex(40, 40), rotation: 0, open: true }]
+		store.players[0].employees.push(rf.TV_ANNOUNCER)
+		return store
+	}
+
+	it("latches on the holder's first TV placement and never again", () => {
+		const store = tvBoard()
+		controller.selectMarketer(rf.TV_ANNOUNCER, false)
+		for (const h of [7, 1, 5, 2, 4]) controller.toggleTVHouseSelection(mapMod.findIndexForHouse(h))
+		controller.chooseGood(2)
+		controller.chooseDuration(3)
+		controller.placeMarketingCampaign(0)
+
+		expect(store.mediaLine.doubleCampaign).toBe(28)
+		expect(store.mediaLine.doubleUsed).toBe(true)
+		expect(store.players[0].milestones).toContain(rf.FIRST_TV_ANNOUNCER_USED)
+
+		// A second channel placement by the same holder does not re-latch
+		store.players[0].employees.push(rf.TV_ANNOUNCER)
+		controller.selectMarketer(rf.TV_ANNOUNCER, false)
+		for (const h of [7, 1, 5, 2, 4]) controller.toggleTVHouseSelection(mapMod.findIndexForHouse(h))
+		controller.chooseGood(2)
+		controller.chooseDuration(3)
+		controller.placeMarketingCampaign(0)
+
+		expect(store.mediaLine.doubleCampaign).toBe(28)
+		expect(store.campaigns).toHaveLength(2)
+	})
+
+	it("pushes two cards per house while latched, then frees the slot at expiry", () => {
+		const store = tvBoard()
+		model.addMarketingCampaign(28, -1, false, rf.BURGER, 1, [7, 1, 5, 2, 4])
+		store.players[0].marketers.push({ campaign: 28, marketer: rf.TV_ANNOUNCER, nightShift: false })
+		store.mediaLine.doubleCampaign = 28
+		store.mediaLine.doubleUsed = true
+
+		rules.doMarketingCampaigns(false)
+		for (const h of [7, 1, 5, 2, 4]) {
+			expect(store.needs.find((n) => n.number === h).needs).toEqual([
+				[rf.BURGER, 0],
+				[rf.BURGER, 0],
+			])
+		}
+		// Duration 1: the campaign expired, the slot is freed, the latch stays
+		expect(store.campaigns).toHaveLength(0)
+		expect(store.mediaLine.doubleCampaign).toBe(-1)
+		expect(store.mediaLine.doubleUsed).toBe(true)
+	})
+
+	it("unlatched TV campaigns push a single card per house", () => {
+		const store = tvBoard()
+		model.addMarketingCampaign(29, -1, false, rf.BURGER, 9, [7, 1, 5])
+		store.players[0].marketers.push({ campaign: 29, marketer: rf.TV_ANNOUNCER, nightShift: false })
+		rules.doMarketingCampaigns(false)
+		for (const h of [7, 1, 5]) {
+			expect(store.needs.find((n) => n.number === h).needs).toEqual([[rf.BURGER, 0]])
+		}
+	})
+})

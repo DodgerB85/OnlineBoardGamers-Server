@@ -1440,6 +1440,13 @@ export function placeMarketingCampaign(index) {
 		model.addMarketingCampaign(store.context.campaign, index, store.context.rotated, store.context.good, store.context.duration, isTV ? [...store.context.tvHouses] : undefined)
 		rules.giveMarketingMilestones(playerIndex, store.context.marketer)
 
+		// Media Line mod: milestone 2 (First TV Announcer Used) - latch the
+		// holder's FIRST TV campaign; it pushes double demand until it expires
+		if (isTV && plyr.hasMilestone(playerIndex, rf.FIRST_TV_ANNOUNCER_USED) && !store.mediaLine.doubleUsed) {
+			store.mediaLine.doubleCampaign = store.context.campaign
+			store.mediaLine.doubleUsed = true
+		}
+
 		// SECOND CAMPAIGN MANAGER MILESTONE - add another campaign of the same type
 		if (plyr.hasMilestone(playerIndex, rf.FIRST_CAMPAIGN_MANAGER_USED) && !store.context.alreadyDoneMailboxMS && !store.context.secondCampaignManager && store.availableMilestones.indexOf(rf.FIRST_CAMPAIGN_MANAGER_USED) > -1) {
 			store.context.secondCampaignManager = true
