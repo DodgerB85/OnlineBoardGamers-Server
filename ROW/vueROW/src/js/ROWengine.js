@@ -81,6 +81,11 @@ export class PlayerState {
         this.player = player;
         for (const u of Object.values(Unlockable))
             this.unlocked[u] = 0;
+        // Gain $1 and draw-a-card are already unlocked once at setup: they are
+        // usable in SINGLE_OR_DOUBLE auxiliary actions from the start, and the
+        // player board only shows their remaining (second) upgrade disc.
+        this.unlocked[Unlockable.AUX_GAIN_DOLLAR] = 1;
+        this.unlocked[Unlockable.AUX_DRAW_CARD_TO_DISCARD_CARD] = 1;
     }
     getNumberOfCowboys() {
         return this.workers[Worker.COWBOY];

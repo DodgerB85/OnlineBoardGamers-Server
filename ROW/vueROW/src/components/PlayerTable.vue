@@ -80,7 +80,9 @@ const certMarkers = [
 // A disc is clickable (yellow) when an unlock action is live and this disc can
 // still be removed. Clicking performs the unlock directly.
 function discUnlockAction(d) {
-	if (!interactive.value || !ps.value || unlocked(d.u, d.nth)) return null
+	if (!interactive.value || !ps.value) return null
+	// Only the next disc in the pair can be removed: left first, then right.
+	if ((ps.value.unlocked[d.u] ?? 0) !== d.nth - 1) return null
 	if (!ps.value.canUnlock(d.u, game.value.isRailsToTheNorth())) return null
 	if (!d.black && store.actions.includes(ActionType.UNLOCK_WHITE)) return ActionType.UNLOCK_WHITE
 	if (store.actions.includes(ActionType.UNLOCK_BLACK_OR_WHITE)) return ActionType.UNLOCK_BLACK_OR_WHITE

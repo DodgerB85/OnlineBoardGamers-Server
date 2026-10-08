@@ -2,7 +2,7 @@
  * Serialization for the ROW game state (the persisted `gameData`).
  * Mirrors the field set of ROW.serialize but as a plain JSON document.
  */
-import { ActionStack, JavaRandom, ROWError, ROWException } from "./ROWcore";
+import { ActionStack, JavaRandom, ROWError, ROWException, Unlockable } from "./ROWcore";
 import { CattleMarket, Foresights, Game, JobMarket, KansasCitySupply, ObjectiveCards, PlayerState, RailroadTrack, Trail } from "./ROWengine";
 import { OBJECTIVE_CARD_TYPES } from "./ROWdata";
 function serializePlayerState(ps) {
@@ -37,6 +37,10 @@ function deserializePlayerState(obj) {
     ps.workers = obj.workers ?? ps.workers;
     ps.buildings = obj.buildings ?? [];
     ps.unlocked = obj.unlocked ?? ps.unlocked;
+    // Setup already removes the first (left) gain-$1 / draw-a-card disc. Older
+    // payloads saved before that starting state are brought up to it on load.
+    for (const u of [Unlockable.AUX_GAIN_DOLLAR, Unlockable.AUX_DRAW_CARD_TO_DISCARD_CARD])
+        ps.unlocked[u] = Math.max(ps.unlocked[u] ?? 0, 1);
     ps.objectives = obj.objectives ?? [];
     ps.stationMasters = obj.stationMasters ?? [];
     ps.teepees = obj.teepees ?? [];
