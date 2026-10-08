@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url"
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PAKO_FILE = path.join(__dirname, "..", "..", "..", "..", "Lobby", "static", "Lobby", "common", "pakoLib.js")
 
-let model, rf, rules, mapMod, controller, useModelStore
+let model, rf, rules, mapMod, controller, funcs, replay, useModelStore
 
 beforeAll(async () => {
 	if (!globalThis.pako) {
@@ -30,6 +30,8 @@ beforeAll(async () => {
 	rules = await import("./FCMrules.js")
 	mapMod = await import("./FCMmap.js")
 	controller = await import("./FCMcontroller.js")
+	funcs = await import("./FCMfuncs.js")
+	replay = await import("./FCMreplay.js")
 	;({ useModelStore } = await import("../stores/FCMstore.js"))
 })
 
@@ -946,5 +948,175 @@ describe("Media Line stage 5 - milestone 2 first-campaign double", () => {
 		for (const h of [7, 1, 5]) {
 			expect(store.needs.find((n) => n.number === h).needs).toEqual([[rf.BURGER, 0]])
 		}
+	})
+})
+
+describe("Media Line stage 6 - save / load round trip", () => {
+	const STARTING_MAP = [17, 0, 4, 0, 19, 3, 18, 0, 12, 2, 24, 2, 9, 0, 0, 2, 13, 2]
+
+	function seedMLGame(opts = ["50"]) {
+		setActivePinia(createPinia())
+		const store = useModelStore()
+		model.setInternalStartingOptions(opts)
+		store.players.splice(0)
+		for (let i = 0; i < 2; i++) {
+			store.players.push({
+				name: "P" + i,
+				displayName: "P" + i,
+				colour: i,
+				restaurants: [],
+				money: 100,
+				bankrupt: false,
+				employees: [],
+				beach: [],
+				milestones: [],
+				marketers: [],
+				resources: [],
+				additionalCampaignArrayIndex: -1,
+				additionalMarketedGood: [],
+				coffeeShops: [],
+				ceoSlots: 3,
+				ceoAction: rf.CEO_ACTION_HIRE_1,
+				OOBpreference: 0,
+			})
+		}
+		store.gameflow.turn = 5
+		store.gameflow.fullTurnOrder = [0, 1]
+		store.gameflow.turnOrder = [0, 1]
+		store.availableEmployees = [...rf.ORIGINAL_AVAILABLE_EMPLOYEES]
+		store.availableMarketingCampaigns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14]
+		model.setupKetchupExpansion(2)
+		store.reserveCards = []
+		store.bank = 0
+		store.bankBroken = 0
+		return store
+	}
+
+	function decodeExport(b64) {
+		return JSON.parse(pako.ungzip(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { to: "string" }))
+	}
+	function encodeArr(arr) {
+		return btoa(String.fromCharCode(...new Uint8Array(pako.gzip(JSON.stringify(arr)))))
+	}
+	function importInto(decoded, opts = ["50"], forGameOver = false) {
+		globalThis.window.initData = { startingOptions: opts, startingMap: STARTING_MAP, playerNames: ["P0", "P1"] }
+		const store = seedMLGame(opts)
+		const result = funcs.importFCMmodel(encodeArr(decoded), forGameOver, false)
+		expect(result).not.toBe(-9999)
+		return store
+	}
+
+	it("exportFCMmodel keeps TV houses, phone tokens and the media line state", () => {
+		const store = seedMLGame()
+		const phoneIdx = mapMod.giveIndex(40, 39)
+		model.addMarketingCampaign(28, -1, false, rf.BURGER, 3, [7, 1, 5])
+		model.addMarketingCampaign(30, phoneIdx, true, rf.PIZZA, 2)
+		store.players[0].marketers.push({ campaign: 28, marketer: rf.TV_ANNOUNCER, nightShift: false })
+		store.players[0].marketers.push({ campaign: 30, marketer: rf.TELEMARKETER, nightShift: false })
+		store.mediaLine.headlines.push({ turn: 4, playerIndex: 0, value: 5 }, { turn: 4, playerIndex: 1, value: -5 })
+		store.mediaLine.doubleCampaign = 28
+		store.mediaLine.doubleUsed = true
+
+		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
+		expect(decoded[decoded.length - 1].headlines).toHaveLength(2)
+
+		const restored = importInto(decoded)
+		const tv = restored.campaigns.find((c) => c.number === 28)
+		expect(tv).toMatchObject({ index: -1, rotated: false, good: rf.BURGER, duration: 3, houses: [7, 1, 5] })
+		const phone = restored.campaigns.find((c) => c.number === 30)
+		expect(phone.index).toBe(phoneIdx)
+		expect(phone.rotated).toBe(true)
+		expect(phone.good).toBe(rf.PIZZA)
+		expect(phone.duration).toBe(2)
+		expect(restored.mediaLine.headlines).toEqual([
+			{ turn: 4, playerIndex: 0, value: 5 },
+			{ turn: 4, playerIndex: 1, value: -5 },
+		])
+		expect(restored.mediaLine.doubleCampaign).toBe(28)
+		expect(restored.mediaLine.doubleUsed).toBe(true)
+	})
+
+	it("loads an older save without the media line slot using safe defaults", () => {
+		const store = seedMLGame()
+		store.mediaLine.headlines.push({ turn: 4, playerIndex: 0, value: 5 })
+		store.mediaLine.doubleCampaign = 28
+		store.mediaLine.doubleUsed = true
+
+		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
+		decoded.pop() // strip the media line slot: pre-module save shape
+
+		const restored = importInto(decoded)
+		expect(restored.mediaLine.headlines).toEqual([])
+		expect(restored.mediaLine.doubleCampaign).toBe(-1)
+		expect(restored.mediaLine.doubleUsed).toBe(false)
+	})
+
+	it("omits the slot when the module was not chosen", () => {
+		seedMLGame([])
+		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
+		expect(decoded[decoded.length - 1].headlines).toBeUndefined()
+	})
+
+	it("round-trips through the in-memory simple snapshot", () => {
+		const store = seedMLGame()
+		model.addMarketingCampaign(28, -1, false, rf.BURGER, 3, [7, 1])
+		store.mediaLine.headlines.push({ turn: 4, playerIndex: 1, value: -5 })
+		store.mediaLine.doubleCampaign = 28
+		store.mediaLine.doubleUsed = true
+		const b64 = funcs.simpleExportWholeFCMmodel()
+
+		seedMLGame()
+		funcs.simpleImportWholeFCMmodel(b64)
+		const restored = useModelStore()
+		expect(restored.campaigns.find((c) => c.number === 28)).toMatchObject({ index: -1, duration: 3, houses: [7, 1] })
+		expect(restored.mediaLine.headlines).toEqual([{ turn: 4, playerIndex: 1, value: -5 }])
+		expect(restored.mediaLine.doubleCampaign).toBe(28)
+		expect(restored.mediaLine.doubleUsed).toBe(true)
+	})
+})
+
+describe("Media Line stage 6 - replay", () => {
+	it("replays a TV placement: houses, announcer ownership and the milestone 2 lookahead latch", () => {
+		const store = freshGame(2, ["50"])
+		store.players[0].employees.push(rf.TV_ANNOUNCER)
+		// A benign earlier entry (the handler reads the previous entry for the
+		// mailbox MS), then the live order: campaign entry, milestone entry
+		store.history.push([rf.HIST_HIRE, 0, 999, [1]])
+		store.history.push([rf.HIST_START_MARKETING_CAMPAIGN, 0, 1000, [28, [7, 1, 5], rf.BURGER, 3]])
+		store.history.push([rf.HIST_NEW_MILESTONE, 0, 1001, [rf.FIRST_TV_ANNOUNCER_USED]])
+
+		replay.replayStartMarketingCampaign(1, 0, [28, [7, 1, 5], rf.BURGER, 3])
+
+		expect(store.campaigns[0]).toMatchObject({ number: 28, index: -1, good: rf.BURGER, duration: 3, houses: [7, 1, 5] })
+		expect(store.players[0].employees).toEqual([]) // announcer moved to the market
+		expect(store.players[0].marketers).toEqual([{ campaign: 28, marketer: rf.TV_ANNOUNCER, nightShift: false }])
+		// The milestone is not replayed yet - the latch comes from the lookahead
+		expect(store.mediaLine.doubleCampaign).toBe(28)
+		expect(store.mediaLine.doubleUsed).toBe(true)
+	})
+
+	it("replays a phone placement and chains the second token to the same telemarketer", () => {
+		const store = freshGame(2, ["50"])
+		store.players[0].employees.push(rf.TELEMARKETER)
+		store.history.push([rf.HIST_HIRE, 0, 999, [1]])
+		const phoneIdx = mapMod.giveIndex(40, 39)
+		const wireIdx = funcs.exportIndex(phoneIdx)
+
+		replay.replayStartMarketingCampaign(1, 0, [30, wireIdx, rf.BURGER, 1, 2])
+		expect(store.campaigns[0]).toMatchObject({ number: 30, index: phoneIdx, rotated: true, good: rf.BURGER, duration: 2 })
+		expect(store.players[0].marketers).toEqual([{ campaign: 30, marketer: rf.TELEMARKETER, nightShift: false }])
+
+		replay.replayStartMarketingCampaign(1, 0, [31, wireIdx, rf.BURGER, 0, 2])
+		expect(store.players[0].marketers).toHaveLength(2)
+		// Live addCampaignToMarketer does not set nightShift on the extra entry
+		expect(store.players[0].marketers[1]).toEqual({ campaign: 31, marketer: rf.TELEMARKETER })
+		expect(store.campaigns[1]).toMatchObject({ number: 31, index: phoneIdx, rotated: false })
+	})
+
+	it("replays a published headline onto the current replay turn", () => {
+		const store = freshGame(2, ["50"])
+		store.gameflow.turn = 4
+		replay.replayPublishHeadline(0, 1, [5])
+		expect(store.mediaLine.headlines).toEqual([{ turn: 4, playerIndex: 1, value: 5 }])
 	})
 })

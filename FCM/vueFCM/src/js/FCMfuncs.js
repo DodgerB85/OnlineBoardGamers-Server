@@ -237,6 +237,9 @@ export function simpleExportWholeFCMmodel() {
 	// 23 - Second Bailout mod
 	temp.push(JSON.parse(JSON.stringify(store.bailout)))
 
+	// 24 - Media Line mod (only when chosen)
+	if (store.startingOptions.mediaLine) temp.push(JSON.parse(JSON.stringify(store.mediaLine)))
+
 	let step1 = JSON.stringify(temp)
 	// eslint-disable-next-line no-undef
 	let step2 = pako.gzip(step1)
@@ -550,10 +553,15 @@ export function exportFCMmodel(forGameOver, includeContext) {
 	temp.push(
 		store.campaigns.map((c) => {
 			const entry = [c.number]
-			if (c.number <= 16) {
+			// Media Line mod phone tokens (30-35) are stored like standard ones;
+			// TV channels (28-29) have no token, so their chosen houses are stored
+			// instead: [number, good, duration, ...houses]
+			if ((c.number >= 30 && c.number <= 35) || c.number <= 16) {
 				entry.push(exportIndex(c.index), c.good)
 				if (c.duration !== 9) entry.push(c.duration)
 				if (rf.ROTATABLE_CAMPAIGNS.includes(c.number) && c.rotated) entry.push(6)
+			} else if (c.number === 28 || c.number === 29) {
+				entry.push(c.good, c.duration, ...(c.houses || []))
 			} else {
 				entry.push(c.good)
 				if (c.duration !== 9) entry.push(c.duration)
@@ -684,6 +692,9 @@ export function exportFCMmodel(forGameOver, includeContext) {
 		temp.push([[...store.bailout.order], Object.entries(store.bailout.pool).flat().map(Number), Object.entries(store.bailout.claims).flat().map(Number)])
 	}
 
+	// 21 - Media Line mod (only when the module was chosen; shape-detected on load)
+	if (store.startingOptions.mediaLine) temp.push(JSON.parse(JSON.stringify(store.mediaLine)))
+
 	let step1 = JSON.stringify(temp)
 	// eslint-disable-next-line no-undef
 	let step2B = pako.gzip(step1)
@@ -805,18 +816,25 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	store.campaigns.splice(0)
 	store.campaigns = inputArr[IMPORT_INDEX].map((c) => {
 		const num = c[0]
-		const isStandard = num <= 16
+		// Media Line mod: phone tokens (30-35) use the standard layout; TV
+		// channels (28-29) carry [number, good, duration, ...houses] instead
+		const isStandard = num <= 16 || (num >= 30 && num <= 35)
+		const isTV = num === 28 || num === 29
 
 		// Create base object
 		const campaign = {
 			number: num,
-			index: isStandard ? importIndex(c[1]) : 0,
+			index: isStandard ? importIndex(c[1]) : -1,
 			good: isStandard ? c[2] : c[1],
 			duration: 9,
 			rotated: false,
+			houses: [],
 		}
 
-		if (isStandard) {
+		if (isTV) {
+			campaign.duration = c[2]
+			campaign.houses = c.slice(3)
+		} else if (isStandard) {
 			// Handle Duration
 			if (c.length > 3 && c[3] <= 5) campaign.duration = c[3]
 
@@ -834,7 +852,7 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 
 	// Update the Map UI
 	for (const camp of store.campaigns) {
-		if (camp.number >= 1 && camp.number <= 16) {
+		if ((camp.number >= 1 && camp.number <= 16) || (camp.number >= 30 && camp.number <= 35)) {
 			map.addElement(rf.TYPE_CAMPAIGN, camp.number, camp.index, camp.rotated)
 		}
 	}
@@ -1188,6 +1206,8 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	restoreStadiumState(inputArr, moduleImportIndex)
 	// Second Bailout mod (trails the stadium slot when that module is chosen)
 	restoreBailoutState(inputArr, moduleImportIndex, forGameOver)
+	// Media Line mod (trailing slot, shape-detected like the other module states)
+	restoreMediaLineState(inputArr)
 }
 
 // Shape check for both bailout slot formats: the older full object and the
@@ -1225,6 +1245,30 @@ export function restoreBailoutState(inputArr, index = inputArr.length - 1, forGa
 		// Older saves stored the full object
 		Object.assign(store.bailout, slot)
 	}
+}
+
+// Media Line mod wire slot: the full state object (headlines, doubleCampaign,
+// doubleUsed). Object shape-detected, so it cannot collide with the compact
+// Stadium/Bailout/Labor Market array slots that may trail older saves.
+function isMediaLineSlot(el) {
+	return Boolean(el && typeof el === "object" && !Array.isArray(el) && Array.isArray(el.headlines))
+}
+
+// Reads the Media Line slot, scanning the whole save like the Labor Market one.
+// Always resets to defaults first so module-off games never leak state.
+export function restoreMediaLineState(inputArr) {
+	const store = useModelStore()
+	store.mediaLine.headlines = []
+	store.mediaLine.doubleCampaign = -1
+	store.mediaLine.doubleUsed = false
+	if (!store.startingOptions.mediaLine) return
+	const slot = [...(inputArr || [])].reverse().find(isMediaLineSlot)
+	if (!slot) return
+	store.mediaLine.headlines = (slot.headlines || [])
+		.filter((h) => h && Number.isInteger(h.turn) && Number.isInteger(h.playerIndex) && (h.value === 5 || h.value === -5))
+		.map((h) => ({ turn: h.turn, playerIndex: h.playerIndex, value: h.value }))
+	if (Number.isInteger(slot.doubleCampaign)) store.mediaLine.doubleCampaign = slot.doubleCampaign
+	store.mediaLine.doubleUsed = slot.doubleUsed === true
 }
 
 // Stadium mod wire slot: [gamesPlayed] or [gamesPlayed, [gameNumber, food, units]].
@@ -1516,6 +1560,8 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	// by shape so snapshots from before either module existed still load.
 	restoreLaborMarketState(inputModel)
 	restoreBailoutState(inputModel.slice(21))
+	// Media Line mod (shape-detected; older snapshots predate the slot)
+	restoreMediaLineState(inputModel)
 
 	// Adjust CEOs with dumpling MS, using history
 	if (store.startingOptions.dumplings) {
