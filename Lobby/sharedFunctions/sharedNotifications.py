@@ -1264,32 +1264,81 @@ def SN_sendDeclineEmail(declinerUsername, creatorUsername, gameCode, gameName, g
 
     activate(originalLang)
 
+def SN_model_dump(obj):
+    """Every column and relation of one model row as "name: value" lines.
+
+    Not all fields are used by all games - sending them all is the point: a
+    copy/paste of the bug report email should carry the whole record.
+    """
+    if obj is None:
+        return ["(row not found)"]
+
+    rows = []
+    for field in obj._meta.concrete_fields:
+        try:
+            value = getattr(obj, field.name)
+            if field.is_relation:
+                value = f"{value} (id={getattr(obj, field.attname)})"
+            else:
+                value = repr(value)
+        except Exception as e:
+            value = f"<unreadable: {e}>"
+        rows.append(f"{field.name}: {value}")
+
+    for field in obj._meta.many_to_many:
+        try:
+            value = list(getattr(obj, field.name).values_list("pk", flat=True))
+        except Exception as e:
+            value = f"<unreadable: {e}>"
+        rows.append(f"{field.name}: {value}")
+
+    return rows
+
+
 # This is async
 def SN_sendBugReportEmail(reporterUsername, reporterEmail, gameCode, gameID, gameData, bugDescription, rewindData, startingMap):
     subject = getGameStrings(gameCode)["bugReportSubject"]
     adminUser = User.objects.get(username="admin")
+
+    try:
+        currentGame = Game.objects.get(id=gameID, gameCode=gameCode)
+    except Game.DoesNotExist:
+        currentGame = None
+
+    gameRows = SN_model_dump(currentGame)
+    playerSections = []
+    if currentGame:
+        for index, gamePlayer in enumerate(currentGame.players.select_related("player").order_by("seat_order"), start=1):
+            rows = SN_model_dump(gamePlayer)
+            rows.append(f"player.username: {gamePlayer.player.username}")
+            rows.append(f"player.email: {gamePlayer.player.email}")
+            playerSections.append({"index": index, "rows": rows})
+
+    the_url = f"https://www.OnlineBoardGamers.com/{gameCode}/{gameID}/show/"
+
     message = render_to_string(
-        "Lobby/gameEmails/email_bug.html",
+        "Lobby/gameEmails/email_bug_full.html",
         {
             "game": gameCode,
             "username": reporterUsername,
             "domain": "www.OnlineBoardGamers.com",
             "gameID": gameID,
+            "the_url": the_url,
             "gameData": gameData,
             "bugDescription": bugDescription,
             "userEmail": reporterEmail,
             "rewindData": rewindData,
             "startingMap": startingMap,
+            "gameRows": gameRows,
+            "playerSections": playerSections,
+            "sentAt": timezone.now().strftime("%Y-%m-%d %H:%M:%S %Z"),
         },
     )
     bug_message = (
         f"BUG REPORT for game {gameCode} (ID: {gameID}).\n"
         f"User: {reporterUsername}\n"
         f"Bug Description: {bugDescription}\n"
-        f"URL: <https://www.OnlineBoardGamers.com/{gameCode}/{gameID}/show/>"  # Added brackets here
-        # f"Game Data: {gameData}\n"
-        # f"Rewind Data: {rewindData}\n"
-        # f"Starting Map: {startingMap}"
+        f"URL: <{the_url}>"
     )
     SN_sendAdminErrorMessage(bug_message)
     try:
