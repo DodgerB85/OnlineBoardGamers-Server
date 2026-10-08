@@ -12123,6 +12123,54 @@ msgstr "第三次破产：游戏立即结束——救市只有一次。"
 msgid "Short games are unaffected: the first break already ends them, so the bailout never happens."
 msgstr "短局不受影响：第一次破产即终局，救市永远不会发生。"
 
+#: .\templates\Lobby\fcm_options_grid.html:18
+msgid "Use Media Line"
+msgstr "使用电波营销模组"
+
+#: .\templates\Lobby\fcm_options_grid.html:19
+msgid "Adds the Telemarketer (phone calls to the houses beside your restaurant) and the TV Announcer (antennas on 5 nearby roofs, plus free +/- $5 city headlines)"
+msgstr "新增电话推销员（给餐厅旁的房屋打电话）与电视广播员（在附近 5 栋房顶装天线，还可免费发布 ±$5 全城头条）"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Media Line"
+msgstr "电波营销"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "The base game's marketing is paper: billboards, mail, airplanes. This module adds the airwaves. A Telemarketer calls the houses right next door - no roads required, one call per house. A TV Announcer mounts antennas on five nearby roofs and owns the news: one story moves every price in the city by $5 tomorrow, up or down. Demand is small but surgical - the payoff is one perfectly stocked jackpot night that can break the bank."
+msgstr "原版的广告是纸媒：广告牌、邮箱、飞机。本模组加入电波。电话推销员直接给隔壁的房子打电话——不需要沿路，一通电话对应一栋房。电视广播员在附近五栋房顶装上天线，还掌握着新闻话语权：一条报道就能让全城明晚的价格集体 +$5 或 -$5。电波带来的需求不多但极其精准——回报是一场备货完美的开奖之夜，足以撑爆银行。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Training chain: Marketing Trainee → Telemarketer (level 2) → TV Announcer (level 3) → Brand Director. Six of each; cards may be stacked."
+msgstr "训练链：营销实习生 → 电话推销员（2 级）→ 电视广播员（3 级）→ 品牌总监。各 6 张；可以叠加持有。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Telemarketer: places 2x1 phone tokens attached to buildings (not roads) within one orthogonal step of your restaurant (a cross of 5 tiles). Each action places up to two tokens - two calls with the same food and duration, placed together; you may place only one. A token wedged between two houses reaches both. Duration 1-3 nights. The city has only 6 tokens: at most 6 calls on the board at once."
+msgstr "电话推销员：在餐厅上下左右 1 格范围（十字 5 格）内放置 2×1 电话牌，贴着建筑（可不沿路）。每次行动最多放两张——两通电话，同一商品同一时长，一起下单；也可以只放一张。一张牌夹在两栋房之间则两栋都接到电话。持续 1~3 晚。全城共 6 张电话牌：同时最多 6 通电话在版。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "TV Announcer: picks exactly 5 houses within 2 steps of your restaurant (a diamond of 13 tiles) and mounts a rooftop antenna on each. Duration 1-4 nights. The city has only 2 channels: at most 2 TV campaigns at once; one player holding both has a monopoly."
+msgstr "电视广播员：在餐厅 2 格范围（钻石 13 格）内必须选满 5 栋房，每栋房顶竖一根天线。持续 1~4 晚。全城仅 2 个频道：同时最多 2 个电视频道开播；一人独占两个频道即为垄断。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Headline (TV Announcer only, free, one per working announcer per turn): tomorrow night every sale in the city pays +$5 (Prime Time) or -$5 (Bad Press). Stories stack and cancel each other out, clamped to a city-wide total of +$10 or -$10."
+msgstr "头条（仅电视广播员、免费、每张在班卡每回合 1 条）：明晚全城每单结算价 +$5（黄金档）或 -$5（负面新闻）。多条报道可叠加也可相互抵消，全城总量封顶 ±$10。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Timing: campaigns start pushing demand the turn after placement, like all campaigns. Houses keep the usual 3-demand cap; the different media push in a fixed order."
+msgstr "时序：与所有广告战役相同，放置后的次回合开始推送需求。房屋仍遵守 3 张需求上限；各媒介按固定顺序推送。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Unserved orders stay on the house and may be fulfilled by anyone."
+msgstr "未被满足的订单留在房屋上，任何玩家都可以去满足。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Milestone \"First Telemarketer used\": unlocks a permanent group bonus - at Dinnertime, if every house of one of your media groups (the 2 phone houses or the 5 antenna houses) is served entirely by you, earn $10 per house ($20 per phone group, $50 per TV group; groups settle separately). Requires purity: no other marketing employees or campaigns of yours may be active that night."
+msgstr "里程碑「首次使用电话推销员」：解锁永久的整组奖励——晚餐结算时，若你的某个电波组（电话 2 栋或天线 5 栋）全部由你一人卖出，每栋奖励 $10（电话组 $20、电视组 $50，多组分别结算）。要求当晚纯净：你没有其他营销员工或广告战役在班。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
+msgid "Milestone \"First TV Announcer used\": one-time launch bonus - during your first TV campaign, every antenna house gets 2 demand per night instead of 1."
+msgstr "里程碑「首次使用电视广播员」：一次性开播奖励——你的首个电视战役期间，每栋天线房每晚推 2 张需求而非 1 张。"
+
 #~ msgid "Basic Options"
 #~ msgstr "基本选项"
 

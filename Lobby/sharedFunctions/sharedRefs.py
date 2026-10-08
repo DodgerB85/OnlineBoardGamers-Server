@@ -798,6 +798,7 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
         rfFCM.SO_STADIUM,
         rfFCM.SO_LABOR_MARKET,
         rfFCM.SO_SECOND_BAILOUT,
+        rfFCM.SO_MEDIA_LINE,
     ]
 
     options_map = {
@@ -834,6 +835,7 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
         rfFCM.SO_STADIUM: ("so_stadium.svg", "Stadium"),
         rfFCM.SO_LABOR_MARKET: ("so_laborMarket.svg", "Labor Market"),
         rfFCM.SO_SECOND_BAILOUT: ("so_bailout.svg", "Second Bailout"),
+        rfFCM.SO_MEDIA_LINE: ("so_mediaLine.svg", "Media Line"),
         rfFCM.SO_STRICT_PAYDAY_FRIDGE: ("so_strict.svg", "Turn Order Payday/Fridge"),
         rfFCM.SO_DRAFT_MODULE_BREAKER: ("so_draftMods.jpg", "Draft Modules"),
         rfFCM.SO_DRAFT_SKIP_MODULE: ("so_skip.jpg", "Skip Module"),

@@ -230,6 +230,27 @@
           </div>
           <br />
 
+          <div class="FCMhelpSection">
+            <h2 class="fcm-china-help-title">{% translate "Media Line" %}</h2>
+            <img class="helpEmployeeImg" src="{% static 'FCM/images/e_telemarketer.jpg' %}" alt="Telemarketer" width="145" height="225" />
+            <img class="helpEmployeeImg" src="{% static 'FCM/images/e_tv_announcer.jpg' %}" alt="TV Announcer" width="145" height="225" />
+            <br />
+            <b><u>{% translate "Overview" %}</u></b>
+            <p>{% blocktranslate trimmed %}The base game's marketing is paper: billboards, mail, airplanes. This module adds the airwaves. A Telemarketer calls the houses right next door - no roads required, one call per house. A TV Announcer mounts antennas on five nearby roofs and owns the news: one story moves every price in the city by $5 tomorrow, up or down. Demand is small but surgical - the payoff is one perfectly stocked jackpot night that can break the bank.{% endblocktranslate %}</p>
+            <b><u>{% translate "Rules" %}</u></b>
+            <ul>
+              <li>{% blocktranslate trimmed %}Training chain: Marketing Trainee → Telemarketer (level 2) → TV Announcer (level 3) → Brand Director. Six of each; cards may be stacked.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Telemarketer: places 2x1 phone tokens attached to buildings (not roads) within one orthogonal step of your restaurant (a cross of 5 tiles). Each action places up to two tokens - two calls with the same food and duration, placed together; you may place only one. A token wedged between two houses reaches both. Duration 1-3 nights. The city has only 6 tokens: at most 6 calls on the board at once.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}TV Announcer: picks exactly 5 houses within 2 steps of your restaurant (a diamond of 13 tiles) and mounts a rooftop antenna on each. Duration 1-4 nights. The city has only 2 channels: at most 2 TV campaigns at once; one player holding both has a monopoly.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Headline (TV Announcer only, free, one per working announcer per turn): tomorrow night every sale in the city pays +$5 (Prime Time) or -$5 (Bad Press). Stories stack and cancel each other out, clamped to a city-wide total of +$10 or -$10.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Timing: campaigns start pushing demand the turn after placement, like all campaigns. Houses keep the usual 3-demand cap; the different media push in a fixed order.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Unserved orders stay on the house and may be fulfilled by anyone.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Milestone "First Telemarketer used": unlocks a permanent group bonus - at Dinnertime, if every house of one of your media groups (the 2 phone houses or the 5 antenna houses) is served entirely by you, earn $10 per house ($20 per phone group, $50 per TV group; groups settle separately). Requires purity: no other marketing employees or campaigns of yours may be active that night.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Milestone "First TV Announcer used": one-time launch bonus - during your first TV campaign, every antenna house gets 2 demand per night instead of 1.{% endblocktranslate %}</li>
+            </ul>
+          </div>
+          <br />
+
             <div class="card section">
               <h2 class="fcm-china-help-title">{% translate "Further Help" %}</h2>
               <p>
