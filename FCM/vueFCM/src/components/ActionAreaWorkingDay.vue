@@ -76,6 +76,9 @@ const computedAvailableMarketers = computed(() => {
 // Media Line mod: TV channel - all required houses picked
 const computedTVSelectionDone = computed(() => controller.tvSelectionComplete())
 
+// Media Line mod: free headline publications left for the current player
+const computedHeadlinesLeft = computed(() => (store.startingOptions.mediaLine ? controller.mediaLineHeadlinesLeft(controller.currentPlayerIndex()) : 0))
+
 const computedTrainableOptions = computed(() => {
 	const ret = {
 		beachTrainable: [],
@@ -256,6 +259,13 @@ const computedProducers = computed(() => {
 </script>
 
 <template>
+	<!-- Media Line mod: free headline publication, available in every subphase -->
+	<div id="headlinePublishDiv" v-if="computedHeadlinesLeft > 0">
+		<p>{{ $t("workingDay.publishHeadline", { left: computedHeadlinesLeft }) }}</p>
+		<button class="actionsLineButton" @click="controller.publishHeadline(5)"><img :src="view.getImage('headline_prime')" class="headlineChoiceImg" alt="" /> {{ $t("workingDay.headlinePrime") }}</button>
+		<button class="actionsLineButton" @click="controller.publishHeadline(-5)"><img :src="view.getImage('headline_press')" class="headlineChoiceImg" alt="" /> {{ $t("workingDay.headlinePress") }}</button>
+	</div>
+
 	<!-- Temporary Worker choice, before hiring -->
 	<template v-if="store.gameflow.subphase === rf.SUBPHASE_TEMPORARY_WORKER">
 		<div>
@@ -985,6 +995,12 @@ const computedProducers = computed(() => {
 .cardImg {
 	width: 100%;
 	height: 100%;
+}
+
+.headlineChoiceImg {
+	height: 30px;
+	vertical-align: middle;
+	margin-right: 5px;
 }
 
 .cardSummaryDiv {

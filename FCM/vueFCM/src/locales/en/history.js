@@ -106,6 +106,13 @@
     flipToFriedChicken: "Unserved demand at house(s) {houses} flips to fried chicken:",
     houseMovedOut: "House(s) {houses} moved out of the neighbourhood",
 
+    // Media Line mod
+    tvAtHouses: "reaching house(s) {houses}",
+    publishHeadline: "{name} publishes a headline:",
+    headlinePrime: "all prices +$5 next dinner",
+    headlinePress: "all prices -$5 next dinner",
+    mediaLineBonus: "{name} receives {amount} - full neighbourhoods ordered: {houses}",
+
     // Stadium mod
     stadiumAnnounce: "The stadium announces a game on turn {turn}: it will demand {units} \u00D7 {good}",
     stadiumWinner: "{name} feeds the whole stadium, selling {units} \u00D7 {good}",

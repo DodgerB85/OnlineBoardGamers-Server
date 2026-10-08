@@ -75,6 +75,9 @@
     phoneTokenSameAsFirst: "The second phone token automatically uses the same good and duration as the first",
     tvChannelProgress: "Pick houses for your TV channel: {current}/5",
     skipSecondPhoneToken: "Skip Second Phone Token",
+    publishHeadline: "Publish a headline (free action, {left} left):",
+    headlinePrime: "Golden Time: all prices +$5 next dinner",
+    headlinePress: "Bad Press: all prices -$5 next dinner",
 
     // Production
     producedLabel: "Produced:",

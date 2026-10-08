@@ -275,7 +275,8 @@ const computedEntry3 = computed(() => {
 		}
 	} else if (entry[0] === rf.HIST_START_MARKETING_CAMPAIGN) {
 		ret.campaignNumber = param[0]
-		const campaignIndex = funcs.importIndex(param[1]) // OR ROUTE IF HAWKER
+		const isTV = ret.campaignNumber === 28 || ret.campaignNumber === 29
+		const campaignIndex = funcs.importIndex(param[1]) // OR ROUTE IF HAWKER, HOUSE NUMBERS IF TV
 		const campaignGoodEntry = param[2]
 		let paramIdx = 3
 		let campaignEmployee = -1
@@ -283,7 +284,9 @@ const computedEntry3 = computed(() => {
 			if (ret.campaignNumber <= 3) campaignEmployee = rf.BRAND_DIRECTOR
 			else if (ret.campaignNumber <= 20) campaignEmployee = rf.GOURMET_FOOD_CRITIC
 			else if (ret.campaignNumber <= 24) campaignEmployee = rf.RURAL_MARKETEER
-			else campaignEmployee = rf.HAWKER_MARKETEER
+			else if (ret.campaignNumber <= 27) campaignEmployee = rf.HAWKER_MARKETEER
+			else if (isTV) campaignEmployee = rf.TV_ANNOUNCER
+			else campaignEmployee = rf.TELEMARKETER
 		}
 		// Otherwise need to read in the employee
 		else {
@@ -302,9 +305,10 @@ const computedEntry3 = computed(() => {
 		// Add second good for radio campaigns when the First Radio Campaign milestone is held
 		ret.radioDouble = store.players[entry[1]] != null && plyr.hasMilestone(entry[1], rf.FIRST_RADIO_CAMPAIGN) && rf.MARKETING_CAMPAIGNS[ret.campaignNumber]?.type === rf.RADIO
 
-		ret.noCoords = ret.campaignNumber >= 17 && ret.campaignNumber <= 27
+		ret.noCoords = (ret.campaignNumber >= 17 && ret.campaignNumber <= 27) || isTV
 		ret.isHawker = ret.campaignNumber >= 25 && ret.campaignNumber <= 27
 		ret.routeIndexes = ret.isHawker ? funcs.importIndexes(param[1]) : []
+		ret.tvHouses = isTV ? [...param[1]] : []
 
 		let rotString = ""
 		if (!UNROTATABLE_CAMPAIGNS.includes(ret.campaignNumber)) {
@@ -799,7 +803,7 @@ const computedEntry3 = computed(() => {
 				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
 				<template #num>{{ computedEntry3.campaignNumber }}</template>
 				<template #employee><InfoPopup type="employee" :employeeId="computedEntry3.campaignEmployee"><span class="compact" :class="empClass(computedEntry3.campaignEmployee)">{{ empTitle(computedEntry3.campaignEmployee) }}</span></InfoPopup></template>
-			</i18n-t> <template v-if="!computedEntry3.noCoords">{{ computedEntry3.orientationStr ? $t("history.orientAtCoords", { orient: computedEntry3.orientationStr, x: computedEntry3.Xcoord, y: computedEntry3.Ycoord }) : $t("history.atCoords", { x: computedEntry3.Xcoord, y: computedEntry3.Ycoord }) }}</template>{{ $t("history.advertising") + " " }}
+			</i18n-t> <template v-if="!computedEntry3.noCoords">{{ computedEntry3.orientationStr ? $t("history.orientAtCoords", { orient: computedEntry3.orientationStr, x: computedEntry3.Xcoord, y: computedEntry3.Ycoord }) : $t("history.atCoords", { x: computedEntry3.Xcoord, y: computedEntry3.Ycoord }) }}</template><template v-if="computedEntry3.tvHouses.length > 0">{{ $t("history.tvAtHouses", { houses: computedEntry3.tvHouses.join(", ") }) + " " }}</template>{{ $t("history.advertising") + " " }}
 			<img v-for="(g, gi) in computedEntry3.campaignGoods" :key="gi" class="foodTokenImg" :class="goodClass(g)" :src="goodSrc(g)" alt="" />
 			<img v-if="computedEntry3.radioDouble" class="foodTokenImg" :class="goodClass(computedEntry3.campaignGoods[0])" :src="goodSrc(computedEntry3.campaignGoods[0])" alt="" />
 			{{ computedEntry3.durationNum === 9 ? $t("history.eternally") : $t("history.forTurns", computedEntry3.durationNum) }}
@@ -886,6 +890,24 @@ const computedEntry3 = computed(() => {
 			<div v-else><i18n-t keypath="history.stadiumNobody" tag="span" scope="global">
 				<template #units>{{ entry[3][2] }}</template>
 				<template #good><img class="foodTokenImg" :class="goodClass(entry[3][1])" :src="goodSrc(entry[3][1])" alt="" /></template>
+			</i18n-t>
+			</div>
+		</template>
+
+		<!-- HIST_PUBLISH_HEADLINE: free headline shifts all prices tonight (Media Line mod) -->
+		<template v-else-if="entry[0] === rf.HIST_PUBLISH_HEADLINE">
+			<div><i18n-t keypath="history.publishHeadline" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t> <img class="headlineHistoryImg" :src="view.getImage(entry[3][0] > 0 ? 'headline_prime' : 'headline_press')" alt="" /> {{ entry[3][0] > 0 ? $t("history.headlinePrime") : $t("history.headlinePress") }}
+			</div>
+		</template>
+
+		<!-- HIST_MEDIA_LINE_BONUS: full neighbourhood orders pay a bonus (Media Line mod) -->
+		<template v-else-if="entry[0] === rf.HIST_MEDIA_LINE_BONUS">
+			<div><i18n-t keypath="history.mediaLineBonus" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][0]].colour)">{{ store.players[entry[3][0]].displayName }}</span></template>
+				<template #amount>{{ entry[3][1] }}</template>
+				<template #houses>{{ entry[3][2].flat().join(", ") }}</template>
 			</i18n-t>
 			</div>
 		</template>
@@ -1488,6 +1510,12 @@ span.compact {
 
 img.foodTokenImg {
 	width: 25px;
+	vertical-align: middle;
+	margin: 1px 1px;
+}
+
+img.headlineHistoryImg {
+	height: 25px;
 	vertical-align: middle;
 	margin: 1px 1px;
 }

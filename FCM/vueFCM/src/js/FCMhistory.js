@@ -153,8 +153,11 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 				else if (!map.isIndexOnBottomEdgeOfMap(campaignIndex, widthOnBottom)) highlightIndex -= rf.ssW * height
 			}
 		}
-		if (campaignNumber <= 16) {
+		if (campaignNumber <= 16 || (campaignNumber >= 30 && campaignNumber <= 35)) {
 			for (let i = 0; i < height; i++) for (let j = 0; j < width; j++) squares.push(highlightIndex + j + rf.ssW * i)
+		} else if (campaignNumber === 28 || campaignNumber === 29) {
+			// Media Line mod: TV channel - highlight the picked houses
+			for (let h = 0; h < entry3[1].length; h++) pushHouseFootprint(entry3[1][h], squares)
 		} else if (campaignNumber >= 25 && campaignNumber <= 27) {
 			squares.push(...funcs.importIndexes(entry3[1]))
 		}
@@ -167,7 +170,24 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 		const campaignIndex = funcs.importIndex(entry3[1])
 		squares.push(campaignIndex)
 		if (campaignNumber === 7 || campaignNumber === 8) squares.push(campaignIndex + 1, campaignIndex + rf.ssW, campaignIndex + rf.ssW + 1)
+	} else if (action === rf.HIST_MEDIA_LINE_BONUS) {
+		// Media Line mod: highlight every house of the full-order groups
+		for (let g = 0; g < entry3[2].length; g++) {
+			for (let h = 0; h < entry3[2][g].length; h++) pushHouseFootprint(entry3[2][g][h], squares)
+		}
 	}
 
 	store.historyHelpers.indexesToHighlightYellow = squares
+}
+
+// Full footprint (all covered squares) of one house on the board
+function pushHouseFootprint(houseNumber, squares) {
+	const houseIndex = map.findIndexForHouse(houseNumber)
+	if (houseIndex === -1) return
+	const houseData = store.houses.find((hs) => hs.number === houseNumber)
+	const rotation = houseData ? houseData.rotated : 1
+	const sideways = rotation === 1 || rotation === 3
+	const height = sideways ? 2 : 3
+	const width = sideways ? 3 : 2
+	for (let i = 0; i < height; i++) for (let j = 0; j < width; j++) squares.push(houseIndex + j + rf.ssW * i)
 }
