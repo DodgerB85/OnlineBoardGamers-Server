@@ -14,7 +14,7 @@ import {
 	type Edition,
 } from "../game"
 import { usePersonalStore } from "./personal"
-import { decompress, loadChat, loadRewind, reloadGameData, resign, saveGame, updateDataFromLoadRewind } from "../backend/ROW_IO"
+import { decompress, loadChat, loadRewind, reloadGameData, resign, saveGame, saveZoom, updateDataFromLoadRewind } from "../backend/ROW_IO"
 import { broadcastGameUpdate } from "../backend/ROWwebsocket"
 
 /** A recorded player action, in the IND history shape (type/player/time/params). */
@@ -430,6 +430,17 @@ export const useGameStore = defineStore("store", () => {
 		}
 	}
 
+	/** Persist the saved zoom level (debounced). */
+	let zoomSaveTimer: ReturnType<typeof setTimeout> | undefined
+	function persistZoom(level: number): void {
+		const personal = usePersonalStore()
+		if (personal.gameID < 0) return
+		if (zoomSaveTimer) clearTimeout(zoomSaveTimer)
+		zoomSaveTimer = setTimeout(() => {
+			void saveZoom(personal.gameID, level).catch(() => undefined)
+		}, 800)
+	}
+
 	/** Resign from the game (server marks the player missing). */
 	async function resignGame(): Promise<void> {
 		const personal = usePersonalStore()
@@ -546,6 +557,7 @@ export const useGameStore = defineStore("store", () => {
 		reloadFromServer,
 		reloadChat,
 		resignGame,
+		persistZoom,
 		skip,
 		possibleMovesFor,
 		serialize,

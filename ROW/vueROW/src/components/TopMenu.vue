@@ -30,6 +30,7 @@ function toggleChat() {
 
 function zoom(dir: number) {
 	personal.zoom = Math.min(28, Math.max(8, personal.zoom + dir))
+	store.persistZoom(personal.zoom)
 }
 
 function resignGame() {

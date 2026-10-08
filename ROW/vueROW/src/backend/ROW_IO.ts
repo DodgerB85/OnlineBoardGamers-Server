@@ -23,6 +23,15 @@ function post(url: string, body: unknown): Promise<Response> {
 	})
 }
 
+function put(url: string, body: unknown): Promise<Response> {
+	const csrftoken = getCookie("csrftoken")
+	return fetch(url, {
+		method: "PUT",
+		headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken ?? "" },
+		body: JSON.stringify(body),
+	})
+}
+
 export function compress(data: unknown): string {
 	const json = JSON.stringify(data)
 	const bytes = gzipSync(strToU8(json))
@@ -89,6 +98,12 @@ export async function loadChat(gameID: number): Promise<string> {
 	if (!response.ok) throw new Error("Network response was not ok")
 	const data = await response.json()
 	return data.chatData
+}
+
+/** Persist the saved zoom level (PUT, shared_save_zoom). */
+export async function saveZoom(gameID: number, zoomLevel: number): Promise<void> {
+	const response = await put("/ROW/saveZoomROW/", { action: "zoom", gameID, zoomLevel, allPlayers: false })
+	if (!response.ok) throw new Error("Network response was not ok")
 }
 
 export async function sendChatMessage(gameID: number, newEntry: unknown[]): Promise<string> {
