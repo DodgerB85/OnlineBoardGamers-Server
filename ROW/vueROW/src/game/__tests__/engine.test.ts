@@ -37,10 +37,14 @@ describe("Game setup (ROWTest.Create / TestHelper.givenAGame)", () => {
 			// 14-card starting deck total (4 drawn + 10 in stack)
 			expect(ps.drawStack.length + ps.hand.length).toBe(14)
 			// 4 players -> initial worker count = 2*4-1 = 7 per type
-			expect(ps.getNumberOfCowboys()).toBe(7)
-			expect(ps.getNumberOfCraftsmen()).toBe(7)
-			expect(ps.getNumberOfEngineers()).toBe(7)
+			expect(ps.getNumberOfCowboys()).toBe(1)
+			expect(ps.getNumberOfCraftsmen()).toBe(1)
+			expect(ps.getNumberOfEngineers()).toBe(1)
 		}
+		// Job market starts with one full row of workers (7 tiles drawn for 4p).
+		const jm = game.getJobMarket()
+		expect(jm.currentRowIndex).toBe(1)
+		expect(jm.rows[0].workers.length).toBe(4)
 		expect(game.possibleActions().has(ActionType.MOVE)).toBe(true)
 	})
 

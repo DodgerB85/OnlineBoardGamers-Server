@@ -58,6 +58,7 @@ import {
 	createKcSet2,
 	createKcSet3,
 	initialWorkerCount,
+	jobMarketInitialWorkerCount,
 	JOB_MARKET_CATTLE,
 	JOB_MARKET_COST,
 	KcTile,
@@ -1147,11 +1148,10 @@ export class Game {
 			shuffle(deck, rng)
 			ps.drawStack = deck
 			ps.drawUpToHandLimit(rng)
-			// starting workers (getInitialWorkerCount each type)
-			const initial = initialWorkerCount(players.length)
-			ps.workers[Worker.COWBOY] = initial
-			ps.workers[Worker.CRAFTSMAN] = initial
-			ps.workers[Worker.ENGINEER] = initial
+			// starting workers: one of each (JobMarket.getInitialWorkerCount is for the supply fill)
+			ps.workers[Worker.COWBOY] = 1
+			ps.workers[Worker.CRAFTSMAN] = 1
+			ps.workers[Worker.ENGINEER] = 1
 			playerStates[p.name] = ps
 		}
 
@@ -1185,8 +1185,8 @@ export class Game {
 			if (!tile) break
 			if ("hazard" in tile ? trail.placeHazard(tile.hazard) : "teepee" in tile && trail.placeTeepee(tile.teepee)) placed++
 		}
-		// One full first row of workers from the second pile.
-		for (let i = 0; i < players.length; i++) {
+		// One initial job-market row of workers from the second pile (JobMarket.getInitialWorkerCount).
+		for (let i = 0; i < jobMarketInitialWorkerCount(players.length); i++) {
 			const tile = kcSupply.draw(1)
 			if (tile && "worker" in tile) jobMarket.addWorker(tile.worker, players.length)
 		}

@@ -43,6 +43,15 @@ export function cattleImage(type: string): string {
 	return asset(`images/row/cards/${type.toLowerCase()}.jpg`)
 }
 
+/** Card backs. (Static template attributes would get compiled into module imports by Vite.) */
+export function cardBackImage(): string {
+	return asset("images/row/cards/back.jpg")
+}
+
+export function cardBackGreyImage(): string {
+	return asset("images/row/cards/back_grey.jpg")
+}
+
 export function workerImage(worker: string): string {
 	return asset(`images/row/${worker.toLowerCase()}.jpg`)
 }

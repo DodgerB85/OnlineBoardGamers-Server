@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { computed } from "vue"
 import TopMenu from "./components/TopMenu.vue"
 import TopMenuViews from "./components/TopMenuViews.vue"
 import ActionBar from "./components/ActionBar.vue"
 import TrailBoard from "./components/TrailBoard.vue"
 import PlayerBoard from "./components/PlayerBoard.vue"
-import Opponents from "./components/Opponents.vue"
+import CattleMarket from "./components/CattleMarket.vue"
+import ObjectivesMarket from "./components/ObjectivesMarket.vue"
 import DebugArea from "./components/DebugArea.vue"
 import FooterBar from "./components/FooterBar.vue"
 import { useGameStore } from "./stores/game"
@@ -16,6 +18,16 @@ const personal = usePersonalStore()
 
 initGame()
 
+const boardPlayers = computed(() => {
+	store.version
+	const g = store.game
+	if (!g) return []
+	const order = g.state.playerOrder.length ? g.state.playerOrder : g.state.players.map((p) => p.name)
+	// Own board first (matching the reference layout), then the others.
+	const me = order.find((n) => n === personal.name) ?? order[0]
+	return [me, ...order.filter((n) => n !== me)]
+})
+
 function showDebug() {
 	return personal.name === "admin" || personal.name === "BotKickStarter"
 }
@@ -25,12 +37,15 @@ function showDebug() {
 	<TopMenu />
 	<div id="wholeMiddleArea">
 		<TopMenuViews />
-		<Opponents />
 		<ActionBar />
 		<div id="mainArea">
 			<TrailBoard />
-			<PlayerBoard />
+			<div id="playerBoards">
+				<PlayerBoard v-for="p in boardPlayers" :key="p" :playerName="p" />
+			</div>
 		</div>
+		<CattleMarket />
+		<ObjectivesMarket />
 		<DebugArea v-if="showDebug()" />
 	</div>
 	<FooterBar />
@@ -39,5 +54,6 @@ function showDebug() {
 <style>
 body { margin: 0 !important; background-color: #d4eafd; font-family: Arial, sans-serif; font-size: 15px; }
 #wholeMiddleArea { min-height: 500px; text-align: center; }
-#mainArea { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+#mainArea { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 4px; }
+#playerBoards { display: flex; flex-direction: column; align-items: center; }
 </style>

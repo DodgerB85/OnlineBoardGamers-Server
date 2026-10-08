@@ -134,6 +134,9 @@ export function initialWorkerCount(playerCount: number): number {
 	return playerCount === 2 ? 3 : playerCount * 2 - 1
 }
 
+/** JobMarket.getInitialWorkerCount: tiles drawn from supply pile 1 at setup. */
+export const jobMarketInitialWorkerCount = initialWorkerCount
+
 // ---------------------------------------------------------------------------
 // Cattle market
 // ---------------------------------------------------------------------------

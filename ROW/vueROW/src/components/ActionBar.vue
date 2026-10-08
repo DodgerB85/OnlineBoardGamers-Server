@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
-import { ActionType, CattleCard, ObjectiveCardDef } from "../game"
+import { ActionType } from "../game"
 import { engineMoveRange, reachableSpacesFor } from "../view/targets"
 import { useGameStore } from "../stores/game"
 
@@ -36,13 +36,6 @@ const deliveries = computed(() => {
 	} catch {
 		return []
 	}
-})
-
-// --- Buy cattle ---
-const buys = computed(() => {
-	if (!actions.value.includes(ActionType.BUY_CATTLE)) return []
-	const ps = g().currentPlayerState()
-	return g().getCattleMarket().possibleBuys(ps.cowboysRemaining(), ps.balance)
 })
 
 // --- Hire worker ---
@@ -100,9 +93,6 @@ const buildingOptions = computed<{ buildings: string[]; locations: string[] } | 
 	return { buildings: ps.buildings.slice(), locations }
 })
 
-// --- Hand cards (discard / remove / play objective) ---
-const handCattle = computed<CattleCard[]>(() => g().currentPlayerState().hand.filter((c): c is CattleCard => (c as CattleCard).value !== undefined))
-
 // --- Engine moves ---
 
 const engineMoves = computed(() => {
@@ -131,8 +121,18 @@ const TARGET_ACTIONS = new Set<string>([
 ])
 const directActions = computed(() => actions.value.filter((a) => !TARGET_ACTIONS.has(a) && !engineMoveRange(a, g())))
 
-const objectiveAvailable = computed(() => (actions.value.includes(ActionType.TAKE_OBJECTIVE_CARD) ? g().getObjectiveCards().available.slice() : []))
-const objectivesInHand = computed<ObjectiveCardDef[]>(() => g().currentPlayerState().hand.filter((c): c is ObjectiveCardDef => (c as any).tasks !== undefined))
+// Card-target actions: selected here, then the card is clicked on the player board.
+const CARD_TARGET_ACTIONS = new Set<string>([
+	ActionType.DISCARD_CARD, ActionType.REMOVE_CARD,
+	ActionType.DISCARD_1_OBJECTIVE_CARD_TO_GAIN_2_CERTIFICATES, ActionType.PLAY_OBJECTIVE_CARD,
+	ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_1_CERTIFICATE,
+	ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_3_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND,
+	ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_6_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND,
+	ActionType.DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS,
+	ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS, ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS,
+])
+const cardActions = computed(() => actions.value.filter((a) => CARD_TARGET_ACTIONS.has(a)))
+const unlockActions = computed(() => actions.value.filter((a) => a === ActionType.UNLOCK_WHITE || a === ActionType.UNLOCK_BLACK_OR_WHITE))
 
 function p(type: ActionType, extra: Record<string, unknown> = {}) {
 	store.perform({ type, ...extra })
@@ -155,13 +155,6 @@ function p(type: ActionType, extra: Record<string, unknown> = {}) {
 			<div class="label">Foresight</div>
 			<button v-for="c in foresights.choices" :key="c.i" class="act" @click="p(foresights.a, { choice: c.i })">
 				{{ tileLabel(c.t) }}
-			</button>
-		</div>
-
-		<div v-if="buys.length" class="group">
-			<div class="label">Buy cattle</div>
-			<button v-for="(b, i) in buys" :key="i" class="act" @click="p(ActionType.BUY_CATTLE, { cattleCards: g().getCattleMarket().market.filter((c: CattleCard) => c.value === b.breedingValue).slice(0, b.pair ? 2 : 1), cowboys: b.cowboys, dollars: b.dollars })">
-				v{{ b.breedingValue }} {{ b.pair ? "(pair)" : "" }} {{ b.dollars }}$ {{ b.cowboys }}c
 			</button>
 		</div>
 
@@ -212,20 +205,26 @@ function p(type: ActionType, extra: Record<string, unknown> = {}) {
 			<button v-for="sp in em.spaces" :key="sp" class="act" @click="p(em.type, { to: sp })">{{ sp }}</button>
 		</div>
 
-		<div v-if="handCattle.length" class="group">
-			<div class="label">Cattle in hand</div>
-			<button v-for="(c, i) in handCattle" :key="i" class="act" @click="p((actions.find((a) => a.startsWith('DISCARD_1_CATTLE_CARD')) || actions.find((a) => a.startsWith('DISCARD_PAIR')) || ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_1_CERTIFICATE) as ActionType, { cattleType: c.type })">{{ c.type }}</button>
+		<div v-if="cardActions.length" class="group">
+			<div class="label">Card actions — select, then click a card on your player board</div>
+			<button
+				v-for="a in cardActions"
+				:key="a"
+				class="act"
+				:class="{ active: store.selectedAction === a }"
+				@click="store.selectAction(a)"
+			>{{ a }}</button>
 		</div>
 
-		<div v-if="objectiveAvailable.length" class="group">
-			<div class="label">Take objective</div>
-			<button v-for="o in objectiveAvailable" :key="o.id" class="act" @click="p(ActionType.TAKE_OBJECTIVE_CARD, { objectiveCard: o })">{{ o.id }}</button>
-		</div>
-
-		<div v-if="objectivesInHand.length" class="group">
-			<div class="label">Objectives in hand</div>
-			<button v-for="o in objectivesInHand" :key="o.id" class="act" @click="p(ActionType.PLAY_OBJECTIVE_CARD, { objectiveCard: o })">{{ o.id }}</button>
-			<button v-for="o in objectivesInHand" :key="o.id + '-d'" class="act" @click="p(ActionType.DISCARD_1_OBJECTIVE_CARD_TO_GAIN_2_CERTIFICATES, { objectiveCard: o })">discard {{ o.id }}</button>
+		<div v-if="unlockActions.length" class="group">
+			<div class="label">Unlock — select, then click a disc on your player board</div>
+			<button
+				v-for="a in unlockActions"
+				:key="a"
+				class="act"
+				:class="{ active: store.selectedAction === a }"
+				@click="store.selectAction(a)"
+			>{{ a }}</button>
 		</div>
 
 		<div class="group">
