@@ -2069,8 +2069,6 @@ class FCMpresenter(GamePresenter):
 
         # Check for new player order seed
         self.gameObj.playerOrderSeed = random.randint(1000, 32767)
-        # Copy in an initial value to prevent forced LU values of 99999 overwriting maps
-        self.gameObj.latestUpdate = self.gameObj.created
         self.gameObj.save()
         starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
 

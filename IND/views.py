@@ -725,6 +725,8 @@ def forkINDgame(request):
     # newGame.id = None
     newGame.gameName = f"{old_presenter.getGameName()} (fork)"
     newGame.gameStatus = "ACTIVE"
+    # New game, so restart the kickout timer rather than inheriting the source game's LU
+    newGame.latestUpdate = str(int(time.time()) * 1000)
     newGame.save()  # This creates the new record and assigns a new ID
 
     # Copy GamePlayer relationships
