@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { ActionType, CattleCard, ObjectiveCardDef } from "../game"
+import { engineMoveRange, reachableSpacesFor } from "../view/targets"
 import { useGameStore } from "../stores/game"
 
 function tileLabel(t: unknown): string {
@@ -103,43 +104,14 @@ const buildingOptions = computed<{ buildings: string[]; locations: string[] } | 
 const handCattle = computed<CattleCard[]>(() => g().currentPlayerState().hand.filter((c): c is CattleCard => (c as CattleCard).value !== undefined))
 
 // --- Engine moves ---
-const ENGINE_FORWARD: Record<string, [number, number]> = {
-	[ActionType.MOVE_ENGINE_1_FORWARD]: [1, 1],
-	[ActionType.MOVE_ENGINE_2_FORWARD]: [1, 2],
-	[ActionType.PAY_1_DOLLAR_TO_MOVE_ENGINE_1_FORWARD]: [1, 1],
-	[ActionType.PAY_2_DOLLARS_TO_MOVE_ENGINE_2_FORWARD]: [1, 2],
-	[ActionType.MOVE_ENGINE_AT_MOST_2_FORWARD]: [0, 2],
-	[ActionType.MOVE_ENGINE_AT_MOST_3_FORWARD]: [0, 3],
-	[ActionType.MOVE_ENGINE_AT_MOST_4_FORWARD]: [0, 4],
-	[ActionType.MOVE_ENGINE_2_OR_3_FORWARD]: [2, 3],
-	[ActionType.DISCARD_1_JERSEY_TO_MOVE_ENGINE_1_FORWARD]: [1, 1],
-	[ActionType.DISCARD_1_DUTCH_BELT_TO_MOVE_ENGINE_2_FORWARD]: [1, 2],
-}
-const ENGINE_BACKWARD: Record<string, [number, number]> = {
-	[ActionType.MOVE_ENGINE_1_BACKWARDS_TO_GAIN_3_DOLLARS]: [1, 1],
-	[ActionType.MOVE_ENGINE_AT_LEAST_1_BACKWARDS_AND_GAIN_3_DOLLARS]: [1, 39],
-	[ActionType.MOVE_ENGINE_1_BACKWARDS_TO_REMOVE_1_CARD]: [1, 1],
-	[ActionType.MOVE_ENGINE_1_BACKWARDS_TO_REMOVE_1_CARD_AND_GAIN_1_DOLLAR]: [1, 1],
-	[ActionType.MOVE_ENGINE_2_BACKWARDS_TO_REMOVE_2_CARDS]: [2, 2],
-	[ActionType.MOVE_ENGINE_2_BACKWARDS_TO_REMOVE_2_CARDS_AND_GAIN_2_DOLLARS]: [2, 2],
-	[ActionType.PAY_1_DOLLAR_AND_MOVE_ENGINE_1_BACKWARDS_TO_GAIN_1_CERTIFICATE]: [1, 1],
-	[ActionType.PAY_2_DOLLARS_AND_MOVE_ENGINE_2_BACKWARDS_TO_GAIN_2_CERTIFICATES]: [2, 2],
-	[ActionType.EXTRAORDINARY_DELIVERY]: [1, 39],
-}
+
 const engineMoves = computed(() => {
 	const rt = g().getRailroadTrack()
 	const player = g().currentPlayer
 	const out: { type: ActionType; spaces: string[] }[] = []
 	for (const a of actions.value) {
-		if (a === ActionType.MOVE_ENGINE_FORWARD) {
-			out.push({ type: a, spaces: [...rt.reachableSpacesForward(rt.currentSpace(player), 0, g().currentPlayerState().getNumberOfEngineers())] })
-		} else if (ENGINE_FORWARD[a]) {
-			const [lo, hi] = ENGINE_FORWARD[a]
-			out.push({ type: a, spaces: [...rt.reachableSpacesForward(rt.currentSpace(player), lo, hi)] })
-		} else if (ENGINE_BACKWARD[a]) {
-			const [lo, hi] = ENGINE_BACKWARD[a]
-			out.push({ type: a, spaces: [...rt.reachableSpacesBackwards(rt.currentSpace(player), lo, hi)] })
-		}
+		const spaces = [...reachableSpacesFor(a, g())]
+		if (spaces.length) out.push({ type: a, spaces })
 	}
 	return out
 })
@@ -157,7 +129,7 @@ const TARGET_ACTIONS = new Set<string>([
 	ActionType.TAKE_BREEDING_VALUE_3_CATTLE_CARD, ActionType.APPOINT_STATION_MASTER, ActionType.DOWNGRADE_STATION,
 	ActionType.UPGRADE_ANY_STATION_BEHIND_ENGINE, ActionType.USE_ADJACENT_BUILDING,
 ])
-const directActions = computed(() => actions.value.filter((a) => !TARGET_ACTIONS.has(a) && !ENGINE_FORWARD[a] && !ENGINE_BACKWARD[a] && a !== ActionType.MOVE_ENGINE_FORWARD))
+const directActions = computed(() => actions.value.filter((a) => !TARGET_ACTIONS.has(a) && !engineMoveRange(a, g())))
 
 const objectiveAvailable = computed(() => (actions.value.includes(ActionType.TAKE_OBJECTIVE_CARD) ? g().getObjectiveCards().available.slice() : []))
 const objectivesInHand = computed<ObjectiveCardDef[]>(() => g().currentPlayerState().hand.filter((c): c is ObjectiveCardDef => (c as any).tasks !== undefined))
@@ -218,8 +190,21 @@ function p(type: ActionType, extra: Record<string, unknown> = {}) {
 		</div>
 
 		<div v-if="buildingOptions && buildingOptions.buildings.length && buildingActions.length" class="group">
-			<div class="label">Place building (pick then location)</div>
-			<button v-for="b in buildingOptions.buildings" :key="b" class="act" @click="p(buildingActions[0], { building: b, location: buildingOptions.locations[0] })">{{ b }} → {{ buildingOptions.locations[0] }}</button>
+			<div class="label">Place building — pick one, then click a spot on the map</div>
+			<button
+				v-for="b in buildingOptions.buildings"
+				:key="b"
+				class="act"
+				:class="{ active: store.selectedAction === buildingActions[0] && store.pendingBuilding === b }"
+				@click="store.pickBuilding(buildingActions[0], b)"
+			>{{ b }}</button>
+		</div>
+
+		<div v-if="actions.includes(ActionType.USE_ADJACENT_BUILDING)" class="group">
+			<div class="label">Adjacent building</div>
+			<button class="act" :class="{ active: store.selectedAction === ActionType.USE_ADJACENT_BUILDING }" @click="store.selectAction(ActionType.USE_ADJACENT_BUILDING)">
+				{{ store.selectedAction === ActionType.USE_ADJACENT_BUILDING ? "Click a building on the map" : "Use adjacent building" }}
+			</button>
 		</div>
 
 		<div v-for="em in engineMoves" :key="em.type" class="group">

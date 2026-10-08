@@ -1,4 +1,4 @@
-import { defineStore } from "pinia"
+﻿import { defineStore } from "pinia"
 import { computed, reactive, ref, shallowRef } from "vue"
 import {
 	ActionType,
@@ -36,6 +36,8 @@ export const useGameStore = defineStore("store", () => {
 		showRewindPanel: false,
 		showReplay: false,
 	})
+	const selectedAction = ref<ActionType | null>(null)
+	const pendingBuilding = ref<string | null>(null)
 	const gameMessages = reactive({ errorText: "", successText: "", bugErrorText: "" })
 	const history = reactive<unknown[]>([])
 	const chatData = reactive<unknown[]>([])
@@ -61,6 +63,21 @@ export const useGameStore = defineStore("store", () => {
 		version.value++
 	}
 
+	function selectAction(a: ActionType) {
+		selectedAction.value = selectedAction.value === a ? null : a
+		pendingBuilding.value = null
+	}
+
+	function pickBuilding(a: ActionType, building: string) {
+		selectedAction.value = a
+		pendingBuilding.value = building
+	}
+
+	function clearAction() {
+		selectedAction.value = null
+		pendingBuilding.value = null
+	}
+
 	function setGame(g: Game) {
 		game.value = g
 		touch()
@@ -84,6 +101,7 @@ export const useGameStore = defineStore("store", () => {
 			gameMessages.errorText = (err as Error).message
 			return
 		}
+		clearAction()
 		touch()
 	}
 
@@ -94,6 +112,7 @@ export const useGameStore = defineStore("store", () => {
 	function endTurn() {
 		const g = getGame()
 		g.endTurn(g.currentPlayer, rng)
+		clearAction()
 		touch()
 		void persistTurn()
 	}
@@ -137,6 +156,7 @@ export const useGameStore = defineStore("store", () => {
 	function skip() {
 		const g = getGame()
 		g.skip(g.currentPlayer)
+		clearAction()
 		touch()
 	}
 
@@ -150,6 +170,7 @@ export const useGameStore = defineStore("store", () => {
 	}
 
 	function initFromGameData(gameData: unknown, players: PlayerInfo[], edition: Edition) {
+		clearAction()
 		if (gameData && typeof gameData === "object" && (gameData as { v?: number }).v === 1) {
 			setGame(deserializeGame(gameData as never))
 			return
@@ -166,6 +187,11 @@ export const useGameStore = defineStore("store", () => {
 
 	return {
 		version,
+		selectedAction,
+		pendingBuilding,
+		selectAction,
+		pickBuilding,
+		clearAction,
 		game,
 		state,
 		currentPlayer,

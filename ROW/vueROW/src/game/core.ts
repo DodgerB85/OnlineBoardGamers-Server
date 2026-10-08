@@ -444,9 +444,8 @@ export class JavaRandom implements Rng {
 	int(bound: number): number {
 		if (bound <= 0) throw new Error("bound must be positive")
 		if ((bound & -bound) === bound) {
-			// power of two
-			const bits = Math.log2(bound)
-			return Number((BigInt(this.next(bits)) * BigInt(bound)) >> BigInt(bits))
+			// Power of two: Java still draws 31 bits here.
+			return Math.floor((bound * this.next(31)) / 0x80000000)
 		}
 		let bits: number
 		let val: number
@@ -507,8 +506,8 @@ export class RecordingRandom implements Rng {
 		// Replay the same algorithm as JavaRandom, drawing from the tape.
 		if (bound <= 0) throw new Error("bound must be positive")
 		if ((bound & -bound) === bound) {
-			const bits = Math.log2(bound)
-			return Number((BigInt(this.next(bits)) * BigInt(bound)) >> BigInt(bits))
+			// Power of two: Java still draws 31 bits here.
+			return Math.floor((bound * this.next(31)) / 0x80000000)
 		}
 		let bits: number
 		let val: number

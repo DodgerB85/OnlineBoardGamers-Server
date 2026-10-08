@@ -48,6 +48,9 @@ import {
 	buildTrailNodes,
 	buildingNumbersForOptions,
 	CATTLE_COSTS,
+	STATION_MASTERS_ORIGINAL,
+	STATION_MASTERS_PROMOS,
+	STATION_MASTERS_SECOND_EDITION,
 	CITY_INFO,
 	cattleMarketLimit,
 	createCattleSet,
@@ -365,7 +368,6 @@ class TrailLocation {
 		this.next = def.next
 		this.inWoods = def.inWoods ?? false
 		this.riskAction = def.riskAction ?? null
-		if (def.kind === "HAZARD") this.hazard = { type: def.name.split("-")[0] as HazardType, hand: Hand.NONE, points: def.hazardPoints ?? 0 }
 	}
 
 	getHand(): Hand {
@@ -401,6 +403,26 @@ export class Trail {
 			const loc = this.locations.get(locName)
 			if (loc) loc.building = { name: names[i], player: null }
 		})
+	}
+
+	/** Trail.placeHazard: first (lowest-number) empty spot of the hazard's type. */
+	placeHazard(hazard: Hazard): boolean {
+		const candidates = [...this.locations.values()]
+			.filter((l) => l.kind === "HAZARD" && l.hazard === null && l.def.name.startsWith(hazard.type))
+			.sort((a, b) => (a.def.hazardPoints ?? 0) - (b.def.hazardPoints ?? 0))
+		if (candidates.length === 0) return false
+		candidates[0].hazard = hazard
+		return true
+	}
+
+	/** Trail.placeTeepee: lowest-reward empty teepee spot. */
+	placeTeepee(teepee: Teepee): boolean {
+		const candidates = [...this.locations.values()]
+			.filter((l) => l.kind === "TEEPEE" && l.teepee === null)
+			.sort((a, b) => (a.def.reward ?? 0) - (b.def.reward ?? 0))
+		if (candidates.length === 0) return false
+		candidates[0].teepee = teepee
+		return true
 	}
 
 	getLocation(name: string): TrailLocation {
@@ -1137,6 +1159,13 @@ export class Game {
 		trail.placeNeutralBuildings(rng, options.buildings === "BEGINNER")
 		const railroad = new RailroadTrack()
 		railroad.init(players.map((p) => p.name))
+		// Station master tiles: shuffled pile dealt onto the first five stations.
+		const masterPile = [...STATION_MASTERS_ORIGINAL]
+		if (options.edition === Edition.SECOND) masterPile.push(...STATION_MASTERS_SECOND_EDITION)
+		else if (options.stationMasterPromos) masterPile.push(...STATION_MASTERS_PROMOS)
+		shuffle(masterPile, rng)
+		for (let i = 0; i < 5 && i < railroad.stations.length; i++) railroad.stations[i].stationMaster = masterPile[i]
+		railroad.stationMasters = masterPile.slice(5)
 		const jobMarket = new JobMarket()
 		const cattleMarket = new CattleMarket(options.simmental)
 		cattleMarket.init(players.length, rng)
@@ -1148,6 +1177,19 @@ export class Game {
 		const startingDeck = [...STARTING_OBJECTIVE_IDS]
 		shuffle(startingDeck, rng)
 		const startingObjectiveCards = startingDeck.slice(0, players.length).map((id) => OBJECTIVE_CARD_TYPES[id])
+
+		// GWT.placeInitialTiles: 7 hazard/teepee tiles from the first supply pile.
+		let placed = 0
+		while (placed < 7 && kcSupply.tilesLeft(0) > 0) {
+			const tile = kcSupply.draw(0)
+			if (!tile) break
+			if ("hazard" in tile ? trail.placeHazard(tile.hazard) : "teepee" in tile && trail.placeTeepee(tile.teepee)) placed++
+		}
+		// One full first row of workers from the second pile.
+		for (let i = 0; i < players.length; i++) {
+			const tile = kcSupply.draw(1)
+			if (tile && "worker" in tile) jobMarket.addWorker(tile.worker, players.length)
+		}
 
 		const game = new Game({
 			edition: options.edition,
@@ -1164,9 +1206,17 @@ export class Game {
 			kcSupply,
 			foresights,
 			objectiveCards,
-			startingObjectiveCards,
+			startingObjectiveCards: [],
 			actionStack: ActionStack.initial([]),
 			canUndo: false,
+		})
+		// GWT.start: starting balances, committed objectives, second-edition overdraws.
+		playerOrder.forEach((name, i) => {
+			const ps = playerStates[name]
+			ps.gainDollars(6 + i)
+			const objective = startingObjectiveCards[i]
+			if (objective) ps.objectives.push(objective.id)
+			if (options.edition === Edition.SECOND && i > 0) ps.drawCards(i, rng)
 		})
 		game.beginTurn()
 		return game
@@ -1384,13 +1434,13 @@ export class Game {
 				ps.gainDollars(2 * this.state.railroadTrack.numberOfUpgradedStations(this.currentPlayer))
 				return null
 			case ActionType.HIRE_WORKER:
-				return this.hireWorker(action.row as number, action.worker as Worker, 0)
+				return { immediate: [], actions: this.hireWorker(action.row as number, action.worker as Worker, 0), canUndo: true }
 			case ActionType.HIRE_WORKER_PLUS_2:
-				return this.hireWorker(action.row as number, action.worker as Worker, 2)
+				return { immediate: [], actions: this.hireWorker(action.row as number, action.worker as Worker, 2), canUndo: true }
 			case ActionType.HIRE_WORKER_MINUS_1:
-				return this.hireWorker(action.row as number, action.worker as Worker, -1)
+				return { immediate: [], actions: this.hireWorker(action.row as number, action.worker as Worker, -1), canUndo: true }
 			case ActionType.HIRE_WORKER_MINUS_2:
-				return this.hireWorker(action.row as number, action.worker as Worker, -2)
+				return { immediate: [], actions: this.hireWorker(action.row as number, action.worker as Worker, -2), canUndo: true }
 			case ActionType.TAKE_OBJECTIVE_CARD: {
 				const requested = action.objectiveCard as ObjectiveCardDef | undefined
 				const chosen = requested ?? this.state.objectiveCards.draw()
@@ -1414,21 +1464,27 @@ export class Game {
 				return { immediate: card.action ? [PossibleAction.mandatory(card.action)] : [], actions: [], canUndo: true }
 			}
 			case ActionType.CHOOSE_FORESIGHT_1:
-				return [this.chooseForesight(0, action.choice as number, rng)]
+				return { immediate: [], actions: [this.chooseForesight(0, action.choice as number, rng)], canUndo: true }
 			case ActionType.CHOOSE_FORESIGHT_2:
-				return [this.chooseForesight(1, action.choice as number, rng)]
+				return { immediate: [], actions: [this.chooseForesight(1, action.choice as number, rng)], canUndo: true }
 			case ActionType.CHOOSE_FORESIGHT_3:
-				return [this.chooseForesight(2, action.choice as number, rng)]
+				return { immediate: [], actions: [this.chooseForesight(2, action.choice as number, rng)], canUndo: true }
 			case ActionType.DELIVER_TO_CITY: {
 				return { immediate: this.deliverToCity(action.city as City, (action.certificates as number) ?? 0), actions: [], canUndo: true }
 			}
 			case ActionType.BUY_CATTLE: {
-				const cards = (action.cattleCards as CattleCard[]) ?? []
+				const requested = (action.cattleCards as CattleCard[]) ?? []
+				const market = this.state.cattleMarket.market
+				const cards = requested.map((req) => {
+					const idx = market.findIndex((m) => m.type === req.type && m.points === req.points && (req.value === undefined || m.value === req.value))
+					if (idx < 0) throw new ROWException(ROWError.CATTLE_CARD_NOT_AVAILABLE)
+					return market[idx]
+				})
 				const cost = this.state.cattleMarket.buy(cards, action.cowboys as number, action.dollars as number)
 				for (const c of cards) ps.discardPile.unshift(c)
 				ps.payDollars(cost.dollars)
-				for (let i = 0; i < cost.cowboys; i++) ps.gainWorker(Worker.COWBOY)
-				return null
+				ps.useCowboys(cost.cowboys)
+				return { immediate: [], actions: [], canUndo: true }
 			}
 			case ActionType.SINGLE_AUXILIARY_ACTION:
 				return this.unlockedSingleAuxiliaryActions(ps)
@@ -1554,13 +1610,13 @@ export class Game {
 				return null
 			case ActionType.PLACE_BUILDING:
 				this.placeBuilding(action.location as string, action.building as string, 2)
-				return null
+				return { immediate: [], actions: [], canUndo: true }
 			case ActionType.PLACE_CHEAP_BUILDING:
 				this.placeBuilding(action.location as string, action.building as string, 1)
-				return null
+				return { immediate: [], actions: [], canUndo: true }
 			case ActionType.PLACE_BUILDING_FOR_FREE:
 				this.placeBuilding(action.location as string, action.building as string, 0)
-				return null
+				return { immediate: [], actions: [], canUndo: true }
 			case ActionType.REMOVE_HAZARD:
 			case ActionType.REMOVE_HAZARD_FOR_2_DOLLARS:
 			case ActionType.REMOVE_HAZARD_FOR_5_DOLLARS:
@@ -1736,7 +1792,6 @@ export class Game {
 		this.state.trail.movePlayer(this.currentPlayer, to)
 		if (!this.state.actionStack.canPerform(ActionType.MOVE)) this.state.actionStack.clear()
 		if (payFeesAndActivate) {
-			ps.activate(to)
 			return { immediate: [], actions: [this.activateLocation(toLoc)], canUndo: true }
 		}
 		if (to === "KANSAS_CITY") throw new ROWException(ROWError.CANNOT_PERFORM_ACTION)
@@ -1921,16 +1976,10 @@ export class Game {
 	}
 
 	placeHazardOnTrail(hazard: Hazard): void {
-		const candidates = [...this.state.trail.locations.values()]
-			.filter((l) => l.kind === "HAZARD" && l.hazard === null && l.def.name.startsWith(hazard.type))
-			.sort((a, b) => (a.def.hazardPoints ?? 0) - (b.def.hazardPoints ?? 0))
-		if (candidates.length > 0) candidates[0].hazard = hazard
+		this.state.trail.placeHazard(hazard)
 	}
 	placeTeepeeOnTrail(teepee: Teepee): void {
-		const candidates = [...this.state.trail.locations.values()]
-			.filter((l) => l.kind === "TEEPEE" && l.teepee === null && (l.def.reward ?? 0) > 0)
-			.sort((a, b) => (a.def.reward ?? 0) - (b.def.reward ?? 0))
-		if (candidates.length > 0) candidates[0].teepee = teepee
+		this.state.trail.placeTeepee(teepee)
 	}
 
 	deliverToCity(city: City, certificates: number): PossibleAction[] {
@@ -1950,10 +1999,11 @@ export class Game {
 			// Extraordinary delivery (building 9A): the city value must fit the engine's backward move.
 			if (CITY_INFO[city].value > ps.lastEngineMove) throw new ROWException(ROWError.CITY_VALUE_MUST_BE_LESS_THEN_OR_EQUAL_TO_SPACES_THAT_ENGINE_MOVED_BACKWARDS)
 		}
-		if (this.state.railroadTrack.cities[city].includes(this.currentPlayer) && city !== City.KANSAS_CITY && city !== City.SAN_FRANCISCO && !this.isRailsToTheNorth()) {
+		const delivered = (this.state.railroadTrack.cities[city] ??= [])
+		if (delivered.includes(this.currentPlayer) && city !== City.KANSAS_CITY && city !== City.SAN_FRANCISCO && !this.isRailsToTheNorth()) {
 			throw new ROWException(ROWError.ALREADY_DELIVERED_TO_CITY)
 		}
-		this.state.railroadTrack.cities[city].push(this.currentPlayer)
+		delivered.push(this.currentPlayer)
 		return this.removeDisc(CITY_INFO[city].discColors)
 	}
 

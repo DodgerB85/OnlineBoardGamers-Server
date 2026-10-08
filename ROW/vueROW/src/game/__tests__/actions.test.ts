@@ -1,9 +1,38 @@
 import { describe, expect, it } from "vitest"
-import { ActionType, Game, JavaRandom, PlayerInfo, defaultOptions, serializeGame, deserializeGame } from "../index"
+import { ActionType, Card, Game, JavaRandom, PlayerInfo, defaultOptions, serializeGame, deserializeGame } from "../index"
 
 function players(n: number): PlayerInfo[] {
 	const colors = ["RED", "BLUE", "YELLOW", "GREEN"]
 	return Array.from({ length: n }, (_, i) => ({ name: `Player ${i + 1}`, color: colors[i], type: "HUMAN" as const }))
+}
+
+/** After arriving anywhere, complete the mandatory chains (building activations, KC foresights/delivery). */
+function drainTurn(game: Game, rngSeed: number) {
+	const player = game.currentPlayer
+	for (let guard = 0; guard < 20; guard++) {
+		const acts = game.possibleActions()
+		const rng = new JavaRandom(rngSeed + guard)
+		if (acts.has(ActionType.CHOOSE_FORESIGHT_1)) game.perform(player, { type: ActionType.CHOOSE_FORESIGHT_1, choice: 0 }, rng)
+		else if (acts.has(ActionType.CHOOSE_FORESIGHT_2)) game.perform(player, { type: ActionType.CHOOSE_FORESIGHT_2, choice: 0 }, rng)
+		else if (acts.has(ActionType.CHOOSE_FORESIGHT_3)) game.perform(player, { type: ActionType.CHOOSE_FORESIGHT_3, choice: 0 }, rng)
+		else if (acts.has(ActionType.DELIVER_TO_CITY)) {
+			const pd = game.possibleDeliveries()[0]
+			game.perform(player, { type: ActionType.DELIVER_TO_CITY, city: pd.city, certificates: pd.certificates }, rng)
+		} 		else if (acts.has(ActionType.DISCARD_CARD)) {
+			const card = game.currentPlayerState().hand[0] as Card
+			game.perform(player, { type: ActionType.DISCARD_CARD, card }, rng)
+		} else if (acts.has(ActionType.UNLOCK_WHITE) || acts.has(ActionType.UNLOCK_BLACK_OR_WHITE)) {
+			const ps = game.currentPlayerState()
+			const type = acts.has(ActionType.UNLOCK_WHITE) ? ActionType.UNLOCK_WHITE : ActionType.UNLOCK_BLACK_OR_WHITE
+			const u = Object.keys(ps.unlocked).find((k) => ps.canUnlock(k as never, game.isRailsToTheNorth()))
+			if (!u) break
+			game.perform(player, { type, unlock: u }, rng)
+		} else if (acts.has(ActionType.DOWNGRADE_STATION)) {
+			const idx = game.getRailroadTrack().stations.findIndex((s) => s.upgradedBy.includes(player))
+			if (idx < 0) break
+			game.perform(player, { type: ActionType.DOWNGRADE_STATION, station: idx }, rng)
+		} else break
+	}
 }
 
 describe("Full turn loop", () => {
@@ -17,6 +46,7 @@ describe("Full turn loop", () => {
 			game.perform(player, { type: ActionType.MOVE, steps: moves[0].steps }, new JavaRandom(safety))
 			// A location is now active and offers at least one action.
 			expect(game.possibleActions().size).toBeGreaterThan(0)
+			drainTurn(game, 500 + safety)
 			game.endTurn(player, new JavaRandom(1000 + safety))
 		}
 		expect(safety).toBeGreaterThan(2)

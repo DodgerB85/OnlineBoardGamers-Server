@@ -110,6 +110,20 @@ export const TURNOUT_SPACES = ["4.5", "7.5", "10.5", "13.5", "16.5", "21.5", "25
 export const MAX_SPACE = 39
 
 // ---------------------------------------------------------------------------
+// Station master tiles (StationMaster.java)
+// ---------------------------------------------------------------------------
+
+export const STATION_MASTERS_ORIGINAL = [
+	"GAIN_2_DOLLARS_POINT_FOR_EACH_WORKER",
+	"REMOVE_HAZARD_OR_TEEPEE_POINTS_FOR_EACH_2_OBJECTIVE_CARDS",
+	"PERM_CERT_POINTS_FOR_EACH_2_HAZARDS",
+	"PERM_CERT_POINTS_FOR_TEEPEE_PAIRS",
+	"PERM_CERT_POINTS_FOR_EACH_2_CERTS",
+]
+export const STATION_MASTERS_PROMOS = ["TWO_PERM_CERTS", "TWELVE_DOLLARS"]
+export const STATION_MASTERS_SECOND_EDITION = ["TWO_PERM_CERTS", "TWELVE_DOLLARS", "PERM_CERT_POINTS_PER_2_STATIONS", "GAIN_2_CERTS_POINTS_PER_BUILDING"]
+
+// ---------------------------------------------------------------------------
 // Job market
 // ---------------------------------------------------------------------------
 
