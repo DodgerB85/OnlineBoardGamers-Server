@@ -75,6 +75,10 @@ def showROWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     # The ROW client reads the whole model as plain JSON out of gameData.
     returnData["gameData"] = returnData["gameData"] if returnData["gameData"] else "{}"
 
+    # Edition is carried as a starting option.
+    loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    returnData["edition"] = "SECOND" if rfROW.SO_SECOND_EDITION in loadedStartingOptions else "FIRST"
+
     currentPlayersArr = []
     if currentGame.phase in rfROW.MAIN_PHASES:
         currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else [])

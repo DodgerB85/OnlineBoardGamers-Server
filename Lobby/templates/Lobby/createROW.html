@@ -54,7 +54,6 @@
                             <option value="2" selected="selected">2</option>
                             <option value="3">3</option>
                             <option value="4">4</option>
-                            <option value="5">5</option>
                         </select>
                     </div>
                     <div class="form-row" id="selPlayer2">
@@ -74,18 +73,6 @@
                         <label class="form-label" for="player4">{% translate "Player 4" %}</label>
                         <div class="field">
                             <input type="text" id="player4" name="player4" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
-                        </div>
-                    </div>
-                    <div class="form-row" id="selPlayer5" style="display:none">
-                        <label class="form-label" for="player5">{% translate "Player 5" %}</label>
-                        <div class="field">
-                            <input type="text" id="player5" name="player5" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
-                        </div>
-                    </div>
-                    <div class="form-row" id="selPlayer6" style="display:none">
-                        <label class="form-label" for="player6">{% translate "Player 6" %}</label>
-                        <div class="field">
-                            <input type="text" id="player6" name="player6" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
                         </div>
                     </div>
                 </div>
@@ -138,7 +125,13 @@
                 <div class="card">
                     <div class="card-header"><h2 class="card-title">{% translate "Game Options" %}</h2></div>
                     <div class="check-list">
-                        <div class="opt-help">{% translate "Game options will be added here as the game is implemented." %}</div>
+                        <div class="form-row">
+                            <label class="form-label" for="edition">{% translate "Edition" %}</label>
+                            <select name="edition" id="edition" style="flex:0 0 auto;width:auto">
+                                <option value="FIRST" selected="selected">{% translate "First edition" %}</option>
+                                <option value="SECOND">{% translate "Second edition" %}</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -152,7 +145,7 @@
     <script>
     function selectPlayers() {
         var maxPlayers = parseInt(document.getElementById("playerNumber").value);
-        for (var i = 2; i <= 6; i++) {
+        for (var i = 2; i <= 4; i++) {
             var row = document.getElementById("selPlayer" + i);
             if (row) row.style.display = i < maxPlayers ? "block" : "none";
         }

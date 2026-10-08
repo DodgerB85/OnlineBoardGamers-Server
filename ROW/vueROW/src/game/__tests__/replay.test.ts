@@ -147,6 +147,10 @@ const CARDS = (a: unknown, b: unknown) => JSON.stringify(stable(a)).localeCompar
 function canon(s: any): any {
 	const o = JSON.parse(JSON.stringify(s))
 	delete o.options
+	// The action stack is serialized separately from the game state (Java shape),
+	// so it isn't part of the compared state subset.
+	delete o.actionStack
+	delete o.rngState
 	for (const ps of Object.values<any>(o.playerStates ?? {})) {
 		delete ps.discs
 		ps.hand = [...(ps.hand ?? [])].sort(CARDS)
@@ -221,15 +225,18 @@ describe("Replay fixtures drive the real engine", () => {
 						expect(() => game.perform(cmd.player, cmd.action, rng), label).toThrow(new RegExp(cmd.expectedError))
 					} else {
 						game.perform(cmd.player, cmd.action, rng)
+						rng.assertFullyConsumed()
 					}
 				} else if (cmd.kind === "skip") {
 					if (cmd.expectedError) {
 						expect(() => game.skip(cmd.player), label).toThrow(new RegExp(cmd.expectedError))
 					} else {
 						game.skip(cmd.player)
+						rng.assertFullyConsumed()
 					}
 				} else if (cmd.kind === "endTurn") {
 					game.endTurn(cmd.player, rng)
+					rng.assertFullyConsumed()
 				} else if (cmd.kind === "undo") {
 					game.undo(cmd.player)
 				} else {

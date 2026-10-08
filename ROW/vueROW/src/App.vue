@@ -7,6 +7,8 @@ import TrailBoard from "./components/TrailBoard.vue"
 import PlayerBoard from "./components/PlayerBoard.vue"
 import CattleMarket from "./components/CattleMarket.vue"
 import ObjectivesMarket from "./components/ObjectivesMarket.vue"
+import EndedDialog from "./components/EndedDialog.vue"
+import ReplayPanel from "./components/ReplayPanel.vue"
 import DebugArea from "./components/DebugArea.vue"
 import FooterBar from "./components/FooterBar.vue"
 import { useGameStore } from "./stores/game"
@@ -38,7 +40,7 @@ function showDebug() {
 	<div id="wholeMiddleArea">
 		<TopMenuViews />
 		<ActionBar />
-		<div id="mainArea">
+		<div id="mainArea" :style="{ zoom: personal.zoom / 16 }">
 			<div id="leftColumn">
 				<TrailBoard />
 				<CattleMarket />
@@ -50,6 +52,8 @@ function showDebug() {
 		</div>
 		<DebugArea v-if="showDebug()" />
 	</div>
+	<EndedDialog />
+	<ReplayPanel />
 	<FooterBar />
 </template>
 

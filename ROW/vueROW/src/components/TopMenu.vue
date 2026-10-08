@@ -18,6 +18,25 @@ function loadRewind() {
 	void store.rewind()
 }
 
+function toggleReplay() {
+	if (store.viewSettings.showReplay) store.exitReplay()
+	else store.enterReplay()
+}
+
+function toggleChat() {
+	if (!store.viewSettings.showChat) personal.chatNotification = false
+	store.viewSettings.showChat = !store.viewSettings.showChat
+}
+
+function zoom(dir: number) {
+	personal.zoom = Math.min(28, Math.max(8, personal.zoom + dir))
+}
+
+function resignGame() {
+	if (!window.confirm("Are you sure you want to resign? You will not be able to continue.")) return
+	void store.resignGame()
+}
+
 function nextGame() {
 	if (window.initData?.nextURL) window.location.href = window.initData.nextURL
 }
@@ -48,8 +67,9 @@ const kickoutText = computed(() => {
 				</span>
 			</div>
 			<div class="menuRow">
-				<span :class="['topMenuItem', { selected: store.viewSettings.showChat }]" @click="toggle('showChat')">
+				<span :class="['topMenuItem', { selected: store.viewSettings.showChat }]" @click="toggleChat">
 					<img :src="getImage('icon-chat')" /><span>{{ t('topMenu.chat') }}</span>
+					<span v-if="personal.chatNotification" class="notifDot"></span>
 				</span>
 				<span :class="['topMenuItem', { selected: store.viewSettings.showBug }]" @click="toggle('showBug')">
 					<img :src="getImage('icon-stop')" /><span>{{ t('topMenu.bug') }}</span>
@@ -62,7 +82,7 @@ const kickoutText = computed(() => {
 					<img :src="getImage('icon-scroll')" /><span>{{ t('topMenu.history') }}</span>
 				</span>
 				<div class="menuDivider"></div>
-				<span :class="['topMenuItem', { selected: store.viewSettings.showReplay }]" @click="toggle('showReplay')">
+				<span :class="['topMenuItem', { selected: store.viewSettings.showReplay }]" @click="toggleReplay">
 					<img :src="getImage('icon-replay')" /><span>{{ t('topMenu.replay') }}</span>
 				</span>
 				<span
@@ -78,6 +98,11 @@ const kickoutText = computed(() => {
 		<div id="topRight">
 			<div v-if="personal.name">{{ personal.name }}</div>
 			<div v-if="kickoutText">{{ t('topMenu.timeToNextKickout') }} {{ kickoutText }}</div>
+			<div class="topControls">
+				<button class="topBtn" @click="zoom(-1)">🔍−</button>
+				<button class="topBtn" @click="zoom(1)">🔍+</button>
+				<button v-if="personal.pov >= 0 && !personal.trainingGame" class="topBtn resign" @click="resignGame">{{ t('topMenu.resign') }}</button>
+			</div>
 		</div>
 
 		<div id="topInfos">
@@ -103,4 +128,9 @@ const kickoutText = computed(() => {
 #topRight { float: right; font-size: 14px; text-align: center; margin-right: 6px; }
 #topInfos { clear: both; text-align: center; font-size: 14px; padding-top: 4px; }
 .error { color: #ff8080; }
+.topMenuItem { position: relative; }
+.notifDot { position: absolute; top: 2px; right: 12px; width: 10px; height: 10px; background: red; border-radius: 50%; border: 1px solid white; }
+.topControls { margin-top: 4px; }
+.topBtn { margin: 1px; padding: 2px 8px; cursor: pointer; font-size: 13px; }
+.topBtn.resign { background: #f6d9c9; font-weight: bold; }
 </style>

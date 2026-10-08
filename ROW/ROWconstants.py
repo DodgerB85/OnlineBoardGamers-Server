@@ -20,3 +20,4 @@ PHASE_LOOKBACK_AMOUNT = 1
 # Only option values that are ROW-specific belong here. The common options
 # (Practice / Learning / Experienced) come from Lobby.sharedFunctions.constants.
 SO_BASE_GAME = -1
+SO_SECOND_EDITION = 2

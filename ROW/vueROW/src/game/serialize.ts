@@ -3,7 +3,7 @@
  * Mirrors the field set of ROW.serialize but as a plain JSON document.
  */
 
-import { ActionStack, Edition, ROWError, ROWException, Mode, Options, PlayerInfo, Rng, Status } from "./core"
+import { ActionStack, Edition, JavaRandom, ROWError, ROWException, Mode, Options, PlayerInfo, Rng, Status, type SerializedActionStack } from "./core"
 import { CattleMarket, Foresights, Game, GameState, JobMarket, KansasCitySupply, ObjectiveCards, PlayerState, RailroadTrack, Trail } from "./engine"
 import { OBJECTIVE_CARD_TYPES } from "./data"
 
@@ -25,6 +25,8 @@ export interface SerializedGame {
 	objectiveCards: unknown
 	startingObjectiveCards: string[]
 	canUndo: boolean
+	actionStack?: SerializedActionStack
+	rngState?: string
 }
 
 function serializePlayerState(ps: PlayerState): Record<string, unknown> {
@@ -97,7 +99,7 @@ function deserializeTrail(obj: any, edition: Edition): Trail {
 	return trail
 }
 
-export function serializeGame(game: Game): SerializedGame {
+export function serializeGame(game: Game, rng?: Rng): SerializedGame {
 	const s = game.state
 	const playerStates: Record<string, unknown> = {}
 	for (const [name, ps] of Object.entries(s.playerStates)) playerStates[name] = serializePlayerState(ps)
@@ -123,6 +125,8 @@ export function serializeGame(game: Game): SerializedGame {
 		objectiveCards: { drawStack: s.objectiveCards.drawStack.map((c) => c.id), available: s.objectiveCards.available.map((c) => c.id) },
 		startingObjectiveCards: s.startingObjectiveCards.map((c) => c.id),
 		canUndo: s.canUndo,
+		actionStack: s.actionStack.serialize(),
+		rngState: rng instanceof JavaRandom ? rng.getState() : undefined,
 	}
 }
 
@@ -177,12 +181,12 @@ export function deserializeGame(obj: SerializedGame): Game {
 		foresights,
 		objectiveCards,
 		startingObjectiveCards: (obj.startingObjectiveCards ?? []).map((id) => OBJECTIVE_CARD_TYPES[id]),
-		actionStack: new ActionStack([], []),
+		actionStack: obj.actionStack ? ActionStack.deserialize(obj.actionStack) : new ActionStack([], []),
 		canUndo: obj.canUndo ?? false,
 	}
 	const game = new Game(state)
-	// Rebuild the begin-turn action stack for the current player.
-	game.beginTurn()
+	// Older payloads (and fresh games) have no action stack: rebuild begin-turn.
+	if (!obj.actionStack) game.beginTurn()
 	return game
 }
 

@@ -22,6 +22,9 @@ export function initGame(): void {
 	personal.secondsToNextKickout = Number(initData.secondsToNextKickout ?? 99999)
 	personal.trainingGame = Array.isArray(initData.startingOptions) && (initData.startingOptions as number[]).includes(102)
 	personal.transactionID = String(initData.transactionID ?? "")
+	personal.chatNotification = Boolean(initData.chatNotification)
+	personal.zoom = Number(initData.myZoomLevel ?? 16)
+	store.turn = Number(initData.turn ?? 1)
 
 	const edition = (initData.edition as Edition) ?? Edition.FIRST
 	const names = (initData.playerNames as string[]) ?? []
@@ -38,6 +41,10 @@ export function initGame(): void {
 
 	store.useRng(new JavaRandom(Number(initData.gameID ?? Date.now())))
 	store.initFromGameData(gameData, players, edition)
+
+	// OBG is authoritative for whose turn it is; align the engine to it.
+	const currentPlayers = Array.isArray(initData.currentPlayers) ? (initData.currentPlayers as string[]) : []
+	store.alignToCurrentPlayers(currentPlayers)
 
 	const chat = initData.chatData
 	if (typeof chat === "string" && chat.length > 0) {
@@ -63,9 +70,14 @@ function setupLiveUpdates(): void {
 	const personal = usePersonalStore()
 	if (personal.gameID < 0) return
 	void startWebSocket().then((ws) => {
-		if (ws) ws.onmessage = () => void store.reloadFromServer()
+		if (ws)
+			ws.onmessage = () => {
+				void store.reloadFromServer()
+				void store.reloadChat()
+			}
 	})
 	setInterval(() => {
 		void store.reloadFromServer()
+		void store.reloadChat()
 	}, 20000)
 }

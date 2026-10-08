@@ -69,7 +69,7 @@
     initData.phase = {{ phase }};
     initData.finishedGame = {{ finishedGame|lower }};
     initData.transactionID = "{{ transactionID }}";
-    initData.edition = "FIRST";
+    initData.edition = "{{ edition }}";
 
     {% if spoilerFree %}
     initData.spoilerFree = true;

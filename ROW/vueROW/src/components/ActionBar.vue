@@ -2,7 +2,7 @@
 import { computed } from "vue"
 import { ActionType, Hand, PLAYER_BUILDINGS } from "../game"
 import { buildingImage } from "../view/assets"
-import { engineMoveRange, reachableSpacesFor } from "../view/targets"
+import { engineMoveRange, humanizeAction, reachableSpacesFor } from "../view/targets"
 import { useGameStore } from "../stores/game"
 
 function tileLabel(t: unknown): string {
@@ -159,7 +159,11 @@ function p(type: ActionType, extra: Record<string, unknown> = {}) {
 
 <template>
 	<div id="actionBar">
-		<div v-if="moves.length" class="group">
+		<div v-if="!store.canAct()" class="group">
+			<div class="label">{{ store.saving ? "Saving…" : "Waiting for other players" }}</div>
+		</div>
+		<template v-else>
+			<div v-if="moves.length" class="group">
 			<div class="label">Move</div>
 			<button v-for="(mv, i) in moves" :key="i" class="act" @click="p(ActionType.MOVE, { steps: mv.steps })">{{ mv.steps.join(" → ") }} ({{ mv.cost }}$)</button>
 		</div>
@@ -232,7 +236,7 @@ function p(type: ActionType, extra: Record<string, unknown> = {}) {
 		</div>
 
 		<div v-for="em in engineMoves" :key="em.type" class="group">
-			<div class="label">{{ em.type }}</div>
+			<div class="label">{{ humanizeAction(em.type) }}</div>
 			<button v-for="sp in em.spaces" :key="sp" class="act" @click="p(em.type, { to: sp })">{{ sp }}</button>
 		</div>
 
@@ -244,7 +248,7 @@ function p(type: ActionType, extra: Record<string, unknown> = {}) {
 				class="act"
 				:class="{ active: store.selectedAction === a }"
 				@click="store.selectAction(a)"
-			>{{ a }}</button>
+			>{{ humanizeAction(a) }}</button>
 		</div>
 
 		<div v-if="unlockActions.length" class="group">
@@ -255,19 +259,21 @@ function p(type: ActionType, extra: Record<string, unknown> = {}) {
 				class="act"
 				:class="{ active: store.selectedAction === a }"
 				@click="store.selectAction(a)"
-			>{{ a }}</button>
+			>{{ humanizeAction(a) }}</button>
 		</div>
 
 		<div class="group">
 			<div class="label">Other actions</div>
-			<button v-for="a in directActions" :key="a" class="act" @click="p(a)">{{ a }}</button>
+			<button v-for="a in directActions" :key="a" class="act" @click="p(a)">{{ humanizeAction(a) }}</button>
 		</div>
 
 		<div class="group">
+			<button class="act" :disabled="!store.canUndo" @click="store.undo()">Undo</button>
 			<button class="act reset" @click="store.resetWholeTurn()">Reset Whole Turn</button>
-			<button class="act end" @click="store.endTurn()">End Turn</button>
-			<button v-if="store.canSkip" class="act" @click="store.skip()">Skip</button>
+			<button class="act end" :disabled="store.saving" @click="store.endTurn()">End Turn</button>
+			<button v-if="store.canSkip" class="act" :disabled="store.saving" @click="store.skip()">Skip</button>
 		</div>
+		</template>
 	</div>
 </template>
 

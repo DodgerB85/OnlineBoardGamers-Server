@@ -83,6 +83,14 @@ export async function reloadGameData(gameID: number): Promise<{ gameData: string
 	return response.json()
 }
 
+/** Fetch the stored chat (gzip+base64) and clear this viewer's chat notification. */
+export async function loadChat(gameID: number): Promise<string> {
+	const response = await post("/ROW/data/2/", { gameID })
+	if (!response.ok) throw new Error("Network response was not ok")
+	const data = await response.json()
+	return data.chatData
+}
+
 export async function sendChatMessage(gameID: number, newEntry: unknown[]): Promise<string> {
 	const response = await post("/ROW/sendChatMessageROW/", { action: "sendChatMessage", gameID, newEntry })
 	if (!response.ok) throw new Error("Network response was not ok")
@@ -91,7 +99,8 @@ export async function sendChatMessage(gameID: number, newEntry: unknown[]): Prom
 }
 
 export async function saveNotes(gameID: number, notes: string): Promise<void> {
-	await post("/ROW/saveNotesROW/", { action: "saveNotes", gameID, notes })
+	const response = await post("/ROW/saveNotesROW/", { action: "saveNotes", gameID, notes })
+	if (!response.ok) throw new Error("Network response was not ok")
 }
 
 export async function loadRewind(gameID: number, latestUpdate: string | number): Promise<unknown> {
@@ -127,6 +136,7 @@ export async function resign(gameID: number): Promise<void> {
 
 export async function submitBug(gameID: number, description: string, gameData: unknown): Promise<boolean> {
 	const response = await post("/ROW/bugEntry/", { action: "bugentry", gameID, description, gameData: JSON.stringify(gameData) })
+	if (!response.ok) throw new Error("Network response was not ok")
 	const data = await response.json()
 	return !!data.bugEntrySuccess
 }

@@ -79,6 +79,9 @@ def create_row_game(
     isTrainingGame = False
 
     max_players = get_max_players(request.POST)
+    # ROW supports 2-4 players; clamp in case the lobby posts a larger number.
+    if max_players > 4:
+        max_players = 4
 
     if is_main_tournament or is_mini_tournament:
         if not tournamentObj or not tournamentGameName:
@@ -99,7 +102,7 @@ def create_row_game(
         host = request.user
         game_pace = request.POST.get("pace", 30)
         kickout_duration = request.POST.get("kickoutDuration", 100)
-        invited_usernames = [request.POST.get(f"player{i}") for i in range(2, 7) if request.POST.get(f"player{i}")]
+        invited_usernames = [request.POST.get(f"player{i}") for i in range(2, 5) if request.POST.get(f"player{i}")]
 
         if "trainingGame" in request.POST:
             isTrainingGame = True
@@ -128,7 +131,9 @@ def create_row_game(
         elif "experiencedGame" in request.POST:
             starting_options.append(rf.SO_EXPERIENCED_GAME)
 
-        # ROW-specific options would be appended to starting_options here.
+        # ROW-specific options.
+        if request.POST.get("edition", "FIRST") == "SECOND":
+            starting_options.append(rfROW.SO_SECOND_EDITION)
 
         all_players.append(request.user)
 

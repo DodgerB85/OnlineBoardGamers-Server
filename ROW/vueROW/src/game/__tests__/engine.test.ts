@@ -4,7 +4,11 @@ import {
 	BuildingsOption,
 	Card,
 	CattleType,
+	City,
 	Edition,
+	Hand,
+	HazardType,
+	OBJECTIVE_CARD_TYPES,
 	ROWError,
 	Game,
 	JavaRandom,
@@ -148,5 +152,49 @@ describe("Reset whole turn (turn-start snapshot)", () => {
 		expect(restored.currentPlayerState().player).toBe(game.currentPlayer)
 		expect(restored.currentPlayerState().balance).toBe(startBalance)
 		expect(game.currentPlayerState().balance).toBe(startBalance + 5)
+	})
+})
+
+describe("Objective scoring (ObjectiveCard.score)", () => {
+	it("scores a completed committed objective and penalises a failed one", () => {
+		const game = startGame(2)
+		const ps = game.currentPlayerState()
+		ps.objectives = []
+		ps.hand = []
+		// GAIN2_4HH: breeding value 4 + 2 hazards, 3 points, penalty 2.
+		ps.objectives.push("GAIN2_4HH")
+		expect(game.scoreDetails(ps.player).OBJECTIVE_CARDS).toBe(-2)
+		// Give the required resources: a West Highland (breeding value 4) + 2 hazards.
+		ps.hand.push({ type: CattleType.WEST_HIGHLAND, points: 3, value: 4 } as never)
+		ps.hazards.push({ type: HazardType.FLOOD, hand: Hand.GREEN, points: 2 } as never)
+		ps.hazards.push({ type: HazardType.DROUGHT, hand: Hand.GREEN, points: 2 } as never)
+		expect(game.scoreDetails(ps.player).OBJECTIVE_CARDS).toBe(3)
+	})
+
+	it("counts an optional (in-hand) objective when it can be completed", () => {
+		const game = startGame(2)
+		const ps = game.currentPlayerState()
+		ps.objectives = []
+		ps.hand = []
+		// AUX_SF: 1 San Francisco delivery, 5 points, penalty 3.
+		ps.hand.push(OBJECTIVE_CARD_TYPES.AUX_SF as never)
+		expect(game.scoreDetails(ps.player).OBJECTIVE_CARDS).toBe(0)
+		game.getRailroadTrack().cities[City.SAN_FRANCISCO] = [ps.player]
+		expect(game.scoreDetails(ps.player).OBJECTIVE_CARDS).toBe(5)
+	})
+})
+
+describe("RNG state (snapshot/restore)", () => {
+	it("round-trips the internal seed", () => {
+		const rng = new JavaRandom(42)
+		rng.next(31)
+		rng.int(10)
+		const state = rng.getState()
+		const a = rng.next(31)
+		const b = rng.next(31)
+		const restored = new JavaRandom(0)
+		restored.setState(state)
+		expect(restored.next(31)).toBe(a)
+		expect(restored.next(31)).toBe(b)
 	})
 })

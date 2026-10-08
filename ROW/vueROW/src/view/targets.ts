@@ -80,3 +80,11 @@ export function reachableSpacesFor(a: ActionType, g: Game): Set<string> {
 export function moveDestination(m: PossibleMove): string {
 	return m.steps[m.steps.length - 1]
 }
+
+/** Human-readable label for an action type (falls back to a prettified enum). */
+export function humanizeAction(a: string): string {
+	return a
+		.replace(/_/g, " ")
+		.toLowerCase()
+		.replace(/^\w/, (c) => c.toUpperCase())
+}

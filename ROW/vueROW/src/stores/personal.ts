@@ -18,13 +18,16 @@ export const usePersonalStore = defineStore("personal", () => {
 	const haltPlay = ref(false)
 	const kickoutRequired = ref(0)
 	const transactionID = ref("")
+	const chatNotification = ref(false)
+	const zoom = ref(16)
 
-	function canPlay(currentPlayer: string | null, phase: number): boolean {
-		// phase === 2 is GAME_OVER in the engine; viewers who are the current seat may act.
+	function canPlay(currentPlayer: string | null): boolean {
 		if (haltPlay.value) return false
-		if (pov.value < 0) return false
+		// Practice/training games let the logged-in user drive every seat.
 		if (trainingGame.value) return true
-		return currentPlayer !== null
+		if (pov.value < 0) return false
+		if (!name.value) return false
+		return name.value === currentPlayer
 	}
 
 	function getCorrectedColour(colour: string): string {
@@ -47,6 +50,8 @@ export const usePersonalStore = defineStore("personal", () => {
 		haltPlay,
 		kickoutRequired,
 		transactionID,
+		chatNotification,
+		zoom,
 		canPlay,
 		getCorrectedColour,
 	}

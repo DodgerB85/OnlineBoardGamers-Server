@@ -464,6 +464,14 @@ export class JavaRandom implements Rng {
 	double(): number {
 		return ((this.next(26) << 27) + this.next(27)) / (1 << 53)
 	}
+
+	/** Snapshot/restore the internal seed so a position can be replayed exactly. */
+	getState(): string {
+		return this.seed.toString()
+	}
+	setState(state: string): void {
+		this.seed = BigInt(state)
+	}
 }
 
 export interface RandomTapeEntry {
@@ -547,6 +555,25 @@ export function shuffle<T>(list: T[], rnd: Rng): void {
 // PossibleAction algebra (port of PossibleAction.java)
 // ---------------------------------------------------------------------------
 
+/** JSON form of the possible-action tree, so mid-turn state round-trips. */
+export interface SerializedPossibleAction {
+	kind: "mandatory" | "any" | "choice" | "repeat" | "whenThen"
+	action?: ActionType | null
+	actions?: SerializedPossibleAction[]
+	atLeast?: number
+	atMost?: number
+	repeatingAction?: SerializedPossibleAction
+	current?: SerializedPossibleAction | null
+	when?: ActionType
+	then?: ActionType
+	thens?: number
+}
+
+export interface SerializedActionStack {
+	actions: SerializedPossibleAction[]
+	immediateActions: SerializedPossibleAction[]
+}
+
 export abstract class PossibleAction {
 	abstract perform(action: ActionType): void
 	abstract skip(): void
@@ -555,6 +582,22 @@ export abstract class PossibleAction {
 	abstract canSkip(): boolean
 	abstract getPossibleActions(): Set<ActionType>
 	abstract clone(): PossibleAction
+	abstract serialize(): SerializedPossibleAction
+
+	static deserialize(obj: SerializedPossibleAction): PossibleAction {
+		switch (obj.kind) {
+			case "mandatory":
+				return new Mandatory(obj.action ?? null)
+			case "any":
+				return new AnyAction((obj.actions ?? []).map(PossibleAction.deserialize))
+			case "choice":
+				return new ChoiceAction((obj.actions ?? []).map(PossibleAction.deserialize))
+			case "repeat":
+				return new Repeat(obj.atLeast ?? 0, obj.atMost ?? 0, PossibleAction.deserialize(obj.repeatingAction as SerializedPossibleAction), obj.current ? PossibleAction.deserialize(obj.current) : null)
+			case "whenThen":
+				return new WhenThen(obj.atLeast ?? 0, obj.atMost ?? 0, obj.when as ActionType, obj.then as ActionType, obj.thens ?? 0, obj.current ? PossibleAction.deserialize(obj.current) : null)
+		}
+	}
 
 	static mandatory(action: ActionType): PossibleAction {
 		return new Mandatory(action)
@@ -613,6 +656,9 @@ class Mandatory extends PossibleAction {
 	clone(): PossibleAction {
 		return new Mandatory(this.action)
 	}
+	serialize(): SerializedPossibleAction {
+		return { kind: "mandatory", action: this.action }
+	}
 }
 
 class AnyAction extends PossibleAction {
@@ -651,6 +697,9 @@ class AnyAction extends PossibleAction {
 	clone(): PossibleAction {
 		return new AnyAction(this.actions.map((a) => a.clone()))
 	}
+	serialize(): SerializedPossibleAction {
+		return { kind: "any", actions: this.actions.map((a) => a.serialize()) }
+	}
 }
 
 class ChoiceAction extends AnyAction {
@@ -676,6 +725,9 @@ class ChoiceAction extends AnyAction {
 	}
 	clone(): PossibleAction {
 		return new ChoiceAction(this.actions.map((a) => a.clone()))
+	}
+	serialize(): SerializedPossibleAction {
+		return { kind: "choice", actions: this.actions.map((a) => a.serialize()) }
 	}
 }
 
@@ -725,14 +777,23 @@ class Repeat extends PossibleAction {
 	clone(): PossibleAction {
 		return new Repeat(this.atLeast, this.atMost, this.repeatingAction, this.current)
 	}
+	serialize(): SerializedPossibleAction {
+		return {
+			kind: "repeat",
+			atLeast: this.atLeast,
+			atMost: this.atMost,
+			repeatingAction: this.repeatingAction.serialize(),
+			current: this.current ? this.current.serialize() : null,
+		}
+	}
 }
 
 class WhenThen extends Repeat {
 	private when: ActionType
 	private then: ActionType
 	private thens: number
-	constructor(atLeast: number, atMost: number, when: ActionType, then: ActionType, thens: number) {
-		super(atLeast, atMost, PossibleAction.optionalAction(when))
+	constructor(atLeast: number, atMost: number, when: ActionType, then: ActionType, thens: number, current: PossibleAction | null = null) {
+		super(atLeast, atMost, PossibleAction.optionalAction(when), current)
 		this.when = when
 		this.then = then
 		this.thens = thens
@@ -766,7 +827,19 @@ class WhenThen extends Repeat {
 		return super.getPossibleActions()
 	}
 	clone(): PossibleAction {
-		return new WhenThen(this.atLeast, this.atMost, this.when, this.then, this.thens)
+		return new WhenThen(this.atLeast, this.atMost, this.when, this.then, this.thens, this.current)
+	}
+	serialize(): SerializedPossibleAction {
+		return {
+			kind: "whenThen",
+			atLeast: this.atLeast,
+			atMost: this.atMost,
+			repeatingAction: this.repeatingAction.serialize(),
+			current: this.current ? this.current.serialize() : null,
+			when: this.when,
+			then: this.then,
+			thens: this.thens,
+		}
 	}
 }
 
@@ -879,6 +952,20 @@ export class ActionStack {
 		return new ActionStack(
 			this.actions.map((a) => a.clone()),
 			this.immediateActions.map((a) => a.clone()),
+		)
+	}
+
+	serialize(): SerializedActionStack {
+		return {
+			actions: this.actions.map((a) => a.serialize()),
+			immediateActions: this.immediateActions.map((a) => a.serialize()),
+		}
+	}
+
+	static deserialize(obj: SerializedActionStack): ActionStack {
+		return new ActionStack(
+			(obj.actions ?? []).map(PossibleAction.deserialize),
+			(obj.immediateActions ?? []).map(PossibleAction.deserialize),
 		)
 	}
 }

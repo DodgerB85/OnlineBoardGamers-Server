@@ -5,25 +5,31 @@
  * tiles, temporary-certificate markers, auxiliary-action squares and unlock
  * discs with the same coordinates as the original SVG.
  */
-import { computed } from "vue"
-import { ActionType, Unlockable, isCattleCard } from "../game"
+import { computed, ref } from "vue"
+import { ActionType, Unlockable, isCattleCard, isObjectiveCard } from "../game"
 import { useGameStore } from "../stores/game"
+import { usePersonalStore } from "../stores/personal"
 import { cardBackGreyImage, editionImage, hazardImage, jobMarketTokenImage, stationMasterImage, teepeeImage, workerImage } from "../view/assets"
+import { humanizeAction } from "../view/targets"
 import CardView from "./CardView.vue"
 
 const props = withDefaults(defineProps<{ playerName?: string }>(), { playerName: "" })
 
 const store = useGameStore()
+const personal = usePersonalStore()
 
 const game = computed(() => {
 	store.version
 	return store.game
 })
 
-// Readonly boards show other players; default is the acting player's own board.
+// Only the viewer's own board shows their hand; opponents and spectators see
+// the public board (hand shown as card backs).
 const readonly = computed(() => {
 	const g = game.value
-	return !!props.playerName && !!g && props.playerName !== g.currentPlayer
+	if (!g) return true
+	if (!personal.name) return true
+	return props.playerName !== personal.name
 })
 const ps = computed(() => {
 	const g = game.value
@@ -135,6 +141,8 @@ const hand = computed(() => ps.value?.hand ?? [])
 // Personal collections + card stacks (public info; shown on every board).
 const drawStackSize = computed(() => ps.value?.drawStack.length ?? 0)
 const discardSize = computed(() => ps.value?.discardPile.length ?? 0)
+const discardPile = computed(() => ps.value?.discardPile ?? [])
+const showDiscard = ref(false)
 const collections = computed(() => {
 	const p = ps.value
 	return {
@@ -154,10 +162,11 @@ function canSelectCard(card: unknown): boolean {
 	switch (sel) {
 		case ActionType.DISCARD_CARD:
 		case ActionType.REMOVE_CARD:
+		case ActionType.UPGRADE_SIMMENTAL:
 			return true
 		case ActionType.DISCARD_1_OBJECTIVE_CARD_TO_GAIN_2_CERTIFICATES:
 		case ActionType.PLAY_OBJECTIVE_CARD:
-			return !cattle
+			return isObjectiveCard(card as never)
 		case ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_3_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND:
 		case ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_6_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND:
 		case ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_1_CERTIFICATE:
@@ -174,12 +183,19 @@ function canSelectCard(card: unknown): boolean {
 function selectCard(card: unknown) {
 	if (!canSelectCard(card)) return
 	const sel = store.selectedAction as ActionType
-	const cattle = isCattleCard(card as never)
-	if (cattle) {
-		const c = card as { type: string }
-		store.perform({ type: sel, cattleType: c.type })
-	} else {
-		store.perform({ type: sel, objectiveCard: card })
+	switch (sel) {
+		case ActionType.DISCARD_CARD:
+		case ActionType.REMOVE_CARD:
+		case ActionType.UPGRADE_SIMMENTAL:
+			// These engine actions take the whole card object.
+			store.perform({ type: sel, card })
+			return
+		case ActionType.DISCARD_1_OBJECTIVE_CARD_TO_GAIN_2_CERTIFICATES:
+		case ActionType.PLAY_OBJECTIVE_CARD:
+			store.perform({ type: sel, objectiveCard: card })
+			return
+		default:
+			store.perform({ type: sel, cattleType: (card as { type: string }).type })
 	}
 }
 </script>
@@ -193,13 +209,13 @@ function selectCard(card: unknown) {
 			<span>engine {{ store.game?.getRailroadTrack().currentSpace(ps.player) }}</span>
 		</div>
 		<div class="collections">
-			<span class="stack" :title="`Draw pile (${drawStackSize})`">
+			<span class="stack" :title="`Draw pile (${drawStackSize}, hidden)`">
 				<img :src="cardBackGreyImage()" alt="" /><b>{{ drawStackSize }}</b>
 			</span>
-			<span class="stack discard" :title="`Discard pile (${discardSize})`">
+			<span class="stack discard" :title="`Discard pile (${discardSize}) — click to inspect`" @click="showDiscard = !showDiscard">
 				<img :src="cardBackGreyImage()" alt="" /><b>{{ discardSize }}</b>
 			</span>
-			<img v-for="m in collections.masters" :key="'sm' + m.name" class="collect" :src="m.img" :title="`${m.name} station master`" alt="" />
+			<img v-for="m in collections.masters" :key="'sm' + m.name" class="collect" :src="m.img" :title="humanizeAction(m.name)" alt="" />
 			<img v-for="(h, i) in collections.hazards" :key="'hz' + i" class="collect" :src="h.img" :title="h.label" alt="" />
 			<img v-for="(t, i) in collections.teepees" :key="'tp' + i" class="collect" :src="t.img" :title="t.label" alt="" />
 			<img v-if="collections.token" class="collect" :src="jobMarketTokenImage()" title="Job market token" alt="" />
@@ -223,25 +239,20 @@ function selectCard(card: unknown) {
 		</div>
 
 		<svg class="player-board" :class="color" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 442">
-			<defs>
-				<clipPath id="tileclipPB">
-					<rect rx="6" ry="6" width="33" height="39" />
-				</clipPath>
-			</defs>
 			<image :href="editionImage(edition, `player_board_${color}.jpg`)" x="0" y="0" width="800" height="446" />
 			<image v-if="playerCount > 2" :href="`/static/ROW/images/row/${playerCount}p_${color}.jpg`" x="179" y="-9" width="268" height="150" />
 
 			<!-- workers (count-1 like the original; the last one is on deck) -->
 			<g v-for="i in cowboys" :key="'c' + i" transform="scale(2.2,2.2)">
-				<image :href="workerImage('COWBOY')" :x="122 + (i - 1) * 36.7" y="71" width="33" height="39" clip-path="url(#tileclipPB)" />
+				<image :href="workerImage('COWBOY')" :x="122 + (i - 1) * 36.7" y="71" width="33" height="39" />
 				<rect class="worker" :x="122 + (i - 1) * 36.7" y="71" width="33" height="39" rx="6" ry="6" :class="{ selectable: workerEligible(i - 1, 'cowboy') }" @click="onWorker('cowboy')" />
 			</g>
 			<g v-for="i in craftsmen" :key="'k' + i" transform="scale(2.2,2.2)">
-				<image :href="workerImage('CRAFTSMAN')" :x="122 + (i - 1) * 36.7" y="113" width="33" height="39" clip-path="url(#tileclipPB)" />
+				<image :href="workerImage('CRAFTSMAN')" :x="122 + (i - 1) * 36.7" y="113" width="33" height="39" />
 				<rect class="worker" :x="122 + (i - 1) * 36.7" y="113" width="33" height="39" rx="6" ry="6" :class="{ selectable: workerEligible(i - 1, 'craftsman') }" @click="onWorker('craftsman')" />
 			</g>
 			<g v-for="i in engineers" :key="'e' + i" transform="scale(2.2,2.2)">
-				<image :href="workerImage('ENGINEER')" :x="122 + (i - 1) * 36.7" y="155" width="33" height="39" clip-path="url(#tileclipPB)" />
+				<image :href="workerImage('ENGINEER')" :x="122 + (i - 1) * 36.7" y="155" width="33" height="39" />
 				<rect class="worker" :x="122 + (i - 1) * 36.7" y="155" width="33" height="39" rx="6" ry="6" :class="{ selectable: workerEligible(i - 1, 'engineer') }" @click="onWorker('engineer')" />
 			</g>
 
@@ -262,7 +273,7 @@ function selectCard(card: unknown) {
 				:class="{ selectable: store.actions.includes(a.action), disabled: !store.actions.includes(a.action) }"
 				@click="store.actions.includes(a.action) && store.perform({ type: a.action })"
 			>
-				<title>{{ a.action }}</title>
+				<title>{{ humanizeAction(a.action) }}</title>
 			</rect>
 			<rect class="action" x="13" y="368" rx="4" ry="4" width="54" height="54" :class="{ selectable: store.actions.includes(auxRemoveCardAction), disabled: !store.actions.includes(auxRemoveCardAction) }" @click="store.actions.includes(auxRemoveCardAction) && store.perform({ type: auxRemoveCardAction })" />
 			<rect class="action" x="114" y="368" rx="4" ry="4" width="54" height="54" :class="{ selectable: store.actions.includes(auxRemoveCard2Action), disabled: !store.actions.includes(auxRemoveCard2Action) }" @click="store.actions.includes(auxRemoveCard2Action) && store.perform({ type: auxRemoveCard2Action })" />
@@ -286,6 +297,16 @@ function selectCard(card: unknown) {
 				<text x="222" y="224" text-anchor="middle" class="cowboysRemaining">{{ ps.cowboysRemaining() }}/{{ ps.getNumberOfCowboys() }}</text>
 			</g>
 		</svg>
+		<div v-if="showDiscard" class="stackDialog">
+			<div class="stackDialogHead">
+				Discard pile ({{ discardSize }})
+				<button @click="showDiscard = false">Close</button>
+			</div>
+			<div class="stackDialogCards">
+				<CardView v-for="(c, i) in discardPile" :key="i" :card="c" />
+				<span v-if="discardPile.length === 0" class="empty">Empty</span>
+			</div>
+		</div>
 	</div>
 </template>
 
@@ -305,6 +326,12 @@ function selectCard(card: unknown) {
 .handCard.back img { width: 100%; height: 100%; display: block; }
 .handCard.selectable { cursor: pointer; outline: 2px solid #d4af37; }
 .handCard.dimmed { opacity: 0.45; }
+
+.stackDialog { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.stackDialogHead { color: #fff; font-weight: bold; margin-bottom: 8px; }
+.stackDialogHead button { margin-left: 10px; cursor: pointer; }
+.stackDialogCards { display: flex; flex-wrap: wrap; gap: 4px; max-width: 70vw; max-height: 60vh; overflow-y: auto; background: #fffde8; padding: 8px; border-radius: 6px; }
+.stackDialogCards .empty { color: #666; padding: 8px; }
 
 .player-board {
 	width: 100%;

@@ -35,6 +35,7 @@ import {
 	Rng,
 	ScoreCategory,
 	Status,
+	Task,
 	Teepee,
 	Unlockable,
 	UNLOCKABLE_INFO,
@@ -79,6 +80,59 @@ const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v))
 
 /** Certificate track steps (PlayerState.CERTIFICATE_STEPS). */
 const CERTIFICATE_STEPS = [0, 1, 2, 3, 4, 6]
+
+/** ObjectiveCard.Counts: resources available to satisfy objective tasks. */
+interface ObjectiveCounts {
+	buildings: number
+	greenTeepees: number
+	blueTeepees: number
+	hazards: number
+	stations: number
+	breedingValue3: number
+	breedingValue4: number
+	breedingValue5: number
+	sanFrancisco: number
+}
+
+function objectiveCountsNegative(c: ObjectiveCounts): boolean {
+	return c.buildings < 0 || c.greenTeepees < 0 || c.blueTeepees < 0 || c.hazards < 0 || c.stations < 0 || c.breedingValue3 < 0 || c.breedingValue4 < 0 || c.breedingValue5 < 0 || c.sanFrancisco < 0
+}
+
+function subtractObjectiveTasks(c: ObjectiveCounts, tasks: Task[]): ObjectiveCounts {
+	const r = { ...c }
+	for (const t of tasks) {
+		switch (t) {
+			case Task.BUILDING:
+				r.buildings--
+				break
+			case Task.GREEN_TEEPEE:
+				r.greenTeepees--
+				break
+			case Task.BLUE_TEEPEE:
+				r.blueTeepees--
+				break
+			case Task.HAZARD:
+				r.hazards--
+				break
+			case Task.STATION:
+				r.stations--
+				break
+			case Task.BREEDING_VALUE_3:
+				r.breedingValue3--
+				break
+			case Task.BREEDING_VALUE_4:
+				r.breedingValue4--
+				break
+			case Task.BREEDING_VALUE_5:
+				r.breedingValue5--
+				break
+			case Task.SAN_FRANCISCO:
+				r.sanFrancisco--
+				break
+		}
+	}
+	return r
+}
 
 interface ExecuteResult {
 	immediate: PossibleAction[]
@@ -1021,6 +1075,9 @@ export class RailroadTrack {
 
 	numberOfUpgradedStations(player: string): number {
 		return this.stations.filter((s) => s.upgradedBy.includes(player)).length
+	}
+	numberOfDeliveries(player: string, city: City): number {
+		return (this.cities[city] ?? []).filter((p) => p === player).length
 	}
 	getUpgradedBy(stationIndex: number): string[] {
 		return this.stations[stationIndex].upgradedBy
@@ -2103,12 +2160,13 @@ export class Game {
 
 	scoreDetails(player: string): Partial<Record<ScoreCategory, number>> {
 		const ps = this.playerState(player)
+		const objectives = this.scoreObjectives(ps)
 		const categories: Partial<Record<ScoreCategory, number>> = {}
 		categories[ScoreCategory.BID] = ps.bid ? -ps.bid.points : 0
 		categories[ScoreCategory.DOLLARS] = Math.floor(ps.balance / 5)
 		categories[ScoreCategory.CATTLE_CARDS] = this.scoreCattleCards(ps)
-		categories[ScoreCategory.OBJECTIVE_CARDS] = this.scoreObjectives(ps)
-		categories[ScoreCategory.STATION_MASTERS] = this.scoreStationMasters(ps)
+		categories[ScoreCategory.OBJECTIVE_CARDS] = objectives.total
+		categories[ScoreCategory.STATION_MASTERS] = this.scoreStationMasters(ps, objectives.committedCount)
 		categories[ScoreCategory.WORKERS] = Object.values(ps.workers).reduce((a, c) => a + (c === 6 ? 8 : c === 5 ? 4 : 0), 0)
 		categories[ScoreCategory.HAZARDS] = ps.hazards.reduce((a, h) => a + h.points, 0)
 		categories[ScoreCategory.EXTRA_STEP_POINTS] = ps.hasUnlocked(Unlockable.EXTRA_STEP_POINTS) ? 3 : 0
@@ -2136,17 +2194,91 @@ export class Game {
 		return points
 	}
 
-	private scoreObjectives(ps: PlayerState): number {
-		// Simplified: committed objectives score their points; uncommitted objectives in
-		// deck/hand/discard are ignored unless they can be completed is not yet ported.
-		return ps.objectives.reduce((a, id) => a + (OBJECTIVE_CARD_TYPES[id]?.points ?? 0), 0)
+	/**
+	 * Objective scoring, ported from ObjectiveCard.score (GPL-3.0, Tom Wetjens):
+	 * both committed and optional (in-hand) objectives are considered; a card is
+	 * scored if its tasks are met, otherwise the player may still "commit" to it
+	 * and take its penalty. Returns the best total plus the number of committed
+	 * cards (needed for the points-per-2-objectives station master).
+	 */
+	private scoreObjectives(ps: PlayerState): { total: number; committedCount: number } {
+		const counts = this.objectiveCounts(ps)
+		const committedIds = new Set(ps.objectives)
+		const cards: { def: ObjectiveCardDef; committed: boolean }[] = []
+		for (const id of ps.objectives) {
+			const def = OBJECTIVE_CARD_TYPES[id]
+			if (def) cards.push({ def, committed: true })
+		}
+		for (const c of ps.hand) {
+			if (isObjectiveCard(c) && !committedIds.has(c.id)) cards.push({ def: c, committed: false })
+		}
+		cards.sort((a, b) => b.def.points - a.def.points)
+		const results = this.scoreObjectiveCards(cards, 0, counts, 0, 0)
+		const pairs3 = ps.stationMasters.includes("REMOVE_HAZARD_OR_TEEPEE_POINTS_FOR_EACH_2_OBJECTIVE_CARDS")
+		let best = { total: 0, committedCount: 0 }
+		let bestValue = -Infinity
+		for (const r of results) {
+			const value = pairs3 ? r.total + Math.floor(r.committedCount / 2) * 3 : r.total
+			if (value > bestValue) {
+				bestValue = value
+				best = r
+			}
+		}
+		return best
 	}
 
-	private scoreStationMasters(ps: PlayerState): number {
+	private scoreObjectiveCards(
+		cards: { def: ObjectiveCardDef; committed: boolean }[],
+		index: number,
+		counts: ObjectiveCounts,
+		total: number,
+		committedCount: number,
+	): { total: number; committedCount: number }[] {
+		if (index >= cards.length) return [{ total, committedCount }]
+		const { def, committed } = cards[index]
+		const remaining = subtractObjectiveTasks(counts, def.tasks)
+		if (objectiveCountsNegative(remaining)) {
+			if (committed) return this.scoreObjectiveCards(cards, index + 1, counts, total - def.penalty, committedCount + 1)
+			return [
+				...this.scoreObjectiveCards(cards, index + 1, counts, total, committedCount),
+				...this.scoreObjectiveCards(cards, index + 1, counts, total - def.penalty, committedCount + 1),
+			]
+		}
+		if (committed) {
+			return [
+				...this.scoreObjectiveCards(cards, index + 1, remaining, total + def.points, committedCount + 1),
+				...this.scoreObjectiveCards(cards, index + 1, counts, total - def.penalty, committedCount + 1),
+			]
+		}
+		return [
+			...this.scoreObjectiveCards(cards, index + 1, counts, total, committedCount),
+			...this.scoreObjectiveCards(cards, index + 1, remaining, total + def.points, committedCount + 1),
+		]
+	}
+
+	private objectiveCounts(ps: PlayerState): ObjectiveCounts {
+		const teepees = ps.teepees.length
+		const greenTeepees = ps.numberOfGreenTeepees()
+		return {
+			buildings: this.state.trail.numberOfBuildings(ps.player),
+			greenTeepees,
+			blueTeepees: teepees - greenTeepees,
+			hazards: ps.numberOfHazards(),
+			stations: this.state.railroadTrack.numberOfUpgradedStations(ps.player),
+			breedingValue3: ps.numberOfCattleCards([CattleType.AYRSHIRE, CattleType.BROWN_SWISS, CattleType.HOLSTEIN]),
+			breedingValue4: ps.numberOfCattleCards([CattleType.WEST_HIGHLAND]),
+			breedingValue5: ps.numberOfCattleCards([CattleType.TEXAS_LONGHORN]),
+			sanFrancisco: this.state.railroadTrack.numberOfDeliveries(ps.player, this.state.edition === Edition.SECOND ? City.NEW_YORK_CITY : City.SAN_FRANCISCO),
+		}
+	}
+
+	private scoreStationMasters(ps: PlayerState, committedCount: number): number {
 		let result = 0
 		if (ps.stationMasters.includes("GAIN_2_DOLLARS_POINT_FOR_EACH_WORKER")) result += ps.getNumberOfCowboys() + ps.getNumberOfCraftsmen() + ps.getNumberOfEngineers()
+		if (ps.stationMasters.includes("REMOVE_HAZARD_OR_TEEPEE_POINTS_FOR_EACH_2_OBJECTIVE_CARDS")) result += Math.floor(committedCount / 2) * 3
 		if (ps.stationMasters.includes("PERM_CERT_POINTS_FOR_EACH_2_HAZARDS")) result += Math.floor(ps.hazards.length / 2) * 3
 		if (ps.stationMasters.includes("PERM_CERT_POINTS_FOR_TEEPEE_PAIRS")) result += ps.numberOfTeepeePairs() * 3
+		if (ps.stationMasters.includes("PERM_CERT_POINTS_FOR_EACH_2_CERTS")) result += Math.floor((ps.tempCertificates + ps.permanentCertificates()) / 2) * 3
 		if (ps.stationMasters.includes("PERM_CERT_POINTS_PER_2_STATIONS")) result += Math.floor(this.state.railroadTrack.numberOfUpgradedStations(ps.player) / 2) * 3
 		if (ps.stationMasters.includes("GAIN_2_CERTS_POINTS_PER_BUILDING")) result += this.state.trail.numberOfBuildings(ps.player) * 2
 		return result
