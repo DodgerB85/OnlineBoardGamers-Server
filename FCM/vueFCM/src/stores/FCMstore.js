@@ -74,6 +74,8 @@ export const useModelStore = defineStore("store", () => {
 		laborMarket: false,
 		// Second Bailout mod
 		secondBailout: false,
+		// Media Line mod
+		mediaLine: false,
 	}
 
 	// This var affects the ZOOM level

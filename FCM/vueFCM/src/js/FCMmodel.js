@@ -415,6 +415,8 @@ export function setInternalStartingOptions(startingOptionsArray) {
 		if (opts[i] === rf.SO_LABOR_MARKET) store.startingOptions.laborMarket = true
 		// Second Bailout mod
 		if (opts[i] === rf.SO_SECOND_BAILOUT) store.startingOptions.secondBailout = true
+		// Media Line mod
+		if (opts[i] === rf.SO_MEDIA_LINE) store.startingOptions.mediaLine = true
 
 		if (opts[i] === rf.SO_STRICT_PAYDAY_FRIDGE) store.startingOptions.strictPaydayFridge = true
 		if (opts[i] === rf.SO_TRAINING_GAME) store.startingOptions.trainingGame = true
@@ -525,6 +527,16 @@ export function setupKetchupExpansion(playerNumber) {
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
 	}
 	if (store.startingOptions.laborMarket) store.availableEmployees[rf.HEADHUNTER] = 6
+	// Media Line mod
+	if (store.startingOptions.mediaLine) {
+		store.availableEmployees[rf.TELEMARKETER] = 6
+		store.availableEmployees[rf.TV_ANNOUNCER] = 6
+		store.availableMarketingCampaigns.push(28, 29, 30, 31, 32, 33, 34, 35)
+		if (store.startingOptions.useMilestones) {
+			store.availableMilestones.push(rf.FIRST_TELEMARKETER_USED)
+			store.availableMilestones.push(rf.FIRST_TV_ANNOUNCER_USED)
+		}
+	}
 }
 
 export function setupLaborMarketExpansion() {

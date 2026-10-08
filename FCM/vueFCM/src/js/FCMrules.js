@@ -45,6 +45,7 @@ export function oneLevelAbove(employee, preservingColour) {
 			break
 		case rf.MARKETING_TRAINEE:
 			level = [rf.CAMPAIGN_MANAGER, rf.RURAL_MARKETEER, rf.MASS_MARKETEER, rf.GOURMET_FOOD_CRITIC, rf.HAWKER_MARKETEER]
+			if (store.startingOptions.mediaLine) level.push(rf.TELEMARKETER)
 			break
 		case rf.CAMPAIGN_MANAGER:
 			level = [rf.BRAND_MANAGER]
@@ -73,6 +74,12 @@ export function oneLevelAbove(employee, preservingColour) {
 			break
 		case rf.FRIED_CHICKEN_COOK:
 			level = [rf.FRIED_CHICKEN_CHEF]
+			break
+		case rf.TELEMARKETER:
+			level = [rf.TV_ANNOUNCER]
+			break
+		case rf.TV_ANNOUNCER:
+			level = [rf.BRAND_DIRECTOR]
 			break
 		case rf.WAITRESS:
 			level = [rf.B_MOVIE_STAR, rf.C_MOVIE_STAR, rf.D_MOVIE_STAR, rf.JAZZ_MUSICIAN]
