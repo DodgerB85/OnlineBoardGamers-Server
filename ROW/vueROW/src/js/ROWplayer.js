@@ -16,13 +16,19 @@ export function playerColour(name) {
 	return p ? p.color.toLowerCase() : "red"
 }
 
-/** Order players with the viewer's own seat first (matching the reference layout). */
+/** Order players for the board stack.
+ *  Practice (hotseat) games put the current player's board on top so you can
+ *  act for the turn owner; normal games put the viewer's own board first. */
 export function boardPlayersOrder() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	const g = store.game
 	if (!g) return []
 	const order = g.state.playerOrder.length ? g.state.playerOrder : g.state.players.map((p) => p.name)
+	if (personal.trainingGame) {
+		const current = g.currentPlayer ?? order[0]
+		return [current, ...order.filter((n) => n !== current)]
+	}
 	const me = order.find((n) => n === personal.name) ?? order[0]
 	return [me, ...order.filter((n) => n !== me)]
 }

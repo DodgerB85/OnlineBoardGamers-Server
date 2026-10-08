@@ -25,12 +25,23 @@ const game = computed(() => {
 })
 
 // Only the viewer's own board shows their hand; opponents and spectators see
-// the public board (hand shown as card backs).
+// the public board (hand shown as card backs). In a practice (hotseat) game the
+// viewer plays every seat, so every hand is shown.
 const readonly = computed(() => {
 	const g = game.value
 	if (!g) return true
+	if (personal.trainingGame) return false
 	if (!personal.name) return true
 	return props.playerName !== personal.name
+})
+
+// Only this board can be acted on: the viewer's own seat, or (hotseat) the
+// current player's seat.
+const interactive = computed(() => {
+	const g = game.value
+	if (!g) return false
+	if (personal.trainingGame) return props.playerName === g.currentPlayer
+	return !!personal.name && props.playerName === personal.name
 })
 const ps = computed(() => {
 	const g = game.value
@@ -66,8 +77,15 @@ const certMarkers = [
 	{ n: 6, y: 389 },
 ]
 
-const canUnlockWhite = computed(() => store.selectedAction === ActionType.UNLOCK_WHITE || store.selectedAction === ActionType.UNLOCK_BLACK_OR_WHITE)
-const canUnlockBlack = computed(() => store.selectedAction === ActionType.UNLOCK_BLACK_OR_WHITE)
+// A disc is clickable (yellow) when an unlock action is live and this disc can
+// still be removed. Clicking performs the unlock directly.
+function discUnlockAction(d) {
+	if (!interactive.value || !ps.value || unlocked(d.u, d.nth)) return null
+	if (!ps.value.canUnlock(d.u, game.value.isRailsToTheNorth())) return null
+	if (!d.black && store.actions.includes(ActionType.UNLOCK_WHITE)) return ActionType.UNLOCK_WHITE
+	if (store.actions.includes(ActionType.UNLOCK_BLACK_OR_WHITE)) return ActionType.UNLOCK_BLACK_OR_WHITE
+	return null
+}
 
 function unlocked(u, atLeast = 1) {
 	return (ps.value?.unlocked[u] ?? 0) >= atLeast
@@ -106,22 +124,21 @@ const DISCS = [
 ]
 
 function workerEligible(index, kind) {
-	if (store.selectedAction !== ActionType.APPOINT_STATION_MASTER || !ps.value) return false
+	if (!interactive.value || store.selectedAction !== ActionType.APPOINT_STATION_MASTER || !ps.value) return false
 	const total = kind === "cowboy" ? ps.value.getNumberOfCowboys() : kind === "craftsman" ? ps.value.getNumberOfCraftsmen() : ps.value.getNumberOfEngineers()
 	return index === total - 2
 }
 
 function onWorker(kind) {
-	if (!readonly.value && store.selectedAction === ActionType.APPOINT_STATION_MASTER) {
+	if (interactive.value && store.selectedAction === ActionType.APPOINT_STATION_MASTER) {
 		controller.perform({ type: ActionType.APPOINT_STATION_MASTER, worker: kind === "cowboy" ? "COWBOY" : kind === "craftsman" ? "CRAFTSMAN" : "ENGINEER" })
 	}
 }
 
 function unlock(d) {
-	if (readonly.value) return
-	if (!canUnlockWhite.value) return
-	if (d.black && !canUnlockBlack.value) return
-	controller.perform({ type: store.selectedAction, unlock: d.u })
+	const type = discUnlockAction(d)
+	if (!type) return
+	controller.perform({ type, unlock: d.u })
 }
 
 const hand = computed(() => ps.value?.hand ?? [])
@@ -143,7 +160,7 @@ const collections = computed(() => {
 
 // ---- hand selection (reference canSelectCard / selectCard) ----
 function canSelectCard(card) {
-	if (readonly.value) return false
+	if (!interactive.value) return false
 	const sel = store.selectedAction
 	if (!sel) return false
 	const cattle = isCattle(card)
@@ -265,20 +282,20 @@ function selectCard(card) {
 				ry="4"
 				width="54"
 				height="54"
-				:class="{ selectable: store.actions.includes(a.action), disabled: !store.actions.includes(a.action) }"
-				@click="store.actions.includes(a.action) && controller.perform({ type: a.action })"
+				:class="{ selectable: interactive && store.actions.includes(a.action), disabled: !interactive || !store.actions.includes(a.action) }"
+				@click="interactive && store.actions.includes(a.action) && controller.perform({ type: a.action })"
 			>
 				<title>{{ view.humanizeAction(a.action) }}</title>
 			</rect>
-			<rect class="action" x="13" y="368" rx="4" ry="4" width="54" height="54" :class="{ selectable: store.actions.includes(auxRemoveCardAction), disabled: !store.actions.includes(auxRemoveCardAction) }" @click="store.actions.includes(auxRemoveCardAction) && controller.perform({ type: auxRemoveCardAction })" />
-			<rect class="action" x="114" y="368" rx="4" ry="4" width="54" height="54" :class="{ selectable: store.actions.includes(auxRemoveCard2Action), disabled: !store.actions.includes(auxRemoveCard2Action) }" @click="store.actions.includes(auxRemoveCard2Action) && controller.perform({ type: auxRemoveCard2Action })" />
+			<rect class="action" x="13" y="368" rx="4" ry="4" width="54" height="54" :class="{ selectable: interactive && store.actions.includes(auxRemoveCardAction), disabled: !interactive || !store.actions.includes(auxRemoveCardAction) }" @click="interactive && store.actions.includes(auxRemoveCardAction) && controller.perform({ type: auxRemoveCardAction })" />
+			<rect class="action" x="114" y="368" rx="4" ry="4" width="54" height="54" :class="{ selectable: interactive && store.actions.includes(auxRemoveCard2Action), disabled: !interactive || !store.actions.includes(auxRemoveCard2Action) }" @click="interactive && store.actions.includes(auxRemoveCard2Action) && controller.perform({ type: auxRemoveCard2Action })" />
 
 			<!-- unlock discs -->
 			<circle
 				v-for="(d, i) in DISCS"
 				:key="'d' + i"
 				class="disc"
-				:class="[`${d.u}_todo_${d.nth}`, unlocked(d.u, d.nth) ? 'unlocked' : '', d.black ? (canUnlockBlack ? 'selectable' : 'disabled') : canUnlockWhite ? 'selectable' : 'disabled']"
+				:class="[`${d.u}_todo_${d.nth}`, unlocked(d.u, d.nth) ? 'unlocked' : '', discUnlockAction(d) ? 'selectable' : 'disabled']"
 				:cx="d.cx"
 				:cy="d.cy"
 				r="25"
@@ -343,8 +360,8 @@ function selectCard(card) {
 	stroke-width: 2;
 	fill: rgb(0, 0, 0, 0.01);
 }
-.action.selectable { cursor: pointer; }
-.action.selectable:hover { stroke: black; }
+.action.selectable { cursor: pointer; stroke: #ffd400; stroke-width: 4; }
+.action.selectable:hover { stroke: #90ee90; stroke-width: 6; }
 .action.disabled { stroke: none; }
 
 .disc {
@@ -353,8 +370,8 @@ function selectCard(card) {
 	cursor: default;
 }
 .disc.unlocked { display: none; }
-.disc.selectable { cursor: pointer; }
-.disc.selectable:hover { stroke: black; }
+.disc.selectable { cursor: pointer; stroke: #ffd400; stroke-width: 4; }
+.disc.selectable:hover { stroke: #90ee90; stroke-width: 6; }
 .disc.disabled { stroke: none; }
 
 /* Disc colors: white discs start brownish on the artwork; black discs black. */
@@ -367,11 +384,8 @@ function selectCard(card) {
 .disc.EXTRA_CARD_todo_1, .disc.EXTRA_CARD_todo_2, .disc.CERT_LIMIT_6_todo_1 { fill: black; }
 
 .worker { fill: transparent; cursor: default; }
-.worker.selectable { cursor: pointer; animation: pulse 1s infinite alternate; }
-@keyframes pulse {
-	from { fill: rgb(0, 0, 0, 0.05); }
-	to { fill: rgb(255, 255, 255, 0.35); }
-}
+.worker.selectable { cursor: pointer; stroke: #ffd400; stroke-width: 2; }
+.worker.selectable:hover { stroke: #90ee90; stroke-width: 3; }
 
 .cowboysRemaining {
 	font-size: 32px;

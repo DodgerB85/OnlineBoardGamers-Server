@@ -11,14 +11,6 @@ import { useModelStore } from "../stores/ROWstore.js"
 const { ActionType, Hand } = rf
 const store = useModelStore()
 
-function tileLabel(t) {
-	if (!t) return "—"
-	if ("worker" in t) return String(t.worker)
-	if ("teepee" in t) return String(t.teepee)
-	if ("hazard" in t) return String(t.hazard.type)
-	return "?"
-}
-
 const g = () => store.getGame()
 const actions = computed(() => store.actions)
 
@@ -32,16 +24,6 @@ const moves = computed(() => {
 	}
 })
 
-// --- Deliveries (normal at Kansas City, extraordinary otherwise) ---
-const deliveries = computed(() => {
-	if (!actions.value.includes(ActionType.DELIVER_TO_CITY)) return []
-	try {
-		return g().possibleDeliveries()
-	} catch {
-		return []
-	}
-})
-
 // --- Hire worker ---
 const hireRows = computed(() => {
 	if (!actions.value.includes(ActionType.HIRE_WORKER) && !actions.value.includes(ActionType.HIRE_WORKER_PLUS_2) && !actions.value.includes(ActionType.HIRE_WORKER_MINUS_1) && !actions.value.includes(ActionType.HIRE_WORKER_MINUS_2)) return []
@@ -49,41 +31,6 @@ const hireRows = computed(() => {
 	const rows = []
 	for (let i = 0; i < jm.currentRowIndex; i++) rows.push({ index: i, workers: jm.rows[i].workers, cost: jm.rows[i].workers.length })
 	return rows
-})
-
-// --- Unlock ---
-const unlocks = computed(() => {
-	const game = g()
-	const ps = game.currentPlayerState()
-	for (const a of actions.value) {
-		if (a !== ActionType.UNLOCK_WHITE && a !== ActionType.UNLOCK_BLACK_OR_WHITE) continue
-		const available = Object.keys(ps.unlocked).filter((u) => ps.canUnlock(u, game.isRailsToTheNorth()))
-		return { type: a, available }
-	}
-	return null
-})
-
-// --- Foresight ---
-const foresights = computed(() => {
-	const game = g()
-	for (const [a, col] of [
-		[ActionType.CHOOSE_FORESIGHT_1, 0],
-		[ActionType.CHOOSE_FORESIGHT_2, 1],
-		[ActionType.CHOOSE_FORESIGHT_3, 2],
-	]) {
-		if (actions.value.includes(a)) return { a, col, choices: game.getForesights().choices(col).map((t, i) => ({ i, t })) }
-	}
-	return null
-})
-
-// --- Hazards / teepees ---
-const hazards = computed(() => {
-	if (!actions.value.some((a) => a.startsWith("REMOVE_HAZARD"))) return []
-	return [...g().getTrail().locations.values()].filter((l) => l.kind === "HAZARD" && l.hazard).map((l) => l.name)
-})
-const teepees = computed(() => {
-	if (!actions.value.includes(ActionType.TRADE_WITH_TRIBES)) return []
-	return [...g().getTrail().locations.values()].filter((l) => l.kind === "TEEPEE" && l.teepee).map((l) => l.name)
 })
 
 // --- Buildings ---
@@ -137,7 +84,10 @@ const TARGET_ACTIONS = new Set([
 	ActionType.TAKE_BREEDING_VALUE_3_CATTLE_CARD, ActionType.APPOINT_STATION_MASTER, ActionType.DOWNGRADE_STATION,
 	ActionType.UPGRADE_ANY_STATION_BEHIND_ENGINE, ActionType.USE_ADJACENT_BUILDING,
 ])
-const directActions = computed(() => actions.value.filter((a) => !TARGET_ACTIONS.has(a) && !map.engineMoveRange(a, g())))
+// Actions offered by a placed building are shown on the board (hover the building), not here.
+const buildingActionSet = computed(() => map.activeBuildingActions(g(), actions.value))
+
+const directActions = computed(() => actions.value.filter((a) => !TARGET_ACTIONS.has(a) && !map.engineMoveRange(a, g()) && !buildingActionSet.value.has(a)))
 
 // Card-target actions: selected here, then the card is clicked on the player table.
 const CARD_TARGET_ACTIONS = new Set([
@@ -150,7 +100,6 @@ const CARD_TARGET_ACTIONS = new Set([
 	ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS, ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS,
 ])
 const cardActions = computed(() => actions.value.filter((a) => CARD_TARGET_ACTIONS.has(a)))
-const unlockActions = computed(() => actions.value.filter((a) => a === ActionType.UNLOCK_WHITE || a === ActionType.UNLOCK_BLACK_OR_WHITE))
 
 function p(type, extra = {}) {
 	controller.perform({ type, ...extra })
@@ -168,18 +117,6 @@ function p(type, extra = {}) {
 			<button v-for="(mv, i) in moves" :key="i" class="act" @click="p(ActionType.MOVE, { steps: mv.steps })">{{ mv.steps.join(" → ") }} ({{ mv.cost }}$)</button>
 		</div>
 
-		<div v-if="deliveries.length" class="group">
-			<div class="label">Deliver</div>
-			<button v-for="d in deliveries" :key="d.city" class="act" @click="p(ActionType.DELIVER_TO_CITY, { city: d.city, certificates: d.certificates })">{{ d.city }}</button>
-		</div>
-
-		<div v-if="foresights" class="group">
-			<div class="label">Foresight</div>
-			<button v-for="c in foresights.choices" :key="c.i" class="act" @click="p(foresights.a, { choice: c.i })">
-				{{ tileLabel(c.t) }}
-			</button>
-		</div>
-
 		<div v-if="hireRows.length" class="group">
 			<div class="label">Hire worker</div>
 			<template v-for="row in hireRows" :key="row.index">
@@ -187,21 +124,6 @@ function p(type, extra = {}) {
 					r{{ row.index }} {{ w }}
 				</button>
 			</template>
-		</div>
-
-		<div v-if="unlocks && unlocks.available.length" class="group">
-			<div class="label">Unlock</div>
-			<button v-for="u in unlocks.available" :key="u" class="act" @click="p(unlocks.type, { unlock: u })">{{ u }}</button>
-		</div>
-
-		<div v-if="hazards.length" class="group">
-			<div class="label">Remove hazard</div>
-			<button v-for="loc in hazards" :key="loc" class="act" @click="p(actions.find((a) => a.startsWith('REMOVE_HAZARD')), { location: loc })">{{ loc }}</button>
-		</div>
-
-		<div v-if="teepees.length" class="group">
-			<div class="label">Trade with tribes</div>
-			<button v-for="loc in teepees" :key="loc" class="act" @click="p(ActionType.TRADE_WITH_TRIBES, { location: loc })">{{ loc }}</button>
 		</div>
 
 		<div v-if="buildingOptions && buildingOptions.buildings.length && buildingActions.length" class="group">
@@ -221,13 +143,6 @@ function p(type, extra = {}) {
 			</div>
 		</div>
 
-		<div v-if="actions.includes(ActionType.USE_ADJACENT_BUILDING)" class="group">
-			<div class="label">Adjacent building</div>
-			<button class="act" :class="{ active: store.selectedAction === ActionType.USE_ADJACENT_BUILDING }" @click="store.selectAction(ActionType.USE_ADJACENT_BUILDING)">
-				{{ store.selectedAction === ActionType.USE_ADJACENT_BUILDING ? "Click a building on the map" : "Use adjacent building" }}
-			</button>
-		</div>
-
 		<div v-if="actions.includes(ActionType.APPOINT_STATION_MASTER)" class="group">
 			<div class="label">Appoint station master</div>
 			<button class="act" :class="{ active: store.selectedAction === ActionType.APPOINT_STATION_MASTER }" @click="store.selectAction(ActionType.APPOINT_STATION_MASTER)">
@@ -244,17 +159,6 @@ function p(type, extra = {}) {
 			<div class="label">Card actions — select, then click a card on your player table</div>
 			<button
 				v-for="a in cardActions"
-				:key="a"
-				class="act"
-				:class="{ active: store.selectedAction === a }"
-				@click="store.selectAction(a)"
-			>{{ view.humanizeAction(a) }}</button>
-		</div>
-
-		<div v-if="unlockActions.length" class="group">
-			<div class="label">Unlock — select, then click a disc on your player table</div>
-			<button
-				v-for="a in unlockActions"
 				:key="a"
 				class="act"
 				:class="{ active: store.selectedAction === a }"

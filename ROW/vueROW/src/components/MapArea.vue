@@ -164,14 +164,20 @@ function clickStation(i) {
 	}
 }
 
-function clickWorker(row, worker) {
-	if (!game.value) return
+function hireActionFor(row, worker) {
+	if (!game.value) return null
 	const jm = g().getJobMarket()
-	if (row >= jm.currentRowIndex) return
+	if (row >= jm.currentRowIndex) return null
 	const hire = WORKER_ACTIONS.find((a) => store.actions.includes(a))
-	if (!hire) return
+	if (!hire) return null
 	const mod = hire === ActionType.HIRE_WORKER_PLUS_2 ? 2 : hire === ActionType.HIRE_WORKER_MINUS_1 ? -1 : hire === ActionType.HIRE_WORKER_MINUS_2 ? -2 : 0
-	if (jm.cost(row, worker) + mod > g().playerState(g().currentPlayer).balance) return
+	if (jm.cost(row, worker) + mod > g().playerState(g().currentPlayer).balance) return null
+	return hire
+}
+
+function clickWorker(row, worker) {
+	const hire = hireActionFor(row, worker)
+	if (!hire) return
 	controller.perform({ type: hire, row, worker })
 }
 
@@ -303,6 +309,7 @@ const jobWorkers = computed(() => {
 				x: JOB_MARKET.x + offset + ci * JOB_MARKET.workerW,
 				y: JOB_MARKET.y0 + ri * JOB_MARKET.rowStep,
 				row: ri,
+				hireable: !!hireActionFor(ri, w),
 			})
 		})
 	})
@@ -312,6 +319,32 @@ const jobToken = computed(() => {
 	if (!game.value) return null
 	const jm = g().getJobMarket()
 	return { img: view.jobMarketTokenImage(), x: JOB_MARKET.tokenX, y: JOB_MARKET.tokenY0 + jm.currentRowIndex * JOB_MARKET.rowStep }
+})
+
+// ---- clickable-target highlighting (yellow = available, green = hover) ----
+const reachableSpaces = computed(() => {
+	const out = new Set()
+	if (!game.value) return out
+	for (const a of store.actions) for (const s of map.reachableSpacesFor(a, g())) out.add(s)
+	return out
+})
+
+const deliverableCities = computed(() => {
+	if (!game.value || !store.actions.includes(ActionType.DELIVER_TO_CITY)) return new Set()
+	try {
+		return new Set(g().possibleDeliveries().map((d) => d.city))
+	} catch {
+		return new Set()
+	}
+})
+
+const foresightActive = computed(() => {
+	const acts = store.actions
+	return {
+		0: acts.includes(ActionType.CHOOSE_FORESIGHT_1),
+		1: acts.includes(ActionType.CHOOSE_FORESIGHT_2),
+		2: acts.includes(ActionType.CHOOSE_FORESIGHT_3),
+	}
 })
 
 const foresightTiles = computed(() => {
@@ -326,6 +359,92 @@ const foresightTiles = computed(() => {
 	}
 	return out
 })
+
+// ---- building hover: zoom to 2x + clickable action hotspots ----
+const hovered = ref(null)
+let hoverTimer = null
+
+function enterBuilding(name) {
+	if (hoverTimer) {
+		clearTimeout(hoverTimer)
+		hoverTimer = null
+	}
+	hovered.value = name
+}
+function leaveBuilding() {
+	if (hoverTimer) clearTimeout(hoverTimer)
+	hoverTimer = setTimeout(() => {
+		hovered.value = null
+	}, 250)
+}
+
+const hoveredBuilding = computed(() => {
+	const name = hovered.value
+	if (!name || !game.value) return null
+	const tile = buildingTiles.value.find((t) => t.name === name)
+	if (!tile) return null
+	const inter = map.buildingInteraction(name, g(), store.actions)
+	const r = tile.rect
+	return {
+		name,
+		rect: r,
+		img: tile.img,
+		mode: inter ? inter.mode : null,
+		options: inter ? inter.options : [],
+		transform: `translate(${r.x + r.w / 2},${r.y + r.h / 2}) scale(2) translate(${-(r.x + r.w / 2)},${-(r.y + r.h / 2)})`,
+	}
+})
+
+function runHotspot(opt) {
+	const b = hoveredBuilding.value
+	if (!b) return
+	if (b.mode === "adjacent") {
+		controller.perform({ type: ActionType.USE_ADJACENT_BUILDING, location: b.name })
+		return
+	}
+	// Actions that need a further choice are armed; the board/top choosers finish them.
+	if (map.NEEDS_PARAMS.has(opt)) {
+		store.selectAction(opt)
+		return
+	}
+	controller.perform({ type: opt })
+}
+
+// ---- top-layer clickable borders (drawn last so they are never covered) ----
+const hitTargets = computed(() => {
+	if (!game.value) return []
+	const out = []
+	for (const l of trailLocations.value) {
+		const hasTargets = candidatesFor(l.name).length > 0
+		const building = map.buildingInteraction(l.name, g(), store.actions)
+		if (!hasTargets && !building) continue
+		out.push({ key: "loc:" + l.name, type: "location", name: l.name, x: l.rect.x, y: l.rect.y, w: l.rect.w, h: l.rect.h, rx: 2, transform: null })
+	}
+	for (const c of cityGroups.value) {
+		if (!deliverableCities.value.has(c.city)) continue
+		out.push({ key: "city:" + c.city, type: "city", idx: c.idx, x: c.pos.rect.x, y: c.pos.rect.y, w: 52, h: 50, rx: 2, transform: null })
+	}
+	for (const sr of SPACE_RECTS) {
+		if (!reachableSpaces.value.has(sr.space)) continue
+		out.push({ key: "space:" + sr.space, type: "space", space: sr.space, x: 0, y: 0, w: sr.w, h: sr.h, rx: 3, transform: `translate(${sr.x},${sr.y}) ${sr.transform ?? ""}` })
+	}
+	for (const f of foresightTiles.value) {
+		if (!foresightActive.value[f.slot.col]) continue
+		out.push({ key: "fs:" + f.slot.col + "-" + f.slot.row, type: "foresight", col: f.slot.col, row: f.slot.row, x: f.slot.x, y: f.slot.y, w: 33, h: 39, rx: 3, transform: null })
+	}
+	return out
+})
+
+function clickTarget(t) {
+	if (t.type === "location") clickLocation(t.name)
+	else if (t.type === "city") clickCity(t.idx)
+	else if (t.type === "space") clickSpace(t.space)
+	else if (t.type === "foresight") clickForesight(t.col, t.row)
+}
+
+function enterTarget(t) {
+	if (t.type === "location") enterBuilding(t.name)
+}
 </script>
 
 <template>
@@ -336,19 +455,19 @@ const foresightTiles = computed(() => {
 
 			<g :transform="`translate(0 ${shift})`">
 				<!-- foresights -->
-				<g v-for="f in foresightTiles" :key="'fs' + f.slot.col + '-' + f.slot.row" class="foresight" @click="clickForesight(f.slot.col, f.slot.row)">
+				<g v-for="f in foresightTiles" :key="'fs' + f.slot.col + '-' + f.slot.row" class="foresight">
 					<image :href="f.img" :x="f.slot.x" :y="f.slot.y" width="33" height="39" />
 					<text v-if="f.points" :x="f.slot.x + 21" :y="f.slot.y + 33" class="points">{{ f.points }}</text>
 				</g>
 
 				<!-- delivery cities -->
-				<g v-for="c in cityGroups" :key="'city' + c.city" class="cityGroup" @click="clickCity(c.idx)">
+				<g v-for="c in cityGroups" :key="'city' + c.city" class="cityGroup">
 					<circle v-for="(d, i) in c.discs" :key="i" :class="'disc ' + d.color" :cx="d.cx" :cy="d.cy" r="11" />
 					<rect class="city" :x="c.pos.rect.x" :y="c.pos.rect.y" width="52" height="50" rx="2" ry="2" />
 				</g>
 
 				<!-- railroad track spaces -->
-				<g v-for="sr in SPACE_RECTS" :key="'space' + sr.space" :transform="`translate(${sr.x},${sr.y}) ${sr.transform ?? ''}`" @click="clickSpace(sr.space)">
+				<g v-for="sr in SPACE_RECTS" :key="'space' + sr.space" :transform="`translate(${sr.x},${sr.y}) ${sr.transform ?? ''}`">
 					<rect class="space" rx="3" ry="3" :width="sr.w" :height="sr.h" />
 				</g>
 				<g v-for="e in engines" :key="'eng' + e.rect.space" :transform="`translate(${e.rect.x},${e.rect.y}) ${e.rect.transform ?? ''}`">
@@ -364,8 +483,9 @@ const foresightTiles = computed(() => {
 				</g>
 
 				<!-- job market -->
-				<g v-for="w in jobWorkers" :key="'jm' + w.key" class="workerGroup" @click="clickWorker(w.row, w.worker)">
+				<g v-for="w in jobWorkers" :key="'jm' + w.key" class="workerGroup" :class="{ hireable: w.hireable }" @click="clickWorker(w.row, w.worker)">
 					<image :href="w.img" :x="w.x" :y="w.y" width="33" height="39" />
+					<rect class="hireOutline" :x="w.x" :y="w.y" width="33" height="39" rx="4" ry="4" />
 				</g>
 				<image v-if="jobToken" :href="jobToken.img" :x="jobToken.x" :y="jobToken.y" width="30" height="30" />
 
@@ -395,18 +515,19 @@ const foresightTiles = computed(() => {
 					/>
 				</g>
 
-				<!-- location hit-rects on top of everything -->
+				<!-- location hit-rects: hover any location to peek at buildings (click handled by the top layer) -->
 				<rect
 					v-for="l in trailLocations"
 					:key="l.name"
-					:class="['location', { selectable: candidatesFor(l.name).length > 0 }]"
+					class="location"
 					:x="l.rect.x"
 					:y="l.rect.y"
 					:width="l.rect.w"
 					:height="l.rect.h"
 					rx="2"
 					ry="2"
-					@click="clickLocation(l.name)"
+					@mouseenter="enterBuilding(l.name)"
+					@mouseleave="leaveBuilding"
 				>
 					<title>{{ l.name }}</title>
 				</rect>
@@ -414,6 +535,54 @@ const foresightTiles = computed(() => {
 				<!-- ranchers -->
 				<g class="ranchers">
 					<circle v-for="r in ranchers" :key="'r' + r.player" :class="'rancher ' + r.color" :cx="r.x" :cy="r.y" r="7" />
+				</g>
+
+				<!-- clickable-target borders, drawn on top so they never get covered -->
+				<g class="hitLayer">
+					<rect
+						v-for="t in hitTargets"
+						:key="t.key"
+						class="hit"
+						:x="t.x"
+						:y="t.y"
+						:width="t.w"
+						:height="t.h"
+						:rx="t.rx"
+						:ry="t.rx"
+						:transform="t.transform || undefined"
+						@mouseenter="enterTarget(t)"
+						@mouseleave="leaveBuilding"
+						@click="clickTarget(t)"
+					/>
+				</g>
+
+				<!-- hovered building: zoomed, with action hotspots -->
+				<g
+					v-if="hoveredBuilding"
+					class="buildingOverlay"
+					@mouseenter="enterBuilding(hoveredBuilding.name)"
+					@mouseleave="leaveBuilding"
+					@click="clickLocation(hoveredBuilding.name)"
+				>
+					<g :transform="hoveredBuilding.transform">
+						<image :href="hoveredBuilding.img" :x="hoveredBuilding.rect.x" :y="hoveredBuilding.rect.y" :width="hoveredBuilding.rect.w" :height="hoveredBuilding.rect.h" />
+						<g v-for="(opt, i) in hoveredBuilding.options" :key="i">
+							<rect
+								class="hotspot"
+								:x="hoveredBuilding.rect.x"
+								:y="hoveredBuilding.rect.y + (i * hoveredBuilding.rect.h) / hoveredBuilding.options.length"
+								:width="hoveredBuilding.rect.w"
+								:height="hoveredBuilding.rect.h / hoveredBuilding.options.length"
+								@click.stop="runHotspot(opt)"
+							/>
+							<text
+								class="hotspotLabel"
+								:x="hoveredBuilding.rect.x + hoveredBuilding.rect.w / 2"
+								:y="hoveredBuilding.rect.y + (i + 0.5) * (hoveredBuilding.rect.h / hoveredBuilding.options.length)"
+								text-anchor="middle"
+							>{{ view.humanizeAction(opt) }}</text>
+						</g>
+					</g>
 				</g>
 			</g>
 		</svg>
@@ -462,7 +631,22 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 }
 .stationGroup:hover .station { stroke: black; }
 
-.foresight, .workerGroup { cursor: pointer; }
+.foresight { cursor: pointer; }
+.workerGroup { cursor: default; }
+.workerGroup.hireable { cursor: pointer; }
+.hireOutline { fill: transparent; stroke: none; pointer-events: none; }
+.workerGroup.hireable .hireOutline { stroke: #ffd400; stroke-width: 4; }
+.workerGroup.hireable:hover .hireOutline { stroke: #90ee90; stroke-width: 6; }
+
+/* Clickable targets: thick yellow border, light-green on hover, drawn in a top layer. */
+.hit {
+	fill: transparent;
+	stroke: #ffd400;
+	stroke-width: 6;
+	cursor: pointer;
+}
+.hit:hover { stroke: #90ee90; stroke-width: 7; }
+.hitLayer { pointer-events: all; }
 
 .points {
 	fill: white;
@@ -489,6 +673,25 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 .disc.orange, .engine.orange, .rancher.orange { fill: orange; }
 .disc.purple, .engine.purple, .rancher.purple { fill: purple; }
 .disc.black, .engine.black, .rancher.black { fill: black; }
+
+/* Hovered-building action hotspots */
+.buildingOverlay { pointer-events: all; }
+.hotspot {
+	fill: rgb(255, 255, 0, 0.18);
+	stroke: #ffd400;
+	stroke-width: 2;
+	cursor: pointer;
+}
+.hotspot:hover { fill: rgb(255, 255, 0, 0.45); stroke: black; }
+.hotspotLabel {
+	fill: #1a1a1a;
+	font-size: 20px;
+	font-weight: bold;
+	pointer-events: none;
+	paint-order: stroke;
+	stroke: #ffffff;
+	stroke-width: 4px;
+}
 
 .chooser {
 	position: absolute;

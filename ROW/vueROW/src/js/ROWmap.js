@@ -11,6 +11,7 @@
  * component.
  */
 import { ActionType } from "./ROWreference"
+import { neutralBuildingAction, playerBuildingAction } from "./ROWdata"
 
 /** Trail location rectangles, keyed by engine location name. */
 export const TRAIL_SPOTS = {
@@ -233,3 +234,84 @@ export function reachableSpacesFor(a, g) {
 export function moveDestination(m) {
 	return m.steps[m.steps.length - 1]
 }
+
+// ---------------------------------------------------------------------------
+// Building activation (board-integrated actions)
+// ---------------------------------------------------------------------------
+
+/** Actions that need a target/choice before the engine can perform them. */
+export const NEEDS_PARAMS = new Set([
+	ActionType.MOVE,
+	ActionType.MOVE_1_FORWARD,
+	ActionType.MOVE_2_FORWARD,
+	ActionType.MOVE_3_FORWARD,
+	ActionType.MOVE_3_FORWARD_WITHOUT_FEES,
+	ActionType.MOVE_4_FORWARD,
+	ActionType.MOVE_5_FORWARD,
+	ActionType.DELIVER_TO_CITY,
+	ActionType.HIRE_WORKER,
+	ActionType.HIRE_WORKER_PLUS_2,
+	ActionType.HIRE_WORKER_MINUS_1,
+	ActionType.HIRE_WORKER_MINUS_2,
+	ActionType.BUY_CATTLE,
+	ActionType.PLACE_BUILDING,
+	ActionType.PLACE_CHEAP_BUILDING,
+	ActionType.PLACE_BUILDING_FOR_FREE,
+	ActionType.REMOVE_HAZARD,
+	ActionType.REMOVE_HAZARD_FOR_FREE,
+	ActionType.REMOVE_HAZARD_FOR_2_DOLLARS,
+	ActionType.REMOVE_HAZARD_FOR_5_DOLLARS,
+	ActionType.TRADE_WITH_TRIBES,
+	ActionType.APPOINT_STATION_MASTER,
+	ActionType.DOWNGRADE_STATION,
+	ActionType.UPGRADE_ANY_STATION_BEHIND_ENGINE,
+	ActionType.TAKE_BREEDING_VALUE_3_CATTLE_CARD,
+])
+
+/** The local action tree a placed building offers the current player. */
+function buildingLocalAction(loc, game) {
+	const b = loc.building
+	if (!b) return null
+	const ps = game.currentPlayerState()
+	return b.player === null ? neutralBuildingAction(b.name, ps.getNumberOfCowboys()) : playerBuildingAction(b.name, game.edition, ps.getNumberOfCowboys())
+}
+
+/**
+ * What building interaction, if any, is available for a location right now:
+ *   { mode: "activate", options:[ActionType...] }  -> the player is on/at it
+ *   { mode: "adjacent", options:[USE_ADJACENT_BUILDING] } -> it can be used from an adjacent spot
+ * Returns null when the building cannot be interacted with.
+ */
+export function buildingInteraction(locName, game, liveActions) {
+	const loc = game.getTrail().getLocation(locName)
+	if (!loc || loc.kind !== "BUILDING" || !loc.building) return null
+	const ps = game.currentPlayerState()
+	const current = game.getTrail().currentLocation(game.currentPlayer)
+	const last = ps.getLastActivatedLocation()
+	const here = locName === current || locName === last
+
+	if (here) {
+		const local = buildingLocalAction(loc, game)
+		const offered = new Set(local ? local.getPossibleActions() : [])
+		if (loc.riskAction) offered.add(loc.riskAction)
+		// Engine moves need a spatial target (shown as track-space buttons), not a building hotspot.
+		const options = [...offered].filter((a) => liveActions.includes(a) && !engineMoveRange(a, game))
+		if (options.length) return { mode: "activate", location: locName, options }
+	}
+	if (liveActions.includes(ActionType.USE_ADJACENT_BUILDING) && game.getTrail().getAdjacentLocations(current).includes(locName)) {
+		return { mode: "adjacent", location: locName, options: [ActionType.USE_ADJACENT_BUILDING] }
+	}
+	return null
+}
+
+/** Every building action currently reachable through a board interaction. */
+export function activeBuildingActions(game, liveActions) {
+	const set = new Set()
+	for (const [name, loc] of game.getTrail().locations) {
+		if (loc.kind !== "BUILDING" || !loc.building) continue
+		const inter = buildingInteraction(name, game, liveActions)
+		if (inter) for (const a of inter.options) set.add(a)
+	}
+	return set
+}
+
