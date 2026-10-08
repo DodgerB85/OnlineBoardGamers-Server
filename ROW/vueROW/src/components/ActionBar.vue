@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
-import { ActionType } from "../game"
+import { ActionType, Hand, PLAYER_BUILDINGS } from "../game"
+import { buildingImage } from "../view/assets"
 import { engineMoveRange, reachableSpacesFor } from "../view/targets"
 import { useGameStore } from "../stores/game"
 
@@ -93,6 +94,23 @@ const buildingOptions = computed<{ buildings: string[]; locations: string[] } | 
 	return { buildings: ps.buildings.slice(), locations }
 })
 
+const HAND_LABEL: Record<Hand, string> = {
+	[Hand.NONE]: "no hand limit",
+	[Hand.GREEN]: "green hand",
+	[Hand.BLACK]: "black hand",
+	[Hand.BOTH]: "green or black hand",
+}
+
+function buildingImageFor(building: string): string {
+	const color = g().state.players.find((p) => p.name === g().currentPlayer)?.color?.toLowerCase() ?? "red"
+	return buildingImage(g().edition, building, color)
+}
+function buildingLabel(building: string): string {
+	const info = PLAYER_BUILDINGS[building]
+	if (!info) return building
+	return `${building}: ${info.craftsmen} craftsman${info.craftsmen === 1 ? "" : "en"}, ${HAND_LABEL[info.hand]}, ${info.points} point${info.points === 1 ? "" : "s"}`
+}
+
 // --- Engine moves ---
 
 const engineMoves = computed(() => {
@@ -184,19 +202,32 @@ function p(type: ActionType, extra: Record<string, unknown> = {}) {
 
 		<div v-if="buildingOptions && buildingOptions.buildings.length && buildingActions.length" class="group">
 			<div class="label">Place building — pick one, then click a spot on the map</div>
-			<button
-				v-for="b in buildingOptions.buildings"
-				:key="b"
-				class="act"
-				:class="{ active: store.selectedAction === buildingActions[0] && store.pendingBuilding === b }"
-				@click="store.pickBuilding(buildingActions[0], b)"
-			>{{ b }}</button>
+			<div class="supply">
+				<img
+					v-for="b in buildingOptions.buildings"
+					:key="b"
+					class="buildingTile"
+					:class="{ active: store.selectedAction === buildingActions[0] && store.pendingBuilding === b }"
+					:src="buildingImageFor(b)"
+					:alt="b"
+					:title="buildingLabel(b)"
+					draggable="false"
+					@click="store.pickBuilding(buildingActions[0], b)"
+				/>
+			</div>
 		</div>
 
 		<div v-if="actions.includes(ActionType.USE_ADJACENT_BUILDING)" class="group">
 			<div class="label">Adjacent building</div>
 			<button class="act" :class="{ active: store.selectedAction === ActionType.USE_ADJACENT_BUILDING }" @click="store.selectAction(ActionType.USE_ADJACENT_BUILDING)">
 				{{ store.selectedAction === ActionType.USE_ADJACENT_BUILDING ? "Click a building on the map" : "Use adjacent building" }}
+			</button>
+		</div>
+
+		<div v-if="actions.includes(ActionType.APPOINT_STATION_MASTER)" class="group">
+			<div class="label">Appoint station master</div>
+			<button class="act" :class="{ active: store.selectedAction === ActionType.APPOINT_STATION_MASTER }" @click="store.selectAction(ActionType.APPOINT_STATION_MASTER)">
+				{{ store.selectedAction === ActionType.APPOINT_STATION_MASTER ? "Click a worker on your player board" : "Appoint station master" }}
 			</button>
 		</div>
 
@@ -233,6 +264,7 @@ function p(type: ActionType, extra: Record<string, unknown> = {}) {
 		</div>
 
 		<div class="group">
+			<button class="act reset" @click="store.resetWholeTurn()">Reset Whole Turn</button>
 			<button class="act end" @click="store.endTurn()">End Turn</button>
 			<button v-if="store.canSkip" class="act" @click="store.skip()">Skip</button>
 		</div>
@@ -245,4 +277,9 @@ function p(type: ActionType, extra: Record<string, unknown> = {}) {
 .label { font-weight: bold; font-size: 12px; margin-bottom: 3px; }
 .act { margin: 2px; padding: 3px 7px; cursor: pointer; font-size: 12px; }
 .end { background: #cfe8cf; font-weight: bold; }
+.reset { background: #f6d9c9; font-weight: bold; }
+.supply { display: flex; flex-wrap: wrap; gap: 3px; }
+.buildingTile { width: 44px; height: 52px; border: 2px solid #ffffff; border-radius: 4px; cursor: pointer; background: #fff; }
+.buildingTile:hover { border-color: black; }
+.buildingTile.active { border-color: green; box-shadow: 0 0 4px green; }
 </style>

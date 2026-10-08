@@ -100,6 +100,27 @@ export async function loadRewind(gameID: number, latestUpdate: string | number):
 	return response.json()
 }
 
+export async function updateDataFromLoadRewind(payload: {
+	gameID: number
+	turn: number
+	phase: number
+	gameData: unknown
+	allIsCurrentPlayers: string[]
+	allRemainingPlayersInTurnOrder: string[]
+}): Promise<{ latestUpdate: string; secondsToNextKickout: number }> {
+	const response = await post("/ROW/processROWturn/", {
+		action: "updateDataFromLoadRewind",
+		gameID: payload.gameID,
+		turn: payload.turn,
+		phase: payload.phase,
+		gameData: JSON.stringify(payload.gameData),
+		allIsCurrentPlayers: payload.allIsCurrentPlayers,
+		allRemainingPlayersInTurnOrder: payload.allRemainingPlayersInTurnOrder,
+	})
+	if (!response.ok) throw new Error("Network response was not ok")
+	return response.json()
+}
+
 export async function resign(gameID: number): Promise<void> {
 	await post("/ROW/processROWturn/", { action: "resign", gameID })
 }

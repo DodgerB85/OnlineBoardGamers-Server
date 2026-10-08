@@ -8,7 +8,7 @@
 import { computed } from "vue"
 import { ActionType, Unlockable, isCattleCard } from "../game"
 import { useGameStore } from "../stores/game"
-import { cardBackGreyImage, editionImage, workerImage } from "../view/assets"
+import { cardBackGreyImage, editionImage, hazardImage, jobMarketTokenImage, stationMasterImage, teepeeImage, workerImage } from "../view/assets"
 import CardView from "./CardView.vue"
 
 const props = withDefaults(defineProps<{ playerName?: string }>(), { playerName: "" })
@@ -132,6 +132,19 @@ function clickAux(action: ActionType) {
 
 const hand = computed(() => ps.value?.hand ?? [])
 
+// Personal collections + card stacks (public info; shown on every board).
+const drawStackSize = computed(() => ps.value?.drawStack.length ?? 0)
+const discardSize = computed(() => ps.value?.discardPile.length ?? 0)
+const collections = computed(() => {
+	const p = ps.value
+	return {
+		masters: (p?.stationMasters ?? []).map((m) => ({ name: m, img: stationMasterImage(m) })),
+		hazards: (p?.hazards ?? []).map((h) => ({ img: hazardImage(h.type, h.hand), label: `${h.type} (${h.hand}) ${h.points} pts` })),
+		teepees: (p?.teepees ?? []).map((t) => ({ img: teepeeImage(t), label: `${t} teepee` })),
+		token: p?.jobMarketToken ?? false,
+	}
+})
+
 // ---- hand selection (reference canSelectCard / selectCard) ----
 function canSelectCard(card: unknown): boolean {
 	if (readonly.value) return false
@@ -178,6 +191,18 @@ function selectCard(card: unknown) {
 			<span v-if="ps.handValue()">hand value {{ ps.handValue() }}</span>
 			<span>certs {{ ps.tempCertificates }}/{{ ps.tempCertificates + ps.permanentCertificates() }}</span>
 			<span>engine {{ store.game?.getRailroadTrack().currentSpace(ps.player) }}</span>
+		</div>
+		<div class="collections">
+			<span class="stack" :title="`Draw pile (${drawStackSize})`">
+				<img :src="cardBackGreyImage()" alt="" /><b>{{ drawStackSize }}</b>
+			</span>
+			<span class="stack discard" :title="`Discard pile (${discardSize})`">
+				<img :src="cardBackGreyImage()" alt="" /><b>{{ discardSize }}</b>
+			</span>
+			<img v-for="m in collections.masters" :key="'sm' + m.name" class="collect" :src="m.img" :title="`${m.name} station master`" alt="" />
+			<img v-for="(h, i) in collections.hazards" :key="'hz' + i" class="collect" :src="h.img" :title="h.label" alt="" />
+			<img v-for="(t, i) in collections.teepees" :key="'tp' + i" class="collect" :src="t.img" :title="t.label" alt="" />
+			<img v-if="collections.token" class="collect" :src="jobMarketTokenImage()" title="Job market token" alt="" />
 		</div>
 		<div class="hand">
 			<template v-if="!readonly">
@@ -268,6 +293,12 @@ function selectCard(card: unknown) {
 #playerBoard { display: block; width: 100%; margin: 8px 0; }
 .header { margin-bottom: 4px; font-size: 13px; display: flex; gap: 14px; justify-content: center; }
 .header .balance { font-weight: bold; color: #0a6c0a; }
+.collections { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; margin-bottom: 4px; min-height: 34px; }
+.collections .collect { width: 26px; height: 30px; border: 1px solid #fff; border-radius: 4px; background: #fff; }
+.collections .stack { position: relative; width: 26px; height: 30px; border: 1px solid #fff; border-radius: 4px; overflow: hidden; }
+.collections .stack img { width: 100%; height: 100%; display: block; }
+.collections .stack.discard { filter: grayscale(0.6); }
+.collections .stack b { position: absolute; right: 1px; bottom: 0; color: #fff; font-size: 11px; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
 .hand { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-bottom: 6px; min-height: 58px; }
 .handCard { cursor: default; }
 .handCard.back { width: 80px; height: 115px; border: 1px solid #ffffff; border-radius: 5px; overflow: hidden; flex: none; }

@@ -1,4 +1,6 @@
 import { Edition, JavaRandom, PlayerInfo } from "../game"
+import { decompress } from "../backend/ROW_IO"
+import { startWebSocket } from "../backend/ROWwebsocket"
 import { useGameStore } from "../stores/game"
 import { usePersonalStore } from "../stores/personal"
 
@@ -40,11 +42,30 @@ export function initGame(): void {
 	const chat = initData.chatData
 	if (typeof chat === "string" && chat.length > 0) {
 		try {
-			const binary = atob(chat)
-			const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0))
-			store.chatData.splice(0, store.chatData.length, ...JSON.parse(new TextDecoder().decode(bytes)))
+			// The server stores chat as gzip+base64, not plain base64 JSON.
+			const parsed = decompress(chat)
+			if (Array.isArray(parsed)) store.chatData.splice(0, store.chatData.length, ...parsed)
 		} catch {
 			/* ignore malformed chat */
 		}
 	}
+
+	setupLiveUpdates()
+}
+
+/**
+ * Live updates: start the websocket and, as a fallback, poll for newer data.
+ * Both paths funnel into store.reloadFromServer(), which no-ops when the
+ * server version matches the local one.
+ */
+function setupLiveUpdates(): void {
+	const store = useGameStore()
+	const personal = usePersonalStore()
+	if (personal.gameID < 0) return
+	void startWebSocket().then((ws) => {
+		if (ws) ws.onmessage = () => void store.reloadFromServer()
+	})
+	setInterval(() => {
+		void store.reloadFromServer()
+	}, 20000)
 }

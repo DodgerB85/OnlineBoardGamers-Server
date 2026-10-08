@@ -133,3 +133,20 @@ describe("Illegal actions", () => {
 		expect(() => game.perform(game.currentPlayer, { type: ActionType.GAIN_12_DOLLARS }, new JavaRandom(0))).toThrowError(/CANNOT_PERFORM_ACTION/)
 	})
 })
+
+describe("Reset whole turn (turn-start snapshot)", () => {
+	it("restores the turn-start position from a detached snapshot", () => {
+		const game = startGame(2)
+		const startBalance = game.currentPlayerState().balance
+		// The store snapshots the turn start with a JSON round-trip (detached copy).
+		const snapshot = JSON.parse(JSON.stringify(serializeGame(game)))
+		// Mutate the live game after the snapshot.
+		game.currentPlayerState().gainDollars(5)
+		expect(game.currentPlayerState().balance).toBe(startBalance + 5)
+		// Resetting restores the turn start without affecting the live game.
+		const restored = deserializeGame(snapshot)
+		expect(restored.currentPlayerState().player).toBe(game.currentPlayer)
+		expect(restored.currentPlayerState().balance).toBe(startBalance)
+		expect(game.currentPlayerState().balance).toBe(startBalance + 5)
+	})
+})

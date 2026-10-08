@@ -13,6 +13,11 @@ function toggle(name: "showChat" | "showNotes" | "showBug" | "showHistory" | "sh
 	store.viewSettings[name] = !store.viewSettings[name]
 }
 
+function loadRewind() {
+	store.gameMessages.rewindErrorText = ""
+	void store.rewind()
+}
+
 function nextGame() {
 	if (window.initData?.nextURL) window.location.href = window.initData.nextURL
 }
@@ -60,6 +65,13 @@ const kickoutText = computed(() => {
 				<span :class="['topMenuItem', { selected: store.viewSettings.showReplay }]" @click="toggle('showReplay')">
 					<img :src="getImage('icon-replay')" /><span>{{ t('topMenu.replay') }}</span>
 				</span>
+				<span
+					v-if="personal.pov >= 0"
+					:class="['topMenuItem', { selected: store.viewSettings.performingRewind }]"
+					@click="loadRewind"
+				>
+					<img :src="getImage('icon-rewind')" /><span>{{ t('topMenu.rewind') }}</span>
+				</span>
 			</div>
 		</div>
 
@@ -72,6 +84,7 @@ const kickoutText = computed(() => {
 			<span>{{ store.state?.players?.length ?? 0 }} players</span>
 			<span v-if="store.currentPlayer"> | turn by {{ store.currentPlayer }}</span>
 			<span v-if="store.gameMessages.errorText" class="error"> | {{ store.gameMessages.errorText }}</span>
+			<span v-if="store.gameMessages.rewindErrorText" class="error"> | {{ store.gameMessages.rewindErrorText }}</span>
 		</div>
 	</div>
 </template>
