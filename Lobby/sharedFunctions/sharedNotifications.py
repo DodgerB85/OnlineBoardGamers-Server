@@ -1743,7 +1743,7 @@ def SN_sendDiscordDM(discordID, message_text, urlText, urlRaw):
         SN_sendAdminErrorMessage(f"Discord DM failed for id: ({discordID}): {channel_resp.text}")
 
 
-def SN_sendAdminErrorMessage(message):
+def SN_sendAdminErrorMessage(message, webhook_key="WEBHOOK_ADMIN_ERROR_MSG"):
     # Never reach Discord from the test suite. Several error paths call this on
     # purpose - FCM's map-sync guard rejects saves that a test deliberately makes
     # mismatched, for one - and each one posts to the real admin webhook, so a
@@ -1754,17 +1754,19 @@ def SN_sendAdminErrorMessage(message):
         from django.db import connection
 
         if str(connection.settings_dict.get("NAME", "")).startswith("test_"):
-            return
+            return True
     except Exception:
         pass
 
     try:
-        requests.post(
-            f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
+        response = requests.post(
+            f"https://discord.com/api/webhooks/{config(webhook_key)}",
             data={"content": message},
         )
+        return response.ok
     except Exception as e:
         print("sendAdminErrorMessage ERROR: " + str(e))
+        return False
 
 
 def SN_sendMomentumNotification(game, user, message, subject, is_streak=False):
