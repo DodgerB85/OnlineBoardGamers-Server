@@ -1015,7 +1015,12 @@ def _processTurn(request):
             # would let a rewind restore it.
             currentRewindDataArray = []
             currentGame.rewindTempData = ""
-        if jsonData["saveRewind"]:
+        if jsonData["saveRewind"] and currentGame.gameData:
+            # Never record an empty state as a rewind point. A brand-new game has
+            # gameData == "" and its first save used to push "" onto the stack. The
+            # client cannot import "" (its gzip decode fails), so rewinding to that
+            # entry left the board unchanged while draining the stack - a phantom
+            # rewind that stranded the player mid-turn.
             oldData = currentGame.gameData
             if len(currentRewindDataArray) == 0 or currentRewindDataArray[-1] != oldData:
                 currentRewindDataArray.append(oldData)
@@ -1596,8 +1601,19 @@ def _processTurn(request):
         if len(currentRewindDataArray) > 0:
             loadData = currentRewindDataArray.pop()
 
-        while loadData == currentGame.gameData and len(currentRewindDataArray) > 0:
+        # Skip targets that cannot be restored. The legacy empty-string seed (see the
+        # push guard in saveNormal) and duplicates of the current state are no-ops the
+        # client cannot import, so restoring one used to drain the stack and fabricate
+        # a HIST_REWIND while leaving the board unchanged.
+        while (loadData == "" or loadData == currentGame.gameData) and len(currentRewindDataArray) > 0:
             loadData = currentRewindDataArray.pop()
+
+        if loadData == "" or loadData == currentGame.gameData:
+            return JsonResponse(
+                {"message": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")},
+                safe=False,
+            )
+
         currentGame.gameData = loadData
 
         # currentGame.rewindTempData = loadData
