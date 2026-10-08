@@ -266,6 +266,16 @@ export const NEEDS_PARAMS = new Set([
 	ActionType.DOWNGRADE_STATION,
 	ActionType.UPGRADE_ANY_STATION_BEHIND_ENGINE,
 	ActionType.TAKE_BREEDING_VALUE_3_CATTLE_CARD,
+	ActionType.DISCARD_CARD,
+	ActionType.REMOVE_CARD,
+	ActionType.DISCARD_1_OBJECTIVE_CARD_TO_GAIN_2_CERTIFICATES,
+	ActionType.PLAY_OBJECTIVE_CARD,
+	ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_1_CERTIFICATE,
+	ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_3_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND,
+	ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_6_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND,
+	ActionType.DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS,
+	ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS,
+	ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS,
 ])
 
 /** The local action tree a placed building offers the current player. */
@@ -293,13 +303,12 @@ export function buildingInteraction(locName, game, liveActions) {
 	if (here) {
 		const local = buildingLocalAction(loc, game)
 		const offered = new Set(local ? local.getPossibleActions() : [])
-		if (loc.riskAction) offered.add(loc.riskAction)
-		// Engine moves need a spatial target (shown as track-space buttons), not a building hotspot.
-		const options = [...offered].filter((a) => liveActions.includes(a) && !engineMoveRange(a, game))
-		if (options.length) return { mode: "activate", location: locName, options }
+		const layoutActions = [...offered]
+		const options = [...offered].filter((a) => liveActions.includes(a))
+		if (options.length) return { mode: "activate", location: locName, options, layoutActions }
 	}
 	if (liveActions.includes(ActionType.USE_ADJACENT_BUILDING) && game.getTrail().getAdjacentLocations(current).includes(locName)) {
-		return { mode: "adjacent", location: locName, options: [ActionType.USE_ADJACENT_BUILDING] }
+		return { mode: "adjacent", location: locName, options: [ActionType.USE_ADJACENT_BUILDING], layoutActions: [ActionType.USE_ADJACENT_BUILDING] }
 	}
 	return null
 }
@@ -314,4 +323,3 @@ export function activeBuildingActions(game, liveActions) {
 	}
 	return set
 }
-

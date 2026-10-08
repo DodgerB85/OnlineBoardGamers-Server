@@ -143,6 +143,11 @@ function clickCity(idx) {
 
 function clickSpace(space) {
 	if (!game.value) return
+	const selected = store.selectedAction
+	if (selected && map.engineMoveRange(selected, g()) && map.reachableSpacesFor(selected, g()).has(space)) {
+		controller.perform({ type: selected, to: space })
+		return
+	}
 	for (const a of store.actions) {
 		if (map.reachableSpacesFor(a, g()).has(space)) {
 			controller.perform({ type: a, to: space })
@@ -203,8 +208,8 @@ const buildingTiles = computed(() => {
 		if (!rect) continue
 		const img = loc.building.player
 			? view.buildingImage(g().edition, loc.building.name, colorByPlayer.value[loc.building.player] ?? "red")
-			: view.editionImage(g().edition, `${loc.building.name.toLowerCase()}.jpg`)
-		out.push({ name, img, rect })
+			: view.editionImage("FIRST", `${loc.building.name.toLowerCase()}.jpg`)
+		out.push({ name, building: loc.building.name, img, rect })
 	}
 	return out
 })
@@ -244,21 +249,6 @@ const ranchers = computed(() => {
 		players.forEach((p, i) => out.push({ player: p, color: colorByPlayer.value[p] ?? "red", x: c.cx + i * 10 - ((players.length - 1) * 10) / 2, y: c.cy }))
 	}
 	return out
-})
-
-const MOVE_COLORS = ["orange", "purple", "cyan", "salmon", "green", "silver", "gold", "navy", "teal", "brown"]
-const routes = computed(() => {
-	if (!game.value || !store.actions.includes(ActionType.MOVE)) return []
-	return moves.value.map((m, i) => {
-		const from = center(m.from ?? "START")
-		const pts = []
-		for (const step of m.steps) {
-			const c = center(step)
-			if (c) pts.push(c)
-		}
-		const all = from ? [from, ...pts] : pts
-		return { steps: m.steps, cost: m.cost, color: MOVE_COLORS[i % MOVE_COLORS.length], points: all.map((p) => `${p.cx},${p.cy}`).join(" ") }
-	})
 })
 
 const engines = computed(() => {
@@ -338,6 +328,69 @@ const deliverableCities = computed(() => {
 	}
 })
 
+function buildingActionRegions(name, rect, inter) {
+	if (!inter) return []
+	const actions = inter.options
+	const allActions = inter.layoutActions
+	const top = rect.y + rect.h * 0.48
+	const bottom = rect.y + rect.h * 0.91
+	const left = rect.x + rect.w * 0.08
+	const right = rect.x + rect.w * 0.92
+	const middle = rect.x + rect.w / 2
+	const panel = (x1, x2) => `${x1},${top} ${x2},${top} ${x2},${bottom} ${x1},${bottom}`
+	const triangleTop = `${left},${top} ${middle},${top} ${left},${bottom}`
+	const triangleBottom = `${middle},${top} ${middle},${bottom} ${left},${bottom}`
+	let groups
+	let shapes
+
+	// The printed neutral A tile has three columns; C and D split their left
+	// column diagonally, with their remaining action printed on the right.
+	if (name === "A") {
+		groups = [[0], [1], [2]]
+		shapes = [panel(left, left + (right - left) / 3), panel(left + (right - left) / 3, left + (right - left) * 2 / 3), panel(left + (right - left) * 2 / 3, right)]
+	} else if (["C", "D", "8a"].includes(name)) {
+		groups = [[0], [1], [2]]
+		shapes = [triangleTop, triangleBottom, panel(middle, right)]
+	} else if (name === "10b") {
+		groups = [[0], [1], [2]]
+		const horizontal = rect.y + rect.h * 0.70
+		shapes = [
+			`${left},${top} ${middle},${top} ${middle},${horizontal} ${left},${horizontal}`,
+			`${left},${horizontal} ${middle},${horizontal} ${middle},${bottom} ${left},${bottom}`,
+			panel(middle, right),
+		]
+	} else if (["2a", "E"].includes(name)) {
+		groups = [[0], allActions.map((_, index) => index).slice(1)]
+		shapes = [panel(left, middle), panel(middle, right)]
+	} else if (name === "4b") {
+		const moveIndex = allActions.findIndex((action) => action === ActionType.MOVE_3_FORWARD)
+		groups = [allActions.map((_, index) => index).filter((index) => index !== moveIndex), [moveIndex]]
+		shapes = [panel(left, middle), panel(middle, right)]
+	} else if (allActions.length <= 1) {
+		groups = [[0]]
+		shapes = [panel(left, right)]
+	} else {
+		groups = allActions.map((_, index) => [index])
+		shapes = allActions.length === 3
+			? [panel(left, left + (right - left) / 3), panel(left + (right - left) / 3, left + (right - left) * 2 / 3), panel(left + (right - left) * 2 / 3, right)]
+			: [panel(left, middle), panel(middle, right)]
+	}
+
+	return groups.map((slots, index) => ({
+		points: shapes[index],
+		actions: slots.map((slot) => allActions[slot]).filter((action) => actions.includes(action)),
+	})).filter((region) => region.actions.length)
+}
+
+const activeBuildingRegions = computed(() => {
+	if (!game.value || !controller.canAct()) return []
+	return buildingTiles.value.flatMap((tile) => {
+		const inter = map.buildingInteraction(tile.name, g(), store.actions)
+		const building = g().getTrail().getLocation(tile.name).building.name
+		return buildingActionRegions(building, tile.rect, inter).map((region) => ({ ...region, name: tile.name, mode: inter.mode }))
+	})
+})
+
 const foresightActive = computed(() => {
 	const acts = store.actions
 	return {
@@ -385,29 +438,45 @@ const hoveredBuilding = computed(() => {
 	if (!tile) return null
 	const inter = map.buildingInteraction(name, g(), store.actions)
 	const r = tile.rect
+	const building = tile.building
+	const regions = controller.canAct() ? buildingActionRegions(building, r, inter).map((region) => ({ ...region, name, mode: inter.mode })) : []
 	return {
 		name,
+		building,
 		rect: r,
 		img: tile.img,
 		mode: inter ? inter.mode : null,
-		options: inter ? inter.options : [],
+		regions,
 		transform: `translate(${r.x + r.w / 2},${r.y + r.h / 2}) scale(2) translate(${-(r.x + r.w / 2)},${-(r.y + r.h / 2)})`,
 	}
 })
 
-function runHotspot(opt) {
-	const b = hoveredBuilding.value
-	if (!b) return
-	if (b.mode === "adjacent") {
-		controller.perform({ type: ActionType.USE_ADJACENT_BUILDING, location: b.name })
+function runHotspot(opt, name, mode) {
+	if (!controller.canAct()) return
+	if (mode === "adjacent") {
+		controller.perform({ type: ActionType.USE_ADJACENT_BUILDING, location: name })
 		return
 	}
 	// Actions that need a further choice are armed; the board/top choosers finish them.
-	if (map.NEEDS_PARAMS.has(opt)) {
+	if (map.NEEDS_PARAMS.has(opt) || map.engineMoveRange(opt, g())) {
 		store.selectAction(opt)
 		return
 	}
 	controller.perform({ type: opt })
+}
+
+function clickBuildingRegion(region, mode = region.mode) {
+	if (region.actions.length === 1) {
+		runHotspot(region.actions[0], region.name, mode)
+		return
+	}
+	const pos = center(region.name)
+	if (!pos) return
+	chooser.value = {
+		x: pos.cx,
+		y: pos.cy,
+		cands: region.actions.map((action) => ({ label: view.humanizeAction(action), run: () => runHotspot(action, region.name, mode) })),
+	}
 }
 
 // ---- top-layer clickable borders (drawn last so they are never covered) ----
@@ -501,20 +570,6 @@ function enterTarget(t) {
 					<image v-for="t in teepeeTiles" :key="'tp' + t.name" :href="t.img" :x="t.rect.x" :y="t.rect.y" width="33" height="39" />
 				</g>
 
-				<!-- possible move routes -->
-				<g v-if="!chooser" class="routes">
-					<polyline
-						v-for="(r, i) in routes"
-						:key="i"
-						:points="r.points"
-						:stroke="r.color"
-						stroke-width="4"
-						fill="none"
-						class="route"
-						@click="controller.perform({ type: ActionType.MOVE, steps: r.steps })"
-					/>
-				</g>
-
 				<!-- location hit-rects: hover any location to peek at buildings (click handled by the top layer) -->
 				<rect
 					v-for="l in trailLocations"
@@ -555,6 +610,15 @@ function enterTarget(t) {
 						@click="clickTarget(t)"
 					/>
 				</g>
+				<polygon
+					v-for="(region, index) in activeBuildingRegions"
+					:key="'building-region-' + region.name + '-' + index"
+					class="hotspot originalHotspot"
+					:points="region.points"
+					@mouseenter="enterBuilding(region.name)"
+					@mouseleave="leaveBuilding"
+					@click.stop="clickBuildingRegion(region)"
+				/>
 
 				<!-- hovered building: zoomed, with action hotspots -->
 				<g
@@ -566,22 +630,13 @@ function enterTarget(t) {
 				>
 					<g :transform="hoveredBuilding.transform">
 						<image :href="hoveredBuilding.img" :x="hoveredBuilding.rect.x" :y="hoveredBuilding.rect.y" :width="hoveredBuilding.rect.w" :height="hoveredBuilding.rect.h" />
-						<g v-for="(opt, i) in hoveredBuilding.options" :key="i">
-							<rect
-								class="hotspot"
-								:x="hoveredBuilding.rect.x"
-								:y="hoveredBuilding.rect.y + (i * hoveredBuilding.rect.h) / hoveredBuilding.options.length"
-								:width="hoveredBuilding.rect.w"
-								:height="hoveredBuilding.rect.h / hoveredBuilding.options.length"
-								@click.stop="runHotspot(opt)"
-							/>
-							<text
-								class="hotspotLabel"
-								:x="hoveredBuilding.rect.x + hoveredBuilding.rect.w / 2"
-								:y="hoveredBuilding.rect.y + (i + 0.5) * (hoveredBuilding.rect.h / hoveredBuilding.options.length)"
-								text-anchor="middle"
-							>{{ view.humanizeAction(opt) }}</text>
-						</g>
+						<polygon
+							v-for="(region, index) in hoveredBuilding.regions"
+							:key="index"
+							class="hotspot"
+							:points="region.points"
+							@click.stop="clickBuildingRegion(region)"
+						/>
 					</g>
 				</g>
 			</g>
@@ -656,14 +711,6 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 	pointer-events: none;
 }
 
-.route {
-	cursor: pointer;
-	opacity: 0.85;
-	stroke-linejoin: round;
-	stroke-linecap: round;
-}
-.route:hover { opacity: 1; stroke-width: 7; }
-
 .disc, .engine, .rancher { stroke: black; stroke-width: 0.5; }
 .disc.red, .engine.red, .rancher.red { fill: red; }
 .disc.blue, .engine.blue, .rancher.blue { fill: blue; }
@@ -677,21 +724,12 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 /* Hovered-building action hotspots */
 .buildingOverlay { pointer-events: all; }
 .hotspot {
-	fill: rgb(255, 255, 0, 0.18);
+	fill: rgb(255, 255, 0, 0.32);
 	stroke: #ffd400;
-	stroke-width: 2;
+	stroke-width: 1.5;
 	cursor: pointer;
 }
-.hotspot:hover { fill: rgb(255, 255, 0, 0.45); stroke: black; }
-.hotspotLabel {
-	fill: #1a1a1a;
-	font-size: 20px;
-	font-weight: bold;
-	pointer-events: none;
-	paint-order: stroke;
-	stroke: #ffffff;
-	stroke-width: 4px;
-}
+.hotspot:hover { fill: rgb(144, 238, 144, 0.55); stroke: #90ee90; }
 
 .chooser {
 	position: absolute;
