@@ -289,10 +289,20 @@ const cityGroups = computed(() => {
 const jobWorkers = computed(() => {
 	if (!game.value) return []
 	const jm = g().getJobMarket()
+	const playerCount = g().state.players.length
 	const out: { key: string; worker: string; img: string; x: number; y: number; row: number }[] = []
 	jm.rows.forEach((row, ri) => {
+		// Reference: workers are right-aligned in the 4-wide row area.
+		const offset = (4 - Math.max(playerCount, row.workers.length)) * JOB_MARKET.workerW
 		row.workers.forEach((w, ci) => {
-			out.push({ key: `${ri}-${ci}-${w}`, worker: w, img: workerImage(w), x: JOB_MARKET.x + ci * JOB_MARKET.workerW, y: JOB_MARKET.y0 + ri * JOB_MARKET.rowStep, row: ri })
+			out.push({
+				key: `${ri}-${ci}-${w}`,
+				worker: w,
+				img: workerImage(w),
+				x: JOB_MARKET.x + offset + ci * JOB_MARKET.workerW,
+				y: JOB_MARKET.y0 + ri * JOB_MARKET.rowStep,
+				row: ri,
+			})
 		})
 	})
 	return out
