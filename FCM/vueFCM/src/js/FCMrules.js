@@ -1806,6 +1806,20 @@ export function getPlaceInFullTurnOrderForPlayer(playerIndex) {
 	return -1
 }
 
+// Media Line mod: city-wide headline modifier for tonight's dinner.
+// Headlines are published during a working day and take effect only at the
+// NEXT turn's dinner (gameflow.turn has not yet incremented during dinner).
+// Stacks freely, city total clamped to +/-10.
+export function giveHeadlineTotal() {
+	const store = useModelStore()
+	if (!store.startingOptions.mediaLine) return 0
+	let sum = 0
+	for (const h of store.mediaLine.headlines) {
+		if (h.turn === store.gameflow.turn - 1) sum += h.value
+	}
+	return Math.max(-10, Math.min(10, sum))
+}
+
 export function doDinnerTime(replayOnly) {
 	const store = useModelStore()
 
@@ -1993,6 +2007,9 @@ export function doDinnerTime(replayOnly) {
 	finalizeMilestones(firstPizzas, possiblePizzaBomb)
 
 	// --- PHASE 3: CALCULATE FINAL EARNINGS & BONUSES ---
+	// Media Line mod: headlines published last working day shift every sale
+	// price city-wide tonight (city total clamped to +/-10; negative legal)
+	const headlineTotal = giveHeadlineTotal()
 	sold.forEach((sale) => {
 		const pIdx = sale.playerIndex
 		const p = store.players[pIdx]
@@ -2000,7 +2017,7 @@ export function doDinnerTime(replayOnly) {
 		if (model.hasGarden(sale.house)) multiplier++
 		if (model.adjacentToPark(sale.house)) multiplier++
 
-		let price = sale.needs.length * plyr.playersPrice(pIdx) * multiplier
+		let price = sale.needs.length * (plyr.playersPrice(pIdx) + headlineTotal) * multiplier
 		const bonus = plyr.playerBonus(pIdx, sale.needs)
 		price += bonus
 

@@ -471,3 +471,152 @@ describe("Media Line stage 3 - TV channel action", () => {
 		expect(controller.tvSelectionComplete()).toBe(true)
 	})
 })
+
+describe("Media Line stage 4 - headline publication", () => {
+	it("allows one headline per on-duty TV announcer, campaigns count as on duty", () => {
+		const store = freshGame(2, ["50"])
+		store.players[0].employees.push(rf.TV_ANNOUNCER)
+		store.players[0].marketers.push({ campaign: 28, marketer: rf.TV_ANNOUNCER })
+		expect(controller.mediaLineHeadlinesLeft(0)).toBe(2)
+		controller.publishHeadline(5)
+		expect(controller.mediaLineHeadlinesLeft(0)).toBe(1)
+		controller.publishHeadline(-5)
+		expect(controller.mediaLineHeadlinesLeft(0)).toBe(0)
+		// No announcer free anymore - extra publications are ignored
+		controller.publishHeadline(5)
+		expect(store.mediaLine.headlines).toHaveLength(2)
+		expect(store.mediaLine.headlines[0]).toEqual({ turn: store.gameflow.turn, playerIndex: 0, value: 5 })
+		expect(store.history.some((h) => h[0] === rf.HIST_PUBLISH_HEADLINE)).toBe(true)
+	})
+
+	it("rejects publishing without the mod or with an invalid value", () => {
+		const store = freshGame(2, [])
+		store.players[0].employees.push(rf.TV_ANNOUNCER)
+		controller.publishHeadline(5)
+		expect(store.mediaLine.headlines).toHaveLength(0)
+		const store2 = freshGame(2, ["50"])
+		store2.players[0].employees.push(rf.TV_ANNOUNCER)
+		controller.publishHeadline(3)
+		controller.publishHeadline(0)
+		expect(store2.mediaLine.headlines).toHaveLength(0)
+	})
+
+	it("applies only next turn and clamps the city total at +/-10", () => {
+		const store = freshGame(2, ["50"])
+		expect(rules.giveHeadlineTotal()).toBe(0)
+		// Published this turn: not effective tonight
+		store.mediaLine.headlines.push({ turn: store.gameflow.turn, playerIndex: 0, value: 5 })
+		expect(rules.giveHeadlineTotal()).toBe(0)
+		// Published last turn: effective, stacking up to the +10 clamp
+		store.mediaLine.headlines.push({ turn: store.gameflow.turn - 1, playerIndex: 0, value: 5 })
+		store.mediaLine.headlines.push({ turn: store.gameflow.turn - 1, playerIndex: 1, value: 5 })
+		expect(rules.giveHeadlineTotal()).toBe(10)
+		// And down to the -10 clamp
+		store.mediaLine.headlines.splice(0)
+		for (let i = 0; i < 4; i++) store.mediaLine.headlines.push({ turn: store.gameflow.turn - 1, playerIndex: 1, value: -5 })
+		expect(rules.giveHeadlineTotal()).toBe(-10)
+	})
+
+	it("is inert without the mod", () => {
+		const store = freshGame(2, [])
+		store.mediaLine.headlines.push({ turn: store.gameflow.turn - 1, playerIndex: 0, value: 5 })
+		expect(rules.giveHeadlineTotal()).toBe(0)
+	})
+})
+
+describe("Media Line stage 4 - headline in dinner settlement", () => {
+	function dinnerFreshGame() {
+		setActivePinia(createPinia())
+		const store = useModelStore()
+		model.setInternalStartingOptions(["50"])
+		store.mapData.tiles = mapMod.generateRandomMap(2)
+		mapMod.initCoords()
+		store.players.splice(0)
+		for (let i = 0; i < 2; i++) {
+			store.players.push({
+				name: "P" + i,
+				displayName: "P" + i,
+				colour: i,
+				restaurants: [],
+				money: 100,
+				bankrupt: false,
+				employees: [],
+				beach: [],
+				milestones: [],
+				marketers: [],
+				resources: [],
+				additionalCampaignArrayIndex: -1,
+				additionalMarketedGood: [],
+			})
+		}
+		store.gameflow.turn = 3
+		store.gameflow.fullTurnOrder = [0, 1]
+		store.gameflow.turnOrder = [0, 1]
+		store.availableMilestones = []
+		return store
+	}
+
+	// Brute-force a restaurant placement with road access to a target house
+	function tryPlaceRestaurantNear(store, playerIndex, centerIndex) {
+		const colour = store.players[playerIndex].colour
+		for (let dy = -4; dy <= 4; dy++) {
+			for (let dx = -8; dx <= 8; dx++) {
+				const index = centerIndex + dy * rf.ssW + dx
+				if (index < 0 || index >= store.mapData.coords.length) continue
+				for (let rotation = 0; rotation < 4; rotation++) {
+					mapMod.addElement(rf.TYPE_RESTAURANT, colour, index, false)
+					store.players[playerIndex].restaurants.push({ index, rotation, open: true })
+					const distances = model.giveRestaurantRangesForHouse(store.houseUnderTest)
+					if (distances[playerIndex] !== -99 && distances[playerIndex] !== undefined) return true
+					store.players[playerIndex].restaurants.pop()
+					mapMod.addElement(rf.TYPE_RESTAURANT, colour, index, false, true)
+				}
+			}
+		}
+		return false
+	}
+
+	function placeAndFeed(store) {
+		let placed = false
+		for (const h of rf.BOARD_HOUSES) {
+			const idx = mapMod.findIndexForHouse(h)
+			if (idx < 0) continue
+			store.houseUnderTest = h
+			placed = tryPlaceRestaurantNear(store, 0, idx)
+			if (placed) break
+		}
+		expect(placed).toBe(true)
+		store.players[0].resources = [rf.BURGER]
+		store.needs.push({ number: store.houseUnderTest, needs: [[rf.BURGER, -1]] })
+		return store.houseUnderTest
+	}
+
+	it("adds tonight's headline to the sale price", () => {
+		const store = dinnerFreshGame()
+		placeAndFeed(store)
+		store.mediaLine.headlines.push({ turn: store.gameflow.turn - 1, playerIndex: 0, value: 5 })
+		const moneyBefore = store.players[0].money
+		rules.doDinnerTime(false)
+		// 1 burger x (base 10 + headline +5); no gardens, parks or milestones
+		expect(store.players[0].money - moneyBefore).toBe(15)
+	})
+
+	it("without headlines the price stays at the menu price", () => {
+		const store = dinnerFreshGame()
+		placeAndFeed(store)
+		const moneyBefore = store.players[0].money
+		rules.doDinnerTime(false)
+		expect(store.players[0].money - moneyBefore).toBe(10)
+	})
+
+	it("negative settlement prices are legal (money flows back)", () => {
+		const store = dinnerFreshGame()
+		placeAndFeed(store)
+		store.players[0].employees.push(rf.PRICING_MANAGER, rf.PRICING_MANAGER) // menu 10 - 2 = 8
+		store.mediaLine.headlines.push({ turn: store.gameflow.turn - 1, playerIndex: 1, value: -5 })
+		store.mediaLine.headlines.push({ turn: store.gameflow.turn - 1, playerIndex: 1, value: -5 }) // city total -10
+		const moneyBefore = store.players[0].money
+		rules.doDinnerTime(false)
+		expect(store.players[0].money - moneyBefore).toBe(-2)
+	})
+})

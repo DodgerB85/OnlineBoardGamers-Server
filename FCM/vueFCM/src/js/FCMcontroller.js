@@ -1512,6 +1512,28 @@ export function tvSelectionComplete() {
 	return store.context.tvHouses.length === needed && needed > 0
 }
 
+// MEDIA LINE - headlines.
+// Each on-duty TV Announcer may publish one +$5 or -$5 headline per working
+// day. Publishing is free and takes effect at the next turn's dinner.
+export function mediaLineHeadlinesLeft(playerIndex) {
+	const store = useModelStore()
+	const player = store.players[playerIndex]
+	const onDuty = player.employees.filter((e) => e === rf.TV_ANNOUNCER).length + player.marketers.filter((m) => m.marketer === rf.TV_ANNOUNCER).length
+	const published = store.mediaLine.headlines.filter((h) => h.turn === store.gameflow.turn && h.playerIndex === playerIndex).length
+	return onDuty - published
+}
+
+export function publishHeadline(value) {
+	const store = useModelStore()
+	if (!store.startingOptions.mediaLine) return
+	if (value !== 5 && value !== -5) return
+	const playerIndex = currentPlayerIndex()
+	if (mediaLineHeadlinesLeft(playerIndex) <= 0) return
+
+	store.mediaLine.headlines.push({ turn: store.gameflow.turn, playerIndex: playerIndex, value: value })
+	model.addHistory(rf.HIST_PUBLISH_HEADLINE, [value], playerIndex, 0)
+}
+
 // --- HAWKER TRUCK ROUTE SELECTION ---
 
 // The hawker route reuses the cart-operator path-drawing flow with range 2.

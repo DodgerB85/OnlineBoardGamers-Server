@@ -160,6 +160,12 @@ export const useModelStore = defineStore("store", () => {
 		order: [], // playerIds in claim order (= turn order at bailout time)
 	})
 
+	// Media Line mod - published headlines. Each headline is written during a
+	// working day and modifies every sale price at the NEXT turn's dinner only.
+	const mediaLine = reactive({
+		headlines: [], // { turn, playerIndex, value } with value +5 / -5
+	})
+
 	/*************************************** UNSAVED - TEMP VARS -- these do not need to be stored or saved */
 
 	const context = reactive({
@@ -479,6 +485,7 @@ export const useModelStore = defineStore("store", () => {
 		stadium,
 		laborMarket,
 		bailout,
+		mediaLine,
 		reserveCards,
 		bank,
 		bankBroken,
