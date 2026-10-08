@@ -62,4 +62,5 @@ urlpatterns = [
     path("data/<int:dataType>/", views.FCMdata, name="FCMdata"),
     path("sendChatMessage/", views.sendChatMessage, name="sendChatMessage"),
     path("castVote/", views.castVote, name="castVoteCNS"),
+    path("nudgeTourneyAdmins/", views.nudgeTourneyAdmins, name="nudgeTourneyAdmins"),
 ]

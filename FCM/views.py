@@ -12,6 +12,8 @@ from django.db import transaction
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.utils.translation import gettext  # , get_language
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 import Lobby.sharedFunctions.constants as rf
 from Lobby.gameViewHelpers import (
@@ -2060,3 +2062,27 @@ def load_rewind_data(currentGame):
     except Exception as e:
         print(f"CRITICAL ERROR loading rewind data: {e}")
         return []
+
+
+@csrf_exempt
+@login_required()
+@require_POST
+def nudgeTourneyAdmins(request):
+    # Webhook lives in .env; the legacy show2 bundle posts {content} with no CSRF header.
+    origin = request.headers.get("Origin") or request.headers.get("Referer", "")
+    if origin and request.get_host().lower() not in origin.lower():
+        return JsonResponse({"error": "Bad origin"}, status=403)
+
+    try:
+        jsonData = json.loads(request.body.decode("utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    message = jsonData.get("content") if isinstance(jsonData, dict) else None
+    if not isinstance(message, str) or not message.strip() or len(message) > 2000:
+        return JsonResponse({"error": "Bad message"}, status=400)
+
+    if SN_sendAdminErrorMessage(message, webhook_key="WEBHOOK_FCM_TOURNAMENT_ADMIN") is False:
+        return JsonResponse({"status": "error"}, status=502)
+
+    return JsonResponse({"status": "success"})
