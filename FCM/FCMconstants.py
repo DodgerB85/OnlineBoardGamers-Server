@@ -69,6 +69,9 @@ SO_RANDOM_MODULES_NEW_MS = 202
 # Marker only: add Chinese expansion modules to the random pool at startGame.
 # Not shown as a starting-option icon.
 SO_RANDOM_MODULES_CHINESE = 203
+# Marker only: add fan expansion modules to the random pool at startGame.
+# Not shown as a starting-option icon.
+SO_RANDOM_MODULES_FAN = 204
 SO_DRAFT_MODULES = 205
 SO_MIN_RANDOM_MODULES = 210
 SO_MAX_RANDOM_MODULES = 211
