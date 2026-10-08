@@ -1,13 +1,17 @@
-<script setup lang="ts">
+<script setup>
 /**
  * Card artwork, ported from the boardgamefiesta GWT card.component
  * (GPL-3.0, Tom Wetjens). Cattle cards 80x115, objective cards use the same
  * frame; SIMMENTAL art lives under row2/cards.
  */
 import { computed } from "vue"
-import { isCattleCard, type Card } from "../game"
+import { isCattleCard } from "../js/ROWcore"
 
-const props = withDefaults(defineProps<{ card: Card; points?: boolean; small?: boolean }>(), { points: true, small: false })
+const props = defineProps({
+	card: { type: Object, required: true },
+	points: { type: Boolean, default: true },
+	small: { type: Boolean, default: false },
+})
 
 const img = computed(() => {
 	const card = props.card

@@ -1,15 +1,17 @@
-<script setup lang="ts">
+<script setup>
 /**
  * Objective card market, ported from the boardgamefiesta GWT
  * objective-cards.component (GPL-3.0, Tom Wetjens).
  */
 import { computed } from "vue"
-import { ActionType } from "../game"
-import { useGameStore } from "../stores/game"
+import * as rf from "../js/ROWreference"
+import * as controller from "../js/ROWcontroller"
+import * as view from "../js/ROWview"
+import { useModelStore } from "../stores/ROWstore.js"
 import CardView from "./CardView.vue"
-import { cardBackGreyImage } from "../view/assets"
 
-const store = useGameStore()
+const { ActionType } = rf
+const store = useModelStore()
 
 const game = computed(() => {
 	store.version
@@ -25,15 +27,15 @@ const available = computed(() => (game.value ? g().getObjectiveCards().available
 const drawStackSize = computed(() => (game.value ? g().getObjectiveCards().drawStack.length : 0))
 const canTake = computed(() => store.actions.includes(ActionType.TAKE_OBJECTIVE_CARD))
 
-function take(id: string) {
+function take(id) {
 	if (!canTake.value) return
 	const card = g().getObjectiveCards().available.find((c) => c.id === id)
-	if (card) store.perform({ type: ActionType.TAKE_OBJECTIVE_CARD, objectiveCard: card })
+	if (card) controller.perform({ type: ActionType.TAKE_OBJECTIVE_CARD, objectiveCard: card })
 }
 
 function takeFromDrawStack() {
 	if (!canTake.value) return
-	store.perform({ type: ActionType.TAKE_OBJECTIVE_CARD })
+	controller.perform({ type: ActionType.TAKE_OBJECTIVE_CARD })
 }
 </script>
 
@@ -49,7 +51,7 @@ function takeFromDrawStack() {
 			@click="take(card.id)"
 		/>
 		<div class="drawStack" :class="{ selectable: canTake }" @click="takeFromDrawStack">
-			<img :src="cardBackGreyImage()" alt="" draggable="false" />
+			<img :src="view.cardBackGreyImage()" alt="" draggable="false" />
 			<span class="count">{{ drawStackSize }}</span>
 		</div>
 	</div>

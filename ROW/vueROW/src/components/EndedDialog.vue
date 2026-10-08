@@ -1,12 +1,12 @@
-<script setup lang="ts">
+<script setup>
 /**
  * End-of-game results: standings, totals, ties and a per-category scoring
  * breakdown (ported from the reference ended-dialog).
  */
 import { computed } from "vue"
-import { useGameStore } from "../stores/game"
+import { useModelStore } from "../stores/ROWstore.js"
 
-const store = useGameStore()
+const store = useModelStore()
 
 const game = computed(() => {
 	store.version
@@ -16,18 +16,18 @@ const ended = computed(() => game.value?.isEnded() ?? false)
 const ranking = computed(() => (game.value && ended.value ? game.value.ranking() : []))
 const winners = computed(() => {
 	const r = ranking.value
-	if (r.length === 0) return new Set<string>()
-	const top = game.value!.getScore(r[0])
-	return new Set(r.filter((n) => game.value!.getScore(n) === top))
+	if (r.length === 0) return new Set()
+	const top = game.value.getScore(r[0])
+	return new Set(r.filter((n) => game.value.getScore(n) === top))
 })
 
-function score(name: string): number {
+function score(name) {
 	return game.value?.getScore(name) ?? 0
 }
-function details(name: string): [string, number][] {
+function details(name) {
 	const d = game.value?.scoreDetails(name) ?? {}
 	return Object.entries(d)
-		.map(([k, v]) => [k, v ?? 0] as [string, number])
+		.map(([k, v]) => [k, v ?? 0])
 		.filter(([, v]) => v !== 0)
 }
 </script>

@@ -1,26 +1,29 @@
-<script setup lang="ts">
+<script setup>
 import { computed } from "vue"
 import { useI18n } from "vue-i18n"
-import { getImage } from "../view/assets"
-import { useGameStore } from "../stores/game"
-import { usePersonalStore } from "../stores/personal"
+import * as rf from "../js/ROWreference"
+import * as controller from "../js/ROWcontroller"
+import * as replay from "../js/ROWreplay"
+import * as view from "../js/ROWview"
+import { useModelStore } from "../stores/ROWstore.js"
+import { usePersonalStore } from "../stores/ROWpersonal.js"
 
 const { t } = useI18n()
-const store = useGameStore()
+const store = useModelStore()
 const personal = usePersonalStore()
 
-function toggle(name: "showChat" | "showNotes" | "showBug" | "showHistory" | "showInfo") {
+function toggle(name) {
 	store.viewSettings[name] = !store.viewSettings[name]
 }
 
 function loadRewind() {
 	store.gameMessages.rewindErrorText = ""
-	void store.rewind()
+	void controller.rewind()
 }
 
 function toggleReplay() {
-	if (store.viewSettings.showReplay) store.exitReplay()
-	else store.enterReplay()
+	if (store.viewSettings.showReplay) replay.exitReplay()
+	else replay.enterReplay()
 }
 
 function toggleChat() {
@@ -28,14 +31,14 @@ function toggleChat() {
 	store.viewSettings.showChat = !store.viewSettings.showChat
 }
 
-function zoom(dir: number) {
-	personal.zoom = Math.min(28, Math.max(8, personal.zoom + dir))
-	store.persistZoom(personal.zoom)
+function zoom(dir) {
+	personal.zoom = Math.min(rf.MAX_ZOOM, Math.max(rf.MIN_ZOOM, personal.zoom + dir))
+	controller.persistZoom(personal.zoom)
 }
 
 function resignGame() {
 	if (!window.confirm("Are you sure you want to resign? You will not be able to continue.")) return
-	void store.resignGame()
+	void controller.resignGame()
 }
 
 function nextGame() {
@@ -50,10 +53,10 @@ const kickoutText = computed(() => {
 	return `${m} : ${sec}`
 })
 
-const gameName = computed(() => String((window.initData as Record<string, unknown> | undefined)?.gameName ?? ""))
+const gameName = computed(() => String(window.initData?.gameName ?? ""))
 const players = computed(() => store.state?.players ?? [])
 
-function playerColor(color: string): string {
+function playerColor(color) {
 	return color ? color.toLowerCase() : "white"
 }
 </script>
@@ -62,43 +65,43 @@ function playerColor(color: string): string {
 	<div id="top">
 		<div id="menu">
 			<a href="/">
-				<span class="topMenuItem"><img :src="getImage('icon-house')" /><span>{{ t('topMenu.home') }}</span></span>
+				<span class="topMenuItem"><img :src="view.getImage('icon-house')" /><span>{{ t('topMenu.home') }}</span></span>
 			</a>
-			<span class="topMenuItem" @click="nextGame"><img :src="getImage('icon-nextGame')" /><span>{{ t('topMenu.next') }}</span></span>
+			<span class="topMenuItem" @click="nextGame"><img :src="view.getImage('icon-nextGame')" /><span>{{ t('topMenu.next') }}</span></span>
 			<div class="menuDivider"></div>
 			<a href="/ROW/help/" target="_blank">
-				<span class="topMenuItem"><img :src="getImage('icon-rulebook')" /><span>{{ t('topMenu.rules') }}</span></span>
+				<span class="topMenuItem"><img :src="view.getImage('icon-rulebook')" /><span>{{ t('topMenu.rules') }}</span></span>
 			</a>
 			<span :class="['topMenuItem', { selected: store.viewSettings.showInfo }]" @click="toggle('showInfo')">
-				<img :src="getImage('icon-info')" /><span>{{ t('topMenu.info') }}</span>
+				<img :src="view.getImage('icon-info')" /><span>{{ t('topMenu.info') }}</span>
 			</span>
 			<div class="menuDivider"></div>
 			<span v-if="personal.pov >= 0" :class="['topMenuItem', { selected: store.viewSettings.performingRewind }]" @click="loadRewind">
-				<img :src="getImage('icon-rewind')" /><span>{{ t('topMenu.rewind') }}</span>
+				<img :src="view.getImage('icon-rewind')" /><span>{{ t('topMenu.rewind') }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
 			<br />
 
 			<span :class="['topMenuItem', { selected: store.viewSettings.showChat }]" @click="toggleChat">
-				<img :src="getImage('icon-chat')" /><span>{{ t('topMenu.chat') }}</span>
+				<img :src="view.getImage('icon-chat')" /><span>{{ t('topMenu.chat') }}</span>
 				<span v-if="personal.chatNotification" class="notifDot"></span>
 			</span>
 			<span v-if="personal.pov >= 0" :class="['topMenuItem', { selected: store.viewSettings.showBug }]" @click="toggle('showBug')">
-				<img :src="getImage('icon-stop')" /><span>{{ t('topMenu.bug') }}</span>
+				<img :src="view.getImage('icon-stop')" /><span>{{ t('topMenu.bug') }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 			<div class="menuDivider"></div>
 			<span v-if="personal.pov >= 0" :class="['topMenuItem', { selected: store.viewSettings.showNotes }]" @click="toggle('showNotes')">
-				<img :src="getImage('icon-notebook')" /><span>{{ t('topMenu.notes') }}</span>
+				<img :src="view.getImage('icon-notebook')" /><span>{{ t('topMenu.notes') }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 			<span :class="['topMenuItem', { selected: store.viewSettings.showHistory }]" @click="toggle('showHistory')">
-				<img :src="getImage('icon-scroll')" /><span>{{ t('topMenu.history') }}</span>
+				<img :src="view.getImage('icon-scroll')" /><span>{{ t('topMenu.history') }}</span>
 			</span>
 			<div class="menuDivider"></div>
 			<span :class="['topMenuItem', { selected: store.viewSettings.showReplay }]" @click="toggleReplay">
-				<img :src="getImage('icon-replay')" /><span>{{ t('topMenu.replay') }}</span>
+				<img :src="view.getImage('icon-replay')" /><span>{{ t('topMenu.replay') }}</span>
 			</span>
 		</div>
 

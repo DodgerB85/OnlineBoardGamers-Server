@@ -1,16 +1,19 @@
-<script setup lang="ts">
+<script setup>
 /**
  * Cattle market, ported from the boardgamefiesta GWT cattle-market.component
  * (GPL-3.0, Tom Wetjens): market cards as artwork, click-to-select and confirm
  * a buy (single or pair), plus a draw-stack placeholder.
  */
 import { computed, ref } from "vue"
-import { ActionType, CattleCard, isCattleCard } from "../game"
-import { useGameStore } from "../stores/game"
-import { cardBackImage } from "../view/assets"
+import * as rf from "../js/ROWreference"
+import * as controller from "../js/ROWcontroller"
+import * as view from "../js/ROWview"
+import { isCattleCard } from "../js/ROWcore"
+import { useModelStore } from "../stores/ROWstore.js"
 import CardView from "./CardView.vue"
 
-const store = useGameStore()
+const { ActionType } = rf
+const store = useModelStore()
 
 const game = computed(() => {
 	store.version
@@ -22,7 +25,7 @@ function g() {
 	return v
 }
 
-const market = computed<CattleCard[]>(() => (game.value ? g().getCattleMarket().market : []))
+const market = computed(() => (game.value ? g().getCattleMarket().market : []))
 const drawStackSize = computed(() => (game.value ? g().getCattleMarket().drawStack.length : 0))
 const buying = computed(() => store.actions.includes(ActionType.BUY_CATTLE))
 const takingThree = computed(() => store.actions.includes(ActionType.TAKE_BREEDING_VALUE_3_CATTLE_CARD))
@@ -33,25 +36,25 @@ const possibleBuys = computed(() => {
 	return g().getCattleMarket().possibleBuys(ps.cowboysRemaining(), ps.balance)
 })
 
-const selected = ref<CattleCard[]>([])
+const selected = ref([])
 
-function canBuySingle(breedingValue: number): boolean {
+function canBuySingle(breedingValue) {
 	return possibleBuys.value.some((o) => o.breedingValue === breedingValue && !o.pair)
 }
-function canBuyPair(breedingValue: number): boolean {
+function canBuyPair(breedingValue) {
 	return possibleBuys.value.some((o) => o.breedingValue === breedingValue && o.pair)
 }
-function canSelectCard(card: CattleCard): boolean {
+function canSelectCard(card) {
 	if (takingThree.value) return card.value === 3
 	return buying.value && canBuySingle(card.value)
 }
-function isSelected(card: CattleCard): boolean {
+function isSelected(card) {
 	return selected.value.includes(card)
 }
 
-function selectCard(card: CattleCard) {
+function selectCard(card) {
 	if (takingThree.value && card.value === 3) {
-		store.perform({ type: ActionType.TAKE_BREEDING_VALUE_3_CATTLE_CARD, card })
+		controller.perform({ type: ActionType.TAKE_BREEDING_VALUE_3_CATTLE_CARD, card })
 		return
 	}
 	if (!canSelectCard(card)) return
@@ -82,10 +85,10 @@ function confirm() {
 	if (!option) return
 	// Resolve the selected cards to actual market card objects.
 	const cards = selected.value.map((sel) => {
-		const m = g().getCattleMarket().market.find((mc) => isCattleCard(mc) && (mc as CattleCard).type === sel.type && (mc as CattleCard).value === sel.value)
-		return (m ?? sel) as never
+		const m = g().getCattleMarket().market.find((mc) => isCattleCard(mc) && mc.type === sel.type && mc.value === sel.value)
+		return m ?? sel
 	})
-	store.perform({ type: ActionType.BUY_CATTLE, cattleCards: cards, cowboys: option.cowboys, dollars: option.dollars })
+	controller.perform({ type: ActionType.BUY_CATTLE, cattleCards: cards, cowboys: option.cowboys, dollars: option.dollars })
 	selected.value = []
 }
 </script>
@@ -106,7 +109,7 @@ function confirm() {
 				@click="selectCard(card)"
 			/>
 			<div class="drawStack" :class="{ empty: drawStackSize === 0 }">
-				<img :src="cardBackImage()" alt="" draggable="false" />
+				<img :src="view.cardBackImage()" alt="" draggable="false" />
 				<span class="count">{{ drawStackSize }}</span>
 			</div>
 		</div>
