@@ -39,13 +39,15 @@ function showDebug() {
 		<TopMenuViews />
 		<ActionBar />
 		<div id="mainArea">
-			<TrailBoard />
+			<div id="leftColumn">
+				<TrailBoard />
+				<CattleMarket />
+				<ObjectivesMarket />
+			</div>
 			<div id="playerBoards">
 				<PlayerBoard v-for="p in boardPlayers" :key="p" :playerName="p" />
 			</div>
 		</div>
-		<CattleMarket />
-		<ObjectivesMarket />
 		<DebugArea v-if="showDebug()" />
 	</div>
 	<FooterBar />
@@ -55,5 +57,6 @@ function showDebug() {
 body { margin: 0 !important; background-color: #d4eafd; font-family: Arial, sans-serif; font-size: 15px; }
 #wholeMiddleArea { min-height: 500px; text-align: center; }
 #mainArea { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 4px; }
-#playerBoards { display: flex; flex-direction: column; align-items: center; }
+#leftColumn { display: flex; flex-direction: column; align-items: center; flex: 0 1 780px; min-width: 0; }
+#playerBoards { display: flex; flex-direction: column; align-items: center; flex: 1 1 360px; min-width: 300px; max-width: 46%; }
 </style>

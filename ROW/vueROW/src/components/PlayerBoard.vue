@@ -265,7 +265,7 @@ function selectCard(card: unknown) {
 </template>
 
 <style scoped>
-#playerBoard { display: inline-block; margin: 8px; }
+#playerBoard { display: block; width: 100%; margin: 8px 0; }
 .header { margin-bottom: 4px; font-size: 13px; display: flex; gap: 14px; justify-content: center; }
 .header .balance { font-weight: bold; color: #0a6c0a; }
 .hand { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-bottom: 6px; min-height: 58px; }
@@ -276,8 +276,7 @@ function selectCard(card: unknown) {
 .handCard.dimmed { opacity: 0.45; }
 
 .player-board {
-	width: 800px;
-	max-width: 100%;
+	width: 100%;
 	height: auto;
 	display: block;
 	background-color: #7b706f;
