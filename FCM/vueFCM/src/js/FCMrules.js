@@ -915,6 +915,27 @@ export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, 
 			})
 	}
 
+	// --- CASE A2: PHONE TOKENS (Media Line mod) - 2x1 against buildings in the
+	// restaurant's immediate surroundings; roads are irrelevant (radio waves),
+	// so this bypasses the road-adjacency machinery of CASE B ---
+	if (campaignData.type === rf.PHONE) {
+		const player = controller.currentPlayerObj()
+		const zone = new Set()
+		for (const s of player.restaurants) {
+			map.areaAroundFootprint(map.giveAllSpaceForAToken(s.index, 2, 2), 1).forEach((i) => zone.add(i))
+		}
+
+		const possibilities = []
+		for (const anchor of zone) {
+			const cells = map.giveAllSpaceForAToken(anchor, w, h)
+			const fits = cells.every(
+				(c) => zone.has(c) && store.mapData.coords[c] === rf.EMPTY_SPACE && map.giveNeighbours(c).some((n) => map.isBuildingValue(store.mapData.coords[n])),
+			)
+			if (fits) possibilities.push(anchor)
+		}
+		return possibilities
+	}
+
 	// --- CASE B: STANDARD CAMPAIGNS (BILLBOARD/MAIL) ---
 	let possibilities = map.locationFor(w, h, true)
 	const range = giveMaxRangeForMarketer(marketer)
@@ -2672,7 +2693,10 @@ export function housesAffectedByMarketingCampaign(campaign) {
 
 	// 1. Determine the affected area based on Campaign Type
 	switch (campaignData.type) {
-		case rf.BILLBOARD: {
+		case rf.BILLBOARD:
+		case rf.PHONE: {
+			// Media Line phone token: same rule as a billboard - every house
+			// touching the token footprint catches the call (typically 2).
 			let w = campaign.rotated ? campaignData.height : campaignData.width
 			let h = campaign.rotated ? campaignData.width : campaignData.height
 			// Get neighbors of the billboard's footprint
@@ -2724,6 +2748,12 @@ export function housesAffectedByMarketingCampaign(campaign) {
 
 		case rf.HAWKER_TRUCK:
 			model.getHousesAffectedByHawkerTruck(campaign.number).forEach((h) => affectedHouses.add(h))
+			break
+
+		case rf.TV_CHANNEL:
+			// Media Line mod - B3 affects exactly the houses the player picked
+			// inside the restaurant's diamond range (stored at placement time).
+			;(campaign.houses || []).forEach((h) => affectedHouses.add(h))
 			break
 	}
 

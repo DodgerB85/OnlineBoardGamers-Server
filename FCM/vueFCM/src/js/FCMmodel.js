@@ -683,6 +683,29 @@ export function removeMarketingCampaign(number) {
 	map.addElement(rf.TYPE_CAMPAIGN, number, campaign.index, campaign.rotated, true)
 }
 
+// Media Line mod - B3 diamond range: houses whose footprint comes within
+// Manhattan distance `dist` of any of the player's restaurants (waves ignore
+// roads). The stadium is never affected by marketing.
+export function giveHousesInWaveRange(playerIndex, dist = 2) {
+	const store = useModelStore()
+	const player = store.players[playerIndex]
+	const footprints = []
+	for (const r of player.restaurants) {
+		footprints.push(...map.giveAllSpaceForAToken(r.index, 2, 2))
+	}
+
+	const houses = new Set()
+	for (let i = 0; i < store.mapData.coords.length; i++) {
+		const v = store.mapData.coords[i]
+		if (v > rf.HOUSE && v < rf.HOUSE + 29) {
+			const house = Number.isInteger(v) ? v - rf.HOUSE : Math.round((v - rf.HOUSE + Number.EPSILON) * 100) / 100
+			if (house === rf.STADIUM) continue
+			if (footprints.some((f) => map.manhattanDistance(i, f) <= dist)) houses.add(house)
+		}
+	}
+	return Array.from(houses).sort((a, b) => a - b)
+}
+
 export function addRestaurant_core(playerIndex, index, rotation, open) {
 	const store = useModelStore()
 	plyr.addRestaurantToPlayer(playerIndex, index, rotation, open)

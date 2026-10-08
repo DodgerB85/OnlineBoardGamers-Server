@@ -1631,6 +1631,43 @@ export function giveAllSpaceForAToken(index, width, height) {
 	return res
 }
 
+// Media Line mod - radio-wave geometry helpers (waves ignore roads).
+
+// Manhattan distance between two board spaces.
+export function manhattanDistance(indexA, indexB) {
+	const [ax, ay] = giveCoord(indexA)
+	const [bx, by] = giveCoord(indexB)
+	return Math.abs(ax - bx) + Math.abs(ay - by)
+}
+
+// Spaces within Chebyshev distance `dist` of any footprint space, clipped to
+// the board. B2 phone tokens must sit inside the dist=1 surroundings of a
+// restaurant block (the relaxed "nine-grid" cross of the design doc).
+export function areaAroundFootprint(spaces, dist) {
+	const res = new Set()
+	for (const space of spaces) {
+		const [x, y] = giveCoord(space)
+		for (let dx = -dist; dx <= dist; dx++) {
+			for (let dy = -dist; dy <= dist; dy++) {
+				const nx = x + dx
+				const ny = y + dy
+				if (nx < 0 || ny < 0 || nx >= rf.ssW || ny >= rf.ssH) continue
+				res.add(giveIndex(nx, ny))
+			}
+		}
+	}
+	return Array.from(res)
+}
+
+// Media Line mod - true for house or restaurant spaces (phone lines must
+// attach to buildings). Gardens are not buildings themselves. NB campaign
+// numbers 10-15 collide with restaurant values (see RESTAURANT_OPEN note) -
+// accepted edge case: a billboard neighbour occasionally counts as a wall.
+export function isBuildingValue(value) {
+	if (value > rf.HOUSE && value < rf.HOUSE + 29) return true
+	return value >= rf.RESTAURANT_OPEN && value <= rf.RESTAURANT_OPEN + 5
+}
+
 export function findIndexForHouse(number) {
 	const store = useModelStore()
 	return store.mapData.coords.indexOf(number + rf.HOUSE)
