@@ -1444,7 +1444,7 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	store.campaigns.splice(0)
 	Object.assign(store.campaigns, inputModel[7])
 	for (let i = 0; i < store.campaigns.length; i++) {
-		if (store.campaigns[i].number >= 1 && store.campaigns[i].number <= 16) map.addElement(rf.TYPE_CAMPAIGN, store.campaigns[i].number, store.campaigns[i].index, store.campaigns[i].rotated)
+		if ((store.campaigns[i].number >= 1 && store.campaigns[i].number <= 16) || (store.campaigns[i].number >= 30 && store.campaigns[i].number <= 35)) map.addElement(rf.TYPE_CAMPAIGN, store.campaigns[i].number, store.campaigns[i].index, store.campaigns[i].rotated)
 	}
 
 	// 8 - gardens

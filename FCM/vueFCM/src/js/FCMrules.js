@@ -321,6 +321,11 @@ export function allowedCampaigns(marketer) {
 			return [rf.GIANT_BILLBOARD]
 		case rf.HAWKER_MARKETEER:
 			return [rf.HAWKER_TRUCK]
+		// Media Line mod
+		case rf.TELEMARKETER:
+			return [rf.PHONE]
+		case rf.TV_ANNOUNCER:
+			return [rf.TV_CHANNEL]
 		default:
 			return []
 	}
@@ -340,6 +345,11 @@ export function giveMaxDurationForMarketer(marketer) {
 			return 3
 		case rf.HAWKER_MARKETEER:
 			return 3
+		// Media Line mod
+		case rf.TELEMARKETER:
+			return 3
+		case rf.TV_ANNOUNCER:
+			return 4
 		default:
 			return 0
 	}
@@ -3106,6 +3116,13 @@ export function giveMarketingMilestones(playerIndex, marketer) {
 		case rf.CAMPAIGN_MANAGER:
 			plyr.awardMilestone(playerIndex, rf.FIRST_MARKETEER_USED)
 			plyr.awardMilestone(playerIndex, rf.FIRST_CAMPAIGN_MANAGER_USED)
+			break
+		// Media Line mod
+		case rf.TELEMARKETER:
+			plyr.awardMilestone(playerIndex, rf.FIRST_TELEMARKETER_USED)
+			break
+		case rf.TV_ANNOUNCER:
+			plyr.awardMilestone(playerIndex, rf.FIRST_TV_ANNOUNCER_USED)
 			break
 		/*case BRAND_MANAGER:
                 model.giveMilestone(FIRST_MARKETEER_USED, player);

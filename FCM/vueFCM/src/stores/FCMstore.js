@@ -239,6 +239,9 @@ export const useModelStore = defineStore("store", () => {
 		refusePlaneDouble: false,
 		firstCampaignDuration: 1,
 		firstCampaignCampaign: 11,
+		// Media Line mod
+		tvHouses: [], // House numbers picked for the TV channel campaign
+		mediaLineSecondCall: false, // Phone token: second placement within the same action
 		selectedBuilding: -1,
 		house: 1,
 		houseIndex: -1, // Board index of the house being given a garden

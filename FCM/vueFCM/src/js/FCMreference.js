@@ -702,7 +702,7 @@ export const MARKETING_CAMPAIGNS = [
 ]
 
 export const SMALL_CAMPAIGNS = [1, 2, 3, 9, 10, 15, 16]
-export const ROTATABLE_CAMPAIGNS = [4, 5, 6, 11, 13, 14]
+export const ROTATABLE_CAMPAIGNS = [4, 5, 6, 11, 13, 14, 30, 31, 32, 33, 34, 35]
 
 //rf.PARKS = [
 //	{shape: "I", width: 4, height: 1 }

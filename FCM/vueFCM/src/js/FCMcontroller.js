@@ -1107,6 +1107,9 @@ export function campaignDurationInfinite() {
 	const playerIndex = currentPlayerIndex()
 	const campaignData = rf.MARKETING_CAMPAIGNS[store.context.campaign]
 
+	// Media Line mod: phone tokens and TV channels are never infinite
+	if (campaignData.type === rf.PHONE || campaignData.type === rf.TV_CHANNEL) return false
+
 	if (store.context.restaurantMilestone) return true
 	if (store.availableMilestones.indexOf(rf.FIRST_BILLBOARD) > -1 && campaignData.type === rf.BILLBOARD) return true
 	if (plyr.hasMilestone(playerIndex, rf.FIRST_BILLBOARD)) return true
@@ -1122,8 +1125,20 @@ export function setCampaignPlacementHighlights() {
 
 	if (store.context.marketer === -1 || store.context.campaign === -1) return
 
-	// Gourmet guides / giant billboards / hawker trucks are placed via button, not map click
-	if (store.context.campaign > 16) return
+	const campaignData = rf.MARKETING_CAMPAIGNS[store.context.campaign]
+
+	// Media Line mod: TV channels - every space of the candidate houses in the
+	// diamond range is clickable (yellow); already-picked houses show in the
+	// house-highlight layer so the selection progress is visible
+	if (campaignData.type === rf.TV_CHANNEL) {
+		store.highlights.indexesToHighlightYellow = model.giveSpacesOfHouses(model.giveHousesInWaveRange(currentPlayerIndex(), 2))
+		store.highlights.indexesToHighlightHouses = model.giveSpacesOfHouses(store.context.tvHouses)
+		return
+	}
+
+	// Gourmet guides / giant billboards / hawker trucks are placed via button, not map click.
+	// Phone tokens (Media Line mod) are placed by map click despite their high numbers.
+	if (store.context.campaign > 16 && campaignData.type !== rf.PHONE) return
 
 	store.highlights.indexesToHighlightYellow = rules.givePossiblePositionsForMarketingCampaign(store.context.marketer, store.context.campaign, store.context.rotated)
 }
@@ -1150,6 +1165,8 @@ export function resetMarketingSelection() {
 	store.context.from = -1
 	store.context.range = 0
 	store.context.temporaryMarketer = false
+	store.context.mediaLineSecondCall = false
+	store.context.tvHouses.splice(0)
 }
 
 export function selectMarketer(marketer, nightShift, temporary = false) {
@@ -1178,6 +1195,11 @@ export function selectMarketer(marketer, nightShift, temporary = false) {
 	if (campaigns.includes(21)) campaigns = [21]
 	if (campaigns.includes(22)) campaigns = [22]
 	if (campaigns.includes(23)) campaigns = [23]
+
+	// Media Line mod: TV channels / phone tokens are identical - only offer the first
+	if (campaigns.some((c) => rf.MARKETING_CAMPAIGNS[c].type === rf.TV_CHANNEL || rf.MARKETING_CAMPAIGNS[c].type === rf.PHONE)) {
+		campaigns = [campaigns.find((c) => rf.MARKETING_CAMPAIGNS[c].type === rf.TV_CHANNEL || rf.MARKETING_CAMPAIGNS[c].type === rf.PHONE)]
+	}
 
 	store.context.campaigns = campaigns
 
@@ -1325,6 +1347,8 @@ export function placeMarketingCampaign(index) {
 	const playerIndex = currentPlayerIndex()
 	const playerObj = currentPlayerObj()
 	let scmChain = false
+	let mlChain = false
+	const isTV = rf.MARKETING_CAMPAIGNS[store.context.campaign].type === rf.TV_CHANNEL
 
 	// If it's an airplane campaign, return the index to the original position
 	if (rf.MARKETING_CAMPAIGNS[store.context.campaign].type === rf.AIRPLANE) {
@@ -1376,6 +1400,9 @@ export function placeMarketingCampaign(index) {
 	else {
 		if (store.context.secondCampaignManager) {
 			plyr.addCampaignToMarketer(playerIndex, store.context.marketer, store.context.campaign)
+		} else if (store.context.mediaLineSecondCall) {
+			// Media Line mod: the second phone token hangs off the same telemarketer
+			plyr.addCampaignToMarketer(playerIndex, store.context.marketer, store.context.campaign)
 		} else if (store.context.temporaryMarketer) {
 			store.laborMarket.temporaryCampaignOwners[store.context.campaign] = playerIndex
 			rules.temporaryWorkerUsesAction(playerIndex, rf.MARKETING_TRAINEE)
@@ -1395,9 +1422,12 @@ export function placeMarketingCampaign(index) {
 
 		store.context.justMarketed.push(store.context.campaign)
 		if (store.context.campaign >= 17 && store.context.campaign <= 27) index = -1
+		// Media Line mod: TV channels have no board token
+		if (isTV) index = -1
 
 		const histObj = [store.context.campaign]
 		if (store.context.campaign >= 25 && store.context.campaign <= 27) histObj.push([...funcs.exportIndexes(store.context.path)])
+		else if (isTV) histObj.push([...store.context.tvHouses])
 		else histObj.push(funcs.exportIndex(index))
 		if (store.context.secondGood > -1) histObj.push([store.context.secondGood, store.context.good])
 		else histObj.push(store.context.good)
@@ -1407,7 +1437,7 @@ export function placeMarketingCampaign(index) {
 
 		model.addHistory(rf.HIST_START_MARKETING_CAMPAIGN, [...histObj], playerIndex, 0)
 
-		model.addMarketingCampaign(store.context.campaign, index, store.context.rotated, store.context.good, store.context.duration)
+		model.addMarketingCampaign(store.context.campaign, index, store.context.rotated, store.context.good, store.context.duration, isTV ? [...store.context.tvHouses] : undefined)
 		rules.giveMarketingMilestones(playerIndex, store.context.marketer)
 
 		// SECOND CAMPAIGN MANAGER MILESTONE - add another campaign of the same type
@@ -1424,6 +1454,19 @@ export function placeMarketingCampaign(index) {
 			awardCampaignTypeAndGoodMilestones(playerIndex)
 			playNightShiftCampaign()
 			return
+		}
+		// MEDIA LINE - phone tokens: a telemarketer places up to two identical
+		// tokens in one action; the second keeps the first token's good and duration
+		else if (rf.MARKETING_CAMPAIGNS[store.context.campaign].type === rf.PHONE && !store.context.mediaLineSecondCall) {
+			const remaining = store.availableMarketingCampaigns.filter((c) => rf.MARKETING_CAMPAIGNS[c].type === rf.PHONE)
+			if (remaining.length > 0) {
+				mlChain = true
+				store.context.mediaLineSecondCall = true
+				store.context.campaign = remaining[0]
+				store.context.campaigns = [remaining[0]]
+				store.context.rotated = false
+				setCampaignPlacementHighlights()
+			}
 		} else {
 			store.context.secondCampaignManager = false
 		}
@@ -1441,8 +1484,32 @@ export function placeMarketingCampaign(index) {
 		}
 	}
 
-	// Return to the marketer choice screen unless the Second Campaign Manager chain took over
-	if (!scmChain) resetMarketingSelection()
+	// Return to the marketer choice screen unless the Second Campaign Manager or
+	// Media Line phone chain took over
+	if (!scmChain && !mlChain) resetMarketingSelection()
+}
+
+// MEDIA LINE - toggle a candidate house for the TV channel campaign
+export function toggleTVHouseSelection(index) {
+	const store = useModelStore()
+	const v = store.mapData.coords[index]
+	if (!(v > rf.HOUSE && v < rf.HOUSE + 29)) return
+	const house = Number.isInteger(v) ? v - rf.HOUSE : Math.round((v - rf.HOUSE + Number.EPSILON) * 100) / 100
+	if (!model.giveHousesInWaveRange(currentPlayerIndex(), 2).includes(house)) return
+
+	const pos = store.context.tvHouses.indexOf(house)
+	if (pos > -1) store.context.tvHouses.splice(pos, 1)
+	else if (store.context.tvHouses.length < 5) store.context.tvHouses.push(house)
+
+	// Picked houses show in the house-highlight layer so the selection progress is visible
+	store.highlights.indexesToHighlightHouses = model.giveSpacesOfHouses(store.context.tvHouses)
+}
+
+// Media Line - TV channel: 5 houses must be picked (or every candidate when fewer)
+export function tvSelectionComplete() {
+	const store = useModelStore()
+	const needed = Math.min(5, model.giveHousesInWaveRange(currentPlayerIndex(), 2).length)
+	return store.context.tvHouses.length === needed && needed > 0
 }
 
 // --- HAWKER TRUCK ROUTE SELECTION ---

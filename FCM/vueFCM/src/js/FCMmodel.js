@@ -576,7 +576,7 @@ export function findPlayerForCampaign(number) {
 	return -1
 }
 
-export function addMarketingCampaign(number, index, rotated, good, duration) {
+export function addMarketingCampaign(number, index, rotated, good, duration, houses) {
 	//}, nightShift) {
 	const store = useModelStore()
 	store.campaigns.push({
@@ -585,11 +585,14 @@ export function addMarketingCampaign(number, index, rotated, good, duration) {
 		rotated: rotated,
 		good: good,
 		duration: duration,
+		houses: houses || [],
 		//nightShift: nightShift,
 	})
 	store.availableMarketingCampaigns.splice(store.availableMarketingCampaigns.indexOf(number), 1)
 
-	if (rf.MARKETING_CAMPAIGNS[number].type != rf.GOURMET_GUIDE && rf.MARKETING_CAMPAIGNS[number].type != rf.HAWKER_TRUCK) {
+	// Media Line mod: TV channels have no board token - the selected houses are
+	// marked with antennas instead
+	if (rf.MARKETING_CAMPAIGNS[number].type != rf.GOURMET_GUIDE && rf.MARKETING_CAMPAIGNS[number].type != rf.HAWKER_TRUCK && rf.MARKETING_CAMPAIGNS[number].type != rf.TV_CHANNEL) {
 		map.addElement(rf.TYPE_CAMPAIGN, number, index, rotated)
 	}
 
@@ -704,6 +707,21 @@ export function giveHousesInWaveRange(playerIndex, dist = 2) {
 		}
 	}
 	return Array.from(houses).sort((a, b) => a - b)
+}
+
+// Media Line mod: every board space occupied by one of the given house numbers
+export function giveSpacesOfHouses(houses) {
+	const store = useModelStore()
+	const wanted = new Set(houses)
+	const spaces = []
+	for (let i = 0; i < store.mapData.coords.length; i++) {
+		const v = store.mapData.coords[i]
+		if (v > rf.HOUSE && v < rf.HOUSE + 29) {
+			const house = Number.isInteger(v) ? v - rf.HOUSE : Math.round((v - rf.HOUSE + Number.EPSILON) * 100) / 100
+			if (wanted.has(house)) spaces.push(i)
+		}
+	}
+	return spaces
 }
 
 export function addRestaurant_core(playerIndex, index, rotation, open) {

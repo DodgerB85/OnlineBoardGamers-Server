@@ -72,6 +72,9 @@
     addHawkerTruck: "Add Hawker Truck",
     placeCampaign: "Place Campaign",
     clickToPlaceCampaign: "Click a highlighted square on the map to place your campaign",
+    phoneTokenSameAsFirst: "The second phone token automatically uses the same good and duration as the first",
+    tvChannelProgress: "Pick houses for your TV channel: {current}/5",
+    skipSecondPhoneToken: "Skip Second Phone Token",
 
     // Production
     producedLabel: "Produced:",

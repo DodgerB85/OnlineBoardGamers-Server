@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url"
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PAKO_FILE = path.join(__dirname, "..", "..", "..", "..", "Lobby", "static", "Lobby", "common", "pakoLib.js")
 
-let model, rf, rules, mapMod, useModelStore
+let model, rf, rules, mapMod, controller, useModelStore
 
 beforeAll(async () => {
 	if (!globalThis.pako) {
@@ -29,6 +29,7 @@ beforeAll(async () => {
 	rf = await import("./FCMreference.js")
 	rules = await import("./FCMrules.js")
 	mapMod = await import("./FCMmap.js")
+	controller = await import("./FCMcontroller.js")
 	;({ useModelStore } = await import("../stores/FCMstore.js"))
 })
 
@@ -288,5 +289,185 @@ describe("Media Line affected houses", () => {
 		store.mapData.coords = blankCoords()
 		const campaign = { number: 28, index: -1, rotated: false, good: 0, duration: 2, houses: [3, 7, 11, 12, 25] }
 		expect(rules.housesAffectedByMarketingCampaign(campaign).sort((a, b) => a - b)).toEqual([3, 7, 11, 12, 25])
+	})
+})
+
+describe("Media Line stage 3 - campaign allowances", () => {
+	it("maps employees to campaign types and durations", () => {
+		freshGame(2, ["50"])
+		expect(rules.allowedCampaigns(rf.TELEMARKETER)).toEqual([rf.PHONE])
+		expect(rules.allowedCampaigns(rf.TV_ANNOUNCER)).toEqual([rf.TV_CHANNEL])
+		expect(rules.giveMaxDurationForMarketer(rf.TELEMARKETER)).toBe(3)
+		expect(rules.giveMaxDurationForMarketer(rf.TV_ANNOUNCER)).toBe(4)
+	})
+
+	it("offers the matching pool slots", () => {
+		freshGame(2, ["50"])
+		expect(rules.possibleMarketingCampaigns([1, 2, 28, 29, 30, 31], rf.TELEMARKETER)).toEqual([30, 31])
+		expect(rules.possibleMarketingCampaigns([1, 2, 28, 29, 30, 31], rf.TV_ANNOUNCER)).toEqual([28, 29])
+	})
+
+	it("phone and TV campaigns are never infinite, even with the billboard milestone", () => {
+		const store = freshGame(2, ["50"])
+		store.players[0].milestones.push(rf.FIRST_BILLBOARD)
+		store.context.campaign = 30
+		expect(controller.campaignDurationInfinite()).toBe(false)
+		store.context.campaign = 28
+		expect(controller.campaignDurationInfinite()).toBe(false)
+	})
+
+	it("collects every space of a house footprint", () => {
+		const store = freshGame(2, ["50"])
+		const coords = blankCoords()
+		stamp(coords, 38, 40, 2, 3, rf.HOUSE + 7)
+		store.mapData.coords = coords
+		const expected = [
+			mapMod.giveIndex(38, 40),
+			mapMod.giveIndex(39, 40),
+			mapMod.giveIndex(38, 41),
+			mapMod.giveIndex(39, 41),
+			mapMod.giveIndex(38, 42),
+			mapMod.giveIndex(39, 42),
+		]
+		expect(model.giveSpacesOfHouses([7]).sort((a, b) => a - b)).toEqual(expected.sort((a, b) => a - b))
+	})
+})
+
+describe("Media Line stage 3 - phone token action", () => {
+	function phoneActionBoard() {
+		const store = freshGame(2, ["50"])
+		const coords = blankCoords()
+		stamp(coords, 40, 40, 2, 2, rf.RESTAURANT_OPEN)
+		store.mapData.coords = coords
+		store.players[0].restaurants = [{ index: mapMod.giveIndex(40, 40), rotation: 0, open: true }]
+		store.players[0].employees.push(rf.TELEMARKETER)
+		store.players[0].additionalCampaignArrayIndex = -1
+		store.players[0].additionalMarketedGood = []
+		return store
+	}
+
+	it("chains a second identical token and locks its good and duration", () => {
+		const store = phoneActionBoard()
+		controller.selectMarketer(rf.TELEMARKETER, false)
+		expect(store.context.campaigns).toEqual([30])
+		expect(store.context.campaign).toBe(30)
+		expect(store.context.duration).toBe(1)
+
+		controller.chooseGood(1)
+		controller.chooseDuration(2)
+		controller.placeMarketingCampaign(mapMod.giveIndex(40, 39))
+
+		// First token placed, second-token chain armed
+		expect(store.context.mediaLineSecondCall).toBe(true)
+		expect(store.context.campaign).toBe(31)
+		expect(store.context.duration).toBe(2)
+		expect(store.context.good).toBe(1)
+		expect(store.campaigns).toHaveLength(1)
+		expect(store.campaigns[0]).toMatchObject({ number: 30, good: 1, duration: 2, index: mapMod.giveIndex(40, 39) })
+		expect(store.availableMarketingCampaigns).not.toContain(30)
+		expect(store.players[0].employees).not.toContain(rf.TELEMARKETER)
+		expect(store.players[0].marketers[0]).toEqual({ campaign: 30, marketer: rf.TELEMARKETER, nightShift: false })
+		expect(store.players[0].milestones).toContain(rf.FIRST_TELEMARKETER_USED)
+
+		// Second token: same good and duration, hanging off the same telemarketer
+		controller.placeMarketingCampaign(mapMod.giveIndex(40, 42))
+
+		expect(store.context.mediaLineSecondCall).toBe(false)
+		expect(store.campaigns).toHaveLength(2)
+		expect(store.campaigns[1]).toMatchObject({ number: 31, good: 1, duration: 2 })
+		expect(store.players[0].marketers).toHaveLength(2)
+		expect(store.players[0].marketers[1].marketer).toBe(rf.TELEMARKETER)
+		expect(store.players[0].additionalCampaignArrayIndex).toBe(1)
+	})
+
+	it("can finish the action with a single token", () => {
+		const store = phoneActionBoard()
+		controller.selectMarketer(rf.TELEMARKETER, false)
+		controller.placeMarketingCampaign(mapMod.giveIndex(40, 39))
+		expect(store.context.mediaLineSecondCall).toBe(true)
+		controller.resetMarketingSelection()
+		expect(store.campaigns).toHaveLength(1)
+		expect(store.context.marketer).toBe(-1)
+	})
+})
+
+describe("Media Line stage 3 - TV channel action", () => {
+	// Restaurant 40-41/40-41 plus SIX houses inside the diamond (dist <= 2):
+	// 7 west (38,40), 1 east (42,39), 5 north (40,36), 2 south (40,42),
+	// 4 north-east diagonal (42,42), 6 north-west diagonal (38,37)
+	function tvActionBoard() {
+		const store = freshGame(2, ["50"])
+		const coords = blankCoords()
+		stamp(coords, 40, 40, 2, 2, rf.RESTAURANT_OPEN)
+		stamp(coords, 38, 40, 2, 3, rf.HOUSE + 7)
+		stamp(coords, 42, 39, 2, 3, rf.HOUSE + 1)
+		stamp(coords, 40, 36, 2, 3, rf.HOUSE + 5)
+		stamp(coords, 40, 42, 2, 3, rf.HOUSE + 2)
+		stamp(coords, 42, 42, 2, 3, rf.HOUSE + 4)
+		stamp(coords, 38, 37, 2, 3, rf.HOUSE + 6)
+		store.mapData.coords = coords
+		store.players[0].restaurants = [{ index: mapMod.giveIndex(40, 40), rotation: 0, open: true }]
+		store.players[0].employees.push(rf.TV_ANNOUNCER)
+		return store
+	}
+
+	it("picks 5 of 6 houses, caps at 5, and places without a board token", () => {
+		const store = tvActionBoard()
+		controller.selectMarketer(rf.TV_ANNOUNCER, false)
+		expect(store.context.campaign).toBe(28)
+		// All 6 candidate houses are clickable (6 spaces each)
+		expect(store.highlights.indexesToHighlightYellow).toHaveLength(36)
+
+		// Out-of-range squares are ignored
+		controller.toggleTVHouseSelection(mapMod.giveIndex(50, 50))
+		expect(store.context.tvHouses).toEqual([])
+
+		controller.toggleTVHouseSelection(mapMod.findIndexForHouse(7))
+		controller.toggleTVHouseSelection(mapMod.findIndexForHouse(1))
+		controller.toggleTVHouseSelection(mapMod.findIndexForHouse(5))
+		controller.toggleTVHouseSelection(mapMod.findIndexForHouse(2))
+		expect(controller.tvSelectionComplete()).toBe(false)
+		controller.toggleTVHouseSelection(mapMod.findIndexForHouse(4))
+		expect(controller.tvSelectionComplete()).toBe(true)
+
+		// The 6th candidate cannot join once 5 are picked
+		controller.toggleTVHouseSelection(mapMod.findIndexForHouse(6))
+		expect(store.context.tvHouses).toHaveLength(5)
+
+		// Deselecting reopens the choice
+		controller.toggleTVHouseSelection(mapMod.findIndexForHouse(4))
+		expect(controller.tvSelectionComplete()).toBe(false)
+		controller.toggleTVHouseSelection(mapMod.findIndexForHouse(4))
+
+		controller.chooseGood(2)
+		controller.chooseDuration(3)
+		controller.placeMarketingCampaign(0)
+
+		expect(store.campaigns).toHaveLength(1)
+		expect(store.campaigns[0]).toMatchObject({ number: 28, index: -1, good: 2, duration: 3 })
+		expect([...store.campaigns[0].houses].sort((a, b) => a - b)).toEqual([1, 2, 4, 5, 7])
+		expect(store.availableMarketingCampaigns).toContain(29)
+		expect(store.availableMarketingCampaigns).not.toContain(28)
+		expect(store.players[0].marketers).toEqual([{ campaign: 28, marketer: rf.TV_ANNOUNCER, nightShift: false }])
+		expect(store.players[0].milestones).toContain(rf.FIRST_TV_ANNOUNCER_USED)
+		// No board token: no space ever became a TV campaign element
+		expect(store.mapData.coords.some((v) => v === rf.MARKETING + 28)).toBe(false)
+	})
+
+	it("completes with all houses when fewer than 5 are in range", () => {
+		const store = freshGame(2, ["50"])
+		const coords = blankCoords()
+		stamp(coords, 40, 40, 2, 2, rf.RESTAURANT_OPEN)
+		stamp(coords, 38, 40, 2, 3, rf.HOUSE + 7)
+		stamp(coords, 43, 39, 2, 3, rf.HOUSE + 1)
+		stamp(coords, 42, 42, 2, 3, rf.HOUSE + 4)
+		stamp(coords, 40, 36, 2, 3, rf.HOUSE + 5)
+		store.mapData.coords = coords
+		store.players[0].restaurants = [{ index: mapMod.giveIndex(40, 40), rotation: 0, open: true }]
+		store.players[0].employees.push(rf.TV_ANNOUNCER)
+		controller.selectMarketer(rf.TV_ANNOUNCER, false)
+		expect(controller.tvSelectionComplete()).toBe(false)
+		for (const h of [7, 1, 4, 5]) controller.toggleTVHouseSelection(mapMod.findIndexForHouse(h))
+		expect(controller.tvSelectionComplete()).toBe(true)
 	})
 })

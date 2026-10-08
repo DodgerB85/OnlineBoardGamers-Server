@@ -88,6 +88,12 @@ function clickedOnSquare(index) {
 		else controller.placeCoffeeShopMS(index)
 	} else if (store.gameflow.subphase === rf.SUBPHASE_MARKETING && store.context.marketer > -1 && store.context.campaign > -1 && store.context.campaign <= 16) {
 		controller.placeMarketingCampaign(index)
+	} else if (store.gameflow.subphase === rf.SUBPHASE_MARKETING && store.context.marketer > -1 && rf.MARKETING_CAMPAIGNS[store.context.campaign]?.type === rf.PHONE) {
+		// Media Line mod: phone tokens are placed by map click
+		controller.placeMarketingCampaign(index)
+	} else if (store.gameflow.subphase === rf.SUBPHASE_MARKETING && store.context.marketer > -1 && rf.MARKETING_CAMPAIGNS[store.context.campaign]?.type === rf.TV_CHANNEL) {
+		// Media Line mod: TV channel - click a highlighted house to (de)select it
+		controller.toggleTVHouseSelection(index)
 	} else if (store.gameflow.subphase === rf.SUBPHASE_MARKETING && store.context.hawkerRouteActive) {
 		controller.selectHawkerRoutePosition(index)
 	} else if (store.context.action === rf.ACT_PLACE_FREEWAY) {
@@ -520,7 +526,7 @@ function changeGhost(index, add, event) {
 		return
 	}
 	// PLACING CAMPAIGN
-	else if ((store.gameflow.subphase === rf.SUBPHASE_MARKETING && store.context.marketer > -1 && store.context.campaign > -1 && store.context.campaign <= 16) || (store.context.restaurantMilestone && store.context.campaign > -1 && store.context.campaign <= 16)) {
+	else if ((store.gameflow.subphase === rf.SUBPHASE_MARKETING && store.context.marketer > -1 && store.context.campaign > -1 && (store.context.campaign <= 16 || rf.MARKETING_CAMPAIGNS[store.context.campaign]?.type === rf.PHONE)) || (store.context.restaurantMilestone && store.context.campaign > -1 && store.context.campaign <= 16)) {
 		const campaignData = rf.MARKETING_CAMPAIGNS[store.context.campaign]
 		const sqSize = store.refSize / 5
 

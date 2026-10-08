@@ -40,8 +40,9 @@ const campaignDisplays = computed(() => {
 	const sqSize = store.refSize / 5
 
 	for (const c of store.campaigns) {
-		// Gourmet guides / giant billboards / hawker trucks are off-board items
-		if (c.number < 1 || c.number > 16) continue
+		// Gourmet guides / giant billboards / hawker trucks / TV channels are off-board items.
+		// Media Line phone tokens (30-35) render like normal campaigns.
+		if (c.number < 1 || (c.number > 16 && !(c.number >= 30 && c.number <= 35))) continue
 		if (c.index < 0) continue
 
 		const campaignData = rf.MARKETING_CAMPAIGNS[c.number]
@@ -134,6 +135,30 @@ const campaignDisplays = computed(() => {
 			numX: parseInt(tokenX + store.refSize / 13),
 			numY: parseInt(tokenY + store.refSize / 13),
 		})
+	}
+	return res
+})
+
+// Media Line mod: TV channel antennas - one marker per targeted house, anchored
+// at the house's top-left space; two channels on the same house sit side by side
+const tvAntennaDisplays = computed(() => {
+	const res = []
+	const sqSize = store.refSize / 5
+	for (const c of store.campaigns) {
+		if (rf.MARKETING_CAMPAIGNS[c.number]?.type !== rf.TV_CHANNEL) continue
+		for (const house of c.houses || []) {
+			const idx = map.findIndexForHouse(house)
+			if (idx < 0) continue
+			const [x, y] = view.getXYforSmallSquare(idx)
+			const sideBySide = res.filter((a) => a.house === house).length
+			res.push({
+				house,
+				src: view.getImage(c.number === 28 ? "antenna35" : "antenna45"),
+				x: x + sideBySide * sqSize * 0.55,
+				y: y - sqSize * 0.15,
+				width: sqSize * 0.6,
+			})
+		}
 	}
 	return res
 })
@@ -722,6 +747,11 @@ function tileRotationClass(tileData) {
 				<span class="campaignDurationSpan" :class="{ r1: camp.duration === 9, inverted: camp.hasSecondGood }" :style="{ left: camp.numX + 'px', top: camp.numY + 'px' }">{{ camp.duration === 9 ? "8" : camp.duration }}</span>
 			</template>
 
+			<!-- Display Media Line TV channel antennas -->
+			<template v-for="(ant, antIdx) in tvAntennaDisplays" :key="'ant' + antIdx">
+				<img class="boardAntennaImg" :src="ant.src" :style="{ left: ant.x + 'px', top: ant.y + 'px', width: ant.width + 'px' }" alt="Antenna" />
+			</template>
+
 			<!-- Display natural board houses -->
 			<template v-for="(h, hIdx) in naturalHouseDisplays" :key="'nh' + hIdx">
 				<img class="boardHouseImg" :src="view.getImage('house_small')" :style="{ left: h.x + 'px', top: h.y + 'px', width: h.width + 'px' }" :alt="$t('items.house')" />
@@ -832,6 +862,13 @@ function tileRotationClass(tileData) {
 .boardCampaignImg {
 	position: absolute;
 	z-index: 10;
+	height: auto;
+}
+
+/* Media Line TV channel antennas - above houses, below clickable layers */
+.boardAntennaImg {
+	position: absolute;
+	z-index: 12;
 	height: auto;
 }
 
