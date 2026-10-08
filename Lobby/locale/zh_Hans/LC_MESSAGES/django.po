@@ -5153,6 +5153,10 @@ msgid "Include 4 chinese expansion options"
 msgstr "包含 4 个中国扩展选项"
 
 #: .\Lobby\templates\Lobby\createFCM.html:913
+msgid "Include 4 fan expansion options"
+msgstr "包含 4 个粉丝模组选项"
+
+#: .\Lobby\templates\Lobby\createFCM.html:913
 msgid "Draft modules"
 msgstr "所有模组"
 
