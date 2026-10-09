@@ -75,13 +75,6 @@ def showROWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     # The ROW client reads the whole model as plain JSON out of gameData.
     returnData["gameData"] = returnData["gameData"] if returnData["gameData"] else "{}"
 
-    # With ROW_USE_SOURCE_CODE the client is loaded from the Vite dev server. Address it by the
-    # host serving this page (same machine, port 3060) instead of "localhost", so a browser on
-    # another machine reaches the dev machine rather than its own localhost.
-    request_host = request.get_host()
-    hostname = request_host.rsplit(":", 1)[0] if request_host.rsplit(":", 1)[-1].isdigit() else request_host
-    returnData["viteDevOrigin"] = f"http://{hostname}:3060"
-
     # Edition is carried as a starting option.
     loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
     returnData["edition"] = "SECOND" if rfROW.SO_SECOND_EDITION in loadedStartingOptions else "FIRST"
