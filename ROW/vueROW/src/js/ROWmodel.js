@@ -72,7 +72,7 @@ export function restoreRng(serialized) {
 
 export function savedPayload() {
 	const store = useModelStore()
-	return makeSavedPayload(getGame(), rng, store.history)
+	return { ...makeSavedPayload(getGame(), rng, store.history), turn: store.turn }
 }
 
 /** Detach a serialized copy of the current (turn-start) position + RNG. */
@@ -94,16 +94,24 @@ export function snapshotTurn() {
 export function alignToCurrentPlayers(order) {
 	const store = useModelStore()
 	const g = store.game
-	if (!g || !order || order.length === 0) return
+	if (!g || !order || order.length === 0) return false
 	const valid = order.filter((n) => g.state.playerStates[n])
-	if (valid.length === 0) return
+	if (valid.length === 0) return false
 	const same = valid.length === g.state.playerOrder.length && valid.every((n, i) => n === g.state.playerOrder[i]) && g.state.currentPlayer === valid[0]
-	if (same) return
+	if (same) return false
 	g.state.playerOrder = valid
 	g.state.currentPlayer = valid[0]
 	g.beginTurn()
 	store.touch()
 	snapshotTurn()
+	return true
+}
+
+/** Restore the history log carried inside a serialized payload, if present. */
+export function restoreHistoryFrom(payload) {
+	if (!payload || !Array.isArray(payload.history)) return
+	const store = useModelStore()
+	store.history.splice(0, store.history.length, ...payload.history)
 }
 
 export function initFromGameData(gameData, players, options) {
@@ -112,8 +120,16 @@ export function initFromGameData(gameData, players, options) {
 	if (gameData && typeof gameData === "object" && gameData.v === 1) {
 		restoreRng(gameData)
 		store.setGame(deserializeGame(gameData))
-		if (Array.isArray(gameData.history)) store.history.splice(0, store.history.length, ...gameData.history)
+		restoreHistoryFrom(gameData)
+		if (Number.isFinite(Number(gameData.turn))) store.turn = Number(gameData.turn)
 		snapshotTurn()
+		return
+	}
+	// An empty payload ({}) means a brand-new game; anything else is a
+	// corrupted/unrecognised state and must not silently start a fresh game.
+	const hasData = gameData && typeof gameData === "object" && Object.keys(gameData).length > 0
+	if (hasData) {
+		store.gameMessages.errorText = "Could not load the saved game (unrecognised data). Please report this bug."
 		return
 	}
 	store.setGame(Game.start(players, { ...defaultOptions(options.edition, options) }, rng))
@@ -155,7 +171,8 @@ export function initGame() {
 		try {
 			gameData = JSON.parse(gameData)
 		} catch {
-			gameData = null
+			// A non-empty string that will not parse is corrupted save data.
+			gameData = gameData.trim() === "" || gameData.trim() === "{}" ? {} : { corrupt: true }
 		}
 	}
 

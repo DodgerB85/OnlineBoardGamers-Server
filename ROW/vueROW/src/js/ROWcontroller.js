@@ -16,6 +16,7 @@ export function canAct() {
 	const personal = usePersonalStore()
 	const g = store.game
 	if (!g) return false
+	if (store.saving) return false
 	if (store.viewSettings.showReplay) return false
 	return personal.canPlay(g.currentPlayer)
 }
@@ -85,6 +86,9 @@ export async function endTurn() {
 		return
 	}
 	const endingPlayer = g.currentPlayer
+	const before = captureUndo()
+	const prevTurnSnapshot = store.wholeTurnResetData
+	const prevFrameCount = store.replayFrames.length
 	g.endTurn(g.currentPlayer, model.getRng())
 	store.clearAction()
 	store.undoSnapshot = null
@@ -93,11 +97,23 @@ export async function endTurn() {
 	model.snapshotTurn()
 	store.turn++
 	store.saving = true
+	let ok = false
 	try {
-		const ok = await persistTurn()
-		if (!ok) await reloadFromServer()
+		ok = await persistTurn()
 	} finally {
 		store.saving = false
+	}
+	if (!ok) {
+		// The server did not accept the end of turn: roll the local advance back
+		// so the client never drifts ahead of the persisted position.
+		model.restoreRng(before)
+		store.setGame(deserializeGame(before))
+		store.wholeTurnResetData = prevTurnSnapshot
+		if (store.replayFrames.length > prevFrameCount) store.replayFrames.pop()
+		if (store.history[0]?.type === "END_TURN") store.history.shift()
+		store.turn--
+		store.undoSnapshot = null
+		store.touch()
 	}
 }
 
@@ -156,18 +172,25 @@ export async function rewind() {
 		if (typeof parsed === "string") parsed = JSON.parse(parsed)
 		model.restoreRng(parsed)
 		store.setGame(deserializeGame(parsed))
+		model.restoreHistoryFrom(parsed)
+		if (Number.isFinite(Number(parsed.turn))) store.turn = Number(parsed.turn)
 		personal.latestUpdate = Number(data.latestUpdate ?? personal.latestUpdate)
 		window.initData.latestUpdate = data.latestUpdate
 		store.missingPlayers = data.missingPlayers ?? []
 		store.undoSnapshot = null
-		model.snapshotTurn()
 
-		// Write the rewound position back so the server stays in sync.
+		// Exclude missing players from the engine rotation and pick the current
+		// player from the remaining seats before writing the position back.
 		const g = store.getGame()
 		const ended = g.isEnded()
-		const order = g.state.playerOrder.length > 0 ? g.state.playerOrder : g.state.players.map((p) => p.name)
-		const current = g.currentPlayer
-		const rotated = [current, ...order.filter((p) => p !== current)]
+		const allOrder = g.state.playerOrder.length > 0 ? g.state.playerOrder : g.state.players.map((p) => p.name)
+		const available = allOrder.filter((p) => !store.missingPlayers.includes(p))
+		let current = g.currentPlayer
+		if (store.missingPlayers.includes(current) && available.length > 0) current = available[0]
+		const rotated = [current, ...available.filter((p) => p !== current)]
+		if (!model.alignToCurrentPlayers(rotated)) model.snapshotTurn()
+
+		// Write the rewound position back so the server stays in sync.
 		const result = await updateDataFromLoadRewind({
 			gameID: personal.gameID,
 			turn: store.turn,
@@ -234,8 +257,13 @@ export async function reloadFromServer() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	if (personal.gameID < 0) return
+	// Never clobber the replay view (or the pre-replay live position) while the
+	// user is reviewing history; reloading would also advance latestUpdate past
+	// the state that exitReplay restores.
+	if (store.viewSettings.showReplay) return
 	try {
 		const data = await reloadGameData(personal.gameID)
+		if (Array.isArray(data.missingPlayers)) store.missingPlayers = data.missingPlayers
 		if (String(data.latestUpdate) === String(personal.latestUpdate)) return
 		let gd = data.gameData
 		if (typeof gd === "string") gd = JSON.parse(gd)
@@ -244,10 +272,15 @@ export async function reloadFromServer() {
 			store.undoSnapshot = null
 			model.restoreRng(gd)
 			store.setGame(deserializeGame(gd))
-			model.snapshotTurn()
+			model.restoreHistoryFrom(gd)
+			if (Number.isFinite(Number(data.turn))) store.turn = Number(data.turn)
+			else if (Number.isFinite(Number(gd.turn))) store.turn = Number(gd.turn)
+			// OBG is authoritative for turn order; realign to its current players.
+			if (!model.alignToCurrentPlayers(Array.isArray(data.currentPlayerNames) ? data.currentPlayerNames : [])) model.snapshotTurn()
 		}
 		personal.latestUpdate = Number(data.latestUpdate)
 		personal.secondsToNextKickout = data.secondsToNextKickout
+		store.touch()
 	} catch (error) {
 		console.error("Error reloading game data:", error)
 	}
