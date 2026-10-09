@@ -569,7 +569,7 @@ export function playerBuildingAction(name, edition, cowboys) {
 // ---------------------------------------------------------------------------
 // Objective cards (ObjectiveCard.Type)
 // ---------------------------------------------------------------------------
-const oc = (id, tasks, points, penalty, action) => ({ id, tasks, points, penalty, action });
+const oc = (id, tasks, points, penalty, action, drawChoice = false) => ({ id, tasks, points, penalty, action, drawChoice });
 export const OBJECTIVE_CARD_TYPES = {
     START_34B: oc("START_34B", [Task.BREEDING_VALUE_3, Task.BREEDING_VALUE_4, Task.BUILDING], 3, 0, null),
     START_SSG: oc("START_SSG", [Task.STATION, Task.STATION, Task.GREEN_TEEPEE], 3, 0, null),
@@ -581,11 +581,11 @@ export const OBJECTIVE_CARD_TYPES = {
     GAIN2_SSH: oc("GAIN2_SSH", [Task.STATION, Task.STATION, Task.HAZARD], 3, 2, ActionType.GAIN_2_DOLLARS),
     GAIN2_333B: oc("GAIN2_333B", [Task.BREEDING_VALUE_3, Task.BREEDING_VALUE_3, Task.BREEDING_VALUE_3, Task.BUILDING], 4, 2, ActionType.GAIN_2_DOLLARS),
     AUX_SF: oc("AUX_SF", [Task.SAN_FRANCISCO], 5, 3, ActionType.SINGLE_OR_DOUBLE_AUXILIARY_ACTION),
-    DRAW_BBH: oc("DRAW_BBH", [Task.BUILDING, Task.BUILDING, Task.HAZARD], 3, 2, ActionType.DRAW_3_CARDS),
-    DRAW_SGBL: oc("DRAW_SGBL", [Task.STATION, Task.GREEN_TEEPEE, Task.BLUE_TEEPEE], 3, 2, ActionType.DRAW_3_CARDS),
-    DRAW_5H: oc("DRAW_5H", [Task.BREEDING_VALUE_5, Task.HAZARD], 3, 2, ActionType.DRAW_3_CARDS),
-    DRAW_SGG: oc("DRAW_SGG", [Task.STATION, Task.GREEN_TEEPEE, Task.GREEN_TEEPEE], 3, 2, ActionType.DRAW_3_CARDS),
-    DRAW_333S: oc("DRAW_333S", [Task.BREEDING_VALUE_3, Task.BREEDING_VALUE_3, Task.BREEDING_VALUE_3, Task.STATION], 4, 2, ActionType.DRAW_3_CARDS),
+    DRAW_BBH: oc("DRAW_BBH", [Task.BUILDING, Task.BUILDING, Task.HAZARD], 3, 2, ActionType.DRAW_CARD, true),
+    DRAW_SGBL: oc("DRAW_SGBL", [Task.STATION, Task.GREEN_TEEPEE, Task.BLUE_TEEPEE], 3, 2, ActionType.DRAW_CARD, true),
+    DRAW_5H: oc("DRAW_5H", [Task.BREEDING_VALUE_5, Task.HAZARD], 3, 2, ActionType.DRAW_CARD, true),
+    DRAW_SGG: oc("DRAW_SGG", [Task.STATION, Task.GREEN_TEEPEE, Task.GREEN_TEEPEE], 3, 2, ActionType.DRAW_CARD, true),
+    DRAW_333S: oc("DRAW_333S", [Task.BREEDING_VALUE_3, Task.BREEDING_VALUE_3, Task.BREEDING_VALUE_3, Task.STATION], 4, 2, ActionType.DRAW_CARD, true),
     ENGINE_44SG: oc("ENGINE_44SG", [Task.BREEDING_VALUE_4, Task.BREEDING_VALUE_4, Task.STATION, Task.GREEN_TEEPEE], 5, 3, ActionType.MOVE_ENGINE_AT_MOST_2_FORWARD),
     ENGINE_345: oc("ENGINE_345", [Task.BREEDING_VALUE_3, Task.BREEDING_VALUE_4, Task.BREEDING_VALUE_5], 5, 3, ActionType.MOVE_ENGINE_AT_MOST_2_FORWARD),
     ENGINE_BBGG: oc("ENGINE_BBGG", [Task.BUILDING, Task.BUILDING, Task.GREEN_TEEPEE, Task.GREEN_TEEPEE], 5, 3, ActionType.MOVE_ENGINE_AT_MOST_2_FORWARD),

@@ -1816,7 +1816,10 @@ export class Game {
                     throw new ROWException(ROWError.CARD_NOT_IN_HAND);
                 const [card] = ps.hand.splice(idx, 1);
                 ps.objectives.push(card.id);
-                return { immediate: card.action ? [PossibleAction.mandatory(card.action)] : [], actions: [], canUndo: true };
+                // Java's ObjectiveCard.possibleAction is optional(...): the GAIN2/ENGINE/MOVE cards
+                // grant one optional action and the DRAW cards an optional draw-1/2/3 choice.
+                const grant = card.action ? (card.drawChoice ? PossibleAction.choiceActions([ActionType.DRAW_CARD, ActionType.DRAW_2_CARDS, ActionType.DRAW_3_CARDS]) : PossibleAction.mandatory(card.action)) : null;
+                return { immediate: grant ? [PossibleAction.optional(grant)] : [], actions: [], canUndo: true };
             }
             // Java returns the next foresight/delivery as ImmediateActions, not newActions.
             case ActionType.CHOOSE_FORESIGHT_1: {
