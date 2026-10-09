@@ -4,7 +4,7 @@
  */
 import { ActionStack, JavaRandom, ROWError, ROWException, Unlockable } from "./ROWcore";
 import { CattleMarket, Foresights, Game, JobMarket, KansasCitySupply, ObjectiveCards, PlayerState, RailroadTrack, Trail } from "./ROWengine";
-import { OBJECTIVE_CARD_TYPES } from "./ROWdata";
+import { OBJECTIVE_CARD_TYPES, STATIONS } from "./ROWdata";
 function serializePlayerState(ps) {
     return {
         player: ps.player,
@@ -133,7 +133,9 @@ export function deserializeGame(obj) {
     const rt = obj.railroadTrack;
     railroad.players = rt.players ?? {};
     railroad.cities = rt.cities ?? {};
-    railroad.stations = rt.stations ?? [];
+    // A payload may carry only the mutable half of a station (Java's serializer does); the
+    // printed cost/points/disc colours/space come from our own table, keyed by index.
+    railroad.stations = (rt.stations ?? []).map((st, i) => ({ ...(STATIONS[i] ?? {}), ...st }));
     railroad.branchlets = rt.branchlets ?? {};
     railroad.mediumTownTiles = rt.mediumTownTiles ?? {};
     railroad.stationMasters = rt.bonusStationMasters ?? [];

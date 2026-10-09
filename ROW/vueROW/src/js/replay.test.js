@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { ActionStack, CATTLE_DEFAULT_VALUE, OBJECTIVE_CARD_TYPES, PossibleAction, RecordingRandom, ActionType, deserializeGame, serializeGame } from "./ROWindex";
+import { ActionStack, CATTLE_DEFAULT_VALUE, OBJECTIVE_CARD_TYPES, STATIONS, PossibleAction, RecordingRandom, ActionType, deserializeGame, serializeGame } from "./ROWindex";
 /**
  * Real replay audit: every Java fixture's `initialState` is hydrated into our
  * engine, each recorded command is executed through `Game.perform`, and the
@@ -134,11 +134,10 @@ function toOurs(s) {
             branchlets: rt.branchlets ?? {},
             mediumTownTiles: rt.mediumTownTiles ?? {},
             bonusStationMasters: rt.bonusStationMasters ?? [],
-            stations: (rt.stations ?? []).map((st) => ({
-                cost: st.cost,
-                points: st.points,
-                discColors: st.discColors,
-                space: st.space,
+            // Java only serializes the mutable part of a station; the printed cost/points/space
+            // come from our own table, keyed by station index.
+            stations: (rt.stations ?? []).map((st, i) => ({
+                ...STATIONS[i],
                 upgradedBy: (st.players ?? []).map((c) => colorToName[c] ?? c),
                 stationMaster: st.stationMaster ?? null,
                 worker: st.worker ?? null,

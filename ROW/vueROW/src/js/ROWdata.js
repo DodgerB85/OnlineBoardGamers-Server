@@ -187,6 +187,31 @@ export function numberOfSignals(number) {
 /** Turnout spaces (integer engine positions with a station). */
 export const TURNOUT_SPACES = ["4.5", "7.5", "10.5", "13.5", "16.5", "21.5", "25.5", "29.5", "33.5"];
 export const MAX_SPACE = 39;
+/**
+ * The railroad track as the reference engine walks it (RailroadTrack's Space graph): each space
+ * steps to the next integer, and a turnout is an *optional* stop between them, so from space 4 the
+ * engine may reach both 4.5 and 5 in one step. Space 39 is a terminal turnout. Towns hang off the
+ * main line but the engine may never enter one ("cannot move to the north"), so they are omitted.
+ */
+function buildTrackGraph() {
+    const next = {};
+    const previous = {};
+    const link = (a, b) => {
+        (next[a] ??= []).push(b);
+        (previous[b] ??= []).push(a);
+    };
+    const turnoutBases = new Set(TURNOUT_SPACES.map((t) => t.split(".")[0]));
+    for (let n = 0; n <= MAX_SPACE - 1; n++) {
+        const from = String(n);
+        link(from, String(n + 1));
+        if (turnoutBases.has(from))
+            link(from, `${n}.5`), link(`${n}.5`, String(n + 1));
+    }
+    return { next, previous };
+}
+const TRACK = buildTrackGraph();
+export const TRACK_NEXT = TRACK.next;
+export const TRACK_PREVIOUS = TRACK.previous;
 // ---------------------------------------------------------------------------
 // Station master tiles (StationMaster.java)
 // ---------------------------------------------------------------------------

@@ -12,8 +12,8 @@
  * and end-of-game scoring. Not ported: bidding, the Garth automa and the balanced
  * cattle-market variant - those throw ROWError.NOT_IMPLEMENTED rather than guessing.
  */
-import { ActionStack, ActionType, CattleType, City, DiscColor, Edition, ROWError, ROWException, Hand, HazardType, PossibleAction, ScoreCategory, Status, Task, Teepee, Unlockable, UNLOCKABLE_INFO, Worker, handFee, isCattleCard, isObjectiveCard, shuffle, } from "./ROWcore";
-import { buildTrailNodes, buildingNumbersForOptions, cityStrip, CATTLE_COSTS, STATION_MASTERS_ORIGINAL, STATION_MASTERS_PROMOS, STATION_MASTERS_SECOND_EDITION, STATION_MASTERS_RTTN, CITY_INFO, RTTN_TRACK, RTTN_BIG_TOWNS, RTTN_MEDIUM_TOWN_DEAL_ORDER, MEDIUM_TOWN_TILES, cattleMarketLimit, createCattleSet, createKcSet1, createKcSet2, createKcSet3, jobMarketInitialWorkerCount, JOB_MARKET_CATTLE, JOB_MARKET_COST, NEUTRAL_BUILDING_LOCATIONS, neutralBuildingAction, numberOfSignals, OBJECTIVE_CARD_TYPES, OBJECTIVE_DRAW_STACK, PLAYER_BUILDINGS, playerBuildingAction, STATIONS, STARTING_OBJECTIVE_IDS, } from "./ROWdata";
+import { ActionStack, ActionType, CattleType, City, DiscColor, Edition, ROWError, ROWException, Hand, HazardType, PossibleAction, ScoreCategory, Status, Task, Teepee, Unlockable, UNLOCKABLE_INFO, Variant, Worker, handFee, isCattleCard, isObjectiveCard, shuffle, } from "./ROWcore";
+import { buildTrailNodes, buildingNumbersForOptions, cityStrip, TRACK_NEXT, TRACK_PREVIOUS, CATTLE_COSTS, STATION_MASTERS_ORIGINAL, STATION_MASTERS_PROMOS, STATION_MASTERS_SECOND_EDITION, STATION_MASTERS_RTTN, CITY_INFO, RTTN_TRACK, RTTN_BIG_TOWNS, RTTN_MEDIUM_TOWN_DEAL_ORDER, MEDIUM_TOWN_TILES, cattleMarketLimit, createCattleSet, createKcSet1, createKcSet2, createKcSet3, jobMarketInitialWorkerCount, JOB_MARKET_CATTLE, JOB_MARKET_COST, NEUTRAL_BUILDING_LOCATIONS, neutralBuildingAction, numberOfSignals, OBJECTIVE_CARD_TYPES, OBJECTIVE_DRAW_STACK, PLAYER_BUILDINGS, playerBuildingAction, STATIONS, STARTING_OBJECTIVE_IDS, } from "./ROWdata";
 const clone = (v) => JSON.parse(JSON.stringify(v));
 /** Certificate track steps (PlayerState.CERTIFICATE_STEPS). */
 const CERTIFICATE_STEPS = [0, 1, 2, 3, 4, 6];
@@ -715,8 +715,9 @@ export class CattleMarket {
         this.market = [];
         this.simmental = simmental;
     }
-    init(playerCount, rng) {
-        const set = createCattleSet(playerCount, this.simmental);
+    init(playerCount, rng, balanced = false) {
+        // CattleMarket.original always uses the full 4-player deck; the balanced variant scales it.
+        const set = createCattleSet(balanced ? playerCount : 4, this.simmental);
         shuffle(set, rng);
         this.drawStack = set;
         this.market = [];
@@ -789,14 +790,15 @@ export class KansasCitySupply {
     constructor() {
         this.piles = [];
     }
-    init(playerCount, rng) {
+    init(playerCount, rng, balanced = false) {
         const p1 = createKcSet1();
         const p2 = createKcSet2();
         const p3 = createKcSet3();
         shuffle(p1, rng);
         shuffle(p2, rng);
         shuffle(p3, rng);
-        if (playerCount === 3) {
+        // KansasCitySupply.balanced: only the "Balanced" variant trims tiles for 2-3 players.
+        if (balanced && playerCount === 3) {
             // balanced variant: remove some tiles (KansasCitySupply.balanced)
             removeTeepees(p1, Teepee.BLUE, 1);
             removeTeepees(p1, Teepee.GREEN, 2);
@@ -805,7 +807,7 @@ export class KansasCitySupply {
             removeTeepees(p3, Teepee.BLUE, 1);
             removeWorkers(p3, 1);
         }
-        else if (playerCount === 2) {
+        else if (balanced && playerCount === 2) {
             removeTeepees(p1, Teepee.GREEN, 3);
             removeTeepees(p1, Teepee.BLUE, 3);
             removeHazardsWithPoints(p1, 1, 2);
@@ -1005,101 +1007,70 @@ export class RailroadTrack {
     signalsPassed(player) {
         return numberOfSignals(Math.ceil(parseFloat(this.currentSpace(player))));
     }
-    reachable(from, atLeast, atMost, direction) {
-        // Linear numeric track: 0..39 plus half-turnouts.
-        const result = new Set();
-        const isTurnout = (n) => !Number.isInteger(n);
-        const consider = (pos, steps) => {
-            if (pos < 0 || pos > STATIONS.length)
-                return;
-            // convert to space name
+    /** Java's Space.isTurnout(): a space its predecessor also bypasses. True for the 9 turnouts. */
+    isTurnout(space) {
+        const previous = TRACK_PREVIOUS[space] ?? [];
+        const next = TRACK_NEXT[space] ?? [];
+        return previous.length === 1 && next.length === 1 && (TRACK_NEXT[previous[0]] ?? []).includes(next[0]);
+    }
+    /**
+     * Java's RailroadTrack.reachableSpacesEngine: walk the track graph, skipping occupied spaces
+     * for free (they cost no step), and never entering a town. Returns space name -> fewest steps.
+     */
+    reachableSpaces(from, atLeast, atMost, forward) {
+        const occupied = (name) => Object.values(this.players).includes(name);
+        const reachable = new Map();
+        const walk = (current, remainingAtLeast, remainingAtMost, steps) => {
+            // START may always be shared; every other space must be free to stop on or pass over.
+            const available = current !== from && (current === "0" || !occupied(current));
+            if (available && remainingAtLeast <= 1 && remainingAtMost > 0) {
+                const cost = steps + 1;
+                const best = reachable.get(current);
+                if (best === undefined || cost < best)
+                    reachable.set(current, cost);
+            }
+            const neighbours = (forward ? TRACK_NEXT[current] : TRACK_PREVIOUS[current]) ?? [];
+            if (!available) {
+                // Occupied (or the starting space): jump over it without spending a step.
+                for (const n of neighbours)
+                    walk(n, remainingAtLeast, remainingAtMost, steps);
+            }
+            else if (remainingAtMost > 1) {
+                for (const n of neighbours)
+                    walk(n, Math.max(remainingAtLeast - 1, 0), remainingAtMost - 1, steps + 1);
+            }
         };
-        // Build candidate spaces between from and to.
-        const start = parseFloat(from);
-        const fromInt = Math.floor(start);
-        const isFromTurnout = !Number.isInteger(start);
-        let steps = 0;
-        let current = fromInt;
-        const spaces = [];
-        const allSpaces = [];
-        for (let i = 0; i <= 39; i++)
-            allSpaces.push(String(i));
-        for (const t of ["4.5", "7.5", "10.5", "13.5", "16.5", "21.5", "25.5", "29.5", "33.5"])
-            allSpaces.push(t);
-        void allSpaces;
-        // Simplified: enumerate integer positions as steps; turnouts are 1 step too.
-        const candidates = [];
-        // forward
-        if (direction === 1) {
-            steps = 0;
-            current = fromInt;
-            // if starting on a turnout, first step is the next integer
-            if (isFromTurnout) {
-                steps = 1;
-                current = fromInt + 1;
-            }
-            else {
-                current = fromInt;
-            }
-            for (let n = current + (isFromTurnout ? 0 : 1); n <= 39; n++) {
-                steps = isFromTurnout ? current - fromInt + (n - current) : n - fromInt;
-                candidates.push({ name: String(n), steps });
-                const turnout = `${n}.5`;
-                if (["4", "7", "10", "13", "16", "21", "25", "29", "33"].includes(String(n))) {
-                    candidates.push({ name: turnout, steps: steps + 1 });
-                }
-            }
-        }
-        else {
-            steps = 0;
-            current = fromInt;
-            if (isFromTurnout) {
-                steps = 1;
-                current = fromInt;
-            }
-            for (let n = fromInt - (isFromTurnout ? 0 : 1); n >= 0; n--) {
-                steps = isFromTurnout ? fromInt - n + 1 : fromInt - n;
-                candidates.push({ name: String(n), steps });
-                if (["4", "7", "10", "13", "16", "21", "25", "29", "33"].includes(String(n))) {
-                    candidates.push({ name: `${n}.5`, steps: steps + 1 });
-                }
-            }
-        }
-        for (const c of candidates) {
-            if (c.steps >= atLeast && c.steps <= atMost) {
-                // Cannot land on an occupied space (other than self).
-                const occupied = Object.entries(this.players).some(([p, sp]) => sp === c.name);
-                if (!occupied)
-                    result.add(c.name);
-            }
-        }
-        return result;
+        walk(from, atLeast, atMost, 0);
+        return reachable;
     }
     reachableSpacesForward(from, atLeast, atMost) {
-        return this.reachable(from, atLeast, atMost, 1);
+        return new Set(this.reachableSpaces(from, atLeast, atMost, true).keys());
     }
     reachableSpacesBackwards(from, atLeast, atMost) {
-        return this.reachable(from, atLeast, atMost, -1);
+        return new Set(this.reachableSpaces(from, atLeast, atMost, false).keys());
+    }
+    /** Java's RailroadTrack.moveEngine: validate, move, and report the walk's step count. */
+    moveEngine(player, to, atLeast, atMost, forward) {
+        // Java checks occupancy first (START is exempt) and "already there" second.
+        if (to !== "0" && Object.values(this.players).includes(to))
+            throw new ROWException(ROWError.ALREADY_PLAYER_ON_SPACE);
+        const from = this.currentSpace(player);
+        if (to === from)
+            throw new ROWException(ROWError.ALREADY_AT_SPACE);
+        const reachable = this.reachableSpaces(from, atLeast, atMost, forward);
+        if (!reachable.has(to))
+            throw new ROWException(ROWError.SPACE_NOT_REACHABLE);
+        this.players[player] = to;
+        const immediate = this.stationUpgradeImmediate(player, to);
+        if (to === "39")
+            immediate.push(PossibleAction.mandatory(ActionType.MOVE_ENGINE_AT_LEAST_1_BACKWARDS_AND_GAIN_3_DOLLARS));
+        return { immediate, steps: reachable.get(to) };
     }
     moveEngineForward(player, to, atLeast, atMost) {
-        const from = this.currentSpace(player);
-        const reachable = this.reachableSpacesForward(from, atLeast, atMost);
-        if (!reachable.has(to))
-            throw new ROWException(ROWError.SPACE_NOT_REACHABLE);
-        if (Object.entries(this.players).some(([p, sp]) => p !== player && sp === to))
-            throw new ROWException(ROWError.ALREADY_PLAYER_ON_SPACE);
-        this.players[player] = to;
-        return this.stationUpgradeImmediate(player, to);
+        return this.moveEngine(player, to, atLeast, atMost, true).immediate;
     }
     moveEngineBackwards(player, to, atLeast, atMost) {
-        const from = this.currentSpace(player);
-        const reachable = this.reachableSpacesBackwards(from, atLeast, atMost);
-        if (!reachable.has(to))
-            throw new ROWException(ROWError.SPACE_NOT_REACHABLE);
-        if (Object.entries(this.players).some(([p, sp]) => p !== player && sp === to))
-            throw new ROWException(ROWError.ALREADY_PLAYER_ON_SPACE);
-        this.players[player] = to;
-        return this.stationUpgradeImmediate(player, to);
+        return this.moveEngine(player, to, atLeast, atMost, false).immediate;
     }
     /** Stopping on a turnout with an unupgraded station offers an optional station upgrade. */
     stationUpgradeImmediate(player, space) {
@@ -1479,10 +1450,13 @@ export class Game {
             railroad.stationMasters = masterPile.slice(5);
         }
         const jobMarket = new JobMarket();
+        // The "balanced" variant scales the supply and cattle deck to the player count; the
+        // original rules always use the full 4-player sets (RailroadTrack/CattleMarket.original).
+        const balanced = options.variant === Variant.BALANCED;
         const cattleMarket = new CattleMarket(options.simmental);
-        cattleMarket.init(players.length, rng);
+        cattleMarket.init(players.length, rng, balanced);
         const kcSupply = new KansasCitySupply();
-        kcSupply.init(players.length, rng);
+        kcSupply.init(players.length, rng, balanced);
         const foresights = new Foresights();
         foresights.init(kcSupply, rng);
         const objectiveCards = new ObjectiveCards(rng);
@@ -1563,8 +1537,12 @@ export class Game {
         if (this.state.trail.atKansasCity(p)) {
             return this.state.railroadTrack.possibleDeliveries(p, ps.handValue(), ps.tempCertificates + ps.permanentCertificates());
         }
+        // Extraordinary delivery (building 9A): only cities the player may deliver to, and only
+        // those whose value fits the engine's last backward move.
         const out = [];
         for (const city of Object.keys(CITY_INFO)) {
+            if (!this.state.railroadTrack.canDeliver(p, city))
+                continue;
             const value = CITY_INFO[city].value;
             if (value <= ps.lastEngineMove)
                 out.push({ city, certificates: 0, reward: 0 });
@@ -1946,11 +1924,11 @@ export class Game {
             }
             case ActionType.MOVE_ENGINE_AT_LEAST_1_BACKWARDS_AND_GAIN_3_DOLLARS:
             case ActionType.MOVE_ENGINE_1_BACKWARDS_TO_GAIN_3_DOLLARS: {
-                const from = this.state.railroadTrack.currentSpace(this.currentPlayer);
-                const immediate = this.state.railroadTrack.moveEngineBackwards(this.currentPlayer, action.to, action.type === ActionType.MOVE_ENGINE_1_BACKWARDS_TO_GAIN_3_DOLLARS ? 1 : 1, action.type === ActionType.MOVE_ENGINE_1_BACKWARDS_TO_GAIN_3_DOLLARS ? 1 : Number.MAX_SAFE_INTEGER);
                 if (action.type === ActionType.MOVE_ENGINE_AT_LEAST_1_BACKWARDS_AND_GAIN_3_DOLLARS)
-                    ps.lastEngineMove = this.spaceDistance(from, action.to);
-                ps.gainDollars(3);
+                    ps.gainDollars(3);
+                const immediate = this.state.railroadTrack.moveEngineBackwards(this.currentPlayer, action.to, 1, action.type === ActionType.MOVE_ENGINE_1_BACKWARDS_TO_GAIN_3_DOLLARS ? 1 : Number.MAX_SAFE_INTEGER);
+                if (action.type === ActionType.MOVE_ENGINE_1_BACKWARDS_TO_GAIN_3_DOLLARS)
+                    ps.gainDollars(3);
                 return { immediate, actions: [], canUndo: true };
             }
             case ActionType.MOVE_ENGINE_1_BACKWARDS_TO_REMOVE_1_CARD: {
@@ -1972,10 +1950,10 @@ export class Game {
                 return { immediate: [...immediate, PossibleAction.repeat(0, 2, ActionType.REMOVE_CARD)], actions: [], canUndo: true };
             }
             case ActionType.EXTRAORDINARY_DELIVERY: {
-                const from = this.state.railroadTrack.currentSpace(this.currentPlayer);
-                const immediate = this.state.railroadTrack.moveEngineBackwards(this.currentPlayer, action.to, 1, Number.MAX_SAFE_INTEGER);
-                ps.lastEngineMove = this.engineDistanceNotCountingTurnouts(from, action.to);
-                return { immediate: [PossibleAction.mandatory(ActionType.DELIVER_TO_CITY), ...immediate], actions: [], canUndo: true };
+                const move = this.state.railroadTrack.moveEngine(this.currentPlayer, action.to, 1, Number.MAX_SAFE_INTEGER, false);
+                // Java's EngineMove.getStepsNotCountingTurnouts: a turnout stop is not a step.
+                ps.lastEngineMove = move.steps - (this.state.railroadTrack.isTurnout(action.to) ? 1 : 0);
+                return { immediate: [PossibleAction.mandatory(ActionType.DELIVER_TO_CITY), ...move.immediate], actions: [], canUndo: true };
             }
             case ActionType.UPGRADE_STATION: {
                 const stationIndex = this.stationAtCurrentSpace();
@@ -2026,6 +2004,8 @@ export class Game {
                 return { immediate: [PossibleAction.optionalAction(ActionType.PLACE_BRANCHLET)], actions: [], canUndo: true };
             }
             case ActionType.TAKE_BONUS_STATION_MASTER: {
+                if (ps.stationMasters.includes(action.stationMaster))
+                    throw new ROWException(ROWError.ALREADY_HAS_STATION_MASTER);
                 this.state.railroadTrack.takeBonusStationMaster(action.stationMaster);
                 ps.stationMasters.push(action.stationMaster);
                 return { immediate: this.stationMasterActivate(action.stationMaster), actions: [], canUndo: true };
@@ -2217,13 +2197,6 @@ export class Game {
         }
         return false;
     }
-    spaceDistance(from, to) {
-        return Math.abs(Math.round(parseFloat(from) - parseFloat(to)));
-    }
-    /** Distance in engine steps, ignoring turnouts (ExtraordinaryDelivery). */
-    engineDistanceNotCountingTurnouts(from, to) {
-        return Math.max(1, Math.abs(Math.floor(parseFloat(from)) - Math.floor(parseFloat(to))) + 1);
-    }
     doMove(steps, atMost, payFeesAndActivate) {
         const ps = this.currentPlayerState();
         if (!steps || steps.length === 0)
@@ -2319,8 +2292,11 @@ export class Game {
         const station = this.state.railroadTrack.stations[stationIndex];
         if (!station.stationMaster)
             throw new ROWException(ROWError.CANNOT_PERFORM_ACTION);
-        if (ps.workers[worker] <= 0)
+        // PlayerState.removeWorker: a worker of that type must remain on the board afterwards.
+        if (ps.workers[worker] <= 1)
             throw new ROWException(ROWError.NOT_ENOUGH_WORKERS);
+        if (ps.stationMasters.includes(station.stationMaster))
+            throw new ROWException(ROWError.ALREADY_HAS_STATION_MASTER);
         ps.workers[worker]--;
         station.worker = worker;
         const master = station.stationMaster;
