@@ -24,6 +24,8 @@ function serializePlayerState(ps) {
         jobMarketToken: ps.jobMarketToken,
         numberOfCowboysUsedInTurn: ps.numberOfCowboysUsedInTurn,
         locationsActivatedInTurn: ps.locationsActivatedInTurn,
+        turns: ps.turns,
+        stops: ps.stops,
         lastEngineMove: ps.lastEngineMove,
         lastUpgradedStation: ps.lastUpgradedStation,
         exchangeTokens: ps.exchangeTokens,
@@ -54,6 +56,8 @@ function deserializePlayerState(obj) {
     ps.jobMarketToken = obj.jobMarketToken ?? false;
     ps.numberOfCowboysUsedInTurn = obj.numberOfCowboysUsedInTurn ?? 0;
     ps.locationsActivatedInTurn = obj.locationsActivatedInTurn ?? [];
+    ps.turns = obj.turns ?? 0;
+    ps.stops = obj.stops ?? {};
     ps.lastEngineMove = obj.lastEngineMove ?? 0;
     ps.lastUpgradedStation = obj.lastUpgradedStation ?? -1;
     // Payloads saved before exchange tokens existed still start with the one every player gets.
@@ -176,9 +180,10 @@ export function deserializeGame(obj) {
         canUndo: obj.canUndo ?? false,
     };
     const game = new Game(state);
-    // Older payloads (and fresh games) have no action stack: rebuild begin-turn.
+    // Older payloads (and fresh games) have no action stack: rebuild begin-turn
+    // without counting it (the persisted `turns` counter is authoritative).
     if (!obj.actionStack)
-        game.beginTurn();
+        game.beginTurn(false);
     return game;
 }
 function getBool(obj, key) {

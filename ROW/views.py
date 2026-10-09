@@ -80,6 +80,13 @@ def showROWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData["edition"] = "SECOND" if rfROW.SO_SECOND_EDITION in loadedStartingOptions else "FIRST"
     returnData["railsToTheNorth"] = rfROW.SO_RTTN in loadedStartingOptions
     returnData["simmental"] = rfROW.SO_SIMMENTAL in loadedStartingOptions
+    returnData["mode"] = "STRATEGIC" if rfROW.SO_MODE_STRATEGIC in loadedStartingOptions else "ORIGINAL"
+    returnData["buildings"] = "BEGINNER" if rfROW.SO_BUILDINGS_BEGINNER in loadedStartingOptions else "RANDOMIZED"
+    returnData["playerOrder"] = "BIDDING" if rfROW.SO_PLAYER_ORDER_BIDDING in loadedStartingOptions else "RANDOMIZED"
+    returnData["variant"] = "BALANCED" if rfROW.SO_VARIANT_BALANCED in loadedStartingOptions else "ORIGINAL"
+    returnData["stationMasterPromos"] = rfROW.SO_STATION_MASTER_PROMOS in loadedStartingOptions
+    returnData["building11"] = rfROW.SO_BUILDING_11 in loadedStartingOptions
+    returnData["building13"] = rfROW.SO_BUILDING_13 in loadedStartingOptions
 
     currentPlayersArr = []
     if currentGame.phase in rfROW.MAIN_PHASES:
@@ -443,6 +450,9 @@ def ROWdata(request, dataType=1):
                 "turn": currentGame.turn,
                 "missingPlayers": presenter.getMissingPlayersNamesArray(),
                 "currentPlayerNames": currentGame.serverCurrentPlayerNamesInTurnOrder or [],
+                "kickoutVotesData": presenter.getKickoutVotesData(),
+                "kickoutVoteThreshold": presenter.getKickoutVoteThreshold(),
+                "kickoutRequired": presenter.kickoutRequired(),
                 "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
                 "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
                 "transactionID": currentGame.transactionID,

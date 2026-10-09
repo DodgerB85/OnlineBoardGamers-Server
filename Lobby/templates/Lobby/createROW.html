@@ -132,6 +132,34 @@
                                 <option value="SECOND">{% translate "Second edition" %}</option>
                             </select>
                         </div>
+                        <div class="form-row">
+                            <label class="form-label" for="mode">{% translate "Mode" %}</label>
+                            <select name="mode" id="mode" style="flex:0 0 auto;width:auto">
+                                <option value="ORIGINAL" selected="selected">{% translate "Original" %}</option>
+                                <option value="STRATEGIC">{% translate "Strategic (less hidden, e.g. running score)" %}</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label class="form-label" for="buildings">{% translate "Buildings" %}</label>
+                            <select name="buildings" id="buildings" style="flex:0 0 auto;width:auto">
+                                <option value="RANDOMIZED" selected="selected">{% translate "Randomize" %}</option>
+                                <option value="BEGINNER">{% translate "Beginner (only a-side)" %}</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label class="form-label" for="playerOrder">{% translate "Player order" %}</label>
+                            <select name="playerOrder" id="playerOrder" style="flex:0 0 auto;width:auto">
+                                <option value="RANDOMIZED" selected="selected">{% translate "Randomize (original)" %}</option>
+                                <option value="BIDDING">{% translate "Bidding (VPs)" %}</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label class="form-label" for="variant">{% translate "Variant" %}</label>
+                            <select name="variant" id="variant" style="flex:0 0 auto;width:auto">
+                                <option value="ORIGINAL" selected="selected">{% translate "Original" %}</option>
+                                <option value="BALANCED">{% translate "Balanced (tiles adjusted for 2/3p)" %}</option>
+                            </select>
+                        </div>
                         <label class="check-label">
                             <input type="checkbox" class="myCheckbox" id="railsToTheNorth" name="railsToTheNorth" value="1">
                             <div>
@@ -144,6 +172,27 @@
                             <div>
                                 <div>{% translate "Simmental cattle" %}</div>
                                 <div class="opt-help">{% translate "Second edition only: extra breeding-value 2 cattle that upgrade on delivery" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" class="myCheckbox" id="stationMasterPromos" name="stationMasterPromos" value="1">
+                            <div>
+                                <div>{% translate "Station master promos" %}</div>
+                                <div class="opt-help">{% translate "Adds the promo station master tiles" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" class="myCheckbox" id="building11" name="building11" value="1">
+                            <div>
+                                <div>{% translate "Building 11" %}</div>
+                                <div class="opt-help">{% translate "Adds the building 11 promo tiles" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" class="myCheckbox" id="building13" name="building13" value="1">
+                            <div>
+                                <div>{% translate "Building 13" %}</div>
+                                <div class="opt-help">{% translate "Adds the building 13 promo tiles" %}</div>
                             </div>
                         </label>
                     </div>

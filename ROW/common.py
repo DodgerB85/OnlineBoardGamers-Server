@@ -139,6 +139,20 @@ def create_row_game(
                 starting_options.append(rfROW.SO_SIMMENTAL)
         if request.POST.get("railsToTheNorth"):
             starting_options.append(rfROW.SO_RTTN)
+        if request.POST.get("mode") == "STRATEGIC":
+            starting_options.append(rfROW.SO_MODE_STRATEGIC)
+        if request.POST.get("buildings") == "BEGINNER":
+            starting_options.append(rfROW.SO_BUILDINGS_BEGINNER)
+        if request.POST.get("playerOrder") == "BIDDING":
+            starting_options.append(rfROW.SO_PLAYER_ORDER_BIDDING)
+        if request.POST.get("variant") == "BALANCED":
+            starting_options.append(rfROW.SO_VARIANT_BALANCED)
+        if request.POST.get("stationMasterPromos"):
+            starting_options.append(rfROW.SO_STATION_MASTER_PROMOS)
+        if request.POST.get("building11"):
+            starting_options.append(rfROW.SO_BUILDING_11)
+        if request.POST.get("building13"):
+            starting_options.append(rfROW.SO_BUILDING_13)
 
         all_players.append(request.user)
 

@@ -9,7 +9,7 @@ import { decompress } from "../backend/ROW_IO"
 import { startWebSocket } from "../backend/ROWwebsocket"
 import { useModelStore } from "../stores/ROWstore"
 import { usePersonalStore } from "../stores/ROWpersonal"
-import { COLOURS, SO_TRAINING_GAME, DEFAULT_ZOOM, Edition } from "./ROWreference"
+import { COLOURS, SO_TRAINING_GAME, DEFAULT_ZOOM, Edition, Mode, BuildingsOption, PlayerOrderOption, Variant } from "./ROWreference"
 import * as controller from "./ROWcontroller"
 
 /** The single RNG driving the engine (module-level; the store is a singleton). */
@@ -101,7 +101,7 @@ export function alignToCurrentPlayers(order) {
 	if (same) return false
 	g.state.playerOrder = valid
 	g.state.currentPlayer = valid[0]
-	g.beginTurn()
+	g.beginTurn(false)
 	store.touch()
 	snapshotTurn()
 	return true
@@ -150,6 +150,9 @@ export function initGame() {
 	personal.notes = String(initData.notes ?? "")
 	personal.finishedGame = Boolean(initData.finishedGame)
 	personal.secondsToNextKickout = Number(initData.secondsToNextKickout ?? 99999)
+	personal.kickoutRequired = Number(initData.kickoutRequired ?? 0)
+	store.kickoutVotesData = initData.kickoutVotesData ?? {}
+	store.kickoutVoteThreshold = Number(initData.kickoutVoteThreshold ?? 0)
 	personal.trainingGame = Array.isArray(initData.startingOptions) && initData.startingOptions.includes(SO_TRAINING_GAME)
 	personal.transactionID = String(initData.transactionID ?? "")
 	personal.chatNotification = Boolean(initData.chatNotification)
@@ -160,8 +163,15 @@ export function initGame() {
 	// Game options carried as starting options by the Django views.
 	const options = {
 		edition,
+		mode: initData.mode ?? Mode.ORIGINAL,
+		buildings: initData.buildings ?? BuildingsOption.RANDOMIZED,
+		playerOrder: initData.playerOrder ?? PlayerOrderOption.RANDOMIZED,
+		variant: initData.variant ?? Variant.ORIGINAL,
 		railsToTheNorth: Boolean(initData.railsToTheNorth),
 		simmental: Boolean(initData.simmental),
+		stationMasterPromos: Boolean(initData.stationMasterPromos),
+		building11: Boolean(initData.building11),
+		building13: Boolean(initData.building13),
 	}
 	const names = initData.playerNames ?? []
 	const players = names.map((name, i) => ({ name, color: COLOURS[i % COLOURS.length], type: "HUMAN" }))

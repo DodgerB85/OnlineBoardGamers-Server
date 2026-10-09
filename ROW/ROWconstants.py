@@ -23,3 +23,12 @@ SO_BASE_GAME = -1
 SO_SECOND_EDITION = 2
 SO_RTTN = 3  # Rails to the North expansion
 SO_SIMMENTAL = 4  # second edition simmental cattle
+
+# Extra setup options (mirror the Java GWTProvider options).
+SO_MODE_STRATEGIC = 20
+SO_BUILDINGS_BEGINNER = 21
+SO_PLAYER_ORDER_BIDDING = 22
+SO_VARIANT_BALANCED = 23
+SO_STATION_MASTER_PROMOS = 24
+SO_BUILDING_11 = 25
+SO_BUILDING_13 = 26

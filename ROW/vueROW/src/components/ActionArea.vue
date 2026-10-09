@@ -7,11 +7,12 @@ import * as view from "../js/ROWview"
 import { PLAYER_BUILDINGS } from "../js/ROWdata"
 import { useModelStore } from "../stores/ROWstore.js"
 
-const { ActionType, Hand } = rf
+const { ActionType, Hand, Status } = rf
 const store = useModelStore()
 
 const g = () => store.getGame()
 const actions = computed(() => store.actions)
+const isBidding = computed(() => store.game?.state?.status === Status.BIDDING)
 
 // --- Moves on the trail (done by clicking the map, not from here) ---
 const canMove = computed(() => store.actions.includes(ActionType.MOVE) && store.moveStepsLeft > 0)
@@ -81,7 +82,7 @@ const TARGET_ACTIONS = new Set([
 // Actions offered by a placed building are shown on the board (hover the building), not here.
 const buildingActionSet = computed(() => map.activeBuildingActions(g(), actions.value))
 
-const directActions = computed(() => actions.value.filter((a) => a !== ActionType.PLACE_BRANCHLET && !TARGET_ACTIONS.has(a) && !map.engineMoveRange(a, g()) && !buildingActionSet.value.has(a)))
+const directActions = computed(() => actions.value.filter((a) => a !== ActionType.PLACE_BRANCHLET && a !== ActionType.PLACE_BID && !TARGET_ACTIONS.has(a) && !map.engineMoveRange(a, g()) && !buildingActionSet.value.has(a)))
 
 // Card-target actions: selected here, then the card is clicked on the player table.
 const CARD_TARGET_ACTIONS = new Set([
@@ -107,6 +108,7 @@ function p(type, extra = {}) {
 			<div class="label">{{ store.saving ? "Saving…" : "Waiting for other players" }}</div>
 		</div>
 		<template v-else>
+		<template v-if="!isBidding">
 		<div v-if="canMove" class="group">
 			<div class="label">Move — click a highlighted spot, {{ stepsLeft }} step{{ stepsLeft === 1 ? "" : "s" }} left (yellow = next step, cyan = further)</div>
 			<button v-if="store.plannedSteps.length" class="act stay" :disabled="store.saving" @click="controller.commitMove(store.plannedSteps)">Stay Here</button>
@@ -177,6 +179,7 @@ function p(type, extra = {}) {
 			<div class="label">Other actions</div>
 			<button v-for="a in directActions" :key="a" class="act" @click="p(a)">{{ view.humanizeAction(a) }}</button>
 		</div>
+		</template>
 
 		<div class="group">
 			<button class="act" :disabled="!store.canUndo" @click="controller.undo()">Undo</button>

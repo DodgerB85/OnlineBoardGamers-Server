@@ -124,6 +124,13 @@ export async function resign(gameID) {
 	await post("/ROW/processROWturn/", { action: "resign", gameID })
 }
 
+/** Vote to kick out (or actually kick out) the timed-out player. */
+export async function kickout(gameID, kickedName, latestUpdate) {
+	const response = await post("/ROW/processROWturn/", { action: "kickout", gameID, kickedName, latestUpdate })
+	if (!response.ok) throw new Error("Network response was not ok")
+	return response.json()
+}
+
 export async function submitBug(gameID, description, gameData) {
 	const response = await post("/ROW/bugEntry/", { action: "bugentry", gameID, description, gameData: JSON.stringify(gameData) })
 	if (!response.ok) throw new Error("Network response was not ok")

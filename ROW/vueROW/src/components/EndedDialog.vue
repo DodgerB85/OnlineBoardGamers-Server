@@ -5,6 +5,7 @@
  */
 import { computed } from "vue"
 import { useModelStore } from "../stores/ROWstore.js"
+import { City } from "../js/ROWreference"
 
 const store = useModelStore()
 
@@ -30,6 +31,62 @@ function details(name) {
 		.map(([k, v]) => [k, v ?? 0])
 		.filter(([, v]) => v !== 0)
 }
+
+/** Per-player detailed statistics (mirrors the reference stats table). */
+const stats = computed(() => {
+	const g = game.value
+	if (!g || !ended.value) return []
+	const names = g.state.players.map((p) => p.name)
+	const n = names.length
+	return names.map((name) => {
+		const ps = g.playerState(name)
+		const psStops = ps.stops ?? {}
+		const deliveries = {}
+		for (const city of Object.values(City)) deliveries[city] = g.getRailroadTrack().numberOfDeliveries(name, city)
+		let teepeeStops = 0
+		let hazardStops = 0
+		let buildingStops = 0
+		for (const [locName, loc] of g.getTrail().locations) {
+			const count = psStops[locName] ?? 0
+			if (!count) continue
+			if (loc.teepee) teepeeStops += count
+			else if (loc.hazard) hazardStops += count
+			else if (loc.building) buildingStops += count
+		}
+		return {
+			name,
+			seat: names.indexOf(name) + 1,
+			turns: ps.turns ?? 0,
+			cowboys: ps.getNumberOfCowboys(),
+			craftsmen: ps.getNumberOfCraftsmen(),
+			engineers: ps.getNumberOfEngineers(),
+			stepLimit: ps.getStepLimit(n),
+			handLimit: ps.getHandLimit(),
+			permCerts: ps.permanentCertificates(),
+			tempCerts: ps.tempCertificates,
+			tempCertLimit: ps.getTempCertificateLimit(),
+			deliveries,
+			buildingStops,
+			teepeeStops,
+			hazardStops,
+		}
+	})
+})
+const STAT_ROWS = [
+	["Seat", "seat"],
+	["Turns", "turns"],
+	["Cowboys", "cowboys"],
+	["Craftsmen", "craftsmen"],
+	["Engineers", "engineers"],
+	["Step limit", "stepLimit"],
+	["Hand limit", "handLimit"],
+	["Permanent certificates", "permCerts"],
+	["Temporary certificates", "tempCerts"],
+	["Certificate limit", "tempCertLimit"],
+	["Stops at buildings", "buildingStops"],
+	["Stops at teepees", "teepeeStops"],
+	["Stops at hazards", "hazardStops"],
+]
 </script>
 
 <template>
@@ -51,6 +108,26 @@ function details(name) {
 			</tbody>
 		</table>
 		<div v-if="winners.size > 1" class="tie">Tie between {{ [...winners].join(", ") }}</div>
+
+		<h3>Detailed results</h3>
+		<table>
+			<thead>
+				<tr>
+					<th></th>
+					<th v-for="s in stats" :key="s.name">{{ s.name }}</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr v-for="[label, key] in STAT_ROWS" :key="key">
+					<th>{{ label }}</th>
+					<td v-for="s in stats" :key="s.name + key">{{ s[key] }}</td>
+				</tr>
+				<tr v-for="city in Object.keys(stats[0]?.deliveries ?? {})" :key="city">
+					<th>Deliveries to {{ city }}</th>
+					<td v-for="s in stats" :key="s.name + city">{{ s.deliveries[city] }}</td>
+				</tr>
+			</tbody>
+		</table>
 	</div>
 </template>
 

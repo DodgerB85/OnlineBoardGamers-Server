@@ -51,6 +51,10 @@ export const useModelStore = defineStore("store", () => {
 	const saving = ref(false)
 	/** Players the server reports as missing (kicked out / resigned). */
 	const missingPlayers = ref([])
+	/** Active kickout votes: {voter: [targetUsername, voteTimeMs]}. */
+	const kickoutVotesData = ref({})
+	/** Votes required to kick out the timed-out player. */
+	const kickoutVoteThreshold = ref(0)
 
 	/** Serialized snapshot taken at the start of the current player's turn. */
 	const wholeTurnResetData = ref(null)
@@ -161,6 +165,8 @@ export const useModelStore = defineStore("store", () => {
 		turn,
 		saving,
 		missingPlayers,
+		kickoutVotesData,
+		kickoutVoteThreshold,
 		wholeTurnResetData,
 		undoSnapshot,
 		liveBeforeReplay,

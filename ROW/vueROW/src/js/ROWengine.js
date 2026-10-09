@@ -147,6 +147,8 @@ export class PlayerState {
         this.jobMarketToken = false;
         this.numberOfCowboysUsedInTurn = 0;
         this.locationsActivatedInTurn = [];
+        this.turns = 0;
+        this.stops = {};
         this.lastEngineMove = 0;
         this.lastUpgradedStation = -1; // Java's "no station yet" representation
         this.discs = 12; // placement discs remaining (14 total, 2 start removed); simplified
@@ -417,6 +419,7 @@ export class PlayerState {
     }
     activate(locationName) {
         this.locationsActivatedInTurn.push(locationName);
+        this.stops[locationName] = (this.stops[locationName] ?? 0) + 1;
     }
     scoreBuildingPoints(trail, player) {
         return trail.scoreBuildings(player);
@@ -1481,7 +1484,7 @@ export class Game {
         const game = new Game({
             edition: options.edition,
             options,
-            status: Status.STARTED,
+            status: Status.BIDDING,
             players,
             playerOrder,
             currentPlayer: playerOrder[0],
@@ -1493,35 +1496,118 @@ export class Game {
             kcSupply,
             foresights,
             objectiveCards,
-            startingObjectiveCards: [],
+            startingObjectiveCards,
             actionStack: ActionStack.initial([]),
             canUndo: false,
         });
-        // GWT.start: starting balances, committed objectives, second-edition overdraws.
-        playerOrder.forEach((name, i) => {
-            const ps = playerStates[name];
-            ps.gainDollars(6 + i);
-            const objective = startingObjectiveCards[i];
-            if (objective)
-                ps.objectives.push(objective.id);
-            if (options.edition === Edition.SECOND && i > 0)
-                ps.drawCards(i, rng);
-        });
-        game.beginTurn();
+        if (options.playerOrder === "BIDDING") {
+            game.startBidding();
+        }
+        else {
+            game.startSetup(rng);
+        }
         return game;
     }
+    /** Java's private GWT.start(random): start balances, objectives, first turn. */
+    startSetup(rng) {
+        // Java's Player objects are kept; only the order changes with the bid result.
+        const byName = new Map(this.state.players.map((p) => [p.name, p]));
+        this.state.players = this.state.playerOrder.map((name) => byName.get(name));
+        this.state.playerOrder.forEach((name, i) => {
+            const ps = this.state.playerStates[name];
+            ps.gainDollars(6 + i);
+            const objective = this.state.startingObjectiveCards.shift();
+            if (objective)
+                ps.objectives.push(objective.id);
+            if (this.state.edition === Edition.SECOND && i > 0)
+                ps.drawCards(i, rng);
+        });
+        this.state.status = Status.STARTED;
+        this.beginFirstTurn();
+    }
+    /** Java's GWT.startBidding: status stays BIDDING, first bidder begins. */
+    startBidding() {
+        this.state.status = Status.BIDDING;
+        this.beginFirstTurn();
+    }
+    beginFirstTurn() {
+        this.state.currentPlayer = this.state.playerOrder[0];
+        this.beginTurn();
+    }
     // ---- turn flow (ROW.determineBeginTurnActions) ----
-    beginTurn() {
-        const ps = this.currentPlayerState();
-        ps.numberOfCowboysUsedInTurn = 0;
-        ps.locationsActivatedInTurn = [];
-        const actions = [];
-        const handLimit = ps.getHandLimit();
-        if (ps.hand.length > handLimit) {
-            actions.push(PossibleAction.repeat(ps.hand.length - handLimit, ps.hand.length - handLimit, ActionType.DISCARD_CARD));
+    beginTurn(countTurn = true) {
+        this.state.actionStack = ActionStack.initial(this.determineBeginTurnActions());
+        if (this.state.status !== Status.BIDDING) {
+            const ps = this.currentPlayerState();
+            ps.numberOfCowboysUsedInTurn = 0;
+            ps.locationsActivatedInTurn = [];
+            if (countTurn)
+                ps.turns++;
         }
+    }
+    determineBeginTurnActions() {
+        if (this.mustPlaceBid(this.state.currentPlayer))
+            return [PossibleAction.mandatory(ActionType.PLACE_BID)];
+        const ps = this.currentPlayerState();
+        const actions = [];
+        const mustDiscard = ps.hand.length - ps.getHandLimit();
+        if (mustDiscard > 0)
+            actions.push(PossibleAction.repeat(mustDiscard, mustDiscard, ActionType.DISCARD_CARD));
         actions.push(PossibleAction.mandatory(ActionType.MOVE));
-        this.state.actionStack = ActionStack.initial(actions);
+        return actions;
+    }
+    mustPlaceBid(player) {
+        return this.state.status === Status.BIDDING && this.isBidContested(player);
+    }
+    isBidContested(player) {
+        const bid = this.playerState(player).bid;
+        if (!bid)
+            return true;
+        return this.isPositionContested(bid.position);
+    }
+    isPositionContested(position) {
+        return Object.values(this.state.playerStates).filter((ps) => ps.bid && ps.bid.position === position).length > 1;
+    }
+    /** Java's GWT.placeBid: position in range, points strictly above the current best for that seat. */
+    placeBid(bid, _rng) {
+        if (!Number.isInteger(bid.position) || bid.position < 0 || bid.position >= this.state.playerOrder.length)
+            throw new ROWException(ROWError.BID_INVALID_POSITION);
+        if (!Number.isInteger(bid.points))
+            throw new ROWException(ROWError.BID_INVALID_POSITION);
+        let highest = -1;
+        for (const ps of Object.values(this.state.playerStates)) {
+            if (ps.bid && ps.bid.position === bid.position && ps.bid.points > highest)
+                highest = ps.bid.points;
+        }
+        if (bid.points <= highest)
+            throw new ROWException(ROWError.BID_TOO_LOW);
+        this.currentPlayerState().bid = { position: bid.position, points: bid.points };
+    }
+    endBiddingIfCompleted(rng) {
+        const bids = Object.values(this.state.playerStates).map((ps) => ps.bid).filter((b) => b);
+        const distinct = new Set(bids.map((b) => b.position)).size;
+        if (distinct !== this.state.playerOrder.length)
+            return;
+        this.state.actionStack.clear();
+        const order = this.playerOrderFromBids();
+        this.state.playerOrder = order;
+        this.startSetup(rng);
+    }
+    playerOrderFromBids() {
+        const base = this.state.playerOrder;
+        return [...base].sort((a, b) => {
+            const ba = this.playerState(a).bid;
+            const bb = this.playerState(b).bid;
+            const pa = ba ? ba.position : Number.MAX_SAFE_INTEGER;
+            const pb = bb ? bb.position : Number.MAX_SAFE_INTEGER;
+            if (pa !== pb)
+                return pa - pb;
+            const va = ba ? ba.points : Number.MIN_SAFE_INTEGER;
+            const vb = bb ? bb.points : Number.MIN_SAFE_INTEGER;
+            if (va !== vb)
+                return vb - va;
+            return base.indexOf(a) - base.indexOf(b);
+        });
     }
     getStepLimit() {
         return this.currentPlayerState().getStepLimit(this.state.players.length);
@@ -1553,11 +1639,13 @@ export class Game {
         if (this.isEnded())
             return new Set();
         const set = new Set(this.state.actionStack.getPossibleActions());
-        // Objective cards may be played at allowed windows.
-        if (this.canPlayObjectiveCard())
-            set.add(ActionType.PLAY_OBJECTIVE_CARD);
-        if (this.canUseExchangeToken())
-            set.add(ActionType.USE_EXCHANGE_TOKEN);
+        // Objective cards and exchange tokens are only available once the game has started.
+        if (this.state.status === Status.STARTED) {
+            if (this.canPlayObjectiveCard())
+                set.add(ActionType.PLAY_OBJECTIVE_CARD);
+            if (this.canUseExchangeToken())
+                set.add(ActionType.USE_EXCHANGE_TOKEN);
+        }
         return set;
     }
     /** Java's Action.UseExchangeToken.canPerform. */
@@ -1625,7 +1713,7 @@ export class Game {
             if (this.state.trail.atKansasCity(this.currentPlayer))
                 this.state.trail.moveToStart(this.currentPlayer);
             this.state.canUndo = false;
-            this.afterEndTurn();
+            this.afterEndTurn(rng);
         }
         catch (e) {
             Object.assign(this.state, backup);
@@ -1634,10 +1722,20 @@ export class Game {
     }
     getNextPlayer() {
         const order = this.state.playerOrder;
-        const idx = order.indexOf(this.currentPlayer);
-        return order[(idx + 1) % order.length];
+        let idx = order.indexOf(this.currentPlayer);
+        let player;
+        do {
+            idx = (idx + 1) % order.length;
+            player = order[idx];
+        } while (this.state.status === Status.BIDDING && !this.mustPlaceBid(player));
+        return player;
     }
-    afterEndTurn() {
+    afterEndTurn(rng) {
+        if (this.state.status === Status.BIDDING) {
+            this.endBiddingIfCompleted(rng);
+            if (this.state.status === Status.STARTED)
+                return;
+        }
         this.state.foresights.fillUp(this.state.kcSupply, !this.state.jobMarket.isClosed());
         const playerThatEndedTurn = this.currentPlayer;
         this.state.currentPlayer = this.getNextPlayer();
@@ -1659,7 +1757,8 @@ export class Game {
         const type = action.type;
         if (type === ActionType.PLAY_OBJECTIVE_CARD && !this.canPlayObjectiveCard())
             throw new ROWException(ROWError.CANNOT_PERFORM_ACTION);
-        const anytime = type === ActionType.PLAY_OBJECTIVE_CARD || type === ActionType.USE_EXCHANGE_TOKEN;
+        // Bidding forces every action through the stack (Java: isAnytimeAction only counts when started).
+        const anytime = (type === ActionType.PLAY_OBJECTIVE_CARD || type === ActionType.USE_EXCHANGE_TOKEN) && this.state.status !== Status.BIDDING;
         const backup = backupState(this.state);
         try {
             const stack = this.state.actionStack;
@@ -1720,7 +1819,8 @@ export class Game {
                 return this.doMove(action.steps, atMost, action.type !== ActionType.MOVE_3_FORWARD_WITHOUT_FEES);
             }
             case ActionType.PLACE_BID:
-                throw new ROWException(ROWError.NOT_IMPLEMENTED);
+                this.placeBid({ position: action.position, points: action.points }, rng);
+                return { immediate: [], actions: [], canUndo: true };
             case ActionType.DISCARD_CARD: {
                 const card = action.card;
                 if (!card)

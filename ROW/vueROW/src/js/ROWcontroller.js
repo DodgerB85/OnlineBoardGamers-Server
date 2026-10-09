@@ -6,7 +6,7 @@ import * as model from "./ROWmodel"
 import { deserializeGame, serializeGame } from "./ROWfuncs"
 import { useModelStore } from "../stores/ROWstore"
 import { usePersonalStore } from "../stores/ROWpersonal"
-import { decompress, loadChat, loadRewind, reloadGameData, resign, saveGame, saveZoom, updateDataFromLoadRewind } from "../backend/ROW_IO"
+import { decompress, loadChat, loadRewind, reloadGameData, resign, saveGame, saveZoom, updateDataFromLoadRewind, kickout } from "../backend/ROW_IO"
 import { broadcastGameUpdate } from "../backend/ROWwebsocket"
 import { ActionType, PHASE_MAIN, PHASE_GAME_OVER } from "./ROWreference"
 
@@ -264,6 +264,9 @@ export async function reloadFromServer() {
 	try {
 		const data = await reloadGameData(personal.gameID)
 		if (Array.isArray(data.missingPlayers)) store.missingPlayers = data.missingPlayers
+		if (data.kickoutVotesData) store.kickoutVotesData = data.kickoutVotesData
+		if (data.kickoutVoteThreshold != null) store.kickoutVoteThreshold = Number(data.kickoutVoteThreshold)
+		if (data.kickoutRequired != null) personal.kickoutRequired = Number(data.kickoutRequired)
 		if (String(data.latestUpdate) === String(personal.latestUpdate)) return
 		let gd = data.gameData
 		if (typeof gd === "string") gd = JSON.parse(gd)
@@ -323,5 +326,30 @@ export async function resignGame() {
 	} catch (error) {
 		console.error("Error resigning:", error)
 		store.gameMessages.errorText = "Error resigning from the game"
+	}
+}
+
+/**
+ * Vote to kick out (or, on the decisive vote, actually kick out) the timed-out
+ * player. A recorded vote updates the local votes; a completed kickout refreshes
+ * the game from the server.
+ */
+export async function kickoutPlayer(kickedName) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	if (personal.gameID < 0 || !kickedName) return
+	try {
+		const result = await kickout(personal.gameID, kickedName, personal.latestUpdate)
+		if (result.syncError) return
+		if (result.voteCast) {
+			if (result.votesData) store.kickoutVotesData = JSON.parse(result.votesData)
+			if (result.threshold != null) store.kickoutVoteThreshold = Number(result.threshold)
+			return
+		}
+		personal.kickoutRequired = 0
+		store.kickoutVotesData = {}
+		await reloadFromServer()
+	} catch (error) {
+		console.error("Error kicking out player:", error)
 	}
 }

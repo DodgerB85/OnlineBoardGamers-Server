@@ -12,6 +12,8 @@ import TopMenu from "./components/TopMenu.vue"
 import TopMenuViews from "./components/TopMenuViews.vue"
 import ActionArea from "./components/ActionArea.vue"
 import MapArea from "./components/MapArea.vue"
+import BiddingArea from "./components/BiddingArea.vue"
+import KickoutArea from "./components/KickoutArea.vue"
 import PlayerTable from "./components/PlayerTable.vue"
 import CattleMarket from "./components/CattleMarket.vue"
 import ObjectivesMarket from "./components/ObjectivesMarket.vue"
@@ -46,6 +48,8 @@ const showDebug = computed(() => rf.DEBUG_USERS.includes(personal.name))
 					<ReplayArea v-if="store.viewSettings.showReplay" />
 
 					<div id="mainAreaLessHistory" :style="{ zoom: personal.zoom / 16 }">
+						<BiddingArea />
+						<KickoutArea />
 						<ActionArea />
 
 						<div id="rowBoard">

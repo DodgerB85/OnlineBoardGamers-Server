@@ -99,6 +99,8 @@ function toOurs(s) {
             jobMarketToken: p.jobMarketToken ?? false,
             numberOfCowboysUsedInTurn: p.usedCowboys ?? 0,
             locationsActivatedInTurn: p.locationsActivatedInTurn ?? [],
+            turns: p.turns ?? 0,
+            stops: p.stops ?? {},
             lastEngineMove: p.lastEngineMove ?? 0,
             lastUpgradedStation: p.lastUpgradedStation ?? -1,
             exchangeTokens: p.exchangeTokens ?? 1,
