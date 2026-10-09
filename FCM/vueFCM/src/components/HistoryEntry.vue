@@ -1090,8 +1090,8 @@ const computedEntry3 = computed(() => {
 							<td>{{ computedEntry3.splitSales ? $t("history.itemsHeader") : $t("history.salesHeader") }}</td>
 							<td v-if="computedEntry3.splitSales">{{ $t("history.coffeeHeader") }}</td>
 							<td v-if="computedEntry3.splitSales">{{ $t("history.icHeader") }}</td>
-							<td v-if="computedEntry3.jazzTable"><InfoPopup type="employee" :employeeId="rf.JAZZ_MUSICIAN"><span class="compact" :class="empType(rf.JAZZ_MUSICIAN)">{{ empTitle(rf.JAZZ_MUSICIAN, true) }}</span></InfoPopup></td>
-							<td><InfoPopup type="employee" :employeeId="rf.WAITRESS"><span class="compact" :class="empType(rf.WAITRESS)">{{ empTitle(rf.WAITRESS) }}</span></InfoPopup></td>
+							<td v-if="computedEntry3.jazzTable"><InfoPopup type="employee" :employeeId="rf.JAZZ_MUSICIAN"><span class="compact" :class="empType(rf.JAZZ_MUSICIAN)">{{ $t("history.abbr.colJazz") }}</span></InfoPopup></td>
+							<td><InfoPopup type="employee" :employeeId="rf.WAITRESS"><span class="compact" :class="empType(rf.WAITRESS)">{{ $t("history.abbr.colWaitress") }}</span></InfoPopup></td>
 							<td>{{ $t("history.cfoBonusHeader") }}</td>
 							<td>{{ $t("history.totalHeader") }}</td>
 						</tr>

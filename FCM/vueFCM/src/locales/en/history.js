@@ -62,6 +62,8 @@
       seniorVP: "Senior VP",
       recruitingMgr: "Recruiting Mgr",
       jazzM: "Jazz M",
+      colJazz: "J",
+      colWaitress: "W",
     },
     salaryPay: "{amount} and {count} item|{amount} and {count} items",
 
