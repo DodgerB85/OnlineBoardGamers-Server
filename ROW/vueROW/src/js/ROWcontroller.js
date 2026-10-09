@@ -8,7 +8,7 @@ import { useModelStore } from "../stores/ROWstore"
 import { usePersonalStore } from "../stores/ROWpersonal"
 import { decompress, loadChat, loadRewind, reloadGameData, resign, saveGame, saveZoom, updateDataFromLoadRewind } from "../backend/ROW_IO"
 import { broadcastGameUpdate } from "../backend/ROWwebsocket"
-import { PHASE_MAIN, PHASE_GAME_OVER } from "./ROWreference"
+import { ActionType, PHASE_MAIN, PHASE_GAME_OVER } from "./ROWreference"
 
 /** Only the seat whose turn it is may act (practice games excepted). */
 export function canAct() {
@@ -31,19 +31,21 @@ export function submit(action) {
 	store.gameMessages.errorText = ""
 	if (!canAct()) {
 		store.gameMessages.errorText = "It is not your turn"
-		return
+		return false
 	}
 	const before = captureUndo()
 	try {
 		g.perform(g.currentPlayer, action, model.getRng())
 	} catch (err) {
 		store.gameMessages.errorText = err.message
-		return
+		return false
 	}
 	store.clearAction()
+	store.clearMovePlan()
 	store.undoSnapshot = g.canUndo() ? before : null
 	model.recordHistory(action.type, g.currentPlayer, model.actionParams(action))
 	store.touch()
+	return true
 }
 
 /** Undo the last undoable action by restoring the captured snapshot. */
@@ -61,7 +63,16 @@ export function undo() {
 }
 
 export function perform(action) {
-	submit(action)
+	return submit(action)
+}
+
+/**
+ * Submit the trail move the player has clicked together, clearing the plan.
+ * Returns the location landed on, or null when the engine rejected it.
+ */
+export function commitMove(steps) {
+	if (!steps.length) return null
+	return perform({ type: ActionType.MOVE, steps: [...steps] }) ? steps[steps.length - 1] : null
 }
 
 export async function endTurn() {

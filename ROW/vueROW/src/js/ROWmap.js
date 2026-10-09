@@ -173,6 +173,9 @@ export const MOVE_FAMILY = [
 
 export const BUILD_ACTIONS = [ActionType.PLACE_BUILDING, ActionType.PLACE_CHEAP_BUILDING, ActionType.PLACE_BUILDING_FOR_FREE]
 
+/** Offered by a market UI element rather than a board hotspot. */
+export const MARKET_DRAW_ACTIONS = new Set([ActionType.DRAW_2_CATTLE_CARDS])
+
 export const HAZARD_ACTIONS = [
 	ActionType.REMOVE_HAZARD,
 	ActionType.REMOVE_HAZARD_FOR_FREE,
@@ -231,8 +234,56 @@ export function reachableSpacesFor(a, g) {
 	return r.dir === 1 ? rt.reachableSpacesForward(from, r.lo, r.hi) : rt.reachableSpacesBackwards(from, r.lo, r.hi)
 }
 
+/**
+ * The MOVE-family action a building has armed on the board, with the movement
+ * range it allows. Null when nothing is armed. Plain MOVE is not one of these:
+ * it is the turn's own mandatory move and is never armed.
+ */
+export function armedTrailMove(game, liveActions, selected) {
+	if (!selected || selected === ActionType.MOVE || !MOVE_FAMILY.includes(selected)) return null
+	if (!liveActions.includes(selected)) return null
+	return { type: selected, limit: game.moveStepLimit(selected) ?? game.getStepLimit() }
+}
+
+/** Spots a building move can reach, used to tell a forced move from a real choice. */
+export function trailMoveTargets(game, type) {
+	return game.getTrail().possibleMovesFrom(game.currentPlayer, game.playerState(game.currentPlayer).balance, game.moveStepLimit(type) ?? game.getStepLimit(), game.state.players.length)
+}
+
 export function moveDestination(m) {
 	return m.steps[m.steps.length - 1]
+}
+
+/** The spots walked between two adjacent spots of a route, filled in with the empty ones. */
+function trailGap(trail, from, to) {
+	if (from === to) return [from]
+	const walk = (cur, acc) => {
+		for (const n of trail.getLocation(cur).next) {
+			if (n === to) return [...acc, n]
+			if (trail.getLocation(n).isEmpty()) {
+				const tail = walk(n, [...acc, n])
+				if (tail) return tail
+			}
+		}
+		return null
+	}
+	return walk(from, [from])
+}
+
+/**
+ * Every spot walked for a move: its steps plus the empty spots the engine passes
+ * through for free between them. Null when the steps do not join up.
+ */
+export function trailRoute(trail, from, steps) {
+	const route = [from]
+	let cur = from
+	for (const step of steps) {
+		const gap = trailGap(trail, cur, step)
+		if (!gap) return null
+		route.push(...gap.slice(1))
+		cur = step
+	}
+	return route
 }
 
 /** View-side preview of Game.placeBuilding: are the craftsmen and dollars there? */
@@ -336,7 +387,7 @@ export function activeBuildingActions(game, liveActions) {
 	for (const [name, loc] of game.getTrail().locations) {
 		if (loc.kind !== "BUILDING" || !loc.building) continue
 		const inter = buildingInteraction(name, game, liveActions)
-		if (inter) for (const a of inter.options) set.add(a)
+		if (inter) for (const a of inter.options) if (!MARKET_DRAW_ACTIONS.has(a)) set.add(a)
 	}
 	return set
 }

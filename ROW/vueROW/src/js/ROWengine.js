@@ -16,6 +16,15 @@ import { buildTrailNodes, buildingNumbersForOptions, CATTLE_COSTS, STATION_MASTE
 const clone = (v) => JSON.parse(JSON.stringify(v));
 /** Certificate track steps (PlayerState.CERTIFICATE_STEPS). */
 const CERTIFICATE_STEPS = [0, 1, 2, 3, 4, 6];
+/**
+ * Key for matching a described card against the hand: cattle by type + points, objective cards by
+ * points + penalty + tasks. Mirrors Java's findCardInHand, so a card that arrived as plain JSON
+ * (a recorded client action, or a replay fixture) resolves to the card already in hand.
+ */
+function cardKey(card) {
+    if (card.type !== undefined) return `cattle:${card.type}:${card.points}`;
+    return `objective:${card.points ?? 0}:${card.penalty ?? 0}:${[...(card.tasks ?? [])].sort().join(",")}`;
+}
 function objectiveCountsNegative(c) {
     return c.buildings < 0 || c.greenTeepees < 0 || c.blueTeepees < 0 || c.hazards < 0 || c.stations < 0 || c.breedingValue3 < 0 || c.breedingValue4 < 0 || c.breedingValue5 < 0 || c.sanFrancisco < 0;
 }
@@ -178,11 +187,15 @@ export class PlayerState {
             this.drawCard(rng);
     }
     discardCard(card) {
-        const idx = this.hand.indexOf(card);
+        // Identity first, then by value: an action carried as JSON describes the card rather than
+        // referencing the object in hand.
+        let idx = this.hand.indexOf(card);
+        if (idx < 0)
+            idx = this.hand.findIndex((c) => cardKey(c) === cardKey(card));
         if (idx < 0)
             throw new ROWException(ROWError.CARD_NOT_IN_HAND);
-        this.hand.splice(idx, 1);
-        this.discardPile.unshift(card);
+        const [removed] = this.hand.splice(idx, 1);
+        this.discardPile.unshift(removed);
     }
     discardCattleCards(type, amount) {
         const candidates = this.hand
@@ -446,8 +459,12 @@ export class Trail {
         }
         return out;
     }
-    possibleMovesFrom(player, balance, stepLimit, playerCount) {
-        const from = this.currentLocation(player);
+    /**
+     * Every legal move from `from` (defaults to where the player stands). The UI
+     * passes an origin to preview a move the player is still building up, one
+     * clicked step at a time.
+     */
+    possibleMovesFrom(player, balance, stepLimit, playerCount, from = this.currentLocation(player)) {
         if (!from) {
             // opening placement: any non-empty building location
             const moves = [];
@@ -1265,6 +1282,13 @@ export class Game {
             ps.discardHand();
         this.state.actionStack.skipAll();
         ps.drawUpToHandLimit(rng);
+        // Java clears these on the player ending the turn, not on the next player's beginTurn:
+        // locationsActivatedInTurn and numberOfCowboysUsedInTurn are what the turn loop reads.
+        ps.numberOfCowboysUsedInTurn = 0;
+        ps.locationsActivatedInTurn = [];
+        ps.lastEngineMove = 0;
+        // lastUpgradedStation is deliberately left alone: Java serialises "none" as -1 while this
+        // codebase uses null, so resetting it here would change the representation mid-game.
         if (this.state.trail.atKansasCity(this.currentPlayer))
             this.state.trail.moveToStart(this.currentPlayer);
         this.state.canUndo = false;
@@ -1325,6 +1349,21 @@ export class Game {
             throw e;
         }
     }
+    /**
+     * Steps a MOVE-family action may take, or null when the player's own step
+     * limit applies. Shared with the board so both agree on the movement range.
+     */
+    moveStepLimit(type) {
+        switch (type) {
+            case ActionType.MOVE_1_FORWARD: return 1;
+            case ActionType.MOVE_2_FORWARD: return 2;
+            case ActionType.MOVE_3_FORWARD: return 3;
+            case ActionType.MOVE_4_FORWARD: return 4;
+            case ActionType.MOVE_5_FORWARD: return 5;
+            case ActionType.MOVE_3_FORWARD_WITHOUT_FEES: return 3;
+            default: return null;
+        }
+    }
     execute(action, rng) {
         const ps = this.currentPlayerState();
         switch (action.type) {
@@ -1335,13 +1374,7 @@ export class Game {
             case ActionType.MOVE_4_FORWARD:
             case ActionType.MOVE_5_FORWARD:
             case ActionType.MOVE_3_FORWARD_WITHOUT_FEES: {
-                const atMost = action.type === ActionType.MOVE_1_FORWARD ? 1
-                    : action.type === ActionType.MOVE_2_FORWARD ? 2
-                        : action.type === ActionType.MOVE_3_FORWARD ? 3
-                            : action.type === ActionType.MOVE_4_FORWARD ? 4
-                                : action.type === ActionType.MOVE_5_FORWARD ? 5
-                                    : action.type === ActionType.MOVE_3_FORWARD_WITHOUT_FEES ? 3
-                                        : null;
+                const atMost = this.moveStepLimit(action.type);
                 return this.doMove(action.steps, atMost, action.type !== ActionType.MOVE_3_FORWARD_WITHOUT_FEES);
             }
             case ActionType.PLACE_BID:
@@ -1351,7 +1384,7 @@ export class Game {
                 if (!card)
                     throw new ROWException(ROWError.CARD_NOT_IN_HAND);
                 ps.discardCard(card);
-                return null;
+                return { immediate: [], actions: [], canUndo: true };
             }
             case ActionType.DRAW_CARD: {
                 if (!ps.drawCard(rng))

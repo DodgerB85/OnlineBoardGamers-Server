@@ -2,7 +2,6 @@
 import { computed } from "vue"
 import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
-import * as model from "../js/ROWmodel"
 import * as map from "../js/ROWmap"
 import * as view from "../js/ROWview"
 import { PLAYER_BUILDINGS } from "../js/ROWdata"
@@ -14,15 +13,10 @@ const store = useModelStore()
 const g = () => store.getGame()
 const actions = computed(() => store.actions)
 
-// --- Moves on the trail ---
-const moves = computed(() => {
-	if (!store.currentPlayer || !actions.value.includes(ActionType.MOVE)) return []
-	try {
-		return model.possibleMovesFor(store.currentPlayer)
-	} catch {
-		return []
-	}
-})
+// --- Moves on the trail (done by clicking the map, not from here) ---
+const canMove = computed(() => store.actions.includes(ActionType.MOVE) && store.moveStepsLeft > 0)
+const stepsLeft = computed(() => store.moveStepsLeft)
+const armedMove = computed(() => (store.game ? map.armedTrailMove(store.game, store.actions, store.selectedAction) : null))
 
 // --- Hire worker ---
 const hireRows = computed(() => {
@@ -112,9 +106,14 @@ function p(type, extra = {}) {
 			<div class="label">{{ store.saving ? "Saving…" : "Waiting for other players" }}</div>
 		</div>
 		<template v-else>
-			<div v-if="moves.length" class="group">
-			<div class="label">Move</div>
-			<button v-for="(mv, i) in moves" :key="i" class="act" @click="p(ActionType.MOVE, { steps: mv.steps })">{{ mv.steps.join(" → ") }} ({{ mv.cost }}$)</button>
+		<div v-if="canMove" class="group">
+			<div class="label">Move — click a highlighted spot, {{ stepsLeft }} step{{ stepsLeft === 1 ? "" : "s" }} left (yellow = next step, cyan = further)</div>
+			<button v-if="store.plannedSteps.length" class="act stay" :disabled="store.saving" @click="controller.commitMove(store.plannedSteps)">Stay Here</button>
+		</div>
+
+		<div v-if="armedMove" class="group">
+			<div class="label">Move — click a highlighted spot, {{ armedMove.limit }} step{{ armedMove.limit === 1 ? "" : "s" }} at most</div>
+			<button class="act" @click="store.clearAction()">Cancel</button>
 		</div>
 
 		<div v-if="hireRows.length" class="group">
@@ -152,7 +151,7 @@ function p(type, extra = {}) {
 
 		<div v-for="em in engineMoves" :key="em.type" class="group">
 			<div class="label">{{ view.humanizeAction(em.type) }}</div>
-			<button v-for="sp in em.spaces" :key="sp" class="act" @click="p(em.type, { to: sp })">{{ sp }}</button>
+			<button v-for="sp in em.spaces" :key="sp" class="act move" @click="p(em.type, { to: sp })">{{ sp }}</button>
 		</div>
 
 		<div v-if="cardActions.length" class="group">
@@ -186,7 +185,10 @@ function p(type, extra = {}) {
 .group { border: 1px solid #999; border-radius: 5px; padding: 5px; background: #f4f7d7; max-width: 460px; }
 .label { font-weight: bold; font-size: 12px; margin-bottom: 3px; }
 .act { margin: 2px; padding: 3px 7px; cursor: pointer; font-size: 12px; }
+/* Movement options match the board: light-green border on hover, as the map spots do. */
+.act.move:hover { border: 2px solid #90ee90; }
 .end { background: #cfe8cf; font-weight: bold; }
+.stay { background: #cfe8cf; }
 .reset { background: #f6d9c9; font-weight: bold; }
 .supply { display: flex; flex-wrap: wrap; gap: 3px; }
 .buildingTile { width: 44px; height: 52px; border: 2px solid #ffffff; border-radius: 4px; cursor: pointer; background: #fff; }

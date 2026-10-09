@@ -66,14 +66,55 @@ function center(name) {
 // ---------- candidate resolution: one click, what can it do? ----------
 const chooser = ref(null)
 
+/** Where the next click would count as a step from: the last spot clicked, else where the player stands. */
+const moveOrigin = computed(() => {
+	if (!game.value) return null
+	const planned = store.plannedSteps
+	if (planned.length) return planned[planned.length - 1]
+	return g().getTrail().currentLocation(g().currentPlayer)
+})
+
+/** A MOVE-family action picked off a building, armed until a spot is clicked or it is cancelled. */
+const armedMove = computed(() => (game.value ? map.armedTrailMove(g(), store.actions, store.selectedAction) : null))
+
 const moves = computed(() => {
-	if (!game.value || !store.currentPlayer || !store.actions.includes(ActionType.MOVE)) return []
+	if (!game.value || !store.currentPlayer) return []
+	// A building move is always one move, not a plan, and starts where the player stands.
+	const armed = armedMove.value
+	if (armed) {
+		try {
+			return model.possibleMovesFor(store.currentPlayer, armed.limit)
+		} catch {
+			return []
+		}
+	}
+	if (!store.actions.includes(ActionType.MOVE)) return []
 	try {
-		return model.possibleMovesFor(store.currentPlayer)
+		return model.possibleMovesFor(store.currentPlayer, store.moveStepsLeft, moveOrigin.value)
 	} catch {
 		return []
 	}
 })
+
+/**
+ * Walk towards `name`: take the highlighted route when it spends the last of the
+ * turn's steps, otherwise record the step and keep highlighting what is left.
+ * The opening placement goes straight onto a building, and Kansas City ends the
+ * trail, so both commit at once.
+ */
+function takeMove(name) {
+	const target = moveTargets.value.get(name)
+	if (!target) return
+	const steps = [...store.plannedSteps, ...target.steps]
+	const endsMove = !moveOrigin.value || map.moveDestination(target) === "KANSAS_CITY" || store.moveStepsLeft <= target.steps.length
+	if (endsMove) {
+		const to = controller.commitMove(steps)
+		// Out of steps: drop straight into the actions of the spot we landed on.
+		if (to) enterBuilding(to)
+	} else {
+		store.planMove(steps)
+	}
+}
 
 function candidatesFor(name) {
 	if (!game.value) return []
@@ -81,14 +122,15 @@ function candidatesFor(name) {
 	const player = g().currentPlayer
 	const out = []
 
-	if (acts.includes(ActionType.MOVE)) {
-		for (const m of moves.value.filter((m) => map.moveDestination(m) === name)) {
-			const fee = playerFeesLabel(m)
-			out.push({
-				label: `Move here (${m.cost}$${fee ? "; " + fee : ""})`,
-				run: () => controller.perform({ type: ActionType.MOVE, steps: m.steps }),
-			})
-		}
+	const armed = armedMove.value
+	if (armed) {
+		// A building move is all-or-nothing: it has no plan and no staying put.
+		const target = moveTargets.value.get(name)
+		if (target) out.push({ label: moveLabel(target), run: () => controller.perform({ type: armed.type, steps: target.steps }) })
+	} else if (acts.includes(ActionType.MOVE)) {
+		// One move per spot: the cheapest route, the same one drawn in light green.
+		const target = moveTargets.value.get(name)
+		if (target) out.push({ label: moveLabel(target), run: () => takeMove(name) })
 	}
 
 	const loc = g().getTrail().locations.get(name)
@@ -128,6 +170,50 @@ function playerFeesLabel(m) {
 	return Object.entries(m.playerFees)
 		.map(([p, f]) => `${f}$ to ${p}`)
 		.join(", ")
+}
+
+function moveLabel(m) {
+	const fee = playerFeesLabel(m)
+	return `Move here (${m.cost}$${fee ? "; " + fee : ""})`
+}
+
+// ---------- trail moves: cheapest/shortest path per destination ----------
+const moveTargets = computed(() => {
+	const out = new Map()
+	for (const m of moves.value) {
+		const to = map.moveDestination(m)
+		const best = out.get(to)
+		if (!best || m.cost < best.cost || (m.cost === best.cost && m.steps.length < best.steps.length)) out.set(to, m)
+	}
+	return out
+})
+
+/** The spot under the cursor that is a move destination, if any. */
+const hoveredMove = ref(null)
+
+/** Spots to light green: those already walked, plus the hovered destination's route. */
+const moveRoute = computed(() => {
+	if (!game.value) return new Set()
+	const trail = g().getTrail()
+	const player = g().currentPlayer
+	const out = new Set()
+	const add = (steps, from) => {
+		if (!from) return
+		for (const spot of map.trailRoute(trail, from, steps) ?? []) out.add(spot)
+	}
+	// Walked so far: stays lit until the move is committed or changed.
+	add(store.plannedSteps, trail.currentLocation(player))
+	// One step away the outline itself is enough; further lights the whole route.
+	const target = hoveredMove.value ? moveTargets.value.get(hoveredMove.value) : null
+	if (target && target.steps.length > 1) add(target.steps, target.from)
+	return out
+})
+
+/** Highlight tone: cyan when more than one step away, light green on the shown route, else the default yellow. */
+function locationTone(name) {
+	if (moveRoute.value.has(name)) return "route"
+	const target = moveTargets.value.get(name)
+	return target && target.steps.length > 1 ? "far" : ""
 }
 
 function clickLocation(name) {
@@ -390,7 +476,7 @@ function buildingActionRegions(name, rect, inter) {
 
 	return groups.map((slots, index) => ({
 		points: shapes[index],
-		actions: slots.map((slot) => allActions[slot]).filter((action) => actions.includes(action)),
+		actions: slots.map((slot) => allActions[slot]).filter((action) => actions.includes(action) && !map.MARKET_DRAW_ACTIONS.has(action)),
 	})).filter((region) => region.actions.length)
 }
 
@@ -457,6 +543,9 @@ const hoveredBuilding = computed(() => {
 		building,
 		rect: r,
 		img: tile.img,
+		// The zoomed tile covers the board's own border, so it draws its own.
+		// Light green while it is a movement option the mouse is over, black otherwise.
+		move: moveTargets.value.has(name),
 		mode: inter ? inter.mode : null,
 		regions,
 		transform: `translate(${r.x + r.w / 2},${r.y + r.h / 2}) scale(2) translate(${-(r.x + r.w / 2)},${-(r.y + r.h / 2)})`,
@@ -467,6 +556,16 @@ function runHotspot(opt, name, mode) {
 	if (!controller.canAct()) return
 	if (mode === "adjacent") {
 		controller.perform({ type: ActionType.USE_ADJACENT_BUILDING, location: name })
+		return
+	}
+	if (opt !== ActionType.MOVE && map.MOVE_FAMILY.includes(opt)) {
+		const options = map.trailMoveTargets(g(), opt)
+		// Nothing to choose between: take the only spot straight away.
+		if (options.length < 2) {
+			if (options.length === 1) controller.perform({ type: opt, steps: options[0].steps })
+			return
+		}
+		store.selectAction(opt)
 		return
 	}
 	// Actions that need a further choice are armed; the board/top choosers finish them.
@@ -499,7 +598,7 @@ const hitTargets = computed(() => {
 		const hasTargets = candidatesFor(l.name).length > 0
 		const building = map.buildingInteraction(l.name, g(), store.actions)
 		if (!hasTargets && !building) continue
-		out.push({ key: "loc:" + l.name, type: "location", name: l.name, x: l.rect.x, y: l.rect.y, w: l.rect.w, h: l.rect.h, rx: 2, transform: null })
+		out.push({ key: "loc:" + l.name, type: "location", name: l.name, tone: locationTone(l.name), x: l.rect.x, y: l.rect.y, w: l.rect.w, h: l.rect.h, rx: 2, transform: null })
 	}
 	for (const c of cityGroups.value) {
 		if (!deliverableCities.value.has(c.city)) continue
@@ -524,7 +623,15 @@ function clickTarget(t) {
 }
 
 function enterTarget(t) {
-	if (t.type === "location") enterBuilding(t.name)
+	if (t.type === "location") {
+		enterBuilding(t.name)
+		hoveredMove.value = moveTargets.value.has(t.name) ? t.name : null
+	}
+}
+
+function leaveTarget(t) {
+	if (t.type === "location" && hoveredMove.value === t.name) hoveredMove.value = null
+	leaveBuilding()
 }
 </script>
 
@@ -609,7 +716,7 @@ function enterTarget(t) {
 					<rect
 						v-for="t in hitTargets"
 						:key="t.key"
-						class="hit"
+						:class="t.tone ? 'hit ' + t.tone : 'hit'"
 						:x="t.x"
 						:y="t.y"
 						:width="t.w"
@@ -618,7 +725,7 @@ function enterTarget(t) {
 						:ry="t.rx"
 						:transform="t.transform || undefined"
 						@mouseenter="enterTarget(t)"
-						@mouseleave="leaveBuilding"
+						@mouseleave="leaveTarget(t)"
 						@click="clickTarget(t)"
 					/>
 				</g>
@@ -642,6 +749,16 @@ function enterTarget(t) {
 				>
 					<g :transform="hoveredBuilding.transform">
 						<image :href="hoveredBuilding.img" :x="hoveredBuilding.rect.x" :y="hoveredBuilding.rect.y" :width="hoveredBuilding.rect.w" :height="hoveredBuilding.rect.h" />
+						<rect
+							class="buildingOutline"
+							:class="{ move: hoveredBuilding.move }"
+							:x="hoveredBuilding.rect.x"
+							:y="hoveredBuilding.rect.y"
+							:width="hoveredBuilding.rect.w"
+							:height="hoveredBuilding.rect.h"
+							rx="2"
+							ry="2"
+						/>
 						<polygon
 							v-for="(region, index) in hoveredBuilding.regions"
 							:key="index"
@@ -713,13 +830,15 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 .workerGroup.hireable .hireOutline { stroke: #ffd400; stroke-width: 4; }
 .workerGroup.hireable:hover .hireOutline { stroke: #90ee90; stroke-width: 6; }
 
-/* Clickable targets: thick yellow border, light-green on hover, drawn in a top layer. */
+/* Clickable targets: yellow border, cyan when more than one step away, light green on hover or on a shown route. */
 .hit {
 	fill: transparent;
 	stroke: #ffd400;
 	stroke-width: 6;
 	cursor: pointer;
 }
+.hit.far { stroke: #00cfe0; }
+.hit.route { stroke: #90ee90; stroke-width: 7; }
 .hit:hover { stroke: #90ee90; stroke-width: 7; }
 .hitLayer { pointer-events: all; }
 
@@ -743,6 +862,9 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 
 /* Hovered-building action hotspots */
 .buildingOverlay { pointer-events: all; }
+/* Border of the 2x tile, drawn over its artwork so it is not lost behind it. */
+.buildingOutline { fill: none; stroke: black; stroke-width: 6; pointer-events: none; }
+.buildingOutline.move { stroke: #90ee90; }
 .hotspot {
 	fill: rgb(255, 255, 0, 0.32);
 	stroke: #ffd400;

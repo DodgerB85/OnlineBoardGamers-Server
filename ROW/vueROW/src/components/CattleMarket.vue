@@ -59,7 +59,22 @@ const possibleBuys = computed(() => {
 	return g().getCattleMarket().possibleBuys(ps.cowboysRemaining(), ps.balance)
 })
 
+/** DRAW_2_CATTLE_CARDS lives on the draw pile: 1 cowboy for 2 cards, repeatable. */
+const drawingTwo = computed(() => store.actions.includes(ActionType.DRAW_2_CATTLE_CARDS))
+
 const selected = ref([])
+
+const hint = computed(() => {
+	if (takingThree.value) return "Take a breeding value 3 card"
+	if (buying.value) return possibleBuys.value.length ? "Select card(s) to buy" : "Not enough dollars or cowboys to buy cattle"
+	return `Click the draw pile to draw 2 cattle cards for 1 cowboy (${g().currentPlayerState().cowboysRemaining()} left)`
+})
+
+function drawTwo() {
+	if (!drawingTwo.value) return
+	selected.value = []
+	controller.perform({ type: ActionType.DRAW_2_CATTLE_CARDS })
+}
 
 function canBuySingle(breedingValue) {
 	return possibleBuys.value.some((o) => o.breedingValue === breedingValue && !o.pair)
@@ -118,8 +133,8 @@ function confirm() {
 
 <template>
 	<div id="cattleMarket" v-if="game">
-		<div v-if="buying || takingThree" class="hint">
-			<span>{{ takingThree ? "Take a breeding value 3 card" : possibleBuys.length ? "Select card(s) to buy" : "Not enough dollars or cowboys to buy cattle" }}</span>
+		<div v-if="buying || takingThree || drawingTwo" class="hint">
+			<span>{{ hint }}</span>
 			<button v-if="buying" class="buy" :disabled="!canConfirm" @click="confirm">Buy</button>
 		</div>
 		<div class="cards" :class="{ buying: buying || takingThree, selecting: selected.length > 0 }">
@@ -131,10 +146,16 @@ function confirm() {
 				:card="card"
 				@click="selectCard(card)"
 			/>
-			<div class="drawStack" :class="{ empty: drawStackSize === 0 }" :title="`Draw pile (${drawStackSize}) — cattle cards still to be turned face up into the market`">
+			<div
+				class="drawStack"
+				:class="{ empty: drawStackSize === 0, selectable: drawingTwo }"
+				:title="drawingTwo ? 'Draw 2 cattle cards for 1 cowboy' : `Draw pile (${drawStackSize}) — cattle cards still to be turned face up into the market`"
+				@click="drawTwo"
+			>
 				<img :src="view.cardBackImage()" alt="" draggable="false" />
-				<em class="stackLabel">Draw</em>
+				<em class="stackLabel">{{ drawingTwo ? "Draw 2" : "Draw" }}</em>
 				<span class="count">({{ drawStackSize }})</span>
+				<em v-if="drawingTwo" class="cost">1 cowboy</em>
 			</div>
 		</div>
 	</div>
@@ -162,6 +183,8 @@ function confirm() {
 	overflow: hidden;
 }
 .drawStack.empty { border: none; }
+.drawStack.selectable { cursor: pointer; border-width: 5px; border-color: #ffd400; }
+.drawStack.selectable:hover { border-color: #90ee90; }
 .drawStack img { width: 100%; height: 100%; display: block; }
 .drawStack .stackLabel {
 	position: absolute;
@@ -187,5 +210,19 @@ function confirm() {
 	font-size: 17px;
 	font-weight: bold;
 	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+/* Cost of the draw-2 option, shown once the action is live. */
+.drawStack .cost {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 22px;
+	font-style: normal;
+	font-size: 12px;
+	font-weight: bold;
+	text-align: center;
+	color: white;
+	background: rgba(144, 238, 144, 0.85);
+	text-shadow: -1px -1px 0 #000, 1px 1px 0 #000;
 }
 </style>

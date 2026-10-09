@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { ActionStack, CATTLE_DEFAULT_VALUE, PossibleAction, RecordingRandom, ActionType, deserializeGame, serializeGame } from "./ROWindex";
@@ -208,8 +208,22 @@ function diff(a, b, path = "") {
     const short = (v) => JSON.stringify(v)?.slice(0, 90);
     return [`${path}: got ${short(a)} want ${short(b)}`];
 }
+/** Annotate an engine failure with the fixture and command index that produced it. */
+function run(command, label) {
+    try {
+        command();
+    } catch (error) {
+        throw new Error(`${label}\n  ${error?.message ?? error}`);
+    }
+}
 const fixtureDir = join(__dirname, "__fixtures__", "replays");
-const files = readdirSync(fixtureDir).filter((f) => f.endsWith(".json"));
+// The 17 hand-written baseline fixtures live directly in replays/; generated ones go in
+// replays/fuzz/ so that fixtures.test.js can keep counting the baseline on its own.
+const files = ["", "fuzz"].flatMap((dir) => {
+    const absolute = dir ? join(fixtureDir, dir) : fixtureDir;
+    if (!existsSync(absolute)) return [];
+    return readdirSync(absolute).filter((f) => f.endsWith(".json")).map((f) => (dir ? join(dir, f) : f));
+});
 describe("Replay fixtures drive the real engine", () => {
     for (const file of files) {
         it(`replays ${file}`, () => {
@@ -226,8 +240,10 @@ describe("Replay fixtures drive the real engine", () => {
                         expect(() => game.perform(cmd.player, cmd.action, rng), label).toThrow(new RegExp(cmd.expectedError));
                     }
                     else {
-                        game.perform(cmd.player, cmd.action, rng);
-                        rng.assertFullyConsumed();
+                        run(() => {
+                            game.perform(cmd.player, cmd.action, rng);
+                            rng.assertFullyConsumed();
+                        }, label);
                     }
                 }
                 else if (cmd.kind === "skip") {
@@ -235,13 +251,17 @@ describe("Replay fixtures drive the real engine", () => {
                         expect(() => game.skip(cmd.player), label).toThrow(new RegExp(cmd.expectedError));
                     }
                     else {
-                        game.skip(cmd.player);
-                        rng.assertFullyConsumed();
+                        run(() => {
+                            game.skip(cmd.player);
+                            rng.assertFullyConsumed();
+                        }, label);
                     }
                 }
                 else if (cmd.kind === "endTurn") {
-                    game.endTurn(cmd.player, rng);
-                    rng.assertFullyConsumed();
+                    run(() => {
+                        game.endTurn(cmd.player, rng);
+                        rng.assertFullyConsumed();
+                    }, label);
                 }
                 else if (cmd.kind === "undo") {
                     game.undo(cmd.player);

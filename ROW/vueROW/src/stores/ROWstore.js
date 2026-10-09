@@ -9,6 +9,7 @@
 import { defineStore } from "pinia"
 import { computed, reactive, ref } from "vue"
 import { usePersonalStore } from "./ROWpersonal"
+import { ActionType } from "../js/ROWreference"
 
 export const useModelStore = defineStore("store", () => {
 	// Bumped after every engine mutation so `computed`s re-evaluate.
@@ -35,6 +36,11 @@ export const useModelStore = defineStore("store", () => {
 
 	const selectedAction = ref(null)
 	const pendingBuilding = ref(null)
+	/**
+	 * Trail spots the player has clicked for the mandatory MOVE, so the move can
+	 * be walked one step at a time. Null until they click the first one.
+	 */
+	const movePlan = ref(null)
 	const gameMessages = reactive({ errorText: "", successText: "", bugErrorText: "", rewindErrorText: "" })
 	const history = reactive([])
 	const chatData = reactive([])
@@ -82,8 +88,35 @@ export const useModelStore = defineStore("store", () => {
 		version.value++
 	}
 
+	/** Steps clicked so far; empty whenever MOVE is not pending or the plan went stale. */
+	const plannedSteps = computed(() => {
+		version.value
+		const g = game.value
+		const plan = movePlan.value
+		if (!g || !plan || !actions.value.includes(ActionType.MOVE)) return []
+		return g.getTrail().currentLocation(g.currentPlayer) === plan.from ? plan.steps : []
+	})
+
+	/** How many of this turn's steps the player may still click. */
+	const moveStepsLeft = computed(() => {
+		version.value
+		const g = game.value
+		if (!g || !actions.value.includes(ActionType.MOVE)) return 0
+		return Math.max(0, g.getStepLimit() - plannedSteps.value.length)
+	})
+
+	function planMove(steps) {
+		const g = game.value
+		movePlan.value = { from: g ? g.getTrail().currentLocation(g.currentPlayer) : null, steps: [...steps] }
+	}
+
+	function clearMovePlan() {
+		movePlan.value = null
+	}
+
 	function setGame(g) {
 		game.value = g
+		clearMovePlan()
 		touch()
 	}
 
@@ -120,6 +153,8 @@ export const useModelStore = defineStore("store", () => {
 		viewSettings,
 		selectedAction,
 		pendingBuilding,
+		plannedSteps,
+		moveStepsLeft,
 		gameMessages,
 		history,
 		chatData,
@@ -142,6 +177,8 @@ export const useModelStore = defineStore("store", () => {
 		selectAction,
 		pickBuilding,
 		clearAction,
+		planMove,
+		clearMovePlan,
 		clearMessages,
 		personal: usePersonalStore,
 	}

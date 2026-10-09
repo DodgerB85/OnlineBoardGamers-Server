@@ -39,9 +39,13 @@ export function playerState(name) {
 	return getGame().playerState(name)
 }
 
-export function possibleMovesFor(player) {
+/**
+ * Legal trail moves. `stepsLeft` and `from` let the UI preview the part of the
+ * move the player has not committed yet (see the store's move plan).
+ */
+export function possibleMovesFor(player, stepsLeft, from) {
 	const g = getGame()
-	return g.getTrail().possibleMovesFrom(player, g.playerState(player).balance, g.getStepLimit(), g.state.players.length)
+	return g.getTrail().possibleMovesFrom(player, g.playerState(player).balance, stepsLeft ?? g.getStepLimit(), g.state.players.length, from)
 }
 
 export function serialize() {
