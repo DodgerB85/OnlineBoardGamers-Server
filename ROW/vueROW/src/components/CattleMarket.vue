@@ -131,9 +131,10 @@ function confirm() {
 				:card="card"
 				@click="selectCard(card)"
 			/>
-			<div class="drawStack" :class="{ empty: drawStackSize === 0 }">
+			<div class="drawStack" :class="{ empty: drawStackSize === 0 }" :title="`Draw pile (${drawStackSize}) — cattle cards still to be turned face up into the market`">
 				<img :src="view.cardBackImage()" alt="" draggable="false" />
-				<span class="count">{{ drawStackSize }}</span>
+				<em class="stackLabel">Draw</em>
+				<span class="count">({{ drawStackSize }})</span>
 			</div>
 		</div>
 	</div>
@@ -162,13 +163,29 @@ function confirm() {
 }
 .drawStack.empty { border: none; }
 .drawStack img { width: 100%; height: 100%; display: block; }
+.drawStack .stackLabel {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	font-style: normal;
+	font-size: 13px;
+	font-weight: bold;
+	line-height: 17px;
+	text-align: center;
+	color: white;
+	background: rgba(0, 0, 0, 0.55);
+	text-shadow: -1px -1px 0 #000, 1px 1px 0 #000;
+}
 .drawStack .count {
 	position: absolute;
-	right: 4px;
+	left: 0;
+	right: 0;
 	bottom: 2px;
+	text-align: center;
 	color: white;
-	font-size: 12px;
+	font-size: 17px;
 	font-weight: bold;
-	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000;
+	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
 </style>
