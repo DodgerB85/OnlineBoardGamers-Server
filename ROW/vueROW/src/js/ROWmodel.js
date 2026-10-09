@@ -106,7 +106,7 @@ export function alignToCurrentPlayers(order) {
 	snapshotTurn()
 }
 
-export function initFromGameData(gameData, players, edition) {
+export function initFromGameData(gameData, players, options) {
 	const store = useModelStore()
 	store.clearAction()
 	if (gameData && typeof gameData === "object" && gameData.v === 1) {
@@ -116,7 +116,7 @@ export function initFromGameData(gameData, players, edition) {
 		snapshotTurn()
 		return
 	}
-	store.setGame(Game.start(players, { ...defaultOptions(edition) }, rng))
+	store.setGame(Game.start(players, { ...defaultOptions(options.edition, options) }, rng))
 	snapshotTurn()
 }
 
@@ -141,6 +141,12 @@ export function initGame() {
 	store.turn = Number(initData.turn ?? 1)
 
 	const edition = initData.edition ?? Edition.FIRST
+	// Game options carried as starting options by the Django views.
+	const options = {
+		edition,
+		railsToTheNorth: Boolean(initData.railsToTheNorth),
+		simmental: Boolean(initData.simmental),
+	}
 	const names = initData.playerNames ?? []
 	const players = names.map((name, i) => ({ name, color: COLOURS[i % COLOURS.length], type: "HUMAN" }))
 
@@ -154,7 +160,7 @@ export function initGame() {
 	}
 
 	setRng(new JavaRandom(Number(initData.gameID ?? Date.now())))
-	initFromGameData(gameData, players, edition)
+	initFromGameData(gameData, players, options)
 
 	// OBG is authoritative for whose turn it is; align the engine to it.
 	alignToCurrentPlayers(Array.isArray(initData.currentPlayers) ? initData.currentPlayers : [])

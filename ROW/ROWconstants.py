@@ -21,3 +21,5 @@ PHASE_LOOKBACK_AMOUNT = 1
 # (Practice / Learning / Experienced) come from Lobby.sharedFunctions.constants.
 SO_BASE_GAME = -1
 SO_SECOND_EDITION = 2
+SO_RTTN = 3  # Rails to the North expansion
+SO_SIMMENTAL = 4  # second edition simmental cattle

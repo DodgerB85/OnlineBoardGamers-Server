@@ -137,6 +137,74 @@ export const CITY_POSITIONS = [
 	{ rect: { x: 722, y: 0, w: 52, h: 50 }, disc: { cx: 748, cy: 17 } },
 ]
 
+/**
+ * Rails to the North strip geometry, in the strip's own absolute space (the strip image sits at
+ * 0,0). Subtract RTTN_SHIFT to get board space, which is where the shifted board group draws.
+ */
+export const RTTN_CITY_SPOTS = {
+	KANSAS_CITY: { rect: { x: 121, y: 191, w: 52, h: 50 }, disc: { cx: 147, cy: 210 } },
+	COLUMBIA: { rect: { x: 183, y: 191, w: 52, h: 50 }, disc: { cx: 210, cy: 210 } },
+	ST_LOUIS: { rect: { x: 279, y: 191, w: 52, h: 50 }, disc: { cx: 305.5, cy: 209.5 } },
+	CHICAGO: { rect: { x: 343, y: 191, w: 52, h: 50 }, disc: { cx: 368.5, cy: 210 } },
+	DETROIT: { rect: { x: 470, y: 191, w: 52, h: 50 }, disc: { cx: 495, cy: 209 } },
+	CLEVELAND: { rect: { x: 533, y: 191, w: 52, h: 50 }, disc: { cx: 558.25, cy: 209 } },
+	PITTSBURGH: { rect: { x: 629, y: 191, w: 52, h: 50 }, disc: { cx: 655, cy: 209 } },
+	NEW_YORK_CITY: { rect: { x: 722, y: 191, w: 52, h: 50 }, disc: { cx: 747.5, cy: 209 } },
+	MEMPHIS: { rect: { x: 115, y: 127, w: 52, h: 50 }, disc: { cx: 140, cy: 144 } },
+	SAN_FRANCISCO: { rect: { x: 163, y: 35, w: 52, h: 50 }, disc: { cx: 188.5, cy: 53 } },
+	DENVER: { rect: { x: 310, y: 35, w: 52, h: 50 }, disc: { cx: 336, cy: 53 } },
+	MILWAUKEE: { rect: { x: 388, y: 36, w: 52, h: 50 }, disc: { cx: 414, cy: 54 } },
+	GREEN_BAY: { rect: { x: 517, y: 36, w: 52, h: 50 }, disc: { cx: 543, cy: 53 } },
+	MINNEAPOLIS: { rect: { x: 670, y: 36, w: 52, h: 50 }, disc: { cx: 695.5, cy: 54 } },
+	MONTREAL: { rect: { x: 744, y: 82, w: 52, h: 50 }, disc: { cx: 769.5, cy: 100 } },
+	TORONTO: { rect: { x: 596, y: 132, w: 52, h: 50 }, disc: { cx: 621, cy: 150 } },
+}
+/** Town hit squares on the strip (36x36), keyed by RTTN_TRACK town name. */
+export const RTTN_TOWN_SPOTS = {
+	40: { x: 58, y: 33.5 },
+	41: { x: 454.5, y: 62 },
+	42: { x: 51, y: 144 },
+	43: { x: 1.5, y: 144.5 },
+	44: { x: 9, y: 1.5 },
+	45: { x: 299, y: 142 },
+	46: { x: 240, y: 141 },
+	47: { x: 304.5, y: 93 },
+	MEM: { x: 121.5, y: 95 },
+	SFO: { x: 171, y: 2 },
+	DEN: { x: 317.5, y: 1.5 },
+	MIL: { x: 396, y: 3 },
+	48: { x: 237.5, y: 64.5 },
+	49: { x: 234.5, y: 3 },
+	50: { x: 450, y: 3 },
+	GBY: { x: 525, y: 3 },
+	51: { x: 579, y: 49 },
+	52: { x: 520, y: 91 },
+	53: { x: 616, y: 3 },
+	MIN: { x: 678, y: 3 },
+	TOR: { x: 603.5, y: 99 },
+	54: { x: 647, y: 99 },
+	55: { x: 727.5, y: 3 },
+	56: { x: 477, y: 142 },
+	57: { x: 420.5, y: 142 },
+	MON: { x: 751.5, y: 49 },
+	58: { x: 676, y: 147.5 },
+	59: { x: 726.5, y: 147.5 },
+}
+/** The tile resting on each medium town. */
+export const RTTN_MEDIUM_TOWN_SPOTS = {
+	43: { x: 3, y: 114 },
+	46: { x: 240, y: 107 },
+	52: { x: 521, y: 126 },
+	55: { x: 763.5, y: 3 },
+	57: { x: 387.5, y: 142 },
+	59: { x: 762, y: 149 },
+}
+/** The two extra station towns, keyed by station index (10 = green, 11 = red). */
+export const RTTN_STATION_SPOTS = {
+	10: { rect: { x: 59, y: 73, w: 33, h: 33 }, disc: { cx: 75, cy: 89 }, master: { x: 24.5, y: 65 } },
+	11: { rect: { x: 456, y: 104, w: 33, h: 33 }, disc: { cx: 473, cy: 120 }, master: { x: 422, y: 95 } },
+}
+
 /** Foresight slots: engine [column][row] mapped onto the top-left slots. */
 export const FORESIGHT_SLOTS = [
 	{ col: 0, row: 0, x: 89.5, y: 195 },
@@ -344,6 +412,7 @@ export const NEEDS_PARAMS = new Set([
 	ActionType.DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS,
 	ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS,
 	ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS,
+	ActionType.PLACE_BRANCHLET,
 ])
 
 /** The local action tree a placed building offers the current player. */

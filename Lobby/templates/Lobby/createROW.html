@@ -127,11 +127,25 @@
                     <div class="check-list">
                         <div class="form-row">
                             <label class="form-label" for="edition">{% translate "Edition" %}</label>
-                            <select name="edition" id="edition" style="flex:0 0 auto;width:auto">
+                            <select name="edition" id="edition" style="flex:0 0 auto;width:auto" onchange="toggleSimmental();">
                                 <option value="FIRST" selected="selected">{% translate "First edition" %}</option>
                                 <option value="SECOND">{% translate "Second edition" %}</option>
                             </select>
                         </div>
+                        <label class="check-label">
+                            <input type="checkbox" class="myCheckbox" id="railsToTheNorth" name="railsToTheNorth" value="1">
+                            <div>
+                                <div>{% translate "Rails to the North" %}</div>
+                                <div class="opt-help">{% translate "Expansion: northern cities, branchlets and extra station towns" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label" id="simmentalRow" style="display:none">
+                            <input type="checkbox" class="myCheckbox" id="simmental" name="simmental" value="1">
+                            <div>
+                                <div>{% translate "Simmental cattle" %}</div>
+                                <div class="opt-help">{% translate "Second edition only: extra breeding-value 2 cattle that upgrade on delivery" %}</div>
+                            </div>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -150,8 +164,13 @@
             if (row) row.style.display = i < maxPlayers ? "block" : "none";
         }
     }
+    function toggleSimmental() {
+        var row = document.getElementById("simmentalRow");
+        if (row) row.style.display = document.getElementById("edition").value === "SECOND" ? "block" : "none";
+    }
     document.addEventListener("DOMContentLoaded", function () {
         selectPlayers();
+        toggleSimmental();
         var form = document.getElementById("gameCreationForm");
         if (form) {
             form.addEventListener("submit", function (event) {

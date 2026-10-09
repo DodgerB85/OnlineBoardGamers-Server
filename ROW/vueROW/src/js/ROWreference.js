@@ -64,6 +64,8 @@ export const ALL_PHASES = [PHASE_SETUP, PHASE_MAIN, PHASE_GAME_OVER]
 // ---------------------------------------------------------------------------
 export const SO_BASE_GAME = -1
 export const SO_SECOND_EDITION = 2
+export const SO_RTTN = 3
+export const SO_SIMMENTAL = 4
 export const SO_TRAINING_GAME = 102
 export const SO_LEARNING_GAME = 110
 export const SO_EXPERIENCED_GAME = 120

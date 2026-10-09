@@ -134,6 +134,11 @@ def create_row_game(
         # ROW-specific options.
         if request.POST.get("edition", "FIRST") == "SECOND":
             starting_options.append(rfROW.SO_SECOND_EDITION)
+            # Java's GWT2Provider is the only one that reads the simmental flag.
+            if request.POST.get("simmental"):
+                starting_options.append(rfROW.SO_SIMMENTAL)
+        if request.POST.get("railsToTheNorth"):
+            starting_options.append(rfROW.SO_RTTN)
 
         all_players.append(request.user)
 

@@ -51,11 +51,112 @@ export const ORIGINAL_CITY_STRIP = [
     City.SACRAMENTO,
     City.SAN_FRANCISCO,
 ];
+/** RailroadTrack.SECOND_EDITION_CITY_STRIP. */
+export const SECOND_EDITION_CITY_STRIP = [
+    City.KANSAS_CITY,
+    City.FULTON,
+    City.ST_LOUIS,
+    City.BLOOMINGTON,
+    City.PEORIA,
+    City.CHICAGO_2,
+    City.TOLEDO,
+    City.PITTSBURGH_2,
+    City.PHILADELPHIA,
+    City.NEW_YORK_CITY,
+];
+/** RailroadTrack.RTTN_CITY_STRIP. */
+export const RTTN_CITY_STRIP = [
+    City.KANSAS_CITY,
+    City.COLUMBIA,
+    City.ST_LOUIS,
+    City.CHICAGO,
+    City.DETROIT,
+    City.CLEVELAND,
+    City.PITTSBURGH,
+    City.NEW_YORK_CITY,
+];
 export function cityStrip(edition, railsToTheNorth) {
     if (railsToTheNorth)
-        return ORIGINAL_CITY_STRIP;
-    return ORIGINAL_CITY_STRIP;
+        return RTTN_CITY_STRIP;
+    return edition === Edition.SECOND ? SECOND_EDITION_CITY_STRIP : ORIGINAL_CITY_STRIP;
 }
+/**
+ * Rails to the North track: RailroadTrack's static Space graph, transcribed down to the part
+ * accessibleTowns() walks - the main line up to space 16 plus every town hanging off it. The
+ * engine never enters a Town ("Engine cannot move to the north"), so the main line itself stays
+ * the linear 0..39 model the engine already uses.
+ *
+ * `next` holds forward edges only, exactly like Space.to() / Space.next() build them.
+ * `town.activate` names the branchlet-placement hook (RailroadTrack's BiFunction); towns without
+ * one pay nothing.
+ */
+export const RTTN_TRACK = {
+    "0": { next: ["1", "42"] },
+    "1": { next: ["2", "MEM"] },
+    "2": { next: ["3"] },
+    "3": { next: ["4"] },
+    "4": { next: ["4.5", "MEM", "45"] },
+    "4.5": { next: ["5"] },
+    "5": { next: ["6"] },
+    "6": { next: ["7", "47", "MIL"] },
+    "7": { next: ["7.5"] },
+    "7.5": { next: ["8"] },
+    "8": { next: ["9"] },
+    "9": { next: ["10"] },
+    "10": { next: ["10.5", "56"] },
+    "10.5": { next: ["11"] },
+    "11": { next: ["12"] },
+    "12": { next: ["13", "TOR"] },
+    "13": { next: ["13.5"] },
+    "13.5": { next: ["14"] },
+    "14": { next: ["15"] },
+    "15": { next: ["16", "58"] },
+    // Towns
+    "42": { town: { area: "GREEN" }, next: ["MEM", "43"] },
+    "43": { town: { area: "GREEN", kind: "medium" }, next: [] },
+    "MEM": { town: { area: "GREEN", kind: "big", city: "MEMPHIS", activate: "FIRST_GAIN_2_DOLLARS" }, next: ["40", "44"] },
+    "40": { town: { area: "GREEN", kind: "station", station: 10 }, next: [] },
+    "44": { town: { area: "GREEN", activate: "GAIN_EXCHANGE_TOKEN" }, next: [] },
+    "45": { town: { area: "PURPLE", activate: "FIRST_GAIN_2_DOLLARS" }, next: ["46"] },
+    "46": { town: { area: "PURPLE", kind: "medium" }, next: [] },
+    "47": { town: { area: "BLUE" }, next: ["48", "DEN", "49"] },
+    "48": { town: { area: "BLUE", activate: "GAIN_EXCHANGE_TOKEN" }, next: [] },
+    "DEN": { town: { area: "BLUE", kind: "big", city: "DENVER", activate: "PAY_1_2_3" }, next: [] },
+    "49": { town: { area: "BLUE" }, next: ["SFO"] },
+    "SFO": { town: { area: "BLUE", kind: "big", city: "SAN_FRANCISCO" }, next: [] },
+    "MIL": { town: { area: "RED", kind: "big", city: "MILWAUKEE" }, next: ["50"] },
+    "50": { town: { area: "RED", activate: "FIRST_GAIN_2_DOLLARS" }, next: ["GBY", "MIL", "41"] },
+    "GBY": { town: { area: "RED", kind: "big", city: "GREEN_BAY" }, next: ["41", "51", "50"] },
+    "41": { town: { area: "RED", kind: "station", station: 11 }, next: [] },
+    "51": { town: { area: "RED", activate: "FIRST_GAIN_2_DOLLARS" }, next: ["52", "53", "54", "GBY"] },
+    "52": { town: { area: "RED", kind: "medium" }, next: [] },
+    "53": { town: { area: "RED", activate: "FIRST_GAIN_1_CERTIFICATE" }, next: ["MIN", "51"] },
+    "MIN": { town: { area: "RED", kind: "big", city: "MINNEAPOLIS", activate: "PAY_1_3_4" }, next: [] },
+    "54": { town: { area: "RED", activate: "FIRST_GAIN_1_CERTIFICATE" }, next: ["TOR", "MON", "55", "51"] },
+    "TOR": { town: { area: "RED", kind: "big", city: "TORONTO" }, next: ["54"] },
+    "MON": { town: { area: "RED", kind: "big", city: "MONTREAL" }, next: [] },
+    "55": { town: { area: "RED", kind: "medium" }, next: [] },
+    "56": { town: { area: "TEAL", activate: "FIRST_GAIN_EXCHANGE_TOKEN" }, next: ["57"] },
+    "57": { town: { area: "TEAL", kind: "medium" }, next: [] },
+    "58": { town: { area: "VIOLET", activate: "FIRST_TAKE_OBJECTIVE_CARD" }, next: ["59"] },
+    "59": { town: { area: "VIOLET", kind: "medium" }, next: [] },
+};
+/**
+ * Medium towns in the order Java deals MediumTownTile.shuffledPile onto them: `MEDIUM_TOWNS` is a
+ * HashMap keyed by town name, so iteration follows String-hash buckets (all six land in distinct
+ * buckets of a 16-slot table), not insertion order.
+ */
+export const RTTN_MEDIUM_TOWN_DEAL_ORDER = ["55", "46", "57", "59", "52", "43"];
+/** Big towns keyed by the city they unlock a delivery to (RailroadTrack.BIG_TOWNS). */
+export const RTTN_BIG_TOWNS = Object.fromEntries(Object.entries(RTTN_TRACK).filter(([, node]) => node.town?.kind === "big").map(([name, node]) => [node.town.city, name]));
+/** The five MediumTownTile types, two copies each (MediumTownTile.shuffledPile). */
+export const MEDIUM_TOWN_TILES = [
+    "GAIN_5_DOLLARS_OR_TAKE_CATTLE_CARD",
+    "HIRE_WORKER_PLUS_2",
+    "REMOVE_2_CARDS",
+    "MOVE_ENGINE_3_FORWARD",
+    "PLACE_BUILDING_FOR_FREE",
+];
 export const STATIONS = [
     { cost: 2, points: 1, discColors: [DiscColor.WHITE], space: "4.5" },
     { cost: 2, points: 1, discColors: [DiscColor.WHITE], space: "7.5" },
@@ -67,6 +168,9 @@ export const STATIONS = [
     { cost: 6, points: 7, discColors: [DiscColor.WHITE, DiscColor.BLACK], space: "29.5" },
     { cost: 5, points: 8, discColors: [DiscColor.WHITE, DiscColor.BLACK], space: "33.5" },
     { cost: 3, points: 9, discColors: [DiscColor.WHITE, DiscColor.BLACK], space: "39" },
+    // Rails To The North (STATION_GREEN / STATION_RED): reached through towns 40 / 41 only.
+    { cost: 7, points: 6, discColors: [DiscColor.WHITE], space: "40" },
+    { cost: 15, points: 8, discColors: [DiscColor.WHITE, DiscColor.BLACK], space: "41" },
 ];
 /** Signals between engine and a city value (RailroadTrack.SIGNALS + numberOfSignals). */
 export const SIGNALS = [3, 4, 5, 7, 9, 10, 11, 13, 15, 16, 17];
@@ -95,6 +199,8 @@ export const STATION_MASTERS_ORIGINAL = [
 ];
 export const STATION_MASTERS_PROMOS = ["TWO_PERM_CERTS", "TWELVE_DOLLARS"];
 export const STATION_MASTERS_SECOND_EDITION = ["TWO_PERM_CERTS", "TWELVE_DOLLARS", "PERM_CERT_POINTS_PER_2_STATIONS", "GAIN_2_CERTS_POINTS_PER_BUILDING"];
+/** StationMaster.RTTN: the second-edition promo set plus the two Rails to the North tiles. */
+export const STATION_MASTERS_RTTN = [...STATION_MASTERS_SECOND_EDITION, "PLACE_BRANCHLET_POINTS_PER_2_EXCHANGE_TOKENS", "GAIN_EXCHANGE_TOKEN_POINTS_PER_AREA"];
 // ---------------------------------------------------------------------------
 // Job market
 // ---------------------------------------------------------------------------

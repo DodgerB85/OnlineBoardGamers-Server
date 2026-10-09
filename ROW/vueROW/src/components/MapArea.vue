@@ -12,7 +12,7 @@ import * as controller from "../js/ROWcontroller"
 import * as model from "../js/ROWmodel"
 import * as map from "../js/ROWmap"
 import * as view from "../js/ROWview"
-import { cityStrip } from "../js/ROWdata"
+import { cityStrip, RTTN_BIG_TOWNS } from "../js/ROWdata"
 import { useModelStore } from "../stores/ROWstore.js"
 
 const { ActionType } = rf
@@ -22,6 +22,10 @@ const {
 	CITY_POSITIONS,
 	FORESIGHT_SLOTS,
 	JOB_MARKET,
+	RTTN_CITY_SPOTS,
+	RTTN_MEDIUM_TOWN_SPOTS,
+	RTTN_STATION_SPOTS,
+	RTTN_TOWN_SPOTS,
 	SPACE_RECTS,
 	STATION_DISCS,
 	STATION_MASTERS,
@@ -232,10 +236,10 @@ function choose(c) {
 }
 
 // ---------- other click targets ----------
-function clickCity(idx) {
+function clickCity(idx, city) {
 	if (!game.value || !store.actions.includes(ActionType.DELIVER_TO_CITY)) return
-	const city = cityStrip(g().edition, g().isRailsToTheNorth())[idx]
-	const pd = g().possibleDeliveries().find((d) => d.city === city)
+	const name = city ?? cityStrip(g().edition, g().isRailsToTheNorth())[idx]
+	const pd = g().possibleDeliveries().find((d) => d.city === name)
 	if (pd) controller.perform({ type: ActionType.DELIVER_TO_CITY, city: pd.city, certificates: pd.certificates })
 }
 
@@ -261,6 +265,9 @@ function clickStation(i) {
 	const rt = g().getRailroadTrack()
 	const station = rt.stations[i]
 	if (!station) return
+	// Rails to the North: the station town you just branched onto offers its own upgrade.
+	if (acts.includes(ActionType.UPGRADE_STATION_TOWN) && (i === 10 || i === 11))
+		return controller.perform({ type: ActionType.UPGRADE_STATION_TOWN })
 	if (acts.includes(ActionType.DOWNGRADE_STATION) && station.upgradedBy.includes(player)) return controller.perform({ type: ActionType.DOWNGRADE_STATION, station: i })
 	if (acts.includes(ActionType.UPGRADE_ANY_STATION_BEHIND_ENGINE) && parseFloat(rt.currentSpace(player)) > parseFloat(station.space)) {
 		return controller.perform({ type: ActionType.UPGRADE_ANY_STATION_BEHIND_ENGINE, station: i })
@@ -359,27 +366,69 @@ const engines = computed(() => {
 
 const stations = computed(() => {
 	if (!game.value) return []
-	return g().getRailroadTrack().stations.map((st, i) => ({
-		i,
-		pos: STATION_POSITIONS[i],
-		discs: st.upgradedBy.map((p, k) => ({ color: colorByPlayer.value[p] ?? "red", cx: STATION_DISCS[i].cx, cy: STATION_DISCS[i].cy - k * 4 })),
-		masterPos: st.stationMaster ? STATION_MASTERS[i] : null,
-		masterImg: st.stationMaster ? view.stationMasterImage(st.stationMaster) : null,
-		workerImg: st.worker ? view.workerImage(st.worker) : null,
-	}))
+	return g()
+		.getRailroadTrack()
+		.stations.map((st, i) => {
+			// Stations 10/11 only exist on the Rails to the North strip.
+			const extra = rttn.value ? RTTN_STATION_SPOTS[i] : null
+			if (i >= 10 && !extra) return null
+			const pos = extra ? { x: extra.rect.x, y: extra.rect.y - shift.value } : STATION_POSITIONS[i]
+			const disc = extra ? { cx: extra.disc.cx, cy: extra.disc.cy - shift.value } : STATION_DISCS[i]
+			const masterPos = extra ? { x: extra.master.x, y: extra.master.y - shift.value } : STATION_MASTERS[i]
+			return {
+				i,
+				pos,
+				discs: st.upgradedBy.map((p, k) => ({ color: colorByPlayer.value[p] ?? "red", cx: disc.cx, cy: disc.cy - k * 4 })),
+				masterPos: st.stationMaster ? masterPos : null,
+				masterImg: st.stationMaster ? view.stationMasterImage(st.stationMaster) : null,
+				workerImg: st.worker ? view.workerImage(st.worker) : null,
+			}
+		})
+		.filter(Boolean)
 })
 
 const cityGroups = computed(() => {
 	if (!game.value) return []
 	const rt = g().getRailroadTrack()
 	const strip = cityStrip(g().edition, g().isRailsToTheNorth())
-	return CITY_POSITIONS.map((cp, i) => ({
-		idx: i,
-		pos: cp,
-		city: strip[i],
-		discs: (rt.cities[strip[i]] ?? []).map((p, k) => ({ color: colorByPlayer.value[p] ?? "red", cx: cp.disc.cx, cy: cp.disc.cy - k * 4 })),
+	// On the expansion strip the city crests live at their own coordinates instead of the
+	// board's printed strip, which the expansion covers. The big towns you reach behind a
+	// branchlet sit on the strip too, so they get delivery discs there as well.
+	const table = g().isRailsToTheNorth() ? RTTN_CITY_SPOTS : null
+	const cities = table ? [...strip, ...Object.keys(RTTN_BIG_TOWNS)] : strip
+	return cities
+		.map((city, i) => {
+			const spot = table ? table[city] : CITY_POSITIONS[i]
+			if (!spot) return null
+			const pos = table
+				? { rect: { x: spot.rect.x, y: spot.rect.y - shift.value, w: spot.rect.w, h: spot.rect.h }, disc: { cx: spot.disc.cx, cy: spot.disc.cy - shift.value } }
+				: spot
+			return {
+				idx: i,
+				pos,
+				city,
+				discs: (rt.cities[city] ?? []).map((p, k) => ({ color: colorByPlayer.value[p] ?? "red", cx: pos.disc.cx, cy: pos.disc.cy - k * 4 })),
+			}
+		})
+		.filter(Boolean)
+})
+
+/** Towns on the expansion strip: branchlet markers plus the medium town tile sitting on them. */
+const towns = computed(() => {
+	if (!game.value || !rttn.value) return []
+	const track = g().getRailroadTrack()
+	return Object.entries(RTTN_TOWN_SPOTS).map(([name, sp]) => ({
+		name,
+		x: sp.x,
+		y: sp.y - shift.value,
+		branchlets: (track.branchlets[name] ?? []).map((p) => colorByPlayer.value[p] ?? "red"),
+		tileImg: track.mediumTownTiles[name] ? view.stationMasterImage(track.mediumTownTiles[name]) : null,
 	}))
 })
+const mediumTownTiles = computed(() => towns.value.filter((t) => t.tileImg))
+const branchletMarkers = computed(() =>
+	towns.value.flatMap((t) => t.branchlets.map((color, i) => ({ color, cx: t.x + 9 + (i % 2) * 17, cy: t.y + 11 + Math.floor(i / 2) * 15 })))
+)
 
 const jobWorkers = computed(() => {
 	if (!game.value) return []
@@ -602,7 +651,15 @@ const hitTargets = computed(() => {
 	}
 	for (const c of cityGroups.value) {
 		if (!deliverableCities.value.has(c.city)) continue
-		out.push({ key: "city:" + c.city, type: "city", idx: c.idx, x: c.pos.rect.x, y: c.pos.rect.y, w: 52, h: 50, rx: 2, transform: null })
+		out.push({ key: "city:" + c.city, type: "city", idx: c.idx, city: c.city, x: c.pos.rect.x, y: c.pos.rect.y, w: 52, h: 50, rx: 2, transform: null })
+	}
+	// Rails to the North: towns the player may put a branchlet on.
+	if (store.actions.includes(ActionType.PLACE_BRANCHLET)) {
+		const allowed = new Set(g().possibleTowns(g().currentPlayer))
+		for (const [name, sp] of Object.entries(RTTN_TOWN_SPOTS)) {
+			if (!allowed.has(name)) continue
+			out.push({ key: "town:" + name, type: "town", name, x: sp.x, y: sp.y - shift.value, w: 36, h: 36, rx: 2, transform: null })
+		}
 	}
 	for (const sr of SPACE_RECTS) {
 		if (!reachableSpaces.value.has(sr.space)) continue
@@ -617,9 +674,16 @@ const hitTargets = computed(() => {
 
 function clickTarget(t) {
 	if (t.type === "location") clickLocation(t.name)
-	else if (t.type === "city") clickCity(t.idx)
+	else if (t.type === "city") clickCity(t.idx, t.city)
 	else if (t.type === "space") clickSpace(t.space)
 	else if (t.type === "foresight") clickForesight(t.col, t.row)
+	else if (t.type === "town") clickTown(t.name)
+}
+
+/** Rails to the North: drop a branchlet on the clicked town. */
+function clickTown(name) {
+	if (!game.value) return
+	controller.perform({ type: ActionType.PLACE_BRANCHLET, town: name })
 }
 
 function enterTarget(t) {
@@ -709,6 +773,14 @@ function leaveTarget(t) {
 				<!-- ranchers -->
 				<g class="ranchers">
 					<circle v-for="r in ranchers" :key="'r' + r.player" :class="'rancher ' + r.color" :cx="r.x" :cy="r.y" r="7" />
+				</g>
+
+				<!-- Rails to the North: medium town tiles and branchlets on the strip -->
+				<g v-if="rttn" class="mediumTownTiles">
+					<image v-for="t in mediumTownTiles" :key="'mt' + t.name" :href="t.tileImg" :x="t.x" :y="t.y" width="36" height="36" />
+				</g>
+				<g v-if="rttn" class="branchlets">
+					<circle v-for="(m, i) in branchletMarkers" :key="'bl' + i" :class="'disc ' + m.color" :cx="m.cx" :cy="m.cy" r="7" />
 				</g>
 
 				<!-- clickable-target borders, drawn on top so they never get covered -->

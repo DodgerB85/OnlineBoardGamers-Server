@@ -885,7 +885,7 @@ export function isCattleCard(card) {
 export function isObjectiveCard(card) {
     return card.tasks !== undefined;
 }
-export function defaultOptions(edition = Edition.FIRST) {
+export function defaultOptions(edition = Edition.FIRST, extra = {}) {
     return {
         edition,
         mode: Mode.ORIGINAL,
@@ -897,5 +897,6 @@ export function defaultOptions(edition = Edition.FIRST) {
         building11: false,
         building13: false,
         railsToTheNorth: false,
+        ...extra,
     };
 }

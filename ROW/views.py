@@ -78,6 +78,8 @@ def showROWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     # Edition is carried as a starting option.
     loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
     returnData["edition"] = "SECOND" if rfROW.SO_SECOND_EDITION in loadedStartingOptions else "FIRST"
+    returnData["railsToTheNorth"] = rfROW.SO_RTTN in loadedStartingOptions
+    returnData["simmental"] = rfROW.SO_SIMMENTAL in loadedStartingOptions
 
     currentPlayersArr = []
     if currentGame.phase in rfROW.MAIN_PHASES:

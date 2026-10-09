@@ -81,7 +81,7 @@ const TARGET_ACTIONS = new Set([
 // Actions offered by a placed building are shown on the board (hover the building), not here.
 const buildingActionSet = computed(() => map.activeBuildingActions(g(), actions.value))
 
-const directActions = computed(() => actions.value.filter((a) => !TARGET_ACTIONS.has(a) && !map.engineMoveRange(a, g()) && !buildingActionSet.value.has(a)))
+const directActions = computed(() => actions.value.filter((a) => a !== ActionType.PLACE_BRANCHLET && !TARGET_ACTIONS.has(a) && !map.engineMoveRange(a, g()) && !buildingActionSet.value.has(a)))
 
 // Card-target actions: selected here, then the card is clicked on the player table.
 const CARD_TARGET_ACTIONS = new Set([
@@ -92,6 +92,7 @@ const CARD_TARGET_ACTIONS = new Set([
 	ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_6_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND,
 	ActionType.DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS,
 	ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS, ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS,
+	ActionType.DISCARD_CATTLE_CARD_TO_PLACE_BRANCHLET,
 ])
 const cardActions = computed(() => actions.value.filter((a) => CARD_TARGET_ACTIONS.has(a)))
 
@@ -140,6 +141,13 @@ function p(type, extra = {}) {
 					@click="store.pickBuilding(buildingActions[0], b)"
 				/>
 			</div>
+		</div>
+
+		<div v-if="actions.includes(ActionType.PLACE_BRANCHLET)" class="group">
+			<div class="label">Rails to the North — click a highlighted town on the strip</div>
+			<button class="act" :class="{ active: store.selectedAction === ActionType.PLACE_BRANCHLET }" @click="store.selectAction(ActionType.PLACE_BRANCHLET)">
+				{{ store.selectedAction === ActionType.PLACE_BRANCHLET ? "Click a town" : "Place branchlet" }}
+			</button>
 		</div>
 
 		<div v-if="actions.includes(ActionType.APPOINT_STATION_MASTER)" class="group">

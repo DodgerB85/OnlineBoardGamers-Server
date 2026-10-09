@@ -26,6 +26,9 @@ function serializePlayerState(ps) {
         locationsActivatedInTurn: ps.locationsActivatedInTurn,
         lastEngineMove: ps.lastEngineMove,
         lastUpgradedStation: ps.lastUpgradedStation,
+        exchangeTokens: ps.exchangeTokens,
+        branchlets: ps.branchlets,
+        lastPlacedBranchlet: ps.lastPlacedBranchlet,
         discs: ps.discs,
     };
 }
@@ -52,7 +55,11 @@ function deserializePlayerState(obj) {
     ps.numberOfCowboysUsedInTurn = obj.numberOfCowboysUsedInTurn ?? 0;
     ps.locationsActivatedInTurn = obj.locationsActivatedInTurn ?? [];
     ps.lastEngineMove = obj.lastEngineMove ?? 0;
-    ps.lastUpgradedStation = obj.lastUpgradedStation ?? null;
+    ps.lastUpgradedStation = obj.lastUpgradedStation ?? -1;
+    // Payloads saved before exchange tokens existed still start with the one every player gets.
+    ps.exchangeTokens = obj.exchangeTokens ?? 1;
+    ps.branchlets = obj.branchlets ?? 15;
+    ps.lastPlacedBranchlet = obj.lastPlacedBranchlet ?? null;
     ps.discs = obj.discs ?? 12;
     return ps;
 }
@@ -71,7 +78,9 @@ function deserializeTrail(obj, edition) {
         if (!loc)
             continue;
         if (data.building)
-            loc.building = data.building;
+            // Java omits `player` on neutral buildings; ROW always keeps it as null or a player
+            // name, and the engine compares with `=== null` all over.
+            loc.building = { ...data.building, player: data.building.player ?? null };
         if (data.teepee)
             loc.teepee = data.teepee;
         if (data.hazard)
@@ -98,6 +107,9 @@ export function serializeGame(game, rng) {
             players: s.railroadTrack.players,
             cities: s.railroadTrack.cities,
             stations: s.railroadTrack.stations,
+            branchlets: s.railroadTrack.branchlets,
+            mediumTownTiles: s.railroadTrack.mediumTownTiles,
+            bonusStationMasters: s.railroadTrack.stationMasters,
         },
         jobMarket: { rows: s.jobMarket.rows, currentRowIndex: s.jobMarket.currentRowIndex },
         cattleMarket: { drawStack: s.cattleMarket.drawStack, market: s.cattleMarket.market, simmental: s.cattleMarket.simmental },
@@ -117,11 +129,14 @@ export function deserializeGame(obj) {
     for (const [name, ps] of Object.entries(obj.playerStates))
         playerStates[name] = deserializePlayerState(ps);
     const trail = deserializeTrail(obj.trail, obj.edition);
-    const railroad = new RailroadTrack();
+    const railroad = new RailroadTrack(obj.edition, !!obj.options?.railsToTheNorth);
     const rt = obj.railroadTrack;
     railroad.players = rt.players ?? {};
     railroad.cities = rt.cities ?? {};
     railroad.stations = rt.stations ?? [];
+    railroad.branchlets = rt.branchlets ?? {};
+    railroad.mediumTownTiles = rt.mediumTownTiles ?? {};
+    railroad.stationMasters = rt.bonusStationMasters ?? [];
     const jobMarket = new JobMarket();
     const jm = obj.jobMarket;
     if (jm) {
