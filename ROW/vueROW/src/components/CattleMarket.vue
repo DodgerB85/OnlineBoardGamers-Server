@@ -96,7 +96,7 @@ function confirm() {
 <template>
 	<div id="cattleMarket" v-if="game">
 		<div v-if="buying || takingThree" class="hint">
-			<span>{{ takingThree ? "Take a breeding value 3 card" : "Select card(s) to buy" }}</span>
+			<span>{{ takingThree ? "Take a breeding value 3 card" : possibleBuys.length ? "Select card(s) to buy" : "Not enough dollars or cowboys to buy cattle" }}</span>
 			<button v-if="buying" class="buy" :disabled="!canConfirm" @click="confirm">Buy</button>
 		</div>
 		<div class="cards" :class="{ buying: buying || takingThree, selecting: selected.length > 0 }">
@@ -104,7 +104,7 @@ function confirm() {
 				v-for="(card, i) in market"
 				:key="i"
 				class="marketCard"
-				:class="{ disabled: !canSelectCard(card), selected: isSelected(card) }"
+				:class="{ selectable: canSelectCard(card), disabled: !canSelectCard(card), selected: isSelected(card) }"
 				:card="card"
 				@click="selectCard(card)"
 			/>
@@ -123,11 +123,11 @@ function confirm() {
 .hint .buy:disabled { opacity: 0.4; cursor: default; }
 .cards { display: flex; flex-wrap: wrap; gap: 4px; }
 .marketCard { box-shadow: 4px 4px 4px rgb(0, 0, 0, 0.75); border: 3px solid #ffffff; border-radius: 6px; cursor: default; }
-.marketCard.selectable { cursor: pointer; }
-.marketCard.selectable:hover { border-color: black; }
+.marketCard.selectable { cursor: pointer; border-width: 5px; border-color: #ffd400; }
+.marketCard.selectable:hover { border-color: #90ee90; }
 .cards.buying .marketCard.disabled { border-color: grey; opacity: 0.6; }
 .cards.selecting .marketCard { opacity: 0.7; }
-.cards.selecting .marketCard.selected { border-color: green; opacity: 1; }
+.cards.selecting .marketCard.selected { border-color: #90ee90; opacity: 1; }
 .drawStack {
 	position: relative;
 	width: 80px;
