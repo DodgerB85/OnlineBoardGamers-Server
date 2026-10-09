@@ -9,12 +9,12 @@ export default defineConfig(({ command }) => ({
 	root: resolve("./src"),
 	server: {
 		host: "0.0.0.0",
-		port: 3045,
+		port: 3060,
 		open: false,
 		fs: {
 			allow: [resolve(".."), resolve("../.."), resolve("../../")],
 		},
-		// Serve the real game art from Django while developing the client on :3045.
+		// Serve the real game art from Django while developing the client on :3060.
 		proxy: {
 			"/static/ROW": {
 				target: "http://localhost:8000",
