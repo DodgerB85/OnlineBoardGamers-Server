@@ -9,6 +9,7 @@ import { usePersonalStore } from "../stores/ROWpersonal"
 import { decompress, loadChat, loadRewind, reloadGameData, resign, saveGame, saveZoom, updateDataFromLoadRewind, kickout } from "../backend/ROW_IO"
 import { broadcastGameUpdate } from "../backend/ROWwebsocket"
 import { ActionType, PHASE_MAIN, PHASE_GAME_OVER } from "./ROWreference"
+import { AI_NAME, playAutomaTurns } from "./automa/index"
 
 /** Only the seat whose turn it is may act (practice games excepted). */
 export function canAct() {
@@ -78,6 +79,7 @@ export function commitMove(steps) {
 
 export async function endTurn() {
 	const store = useModelStore()
+	const personal = usePersonalStore()
 	if (store.saving) return
 	const g = store.getGame()
 	store.gameMessages.errorText = ""
@@ -95,6 +97,9 @@ export async function endTurn() {
 	model.recordHistory("END_TURN", endingPlayer)
 	store.touch()
 	model.snapshotTurn()
+	// The automa plays immediately, so one save commits the human's turn + Garth's whole turn.
+	if (personal.automaGame && !g.isEnded() && g.currentPlayer === AI_NAME)
+		playAutomaTurns(g, model.getRng())
 	store.turn++
 	store.saving = true
 	let ok = false
@@ -284,8 +289,32 @@ export async function reloadFromServer() {
 		personal.latestUpdate = Number(data.latestUpdate)
 		personal.secondsToNextKickout = data.secondsToNextKickout
 		store.touch()
+		void runAutomaIfNeeded()
 	} catch (error) {
 		console.error("Error reloading game data:", error)
+	}
+}
+
+/**
+ * If the persisted position is on the RowAI seat (e.g. a previous automa turn was interrupted),
+ * play Garth's turn and save. Otherwise a no-op. Never runs during replay or while saving.
+ */
+export async function runAutomaIfNeeded() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	if (!personal.automaGame || store.saving || store.viewSettings.showReplay) return
+	const g = store.game
+	if (!g || g.isEnded() || g.currentPlayer !== AI_NAME) return
+	store.saving = true
+	try {
+		playAutomaTurns(g, model.getRng())
+		store.touch()
+		await persistTurn()
+	} catch (error) {
+		console.error("Error running the automa:", error)
+		store.gameMessages.errorText = "Error running the automa"
+	} finally {
+		store.saving = false
 	}
 }
 

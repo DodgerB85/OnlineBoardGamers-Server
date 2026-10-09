@@ -22,6 +22,8 @@ export const usePersonalStore = defineStore("personal", () => {
 	const transactionID = ref("")
 	const chatNotification = ref(false)
 	const zoom = ref(16)
+	/** True when a RowAI (Garth) seat is in the game; the client drives that seat. */
+	const automaGame = ref(false)
 
 	function canPlay(currentPlayer) {
 		if (haltPlay.value) return false
@@ -54,6 +56,7 @@ export const usePersonalStore = defineStore("personal", () => {
 		transactionID,
 		chatNotification,
 		zoom,
+		automaGame,
 		canPlay,
 		getCorrectedColour,
 	}

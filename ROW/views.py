@@ -87,6 +87,9 @@ def showROWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData["stationMasterPromos"] = rfROW.SO_STATION_MASTER_PROMOS in loadedStartingOptions
     returnData["building11"] = rfROW.SO_BUILDING_11 in loadedStartingOptions
     returnData["building13"] = rfROW.SO_BUILDING_13 in loadedStartingOptions
+    automa_option = next((c for c in loadedStartingOptions if c in rfROW.AUTOMA_OPTIONS), None)
+    returnData["automaGame"] = automa_option is not None
+    returnData["difficulty"] = rfROW.AUTOMA_DIFFICULTY_BY_OPTION.get(automa_option, "EASY")
 
     currentPlayersArr = []
     if currentGame.phase in rfROW.MAIN_PHASES:
@@ -310,7 +313,7 @@ def performSaveROWGame(request, currentGame, jsonData):
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         allIsCurrentPlayers = jsonData["allIsCurrentPlayers"]
         if len(allIsCurrentPlayers) > 0 and rf.SO_TRAINING_GAME not in loadedStartingOptions:
-            playerListToNotify = [p.strip() for p in allIsCurrentPlayers if p.strip() not in {request.user.username, "RowBot"}]
+            playerListToNotify = [p.strip() for p in allIsCurrentPlayers if p.strip() not in {request.user.username, "RowBot", "RowAI"}]
             if len(playerListToNotify) > 0:
                 presenter.sendYourTurnNotification("ROW", playerListToNotify, currentGame.id, presenter.getGameName(), currentGame, oldVer)
 

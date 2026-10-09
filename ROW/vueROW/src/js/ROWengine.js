@@ -14,6 +14,7 @@
  */
 import { ActionStack, ActionType, CattleType, City, DiscColor, Edition, ROWError, ROWException, Hand, HazardType, PossibleAction, ScoreCategory, Status, Task, Teepee, Unlockable, UNLOCKABLE_INFO, Variant, Worker, handFee, isCattleCard, isObjectiveCard, shuffle, } from "./ROWcore";
 import { buildTrailNodes, buildingNumbersForOptions, cityStrip, TRACK_NEXT, TRACK_PREVIOUS, CATTLE_COSTS, STATION_MASTERS_ORIGINAL, STATION_MASTERS_PROMOS, STATION_MASTERS_SECOND_EDITION, STATION_MASTERS_RTTN, CITY_INFO, RTTN_TRACK, RTTN_BIG_TOWNS, RTTN_MEDIUM_TOWN_DEAL_ORDER, MEDIUM_TOWN_TILES, cattleMarketLimit, createCattleSet, createKcSet1, createKcSet2, createKcSet3, jobMarketInitialWorkerCount, JOB_MARKET_CATTLE, JOB_MARKET_COST, NEUTRAL_BUILDING_LOCATIONS, neutralBuildingAction, numberOfSignals, OBJECTIVE_CARD_TYPES, OBJECTIVE_DRAW_STACK, PLAYER_BUILDINGS, playerBuildingAction, STATIONS, STARTING_OBJECTIVE_IDS, } from "./ROWdata";
+import { createGarth } from "./automa/garth";
 const clone = (v) => JSON.parse(JSON.stringify(v));
 /** Certificate track steps (PlayerState.CERTIFICATE_STEPS). */
 const CERTIFICATE_STEPS = [0, 1, 2, 3, 4, 6];
@@ -149,6 +150,7 @@ export class PlayerState {
         this.locationsActivatedInTurn = [];
         this.turns = 0;
         this.stops = {};
+        this.automaState = null;
         this.lastEngineMove = 0;
         this.lastUpgradedStation = -1; // Java's "no station yet" representation
         this.discs = 12; // placement discs remaining (14 total, 2 start removed); simplified
@@ -1122,6 +1124,8 @@ export class RailroadTrack {
     isAccessibleCity(player, city) {
         if (this.cityStrip.includes(city))
             return true;
+        if (city === City.SAN_FRANCISCO && this.isComputer(player))
+            return true;
         const town = RTTN_BIG_TOWNS[city];
         return !!town && this.hasBranchlet(town, player);
     }
@@ -1369,6 +1373,10 @@ export class Game {
             throw new ROWException(ROWError.NO_SUCH_PLAYER);
         return ps;
     }
+    /** Java's `player.getType() == COMPUTER` exemptions (Garth plays by different rules). */
+    isComputer(player) {
+        return this.state.players.find((p) => p.name === player)?.type === "COMPUTER";
+    }
     getTrail() {
         return this.state.trail;
     }
@@ -1402,12 +1410,14 @@ export class Game {
         const buildingNumbers = buildingNumbersForOptions(options.edition, options);
         for (const p of players) {
             const ps = new PlayerState(p.name);
-            ps.balance = 0;
+            const computer = p.type === "COMPUTER";
+            ps.balance = computer ? 999 : 0;
             if (options.buildings === "BEGINNER") {
-                ps.buildings = buildingNumbers.map((n) => `${n}a`);
+                ps.buildings = buildingNumbers.map((n) => `${n}${computer ? "b" : "a"}`);
             }
             else {
-                ps.buildings = buildingNumbers.map((n) => `${n}${rng.boolean() ? "a" : "b"}`);
+                const sides = buildingNumbers.map(() => (rng.boolean() ? "a" : "b"));
+                ps.buildings = buildingNumbers.map((n, i) => `${n}${computer ? "b" : sides[i]}`);
             }
             // starting deck
             const deck = [];
@@ -1428,6 +1438,9 @@ export class Game {
             ps.workers[Worker.ENGINEER] = 1;
             playerStates[p.name] = ps;
         }
+        for (const p of players)
+            if (p.type === "COMPUTER")
+                playerStates[p.name].automaState = createGarth(playerStates[p.name], rng, options.difficulty);
         const trail = new Trail(options.edition);
         trail.placeNeutralBuildings(rng, options.buildings === "BEGINNER");
         const railroad = new RailroadTrack(options.edition, options.railsToTheNorth);
@@ -1519,8 +1532,10 @@ export class Game {
             const objective = this.state.startingObjectiveCards.shift();
             if (objective)
                 ps.objectives.push(objective.id);
-            if (this.state.edition === Edition.SECOND && i > 0)
+            if (this.state.edition === Edition.SECOND && i > 0 && this.state.players[i]?.type !== "COMPUTER")
                 ps.drawCards(i, rng);
+            if (ps.automaState)
+                ps.automaState.start(this, rng);
         });
         this.state.status = Status.STARTED;
         this.beginFirstTurn();
@@ -2305,7 +2320,7 @@ export class Game {
         if (!steps || steps.length === 0)
             throw new ROWException(ROWError.MUST_MOVE_AT_LEAST_STEPS);
         if (atMost === null) {
-            if (steps.length > this.getStepLimit())
+            if (!this.isComputer(this.currentPlayer) && steps.length > this.getStepLimit())
                 throw new ROWException(ROWError.STEPS_EXCEED_LIMIT);
         }
         else if (steps.length > atMost) {
@@ -2395,12 +2410,15 @@ export class Game {
         const station = this.state.railroadTrack.stations[stationIndex];
         if (!station.stationMaster)
             throw new ROWException(ROWError.CANNOT_PERFORM_ACTION);
-        // PlayerState.removeWorker: a worker of that type must remain on the board afterwards.
-        if (ps.workers[worker] <= 1)
-            throw new ROWException(ROWError.NOT_ENOUGH_WORKERS);
         if (ps.stationMasters.includes(station.stationMaster))
             throw new ROWException(ROWError.ALREADY_HAS_STATION_MASTER);
-        ps.workers[worker]--;
+        // PlayerState.removeWorker: a worker of that type must remain on the board afterwards.
+        // The automa is exempt (Java's RailroadTrack.appointStationMaster skips removeWorker).
+        if (!this.isComputer(this.currentPlayer)) {
+            if (ps.workers[worker] <= 1)
+                throw new ROWException(ROWError.NOT_ENOUGH_WORKERS);
+            ps.workers[worker]--;
+        }
         station.worker = worker;
         const master = station.stationMaster;
         station.stationMaster = null;
@@ -2570,7 +2588,7 @@ export class Game {
         if (atKc) {
             // Normal delivery: bank pays breeding value minus transport costs (+KC bonus).
             const breedingValue = ps.handValue() + certificates;
-            if (breedingValue < CITY_INFO[city].value)
+            if (breedingValue < CITY_INFO[city].value && !this.isComputer(this.currentPlayer))
                 throw new ROWException(ROWError.NOT_ENOUGH_BREEDING_VALUE);
             const transportCosts = track.transportCosts(this.currentPlayer, city);
             let payout = Math.max(0, breedingValue - transportCosts);
@@ -2837,7 +2855,16 @@ export class Game {
         categories[ScoreCategory.BUILDINGS] = this.state.trail.scoreBuildings(player);
         categories[ScoreCategory.CITIES] = this.state.railroadTrack.scoreDeliveries(player, ps);
         categories[ScoreCategory.STATIONS] = this.state.railroadTrack.scoreStations(player);
+        if (ps.automaState)
+            return ps.automaState.adjustScore(categories, this, ps);
         return categories;
+    }
+    /** Java's GWT.executeAutoma: one Garth step on the current player's behalf. */
+    executeAutoma(player, rng) {
+        const ps = this.playerState(player);
+        if (!ps.automaState)
+            throw new ROWException(ROWError.NO_AUTOMA_STATE);
+        ps.automaState.execute(this, rng);
     }
     getScore(player) {
         return Object.values(this.scoreDetails(player)).reduce((a, b) => a + (b ?? 0), 0);

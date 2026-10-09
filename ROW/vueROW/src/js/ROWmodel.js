@@ -10,6 +10,7 @@ import { startWebSocket } from "../backend/ROWwebsocket"
 import { useModelStore } from "../stores/ROWstore"
 import { usePersonalStore } from "../stores/ROWpersonal"
 import { COLOURS, SO_TRAINING_GAME, DEFAULT_ZOOM, Edition, Mode, BuildingsOption, PlayerOrderOption, Variant } from "./ROWreference"
+import { AI_NAME } from "./automa/index"
 import * as controller from "./ROWcontroller"
 
 /** The single RNG driving the engine (module-level; the store is a singleton). */
@@ -172,9 +173,11 @@ export function initGame() {
 		stationMasterPromos: Boolean(initData.stationMasterPromos),
 		building11: Boolean(initData.building11),
 		building13: Boolean(initData.building13),
+		difficulty: initData.difficulty ?? "EASY",
 	}
 	const names = initData.playerNames ?? []
-	const players = names.map((name, i) => ({ name, color: COLOURS[i % COLOURS.length], type: "HUMAN" }))
+	personal.automaGame = names.includes(AI_NAME)
+	const players = names.map((name, i) => ({ name, color: COLOURS[i % COLOURS.length], type: name === AI_NAME ? "COMPUTER" : "HUMAN" }))
 
 	let gameData = initData.gameData
 	if (typeof gameData === "string") {
@@ -204,6 +207,7 @@ export function initGame() {
 	}
 
 	setupLiveUpdates()
+	void controller.runAutomaIfNeeded()
 }
 
 /**

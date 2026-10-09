@@ -1994,7 +1994,7 @@ class ROWpresenter(GamePresenter):
         self.gameObj.save()
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists():
-            playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
+            playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username not in (request.user.username, "RowAI")]
             self._sendStartGameNotification(request, playerListToNotify)
 
     def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):

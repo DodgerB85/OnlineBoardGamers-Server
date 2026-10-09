@@ -5,6 +5,7 @@
 import { ActionStack, JavaRandom, ROWError, ROWException, Unlockable } from "./ROWcore";
 import { CattleMarket, Foresights, Game, JobMarket, KansasCitySupply, ObjectiveCards, PlayerState, RailroadTrack, Trail } from "./ROWengine";
 import { OBJECTIVE_CARD_TYPES, STATIONS } from "./ROWdata";
+import { deserializeGarth } from "./automa/garth";
 function serializePlayerState(ps) {
     return {
         player: ps.player,
@@ -32,6 +33,7 @@ function serializePlayerState(ps) {
         branchlets: ps.branchlets,
         lastPlacedBranchlet: ps.lastPlacedBranchlet,
         discs: ps.discs,
+        automaState: ps.automaState ? ps.automaState.serialize() : null,
     };
 }
 function deserializePlayerState(obj) {
@@ -65,6 +67,7 @@ function deserializePlayerState(obj) {
     ps.branchlets = obj.branchlets ?? 15;
     ps.lastPlacedBranchlet = obj.lastPlacedBranchlet ?? null;
     ps.discs = obj.discs ?? 12;
+    ps.automaState = obj.automaState ? deserializeGarth(obj.player, obj.automaState) : null;
     return ps;
 }
 function serializeTrail(trail) {

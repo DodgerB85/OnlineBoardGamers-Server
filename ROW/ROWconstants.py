@@ -32,3 +32,18 @@ SO_VARIANT_BALANCED = 23
 SO_STATION_MASTER_PROMOS = 24
 SO_BUILDING_11 = 25
 SO_BUILDING_13 = 26
+
+# Garth automa game (the RowAI seat plays). The code also carries the difficulty.
+# The seat's presence is the real "is this an automa game" flag; this marks it for stats.
+SO_AUTOMA_EASY = 27
+SO_AUTOMA_MEDIUM = 28
+SO_AUTOMA_HARD = 29
+SO_AUTOMA_VERY_HARD = 30
+
+AUTOMA_DIFFICULTY_BY_OPTION = {
+    SO_AUTOMA_EASY: "EASY",
+    SO_AUTOMA_MEDIUM: "MEDIUM",
+    SO_AUTOMA_HARD: "HARD",
+    SO_AUTOMA_VERY_HARD: "VERY_HARD",
+}
+AUTOMA_OPTIONS = set(AUTOMA_DIFFICULTY_BY_OPTION)

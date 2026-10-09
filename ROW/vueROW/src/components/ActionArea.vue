@@ -5,6 +5,7 @@ import * as controller from "../js/ROWcontroller"
 import * as map from "../js/ROWmap"
 import * as view from "../js/ROWview"
 import { PLAYER_BUILDINGS } from "../js/ROWdata"
+import { AI_NAME } from "../js/automa/index"
 import { useModelStore } from "../stores/ROWstore.js"
 
 const { ActionType, Hand, Status } = rf
@@ -13,6 +14,7 @@ const store = useModelStore()
 const g = () => store.getGame()
 const actions = computed(() => store.actions)
 const isBidding = computed(() => store.game?.state?.status === Status.BIDDING)
+const automaThinking = computed(() => store.game?.currentPlayer === AI_NAME)
 
 // --- Moves on the trail (done by clicking the map, not from here) ---
 const canMove = computed(() => store.actions.includes(ActionType.MOVE) && store.moveStepsLeft > 0)
@@ -105,7 +107,7 @@ function p(type, extra = {}) {
 <template>
 	<div id="actionBar">
 		<div v-if="!controller.canAct()" class="group">
-			<div class="label">{{ store.saving ? "Saving…" : "Waiting for other players" }}</div>
+			<div class="label">{{ store.saving ? "Saving…" : automaThinking ? "Garth is thinking…" : "Waiting for other players" }}</div>
 		</div>
 		<template v-else>
 		<template v-if="!isBidding">

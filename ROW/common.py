@@ -77,11 +77,15 @@ def create_row_game(
     all_players = []
     invited_usernames_objs = []
     isTrainingGame = False
+    isAutomaGame = "rowAI" in request.POST
 
     max_players = get_max_players(request.POST)
     # ROW supports 2-4 players; clamp in case the lobby posts a larger number.
     if max_players > 4:
         max_players = 4
+    # A Garth automa game is a fixed 2-player (human + computer) game.
+    if isAutomaGame:
+        max_players = 2
 
     if is_main_tournament or is_mini_tournament:
         if not tournamentObj or not tournamentGameName:
@@ -109,7 +113,7 @@ def create_row_game(
         if max_players == 1:
             isTrainingGame = True
 
-        if not isTrainingGame:
+        if not isTrainingGame and not isAutomaGame:
             invited_usernames_objs = SF_validatePlayers(request, invited_usernames, max_players, allow_creator=False)
             if invited_usernames_objs is None:
                 return HttpResponseRedirect(reverse("createROWpage"))
@@ -155,6 +159,19 @@ def create_row_game(
             starting_options.append(rfROW.SO_BUILDING_13)
 
         all_players.append(request.user)
+
+        if isAutomaGame:
+            # The RowAI seat is the flag: its presence marks the game as an automa game. The
+            # option code only carries the difficulty (and excludes the game from stats).
+            game_status = "ACTIVE"
+            stats_exclude = True
+            difficulty = request.POST.get("difficulty", "EASY")
+            code = next(
+                (k for k, v in rfROW.AUTOMA_DIFFICULTY_BY_OPTION.items() if v == difficulty),
+                rfROW.SO_AUTOMA_EASY,
+            )
+            starting_options.append(code)
+            all_players.append(User.objects.get(username="RowAI"))
 
     with transaction.atomic():
         new_game = Game(
@@ -203,7 +220,7 @@ def create_row_game(
             new_game.zoomLevels = json.dumps([16] * actual_player_count)
             new_game.save()
 
-        if is_main_tournament or is_mini_tournament or isTrainingGame:
+        if is_main_tournament or is_mini_tournament or isTrainingGame or isAutomaGame:
             presenter = cast("ROWpresenter", new_game.presenter())
             presenter.startGame(request)
 
@@ -225,6 +242,10 @@ def create_row_game(
 
     elif isTrainingGame:
         messages.success(request, gettext("Your Practice game has started"))
+        return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
+
+    elif isAutomaGame:
+        messages.success(request, gettext("Your game against Garth has started"))
         return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
 
     messages.success(request, SF_getGameCreationJsonReturn("ROW", new_game.id))

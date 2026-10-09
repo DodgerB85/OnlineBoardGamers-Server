@@ -1,5 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readdirSync, readFileSync } from "node:fs";import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { ActionStack, CATTLE_DEFAULT_VALUE, OBJECTIVE_CARD_TYPES, STATIONS, PossibleAction, RecordingRandom, ActionType, deserializeGame, serializeGame } from "./ROWindex";
 /**
@@ -106,6 +105,7 @@ function toOurs(s) {
             exchangeTokens: p.exchangeTokens ?? 1,
             branchlets: p.branchlets ?? 15,
             lastPlacedBranchlet: p.lastPlacedBranchlet ?? null,
+            automaState: p.automaState ?? null,
         };
     }
     const rt = s.railroadTrack ?? {};
@@ -339,6 +339,8 @@ describe("Replay fixtures drive the real engine", () => {
                             return game.endTurn(cmd.player, rng);
                         case "undo":
                             return game.undo(cmd.player);
+                        case "automa":
+                            return game.executeAutoma(cmd.player, rng);
                         default:
                             throw new Error(`Unsupported command kind: ${cmd.kind}`);
                     }
