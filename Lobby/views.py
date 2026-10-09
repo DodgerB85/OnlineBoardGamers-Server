@@ -4443,15 +4443,24 @@ def MiniTournament(request, Mini_Tournament_id):
 
         if "understand_movement" not in request.POST:
             messages.error(request, gettext("Please tick to confirm you can move regularly"))
-            HttpResponseRedirect(reverse("MiniTournament", kwargs={"Mini_Tournament_id": Mini_Tournament_id}))
+            return HttpResponseRedirect(reverse("MiniTournament", kwargs={"Mini_Tournament_id": Mini_Tournament_id}))
 
         # Always remove from invited just in case
         Mini_Tournament.invitedPlayers.remove(request.user)
 
-        if Mini_Tournament and Mini_Tournament.startingPlayers.count() < Mini_Tournament.maxTournamentPlayers:
-            Mini_Tournament.startingPlayers.add(request.user)
-            Mini_Tournament.save()
-            if Mini_Tournament.startingPlayers.count() == Mini_Tournament.maxTournamentPlayers:
+        # Lock the row so two simultaneous joins can't both pass the count check
+        startTournament = False
+        with transaction.atomic():
+            Mini_Tournament = Tournament.objects.select_for_update().get(id=Mini_Tournament_id, tournamentCategory="Mini")
+            joinAccepted = Mini_Tournament.startingPlayers.count() < Mini_Tournament.maxTournamentPlayers
+            if joinAccepted:
+                Mini_Tournament.startingPlayers.add(request.user)
+                Mini_Tournament.save()
+                startTournament = Mini_Tournament.startingPlayers.count() == Mini_Tournament.maxTournamentPlayers
+
+        if joinAccepted:
+            if startTournament:
+                # Start outside the lock: matchmaking can take ~30s
                 SF_startAnyTournament(request, Mini_Tournament)
             messages.success(request, (gettext("You have joined the Tournament")))
         else:
@@ -5319,10 +5328,20 @@ def MainTournament(request, Main_Tournament_id):
             messages.error(request, gettext("Please tick to confirm you can move regularly"))
             return HttpResponseRedirect(reverse("MainTournament", kwargs={"Main_Tournament_id": Main_Tournament_id}))
 
-        if currentTournament and currentTournament.startingPlayers.count() < currentTournament.maxTournamentPlayers:
-            currentTournament.startingPlayers.add(request.user)
-            currentTournament.save()
-            if currentTournament.startingPlayers.count() == currentTournament.maxTournamentPlayers:
+        # Lock the row so two simultaneous joins can't both pass the count check
+        startTournament = False
+        with transaction.atomic():
+            currentTournament = Tournament.objects.select_for_update().get(id=Main_Tournament_id, tournamentCategory="Main")
+            # Re-verify status and count inside the lock, in case the tournament started while waiting
+            joinAccepted = currentTournament.tournamentStatus in [OPEN, PRIVATE] and currentTournament.startingPlayers.count() < currentTournament.maxTournamentPlayers
+            if joinAccepted:
+                currentTournament.startingPlayers.add(request.user)
+                currentTournament.save()
+                startTournament = currentTournament.startingPlayers.count() == currentTournament.maxTournamentPlayers
+
+        if joinAccepted:
+            if startTournament:
+                # Start outside the lock: matchmaking can take ~30s
                 SF_startAnyTournament(request, currentTournament)
             messages.success(request, (gettext("You have joined the Tournament")))
         else:

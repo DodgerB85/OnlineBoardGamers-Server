@@ -94,6 +94,7 @@
               </p>
               {% if not isSignedUp %}
                 <form action="{% url 'MiniTournament' Mini_Tournament_id=MT_ID %}"
+                      id="joinTournamentForm"
                       method="post">
                   {% csrf_token %}
                   <label class="check-label" style="margin-bottom: 12px;">
@@ -104,10 +105,30 @@
                     <span>{% translate "I understand I need to move several times a day" %}</span>
                   </label>
                   <br>
-                  <input class="button button-primary"
+                  <input id="joinTournamentButton"
+                         class="button button-primary"
                          type="submit"
                          value="{% if isInvitedPlayer %}{% translate "Accept Invite & Join Mini Tournament" %}{% else %}{% translate "Join Mini Tournament" %}{% endif %}" />
                 </form>
+                <script>
+                  (function () {
+                    var form = document.getElementById("joinTournamentForm");
+                    var btn = document.getElementById("joinTournamentButton");
+                    if (!form || !btn) return;
+                    form.addEventListener("submit", function (e) {
+                      if (e.submitter && e.submitter !== btn) return;
+                      if (form.dataset.joinPending) {
+                        e.preventDefault();
+                        return;
+                      }
+                      form.dataset.joinPending = "1";
+                      btn.disabled = true;
+                      {% if openSlots|length == 1 %}
+                      btn.value = "{% translate 'Generating tournament......' %}";
+                      {% endif %}
+                    });
+                  })();
+                </script>
                 {% if isInvitedPlayer %}
                   <form action="{% url 'MiniTournament' Mini_Tournament_id=MT_ID %}"
                         method="post"
