@@ -11,6 +11,9 @@ export default defineConfig(({ command }) => ({
 		host: "0.0.0.0",
 		port: 3060,
 		open: false,
+		// The Django page loads these modules from its own origin, so dev requests are
+		// cross-origin (different port, possibly a different machine on the LAN).
+		cors: true,
 		fs: {
 			allow: [resolve(".."), resolve("../.."), resolve("../../")],
 		},
