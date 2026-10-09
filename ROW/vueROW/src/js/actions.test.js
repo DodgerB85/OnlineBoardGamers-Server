@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ActionType, Game, JavaRandom, defaultOptions, serializeGame, deserializeGame } from "./ROWindex";
+import { ActionStack, ActionType, CattleType, Game, JavaRandom, PossibleAction, Unlockable, defaultOptions, neutralBuildingAction, serializeGame, deserializeGame } from "./ROWindex";
+import { NEEDS_PARAMS } from "./ROWmap";
 function players(n) {
     const colors = ["RED", "BLUE", "YELLOW", "GREEN"];
     return Array.from({ length: n }, (_, i) => ({ name: `Player ${i + 1}`, color: colors[i], type: "HUMAN" }));
@@ -80,5 +81,93 @@ describe("Full turn loop", () => {
             game = deserializeGame(JSON.parse(JSON.stringify(serializeGame(game))));
             expect(game.state.players.length).toBe(3);
         }
+    });
+});
+
+describe("Neutral building F", () => {
+    it("arms the pair discard for card selection, then discards a pair for $4", () => {
+        const game = Game.start(players(2), defaultOptions(), new JavaRandom(11));
+        const player = game.currentPlayer;
+        const ps = game.currentPlayerState();
+        ps.hand = [
+            { type: CattleType.JERSEY, points: 0, value: 1 },
+            { type: CattleType.JERSEY, points: 0, value: 1 },
+        ];
+        ps.balance = 0;
+        game.state.actionStack = ActionStack.initial([neutralBuildingAction("F", ps.getNumberOfCowboys())]);
+
+        expect(NEEDS_PARAMS.has(ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS)).toBe(true);
+        expect(game.possibleActions().has(ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS)).toBe(true);
+
+        game.perform(player, { type: ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS, cattleType: CattleType.JERSEY }, new JavaRandom(12));
+
+        expect(ps.hand).toHaveLength(0);
+        expect(ps.discardPile).toHaveLength(2);
+        expect(ps.discardPile.every((card) => card.type === CattleType.JERSEY)).toBe(true);
+        expect(ps.balance).toBe(4);
+        expect(game.possibleActions().has(ActionType.REMOVE_HAZARD)).toBe(true);
+    });
+});
+
+describe("Auxiliary action choice", () => {
+    it("lets a double auxiliary action choose one row and use its double version", () => {
+        const game = Game.start(players(2), defaultOptions(), new JavaRandom(13));
+        const player = game.currentPlayer;
+        const ps = game.currentPlayerState();
+        ps.balance = 0;
+        ps.unlocked[Unlockable.AUX_GAIN_DOLLAR] = 2;
+        game.state.actionStack = ActionStack.initial([PossibleAction.mandatory(ActionType.SINGLE_OR_DOUBLE_AUXILIARY_ACTION)]);
+
+        game.perform(player, { type: ActionType.SINGLE_OR_DOUBLE_AUXILIARY_ACTION }, new JavaRandom(14));
+        expect(game.possibleActions()).toEqual(new Set([
+            ActionType.GAIN_1_DOLLAR,
+            ActionType.GAIN_2_DOLLARS,
+            ActionType.DRAW_CARD,
+        ]));
+
+        game.perform(player, { type: ActionType.GAIN_2_DOLLARS }, new JavaRandom(15));
+
+        expect(ps.balance).toBe(2);
+        expect(game.possibleActions().size).toBe(0);
+    });
+
+    it("lets a single auxiliary action choose only one unlocked single action", () => {
+        const game = Game.start(players(2), defaultOptions(), new JavaRandom(16));
+        const player = game.currentPlayer;
+        const ps = game.currentPlayerState();
+        ps.balance = 0;
+        ps.unlocked[Unlockable.AUX_GAIN_DOLLAR] = 2;
+        game.state.actionStack = ActionStack.initial([PossibleAction.mandatory(ActionType.SINGLE_AUXILIARY_ACTION)]);
+
+        game.perform(player, { type: ActionType.SINGLE_AUXILIARY_ACTION }, new JavaRandom(17));
+        expect(game.possibleActions()).toEqual(new Set([
+            ActionType.GAIN_1_DOLLAR,
+            ActionType.DRAW_CARD,
+        ]));
+
+        game.perform(player, { type: ActionType.GAIN_1_DOLLAR }, new JavaRandom(18));
+
+        expect(ps.balance).toBe(1);
+        expect(game.possibleActions().size).toBe(0);
+    });
+
+    it("offers only the single version when a row has one cleared disc", () => {
+        const game = Game.start(players(2), defaultOptions(), new JavaRandom(19));
+        const player = game.currentPlayer;
+        const ps = game.currentPlayerState();
+        ps.balance = 0;
+        ps.unlocked[Unlockable.AUX_GAIN_DOLLAR] = 1;
+        game.state.actionStack = ActionStack.initial([PossibleAction.mandatory(ActionType.SINGLE_OR_DOUBLE_AUXILIARY_ACTION)]);
+
+        game.perform(player, { type: ActionType.SINGLE_OR_DOUBLE_AUXILIARY_ACTION }, new JavaRandom(20));
+        expect(game.possibleActions()).toEqual(new Set([
+            ActionType.GAIN_1_DOLLAR,
+            ActionType.DRAW_CARD,
+        ]));
+
+        game.perform(player, { type: ActionType.GAIN_1_DOLLAR }, new JavaRandom(21));
+
+        expect(ps.balance).toBe(1);
+        expect(game.possibleActions().size).toBe(0);
     });
 });

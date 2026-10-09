@@ -1464,9 +1464,9 @@ export class Game {
                 return { immediate: [], actions: [], canUndo: true };
             }
             case ActionType.SINGLE_AUXILIARY_ACTION:
-                return this.unlockedSingleAuxiliaryActions(ps);
+                return { immediate: [], actions: [PossibleAction.optional(PossibleAction.choice(this.unlockedSingleAuxiliaryActions(ps)))], canUndo: true };
             case ActionType.SINGLE_OR_DOUBLE_AUXILIARY_ACTION:
-                return this.unlockedSingleOrDoubleAuxiliaryActions(ps);
+                return { immediate: [], actions: [PossibleAction.optional(PossibleAction.choice(this.unlockedSingleOrDoubleAuxiliaryActions(ps)))], canUndo: true };
             case ActionType.MOVE_ENGINE_FORWARD: {
                 const to = action.to ?? this.forwardTarget();
                 const immediate = this.state.railroadTrack.moveEngineForward(this.currentPlayer, to, 0, ps.getNumberOfEngineers());

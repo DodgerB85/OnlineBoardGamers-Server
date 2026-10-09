@@ -8,6 +8,7 @@
 import { computed, ref } from "vue"
 import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
+import * as map from "../js/ROWmap"
 import * as view from "../js/ROWview"
 import { useModelStore } from "../stores/ROWstore.js"
 import { usePersonalStore } from "../stores/ROWpersonal.js"
@@ -93,19 +94,34 @@ function unlocked(u, atLeast = 1) {
 	return (ps.value?.unlocked[u] ?? 0) >= atLeast
 }
 
-const AUX_ACTIONS = [
-	{ id: "aux-dollar", x: 13, y: 41, action: ActionType.GAIN_1_DOLLAR },
-	{ id: "aux-dollar-2", x: 111, y: 41, action: ActionType.GAIN_2_DOLLARS },
-	{ id: "aux-draw", x: 13, y: 120, action: ActionType.DRAW_CARD },
-	{ id: "aux-draw-2", x: 112, y: 120, action: ActionType.DRAW_2_CARDS },
-	{ id: "aux-move-engine-backwards", x: 13, y: 204, action: ActionType.PAY_1_DOLLAR_AND_MOVE_ENGINE_1_BACKWARDS_TO_GAIN_1_CERTIFICATE },
-	{ id: "aux-move-engine-backwards-2", x: 114, y: 204, action: ActionType.PAY_2_DOLLARS_AND_MOVE_ENGINE_2_BACKWARDS_TO_GAIN_2_CERTIFICATES },
-	{ id: "aux-move-engine-forward", x: 13, y: 288, action: ActionType.PAY_1_DOLLAR_TO_MOVE_ENGINE_1_FORWARD },
-	{ id: "aux-move-engine-forward-2", x: 114, y: 288, action: ActionType.PAY_2_DOLLARS_TO_MOVE_ENGINE_2_FORWARD },
-]
-
 const auxRemoveCardAction = computed(() => (SECOND.value ? ActionType.MOVE_ENGINE_1_BACKWARDS_TO_REMOVE_1_CARD_AND_GAIN_1_DOLLAR : ActionType.MOVE_ENGINE_1_BACKWARDS_TO_REMOVE_1_CARD))
 const auxRemoveCard2Action = computed(() => (SECOND.value ? ActionType.MOVE_ENGINE_2_BACKWARDS_TO_REMOVE_2_CARDS_AND_GAIN_2_DOLLARS : ActionType.MOVE_ENGINE_2_BACKWARDS_TO_REMOVE_2_CARDS))
+
+const AUX_ROW_DEFS = [
+	{ id: "aux-dollar", y: 41, single: ActionType.GAIN_1_DOLLAR, double: ActionType.GAIN_2_DOLLARS },
+	{ id: "aux-draw", y: 120, single: ActionType.DRAW_CARD, double: ActionType.DRAW_2_CARDS },
+	{ id: "aux-move-engine-backwards", y: 204, single: ActionType.PAY_1_DOLLAR_AND_MOVE_ENGINE_1_BACKWARDS_TO_GAIN_1_CERTIFICATE, double: ActionType.PAY_2_DOLLARS_AND_MOVE_ENGINE_2_BACKWARDS_TO_GAIN_2_CERTIFICATES },
+	{ id: "aux-move-engine-forward", y: 288, single: ActionType.PAY_1_DOLLAR_TO_MOVE_ENGINE_1_FORWARD, double: ActionType.PAY_2_DOLLARS_TO_MOVE_ENGINE_2_FORWARD },
+]
+
+const auxRows = computed(() => [...AUX_ROW_DEFS, {
+	id: "aux-remove-card",
+	y: 368,
+	single: auxRemoveCardAction.value,
+	double: auxRemoveCard2Action.value,
+}].map((row) => ({
+	...row,
+	action: store.actions.includes(row.double) ? row.double : row.single,
+})))
+
+function activateAuxiliaryAction(action) {
+	if (!interactive.value || !store.actions.includes(action)) return
+	if (map.engineMoveRange(action, game.value)) {
+		store.selectAction(action)
+		return
+	}
+	controller.perform({ type: action })
+}
 
 // Unlock discs: [unlockable, cx, cy, color] (white = first disc of a pair).
 const DISCS = [
@@ -273,24 +289,22 @@ function selectCard(card) {
 			<!-- temporary certificates -->
 			<rect v-for="m in certMarkers" v-show="tempCertificates === m.n" :key="'cert' + m.n" class="marker" x="744" :y="m.y" width="30" height="30" />
 
-			<!-- auxiliary actions -->
+			<!-- Choose one auxiliary row. If its double action is available, select that by default. -->
 			<rect
-				v-for="a in AUX_ACTIONS"
-				:key="a.id"
+				v-for="row in auxRows"
+				:key="row.id"
 				class="action"
-				:x="a.x"
-				:y="a.y"
+				x="13"
+				:y="row.y"
 				rx="4"
 				ry="4"
-				width="54"
+				width="155"
 				height="54"
-				:class="{ selectable: interactive && store.actions.includes(a.action), disabled: !interactive || !store.actions.includes(a.action) }"
-				@click="interactive && store.actions.includes(a.action) && controller.perform({ type: a.action })"
+				:class="{ selectable: interactive && store.actions.includes(row.action), disabled: !interactive || !store.actions.includes(row.action) }"
+				@click="activateAuxiliaryAction(row.action)"
 			>
-				<title>{{ view.humanizeAction(a.action) }}</title>
+				<title>{{ view.humanizeAction(row.action) }}</title>
 			</rect>
-			<rect class="action" x="13" y="368" rx="4" ry="4" width="54" height="54" :class="{ selectable: interactive && store.actions.includes(auxRemoveCardAction), disabled: !interactive || !store.actions.includes(auxRemoveCardAction) }" @click="interactive && store.actions.includes(auxRemoveCardAction) && controller.perform({ type: auxRemoveCardAction })" />
-			<rect class="action" x="114" y="368" rx="4" ry="4" width="54" height="54" :class="{ selectable: interactive && store.actions.includes(auxRemoveCard2Action), disabled: !interactive || !store.actions.includes(auxRemoveCard2Action) }" @click="interactive && store.actions.includes(auxRemoveCard2Action) && controller.perform({ type: auxRemoveCard2Action })" />
 
 			<!-- unlock discs -->
 			<circle
