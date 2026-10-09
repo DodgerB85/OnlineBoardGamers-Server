@@ -5301,6 +5301,16 @@ def MainTournament(request, Main_Tournament_id):
         except Tournament.DoesNotExist:
             raise Http404(gettext("Tournament does not exist")) from None
 
+        if "startTournament" in request.POST:
+            if request.user.username != "admin":
+                messages.error(request, gettext("Illegal Access"))
+            elif currentTournament.tournamentStatus != OPEN:
+                messages.error(request, gettext("This tournament cannot be started"))
+            else:
+                SF_startAnyTournament(request, currentTournament)
+                messages.success(request, gettext("Tournament started"))
+            return HttpResponseRedirect(reverse("MainTournament", kwargs={"Main_Tournament_id": Main_Tournament_id}))
+
         if currentTournament.tournamentStatus not in [OPEN, PRIVATE]:
             messages.error(request, gettext("This tournament is not open for signup yet"))
             return HttpResponseRedirect(reverse("MainTournament", kwargs={"Main_Tournament_id": Main_Tournament_id}))

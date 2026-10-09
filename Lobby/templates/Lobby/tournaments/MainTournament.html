@@ -163,8 +163,18 @@
                     </div>
                   </form>
                 {% endif %}
+                {% if tournament.tournamentStatus == "OP" and user.username == "admin" %}
+                  <form action="{% url 'MainTournament' Main_Tournament_id=MainT_ID %}"
+                        method="post"
+                        style="margin-top:14px">
+                    {% csrf_token %}
+                    <button class="button button-primary" type="submit" name="startTournament" value="true">
+                      {% translate "Start Tournament Now" %}
+                    </button>
+                  </form>
+                {% endif %}
               </div>
-            
+
             <!-- ////////////////////////////////////////////////////////////////// IP MainT -->
           {% elif tournament.tournamentStatus == "IP" or tournament.tournamentStatus == "FN" %}
             <!-- FIRST DEAL WITH MG -->
