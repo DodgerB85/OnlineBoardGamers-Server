@@ -162,6 +162,15 @@ function startDinnerAnimation(autoplay) {
 	dinner.start(script.steps, autoplay, script.overlay)
 }
 
+// Playback for one house only: its sale block plus the coffee block that
+// dinnerScript expects to sit immediately after it.
+function startDinnerAnimationFor(bi, autoplay) {
+	const blocks = computedEntry3.value.blocks
+	const end = blocks[bi + 1]?.kind === "coffee" ? bi + 2 : bi + 1
+	const script = buildDinnerScript(blocks.slice(bi, end))
+	dinner.start(script.steps, autoplay, script.overlay)
+}
+
 function salaryPayText(salaryArr) {
 	if (salaryArr.length > 1) return i18n.global.t("history.salaryPay", { amount: salaryArr[0], count: salaryArr[1] })
 	return String(salaryArr[0])
@@ -619,6 +628,9 @@ const computedEntry3 = computed(() => {
 	} else if (entry[0] === rf.HIST_INCOME) {
 		ret.none = param.length === 0
 		ret.jazzTable = !!store.startingOptions.jazzMusicians
+		// Coffee-module rows carry coffee income at index 3 (always length 4).
+		// Older entries only ever had length 2 or 3, so they stay pooled.
+		ret.splitSales = param.length > 0 && param[0].length >= 4
 		ret.incomeRows = []
 		for (let k = 0; k < param.length; k++) {
 			const waitressVal = plyr.hasMilestone(k, rf.FIRST_WAITRESS) ? 5 : 3
@@ -630,9 +642,12 @@ const computedEntry3 = computed(() => {
 				numberOfJazz = param[k][1][1]
 			} else numberOfWaitress = param[k][1]
 			const CFObonus = param[k].length > 2 ? param[k][2] : 0
+			const coffeeIncome = ret.splitSales ? param[k][3] : 0
 			ret.incomeRows.push({
 				colour: store.players[k]?.colour,
 				salesIncome: salesIncome,
+				itemsIncome: salesIncome - coffeeIncome,
+				coffeeIncome: coffeeIncome,
 				numberOfJazz: numberOfJazz,
 				numberOfWaitress: numberOfWaitress,
 				waitressVal: waitressVal,
@@ -977,6 +992,14 @@ const computedEntry3 = computed(() => {
 				</div>
 				<template v-for="(block, bi) in computedEntry3.blocks" :key="bi">
 					<div v-if="block.kind === 'sale'" class="house">
+						<div v-if="block.sale" class="houseAnimButtons">
+							<button class="houseAnimBtn" :title="$t('history.animAnimate')" @click.stop="startDinnerAnimationFor(bi, true)">
+								<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+							</button>
+							<button class="houseAnimBtn" :title="$t('history.animStepThrough')" @click.stop="startDinnerAnimationFor(bi, false)">
+								<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5l8 7-8 7zM16 5h3v14h-3z" /></svg>
+							</button>
+						</div>
 						<span v-if="!block.isApartment && !block.isRural">{{ $t("history.houseLabel", { num: block.buildingNumber }) }}</span>
 						<span v-else-if="block.isApartment">{{ $t("history.apartmentLabel", { num: translateApartmentNumber(block.buildingNumber) }) }}</span>
 						<span v-else>{{ $t("history.ruralLabel") }}</span>
@@ -1064,7 +1087,9 @@ const computedEntry3 = computed(() => {
 					<thead>
 						<tr>
 							<td>{{ $t("history.playerHeader") }}</td>
-							<td>{{ $t("history.salesHeader") }}</td>
+							<td>{{ computedEntry3.splitSales ? $t("history.itemsHeader") : $t("history.salesHeader") }}</td>
+							<td v-if="computedEntry3.splitSales">{{ $t("history.coffeeHeader") }}</td>
+							<td v-if="computedEntry3.splitSales">{{ $t("history.icHeader") }}</td>
 							<td v-if="computedEntry3.jazzTable"><InfoPopup type="employee" :employeeId="rf.JAZZ_MUSICIAN"><span class="compact" :class="empType(rf.JAZZ_MUSICIAN)">{{ empTitle(rf.JAZZ_MUSICIAN, true) }}</span></InfoPopup></td>
 							<td><InfoPopup type="employee" :employeeId="rf.WAITRESS"><span class="compact" :class="empType(rf.WAITRESS)">{{ empTitle(rf.WAITRESS) }}</span></InfoPopup></td>
 							<td>{{ $t("history.cfoBonusHeader") }}</td>
@@ -1074,7 +1099,12 @@ const computedEntry3 = computed(() => {
 					<tbody>
 						<tr v-for="(r, i) in computedEntry3.incomeRows" :key="i">
 							<td><img class="playerImage" :src="playerIconSrc(r.colour)" alt="" /></td>
-							<td>${{ r.salesIncome }}</td>
+							<td v-if="!computedEntry3.splitSales">${{ r.salesIncome }}</td>
+							<template v-else>
+								<td>${{ r.itemsIncome }}</td>
+								<td>${{ r.coffeeIncome }}</td>
+								<td>${{ r.salesIncome }}</td>
+							</template>
 							<td v-if="computedEntry3.jazzTable">${{ r.numberOfJazz * 15 }}</td>
 							<td>${{ r.numberOfWaitress * r.waitressVal }}</td>
 							<td>${{ r.CFObonus }}</td>
@@ -1408,6 +1438,41 @@ h4 {
 
 .house {
 	border-bottom: #000 1px solid;
+	position: relative;
+}
+
+/* Per-house playback buttons, parked in the entry's right-hand gap
+   (the 45px padding .log reserves for the player icon, unused here). */
+.houseAnimButtons {
+	position: absolute;
+	top: 2px;
+	right: -43px;
+	width: 42px;
+	display: flex;
+	gap: 2px;
+}
+
+.houseAnimBtn {
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #555;
+	border: 1px solid #777;
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+.houseAnimBtn:hover {
+	background: #666;
+}
+
+.houseAnimBtn svg {
+	width: 14px;
+	height: 14px;
+	fill: #fff;
 }
 
 .coffeeDiv {

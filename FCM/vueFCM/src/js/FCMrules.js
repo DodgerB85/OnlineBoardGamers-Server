@@ -2019,7 +2019,9 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 	const store = useModelStore()
 	const histoIncome = []
 	store.players.forEach((p, playerIndex) => {
-		const salesIncome = earnings[playerIndex] + (store.startingOptions.coffee ? coffeeEarnings[playerIndex] : 0)
+		const itemsIncome = earnings[playerIndex]
+		const coffeeIncome = store.startingOptions.coffee ? coffeeEarnings[playerIndex] : 0
+		const salesIncome = itemsIncome + coffeeIncome
 		let total = salesIncome
 		const waitressVal = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS) ? 5 : 3
 
@@ -2033,6 +2035,14 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 			const supplement = Math.ceil(total / 2)
 			total += supplement
 			hI.push(supplement)
+		}
+
+		// Coffee split (Coffee module only): pad the CFO slot so coffee income always
+		// lands at index 3. Old entries never have length 4, so the history reader can
+		// tell split rows from the old pooled-sales rows by length alone.
+		if (store.startingOptions.coffee) {
+			while (hI.length < 3) hI.push(0)
+			hI.push(coffeeIncome)
 		}
 
 		histoIncome[playerIndex] = hI

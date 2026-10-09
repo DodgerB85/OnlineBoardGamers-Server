@@ -196,6 +196,9 @@
     incomeHeader: "Income",
     playerHeader: "Player",
     salesHeader: "Sales",
+    itemsHeader: "Items",
+    coffeeHeader: "Coffee",
+    icHeader: "I+C",
     cfoBonusHeader: "CFO bonus",
     totalHeader: "Total",
 
