@@ -108,8 +108,14 @@ function candidatesFor(name) {
 			out.length = 0
 			out.push({ label: `Place ${picked} here`, run: () => controller.perform({ type: sel, location: name, building: picked }) })
 		} else {
+			const color = colorByPlayer.value[player] ?? "red"
 			for (const b of g().playerState(player).buildings) {
-				out.push({ label: `Place building ${b}`, run: () => controller.perform({ type: sel, location: name, building: b }) })
+				out.push({
+					label: `Place building ${b}`,
+					img: view.buildingImage(g().edition, b, color),
+					enabled: map.canPlaceBuilding(g(), player, loc, b, sel),
+					run: () => controller.perform({ type: sel, location: name, building: b }),
+				})
 			}
 		}
 	} else if (sel === ActionType.USE_ADJACENT_BUILDING && loc.building) {
@@ -127,10 +133,16 @@ function playerFeesLabel(m) {
 function clickLocation(name) {
 	const cands = candidatesFor(name)
 	if (!cands.length) return
-	if (cands.length === 1) return cands[0].run()
+	if (cands.length === 1 && cands[0].enabled !== false) return cands[0].run()
 	const c = center(name)
 	if (!c) return
 	chooser.value = { x: c.cx, y: c.cy, cands }
+}
+
+function choose(c) {
+	if (c.enabled === false) return
+	c.run()
+	chooser.value = null
 }
 
 // ---------- other click targets ----------
@@ -642,8 +654,16 @@ function enterTarget(t) {
 			</g>
 		</svg>
 
-		<div v-if="chooser" class="chooser" :style="{ left: (chooser.x / 800) * 100 + '%', top: ((chooser.y + shift) / (rttn ? 1035 : 840)) * 100 + '%' }">
-			<button v-for="(c, i) in chooser.cands" :key="i" class="act" @click="c.run(); chooser = null">{{ c.label }}</button>
+		<div
+			v-if="chooser"
+			class="chooser"
+			:class="{ tiled: chooser.cands.some((c) => c.img) }"
+			:style="{ left: (chooser.x / 800) * 100 + '%', top: ((chooser.y + shift) / (rttn ? 1035 : 840)) * 100 + '%' }"
+		>
+			<template v-for="(c, i) in chooser.cands" :key="i">
+				<img v-if="c.img" class="cand" :class="c.enabled === false ? 'disabled' : 'enabled'" :src="c.img" :title="c.label" :alt="c.label" draggable="false" @click="choose(c)" />
+				<button v-else class="act" @click="choose(c)">{{ c.label }}</button>
+			</template>
 			<button class="act cancel" @click="chooser = null">Cancel</button>
 		</div>
 	</div>
@@ -746,4 +766,11 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 }
 .chooser .act { font-size: 12px; padding: 3px 8px; cursor: pointer; white-space: nowrap; }
 .chooser .cancel { background: #eee; }
+/* Building picker: tile images in a wrapped grid instead of a text list. */
+.chooser.tiled { flex-direction: row; flex-wrap: wrap; width: 284px; }
+.chooser .cand { box-sizing: border-box; width: 92px; height: 108px; padding: 0; border: 5px solid #000; border-radius: 6px; background: #fff; cursor: pointer; }
+.chooser .cand.enabled { border-color: #ffd400; }
+.chooser .cand.enabled:hover { border-color: #90ee90; }
+.chooser .cand.disabled { opacity: 0.55; cursor: default; }
+.chooser.tiled .cancel { width: 100%; text-align: center; }
 </style>

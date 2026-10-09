@@ -11,7 +11,7 @@
  * component.
  */
 import { ActionType } from "./ROWreference"
-import { neutralBuildingAction, playerBuildingAction } from "./ROWdata"
+import { neutralBuildingAction, playerBuildingAction, PLAYER_BUILDINGS } from "./ROWdata"
 
 /** Trail location rectangles, keyed by engine location name. */
 export const TRAIL_SPOTS = {
@@ -233,6 +233,23 @@ export function reachableSpacesFor(a, g) {
 
 export function moveDestination(m) {
 	return m.steps[m.steps.length - 1]
+}
+
+/** View-side preview of Game.placeBuilding: are the craftsmen and dollars there? */
+export function canPlaceBuilding(g, player, loc, building, action) {
+	if (loc.building && loc.building.player !== player) return false
+	const info = PLAYER_BUILDINGS[building]
+	if (!info) return false
+	const ps = g.playerState(player)
+	if (!ps.buildings.includes(building)) return false
+	let needed = info.craftsmen
+	if (loc.building) {
+		const existing = PLAYER_BUILDINGS[loc.building.name]
+		if (!existing || existing.craftsmen >= info.craftsmen) return false
+		needed = info.craftsmen - existing.craftsmen
+	}
+	const perCraftsman = action === ActionType.PLACE_BUILDING_FOR_FREE ? 0 : action === ActionType.PLACE_CHEAP_BUILDING ? 1 : 2
+	return needed <= ps.getNumberOfCraftsmen() && needed * perCraftsman <= ps.balance
 }
 
 // ---------------------------------------------------------------------------

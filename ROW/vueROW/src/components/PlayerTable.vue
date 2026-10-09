@@ -164,8 +164,21 @@ const hand = computed(() => ps.value?.hand ?? [])
 // Personal collections + card stacks (public info; shown on every board).
 const drawStackSize = computed(() => ps.value?.drawStack.length ?? 0)
 const discardSize = computed(() => ps.value?.discardPile.length ?? 0)
-const discardPile = computed(() => ps.value?.discardPile ?? [])
-const showDiscard = ref(false)
+const showStack = ref(null) // "draw" | "discard"
+/** Display copy only: sorted by value so the pile's real order can never leak. */
+function displayOrder(a, b) {
+	return (a.value ?? 0) - (b.value ?? 0) || String(a.type).localeCompare(String(b.type)) || (a.points ?? 0) - (b.points ?? 0)
+}
+const viewedCards = computed(() => {
+	const p = ps.value
+	if (!p) return []
+	if (showStack.value === "draw") return [...p.drawStack].sort(displayOrder)
+	if (showStack.value === "discard") return [...p.discardPile]
+	return []
+})
+function toggleStack(which) {
+	showStack.value = showStack.value === which ? null : which
+}
 const collections = computed(() => {
 	const p = ps.value
 	return {
@@ -231,7 +244,7 @@ function selectCard(card) {
 </script>
 
 <template>
-	<div v-if="ps" id="playerBoard">
+	<div v-if="ps" id="playerBoard" :style="{ borderColor: color }">
 		<div class="header">
 			<span class="balance">${{ ps.balance }}</span>
 			<span v-if="ps.handValue()">hand value {{ ps.handValue() }}</span>
@@ -239,11 +252,11 @@ function selectCard(card) {
 			<span>engine {{ store.game?.getRailroadTrack().currentSpace(ps.player) }}</span>
 		</div>
 		<div class="collections">
-			<span class="stack" :title="`Draw pile (${drawStackSize}, hidden)`">
-				<img :src="view.cardBackGreyImage()" alt="" /><b>{{ drawStackSize }}</b>
+			<span class="stack" :title="`Draw pile (${drawStackSize}) — click to inspect`" @click="toggleStack('draw')">
+				<img :src="view.cardBackGreyImage()" alt="" /><b>{{ drawStackSize }}</b><em class="stackLabel">Draw</em>
 			</span>
-			<span class="stack discard" :title="`Discard pile (${discardSize}) — click to inspect`" @click="showDiscard = !showDiscard">
-				<img :src="view.cardBackGreyImage()" alt="" /><b>{{ discardSize }}</b>
+			<span class="stack discard" :title="`Discard pile (${discardSize}) — click to inspect`" @click="toggleStack('discard')">
+				<img :src="view.cardBackGreyImage()" alt="" /><b>{{ discardSize }}</b><em class="stackLabel">Discard</em>
 			</span>
 			<img v-for="m in collections.masters" :key="'sm' + m.name" class="collect" :src="m.img" :title="view.humanizeAction(m.name)" alt="" />
 			<img v-for="(h, i) in collections.hazards" :key="'hz' + i" class="collect" :src="h.img" :title="h.label" alt="" />
@@ -325,29 +338,44 @@ function selectCard(card) {
 				<text x="222" y="224" text-anchor="middle" class="cowboysRemaining">{{ ps.cowboysRemaining() }}/{{ ps.getNumberOfCowboys() }}</text>
 			</g>
 		</svg>
-		<div v-if="showDiscard" class="stackDialog">
+		<div v-if="showStack" class="stackDialog">
 			<div class="stackDialogHead">
-				Discard pile ({{ discardSize }})
-				<button @click="showDiscard = false">Close</button>
+				{{ showStack === "draw" ? "Draw pile (shown in value order)" : "Discard pile" }} ({{ showStack === "draw" ? drawStackSize : discardSize }})
+				<button @click="showStack = null">Close</button>
 			</div>
 			<div class="stackDialogCards">
-				<CardView v-for="(c, i) in discardPile" :key="i" :card="c" />
-				<span v-if="discardPile.length === 0" class="empty">Empty</span>
+				<CardView v-for="(c, i) in viewedCards" :key="i" :card="c" />
+				<span v-if="viewedCards.length === 0" class="empty">Empty</span>
 			</div>
 		</div>
 	</div>
 </template>
 
 <style scoped>
-#playerBoard { display: block; width: 100%; margin: 8px 0; }
+#playerBoard { display: block; width: 100%; margin: 8px 0; box-sizing: border-box; border: 4px solid; border-radius: 8px; padding: 4px; }
 .header { margin-bottom: 4px; font-size: 13px; display: flex; gap: 14px; justify-content: center; }
 .header .balance { font-weight: bold; color: #0a6c0a; }
-.collections { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; margin-bottom: 4px; min-height: 34px; }
+.collections { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; margin-bottom: 4px; min-height: 64px; }
 .collections .collect { width: 26px; height: 30px; border: 1px solid #fff; border-radius: 4px; background: #fff; }
-.collections .stack { position: relative; width: 26px; height: 30px; border: 1px solid #fff; border-radius: 4px; overflow: hidden; }
+.collections .stack { position: relative; box-sizing: border-box; width: 52px; height: 60px; border: 3px solid #ffd400; border-radius: 4px; overflow: hidden; cursor: pointer; }
+.collections .stack:hover { border-color: #90ee90; }
 .collections .stack img { width: 100%; height: 100%; display: block; }
-.collections .stack.discard { filter: grayscale(0.6); }
-.collections .stack b { position: absolute; right: 1px; bottom: 0; color: #fff; font-size: 11px; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
+.collections .stack.discard img { filter: grayscale(0.6); }
+.collections .stack b { position: absolute; right: 1px; bottom: 0; color: #fff; font-size: 13px; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
+.collections .stack .stackLabel {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	font-style: normal;
+	font-size: 13px;
+	font-weight: bold;
+	line-height: 17px;
+	text-align: center;
+	color: #fff;
+	background: rgba(0, 0, 0, 0.55);
+	text-shadow: -1px -1px 0 #000, 1px 1px 0 #000;
+}
 .hand { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-bottom: 6px; min-height: 58px; }
 .handCard { cursor: default; }
 .handCard.back { width: 80px; height: 115px; border: 1px solid #ffffff; border-radius: 5px; overflow: hidden; flex: none; }

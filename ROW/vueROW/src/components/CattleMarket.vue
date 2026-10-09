@@ -8,7 +8,7 @@ import { computed, ref } from "vue"
 import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
 import * as view from "../js/ROWview"
-import { isCattleCard } from "../js/ROWcore"
+import { isCattleCard, CattleType } from "../js/ROWcore"
 import { useModelStore } from "../stores/ROWstore.js"
 import CardView from "./CardView.vue"
 
@@ -26,6 +26,29 @@ function g() {
 }
 
 const market = computed(() => (game.value ? g().getCattleMarket().market : []))
+// Display order only (copy, never the live array): ascending breeding value keeps
+// colours together and pins brown West Highland left of purple Texas Longhorn;
+// ties fall back to colour, then points.
+const CATTLE_TYPE_ORDER = [
+	CattleType.JERSEY,
+	CattleType.GUERNSEY,
+	CattleType.BLACK_ANGUS,
+	CattleType.DUTCH_BELT,
+	CattleType.SIMMENTAL,
+	CattleType.HOLSTEIN,
+	CattleType.BROWN_SWISS,
+	CattleType.AYRSHIRE,
+	CattleType.WEST_HIGHLAND,
+	CattleType.TEXAS_LONGHORN,
+]
+function marketOrder(a, b) {
+	return (
+		(a.value ?? 0) - (b.value ?? 0) ||
+		CATTLE_TYPE_ORDER.indexOf(a.type) - CATTLE_TYPE_ORDER.indexOf(b.type) ||
+		(a.points ?? 0) - (b.points ?? 0)
+	)
+}
+const displayMarket = computed(() => [...market.value].sort(marketOrder))
 const drawStackSize = computed(() => (game.value ? g().getCattleMarket().drawStack.length : 0))
 const buying = computed(() => store.actions.includes(ActionType.BUY_CATTLE))
 const takingThree = computed(() => store.actions.includes(ActionType.TAKE_BREEDING_VALUE_3_CATTLE_CARD))
@@ -101,7 +124,7 @@ function confirm() {
 		</div>
 		<div class="cards" :class="{ buying: buying || takingThree, selecting: selected.length > 0 }">
 			<CardView
-				v-for="(card, i) in market"
+				v-for="(card, i) in displayMarket"
 				:key="i"
 				class="marketCard"
 				:class="{ selectable: canSelectCard(card), disabled: !canSelectCard(card), selected: isSelected(card) }"
