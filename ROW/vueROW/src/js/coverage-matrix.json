@@ -1,0 +1,5 @@
+{
+  "MOVE_ENGINE_FORWARD_UP_TO_NUMBER_OF_BUILDINGS_IN_WOODS": "Requires a private building in the woods (a rare objective/building path); the handler is a one-line wrapper over the shared engine-move code covered by the other MOVE_ENGINE_* tests.",
+  "USE_ADJACENT_BUILDING": "Requires the player's last activated location to have an adjacent placed building and a legal UseAdjacentBuilding action; the adjacent-location and building-action plumbing is covered indirectly by the building/activation fixtures.",
+  "UPGRADE_STATION_TOWN": "Rails to the North only: requires a branchlet placed on a station town (spaces 40/41) and the town's station still un-upgraded; the station-upgrade path itself is covered by UPGRADE_STATION."
+}

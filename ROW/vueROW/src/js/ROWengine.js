@@ -13,8 +13,8 @@
  * scoring.
  */
 import { ActionStack, ActionType, CattleType, City, DiscColor, Edition, ROWError, ROWException, Hand, HazardType, PossibleAction, ScoreCategory, Status, Task, Teepee, Unlockable, UNLOCKABLE_INFO, Variant, Worker, handFee, isCattleCard, isObjectiveCard, shuffle, } from "./ROWcore";
-import { buildTrailNodes, buildingNumbersForOptions, cityStrip, TRACK_NEXT, TRACK_PREVIOUS, CATTLE_COSTS, STATION_MASTERS_ORIGINAL, STATION_MASTERS_PROMOS, STATION_MASTERS_SECOND_EDITION, STATION_MASTERS_RTTN, CITY_INFO, RTTN_TRACK, RTTN_BIG_TOWNS, RTTN_MEDIUM_TOWN_DEAL_ORDER, MEDIUM_TOWN_TILES, cattleMarketLimit, createCattleSet, createKcSet1, createKcSet2, createKcSet3, jobMarketInitialWorkerCount, JOB_MARKET_CATTLE, JOB_MARKET_COST, NEUTRAL_BUILDING_LOCATIONS, neutralBuildingAction, numberOfSignals, OBJECTIVE_CARD_TYPES, OBJECTIVE_DRAW_STACK, PLAYER_BUILDINGS, playerBuildingAction, STATIONS, STARTING_OBJECTIVE_IDS, } from "./ROWdata";
-import { createGarth } from "./automa/garth";
+import { buildTrailNodes, buildingNumbersForOptions, cityStrip, TRACK_NEXT, TRACK_PREVIOUS, CATTLE_COSTS, STATION_MASTERS_ORIGINAL, STATION_MASTERS_PROMOS, STATION_MASTERS_SECOND_EDITION, STATION_MASTERS_RTTN, CITY_INFO, RTTN_TRACK, RTTN_BIG_TOWNS, RTTN_MEDIUM_TOWN_DEAL_ORDER, MEDIUM_TOWN_TILES, cattleMarketLimit, createCattleSet, createKcSet1, createKcSet2, createKcSet3, jobMarketInitialWorkerCount, JOB_MARKET_CATTLE, JOB_MARKET_COST, NEUTRAL_BUILDING_LOCATIONS, neutralBuildingAction, numberOfSignals, OBJECTIVE_CARD_TYPES, OBJECTIVE_DRAW_STACK, playerBuildingAction, playerBuildingInfo, STATIONS, STARTING_OBJECTIVE_IDS, } from "./ROWdata";
+import { createGarth, lowestBidPossible } from "./automa/garth";
 const clone = (v) => JSON.parse(JSON.stringify(v));
 /** Certificate track steps (PlayerState.CERTIFICATE_STEPS). */
 export const CERTIFICATE_STEPS = [0, 1, 2, 3, 4, 6];
@@ -25,7 +25,8 @@ export const CERTIFICATE_STEPS = [0, 1, 2, 3, 4, 6];
  */
 function cardKey(card) {
     if (typeof card === "string") return `objective-id:${card}`;
-    if (card.type !== undefined) return `cattle:${card.type}:${card.points}`;
+    // Java's findCattleCardInHand matches by type only (ActionType.java:453-462).
+    if (card.type !== undefined) return `cattle:${card.type}`;
     return `objective:${card.points ?? 0}:${card.penalty ?? 0}:${[...(card.tasks ?? [])].sort().join(",")}`;
 }
 /**
@@ -307,21 +308,13 @@ export class PlayerState {
     }
     removeCards(cards) {
         for (const card of cards) {
-            // Identity first (cards held in memory), then by value: a card that arrived as plain
-            // JSON describes the card rather than referencing the object in hand.
-            let found = false;
-            for (const pile of [this.hand, this.discardPile, this.drawStack]) {
-                let idx = pile.indexOf(card);
-                if (idx < 0 && card && typeof card === "object")
-                    idx = pile.findIndex((c) => c && typeof c === "object" && cardKey(c) === cardKey(card));
-                if (idx >= 0) {
-                    pile.splice(idx, 1);
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
+            // Java's removeCard(s) only ever removes from the hand (PlayerState.java:405-416).
+            let idx = this.hand.indexOf(card);
+            if (idx < 0 && card && typeof card === "object")
+                idx = this.hand.findIndex((c) => c && typeof c === "object" && cardKey(c) === cardKey(card));
+            if (idx < 0)
                 throw new ROWException(ROWError.CARD_NOT_IN_HAND);
+            this.hand.splice(idx, 1);
         }
     }
     hasObjectiveCardInHand() {
@@ -403,6 +396,9 @@ export class PlayerState {
         this.buildings.splice(idx, 1);
     }
     gainWorker(worker) {
+        // PlayerState.addWorker throws at 6 (hasMaxWorkers).
+        if ((this.workers[worker] ?? 0) >= 6)
+            throw new ROWException(ROWError.WORKERS_EXCEED_LIMIT);
         this.workers[worker]++;
     }
     unlock(u) {
@@ -414,9 +410,6 @@ export class PlayerState {
         this.unlocked[u] = (this.unlocked[u] ?? 0) + 1;
         if (u === Unlockable.EXTRA_STEP_DOLLARS)
             this.gainDollars(3);
-    }
-    hasUsedBuildingInTurn(locationName) {
-        return this.locationsActivatedInTurn.includes(locationName);
     }
     activate(locationName) {
         this.locationsActivatedInTurn.push(locationName);
@@ -451,9 +444,9 @@ class TrailLocation {
         this.inWoods = def.inWoods ?? false;
         this.riskAction = def.riskAction ?? null;
     }
-    getHand() {
+    getHand(edition) {
         if (this.building)
-            return this.building.player === null ? Hand.NONE : PLAYER_BUILDINGS[this.building.name]?.hand ?? Hand.NONE;
+            return this.building.player === null ? Hand.NONE : playerBuildingInfo(this.building.name, edition)?.hand ?? Hand.NONE;
         if (this.hazard)
             return this.hazard.hand;
         if (this.teepee)
@@ -592,10 +585,10 @@ export class Trail {
                 owner = loc.building.player;
             }
             if (!toOther) {
-                cost += loc.getHand() === Hand.NONE ? 0 : handFee(loc.getHand(), playerCount);
+                cost += loc.getHand(this.edition) === Hand.NONE ? 0 : handFee(loc.getHand(this.edition), playerCount);
             }
             else {
-                const fee = Math.min(remaining, handFee(loc.getHand(), playerCount));
+                const fee = Math.min(remaining, handFee(loc.getHand(this.edition), playerCount));
                 if (owner && fee > 0)
                     fees[owner] = (fees[owner] ?? 0) + fee;
             }
@@ -632,7 +625,7 @@ export class Trail {
         let points = 0;
         for (const loc of this.locations.values()) {
             if (loc.kind === "BUILDING" && loc.building && loc.building.player === player) {
-                points += PLAYER_BUILDINGS[loc.building.name]?.points ?? 0;
+                points += playerBuildingInfo(loc.building.name, this.edition)?.points ?? 0;
             }
         }
         return points;
@@ -1053,6 +1046,24 @@ export class RailroadTrack {
     reachableSpacesBackwards(from, atLeast, atMost) {
         return new Set(this.reachableSpaces(from, atLeast, atMost, false).keys());
     }
+    /**
+     * Java's Space.isAfter: true when `target` is behind `from` along the previous-space graph.
+     * The graph holds only the main line (towns are omitted, matching Java's Town filter), so
+     * RttN town-stations are correctly never "behind".
+     */
+    isAfter(from, target) {
+        if (from === target) return false;
+        const stack = [...(TRACK_PREVIOUS[from] ?? [])];
+        const seen = new Set();
+        while (stack.length > 0) {
+            const cur = stack.pop();
+            if (cur === target) return true;
+            if (seen.has(cur)) continue;
+            seen.add(cur);
+            for (const p of TRACK_PREVIOUS[cur] ?? []) stack.push(p);
+        }
+        return false;
+    }
     /** Java's RailroadTrack.moveEngine: validate, move, and report the walk's step count. */
     moveEngine(player, to, atLeast, atMost, forward) {
         // Java checks occupancy first (START is exempt) and "already there" second.
@@ -1407,16 +1418,18 @@ export class Game {
             shuffle(playerOrder, rng);
         const playerStates = {};
         const buildingNumbers = buildingNumbersForOptions(options.edition, options);
+        // Java builds ONE BuildingSet for the whole game (GWT.java:120), so every human holds the
+        // same set of sides; only the computer seat swaps to b-sides.
+        const buildingSides = options.buildings === "BEGINNER" ? null : buildingNumbers.map(() => (rng.boolean() ? "a" : "b"));
         for (const p of players) {
             const ps = new PlayerState(p.name);
             const computer = p.type === "COMPUTER";
             ps.balance = computer ? 999 : 0;
-            if (options.buildings === "BEGINNER") {
+            if (buildingSides === null) {
                 ps.buildings = buildingNumbers.map((n) => `${n}${computer ? "b" : "a"}`);
             }
             else {
-                const sides = buildingNumbers.map(() => (rng.boolean() ? "a" : "b"));
-                ps.buildings = buildingNumbers.map((n, i) => `${n}${computer ? "b" : sides[i]}`);
+                ps.buildings = buildingNumbers.map((n, i) => `${n}${computer ? "b" : buildingSides[i]}`);
             }
             // starting deck
             const deck = [];
@@ -1477,7 +1490,8 @@ export class Game {
         const objectiveCards = new ObjectiveCards(rng);
         const startingDeck = [...STARTING_OBJECTIVE_IDS];
         shuffle(startingDeck, rng);
-        const startingObjectiveCards = startingDeck.slice(0, players.length).map((id) => OBJECTIVE_CARD_TYPES[id]);
+        // Java keeps the last playerCount cards of the shuffled deck (removes from the front).
+        const startingObjectiveCards = startingDeck.slice(Math.max(0, startingDeck.length - players.length)).map((id) => OBJECTIVE_CARD_TYPES[id]);
         // GWT.placeInitialTiles: 7 hazard/teepee tiles from the first supply pile.
         let placed = 0;
         while (placed < 7 && kcSupply.tilesLeft(0) > 0) {
@@ -1732,6 +1746,125 @@ export class Game {
         catch (e) {
             Object.assign(this.state, backup);
             throw e;
+        }
+    }
+    /** Any unlockable disc of one of the given colours the player could still clear. */
+    anyUnlockable(ps, colors) {
+        return Object.values(Unlockable).find((u) => colors.includes(UNLOCKABLE_INFO[u].discColor) && ps.canUnlock(u, this.isRailsToTheNorth()));
+    }
+    /**
+     * Java's GWT.forceEndTurn: play a safe fallback for each mandatory action until the turn can
+     * end, then end it. (OBG's server owns kickouts; this mirrors the reference for completeness.)
+     */
+    forceEndTurn(player, rng) {
+        if (this.isEnded())
+            throw new ROWException(ROWError.GAME_ENDED);
+        if (player !== this.currentPlayer)
+            throw new ROWException(ROWError.NOT_CURRENT_PLAYER);
+        const ps = this.currentPlayerState();
+        let guard = 0;
+        while (this.currentPlayer === player && !this.state.actionStack.isEmpty() && !this.state.actionStack.canSkip() && guard++ < 50) {
+            const possible = this.state.actionStack.getPossibleActions();
+            if (possible.has(ActionType.PLACE_BID)) {
+                this.perform(player, { type: ActionType.PLACE_BID, ...lowestBidPossible(this) }, rng);
+            }
+            else if (possible.has(ActionType.MOVE)) {
+                const moves = this.possibleMoves(player);
+                if (moves.length === 0)
+                    break;
+                this.perform(player, { type: ActionType.MOVE, steps: moves[0].steps }, rng);
+            }
+            else if (possible.has(ActionType.SINGLE_AUXILIARY_ACTION)) {
+                this.perform(player, { type: ActionType.SINGLE_AUXILIARY_ACTION }, rng);
+                this.perform(player, { type: ActionType.GAIN_1_DOLLAR }, rng);
+            }
+            else if (possible.has(ActionType.DELIVER_TO_CITY)) {
+                this.perform(player, { type: ActionType.DELIVER_TO_CITY, city: City.KANSAS_CITY, certificates: 0 }, rng);
+            }
+            else if (possible.has(ActionType.CHOOSE_FORESIGHT_1)) {
+                this.perform(player, { type: ActionType.CHOOSE_FORESIGHT_1, choice: 0 }, rng);
+            }
+            else if (possible.has(ActionType.CHOOSE_FORESIGHT_2)) {
+                this.perform(player, { type: ActionType.CHOOSE_FORESIGHT_2, choice: 0 }, rng);
+            }
+            else if (possible.has(ActionType.CHOOSE_FORESIGHT_3)) {
+                this.perform(player, { type: ActionType.CHOOSE_FORESIGHT_3, choice: 0 }, rng);
+            }
+            else if (possible.has(ActionType.UNLOCK_WHITE)) {
+                const u = this.anyUnlockable(ps, [DiscColor.WHITE]);
+                if (!u)
+                    break;
+                this.perform(player, { type: ActionType.UNLOCK_WHITE, unlock: u }, rng);
+            }
+            else if (possible.has(ActionType.UNLOCK_BLACK_OR_WHITE)) {
+                const u = this.anyUnlockable(ps, [DiscColor.WHITE, DiscColor.BLACK]);
+                if (!u)
+                    break;
+                this.perform(player, { type: ActionType.UNLOCK_BLACK_OR_WHITE, unlock: u }, rng);
+            }
+            else if (possible.has(ActionType.TAKE_OBJECTIVE_CARD)) {
+                const available = this.state.objectiveCards.available;
+                if (available.length === 0)
+                    break;
+                this.perform(player, { type: ActionType.TAKE_OBJECTIVE_CARD, objectiveCard: available[0] }, rng);
+            }
+            else if (possible.has(ActionType.GAIN_EXCHANGE_TOKEN)) {
+                this.perform(player, { type: ActionType.GAIN_EXCHANGE_TOKEN }, rng);
+            }
+            else if (possible.has(ActionType.DISCARD_CARD)) {
+                if (ps.hand.length === 0)
+                    break;
+                this.perform(player, { type: ActionType.DISCARD_CARD, card: ps.hand[0] }, rng);
+            }
+            else if (possible.has(ActionType.REMOVE_CARD)) {
+                if (ps.hand.length === 0)
+                    break;
+                this.perform(player, { type: ActionType.REMOVE_CARD, card: ps.hand[0] }, rng);
+            }
+            else if (possible.has(ActionType.DOWNGRADE_STATION)) {
+                const idx = this.state.railroadTrack.stations.findIndex((s) => s.upgradedBy.includes(player));
+                if (idx < 0)
+                    break;
+                this.perform(player, { type: ActionType.DOWNGRADE_STATION, station: idx }, rng);
+            }
+            else if (possible.has(ActionType.MOVE_ENGINE_AT_LEAST_1_BACKWARDS_AND_GAIN_3_DOLLARS)) {
+                const to = [...this.state.railroadTrack.reachableSpacesBackwards(this.state.railroadTrack.currentSpace(player), 1, 1)][0];
+                if (!to)
+                    break;
+                this.perform(player, { type: ActionType.MOVE_ENGINE_AT_LEAST_1_BACKWARDS_AND_GAIN_3_DOLLARS, to }, rng);
+            }
+            else if (!this.state.actionStack.canSkip()) {
+                throw new ROWException(ROWError.CANNOT_FORCE_END_TURN);
+            }
+        }
+        if (this.currentPlayer === player)
+            this.endTurn(player, rng);
+    }
+    /** Java's GWT.end: the game is over. */
+    end() {
+        this.state.status = Status.ENDED;
+    }
+    /**
+     * Java's GWT.leave: drop a player from the rotation. OBG's server owns seating/kickouts, so this
+     * mirrors the reference (e.g. for a single remaining player to trigger the game end).
+     */
+    leave(player, rng) {
+        if (this.state.status === Status.BIDDING) {
+            this.state.playerOrder = this.state.playerOrder.filter((p) => p !== player);
+            if (this.currentPlayer === player)
+                this.afterEndTurn(rng);
+        }
+        else if (this.state.status === Status.STARTED) {
+            if (this.currentPlayer === player) {
+                this.state.actionStack.clear();
+                this.afterEndTurn(rng);
+            }
+            this.state.playerOrder = this.state.playerOrder.filter((p) => p !== player);
+            if (this.state.playerOrder.length === 1)
+                this.end();
+        }
+        else {
+            throw new ROWException(ROWError.GAME_ENDED);
         }
     }
     getNextPlayer() {
@@ -2083,7 +2216,8 @@ export class Game {
                 const station = this.state.railroadTrack.stations[stationIndex];
                 if (!station)
                     throw new ROWException(ROWError.STATION_NOT_ON_TRACK);
-                if (parseFloat(this.state.railroadTrack.currentSpace(this.currentPlayer)) <= parseFloat(station.space))
+                // Java's Space.isAfter walks the previous-space graph (not a numeric compare).
+                if (!this.state.railroadTrack.isAfter(this.state.railroadTrack.currentSpace(this.currentPlayer), station.space))
                     throw new ROWException(ROWError.STATION_MUST_BE_BEHIND_ENGINE);
                 return { immediate: this.upgradeStation(stationIndex), actions: [], canUndo: true };
             }
@@ -2129,7 +2263,9 @@ export class Game {
             }
             case ActionType.UPGRADE_SIMMENTAL: {
                 const requested = action.card ?? action.cattleCard;
-                const idx = requested && typeof requested === "object" ? ps.hand.findIndex((c) => isCattleCard(c) && c.type === requested.type && c.points === requested.points && (requested.value === undefined || c.value === requested.value)) : -1;
+                // Java matches the Simmental by type only (findCattleCardInHand), then upgrades
+                // whichever value it happens to find.
+                const idx = requested && typeof requested === "object" ? ps.hand.findIndex((c) => isCattleCard(c) && c.type === requested.type) : -1;
                 if (idx < 0)
                     throw new ROWException(ROWError.CARD_NOT_IN_HAND);
                 const card = ps.hand[idx];
@@ -2358,7 +2494,7 @@ export class Game {
         const ps = this.currentPlayerState();
         for (const name of steps) {
             const loc = this.state.trail.getLocation(name);
-            const amount = Math.min(ps.balance, handFee(loc.getHand(), this.state.players.length));
+                const amount = Math.min(ps.balance, handFee(loc.getHand(this.edition), this.state.players.length));
             if (amount <= 0)
                 continue;
             let recipient = null;
@@ -2452,7 +2588,7 @@ export class Game {
         const loc = this.state.trail.getLocation(locationName);
         if (loc.kind !== "BUILDING")
             throw new ROWException(ROWError.MUST_START_ON_NEUTRAL_BUILDING);
-        const info = PLAYER_BUILDINGS[buildingName];
+        const info = playerBuildingInfo(buildingName, this.edition);
         if (!info)
             throw new ROWException(ROWError.BUILDING_NOT_AVAILABLE);
         if (!ps.buildings.includes(buildingName))
@@ -2463,7 +2599,7 @@ export class Game {
                 throw new ROWException(ROWError.CANNOT_REPLACE_NEUTRAL_BUILDING);
             if (loc.building.player !== this.currentPlayer)
                 throw new ROWException(ROWError.CANNOT_REPLACE_BUILDING_OF_OTHER_PLAYER);
-            const existing = PLAYER_BUILDINGS[loc.building.name];
+            const existing = playerBuildingInfo(loc.building.name, this.edition);
             if (existing.craftsmen >= info.craftsmen)
                 throw new ROWException(ROWError.REPLACEMENT_BUILDING_MUST_BE_HIGHER);
             craftsmenNeeded = info.craftsmen - existing.craftsmen;
@@ -2788,13 +2924,24 @@ export class Game {
             return [PossibleAction.mandatory(ActionType.DOWNGRADE_STATION)];
         return [];
     }
+    /** Java's PlayerState.hasUsedBuildingInTurn: match by building name, resolving location names. */
+    buildingUsedInTurn(ps, buildingName) {
+        if (!buildingName)
+            return false;
+        return ps.locationsActivatedInTurn.some((name) => {
+            const l = this.state.trail.locations.get(name);
+            return l && l.building && l.building.name === buildingName;
+        });
+    }
     activateLocation(loc, adjacent = false) {
         const ps = this.currentPlayerState();
         if (loc.kind === "KANSAS_CITY")
             return this.kansasCityAction();
         if (loc.kind === "BUILDING") {
             const building = loc.building;
-            const canUse = !!building && (adjacent || building.player === null || building.player === this.currentPlayer) && (this.edition === Edition.FIRST || !ps.hasUsedBuildingInTurn(loc.name));
+            // Java matches the "already used this building" rule by the building's name, not the
+            // location (PlayerState.hasUsedBuildingInTurn).
+            const canUse = !!building && (adjacent || building.player === null || building.player === this.currentPlayer) && (this.edition === Edition.FIRST || !this.buildingUsedInTurn(ps, building.name));
             if (canUse && building) {
                 ps.activate(loc.name);
                 const localAction = building.player === null ? neutralBuildingAction(building.name, ps.getNumberOfCowboys()) : playerBuildingAction(building.name, this.edition, ps.getNumberOfCowboys());
@@ -2877,10 +3024,10 @@ export class Game {
     }
     /**
      * Objective scoring, ported from ObjectiveCard.score (GPL-3.0, Tom Wetjens):
-     * both committed and optional (in-hand) objectives are considered; a card is
-     * scored if its tasks are met, otherwise the player may still "commit" to it
-     * and take its penalty. Returns the best total plus the number of committed
-     * cards (needed for the points-per-2-objectives station master).
+     * both committed and optional objectives are considered; a card is scored if its
+     * tasks are met, otherwise the player may still "commit" to it and take its
+     * penalty. Returns the best total plus the number of committed cards (needed for
+     * the points-per-2-objectives station master).
      */
     scoreObjectives(ps) {
         const counts = this.objectiveCounts(ps);
@@ -2891,9 +3038,16 @@ export class Game {
             if (def)
                 cards.push({ def, committed: true });
         }
-        for (const c of ps.hand) {
-            if (isObjectiveCard(c) && !committedIds.has(c.id))
-                cards.push({ def: c, committed: false });
+        // Java's getOptionalObjectives collects objective cards from hand, discard pile
+        // and draw stack into a Set (PlayerState.java:844-848), so dedupe by card id.
+        const seenOptional = new Set();
+        for (const pile of [ps.hand, ps.discardPile, ps.drawStack]) {
+            for (const c of pile) {
+                if (isObjectiveCard(c) && c.id && !committedIds.has(c.id) && !seenOptional.has(c.id)) {
+                    seenOptional.add(c.id);
+                    cards.push({ def: c, committed: false });
+                }
+            }
         }
         cards.sort((a, b) => b.def.points - a.def.points);
         const results = this.scoreObjectiveCards(cards, 0, counts, 0, 0);

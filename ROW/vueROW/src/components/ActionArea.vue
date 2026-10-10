@@ -4,7 +4,7 @@ import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
 import * as map from "../js/ROWmap"
 import * as view from "../js/ROWview"
-import { PLAYER_BUILDINGS } from "../js/ROWdata"
+import { playerBuildingInfo } from "../js/ROWdata"
 import { AI_NAME } from "../js/automa/index"
 import { useModelStore } from "../stores/ROWstore.js"
 
@@ -53,7 +53,7 @@ function buildingImageFor(building) {
 	return view.buildingImage(g().edition, building, color)
 }
 function buildingLabel(building) {
-	const info = PLAYER_BUILDINGS[building]
+	const info = playerBuildingInfo(building, g().edition)
 	if (!info) return building
 	return `${building}: ${info.craftsmen} craftsman${info.craftsmen === 1 ? "" : "en"}, ${HAND_LABEL[info.hand]}, ${info.points} point${info.points === 1 ? "" : "s"}`
 }

@@ -27,7 +27,7 @@ import {
 	Edition,
 	ScoreCategory,
 } from "../ROWcore"
-import { PLAYER_BUILDINGS, CITY_INFO, JOB_MARKET_COST, OBJECTIVE_CARD_TYPES } from "../ROWdata"
+import { playerBuildingInfo, CITY_INFO, JOB_MARKET_COST, OBJECTIVE_CARD_TYPES } from "../ROWdata"
 
 const WORKERS = [Worker.COWBOY, Worker.CRAFTSMAN, Worker.ENGINEER]
 
@@ -296,26 +296,27 @@ export class Garth {
 		const startLoc = trail.getLocation(next && trail.currentLocation(next) ? trail.currentLocation(next) : "START")
 		const newBuildLocation = firstEmptyBuildingLocation(trail, startLoc)
 		const options = []
+		const pb = (name) => playerBuildingInfo(name, game.edition)
 		for (const building of ps.buildings) {
-			const info = PLAYER_BUILDINGS[building]
+			const info = pb(building)
 			if (!info || info.craftsmen > workerCount(ps, Worker.CRAFTSMAN)) continue
 			if (newBuildLocation) options.push({ craftsmen: info.craftsmen, building, location: newBuildLocation })
 			for (const loc of trail.locations.values()) {
 				if (loc.kind !== "BUILDING" || !loc.building || loc.building.player !== player) continue
-				const other = PLAYER_BUILDINGS[loc.building.name]
+				const other = pb(loc.building.name)
 				if (other && other.craftsmen < info.craftsmen) options.push({ craftsmen: info.craftsmen - other.craftsmen, building, location: loc })
 			}
 		}
 		if (options.length === 0) return
 		options.sort((a, b) => {
 			if (a.craftsmen !== b.craftsmen) return b.craftsmen - a.craftsmen
-			const ap = a.location.building ? PLAYER_BUILDINGS[a.location.building.name]?.points ?? 0 : 0
-			const bp = b.location.building ? PLAYER_BUILDINGS[b.location.building.name]?.points ?? 0 : 0
+			const ap = a.location.building ? pb(a.location.building.name)?.points ?? 0 : 0
+			const bp = b.location.building ? pb(b.location.building.name)?.points ?? 0 : 0
 			if (ap !== bp) return bp - ap
-			const aNew = handFee(PLAYER_BUILDINGS[a.building].hand, playerCount)
-			const aOld = a.location.building ? handFee(PLAYER_BUILDINGS[a.location.building.name].hand, playerCount) : 0
-			const bNew = handFee(PLAYER_BUILDINGS[b.building].hand, playerCount)
-			const bOld = b.location.building ? handFee(PLAYER_BUILDINGS[b.location.building.name].hand, playerCount) : 0
+			const aNew = handFee(pb(a.building).hand, playerCount)
+			const aOld = a.location.building ? handFee(pb(a.location.building.name).hand, playerCount) : 0
+			const bNew = handFee(pb(b.building).hand, playerCount)
+			const bOld = b.location.building ? handFee(pb(b.location.building.name).hand, playerCount) : 0
 			return bNew - bOld - (aNew - aOld)
 		})
 		const best = options[0]
@@ -565,7 +566,7 @@ function randomBlackOrWhiteDisc(ps) {
 	if (u === undefined) throw new ROWException(ROWError.NO_ACTIONS)
 	return u
 }
-function lowestBidPossible(game) {
+export function lowestBidPossible(game) {
 	const used = new Set()
 	for (const name of game.state.playerOrder) {
 		const bid = game.playerState(name).bid

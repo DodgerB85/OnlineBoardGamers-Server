@@ -444,6 +444,21 @@ export const PLAYER_BUILDINGS = {
     "13a": PB("13a", Hand.GREEN, 4, 5),
     "13b": PB("13b", Hand.NONE, 2, 4),
 };
+/**
+ * Second-edition stat overrides (PlayerBuilding 11A2ndEdition / 13A2ndEdition / 13B2ndEdition):
+ * only the hand fee / craftsmen / points differ; the actions are handled in playerBuildingAction.
+ */
+const PLAYER_BUILDINGS_SECOND_EDITION = {
+    "11a": PB("11a", Hand.NONE, 12, 20),
+    "13a": PB("13a", Hand.NONE, 4, 5),
+    "13b": PB("13b", Hand.NONE, 3, 4),
+};
+/** Edition-aware player-building stats. */
+export function playerBuildingInfo(name, edition) {
+    if (edition === Edition.SECOND && PLAYER_BUILDINGS_SECOND_EDITION[name])
+        return PLAYER_BUILDINGS_SECOND_EDITION[name];
+    return PLAYER_BUILDINGS[name];
+}
 /** Buildings available for the given edition + options (BuildingSet.buildingsForOptions). */
 export function buildingNumbersForOptions(edition, opts) {
     const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];

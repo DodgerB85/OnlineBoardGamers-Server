@@ -11,7 +11,7 @@
  * component.
  */
 import { ActionType } from "./ROWreference"
-import { neutralBuildingAction, playerBuildingAction, PLAYER_BUILDINGS } from "./ROWdata"
+import { neutralBuildingAction, playerBuildingAction, playerBuildingInfo } from "./ROWdata"
 
 /** Trail location rectangles, keyed by engine location name. */
 export const TRAIL_SPOTS = {
@@ -358,13 +358,13 @@ export function trailRoute(trail, from, steps) {
 /** View-side preview of Game.placeBuilding: are the craftsmen and dollars there? */
 export function canPlaceBuilding(g, player, loc, building, action) {
 	if (loc.building && loc.building.player !== player) return false
-	const info = PLAYER_BUILDINGS[building]
+	const info = playerBuildingInfo(building, g.edition)
 	if (!info) return false
 	const ps = g.playerState(player)
 	if (!ps.buildings.includes(building)) return false
 	let needed = info.craftsmen
 	if (loc.building) {
-		const existing = PLAYER_BUILDINGS[loc.building.name]
+		const existing = playerBuildingInfo(loc.building.name, g.edition)
 		if (!existing || existing.craftsmen >= info.craftsmen) return false
 		needed = info.craftsmen - existing.craftsmen
 	}
