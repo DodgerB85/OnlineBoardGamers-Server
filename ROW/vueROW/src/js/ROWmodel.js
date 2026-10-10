@@ -154,6 +154,10 @@ export function initGame() {
 	personal.kickoutRequired = Number(initData.kickoutRequired ?? 0)
 	store.kickoutVotesData = initData.kickoutVotesData ?? {}
 	store.kickoutVoteThreshold = Number(initData.kickoutVoteThreshold ?? 0)
+	store.deleteVotesData = initData.deleteVotesData ?? {}
+	store.statsExcludeVotesData = initData.statsExcludeVotesData ?? {}
+	personal.votedToDelete = Boolean(store.deleteVotesData[personal.name])
+	personal.votedToExclude = Boolean(store.statsExcludeVotesData[personal.name])
 	personal.trainingGame = Array.isArray(initData.startingOptions) && initData.startingOptions.includes(SO_TRAINING_GAME)
 	personal.transactionID = String(initData.transactionID ?? "")
 	personal.chatNotification = Boolean(initData.chatNotification)

@@ -99,6 +99,13 @@ function playerColor(color) {
 			<span :class="['topMenuItem', { selected: store.viewSettings.showHistory }]" @click="toggle('showHistory')">
 				<img :src="view.getImage('icon-scroll')" /><span>{{ t('topMenu.history') }}</span>
 			</span>
+			<span
+				v-if="personal.pov >= 0 && !personal.trainingGame && !(store.game?.isEnded())"
+				:class="['topMenuItem', { selected: store.viewSettings.showVotes }]"
+				@click="toggle('showVotes')"
+			>
+				<img :src="view.getImage('icon-stop')" /><span>Vote</span>
+			</span>
 			<div class="menuDivider"></div>
 			<span :class="['topMenuItem', { selected: store.viewSettings.showReplay }]" @click="toggleReplay">
 				<img :src="view.getImage('icon-replay')" /><span>{{ t('topMenu.replay') }}</span>

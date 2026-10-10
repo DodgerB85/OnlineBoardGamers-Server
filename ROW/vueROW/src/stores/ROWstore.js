@@ -28,8 +28,7 @@ export const useModelStore = defineStore("store", () => {
 		showBug: false,
 		showHistory: false,
 		showInfo: false,
-		showLoader: false,
-		showRewindPanel: false,
+		showVotes: false,
 		showReplay: false,
 		performingRewind: false,
 	})
@@ -55,6 +54,10 @@ export const useModelStore = defineStore("store", () => {
 	const kickoutVotesData = ref({})
 	/** Votes required to kick out the timed-out player. */
 	const kickoutVoteThreshold = ref(0)
+	/** Delete-game votes: {username: bool}. */
+	const deleteVotesData = ref({})
+	/** Exclude-from-stats votes: {username: bool}. */
+	const statsExcludeVotesData = ref({})
 
 	/** Serialized snapshot taken at the start of the current player's turn. */
 	const wholeTurnResetData = ref(null)
@@ -167,6 +170,8 @@ export const useModelStore = defineStore("store", () => {
 		missingPlayers,
 		kickoutVotesData,
 		kickoutVoteThreshold,
+		deleteVotesData,
+		statsExcludeVotesData,
 		wholeTurnResetData,
 		undoSnapshot,
 		liveBeforeReplay,

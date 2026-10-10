@@ -80,6 +80,7 @@ const TARGET_ACTIONS = new Set([
 	ActionType.DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS, ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS, ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS,
 	ActionType.TAKE_BREEDING_VALUE_3_CATTLE_CARD, ActionType.APPOINT_STATION_MASTER, ActionType.DOWNGRADE_STATION,
 	ActionType.UPGRADE_ANY_STATION_BEHIND_ENGINE, ActionType.USE_ADJACENT_BUILDING,
+	ActionType.UPGRADE_SIMMENTAL, ActionType.TAKE_BONUS_STATION_MASTER,
 ])
 // Actions offered by a placed building are shown on the board (hover the building), not here.
 const buildingActionSet = computed(() => map.activeBuildingActions(g(), actions.value))
@@ -96,8 +97,12 @@ const CARD_TARGET_ACTIONS = new Set([
 	ActionType.DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS,
 	ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS, ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS,
 	ActionType.DISCARD_CATTLE_CARD_TO_PLACE_BRANCHLET,
+	ActionType.UPGRADE_SIMMENTAL,
 ])
 const cardActions = computed(() => actions.value.filter((a) => CARD_TARGET_ACTIONS.has(a)))
+
+// RttN: the bonus station master pile is a real choice the UI has to present.
+const bonusStationMasters = computed(() => (actions.value.includes(ActionType.TAKE_BONUS_STATION_MASTER) ? g().getRailroadTrack().stationMasters.slice() : []))
 
 function p(type, extra = {}) {
 	controller.perform({ type, ...extra })
@@ -159,6 +164,22 @@ function p(type, extra = {}) {
 			<button class="act" :class="{ active: store.selectedAction === ActionType.APPOINT_STATION_MASTER }" @click="store.selectAction(ActionType.APPOINT_STATION_MASTER)">
 				{{ store.selectedAction === ActionType.APPOINT_STATION_MASTER ? "Click a worker on your player board" : "Appoint station master" }}
 			</button>
+		</div>
+
+		<div v-if="bonusStationMasters.length" class="group">
+			<div class="label">Take a bonus station master tile</div>
+			<div class="supply">
+				<img
+					v-for="m in bonusStationMasters"
+					:key="m"
+					class="buildingTile"
+					:src="view.stationMasterImage(m)"
+					:alt="m"
+					:title="m"
+					draggable="false"
+					@click="p(ActionType.TAKE_BONUS_STATION_MASTER, { stationMaster: m })"
+				/>
+			</div>
 		</div>
 
 		<div v-for="em in engineMoves" :key="em.type" class="group">

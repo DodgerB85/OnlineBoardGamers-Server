@@ -39,10 +39,6 @@ export function buildingImage(edition, building, color) {
 	return editionImage(edition, `buildings/${building}_${color.toLowerCase()}.jpg`)
 }
 
-export function cattleImage(type) {
-	return asset(`images/row/cards/${type.toLowerCase()}.jpg`)
-}
-
 /** Card backs. (Static template attributes are compiled into module imports by Vite.) */
 export function cardBackImage() {
 	return asset("images/row/cards/back.jpg")
@@ -90,10 +86,6 @@ const STATION_MASTER_IMAGES = {
 export function stationMasterImage(master) {
 	const file = STATION_MASTER_IMAGES[master]
 	return file ? asset(`images/row/${file}`) : ""
-}
-
-export function soundFile(relative) {
-	return asset(`sounds/${relative}`)
 }
 
 /**

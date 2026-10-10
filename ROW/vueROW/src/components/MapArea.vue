@@ -13,6 +13,7 @@ import * as model from "../js/ROWmodel"
 import * as map from "../js/ROWmap"
 import * as view from "../js/ROWview"
 import { cityStrip, RTTN_BIG_TOWNS } from "../js/ROWdata"
+import { CERTIFICATE_STEPS } from "../js/ROWengine"
 import { useModelStore } from "../stores/ROWstore.js"
 
 const { ActionType } = rf
@@ -236,11 +237,45 @@ function choose(c) {
 }
 
 // ---------- other click targets ----------
+/** Cash the bank pays for delivering to `city` when using `total` certificates (temp + perm). */
+function deliveryPayout(city, total) {
+	const ps = g().currentPlayerState()
+	const transport = g().getRailroadTrack().transportCosts(g().currentPlayer, city)
+	let payout = Math.max(0, ps.handValue() + total - transport)
+	if (city === "KANSAS_CITY") payout += g().edition === "FIRST" ? 6 : 4
+	return payout
+}
+
 function clickCity(idx, city) {
 	if (!game.value || !store.actions.includes(ActionType.DELIVER_TO_CITY)) return
 	const name = city ?? cityStrip(g().edition, g().isRailsToTheNorth())[idx]
 	const pd = g().possibleDeliveries().find((d) => d.city === name)
-	if (pd) controller.perform({ type: ActionType.DELIVER_TO_CITY, city: pd.city, certificates: pd.certificates })
+	if (!pd) return
+	const ps = g().currentPlayerState()
+	const perm = ps.permanentCertificates()
+	const minTotal = Math.max(pd.certificates, perm)
+	// Permanent certificates are always free value; the only real choice is how many
+	// temporary certificates to spend (which moves the temp track down to a valid step).
+	const totals = [...new Set(CERTIFICATE_STEPS.filter((s) => s <= ps.tempCertificates).map((s) => perm + (ps.tempCertificates - s)))]
+		.filter((t) => t >= minTotal)
+		.sort((a, b) => a - b)
+	const cands = totals.map((total) => ({
+		label: `${total} cert${total === 1 ? "" : "s"} → $${deliveryPayout(name, total)}`,
+		run: () => controller.perform({ type: ActionType.DELIVER_TO_CITY, city: pd.city, certificates: total }),
+	}))
+	if (cands.length === 0) {
+		controller.perform({ type: ActionType.DELIVER_TO_CITY, city: pd.city, certificates: pd.certificates })
+		return
+	}
+	if (cands.length === 1) {
+		cands[0].run()
+		return
+	}
+	const grp = cityGroups.value.find((cg) => cg.city === name)
+	const pos = grp?.pos?.disc ?? grp?.pos?.rect
+	const x = pos ? (pos.cx ?? pos.x + (pos.w ?? 0) / 2) : 400
+	const y = pos ? (pos.cy ?? pos.y + (pos.h ?? 0) / 2) : 400
+	chooser.value = { x, y, cands }
 }
 
 function clickSpace(space) {

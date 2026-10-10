@@ -16,7 +16,7 @@ import CardView from "./CardView.vue"
 
 const props = defineProps({ playerName: { type: String, default: "" } })
 
-const { ActionType, Unlockable } = rf
+const { ActionType, Unlockable, CattleType } = rf
 const store = useModelStore()
 const personal = usePersonalStore()
 
@@ -198,8 +198,9 @@ function canSelectCard(card) {
 	switch (sel) {
 		case ActionType.DISCARD_CARD:
 		case ActionType.REMOVE_CARD:
-		case ActionType.UPGRADE_SIMMENTAL:
 			return true
+		case ActionType.UPGRADE_SIMMENTAL:
+			return isCattle(card) && card.type === CattleType.SIMMENTAL
 		case ActionType.DISCARD_1_OBJECTIVE_CARD_TO_GAIN_2_CERTIFICATES:
 		case ActionType.PLAY_OBJECTIVE_CARD:
 			return isObjective(card)

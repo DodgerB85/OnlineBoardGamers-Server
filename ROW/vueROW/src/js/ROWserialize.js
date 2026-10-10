@@ -32,7 +32,6 @@ function serializePlayerState(ps) {
         exchangeTokens: ps.exchangeTokens,
         branchlets: ps.branchlets,
         lastPlacedBranchlet: ps.lastPlacedBranchlet,
-        discs: ps.discs,
         automaState: ps.automaState ? ps.automaState.serialize() : null,
     };
 }
@@ -66,7 +65,6 @@ function deserializePlayerState(obj) {
     ps.exchangeTokens = obj.exchangeTokens ?? 1;
     ps.branchlets = obj.branchlets ?? 15;
     ps.lastPlacedBranchlet = obj.lastPlacedBranchlet ?? null;
-    ps.discs = obj.discs ?? 12;
     ps.automaState = obj.automaState ? deserializeGarth(obj.player, obj.automaState) : null;
     return ps;
 }

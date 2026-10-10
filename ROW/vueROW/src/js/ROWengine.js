@@ -8,16 +8,16 @@
  * Scope of this port: both editions and the Rails to the North expansion, 2-4
  * players, the main turn loop, trail movement + tolls, neutral/private building
  * activation, hiring, buying cattle, the Kansas City subphases, station upgrades,
- * auxiliary actions, city deliveries (including the northern strip and branchlets)
- * and end-of-game scoring. Not ported: bidding, the Garth automa and the balanced
- * cattle-market variant - those throw ROWError.NOT_IMPLEMENTED rather than guessing.
+ * auxiliary actions, city deliveries (including the northern strip and branchlets),
+ * bidding, the Garth automa, the balanced cattle-market variant and end-of-game
+ * scoring.
  */
 import { ActionStack, ActionType, CattleType, City, DiscColor, Edition, ROWError, ROWException, Hand, HazardType, PossibleAction, ScoreCategory, Status, Task, Teepee, Unlockable, UNLOCKABLE_INFO, Variant, Worker, handFee, isCattleCard, isObjectiveCard, shuffle, } from "./ROWcore";
 import { buildTrailNodes, buildingNumbersForOptions, cityStrip, TRACK_NEXT, TRACK_PREVIOUS, CATTLE_COSTS, STATION_MASTERS_ORIGINAL, STATION_MASTERS_PROMOS, STATION_MASTERS_SECOND_EDITION, STATION_MASTERS_RTTN, CITY_INFO, RTTN_TRACK, RTTN_BIG_TOWNS, RTTN_MEDIUM_TOWN_DEAL_ORDER, MEDIUM_TOWN_TILES, cattleMarketLimit, createCattleSet, createKcSet1, createKcSet2, createKcSet3, jobMarketInitialWorkerCount, JOB_MARKET_CATTLE, JOB_MARKET_COST, NEUTRAL_BUILDING_LOCATIONS, neutralBuildingAction, numberOfSignals, OBJECTIVE_CARD_TYPES, OBJECTIVE_DRAW_STACK, PLAYER_BUILDINGS, playerBuildingAction, STATIONS, STARTING_OBJECTIVE_IDS, } from "./ROWdata";
 import { createGarth } from "./automa/garth";
 const clone = (v) => JSON.parse(JSON.stringify(v));
 /** Certificate track steps (PlayerState.CERTIFICATE_STEPS). */
-const CERTIFICATE_STEPS = [0, 1, 2, 3, 4, 6];
+export const CERTIFICATE_STEPS = [0, 1, 2, 3, 4, 6];
 /**
  * Key for matching a described card against the hand: cattle by type + points, objective cards by
  * points + penalty + tasks. Mirrors Java's findCardInHand, so a card that arrived as plain JSON
@@ -153,7 +153,6 @@ export class PlayerState {
         this.automaState = null;
         this.lastEngineMove = 0;
         this.lastUpgradedStation = -1; // Java's "no station yet" representation
-        this.discs = 12; // placement discs remaining (14 total, 2 start removed); simplified
         this.player = player;
         for (const u of Object.values(Unlockable))
             this.unlocked[u] = 0;
@@ -2432,7 +2431,6 @@ export class Game {
         if (idx < 0)
             throw new ROWException(ROWError.STATION_NOT_UPGRADED_BY_PLAYER);
         station.upgradedBy.splice(idx, 1);
-        ps.discs += 1;
     }
     stationMasterActivate(master) {
         if (master === "GAIN_2_DOLLARS_POINT_FOR_EACH_WORKER")
@@ -2443,6 +2441,10 @@ export class Game {
             return [PossibleAction.optionalAction(ActionType.GAIN_12_DOLLARS)];
         if (master === "GAIN_2_CERTS_POINTS_PER_BUILDING")
             return [PossibleAction.optionalAction(ActionType.GAIN_2_CERTIFICATES)];
+        if (master === "GAIN_EXCHANGE_TOKEN_POINTS_PER_AREA")
+            return [PossibleAction.optionalAction(ActionType.GAIN_EXCHANGE_TOKEN)];
+        if (master === "PLACE_BRANCHLET_POINTS_PER_2_EXCHANGE_TOKENS")
+            return [PossibleAction.optionalAction(ActionType.PLACE_BRANCHLET)];
         return [];
     }
     placeBuilding(locationName, buildingName, costPerCraftsman) {
@@ -2666,7 +2668,7 @@ export class Game {
                     takeObjectiveCard(City.CLEVELAND);
                     break;
                 case City.NEW_YORK_CITY:
-                    if (track.bonusStationMasters.length > 0)
+                    if (track.stationMasters.length > 0)
                         out.push(PossibleAction.mandatory(ActionType.TAKE_BONUS_STATION_MASTER));
                     break;
                 case City.MEMPHIS:
@@ -2962,6 +2964,10 @@ export class Game {
             result += Math.floor(this.state.railroadTrack.numberOfUpgradedStations(ps.player) / 2) * 3;
         if (ps.stationMasters.includes("GAIN_2_CERTS_POINTS_PER_BUILDING"))
             result += this.state.trail.numberOfBuildings(ps.player) * 2;
+        if (ps.stationMasters.includes("PLACE_BRANCHLET_POINTS_PER_2_EXCHANGE_TOKENS"))
+            result += Math.floor(ps.exchangeTokens / 2) * 5;
+        if (ps.stationMasters.includes("GAIN_EXCHANGE_TOKEN_POINTS_PER_AREA"))
+            result += this.state.railroadTrack.numberOfAreas(ps.player) * 2;
         return result;
     }
     ranking() {

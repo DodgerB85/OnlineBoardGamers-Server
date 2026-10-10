@@ -3,11 +3,14 @@
  * End-of-game results: standings, totals, ties and a per-category scoring
  * breakdown (ported from the reference ended-dialog).
  */
-import { computed } from "vue"
+import { computed, ref } from "vue"
 import { useModelStore } from "../stores/ROWstore.js"
 import { City } from "../js/ROWreference"
 
 const store = useModelStore()
+
+const dismissed = ref(false)
+const nextURL = String(window.initData?.nextURL ?? "")
 
 const game = computed(() => {
 	store.version
@@ -90,8 +93,12 @@ const STAT_ROWS = [
 </script>
 
 <template>
-	<div v-if="ended" id="endedDialog">
+	<div v-if="ended && !dismissed" id="endedDialog">
 		<h2>Game over</h2>
+		<div class="dialog-actions">
+			<a v-if="nextURL" class="ended-action" :href="nextURL">Next game</a>
+			<button class="ended-action" @click="dismissed = true">Close</button>
+		</div>
 		<table>
 			<thead>
 				<tr><th>#</th><th>Player</th><th>Total</th><th>Breakdown</th></tr>
@@ -150,4 +157,7 @@ td.total { text-align: right; font-weight: bold; }
 .cats { max-width: 420px; }
 .cat { display: inline-block; margin-right: 8px; font-size: 12px; color: #333; }
 .tie { color: #ffe08a; font-weight: bold; margin-top: 8px; }
+.dialog-actions { display: flex; gap: 10px; margin-bottom: 10px; }
+.ended-action { padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer; background: #ffd400; color: #222; text-decoration: none; font-size: 14px; }
+.ended-action:hover { background: #ffe680; }
 </style>

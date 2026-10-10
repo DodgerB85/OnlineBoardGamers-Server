@@ -44,6 +44,7 @@ USERNAMES_NOT_TO_NOTIFY = [
     "RnbBot",
     "WebBot",
     "KfwBot",
+    "RowAI",
     "SHADOW",
     # Shadows
     "SHADOW_2",

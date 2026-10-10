@@ -3,7 +3,7 @@
  * turns. There is no per-action endpoint and no rule enforcement server-side.
  */
 
-import { deflateSync, gunzipSync, gzipSync, strFromU8, strToU8 } from "fflate"
+import { gunzipSync, gzipSync, strFromU8, strToU8 } from "fflate"
 
 export function getCookie(name) {
 	const cookies = document.cookie ? document.cookie.split(";") : []
@@ -124,6 +124,13 @@ export async function resign(gameID) {
 	await post("/ROW/processROWturn/", { action: "resign", gameID })
 }
 
+/** Cast a vote (delete game / exclude from stats / rewind consent). */
+export async function castVote(gameID, topic, choice = true) {
+	const response = await post("/ROW/castVote/", { gameID, topic, choice })
+	if (!response.ok) throw new Error("Network response was not ok")
+	return response.json()
+}
+
 /** Vote to kick out (or actually kick out) the timed-out player. */
 export async function kickout(gameID, kickedName, latestUpdate) {
 	const response = await post("/ROW/processROWturn/", { action: "kickout", gameID, kickedName, latestUpdate })
@@ -137,6 +144,3 @@ export async function submitBug(gameID, description, gameData) {
 	const data = await response.json()
 	return !!data.bugEntrySuccess
 }
-
-// Exposed for potential future compression needs.
-export { deflateSync }
