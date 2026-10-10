@@ -106,6 +106,13 @@ function playerColor(color) {
 			>
 				<img :src="view.getImage('icon-stop')" /><span>Vote</span>
 			</span>
+			<span
+				v-if="store.game?.isEnded()"
+				class="topMenuItem"
+				@click="store.viewSettings.showEndedDialog = true"
+			>
+				<img :src="view.getImage('icon-info')" /><span>Results</span>
+			</span>
 			<div class="menuDivider"></div>
 			<span :class="['topMenuItem', { selected: store.viewSettings.showReplay }]" @click="toggleReplay">
 				<img :src="view.getImage('icon-replay')" /><span>{{ t('topMenu.replay') }}</span>

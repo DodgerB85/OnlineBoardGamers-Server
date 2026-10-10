@@ -1195,6 +1195,28 @@ def SR_getROWstartingOptionsHTML(startingOptionsArr):
             startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
         if option == rf.SO_EXPERIENCED_GAME:
             startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
+        if option == rfROW.SO_SECOND_EDITION:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Second edition") + "'>2nd ed</span>"
+        if option == rfROW.SO_RTTN:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Rails to the North") + "'>RttN</span>"
+        if option == rfROW.SO_SIMMENTAL:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Simmental cattle") + "'>Sim</span>"
+        if option == rfROW.SO_MODE_STRATEGIC:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Strategic mode") + "'>Strategic</span>"
+        if option == rfROW.SO_BUILDINGS_BEGINNER:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Beginner buildings") + "'>Beginner</span>"
+        if option == rfROW.SO_PLAYER_ORDER_BIDDING:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Bidding for player order") + "'>Bidding</span>"
+        if option == rfROW.SO_VARIANT_BALANCED:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Balanced variant") + "'>Balanced</span>"
+        if option == rfROW.SO_STATION_MASTER_PROMOS:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Station master promos") + "'>Promos</span>"
+        if option == rfROW.SO_BUILDING_11:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Building 11") + "'>Bldg 11</span>"
+        if option == rfROW.SO_BUILDING_13:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Building 13") + "'>Bldg 13</span>"
+        if option in rfROW.AUTOMA_OPTIONS:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Garth automa") + "'>Garth</span>"
 
     return startingOptionsHTML
 

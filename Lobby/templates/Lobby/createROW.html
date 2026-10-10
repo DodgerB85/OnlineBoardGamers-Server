@@ -269,7 +269,27 @@
             var input = document.getElementById("player" + (i + 2));
             if (input) input.value = names[i];
         }
+        // Restore the ROW-specific options from the previous game's starting options.
+        var so = {{ startingOptions|safe }};
+        function hasOpt(c) { return so.indexOf(c) !== -1; }
+        document.getElementById("edition").value = hasOpt(2) ? "SECOND" : "FIRST";
+        document.getElementById("mode").value = hasOpt(20) ? "STRATEGIC" : "ORIGINAL";
+        document.getElementById("buildings").value = hasOpt(21) ? "BEGINNER" : "RANDOMIZED";
+        document.getElementById("playerOrder").value = hasOpt(22) ? "BIDDING" : "RANDOMIZED";
+        document.getElementById("variant").value = hasOpt(23) ? "BALANCED" : "ORIGINAL";
+        document.getElementById("railsToTheNorth").checked = hasOpt(3);
+        document.getElementById("simmental").checked = hasOpt(4);
+        document.getElementById("stationMasterPromos").checked = hasOpt(24);
+        document.getElementById("building11").checked = hasOpt(25);
+        document.getElementById("building13").checked = hasOpt(26);
+        var automaDifficulty = hasOpt(27) ? "EASY" : hasOpt(28) ? "MEDIUM" : hasOpt(29) ? "HARD" : hasOpt(30) ? "VERY_HARD" : null;
+        if (automaDifficulty) {
+            document.getElementById("rowAI").checked = true;
+            document.getElementById("difficulty").value = automaDifficulty;
+        }
         selectPlayers();
+        toggleSimmental();
+        toggleRowAI();
         {% endif %}
     });
     </script>

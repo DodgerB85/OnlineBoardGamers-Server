@@ -70,6 +70,23 @@ describe("Rails to the North: New York City bonus station master", () => {
         expect(game.getRailroadTrack().stationMasters).not.toContain(tile);
     });
 });
+describe("Player order (OBG server is master)", () => {
+    it("keeps the incoming seat order when playerOrder is not RANDOMIZED", () => {
+        const roster = players(4);
+        const game = Game.start(roster, { ...defaultOptions(Edition.FIRST), buildings: "BEGINNER", playerOrder: "FIXED" }, new JavaRandom(1));
+        const names = roster.map((p) => p.name);
+        expect(game.state.playerOrder).toEqual(names);
+        expect(game.state.players.map((p) => p.name)).toEqual(names);
+        expect(game.state.currentPlayer).toBe(names[0]);
+    });
+    it("still shuffles for the reference RANDOMIZED option", () => {
+        const roster = players(4);
+        const game = Game.start(roster, { ...defaultOptions(Edition.FIRST), buildings: "BEGINNER", playerOrder: "RANDOMIZED" }, new JavaRandom(1));
+        expect(game.state.playerOrder.length).toBe(4);
+        expect([...game.state.playerOrder].sort()).toEqual([...roster.map((p) => p.name)].sort());
+    });
+});
+
 describe("Rails to the North station master scoring + activation", () => {
     function rttnGame() {
         return Game.start(players(2), defaultOptions(Edition.SECOND, { railsToTheNorth: true }), new JavaRandom(21));

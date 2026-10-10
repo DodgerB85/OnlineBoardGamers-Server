@@ -12,6 +12,15 @@ let retryCount = 0
 const MAX_RETRIES = 13
 const BASE_RETRY_DELAY = 2000
 
+/**
+ * Message handler registered once by the caller. It is (re)attached to every new
+ * socket in `startWebSocket`, so a reconnect does not lose live updates.
+ */
+let onMessageHandler = null
+export function setOnMessage(handler) {
+	onMessageHandler = handler
+}
+
 export async function startWebSocket() {
 	const personal = usePersonalStore()
 	if (ROWwebSocket && ROWwebSocket.readyState === 1) return ROWwebSocket
@@ -48,6 +57,9 @@ export async function startWebSocket() {
 		try {
 			if (ROWwebSocket) ROWwebSocket.close()
 			ROWwebSocket = new WebSocket("wss://wss.s3.sitereview.io/ws/HomeROWchannel" + String(personal.gameID) + "/")
+			ROWwebSocket.onmessage = (evt) => {
+				if (onMessageHandler) onMessageHandler(evt)
+			}
 			ROWwebSocket.onopen = () => {
 				cleanup()
 				retryCount = 0

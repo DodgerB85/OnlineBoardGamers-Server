@@ -17,6 +17,7 @@ export function canAct() {
 	const personal = usePersonalStore()
 	const g = store.game
 	if (!g) return false
+	if (g.isEnded()) return false
 	if (store.saving) return false
 	if (store.viewSettings.showReplay) return false
 	return personal.canPlay(g.currentPlayer)
@@ -91,15 +92,31 @@ export async function endTurn() {
 	const before = captureUndo()
 	const prevTurnSnapshot = store.wholeTurnResetData
 	const prevFrameCount = store.replayFrames.length
-	g.endTurn(g.currentPlayer, model.getRng())
+	try {
+		g.endTurn(g.currentPlayer, model.getRng())
+		// The automa plays immediately, so one save commits the human's turn + Garth's whole turn.
+		if (personal.automaGame && !g.isEnded() && g.currentPlayer === AI_NAME)
+			playAutomaTurns(g, model.getRng())
+	} catch (err) {
+		// The engine rejected or the automa got stuck: roll the whole local advance back
+		// so the client never drifts ahead of the persisted position, and report it.
+		store.gameMessages.errorText = err?.message ?? "Could not end the turn"
+		model.restoreRng(before)
+		store.setGame(deserializeGame(before))
+		store.wholeTurnResetData = prevTurnSnapshot
+		if (store.replayFrames.length > prevFrameCount) store.replayFrames.pop()
+		if (store.history[0]?.type === "END_TURN") store.history.shift()
+		store.undoSnapshot = null
+		store.touch()
+		return
+	}
 	store.clearAction()
 	store.undoSnapshot = null
 	model.recordHistory("END_TURN", endingPlayer)
 	store.touch()
+	// Snapshot after the automa has played, so "Reset Whole Turn" restores the next
+	// human turn rather than Garth's (which a human cannot act on).
 	model.snapshotTurn()
-	// The automa plays immediately, so one save commits the human's turn + Garth's whole turn.
-	if (personal.automaGame && !g.isEnded() && g.currentPlayer === AI_NAME)
-		playAutomaTurns(g, model.getRng())
 	store.turn++
 	store.saving = true
 	let ok = false
@@ -198,12 +215,17 @@ export async function rewind() {
 		// Write the rewound position back so the server stays in sync.
 		const result = await updateDataFromLoadRewind({
 			gameID: personal.gameID,
+			latestUpdate: personal.latestUpdate,
 			turn: store.turn,
 			phase: ended ? PHASE_GAME_OVER : PHASE_MAIN,
 			gameData: model.savedPayload(),
 			allIsCurrentPlayers: [current],
 			allRemainingPlayersInTurnOrder: rotated,
 		})
+		if (result.syncError) {
+			store.gameMessages.rewindErrorText = "It appears you have an older version of the game. Please refresh the page"
+			return
+		}
 		personal.latestUpdate = Number(result.latestUpdate)
 		window.initData.latestUpdate = result.latestUpdate
 		personal.secondsToNextKickout = result.secondsToNextKickout
@@ -226,7 +248,7 @@ export async function persistTurn() {
 	const ended = g.isEnded()
 	const order = g.state.playerOrder.length > 0 ? g.state.playerOrder : g.state.players.map((p) => p.name)
 	const current = g.currentPlayer
-	const rotated = [current, ...order.filter((p) => p !== current)]
+	const rotated = [current, ...order.filter((p) => p !== current && !store.missingPlayers.includes(p))]
 	try {
 		const result = await saveGame({
 			gameID: personal.gameID,
@@ -283,8 +305,10 @@ export async function reloadFromServer() {
 			model.restoreHistoryFrom(gd)
 			if (Number.isFinite(Number(data.turn))) store.turn = Number(data.turn)
 			else if (Number.isFinite(Number(gd.turn))) store.turn = Number(gd.turn)
-			// OBG is authoritative for turn order; realign to its current players.
-			if (!model.alignToCurrentPlayers(Array.isArray(data.currentPlayerNames) ? data.currentPlayerNames : [])) model.snapshotTurn()
+			// OBG is authoritative for turn order; realign to its current players,
+			// dropping seats the server reports as missing.
+			const serverOrder = (Array.isArray(data.currentPlayerNames) ? data.currentPlayerNames : []).filter((n) => !store.missingPlayers.includes(n))
+			if (!model.alignToCurrentPlayers(serverOrder)) model.snapshotTurn()
 		}
 		personal.latestUpdate = Number(data.latestUpdate)
 		personal.secondsToNextKickout = data.secondsToNextKickout

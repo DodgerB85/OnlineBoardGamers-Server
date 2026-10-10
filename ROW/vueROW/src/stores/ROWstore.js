@@ -29,6 +29,7 @@ export const useModelStore = defineStore("store", () => {
 		showHistory: false,
 		showInfo: false,
 		showVotes: false,
+		showEndedDialog: true,
 		showReplay: false,
 		performingRewind: false,
 	})

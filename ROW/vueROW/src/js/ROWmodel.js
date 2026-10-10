@@ -6,7 +6,7 @@ import { JavaRandom, defaultOptions } from "./ROWcore"
 import { Game } from "./ROWengine"
 import { deserializeGame, serializeGame, savedPayload as makeSavedPayload } from "./ROWfuncs"
 import { decompress } from "../backend/ROW_IO"
-import { startWebSocket } from "../backend/ROWwebsocket"
+import { startWebSocket, setOnMessage } from "../backend/ROWwebsocket"
 import { useModelStore } from "../stores/ROWstore"
 import { usePersonalStore } from "../stores/ROWpersonal"
 import { COLOURS, SO_TRAINING_GAME, DEFAULT_ZOOM, Edition, Mode, BuildingsOption, PlayerOrderOption, Variant } from "./ROWreference"
@@ -101,6 +101,10 @@ export function alignToCurrentPlayers(order) {
 	const same = valid.length === g.state.playerOrder.length && valid.every((n, i) => n === g.state.playerOrder[i]) && g.state.currentPlayer === valid[0]
 	if (same) return false
 	g.state.playerOrder = valid
+	// Keep `state.players` in the same order as the (server) seat order: `finalPositions`,
+	// `ranking()` and the presenter's seat lookups all index this array.
+	const byName = new Map(g.state.players.map((p) => [p.name, p]))
+	g.state.players = valid.map((n) => byName.get(n)).filter(Boolean)
 	g.state.currentPlayer = valid[0]
 	g.beginTurn(false)
 	store.touch()
@@ -154,6 +158,7 @@ export function initGame() {
 	personal.kickoutRequired = Number(initData.kickoutRequired ?? 0)
 	store.kickoutVotesData = initData.kickoutVotesData ?? {}
 	store.kickoutVoteThreshold = Number(initData.kickoutVoteThreshold ?? 0)
+	store.missingPlayers = Array.isArray(initData.missingPlayers) ? initData.missingPlayers : []
 	store.deleteVotesData = initData.deleteVotesData ?? {}
 	store.statsExcludeVotesData = initData.statsExcludeVotesData ?? {}
 	personal.votedToDelete = Boolean(store.deleteVotesData[personal.name])
@@ -170,7 +175,10 @@ export function initGame() {
 		edition,
 		mode: initData.mode ?? Mode.ORIGINAL,
 		buildings: initData.buildings ?? BuildingsOption.RANDOMIZED,
-		playerOrder: initData.playerOrder ?? PlayerOrderOption.RANDOMIZED,
+		// The server (playerOrderSeed) already shuffled the seats and sent them in
+		// `playerNames`, so the engine must keep that order. Only bidding still
+		// reorders the seats in-game.
+		playerOrder: (initData.playerOrder ?? PlayerOrderOption.RANDOMIZED) === PlayerOrderOption.BIDDING ? PlayerOrderOption.BIDDING : "FIXED",
 		variant: initData.variant ?? Variant.ORIGINAL,
 		railsToTheNorth: Boolean(initData.railsToTheNorth),
 		simmental: Boolean(initData.simmental),
@@ -196,8 +204,10 @@ export function initGame() {
 	setRng(new JavaRandom(Number(initData.gameID ?? Date.now())))
 	initFromGameData(gameData, players, options)
 
-	// OBG is authoritative for whose turn it is; align the engine to it.
-	alignToCurrentPlayers(Array.isArray(initData.currentPlayers) ? initData.currentPlayers : [])
+	// OBG is authoritative for whose turn it is; align the engine to it, excluding
+	// seats the server reports as missing (resigned / kicked).
+	const serverCurrentPlayers = (Array.isArray(initData.currentPlayers) ? initData.currentPlayers : []).filter((n) => !store.missingPlayers.includes(n))
+	alignToCurrentPlayers(serverCurrentPlayers)
 
 	const chat = initData.chatData
 	if (typeof chat === "string" && chat.length > 0) {
@@ -222,13 +232,13 @@ export function initGame() {
 function setupLiveUpdates() {
 	const personal = usePersonalStore()
 	if (personal.gameID < 0) return
-	void startWebSocket().then((ws) => {
-		if (ws)
-			ws.onmessage = () => {
-				void controller.reloadFromServer()
-				void controller.reloadChat()
-			}
+	// Register the handler once; ROWwebsocket re-attaches it to every new socket,
+	// so live push survives reconnects.
+	setOnMessage(() => {
+		void controller.reloadFromServer()
+		void controller.reloadChat()
 	})
+	void startWebSocket()
 	setInterval(() => {
 		void controller.reloadFromServer()
 		void controller.reloadChat()

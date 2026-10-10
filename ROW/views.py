@@ -104,6 +104,7 @@ def showROWgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "pov": -99,
             "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False, False)),
             "currentPlayers": currentPlayersArr,
+            "missingPlayers": json.dumps(presenter.getMissingPlayersNamesArray()),
         }
     )
 
@@ -169,8 +170,16 @@ def _processROWturn(request):
         _missingPlayer = User.objects.get(username=request.user.username)
         presenter.addMissingPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
+        newVer = (int(currentGame.latestUpdate) % 1000) + 1
+        currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
         currentGame.save()
-        return JsonResponse({"latestUpdate": currentGame.latestUpdate}, safe=False)
+        return JsonResponse(
+            {
+                "latestUpdate": currentGame.latestUpdate,
+                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+            },
+            safe=False,
+        )
 
     elif jsonData["action"] == "kickout":
         if str(latest_update) != str(currentGame.latestUpdate):
@@ -183,7 +192,13 @@ def _processROWturn(request):
             currentGame.save()
             return JsonResponse(kickout_vote_result, safe=False)
 
-        _missingPlayer = User.objects.get(username=jsonData["kickedName"])
+        # The kickout target is client-supplied; only trust it if it is a real seat
+        # in this game and not the requester themselves.
+        target_username = jsonData["kickedName"]
+        if target_username == request.user.username or not currentGame.players.filter(player__username=target_username).exists():
+            return JsonResponse({"error": "Invalid kickout target"}, status=400)
+
+        _missingPlayer = User.objects.get(username=target_username)
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
@@ -236,6 +251,9 @@ def _processROWturn(request):
         )
 
     elif jsonData["action"] == "updateDataFromLoadRewind":
+        # Second half of a rewind: reject if another write landed between the load and this update.
+        if str(jsonData.get("latestUpdate", 0)) != str(currentGame.latestUpdate):
+            return JsonResponse({"syncError": True}, safe=False)
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
         presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])

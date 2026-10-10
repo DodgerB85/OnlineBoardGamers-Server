@@ -3,13 +3,12 @@
  * End-of-game results: standings, totals, ties and a per-category scoring
  * breakdown (ported from the reference ended-dialog).
  */
-import { computed, ref } from "vue"
+import { computed } from "vue"
 import { useModelStore } from "../stores/ROWstore.js"
 import { City } from "../js/ROWreference"
 
 const store = useModelStore()
 
-const dismissed = ref(false)
 const nextURL = String(window.initData?.nextURL ?? "")
 
 const game = computed(() => {
@@ -93,11 +92,11 @@ const STAT_ROWS = [
 </script>
 
 <template>
-	<div v-if="ended && !dismissed" id="endedDialog">
+	<div v-if="ended && store.viewSettings.showEndedDialog" id="endedDialog">
 		<h2>Game over</h2>
 		<div class="dialog-actions">
 			<a v-if="nextURL" class="ended-action" :href="nextURL">Next game</a>
-			<button class="ended-action" @click="dismissed = true">Close</button>
+			<button class="ended-action" @click="store.viewSettings.showEndedDialog = false">Close</button>
 		</div>
 		<table>
 			<thead>

@@ -207,7 +207,7 @@ function p(type, extra = {}) {
 		<div class="group">
 			<button class="act" :disabled="!store.canUndo" @click="controller.undo()">Undo</button>
 			<button class="act reset" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
-			<button class="act end" :disabled="store.saving" @click="controller.endTurn()">End Turn</button>
+			<button class="act end" :disabled="store.saving || store.game?.isEnded()" @click="controller.endTurn()">End Turn</button>
 			<button v-if="store.canSkip" class="act" :disabled="store.saving" @click="controller.skip()">Skip</button>
 		</div>
 		</template>

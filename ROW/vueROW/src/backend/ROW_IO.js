@@ -4,6 +4,7 @@
  */
 
 import { gunzipSync, gzipSync, strFromU8, strToU8 } from "fflate"
+import { usePersonalStore } from "../stores/ROWpersonal"
 
 export function getCookie(name) {
 	const cookies = document.cookie ? document.cookie.split(";") : []
@@ -84,7 +85,9 @@ export async function loadChat(gameID) {
 
 /** Persist the saved zoom level (PUT, shared_save_zoom). */
 export async function saveZoom(gameID, zoomLevel) {
-	const response = await put("/ROW/saveZoomROW/", { action: "zoom", gameID, zoomLevel, allPlayers: false })
+	const personal = usePersonalStore()
+	// shared_save_zoom requires the seat index when not saving for all players.
+	const response = await put("/ROW/saveZoomROW/", { action: "zoom", gameID, zoomLevel, playerNumber: personal.pov, allPlayers: false })
 	if (!response.ok) throw new Error("Network response was not ok")
 }
 
@@ -110,6 +113,7 @@ export async function updateDataFromLoadRewind(payload) {
 	const response = await post("/ROW/processROWturn/", {
 		action: "updateDataFromLoadRewind",
 		gameID: payload.gameID,
+		latestUpdate: payload.latestUpdate,
 		turn: payload.turn,
 		phase: payload.phase,
 		gameData: JSON.stringify(payload.gameData),
