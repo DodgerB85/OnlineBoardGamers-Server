@@ -13,6 +13,7 @@ from django.urls import reverse
 # from django.contrib.sites.shortcuts import get_current_site
 # from django.template.loader import render_to_string
 from django.utils.translation import gettext  # , get_language
+from django.views.decorators.http import require_POST
 
 from Lobby.gameViewHelpers import (
     build_show_game_data,
@@ -994,3 +995,31 @@ def TGZstatGames(request):
 @login_required()
 def castVote(request):
     return process_game_with_mutex(request, shared_cast_vote, mutex_prefix="processTurn_")
+
+
+@login_required()
+@require_POST
+def nudgeTourneyAdmins(request):
+    # The Discord webhook itself lives in .env, never in the client bundle.
+    jsonData = json.loads(request.body.decode("utf-8"))
+    try:
+        currentGame = Game.objects.get(id=jsonData.get("gameID"), gameCode="TGZ")
+    except (Game.DoesNotExist, TypeError, ValueError):
+        raise Http404(gettext("Game does not exist")) from None
+
+    gameLink = f"[Click here to go to the game](https://www.OnlineBoardGamers.com/TGZ/{currentGame.id}/show/)"
+    nudgeType = str(jsonData.get("type"))
+    if nudgeType == "0":
+        message = "=======================\nRESIGN REQUEST RECEIVED\nPlayer: " + request.user.username + "\n" + gameLink
+    elif nudgeType == "1":
+        timedOutPlayers = ", ".join(gp.player.username for gp in currentGame.players.filter(is_current=True) if gp.player)
+        message = (
+            "============\nGAME TIMEOUT\nAlerting Player: " + request.user.username + "\nTimed Out Player: " + timedOutPlayers + "\n" + gameLink
+        )
+    else:
+        return JsonResponse({"error": "Bad type"}, status=400)
+
+    if SN_sendAdminErrorMessage(message, webhook_key="WEBHOOK_TGZ_TOURNAMENT_ADMIN") is False:
+        return JsonResponse({"status": "error"}, status=502)
+
+    return JsonResponse({"status": "success"})

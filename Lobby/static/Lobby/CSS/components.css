@@ -255,7 +255,17 @@ input.button,
     .create-page input[type="submit"]:disabled:hover {
         background: var(--color-surface-soft);
         border-color: #cbd3db;
+        color: var(--color-ink);
         cursor: not-allowed;
+    }
+}
+
+@media (hover: hover) {
+    .button-primary:disabled:hover {
+        opacity: 1;
+        background: var(--color-accent);
+        border-color: rgba(0, 0, 0, 0.15);
+        color: var(--color-accent-ink);
     }
 }
 

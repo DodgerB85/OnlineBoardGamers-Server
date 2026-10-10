@@ -1,10 +1,11 @@
-<script setup lang="ts">
-import { useGameStore } from "../stores/game"
+<script setup>
+import * as model from "../js/ROWmodel"
+import { useModelStore } from "../stores/ROWstore.js"
 
-const store = useGameStore()
+const store = useModelStore()
 
 function showState() {
-	window.alert(JSON.stringify(store.serialize(), null, 2))
+	window.alert(JSON.stringify(model.serialize(), null, 2))
 }
 </script>
 

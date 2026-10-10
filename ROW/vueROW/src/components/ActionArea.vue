@@ -1,0 +1,231 @@
+<script setup>
+import { computed } from "vue"
+import * as rf from "../js/ROWreference"
+import * as controller from "../js/ROWcontroller"
+import * as map from "../js/ROWmap"
+import * as view from "../js/ROWview"
+import { PLAYER_BUILDINGS } from "../js/ROWdata"
+import { AI_NAME } from "../js/automa/index"
+import { useModelStore } from "../stores/ROWstore.js"
+
+const { ActionType, Hand, Status } = rf
+const store = useModelStore()
+
+const g = () => store.getGame()
+const actions = computed(() => store.actions)
+const isBidding = computed(() => store.game?.state?.status === Status.BIDDING)
+const automaThinking = computed(() => store.game?.currentPlayer === AI_NAME)
+
+// --- Moves on the trail (done by clicking the map, not from here) ---
+const canMove = computed(() => store.actions.includes(ActionType.MOVE) && store.moveStepsLeft > 0)
+const stepsLeft = computed(() => store.moveStepsLeft)
+const armedMove = computed(() => (store.game ? map.armedTrailMove(store.game, store.actions, store.selectedAction) : null))
+
+// --- Hire worker ---
+const hireRows = computed(() => {
+	if (!actions.value.includes(ActionType.HIRE_WORKER) && !actions.value.includes(ActionType.HIRE_WORKER_PLUS_2) && !actions.value.includes(ActionType.HIRE_WORKER_MINUS_1) && !actions.value.includes(ActionType.HIRE_WORKER_MINUS_2)) return []
+	const jm = g().getJobMarket()
+	const rows = []
+	for (let i = 0; i < jm.currentRowIndex; i++) rows.push({ index: i, workers: jm.rows[i].workers, cost: jm.rows[i].workers.length })
+	return rows
+})
+
+// --- Buildings ---
+const buildingActions = computed(() => actions.value.filter((a) => a === ActionType.PLACE_BUILDING || a === ActionType.PLACE_CHEAP_BUILDING || a === ActionType.PLACE_BUILDING_FOR_FREE))
+const buildingOptions = computed(() => {
+	if (buildingActions.value.length === 0) return null
+	const ps = g().currentPlayerState()
+	const locations = [...g().getTrail().locations.values()]
+		.filter((l) => l.kind === "BUILDING" && (!l.building || l.building.player === ps.player))
+		.map((l) => l.name)
+	return { buildings: ps.buildings.slice(), locations }
+})
+
+const HAND_LABEL = {
+	[Hand.NONE]: "no hand limit",
+	[Hand.GREEN]: "green hand",
+	[Hand.BLACK]: "black hand",
+	[Hand.BOTH]: "green or black hand",
+}
+
+function buildingImageFor(building) {
+	const color = g().state.players.find((p) => p.name === g().currentPlayer)?.color?.toLowerCase() ?? "red"
+	return view.buildingImage(g().edition, building, color)
+}
+function buildingLabel(building) {
+	const info = PLAYER_BUILDINGS[building]
+	if (!info) return building
+	return `${building}: ${info.craftsmen} craftsman${info.craftsmen === 1 ? "" : "en"}, ${HAND_LABEL[info.hand]}, ${info.points} point${info.points === 1 ? "" : "s"}`
+}
+
+// --- Engine moves ---
+const engineMoves = computed(() => {
+	const out = []
+	for (const a of actions.value) {
+		const spaces = [...map.reachableSpacesFor(a, g())]
+		if (spaces.length) out.push({ type: a, spaces })
+	}
+	return out
+})
+
+// --- Actions with no extra target ---
+const TARGET_ACTIONS = new Set([
+	ActionType.MOVE, ActionType.DELIVER_TO_CITY, ActionType.CHOOSE_FORESIGHT_1, ActionType.CHOOSE_FORESIGHT_2, ActionType.CHOOSE_FORESIGHT_3,
+	ActionType.BUY_CATTLE, ActionType.HIRE_WORKER, ActionType.HIRE_WORKER_PLUS_2, ActionType.HIRE_WORKER_MINUS_1, ActionType.HIRE_WORKER_MINUS_2,
+	ActionType.UNLOCK_WHITE, ActionType.UNLOCK_BLACK_OR_WHITE, ActionType.REMOVE_HAZARD, ActionType.REMOVE_HAZARD_FOR_2_DOLLARS, ActionType.REMOVE_HAZARD_FOR_5_DOLLARS, ActionType.REMOVE_HAZARD_FOR_FREE,
+	ActionType.TRADE_WITH_TRIBES, ActionType.PLACE_BUILDING, ActionType.PLACE_CHEAP_BUILDING, ActionType.PLACE_BUILDING_FOR_FREE,
+	ActionType.REMOVE_CARD, ActionType.DISCARD_CARD, ActionType.TAKE_OBJECTIVE_CARD, ActionType.PLAY_OBJECTIVE_CARD,
+	ActionType.DISCARD_1_OBJECTIVE_CARD_TO_GAIN_2_CERTIFICATES, ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_1_CERTIFICATE,
+	ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_3_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND, ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_6_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND,
+	ActionType.DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS, ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS, ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS,
+	ActionType.TAKE_BREEDING_VALUE_3_CATTLE_CARD, ActionType.APPOINT_STATION_MASTER, ActionType.DOWNGRADE_STATION,
+	ActionType.UPGRADE_ANY_STATION_BEHIND_ENGINE, ActionType.USE_ADJACENT_BUILDING,
+	ActionType.UPGRADE_SIMMENTAL, ActionType.TAKE_BONUS_STATION_MASTER,
+])
+// Actions offered by a placed building are shown on the board (hover the building), not here.
+const buildingActionSet = computed(() => map.activeBuildingActions(g(), actions.value))
+
+const directActions = computed(() => actions.value.filter((a) => a !== ActionType.PLACE_BRANCHLET && a !== ActionType.PLACE_BID && !TARGET_ACTIONS.has(a) && !map.engineMoveRange(a, g()) && !buildingActionSet.value.has(a)))
+
+// Card-target actions: selected here, then the card is clicked on the player table.
+const CARD_TARGET_ACTIONS = new Set([
+	ActionType.DISCARD_CARD, ActionType.REMOVE_CARD,
+	ActionType.DISCARD_1_OBJECTIVE_CARD_TO_GAIN_2_CERTIFICATES, ActionType.PLAY_OBJECTIVE_CARD,
+	ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_1_CERTIFICATE,
+	ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_3_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND,
+	ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_6_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND,
+	ActionType.DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS,
+	ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS, ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS,
+	ActionType.DISCARD_CATTLE_CARD_TO_PLACE_BRANCHLET,
+	ActionType.UPGRADE_SIMMENTAL,
+])
+const cardActions = computed(() => actions.value.filter((a) => CARD_TARGET_ACTIONS.has(a)))
+
+// RttN: the bonus station master pile is a real choice the UI has to present.
+const bonusStationMasters = computed(() => (actions.value.includes(ActionType.TAKE_BONUS_STATION_MASTER) ? g().getRailroadTrack().stationMasters.slice() : []))
+
+function p(type, extra = {}) {
+	controller.perform({ type, ...extra })
+}
+</script>
+
+<template>
+	<div id="actionBar">
+		<div v-if="!controller.canAct()" class="group">
+			<div class="label">{{ store.saving ? "Saving…" : automaThinking ? "Garth is thinking…" : "Waiting for other players" }}</div>
+		</div>
+		<template v-else>
+		<template v-if="!isBidding">
+		<div v-if="canMove" class="group">
+			<div class="label">Move — click a highlighted spot, {{ stepsLeft }} step{{ stepsLeft === 1 ? "" : "s" }} left (yellow = next step, cyan = further)</div>
+			<button v-if="store.plannedSteps.length" class="act stay" :disabled="store.saving" @click="controller.commitMove(store.plannedSteps)">Stay Here</button>
+		</div>
+
+		<div v-if="armedMove" class="group">
+			<div class="label">Move — click a highlighted spot, {{ armedMove.limit }} step{{ armedMove.limit === 1 ? "" : "s" }} at most</div>
+			<button class="act" @click="store.clearAction()">Cancel</button>
+		</div>
+
+		<div v-if="hireRows.length" class="group">
+			<div class="label">Hire worker</div>
+			<template v-for="row in hireRows" :key="row.index">
+				<button v-for="w in row.workers" :key="row.index + '-' + w" class="act" @click="p(actions.includes(ActionType.HIRE_WORKER_PLUS_2) ? ActionType.HIRE_WORKER_PLUS_2 : actions.includes(ActionType.HIRE_WORKER_MINUS_1) ? ActionType.HIRE_WORKER_MINUS_1 : actions.includes(ActionType.HIRE_WORKER_MINUS_2) ? ActionType.HIRE_WORKER_MINUS_2 : ActionType.HIRE_WORKER, { row: row.index, worker: w })">
+					r{{ row.index }} {{ w }}
+				</button>
+			</template>
+		</div>
+
+		<div v-if="buildingOptions && buildingOptions.buildings.length && buildingActions.length" class="group">
+			<div class="label">Place building — pick one, then click a spot on the map</div>
+			<div class="supply">
+				<img
+					v-for="b in buildingOptions.buildings"
+					:key="b"
+					class="buildingTile"
+					:class="{ active: store.selectedAction === buildingActions[0] && store.pendingBuilding === b }"
+					:src="buildingImageFor(b)"
+					:alt="b"
+					:title="buildingLabel(b)"
+					draggable="false"
+					@click="store.pickBuilding(buildingActions[0], b)"
+				/>
+			</div>
+		</div>
+
+		<div v-if="actions.includes(ActionType.PLACE_BRANCHLET)" class="group">
+			<div class="label">Rails to the North — click a highlighted town on the strip</div>
+			<button class="act" :class="{ active: store.selectedAction === ActionType.PLACE_BRANCHLET }" @click="store.selectAction(ActionType.PLACE_BRANCHLET)">
+				{{ store.selectedAction === ActionType.PLACE_BRANCHLET ? "Click a town" : "Place branchlet" }}
+			</button>
+		</div>
+
+		<div v-if="actions.includes(ActionType.APPOINT_STATION_MASTER)" class="group">
+			<div class="label">Appoint station master</div>
+			<button class="act" :class="{ active: store.selectedAction === ActionType.APPOINT_STATION_MASTER }" @click="store.selectAction(ActionType.APPOINT_STATION_MASTER)">
+				{{ store.selectedAction === ActionType.APPOINT_STATION_MASTER ? "Click a worker on your player board" : "Appoint station master" }}
+			</button>
+		</div>
+
+		<div v-if="bonusStationMasters.length" class="group">
+			<div class="label">Take a bonus station master tile</div>
+			<div class="supply">
+				<img
+					v-for="m in bonusStationMasters"
+					:key="m"
+					class="buildingTile"
+					:src="view.stationMasterImage(m)"
+					:alt="m"
+					:title="m"
+					draggable="false"
+					@click="p(ActionType.TAKE_BONUS_STATION_MASTER, { stationMaster: m })"
+				/>
+			</div>
+		</div>
+
+		<div v-for="em in engineMoves" :key="em.type" class="group">
+			<div class="label">{{ view.humanizeAction(em.type) }}</div>
+			<button v-for="sp in em.spaces" :key="sp" class="act move" @click="p(em.type, { to: sp })">{{ sp }}</button>
+		</div>
+
+		<div v-if="cardActions.length" class="group">
+			<div class="label">Card actions — select, then click a card on your player table</div>
+			<button
+				v-for="a in cardActions"
+				:key="a"
+				class="act"
+				:class="{ active: store.selectedAction === a }"
+				@click="store.selectAction(a)"
+			>{{ view.humanizeAction(a) }}</button>
+		</div>
+
+		<div class="group">
+			<div class="label">Other actions</div>
+			<button v-for="a in directActions" :key="a" class="act" @click="p(a)">{{ view.humanizeAction(a) }}</button>
+		</div>
+		</template>
+
+		<div class="group">
+			<button class="act" :disabled="!store.canUndo" @click="controller.undo()">Undo</button>
+			<button class="act reset" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
+			<button class="act end" :disabled="store.saving" @click="controller.endTurn()">End Turn</button>
+			<button v-if="store.canSkip" class="act" :disabled="store.saving" @click="controller.skip()">Skip</button>
+		</div>
+		</template>
+	</div>
+</template>
+
+<style scoped>
+#actionBar { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 6px; }
+.group { border: 1px solid #999; border-radius: 5px; padding: 5px; background: #f4f7d7; max-width: 460px; }
+.label { font-weight: bold; font-size: 12px; margin-bottom: 3px; }
+.act { margin: 2px; padding: 3px 7px; cursor: pointer; font-size: 12px; }
+/* Movement options match the board: light-green border on hover, as the map spots do. */
+.act.move:hover { border: 2px solid #90ee90; }
+.end { background: #cfe8cf; font-weight: bold; }
+.stay { background: #cfe8cf; }
+.reset { background: #f6d9c9; font-weight: bold; }
+.supply { display: flex; flex-wrap: wrap; gap: 3px; }
+.buildingTile { width: 44px; height: 52px; border: 2px solid #ffffff; border-radius: 4px; cursor: pointer; background: #fff; }
+.buildingTile:hover { border-color: black; }
+.buildingTile.active { border-color: green; box-shadow: 0 0 4px green; }
+</style>

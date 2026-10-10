@@ -2141,7 +2141,9 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 	const store = useModelStore()
 	const histoIncome = []
 	store.players.forEach((p, playerIndex) => {
-		const salesIncome = earnings[playerIndex] + (store.startingOptions.coffee ? coffeeEarnings[playerIndex] : 0)
+		const itemsIncome = earnings[playerIndex]
+		const coffeeIncome = store.startingOptions.coffee ? coffeeEarnings[playerIndex] : 0
+		const salesIncome = itemsIncome + coffeeIncome
 		let total = salesIncome
 		const waitressVal = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS) ? 5 : 3
 
@@ -2157,8 +2159,17 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 			hI.push(supplement)
 		} else if (store.startingOptions.mediaLine) hI.push(0)
 
+		// Coffee split (Coffee module only): pad the CFO slot so coffee income always
+		// lands at index 3. Old entries never have length 4, so the history reader can
+		// tell split rows from the old pooled-sales rows by length alone.
+		if (store.startingOptions.coffee) {
+			while (hI.length < 3) hI.push(0)
+			hI.push(coffeeIncome)
+		}
+
 		// Media Line mod: milestone 1 bonus gets its own column in the income
-		// table (index 3); the money itself was already paid in settleMediaLineGroups
+		// table, always LAST (index 3 without coffee, index 4 with it); the
+		// money itself was already paid in settleMediaLineGroups
 		if (store.startingOptions.mediaLine) hI.push(mediaLineBonuses?.[playerIndex] ?? 0)
 
 		histoIncome[playerIndex] = hI

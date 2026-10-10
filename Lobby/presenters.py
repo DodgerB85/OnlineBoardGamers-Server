@@ -1994,7 +1994,7 @@ class ROWpresenter(GamePresenter):
         self.gameObj.save()
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists():
-            playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
+            playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username not in (request.user.username, "RowAI")]
             self._sendStartGameNotification(request, playerListToNotify)
 
     def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
@@ -2110,6 +2110,24 @@ class FCMpresenter(GamePresenter):
             ]
             if chineseInPool:
                 availableModules.extend(chineseFlags)
+            # Fan mods: same create-time marker pattern as the Chinese expansion
+            fanFlags = [
+                rfFCM.SO_FRIED_CHICKEN,
+                rfFCM.SO_STADIUM,
+                rfFCM.SO_LABOR_MARKET,
+                rfFCM.SO_SECOND_BAILOUT,
+            ]
+            fanInPool = (
+                rfFCM.SO_RANDOM_MODULES_FAN in starting_options
+                or any(x in starting_options for x in fanFlags)
+            )
+            starting_options = [
+                x
+                for x in starting_options
+                if x != rfFCM.SO_RANDOM_MODULES_FAN and x not in fanFlags
+            ]
+            if fanInPool:
+                availableModules.extend(fanFlags)
             # Add hard choices only with original MS
             if rfFCM.SO_NEW_MS not in starting_options:
                 availableModules.append(rfFCM.SO_HARD_CHOICES)
@@ -2143,6 +2161,9 @@ class FCMpresenter(GamePresenter):
                     selectedModules.append(chosenDistOption)
             # Only exclude stats if a Chinese module actually made the roll
             if chineseInPool and any(x in selectedModules for x in chineseFlags):
+                self.gameObj.statsExcludedGame = True
+            # Same for fan mods
+            if fanInPool and any(x in selectedModules for x in fanFlags):
                 self.gameObj.statsExcludedGame = True
             starting_options.extend(selectedModules)
             self.gameObj.startingOptions = json.dumps(starting_options, separators=(",", ":"))

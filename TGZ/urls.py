@@ -37,4 +37,5 @@ urlpatterns = [
     path("createTGZspinoff/", views.createTGZspinoff, name="createTGZspinoff"),
     path("createTGZgame/", views.createTGZgame, name="createTGZgame"),
     path("castVote/", views.castVote, name="castVoteCNS"),
+    path("nudgeTourneyAdmins/", views.nudgeTourneyAdmins, name="nudgeTourneyAdmins"),
 ]

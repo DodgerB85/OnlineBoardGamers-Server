@@ -743,6 +743,18 @@ describe("Media Line stage 4 - headline in dinner settlement", () => {
 		rules.doDinnerTime(false)
 		expect(store.players[0].money - moneyBefore).toBe(-2)
 	})
+
+	it("income rows keep the media bonus after the coffee column (module coexistence)", () => {
+		const store = dinnerFreshGame()
+		placeAndFeed(store)
+		// coffee module on: coffee owns index 3, the media bonus sits last
+		store.startingOptions.coffee = true
+		rules.doDinnerTime(false)
+		const row = store.history.find((e) => e[0] === rf.HIST_INCOME)[3][0]
+		expect(row.length).toBe(5)
+		expect(row[3]).toBe(0) // coffee income (none sold)
+		expect(row[4]).toBe(0) // media line bonus (no groups tonight)
+	})
 })
 
 describe("Media Line stage 5 - serpentine campaign order", () => {

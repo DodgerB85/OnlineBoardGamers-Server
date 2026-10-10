@@ -758,7 +758,9 @@ export default {
 			"executiveVP": "执行副总裁",
 			"seniorVP": "高级副总裁",
 			"recruitingMgr": "招聘经理",
-			"jazzM": "爵士乐手"
+			"jazzM": "爵士乐手",
+			"colJazz": "爵",
+			"colWaitress": "侍"
 		},
 		"salaryPay": "{amount} 和 {count} 件物品",
 		"chooseTurnOrderAutoEarly": "{name} 选择 {ordinal} 行动（自动靠前）",
@@ -791,6 +793,9 @@ export default {
 		"noIncome": "没有收入",
 		"playerHeader": "玩家",
 		"salesHeader": "销售",
+		"itemsHeader": "商品",
+		"coffeeHeader": "咖啡",
+		"icHeader": "商品+咖啡",
 		"noSalaries": "没有薪水",
 		"paysSalaries": "{name} 支付薪水：${pay}",
 		"campaignHouses": "#{num} 在房屋 {list} 上投放了 {good}",

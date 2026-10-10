@@ -152,3 +152,48 @@ class FcmRewindTest(TestCase):
         self.assertNotIn("STATE-3", stack)
         self.assertEqual(len(stack), after_true, "saveRewind=False must not grow the stack")
         self.assertEqual(self.game.gameData, "STATE-3", "game state still advances")
+
+    def test_new_game_empty_state_is_not_a_rewind_point(self):
+        # A brand-new game has gameData == "". Its first save must not push that
+        # empty string: the client cannot import it, so rewinding to it would drain
+        # the stack and strand the board (the reported game-36484 failure).
+        self.game.gameData = ""
+        self.game.rewindData = ""
+        self.game.save()
+
+        self._save(True, "STATE-1")
+
+        self.assertEqual(rewind_list(self.game), [], "an empty state is not a rewind point")
+        self.assertEqual(self.game.gameData, "STATE-1")
+
+    def test_rewind_to_empty_seed_is_refused_without_draining(self):
+        # Defence for stacks already poisoned by the legacy empty seed.
+        self.game.gameData = "STATE-0"
+        self.game.rewindData = json.dumps([""])
+        self.game.save()
+        before_lu = self.game.latestUpdate
+
+        self.client.force_login(self.user)
+        response = self.client.post(
+            self.url,
+            data=json.dumps(
+                {
+                    "action": "loadRewind",
+                    "gameID": self.game.id,
+                    "latestUpdate": self.game.latestUpdate,
+                    "turn": 1,
+                    "phase": 5,
+                    "latency": 20,
+                    "RSRP": False,
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        body = json.loads(response.content)
+        self.assertIn("message", body, body)
+
+        self.game.refresh_from_db()
+        self.assertEqual(self.game.gameData, "STATE-0", "a refused rewind must not change the board")
+        self.assertEqual(rewind_list(self.game), [""], "a refused rewind must not drain the stack")
+        self.assertEqual(self.game.latestUpdate, before_lu)

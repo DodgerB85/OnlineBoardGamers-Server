@@ -1279,6 +1279,7 @@ export async function submitBug(bugContent) {
 		if (data.bugEntrySuccess) {
 			store.gameMessages.successText = i18n.global.t("FCM_IO.bugReportSubmitted")
 			store.viewSettings.showBug = false
+			store.viewSettings.showGameLoader = false
 			return true
 		} else {
 			store.gameMessages.bugErrorText = i18n.global.t("FCM_IO.bugErrorHtml")

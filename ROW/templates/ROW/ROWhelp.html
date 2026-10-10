@@ -6,19 +6,113 @@
 {% endblock page_title %}
 {% block content %}
   <div class="card section">
-    <h2>{% translate "Rules" %}</h2>
+    <h2>{% translate "Overview" %}</h2>
     <div class="help-qa">
       <p>
-        {% blocktranslate %}Ranchers of the Old West is an online board game hosted by Online Board Gamers.{% endblocktranslate %}
+        {% blocktranslate %}Ranchers of the Old West is an online board game hosted by Online Board Gamers. Each player is a
+        cattleman driving a herd north to Kansas City while building up their deck, hiring workers, laying track
+        and placing buildings. When Kansas City is reached the herd is sold and the player rides back to the start
+        to do it again. The player with the most victory points when the game ends wins.{% endblocktranslate %}
       </p>
     </div>
   </div>
+
   <div class="card section">
-    <h2>{% translate "Playing the Game" %}</h2>
+    <h2>{% translate "A turn in three phases" %}</h2>
     <div class="help-qa">
       <p>
-        {% translate "This game is still being implemented. Help content will be added here." %}
+        {% blocktranslate trimmed %}
+          <b>1. Move.</b> Move your cattleman 1 or more steps forward along the trail. You cannot move backwards.
+          Spaces with no tile are not counted as steps. If you move onto or over a location showing a hand icon you
+          pay a fee (green/black hands differ by player count); fees on hazards and teepees go to the bank, fees on
+          an opponent's building go to that player.
+        {% endblocktranslate %}
       </p>
+      <p>
+        {% blocktranslate trimmed %}
+          <b>2. Take an action.</b> Depending on where you stopped you may use the local action printed on the tile,
+          or take a single unlocked auxiliary action from your player board, or (if you stopped on an opponent's
+          building, a hazard or a teepee) only an auxiliary action. Actions separated by a divider can each be used
+          once; a split action means you choose one side.
+        {% endblocktranslate %}
+      </p>
+      <p>
+        {% blocktranslate trimmed %}
+          <b>3. Draw up.</b> Draw cards until your hand matches your hand limit. Do not reshuffle the discard pile
+          until you actually need to draw and the draw stack is empty.
+        {% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h2>{% translate "Kansas City" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% blocktranslate trimmed %}
+          Stopping at Kansas City resolves five steps in order: choose the tiles in foresight spots 1, 2 and 3;
+          then sell your herd (add up the breeding value of each different cattle type in hand, plus any certificates
+          you choose to spend) and copy your hand to your discard pile; then deliver to a city whose value your herd
+          covers. Removing a disc unlocks the upgrade printed on your player board. The engine then travels back to
+          the start.
+        {% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h2>{% translate "Common actions" %}</h2>
+    <div class="help-qa">
+      <ul>
+        <li>{% translate "Hire a worker from the job market (the whole row under the job market token is locked)." %}</li>
+        <li>{% translate "Buy cattle from the cattle market, single or pair, using cowboys for better cards." %}</li>
+        <li>{% translate "Place or upgrade a private building; the craftsmen in your row must cover the cost." %}</li>
+        <li>{% translate "Move your engine forward (up to the number of engineers you have) and upgrade a station you stop on." %}</li>
+        <li>{% translate "Trade with the tribes and remove hazards." %}</li>
+        <li>{% translate "Take objective cards and play them for their bonus; completed objectives score points, incomplete ones cost points." %}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h2>{% translate "Using the online board" %}</h2>
+    <div class="help-qa">
+      <ul>
+        <li>{% translate "Click a highlighted trail spot to move your cattleman. Cyan spots are more than one step away." %}</li>
+        <li>{% translate "When several actions are possible the buttons appear in the action bar under the board. Pick one, then click the card, board space or track space it needs." %}</li>
+        <li>{% translate "Hover a building or heartland tile on the board to see its actions." %}</li>
+        <li>{% translate "Use Undo to step back one action, or Reset Whole Turn to go back to the start of your turn." %}</li>
+        <li>{% translate "The History button lists recent actions, Chat talks to the table, Notes are private to you, and the magnifier buttons zoom the board." %}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h2>{% translate "Scoring at the end" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% blocktranslate trimmed %}
+          Final points come from cash ($1 per $5), cattle cards, objective cards, station masters, workers in the
+          last two slots of each row, hazards, buildings on the board, cities you delivered to, upgraded stations,
+          the job-market token and any extra-step bonus. Ties are shared.
+        {% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h2>{% translate "Game options" %}</h2>
+    <div class="help-qa">
+      <ul>
+        <li>{% translate "Edition: first edition or second edition (different buildings, cities and objectives)." %}</li>
+        <li>{% translate "Rails to the North: enables the northern map, branchlets, towns and bonus station masters." %}</li>
+        <li>{% translate "Simmental (second edition): adds the Simmental cattle to the market." %}</li>
+        <li>{% translate "Station master promos, building 11 and building 13: optional promo tiles." %}</li>
+        <li>{% translate "Buildings: beginner (all A sides) or randomized." %}</li>
+        <li>{% translate "Player order: randomized, or resolved by an auction before the first turn." %}</li>
+        <li>{% translate "Variant: original, or balanced (smaller cattle market and Kansas City supply)." %}</li>
+        <li>{% translate "Play against the Garth automa by ticking the computer player and choosing a difficulty." %}</li>
+      </ul>
     </div>
   </div>
 {% endblock content %}

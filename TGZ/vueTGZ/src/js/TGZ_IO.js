@@ -813,28 +813,15 @@ export function nudgeTourneyAdmins(type) {
 	const personal = usePersonalStore()
 	store.topMenuViews.showLoader = true
 
-	// Usage example
-	const webhookUrl = "https://discord.com/api/webhooks/1197726435369029713/WJz5fJ0KsJnUM1bH4Czn7ELBSTzL_Bng6ZMO52IuRHa1A-FyJcDsZZhdbQYORKDwvehS"
-	let message = ""
-	// Resign
-	if (type === 0) {
-		message = "=======================\n"
-		message += "RESIGN REQUEST RECEIVED\n"
-		message += "Player: " + personal.name + "\n"
-		message += "[Click here to go to the game](https://www.OnlineBoardGamers.com/TGZ/" + String(personal.gameID) + "/show/)"
-	} else if (type === 1) {
-		message = "============\n"
-		message += "GAME TIMEOUT\n"
-		message += "Alerting Player: " + personal.name + "\n"
-		message += "Timed Out Player: " + controller.currentPlayerObj().name + "\n"
-		message += "[Click here to go to the game](https://www.OnlineBoardGamers.com/TGZ/" + String(personal.gameID) + "/show/)"
-	}
-	fetch(webhookUrl, {
+	// The Discord webhook lives server-side (.env); we only send what to alert about.
+	let csrftoken = funcs.getCookie("csrftoken")
+	fetch("/TGZ/nudgeTourneyAdmins/", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
+			"X-CSRFToken": csrftoken,
 		},
-		body: JSON.stringify({ content: message }),
+		body: JSON.stringify({ type: type, gameID: personal.gameID }),
 	})
 		.then((response) => {
 			if (response.ok) {

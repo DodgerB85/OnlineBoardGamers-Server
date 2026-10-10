@@ -128,6 +128,7 @@
                 </div>
                 {% if not isSignedUp %}
                   <form action="{% url 'MainTournament' Main_Tournament_id=MainT_ID %}"
+                        id="joinTournamentForm"
                         method="post"
                         style="margin-top:14px">
                     {% csrf_token %}
@@ -144,7 +145,7 @@
                       </label>
                     </div>
                     <div class="row-flex" style="gap:8px;">
-                      <button class="button button-primary" type="submit">
+                      <button id="joinTournamentButton" class="button button-primary" type="submit">
                         {% if isInvitedPlayer %}
                           {% translate "Accept Invite & Join Tournament" %}
                         {% else %}
@@ -162,9 +163,38 @@
                       {% endif %}
                     </div>
                   </form>
+                  <script>
+                    (function () {
+                      var form = document.getElementById("joinTournamentForm");
+                      var btn = document.getElementById("joinTournamentButton");
+                      if (!form || !btn) return;
+                      form.addEventListener("submit", function (e) {
+                        if (e.submitter && e.submitter !== btn) return;
+                        if (form.dataset.joinPending) {
+                          e.preventDefault();
+                          return;
+                        }
+                        form.dataset.joinPending = "1";
+                        btn.disabled = true;
+                        {% if openSlots|length == 1 %}
+                        btn.textContent = "{% translate 'Generating tournament......' %}";
+                        {% endif %}
+                      });
+                    })();
+                  </script>
+                {% endif %}
+                {% if tournament.tournamentStatus == "OP" and user.username == "admin" %}
+                  <form action="{% url 'MainTournament' Main_Tournament_id=MainT_ID %}"
+                        method="post"
+                        style="margin-top:14px">
+                    {% csrf_token %}
+                    <button class="button button-primary" type="submit" name="startTournament" value="true">
+                      {% translate "Start Tournament Now" %}
+                    </button>
+                  </form>
                 {% endif %}
               </div>
-            
+
             <!-- ////////////////////////////////////////////////////////////////// IP MainT -->
           {% elif tournament.tournamentStatus == "IP" or tournament.tournamentStatus == "FN" %}
             <!-- FIRST DEAL WITH MG -->

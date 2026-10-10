@@ -54,7 +54,6 @@
                             <option value="2" selected="selected">2</option>
                             <option value="3">3</option>
                             <option value="4">4</option>
-                            <option value="5">5</option>
                         </select>
                     </div>
                     <div class="form-row" id="selPlayer2">
@@ -74,18 +73,6 @@
                         <label class="form-label" for="player4">{% translate "Player 4" %}</label>
                         <div class="field">
                             <input type="text" id="player4" name="player4" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
-                        </div>
-                    </div>
-                    <div class="form-row" id="selPlayer5" style="display:none">
-                        <label class="form-label" for="player5">{% translate "Player 5" %}</label>
-                        <div class="field">
-                            <input type="text" id="player5" name="player5" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
-                        </div>
-                    </div>
-                    <div class="form-row" id="selPlayer6" style="display:none">
-                        <label class="form-label" for="player6">{% translate "Player 6" %}</label>
-                        <div class="field">
-                            <input type="text" id="player6" name="player6" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
                         </div>
                     </div>
                 </div>
@@ -138,7 +125,92 @@
                 <div class="card">
                     <div class="card-header"><h2 class="card-title">{% translate "Game Options" %}</h2></div>
                     <div class="check-list">
-                        <div class="opt-help">{% translate "Game options will be added here as the game is implemented." %}</div>
+                        <div class="form-row">
+                            <label class="form-label" for="edition">{% translate "Edition" %}</label>
+                            <select name="edition" id="edition" style="flex:0 0 auto;width:auto" onchange="toggleSimmental();">
+                                <option value="FIRST" selected="selected">{% translate "First edition" %}</option>
+                                <option value="SECOND">{% translate "Second edition" %}</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label class="form-label" for="mode">{% translate "Mode" %}</label>
+                            <select name="mode" id="mode" style="flex:0 0 auto;width:auto">
+                                <option value="ORIGINAL" selected="selected">{% translate "Original" %}</option>
+                                <option value="STRATEGIC">{% translate "Strategic (less hidden, e.g. running score)" %}</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label class="form-label" for="buildings">{% translate "Buildings" %}</label>
+                            <select name="buildings" id="buildings" style="flex:0 0 auto;width:auto">
+                                <option value="RANDOMIZED" selected="selected">{% translate "Randomize" %}</option>
+                                <option value="BEGINNER">{% translate "Beginner (only a-side)" %}</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label class="form-label" for="playerOrder">{% translate "Player order" %}</label>
+                            <select name="playerOrder" id="playerOrder" style="flex:0 0 auto;width:auto">
+                                <option value="RANDOMIZED" selected="selected">{% translate "Randomize (original)" %}</option>
+                                <option value="BIDDING">{% translate "Bidding (VPs)" %}</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label class="form-label" for="variant">{% translate "Variant" %}</label>
+                            <select name="variant" id="variant" style="flex:0 0 auto;width:auto">
+                                <option value="ORIGINAL" selected="selected">{% translate "Original" %}</option>
+                                <option value="BALANCED">{% translate "Balanced (tiles adjusted for 2/3p)" %}</option>
+                            </select>
+                        </div>
+                        <label class="check-label">
+                            <input type="checkbox" class="myCheckbox" id="railsToTheNorth" name="railsToTheNorth" value="1">
+                            <div>
+                                <div>{% translate "Rails to the North" %}</div>
+                                <div class="opt-help">{% translate "Expansion: northern cities, branchlets and extra station towns" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label" id="simmentalRow" style="display:none">
+                            <input type="checkbox" class="myCheckbox" id="simmental" name="simmental" value="1">
+                            <div>
+                                <div>{% translate "Simmental cattle" %}</div>
+                                <div class="opt-help">{% translate "Second edition only: extra breeding-value 2 cattle that upgrade on delivery" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" class="myCheckbox" id="stationMasterPromos" name="stationMasterPromos" value="1">
+                            <div>
+                                <div>{% translate "Station master promos" %}</div>
+                                <div class="opt-help">{% translate "Adds the promo station master tiles" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" class="myCheckbox" id="building11" name="building11" value="1">
+                            <div>
+                                <div>{% translate "Building 11" %}</div>
+                                <div class="opt-help">{% translate "Adds the building 11 promo tiles" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" class="myCheckbox" id="building13" name="building13" value="1">
+                            <div>
+                                <div>{% translate "Building 13" %}</div>
+                                <div class="opt-help">{% translate "Adds the building 13 promo tiles" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" class="myCheckbox" id="rowAI" name="rowAI" value="1" onchange="toggleRowAI();">
+                            <div>
+                                <div>{% translate "Play against Garth (AI)" %}</div>
+                                <div class="opt-help">{% translate "Solo game against the Garth automa. Forces a 2-player game and excludes it from stats." %}</div>
+                            </div>
+                        </label>
+                        <div class="form-row" id="rowAIDifficultyRow" style="display:none">
+                            <label class="form-label" for="difficulty">{% translate "Garth difficulty" %}</label>
+                            <select name="difficulty" id="difficulty" style="flex:0 0 auto;width:auto">
+                                <option value="EASY" selected="selected">{% translate "Garth (easy)" %}</option>
+                                <option value="MEDIUM">{% translate "Garth (medium)" %}</option>
+                                <option value="HARD">{% translate "Garth (hard)" %}</option>
+                                <option value="VERY_HARD">{% translate "Garth (very hard)" %}</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -152,13 +224,28 @@
     <script>
     function selectPlayers() {
         var maxPlayers = parseInt(document.getElementById("playerNumber").value);
-        for (var i = 2; i <= 6; i++) {
+        for (var i = 2; i <= 4; i++) {
             var row = document.getElementById("selPlayer" + i);
-            if (row) row.style.display = i < maxPlayers ? "block" : "none";
+            if (row) row.style.display = i <= maxPlayers ? "block" : "none";
+        }
+    }
+    function toggleSimmental() {
+        var row = document.getElementById("simmentalRow");
+        if (row) row.style.display = document.getElementById("edition").value === "SECOND" ? "block" : "none";
+    }
+    function toggleRowAI() {
+        var checked = document.getElementById("rowAI").checked;
+        var row = document.getElementById("rowAIDifficultyRow");
+        if (row) row.style.display = checked ? "block" : "none";
+        if (checked) {
+            var players = document.getElementById("playerNumber");
+            if (players) { players.value = "2"; selectPlayers(); }
         }
     }
     document.addEventListener("DOMContentLoaded", function () {
         selectPlayers();
+        toggleSimmental();
+        toggleRowAI();
         var form = document.getElementById("gameCreationForm");
         if (form) {
             form.addEventListener("submit", function (event) {

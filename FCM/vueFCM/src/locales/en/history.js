@@ -62,6 +62,8 @@
       seniorVP: "Senior VP",
       recruitingMgr: "Recruiting Mgr",
       jazzM: "Jazz M",
+      colJazz: "J",
+      colWaitress: "W",
     },
     salaryPay: "{amount} and {count} item|{amount} and {count} items",
 
@@ -205,6 +207,9 @@
     mediaLineBonusHeader: "Media milestone",
     playerHeader: "Player",
     salesHeader: "Sales",
+    itemsHeader: "Items",
+    coffeeHeader: "Coffee",
+    icHeader: "I+C",
     cfoBonusHeader: "CFO bonus",
     totalHeader: "Total",
 

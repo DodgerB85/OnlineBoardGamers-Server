@@ -33,10 +33,9 @@
         box-sizing: border-box;
       }
     </style>
-    <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
     {% if settingsDebug %}
-      <script type="module" src="http://localhost:3045/static/@vite/client"></script>
-      <script type="module" src="http://localhost:3045/static/main.js"></script>
+      <script type="module" src="http://localhost:3060/static/@vite/client"></script>
+      <script type="module" src="http://localhost:3060/static/main.js"></script>
     {% else %}
       <link href="{% get_static_prefix %}ROW/ROWvuedist/main.css" rel="stylesheet" />
       <script type="module" crossorigin="" src="{% get_static_prefix %}ROW/ROWvuedist/main.js"></script>
@@ -69,7 +68,17 @@
     initData.phase = {{ phase }};
     initData.finishedGame = {{ finishedGame|lower }};
     initData.transactionID = "{{ transactionID }}";
-    initData.edition = "FIRST";
+    initData.edition = "{{ edition }}";
+    initData.railsToTheNorth = {{ railsToTheNorth|lower }};
+    initData.simmental = {{ simmental|lower }};
+    initData.mode = "{{ mode }}";
+    initData.buildings = "{{ buildings }}";
+    initData.playerOrder = "{{ playerOrder }}";
+    initData.variant = "{{ variant }}";
+    initData.stationMasterPromos = {{ stationMasterPromos|lower }};
+    initData.building11 = {{ building11|lower }};
+    initData.building13 = {{ building13|lower }};
+    initData.difficulty = "{{ difficulty }}";
 
     {% if spoilerFree %}
     initData.spoilerFree = true;

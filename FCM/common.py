@@ -67,6 +67,9 @@ def buildFCMstartingOptions(post_data):
             if "includeChineseExpansion" in post_data:
                 # Marker only — actual Chinese modules are rolled in startGame
                 optionsArr.append(rfFCM.SO_RANDOM_MODULES_CHINESE)
+            if "includeFanExpansion" in post_data:
+                # Marker only — actual fan mods are rolled in startGame
+                optionsArr.append(rfFCM.SO_RANDOM_MODULES_FAN)
         if "draftModules" in post_data:
             if post_data.get("draft_MS") == "302":
                 optionsArr.append(rfFCM.SO_NEW_MS)
