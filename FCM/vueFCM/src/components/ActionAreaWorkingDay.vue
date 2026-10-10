@@ -73,6 +73,12 @@ const computedAvailableMarketers = computed(() => {
 	return marketers.filter((entry) => entry.employee !== rf.MASS_MARKETEER)
 })
 
+// Media Line mod: TV channel - all required houses picked
+const computedTVSelectionDone = computed(() => controller.tvSelectionComplete())
+
+// Media Line mod: free headline publications left for the current player
+const computedHeadlinesLeft = computed(() => (store.startingOptions.mediaLine ? controller.mediaLineHeadlinesLeft(controller.currentPlayerIndex()) : 0))
+
 const computedTrainableOptions = computed(() => {
 	const ret = {
 		beachTrainable: [],
@@ -253,6 +259,14 @@ const computedProducers = computed(() => {
 </script>
 
 <template>
+	<!-- Media Line mod: free headline publication, only while the marketing
+	     employees are at work (the TV announcer's work moment) -->
+	<div id="headlinePublishDiv" v-if="computedHeadlinesLeft > 0 && store.gameflow.subphase === rf.SUBPHASE_MARKETING">
+		<p>{{ $t("workingDay.publishHeadline", { left: computedHeadlinesLeft }) }}</p>
+		<button class="actionsLineButton" @click="controller.publishHeadline(5)"><img :src="view.getImage('headline_prime')" class="headlineChoiceImg" alt="" /> {{ $t("workingDay.headlinePrime") }}</button>
+		<button class="actionsLineButton" @click="controller.publishHeadline(-5)"><img :src="view.getImage('headline_press')" class="headlineChoiceImg" alt="" /> {{ $t("workingDay.headlinePress") }}</button>
+	</div>
+
 	<!-- Temporary Worker choice, before hiring -->
 	<template v-if="store.gameflow.subphase === rf.SUBPHASE_TEMPORARY_WORKER">
 		<div>
@@ -540,6 +554,8 @@ const computedProducers = computed(() => {
 				<p v-if="!store.context.nightShift && !store.context.secondCampaignManager && controller.currentPlayerObj().employees.includes(rf.NIGHT_SHIFT_MANAGER) && store.context.marketer === rf.MARKETING_TRAINEE">{{ $t("workingDay.nightShiftMarketingTrainee") }}</p>
 
 				<AddItemBox :itemBeingAdded="rf.ITEM_BOX_CAMPAIGN" />
+				<!-- Media Line: the second phone token keeps the first token's good and duration -->
+				<p v-if="store.context.mediaLineSecondCall">{{ $t("workingDay.phoneTokenSameAsFirst") }}</p>
 
 				<!-- Hawker truck: route-based placement -->
 				<template v-if="store.context.campaign >= 25 && store.context.campaign <= 27">
@@ -553,14 +569,22 @@ const computedProducers = computed(() => {
 					<p v-else><button class="actionsLineButton" @click="controller.placeMarketingCampaign(0)">{{ $t("workingDay.placeCampaign") }}</button></p>
 				</template>
 
-				<!-- Gourmet guides / giant billboards: button placement -->
-				<p v-else-if="store.context.campaign > 16"><button class="actionsLineButton" @click="controller.placeMarketingCampaign(0)">{{ $t("workingDay.placeCampaign") }}</button></p>
+				<!-- Media Line: TV channel - pick the houses on the map -->
+				<template v-else-if="rf.MARKETING_CAMPAIGNS[store.context.campaign].type === rf.TV_CHANNEL">
+					<p>{{ $t("workingDay.tvChannelProgress", { current: store.context.tvHouses.length }) }}</p>
+					<p><button class="actionsLineButton" :disabled="!computedTVSelectionDone" @click="controller.placeMarketingCampaign(0)">{{ $t("workingDay.placeCampaign") }}</button></p>
+				</template>
+
+				<!-- Gourmet guides / giant billboards: button placement (Media Line phone tokens use map clicks) -->
+				<p v-else-if="store.context.campaign > 16 && rf.MARKETING_CAMPAIGNS[store.context.campaign].type !== rf.PHONE"><button class="actionsLineButton" @click="controller.placeMarketingCampaign(0)">{{ $t("workingDay.placeCampaign") }}</button></p>
 				<p v-else>{{ $t("workingDay.clickToPlaceCampaign") }}</p>
 
 				<br />
 				<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 				<button class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.reset") }}</button>
 				<button v-if="store.context.nightShift" class="actionsLineButton" @click="controller.skipNightShiftManager()">{{ $t("actionArea.skipNightShiftManager") }}</button>
+				<!-- Media Line: finish the action after just one phone token -->
+				<button v-if="store.context.mediaLineSecondCall" class="actionsLineButton" @click="controller.resetMarketingSelection()">{{ $t("workingDay.skipSecondPhoneToken") }}</button>
 			</template>
 		</template>
 	</template>
@@ -972,6 +996,12 @@ const computedProducers = computed(() => {
 .cardImg {
 	width: 100%;
 	height: 100%;
+}
+
+.headlineChoiceImg {
+	height: 30px;
+	vertical-align: middle;
+	margin-right: 5px;
 }
 
 .cardSummaryDiv {

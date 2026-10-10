@@ -415,6 +415,8 @@ export function setInternalStartingOptions(startingOptionsArray) {
 		if (opts[i] === rf.SO_LABOR_MARKET) store.startingOptions.laborMarket = true
 		// Second Bailout mod
 		if (opts[i] === rf.SO_SECOND_BAILOUT) store.startingOptions.secondBailout = true
+		// Media Line mod
+		if (opts[i] === rf.SO_MEDIA_LINE) store.startingOptions.mediaLine = true
 
 		if (opts[i] === rf.SO_STRICT_PAYDAY_FRIDGE) store.startingOptions.strictPaydayFridge = true
 		if (opts[i] === rf.SO_TRAINING_GAME) store.startingOptions.trainingGame = true
@@ -525,6 +527,16 @@ export function setupKetchupExpansion(playerNumber) {
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
 	}
 	if (store.startingOptions.laborMarket) store.availableEmployees[rf.HEADHUNTER] = 6
+	// Media Line mod
+	if (store.startingOptions.mediaLine) {
+		store.availableEmployees[rf.TELEMARKETER] = 6
+		store.availableEmployees[rf.TV_ANNOUNCER] = 6
+		store.availableMarketingCampaigns.push(28, 29, 30, 31, 32, 33, 34, 35)
+		if (store.startingOptions.useMilestones) {
+			store.availableMilestones.push(rf.FIRST_TELEMARKETER_USED)
+			store.availableMilestones.push(rf.FIRST_TV_ANNOUNCER_USED)
+		}
+	}
 }
 
 export function setupLaborMarketExpansion() {
@@ -564,7 +576,7 @@ export function findPlayerForCampaign(number) {
 	return -1
 }
 
-export function addMarketingCampaign(number, index, rotated, good, duration) {
+export function addMarketingCampaign(number, index, rotated, good, duration, houses) {
 	//}, nightShift) {
 	const store = useModelStore()
 	store.campaigns.push({
@@ -573,11 +585,14 @@ export function addMarketingCampaign(number, index, rotated, good, duration) {
 		rotated: rotated,
 		good: good,
 		duration: duration,
+		houses: houses || [],
 		//nightShift: nightShift,
 	})
 	store.availableMarketingCampaigns.splice(store.availableMarketingCampaigns.indexOf(number), 1)
 
-	if (rf.MARKETING_CAMPAIGNS[number].type != rf.GOURMET_GUIDE && rf.MARKETING_CAMPAIGNS[number].type != rf.HAWKER_TRUCK) {
+	// Media Line mod: TV channels have no board token - the selected houses are
+	// marked with antennas instead
+	if (rf.MARKETING_CAMPAIGNS[number].type != rf.GOURMET_GUIDE && rf.MARKETING_CAMPAIGNS[number].type != rf.HAWKER_TRUCK && rf.MARKETING_CAMPAIGNS[number].type != rf.TV_CHANNEL) {
 		map.addElement(rf.TYPE_CAMPAIGN, number, index, rotated)
 	}
 
@@ -669,6 +684,44 @@ export function removeMarketingCampaign(number) {
 
 	// 4. Update map
 	map.addElement(rf.TYPE_CAMPAIGN, number, campaign.index, campaign.rotated, true)
+}
+
+// Media Line mod - B3 diamond range: houses inside the diamond of 13 map
+// tiles (Manhattan distance `tileRange` in 5x5 tiles) around any of the
+// player's restaurants (waves ignore roads). The stadium is never affected
+// by marketing.
+export function giveHousesInWaveRange(playerIndex, tileRange = 2) {
+	const store = useModelStore()
+	// Media Line mod - the wave is measured from the restaurant doors: the
+	// single door corner normally, all four corners with a Local/Regional
+	// Manager (the same rule billboards and mail campaigns use)
+	const region = map.waveRegionSpaces(giveRestaurantDoorIndices(playerIndex, { openOnly: false }), tileRange)
+
+	const houses = new Set()
+	for (let i = 0; i < store.mapData.coords.length; i++) {
+		const v = store.mapData.coords[i]
+		if (v > rf.HOUSE && v < rf.HOUSE + 29) {
+			const house = Number.isInteger(v) ? v - rf.HOUSE : Math.round((v - rf.HOUSE + Number.EPSILON) * 100) / 100
+			if (house === rf.STADIUM) continue
+			if (region.has(i)) houses.add(house)
+		}
+	}
+	return Array.from(houses).sort((a, b) => a - b)
+}
+
+// Media Line mod: every board space occupied by one of the given house numbers
+export function giveSpacesOfHouses(houses) {
+	const store = useModelStore()
+	const wanted = new Set(houses)
+	const spaces = []
+	for (let i = 0; i < store.mapData.coords.length; i++) {
+		const v = store.mapData.coords[i]
+		if (v > rf.HOUSE && v < rf.HOUSE + 29) {
+			const house = Number.isInteger(v) ? v - rf.HOUSE : Math.round((v - rf.HOUSE + Number.EPSILON) * 100) / 100
+			if (wanted.has(house)) spaces.push(i)
+		}
+	}
+	return spaces
 }
 
 export function addRestaurant_core(playerIndex, index, rotation, open) {

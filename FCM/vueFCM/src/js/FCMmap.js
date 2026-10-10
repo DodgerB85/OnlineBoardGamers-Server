@@ -1631,6 +1631,42 @@ export function giveAllSpaceForAToken(index, width, height) {
 	return res
 }
 
+// Media Line mod - radio-wave geometry helpers (waves ignore roads).
+
+// Every board space inside the map tiles (5x5 blocks) within Manhattan
+// distance `tileRange` of any tile containing one of the given anchor
+// squares. Callers pass restaurant DOOR squares (giveRestaurantDoorIndices):
+// without a Local/Regional Manager only the single door corner counts, with
+// one all four corners of the building do - the same rule every other
+// restaurant-distance mechanic uses.
+// tileRange=1 is the cross of 5 tiles (B2 phone placement), tileRange=2 the
+// diamond of 13 tiles (B3 TV house selection).
+export function waveRegionSpaces(anchorSquares, tileRange) {
+	const regionTiles = new Set()
+	for (const s of anchorSquares) {
+		const t = giveTileNumber(s)
+		const tx = t % TILES_WIDE
+		const ty = Math.floor(t / TILES_WIDE)
+		for (let dy = -tileRange; dy <= tileRange; dy++) {
+			for (let dx = -tileRange; dx <= tileRange; dx++) {
+				if (Math.abs(dx) + Math.abs(dy) > tileRange) continue
+				const nx = tx + dx
+				const ny = ty + dy
+				if (nx < 0 || ny < 0 || nx >= TILES_WIDE || ny >= rf.ssH / 5) continue
+				regionTiles.add(ny * TILES_WIDE + nx)
+			}
+		}
+	}
+	const spaces = new Set()
+	for (const t of regionTiles) {
+		const start = giveStartingIndexForTile(t)
+		for (let y = 0; y < 5; y++) {
+			for (let x = 0; x < 5; x++) spaces.add(start + x + y * rf.ssW)
+		}
+	}
+	return spaces
+}
+
 export function findIndexForHouse(number) {
 	const store = useModelStore()
 	return store.mapData.coords.indexOf(number + rf.HOUSE)

@@ -74,6 +74,8 @@ export const useModelStore = defineStore("store", () => {
 		laborMarket: false,
 		// Second Bailout mod
 		secondBailout: false,
+		// Media Line mod
+		mediaLine: false,
 	}
 
 	// This var affects the ZOOM level
@@ -158,6 +160,21 @@ export const useModelStore = defineStore("store", () => {
 		order: [], // playerIds in claim order (= turn order at bailout time)
 	})
 
+	// Media Line mod - published headlines. Each headline is written during a
+	// working day and modifies every sale price at the NEXT turn's dinner only.
+	// Milestone 2 (First TV Announcer Used): doubleCampaign is the one campaign
+	// of the holder's that pushes 2 cards per house per night; doubleUsed is the
+	// one-shot latch (the reward applies to the holder's first TV campaign only).
+	// Milestone 1 (First Telemarketer Used) needs the per-night accumulator in
+	// the saved state: campaigns register their groups at payday, dinner settles
+	// them a turn later - a page reload in between must not lose the bonus.
+	const mediaLine = reactive({
+		headlines: [], // { turn, playerIndex, value } with value +5 / -5
+		doubleCampaign: -1,
+		doubleUsed: false,
+		night: { groups: {}, aLinePushers: [] }, // campaign num -> { owner, houses[] }; players whose own A-line campaigns ran
+	})
+
 	/*************************************** UNSAVED - TEMP VARS -- these do not need to be stored or saved */
 
 	const context = reactive({
@@ -237,6 +254,9 @@ export const useModelStore = defineStore("store", () => {
 		refusePlaneDouble: false,
 		firstCampaignDuration: 1,
 		firstCampaignCampaign: 11,
+		// Media Line mod
+		tvHouses: [], // House numbers picked for the TV channel campaign
+		mediaLineSecondCall: false, // Phone token: second placement within the same action
 		selectedBuilding: -1,
 		house: 1,
 		houseIndex: -1, // Board index of the house being given a garden
@@ -474,6 +494,7 @@ export const useModelStore = defineStore("store", () => {
 		stadium,
 		laborMarket,
 		bailout,
+		mediaLine,
 		reserveCards,
 		bank,
 		bankBroken,

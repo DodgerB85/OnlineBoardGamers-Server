@@ -258,7 +258,15 @@ export default {
 		"firstFriedChickenSoldDesc": "可营销炸鸡；每卖出 1 份 +$5",
 		"firstStadiumSold": "首个体育馆供应商",
 		"firstStadiumSoldTitle": "首个体育馆供应商",
-		"firstStadiumSoldDesc": "之后每场比赛提前 3 回合收到公告"
+		"firstStadiumSoldDesc": "之后每场比赛提前 3 回合收到公告",
+
+		"firstTelemarketerUsed": "首位使用电话推销员",
+		"firstTelemarketerUsedTitle": "首位使用电话推销员",
+		"firstTelemarketerUsedDesc": "你用电波营销的房全由你卖：每栋+$10；分组结算；当晚使用非电波广告则无效",
+
+		"firstTvAnnouncerUsed": "首位使用电视广播员",
+		"firstTvAnnouncerUsedTitle": "首位使用电视广播员",
+		"firstTvAnnouncerUsedDesc": "首个电视频道：每栋天线房每晚 2 张需求"
 	},
 	"employees": {
 		"waitress": "服务员",
@@ -378,7 +386,13 @@ export default {
 		"headhunter": "猎头",
 		"headhunterDesc": "从对手休假区挖1人；若留任，发薪时一次性支付每级$10。",
 		"unionOrganizer": "工会组织者",
-		"unionOrganizerDesc": "5人起算，最多者各得1张。占CEO直属槽，无行动，工资$5。"
+		"unionOrganizerDesc": "5人起算，最多者各得1张。占CEO直属槽，无行动，工资$5。",
+
+		"telemarketer": "电话推销员",
+		"telemarketerDesc": "在十字五板块范围（餐厅板块加上下左右）的空地放置电话牌，不需要沿路",
+
+		"tvAnnouncer": "电视广播员",
+		"tvAnnouncerDesc": "在菱形十三板块范围内选 5 栋房装天线，每晚可发一条头条"
 	},
 	"laborMarket": {
 		"unionMustWork": "你必须安排工会组织者上班"
@@ -497,6 +511,12 @@ export default {
 		"addHawkerTruck": "添加小贩货车",
 		"placeCampaign": "放置营销板块",
 		"clickToPlaceCampaign": "点击地图上的高亮方格放置您的营销板块",
+		"phoneTokenSameAsFirst": "第二张电话牌自动沿用第一张的商品与时长",
+		"tvChannelProgress": "为您的电视频道选择房屋：{current}/5",
+		"skipSecondPhoneToken": "跳过第二张电话牌",
+		"publishHeadline": "发布头条（免费动作，还可发布 {left} 条）：",
+		"headlinePrime": "黄金档：明晚所有基础价格 +$5",
+		"headlinePress": "负面新闻：明晚所有基础价格 -$5",
 		"producedLabel": "已制作：",
 		"selectDrinkProducer": "选择食物/饮料生产者",
 		"tracePathCollectDrinks": "点击高亮方格描绘路径，然后停止以收集饮料",
@@ -671,6 +691,11 @@ export default {
 		"admin": "admin",
 		"flipToFriedChicken": "房屋 {houses} 未被满足的需求翻面成炸鸡：",
 		"houseMovedOut": "房屋 {houses} 搬家了（本局不再接受任何广告）",
+		"tvAtHouses": "覆盖房屋 {houses}",
+		"publishHeadline": "{name} 发布了一条头条新闻：",
+		"headlinePrime": "明晚所有基础价格 +$5",
+		"headlinePress": "明晚所有基础价格 -$5",
+		"mediaLineBonus": "{name} 的电波营销指定房子订单全部售出，获得 ${amount}：房屋 {houses}",
 		"stadiumAnnounce": "体育馆公告：第 {turn} 回合举办比赛，需要 {units} 份 {good}",
 		"stadiumWinner": "{name} 独家供应体育馆，卖出 {units} 份 {good}",
 		"stadiumNobody": "无人备齐体育馆需求——{units} 份 {good} 当天清零：",
@@ -733,7 +758,9 @@ export default {
 			"executiveVP": "执行副总裁",
 			"seniorVP": "高级副总裁",
 			"recruitingMgr": "招聘经理",
-			"jazzM": "爵士乐手"
+			"jazzM": "爵士乐手",
+			"colJazz": "爵",
+			"colWaitress": "侍"
 		},
 		"salaryPay": "{amount} 和 {count} 件物品",
 		"chooseTurnOrderAutoEarly": "{name} 选择 {ordinal} 行动（自动靠前）",
@@ -758,6 +785,7 @@ export default {
 		"providerPriceDistance": "${price}，距离 {distance}，",
 		"playerOrdinal": "{ordinal}号玩家",
 		"basePriceItems": "基础价格 ${price} x {count} 件物品。",
+		"headlineApplied": "（含今晚头条 {amount}）",
 		"bonusOf": "该玩家获得 ${amount} 的奖励。",
 		"fryChefBonus": "炸薯条主厨增加 ${amount} 的奖励",
 		"distanceReducedMilestone": "因里程碑减少距离",
@@ -765,6 +793,9 @@ export default {
 		"noIncome": "没有收入",
 		"playerHeader": "玩家",
 		"salesHeader": "销售",
+		"itemsHeader": "商品",
+		"coffeeHeader": "咖啡",
+		"icHeader": "商品+咖啡",
 		"noSalaries": "没有薪水",
 		"paysSalaries": "{name} 支付薪水：${pay}",
 		"campaignHouses": "#{num} 在房屋 {list} 上投放了 {good}",
@@ -826,6 +857,7 @@ export default {
 		"noCoffeeSold": "没有销售咖啡",
 		"moreInformation": "更多信息",
 		"incomeHeader": "收入",
+		"mediaLineBonusHeader": "电波里程碑",
 		"cfoBonusHeader": "CFO 奖励",
 		"totalHeader": "总计",
 		"salariesHeader": "薪水",
@@ -890,6 +922,10 @@ export default {
 		"noActiveHawkerTrucks": "没有活跃的小贩货车",
 		"stadiumTitle": "体育馆",
 		"stadiumGame": "第 {turn} 回合比赛，需要 {units} 份",
+		"headlineTitle": "头条新闻",
+		"headlineTonight": "今晚：所有基础价格 {amount}",
+		"headlineNoEffect": "今晚基础价格无变化",
+		"headlineToday": "今日已发布：",
 		"availableEmployees": "可用员工",
 		"hireEmployee": "雇佣员工",
 		"currentEmployees": "当前员工",

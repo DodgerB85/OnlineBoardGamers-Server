@@ -103,6 +103,15 @@ function buildDiscount(playerIndex, player) {
 	let maxPrice = rules.basePrice()
 	let price = plyr.playersPrice(playerIndex)
 
+	// Media Line: tonight's headline shifts every sale price - show what dinner
+	// will actually pay, not the raw base price
+	const headline = rules.giveHeadlineTotal()
+	if (headline !== 0) {
+		price += headline
+		minPrice += headline
+		maxPrice += headline
+	}
+
 	if (player.ceoAction === rf.CEO_ACTION_PRICE_MINUS_3) {
 		minPrice -= 3
 		maxPrice -= 3
@@ -162,7 +171,9 @@ function buildMarketers(playerIndex, player) {
 			continue
 		}
 		const campaignObj = store.campaigns.find((obj) => obj.number === m.campaign)
-		const entry = { campaign: m.campaign, infinite: campaignObj.duration === 9, goods: [] }
+		// Show the billboard number (vanilla IDs double as it; B-line TV/phone
+		// slots map to their insert numbers 3.5/4.5/6.5/6.6/...)
+		const entry = { campaign: rules.campaignSortKey(m.campaign), infinite: campaignObj.duration === 9, goods: [] }
 		if (campaignObj.duration === 9) {
 			entry.goods.push({ good: campaignObj.good, copies: 1 })
 			if (plyr.hasMilestone(playerIndex, rf.FIRST_RADIO_CAMPAIGN) && rf.MARKETING_CAMPAIGNS[campaignObj.number].type === rf.RADIO) {
@@ -354,6 +365,22 @@ const stadiumAnnouncement = computed(() => {
 	if (personal.pov >= 0 && plyr.hasMilestone(personal.pov, rf.FIRST_STADIUM_SOLD)) lead = 3
 	if (store.gameflow.turn < gameTurn - lead + 1) return null
 	return { turn: gameTurn, units: a.units, foodImg: view.getImage("item_" + a.food) }
+})
+
+/* ---------------- Media Line ---------------- */
+const useMediaLine = computed(() => store.startingOptions.mediaLine)
+
+// Public headline board: what shifts every price at tonight's dinner (published
+// last working day, city total clamped to +/-10) plus today's publications.
+const headlineBoard = computed(() => {
+	const tonight = rules.giveHeadlineTotal()
+	const today = store.mediaLine.headlines.filter((h) => h.turn === store.gameflow.turn)
+	if (tonight === 0 && today.length === 0) return null
+	return {
+		hasEffect: tonight !== 0,
+		tonightStr: tonight > 0 ? "+" + tonight : "" + tonight,
+		today: today.map((h) => ({ up: h.value > 0, img: view.getImage(h.value > 0 ? "headline_prime" : "headline_press") })),
+	}
 })
 
 /* ---------------- Rural Marketing Area ---------------- */
@@ -659,6 +686,19 @@ const playerRows = computed(() => {
 			</div>
 		</div>
 
+		<!-- MEDIA LINE -->
+		<div id="headlineBoardDisplay" v-if="useMediaLine && headlineBoard !== null">
+			<strong>{{ $t("assistance.headlineTitle") }}</strong>
+			<div class="headlineAnnouncement">
+				<template v-if="!headlineBoard.hasEffect">{{ $t("assistance.headlineNoEffect") }}</template>
+				<template v-else>{{ $t("assistance.headlineTonight", { amount: headlineBoard.tonightStr }) }}</template>
+			</div>
+			<div v-if="headlineBoard.today.length > 0" class="headlineToday">
+				{{ $t("assistance.headlineToday") }}
+				<img v-for="(h, i) in headlineBoard.today" :key="'hl' + i" class="headlineImg" :src="h.img" alt="" />
+			</div>
+		</div>
+
 		<!-- SANDBOX MODE -->
 		<div id="sandboxDiv" v-if="sandboxMode">
 			<div>
@@ -936,6 +976,21 @@ const playerRows = computed(() => {
 }
 
 .stadiumAnnouncement .stadiumItemImg {
+	height: 22px;
+	vertical-align: bottom;
+}
+
+/* Media Line headlines */
+#headlineBoardDisplay {
+	width: 392px;
+	border: #000 1px solid;
+	margin: 0 auto;
+	margin-top: 5px;
+	padding: 3px;
+	text-align: left;
+}
+
+.headlineImg {
 	height: 22px;
 	vertical-align: bottom;
 }

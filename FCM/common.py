@@ -33,6 +33,7 @@ STATS_EXCLUDED_OPTIONS = [
     rfFCM.SO_STADIUM,
     rfFCM.SO_LABOR_MARKET,
     rfFCM.SO_SECOND_BAILOUT,
+    rfFCM.SO_MEDIA_LINE,
 ]
 
 
@@ -118,6 +119,7 @@ def buildFCMstartingOptions(post_data):
         "stadium",
         "laborMarket",
         "secondBailout",
+        "mediaLine",
         "allowRewind",
     ]
     optionsArr.extend(int(post_data[opt]) for opt in option_names if opt in post_data)

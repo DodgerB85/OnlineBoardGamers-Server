@@ -318,6 +318,7 @@ export async function generateReplayData(spoilerFree = false) {
 		else if (action === rf.HIST_UNION_ORGANIZER) replayUnionOrganizer(i, playerIdx, param)
 		else if (action === rf.HIST_BANK_BAILOUT) replayBankBailout(i, playerIdx, param)
 		else if (action === rf.HIST_BAILOUT_CLAIM) replayBailoutClaim(i, playerIdx, param)
+		else if (action === rf.HIST_PUBLISH_HEADLINE) replayPublishHeadline(i, playerIdx, param)
 
 		store.replayData.push(funcs.simpleExportWholeFCMmodel())
 
@@ -502,6 +503,14 @@ export function replayFridgeResources(historyIndex, playerIndex, param) {
 	for (let i = 0; i < param.length; i++) {
 		plyr.addResources(playerIndex, param[i], 1)
 	}
+}
+
+// Media Line mod: headlines are published during a working day and only modify
+// the NEXT turn's dinner (giveHeadlineTotal matches turn - 1), so recording the
+// current replay turn here replays the timing exactly like live play.
+export function replayPublishHeadline(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	store.mediaLine.headlines.push({ turn: store.gameflow.turn, playerIndex: playerIndex, value: param[0] })
 }
 
 export function replayDinnerTime(historyIndex, playerIndex, param) {
@@ -798,7 +807,14 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 		5 = duration IF NOT INFINITE
 		*/
 	let campaignNumber = param[0]
-	let campaignIndex = funcs.importIndex(param[1])
+	// Media Line mod: TV channels log the chosen house NUMBERS in place of a
+	// board index (they have no token); phone tokens log a normal board index
+	const isTV = campaignNumber === 28 || campaignNumber === 29
+	const isPhone = campaignNumber >= 30 && campaignNumber <= 35
+	let tvHouses = []
+	let campaignIndex = -1
+	if (isTV) tvHouses = [...param[1]]
+	else campaignIndex = funcs.importIndex(param[1])
 	let good = -1
 	let secondGood = -1
 	if (typeof param[2] === "object") {
@@ -812,6 +828,9 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 		if (campaignNumber <= 3) campaignEmployee = rf.BRAND_DIRECTOR
 		else if (campaignNumber >= 17 && campaignNumber <= 20) campaignEmployee = rf.GOURMET_FOOD_CRITIC
 		else if (campaignNumber >= 21 && campaignNumber <= 24) campaignEmployee = rf.RURAL_MARKETEER
+		// Media Line mod
+		else if (isTV) campaignEmployee = rf.TV_ANNOUNCER
+		else if (isPhone) campaignEmployee = rf.TELEMARKETER
 	}
 	// Otherwise need to read in the employee
 	else {
@@ -837,8 +856,12 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 	// entry, so the replay can distinguish it without changing the legacy
 	// campaign-history payload.
 	const temporaryCampaign = store.laborMarket.temporaryCampaignOwners[campaignNumber] === playerIndex
+	// Media Line mod: the second phone token of a telemarketer hangs off the
+	// same employee (live play used addCampaignToMarketer, no employee moved),
+	// so a phone campaign whose telemarketer already left the bench is one
+	const secondPhoneToken = isPhone && store.players[playerIndex].employees.indexOf(campaignEmployee) === -1
 	if (!temporaryCampaign) {
-		if (restoMS) plyr.addCampaignToMarketer(playerIndex, campaignEmployee, campaignNumber)
+		if (restoMS || secondPhoneToken) plyr.addCampaignToMarketer(playerIndex, campaignEmployee, campaignNumber)
 		else plyr.sendPlayerMarketerToMarket(playerIndex, campaignEmployee, campaignNumber, false, false)
 	}
 
@@ -876,9 +899,22 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 	} else if (campaignNumber >= 25 && campaignNumber <= 27) {
 		store.context.highlightHistorySquares.push(...funcs.importIndexes(param[1]))
 	}
-	model.addMarketingCampaign(campaignNumber, campaignIndex, campaignRotated === 1, good, durationNum)
+	model.addMarketingCampaign(campaignNumber, campaignIndex, campaignRotated === 1, good, durationNum, isTV ? tvHouses : undefined)
 	if (secondGood >= 0) {
 		store.players[playerIndex].additionalMarketedGood = [campaignNumber, secondGood]
+	}
+
+	// Media Line mod: milestone 2 (First TV Announcer Used) latches the holder's
+	// first TV campaign. Live play awards the milestone right AFTER this history
+	// entry (giveMarketingMilestones trails placeMarketingCampaign), so look
+	// ahead for it when the holder does not have it replayed yet.
+	if (isTV && !store.mediaLine.doubleUsed) {
+		const nextEntry = store.computedHistory[historyIndex + 1]
+		const milestoneEarnedHere = nextEntry && nextEntry[0] === rf.HIST_NEW_MILESTONE && nextEntry[1] === playerIndex && Array.isArray(nextEntry[3]) && nextEntry[3][0] === rf.FIRST_TV_ANNOUNCER_USED
+		if (plyr.hasMilestone(playerIndex, rf.FIRST_TV_ANNOUNCER_USED) || milestoneEarnedHere) {
+			store.mediaLine.doubleCampaign = campaignNumber
+			store.mediaLine.doubleUsed = true
+		}
 	}
 }
 
@@ -1044,5 +1080,6 @@ export function setgameflowVars(playerIndex, action) {
 	else if (action === rf.HIST_PIZZA_BOMB) store.gameflow.phase = rf.PHASE_PIZZA_BOMB
 	else if (action === rf.HIST_CHOOSE_MODULE) store.gameflow.phase = rf.PHASE_SETUP_MODULES
 	else if (action === rf.HIST_TEMPORARY_WORKER || action === rf.HIST_HEADHUNT) store.gameflow.phase = rf.PHASE_WORKING_DAY
+	else if (action === rf.HIST_PUBLISH_HEADLINE) store.gameflow.phase = rf.PHASE_WORKING_DAY
 	else if (action === rf.HIST_UNION_ORGANIZER) store.gameflow.phase = rf.PHASE_CLEAN_UP
 }

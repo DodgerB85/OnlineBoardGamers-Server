@@ -45,6 +45,7 @@ export function oneLevelAbove(employee, preservingColour) {
 			break
 		case rf.MARKETING_TRAINEE:
 			level = [rf.CAMPAIGN_MANAGER, rf.RURAL_MARKETEER, rf.MASS_MARKETEER, rf.GOURMET_FOOD_CRITIC, rf.HAWKER_MARKETEER]
+			if (store.startingOptions.mediaLine) level.push(rf.TELEMARKETER)
 			break
 		case rf.CAMPAIGN_MANAGER:
 			level = [rf.BRAND_MANAGER]
@@ -73,6 +74,12 @@ export function oneLevelAbove(employee, preservingColour) {
 			break
 		case rf.FRIED_CHICKEN_COOK:
 			level = [rf.FRIED_CHICKEN_CHEF]
+			break
+		case rf.TELEMARKETER:
+			level = [rf.TV_ANNOUNCER]
+			break
+		case rf.TV_ANNOUNCER:
+			level = [rf.BRAND_DIRECTOR]
 			break
 		case rf.WAITRESS:
 			level = [rf.B_MOVIE_STAR, rf.C_MOVIE_STAR, rf.D_MOVIE_STAR, rf.JAZZ_MUSICIAN]
@@ -307,13 +314,21 @@ export function allowedCampaigns(marketer) {
 		case rf.BRAND_MANAGER:
 			return [rf.BILLBOARD, rf.MAIL, rf.AIRPLANE]
 		case rf.BRAND_DIRECTOR:
-			return [rf.BILLBOARD, rf.MAIL, rf.AIRPLANE, rf.RADIO]
+			// Media Line mod: the top of the B-line chain also places TV
+			// channels and phone tokens (pool-gated - absent without the mod)
+			return [rf.BILLBOARD, rf.MAIL, rf.AIRPLANE, rf.RADIO, rf.PHONE, rf.TV_CHANNEL]
 		case rf.GOURMET_FOOD_CRITIC:
 			return [rf.GOURMET_GUIDE]
 		case rf.RURAL_MARKETEER:
 			return [rf.GIANT_BILLBOARD]
 		case rf.HAWKER_MARKETEER:
 			return [rf.HAWKER_TRUCK]
+		// Media Line mod: each card also places every campaign type at or
+		// below its tier, exactly like the A-line managers do
+		case rf.TELEMARKETER:
+			return [rf.BILLBOARD, rf.PHONE]
+		case rf.TV_ANNOUNCER:
+			return [rf.BILLBOARD, rf.PHONE, rf.TV_CHANNEL]
 		default:
 			return []
 	}
@@ -333,6 +348,11 @@ export function giveMaxDurationForMarketer(marketer) {
 			return 3
 		case rf.HAWKER_MARKETEER:
 			return 3
+		// Media Line mod
+		case rf.TELEMARKETER:
+			return 3
+		case rf.TV_ANNOUNCER:
+			return 4
 		default:
 			return 0
 	}
@@ -906,6 +926,28 @@ export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, 
 				if (rotated) return pos % 5 === 0 ? pos - 1 : pos + 1
 				return pos % (ssDim * 5) < ssDim ? pos - ssDim : pos + ssDim
 			})
+	}
+
+	// --- CASE A2: PHONE TOKENS (Media Line mod) - 2x1 with its anchor square on
+	// empty ground in the cross of 5 map tiles (the restaurant's tile plus the 4
+	// orthogonal neighbours). Like any other token the card may straddle the
+	// edge of the zone into the next tile (one cell each side); roads are
+	// irrelevant (radio waves), so this bypasses the road-adjacency machinery
+	// of CASE B ---
+	if (campaignData.type === rf.PHONE) {
+		// Measured from the restaurant doors (all four corners with a
+		// Local/Regional Manager), like every other restaurant-distance rule
+		const zone = map.waveRegionSpaces(model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: false }), 1)
+
+		const possibilities = []
+		for (const anchor of zone) {
+			const [ax, ay] = map.giveCoord(anchor)
+			if (ax + w > rf.ssW || ay + h > rf.ssH) continue // never wrap off the board edge
+			const cells = map.giveAllSpaceForAToken(anchor, w, h)
+			const fits = cells.every((c) => store.mapData.coords[c] === rf.EMPTY_SPACE)
+			if (fits) possibilities.push(anchor)
+		}
+		return possibilities
 	}
 
 	// --- CASE B: STANDARD CAMPAIGNS (BILLBOARD/MAIL) ---
@@ -1759,6 +1801,19 @@ export function availableNewRoads() {
 	return res
 }
 
+// Media Line mod: B-line campaigns slot into the A-line push order with
+// decimal sort keys (serpentine interleave) - TV channels between radio and
+// airplanes, phone tokens in pairs after radio 6/7/8. A-line keys are their
+// raw campaign numbers, untouched, so old replays stay byte-identical.
+// radio(1-3) TV-A(3.5) plane(4) TV-B(4.5) plane(5,6) phone pairs 6.5/6.6
+// after radio 6, 7.5/7.6 after radio 7, 8.5/8.6 after radio 8, then
+// mailbox(7-10) billboard(11-16) ...
+export function campaignSortKey(number) {
+	if (number >= 28 && number <= 29) return 3.5 + (number - 28) // TV channels: 3.5, 4.5
+	if (number >= 30 && number <= 35) return 6 + Math.floor((number - 30) / 2) + 0.5 + ((number - 30) % 2) * 0.1 // phone pairs: 6.5/6.6, 7.5/7.6, 8.5/8.6
+	return number
+}
+
 // Used in dinnertime to break ties
 export function getPlaceInFullTurnOrderForPlayer(playerIndex) {
 	const store = useModelStore()
@@ -1766,6 +1821,63 @@ export function getPlaceInFullTurnOrderForPlayer(playerIndex) {
 		if (store.gameflow.fullTurnOrder[i] === playerIndex) return i
 	}
 	return -1
+}
+
+// Media Line mod: city-wide headline modifier for tonight's dinner.
+// Headlines are published during a working day and take effect only at the
+// NEXT turn's dinner (gameflow.turn has not yet incremented during dinner).
+// Stacks freely, city total clamped to +/-10.
+export function giveHeadlineTotal() {
+	const store = useModelStore()
+	if (!store.startingOptions.mediaLine) return 0
+	let sum = 0
+	for (const h of store.mediaLine.headlines) {
+		if (h.turn === store.gameflow.turn - 1) sum += h.value
+	}
+	return Math.max(-10, Math.min(10, sum))
+}
+
+// Media Line mod: milestone 1 (First Telemarketer Used) - grouped all-eat
+// bonus, judged after dinner. Purity: none of the holder's own A-line
+// campaigns ran tonight (their pushed demands are what is being matched).
+// All-eat: per B-line campaign, every house it actually pushed into tonight
+// must have been sold - the WHOLE house, including demand other players'
+// ads brought - by the holder (one sale always covers a whole house).
+// Each group pays houses x $10 independently; a group with any house lost
+// to a rival (or left unsold) pays nothing.
+function settleMediaLineGroups(sold, replayOnly) {
+	const store = useModelStore()
+	const bonuses = new Array(store.players.length).fill(0)
+	const night = store.mediaLine.night
+	store.mediaLine.night = { groups: {}, aLinePushers: [] } // reset for the next night
+	if (!store.startingOptions.mediaLine) return bonuses
+
+	for (let i = 0; i < store.players.length; i++) {
+		if (!plyr.hasMilestone(i, rf.FIRST_TELEMARKETER_USED)) continue
+		if (night.aLinePushers.includes(i)) continue // purity broken
+		// Media Line mod: purity also breaks when the holder has an A-line
+		// campaign already on the board at settlement - placed this turn, its
+		// first push only happens tonight, so it escapes the aLinePushers check
+		if (store.campaigns.some((c) => c.number <= 27 && model.findPlayerForCampaign(c.number) === i)) continue
+
+		let total = 0
+		const groups = []
+		for (const g of Object.values(night.groups)) {
+			if (g.owner !== i || g.houses.length === 0) continue
+			const allEaten = g.houses.every((h) => sold.some((s) => s.house === h && s.playerIndex === i))
+			if (allEaten) {
+				total += g.houses.length * 10
+				groups.push([...g.houses].sort((a, b) => a - b))
+			}
+		}
+		if (total > 0) {
+			bonuses[i] = total
+			store.players[i].money += total
+			store.bank -= total
+			if (!replayOnly) model.addHistory(rf.HIST_MEDIA_LINE_BONUS, [i, total, groups], -1, 0)
+		}
+	}
+	return bonuses
 }
 
 export function doDinnerTime(replayOnly) {
@@ -1955,6 +2067,9 @@ export function doDinnerTime(replayOnly) {
 	finalizeMilestones(firstPizzas, possiblePizzaBomb)
 
 	// --- PHASE 3: CALCULATE FINAL EARNINGS & BONUSES ---
+	// Media Line mod: headlines published last working day shift every sale
+	// price city-wide tonight (city total clamped to +/-10; negative legal)
+	const headlineTotal = giveHeadlineTotal()
 	sold.forEach((sale) => {
 		const pIdx = sale.playerIndex
 		const p = store.players[pIdx]
@@ -1962,7 +2077,7 @@ export function doDinnerTime(replayOnly) {
 		if (model.hasGarden(sale.house)) multiplier++
 		if (model.adjacentToPark(sale.house)) multiplier++
 
-		let price = sale.needs.length * plyr.playersPrice(pIdx) * multiplier
+		let price = sale.needs.length * (plyr.playersPrice(pIdx) + headlineTotal) * multiplier
 		const bonus = plyr.playerBonus(pIdx, sale.needs)
 		price += bonus
 
@@ -1986,6 +2101,11 @@ export function doDinnerTime(replayOnly) {
 	sold.forEach((sale) => {
 		if (!replayOnly) giveSalesMilestones(sale.playerIndex, sale.needs)
 	})
+
+	// Media Line mod: stamp tonight's city-wide headline onto each SOLD house
+	// entry so the history view can show the price shift behind the earnings.
+	// No-sale entries stay length 2 - the consumer reads house[2] as providers
+	if (headlineTotal !== 0) for (const h of histoHouses) if (h.length > 2) h.push(headlineTotal)
 
 	if (!replayOnly) model.addHistory(rf.HIST_DINNER_TIME, histoHouses, -1, 0)
 
@@ -2011,11 +2131,13 @@ export function doDinnerTime(replayOnly) {
 	}
 
 	// --- PHASE 4: PAYOUTS & BANK BREAK ---
-	finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayOnly)
+	// Media Line mod: milestone 1 bonus (from the bank, outside sales income)
+	const mediaLineBonuses = settleMediaLineGroups(sold, replayOnly)
+	finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayOnly, mediaLineBonuses)
 
 }
 
-function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayOnly) {
+function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayOnly, mediaLineBonuses) {
 	const store = useModelStore()
 	const histoIncome = []
 	store.players.forEach((p, playerIndex) => {
@@ -2035,7 +2157,7 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 			const supplement = Math.ceil(total / 2)
 			total += supplement
 			hI.push(supplement)
-		}
+		} else if (store.startingOptions.mediaLine) hI.push(0)
 
 		// Coffee split (Coffee module only): pad the CFO slot so coffee income always
 		// lands at index 3. Old entries never have length 4, so the history reader can
@@ -2044,6 +2166,11 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 			while (hI.length < 3) hI.push(0)
 			hI.push(coffeeIncome)
 		}
+
+		// Media Line mod: milestone 1 bonus gets its own column in the income
+		// table, always LAST (index 3 without coffee, index 4 with it); the
+		// money itself was already paid in settleMediaLineGroups
+		if (store.startingOptions.mediaLine) hI.push(mediaLineBonuses?.[playerIndex] ?? 0)
 
 		histoIncome[playerIndex] = hI
 		p.money += total
@@ -2069,7 +2196,7 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 	})
 
 	if (!replayOnly) {
-		const hasInc = histoIncome.some((h) => h[0] > 0 || (Array.isArray(h[1]) ? h[1].some((v) => v > 0) : h[1] > 0))
+		const hasInc = histoIncome.some((h) => h[0] > 0 || (Array.isArray(h[1]) ? h[1].some((v) => v > 0) : h[1] > 0) || h[3] > 0)
 		model.addHistory(rf.HIST_INCOME, hasInc ? histoIncome : [], -1, 0)
 	}
 
@@ -2675,7 +2802,10 @@ export function housesAffectedByMarketingCampaign(campaign) {
 
 	// 1. Determine the affected area based on Campaign Type
 	switch (campaignData.type) {
-		case rf.BILLBOARD: {
+		case rf.BILLBOARD:
+		case rf.PHONE: {
+			// Media Line phone token: same rule as a billboard - every house
+			// touching the token footprint catches the call (typically 2).
 			let w = campaign.rotated ? campaignData.height : campaignData.width
 			let h = campaign.rotated ? campaignData.width : campaignData.height
 			// Get neighbors of the billboard's footprint
@@ -2728,6 +2858,12 @@ export function housesAffectedByMarketingCampaign(campaign) {
 		case rf.HAWKER_TRUCK:
 			model.getHousesAffectedByHawkerTruck(campaign.number).forEach((h) => affectedHouses.add(h))
 			break
+
+		case rf.TV_CHANNEL:
+			// Media Line mod - B3 affects exactly the houses the player picked
+			// inside the restaurant's diamond range (stored at placement time).
+			;(campaign.houses || []).forEach((h) => affectedHouses.add(h))
+			break
 	}
 
 	// 2. Identify houses within the affected area
@@ -2758,6 +2894,12 @@ export function housesAffectedByMarketingCampaign(campaign) {
 	return Array.from(affectedHouses)
 }
 
+// Media Line mod: the per-night accumulator for milestone 1 (First Telemarketer
+// Used, grouped all-eat bonus) lives in store.mediaLine.night. doMarketingCampaigns
+// fills it at payday (the pushes whose needs are matched at the NEXT turn's dinner)
+// and the next doDinnerTime consumes + resets it. It is part of the saved state so
+// a page reload between payday and dinner cannot silently drop the bonus.
+
 // PHASE_MARKETING_CAMPAIGNS -- fire off marketing campaigns
 // replayFinalPass: replay only. Live play repeats the whole phase once per Mass
 // Marketeer and only ticks campaign durations down on the last repeat. The replay
@@ -2777,8 +2919,9 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 
 	// Phase Loop (Runs once normally, or multiple times for Mass Marketers)
 	for (let mmLoop = totalMassMarketers; mmLoop >= 0; mmLoop--) {
-		// Sort campaigns by number
-		const sortedCampaigns = [...store.campaigns].sort((a, b) => a.number - b.number)
+		// Sort campaigns by number (Media Line mod: B-line campaigns use
+		// decimal sort keys so they interleave into the A-line order)
+		const sortedCampaigns = [...store.campaigns].sort((a, b) => campaignSortKey(a.number) - campaignSortKey(b.number))
 
 		const histObj = []
 		const earnedByPlayers = []
@@ -2791,12 +2934,31 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 			// the campaign still markets, just without a player attribution.
 			const isRadio = rf.MARKETING_CAMPAIGNS[campaign.number].type === rf.RADIO
 			const isAirplane = rf.MARKETING_CAMPAIGNS[campaign.number].type === rf.AIRPLANE
+			const isBLine = store.startingOptions.mediaLine && campaign.number >= 28 && campaign.number <= 35
+
+			// Media Line mod: nightly bookkeeping for the grouped all-eat bonus
+			if (store.startingOptions.mediaLine) {
+				const night = store.mediaLine.night
+				if (isBLine) {
+					if (!night.groups[campaign.number]) night.groups[campaign.number] = { owner: playerIndex, houses: [] }
+					else night.groups[campaign.number].owner = playerIndex
+				} else if (playerIndex !== -1) {
+					// The player's own A-line campaign ran tonight - breaks purity
+					if (!night.aLinePushers.includes(playerIndex)) night.aLinePushers.push(playerIndex)
+				}
+			}
 
 			let good1 = campaign.good
 			let good2 = -1
 
 			// Milestone: Radio double marketing
 			if (player !== -1 && plyr.hasMilestone(playerIndex, rf.FIRST_RADIO_CAMPAIGN) && isRadio) {
+				good2 = campaign.good
+			}
+
+			// Media Line mod: milestone 2 (First TV Announcer Used) - the holder's
+			// first TV campaign pushes 2 identical cards per house per night
+			if (store.startingOptions.mediaLine && campaign.number === store.mediaLine.doubleCampaign) {
 				good2 = campaign.good
 			}
 
@@ -2832,7 +2994,10 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 				}
 
 				// Standard Good 1
-				tryAddNeed(good1, h1)
+				if (tryAddNeed(good1, h1) && isBLine) {
+					const houseList = store.mediaLine.night.groups[campaign.number].houses
+					if (!houseList.includes(houseId)) houseList.push(houseId)
+				}
 
 				// Standard Good 2
 				if (h2) tryAddNeed(good2, h2)
@@ -2865,6 +3030,9 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 					for (let i = 0; i < store.players.length; i++) {
 						plyr.recallMarketeer(i, campaign.number)
 					}
+					// Media Line mod: the doubled campaign is gone - free the slot
+					// (the one-shot latch stays, doubling never repeats)
+					if (store.mediaLine.doubleCampaign === campaign.number) store.mediaLine.doubleCampaign = -1
 				} else if (campaign.duration < 9) {
 					campaign.duration--
 				}
@@ -3079,6 +3247,13 @@ export function giveMarketingMilestones(playerIndex, marketer) {
 		case rf.CAMPAIGN_MANAGER:
 			plyr.awardMilestone(playerIndex, rf.FIRST_MARKETEER_USED)
 			plyr.awardMilestone(playerIndex, rf.FIRST_CAMPAIGN_MANAGER_USED)
+			break
+		// Media Line mod
+		case rf.TELEMARKETER:
+			plyr.awardMilestone(playerIndex, rf.FIRST_TELEMARKETER_USED)
+			break
+		case rf.TV_ANNOUNCER:
+			plyr.awardMilestone(playerIndex, rf.FIRST_TV_ANNOUNCER_USED)
 			break
 		/*case BRAND_MANAGER:
                 model.giveMilestone(FIRST_MARKETEER_USED, player);

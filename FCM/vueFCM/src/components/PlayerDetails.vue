@@ -142,7 +142,9 @@ const resourceCounts = computed(() => {
 						<img v-if="rf.UNIQUE_CARDS.indexOf(emp) > -1" :src="view.getImage('icon1x')" class="iconsImg" />
 						<img v-else-if="rf.HIREABLE_EMPLOYEES.indexOf(emp) > -1" :src="view.getImage('iconRecruit')" class="iconsImg" />
 						<span v-else class="blankIcon">&nbsp;</span>
-						<img v-if="rf.getRangeForEmployee(emp) === 8" :src="view.getImage('iconRangeInfinite')" class="iconsImg iconMiddle" />
+						<img v-if="emp === rf.TELEMARKETER" :src="view.getImage('iconWaveRange1')" class="iconsImg iconMiddle" />
+						<img v-else-if="emp === rf.TV_ANNOUNCER" :src="view.getImage('iconWaveRange2')" class="iconsImg iconMiddle" />
+						<img v-else-if="rf.getRangeForEmployee(emp) === 8" :src="view.getImage('iconRangeInfinite')" class="iconsImg iconMiddle" />
 						<img v-else-if="rf.getRangeForEmployee(emp) >= 1" :src="view.getImage('iconRange' + rf.getRangeForEmployee(emp))" class="iconsImg iconMiddle" :class="{ fixedHeight: rf.getRangeType(emp) === 'road' }" />
 						<span v-else class="blankIcon iconMiddle">&nbsp;</span>
 						<img v-if="rf.REQUIRE_SALARY.indexOf(emp) > -1" :src="view.getImage('iconSalary')" class="iconsImg" />
@@ -167,7 +169,9 @@ const resourceCounts = computed(() => {
 						<img v-if="rf.UNIQUE_CARDS.indexOf(emp) > -1" :src="view.getImage('icon1x')" class="iconsImg" />
 						<img v-else-if="rf.HIREABLE_EMPLOYEES.indexOf(emp) > -1" :src="view.getImage('iconRecruit')" class="iconsImg" />
 						<span v-else class="blankIcon">&nbsp;</span>
-						<img v-if="rf.getRangeForEmployee(emp) === 8" :src="view.getImage('iconRangeInfinite')" class="iconsImg iconMiddle" />
+						<img v-if="emp === rf.TELEMARKETER" :src="view.getImage('iconWaveRange1')" class="iconsImg iconMiddle" />
+						<img v-else-if="emp === rf.TV_ANNOUNCER" :src="view.getImage('iconWaveRange2')" class="iconsImg iconMiddle" />
+						<img v-else-if="rf.getRangeForEmployee(emp) === 8" :src="view.getImage('iconRangeInfinite')" class="iconsImg iconMiddle" />
 						<img v-else-if="rf.getRangeForEmployee(emp) >= 1" :src="view.getImage('iconRange' + rf.getRangeForEmployee(emp))" class="iconsImg iconMiddle" :class="{ fixedHeight: rf.getRangeType(emp) === 'road' }" />
 						<span v-else class="blankIcon iconMiddle">&nbsp;</span>
 						<img v-if="rf.REQUIRE_SALARY.indexOf(emp) > -1" :src="view.getImage('iconSalary')" class="iconsImg" />
