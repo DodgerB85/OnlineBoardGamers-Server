@@ -1074,7 +1074,10 @@ describe("Media Line stage 5 - milestone 1 grouped all-eat bonus", () => {
 		// (this is exactly what a Ctrl+F5 does - fresh module state, saved game data)
 		const b64 = funcs.exportFCMmodel(false, false)
 		const decoded = JSON.parse(pako.ungzip(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { to: "string" }))
-		expect(decoded[decoded.length - 1].night.groups["28"]).toMatchObject({ owner: 0 })
+		const slot = decoded[decoded.length - 1]
+		expect(slot[0]).toBe(-rf.SO_MEDIA_LINE)
+		expect(slot[5][0]).toBe(28)
+		expect(slot[5][1]).toBe(0)
 
 		setActivePinia(createPinia())
 		const re = useModelStore()
@@ -1232,9 +1235,18 @@ describe("Media Line stage 6 - save / load round trip", () => {
 		store.mediaLine.headlines.push({ turn: 4, playerIndex: 0, value: 5 }, { turn: 4, playerIndex: 1, value: -5 })
 		store.mediaLine.doubleCampaign = 28
 		store.mediaLine.doubleUsed = true
+		store.mediaLine.night.groups[28] = { owner: 0, houses: [7, 1] }
+		store.mediaLine.night.aLinePushers.push(1)
 
 		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
-		expect(decoded[decoded.length - 1].headlines).toHaveLength(2)
+		const slot = decoded[decoded.length - 1]
+		// Compact tagged slot: [tag, version, headlinesFlat, doubleCampaign, doubleUsed, groupsFlat, aLinePushers]
+		expect(slot[0]).toBe(-rf.SO_MEDIA_LINE)
+		expect(slot[2]).toEqual([4, 0, 5, 4, 1, -5])
+		expect(slot[3]).toBe(28)
+		expect(slot[4]).toBe(1)
+		expect(slot[5]).toEqual([28, 0, 2, 7, 1])
+		expect(slot[6]).toEqual([1])
 
 		const restored = importInto(decoded)
 		const tv = restored.campaigns.find((c) => c.number === 28)
@@ -1250,6 +1262,41 @@ describe("Media Line stage 6 - save / load round trip", () => {
 		])
 		expect(restored.mediaLine.doubleCampaign).toBe(28)
 		expect(restored.mediaLine.doubleUsed).toBe(true)
+		expect(restored.mediaLine.night.groups[28]).toEqual({ owner: 0, houses: [7, 1] })
+		expect(restored.mediaLine.night.aLinePushers).toEqual([1])
+	})
+
+	it("prunes headlines older than the previous turn from the save slot", () => {
+		const store = seedMLGame() // turn 5
+		store.mediaLine.headlines.push({ turn: 3, playerIndex: 0, value: 5 }, { turn: 4, playerIndex: 1, value: -5 }, { turn: 5, playerIndex: 0, value: 5 })
+
+		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
+		const slot = decoded[decoded.length - 1]
+		expect(slot[2]).toEqual([4, 1, -5, 5, 0, 5])
+
+		const restored = importInto(decoded)
+		expect(restored.mediaLine.headlines).toEqual([
+			{ turn: 4, playerIndex: 1, value: -5 },
+			{ turn: 5, playerIndex: 0, value: 5 },
+		])
+	})
+
+	it("still loads the legacy verbose media line slot", () => {
+		seedMLGame()
+		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
+		decoded[decoded.length - 1] = {
+			headlines: [{ turn: 4, playerIndex: 0, value: 5 }],
+			doubleCampaign: 28,
+			doubleUsed: true,
+			night: { groups: { 29: { owner: 1, houses: [3, 2] } }, aLinePushers: [0] },
+		}
+
+		const restored = importInto(decoded)
+		expect(restored.mediaLine.headlines).toEqual([{ turn: 4, playerIndex: 0, value: 5 }])
+		expect(restored.mediaLine.doubleCampaign).toBe(28)
+		expect(restored.mediaLine.doubleUsed).toBe(true)
+		expect(restored.mediaLine.night.groups[29]).toEqual({ owner: 1, houses: [3, 2] })
+		expect(restored.mediaLine.night.aLinePushers).toEqual([0])
 	})
 
 	it("loads an older save without the media line slot using safe defaults", () => {
@@ -1270,7 +1317,7 @@ describe("Media Line stage 6 - save / load round trip", () => {
 	it("omits the slot when the module was not chosen", () => {
 		seedMLGame([])
 		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
-		expect(decoded[decoded.length - 1].headlines).toBeUndefined()
+		expect(decoded.some((el) => Array.isArray(el) && el[0] === -rf.SO_MEDIA_LINE)).toBe(false)
 	})
 
 	it("round-trips through the in-memory simple snapshot", () => {
@@ -1334,5 +1381,23 @@ describe("Media Line stage 6 - replay", () => {
 		store.gameflow.turn = 4
 		replay.replayPublishHeadline(0, 1, [5])
 		expect(store.mediaLine.headlines).toEqual([{ turn: 4, playerIndex: 1, value: 5 }])
+	})
+
+	it("uses the trailing chain marker so stacked telemarketers replay correctly", () => {
+		const store = freshGame(2, ["50"])
+		store.players[0].employees.push(rf.TELEMARKETER, rf.TELEMARKETER)
+		store.history.push([rf.HIST_HIRE, 0, 999, [1]])
+		store.history.push([rf.HIST_HIRE, 0, 1000, [1]])
+		const phoneIdx = mapMod.giveIndex(40, 39)
+		const wireIdx = funcs.exportIndex(phoneIdx)
+
+		// First token: no marker - moves one telemarketer to the market
+		replay.replayStartMarketingCampaign(1, 0, [30, wireIdx, rf.BURGER, 0, 2])
+		// Second token: flagged after the duration - hangs off the same employee
+		replay.replayStartMarketingCampaign(2, 0, [31, wireIdx, rf.BURGER, 0, 2, 1])
+
+		expect(store.players[0].marketers).toHaveLength(2)
+		// Only the first token consumed a bench copy; one stays available
+		expect(store.players[0].employees).toEqual([rf.TELEMARKETER])
 	})
 })

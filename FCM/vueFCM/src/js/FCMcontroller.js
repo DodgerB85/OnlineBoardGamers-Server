@@ -1438,6 +1438,9 @@ export function placeMarketingCampaign(index) {
 		if (store.context.campaign >= 4 && store.context.campaign <= 16) histObj.push(store.context.marketer)
 		if (rf.ROTATABLE_CAMPAIGNS.includes(store.context.campaign)) histObj.push(funcs.booleanToInt(store.context.rotated))
 		if (store.context.duration < 9) histObj.push(store.context.duration)
+		// Media Line mod: flag the chained second phone token so replay can tell
+		// it apart from a first placement even when Telemarketers are stacked
+		if (store.context.mediaLineSecondCall) histObj.push(1)
 
 		model.addHistory(rf.HIST_START_MARKETING_CAMPAIGN, [...histObj], playerIndex, 0)
 

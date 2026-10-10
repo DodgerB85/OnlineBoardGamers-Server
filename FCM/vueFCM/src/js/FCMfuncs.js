@@ -509,8 +509,10 @@ function padItemCounts(arr) {
 			15 - first pizzas (mid-game)
 			16 - reserve cards (mid-game)
 			17 - context (mid-game + includeContext)
-			18 - stadium (stadium module chosen)
-			19 - second bailout (module chosen, claim night open, mid-game)
+			18 - labor market (module chosen)
+			19 - stadium (module chosen)
+			20 - second bailout (module chosen, claim night open, mid-game)
+			21 - media line (module chosen)
 	 */
 
 export function exportFCMmodel(forGameOver, includeContext) {
@@ -692,8 +694,9 @@ export function exportFCMmodel(forGameOver, includeContext) {
 		temp.push([[...store.bailout.order], Object.entries(store.bailout.pool).flat().map(Number), Object.entries(store.bailout.claims).flat().map(Number)])
 	}
 
-	// 21 - Media Line mod (only when the module was chosen; shape-detected on load)
-	if (store.startingOptions.mediaLine) temp.push(JSON.parse(JSON.stringify(store.mediaLine)))
+	// Media Line mod (only when the module was chosen; shape-detected on load).
+	// Compact positional slot, tagged like the Labor Market one.
+	if (store.startingOptions.mediaLine) temp.push(exportMediaLineSlot())
 
 	let step1 = JSON.stringify(temp)
 	// eslint-disable-next-line no-undef
@@ -1247,15 +1250,41 @@ export function restoreBailoutState(inputArr, index = inputArr.length - 1, forGa
 	}
 }
 
-// Media Line mod wire slot: the full state object (headlines, doubleCampaign,
-// doubleUsed). Object shape-detected, so it cannot collide with the compact
-// Stadium/Bailout/Labor Market array slots that may trail older saves.
+// Media Line wire slot, two shapes (shape-detected so they cannot collide with
+// the compact Stadium/Bailout/Labor Market arrays):
+//   compact: [-SO_MEDIA_LINE, version, headlinesFlat, doubleCampaign, doubleUsed,
+//             groupsFlat, aLinePushers]
+//   legacy:  { headlines, doubleCampaign, doubleUsed, night }
 function isMediaLineSlot(el) {
+	if (Array.isArray(el)) return el.length >= 7 && el[0] === -rf.SO_MEDIA_LINE
 	return Boolean(el && typeof el === "object" && !Array.isArray(el) && Array.isArray(el.headlines))
 }
 
+// Media Line wire slot: compact positional array tagged with the negative option
+// code so it cannot collide with the Stadium/Bailout/Labor Market slots:
+//   [tag, version, headlinesFlat, doubleCampaign, doubleUsed, groupsFlat, aLinePushers]
+// Headlines are flat [turn, playerIndex, value, ...] and pruned to the current
+// and previous turn (only those can still affect quota or tonight's dinner).
+// Groups are flat [campaignNum, owner, houseCount, ...houses].
+export function exportMediaLineSlot() {
+	const store = useModelStore()
+	const ml = store.mediaLine
+	const minTurn = store.gameflow.turn - 1
+	const headlines = []
+	for (const h of ml.headlines) {
+		if (h.turn < minTurn) continue
+		headlines.push(h.turn, h.playerIndex, h.value)
+	}
+	const groups = []
+	for (const [num, g] of Object.entries(ml.night.groups)) {
+		groups.push(Number(num), g.owner, g.houses.length, ...g.houses)
+	}
+	return [-rf.SO_MEDIA_LINE, 1, headlines, ml.doubleCampaign, ml.doubleUsed ? 1 : 0, groups, [...ml.night.aLinePushers]]
+}
+
 // Reads the Media Line slot, scanning the whole save like the Labor Market one.
-// Always resets to defaults first so module-off games never leak state.
+// Always resets to defaults first so module-off games never leak state. Accepts
+// both the compact slot and the legacy verbose object.
 export function restoreMediaLineState(inputArr) {
 	const store = useModelStore()
 	store.mediaLine.headlines = []
@@ -1265,6 +1294,38 @@ export function restoreMediaLineState(inputArr) {
 	if (!store.startingOptions.mediaLine) return
 	const slot = [...(inputArr || [])].reverse().find(isMediaLineSlot)
 	if (!slot) return
+
+	if (Array.isArray(slot)) {
+		const flat = Array.isArray(slot[2]) ? slot[2] : []
+		for (let i = 0; i + 2 < flat.length; i += 3) {
+			const turn = flat[i]
+			const playerIndex = flat[i + 1]
+			const value = flat[i + 2]
+			if (Number.isInteger(turn) && Number.isInteger(playerIndex) && (value === 5 || value === -5)) {
+				store.mediaLine.headlines.push({ turn, playerIndex, value })
+			}
+		}
+		if (Number.isInteger(slot[3])) store.mediaLine.doubleCampaign = slot[3]
+		store.mediaLine.doubleUsed = slot[4] === 1
+		const groups = {}
+		const flatGroups = Array.isArray(slot[5]) ? slot[5] : []
+		let gi = 0
+		while (gi + 2 < flatGroups.length) {
+			const num = flatGroups[gi]
+			const owner = flatGroups[gi + 1]
+			const count = flatGroups[gi + 2]
+			const houses = flatGroups.slice(gi + 3, gi + 3 + count)
+			if (Number.isInteger(num) && Number.isInteger(owner) && Number.isInteger(count) && count >= 0 && houses.length === count && houses.every(Number.isInteger)) {
+				groups[num] = { owner, houses }
+			}
+			gi += 3 + count
+		}
+		const pushers = Array.isArray(slot[6]) ? slot[6].filter((x) => Number.isInteger(x)) : []
+		store.mediaLine.night = { groups, aLinePushers: pushers }
+		return
+	}
+
+	// Legacy verbose object
 	store.mediaLine.headlines = (slot.headlines || [])
 		.filter((h) => h && Number.isInteger(h.turn) && Number.isInteger(h.playerIndex) && (h.value === 5 || h.value === -5))
 		.map((h) => ({ turn: h.turn, playerIndex: h.playerIndex, value: h.value }))

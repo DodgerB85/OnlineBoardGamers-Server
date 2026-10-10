@@ -857,9 +857,11 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 	// campaign-history payload.
 	const temporaryCampaign = store.laborMarket.temporaryCampaignOwners[campaignNumber] === playerIndex
 	// Media Line mod: the second phone token of a telemarketer hangs off the
-	// same employee (live play used addCampaignToMarketer, no employee moved),
-	// so a phone campaign whose telemarketer already left the bench is one
-	const secondPhoneToken = isPhone && store.players[playerIndex].employees.indexOf(campaignEmployee) === -1
+	// same employee (live play used addCampaignToMarketer, no employee moved).
+	// New saves flag it explicitly after the duration; older saves fall back to
+	// "the telemarketer already left the bench" (only reliable with one copy).
+	const chainedPhone = isPhone && param.length > paramIdx + 1 && param[paramIdx + 1] === 1
+	const secondPhoneToken = isPhone && (chainedPhone || store.players[playerIndex].employees.indexOf(campaignEmployee) === -1)
 	if (!temporaryCampaign) {
 		if (restoMS || secondPhoneToken) plyr.addCampaignToMarketer(playerIndex, campaignEmployee, campaignNumber)
 		else plyr.sendPlayerMarketerToMarket(playerIndex, campaignEmployee, campaignNumber, false, false)

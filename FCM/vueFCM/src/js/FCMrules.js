@@ -2104,8 +2104,8 @@ export function doDinnerTime(replayOnly) {
 
 	// Media Line mod: stamp tonight's city-wide headline onto each SOLD house
 	// entry so the history view can show the price shift behind the earnings.
-	// No-sale entries stay length 2 - the consumer reads house[2] as providers
-	if (headlineTotal !== 0) for (const h of histoHouses) if (h.length > 2) h.push(headlineTotal)
+	// No-sale entries stay length 2; coffee blocks (array at index 0) are skipped
+	if (headlineTotal !== 0) for (const h of histoHouses) if (typeof h[0] === "number" && Array.isArray(h[2])) h.push(headlineTotal)
 
 	if (!replayOnly) model.addHistory(rf.HIST_DINNER_TIME, histoHouses, -1, 0)
 
