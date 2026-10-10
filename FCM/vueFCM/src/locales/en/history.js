@@ -109,9 +109,9 @@
     // Media Line mod
     tvAtHouses: "reaching house(s) {houses}",
     publishHeadline: "{name} publishes a headline:",
-    headlinePrime: "all prices +$5 next dinner",
-    headlinePress: "all prices -$5 next dinner",
-    mediaLineBonus: "{name} receives {amount} - full neighbourhoods ordered: {houses}",
+    headlinePrime: "all base prices +$5 next dinner",
+    headlinePress: "all base prices -$5 next dinner",
+    mediaLineBonus: "{name} sold out every targeted media house, earning ${amount}: houses {houses}",
 
     // Stadium mod
     stadiumAnnounce: "The stadium announces a game on turn {turn}: it will demand {units} \u00D7 {good}",
@@ -163,6 +163,7 @@
     apartmentGoesTo: "Apartment #{num} goes to {player} for ${amount}",
     ruralGoesTo: "Rural Area goes to {player} for ${amount}",
     basePriceItems: "Base price ${price} x {count} item.|Base price ${price} x {count} items.",
+    headlineApplied: "(includes tonight's headline {amount})",
     doubledGarden: "The base price is doubled, because the house has a garden.",
     doubledParkApartment: "The base price is doubled, because the apartment is adjacent to a park.",
     doubledParkHouse: "The base price is doubled, because the house is adjacent to a park.",
@@ -201,6 +202,7 @@
     // Income
     noIncome: "No income",
     incomeHeader: "Income",
+    mediaLineBonusHeader: "Media milestone",
     playerHeader: "Player",
     salesHeader: "Sales",
     cfoBonusHeader: "CFO bonus",

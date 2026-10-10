@@ -259,8 +259,9 @@ const computedProducers = computed(() => {
 </script>
 
 <template>
-	<!-- Media Line mod: free headline publication, available in every subphase -->
-	<div id="headlinePublishDiv" v-if="computedHeadlinesLeft > 0">
+	<!-- Media Line mod: free headline publication, only while the marketing
+	     employees are at work (the TV announcer's work moment) -->
+	<div id="headlinePublishDiv" v-if="computedHeadlinesLeft > 0 && store.gameflow.subphase === rf.SUBPHASE_MARKETING">
 		<p>{{ $t("workingDay.publishHeadline", { left: computedHeadlinesLeft }) }}</p>
 		<button class="actionsLineButton" @click="controller.publishHeadline(5)"><img :src="view.getImage('headline_prime')" class="headlineChoiceImg" alt="" /> {{ $t("workingDay.headlinePrime") }}</button>
 		<button class="actionsLineButton" @click="controller.publishHeadline(-5)"><img :src="view.getImage('headline_press')" class="headlineChoiceImg" alt="" /> {{ $t("workingDay.headlinePress") }}</button>
@@ -552,9 +553,9 @@ const computedProducers = computed(() => {
 				<p v-else>{{ $t("workingDay.chooseMarketingCampaign") }}</p>
 				<p v-if="!store.context.nightShift && !store.context.secondCampaignManager && controller.currentPlayerObj().employees.includes(rf.NIGHT_SHIFT_MANAGER) && store.context.marketer === rf.MARKETING_TRAINEE">{{ $t("workingDay.nightShiftMarketingTrainee") }}</p>
 
-				<AddItemBox v-if="!store.context.mediaLineSecondCall" :itemBeingAdded="rf.ITEM_BOX_CAMPAIGN" />
-				<!-- Media Line: the second phone token is locked to the first token's good and duration -->
-				<p v-else>{{ $t("workingDay.phoneTokenSameAsFirst") }}</p>
+				<AddItemBox :itemBeingAdded="rf.ITEM_BOX_CAMPAIGN" />
+				<!-- Media Line: the second phone token keeps the first token's good and duration -->
+				<p v-if="store.context.mediaLineSecondCall">{{ $t("workingDay.phoneTokenSameAsFirst") }}</p>
 
 				<!-- Hawker truck: route-based placement -->
 				<template v-if="store.context.campaign >= 25 && store.context.campaign <= 27">

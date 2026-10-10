@@ -155,87 +155,105 @@ describe("Media Line training chain", () => {
 })
 
 describe("Media Line geometry primitives", () => {
-	it("computes manhattan distance", () => {
+	it("builds the cross of 5 tiles around the door square's tile", () => {
 		freshGame(2, ["50"])
-		const a = mapMod.giveIndex(40, 40)
-		expect(mapMod.manhattanDistance(a, a)).toBe(0)
-		expect(mapMod.manhattanDistance(a, mapMod.giveIndex(41, 40))).toBe(1)
-		expect(mapMod.manhattanDistance(a, mapMod.giveIndex(41, 41))).toBe(2)
-		expect(mapMod.manhattanDistance(a, mapMod.giveIndex(38, 42))).toBe(4)
-	})
-
-	it("dilates a 2x2 footprint into the 4x4 nine-grid ring", () => {
-		freshGame(2, ["50"])
-		const footprint = [mapMod.giveIndex(40, 40), mapMod.giveIndex(41, 40), mapMod.giveIndex(40, 41), mapMod.giveIndex(41, 41)]
-		const area = mapMod.areaAroundFootprint(footprint, 1)
+		// restaurant (40,40) rotation 0 -> door on square (41,40), tile (8,8)
+		const door = [mapMod.giveIndex(41, 40)]
+		const region = mapMod.waveRegionSpaces(door, 1)
 		const expected = []
-		for (let x = 39; x <= 42; x++) {
-			for (let y = 39; y <= 42; y++) {
-				expected.push(mapMod.giveIndex(x, y))
+		// tiles (7,8) (8,8) (9,8) (8,7) (8,9), each contributing all 25 spaces
+		for (const [tx, ty] of [
+			[8, 8],
+			[7, 8],
+			[9, 8],
+			[8, 7],
+			[8, 9],
+		]) {
+			for (let y = 0; y < 5; y++) {
+				for (let x = 0; x < 5; x++) expected.push(mapMod.giveIndex(tx * 5 + x, ty * 5 + y))
 			}
 		}
-		expect(area.sort((a, b) => a - b)).toEqual(expected.sort((a, b) => a - b))
+		expect([...region].sort((a, b) => a - b)).toEqual(expected.sort((a, b) => a - b))
 	})
 
-	it("clips the dilation at the board edge", () => {
+	it("diamond range 2 covers 13 tiles and clips at the board edge", () => {
 		freshGame(2, ["50"])
-		const footprint = [mapMod.giveIndex(0, 0), mapMod.giveIndex(1, 0), mapMod.giveIndex(0, 1), mapMod.giveIndex(1, 1)]
-		const area = mapMod.areaAroundFootprint(footprint, 1)
-		expect(area).toHaveLength(9) // 3x3 clipped out of the 4x4 ring
-		expect(area).not.toContain(-1)
-		expect(area.every((i) => i >= 0)).toBe(true)
-	})
-
-	it("recognises buildings (houses and restaurants, not roads/gardens)", () => {
-		expect(mapMod.isBuildingValue(rf.HOUSE + 1)).toBe(true)
-		expect(mapMod.isBuildingValue(rf.HOUSE + 25)).toBe(true)
-		expect(mapMod.isBuildingValue(13.2)).toBe(true) // fractional apartment value
-		expect(mapMod.isBuildingValue(rf.RESTAURANT_OPEN + 3)).toBe(true)
-		expect(mapMod.isBuildingValue(rf.EMPTY_SPACE)).toBe(false)
-		expect(mapMod.isBuildingValue(rf.ROAD)).toBe(false)
-		expect(mapMod.isBuildingValue(rf.GARDEN)).toBe(false)
-		expect(mapMod.isBuildingValue(rf.OFF_BOARD)).toBe(false)
+		// door squares of restaurants at (42,42) and (1,1), both rotation 0
+		const centre = [mapMod.giveIndex(43, 42)]
+		expect(mapMod.waveRegionSpaces(centre, 2).size).toBe(13 * 25)
+		// corner restaurant: only the in-board part of the diamond remains
+		const corner = [mapMod.giveIndex(2, 1)]
+		expect(mapMod.waveRegionSpaces(corner, 2).size).toBe(6 * 25)
 	})
 })
 
 describe("Media Line B3 diamond range", () => {
+	// Restaurant (colour 0) x40-41, y40-41 sits on tile (8,8). Houses are
+	// stamped one per tile so the tile-space diamond decides membership.
 	function diamondBoard() {
 		const store = freshGame(2, ["50"])
 		const coords = blankCoords()
-		// restaurant (colour 0) x40-41, y40-41
 		stamp(coords, 40, 40, 2, 2, rf.RESTAURANT_OPEN)
-		// house 7 touching directly to the west: dist 1
-		stamp(coords, 38, 40, 2, 3, rf.HOUSE + 7)
-		// house 1 one space-gap east: dist 2
-		stamp(coords, 43, 39, 2, 3, rf.HOUSE + 1)
-		// house 4 diagonally touching at the corner: dist 2 (含对角)
+		// house 4 in the restaurant's own tile (8,8) - dist 0
 		stamp(coords, 42, 42, 2, 3, rf.HOUSE + 4)
-		// house 5 two spaces north: dist 2
-		stamp(coords, 40, 36, 2, 3, rf.HOUSE + 5)
-		// house 2 far away south-east: dist 5
-		stamp(coords, 43, 44, 2, 3, rf.HOUSE + 2)
-		// house 6 far away east: dist 5
-		stamp(coords, 46, 40, 2, 3, rf.HOUSE + 6)
-		// stadium space within dist 2 - marketing never affects it
-		coords[mapMod.giveIndex(39, 42)] = rf.HOUSE + rf.STADIUM
+		// house 1 east, tile (9,8) - dist 1
+		stamp(coords, 46, 42, 2, 3, rf.HOUSE + 1)
+		// house 5 south, tile (8,9) - dist 1
+		stamp(coords, 42, 47, 2, 3, rf.HOUSE + 5)
+		// house 6 far east, tile (10,8) - dist 2 (arm of the diamond)
+		stamp(coords, 51, 42, 2, 3, rf.HOUSE + 6)
+		// house 7 south-east, tile (9,9) - dist 2 (diagonal)
+		stamp(coords, 47, 47, 2, 3, rf.HOUSE + 7)
+		// house 2 beyond the arm, tile (11,8) - dist 3, out of range
+		stamp(coords, 56, 42, 2, 3, rf.HOUSE + 2)
+		// house 3 diagonal corner, tile (10,10) - dist 4, out of range
+		stamp(coords, 52, 52, 2, 3, rf.HOUSE + 3)
+		// stadium space inside the restaurant tile - marketing never affects it
+		coords[mapMod.giveIndex(44, 44)] = rf.HOUSE + rf.STADIUM
 		store.mapData.coords = coords
 		store.players[0].restaurants = [{ index: mapMod.giveIndex(40, 40), rotation: 0, open: true }]
 		return store
 	}
 
-	it("selects houses within manhattan distance 2, diagonals included", () => {
+	it("selects houses inside the 13-tile diamond, arms and diagonals included", () => {
 		diamondBoard()
-		expect(model.giveHousesInWaveRange(0, 2)).toEqual([1, 4, 5, 7])
+		expect(model.giveHousesInWaveRange(0, 2)).toEqual([1, 4, 5, 6, 7])
 	})
 
-	it("cross only (distance 1) keeps just the touching house", () => {
+	it("cross only (tile distance 1) keeps the own and orthogonal tiles", () => {
 		diamondBoard()
-		expect(model.giveHousesInWaveRange(0, 1)).toEqual([7])
+		expect(model.giveHousesInWaveRange(0, 1)).toEqual([1, 4, 5])
 	})
 
 	it("excludes the stadium even when in range", () => {
 		diamondBoard()
 		expect(model.giveHousesInWaveRange(0, 2)).not.toContain(rf.STADIUM)
+	})
+
+	it("a straddling restaurant waves only from its door tile", () => {
+		// 2x2 restaurant at x39-40 y39-40 straddles tiles (7,7)(8,7)(7,8)(8,8);
+		// rotation 0 puts the door on square (40,39) -> tile (8,7)
+		const store = freshGame(2, ["50"])
+		const coords = blankCoords()
+		stamp(coords, 39, 39, 2, 2, rf.RESTAURANT_OPEN)
+		// house 8 on tile (6,8): distance 3 from the door tile (out), distance 1
+		// from the south-west footprint tile (7,8) - the door rule excludes it
+		stamp(coords, 30, 40, 2, 3, rf.HOUSE + 8)
+		store.mapData.coords = coords
+		store.players[0].restaurants = [{ index: mapMod.giveIndex(39, 39), rotation: 0, open: true }]
+		expect(model.giveHousesInWaveRange(0, 2)).toEqual([])
+	})
+
+	it("a Local Manager opens all four corners as doors", () => {
+		const store = freshGame(2, ["50"])
+		const coords = blankCoords()
+		stamp(coords, 39, 39, 2, 2, rf.RESTAURANT_OPEN)
+		stamp(coords, 30, 40, 2, 3, rf.HOUSE + 8)
+		store.mapData.coords = coords
+		store.players[0].restaurants = [{ index: mapMod.giveIndex(39, 39), rotation: 0, open: true }]
+		store.players[0].employees.push(rf.LOCAL_MANAGER)
+		// the south-west door corner (39,40) -> tile (7,8) reaches house 8
+		expect(model.giveHousesInWaveRange(0, 2)).toEqual([8])
 	})
 })
 
@@ -251,26 +269,45 @@ describe("Media Line B2 phone token placement", () => {
 		return store
 	}
 
-	it("allows 2x1 pairs on empty ring cells that touch the restaurant block", () => {
+	it("allows any empty 2x1 pair anchored inside the cross of 5 tiles", () => {
 		phoneBoard(false)
 		const positions = rules.givePossiblePositionsForMarketingCampaign(rf.TELEMARKETER, 30, false)
-		expect(positions.sort((a, b) => a - b)).toEqual([mapMod.giveIndex(40, 39), mapMod.giveIndex(40, 42)])
+		// deep inside the west tile (7,8)
+		expect(positions).toContain(mapMod.giveIndex(37, 41))
+		// straddling the boundary between the west and centre tiles
+		expect(positions).toContain(mapMod.giveIndex(39, 43))
+		// anchored on the cross edge - the second cell may sit in the next tile
+		expect(positions).toContain(mapMod.giveIndex(49, 43))
+		// the diagonally adjacent tile (7,7) is not part of the cross
+		expect(positions).not.toContain(mapMod.giveIndex(37, 37))
+		// two tiles west (6,8) is beyond the cross
+		expect(positions).not.toContain(mapMod.giveIndex(33, 41))
+		// the restaurant block itself is not empty ground
+		expect(positions).not.toContain(mapMod.giveIndex(40, 40))
+		// an anchor outside the cross does not become valid by reaching in
+		expect(positions).not.toContain(mapMod.giveIndex(50, 43))
 	})
 
-	it("rotated tokens run vertically along the block sides", () => {
+	it("rotated tokens run vertically anywhere in the cross", () => {
 		phoneBoard(false)
 		const positions = rules.givePossiblePositionsForMarketingCampaign(rf.TELEMARKETER, 30, true)
-		expect(positions.sort((a, b) => a - b)).toEqual([mapMod.giveIndex(39, 40), mapMod.giveIndex(42, 40)])
+		// vertical pair inside the north tile (8,7)
+		expect(positions).toContain(mapMod.giveIndex(41, 37))
+		// vertical pair inside the west tile (7,8)
+		expect(positions).toContain(mapMod.giveIndex(37, 41))
+		// anchored on the top row of the north tile pokes into the tile above
+		expect(positions).toContain(mapMod.giveIndex(41, 35))
+		// diagonal tile (7,7) again excluded
+		expect(positions).not.toContain(mapMod.giveIndex(37, 37))
 	})
 
-	it("house-occupied ring cells are not placeable, house walls count as buildings", () => {
+	it("house-occupied cells inside the cross are not placeable", () => {
 		phoneBoard(true)
-		const positions = rules.givePossiblePositionsForMarketingCampaign(rf.TELEMARKETER, 30, true)
-		// the west column (39,40)-(39,41) is now covered by house 7's spaces
-		expect(positions).toEqual([mapMod.giveIndex(42, 40)])
 		const flat = rules.givePossiblePositionsForMarketingCampaign(rf.TELEMARKETER, 30, false)
-		// the corner cell (39,39) qualifies via house 7's wall next to it
-		expect(flat.sort((a, b) => a - b)).toEqual([mapMod.giveIndex(39, 39), mapMod.giveIndex(40, 39), mapMod.giveIndex(40, 42)])
+		// house 7 covers x38-39 y40-42 in the west tile - anchors overlapping
+		// its cells are gone, empty ground west of it stays available
+		expect(flat).not.toContain(mapMod.giveIndex(38, 40))
+		expect(flat).toContain(mapMod.giveIndex(36, 40))
 	})
 })
 
@@ -297,8 +334,9 @@ describe("Media Line affected houses", () => {
 describe("Media Line stage 3 - campaign allowances", () => {
 	it("maps employees to campaign types and durations", () => {
 		freshGame(2, ["50"])
-		expect(rules.allowedCampaigns(rf.TELEMARKETER)).toEqual([rf.PHONE])
-		expect(rules.allowedCampaigns(rf.TV_ANNOUNCER)).toEqual([rf.TV_CHANNEL])
+		expect(rules.allowedCampaigns(rf.TELEMARKETER)).toEqual([rf.BILLBOARD, rf.PHONE])
+		expect(rules.allowedCampaigns(rf.TV_ANNOUNCER)).toEqual([rf.BILLBOARD, rf.PHONE, rf.TV_CHANNEL])
+		expect(rules.allowedCampaigns(rf.BRAND_DIRECTOR)).toEqual([rf.BILLBOARD, rf.MAIL, rf.AIRPLANE, rf.RADIO, rf.PHONE, rf.TV_CHANNEL])
 		expect(rules.giveMaxDurationForMarketer(rf.TELEMARKETER)).toBe(3)
 		expect(rules.giveMaxDurationForMarketer(rf.TV_ANNOUNCER)).toBe(4)
 	})
@@ -306,7 +344,8 @@ describe("Media Line stage 3 - campaign allowances", () => {
 	it("offers the matching pool slots", () => {
 		freshGame(2, ["50"])
 		expect(rules.possibleMarketingCampaigns([1, 2, 28, 29, 30, 31], rf.TELEMARKETER)).toEqual([30, 31])
-		expect(rules.possibleMarketingCampaigns([1, 2, 28, 29, 30, 31], rf.TV_ANNOUNCER)).toEqual([28, 29])
+		expect(rules.possibleMarketingCampaigns([1, 2, 28, 29, 30, 31], rf.TV_ANNOUNCER)).toEqual([28, 29, 30, 31])
+		expect(rules.possibleMarketingCampaigns([1, 2, 28, 29, 30, 31], rf.BRAND_DIRECTOR)).toEqual([1, 2, 28, 29, 30, 31])
 	})
 
 	it("phone and TV campaigns are never infinite, even with the billboard milestone", () => {
@@ -351,7 +390,9 @@ describe("Media Line stage 3 - phone token action", () => {
 	it("chains a second identical token and locks its good and duration", () => {
 		const store = phoneActionBoard()
 		controller.selectMarketer(rf.TELEMARKETER, false)
-		expect(store.context.campaigns).toEqual([30])
+		// All campaign cards, ordered by the number printed on them: the six
+		// phone cards (6.5-8.6) come before the higher-numbered billboards
+		expect(store.context.campaigns).toEqual([30, 31, 32, 33, 34, 35, 11, 13, 14])
 		expect(store.context.campaign).toBe(30)
 		expect(store.context.duration).toBe(1)
 
@@ -359,8 +400,10 @@ describe("Media Line stage 3 - phone token action", () => {
 		controller.chooseDuration(2)
 		controller.placeMarketingCampaign(mapMod.giveIndex(40, 39))
 
-		// First token placed, second-token chain armed
+		// First token placed, second-token chain armed with the remaining
+		// phone cards to choose from (default: the first one)
 		expect(store.context.mediaLineSecondCall).toBe(true)
+		expect(store.context.campaigns).toEqual([31, 32, 33, 34, 35])
 		expect(store.context.campaign).toBe(31)
 		expect(store.context.duration).toBe(2)
 		expect(store.context.good).toBe(1)
@@ -371,12 +414,16 @@ describe("Media Line stage 3 - phone token action", () => {
 		expect(store.players[0].marketers[0]).toEqual({ campaign: 30, marketer: rf.TELEMARKETER, nightShift: false })
 		expect(store.players[0].milestones).toContain(rf.FIRST_TELEMARKETER_USED)
 
+		// The player may spend a different numbered card on the second token
+		controller.chooseCampaign(33)
+
 		// Second token: same good and duration, hanging off the same telemarketer
 		controller.placeMarketingCampaign(mapMod.giveIndex(40, 42))
 
 		expect(store.context.mediaLineSecondCall).toBe(false)
 		expect(store.campaigns).toHaveLength(2)
-		expect(store.campaigns[1]).toMatchObject({ number: 31, good: 1, duration: 2 })
+		expect(store.campaigns[1]).toMatchObject({ number: 33, good: 1, duration: 2 })
+		expect(store.availableMarketingCampaigns).not.toContain(33)
 		expect(store.players[0].marketers).toHaveLength(2)
 		expect(store.players[0].marketers[1].marketer).toBe(rf.TELEMARKETER)
 		expect(store.players[0].additionalCampaignArrayIndex).toBe(1)
@@ -385,11 +432,28 @@ describe("Media Line stage 3 - phone token action", () => {
 	it("can finish the action with a single token", () => {
 		const store = phoneActionBoard()
 		controller.selectMarketer(rf.TELEMARKETER, false)
+		controller.chooseCampaign(30)
 		controller.placeMarketingCampaign(mapMod.giveIndex(40, 39))
 		expect(store.context.mediaLineSecondCall).toBe(true)
 		controller.resetMarketingSelection()
 		expect(store.campaigns).toHaveLength(1)
 		expect(store.context.marketer).toBe(-1)
+	})
+
+	it("TV announcer placing a phone token does not chain a second one", () => {
+		const store = phoneActionBoard()
+		store.players[0].employees.push(rf.TV_ANNOUNCER)
+		controller.selectMarketer(rf.TV_ANNOUNCER, false)
+		controller.chooseCampaign(30)
+		controller.chooseGood(1)
+		controller.chooseDuration(2)
+		controller.placeMarketingCampaign(mapMod.giveIndex(40, 39))
+
+		// Only the telemarketer chains - the announcer's action is done
+		expect(store.context.mediaLineSecondCall).toBe(false)
+		expect(store.campaigns).toHaveLength(1)
+		expect(store.campaigns[0]).toMatchObject({ number: 30, good: 1, duration: 2 })
+		expect(store.players[0].marketers).toEqual([{ campaign: 30, marketer: rf.TV_ANNOUNCER, nightShift: false }])
 	})
 })
 
@@ -416,6 +480,7 @@ describe("Media Line stage 3 - TV channel action", () => {
 	it("picks 5 of 6 houses, caps at 5, and places without a board token", () => {
 		const store = tvActionBoard()
 		controller.selectMarketer(rf.TV_ANNOUNCER, false)
+		controller.chooseCampaign(28)
 		expect(store.context.campaign).toBe(28)
 		// All 6 candidate houses are clickable (6 spaces each)
 		expect(store.highlights.indexesToHighlightYellow).toHaveLength(36)
@@ -456,6 +521,18 @@ describe("Media Line stage 3 - TV channel action", () => {
 		expect(store.mapData.coords.some((v) => v === rf.MARKETING + 28)).toBe(false)
 	})
 
+	it("an on-campaign TV announcer keeps his nightly headline", () => {
+		const store = tvActionBoard()
+		// The announcer has been moved from employees onto campaign duty
+		store.players[0].employees = store.players[0].employees.filter((e) => e !== rf.TV_ANNOUNCER)
+		store.players[0].marketers.push({ campaign: 28, marketer: rf.TV_ANNOUNCER, nightShift: false })
+
+		expect(controller.mediaLineHeadlinesLeft(0)).toBe(1)
+		controller.publishHeadline(5)
+		expect(store.mediaLine.headlines).toHaveLength(1)
+		expect(controller.mediaLineHeadlinesLeft(0)).toBe(0)
+	})
+
 	it("completes with all houses when fewer than 5 are in range", () => {
 		const store = freshGame(2, ["50"])
 		const coords = blankCoords()
@@ -468,6 +545,7 @@ describe("Media Line stage 3 - TV channel action", () => {
 		store.players[0].restaurants = [{ index: mapMod.giveIndex(40, 40), rotation: 0, open: true }]
 		store.players[0].employees.push(rf.TV_ANNOUNCER)
 		controller.selectMarketer(rf.TV_ANNOUNCER, false)
+		controller.chooseCampaign(28)
 		expect(controller.tvSelectionComplete()).toBe(false)
 		for (const h of [7, 1, 4, 5]) controller.toggleTVHouseSelection(mapMod.findIndexForHouse(h))
 		expect(controller.tvSelectionComplete()).toBe(true)
@@ -603,6 +681,50 @@ describe("Media Line stage 4 - headline in dinner settlement", () => {
 		expect(store.players[0].money - moneyBefore).toBe(15)
 	})
 
+	it("stamps the headline at the option-dependent index in the dinner history entry", () => {
+		// fryChefs OFF (game #24 layout): [id, needs, winners, bonus, bits, headline]
+		const store = dinnerFreshGame()
+		placeAndFeed(store)
+		store.mediaLine.headlines.push({ turn: store.gameflow.turn - 1, playerIndex: 0, value: 5 })
+		rules.doDinnerTime(false)
+		const houseOff = store.history.find((e) => e[0] === rf.HIST_DINNER_TIME)[3][0]
+		expect(houseOff.length).toBe(6)
+		expect(houseOff[5]).toBe(5) // headline sits at index 5 when fryChefs is off
+
+		// fryChefs ON: chef count takes index 5, headline shifts to index 6
+		const store2 = dinnerFreshGame()
+		placeAndFeed(store2)
+		store2.startingOptions.fryChefs = true
+		store2.mediaLine.headlines.push({ turn: store2.gameflow.turn - 1, playerIndex: 0, value: 5 })
+		rules.doDinnerTime(false)
+		const houseOn = store2.history.find((e) => e[0] === rf.HIST_DINNER_TIME)[3][0]
+		expect(houseOn.length).toBe(7)
+		expect(houseOn[5]).toBe(0) // fry chef count (none used)
+		expect(houseOn[6]).toBe(5) // headline sits at index 6 when fryChefs is on
+	})
+
+	it("an unsold house keeps its length-2 entry (headline stamps sold houses only)", () => {
+		const store = dinnerFreshGame()
+		placeAndFeed(store)
+		// another board house demanding lemonade - player 0 only has burgers,
+		// so nobody sells regardless of restaurant range (deterministic no-sale)
+		let farHouse = -1
+		for (const h of rf.BOARD_HOUSES) {
+			if (h !== store.houseUnderTest && mapMod.findIndexForHouse(h) >= 0) {
+				farHouse = h
+				break
+			}
+		}
+		expect(farHouse).toBeGreaterThan(-1)
+		store.needs.push({ number: farHouse, needs: [[rf.LEMONADE, -1]] })
+		store.mediaLine.headlines.push({ turn: store.gameflow.turn - 1, playerIndex: 0, value: 5 })
+		rules.doDinnerTime(false)
+		const houses = store.history.find((e) => e[0] === rf.HIST_DINNER_TIME)[3]
+		const unsold = houses.find((hh) => hh[0] === farHouse)
+		// no providers and no headline - length-2 no-sale entry
+		expect(unsold.length).toBe(2)
+	})
+
 	it("without headlines the price stays at the menu price", () => {
 		const store = dinnerFreshGame()
 		placeAndFeed(store)
@@ -632,13 +754,13 @@ describe("Media Line stage 5 - serpentine campaign order", () => {
 		// TV channels slot between radio and airplanes
 		expect(rules.campaignSortKey(28)).toBe(3.5)
 		expect(rules.campaignSortKey(29)).toBe(4.5)
-		// Phone tokens interleave between the mailboxes
+		// Phone tokens pair up after radio 6/7/8: 6.5/6.6, 7.5/7.6, 8.5/8.6
 		expect(rules.campaignSortKey(30)).toBe(6.5)
-		expect(rules.campaignSortKey(31)).toBe(7.5)
-		expect(rules.campaignSortKey(32)).toBe(8.5)
-		expect(rules.campaignSortKey(33)).toBe(9.5)
-		expect(rules.campaignSortKey(34)).toBe(10.5)
-		expect(rules.campaignSortKey(35)).toBe(10.6)
+		expect(rules.campaignSortKey(31)).toBe(6.6)
+		expect(rules.campaignSortKey(32)).toBe(7.5)
+		expect(rules.campaignSortKey(33)).toBe(7.6)
+		expect(rules.campaignSortKey(34)).toBe(8.5)
+		expect(rules.campaignSortKey(35)).toBe(8.6)
 	})
 
 	it("interleaves B-line pushes into the A-line order", () => {
@@ -789,20 +911,36 @@ describe("Media Line stage 5 - milestone 1 grouped all-eat bonus", () => {
 
 		// The holder also owns a lingering billboard campaign in open country:
 		// billboards only reach houses touching the token, so this one pushes
-		// nothing - purity is about owning a running A-line campaign at all
-		const quiet = store.mapData.coords.findIndex((v, i) => {
-			if (v !== rf.EMPTY_SPACE) return false
-			const x = i % rf.ssW
-			const y = Math.floor(i / rf.ssW)
-			for (let dy = -2; dy <= 2; dy++) {
-				for (let dx = -2; dx <= 2; dx++) {
-					const t = store.mapData.coords[mapMod.giveIndex(x + dx, y + dy)]
-					if (t === undefined || (t > rf.HOUSE && t < rf.HOUSE + 29)) return false
-				}
+		// nothing - purity is about owning a running A-line campaign at all.
+		// Deterministic quiet spot: the empty cell farthest (Manhattan) from
+		// every target house, with every other house touching the token
+		// footprint stamped to EMPTY (houses are not roads, so target-house
+		// servability computed above is unaffected on any random map).
+		const targetIdx = houses.map((h) => mapMod.findIndexForHouse(h))
+		let quiet = -1
+		let bestDist = -1
+		for (let i = 0; i < store.mapData.coords.length; i++) {
+			if (store.mapData.coords[i] !== rf.EMPTY_SPACE) continue
+			const [x, y] = mapMod.giveCoord(i)
+			let d = Infinity
+			for (const t of targetIdx) {
+				const [tx, ty] = mapMod.giveCoord(t)
+				d = Math.min(d, Math.abs(x - tx) + Math.abs(y - ty))
 			}
-			return true
-		})
-		expect(quiet).toBeGreaterThan(-1)
+			if (d > bestDist) {
+				bestDist = d
+				quiet = i
+			}
+		}
+		expect(bestDist).toBeGreaterThanOrEqual(3)
+		const stampHouses = (cells) => {
+			for (const c of cells) {
+				const v = store.mapData.coords[c]
+				if (v > rf.HOUSE && v < rf.HOUSE + 29 && !targetIdx.includes(c)) store.mapData.coords[c] = rf.EMPTY_SPACE
+			}
+		}
+		const footprint = mapMod.giveAllSpaceForAToken(quiet, 2, 1)
+		stampHouses([...footprint, ...mapMod.neighbours(footprint)])
 		store.campaigns.push({ number: 11, index: quiet, rotated: false, good: rf.PIZZA, duration: 9, houses: [] })
 		store.players[0].marketers.push({ campaign: 11, marketer: -1, nightShift: false })
 
@@ -814,6 +952,29 @@ describe("Media Line stage 5 - milestone 1 grouped all-eat bonus", () => {
 		const before = store.players[0].money
 		rules.doDinnerTime(false)
 		// Sales only - purity broken by the own mailbox campaign
+		expect(store.players[0].money - before).toBe(50)
+		expect(store.history.some((h) => h[0] === rf.HIST_MEDIA_LINE_BONUS)).toBe(false)
+	})
+
+	it("an A-line campaign placed this turn (first push only tonight) breaks purity", () => {
+		const store = nightBoard()
+		const houses = ensureServable(store, 5).slice(0, 5)
+		expect(houses).toHaveLength(5)
+
+		model.addMarketingCampaign(28, -1, false, rf.BURGER, 9, houses)
+		store.players[0].marketers.push({ campaign: 28, marketer: rf.TV_ANNOUNCER, nightShift: false })
+		store.players[0].milestones.push(rf.FIRST_TELEMARKETER_USED)
+
+		rules.doMarketingCampaigns(false) // B-line fires, groups armed
+		// The holder now launches an A-line campaign for the coming night: it is
+		// on the board at settlement but has not pushed anything yet
+		store.campaigns.push({ number: 5, index: -1, rotated: false, good: rf.PIZZA, duration: 4, houses: [] })
+		store.players[0].marketers.push({ campaign: 5, marketer: -1, nightShift: false })
+
+		store.players[0].resources = Array(5).fill(rf.BURGER)
+		const before = store.players[0].money
+		rules.doDinnerTime(false)
+		// Sales only - purity broken by the freshly placed A-line campaign
 		expect(store.players[0].money - before).toBe(50)
 		expect(store.history.some((h) => h[0] === rf.HIST_MEDIA_LINE_BONUS)).toBe(false)
 	})
@@ -877,6 +1038,47 @@ describe("Media Line stage 5 - milestone 1 grouped all-eat bonus", () => {
 		const bonusEntry = store.history.find((h) => h[0] === rf.HIST_MEDIA_LINE_BONUS)
 		expect(bonusEntry[3][1]).toBe(40)
 	})
+
+	it("a page reload between payday and dinner keeps the pending bonus (night is saved state)", () => {
+		// Fixed map so the reload rebuilds the exact same board (importFCMmodel
+		// regenerates the map from initData.startingMap, not from gameData)
+		const TEST_MAP = []
+		for (let i = 0; i < 16; i++) TEST_MAP.push(i, 0)
+
+		const store = nightBoard()
+		store.mapData.tiles = mapMod.expandMapToFullGrid(TEST_MAP, 4)
+		mapMod.initCoords()
+		const houses = ensureServable(store, 5).slice(0, 5)
+		expect(houses).toHaveLength(5)
+
+		model.addMarketingCampaign(28, -1, false, rf.BURGER, 9, houses)
+		store.players[0].marketers.push({ campaign: 28, marketer: rf.TV_ANNOUNCER, nightShift: false })
+		store.players[0].milestones.push(rf.FIRST_TELEMARKETER_USED)
+
+		rules.doMarketingCampaigns(false)
+		expect(store.mediaLine.night.groups[28]).toMatchObject({ owner: 0, houses: expect.arrayContaining(houses) })
+
+		// Simulate the reload: round-trip the full state through the wire format
+		// (this is exactly what a Ctrl+F5 does - fresh module state, saved game data)
+		const b64 = funcs.exportFCMmodel(false, false)
+		const decoded = JSON.parse(pako.ungzip(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { to: "string" }))
+		expect(decoded[decoded.length - 1].night.groups["28"]).toMatchObject({ owner: 0 })
+
+		setActivePinia(createPinia())
+		const re = useModelStore()
+		globalThis.window.initData = { startingOptions: ["50"], startingMap: TEST_MAP, playerNames: ["P0", "P1", "P2", "P3"] }
+		const encoded = btoa(String.fromCharCode(...new Uint8Array(pako.gzip(JSON.stringify(decoded)))))
+		expect(funcs.importFCMmodel(encoded, false, false)).not.toBe(-9999)
+		expect(re.mediaLine.night.groups[28]).toMatchObject({ owner: 0, houses: expect.arrayContaining(houses) })
+
+		re.players[0].resources = Array(5).fill(rf.BURGER)
+		const before = re.players[0].money
+		rules.doDinnerTime(false)
+		// 5 sales x $10 + all-eat bonus 5 houses x $10 - still paid after the reload
+		expect(re.players[0].money - before).toBe(100)
+		const bonusEntry = re.history.find((h) => h[0] === rf.HIST_MEDIA_LINE_BONUS)
+		expect(bonusEntry[3][1]).toBe(50)
+	})
 })
 
 describe("Media Line stage 5 - milestone 2 first-campaign double", () => {
@@ -899,6 +1101,7 @@ describe("Media Line stage 5 - milestone 2 first-campaign double", () => {
 	it("latches on the holder's first TV placement and never again", () => {
 		const store = tvBoard()
 		controller.selectMarketer(rf.TV_ANNOUNCER, false)
+		controller.chooseCampaign(28)
 		for (const h of [7, 1, 5, 2, 4]) controller.toggleTVHouseSelection(mapMod.findIndexForHouse(h))
 		controller.chooseGood(2)
 		controller.chooseDuration(3)
@@ -911,6 +1114,7 @@ describe("Media Line stage 5 - milestone 2 first-campaign double", () => {
 		// A second channel placement by the same holder does not re-latch
 		store.players[0].employees.push(rf.TV_ANNOUNCER)
 		controller.selectMarketer(rf.TV_ANNOUNCER, false)
+		controller.chooseCampaign(28)
 		for (const h of [7, 1, 5, 2, 4]) controller.toggleTVHouseSelection(mapMod.findIndexForHouse(h))
 		controller.chooseGood(2)
 		controller.chooseDuration(3)

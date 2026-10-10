@@ -165,10 +165,14 @@ export const useModelStore = defineStore("store", () => {
 	// Milestone 2 (First TV Announcer Used): doubleCampaign is the one campaign
 	// of the holder's that pushes 2 cards per house per night; doubleUsed is the
 	// one-shot latch (the reward applies to the holder's first TV campaign only).
+	// Milestone 1 (First Telemarketer Used) needs the per-night accumulator in
+	// the saved state: campaigns register their groups at payday, dinner settles
+	// them a turn later - a page reload in between must not lose the bonus.
 	const mediaLine = reactive({
 		headlines: [], // { turn, playerIndex, value } with value +5 / -5
 		doubleCampaign: -1,
 		doubleUsed: false,
+		night: { groups: {}, aLinePushers: [] }, // campaign num -> { owner, houses[] }; players whose own A-line campaigns ran
 	})
 
 	/*************************************** UNSAVED - TEMP VARS -- these do not need to be stored or saved */

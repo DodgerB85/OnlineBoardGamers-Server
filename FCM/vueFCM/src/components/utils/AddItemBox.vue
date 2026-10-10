@@ -379,8 +379,8 @@ function flipLobbyist(vertical) {
 				<img v-for="campaign in store.context.campaigns" :key="campaign" :src="view.getImage(`campaign_${campaign}`)" class="selectable campaignChoiceImg" :class="{ selectedChoice: store.context.campaign === campaign }" :style="campaignChoiceStyle(campaign)" @click="controller.chooseCampaign(campaign)" :alt="campaign" />
 			</div>
 
-			<!-- Main good -->
-			<div class="addBoxSection">
+			<!-- Main good (Media Line: locked to the first token during the second phone call) -->
+			<div v-if="!store.context.mediaLineSecondCall" class="addBoxSection">
 				<img v-for="good in mainGoodChoices" :key="good" :src="view.getImage(`item_${good}`)" class="goodChoiceImg" :class="{ selectedGoodImg: store.context.good === good }" @click="controller.chooseGood(good)" :alt="good" />
 			</div>
 
@@ -390,8 +390,8 @@ function flipLobbyist(vertical) {
 				<button class="boxRefuseSecondButton" :class="{ selectedDurationButton: store.context.secondGood === -1 }" @click="controller.chooseSecondGood(-1)">{{ $t("items.none") }}</button>
 			</div>
 
-			<!-- Duration -->
-			<div class="addBoxSection durationSection">
+			<!-- Duration (Media Line: locked to the first token during the second phone call) -->
+			<div v-if="!store.context.mediaLineSecondCall" class="addBoxSection durationSection">
 				<span>{{ $t("items.duration") }}</span>
 				<!-- When infinite, ONLY the always-selected infinite button shows, with no hover highlight -->
 				<button v-if="controller.campaignDurationInfinite()" class="durationButton infiniteDurationButton selectedDurationButton">&infin;</button>

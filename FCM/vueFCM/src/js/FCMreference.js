@@ -376,7 +376,13 @@ export const EMPLOYEE_ARRANGEMENT = [
 	-1,
 	-1,
 	-1,
-	// Drinks 50
+	// Media Line marketers, under the marketing chain like the module marketers above
+	-1,
+	TELEMARKETER,
+	TV_ANNOUNCER,
+	-1,
+	-1,
+	// Drinks 60
 	23,
 	24,
 	25,
@@ -475,12 +481,6 @@ export const EMPLOYEE_ARRANGEMENT = [
 	// Labor Market special cards
 	TEMPORARY_WORKER,
 	UNION_ORGANIZER,
-	-1,
-	-1,
-	-1,
-	// Media Line
-	TELEMARKETER,
-	TV_ANNOUNCER,
 	-1,
 	-1,
 	-1,
@@ -941,6 +941,8 @@ export const MILESTONES_STR = [
 	{ text: t('milestones.firstDumplingSold'), type: "food", title: t('milestones.firstDumplingSoldTitle'), description: t('milestones.firstDumplingSoldDesc'), img: "m_icon01.png", additionalClass: "higher" }, // TODO class? Icon?
 	{ text: t('milestones.firstFriedChickenSold'), type: "food", title: t('milestones.firstFriedChickenSoldTitle'), description: t('milestones.firstFriedChickenSoldDesc'), img: "m_icon01.png", additionalClass: "higher" }, // TODO class? Icon?
 	{ text: t('milestones.firstStadiumSold'), type: "waitress", title: t('milestones.firstStadiumSoldTitle'), description: t('milestones.firstStadiumSoldDesc'), img: "m_icon15.png" },
+	{ text: t('milestones.firstTelemarketerUsed'), type: "marketer", title: t('milestones.firstTelemarketerUsedTitle'), description: t('milestones.firstTelemarketerUsedDesc'), img: "m_icon30.png" },
+	{ text: t('milestones.firstTvAnnouncerUsed'), type: "marketer", title: t('milestones.firstTvAnnouncerUsedTitle'), description: t('milestones.firstTvAnnouncerUsedDesc'), img: "m_icon31.png" },
 ]
 
 export const EMPLOYEES_STR = [
@@ -1011,6 +1013,8 @@ export const EMPLOYEES_STR = [
 	{ title: t('employees.temporaryWorker'), description: t('employees.temporaryWorkerDesc'), type: "hiring" },
 	{ title: t('employees.headhunter'), description: t('employees.headhunterDesc'), type: "hiring" },
 	{ title: t('employees.unionOrganizer'), description: t('employees.unionOrganizerDesc'), type: "manager" },
+	{ title: t('employees.telemarketer'), description: t('employees.telemarketerDesc'), type: "marketer" },
+	{ title: t('employees.tvAnnouncer'), description: t('employees.tvAnnouncerDesc'), type: "marketer" },
 ]
 
 export function employeeName(emp) {

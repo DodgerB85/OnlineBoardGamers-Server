@@ -1261,6 +1261,7 @@ export function restoreMediaLineState(inputArr) {
 	store.mediaLine.headlines = []
 	store.mediaLine.doubleCampaign = -1
 	store.mediaLine.doubleUsed = false
+	store.mediaLine.night = { groups: {}, aLinePushers: [] }
 	if (!store.startingOptions.mediaLine) return
 	const slot = [...(inputArr || [])].reverse().find(isMediaLineSlot)
 	if (!slot) return
@@ -1269,6 +1270,19 @@ export function restoreMediaLineState(inputArr) {
 		.map((h) => ({ turn: h.turn, playerIndex: h.playerIndex, value: h.value }))
 	if (Number.isInteger(slot.doubleCampaign)) store.mediaLine.doubleCampaign = slot.doubleCampaign
 	store.mediaLine.doubleUsed = slot.doubleUsed === true
+	// Milestone 1 per-night accumulator (older saves predate it - keep defaults)
+	if (slot.night && typeof slot.night === "object" && !Array.isArray(slot.night)) {
+		const groups = {}
+		if (slot.night.groups && typeof slot.night.groups === "object" && !Array.isArray(slot.night.groups)) {
+			for (const [key, g] of Object.entries(slot.night.groups)) {
+				if (g && typeof g === "object" && Number.isInteger(g.owner) && Array.isArray(g.houses) && g.houses.every(Number.isInteger)) {
+					groups[Number(key)] = { owner: g.owner, houses: [...g.houses] }
+				}
+			}
+		}
+		const pushers = Array.isArray(slot.night.aLinePushers) ? slot.night.aLinePushers.filter((x) => Number.isInteger(x)) : []
+		store.mediaLine.night = { groups: groups, aLinePushers: pushers }
+	}
 }
 
 // Stadium mod wire slot: [gamesPlayed] or [gamesPlayed, [gameNumber, food, units]].

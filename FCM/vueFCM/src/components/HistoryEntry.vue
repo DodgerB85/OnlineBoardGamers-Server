@@ -4,6 +4,7 @@
  */
 
 import * as rf from "../js/FCMreference.js"
+import * as rules from "../js/FCMrules.js"
 import * as funcs from "../js/FCMfuncs.js"
 import * as history from "../js/FCMhistory.js"
 import * as replay from "../js/FCMreplay.js"
@@ -275,6 +276,8 @@ const computedEntry3 = computed(() => {
 		}
 	} else if (entry[0] === rf.HIST_START_MARKETING_CAMPAIGN) {
 		ret.campaignNumber = param[0]
+		// Media Line mod: B-line campaigns display their billboard-style sort key (3.5/4.5/6.5...)
+		ret.campaignDisplayNumber = rules.campaignSortKey(ret.campaignNumber)
 		const isTV = ret.campaignNumber === 28 || ret.campaignNumber === 29
 		const campaignIndex = funcs.importIndex(param[1]) // OR ROUTE IF HAWKER, HOUSE NUMBERS IF TV
 		const campaignGoodEntry = param[2]
@@ -442,7 +445,7 @@ const computedEntry3 = computed(() => {
 		Regular sale house:
 		0 = houseNumber
 		1 = [list of goods]
-		// NO SALE STOPS HERE (length === 2)
+		// NO SALE STOPS HERE (no providers list after the goods)
 		2 = [list of providers, winner first] - each [colour, price, distance, waitresses|[jazz,waitresses], order, movieStar?]
 		3 = bonus_amount
 		4 = garden/park/both status
@@ -480,14 +483,16 @@ const computedEntry3 = computed(() => {
 					isApartment: rf.APARTMENTS.includes(buildingNumber),
 					isRural: buildingNumber == rf.RURAL_MARKETING_AREA,
 					goods: house[1],
-					noSale: house.length === 2,
+					// No-sale: no providers list follows the goods (length-2 entries,
+					// or length-3 when an old save carries a stamped headline number)
+					noSale: !Array.isArray(house[2]),
 					multipleProviders: false,
 					providers: [],
 					singleProviderColour: null,
 					roadworksNote: false,
 					sale: null,
 				}
-				if (house.length !== 2) {
+				if (!block.noSale) {
 					const providers = house[2]
 					block.multipleProviders = providers.length > 1
 					if (block.multipleProviders) {
@@ -509,6 +514,11 @@ const computedEntry3 = computed(() => {
 					const winner = providers[0]
 					if (winner.length > 0) {
 						const basePrice = winner[1]
+						// Media Line mod: the entry carries tonight's city-wide headline
+						// shift after bonus(3)/bits(4)/fryChefs(5, only if that option
+						// is on) - so its index depends on startingOptions.fryChefs
+						const headlineIdx = store.startingOptions.fryChefs ? 6 : 5
+						const headlineTotal = house.length > headlineIdx ? house[headlineIdx] : 0
 						const bonusAmount = house[3]
 						const numItems = house[1].length
 						const gardenParkStatus = house[4]
@@ -519,11 +529,12 @@ const computedEntry3 = computed(() => {
 						currentGardenParkMultiplier = gardenParkMultiplier
 						let numFryChefs = 0
 						if (store.startingOptions.fryChefs && house.length > 5 && house[5] > 0 && house[5] !== 9) numFryChefs = house[5]
-						const finalSaleAmount = basePrice * numItems * gardenParkMultiplier + bonusAmount + numFryChefs * 10
+						const finalSaleAmount = (basePrice + headlineTotal) * numItems * gardenParkMultiplier + bonusAmount + numFryChefs * 10
 						const winnerIdx = store.players.findIndex((p) => p.colour === winner[0])
 						block.sale = {
 							winnerColour: winner[0],
 							basePrice: basePrice,
+							headlineTotal: headlineTotal,
 							numItems: numItems,
 							gardenParkStatus: gardenParkStatus,
 							bonusAmount: bonusAmount,
@@ -531,6 +542,9 @@ const computedEntry3 = computed(() => {
 							finalSaleAmount: finalSaleAmount,
 							milestoneNote: winnerIdx > -1 && (plyr.hasMilestone(winnerIdx, rf.FIRST_MARKETEER_USED) || plyr.hasMilestone(winnerIdx, rf.SOMEONE_SELLS_YOUR_DEMAND)),
 						}
+						// Media Line mod: surface the city-wide headline once for the
+						// evening header (the same shift applied to every house tonight)
+						if (headlineTotal !== 0) ret.headlineTotal = headlineTotal
 					}
 				}
 				ret.blocks.push(block)
@@ -623,6 +637,7 @@ const computedEntry3 = computed(() => {
 	} else if (entry[0] === rf.HIST_INCOME) {
 		ret.none = param.length === 0
 		ret.jazzTable = !!store.startingOptions.jazzMusicians
+		ret.mediaLine = !!store.startingOptions.mediaLine
 		ret.incomeRows = []
 		for (let k = 0; k < param.length; k++) {
 			const waitressVal = plyr.hasMilestone(k, rf.FIRST_WAITRESS) ? 5 : 3
@@ -634,6 +649,8 @@ const computedEntry3 = computed(() => {
 				numberOfJazz = param[k][1][1]
 			} else numberOfWaitress = param[k][1]
 			const CFObonus = param[k].length > 2 ? param[k][2] : 0
+			// Media Line mod: entry index 3 carries the milestone 1 bonus
+			const mediaLineBonus = param[k].length > 3 ? param[k][3] : 0
 			ret.incomeRows.push({
 				colour: store.players[k]?.colour,
 				salesIncome: salesIncome,
@@ -641,7 +658,8 @@ const computedEntry3 = computed(() => {
 				numberOfWaitress: numberOfWaitress,
 				waitressVal: waitressVal,
 				CFObonus: CFObonus,
-				totalIncome: salesIncome + numberOfJazz * 15 + numberOfWaitress * waitressVal + CFObonus,
+				mediaLineBonus: mediaLineBonus,
+				totalIncome: salesIncome + numberOfJazz * 15 + numberOfWaitress * waitressVal + CFObonus + mediaLineBonus,
 			})
 		}
 	} else if (entry[0] === rf.HIST_SALARY) {
@@ -801,7 +819,7 @@ const computedEntry3 = computed(() => {
 		<template v-else-if="entry[0] === rf.HIST_START_MARKETING_CAMPAIGN">
 			<i18n-t keypath="history.campaignStart" tag="span" scope="global">
 				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
-				<template #num>{{ computedEntry3.campaignNumber }}</template>
+				<template #num>{{ computedEntry3.campaignDisplayNumber }}</template>
 				<template #employee><InfoPopup type="employee" :employeeId="computedEntry3.campaignEmployee"><span class="compact" :class="empClass(computedEntry3.campaignEmployee)">{{ empTitle(computedEntry3.campaignEmployee) }}</span></InfoPopup></template>
 			</i18n-t> <template v-if="!computedEntry3.noCoords">{{ computedEntry3.orientationStr ? $t("history.orientAtCoords", { orient: computedEntry3.orientationStr, x: computedEntry3.Xcoord, y: computedEntry3.Ycoord }) : $t("history.atCoords", { x: computedEntry3.Xcoord, y: computedEntry3.Ycoord }) }}</template><template v-if="computedEntry3.tvHouses.length > 0">{{ $t("history.tvAtHouses", { houses: computedEntry3.tvHouses.join(", ") }) + " " }}</template>{{ $t("history.advertising") + " " }}
 			<img v-for="(g, gi) in computedEntry3.campaignGoods" :key="gi" class="foodTokenImg" :class="goodClass(g)" :src="goodSrc(g)" alt="" />
@@ -993,6 +1011,8 @@ const computedEntry3 = computed(() => {
 			<p v-if="computedEntry3.noSalesAtAll">{{ $t("history.noSalesAtAll") }}</p>
 			<div v-else>
 				<h4>{{ $t("history.dinnerTime") }}</h4>
+				<!-- Media Line mod: tonight's city-wide headline shift behind the prices -->
+				<div v-if="computedEntry3.headlineTotal" class="headlineHistNote">{{ $t("assistance.headlineTonight", { amount: computedEntry3.headlineTotal > 0 ? "+" + computedEntry3.headlineTotal : computedEntry3.headlineTotal }) }}</div>
 				<div v-if="hasDinnerSales" class="dinnerAnimButtons">
 					<button class="actionsLineButton" @click.stop="startDinnerAnimation(true)">{{ $t("history.animAnimate") }}</button>
 					<button class="actionsLineButton" @click.stop="startDinnerAnimation(false)">{{ $t("history.animStepThrough") }}</button>
@@ -1043,6 +1063,7 @@ const computedEntry3 = computed(() => {
 									<template #amount>{{ block.sale.finalSaleAmount }}</template>
 								</i18n-t>
 								<span>{{ " " + $t("history.basePriceItems", { price: block.sale.basePrice, count: block.sale.numItems }) }}</span>
+								<span v-if="block.sale.headlineTotal">{{ " " + $t("history.headlineApplied", { amount: block.sale.headlineTotal > 0 ? "+" + block.sale.headlineTotal : block.sale.headlineTotal }) }}</span>
 								<span v-if="block.sale.gardenParkStatus === 1">{{ " " + $t("history.doubledGarden") }}</span>
 								<span v-else-if="block.sale.gardenParkStatus === 2 && block.isApartment">{{ " " + $t("history.doubledParkApartment") }}</span>
 								<span v-else-if="block.sale.gardenParkStatus === 2">{{ " " + $t("history.doubledParkHouse") }}</span>
@@ -1089,6 +1110,7 @@ const computedEntry3 = computed(() => {
 							<td>{{ $t("history.salesHeader") }}</td>
 							<td v-if="computedEntry3.jazzTable"><InfoPopup type="employee" :employeeId="rf.JAZZ_MUSICIAN"><span class="compact" :class="empType(rf.JAZZ_MUSICIAN)">{{ empTitle(rf.JAZZ_MUSICIAN, true) }}</span></InfoPopup></td>
 							<td><InfoPopup type="employee" :employeeId="rf.WAITRESS"><span class="compact" :class="empType(rf.WAITRESS)">{{ empTitle(rf.WAITRESS) }}</span></InfoPopup></td>
+							<td v-if="computedEntry3.mediaLine">{{ $t("history.mediaLineBonusHeader") }}</td>
 							<td>{{ $t("history.cfoBonusHeader") }}</td>
 							<td>{{ $t("history.totalHeader") }}</td>
 						</tr>
@@ -1099,6 +1121,7 @@ const computedEntry3 = computed(() => {
 							<td>${{ r.salesIncome }}</td>
 							<td v-if="computedEntry3.jazzTable">${{ r.numberOfJazz * 15 }}</td>
 							<td>${{ r.numberOfWaitress * r.waitressVal }}</td>
+							<td v-if="computedEntry3.mediaLine">${{ r.mediaLineBonus }}</td>
 							<td>${{ r.CFObonus }}</td>
 							<td>${{ r.totalIncome }}</td>
 						</tr>

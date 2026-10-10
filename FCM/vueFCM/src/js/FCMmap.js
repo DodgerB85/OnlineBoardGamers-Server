@@ -1633,39 +1633,38 @@ export function giveAllSpaceForAToken(index, width, height) {
 
 // Media Line mod - radio-wave geometry helpers (waves ignore roads).
 
-// Manhattan distance between two board spaces.
-export function manhattanDistance(indexA, indexB) {
-	const [ax, ay] = giveCoord(indexA)
-	const [bx, by] = giveCoord(indexB)
-	return Math.abs(ax - bx) + Math.abs(ay - by)
-}
-
-// Spaces within Chebyshev distance `dist` of any footprint space, clipped to
-// the board. B2 phone tokens must sit inside the dist=1 surroundings of a
-// restaurant block (the relaxed "nine-grid" cross of the design doc).
-export function areaAroundFootprint(spaces, dist) {
-	const res = new Set()
-	for (const space of spaces) {
-		const [x, y] = giveCoord(space)
-		for (let dx = -dist; dx <= dist; dx++) {
-			for (let dy = -dist; dy <= dist; dy++) {
-				const nx = x + dx
-				const ny = y + dy
-				if (nx < 0 || ny < 0 || nx >= rf.ssW || ny >= rf.ssH) continue
-				res.add(giveIndex(nx, ny))
+// Every board space inside the map tiles (5x5 blocks) within Manhattan
+// distance `tileRange` of any tile containing one of the given anchor
+// squares. Callers pass restaurant DOOR squares (giveRestaurantDoorIndices):
+// without a Local/Regional Manager only the single door corner counts, with
+// one all four corners of the building do - the same rule every other
+// restaurant-distance mechanic uses.
+// tileRange=1 is the cross of 5 tiles (B2 phone placement), tileRange=2 the
+// diamond of 13 tiles (B3 TV house selection).
+export function waveRegionSpaces(anchorSquares, tileRange) {
+	const regionTiles = new Set()
+	for (const s of anchorSquares) {
+		const t = giveTileNumber(s)
+		const tx = t % TILES_WIDE
+		const ty = Math.floor(t / TILES_WIDE)
+		for (let dy = -tileRange; dy <= tileRange; dy++) {
+			for (let dx = -tileRange; dx <= tileRange; dx++) {
+				if (Math.abs(dx) + Math.abs(dy) > tileRange) continue
+				const nx = tx + dx
+				const ny = ty + dy
+				if (nx < 0 || ny < 0 || nx >= TILES_WIDE || ny >= rf.ssH / 5) continue
+				regionTiles.add(ny * TILES_WIDE + nx)
 			}
 		}
 	}
-	return Array.from(res)
-}
-
-// Media Line mod - true for house or restaurant spaces (phone lines must
-// attach to buildings). Gardens are not buildings themselves. NB campaign
-// numbers 10-15 collide with restaurant values (see RESTAURANT_OPEN note) -
-// accepted edge case: a billboard neighbour occasionally counts as a wall.
-export function isBuildingValue(value) {
-	if (value > rf.HOUSE && value < rf.HOUSE + 29) return true
-	return value >= rf.RESTAURANT_OPEN && value <= rf.RESTAURANT_OPEN + 5
+	const spaces = new Set()
+	for (const t of regionTiles) {
+		const start = giveStartingIndexForTile(t)
+		for (let y = 0; y < 5; y++) {
+			for (let x = 0; x < 5; x++) spaces.add(start + x + y * rf.ssW)
+		}
+	}
+	return spaces
 }
 
 export function findIndexForHouse(number) {

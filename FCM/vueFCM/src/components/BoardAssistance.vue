@@ -103,6 +103,15 @@ function buildDiscount(playerIndex, player) {
 	let maxPrice = rules.basePrice()
 	let price = plyr.playersPrice(playerIndex)
 
+	// Media Line: tonight's headline shifts every sale price - show what dinner
+	// will actually pay, not the raw base price
+	const headline = rules.giveHeadlineTotal()
+	if (headline !== 0) {
+		price += headline
+		minPrice += headline
+		maxPrice += headline
+	}
+
 	if (player.ceoAction === rf.CEO_ACTION_PRICE_MINUS_3) {
 		minPrice -= 3
 		maxPrice -= 3
@@ -162,7 +171,9 @@ function buildMarketers(playerIndex, player) {
 			continue
 		}
 		const campaignObj = store.campaigns.find((obj) => obj.number === m.campaign)
-		const entry = { campaign: m.campaign, infinite: campaignObj.duration === 9, goods: [] }
+		// Show the billboard number (vanilla IDs double as it; B-line TV/phone
+		// slots map to their insert numbers 3.5/4.5/6.5/6.6/...)
+		const entry = { campaign: rules.campaignSortKey(m.campaign), infinite: campaignObj.duration === 9, goods: [] }
 		if (campaignObj.duration === 9) {
 			entry.goods.push({ good: campaignObj.good, copies: 1 })
 			if (plyr.hasMilestone(playerIndex, rf.FIRST_RADIO_CAMPAIGN) && rf.MARKETING_CAMPAIGNS[campaignObj.number].type === rf.RADIO) {

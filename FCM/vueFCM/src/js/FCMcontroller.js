@@ -333,7 +333,10 @@ function setupMarketingPhase() {
 	plyr.sendMassMarketeers(currentPlayerIndex())
 
 	let marketersCopy = funcs.removeItemAll(allMarketers, rf.MASS_MARKETEER)
-	if (marketersCopy.length === 0 && rules.temporaryWorkerRemainingActions(currentPlayerIndex(), rf.MARKETING_TRAINEE) === 0 && store.context.massMarketersOnly === -1) {
+	// Media Line mod: a TV announcer on campaign duty still publishes his
+	// nightly headline - keep the marketing phase alive for the button
+	const headlineLeft = store.startingOptions.mediaLine && mediaLineHeadlinesLeft(currentPlayerIndex()) > 0
+	if (marketersCopy.length === 0 && rules.temporaryWorkerRemainingActions(currentPlayerIndex(), rf.MARKETING_TRAINEE) === 0 && store.context.massMarketersOnly === -1 && !headlineLeft) {
 		// if you only had MM, move to next phase
 		endWorkingDaySubphase()
 	}
@@ -1196,10 +1199,11 @@ export function selectMarketer(marketer, nightShift, temporary = false) {
 	if (campaigns.includes(22)) campaigns = [22]
 	if (campaigns.includes(23)) campaigns = [23]
 
-	// Media Line mod: TV channels / phone tokens are identical - only offer the first
-	if (campaigns.some((c) => rf.MARKETING_CAMPAIGNS[c].type === rf.TV_CHANNEL || rf.MARKETING_CAMPAIGNS[c].type === rf.PHONE)) {
-		campaigns = [campaigns.find((c) => rf.MARKETING_CAMPAIGNS[c].type === rf.TV_CHANNEL || rf.MARKETING_CAMPAIGNS[c].type === rf.PHONE)]
-	}
+	// Media Line mod: order the offered campaigns by the number printed on
+	// the card - TV channels (3.5/4.5) slot between the airplanes and phone
+	// tokens (6.5-8.6) between the radios, ahead of the higher-numbered
+	// billboard cards
+	campaigns = [...campaigns].sort((a, b) => rules.campaignSortKey(a) - rules.campaignSortKey(b))
 
 	store.context.campaigns = campaigns
 
@@ -1463,14 +1467,18 @@ export function placeMarketingCampaign(index) {
 			return
 		}
 		// MEDIA LINE - phone tokens: a telemarketer places up to two identical
-		// tokens in one action; the second keeps the first token's good and duration
-		else if (rf.MARKETING_CAMPAIGNS[store.context.campaign].type === rf.PHONE && !store.context.mediaLineSecondCall) {
+		// tokens in one action; the second keeps the first token's good and
+		// duration. Only the telemarketer chains - TV announcers and brand
+		// directors may place phone tokens too, but just one per action.
+		else if (rf.MARKETING_CAMPAIGNS[store.context.campaign].type === rf.PHONE && store.context.marketer === rf.TELEMARKETER && !store.context.mediaLineSecondCall) {
 			const remaining = store.availableMarketingCampaigns.filter((c) => rf.MARKETING_CAMPAIGNS[c].type === rf.PHONE)
 			if (remaining.length > 0) {
 				mlChain = true
 				store.context.mediaLineSecondCall = true
+				// The player picks which numbered phone card to spend on the
+				// second token; good and duration stay locked to the first
 				store.context.campaign = remaining[0]
-				store.context.campaigns = [remaining[0]]
+				store.context.campaigns = remaining
 				store.context.rotated = false
 				setCampaignPlacementHighlights()
 			}

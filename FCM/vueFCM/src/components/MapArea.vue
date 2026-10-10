@@ -139,24 +139,69 @@ const campaignDisplays = computed(() => {
 	return res
 })
 
-// Media Line mod: TV channel antennas - one marker per targeted house, anchored
-// at the house's top-left space; two channels on the same house sit side by side
+// Media Line mod: TV channel antennas - circular markers straddling the TOP
+// edge of the house body. The house_garden compound is 2x3 (body 2x2 + garden
+// strip); per rotation the garden sits bottom(r0)/left(r1)/top(r2)/right(r3),
+// so the body anchor shifts: r1 body starts 1 square right, r2 one square down
+// Duration chip backgrounds = the advertised food's own token colour
+// (sampled from the official board token art)
+const FOOD_CHIP_COLOURS = {
+	[rf.LEMONADE]: "#ffc700",
+	[rf.COKE]: "#a80a0f",
+	[rf.BEER]: "#004c35",
+	[rf.PIZZA]: "#ee7500",
+	[rf.BURGER]: "#996b2b",
+	[rf.FRIED_CHICKEN]: "#cd972b",
+}
+function chipTextColour(bg) {
+	const r = parseInt(bg.slice(1, 3), 16)
+	const g = parseInt(bg.slice(3, 5), 16)
+	const b = parseInt(bg.slice(5, 7), 16)
+	return 0.299 * r + 0.587 * g + 0.114 * b > 150 ? "#1f2937" : "#fff"
+}
 const tvAntennaDisplays = computed(() => {
 	const res = []
 	const sqSize = store.refSize / 5
 	for (const c of store.campaigns) {
 		if (rf.MARKETING_CAMPAIGNS[c.number]?.type !== rf.TV_CHANNEL) continue
 		for (const house of c.houses || []) {
-			const idx = map.findIndexForHouse(house)
-			if (idx < 0) continue
-			const [x, y] = view.getXYforSmallSquare(idx)
-			const sideBySide = res.filter((a) => a.house === house).length
+			// Board apartments (3.2 / 9.7) live outside store.houses - findApartment locates them
+			let houseObj = model.findHouse(house)
+			if (houseObj === -1) houseObj = model.findApartment(house)
+			if (houseObj === -1 || houseObj.index < 0) continue
+			const [x, y] = view.getXYforSmallSquare(houseObj.index)
+			const width = sqSize * 0.6
+			const half = width / 2
+			let hx = x
+			let hy = y
+			if (rf.APARTMENTS.includes(house)) {
+				// Apartment building is 3 squares wide, anchored unrotated at (x, y)
+				hx = x + 0.5 * sqSize
+			} else if (houseObj.rotated === 1 || houseObj.rotated === true) hx = x + sqSize
+			else if (houseObj.rotated === 2) hy = y + sqSize
+			// Remaining-nights chip: its centre rides the antenna's TOP point
+			const chip = width * 0.55
+			const chipBg = FOOD_CHIP_COLOURS[c.good] || "#1f2937"
+			const slot = res.filter((a) => a.house === house).length
+			// One antenna centred; two sit snugly side by side on centre (+/-0.35sq)
+			const cx = hx + (slot === 0 ? 1 : 1.35) * sqSize
+			if (slot === 1) {
+				const first = res.find((a) => a.house === house)
+				first.x = hx + 0.65 * sqSize - half
+				first.chipX = hx + 0.65 * sqSize - chip / 2 // keep its chip on the new top point
+			}
 			res.push({
 				house,
 				src: view.getImage(c.number === 28 ? "antenna35" : "antenna45"),
-				x: x + sideBySide * sqSize * 0.55,
-				y: y - sqSize * 0.15,
-				width: sqSize * 0.6,
+				x: cx - half,
+				y: hy - half,
+				width,
+				duration: c.duration,
+				chipX: cx - chip / 2,
+				chipY: hy - half - chip / 2,
+				chipSize: chip,
+				chipBg,
+				chipText: chipTextColour(chipBg),
 			})
 		}
 	}
@@ -750,6 +795,7 @@ function tileRotationClass(tileData) {
 			<!-- Display Media Line TV channel antennas -->
 			<template v-for="(ant, antIdx) in tvAntennaDisplays" :key="'ant' + antIdx">
 				<img class="boardAntennaImg" :src="ant.src" :style="{ left: ant.x + 'px', top: ant.y + 'px', width: ant.width + 'px' }" alt="Antenna" />
+				<span class="antennaDurationChip" :class="{ r1: ant.duration === 9 }" :style="{ left: ant.chipX + 'px', top: ant.chipY + 'px', width: ant.chipSize + 'px', height: ant.chipSize + 'px', fontSize: ant.chipSize * 0.62 + 'px', backgroundColor: ant.chipBg, color: ant.chipText }">{{ ant.duration === 9 ? "8" : ant.duration }}</span>
 			</template>
 
 			<!-- Display natural board houses -->
@@ -870,6 +916,19 @@ function tileRotationClass(tileData) {
 	position: absolute;
 	z-index: 12;
 	height: auto;
+}
+
+/* Remaining-nights chip riding a TV antenna marker (bg/colour set inline
+   from the advertised food's own colour) */
+.antennaDurationChip {
+	position: absolute;
+	font-weight: bold;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 14;
+	pointer-events: none;
 }
 
 .boardTokenImg {

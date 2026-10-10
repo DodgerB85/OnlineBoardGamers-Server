@@ -314,18 +314,21 @@ export function allowedCampaigns(marketer) {
 		case rf.BRAND_MANAGER:
 			return [rf.BILLBOARD, rf.MAIL, rf.AIRPLANE]
 		case rf.BRAND_DIRECTOR:
-			return [rf.BILLBOARD, rf.MAIL, rf.AIRPLANE, rf.RADIO]
+			// Media Line mod: the top of the B-line chain also places TV
+			// channels and phone tokens (pool-gated - absent without the mod)
+			return [rf.BILLBOARD, rf.MAIL, rf.AIRPLANE, rf.RADIO, rf.PHONE, rf.TV_CHANNEL]
 		case rf.GOURMET_FOOD_CRITIC:
 			return [rf.GOURMET_GUIDE]
 		case rf.RURAL_MARKETEER:
 			return [rf.GIANT_BILLBOARD]
 		case rf.HAWKER_MARKETEER:
 			return [rf.HAWKER_TRUCK]
-		// Media Line mod
+		// Media Line mod: each card also places every campaign type at or
+		// below its tier, exactly like the A-line managers do
 		case rf.TELEMARKETER:
-			return [rf.PHONE]
+			return [rf.BILLBOARD, rf.PHONE]
 		case rf.TV_ANNOUNCER:
-			return [rf.TV_CHANNEL]
+			return [rf.BILLBOARD, rf.PHONE, rf.TV_CHANNEL]
 		default:
 			return []
 	}
@@ -925,22 +928,23 @@ export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, 
 			})
 	}
 
-	// --- CASE A2: PHONE TOKENS (Media Line mod) - 2x1 against buildings in the
-	// restaurant's immediate surroundings; roads are irrelevant (radio waves),
-	// so this bypasses the road-adjacency machinery of CASE B ---
+	// --- CASE A2: PHONE TOKENS (Media Line mod) - 2x1 with its anchor square on
+	// empty ground in the cross of 5 map tiles (the restaurant's tile plus the 4
+	// orthogonal neighbours). Like any other token the card may straddle the
+	// edge of the zone into the next tile (one cell each side); roads are
+	// irrelevant (radio waves), so this bypasses the road-adjacency machinery
+	// of CASE B ---
 	if (campaignData.type === rf.PHONE) {
-		const player = controller.currentPlayerObj()
-		const zone = new Set()
-		for (const s of player.restaurants) {
-			map.areaAroundFootprint(map.giveAllSpaceForAToken(s.index, 2, 2), 1).forEach((i) => zone.add(i))
-		}
+		// Measured from the restaurant doors (all four corners with a
+		// Local/Regional Manager), like every other restaurant-distance rule
+		const zone = map.waveRegionSpaces(model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: false }), 1)
 
 		const possibilities = []
 		for (const anchor of zone) {
+			const [ax, ay] = map.giveCoord(anchor)
+			if (ax + w > rf.ssW || ay + h > rf.ssH) continue // never wrap off the board edge
 			const cells = map.giveAllSpaceForAToken(anchor, w, h)
-			const fits = cells.every(
-				(c) => zone.has(c) && store.mapData.coords[c] === rf.EMPTY_SPACE && map.giveNeighbours(c).some((n) => map.isBuildingValue(store.mapData.coords[n])),
-			)
+			const fits = cells.every((c) => store.mapData.coords[c] === rf.EMPTY_SPACE)
 			if (fits) possibilities.push(anchor)
 		}
 		return possibilities
@@ -1799,14 +1803,14 @@ export function availableNewRoads() {
 
 // Media Line mod: B-line campaigns slot into the A-line push order with
 // decimal sort keys (serpentine interleave) - TV channels between radio and
-// airplanes, phone tokens between mailboxes. A-line keys are their raw
-// campaign numbers, untouched, so old replays stay byte-identical.
-// radio(1-3) TV-A(3.5) plane(4) TV-B(4.5) plane(5,6) phone1-6(6.5,7.5,8.5,
-// 9.5,10.5,10.6) mailbox(7-10) billboard(11-16) ...
+// airplanes, phone tokens in pairs after radio 6/7/8. A-line keys are their
+// raw campaign numbers, untouched, so old replays stay byte-identical.
+// radio(1-3) TV-A(3.5) plane(4) TV-B(4.5) plane(5,6) phone pairs 6.5/6.6
+// after radio 6, 7.5/7.6 after radio 7, 8.5/8.6 after radio 8, then
+// mailbox(7-10) billboard(11-16) ...
 export function campaignSortKey(number) {
 	if (number >= 28 && number <= 29) return 3.5 + (number - 28) // TV channels: 3.5, 4.5
-	if (number >= 30 && number <= 34) return 6.5 + (number - 30) // phone slots 1-5: 6.5 - 10.5
-	if (number === 35) return 10.6 // phone slot 6
+	if (number >= 30 && number <= 35) return 6 + Math.floor((number - 30) / 2) + 0.5 + ((number - 30) % 2) * 0.1 // phone pairs: 6.5/6.6, 7.5/7.6, 8.5/8.6
 	return number
 }
 
@@ -1843,30 +1847,37 @@ export function giveHeadlineTotal() {
 // to a rival (or left unsold) pays nothing.
 function settleMediaLineGroups(sold, replayOnly) {
 	const store = useModelStore()
-	const night = mediaLineNight
-	mediaLineNight = { groups: {}, aLinePushers: new Set() } // reset for the next night
-	if (!store.startingOptions.mediaLine) return
+	const bonuses = new Array(store.players.length).fill(0)
+	const night = store.mediaLine.night
+	store.mediaLine.night = { groups: {}, aLinePushers: [] } // reset for the next night
+	if (!store.startingOptions.mediaLine) return bonuses
 
 	for (let i = 0; i < store.players.length; i++) {
 		if (!plyr.hasMilestone(i, rf.FIRST_TELEMARKETER_USED)) continue
-		if (night.aLinePushers.has(i)) continue // purity broken
+		if (night.aLinePushers.includes(i)) continue // purity broken
+		// Media Line mod: purity also breaks when the holder has an A-line
+		// campaign already on the board at settlement - placed this turn, its
+		// first push only happens tonight, so it escapes the aLinePushers check
+		if (store.campaigns.some((c) => c.number <= 27 && model.findPlayerForCampaign(c.number) === i)) continue
 
 		let total = 0
 		const groups = []
 		for (const g of Object.values(night.groups)) {
-			if (g.owner !== i || g.houses.size === 0) continue
-			const allEaten = [...g.houses].every((h) => sold.some((s) => s.house === h && s.playerIndex === i))
+			if (g.owner !== i || g.houses.length === 0) continue
+			const allEaten = g.houses.every((h) => sold.some((s) => s.house === h && s.playerIndex === i))
 			if (allEaten) {
-				total += g.houses.size * 10
+				total += g.houses.length * 10
 				groups.push([...g.houses].sort((a, b) => a - b))
 			}
 		}
 		if (total > 0) {
+			bonuses[i] = total
 			store.players[i].money += total
 			store.bank -= total
 			if (!replayOnly) model.addHistory(rf.HIST_MEDIA_LINE_BONUS, [i, total, groups], -1, 0)
 		}
 	}
+	return bonuses
 }
 
 export function doDinnerTime(replayOnly) {
@@ -2091,6 +2102,11 @@ export function doDinnerTime(replayOnly) {
 		if (!replayOnly) giveSalesMilestones(sale.playerIndex, sale.needs)
 	})
 
+	// Media Line mod: stamp tonight's city-wide headline onto each SOLD house
+	// entry so the history view can show the price shift behind the earnings.
+	// No-sale entries stay length 2 - the consumer reads house[2] as providers
+	if (headlineTotal !== 0) for (const h of histoHouses) if (h.length > 2) h.push(headlineTotal)
+
 	if (!replayOnly) model.addHistory(rf.HIST_DINNER_TIME, histoHouses, -1, 0)
 
 	// Fried Chicken mod: record flips & move-outs (state itself was already applied above and
@@ -2116,12 +2132,12 @@ export function doDinnerTime(replayOnly) {
 
 	// --- PHASE 4: PAYOUTS & BANK BREAK ---
 	// Media Line mod: milestone 1 bonus (from the bank, outside sales income)
-	settleMediaLineGroups(sold, replayOnly)
-	finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayOnly)
+	const mediaLineBonuses = settleMediaLineGroups(sold, replayOnly)
+	finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayOnly, mediaLineBonuses)
 
 }
 
-function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayOnly) {
+function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayOnly, mediaLineBonuses) {
 	const store = useModelStore()
 	const histoIncome = []
 	store.players.forEach((p, playerIndex) => {
@@ -2139,7 +2155,11 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 			const supplement = Math.ceil(total / 2)
 			total += supplement
 			hI.push(supplement)
-		}
+		} else if (store.startingOptions.mediaLine) hI.push(0)
+
+		// Media Line mod: milestone 1 bonus gets its own column in the income
+		// table (index 3); the money itself was already paid in settleMediaLineGroups
+		if (store.startingOptions.mediaLine) hI.push(mediaLineBonuses?.[playerIndex] ?? 0)
 
 		histoIncome[playerIndex] = hI
 		p.money += total
@@ -2165,7 +2185,7 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 	})
 
 	if (!replayOnly) {
-		const hasInc = histoIncome.some((h) => h[0] > 0 || (Array.isArray(h[1]) ? h[1].some((v) => v > 0) : h[1] > 0))
+		const hasInc = histoIncome.some((h) => h[0] > 0 || (Array.isArray(h[1]) ? h[1].some((v) => v > 0) : h[1] > 0) || h[3] > 0)
 		model.addHistory(rf.HIST_INCOME, hasInc ? histoIncome : [], -1, 0)
 	}
 
@@ -2863,15 +2883,11 @@ export function housesAffectedByMarketingCampaign(campaign) {
 	return Array.from(affectedHouses)
 }
 
-// Media Line mod: per-night accumulator for milestone 1 (First Telemarketer
-// Used, grouped all-eat bonus). Filled by doMarketingCampaigns (the payday
-// pushes whose needs are matched at the NEXT turn's dinner) and consumed +
-// reset by the next doDinnerTime - mirroring the live/replay call alternation.
-// groups: campaignNumber -> { owner, houses:Set } - houses the campaign
-// actually pushed demand into (houses squeezed out by the 3-card cap are
-// never added). aLinePushers: players whose own A-line campaigns ran tonight
-// (breaks purity for the milestone bonus).
-let mediaLineNight = { groups: {}, aLinePushers: new Set() }
+// Media Line mod: the per-night accumulator for milestone 1 (First Telemarketer
+// Used, grouped all-eat bonus) lives in store.mediaLine.night. doMarketingCampaigns
+// fills it at payday (the pushes whose needs are matched at the NEXT turn's dinner)
+// and the next doDinnerTime consumes + resets it. It is part of the saved state so
+// a page reload between payday and dinner cannot silently drop the bonus.
 
 // PHASE_MARKETING_CAMPAIGNS -- fire off marketing campaigns
 // replayFinalPass: replay only. Live play repeats the whole phase once per Mass
@@ -2911,12 +2927,13 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 
 			// Media Line mod: nightly bookkeeping for the grouped all-eat bonus
 			if (store.startingOptions.mediaLine) {
+				const night = store.mediaLine.night
 				if (isBLine) {
-					if (!mediaLineNight.groups[campaign.number]) mediaLineNight.groups[campaign.number] = { owner: playerIndex, houses: new Set() }
-					else mediaLineNight.groups[campaign.number].owner = playerIndex
+					if (!night.groups[campaign.number]) night.groups[campaign.number] = { owner: playerIndex, houses: [] }
+					else night.groups[campaign.number].owner = playerIndex
 				} else if (playerIndex !== -1) {
 					// The player's own A-line campaign ran tonight - breaks purity
-					mediaLineNight.aLinePushers.add(playerIndex)
+					if (!night.aLinePushers.includes(playerIndex)) night.aLinePushers.push(playerIndex)
 				}
 			}
 
@@ -2966,7 +2983,10 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 				}
 
 				// Standard Good 1
-				if (tryAddNeed(good1, h1) && isBLine) mediaLineNight.groups[campaign.number].houses.add(houseId)
+				if (tryAddNeed(good1, h1) && isBLine) {
+					const houseList = store.mediaLine.night.groups[campaign.number].houses
+					if (!houseList.includes(houseId)) houseList.push(houseId)
+				}
 
 				// Standard Good 2
 				if (h2) tryAddNeed(good2, h2)
