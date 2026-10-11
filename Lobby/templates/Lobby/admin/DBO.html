@@ -26,13 +26,7 @@
     <button onclick="searchGames()">{% translate "Search" %}</button>
     <div id="results"></div>
     <br />
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
+    {% include "Lobby/messages.html" %}
     There are {{ totalGamesCount }} games.
     <br />
     There are {{ noramlGamesCount }} normal games.

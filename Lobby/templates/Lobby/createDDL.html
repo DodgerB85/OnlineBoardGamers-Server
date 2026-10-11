@@ -12,13 +12,7 @@
             <a class="button button-ghost button-sm" href="{% url 'newGamesPage' %}">&#8592; {% translate "New Game" %}</a>
         </div>
 
-        {% if messages %}
-        <div style="margin-bottom:16px">
-            {% for message in messages %}
-            <div class="pill {% if message.tags == 'error' %}pill-danger{% elif message.tags == 'success' %}pill-positive{% else %}pill-accent{% endif %}" style="display:block;padding:10px 14px;border-radius:var(--radius-md);margin-bottom:8px">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
+        {% include "Lobby/messages.html" %}
 
         <div class="card card-soft" style="border-left:3px solid var(--color-accent);margin-bottom:16px">
             <span style="font-size:14px">{% translate "New to Duck Dealer? For Rules, How to Play, and Game Guide, please see " %}<a href="{% url 'DDL:DDLhelp' %}">{% translate "Help" %}</a>.</span>

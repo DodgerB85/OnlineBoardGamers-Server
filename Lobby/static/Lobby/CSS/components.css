@@ -706,6 +706,37 @@ button {
     border-color: transparent;
 }
 
+/* Pill-colored, but a real message box: may contain <br/>, links and buttons
+   (e.g. the game-creation invite message), so it must wrap. */
+.message-box {
+    display: block;
+    white-space: normal;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+.message-box a {
+    color: inherit;
+    text-decoration: underline;
+    font-weight: 700;
+    word-break: break-all;
+}
+.message-box .copyGameLinkButton {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 6px;
+    padding: 4px 10px;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
 /* ---------- TABS (09 dense-scoreboard look) ---------- */
 .tabs {
     display: flex;
