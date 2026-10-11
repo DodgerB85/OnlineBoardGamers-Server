@@ -177,47 +177,7 @@ def gettext_noop(x):
     return x
 
 
-# 1. Make sure this folder name matches exactly what you created
-JINJA2_CACHE_DIR = BASE_DIR / "jinja2_cache"
-
-# 2. Force the creation of the folder if it's missing
-if not JINJA2_CACHE_DIR.exists():
-    import os
-
-    os.makedirs(JINJA2_CACHE_DIR, exist_ok=True)
-
-# Auto-discover Jinja2 template directories for all apps
-JINJA2_TEMPLATE_DIRS = [BASE_DIR / "Lobby/jinja2"]
-
 TEMPLATES = [
-    {
-        # --- JINJA2 (Using django-jinja for compatibility) ---
-        "BACKEND": "django_jinja.backend.Jinja2",
-        "NAME": "jinja2",  # <--- Add this
-        "DIRS": JINJA2_TEMPLATE_DIRS,  # Auto-discovered Jinja2 template directories
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "match_extension": ".jinja",  # <--- CRITICAL
-            "environment": "OnlineBoardGamers.jinja2.environment",
-            # This allows {{ request }}, {{ user }}, etc. in Jinja
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-            "auto_reload": DEBUG,  # Always disable for performance
-            "translation_engine": "django.utils.translation",
-            ## Optimized Jinja2 Bytecode Cache settings
-            "bytecode_cache": {
-                "name": "jinja2_cache",
-                "enabled": True,  # <--- CRITICAL
-                "backend": "jinja2.FileSystemBytecodeCache",
-                "dir": str(JINJA2_CACHE_DIR),  # Use the absolute path
-                # "auto_reload": not DEBUG,  # Cache templates in production
-            },
-        },
-    },
     {
         # --- STANDARD DJANGO (With RAM Caching) ---
         "BACKEND": "django.template.backends.django.DjangoTemplates",

@@ -3116,7 +3116,6 @@ def playerInfo(request, usernameToProfile):
             "jointWinPercentage": jointWinPercentage,
             "jointGameStats": jointGameStats,
         },
-        # using="jinja2",
     )
 
     return response
