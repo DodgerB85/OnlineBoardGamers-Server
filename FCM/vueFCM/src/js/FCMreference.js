@@ -716,7 +716,6 @@ export const ROAD = 1
 export const DRINK_BEER = 2
 export const DRINK_COKE = 3
 export const DRINK_LEMONADE = 4
-//export const ROADWORKS = 5 // Not used - use ROAD_UC
 export const ROAD_UC = 6
 export const PARK = 7
 export const FREEWAY = 8

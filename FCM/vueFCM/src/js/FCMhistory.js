@@ -121,15 +121,7 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 		const campaignNumber = entry3[0]
 		const campaignIndex = funcs.importIndex(entry3[1])
 		let paramIdx = 3
-		//let campaignEmployee = -1
-		if (campaignNumber <= 3 || campaignNumber >= 17) {
-			//if (campaignNumber <= 3) campaignEmployee = rf.BRAND_DIRECTOR
-			//else if (campaignNumber >= 17 && campaignNumber <= 20) campaignEmployee = rf.GOURMET_FOOD_CRITIC
-			//else if (campaignNumber >= 21 && campaignNumber <= 24) campaignEmployee = rf.RURAL_MARKETEER
-		} else {
-			//campaignEmployee = entry3[paramIdx]
-			paramIdx++
-		}
+		if (campaignNumber > 3 && campaignNumber < 17) paramIdx++
 		let campaignRotated = 0
 		if (rf.ROTATABLE_CAMPAIGNS.includes(campaignNumber)) {
 			campaignRotated = entry3[paramIdx]

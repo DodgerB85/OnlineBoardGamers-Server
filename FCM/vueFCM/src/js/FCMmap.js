@@ -1569,24 +1569,18 @@ export function getUsedRowCol() {
 	let row = 0
 	let col = 0
 	for (row = 0; row < 14; row++) {
-		//let rowCount = 0
 		let currentRowArr = []
 		for (col = 0; col < store.mapData.dimensions[0] * 2; col += 2) {
-			//rowCount += store.mapData.tiles[row * store.mapData.dimensions[0] * 2 + col]
 			currentRowArr.push(store.mapData.tiles[row * store.mapData.dimensions[0] * 2 + col])
 		}
-		//if (rowCount != -store.mapData.dimensions[0]) usedRows.push(row)
 		if (currentRowArr.some((x) => x !== -1)) usedRows.push(row)
 	}
 	let usedCols = []
 	for (col = 0; col < store.mapData.dimensions[0] * 2; col += 2) {
-		//let colCount = 0
 		let currentColArr = []
 		for (row = 0; row < store.mapData.tiles.length; row += store.mapData.dimensions[0] * 2) {
-			//colCount += store.mapData.tiles[row + col]
 			currentColArr.push(store.mapData.tiles[row + col])
 		}
-		//if (colCount != -store.mapData.dimensions[1]) usedCols.push(col / 2)
 		if (currentColArr.some((x) => x !== -1)) usedCols.push(col / 2)
 	}
 	return [usedRows, usedCols]

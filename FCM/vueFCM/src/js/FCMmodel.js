@@ -294,7 +294,6 @@ export async function initGame() {
 			personal.moveDataRaw = window.initData.moveData
 		}
 		// If you have a move, import that too for the visuals
-		//IO.loadCurrentMove()
 		// Add expert panel for working day NOT your turn
 		// You must be involved, have moved, and not be able to play
 		if (store.gameflow.phase >= rf.PHASE_WORKING_DAY && window.initData.moveData !== "") {
@@ -346,7 +345,6 @@ export async function initGame() {
 	// start WS. NB the tutorial game has no Game row, so there is nothing to listen to
 	if (window.initData.pov >= -9 && !personal.tutorial) {
 		WS.StartWebSocket().catch(() => {
-			console.log("WebSocket background task initialized.")
 		})
 	}
 	// Stalled simul phase: every move is in, but the phase never advanced (eg the client

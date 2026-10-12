@@ -21,7 +21,6 @@ export async function makeAImove() {
 	let playerObj = store.players[playerIndex]
 	playerObj.AIlevel = 2
 
-	console.log(`making AI move: phase -  ${phase}, subphase - ${subphase}, playerIndex = ${playerIndex}`)
 
 	if (phase === rf.PHASE_SETUP_RESTAURANT1) {
 		let rotation = Math.floor(Math.random() * 4)

@@ -12,7 +12,6 @@
 
 import * as controller from "../js/FCMcontroller"
 
-//import { ref } from 'vue'
 import { defineStore } from "pinia"
 import * as rf from "../js/FCMreference"
 import * as funcs from "../js/FCMfuncs"
@@ -23,7 +22,6 @@ export const usePersonalStore = defineStore("personal", () => {
 	const store = useModelStore()
 
 	/******* SET ONCE VARS - IN SETUP */
-	//const superuser = ref(false)
 	var WSstatus = "WSconnecting" // Use for light colour
 	var haltPlay = false // Stop someone moving, eg when waiting for game to save
 	var gameID = -1
@@ -69,7 +67,6 @@ export const usePersonalStore = defineStore("personal", () => {
 		if (this.tutorial && store.gameflow.turnOrder[0] !== 0) return false
 		if (this.trainingGame) return true
 		if (this.superuser) return true
-		//if (store..tournamentGame && this.name === rf.TOURNAMENT_ADMIN_NAME) return true
 		if (this.pov < 0) return false
 		if (this.pov >= 0 && store.players[this.pov].displayName === rf.BOT_NAME) return false
 

@@ -1,6 +1,4 @@
 import * as rf from "./FCMreference"
-//import * as rules from "./FCMrules"
-//import * as controller from "./FCMcontroller"
 import * as map from "./FCMmap"
 import * as model from "./FCMmodel"
 import * as context from "./FCMcontext"
@@ -105,7 +103,6 @@ export function removeItemAll(arr, value) {
 export function htmlEscape(str) {
 	return (
 		String(str)
-			//.replace(/(?:\r|\n|\r\n)/g, "SNLB")
 			.replace(/&/g, "&amp;")
 			.replace(/"/g, "&quot;")
 			.replace(/'/g, "&#39;")
@@ -284,7 +281,6 @@ function getMapWidthAndShift() {
 }
 
 export function exportIndex(index) {
-	//if (index === 0) return 0
 	if (index === -1) return -1
 	const { mapWidthSq, xShift, yShift } = getMapWidthAndShift()
 
@@ -1513,8 +1509,6 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	context.resetContextAndHighlights()
 
 	// 0 = tiles
-	//store.mapData.tiles = JSON.parse(JSON.stringify(inputModel[0]))
-	//map.initCoords()
 	store.mapData.tiles.splice(0)
 	store.mapData.coords.splice(0)
 	Object.assign(store.mapData.tiles, inputModel[0][0])
@@ -1557,7 +1551,6 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	// 5 - bank
 	store.bank = inputModel[5]
 	// 6 - gameflow
-	//store.gameflow.splice(0)
 	Object.assign(store.gameflow, inputModel[6])
 	// 7 - campaigns
 	store.campaigns.splice(0)

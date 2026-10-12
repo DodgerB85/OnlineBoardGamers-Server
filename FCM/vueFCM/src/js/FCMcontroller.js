@@ -1907,7 +1907,6 @@ export async function endPlayerTurn(forced, isPointlessMove = false, extraPostDa
 			store.gameflow.turnOrder.splice(0)
 			endCurrentPhase()
 			// Game over is saved on game end
-			//if (store.gameflow.phase === rf.PHASE_GAME_OVER) return
 		}
 
 		// You always want to save a rewind, even at the END of a pointless move
@@ -1943,7 +1942,6 @@ export async function endPlayerTurn(forced, isPointlessMove = false, extraPostDa
 		store.gameflow.turnOrder = store.gameflow.turnOrder.filter((playerIndex) => playerIndex !== personal.pov)
 		// NEED TO REBUILD THE TO ARRAY NOW, OTHERWISE VUE GFX THAT REALLY ON (eg turnOder[0]) WILL CAUSE ERRORS
 		// The turn order should be set/reset again after processing the end of the simul turn
-		//if (store.gameflow.turnOrder.length === 0) store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
 		let moveData = []
 		if (store.gameflow.phase === rf.PHASE_SETUP_RESERVE) moveData.push(store.reserveCards[personal.pov])
 		else if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) {
@@ -1956,7 +1954,6 @@ export async function endPlayerTurn(forced, isPointlessMove = false, extraPostDa
 	} else if (store.gameflow.phase === rf.PHASE_PAYDAY) {
 		let paidInFood = [...store.context.preMoveData[0][1]]
 		let paydayMoveData = [[...store.context.justFired], [...paidInFood]]
-		//if (paydayMoveData[0].length === 0) paydayMoveData[0] = [[-8], []]
 		if (paydayMoveData[0].length === 0) paydayMoveData[0] = [-8]
 		// NOW NEED TO ADD ANY CLEANUP ON THE END
 		if (store.context.preMoveData[1].length === 0) store.context.preMoveData[1] = [-9]
@@ -2061,7 +2058,6 @@ export async function endCurrentPhase() {
 	// --- PHASE: SETUP RESTAURANT 1 ---
 	if (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1) {
 		const readyPlayers = store.players.filter((p) => p.restaurants.length > 0 || p.displayName === rf.BOT_NAME)
-		console.log(`readyPlayers: ${readyPlayers.length}`)
 		if (readyPlayers.length === store.players.length) {
 			if (store.startingOptions.shortGame) {
 				if (store.gameflow.turn === 0) {

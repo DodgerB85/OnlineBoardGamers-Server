@@ -277,7 +277,6 @@ function showLobbyistGhost(index) {
 
 	let imgSrc = ""
 	let width = 2 * sqSize
-	//let height = sqSize
 
 	if (bType === 0) {
 		// Road - under construction image (placed on current turn)

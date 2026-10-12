@@ -2406,7 +2406,6 @@ export function baseSalary(playerIndex, applyFirstTrainDiscount = true) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
 	// Bots should not be paying back into the bank
-	//alert(`name: ${player.name} -- displayName: ${player.displayName} -- equalsBot: ${player.displayName === rf.BOT_NAME}`)
 	if (playerObj.displayName === rf.BOT_NAME) return 0
 
 	let due = 0
@@ -2557,7 +2556,6 @@ export function canPayWithMoney(playerIndex, n) {
 export function paySalaries(foodPayements) {
 	const store = useModelStore()
 	let histo = []
-	console.log(`[PAY] ========== PAYSalaries ========== POV=${store.players[0]?.displayName || '?'}`)
 	for (let i = 0; i < store.players.length; i++) {
 		let player = store.players[i]
 		let foodPayement = foodPayements[i]
@@ -2583,7 +2581,6 @@ export function paySalaries(foodPayements) {
 			due = normalAfterFood + switchDue
 		}
 
-		//if (!Rules.canAffordPayDay(player) && plyr.hasMilestone(i, FIRST_TRAINER_USED)) {
 		if (due > player.money && plyr.hasMilestone(i, rf.FIRST_TRAINER_USED)) {
 			store.bank += player.money
 			player.money = 0
@@ -2591,7 +2588,6 @@ export function paySalaries(foodPayements) {
 				histo.push([due, player.resources.length])
 				player.resources = []
 			} else histo.push([due])
-			console.log(`[PAY] ${player.displayName}: due=${due} PRE=$${preMoney} trainer_bust → money=$${player.money}`)
 		} else {
 			player.money -= due
 			store.bank += due
@@ -2601,7 +2597,6 @@ export function paySalaries(foodPayements) {
 			} else {
 				histo.push([due])
 			}
-			console.log(`[PAY] ${player.displayName}: due=${due} PRE=$${preMoney} → money=$${player.money}`)
 		}
 		clearHeadhuntSalaries(i)
 	}
