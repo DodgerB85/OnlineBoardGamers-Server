@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 14:20+0800\n"
+"POT-Creation-Date: 2026-10-12 21:50+0800\n"
 "PO-Revision-Date: 2023-10-07 20:03+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,27 +18,23 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 3.3.2\n"
 
-#: .\HLC\common.py:219
+#: .\common.py:224
 msgid "Your Practice game has started"
 msgstr "你的练习局已开始"
 
-#: .\HLC\templates\HLC\HLCgameSummary.html:19
+#: .\templates\HLC\HLCgameSummary.html:13
 msgid "Horseless Carriage Game Summary"
 msgstr "Horseless Carriage游戏总结"
 
-#: .\HLC\templates\HLC\HLChelp.html:5
+#: .\templates\HLC\HLChelp.html:5
 msgid "Horseless Carriage Help"
 msgstr "Horseless Carriage帮助"
 
-#: .\HLC\templates\HLC\HLChelp.html:9 .\HLC\templates\HLC\HLCtemplate.html:46
+#: .\templates\HLC\HLChelp.html:9 .\templates\HLC\HLCtemplate.html:46
 msgid "Rules"
 msgstr "规则"
 
-#: .\HLC\templates\HLC\HLChelp.html:12
-#| msgid ""
-#| "Horseless Carriage rules available <a "
-#| "href='https://boardgamegeek.com/filepage/251309/first-edition-english-"
-#| "rulebook' target='_blank'>here</a>"
+#: .\templates\HLC\HLChelp.html:12
 msgid ""
 "Horseless Carriage rules available <a "
 "href=\"https://boardgamegeek.com/filepage/251309/first-edition-english-"
@@ -48,7 +44,7 @@ msgstr ""
 "href=\"https://boardgamegeek.com/filepage/251309/first-edition-english-"
 "rulebook\" target=\"_blank\">此处</a>"
 
-#: .\HLC\templates\HLC\HLChelp.html:19
+#: .\templates\HLC\HLChelp.html:19
 msgid ""
 "How to play guide example <a "
 "href=\"https://www.youtube.com/watch?v=It25avQY23A\" "
@@ -57,87 +53,87 @@ msgstr ""
 "玩法示例见 <a href=\"https://www.youtube.com/watch?v=It25avQY23A\" "
 "target=\"_blank\">此处</a>"
 
-#: .\HLC\templates\HLC\HLChelp.html:26
+#: .\templates\HLC\HLChelp.html:26
 msgid "Playing the Game"
 msgstr "进行游戏"
 
-#: .\HLC\templates\HLC\HLChelp.html:29
+#: .\templates\HLC\HLChelp.html:29
 msgid "The active player has a yellow highlight"
 msgstr "当前行动玩家为黄色高亮"
 
-#: .\HLC\templates\HLC\HLChelp.html:31
+#: .\templates\HLC\HLChelp.html:31
 msgid ""
 "Click on a player's name to view their factory - their name will get a green"
 " border to show you are looking at their factory. You can also click their "
 "name again as a shortcut to go back to the Market Board screen"
 msgstr "点击玩家名字可查看其工厂——名字会出现绿色边框，表示你正在查看其工厂。再次点击名字可快捷返回市场版图屏幕"
 
-#: .\HLC\templates\HLC\HLChelp.html:37
-msgid "If the pieces are obscuring the Tech Track, click the \\"
-msgstr "若棋子遮挡了科技轨道，点击 \\"
+#: .\templates\HLC\HLChelp.html:37
+#| msgid "If the pieces are obscuring the Tech Track, click the \\"
+msgid ""
+"If the pieces are obscuring the Tech Track, click the “Hide Pieces” button, "
+"next to the Min Specs board"
+msgstr "如果棋子挡住了科技轨道，请点击 Min Specs 版旁边的“隐藏棋子”按钮"
 
-#: .\HLC\templates\HLC\HLChelp.html:40
+#: .\templates\HLC\HLChelp.html:40
 msgid "Factory building can be done simultaneously."
 msgstr "工厂建造可以同时进行。"
 
-#: .\HLC\templates\HLC\HLChelp.html:44
+#: .\templates\HLC\HLChelp.html:44
 msgid ""
 "If you are not first in turn order, you can submit your factory and it will "
 "be verified in turn order."
 msgstr "若你不是回合顺序第一，可先提交工厂，系统会按回合顺序校验。"
 
-#: .\HLC\templates\HLC\HLChelp.html:48
-msgid "In the lobby, you will show up under \\"
-msgstr "在大厅中，你会显示在 \\ 下"
+#: .\templates\HLC\HLChelp.html:48
+msgid ""
+"In the lobby, you will show up under “current players” until your factory is"
+" verified"
+msgstr "在大厅中，你的工厂通过验证之前会显示在“当前玩家”下"
 
-#: .\HLC\templates\HLC\HLChelp.html:50
-msgid "In this case the game won't have the green \\"
-msgstr "这种情况下游戏不会有绿色 \\"
+#: .\templates\HLC\HLChelp.html:50
+msgid ""
+"In this case the game won't have the green “Your Move” highlight until you "
+"need to make a move again."
+msgstr "在这种情况下，游戏不会显示绿色的“该你行动”高亮，直到你再次需要行动为止。"
 
-#: .\HLC\templates\HLC\HLChelp.html:52
+#: .\templates\HLC\HLChelp.html:52
 msgid ""
 "If previous players use up the components, factory building will be re-"
 "enabled and you will need to remove those components."
 msgstr "若之前的玩家用尽了组件，工厂建造将重新启用，你需要移除那些组件。"
 
-#: .\HLC\templates\HLC\HLChelp.html:57
+#: .\templates\HLC\HLChelp.html:57
 msgid ""
 "To prevent losing your factory mid-build, the game won't update live during "
 "this phase. Check the lobby or refresh your game"
 msgstr "为防止建造中途丢失工厂，本阶段游戏不会实时更新。请查看大厅或刷新游戏"
 
-#: .\HLC\templates\HLC\HLChelp.html:62
+#: .\templates\HLC\HLChelp.html:62
 msgid ""
 "you will also be sent a notification once you need to move, if you have "
 "enabled this in your profile."
 msgstr "若你在个人资料中启用，需要走子时也会收到通知。"
 
-#: .\HLC\templates\HLC\HLChelp.html:65
+#: .\templates\HLC\HLChelp.html:65
 msgid "During factory building, a tech level summary is displayed."
 msgstr "工厂建造期间会显示科技等级摘要。"
 
-#: .\HLC\templates\HLC\HLChelp.html:67
+#: .\templates\HLC\HLChelp.html:67
 msgid "Your techs have a bar with a green outline"
 msgstr "你的科技条为绿色轮廓"
 
-#: .\HLC\templates\HLC\HLChelp.html:69
+#: .\templates\HLC\HLChelp.html:69
 msgid ""
 "Techs you have access to this turn (but have not researched yourself) have a"
 " bar with a yellow outline"
 msgstr "本回合你可访问（但自己未研究）的科技条为黄色轮廓"
 
-#: .\HLC\templates\HLC\HLChelp.html:75
+#: .\templates\HLC\HLChelp.html:75
 msgid "How can I see which Market Windows have been placed?"
 msgstr "如何查看放置了哪些市场窗口？"
 
-#: .\HLC\templates\HLC\HLChelp.html:78
-#| msgid ""
-#| "Any dealership with sales potential will be shown under the player names. "
-#| "Clicking on a dealership with a placed Market Window will show you the "
-#| "remaining squares it can sell to. If the Market Window has not been placed, "
-#| "then all eligible squares will be highlighted. <BR/> The Market Windows also"
-#| " have a name on them, in the top left, althought this can be obscured if "
-#| "other Market Windows are placed on top."
+#: .\templates\HLC\HLChelp.html:78
 msgid ""
 "Any dealership with sales potential will be shown under the player names. "
 "Clicking on a dealership with a placed Market Window will show you the "
@@ -146,27 +142,19 @@ msgid ""
 msgstr ""
 "任何有销售潜力的经销商会显示在玩家名称下方。点击已放置市场窗口的经销商，会显示其仍可销售的方格。若尚未放置市场窗口，则高亮所有符合条件的方格。"
 
-#: .\HLC\templates\HLC\HLChelp.html:84
+#: .\templates\HLC\HLChelp.html:84
 msgid ""
 "The Market Windows also have a name on them, in the top left, althought this"
 " can be obscured if other Market Windows are placed on top."
 msgstr "市场窗口左上角也有名称，尽管若其他市场窗口叠在上面可能被遮挡。"
 
-#: .\HLC\templates\HLC\HLChelp.html:92
+#: .\templates\HLC\HLChelp.html:92
 msgid ""
 "I am second in Engineering Focus. Why can't I build techs from people with "
 "lower Engineering Focus?"
 msgstr "我是工程焦点顺位的第二名。为什么我不能从工程关注度较低的人那里建造技术站？"
 
-#: .\HLC\templates\HLC\HLChelp.html:96
-#| msgid ""
-#| "From the rulebook: \"The player with the second highest engineering focus "
-#| "has access to every technology researched by at least two players; the "
-#| "third, to any researched by three others; and the fourth to any research "
-#| "done by 4 players already.\"<BR/> So in fact, you can build techs you "
-#| "haven't researched, but it must have been researched by at least 2 players. "
-#| "If there is a tech that has only been researched by one person, even if they"
-#| " are lower in engineering focus, then you will not have access to it."
+#: .\templates\HLC\HLChelp.html:96
 msgid ""
 "From the rulebook: \"The player with the second highest engineering focus "
 "has access to every technology researched by at least two players; the "
@@ -175,15 +163,7 @@ msgid ""
 msgstr ""
 "规则书原文：“工程关注度第二高的玩家可使用至少两名玩家研究过的每一项技术；第三名可使用三名玩家研究过的技术；第四名可使用四名玩家已研究过的技术。”"
 
-#: .\HLC\templates\HLC\HLChelp.html:102
-#| msgid ""
-#| "From the rulebook: \"The player with the second highest engineering focus "
-#| "has access to every technology researched by at least two players; the "
-#| "third, to any researched by three others; and the fourth to any research "
-#| "done by 4 players already.\"<BR/> So in fact, you can build techs you "
-#| "haven't researched, but it must have been researched by at least 2 players. "
-#| "If there is a tech that has only been researched by one person, even if they"
-#| " are lower in engineering focus, then you will not have access to it."
+#: .\templates\HLC\HLChelp.html:102
 msgid ""
 "So in fact, you can build techs you haven't researched, but it must have "
 "been researched by at least 2 players. If there is a tech that has only been"
@@ -191,11 +171,11 @@ msgid ""
 " are lower in engineering focus."
 msgstr "因此实际上你可以建造自己未研究过的科技，但必须至少有 2 名玩家研究过。若某科技只有一人研究过，即使其工程关注度更低，你也无法使用。"
 
-#: .\HLC\templates\HLC\HLChelp.html:112
+#: .\templates\HLC\HLChelp.html:112
 msgid "Why do I have to have a set focus turn if there is only one slot left?"
 msgstr "如果只剩下一个顺位槽，为什么我必须进行焦点设置？"
 
-#: .\HLC\templates\HLC\HLChelp.html:115
+#: .\templates\HLC\HLChelp.html:115
 msgid ""
 "You are probably missing a crucial point; you are now in the situation where"
 " if you were to go over 10 Gantt and there is only 1 clock left, then you "
@@ -206,14 +186,14 @@ msgstr ""
 "你可能漏掉了关键一点；现在的情况是若你要超过 10 甘特点且只剩 1 "
 "个钟，则由你决定游戏结束还是再来一轮。这很重要！因此我决定按实际规则保留游戏，而非做成跳过。"
 
-#: .\HLC\templates\HLC\HLChelp.html:120
+#: .\templates\HLC\HLChelp.html:120
 msgid ""
 "Additionally, the factory building phase happens before Gantt are increased,"
 " so it's basically impossible to know if someone below 10 Gantt will end up "
 "above or below 10 after the end of the factory building phase."
 msgstr "另外，工厂建造阶段发生在甘特点增加之前，因此几乎无法预知甘特点低于 10 的人在工厂建造结束后会高于还是低于 10。"
 
-#: .\HLC\templates\HLC\HLChelp.html:125
+#: .\templates\HLC\HLChelp.html:125
 msgid ""
 "Similarly, if someone is on 10 Gantt or higher, they might wish to spend "
 "them all right now in order to reset their Gantt, for example, if they only "
@@ -221,164 +201,160 @@ msgid ""
 "the punchclock number in a later turn."
 msgstr "类似地，若某人有 10 点或更多甘特点，他们可能想立刻花光以重置甘特点，例如只有 5 个规划部门，并希望之后回合有机会降低打卡钟数字。"
 
-#: .\HLC\templates\HLC\HLChelp.html:132
+#: .\templates\HLC\HLChelp.html:132
 msgid "When can I resign?"
 msgstr "何时可以认输？"
 
-#: .\HLC\templates\HLC\HLChelp.html:134
+#: .\templates\HLC\HLChelp.html:134
 msgid "You can resign during the Research phase."
 msgstr "你可以在研究阶段认输。"
 
-#: .\HLC\templates\HLC\HLChelp.html:138
-#| msgid "For further help contact"
+#: .\templates\HLC\HLChelp.html:138
 msgid "Further Help"
 msgstr "更多帮助"
 
-#: .\HLC\templates\HLC\HLChelp.html:140
+#: .\templates\HLC\HLChelp.html:140
 msgid "For any questions / comments / suggestions, please contact"
 msgstr "如有问题/意见/建议，请联系"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:30
+#: .\templates\HLC\HLCtemplate.html:30
 msgid "Home"
 msgstr "首页"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:34
+#: .\templates\HLC\HLCtemplate.html:34
 msgid "Chat"
 msgstr "聊天"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:37
+#: .\templates\HLC\HLCtemplate.html:37
 msgid "Bug"
 msgstr "缺陷"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:50
+#: .\templates\HLC\HLCtemplate.html:50
 msgid "Notes"
 msgstr "笔记"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:54
+#: .\templates\HLC\HLCtemplate.html:54
 msgid "Reserve"
 msgstr "储备"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:58
+#: .\templates\HLC\HLCtemplate.html:58
 msgid "History"
 msgstr "历史"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:63
+#: .\templates\HLC\HLCtemplate.html:63
 msgid "Rewind"
 msgstr "回退"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:69
+#: .\templates\HLC\HLCtemplate.html:67
+msgid "Replay"
+msgstr ""
+
+#: .\templates\HLC\HLCtemplate.html:72
 msgid "Connecting to server"
 msgstr "连接到服务器"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:72
+#: .\templates\HLC\HLCtemplate.html:75
 msgid "Logged in as"
 msgstr "登录为"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:75
+#: .\templates\HLC\HLCtemplate.html:78
 msgid "Time to next kickout"
 msgstr "到下一次踢出时间"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:87
+#: .\templates\HLC\HLCtemplate.html:90
 msgid ""
 "You can give permission for the host to rewind the game back to the start of"
 " the restructuring phase. All players must give permission before the host "
 "is able to rewind the game."
 msgstr "您可以允许房主将游戏倒回到重组阶段的开始。所有玩家必须获得许可，房主才能倒回游戏。"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:94
+#: .\templates\HLC\HLCtemplate.html:97
 msgid ""
 "Tournament games are a bit more competitive, so rewinds should not be "
 "expected"
 msgstr "锦标赛的竞争更激烈，所以不应该期待倒带"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:106
+#: .\templates\HLC\HLCtemplate.html:109
 msgid "Permission for single rewind"
 msgstr "允许单次倒带"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:114
+#: .\templates\HLC\HLCtemplate.html:117
 msgid "Permanent Permission"
 msgstr "永久许可"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:120
+#: .\templates\HLC\HLCtemplate.html:123
 msgid "Give Permission"
 msgstr "授予权限"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:123
-#: .\HLC\templates\HLC\HLCtemplate.html:159
+#: .\templates\HLC\HLCtemplate.html:126 .\templates\HLC\HLCtemplate.html:162
 msgid ""
 "Rewinding from the start of the sales phase will go to the very start of the"
 " factory building phase"
 msgstr "从销售阶段开始倒回，一直到工厂建设阶段开始"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:133
+#: .\templates\HLC\HLCtemplate.html:136
 msgid ""
 "As the game host, you must wait for all players to give permission. They can"
 " allow you to rewind once, or as much as you like. Try asking in chat for "
 "permission if you wish to rewind. Current Permissions:"
 msgstr "作为游戏房主，您必须等待所有玩家给予许可。它们可以让你倒回一次，也可以随心所欲。如果您想倒回，请尝试在聊天中请求许可。当前权限："
 
-#: .\HLC\templates\HLC\HLCtemplate.html:143
+#: .\templates\HLC\HLCtemplate.html:146
 msgid "Reload the whole page to refresh permissions"
 msgstr "重新加载整个页面来刷新权限"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:147
+#: .\templates\HLC\HLCtemplate.html:150
 msgid ""
 "Tournament games are a bit more competitive, so you should not feel "
 "obligated to accept a rewind request"
 msgstr "锦标赛更具竞争力，所以你不应该觉得有义务接受倒回请求"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:153
+#: .\templates\HLC\HLCtemplate.html:156
 msgid "REWIND"
 msgstr "倒回"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:156
+#: .\templates\HLC\HLCtemplate.html:159
 msgid "Please wait for all players to give permission"
 msgstr "请等待所有玩家给予许可"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:168
+#: .\templates\HLC\HLCtemplate.html:171
 msgid "Game"
 msgstr "游戏"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:171
+#: .\templates\HLC\HLCtemplate.html:174
 msgid "Turn"
 msgstr "回合"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:172
+#: .\templates\HLC\HLCtemplate.html:175
 msgid "Phase"
 msgstr "阶段"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:173
+#: .\templates\HLC\HLCtemplate.html:176
 msgid "Current player"
 msgstr "当前玩家"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:181
+#: .\templates\HLC\HLCtemplate.html:184
 msgid "Send a message"
 msgstr "发送消息"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:186
+#: .\templates\HLC\HLCtemplate.html:189
 msgid "Send"
 msgstr "发送"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:193
+#: .\templates\HLC\HLCtemplate.html:196
 msgid "Oldest First"
 msgstr "最年长的优先"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:198
+#: .\templates\HLC\HLCtemplate.html:201
 msgid "Newest First"
 msgstr "最年轻的优先"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:207
+#: .\templates\HLC\HLCtemplate.html:210
 msgid "Bug Report"
 msgstr "错误报告"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:210
+#: .\templates\HLC\HLCtemplate.html:213
 #, python-format
-#| msgid ""
-#| "Please submit a bug report if you encounter any issues, giving as much "
-#| "detail as possbile.<BR/> The game data will be submitted along with your "
-#| "report. <BR> You can also report it on the OBG discord. Click <a "
-#| "href=\"https://discord.gg/hCU7Fr77yV\" class=\"linkOther\" "
-#| "target=\"_blank\">Here</a> to join"
 msgid ""
 "Please submit a bug report if you encounter any issues, giving as much "
 "detail as possible. <br /> The game data will be submitted along with your "
@@ -388,35 +364,35 @@ msgstr ""
 "若遇到任何问题，请尽可能详细地提交缺陷报告。<br /> 游戏数据将随报告一起提交。<br /> 你也可以在 OBG Discord 报告。点击 <a "
 "href=\"%(url)s\" class=\"linkOther\" target=\"_blank\">此处</a> 加入。"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:223
+#: .\templates\HLC\HLCtemplate.html:226
 msgid "Submit"
 msgstr "提交"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:225
+#: .\templates\HLC\HLCtemplate.html:228
 msgid "Cancel"
 msgstr "取消"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:229
+#: .\templates\HLC\HLCtemplate.html:232
 msgid "Personal game notes"
 msgstr "个人游戏笔记"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:230
+#: .\templates\HLC\HLCtemplate.html:233
 msgid "Only you can see these notes"
 msgstr "只有你能看到这些笔记"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:235
+#: .\templates\HLC\HLCtemplate.html:238
 msgid "Save"
 msgstr "保存"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:236
+#: .\templates\HLC\HLCtemplate.html:239
 msgid "Clear"
 msgstr "清除"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:237
+#: .\templates\HLC\HLCtemplate.html:240
 msgid "Close"
 msgstr "关闭"
 
-#: .\HLC\templates\HLC\HLCtemplate.html:278
+#: .\templates\HLC\HLCtemplate.html:282
 msgid ""
 "Horseless Carriage is a board game by Jeroen Doumen and Joris Wiersinga, "
 "published by <a href='https://www.splottershop.com/'>Splotter Spellen</a>."
@@ -425,21 +401,8 @@ msgstr ""
 "href='https://www.splottershop.com/'>Splotter Spellen</a>出版。"
 
 #. Translators: This is an email
-#: .\HLC\templates\HLC\yourTurnEmailFactory.html:5
+#: .\templates\HLC\yourTurnEmailFactory.html:5
 #, python-format
-#| msgid ""
-#| "\n"
-#| "Hi %(user)s,\n"
-#| "\n"
-#| "It is your turn at Online Board Gamers - Horseless Carriage.\n"
-#| "\n"
-#| "Your factory needs building - you are now the current player.\n"
-#| "\n"
-#| "Game: %(gameName)s\n"
-#| "Turn/Phase: %(currentTurnString)s\n"
-#| "\n"
-#| "https://%(domain)s%(the_url)s\n"
-#| "\n"
 msgid ""
 "\n"
 "Hi %(user)s,\n"
@@ -471,19 +434,25 @@ msgstr ""
 "通知偏好可在你的个人资料中修改\n"
 "\n"
 
-#: .\HLC\views.py:45 .\HLC\views.py:85
+#: .\views.py:45 .\views.py:85
 msgid "Game does not exist"
 msgstr "游戏不存在"
 
-#: .\HLC\views.py:533
+#: .\views.py:540
 msgid ""
 "<b>No rewind data. Rewind limit reached. Please play on to generate more "
 "rewind data </b>"
 msgstr "<b>没有倒回数据。已达到倒回限制。请继续进行游戏以生成更多倒回数据</b>"
 
-#: .\HLC\views.py:538
+#: .\views.py:545
 msgid "<b>Permissions missing. Please reload the page and check again</b>"
 msgstr "<b>权限丢失。请重新加载页面并再次检查</b>"
+
+#~ msgid "In the lobby, you will show up under \\"
+#~ msgstr "在大厅中，你会显示在 \\ 下"
+
+#~ msgid "In this case the game won't have the green \\"
+#~ msgstr "这种情况下游戏不会有绿色 \\"
 
 #, fuzzy
 #~ msgid "Two Lives"

@@ -5487,12 +5487,12 @@ msgstr "Revenu à chaque tour"
 #: .\Private\Z_Deployment\HCgameSummary.js:37
 #: .\Private\Z_Deployment\HLCgameSummary.js:37
 msgid "Turn"
-msgstr "Tourner"
+msgstr "Tour"
 
 #: .\Private\Z_Deployment\HCgameSummary.js:38
 #: .\Private\Z_Deployment\HLCgameSummary.js:38
 msgid "Turn Income"
-msgstr "Transformer le revenu"
+msgstr "Revenu par tour"
 
 #: .\Private\Z_Deployment\HCgameSummary.js:39
 #: .\Private\Z_Deployment\HLCgameSummary.js:39
@@ -5503,7 +5503,7 @@ msgstr "Argent total"
 #: .\Private\Z_Deployment\HLCgameSummary-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCgameSummary.js:41
 msgid "Total Money VS Turn"
-msgstr "Argent total contre tour"
+msgstr "Argent total par tour"
 
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:12097

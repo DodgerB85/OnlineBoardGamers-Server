@@ -5483,12 +5483,12 @@ msgstr "Einkommen in jeder Runde"
 #: .\Private\Z_Deployment\HCgameSummary.js:37
 #: .\Private\Z_Deployment\HLCgameSummary.js:37
 msgid "Turn"
-msgstr "Drehen"
+msgstr "Runde"
 
 #: .\Private\Z_Deployment\HCgameSummary.js:38
 #: .\Private\Z_Deployment\HLCgameSummary.js:38
 msgid "Turn Income"
-msgstr "Einkommen umwandeln"
+msgstr "Einkommen pro Runde"
 
 #: .\Private\Z_Deployment\HCgameSummary.js:39
 #: .\Private\Z_Deployment\HLCgameSummary.js:39
@@ -5499,7 +5499,7 @@ msgstr "Gesamtgeld"
 #: .\Private\Z_Deployment\HLCgameSummary-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCgameSummary.js:41
 msgid "Total Money VS Turn"
-msgstr "Gesamtgeld vs. Umsatz"
+msgstr "Gesamtgeld pro Runde"
 
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:12097

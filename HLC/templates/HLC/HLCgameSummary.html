@@ -3,7 +3,7 @@
 {% block head %}
     <style>
         .HLCsummaryGraph { min-width: 500px; max-width: 500px; min-height: 300px; max-height: 300px; }
-        .centeredDiv { margin: 0 auto; }
+        .centeredDiv { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
     </style>
 {% endblock head %}
 {% block body %}
@@ -19,6 +19,13 @@
         <div class="centeredDiv">
             <canvas id="gameMoneySummary" class="HLCsummaryGraph"></canvas>
             <canvas id="gameIncomeSummary" class="HLCsummaryGraph"></canvas>
+            <canvas id="gameCarsSoldSummary" class="HLCsummaryGraph"></canvas>
+            <canvas id="gameCarsCumulativeSummary" class="HLCsummaryGraph"></canvas>
+            <canvas id="gameTrucksSoldSummary" class="HLCsummaryGraph"></canvas>
+            <canvas id="gameTrucksCumulativeSummary" class="HLCsummaryGraph"></canvas>
+            <canvas id="gameSportsSoldSummary" class="HLCsummaryGraph"></canvas>
+            <canvas id="gameSportsCumulativeSummary" class="HLCsummaryGraph"></canvas>
+            <canvas id="gameInnovationSummary" class="HLCsummaryGraph"></canvas>
         </div>
     </div>
     <script>

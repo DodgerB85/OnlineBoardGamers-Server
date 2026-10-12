@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\FCMbigString.js:979
@@ -5446,17 +5446,17 @@ msgstr "Ingresos en cada turno"
 #: .\Private\Z_Deployment\HCgameSummary.js:37
 #: .\Private\Z_Deployment\HLCgameSummary.js:37
 msgid "Turn"
-msgstr "Doblar"
+msgstr "Turno"
 
 #: .\Private\Z_Deployment\HCgameSummary.js:38
 #: .\Private\Z_Deployment\HLCgameSummary.js:38
 msgid "Turn Income"
-msgstr "Convertir ingresos"
+msgstr "Ingresos por turno"
 
 #: .\Private\Z_Deployment\HCgameSummary.js:39
 #: .\Private\Z_Deployment\HLCgameSummary.js:39
 msgid "Total Money"
-msgstr "dinero total"
+msgstr "Dinero total"
 
 #: .\Private\Z_Deployment\HCgameSummary.js:41
 #: .\Private\Z_Deployment\HLCgameSummary-obfuscated.js:1

@@ -5463,12 +5463,12 @@ msgstr "Guadagno ad ogni turno"
 #: .\Private\Z_Deployment\HCgameSummary.js:37
 #: .\Private\Z_Deployment\HLCgameSummary.js:37
 msgid "Turn"
-msgstr "Giro"
+msgstr "Turno"
 
 #: .\Private\Z_Deployment\HCgameSummary.js:38
 #: .\Private\Z_Deployment\HLCgameSummary.js:38
 msgid "Turn Income"
-msgstr "Trasforma il reddito"
+msgstr "Reddito per turno"
 
 #: .\Private\Z_Deployment\HCgameSummary.js:39
 #: .\Private\Z_Deployment\HLCgameSummary.js:39

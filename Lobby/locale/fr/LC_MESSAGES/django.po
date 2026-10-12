@@ -3014,7 +3014,7 @@ msgstr "Nous avons trouvé la meilleure mythologie"
 #: .\Lobby\sharedFunctions\sharedRefs.py:587
 #: .\Lobby\templates\Lobby\gameDisplay\currentGameRow.html:14
 msgid "Turn"
-msgstr "Tourner"
+msgstr "Tour"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:499
 #: .\Lobby\sharedFunctions\sharedRefs.py:601
