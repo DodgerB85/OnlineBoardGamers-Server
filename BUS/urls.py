@@ -23,6 +23,8 @@ urlpatterns = [
     ),
     path("<int:original_id>/", views.redirect_old_url, name="showBUSgameOld"),
     path("help/", views.BUShelp, name="BUShelp"),
+    path("BUSstats/", views.BUSstats, name="BUSstats"),
+    path("BUSstatGames/", views.BUSstatGames, name="BUSstatGames"),
     path("data/<int:dataType>/", views.busData, name="busData"),
     path("bugEntry/", views.bugEntry, name="bugEntry"),
     # API routes

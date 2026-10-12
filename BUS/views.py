@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, cast
 
 import lzstring
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -25,6 +26,7 @@ from Lobby.gameViewHelpers import (
 # fore change comment
 from Lobby.models import Game, Profile, User
 from Lobby.sharedFunctions.sharedFunctions import (
+    SF_fastSerializeGame,
     SF_updateFlexiTime,
 )
 from Lobby.sharedFunctions.sharedNotifications import (
@@ -598,3 +600,86 @@ def updateFinishedGameDataFormat(request):
     next_game_id = next_game.id if next_game else None
 
     return JsonResponse({"nextGameID": next_game_id})
+
+
+@login_required
+def BUSstats(request):
+    with open("./BUS/BUSstats/BUS_stats.json") as f:
+        data = json.load(f)
+
+    return render(
+        request,
+        "BUS/BUSstats.html",
+        {
+            "timeString": data["time_string"],
+            "all_data": data["player_counts"],
+        },
+    )
+
+
+@login_required
+def BUSstatGames(request):
+    # Post is required
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    # Get the game ids
+    gameIDs = json.loads(request.POST["game_ids"])
+
+    total_games_count = len(gameIDs)
+    unique_gameIDs = list(set(gameIDs))
+
+    unique_gameIDs.reverse()
+
+    # Pagination settings
+    page = request.POST.get("page", 1)  # Get the current page number from the request
+    items_per_page = 20  # Number of games to display per page
+
+    # Get the total count of games BEFORE slicing gameIDs
+    total_games_count_unique = len(unique_gameIDs)
+
+    # Initialize paginator and related variables outside the try block
+    paginator = Paginator(unique_gameIDs, items_per_page)
+    gameIDs_page = []
+    num_pages = 1  # Default to 1 page if there are no games
+
+    # Slice gameIDs for the current page
+    try:
+        gameIDs_page = paginator.page(page).object_list  # Get the gameIDs for the current page
+        num_pages = paginator.num_pages
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        gameIDs_page = paginator.page(1).object_list
+        page = 1
+        num_pages = paginator.num_pages
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        gameIDs_page = paginator.page(paginator.num_pages).object_list
+        page = paginator.num_pages
+
+    # Filter the games for the current page ONLY
+    finishedGames = (
+        Game.objects.filter(id__in=gameIDs_page, gameCode="BUS")
+        .order_by("-latestUpdate")
+        .select_related("creator__profile", "creator")
+        .prefetch_related(
+            "players__player",
+            "invitedPlayers",
+        )
+    )
+
+    # Serialize ONLY the games for the current page
+    finishedGamesListJson = [SF_fastSerializeGame(game, request.user) for game in finishedGames]
+
+    return render(
+        request,
+        "BUS/BUSstatGames.html",
+        {
+            "finishedGamesList": finishedGamesListJson,
+            "page": int(page),
+            "num_pages": num_pages,
+            "total_games_count_unique": total_games_count_unique,  # Pass the total count to the template
+            "total_games_count": total_games_count,
+            "game_ids_json": request.POST["game_ids"],  # Pass the game_ids back to the template
+        },
+    )
