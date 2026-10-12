@@ -174,6 +174,7 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 
 // Full footprint (all covered squares) of one house on the board
 function pushHouseFootprint(houseNumber, squares) {
+	const store = useModelStore()
 	const houseIndex = map.findIndexForHouse(houseNumber)
 	if (houseIndex === -1) return
 	const houseData = store.houses.find((hs) => hs.number === houseNumber)

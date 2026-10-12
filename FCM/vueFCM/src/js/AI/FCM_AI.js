@@ -530,8 +530,8 @@ export async function makeAImove() {
 						break
 					}
 				}
-				emergnecyCheck++
 			}
+			emergnecyCheck++
 		}
 		emergnecyCheck = 0
 		while (rules.salary(playerIndex) > playerObj.money && emergnecyCheck <= 50) {
@@ -545,8 +545,8 @@ export async function makeAImove() {
 						break
 					}
 				}
-				emergnecyCheck++
 			}
+			emergnecyCheck++
 		}
 		for (let i = playerObj.marketers.length - 1; i >= 0; i--) {
 			let employee = playerObj.marketers[i].marketer

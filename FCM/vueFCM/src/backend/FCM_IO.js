@@ -1646,7 +1646,7 @@ export function processSimulMoveData(data) {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminPhaseMismatchSetupReserve")
 				sendDiscordWebhook(`JS ERROR: phase mismatch in SETUP_RESERVE - gameID: ${personal.gameID} player: ${store.players[i].name} phase: ${store.gameflow.phase} decompressedData: ${JSON.stringify(decompressedData)}`)
 			}
-			if (!decompressedData[i][0] === store.players[i].name && store.players[i].name !== rf.TOURNAMENT_ADMIN_NAME) {
+			if (decompressedData[i][0] !== store.players[i].name && store.players[i].name !== rf.TOURNAMENT_ADMIN_NAME) {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminNameMismatchSetupReserve")
 				sendDiscordWebhook(`JS ERROR: player name mismatch in SETUP_RESERVE - gameID: ${personal.gameID} player: ${store.players[i].name} decompressedData: ${JSON.stringify(decompressedData)}`)
 			}
