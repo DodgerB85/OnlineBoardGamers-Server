@@ -2090,44 +2090,25 @@ class FCMpresenter(GamePresenter):
                 rfFCM.SO_MOVIE_STARS,
                 rfFCM.SO_NIGHT_SHIFT,
             ]
-            # Chinese expansion: create-time only writes the pool marker (203).
-            # Legacy games may already have the four module flags pre-written —
+            # Expansion pools: create-time only writes the pool marker (203 Chinese, 204 fan).
+            # Legacy games may already have the module flags pre-written —
             # strip those too and treat them as pool candidates either way.
-            chineseFlags = [
-                rfFCM.SO_JAZZ_MUSICIANS,
-                rfFCM.SO_DUMPLINGS,
-                rfFCM.SO_DELIVERY_DRIVERS,
-                rfFCM.SO_HAWKERS,
-            ]
-            chineseInPool = (
-                rfFCM.SO_RANDOM_MODULES_CHINESE in starting_options
-                or any(x in starting_options for x in chineseFlags)
-            )
-            starting_options = [
-                x
-                for x in starting_options
-                if x != rfFCM.SO_RANDOM_MODULES_CHINESE and x not in chineseFlags
-            ]
-            if chineseInPool:
-                availableModules.extend(chineseFlags)
-            # Fan mods: same create-time marker pattern as the Chinese expansion
-            fanFlags = [
-                rfFCM.SO_FRIED_CHICKEN,
-                rfFCM.SO_STADIUM,
-                rfFCM.SO_LABOR_MARKET,
-                rfFCM.SO_SECOND_BAILOUT,
-            ]
-            fanInPool = (
-                rfFCM.SO_RANDOM_MODULES_FAN in starting_options
-                or any(x in starting_options for x in fanFlags)
-            )
-            starting_options = [
-                x
-                for x in starting_options
-                if x != rfFCM.SO_RANDOM_MODULES_FAN and x not in fanFlags
-            ]
-            if fanInPool:
-                availableModules.extend(fanFlags)
+            expansionPools = []
+            for marker, flags in [
+                (
+                    rfFCM.SO_RANDOM_MODULES_CHINESE,
+                    [rfFCM.SO_JAZZ_MUSICIANS, rfFCM.SO_DUMPLINGS, rfFCM.SO_DELIVERY_DRIVERS, rfFCM.SO_HAWKERS],
+                ),
+                (
+                    rfFCM.SO_RANDOM_MODULES_FAN,
+                    [rfFCM.SO_FRIED_CHICKEN, rfFCM.SO_STADIUM, rfFCM.SO_LABOR_MARKET, rfFCM.SO_SECOND_BAILOUT],
+                ),
+            ]:
+                inPool = marker in starting_options or any(x in starting_options for x in flags)
+                starting_options = [x for x in starting_options if x != marker and x not in flags]
+                if inPool:
+                    availableModules.extend(flags)
+                expansionPools.append((inPool, flags))
             # Add hard choices only with original MS
             if rfFCM.SO_NEW_MS not in starting_options:
                 availableModules.append(rfFCM.SO_HARD_CHOICES)
@@ -2158,12 +2139,10 @@ class FCMpresenter(GamePresenter):
                 chosenDistOption = distOptions[currentIndex]
                 if chosenDistOption > 0:
                     selectedModules.append(chosenDistOption)
-            # Only exclude stats if a Chinese module actually made the roll
-            if chineseInPool and any(x in selectedModules for x in chineseFlags):
-                self.gameObj.statsExcludedGame = True
-            # Same for fan mods
-            if fanInPool and any(x in selectedModules for x in fanFlags):
-                self.gameObj.statsExcludedGame = True
+            # Only exclude stats if an expansion module actually made the roll
+            for inPool, flags in expansionPools:
+                if inPool and any(x in selectedModules for x in flags):
+                    self.gameObj.statsExcludedGame = True
             starting_options.extend(selectedModules)
             self.gameObj.startingOptions = json.dumps(starting_options, separators=(",", ":"))
 

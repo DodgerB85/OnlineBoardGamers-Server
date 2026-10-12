@@ -17,7 +17,7 @@ This doc uses FCM as the reference; the same pattern applies to any game's start
 Add `SO_<MODULE_NAME> = <next free int>`. Keep ids stable once published: they are persisted in DB rows and recognised by stats utilities (`siteUtils/calcStats_FCM.py`) and old clients.
 
 - Regular fan-module ids are 1..99 (note the `SO_NEW_DISTRICTS_*` family uses 181/182/183 sub-variants).
-- Chinese-expansion module range is separate (the `SO_RANDOM_MODULES`/`SO_RANDOM_MODULES_CHINESE` machinery rolls real ids into `startingOptions` in `FCMpresenter.startGame`, see below).
+- Chinese-expansion module range is separate (the `SO_RANDOM_MODULES`/`SO_RANDOM_MODULES_CHINESE` machinery rolls real ids into `startingOptions` in `FCMpresenter.startGame`, see below). The fan expansion works the same way with `SO_RANDOM_MODULES_FAN` (204).
 
 ### 2. Creation form — `Lobby/templates/Lobby/createFCM.html`
 
