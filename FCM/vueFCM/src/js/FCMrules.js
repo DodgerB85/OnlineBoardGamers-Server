@@ -2763,6 +2763,19 @@ function stadiumAnnouncementLead() {
 	return 2
 }
 
+// The injected STADIUM need only exists inside doDinnerTime's synchronous
+// run, so displays that should count it during the working day (map arena
+// token, board total demand) derive it from the announcement instead.
+// Game day only - never the milestone holder's early lead turns, that
+// knowledge stays private.
+export function stadiumGameDayDemand() {
+	const store = useModelStore()
+	if (!store.startingOptions.stadium) return null
+	if (store.stadium.announcement === null) return null
+	if (store.gameflow.turn !== 5 + store.stadium.gamesPlayed * 3) return null
+	return { food: store.stadium.announcement.food, units: store.stadium.announcement.units }
+}
+
 // Called at the end of a turn (after Dinnertime, during clean-up) with the turn
 // that just ended. Creates the announcement for the next game when it is due.
 // With the First Stadium Supplier milestone the announcement is rolled one turn
