@@ -765,23 +765,23 @@ export function replayAddFreeway(historyIndex, playerIndex, param) {
 		if (map.isIndexOnLeftEdgeOfMap(index, 1)) {
 			highlightIndex--
 			if (!rotated) store.context.highlightHistorySquares.push(highlightIndex, highlightIndex - 1, highlightIndex - 2)
-			else if (rotated) store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
+			else store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
 		} else {
 			highlightIndex++
 			if (!rotated) store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + 1, highlightIndex + 2)
-			else if (rotated) store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
+			else store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
 		}
 	}
 	// if on top/bot
-	else if (!sides) {
+	else {
 		if (map.isIndexOnBottomEdgeOfMap(index, 1)) {
 			highlightIndex += rf.ssW
 			if (!rotated) store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + 1, highlightIndex + 2)
-			else if (rotated) store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
+			else store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
 		} else {
 			highlightIndex -= rf.ssW
 			if (!rotated) store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + 1, highlightIndex + 2)
-			else if (rotated) store.context.highlightHistorySquares.push(highlightIndex, highlightIndex - rf.ssW, highlightIndex - rf.ssW * 2)
+			else store.context.highlightHistorySquares.push(highlightIndex, highlightIndex - rf.ssW, highlightIndex - rf.ssW * 2)
 		}
 	}
 	model.addFreeway(index, rotated, sides)
@@ -881,14 +881,14 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 			let widthOnLeft = width
 			if (widthOnLeft === 2) widthOnLeft = 1
 			if (map.isIndexOnLeftEdgeOfMap(campaignIndex, widthOnLeft)) highlightIndex -= 1 * width
-			else if (!map.isIndexOnLeftEdgeOfMap(campaignIndex, widthOnLeft)) highlightIndex += 1
+			else highlightIndex += 1
 		}
 		// If on top/bottom
 		else {
 			let widthOnBottom = width
 			if (param[1] === 4) widthOnBottom = 1
 			if (map.isIndexOnBottomEdgeOfMap(campaignIndex, widthOnBottom)) highlightIndex += rf.ssW
-			else if (!map.isIndexOnBottomEdgeOfMap(campaignIndex, widthOnBottom)) highlightIndex -= rf.ssW * height
+			else highlightIndex -= rf.ssW * height
 		}
 	}
 

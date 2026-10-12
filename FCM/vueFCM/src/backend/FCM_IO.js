@@ -19,8 +19,8 @@ import { usePersonalStore } from "../stores/FCMpersonal.js"
 
 function restartKickoutTimers() {
 	const personal = usePersonalStore()
-	if (personal.kickoutCountdownIntervalTimer != null) clearInterval(personal.kickoutCountdownIntervalTimer)
-	if (personal.flexiKickoutCountdownIntervalTimer != null) clearInterval(personal.flexiKickoutCountdownIntervalTimer)
+	clearInterval(personal.kickoutCountdownIntervalTimer)
+	clearInterval(personal.flexiKickoutCountdownIntervalTimer)
 	if (personal.secondsToNextKickout <= 1200) {
 		personal.kickoutCountdownIntervalTimer = setInterval(view.kickoutTimerTicker, 1000)
 	}
@@ -496,7 +496,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 		...extraPostData,
 	}
 
-	if ((window.initData.gameData === "" || !window.initData.gameData) && store.gameflow.turn === 0) {
+	if (!window.initData.gameData && store.gameflow.turn === 0) {
 		//postData.mapTiles = map.getOriginalTiles(false)
 		window.initData.startingMap = map.getOriginalTiles(false)
 	}
@@ -1945,8 +1945,7 @@ export function checkPaydayDataValid(playerIndex, paydayData) {
 		let due = rules.salary(playerIndex)
 		let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
 		// Remove any coffee
-		let resourceCopy = [...playerObj.resources]
-		resourceCopy = funcs.removeItemAll(playerObj.resources, rf.COFFEE)
+		let resourceCopy = funcs.removeItemAll(playerObj.resources, rf.COFFEE)
 		let excessItems = true
 		if (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) && resourceCopy.length > 0) {
 			due -= unitarySalary * resourceCopy.length
@@ -1966,7 +1965,7 @@ export function checkPaydayDataValid(playerIndex, paydayData) {
 	}
 
 	// Finally, it must be a fired move. So check can pay salary
-	if (paydayData[0].length >= 1 && paydayData[0][0] >= 0) {
+	if (paydayData[0][0] >= 0) {
 		let due = rules.salary(playerIndex)
 
 		// Make sure any paid in food is still valid

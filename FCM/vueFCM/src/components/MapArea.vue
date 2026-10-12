@@ -164,7 +164,7 @@ const tvAntennaDisplays = computed(() => {
 	const sqSize = store.refSize / 5
 	for (const c of store.campaigns) {
 		if (rf.MARKETING_CAMPAIGNS[c.number]?.type !== rf.TV_CHANNEL) continue
-		for (const house of c.houses || []) {
+		for (const house of c.houses) {
 			// Board apartments (3.2 / 9.7) live outside store.houses - findApartment locates them
 			let houseObj = model.findHouse(house)
 			if (houseObj === -1) houseObj = model.findApartment(house)
@@ -621,7 +621,7 @@ const needDisplays = computed(() => {
 			}
 			continue
 		}
-		if (!need.needs || need.needs.length === 0) continue
+		if (need.needs.length === 0) continue
 
 		// House needs
 		const houseObj = model.findHouse(need.number)

@@ -45,21 +45,21 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 			if (map.isIndexOnLeftEdgeOfMap(index, 1)) {
 				highlightIndex--
 				if (!rotated) squares.push(highlightIndex, highlightIndex - 1, highlightIndex - 2)
-				else if (rotated) squares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
+				else squares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
 			} else {
 				highlightIndex++
 				if (!rotated) squares.push(highlightIndex, highlightIndex + 1, highlightIndex + 2)
-				else if (rotated) squares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
+				else squares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
 			}
-		} else if (!sides) {
+		} else {
 			if (map.isIndexOnBottomEdgeOfMap(index, 1)) {
 				highlightIndex += rf.ssW
 				if (!rotated) squares.push(highlightIndex, highlightIndex + 1, highlightIndex + 2)
-				else if (rotated) squares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
+				else squares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
 			} else {
 				highlightIndex -= rf.ssW
 				if (!rotated) squares.push(highlightIndex, highlightIndex + 1, highlightIndex + 2)
-				else if (rotated) squares.push(highlightIndex, highlightIndex - rf.ssW, highlightIndex - rf.ssW * 2)
+				else squares.push(highlightIndex, highlightIndex - rf.ssW, highlightIndex - rf.ssW * 2)
 			}
 		}
 	} else if (action === rf.HIST_LOBBYIST_PARK) {
@@ -137,12 +137,12 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 				let widthOnLeft = width
 				if (widthOnLeft === 2) widthOnLeft = 1
 				if (map.isIndexOnLeftEdgeOfMap(campaignIndex, widthOnLeft)) highlightIndex -= 1 * width
-				else if (!map.isIndexOnLeftEdgeOfMap(campaignIndex, widthOnLeft)) highlightIndex += 1
+				else highlightIndex += 1
 			} else {
 				let widthOnBottom = width
 				if (entry3[1] === 4) widthOnBottom = 1
 				if (map.isIndexOnBottomEdgeOfMap(campaignIndex, widthOnBottom)) highlightIndex += rf.ssW
-				else if (!map.isIndexOnBottomEdgeOfMap(campaignIndex, widthOnBottom)) highlightIndex -= rf.ssW * height
+				else highlightIndex -= rf.ssW * height
 			}
 		}
 		if (campaignNumber <= 16 || (campaignNumber >= 30 && campaignNumber <= 35)) {

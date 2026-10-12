@@ -40,7 +40,6 @@ function marketerCampaignImage(playerIndex, marketer) {
 // Count of each resource type the player holds
 const resourceCounts = computed(() => {
 	const player = store.players[props.playerIndexProp]
-	if (!player) return {}
 	const counts = {}
 	for (const r of player.resources) counts[r] = (counts[r] || 0) + 1
 	return counts
@@ -56,7 +55,7 @@ const resourceCounts = computed(() => {
 					<div class="milestoneTitle">{{ rf.MILESTONES_STR[ms].title.toUpperCase() }}</div>
 					<div class="milestoneText">{{ rf.MILESTONES_STR[ms].description }}</div>
 					<div class="milestoneSpacer">&nbsp;</div>
-					<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms].img)" :class="rf.MILESTONES_STR[ms].additionalClass ? rf.MILESTONES_STR[ms].additionalClass : ''" />
+					<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms].img)" :class="rf.MILESTONES_STR[ms].additionalClass" />
 				</span>
 			</template>
 			<template v-else>{{ $t("playerDetails.noMilestones") }}</template>
@@ -89,7 +88,7 @@ const resourceCounts = computed(() => {
 				</div>
 			</div>
 			<!-- RESERVE CARD -->
-			<template v-if="store.bankBroken !== 0 || (store.bankBroken === 0 && (personal.trainingGame || playerIndexProp === personal.pov))">
+			<template v-if="store.bankBroken !== 0 || personal.trainingGame || playerIndexProp === personal.pov">
 				<div v-if="store.reserveCards[playerIndexProp] >= 1 && store.reserveCards[playerIndexProp] <= 3" class="cardSummaryDiv">
 					<img class="cardImg" :src="view.getImage(view.getReserveCardImageKey(store.reserveCards[playerIndexProp]))" />
 				</div>

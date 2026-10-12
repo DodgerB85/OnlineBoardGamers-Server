@@ -11,7 +11,7 @@ function rotateKeyHandler(event) {
 	if (activeRotate) activeRotate()
 }
 
-if (typeof document !== "undefined") document.addEventListener("keyup", rotateKeyHandler)
+document.addEventListener("keyup", rotateKeyHandler)
 </script>
 
 <script setup>

@@ -42,10 +42,10 @@ const props = defineProps({
 function clickedHistoryEntry(action, entry3, entry_id) {
 	// If not replay, or if clicking on the replay entry, just do highlights
 	if (!store.viewSettings.showReplay || entry_id === -1) {
-		if (history.setupHistoryHighlight) history.setupHistoryHighlight(action, entry3, entry_id)
+		history.setupHistoryHighlight(action, entry3, entry_id)
 	}
 	// Otherwise, you are clicking in history during replay
-	else if (replay.goToReplayStep) replay.goToReplayStep(entry_id)
+	else replay.goToReplayStep(entry_id)
 }
 
 const ORDINAL_KEYS = ["first", "second", "third", "fourth", "fifth", "sixth"]
@@ -156,7 +156,7 @@ function goodClass(good) {
 }
 
 // Dinner animation: only offer playback when at least one sale actually happened
-const hasDinnerSales = computed(() => computedEntry3.value.blocks?.some((b) => b.kind === "sale" && b.sale) ?? false)
+const hasDinnerSales = computed(() => computedEntry3.value.blocks.some((b) => b.kind === "sale" && b.sale))
 
 function startDinnerAnimation(autoplay) {
 	const script = buildDinnerScript(computedEntry3.value.blocks)
@@ -237,7 +237,6 @@ function showHawkerRoute(routeIndexes) {
 // Toggle the coffee route highlight + the info panel in the action area
 function toggleCoffeeInfo(bi) {
 	const block = computedEntry3.value.blocks[bi]
-	if (!block || block.kind !== "coffee") return
 
 	if (store.viewSettings.coffeeInfoShownBlock === bi) {
 		store.clearCoffeeHistoryInfo()
@@ -717,7 +716,7 @@ const computedEntry3 = computed(() => {
 		else if (param[0] === rf.CEO_ACTION_COACH) ret.ceoText = "employees.coachDesc"
 		else ret.ceoText = ""
 	} else if (entry[0] === rf.HIST_CHOOSE_MODULE) {
-		ret.moduleChoice = MODULE_IMGS[param[0]] ?? null
+		ret.moduleChoice = MODULE_IMGS[param[0]]
 	}
 	return ret
 })
@@ -1263,7 +1262,7 @@ const computedEntry3 = computed(() => {
 				<div class="milestoneTitle">{{ computedEntry3.ms.title.toUpperCase() }}</div>
 				<div class="milestoneText">{{ computedEntry3.ms.description }}</div>
 				<div class="milestoneSpacer">&nbsp;</div>
-				<img class="milestoneIcon" :src="view.getImage(computedEntry3.ms.img)" :class="computedEntry3.ms.additionalClass ? computedEntry3.ms.additionalClass : ''" alt="" />
+				<img class="milestoneIcon" :src="view.getImage(computedEntry3.ms.img)" :class="computedEntry3.ms.additionalClass" alt="" />
 			</span>
 			<span v-else>?</span>
 		</template>
@@ -1318,7 +1317,7 @@ const computedEntry3 = computed(() => {
 					<div class="milestoneTitle">{{ rf.MILESTONES_STR[ms].title.toUpperCase() }}</div>
 					<div class="milestoneText">{{ rf.MILESTONES_STR[ms].description }}</div>
 					<div class="milestoneSpacer">&nbsp;</div>
-					<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms].img)" :class="rf.MILESTONES_STR[ms].additionalClass ? rf.MILESTONES_STR[ms].additionalClass : ''" alt="" />
+					<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms].img)" :class="rf.MILESTONES_STR[ms].additionalClass" alt="" />
 				</span>
 			</template>
 		</template>

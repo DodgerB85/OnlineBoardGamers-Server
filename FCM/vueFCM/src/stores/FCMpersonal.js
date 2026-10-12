@@ -66,9 +66,8 @@ export const usePersonalStore = defineStore("personal", () => {
 		// is correct for real hotseat Practice games, and the reason this went unnoticed).
 		if (this.tutorial && store.gameflow.turnOrder[0] !== 0) return false
 		if (this.trainingGame) return true
-		if (this.superuser) return true
 		if (this.pov < 0) return false
-		if (this.pov >= 0 && store.players[this.pov].displayName === rf.BOT_NAME) return false
+		if (store.players[this.pov].displayName === rf.BOT_NAME) return false
 
 		// Pre moves
 		if (store.gameflow.phase === rf.PHASE_PAYDAY || store.gameflow.phase === rf.PHASE_CLEAN_UP) {

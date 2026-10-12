@@ -28,16 +28,6 @@ export function sleep(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-export function compressObjectToDB(obj) {
-	// PAKO
-	let step1 = JSON.stringify(obj)
-	// eslint-disable-next-line no-undef
-	let step2B = pako.gzip(step1)
-	let base64Data1 = btoa(String.fromCharCode(...new Uint8Array(step2B)))
-
-	return base64Data1
-}
-
 export function decompressObjectFromDB(str) {
 	let step1
 	let step2
@@ -125,10 +115,7 @@ export function decompressChatData(data) {
 	// NB personal.gameCreationTimestamp must already be loaded
 	const personal = usePersonalStore()
 	if (data.length > 0) {
-		let compressedData = Uint8Array.from(atob(data), (c) => c.charCodeAt(0))
-		// eslint-disable-next-line no-undef
-		let decompressedData = pako.ungzip(compressedData, { to: "string" })
-		var chatArray = JSON.parse(decompressedData)
+		var chatArray = decompressData(data)
 	} else chatArray = []
 	// Update all the timings
 	let currentFullTime = personal.gameCreationTimestamp
@@ -237,12 +224,7 @@ export function simpleExportWholeFCMmodel() {
 	// 24 - Media Line mod (only when chosen)
 	if (store.startingOptions.mediaLine) temp.push(JSON.parse(JSON.stringify(store.mediaLine)))
 
-	let step1 = JSON.stringify(temp)
-	// eslint-disable-next-line no-undef
-	let step2 = pako.gzip(step1)
-	let base64Data = btoa(String.fromCharCode(...new Uint8Array(step2)))
-
-	return base64Data
+	return compressData(temp)
 }
 
 export function exportIndexes(indexes) {
@@ -694,12 +676,7 @@ export function exportFCMmodel(forGameOver, includeContext) {
 	// Compact positional slot, tagged like the Labor Market one.
 	if (store.startingOptions.mediaLine) temp.push(exportMediaLineSlot())
 
-	let step1 = JSON.stringify(temp)
-	// eslint-disable-next-line no-undef
-	let step2B = pako.gzip(step1)
-	let base64Data1 = btoa(String.fromCharCode(...new Uint8Array(step2B)))
-
-	return base64Data1
+	return compressData(temp)
 }
 
 export function importFCMmodel(inputB64, forGameOver, includeContext) {
@@ -992,7 +969,6 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 
 	if (store.startingOptions.lobbyists) {
 		// 12: Parks
-		store.parks.splice(0)
 		store.parks = inputArr[IMPORT_INDEX].map((p) => ({
 			index: importIndex(p[0]),
 			variety: p[1],
@@ -1007,7 +983,6 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 		IMPORT_INDEX++
 
 		// 13: New Roads
-		store.newRoads.splice(0)
 		store.newRoads = inputArr[IMPORT_INDEX].map((r) => ({
 			index: importIndex(r[0]),
 			variety: r[1],
@@ -1073,10 +1048,8 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	// INTERNAL OPTIONS NEED TO BE SET BEFORE THIS
 	store.availableEmployees = [...rf.ORIGINAL_AVAILABLE_EMPLOYEES]
 	store.availableMarketingCampaigns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14]
-	if (store.startingOptions.useMilestones === false) {
-		store.availableMilestones.splice(0)
-	} else {
-		store.availableMilestones.splice(0)
+	store.availableMilestones.splice(0)
+	if (store.startingOptions.useMilestones !== false) {
 		Object.assign(store.availableMilestones, rf.BASE_GAME_MILESTONES)
 		if (store.startingOptions.noCeoMilestone === true) {
 			store.availableMilestones.splice(store.availableMilestones.indexOf(rf.FIRST_100_DOL), 1)
@@ -1497,10 +1470,7 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	const store = useModelStore()
 
 	
-	let compressedData = Uint8Array.from(atob(inputBase64), (c) => c.charCodeAt(0))
-	// eslint-disable-next-line no-undef
-	let decompressedData = pako.ungzip(compressedData, { to: "string" })
-	let inputModel = JSON.parse(decompressedData)
+	let inputModel = decompressData(inputBase64)
 
 
 

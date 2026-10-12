@@ -44,7 +44,6 @@ function confirmTemporaryWorkerSelection() {
 
 function undoHireEmployee(employee) {
 	const idx = store.context.justHired.indexOf(employee)
-	if (idx === -1) return
 	store.availableEmployees[employee]++
 	store.context.justHired.splice(idx, 1)
 	store.context.endOfDaySummaryData.hire.hired.splice(store.context.endOfDaySummaryData.hire.hired.indexOf(employee), 1)

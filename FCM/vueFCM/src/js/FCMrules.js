@@ -215,7 +215,6 @@ export function headhuntCost(employee) {
 }
 
 export function resolveUnionHolders(workedCounts, minimum = 5) {
-	if (!Array.isArray(workedCounts) || workedCounts.length === 0) return []
 	const eligible = workedCounts.map((count, index) => ({ count, index })).filter(({ count }) => Number.isFinite(count) && count >= minimum)
 	if (eligible.length === 0) return []
 	const max = Math.max(...eligible.map(({ count }) => count))
@@ -1044,7 +1043,7 @@ export function givePossiblePositionsForNewRestaurant(rotation, ranged) {
 		}
 
 		// Add Coffee Shops to the reachability set
-		if (store.startingOptions.coffee && player.coffeeShops.length > 0) {
+		if (store.startingOptions.coffee) {
 			for (const shopIdx of player.coffeeShops) {
 				const options = map.emptySpacesAdjacentToRoadsWithinRange(shopIdx, range, false, null)
 				options.forEach((opt) => reachSet.add(opt))
@@ -1101,7 +1100,7 @@ export function givePossibleStartsFromRestaurants(anyIndex) {
 	}
 
 	// Coffee always uses road neighbours, even when anyIndex picks plain neighbours for doors
-	if (store.startingOptions.coffee && playerObj.coffeeShops.length > 0) {
+	if (store.startingOptions.coffee) {
 		for (const shopIdx of playerObj.coffeeShops) {
 			for (const n of map.nextRoadNeighbours(shopIdx, -1, false, true)) {
 				resultSet.add(n)
@@ -1125,7 +1124,7 @@ export function firstStartIsFromTheSameTile(index) {
 		}
 	}
 
-	if (store.startingOptions.coffee && playerObj.coffeeShops.length > 0) {
+	if (store.startingOptions.coffee) {
 		for (const coffeeIdx of playerObj.coffeeShops) {
 			if (vicinity.has(coffeeIdx) && map.onTheSameTile(index, coffeeIdx)) {
 				return true
@@ -1286,7 +1285,7 @@ export function givePossibleStartsFromRestaurantsForZeppelin() {
 		uniqueTiles.add(map.giveTileNumber(doorIndex))
 	}
 
-	if (store.startingOptions.coffee && playerObj.coffeeShops.length > 0) {
+	if (store.startingOptions.coffee) {
 		for (const shopIndex of playerObj.coffeeShops) {
 			uniqueTiles.add(map.giveTileNumber(shopIndex))
 		}
@@ -1736,15 +1735,10 @@ export function availableUrbanPlanningTiles() {
 export function availableHouses() {
 	const store = useModelStore()
 
-	// 1. Return all if no houses are built
-	if (store.houses.length === 0) {
-		return [...rf.AVAILABLE_HOUSES]
-	}
-
-	// 2. Create a Set of built house numbers for O(1) lookups
+	// Create a Set of built house numbers for O(1) lookups
 	const builtHouseNumbers = new Set(store.houses.map((h) => h.number))
 
-	// 3. Filter the global list to find houses not yet in the Set
+	// Filter the global list to find houses not yet in the Set
 	return rf.AVAILABLE_HOUSES.filter((houseNum) => !builtHouseNumbers.has(houseNum))
 }
 
@@ -1759,45 +1753,40 @@ export function availableParks() {
 	const store = useModelStore()
 	if (!store.startingOptions.lobbyists) return []
 	let res = [0, 1, 2, 2]
-	if (store.parks.length > 0) {
-		if (store.parks.some((r) => r.variety === 0))
-			res = res.filter(function (item) {
-				return item !== 0
-			})
-		if (store.parks.some((r) => r.variety === 1))
-			res = res.filter(function (item) {
-				return item !== 1
-			})
-		let variety2count = 0
-		for (let i = 0; i < store.parks.length; i++) if (store.parks[i].variety === 2) variety2count++
-		if (variety2count >= 2)
-			res = res.filter(function (item) {
-				return item !== 2
-			})
-		//res -= model.parks.length;
-	}
+	if (store.parks.some((r) => r.variety === 0))
+		res = res.filter(function (item) {
+			return item !== 0
+		})
+	if (store.parks.some((r) => r.variety === 1))
+		res = res.filter(function (item) {
+			return item !== 1
+		})
+	let variety2count = 0
+	for (let i = 0; i < store.parks.length; i++) if (store.parks[i].variety === 2) variety2count++
+	if (variety2count >= 2)
+		res = res.filter(function (item) {
+			return item !== 2
+		})
+	//res -= model.parks.length;
 	return res
 }
 
 export function availableNewRoads() {
 	const store = useModelStore()
 	if (!store.startingOptions.lobbyists) return []
-	let res = [0, 0, 0, 0, 1, 1, 2, 2]
-	if (store.newRoads.length > 0) {
-		res = []
-		let variety0count = 4
-		let variety1count = 2
-		let variety2count = 2
-		for (let i = 0; i < store.newRoads.length; i++) {
-			if (store.newRoads[i].variety === 0) variety0count--
-			else if (store.newRoads[i].variety === 1) variety1count--
-			else if (store.newRoads[i].variety === 2) variety2count--
-		}
-		for (let j = 0; j < variety0count; j++) res.push(0)
-		for (let k = 0; k < variety1count; k++) res.push(1)
-		for (let m = 0; m < variety2count; m++) res.push(2)
-		//res -= model.newRoads.length;
+	let res = []
+	let variety0count = 4
+	let variety1count = 2
+	let variety2count = 2
+	for (let i = 0; i < store.newRoads.length; i++) {
+		if (store.newRoads[i].variety === 0) variety0count--
+		else if (store.newRoads[i].variety === 1) variety1count--
+		else if (store.newRoads[i].variety === 2) variety2count--
 	}
+	for (let j = 0; j < variety0count; j++) res.push(0)
+	for (let k = 0; k < variety1count; k++) res.push(1)
+	for (let m = 0; m < variety2count; m++) res.push(2)
+	//res -= model.newRoads.length;
 	return res
 }
 
@@ -2088,12 +2077,10 @@ export function doDinnerTime(replayOnly) {
 		earnings[pIdx] += price
 
 		const houseHisto = histoHouses.find((h) => h[0] === sale.house)
-		if (houseHisto) {
-			houseHisto.push(bonus)
-			const bits = (model.hasGarden(sale.house) ? 1 : 0) + (model.adjacentToPark(sale.house) ? 2 : 0)
-			houseHisto.push(bits)
-			if (store.startingOptions.fryChefs) houseHisto.push(chefs < 9 ? chefs : 0)
-		}
+		houseHisto.push(bonus)
+		const bits = (model.hasGarden(sale.house) ? 1 : 0) + (model.adjacentToPark(sale.house) ? 2 : 0)
+		houseHisto.push(bits)
+		if (store.startingOptions.fryChefs) houseHisto.push(chefs < 9 ? chefs : 0)
 	})
 
 	// Give MS for selling — AFTER bonus calc so the sale that EARNED the milestone
@@ -2142,7 +2129,7 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 	const histoIncome = []
 	store.players.forEach((p, playerIndex) => {
 		const itemsIncome = earnings[playerIndex]
-		const coffeeIncome = store.startingOptions.coffee ? coffeeEarnings[playerIndex] : 0
+		const coffeeIncome = coffeeEarnings[playerIndex]
 		const salesIncome = itemsIncome + coffeeIncome
 		let total = salesIncome
 		const waitressVal = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS) ? 5 : 3
@@ -2313,9 +2300,7 @@ export function processCoffee(houseNum, winner, usedFryChefs, coffeeEarnings, hi
 	})
 
 	historyForCoffeeHouse.push(store.players.map((_, i) => coffeeSalesData[i]))
-	if (store.startingOptions.coffee && historyForCoffeeHouse.length > 0) {
-		histoHouses.push([...historyForCoffeeHouse])
-	}
+	histoHouses.push([...historyForCoffeeHouse])
 }
 
 export function basePrice() {
@@ -3197,11 +3182,8 @@ export function isRequiredToPlayCleanUp(playerIndex) {
 		return false
 	}
 
-	if (plyr.hasFridge(playerIndex) && playerObj.resources.length > 0) {
-		// Rule change to allow throwing away all food
-		return kimchiFridgeCollision(playerIndex) || playerObj.resources.length > 0
-	}
-	return false
+	// Rule change: a fridge owner may throw away all food, so always gets the choice
+	return plyr.hasFridge(playerIndex)
 }
 
 export function autoProcessCleanUp(playerIndex) {

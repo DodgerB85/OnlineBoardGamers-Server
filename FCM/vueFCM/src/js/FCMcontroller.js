@@ -56,22 +56,20 @@ export function getCurrentPlayersArray() {
 	const store = useModelStore()
 	// Why is this using displayname?
 	if (!controller.isSimulPhase(store.gameflow.phase)) return [store.players[store.gameflow.turnOrder[0]].displayName]
-	if (controller.isSimulPhase(store.gameflow.phase)) {
-		let ret = []
-		for (let i = 0; i < store.gameflow.turnOrder.length; i++) {
-			let nameToAdd = store.players[store.gameflow.turnOrder[i]].displayName
-			if (nameToAdd.includes(rf.TOURNAMENT_ADMIN_NAME)) nameToAdd = rf.TOURNAMENT_ADMIN_NAME
-			ret.push(nameToAdd)
-		}
-		return ret
+	let ret = []
+	for (let i = 0; i < store.gameflow.turnOrder.length; i++) {
+		let nameToAdd = store.players[store.gameflow.turnOrder[i]].displayName
+		if (nameToAdd.includes(rf.TOURNAMENT_ADMIN_NAME)) nameToAdd = rf.TOURNAMENT_ADMIN_NAME
+		ret.push(nameToAdd)
 	}
+	return ret
 }
 
 export function chooseTemporaryWorkerRoles(roles) {
 	const store = useModelStore()
 	const playerIndex = currentPlayerIndex()
 	const playerObj = currentPlayerObj()
-	if (!store.startingOptions.laborMarket || !playerObj.employees.includes(rf.TEMPORARY_WORKER) || !Array.isArray(roles)) return false
+	if (!store.startingOptions.laborMarket || !playerObj.employees.includes(rf.TEMPORARY_WORKER)) return false
 	if (store.laborMarket.dailyTemporaryEffects[playerIndex]) return false
 
 	const limit = rules.temporaryWorkerActionCount(store.laborMarket.removedTemporaryWorkersAtTurnStart)
@@ -1402,10 +1400,8 @@ export function placeMarketingCampaign(index) {
 	}
 	// --- NORMAL CAMPAIGN ---
 	else {
-		if (store.context.secondCampaignManager) {
-			plyr.addCampaignToMarketer(playerIndex, store.context.marketer, store.context.campaign)
-		} else if (store.context.mediaLineSecondCall) {
-			// Media Line mod: the second phone token hangs off the same telemarketer
+		// Media Line mod: the second phone token hangs off the same telemarketer
+		if (store.context.secondCampaignManager || store.context.mediaLineSecondCall) {
 			plyr.addCampaignToMarketer(playerIndex, store.context.marketer, store.context.campaign)
 		} else if (store.context.temporaryMarketer) {
 			store.laborMarket.temporaryCampaignOwners[store.context.campaign] = playerIndex
@@ -1802,7 +1798,7 @@ export async function endPlayerTurn(forced, isPointlessMove = false, extraPostDa
 	// EXIT EARLY FOR CHOOSING RESERVE OUT OF PHASE (not used in training games)
 	if (!personal.trainingGame && (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 || store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT2) && model.alreadyChosenReserveCard() && store.players[personal.pov].restaurants.length > 0) {
 		let moveData = [store.reserveCards[personal.pov]]
-		personal.moveDataRaw = funcs.compressObjectToDB([personal.name, [0, 1, 2], Math.round(new Date().getTime() / 1000), [...moveData]])
+		personal.moveDataRaw = funcs.compressData([personal.name, [0, 1, 2], Math.round(new Date().getTime() / 1000), [...moveData]])
 		IO.saveSimulMove(moveData)
 		return
 	}
@@ -1972,7 +1968,7 @@ export async function endPlayerTurn(forced, isPointlessMove = false, extraPostDa
 		else if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) phasesArr = [3, 4]
 		else if ([5, 6, 7, 8, 9, 11, 12, 15].includes(store.gameflow.phase)) phasesArr = [5, 6, 7, 8, 9, 11, 12, 15]
 
-		personal.moveDataRaw = funcs.compressObjectToDB([personal.name, [...phasesArr], Math.round(new Date().getTime() / 1000), [...moveData]])
+		personal.moveDataRaw = funcs.compressData([personal.name, [...phasesArr], Math.round(new Date().getTime() / 1000), [...moveData]])
 		await IO.saveSimulMove(moveData)
 		if (rf.SUPER_USERS.includes(personal.name)) personal.pov = -1
 		// Make sure this function is exited now
@@ -2357,10 +2353,8 @@ export function startPlayerTurn(startingMidPhase) {
 	} else if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) {
 		rf.sortEmployees(currentPlayerObj().beach)
 
-		if (currentPlayerObj().employees.length < currentPlayerObj().ceoSlots) {
-			while (currentPlayerObj().employees.length < currentPlayerObj().ceoSlots) {
-				currentPlayerObj().employees.push(rf.BLANK_EMPLOYEE_SPACE)
-			}
+		while (currentPlayerObj().employees.length < currentPlayerObj().ceoSlots) {
+			currentPlayerObj().employees.push(rf.BLANK_EMPLOYEE_SPACE)
 		}
 	} else if (store.gameflow.phase === rf.PHASE_TURN_ORDER) {
 		// No action needed
@@ -2694,7 +2688,7 @@ export function autoFillEmployees() {
 		// add first non manager
 		for (let j = 0; j < playerObj.beach.length; j++) {
 			if (!rf.MANAGERS.includes(playerObj.beach[j])) {
-				if (playerObj.employees[i] === rf.BLANK_EMPLOYEE_SPACE && playerObj.beach.length > 0) plyr.setEmployeeInIndex(currentPlayerIndex(), playerObj.beach[j], i)
+				if (playerObj.employees[i] === rf.BLANK_EMPLOYEE_SPACE) plyr.setEmployeeInIndex(currentPlayerIndex(), playerObj.beach[j], i)
 				break
 			}
 		}

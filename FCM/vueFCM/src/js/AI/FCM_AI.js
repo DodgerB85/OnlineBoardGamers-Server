@@ -28,13 +28,11 @@ export async function makeAImove() {
 		let heatMap = null
 		let best = null
 
-		if (playerObj.AIlevel >= 2) {
-			heatMap = generatePlacementHeatMap()
-			best = findBestPlacement(heatMap)
-			if (best !== null) {
-				index = best.index
-				rotation = best.rotation
-			}
+		heatMap = generatePlacementHeatMap()
+		best = findBestPlacement(heatMap)
+		if (best !== null) {
+			index = best.index
+			rotation = best.rotation
 		}
 
 		if (index === null) {

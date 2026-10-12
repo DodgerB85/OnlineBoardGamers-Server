@@ -141,7 +141,7 @@ watch(
 		if (personal.pov < 0) return
 		updateSoloKickoutCountdown()
 		if (soloKickoutCountdown.value !== "") {
-			if (personal.kickoutCountdownIntervalTimer != null) clearInterval(personal.kickoutCountdownIntervalTimer)
+			clearInterval(personal.kickoutCountdownIntervalTimer)
 			personal.kickoutCountdownIntervalTimer = setInterval(updateSoloKickoutCountdown, 1000)
 		}
 	},
@@ -221,7 +221,6 @@ function localFireEmployee(fireToken) {
 
 function localUnfireEmployee(fireToken) {
 	const idx = store.context.justFired.indexOf(fireToken)
-	if (idx === -1) return
 	const employee = plyr.restoreFiredEmployee(controller.currentPlayerIndex(), fireToken)
 	store.availableEmployees[employee]--
 	store.context.justFired.splice(idx, 1)
@@ -278,9 +277,7 @@ watch(
 )
 
 const filteredBeach = computed(() => {
-	let obj = controller.currentPlayerObj()
-	if (!obj || !obj.beach) return []
-	const beach = obj.beach
+	const beach = controller.currentPlayerObj().beach
 	// Managers are only selectable into a CEO slot
 	return beach.filter((emp) => {
 		if (store.context.selectedEmployeeIndexForRestructuring < controller.currentPlayerObj().ceoSlots) return true
@@ -296,7 +293,6 @@ const ceoEmployees = computed(() => {
 
 const nonCeoEmployees = computed(() => {
 	const player = controller.currentPlayerObj()
-	if (!player) return []
 	// Only slices when employees or ceoSlots actually change
 	return player.employees.slice(player.ceoSlots)
 })

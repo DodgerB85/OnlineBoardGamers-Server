@@ -441,7 +441,7 @@ export function nextRoadNeighbours(index, comingFrom, sameTile, ignoreCrossing) 
 		}
 
 		// Handle Standard Road/Crossing Logic
-		return ignoreCrossing === true || isCrossing(index) || onTheSameTile(index, space)
+		return true
 	})
 
 	// 3. Final optional same-tile filter
@@ -656,19 +656,11 @@ export function isCollapsePossible(index, width, rotated) {
 // All the roads spaces from the index. Useful for the dinnertime
 
 
-// REPLACE THIS FUNCTION WITH THE BELOW
 export function getRuralMarketingZone() {
 	const store = useModelStore()
 	let freewayIndexes = []
 	for (let i = 0; i < store.mapData.coords.length; i++) if (store.mapData.coords[i] == rf.FREEWAY) freewayIndexes.push(i)
 	return freewayIndexes
-}
-
-export function getRuralMarketingSigns() {
-	const store = useModelStore()
-	let res = []
-	for (let i = 0; i < store.mapData.coords.length; i++) if (store.mapData.coords[i] == rf.FREEWAY) res.push(i)
-	return res
 }
 
 // Only used to place weird object
@@ -1165,15 +1157,6 @@ export function emptyNeighboursWithinRange(path, lobbyist, lobbyistData) {
 	}
 
 	return Array.from(res)
-}
-
-// Check if the given index is a crossing to a new tile or not
-export function isCrossing() {
-	// Previously, base game only allowed corssing mind tile
-	// But this broke certain possibilities, and doesn't work with expansions
-	// So I think Splotter retro ruled taht any crossing is allowed between tiles
-	// I think the mid point crossing was just to aid simplicity when it made zero difference anyway
-	return true
 }
 
 export function buildingAdjacentToRoad(index, width, height) {

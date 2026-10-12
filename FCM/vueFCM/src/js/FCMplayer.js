@@ -126,7 +126,7 @@ export function addToStructureFromMiniBeach(emp, anyFreeCEOslots, beachIdx) {
 		const blanks = Array(count).fill(rf.BLANK_EMPLOYEE_SPACE)
 		controller.currentPlayerObj().employees.push(...blanks)
 	}
-	if (!rf.MANAGERS.includes(emp)) {
+	else {
 		if (!controller.currentPlayerObj().employees.includes(rf.BLANK_EMPLOYEE_SPACE)) return
 		// Find the first index after CEO slots that is rf.BLANK_EMPLOYEE_SPACE
 		let foundIdx = controller.currentPlayerObj().employees.findIndex((emp, idx) => {

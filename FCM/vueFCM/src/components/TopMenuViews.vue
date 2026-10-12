@@ -30,7 +30,7 @@ const showExpandedEmployees = ref(false)
 const consentLevel = ref(0)
 
 function reserveEmployeeCount(employee) {
-	if (employee === rf.TEMPORARY_WORKER) return store.players.length - (store.laborMarket?.removedTemporaryWorkers || 0)
+	if (employee === rf.TEMPORARY_WORKER) return store.players.length - store.laborMarket.removedTemporaryWorkers
 	return store.availableEmployees[employee]
 }
 
@@ -642,7 +642,7 @@ const sortedCampaigns = computed(() => {
 						<div class="milestoneTitle">{{ rf.MILESTONES_STR[ms].title.toUpperCase() }}</div>
 						<div class="milestoneText">{{ rf.MILESTONES_STR[ms].description }}</div>
 						<div class="milestoneSpacer">&nbsp;</div>
-						<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms].img)" :class="rf.MILESTONES_STR[ms].additionalClass ? rf.MILESTONES_STR[ms].additionalClass : ''" />
+						<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms].img)" :class="rf.MILESTONES_STR[ms].additionalClass" />
 						<br v-if="milestonePlayerColours(ms).length > 0" />
 						<template v-for="(colour, i) in milestonePlayerColours(ms)" :key="i">
 							<img :src="view.getImage('player_' + personal.getCorrectedColour(colour))" style="width:30px;height:30px;padding-left:5px;" />
@@ -668,7 +668,7 @@ const sortedCampaigns = computed(() => {
 						<div class="milestoneTitle">{{ rf.MILESTONES_STR[ms[0]].title.toUpperCase() }}</div>
 						<div class="milestoneText">{{ rf.MILESTONES_STR[ms[0]].description }}</div>
 						<div class="milestoneSpacer">&nbsp;</div>
-						<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms[0]].img)" :class="rf.MILESTONES_STR[ms[0]].additionalClass ? rf.MILESTONES_STR[ms[0]].additionalClass : ''" />
+						<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms[0]].img)" :class="rf.MILESTONES_STR[ms[0]].additionalClass" />
 						<br />
 						<template v-for="(colour, i) in ms.slice(1)" :key="i">
 							<img :src="view.getImage('player_' + personal.getCorrectedColour(colour))" style="width:30px;height:30px;padding-left:5px;" />
@@ -824,7 +824,7 @@ const sortedCampaigns = computed(() => {
 			</div>
 
 			<!-- LOBBYIST TILES -->
-			<div v-if="store.startingOptions && store.startingOptions.lobbyists" class="reserveSection">
+			<div v-if="store.startingOptions.lobbyists" class="reserveSection">
 				<p><b>{{ $t('topMenuViews.availableLobbyistTiles') }}</b></p>
 				<div id="allTileChoiceDivRes">
 					<div v-for="tile in rules.availableLobbyistTiles()" :key="'restile-' + tile">

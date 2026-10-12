@@ -230,8 +230,8 @@ export async function initGame() {
 		if (window.initData.preferedColor > -1) personal.preferredColour = window.initData.preferedColor
 		personal.secondsToNextKickout = window.initData.secondsToNextKickout
 		// Set up kickout timer / kickout options
-		if (personal.kickoutCountdownIntervalTimer != null) clearInterval(personal.kickoutCountdownIntervalTimer)
-		if (personal.flexiKickoutCountdownIntervalTimer != null) clearInterval(personal.flexiKickoutCountdownIntervalTimer)
+		clearInterval(personal.kickoutCountdownIntervalTimer)
+		clearInterval(personal.flexiKickoutCountdownIntervalTimer)
 		if (window.initData.kickoutRequired > 0) {
 			personal.kickoutRequired = window.initData.kickoutRequired
 			if (personal.kickoutRequired === 1) {
@@ -1079,7 +1079,7 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 	}
 
 	if (number === rf.RURAL_MARKETING_AREA && store.freeways.length > 0) {
-		zone = map.getRuralMarketingSigns()
+		zone = map.getRuralMarketingZone()
 	}
 	if (index !== -1) zone.push(index)
 

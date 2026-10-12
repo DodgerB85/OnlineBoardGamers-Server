@@ -404,8 +404,8 @@ const rmaCampaigns = computed(() => {
 		.filter((c) => rf.MARKETING_CAMPAIGNS[c.number]?.type === rf.GIANT_BILLBOARD)
 		.map((c) => {
 			const idx = c.number - 21
-			const bb = GIANT_BILLBOARD_COORDS[idx] || [0, 0]
-			const bi = GIANT_BILLBOARD_ITEM_COORDS[idx] || [0, 0]
+			const bb = GIANT_BILLBOARD_COORDS[idx]
+			const bi = GIANT_BILLBOARD_ITEM_COORDS[idx]
 			let itemLeft = bi[0]
 			if (c.good === rf.BEER) itemLeft += 11
 			if (c.good === rf.COKE) itemLeft += 9
@@ -437,7 +437,7 @@ const RMA_DEMAND_COORDS = [
 
 const rmaDemands = computed(() => {
 	const rmaNeed = store.needs.find((n) => n.number === rf.RURAL_MARKETING_AREA)
-	if (!rmaNeed || !rmaNeed.needs) return []
+	if (!rmaNeed) return []
 
 	const combined = [0, 0, 0, 0, 0, 0]
 	for (const [good] of rmaNeed.needs) combined[good === rf.DUMPLING ? 5 : good]++

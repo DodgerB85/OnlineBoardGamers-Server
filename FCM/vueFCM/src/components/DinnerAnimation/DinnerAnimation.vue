@@ -18,7 +18,6 @@ const step = computed(() => dinner.current)
 const advancing = computed(() => dinner.state.advancing)
 const description = computed(() => {
 	const s = step.value
-	if (!s) return ""
 	return i18n.global.t(s.textKey, s.textParams || {})
 })
 
@@ -32,10 +31,7 @@ function schedule() {
 }
 
 watch(() => dinner.state.index, schedule)
-watch(advancing, (a) => {
-	if (a) schedule()
-	else clearTimeout(timer)
-})
+watch(advancing, schedule)
 onMounted(schedule)
 onBeforeUnmount(() => clearTimeout(timer))
 
@@ -128,14 +124,12 @@ function carStyle() {
 
 function flareBoxStyle() {
 	const f = step.value?.flare
-	if (!f) return {}
 	const sq = store.refSize / 5
 	return { left: f.pos.x - sq / 2 + "px", top: f.pos.y - sq / 2 + "px", width: sq + "px", height: sq + "px" }
 }
 
 function incomeStyle() {
 	const c = step.value?.car
-	if (!c) return {}
 	return { left: c.x + "px", top: c.y + "px" }
 }
 </script>
