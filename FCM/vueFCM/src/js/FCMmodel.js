@@ -1064,7 +1064,8 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 	const playerColour = store.players[playerIndex].colour
 	const restaurantSquares = getSinglePlayerRestaurantEntrances(playerIndex)
 	const index = map.findIndexForHouse(number)
-	const zone = zoneSquaresForHouse(number, index)
+	// let: the stadium override below replaces the whole zone
+	let zone = zoneSquaresForHouse(number, index)
 	if (index !== -1) zone.push(index)
 
 	// Stadium mod: the arena is a 24-cell pseudo-house - seed routes from every
@@ -1271,7 +1272,8 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 export function giveRestaurantRangesForHouse(number) {
 	const store = useModelStore()
 	const index = map.findIndexForHouse(number)
-	const zone = zoneSquaresForHouse(number, index)
+	// let: the stadium override below replaces the whole zone
+	let zone = zoneSquaresForHouse(number, index)
 
 	// Stadium mod: the arena spans 24 cells over two tiles - measure from the
 	// nearest arena cell instead of the generic 2x2 at its anchor corner, so
