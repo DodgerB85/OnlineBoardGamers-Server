@@ -42,7 +42,7 @@
 
       <h2 class="bus-stats-title">{% translate "Action Statistics" %}</h2>
       <p>
-        {% translate "Every player starts with 20 action points, and each chosen action costs one. 'Everyone else' is every losing player. Compare 'Win % when used' against the baseline win rate to see how the action is linked to winning." %}
+        {% translate "Every player starts with 20 action points, and each chosen action costs one. 'Everyone else' is every losing player. Compare 'Win % when used' against a fair share of wins (100% divided by the player count) to see how the action is linked to winning." %}
       </p>
 
       <div class="tab">
@@ -58,7 +58,6 @@
             {% translate "Games:" %} <span class="clickableStatTD" onclick="openGameIdsPage({{ row.game_ids }})">{{ row.finishedGamesCount }}</span>
             &nbsp;&middot;&nbsp; {% translate "Average turns:" %} {{ row.avg_turns }}
             ({% translate "median" %} {{ row.median_turns }})
-            &nbsp;&middot;&nbsp; {% translate "Baseline win rate:" %} {{ row.win_pct_baseline }}%
           </p>
           <canvas class="bar_canvas"
                   id="bar-chartplayers{{ playerCount }}"

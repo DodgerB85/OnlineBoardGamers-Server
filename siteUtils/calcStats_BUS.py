@@ -198,7 +198,6 @@ def calculate_stats(games):
     """Calculates the stats for one bucket of games (a single player count, or all combined)."""
     winners = [player for game in games for player in game["players"] if player["is_winner"]]
     others = [player for game in games for player in game["players"] if not player["is_winner"]]
-    all_players = winners + others
 
     finished_games_count = len(games)
     game_ids = [game["game_id"] for game in games]
@@ -281,7 +280,6 @@ def calculate_stats(games):
         "game_ids": game_ids,
         "avg_turns": mean_or_zero(turns),
         "median_turns": median_or_zero(turns),
-        "win_pct_baseline": round(len(winners) / len(all_players) * 100) if all_players else 0,
         "action_stats": action_stats,
         "end_reasons": end_reasons,
         "player_summary": {
