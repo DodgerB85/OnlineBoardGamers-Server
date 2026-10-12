@@ -1,0 +1,216 @@
+{% extends "Lobby/layout.html" %}
+{% load static i18n compress %}
+{% block head %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+  {% compress js %}
+    <script src="{% static 'IND/INDstats.js' %}"></script>
+  {% endcompress %}
+
+  <link href="{% static 'Lobby/CSS/stats.css' %}" rel="stylesheet">
+{% endblock head %}
+{% block body %}
+  <div class="page">
+    {% include "Lobby/messages.html" %}
+
+    <div class="page-header">
+      <h1 class="page-title">{% translate "Indonesia Stats" %}</h1>
+      <a class="button button-ghost button-sm"
+         href="{% url 'stats' %}">← {% translate "Back to Main Stats" %}</a>
+    </div>
+
+    <div id="INDstatsPage" class="card section ind-stats">
+      <div class="ind-stats-summary">
+        <div class="stats-tile">
+          <div class="stats-tile-num">{{ all_data.combined.finishedGamesCount }}</div>
+          <div class="stats-tile-label">{% translate "Finished games" %}</div>
+        </div>
+        <div class="stats-tile">
+          <div class="stats-tile-num">{{ all_data.combined.avg_turns }}</div>
+          <div class="stats-tile-label">{% translate "Average turns" %}</div>
+        </div>
+        <div class="stats-tile">
+          <div class="stats-tile-num">{{ all_data.combined.player_summary.winner.median_rnd_upgrades }}</div>
+          <div class="stats-tile-label">{% translate "Median R&D upgrades of winners" %}</div>
+        </div>
+      </div>
+      <div class="callout callout-warn">
+        {% translate "Any game with a resigned/kicked player, practice game, or custom map game is not considered for these stats." %}
+      </div>
+      <div class="callout callout-info">
+        {% translate "These are historical stats. They show what has happened in previous games, but Indonesia still rewards reading and responding to the current game state." %}
+      </div>
+
+      <h2 class="ind-stats-title">{% translate "R&D (Tech) Statistics" %}</h2>
+      <p>
+        {% translate "Every R&D track starts at level 1, so an upgrade is one research action spent on that track. 'Everyone else' is every losing player. Compare 'Win % when upgraded' against the baseline win rate to see how the track is linked to winning." %}
+      </p>
+
+      <div class="tab">
+        <button class="tablinks" id="players2tab">{% translate "2 Player" %}</button>
+        <button class="tablinks" id="players3tab">{% translate "3 Player" %}</button>
+        <button class="tablinks" id="players4tab">{% translate "4 Player" %}</button>
+        <button class="tablinks" id="players5tab">{% translate "5 Player" %}</button>
+        <button class="tablinks" id="playerscombinedtab">{% translate "All Games" %}</button>
+      </div>
+
+      {% for playerCount, row in all_data.items %}
+        <div class="statsDiv" id="players{{ playerCount }}">
+          <p>
+            {% translate "Games:" %} {{ row.finishedGamesCount }}
+            &nbsp;&middot;&nbsp; {% translate "Average turns:" %} {{ row.avg_turns }}
+            ({% translate "median" %} {{ row.median_turns }})
+          </p>
+          <canvas class="bar_canvas"
+                  id="bar-chartplayers{{ playerCount }}"
+                  width="1000"></canvas>
+          <script>
+            var bar_ctx = document.getElementById('bar-chartplayers{{ playerCount }}').getContext('2d');
+
+            var datasets = [{
+              label: 'Winners',
+              data: [{% for value in row.chart.winner_median_upgrades %}{{ value }},{% endfor %}],
+              backgroundColor: 'green',
+            }, {
+              label: 'Everyone else',
+              data: [{% for value in row.chart.other_median_upgrades %}{{ value }},{% endfor %}],
+              backgroundColor: 'grey',
+            }];
+
+            var bar_chart = new Chart(bar_ctx, {
+              type: 'bar',
+              data: {
+                labels: [{% for label in row.chart.labels %}"{{ label }}",{% endfor %}],
+                datasets: datasets
+              },
+              options: {
+                responsive: false,
+                legend: {
+                  display: true
+                },
+                title: {
+                  display: true,
+                  text: 'Median R&D upgrades per track',
+                  fontSize: 30
+                },
+                scales: {
+                  yAxes: [{
+                    ticks: {
+                      beginAtZero: true
+                    }
+                  }],
+                  xAxes: [{
+                    ticks: {
+                      fontStyle: 'bold',
+                      fontSize: 16
+                    }
+                  }]
+                }
+              }
+            });
+          </script>
+          <p class="ind-stats-note">
+            {% translate "Baseline win rate for this group:" %} {{ row.win_pct_baseline }}%
+          </p>
+          <table class="generalTable">
+            <tr>
+              <th>{% translate "R&D track" %}</th>
+              <th>{% translate "Winner avg upgrades" %}</th>
+              <th>{% translate "Winner median upgrades" %}</th>
+              <th>{% translate "Winners who upgraded %" %}</th>
+              <th>{% translate "Others avg upgrades" %}</th>
+              <th>{% translate "Others median upgrades" %}</th>
+              <th>{% translate "Others who upgraded %" %}</th>
+              <th>{% translate "Win % when upgraded" %}</th>
+            </tr>
+            {% for track_name, track_data in row.rnd_stats.items %}
+              <tr>
+                <td>{{ track_name }}</td>
+                <td>{{ track_data.winner_avg_upgrades }}</td>
+                <td>{{ track_data.winner_median_upgrades }}</td>
+                <td>{{ track_data.winner_upgraded_pct }} %</td>
+                <td>{{ track_data.other_avg_upgrades }}</td>
+                <td>{{ track_data.other_median_upgrades }}</td>
+                <td>{{ track_data.other_upgraded_pct }} %</td>
+                <td>{{ track_data.upgraded_win_pct }} % ({{ track_data.upgraded_players }} {% translate "players" %})</td>
+              </tr>
+            {% endfor %}
+          </table>
+
+          <h3>{% translate "At Game End (Per Player)" %}</h3>
+          <table class="generalTable">
+            <tr>
+              <th></th>
+              <th>{% translate "Winners" %}</th>
+              <th>{% translate "Everyone else" %}</th>
+            </tr>
+            <tr>
+              <td>{% translate "R&D upgrades (all tracks, avg and median)" %}</td>
+              <td>{{ row.player_summary.winner.avg_rnd_upgrades }} ({{ row.player_summary.winner.median_rnd_upgrades }})</td>
+              <td>{{ row.player_summary.other.avg_rnd_upgrades }} ({{ row.player_summary.other.median_rnd_upgrades }})</td>
+            </tr>
+            <tr>
+              <td>{% translate "Slots used" %}</td>
+              <td>{{ row.player_summary.winner.avg_slots_used }}</td>
+              <td>{{ row.player_summary.other.avg_slots_used }}</td>
+            </tr>
+            <tr>
+              <td>{% translate "Companies owned" %}</td>
+              <td>{{ row.player_summary.winner.avg_companies }}</td>
+              <td>{{ row.player_summary.other.avg_companies }}</td>
+            </tr>
+            <tr>
+              <td>{% translate "Mergers completed" %}</td>
+              <td>{{ row.player_summary.winner.avg_mergers }}</td>
+              <td>{{ row.player_summary.other.avg_mergers }}</td>
+            </tr>
+            <tr>
+              <td>{% translate "Merged at least once" %}</td>
+              <td>{{ row.player_summary.winner.merged_pct }} %</td>
+              <td>{{ row.player_summary.other.merged_pct }} %</td>
+            </tr>
+            <tr>
+              <td>{% translate "Final cash (avg and median)" %}</td>
+              <td>{{ row.player_summary.winner.avg_score }} ({{ row.player_summary.winner.median_score }})</td>
+              <td>{{ row.player_summary.other.avg_score }} ({{ row.player_summary.other.median_score }})</td>
+            </tr>
+          </table>
+
+          <h3>{% translate "Companies Owned at Game End (By Type)" %}</h3>
+          <table class="generalTable">
+            <tr>
+              <th>{% translate "Company type" %}</th>
+              <th>{% translate "Winner average" %}</th>
+              <th>{% translate "Others average" %}</th>
+            </tr>
+            {% for company_type, company_data in row.company_stats.items %}
+              <tr>
+                <td>{{ company_type }}</td>
+                <td>{{ company_data.winner_avg }}</td>
+                <td>{{ company_data.other_avg }}</td>
+              </tr>
+            {% endfor %}
+          </table>
+
+          <h3>{% translate "Wins by Starting Turn Position" %}</h3>
+          <table class="generalTable">
+            <tr>
+              <th>{% translate "Starting position" %}</th>
+              <th>{% translate "Wins" %}</th>
+              <th>{% translate "Win %" %}</th>
+              <th>{% translate "Games" %}</th>
+            </tr>
+            {% for seat in row.seat_wins %}
+              <tr>
+                <td>{{ seat.0 }}</td>
+                <td>{{ seat.1 }}</td>
+                <td>{{ seat.2 }} %</td>
+                <td>{{ seat.3 }}</td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% include "Lobby/common/homeButton.html" %}
+{% endblock body %}

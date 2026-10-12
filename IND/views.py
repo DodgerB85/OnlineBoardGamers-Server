@@ -843,3 +843,18 @@ def createINDspinoff(request):
 @login_required()
 def castVote(request):
     return process_game_with_mutex(request, shared_cast_vote, mutex_prefix="processTurn_")
+
+
+@login_required
+def INDstats(request):
+    with open("./IND/INDstats/IND_stats.json") as f:
+        data = json.load(f)
+
+    return render(
+        request,
+        "IND/INDstats.html",
+        {
+            "timeString": data["time_string"],
+            "all_data": data["player_counts"],
+        },
+    )
