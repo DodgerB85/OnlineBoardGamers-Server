@@ -139,6 +139,12 @@ export function replaySetupKetchupExpansion(playerNumber) {
 	if (store.startingOptions.stadium) {
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
 	}
+	if (store.startingOptions.mediaLine) {
+		store.availableEmployees[rf.TELEMARKETER] = 6
+		store.availableEmployees[rf.TV_ANNOUNCER] = 6
+		store.availableMarketingCampaigns.push(28, 29, 30, 31, 32, 33, 34, 35)
+		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_TELEMARKETER_USED, rf.FIRST_TV_ANNOUNCER_USED)
+	}
 	if (store.startingOptions.laborMarket) model.setupLaborMarketExpansion()
 }
 
@@ -785,6 +791,9 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 	// board index (they have no token); phone tokens log a normal board index
 	const isTV = campaignNumber === 28 || campaignNumber === 29
 	const isPhone = campaignNumber >= 30 && campaignNumber <= 35
+	// Media Line mod: a non-default marketer is logged last as [employee] (index 3+ is never otherwise an array)
+	const loggedMarketer = param.length > 3 && Array.isArray(param[param.length - 1]) ? param[param.length - 1][0] : -1
+	if (loggedMarketer !== -1) param = param.slice(0, -1)
 	let tvHouses = []
 	let campaignIndex = -1
 	if (isTV) tvHouses = [...param[1]]
@@ -805,6 +814,7 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 		// Media Line mod
 		else if (isTV) campaignEmployee = rf.TV_ANNOUNCER
 		else if (isPhone) campaignEmployee = rf.TELEMARKETER
+		if (loggedMarketer !== -1) campaignEmployee = loggedMarketer
 	}
 	// Otherwise need to read in the employee
 	else {

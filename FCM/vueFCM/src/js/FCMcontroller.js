@@ -1421,6 +1421,10 @@ export function placeMarketingCampaign(index) {
 		// Media Line mod: flag the chained second phone token so replay can tell
 		// it apart from a first placement even when Telemarketers are stacked
 		if (store.context.mediaLineSecondCall) histObj.push(1)
+		// Media Line mod: a Brand/Marketing Director can also place phone/TV; log a non-default
+		// marketer last, wrapped in an array so positional readers of older entries stay unambiguous
+		const defaultMediaMarketer = isTV ? rf.TV_ANNOUNCER : rf.MARKETING_CAMPAIGNS[store.context.campaign].type === rf.PHONE ? rf.TELEMARKETER : -1
+		if (defaultMediaMarketer !== -1 && store.context.marketer !== defaultMediaMarketer) histObj.push([store.context.marketer])
 
 		model.addHistory(rf.HIST_START_MARKETING_CAMPAIGN, [...histObj], playerIndex, 0)
 

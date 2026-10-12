@@ -246,7 +246,7 @@ function toggleCoffeeInfo(bi) {
 const computedEntry3 = computed(() => {
 	let ret = {}
 	let entry = props.entry
-	const param = entry[3]
+	let param = entry[3]
 
 	if (entry[0] === rf.HIST_CHOOSE_RESTAURANT_STARTING_POSITION) {
 		const restoIndex = funcs.importIndex(param[0])
@@ -285,6 +285,9 @@ const computedEntry3 = computed(() => {
 		const isTV = ret.campaignNumber === 28 || ret.campaignNumber === 29
 		const campaignIndex = funcs.importIndex(param[1]) // OR ROUTE IF HAWKER, HOUSE NUMBERS IF TV
 		const campaignGoodEntry = param[2]
+		// Media Line mod: a non-default marketer is logged last as [employee]
+		const loggedMarketer = param.length > 3 && Array.isArray(param[param.length - 1]) ? param[param.length - 1][0] : -1
+		if (loggedMarketer !== -1) param = param.slice(0, -1)
 		let paramIdx = 3
 		let campaignEmployee = -1
 		if (ret.campaignNumber <= 3 || ret.campaignNumber >= 17) {
@@ -294,6 +297,7 @@ const computedEntry3 = computed(() => {
 			else if (ret.campaignNumber <= 27) campaignEmployee = rf.HAWKER_MARKETEER
 			else if (isTV) campaignEmployee = rf.TV_ANNOUNCER
 			else campaignEmployee = rf.TELEMARKETER
+			if (loggedMarketer !== -1) campaignEmployee = loggedMarketer
 		}
 		// Otherwise need to read in the employee
 		else {

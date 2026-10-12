@@ -1401,3 +1401,28 @@ describe("Media Line stage 6 - replay", () => {
 		expect(store.players[0].employees).toEqual([rf.TELEMARKETER])
 	})
 })
+
+describe("Media Line replay - non-default marketer and setup", () => {
+	it("moves the logged Brand Director, not a TV Announcer, for a director-placed TV channel", () => {
+		const store = freshGame(2, ["50"])
+		store.players[0].employees.push(rf.BRAND_DIRECTOR, rf.TV_ANNOUNCER)
+		store.history.push([rf.HIST_HIRE, 0, 999, [1]])
+		replay.replayStartMarketingCampaign(1, 0, [28, [7, 1, 5], rf.BURGER, 3, [rf.BRAND_DIRECTOR]])
+		expect(store.players[0].employees).toEqual([rf.TV_ANNOUNCER])
+		expect(store.players[0].marketers).toEqual([{ campaign: 28, marketer: rf.BRAND_DIRECTOR, nightShift: false }])
+		expect(store.campaigns[0]).toMatchObject({ number: 28, duration: 3 })
+	})
+
+	it("replay setup seeds the Media Line pools, campaigns and milestones like live setup", () => {
+		const store = freshGame(2, ["50"])
+		store.availableEmployees = [...rf.ORIGINAL_AVAILABLE_EMPLOYEES]
+		store.availableMarketingCampaigns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14]
+		store.availableMilestones = rf.BASE_GAME_MILESTONES.concat([])
+		replay.replaySetupKetchupExpansion(2)
+		expect(store.availableEmployees[rf.TELEMARKETER]).toBe(6)
+		expect(store.availableEmployees[rf.TV_ANNOUNCER]).toBe(6)
+		for (let n = 28; n <= 35; n++) expect(store.availableMarketingCampaigns).toContain(n)
+		expect(store.availableMilestones).toContain(rf.FIRST_TELEMARKETER_USED)
+		expect(store.availableMilestones).toContain(rf.FIRST_TV_ANNOUNCER_USED)
+	})
+})
