@@ -178,7 +178,7 @@ def calculate_stats(games):
     # that track was not part of the game and is skipped.
     num_tracks = max((len(player["rnd"]) for player in all_players), default=0)
     rnd_stats = {}
-    chart = {"labels": [], "winner_median_upgrades": [], "other_median_upgrades": []}
+    chart = {"labels": [], "winner_upgraded_counts": [], "other_upgraded_counts": []}
 
     for track_idx in range(num_tracks):
         track_name = RND_TRACK_NAMES[track_idx]
@@ -196,6 +196,10 @@ def calculate_stats(games):
         # Win rate of every player (winner or not) who upgraded this track at least once
         upgraded_players = winner_upgraded + other_upgraded
 
+        winner_upgraded_game_ids = [game["game_id"] for game in games if upgraded_in_game(game, track_idx, True)]
+        other_upgraded_game_ids = [game["game_id"] for game in games if upgraded_in_game(game, track_idx, False)]
+        upgraded_game_ids = [game["game_id"] for game in games if upgraded_in_game(game, track_idx, True) or upgraded_in_game(game, track_idx, False)]
+
         rnd_stats[track_name] = {
             "winner_avg_upgrades": mean_or_zero(winner_upgrades),
             "winner_median_upgrades": median_or_zero(winner_upgrades),
@@ -205,14 +209,17 @@ def calculate_stats(games):
             "other_upgraded_pct": round(len(other_upgraded) / len(others_with_track) * 100) if others_with_track else 0,
             "upgraded_players": len(upgraded_players),
             "upgraded_win_pct": round(len(winner_upgraded) / len(upgraded_players) * 100) if upgraded_players else 0,
-            "winner_upgraded_game_ids": [game["game_id"] for game in games if upgraded_in_game(game, track_idx, True)],
-            "other_upgraded_game_ids": [game["game_id"] for game in games if upgraded_in_game(game, track_idx, False)],
-            "upgraded_game_ids": [game["game_id"] for game in games if upgraded_in_game(game, track_idx, True) or upgraded_in_game(game, track_idx, False)],
+            "winner_upgraded_game_ids": winner_upgraded_game_ids,
+            "winner_upgraded_game_count": len(winner_upgraded_game_ids),
+            "other_upgraded_game_ids": other_upgraded_game_ids,
+            "other_upgraded_game_count": len(other_upgraded_game_ids),
+            "upgraded_game_ids": upgraded_game_ids,
+            "upgraded_game_count": len(upgraded_game_ids),
         }
 
         chart["labels"].append(track_name)
-        chart["winner_median_upgrades"].append(rnd_stats[track_name]["winner_median_upgrades"])
-        chart["other_median_upgrades"].append(rnd_stats[track_name]["other_median_upgrades"])
+        chart["winner_upgraded_counts"].append(rnd_stats[track_name]["winner_upgraded_game_count"])
+        chart["other_upgraded_counts"].append(rnd_stats[track_name]["other_upgraded_game_count"])
 
     # Companies owned at game end, by type (and the games where the role owned at least one)
     company_stats = {}
@@ -261,6 +268,9 @@ def calculate_stats(games):
 
     turns = [game["turn"] for game in games]
 
+    winner_merged_game_ids = [game["game_id"] for game in games if merged_in_game(game, True)]
+    other_merged_game_ids = [game["game_id"] for game in games if merged_in_game(game, False)]
+
     return {
         "finishedGamesCount": finished_games_count,
         "game_ids": game_ids,
@@ -270,8 +280,8 @@ def calculate_stats(games):
         "rnd_stats": rnd_stats,
         "company_stats": company_stats,
         "player_summary": {
-            "winner": {**player_summary(winners), "merged_game_ids": [game["game_id"] for game in games if merged_in_game(game, True)]},
-            "other": {**player_summary(others), "merged_game_ids": [game["game_id"] for game in games if merged_in_game(game, False)]},
+            "winner": {**player_summary(winners), "merged_game_ids": winner_merged_game_ids, "merged_game_count": len(winner_merged_game_ids)},
+            "other": {**player_summary(others), "merged_game_ids": other_merged_game_ids, "merged_game_count": len(other_merged_game_ids)},
         },
         "seat_wins": seats,
         "chart": chart,

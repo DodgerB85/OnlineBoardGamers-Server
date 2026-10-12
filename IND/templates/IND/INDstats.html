@@ -68,11 +68,11 @@
 
             var datasets = [{
               label: 'Winners',
-              data: [{% for value in row.chart.winner_median_upgrades %}{{ value }},{% endfor %}],
+              data: [{% for value in row.chart.winner_upgraded_counts %}{{ value }},{% endfor %}],
               backgroundColor: 'green',
             }, {
               label: 'Everyone else',
-              data: [{% for value in row.chart.other_median_upgrades %}{{ value }},{% endfor %}],
+              data: [{% for value in row.chart.other_upgraded_counts %}{{ value }},{% endfor %}],
               backgroundColor: 'grey',
             }];
 
@@ -89,7 +89,7 @@
                 },
                 title: {
                   display: true,
-                  text: 'Median R&D upgrades per track',
+                  text: 'Games where the track was upgraded',
                   fontSize: 30
                 },
                 onClick: function (event, item) {
@@ -118,7 +118,7 @@
           <p class="ind-stats-note">
             {% translate "Baseline win rate for this group:" %} {{ row.win_pct_baseline }}%
             <br />
-            {% translate "Click a cell to see the games" %}
+            {% translate "Bars show how many games the track was upgraded in - by the winner, or by any other player. Click a bar or a bracketed game count to see exactly those games. Percentages are per player; the table's average and median columns show how many upgrades each group spent." %}
           </p>
           <table class="generalTable">
             <tr>
@@ -137,13 +137,13 @@
                 <td>{{ track_data.winner_avg_upgrades }}</td>
                 <td>{{ track_data.winner_median_upgrades }}</td>
                 <td class="clickableStatTD"
-                    onclick="openGameIdsPage({{ track_data.winner_upgraded_game_ids }})">{{ track_data.winner_upgraded_pct }} %</td>
+                    onclick="openGameIdsPage({{ track_data.winner_upgraded_game_ids }})">{{ track_data.winner_upgraded_pct }} % ({{ track_data.winner_upgraded_game_count }} {% translate "games" %})</td>
                 <td>{{ track_data.other_avg_upgrades }}</td>
                 <td>{{ track_data.other_median_upgrades }}</td>
                 <td class="clickableStatTD"
-                    onclick="openGameIdsPage({{ track_data.other_upgraded_game_ids }})">{{ track_data.other_upgraded_pct }} %</td>
+                    onclick="openGameIdsPage({{ track_data.other_upgraded_game_ids }})">{{ track_data.other_upgraded_pct }} % ({{ track_data.other_upgraded_game_count }} {% translate "games" %})</td>
                 <td class="clickableStatTD"
-                    onclick="openGameIdsPage({{ track_data.upgraded_game_ids }})">{{ track_data.upgraded_win_pct }} % ({{ track_data.upgraded_players }} {% translate "players" %})</td>
+                    onclick="openGameIdsPage({{ track_data.upgraded_game_ids }})">{{ track_data.upgraded_win_pct }} % ({{ track_data.upgraded_game_count }} {% translate "games" %})</td>
               </tr>
             {% endfor %}
           </table>
@@ -178,9 +178,9 @@
             <tr>
               <td>{% translate "Merged at least once" %}</td>
               <td class="clickableStatTD"
-                  onclick="openGameIdsPage({{ row.player_summary.winner.merged_game_ids }})">{{ row.player_summary.winner.merged_pct }} %</td>
+                  onclick="openGameIdsPage({{ row.player_summary.winner.merged_game_ids }})">{{ row.player_summary.winner.merged_pct }} % ({{ row.player_summary.winner.merged_game_count }} {% translate "games" %})</td>
               <td class="clickableStatTD"
-                  onclick="openGameIdsPage({{ row.player_summary.other.merged_game_ids }})">{{ row.player_summary.other.merged_pct }} %</td>
+                  onclick="openGameIdsPage({{ row.player_summary.other.merged_game_ids }})">{{ row.player_summary.other.merged_pct }} % ({{ row.player_summary.other.merged_game_count }} {% translate "games" %})</td>
             </tr>
             <tr>
               <td>{% translate "Final cash (avg and median)" %}</td>
