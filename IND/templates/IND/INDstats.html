@@ -68,11 +68,11 @@
 
             var datasets = [{
               label: 'Winners',
-              data: [{% for value in row.chart.winner_upgraded_counts %}{{ value }},{% endfor %}],
+              data: [{% for value in row.chart.winner_avg_upgrades %}{{ value }},{% endfor %}],
               backgroundColor: 'green',
             }, {
               label: 'Everyone else',
-              data: [{% for value in row.chart.other_upgraded_counts %}{{ value }},{% endfor %}],
+              data: [{% for value in row.chart.other_avg_upgrades %}{{ value }},{% endfor %}],
               backgroundColor: 'grey',
             }];
 
@@ -89,15 +89,8 @@
                 },
                 title: {
                   display: true,
-                  text: 'Games where the track was upgraded',
+                  text: 'Average R&D upgrades per track',
                   fontSize: 30
-                },
-                onClick: function (event, item) {
-                  if (item.length === 0) return
-                  var clicked = item[0]
-                  var trackData = {{ row.rnd_stats|safe }}[this.data.labels[clicked._index]]
-                  if (clicked._datasetIndex === 0) openGameIdsPage(trackData.winner_upgraded_game_ids)
-                  else openGameIdsPage(trackData.other_upgraded_game_ids)
                 },
                 scales: {
                   yAxes: [{
@@ -118,17 +111,15 @@
           <p class="ind-stats-note">
             {% translate "Baseline win rate for this group:" %} {{ row.win_pct_baseline }}%
             <br />
-            {% translate "Bars show how many games the track was upgraded in - by the winner, or by any other player. Click a bar or a bracketed game count to see exactly those games. Percentages are per player; the table's average and median columns show how many upgrades each group spent." %}
+            {% translate "The chart shows the average number of upgrades each group spent per track. Percentages are per player; every bracketed game count is clickable and opens exactly those games." %}
           </p>
           <table class="generalTable">
             <tr>
               <th>{% translate "R&D track" %}</th>
               <th>{% translate "Winner avg upgrades" %}</th>
               <th>{% translate "Winner median upgrades" %}</th>
-              <th>{% translate "Winners who upgraded %" %}</th>
               <th>{% translate "Others avg upgrades" %}</th>
               <th>{% translate "Others median upgrades" %}</th>
-              <th>{% translate "Others who upgraded %" %}</th>
               <th>{% translate "Win % when upgraded" %}</th>
             </tr>
             {% for track_name, track_data in row.rnd_stats.items %}
@@ -136,15 +127,38 @@
                 <td>{{ track_name }}</td>
                 <td>{{ track_data.winner_avg_upgrades }}</td>
                 <td>{{ track_data.winner_median_upgrades }}</td>
-                <td class="clickableStatTD"
-                    onclick="openGameIdsPage({{ track_data.winner_upgraded_game_ids }})">{{ track_data.winner_upgraded_pct }} % ({{ track_data.winner_upgraded_game_count }} {% translate "games" %})</td>
                 <td>{{ track_data.other_avg_upgrades }}</td>
                 <td>{{ track_data.other_median_upgrades }}</td>
                 <td class="clickableStatTD"
-                    onclick="openGameIdsPage({{ track_data.other_upgraded_game_ids }})">{{ track_data.other_upgraded_pct }} % ({{ track_data.other_upgraded_game_count }} {% translate "games" %})</td>
-                <td class="clickableStatTD"
                     onclick="openGameIdsPage({{ track_data.upgraded_game_ids }})">{{ track_data.upgraded_win_pct }} % ({{ track_data.upgraded_game_count }} {% translate "games" %})</td>
               </tr>
+            {% endfor %}
+          </table>
+
+          <h3>{% translate "Upgrade Level Distribution" %}</h3>
+          <p class="ind-stats-note">
+            {% translate "How far each group went: the share of winners / other players that finished the game with that many upgrades in the track. '0' means the track was never upgraded." %}
+          </p>
+          <table class="generalTable">
+            <tr>
+              <th>{% translate "R&D track" %}</th>
+              <th>{% translate "Upgrades spent" %}</th>
+              <th>{% translate "Winners" %}</th>
+              <th>{% translate "Everyone else" %}</th>
+            </tr>
+            {% for track_name, track_data in row.rnd_stats.items %}
+              {% for level in track_data.levels %}
+                <tr>
+                  {% if forloop.first %}
+                    <td rowspan="{{ track_data.levels|length }}">{{ track_name }}</td>
+                  {% endif %}
+                  <td>{{ level.upgrades }}</td>
+                  <td class="clickableStatTD"
+                      onclick="openGameIdsPage({{ level.winner_game_ids }})">{{ level.winner_pct }} % ({{ level.winner_game_count }} {% translate "games" %})</td>
+                  <td class="clickableStatTD"
+                      onclick="openGameIdsPage({{ level.other_game_ids }})">{{ level.other_pct }} % ({{ level.other_game_count }} {% translate "games" %})</td>
+                </tr>
+              {% endfor %}
             {% endfor %}
           </table>
 

@@ -156,6 +156,38 @@ def median_or_zero(values):
     return round(median(values), 2) if values else 0
 
 
+def build_level_distribution(games, winners_with_track, others_with_track, track_idx):
+    """Per number of upgrades (0-4): each group's player share plus the games behind that level.
+
+    Percentages are per player. The game ids are the games where that group had a player finish the
+    track at that level (so for "others" a game can appear at more than one level).
+    """
+    total_winners = len(winners_with_track)
+    total_others = len(others_with_track)
+
+    levels = []
+    for upgrades in range(5):
+        winner_players = [player for player in winners_with_track if player["rnd"][track_idx] - 1 == upgrades]
+        other_players = [player for player in others_with_track if player["rnd"][track_idx] - 1 == upgrades]
+
+        winner_game_ids = [game["game_id"] for game in games if any(player["is_winner"] and track_idx < len(player["rnd"]) and player["rnd"][track_idx] - 1 == upgrades for player in game["players"])]
+        other_game_ids = [game["game_id"] for game in games if any(not player["is_winner"] and track_idx < len(player["rnd"]) and player["rnd"][track_idx] - 1 == upgrades for player in game["players"])]
+
+        levels.append(
+            {
+                "upgrades": upgrades,
+                "winner_pct": round(len(winner_players) / total_winners * 100) if total_winners else 0,
+                "winner_game_ids": winner_game_ids,
+                "winner_game_count": len(winner_game_ids),
+                "other_pct": round(len(other_players) / total_others * 100) if total_others else 0,
+                "other_game_ids": other_game_ids,
+                "other_game_count": len(other_game_ids),
+            }
+        )
+
+    return levels
+
+
 def calculate_stats(games):
     """Calculates the stats for one bucket of games (a single player count, or all combined)."""
     winners = [player for game in games for player in game["players"] if player["is_winner"]]
@@ -178,7 +210,7 @@ def calculate_stats(games):
     # that track was not part of the game and is skipped.
     num_tracks = max((len(player["rnd"]) for player in all_players), default=0)
     rnd_stats = {}
-    chart = {"labels": [], "winner_upgraded_counts": [], "other_upgraded_counts": []}
+    chart = {"labels": [], "winner_avg_upgrades": [], "other_avg_upgrades": []}
 
     for track_idx in range(num_tracks):
         track_name = RND_TRACK_NAMES[track_idx]
@@ -195,31 +227,23 @@ def calculate_stats(games):
 
         # Win rate of every player (winner or not) who upgraded this track at least once
         upgraded_players = winner_upgraded + other_upgraded
-
-        winner_upgraded_game_ids = [game["game_id"] for game in games if upgraded_in_game(game, track_idx, True)]
-        other_upgraded_game_ids = [game["game_id"] for game in games if upgraded_in_game(game, track_idx, False)]
         upgraded_game_ids = [game["game_id"] for game in games if upgraded_in_game(game, track_idx, True) or upgraded_in_game(game, track_idx, False)]
 
         rnd_stats[track_name] = {
             "winner_avg_upgrades": mean_or_zero(winner_upgrades),
             "winner_median_upgrades": median_or_zero(winner_upgrades),
-            "winner_upgraded_pct": round(len(winner_upgraded) / len(winners_with_track) * 100) if winners_with_track else 0,
             "other_avg_upgrades": mean_or_zero(other_upgrades),
             "other_median_upgrades": median_or_zero(other_upgrades),
-            "other_upgraded_pct": round(len(other_upgraded) / len(others_with_track) * 100) if others_with_track else 0,
             "upgraded_players": len(upgraded_players),
             "upgraded_win_pct": round(len(winner_upgraded) / len(upgraded_players) * 100) if upgraded_players else 0,
-            "winner_upgraded_game_ids": winner_upgraded_game_ids,
-            "winner_upgraded_game_count": len(winner_upgraded_game_ids),
-            "other_upgraded_game_ids": other_upgraded_game_ids,
-            "other_upgraded_game_count": len(other_upgraded_game_ids),
             "upgraded_game_ids": upgraded_game_ids,
             "upgraded_game_count": len(upgraded_game_ids),
+            "levels": build_level_distribution(games, winners_with_track, others_with_track, track_idx),
         }
 
         chart["labels"].append(track_name)
-        chart["winner_upgraded_counts"].append(rnd_stats[track_name]["winner_upgraded_game_count"])
-        chart["other_upgraded_counts"].append(rnd_stats[track_name]["other_upgraded_game_count"])
+        chart["winner_avg_upgrades"].append(rnd_stats[track_name]["winner_avg_upgrades"])
+        chart["other_avg_upgrades"].append(rnd_stats[track_name]["other_avg_upgrades"])
 
     # Companies owned at game end, by type (and the games where the role owned at least one)
     company_stats = {}
