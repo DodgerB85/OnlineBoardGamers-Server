@@ -79,6 +79,11 @@ function cancelKickout() {
 	personal.kickoutRequired = 0
 }
 
+// Tournament game: no kickout - send the admins a webhook so they can stand in
+function alertAdmins() {
+	IO.alertTourneyAdmins(currentKickoutTarget())
+}
+
 function passKickout() {
 	Bot.passKickout()
 }
@@ -439,7 +444,19 @@ function skipModuleAndEndTurn() {
 				</div>
 				<div v-else id="kickoutDiv">
 					<br />
-					<template v-if="canKickoutNow()">
+					<!-- Tournament game: the admins stand in for a timed-out player, so alert them -->
+					<template v-if="personal.tournamentGame">
+						<i18n-t keypath="actionArea.playerTimedOut" tag="div" scope="global">
+							<template #name><b>{{ kickoutTargetObj.name }}</b></template>
+						</i18n-t>
+						<br />
+						{{ $t("actionArea.tournamentAlertAdmins") }}
+						<br />
+						<br />
+						<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("actionArea.notNowAllowMoreTime") }}</button></span>
+						<span><button class="actionsLineButton" id="alertAdminsButton" @click="alertAdmins">{{ $t("actionArea.alertAdmins") }}</button></span>
+					</template>
+					<template v-else-if="canKickoutNow()">
 						<template v-if="store.context.action !== rf.ACT_CONFIRM_KICKOUT">
 							<i18n-t keypath="actionArea.playerTimedOut" tag="div" scope="global">
 								<template #name><b>{{ kickoutTargetObj.name }}</b></template>

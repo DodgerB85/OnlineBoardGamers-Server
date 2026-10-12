@@ -1054,7 +1054,7 @@ function tileRotationClass(tileData) {
 	z-index: 5;
 }
 
-/* Flipped park rotations (mirror horizontally, matching FCM.css) */
+/* Flipped park rotations (mirror horizontally, matching the board tiles) */
 .r0M { transform: rotate(0deg) scaleX(-1); }
 .r1M { transform: rotate(90deg) scaleX(-1); }
 .r2M { transform: rotate(180deg) scaleX(-1); }

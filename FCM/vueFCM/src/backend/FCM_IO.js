@@ -1013,6 +1013,41 @@ export async function kickout(kickedPlayerIndex) {
 	}
 }
 
+// Tournament game: the timed-out player is covered by the tournament admins, so
+// alert them through the webhook instead of kicking. Message text mirrors what
+// the raw-JS client sent (IO.nudgeTourneyAdmins).
+export async function alertTourneyAdmins(timedOutPlayerName) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	store.viewSettings.showGameLoader = true
+
+	let message = "============\n"
+	message += "GAME TIMEOUT\n"
+	message += "Alerting Player: " + personal.name + "\n"
+	message += "Timed Out Player: " + timedOutPlayerName + "\n"
+	message += "[Click here to go to the game](https://www.OnlineBoardGamers.com/FCM/" + String(personal.gameID) + "/)"
+
+	try {
+		const response = await fetch("/FCM/nudgeTourneyAdmins/", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ content: message }),
+		})
+		store.viewSettings.showGameLoader = false
+
+		if (!response.ok) {
+			store.gameMessages.errorText = i18n.global.t("actionArea.alertAdminsFailed")
+			return
+		}
+
+		// Alert sent: hide the kickout panel like the raw-JS client did
+		personal.kickoutRequired = 0
+	} catch {
+		store.viewSettings.showGameLoader = false
+		store.gameMessages.errorText = i18n.global.t("actionArea.alertAdminsFailed")
+	}
+}
+
 export async function resign(playerName) {
 	const store = useModelStore()
 	const personal = usePersonalStore()

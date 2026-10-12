@@ -185,6 +185,7 @@ export async function initGame() {
 	}
 	// Tutorial game is built entirely in the browser and is never persisted
 	personal.tutorial = !!window.initData.tutorial
+	personal.tournamentGame = !!window.initData.tournamentGame
 	//store.refSize = window.initData.myZoomLevel
 	store.refSize = 200
 	personal.liveWS = false

@@ -29,6 +29,7 @@ export const usePersonalStore = defineStore("personal", () => {
 	var finishedGame = false // Tells the game how to load the compressed data
 	var trainingGame = false // Same as Practice game, IE single player mode (NOT solo)
 	var tutorial = false // Bespoke /FCM/tutorial/ game. Never saved, never sent to the server.
+	var tournamentGame = false // Tournament game: kickout hands over to the admins instead
 	var liveWS = false // Basically always set to true, IE open a live connection
 	var name = "Guest" // your username
 	var latestUpdate = "-1" // -1 = not yet received from server
@@ -130,6 +131,7 @@ export const usePersonalStore = defineStore("personal", () => {
 		finishedGame,
 		trainingGame,
 		tutorial,
+		tournamentGame,
 		liveWS,
 		name,
 		latestUpdate,

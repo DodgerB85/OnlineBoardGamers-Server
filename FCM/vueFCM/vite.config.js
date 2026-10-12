@@ -68,7 +68,8 @@ export default defineConfig(({ command }) => ({
         /^\/static.*/,
       ],
       input: {
-        main: resolve('./src/main.js')
+        main: resolve('./src/main.js'),
+        admin: resolve('./src/admin.js')
       },
       output: {
         entryFileNames: `[name].js`,

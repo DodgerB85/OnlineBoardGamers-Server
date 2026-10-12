@@ -72,7 +72,7 @@ All in `Lobby/models.py`:
 
 ## Page shell and the game client
 
-A show view (`FCM/views.py::showGame`, or e.g. `RNB/views.py::showRNBgame`) is a thin wrapper around the shared `build_show_game_data(...)` in `Lobby/gameViewHelpers.py`, which loads the game + players + viewer profile and redirects people who are not involved to the right list. It renders a Django template (`FCM/templates/FCM/showFCMgame.html`) whose only job is to embed the client bundle (`/static/FCM/FCMvuedist/...` or legacy `FCMdist`) and hand it an init payload (game id, options, starting data, viewer identity).
+A show view (`FCM/views.py::showFCMgame`, or e.g. `RNB/views.py::showRNBgame`) is a thin wrapper around the shared `build_show_game_data(...)` in `Lobby/gameViewHelpers.py`, which loads the game + players + viewer profile and redirects people who are not involved to the right list. It renders a Django template (`FCM/templates/FCM/showFCMgame.html`) whose only job is to embed the client bundle (`/static/FCM/FCMvuedist/...`) and hand it an init payload (game id, options, starting data, viewer identity).
 
 From then on the browser talks to the API:
 
@@ -93,7 +93,7 @@ From then on the browser talks to the API:
 
 Games that offer a replay rebuild the game in the browser from the stored history, one entry at a time, and store a full snapshot per entry so stepping is O(1). The pattern is the same everywhere: reset the model to a seed derived from the first history entry plus the immutable per-player identity, walk the remaining entries calling the same model mutations live play uses, and snapshot after each.
 
-- `FCM/static/FCM/JS/FCMreplay.js` (raw JS) and `TGZ/vueTGZ/src/js/TGZreplay.js` (Vue).
+- `FCM/vueFCM/src/js/FCMreplay.js` and `TGZ/vueTGZ/src/js/TGZreplay.js` (both Vue).
 - `HLC/static/HLC/JS/HLCreplay.js` (raw JS).
 
 The mutations are split into `XXX` and `XXX_core`: `XXX` is the live wrapper and may read in-the-moment state (current player, what is being placed right now), logs the history and paints the UI. `XXX_core` takes the player index and everything else it needs as arguments, touches no DOM and never logs, so the replay can call it without a live board. Replay-specific flags (`showingReplay` etc.) make the shared `Rules`/`canPlay` helpers stand down while stepping.
