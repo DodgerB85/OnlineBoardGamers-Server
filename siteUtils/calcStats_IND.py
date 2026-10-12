@@ -106,7 +106,7 @@ def decode_game_data(game_data):
     return json.loads(gzip.decompress(base64.b64decode(game_data)))
 
 
-def parse_game(game_data, winner_username):
+def parse_game(game_id, game_data, winner_username):
     """Turns one finished game export into the per-player end-of-game state used by the stats.
 
     Layout of a finished IND export: [players, cities, gameflow, history, activeCompanies]
@@ -145,7 +145,7 @@ def parse_game(game_data, winner_username):
             }
         )
 
-    return {"turn": game_turn, "players": players}
+    return {"game_id": game_id, "turn": game_turn, "players": players}
 
 
 def mean_or_zero(values):
@@ -163,6 +163,16 @@ def calculate_stats(games):
     all_players = winners + others
 
     finished_games_count = len(games)
+    game_ids = [game["game_id"] for game in games]
+
+    def upgraded_in_game(game, track_idx, is_winner):
+        return any(player["is_winner"] == is_winner and track_idx < len(player["rnd"]) and player["rnd"][track_idx] >= 2 for player in game["players"])
+
+    def merged_in_game(game, is_winner):
+        return any(player["is_winner"] == is_winner and player["mergers"] > 0 for player in game["players"])
+
+    def owned_type_in_game(game, company_type, is_winner):
+        return any(player["is_winner"] == is_winner and player["company_counts"][company_type] > 0 for player in game["players"])
 
     # R&D ("tech") tracks: levels start at 1, so upgrades = level - 1. A -1 subsidy entry means
     # that track was not part of the game and is skipped.
@@ -195,18 +205,27 @@ def calculate_stats(games):
             "other_upgraded_pct": round(len(other_upgraded) / len(others_with_track) * 100) if others_with_track else 0,
             "upgraded_players": len(upgraded_players),
             "upgraded_win_pct": round(len(winner_upgraded) / len(upgraded_players) * 100) if upgraded_players else 0,
+            "winner_upgraded_game_ids": [game["game_id"] for game in games if upgraded_in_game(game, track_idx, True)],
+            "other_upgraded_game_ids": [game["game_id"] for game in games if upgraded_in_game(game, track_idx, False)],
+            "upgraded_game_ids": [game["game_id"] for game in games if upgraded_in_game(game, track_idx, True) or upgraded_in_game(game, track_idx, False)],
         }
 
         chart["labels"].append(track_name)
         chart["winner_median_upgrades"].append(rnd_stats[track_name]["winner_median_upgrades"])
         chart["other_median_upgrades"].append(rnd_stats[track_name]["other_median_upgrades"])
 
-    # Companies owned at game end, by type
+    # Companies owned at game end, by type (and the games where the role owned at least one)
     company_stats = {}
     for company_type in COMPANY_TYPE_NAMES:
+        winner_type_game_ids = [game["game_id"] for game in games if owned_type_in_game(game, company_type, True)]
+        other_type_game_ids = [game["game_id"] for game in games if owned_type_in_game(game, company_type, False)]
         company_stats[company_type] = {
             "winner_avg": mean_or_zero([player["company_counts"][company_type] for player in winners]),
             "other_avg": mean_or_zero([player["company_counts"][company_type] for player in others]),
+            "winner_game_count": len(winner_type_game_ids),
+            "winner_game_ids": winner_type_game_ids,
+            "other_game_count": len(other_type_game_ids),
+            "other_game_ids": other_type_game_ids,
         }
 
     def total_rnd_upgrades(player):
@@ -227,27 +246,33 @@ def calculate_stats(games):
     # Wins by starting turn position (player array order = seat order at game start)
     seat_wins = {}
     seat_games = {}
+    seat_win_ids = {}
     for game in games:
         for player in game["players"]:
             seat_games[player["seat"]] = seat_games.get(player["seat"], 0) + 1
             if player["is_winner"]:
                 seat_wins[player["seat"]] = seat_wins.get(player["seat"], 0) + 1
+                seat_win_ids.setdefault(player["seat"], []).append(game["game_id"])
 
     seats = []
     for seat in sorted(seat_games):
         wins = seat_wins.get(seat, 0)
-        seats.append([SEAT_TITLES[seat], wins, round(wins / seat_games[seat] * 100), seat_games[seat]])
+        seats.append([SEAT_TITLES[seat], wins, round(wins / seat_games[seat] * 100), seat_games[seat], seat_win_ids.get(seat, [])])
 
     turns = [game["turn"] for game in games]
 
     return {
         "finishedGamesCount": finished_games_count,
+        "game_ids": game_ids,
         "avg_turns": mean_or_zero(turns),
         "median_turns": median_or_zero(turns),
         "win_pct_baseline": round(len(winners) / len(all_players) * 100) if all_players else 0,
         "rnd_stats": rnd_stats,
         "company_stats": company_stats,
-        "player_summary": {"winner": player_summary(winners), "other": player_summary(others)},
+        "player_summary": {
+            "winner": {**player_summary(winners), "merged_game_ids": [game["game_id"] for game in games if merged_in_game(game, True)]},
+            "other": {**player_summary(others), "merged_game_ids": [game["game_id"] for game in games if merged_in_game(game, False)]},
+        },
         "seat_wins": seats,
         "chart": chart,
     }
@@ -268,7 +293,7 @@ def generate_stats_data():
 
     for game_id, winner_username, max_players, game_data in fetch_games_to_analyse():
         try:
-            game = parse_game(game_data, winner_username)
+            game = parse_game(game_id, game_data, winner_username)
         except Exception as e:
             print(f"Game ERROR - COULD NOT READ {game_id}: {e}")
             continue

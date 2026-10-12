@@ -590,6 +590,14 @@
 	color: var(--color-ink);
 }
 
+.ind-stats .clickableStatTD {
+	cursor: pointer;
+}
+
+.ind-stats .clickableStatTD:hover {
+	background: var(--color-positive-bg);
+}
+
 /* ============================================================
    "Ten most recently ..." tables — new design
    The shared row09 rules in components.css already collapse
