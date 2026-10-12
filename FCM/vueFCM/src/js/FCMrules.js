@@ -2053,8 +2053,10 @@ export function doDinnerTime(replayOnly) {
 		}
 
 		// Coffee block must come AFTER the house's regular block,
-		// so the history UI can attribute it to the correct house
-		if (winningCompetitors.length > 0 && need.number !== rf.STADIUM && store.startingOptions.coffee && model.getAvailableCoffee(false)) {
+		// so the history UI can attribute it to the correct house.
+		// Stadium included: the game-day sale is a regular sale, so the
+		// standard coffee rule applies to its delivery route as well.
+		if (winningCompetitors.length > 0 && store.startingOptions.coffee && model.getAvailableCoffee(false)) {
 			processCoffee(need.number, winningCompetitors[0], usedFryChefs, coffeeEarnings, histoHouses, possibleCoffeeMS)
 		}
 	}
