@@ -109,9 +109,7 @@ export function generateRandomMap(maxPlayers) {
 		}
 	}
 
-	// 6. Stadium mod - force-place the 2 arena half-tiles on a random adjacent
-	// pair of tiles, replacing 2 normal tiles. Horizontal: 27 left, 28 right, rot 0.
-	// Vertical: 27 top, 28 bottom, rot 1 (both halves rotate clockwise).
+	// 6. Stadium mod - force-place the 2 arena half-tiles on a random adjacent pair
 	if (options.stadium) {
 		const { w, h } = NATURAL_SIZE[maxPlayers] || NATURAL_SIZE[2]
 		const horizontal = Math.random() < 0.5

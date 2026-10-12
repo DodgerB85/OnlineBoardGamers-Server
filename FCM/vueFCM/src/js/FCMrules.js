@@ -1810,9 +1810,8 @@ export function doDinnerTime(replayOnly) {
 	const fcMod = store.startingOptions.friedChicken
 
 	// Stadium mod: game-day demand injection (deterministic, recomputed on replay)
-	const stadiumMod = store.startingOptions.stadium
 	let stadiumResult = null
-	if (stadiumMod && store.stadium.announcement !== null && !store.needs.some((n) => n.number === rf.STADIUM) && store.gameflow.turn === 5 + store.stadium.gamesPlayed * 3) {
+	if (store.startingOptions.stadium && store.stadium.announcement !== null && !store.needs.some((n) => n.number === rf.STADIUM) && store.gameflow.turn === stadiumGameTurn(store.stadium.gamesPlayed)) {
 		const a = store.stadium.announcement
 		const subNeeds = []
 		for (let i = 0; i < a.units; i++) subNeeds.push([a.food, -1])
@@ -2638,6 +2637,11 @@ export function payingWithGoodsRequireAction(playerIndex) {
 
 // --- Stadium mod ---
 
+// Turn on which the next stadium game happens, given the games already played
+export function stadiumGameTurn(gamesPlayed) {
+	return 5 + gamesPlayed * 3
+}
+
 // The First Stadium Supplier milestone hears announcements 1 turn earlier
 function stadiumAnnouncementLead() {
 	const store = useModelStore()
@@ -2649,13 +2653,11 @@ function stadiumAnnouncementLead() {
 
 // Called at the end of a turn (after Dinnertime, during clean-up) with the turn
 // that just ended. Creates the announcement for the next game when it is due.
-// With the First Stadium Supplier milestone the announcement is rolled one turn
-// early, but the shared history entry (what everyone else sees) waits until the
-// normal 2-turn lead - the holder's early knowledge stays private.
+// Holder sees the roll early; shared history waits for the normal lead
 export function stadiumEndOfTurn(turnJustEnded) {
 	const store = useModelStore()
 	if (!store.startingOptions.stadium) return
-	const nextGameTurn = 5 + store.stadium.gamesPlayed * 3
+	const nextGameTurn = stadiumGameTurn(store.stadium.gamesPlayed)
 
 	// Roll the next game's demand at the earliest lead that applies (3 with the milestone, else 2)
 	if (store.stadium.announcement === null && turnJustEnded >= nextGameTurn - stadiumAnnouncementLead()) {
@@ -2665,7 +2667,7 @@ export function stadiumEndOfTurn(turnJustEnded) {
 		if (store.startingOptions.dumplings) pool.push(rf.DUMPLING)
 		if (store.startingOptions.friedChicken) pool.push(rf.FRIED_CHICKEN)
 		const food = pool[Math.floor(Math.random() * pool.length)]
-		const units = gameNumber === 1 ? 6 : gameNumber === 2 ? 12 : 16
+		const units = [6, 12][gameNumber - 1] ?? 16
 		store.stadium.announcement = { gameNumber: gameNumber, food: food, units: units }
 	}
 

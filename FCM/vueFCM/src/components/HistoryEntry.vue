@@ -907,7 +907,7 @@ const computedEntry3 = computed(() => {
 		<!-- HIST_STADIUM_ANNOUNCE: the next stadium game is announced (Stadium mod) -->
 		<template v-else-if="entry[0] === rf.HIST_STADIUM_ANNOUNCE">
 			<div><i18n-t keypath="history.stadiumAnnounce" tag="span" scope="global">
-				<template #turn>{{ 3 * entry[3][0] + 2 }}</template>
+				<template #turn>{{ rules.stadiumGameTurn(entry[3][0] - 1) }}</template>
 				<template #units>{{ entry[3][2] }}</template>
 				<template #good><img class="foodTokenImg" :class="goodClass(entry[3][1])" :src="goodSrc(entry[3][1])" alt="" /></template>
 			</i18n-t>

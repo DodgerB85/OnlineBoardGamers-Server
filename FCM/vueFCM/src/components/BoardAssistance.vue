@@ -348,7 +348,7 @@ const useStadium = computed(() => store.startingOptions.stadium)
 const stadiumAnnouncement = computed(() => {
 	const a = store.stadium.announcement
 	if (a === null) return null
-	const gameTurn = 5 + store.stadium.gamesPlayed * 3
+	const gameTurn = rules.stadiumGameTurn(store.stadium.gamesPlayed)
 	let lead = 2
 	if (personal.pov >= 0 && plyr.hasMilestone(personal.pov, rf.FIRST_STADIUM_SOLD)) lead = 3
 	if (store.gameflow.turn < gameTurn - lead + 1) return null

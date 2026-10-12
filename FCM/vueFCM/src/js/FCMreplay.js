@@ -136,9 +136,7 @@ export function replaySetupKetchupExpansion(playerNumber) {
 		store.availableEmployees[rf.FRIED_CHICKEN_CHEF] = max
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_FRIED_CHICKEN_SOLD)
 	}
-	if (store.startingOptions.stadium) {
-		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
-	}
+	if (store.startingOptions.stadium && store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
 	if (store.startingOptions.mediaLine) {
 		store.availableEmployees[rf.TELEMARKETER] = 6
 		store.availableEmployees[rf.TV_ANNOUNCER] = 6

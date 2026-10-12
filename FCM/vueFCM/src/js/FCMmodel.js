@@ -521,9 +521,7 @@ export function setupKetchupExpansion(playerNumber) {
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_FRIED_CHICKEN_SOLD)
 	}
 	// Stadium mod
-	if (store.startingOptions.stadium) {
-		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
-	}
+	if (store.startingOptions.stadium && store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
 	if (store.startingOptions.laborMarket) store.availableEmployees[rf.HEADHUNTER] = 6
 	// Media Line mod
 	if (store.startingOptions.mediaLine) {

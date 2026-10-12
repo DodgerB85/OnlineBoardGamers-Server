@@ -1174,8 +1174,7 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 
 	applyDumplingCeoActions()
 
-	// Labor Market mod: written directly before the Stadium slot for chosen-module
-	// saves, so advance the index only when the slot is actually present
+	// Labor Market mod: its slot sits right before the Stadium slot when present
 	let moduleImportIndex = IMPORT_INDEX
 	if (isLaborMarketSlot(inputArr[moduleImportIndex])) moduleImportIndex++
 	restoreLaborMarketState(inputArr, IMPORT_INDEX)
@@ -1362,13 +1361,7 @@ function applyStadiumSlot(slot) {
 	return false
 }
 
-// Stadium mod: restore state from the trailing wire-format slot (shape-detected).
-// `index` is the next unread import position - the stadium slot sits there
-// whenever the module was chosen (it is pushed before the bailout slot, so no
-// offset is needed). The slot is only scanned when the module was chosen -
-// other games never store it, so their saves load without it. For saves that
-// predate the slot, rebuild from history: gamesPlayed from the result entries,
-// and the last announcement if it is still for an upcoming game.
+// Stadium mod: restore from the trailing slot; older saves rebuild from history
 export function restoreStadiumState(inputArr, index = inputArr.length - 1) {
 	const store = useModelStore()
 	store.stadium.gamesPlayed = 0

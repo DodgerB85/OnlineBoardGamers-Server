@@ -3,6 +3,7 @@ import * as map from "../js/FCMmap"
 import * as view from "../js/FCMview"
 import * as rf from "../js/FCMreference"
 import * as model from "../js/FCMmodel"
+import * as rules from "../js/FCMrules.js"
 
 import { useModelStore } from "../stores/FCMstore.js"
 import { usePersonalStore } from "../stores/FCMpersonal.js"
@@ -666,7 +667,7 @@ const needDisplays = computed(() => {
 	// Stadium mod - on game day, show the announced demand on the arena itself.
 	// Derived from the announcement: the injected need only exists inside
 	// doDinnerTime's synchronous run, so it can never drive the display.
-	if (store.startingOptions.stadium && store.stadium.announcement !== null && store.gameflow.turn === 5 + store.stadium.gamesPlayed * 3) {
+	if (store.startingOptions.stadium && store.stadium.announcement !== null && store.gameflow.turn === rules.stadiumGameTurn(store.stadium.gamesPlayed)) {
 		const idx = map.findIndexForHouse(rf.STADIUM)
 		if (idx > -1) {
 			const [x, y] = view.getXYforSmallSquare(idx)
