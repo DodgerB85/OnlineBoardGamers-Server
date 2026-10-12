@@ -174,6 +174,37 @@ describe("stadium announcement schedule", () => {
 	})
 })
 
+describe("stadium game-day demand (display helper)", () => {
+	it("returns the announced demand on the game day itself", () => {
+		const store = freshGame()
+		store.stadium.announcement = { gameNumber: 1, food: rf.PIZZA, units: 6 }
+		expect(rules.stadiumGameDayDemand()).toEqual({ food: rf.PIZZA, units: 6 })
+	})
+
+	it("returns null before the game day, even once the announcement is public", () => {
+		const store = freshGame()
+		store.gameflow.turn = 4 // game 1 is on turn 5, announcement public since turn 3
+		store.stadium.announcement = { gameNumber: 1, food: rf.PIZZA, units: 6 }
+		expect(rules.stadiumGameDayDemand()).toBeNull()
+	})
+
+	it("follows the every-3-turns schedule after the first game", () => {
+		const store = freshGame()
+		store.stadium.gamesPlayed = 1 // next game day is turn 8
+		store.stadium.announcement = { gameNumber: 2, food: rf.BURGER, units: 12 }
+		store.gameflow.turn = 7
+		expect(rules.stadiumGameDayDemand()).toBeNull()
+		store.gameflow.turn = 8
+		expect(rules.stadiumGameDayDemand()).toEqual({ food: rf.BURGER, units: 12 })
+	})
+
+	it("returns null without the stadium option", () => {
+		const store = freshGame(2, [rf.SO_SHORT_GAME])
+		store.stadium.announcement = { gameNumber: 1, food: rf.PIZZA, units: 6 }
+		expect(rules.stadiumGameDayDemand()).toBeNull()
+	})
+})
+
 describe("stadium game day settlement", () => {
 	it("winner takes all: full stock threshold, single payment, milestone, schedule advances", () => {
 		const store = freshGame()
