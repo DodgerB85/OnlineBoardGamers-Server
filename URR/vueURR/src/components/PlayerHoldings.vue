@@ -48,8 +48,7 @@ function reset() { inspectedPlayer.value = null; store.viewSettings.showOwnedLan
 <template>
 	<aside class="holdingsPanel">
 		<div v-if="inspectedPlayer !== null" class="inspectionLabel">Inspecting player</div>
-		<div class="panelTitle"><b :title="player?.displayName"><PlayerMarker :index="activePlayer" /></b><button v-if="inspectedPlayer !== null" @click="reset">Follow turn</button></div>
-		<button class="showOwnedLand" :aria-pressed="store.viewSettings.showOwnedLand" @click="store.viewSettings.showOwnedLand = !store.viewSettings.showOwnedLand">{{ store.viewSettings.showOwnedLand ? 'Hide owned land' : 'Show owned land' }}</button>
+		<div class="panelTitle"><b :title="player?.displayName"><PlayerMarker :index="activePlayer" /></b><button class="showOwnedLand" :aria-pressed="store.viewSettings.showOwnedLand" @click="store.viewSettings.showOwnedLand = !store.viewSettings.showOwnedLand">{{ store.viewSettings.showOwnedLand ? 'Hide owned land' : 'Show owned land' }}</button><button v-if="inspectedPlayer !== null" @click="reset">Follow turn</button></div>
 		<div class="money"><span>Private treasury · total</span><b>{{ player?.money ?? 0 }} <small>SPL</small></b></div>
 		<div class="reservedMoney" v-if="player && availableMoney < player.money"><b>{{ availableMoney }} SPL available</b><span>{{ player.money - availableMoney }} SPL reserved for highest bids</span></div>
 		<div class="terrainGrid" v-if="showLand"><div class="terrainRow" v-for="entry in land" :key="entry.type" :title="`${rf.LAND_NAMES[entry.type]}: ${entry.count} lands worth ${entry.value} SPL`"><img :src="assets.getTerrainImage(entry.type)" :alt="rf.LAND_NAMES[entry.type]" /><b>{{ entry.count }}</b><span>{{ rf.LAND_NAMES[entry.type] }}</span><span v-if="entry.cityCount" class="cityCount" :title="`${entry.cityCount} ${rf.LAND_NAMES[entry.type].toLowerCase()} ${entry.cityCount === 1 ? 'city' : 'cities'} included in ${entry.count} lands`"><img :src="assets.getTerrainImage(entry.type, true)" alt="City" />{{ entry.cityCount }}</span><small v-if="store.gameflow.phase === rf.PHASE_GAME_OVER" class="landValue">{{ entry.value }} SPL</small></div></div>
@@ -65,7 +64,7 @@ function reset() { inspectedPlayer.value = null; store.viewSettings.showOwnedLan
 
 <style scoped>
 .holdingsPanel { width: 205px; box-sizing: border-box; background: #fff9df; border: 2px solid #8e805e; border-radius: 7px; padding: 8px; text-align: left; font-size: 16px; font-weight: 600; display: grid; grid-template-columns: minmax(0, 1fr); gap: 5px; align-self: flex-start; }
-.panelTitle { display: flex; justify-content: space-between; gap: 4px; font-size: 16px; }
+.panelTitle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px;  font-size: 16px; }
 .panelTitle b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.panelTitle button { font: inherit; font-size: 16px; font-weight: 600; flex-shrink: 0; cursor: pointer; }
 .money, .assetLine { font-weight: bold; }
 .playerMarker { width: 22px; height: 22px; vertical-align: middle; }.nationArtwork { margin: 3px 0; }.nationArtwork img { width: 100%; }
@@ -73,7 +72,7 @@ function reset() { inspectedPlayer.value = null; store.viewSettings.showOwnedLan
 .nationIncome { display: flex; justify-content: space-between; gap: 5px; font-size: 16px; font-weight: 600; padding: 4px 0; }.reservedMoney { display: grid; gap: 3px; padding: 4px 7px; font-size: 16px; font-weight: 600; }.reservedMoney span { color: #655a42; font-size: 16px; font-weight: 600; }
 .terrainGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 7px 0; }.terrainRow { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 16px; font-weight: 600; }.terrainRow img { width: 40px; height: 40px; border-radius: 3px; }.terrainRow b { position: absolute; top: 24px; right: 0; min-width: 18px; text-align: center; background: #fffdf4; border: 1px solid #aa9b77; border-radius: 9px; font-size: 16px; font-weight: 600; }
 .terrainRow .cityCount { display: inline-flex; align-items: center; gap: 3px; font-size: 16px; font-weight: 600; }.terrainRow .cityCount img { width: 20px; height: 20px; }
-.ruledStates { display: flex; flex-wrap: wrap; gap: 6px; }.ruledStates span { display: inline-flex; align-items: center; gap: 4px; }.ruledStates img { width: 26px; height: 26px; }.primogeniture { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; border-top: 1px solid #c4b894; padding-top: 6px; }.primogeniture span { min-width: 0; overflow-wrap: anywhere; }.primogeniture img { width: 64px; flex-shrink: 0; }.primogeniture b { display: block; font-size: 16px; font-weight: 600; }
+.ruledStates { display: flex; flex-wrap: wrap; gap: 6px; }.ruledStates span { display: inline-flex; align-items: center; gap: 4px; }.ruledStates img { width: 26px; height: 26px; }.primogeniture { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; border-top: 1px solid #c4b894; padding-top: 6px; }.primogeniture span { min-width: 0; overflow-wrap: anywhere; }.primogeniture > img { width: 64px; flex-shrink: 0; }.primogeniture b { display: block; font-size: 16px; font-weight: 600; }
 summary { cursor: pointer; padding: 4px 0; }
 .landValue { font-size: 16px; font-weight: bold; white-space: nowrap; }
 .markerCount { display: flex; align-items: center; gap: 6px; font-size: 16px; font-weight: 600; }

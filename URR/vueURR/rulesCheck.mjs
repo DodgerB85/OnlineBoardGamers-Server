@@ -474,7 +474,7 @@ const area = (game, areaId) => game.board.areas.find((entry) => entry.id === are
 	const next = applyAction(purchased, 0, end)
 	assert.equal(next.gameflow.turnOrder[0], 0)
 	assert.equal(endsDecision(purchased, next, end), true)
-	assert.match(describeAction(purchased, next, end), /End Turn to confirm/)
+	assert.doesNotMatch(describeAction(purchased, next, end), /End Turn/)
 	const offer = { ...game, gameflow: { ...game.gameflow, pendingOffer: { returnPlayer: 0 } } }
 	assert.throws(() => defaultEndAction(offer), /Accept or Decline/)
 }

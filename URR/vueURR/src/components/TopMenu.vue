@@ -22,6 +22,10 @@ onBeforeUnmount(() => {
 	document.documentElement.style.removeProperty("--urr-menu-height")
 })
 
+function fitMap() {
+	store.viewSettings.boardZoom = 1
+	document.querySelector(".mapContainer")?.scrollIntoView({ block: "start", behavior: "smooth" })
+}
 function clearPanels() {
 	store.gameMessages.bugErrorText = ""
 	store.gameMessages.successText = ""
@@ -195,7 +199,7 @@ function getKickoutTimerText() {
 			<div id="zoomDiv" class="mapZoom">
 				<button @click="store.viewSettings.boardZoom = Math.min(3, store.viewSettings.boardZoom + .25)" :disabled="store.viewSettings.boardZoom >= 3" aria-label="Zoom in">🔍+</button>
 				<button @click="store.viewSettings.boardZoom = Math.max(.5, store.viewSettings.boardZoom - .25)" :disabled="store.viewSettings.boardZoom <= .5" aria-label="Zoom out">🔍−</button>
-				<button @click="store.viewSettings.boardZoom = 1" title="Fit the board">{{ Math.round(store.viewSettings.boardZoom * 100) }}%</button>
+				<button @click="fitMap" title="Map fills the space between the panels">🔍Map</button>
 			</div>
 		</div>
 	</div>
@@ -220,7 +224,7 @@ function getKickoutTimerText() {
 	color: white;
 	padding: 0px;
 	width: 100%;
-	min-width: 1400px;
+	min-width: 1380px;
 	height: 60px;
 	top: 0px;
 	z-index: 2;
