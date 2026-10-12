@@ -91,10 +91,6 @@ function getOrdinalWord(n) {
 	return ORDINAL_KEYS[n] ? i18n.global.t("history.ordinals." + ORDINAL_KEYS[n]) : String(n + 1)
 }
 
-function giveNumOrdinal(n) {
-	return ORDINAL_KEYS[n] ? i18n.global.t("history.numOrdinals." + ORDINAL_KEYS[n]) : String(n + 1)
-}
-
 function playerName(playerIndex) {
 	return store.players[playerIndex]?.displayName ?? i18n.global.t("history.system")
 }

@@ -29,6 +29,22 @@ function restartKickoutTimers() {
 	}
 }
 
+async function throwIfNotOk(response) {
+	if (response.ok) return
+	const errorData = await response.json() // Assuming the server returns JSON error data
+	throw new Error(errorData.error || "Network response was not ok")
+}
+
+function reportSaveError(label, payloadInfo, error) {
+	const personal = usePersonalStore()
+	const gameInfo = `Game ${personal.gameID} - User ${personal.name || "unknown"} - ${payloadInfo}`
+	const errorName = error && error.name ? error.name : "Error"
+	const errorMsg = error && error.message ? error.message : String(error)
+	const errorStack = error && error.stack ? String(error.stack).substring(0, 1200) : "no stack"
+	const browserInfo = typeof navigator !== "undefined" ? navigator.userAgent : "unknown UA"
+	sendDiscordWebhook(`${label} - ${gameInfo}: [${errorName}] ${errorMsg} | UA: ${browserInfo} | stack: ${errorStack}`)
+}
+
 /***** PRE-MOVES
  *
  * _controller.store.context.preMoveData = [[[paydaySkipFlag], [paidInFood]], [cleanupSkipFlag]]
@@ -165,11 +181,7 @@ export async function saveAndUpdateNotifictions(playerIndexesToNotify, referring
 			}),
 			headers: { "X-CSRFToken": csrftoken },
 		})
-		if (!response.ok) {
-			const errorData = await response.json() // Assuming the server returns JSON error data
-			const errorMessage = errorData.error || "Network response was not ok"
-			throw new Error(errorMessage)
-		}
+		await throwIfNotOk(response)
 		let _result = await response.json()
 
 		if (_result.syncError) {
@@ -186,13 +198,7 @@ export async function saveAndUpdateNotifictions(playerIndexesToNotify, referring
 	} catch (error) {
 		console.error("Error fetching data:", error)
 		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
-		const payloadInfo = `referringPhase=${referringPhase}, LU=${personal.latestUpdate}`
-		const gameInfo = `Game ${personal.gameID} - User ${personal.name || "unknown"} - ${payloadInfo}`
-		const errorName = error && error.name ? error.name : "Error"
-		const errorMsg = error && error.message ? error.message : String(error)
-		const errorStack = error && error.stack ? String(error.stack).substring(0, 1200) : "no stack"
-		const browserInfo = typeof navigator !== "undefined" ? navigator.userAgent : "unknown UA"
-		sendDiscordWebhook(`FCM save and notify error - ${gameInfo}: [${errorName}] ${errorMsg} | UA: ${browserInfo} | stack: ${errorStack}`)
+		reportSaveError("FCM save and notify error", `referringPhase=${referringPhase}, LU=${personal.latestUpdate}`, error)
 	}
 }
 
@@ -556,11 +562,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 			body: JSON.stringify(postData),
 			headers: { "X-CSRFToken": csrftoken },
 		})
-		if (!response.ok) {
-			const errorData = await response.json() // Assuming the server returns JSON error data
-			const errorMessage = errorData.error || "Network response was not ok"
-			throw new Error(errorMessage)
-		}
+		await throwIfNotOk(response)
 		result = await response.json()
 
 		if (result.latestUpdate > parseInt(personal.latestUpdate)) personal.latestUpdate = String(result.latestUpdate)
@@ -713,13 +715,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 		console.error("Error fetching data:", error)
 		personal.haltPlay = false
 		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
-		const payloadInfo = `turn=${store.gameflow.turn}, phase=${store.gameflow.phase}, LU=${postData.latestUpdate}, nextPlayer=${postData.nextPlayer?.[0] || "none"}`
-		const gameInfo = `Game ${personal.gameID} - User ${personal.name || "unknown"} - ${payloadInfo}`
-		const errorName = error && error.name ? error.name : "Error"
-		const errorMsg = error && error.message ? error.message : String(error)
-		const errorStack = error && error.stack ? String(error.stack).substring(0, 1200) : "no stack"
-		const browserInfo = typeof navigator !== "undefined" ? navigator.userAgent : "unknown UA"
-		sendDiscordWebhook(`FCM save error - ${gameInfo}: [${errorName}] ${errorMsg} | UA: ${browserInfo} | stack: ${errorStack}`)
+		reportSaveError("FCM save error", `turn=${store.gameflow.turn}, phase=${store.gameflow.phase}, LU=${postData.latestUpdate}, nextPlayer=${postData.nextPlayer?.[0] || "none"}`, error)
 	}
 }
 
@@ -749,11 +745,7 @@ export async function savePreTurn(preMoveDataRaw) {
 			body: JSON.stringify(postData),
 			headers: { "X-CSRFToken": csrftoken },
 		})
-		if (!response.ok) {
-			const errorData = await response.json() // Assuming the server returns JSON error data
-			const errorMessage = errorData.error || "Network response was not ok"
-			throw new Error(errorMessage)
-		}
+		await throwIfNotOk(response)
 		const data = await response.json()
 		if (data.syncError) {
 			store.gameMessages.errorText = i18n.global.t("FCM_IO.olderVersionRefresh")
@@ -894,11 +886,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 			body: JSON.stringify(postData),
 			headers: { "X-CSRFToken": csrftoken },
 		})
-		if (!response.ok) {
-			const errorData = await response.json() // Assuming the server returns JSON error data
-			const errorMessage = errorData.error || "Network response was not ok"
-			throw new Error(errorMessage)
-		}
+		await throwIfNotOk(response)
 		const data = await response.json()
 
 		if (data.syncError) {
@@ -964,13 +952,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 		console.error("Error fetching data:", error)
 		personal.haltPlay = false
 		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
-		const payloadInfo = `LU=${personal.latestUpdate}`
-		const gameInfo = `Game ${personal.gameID} - User ${personal.name || "unknown"} - ${payloadInfo}`
-		const errorName = error && error.name ? error.name : "Error"
-		const errorMsg = error && error.message ? error.message : String(error)
-		const errorStack = error && error.stack ? String(error.stack).substring(0, 1200) : "no stack"
-		const browserInfo = typeof navigator !== "undefined" ? navigator.userAgent : "unknown UA"
-		sendDiscordWebhook(`FCM simul move save error - ${gameInfo}: [${errorName}] ${errorMsg} | UA: ${browserInfo} | stack: ${errorStack}`)
+		reportSaveError("FCM simul move save error", `LU=${personal.latestUpdate}`, error)
 	}
 }
 

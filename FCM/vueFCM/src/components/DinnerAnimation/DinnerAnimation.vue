@@ -52,19 +52,9 @@ function tokenSrc(good) {
 }
 
 // During pickup the demand simply disappears from the house in place.
-// Drinks are narrowed exactly like MapArea.tokenStyle does for the board,
-// so the animated load matches what the player already knows.
+// Sized exactly like the board tokens, so the animated load matches what the player already knows.
 function tokenStyle(t) {
-	let size = tokenSize.value
-	let x = t.x
-	if (t.good === rf.BEER || t.good === rf.COKE) {
-		x += size / 4.5
-		size /= 2
-	} else if (t.good === rf.LEMONADE) {
-		x += size / 5
-		size /= 1.5
-	}
-	return { left: x + "px", top: t.y + "px", width: size + "px" }
+	return view.boardTokenStyle(t.good, t.x, t.y, tokenSize.value)
 }
 
 function tokenClass() {

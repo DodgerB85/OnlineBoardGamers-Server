@@ -210,20 +210,7 @@ const tvAntennaDisplays = computed(() => {
 
 // Board food token sizing - beer/coke halved, lemonade reduced
 function tokenStyle(token) {
-	let x = token.x
-	let width = token.width
-	if (token.good === rf.BEER || token.good === rf.COKE) {
-		x += width / 4.5
-		width /= 2
-	} else if (token.good === rf.LEMONADE) {
-		x += width / 5
-		width /= 1.5
-	}
-	return {
-		left: x + "px",
-		top: token.y + "px",
-		width: width + "px",
-	}
+	return view.boardTokenStyle(token.good, token.x, token.y, token.width)
 }
 
 // Built houses - house_garden image pasted over the tile + house number

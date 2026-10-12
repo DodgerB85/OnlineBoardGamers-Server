@@ -10,6 +10,8 @@ import { generatePlacementHeatMap, findBestPlacement } from "./restaurantHeatMap
 import { think } from "./aiDebug"
 import { useModelStore } from "../../stores/FCMstore.js"
 
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)]
+
 export async function makeAImove() {
 	const store = useModelStore()
 	context.resetContext()
@@ -37,7 +39,7 @@ export async function makeAImove() {
 
 		if (index === null) {
 			const possibleSqs = rules.givePossibleStartingRestaurantsPosition(rotation)
-			index = possibleSqs[Math.floor(Math.random() * possibleSqs.length)]
+			index = pick(possibleSqs)
 		}
 
 		// Calculation is done, nothing has been written to the model yet: this is
@@ -173,7 +175,7 @@ export async function makeAImove() {
 						if (store.gameflow.turn === 4) chosenBeach = rf.JUNIOR_VICE_PRESIDENT
 						if (store.gameflow.turn === 5) chosenBeach = rf.KITCHEN_TRAINEE
 					} else {
-						chosenBeach = possibleBeach[Math.floor(Math.random() * possibleBeach.length)]
+						chosenBeach = pick(possibleBeach)
 					}
 
 					let steps = 0
@@ -186,7 +188,7 @@ export async function makeAImove() {
 							continue
 						}
 
-						let chosenTo = possibleToFlat[Math.floor(Math.random() * possibleToFlat.length)]
+						let chosenTo = pick(possibleToFlat)
 
 						if (playerObj.AIlevel === 1) {
 							if (store.gameflow.turn === 3) chosenTo = rf.JUNIOR_VICE_PRESIDENT
@@ -199,7 +201,7 @@ export async function makeAImove() {
 								}
 							} else {
 								const highestTier = possibleTo.filter((tier) => tier.length > 0).pop()
-								if (highestTier) chosenTo = highestTier[Math.floor(Math.random() * highestTier.length)]
+								if (highestTier) chosenTo = pick(highestTier)
 							}
 						}
 
@@ -272,7 +274,7 @@ export async function makeAImove() {
 				let rotated = rotatable && Math.random() < 0.5
 
 				let possibleSqs = rules.givePossiblePositionsForMarketingCampaign(marketer, campaign, rotated)
-				let index = possibleSqs[Math.floor(Math.random() * possibleSqs.length)]
+				let index = pick(possibleSqs)
 
 				if (playerObj.AIlevel === 1) {
 					outer: for (let rotVal = 0; rotVal <= 1; rotVal++) {
@@ -397,7 +399,7 @@ export async function makeAImove() {
 
 			if (possibleGardenHouses.length > 0) {
 				const indexes = possibleGardenHouses.map((h) => map.findIndexForHouse(h))
-				const chosenIndex = indexes[Math.floor(Math.random() * indexes.length)]
+				const chosenIndex = pick(indexes)
 
 				const houseValue = store.mapData.coords[chosenIndex] - rf.HOUSE
 				const edges = map.findFreeEdgesForHouse(houseValue)
@@ -417,7 +419,7 @@ export async function makeAImove() {
 			else {
 				const houses = freeHouses
 				if (houses.length > 0) {
-					const selectedBuilding = houses[Math.floor(Math.random() * houses.length)]
+					const selectedBuilding = pick(houses)
 					const rotation = Math.floor(Math.random() * 2)
 					const isRotated = rotation === 1
 
@@ -427,7 +429,7 @@ export async function makeAImove() {
 					const possiblePos = rules.givePossiblePositionsForBlock(w, h)
 
 					if (possiblePos.length > 0) {
-						const chosenIndex = possiblePos[Math.floor(Math.random() * possiblePos.length)]
+						const chosenIndex = pick(possiblePos)
 
 						model.addHouse(selectedBuilding, chosenIndex, isRotated)
 						plyr.awardMilestone(playerIndex, rf.FIRST_HOUSE_BUILT)
@@ -462,7 +464,7 @@ export async function makeAImove() {
 				const indexes = rules.givePossiblePositionsForNewRestaurant(rotation, !isRegionalManager)
 
 				if (indexes.length > 0) {
-					const chosenIndex = indexes[Math.floor(Math.random() * indexes.length)]
+					const chosenIndex = pick(indexes)
 
 					model.addRestaurant_core(playerIndex, chosenIndex, rotation, isRegionalManager)
 					store.context.justOpened.push(manager)
@@ -500,7 +502,7 @@ export async function makeAImove() {
 			reasons: ["Has " + playerObj.coffeeShops.length + "/3 coffee shops"],
 		})
 
-		if (spaces.length > 0) controller.placeCoffeeShopMS(spaces[Math.floor(Math.random() * spaces.length)])
+		if (spaces.length > 0) controller.placeCoffeeShopMS(pick(spaces))
 		await controller.endPlayerTurn(false, false)
 	} else if (phase === rf.PHASE_PAYDAY) {
 		if (plyr.hasMilestone(playerIndex, rf.FIRST_TRAINER_USED) && !rules.canAffordPayDay(playerIndex)) {
@@ -621,7 +623,7 @@ export function actionHires(playerIndex) {
             
             if (possibleHires.length === 0) break;
 
-            const chosen = possibleHires[Math.floor(Math.random() * possibleHires.length)];
+            const chosen = pick(possibleHires);
             
             const existingCount = playerObj.beach.filter(e => e === chosen).length;
             
@@ -629,7 +631,7 @@ export function actionHires(playerIndex) {
                 actionAIhire(playerIndex, chosen);
             }
         } else {
-            const chosen = possibleHires[Math.floor(Math.random() * possibleHires.length)];
+            const chosen = pick(possibleHires);
             actionAIhire(playerIndex, chosen);
         }
         

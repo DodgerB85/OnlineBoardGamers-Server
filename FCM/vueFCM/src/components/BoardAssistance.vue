@@ -300,9 +300,9 @@ function buildProduction(playerIndex, player) {
 /* ---------------- Gourmet Food Critics ---------------- */
 const gourmetUsed = computed(() => store.startingOptions.gourmet)
 
-const gfcCampaigns = computed(() => {
-	return store.campaigns
-		.filter((c) => rf.MARKETING_CAMPAIGNS[c.number]?.type === rf.GOURMET_GUIDE)
+const campaignsOfType = (type) =>
+	store.campaigns
+		.filter((c) => rf.MARKETING_CAMPAIGNS[c.number]?.type === type)
 		.map((c) => ({
 			number: c.number,
 			good: c.good,
@@ -310,22 +310,12 @@ const gfcCampaigns = computed(() => {
 			campaignImg: view.getImage("campaign_" + c.number),
 			foodImg: view.getImage("item_" + c.good),
 		}))
-})
+const gfcCampaigns = computed(() => campaignsOfType(rf.GOURMET_GUIDE))
 
 /* ---------------- Hawker Trucks ---------------- */
 const useHawkerTrucks = computed(() => store.startingOptions.hawkers)
 
-const hawkerCampaigns = computed(() => {
-	return store.campaigns
-		.filter((c) => rf.MARKETING_CAMPAIGNS[c.number]?.type === rf.HAWKER_TRUCK)
-		.map((c) => ({
-			number: c.number,
-			good: c.good,
-			duration: c.duration,
-			campaignImg: view.getImage("campaign_" + c.number),
-			foodImg: view.getImage("item_" + c.good),
-		}))
-})
+const hawkerCampaigns = computed(() => campaignsOfType(rf.HAWKER_TRUCK))
 
 function showHawkerRoute(campaignNumber) {
 	// Toggle off if already showing this route
@@ -1076,16 +1066,6 @@ const playerRows = computed(() => {
 
 .fixedCampaign img.campaign.w2 {
 	width: 80px;
-}
-
-.fixedCampaign div.inner {
-	position: absolute;
-	bottom: 0;
-	width: 100%;
-	height: 40px;
-	line-height: 40px;
-	color: #fff;
-	font-size: 20px;
 }
 
 .fixedCampaign div.innerGFM {
