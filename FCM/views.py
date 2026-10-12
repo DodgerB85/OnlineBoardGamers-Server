@@ -710,12 +710,18 @@ def _processTurn(request):
         # return JsonResponse({"syncError": True}, safe=False)
 
         # Wipe the move data
-        presenter.deleteSinglePlayersMove(request.user.username)
+        # Optional playerName lets the payday guard reset an insolvent player's
+        # move from another client; default stays the requesting user
+        targetName = jsonData.get("playerName", "") or request.user.username
+        game_player_names = [gp.player.username for gp in currentGame.players.all().select_related("player") if gp.player]
+        if targetName not in game_player_names:
+            targetName = request.user.username
+        presenter.deleteSinglePlayersMove(targetName)
 
         # Update current players
         currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
-        if request.user.username not in currentPlayersArr:
-            currentPlayersArr.append(request.user.username)  # This updates the list directly
+        if targetName not in currentPlayersArr:
+            currentPlayersArr.append(targetName)  # This updates the list directly
             presenter.setCurrentPlayersFromArrInTurnOrder(currentPlayersArr)
         currentGame.save()
         return JsonResponse({"unlockStatus": True, "latestUpdate": currentGame.latestUpdate}, safe=False)

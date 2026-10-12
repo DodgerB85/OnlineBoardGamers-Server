@@ -1925,9 +1925,13 @@ export async function endPlayerTurn(forced, isPointlessMove = false, extraPostDa
 		startPlayerTurn(false)
 
 		// After save, check if next players can be skipped (e.g. PAYDAY auto-skip)
+		// Never force-end the current player: after a phase change (e.g. into PAYDAY)
+		// the last WD player sits in the fresh turn order as a payer and must choose
+		// their own payday move - force-ending them would auto-submit [[-8],[]]
+		// and process their salary without consent
 		const turnOrderBefore = store.gameflow.turnOrder.length
 		actionAllPlayerSkips()
-		if (store.gameflow.turnOrder.length < turnOrderBefore && store.gameflow.turnOrder.length > 0) {
+		if (store.gameflow.turnOrder.length < turnOrderBefore && store.gameflow.turnOrder.length > 0 && !store.gameflow.turnOrder.includes(personal.pov)) {
 			await endPlayerTurn(true, true)
 		}
 		// Make sure this function is exited now

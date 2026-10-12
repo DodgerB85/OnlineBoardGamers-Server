@@ -841,6 +841,13 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 			}
 		}
 	}
+	// Payday - players auto-skipped for no salary never need to move
+	// (mirrors canSkipCurrentPlayer, so the server doesn't wait on their -9 presets)
+	if (store.gameflow.phase === rf.PHASE_PAYDAY) {
+		for (let i = 0; i < store.players.length; i++) {
+			if (controller.canSkipCurrentPlayer(i) && !notRequiedPlayerNames.includes(store.players[i].name)) notRequiedPlayerNames.push(store.players[i].name)
+		}
+	}
 	// Clean up - no fridge or nothing to bin (mirrors canSkipCurrentPlayer /
 	// isRequiredToPlayCleanUp, so such players never enter the cleanup turn order)
 	if (store.gameflow.phase === rf.PHASE_CLEAN_UP) {
@@ -917,6 +924,15 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 		else if (data.allPlayersMoved === true) {
 			// LOAD AND PROCESS ALL DATA
 			personal.latestUpdate = data.latestUpdate
+			// Payday safety: never process salaries if someone cannot pay -
+			// reset their move, keep everyone else's, and stay in PAYDAY
+			if (store.gameflow.phase === rf.PHASE_PAYDAY && (await resetInsolventPaydayPlayers(data.moveData))) {
+				store.viewSettings.showGameLoader = false
+				personal.haltPlay = false
+				if (personal.liveWS) WS.broadcastGameUpdate()
+				controller.startPlayerTurn(false)
+				return
+			}
 			await processSimulMoveData(data.moveData)
 			// Preserve TO settings after working day
 			if (store.gameflow.phase !== rf.PHASE_RESTRUCTURING && store.gameflow.phase !== rf.PHASE_PAYDAY) await deleteMoveData()
@@ -1522,6 +1538,85 @@ export async function castVote(topic, choice) {
 	}
 }
 
+// Cash still owed at payday after a player's move - mirrors checkPaydayDataValid
+function paydayDueForGuard(playerIndex, paydayMove) {
+	// paydayMove = [[flagOrFires], [paidInFood]]
+	const flags = paydayMove[0]
+	const food = paydayMove[1] || []
+	// Trainer MS bust: money goes to 0, never negative
+	if (flags.length === 1 && flags[0] === -5) return 0
+	let due = rules.salary(playerIndex)
+	const unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+	if (flags.length >= 1 && flags[0] >= 0) {
+		// Fired move: each salaried fire reduces the due
+		for (let i = 0; i < flags.length; i++) {
+			if (rules.doesEmployeeRequireSalary(playerIndex, flags[i]) === true) due -= unitarySalary
+		}
+	} else if ((flags.length === 1 && flags[0] === -4) || (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) && food.length > 0)) {
+		// Food pays base salary only; job-switch salary is cash-only
+		due = Math.max(rules.baseSalary(playerIndex) - unitarySalary * food.length, 0) + rules.headhuntSalaryDue(playerIndex)
+	}
+	return Math.max(due, 0)
+}
+
+// Returns true if play was halted (insolvent player(s) found and reset)
+async function resetInsolventPaydayPlayers(moveDataRaw) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	const decompressedData = funcs.decompressObjectFromDB(moveDataRaw)
+	const insolvent = []
+	for (let i = 0; i < decompressedData.length; i++) {
+		if (store.players[i].displayName === rf.BOT_NAME) continue
+		if (rules.salary(i) === 0) continue
+		// Blank entry (deleted/scaffolded) — no move to check
+		if (!decompressedData[i][3] || decompressedData[i][3].length === 0) continue
+		const paydayMove = decompressedData[i][3][0]
+		if (store.players[i].money >= paydayDueForGuard(i, paydayMove)) continue
+		insolvent.push(i)
+	}
+	if (insolvent.length === 0) return false
+
+	// Delete their stored move server-side and put them back in current players
+	for (const i of insolvent) {
+		const newLU = await unlockPlayerPayday(store.players[i].name)
+		if (newLU) personal.latestUpdate = newLU
+	}
+	// Everyone else's moves stay stored; only the insolvent players replay
+	store.gameflow.turnOrder.splice(0)
+	insolvent.forEach((i) => store.gameflow.turnOrder.push(i))
+	if (insolvent.includes(personal.pov)) {
+		personal.moveDataRaw = ""
+		store.context.preMoveData = [[[-9], []], [-9]]
+	}
+	// Persist the corrected turn order and notify the reset players
+	await saveGameNormal(false, false, false)
+	return true
+}
+
+async function unlockPlayerPayday(playerName) {
+	const personal = usePersonalStore()
+	let csrftoken = funcs.getCookie("csrftoken")
+	try {
+		const response = await fetch("/FCM/processTurn/", {
+			method: "POST",
+			body: JSON.stringify({
+				latestUpdate: personal.latestUpdate,
+				action: "unlockPayday",
+				gameID: personal.gameID,
+				playerName: playerName,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) return null
+		const result = await response.json()
+		if (result.syncError) return null
+		return result.latestUpdate
+	} catch (error) {
+		console.error("Error unlocking payday move:", error)
+		return null
+	}
+}
+
 export function processSimulMoveData(data) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
@@ -1642,6 +1737,11 @@ export function processSimulMoveData(data) {
 			let histAdded = false
 			let playerObj = store.players[i]
 			if (playerObj.displayName === rf.BOT_NAME) {
+				foodPayements.push([])
+				continue
+			}
+			// Blank entry (deleted/scaffolded, e.g. salary-0 skip) — no move to process
+			if (!decompressedData[i][3] || decompressedData[i][3].length === 0) {
 				foodPayements.push([])
 				continue
 			}
