@@ -756,6 +756,11 @@ def _processTurn(request):
         return JsonResponse({"OOBsaved": setCorrectly}, safe=False)
 
     elif jsonData["action"] == "deleteMoveData":
+        # legacy FCMmain.js does not send latestUpdate
+        if "latestUpdate" in jsonData and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+            message = f"SYNC ERROR IN: FCM deleteMoveData - gameID: {currentGame.id} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} - DB_LU: {currentGame.latestUpdate}"
+            log_expected_sync_reject(message)
+            return JsonResponse({"syncError": True}, safe=False)
         phase = jsonData["phase"]
         # This is the "new phase" you are just moving into
         # If moving into TO, don't clear the moves (save pre-selectiongs), EXCEPT on turn 1 when there's no pre-selection
@@ -825,7 +830,7 @@ def _processTurn(request):
                 playerListToNotify.remove("FcmBot")
             if "FcmAI" in playerListToNotify:
                 playerListToNotify.remove("FcmAI")
-            for player in playerListToNotify:
+            for player in list(playerListToNotify):
                 ppov = presenter.seatPosition(player)
                 playerNotificationSuppression = currentGame.FCMnotificationSuppression[ppov : ppov + 1]
                 if playerNotificationSuppression == "1":
@@ -913,7 +918,7 @@ def _processTurn(request):
                 playerListToNotify.remove("FcmBot")
             if "FcmAI" in playerListToNotify:
                 playerListToNotify.remove("FcmAI")
-            for player in playerListToNotify:
+            for player in list(playerListToNotify):
                 ppov = presenter.seatPosition(player)
                 playerNotificationSuppression = currentGame.FCMnotificationSuppression[ppov : ppov + 1]
                 if playerNotificationSuppression == "1":
@@ -1762,6 +1767,11 @@ def _processTurn(request):
         )
 
     elif jsonData["action"] == "saveAndUpdateNotifictions":
+        # legacy FCMmain.js does not send latestUpdate
+        if "latestUpdate" in jsonData and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+            message = f"SYNC ERROR IN: FCM saveAndUpdateNotifictions - gameID: {currentGame.id} - User: {request.user.username} - JSON_LU: {jsonData['latestUpdate']} - DB_LU: {currentGame.latestUpdate}"
+            log_expected_sync_reject(message)
+            return JsonResponse({"syncError": True}, safe=False)
         currentGame.gameData = jsonData["data"]
         # referringPhase = jsonData["referringPhase"]
 
@@ -1788,18 +1798,17 @@ def _processTurn(request):
 
         presenter.setCurrentPlayersFromArrInTurnOrder(currentPlayersArr)
 
-        currentGame.save()
-
         if request.user.username in playerListToNotify:
             playerListToNotify.remove(request.user.username)
 
         # SAVE UPDATE NOTIFICATION
-        for player in playerListToNotify:
+        for player in list(playerListToNotify):
             ppov = presenter.seatPosition(player)
             playerNotificationSuppression = currentGame.FCMnotificationSuppression[ppov : ppov + 1]
             if playerNotificationSuppression == "1":
                 playerListToNotify.remove(player)
                 currentGame.FCMnotificationSuppression = currentGame.FCMnotificationSuppression[:ppov] + "0" + currentGame.FCMnotificationSuppression[ppov + 1 :]
+        currentGame.save()  # persists the suppression reset; before notifying
 
         if len(playerListToNotify) > 0:
             presenter.sendYourTurnNotification(

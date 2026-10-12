@@ -70,6 +70,7 @@ export function deleteMoveData() {
 		method: "POST",
 		body: JSON.stringify({
 			action: "deleteMoveData",
+			latestUpdate: personal.latestUpdate,
 			gameID: personal.gameID,
 			phase: store.gameflow.phase,
 		}),
@@ -77,7 +78,9 @@ export function deleteMoveData() {
 	})
 		.then((response) => response.json())
 		.then((result) => {
-			if (result.result === 2) {
+			if (result.syncError) {
+				store.gameMessages.errorText = i18n.global.t("FCM_IO.olderVersionRefresh")
+			} else if (result.result === 2) {
 				//store.gameMessages.successText = "<b>Save Successful</b> "
 			} else {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.saveErrorSST")
@@ -154,6 +157,7 @@ export async function saveAndUpdateNotifictions(playerIndexesToNotify, referring
 			method: "POST",
 			body: JSON.stringify({
 				action: "saveAndUpdateNotifictions",
+				latestUpdate: personal.latestUpdate,
 				gameID: personal.gameID,
 				data: funcs.exportFCMmodel(false, false),
 				playerIndexesToNotify: playerIndexesToNotify,
@@ -167,6 +171,12 @@ export async function saveAndUpdateNotifictions(playerIndexesToNotify, referring
 			throw new Error(errorMessage)
 		}
 		let _result = await response.json()
+
+		if (_result.syncError) {
+			store.gameMessages.errorText = i18n.global.t("FCM_IO.olderVersionRefresh")
+			store.viewSettings.showGameLoader = false
+			return
+		}
 
 		store.viewSettings.showGameLoader = false
 		
