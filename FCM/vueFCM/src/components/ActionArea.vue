@@ -184,7 +184,7 @@ const computedNumPays = computed(() => rules.numPayNeeded(controller.currentPlay
 const computedPaysLeft = computed(() => computedNumPays.value - store.context.preMoveData[0][1].length)
 const paidItemsCount = computed(() => store.context.preMoveData[0][1].length)
 const computedMoneyUsed = computed(() => {
-	const unitarySalary = plyr.hasMilestone(controller.currentPlayerIndex(), rf.FIRST_WAITRESS_USED) ? 3 : 5
+	const unitarySalary = plyr.unitarySalary(controller.currentPlayerIndex())
 	return Math.max(computedTotalSalary.value - store.context.preMoveData[0][1].length * unitarySalary, 0)
 })
 const computedNeedFiringMarketers = computed(() => rules.needFiringMarketers(controller.currentPlayerIndex()))

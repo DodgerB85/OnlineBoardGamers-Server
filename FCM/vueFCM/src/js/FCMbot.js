@@ -33,7 +33,7 @@ export function generatePaydayDefaultMove(playerIndex) {
 
 	if (due === 0) return [[-8], [-9]]
 
-	let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+	let unitarySalary = plyr.unitarySalary(playerIndex)
 	let fired = []
 	const payableWithFood = rules.baseSalary(playerIndex)
 	let remaining = due

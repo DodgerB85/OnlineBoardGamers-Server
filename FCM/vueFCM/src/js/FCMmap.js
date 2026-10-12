@@ -9,6 +9,14 @@ import { toRaw } from "vue"
 import { useModelStore } from "../stores/FCMstore.js"
 
 const ROAD_IDS = new Set(rf.ROADS)
+// Natural (unrotated) size in tiles per player count
+const NATURAL_SIZE = {
+	2: { w: 3, h: 3 },
+	3: { w: 4, h: 3 },
+	4: { w: 4, h: 4 },
+	5: { w: 5, h: 4 },
+	6: { w: 6, h: 4 },
+}
 
 export function numTiles(numPlayers) {
 	switch (numPlayers) {
@@ -105,19 +113,19 @@ export function generateRandomMap(maxPlayers) {
 	// pair of tiles, replacing 2 normal tiles. Horizontal: 27 left, 28 right, rot 0.
 	// Vertical: 27 top, 28 bottom, rot 1 (both halves rotate clockwise).
 	if (options.stadium) {
-		const dims = { 2: [3, 3], 3: [4, 3], 4: [4, 4], 5: [5, 4], 6: [6, 4] }[maxPlayers] || [3, 3]
+		const { w, h } = NATURAL_SIZE[maxPlayers] || NATURAL_SIZE[2]
 		const horizontal = Math.random() < 0.5
 		const rot = horizontal ? 0 : 1
 		let x, y
 		if (horizontal) {
-			x = Math.floor(Math.random() * (dims[0] - 1))
-			y = Math.floor(Math.random() * dims[1])
+			x = Math.floor(Math.random() * (w - 1))
+			y = Math.floor(Math.random() * h)
 		} else {
-			x = Math.floor(Math.random() * dims[0])
-			y = Math.floor(Math.random() * (dims[1] - 1))
+			x = Math.floor(Math.random() * w)
+			y = Math.floor(Math.random() * (h - 1))
 		}
-		const first = y * dims[0] + x
-		const second = first + (horizontal ? 1 : dims[0])
+		const first = y * w + x
+		const second = first + (horizontal ? 1 : w)
 		res[first * 2] = 27
 		res[first * 2 + 1] = rot
 		res[second * 2] = 28
@@ -137,16 +145,7 @@ export function expandMapToFullGrid(map, maxPlayers) {
 	const GRID_HEIGHT = 16 // 6 top rows + 10 remaining rows
 	const START_OFFSET = 6
 
-	// Determine the active area dimensions based on player count
-	const dimensions = {
-		2: { w: 3, h: 3 },
-		3: { w: 4, h: 3 },
-		4: { w: 4, h: 4 },
-		5: { w: 5, h: 4 },
-		6: { w: 6, h: 4 },
-	}
-
-	const { w: naturalWidth, h: naturalHeight } = dimensions[maxPlayers] || dimensions[2]
+	const { w: naturalWidth, h: naturalHeight } = NATURAL_SIZE[maxPlayers] || NATURAL_SIZE[2]
 
 	let mapPointer = 0
 
@@ -213,21 +212,7 @@ export function getOriginalTiles(tilesOnly) {
 	let originalTiles = []
 	let numPlayers = store.players.length
 
-	let naturalWidth = 3
-	let naturalHeight = 3
-	if (numPlayers == 3) naturalWidth = 4
-	if (numPlayers == 4) {
-		naturalHeight = 4
-		naturalWidth = 4
-	}
-	if (numPlayers == 5) {
-		naturalHeight = 4
-		naturalWidth = 5
-	}
-	if (numPlayers == 6) {
-		naturalHeight = 4
-		naturalWidth = 6
-	}
+	const { w: naturalWidth, h: naturalHeight } = NATURAL_SIZE[numPlayers] || NATURAL_SIZE[2]
 	// start at 6,6, so 102>204 total tiles, plus 6>12
 	let start = 216
 	for (let i = 0; i < naturalHeight; i++) {
@@ -284,19 +269,17 @@ export function getCoordsForTile(index) {
 }
 
 export function isTopLeftOfTile(index) {
-	const store = useModelStore()
-	// Move it on to top row of tiles
-	if (index > store.mapData.dimensions[0] * 5 * 5) index = index % (store.mapData.dimensions[0] * 5 * 5)
-	// Needs to be top row and top left
-	if (index < store.mapData.dimensions[0] * 5 && index % 5 == 0) return true
-	return false
+	return isTopRowInColumn(index, 0)
 }
 export function isTopRightOfTile(index) {
+	return isTopRowInColumn(index, 4)
+}
+function isTopRowInColumn(index, column) {
 	const store = useModelStore()
 	// Move it on to top row of tiles
 	if (index > store.mapData.dimensions[0] * 5 * 5) index = index % (store.mapData.dimensions[0] * 5 * 5)
-	// Needs to be top row and top left
-	if (index < store.mapData.dimensions[0] * 5 && index % 5 == 4) return true
+	// Needs to be top row and in the given column of its tile
+	if (index < store.mapData.dimensions[0] * 5 && index % 5 == column) return true
 	return false
 }
 export function isBottomLeftOfTile(index) {
@@ -816,7 +799,7 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 
 	// 1. Get initial road neighbors to start paths
 	const startNodes = neighbours(index)
-		.filter((n) => rf.ROADS.includes(store.mapData.coords[n]))
+		.filter((n) => ROAD_IDS.has(store.mapData.coords[n]))
 		.map((n) => ({
 			index: n,
 			range: onTheSameTile(index, n) ? 0 : 1,

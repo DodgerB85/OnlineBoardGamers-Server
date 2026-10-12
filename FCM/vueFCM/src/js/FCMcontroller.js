@@ -28,13 +28,7 @@ export function currentPlayerObj() {
 		}
 	}
 	if (store.gameflow.turnOrder.length > 0) return store.players[store.gameflow.turnOrder[0]]
-	else {
-		if (!store.viewSettings.showReplay && personal.pov >= 0) {
-			alert(i18n.global.t("alerts.cpiError", { turnOrder: String(store.gameflow.turnOrder) }))
-		}
-		store.gameflow.turnOrder = [0]
-		return store.players[0]
-	}
+	return store.players[currentPlayerIndex()]
 }
 
 export function currentPlayerIndex() {
@@ -533,10 +527,7 @@ export function setupHousesAndGardensPhase() {
 	context.clearAllHighlights()
 
 	store.context.selectedBuilding = -1
-	store.context.rotation = 0
-	store.context.house = -1
-	store.context.houseIndex = -1
-	store.context.edges.splice(0)
+	resetHouseSelection()
 
 	const numLeft = playerObj.employees.filter((e) => e === rf.NEW_BUSINESS_DEVELOPER).length - store.context.justBuilt.length
 	if (numLeft <= 0) return
@@ -571,10 +562,7 @@ export function updateHousesHighlights() {
 export function selectHouseToBuild(houseNumber) {
 	const store = useModelStore()
 	store.context.selectedBuilding = houseNumber
-	store.context.rotation = 0
-	store.context.house = -1
-	store.context.houseIndex = -1
-	store.context.edges.splice(0)
+	resetHouseSelection()
 	updateHousesHighlights()
 }
 
@@ -582,11 +570,16 @@ export function selectHouseToBuild(houseNumber) {
 export function selectGardenToBuild() {
 	const store = useModelStore()
 	store.context.selectedBuilding = -1
+	resetHouseSelection()
+	updateHousesHighlights()
+}
+
+function resetHouseSelection() {
+	const store = useModelStore()
 	store.context.rotation = 0
 	store.context.house = -1
 	store.context.houseIndex = -1
 	store.context.edges.splice(0)
-	updateHousesHighlights()
 }
 
 // Clicked a highlighted square during the HOUSES subphase
@@ -680,14 +673,10 @@ export function setupLobbyistsPhase() {
 	// Set initial building type and variety
 	if (newRoads.length === 0) {
 		store.context.buildingType = 1
-		for (let i = 0; i < 3; i++) {
-			if (newParks.includes(i)) { store.context.variety = i; break }
-		}
+		setFirstAvailableVariety(newParks)
 	} else {
 		store.context.buildingType = 0
-		for (let i = 0; i < 3; i++) {
-			if (newRoads.includes(i)) { store.context.variety = i; break }
-		}
+		setFirstAvailableVariety(newRoads)
 	}
 	store.context.rotation = 0
 	store.context.flipped = false
@@ -701,11 +690,15 @@ export function selectLobbyistBuilding(type) {
 	store.context.rotation = 0
 	store.context.flipped = false
 
-	const available = type === 0 ? rules.availableNewRoads() : rules.availableParks()
-	for (let i = 0; i < 3; i++) {
-		if (available.includes(i)) { store.context.variety = i; break }
-	}
+	setFirstAvailableVariety(type === 0 ? rules.availableNewRoads() : rules.availableParks())
 	updateLobbyistHighlights()
+}
+
+function setFirstAvailableVariety(available) {
+	const store = useModelStore()
+	for (let i = 0; i < 3; i++) {
+		if (available.includes(i)) { store.context.variety = i; return }
+	}
 }
 
 // Select a specific variety within the current building type
@@ -954,18 +947,22 @@ export function setupCoffeeShopsPhase() {
 	if (remaining > 0) {
 		// leadBaristaCoffeeShopsFromB is always placed first; a TB shop is placed second (after the range-2 shop)
 		const unlimited = store.context.leadBaristaCoffeeShopsFromB > 0 || (store.context.justCoffeeShopped.length === 1 && store.context.leadBaristaCoffeeShopsFromTB > 0)
-
-		if (player.coffeeShops.length < 3) {
-			store.context.coffeeShopAction = "place"
-			store.highlights.indexesToHighlightYellow = rules.givePossiblePositionsForCoffeeShop(unlimited ? 99 : 2)
-		} else {
-			// No more coffee shops available - select a placed one to move it
-			store.context.coffeeShopAction = "remove"
-			store.highlights.indexesToHighlightYellow = [...player.coffeeShops]
-		}
+		highlightCoffeeShopSpots(player, "coffeeShopAction", unlimited ? 99 : 2)
 	} else {
 		store.context.coffeeShopAction = ""
 		if (store.context.justCoffeeShopped.length === 0) endWorkingDaySubphase()
+	}
+}
+
+function highlightCoffeeShopSpots(player, actionKey, range) {
+	const store = useModelStore()
+	if (player.coffeeShops.length < 3) {
+		store.context[actionKey] = "place"
+		store.highlights.indexesToHighlightYellow = rules.givePossiblePositionsForCoffeeShop(range)
+	} else {
+		// No more coffee shops available - select a placed one to move it
+		store.context[actionKey] = "remove"
+		store.highlights.indexesToHighlightYellow = [...player.coffeeShops]
 	}
 }
 
@@ -1021,7 +1018,6 @@ export function setupPizzaBombPhase() {
 
 // Clicked a highlighted square to place the free radio campaign
 export function choosePizzaBombMarketer(index) {
-	const store = useModelStore()
 	const playerIndex = currentPlayerIndex()
 
 	const campaign = rules.firstRadioCampaign()
@@ -1031,22 +1027,20 @@ export function choosePizzaBombMarketer(index) {
 	if (campaign !== 1) histData.push(campaign)
 	model.addHistory(rf.HIST_PIZZA_BOMB, histData, playerIndex, 0)
 
-	store.firstPizzas.splice(0, 3)
-
-	if (store.firstPizzas.length < 3 || store.firstPizzas[2] !== currentPlayerIndex()) {
-		endPlayerTurn(false, false)
-	} else {
-		setupPizzaBombPhase()
-	}
+	advancePizzaBomb(false, false)
 }
 
 // No space left for the pizza radio - skip this bomb
 export function skipPizzaBombMarketer() {
+	advancePizzaBomb(true, true)
+}
+
+function advancePizzaBomb(forced, pointless) {
 	const store = useModelStore()
 	store.firstPizzas.splice(0, 3)
 
 	if (store.firstPizzas.length < 3 || store.firstPizzas[2] !== currentPlayerIndex()) {
-		endPlayerTurn(true, true)
+		endPlayerTurn(forced, pointless)
 	} else {
 		setupPizzaBombPhase()
 	}
@@ -1060,18 +1054,8 @@ export function skipPizzaBombMarketer() {
 
 // Set up the Coffee Shop MS phase.
 export function setupCoffeeShopMSPhase() {
-	const store = useModelStore()
 	context.clearAllHighlights()
-
-	const player = currentPlayerObj()
-	if (player.coffeeShops.length < 3) {
-		store.context.coffeeShopMSAction = "place"
-		store.highlights.indexesToHighlightYellow = rules.givePossiblePositionsForCoffeeShop(99)
-	} else {
-		// No more coffee shops available - select a placed one to move it
-		store.context.coffeeShopMSAction = "remove"
-		store.highlights.indexesToHighlightYellow = [...player.coffeeShops]
-	}
+	highlightCoffeeShopSpots(currentPlayerObj(), "coffeeShopMSAction", 99)
 }
 
 // Clicked a highlighted square to place the milestone coffee shop
@@ -1573,7 +1557,8 @@ export function startHawkerRouteSelection() {
 }
 
 // Called from MapHighlight when clicking a highlighted square during hawker route selection
-export function selectHawkerRoutePosition(index) {
+// Commit the next section of a driving route; returns it so the caller can read its target
+function advanceRoute(index) {
 	const store = useModelStore()
 	clearDrivingPreview()
 
@@ -1586,8 +1571,7 @@ export function selectHawkerRoutePosition(index) {
 			store.context.range--
 		}
 	}
-
-	let nextRoad = rules.nextRoadPossibilities(index, store.context.from, store.context.range)
+	const nextRoad = rules.nextRoadPossibilities(index, store.context.from, store.context.range)
 
 	if (nextRoad.from !== -1) {
 		store.context.from = nextRoad.from
@@ -1598,6 +1582,13 @@ export function selectHawkerRoutePosition(index) {
 
 	store.context.path = store.context.path.concat(nextRoad.path)
 	store.highlights.indexesToHighlightPath = [...store.context.path]
+	return nextRoad
+}
+
+export function selectHawkerRoutePosition(index) {
+	const store = useModelStore()
+	const nextRoad = advanceRoute(index)
+
 	store.highlights.indexesToHighlightHouses = rules.giveHousesAlongHawkerPath(store.context.path)
 
 	if (nextRoad.target.length > 0) {
@@ -1856,7 +1847,7 @@ export async function endPlayerTurn(forced, isPointlessMove = false, extraPostDa
 			let due = normalDue + switchDue
 			if (due >= 20) plyr.awardMilestone(playerIndex, rf.FIRST_20_SALARIES)
 			if (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) && store.context.preMoveData[0][1].length > 0) {
-				let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+				let unitarySalary = plyr.unitarySalary(playerIndex)
 				paidItems = store.context.preMoveData[0][1].length
 				store.context.preMoveData[0][1].splice(0)
 				due = Math.max(normalDue - unitarySalary * paidItems, 0) + switchDue
@@ -1998,6 +1989,22 @@ export function actionAllPlayerSkips() {
 }
 
 // Checks a playerIndex for any moves. NO pizza bomb skips, as only relevant players get into turn order
+function resetNewTurnOrder() {
+	const store = useModelStore()
+	store.gameflow.newTurnOrder.length = 0
+	store.players.forEach(() => store.gameflow.newTurnOrder.push(-1))
+}
+
+function setBotsInNewTurnOrder() {
+	const store = useModelStore()
+	let replacingIdx = 0
+	store.players.forEach((p, i) => {
+		if (p.displayName === rf.BOT_NAME) {
+			store.gameflow.newTurnOrder[replacingIdx++] = i
+		}
+	})
+}
+
 export function canSkipCurrentPlayer(playerIndex) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
@@ -2061,10 +2068,9 @@ export async function endCurrentPhase() {
 					model.clearForNewTurn()
 				}
 				store.gameflow.phase = rf.PHASE_TURN_ORDER
-				store.gameflow.newTurnOrder.length = 0
+				resetNewTurnOrder()
 				store.gameflow.fullTurnOrder.reverse()
 				store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
-				store.players.forEach(() => store.gameflow.newTurnOrder.push(-1))
 			} else {
 				store.gameflow.phase = rf.PHASE_SETUP_RESERVE
 				const fto = store.players.map((_, i) => i).reverse()
@@ -2093,16 +2099,10 @@ export async function endCurrentPhase() {
 			const currentMonies = store.players.map((p) => p.money)
 			model.addHistory(rf.HIST_NEW_TURN, [store.gameflow.turn, store.bank, currentMonies], -1, 0)
 		}
-		store.gameflow.newTurnOrder.length = 0
-		store.players.forEach(() => store.gameflow.newTurnOrder.push(-1))
+		resetNewTurnOrder()
 
 		Bot.removeBotPlayers()
-		let replacingIdx = 0
-		store.players.forEach((p, i) => {
-			if (p.displayName === rf.BOT_NAME) {
-				store.gameflow.newTurnOrder[replacingIdx++] = i
-			}
-		})
+		setBotsInNewTurnOrder()
 	}
 
 	// --- PHASE: RESTRUCTURING ---
@@ -2116,15 +2116,8 @@ export async function endCurrentPhase() {
 		Bot.removeBotPlayers()
 
 		store.gameflow.phase = rf.PHASE_TURN_ORDER
-		store.gameflow.newTurnOrder.length = 0
-		store.players.forEach(() => store.gameflow.newTurnOrder.push(-1))
-
-		let replacingIdx = 0
-		store.players.forEach((p, i) => {
-			if (p.displayName === rf.BOT_NAME) {
-				store.gameflow.newTurnOrder[replacingIdx++] = i
-			}
-		})
+		resetNewTurnOrder()
+		setBotsInNewTurnOrder()
 
 		// Optimized Milestone Awarding
 		store.players.forEach((player, i) => {
@@ -2958,28 +2951,8 @@ function zeppelinTilesToSquares(tiles) {
 // Clicked a highlighted square while driving a cart / truck along the road
 export function selectNextPosition(index) {
 	const store = useModelStore()
-	clearDrivingPreview()
+	const nextRoad = advanceRoute(index)
 
-	if (store.context.from > -1) {
-		if (!map.onTheSameTile(index, store.context.from)) {
-			store.context.range--
-		}
-	} else {
-		if (!rules.firstStartIsFromTheSameTile(index)) {
-			store.context.range--
-		}
-	}
-	let nextRoad = rules.nextRoadPossibilities(index, store.context.from, store.context.range)
-
-	if (nextRoad.from !== -1) {
-		store.context.from = nextRoad.from
-	} else {
-		store.context.from = index
-	}
-	store.context.range = nextRoad.range
-
-	store.context.path = store.context.path.concat(nextRoad.path)
-	store.highlights.indexesToHighlightPath = [...store.context.path]
 	store.highlights.indexesToHighlightDrinks = rules.giveDrinkSquaresAlongPath(store.context.path)
 	if (nextRoad.target.length > 0) {
 		store.highlights.indexesToHighlightYellow = nextRoad.target

@@ -679,6 +679,19 @@ export function exportFCMmodel(forGameOver, includeContext) {
 	return compressData(temp)
 }
 
+// Dumpling MS CEO actions are not saved on players; rebuild them from history
+function applyDumplingCeoActions() {
+	const store = useModelStore()
+	if (store.startingOptions.dumplings) {
+		for (let i = 0; i < store.history.length; i++) {
+			if (store.history[i][0] === rf.HIST_CEO_BONUS_CHOSEN) {
+				let pIdx = store.history[i][1]
+				store.players[pIdx].ceoAction = store.history[i][3][0]
+			}
+		}
+	}
+}
+
 export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	let step1
 	let step2
@@ -1159,15 +1172,7 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 		removeItemAll(store.availableMilestones, rf.FIRST_HIRE_3)
 	}
 
-	// Adjust CEOs with dumpling MS, using history
-	if (store.startingOptions.dumplings) {
-		for (let i = 0; i < store.history.length; i++) {
-			if (store.history[i][0] === rf.HIST_CEO_BONUS_CHOSEN) {
-				let pIdx = store.history[i][1]
-				store.players[pIdx].ceoAction = store.history[i][3][0]
-			}
-		}
-	}
+	applyDumplingCeoActions()
 
 	// Labor Market mod: written directly before the Stadium slot for chosen-module
 	// saves, so advance the index only when the slot is actually present
@@ -1601,13 +1606,5 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	// Media Line mod (shape-detected; older snapshots predate the slot)
 	restoreMediaLineState(inputModel)
 
-	// Adjust CEOs with dumpling MS, using history
-	if (store.startingOptions.dumplings) {
-		for (let i = 0; i < store.history.length; i++) {
-			if (store.history[i][0] === rf.HIST_CEO_BONUS_CHOSEN) {
-				let pIdx = store.history[i][1]
-				store.players[pIdx].ceoAction = store.history[i][3][0]
-			}
-		}
-	}
+	applyDumplingCeoActions()
 }

@@ -192,6 +192,11 @@ export function hasMilestone(playerIndex, ms) {
 	return playerObj.milestones.indexOf(ms) > -1
 }
 
+// Salary per employee unit: the waitress milestone makes it 3 instead of 5
+export function unitarySalary(playerIndex) {
+	return hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+}
+
 export function hasFridge(playerIndex) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]

@@ -9,6 +9,11 @@ import { toRaw } from "vue"
 import { useModelStore } from "../stores/FCMstore.js"
 
 const DRINK_TYPES = new Set([rf.DRINK_BEER, rf.DRINK_COKE, rf.DRINK_LEMONADE])
+const DRINK_ITEMS = {
+	[rf.DRINK_BEER]: rf.BEER,
+	[rf.DRINK_COKE]: rf.COKE,
+	[rf.DRINK_LEMONADE]: rf.LEMONADE,
+}
 
 export function getOffsetForRotation(rotation) {
 	if (rotation === 0) return 1
@@ -755,6 +760,35 @@ export function givePossiblePositionsForCoffeeShop(range) {
 	})
 }
 
+// True when the n squares from start, stepping by step, are all empty
+function allEmptyInLine(coords, start, step, n) {
+	for (let j = 0; j < n; j++) if (coords[start + j * step] !== rf.EMPTY_SPACE) return false
+	return true
+}
+
+// Empty squares within range of the player's restaurants (per rotation) and coffee shops
+function reachSpaces(playerObj, range, lobbyist, lobbyistData) {
+	const store = useModelStore()
+	const reachSet = new Set()
+	const hasDriveIn = plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())
+
+	for (const resto of playerObj.restaurants) {
+		const minR = hasDriveIn ? 0 : resto.rotation
+		const maxR = hasDriveIn ? 4 : resto.rotation + 1
+
+		for (let r = minR; r < maxR; r++) {
+			map.emptySpacesAdjacentToRoadsWithinRange(resto.index + getOffsetForRotation(r), range, lobbyist, lobbyistData).forEach((idx) => reachSet.add(idx))
+		}
+	}
+
+	if (store.startingOptions.coffee) {
+		playerObj.coffeeShops.forEach((idx) => {
+			map.emptySpacesAdjacentToRoadsWithinRange(idx, range, lobbyist, lobbyistData).forEach((resIdx) => reachSet.add(resIdx))
+		})
+	}
+	return reachSet
+}
+
 export function givePossiblePositionsForSimpleObject(w, h, range, rotated, lobbyist, newRoad, lobbyistData) {
 	const store = useModelStore()
 	const mapWidth = rf.ssW
@@ -777,28 +811,8 @@ export function givePossiblePositionsForSimpleObject(w, h, range, rotated, lobby
 		})
 	}
 
-	// 4. Build Reachability Set (Replaces _.intersection)
-	const reachSet = new Set()
-	const playerObj = controller.currentPlayerObj()
-	const hasDriveIn = plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())
-
-	// Add ranges from restaurants
-	for (const resto of playerObj.restaurants) {
-		const minR = hasDriveIn ? 0 : resto.rotation
-		const maxR = hasDriveIn ? 4 : resto.rotation + 1
-
-		for (let r = minR; r < maxR; r++) {
-			let offset = r === 0 ? 1 : r === 1 ? mapWidth + 1 : r === 2 ? mapWidth : 0
-			map.emptySpacesAdjacentToRoadsWithinRange(resto.index + offset, range, lobbyist, lobbyistData).forEach((idx) => reachSet.add(idx))
-		}
-	}
-
-	// Add ranges from coffee shops
-	if (store.startingOptions.coffee) {
-		playerObj.coffeeShops.forEach((idx) => {
-			map.emptySpacesAdjacentToRoadsWithinRange(idx, range, lobbyist, lobbyistData).forEach((resIdx) => reachSet.add(resIdx))
-		})
-	}
+	// 4. Build Reachability Set
+	const reachSet = reachSpaces(controller.currentPlayerObj(), range, lobbyist, lobbyistData)
 
 	// 5. Filter possibilities by Reachability
 	possibilities = possibilities.filter((pp) => {
@@ -811,28 +825,23 @@ export function givePossiblePositionsForSimpleObject(w, h, range, rotated, lobby
 		const restoStarts = [...new Set(givePossibleStartsFromRestaurants(true).flat())].filter((idx) => coords[idx] === rf.EMPTY_SPACE)
 
 		for (const idx of restoStarts) {
-			let isValid = true
 			const testResult = restaurantRoadTest(idx)
 
 			if (!rotated) {
 				if (testResult === 1) {
 					// Left to Right
-					for (let j = 0; j < w; j++) if (coords[idx + j] !== rf.EMPTY_SPACE) isValid = false
-					if (isValid) possibilities.push(idx)
+					if (allEmptyInLine(coords, idx, 1, w)) possibilities.push(idx)
 				} else if (testResult === 3) {
 					// Right to Left
-					for (let j = 0; j < w; j++) if (coords[idx - j] !== rf.EMPTY_SPACE) isValid = false
-					if (isValid) possibilities.push(idx - w + 1)
+					if (allEmptyInLine(coords, idx, -1, w)) possibilities.push(idx - w + 1)
 				}
 			} else {
 				if (testResult === 0) {
 					// Up to Down (Top edge)
-					for (let j = 0; j < h; j++) if (coords[idx - j * mapWidth] !== rf.EMPTY_SPACE) isValid = false
-					if (isValid) possibilities.push(idx - (h - 1) * mapWidth)
+					if (allEmptyInLine(coords, idx, -mapWidth, h)) possibilities.push(idx - (h - 1) * mapWidth)
 				} else if (testResult === 2) {
 					// Up to Down (Bottom edge)
-					for (let j = 0; j < h; j++) if (coords[idx + j * mapWidth] !== rf.EMPTY_SPACE) isValid = false
-					if (isValid) possibilities.push(idx)
+					if (allEmptyInLine(coords, idx, mapWidth, h)) possibilities.push(idx)
 				}
 			}
 		}
@@ -854,7 +863,6 @@ export function restaurantRoadTest(index) {
 // Give possible positions for marketing campaign
 export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, rotated) {
 	const store = useModelStore()
-	const mapWidth = rf.ssW
 	const campaignData = rf.MARKETING_CAMPAIGNS[campaignId]
 
 	let w = rotated ? campaignData.height : campaignData.width
@@ -954,29 +962,7 @@ export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, 
 	const range = giveMaxRangeForMarketer(marketer)
 
 	if (range > -1) {
-		const reachSet = new Set()
-		const player = controller.currentPlayerObj()
-
-		// Build reachability map using Sets (O(1) lookup)
-		const sources = [...player.restaurants]
-
-		for (const s of sources) {
-			const driveIn = plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())
-			const minR = !driveIn ? s.rotation : 0
-			const maxR = !driveIn ? s.rotation + 1 : 4
-
-			for (let r = minR; r < maxR; r++) {
-				let off = r === 0 ? 1 : r === 1 ? mapWidth + 1 : r === 2 ? mapWidth : 0
-				map.emptySpacesAdjacentToRoadsWithinRange(s.index + off, range, false, null).forEach((idx) => reachSet.add(idx))
-			}
-		}
-
-		// Coffee shops measure from their own square (no restaurant rotation offsets)
-		if (store.startingOptions.coffee) {
-			player.coffeeShops.forEach((idx) => {
-				map.emptySpacesAdjacentToRoadsWithinRange(idx, range, false, null).forEach((i) => reachSet.add(i))
-			})
-		}
+		const reachSet = reachSpaces(controller.currentPlayerObj(), range, false, null)
 
 		// Final intersection filter
 		possibilities = possibilities.filter((pp) => {
@@ -1174,27 +1160,9 @@ export function gatherDrinksAlongPath(path, collectionNumber) {
 	const store = useModelStore()
 	const coords = store.mapData.coords
 
-	// 1. Gather all unique neighbors along the entire path
-	const uniqueSpaces = new Set()
-	for (const step of path) {
-		const stepNeighbors = map.neighbours(step)
-		for (const space of stepNeighbors) {
-			if (DRINK_TYPES.has(coords[space])) {
-				uniqueSpaces.add(space)
-			}
-		}
-	}
-
-	// 3. Transform unique drink tiles into items based on collectionNumber
 	const inventory = []
-	for (const space of uniqueSpaces) {
-		const type = coords[space]
-
-		// Determine which item to add
-		let itemType = null
-		if (type === rf.DRINK_LEMONADE) itemType = rf.LEMONADE
-		else if (type === rf.DRINK_COKE) itemType = rf.COKE
-		else if (type === rf.DRINK_BEER) itemType = rf.BEER
+	for (const space of giveDrinkSquaresAlongPath(path)) {
+		const itemType = DRINK_ITEMS[coords[space]]
 
 		// Add to inventory 'collectionNumber' times
 		if (itemType != null) {
@@ -1305,21 +1273,14 @@ export function nextAirPossibilitiesForZeppelin(index, path) {
 export function gatherFromTiles(tiles, range) {
 	const inventory = []
 
-	// 1. Define valid sources and their corresponding items
-	const drinkMapping = {
-		[rf.DRINK_BEER]: rf.BEER,
-		[rf.DRINK_COKE]: rf.COKE,
-		[rf.DRINK_LEMONADE]: rf.LEMONADE,
-	}
-
-	// 2. Iterate through provided tiles
+	// 1. Iterate through provided tiles
 	for (const t of tiles) {
 		const tileNumber = map.giveTileAtPosition(t)
 		const contents = rf.TILES[tileNumber] || []
 
-		// 3. Filter and map drinks in one pass
+		// 2. Filter and map drinks in one pass
 		for (const type of contents) {
-			const item = drinkMapping[type]
+			const item = DRINK_ITEMS[type]
 
 			if (item != null) {
 				// Add the item to results 'range' times
@@ -1369,37 +1330,7 @@ export function giveTurnOrderFromFreeSlots() {
 
 export function getRemainingRecruitingPoints(playerIndex) {
 	const store = useModelStore()
-	const playerObj = store.players[playerIndex]
-	const employees = playerObj.employees
-
-	let base = 0
-
-	// 1. CEO Action logic
-	if (playerObj.ceoAction === rf.CEO_ACTION_HIRE_1) {
-		base += 1
-	} else if (playerObj.ceoAction === rf.CEO_ACTION_RECRUITING_MANAGER) {
-		base += 2
-	}
-
-	// 2. Employee and Night Shift logic in a single pass
-	const hasNightShift = store.startingOptions.nightShift && employees.includes(rf.NIGHT_SHIFT_MANAGER)
-
-	for (const employee of employees) {
-		if (employee === rf.RECRUITING_GIRL) {
-			base += 1
-			if (hasNightShift) base += 1 // Add bonus point immediately
-		} else if (employee === rf.RECRUITING_MANAGER) {
-			base += 2
-		} else if (employee === rf.HR_DIRECTOR) {
-			base += 4
-		}
-	}
-	base += temporaryWorkerRemainingActions(playerIndex, rf.RECRUITING_GIRL)
-
-	// 3. Subtract points for hires already made this turn
-	base -= store.context.justHired.length
-
-	return base
+	return getTotalRecruitingPoints(playerIndex) + temporaryWorkerRemainingActions(playerIndex, rf.RECRUITING_GIRL) - store.context.justHired.length
 }
 
 export function getTotalRecruitingPoints(playerIndex) {
@@ -1668,9 +1599,10 @@ export function givePossibleFoodDrinksChoice(employee) {
 	else return []
 }
 
-export function availableLobbyistTiles() {
+// Tiles 0-19 plus the New Districts tiles, before any are used
+function districtTiles() {
 	const store = useModelStore()
-	let allTiles = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+	const allTiles = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 	if (store.startingOptions.newDistricts) {
 		allTiles.push(20)
 		allTiles.push(21)
@@ -1679,30 +1611,27 @@ export function availableLobbyistTiles() {
 		allTiles.push(24)
 		if (store.startingOptions.lobbyists) allTiles.push(25)
 	}
-
-	let usedTiles = []
-	for (let i = 0; i < store.mapData.tiles.length; i += 2) {
-		usedTiles.push(store.mapData.tiles[i])
-	}
-
-	allTiles = allTiles.filter(function (item) {
-		return !usedTiles.includes(item)
-	})
-
 	return allTiles
 }
 
+function usedMapTiles() {
+	const store = useModelStore()
+	const usedTiles = []
+	for (let i = 0; i < store.mapData.tiles.length; i += 2) {
+		usedTiles.push(store.mapData.tiles[i])
+	}
+	return usedTiles
+}
+
+export function availableLobbyistTiles() {
+	const usedTiles = usedMapTiles()
+	return districtTiles().filter(function (item) {
+		return !usedTiles.includes(item)
+	})
+}
 export function availableUrbanPlanningTiles() {
 	const store = useModelStore()
-	let allTiles = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-	if (store.startingOptions.newDistricts) {
-		allTiles.push(20)
-		allTiles.push(21)
-		allTiles.push(22)
-		allTiles.push(23)
-		allTiles.push(24)
-		if (store.startingOptions.lobbyists) allTiles.push(25)
-	}
+	let allTiles = districtTiles()
 
 	if (store.players.length === 6) {
 		if (!allTiles.includes(20)) allTiles.push(20)
@@ -1713,11 +1642,7 @@ export function availableUrbanPlanningTiles() {
 		if (store.startingOptions.lobbyists && !allTiles.includes(25)) allTiles.push(25)
 	}
 
-	let usedTiles = []
-	for (let i = 0; i < store.mapData.tiles.length; i += 2) {
-		usedTiles.push(store.mapData.tiles[i])
-	}
-
+	const usedTiles = usedMapTiles()
 	allTiles = allTiles.filter(function (item) {
 		return !usedTiles.includes(item)
 	})
@@ -2454,7 +2379,6 @@ export function employeesRequiringASalary(playerIndex) {
 	const store = useModelStore()
 	const palayerObj = store.players[playerIndex]
 	const salarySet = new Set(rf.REQUIRE_SALARY)
-	const marketerSet = new Set(rf.MARKETERS)
 	const hasFreeMarketers = plyr.hasMilestone(playerIndex, rf.FIRST_BILLBOARD)
 
 	const requiring = []
@@ -2462,10 +2386,7 @@ export function employeesRequiringASalary(playerIndex) {
 	// Helper to process a group of employees
 	const processList = (list) => {
 		for (const emp of list) {
-			// An employee requires salary if in REQUIRE_SALARY and not a marketer made free by the billboard milestone
-			if (salarySet.has(emp) && (!hasFreeMarketers || !marketerSet.has(emp))) {
-				requiring.push(emp)
-			}
+			if (doesEmployeeRequireSalary(playerIndex, emp)) requiring.push(emp)
 		}
 	}
 
@@ -2475,19 +2396,20 @@ export function employeesRequiringASalary(playerIndex) {
 
 	// 2. Check marketers currently working on campaigns
 	// If we have the billboard milestone, all marketers are free (length check avoided)
-	if (!hasFreeMarketers) {
-		palayerObj.marketers.forEach((entry, i) => {
-			// Ignore the marketer in the additional campaign slot (usually handled elsewhere)
-			if (i !== palayerObj.additionalCampaignArrayIndex) {
-				const emp = entry.marketer
-				if (salarySet.has(emp)) {
-					requiring.push(emp)
-				}
-			}
-		})
-	}
+	if (!hasFreeMarketers) pushSalaryMarketers(palayerObj, salarySet, requiring)
 
 	return requiring
+}
+
+// Marketers (except the additional campaign slot) whose job needs a salary
+function pushSalaryMarketers(playerObj, salarySet, out) {
+	playerObj.marketers.forEach((entry, i) => {
+		if (i !== playerObj.additionalCampaignArrayIndex && salarySet.has(entry.marketer)) out.push(entry.marketer)
+	})
+}
+
+function countNonCoffeeResources(playerObj) {
+	return playerObj.resources.filter((resource) => resource !== rf.COFFEE).length
 }
 
 export function doesEmployeeRequireSalary(playerIndex, employee) {
@@ -2509,14 +2431,11 @@ export function canAffordPayDay(playerIndex) {
 
 	// 2. Calculate the "gap" in coverage
 	// Milestone reduces the cost of firing an employee from $5 to $3
-	const firingPenalty = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+	const firingPenalty = plyr.unitarySalary(playerIndex)
 	// 3. First Beer Sold Milestone Logic
 	// Resources can replace normal salary, but not the one-time job-switch salary.
 	if (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD)) {
-		// Count how many non-coffee resources the player has
-		const validResourcesCount = playerObj.resources.reduce((acc, item) => {
-			return item !== rf.COFFEE ? acc + 1 : acc
-		}, 0)
+		const validResourcesCount = countNonCoffeeResources(playerObj)
 
 		const resourceCoverage = Math.min(normalDue, validResourcesCount * firingPenalty)
 		return playerObj.money + resourceCoverage >= due
@@ -2534,7 +2453,7 @@ export function canPayWithFood(playerIndex) {
 export function canPayWithMoney(playerIndex, n) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
-	let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+	let unitarySalary = plyr.unitarySalary(playerIndex)
 	return Math.floor(Math.max(0, playerObj.money - headhuntSalaryDue(playerIndex)) / unitarySalary) >= n
 }
 
@@ -2561,7 +2480,7 @@ export function paySalaries(foodPayements) {
 		}
 
 		if (plyr.hasMilestone(i, rf.FIRST_BEER_SOLD) && foodPayement.length > 0) {
-			let unitarySalary = plyr.hasMilestone(i, rf.FIRST_WAITRESS_USED) ? 3 : 5
+			let unitarySalary = plyr.unitarySalary(i)
 			const normalAfterFood = Math.max(normalDue - unitarySalary * foodPayement.length, 0)
 			due = normalAfterFood + switchDue
 		}
@@ -2660,10 +2579,10 @@ export function marketersNeedingFiring(playerIndex) {
 	}
 
 	// 2. Calculate the cash gap. Resources may cover normal salaries only.
-	const penalty = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+	const penalty = plyr.unitarySalary(playerIndex)
 	const currentSalary = salary(playerIndex)
 	const availableCash = Math.max(0, playerObj.money)
-	const validResources = plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) ? playerObj.resources.filter((resource) => resource !== rf.COFFEE).length : 0
+	const validResources = plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) ? countNonCoffeeResources(playerObj) : 0
 	const resourceCoverage = Math.min(baseSalary(playerIndex), validResources * penalty)
 	const shortfall = currentSalary - availableCash - resourceCoverage
 	if (shortfall <= 0) return []
@@ -2688,21 +2607,13 @@ export function marketersNeedingFiring(playerIndex) {
 	// cover the gap. Firing a newly headhunted employee also removes its switch salary.
 	const result = []
 	const nonMarketerRelief = totalPaidStaff * penalty + headhuntSalaryDue(playerIndex)
-	if (shortfall > nonMarketerRelief && playerObj.marketers.length > 0) {
-		playerObj.marketers.forEach((entry, i) => {
-			const emp = entry.marketer
-			// Ignore the marketer in the additional campaign slot
-			if (i !== playerObj.additionalCampaignArrayIndex && salarySet.has(emp)) {
-				result.push(emp)
-			}
-		})
-	}
+	if (shortfall > nonMarketerRelief && playerObj.marketers.length > 0) pushSalaryMarketers(playerObj, salarySet, result)
 
 	return result
 }
 
 export function numPayNeeded(playerIndex) {
-	let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+	let unitarySalary = plyr.unitarySalary(playerIndex)
 	let due = baseSalary(playerIndex)
 	return Math.ceil(due / unitarySalary)
 }
@@ -2713,7 +2624,7 @@ export function payingWithGoodsRequireAction(playerIndex) {
 	// 1. Return false immediately if the player cannot pay with resources
 	if (!plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD)) return false
 
-	const penalty = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+	const penalty = plyr.unitarySalary(playerIndex)
 	const unpaidStaffCount = employeesRequiringASalary(playerIndex).length
 
 	// 2. Calculate if the player has more payment options than debt
@@ -2955,7 +2866,7 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 			for (const houseId of affectedHouses) {
 				const isApt = rf.APARTMENTS.includes(houseId)
 				const limit = model.hasGarden(houseId) ? 5 : 3
-				const isInfiniteHouse = houseId === 3.2 || houseId === 9.7
+				const isInfiniteHouse = isApt
 
 				const tryAddNeed = (good, history) => {
 					const needs = store.needs.find((n) => n.number === houseId)
@@ -3074,14 +2985,14 @@ export function handleBankBreak(replayOnly) {
 	if (store.bankBroken === 0) {
 		store.bankBroken = 1
 
-		if (!replayOnly) model.addHistory(rf.HIST_DISPLAY_RESERVE, store.reserveCards.filter((card) => card !== rf.RES_CARD_NOT_CHOSEN && card !== rf.RES_CARD_NONE), -1, 0)
+		// RES_CARD_NOT_CHOSEN = not chosen, RES_CARD_NONE = no reserve card: neither counts at bank break
+		const chosenCards = store.reserveCards.filter((card) => card !== rf.RES_CARD_NOT_CHOSEN && card !== rf.RES_CARD_NONE)
+		if (!replayOnly) model.addHistory(rf.HIST_DISPLAY_RESERVE, chosenCards, -1, 0)
 
 		const reserve = [0, 0, 0]
 		let total = 0
 
-		store.reserveCards.forEach((card) => {
-			// RES_CARD_NOT_CHOSEN = not chosen, RES_CARD_NONE = no reserve card: neither counts at bank break
-			if (card === rf.RES_CARD_NOT_CHOSEN || card === rf.RES_CARD_NONE) return
+		chosenCards.forEach((card) => {
 			total += card * 100
 			reserve[card - 1]++
 		})
@@ -3090,7 +3001,7 @@ export function handleBankBreak(replayOnly) {
 		store.ceoLevel = reserve.lastIndexOf(maxVal) + 2
 
 		if (store.startingOptions.reservePrice) {
-			total = 200 * store.reserveCards.filter((card) => card !== rf.RES_CARD_NOT_CHOSEN && card !== rf.RES_CARD_NONE).length
+			total = 200 * chosenCards.length
 			store.ceoLevel = 3
 		}
 
@@ -3326,7 +3237,7 @@ export function givePossiblePositionsForRadioPizzaBomb(houseNumber) {
 	const tileSet = new Set()
 
 	// 1. Resolve House or Apartment Object
-	const isApartment = houseNumber === 3.2 || houseNumber === 9.7
+	const isApartment = rf.APARTMENTS.includes(houseNumber)
 	const house = isApartment ? model.findApartment(houseNumber) : model.findHouse(houseNumber)
 
 	if (!house) return []

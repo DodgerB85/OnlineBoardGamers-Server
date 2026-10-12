@@ -1556,7 +1556,7 @@ function paydayDueForGuard(playerIndex, paydayMove) {
 	// Trainer MS bust: money goes to 0, never negative
 	if (flags.length === 1 && flags[0] === -5) return 0
 	let due = rules.salary(playerIndex)
-	const unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+	const unitarySalary = plyr.unitarySalary(playerIndex)
 	if (flags.length >= 1 && flags[0] >= 0) {
 		// Fired move: each salaried fire reduces the due
 		for (let i = 0; i < flags.length; i++) {
@@ -1769,7 +1769,7 @@ export function processSimulMoveData(data) {
 				turnDataArray[1].splice(0)
 				// Food may replace normal salary only; job-switch salary is cash-only.
 				let due = rules.baseSalary(i)
-				let unitarySalary = plyr.hasMilestone(i, rf.FIRST_WAITRESS_USED) ? 3 : 5
+				let unitarySalary = plyr.unitarySalary(i)
 				// Remove any coffee
 				playerObj.resources = funcs.removeItemAll(playerObj.resources, rf.COFFEE)
 				while (due > 0 && playerObj.resources.length > 0) {
@@ -1943,7 +1943,7 @@ export function checkPaydayDataValid(playerIndex, paydayData) {
 		paydayData[1].splice(0)
 		// Find the salay due
 		let due = rules.salary(playerIndex)
-		let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+		let unitarySalary = plyr.unitarySalary(playerIndex)
 		// Remove any coffee
 		let resourceCopy = funcs.removeItemAll(playerObj.resources, rf.COFFEE)
 		let excessItems = true
