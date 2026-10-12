@@ -491,8 +491,7 @@ const computedEntry3 = computed(() => {
 					isApartment: rf.APARTMENTS.includes(buildingNumber),
 					isRural: buildingNumber == rf.RURAL_MARKETING_AREA,
 					goods: house[1],
-					// No-sale: no providers list follows the goods (length-2 entries,
-					// or length-3 when an old save carries a stamped headline number)
+					// No-sale: no providers list follows the goods (length-2 entries)
 					noSale: !Array.isArray(house[2]),
 					multipleProviders: false,
 					providers: [],
@@ -1030,7 +1029,7 @@ const computedEntry3 = computed(() => {
 			<div v-else>
 				<h4>{{ $t("history.dinnerTime") }}</h4>
 				<!-- Media Line mod: tonight's city-wide headline shift behind the prices -->
-				<div v-if="computedEntry3.headlineTotal" class="headlineHistNote">{{ $t("assistance.headlineTonight", { amount: computedEntry3.headlineTotal > 0 ? "+" + computedEntry3.headlineTotal : computedEntry3.headlineTotal }) }}</div>
+				<div v-if="computedEntry3.headlineTotal" class="headlineHistNote">{{ $t("assistance.headlineTonight", { amount: (computedEntry3.headlineTotal > 0 ? "+" : "") + computedEntry3.headlineTotal }) }}</div>
 				<div v-if="hasDinnerSales" class="dinnerAnimButtons">
 					<button class="actionsLineButton" @click.stop="startDinnerAnimation(true)">{{ $t("history.animAnimate") }}</button>
 					<button class="actionsLineButton" @click.stop="startDinnerAnimation(false)">{{ $t("history.animStepThrough") }}</button>
@@ -1089,7 +1088,7 @@ const computedEntry3 = computed(() => {
 									<template #amount>{{ block.sale.finalSaleAmount }}</template>
 								</i18n-t>
 								<span>{{ " " + $t("history.basePriceItems", { price: block.sale.basePrice, count: block.sale.numItems }) }}</span>
-								<span v-if="block.sale.headlineTotal">{{ " " + $t("history.headlineApplied", { amount: block.sale.headlineTotal > 0 ? "+" + block.sale.headlineTotal : block.sale.headlineTotal }) }}</span>
+								<span v-if="block.sale.headlineTotal">{{ " " + $t("history.headlineApplied", { amount: (block.sale.headlineTotal > 0 ? "+" : "") + block.sale.headlineTotal }) }}</span>
 								<span v-if="block.sale.gardenParkStatus === 1">{{ " " + $t("history.doubledGarden") }}</span>
 								<span v-else-if="block.sale.gardenParkStatus === 2 && block.isApartment">{{ " " + $t("history.doubledParkApartment") }}</span>
 								<span v-else-if="block.sale.gardenParkStatus === 2">{{ " " + $t("history.doubledParkHouse") }}</span>

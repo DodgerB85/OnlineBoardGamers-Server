@@ -939,6 +939,7 @@ export default {
 		"duration": "Durée (tours) :",
 		"mapTile": "Tuile de carte",
 		"house": "Maison",
+		"antenna": "Antenne",
 		"noMoreHouses": "Plus de maisons",
 		"noMoreGardens": "Plus de jardins",
 		"noMoreRoads": "Plus de routes",

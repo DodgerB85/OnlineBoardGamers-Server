@@ -422,8 +422,6 @@ function generatePath(x, y, dir, rows) {
 
 const sortedCampaigns = computed(() => {
 	// We spread into a new array so we don't mutate the store directly.
-	// Media Line campaigns sort by their printed number (3.5/4.5, 6.5-8.6),
-	// not by raw campaign id, so they interleave with the A-line campaigns.
 	return [...store.availableMarketingCampaigns].sort((a, b) => rules.campaignSortKey(a) - rules.campaignSortKey(b))
 })
 </script>
@@ -732,7 +730,7 @@ const sortedCampaigns = computed(() => {
 											<img v-else-if="rf.HIREABLE_EMPLOYEES.indexOf(emp) > -1" :src="view.getImage('iconRecruit')" class="iconsImg" />
 											<span v-else class="blankIcon">&nbsp;</span>
 											<img v-if="emp === rf.TELEMARKETER" :src="view.getImage('iconWaveRange1')" class="iconsImg iconMiddle" />
-										<img v-else-if="emp === rf.TV_ANNOUNCER" :src="view.getImage('iconWaveRange2')" class="iconsImg iconMiddle" />
+											<img v-else-if="emp === rf.TV_ANNOUNCER" :src="view.getImage('iconWaveRange2')" class="iconsImg iconMiddle" />
 										<img v-else-if="rf.getRangeForEmployee(emp) === 8" :src="view.getImage('iconRangeInfinite')" class="iconsImg iconMiddle" />
 											<img v-else-if="rf.getRangeForEmployee(emp) >= 1" :src="view.getImage('iconRange' + rf.getRangeForEmployee(emp))" class="iconsImg iconMiddle" :class="{ fixedHeight: rf.getRangeType(emp) === 'road' }" />
 											<span v-else class="blankIcon iconMiddle">&nbsp;</span>

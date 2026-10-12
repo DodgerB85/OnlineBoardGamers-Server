@@ -1181,10 +1181,6 @@ export function selectMarketer(marketer, nightShift, temporary = false) {
 	if (campaigns.includes(22)) campaigns = [22]
 	if (campaigns.includes(23)) campaigns = [23]
 
-	// Media Line mod: order the offered campaigns by the number printed on
-	// the card - TV channels (3.5/4.5) slot between the airplanes and phone
-	// tokens (6.5-8.6) between the radios, ahead of the higher-numbered
-	// billboard cards
 	campaigns = [...campaigns].sort((a, b) => rules.campaignSortKey(a) - rules.campaignSortKey(b))
 
 	store.context.campaigns = campaigns
@@ -1496,7 +1492,7 @@ export function toggleTVHouseSelection(index) {
 	const store = useModelStore()
 	const v = store.mapData.coords[index]
 	if (!(v > rf.HOUSE && v < rf.HOUSE + 29)) return
-	const house = Number.isInteger(v) ? v - rf.HOUSE : Math.round((v - rf.HOUSE + Number.EPSILON) * 100) / 100
+	const house = model.houseNumberAt(v)
 	if (!model.giveHousesInWaveRange(currentPlayerIndex(), 2).includes(house)) return
 
 	const pos = store.context.tvHouses.indexOf(house)

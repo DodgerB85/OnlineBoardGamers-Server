@@ -980,6 +980,7 @@ export default {
 		"duration": "{duration} 个回合:",
 		"mapTile": "地图板块",
 		"house": "房屋",
+		"antenna": "天线",
 		"noMoreHouses": "没有更多的板块",
 		"noMoreGardens": "没有更多的板块",
 		"noMoreRoads": "没有更多的板块",

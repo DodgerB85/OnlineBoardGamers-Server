@@ -171,8 +171,6 @@ function buildMarketers(playerIndex, player) {
 			continue
 		}
 		const campaignObj = store.campaigns.find((obj) => obj.number === m.campaign)
-		// Show the billboard number (vanilla IDs double as it; B-line TV/phone
-		// slots map to their insert numbers 3.5/4.5/6.5/6.6/...)
 		const entry = { campaign: rules.campaignSortKey(m.campaign), infinite: campaignObj.duration === 9, goods: [] }
 		if (campaignObj.duration === 9) {
 			entry.goods.push({ good: campaignObj.good, copies: 1 })
@@ -368,7 +366,7 @@ const headlineBoard = computed(() => {
 	if (tonight === 0 && today.length === 0) return null
 	return {
 		hasEffect: tonight !== 0,
-		tonightStr: tonight > 0 ? "+" + tonight : "" + tonight,
+		tonightStr: (tonight > 0 ? "+" : "") + tonight,
 		today: today.map((h) => ({ up: h.value > 0, img: view.getImage(h.value > 0 ? "headline_prime" : "headline_press") })),
 	}
 })

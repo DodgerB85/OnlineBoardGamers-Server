@@ -1715,16 +1715,9 @@ export function availableNewRoads() {
 	return res
 }
 
-// Media Line mod: B-line campaigns slot into the A-line push order with
-// decimal sort keys (serpentine interleave) - TV channels between radio and
-// airplanes, phone tokens in pairs after radio 6/7/8. A-line keys are their
-// raw campaign numbers, untouched, so old replays stay byte-identical.
-// radio(1-3) TV-A(3.5) plane(4) TV-B(4.5) plane(5,6) phone pairs 6.5/6.6
-// after radio 6, 7.5/7.6 after radio 7, 8.5/8.6 after radio 8, then
-// mailbox(7-10) billboard(11-16) ...
+// Media Line B-line keys (decimal, interleaved with A-line numbers); A-line keys stay raw
 export function campaignSortKey(number) {
-	if (number >= 28 && number <= 29) return 3.5 + (number - 28) // TV channels: 3.5, 4.5
-	if (number >= 30 && number <= 35) return 6 + Math.floor((number - 30) / 2) + 0.5 + ((number - 30) % 2) * 0.1 // phone pairs: 6.5/6.6, 7.5/7.6, 8.5/8.6
+	if (number >= 28 && number <= 35) return [3.5, 4.5, 6.5, 6.6, 7.5, 7.6, 8.5, 8.6][number - 28]
 	return number
 }
 
@@ -2082,7 +2075,7 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 		// Media Line mod: milestone 1 bonus gets its own column in the income
 		// table, always LAST (index 3 without coffee, index 4 with it); the
 		// money itself was already paid in settleMediaLineGroups
-		if (store.startingOptions.mediaLine) hI.push(mediaLineBonuses?.[playerIndex] ?? 0)
+		if (store.startingOptions.mediaLine) hI.push(mediaLineBonuses[playerIndex])
 
 		histoIncome[playerIndex] = hI
 		p.money += total
@@ -2753,7 +2746,7 @@ export function housesAffectedByMarketingCampaign(campaign) {
 		case rf.TV_CHANNEL:
 			// Media Line mod - B3 affects exactly the houses the player picked
 			// inside the restaurant's diamond range (stored at placement time).
-			;(campaign.houses || []).forEach((h) => affectedHouses.add(h))
+			campaign.houses.forEach((h) => affectedHouses.add(h))
 			break
 	}
 
@@ -2849,7 +2842,7 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 
 			// Media Line mod: milestone 2 (First TV Announcer Used) - the holder's
 			// first TV campaign pushes 2 identical cards per house per night
-			if (store.startingOptions.mediaLine && campaign.number === store.mediaLine.doubleCampaign) {
+			if (campaign.number === store.mediaLine.doubleCampaign) {
 				good2 = campaign.good
 			}
 

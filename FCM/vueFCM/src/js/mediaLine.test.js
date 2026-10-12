@@ -1,5 +1,5 @@
 /**
- * Media Line mod tests (stage 1 - data layer):
+ * Media Line mod tests (data layer):
  * 1. Constant allocation (employees 59/60, SO 50, milestones 42/43, HIST 73,
  *    campaign types TV_CHANNEL/PHONE, campaign slots 28-35).
  * 2. Setup: pools x6, campaigns 28-35 pushed, milestones gated by useMilestones.

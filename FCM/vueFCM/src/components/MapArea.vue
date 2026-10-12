@@ -163,7 +163,7 @@ const tvAntennaDisplays = computed(() => {
 	const res = []
 	const sqSize = store.refSize / 5
 	for (const c of store.campaigns) {
-		if (rf.MARKETING_CAMPAIGNS[c.number]?.type !== rf.TV_CHANNEL) continue
+		if (rf.MARKETING_CAMPAIGNS[c.number].type !== rf.TV_CHANNEL) continue
 		for (const house of c.houses) {
 			// Board apartments (3.2 / 9.7) live outside store.houses - findApartment locates them
 			let houseObj = model.findHouse(house)
@@ -181,7 +181,7 @@ const tvAntennaDisplays = computed(() => {
 			else if (houseObj.rotated === 2) hy = y + sqSize
 			// Remaining-nights chip: its centre rides the antenna's TOP point
 			const chip = width * 0.55
-			const chipBg = FOOD_CHIP_COLOURS[c.good] || "#1f2937"
+			const chipBg = FOOD_CHIP_COLOURS[c.good]
 			const slot = res.filter((a) => a.house === house).length
 			// One antenna centred; two sit snugly side by side on centre (+/-0.35sq)
 			const cx = hx + (slot === 0 ? 1 : 1.35) * sqSize
@@ -781,7 +781,7 @@ function tileRotationClass(tileData) {
 
 			<!-- Display Media Line TV channel antennas -->
 			<template v-for="(ant, antIdx) in tvAntennaDisplays" :key="'ant' + antIdx">
-				<img class="boardAntennaImg" :src="ant.src" :style="{ left: ant.x + 'px', top: ant.y + 'px', width: ant.width + 'px' }" alt="Antenna" />
+				<img class="boardAntennaImg" :src="ant.src" :style="{ left: ant.x + 'px', top: ant.y + 'px', width: ant.width + 'px' }" :alt="$t('items.antenna')" />
 				<span class="antennaDurationChip" :class="{ r1: ant.duration === 9 }" :style="{ left: ant.chipX + 'px', top: ant.chipY + 'px', width: ant.chipSize + 'px', height: ant.chipSize + 'px', fontSize: ant.chipSize * 0.62 + 'px', backgroundColor: ant.chipBg, color: ant.chipText }">{{ ant.duration === 9 ? "8" : ant.duration }}</span>
 			</template>
 

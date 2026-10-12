@@ -684,15 +684,15 @@ export function removeMarketingCampaign(number) {
 	map.addElement(rf.TYPE_CAMPAIGN, number, campaign.index, campaign.rotated, true)
 }
 
+// Board value of a house square (HOUSE + number) back to the house number
+export function houseNumberAt(v) {
+	return Number.isInteger(v) ? v - rf.HOUSE : Math.round((v - rf.HOUSE + Number.EPSILON) * 100) / 100
+}
+
 // Media Line mod - B3 diamond range: houses inside the diamond of 13 map
 // tiles (Manhattan distance `tileRange` in 5x5 tiles) around any of the
 // player's restaurants (waves ignore roads). The stadium is never affected
 // by marketing.
-// Board value of a house square (HOUSE + number) back to the house number
-function houseNumberAt(v) {
-	return Number.isInteger(v) ? v - rf.HOUSE : Math.round((v - rf.HOUSE + Number.EPSILON) * 100) / 100
-}
-
 export function giveHousesInWaveRange(playerIndex, tileRange = 2) {
 	const store = useModelStore()
 	// Media Line mod - the wave is measured from the restaurant doors: the

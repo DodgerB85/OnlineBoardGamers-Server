@@ -939,6 +939,7 @@ export default {
 		"duration": "Durata (turni):",
 		"mapTile": "Riquadro della mappa",
 		"house": "Casa",
+		"antenna": "Antenna",
 		"noMoreHouses": "Niente più case",
 		"noMoreGardens": "Niente più giardini",
 		"noMoreRoads": "Niente più strade",
