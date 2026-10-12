@@ -2044,6 +2044,7 @@ export class Game {
                 return { immediate: this.hireWorker(action.row, action.worker, -2), actions: [], canUndo: true };
             case ActionType.TAKE_OBJECTIVE_CARD: {
                 const chosen = action.objectiveCard ? this.state.objectiveCards.remove(action.objectiveCard) : this.state.objectiveCards.draw();
+                // Rules: a taken objective card goes face up onto the personal discard pile.
                 ps.gainCard(chosen);
                 // Java: ActionResult.undoNotAllowed(ImmediateActions.none())
                 return { immediate: [], actions: [], canUndo: false };

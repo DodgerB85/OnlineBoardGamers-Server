@@ -150,20 +150,16 @@ function candidatesFor(name) {
 		out.push({ label: `Trade with tribe`, run: () => controller.perform({ type: ActionType.TRADE_WITH_TRIBES, location: name }) })
 	}
 	if (sel && BUILD_ACTIONS.includes(sel) && loc.kind === "BUILDING" && (!loc.building || loc.building.player === player)) {
-		const picked = store.pendingBuilding
-		if (picked) {
-			out.length = 0
-			out.push({ label: `Place ${picked} here`, run: () => controller.perform({ type: sel, location: name, building: picked }) })
-		} else {
-			const color = colorByPlayer.value[player] ?? "red"
-			for (const b of g().playerState(player).buildings) {
-				out.push({
-					label: `Place building ${b}`,
-					img: view.buildingImage(g().edition, b, color),
-					enabled: map.canPlaceBuilding(g(), player, loc, b, sel),
-					run: () => controller.perform({ type: sel, location: name, building: b }),
-				})
-			}
+		// The chooser on the clicked spot is where the building is picked; unaffordable
+		// ones are shown dimmed so the spot's options stay readable.
+		const color = colorByPlayer.value[player] ?? "red"
+		for (const b of g().playerState(player).buildings) {
+			out.push({
+				label: `Place building ${b}`,
+				img: view.buildingImage(g().edition, b, color),
+				enabled: map.canPlaceBuilding(g(), player, loc, b, sel),
+				run: () => controller.perform({ type: sel, location: name, building: b }),
+			})
 		}
 	} else if (sel === ActionType.USE_ADJACENT_BUILDING && loc.building) {
 		out.push({ label: `Use ${loc.building.name} building`, run: () => controller.perform({ type: ActionType.USE_ADJACENT_BUILDING, location: name }) })
@@ -220,6 +216,26 @@ function locationTone(name) {
 	const target = moveTargets.value.get(name)
 	return target && target.steps.length > 1 ? "far" : ""
 }
+
+/** Numbered markers for the steps of the route shown for the hovered destination. */
+const routeSteps = computed(() => {
+	if (!game.value) return []
+	const target = hoveredMove.value ? moveTargets.value.get(hoveredMove.value) : null
+	if (!target || target.steps.length < 2) return []
+	return target.steps
+		.map((name, i) => {
+			const c = center(name)
+			return c ? { key: `${name}-${i}`, n: i + 1, cx: c.cx, cy: c.cy } : null
+		})
+		.filter(Boolean)
+})
+
+/** Top edge of the spot the planned walk has reached: where the Stay Here popup hangs. */
+const stayHereAt = computed(() => {
+	if (!store.plannedSteps.length) return null
+	const s = spot(store.plannedSteps[store.plannedSteps.length - 1])
+	return s ? { cx: s.x + s.w / 2, cy: s.y } : null
+})
 
 function clickLocation(name) {
 	const cands = candidatesFor(name)
@@ -386,7 +402,7 @@ const ranchers = computed(() => {
 	for (const [loc, players] of Object.entries(byLoc)) {
 		const c = center(loc)
 		if (!c) continue
-		players.forEach((p, i) => out.push({ player: p, color: colorByPlayer.value[p] ?? "red", x: c.cx + i * 10 - ((players.length - 1) * 10) / 2, y: c.cy }))
+		players.forEach((p, i) => out.push({ player: p, loc, color: colorByPlayer.value[p] ?? "red", x: c.cx + i * 10 - ((players.length - 1) * 10) / 2, y: c.cy }))
 	}
 	return out
 })
@@ -627,6 +643,9 @@ const hoveredBuilding = computed(() => {
 		building,
 		rect: r,
 		img: tile.img,
+		// Pieces standing on the tile ride along with the zoom, so the cattleman
+		// does not vanish behind the enlarged building.
+		ranchers: ranchers.value.filter((rn) => rn.loc === name),
 		// The zoomed tile covers the board's own border, so it draws its own.
 		// Light green while it is a movement option the mouse is over, black otherwise.
 		move: moveTargets.value.has(name),
@@ -721,16 +740,24 @@ function clickTown(name) {
 	controller.perform({ type: ActionType.PLACE_BRANCHLET, town: name })
 }
 
+/** Hovering a spot: zoom the building and light the route to it. */
+function hoverLocation(name) {
+	enterBuilding(name)
+	hoveredMove.value = moveTargets.value.has(name) ? name : null
+}
+
+function unhoverLocation(name) {
+	if (hoveredMove.value === name) hoveredMove.value = null
+	leaveBuilding()
+}
+
 function enterTarget(t) {
-	if (t.type === "location") {
-		enterBuilding(t.name)
-		hoveredMove.value = moveTargets.value.has(t.name) ? t.name : null
-	}
+	if (t.type === "location") hoverLocation(t.name)
 }
 
 function leaveTarget(t) {
-	if (t.type === "location" && hoveredMove.value === t.name) hoveredMove.value = null
-	leaveBuilding()
+	if (t.type === "location") unhoverLocation(t.name)
+	else leaveBuilding()
 }
 </script>
 
@@ -849,13 +876,15 @@ function leaveTarget(t) {
 				<!-- hovered building: zoomed, with action hotspots -->
 				<g
 					v-if="hoveredBuilding"
+					:key="hoveredBuilding.name"
 					class="buildingOverlay"
-					@mouseenter="enterBuilding(hoveredBuilding.name)"
-					@mouseleave="leaveBuilding"
+					@mouseenter="hoverLocation(hoveredBuilding.name)"
+					@mouseleave="unhoverLocation(hoveredBuilding.name)"
 					@click="clickLocation(hoveredBuilding.name)"
 				>
 					<g :transform="hoveredBuilding.transform">
 						<image :href="hoveredBuilding.img" :x="hoveredBuilding.rect.x" :y="hoveredBuilding.rect.y" :width="hoveredBuilding.rect.w" :height="hoveredBuilding.rect.h" />
+						<circle v-for="r in hoveredBuilding.ranchers" :key="'rn' + r.player" :class="'rancher ' + r.color" :cx="r.x" :cy="r.y" r="7" />
 						<rect
 							class="buildingOutline"
 							:class="{ move: hoveredBuilding.move }"
@@ -875,6 +904,11 @@ function leaveTarget(t) {
 						/>
 					</g>
 				</g>
+
+				<!-- steps of the hovered move, numbered so the route reads at a glance -->
+				<g v-if="routeSteps.length" class="routeNumbers">
+					<text v-for="s in routeSteps" :key="s.key" :x="s.cx" :y="s.cy + 5" text-anchor="middle">{{ s.n }}</text>
+				</g>
 			</g>
 		</svg>
 
@@ -889,6 +923,16 @@ function leaveTarget(t) {
 				<button v-else class="act" @click="choose(c)">{{ c.label }}</button>
 			</template>
 			<button class="act cancel" @click="chooser = null">Cancel</button>
+		</div>
+
+		<!-- Stop the walk early: anchored to the spot the plan has reached. -->
+		<div
+			v-if="stayHereAt"
+			class="stayHere"
+			:style="{ left: (stayHereAt.cx / 800) * 100 + '%', top: ((stayHereAt.cy + shift + 20) / (rttn ? 1015 : 820)) * 100 + '%' }"
+			@click="controller.commitMove(store.plannedSteps)"
+		>
+			Stay Here<span class="arrow">▼</span>
 		</div>
 	</div>
 </template>
@@ -967,8 +1011,18 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 .disc.purple, .engine.purple, .rancher.purple { fill: purple; }
 .disc.black, .engine.black, .rancher.black { fill: black; }
 
-/* Hovered-building action hotspots */
-.buildingOverlay { pointer-events: all; }
+/* Hovered-building action hotspots. The zoom grows out of the tile: transform-box
+   makes the scale pivot on the overlay's own (already zoomed) box, whose centre is
+   the tile's centre. */
+.buildingOverlay {
+	pointer-events: all;
+	transform-box: fill-box;
+	transform-origin: center;
+	animation: buildingZoom 150ms ease-out;
+}
+@keyframes buildingZoom {
+	from { transform: scale(0.5); }
+}
 /* Border of the 2x tile, drawn over its artwork so it is not lost behind it. */
 .buildingOutline { fill: none; stroke: black; stroke-width: 6; pointer-events: none; }
 .buildingOutline.move { stroke: #90ee90; }
@@ -995,6 +1049,35 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 }
 .chooser .act { font-size: 12px; padding: 3px 8px; cursor: pointer; white-space: nowrap; }
 .chooser .cancel { background: #eee; }
+
+/* Numbered step markers on the route to the hovered destination. */
+.routeNumbers text {
+	fill: white;
+	font-size: 17px;
+	font-weight: bold;
+	paint-order: stroke;
+	stroke: black;
+	stroke-width: 3px;
+	pointer-events: none;
+}
+
+/* Stay Here bubble, hanging just above the spot the planned walk reached. */
+.stayHere {
+	position: absolute;
+	transform: translate(-50%, -100%);
+	background: #cfe8cf;
+	border: 1px solid #333;
+	border-radius: 6px;
+	padding: 2px 8px 0;
+	font-size: 12px;
+	font-weight: bold;
+	cursor: pointer;
+	z-index: 6;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+	white-space: nowrap;
+}
+.stayHere:hover { background: #b7e0b7; }
+.stayHere .arrow { display: block; text-align: center; font-size: 11px; line-height: 10px; }
 /* Building picker: tile images in a wrapped grid instead of a text list. */
 .chooser.tiled { flex-direction: row; flex-wrap: wrap; width: 284px; }
 .chooser .cand { box-sizing: border-box; width: 92px; height: 108px; padding: 0; border: 5px solid #000; border-radius: 6px; background: #fff; cursor: pointer; }

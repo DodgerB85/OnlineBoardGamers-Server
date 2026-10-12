@@ -35,7 +35,6 @@ export const useModelStore = defineStore("store", () => {
 	})
 
 	const selectedAction = ref(null)
-	const pendingBuilding = ref(null)
 	/**
 	 * Trail spots the player has clicked for the mandatory MOVE, so the move can
 	 * be walked one step at a time. Null until they click the first one.
@@ -135,17 +134,10 @@ export const useModelStore = defineStore("store", () => {
 
 	function selectAction(a) {
 		selectedAction.value = selectedAction.value === a ? null : a
-		pendingBuilding.value = null
-	}
-
-	function pickBuilding(a, building) {
-		selectedAction.value = a
-		pendingBuilding.value = building
 	}
 
 	function clearAction() {
 		selectedAction.value = null
-		pendingBuilding.value = null
 	}
 
 	function clearMessages() {
@@ -160,7 +152,6 @@ export const useModelStore = defineStore("store", () => {
 		game,
 		viewSettings,
 		selectedAction,
-		pendingBuilding,
 		plannedSteps,
 		moveStepsLeft,
 		gameMessages,
@@ -187,7 +178,6 @@ export const useModelStore = defineStore("store", () => {
 		setGame,
 		getGame,
 		selectAction,
-		pickBuilding,
 		clearAction,
 		planMove,
 		clearMovePlan,

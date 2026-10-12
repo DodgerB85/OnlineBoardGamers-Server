@@ -32,13 +32,15 @@ const hireRows = computed(() => {
 
 // --- Buildings ---
 const buildingActions = computed(() => actions.value.filter((a) => a === ActionType.PLACE_BUILDING || a === ActionType.PLACE_CHEAP_BUILDING || a === ActionType.PLACE_BUILDING_FOR_FREE))
+// Display only: a building is listed when it fits at least one spot the player may
+// build on. The choice itself is made in the chooser that opens on the map.
 const buildingOptions = computed(() => {
 	if (buildingActions.value.length === 0) return null
-	const ps = g().currentPlayerState()
-	const locations = [...g().getTrail().locations.values()]
-		.filter((l) => l.kind === "BUILDING" && (!l.building || l.building.player === ps.player))
-		.map((l) => l.name)
-	return { buildings: ps.buildings.slice(), locations }
+	const game = g()
+	const ps = game.currentPlayerState()
+	const action = buildingActions.value[0]
+	const locations = [...game.getTrail().locations.values()].filter((l) => l.kind === "BUILDING" && (!l.building || l.building.player === ps.player))
+	return ps.buildings.filter((b) => locations.some((l) => map.canPlaceBuilding(game, ps.player, l, b, action)))
 })
 
 const HAND_LABEL = {
@@ -100,6 +102,8 @@ const CARD_TARGET_ACTIONS = new Set([
 	ActionType.UPGRADE_SIMMENTAL,
 ])
 const cardActions = computed(() => actions.value.filter((a) => CARD_TARGET_ACTIONS.has(a)))
+/** A draw-then-discard leaves DISCARD_CARD as the only card action: clicking a card discards it. */
+const discardOnly = computed(() => cardActions.value.length === 1 && cardActions.value[0] === ActionType.DISCARD_CARD)
 
 // RttN: the bonus station master pile is a real choice the UI has to present.
 const bonusStationMasters = computed(() => (actions.value.includes(ActionType.TAKE_BONUS_STATION_MASTER) ? g().getRailroadTrack().stationMasters.slice() : []))
@@ -118,7 +122,6 @@ function p(type, extra = {}) {
 		<template v-if="!isBidding">
 		<div v-if="canMove" class="group">
 			<div class="label">Move — click a highlighted spot, {{ stepsLeft }} step{{ stepsLeft === 1 ? "" : "s" }} left (yellow = next step, cyan = further)</div>
-			<button v-if="store.plannedSteps.length" class="act stay" :disabled="store.saving" @click="controller.commitMove(store.plannedSteps)">Stay Here</button>
 		</div>
 
 		<div v-if="armedMove" class="group">
@@ -135,20 +138,10 @@ function p(type, extra = {}) {
 			</template>
 		</div>
 
-		<div v-if="buildingOptions && buildingOptions.buildings.length && buildingActions.length" class="group">
-			<div class="label">Place building — pick one, then click a spot on the map</div>
+		<div v-if="buildingOptions && buildingOptions.length" class="group">
+			<div class="label">Place building — choose a spot, then place a building. Here are your available buildings.</div>
 			<div class="supply">
-				<img
-					v-for="b in buildingOptions.buildings"
-					:key="b"
-					class="buildingTile"
-					:class="{ active: store.selectedAction === buildingActions[0] && store.pendingBuilding === b }"
-					:src="buildingImageFor(b)"
-					:alt="b"
-					:title="buildingLabel(b)"
-					draggable="false"
-					@click="store.pickBuilding(buildingActions[0], b)"
-				/>
+				<img v-for="b in buildingOptions" :key="b" class="buildingTile display" :src="buildingImageFor(b)" :alt="b" :title="buildingLabel(b)" draggable="false" />
 			</div>
 		</div>
 
@@ -188,7 +181,7 @@ function p(type, extra = {}) {
 		</div>
 
 		<div v-if="cardActions.length" class="group">
-			<div class="label">Card actions — select, then click a card on your player table</div>
+			<div class="label">{{ discardOnly ? "Click a card on your player table to discard it" : "Card actions — select, then click a card on your player table" }}</div>
 			<button
 				v-for="a in cardActions"
 				:key="a"
@@ -222,10 +215,11 @@ function p(type, extra = {}) {
 /* Movement options match the board: light-green border on hover, as the map spots do. */
 .act.move:hover { border: 2px solid #90ee90; }
 .end { background: #cfe8cf; font-weight: bold; }
-.stay { background: #cfe8cf; }
 .reset { background: #f6d9c9; font-weight: bold; }
 .supply { display: flex; flex-wrap: wrap; gap: 3px; }
 .buildingTile { width: 44px; height: 52px; border: 2px solid #ffffff; border-radius: 4px; cursor: pointer; background: #fff; }
 .buildingTile:hover { border-color: black; }
-.buildingTile.active { border-color: green; box-shadow: 0 0 4px green; }
+/* Twice the size, display only: the building is picked in the chooser on the map. */
+.buildingTile.display { width: 88px; height: 104px; cursor: default; }
+.buildingTile.display:hover { border-color: #ffffff; }
 </style>

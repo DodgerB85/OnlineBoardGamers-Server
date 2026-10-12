@@ -65,6 +65,28 @@ describe("UPGRADE_ANY_STATION_BEHIND_ENGINE walks the graph (Space.isAfter)", ()
         expect(rt.isAfter("4.5", "4.5")).toBe(false);
     });
 });
+describe("TAKE_OBJECTIVE_CARD goes face up on the discard pile (rulebook)", () => {
+    it("takes a chosen display card and replenishes the display", () => {
+        const game = freshGame(2, 41);
+        const ps = game.currentPlayerState();
+        ps.discardPile = [];
+        game.state.actionStack = ActionStack.initial([PossibleAction.mandatory(ActionType.TAKE_OBJECTIVE_CARD)]);
+        const card = game.getObjectiveCards().available[0];
+        game.perform(game.currentPlayer, { type: ActionType.TAKE_OBJECTIVE_CARD, objectiveCard: { ...card } }, new JavaRandom(42));
+        expect(ps.discardPile[0].id).toBe(card.id);
+        expect(game.getObjectiveCards().available).toHaveLength(4);
+        expect(game.getObjectiveCards().available.some((c) => c.id === card.id)).toBe(false);
+    });
+    it("draws the top of the draw stack when no card is named", () => {
+        const game = freshGame(2, 43);
+        const ps = game.currentPlayerState();
+        ps.discardPile = [];
+        game.state.actionStack = ActionStack.initial([PossibleAction.mandatory(ActionType.TAKE_OBJECTIVE_CARD)]);
+        const top = game.getObjectiveCards().drawStack[0];
+        game.perform(game.currentPlayer, { type: ActionType.TAKE_OBJECTIVE_CARD }, new JavaRandom(44));
+        expect(ps.discardPile[0].id).toBe(top.id);
+    });
+});
 describe("Optional objectives score from every pile (PlayerState.getOptionalObjectives)", () => {
     it("scores an objective card sitting in the discard pile", () => {
         const game = freshGame();

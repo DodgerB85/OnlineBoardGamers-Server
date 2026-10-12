@@ -62,8 +62,9 @@ function takeFromDrawStack() {
 .hint { margin-bottom: 4px; font-size: 13px; }
 #objectivesMarket > .objCard, #objectivesMarket > .drawStack { display: inline-block; vertical-align: top; margin: 2px; }
 .objCard { box-shadow: 4px 4px 4px rgb(0, 0, 0, 0.75); border: 3px solid #ffffff; border-radius: 6px; cursor: default; }
-.objCard.selectable { cursor: pointer; }
-.objCard.selectable:hover { border-color: black; }
+/* Yellow = takeable, light green on mouseover, like the rest of the board. */
+.objCard.selectable { cursor: pointer; border-color: #ffd400; }
+.objCard.selectable:hover { border-color: #90ee90; }
 .drawStack {
 	position: relative;
 	width: 80px;
@@ -74,8 +75,8 @@ function takeFromDrawStack() {
 	overflow: hidden;
 }
 .drawStack img { width: 100%; height: 100%; display: block; }
-.drawStack.selectable { cursor: pointer; }
-.drawStack.selectable:hover { border-color: black; }
+.drawStack.selectable { cursor: pointer; border-color: #ffd400; }
+.drawStack.selectable:hover { border-color: #90ee90; }
 .drawStack .count {
 	position: absolute;
 	right: 4px;

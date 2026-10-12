@@ -161,6 +161,33 @@ function unlock(d) {
 
 const hand = computed(() => ps.value?.hand ?? [])
 
+// ---- hand selection (reference canSelectCard / selectCard) ----
+const hoveredCard = ref(null)
+
+/**
+ * The card action the table is serving: the player's pick, or a live DISCARD_CARD
+ * left behind by a draw-then-discard, which needs no selecting.
+ */
+const cardAction = computed(() => {
+	if (store.selectedAction) return store.selectedAction
+	return store.actions.includes(ActionType.DISCARD_CARD) ? ActionType.DISCARD_CARD : null
+})
+
+const PAIR_ACTIONS = new Set([ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS, ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS])
+
+/** The two cards a hovered card's pair action would discard (the engine takes the lowest values). */
+const pairToDiscard = computed(() => {
+	const i = hoveredCard.value
+	const card = i === null ? null : hand.value[i]
+	if (!card || !isCattle(card) || !PAIR_ACTIONS.has(cardAction.value)) return new Set()
+	const same = hand.value
+		.map((c, k) => ({ c, k }))
+		.filter(({ c }) => isCattle(c) && c.type === card.type)
+		.sort((a, b) => a.c.value - b.c.value)
+	if (same.length < 2) return new Set()
+	return new Set(same.slice(0, 2).map(({ k }) => k))
+})
+
 // Personal collections + card stacks (public info; shown on every board).
 const drawStackSize = computed(() => ps.value?.drawStack.length ?? 0)
 const discardSize = computed(() => ps.value?.discardPile.length ?? 0)
@@ -189,10 +216,9 @@ const collections = computed(() => {
 	}
 })
 
-// ---- hand selection (reference canSelectCard / selectCard) ----
 function canSelectCard(card) {
 	if (!interactive.value) return false
-	const sel = store.selectedAction
+	const sel = cardAction.value
 	if (!sel) return false
 	const cattle = isCattle(card)
 	switch (sel) {
@@ -227,7 +253,7 @@ function isObjective(card) {
 
 function selectCard(card) {
 	if (!canSelectCard(card)) return
-	const sel = store.selectedAction
+	const sel = cardAction.value
 	switch (sel) {
 		case ActionType.DISCARD_CARD:
 		case ActionType.REMOVE_CARD:
@@ -271,8 +297,10 @@ function selectCard(card) {
 					v-for="(card, i) in hand"
 					:key="i"
 					class="handCard"
-					:class="{ selectable: canSelectCard(card), dimmed: !!store.selectedAction && !canSelectCard(card) }"
+					:class="{ selectable: canSelectCard(card), pair: pairToDiscard.has(i), dimmed: !!store.selectedAction && !canSelectCard(card) }"
 					:card="card"
+					@mouseenter="hoveredCard = i"
+					@mouseleave="hoveredCard = null"
 					@click="selectCard(card)"
 				/>
 			</template>
@@ -382,7 +410,10 @@ function selectCard(card) {
 .handCard { cursor: default; }
 .handCard.back { width: 80px; height: 115px; border: 1px solid #ffffff; border-radius: 5px; overflow: hidden; flex: none; }
 .handCard.back img { width: 100%; height: 100%; display: block; }
-.handCard.selectable { cursor: pointer; outline: 2px solid #d4af37; }
+/* Selectable cards are yellow; the mouseover (and the pair a hovered card would
+   discard) turns light green, like the board's other clickable targets. */
+.handCard.selectable { cursor: pointer; outline: 2px solid #ffd400; }
+.handCard.selectable:hover, .handCard.pair { outline: 2px solid #90ee90; }
 .handCard.dimmed { opacity: 0.45; }
 
 .stackDialog { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center; }
