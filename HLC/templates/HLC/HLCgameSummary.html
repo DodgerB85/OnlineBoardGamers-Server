@@ -4,6 +4,8 @@
     <style>
         .HLCsummaryGraph { min-width: 500px; max-width: 500px; min-height: 300px; max-height: 300px; }
         .centeredDiv { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+        #HLCgameSummaryPage .page-header { justify-content: center; }
+        .HLCsummaryBackLink { text-align: center; }
     </style>
 {% endblock head %}
 {% block body %}
@@ -12,7 +14,9 @@
         <div class="page-header">
             <h1 class="page-title">{% translate "Horseless Carriage Game Summary" %}</h1>
         </div>
-        <a class="button button-ghost" href="{% url 'HLC:showHLCgame' game_id=gameID %}">Back to Game</a>
+        <div class="HLCsummaryBackLink">
+            <a class="button button-ghost" href="{% url 'HLC:showHLCgame' game_id=gameID %}">Back to Game</a>
+        </div>
         <br />
         <br />
         <!--<b>NOTE: GAMES CREATED BEFORE 11 MARCH MIGHT HAVE MISSING OR INCOMPLETE INFORMATION</b><br /><br />-->
