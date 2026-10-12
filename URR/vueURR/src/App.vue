@@ -7,6 +7,7 @@ import * as IO from "./backend/URR_IO"
 import * as WS from "./backend/URRwebsocket"
 import * as rules from "./js/URRrules"
 import * as controller from "./js/URRcontroller"
+import { MAP_WIDTH, MAP_HEIGHT } from "./js/URRboardDisplay"
 
 import PlayerMarker from "./components/PlayerMarker.vue"
 import TopMenu from "./components/TopMenu.vue"
@@ -48,7 +49,6 @@ watch(isNationDivision, () => { if (isMapPreviewOpen.value) closeMapPreview() })
 const map = ref(null)
 const holdings = ref(null)
 const statusPanels = ref(null)
-const actionPanelBody = ref(null)
 const selectedArea = ref(null)
 const gameActions = ref(null)
 const mapAction = ref(null)
@@ -60,17 +60,27 @@ const canalPath = ref([])
 const digCapacity = ref(null)
 const mainArea = ref(null)
 const boardBaseWidth = ref(640)
+const MIN_BOARD_WIDTH = 460
+const MAX_BOARD_WIDTH = 1800
 let boardObserver = null
+
+// Side panels stay in view while the page scrolls; a panel taller than the window pins its bottom edge instead of its top.
+function stickPanels() {
+	for (const panel of mainArea.value.querySelectorAll(":scope > aside")) panel.style.top = `${Math.min(12, window.innerHeight - panel.offsetHeight - 12)}px`
+}
 
 function resizeBoard() {
 	const area = mainArea.value
+	stickPanels()
 	if (isNationDivision.value) return
 	const styles = getComputedStyle(area)
 	const padding = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight)
 	const sidebars = [...area.querySelectorAll(":scope > aside")]
 	const availableWidth = area.clientWidth - padding - sidebars.reduce((width, sidebar) => width + sidebar.offsetWidth, 0) - sidebars.length * parseFloat(styles.gap)
-	const overhead = parseFloat(styles.getPropertyValue("--board-overhead"))
-	boardBaseWidth.value = Math.min(920, availableWidth, Math.max(460, (window.innerHeight - overhead) * 1.2333))
+	// The map takes all the width the side panels leave, so nothing is wasted left or right.
+	// ...but never taller than the window.
+	const fit = Math.round(Math.max(MIN_BOARD_WIDTH, Math.min(MAX_BOARD_WIDTH, availableWidth, window.innerHeight * (MAP_WIDTH / MAP_HEIGHT))))
+	if (fit !== boardBaseWidth.value) boardBaseWidth.value = fit
 }
 
 model.initGame()
@@ -78,6 +88,7 @@ let updateTimer = null
 onMounted(() => {
 	boardObserver = new ResizeObserver(resizeBoard)
 	boardObserver.observe(mainArea.value)
+	for (const panel of mainArea.value.querySelectorAll(":scope > aside")) boardObserver.observe(panel)
 	window.addEventListener("resize", resizeBoard)
 	if (personal.gameID === undefined || personal.pov < -9) return
 	WS.StartWebSocket()
@@ -134,29 +145,26 @@ const actionPanelTitle = computed(() => {
 })
 function selectArea(id) {
 	selectedArea.value = id
-	if (id !== null && store.gameflow.phase === rf.PHASE_SETTLEMENT) store.viewSettings.inspectedState = store.board.areas.find((area) => area.id === id).state
 }
 function locateNation(id) { map.value.locateNation(id) }
 function revealStatus(type) {
 	nextTick(() => statusPanels.value.querySelector(type === "player" ? ".holdingsPanel" : ".stateStrip").scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" }))
 }
 watch(() => store.viewSettings.historyArea, (id) => { if (id) map.value.locateArea(id) })
-watch([() => store.gameflow.turn, () => store.gameflow.phase, () => store.gameflow.turnOrder[0], () => view.currentStateId(store), () => store.gameflow.developmentStep, () => store.rain.step, () => store.gameflow.pendingOffer], async () => {
-	await nextTick()
-	if (actionPanelBody.value) {
-		actionPanelBody.value.scrollTop = 0
-		actionPanelBody.value.parentElement.scrollTop = 0
-	}
-})
 const automaticAction = computed(() => {
 	if (store.viewSettings.showLoader || store.viewSettings.isSaving || store.viewSettings.performingRewind) return null
 	if (store.turnDraft.pauseAutomatic || store.turnDraft.ready) return null
 	return personal.canPlay() ? rules.getAutomaticAction(store) : controller.getAutomaticBotAction()
 })
-watch(automaticAction, (action) => {
+// A turn made only of forced moves (nothing to decide) saves itself instead of waiting for End Turn.
+let forcedSteps = 0
+watch(() => store.turnDraft.steps.length, (count) => { if (count === 0) forcedSteps = 0 })
+watch(automaticAction, async (action) => {
 	if (!action) return
-	if (controller.canRunBotTurn()) controller.submitBotAction(action)
-	else controller.submitAction(action)
+	if (controller.canRunBotTurn()) return controller.submitBotAction(action)
+	if (!await controller.submitAction(action)) return
+	forcedSteps++
+	if (store.turnDraft.ready && store.turnDraft.steps.length === forcedSteps) await controller.endPlayerTurn()
 }, { immediate: true, flush: "post" })
 watch(() => store.turnDraft.revision, () => {
 	map.value?.finishDig()
@@ -195,18 +203,19 @@ function showDebug() {
 			<p>Select a hex to inspect it, or a card to enlarge it. Choose a nation below; click the map to enlarge it.</p>
 			<p><a href="/URR/help/" target="_blank" rel="noopener">Icons and interface help</a> is also available from Rules in the menu. Enjoy the game!</p>
 		</div>
-		<div id="mainAreaLessHistory" :class="{ nationDivisionLayout: isNationDivision }" ref="mainArea" :style="{ '--board-width': `${boardBaseWidth * store.viewSettings.boardZoom}px`, '--board-overhead': `${(showLandMarket ? 390 : 275) + (store.viewSettings.showReplay ? 60 : 0) + (map?.isTracing ? 60 : 0)}px` }">
-			<aside ref="statusPanels" class="stateSidebar"><PlayerHoldings ref="holdings" /><StateStrip v-if="!isNationDivision" @inspect="revealStatus" /><EquipmentSupply v-if="!isNationDivision" /></aside>
+		<div id="mainAreaLessHistory" :class="{ nationDivisionLayout: isNationDivision }" ref="mainArea" :style="{ '--board-width': `${boardBaseWidth * store.viewSettings.boardZoom}px` }">
+			<aside v-if="!isNationDivision" class="equipmentSidebar"><EquipmentSupply /></aside>
+			<aside ref="statusPanels" class="stateSidebar"><PlayerHoldings ref="holdings" /><StateStrip v-if="!isNationDivision" @inspect="revealStatus" /></aside>
 			<div class="mapContainer" :title="isNationDivision ? 'Click the map to enlarge' : undefined" @keydown.enter="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()" @keydown.space="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()" @click="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()">
 				<TerrainMarket v-if="showLandMarket" />
 				<Teleport to="#nationMapPreviewBody" :disabled="!isMapPreviewOpen">
-				<MapArea ref="map" :selected-hex="selectedArea" :map-action="mapAction" :action-targets="actionTargets" @confirm-action="gameActions?.confirmMapAction()" @cancel-action="gameActions?.cancelMapAction()" :highlighted-player="store.viewSettings.showOwnedLand ? holdings?.activePlayer ?? null : null" :removal-area="removalArea" :land-draft="landDraft" :waiting-player-index="waitingPlayerIndex" :dig-capacity="digCapacity" @select-area="selectArea" @change-path="canalPath = $event" />
+				<MapArea ref="map" :selected-hex="selectedArea" :map-action="mapAction" :action-targets="actionTargets" @confirm-action="gameActions?.confirmMapAction()" @cancel-action="gameActions?.cancelMapAction()" :highlighted-player="store.viewSettings.showOwnedLand ? holdings?.activePlayer ?? null : null" :removal-area="removalArea" :land-draft="landDraft" :waiting-player-index="waitingPlayerIndex" :dig-capacity="digCapacity" @select-area="selectArea" @click-area="gameActions?.planClick($event)" @change-path="canalPath = $event" />
 				</Teleport>
 			</div>
 			<aside v-if="!store.viewSettings.showReplay" class="actionSidebar">
 				<div v-if="!isNationDivision" class="actionPanelHeading"><small class="actingLabel">{{ actingLabel }} <PlayerMarker v-if="actingPlayer !== undefined" :index="actingPlayer" /></small>{{ actionPanelTitle }}</div>
 				<DevelopmentProgress v-if="!isNationDivision && !store.turnDraft.ready" />
-				<div v-if="!store.turnDraft.ready || isNationDivision" ref="actionPanelBody" class="actionPanelBody"><NationMarket v-if="isNationDivision" :is-board-layout="isNationDivision" @locate-nation="locateNation" />
+				<div v-if="!store.turnDraft.ready || isNationDivision" class="actionPanelBody"><NationMarket v-if="isNationDivision" :is-board-layout="isNationDivision" @locate-nation="locateNation" />
 				<GameActions v-else ref="gameActions" :key="store.turnDraft.revision" @select-area="selectedArea = $event" @change-map-action="mapAction = $event" @change-action-targets="actionTargets = $event" :selected-area="selectedArea" :path="canalPath" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" @change-turn-action="turnAction = $event" @change-dig-capacity="digCapacity = $event" /></div>
 				<TurnControls :is-nation-division="isNationDivision" :turn-action="turnAction" :land-draft="landDraft" @end-turn="finishTurn" />
 			</aside>
@@ -231,29 +240,33 @@ body {
 	font-size: 16px;
 }
 
-#app { display: flex; flex-direction: column; min-width: 1400px; min-height: 100vh; }
+/* 1380, not the 1400 viewport width: leaves room for a classic scrollbar so a 1400px window gets no horizontal scrollbar. */
+#app { display: flex; flex-direction: column; min-width: 1380px; min-height: 100vh; }
 #app > #footer { flex-shrink: 0; }
 
 #wholeMiddleArea {
 	flex: 1 0 auto;
 	width: 100%;
-	min-width: 1400px;
+	min-width: 1380px;
 	text-align: center;
 	min-height: 500px;
 }
 
-#mainAreaLessHistory { max-width: 1510px; padding: 12px; box-sizing: border-box; display: flex; align-items: flex-start; justify-content: flex-start; gap: 12px; margin: 0 auto; }
-#gameArea { width: 100%; transition: margin-left .5s ease-in-out; }.historyOpen #gameArea { margin-left: 462px; }
-.mapContainer { display: flex; flex-direction: column; gap: 12px; min-width: 0; flex: 0 0 var(--board-width); width: var(--board-width); }
+#mainAreaLessHistory { padding: 12px var(--page-margin); box-sizing: border-box; display: flex; align-items: flex-start; justify-content: flex-start; gap: 12px; margin: 0 auto; }
+/* 5% page margins, shrinking only as far as the panels and a minimum-size map need. */
+#gameArea { --page-margin: clamp(12px, 5%, calc((100% - 1310px) / 2)); width: 100%; transition: margin-left .5s ease-in-out; }.historyOpen #gameArea { margin-left: 462px; }
+.mapContainer { scroll-margin-top: 12px; display: flex; flex-direction: column; gap: 12px; min-width: 0; flex: 0 0 var(--board-width); width: var(--board-width); }
+.equipmentSidebar, .stateSidebar, .actionSidebar { position: sticky; top: 12px; }
+.equipmentSidebar { flex: 0 0 210px; min-width: 0; }
 .stateSidebar { flex: 0 0 260px; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
 .stateSidebar .holdingsPanel { width: 100%; }
-.actionSidebar { flex: 0 0 340px; position: sticky; top: 12px; max-height: calc(100vh - 205px); overflow-y: auto; padding: 12px; box-sizing: border-box; background: #fff9e9; border: 1px solid #aa9b77; border-radius: 5px; }
+.actionSidebar { flex: 0 0 340px; padding: 12px; box-sizing: border-box; background: #fff9e9; border: 1px solid #aa9b77; border-radius: 5px; }
 .actionSidebar .gameActions { margin: 0; padding: 0; border: 0; background: transparent; }
 .actionSidebar .equipmentCard { float: none; display: block; max-width: 100%; width: 100%; margin: 0 0 8px; }
 .actionPanelHeading { padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #c4b894; font-size: 17px; font-weight: bold; }
 .gameActions input[type=number], .gameActions select, .nationMarket input { min-height: 36px; box-sizing: border-box; font-size: 16px; }
 
-.stateSidebar .holdingsPanel, .stateSidebar .equipmentSupply, .actionSidebar .gameActions, .actionSidebar .nationMarket { font-size: 16px; }
+.stateSidebar .holdingsPanel, .equipmentSidebar .equipmentSupply, .actionSidebar .gameActions, .actionSidebar .nationMarket { font-size: 16px; }
 .stateSidebar .panelTitle { font-size: 18px; }.stateSidebar .panelTitle button { font-size: 16px; font-weight: 600; }
 .stateSidebar .money > span, .stateSidebar .nationIncome, .stateSidebar .markerCount, .stateSidebar .reservedMoney, .stateSidebar .primogeniture, .stateSidebar .primogeniture b, .stateSidebar .terrainRow, .stateSidebar .eraCard > span { font-size: 16px; font-weight: 600; }
 .stateSidebar .playerMarker { width: 32px; height: 32px; }.stateSidebar .terrainRow img { width: 48px; height: 48px; }.stateSidebar .terrainRow .cityCount img { width: 28px; height: 28px; }.stateSidebar .ruledStates img { width: 36px; height: 36px; }
@@ -289,7 +302,8 @@ body {
 /* Nation selection uses the middle of the screen; the map remains a reference. */
 .nationDivision .turnOrder .phaseLabel, .nationDivision .turnOrder > .orderRow + .orderRow { display: none; }
 #mainAreaLessHistory.nationDivisionLayout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 10px; max-width: 1800px; }
-.nationDivisionLayout .actionSidebar { grid-column: 1; grid-row: 1 / span 2; position: static; max-height: none; overflow: visible; padding: 10px; }
+.nationDivisionLayout > aside { position: static; }
+.nationDivisionLayout .actionSidebar { grid-column: 1; grid-row: 1 / span 2; padding: 10px; }
 .nationDivisionLayout .mapContainer { grid-column: 2; grid-row: 1; width: 100%; gap: 5px; }
 .nationDivisionLayout .stateSidebar { grid-column: 2; grid-row: 2; width: 100%; }
 .nationDivisionLayout .mapSurface { cursor: zoom-in; }

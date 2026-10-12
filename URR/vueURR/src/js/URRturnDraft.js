@@ -25,24 +25,24 @@ export function actionSummary(before, after, action) {
 	const label = (id) => after.board.areas.find((area) => area.id === id)?.label || id
 	let message
 	if (action.type === "allocateWater") message = `${label(action.area)} · ${before.board.areas.find((area) => area.id === action.area)?.waterwork ? `${action.amount} water sent` : "irrigated"}.`
-	else if (["dig", "digEridu", "exchangeBarahshum"].includes(action.type)) message = `Canal ${(action.path || [action.from, action.to]).map(label).join(" → ")} added to your draft.`
-	else if (action.type === "buyCard") message = "Crew added to your draft."
-	else if (["requestWaterwork", "exchangeCalah"].includes(action.type)) message = `${label(action.area)} · ${action.kind}${action.type === "exchangeCalah" ? " via Calah" : ""} ${after.gameflow.pendingOffer ? "agreement request prepared" : "added to your draft"}.`
-	else if (action.type === "respondOffer") message = action.accept ? "Agreement accepted in your draft." : "Agreement declined in your draft."
+	else if (["dig", "digEridu", "exchangeBarahshum"].includes(action.type)) message = `Canal ${(action.path || [action.from, action.to]).map(label).join(" → ")}`
+	else if (action.type === "buyCard") message = "Crew"
+	else if (["requestWaterwork", "exchangeCalah"].includes(action.type)) message = `${label(action.area)} · ${action.kind}${action.type === "exchangeCalah" ? " via Calah" : ""}${after.gameflow.pendingOffer ? " · agreement requested" : ""}`
+	else if (action.type === "respondOffer") message = action.accept ? "Agreement accepted" : "Agreement declined"
 	else if (action.type === "harvest") message = `${rf.STATE_NAMES[before.rain.harvestOrder[0]]} harvest · ${action.choice === "store" ? `store in treasury${action.remove ? ` and remove ${label(action.remove)}` : ""}` : "distribute to landowners"}.`
-	else if (["buyNation", "bidNation", "offerNation"].includes(action.type)) message = `${rf.NATION_NAMES[action.nation]} · ${action.type === "buyNation" ? "purchase" : `offer ${action.amount} SPL`} prepared.`
-	else if (action.type === "tradeLand") message = `Trade prepared: ${[action.buy ? `buy ${label(action.buy)}` : "", ...(action.sellBefore || []).flat().map((id) => `sell ${label(id)}`), ...(action.sellAfter || []).flat().map((id) => `sell ${label(id)}`)].filter(Boolean).join(" · ")}.`
-	else if (action.type === "bidPrimogeniture") message = `Primogeniture bid · ${action.amount} SPL prepared.`
-	else if (action.type === "pass") message = "Pass prepared."
+	else if (["buyNation", "bidNation", "offerNation"].includes(action.type)) message = `${rf.NATION_NAMES[action.nation]} · ${action.type === "buyNation" ? "purchase" : `offer ${action.amount} SPL`}`
+	else if (action.type === "tradeLand") message = `Trade: ${[action.buy ? `buy ${label(action.buy)}` : "", ...(action.sellBefore || []).flat().map((id) => `sell ${label(id)}`), ...(action.sellAfter || []).flat().map((id) => `sell ${label(id)}`)].filter(Boolean).join(" · ")}.`
+	else if (action.type === "bidPrimogeniture") message = `Primogeniture bid · ${action.amount} SPL`
+	else if (action.type === "pass") message = "Pass"
 	else if (action.type === "endDevelopment") message = `${rf.STATE_NAMES[before.gameflow.stateOrder[before.gameflow.stateIndex]]} development complete.`
-	else if (action.type === "resolveMaintenance") message = "Required crew and maintenance resolved in your draft."
-	else message = "Turn choice prepared."
+	else if (action.type === "resolveMaintenance") message = "Required crew hired"
+	else message = "Turn choice"
 	return message
 }
 
 export function describeAction(before, after, action) {
 	const message = actionSummary(before, after, action)
-	if (endsDecision(before, after, action)) return `${message} Review your choices, then End Turn to confirm.`
+	if (endsDecision(before, after, action)) return message
 	const frame = water.currentWaterFrame(after)
-	return `${message} ${after.rain.step === "routing" && frame ? `${frame.water} water remaining · choose another destination.` : "Continue playing, or End Turn to confirm."}`
+	return after.rain.step === "routing" && frame ? `${message} ${frame.water} water remaining · choose another destination.` : message
 }

@@ -78,12 +78,13 @@ export function computeHistory(history, creationTimestamp) {
 			if (after.era >= 4) for (const nation of before.nations.filter((nation) => !nation.isRemoved && after.nations[nation.id].isRemoved)) details.push({ nation: nation.id, text: `${rf.NATION_NAMES[nation.id]} dissolves` })
 			addSummary("era", `Era ${after.era === 5 ? 'M' : after.era} begins`, details.length ? "Old crews retire and independent nations dissolve as shown below." : "The new equipment era begins; no crews retire.", details)
 		}
-		const beginsDevelopment = before.gameflow.phase === rf.PHASE_SETTLEMENT && after.gameflow.phase === rf.PHASE_DEVELOPMENT
+		// With no active state the whole development phase and rainy season resolve inside the move that ends settlement.
+		const beginsDevelopment = before.gameflow.phase === rf.PHASE_SETTLEMENT && (after.gameflow.phase !== rf.PHASE_SETTLEMENT || after.gameflow.turn > before.gameflow.turn)
 		const paysNegotiationIncome = before.gameflow.phase === rf.PHASE_DIVIDING_NATIONS && action?.type === "pass" && before.gameflow.passes === before.players.length - 1 && before.nations[rf.NATION_ASHUR].ownerType !== null
 		if (beginsDevelopment || paysNegotiationIncome) {
 			const details = after.nations.filter((nation) => !nation.isRemoved && nation.ownerType !== null).map((nation) => ({ nation: nation.id, player: nation.ownerType === "player" ? nation.owner : undefined, state: nation.ownerType === "state" ? nation.owner : undefined, text: `${rf.NATION_NAMES[nation.id]} pays ${rf.NATION_INCOMES[nation.id]} SPL to ${nation.ownerType === 'player' ? 'private cash' : `${rf.STATE_NAMES[nation.owner]} treasury`}` }))
 			addSummary("nationIncome", "Nation income paid", details.length ? "Each surviving nation pays its owner." : "No surviving owned nations; no nation income is paid.", details)
-			if (beginsDevelopment) addSummary("development", "Development begins", "Crews are ready to dig. Active states develop in this order:", after.gameflow.stateOrder.map((id) => ({ state: id, text: `${rf.STATE_NAMES[id]}${before.states[id].isActive ? '' : ' · emerges this round'}` })))
+			if (beginsDevelopment) addSummary("development", "Development begins", after.gameflow.stateOrder.length ? "Crews are ready to dig. Active states develop in this order:" : "No states have 6 lands yet, so nothing to develop this turn.", after.gameflow.stateOrder.map((id) => ({ state: id, text: `${rf.STATE_NAMES[id]}${before.states[id].isActive ? '' : ' · emerges this round'}` })))
 		}
 		if (before.rain.step === "harvest" && action?.type === "harvest") {
 			const id = before.rain.harvestOrder[0]

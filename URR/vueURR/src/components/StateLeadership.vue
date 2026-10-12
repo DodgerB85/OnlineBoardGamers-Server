@@ -6,7 +6,7 @@ defineProps({ change: { type: Object, required: true } })
 </script>
 
 <template>
-	<div class="leadershipChange"><img :src="assets.getStateOrderImage(change.id)" alt="" /><span>{{ rf.STATE_NAMES[change.id] }} · {{ change.hasEmerged ? 'Emerged' : change.isActive ? 'Monarch' : 'Ownership leader' }}<small v-if="change.hasEmerged && change.king === null">No monarch</small><small v-else-if="!change.hasEmerged"><PlayerMarker v-if="change.previousKing !== null" :index="change.previousKing" :name="change.previousName" /><template v-else>No leader</template> → <PlayerMarker v-if="change.king !== null" :index="change.king" :name="change.nextName" /><template v-else>No leader</template></small></span><PlayerMarker v-if="change.hasEmerged && change.king !== null" :index="change.king" :name="change.nextName" /></div>
+	<div class="leadershipChange"><img :src="assets.getStateOrderImage(change.id)" alt="" /><span>{{ rf.STATE_NAMES[change.id] }} · {{ change.hasEmerged ? 'Emerged' : change.isActive ? 'Monarch' : 'Leader changes' }}<small v-if="change.hasEmerged && change.king === null">No monarch</small><small v-else-if="!change.hasEmerged"><PlayerMarker v-if="change.previousKing !== null" :index="change.previousKing" :name="change.previousName" /><template v-else>nobody</template> → <PlayerMarker v-if="change.king !== null" :index="change.king" :name="change.nextName" /><template v-else>nobody</template></small></span><PlayerMarker v-if="change.hasEmerged && change.king !== null" :index="change.king" :name="change.nextName" /></div>
 </template>
 
 <style scoped>

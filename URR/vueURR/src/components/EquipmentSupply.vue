@@ -16,7 +16,7 @@ const nextEra = computed(() => purchaseEra.value > store.era ? purchaseEra.value
 			<span><b>Era {{ store.era === 5 ? 'M' : store.era }}</b> · {{ store.era === 5 ? 'Unlimited' : `${store.cardSupply[store.era]} left` }}</span>
 			<ArtworkCard :src="assets.getEquipmentCardImage(store.era)" :alt="`Era ${store.era === 5 ? 'M' : store.era} equipment`" />
 		</div>
-		<p v-if="nextEra !== null" class="eraTrigger"><template v-if="purchaseEra > store.era">Next purchase starts Era {{ nextEra === 5 ? 'M' : nextEra }}.</template><template v-else>Era {{ nextEra === 5 ? 'M' : nextEra }} starts with its first purchase, after this supply runs out.</template></p>
+		<p v-if="purchaseEra > store.era" class="eraTrigger">Next purchase starts Era {{ nextEra === 5 ? 'M' : nextEra }}.</p>
 		<details class="allEras">
 			<summary>All eras</summary>
 			<div class="eraCards">

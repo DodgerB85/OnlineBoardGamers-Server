@@ -52,7 +52,7 @@ export async function submitAction(action) {
 	const draft = store.turnDraft
 	if (!draft.start) { draft.start = checkpoint; draft.player = player }
 	const after = model.snapshotState()
-	draft.steps.push({ ...checkpoint, label: turnDraft.actionSummary(before, after, action) })
+	draft.steps.push({ ...checkpoint, label: turnDraft.actionSummary(before, after, action), action: JSON.parse(JSON.stringify(action)), player })
 	draft.ready = turnDraft.endsDecision(before, after, action)
 	draft.message = turnDraft.describeAction(before, after, action)
 	draft.pauseAutomatic = false
@@ -84,7 +84,31 @@ export function undoAction() {
 	if (!canReviewTurn() || !store.turnDraft.steps.length) return
 	const checkpoint = store.turnDraft.steps.pop()
 	restoreCheckpoint(checkpoint)
-	store.turnDraft.message = "Last action undone. Continue playing or reset the turn."
+	store.turnDraft.message = "Last action undone."
+}
+
+// Remove one choice from the draft by replaying the later ones without it; if they no longer fit, nothing changes.
+export async function removeDraftStep(index) {
+	const store = useModelStore()
+	const steps = store.turnDraft.steps
+	if (!canReviewTurn() || !steps[index]) return false
+	const backup = { state: model.snapshotState(), history: [...store.history], steps: [...steps], ready: store.turnDraft.ready }
+	const later = steps.slice(index + 1).map((step) => step.action)
+	const checkpoint = steps[index]
+	steps.splice(index)
+	restoreCheckpoint(checkpoint)
+	for (const action of later) {
+		if (await submitAction(action)) continue
+		model.restoreState(backup.state)
+		store.history.splice(0, store.history.length, ...backup.history)
+		steps.splice(0, steps.length, ...backup.steps)
+		store.turnDraft.ready = backup.ready
+		store.turnDraft.revision++
+		store.gameMessages.actionError = "That choice can't be removed because later choices depend on it. Undo those first."
+		return false
+	}
+	store.turnDraft.message = "Choice removed."
+	return true
 }
 
 export function resetTurn() {
@@ -96,7 +120,7 @@ export function resetTurn() {
 	store.viewSettings.actionIntent = ""
 	store.clearTurnDraft()
 	store.turnDraft.pauseAutomatic = true
-	store.turnDraft.message = "Turn reset. Your choices have not been committed."
+	store.turnDraft.message = "Turn reset."
 }
 
 export async function endPlayerTurn() {

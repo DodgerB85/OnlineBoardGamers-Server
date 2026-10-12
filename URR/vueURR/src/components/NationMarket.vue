@@ -37,7 +37,13 @@ function amountError(nation) {
 }
 function isAuction(nation) { return auction.value?.nation === nation.id }
 function nationState(nation) { return store.board.areas.find((area) => area.nation === nation.id).state }
-function bid(nation) { controller.submitAction({ type: "bidNation", nation: nation.id, amount: Number(amount(nation)) }) }
+let ending = false
+async function endTurnWith(action) {
+	if (ending || store.viewSettings.isSaving) return
+	ending = true
+	try { if (await controller.submitAction(action)) await controller.endPlayerTurn() } finally { ending = false }
+}
+function bid(nation) { return endTurnWith({ type: "bidNation", nation: nation.id, amount: Number(amount(nation)) }) }
 function adjustBid(nation, change) { amounts[nation.id] = Math.min(moneyForBid(nation), Math.max(minimum(nation), amount(nation) + change)) }
 watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.value], () => {
 	if (auction.value) amounts[auction.value.nation] = minimum(store.nations[auction.value.nation])
@@ -67,23 +73,23 @@ watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.val
 						<label :for="`nation-bid-${nation.id}`">{{ auction ? "Bid" : "Offer" }} SPL</label>
 						<input :id="`nation-bid-${nation.id}`" type="number" inputmode="numeric" :value="amount(nation)" @input="amounts[nation.id] = Number($event.target.value)" :min="minimum(nation)" :max="moneyForBid(nation)" step="1" required :disabled="!personal.canPlay()" />
 						<template v-if="nation.bids.length"><button v-for="increment in [1, 5, 10]" :key="increment" type="button" class="bidAdjustment" :aria-label="`Raise bid by ${increment} SPL`" :disabled="!personal.canPlay() || amount(nation) + increment > moneyForBid(nation)" @click="adjustBid(nation, increment)">+{{ increment }}</button></template>
-						<button :disabled="!personal.canPlay() || amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)">{{ auction ? "Bid" : "Make offer" }}</button>
+						<button :disabled="!personal.canPlay() || amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)">{{ auction ? "Bid" : "Make offer" }} &amp; End Turn</button>
 					</form>
 					<p v-if="!auction && treaty?.id !== nation.id && amountError(nation)" class="amountError" role="status">{{ amountError(nation) }}</p>
 				</template>
 				<div v-if="nation.ownerType === null && !auction && treaty?.id === nation.id" class="marketControls treatyControls">
-					<button class="primaryAction" :disabled="!personal.canPlay() || available < price(nation)" @click="controller.submitAction({ type: 'buyNation', nation: nation.id })">Buy for {{ price(nation) }} SPL</button>
-					<button class="passButton" :disabled="!personal.canPlay()" @click="controller.submitAction({ type: 'pass' })">Pass</button>
+					<button class="primaryAction" :disabled="!personal.canPlay() || available < price(nation)" @click="endTurnWith({ type: 'buyNation', nation: nation.id })">Buy for {{ price(nation) }} SPL &amp; End Turn</button>
+					<button class="passButton" :disabled="!personal.canPlay()" @click="endTurnWith({ type: 'pass' })">Pass &amp; End Turn</button>
 				</div>
 				<div v-if="nation.ownerType === null && isAuction(nation)" class="marketControls auctionControls">
 					<form @submit.prevent="bid(nation)">
 						<label :for="`nation-bid-${nation.id}`">Bid SPL</label>
 						<input :id="`nation-bid-${nation.id}`" type="number" inputmode="numeric" :value="amount(nation)" @input="amounts[nation.id] = Number($event.target.value)" :min="minimum(nation)" :max="moneyForBid(nation)" step="1" required :disabled="!personal.canPlay()" />
 						<button v-for="increment in [1, 5, 10]" :key="increment" type="button" class="bidAdjustment" :aria-label="`Raise bid by ${increment} SPL`" :disabled="!personal.canPlay() || amount(nation) + increment > moneyForBid(nation)" @click="adjustBid(nation, increment)">+{{ increment }}</button>
-						<button class="primaryAction" :disabled="!personal.canPlay() || amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)">Bid</button>
+						<button class="primaryAction" :disabled="!personal.canPlay() || amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)">Bid {{ amount(nation) }} SPL &amp; End Turn</button>
 					</form>
 					<p v-if="amountError(nation)" class="amountError" role="status">{{ amountError(nation) }}</p>
-					<button class="passButton" :disabled="!personal.canPlay()" @click="controller.submitAction({ type: 'pass' })">Withdraw</button>
+					<button class="passButton" :disabled="!personal.canPlay()" @click="endTurnWith({ type: 'pass' })">Withdraw &amp; End Turn</button>
 				</div>
 				</div>
 			</article>
