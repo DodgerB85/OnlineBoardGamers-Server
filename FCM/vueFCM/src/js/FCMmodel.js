@@ -312,7 +312,7 @@ export async function initGame() {
 			let decompressedData = funcs.decompressData(window.initData.moveData)
 			if (decompressedData[0] !== window.initData.name) {
 				alert(i18n.global.t("alerts.nameMatchError"))
-			} else {
+			} else if (decompressedData[3] && decompressedData[3].length === 3) {
 				store.players[personal.pov].beach = [...decompressedData[3][0]]
 				store.players[personal.pov].employees = [...decompressedData[3][1]]
 				if (decompressedData[3][2]) store.players[personal.pov].OOBpreference = decompressedData[3][2]

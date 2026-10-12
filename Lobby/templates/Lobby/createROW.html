@@ -85,7 +85,7 @@
                     <div class="check-list">
                         {% url "lobbyHelp" as the_url %}
                         <label class="check-label">
-                            <input type="checkbox" class="myCheckbox" id="trainingGame" name="trainingGame" value="102">
+                            <input type="checkbox" class="myCheckbox" id="trainingGame" name="trainingGame" value="102" onchange="selectPlayers();">
                             <div>
                                 <div>{% translate "Practice Game" %}</div>
                                 <div class="opt-help">{% blocktranslate trimmed %}Play all seats on the same device. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
@@ -218,9 +218,14 @@
     <script>
     function selectPlayers() {
         var maxPlayers = parseInt(document.getElementById("playerNumber").value);
+        var practice = document.getElementById("trainingGame").checked;
         for (var i = 2; i <= 4; i++) {
             var row = document.getElementById("selPlayer" + i);
             if (row) row.style.display = i <= maxPlayers ? "block" : "none";
+            var input = document.getElementById("player" + i);
+            if (!input) continue;
+            if (practice && i <= maxPlayers) input.value = i === 2 ? "SHADOW" : "SHADOW_" + (i - 1);
+            else if (/^SHADOW(_\d+)?$/.test(input.value)) input.value = "";
         }
     }
     function toggleSimmental() {
@@ -276,6 +281,7 @@
         document.getElementById("stationMasterPromos").checked = hasOpt(24);
         document.getElementById("building11").checked = hasOpt(25);
         document.getElementById("building13").checked = hasOpt(26);
+        if (hasOpt(102)) document.getElementById("trainingGame").checked = true;
         var automaDifficulty = hasOpt(27) ? "EASY" : hasOpt(28) ? "MEDIUM" : hasOpt(29) ? "HARD" : hasOpt(30) ? "VERY_HARD" : null;
         if (automaDifficulty) {
             document.getElementById("rowAI").checked = true;

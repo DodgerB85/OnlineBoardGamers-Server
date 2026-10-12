@@ -1696,9 +1696,11 @@ export function processSimulMoveData(data) {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminNameMismatchRestructuring")
 				sendDiscordWebhook(`JS ERROR: player name mismatch in PHASE_RESTRUCTURING - gameID: ${personal.gameID} player: ${store.players[i].name} decompressedData: ${JSON.stringify(decompressedData)}`)
 			}
-			if (content.length !== 3) {
+			// Blank entry (deleted/scaffolded) or wrong shape — no move to process
+			if (!content || content.length !== 3) {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminDataErrorRestructuring")
 				sendDiscordWebhook(`JS ERROR: data-error in PHASE_RESTRUCTURING - gameID: ${personal.gameID} player: ${store.players[i].name} decompressedData: ${JSON.stringify(decompressedData)}`)
+				continue
 			}
 
 			store.players[i].beach = content[0]
