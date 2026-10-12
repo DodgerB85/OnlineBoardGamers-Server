@@ -110,14 +110,7 @@ export const usePersonalStore = defineStore("personal", () => {
 	}
 
 	function getCorrectedColourHexForRestoBorder(colour) {
-		if (this.preferredColour > -1 && this.pov > -1) {
-			if (store.players[this.pov].colour === colour) {
-				colour = this.preferredColour
-			} else if (this.preferredColour === colour) {
-				colour = store.players[this.pov].colour
-			}
-		}
-
+		colour = getCorrectedColour.call(this, colour)
 		if (colour === 0) return "#c592a9"
 		if (colour === 1) return "#af272d"
 		if (colour === 2) return "#91c3c4"

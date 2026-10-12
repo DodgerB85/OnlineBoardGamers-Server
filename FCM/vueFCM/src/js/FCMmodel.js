@@ -122,10 +122,7 @@ export function setupNewGame(opts = {}) {
 	if (store.startingOptions.draftModules) store.gameflow.phase = rf.PHASE_SETUP_MODULES
 	if (store.startingOptions.urbanPlanning || store.startingOptions.urbanPlanningPlus) store.gameflow.phase = rf.PHASE_URBAN_PLANNING
 
-	store.availableMarketingCampaigns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14]
-	if (store.players.length > 2) store.availableMarketingCampaigns.push(12)
-	if (store.players.length > 3) store.availableMarketingCampaigns.push(15)
-	if (store.players.length > 4) store.availableMarketingCampaigns.push(16)
+	store.availableMarketingCampaigns = baseMarketingCampaigns(store.players.length)
 
 	store.availableEmployees = [...rf.ORIGINAL_AVAILABLE_EMPLOYEES]
 
@@ -160,12 +157,7 @@ export function setupNewGame(opts = {}) {
 
 	addHistory(rf.HIST_SETUP_GAME, [], -1, 0)
 
-	if (store.mapData.tiles.indexOf(20) > -1) {
-		let rotated = 0
-		if (store.mapData.tiles[store.mapData.tiles.indexOf(20) + 1] === 1 || store.mapData.tiles[store.mapData.tiles.indexOf(20) + 1] === 3) rotated = 1
-		let index = map.findIndexForHouse(25)
-		addHouse(25, index, rotated)
-	}
+	addHouse25IfTile20()
 }
 
 export async function initGame() {
@@ -435,6 +427,14 @@ export function maxUnique(playerNumber) {
 	return max
 }
 
+export function baseMarketingCampaigns(playerCount) {
+	const campaigns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14]
+	if (playerCount > 2) campaigns.push(12)
+	if (playerCount > 3) campaigns.push(15)
+	if (playerCount > 4) campaigns.push(16)
+	return campaigns
+}
+
 export function setupKetchupExpansion(playerNumber) {
 	const store = useModelStore()
 	let max = maxUnique(playerNumber)
@@ -688,6 +688,11 @@ export function removeMarketingCampaign(number) {
 // tiles (Manhattan distance `tileRange` in 5x5 tiles) around any of the
 // player's restaurants (waves ignore roads). The stadium is never affected
 // by marketing.
+// Board value of a house square (HOUSE + number) back to the house number
+function houseNumberAt(v) {
+	return Number.isInteger(v) ? v - rf.HOUSE : Math.round((v - rf.HOUSE + Number.EPSILON) * 100) / 100
+}
+
 export function giveHousesInWaveRange(playerIndex, tileRange = 2) {
 	const store = useModelStore()
 	// Media Line mod - the wave is measured from the restaurant doors: the
@@ -699,7 +704,7 @@ export function giveHousesInWaveRange(playerIndex, tileRange = 2) {
 	for (let i = 0; i < store.mapData.coords.length; i++) {
 		const v = store.mapData.coords[i]
 		if (v > rf.HOUSE && v < rf.HOUSE + 29) {
-			const house = Number.isInteger(v) ? v - rf.HOUSE : Math.round((v - rf.HOUSE + Number.EPSILON) * 100) / 100
+			const house = houseNumberAt(v)
 			if (house === rf.STADIUM) continue
 			if (region.has(i)) houses.add(house)
 		}
@@ -715,7 +720,7 @@ export function giveSpacesOfHouses(houses) {
 	for (let i = 0; i < store.mapData.coords.length; i++) {
 		const v = store.mapData.coords[i]
 		if (v > rf.HOUSE && v < rf.HOUSE + 29) {
-			const house = Number.isInteger(v) ? v - rf.HOUSE : Math.round((v - rf.HOUSE + Number.EPSILON) * 100) / 100
+			const house = houseNumberAt(v)
 			if (wanted.has(house)) spaces.push(i)
 		}
 	}
@@ -763,6 +768,17 @@ export function addHouse(number, index, rotated) {
 	})
 
 	map.addElement(rf.TYPE_HOUSE, number, index, rotated)
+}
+
+// House 25 sits on tile 20; re-add it after that tile is placed or the map is rebuilt
+export function addHouse25IfTile20() {
+	const store = useModelStore()
+	if (store.mapData.tiles.indexOf(20) > -1) {
+		let rotated = 0
+		if (store.mapData.tiles[store.mapData.tiles.indexOf(20) + 1] === 1 || store.mapData.tiles[store.mapData.tiles.indexOf(20) + 1] === 3) rotated = 1
+		let index = map.findIndexForHouse(25)
+		addHouse(25, index, rotated)
+	}
 }
 
 export function addNeedToHouse(good, house, ownerIndex) {
@@ -840,64 +856,36 @@ function getUsedBounds() {
 	}
 }
 
-export function isItemOnLeftOfBoard() {
+// Any off-board item (freeway / side-road) inside the given [r0,r1) x [c0,c1) squares
+function isOffBoardItemIn(r0, r1, c0, c1) {
 	const store = useModelStore()
 	const coords = store.mapData.coords
-	const b = getUsedBounds()
-	if (!b) return false
-	const ssW = rf.ssW
-	for (let r = b.rowStart; r < b.rowEnd; r++) {
-		for (let c = b.colStart - 5; c < b.colStart; c++) {
-			if (c < 0) continue
-			if (isOffBoardItem(coords[r * ssW + c])) return true
+	for (let r = Math.max(r0, 0); r < Math.min(r1, rf.ssH); r++) {
+		for (let c = Math.max(c0, 0); c < Math.min(c1, rf.ssW); c++) {
+			if (isOffBoardItem(coords[r * rf.ssW + c])) return true
 		}
 	}
 	return false
+}
+
+export function isItemOnLeftOfBoard() {
+	const b = getUsedBounds()
+	return b !== null && isOffBoardItemIn(b.rowStart, b.rowEnd, b.colStart - 5, b.colStart)
 }
 
 export function isItemOnRightOfBoard() {
-	const store = useModelStore()
-	const coords = store.mapData.coords
 	const b = getUsedBounds()
-	if (!b) return false
-	const ssW = rf.ssW
-	for (let r = b.rowStart; r < b.rowEnd; r++) {
-		for (let c = b.colEnd; c < b.colEnd + 5; c++) {
-			if (c >= ssW) continue
-			if (isOffBoardItem(coords[r * ssW + c])) return true
-		}
-	}
-	return false
+	return b !== null && isOffBoardItemIn(b.rowStart, b.rowEnd, b.colEnd, b.colEnd + 5)
 }
 
 export function isItemOnTopOfBoard() {
-	const store = useModelStore()
-	const coords = store.mapData.coords
 	const b = getUsedBounds()
-	if (!b) return false
-	const ssW = rf.ssW
-	for (let r = b.rowStart - 5; r < b.rowStart; r++) {
-		if (r < 0) continue
-		for (let c = b.colStart; c < b.colEnd; c++) {
-			if (isOffBoardItem(coords[r * ssW + c])) return true
-		}
-	}
-	return false
+	return b !== null && isOffBoardItemIn(b.rowStart - 5, b.rowStart, b.colStart, b.colEnd)
 }
 
 export function isItemOnBottomOfBoard() {
-	const store = useModelStore()
-	const coords = store.mapData.coords
 	const b = getUsedBounds()
-	if (!b) return false
-	const ssW = rf.ssW
-	for (let r = b.rowEnd; r < b.rowEnd + 5; r++) {
-		if (r >= rf.ssH) continue
-		for (let c = b.colStart; c < b.colEnd; c++) {
-			if (isOffBoardItem(coords[r * ssW + c])) return true
-		}
-	}
-	return false
+	return b !== null && isOffBoardItemIn(b.rowEnd, b.rowEnd + 5, b.colStart, b.colEnd)
 }
 
 export function alreadyChosenReserveCard() {
@@ -924,14 +912,7 @@ export function clearForNewTurn() {
 	})
 
 	// 2. Handle Hard Choices / New Milestones logic
-	const removedHC = []
-	if (store.startingOptions.hardChoices) {
-		if (turn === 2) removedHC.push(...rf.HC_OLD_MS_LEAVE_END_TURN_2)
-		if (turn === 3) removedHC.push(...rf.HC_OLD_MS_LEAVE_END_TURN_3)
-	} else if (store.startingOptions.newMilestones && turn === 2) {
-		removedHC.push(...rf.HC_NEW_MS_LEAVE_END_TURN_2)
-	}
-	if (removedHC.length > 0) usedMilestonesArray.push(...removedHC)
+	usedMilestonesArray.push(...rf.hardChoiceMilestonesLeaving(store.startingOptions, turn))
 
 	// 3. Optimized "Difference": Using a Set for O(1) lookups
 	const usedSet = new Set(usedMilestonesArray)
@@ -1041,15 +1022,10 @@ export function getAvailableCoffee(returnArray) {
 	return false
 }
 
-// number = house / apartment / RMA number
-export function getCoffeeRoute(number, playerIndex, winningRange) {
+// Squares around a house / apartment / RMA that a restaurant route must reach
+function zoneSquaresForHouse(number, index) {
 	const store = useModelStore()
-	const playerColour = store.players[playerIndex].colour
-	const restaurantSquares = getSinglePlayerRestaurantEntrances(playerIndex)
-	const index = map.findIndexForHouse(number)
 	let zone = []
-
-	// 1. Zone Calculation
 	if (number !== rf.RURAL_MARKETING_AREA) {
 		zone = [index + 1, index + rf.ssW, index + rf.ssW + 1]
 	}
@@ -1081,6 +1057,16 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 	if (number === rf.RURAL_MARKETING_AREA && store.freeways.length > 0) {
 		zone = map.getRuralMarketingZone()
 	}
+	return zone
+}
+
+// number = house / apartment / RMA number
+export function getCoffeeRoute(number, playerIndex, winningRange) {
+	const store = useModelStore()
+	const playerColour = store.players[playerIndex].colour
+	const restaurantSquares = getSinglePlayerRestaurantEntrances(playerIndex)
+	const index = map.findIndexForHouse(number)
+	const zone = zoneSquaresForHouse(number, index)
 	if (index !== -1) zone.push(index)
 
 	// 2. Generate and Filter Routes (Subset logic optimized)
@@ -1277,48 +1263,7 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 export function giveRestaurantRangesForHouse(number) {
 	const store = useModelStore()
 	const index = map.findIndexForHouse(number)
-	let zone = []
-
-	// 1. Initial Zone Setup
-	if (number !== rf.RURAL_MARKETING_AREA) {
-		zone = [index + 1, index + rf.ssW, index + rf.ssW + 1]
-	}
-
-	// 2. Garden Logic
-	if (hasGarden(number)) {
-		if (!rf.BOARD_HOUSES.includes(number)) {
-			const house = store.houses.find((h) => h.number === number)
-			if (house && (house.rotated === 1 || house.rotated === 3)) {
-				zone.push(index + 2, index + rf.ssW + 2)
-			} else {
-				zone.push(index + 2 * rf.ssW, index + 2 * rf.ssW + 1)
-			}
-		} else {
-			const g = store.gardens.find((garden) => garden.house === number)
-			if (g) {
-				const { index: gIdx } = g
-				if (gIdx === index - 1) {
-					zone.push(index - 1, index + rf.ssW - 1)
-				} else if (gIdx === index + 2) {
-					zone.push(index + 2, index + rf.ssW + 2)
-				} else if (gIdx === index - rf.ssW) {
-					zone.push(index - rf.ssW, index - rf.ssW + 1)
-				} else if (gIdx === index + 2 * rf.ssW) {
-					zone.push(index + 2 * rf.ssW, index + 2 * rf.ssW + 1)
-				}
-			}
-		}
-	}
-
-	// 3. Apartment logig
-	if (rf.APARTMENTS.includes(number)) {
-		zone.push(index + 2, index + rf.ssW + 2, index + 2 * rf.ssW, index + 2 * rf.ssW + 1, index + 2 * rf.ssW + 2)
-	}
-
-	// 4. Rural Marketing Overrides
-	if (number === rf.RURAL_MARKETING_AREA && store.freeways.length > 0) {
-		zone = map.getRuralMarketingZone()
-	}
+	const zone = zoneSquaresForHouse(number, index)
 
 	// 5. Distance Calculations
 	// Each res/t entry is keyed by playerIndex; -99 = unreachable
@@ -1389,8 +1334,7 @@ export function getHousesAffectedByHawkerTruck(campaignNumber) {
 
 		// Check if the space contains a house
 		if (spaceContent > rf.HOUSE && spaceContent < rf.HOUSE + 29) {
-			const rawHouseNum = spaceContent - rf.HOUSE
-			const houseNum = Number.isInteger(spaceContent) ? rawHouseNum : Math.round((rawHouseNum + Number.EPSILON) * 100) / 100
+			const houseNum = houseNumberAt(spaceContent)
 
 			// Handle Board Houses and Apartments (Simple check)
 			if (rf.BOARD_HOUSES.includes(houseNum) || rf.APARTMENTS.includes(houseNum)) {
@@ -1441,30 +1385,9 @@ export function hasGarden(house) {
 export function adjacentToPark(building) {
 	const store = useModelStore()
 	// building is the number of the bldg, eg 3.2, 9.7, 22
-	let adjacentToPark = false
-	let parkCheckArea
-	if (building != rf.RURAL_MARKETING_AREA) {
-		if (building === 3.2 || building === 9.7) {
-			let appZone = map.giveAllSpaceForAToken(map.findIndexForApartment(building), 3, 3)
-			parkCheckArea = map.neighbours(appZone)
-			for (let i = 0; i < parkCheckArea.length; i++) {
-				if (store.mapData.coords[parkCheckArea[i]] === rf.PARK) {
-					adjacentToPark = true
-					break
-				}
-			}
-		} else {
-			let houseZone = map.getZoneOfHouse(building)
-			parkCheckArea = map.neighbours(houseZone)
-			for (let i = 0; i < parkCheckArea.length; i++) {
-				if (store.mapData.coords[parkCheckArea[i]] === rf.PARK) {
-					adjacentToPark = true
-					break
-				}
-			}
-		}
-	}
-	return adjacentToPark
+	if (building == rf.RURAL_MARKETING_AREA) return false
+	const zone = building === 3.2 || building === 9.7 ? map.giveAllSpaceForAToken(map.findIndexForApartment(building), 3, 3) : map.getZoneOfHouse(building)
+	return map.neighbours(zone).some((i) => store.mapData.coords[i] === rf.PARK)
 }
 
 export function houseForThisGarden(index) {

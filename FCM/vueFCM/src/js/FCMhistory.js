@@ -25,10 +25,7 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 		let rotation = entry3.length > 2 ? entry3[2] : 1
 		if (rotation === true) rotation = 1
 		if (rotation === false) rotation = 0
-		const sideways = rotation === 1 || rotation === 3
-		const height = sideways ? 2 : 3
-		const width = sideways ? 3 : 2
-		for (let i = 0; i < height; i++) for (let j = 0; j < width; j++) squares.push(houseIndex + j + rf.ssW * i)
+		squares.push(...footprintSquares(houseIndex, rotation))
 	} else if (action === rf.HIST_BUILD_GARDEN) {
 		const gardenIndex = funcs.importIndex(entry3[0])
 		let rotated = true
@@ -92,15 +89,7 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 	} else if (action === rf.HIST_FLIP_TO_FRIED_CHICKEN || action === rf.HIST_HOUSE_MOVED_OUT) {
 		// Fried Chicken mod: highlight the affected house(s)
 		for (let h = 0; h < entry3.length; h++) {
-			const houseNumber = action === rf.HIST_HOUSE_MOVED_OUT ? entry3[h] : entry3[h][0]
-			const houseIndex = map.findIndexForHouse(houseNumber)
-			if (houseIndex === -1) continue
-			const houseData = store.houses.find((hs) => hs.number === houseNumber)
-			const rotation = houseData ? houseData.rotated : 1
-			const sideways = rotation === 1 || rotation === 3
-			const height = sideways ? 2 : 3
-			const width = sideways ? 3 : 2
-			for (let i = 0; i < height; i++) for (let j = 0; j < width; j++) squares.push(houseIndex + j + rf.ssW * i)
+			pushHouseFootprint(action === rf.HIST_HOUSE_MOVED_OUT ? entry3[h] : entry3[h][0], squares)
 		}
 	} else if (action === rf.HIST_STADIUM_ANNOUNCE || action === rf.HIST_STADIUM_RESULT) {
 		// Stadium mod: highlight the arena
@@ -178,9 +167,15 @@ function pushHouseFootprint(houseNumber, squares) {
 	const houseIndex = map.findIndexForHouse(houseNumber)
 	if (houseIndex === -1) return
 	const houseData = store.houses.find((hs) => hs.number === houseNumber)
-	const rotation = houseData ? houseData.rotated : 1
+	squares.push(...footprintSquares(houseIndex, houseData ? houseData.rotated : 1))
+}
+
+// Squares covered by a house whose top-left is index: 3 wide x 2 tall when sideways, else 2 x 3
+export function footprintSquares(index, rotation) {
 	const sideways = rotation === 1 || rotation === 3
 	const height = sideways ? 2 : 3
 	const width = sideways ? 3 : 2
-	for (let i = 0; i < height; i++) for (let j = 0; j < width; j++) squares.push(houseIndex + j + rf.ssW * i)
+	const squares = []
+	for (let i = 0; i < height; i++) for (let j = 0; j < width; j++) squares.push(index + j + rf.ssW * i)
+	return squares
 }
