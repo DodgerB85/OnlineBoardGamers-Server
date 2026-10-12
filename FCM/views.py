@@ -55,6 +55,12 @@ def log_expected_sync_reject(message):
     logger.warning(message)
 
 
+def _canActInGame(request, currentGame):
+    # Kicked players stay included: they can still chat and resign
+    username = request.user.username
+    return username in FCMsuperUsers or username in FCMadminUsers or currentGame.players.filter(player=request.user).exists()
+
+
 def _resolvePassKickoutTarget(request, currentGame, presenter, jsonData):
     """Validate a normal player's "keep the timed-out player in the game" skip.
 
@@ -659,6 +665,10 @@ def _processTurn(request):
 
     if currentGame.relatedMainTournament and request.user.username == "FCMtourneyAdmin":
         FCMsuperUsers.append("FCMtourneyAdmin")
+
+    # Spectators may poll loadNew; every other action mutates the game
+    if jsonData["action"] != "loadNew" and not _canActInGame(request, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
     # loads the latest game and updates latest-Update
     if jsonData["action"] == "loadNew":
@@ -1545,9 +1555,6 @@ def _processTurn(request):
         )
 
     elif jsonData["action"] == "loadRewind":
-        # If working day, clear move data now, to get rid of pre-prepared SALARY phase
-        if jsonData["phase"] == rfFCM.PHASE_WORKING_DAY:
-            presenter.clearAllMoveDataV2()
         currentRewindDataArray = load_rewind_data(currentGame)
         if len(currentRewindDataArray) == 0:
             return JsonResponse(
@@ -1564,6 +1571,10 @@ def _processTurn(request):
                 {"message": "<b>" + gettext("Permissions missing. Please reload the page and check again") + "</b>"},
                 safe=False,
             )
+
+        # If working day, clear move data now, to get rid of pre-prepared SALARY phase
+        if jsonData["phase"] == rfFCM.PHASE_WORKING_DAY:
+            presenter.clearAllMoveDataV2()
 
         # If there is any move data, simply clear it out and go back to the game
         if presenter.hasAnyPlayerMovedThisPhase(currentGame.phase):
@@ -1691,6 +1702,8 @@ def _processTurn(request):
         )
 
     elif jsonData["action"] == "adminKickout":
+        if request.user.username not in FCMsuperUsers and request.user.username not in FCMadminUsers:
+            return JsonResponse({"error": gettext("Permissions missing")}, status=403)
         # Check if old version is older than DB version, and if so, return
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
@@ -1838,6 +1851,8 @@ def _sendChatMessage(request):
             currentGame = Game.objects.get(id=game_id, gameCode="FCM")
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist")) from None
+        if not _canActInGame(request, currentGame):
+            return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
         presenter = cast("FCMpresenter", currentGame.presenter())
 
         currentChatData = []
@@ -1897,6 +1912,8 @@ def changeAssistance(request):
             currentGame = Game.objects.get(id=jsonData["gameID"], gameCode="FCM")
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist")) from None
+        if not _canActInGame(request, currentGame):
+            return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
         playerNumber = int(jsonData["playerNumber"])
         requiredLength = 3 * currentGame.maxPlayers
