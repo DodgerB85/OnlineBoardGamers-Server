@@ -126,6 +126,45 @@ describe("stadium map generation", () => {
 		// House lookup works
 		expect(mapMod.findIndexForHouse(rf.STADIUM)).toBeGreaterThan(-1)
 	})
+
+	it("measures restaurant range from the full arena footprint, not the anchor corner", () => {
+		let verified = false
+		for (let mapAttempt = 0; mapAttempt < 5 && !verified; mapAttempt++) {
+			const store = freshGame()
+			const anchor = mapMod.findIndexForHouse(rf.STADIUM)
+			const arenaCells = []
+			for (let i = 0; i < store.mapData.coords.length; i++) {
+				if (store.mapData.coords[i] === rf.HOUSE + rf.STADIUM) arenaCells.push(i)
+			}
+			// The arena cell furthest from the generic 2x2 zone the old code measured from
+			const centre = arenaCells.reduce((a, b) => (Math.abs(b - anchor) > Math.abs(a - anchor) ? b : a))
+			const oldZone = [anchor, anchor + 1, anchor + rf.ssW, anchor + rf.ssW + 1]
+			if (oldZone.includes(centre)) continue
+
+			// Place a restaurant on the ring road next to that far-side cell
+			for (let dy = -2; dy <= 2 && !verified; dy++) {
+				for (let dx = -3; dx <= 3 && !verified; dx++) {
+					const index = centre + dy * rf.ssW + dx
+					if (index < 0 || index >= store.mapData.coords.length) continue
+					for (let rotation = 0; rotation < 4 && !verified; rotation++) {
+						mapMod.addElement(rf.TYPE_RESTAURANT, store.players[0].colour, index, false)
+						store.players[0].restaurants.push({ index, rotation, open: true })
+						const d = model.giveRestaurantRangesForHouse(rf.STADIUM)[0]
+						if (d !== -99 && d !== undefined) {
+							// Pre-fix (anchor 2x2 only) this far-side spot measured 3+ crossings;
+							// from the true nearest arena cell it is at most 2
+							expect(d).toBeLessThanOrEqual(2)
+							verified = true
+						} else {
+							store.players[0].restaurants.pop()
+							mapMod.addElement(rf.TYPE_RESTAURANT, store.players[0].colour, index, false, true)
+						}
+					}
+				}
+			}
+		}
+		expect(verified).toBe(true)
+	})
 })
 
 describe("stadium announcement schedule", () => {
@@ -241,6 +280,44 @@ describe("stadium game day settlement", () => {
 		expect(store.needs.some((n) => n.number === rf.STADIUM)).toBe(false)
 		expect(store.stadium.gamesPlayed).toBe(0)
 		expect(store.stadium.announcement).not.toBeNull()
+	})
+
+	it("game-day sale triggers the coffee module for shops on the delivery route", () => {
+		let sold = false
+		for (let mapAttempt = 0; mapAttempt < 3 && !sold; mapAttempt++) {
+			const store = freshGame(2, [rf.SO_COFFEE, "47"])
+			const stadiumIndex = mapMod.findIndexForHouse(rf.STADIUM)
+			if (!tryPlaceRestaurantNear(store, 0, stadiumIndex)) continue
+
+			// Seed a stocked shop on empty land next to a road that every
+			// surviving delivery route walks (getCoffeeRoute's common
+			// squares) - a real-game-legal spot that must sell on game day.
+			const winnerDist = model.giveRestaurantRangesForHouse(rf.STADIUM)[0]
+			const commonSquares = model.getCoffeeRoute(rf.STADIUM, 0, winnerDist)[1]
+			const candidates = []
+			for (const r of commonSquares) {
+				for (const s of [r + 1, r - 1, r + rf.ssW, r - rf.ssW]) {
+					if (s >= 0 && s < store.mapData.coords.length && store.mapData.coords[s] === rf.EMPTY_SPACE && !candidates.includes(s)) candidates.push(s)
+				}
+			}
+
+			for (const shop of candidates) {
+				store.stadium.gamesPlayed = 0
+				store.stadium.announcement = { gameNumber: 1, food: rf.PIZZA, units: 6 }
+				store.players[0].resources = Array(6).fill(rf.PIZZA)
+				store.players[1].coffeeShops = [shop]
+				store.mapData.coords[shop] = 160 + store.players[1].colour
+				store.players[1].resources = [rf.COFFEE, rf.COFFEE]
+				const before = store.players[1].money
+				rules.doDinnerTime(false)
+				if (store.players[1].money > before) {
+					sold = true
+					break
+				}
+				store.mapData.coords[shop] = rf.EMPTY_SPACE
+			}
+		}
+		expect(sold).toBe(true)
 	})
 
 	it("after game 1 is won, the next announcement is created at the end of the same turn (end to end)", () => {

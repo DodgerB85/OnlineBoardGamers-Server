@@ -1085,6 +1085,16 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 	}
 	if (index !== -1) zone.push(index)
 
+	// Stadium mod: the arena is a 24-cell pseudo-house - seed routes from every
+	// arena square, not just the generic 2x2 at its anchor corner (same
+	// footprint scan the history arena highlight uses)
+	if (number === rf.STADIUM) {
+		zone = []
+		for (let i = 0; i < store.mapData.coords.length; i++) {
+			if (store.mapData.coords[i] === rf.HOUSE + rf.STADIUM) zone.push(i)
+		}
+	}
+
 	// 2. Generate and Filter Routes (Subset logic optimized)
 	let possibleRoutes = []
 	for (const space of zone) {
@@ -1320,6 +1330,16 @@ export function giveRestaurantRangesForHouse(number) {
 	// 4. Rural Marketing Overrides
 	if (number === rf.RURAL_MARKETING_AREA && store.freeways.length > 0) {
 		zone = map.getRuralMarketingZone()
+	}
+
+	// Stadium mod: the arena spans 24 cells over two tiles - measure from the
+	// nearest arena cell instead of the generic 2x2 at its anchor corner, so
+	// every restaurant on the ring road counts its true (crossing) distance
+	if (number === rf.STADIUM) {
+		zone = []
+		for (let i = 0; i < store.mapData.coords.length; i++) {
+			if (store.mapData.coords[i] === rf.HOUSE + rf.STADIUM) zone.push(i)
+		}
 	}
 
 	// 5. Distance Calculations

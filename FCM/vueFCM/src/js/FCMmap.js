@@ -1684,6 +1684,17 @@ export function getZoneOfHouse(houseNumber) {
 	const mapWidth = rf.ssW
 	const index = findIndexForHouse(houseNumber)
 
+	// Stadium mod: the arena is a 24-cell pseudo-house - zone out its full
+	// footprint instead of the generic 2x2 at its anchor corner (no garden
+	// logic needed, the arena never has one)
+	if (houseNumber === rf.STADIUM) {
+		const arenaZone = []
+		for (let i = 0; i < store.mapData.coords.length; i++) {
+			if (store.mapData.coords[i] === rf.HOUSE + rf.STADIUM) arenaZone.push(i)
+		}
+		return arenaZone
+	}
+
 	// 1. Initialize the base 2x2 house zone
 	let zone = []
 	if (houseNumber !== rf.RURAL_MARKETING_AREA) {
