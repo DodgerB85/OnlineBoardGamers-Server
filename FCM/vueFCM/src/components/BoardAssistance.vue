@@ -88,6 +88,10 @@ const totalBoardNeeds = computed(() => {
 	for (const need of store.needs) {
 		for (const n of need.needs) sums[n[0]]++
 	}
+	// Stadium mod: game-day demand only lives inside doDinnerTime's run, so
+	// derive it from the announcement (same gate as the map arena token)
+	const stadiumDemand = rules.stadiumGameDayDemand()
+	if (stadiumDemand) sums[stadiumDemand.food] += stadiumDemand.units
 	return foodSumGoods(sums)
 })
 
