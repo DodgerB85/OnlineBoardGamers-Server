@@ -40,7 +40,7 @@ const show = ref(false)
 				<div class="milestoneTitle">{{ rf.MILESTONES_STR[milestoneId].title.toUpperCase() }}</div>
 				<div class="milestoneText">{{ rf.MILESTONES_STR[milestoneId].description }}</div>
 				<div class="milestoneSpacer">&nbsp;</div>
-				<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[milestoneId].img)" :class="rf.MILESTONES_STR[milestoneId].additionalClass ? rf.MILESTONES_STR[milestoneId].additionalClass : ''" />
+				<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[milestoneId].img)" :class="rf.MILESTONES_STR[milestoneId].additionalClass" />
 			</div>
 		</div>
 	</span>

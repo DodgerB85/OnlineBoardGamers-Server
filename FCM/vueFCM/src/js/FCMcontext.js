@@ -86,7 +86,6 @@ export function resetContext() {
 
 	// New stuff
 	store.context.restaurantMilestone = false
-	store.context.noMoreRestaurants = false
 	store.context.nightShift = false
 	store.context.nightShiftCampaign = false
 	store.context.from = -1

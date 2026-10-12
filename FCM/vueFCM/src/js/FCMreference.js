@@ -716,7 +716,6 @@ export const ROAD = 1
 export const DRINK_BEER = 2
 export const DRINK_COKE = 3
 export const DRINK_LEMONADE = 4
-//export const ROADWORKS = 5 // Not used - use ROAD_UC
 export const ROAD_UC = 6
 export const PARK = 7
 export const FREEWAY = 8
@@ -803,6 +802,17 @@ export const HC_OLD_MS_LEAVE_END_TURN_2 = [FIRST_BURGER_MARKETED, FIRST_PIZZA_MA
 export const HC_OLD_MS_LEAVE_END_TURN_3 = [FIRST_HIRE_3]
 
 export const HC_NEW_MS_LEAVE_END_TURN_2 = [FIRST_MARKETEER_USED, FIRST_TRAINER_USED, FIRST_RECRUITING_GIRL_USED]
+
+// Milestones that leave the board at the end of `turn` (fresh array, callers may keep it)
+export function hardChoiceMilestonesLeaving(startingOptions, turn) {
+	if (startingOptions.hardChoices) {
+		if (turn === 2) return [...HC_OLD_MS_LEAVE_END_TURN_2]
+		if (turn === 3) return [...HC_OLD_MS_LEAVE_END_TURN_3]
+		return []
+	}
+	if (startingOptions.newMilestones && turn === 2) return [...HC_NEW_MS_LEAVE_END_TURN_2]
+	return []
+}
 
 export const ADD_RESTO = 1
 export const ADD_RESTO_WD = 2

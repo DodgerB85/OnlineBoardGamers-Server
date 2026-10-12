@@ -33,7 +33,7 @@ export function generatePaydayDefaultMove(playerIndex) {
 
 	if (due === 0) return [[-8], [-9]]
 
-	let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+	let unitarySalary = plyr.unitarySalary(playerIndex)
 	let fired = []
 	const payableWithFood = rules.baseSalary(playerIndex)
 	let remaining = due
@@ -94,7 +94,7 @@ export function passKickout() {
 			// endPlayerTurn reads justFired and the live employee list, exactly
 			// as a played turn would. Mirrors localFireEmployee.
 			const paydayMove = generatePaydayDefaultMove(timedOutPlayerIndex)
-			const fired = paydayMove[0].length > 0 && paydayMove[0][0] >= 0 ? paydayMove[0] : []
+			const fired = paydayMove[0][0] >= 0 ? paydayMove[0] : []
 			for (const token of fired) {
 				if (plyr.fireEmployee(timedOutPlayerIndex, token)) {
 					store.availableEmployees[rf.decodeFiredEmployee(token)]++

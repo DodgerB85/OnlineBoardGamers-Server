@@ -175,8 +175,6 @@ function buildMarketers(playerIndex, player) {
 			continue
 		}
 		const campaignObj = store.campaigns.find((obj) => obj.number === m.campaign)
-		// Show the billboard number (vanilla IDs double as it; B-line TV/phone
-		// slots map to their insert numbers 3.5/4.5/6.5/6.6/...)
 		const entry = { campaign: rules.campaignSortKey(m.campaign), infinite: campaignObj.duration === 9, goods: [] }
 		if (campaignObj.duration === 9) {
 			entry.goods.push({ good: campaignObj.good, copies: 1 })
@@ -304,9 +302,9 @@ function buildProduction(playerIndex, player) {
 /* ---------------- Gourmet Food Critics ---------------- */
 const gourmetUsed = computed(() => store.startingOptions.gourmet)
 
-const gfcCampaigns = computed(() => {
-	return store.campaigns
-		.filter((c) => rf.MARKETING_CAMPAIGNS[c.number]?.type === rf.GOURMET_GUIDE)
+const campaignsOfType = (type) =>
+	store.campaigns
+		.filter((c) => rf.MARKETING_CAMPAIGNS[c.number]?.type === type)
 		.map((c) => ({
 			number: c.number,
 			good: c.good,
@@ -314,22 +312,12 @@ const gfcCampaigns = computed(() => {
 			campaignImg: view.getImage("campaign_" + c.number),
 			foodImg: view.getImage("item_" + c.good),
 		}))
-})
+const gfcCampaigns = computed(() => campaignsOfType(rf.GOURMET_GUIDE))
 
 /* ---------------- Hawker Trucks ---------------- */
 const useHawkerTrucks = computed(() => store.startingOptions.hawkers)
 
-const hawkerCampaigns = computed(() => {
-	return store.campaigns
-		.filter((c) => rf.MARKETING_CAMPAIGNS[c.number]?.type === rf.HAWKER_TRUCK)
-		.map((c) => ({
-			number: c.number,
-			good: c.good,
-			duration: c.duration,
-			campaignImg: view.getImage("campaign_" + c.number),
-			foodImg: view.getImage("item_" + c.good),
-		}))
-})
+const hawkerCampaigns = computed(() => campaignsOfType(rf.HAWKER_TRUCK))
 
 function showHawkerRoute(campaignNumber) {
 	// Toggle off if already showing this route
@@ -364,7 +352,7 @@ const useStadium = computed(() => store.startingOptions.stadium)
 const stadiumAnnouncement = computed(() => {
 	const a = store.stadium.announcement
 	if (a === null) return null
-	const gameTurn = 5 + store.stadium.gamesPlayed * 3
+	const gameTurn = rules.stadiumGameTurn(store.stadium.gamesPlayed)
 	let lead = 2
 	if (personal.pov >= 0 && plyr.hasMilestone(personal.pov, rf.FIRST_STADIUM_SOLD)) lead = 3
 	if (store.gameflow.turn < gameTurn - lead + 1) return null
@@ -382,7 +370,7 @@ const headlineBoard = computed(() => {
 	if (tonight === 0 && today.length === 0) return null
 	return {
 		hasEffect: tonight !== 0,
-		tonightStr: tonight > 0 ? "+" + tonight : "" + tonight,
+		tonightStr: (tonight > 0 ? "+" : "") + tonight,
 		today: today.map((h) => ({ up: h.value > 0, img: view.getImage(h.value > 0 ? "headline_prime" : "headline_press") })),
 	}
 })
@@ -408,8 +396,8 @@ const rmaCampaigns = computed(() => {
 		.filter((c) => rf.MARKETING_CAMPAIGNS[c.number]?.type === rf.GIANT_BILLBOARD)
 		.map((c) => {
 			const idx = c.number - 21
-			const bb = GIANT_BILLBOARD_COORDS[idx] || [0, 0]
-			const bi = GIANT_BILLBOARD_ITEM_COORDS[idx] || [0, 0]
+			const bb = GIANT_BILLBOARD_COORDS[idx]
+			const bi = GIANT_BILLBOARD_ITEM_COORDS[idx]
 			let itemLeft = bi[0]
 			if (c.good === rf.BEER) itemLeft += 11
 			if (c.good === rf.COKE) itemLeft += 9
@@ -441,7 +429,7 @@ const RMA_DEMAND_COORDS = [
 
 const rmaDemands = computed(() => {
 	const rmaNeed = store.needs.find((n) => n.number === rf.RURAL_MARKETING_AREA)
-	if (!rmaNeed || !rmaNeed.needs) return []
+	if (!rmaNeed) return []
 
 	const combined = [0, 0, 0, 0, 0, 0]
 	for (const [good] of rmaNeed.needs) combined[good === rf.DUMPLING ? 5 : good]++
@@ -1080,16 +1068,6 @@ const playerRows = computed(() => {
 
 .fixedCampaign img.campaign.w2 {
 	width: 80px;
-}
-
-.fixedCampaign div.inner {
-	position: absolute;
-	bottom: 0;
-	width: 100%;
-	height: 40px;
-	line-height: 40px;
-	color: #fff;
-	font-size: 20px;
 }
 
 .fixedCampaign div.innerGFM {

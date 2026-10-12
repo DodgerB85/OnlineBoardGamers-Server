@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
-from Lobby.models import Game, User
+from Lobby.models import Game, GamePlayer, User
 
 
 def rewind_list(game):
@@ -25,6 +25,7 @@ class FcmRewindTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user("rewindtester", "r@example.com", "pw")
         self.game = Game.objects.create(gameCode="FCM", creator=self.user, host=self.user, gameStatus="ACTIVE", gameData="STATE-0", startingMap="")
+        GamePlayer.objects.create(game=self.game, player=self.user, seat_order=0)
         self.url = reverse("FCM:processTurn")
 
     def _save(self, save_rewind, new_state):

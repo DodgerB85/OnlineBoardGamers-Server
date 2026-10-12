@@ -30,6 +30,12 @@ export function getFlexiKickoutTImerText() {
 	return hoursToGo + ":" + minsToGo + ":" + secsToGo
 }
 
+function blinkRed(el, blink) {
+	if (!el) return
+	if (blink) el.classList.toggle("redText")
+	else el.classList.remove("redText")
+}
+
 export function kickoutTimerTicker() {
 	const personal = usePersonalStore()
 	if (personal.trainingGame) {
@@ -40,15 +46,7 @@ export function kickoutTimerTicker() {
 		clearInterval(personal.kickoutCountdownIntervalTimer)
 	} else {
 		personal.secondsToNextKickout--
-		let el = document.getElementById("kickoutTimerTimer")
-		if (el) {
-			if (personal.secondsToNextKickout < 60) {
-				if (el.classList.contains("redText")) el.classList.remove("redText")
-				else el.classList.add("redText")
-			} else {
-				el.classList.remove("redText")
-			}
-		}
+		blinkRed(document.getElementById("kickoutTimerTimer"), personal.secondsToNextKickout < 60)
 		if (personal.secondsToNextKickout < 0) personal.secondsToNextKickout = 0
 	}
 }
@@ -60,16 +58,15 @@ export function kickoutFlexiTimerTicker() {
 		return
 	}
 	personal.flexiSecondsToNextKickout--
-	let el = document.getElementById("flexiKickoutTimerSpan")
-	if (el) {
-		if (personal.flexiSecondsToNextKickout < 60) {
-			if (el.classList.contains("redText")) el.classList.remove("redText")
-			else el.classList.add("redText")
-		} else {
-			el.classList.remove("redText")
-		}
-	}
+	blinkRed(document.getElementById("flexiKickoutTimerSpan"), personal.flexiSecondsToNextKickout < 60)
 	if (personal.flexiSecondsToNextKickout < 0) personal.flexiSecondsToNextKickout = 0
+}
+
+export function fitHeightToFooter(el) {
+	const cs = getComputedStyle(el)
+	const b = document.getElementById("footer").getBoundingClientRect().top
+	const a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+	el.style["max-height"] = String(parseInt(b - a)) + "px"
 }
 
 export function phaseStr(phase) {
@@ -491,81 +488,41 @@ export function getXYforSmallSquare(index, usedRowCol) {
 }
 
 // Board food tokens - picks the high contrast variant when the user has that setting
-export function giveBoardFoodTokenImage(good) {
-	const highContrast = window.initData.highContrastBoardItems
-	let name = ""
-	if (highContrast) {
-		switch (good) {
-			case rf.BURGER:
-				name = "burger_board2.png"
-				break
-			case rf.PIZZA:
-				name = "pizza_board2.png"
-				break
-			case rf.BEER:
-				name = "beer_board2.png"
-				break
-			case rf.COKE:
-				name = "coke_board2.png"
-				break
-			case rf.LEMONADE:
-				name = "juice_board2.png"
-				break
-			case rf.COFFEE:
-				name = "coffee_board.png"
-				break
-			case rf.SUSHI:
-				name = "sushi_board.png"
-				break
-			case rf.NOODLES:
-				name = "noodles_board.png"
-				break
-			case rf.KIMCHI:
-				name = "kimchi_board.png"
-				break
-			case rf.DUMPLING:
-				name = "dumpling_board.png"
-				break
-			case rf.FRIED_CHICKEN:
-				name = "fried_chicken_board.png"
-				break
-		}
-	} else {
-		switch (good) {
-			case rf.BURGER:
-				name = "burger_board.png"
-				break
-			case rf.PIZZA:
-				name = "pizza_board.png"
-				break
-			case rf.BEER:
-				name = "beer_board.png"
-				break
-			case rf.COKE:
-				name = "coke_board.png"
-				break
-			case rf.LEMONADE:
-				name = "juice_board.png"
-				break
-			case rf.COFFEE:
-				name = "coffee_board.png"
-				break
-			case rf.SUSHI:
-				name = "sushi_board.png"
-				break
-			case rf.NOODLES:
-				name = "noodles_board.png"
-				break
-			case rf.KIMCHI:
-				name = "kimchi_board.png"
-				break
-			case rf.DUMPLING:
-				name = "dumpling_board.png"
-				break
-			case rf.FRIED_CHICKEN:
-				name = "fried_chicken_board.png"
-				break
-		}
+// Board food token sizing - beer/coke halved, lemonade reduced
+export function boardTokenStyle(good, x, y, width) {
+	if (good === rf.BEER || good === rf.COKE) {
+		x += width / 4.5
+		width /= 2
+	} else if (good === rf.LEMONADE) {
+		x += width / 5
+		width /= 1.5
 	}
-	return new URL(`../../../static/FCM/images/` + name, import.meta.url).href
+	return { left: x + "px", top: y + "px", width: width + "px" }
+}
+
+const BOARD_FOOD_IMAGES = {
+	[rf.BURGER]: "burger_board.png",
+	[rf.PIZZA]: "pizza_board.png",
+	[rf.BEER]: "beer_board.png",
+	[rf.COKE]: "coke_board.png",
+	[rf.LEMONADE]: "juice_board.png",
+	[rf.COFFEE]: "coffee_board.png",
+	[rf.SUSHI]: "sushi_board.png",
+	[rf.NOODLES]: "noodles_board.png",
+	[rf.KIMCHI]: "kimchi_board.png",
+	[rf.DUMPLING]: "dumpling_board.png",
+	[rf.FRIED_CHICKEN]: "fried_chicken_board.png",
+}
+const BOARD_FOOD_IMAGES_HIGH_CONTRAST = {
+	...BOARD_FOOD_IMAGES,
+	[rf.BURGER]: "burger_board2.png",
+	[rf.PIZZA]: "pizza_board2.png",
+	[rf.BEER]: "beer_board2.png",
+	[rf.COKE]: "coke_board2.png",
+	[rf.LEMONADE]: "juice_board2.png",
+}
+
+export function giveBoardFoodTokenImage(good) {
+	const images = window.initData.highContrastBoardItems ? BOARD_FOOD_IMAGES_HIGH_CONTRAST : BOARD_FOOD_IMAGES
+	return new URL(`../../../static/FCM/images/` + (images[good] ?? ""), import.meta.url).href
 }

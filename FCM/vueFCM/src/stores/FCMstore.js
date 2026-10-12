@@ -433,13 +433,7 @@ export const useModelStore = defineStore("store", () => {
 				turnAtEntry++
 				// clearForNewTurn runs during cleanup when turn is still (turnAtEntry - 1)
 				const prevTurn = turnAtEntry - 1
-			const hcRemoved = []
-			if (startingOptions.hardChoices) {
-				if (prevTurn === 2) hcRemoved.push(...rf.HC_OLD_MS_LEAVE_END_TURN_2)
-				if (prevTurn === 3) hcRemoved.push(...rf.HC_OLD_MS_LEAVE_END_TURN_3)
-			} else if (startingOptions.newMilestones && prevTurn === 2) {
-				hcRemoved.push(...rf.HC_NEW_MS_LEAVE_END_TURN_2)
-			}
+				const hcRemoved = rf.hardChoiceMilestonesLeaving(startingOptions, prevTurn)
 				if (hcRemoved.length > 0) {
 					result.push([rf.HIST_REMOVE_HC_MS, hcRemoved, -1, 0])
 				}

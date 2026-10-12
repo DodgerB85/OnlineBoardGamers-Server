@@ -19,14 +19,30 @@ import { usePersonalStore } from "../stores/FCMpersonal.js"
 
 function restartKickoutTimers() {
 	const personal = usePersonalStore()
-	if (personal.kickoutCountdownIntervalTimer != null) clearInterval(personal.kickoutCountdownIntervalTimer)
-	if (personal.flexiKickoutCountdownIntervalTimer != null) clearInterval(personal.flexiKickoutCountdownIntervalTimer)
+	clearInterval(personal.kickoutCountdownIntervalTimer)
+	clearInterval(personal.flexiKickoutCountdownIntervalTimer)
 	if (personal.secondsToNextKickout <= 1200) {
 		personal.kickoutCountdownIntervalTimer = setInterval(view.kickoutTimerTicker, 1000)
 	}
 	if (personal.kickoutRequired === 1 && personal.secondsToNextKickout <= 1200) {
 		personal.flexiKickoutCountdownIntervalTimer = setInterval(view.kickoutFlexiTimerTicker, 1000)
 	}
+}
+
+async function throwIfNotOk(response) {
+	if (response.ok) return
+	const errorData = await response.json() // Assuming the server returns JSON error data
+	throw new Error(errorData.error || "Network response was not ok")
+}
+
+function reportSaveError(label, payloadInfo, error) {
+	const personal = usePersonalStore()
+	const gameInfo = `Game ${personal.gameID} - User ${personal.name || "unknown"} - ${payloadInfo}`
+	const errorName = error && error.name ? error.name : "Error"
+	const errorMsg = error && error.message ? error.message : String(error)
+	const errorStack = error && error.stack ? String(error.stack).substring(0, 1200) : "no stack"
+	const browserInfo = typeof navigator !== "undefined" ? navigator.userAgent : "unknown UA"
+	sendDiscordWebhook(`${label} - ${gameInfo}: [${errorName}] ${errorMsg} | UA: ${browserInfo} | stack: ${errorStack}`)
 }
 
 /***** PRE-MOVES
@@ -70,6 +86,7 @@ export function deleteMoveData() {
 		method: "POST",
 		body: JSON.stringify({
 			action: "deleteMoveData",
+			latestUpdate: personal.latestUpdate,
 			gameID: personal.gameID,
 			phase: store.gameflow.phase,
 		}),
@@ -77,7 +94,9 @@ export function deleteMoveData() {
 	})
 		.then((response) => response.json())
 		.then((result) => {
-			if (result.result === 2) {
+			if (result.syncError) {
+				store.gameMessages.errorText = i18n.global.t("FCM_IO.olderVersionRefresh")
+			} else if (result.result === 2) {
 				//store.gameMessages.successText = "<b>Save Successful</b> "
 			} else {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.saveErrorSST")
@@ -154,6 +173,7 @@ export async function saveAndUpdateNotifictions(playerIndexesToNotify, referring
 			method: "POST",
 			body: JSON.stringify({
 				action: "saveAndUpdateNotifictions",
+				latestUpdate: personal.latestUpdate,
 				gameID: personal.gameID,
 				data: funcs.exportFCMmodel(false, false),
 				playerIndexesToNotify: playerIndexesToNotify,
@@ -161,12 +181,14 @@ export async function saveAndUpdateNotifictions(playerIndexesToNotify, referring
 			}),
 			headers: { "X-CSRFToken": csrftoken },
 		})
-		if (!response.ok) {
-			const errorData = await response.json() // Assuming the server returns JSON error data
-			const errorMessage = errorData.error || "Network response was not ok"
-			throw new Error(errorMessage)
-		}
+		await throwIfNotOk(response)
 		let _result = await response.json()
+
+		if (_result.syncError) {
+			store.gameMessages.errorText = i18n.global.t("FCM_IO.olderVersionRefresh")
+			store.viewSettings.showGameLoader = false
+			return
+		}
 
 		store.viewSettings.showGameLoader = false
 		
@@ -176,13 +198,7 @@ export async function saveAndUpdateNotifictions(playerIndexesToNotify, referring
 	} catch (error) {
 		console.error("Error fetching data:", error)
 		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
-		const payloadInfo = `referringPhase=${referringPhase}, LU=${personal.latestUpdate}`
-		const gameInfo = `Game ${personal.gameID} - User ${personal.name || "unknown"} - ${payloadInfo}`
-		const errorName = error && error.name ? error.name : "Error"
-		const errorMsg = error && error.message ? error.message : String(error)
-		const errorStack = error && error.stack ? String(error.stack).substring(0, 1200) : "no stack"
-		const browserInfo = typeof navigator !== "undefined" ? navigator.userAgent : "unknown UA"
-		sendDiscordWebhook(`FCM save and notify error - ${gameInfo}: [${errorName}] ${errorMsg} | UA: ${browserInfo} | stack: ${errorStack}`)
+		reportSaveError("FCM save and notify error", `referringPhase=${referringPhase}, LU=${personal.latestUpdate}`, error)
 	}
 }
 
@@ -486,7 +502,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 		...extraPostData,
 	}
 
-	if ((window.initData.gameData === "" || !window.initData.gameData) && store.gameflow.turn === 0) {
+	if (!window.initData.gameData && store.gameflow.turn === 0) {
 		//postData.mapTiles = map.getOriginalTiles(false)
 		window.initData.startingMap = map.getOriginalTiles(false)
 	}
@@ -546,11 +562,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 			body: JSON.stringify(postData),
 			headers: { "X-CSRFToken": csrftoken },
 		})
-		if (!response.ok) {
-			const errorData = await response.json() // Assuming the server returns JSON error data
-			const errorMessage = errorData.error || "Network response was not ok"
-			throw new Error(errorMessage)
-		}
+		await throwIfNotOk(response)
 		result = await response.json()
 
 		if (result.latestUpdate > parseInt(personal.latestUpdate)) personal.latestUpdate = String(result.latestUpdate)
@@ -703,13 +715,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 		console.error("Error fetching data:", error)
 		personal.haltPlay = false
 		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
-		const payloadInfo = `turn=${store.gameflow.turn}, phase=${store.gameflow.phase}, LU=${postData.latestUpdate}, nextPlayer=${postData.nextPlayer?.[0] || "none"}`
-		const gameInfo = `Game ${personal.gameID} - User ${personal.name || "unknown"} - ${payloadInfo}`
-		const errorName = error && error.name ? error.name : "Error"
-		const errorMsg = error && error.message ? error.message : String(error)
-		const errorStack = error && error.stack ? String(error.stack).substring(0, 1200) : "no stack"
-		const browserInfo = typeof navigator !== "undefined" ? navigator.userAgent : "unknown UA"
-		sendDiscordWebhook(`FCM save error - ${gameInfo}: [${errorName}] ${errorMsg} | UA: ${browserInfo} | stack: ${errorStack}`)
+		reportSaveError("FCM save error", `turn=${store.gameflow.turn}, phase=${store.gameflow.phase}, LU=${postData.latestUpdate}, nextPlayer=${postData.nextPlayer?.[0] || "none"}`, error)
 	}
 }
 
@@ -739,11 +745,7 @@ export async function savePreTurn(preMoveDataRaw) {
 			body: JSON.stringify(postData),
 			headers: { "X-CSRFToken": csrftoken },
 		})
-		if (!response.ok) {
-			const errorData = await response.json() // Assuming the server returns JSON error data
-			const errorMessage = errorData.error || "Network response was not ok"
-			throw new Error(errorMessage)
-		}
+		await throwIfNotOk(response)
 		const data = await response.json()
 		if (data.syncError) {
 			store.gameMessages.errorText = i18n.global.t("FCM_IO.olderVersionRefresh")
@@ -884,11 +886,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 			body: JSON.stringify(postData),
 			headers: { "X-CSRFToken": csrftoken },
 		})
-		if (!response.ok) {
-			const errorData = await response.json() // Assuming the server returns JSON error data
-			const errorMessage = errorData.error || "Network response was not ok"
-			throw new Error(errorMessage)
-		}
+		await throwIfNotOk(response)
 		const data = await response.json()
 
 		if (data.syncError) {
@@ -954,13 +952,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 		console.error("Error fetching data:", error)
 		personal.haltPlay = false
 		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
-		const payloadInfo = `LU=${personal.latestUpdate}`
-		const gameInfo = `Game ${personal.gameID} - User ${personal.name || "unknown"} - ${payloadInfo}`
-		const errorName = error && error.name ? error.name : "Error"
-		const errorMsg = error && error.message ? error.message : String(error)
-		const errorStack = error && error.stack ? String(error.stack).substring(0, 1200) : "no stack"
-		const browserInfo = typeof navigator !== "undefined" ? navigator.userAgent : "unknown UA"
-		sendDiscordWebhook(`FCM simul move save error - ${gameInfo}: [${errorName}] ${errorMsg} | UA: ${browserInfo} | stack: ${errorStack}`)
+		reportSaveError("FCM simul move save error", `LU=${personal.latestUpdate}`, error)
 	}
 }
 
@@ -1546,7 +1538,7 @@ function paydayDueForGuard(playerIndex, paydayMove) {
 	// Trainer MS bust: money goes to 0, never negative
 	if (flags.length === 1 && flags[0] === -5) return 0
 	let due = rules.salary(playerIndex)
-	const unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+	const unitarySalary = plyr.unitarySalary(playerIndex)
 	if (flags.length >= 1 && flags[0] >= 0) {
 		// Fired move: each salaried fire reduces the due
 		for (let i = 0; i < flags.length; i++) {
@@ -1636,7 +1628,7 @@ export function processSimulMoveData(data) {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminPhaseMismatchSetupReserve")
 				sendDiscordWebhook(`JS ERROR: phase mismatch in SETUP_RESERVE - gameID: ${personal.gameID} player: ${store.players[i].name} phase: ${store.gameflow.phase} decompressedData: ${JSON.stringify(decompressedData)}`)
 			}
-			if (!decompressedData[i][0] === store.players[i].name && store.players[i].name !== rf.TOURNAMENT_ADMIN_NAME) {
+			if (decompressedData[i][0] !== store.players[i].name && store.players[i].name !== rf.TOURNAMENT_ADMIN_NAME) {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminNameMismatchSetupReserve")
 				sendDiscordWebhook(`JS ERROR: player name mismatch in SETUP_RESERVE - gameID: ${personal.gameID} player: ${store.players[i].name} decompressedData: ${JSON.stringify(decompressedData)}`)
 			}
@@ -1759,7 +1751,7 @@ export function processSimulMoveData(data) {
 				turnDataArray[1].splice(0)
 				// Food may replace normal salary only; job-switch salary is cash-only.
 				let due = rules.baseSalary(i)
-				let unitarySalary = plyr.hasMilestone(i, rf.FIRST_WAITRESS_USED) ? 3 : 5
+				let unitarySalary = plyr.unitarySalary(i)
 				// Remove any coffee
 				playerObj.resources = funcs.removeItemAll(playerObj.resources, rf.COFFEE)
 				while (due > 0 && playerObj.resources.length > 0) {
@@ -1933,10 +1925,9 @@ export function checkPaydayDataValid(playerIndex, paydayData) {
 		paydayData[1].splice(0)
 		// Find the salay due
 		let due = rules.salary(playerIndex)
-		let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+		let unitarySalary = plyr.unitarySalary(playerIndex)
 		// Remove any coffee
-		let resourceCopy = [...playerObj.resources]
-		resourceCopy = funcs.removeItemAll(playerObj.resources, rf.COFFEE)
+		let resourceCopy = funcs.removeItemAll(playerObj.resources, rf.COFFEE)
 		let excessItems = true
 		if (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) && resourceCopy.length > 0) {
 			due -= unitarySalary * resourceCopy.length
@@ -1956,7 +1947,7 @@ export function checkPaydayDataValid(playerIndex, paydayData) {
 	}
 
 	// Finally, it must be a fired move. So check can pay salary
-	if (paydayData[0].length >= 1 && paydayData[0][0] >= 0) {
+	if (paydayData[0][0] >= 0) {
 		let due = rules.salary(playerIndex)
 
 		// Make sure any paid in food is still valid

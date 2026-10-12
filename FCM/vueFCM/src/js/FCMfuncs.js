@@ -1,6 +1,4 @@
 import * as rf from "./FCMreference"
-//import * as rules from "./FCMrules"
-//import * as controller from "./FCMcontroller"
 import * as map from "./FCMmap"
 import * as model from "./FCMmodel"
 import * as context from "./FCMcontext"
@@ -28,16 +26,6 @@ export function booleanToInt(b) {
 
 export function sleep(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-export function compressObjectToDB(obj) {
-	// PAKO
-	let step1 = JSON.stringify(obj)
-	// eslint-disable-next-line no-undef
-	let step2B = pako.gzip(step1)
-	let base64Data1 = btoa(String.fromCharCode(...new Uint8Array(step2B)))
-
-	return base64Data1
 }
 
 export function decompressObjectFromDB(str) {
@@ -105,7 +93,6 @@ export function removeItemAll(arr, value) {
 export function htmlEscape(str) {
 	return (
 		String(str)
-			//.replace(/(?:\r|\n|\r\n)/g, "SNLB")
 			.replace(/&/g, "&amp;")
 			.replace(/"/g, "&quot;")
 			.replace(/'/g, "&#39;")
@@ -128,10 +115,7 @@ export function decompressChatData(data) {
 	// NB personal.gameCreationTimestamp must already be loaded
 	const personal = usePersonalStore()
 	if (data.length > 0) {
-		let compressedData = Uint8Array.from(atob(data), (c) => c.charCodeAt(0))
-		// eslint-disable-next-line no-undef
-		let decompressedData = pako.ungzip(compressedData, { to: "string" })
-		var chatArray = JSON.parse(decompressedData)
+		var chatArray = decompressData(data)
 	} else chatArray = []
 	// Update all the timings
 	let currentFullTime = personal.gameCreationTimestamp
@@ -240,12 +224,7 @@ export function simpleExportWholeFCMmodel() {
 	// 24 - Media Line mod (only when chosen)
 	if (store.startingOptions.mediaLine) temp.push(JSON.parse(JSON.stringify(store.mediaLine)))
 
-	let step1 = JSON.stringify(temp)
-	// eslint-disable-next-line no-undef
-	let step2 = pako.gzip(step1)
-	let base64Data = btoa(String.fromCharCode(...new Uint8Array(step2)))
-
-	return base64Data
+	return compressData(temp)
 }
 
 export function exportIndexes(indexes) {
@@ -284,7 +263,6 @@ function getMapWidthAndShift() {
 }
 
 export function exportIndex(index) {
-	//if (index === 0) return 0
 	if (index === -1) return -1
 	const { mapWidthSq, xShift, yShift } = getMapWidthAndShift()
 
@@ -698,12 +676,20 @@ export function exportFCMmodel(forGameOver, includeContext) {
 	// Compact positional slot, tagged like the Labor Market one.
 	if (store.startingOptions.mediaLine) temp.push(exportMediaLineSlot())
 
-	let step1 = JSON.stringify(temp)
-	// eslint-disable-next-line no-undef
-	let step2B = pako.gzip(step1)
-	let base64Data1 = btoa(String.fromCharCode(...new Uint8Array(step2B)))
+	return compressData(temp)
+}
 
-	return base64Data1
+// Dumpling MS CEO actions are not saved on players; rebuild them from history
+function applyDumplingCeoActions() {
+	const store = useModelStore()
+	if (store.startingOptions.dumplings) {
+		for (let i = 0; i < store.history.length; i++) {
+			if (store.history[i][0] === rf.HIST_CEO_BONUS_CHOSEN) {
+				let pIdx = store.history[i][1]
+				store.players[pIdx].ceoAction = store.history[i][3][0]
+			}
+		}
+	}
 }
 
 export function importFCMmodel(inputB64, forGameOver, includeContext) {
@@ -996,7 +982,6 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 
 	if (store.startingOptions.lobbyists) {
 		// 12: Parks
-		store.parks.splice(0)
 		store.parks = inputArr[IMPORT_INDEX].map((p) => ({
 			index: importIndex(p[0]),
 			variety: p[1],
@@ -1011,7 +996,6 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 		IMPORT_INDEX++
 
 		// 13: New Roads
-		store.newRoads.splice(0)
 		store.newRoads = inputArr[IMPORT_INDEX].map((r) => ({
 			index: importIndex(r[0]),
 			variety: r[1],
@@ -1077,10 +1061,8 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	// INTERNAL OPTIONS NEED TO BE SET BEFORE THIS
 	store.availableEmployees = [...rf.ORIGINAL_AVAILABLE_EMPLOYEES]
 	store.availableMarketingCampaigns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14]
-	if (store.startingOptions.useMilestones === false) {
-		store.availableMilestones.splice(0)
-	} else {
-		store.availableMilestones.splice(0)
+	store.availableMilestones.splice(0)
+	if (store.startingOptions.useMilestones !== false) {
 		Object.assign(store.availableMilestones, rf.BASE_GAME_MILESTONES)
 		if (store.startingOptions.noCeoMilestone === true) {
 			store.availableMilestones.splice(store.availableMilestones.indexOf(rf.FIRST_100_DOL), 1)
@@ -1190,18 +1172,9 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 		removeItemAll(store.availableMilestones, rf.FIRST_HIRE_3)
 	}
 
-	// Adjust CEOs with dumpling MS, using history
-	if (store.startingOptions.dumplings) {
-		for (let i = 0; i < store.history.length; i++) {
-			if (store.history[i][0] === rf.HIST_CEO_BONUS_CHOSEN) {
-				let pIdx = store.history[i][1]
-				store.players[pIdx].ceoAction = store.history[i][3][0]
-			}
-		}
-	}
+	applyDumplingCeoActions()
 
-	// Labor Market mod: written directly before the Stadium slot for chosen-module
-	// saves, so advance the index only when the slot is actually present
+	// Labor Market mod: its slot sits right before the Stadium slot when present
 	let moduleImportIndex = IMPORT_INDEX
 	if (isLaborMarketSlot(inputArr[moduleImportIndex])) moduleImportIndex++
 	restoreLaborMarketState(inputArr, IMPORT_INDEX)
@@ -1388,13 +1361,7 @@ function applyStadiumSlot(slot) {
 	return false
 }
 
-// Stadium mod: restore state from the trailing wire-format slot (shape-detected).
-// `index` is the next unread import position - the stadium slot sits there
-// whenever the module was chosen (it is pushed before the bailout slot, so no
-// offset is needed). The slot is only scanned when the module was chosen -
-// other games never store it, so their saves load without it. For saves that
-// predate the slot, rebuild from history: gamesPlayed from the result entries,
-// and the last announcement if it is still for an upcoming game.
+// Stadium mod: restore from the trailing slot; older saves rebuild from history
 export function restoreStadiumState(inputArr, index = inputArr.length - 1) {
 	const store = useModelStore()
 	store.stadium.gamesPlayed = 0
@@ -1501,10 +1468,7 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	const store = useModelStore()
 
 	
-	let compressedData = Uint8Array.from(atob(inputBase64), (c) => c.charCodeAt(0))
-	// eslint-disable-next-line no-undef
-	let decompressedData = pako.ungzip(compressedData, { to: "string" })
-	let inputModel = JSON.parse(decompressedData)
+	let inputModel = decompressData(inputBase64)
 
 
 
@@ -1513,8 +1477,6 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	context.resetContextAndHighlights()
 
 	// 0 = tiles
-	//store.mapData.tiles = JSON.parse(JSON.stringify(inputModel[0]))
-	//map.initCoords()
 	store.mapData.tiles.splice(0)
 	store.mapData.coords.splice(0)
 	Object.assign(store.mapData.tiles, inputModel[0][0])
@@ -1557,7 +1519,6 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	// 5 - bank
 	store.bank = inputModel[5]
 	// 6 - gameflow
-	//store.gameflow.splice(0)
 	Object.assign(store.gameflow, inputModel[6])
 	// 7 - campaigns
 	store.campaigns.splice(0)
@@ -1638,13 +1599,5 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	// Media Line mod (shape-detected; older snapshots predate the slot)
 	restoreMediaLineState(inputModel)
 
-	// Adjust CEOs with dumpling MS, using history
-	if (store.startingOptions.dumplings) {
-		for (let i = 0; i < store.history.length; i++) {
-			if (store.history[i][0] === rf.HIST_CEO_BONUS_CHOSEN) {
-				let pIdx = store.history[i][1]
-				store.players[pIdx].ceoAction = store.history[i][3][0]
-			}
-		}
-	}
+	applyDumplingCeoActions()
 }

@@ -150,20 +150,11 @@ class FcmPassKickoutTest(TestCase):
         self.assertTrue(body.get("syncError"), body)
 
     def test_non_participant_rejected(self):
-        body = self._post(
-            self.carol,
-            "saveSimulMove",
-            {
-                "phase": PHASE_RESTRUCTURING,
-                "moveData": compress([[], [5], 0]),
-                "notificationSuppression": False,
-                "notRequiedPlayerNames": [],
-                "continueFromStalledGame": False,
-                "passKickoutFor": "alice",
-            },
-        )
+        self.client.force_login(self.carol)
+        payload = {"action": "saveSimulMove", "gameID": self.game.id, "latestUpdate": self.game.latestUpdate, "passKickoutFor": "alice"}
+        response = self.client.post(self.url, data=json.dumps(payload), content_type="application/json")
 
-        self.assertTrue(body.get("syncError"), body)
+        self.assertEqual(response.status_code, 403, response.content)
 
     def test_save_normal_attributs_move_and_flex_under_target(self):
         self.game.phase = PHASE_WORKING_DAY

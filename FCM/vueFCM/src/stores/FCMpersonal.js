@@ -12,7 +12,6 @@
 
 import * as controller from "../js/FCMcontroller"
 
-//import { ref } from 'vue'
 import { defineStore } from "pinia"
 import * as rf from "../js/FCMreference"
 import * as funcs from "../js/FCMfuncs"
@@ -23,7 +22,6 @@ export const usePersonalStore = defineStore("personal", () => {
 	const store = useModelStore()
 
 	/******* SET ONCE VARS - IN SETUP */
-	//const superuser = ref(false)
 	var WSstatus = "WSconnecting" // Use for light colour
 	var haltPlay = false // Stop someone moving, eg when waiting for game to save
 	var gameID = -1
@@ -68,10 +66,8 @@ export const usePersonalStore = defineStore("personal", () => {
 		// is correct for real hotseat Practice games, and the reason this went unnoticed).
 		if (this.tutorial && store.gameflow.turnOrder[0] !== 0) return false
 		if (this.trainingGame) return true
-		if (this.superuser) return true
-		//if (store..tournamentGame && this.name === rf.TOURNAMENT_ADMIN_NAME) return true
 		if (this.pov < 0) return false
-		if (this.pov >= 0 && store.players[this.pov].displayName === rf.BOT_NAME) return false
+		if (store.players[this.pov].displayName === rf.BOT_NAME) return false
 
 		// Pre moves
 		if (store.gameflow.phase === rf.PHASE_PAYDAY || store.gameflow.phase === rf.PHASE_CLEAN_UP) {
@@ -114,14 +110,7 @@ export const usePersonalStore = defineStore("personal", () => {
 	}
 
 	function getCorrectedColourHexForRestoBorder(colour) {
-		if (this.preferredColour > -1 && this.pov > -1) {
-			if (store.players[this.pov].colour === colour) {
-				colour = this.preferredColour
-			} else if (this.preferredColour === colour) {
-				colour = store.players[this.pov].colour
-			}
-		}
-
+		colour = getCorrectedColour.call(this, colour)
 		if (colour === 0) return "#c592a9"
 		if (colour === 1) return "#af272d"
 		if (colour === 2) return "#91c3c4"

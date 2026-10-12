@@ -10,9 +10,9 @@
 
 import HistoryEntry from "./HistoryEntry.vue"
 
-//import * as rf from "../js/FCMreference.js"
 
 import { useModelStore } from "../stores/FCMstore.js"
+import * as view from "../js/FCMview"
 const store = useModelStore()
 
 function historyToggle() {
@@ -20,11 +20,7 @@ function historyToggle() {
 		if (document.getElementById("historyMainDiv").classList.contains("reverseHistory")) document.getElementById("historyMainDiv").classList.remove("reverseHistory")
 		else document.getElementById("historyMainDiv").classList.add("reverseHistory")
 
-		var el = document.getElementById("history")
-		var cs = getComputedStyle(el)
-		var b = document.getElementById("footer").getBoundingClientRect().top
-		var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
-		el.style["max-height"] = String(parseInt(b - a)) + "px"
+		view.fitHeightToFooter(document.getElementById("history"))
 	}, 400)
 }
 </script>

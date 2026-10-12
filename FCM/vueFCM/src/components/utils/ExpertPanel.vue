@@ -97,7 +97,6 @@ const hasCleanupPreset = computed(() => {
 const currentSalary = computed(() => personal.pov >= 0 ? rules.salary(personal.pov) : 0)
 
 const keepAllButtonText = computed(() => {
-	if (!playerObj.value) return i18n.global.t("expert.keepAll")
 	if (hasBeerMS.value && !hasFridge.value) return i18n.global.t("expert.keepAllItemsThenMoney")
 	if (currentSalary.value === 0) return i18n.global.t("expert.keepAllNoSalary")
 	if (playerObj.value.money >= currentSalary.value) return i18n.global.t("expert.keepAllEnoughMoney")

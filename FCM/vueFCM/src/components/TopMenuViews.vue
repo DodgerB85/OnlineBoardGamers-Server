@@ -30,7 +30,7 @@ const showExpandedEmployees = ref(false)
 const consentLevel = ref(0)
 
 function reserveEmployeeCount(employee) {
-	if (employee === rf.TEMPORARY_WORKER) return store.players.length - (store.laborMarket?.removedTemporaryWorkers || 0)
+	if (employee === rf.TEMPORARY_WORKER) return store.players.length - store.laborMarket.removedTemporaryWorkers
 	return store.availableEmployees[employee]
 }
 
@@ -422,8 +422,6 @@ function generatePath(x, y, dir, rows) {
 
 const sortedCampaigns = computed(() => {
 	// We spread into a new array so we don't mutate the store directly.
-	// Media Line campaigns sort by their printed number (3.5/4.5, 6.5-8.6),
-	// not by raw campaign id, so they interleave with the A-line campaigns.
 	return [...store.availableMarketingCampaigns].sort((a, b) => rules.campaignSortKey(a) - rules.campaignSortKey(b))
 })
 </script>
@@ -642,7 +640,7 @@ const sortedCampaigns = computed(() => {
 						<div class="milestoneTitle">{{ rf.MILESTONES_STR[ms].title.toUpperCase() }}</div>
 						<div class="milestoneText">{{ rf.MILESTONES_STR[ms].description }}</div>
 						<div class="milestoneSpacer">&nbsp;</div>
-						<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms].img)" :class="rf.MILESTONES_STR[ms].additionalClass ? rf.MILESTONES_STR[ms].additionalClass : ''" />
+						<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms].img)" :class="rf.MILESTONES_STR[ms].additionalClass" />
 						<br v-if="milestonePlayerColours(ms).length > 0" />
 						<template v-for="(colour, i) in milestonePlayerColours(ms)" :key="i">
 							<img :src="view.getImage('player_' + personal.getCorrectedColour(colour))" style="width:30px;height:30px;padding-left:5px;" />
@@ -668,7 +666,7 @@ const sortedCampaigns = computed(() => {
 						<div class="milestoneTitle">{{ rf.MILESTONES_STR[ms[0]].title.toUpperCase() }}</div>
 						<div class="milestoneText">{{ rf.MILESTONES_STR[ms[0]].description }}</div>
 						<div class="milestoneSpacer">&nbsp;</div>
-						<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms[0]].img)" :class="rf.MILESTONES_STR[ms[0]].additionalClass ? rf.MILESTONES_STR[ms[0]].additionalClass : ''" />
+						<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms[0]].img)" :class="rf.MILESTONES_STR[ms[0]].additionalClass" />
 						<br />
 						<template v-for="(colour, i) in ms.slice(1)" :key="i">
 							<img :src="view.getImage('player_' + personal.getCorrectedColour(colour))" style="width:30px;height:30px;padding-left:5px;" />
@@ -732,7 +730,7 @@ const sortedCampaigns = computed(() => {
 											<img v-else-if="rf.HIREABLE_EMPLOYEES.indexOf(emp) > -1" :src="view.getImage('iconRecruit')" class="iconsImg" />
 											<span v-else class="blankIcon">&nbsp;</span>
 											<img v-if="emp === rf.TELEMARKETER" :src="view.getImage('iconWaveRange1')" class="iconsImg iconMiddle" />
-										<img v-else-if="emp === rf.TV_ANNOUNCER" :src="view.getImage('iconWaveRange2')" class="iconsImg iconMiddle" />
+											<img v-else-if="emp === rf.TV_ANNOUNCER" :src="view.getImage('iconWaveRange2')" class="iconsImg iconMiddle" />
 										<img v-else-if="rf.getRangeForEmployee(emp) === 8" :src="view.getImage('iconRangeInfinite')" class="iconsImg iconMiddle" />
 											<img v-else-if="rf.getRangeForEmployee(emp) >= 1" :src="view.getImage('iconRange' + rf.getRangeForEmployee(emp))" class="iconsImg iconMiddle" :class="{ fixedHeight: rf.getRangeType(emp) === 'road' }" />
 											<span v-else class="blankIcon iconMiddle">&nbsp;</span>
@@ -824,7 +822,7 @@ const sortedCampaigns = computed(() => {
 			</div>
 
 			<!-- LOBBYIST TILES -->
-			<div v-if="store.startingOptions && store.startingOptions.lobbyists" class="reserveSection">
+			<div v-if="store.startingOptions.lobbyists" class="reserveSection">
 				<p><b>{{ $t('topMenuViews.availableLobbyistTiles') }}</b></p>
 				<div id="allTileChoiceDivRes">
 					<div v-for="tile in rules.availableLobbyistTiles()" :key="'restile-' + tile">

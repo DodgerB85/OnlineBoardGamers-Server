@@ -3,6 +3,7 @@ import * as map from "../js/FCMmap"
 import * as view from "../js/FCMview"
 import * as rf from "../js/FCMreference"
 import * as model from "../js/FCMmodel"
+import * as rules from "../js/FCMrules.js"
 
 import { useModelStore } from "../stores/FCMstore.js"
 import { usePersonalStore } from "../stores/FCMpersonal.js"
@@ -163,8 +164,8 @@ const tvAntennaDisplays = computed(() => {
 	const res = []
 	const sqSize = store.refSize / 5
 	for (const c of store.campaigns) {
-		if (rf.MARKETING_CAMPAIGNS[c.number]?.type !== rf.TV_CHANNEL) continue
-		for (const house of c.houses || []) {
+		if (rf.MARKETING_CAMPAIGNS[c.number].type !== rf.TV_CHANNEL) continue
+		for (const house of c.houses) {
 			// Board apartments (3.2 / 9.7) live outside store.houses - findApartment locates them
 			let houseObj = model.findHouse(house)
 			if (houseObj === -1) houseObj = model.findApartment(house)
@@ -181,7 +182,7 @@ const tvAntennaDisplays = computed(() => {
 			else if (houseObj.rotated === 2) hy = y + sqSize
 			// Remaining-nights chip: its centre rides the antenna's TOP point
 			const chip = width * 0.55
-			const chipBg = FOOD_CHIP_COLOURS[c.good] || "#1f2937"
+			const chipBg = FOOD_CHIP_COLOURS[c.good]
 			const slot = res.filter((a) => a.house === house).length
 			// One antenna centred; two sit snugly side by side on centre (+/-0.35sq)
 			const cx = hx + (slot === 0 ? 1 : 1.35) * sqSize
@@ -210,20 +211,7 @@ const tvAntennaDisplays = computed(() => {
 
 // Board food token sizing - beer/coke halved, lemonade reduced
 function tokenStyle(token) {
-	let x = token.x
-	let width = token.width
-	if (token.good === rf.BEER || token.good === rf.COKE) {
-		x += width / 4.5
-		width /= 2
-	} else if (token.good === rf.LEMONADE) {
-		x += width / 5
-		width /= 1.5
-	}
-	return {
-		left: x + "px",
-		top: token.y + "px",
-		width: width + "px",
-	}
+	return view.boardTokenStyle(token.good, token.x, token.y, token.width)
 }
 
 // Built houses - house_garden image pasted over the tile + house number
@@ -621,7 +609,7 @@ const needDisplays = computed(() => {
 			}
 			continue
 		}
-		if (!need.needs || need.needs.length === 0) continue
+		if (need.needs.length === 0) continue
 
 		// House needs
 		const houseObj = model.findHouse(need.number)
@@ -679,7 +667,7 @@ const needDisplays = computed(() => {
 	// Stadium mod - on game day, show the announced demand on the arena itself.
 	// Derived from the announcement: the injected need only exists inside
 	// doDinnerTime's synchronous run, so it can never drive the display.
-	if (store.startingOptions.stadium && store.stadium.announcement !== null && store.gameflow.turn === 5 + store.stadium.gamesPlayed * 3) {
+	if (store.startingOptions.stadium && store.stadium.announcement !== null && store.gameflow.turn === rules.stadiumGameTurn(store.stadium.gamesPlayed)) {
 		const idx = map.findIndexForHouse(rf.STADIUM)
 		if (idx > -1) {
 			const [x, y] = view.getXYforSmallSquare(idx)
@@ -794,7 +782,7 @@ function tileRotationClass(tileData) {
 
 			<!-- Display Media Line TV channel antennas -->
 			<template v-for="(ant, antIdx) in tvAntennaDisplays" :key="'ant' + antIdx">
-				<img class="boardAntennaImg" :src="ant.src" :style="{ left: ant.x + 'px', top: ant.y + 'px', width: ant.width + 'px' }" alt="Antenna" />
+				<img class="boardAntennaImg" :src="ant.src" :style="{ left: ant.x + 'px', top: ant.y + 'px', width: ant.width + 'px' }" :alt="$t('items.antenna')" />
 				<span class="antennaDurationChip" :class="{ r1: ant.duration === 9 }" :style="{ left: ant.chipX + 'px', top: ant.chipY + 'px', width: ant.chipSize + 'px', height: ant.chipSize + 'px', fontSize: ant.chipSize * 0.62 + 'px', backgroundColor: ant.chipBg, color: ant.chipText }">{{ ant.duration === 9 ? "8" : ant.duration }}</span>
 			</template>
 

@@ -10,7 +10,7 @@ import json
 from django.test import TestCase
 from django.urls import reverse
 
-from Lobby.models import Game, User
+from Lobby.models import Game, GamePlayer, User
 
 OLD_TILES = [3, 3, 0, 2, 8, 1, 9, 0, 7, 1, 1, 0, 10, 1, 19, 1, 2, 0]
 NEW_TILES = [3, 0, 17, 1, 10, 1, 16, 0, 8, 0, 9, 3, 19, 3, 18, 0, 15, 2]
@@ -29,6 +29,7 @@ class FcmResetMapTest(TestCase):
             gameData="OLD-STATE",
             startingMap=json.dumps(OLD_TILES, separators=(",", ":")),
         )
+        GamePlayer.objects.create(game=self.game, player=self.rival, seat_order=0)
 
     def _save(self, user, tiles, **extra):
         self.client.force_login(user)

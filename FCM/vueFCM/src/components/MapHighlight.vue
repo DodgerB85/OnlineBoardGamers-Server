@@ -212,7 +212,7 @@ function showGardenGhost(index) {
 		if (edges.length !== 1) {
 			// More than one option: no ghost until that house is selected
 			img.style.display = "none"
-			if (ghostHouseNumberRef.value) ghostHouseNumberRef.value.style.display = "none"
+			ghostHouseNumberRef.value.style.display = "none"
 			return
 		}
 		edge = edges[0]
@@ -234,7 +234,7 @@ function showGardenGhost(index) {
 	img.style.width = 2 * sqSize + "px"
 	img.style.height = "auto"
 
-	if (ghostHouseNumberRef.value) ghostHouseNumberRef.value.style.display = "none"
+	ghostHouseNumberRef.value.style.display = "none"
 }
 
 // Compute which adjacent existing roads would get roadwork markers if a road
@@ -268,7 +268,6 @@ function computePotentialRoadworkIndexes(index, variety, rotation) {
 // Ghost preview for lobbyist-placed roads/parks
 function showLobbyistGhost(index) {
 	const img = ghostImgRef.value
-	if (!img) return
 	const sqSize = store.refSize / 5
 	const [x, y] = view.getXYforSmallSquare(index)
 	const bType = store.context.buildingType
@@ -277,7 +276,6 @@ function showLobbyistGhost(index) {
 
 	let imgSrc = ""
 	let width = 2 * sqSize
-	//let height = sqSize
 
 	if (bType === 0) {
 		// Road - under construction image (placed on current turn)
@@ -346,7 +344,7 @@ function showLobbyistGhost(index) {
 	img.style.transform = "rotate(" + rot * 90 + "deg)" + (bType === 1 && store.context.flipped ? " scaleX(-1)" : "")
 	img.classList.remove("r0", "r1", "r2", "r3", "r0M", "r1M", "r2M", "r3M")
 
-	if (ghostHouseNumberRef.value) ghostHouseNumberRef.value.style.display = "none"
+	ghostHouseNumberRef.value.style.display = "none"
 
 	// Compute roadwork markers for adjacent roads
 	ghostRoadworkIndexes.value = computePotentialRoadworkIndexes(index, v, rot)
@@ -355,7 +353,6 @@ function showLobbyistGhost(index) {
 // Ghost preview for the lobbyist milestone new board tile
 function showLobbyistMSTileGhost(index) {
 	const img = ghostImgRef.value
-	if (!img) return
 	const sqSize = store.refSize / 5
 	const [x, y] = view.getXYforSmallSquare(index)
 	let left = x
@@ -377,7 +374,7 @@ function showLobbyistMSTileGhost(index) {
 	img.style.transformOrigin = "center"
 	img.style.borderWidth = "0px"
 	img.classList.remove("r0", "r1", "r2", "r3")
-	if (ghostHouseNumberRef.value) ghostHouseNumberRef.value.style.display = "none"
+	ghostHouseNumberRef.value.style.display = "none"
 }
 
 function handleTouchStart(event, index) {
@@ -478,7 +475,7 @@ function changeGhost(index, add, event) {
 	if (!add || !img) {
 		if (img) img.style.display = "none"
 		if (div) div.style.display = "none"
-		if (ghostHouseNumberRef.value) ghostHouseNumberRef.value.style.display = "none"
+		ghostHouseNumberRef.value.style.display = "none"
 		ghostRoadworkIndexes.value = []
 		return
 	}

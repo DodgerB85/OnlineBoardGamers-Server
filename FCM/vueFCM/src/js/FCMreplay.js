@@ -136,8 +136,12 @@ export function replaySetupKetchupExpansion(playerNumber) {
 		store.availableEmployees[rf.FRIED_CHICKEN_CHEF] = max
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_FRIED_CHICKEN_SOLD)
 	}
-	if (store.startingOptions.stadium) {
-		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
+	if (store.startingOptions.stadium && store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
+	if (store.startingOptions.mediaLine) {
+		store.availableEmployees[rf.TELEMARKETER] = 6
+		store.availableEmployees[rf.TV_ANNOUNCER] = 6
+		store.availableMarketingCampaigns.push(28, 29, 30, 31, 32, 33, 34, 35)
+		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_TELEMARKETER_USED, rf.FIRST_TV_ANNOUNCER_USED)
 	}
 	if (store.startingOptions.laborMarket) model.setupLaborMarketExpansion()
 }
@@ -165,10 +169,7 @@ export function resetDataForReplay() {
 
 	// Reset campaigns
 	store.availableMarketingCampaigns.splice(0)
-	store.availableMarketingCampaigns.push(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14)
-	if (store.players.length > 2) store.availableMarketingCampaigns.push(12)
-	if (store.players.length > 3) store.availableMarketingCampaigns.push(15)
-	if (store.players.length > 4) store.availableMarketingCampaigns.push(16)
+	store.availableMarketingCampaigns.push(...model.baseMarketingCampaigns(store.players.length))
 
 	// Reset employees
 	store.availableEmployees.splice(0)
@@ -244,12 +245,7 @@ export function resetDataForReplay() {
 	view.setMapDisplayTiles()
 
 	// Re-add house 25
-	if (store.mapData.tiles.indexOf(20) > -1) {
-		let rotated = 0
-		if (store.mapData.tiles[store.mapData.tiles.indexOf(20) + 1] === 1 || store.mapData.tiles[store.mapData.tiles.indexOf(20) + 1] === 3) rotated = 1
-		let index = map.findIndexForHouse(25)
-		model.addHouse(25, index, rotated)
-	}
+	model.addHouse25IfTile20()
 }
 
 export async function generateReplayData(spoilerFree = false) {
@@ -428,11 +424,7 @@ export function replayFriedChickenHouse(historyIndex, playerIndex, param, movedO
 		const houseIndex = map.findIndexForHouse(houseNumber)
 		if (houseIndex === -1) continue
 		const houseData = store.houses.find((hs) => hs.number === houseNumber)
-		const rotation = houseData ? houseData.rotated : 1
-		const sideways = rotation === 1 || rotation === 3
-		const height = sideways ? 2 : 3
-		const width = sideways ? 3 : 2
-		for (let i = 0; i < height; i++) for (let j = 0; j < width; j++) store.context.highlightHistorySquares.push(houseIndex + j + rf.ssW * i)
+		store.context.highlightHistorySquares.push(...history.footprintSquares(houseIndex, houseData ? houseData.rotated : 1))
 	}
 }
 
@@ -445,12 +437,7 @@ export function replayNewTile(historyIndex, playerIndex, param) {
 	map.addTileToMap(tileID, tileArrIndex, tileRotation)
 	view.setMapDisplayTiles()
 
-	if (tileID === 20) {
-		let rotated = 0
-		if (store.mapData.tiles[store.mapData.tiles.indexOf(20) + 1] === 1 || store.mapData.tiles[store.mapData.tiles.indexOf(20) + 1] === 3) rotated = 1
-		let house25index = map.findIndexForHouse(25)
-		model.addHouse(25, house25index, rotated)
-	}
+	if (tileID === 20) model.addHouse25IfTile20()
 
 	let tileIndex = funcs.importIndex(param[0])
 	store.context.highlightHistorySquares.push(tileIndex)
@@ -460,31 +447,29 @@ export function replayNewTile(historyIndex, playerIndex, param) {
 export function replaySalary(historyIndex, playerIndex, param) {
 	const store = useModelStore()
 	for (let i = 0; i < param.length; i++) {
-		let due = param[i][0]
-		store.players[i].money -= due
-		if (plyr.hasMilestone(i, rf.FIRST_TRAINER_USED) && store.players[i].money < 0) {
-			// Add the negative to the due
-			due += store.players[i].money
-			store.players[i].money = 0
-		}
-		store.bank += due
+		store.bank += takeSalaryFromPlayer(i, param[i][0])
 		clearPendingHeadhuntSalary(i)
 	}
 }
 
 export function replaySalary_strict(historyIndex, playerIndex, param) {
 	const store = useModelStore()
-	let due = param[0]
+	store.bank += takeSalaryFromPlayer(playerIndex, param[0])
+	clearPendingHeadhuntSalary(playerIndex)
+	// NB the paid in food exact items are never stored, just the amount
+	// Nothing needs doing here; just the net money adjusting
+}
+
+// Returns the amount that reaches the bank: a trainer absorbs any overdraft
+function takeSalaryFromPlayer(playerIndex, due) {
+	const store = useModelStore()
 	store.players[playerIndex].money -= due
 	if (plyr.hasMilestone(playerIndex, rf.FIRST_TRAINER_USED) && store.players[playerIndex].money < 0) {
 		// Add the negative to the due
 		due += store.players[playerIndex].money
 		store.players[playerIndex].money = 0
 	}
-	store.bank += due
-	clearPendingHeadhuntSalary(playerIndex)
-	// NB the paid in food exact items are never stored, just the amount
-	// Nothing needs doing here; just the net money adjusting
+	return due
 }
 
 function clearPendingHeadhuntSalary(playerIndex) {
@@ -589,14 +574,7 @@ export function replayAddHouse(historyIndex, playerIndex, param) {
 	if (rotation === true) rotation = 1
 	if (rotation === false) rotation = 0
 	model.addHouse(houseNumber, houseIndex, rotation)
-	const sideways = rotation === 1 || rotation === 3
-	const height = sideways ? 2 : 3
-	const width = sideways ? 3 : 2
-	for (let i = 0; i < height; i++) {
-		for (let j = 0; j < width; j++) {
-			store.context.highlightHistorySquares.push(houseIndex + j + rf.ssW * i)
-		}
-	}
+	store.context.highlightHistorySquares.push(...history.footprintSquares(houseIndex, rotation))
 }
 
 export function replayAddGarden(historyIndex, playerIndex, param) {
@@ -765,23 +743,23 @@ export function replayAddFreeway(historyIndex, playerIndex, param) {
 		if (map.isIndexOnLeftEdgeOfMap(index, 1)) {
 			highlightIndex--
 			if (!rotated) store.context.highlightHistorySquares.push(highlightIndex, highlightIndex - 1, highlightIndex - 2)
-			else if (rotated) store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
+			else store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
 		} else {
 			highlightIndex++
 			if (!rotated) store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + 1, highlightIndex + 2)
-			else if (rotated) store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
+			else store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
 		}
 	}
 	// if on top/bot
-	else if (!sides) {
+	else {
 		if (map.isIndexOnBottomEdgeOfMap(index, 1)) {
 			highlightIndex += rf.ssW
 			if (!rotated) store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + 1, highlightIndex + 2)
-			else if (rotated) store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
+			else store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
 		} else {
 			highlightIndex -= rf.ssW
 			if (!rotated) store.context.highlightHistorySquares.push(highlightIndex, highlightIndex + 1, highlightIndex + 2)
-			else if (rotated) store.context.highlightHistorySquares.push(highlightIndex, highlightIndex - rf.ssW, highlightIndex - rf.ssW * 2)
+			else store.context.highlightHistorySquares.push(highlightIndex, highlightIndex - rf.ssW, highlightIndex - rf.ssW * 2)
 		}
 	}
 	model.addFreeway(index, rotated, sides)
@@ -811,6 +789,9 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 	// board index (they have no token); phone tokens log a normal board index
 	const isTV = campaignNumber === 28 || campaignNumber === 29
 	const isPhone = campaignNumber >= 30 && campaignNumber <= 35
+	// Media Line mod: a non-default marketer is logged last as [employee] (index 3+ is never otherwise an array)
+	const loggedMarketer = param.length > 3 && Array.isArray(param[param.length - 1]) ? param[param.length - 1][0] : -1
+	if (loggedMarketer !== -1) param = param.slice(0, -1)
 	let tvHouses = []
 	let campaignIndex = -1
 	if (isTV) tvHouses = [...param[1]]
@@ -831,6 +812,7 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 		// Media Line mod
 		else if (isTV) campaignEmployee = rf.TV_ANNOUNCER
 		else if (isPhone) campaignEmployee = rf.TELEMARKETER
+		if (loggedMarketer !== -1) campaignEmployee = loggedMarketer
 	}
 	// Otherwise need to read in the employee
 	else {
@@ -881,14 +863,14 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 			let widthOnLeft = width
 			if (widthOnLeft === 2) widthOnLeft = 1
 			if (map.isIndexOnLeftEdgeOfMap(campaignIndex, widthOnLeft)) highlightIndex -= 1 * width
-			else if (!map.isIndexOnLeftEdgeOfMap(campaignIndex, widthOnLeft)) highlightIndex += 1
+			else highlightIndex += 1
 		}
 		// If on top/bottom
 		else {
 			let widthOnBottom = width
 			if (param[1] === 4) widthOnBottom = 1
 			if (map.isIndexOnBottomEdgeOfMap(campaignIndex, widthOnBottom)) highlightIndex += rf.ssW
-			else if (!map.isIndexOnBottomEdgeOfMap(campaignIndex, widthOnBottom)) highlightIndex -= rf.ssW * height
+			else highlightIndex -= rf.ssW * height
 		}
 	}
 
@@ -985,15 +967,8 @@ export function replayHire(historyIndex, playerIndex, param) {
 
 export function replayTurnOrder(historyIndex, playerIndex, param) {
 	const store = useModelStore()
-	if (store.computedHistory[historyIndex][0] === rf.HIST_CHOOSE_TURN_ORDER) {
-		store.gameflow.newTurnOrder[param[0]] = playerIndex
-	} else if (store.computedHistory[historyIndex][0] === rf.HIST_CHOOSE_TURN_ORDER_FORCED) {
-		store.gameflow.newTurnOrder[param[0]] = playerIndex
-	} else if (store.computedHistory[historyIndex][0] === rf.HIST_CHOOSE_TURN_ORDER_AUTO_EARLY) {
-		store.gameflow.newTurnOrder[param[0]] = playerIndex
-	} else if (store.computedHistory[historyIndex][0] === rf.HIST_CHOOSE_TURN_ORDER_AUTO_LATE) {
-		store.gameflow.newTurnOrder[param[0]] = playerIndex
-	}
+	const turnOrderActions = [rf.HIST_CHOOSE_TURN_ORDER, rf.HIST_CHOOSE_TURN_ORDER_FORCED, rf.HIST_CHOOSE_TURN_ORDER_AUTO_EARLY, rf.HIST_CHOOSE_TURN_ORDER_AUTO_LATE]
+	if (turnOrderActions.includes(store.computedHistory[historyIndex][0])) store.gameflow.newTurnOrder[param[0]] = playerIndex
 
 	if (!store.gameflow.newTurnOrder.includes(-1)) {
 		store.gameflow.fullTurnOrder = [...store.gameflow.newTurnOrder]

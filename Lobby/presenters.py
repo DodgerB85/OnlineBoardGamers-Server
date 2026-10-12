@@ -2090,44 +2090,25 @@ class FCMpresenter(GamePresenter):
                 rfFCM.SO_MOVIE_STARS,
                 rfFCM.SO_NIGHT_SHIFT,
             ]
-            # Chinese expansion: create-time only writes the pool marker (203).
-            # Legacy games may already have the four module flags pre-written —
+            # Expansion pools: create-time only writes the pool marker (203 Chinese, 204 fan).
+            # Legacy games may already have the module flags pre-written —
             # strip those too and treat them as pool candidates either way.
-            chineseFlags = [
-                rfFCM.SO_JAZZ_MUSICIANS,
-                rfFCM.SO_DUMPLINGS,
-                rfFCM.SO_DELIVERY_DRIVERS,
-                rfFCM.SO_HAWKERS,
-            ]
-            chineseInPool = (
-                rfFCM.SO_RANDOM_MODULES_CHINESE in starting_options
-                or any(x in starting_options for x in chineseFlags)
-            )
-            starting_options = [
-                x
-                for x in starting_options
-                if x != rfFCM.SO_RANDOM_MODULES_CHINESE and x not in chineseFlags
-            ]
-            if chineseInPool:
-                availableModules.extend(chineseFlags)
-            # Fan mods: same create-time marker pattern as the Chinese expansion
-            fanFlags = [
-                rfFCM.SO_FRIED_CHICKEN,
-                rfFCM.SO_STADIUM,
-                rfFCM.SO_LABOR_MARKET,
-                rfFCM.SO_SECOND_BAILOUT,
-            ]
-            fanInPool = (
-                rfFCM.SO_RANDOM_MODULES_FAN in starting_options
-                or any(x in starting_options for x in fanFlags)
-            )
-            starting_options = [
-                x
-                for x in starting_options
-                if x != rfFCM.SO_RANDOM_MODULES_FAN and x not in fanFlags
-            ]
-            if fanInPool:
-                availableModules.extend(fanFlags)
+            expansionPools = []
+            for marker, flags in [
+                (
+                    rfFCM.SO_RANDOM_MODULES_CHINESE,
+                    [rfFCM.SO_JAZZ_MUSICIANS, rfFCM.SO_DUMPLINGS, rfFCM.SO_DELIVERY_DRIVERS, rfFCM.SO_HAWKERS],
+                ),
+                (
+                    rfFCM.SO_RANDOM_MODULES_FAN,
+                    [rfFCM.SO_FRIED_CHICKEN, rfFCM.SO_STADIUM, rfFCM.SO_LABOR_MARKET, rfFCM.SO_SECOND_BAILOUT],
+                ),
+            ]:
+                inPool = marker in starting_options or any(x in starting_options for x in flags)
+                starting_options = [x for x in starting_options if x != marker and x not in flags]
+                if inPool:
+                    availableModules.extend(flags)
+                expansionPools.append((inPool, flags))
             # Add hard choices only with original MS
             if rfFCM.SO_NEW_MS not in starting_options:
                 availableModules.append(rfFCM.SO_HARD_CHOICES)
@@ -2148,7 +2129,6 @@ class FCMpresenter(GamePresenter):
             for _i in range(numberOfModulesToPick):
                 currentIndex = random.randrange(0, len(availableModules), 1)
                 selectedModules.append(availableModules.pop(currentIndex))
-            # _tournamentType = random.choice(["RR", "KO", "TL"])
             if rfFCM.SO_NEW_DISTRICTS in selectedModules:
                 currentIndex = random.randrange(0, 3, 1)
                 distOptions = [
@@ -2159,17 +2139,12 @@ class FCMpresenter(GamePresenter):
                 chosenDistOption = distOptions[currentIndex]
                 if chosenDistOption > 0:
                     selectedModules.append(chosenDistOption)
-            # Only exclude stats if a Chinese module actually made the roll
-            if chineseInPool and any(x in selectedModules for x in chineseFlags):
-                self.gameObj.statsExcludedGame = True
-            # Same for fan mods
-            if fanInPool and any(x in selectedModules for x in fanFlags):
-                self.gameObj.statsExcludedGame = True
+            # Only exclude stats if an expansion module actually made the roll
+            for inPool, flags in expansionPools:
+                if inPool and any(x in selectedModules for x in flags):
+                    self.gameObj.statsExcludedGame = True
             starting_options.extend(selectedModules)
             self.gameObj.startingOptions = json.dumps(starting_options, separators=(",", ":"))
-            # self.startingOptions = (
-            #  self.startingOptions + "," + (",".join(selectedModules))
-            # )
 
         self.gameObj.gameStatus = "ACTIVE"
 
@@ -2234,8 +2209,6 @@ class FCMpresenter(GamePresenter):
             allPlayers = self.getAllPlayersOrderedySeatInArray(True, False)
             missing_players = set(self.gameObj.players.filter(is_missing=True).values_list("player__username", flat=True))
             # In a tournament, don't remove missing players, as FCMtA plays for them
-            # if self.gameObj.relatedMainTournament:
-            #    missing_players = {}
             return [
                 [
                     playerName,
@@ -2292,20 +2265,6 @@ class FCMpresenter(GamePresenter):
             return False
         return len(playerMoveArr) >= 4 and len(playerMoveArr[3]) >= 2 and isinstance(playerMoveArr[3][1], list) and len(playerMoveArr[3][1]) > 0
 
-    # rf.PHASE_SETUP_RESTAURANT1 = 0
-    # rf.PHASE_SETUP_RESTAURANT2 = 1
-    # rf.PHASE_SETUP_RESERVE = 2
-    # rf.PHASE_RESTRUCTURING = 3
-    # rf.PHASE_TURN_ORDER = 4
-    # rf.PHASE_WORKING_DAY = 5
-    # rf.PHASE_DINNERTIME = 6
-    # rf.PHASE_PIZZA_BOMB = 11
-    # rf.PHASE_PAYDAY = 7
-    # rf.PHASE_MARKETING_CAMPAIGNS = 8
-    # rf.PHASE_COFFE_SHOP_MS = 12
-    # rf.PHASE_CLEAN_UP = 9
-    # rf.PHASE_GAME_OVER = 10
-    # rf.PHASE_SETUP_MODULES = 13
 
     def isThisValidActualMoveArrForPhase(self, phase, moveArr):
         from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
@@ -2377,7 +2336,6 @@ class FCMpresenter(GamePresenter):
             return bool(moveData[2] == 1 or moveData[2] == 2)
 
         # Now phase is 7 or 9, AND there is move data
-        # moveData = [[[-9],[]],[-9]]
         phases_arr = [
             rfFCM.PHASE_WORKING_DAY,
             rfFCM.PHASE_DINNERTIME,
@@ -2463,8 +2421,6 @@ class FCMpresenter(GamePresenter):
         playersMoveDataArr = self.getOrScaffoldAllMoveData()
         playersToMove = []
         missingPlayers = set(self.gameObj.players.filter(is_missing=True).values_list("player__username", flat=True))
-        # if self.gameObj.relatedMainTournament:
-        #    missingPlayers = {}
         for subArr in playersMoveDataArr:
             if subArr[0] not in notRequiedPlayerNames and subArr[0] not in missingPlayers and not self.isThisValidActualMoveArrForPhase(self.gameObj.phase, subArr):
                 playersToMove.append(subArr[0])
@@ -2481,13 +2437,11 @@ class FCMpresenter(GamePresenter):
         # Don't clear moves at end of payday to preserve fridge data
         # Actually, clearing moves can cause no turn order if the players browser doesn't respond
         if self.gameObj.phase != rfFCM.PHASE_PAYDAY and self.gameObj.phase != rfFCM.PHASE_RESTRUCTURING:
-            # self.clearAllMoveDataV2()
             pass
 
         # Add latest update to stop flex time being double deducted
         newVer = (int(self.gameObj.latestUpdate) % 1000) + 1
         self.gameObj.latestUpdate = str((int(time.time()) * 1000) + newVer)
-        # jsonResponse.append({"latestUpdate": self.latestUpdate})
         jsonResponse["latestUpdate"] = self.gameObj.latestUpdate
 
         return jsonResponse
@@ -2524,8 +2478,6 @@ class FCMpresenter(GamePresenter):
 
         # Remove missing players
         missing_players = set(self.gameObj.players.filter(is_missing=True).values_list("player__username", flat=True))
-        # if self.gameObj.relatedMainTournament:
-        #    missing_players = {}
         currentPlayers = [username for username in currentPlayers if username not in missing_players]
 
         # If any play has a move, then remove them
@@ -2612,30 +2564,12 @@ class FCMpresenter(GamePresenter):
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
 
-        # This is sorted with winner in [0][name, money]
-        finalPositions = []
-        for i in range(len(_finalScores)):
-            finalPositions.append(_finalScores[i][0])
-
-        # Convert finalPositions from simple list to list of lists format
+        # Winner first; each entry becomes [username, posText, pos] for the notification
+        ordinals = ["1st - Congratulations!", "2nd", "3rd", "4th", "5th", "6th"]
         convertedFinalPositions = []
-        for pos, username in enumerate(finalPositions):
-            if pos == 0:
-                posText = "1st - Congratulations!"
-            elif pos == 1:
-                posText = "2nd"
-            elif pos == 2:
-                posText = "3rd"
-            elif pos == 3:
-                posText = "4th"
-            elif pos == 4:
-                posText = "5th"
-            elif pos == 5:
-                posText = "6th"
-            else:
-                posText = "Last"
-
-            convertedFinalPositions.append([username, posText, pos])
+        for pos in range(len(_finalScores)):
+            posText = ordinals[pos] if pos < len(ordinals) else "Last"
+            convertedFinalPositions.append([_finalScores[pos][0], posText, pos])
 
         async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "FCM", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 

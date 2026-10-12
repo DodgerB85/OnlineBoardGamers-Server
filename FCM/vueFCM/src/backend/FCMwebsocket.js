@@ -3,10 +3,8 @@ import { usePersonalStore } from "../stores/FCMpersonal.js"
 import i18n from "../i18n"
 
 import * as IO from "./FCM_IO"
-//import * as funcs from "../js/FCMfuncs"
 import * as view from "../js/FCMview"
 import * as rf from "../js/FCMreference.js"
-//import * as model from "../js/FCMmodel"
 
 export var FCMwebSocket = null
 let FCMconnectionPromise = null // Track the in-progress connection
@@ -119,7 +117,6 @@ async function FCMwebSocketOnInfo(IncomingInfo) {
 				// A full load is required to reload the whole starting options which only normally comes with the HTML
 				// It's not worth having a separate update function to send starting options just to "smoothly" live update
 				// during module selection which a) isn't done often and b) isn't necesserily done live anyway
-				//if (M.gameflow.phase === rf.PHASE_SETUP_MODULES) location.reload()
 				//else global.haltPlay = false
 
 				if (personal.canPlay()) {
@@ -143,7 +140,6 @@ async function FCMwebSocketOnInfo(IncomingInfo) {
 							let n = new Notification(title, options)
 							n.onclick = function () {
 								//event.preventDefault() // Prevents the browser from focusing the Notification's tab
-								//window.open("http://localhost:8000/IND/54/", "_blank")
 								// Check if the window client exists
 								window.focus()
 								n.close()
