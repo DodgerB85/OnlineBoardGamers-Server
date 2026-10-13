@@ -53,3 +53,15 @@ test("Fully automatic rainy seasons can replay all three rivers after harvest ha
 	assert.equal(script.steps.filter((step) => step.type === "outflow").reduce((sum, step) => sum + step.amount, 0), 18)
 	assert.deepEqual(script.steps.at(-1).wet, [])
 })
+
+
+test("Rainy-season completion replays the same water flow after harvesting", () => {
+	const history = routingHistory()
+	const before = JSON.parse(history.at(-1)[2])
+	const player = before.gameflow.turnOrder[0]
+	const action = { type: "harvest", choice: "distribute" }
+	const after = applyAction(before, player, action)
+	history.push([rf.HIST_ACTION, player, JSON.stringify(after), action])
+	assert.equal(after.rain.step, "complete")
+	assert.deepEqual(buildWaterPlayback(history, 3), buildWaterPlayback(history, 2))
+})

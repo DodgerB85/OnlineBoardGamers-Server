@@ -149,7 +149,7 @@ const actionImages = computed(() => {
 })
 const playback = useWaterPlaybackStore()
 const playbackError = ref("")
-const canReplayWater = computed(() => props.entry.administration?.kind === "riverComplete" && (!store.turnDraft.start || props.entry.historyIndex < store.turnDraft.start.historyLength))
+const canReplayWater = computed(() => ["riverComplete", "rainEnd"].includes(props.entry.administration?.kind) && (!store.turnDraft.start || props.entry.historyIndex < store.turnDraft.start.historyLength))
 function startWaterPlayback(advancing) {
 	try {
 		playback.start(store.history, props.entry.historyIndex, advancing)
