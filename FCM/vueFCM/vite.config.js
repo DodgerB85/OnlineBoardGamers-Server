@@ -73,7 +73,12 @@ export default defineConfig(({ command }) => ({
       },
       output: {
         entryFileNames: `[name].js`,
-        chunkFileNames: `[name].js`,
+        // Content-hash the lazy chunks: the entry files are cache-busted by
+        // ManifestStaticFilesStorage in the template, but a fixed chunk name
+        // (e.g. FCM_IO.js) let Cloudflare/browsers serve a stale build for the
+        // full max-age. The chunk name is part of the entry source, so the
+        // entry's manifest hash follows whenever a chunk changes.
+        chunkFileNames: `[name]-[hash].js`,
         //assetFileNames: `[name].[ext]`
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name.split('.')
