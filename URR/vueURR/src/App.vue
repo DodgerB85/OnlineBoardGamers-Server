@@ -84,6 +84,7 @@ function resizeBoard() {
 }
 
 model.initGame()
+controller.startPlayerTurn()
 let updateTimer = null
 onMounted(() => {
 	boardObserver = new ResizeObserver(resizeBoard)
@@ -105,12 +106,6 @@ const waitingPlayerIndex = computed(() => {
 	if (personal.haltPlay || personal.canPlay() || store.gameflow.phase === rf.PHASE_GAME_OVER || rules.canExchangeBarahshum(store, personal.pov)) return null
 	return view.displayedTurnOrder(store)[0] ?? null
 })
-const showLandMarket = computed(() => {
-	if (store.gameflow.phase === rf.PHASE_SETTLEMENT) return true
-	const stateId = view.currentStateId(store)
-	if (store.gameflow.phase !== rf.PHASE_DEVELOPMENT || store.gameflow.developmentStep === "betweenStates" || store.gameflow.pendingOffer || stateId === null) return false
-	return store.players[store.states[stateId].king].money < rules.maintenanceShortfall(store, stateId)
-})
 const isBarahshumExchange = computed(() => !personal.haltPlay && !store.viewSettings.showReplay && personal.pov >= 0 && !personal.canPlay() && rules.canExchangeBarahshum(store, personal.pov))
 const actingPlayer = computed(() => store.turnDraft.ready ? store.turnDraft.player : isBarahshumExchange.value ? personal.pov : view.displayedTurnOrder(store)[0])
 const actingLabel = computed(() => {
@@ -120,7 +115,7 @@ const actingLabel = computed(() => {
 	const player = store.players[store.gameflow.turnOrder[0]]
 	const stateId = view.currentStateId(store)
 	const context = store.gameflow.pendingOffer ? "Responding" : store.gameflow.developmentStep === "betweenStates" ? "Next" : "Acting"
-	return `${context}: ${stateId === null ? '' : `${rf.STATE_NAMES[stateId]} · `}${player ? '' : 'Automatic resolution'}`
+	return `${context}: ${stateId === null ? '' : `${rf.STATE_NAMES[stateId]}\n`}${player ? '' : 'Automatic resolution'}`
 })
 const actionPanelTitle = computed(() => {
 	if (store.turnDraft.ready) return "Confirm your turn"
@@ -130,25 +125,25 @@ const actionPanelTitle = computed(() => {
 		const treaty = store.nations.find((nation) => nation.ownerType === null)
 		if (treaty) return `Treaty: ${rf.NATION_NAMES[treaty.id]}`
 	}
-	if (isBarahshumExchange.value) return "Barahshum · free canal"
-	if (map.value?.isTracing) return `Canal draft · ${Math.max(0, canalPath.value.length - 1)} segment${canalPath.value.length === 2 ? "" : "s"}`
-	if (store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep === "eridu") return canalPath.value.length >= 2 ? "Eridu · canal review" : "Eridu · special digging turn"
+	if (isBarahshumExchange.value) return "Barahshum\nfree canal"
+	if (map.value?.isTracing) return `Canal draft\n${Math.max(0, canalPath.value.length - 1)} segment${canalPath.value.length === 2 ? "" : "s"}`
+	if (store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep === "eridu") return canalPath.value.length >= 2 ? "Eridu\ncanal review" : "Eridu\nspecial digging turn"
 	const stateId = view.currentStateId(store)
-	if (store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep === "digging" && canalPath.value.length >= 2) return `${rf.STATE_NAMES[stateId]} · canal review`
-	if (stateId !== null && store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep !== "betweenStates" && store.players[store.states[stateId].king].money < rules.maintenanceShortfall(store, stateId)) return `${rf.STATE_NAMES[stateId]} · crew funding`
+	if (store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep === "digging" && canalPath.value.length >= 2) return `${rf.STATE_NAMES[stateId]}\ncanal review`
+	if (stateId !== null && store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep !== "betweenStates" && store.players[store.states[stateId].king].money < rules.maintenanceShortfall(store, stateId)) return `${rf.STATE_NAMES[stateId]}\ncrew funding`
 	if (stateId !== null && store.gameflow.phase === rf.PHASE_RAINY_SEASON) {
-		if (store.gameflow.endReason) return `${rf.STATE_NAMES[stateId]} · final ${store.rain.step === "harvest" ? "harvest" : "water"}`
-		return store.rain.step === "harvest" ? `${rf.STATE_NAMES[stateId]} · harvest ${rules.harvestAmount(store, stateId)} SPL` : `${rf.STATE_NAMES[stateId]} · route water`
+		if (store.gameflow.endReason) return `${rf.STATE_NAMES[stateId]}\nfinal ${store.rain.step === "harvest" ? "harvest" : "water"}`
+		return store.rain.step === "harvest" ? `${rf.STATE_NAMES[stateId]}\nharvest ${rules.harvestAmount(store, stateId)} SPL` : `${rf.STATE_NAMES[stateId]}\nroute water`
 	}
 	if (store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep === "betweenStates") return stateId === null ? "Before rainy season" : `Before ${rf.STATE_NAMES[stateId]} development`
-	return stateId === null ? view.phaseStr(store.gameflow.phase) : `${rf.STATE_NAMES[stateId]} · ${view.phaseStr(store.gameflow.phase)}`
+	return stateId === null ? view.phaseStr(store.gameflow.phase) : `${rf.STATE_NAMES[stateId]}\n${view.phaseStr(store.gameflow.phase)}`
 })
 function selectArea(id) {
 	selectedArea.value = id
 }
 function locateNation(id) { map.value.locateNation(id) }
 function revealStatus(type) {
-	nextTick(() => statusPanels.value.querySelector(type === "player" ? ".holdingsPanel" : ".stateStrip").scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" }))
+	if (type === "player") nextTick(() => statusPanels.value.querySelector(".holdingsPanel").scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" }))
 }
 watch(() => store.viewSettings.historyArea, (id) => { if (id) map.value.locateArea(id) })
 const automaticAction = computed(() => {
@@ -204,22 +199,21 @@ function showDebug() {
 			<p><a href="/URR/help/" target="_blank" rel="noopener">Icons and interface help</a> is also available from Rules in the menu. Enjoy the game!</p>
 		</div>
 		<div id="mainAreaLessHistory" :class="{ nationDivisionLayout: isNationDivision }" ref="mainArea" :style="{ '--board-width': `${boardBaseWidth * store.viewSettings.boardZoom}px` }">
-			<aside v-if="!isNationDivision" class="equipmentSidebar"><EquipmentSupply /></aside>
-			<aside ref="statusPanels" class="stateSidebar"><PlayerHoldings ref="holdings" /><StateStrip v-if="!isNationDivision" @inspect="revealStatus" /></aside>
+			<aside ref="statusPanels" class="stateSidebar"><PlayerHoldings ref="holdings" /><EquipmentSupply v-if="!isNationDivision" /><StateStrip v-if="!isNationDivision" @inspect="revealStatus" /></aside>
 			<div class="mapContainer" :title="isNationDivision ? 'Click the map to enlarge' : undefined" @keydown.enter="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()" @keydown.space="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()" @click="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()">
-				<TerrainMarket v-if="showLandMarket" />
+				<TerrainMarket />
 				<Teleport to="#nationMapPreviewBody" :disabled="!isMapPreviewOpen">
 				<MapArea ref="map" :selected-hex="selectedArea" :map-action="mapAction" :action-targets="actionTargets" @confirm-action="gameActions?.confirmMapAction()" @cancel-action="gameActions?.cancelMapAction()" :highlighted-player="store.viewSettings.showOwnedLand ? holdings?.activePlayer ?? null : null" :removal-area="removalArea" :land-draft="landDraft" :waiting-player-index="waitingPlayerIndex" :dig-capacity="digCapacity" @select-area="selectArea" @click-area="gameActions?.planClick($event)" @change-path="canalPath = $event" />
 				</Teleport>
 			</div>
 			<aside v-if="!store.viewSettings.showReplay" class="actionSidebar">
 				<div v-if="!isNationDivision" class="actionPanelHeading"><small class="actingLabel">{{ actingLabel }} <PlayerMarker v-if="actingPlayer !== undefined" :index="actingPlayer" /></small>{{ actionPanelTitle }}</div>
-				<DevelopmentProgress v-if="!isNationDivision && !store.turnDraft.ready" />
 				<div v-if="!store.turnDraft.ready || isNationDivision" class="actionPanelBody"><NationMarket v-if="isNationDivision" :is-board-layout="isNationDivision" @locate-nation="locateNation" />
 				<GameActions v-else ref="gameActions" :key="store.turnDraft.revision" @select-area="selectedArea = $event" @change-map-action="mapAction = $event" @change-action-targets="actionTargets = $event" :selected-area="selectedArea" :path="canalPath" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" @change-turn-action="turnAction = $event" @change-dig-capacity="digCapacity = $event" /></div>
 				<TurnControls :is-nation-division="isNationDivision" :turn-action="turnAction" :land-draft="landDraft" @end-turn="finishTurn" />
 			</aside>
 		</div>
+		<DevelopmentProgress v-if="!isNationDivision && !store.viewSettings.showReplay" :is-digging="!!gameActions?.showDigging" />
 		<DebugArea v-if="showDebug() && !store.viewSettings.showReplay" />
 		</div>
 	</div>
@@ -256,22 +250,21 @@ body {
 /* 5% page margins, shrinking only as far as the panels and a minimum-size map need. */
 #gameArea { --page-margin: clamp(12px, 5%, calc((100% - 1310px) / 2)); width: 100%; transition: margin-left .5s ease-in-out; }.historyOpen #gameArea { margin-left: 462px; }
 .mapContainer { scroll-margin-top: 12px; display: flex; flex-direction: column; gap: 12px; min-width: 0; flex: 0 0 var(--board-width); width: var(--board-width); }
-.equipmentSidebar, .stateSidebar, .actionSidebar { position: sticky; top: 12px; }
-.equipmentSidebar { flex: 0 0 210px; min-width: 0; }
+.stateSidebar, .actionSidebar { position: sticky; top: 12px; }
 .stateSidebar { flex: 0 0 260px; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
 .stateSidebar .holdingsPanel { width: 100%; }
-.actionSidebar { flex: 0 0 340px; padding: 12px; box-sizing: border-box; background: #fff9e9; border: 1px solid #aa9b77; border-radius: 5px; }
+.actionSidebar { flex: 0 0 310px; padding: 12px; box-sizing: border-box; background: #fff9e9; border: 1px solid #aa9b77; border-radius: 5px; }
 .actionSidebar .gameActions { margin: 0; padding: 0; border: 0; background: transparent; }
 .actionSidebar .equipmentCard { float: none; display: block; max-width: 100%; width: 100%; margin: 0 0 8px; }
-.actionPanelHeading { padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #c4b894; font-size: 17px; font-weight: bold; }
+.actionPanelHeading { white-space: pre-line; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #c4b894; font-size: 17px; font-weight: bold; }
 .gameActions input[type=number], .gameActions select, .nationMarket input { min-height: 36px; box-sizing: border-box; font-size: 16px; }
 
-.stateSidebar .holdingsPanel, .equipmentSidebar .equipmentSupply, .actionSidebar .gameActions, .actionSidebar .nationMarket { font-size: 16px; }
-.stateSidebar .panelTitle { font-size: 18px; }.stateSidebar .panelTitle button { font-size: 16px; font-weight: 600; }
-.stateSidebar .money > span, .stateSidebar .nationIncome, .stateSidebar .markerCount, .stateSidebar .reservedMoney, .stateSidebar .primogeniture, .stateSidebar .primogeniture b, .stateSidebar .terrainRow, .stateSidebar .eraCard > span { font-size: 16px; font-weight: 600; }
+.stateSidebar .holdingsPanel, .stateSidebar .equipmentSupply, .actionSidebar .gameActions, .actionSidebar .nationMarket { font-size: 16px; }
+.stateSidebar .panelTitle { font-size: 18px; }.stateSidebar .panelTitle button { font-size: 16px; font-weight: 400; }
+.stateSidebar .money > span, .stateSidebar .nationIncome, .stateSidebar .markerCount, .stateSidebar .reservedMoney, .stateSidebar .primogeniture, .stateSidebar .primogeniture b, .stateSidebar .terrainRow, .stateSidebar .eraCard > span { font-size: 16px; font-weight: 400; }
 .stateSidebar .playerMarker { width: 32px; height: 32px; }.stateSidebar .terrainRow img { width: 48px; height: 48px; }.stateSidebar .terrainRow .cityCount img { width: 28px; height: 28px; }.stateSidebar .ruledStates img { width: 36px; height: 36px; }
-.stateSidebar .stateCard { font-size: 16px; font-weight: 600; }.stateSidebar .stateName b { font-size: 16px; }.stateSidebar .stateMeta { font-size: 16px; font-weight: 600; white-space: normal; }.stateSidebar .treasuryHeader { flex-basis: 44px; width: 44px; }.stateSidebar .crewTile { width: 36px; height: 36px; }.stateSidebar .crewTile.splitCrew { width: 50px; flex-basis: 50px; }.stateSidebar .landowners img { width: 32px; height: 32px; }
-.actionSidebar .piece { width: 32px; height: 32px; }.actionSidebar .selectedLand > img, .actionSidebar .routingWork, .actionSidebar .offeredWork img, .actionSidebar .offerHeading img { width: 46px; height: 46px; }.actionSidebar .selectedOwner img, .actionSidebar .paymentRow img { width: 32px; height: 32px; }.actionSidebar .gameActions small { font-size: 16px; font-weight: 600; }
+.stateSidebar .stateCard { font-size: 16px; font-weight: 400; }.stateSidebar .stateName b { font-size: 16px; }.stateSidebar .stateMeta { font-size: 16px; font-weight: 400; white-space: normal; }.stateSidebar .treasuryHeader { flex-basis: 44px; width: 44px; }.stateSidebar .crewTile { width: 36px; height: 36px; }.stateSidebar .crewTile.splitCrew { width: 50px; flex-basis: 50px; }.stateSidebar .landowners img { width: 32px; height: 32px; }
+.actionSidebar .piece { width: 32px; height: 32px; }.actionSidebar .selectedLand > img, .actionSidebar .routingWork, .actionSidebar .offeredWork img, .actionSidebar .offerHeading img { width: 46px; height: 46px; }.actionSidebar .selectedOwner img, .actionSidebar .paymentRow img { width: 32px; height: 32px; }.actionSidebar .gameActions small { font-size: 16px; font-weight: 400; }
 
 #loaderOverlay {
 	position: fixed;
@@ -280,7 +273,7 @@ body {
 	z-index: 9999;
 }
 
-.saveStatus { position: fixed; right: 12px; bottom: 12px; padding: 6px 12px; background: #fff9df; border: 1px solid #8e805e; border-radius: 4px; font-size: 16px; font-weight: 600; z-index: 10000; pointer-events: none; }
+.saveStatus { position: fixed; right: 12px; bottom: 12px; padding: 6px 12px; background: #fff9df; border: 1px solid #8e805e; border-radius: 4px; font-size: 16px; font-weight: 400; z-index: 10000; pointer-events: none; }
 
 #loaderOverlay #loadingText {
 	position: absolute;
@@ -289,7 +282,7 @@ body {
 	transform: translate(-50%, -50%);
 	font-size: 36px;
 }
-.actingLabel { display: block; font-size: 16px; font-weight: 600; color: #655a42; margin-bottom: 5px; }
+.actingLabel { white-space: pre-line; display: block; font-size: 16px; font-weight: 400; color: #655a42; margin-bottom: 5px; }
 .welcomeHelper { margin-bottom: 10px; padding: 8px; background: #edf5e4; border: 1px solid #c1cdb1; border-radius: 4px; }
 .welcomeHelper > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .welcomeHelper button { flex-shrink: 0; min-width: 40px; min-height: 40px; font: inherit; font-size: 20px; }
@@ -309,8 +302,8 @@ body {
 .nationDivisionLayout .mapSurface { cursor: zoom-in; }
 .nationDivisionLayout .mapHint, .nationDivisionLayout .boardLegend { display: none; }
 .nationDivisionLayout .actionPanelHeading { font-size: 15px; padding-bottom: 5px; margin-bottom: 5px; }
-.nationDivisionLayout .nationMarket { font-size: 16px; font-weight: 600; }
-.nationDivision .welcomeHelper { max-width: 1776px; margin: 8px auto 0; box-sizing: border-box; font-size: 16px; font-weight: 600; }
+.nationDivisionLayout .nationMarket { font-size: 16px; font-weight: 400; }
+.nationDivision .welcomeHelper { max-width: 1776px; margin: 8px auto 0; box-sizing: border-box; font-size: 16px; font-weight: 400; }
 .nationDivision .welcomeHelper p { margin: 4px 0; }
 .nationMapPreview { top: 20px; margin: 0 auto; width: min(1000px, calc((100vh - 150px) * 1.2333)); max-width: calc(100vw - 40px); max-height: calc(100vh - 40px); box-sizing: border-box; padding: 12px; background: #fff9df; color: #302f27; border: 2px solid #8e805e; border-radius: 6px; }
 .nationMapPreview[open] { display: flex; flex-direction: column; overflow: hidden; }
@@ -319,8 +312,12 @@ body {
 .mapPreviewViewport { overflow: auto; min-height: 0; }
 .mapPreviewViewport:focus-visible { outline: 2px solid #177daf; }
 
+.actionSidebar :is(.buttonRow, .planButtons, .turnControls > div, .nationActions, .treatyControls, .nationActions form) { justify-content: center; }
+.actionSidebar button { text-align: center; }
+.actionSidebar .gameActions > fieldset > button, .actionSidebar .actionGroup > button, .actionSidebar .harvestChoice > button { display: block; margin-left: auto; margin-right: auto; }
+
 /* One appearance for action buttons across panels and previews. */
-:is(#app, dialog) button:not(.topMenuItem) { box-sizing: border-box; min-height: 34px; padding: 5px 8px; border: 1px solid #998a67; border-radius: 3px; background: #fffdf4; color: #302f27; font-family: Arial, sans-serif; font-size: 16px; font-weight: 600; line-height: 1.2; opacity: 1; cursor: pointer; }
+:is(#app, dialog) button:not(.topMenuItem) { box-sizing: border-box; min-height: 34px; padding: 5px 8px; border: 1px solid #998a67; border-radius: 3px; background: #fffdf4; color: #302f27; font-family: Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 1.2; opacity: 1; cursor: pointer; }
 :is(#app, dialog) button:not(.topMenuItem):hover:enabled { background: #f1e9d7; border-color: #756440; }
 :is(#app, dialog) button:not(.topMenuItem):focus-visible { outline: 2px solid #177daf; outline-offset: 2px; }
 :is(#app, dialog) button:not(.topMenuItem):is([aria-pressed=true], [aria-current], .current, .selected) { background: #e1edf5; border-color: #177daf; }

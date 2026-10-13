@@ -266,8 +266,8 @@ function getKickoutTimerText() {
 .topMenuItem img { width: 38px; height: 38px; }
 .topMenuItem span { font-size: 16px; font-weight: bold; display: block; }
 
-#topRight { flex-shrink: 0; height: 100%; font-size: 16px; font-weight: 600; text-align: center; margin-right: 5px; }
-#zoomDiv { display: flex; justify-content: flex-end; gap: 4px; margin-top: 3px; }#zoomDiv button { min-height: 25px; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }#zoomDiv button:disabled { opacity: .4; cursor: default; }
+#topRight { flex-shrink: 0; height: 100%; font-size: 16px; font-weight: 400; text-align: center; margin-right: 5px; }
+#zoomDiv { display: flex; justify-content: flex-end; gap: 4px; margin-top: 3px; }#zoomDiv button { min-height: 25px; font: inherit; font-size: 16px; font-weight: 400; cursor: pointer; }#zoomDiv button:disabled { opacity: .4; cursor: default; }
 #topInfos { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; min-width: fit-content; flex-shrink: 0; margin: 0 auto; }
 .menuDivider { display: inline-block; width: 5px; height: 50px; background-color: darkgray; margin: 0px 10px 0px 10px; }
 .turnOrderSpan { display: inline-block; padding: 5px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }

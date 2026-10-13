@@ -11,7 +11,7 @@ export function turnContext(game) {
 }
 
 export function endsDecision(before, after, action) {
-	return turnContext(before) !== turnContext(after) || ["pass", "buyNation", "bidNation", "tradeLand", "bidPrimogeniture", "digEridu", "beginDevelopment", "endDevelopment", "respondOffer", "harvest", "exchangeBarahshum"].includes(action.type)
+	return turnContext(before) !== turnContext(after) || ["pass", "buyNation", "bidNation", "tradeLand", "bidPrimogeniture", "digEridu", "beginDevelopment", "endDevelopment", "respondOffer", "harvest", "exchangeBarahshum", "passBarahshum"].includes(action.type)
 }
 
 export function defaultEndAction(game) {
@@ -27,14 +27,15 @@ export function actionSummary(before, after, action) {
 	if (action.type === "allocateWater") message = `${label(action.area)} · ${before.board.areas.find((area) => area.id === action.area)?.waterwork ? `${action.amount} water sent` : "irrigated"}.`
 	else if (["dig", "digEridu", "exchangeBarahshum"].includes(action.type)) message = `Canal ${(action.path || [action.from, action.to]).map(label).join(" → ")}`
 	else if (action.type === "buyCard") message = "Crew"
-	else if (["requestWaterwork", "exchangeCalah"].includes(action.type)) message = `${label(action.area)} · ${action.kind}${action.type === "exchangeCalah" ? " via Calah" : ""}${after.gameflow.pendingOffer ? " · agreement requested" : ""}`
+	else if (["requestWaterwork", "exchangeCalah"].includes(action.type)) message = `${label(action.area)} · ${action.kind}${action.type === "exchangeCalah" ? " via Calah" : ""}${after.gameflow.pendingOffer || after.gameflow.waterworkRequests?.some((offer) => offer.action.area === action.area) ? " · agreement needed" : ""}`
 	else if (action.type === "respondOffer") message = action.accept ? "Agreement accepted" : "Agreement declined"
 	else if (action.type === "harvest") message = `${rf.STATE_NAMES[before.rain.harvestOrder[0]]} harvest · ${action.choice === "store" ? `store in treasury${action.remove ? ` and remove ${label(action.remove)}` : ""}` : "distribute to landowners"}.`
 	else if (["buyNation", "bidNation", "offerNation"].includes(action.type)) message = `${rf.NATION_NAMES[action.nation]} · ${action.type === "buyNation" ? "purchase" : `offer ${action.amount} SPL`}`
 	else if (action.type === "tradeLand") message = `Trade: ${[action.buy ? `buy ${label(action.buy)}` : "", ...(action.sellBefore || []).flat().map((id) => `sell ${label(id)}`), ...(action.sellAfter || []).flat().map((id) => `sell ${label(id)}`)].filter(Boolean).join(" · ")}.`
 	else if (action.type === "bidPrimogeniture") message = `Primogeniture bid · ${action.amount} SPL`
+	else if (action.type === "passBarahshum") message = "Pass Barahshum for this round"
 	else if (action.type === "pass") message = "Pass"
-	else if (action.type === "endDevelopment") message = `${rf.STATE_NAMES[before.gameflow.stateOrder[before.gameflow.stateIndex]]} development complete.`
+	else if (action.type === "endDevelopment") message = after.gameflow.pendingOffer ? "Request landowner agreement." : `${rf.STATE_NAMES[before.gameflow.stateOrder[before.gameflow.stateIndex]]} development complete.`
 	else if (action.type === "resolveMaintenance") message = "Required crew hired"
 	else message = "Turn choice"
 	return message

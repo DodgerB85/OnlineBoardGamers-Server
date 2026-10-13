@@ -54,9 +54,9 @@ watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.val
 <template>
 	<section class="nationMarket" :class="{ boardLayout: isBoardLayout, hasPendingBids }" aria-label="Independent nations">
 		<p class="marketHeading"><b>{{ auction ? `Auction: ${rf.NATION_NAMES[auction.nation]}` : "Independent nations" }}</b><span>{{ available }} SPL available</span></p>
-		<p v-if="reservedMoney" class="moneySummary" title="Reserved money becomes available when outbid; the winner pays when the nation is awarded.">{{ reservedMoney }} SPL reserved for highest bids · {{ totalMoney }} SPL total</p>
-		<p v-if="auction" class="auctionInfo">High bid {{ auction.amount }} SPL · <PlayerMarker :index="auction.highPlayer" /></p>
-		<p v-else-if="!store.turnDraft.ready" class="marketHint">Buy the current nation, or make an offer on another.</p>
+		<p v-if="reservedMoney" class="moneySummary" title="Reserved money becomes available when outbid; the winner pays when the nation is awarded.">{{ reservedMoney }} SPL reserved for highest bids<br>{{ totalMoney }} SPL total</p>
+		<p v-if="auction" class="auctionInfo">High bid {{ auction.amount }} SPL<br><PlayerMarker :index="auction.highPlayer" /></p>
+		<p v-else-if="!store.turnDraft.ready" class="marketHint">Buy the current nation, or make an offer on another. Buying, offering, or passing ends your turn.</p>
 		<div class="nationList">
 			<article v-for="nation in displayedNations" :key="nation.id" class="nationRow" :aria-label="rf.NATION_NAMES[nation.id]" :class="{ current: isAuction(nation) || (!auction && treaty?.id === nation.id), acquired: nation.ownerType !== null, ashur: nation.id === rf.NATION_ASHUR }">
 				<div class="cardHeading"><ArtworkCard :src="assets.getNationCardImage(nation.id)" :alt="rf.NATION_NAMES[nation.id]" /></div>
@@ -73,13 +73,13 @@ watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.val
 						<label :for="`nation-bid-${nation.id}`">{{ auction ? "Bid" : "Offer" }} SPL</label>
 						<input :id="`nation-bid-${nation.id}`" type="number" inputmode="numeric" :value="amount(nation)" @input="amounts[nation.id] = Number($event.target.value)" :min="minimum(nation)" :max="moneyForBid(nation)" step="1" required :disabled="!personal.canPlay()" />
 						<template v-if="nation.bids.length"><button v-for="increment in [1, 5, 10]" :key="increment" type="button" class="bidAdjustment" :aria-label="`Raise bid by ${increment} SPL`" :disabled="!personal.canPlay() || amount(nation) + increment > moneyForBid(nation)" @click="adjustBid(nation, increment)">+{{ increment }}</button></template>
-						<button :disabled="!personal.canPlay() || amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)">{{ auction ? "Bid" : "Make offer" }} &amp; End Turn</button>
+						<button :disabled="!personal.canPlay() || amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)">{{ auction ? "Bid" : "Make offer" }}</button>
 					</form>
 					<p v-if="!auction && treaty?.id !== nation.id && amountError(nation)" class="amountError" role="status">{{ amountError(nation) }}</p>
 				</template>
 				<div v-if="nation.ownerType === null && !auction && treaty?.id === nation.id" class="marketControls treatyControls">
-					<button class="primaryAction" :disabled="!personal.canPlay() || available < price(nation)" @click="endTurnWith({ type: 'buyNation', nation: nation.id })">Buy for {{ price(nation) }} SPL &amp; End Turn</button>
-					<button class="passButton" :disabled="!personal.canPlay()" @click="endTurnWith({ type: 'pass' })">Pass &amp; End Turn</button>
+					<button class="primaryAction" :disabled="!personal.canPlay() || available < price(nation)" @click="endTurnWith({ type: 'buyNation', nation: nation.id })">Buy for {{ price(nation) }} SPL</button>
+					<button class="passButton" :disabled="!personal.canPlay()" @click="endTurnWith({ type: 'pass' })">Pass</button>
 				</div>
 				<div v-if="nation.ownerType === null && isAuction(nation)" class="marketControls auctionControls">
 					<form @submit.prevent="bid(nation)">
@@ -101,23 +101,24 @@ watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.val
 <style scoped>
 .cardHeading { margin-bottom: 7px; }.cardHeading img { width: 100%; display: block; }
 .nationRow.ashur .cardHeading { width: 180px; max-width: 100%; margin: 0 auto 7px; }
-.nationLocation { flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; min-height: 40px; font: inherit; font-size: 16px; font-weight: 600; }.nationLocation img { width: 22px; height: 22px; }
-.nationMarket { text-align: left; color: #263238; font-size: 16px; font-weight: 600; }.nationMarket p { margin: 5px 0; }.marketHeading { display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #c8c2b4; }.marketHeading span { color: #52616a; }.auctionInfo { padding: 5px 7px; background: #e8f2f6; border-left: 3px solid #177daf; }
+.nationLocation { flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; min-height: 40px; font: inherit; font-size: 16px; font-weight: 400; }.nationLocation img { width: 22px; height: 22px; }
+.nationMarket { text-align: left; color: #263238; font-size: 16px; font-weight: 400; }.nationMarket p { margin: 5px 0; }.marketHeading { display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #c8c2b4; }.marketHeading span { color: #52616a; }.auctionInfo { padding: 5px 7px; background: #e8f2f6; border-left: 3px solid #177daf; }
 .nationList { display: flex; flex-direction: column; gap: 5px; margin: 7px 0; }.nationRow { min-width: 0; padding: 7px; background: #f7f5ef; border: 1px solid #c9c2b2; border-radius: 4px; }.nationRow.current { border-color: #177daf; box-shadow: inset 3px 0 #177daf; }.nationRow.acquired { background: #ece9df; }
-ol { padding-left: 18px; margin: 4px 0; color: #52616a; }form { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }form label { font-size: 16px; font-weight: 600; }input { width: 58px; min-width: 0; }button { cursor: pointer; }button:disabled { cursor: default; }.passButton { width: 100%; margin-top: 3px; }
+ol { padding-left: 18px; margin: 4px 0; color: #52616a; }form { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }form label { font-size: 16px; font-weight: 400; }input { width: 58px; min-width: 0; }button { cursor: pointer; }button:disabled { cursor: default; }.passButton { width: 100%; margin-top: 3px; }
 .nationBids { padding-left: 0; margin: 4px 0; list-style: none; }.nationBids li { display: flex; align-items: center; gap: 5px; padding: 3px; }.nationBids img { width: 22px; height: 22px; }.nationBids span { min-width: 0; overflow-wrap: anywhere; }.nationBids b { margin-left: auto; white-space: nowrap; }.nationBids .bidPosition { color: #625940; }.nationBids .currentBidder { background: #e1edf5; border-left: 3px solid #177daf; }
-.marketHint { color: #52616a; font-size: 16px; font-weight: 600; }
+.marketHint { color: #52616a; font-size: 16px; font-weight: 400; }
 .auctionInfo { overflow-wrap: anywhere; }
-.amountError { color: #a40000; font-size: 16px; font-weight: 600; }
+.amountError { color: #a40000; font-size: 16px; font-weight: 400; }
 .bidAdjustment { min-width: 40px; padding: 5px; }
 .marketControls { margin-top: 7px; padding-top: 6px; border-top: 1px solid #c8c2b4; }
-.treatyControls { display: flex; gap: 6px; align-items: stretch; }.treatyControls > button { flex: 1; min-width: 0; margin: 0; }.treatyControls .passButton { width: auto; flex: 0 0 auto; }.treatyControls small { display: block; margin-top: 3px; font-size: 16px; font-weight: 600; }
+.treatyControls { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }.treatyControls > button { margin: 0; }.treatyControls .passButton { width: auto; }.treatyControls small { display: block; margin-top: 3px; font-size: 16px; font-weight: 400; }
 
+.boardLayout { container-type: inline-size; }
 .boardLayout .nationList { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; align-items: stretch; }
 .boardLayout .nationRow { display: flex; flex-direction: column; padding: 6px; }
 .boardLayout .cardHeading, .boardLayout .nationRow.ashur .cardHeading { width: 100%; margin: 0 0 5px; }
-.boardLayout .cardHeading :deep(.artworkButton img) { width: 100%; height: clamp(80px, calc((100vh - 580px) / 2), 150px); object-fit: contain; }
-.boardLayout .nationBids { display: flex; flex-wrap: wrap; gap: 2px 6px; font-size: 16px; font-weight: 600; }
+.boardLayout .cardHeading :deep(.artworkButton img) { width: 100%; height: 150px; object-fit: contain; }
+.boardLayout .nationBids { display: flex; flex-wrap: wrap; gap: 2px 6px; font-size: 16px; font-weight: 400; }
 .boardLayout .nationBids li { flex: 1 1 auto; }
 .boardLayout .nationBids img { width: 28px; height: 28px; }
 .boardLayout .marketControls { margin: 0; padding: 0; border: 0; }
@@ -128,9 +129,11 @@ ol { padding-left: 18px; margin: 4px 0; color: #52616a; }form { display: flex; f
 .boardLayout .bidAdjustment { min-width: 32px; padding: 4px; }
 .nationActions { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 4px; margin-top: auto; }
 .nationActions > form, .nationActions > .marketControls { flex: 1; min-width: 0; }
+.nationActions button { max-width: 100%; white-space: nowrap; }
 .nationActions .amountError { flex-basis: 100%; }
 .boardLayout .nationActions { padding-top: 5px; border-top: 1px solid #c8c2b4; }
-.boardLayout .nationActions button { min-height: 34px; font-size: 16px; font-weight: 600; padding: 4px 6px; }
-.boardLayout .nationActions input { min-height: 34px; font-size: 16px; font-weight: 600; }
-.boardLayout.hasPendingBids .cardHeading :deep(.artworkButton img) { height: clamp(60px, calc((100vh - 660px) / 2), 150px); }
+.boardLayout .nationActions button { min-height: 34px; font-size: 16px; font-weight: 400; padding: 4px 6px; }
+.boardLayout .nationActions input { min-height: 34px; font-size: 16px; font-weight: 400; }
+@container (max-width: 880px) { .boardLayout .nationList { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container (max-width: 580px) { .boardLayout .nationList { grid-template-columns: minmax(0, 1fr); } }
 </style>
