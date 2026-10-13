@@ -412,8 +412,8 @@ function selectCard(card) {
 .handCard.back img { width: 100%; height: 100%; display: block; }
 /* Selectable cards are yellow; the mouseover (and the pair a hovered card would
    discard) turns light green, like the board's other clickable targets. */
-.handCard.selectable { cursor: pointer; outline: 2px solid #ffd400; }
-.handCard.selectable:hover, .handCard.pair { outline: 2px solid #90ee90; }
+.handCard.selectable { cursor: pointer; outline: 5px solid #ffd400; }
+.handCard.selectable:hover, .handCard.pair { outline: 5px solid #90ee90; }
 .handCard.dimmed { opacity: 0.45; }
 
 .stackDialog { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center; }

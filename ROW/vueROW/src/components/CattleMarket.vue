@@ -9,6 +9,7 @@ import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
 import * as view from "../js/ROWview"
 import { isCattleCard, CattleType } from "../js/ROWcore"
+import { CATTLE_COSTS } from "../js/ROWdata"
 import { useModelStore } from "../stores/ROWstore.js"
 import CardView from "./CardView.vue"
 
@@ -79,6 +80,19 @@ function drawTwo() {
 function canBuySingle(breedingValue) {
 	return possibleBuys.value.some((o) => o.breedingValue === breedingValue && !o.pair)
 }
+/** Price tag on a market card: the cheapest single buy the remaining cowboys can pay for. */
+function priceOf(card) {
+	const singles = (CATTLE_COSTS[card.value] ?? []).filter((c) => !c.pair)
+	if (!singles.length) return null
+	const cows = g().currentPlayerState().cowboysRemaining()
+	const withinCowboys = singles.filter((c) => c.cowboys <= cows)
+	return Math.min(...(withinCowboys.length ? withinCowboys : singles).map((c) => c.dollars))
+}
+/** Whether any single buy of this card can be paid for right now. */
+function canAfford(card) {
+	const ps = g().currentPlayerState()
+	return (CATTLE_COSTS[card.value] ?? []).some((c) => !c.pair && c.cowboys <= ps.cowboysRemaining() && c.dollars <= ps.balance)
+}
 function canBuyPair(breedingValue) {
 	return possibleBuys.value.some((o) => o.breedingValue === breedingValue && o.pair)
 }
@@ -145,7 +159,9 @@ function confirm() {
 				:class="{ selectable: canSelectCard(card), disabled: !canSelectCard(card), selected: isSelected(card) }"
 				:card="card"
 				@click="selectCard(card)"
-			/>
+			>
+				<em v-if="priceOf(card) !== null" class="price" :class="{ cant: !canAfford(card) }">${{ priceOf(card) }}</em>
+			</CardView>
 			<div
 				class="drawStack"
 				:class="{ empty: drawStackSize === 0, selectable: drawingTwo }"
@@ -225,4 +241,20 @@ function confirm() {
 	background: rgba(144, 238, 144, 0.85);
 	text-shadow: -1px -1px 0 #000, 1px 1px 0 #000;
 }
+/* Price of the card: always shown, front and centre, red while it is out of reach this turn. */
+.price {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	text-align: center;
+	font-style: normal;
+	font-size: 24px;
+	font-weight: bold;
+	color: white;
+	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+	pointer-events: none;
+}
+.price.cant { color: #ff5252; }
 </style>

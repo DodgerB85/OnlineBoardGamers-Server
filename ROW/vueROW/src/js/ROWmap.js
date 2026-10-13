@@ -11,7 +11,8 @@
  * component.
  */
 import { ActionType } from "./ROWreference"
-import { neutralBuildingAction, playerBuildingAction, playerBuildingInfo } from "./ROWdata"
+import { CattleType, isCattleCard, isObjectiveCard } from "./ROWcore"
+import { JOB_MARKET_COST, neutralBuildingAction, playerBuildingAction, playerBuildingInfo } from "./ROWdata"
 
 /** Trail location rectangles, keyed by engine location name. */
 export const TRAIL_SPOTS = {
@@ -370,6 +371,91 @@ export function canPlaceBuilding(g, player, loc, building, action) {
 	}
 	const perCraftsman = action === ActionType.PLACE_BUILDING_FOR_FREE ? 0 : action === ActionType.PLACE_CHEAP_BUILDING ? 1 : 2
 	return needed <= ps.getNumberOfCraftsmen() && needed * perCraftsman <= ps.balance
+}
+
+/** Dollars an action charges the player, from the cases in Game.execute. */
+const ACTION_DOLLARS = {
+	PAY_1_DOLLAR_TO_MOVE_ENGINE_1_FORWARD: 1,
+	PAY_2_DOLLARS_TO_MOVE_ENGINE_2_FORWARD: 2,
+	PAY_1_DOLLAR_AND_MOVE_ENGINE_1_BACKWARDS_TO_GAIN_1_CERTIFICATE: 1,
+	PAY_2_DOLLARS_AND_MOVE_ENGINE_2_BACKWARDS_TO_GAIN_2_CERTIFICATES: 2,
+	REMOVE_HAZARD_FOR_2_DOLLARS: 2,
+	REMOVE_HAZARD_FOR_5_DOLLARS: 5,
+}
+const BROWN_CATTLE = [CattleType.AYRSHIRE, CattleType.BROWN_SWISS, CattleType.HOLSTEIN]
+
+/**
+ * View-side preview of what Game.execute rejects: no dollars left, or the card
+ * the action discards is not in hand. Unaffordable building action areas are
+ * drawn orange instead of failing on the click.
+ */
+export function canAffordAction(g, action) {
+	const ps = g.currentPlayerState()
+	if ((ACTION_DOLLARS[action] ?? 0) > ps.balance) return false
+	const cattle = ps.hand.filter(isCattleCard)
+	const has = (type) => cattle.some((c) => c.type === type)
+	switch (action) {
+		case ActionType.DISCARD_1_GUERNSEY:
+		case ActionType.DISCARD_1_GUERNSEY_TO_GAIN_4_DOLLARS:
+			return has(CattleType.GUERNSEY)
+		case ActionType.DISCARD_1_DUTCH_BELT_TO_GAIN_2_DOLLARS:
+		case ActionType.DISCARD_1_DUTCH_BELT_TO_GAIN_3_DOLLARS:
+		case ActionType.DISCARD_1_DUTCH_BELT_TO_MOVE_ENGINE_2_FORWARD:
+			return has(CattleType.DUTCH_BELT)
+		case ActionType.DISCARD_1_BLACK_ANGUS_TO_GAIN_2_DOLLARS:
+		case ActionType.DISCARD_1_BLACK_ANGUS_TO_GAIN_2_CERTIFICATES:
+			return has(CattleType.BLACK_ANGUS)
+		case ActionType.DISCARD_1_JERSEY_TO_GAIN_2_DOLLARS:
+		case ActionType.DISCARD_1_JERSEY_TO_GAIN_4_DOLLARS:
+		case ActionType.DISCARD_1_JERSEY_TO_GAIN_1_CERTIFICATE:
+		case ActionType.DISCARD_1_JERSEY_TO_GAIN_2_CERTIFICATES:
+		case ActionType.DISCARD_1_JERSEY_TO_GAIN_1_CERTIFICATE_AND_2_DOLLARS:
+		case ActionType.DISCARD_1_JERSEY_TO_MOVE_ENGINE_1_FORWARD:
+		case ActionType.DISCARD_1_JERSEY_FOR_SINGLE_AUXILIARY_ACTION:
+			return has(CattleType.JERSEY)
+		case ActionType.DISCARD_1_HOLSTEIN_TO_GAIN_10_DOLLARS:
+			return has(CattleType.HOLSTEIN)
+		case ActionType.DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS:
+			return cattle.some((c) => BROWN_CATTLE.includes(c.type))
+		case ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_1_CERTIFICATE:
+		case ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_3_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND:
+		case ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_6_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND:
+			return cattle.length > 0
+		case ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS:
+		case ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS: {
+			const counts = {}
+			for (const c of cattle) counts[c.type] = (counts[c.type] ?? 0) + 1
+			return Object.values(counts).some((n) => n >= 2)
+		}
+		case ActionType.DISCARD_1_OBJECTIVE_CARD_TO_GAIN_2_CERTIFICATES:
+			return ps.hand.some(isObjectiveCard)
+		case ActionType.HIRE_WORKER:
+		case ActionType.HIRE_WORKER_PLUS_2:
+		case ActionType.HIRE_WORKER_MINUS_1:
+		case ActionType.HIRE_WORKER_MINUS_2:
+			return cheapestHire(g, action) <= ps.balance
+		case ActionType.PLACE_BUILDING:
+		case ActionType.PLACE_CHEAP_BUILDING:
+		case ActionType.PLACE_BUILDING_FOR_FREE:
+			return [...g.getTrail().locations.values()].some(
+				(loc) =>
+					loc.kind === "BUILDING" &&
+					(!loc.building || loc.building.player === ps.player) &&
+					ps.buildings.some((b) => canPlaceBuilding(g, ps.player, loc, b, action)),
+			)
+	}
+	return true
+}
+
+/** Cheapest worker left on the job market for a hire action, including its cost modifier. */
+function cheapestHire(g, action) {
+	const jm = g.getJobMarket()
+	const mod = action === ActionType.HIRE_WORKER_PLUS_2 ? 2 : action === ActionType.HIRE_WORKER_MINUS_1 ? -1 : action === ActionType.HIRE_WORKER_MINUS_2 ? -2 : 0
+	let cheapest = Infinity
+	jm.rows.forEach((row, i) => {
+		if (i < jm.currentRowIndex && row.workers.length) cheapest = Math.min(cheapest, JOB_MARKET_COST[i] + mod)
+	})
+	return cheapest
 }
 
 // ---------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ActionType, Game, JavaRandom, defaultOptions } from "./ROWindex";
-import { armedTrailMove, canPlaceBuilding, trailMoveTargets, trailRoute } from "./ROWmap";
+import { ActionType, CattleType, Game, JavaRandom, defaultOptions } from "./ROWindex";
+import { armedTrailMove, canAffordAction, canPlaceBuilding, trailMoveTargets, trailRoute } from "./ROWmap";
 
 function players(n) {
     const colors = ["RED", "BLUE", "YELLOW", "GREEN"];
@@ -36,6 +36,34 @@ describe("canPlaceBuilding (view preview of Game.placeBuilding)", () => {
         expect(canPlaceBuilding(game, ps.player, occupied(ps.player), "1a", ActionType.PLACE_BUILDING)).toBe(false);
         expect(canPlaceBuilding(game, ps.player, occupied(null, "A"), "1a", ActionType.PLACE_BUILDING)).toBe(false);
         expect(canPlaceBuilding(game, ps.player, occupied("Someone Else"), "4a", ActionType.PLACE_BUILDING)).toBe(false);
+    });
+});
+
+describe("canAffordAction (view preview of Game.execute's dollars and cards)", () => {
+    it("rejects a dollar action the balance cannot pay", () => {
+        const { game, ps } = setup();
+        ps.balance = 1;
+        expect(canAffordAction(game, ActionType.REMOVE_HAZARD_FOR_2_DOLLARS)).toBe(false);
+        expect(canAffordAction(game, ActionType.REMOVE_HAZARD_FOR_5_DOLLARS)).toBe(false);
+        expect(canAffordAction(game, ActionType.REMOVE_HAZARD)).toBe(true);
+    });
+    it("rejects a discard the hand cannot satisfy", () => {
+        const { game, ps } = setup();
+        ps.hand = [];
+        expect(canAffordAction(game, ActionType.DISCARD_1_GUERNSEY)).toBe(false);
+        expect(canAffordAction(game, ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_1_CERTIFICATE)).toBe(false);
+        ps.hand.push({ type: CattleType.GUERNSEY, points: 0, value: 2 });
+        expect(canAffordAction(game, ActionType.DISCARD_1_GUERNSEY)).toBe(true);
+        expect(canAffordAction(game, ActionType.DISCARD_1_JERSEY_TO_GAIN_2_DOLLARS)).toBe(false);
+        expect(canAffordAction(game, ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS)).toBe(false);
+        ps.hand.push({ type: CattleType.GUERNSEY, points: 0, value: 2 });
+        expect(canAffordAction(game, ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS)).toBe(true);
+    });
+    it("rejects hiring when the job market cannot offer a worker the balance covers", () => {
+        const { game, ps } = setup();
+        ps.balance = 4;
+        // Row 0 costs 6$, so nothing on the market is affordable until a row is refilled.
+        expect(canAffordAction(game, ActionType.HIRE_WORKER)).toBe(false);
     });
 });
 

@@ -12,6 +12,7 @@ import * as controller from "../js/ROWcontroller"
 import * as model from "../js/ROWmodel"
 import * as map from "../js/ROWmap"
 import * as view from "../js/ROWview"
+import { handFee } from "../js/ROWcore"
 import { cityStrip, RTTN_BIG_TOWNS } from "../js/ROWdata"
 import { CERTIFICATE_STEPS } from "../js/ROWengine"
 import { useModelStore } from "../stores/ROWstore.js"
@@ -225,10 +226,18 @@ const routeSteps = computed(() => {
 	return target.steps
 		.map((name, i) => {
 			const c = center(name)
-			return c ? { key: `${name}-${i}`, n: i + 1, cx: c.cx, cy: c.cy } : null
+			if (!c) return null
+			const cost = stepCost(name)
+			return { key: `${name}-${i}`, label: `#${i + 1}${cost ? ` ($${cost})` : ""}`, cx: c.cx, cy: c.cy }
 		})
 		.filter(Boolean)
 })
+
+/** What walking onto `name` costs this turn: its hand fee, capped at the balance the way buildMove caps it. */
+function stepCost(name) {
+	const game = g()
+	return Math.min(game.currentPlayerState().balance, handFee(game.getTrail().getLocation(name).getHand(game.edition), game.state.players.length))
+}
 
 /** Top edge of the spot the planned walk has reached: where the Stay Here popup hangs. */
 const stayHereAt = computed(() => {
@@ -513,7 +522,10 @@ const jobToken = computed(() => {
 const reachableSpaces = computed(() => {
 	const out = new Set()
 	if (!game.value) return out
-	for (const a of store.actions) for (const s of map.reachableSpacesFor(a, g())) out.add(s)
+	// The train only lights up once its own action area has been picked on the
+	// tile, not as soon as a building offers a move as one option among several.
+	const a = store.selectedAction
+	if (a) for (const s of map.reachableSpacesFor(a, g())) out.add(s)
 	return out
 })
 
@@ -574,10 +586,13 @@ function buildingActionRegions(name, rect, inter) {
 			: [panel(left, middle), panel(middle, right)]
 	}
 
-	return groups.map((slots, index) => ({
-		points: shapes[index],
-		actions: slots.map((slot) => allActions[slot]).filter((action) => actions.includes(action) && !map.MARKET_DRAW_ACTIONS.has(action)),
-	})).filter((region) => region.actions.length)
+	return groups
+		.map((slots, index) => ({
+			points: shapes[index],
+			actions: slots.map((slot) => allActions[slot]).filter((action) => actions.includes(action) && !map.MARKET_DRAW_ACTIONS.has(action)),
+		}))
+		.filter((region) => region.actions.length)
+		.map((region) => ({ ...region, affordable: region.actions.some((a) => map.canAffordAction(g(), a)) }))
 }
 
 const activeBuildingRegions = computed(() => {
@@ -680,6 +695,7 @@ function runHotspot(opt, name, mode) {
 }
 
 function clickBuildingRegion(region, mode = region.mode) {
+	if (!region.affordable) return
 	if (region.actions.length === 1) {
 		runHotspot(region.actions[0], region.name, mode)
 		return
@@ -689,7 +705,11 @@ function clickBuildingRegion(region, mode = region.mode) {
 	chooser.value = {
 		x: pos.cx,
 		y: pos.cy,
-		cands: region.actions.map((action) => ({ label: view.humanizeAction(action), run: () => runHotspot(action, region.name, mode) })),
+		cands: region.actions.map((action) => ({
+			label: view.humanizeAction(action),
+			enabled: map.canAffordAction(g(), action),
+			run: () => runHotspot(action, region.name, mode),
+		})),
 	}
 }
 
@@ -867,6 +887,7 @@ function leaveTarget(t) {
 					v-for="(region, index) in activeBuildingRegions"
 					:key="'building-region-' + region.name + '-' + index"
 					class="hotspot originalHotspot"
+					:class="{ disabled: !region.affordable }"
 					:points="region.points"
 					@mouseenter="enterBuilding(region.name)"
 					@mouseleave="leaveBuilding"
@@ -900,6 +921,7 @@ function leaveTarget(t) {
 								v-for="(region, index) in hoveredBuilding.regions"
 								:key="index"
 								class="hotspot"
+								:class="{ disabled: !region.affordable }"
 								:points="region.points"
 								@click.stop="clickBuildingRegion(region)"
 							/>
@@ -909,7 +931,7 @@ function leaveTarget(t) {
 
 				<!-- steps of the hovered move, numbered so the route reads at a glance -->
 				<g v-if="routeSteps.length" class="routeNumbers">
-					<text v-for="s in routeSteps" :key="s.key" :x="s.cx" :y="s.cy + 5" text-anchor="middle">{{ s.n }}</text>
+					<text v-for="s in routeSteps" :key="s.key" :x="s.cx" :y="s.cy + 5" text-anchor="middle">{{ s.label }}</text>
 				</g>
 			</g>
 		</svg>
@@ -922,7 +944,7 @@ function leaveTarget(t) {
 		>
 			<template v-for="(c, i) in chooser.cands" :key="i">
 				<img v-if="c.img" class="cand" :class="c.enabled === false ? 'disabled' : 'enabled'" :src="c.img" :title="c.label" :alt="c.label" draggable="false" @click="choose(c)" />
-				<button v-else class="act" @click="choose(c)">{{ c.label }}</button>
+				<button v-else class="act" :disabled="c.enabled === false" @click="choose(c)">{{ c.label }}</button>
 			</template>
 			<button class="act cancel" @click="chooser = null">Cancel</button>
 		</div>
@@ -1025,9 +1047,13 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 @keyframes buildingZoom {
 	from { transform: scale(0.5); }
 }
-/* Mousing off plays that same zoom backwards, so the tile shrinks back into the board. */
+/* Mousing off plays that same zoom backwards, so the tile shrinks back into the board.
+   Its own keyframes: a direction change on the finished zoom-in does not restart it. */
+@keyframes buildingZoomOut {
+	to { transform: scale(0.5); }
+}
 .buildingOverlay.buildingZoom-leave-active {
-	animation: buildingZoom 150ms ease-out reverse forwards;
+	animation: buildingZoomOut 150ms ease-out forwards;
 }
 /* Border of the 2x tile, drawn over its artwork so it is not lost behind it. */
 .buildingOutline { fill: none; stroke: black; stroke-width: 6; pointer-events: none; }
@@ -1039,6 +1065,9 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 	cursor: pointer;
 }
 .hotspot:hover { fill: rgb(144, 238, 144, 0.55); stroke: #90ee90; }
+/* No dollars or no card to discard: orange, no hover state, click ignored. */
+.hotspot.disabled { fill: rgb(255, 165, 0, 0.4); stroke: orange; cursor: default; }
+.hotspot.disabled:hover { fill: rgb(255, 165, 0, 0.4); stroke: orange; }
 
 .chooser {
 	position: absolute;
@@ -1054,12 +1083,13 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 .chooser .act { font-size: 12px; padding: 3px 8px; cursor: pointer; white-space: nowrap; }
+.chooser .act:disabled { opacity: 0.4; cursor: default; }
 .chooser .cancel { background: #eee; }
 
-/* Numbered step markers on the route to the hovered destination. */
+/* Numbered step markers on the route to the hovered destination, with its hand fee. */
 .routeNumbers text {
 	fill: white;
-	font-size: 17px;
+	font-size: 14px;
 	font-weight: bold;
 	paint-order: stroke;
 	stroke: black;
