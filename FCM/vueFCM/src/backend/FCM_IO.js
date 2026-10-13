@@ -1566,12 +1566,14 @@ export async function castVote(topic, choice) {
 }
 
 // Cash still owed at payday after a player's move - mirrors checkPaydayDataValid
-function paydayDueForGuard(playerIndex, paydayMove) {
+export function paydayDueForGuard(playerIndex, paydayMove) {
 	// paydayMove = [[flagOrFires], [paidInFood]]
 	const flags = paydayMove[0]
 	const food = paydayMove[1] || []
-	// Trainer MS bust: money goes to 0, never negative
-	if (flags.length === 1 && flags[0] === -5) return 0
+	// First Trainer Used: never insolvent. The bust rule (rules.paySalaries)
+	// takes all their cash, keeps every employee and never goes negative - this
+	// covers both the -5 pre-move and the in-payday manual keep-all move (-8)
+	if (plyr.hasMilestone(playerIndex, rf.FIRST_TRAINER_USED)) return 0
 	let due = rules.salary(playerIndex)
 	const unitarySalary = plyr.unitarySalary(playerIndex)
 	if (flags.length >= 1 && flags[0] >= 0) {
