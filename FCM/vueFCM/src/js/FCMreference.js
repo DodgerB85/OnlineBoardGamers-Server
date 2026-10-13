@@ -564,6 +564,9 @@ export const ORIGINAL_AVAILABLE_EMPLOYEES = [
 	-1,
 	-1,
 	-1,
+	// Media Line mod
+	-1,
+	-1,
 ]
 /*exp, 32-48*/ /*-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]*/
 

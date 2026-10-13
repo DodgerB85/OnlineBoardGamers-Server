@@ -123,6 +123,8 @@ describe("Media Line setup", () => {
 	it("does nothing without SO 50", () => {
 		const store = freshGame(2, [])
 		expect(store.startingOptions.mediaLine).toBe(false)
+		expect(store.availableEmployees[rf.TELEMARKETER]).toBe(-1)
+		expect(store.availableEmployees[rf.TV_ANNOUNCER]).toBe(-1)
 		for (let n = 28; n <= 35; n++) {
 			expect(store.availableMarketingCampaigns).not.toContain(n)
 		}
