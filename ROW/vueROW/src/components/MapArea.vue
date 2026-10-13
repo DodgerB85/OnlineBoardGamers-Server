@@ -874,36 +874,38 @@ function leaveTarget(t) {
 				/>
 
 				<!-- hovered building: zoomed, with action hotspots -->
-				<g
-					v-if="hoveredBuilding"
-					:key="hoveredBuilding.name"
-					class="buildingOverlay"
-					@mouseenter="hoverLocation(hoveredBuilding.name)"
-					@mouseleave="unhoverLocation(hoveredBuilding.name)"
-					@click="clickLocation(hoveredBuilding.name)"
-				>
-					<g :transform="hoveredBuilding.transform">
-						<image :href="hoveredBuilding.img" :x="hoveredBuilding.rect.x" :y="hoveredBuilding.rect.y" :width="hoveredBuilding.rect.w" :height="hoveredBuilding.rect.h" />
-						<circle v-for="r in hoveredBuilding.ranchers" :key="'rn' + r.player" :class="'rancher ' + r.color" :cx="r.x" :cy="r.y" r="7" />
-						<rect
-							class="buildingOutline"
-							:class="{ move: hoveredBuilding.move }"
-							:x="hoveredBuilding.rect.x"
-							:y="hoveredBuilding.rect.y"
-							:width="hoveredBuilding.rect.w"
-							:height="hoveredBuilding.rect.h"
-							rx="2"
-							ry="2"
-						/>
-						<polygon
-							v-for="(region, index) in hoveredBuilding.regions"
-							:key="index"
-							class="hotspot"
-							:points="region.points"
-							@click.stop="clickBuildingRegion(region)"
-						/>
+				<transition name="buildingZoom">
+					<g
+						v-if="hoveredBuilding"
+						:key="hoveredBuilding.name"
+						class="buildingOverlay"
+						@mouseenter="hoverLocation(hoveredBuilding.name)"
+						@mouseleave="unhoverLocation(hoveredBuilding.name)"
+						@click="clickLocation(hoveredBuilding.name)"
+					>
+						<g :transform="hoveredBuilding.transform">
+							<image :href="hoveredBuilding.img" :x="hoveredBuilding.rect.x" :y="hoveredBuilding.rect.y" :width="hoveredBuilding.rect.w" :height="hoveredBuilding.rect.h" />
+							<circle v-for="r in hoveredBuilding.ranchers" :key="'rn' + r.player" :class="'rancher ' + r.color" :cx="r.x" :cy="r.y" r="7" />
+							<rect
+								class="buildingOutline"
+								:class="{ move: hoveredBuilding.move }"
+								:x="hoveredBuilding.rect.x"
+								:y="hoveredBuilding.rect.y"
+								:width="hoveredBuilding.rect.w"
+								:height="hoveredBuilding.rect.h"
+								rx="2"
+								ry="2"
+							/>
+							<polygon
+								v-for="(region, index) in hoveredBuilding.regions"
+								:key="index"
+								class="hotspot"
+								:points="region.points"
+								@click.stop="clickBuildingRegion(region)"
+							/>
+						</g>
 					</g>
-				</g>
+				</transition>
 
 				<!-- steps of the hovered move, numbered so the route reads at a glance -->
 				<g v-if="routeSteps.length" class="routeNumbers">
@@ -1022,6 +1024,10 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 }
 @keyframes buildingZoom {
 	from { transform: scale(0.5); }
+}
+/* Mousing off plays that same zoom backwards, so the tile shrinks back into the board. */
+.buildingOverlay.buildingZoom-leave-active {
+	animation: buildingZoom 150ms ease-out reverse forwards;
 }
 /* Border of the 2x tile, drawn over its artwork so it is not lost behind it. */
 .buildingOutline { fill: none; stroke: black; stroke-width: 6; pointer-events: none; }
