@@ -2790,6 +2790,25 @@ export function trainEmployee(toEmp, steps) {
 	store.context.selectedEmployeeToTrainData.origin = 0
 }
 
+// Inverse of trainEmployee, for a training still in progress in the training subphase
+export function undoTrainEmployee(entry) {
+	const store = useModelStore()
+	const playerObj = currentPlayerObj()
+
+	store.context.justTrained.splice(store.context.justTrained.indexOf(entry), 1)
+	store.availableEmployees[entry.to]++
+	store.context.endOfDaySummaryData.train.trained.splice(store.context.endOfDaySummaryData.train.trained.lastIndexOf(entry.to), 1)
+
+	if (entry.from > -1) {
+		store.availableEmployees[entry.from]--
+		;(entry.fromStructure ? playerObj.employees : playerObj.beach).push(entry.from)
+	} else {
+		// Train-from-hire: the -1 markers in justHired / hire.hired are the recruiting point it spent
+		store.context.justHired.splice(store.context.justHired.lastIndexOf(-1), 1)
+		store.context.endOfDaySummaryData.hire.hired.splice(store.context.endOfDaySummaryData.hire.hired.lastIndexOf(-1), 1)
+	}
+}
+
 export function headhuntEmployee(playerIndex, targetPlayerIndex, beachIndex) {
 	const store = useModelStore()
 	const player = store.players[playerIndex]

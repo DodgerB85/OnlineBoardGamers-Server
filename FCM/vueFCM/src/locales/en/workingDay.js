@@ -22,6 +22,7 @@
 
     // Training
     trainedLabel: "Trained:",
+    clickToUndoTrain: "Click to undo this training",
     nightShiftTrainTwice: "Your Night Shift Manager allows each trainer to work twice",
     canTrainSlots: "You can train {count} employee | You can train {count} slots",
     trainingPointsAvailable: "{count} training points available",

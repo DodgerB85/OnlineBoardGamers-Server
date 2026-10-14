@@ -360,10 +360,10 @@ const computedProducers = computed(() => {
 			<!-- Display just trained employees -->
 			<div v-if="store.context.justTrained.length > 0" class="reminder">
 				<p>{{ $t("workingDay.trainedLabel") }}</p>
-				<template v-for="(entry, idx) in store.context.justTrained" :key="idx">
+				<div v-for="(entry, idx) in store.context.justTrained" :key="idx" class="trainedPair" :title="$t('workingDay.clickToUndoTrain')" @click="controller.undoTrainEmployee(entry)">
 					<img v-if="entry.from > -1" :src="view.getImage(`emp_${entry.from}`)" class="cardImg oldTrainedEmployee" :alt="rf.employeeName(entry.from)" />
 					<img :src="view.getImage(`emp_${entry.to}`)" class="cardImg" :class="{ newTrainedEmployee: entry.from > -1 }" :alt="rf.employeeName(entry.to)" />
-				</template>
+				</div>
 			</div>
 
 			<!-- NSM TEXT -->
@@ -1027,9 +1027,21 @@ const computedProducers = computed(() => {
 }
 
 /** JUST TRAINED SUMMARY */
-.reminder > .cardImg {
+.reminder .cardImg {
 	width: auto;
 	height: 150px;
+}
+
+/* just-trained pair: yellow outline until hovered, click undoes the training */
+.trainedPair {
+	display: inline-block;
+	cursor: pointer;
+}
+.trainedPair > img {
+	outline: 3px solid yellow;
+}
+.trainedPair:hover > img {
+	outline: 3px solid lightgreen;
 }
 
 .nightShiftIcon {
