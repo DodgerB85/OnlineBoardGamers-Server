@@ -179,6 +179,7 @@ export async function reloadGameData() {
 		console.error("Error fetching game data:", error)
 	} finally {
 		store.viewSettings.showLoader = false
+		controller.startPlayerTurn()
 	}
 }
 

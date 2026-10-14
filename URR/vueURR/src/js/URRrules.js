@@ -123,6 +123,7 @@ export function canExchangeBarahshum(game, player) {
 	const nation = game.nations[rf.NATION_BARAHSHUM]
 	if (!nation || nation.isRemoved || nation.ownerType === null) return false
 	if (!barahshumDestinations(game).length) return false
+	if (nation.ownerType === "player" && game.gameflow.barahshumPass?.turn === game.gameflow.turn && game.gameflow.barahshumPass.player === nation.owner) return false
 	if (nation.ownerType === "player") return nation.owner === player && (game.gameflow.phase === rf.PHASE_SETTLEMENT || (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "betweenStates"))
 	return game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.stateOrder[game.gameflow.stateIndex] === nation.owner && game.states[nation.owner].king === player && ["digging", "purchasing"].includes(game.gameflow.developmentStep) && !game.gameflow.pendingOffer
 }

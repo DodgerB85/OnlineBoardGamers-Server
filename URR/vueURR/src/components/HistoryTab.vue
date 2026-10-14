@@ -61,7 +61,7 @@ function findReplayPosition() {
 #history { position: absolute; padding-top: 5px; left: 2px; top: var(--urr-menu-height, 60px); width: 450px; max-height: calc(100vh - var(--urr-menu-height, 60px) - 12px); box-sizing: border-box; z-index: 9999; border: 2px solid black; background-color: #d4eafd; overflow-y: scroll; text-align: center; }
 #history { scroll-padding-top: 60px; scroll-padding-bottom: 8px; }
 .historyControls { position: sticky; top: 0; z-index: 1; background: #d4eafd; }
-#historyToggleDiv { display: flex; align-items: center; justify-content: center; padding: 5px; background: #d4eafd; font-size: 16px; font-weight: 600; }
+#historyToggleDiv { display: flex; align-items: center; justify-content: center; padding: 5px; background: #d4eafd; font-size: 16px; font-weight: 400; }
 .switch { position: relative; display: inline-block; width: 60px; height: 34px; margin: 0 10px; flex-shrink: 0; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider { position: absolute; cursor: pointer; inset: 0; background-color: #2196f3; transition: .4s; border-radius: 34px; }

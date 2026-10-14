@@ -90,6 +90,7 @@ const area = (game, areaId) => game.board.areas.find((entry) => entry.id === are
 	const land = game.board.areas.find((entry) => !entry.isRiver && entry.nation === null)
 	land.owner = land.markerOwner = 1
 	game = applyAction(game, 0, { type: "requestWaterwork", kind: "pump", area: land.id })
+	game = applyAction(game, 0, { type: "endDevelopment" })
 	game = applyAction(game, 1, { type: "respondOffer", accept: false })
 	assert.equal(game.gameflow.developmentStep, "digging")
 }

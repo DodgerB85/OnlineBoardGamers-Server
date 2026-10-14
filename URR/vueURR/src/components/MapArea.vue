@@ -1,5 +1,7 @@
 <script setup>
 import PlayerMarker from "./PlayerMarker.vue"
+import WaterPlayback from "./WaterPlayback.vue"
+import { useWaterPlaybackStore } from "../stores/URRwaterPlayback.js"
 import { computed, nextTick, ref, watch } from "vue"
 import * as boardDisplay from "../js/URRboardDisplay"
 import * as boardRules from "../js/URRmap"
@@ -14,6 +16,10 @@ import { useModelStore } from "../stores/URRstore.js"
 const emit = defineEmits(["selectArea", "clickArea", "changePath", "confirmAction", "cancelAction"])
 const props = defineProps({ selectedHex: { type: String, default: null }, mapAction: { type: Object, default: null }, actionTargets: { type: Array, default: () => [] }, highlightedPlayer: { type: Number, default: null }, removalArea: { type: String, default: null }, landDraft: { type: Object, default: null }, waitingPlayerIndex: { type: Number, default: null }, digCapacity: { type: [Number, String, Array], default: null } })
 const store = useModelStore()
+const playback = useWaterPlaybackStore()
+const displayedBoard = computed(() => playback.state.visible ? playback.state.board : store.board)
+const reservoirCapacities = Object.values(rf.ERA_CARD_DATA).map((card) => card.reservoir[0])
+const pumpCapacities = Object.values(rf.ERA_CARD_DATA).map((card) => card.pump[0])
 const personal = usePersonalStore()
 const selectedHexId = ref(null)
 watch(() => props.selectedHex, (id) => { selectedHexId.value = id })
@@ -21,7 +27,6 @@ const focusedHex = ref(null)
 const boardElement = ref(null)
 const showCoordinates = ref(false)
 const previewOpen = ref(false)
-const previewWater = ref(false)
 const draftPath = ref([])
 const previewError = ref("")
 function previewDigPath(path) {
@@ -29,30 +34,19 @@ function previewDigPath(path) {
 	const previews = capacities.map((capacity) => boardRules.getDigPathPreview(store, path, capacity))
 	return previews.find((preview) => !preview.error) || previews[0] || { cost: null, isComplete: false, error: "No unused digging crews remain." }
 }
-const canTrace = computed(() => personal.canPlay() && store.gameflow.phase === rf.PHASE_DEVELOPMENT && ["digging", "eridu"].includes(store.gameflow.developmentStep) && store.viewSettings.actionIntent === "dig")
+const canTrace = computed(() => !playback.state.visible && personal.canPlay() && store.gameflow.phase === rf.PHASE_DEVELOPMENT && ["digging", "eridu"].includes(store.gameflow.developmentStep) && store.viewSettings.actionIntent === "dig")
 watch(canTrace, (canTrace) => { previewOpen.value = canTrace }, { immediate: true })
 const digPreview = computed(() => previewDigPath(draftPath.value))
 const digOptions = computed(() => previewOpen.value ? Object.fromEntries(store.board.areas.map((area) => [area.id, previewDigPath([...draftPath.value, area.id])])) : {})
-const actualAreas = computed(() => store.board.areas.map((area) => ({ area, position: boardDisplay.getAreaPosition(area) })).filter((entry) => entry.position))
+const actualAreas = computed(() => displayedBoard.value.areas.map((area) => ({ area, position: boardDisplay.getAreaPosition(area) })).filter((entry) => entry.position))
 const tabArea = computed(() => actualAreas.value.some((entry) => entry.area.id === focusedHex.value) ? focusedHex.value : actualAreas.value[0]?.area.id)
 const draftPositions = computed(() => draftPath.value.map((id) => actualAreas.value.find((entry) => entry.area.id === id)?.position || boardDisplay.PRINTED_HEXES.find((hex) => hex.id === id)).filter(Boolean))
 const draftLine = computed(() => draftPositions.value.map((hex) => `${hex.x},${hex.y}`).join(" "))
-const waterPath = computed(() => draftPositions.value.length > 1 ? `M ${draftPositions.value.map((hex) => `${hex.x} ${hex.y}`).join(" L ")}` : "")
-const savedCanals = computed(() => store.board.canals.map(([from, to]) => {
+const savedCanals = computed(() => displayedBoard.value.canals.map(([from, to]) => {
 	const a = actualAreas.value.find((entry) => entry.area.id === from)?.position
 	const b = actualAreas.value.find((entry) => entry.area.id === to)?.position
 	return a && b ? `${a.x},${a.y} ${b.x},${b.y}` : null
 }).filter(Boolean))
-const riverPaths = computed(() => (store.board.riverSources || []).map((source) => {
-	const positions = []
-	let id = source
-	while (id !== null && id !== undefined) {
-		const position = actualAreas.value.find((entry) => entry.area.id === id)?.position
-		if (position) positions.push(`${position.x},${position.y}`)
-		id = store.board.riverDownstream[id]
-	}
-	return positions.join(" ")
-}))
 const waterReport = computed(() => [...store.computedHistory].reverse().find((entry) => (!store.viewSettings.showReplay || entry.historyIndex <= store.replayStep.index) && ["riverStart", "riverComplete"].includes(entry.administration?.kind))?.administration)
 const selectedArea = computed(() => store.board.areas.find((area) => area.id === selectedHexId.value))
 const reachable = computed(() => !previewOpen.value && !store.viewSettings.actionIntent && selectedArea.value?.waterwork ? boardRules.getWaterworkReach(store, selectedArea.value.id) : [])
@@ -75,7 +69,7 @@ const calahSites = computed(() => store.viewSettings.actionIntent === "calah" ? 
 
 // Draw every action above the pieces, using the same outline and badge treatment.
 const mapDecisions = computed(() => {
-	if (store.viewSettings.showReplay || hasMapInspection.value || store.turnDraft.ready) return {}
+	if (playback.state.visible || store.viewSettings.showReplay || hasMapInspection.value || store.turnDraft.ready) return {}
 	const targets = {}
 	const add = (ids, label, kind = "destination", source = false, planned = false) => {
 		for (const id of ids) if (id) targets[id] = { label, kind, source, planned }
@@ -118,35 +112,8 @@ const confirmationPosition = computed(() => {
 	const position = actualAreas.value.find((entry) => entry.area.id === props.mapAction?.area)?.position
 	return position ? { left: `clamp(0px, ${position.x / boardDisplay.MAP_WIDTH * 100}%, calc(100% - 220px))`, top: `min(${(position.y + 45) / boardDisplay.MAP_HEIGHT * 100}%, calc(100% - 100px))` } : null
 })
-const mapHint = computed(() => {
-	if (store.turnDraft.ready) return "Review your draft"
-
-	if (hasMapInspection.value) return "Inspecting the map · Clear map inspection to show available actions"
-	if (store.viewSettings.showReplay) return "Historical position · click a hex to inspect"
-	if (store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === "routing") return `${props.waitingPlayerIndex !== null ? "Waiting · " : ""}Choose a numbered blue destination; the source has a dashed outline`
-	if (props.waitingPlayerIndex !== null) return `Waiting · ${store.gameflow.pendingOffer?.action.area ? 'review the highlighted site' : 'click a hex to inspect'}`
-	if (store.viewSettings.actionIntent === "equip") return props.actionTargets.length ? "Click a lit site to buy · blue pump, red reservoir" : "No equipment site can be bought now"
-	if (store.viewSettings.actionIntent === "build") return "Choose a highlighted site to build a pump or reservoir"
-	if (store.viewSettings.actionIntent === "calah") return "Choose a highlighted site for Calah's free waterwork"
-	if (store.viewSettings.actionIntent === "barahshum") return "Choose a highlighted canal destination beside Barahshum"
-	if (store.viewSettings.actionIntent === "sell") return props.landDraft?.fundingGap === 0 ? "Crew covered · finish development to save the sales" : maintenanceLand.value.length ? "Choose highlighted land to fund the required crew" : "No eligible funding land remains · review crew funding"
-	if (store.gameflow.pendingOffer) return store.gameflow.pendingOffer.action.type === "offerNation" ? "Review the proposed nation purchase" : "Review the proposal at the highlighted site"
-	if (queuedPurchase.value || queuedSales.value.length) return needsMaintenanceSales.value ? "Crew funding: red sites are queued sales" : "Trade draft: blue purchase · red sales"
-	if (store.gameflow.phase === rf.PHASE_SETTLEMENT) return barahshumSites.value.length ? "Select land · purple sites allow Barahshum" : "Click your land to sell it, other land to buy it"
-	if (previewOpen.value) return "Choose a highlighted source, then extend the canal · green allows finishing; gold marks your selection"
-	if (store.gameflow.phase === rf.PHASE_DEVELOPMENT) {
-		if (store.gameflow.developmentStep === "eridu") return "Trace Eridu’s canal or skip digging"
-		if (store.gameflow.developmentStep === "betweenStates") return barahshumSites.value.length ? "Barahshum: select a highlighted canal site" : "Review the board before the next state"
-		if (needsMaintenanceSales.value) return maintenanceLand.value.length ? "Select highlighted land to fund the crew" : "Review the required revolution"
-		const exchanges = [calahSites.value.length ? "Calah" : "", barahshumSites.value.length ? "Barahshum" : ""].filter(Boolean).join(" or ")
-		if (store.gameflow.developmentStep === "digging" && store.states[view.currentStateId(store)]?.diggers.some((crew) => !crew.hasDug)) return `Choose a canal path or buy equipment${exchanges ? ` · purple sites allow ${exchanges}` : ""}`
-		return exchanges ? `Select a site · purple sites allow ${exchanges}` : "Select a site for a pump or reservoir"
-	}
-	if (store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === "harvest") return harvestRemovalSites.value.length ? "Harvest: choose a highlighted waterwork if storing" : "Choose how to use the harvest"
-	return "Click a hex to inspect"
-})
-
 function inspectArea(id) {
+	if (playback.state.visible) return
 	focusedHex.value = id
 	selectedHexId.value = id
 	emit("clickArea", id)
@@ -248,20 +215,13 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 
 <template>
 	<div id="mapArea" ref="boardElement">
-		<div class="boardHeading"><b>Game board</b><span class="mapHint"><PlayerMarker v-if="waitingPlayerIndex !== null" :index="waitingPlayerIndex" /> {{ mapHint }}</span><div class="mapZoom"><button :aria-pressed="showCoordinates" @click="showCoordinates = !showCoordinates" title="Show coordinates on every hex">Hex labels</button></div></div>
-		<div v-if="waterReport" class="riverStatus" role="status"><span><b>{{ waterReport.kind === 'riverComplete' && store.gameflow.phase !== rf.PHASE_RAINY_SEASON ? 'Last rainy season' : `River flow · Turn ${waterReport.turn}` }}</b> · {{ waterReport.waterTotal }} water<template v-if="waterReport.kind === 'riverComplete'"> · {{ waterReport.irrigatedCount }} wet hexes · {{ waterReport.outflow }} water lost<template v-if="!waterReport.irrigatedCount"> · No irrigation income</template></template><template v-else> · Routing in progress</template></span></div>
-		<div class="controls" v-if="previewOpen"><b>Canal path:</b><span>{{ draftPath.map((id) => store.board.areas.find((area) => area.id === id)?.label || id).join(' → ') || 'Click a highlighted starting area.' }}</span><button @click="undoDraft" :disabled="!draftPath.length">Undo</button><button @click="clearDraft" :disabled="!draftPath.length">Clear</button><label><input type="checkbox" v-model="previewWater" :disabled="draftPath.length < 2" /> Animate draft</label></div>
-		<div v-if="previewOpen" class="digStatus" role="status"><b>{{ Array.isArray(digCapacity) ? 'Automatic crew selection' : digCapacity === null ? 'No unused crew' : `${digCapacity} crew` }}</b><template v-if="digPreview.cost"> · {{ digPreview.cost.canals }} canal points + {{ digPreview.cost.junctions }} junction points = {{ digPreview.cost.points }} total</template><span v-if="draftPath.length && !digPreview.error"> · {{ digPreview.isComplete ? 'Ready to add; a fitting crew will be used. You may extend the route.' : draftPath.length === 1 ? 'Select an adjacent highlighted hex.' : 'Unfinished route: continue to an existing river or canal.' }}</span></div>
 		<div v-if="previewError" class="previewError" role="alert">{{ previewError }}</div>
 		<div class="mapSurface">
 			<svg :viewBox="`0 0 ${boardDisplay.MAP_WIDTH} ${boardDisplay.MAP_HEIGHT}`" aria-label="UR: 1830 BC game board"><title>Use arrow keys to move between adjacent hexes, and Enter or Space to select.</title>
 				<image :href="assets.mapImage" x="0" y="0" :width="boardDisplay.MAP_WIDTH" :height="boardDisplay.MAP_HEIGHT" />
-				<g v-if="store.gameflow.phase === rf.PHASE_RAINY_SEASON" class="flowingRivers"><polyline v-for="(path, index) in riverPaths" :key="index" :points="path" /></g>
 				<g v-if="!actualAreas.length" class="printedHexes"><polygon v-for="hex in boardDisplay.PRINTED_HEXES" :key="hex.id" :points="boardDisplay.hexPoints(hex.x, hex.y)" @click="inspectArea(hex.id)" /></g>
 				<polyline v-for="(canal, index) in savedCanals" :key="`canal-${index}`" :points="canal" class="savedCanal" />
 				<polyline v-if="draftLine" :points="draftLine" class="draftCanal" />
-				<path v-if="waterPath && previewWater" :d="waterPath" class="waterPreviewPath" />
-				<circle v-if="waterPath && previewWater" r="11" class="waterPreviewDot"><animateMotion :path="waterPath" dur="2.6s" repeatCount="indefinite" /></circle>
 				<g v-for="entry in actualAreas" :key="entry.area.id" class="boardArea" :class="{ showLabel: showCoordinates || (inspectedNation !== null && entry.area.nation === inspectedNation) || selectedHexId === entry.area.id || queuedPurchase === entry.area.id || queuedSales.includes(entry.area.id) || chosenRemoval === entry.area.id || draftPath.includes(entry.area.id) }">
 					<polygon v-if="inspectionTargets.has(entry.area.id)" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="inspectionHalo" />
 					<polygon v-if="(inspectedNation !== null && entry.area.nation === inspectedNation) || (store.viewSettings.inspectedState !== null && entry.area.state === store.viewSettings.inspectedState)" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="inspectionHighlight" />
@@ -286,13 +246,25 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 					<polygon v-if="hasMapInspection && !inspectionTargets.has(entry.area.id)" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="inspectionShade" />
 				</g>
 			</svg>
-			<div v-if="mapAction && confirmationPosition && !hasMapInspection && !store.turnDraft.ready" class="mapConfirmation" :style="confirmationPosition">
+			<WaterPlayback v-if="playback.state.visible" />
+			<div v-if="!playback.state.visible && mapAction && confirmationPosition && !hasMapInspection && !store.turnDraft.ready" class="mapConfirmation" :style="confirmationPosition">
 				<b>{{ mapAction.label }}</b><small>{{ mapAction.detail }}</small>
 				<div><button :disabled="!mapAction.canConfirm" @click="emit('confirmAction')">Confirm</button><button @click="emit('cancelAction')">Cancel</button></div>
 			</div>
 		</div>
+		<div v-if="waterReport" class="riverStatus" role="status"><span><b>{{ waterReport.kind === 'riverComplete' && store.gameflow.phase !== rf.PHASE_RAINY_SEASON ? 'Last rainy season' : `River flow · Turn ${waterReport.turn}` }}</b> · {{ waterReport.waterTotal }} water<template v-if="waterReport.kind === 'riverComplete'"> · {{ waterReport.irrigatedCount }} wet hexes · {{ waterReport.outflow }} water lost<template v-if="!waterReport.irrigatedCount"> · No irrigation income</template></template><template v-else> · Routing in progress</template></span></div>
+		<div class="mapFooter" v-if="previewOpen">
+			<div class="controls" v-if="previewOpen"><button @click="undoDraft" :disabled="!draftPath.length">Undo</button><button @click="clearDraft" :disabled="!draftPath.length">Clear</button></div>
+		</div>
 		<div v-if="hasMapInspection" class="mapInspectionCue">Inspecting <span v-if="inspectedNation !== null">{{ rf.NATION_NAMES[inspectedNation] }} territory</span><span v-if="store.viewSettings.inspectedState !== null">{{ rf.STATE_NAMES[store.viewSettings.inspectedState] }} territory</span><span v-if="store.viewSettings.inspectedState !== null && highlightedPlayer !== null"> · </span><span v-if="highlightedPlayer !== null"><PlayerMarker :index="highlightedPlayer" /> owned land</span> · other hexes dimmed; clear inspection to show available actions<button @click="inspectedNation = null; store.viewSettings.inspectedState = null; store.viewSettings.showOwnedLand = false">Clear map inspection</button></div>
-		<div class="boardLegend">White square: sold land · River number: reservoir water capacity · Land number: pump reach in canals</div>
+		<div class="legendFooter">
+		<div class="boardLegend">
+			<div class="legendRow"><svg class="legendToken" viewBox="0 0 48 48" role="img" aria-label="White sold-land marker"><rect x="2" y="2" width="44" height="44" class="tokenFrame saleMarkerFrame" /></svg><span>Sold land</span></div>
+			<div class="legendRow"><span class="legendExamples"><img v-for="capacity in reservoirCapacities" :key="capacity" :src="assets.getWaterworkImage(rf.STATE_AKKAD, capacity)" :alt="capacity === 'M' ? 'Unlimited capacity' : `${capacity} water`" /></span><span>On rivers: reservoir water capacity</span></div>
+			<div class="legendRow"><span class="legendExamples"><img v-for="capacity in pumpCapacities" :key="capacity" :src="assets.getWaterworkImage(rf.STATE_AKKAD, capacity)" :alt="capacity === 'M' ? 'Unlimited reach' : `${capacity} canals`" /></span><span>On land: pump reach in canals</span></div>
+		</div>
+			<div class="mapZoom"><button :aria-pressed="showCoordinates" @click="showCoordinates = !showCoordinates" title="Show coordinates on every hex">Hex labels</button></div>
+		</div>
 		<div class="inspection" v-if="selectedArea">
 			<b>{{ selectedArea.label || selectedArea.id }}</b>
 			<span v-if="selectedArea.nation !== null">{{ rf.NATION_NAMES[selectedArea.nation] }} homeland</span>
@@ -325,34 +297,33 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 
 <style scoped>
 .areaHit.purchaseLocked { fill: #444; fill-opacity: .35; }
-.mapSurface { position: relative; }.mapConfirmation { position: absolute; width: 220px; max-width: 100%; box-sizing: border-box; padding: 8px; background: #fff9e9; border: 2px solid #177daf; border-radius: 5px; box-shadow: 0 2px 8px #0005; text-align: left; font-size: 16px; font-weight: 600; line-height: 1.4; z-index: 2; }.mapConfirmation b { display: block; }.mapConfirmation small { display: block; margin: 4px 0; }.mapConfirmation button { min-height: 36px; margin-right: 5px; font: inherit; }.mapConfirmation button:first-child { background: #d9ead1; }.areaHit.actionSite { fill: #7bdca3; fill-opacity: .35; stroke: #176a3b; stroke-width: 6; }.actionShade { fill: #fff9e9; fill-opacity: .55; pointer-events: none; }
+.mapSurface { position: relative; }.mapConfirmation { position: absolute; width: 220px; max-width: 100%; box-sizing: border-box; padding: 8px; background: #fff9e9; border: 2px solid #177daf; border-radius: 5px; box-shadow: 0 2px 8px #0005; text-align: left; font-size: 16px; font-weight: 400; line-height: 1.4; z-index: 2; }.mapConfirmation b { display: block; }.mapConfirmation small { display: block; margin: 4px 0; }.mapConfirmation button { min-height: 36px; margin-right: 5px; font: inherit; }.mapConfirmation button:first-child { background: #d9ead1; }.areaHit.actionSite { fill: #7bdca3; fill-opacity: .35; stroke: #176a3b; stroke-width: 6; }.actionShade { fill: #fff9e9; fill-opacity: .55; pointer-events: none; }
 
 .areaHit.digComplete { fill: #7bdca3; fill-opacity: .3; stroke: #176a3b; }
 .areaHit.digContinue { fill: #c1e8ed; fill-opacity: .25; stroke: #257b89; stroke-dasharray: 10 6; }
-.digStatus, .previewError { width: 100%; box-sizing: border-box; padding: 8px; background: #fff9df; text-align: left; font-size: 16px; font-weight: 600; line-height: 1.5; }
+.previewError { width: 100%; box-sizing: border-box; padding: 8px; background: #fff9df; text-align: left; font-size: 16px; font-weight: 400; line-height: 1.5; }
 
-.boardLegend { font-size: 16px; font-weight: 600; line-height: 1.4; padding: 6px 8px; text-align: left; }
-#mapArea { width: 100%; display: flex; flex-direction: column; align-items: center; min-width: 0; }.boardHeading { width: 100%; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; box-sizing: border-box; padding: 5px 8px; background: #f7edc7; border: 2px solid #8e805e; border-radius: 7px 7px 0 0; font-size: 16px; font-weight: 600; }.mapSurface { width: 100%; line-height: 0; box-shadow: 0 2px 5px #6b614a; }.mapSurface svg { width: 100%; height: auto; display: block; }
+.legendRow { display: contents; }.legendToken { justify-self: end; }.legendExamples { display: inline-flex; gap: 4px; }.legendToken, .legendExamples img { width: 24px; height: 24px; flex-shrink: 0; }
+.boardLegend { display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: center; gap: 4px 8px; font-size: 16px; font-weight: 400; line-height: 1.4; padding: 6px 8px; text-align: left; }
+#mapArea { width: 100%; display: flex; flex-direction: column; align-items: center; min-width: 0; }.mapFooter { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 0; }.legendFooter { display: flex; align-items: flex-start; gap: 8px; width: 100%; padding-top: 6px; }.legendFooter .boardLegend { flex: 1; min-width: 0; }.legendFooter .mapZoom { flex-shrink: 0; }.mapFooter .controls { width: auto; padding: 0; }.mapSurface { position: relative; width: 100%; line-height: 0; box-shadow: 0 2px 5px #6b614a; }.mapSurface svg { width: 100%; height: auto; display: block; }
 .printedHexes polygon, .areaHit { fill: #fff; fill-opacity: .001; stroke: transparent; stroke-width: 5; cursor: pointer; }.areaHit.maintenanceSale { fill: #ffd894; fill-opacity: .2; stroke: #b76400; }.areaHit.harvestRemovalSite { fill: #ffd894; fill-opacity: .22; stroke: #b76400; }.areaHit.barahshumSite, .areaHit.calahSite { fill: #d9b7ed; fill-opacity: .28; stroke: #8758a8; }.areaHit.reachable { fill: #bf9dff; fill-opacity: .24; }.areaHit.waterDestination { fill: #74e9ff; fill-opacity: .3; stroke: #008cb3; }.areaHit.routing { stroke: #006dca; stroke-width: 8; }.areaHit:hover, .areaHit:focus, .areaHit.selected { fill: #fff57a; fill-opacity: .32; stroke: #7e6400; }.areaHit.drafting { stroke: #1165bb; fill-opacity: .17; }
-.savedCanal { fill: none; stroke: #2269ad; stroke-width: 10; stroke-linecap: round; pointer-events: none; }.draftCanal { fill: none; stroke: #1f75ce; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; opacity: .82; pointer-events: none; }.waterPreviewPath { fill: none; stroke: #aef4ff; stroke-width: 6; stroke-dasharray: 12 12; pointer-events: none; }.waterPreviewDot, .irrigationMarker { fill: #35d6ff; stroke: #fff; stroke-width: 3; pointer-events: none; }.ownerMarker, .waterworkMarker, .areaLabel { pointer-events: none; }.areaLabel { opacity: 0; text-anchor: middle; fill: #333; font-weight: bold; font-size: 16px; font-weight: 600; paint-order: stroke; stroke: #fff; stroke-width: 3; }
+.savedCanal { fill: none; stroke: #2269ad; stroke-width: 10; stroke-linecap: round; pointer-events: none; }.draftCanal { fill: none; stroke: #1f75ce; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; opacity: .82; pointer-events: none; }.irrigationMarker { fill: #35d6ff; stroke: #fff; stroke-width: 3; pointer-events: none; }.ownerMarker, .waterworkMarker, .areaLabel { pointer-events: none; }.areaLabel { opacity: 0; text-anchor: middle; fill: #333; font-weight: bold; font-size: 16px; font-weight: 400; paint-order: stroke; stroke: #fff; stroke-width: 3; }
 .tokenFrame { fill: none; stroke: #000; stroke-width: 2; pointer-events: none; }.saleMarkerFrame { fill: #fff; }.irrigationMarker { stroke: #000; stroke-width: 2; }
-.riverStatus { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 8px; box-sizing: border-box; background: #def5ff; font-size: 16px; font-weight: 600; line-height: 1.4; }.riverStatus button { flex-shrink: 0; padding: 6px; font: inherit; border: 1px solid #177daf; border-radius: 3px; background: #fffdf4; cursor: pointer; }.flowingRivers { fill: none; stroke: #16a9db; stroke-width: 6; stroke-dasharray: 12 9; pointer-events: none; animation: riverFlow 1s linear infinite; }.wetHex { fill: #35d6ff; fill-opacity: .22; stroke: #008cb3; stroke-width: 3; pointer-events: none; }.historyOutline { fill: none; stroke: #177daf; stroke-width: 8; pointer-events: none; }@keyframes riverFlow { to { stroke-dashoffset: -21; } }@media (prefers-reduced-motion: reduce) { .flowingRivers { animation: none; } }
+.riverStatus { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 8px; box-sizing: border-box; background: #def5ff; font-size: 16px; font-weight: 400; line-height: 1.4; }.riverStatus button { flex-shrink: 0; padding: 6px; font: inherit; border: 1px solid #177daf; border-radius: 3px; background: #fffdf4; cursor: pointer; }.wetHex { fill: #35d6ff; fill-opacity: .22; stroke: #008cb3; stroke-width: 3; pointer-events: none; }.historyOutline { fill: none; stroke: #177daf; stroke-width: 8; pointer-events: none; }
 .boardArea:hover .areaLabel, .boardArea:focus-within .areaLabel, .boardArea.showLabel .areaLabel { opacity: 1; }
-.inspection { overflow-wrap: anywhere; width: 100%; box-sizing: border-box; min-height: 20px; padding: 6px 8px; background: #fff9df; border: 1px solid #bcae85; font-size: 16px; font-weight: 600; text-align: left; }.controls { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; padding: 8px; font-size: 16px; font-weight: 600; }.controls button { cursor: pointer; }.previewError { color: #a40000; font-weight: bold; font-size: 16px; font-weight: 600; } @media (prefers-reduced-motion: reduce) { .waterPreviewDot { display: none; } }
-.mapZoom { display: inline-flex; gap: 2px; }.mapZoom button { min-width: 28px; min-height: 25px; font: inherit; font-size: 16px; font-weight: 600; background: #fff9df; border: 1px solid #bcae85; border-radius: 3px; cursor: pointer; }.mapZoom button:disabled { opacity: .4; cursor: default; }
+.inspection { overflow-wrap: anywhere; width: 100%; box-sizing: border-box; min-height: 20px; padding: 6px 8px; background: #fff9df; border: 1px solid #bcae85; font-size: 16px; font-weight: 400; text-align: left; }.controls { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; padding: 8px; font-size: 16px; font-weight: 400; }.controls button { cursor: pointer; }.previewError { color: #a40000; font-weight: bold; font-size: 16px; font-weight: 400; }
+.mapZoom { display: inline-flex; gap: 2px; }.mapZoom button { min-width: 28px; min-height: 25px; font: inherit; font-size: 16px; font-weight: 400; background: #fff9df; border: 1px solid #bcae85; border-radius: 3px; cursor: pointer; }.mapZoom button:disabled { opacity: .4; cursor: default; }
 .areaHit.tradePurchase { stroke: #177daf; stroke-width: 8; stroke-dasharray: 12 6; }.areaHit.tradeSale { stroke: #aa3d2e; stroke-width: 8; stroke-dasharray: 12 6; }
 .areaHit.tradePurchase.tradeSale { stroke: #177daf; stroke-dasharray: 12 12; }.purchaseSaleOutline { fill: none; stroke: #aa3d2e; stroke-width: 8; stroke-dasharray: 12 12; stroke-dashoffset: 12; pointer-events: none; }
 .areaHit.removalTarget { stroke: #b76400; stroke-width: 8; }
 .areaHit.offerTarget { stroke: #ad4da7; stroke-width: 8; fill: #f1b4ed; fill-opacity: .25; }
 .mapZoom button[aria-pressed=true] { background: #e1edf5; border-color: #177daf; color: #145575; }
 .areaLabel { font-size: 22px; }
-.mapHint { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 .mapZoom button { min-width: 40px; min-height: 40px; }
 .inspection { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }.inspection img { width: 25px; height: 25px; object-fit: contain; }.inspectionOwner, .inspectionWork { display: inline-flex; align-items: center; gap: 4px; }.inspectionOwner { min-width: 0; overflow-wrap: anywhere; }
 .controls button { min-height: 30px; border: 1px solid #998a67; border-radius: 3px; background: #fffdf4; color: #302f27; font: inherit; padding: 4px 8px; }.controls button:disabled { opacity: .5; cursor: default; }@media (max-width: 1050px) { .controls button { min-height: 40px; } }
-.controls label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }.controls input[type=checkbox] { width: 18px; height: 18px; margin: 0; }@media (max-width: 1050px) { .controls label { min-height: 40px; } }
 .mapDecisionHighlight { pointer-events: none; --decision-color: #007cac; }.mapDecisionHighlight.finish { --decision-color: #176a3b; }.mapDecisionHighlight.build { --decision-color: #75439c; }.mapDecisionHighlight.sale { --decision-color: #a34720; }.mapDecisionHighlight.path { --decision-color: #234872; }.mapDecisionHalo { fill: none; stroke: white; stroke-width: 12; }.mapDecisionOutline { fill: none; stroke: var(--decision-color); stroke-width: 7; }.mapDecisionOutline.source { stroke-dasharray: 12 6; }
 .mapDecisionOutline.planned { stroke-width: 12; fill: var(--decision-color); fill-opacity: .22; }.mapDecisionOutline.chosen { stroke: #a57000; }.decisionBadge { fill: var(--decision-color); stroke: white; stroke-width: 3; }.destinationNumber, .decisionLabel { fill: white; font-size: 20px; font-weight: bold; text-anchor: middle; dominant-baseline: central; }.decisionLabel { font-size: 16px; }
 
-.inspectionHalo { fill: none; stroke: #fffdf5; stroke-width: 9; pointer-events: none; }.inspectionShade { fill: #e9e2d2; fill-opacity: .78; pointer-events: none; }.inspectionHighlight { fill: white; fill-opacity: .12; stroke: #514632; stroke-width: 3; stroke-dasharray: 3 5; pointer-events: none; }.inspectionHighlight.ownedLandHighlight { stroke-width: 4; stroke-dasharray: 10 5; }.mapInspectionCue { width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 16px; font-weight: 600; text-align: left; background: #fff9df; }.mapInspectionCue button { font: inherit; margin-left: 8px; padding: 4px 6px; background: #fffdf5; border: 1px solid #b3a481; border-radius: 3px; cursor: pointer; }
+.inspectionHalo { fill: none; stroke: #fffdf5; stroke-width: 9; pointer-events: none; }.inspectionShade { fill: #e9e2d2; fill-opacity: .78; pointer-events: none; }.inspectionHighlight { fill: white; fill-opacity: .12; stroke: #514632; stroke-width: 3; stroke-dasharray: 3 5; pointer-events: none; }.inspectionHighlight.ownedLandHighlight { stroke-width: 4; stroke-dasharray: 10 5; }.mapInspectionCue { width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 16px; font-weight: 400; text-align: left; background: #fff9df; }.mapInspectionCue button { font: inherit; margin-left: 8px; padding: 4px 6px; background: #fffdf5; border: 1px solid #b3a481; border-radius: 3px; cursor: pointer; }
 </style>

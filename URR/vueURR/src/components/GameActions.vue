@@ -32,6 +32,7 @@ const digButton = ref(null)
 const nationToBuy = ref(null)
 const nationPrice = ref(0)
 const removeWaterwork = ref(null)
+const skipBarahshum = ref(false)
 const waterTarget = ref(null)
 const waterAmount = ref(1)
 const activeSection = ref("")
@@ -233,9 +234,8 @@ watch(maintenanceChoices, (lands) => { maintenanceSelection.value = maintenanceS
 const tradeLeadershipChanges = computed(() => view.getLeadershipChanges(store, tradePreview.value?.game))
 const maintenanceLeadershipChanges = computed(() => view.getLeadershipChanges(store, maintenanceFundingGame.value))
 const willRevolt = computed(() => maintenancePreview.value?.game?.states[state.value?.id]?.hasRevolted || false)
-const harvestPick = ref(null)
 const developmentTurnAction = computed(() => {
-	if (store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === "harvest" && !store.turnDraft.ready && state.value && rules.harvestAmount(store, state.value.id) > 0 && !state.value.hasRevolted) return { hasPendingSales: false, label: "End Turn", error: harvestPick.value ? "" : "Choose distribute or store.", undo: harvestPick.value ? () => { harvestPick.value = null } : null }
+	if (skipBarahshum.value && canExchangeBarahshum.value && !hasTrade.value) return { label: "Pass & End Turn" }
 	if (store.gameflow.phase !== rf.PHASE_DEVELOPMENT || !state.value || ["eridu", "betweenStates"].includes(store.gameflow.developmentStep) || pendingOffer.value || store.turnDraft.ready) return null
 	const hasSales = maintenanceSales.value.length > 0
 	return { hasPendingSales: hasSales || maintenanceSelection.value.length > 0, label: willRevolt.value ? "Declare revolution" : hasSales ? "Sell land & End Turn" : !rules.hasMaintenanceCrew(store, state.value.id) ? "Hire crew & End Turn" : "End Turn", error: props.path.length ? "Add or clear the canal draft before finishing development." : !canFinishDevelopment.value || hasSales ? maintenanceError.value : "" }
@@ -317,6 +317,20 @@ async function confirmSettlementBid() {
 		if (await controller.submitAction({ type: "bidPrimogeniture", amount: primogenitureAmount.value })) await controller.endPlayerTurn()
 	} finally { ending.value = false }
 }
+async function confirmHarvest(choice) {
+	if (ending.value || store.viewSettings.isSaving) return
+	ending.value = true
+	try {
+		if (await controller.submitAction({ type: "harvest", choice, ...(choice === "store" ? { remove: removeWaterwork.value } : {}) })) await controller.endPlayerTurn()
+	} finally { ending.value = false }
+}
+async function confirmAgreement(accept) {
+	if (ending.value || store.viewSettings.isSaving) return
+	ending.value = true
+	try {
+		if (await controller.submitAction({ type: "respondOffer", accept })) await controller.endPlayerTurn()
+	} finally { ending.value = false }
+}
 async function submit(action) {
 	if (await controller.submitAction(action)) {
 		// Dig and equipment stay on the map between purchases; the remounted panel re-selects them.
@@ -354,29 +368,28 @@ function cancelMapAction() {
 async function finishTurn() {
 	if (store.gameflow.phase === rf.PHASE_SETTLEMENT && hasTrade.value) {
 		if (!await controller.submitAction(tradeAction.value)) return false
+	} else if (skipBarahshum.value && canExchangeBarahshum.value) {
+		if (!await controller.submitAction({ type: "passBarahshum", passTurn: store.gameflow.phase === rf.PHASE_SETTLEMENT && personal.canPlay() })) return false
 	} else if (store.gameflow.phase === rf.PHASE_DEVELOPMENT && !store.turnDraft.ready && state.value && !rules.hasMaintenanceCrew(store, state.value.id) && (maintenanceSales.value.length || !canFinishDevelopment.value)) {
 		if (!await controller.submitAction(maintenanceAction.value)) return false
-	} else if (store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === "harvest" && harvestPick.value && !store.turnDraft.ready) {
-		if (!await controller.submitAction({ type: "harvest", choice: harvestPick.value, ...(harvestPick.value === "store" ? { remove: removeWaterwork.value } : {}) })) return false
 	} else if (props.path.length >= 2) {
 		store.gameMessages.actionError = "Review and add your canal before ending the turn, or clear the path."
 		return false
 	}
 	return controller.endPlayerTurn()
 }
-defineExpose({ finishTurn, confirmMapAction, cancelMapAction, planClick })
+defineExpose({ finishTurn, confirmMapAction, cancelMapAction, planClick, showDigging })
 
 watch([() => store.gameflow.phase, () => actor.value, () => store.gameflow.stateIndex], () => {
+	skipBarahshum.value = false
 	resetTrade()
 	maintenanceSales.value = []
 	maintenanceSelection.value = []
 	selectedCrew.value = null
 	diggingDone.value = false
 	useCalah.value = false
-	harvestPick.value = null
 	primogenitureAmount.value = (store.gameflow.primogenitureBid?.amount || 0) + 1
 }, { immediate: true })
-watch(() => store.rain.harvestOrder[0], () => { harvestPick.value = null })
 watch(() => store.gameflow.primogenitureBid?.amount, (amount) => { if (primogenitureAmount.value <= (amount || 0)) primogenitureAmount.value = (amount || 0) + 1 })
 watch(() => props.selectedArea, (id) => {
 	if (id && store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.viewSettings.actionIntent === "sell") toggleMaintenanceLand(id)
@@ -413,8 +426,8 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 		<template v-else-if="store.gameflow.pendingOffer">
 			<div class="offerHeading"><img :src="assets.getStateOrderImage(pendingOffer.state)" alt="" /><b v-if="pendingOffer.action.type === 'offerNation'">{{ rf.STATE_NAMES[pendingOffer.state] }} offers {{ pendingOffer.action.amount }} SPL for {{ rf.NATION_NAMES[pendingOffer.action.nation] }}</b><b v-else>{{ rf.STATE_NAMES[pendingOffer.state] }} asks to build a {{ pendingOffer.action.kind }} at {{ label(pendingOffer.action.area) }}</b></div>
 			<template v-if="pendingOffer.action.type === 'offerNation'"><ArtworkCard class="consentNationCard" :src="assets.getNationCardImage(pendingOffer.action.nation)" :alt="rf.NATION_NAMES[pendingOffer.action.nation]" /><p>Sell {{ rf.NATION_NAMES[pendingOffer.action.nation] }} for <b>{{ pendingOffer.action.amount }} SPL</b>?</p><div class="paymentRow nationSaleRecipient"><img :src="nationSaleRecipient.src" alt="" /><span>{{ nationSaleRecipient.label }}</span><b>{{ nationSaleRecipient.before }} → {{ nationSaleRecipient.after }} SPL</b></div></template>
-			<template v-else><div class="offeredWork"><img :src="assets.getWaterworkImage(pendingOffer.state, cardData[pendingOffer.action.kind][0])" :alt="`Proposed ${pendingOffer.action.kind} · ${view.waterworkMeasure({ kind: pendingOffer.action.kind, capacity: cardData[pendingOffer.action.kind][0] })}`" /><img v-if="offeredLand && !offeredLand.isRiver" :src="assets.getTerrainImage(offeredLand.landType, offeredLand.isCity)" :alt="`${rf.LAND_NAMES[offeredLand.landType]}${offeredLand.isCity ? ' city' : ' land'}`" /><span><b>{{ label(pendingOffer.action.area) }}</b><small v-if="offeredLand && !offeredLand.isRiver" class="workMeasure">{{ rf.LAND_NAMES[offeredLand.landType] }} {{ offeredLand.isCity ? 'city' : 'land' }}</small><small class="workMeasure">{{ pendingOffer.action.kind }} · {{ view.waterworkMeasure({ kind: pendingOffer.action.kind, capacity: cardData[pendingOffer.action.kind][0] }) }}</small></span></div><p>The state treasury pays {{ pendingOffer.action.type === 'exchangeCalah' ? 0 : cardData[pendingOffer.action.kind][1] }} SPL. The site is highlighted on the board.</p><div v-if="offeredLand && offeredLand.owner !== null" class="paymentRow consentIncome"><img :src="assets.getPlayerMarkerImage(offeredLand.owner)" alt="" /><span>Private income if this land is irrigated in the rainy season</span><b>+{{ offeredLandIncome }} SPL</b></div></template>
-			<div class="buttonRow consentControls"><button class="primaryAction" :disabled="!personal.canPlay()" @click="submit({ type: 'respondOffer', accept: true })">Accept</button><button :disabled="!personal.canPlay()" @click="submit({ type: 'respondOffer', accept: false })">Decline</button></div>
+			<template v-else><div class="offeredWork"><img :src="assets.getWaterworkImage(pendingOffer.state, cardData[pendingOffer.action.kind][0])" :title="view.waterworkMeasure({ kind: pendingOffer.action.kind, capacity: cardData[pendingOffer.action.kind][0] })" :alt="`Proposed ${pendingOffer.action.kind} · ${view.waterworkMeasure({ kind: pendingOffer.action.kind, capacity: cardData[pendingOffer.action.kind][0] })}`" /><img v-if="offeredLand && !offeredLand.isRiver" :src="assets.getTerrainImage(offeredLand.landType, offeredLand.isCity)" :alt="`${rf.LAND_NAMES[offeredLand.landType]}${offeredLand.isCity ? ' city' : ' land'}`" /><span><b>{{ label(pendingOffer.action.area) }}</b><small class="workMeasure"><template v-if="offeredLand && !offeredLand.isRiver">{{ rf.LAND_NAMES[offeredLand.landType] }} {{ offeredLand.isCity ? 'city' : 'land' }}{{ ' ' }}</template>{{ pendingOffer.action.kind }}</small></span></div><p>The state treasury pays {{ pendingOffer.action.type === 'exchangeCalah' ? 0 : cardData[pendingOffer.action.kind][1] }} SPL. The site is highlighted on the board.</p><div v-if="offeredLand && offeredLand.owner !== null" class="paymentRow consentIncome"><img :src="assets.getPlayerMarkerImage(offeredLand.owner)" alt="" /><span>If irrigated</span><b>+{{ offeredLandIncome }} SPL</b></div></template>
+			<div class="buttonRow consentControls"><button class="primaryAction" :disabled="!personal.canPlay() || ending || store.viewSettings.isSaving" @click="confirmAgreement(true)">Accept &amp; End Turn</button><button :disabled="!personal.canPlay() || ending || store.viewSettings.isSaving" @click="confirmAgreement(false)">Decline &amp; End Turn</button></div>
 		</template>
 		<fieldset v-else-if="store.gameflow.phase === rf.PHASE_SETTLEMENT && (!canExchangeBarahshum || personal.canPlay())" :disabled="!personal.canPlay()">
 			<p class="hint">Use the map to buy and sell land.</p>
@@ -430,7 +443,7 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 			<MarketForecast v-if="tradePreview?.game" :before="store" :after="tradePreview.game" />
 			<StateLeadership v-for="change in tradeLeadershipChanges" :key="change.id" :change="change" />
 			<button v-if="hasTrade" @click="resetTrade">Clear plan</button>
-			<form v-if="!hasTrade" class="buttonRow primogenitureBid" @submit.prevent="confirmSettlementBid"><label for="primogeniture">Or bid for primogeniture:</label><input id="primogeniture" type="number" inputmode="numeric" v-model.number="primogenitureAmount" :min="(store.gameflow.primogenitureBid?.amount || 0) + 1" :max="primogenitureBudget" step="1" required /><button :disabled="!!primogenitureError || ending || store.viewSettings.isSaving">Bid {{ primogenitureAmount }} SPL &amp; End Turn</button><small>{{ primogenitureBudget }} SPL available · Refunded after settlement</small><span v-if="store.gameflow.primogenitureBid"><PlayerMarker :index="store.gameflow.primogenitureBid.player" /> holds the high bid: {{ store.gameflow.primogenitureBid.amount }} SPL</span><span v-if="primogenitureError" class="error">{{ primogenitureError }}</span></form>
+			<form v-if="!hasTrade" class="buttonRow primogenitureBid" @submit.prevent="confirmSettlementBid"><label for="primogeniture">Or bid for primogeniture:</label><input id="primogeniture" type="number" inputmode="numeric" v-model.number="primogenitureAmount" :min="(store.gameflow.primogenitureBid?.amount || 0) + 1" :max="primogenitureBudget" step="1" required /><button :disabled="!!primogenitureError || ending || store.viewSettings.isSaving">Bid {{ primogenitureAmount }} SPL &amp; End Turn</button><small>{{ primogenitureBudget }} SPL available<br>Refunded after settlement</small><span v-if="store.gameflow.primogenitureBid"><PlayerMarker :index="store.gameflow.primogenitureBid.player" /> holds the high bid: {{ store.gameflow.primogenitureBid.amount }} SPL</span><span v-if="primogenitureError" class="error">{{ primogenitureError }}</span></form>
 		</fieldset>
 		<fieldset v-else-if="store.gameflow.phase === rf.PHASE_DEVELOPMENT && (!canExchangeBarahshum || personal.canPlay())" class="developmentActions plain" :disabled="!personal.canPlay()">
 			<template v-if="store.gameflow.developmentStep === 'betweenStates'">
@@ -441,7 +454,7 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 				<div v-if="showDigging" class="actionGroup">
 					<b>Dig canals</b>
 					<p>Click a highlighted hex, then extend the route. A fitting crew is chosen automatically.</p>
-					<b v-if="store.gameflow.developmentStep === 'eridu'">Eridu's free crew · 2 digging points</b>
+					<b v-if="store.gameflow.developmentStep === 'eridu'">Eridu's free crew<br>2 digging points</b>
 					<label v-else>Crew <select v-model="selectedCrew" @change="setIntent('dig')"><option :value="null">Automatic · smallest fitting crew</option><option v-for="crew in state.diggers" :key="crew.id" :value="crew.id" :disabled="crew.hasDug">{{ crew.capacity }} points · crew {{ crew.id + 1 }}{{ crew.hasDug ? ' (used)' : '' }}</option></select></label>
 					<p v-if="path.length">{{ path.map(label).join(' → ') }}</p>
 					<div v-if="path.length >= 2" class="hint" role="status"><template v-if="digPreview.cost">{{ digPreview.cost.canals }} canal + {{ digPreview.cost.junctions }} junction points.</template><span v-if="chosenCrew && !digError"> Uses {{ chosenCrew.capacity }} crew {{ chosenCrew.id + 1 }}.</span><p v-if="digError" class="error">{{ digError }}</p></div>
@@ -449,22 +462,22 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 					<button v-if="path.length >= 2" ref="digButton" class="digAction primaryAction" :disabled="!!digError" @click="submitDig">Add canal<small>{{ path.map(label).join(' → ') }}</small></button>
 					<button v-if="path.length" @click="emit('clearPath')">Clear canal draft</button>
 					<button v-if="store.gameflow.developmentStep === 'eridu'" @click="submit({ type: 'pass' })">Skip Eridu</button>
-					<button v-else :disabled="!!path.length" @click="finishDigging">Done digging · buy equipment</button>
+					<button v-else :disabled="!!path.length" @click="finishDigging">Done digging<br>buy equipment</button>
 				</div>
 				<template v-if="store.gameflow.developmentStep !== 'eridu'">
 					<div v-if="!rules.hasMaintenanceCrew(store, state.id)" class="actionGroup crewFunding" aria-label="Required crew funding">
 						<template v-if="canFinishDevelopment && !maintenanceSales.length && !maintenanceSelection.length">
-							<b>Crew hired when you end the turn: {{ cardData.digger[0] }} · {{ cardData.digger[1] }} SPL</b>
+							<b>Crew hired when you end the turn: {{ cardData.digger[0] }}<br>{{ cardData.digger[1] }} SPL</b>
 							<p>{{ maintenanceContribution ? `State pays ${Math.min(state.money, cardData.digger[1])} SPL, you pay ${maintenanceContribution} SPL.` : `Paid by the state: treasury ${state.money} → ${state.money - cardData.digger[1]} SPL.` }}</p>
 						</template>
 						<template v-else>
-						<b>Required {{ cardData.digger[0] }} crew · {{ cardData.digger[1] }} SPL</b>
+						<b>Required {{ cardData.digger[0] }} crew<br>{{ cardData.digger[1] }} SPL</b>
 						<p>State pays {{ Math.min(state.money, cardData.digger[1]) }} SPL. Private contribution: {{ maintenanceContribution }} SPL.</p>
 						<p v-if="maintenanceSales.length">Private cash after sales: {{ maintenanceFundingGame.players[state.king].money }} SPL.</p>
 						<p role="status" class="fundingGap">{{ willRevolt ? 'The crew cannot be covered with eligible land.' : maintenanceGap ? `Need ${maintenanceGap} more SPL — select land to sell.` : maintenanceError ? 'Review the funding sales below.' : 'Crew covered. Finish development to hire it.' }}</p>
 						<template v-if="!canFinishDevelopment">
 							<button v-if="store.viewSettings.actionIntent !== 'sell' && maintenanceGap" @click="setIntent('sell')">Select funding land on map</button>
-							<div v-for="group in maintenanceGroups" :key="group.type" class="fundingTerrain"><b>{{ rf.LAND_NAMES[group.type] }}</b><div class="buttonRow"><button v-for="land in group.lands" :key="land.id" :aria-pressed="maintenanceSelection.includes(land.id)" @click="toggleMaintenanceLand(land.id)">{{ label(land.id) }} · +{{ rules.landPrice(maintenanceFundingGame, land) }} SPL</button></div></div>
+							<div v-for="group in maintenanceGroups" :key="group.type" class="fundingTerrain"><b>{{ rf.LAND_NAMES[group.type] }}</b><div class="buttonRow"><button v-for="land in group.lands" :key="land.id" :aria-pressed="maintenanceSelection.includes(land.id)" @click="toggleMaintenanceLand(land.id)">{{ label(land.id) }}<br>+{{ rules.landPrice(maintenanceFundingGame, land) }} SPL</button></div></div>
 							<button v-if="maintenanceSelection.length" class="primaryAction" @click="addMaintenanceBatch">Add sale of {{ maintenanceSelection.length }} land (+{{ maintenanceSelectionValue }} SPL)</button>
 							<p v-if="maintenanceChoices.length" class="hint">Select one terrain type per batch. Each batch sells at the price before its drop. Sales must preserve this throne; stop once the crew is covered.</p>
 							<ol v-if="maintenanceSales.length" aria-label="Crew funding sales"><li v-for="(batch, index) in maintenanceSales" :key="index">Sale {{ index + 1 }}:<button v-for="id in batch" :key="id" :aria-label="`Remove ${label(id)} from maintenance sale`" @click="removeSale(maintenanceSales, index, id)">{{ label(id) }} ×</button></li></ol>
@@ -481,14 +494,15 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 						<label>Assimilate <select v-model="nationToBuy" required><option :value="null">Choose nation</option><option v-for="nation in assimilationChoices" :key="nation.id" :value="nation.id">{{ rf.NATION_NAMES[nation.id] }}</option></select></label>
 						<div v-if="selectedNation" class="nationOfferPreview"><ArtworkCard :src="assets.getNationCardImage(selectedNation.id)" :alt="rf.NATION_NAMES[selectedNation.id]" /><div><b>Seller: <PlayerMarker v-if="selectedNation.ownerType === 'player'" :index="selectedNation.owner" /><template v-else>{{ rf.STATE_NAMES[selectedNation.owner] }}</template></b><p>Allowed offer: {{ rf.NATION_PRICES[selectedNation.id] / 2 }}–{{ rf.NATION_PRICES[selectedNation.id] * 2 }} SPL.</p><label>Offer SPL <input type="number" inputmode="numeric" v-model.number="nationPrice" :min="rf.NATION_PRICES[selectedNation.id] / 2" :max="rf.NATION_PRICES[selectedNation.id] * 2" step="1" required /></label><p v-if="!nationOfferError">{{ rf.STATE_NAMES[state.id] }} treasury after purchase: {{ state.money - nationPrice }} SPL.</p><p v-else class="error">{{ nationOfferError }}</p></div><div v-if="!nationOfferError" class="paymentRow nationPurchaseRecipient"><img :src="nationPurchaseRecipient.src" alt="" /><span>{{ nationPurchaseRecipient.label }}</span><b>{{ nationPurchaseRecipient.before }} → {{ nationPurchaseRecipient.after }} SPL</b></div><button class="nationPurchaseButton" :disabled="!!nationOfferError">{{ requiresNationConsent ? 'Request agreement' : `Buy ${rf.NATION_NAMES[selectedNation.id]}` }}</button></div>
 					</form></details>
+					<p v-if="store.gameflow.offerDeclined && state" role="status">Agreement declined at {{ label(store.gameflow.offerDeclined) }}. Choose another site.</p>
 					<div v-if="showEquipment" class="actionGroup equipmentShop">
 						<b>Buy equipment</b>
-						<p class="hint">Era {{ cardEra === 5 ? 'M' : cardEra }} · {{ cardEra === 5 ? 'Unlimited supply' : `${store.cardSupply[cardEra]} cards left` }}. Click a lit site on the map to buy.</p>
-						<p class="equipLegend"><span class="swatch pump"></span>Pump {{ siteCost.pump[1] }} SPL · reach {{ siteCost.pump[0] }}</p>
-						<p class="equipLegend"><span class="swatch reservoir"></span>Reservoir {{ siteCost.reservoir[1] }} SPL · holds {{ siteCost.reservoir[0] }}</p>
+						<p class="hint">Era {{ cardEra === 5 ? 'M' : cardEra }}<br>{{ cardEra === 5 ? 'Unlimited supply' : `${store.cardSupply[cardEra]} cards left` }}. Click a lit site on the map to buy.</p>
+						<p class="equipLegend"><span class="swatch pump"></span><span>Pump {{ siteCost.pump[1] }} SPL<br>reach {{ siteCost.pump[0] }}</span></p>
+						<p class="equipLegend"><span class="swatch reservoir"></span><span>Reservoir {{ siteCost.reservoir[1] }} SPL<br>holds {{ siteCost.reservoir[0] }}</span></p>
 						<label v-if="ownedCalah"><input type="checkbox" v-model="useCalah" /> Use Calah: free, dissolves Calah, ends its {{ rf.NATION_INCOMES[rf.NATION_CALAH] }} SPL income</label>
 						<p v-if="!equipSites.length" class="hint">{{ noSiteReason }}</p>
-						<div class="crewStepper"><span>Crew {{ cardData.digger[0] }} · {{ cardData.digger[1] }} SPL</span><span class="stepper"><button :disabled="!crewCount" aria-label="Remove one crew" @click="removeCrew">−</button><b>{{ crewCount }}</b><button :disabled="!!crewError" aria-label="Add one crew" @click="submit({ type: 'buyCard', kind: 'digger' })">+</button></span></div>
+						<div class="crewStepper"><span>Crew {{ cardData.digger[0] }}<br>{{ cardData.digger[1] }} SPL</span><span class="stepper"><button :disabled="!crewCount" aria-label="Remove one crew" @click="removeCrew">−</button><b>{{ crewCount }}</b><button :disabled="!!crewError" aria-label="Add one crew" @click="submit({ type: 'buyCard', kind: 'digger' })">+</button></span></div>
 						<p v-if="crewError" class="hint">{{ crewError }}</p>
 						<button v-if="store.gameflow.developmentStep === 'digging' && unusedCrews.length" @click="diggingDone = false">Back to digging</button>
 						<p v-if="cardEra > store.era" class="eraChange">The first purchase starts era {{ cardEra === 5 ? 'M' : cardEra }}.<template v-if="cardEra >= 3"> Era {{ cardEra - 2 }} crews retire.</template><template v-if="cardEra === 3"> Nations may be assimilated.</template><template v-if="cardEra === 4"> Independent nations dissolve.</template></p>
@@ -501,34 +515,35 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 		<fieldset v-else-if="store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === 'routing' && frame" :disabled="!personal.canPlay()">
 			<legend>Route water from {{ label(frame.area) }}</legend>
 			<form @submit.prevent="submit({ type: 'allocateWater', area: waterTarget, amount: chosenWater?.kind === 'irrigate' ? 1 : waterAmount })">
-				<div class="waterSupply"><img class="routingWork" :src="assets.getWaterworkImage(sourceWaterwork.state, sourceWaterwork.capacity)" :alt="`${sourceWaterwork.kind} · ${view.waterworkMeasure(sourceWaterwork)}`" :title="`${sourceWaterwork.kind} · ${view.waterworkMeasure(sourceWaterwork)}`" /><span class="waterDrop" aria-hidden="true"></span><span class="waterCount"><b>{{ frame.water }}</b> water available<small>{{ sourceWaterwork.kind }} · {{ view.waterworkMeasure(sourceWaterwork) }}</small></span></div><p>Choose a numbered blue hex on the map or select its number below.</p><p> Pumps automatically irrigate their own land. Excess returns to the previous waterwork.</p>
+				<div class="waterSupply"><img class="routingWork" :src="assets.getWaterworkImage(sourceWaterwork.state, sourceWaterwork.capacity)" :alt="`${sourceWaterwork.kind} · ${view.waterworkMeasure(sourceWaterwork)}`" :title="`${sourceWaterwork.kind} · ${view.waterworkMeasure(sourceWaterwork)}`" /><span class="waterDrop" aria-hidden="true"></span><span class="waterCount"><b>{{ frame.water }}</b> water available<small>{{ sourceWaterwork.kind }}<br>{{ view.waterworkMeasure(sourceWaterwork) }}</small></span></div><p>Choose a numbered blue hex on the map or select its number below.</p><p> Pumps automatically irrigate their own land. Excess returns to the previous waterwork.</p>
 				<div class="buttonRow">
 					<label>Destination <select v-model="waterTarget" @change="emit('selectArea', waterTarget)" required><option :value="null">Click the map or choose</option><option v-for="(choice, index) in waterOptions" :key="choice.area" :value="choice.area">{{ index + 1 }}. {{ label(choice.area) }} · {{ choice.kind === 'pump' ? 'Send to pump' : 'Irrigate' }}</option></select></label>
-					<div v-if="targetWaterwork" class="offeredWork"><img :src="assets.getWaterworkImage(targetWaterwork.state, targetWaterwork.capacity)" alt="Destination pump" /><span>{{ rf.STATE_NAMES[targetWaterwork.state] }} pump · {{ view.waterworkMeasure(targetWaterwork) }}</span></div>
+					<div v-if="targetWaterwork" class="offeredWork"><img :src="assets.getWaterworkImage(targetWaterwork.state, targetWaterwork.capacity)" alt="Destination pump" /><span>{{ rf.STATE_NAMES[targetWaterwork.state] }} pump<br>{{ view.waterworkMeasure(targetWaterwork) }}</span></div>
 				</div>
 				<div v-if="irrigationLand" class="offeredWork irrigationPreview"><img :src="assets.getTerrainImage(irrigationLand.landType, irrigationLand.isCity)" :alt="`${rf.LAND_NAMES[irrigationLand.landType]}${irrigationLand.isCity ? ' city' : ''}`" /><img :src="assets.getPlayerMarkerImage(irrigationLand.owner)" :alt="store.players[irrigationLand.owner].displayName" /><span>{{ irrigationLand.isCity ? 'City' : 'Land' }} owned by <PlayerMarker :index="irrigationLand.owner" /><small>Private income: +{{ irrigationIncome }} SPL</small><small>{{ rf.STATE_NAMES[irrigationState] }} harvest: {{ rules.harvestAmount(store, irrigationState) }} → {{ rules.harvestAmount(store, irrigationState) + irrigationYield }} SPL</small></span></div>
-				<div class="buttonRow routingControls"><label v-if="chosenWater?.kind === 'pump'">Water (max {{ frame.water }}) <input type="number" inputmode="numeric" v-model.number="waterAmount" min="1" :max="frame.water" step="1" required /></label><button class="primaryAction" :disabled="!chosenWater">{{ !chosenWater ? 'Choose destination' : chosenWater.kind === 'pump' ? 'Send water' : 'Irrigate with one water' }}<small v-if="chosenWater"> · <template v-if="chosenWater.kind === 'pump'">{{ waterAmount }} → </template>{{ label(chosenWater.area) }}<template v-if="chosenWater.kind === 'irrigate'"> · +{{ irrigationYield }} SPL harvest</template></small></button></div>
+				<div class="buttonRow routingControls"><label v-if="chosenWater?.kind === 'pump'">Water (max {{ frame.water }}) <input type="number" inputmode="numeric" v-model.number="waterAmount" min="1" :max="frame.water" step="1" required /></label><button class="primaryAction" :disabled="!chosenWater">{{ !chosenWater ? 'Choose destination' : chosenWater.kind === 'pump' ? 'Send water' : 'Irrigate with one water' }}<small v-if="chosenWater"><template v-if="chosenWater.kind === 'pump'">{{ waterAmount }} → </template>{{ label(chosenWater.area) }}<template v-if="chosenWater.kind === 'irrigate'"><br>+{{ irrigationYield }} SPL harvest</template></small></button></div>
 			</form>
 		</fieldset>
 		<fieldset v-else-if="store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === 'harvest'" :disabled="!personal.canPlay()">
 			<legend>{{ rf.STATE_NAMES[state.id] }} harvest: {{ rules.harvestAmount(store, state.id) }} SPL</legend>
-			<div v-if="harvestPick !== 'store'" class="harvestChoice">
+			<div class="harvestChoice">
 				<b>Distribute to landowners</b>
 				<div class="paymentRow" v-for="payment in harvestPayments" :key="payment.index"><PlayerMarker :index="payment.index" /><span><small>Cash {{ store.players[payment.index].money }} → {{ store.players[payment.index].money + payment.amount }} SPL</small></span><b>+{{ payment.amount }} SPL</b></div>
 				<div v-if="harvest.retained > 0" class="paymentRow"><img :src="assets.getStateOrderImage(state.id)" alt="" /><span>State retains<small>Treasury {{ state.money }} → {{ state.money + harvest.retained }} SPL</small></span><b>{{ harvest.retained }} SPL</b></div>
-				<button v-if="!harvestPick" @click="harvestPick = 'distribute'">Distribute harvest</button>
+				<button :disabled="ending || store.viewSettings.isSaving" @click="confirmHarvest('distribute')">Distribute &amp; end turn</button>
 			</div>
-			<div v-if="!state.hasRevolted && harvestPick !== 'distribute'" class="harvestChoice">
+			<div v-if="!state.hasRevolted" class="harvestChoice">
 				<b>Keep in the state treasury</b><div class="paymentRow"><img :src="assets.getStateOrderImage(state.id)" alt="" /><span>{{ rf.STATE_NAMES[state.id] }}<small>Treasury {{ state.money }} → {{ state.money + rules.harvestAmount(store, state.id) }} SPL</small></span><b>+{{ rules.harvestAmount(store, state.id) }} SPL</b></div>
-				<label v-if="rules.harvestAmount(store, state.id) > 0 && removable.length" class="removeWork">Remove lowest-numbered waterwork <select v-model="removeWaterwork" @change="emit('selectArea', removeWaterwork)"><option v-for="id in removable" :key="id" :value="id">{{ label(id) }} · {{ store.board.areas.find((area) => area.id === id).waterwork.kind }} {{ store.board.areas.find((area) => area.id === id).waterwork.capacity }}</option></select><img v-if="removeWaterwork" class="piece" :src="assets.getWaterworkImage(state.id, store.board.areas.find((area) => area.id === removeWaterwork).waterwork.capacity)" alt="Waterwork to remove" /></label>
-				<button v-if="!harvestPick" @click="harvestPick = 'store'">Store harvest<small v-if="removeWaterwork"> · remove {{ label(removeWaterwork) }}</small></button>
+				<label v-if="rules.harvestAmount(store, state.id) > 0 && removable.length" class="removeWork"><span>Remove smallest waterwork</span><span class="removalControl"><select v-model="removeWaterwork" @change="emit('selectArea', removeWaterwork)"><option v-for="id in removable" :key="id" :value="id">{{ label(id) }} · {{ store.board.areas.find((area) => area.id === id).waterwork.kind }} {{ store.board.areas.find((area) => area.id === id).waterwork.capacity }}</option></select><img v-if="removeWaterwork" class="piece" :src="assets.getWaterworkImage(state.id, store.board.areas.find((area) => area.id === removeWaterwork).waterwork.capacity)" alt="Waterwork to remove" /></span></label>
+				<button :disabled="ending || store.viewSettings.isSaving" @click="confirmHarvest('store')">Store &amp; end turn</button>
 			</div>
 		</fieldset>
 		<div v-if="canExchangeBarahshum" class="actionGroup">
-			<b><PlayerMarker v-if="store.nations[rf.NATION_BARAHSHUM].ownerType === 'player'" :index="store.nations[rf.NATION_BARAHSHUM].owner" /><template v-else>{{ rf.STATE_NAMES[store.nations[rf.NATION_BARAHSHUM].owner] }}</template> · Barahshum</b>
+			<b><PlayerMarker v-if="store.nations[rf.NATION_BARAHSHUM].ownerType === 'player'" :index="store.nations[rf.NATION_BARAHSHUM].owner" /><template v-else>{{ rf.STATE_NAMES[store.nations[rf.NATION_BARAHSHUM].owner] }}</template> Barahshum</b>
 			<p>Dissolve it to dig one canal next to Barahshum, outside a normal turn. Its {{ rf.NATION_INCOMES[rf.NATION_BARAHSHUM] }} SPL income ends.</p>
 			<button v-if="store.viewSettings.actionIntent !== 'barahshum'" @click="setIntent('barahshum')">Choose canal site on the map</button>
 			<template v-else><p v-if="barahshumError" class="hint">{{ barahshumError }}</p><button v-else @click="submit({ type: 'exchangeBarahshum', from: barahshum.id, to: area.id })">Dissolve Barahshum and dig to {{ label(area.id) }}</button></template>
+			<label v-if="store.nations[rf.NATION_BARAHSHUM].ownerType === 'player'" class="barahshumSkip"><input type="checkbox" v-model="skipBarahshum" :disabled="ending || store.viewSettings.isSaving" /><span>Skip Barahshum prompts until next round.</span></label>
 		</div>
 	</section>
 </template>
@@ -536,7 +551,8 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 <style scoped>
 .equipLegend { display: flex; align-items: center; gap: 8px; margin: 4px 0; }.swatch { width: 18px; height: 18px; border-radius: 3px; border: 3px solid #007cac; box-sizing: border-box; flex-shrink: 0; }.swatch.reservoir { border-color: #a34720; }.draftList { list-style: none; margin: 6px 0; padding: 0; }.draftList li { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0; }.draftList button { min-height: 28px; padding: 0 9px; margin: 0; flex-shrink: 0; }.crewStepper { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 0; }.stepper { display: flex; align-items: center; gap: 10px; }.stepper button { min-width: 36px; margin: 0; }.equipmentChoices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }.equipmentChoices button { text-align: left; min-height: 65px; margin: 0; padding: 8px; }.equipmentChoices small { display: block; margin-top: 5px; }.equipmentChoices [aria-pressed=true], .fundingTerrain [aria-pressed=true] { background: #e3eddb; border: 2px solid #547751; }.equipmentPreview { padding: 8px; margin-top: 8px; border: 1px solid #c4b894; border-radius: 4px; }.equipmentReference { margin-top: 8px; }.equipmentReference :deep(img) { max-width: 100%; }.fundingGap { font-weight: bold; }.fundingTerrain { margin: 8px 0; }.crewFunding ol { padding-left: 20px; }
 
-.gameActions { width: 100%; box-sizing: border-box; background: #fff9df; border: 2px solid #8e805e; border-radius: 7px; padding: 8px; margin: 8px 0; text-align: left; font-size: 16px; font-weight: 600; }
+.barahshumSkip { display: flex; align-items: flex-start; gap: 6px; margin-top: 8px; }.barahshumSkip input { flex-shrink: 0; margin-top: 3px; }
+.gameActions { width: 100%; box-sizing: border-box; background: #fff9df; border: 2px solid #8e805e; border-radius: 7px; padding: 8px; margin: 8px 0; text-align: left; font-size: 16px; font-weight: 400; }
 fieldset.plain { border: 0; padding: 0; }fieldset { border: 1px solid #c4b894; border-radius: 4px; padding: 8px; margin: 0; min-width: 0; }legend { max-width: 100%; overflow-wrap: anywhere; box-sizing: border-box; font-weight: bold; font-size: 15px; }p { margin: 6px 0; }.buttonRow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 6px 0; }button, input, select { font: inherit; }button { cursor: pointer; margin: 2px; padding: 4px 7px; }button:disabled { cursor: default; }input[type=number] { width: 70px; }label { margin: 3px; }summary { cursor: pointer; font-weight: bold; padding: 5px 0; }
 .actionGroup { margin: 8px 0; padding: 7px 0; border-top: 1px solid #c4b894; }.saleGroup { margin: 5px 0; }.error { color: #a40000; font-weight: bold; }.hint { color: #655a42; margin: 4px 0; }.piece { width: 24px; height: 24px; object-fit: contain; vertical-align: middle; margin-right: 5px; }
 .cardSupply { display: block; margin-top: 4px; color: #655a42; }.eraChange { padding: 6px; background: #f7edc7; border-left: 3px solid #aa9b77; }
@@ -544,21 +560,22 @@ fieldset.plain { border: 0; padding: 0; }fieldset { border: 1px solid #c4b894; b
 .selectedLand { display: flex; align-items: center; gap: 8px; background: #eee4c9; border-radius: 4px; padding: 7px; margin: 7px 0; }.selectedLand img { width: 35px; height: 35px; }.selectedLand small { display: block; margin-top: 3px; color: #655a42; }
 .selectedLand > span { min-width: 0; overflow-wrap: anywhere; }.selectedLand .selectedOwner { display: flex; align-items: center; gap: 4px; }.selectedLand .selectedOwner img { width: 20px; height: 20px; }
 .queuedPurchase { padding: 6px; border-left: 3px solid #527349; background: #edf5e4; }.tradeBalance { padding: 7px; border-top: 1px solid #c4b894; display: flex; flex-wrap: wrap; gap: 5px; }.tradeBalance b { margin-left: auto; }.tradeBalance small { width: 100%; text-align: right; color: #655a42; }
-.exchangeIncome { display: block; margin-top: 3px; font-size: 16px; font-weight: 600; }.queuedPurchase label { display: flex; align-items: center; gap: 7px; min-height: 40px; margin: 3px 0 0; cursor: pointer; }.queuedPurchase input[type=checkbox] { width: 18px; height: 18px; flex-shrink: 0; margin: 0; }
-.harvestChoice { margin-top: 8px; padding: 8px; background: #f7f0dd; border: 1px solid #c4b894; border-radius: 4px; }.paymentRow { display: flex; align-items: center; gap: 7px; margin: 6px 0; }.paymentRow span { min-width: 0; overflow-wrap: anywhere; }.paymentRow img { width: 25px; height: 25px; }.paymentRow b { margin-left: auto; }.removeWork { display: block; font-size: 16px; font-weight: 600; }.removeWork select { margin: 5px; max-width: calc(100% - 10px); }
+.exchangeIncome { display: block; margin-top: 3px; font-size: 16px; font-weight: 400; }.queuedPurchase label { display: flex; align-items: center; gap: 7px; min-height: 40px; margin: 3px 0 0; cursor: pointer; }.queuedPurchase input[type=checkbox] { width: 18px; height: 18px; flex-shrink: 0; margin: 0; }
+.harvestChoice { margin-top: 8px; padding: 8px; background: #f7f0dd; border: 1px solid #c4b894; border-radius: 4px; }.paymentRow { display: flex; align-items: center; gap: 7px; margin: 6px 0; }.paymentRow span { min-width: 0; overflow-wrap: anywhere; }.paymentRow img { width: 25px; height: 25px; }.paymentRow b { margin-left: auto; }.removeWork { display: block; margin: 8px 0; font-size: 16px; font-weight: 400; }.removalControl { display: flex; align-items: center; gap: 8px; margin-top: 5px; }.removeWork select { flex: 1; min-width: 0; margin: 0; }.removalControl .piece { flex-shrink: 0; margin: 0; }
 .waterSupply { display: flex; align-items: center; gap: 7px; margin: 8px 0; }.waterSupply b { font-size: 24px; }.waterDrop { width: 18px; height: 24px; background: #35c3e6; border: 1px solid #1685b4; border-radius: 65% 35% 55% 45%; transform: rotate(35deg); }
 .routingWork { width: 38px; height: 38px; object-fit: contain; }
-.waterCount { min-width: 0; flex: 1; }.waterCount small { display: block; margin-top: 3px; font-size: 16px; font-weight: 600; color: #655a42; }.waterSupply > img, .waterDrop { flex-shrink: 0; }
-.harvestChoice .paymentRow small { display: block; margin-top: 2px; font-size: 16px; font-weight: 600; color: #655a42; }.harvestChoice .paymentRow b { flex-shrink: 0; white-space: nowrap; }
-.harvestControls, .routingControls, .developmentControls, .tradeControls { align-items: stretch; }.harvestControls button, .routingControls button, .developmentControls button, .tradeControls button { flex: 1; min-width: 0; margin: 0; }.harvestControls small, .tradeControls small { display: block; margin-top: 3px; font-size: 16px; font-weight: 600; }
+.waterCount { min-width: 0; flex: 1; }.waterCount small { display: block; margin-top: 3px; font-size: 16px; font-weight: 400; color: #655a42; }.waterSupply > img, .waterDrop { flex-shrink: 0; }
+.harvestChoice .paymentRow { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: start; }.harvestChoice .paymentRow b { margin-left: 0; }
+.harvestChoice .paymentRow small { display: block; margin-top: 2px; font-size: 16px; font-weight: 400; color: #655a42; }.harvestChoice .paymentRow b { flex-shrink: 0; white-space: nowrap; }
+.harvestControls, .routingControls, .developmentControls, .tradeControls { align-items: stretch; }.harvestControls button, .routingControls button, .developmentControls button, .tradeControls button { flex: 1; min-width: 0; margin: 0; }.harvestControls small, .tradeControls small { display: block; margin-top: 3px; font-size: 16px; font-weight: 400; }
 .maintenanceControls, .tradeControls, .consentControls, .harvestControls, .routingControls, .developmentControls { position: sticky; bottom: -12px; z-index: 1; background: #fff9e9; padding: 7px 0 12px; border-top: 1px solid #c4b894; }
-.developmentControls > small { flex-basis: 100%; font-size: 16px; font-weight: 600; color: #655a42; }
-.routingControls small { font-size: 16px; font-weight: 600; font-weight: normal; }
-.digAction { max-width: 100%; box-sizing: border-box; }.digAction small { display: block; margin-top: 3px; font-size: 16px; font-weight: 600; font-weight: normal; }
-.routingControls label { display: flex; flex-direction: column; gap: 2px; margin: 0; font-size: 16px; font-weight: 600; white-space: nowrap; }.routingControls input { box-sizing: border-box; }
-.irrigationPreview small, .workMeasure { display: block; margin-top: 3px; font-size: 16px; font-weight: 600; color: #655a42; }
-.consentIncome b, .crewContribution b { flex-shrink: 0; white-space: nowrap; }.crewContribution small { display: block; margin-top: 3px; font-size: 16px; font-weight: 600; }
-.endNotice { margin-bottom: 8px; padding: 7px 8px; background: #f6e3cf; border-left: 3px solid #a75a24; color: #663716; font-size: 16px; font-weight: 600; }
+.developmentControls > small { flex-basis: 100%; font-size: 16px; font-weight: 400; color: #655a42; }
+.routingControls small { font-size: 16px; font-weight: 400; font-weight: normal; }
+.digAction { max-width: 100%; box-sizing: border-box; }.digAction small { display: block; margin-top: 3px; font-size: 16px; font-weight: 400; font-weight: normal; }
+.routingControls label { display: flex; flex-direction: column; gap: 2px; margin: 0; font-size: 16px; font-weight: 400; white-space: nowrap; }.routingControls input { box-sizing: border-box; }
+.irrigationPreview small, .workMeasure { display: block; margin-top: 3px; font-size: 16px; font-weight: 400; color: #655a42; }
+.consentIncome b, .crewContribution b { flex-shrink: 0; white-space: nowrap; }.crewContribution small { display: block; margin-top: 3px; font-size: 16px; font-weight: 400; }
+.endNotice { margin-bottom: 8px; padding: 7px 8px; background: #f6e3cf; border-left: 3px solid #a75a24; color: #663716; font-size: 16px; font-weight: 400; }
 .finalStandings { padding-left: 24px; }.finalStandings li { overflow-wrap: anywhere; padding: 7px 0; }.finalStandings img { width: 28px; height: 28px; vertical-align: middle; margin-right: 6px; }.finalStandings b { float: right; margin: 6px 0 0 5px; }
 .offerHeading, .offeredWork { display: flex; align-items: center; gap: 8px; margin: 8px 0; }.offerHeading img, .offeredWork img { width: 38px; height: 38px; }.offerHeading { padding-bottom: 8px; border-bottom: 1px solid #c4b894; font-size: 15px; }
 .nationOfferPreview { display: grid; grid-template-columns: minmax(0, 42%) minmax(0, 1fr); align-items: start; gap: 10px; margin-top: 8px; }.nationOfferPreview > :first-child { width: 100%; }.nationPurchaseRecipient, .nationPurchaseButton { grid-column: 1 / -1; }.nationPurchaseRecipient { margin: 0; }.nationOfferPreview > div { min-width: 0; overflow-wrap: anywhere; }.nationOffer select { max-width: 100%; }

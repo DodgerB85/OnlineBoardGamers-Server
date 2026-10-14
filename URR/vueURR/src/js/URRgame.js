@@ -54,6 +54,7 @@ function awardNation(game, nation, player, amount) {
 function beginSettlement(game) {
 	const flow = game.gameflow
 	flow.phase = rf.PHASE_SETTLEMENT
+	delete flow.barahshumPass
 	flow.turnOrder = [flow.primogeniture]
 	flow.passes = 0
 	flow.primogenitureBid = null
@@ -392,6 +393,7 @@ function resolveMaintenance(game, state, action) {
 
 function endStateTurn(game) {
 	const flow = game.gameflow
+	for (const key of ["developmentPlan", "declinedWaterworks", "waterworkAgreements", "offerDeclined"]) delete flow[key]
 	flow.stateIndex++
 	pauseBetweenStates(game)
 }
@@ -399,7 +401,7 @@ function endStateTurn(game) {
 function pauseBetweenStates(game) {
 	const flow = game.gameflow
 	const barahshum = game.nations[rf.NATION_BARAHSHUM]
-	if (!barahshum.isRemoved && barahshum.ownerType === "player" && rules.barahshumDestinations(game).length) {
+	if (!barahshum.isRemoved && barahshum.ownerType === "player" && !(flow.barahshumPass?.turn === flow.turn && flow.barahshumPass.player === barahshum.owner) && rules.barahshumDestinations(game).length) {
 		flow.developmentStep = "betweenStates"
 		flow.turnOrder = [flow.stateIndex < flow.stateOrder.length ? game.states[flow.stateOrder[flow.stateIndex]].king : flow.primogeniture]
 	} else beginStateTurn(game)
@@ -432,18 +434,41 @@ function requestConsent(game, state, action) {
 	} else {
 		boardRules.requireRule(action.kind === "pump" || action.kind === "reservoir", "Only waterworks need landowner consent")
 		owner = boardRules.getArea(game, action.area).owner
+		boardRules.requireRule(!game.gameflow.declinedWaterworks?.includes(action.area), "The landowner declined construction at this site for this development turn")
 		const preview = JSON.parse(JSON.stringify(game))
 		if (action.type === "exchangeCalah") exchangeCalah(preview, preview.states[state.id], action, owner)
 		else buyCard(preview, preview.states[state.id], action, owner)
 	}
-	if (owner === null || owner === state.king) {
+	const hasAgreement = action.type !== "offerNation" && game.gameflow.waterworkAgreements?.some((agreement) => agreement.state === state.id && agreement.owner === owner && agreement.action.area === action.area && agreement.action.kind === action.kind)
+	if (owner === null || owner === state.king || hasAgreement) {
 		game.gameflow.developmentStep = "purchasing"
 		if (action.type === "offerNation") assimilateNation(game, state, action)
 		else if (action.type === "exchangeCalah") exchangeCalah(game, state, action, owner)
 		else buyCard(game, state, action, owner)
+	} else if (action.type !== "offerNation") {
+		game.gameflow.waterworkRequests ??= []
+		game.gameflow.waterworkRequests.push({ state: state.id, action, returnPlayer: state.king })
 	} else {
 		game.gameflow.pendingOffer = { state: state.id, action, returnPlayer: state.king }
 		game.gameflow.turnOrder = [owner]
+	}
+}
+
+function askNextWaterworkOwner(game) {
+	const offer = game.gameflow.waterworkRequests.shift()
+	game.gameflow.pendingOffer = offer
+	game.gameflow.turnOrder = [boardRules.getArea(game, offer.action.area).owner]
+}
+
+// Validate the whole construction plan without charging for unapproved work.
+function validateWaterworkRequests(game) {
+	if (!game.gameflow.waterworkRequests?.length) return
+	const preview = JSON.parse(JSON.stringify(game))
+	for (const offer of preview.gameflow.waterworkRequests) {
+		const owner = boardRules.getArea(preview, offer.action.area).owner
+		const state = preview.states[offer.state]
+		if (offer.action.type === "exchangeCalah") exchangeCalah(preview, state, offer.action, owner)
+		else buyCard(preview, state, offer.action, owner)
 	}
 }
 
@@ -457,9 +482,26 @@ function respondToOffer(game, player, action) {
 		if (offer.action.type === "offerNation") assimilateNation(game, state, offer.action)
 		else if (offer.action.type === "exchangeCalah") exchangeCalah(game, state, offer.action, player)
 		else buyCard(game, state, offer.action, player)
+		if (offer.action.type !== "offerNation") {
+			game.gameflow.waterworkAgreements ??= []
+			game.gameflow.waterworkAgreements.push({ ...offer, owner: player })
+		}
+	} else if (offer.action.type !== "offerNation") {
+		game.gameflow.declinedWaterworks ??= []
+		game.gameflow.declinedWaterworks.push(offer.action.area)
+		game.gameflow.offerDeclined = offer.action.area
+		game.gameflow.waterworkRequests = []
 	}
 	game.gameflow.pendingOffer = null
 	game.gameflow.turnOrder = [offer.returnPlayer]
+	if (action.accept && offer.action.type !== "offerNation") {
+		if (game.gameflow.waterworkRequests?.length) askNextWaterworkOwner(game)
+		else {
+			const state = game.states[offer.state]
+			if (!rules.hasMaintenanceCrew(game, state.id)) buyCard(game, state, { kind: "digger" })
+			endStateTurn(game)
+		}
+	}
 }
 
 function developmentAction(game, action) {
@@ -491,6 +533,15 @@ function developmentAction(game, action) {
 		flow.developmentStep = "purchasing"
 	} else {
 		boardRules.requireRule(action.type === "endDevelopment", "Dig, purchase a card, or end this state's turn")
+		if (flow.waterworkRequests?.length) {
+			if (!rules.hasMaintenanceCrew(game, state.id)) {
+				buyCard(game, state, { kind: "digger" })
+				flow.developmentPlan?.actions.push({ player: state.king, action: { type: "buyCard", kind: "digger" } })
+			}
+			validateWaterworkRequests(game)
+			askNextWaterworkOwner(game)
+			return
+		}
 		// Ending development commits to the mandatory crew when no land sales are needed.
 		if (!rules.hasMaintenanceCrew(game, state.id)) buyCard(game, state, { kind: "digger" })
 		endStateTurn(game)
@@ -506,11 +557,26 @@ export function applyAction(current, player, action) {
 		if (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "betweenStates") beginStateTurn(game)
 		return game
 	}
+	if (action.type === "passBarahshum") {
+		const flow = game.gameflow
+		boardRules.requireRule((flow.phase === rf.PHASE_SETTLEMENT || (flow.phase === rf.PHASE_DEVELOPMENT && flow.developmentStep === "betweenStates")) && game.nations[rf.NATION_BARAHSHUM].ownerType === "player" && rules.canExchangeBarahshum(game, player), "Only Barahshum's owner may skip its prompts")
+		if (action.passTurn) boardRules.requireRule(flow.phase === rf.PHASE_SETTLEMENT && flow.turnOrder[0] === player, "Only the current player may pass their settlement turn")
+		flow.barahshumPass = { turn: flow.turn, player }
+		if (action.passTurn) settlementAction(game, player, { type: "pass" })
+		else if (flow.phase === rf.PHASE_DEVELOPMENT) beginStateTurn(game)
+		return game
+	}
 	boardRules.requireRule(game.gameflow.turnOrder[0] === player, "It is not this player's turn")
+	const isDevelopmentChoice = game.gameflow.phase === rf.PHASE_DEVELOPMENT && ["dig", "buyCard", "requestWaterwork", "exchangeCalah", "offerNation", "resolveMaintenance"].includes(action.type)
+	const isNationResponse = action.type === "respondOffer" && game.gameflow.pendingOffer?.action.type === "offerNation"
+	if (isDevelopmentChoice && !game.gameflow.developmentPlan) game.gameflow.developmentPlan = { start: JSON.parse(JSON.stringify(current)), actions: [] }
 	if (game.gameflow.pendingOffer) respondToOffer(game, player, action)
 	else if (game.gameflow.phase === rf.PHASE_DIVIDING_NATIONS) nationAction(game, player, action)
 	else if (game.gameflow.phase === rf.PHASE_SETTLEMENT) settlementAction(game, player, action)
-	else if (game.gameflow.phase === rf.PHASE_DEVELOPMENT) developmentAction(game, action)
+	else if (game.gameflow.phase === rf.PHASE_DEVELOPMENT) {
+		developmentAction(game, action)
+		validateWaterworkRequests(game)
+	}
 	else if (game.gameflow.phase === rf.PHASE_RAINY_SEASON && game.rain.step === "routing") {
 		let finished
 		if (action.type === "advanceWater") {
@@ -521,7 +587,30 @@ finished = water.advanceWaterRouting(game)
 	}
 	else if (game.gameflow.phase === rf.PHASE_RAINY_SEASON && game.rain.step === "harvest") harvestAction(game, action)
 	else throw new Error("Water routing must be implemented before rainy-season turns can be submitted")
+	if ((isDevelopmentChoice || isNationResponse) && game.gameflow.developmentPlan) game.gameflow.developmentPlan.actions.push({ player, action })
 	return game
+}
+
+// Reopen a declined construction plan, keeping any earlier landowner approvals.
+export function restoreDevelopmentChoices(game) {
+	const plan = game.gameflow.developmentPlan
+	if (!plan || !game.gameflow.offerDeclined) return null
+	let state = JSON.parse(JSON.stringify(plan.start))
+	for (const [index, player] of state.players.entries()) {
+		player.isMissing = game.players[index].isMissing
+		player.displayName = game.players[index].displayName
+	}
+	for (const key of ["declinedWaterworks", "waterworkAgreements", "offerDeclined"]) state.gameflow[key] = JSON.parse(JSON.stringify(game.gameflow[key] ?? (key === "offerDeclined" ? null : [])))
+	const agreements = state.gameflow.waterworkAgreements
+	const isApproved = ({ action }) => ["requestWaterwork", "exchangeCalah"].includes(action.type) && agreements.some((offer) => offer.action.area === action.area)
+	const choices = plan.actions.filter(({ action }) => !["requestWaterwork", "exchangeCalah"].includes(action.type) || !state.gameflow.declinedWaterworks.includes(action.area))
+	const steps = []
+	for (const choice of [...choices.filter((choice) => !isApproved(choice)), ...choices.filter(isApproved)]) {
+		const before = state
+		state = applyAction(state, choice.player, choice.action)
+		steps.push({ state: before, after: state, ...choice })
+	}
+	return { state, steps }
 }
 
 /** Called by the future water-routing resolver, not by a player action. The

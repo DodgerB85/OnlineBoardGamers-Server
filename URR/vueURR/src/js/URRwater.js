@@ -30,22 +30,23 @@ export function waterChoices(game) {
 	})
 }
 
-export function startWaterRouting(game) {
+export function startWaterRouting(game, record = null) {
 	boardRules.requireRule(game.board.riverSources?.length === 3 && game.board.riverDownstream, "Configure the three rivers before routing water")
 	game.rain.routing = { sourceIndex: 0, river: null, arrivals: {}, stack: [], outflow: 0 }
-	return advanceWaterRouting(game)
+	return advanceWaterRouting(game, record)
 }
 
-function startPump(game, area, amount, parent) {
+function startPump(game, area, amount, parent, record) {
 	const frame = { area: area.id, water: amount, visited: [...parent.visited, area.id], originReservoir: parent.originReservoir ?? game.rain.routing.stack[0].area }
 	if (area.owner !== null && area.irrigatedBy === null) {
 		area.irrigatedBy = area.waterwork.state
 		frame.water--
+		record?.({ type: "irrigate", from: area.id, to: area.id, amount: 1, state: area.waterwork.state })
 	}
 	game.rain.routing.stack.push(frame)
 }
 
-function finishFrame(game) {
+function finishFrame(game, record) {
 	const routing = game.rain.routing
 	const frame = routing.stack.pop()
 	const parent = routing.stack.at(-1)
@@ -54,15 +55,18 @@ function finishFrame(game) {
 		// Returned water has a different traversal history from water the parent
 		// has not sent yet. Keep the batches separate when trying other branches.
 		if (unused.length > 0) {
+			record?.({ type: "return", from: frame.area, to: parent.area, amount: unused.reduce((sum, batch) => sum + batch.water, 0) })
 			parent.returnedWater ??= []
 			parent.returnedWater.push(...unused)
 		}
 	} else {
-		routing.river = { area: game.board.riverDownstream[frame.area], water: frame.downstreamWater + unused.reduce((sum, batch) => sum + batch.water, 0) }
+		const amount = frame.downstreamWater + unused.reduce((sum, batch) => sum + batch.water, 0)
+		record?.({ type: "river", from: frame.area, to: game.board.riverDownstream[frame.area], amount })
+		routing.river = { area: game.board.riverDownstream[frame.area], water: amount }
 	}
 }
 
-export function advanceWaterRouting(game) {
+export function advanceWaterRouting(game, record = null) {
 	const routing = game.rain.routing
 	while (true) {
 		const frame = currentWaterFrame(game)
@@ -81,7 +85,7 @@ export function advanceWaterRouting(game) {
 				frame.visited = returned.visited
 				continue
 			}
-			finishFrame(game)
+			finishFrame(game, record)
 			continue
 		}
 		if (!routing.river) {
@@ -90,10 +94,12 @@ export function advanceWaterRouting(game) {
 				return true
 			}
 			routing.river = { area: game.board.riverSources[routing.sourceIndex++], water: rf.ERA_WATER_PER_RIVER[game.era] }
+			record?.({ type: "source", to: routing.river.area, amount: routing.river.water })
 		}
 		let { area: id, water } = routing.river
 		if (id === null) {
 			routing.outflow += water
+			record?.({ type: "outflow", amount: water })
 			routing.river = null
 			continue
 		}
@@ -103,6 +109,7 @@ export function advanceWaterRouting(game) {
 			arrivals.count++
 			arrivals.water += water
 			routing.arrivals[id] = arrivals
+			record?.({ type: "confluence", to: id, amount: arrivals.water, waiting: arrivals.count < upstreamCount })
 			if (arrivals.count < upstreamCount) {
 				routing.river = null
 				continue
@@ -114,11 +121,15 @@ export function advanceWaterRouting(game) {
 			const diverted = area.waterwork.capacity === "M" ? water : Math.min(water, area.waterwork.capacity)
 			routing.stack.push({ area: id, water: diverted, downstreamWater: water - diverted, visited: [id], originReservoir: id })
 			routing.river = null
-		} else routing.river = { area: game.board.riverDownstream[id], water }
+			record?.({ type: "reservoir", to: id, amount: diverted, downstream: water - diverted, state: area.waterwork.state })
+		} else {
+			record?.({ type: "river", from: id, to: game.board.riverDownstream[id], amount: water })
+			routing.river = { area: game.board.riverDownstream[id], water }
+		}
 	}
 }
 
-export function allocateWater(game, action) {
+export function allocateWater(game, action, record = null) {
 	boardRules.requireRule(action.type === "allocateWater", "Choose where to send the water")
 	const frame = currentWaterFrame(game)
 	const choice = waterChoices(game).find((entry) => entry.area === action.area)
@@ -130,9 +141,11 @@ export function allocateWater(game, action) {
 		boardRules.requireRule(amount === 1, "Each area uses exactly one water")
 		area.irrigatedBy = boardRules.getArea(game, frame.area).waterwork.state
 		frame.water--
+		record?.({ type: "irrigate", from: frame.area, to: area.id, amount: 1, state: area.irrigatedBy })
 	} else {
 		frame.water -= amount
-		startPump(game, area, amount, frame)
+		record?.({ type: "pump", from: frame.area, to: area.id, amount, state: area.waterwork.state })
+		startPump(game, area, amount, frame, record)
 	}
-	return advanceWaterRouting(game)
+	return advanceWaterRouting(game, record)
 }

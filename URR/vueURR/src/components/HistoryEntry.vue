@@ -3,7 +3,8 @@ import PlayerMarker from "./PlayerMarker.vue"
 import ArtworkCard from "./ArtworkCard.vue"
 import * as funcs from "../js/URRfuncs"
 import StateLeadership from "./StateLeadership.vue"
-import { computed } from "vue"
+import { computed, nextTick, ref } from "vue"
+import { useWaterPlaybackStore } from "../stores/URRwaterPlayback.js"
 import * as rf from "../js/URRreference"
 import * as view from "../js/URRview"
 import * as rules from "../js/URRrules"
@@ -85,14 +86,14 @@ const eventText = computed(() => {
 		dig: `${stateName}: dug ${move.path?.map(landLabel).join(" → ")}`,
 		digEridu: `Eridu: dug ${move.path?.map(landLabel).join(" → ")}`,
 		buyCard: `${stateName}: hired a digging crew`,
-		requestWaterwork: `${stateName}: ${after.value?.gameflow.pendingOffer ? 'requested' : 'built'} a ${move.kind} at ${landLabel(move.area)}`,
+		requestWaterwork: `${stateName}: ${after.value?.gameflow.pendingOffer || after.value?.gameflow.waterworkRequests?.some((offer) => offer.action.area === move.area) ? 'requested' : 'built'} a ${move.kind} at ${landLabel(move.area)}`,
 		offerNation: after.value?.gameflow.pendingOffer ? `${stateName}: offered ${move.amount} SPL for ${rf.NATION_NAMES[move.nation]}` : `${stateName}: assimilated ${rf.NATION_NAMES[move.nation]} for ${move.amount} SPL`,
 		respondOffer: `${move.accept ? 'Accepted' : 'Declined'} ${offerDescription}`,
-		endDevelopment: `${stateName}: ended development${before.value?.states[stateId.value]?.diggers.length === 0 && after.value?.states[stateId.value]?.diggers.length > 0 ? " and hired the mandatory crew" : ""}`,
+		endDevelopment: after.value?.gameflow.pendingOffer ? `${stateName}: requested landowner agreement` : `${stateName}: ended development${before.value?.states[stateId.value]?.diggers.length === 0 && after.value?.states[stateId.value]?.diggers.length > 0 ? " and hired the mandatory crew" : ""}`,
 		beginDevelopment: after.value?.gameflow.phase === rf.PHASE_RAINY_SEASON || after.value?.gameflow.turn !== before.value?.gameflow.turn ? "Started the rainy season" : `Started ${rf.STATE_NAMES[after.value?.gameflow.stateOrder[after.value.gameflow.stateIndex]] || 'the next state'} development`,
 		resolveMaintenance: after.value?.states[stateId.value]?.hasRevolted ? `${stateName}: declared a revolution` : `${stateName}: hired the mandatory crew${move.sales?.some((batch) => batch.length) ? ` by selling ${saleLabels(move.sales)}` : ''}`,
 		exchangeBarahshum: `Exchanged Barahshum for a canal to ${landLabel(move.to)}`,
-		exchangeCalah: `${stateName}: ${after.value?.gameflow.pendingOffer ? 'requested a Calah exchange for' : 'exchanged Calah for'} a ${move.kind} at ${landLabel(move.area)}`,
+		exchangeCalah: `${stateName}: ${after.value?.gameflow.pendingOffer || after.value?.gameflow.waterworkRequests?.some((offer) => offer.action.area === move.area) ? 'requested a Calah exchange for' : 'exchanged Calah for'} a ${move.kind} at ${landLabel(move.area)}`,
 		allocateWater: waterDestination.value?.waterwork?.kind === "pump" ? `${stateName}: Sent ${move.amount ?? 1} water from ${landLabel(waterSource)} to ${landLabel(move.area)}` : `${stateName}: irrigated ${landLabel(move.area)} with one water from ${landLabel(waterSource)}`,
 		advanceWater: "Continued automatic water flow",
 		harvest: `${stateName}: ${move.choice === "store" ? "stored" : "distributed"} ${before.value ? rules.harvestAmount(before.value, stateId.value) : ''} SPL harvest${move.remove ? ` · removed waterwork at ${landLabel(move.remove)}` : ''}`,
@@ -146,6 +147,19 @@ const actionImages = computed(() => {
 	}
 	return []
 })
+const playback = useWaterPlaybackStore()
+const playbackError = ref("")
+const canReplayWater = computed(() => ["riverComplete", "rainEnd"].includes(props.entry.administration?.kind) && (!store.turnDraft.start || props.entry.historyIndex < store.turnDraft.start.historyLength))
+function startWaterPlayback(advancing) {
+	try {
+		playback.start(store.history, props.entry.historyIndex, advancing)
+		nextTick(() => document.querySelector("#mapArea .mapSurface").scrollIntoView({ block: "center", behavior: "smooth" }))
+		playbackError.value = ""
+	} catch (error) {
+		playbackError.value = error.message
+		console.error("Unable to replay recorded water flow:", error)
+	}
+}
 function jumpToEntry() {
 	if (!store.viewSettings.showReplay) return
 	store.replayStep.index = props.index
@@ -161,6 +175,8 @@ function jumpToEntry() {
 			<template v-if="entry.administration">
 				<div class="administrationHeading">{{ entry.administration.title }}</div>
 				<p class="administrationExplanation">{{ entry.administration.text }}</p>
+				<div v-if="canReplayWater" class="waterReplayControls"><button @click.stop="startWaterPlayback(true)">Animate</button><button @click.stop="startWaterPlayback(false)">Step through</button></div>
+				<p v-if="playbackError" role="alert">{{ playbackError }}</p>
 				<div class="administrationDetails" v-if="entry.administration.details.length">
 					<div v-for="(detail, detailIndex) in entry.administration.details" :key="detailIndex">
 						<PlayerMarker v-if="detail.player !== undefined" :index="detail.player" />
@@ -184,6 +200,7 @@ function jumpToEntry() {
 </template>
 
 <style scoped>
+.waterReplayControls { display: flex; gap: 6px; margin: 6px 3px; }.waterReplayControls button { padding: 4px 7px; font: inherit; cursor: pointer; }
 .container { display: flex; align-items: center; }
 .log { direction: ltr; margin: 5px; border: #000 1px solid; text-align: left; padding: 3px; background-color: #d4eafd; z-index: 30; line-height: 25px; }
 .log.separator { padding: 3px; }
@@ -194,9 +211,9 @@ function jumpToEntry() {
 .log.currentReplay { box-shadow: inset 3px 0 #177daf; background: #e5f3ff; }.replayPosition { display: block; color: #12628c; font-size: 16px; font-weight: bold; }
 .actionImages { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }.actionImages img { width: 30px; height: 30px; object-fit: contain; }.historyCard { width: 185px; max-width: 100%; }
 .actionImages.multipleCards .historyCard { width: calc((100% - 4px) / 2); max-width: 185px; }
-.nationAwardNotice { display: flex; align-items: center; gap: 5px; margin-top: 4px; padding: 3px 6px; background: #edf6fd; border-left: 3px solid #177daf; font-size: 16px; font-weight: 600; }.nationAwardNotice img { width: 23px; height: 23px; flex-shrink: 0; }.nationAwardNotice span { min-width: 0; overflow-wrap: anywhere; }
+.nationAwardNotice { display: flex; align-items: center; gap: 5px; margin-top: 4px; padding: 3px 6px; background: #edf6fd; border-left: 3px solid #177daf; font-size: 16px; font-weight: 400; }.nationAwardNotice img { width: 23px; height: 23px; flex-shrink: 0; }.nationAwardNotice span { min-width: 0; overflow-wrap: anywhere; }
 .container > img { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; margin-right: 6px; }.container > span:last-child { min-width: 0; overflow-wrap: anywhere; }
-.balanceChanges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }.balanceChanges span { display: inline-flex; align-items: center; gap: 4px; padding: 2px 5px; background: #edf6fd; border: 1px solid #adc2d0; font-size: 16px; font-weight: 600; }.balanceChanges img { width: 22px; height: 22px; }
-.balanceChanges { cursor: pointer; align-items: center; list-style: none; }.balanceChanges::-webkit-details-marker { display: none; }.balanceChanges::before { content: '▸'; font-size: 16px; font-weight: 600; }.balanceDetails[open] .balanceChanges::before { content: '▾'; }.balanceChanges:focus-visible { outline: 2px solid #177daf; outline-offset: 2px; }.balanceBreakdown { display: grid; gap: 3px; margin-top: 5px; padding: 5px; background: #edf6fd; font-size: 16px; font-weight: 600; }.balanceBreakdown > div { display: flex; align-items: center; gap: 5px; }.balanceBreakdown img { width: 22px; height: 22px; flex-shrink: 0; }.balanceBreakdown span { min-width: 0; overflow-wrap: anywhere; }
+.balanceChanges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }.balanceChanges span { display: inline-flex; align-items: center; gap: 4px; padding: 2px 5px; background: #edf6fd; border: 1px solid #adc2d0; font-size: 16px; font-weight: 400; }.balanceChanges img { width: 22px; height: 22px; }
+.balanceChanges { cursor: pointer; align-items: center; list-style: none; }.balanceChanges::-webkit-details-marker { display: none; }.balanceChanges::before { content: '▸'; font-size: 16px; font-weight: 400; }.balanceDetails[open] .balanceChanges::before { content: '▾'; }.balanceChanges:focus-visible { outline: 2px solid #177daf; outline-offset: 2px; }.balanceBreakdown { display: grid; gap: 3px; margin-top: 5px; padding: 5px; background: #edf6fd; font-size: 16px; font-weight: 400; }.balanceBreakdown > div { display: flex; align-items: center; gap: 5px; }.balanceBreakdown img { width: 22px; height: 22px; flex-shrink: 0; }.balanceBreakdown span { min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 1050px) { .balanceChanges { min-height: 40px; } }
 </style>

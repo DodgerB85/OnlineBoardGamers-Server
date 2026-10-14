@@ -2,7 +2,6 @@ import * as rf from "./URRreference"
 import * as model from "./URRmodel"
 import * as IO from "../backend/URR_IO"
 import * as game from "./URRgame.js"
-import * as view from "./URRview.js"
 import * as turnDraft from "./URRturnDraft.js"
 import * as rules from "./URRrules.js"
 import { useModelStore } from "../stores/URRstore.js"
@@ -27,6 +26,23 @@ export function startPlayerTurn() {
 		// Optional "your turn" sound. Add sound files to static/Lobby/common/sounds if wanted.
 	}
 	model.rebuildTurnOrder()
+	if (personal.canPlay() && !store.turnDraft.start && !store.gameflow.pendingOffer && store.gameflow.offerDeclined) {
+		try {
+			const restored = game.restoreDevelopmentChoices(model.snapshotState())
+			if (!restored) return
+			model.restoreState(restored.state)
+			const draft = store.turnDraft
+			draft.player = currentPlayerIndex()
+			draft.steps = restored.steps.map((step) => ({ state: step.state, historyLength: store.history.length, player: step.player, action: step.action, label: turnDraft.actionSummary(step.state, step.after, step.action) }))
+			draft.start = draft.steps[0] || null
+			draft.ready = false
+			draft.pauseAutomatic = true
+			draft.revision++
+		} catch (error) {
+			store.gameMessages.actionError = `Unable to restore construction choices: ${error.message}`
+			console.error("Unable to restore declined development plan:", error)
+		}
+	}
 }
 
 // Rules still run normally; the resulting positions stay local until End Turn.
@@ -34,7 +50,7 @@ export async function submitAction(action) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	let player = personal.trainingGame || rf.SUPER_USERS.includes(personal.name) ? currentPlayerIndex() : personal.pov
-	if (action.type === "exchangeBarahshum") {
+	if (["exchangeBarahshum", "passBarahshum"].includes(action.type)) {
 		if (store.turnDraft.ready || personal.haltPlay || store.viewSettings.showReplay || personal.pov < 0) return false
 		const nation = store.nations[rf.NATION_BARAHSHUM]
 		if ((personal.trainingGame || rf.SUPER_USERS.includes(personal.name)) && nation.ownerType === "player") player = nation.owner
@@ -148,10 +164,7 @@ export async function endPlayerTurn() {
 	if (saved) {
 		store.clearTurnDraft()
 		store.viewSettings.actionIntent = ""
-		const next = store.players[store.gameflow.turnOrder[0]]
-		const stateId = view.currentStateId(store)
-		const context = store.gameflow.pendingOffer ? "respond to the agreement request" : store.rain.step === "routing" ? "route water" : store.rain.step === "harvest" ? "choose the harvest" : view.phaseStr(store.gameflow.phase)
-		store.turnDraft.message = next ? `Turn saved.${stateId === null ? "" : ` · ${rf.STATE_NAMES[stateId]}`} · ${context}.` : "Turn saved. Game complete."
+		startPlayerTurn()
 	}
 	return saved
 }
