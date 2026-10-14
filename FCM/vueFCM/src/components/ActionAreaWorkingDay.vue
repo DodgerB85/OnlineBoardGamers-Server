@@ -362,7 +362,7 @@ const computedProducers = computed(() => {
 				<p>{{ $t("workingDay.trainedLabel") }}</p>
 				<div v-for="(entry, idx) in store.context.justTrained" :key="idx" class="trainedPair" :title="$t('workingDay.clickToUndoTrain')" @click="controller.undoTrainEmployee(entry)">
 					<img v-if="entry.from > -1" :src="view.getImage(`emp_${entry.from}`)" class="cardImg oldTrainedEmployee" :alt="rf.employeeName(entry.from)" />
-					<img :src="view.getImage(`emp_${entry.to}`)" class="cardImg" :class="{ newTrainedEmployee: entry.from > -1 }" :alt="rf.employeeName(entry.to)" />
+					<img :src="view.getImage(`emp_${entry.to}`)" class="cardImg newTrainedEmployee" :alt="rf.employeeName(entry.to)" />
 				</div>
 			</div>
 
@@ -1062,6 +1062,11 @@ const computedProducers = computed(() => {
 	border-radius: 15px;
 	position: relative;
 	left: -25px;
+}
+
+/* train-from-hire shows only the new card, so it must not take the overlap offset */
+.trainedPair > .newTrainedEmployee:only-child {
+	left: 0;
 }
 
 /** CHOOSE RESERVE */
