@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from "vue"
 import * as model from "./js/URRmodel"
 import * as rf from "./js/URRreference"
 import * as view from "./js/URRview"
+import { actionPanelGame } from "./js/URRturnDraft.js"
 import * as IO from "./backend/URR_IO"
 import * as WS from "./backend/URRwebsocket"
 import * as rules from "./js/URRrules"
@@ -118,25 +119,25 @@ const actingLabel = computed(() => {
 	return `${context}: ${stateId === null ? '' : `${rf.STATE_NAMES[stateId]}\n`}${player ? '' : 'Automatic resolution'}`
 })
 const actionPanelTitle = computed(() => {
-	if (store.turnDraft.ready) return "Confirm your turn"
-	if (store.gameflow.pendingOffer) return "Agreement requested"
-	if (store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS) {
-		if (store.gameflow.auction) return `Auction: ${rf.NATION_NAMES[store.gameflow.auction.nation]}`
-		const treaty = store.nations.find((nation) => nation.ownerType === null)
+	const game = actionPanelGame(store)
+	if (game.gameflow.pendingOffer) return "Agreement requested"
+	if (game.gameflow.phase === rf.PHASE_DIVIDING_NATIONS) {
+		if (game.gameflow.auction) return `Auction: ${rf.NATION_NAMES[game.gameflow.auction.nation]}`
+		const treaty = game.nations.find((nation) => nation.ownerType === null)
 		if (treaty) return `Treaty: ${rf.NATION_NAMES[treaty.id]}`
 	}
-	if (isBarahshumExchange.value) return "Barahshum\nfree canal"
+	if (isBarahshumExchange.value || (store.turnDraft.ready && store.turnDraft.steps.at(-1).action.type === "exchangeBarahshum")) return "Barahshum\nfree canal"
 	if (map.value?.isTracing) return `Canal draft\n${Math.max(0, canalPath.value.length - 1)} segment${canalPath.value.length === 2 ? "" : "s"}`
-	if (store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep === "eridu") return canalPath.value.length >= 2 ? "Eridu\ncanal review" : "Eridu\nspecial digging turn"
-	const stateId = view.currentStateId(store)
-	if (store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep === "digging" && canalPath.value.length >= 2) return `${rf.STATE_NAMES[stateId]}\ncanal review`
-	if (stateId !== null && store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep !== "betweenStates" && store.players[store.states[stateId].king].money < rules.maintenanceShortfall(store, stateId)) return `${rf.STATE_NAMES[stateId]}\ncrew funding`
-	if (stateId !== null && store.gameflow.phase === rf.PHASE_RAINY_SEASON) {
-		if (store.gameflow.endReason) return `${rf.STATE_NAMES[stateId]}\nfinal ${store.rain.step === "harvest" ? "harvest" : "water"}`
-		return store.rain.step === "harvest" ? `${rf.STATE_NAMES[stateId]}\nharvest ${rules.harvestAmount(store, stateId)} SPL` : `${rf.STATE_NAMES[stateId]}\nroute water`
+	if (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "eridu") return canalPath.value.length >= 2 ? "Eridu\ncanal review" : "Eridu\nspecial digging turn"
+	const stateId = view.currentStateId(game)
+	if (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "digging" && canalPath.value.length >= 2) return `${rf.STATE_NAMES[stateId]}\ncanal review`
+	if (stateId !== null && game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep !== "betweenStates" && game.players[game.states[stateId].king].money < rules.maintenanceShortfall(game, stateId)) return `${rf.STATE_NAMES[stateId]}\ncrew funding`
+	if (stateId !== null && game.gameflow.phase === rf.PHASE_RAINY_SEASON) {
+		if (game.gameflow.endReason) return `${rf.STATE_NAMES[stateId]}\nfinal ${game.rain.step === "harvest" ? "harvest" : "water"}`
+		return game.rain.step === "harvest" ? `${rf.STATE_NAMES[stateId]}\nharvest ${rules.harvestAmount(game, stateId)} SPL` : `${rf.STATE_NAMES[stateId]}\nroute water`
 	}
-	if (store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep === "betweenStates") return stateId === null ? "Before rainy season" : `Before ${rf.STATE_NAMES[stateId]} development`
-	return stateId === null ? view.phaseStr(store.gameflow.phase) : `${rf.STATE_NAMES[stateId]}\n${view.phaseStr(store.gameflow.phase)}`
+	if (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "betweenStates") return stateId === null ? "Before rainy season" : `Before ${rf.STATE_NAMES[stateId]} development`
+	return stateId === null ? view.phaseStr(game.gameflow.phase) : `${rf.STATE_NAMES[stateId]}\n${view.phaseStr(game.gameflow.phase)}`
 })
 function selectArea(id) {
 	selectedArea.value = id
@@ -153,13 +154,23 @@ const automaticAction = computed(() => {
 })
 // A turn made only of forced moves (nothing to decide) saves itself instead of waiting for End Turn.
 let forcedSteps = 0
+let isResolvingAutomatic = false
 watch(() => store.turnDraft.steps.length, (count) => { if (count === 0) forcedSteps = 0 })
-watch(automaticAction, async (action) => {
-	if (!action) return
-	if (controller.canRunBotTurn()) return controller.submitBotAction(action)
-	if (!await controller.submitAction(action)) return
-	forcedSteps++
-	if (store.turnDraft.ready && store.turnDraft.steps.length === forcedSteps) await controller.endPlayerTurn()
+watch(automaticAction, async () => {
+	if (isResolvingAutomatic) return
+	isResolvingAutomatic = true
+	try {
+		while (automaticAction.value) {
+			if (controller.canRunBotTurn()) {
+				if (!await controller.submitBotAction(automaticAction.value)) return
+			} else {
+				if (!await controller.submitAction(automaticAction.value)) return
+				forcedSteps++
+				if (store.turnDraft.ready && store.turnDraft.steps.length === forcedSteps && !await controller.endPlayerTurn()) return
+			}
+			await nextTick()
+		}
+	} finally { isResolvingAutomatic = false }
 }, { immediate: true, flush: "post" })
 watch(() => store.turnDraft.revision, () => {
 	map.value?.finishDig()
@@ -208,7 +219,7 @@ function showDebug() {
 			</div>
 			<aside v-if="!store.viewSettings.showReplay" class="actionSidebar">
 				<div v-if="!isNationDivision" class="actionPanelHeading"><small class="actingLabel">{{ actingLabel }} <PlayerMarker v-if="actingPlayer !== undefined" :index="actingPlayer" /></small>{{ actionPanelTitle }}</div>
-				<div v-if="!store.turnDraft.ready || isNationDivision" class="actionPanelBody"><NationMarket v-if="isNationDivision" :is-board-layout="isNationDivision" @locate-nation="locateNation" />
+				<div class="actionPanelBody"><NationMarket v-if="isNationDivision" :is-board-layout="isNationDivision" @locate-nation="locateNation" />
 				<GameActions v-else ref="gameActions" :key="store.turnDraft.revision" @select-area="selectedArea = $event" @change-map-action="mapAction = $event" @change-action-targets="actionTargets = $event" :selected-area="selectedArea" :path="canalPath" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" @change-turn-action="turnAction = $event" @change-dig-capacity="digCapacity = $event" /></div>
 				<TurnControls :is-nation-division="isNationDivision" :turn-action="turnAction" :land-draft="landDraft" @end-turn="finishTurn" />
 			</aside>

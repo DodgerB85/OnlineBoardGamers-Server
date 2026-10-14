@@ -65,3 +65,19 @@ test("Rainy-season completion replays the same water flow after harvesting", () 
 	assert.equal(after.rain.step, "complete")
 	assert.deepEqual(buildWaterPlayback(history, 3), buildWaterPlayback(history, 2))
 })
+
+test("Junction water stays visible until the next river merges with it", () => {
+	const script = buildWaterPlayback(routingHistory(false), 1)
+	const waitingIndex = script.steps.findIndex((step) => step.type === "confluence" && step.waiting)
+	assert.ok(waitingIndex >= 0)
+	const arrival = script.steps[waitingIndex]
+	const mergeIndex = script.steps.findIndex((step, index) => index > waitingIndex && step.type === "confluence" && step.to === arrival.to && !step.waiting)
+	assert.ok(mergeIndex > waitingIndex + 1)
+	for (const step of script.steps.slice(waitingIndex, mergeIndex)) {
+		assert.deepEqual(step.waitingWater.find((water) => water.area === arrival.to), { area: arrival.to, amount: arrival.amount })
+	}
+	const incoming = script.steps[mergeIndex - 1]
+	assert.equal(script.steps[mergeIndex].amount, arrival.amount + incoming.amount)
+	assert.ok(!script.steps[mergeIndex].waitingWater.some((water) => water.area === arrival.to))
+	assert.deepEqual(script.steps.at(-1).waitingWater, [])
+})

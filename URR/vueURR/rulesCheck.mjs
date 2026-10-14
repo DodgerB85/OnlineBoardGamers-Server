@@ -264,7 +264,7 @@ const area = (game, areaId) => game.board.areas.find((entry) => entry.id === are
 	assert.equal(next.gameflow.turn, 2)
 	assert.equal(next.gameflow.phase, rf.PHASE_SETTLEMENT)
 	pump.owner = pump.markerOwner = 0
-	assert.equal(rules.getAutomaticAction(game), null)
+	assert.deepEqual(rules.getAutomaticAction(game), { type: "allocateWater", area: pump.id, amount: 2 })
 	assert.throws(() => applyAction(game, 0, action), /Choose where to send/)
 }
 

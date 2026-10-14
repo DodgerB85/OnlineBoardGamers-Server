@@ -12,9 +12,9 @@ export function getAutomaticAction(game) {
 		const frame = water.currentWaterFrame(game)
 		const choices = water.waterChoices(game)
 		if (choices.length === 0) return { type: "advanceWater" }
-		// A quantity choice at a pump can affect the downstream monarch's options.
-		// Direct irrigation is forced only when no destination must be sacrificed.
-		if ((choices.length === 1 && (choices[0].kind === "irrigate" || frame.water === 1)) || (choices.every((choice) => choice.kind === "irrigate") && frame.water >= choices.length)) return { type: "allocateWater", area: choices[0].area, amount: 1 }
+		// With one destination, splitting the handoff only sends the rest there later.
+		if (choices.length === 1) return { type: "allocateWater", area: choices[0].area, amount: choices[0].kind === "pump" ? frame.water : 1 }
+		if (choices.every((choice) => choice.kind === "irrigate") && frame.water >= choices.length) return { type: "allocateWater", area: choices[0].area, amount: 1 }
 	}
 	if (game.rain.step === "harvest") {
 		const state = game.states[game.rain.harvestOrder[0]]
@@ -80,6 +80,12 @@ export function getKing(game, stateId) {
 
 export function getDevelopmentOrder(game) {
 	return game.states.filter((state) => state.isActive).map((state) => state.id).sort((a, b) => ownedLand(game, a).length - ownedLand(game, b).length || game.board.stateOrder.indexOf(a) - game.board.stateOrder.indexOf(b))
+}
+
+export function remainingWaterworkTokens(game, stateId, capacity) {
+	const supply = game.board.waterworkLimits[stateId][capacity]
+	const used = game.board.areas.filter((area) => area.waterwork?.state === stateId && area.waterwork.capacity === capacity).length
+	return supply - used
 }
 
 export function nextCardEra(game) {

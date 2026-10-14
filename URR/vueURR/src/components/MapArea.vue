@@ -89,7 +89,7 @@ const mapDecisions = computed(() => {
 		add(maintenanceLand.value, "Sell", "sale")
 		add(barahshumSites.value, "Canal", "build")
 		if (barahshumSites.value.length) add([store.board.areas.find((area) => area.nation === rf.NATION_BARAHSHUM)?.id], "Source", "build", true)
-		add(harvestRemovalSites.value, "Remove", "sale")
+		add(harvestRemovalSites.value, "", "sale")
 		add([routingArea.value], "Source", "destination", true)
 		waterDestinations.value.forEach((id, index) => { targets[id] = { label: String(index + 1), kind: "destination", number: true } })
 	}
@@ -243,6 +243,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 						<template v-else-if="mapDecisions[entry.area.id].label"><rect :x="entry.position.x - 36" :y="entry.position.y + 23" width="72" height="23" rx="4" class="decisionBadge" /><text :x="entry.position.x" :y="entry.position.y + 35" class="decisionLabel">{{ mapDecisions[entry.area.id].label }}</text></template>
 					</g>
 					<polygon v-if="Object.keys(mapDecisions).length && !mapDecisions[entry.area.id]" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="actionShade" />
+					<polygon v-if="playback.isIrrigationPreview && !playback.current.wet.includes(entry.area.id)" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="inspectionShade" />
 					<polygon v-if="hasMapInspection && !inspectionTargets.has(entry.area.id)" :points="boardDisplay.hexPoints(entry.position.x, entry.position.y)" class="inspectionShade" />
 				</g>
 			</svg>
