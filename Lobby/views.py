@@ -714,6 +714,7 @@ def feedback(request):
 
     if request.method == "POST":
         feedback_text = request.POST.get("feedback", "")
+        category = request.POST.get("category", "")
         if not feedback_text.strip():
             messages.error(request, gettext("Please enter some feedback."))
             return render(request, "Lobby/feedback.html")
@@ -729,6 +730,7 @@ def feedback(request):
                 "username": username,
                 "email": email,
                 "feedback": feedback_text,
+                "category": category,
                 "domain": "www.OnlineBoardGamers.com",
             },
         )
@@ -746,6 +748,7 @@ def feedback(request):
             f"NEW LOBBY DESIGN FEEDBACK\n"
             f"User: {username}\n"
             #f"Email: {email}\n"
+            f"Category: {category}\n"
             f"Feedback: {feedback_text}"
         )
 

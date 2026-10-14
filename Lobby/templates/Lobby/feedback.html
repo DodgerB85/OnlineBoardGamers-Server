@@ -27,6 +27,20 @@
                 onsubmit="const b=this.querySelector('button[type=submit]'); b.disabled=true; b.textContent='Sending feedback......';">
             {% csrf_token %}
             <div class="form-row">
+              <label for="category" class="form-label">{% translate "Category" %}</label>
+              <select id="category"
+                      name="category"
+                      onchange="document.getElementById('bugCaution').hidden = this.value !== 'Bug Report'">
+                <option value="New Layout / Website Design">{% translate "New Layout / Website Design" %}</option>
+                <option value="General Question">{% translate "General Question" %}</option>
+                <option value="Bug Report">{% translate "Bug Report" %}</option>
+              </select>
+              <p id="bugCaution"
+                 class="form-help"
+                 hidden
+                 style="color: var(--color-danger)">{% translate "CAUTION: Please use in game bug reporting for games to ensure all the data is captured" %}</p>
+            </div>
+            <div class="form-row">
               <label for="feedback" class="form-label">{% translate "Your Feedback" %}</label>
               <textarea id="feedback"
                         name="feedback"
