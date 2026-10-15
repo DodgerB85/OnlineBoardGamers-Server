@@ -37,8 +37,13 @@ export function buildWaterPlayback(history, completionIndex) {
 	game.rain = { step: "routing", outflow: null, harvestOrder: [] }
 	const board = JSON.parse(JSON.stringify(game.board))
 	const steps = []
+	const waitingWater = new Map()
 	const label = (id) => board.areas.find((area) => area.id === id)?.label || id
 	function record(event) {
+		if (event.type === "confluence") {
+			if (event.waiting) waitingWater.set(event.to, event.amount)
+			else waitingWater.delete(event.to)
+		}
 		if (event.amount === 0) return
 		const descriptions = {
 			source: `${event.amount} water enters at ${label(event.to)}.`,
@@ -51,7 +56,7 @@ export function buildWaterPlayback(history, completionIndex) {
 			outflow: `${event.amount} water leaves the board.`,
 		}
 		const path = event.from && event.to && ["pump", "irrigate", "return"].includes(event.type) ? canalPath(board, event.from, event.to) : [event.from, event.to].filter(Boolean)
-		steps.push({ ...event, path, text: descriptions[event.type], wet: game.board.areas.filter((area) => area.irrigatedBy !== null).map((area) => area.id) })
+		steps.push({ ...event, path, waitingWater: [...waitingWater].map(([area, amount]) => ({ area, amount })), text: descriptions[event.type], wet: game.board.areas.filter((area) => area.irrigatedBy !== null).map((area) => area.id) })
 	}
 	let finished = water.startWaterRouting(game, record)
 	for (let index = startIndex + 1; index <= completionIndex; index++) {
@@ -61,6 +66,6 @@ export function buildWaterPlayback(history, completionIndex) {
 	}
 	if (!finished || game.rain.routing.outflow !== completed.rain.outflow) throw new Error("This history does not contain all water-routing decisions")
 	const wet = game.board.areas.filter((area) => area.irrigatedBy !== null).map((area) => area.id)
-	steps.push({ type: "complete", path: [], wet, text: `Water routing complete: ${wet.length} ${wet.length === 1 ? "hex" : "hexes"} irrigated, ${game.rain.routing.outflow} water left the board.` })
+	steps.push({ type: "complete", path: [], wet, waitingWater: [], text: `Water routing complete: ${wet.length} ${wet.length === 1 ? "hex" : "hexes"} irrigated, ${game.rain.routing.outflow} water left the board.` })
 	return { board, steps }
 }

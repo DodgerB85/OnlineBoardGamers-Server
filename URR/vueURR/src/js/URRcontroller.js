@@ -106,6 +106,7 @@ export function undoAction() {
 // Remove one choice from the draft by replaying the later ones without it; if they no longer fit, nothing changes.
 export async function removeDraftStep(index) {
 	const store = useModelStore()
+	const actionIntent = store.viewSettings.actionIntent
 	const steps = store.turnDraft.steps
 	if (!canReviewTurn() || !steps[index]) return false
 	const backup = { state: model.snapshotState(), history: [...store.history], steps: [...steps], ready: store.turnDraft.ready }
@@ -113,6 +114,7 @@ export async function removeDraftStep(index) {
 	const checkpoint = steps[index]
 	steps.splice(index)
 	restoreCheckpoint(checkpoint)
+	store.viewSettings.actionIntent = actionIntent
 	for (const action of later) {
 		if (await submitAction(action)) continue
 		model.restoreState(backup.state)

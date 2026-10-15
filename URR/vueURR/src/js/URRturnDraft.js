@@ -1,6 +1,15 @@
 import * as rf from "./URRreference.js"
 import * as water from "./URRwater.js"
 
+export function actionPanelGame(game) {
+	return game.turnDraft.ready ? game.turnDraft.steps.at(-1).state : game
+}
+
+export function turnCost(game) {
+	const before = game.turnDraft.start.state
+	return before.players.reduce((total, player, index) => total + player.money - game.players[index].money, 0) + before.states.reduce((total, state, index) => total + state.money - game.states[index].money, 0)
+}
+
 // Buying equipment closes digging, but remains part of the same state's turn.
 export function turnContext(game) {
 	const flow = game.gameflow
@@ -11,7 +20,11 @@ export function turnContext(game) {
 }
 
 export function endsDecision(before, after, action) {
-	return turnContext(before) !== turnContext(after) || ["pass", "buyNation", "bidNation", "tradeLand", "bidPrimogeniture", "digEridu", "beginDevelopment", "endDevelopment", "respondOffer", "harvest", "exchangeBarahshum", "passBarahshum"].includes(action.type)
+	if (action.type === "exchangeBarahshum") {
+		const nation = before.nations[rf.NATION_BARAHSHUM]
+		return nation.ownerType === "player" && (before.gameflow.phase !== rf.PHASE_SETTLEMENT || nation.owner !== before.gameflow.turnOrder[0])
+	}
+	return turnContext(before) !== turnContext(after) || ["pass", "buyNation", "bidNation", "tradeLand", "bidPrimogeniture", "digEridu", "beginDevelopment", "endDevelopment", "respondOffer", "harvest", "passBarahshum"].includes(action.type)
 }
 
 export function defaultEndAction(game) {

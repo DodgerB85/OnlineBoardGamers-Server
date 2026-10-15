@@ -150,9 +150,13 @@ const actionImages = computed(() => {
 const playback = useWaterPlaybackStore()
 const playbackError = ref("")
 const canReplayWater = computed(() => ["riverComplete", "rainEnd"].includes(props.entry.administration?.kind) && (!store.turnDraft.start || props.entry.historyIndex < store.turnDraft.start.historyLength))
-function startWaterPlayback(advancing) {
+function startWaterPlayback(advancing, showIrrigated = false) {
 	try {
 		playback.start(store.history, props.entry.historyIndex, advancing)
+		if (showIrrigated) {
+			playback.state.index = playback.state.steps.length - 1
+			playback.state.showIrrigated = true
+		}
 		nextTick(() => document.querySelector("#mapArea .mapSurface").scrollIntoView({ block: "center", behavior: "smooth" }))
 		playbackError.value = ""
 	} catch (error) {
@@ -175,14 +179,14 @@ function jumpToEntry() {
 			<template v-if="entry.administration">
 				<div class="administrationHeading">{{ entry.administration.title }}</div>
 				<p class="administrationExplanation">{{ entry.administration.text }}</p>
-				<div v-if="canReplayWater" class="waterReplayControls"><button @click.stop="startWaterPlayback(true)">Animate</button><button @click.stop="startWaterPlayback(false)">Step through</button></div>
+				<div v-if="canReplayWater" class="waterReplayControls"><button @click.stop="startWaterPlayback(true)">Animate</button><button @click.stop="startWaterPlayback(false)">Step through</button><button @click.stop="startWaterPlayback(false, true)">Show irrigated</button></div>
 				<p v-if="playbackError" role="alert">{{ playbackError }}</p>
 				<div class="administrationDetails" v-if="entry.administration.details.length">
 					<div v-for="(detail, detailIndex) in entry.administration.details" :key="detailIndex">
 						<PlayerMarker v-if="detail.player !== undefined" :index="detail.player" />
 						<img v-else-if="detail.state !== undefined" :src="assets.getStateOrderImage(detail.state)" alt="" />
 						<img v-else-if="detail.terrain !== undefined" :src="assets.getTerrainImage(detail.terrain)" alt="" />
-						<button v-if="detail.area" @click.stop="store.viewSettings.historyArea = detail.area" :aria-label="`Find ${detail.label} on the board`">{{ detail.label }}</button><span>{{ detail.text }}</span>
+						<span>{{ detail.text }}</span>
 					</div>
 				</div>
 			</template>

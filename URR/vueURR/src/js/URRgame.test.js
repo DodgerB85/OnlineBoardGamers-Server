@@ -2,7 +2,97 @@ import assert from "node:assert/strict"
 import test from "node:test"
 import { createGame, applyAction, restoreDevelopmentChoices } from "./URRgame.js"
 import * as rf from "./URRreference.js"
-import { canExchangeBarahshum } from "./URRrules.js"
+import { canExchangeBarahshum, getAutomaticAction, remainingWaterworkTokens } from "./URRrules.js"
+import { actionPanelGame, endsDecision, turnCost } from "./URRturnDraft.js"
+import { startWaterRouting, waterChoices } from "./URRwater.js"
+
+test("A sole pump receives all water automatically and stops at its downstream choice", () => {
+	const game = createGame(["A", "B", "C"])
+	for (const nation of game.nations) nation.isRemoved = true
+	Object.assign(game.gameflow, { phase: rf.PHASE_RAINY_SEASON, stateOrder: [0], turnOrder: [1] })
+	Object.assign(game.states[0], { isActive: true, king: 1 })
+	const area = (id) => game.board.areas.find((entry) => entry.id === id)
+	const river = area("printed-3-6")
+	const pump = area("printed-3-5")
+	const nextPump = area("printed-3-4")
+	const land = area("printed-4-5")
+	river.waterwork = { state: 0, kind: "reservoir", capacity: 2 }
+	pump.waterwork = nextPump.waterwork = { state: 0, kind: "pump", capacity: 1 }
+	pump.owner = pump.markerOwner = 2
+	nextPump.owner = nextPump.markerOwner = land.owner = land.markerOwner = 1
+	game.board.canals.push([river.id, pump.id], [pump.id, nextPump.id], [pump.id, land.id])
+	game.rain.step = "routing"
+	game.rain.routing = { sourceIndex: 2, river: null, arrivals: {}, outflow: 0, stack: [{ area: river.id, water: 2, downstreamWater: 4, visited: [river.id], originReservoir: river.id }] }
+	const automatic = getAutomaticAction(game)
+	assert.deepEqual(automatic, { type: "allocateWater", area: pump.id, amount: 2 })
+	const allAtOnce = applyAction(game, 1, automatic)
+	const firstHalf = applyAction(game, 1, { ...automatic, amount: 1 })
+	const splitHandoff = applyAction(firstHalf, 1, getAutomaticAction(firstHalf))
+	assert.deepEqual(allAtOnce, splitHandoff)
+	assert.equal(pump.irrigatedBy, null)
+	assert.equal(allAtOnce.board.areas.find((entry) => entry.id === pump.id).irrigatedBy, 0)
+	assert.equal(waterChoices(allAtOnce).length, 2)
+	assert.equal(getAutomaticAction(allAtOnce), null)
+	land.waterwork = { state: 0, kind: "pump", capacity: 1 }
+	game.board.canals.push([river.id, land.id])
+	assert.equal(waterChoices(game).length, 2)
+	assert.equal(getAutomaticAction(game), null)
+})
+
+test("Action review keeps the decision's panel state after a phase or player handoff", () => {
+	const start = createGame(["A", "B", "C"])
+	const beforeChoice = structuredClone(start)
+	beforeChoice.gameflow.phase = rf.PHASE_RAINY_SEASON
+	const current = structuredClone(beforeChoice)
+	current.gameflow.phase = rf.PHASE_SETTLEMENT
+	current.turnDraft = { ready: true, start: { state: start }, steps: [{ state: beforeChoice }] }
+	assert.equal(actionPanelGame(current), beforeChoice)
+	current.players[0].money -= 20
+	current.states[0].money -= 10
+	assert.equal(turnCost(current), 30)
+	current.turnDraft.ready = false
+	assert.equal(actionPanelGame(current), current)
+})
+
+test("One water and one reachable land is forced; scarce water with two lands remains a choice", () => {
+	const game = createGame(["A", "B", "C"])
+	for (const nation of game.nations) nation.isRemoved = true
+	Object.assign(game.gameflow, { phase: rf.PHASE_RAINY_SEASON, stateOrder: [0], turnOrder: [0] })
+	Object.assign(game.states[0], { isActive: true, king: 0 })
+	const river = game.board.areas.find((area) => area.id === "printed-4-2")
+	const land = game.board.areas.find((area) => area.id === "printed-4-3")
+	river.waterwork = { state: 0, kind: "reservoir", capacity: 2 }
+	land.owner = land.markerOwner = 0
+	game.board.canals.push([river.id, land.id])
+	game.rain.step = "routing"
+	startWaterRouting(game)
+	game.rain.routing.stack.at(-1).water = 1
+	assert.deepEqual(getAutomaticAction(game), { type: "allocateWater", area: land.id, amount: 1 })
+	const otherLand = river.neighbours.map((id) => game.board.areas.find((area) => area.id === id)).find((area) => !area.isRiver && area.id !== land.id)
+	otherLand.owner = otherLand.markerOwner = 0
+	game.board.canals.push([river.id, otherLand.id])
+	assert.equal(getAutomaticAction(game), null)
+	game.rain.routing.stack.at(-1).water = 2
+	assert.equal(getAutomaticAction(game).type, "allocateWater")
+})
+
+test("Barahshum's free canal keeps the owner's settlement turn open for a land purchase", () => {
+	const game = createGame(["A", "B", "C"])
+	Object.assign(game.gameflow, { phase: rf.PHASE_SETTLEMENT, turnOrder: [0, 1, 2] })
+	Object.assign(game.nations[rf.NATION_BARAHSHUM], { ownerType: "player", owner: 0 })
+	const home = game.board.areas.find((area) => area.nation === rf.NATION_BARAHSHUM)
+	const destination = home.neighbours.find((id) => game.board.areas.find((area) => area.id === id).nation === null)
+	const action = { type: "exchangeBarahshum", from: home.id, to: destination }
+	const exchanged = applyAction(game, 0, action)
+	assert.equal(endsDecision(game, exchanged, action), false)
+	assert.deepEqual(exchanged.gameflow.turnOrder, game.gameflow.turnOrder)
+	const land = exchanged.board.areas.find((area) => !area.isRiver && area.nation === null && area.owner === null && area.markerOwner === null)
+	const purchased = applyAction(exchanged, 0, { type: "tradeLand", buy: land.id })
+	assert.equal(purchased.board.areas.find((area) => area.id === land.id).owner, 0)
+	assert.equal(purchased.nations[rf.NATION_BARAHSHUM].isRemoved, true)
+	Object.assign(game.nations[rf.NATION_BARAHSHUM], { owner: 1 })
+	assert.equal(endsDecision(game, applyAction(game, 1, action), action), true)
+})
 
 function betweenStatesGame() {
 	const game = createGame(["A", "B", "C"])
@@ -151,4 +241,16 @@ test("Declining a later request preserves earlier approved construction", () => 
 	assert.deepEqual(restored.state.cardSupply, next.cardSupply)
 	assert.equal(restored.state.gameflow.pendingOffer, null)
 	assert.equal(restored.state.gameflow.waterworkRequests?.length || 0, 0)
+})
+
+test("Waterwork token counts share matching numbers and exclude other states", () => {
+	const game = createGame(["A", "B", "C"])
+	assert.equal(remainingWaterworkTokens(game, 0, 2), 6)
+	game.board.areas[0].waterwork = { state: 0, capacity: 2, kind: "pump" }
+	game.board.areas[1].waterwork = { state: 0, capacity: 2, kind: "reservoir" }
+	game.board.areas[2].waterwork = { state: 1, capacity: 2, kind: "pump" }
+	game.board.areas[3].waterwork = { state: 0, capacity: 1, kind: "pump" }
+	assert.equal(remainingWaterworkTokens(game, 0, 2), 4)
+	game.board.areas[0].waterwork = null
+	assert.equal(remainingWaterworkTokens(game, 0, 2), 5)
 })
