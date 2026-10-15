@@ -82,7 +82,7 @@ function toggleReplay() {
 	store.viewSettings.showReplay = !store.viewSettings.showReplay
 }
 
-// Practice games have no votes to cast; loadRewind confirms before saving.
+// Practice games have no votes to cast, so rewind straight away; normal games open the rewind/votes panel.
 function loadRewind() {
 	if (!personal.trainingGame) store.viewSettings.showRewindPanel = !store.viewSettings.showRewindPanel
 	else IO.loadRewind()

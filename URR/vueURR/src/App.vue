@@ -8,6 +8,7 @@ import * as IO from "./backend/URR_IO"
 import * as WS from "./backend/URRwebsocket"
 import * as rules from "./js/URRrules"
 import * as controller from "./js/URRcontroller"
+import * as assets from "./js/URRassets"
 import { MAP_WIDTH, MAP_HEIGHT } from "./js/URRboardDisplay"
 
 import PlayerMarker from "./components/PlayerMarker.vue"
@@ -107,6 +108,11 @@ const waitingPlayerIndex = computed(() => {
 	if (personal.haltPlay || personal.canPlay() || store.gameflow.phase === rf.PHASE_GAME_OVER || rules.canExchangeBarahshum(store, personal.pov)) return null
 	return view.displayedTurnOrder(store)[0] ?? null
 })
+// vueWEB's page colours: light blue normally, grey while a normal game waits for another player's move.
+const waitingForTurn = computed(() => {
+	const acting = view.displayedTurnOrder(store)[0]
+	return acting !== undefined && !personal.trainingGame && personal.pov >= 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER && personal.pov !== acting
+})
 const isBarahshumExchange = computed(() => !personal.haltPlay && !store.viewSettings.showReplay && personal.pov >= 0 && !personal.canPlay() && rules.canExchangeBarahshum(store, personal.pov))
 const actingPlayer = computed(() => store.turnDraft.ready ? store.turnDraft.player : isBarahshumExchange.value ? personal.pov : view.displayedTurnOrder(store)[0])
 const actingLabel = computed(() => {
@@ -197,7 +203,7 @@ function showDebug() {
 		<div class="mapPreviewViewport" tabindex="0" aria-label="Enlarged map"><div id="nationMapPreviewBody"></div></div>
 	</dialog></Teleport>
 	<TopMenu />
-	<div id="wholeMiddleArea" :class="{ historyOpen: store.viewSettings.showHistory, nationDivision: isNationDivision }">
+	<div id="wholeMiddleArea" :class="{ historyOpen: store.viewSettings.showHistory, nationDivision: isNationDivision, greyBackground: waitingForTurn, normalBackground: !waitingForTurn }">
 		<TopMenuViews />
 		<HistoryTab />
 		<div id="gameArea">
@@ -231,15 +237,15 @@ function showDebug() {
 	<FooterBar />
 	<div class="saveStatus" v-if="store.viewSettings.isSaving || store.viewSettings.isSavingNotes || store.viewSettings.isSendingChat" role="status">{{ store.viewSettings.isSaving ? 'Saving…' : store.viewSettings.isSavingNotes ? 'Saving notes…' : 'Sending chat…' }}</div>
 
-	<div id="loaderOverlay" v-if="store.viewSettings.showLoader">
-		<div id="loadingText">Loading........</div>
+	<div id="loaderOverlay" v-if="store.viewSettings.showLoader" role="status">
+		<div id="loadingText">Loading........<br /><img :src="assets.getAsset('loading-bar-black.gif')" alt="" /></div>
 	</div>
 </template>
 
 <style>
 body {
 	margin: 0px !important;
-	background-color: #e9e2d2;
+	background-color: #d4eafd;
 	color: #302f27;
 	font-family: Arial, sans-serif;
 	font-size: 16px;
@@ -256,6 +262,9 @@ body {
 	text-align: center;
 	min-height: 500px;
 }
+
+.normalBackground { background-color: #d4eafd; transition: background-color 1s ease-in-out; }
+.greyBackground { background-color: lightgray; transition: background-color 1s ease-in-out; }
 
 #mainAreaLessHistory { padding: 12px var(--page-margin); box-sizing: border-box; display: flex; align-items: flex-start; justify-content: flex-start; gap: 12px; margin: 0 auto; }
 /* 5% page margins, shrinking only as far as the panels and a minimum-size map need. */

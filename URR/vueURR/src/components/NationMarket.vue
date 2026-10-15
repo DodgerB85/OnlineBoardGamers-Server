@@ -56,7 +56,7 @@ watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.val
 		<p class="marketHeading"><b>{{ auction ? `Auction: ${rf.NATION_NAMES[auction.nation]}` : "Independent nations" }}</b><span>{{ available }} SPL available</span></p>
 		<p v-if="reservedMoney" class="moneySummary" title="Reserved money becomes available when outbid; the winner pays when the nation is awarded.">{{ reservedMoney }} SPL reserved for highest bids<br>{{ totalMoney }} SPL total</p>
 		<p v-if="auction" class="auctionInfo">High bid {{ auction.amount }} SPL<br><PlayerMarker :index="auction.highPlayer" /></p>
-		<p v-else-if="!store.turnDraft.ready" class="marketHint">Buy the current nation, or make an offer on another. Buying, offering, or passing ends your turn.</p>
+		<p v-else-if="!store.turnDraft.ready" class="marketHint">Buy the current nation, or make an offer on another. Buying, offering, or passing <b>ends your turn</b>.</p>
 		<div class="nationList">
 			<article v-for="nation in displayedNations" :key="nation.id" class="nationRow" :aria-label="rf.NATION_NAMES[nation.id]" :class="{ current: isAuction(nation) || (!auction && treaty?.id === nation.id), acquired: nation.ownerType !== null, ashur: nation.id === rf.NATION_ASHUR }">
 				<div class="cardHeading"><ArtworkCard :src="assets.getNationCardImage(nation.id)" :alt="rf.NATION_NAMES[nation.id]" /></div>

@@ -1,4 +1,5 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -14,7 +15,7 @@
     <style>
       body {
         margin: 0px !important;
-        background-color: #e9e2d2;
+        background-color: #d4eafd;
         font-family: Arial, sans-serif;
       }
       #app {
@@ -24,13 +25,41 @@
       }
       #loadingText {
         position: absolute;
-        top: 50%;
+        top: 0;
         left: 50%;
-        transform: translate(-50%, -50%);
+        transform: translateX(-50%);
+        margin-top: 20px;
         font-size: 40px;
         text-align: center;
         padding: 0 16px;
         box-sizing: border-box;
+        z-index: 10;
+      }
+      /* The four terrains bounce in turn while the game loads. */
+      #loadingContainer {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        align-items: flex-end;
+        gap: 18px;
+      }
+      .terrainIcon {
+        height: 64px;
+        width: auto;
+        animation: terrainBounce 1.2s infinite ease-in-out;
+      }
+      .terrainIcon:nth-child(2) { animation-delay: 0.12s; }
+      .terrainIcon:nth-child(3) { animation-delay: 0.24s; }
+      .terrainIcon:nth-child(4) { animation-delay: 0.36s; }
+      @keyframes terrainBounce {
+        0%, 60%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-28px); }
+      }
+      @media (max-width: 600px) {
+        #loadingContainer { gap: 10px; }
+        .terrainIcon { height: 44px; }
       }
     </style>
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
@@ -47,7 +76,13 @@
       <strong>Please enable Javascript to continue.</strong>
     </noscript>
     <div id="app">
-      <div id="loadingText">UR: 1830 BC is loading........</div>
+      <div id="loadingText">{% translate "UR: 1830 BC is loading........" %}</div>
+      <div id="loadingContainer">
+        <img class="terrainIcon" src="{% static 'URR/images/terrain-hills.png' %}" alt="" />
+        <img class="terrainIcon" src="{% static 'URR/images/terrain-forest.png' %}" alt="" />
+        <img class="terrainIcon" src="{% static 'URR/images/terrain-savannah.png' %}" alt="" />
+        <img class="terrainIcon" src="{% static 'URR/images/terrain-desert.png' %}" alt="" />
+      </div>
     </div>
   <div hidden>{% csrf_token %}</div>
   </body>
