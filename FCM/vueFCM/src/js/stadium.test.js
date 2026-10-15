@@ -351,6 +351,168 @@ describe("stadium game day settlement", () => {
 		expect(sold).toBe(true)
 	})
 
+	it("coffee walk laps the whole arena ring: shops on BOTH half-tiles sell even when the winner only touches one half", () => {
+		// The arena spans two tiles but is ONE building - moving between its
+		// halves is free. With the winner at distance 1 from one half, the
+		// walk covers the full ring (both halves) and shops next to either
+		// half's ring road must both sell. Pre-fix only the winner-side
+		// shop sold: reaching the far half cost a tile crossing and the
+		// walk blew its distance budget.
+		let verified = false
+		for (let mapAttempt = 0; mapAttempt < 5 && !verified; mapAttempt++) {
+			const store = freshGame(2, [rf.SO_COFFEE, "47"])
+
+			// Group arena cells by tile - the arena must span exactly 2 tiles
+			const arenaByTile = new Map()
+			for (let i = 0; i < store.mapData.coords.length; i++) {
+				if (store.mapData.coords[i] === rf.HOUSE + rf.STADIUM) {
+					const t = mapMod.giveTileNumber(i)
+					if (!arenaByTile.has(t)) arenaByTile.set(t, [])
+					arenaByTile.get(t).push(i)
+				}
+			}
+			if (arenaByTile.size !== 2) continue
+			const pairTiles = new Set(arenaByTile.keys())
+
+			// Ring road squares adjacent to arena cells, per half
+			const ringOf = (tile) => {
+				const ring = new Set()
+				for (const cell of arenaByTile.get(tile)) {
+					for (const n of [cell + 1, cell - 1, cell + rf.ssW, cell - rf.ssW]) {
+						if (n >= 0 && n < store.mapData.coords.length && store.mapData.coords[n] === rf.ROAD) ring.add(n)
+					}
+				}
+				return ring
+			}
+			const ringA = ringOf([...pairTiles][0])
+			const ringB = ringOf([...pairTiles][1])
+			if (ringA.size === 0 || ringB.size === 0) continue
+
+			// Empty lots outside the arena pair, adjacent to a given ring half
+			const lotsNextTo = (ring) => {
+				const lots = []
+				for (const r of ring) {
+					for (const s of [r + 1, r - 1, r + rf.ssW, r - rf.ssW]) {
+						if (s >= 0 && s < store.mapData.coords.length && store.mapData.coords[s] === rf.EMPTY_SPACE && !pairTiles.has(mapMod.giveTileNumber(s)) && !lots.includes(s)) lots.push(s)
+					}
+				}
+				return lots
+			}
+
+			// Winner restaurant on a lot next to half A's ring, at distance 1
+			// from the arena (the far half is then only reachable for free)
+			let restoIdx = -1
+			for (const s of lotsNextTo(ringA)) {
+				const cells = [s, s + 1, s + rf.ssW, s + rf.ssW + 1]
+				if (cells.some((c) => c < 0 || c >= store.mapData.coords.length || store.mapData.coords[c] !== rf.EMPTY_SPACE)) continue
+				mapMod.addElement(rf.TYPE_RESTAURANT, store.players[0].colour, s, false)
+				store.players[0].restaurants.push({ index: s, rotation: 0, open: true })
+				if (model.giveRestaurantRangesForHouse(rf.STADIUM)[0] === 1) {
+					restoIdx = s
+					break
+				}
+				store.players[0].restaurants.pop()
+				mapMod.addElement(rf.TYPE_RESTAURANT, store.players[0].colour, s, false, true)
+			}
+			if (restoIdx === -1) continue
+			const restoCells = new Set([restoIdx, restoIdx + 1, restoIdx + rf.ssW, restoIdx + rf.ssW + 1])
+
+			// A stocked shop next to EACH half's ring road (both owned by player 1)
+			const shopNear = (ring) => lotsNextTo(ring).find((s) => !restoCells.has(s))
+			const shopA = shopNear(ringA)
+			const shopB = shopNear(ringB)
+			if (shopA === undefined || shopB === undefined) continue
+
+			store.players[1].coffeeShops = [shopA, shopB]
+			store.mapData.coords[shopA] = 160 + store.players[1].colour
+			store.mapData.coords[shopB] = 160 + store.players[1].colour
+			store.players[1].resources = [rf.COFFEE, rf.COFFEE]
+
+			store.stadium.gamesPlayed = 0
+			store.stadium.announcement = { gameNumber: 1, food: rf.PIZZA, units: 6 }
+			store.players[0].resources = Array(6).fill(rf.PIZZA)
+			rules.doDinnerTime(false)
+
+			// Both shops sold - the walk lapped the whole ring
+			expect(store.players[1].resources.filter((r) => r === rf.COFFEE).length).toBe(0)
+			verified = true
+		}
+		expect(verified).toBe(true)
+	})
+
+	it("free arena crossing is arena-only: a walk seeded next to the ring still pays tile crossings", () => {
+		// Regression for the over-broad first version: regular houses' coffee
+		// walks (seeded on a non-arena tile) must count the arena's two tiles
+		// as normal map tiles. Only the arena's own game-day walk treats the
+		// pair as one building.
+		let verified = false
+		for (let mapAttempt = 0; mapAttempt < 5 && !verified; mapAttempt++) {
+			const store = freshGame(2, [rf.SO_COFFEE, "47"])
+
+			// Adjacent ring-road squares across the arena tile boundary
+			let rA = -1
+			let rB = -1
+			for (let i = 0; i < store.mapData.coords.length && rA === -1; i++) {
+				if (store.mapData.coords[i] !== rf.ROAD) continue
+				for (const n of [i + 1, i - 1, i + rf.ssW, i - rf.ssW]) {
+					if (n >= 0 && n < store.mapData.coords.length && store.mapData.coords[n] === rf.ROAD) {
+						const tI = mapMod.giveTileNumber(i)
+						const tN = mapMod.giveTileNumber(n)
+						if (tI !== tN && store.mapData.coords[i] !== undefined) {
+							// both roads adjacent to arena cells?
+							const nearArena = (sq) => [sq + 1, sq - 1, sq + rf.ssW, sq - rf.ssW].some((m) => m >= 0 && m < store.mapData.coords.length && store.mapData.coords[m] === rf.HOUSE + rf.STADIUM)
+							if (nearArena(i) && nearArena(n)) {
+								rA = i
+								rB = n
+								break
+							}
+						}
+					}
+				}
+			}
+			if (rA === -1) continue
+
+			// A square on a THIRD tile touching rA (simulates a house next to
+			// the ring) and one touching rB (the restaurant's entrance square)
+			const thirdTileSq = (r) => {
+				for (const s of [r + 1, r - 1, r + rf.ssW, r - rf.ssW]) {
+					if (s >= 0 && s < store.mapData.coords.length) {
+						const t = mapMod.giveTileNumber(s)
+						if (t !== mapMod.giveTileNumber(rA) && t !== mapMod.giveTileNumber(rB)) return s
+					}
+				}
+				return -1
+			}
+			const seedHouse = thirdTileSq(rA)
+			const restoSq = thirdTileSq(rB)
+			if (seedHouse === -1 || restoSq === -1) continue
+
+			// An arena cell adjacent to rA seeds the game-day walk
+			let seedArena = -1
+			for (const s of [rA + 1, rA - 1, rA + rf.ssW, rA - rf.ssW]) {
+				if (s >= 0 && s < store.mapData.coords.length && store.mapData.coords[s] === rf.HOUSE + rf.STADIUM) {
+					seedArena = s
+					break
+				}
+			}
+			if (seedArena === -1) continue
+
+			const restaurants = [restoSq]
+
+			// Arena-seeded walk: ringA -> ringB is free, restaurant reachable in 1
+			const arenaRoutes = mapMod.getCoffeeRoutesFromBldgSquare(seedArena, restaurants, 1)
+			expect(arenaRoutes.some((route) => route.includes(rA) && route.includes(rB))).toBe(true)
+
+			// House-seeded walk: reaching the far half now costs a real
+			// crossing, so nothing reaches the restaurant within range 1
+			const houseRoutes = mapMod.getCoffeeRoutesFromBldgSquare(seedHouse, restaurants, 1)
+			expect(houseRoutes.length).toBe(0)
+
+			verified = true
+		}
+		expect(verified).toBe(true)
+	})
+
 	it("after game 1 is won, the next announcement is created at the end of the same turn (end to end)", () => {
 		const store = freshGame()
 		store.stadium.announcement = { gameNumber: 1, food: rf.PIZZA, units: 6 }

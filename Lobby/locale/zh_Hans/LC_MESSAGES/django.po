@@ -12053,6 +12053,10 @@ msgid "The building: When this module is enabled, the Stadium replaces two adjac
 msgstr "建筑：启用本模组后，体育馆在开局时替换两个相邻板块，位置与朝向随机，整局固定不变。它整个是体育馆和外环马路——没有空位也没有房屋，因此不产生常规需求。它的价值在于路网枢纽和比赛日。"
 
 #: .\templates\FCM\fanExpansionsHelp.html
+msgid "With the Coffee module: For the Stadium's game-day walk (including coffee bought along the way), the two arena tiles count as a single building - moving between them never counts as a tile crossing. The walk can lap the entire ring road, so a stocked coffee shop next to either half's road can sell. All other customers count the two tiles as normal map tiles."
+msgstr "与咖啡模组联动：体育馆比赛日的步行（含沿途买咖啡）把两个板块算作同一栋建筑——跨板块交界不记距离，因此可以绕外环走完整圈，贴着任意一半环路的有货咖啡店都能卖出。其他顾客仍把这两个板块按普通板块计距。"
+
+#: .\templates\FCM\fanExpansionsHelp.html
 msgid "Schedule: Games are played on turns 5, 8, 11, ... - every 3 turns, starting with turn 5."
 msgstr "赛程：比赛在第 5、8、11…… 回合进行——每 3 回合一场，首场在第 5 回合。"
 
