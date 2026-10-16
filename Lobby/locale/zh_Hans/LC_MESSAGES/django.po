@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-16 19:34+0800\n"
+"POT-Creation-Date: 2026-10-16 20:13+0800\n"
 "PO-Revision-Date: 2023-10-07 20:27+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -766,10 +766,8 @@ msgid "Your Solo Challenge has started"
 msgstr "你的单人挑战已开始"
 
 #: .\DDL\templates\DDL\DDLhelp.html:5
-#, fuzzy
-#| msgid "Keyflower Help"
 msgid "Duck Dealer Help"
-msgstr "大五月花号 帮助"
+msgstr "Duck Dealer 帮助"
 
 #: .\DDL\templates\DDL\DDLhelp.html:12
 msgid ""
@@ -777,10 +775,13 @@ msgid ""
 "by <a class=\"linkOther\" href=\"https://www.splottershop.com/\" "
 "target=\"_blank\">Splotter Spellen</a>."
 msgstr ""
+"Duck Dealer 是 Jeroen Doumen 与 Joris Wiersinga 设计、由 <a "
+"class=\"linkOther\" href=\"https://www.splottershop.com/\" "
+"target=\"_blank\">Splotter Spellen</a> 出版的桌游。"
 
 #: .\DDL\templates\DDL\DDLhelp.html:20
 msgid "This game is still being implemented. Help content will be added here."
-msgstr ""
+msgstr "本游戏仍在开发中。帮助内容将在此处添加。"
 
 #: .\IND\templates\IND\INDhelp.html:5
 msgid "Indonesia Help"
@@ -1056,7 +1057,8 @@ msgstr "有认输/被踢玩家的对局、训练对局或自定义地图对局�
 msgid ""
 "These are historical stats. They show what has happened in previous games, "
 "but Indonesia still rewards reading and responding to the current game state."
-msgstr "这些是历史统计，反映以往对局的情况，但印度尼西亚仍然奖励读懂并响应当前局势。"
+msgstr ""
+"这些是历史统计，反映以往对局的情况，但印度尼西亚仍然奖励读懂并响应当前局势。"
 
 #: .\IND\templates\IND\INDstats.html:43
 msgid "R&D (Tech) Statistics"
@@ -1069,8 +1071,10 @@ msgid ""
 "spent on that track. 'Everyone else' is every losing player. Compare 'Win %% "
 "when upgraded' against the baseline win rate to see how the track is linked "
 "to winning."
-msgstr "每条研发路线都从 1 级开始，因此一次升级就是花在该路线上的一次研究行动。“其他玩家”指所有未获胜的玩家。将“升级后胜率 "
-"%%”与基准胜率对比，即可看出该路线与获胜的关联。"
+msgstr ""
+"每条研发路线都从 1 级开始，因此一次升级就是花在该路线上的一次研究行动。“其他"
+"玩家”指所有未获胜的玩家。将“升级后胜率 %%”与基准胜率对比，即可看出该路线与获"
+"胜的关联。"
 
 #: .\IND\templates\IND\INDstats.html:52 .\Lobby\templates\Lobby\stats.html:78
 #: .\TGZ\templates\TGZ\TGZstats.html:58
@@ -1103,7 +1107,9 @@ msgid ""
 "The chart shows the average number of upgrades each group spent per track. "
 "Percentages are per player; every bracketed game count is clickable and "
 "opens exactly those games."
-msgstr "图表显示每组在每条路线上花费的平均升级次数。百分比按玩家计算；括号内的对局数均可点击，并打开对应的对局。"
+msgstr ""
+"图表显示每组在每条路线上花费的平均升级次数。百分比按玩家计算；括号内的对局数"
+"均可点击，并打开对应的对局。"
 
 #: .\IND\templates\IND\INDstats.html:118 .\IND\templates\IND\INDstats.html:144
 msgid "R&D track"
@@ -1146,7 +1152,9 @@ msgid ""
 "How far each group went: the share of winners / other players that finished "
 "the game with that many upgrades in the track. '0' means the track was never "
 "upgraded."
-msgstr "各组的升级程度：以该路线的该升级次数结束游戏的获胜玩家／其他玩家所占比例。“0”表示该路线从未升级。"
+msgstr ""
+"各组的升级程度：以该路线的该升级次数结束游戏的获胜玩家／其他玩家所占比"
+"例。“0”表示该路线从未升级。"
 
 #: .\IND\templates\IND\INDstats.html:145
 msgid "Upgrades spent"
@@ -1172,8 +1180,10 @@ msgid ""
 "Hull Capacity is the only R&D track another player can research for you. "
 "These games contain %(total)s hull upgrades: %(by_owner)s%% were made by the "
 "player who owns the hull and %(by_others)s%% by another player."
-msgstr "船体容量是唯一可以由其他玩家为你研究的研发路线。这些对局中共有 %(total)s 次船体升级：其中 %(by_owner)s%% "
-"由船体拥有者自己完成，%(by_others)s%% 由其他玩家完成。"
+msgstr ""
+"船体容量是唯一可以由其他玩家为你研究的研发路线。这些对局中共有 %(total)s 次船"
+"体升级：其中 %(by_owner)s%% 由船体拥有者自己完成，%(by_others)s%% 由其他玩家"
+"完成。"
 
 #: .\IND\templates\IND\INDstats.html:169
 msgid "Games where another player pushed up a hull:"
@@ -1675,53 +1685,49 @@ msgid "Mini Tournament"
 msgstr "迷你锦标赛"
 
 #: .\Lobby\momentumViews.py:43
-#, fuzzy
-#| msgid "Any player can rewind the game at any time."
 msgid "Only players in this game can view its momentum."
-msgstr "任何玩家可随时回退游戏。"
+msgstr "只有本局游戏的玩家才能查看游戏势头。"
 
 #: .\Lobby\momentumViews.py:57
 msgid "Invalid nudge request."
-msgstr ""
+msgstr "无效的提醒请求。"
 
 #: .\Lobby\momentumViews.py:62
 msgid "System busy, please try again."
-msgstr ""
+msgstr "系统繁忙，请稍后再试。"
 
 #: .\Lobby\momentumViews.py:66
-#, fuzzy
-#| msgid "Any player can rewind the game at any time."
 msgid "Only players in this game can send nudges."
-msgstr "任何玩家可随时回退游戏。"
+msgstr "只有本局游戏的玩家才能发送提醒。"
 
 #: .\Lobby\momentumViews.py:68
 msgid "The game has changed. Refresh before sending a nudge."
-msgstr ""
+msgstr "游戏状态已变化。请在刷新后再发送提醒。"
 
 #: .\Lobby\momentumViews.py:70
 msgid "Nudges become available when players can vote to kick out."
-msgstr ""
+msgstr "当玩家可以投票踢出时，才能发送提醒。"
 
 #: .\Lobby\momentumViews.py:73
 msgid "This player is no longer waiting to take a turn."
-msgstr ""
+msgstr "该玩家已不再等待行动。"
 
 #: .\Lobby\momentumViews.py:75
 msgid "Choose another player whose turn is pending."
-msgstr ""
+msgstr "请选择另一位等待行动的玩家。"
 
 #: .\Lobby\momentumViews.py:77
 msgid "This player has turned off turn nudges."
-msgstr ""
+msgstr "该玩家已关闭行动提醒。"
 
 #: .\Lobby\momentumViews.py:80
 msgid ""
 "This player has already been nudged in this match within the last 24 hours."
-msgstr ""
+msgstr "本局游戏中，过去 24 小时内已提醒过该玩家。"
 
 #: .\Lobby\momentumViews.py:85
 msgid "Nudge queued."
-msgstr ""
+msgstr "提醒已加入队列。"
 
 #: .\Lobby\presenters.py:537
 msgid "Game successfully deleted"
@@ -1746,6 +1752,8 @@ msgid ""
 "take your turn, or at least message the players in the game to let them know "
 "you are still interested."
 msgstr ""
+"玩家们现在可以投票把你踢出 %(game)s。%(player)s 请你尽快行动，或者至少给游戏"
+"中的玩家留言，让大家知道你仍有兴趣继续。"
 
 #: .\Lobby\sharedFunctions\sharedFunctions.py:104
 msgid "Your game has been created and is waiting for players<br/>Invite Link: "
@@ -2772,10 +2780,8 @@ msgstr ""
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:1832
 #: .\Lobby\templates\Lobby\gameEmails\momentumEmail.html:3
-#, fuzzy
-#| msgid "per game"
 msgid "Open game"
-msgstr "每局"
+msgstr "打开游戏"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:1856
 #, python-format
@@ -2783,16 +2789,16 @@ msgid ""
 "🔥 %(game)s has a shared %(days)s-day streak. Take a turn before midnight "
 "UTC to keep it alive; one turn by any player meets today's goal."
 msgstr ""
+"🔥 %(game)s 已有 %(days)s 天的共享连续记录。请在 UTC 午夜前行动来保持它；任意"
+"一名玩家行动一次即可达成今日目标。"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:1857
 msgid "Your game's streak is about to expire"
-msgstr ""
+msgstr "你的游戏连续记录即将中断"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:1869
-#, fuzzy
-#| msgid "A player has declined your invitation for Bus"
 msgid "A player asked you to take your turn"
-msgstr "有玩家拒绝了你的 Bus 游戏邀请"
+msgstr "有玩家请你尽快行动"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:36
 msgid "BUS"
@@ -2801,17 +2807,17 @@ msgstr "BUS"
 #: .\Lobby\sharedFunctions\sharedRefs.py:44
 #: .\Lobby\templates\Lobby\createURR.html:11
 msgid "UR: 1830 BC"
-msgstr ""
+msgstr "UR: 1830 BC"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:45
 #: .\Lobby\templates\Lobby\createDDL.html:11
 msgid "Duck Dealer"
-msgstr ""
+msgstr "Duck Dealer"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:46
 #: .\Lobby\templates\Lobby\createROW.html:11
 msgid "Ranchers of the Old West"
-msgstr ""
+msgstr "Ranchers of the Old West"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:50
 msgid "Discord"
@@ -3302,35 +3308,29 @@ msgstr "奇观"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:636
 msgid "Dividing the Independent Nations"
-msgstr ""
+msgstr "分割独立国家"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:638
 msgid "Settlement"
-msgstr ""
+msgstr "定居"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:640
-#, fuzzy
-#| msgid "Developer"
 msgid "Development"
-msgstr "开发者"
+msgstr "开发"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:642
-#, fuzzy
-#| msgid "Rain Ceremony"
 msgid "Rainy Season"
-msgstr "祈雨仪式"
+msgstr "雨季"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:651
 #: .\Lobby\sharedFunctions\sharedRefs.py:662
-#, fuzzy
-#| msgid "Game Setup"
 msgid "Setup"
-msgstr "游戏设置"
+msgstr "设置"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:653
 #: .\Lobby\sharedFunctions\sharedRefs.py:664
 msgid "Main"
-msgstr ""
+msgstr "主阶段"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:674
 msgid "Live"
@@ -3555,65 +3555,53 @@ msgstr "使用推广板块"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1201
 #: .\Lobby\templates\Lobby\createROW.html:126
-#, fuzzy
-#| msgid "2nd Edition"
 msgid "Second edition"
-msgstr "第2版"
+msgstr "第二版"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1203
 #: .\Lobby\templates\Lobby\createROW.html:160
 msgid "Rails to the North"
-msgstr ""
+msgstr "Rails to the North"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1205
 #: .\Lobby\templates\Lobby\createROW.html:167
 msgid "Simmental cattle"
-msgstr ""
+msgstr "Simmental cattle"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1207
 msgid "Strategic mode"
-msgstr ""
+msgstr "战略模式"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1209
-#, fuzzy
-#| msgid "Merger Bidding"
 msgid "Beginner buildings"
-msgstr "合并竞标"
+msgstr "新手建筑"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1211
-#, fuzzy
-#| msgid "Waiting for other players to move"
 msgid "Bidding for player order"
-msgstr "等待其他玩家行动"
+msgstr "竞标决定玩家顺序"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1213
-#, fuzzy
-#| msgid "Balanced"
 msgid "Balanced variant"
-msgstr "平衡"
+msgstr "平衡变体"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1215
 #: .\Lobby\templates\Lobby\createROW.html:174
 msgid "Station master promos"
-msgstr ""
+msgstr "站长促销"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1217
 #: .\Lobby\templates\Lobby\createROW.html:181
-#, fuzzy
-#| msgid "Building"
 msgid "Building 11"
-msgstr "建造"
+msgstr "11 号建筑"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1219
 #: .\Lobby\templates\Lobby\createROW.html:188
-#, fuzzy
-#| msgid "Building"
 msgid "Building 13"
-msgstr "建造"
+msgstr "13 号建筑"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1221
 msgid "Garth automa"
-msgstr ""
+msgstr "Garth automa"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1240
 msgid ""
@@ -4192,7 +4180,7 @@ msgstr "新网站设计"
 
 #: .\Lobby\templates\Lobby\about.html:63
 msgid "Tournament Matchmaking Improvements"
-msgstr ""
+msgstr "锦标赛配对改进"
 
 #: .\Lobby\templates\Lobby\about.html:66
 msgid "Chinese (Hans) Lobby &amp; FCM"
@@ -4248,7 +4236,7 @@ msgstr "Roads &amp; Boats 额外试玩员"
 
 #: .\Lobby\templates\Lobby\about.html:105
 msgid "FCM - Fried Chicken &amp; Stadium modules"
-msgstr ""
+msgstr "FCM - 炸鸡 &amp; 体育场模组"
 
 #: .\Lobby\templates\Lobby\about.html:109
 msgid "Thanks to all the Playtesters!"
@@ -4693,13 +4681,10 @@ msgstr "锦标赛总玩家数"
 #: .\Lobby\templates\Lobby\createKFW.html:72
 #: .\Lobby\templates\Lobby\createRNB.html:187
 #: .\Lobby\templates\Lobby\createWEB.html:72
-#, fuzzy
-#| msgid ""
-#| "This must be between 6 and 12, and a multiple of the per game player count"
 msgid ""
 "This must be a multiple of the per game player count, or the last games will "
 "be short"
-msgstr "必须在 6 到 12 之间，且为每局人数的倍数"
+msgstr "必须是每局人数的倍数，否则最后几局人数会不足"
 
 #: .\Lobby\templates\Lobby\createAQY.html:77
 #: .\Lobby\templates\Lobby\createBUS.html:79
@@ -5056,7 +5041,7 @@ msgstr "常用选项"
 #: .\Lobby\templates\Lobby\createRNB.html:273
 #: .\Lobby\templates\Lobby\createWEB.html:144
 msgid "Standard"
-msgstr ""
+msgstr "标准"
 
 #: .\Lobby\templates\Lobby\createAQY.html:146
 #: .\Lobby\templates\Lobby\createBUS.html:235
@@ -5066,10 +5051,8 @@ msgstr ""
 #: .\Lobby\templates\Lobby\createKFW.html:159
 #: .\Lobby\templates\Lobby\createRNB.html:274
 #: .\Lobby\templates\Lobby\createWEB.html:145
-#, fuzzy
-#| msgid "Kickout available after 1 day"
 msgid "Kickout available after 12 hours"
-msgstr "1 天后可踢出"
+msgstr "12 小时后可踢出"
 
 #: .\Lobby\templates\Lobby\createAQY.html:150
 #: .\Lobby\templates\Lobby\createBUS.html:239
@@ -5366,10 +5349,8 @@ msgid "Keep the same map"
 msgstr "使用相同地图"
 
 #: .\Lobby\templates\Lobby\createAQY.html:218
-#, fuzzy
-#| msgid "Create a Mini Tournament"
 msgid "Create Antiquity Mini Tournament"
-msgstr "创建迷你锦标赛"
+msgstr "创建 中世纪 迷你锦标赛"
 
 #: .\Lobby\templates\Lobby\createAQY.html:218
 msgid "Create Antiquity Game"
@@ -5482,10 +5463,8 @@ msgstr ""
 "规则</a>。不计入统计"
 
 #: .\Lobby\templates\Lobby\createBUS.html:353
-#, fuzzy
-#| msgid "Create a Mini Tournament"
 msgid "Create Bus Mini Tournament"
-msgstr "创建迷你锦标赛"
+msgstr "创建 Bus 迷你锦标赛"
 
 #: .\Lobby\templates\Lobby\createBUS.html:353
 msgid "Create Bus Game"
@@ -5557,10 +5536,8 @@ msgid ""
 msgstr "可存放 1 个板块。允许你以 € 4 M 盗用未完成的电影"
 
 #: .\Lobby\templates\Lobby\createCNS.html:247
-#, fuzzy
-#| msgid "Create a Mini Tournament"
 msgid "Create Cannes Mini Tournament"
-msgstr "创建迷你锦标赛"
+msgstr "创建 Cannes 迷你锦标赛"
 
 #: .\Lobby\templates\Lobby\createCNS.html:247
 msgid "Create Cannes Game"
@@ -5571,10 +5548,8 @@ msgid "Creating Cannes Game..."
 msgstr "正在创建 Cannes 游戏…"
 
 #: .\Lobby\templates\Lobby\createDDL.html:18
-#, fuzzy
-#| msgid "New to Bus? For Rules, How to Play, and Game Guide, please see "
 msgid "New to Duck Dealer? For Rules, How to Play, and Game Guide, please see "
-msgstr "初次游玩 Bus？规则、玩法与指南请见 "
+msgstr "初次游玩 Duck Dealer？规则、玩法与指南请见 "
 
 #: .\Lobby\templates\Lobby\createDDL.html:80
 #: .\Lobby\templates\Lobby\createFCM.html:612
@@ -5588,35 +5563,25 @@ msgstr "玩家6"
 #: .\Lobby\templates\Lobby\createDDL.html:104
 #: .\Lobby\templates\Lobby\createROW.html:91
 #: .\Lobby\templates\Lobby\createURR.html:109
-#, fuzzy, python-format
-#| msgid ""
-#| "Play as up to 4 players on the same device. See <a "
-#| "href=\"%(the_url)s#navGameType\" target=\"_blank\">Help</a>"
+#, python-format
 msgid ""
 "Play all seats on the same device. See <a href=\"%(the_url)s#navGameType\" "
 "target=\"_blank\">Help</a>"
-msgstr ""
-"可在同一设备上最多 4 人游玩。见<a href=\"%(the_url)s#navGameType\" "
+msgstr "在同一设备上操作所有座位。见<a href=\"%(the_url)s#navGameType\" "
 "target=\"_blank\">帮助</a>"
 
 #: .\Lobby\templates\Lobby\createDDL.html:135
 #: .\Lobby\templates\Lobby\createURR.html:142
-#, fuzzy
-#| msgid "The scenario name will be added to the front of the game name"
 msgid "Game options will be added here as the game is implemented."
-msgstr "预设场景名会加在游戏名前面"
+msgstr "随着游戏的开发，游戏选项将在此处添加。"
 
 #: .\Lobby\templates\Lobby\createDDL.html:141
-#, fuzzy
-#| msgid "Create Keyflower Game"
 msgid "Create Duck Dealer Game"
-msgstr "创建 大五月花号 游戏"
+msgstr "创建 Duck Dealer 游戏"
 
 #: .\Lobby\templates\Lobby\createDDL.html:161
-#, fuzzy
-#| msgid "Creating Keyflower Game..."
 msgid "Creating Duck Dealer Game..."
-msgstr "正在创建 大五月花号 游戏…"
+msgstr "正在创建 Duck Dealer 游戏…"
 
 #: .\Lobby\templates\Lobby\createFCM.html:94
 msgid "Food Chain Magnate — Mini Tournament"
@@ -5991,10 +5956,8 @@ msgid "Adds more mainlines to adjust for unusable mainlines"
 msgstr "增加主干道以补偿不可用主干道"
 
 #: .\Lobby\templates\Lobby\createHLC.html:237
-#, fuzzy
-#| msgid "Horseless Carriage - Mini Tournament Won!"
 msgid "Create Horseless Carriage Mini Tournament"
-msgstr "Horseless Carriage - 赢得迷你锦标赛！"
+msgstr "创建 Horseless Carriage 迷你锦标赛"
 
 #: .\Lobby\templates\Lobby\createHLC.html:237
 msgid "Create Horseless Carriage Game"
@@ -6039,10 +6002,8 @@ msgid "Play on the fan-made Aegean map! Game will be excluded from stats"
 msgstr "游玩粉丝制作的爱琴海地图！不计入统计"
 
 #: .\Lobby\templates\Lobby\createIND.html:238
-#, fuzzy
-#| msgid "Create a Mini Tournament"
 msgid "Create Indonesia Mini Tournament"
-msgstr "创建迷你锦标赛"
+msgstr "创建 印度尼西亚 迷你锦标赛"
 
 #: .\Lobby\templates\Lobby\createIND.html:238
 #: .\Lobby\templates\Lobby\createIND2.html:189
@@ -6115,10 +6076,8 @@ msgid "Med&#8722;"
 msgstr "中−"
 
 #: .\Lobby\templates\Lobby\createKFW.html:249
-#, fuzzy
-#| msgid "Create a Mini Tournament"
 msgid "Create Keyflower Mini Tournament"
-msgstr "创建迷你锦标赛"
+msgstr "创建 大五月花号 迷你锦标赛"
 
 #: .\Lobby\templates\Lobby\createKFW.html:249
 msgid "Create Keyflower Game"
@@ -6154,14 +6113,12 @@ msgstr "地图选择"
 #: .\Lobby\templates\Lobby\createRNB.html:355
 #: .\Lobby\templates\Lobby\createRNB2.html:327
 msgid "List Display"
-msgstr ""
+msgstr "列表显示"
 
 #: .\Lobby\templates\Lobby\createRNB.html:356
 #: .\Lobby\templates\Lobby\createRNB2.html:328
-#, fuzzy
-#| msgid "Gameplay"
 msgid "Gallery Display"
-msgstr "玩法"
+msgstr "图库显示"
 
 #: .\Lobby\templates\Lobby\createRNB.html:360
 #: .\Lobby\templates\Lobby\createRNB2.html:332
@@ -6195,17 +6152,13 @@ msgstr "选择地图预览"
 
 #: .\Lobby\templates\Lobby\createRNB.html:393
 #: .\Lobby\templates\Lobby\createRNB2.html:365
-#, fuzzy
-#| msgid "2 players"
 msgid "5 players"
-msgstr "2 人"
+msgstr "5 人"
 
 #: .\Lobby\templates\Lobby\createRNB.html:394
 #: .\Lobby\templates\Lobby\createRNB2.html:366
-#, fuzzy
-#| msgid "2 players"
 msgid "6 players"
-msgstr "2 人"
+msgstr "6 人"
 
 #: .\Lobby\templates\Lobby\createRNB.html:396
 #: .\Lobby\templates\Lobby\createRNB2.html:368
@@ -6213,12 +6166,11 @@ msgid ""
 "Click an icon to filter maps by player count (green = matches game player "
 "count). Click a map to select it."
 msgstr ""
+"点击图标可按玩家数筛选地图（绿色 = 与游戏玩家数匹配）。点击地图即可选择。"
 
 #: .\Lobby\templates\Lobby\createRNB.html:405
-#, fuzzy
-#| msgid "Roads & Boats - Mini Tournament Won!"
 msgid "Create Roads & Boats Mini Tournament"
-msgstr "路与船 - 赢得迷你锦标赛！"
+msgstr "创建 路与船 迷你锦标赛"
 
 #: .\Lobby\templates\Lobby\createRNB.html:405
 #: .\Lobby\templates\Lobby\createRNB2.html:377
@@ -6274,29 +6226,22 @@ msgid "Jump Start"
 msgstr "跳跃启动"
 
 #: .\Lobby\templates\Lobby\createROW.html:18
-#, fuzzy
-#| msgid ""
-#| "New to Roads & Boats? For Rules, How to Play, and Game Guide, please see "
 msgid ""
 "New to Ranchers of the Old West? For Rules, How to Play, and Game Guide, "
 "please see "
-msgstr "初次游玩 路与船？规则、玩法与指南请见 "
+msgstr "初次游玩 Ranchers of the Old West？规则、玩法与指南请见 "
 
 #: .\Lobby\templates\Lobby\createROW.html:123
-#, fuzzy
-#| msgid "2nd Edition"
 msgid "Edition"
-msgstr "第2版"
+msgstr "版本"
 
 #: .\Lobby\templates\Lobby\createROW.html:125
-#, fuzzy
-#| msgid "1st Edition"
 msgid "First edition"
-msgstr "第1版"
+msgstr "第一版"
 
 #: .\Lobby\templates\Lobby\createROW.html:130
 msgid "Mode"
-msgstr ""
+msgstr "模式"
 
 #: .\Lobby\templates\Lobby\createROW.html:132
 #: .\Lobby\templates\Lobby\createROW.html:153
@@ -6308,112 +6253,98 @@ msgstr "原始"
 
 #: .\Lobby\templates\Lobby\createROW.html:133
 msgid "Strategic (less hidden, e.g. running score)"
-msgstr ""
+msgstr "战略（更少隐藏信息，例如实时分数）"
 
 #: .\Lobby\templates\Lobby\createROW.html:137
-#, fuzzy
-#| msgid "Building"
 msgid "Buildings"
-msgstr "建造"
+msgstr "建筑"
 
 #: .\Lobby\templates\Lobby\createROW.html:139
-#, fuzzy
-#| msgid "Random"
 msgid "Randomize"
 msgstr "随机"
 
 #: .\Lobby\templates\Lobby\createROW.html:140
 msgid "Beginner (only a-side)"
-msgstr ""
+msgstr "新手（仅 A 面）"
 
 #: .\Lobby\templates\Lobby\createROW.html:144
-#, fuzzy
-#| msgid "Player trades"
 msgid "Player order"
-msgstr "玩家交易"
+msgstr "玩家顺序"
 
 #: .\Lobby\templates\Lobby\createROW.html:146
-#, fuzzy
-#| msgid "Cool original"
 msgid "Randomize (original)"
-msgstr "基础游戏"
+msgstr "随机（原版）"
 
 #: .\Lobby\templates\Lobby\createROW.html:147
-#, fuzzy
-#| msgid "Building Phase:"
 msgid "Bidding (VPs)"
-msgstr "建造阶段："
+msgstr "竞标（胜利点数）"
 
 #: .\Lobby\templates\Lobby\createROW.html:151
 msgid "Variant"
-msgstr ""
+msgstr "变体"
 
 #: .\Lobby\templates\Lobby\createROW.html:154
 msgid "Balanced (tiles adjusted for 2/3p)"
-msgstr ""
+msgstr "平衡（针对 2/3 人调整板块）"
 
 #: .\Lobby\templates\Lobby\createROW.html:161
 msgid "Expansion: northern cities, branchlets and extra station towns"
-msgstr ""
+msgstr "扩展：北部城市、支线及额外车站城镇"
 
 #: .\Lobby\templates\Lobby\createROW.html:168
 msgid ""
 "Second edition only: extra breeding-value 2 cattle that upgrade on delivery"
-msgstr ""
+msgstr "仅第二版：额外的繁殖值 2 的牛，交付时升级"
 
 #: .\Lobby\templates\Lobby\createROW.html:175
 msgid "Adds the promo station master tiles"
-msgstr ""
+msgstr "添加促销站长板块"
 
 #: .\Lobby\templates\Lobby\createROW.html:182
 msgid "Adds the building 11 promo tiles"
-msgstr ""
+msgstr "添加 11 号建筑促销板块"
 
 #: .\Lobby\templates\Lobby\createROW.html:189
 msgid "Adds the building 13 promo tiles"
-msgstr ""
+msgstr "添加 13 号建筑促销板块"
 
 #: .\Lobby\templates\Lobby\createROW.html:195
 msgid "Play against Garth (AI)"
-msgstr ""
+msgstr "与 Garth 对战（AI）"
 
 #: .\Lobby\templates\Lobby\createROW.html:196
 msgid ""
 "Solo game against the Garth automa. Forces a 2-player game and excludes it "
 "from stats."
-msgstr ""
+msgstr "与 Garth automa 的单人对局。将强制为 2 人局并排除出统计数据。"
 
 #: .\Lobby\templates\Lobby\createROW.html:200
 msgid "Garth difficulty"
-msgstr ""
+msgstr "Garth 难度"
 
 #: .\Lobby\templates\Lobby\createROW.html:202
 msgid "Garth (easy)"
-msgstr ""
+msgstr "Garth（简单）"
 
 #: .\Lobby\templates\Lobby\createROW.html:203
 msgid "Garth (medium)"
-msgstr ""
+msgstr "Garth（中等）"
 
 #: .\Lobby\templates\Lobby\createROW.html:204
 msgid "Garth (hard)"
-msgstr ""
+msgstr "Garth（困难）"
 
 #: .\Lobby\templates\Lobby\createROW.html:205
 msgid "Garth (very hard)"
-msgstr ""
+msgstr "Garth（非常困难）"
 
 #: .\Lobby\templates\Lobby\createROW.html:213
-#, fuzzy
-#| msgid "Create Roads & Boats Game"
 msgid "Create Ranchers of the Old West Game"
-msgstr "创建 路与船 游戏"
+msgstr "创建 Ranchers of the Old West 游戏"
 
 #: .\Lobby\templates\Lobby\createROW.html:253
-#, fuzzy
-#| msgid "Creating Roads & Boats Game..."
 msgid "Creating Ranchers of the Old West Game..."
-msgstr "正在创建 路与船 游戏…"
+msgstr "正在创建 Ranchers of the Old West 游戏…"
 
 #: .\Lobby\templates\Lobby\createTGZ.html:32
 #, python-format
@@ -6615,32 +6546,24 @@ msgid "Create The Great Zimbabwe Game"
 msgstr "创建 大津巴布韦 游戏"
 
 #: .\Lobby\templates\Lobby\createURR.html:18
-#, fuzzy
-#| msgid "New to Bus? For Rules, How to Play, and Game Guide, please see "
 msgid "New to UR: 1830 BC? For Rules, How to Play, and Game Guide, please see "
-msgstr "初次游玩 Bus？规则、玩法与指南请见 "
+msgstr "初次游玩 UR: 1830 BC？规则、玩法与指南请见 "
 
 #: .\Lobby\templates\Lobby\createURR.html:148
-#, fuzzy
-#| msgid "Create Bus Game"
 msgid "Create UR: 1830 BC Game"
-msgstr "创建 Bus 游戏"
+msgstr "创建 UR: 1830 BC 游戏"
 
 #: .\Lobby\templates\Lobby\createURR.html:171
-#, fuzzy
-#| msgid "Creating Bus Game..."
 msgid "Creating UR: 1830 BC Game..."
-msgstr "正在创建 Bus 游戏…"
+msgstr "正在创建 UR: 1830 BC 游戏…"
 
 #: .\Lobby\templates\Lobby\createWEB.html:23
 msgid "New to Web? For Rules, How to Play, and Game Guide, please see "
 msgstr "初次游玩 Web？规则、玩法与指南请见 "
 
 #: .\Lobby\templates\Lobby\createWEB.html:211
-#, fuzzy
-#| msgid "Create a Mini Tournament"
 msgid "Create Web Mini Tournament"
-msgstr "创建迷你锦标赛"
+msgstr "创建 Web 迷你锦标赛"
 
 #: .\Lobby\templates\Lobby\createWEB.html:211
 msgid "Create Web Game"
@@ -7017,53 +6940,48 @@ msgid "Need a refresher on the icons? <a href=\"%(help_url)s\">See Help</a>."
 msgstr "需要回顾图标？<a href=\"%(help_url)s\">查看帮助</a>。"
 
 #: .\Lobby\templates\Lobby\extraStats.html:9
-#, fuzzy
-#| msgid "Per-Game Stats"
 msgid "Extra game stats"
-msgstr "按局统计"
+msgstr "额外游戏统计"
 
 #: .\Lobby\templates\Lobby\extraStats.html:10
 msgid "Preview FCM graphs with synthetic data"
-msgstr ""
+msgstr "用合成数据预览 FCM 图表"
 
 #: .\Lobby\templates\Lobby\extraStats.html:11
 msgid ""
 "Finished multiplayer matches, excluding practice, shadow and stats-excluded "
 "games. Refreshed hourly."
 msgstr ""
+"已完成的多人对局，不含练习局、影子局和被排除统计的对局。每小时刷新一次。"
 
 #: .\Lobby\templates\Lobby\extraStats.html:19
 msgid ""
 "Synthetic FCM preview — these are example numbers, not real game statistics."
-msgstr ""
+msgstr "FCM 合成数据预览 — 这些是示例数字，并非真实对局统计。"
 
 #: .\Lobby\templates\Lobby\extraStats.html:19
 msgid "Show real data"
-msgstr ""
+msgstr "显示真实数据"
 
 #: .\Lobby\templates\Lobby\extraStats.html:25
 msgid "Metric"
-msgstr ""
+msgstr "指标"
 
 #: .\Lobby\templates\Lobby\extraStats.html:25
 msgid "Average"
-msgstr ""
+msgstr "平均值"
 
 #: .\Lobby\templates\Lobby\extraStats.html:25
-#, fuzzy
-#| msgid "Media Line"
 msgid "Median"
-msgstr "电波营销"
+msgstr "中位数"
 
 #: .\Lobby\templates\Lobby\extraStats.html:25
-#, fuzzy
-#| msgid "Simple Ships"
 msgid "Samples"
-msgstr "简洁船只"
+msgstr "样本数"
 
 #: .\Lobby\templates\Lobby\extraStats.html:28
 msgid "How to read these numbers"
-msgstr ""
+msgstr "如何解读这些数字"
 
 #: .\Lobby\templates\Lobby\extraStats.html:29
 msgid ""
@@ -7071,6 +6989,8 @@ msgid ""
 "wait runs from creation to the first timestamp; setup entries at creation "
 "are ignored. This is elapsed wall time, including nights and pauses."
 msgstr ""
+"对局时长从第一条真实历史时间戳到最后一条；大厅等待时间从创建到第一条时间戳，"
+"创建时的设置条目不计入。这是实际流逝的时间，包括夜间和暂停。"
 
 #: .\Lobby\templates\Lobby\extraStats.html:30
 msgid ""
@@ -7079,6 +6999,8 @@ msgid ""
 "turns. Each player in each match contributes one sample; system entries have "
 "no player seat and are excluded."
 msgstr ""
+"记录行动数统计分配给玩家座位的历史条目，包括分配给玩家的自动事件，不一定是一"
+"次提交的回合。每局比赛中每位玩家贡献一个样本；系统条目没有玩家座位，不计入。"
 
 #: .\Lobby\templates\Lobby\extraStats.html:31
 msgid ""
@@ -7086,6 +7008,8 @@ msgid ""
 "automatically generated entries at the same time do not inflate the sample. "
 "Gaps measure match inactivity, not an individual player's thinking time."
 msgstr ""
+"行动间隔使用不同的玩家行动时间戳，因此同一时刻同时或自动生成的条目不会使样本"
+"膨胀。间隔衡量的是对局的不活跃程度，而非单个玩家的思考时间。"
 
 #: .\Lobby\templates\Lobby\extraStats.html:32
 msgid ""
@@ -7093,6 +7017,8 @@ msgid ""
 "excluded from history-based timing metrics. Their action counts can still be "
 "included. DDL histories currently have no timestamps."
 msgstr ""
+"时间戳缺失或不一致的旧版或不受支持的历史记录会从基于时间的统计指标中排除，但"
+"其行动计数仍可计入。DDL 的历史记录目前没有时间戳。"
 
 #: .\Lobby\templates\Lobby\fcmNewCode.html:11
 msgid "New FCM code"
@@ -7529,22 +7455,18 @@ msgid "Category"
 msgstr "分类"
 
 #: .\Lobby\templates\Lobby\feedback.html:34
-#, fuzzy
-#| msgid "New Site Design"
 msgid "New Layout / Website Design"
-msgstr "新网站设计"
+msgstr "新布局 / 网站设计"
 
 #: .\Lobby\templates\Lobby\feedback.html:35
-#, fuzzy
-#| msgid "Generating map"
 msgid "General Question"
-msgstr "正在生成地图"
+msgstr "一般问题"
 
 #: .\Lobby\templates\Lobby\feedback.html:41
 msgid ""
 "CAUTION: Please use in game bug reporting for games to ensure all the data "
 "is captured"
-msgstr ""
+msgstr "注意：对于游戏内的问题，请使用游戏内的错误报告功能，以确保捕获所有数据"
 
 #: .\Lobby\templates\Lobby\feedback.html:44
 msgid "Your Feedback"
@@ -7609,11 +7531,11 @@ msgstr "聊天"
 
 #: .\Lobby\templates\Lobby\gameDisplay\currentGameRow.html:10
 msgid "Daily goal met · UTC"
-msgstr ""
+msgstr "今日目标已达成 · UTC"
 
 #: .\Lobby\templates\Lobby\gameDisplay\currentGameRow.html:10
 msgid "One turn by anyone before midnight UTC keeps the streak alive"
-msgstr ""
+msgstr "在 UTC 午夜前任意玩家行动一次即可保持连续记录"
 
 #: .\Lobby\templates\Lobby\gameDisplay\currentGameRow.html:13
 #: .\Lobby\templates\Lobby\gameDisplay\currentGameRow.html:15
@@ -8079,20 +8001,20 @@ msgstr ""
 "<br />\n"
 
 #: .\Lobby\templates\Lobby\gameMomentum.html:5
-#, fuzzy
-#| msgid "Game Setup"
 msgid "Game momentum"
-msgstr "游戏设置"
+msgstr "游戏势头"
 
 #: .\Lobby\templates\Lobby\gameMomentum.html:8
 msgid ""
 "Send the overdue player a reminder to take their turn. Each player can "
 "receive one nudge per game every 24 hours."
 msgstr ""
+"向逾期未行动的玩家发送行动提醒。每位玩家在每局游戏中每 24 小时最多收到一次提"
+"醒。"
 
 #: .\Lobby\templates\Lobby\gameMomentum.html:11
 msgid "Close"
-msgstr ""
+msgstr "关闭"
 
 #: .\Lobby\templates\Lobby\game_card.html:8
 msgid "players"
@@ -8714,10 +8636,8 @@ msgid "Primary navigation"
 msgstr "主导航"
 
 #: .\Lobby\templates\Lobby\layout.html:256
-#, fuzzy
-#| msgid "Forgot Password?"
 msgid "Forgot Password"
-msgstr "忘记密码？"
+msgstr "忘记密码"
 
 #: .\Lobby\templates\Lobby\layout.html:287
 msgid ""
@@ -8816,7 +8736,7 @@ msgstr "进入游戏踢除闲置玩家"
 
 #: .\Lobby\templates\Lobby\lobby.html:260
 msgid "Finished - result not yet viewed"
-msgstr ""
+msgstr "已结束 - 结果尚未查看"
 
 #: .\Lobby\templates\Lobby\lobby.html:289
 msgid ""
@@ -9735,19 +9655,17 @@ msgstr "没有联合已完成游戏"
 
 #: .\Lobby\templates\Lobby\profile.html:27
 msgid "Appearance"
-msgstr ""
+msgstr "外观"
 
 #: .\Lobby\templates\Lobby\profile.html:33
-#, fuzzy
-#| msgid "Draft modules"
 msgid "Dark mode"
-msgstr "所有模组"
+msgstr "深色模式"
 
 #: .\Lobby\templates\Lobby\profile.html:36
 msgid ""
 "Applies to the lobby and account pages. Game views keep their current "
 "appearance."
-msgstr ""
+msgstr "适用于大厅和账户页面。游戏界面保持当前外观。"
 
 #: .\Lobby\templates\Lobby\profile.html:45
 msgid "Notifications"
@@ -9801,19 +9719,19 @@ msgstr "轮到你时发送浏览器通知。需要保持标签页打开。"
 
 #: .\Lobby\templates\Lobby\profile.html:114
 msgid "Daily momentum"
-msgstr ""
+msgstr "每日势头"
 
 #: .\Lobby\templates\Lobby\profile.html:116
 msgid "Show shared game streaks 🔥"
-msgstr ""
+msgstr "显示共享的游戏连续记录 🔥"
 
 #: .\Lobby\templates\Lobby\profile.html:117
 msgid "Remind me when a streak is about to expire"
-msgstr ""
+msgstr "连续记录即将中断时提醒我"
 
 #: .\Lobby\templates\Lobby\profile.html:118
 msgid "Allow other players to nudge me when my turn expires"
-msgstr ""
+msgstr "允许其他玩家在我的回合超时时提醒我"
 
 #: .\Lobby\templates\Lobby\profile.html:119
 msgid ""
@@ -9821,6 +9739,8 @@ msgid ""
 "follow your notification settings when it's your turn. Hiding streaks also "
 "disables reminders."
 msgstr ""
+"任意玩家的行动都能保持每日 UTC 连续记录。UTC 22:00 的提醒会在轮到你时按你的通"
+"知设置发送。隐藏连续记录也会同时停用提醒。"
 
 #: .\Lobby\templates\Lobby\profile.html:126
 msgid ""
@@ -10362,24 +10282,20 @@ msgid "The game will use the following customisations:"
 msgstr "游戏将使用以下自定义设置："
 
 #: .\Lobby\templates\Lobby\socialButtons.html:5
-#, fuzzy
-#| msgid "Join the Discord"
 msgid "Join our Discord"
-msgstr "加入 Discord"
+msgstr "加入我们的 Discord"
 
 #: .\Lobby\templates\Lobby\socialButtons.html:9
-#, fuzzy
-#| msgid "Join the Discord"
 msgid "Join us on Discord"
-msgstr "加入 Discord"
+msgstr "在 Discord 上加入我们"
 
 #: .\Lobby\templates\Lobby\socialButtons.html:14
 msgid "View source code on GitHub"
-msgstr ""
+msgstr "在 GitHub 上查看源代码"
 
 #: .\Lobby\templates\Lobby\socialButtons.html:18
 msgid "View code on GitHub"
-msgstr ""
+msgstr "在 GitHub 上查看代码"
 
 #: .\Lobby\templates\Lobby\stat_games.html:6
 msgid "Stat Games"
@@ -11040,16 +10956,12 @@ msgstr "拒绝邀请"
 
 #: .\Lobby\templates\Lobby\tournaments\MainTournament.html:174
 #: .\Lobby\templates\Lobby\tournaments\MiniTournament.html:123
-#, fuzzy
-#| msgid "Creating Mini Tournament..."
 msgid "Generating tournament......"
-msgstr "正在创建迷你锦标赛…"
+msgstr "正在生成锦标赛……"
 
 #: .\Lobby\templates\Lobby\tournaments\MainTournament.html:186
-#, fuzzy
-#| msgid "Tournament Name"
 msgid "Start Tournament Now"
-msgstr "锦标赛名称"
+msgstr "立即开始锦标赛"
 
 #: .\Lobby\templates\Lobby\tournaments\MainTournament.html:258
 #: .\Lobby\templates\Lobby\tournaments\MainTournament.html:433
@@ -11230,10 +11142,8 @@ msgid "Your password has been changed"
 msgstr "您的密码已更改"
 
 #: .\Lobby\views.py:1773
-#, fuzzy
-#| msgid "Your RNB preferences have been updated successfully"
 msgid "Your appearance preferences have been updated successfully"
-msgstr "你的 RNB 偏好已成功更新"
+msgstr "你的外观偏好已成功更新"
 
 #: .\Lobby\views.py:1802
 msgid "Your colour preferences have been updated successfully"
@@ -11500,16 +11410,12 @@ msgid "Mini Tournament does not exist"
 msgstr "迷你锦标赛不存在"
 
 #: .\Lobby\views.py:5325
-#, fuzzy
-#| msgid "Tournament Game Started"
 msgid "This tournament cannot be started"
-msgstr "锦标赛游戏已开始"
+msgstr "此锦标赛无法开始"
 
 #: .\Lobby\views.py:5328
-#, fuzzy
-#| msgid "Tournament Game Started"
 msgid "Tournament started"
-msgstr "锦标赛游戏已开始"
+msgstr "锦标赛已开始"
 
 #: .\Lobby\views.py:5332
 msgid "This tournament is not open for signup yet"
@@ -11777,22 +11683,14 @@ msgstr "拾取货物时同理，若货物可驳运到你的位置拾取，会高
 
 #: .\RNB\templates\RNB\RNBhelp.html:143
 msgid "You may also \\"
-msgstr ""
+msgstr "你也可以 \\"
 
 #: .\RNB\templates\RNB\RNBhelp.html:146
-#, fuzzy
-#| msgid ""
-#| "You can only unload a transporter at the start of the Movement Phase. "
-#| "However, the game will allow you to drop a transporter that has been "
-#| "picked up but not moved, as that is the equivalent of just \"undoing\" "
-#| "the action."
 msgid ""
 "You can only unload a transporter at the start of the Movement Phase. "
 "However, the game will allow you to drop a transporter that has been picked "
 "up but not moved, as that is the equivalent of just \\"
-msgstr ""
-"你只能在移动阶段开始时卸下运输单位。不过，若你已拾取运输单位但尚未移动，游戏"
-"仍允许你放下它，因为这等同于只是“撤销”该操作。"
+msgstr "你只能在移动阶段开始时卸下运输单位。不过，若你已拾取运输单位但尚未移动，游戏仍允许你放下它，因为这等同于只是 \\ 该操作。"
 
 #: .\RNB\templates\RNB\RNBhelp.html:149
 msgid ""
@@ -12088,14 +11986,12 @@ msgid "No highscores recorded for this player yet."
 msgstr "该玩家尚无排行榜记录。"
 
 #: .\ROW\common.py:248
-#, fuzzy
-#| msgid "Your game has started"
 msgid "Your game against Garth has started"
-msgstr "你的游戏已开始"
+msgstr "你的 Garth 对局已开始"
 
 #: .\ROW\templates\ROW\ROWhelp.html:5
 msgid "Ranchers of the Old West Help"
-msgstr ""
+msgstr "Ranchers of the Old West 帮助"
 
 #: .\ROW\templates\ROW\ROWhelp.html:9
 msgid "Overview"
@@ -12112,10 +12008,14 @@ msgid ""
 "        to do it again. The player with the most victory points when the "
 "game ends wins."
 msgstr ""
+"Ranchers of the Old West 是由 Online Board Gamers 主办的在线桌游。每位玩家都"
+"是一名牛仔，赶着牛群向北前往堪萨斯城，同时构筑牌组、雇佣工人、铺设轨道并放置"
+"建筑。到达堪萨斯城后，牛群被出售，玩家返回起点再次出发。游戏结束时胜利点数最"
+"多的玩家获胜。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:21
 msgid "A turn in three phases"
-msgstr ""
+msgstr "回合分为三个阶段"
 
 #: .\ROW\templates\ROW\ROWhelp.html:24
 msgid ""
@@ -12125,6 +12025,9 @@ msgid ""
 "black hands differ by player count); fees on hazards and teepees go to the "
 "bank, fees on an opponent's building go to that player."
 msgstr ""
+"<b>1. 移动。</b>将你的牛仔沿路线向前移动 1 步或更多。不能向后移动。没有板块的"
+"格子不计入步数。若你移动到或经过带有手形图标的地点，则需支付费用（绿色/黑色手"
+"形的费用因玩家数而异）；危险和帐篷上的费用归银行，对手建筑上的费用归该玩家。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:32
 msgid ""
@@ -12134,6 +12037,9 @@ msgid ""
 "hazard or a teepee) only an auxiliary action. Actions separated by a divider "
 "can each be used once; a split action means you choose one side."
 msgstr ""
+"<b>2. 执行行动。</b>根据你停下的位置，你可以使用板块上印制的本地行动，或从玩"
+"家板上执行一个未锁定的辅助行动；若你停在对手的建筑、危险或帐篷上，则只能执行"
+"辅助行动。被分隔线分开的行动各可使用一次；分裂行动意味着你选择其中一侧。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:40
 msgid ""
@@ -12141,10 +12047,12 @@ msgid ""
 "not reshuffle the discard pile until you actually need to draw and the draw "
 "stack is empty."
 msgstr ""
+"<b>3. 补牌。</b>摸牌直到手牌达到手牌上限。只有在实际需要摸牌且抽牌堆为空时才"
+"洗混弃牌堆。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:49
 msgid "Kansas City"
-msgstr ""
+msgstr "堪萨斯城"
 
 #: .\ROW\templates\ROW\ROWhelp.html:52
 msgid ""
@@ -12155,56 +12063,58 @@ msgid ""
 "value your herd covers. Removing a disc unlocks the upgrade printed on your "
 "player board. The engine then travels back to the start."
 msgstr ""
+"在堪萨斯城停留会依次结算五个步骤：选择预见位 1、2 和 3 上的板块；然后出售牛群"
+"（累加手中每种不同牛类的繁殖值，再加上你选择花费的证书），并将手牌复制到弃牌"
+"堆；最后向价值在你的牛群总值之内的城市交付。移除一个圆片可解锁玩家板上印制的"
+"升级。火车头随后返回起点。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:64
-#, fuzzy
-#| msgid "Common Options"
 msgid "Common actions"
-msgstr "常用选项"
+msgstr "常用行动"
 
 #: .\ROW\templates\ROW\ROWhelp.html:67
 msgid ""
 "Hire a worker from the job market (the whole row under the job market token "
 "is locked)."
-msgstr ""
+msgstr "从职业市场雇佣一名工人（职业市场标记下方的整行被锁定）。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:68
 msgid ""
 "Buy cattle from the cattle market, single or pair, using cowboys for better "
 "cards."
-msgstr ""
+msgstr "从牛市场购买牛，单头或成对；使用牛仔可获得更好的卡牌。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:69
 msgid ""
 "Place or upgrade a private building; the craftsmen in your row must cover "
 "the cost."
-msgstr ""
+msgstr "放置或升级私人建筑；你那一行的工匠必须承担其费用。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:70
 msgid ""
 "Move your engine forward (up to the number of engineers you have) and "
 "upgrade a station you stop on."
-msgstr ""
+msgstr "将你的火车头向前移动（最多为你拥有的工程师数量），并升级你停留的车站。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:71
 msgid "Trade with the tribes and remove hazards."
-msgstr ""
+msgstr "与部落交易并清除危险。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:72
 msgid ""
 "Take objective cards and play them for their bonus; completed objectives "
 "score points, incomplete ones cost points."
-msgstr ""
+msgstr "拿取目标卡并打出以获得其奖励；完成的目标得点数，未完成的目标扣点数。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:78
 msgid "Using the online board"
-msgstr ""
+msgstr "使用在线版图"
 
 #: .\ROW\templates\ROW\ROWhelp.html:81
 msgid ""
 "Click a highlighted trail spot to move your cattleman. Cyan spots are more "
 "than one step away."
-msgstr ""
+msgstr "点击高亮的路线格来移动你的牛仔。青色格子距离超过一步。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:82
 msgid ""
@@ -12212,26 +12122,30 @@ msgid ""
 "the board. Pick one, then click the card, board space or track space it "
 "needs."
 msgstr ""
+"当有多种行动可选时，按钮会出现在版图下方的行动栏中。选择一个，然后点击它所需"
+"的卡牌、版图格或轨道格。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:83
 msgid "Hover a building or heartland tile on the board to see its actions."
-msgstr ""
+msgstr "将鼠标悬停在版图上的建筑或腹地板块上可查看其行动。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:84
 msgid ""
 "Use Undo to step back one action, or Reset Whole Turn to go back to the "
 "start of your turn."
-msgstr ""
+msgstr "使用“撤销”回退一步行动，或使用“重置整回合”回到本回合开始。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:85
 msgid ""
 "The History button lists recent actions, Chat talks to the table, Notes are "
 "private to you, and the magnifier buttons zoom the board."
 msgstr ""
+"“历史”按钮列出近期行动，“聊天”用于与同桌玩家交流，“笔记”仅你可见，放大镜按钮"
+"可缩放版图。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:91
 msgid "Scoring at the end"
-msgstr ""
+msgstr "终局计分"
 
 #: .\ROW\templates\ROW\ROWhelp.html:94
 msgid ""
@@ -12240,10 +12154,11 @@ msgid ""
 "buildings on the board, cities you delivered to, upgraded stations, the job-"
 "market token and any extra-step bonus. Ties are shared."
 msgstr ""
+"最终点数来自现金（每 $5 得 $1）、牛卡、目标卡、站长、每行最后两个槽位中的工"
+"人、危险、版图上的建筑、你交付过的城市、已升级的车站、职业市场标记以及任何额"
+"外步数奖励。并列名次共享。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:104
-#, fuzzy
-#| msgid "Game Options"
 msgid "Game options"
 msgstr "游戏选项"
 
@@ -12251,43 +12166,43 @@ msgstr "游戏选项"
 msgid ""
 "Edition: first edition or second edition (different buildings, cities and "
 "objectives)."
-msgstr ""
+msgstr "版本：第一版或第二版（建筑、城市和目标不同）。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:108
 msgid ""
 "Rails to the North: enables the northern map, branchlets, towns and bonus "
 "station masters."
-msgstr ""
+msgstr "Rails to the North：启用北部地图、支线、城镇和奖励站长。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:109
 msgid "Simmental (second edition): adds the Simmental cattle to the market."
-msgstr ""
+msgstr "Simmental（第二版）：将 Simmental cattle 添加到市场。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:110
 msgid ""
 "Station master promos, building 11 and building 13: optional promo tiles."
-msgstr ""
+msgstr "站长促销、11 号建筑和 13 号建筑：可选促销板块。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:111
 msgid "Buildings: beginner (all A sides) or randomized."
-msgstr ""
+msgstr "建筑：新手（全部 A 面）或随机。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:112
 msgid ""
 "Player order: randomized, or resolved by an auction before the first turn."
-msgstr ""
+msgstr "玩家顺序：随机，或在第一回合前通过拍卖决定。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:113
 msgid ""
 "Variant: original, or balanced (smaller cattle market and Kansas City "
 "supply)."
-msgstr ""
+msgstr "变体：原版，或平衡（更小的牛市场和堪萨斯城供应）。"
 
 #: .\ROW\templates\ROW\ROWhelp.html:114
 msgid ""
 "Play against the Garth automa by ticking the computer player and choosing a "
 "difficulty."
-msgstr ""
+msgstr "勾选电脑玩家并选择难度，即可与 Garth automa 对战。"
 
 #: .\TGZ\common.py:257
 msgid "Your Practice game has been started"
@@ -12428,10 +12343,8 @@ msgid "How Can I Replay the Game / Copy to a New Game?"
 msgstr "如何回放游戏 / 复制到新游戏？"
 
 #: .\TGZ\templates\TGZ\TGZhelp.html:104
-#, fuzzy
-#| msgid "Select Map"
 msgid "Select \\"
-msgstr "选择地图"
+msgstr "选择 \\"
 
 #: .\TGZ\templates\TGZ\TGZhelp.html:106
 msgid ""
@@ -12440,12 +12353,8 @@ msgid ""
 msgstr "你可以使用屏幕上的箭头，或键盘左/右方向键在游戏中前后步进。"
 
 #: .\TGZ\templates\TGZ\TGZhelp.html:108
-#, fuzzy
-#| msgid ""
-#| "You can also select any entry in \"History\" to jump to that point in "
-#| "time."
 msgid "You can also select any entry in \\"
-msgstr "你也可以在“History”中选择任意条目，跳转到该时间点。"
+msgstr "你也可以在 \\ 中选择任意条目，跳转到该时间点。"
 
 #: .\TGZ\templates\TGZ\TGZhelp.html:110
 msgid ""
@@ -12656,16 +12565,10 @@ msgid ""
 msgstr "你按上述方式获得胜利点数，成绩格式为 VP / VR。"
 
 #: .\TGZ\templates\TGZ\TGZhelp.html:267
-#, fuzzy
-#| msgid ""
-#| "When your VP equal or exceed your VR, you can win the game. This is "
-#| "checked during the \"Let Us Compare Mythologies\" phase."
 msgid ""
 "When your VP equal or exceed your VR, you can win the game. This is checked "
 "during the \\"
-msgstr ""
-"当你的 VP 等于或超过 VR 时，你就能赢得比赛。这会在“Let Us Compare "
-"Mythologies”阶段进行检查。"
+msgstr "当你的 VP 等于或超过 VR 时，你就能赢得游戏。这会在 \\ 阶段进行检查。"
 
 #: .\TGZ\templates\TGZ\TGZhelp.html:270
 msgid ""
@@ -12808,7 +12711,7 @@ msgstr "起始位置"
 
 #: .\URR\templates\URR\URRhelp.html:5
 msgid "UR: 1830 BC Help"
-msgstr ""
+msgstr "UR: 1830 BC 帮助"
 
 #: .\URR\templates\URR\URRhelp.html:16
 msgid ""
@@ -12816,94 +12719,93 @@ msgid ""
 "by <a class=\"linkOther\" href=\"https://www.splottershop.com/\" "
 "target=\"_blank\">Splotter Spellen</a>."
 msgstr ""
+"UR: 1830 BC 是 Jeroen Doumen 与 Joris Wiersinga 设计、由 <a "
+"class=\"linkOther\" href=\"https://www.splottershop.com/\" "
+"target=\"_blank\">Splotter Spellen</a> 出版的桌游。"
 
 #: .\URR\templates\URR\URRhelp.html:19
 msgid "Open the full rulebook (PDF)"
-msgstr ""
+msgstr "打开完整规则书（PDF）"
 
 #: .\URR\templates\URR\URRhelp.html:20
 msgid "Open the player aid (PDF)"
-msgstr ""
+msgstr "打开玩家辅助卡（PDF）"
 
 #: .\URR\templates\URR\URRhelp.html:25
 msgid "Icons and pieces"
-msgstr ""
+msgstr "图标与棋子"
 
 #: .\URR\templates\URR\URRhelp.html:29
 msgid "Terrain hills"
-msgstr ""
+msgstr "地形：丘陵"
 
 #: .\URR\templates\URR\URRhelp.html:30
 msgid "Terrain forest"
-msgstr ""
+msgstr "地形：森林"
 
 #: .\URR\templates\URR\URRhelp.html:31
 msgid "Terrain savannah"
-msgstr ""
+msgstr "地形：草原"
 
 #: .\URR\templates\URR\URRhelp.html:32
 msgid "Terrain desert"
-msgstr ""
+msgstr "地形：沙漠"
 
 #: .\URR\templates\URR\URRhelp.html:34
 msgid "Terrain"
-msgstr ""
+msgstr "地形"
 
 #: .\URR\templates\URR\URRhelp.html:34
 msgid ""
 "Hills, forest, savannah, and desert, in that order. The same pictures "
 "identify terrain in the land market, holdings, and sale plans."
 msgstr ""
+"依次为丘陵、森林、草原和沙漠。土地市场、持有地和出售计划中也用同样的图片标识"
+"地形。"
 
 #: .\URR\templates\URR\URRhelp.html:38
-#, fuzzy
-#| msgid "City builder"
 msgid "City hills"
-msgstr "城市建设者"
+msgstr "城市：丘陵"
 
 #: .\URR\templates\URR\URRhelp.html:39
-#, fuzzy
-#| msgid "City Growth"
 msgid "City forest"
-msgstr "城市成长"
+msgstr "城市：森林"
 
 #: .\URR\templates\URR\URRhelp.html:40
 msgid "City savannah"
-msgstr ""
+msgstr "城市：草原"
 
 #: .\URR\templates\URR\URRhelp.html:41
-#, fuzzy
-#| msgid "City builder"
 msgid "City desert"
-msgstr "城市建设者"
+msgstr "城市：沙漠"
 
 #: .\URR\templates\URR\URRhelp.html:43
 msgid "Cities"
-msgstr ""
+msgstr "城市"
 
 #: .\URR\templates\URR\URRhelp.html:43
 msgid ""
 "City artwork distinguishes city land from ordinary fields. In holdings, the "
 "small city picture counts cities already included in the terrain total."
 msgstr ""
+"城市图标用于区分城市土地与普通田地。在持有地中，小城市图片表示已计入地形总数"
+"的城市。"
 
 #: .\URR\templates\URR\URRhelp.html:47
 msgid "Ownership marker orange"
-msgstr ""
+msgstr "所有权标记：橙色"
 
 #: .\URR\templates\URR\URRhelp.html:48
 msgid "Ownership marker green"
-msgstr ""
+msgstr "所有权标记：绿色"
 
 #: .\URR\templates\URR\URRhelp.html:49
 msgid "Ownership marker teal"
-msgstr ""
+msgstr "所有权标记：青色"
 
 #: .\URR\templates\URR\URRhelp.html:51
-#, fuzzy
-#| msgid "Player trades"
 msgid "Player markers"
-msgstr "玩家交易"
+msgstr "玩家标记"
 
 #: .\URR\templates\URR\URRhelp.html:51
 msgid ""
@@ -12911,18 +12813,20 @@ msgid ""
 "faded marker inside a dashed frame means the land has been sold and is "
 "available to buy."
 msgstr ""
+"玩家颜色标识土地所有者和收款人。在地图上，虚线框内的淡化标记表示该土地已出"
+"售，可以购买。"
 
 #: .\URR\templates\URR\URRhelp.html:55
 msgid "State order akkad"
-msgstr ""
+msgstr "国家顺序：阿卡德"
 
 #: .\URR\templates\URR\URRhelp.html:56
 msgid "State treasury akkad"
-msgstr ""
+msgstr "国家金库：阿卡德"
 
 #: .\URR\templates\URR\URRhelp.html:58
 msgid "State and treasury"
-msgstr ""
+msgstr "国家与金库"
 
 #: .\URR\templates\URR\URRhelp.html:58
 msgid ""
@@ -12930,32 +12834,36 @@ msgid ""
 "crews, and harvest. State colours on equipment identify its owning state. "
 "Private cash and state treasury money are separate."
 msgstr ""
+"国家徽章标识一个国家；金库板显示其金钱、工程队和收获。装备上的国家颜色标识其"
+"所属国家。私人现金与国家金库的钱相互独立。"
 
 #: .\URR\templates\URR\URRhelp.html:62 .\URR\templates\URR\URRhelp.html:64
 msgid "Primogeniture"
-msgstr ""
+msgstr "长子继承权"
 
 #: .\URR\templates\URR\URRhelp.html:64
 msgid ""
 "This marker identifies the player with primogeniture. A pending bid reserves "
 "private cash; Available shows the amount left to spend."
 msgstr ""
+"该标记标识拥有长子继承权的玩家。待处理的出价会预留私人现金；“可用”显示剩余可"
+"花费的金额。"
 
 #: .\URR\templates\URR\URRhelp.html:68
 msgid "Waterwork akkad 1"
-msgstr ""
+msgstr "水利设施：阿卡德 1"
 
 #: .\URR\templates\URR\URRhelp.html:69
 msgid "Waterwork akkad 2"
-msgstr ""
+msgstr "水利设施：阿卡德 2"
 
 #: .\URR\templates\URR\URRhelp.html:70
 msgid "Waterwork akkad unlimited"
-msgstr ""
+msgstr "水利设施：阿卡德 无限"
 
 #: .\URR\templates\URR\URRhelp.html:72
 msgid "Waterworks and crews"
-msgstr ""
+msgstr "水利设施与工程队"
 
 #: .\URR\templates\URR\URRhelp.html:72
 msgid ""
@@ -12964,14 +12872,17 @@ msgid ""
 "number is digging capacity; two pieces represent a split crew, and faded "
 "crews have already dug."
 msgstr ""
+"棋子上的数字表示其容量。对水泵而言是水渠范围；对水库而言是蓄水量。M 表示无"
+"限。在工程队面板中，数字是挖掘能力；两个棋子代表一支分开的工程队，淡化的工程"
+"队表示已经挖掘过。"
 
 #: .\URR\templates\URR\URRhelp.html:76
 msgid "Equipment era 1"
-msgstr ""
+msgstr "装备：时代 1"
 
 #: .\URR\templates\URR\URRhelp.html:78
 msgid "Equipment cards"
-msgstr ""
+msgstr "装备卡"
 
 #: .\URR\templates\URR\URRhelp.html:78
 msgid ""
@@ -12979,58 +12890,64 @@ msgid ""
 "enlarge it. The crew, pump, and reservoir buttons show the action and cost "
 "before you confirm."
 msgstr ""
+"装备卡显示当前容量和价格。选择可放大查看。工程队、水泵和水库按钮会在你确认前"
+"显示行动和费用。"
 
 #: .\URR\templates\URR\URRhelp.html:82
 msgid "Nation calah"
-msgstr ""
+msgstr "国家：卡拉赫"
 
 #: .\URR\templates\URR\URRhelp.html:84
 msgid "Nation cards"
-msgstr ""
+msgstr "国家卡"
 
 #: .\URR\templates\URR\URRhelp.html:84
 msgid ""
 "Select a nation card to read it at full size. Map locates its homeland. "
 "Player or state badges beside a nation show its owner."
 msgstr ""
+"选择国家卡可全尺寸阅读。“地图”按钮会定位其家园。国家旁的玩家或国家徽章显示其"
+"所有者。"
 
 #: .\URR\templates\URR\URRhelp.html:89
 msgid "Map highlights"
-msgstr ""
+msgstr "地图高亮"
 
 #: .\URR\templates\URR\URRhelp.html:92
-#, fuzzy
-#| msgid "Yellow"
 msgid "Yellow:"
-msgstr "黄色"
+msgstr "黄色："
 
 #: .\URR\templates\URR\URRhelp.html:92
 msgid "The selected or focused hex. Its details appear below the map."
-msgstr ""
+msgstr "选中或聚焦的六边形。其详情显示在地图下方。"
 
 #: .\URR\templates\URR\URRhelp.html:93
 msgid "Purple:"
-msgstr ""
+msgstr "紫色："
 
 #: .\URR\templates\URR\URRhelp.html:93
 msgid ""
 "An available Calah waterwork site or Barahshum canal destination. The map "
 "hint and hex description identify the exchange."
 msgstr ""
+"可用的卡拉赫水利设施位置或巴拉赫舒姆水渠目的地。地图提示和六边形描述会说明该"
+"交易。"
 
 #: .\URR\templates\URR\URRhelp.html:94
 msgid "Amber:"
-msgstr ""
+msgstr "琥珀色："
 
 #: .\URR\templates\URR\URRhelp.html:94
 msgid ""
 "Land eligible for a mandatory crew funding sale, or a waterwork eligible for "
 "removal when storing harvest. Select a hex to see which applies."
 msgstr ""
+"符合强制出售土地以筹集工程队资金条件的土地，或在储存收获时可移除的水利设施。"
+"选择一个六边形查看适用哪种情况。"
 
 #: .\URR\templates\URR\URRhelp.html:95
 msgid "Cyan outline:"
-msgstr ""
+msgstr "青色轮廓："
 
 #: .\URR\templates\URR\URRhelp.html:95
 msgid ""
@@ -13038,10 +12955,12 @@ msgid ""
 "destination list; the source has a dashed outline and a Source label. A "
 "small cyan dot on a hex marks irrigation."
 msgstr ""
+"可用的引水目的地。带编号的蓝色徽章与目的地列表对应；水源处有虚线轮廓和 "
+"Source 标签。六边形上的小青点表示灌溉。"
 
 #: .\URR\templates\URR\URRhelp.html:96
 msgid "Blue lines:"
-msgstr ""
+msgstr "蓝色线条："
 
 #: .\URR\templates\URR\URRhelp.html:96
 msgid ""
@@ -13049,81 +12968,77 @@ msgid ""
 "routing is complete, Animate or Step through in history replays where the "
 "water went."
 msgstr ""
+"水渠。较粗的线条是你正在规划的渠道路径。引水完成后，可在历史回放中使用“动画"
+"（Animate）”或“逐步查看（Step through）”了解水的流向。"
 
 #: .\URR\templates\URR\URRhelp.html:98
 msgid ""
 "Select a hex to read its owner, terrain, waterwork, and current role; you do "
 "not need to identify a highlight by colour alone."
 msgstr ""
+"选择六边形可查看其所有者、地形、水利设施和当前作用；你无需仅凭颜色来识别高"
+"亮。"
 
 #: .\URR\templates\URR\URRhelp.html:102
-#, fuzzy
-#| msgid "Game Icons"
 msgid "Menu icons"
-msgstr "游戏图标"
+msgstr "菜单图标"
 
 #: .\URR\templates\URR\URRhelp.html:104
 msgid ""
 "Opens this interface guide, the rulebook, and the player aid in a new tab."
-msgstr ""
+msgstr "在新标签页中打开本界面指南、规则书和玩家辅助卡。"
 
 #: .\URR\templates\URR\URRhelp.html:105
 msgid "Info"
-msgstr ""
+msgstr "信息"
 
 #: .\URR\templates\URR\URRhelp.html:105
-#, fuzzy
-#| msgid "For more information on tournaments, see"
 msgid "Game information and options."
-msgstr "有关锦标赛的更多信息，请参阅"
+msgstr "游戏信息与选项。"
 
 #: .\URR\templates\URR\URRhelp.html:106
 msgid "Messages shared with the other players."
-msgstr ""
+msgstr "与其他玩家共享的消息。"
 
 #: .\URR\templates\URR\URRhelp.html:107
-#, fuzzy
-#| msgid "Note:"
 msgid "Notes"
-msgstr "注意："
+msgstr "笔记"
 
 #: .\URR\templates\URR\URRhelp.html:107
 msgid "Your private notes."
-msgstr ""
+msgstr "你的私人笔记。"
 
 #: .\URR\templates\URR\URRhelp.html:108
 msgid "History"
-msgstr ""
+msgstr "历史"
 
 #: .\URR\templates\URR\URRhelp.html:108
 msgid "The move log, including payments and leadership changes."
-msgstr ""
+msgstr "行动记录，包括付款和领导权变更。"
 
 #: .\URR\templates\URR\URRhelp.html:109
 msgid "Inspect earlier positions, then Exit Replay to return to the live game."
-msgstr ""
+msgstr "查看先前局面，然后使用“退出回放（Exit Replay）”返回实时游戏。"
 
 #: .\URR\templates\URR\URRhelp.html:110
 msgid "Request a rewind to an earlier position."
-msgstr ""
+msgstr "请求回退到先前的局面。"
 
 #: .\URR\templates\URR\URRhelp.html:111
-#, fuzzy
-#| msgid "Bus"
 msgid "Bug"
-msgstr "Bus"
+msgstr "Bug 报告"
 
 #: .\URR\templates\URR\URRhelp.html:111
 msgid "Report a problem with the current game."
-msgstr ""
+msgstr "报告当前游戏的问题。"
 
 #: .\URR\templates\URR\URRhelp.html:112
 msgid "Go to your next game."
-msgstr ""
+msgstr "前往你的下一局游戏。"
 
 #: .\URR\templates\URR\URRhelp.html:113
 msgid "Return to the lobby."
-msgstr ""
+msgstr "返回大厅。"
 
 #: .\URR\templates\URR\URRhelp.html:119
 msgid ""
@@ -13131,6 +13046,8 @@ msgid ""
 "player or state to inspect its holdings; the status panels otherwise follow "
 "the current decision."
 msgstr ""
+"版图上方的行显示玩家顺序和当前行动的国家顺序。选择玩家或国家可查看其持有地；"
+"状态面板在其他情况下跟随当前决策。"
 
 #: .\URR\templates\URR\URRhelp.html:120
 msgid ""
@@ -13139,6 +13056,9 @@ msgid ""
 "inspect its existing status panel. Stars mark monarchs or ownership leaders; "
 "sold land is excluded from ownership counts."
 msgstr ""
+"“概览”比较各国金库、君主、拥有的土地、工程队、收获和顺序，以及每位玩家在各国"
+"中的所有权。选择名称可查看其现有状态面板。星号标记君主或所有权领先者；已出售"
+"的土地不计入所有权统计。"
 
 #: .\URR\templates\URR\URRhelp.html:121
 msgid ""
@@ -13148,6 +13068,10 @@ msgid ""
 "available action highlights. The action panel identifies the acting state "
 "and player separately from the inspected panels."
 msgstr ""
+"被查看的国家会在地图上突出显示，其他六边形变暗且行动高亮被隐藏。玩家面板中的"
+"“显示拥有的土地（Show owned land）”会以同样方式高亮该玩家的持有地。“清除地图"
+"查看（Clear map inspection）”会恢复可用的行动高亮。行动面板会标明正在行动的国"
+"家和玩家，与所查看的面板分开显示。"
 
 #: .\URR\templates\URR\URRhelp.html:122
 msgid ""
@@ -13157,6 +13081,9 @@ msgid ""
 "Settlement, Development, and Rainy Season. During Development it also shows "
 "the substeps. The current phase and step are bold."
 msgstr ""
+"装备供应会突出显示当前时代。“所有时代（All eras）”会展开剩余卡牌。下一个时代"
+"从该供应区的第一次购买开始。在地图和侧面板下方，行动顺序条显示定居、开发和雨"
+"季。开发阶段还会显示子步骤。当前阶段和步骤以粗体显示。"
 
 #: .\URR\templates\URR\URRhelp.html:123
 msgid ""
@@ -13165,10 +13092,13 @@ msgid ""
 "price changes from queued sales before you confirm. Small city markers in a "
 "player's holdings count cities included in the terrain totals."
 msgstr ""
+"印刷版土地市场始终展开。地形标记在印刷价格轨上显示当前土地售价。“计划后市场"
+"（Market after plan）”会在你确认前预览排队出售带来的价格变化。玩家持有地中的"
+"小城市标记表示已计入地形总数的城市。"
 
 #: .\URR\templates\URR\URRhelp.html:125
 msgid "Independent nations:"
-msgstr ""
+msgstr "独立国家："
 
 #: .\URR\templates\URR\URRhelp.html:125
 msgid ""
@@ -13178,10 +13108,13 @@ msgid ""
 "auction, bid or withdraw from the current nation. Bidders who cannot afford "
 "the minimum withdraw automatically."
 msgstr ""
+"购买当前的条约国，或展开另一个国家的行来出价。地图按钮会定位该国的家园。选择"
+"卡图可全尺寸阅读卡牌；使用其缩放控件可进一步放大。拍卖期间，可对当前国家出价"
+"或退出。承担不起最低出价的竞标者会自动退出。"
 
 #: .\URR\templates\URR\URRhelp.html:126
 msgid "Settlement:"
-msgstr ""
+msgstr "定居："
 
 #: .\URR\templates\URR\URRhelp.html:126
 msgid ""
@@ -13190,12 +13123,12 @@ msgid ""
 "before and after buying are separate batches. Pass when finished, or bid for "
 "primogeniture."
 msgstr ""
+"在版图上选择土地。将购买和任何出售加入队列，查看交易后的现金和领导权变更，然"
+"后完成交易。购买前后的出售是分开的批次。完成后选择跳过，或竞标长子继承权。"
 
 #: .\URR\templates\URR\URRhelp.html:127
-#, fuzzy
-#| msgid "Developer"
 msgid "Development:"
-msgstr "开发者"
+msgstr "开发："
 
 #: .\URR\templates\URR\URRhelp.html:127
 msgid ""
@@ -13208,12 +13141,16 @@ msgid ""
 "needs land sales, select the highlighted sites and review the final cash and "
 "any leadership changes before confirming."
 msgstr ""
+"在定居阶段或国家之间，巴拉赫舒姆的所有者可以勾选“跳过巴拉赫舒姆提示直到下一轮"
+"（Skip Barahshum prompts until next round）”，然后使用“跳过并结束回合（Pass "
+"& end turn）”跳过剩余提示。国家在购买装备前先挖掘水渠。选择一支未使用的工程"
+"队，在地图上描绘相邻区域。然后雇佣工程队，或为水泵或水库选择位置。另一位土地"
+"所有者可能需要接受你的提议。私人现金和国家金库相互独立。若所需工程队需要出售"
+"土地，请选择高亮的地点，并在确认前查看最终现金和任何领导权变更。"
 
 #: .\URR\templates\URR\URRhelp.html:128
-#, fuzzy
-#| msgid "Rain Ceremony"
 msgid "Rainy season:"
-msgstr "祈雨仪式"
+msgstr "雨季："
 
 #: .\URR\templates\URR\URRhelp.html:128
 msgid ""
@@ -13221,6 +13158,8 @@ msgid ""
 "payouts before distributing it, or store it in the state treasury and remove "
 "a waterwork when required. Empty harvests resolve automatically."
 msgstr ""
+"选择高亮的目的地来引水。收获时，先查看支出再分发，或在需要时将其存入国家金库"
+"并移除一个水利设施。空收获会自动结算。"
 
 #: .\URR\templates\URR\URRhelp.html:130
 msgid ""
@@ -13229,12 +13168,17 @@ msgid ""
 "its status into view; Back to board returns to the map. Use the zoom "
 "controls to enlarge the map, and select the percentage to fit it again."
 msgstr ""
+"在小屏幕上，“显示行动（Show actions）”会打开屏幕底部的抽屉；描绘渠道时它会关"
+"闭。选择玩家或国家会将其状态带入视野；“返回版图（Back to board）”回到地图。使"
+"用缩放控件放大地图，选择百分比可重新适应屏幕。"
 
 #: .\URR\templates\URR\URRhelp.html:131
 msgid ""
 "For keyboard play, Tab focuses the board. Arrow keys move between adjacent "
 "hexes; Enter or Space selects a hex. Tab moves on to the other controls."
 msgstr ""
+"键盘操作时，按 Tab 聚焦版图。方向键在相邻六边形之间移动；回车或空格选择六边"
+"形。再按 Tab 移动到其他控件。"
 
 #: .\URR\templates\URR\URRhelp.html:132
 msgid ""
@@ -13254,6 +13198,17 @@ msgid ""
 "Playback does not change the game. Use the shared Rewind control for a "
 "previously saved turn."
 msgstr ""
+"你的行动会保存在本地草稿中，直到点击“结束回合”。你在继续施工期间，其他玩家土"
+"地上的水利设施仍只是协议请求。“结束回合”会把请求发送给土地所有者。最后一项协"
+"议被接受后，开发即完成。拒绝会重新打开你的施工选项，并在该国家本回合的开发中"
+"封锁被拒绝的地点。“接受并结束回合（Accept & End Turn）”和“拒绝并结束回合"
+"（Decline & End Turn）”会立即保存协议回应。“撤销”会回退你上一步草稿操作；“重"
+"置回合（Reset Turn）”会恢复当前决策会话的起点。“结束回合”保存草稿并将控制权交"
+"给下一位。这些控件适用于拍卖、协议、开发和引水。收获期间，“分发并结束回合"
+"（Distribute & end turn）”或“储存并结束回合（Store & end turn）”会立即保存选"
+"择。在“结束回合”前刷新或离开会丢弃草稿。已完成引水的历史提供“动画”和“逐步查"
+"看”，地图上有“开始、上一步、暂停或播放、下一步、结束、关闭”控件。回放不会改变"
+"游戏。若要回到先前保存的回合，请使用共用的“回退”控件。"
 
 #: .\URR\templates\URR\URRhelp.html:133
 msgid ""
@@ -13263,6 +13218,10 @@ msgid ""
 "nation during development. Choose a construction or exchange action to "
 "highlight its available sites."
 msgstr ""
+"在列表中选择目的地也会在地图上选中它。引水期间，所选六边形旁的“确认”会将该分"
+"配加入草稿；“取消”会清除选择。开发期间可展开“挖掘水渠（Dig canals）”、“购买装"
+"备（Buy equipment）”或“购买国家（Buy a nation）”。选择建造或交换行动会高亮其"
+"可用地点。"
 
 #: .\URR\templates\URR\URRhelp.html:134
 msgid ""
@@ -13271,18 +13230,21 @@ msgid ""
 "select a history entry or use the step controls to inspect earlier "
 "positions. Exit Replay returns to the live game."
 msgstr ""
+"历史记录行动、金库变化、国家出现和领导权变更。按 Escape 关闭卡牌预览或历史面"
+"板。在回放中，选择历史条目或使用步进控件查看先前局面。“退出回放”返回实时游"
+"戏。"
 
 #: .\URR\templates\URR\showURRgame.html:79
 msgid "UR: 1830 BC is loading........"
-msgstr ""
+msgstr "UR: 1830 BC 加载中........"
 
 #: .\URR\views.py:169
 msgid "Only another active player can initiate kickout."
-msgstr ""
+msgstr "只有其他活跃玩家才能发起踢出。"
 
 #: .\URR\views.py:171
 msgid "This player is not eligible for kickout."
-msgstr ""
+msgstr "该玩家不符合踢出条件。"
 
 #: .\WEB\templates\WEB\WEBhelp.html:5
 msgid "Web Help"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-12 21:50+0800\n"
+"POT-Creation-Date: 2026-10-16 19:49+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,62 +18,58 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: .\common.py:224
+#: .\HLC\common.py:224
 msgid "Your Practice game has started"
-msgstr ""
+msgstr "Tu juego de práctica ha comenzado."
 
-#: .\templates\HLC\HLCgameSummary.html:13
+#: .\HLC\templates\HLC\HLCgameSummary.html:15
 msgid "Horseless Carriage Game Summary"
 msgstr "Resumen del juego del carruaje sin caballos"
 
-#: .\templates\HLC\HLChelp.html:5
+#: .\HLC\templates\HLC\HLChelp.html:5
 msgid "Horseless Carriage Help"
 msgstr "Ayuda de carruaje sin caballos"
 
-#: .\templates\HLC\HLChelp.html:9 .\templates\HLC\HLCtemplate.html:46
+#: .\HLC\templates\HLC\HLChelp.html:9 .\HLC\templates\HLC\HLCtemplate.html:46
 msgid "Rules"
 msgstr "Reglas"
 
-#: .\templates\HLC\HLChelp.html:12
+#: .\HLC\templates\HLC\HLChelp.html:12
 msgid ""
-"Horseless Carriage rules available <a "
-"href=\"https://boardgamegeek.com/filepage/251309/first-edition-english-"
-"rulebook\" target=\"_blank\">here</a>"
+"Horseless Carriage rules available <a href=\"https://boardgamegeek.com/"
+"filepage/251309/first-edition-english-rulebook\" target=\"_blank\">here</a>"
 msgstr ""
-"Reglas de Horseless Carriage disponibles <a "
-"href=\"https://boardgamegeek.com/filepage/251309/first-edition-english-"
-"rulebook\" target=\"_blank\">aquí</a>"
+"Reglas de Horseless Carriage disponibles <a href=\"https://boardgamegeek.com/"
+"filepage/251309/first-edition-english-rulebook\" target=\"_blank\">aquí</a>"
 
-#: .\templates\HLC\HLChelp.html:19
+#: .\HLC\templates\HLC\HLChelp.html:19
 msgid ""
-"How to play guide example <a "
-"href=\"https://www.youtube.com/watch?v=It25avQY23A\" "
-"target=\"_blank\">here</a>"
+"How to play guide example <a href=\"https://www.youtube.com/watch?"
+"v=It25avQY23A\" target=\"_blank\">here</a>"
 msgstr ""
-"Ejemplo de guía de juego <a "
-"href=\"https://www.youtube.com/watch?v=It25avQY23A\" "
-"target=\"_blank\">aquí</a>"
+"Ejemplo de guía de juego <a href=\"https://www.youtube.com/watch?"
+"v=It25avQY23A\" target=\"_blank\">aquí</a>"
 
-#: .\templates\HLC\HLChelp.html:26
+#: .\HLC\templates\HLC\HLChelp.html:26
 msgid "Playing the Game"
 msgstr "Jugando el juego"
 
-#: .\templates\HLC\HLChelp.html:29
+#: .\HLC\templates\HLC\HLChelp.html:29
 msgid "The active player has a yellow highlight"
 msgstr "El jugador activo aparece resaltado en amarillo"
 
-#: .\templates\HLC\HLChelp.html:31
+#: .\HLC\templates\HLC\HLChelp.html:31
 msgid ""
-"Click on a player's name to view their factory - their name will get a green"
-" border to show you are looking at their factory. You can also click their "
+"Click on a player's name to view their factory - their name will get a green "
+"border to show you are looking at their factory. You can also click their "
 "name again as a shortcut to go back to the Market Board screen"
 msgstr ""
-"Haz clic en el nombre de un jugador para ver su fábrica: el nombre tendrá un"
-" borde verde para indicar que estás viendo su fábrica. También puedes volver"
-" a hacer clic en el nombre como atajo para volver a la pantalla del tablero "
+"Haz clic en el nombre de un jugador para ver su fábrica: el nombre tendrá un "
+"borde verde para indicar que estás viendo su fábrica. También puedes volver "
+"a hacer clic en el nombre como atajo para volver a la pantalla del tablero "
 "de mercado"
 
-#: .\templates\HLC\HLChelp.html:37
+#: .\HLC\templates\HLC\HLChelp.html:37
 msgid ""
 "If the pieces are obscuring the Tech Track, click the “Hide Pieces” button, "
 "next to the Min Specs board"
@@ -81,11 +77,11 @@ msgstr ""
 "Si las piezas ocultan la pista tecnológica, haz clic en el botón “Ocultar "
 "piezas”, junto al tablero de especificaciones mínimas"
 
-#: .\templates\HLC\HLChelp.html:40
+#: .\HLC\templates\HLC\HLChelp.html:40
 msgid "Factory building can be done simultaneously."
 msgstr "La construcción de la fábrica puede realizarse simultáneamente."
 
-#: .\templates\HLC\HLChelp.html:44
+#: .\HLC\templates\HLC\HLChelp.html:44
 msgid ""
 "If you are not first in turn order, you can submit your factory and it will "
 "be verified in turn order."
@@ -93,15 +89,15 @@ msgstr ""
 "Si no eres el primero en el orden de turno, puedes enviar tu fábrica y se "
 "verificará en el orden de turno."
 
-#: .\templates\HLC\HLChelp.html:48
+#: .\HLC\templates\HLC\HLChelp.html:48
 msgid ""
-"In the lobby, you will show up under “current players” until your factory is"
-" verified"
+"In the lobby, you will show up under “current players” until your factory is "
+"verified"
 msgstr ""
 "En la sala de espera aparecerás bajo “jugadores actuales” hasta que se "
 "verifique tu fábrica"
 
-#: .\templates\HLC\HLChelp.html:50
+#: .\HLC\templates\HLC\HLChelp.html:50
 msgid ""
 "In this case the game won't have the green “Your Move” highlight until you "
 "need to make a move again."
@@ -109,7 +105,7 @@ msgstr ""
 "En este caso, la partida no tendrá el resaltado verde “Tu turno” hasta que "
 "tengas que volver a mover."
 
-#: .\templates\HLC\HLChelp.html:52
+#: .\HLC\templates\HLC\HLChelp.html:52
 msgid ""
 "If previous players use up the components, factory building will be re-"
 "enabled and you will need to remove those components."
@@ -117,7 +113,7 @@ msgstr ""
 "Si los jugadores anteriores agotan los componentes, se reactivará la "
 "construcción de la fábrica y tendrás que retirar esos componentes."
 
-#: .\templates\HLC\HLChelp.html:57
+#: .\HLC\templates\HLC\HLChelp.html:57
 msgid ""
 "To prevent losing your factory mid-build, the game won't update live during "
 "this phase. Check the lobby or refresh your game"
@@ -126,7 +122,7 @@ msgstr ""
 "actualizará en vivo durante esta fase. Consulta la sala de espera o "
 "actualiza tu partida"
 
-#: .\templates\HLC\HLChelp.html:62
+#: .\HLC\templates\HLC\HLChelp.html:62
 msgid ""
 "you will also be sent a notification once you need to move, if you have "
 "enabled this in your profile."
@@ -134,51 +130,51 @@ msgstr ""
 "También recibirás una notificación cuando tengas que mover, si lo has "
 "activado en tu perfil."
 
-#: .\templates\HLC\HLChelp.html:65
+#: .\HLC\templates\HLC\HLChelp.html:65
 msgid "During factory building, a tech level summary is displayed."
 msgstr ""
 "Durante la construcción de la fábrica se muestra un resumen de niveles "
 "tecnológicos."
 
-#: .\templates\HLC\HLChelp.html:67
+#: .\HLC\templates\HLC\HLChelp.html:67
 msgid "Your techs have a bar with a green outline"
 msgstr "Tus tecnologías tienen una barra con contorno verde"
 
-#: .\templates\HLC\HLChelp.html:69
+#: .\HLC\templates\HLC\HLChelp.html:69
 msgid ""
-"Techs you have access to this turn (but have not researched yourself) have a"
-" bar with a yellow outline"
+"Techs you have access to this turn (but have not researched yourself) have a "
+"bar with a yellow outline"
 msgstr ""
 "Las tecnologías a las que tienes acceso este turno (pero que no has "
 "investigado tú) tienen una barra con contorno amarillo"
 
-#: .\templates\HLC\HLChelp.html:75
+#: .\HLC\templates\HLC\HLChelp.html:75
 msgid "How can I see which Market Windows have been placed?"
 msgstr "¿Cómo puedo ver qué Market Windows se han colocado?"
 
-#: .\templates\HLC\HLChelp.html:78
+#: .\HLC\templates\HLC\HLChelp.html:78
 msgid ""
 "Any dealership with sales potential will be shown under the player names. "
 "Clicking on a dealership with a placed Market Window will show you the "
 "remaining squares it can sell to. If the Market Window has not been placed, "
 "then all eligible squares will be highlighted."
 msgstr ""
-"Cualquier concesionario con potencial de ventas se mostrará bajo los nombres"
-" de los jugadores. Al hacer clic en un concesionario con una ventana de "
+"Cualquier concesionario con potencial de ventas se mostrará bajo los nombres "
+"de los jugadores. Al hacer clic en un concesionario con una ventana de "
 "mercado colocada, verás las casillas restantes en las que puede vender. Si "
 "la ventana de mercado no se ha colocado, se resaltarán todas las casillas "
 "elegibles."
 
-#: .\templates\HLC\HLChelp.html:84
+#: .\HLC\templates\HLC\HLChelp.html:84
 msgid ""
-"The Market Windows also have a name on them, in the top left, althought this"
-" can be obscured if other Market Windows are placed on top."
+"The Market Windows also have a name on them, in the top left, althought this "
+"can be obscured if other Market Windows are placed on top."
 msgstr ""
 "Las ventanas de mercado también llevan un nombre en la esquina superior "
 "izquierda, aunque puede quedar oculto si se colocan otras ventanas de "
 "mercado encima."
 
-#: .\templates\HLC\HLChelp.html:92
+#: .\HLC\templates\HLC\HLChelp.html:92
 msgid ""
 "I am second in Engineering Focus. Why can't I build techs from people with "
 "lower Engineering Focus?"
@@ -186,7 +182,7 @@ msgstr ""
 "Soy segundo en el enfoque de ingeniería. ¿Por qué no puedo construir "
 "tecnologías de personas con un enfoque de ingeniería inferior?"
 
-#: .\templates\HLC\HLChelp.html:96
+#: .\HLC\templates\HLC\HLChelp.html:96
 msgid ""
 "From the rulebook: \"The player with the second highest engineering focus "
 "has access to every technology researched by at least two players; the "
@@ -195,52 +191,50 @@ msgid ""
 msgstr ""
 "Del reglamento: “El jugador con el segundo enfoque de ingeniería más alto "
 "tiene acceso a todas las tecnologías investigadas por al menos dos "
-"jugadores; el tercero, a cualquiera investigada por otros tres; y el cuarto,"
-" a cualquier investigación realizada ya por 4 jugadores.”"
+"jugadores; el tercero, a cualquiera investigada por otros tres; y el cuarto, "
+"a cualquier investigación realizada ya por 4 jugadores.”"
 
-#: .\templates\HLC\HLChelp.html:102
+#: .\HLC\templates\HLC\HLChelp.html:102
 msgid ""
 "So in fact, you can build techs you haven't researched, but it must have "
-"been researched by at least 2 players. If there is a tech that has only been"
-" researched by one person, then you will not have access to it, even if they"
-" are lower in engineering focus."
+"been researched by at least 2 players. If there is a tech that has only been "
+"researched by one person, then you will not have access to it, even if they "
+"are lower in engineering focus."
 msgstr ""
 "De hecho, puedes construir tecnologías que no hayas investigado, pero deben "
 "haber sido investigadas por al menos 2 jugadores. Si una tecnología solo ha "
 "sido investigada por una persona, no tendrás acceso a ella, aunque esa "
 "persona esté más abajo en el enfoque de ingeniería."
 
-#: .\templates\HLC\HLChelp.html:112
+#: .\HLC\templates\HLC\HLChelp.html:112
 msgid "Why do I have to have a set focus turn if there is only one slot left?"
 msgstr ""
 "¿Por qué tengo que tener un turno de enfoque fijo si solo queda una ranura?"
 
-#: .\templates\HLC\HLChelp.html:115
+#: .\HLC\templates\HLC\HLChelp.html:115
 msgid ""
-"You are probably missing a crucial point; you are now in the situation where"
-" if you were to go over 10 Gantt and there is only 1 clock left, then you "
-"can decide if the game ends or goes another round. Pretty important really! "
-"So I decided to leave the game as per the actual rules, rather than making a"
-" skip."
+"You are probably missing a crucial point; you are now in the situation where "
+"if you were to go over 10 Gantt and there is only 1 clock left, then you can "
+"decide if the game ends or goes another round. Pretty important really! So I "
+"decided to leave the game as per the actual rules, rather than making a skip."
 msgstr ""
 "Probablemente se te escape un punto crucial: ahora estás en la situación en "
 "la que, si superaras 10 de Gantt y solo quedara 1 reloj, podrías decidir si "
 "la partida termina o continúa otra ronda. ¡Bastante importante! Así que "
-"decidí dejar la partida según las reglas reales, en lugar de añadir un "
-"salto."
+"decidí dejar la partida según las reglas reales, en lugar de añadir un salto."
 
-#: .\templates\HLC\HLChelp.html:120
+#: .\HLC\templates\HLC\HLChelp.html:120
 msgid ""
-"Additionally, the factory building phase happens before Gantt are increased,"
-" so it's basically impossible to know if someone below 10 Gantt will end up "
+"Additionally, the factory building phase happens before Gantt are increased, "
+"so it's basically impossible to know if someone below 10 Gantt will end up "
 "above or below 10 after the end of the factory building phase."
 msgstr ""
-"Además, la fase de construcción de fábricas ocurre antes de que aumenten los"
-" Gantt, así que es prácticamente imposible saber si alguien por debajo de 10"
-" de Gantt acabará por encima o por debajo de 10 tras el final de la fase de "
+"Además, la fase de construcción de fábricas ocurre antes de que aumenten los "
+"Gantt, así que es prácticamente imposible saber si alguien por debajo de 10 "
+"de Gantt acabará por encima o por debajo de 10 tras el final de la fase de "
 "construcción."
 
-#: .\templates\HLC\HLChelp.html:125
+#: .\HLC\templates\HLC\HLChelp.html:125
 msgid ""
 "Similarly, if someone is on 10 Gantt or higher, they might wish to spend "
 "them all right now in order to reset their Gantt, for example, if they only "
@@ -248,165 +242,173 @@ msgid ""
 "the punchclock number in a later turn."
 msgstr ""
 "Del mismo modo, quien tenga 10 de Gantt o más podría querer gastarlos todos "
-"ahora para reiniciar su Gantt, por ejemplo, si solo tiene 5 departamentos de"
-" planificación y quiere tener la oportunidad de reducir el número del punch "
+"ahora para reiniciar su Gantt, por ejemplo, si solo tiene 5 departamentos de "
+"planificación y quiere tener la oportunidad de reducir el número del punch "
 "clock en un turno posterior."
 
-#: .\templates\HLC\HLChelp.html:132
+#: .\HLC\templates\HLC\HLChelp.html:132
 msgid "When can I resign?"
-msgstr ""
+msgstr "¿Cuándo puedo renunciar?"
 
-#: .\templates\HLC\HLChelp.html:134
+#: .\HLC\templates\HLC\HLChelp.html:134
 msgid "You can resign during the Research phase."
-msgstr ""
+msgstr "Puedes renunciar durante la fase de Investigación."
 
-#: .\templates\HLC\HLChelp.html:138
+#: .\HLC\templates\HLC\HLChelp.html:138
 msgid "Further Help"
-msgstr ""
+msgstr "Más ayuda"
 
-#: .\templates\HLC\HLChelp.html:140
+#: .\HLC\templates\HLC\HLChelp.html:140
 msgid "For any questions / comments / suggestions, please contact"
-msgstr ""
+msgstr "Para cualquier duda/comentario/sugerencia, por favor contactar"
 
-#: .\templates\HLC\HLCtemplate.html:30
+#: .\HLC\templates\HLC\HLCtemplate.html:30
 msgid "Home"
 msgstr "Inicio"
 
-#: .\templates\HLC\HLCtemplate.html:34
+#: .\HLC\templates\HLC\HLCtemplate.html:34
 msgid "Chat"
-msgstr ""
+msgstr "Charlar"
 
-#: .\templates\HLC\HLCtemplate.html:37
+#: .\HLC\templates\HLC\HLCtemplate.html:37
 msgid "Bug"
-msgstr ""
+msgstr "Error"
 
-#: .\templates\HLC\HLCtemplate.html:50
+#: .\HLC\templates\HLC\HLCtemplate.html:50
 msgid "Notes"
-msgstr ""
+msgstr "Notas"
 
-#: .\templates\HLC\HLCtemplate.html:54
+#: .\HLC\templates\HLC\HLCtemplate.html:54
 msgid "Reserve"
-msgstr ""
+msgstr "Reservar"
 
-#: .\templates\HLC\HLCtemplate.html:58
+#: .\HLC\templates\HLC\HLCtemplate.html:58
 msgid "History"
-msgstr ""
+msgstr "Historia"
 
-#: .\templates\HLC\HLCtemplate.html:63
+#: .\HLC\templates\HLC\HLCtemplate.html:63
 msgid "Rewind"
-msgstr ""
+msgstr "Rebobinar"
 
-#: .\templates\HLC\HLCtemplate.html:67
+#: .\HLC\templates\HLC\HLCtemplate.html:67
 msgid "Replay"
-msgstr ""
+msgstr "Repetición"
 
-#: .\templates\HLC\HLCtemplate.html:72
+#: .\HLC\templates\HLC\HLCtemplate.html:72
 msgid "Connecting to server"
 msgstr "Conectando al servidor"
 
-#: .\templates\HLC\HLCtemplate.html:75
+#: .\HLC\templates\HLC\HLCtemplate.html:75
 msgid "Logged in as"
 msgstr "Iniciado sesión como"
 
-#: .\templates\HLC\HLCtemplate.html:78
+#: .\HLC\templates\HLC\HLCtemplate.html:78
 msgid "Time to next kickout"
 msgstr "Tiempo hasta la próxima expulsión"
 
-#: .\templates\HLC\HLCtemplate.html:90
+#: .\HLC\templates\HLC\HLCtemplate.html:90
 msgid ""
-"You can give permission for the host to rewind the game back to the start of"
-" the restructuring phase. All players must give permission before the host "
-"is able to rewind the game."
-msgstr ""
+"You can give permission for the host to rewind the game back to the start of "
+"the restructuring phase. All players must give permission before the host is "
+"able to rewind the game."
+msgstr "Puedes dar permiso al anfitrión para rebobinar la partida hasta el "
+"inicio de la fase de reestructuración. Todos los jugadores deben dar permiso "
+"antes de que el anfitrión pueda rebobinar la partida."
 
-#: .\templates\HLC\HLCtemplate.html:97
+#: .\HLC\templates\HLC\HLCtemplate.html:97
 msgid ""
 "Tournament games are a bit more competitive, so rewinds should not be "
 "expected"
-msgstr ""
+msgstr "Los juegos de torneo son un poco más competitivos, así que no "
+"deberías esperar rebobinados"
 
-#: .\templates\HLC\HLCtemplate.html:109
+#: .\HLC\templates\HLC\HLCtemplate.html:109
 msgid "Permission for single rewind"
 msgstr "Permiso para rebobinado simple"
 
-#: .\templates\HLC\HLCtemplate.html:117
+#: .\HLC\templates\HLC\HLCtemplate.html:117
 msgid "Permanent Permission"
-msgstr ""
+msgstr "Permiso permanente"
 
-#: .\templates\HLC\HLCtemplate.html:123
+#: .\HLC\templates\HLC\HLCtemplate.html:123
 msgid "Give Permission"
-msgstr ""
+msgstr "Dar permiso"
 
-#: .\templates\HLC\HLCtemplate.html:126 .\templates\HLC\HLCtemplate.html:162
+#: .\HLC\templates\HLC\HLCtemplate.html:126
+#: .\HLC\templates\HLC\HLCtemplate.html:162
 msgid ""
-"Rewinding from the start of the sales phase will go to the very start of the"
-" factory building phase"
+"Rewinding from the start of the sales phase will go to the very start of the "
+"factory building phase"
 msgstr ""
 "Rebobinar desde el inicio de la fase de ventas irá al inicio de la fase de "
 "construcción de fábricas"
 
-#: .\templates\HLC\HLCtemplate.html:136
+#: .\HLC\templates\HLC\HLCtemplate.html:136
 msgid ""
-"As the game host, you must wait for all players to give permission. They can"
-" allow you to rewind once, or as much as you like. Try asking in chat for "
+"As the game host, you must wait for all players to give permission. They can "
+"allow you to rewind once, or as much as you like. Try asking in chat for "
 "permission if you wish to rewind. Current Permissions:"
-msgstr ""
+msgstr "Como anfitrión de la partida, debes esperar a que todos los jugadores "
+"den permiso. Pueden permitirte rebobinar una vez, o tantas veces como "
+"quieras. Intenta pedir permiso en el chat si deseas rebobinar. Permisos "
+"actuales:"
 
-#: .\templates\HLC\HLCtemplate.html:146
+#: .\HLC\templates\HLC\HLCtemplate.html:146
 msgid "Reload the whole page to refresh permissions"
 msgstr "Vuelva a cargar toda la página para actualizar los permisos"
 
-#: .\templates\HLC\HLCtemplate.html:150
+#: .\HLC\templates\HLC\HLCtemplate.html:150
 msgid ""
 "Tournament games are a bit more competitive, so you should not feel "
 "obligated to accept a rewind request"
-msgstr ""
+msgstr "Los juegos de torneo son un poco más competitivos, así que no "
+"deberías sentirte obligado a aceptar una solicitud de rebobinado"
 
-#: .\templates\HLC\HLCtemplate.html:156
+#: .\HLC\templates\HLC\HLCtemplate.html:156
 msgid "REWIND"
 msgstr "REBOBINAR"
 
-#: .\templates\HLC\HLCtemplate.html:159
+#: .\HLC\templates\HLC\HLCtemplate.html:159
 msgid "Please wait for all players to give permission"
 msgstr "Espera a que todos los jugadores den permiso"
 
-#: .\templates\HLC\HLCtemplate.html:171
+#: .\HLC\templates\HLC\HLCtemplate.html:171
 msgid "Game"
 msgstr "Juego"
 
-#: .\templates\HLC\HLCtemplate.html:174
+#: .\HLC\templates\HLC\HLCtemplate.html:174
 msgid "Turn"
 msgstr "Giro"
 
-#: .\templates\HLC\HLCtemplate.html:175
+#: .\HLC\templates\HLC\HLCtemplate.html:175
 msgid "Phase"
 msgstr "Fase"
 
-#: .\templates\HLC\HLCtemplate.html:176
+#: .\HLC\templates\HLC\HLCtemplate.html:176
 msgid "Current player"
 msgstr "Jugador actual"
 
-#: .\templates\HLC\HLCtemplate.html:184
+#: .\HLC\templates\HLC\HLCtemplate.html:184
 msgid "Send a message"
 msgstr "Enviar un mensaje"
 
-#: .\templates\HLC\HLCtemplate.html:189
+#: .\HLC\templates\HLC\HLCtemplate.html:189
 msgid "Send"
 msgstr "Enviar"
 
-#: .\templates\HLC\HLCtemplate.html:196
+#: .\HLC\templates\HLC\HLCtemplate.html:196
 msgid "Oldest First"
 msgstr "El más antiguo primero"
 
-#: .\templates\HLC\HLCtemplate.html:201
+#: .\HLC\templates\HLC\HLCtemplate.html:201
 msgid "Newest First"
 msgstr "Lo más nuevo primero"
 
-#: .\templates\HLC\HLCtemplate.html:210
+#: .\HLC\templates\HLC\HLCtemplate.html:210
 msgid "Bug Report"
 msgstr "Informe de error"
 
-#: .\templates\HLC\HLCtemplate.html:213
+#: .\HLC\templates\HLC\HLCtemplate.html:213
 #, python-format
 msgid ""
 "Please submit a bug report if you encounter any issues, giving as much "
@@ -414,40 +416,40 @@ msgid ""
 "report. <br> You can also report it on the OBG discord. Click <a "
 "href=\"%(url)s\" class=\"linkOther\" target=\"_blank\">here</a> to join."
 msgstr ""
-"Envía un informe de error si encuentras algún problema, con el mayor detalle"
-" posible. <br /> Los datos de la partida se enviarán junto con tu informe. "
+"Envía un informe de error si encuentras algún problema, con el mayor detalle "
+"posible. <br /> Los datos de la partida se enviarán junto con tu informe. "
 "<br> También puedes informarlo en el Discord de OBG. Haz clic <a "
 "href=\"%(url)s\" class=\"linkOther\" target=\"_blank\">aquí</a> para unirte."
 
-#: .\templates\HLC\HLCtemplate.html:226
+#: .\HLC\templates\HLC\HLCtemplate.html:226
 msgid "Submit"
 msgstr "Enviar"
 
-#: .\templates\HLC\HLCtemplate.html:228
+#: .\HLC\templates\HLC\HLCtemplate.html:228
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: .\templates\HLC\HLCtemplate.html:232
+#: .\HLC\templates\HLC\HLCtemplate.html:232
 msgid "Personal game notes"
 msgstr "notas de juego personales"
 
-#: .\templates\HLC\HLCtemplate.html:233
+#: .\HLC\templates\HLC\HLCtemplate.html:233
 msgid "Only you can see these notes"
 msgstr "Solo tu puedes ver estas notas"
 
-#: .\templates\HLC\HLCtemplate.html:238
+#: .\HLC\templates\HLC\HLCtemplate.html:238
 msgid "Save"
 msgstr "Guardar"
 
-#: .\templates\HLC\HLCtemplate.html:239
+#: .\HLC\templates\HLC\HLCtemplate.html:239
 msgid "Clear"
 msgstr "Borrar"
 
-#: .\templates\HLC\HLCtemplate.html:240
+#: .\HLC\templates\HLC\HLCtemplate.html:240
 msgid "Close"
 msgstr "Cerrar"
 
-#: .\templates\HLC\HLCtemplate.html:282
+#: .\HLC\templates\HLC\HLCtemplate.html:282
 msgid ""
 "Horseless Carriage is a board game by Jeroen Doumen and Joris Wiersinga, "
 "published by <a href='https://www.splottershop.com/'>Splotter Spellen</a>."
@@ -456,7 +458,7 @@ msgstr ""
 "publicado por <a href='https://www.splottershop.com/'>Splotter Spellen</a>."
 
 #. Translators: This is an email
-#: .\templates\HLC\yourTurnEmailFactory.html:5
+#: .\HLC\templates\HLC\yourTurnEmailFactory.html:5
 #, python-format
 msgid ""
 "\n"
@@ -489,11 +491,11 @@ msgstr ""
 "Las preferencias de notificación se pueden cambiar en tu perfil\n"
 "\n"
 
-#: .\views.py:45 .\views.py:85
+#: .\HLC\views.py:45 .\HLC\views.py:85
 msgid "Game does not exist"
 msgstr "El juego no existe"
 
-#: .\views.py:540
+#: .\HLC\views.py:540
 msgid ""
 "<b>No rewind data. Rewind limit reached. Please play on to generate more "
 "rewind data </b>"
@@ -501,6 +503,6 @@ msgstr ""
 "<b>No hay datos de rebobinado. Se alcanzó el límite de rebobinado. Sigue "
 "jugando para generar más datos de rebobinado </b>"
 
-#: .\views.py:545
+#: .\HLC\views.py:545
 msgid "<b>Permissions missing. Please reload the page and check again</b>"
 msgstr "<b>Faltan permisos. "

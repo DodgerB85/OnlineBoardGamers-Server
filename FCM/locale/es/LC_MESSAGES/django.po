@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-10 15:22+0800\n"
+"POT-Creation-Date: 2026-10-16 19:49+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,757 +18,850 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: .\models.py:54
-msgid "Open"
-msgstr "Abierto"
+#: .\FCM\common.py:230
+msgid "Please Select an Expert Option"
+msgstr "Seleccione una opción experta"
 
-#: .\models.py:55
-msgid "In Progress"
-msgstr "En curso"
+#: .\FCM\common.py:248
+msgid "Error: You cannot add yourself"
+msgstr "Error: no puede agregarle"
 
-#: .\models.py:56
-msgid "Finished"
-msgstr "Terminado"
+#: .\FCM\common.py:390
+msgid "Your Practice game has been started"
+msgstr "Tu juego de práctica ha sido empezado"
 
-#: .\models.py:68
-msgid "Rounds"
-msgstr "Rondas"
+#: .\FCM\common.py:395
+msgid "Your AI game has been started"
+msgstr "Tu juego de IA ha sido iniciado"
 
-#: .\models.py:69
-msgid "Knockout"
-msgstr "Knockear"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:12
+msgid "China Expansion Help"
+msgstr "Ayuda de la expansión de China"
 
-#: .\models.py:70
-msgid "Two Lives"
-msgstr "Dos vidas"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:13
+#: .\FCM\templates\FCM\coffeeHelp.html:13
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:13
+msgid "FCM Help"
+msgstr "Ayuda de FCM"
 
-#: .\models.py:187
-msgid "Points"
-msgstr "Agujas"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:19
+msgid ""
+"These modules are from the Chinese kickstarter (Modian) release from "
+"publisher Yikeguang (一刻馆). Splotter was unaware that these existed before "
+"I contacted them! Therefore you could consider these modules as \"semi-"
+"official\" but unsanctioned by Splotter. <br /> Games with these modules "
+"will therefore be excluded from the stats (except Urban Planning / Urban "
+"Planning Plus). <br /> The rules also don't cover all possiblities. "
+"Therefore, I have made a few judgment calls to tighten up the rules a bit. "
+"In addition, as this content was not designed by Splotter, I'm not sure the "
+"playtesting/balancing was quite as thorough!"
+msgstr "Estos módulos provienen de la edición china del kickstarter (Modian) "
+"de la editorial Yikeguang (一刻馆). ¡Splotter no sabía que existían antes de "
+"que me pusiera en contacto con ellos! Por lo tanto, puedes considerar estos "
+"módulos como «semioficiales», pero no sancionados por Splotter. <br /> Así "
+"pues, las partidas con estos módulos quedarán excluidas de las estadísticas "
+"(excepto Planificación Urbana / Planificación Urbana Plus). <br /> Además, "
+"las reglas tampoco cubren todas las posibilidades. Por ello he tomado "
+"algunas decisiones para precisar un poco las reglas. Y, como este contenido "
+"no fue diseñado por Splotter, ¡no estoy seguro de que las pruebas y el "
+"equilibrio fueran igual de exhaustivos!"
 
-#: .\models.py:209
-msgid "Round"
-msgstr "ronda"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:31
+msgid "Urban Planning"
+msgstr "Planificación Urbana"
 
-#: .\models.py:213
-msgid "Game"
-msgstr "Juego"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:32
+#: .\FCM\templates\FCM\FCMchinaHelp.html:57
+#: .\FCM\templates\FCM\FCMchinaHelp.html:84
+#: .\FCM\templates\FCM\FCMchinaHelp.html:129
+#: .\FCM\templates\FCM\FCMchinaHelp.html:171
+#: .\FCM\templates\FCM\FCMchinaHelp.html:214
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:39
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:100
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:159
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:184
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:232
+msgid "Overview"
+msgstr "Resumen"
 
-#: .\models.py:214
-msgid "Winner"
-msgstr "Ganador"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:34
+msgid ""
+"Random maps can have a huge amount of variance, producing isolated islands "
+"as well as large residential areas. This module allows players to influence "
+"map construction and thus the characteristics of the map to be used."
+msgstr "Los mapas aleatorios pueden tener una gran variabilidad, ya que "
+"producen islas aisladas y también grandes zonas residenciales. Este módulo "
+"permite a los jugadores influir en la construcción del mapa y, por tanto, en "
+"las características del mapa que se usará."
 
-#: .\models.py:239
-msgid "BYES:"
-msgstr "Adiós:"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:42
+msgid ""
+"In turn order, each player may rotate the next tile to be placed, according "
+"to the sequence below. Note you can only rotate the next tile - you cannot "
+"select or change which tile that is."
+msgstr "Por orden de turno, cada jugador puede girar la siguiente baldosa que "
+"se vaya a colocar, siguiendo la secuencia que aparece a continuación. Ten en "
+"cuenta que solo puedes girar la siguiente baldosa: no puedes seleccionar ni "
+"cambiar qué baldosa es."
 
-#: .\models.py:1106
-msgid "No Permission"
-msgstr "Sin permiso"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:47
+msgid ""
+"After all tiles have been placed, turn order will reset to the same order as "
+"when the game started."
+msgstr "Una vez colocadas todas las baldosas, el orden de turno se "
+"restablecerá al mismo orden que al comienzo de la partida."
 
-#: .\models.py:1108
-msgid "Single Permission"
-msgstr "Permiso único"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:56
+msgid "Urban Planning Plus"
+msgstr "Planificación Urbana Plus"
 
-#: .\models.py:1110 .\templates\FCM\GameTemplate.html:194
-msgid "Permanent Permission"
-msgstr "Permiso permanente"
+#: .\FCM\templates\FCM\FCMchinaHelp.html:59
+msgid ""
+"People have asked me in the past about some kind of map tile drafting "
+"option. With the addition of the Urban Planning module, which only allows "
+"players to rotate the next tile, I decided to add this option as well."
+msgstr "En el pasado me han preguntado por algún tipo de opción para elegir "
+"baldosas del mapa. Con la incorporación del módulo Planificación Urbana, que "
+"solo permite girar la siguiente baldosa, decidí añadir también esta opción."
 
-#: .\templates\FCM\FCMhelp.html:21
+#: .\FCM\templates\FCM\FCMchinaHelp.html:67
+msgid ""
+"Same as Urban Planning, except you may now also choose which tile to place, "
+"as well as the rotation."
+msgstr "Igual que Planificación Urbana, salvo que ahora también puedes elegir "
+"qué baldosa colocar, además de la rotación."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:72
+msgid ""
+"For 6p games then the expansion tiles will be added regardless of whether "
+"New Districts has been selected or not."
+msgstr "En partidas de 6 jugadores, las baldosas de expansión se añadirán "
+"tanto si se ha seleccionado Nuevos distritos como si no."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:77
+msgid "Jazz Musicians"
+msgstr "Músicos de jazz"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:86
+msgid ""
+"Jazz originated in the United States in the late 19th and early 20th "
+"centuries. This moving music caused people to linger longer. Whenever you "
+"have such music in your restaurants, it will cause people to give more "
+"generous tips."
+msgstr "El jazz surgió en Estados Unidos a finales del siglo XIX y principios "
+"del XX. Esta música en movimiento hacía que la gente se quedara más tiempo. "
+"Cuando tengas este tipo de música en tus restaurantes, hará que la gente dé "
+"propinas más generosas."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:94
+msgid ""
+"A Jazz Musician can be trained from a Waitress, and requires a salary. There "
+"are 6 Jazz Musicians in the game."
+msgstr "Un Músico de jazz puede formarse a partir de una Camarera y requiere "
+"un salario. Hay 6 Músicos de jazz en la partida."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:99
+msgid ""
+"Each Jazz Musician will generate $15 in tips during the Dinnertime phase."
+msgstr "Cada Músico de jazz generará $15 en propinas durante la fase de la "
+"cena."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:104
+msgid ""
+"Jazz Musicians act as a reverse tie-breaker; ie the person with FEWEST "
+"musicians will win ties - so if you have any Jazz Musicians you will lose "
+"ties to anyone with fewer Jazz Musicians."
+msgstr "Los Músicos de jazz actúan como desempate inverso, es decir, quien "
+"MENOS músicos tenga ganará los empates. Así que, si tienes algún Músico de "
+"jazz, perderás los empates contra cualquiera que tenga menos Músicos de "
+"jazz."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:117
+msgid ""
+"As always, employees need to actually be in your structure to count towards "
+"tie breakers."
+msgstr "Como siempre, los empleados deben estar realmente en tu estructura "
+"para contar en los desempates."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:122
+msgid "Delivery Drivers"
+msgstr "Conductores de entrega"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:131
+msgid ""
+"Takeout! Takeout! Finally we can eat at home. Of course, the emergence of "
+"takeout has made the price war more intense."
+msgstr "¡Para llevar! ¡Para llevar! Por fin podemos comer en casa. Por "
+"supuesto, la aparición de la comida para llevar ha hecho que la guerra de "
+"precios sea más intensa."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:139
+msgid ""
+"The Delivery Driver is a base level employee that can be directly hired, and "
+"requires a salary."
+msgstr "El Conductor de entrega es un empleado de nivel básico que se puede "
+"contratar directamente y requiere un salario."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:144
+msgid ""
+"Note that it is not a 1x employee, but you may only ever have one Delivery "
+"Driver in your organisation."
+msgstr "Ten en cuenta que no es un empleado 1x, pero solo puedes tener un "
+"Conductor de entrega en tu organización."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:149
+msgid ""
+"If a residence has 2 or more demand tokens on it, then any restaurant with a "
+"working Delivery Driver will reduce the distance to 0."
+msgstr "Si una vivienda tiene 2 o más fichas de demanda, cualquier "
+"restaurante con un Conductor de entrega en activo reducirá la distancia a 0."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:154
+msgid ""
+"If you have a Milestone that reduces distance, and it is more favourable to "
+"ignore the Delivery Driver, then the Delivery Driver won't be used. EG if "
+"you are on the same tile as a house, and have the Ketchup Milestone, your "
+"distance will still count as -1; you won't be penalised by having the "
+"distance increased to 0 if using a Delivery Driver. So any net positive "
+"distance will be reduced to 0."
+msgstr "Si tienes un Hito que reduce la distancia y es más favorable ignorar "
+"al Conductor de entrega, el Conductor de entrega no se usará. Por ejemplo, "
+"si estás en la misma baldosa que una casa y tienes el Hito del ketchup, tu "
+"distancia seguirá contando como -1; no te penalizará que la distancia "
+"aumente a 0 por usar un Conductor de entrega. Así que cualquier distancia "
+"neta positiva se reducirá a 0."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:159
+msgid "Dumplings"
+msgstr "Empanadillas"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:173
+msgid "Dumplings are one of China's classic foods."
+msgstr "Las empanadillas son una de las comidas clásicas de China."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:181
+msgid ""
+"Marketing Dumplings: You cannot directly market dumplings. Instead, they are "
+"so tasty that ANY marketed item will also add demand for dumplings. "
+"Immediately after a marketing campaign has run, it will run again except the "
+"second time it will add Dumplings demand instead of its original item."
+msgstr "Marketing de empanadillas: no puedes hacer marketing de empanadillas "
+"directamente. En cambio, son tan sabrosas que CUALQUIER producto "
+"promocionado también añadirá demanda de empanadillas. Justo después de que "
+"se ejecute una campaña de marketing, se ejecutará de nuevo, salvo que la "
+"segunda vez añadirá demanda de Empanadillas en lugar de su producto "
+"original."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:186
+msgid ""
+"The dumpling marketing happens immediately. So if billboards are marketing "
+"item A and item B to the same house, the house will add demand for item A, "
+"then dumpling due billboard A, and then item B. This would normally cause "
+"the maximum demand to be reached, so the dumpling from advertising item B "
+"would only be added if the house has a garden."
+msgstr "El marketing de empanadillas ocurre inmediatamente. Así que, si las "
+"vallas publicitarias están promocionando el producto A y el producto B a la "
+"misma casa, la casa añadirá demanda del producto A, luego de empanadillas "
+"debido a la valla A, y después del producto B. Normalmente esto haría que se "
+"alcanzara la demanda máxima, así que las empanadillas por anunciar el "
+"producto B solo se añadirían si la casa tiene jardín."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:191
+msgid ""
+"Dumplings are produced by Dumpling Cooks and Dumpling Chefs. There are 6 "
+"cooks, each producing.3 dumplings. The chef Is a 1x employee, and will "
+"produce 8 dumplings."
+msgstr "Las empanadillas las producen los Cocineros de empanadillas y los "
+"Chefs de empanadillas. Hay 6 cocineros, cada uno produce 3 empanadillas. El "
+"chef es un empleado 1x y producirá 8 empanadillas."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:196
+msgid ""
+"There is a new Milestone for First Dumpling Sold. After Dinnertime, each "
+"player who has gained this milestone will choose a new action for their CEO. "
+"Their CEO will lose its original action (Hire 1) and replace it with one of "
+"the following: <ul> <li>2x Hire 1 Employee or $5 salary reduction (the same "
+"as a Recruiting Manager)</li> <li>Get 2 training points; you may train one "
+"employee by 2 levels (the same as a Coach)</li> <li>Reduce your base price "
+"by $3 (the same as a permanent Discount Manager.</li> </ul>"
+msgstr "Hay un nuevo Hito por la primera empanadilla vendida. Después de la "
+"cena, cada jugador que haya obtenido este hito elegirá una nueva acción para "
+"su CEO. Su CEO perderá su acción original (Contratar 1) y la sustituirá por "
+"una de las siguientes: <ul> <li>2x Contratar 1 empleado o reducción de "
+"salario de $5 (lo mismo que un Gerente de reclutamiento)</li> <li>Obtener 2 "
+"puntos de entrenamiento; puedes entrenar a un empleado 2 niveles (lo mismo "
+"que un Entrenador)</li> <li>Reducir tu precio base en $3 (lo mismo que un "
+"Gerente de descuento permanente.</li> </ul>"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:207
+msgid "Hawker Marketing"
+msgstr "Marketing ambulante"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:216
+msgid ""
+"Hawker trucks driving by, with their loud and engaging music, can't help but "
+"attract people's attention to their goods."
+msgstr "Los camiones ambulantes, con su música ruidosa y pegadiza, no pueden "
+"evitar atraer la atención de la gente hacia sus productos."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:224
+msgid ""
+"The Hawker Marketeer is a new marketing employee that can be trained from "
+"the Marketing Trainee. The Hawker Marketeer requires a salary. There are 6 "
+"in the game."
+msgstr "El Vendedor ambulante es un nuevo empleado de marketing que puede "
+"formarse a partir del Alumno de marketing. El Vendedor ambulante requiere un "
+"salario. Hay 6 en la partida."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:229
+msgid ""
+"The Hawker Marketeer has a range of 2 and is played in the same way as a "
+"Cart Operator - you need to drive this marketeer out of a restaurant and "
+"along roads up to a range of 2. You can choose campaign number #21 #22 or "
+"#23, and a duration of 1, 2, or 3 turns."
+msgstr "El Vendedor ambulante tiene un alcance de 2 y se juega igual que un "
+"Operador de carro: debes conducir a este vendedor fuera de un restaurante y "
+"por las carreteras hasta un alcance de 2. Puedes elegir la campaña número "
+"#21, #22 o #23, y una duración de 1, 2 o 3 turnos."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:234
+msgid ""
+"When the marketing campaign activates, it will advertise to any residence "
+"directly connected to its route - <b><u>connections through parks or gardens "
+"do not count</u></b>."
+msgstr "Cuando se active la campaña de marketing, se anunciará a cualquier "
+"vivienda conectada directamente a su ruta: <b><u>las conexiones a través de "
+"parques o jardines no cuentan</u></b>."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:239
+msgid ""
+"This is the only time the precise orientation of new houses actually "
+"matters. Therefore, when using this module, the New Business Developer can "
+"place new houses with the garden at the bottom/left/top/right, rather than "
+"just horizontally or vertically."
+msgstr "Esta es la única vez en que la orientación precisa de las casas "
+"nuevas importa de verdad. Por lo tanto, al usar este módulo, el "
+"Desarrollador de nuevos negocios puede colocar casas nuevas con el jardín "
+"abajo/izquierda/arriba/derecha, en lugar de solo en horizontal o vertical."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:244
+msgid ""
+"To use a Hawker Marketeer, click the employee as usual. Then you can set a "
+"route, and once you are happy, deploy the marketing campaign using the \"Add "
+"Hawker Truck\" button. You must use all range if possible. If you need to "
+"stop manually because the last tile contains a loop, click the \"Set Hawker "
+"Route\" button again."
+msgstr "Para usar un Vendedor ambulante, haz clic en el empleado como de "
+"costumbre. Después puedes establecer una ruta y, cuando estés satisfecho, "
+"desplegar la campaña de marketing con el botón «Establecer ruta para agregar "
+"Hawker Truck». Debes usar todo el alcance si es posible. Si necesitas parar "
+"manualmente porque la última baldosa contiene un bucle, vuelve a hacer clic "
+"en el botón «Establecer ruta del vendedor ambulante»."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:249
+msgid ""
+"You can see the truck route by clicking \"Show Route\" in history, or "
+"clicking the marketing token in the hawker marketing area (to the right of "
+"the map)"
+msgstr "Puedes ver la ruta del camión haciendo clic en «Mostrar ruta» en el "
+"historial, o haciendo clic en la ficha de marketing en la zona de marketing "
+"ambulante (a la derecha del mapa)"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:258
+#: .\FCM\templates\FCM\FCMhelp.html:104 .\FCM\templates\FCM\coffeeHelp.html:328
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:249
+msgid "Further Help"
+msgstr "Más ayuda"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:260
+#: .\FCM\templates\FCM\FCMhelp.html:106 .\FCM\templates\FCM\coffeeHelp.html:330
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:251
+msgid "For any questions / comments / suggestions, please contact"
+msgstr "Para cualquier duda/comentario/sugerencia, por favor contactar"
+
+#: .\FCM\templates\FCM\FCMhelp.html:5
+msgid "Food Chain Magnate Help"
+msgstr "Ayuda de Food Chain Magnate"
+
+#: .\FCM\templates\FCM\FCMhelp.html:8
+msgid "Help"
+msgstr "Ayuda"
+
+#: .\FCM\templates\FCM\FCMhelp.html:12
 msgid "Rules Help"
 msgstr "Ayuda de las reglas"
 
-#: .\templates\FCM\FCMhelp.html:22
+#: .\FCM\templates\FCM\FCMhelp.html:18
+#, python-format
 msgid ""
-"Food Chain Magnate rules available <a "
-"href=\"https://www.qugs.org/rules/r175914.pdf\" target=\"_blank\">here</a> "
+"Food Chain Magnate rules available <a href=\"%(fcm_rules_url)s\">here</a> "
 "<br /> Ketchup Expansion rules available <a "
-"href=\"https://www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf\""
-" target=\"_blank\">here</a> <br/> How to play guide example <a "
+"href=\"%(fcm_ketchup_rules_url)s\">here</a> <br /> China Expansion rules "
+"available <a href=\"%(fcm_china_help_url)s\" target=\"_blank\">here</a> <br /"
+"> Fan Expansions rules available <a href=\"%(fcm_fan_help_url)s\" "
+"target=\"_blank\">here</a> <br /> How to play guide example <a "
 "href=\"https://www.myboardgameguides.com/game-strategy/game-specific-"
 "strategy/food-chain-magnate-strategy-guide/\" target=\"_blank\">here</a>"
-msgstr ""
-"Reglas de magnate de la cadena de alimentos disponibles <a href = \"https: "
-"//www.qugs.org/rules/r175914.pdf \" target = \"_ en blanco \"> aquí </a> "
-"<br/> reglas de expansión de ketchup disponibles <A Reglas de magnate de la "
-"cadena de alimentos disponibles <a href = "
-"\"https://www.qugs.org/rules/r175914.pdf\" target = \"_ en blanco\"> aquí "
-"</a> <br/> reglas de expansión de ketchup disponibles <ahref = "
-"\"https://www.boardgamehelpers.com/foodchainmagnate/images/fcm_ketchup_regels_eng_web.pdf\""
-" target = \"_ blank\"> aquí </a> <br/> Ejemplo de guía <ahref = "
-"\"https://www.myboardgameguides.com/game-strategy/game-strategy/food-hain-"
-"magnate-strategy-guide/\" target = \"_ blank\"> aquí </a>"
+msgstr "Reglas de Food Chain Magnate disponibles <a "
+"href=\"%(fcm_rules_url)s\">aquí</a> <br /> Reglas de la expansión Ketchup "
+"disponibles <a href=\"%(fcm_ketchup_rules_url)s\">aquí</a> <br /> Reglas de "
+"la expansión de China disponibles <a href=\"%(fcm_china_help_url)s\" "
+"target=\"_blank\">aquí</a> <br /> Reglas de las expansiones de fans "
+"disponibles <a href=\"%(fcm_fan_help_url)s\" target=\"_blank\">aquí</a> <br "
+"/> Ejemplo de guía de cómo jugar <a "
+"href=\"https://www.myboardgameguides.com/game-strategy/game-specific-strateg"
+"y/food-chain-magnate-strategy-guide/\" target=\"_blank\">aquí</a>"
 
-#: .\templates\FCM\FCMhelp.html:36
+#: .\FCM\templates\FCM\FCMhelp.html:33
 msgid "Game Play"
 msgstr "Juego"
 
-#: .\templates\FCM\FCMhelp.html:38
+#: .\FCM\templates\FCM\FCMhelp.html:35
 msgid "How exactly does coffee work?"
 msgstr "¿Cómo funciona exactamente el café?"
 
-#: .\templates\FCM\FCMhelp.html:40
+#: .\FCM\templates\FCM\FCMhelp.html:38
 #, python-format
-msgid "Please see the dedicated Coffee help page <a href=\"%(the_url)s\">Here</a>"
-msgstr ""
-"Consulte la página de ayuda de café dedicada <a href = \"%(the_url) s \"> "
-"aquí </a>Consulte la página de ayuda de café dedicada <a href = \"%(the_url)"
-" s\"> aquí </a>"
+msgid ""
+"Please see the dedicated Coffee help page <a href=\"%(the_url)s\">Here</a>"
+msgstr "Consulte la página de ayuda dedicada al café <a "
+"href=\"%(the_url)s\">aquí</a>"
 
-#: .\templates\FCM\FCMhelp.html:46
+#: .\FCM\templates\FCM\FCMhelp.html:42
 msgid "What are the Expert Options?"
 msgstr "¿Cuáles son las opciones de expertos?"
 
-#: .\templates\FCM\FCMhelp.html:47
+#: .\FCM\templates\FCM\FCMhelp.html:44
 msgid ""
-"Expert options appear in an orange panel. They are meant to allow players to"
-" automate decisions that are obvious choices to make, and thus allow games "
-"to progress a bit faster.<br/> You can select your preference for Order Of "
-"Business during restructuring. A note is added in history as turn order is "
-"resolved if the decision was automatic. Of course, it is very possible to "
-"select \"Earliest possible\" and stll end up in last position - this just "
-"meant that everyone else had more open slots or an earlier turn order than "
-"you, and also chose to go early in turn order. <br/> You can select to "
-"autopay salary even if you don't have enough money, if you do end up having "
-"enough money after dinnertime. Similarly, if you have the Beer Milestone but"
-" no fridge, you can choose to pay in as much food as possible, and then "
-"money. You also have the option of keeping all remaining food if you have a "
-"fridge and end up with less than 10 items.<br/> <b>Note: </b>Even if you "
-"select an expert option, you still might end up playing that phase. For "
-"example, if you don't have enough money for salary, you will need to fire "
-"someone, and so must play the salary phase. Also, if you end up with kimchi "
-"plus other items, you will be required to play the Cleanup phase. Game "
-"rewinds and player kickouts can also result in phases needing to be played "
-"that you had selected to skip."
-msgstr ""
-"Las opciones de expertos aparecen en un panel naranja. Las opciones de "
-"expertos aparecen en un panel naranja.Están destinados a permitir a los "
-"jugadores automatizar las decisiones que son opciones obvias de tomar y, por"
-" lo tanto, permitir que los juegos progresen un poco más rápido. <br/> Puede"
-" seleccionar su preferencia por el orden de los negocios durante la "
-"reestructuración.Se agrega una nota en el historial a medida que se resuelve"
-" la orden de turno si la decisión era automática.Por supuesto, es muy "
-"posible seleccionar \"más temprano posible\" y Stll termina en la última "
-"posición, esto solo significaba que todos los demás tenían más ranuras "
-"abiertas o una orden de turno anterior que usted, y también eligió ir "
-"temprano a la orden de su vez.<br/> Puede seleccionar salario automático "
-"incluso si no tiene suficiente dinero, si termina teniendo suficiente dinero"
-" después de la hora de la cena.Del mismo modo, si tiene el hito de la "
-"cerveza pero no hay refrigerador, puede optar por pagar la mayor cantidad de"
-" comida posible y luego dinero.También tiene la opción de mantener toda la "
-"comida restante si tiene una nevera y termina con menos de 10 elementos. "
-"<br/> <b> Nota: </b> Incluso si selecciona una opción experta, aún puede "
-"terminar jugando esa fase.Por ejemplo, si no tiene suficiente dinero para el"
-" salario, deberá despedir a alguien, y por lo tanto debe jugar la fase "
-"salarial.Además, si termina con Kimchi más otros artículos, se le pedirá que"
-" juegue la fase de limpieza.El juego de juegos y los inicios de los "
-"jugadores también pueden dar lugar a fases que necesitan ser jugadas que "
-"habías seleccionado para omitir."
+"Expert options appear in an orange panel. They are meant to allow players to "
+"automate decisions that are obvious choices to make, and thus allow games to "
+"progress a bit faster."
+msgstr "Las opciones de experto aparecen en un panel naranja. Su objetivo es "
+"permitir a los jugadores automatizar decisiones que son elecciones obvias, y "
+"así permitir que las partidas avancen algo más rápido."
 
-#: .\templates\FCM\FCMhelp.html:59
+#: .\FCM\templates\FCM\FCMhelp.html:49
+msgid ""
+"You can select your preference for Order Of Business during restructuring. A "
+"note is added in history as turn order is resolved if the decision was "
+"automatic. Of course, it is very possible to select \"Earliest possible\" "
+"and stll end up in last position - this just meant that everyone else had "
+"more open slots or an earlier turn order than you, and also chose to go "
+"early in turn order."
+msgstr "Puedes seleccionar tu preferencia de Orden del día durante la "
+"reestructuración. Se añade una nota en el historial a medida que se resuelve "
+"el orden de turno, si la decisión fue automática. Por supuesto, es muy "
+"posible seleccionar «Más temprano posible» y acabar igualmente en última "
+"posición: esto solo significa que todos los demás tenían más huecos libres o "
+"un orden de turno anterior al tuyo, y también eligieron ir pronto en el "
+"orden de turno."
+
+#: .\FCM\templates\FCM\FCMhelp.html:55
+msgid ""
+"You can select to autopay salary even if you don't have enough money, if you "
+"do end up having enough money after dinnertime. Similarly, if you have the "
+"Beer Milestone but no fridge, you can choose to pay in as much food as "
+"possible, and then money. You also have the option of keeping all remaining "
+"food if you have a fridge and end up with less than 10 items."
+msgstr "Puedes seleccionar el pago automático del salario aunque no tengas "
+"suficiente dinero, si al final acabas teniendo suficiente dinero después de "
+"la fase de la cena. Del mismo modo, si tienes el Hito de la cerveza pero no "
+"tienes nevera, puedes optar por pagar con toda la comida posible y luego con "
+"dinero. También tienes la opción de conservar toda la comida restante si "
+"tienes nevera y acabas con menos de 10 productos."
+
+#: .\FCM\templates\FCM\FCMhelp.html:61 .\FCM\templates\FCM\FCMhelp.html:83
+#: .\FCM\templates\FCM\FCMhelp.html:86 .\FCM\templates\FCM\FCMhelp.html:93
+msgid "Note:"
+msgstr "Nota:"
+
+#: .\FCM\templates\FCM\FCMhelp.html:62
+msgid ""
+"Even if you select an expert option, you still might end up playing that "
+"phase. For example, if you don't have enough money for salary, you will need "
+"to fire someone, and so must play the salary phase. Also, if you end up with "
+"kimchi plus other items, you will be required to play the Cleanup phase. "
+"Game rewinds and player kickouts can also result in phases needing to be "
+"played that you had selected to skip."
+msgstr "Aunque selecciones una opción de experto, es posible que acabes "
+"jugando esa fase. Por ejemplo, si no tienes suficiente dinero para el "
+"salario, tendrás que despedir a alguien y, por tanto, deberás jugar la fase "
+"de salario. Además, si acabas con kimchi y otros productos, tendrás que "
+"jugar la fase de limpieza. Los rebobinados de la partida y las expulsiones "
+"de jugadores también pueden hacer que haya que jugar fases que habías "
+"seleccionado omitir."
+
+#: .\FCM\templates\FCM\FCMhelp.html:68
 msgid "Where do the scenarios come from?"
 msgstr "¿De dónde vienen los escenarios?"
 
-#: .\templates\FCM\FCMhelp.html:60
+#: .\FCM\templates\FCM\FCMhelp.html:69
 msgid "They are suggested in the Ketchup Expansion manual."
 msgstr "Se sugieren en el manual de expansión de ketchup."
 
-#: .\templates\FCM\FCMhelp.html:65
+#: .\FCM\templates\FCM\FCMhelp.html:70
 msgid "What is Sandbox Mode?"
 msgstr "¿Qué es el modo Sandbox?"
 
-#: .\templates\FCM\FCMhelp.html:66
+#: .\FCM\templates\FCM\FCMhelp.html:72
 msgid ""
 "Sandbox mode is the answer to questions such as \"Can I have an option so "
 "that new MS trainer gives a coach instead of a trainer?\" and \"What if the "
-"1x employees were actually unlimited?\". <br/> Sandbox mode unlocks a panel "
-"under the player summaries allowing you to add and remove employees at will "
-"on your turn. <br/> <b>Note:</b> You must have 'Aid' turned on to view "
-"this.<br/> <b>Note:</b> This game will be automatically excluded from stats."
-" There is no record in History of using the Sandbox panel. There is no built"
-" in limit on anyone doing anything with the Sandbox panel. Try to make it "
-"clear in the game description what you are after if you select this "
-"option.<br/> <b>Note:</b> Employees gained this way will not necesserily be "
-"saved if in the middle of a simultaneous move (eg choosing reserve cards). "
-"But no worries, it's Sandbox Mode. So just give yourself the employee again."
-" If you gain an employee this way during restructuring and place the "
-"employee in your structure, then it will be saved. <br/>"
-msgstr ""
-"El modo Sandbox es la respuesta a preguntas como \"¿Puedo tener una opción "
-"para que el nuevo entrenador de MS le dé a un entrenador en lugar de un "
-"entrenador? \" Y \"¿Qué pasaría si los empleados 1x fueran realmente "
-"ilimitados? \". El modo Sandbox es la respuesta a preguntas como \"¿Puedo "
-"tener una opción para que el nuevo entrenador de MS le dé a un entrenador en"
-" lugar de un entrenador?\"y \"¿Qué pasaría si los empleados 1X fueran "
-"realmente ilimitados?\".<br/> El modo Sandbox desbloquea un panel debajo de "
-"los resúmenes del jugador que le permite agregar y eliminar a los empleados "
-"a voluntad en su turno.<br/> <b> Nota: </b> Debe tener 'ayuda' para ver "
-"esto. <br/> <b> nota: </b> Este juego se excluirá automáticamente de las "
-"estadísticas.No hay registro en la historia del uso del panel Sandbox.No hay"
-" un límite incorporado en cualquiera que haga nada con el panel "
-"Sandbox.Intente dejar en claro en el juego la descripción de lo que busca si"
-" selecciona esta opción. <br/> <b> Nota: </b> Los empleados ganados de esta "
-"manera no se guardarán necesariamente si en el medio de un movimiento "
-"simultáneo (por ejemplo, elige tarjetas de reserva).Pero no se preocupe, es "
-"el modo Sandbox.Así que solo date al empleado nuevamente.Si obtiene un "
-"empleado de esta manera durante la reestructuración y coloca al empleado en "
-"su estructura, entonces se guardará.<br/>"
+"1x employees were actually unlimited?\"."
+msgstr "El modo Sandbox es la respuesta a preguntas como «¿Puedo tener una "
+"opción para que el nuevo entrenador de MS dé un coach en lugar de un "
+"entrenador?» y «¿Y si los empleados 1x fueran realmente ilimitados?»."
 
-#: .\templates\FCM\FCMhelp.html:81 .\templates\FCM\FCMstats.html:1022
-#: .\templates\FCM\coffeeHelp.html:275
-msgid "For further help contact"
-msgstr "Para obtener más ayuda para el contacto"
+#: .\FCM\templates\FCM\FCMhelp.html:78
+msgid ""
+"Sandbox mode unlocks a panel under the player summaries allowing you to add "
+"and remove employees at will on your turn."
+msgstr "El modo Sandbox desbloquea un panel debajo de los resúmenes de los "
+"jugadores que te permite añadir y quitar empleados a voluntad durante tu "
+"turno."
 
-#: .\templates\FCM\FCMhelp.html:86 .\templates\FCM\FCMstats.html:1029
-#: .\templates\FCM\GameTemplate.html:31 .\templates\FCM\coffeeHelp.html:278
-msgid "Home"
-msgstr "Hogar"
+#: .\FCM\templates\FCM\FCMhelp.html:83
+msgid "You must have 'Aid' turned on to view this."
+msgstr "Debes tener activada la «Ayuda» para ver esto."
 
-#: .\templates\FCM\FCMstats.html:20
+#: .\FCM\templates\FCM\FCMhelp.html:87
+msgid ""
+"This game will be automatically excluded from stats. There is no record in "
+"History of using the Sandbox panel. There is no built in limit on anyone "
+"doing anything with the Sandbox panel. Try to make it clear in the game "
+"description what you are after if you select this option."
+msgstr "Esta partida quedará excluida automáticamente de las estadísticas. No "
+"hay ningún registro en el Historial del uso del panel Sandbox. No hay ningún "
+"límite integrado sobre lo que cualquiera puede hacer con el panel Sandbox. "
+"Intenta dejar claro en la descripción de la partida qué buscas si "
+"seleccionas esta opción."
+
+#: .\FCM\templates\FCM\FCMhelp.html:94
+msgid ""
+"Employees gained this way will not necesserily be saved if in the middle of "
+"a simultaneous move (eg choosing reserve cards). But no worries, it's "
+"Sandbox Mode. So just give yourself the employee again. If you gain an "
+"employee this way during restructuring and place the employee in your "
+"structure, then it will be saved."
+msgstr "Los empleados obtenidos de esta forma no necesariamente se guardarán "
+"si estás en mitad de un movimiento simultáneo (por ejemplo, al elegir "
+"tarjetas de reserva). Pero no te preocupes, es el modo Sandbox. Así que "
+"vuelve a darte el empleado. Si obtienes un empleado de esta forma durante la "
+"reestructuración y lo colocas en tu estructura, entonces sí se guardará."
+
+#: .\FCM\templates\FCM\FCMhelp.html:99
+msgid "When Can I resign?"
+msgstr "¿Cuándo puedo renunciar?"
+
+#: .\FCM\templates\FCM\FCMhelp.html:100
+msgid "You can resign during the \\"
+msgstr "Puedes renunciar durante la \\"
+
+#: .\FCM\templates\FCM\FCMstats.html:16
+msgid "Food Chain Magnate Stats"
+msgstr "Estadísticas de Food Chain Magnate"
+
+#: .\FCM\templates\FCM\FCMstats.html:17
 msgid "Back to Main Stats"
 msgstr "Volver a las estadísticas principales"
 
-#: .\templates\FCM\FCMstats.html:284
+#: .\FCM\templates\FCM\FCMstats.html:25
+msgid "Finished games"
+msgstr "Partidas terminadas"
+
+#: .\FCM\templates\FCM\FCMstats.html:29
+msgid "Original MS games"
+msgstr "Partidas con hitos originales"
+
+#: .\FCM\templates\FCM\FCMstats.html:33
+msgid "Avg turns Original MS"
+msgstr "Turnos medios con hitos originales"
+
+#: .\FCM\templates\FCM\FCMstats.html:37
+msgid "New MS games"
+msgstr "Partidas con hitos nuevos"
+
+#: .\FCM\templates\FCM\FCMstats.html:41
+msgid "Avg turns New MS"
+msgstr "Turnos medios con hitos nuevos"
+
+#: .\FCM\templates\FCM\FCMstats.html:45
+msgid ""
+"Any game with a resigned/kicked player is not considered for these stats."
+msgstr "Cualquier partida con un jugador que haya renunciado o haya sido "
+"expulsado no se tiene en cuenta para estas estadísticas."
+
+#: .\FCM\templates\FCM\FCMstats.html:48
+msgid ""
+"These are historical stats. They show what has happened in previous games, "
+"but Food Chain Magnate still rewards reading and responding to the current "
+"game state."
+msgstr "Estas son estadísticas históricas. Muestran lo que ha ocurrido en "
+"partidas anteriores, pero Food Chain Magnate sigue premiando leer y "
+"responder al estado actual de la partida."
+
+#: .\FCM\templates\FCM\FCMstats.html:50
+msgid "Module Choices"
+msgstr "Módulos elegidos"
+
+#: .\FCM\templates\FCM\FCMstats.html:51
+msgid ""
+"This shows how often a module or option is selected. Original MS vs New MS "
+"can be read from the finished game counts above."
+msgstr "Esto muestra con qué frecuencia se selecciona un módulo o una opción. "
+"Los hitos originales frente a los hitos nuevos se pueden leer en los "
+"recuentos de partidas terminadas de arriba."
+
+#: .\FCM\templates\FCM\FCMstats.html:340
 msgid "All Players"
 msgstr "Todos los jugadores"
 
-#: .\templates\FCM\FCMstats.html:285
+#: .\FCM\templates\FCM\FCMstats.html:341
 msgid "2 Player"
 msgstr "2 jugador"
 
-#: .\templates\FCM\FCMstats.html:286
+#: .\FCM\templates\FCM\FCMstats.html:342
 msgid "3 Player"
 msgstr "3 jugador"
 
-#: .\templates\FCM\FCMstats.html:287
+#: .\FCM\templates\FCM\FCMstats.html:343
 msgid "4 Player"
 msgstr "4 jugador"
 
-#: .\templates\FCM\FCMstats.html:288
+#: .\FCM\templates\FCM\FCMstats.html:344
 msgid "5 Player"
 msgstr "5 jugador"
 
-#: .\templates\FCM\FCMstats.html:289
+#: .\FCM\templates\FCM\FCMstats.html:345
 msgid "6 Player"
 msgstr "6 jugador"
 
-#: .\templates\FCM\FCMstats.html:295 .\templates\FCM\FCMstats.html:328
-#: .\templates\FCM\FCMstats.html:364 .\templates\FCM\FCMstats.html:397
-#: .\templates\FCM\FCMstats.html:433 .\templates\FCM\FCMstats.html:466
-#: .\templates\FCM\FCMstats.html:502 .\templates\FCM\FCMstats.html:535
-#: .\templates\FCM\FCMstats.html:571 .\templates\FCM\FCMstats.html:604
-#: .\templates\FCM\FCMstats.html:640 .\templates\FCM\FCMstats.html:673
+#: .\FCM\templates\FCM\FCMstats.html:351 .\FCM\templates\FCM\FCMstats.html:424
+#: .\FCM\templates\FCM\FCMstats.html:491 .\FCM\templates\FCM\FCMstats.html:556
+#: .\FCM\templates\FCM\FCMstats.html:623 .\FCM\templates\FCM\FCMstats.html:688
+#: .\FCM\templates\FCM\FCMstats.html:755 .\FCM\templates\FCM\FCMstats.html:820
+#: .\FCM\templates\FCM\FCMstats.html:887 .\FCM\templates\FCM\FCMstats.html:952
+#: .\FCM\templates\FCM\FCMstats.html:1019
+#: .\FCM\templates\FCM\FCMstats.html:1084
 msgid "Opening"
 msgstr "Apertura"
 
-#: .\templates\FCM\FCMstats.html:296 .\templates\FCM\FCMstats.html:329
-#: .\templates\FCM\FCMstats.html:365 .\templates\FCM\FCMstats.html:398
-#: .\templates\FCM\FCMstats.html:434 .\templates\FCM\FCMstats.html:467
-#: .\templates\FCM\FCMstats.html:503 .\templates\FCM\FCMstats.html:536
-#: .\templates\FCM\FCMstats.html:572 .\templates\FCM\FCMstats.html:605
-#: .\templates\FCM\FCMstats.html:641 .\templates\FCM\FCMstats.html:674
+#: .\FCM\templates\FCM\FCMstats.html:352 .\FCM\templates\FCM\FCMstats.html:425
+#: .\FCM\templates\FCM\FCMstats.html:492 .\FCM\templates\FCM\FCMstats.html:557
+#: .\FCM\templates\FCM\FCMstats.html:624 .\FCM\templates\FCM\FCMstats.html:689
+#: .\FCM\templates\FCM\FCMstats.html:756 .\FCM\templates\FCM\FCMstats.html:821
+#: .\FCM\templates\FCM\FCMstats.html:888 .\FCM\templates\FCM\FCMstats.html:953
+#: .\FCM\templates\FCM\FCMstats.html:1020
+#: .\FCM\templates\FCM\FCMstats.html:1085
 msgid "# Wins"
 msgstr "# Gana"
 
-#: .\templates\FCM\FCMstats.html:297 .\templates\FCM\FCMstats.html:330
-#: .\templates\FCM\FCMstats.html:366 .\templates\FCM\FCMstats.html:399
-#: .\templates\FCM\FCMstats.html:435 .\templates\FCM\FCMstats.html:468
-#: .\templates\FCM\FCMstats.html:504 .\templates\FCM\FCMstats.html:537
-#: .\templates\FCM\FCMstats.html:573 .\templates\FCM\FCMstats.html:606
-#: .\templates\FCM\FCMstats.html:642 .\templates\FCM\FCMstats.html:675
+#: .\FCM\templates\FCM\FCMstats.html:353 .\FCM\templates\FCM\FCMstats.html:426
+#: .\FCM\templates\FCM\FCMstats.html:493 .\FCM\templates\FCM\FCMstats.html:558
+#: .\FCM\templates\FCM\FCMstats.html:625 .\FCM\templates\FCM\FCMstats.html:690
+#: .\FCM\templates\FCM\FCMstats.html:757 .\FCM\templates\FCM\FCMstats.html:822
+#: .\FCM\templates\FCM\FCMstats.html:889 .\FCM\templates\FCM\FCMstats.html:954
+#: .\FCM\templates\FCM\FCMstats.html:1021
+#: .\FCM\templates\FCM\FCMstats.html:1086
 msgid "# Losses"
 msgstr "# Pérdidas"
 
-#: .\templates\FCM\FCMstats.html:298 .\templates\FCM\FCMstats.html:331
-#: .\templates\FCM\FCMstats.html:367 .\templates\FCM\FCMstats.html:400
-#: .\templates\FCM\FCMstats.html:436 .\templates\FCM\FCMstats.html:469
-#: .\templates\FCM\FCMstats.html:505 .\templates\FCM\FCMstats.html:538
-#: .\templates\FCM\FCMstats.html:574 .\templates\FCM\FCMstats.html:607
-#: .\templates\FCM\FCMstats.html:643 .\templates\FCM\FCMstats.html:676
+#: .\FCM\templates\FCM\FCMstats.html:354 .\FCM\templates\FCM\FCMstats.html:427
+#: .\FCM\templates\FCM\FCMstats.html:494 .\FCM\templates\FCM\FCMstats.html:559
+#: .\FCM\templates\FCM\FCMstats.html:626 .\FCM\templates\FCM\FCMstats.html:691
+#: .\FCM\templates\FCM\FCMstats.html:758 .\FCM\templates\FCM\FCMstats.html:823
+#: .\FCM\templates\FCM\FCMstats.html:890 .\FCM\templates\FCM\FCMstats.html:955
+#: .\FCM\templates\FCM\FCMstats.html:1022
+#: .\FCM\templates\FCM\FCMstats.html:1087
 msgid "Win to Loss Ratio"
 msgstr "Ratio de ganancias a pérdidas"
 
-#: .\templates\FCM\FCMstats.html:301 .\templates\FCM\FCMstats.html:370
-#: .\templates\FCM\FCMstats.html:439 .\templates\FCM\FCMstats.html:508
-#: .\templates\FCM\FCMstats.html:577 .\templates\FCM\FCMstats.html:646
+#: .\FCM\templates\FCM\FCMstats.html:357 .\FCM\templates\FCM\FCMstats.html:497
+#: .\FCM\templates\FCM\FCMstats.html:629 .\FCM\templates\FCM\FCMstats.html:761
+#: .\FCM\templates\FCM\FCMstats.html:893 .\FCM\templates\FCM\FCMstats.html:1025
 msgid "Marketing Trainee"
 msgstr "Alumno de marketing"
 
-#: .\templates\FCM\FCMstats.html:307 .\templates\FCM\FCMstats.html:376
-#: .\templates\FCM\FCMstats.html:445 .\templates\FCM\FCMstats.html:514
-#: .\templates\FCM\FCMstats.html:583 .\templates\FCM\FCMstats.html:652
+#: .\FCM\templates\FCM\FCMstats.html:375 .\FCM\templates\FCM\FCMstats.html:511
+#: .\FCM\templates\FCM\FCMstats.html:643 .\FCM\templates\FCM\FCMstats.html:775
+#: .\FCM\templates\FCM\FCMstats.html:907 .\FCM\templates\FCM\FCMstats.html:1039
 msgid "Recruiting Girl"
 msgstr "Reclutamiento de niña"
 
-#: .\templates\FCM\FCMstats.html:313 .\templates\FCM\FCMstats.html:346
-#: .\templates\FCM\FCMstats.html:382 .\templates\FCM\FCMstats.html:415
-#: .\templates\FCM\FCMstats.html:451 .\templates\FCM\FCMstats.html:484
-#: .\templates\FCM\FCMstats.html:520 .\templates\FCM\FCMstats.html:553
-#: .\templates\FCM\FCMstats.html:589 .\templates\FCM\FCMstats.html:622
-#: .\templates\FCM\FCMstats.html:658 .\templates\FCM\FCMstats.html:691
+#: .\FCM\templates\FCM\FCMstats.html:393 .\FCM\templates\FCM\FCMstats.html:458
+#: .\FCM\templates\FCM\FCMstats.html:525 .\FCM\templates\FCM\FCMstats.html:590
+#: .\FCM\templates\FCM\FCMstats.html:657 .\FCM\templates\FCM\FCMstats.html:722
+#: .\FCM\templates\FCM\FCMstats.html:789 .\FCM\templates\FCM\FCMstats.html:854
+#: .\FCM\templates\FCM\FCMstats.html:921 .\FCM\templates\FCM\FCMstats.html:986
+#: .\FCM\templates\FCM\FCMstats.html:1053
+#: .\FCM\templates\FCM\FCMstats.html:1118
 msgid "Trainer"
 msgstr "entrenador"
 
-#: .\templates\FCM\FCMstats.html:319 .\templates\FCM\FCMstats.html:352
-#: .\templates\FCM\FCMstats.html:388 .\templates\FCM\FCMstats.html:421
-#: .\templates\FCM\FCMstats.html:457 .\templates\FCM\FCMstats.html:490
-#: .\templates\FCM\FCMstats.html:526 .\templates\FCM\FCMstats.html:559
-#: .\templates\FCM\FCMstats.html:595 .\templates\FCM\FCMstats.html:628
-#: .\templates\FCM\FCMstats.html:664 .\templates\FCM\FCMstats.html:697
+#: .\FCM\templates\FCM\FCMstats.html:407 .\FCM\templates\FCM\FCMstats.html:472
+#: .\FCM\templates\FCM\FCMstats.html:539 .\FCM\templates\FCM\FCMstats.html:604
+#: .\FCM\templates\FCM\FCMstats.html:671 .\FCM\templates\FCM\FCMstats.html:736
+#: .\FCM\templates\FCM\FCMstats.html:803 .\FCM\templates\FCM\FCMstats.html:868
+#: .\FCM\templates\FCM\FCMstats.html:935 .\FCM\templates\FCM\FCMstats.html:1000
+#: .\FCM\templates\FCM\FCMstats.html:1067
+#: .\FCM\templates\FCM\FCMstats.html:1132
 msgid "None of the above"
 msgstr "Ninguno de los anteriores"
 
-#: .\templates\FCM\FCMstats.html:334 .\templates\FCM\FCMstats.html:403
-#: .\templates\FCM\FCMstats.html:472 .\templates\FCM\FCMstats.html:541
-#: .\templates\FCM\FCMstats.html:610 .\templates\FCM\FCMstats.html:679
+#: .\FCM\templates\FCM\FCMstats.html:430 .\FCM\templates\FCM\FCMstats.html:562
+#: .\FCM\templates\FCM\FCMstats.html:694 .\FCM\templates\FCM\FCMstats.html:826
+#: .\FCM\templates\FCM\FCMstats.html:958 .\FCM\templates\FCM\FCMstats.html:1090
 msgid "First Train AND First Hire 3"
 msgstr "Primer tren y primer contrato 3"
 
-#: .\templates\FCM\FCMstats.html:340 .\templates\FCM\FCMstats.html:409
-#: .\templates\FCM\FCMstats.html:478 .\templates\FCM\FCMstats.html:547
-#: .\templates\FCM\FCMstats.html:616 .\templates\FCM\FCMstats.html:685
+#: .\FCM\templates\FCM\FCMstats.html:444 .\FCM\templates\FCM\FCMstats.html:576
+#: .\FCM\templates\FCM\FCMstats.html:708 .\FCM\templates\FCM\FCMstats.html:840
+#: .\FCM\templates\FCM\FCMstats.html:972 .\FCM\templates\FCM\FCMstats.html:1104
 msgid "First Hire 3 Only"
 msgstr "Primero contratado 3 solamente"
 
-#: .\templates\FCM\GameTemplate.html:47
-msgid "Rules"
-msgstr "Normas"
-
-#: .\templates\FCM\GameTemplate.html:52
-msgid "Reserve"
-msgstr "Reservar"
-
-#: .\templates\FCM\GameTemplate.html:60 .\templates\FCM\GameTemplate.html:63
-msgid "Rewind"
-msgstr "Rebobinar"
-
-#: .\templates\FCM\GameTemplate.html:68 .\templates\FCM\GameTemplate.html:119
-msgid "Aid"
-msgstr "Ayuda"
-
-#: .\templates\FCM\GameTemplate.html:78
-msgid "Chat"
-msgstr "Charlar"
-
-#: .\templates\FCM\GameTemplate.html:87
-msgid "Bug"
-msgstr "error"
-
-#: .\templates\FCM\GameTemplate.html:98
-msgid "Notes"
-msgstr "Notas"
-
-#: .\templates\FCM\GameTemplate.html:106
-msgid "History"
-msgstr "Historia"
-
-#: .\templates\FCM\GameTemplate.html:114
-msgid "Replay"
-msgstr "Repetición"
-
-#: .\templates\FCM\GameTemplate.html:128
-msgid "Connecting to server....."
-msgstr "Conectarse al servidor ....."
-
-#: .\templates\FCM\GameTemplate.html:131
-msgid "Logged in as:"
-msgstr "Iniciado sesión como:"
-
-#: .\templates\FCM\GameTemplate.html:134
-msgid "Time to next kickout:"
-msgstr "Hora del próximo inicio:"
-
-#: .\templates\FCM\GameTemplate.html:138
-msgid "ZOOM"
-msgstr "ZOOM"
-
-#: .\templates\FCM\GameTemplate.html:146 .\templates\FCM\GameTemplate.html:236
-msgid "Rewind Game Info"
-msgstr "Rewind Información del juego"
-
-#: .\templates\FCM\GameTemplate.html:150 .\templates\FCM\GameTemplate.html:239
-msgid ""
-"<b><u>Trial Feature</b></u><br/> Anyone may rewind the game at any point "
-"EXCEPT during turn order, and the first person working 9-5.<br/> This is "
-"because the most important hidden information is during restructuring."
-msgstr ""
-"<b> <u> función de prueba </b> </u> <br/> Cualquiera puede rebobinar el "
-"juego en cualquier punto, excepto durante el orden de turno, y la primera "
-"persona que trabaja 9-5. <br/> Esto se debe a que la información oculta más "
-"importante es durante la reestructuración.<b> <u> función de prueba </b> "
-"</u> <br/> Cualquiera puede rebobinar el juego en cualquier punto, excepto "
-"durante el orden de turno, y la primera persona que trabaja 9-5. <br/> Esto "
-"se debe a que la información oculta más importante es durante la "
-"reestructuración."
-
-#: .\templates\FCM\GameTemplate.html:160 .\templates\FCM\GameTemplate.html:249
-#: .\templates\FCM\GameTemplate.html:278
-msgid "REWIND"
-msgstr "REBOBINAR"
-
-#: .\templates\FCM\GameTemplate.html:166
-msgid ""
-"You can give permission for the host to rewind the game back to the start of"
-" the restructuring phase. All players must give permission before the host "
-"is able to rewind the game."
-msgstr ""
-"Puedes dar permiso para que el anfitrión vuelva a reventar el juego al "
-"comienzo de la fase de reestructuración. Puede dar permiso para que el "
-"anfitrión vuelva a reventar el juego al comienzo de la fase de "
-"reestructuración.Todos los jugadores deben dar permiso antes de que el "
-"anfitrión pueda rebobinar el juego."
-
-#: .\templates\FCM\GameTemplate.html:173
-msgid ""
-"Tournament games are a bit more competitive, so rewinds should not be "
-"expected"
-msgstr ""
-"los juegos de torneo son un poco más competitivos, por lo que no se debe "
-"esperar rebobosLos juegos de torneo son un poco más competitivos, por lo que"
-" no se debe esperar rebosnos"
-
-#: .\templates\FCM\GameTemplate.html:186
-msgid "Permission up to last Restructuring"
-msgstr "Permiso hasta la última reestructuración"
-
-#: .\templates\FCM\GameTemplate.html:200
-msgid "Give Permission"
-msgstr "Dar permiso"
-
-#: .\templates\FCM\GameTemplate.html:212 .\templates\FCM\GameTemplate.html:293
-msgid "Exclude game from stats"
-msgstr "Excluir el juego de las estadísticas"
-
-#: .\templates\FCM\GameTemplate.html:216 .\templates\FCM\GameTemplate.html:297
-msgid "Exclude From Stats"
-msgstr "Excluir de las estadísticas"
-
-#: .\templates\FCM\GameTemplate.html:219 .\templates\FCM\GameTemplate.html:300
-msgid "Excluded from Stats"
-msgstr "excluidos de las estadísticas"
-
-#: .\templates\FCM\GameTemplate.html:222 .\templates\FCM\GameTemplate.html:303
-msgid "Waiting for other players"
-msgstr "Esperando a otros jugadores"
-
-#: .\templates\FCM\GameTemplate.html:226 .\templates\FCM\GameTemplate.html:307
-msgid ""
-"If all non-bot players tick and confirm this option, this game won't count "
-"in any win/loss stats. You can use this if you simply wish to have a \"less "
-"competitive\" game, or you wish to exclude it for other reasons (EG multiple"
-" player kickouts)"
-msgstr ""
-"Si todos los jugadores que no son de bots marcan y confirman esta opción, "
-"este juego no contará en ninguna estadística de ganancia/pérdida. Si todos "
-"los jugadores que no son Bot marcan y confirman esta opción, este juego no "
-"contará en ninguna estadística de ganancia/pérdida.Puede usar esto si "
-"simplemente desea tener un juego \"menos competitivo\", o desea excluirlo "
-"por otras razones (por ejemplo, múltiples jugadas de jugadores)"
-
-#: .\templates\FCM\GameTemplate.html:256
-msgid ""
-"As the game host, you must wait for all players to give permission. They can"
-" allow you to rewind once, or as much as you like. Try asking in chat for "
-"permission if you wish to rewind. Current Permissions:"
-msgstr ""
-"Como anfitrión del juego, debes esperar a que todos los jugadores dan "
-"permiso. Como anfitrión del juego, debes esperar a que todos los jugadores "
-"dan permiso.Pueden permitirle rebobinar una vez, o tanto como desee.Intente "
-"pedir permiso en la charla si desea retroceder.Permisos actuales:"
-
-#: .\templates\FCM\GameTemplate.html:266
-msgid "Reload the whole page to refresh permissions"
-msgstr "Recargar toda la página para actualizar los permisos"
-
-#: .\templates\FCM\GameTemplate.html:271
-msgid ""
-"Tournament games are a bit more competitive, so you should not feel "
-"obligated to accept a rewind request"
-msgstr ""
-"los juegos de torneo son un poco más competitivos, por lo que no debe "
-"sentirse obligado a aceptar una solicitud de rebobinadoLos juegos de torneo "
-"son un poco más competitivos, por lo que no debes sentirte obligado a "
-"aceptar una solicitud de rebobinado"
-
-#: .\templates\FCM\GameTemplate.html:281
-msgid "Please wait for all players to give permission"
-msgstr "Espere a que todos los jugadores dan permiso"
-
-#: .\templates\FCM\GameTemplate.html:320
-msgid "Game:"
-msgstr "Juego:"
-
-#: .\templates\FCM\GameTemplate.html:323
-msgid "Bank:"
-msgstr "Banco:"
-
-#: .\templates\FCM\GameTemplate.html:324
-msgid "Turn:"
-msgstr "Doblar:"
-
-#: .\templates\FCM\GameTemplate.html:325
-msgid "Phase:"
-msgstr "Fase:"
-
-#: .\templates\FCM\GameTemplate.html:326
-msgid "Current player:"
-msgstr "Jugador actual:"
-
-#: .\templates\FCM\GameTemplate.html:334
-msgid "Bug Report"
-msgstr "Informe de error"
-
-#: .\templates\FCM\GameTemplate.html:335
-msgid ""
-"Please submit a bug report if you encounter any issues, giving as much "
-"detail as possbile."
-msgstr ""
-"Envíe un informe de error si encuentra algún problema, dando tantos detalles"
-" como Possbile.Envíe un informe de error si encuentra algún problema, dando "
-"tantos detalles como Possbile."
-
-#: .\templates\FCM\GameTemplate.html:336
-msgid ""
-"Do you think there are too many 1x Luxury Managers? Please note that COFFEE,"
-" KIMCHI, SUSHI, and NOODLES add one extra"
-msgstr ""
-"¿Crees que hay demasiados gerentes de lujo 1X? ¿Crees que hay demasiados "
-"gerentes de lujo 1X?Tenga en cuenta que el café, el kimchi, el sushi y los "
-"fideos agregan un extra"
-
-#: .\templates\FCM\GameTemplate.html:337
-msgid ""
-"Please note: Cart / Truck drivers can drive around a 'roundabout' on the "
-"same tile as many times as they like. Drinks will only be collected once"
-msgstr ""
-"Tenga en cuenta: los conductores de carrito / camiones pueden conducir "
-"alrededor de una 'rotonda' en el mismo mosaico tantas veces como quieran. "
-"Tenga en cuenta: los conductores de carrito / camiones pueden conducir "
-"alrededor de una 'rotonda' en el mismo mosaico tantas veces como quieran.Las"
-" bebidas solo se recopilarán una vez"
-
-#: .\templates\FCM\GameTemplate.html:338
-msgid ""
-"Please note: In New MS you need to actually USE an employee to get their "
-"Milestone"
-msgstr ""
-"Tenga en cuenta: en la nueva EM debe usar un empleado para obtener su "
-"hitoTenga en cuenta: en la nueva EM, debe usar un empleado para obtener su "
-"hito"
-
-#: .\templates\FCM\GameTemplate.html:343 .\templates\FCM\GameTemplate.html:354
-msgid "Submit"
-msgstr "Entregar"
-
-#: .\templates\FCM\GameTemplate.html:344
-msgid "Reset"
-msgstr "Reiniciar"
-
-#: .\templates\FCM\GameTemplate.html:348
-msgid "Personal game notes"
-msgstr "Notas del juego personal"
-
-#: .\templates\FCM\GameTemplate.html:349
-msgid "Only you can see these notes"
-msgstr "Solo tú puedes ver estas notas"
-
-#: .\templates\FCM\GameTemplate.html:355
-msgid "Clear"
-msgstr "claro"
-
-#: .\templates\FCM\GameTemplate.html:356
-msgid "Close"
-msgstr "Cerca"
-
-#: .\templates\FCM\GameTemplate.html:361
-msgid "Send a message"
-msgstr "Enviar un mensaje"
-
-#: .\templates\FCM\GameTemplate.html:366
-msgid "Send"
-msgstr "Enviar"
-
-#: .\templates\FCM\GameTemplate.html:373
-msgid "Oldest First"
-msgstr "El más antiguo primero"
-
-#: .\templates\FCM\GameTemplate.html:378
-msgid "Newest First"
-msgstr "El primero primero"
-
-#: .\templates\FCM\GameTemplate.html:394
-msgid "Summary"
-msgstr "Resumen"
-
-#: .\templates\FCM\GameTemplate.html:410
-msgid "Open in Map Editor"
-msgstr "Abrir en el editor de mapas"
-
-#: .\templates\FCM\coffeeHelp.html:21
+#: .\FCM\templates\FCM\coffeeHelp.html:12
 msgid "Coffee Help"
 msgstr "Ayuda de café"
 
-#: .\templates\FCM\coffeeHelp.html:25
+#: .\FCM\templates\FCM\coffeeHelp.html:24
+#, python-format
 msgid ""
 "Finding the correct coffee route can be quite tricky! First of all, please "
-"read the coffee section of the expansion rules.<br/> Make sure you fully "
-"understand the example and the reasons why each route was chosen. <br/> The "
+"read the coffee section of the expansion rules. <br /> Make sure you fully "
+"understand the example and the reasons why each route was chosen. <br /> The "
 "Ketchup Expansion rules are available <a "
-"href=\"https://www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf\""
-" target=\"_blank\">here</a>."
-msgstr ""
-"¡Encontrar la ruta correcta del café puede ser bastante complicado! "
-"¡Encontrar la ruta correcta del café puede ser bastante complicado!En primer"
-" lugar, lea la sección de café de las reglas de expansión. <br/> Asegúrese "
-"de comprender completamente el ejemplo y las razones por las cuales se "
-"eligió cada ruta.<br/> Las reglas de expansión de ketchup están disponibles "
-"<a href = "
-"\"https://www.boardgamehelpers.com/foodchainmagnate/images/fcm_ketchup_regels_eng_web.pdf\""
-" target = \"_ blank\"> aquí </a>."
+"href=\"%(fcm_ketchup_rules_url)s\">here</a>."
+msgstr "¡Encontrar la ruta de café correcta puede ser bastante complicado! En "
+"primer lugar, lee la sección del café de las reglas de la expansión. <br /> "
+"Asegúrate de entender bien el ejemplo y las razones por las que se eligió "
+"cada ruta. <br /> Las reglas de la expansión Ketchup están disponibles <a "
+"href=\"%(fcm_ketchup_rules_url)s\">aquí</a>."
 
-#: .\templates\FCM\coffeeHelp.html:36
+#: .\FCM\templates\FCM\coffeeHelp.html:35
 msgid "What goes into finding a valid coffee route?"
 msgstr "¿Qué se dedica a encontrar una ruta de café válida?"
 
-#: .\templates\FCM\coffeeHelp.html:39
+#: .\FCM\templates\FCM\coffeeHelp.html:38
 msgid ""
-"Remember the following:<br/> <li>Players actually need to have coffee in "
-"stock for a sale to be considered</li> <li>A house can travel along any "
+"Remember the following: <br /> <li>Players actually need to have coffee in "
+"stock for a sale to be considered</li> <li> A house can travel along any "
 "route to get to the winning restaurant, as long as the <b>tile distance</b> "
-"does not go above the minimum required to get to the restaurant</li> <li>If "
-"the route splits, the house will choose the route that sells the most coffee"
-" <ul><li>For example, if the route splits and one route sells a coffee to "
-"players A and B, and the other route sells a coffee to player C only, then "
-"the path selling only to player C will be <b>completely ignored</b> because "
-"there is an alternative valid route that sells more coffee, and the house "
-"will take the route that sells the most possible coffee</li></ul> </li> "
-"<li>If the route splits and each possible split would sell the <b>same</b> "
-"amount of coffee, then <b>no</b> coffee is sold along this split part of the"
-" route <ul><li>This applies even if each path would sell the same amount of "
-"coffee to the same player. Why? Because that's what the designer has said! "
-"You can think of it as the house arguing about <i>which</i> of the coffee "
-"selling places is better, to the point where they end up skipping all of "
-"them, even if they belong to the same chain.</li> </li> <li>Consider the "
-"example above with one path selling to players A and B, and the other path "
-"only to player C. What would happen if player B had no coffee? You would now"
-" be in the situation where one route woulf sell to player A and the other "
-"route to player C. Both routes would now sell the same amount of coffe, and "
-"so now <b>both</b> routes are skipped. </li>"
-msgstr ""
-"Recuerde lo siguiente: <br/> <li> Los jugadores en realidad necesitan tener "
-"café en stock para que se considere una venta </li> <li> Una casa puede "
-"viajar a lo largo de cualquier ruta para llegar al restaurante ganador, "
-"siempre que la distancia <b> de mosaico </b> no salga por encima del mínimo "
-"requerido para llegar al restaurante </li> <li> Si la ruta se divide, la "
-"casa elegirá la ruta que vende la mayoría de la ruta <ul> de la ruta de li> "
-"<ul>, y la ruta de la mayoría de los li>, y la ruta, y la ruta, y la mayoría"
-" de la ruta, y sea la ruta de la mayoría de la ruta, y la mayoría de la "
-"ruta, la casa, y la mayoría de la ruta, la casa sea la ruta. Remember the "
-"following:<br/> <li>Players actually need to have coffee in stock for a sale"
-" to be considered</li> <li>A house can travel along any route to get to the "
-"winning restaurant, as long as the <b>tile distance</b> does not go above "
-"the minimum required to get to the restaurant</li> <li>If the route splits, "
-"the house will choose the route that sells the most coffee <ul><li>For "
-"example, if the route splits and one route sellsUn café a los jugadores A y "
-"B, y la otra ruta vende un café solo al jugador C, entonces el camino que se"
-" vende solo al Jugador C será <b> completamente ignorado </b> porque hay una"
-" ruta alternativa válida que vende más café, y la casa tomará la ruta que "
-"vende el café más posible </li> </ul> </li> <li> Si la ruta se divide y cada"
-" una posible división se venda la misma separación de <b> </b>.El café se "
-"vende a lo largo de esta parte dividida de la ruta <ul> <li> Esto se aplica "
-"incluso si cada ruta vendería la misma cantidad de café al mismo "
-"jugador.¿Por qué?¡Porque eso es lo que ha dicho el diseñador!Se puede pensar"
-" en ello como la casa discutiendo sobre <i> que </i> de los lugares de venta"
-" de café es mejor, hasta el punto en que terminan omitiéndolos a todos, "
-"incluso si pertenecen a la misma cadena. </li> </li> <li> ¿Considerar el "
-"ejemplo anterior con una ruta que vende a los jugadores A y B, y el otro "
-"camino solo al jugador C. ¿Qué pasaría si el jugador B no tuviera café?Ahora"
-" estaría en la situación en la que una ruta vendería al jugador A y la otra "
-"ruta al jugador C. Ambas rutas ahora venderían la misma cantidad de café, "
-"por lo que ahora se omiten las rutas <b> </b>.</li>"
+"does not go above the minimum required to get to the restaurant </li> <li> "
+"If the route splits, the house will choose the route that sells the most "
+"coffee <ul> <li> For example, if the route splits and one route sells a "
+"coffee to players A and B, and the other route sells a coffee to player C "
+"only, then the path selling only to player C will be <b>completely ignored</"
+"b> because there is an alternative valid route that sells more coffee, and "
+"the house will take the route that sells the most possible coffee </li> </"
+"ul> </li> <li> If the route splits and each possible split would sell the "
+"<b>same</b> amount of coffee, then <b>no</b> coffee is sold along this split "
+"part of the route <ul> <li> This applies even if each path would sell the "
+"same amount of coffee to the same player. Why? Because that's what the "
+"designer has said! You can think of it as the house arguing about <i>which</"
+"i> of the coffee selling places is better, to the point where they end up "
+"skipping all of them, even if they belong to the same chain. </li> </li> "
+"<li> Consider the example above with one path selling to players A and B, "
+"and the other path only to player C. What would happen if player B had no "
+"coffee? You would now be in the situation where one route woulf sell to "
+"player A and the other route to player C. Both routes would now sell the "
+"same amount of coffe, and so now <b>both</b> routes are skipped. </li>"
+msgstr "Recuerda lo siguiente: <br /> <li>Los jugadores deben tener realmente "
+"café en existencias para que se considere una venta</li> <li> Una casa puede "
+"recorrer cualquier ruta para llegar al restaurante ganador, siempre que la "
+"<b>distancia en baldosas</b> no supere el mínimo necesario para llegar al "
+"restaurante </li> <li> Si la ruta se bifurca, la casa elegirá la ruta que "
+"venda más café <ul> <li> Por ejemplo, si la ruta se bifurca y una ruta vende "
+"un café a los jugadores A y B, y la otra ruta vende un café solo al jugador "
+"C, entonces el camino que vende solo al jugador C se <b>ignorará por "
+"completo</b>, porque hay una ruta válida alternativa que vende más café, y "
+"la casa tomará la ruta que venda el máximo café posible </li> </ul> </li> "
+"<li> Si la ruta se bifurca y cada bifurcación posible vendería la "
+"<b>misma</b> cantidad de café, no se venderá <b>nada</b> de café en esa "
+"parte bifurcada de la ruta <ul> <li> Esto se aplica incluso si cada camino "
+"vendiera la misma cantidad de café al mismo jugador. ¿Por qué? ¡Porque es lo "
+"que ha dicho el diseñador! Puedes imaginarlo como que la casa discute sobre "
+"<i>cuál</i> de los lugares que venden café es mejor, hasta el punto de "
+"saltarse todos, incluso si pertenecen a la misma cadena. </li> </li> <li> "
+"Considera el ejemplo anterior con un camino que vende a los jugadores A y B, "
+"y el otro camino solo al jugador C. ¿Qué pasaría si el jugador B no tuviera "
+"café? Ahora estarías en la situación en la que una ruta vendería al jugador "
+"A y la otra al jugador C. Ambas rutas venderían ahora la misma cantidad de "
+"café, así que ahora se saltan <b>ambas</b> rutas. </li>"
 
-#: .\templates\FCM\coffeeHelp.html:71
+#: .\FCM\templates\FCM\coffeeHelp.html:78
 msgid ""
-"When I click \"More Information\" in the coffee section in \"History\", what"
-" exactly are the non-road highlights?"
+"When I click \"More Information\" in the coffee section in \"History\", what "
+"exactly are the non-road highlights?"
 msgstr ""
-"Cuando hago clic en \"más información \" en la sección de café en \"Historia"
-" \", ¿qué son exactamente lo más destacado?Cuando hago clic en \"más "
-"información\" en la sección de café en \"Historia\", ¿cuáles son exactamente"
-" lo más destacado?"
+"Cuando hago clic en \"más información \" en la sección de café en \"Historia "
+"\", ¿qué son exactamente lo más destacado?Cuando hago clic en \"más "
+"información\" en la sección de café en \"Historia\", ¿cuáles son exactamente "
+"lo más destacado?"
 
-#: .\templates\FCM\coffeeHelp.html:73
+#: .\FCM\templates\FCM\coffeeHelp.html:81
 msgid ""
 "Restaurants / coffee shops that are highlighted indicate where coffee was "
-"actually sold along the route taken by this house.<br/> Note that the "
+"actually sold along the route taken by this house. <br /> Note that the "
 "squares highlighted correspond to where the restaurants / coffee shops were "
-"on this turn, not where they are now if they were moved later.<br/> So if a "
-"non-road square has a highlight but does not contain a restaurant or coffee "
-"shop, then it must have been moved after this turn."
-msgstr ""
-"Las restaurantes / cafeterías que se destacan indican dónde se vendió el "
-"café a lo largo de la ruta tomada por esta casa. <br/> Tenga en cuenta que "
-"los cuadrados resaltados corresponden a donde los restaurantes / cafeterías "
-"estaban en este turno, no donde ahora se trasladaron si se trasladaron más "
-"tarde. <br/> Entonces, si una plaza no tiene una plaza que no tiene una "
-"plaza, pero no contiene un restaurante o cafetería, entonces debe haber sido"
-" trasladado después de este turno.Los restaurantes / cafeterías que se "
-"destacan indican dónde se vendió el café a lo largo de la ruta tomada por "
-"esta casa. <br/> Tenga en cuenta que los cuadrados destacados corresponden a"
-" donde los restaurantes / cafeterías estaban en este turno, no donde ahora "
-"se mudaron."
+"on this turn, not where they are now if they were moved later. <br /> So if "
+"a non-road square has a highlight but does not contain a restaurant or "
+"coffee shop, then it must have been moved after this turn."
+msgstr "Los restaurantes / cafeterías resaltados indican dónde se vendió "
+"realmente el café a lo largo de la ruta seguida por esta casa. <br /> Ten en "
+"cuenta que las casillas resaltadas corresponden a donde estaban los "
+"restaurantes / cafeterías en este turno, no a donde están ahora si se "
+"movieron después. <br /> Así que, si una casilla que no es de carretera "
+"tiene un resaltado pero no contiene ningún restaurante ni cafetería, "
+"entonces debe haber sido movido después de este turno."
 
-#: .\templates\FCM\coffeeHelp.html:85
+#: .\FCM\templates\FCM\coffeeHelp.html:96
 msgid ""
-"When I click \"More Information\" in the coffee section in \"History\", what"
-" exactly are the road highlights?"
+"When I click \"More Information\" in the coffee section in \"History\", what "
+"exactly are the road highlights?"
 msgstr ""
 "Cuando hago clic en \"más información\" en la sección de café en "
 "\"Historia\", ¿qué son exactamente lo más destacado?Cuando hago clic en "
 "\"más información\" en la sección de café en \"Historia\", ¿cuáles son "
 "exactamente lo más destacado de la carretera?"
 
-#: .\templates\FCM\coffeeHelp.html:87
+#: .\FCM\templates\FCM\coffeeHelp.html:99
 msgid ""
-"If there is only one valid coffee route from the house to the restaurant, it"
-" will be shown.<br/> If there are multiple valid routes, the road squares "
-"common to all valid coffee routes will be shown. <br/> This should help you "
+"If there is only one valid coffee route from the house to the restaurant, it "
+"will be shown. <br /> If there are multiple valid routes, the road squares "
+"common to all valid coffee routes will be shown. <br /> This should help you "
 "to work out how the sales occurred. Remember distance is only measured in "
-"map tiles, not road squares. So if the house could travel one tile right and"
-" then one tile down, OR one tile down and then one tile right, AND both "
+"map tiles, not road squares. So if the house could travel one tile right and "
+"then one tile down, OR one tile down and then one tile right, AND both "
 "choices would sell the same amount of coffee (which would make both valid "
-"choices), then none of this section will be highlighted. If however only one"
-" of those routes sold coffee, then as both are the same distance, and the "
-"house will always choose the route that sells the most coffee, then both the"
-" route and the location where the coffee sale occurred should have a "
-"highlight. <br/> A route will go all round a tile, if possible, as long as "
+"choices), then none of this section will be highlighted. If however only one "
+"of those routes sold coffee, then as both are the same distance, and the "
+"house will always choose the route that sells the most coffee, then both the "
+"route and the location where the coffee sale occurred should have a "
+"highlight. <br /> A route will go all round a tile, if possible, as long as "
 "it stays on the same tile and does not make a U-turn. For example, if the "
-"route includes the triple lemonade tile from the expansion, or the tile with"
-" house 5 on it, then the route will always include all road squares on these"
-" tiles"
-msgstr ""
-"Si solo hay una ruta de café válida desde la casa al restaurante, se "
-"mostrará. <br/> Si hay múltiples rutas válidas, se mostrarán las cuadrados "
-"de carreteras comunes a todas las rutas de café válidas. Si solo hay una "
-"ruta de café válida desde la casa al restaurante, se mostrará. <br/> Si hay "
-"múltiples rutas válidas, se mostrarán los cuadrados de carreteras comunes a "
-"todas las rutas de café válidas.<br/> Esto debería ayudarlo a determinar "
-"cómo ocurrieron las ventas.Recuerde que la distancia solo se mide en majas "
-"de mapas, no cuadrados de carreteras.Entonces, si la casa pudiera viajar un "
-"mosaico a la derecha y luego un mosaico hacia abajo, o un mosaico hacia "
-"abajo y luego un mosaico correcto, y ambas opciones venderían la misma "
-"cantidad de café (que tomaría ambas decisiones válidas), entonces ninguna de"
-" esta sección se resaltará.Sin embargo, si solo una de esas rutas vendía "
-"café, entonces ambas son la misma distancia, y la casa siempre elegirá la "
-"ruta que vende la mayor cantidad de café, entonces tanto la ruta como la "
-"ubicación donde ocurrió la venta de café debe tener lo más destacado.<br/> "
-"Una ruta se extenderá por un mosaico, si es posible, siempre que permanezca "
-"en el mismo mosaico y no gire en U.Por ejemplo, si la ruta incluye el "
-"mosaico Triple Lemonade de la expansión, o el mosaico con la Casa 5, "
-"entonces la ruta siempre incluirá todos los cuadrados de carreteras en estas"
-" baldosas."
+"route includes the triple lemonade tile from the expansion, or the tile with "
+"house 5 on it, then the route will always include all road squares on these "
+"tiles"
+msgstr "Si solo hay una ruta de café válida desde la casa hasta el "
+"restaurante, se mostrará. <br /> Si hay varias rutas válidas, se mostrarán "
+"las casillas de carretera comunes a todas las rutas de café válidas. <br /> "
+"Esto debería ayudarte a deducir cómo se produjeron las ventas. Recuerda que "
+"la distancia solo se mide en baldosas del mapa, no en casillas de carretera. "
+"Así que, si la casa pudiera viajar una baldosa a la derecha y luego una "
+"hacia abajo, O una baldosa hacia abajo y luego una a la derecha, Y ambas "
+"opciones vendieran la misma cantidad de café (lo que haría que ambas "
+"opciones fueran válidas), entonces no se resaltará nada de esta sección. Sin "
+"embargo, si solo una de esas rutas vendiera café, como ambas tienen la misma "
+"distancia y la casa siempre elegirá la ruta que venda más café, tanto la "
+"ruta como el lugar donde se produjo la venta de café deberían tener un "
+"resaltado. <br /> Una ruta recorrerá toda una baldosa, si es posible, "
+"siempre que permanezca en la misma baldosa y no haga un cambio de sentido. "
+"Por ejemplo, si la ruta incluye la baldosa de la limonada triple de la "
+"expansión, o la baldosa con la casa 5, la ruta siempre incluirá todas las "
+"casillas de carretera de esas baldosas"
 
-#: .\templates\FCM\coffeeHelp.html:107
+#: .\FCM\templates\FCM\coffeeHelp.html:122
 msgid ""
 "Please consider the following examples to understand better how Coffee "
 "Selling works"
@@ -777,34 +870,32 @@ msgstr ""
 "venta de caféConsidere los siguientes ejemplos para comprender mejor cómo "
 "funciona la venta de café"
 
-#: .\templates\FCM\coffeeHelp.html:109
+#: .\FCM\templates\FCM\coffeeHelp.html:124
 msgid ""
 "In the following examples, the building with the lemonade makes a sale. "
-"Assume all players have 6 coffees. <br/> Xango Blues (green colour) makes "
+"Assume all players have 6 coffees. <br /> Xango Blues (green colour) makes "
 "the sale, without a drive-thru. Can you work out which locations sell "
-"coffee?<br/> In the answers, the locations that sell are circled in green, "
-"and the locations that don't sell in red.<br/> Common road squares show the "
-"green highlight, and blue lines indicate where there is more than one "
+"coffee? <br /> In the answers, the locations that sell are circled in green, "
+"and the locations that don't sell in red. <br /> Common road squares show "
+"the green highlight, and blue lines indicate where there is more than one "
 "possible path."
-msgstr ""
-"En los siguientes ejemplos, el edificio con la limonada hace una venta. En "
-"los siguientes ejemplos, el edificio con la limonada hace una venta.Suponga "
-"que todos los jugadores tienen 6 cafés.<br/> Xango Blues (color verde) hace "
-"la venta, sin un disco.¿Pueden averiguar qué ubicaciones venden café? <br/> "
-"En las respuestas, las ubicaciones que se venden están rodeadas en verde, y "
-"las ubicaciones que no se venden en rojo. <br/> Los cuadrados de carreteras "
-"comunes muestran el punto culminante verde, y las líneas azules indican "
-"dónde hay más de un camino posible."
+msgstr "En los siguientes ejemplos, el edificio con la limonada realiza una "
+"venta. Supón que todos los jugadores tienen 6 cafés. <br /> Xango Blues "
+"(color verde) realiza la venta, sin drive-thru. ¿Puedes deducir qué "
+"ubicaciones venden café? <br /> En las respuestas, las ubicaciones que "
+"venden están rodeadas en verde, y las que no venden, en rojo. <br /> Las "
+"casillas de carretera comunes muestran el resaltado verde, y las líneas "
+"azules indican dónde hay más de un camino posible."
 
-#: .\templates\FCM\coffeeHelp.html:118
+#: .\FCM\templates\FCM\coffeeHelp.html:135
 msgid "Example 1"
 msgstr "Ejemplo 1"
 
-#: .\templates\FCM\coffeeHelp.html:137
+#: .\FCM\templates\FCM\coffeeHelp.html:164
 msgid "Answer 1"
 msgstr "Respuesta 1"
 
-#: .\templates\FCM\coffeeHelp.html:139
+#: .\FCM\templates\FCM\coffeeHelp.html:166
 msgid ""
 "One coffee is sold to Gluttony and one to Xango. The house can travel all "
 "the way around the triple lemonade square. It can travel on squares it has "
@@ -818,20 +909,20 @@ msgstr ""
 "otro a Xango.La casa puede viajar todo el camino alrededor de la triple "
 "plaza de limonada.Puede viajar en cuadrados que ya ha usado, siempre que no "
 "esté haciendo un giro en U.<b> Los lugares de venta de café no tienen que "
-"estar en la misma baldosa que la ruta, solo tienen que estar adyacentes a la"
-" carretera. </b> La casa 10 podría salir de la casa desde la plaza inferior "
+"estar en la misma baldosa que la ruta, solo tienen que estar adyacentes a la "
+"carretera. </b> La casa 10 podría salir de la casa desde la plaza inferior "
 "izquierda o la plaza superior derecha, por lo que esta parte de la ruta "
 "cuenta como \"indecisa\", y no se producirían ventas de café aquí."
 
-#: .\templates\FCM\coffeeHelp.html:150
+#: .\FCM\templates\FCM\coffeeHelp.html:176
 msgid "Example 2"
 msgstr "Ejemplo 2"
 
-#: .\templates\FCM\coffeeHelp.html:169
+#: .\FCM\templates\FCM\coffeeHelp.html:205
 msgid "Answer 2"
 msgstr "Respuesta 2"
 
-#: .\templates\FCM\coffeeHelp.html:171
+#: .\FCM\templates\FCM\coffeeHelp.html:207
 msgid ""
 "Santa Maria sells 2 coffees. House 12 will use any route that doesn't "
 "increase tile distance. So they come out onto the road square next to the "
@@ -839,9 +930,9 @@ msgid ""
 "mutually exclusive valid routes, each of which would sell one coffee. So "
 "both of these coffee shops will be skipped. Note that <b>although there is "
 "no green highlighted road directly adjacent to the Santa Maria coffee shop "
-"in this section, BOTH (all) valid coffee routes must pass adjacent to it, no"
-" matter which route is taken, and so one sale will always occur here as "
-"well.</b>"
+"in this section, BOTH (all) valid coffee routes must pass adjacent to it, no "
+"matter which route is taken, and so one sale will always occur here as well."
+"</b>"
 msgstr ""
 "Santa María vende 2 cafés. Santa María vende 2 cafés.House 12 usará "
 "cualquier ruta que no aumente la distancia del mosaico.Entonces salen a la "
@@ -854,15 +945,15 @@ msgstr ""
 "adyacentes, sin importar qué ruta se tome, por lo que una venta siempre "
 "ocurrirá aquí también. </b>."
 
-#: .\templates\FCM\coffeeHelp.html:185
+#: .\FCM\templates\FCM\coffeeHelp.html:220
 msgid "Example 3"
 msgstr "Ejemplo 3"
 
-#: .\templates\FCM\coffeeHelp.html:204
+#: .\FCM\templates\FCM\coffeeHelp.html:249
 msgid "Answer 3"
 msgstr "Respuesta 3"
 
-#: .\templates\FCM\coffeeHelp.html:206
+#: .\FCM\templates\FCM\coffeeHelp.html:251
 msgid ""
 "One coffee is sold by Santa Maria from the middle right tile. This one is a "
 "bit more complicated! Remember that the \"winning distance\" for the "
@@ -876,50 +967,48 @@ msgid ""
 "house to exit the centre tile to the bottom, it must first go all the way "
 "around the tile, passing by the Santa Maria coffee shop, before exiting to "
 "the bottom. If the house instead moves onto the right (onto the triple "
-"lemonade tile), then it will travel around the entire tile before exiting to"
-" the bottom, thus also passing this Santa Maria coffee shop. The same will "
+"lemonade tile), then it will travel around the entire tile before exiting to "
+"the bottom, thus also passing this Santa Maria coffee shop. The same will "
 "happen if the house travels along the top and then down onto the triple "
 "lemonade tile. So no matter which valid route the house chooses, it will "
 "<b>always</b> pass by one Santa Maria coffee shop, but never more than 2 of "
-"the other 3 shops, and so these are all skipped. <br/><br/> Note that there "
-"are technically a lot more valid routes than are shown with the blue lines; "
-"for example you can exit the apartment tile down onto the central tile from "
-"any of the 5 bottom road squares. But in all cases, the outcome is the same."
-msgstr ""
-"Santa María vende un café desde el mosaico del medio derecho. Un café es "
-"vendido por Santa María desde el mosaico derecha del medio.¡Este es un poco "
-"más complicado!Recuerde que la \"distancia ganadora\" para la venta de "
-"limonada es 4. Por lo que nunca puede cruzar más de 4 límites de "
-"baldosas.Independientemente de las rutas que elija al principio, hay "
-"esencialmente la ruta más alta y la ruta más baja.La ruta más alta se "
-"vendería a Santa María dos veces y la ruta inferior a Xango dos "
-"veces.Entonces, todas estas ventas se omiten.Curiosamente, no hay baldosas "
-"de carretera resaltadas en ningún lugar cerca del verde Santa María, pero "
-"<b> cada </b> ruta válida pasa por ella.Recuerde que una ruta válida debe "
-"intentar vender la mayor cantidad de café posible.Entonces, para que la casa"
-" salga de la baldosa central hacia el fondo, primero debe recorrer el "
-"azulejo, pasando por la cafetería de Santa María, antes de salir al fondo.Si"
-" la casa se mueve hacia la derecha (hacia el mosaico de limonada triple), "
-"viajará alrededor de todo el mosaico antes de salir al fondo, así que "
-"también pasará esta cafetería de Santa María.Lo mismo sucederá si la casa "
-"viaja a lo largo de la parte superior y luego baja hacia el mosaico de "
-"triple limonada.Entonces, no importa qué ruta válida elija la casa, <b> "
-"siempre </b> pasará por una cafetería de Santa María, pero nunca más de 2 de"
-" las otras 3 tiendas, por lo que todas estas se omiten.<br/> <br/> Tenga en "
-"cuenta que técnicamente hay muchas más rutas válidas de las que se muestran "
-"con las líneas azules;Por ejemplo, puede salir del mosaico de apartamentos "
-"hacia el mosaico central desde cualquiera de los 5 cuadrados de carreteras "
-"inferiores.Pero en todos los casos, el resultado es el mismo."
+"the other 3 shops, and so these are all skipped. <br /> <br /> Note that "
+"there are technically a lot more valid routes than are shown with the blue "
+"lines; for example you can exit the apartment tile down onto the central "
+"tile from any of the 5 bottom road squares. But in all cases, the outcome is "
+"the same."
+msgstr "Santa María vende un café desde la baldosa central derecha. ¡Este es "
+"un poco más complicado! Recuerda que la «distancia ganadora» para la venta "
+"de la limonada es 4. Así que nunca puedes cruzar más de 4 límites de "
+"baldosa. Elijas las rutas que elijas al principio, básicamente hay una ruta "
+"superior y una ruta inferior. La ruta superior vendería a Santa María dos "
+"veces y la ruta inferior a Xango dos veces. Así que se saltan todas estas "
+"ventas. Curiosamente, no hay ninguna baldosa de carretera resaltada cerca de "
+"la Santa María rodeada en verde, pero <b>todas</b> las rutas válidas pasan "
+"por ella. Recuerda que una ruta válida debe intentar vender todo el café "
+"posible. Así que, para que la casa salga de la baldosa central hacia abajo, "
+"primero debe recorrer toda la baldosa, pasando por la cafetería de Santa "
+"María, antes de salir por abajo. Si la casa se mueve en cambio a la derecha "
+"(a la baldosa de la limonada triple), recorrerá toda la baldosa antes de "
+"salir por abajo, pasando también por esta cafetería de Santa María. Lo mismo "
+"ocurrirá si la casa viaja por arriba y luego baja a la baldosa de la "
+"limonada triple. Así que, elija la casa la ruta válida que elija, "
+"<b>siempre</b> pasará por una cafetería de Santa María, pero nunca por más "
+"de 2 de las otras 3 tiendas, y por eso se saltan todas. <br /> <br /> Ten en "
+"cuenta que técnicamente hay muchas más rutas válidas que las que se muestran "
+"con las líneas azules; por ejemplo, puedes salir de la baldosa del edificio "
+"de apartamentos hacia la baldosa central desde cualquiera de las 5 casillas "
+"de carretera de abajo. Pero en todos los casos el resultado es el mismo."
 
-#: .\templates\FCM\coffeeHelp.html:230
+#: .\FCM\templates\FCM\coffeeHelp.html:275
 msgid "Example 4"
 msgstr "Ejemplo 4"
 
-#: .\templates\FCM\coffeeHelp.html:249
+#: .\FCM\templates\FCM\coffeeHelp.html:304
 msgid "Answer 4"
 msgstr "Respuesta 4"
 
-#: .\templates\FCM\coffeeHelp.html:251
+#: .\FCM\templates\FCM\coffeeHelp.html:306
 msgid ""
 "Siap Faji will sell one coffee. Although both blue routes would each sell "
 "one coffee to Siap Faji, both locations are skipped, as per the designer's "
@@ -932,80 +1021,993 @@ msgid ""
 msgstr ""
 "Siap Faji venderá un café. Siap Faji venderá un café.Aunque ambas rutas "
 "azules venderían un café a Siap Faji, se omiten ambas ubicaciones, según la "
-"decisión del diseñador.Piense en ello como la casa discutiendo sobre cuál de"
-" los lugares es mejor (¡aunque pertenecen a la misma cadena!) Y por lo "
-"tanto, ambos lugares se saltan.Tenga en cuenta que si reemplazara la "
-"ubicación de la cerveza verde frente a Xango con una cafetería, entonces "
-"todas las rutas ahora tendrían que pasar por esta ubicación para ser una "
-"ruta válida (porque no aumentaría la distancia del mosaico), y esa ubicación"
-" también vendería un café."
+"decisión del diseñador.Piense en ello como la casa discutiendo sobre cuál de "
+"los lugares es mejor (¡aunque pertenecen a la misma cadena!) Y por lo tanto, "
+"ambos lugares se saltan.Tenga en cuenta que si reemplazara la ubicación de "
+"la cerveza verde frente a Xango con una cafetería, entonces todas las rutas "
+"ahora tendrían que pasar por esta ubicación para ser una ruta válida (porque "
+"no aumentaría la distancia del mosaico), y esa ubicación también vendería un "
+"café."
 
-#: .\templates\FCM\coffeeHelp.html:260
+#: .\FCM\templates\FCM\coffeeHelp.html:314
 msgid "I disagree with something on this page?"
 msgstr "No estoy de acuerdo con algo en esta página?"
 
-#: .\templates\FCM\coffeeHelp.html:262
+#: .\FCM\templates\FCM\coffeeHelp.html:316
 msgid ""
 "Coffee is complicated! I had to rewrite the algorithm several times as my "
 "understanding of the finer points of the rules changed as I went through "
 "development. Any things I wasn't certain of I found clarifications from the "
 "game designer on Board Game Geek. I have had a big input from my playtester "
 "as well, ensuring that the rules are strictly followed and any ambiguities "
-"from the rulebook follow the designer's rulings on BGG. <br/> <br/> If you "
+"from the rulebook follow the designer's rulings on BGG. <br /> <br /> If you "
 "are unsure, I would strongly urge you to ask in the Board Game Geek forums "
 "about it, and if the answer is different to something on this page, please "
 "contact me."
-msgstr ""
-"¡El café es complicado! ¡El café es complicado!Tuve que reescribir el "
-"algoritmo varias veces mientras mi comprensión de los puntos más finos de "
-"las reglas cambiaba a medida que pasaba por el desarrollo.En cualquier cosa "
-"que no estaba seguro de que encontré aclaraciones del diseñador de juegos a "
-"bordo del geek del juego.También he tenido un gran aporte de mi PlayTester, "
-"asegurando que las reglas se sigan estrictamente y cualquier ambigüedad del "
-"libro de reglas siga las decisiones del diseñador en BGG.<br/> <br/> Si no "
-"está seguro, le insto encarecidamente que pregunte en los foros geek del "
-"juego de mesa, y si la respuesta es diferente a algo en esta página, "
-"contácteme."
+msgstr "¡El café es complicado! Tuve que reescribir el algoritmo varias "
+"veces, ya que mi comprensión de los puntos más finos de las reglas fue "
+"cambiando a lo largo del desarrollo. Cualquier cosa de la que no estaba "
+"seguro la consulté con el diseñador del juego en Board Game Geek. También he "
+"contado con una gran aportación de mi probador de juego, asegurando que las "
+"reglas se siguen estrictamente y que cualquier ambigüedad del reglamento "
+"sigue las decisiones del diseñador en BGG. <br /> <br /> Si tienes dudas, te "
+"animo encarecidamente a preguntar en los foros de Board Game Geek, y si la "
+"respuesta difiere de algo de esta página, ponte en contacto conmigo."
 
-#: .\views.py:92
-msgid "Please Select an Expert Option"
-msgstr "Seleccione una opción experta"
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:12
+msgid "Fan Expansions Help"
+msgstr "Ayuda de las expansiones de fans"
 
-#: .\views.py:160
-#, python-brace-format
-msgid "Error: {username} does not exist"
-msgstr "Error: {username} no existe"
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:19
+msgid ""
+"These modules are fan-made expansions. They are not official Splotter "
+"Spellen content. <br /> Games with these modules are therefore excluded from "
+"the stats. <br /> Fan modules can be enabled in the options when creating a "
+"new FCM game."
+msgstr "Estos módulos son expansiones creadas por fans. No son contenido "
+"oficial de Splotter Spellen. <br /> Por lo tanto, las partidas con estos "
+"módulos quedan excluidas de las estadísticas. <br /> Los módulos de fans se "
+"pueden activar en las opciones al crear una nueva partida de FCM."
 
-#: .\views.py:163
-msgid "Error: You cannot add yourself"
-msgstr "Error: no puede agregarle"
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:27
+msgid "Fried Chicken"
+msgstr "Pollo frito"
 
-#: .\views.py:376
-msgid "Your Practice game has been started"
-msgstr "Tu juego de práctica ha sido empezado"
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:41
+msgid ""
+"Fried chicken is a new food born from unhappy customers. When regular demand "
+"goes unserved, frustrated residents start craving fried chicken - and if "
+"nobody delivers, they eventually move out of the neighbourhood. Selling the "
+"very first fried chicken grants a lucrative but risky monopoly."
+msgstr "El pollo frito es una nueva comida nacida de clientes descontentos. "
+"Cuando la demanda normal queda sin atender, los residentes frustrados "
+"empiezan a ansiar pollo frito y, si nadie se lo lleva, acaban mudándose del "
+"vecindario. Vender el primer pollo frito otorga un monopolio lucrativo pero "
+"arriesgado."
 
-#: .\views.py:379
-msgid "Your AI game has been started"
-msgstr "Tu juego de IA ha sido iniciado"
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:49
+msgid ""
+"Flipping: At Dinnertime, if none of a house's regular demand can be served "
+"(every restaurant is too far away, sold out, or too expensive), each "
+"unserved regular demand token flips into ownerless demand for Fried Chicken."
+msgstr "Conversión: en la fase de la cena, si no se puede atender nada de la "
+"demanda normal de una casa (todos los restaurantes están demasiado lejos, "
+"agotados o son demasiado caros), cada ficha de demanda normal sin atender se "
+"convierte en demanda de pollo frito sin propietario."
 
-#: .\views.py:390 .\views.py:675 .\views.py:734 .\views.py:1587
-#: .\views.py:1705 .\views.py:1749 .\views.py:1771 .\views.py:1796
-#: .\views.py:1849
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:54
+msgid ""
+"Moving out: If flipped Fried Chicken demand is still unserved at its second "
+"Dinnertime, the residents move out. All demand is removed, a SOLD sign is "
+"placed on the house, and it will not accept any marketing for the rest of "
+"the game."
+msgstr "Mudanza: si la demanda de pollo frito convertida sigue sin atenderse "
+"en su segunda fase de la cena, los residentes se mudan. Se elimina toda la "
+"demanda, se coloca un cartel de SE VENDE en la casa y esta no aceptará "
+"ningún marketing durante el resto de la partida."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:59
+msgid ""
+"Origin of demand: Fried Chicken demand is normally only created by flipping "
+"- marketing employees cannot create it. Fried Chicken is otherwise a normal "
+"food item: it is sold at your normal price, matched by nearest and cheapest "
+"as usual, and may be stored in the fridge."
+msgstr "Origen de la demanda: la demanda de pollo frito normalmente solo se "
+"crea por conversión; los empleados de marketing no pueden crearla. Por lo "
+"demás, el pollo frito es un producto normal: se vende a tu precio normal, se "
+"empareja por cercanía y precio más bajo como de costumbre, y se puede "
+"almacenar en la nevera."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:64
+msgid ""
+"Milestone \"First fried chicken sold\": The first player to sell Fried "
+"Chicken gains this Milestone, which grants two permanent perks: 1) the "
+"exclusive right to market Fried Chicken (no other player may ever add it to "
+"a campaign), and 2) a brand premium of +$5 for every Fried Chicken sold. The "
+"premium applies from the sale after the Milestone is earned, so the "
+"milestone-earning sale itself does not get the bonus."
+msgstr "Hito «Primer pollo frito vendido»: el primer jugador que venda pollo "
+"frito obtiene este Hito, que otorga dos ventajas permanentes: 1) el derecho "
+"exclusivo a hacer marketing de pollo frito (ningún otro jugador podrá "
+"añadirlo nunca a una campaña) y 2) una prima de marca de +$5 por cada pollo "
+"frito vendido. La prima se aplica desde la venta posterior a la obtención "
+"del Hito, así que la venta que otorga el hito no recibe el bonus."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:69
+msgid ""
+"Strict liability: Fried Chicken marketed by the Milestone player has only "
+"one life. If any marketed Fried Chicken is unserved at Dinnertime, that "
+"house moves out at the very next Dinnertime settlement - before any matching "
+"takes place and with no flip as a buffer. Regular demand gets two lives "
+"(original demand, then flip); marketed Fried Chicken gets just one."
+msgstr "Responsabilidad estricta: el pollo frito promocionado por el jugador "
+"del Hito solo tiene una vida. Si algún pollo frito promocionado queda sin "
+"atender en la fase de la cena, esa casa se muda en la siguiente fase de la "
+"cena, antes de que se realice cualquier emparejamiento y sin conversión que "
+"sirva de colchón. La demanda normal tiene dos vidas (demanda original y "
+"luego conversión); el pollo frito promocionado solo tiene una."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:74
+msgid ""
+"Employees: Fried Chicken is produced by the Fried Chicken Cook (3 per turn, "
+"trained from a Kitchen Trainee; there are 6 in the game) and the Fried "
+"Chicken Chef (8 per turn, trained from a Fried Chicken Cook; a 1x employee). "
+"A Kitchen Trainee cannot produce Fried Chicken directly. Salaries and "
+"training follow the standard employee tiers. When the Fry Chefs module is in "
+"use, a Fried Chicken Cook may also be trained into a Fry Chef."
+msgstr "Empleados: el pollo frito lo producen el Cocinero de pollo frito (3 "
+"por turno, formado a partir de un Aprendiz de cocina; hay 6 en la partida) y "
+"el Chef de pollo frito (8 por turno, formado a partir de un Cocinero de "
+"pollo frito; empleado 1x). Un Aprendiz de cocina no puede producir pollo "
+"frito directamente. Los salarios y el entrenamiento siguen los niveles de "
+"empleado estándar. Cuando el módulo Fry Chefs está en uso, un Cocinero de "
+"pollo frito también puede formarse como Fry Chef."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:79
+msgid ""
+"Rural exemption: The Rural Marketing Area never flips and never moves out."
+msgstr "Exención rural: la zona de marketing rural nunca se convierte ni se "
+"muda."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:88
+msgid "Stadium"
+msgstr "Estadio"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:102
+msgid ""
+"The Stadium is a giant building spanning two map tiles. On game day the "
+"whole city turns into one huge customer: a big crowd with a big appetite for "
+"exactly one food. Games are held every 3 turns and announced well in advance "
+"- stocking up and pricing become a battle for a winner-takes-all jackpot. "
+"Recommended for games with 3 or more players."
+msgstr "El Estadio es un edificio gigante que abarca dos baldosas del mapa. "
+"El día del partido, toda la ciudad se convierte en un único cliente enorme: "
+"una gran multitud con un gran apetito por exactamente una comida. Los "
+"partidos se celebran cada 3 turnos y se anuncian con mucha antelación: "
+"abastecerse y fijar precios se convierte en una batalla por un premio que se "
+"lo lleva todo. Recomendado para partidas de 3 o más jugadores."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:110
+msgid ""
+"The building: When this module is enabled, the Stadium replaces two adjacent "
+"map tiles at game start, at a random position and orientation, and stays "
+"fixed for the whole game. It is all stadium and surrounding road - no "
+"building lots and no houses, so it produces no regular demand. Its value is "
+"the road network and game day."
+msgstr "El edificio: cuando este módulo está activado, el Estadio sustituye "
+"dos baldosas adyacentes del mapa al inicio de la partida, en una posición y "
+"orientación aleatorias, y permanece fijo durante toda la partida. Es todo "
+"estadio y carretera circundante: no hay solares ni casas, así que no produce "
+"demanda normal. Su valor está en la red de carreteras y en el día del "
+"partido."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:115
+msgid ""
+"Schedule: Games are played on turns 5, 8, 11, ... - every 3 turns, starting "
+"with turn 5."
+msgstr "Calendario: los partidos se juegan en los turnos 5, 8, 11, ... cada 3 "
+"turnos, empezando por el turno 5."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:120
+msgid ""
+"The announcement: At the end of a turn, 2 turns before each game, an "
+"announcement reveals which single food the crowd wants. The food is always "
+"mass-market: pizza or burgers, plus noodles, dumplings or fried chicken if "
+"that module is enabled in the same game - never sushi, never drinks or "
+"kimchi."
+msgstr "El anuncio: al final de un turno, 2 turnos antes de cada partido, un "
+"anuncio revela qué única comida quiere la multitud. La comida es siempre de "
+"mercado masivo: pizza o hamburguesas, además de fideos, empanadillas o pollo "
+"frito si ese módulo está activado en la misma partida; nunca sushi, ni "
+"bebidas ni kimchi."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:125
+msgid ""
+"Crowd size: 6 units at the first game, 12 at the second, and 16 from the "
+"third game onward."
+msgstr "Tamaño de la multitud: 6 unidades en el primer partido, 12 en el "
+"segundo y 16 a partir del tercer partido."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:130
+msgid ""
+"Dinnertime on game day: The Stadium (house number 0.1) eats before every "
+"house. Standard matching rules apply: among the restaurants that have the "
+"full amount in stock, the nearest one wins, ties broken by cheapest price. "
+"The winner sells all units in a single sale."
+msgstr "Fase de la cena el día del partido: el Estadio (casa número 0.1) come "
+"antes que cualquier casa. Se aplican las reglas de emparejamiento estándar: "
+"entre los restaurantes que tengan la cantidad completa en existencias, gana "
+"el más cercano y los empates se resuelven por el precio más bajo. El ganador "
+"vende todas las unidades en una sola venta."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:135
+msgid ""
+"One-day event: If no restaurant can supply the full amount, the demand "
+"disappears at Dinnertime - the game is not postponed."
+msgstr "Evento de un solo día: si ningún restaurante puede suministrar la "
+"cantidad completa, la demanda desaparece en la fase de la cena; el partido "
+"no se aplaza."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:140
+msgid ""
+"Isolation: Stadium demand never flips into Fried Chicken and never moves "
+"out. It cannot be targeted by marketing campaigns, and substitution effects "
+"(noodle or sushi replacements, kimchi combos) do not apply. Units sold count "
+"normally towards \"first sold\" milestones."
+msgstr "Aislamiento: la demanda del Estadio nunca se convierte en pollo frito "
+"ni se muda. No puede ser objetivo de campañas de marketing, y los efectos de "
+"sustitución (reemplazos de fideos o sushi, combinaciones de kimchi) no se "
+"aplican. Las unidades vendidas cuentan normalmente para los hitos de "
+"«primero en vender»."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:145
+msgid ""
+"Milestone \"First stadium supplier\": The first player to win a stadium game "
+"gains this Milestone. Reward: future announcements reach this player 3 turns "
+"before the game instead of 2 - privately, one turn before everyone else "
+"learns."
+msgstr "Hito «Primer proveedor del estadio»: el primer jugador que gane un "
+"partido del estadio obtiene este Hito. Recompensa: los futuros anuncios "
+"llegan a este jugador 3 turnos antes del partido en lugar de 2; en privado, "
+"un turno antes de que todos los demás se enteren."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:154
+msgid "Labor Market"
+msgstr "Mercado laboral"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:160
+msgid ""
+"Labor Market turns staffing from private engine-building into a shared "
+"contest. Each company has one Temporary Worker whose value rises as rivals "
+"use theirs; Headhunters turn idle talent on the Beach into both an "
+"opportunity and a liability; and Union Organizers make the largest active "
+"workforces pay for their scale. These pressures overlap: sending more people "
+"to work protects valuable staff but risks attracting a union, while resting "
+"them limits company size but exposes them to competitors. Temporary Workers "
+"offer a third path by producing more actions without adding more workers."
+msgstr "El Mercado laboral convierte el personal de una construcción privada "
+"de motor en una competición compartida. Cada empresa tiene un Trabajador "
+"temporal cuyo valor aumenta a medida que los rivales usan el suyo; los "
+"Cazatalentos convierten el talento ocioso de la Playa en una oportunidad y a "
+"la vez en una responsabilidad; y los Organizadores sindicales hacen que las "
+"plantillas activas más grandes paguen por su escala. Estas presiones se "
+"solapan: enviar a más gente a trabajar protege al personal valioso, pero "
+"arriesga atraer a un sindicato, mientras que dejarlos descansar limita el "
+"tamaño de la empresa, pero los expone a los competidores. Los Trabajadores "
+"temporales ofrecen una tercera vía, ya que producen más acciones sin añadir "
+"más trabajadores."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:161
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:234
+msgid "Rules"
+msgstr "Normas"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:163
+msgid ""
+"Temporary Worker: Every player starts with one on their Beach. At the start "
+"of each turn, its action limit is frozen at 1 plus the number of Temporary "
+"Workers removed before that turn. Before hiring, assign each action to "
+"Waitress, Pricing Manager, Recruiting Girl, Trainer, Errand Boy, Marketing "
+"Trainee or Kitchen Trainee. Different actions may copy different employees, "
+"and the same employee may be chosen repeatedly. It is never doubled by Night "
+"Shift, earns no salary and is permanently removed after that player's "
+"Working Day. Unassigned or unused actions are forfeited."
+msgstr "Trabajador temporal: cada jugador empieza con uno en su Playa. Al "
+"comienzo de cada turno, su límite de acciones queda fijado en 1 más el "
+"número de Trabajadores temporales retirados antes de ese turno. Antes de "
+"contratar, asigna cada acción a Camarera, Gerente de precios, Chica de "
+"reclutamiento, Entrenador, Chico de recados, Alumno de marketing o Aprendiz "
+"de cocina. Acciones distintas pueden copiar empleados distintos, y el mismo "
+"empleado puede elegirse repetidamente. Nunca se duplica por el Turno de "
+"noche, no gana salario y se retira permanentemente después del Día laboral "
+"de ese jugador. Las acciones no asignadas o no usadas se pierden."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:164
+msgid ""
+"Temporary Worker example: Two Temporary Workers had been removed before the "
+"current turn, so every Temporary Worker used this turn receives 3 actions. "
+"You may choose Trainer, Trainer and Recruiting Girl for two training actions "
+"and one recruiting action. A rival using theirs later in the same turn also "
+"receives 3 actions, even after yours has been removed."
+msgstr "Ejemplo de Trabajador temporal: se habían retirado dos Trabajadores "
+"temporales antes del turno actual, así que cada Trabajador temporal usado "
+"este turno recibe 3 acciones. Puedes elegir Entrenador, Entrenador y Chica "
+"de reclutamiento para dos acciones de entrenamiento y una de contratación. "
+"Un rival que use el suyo más tarde en el mismo turno también recibe 3 "
+"acciones, incluso después de que el tuyo se haya retirado."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:165
+msgid ""
+"Temporary campaigns: A Temporary Worker acting as a Marketing Trainee "
+"creates a normal campaign, but no employee card is attached and nothing "
+"returns to the Beach when it expires."
+msgstr "Campañas temporales: un Trabajador temporal que actúe como Alumno de "
+"marketing crea una campaña normal, pero no se le asocia ninguna carta de "
+"empleado y nada vuelve a la Playa cuando caduca."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:166
+msgid ""
+"Headhunter: Train one level from a Management Trainee. It is a level-2 "
+"salaried employee. Each working Headhunter may take one legal employee from "
+"another player's current Beach. If that employee is still employed at "
+"Payday, pay its normal salary, if any, plus a one-time job-switch salary of "
+"$10 per employee level to the bank. If it is fired before Payday, no job-"
+"switch salary is due. Temporary Workers, Headhunters, Union Organizers and "
+"other non-transferable employees are illegal targets."
+msgstr "Cazatalentos: se forma un nivel a partir de un Aprendiz de gestión. "
+"Es un empleado asalariado de nivel 2. Cada Cazatalentos en activo puede "
+"tomar un empleado legal de la Playa actual de otro jugador. Si ese empleado "
+"sigue empleado en el Día de pago, paga su salario normal, si lo tiene, más "
+"un salario único de cambio de trabajo de $10 por nivel del empleado al "
+"banco. Si es despedido antes del Día de pago, no se debe ningún salario de "
+"cambio de trabajo. Los Trabajadores temporales, los Cazatalentos, los "
+"Organizadores sindicales y otros empleados no transferibles son objetivos "
+"ilegales."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:167
+msgid ""
+"Headhunter example: You take a level-4 Senior Vice President from an "
+"opponent's Beach. If you keep it until Payday, you pay its normal $5 salary "
+"plus a one-time $40 job-switch salary to the bank, for $45 total. If you "
+"fire it before Payday, neither payment is due for that employee."
+msgstr "Ejemplo de Cazatalentos: tomas un Vicepresidente sénior de nivel 4 de "
+"la Playa de un oponente. Si lo mantienes hasta el Día de pago, pagas su "
+"salario normal de $5 más un salario único de cambio de trabajo de $40 al "
+"banco, $45 en total. Si lo despidas antes del Día de pago, no se debe "
+"ninguno de los dos pagos por ese empleado."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:168
+msgid ""
+"Unique employees and salary milestones: A Headhunter cannot take a unique "
+"employee when the hiring player already owns the same unique employee. The "
+"Headhunter action does not require cash on hand. The First to train someone "
+"milestone reduces the combined normal and job-switch salaries by $15. The "
+"First Trainer Used milestone protects all employees when the company still "
+"cannot pay, following the normal bankruptcy rule. A job-switch salary is "
+"removed after that Payday and is never charged again."
+msgstr "Empleados únicos e hitos de salario: un Cazatalentos no puede tomar "
+"un empleado único cuando el jugador que contrata ya posee ese mismo empleado "
+"único. La acción de Cazatalentos no requiere dinero en efectivo. El hito "
+"«Primero en entrenar a alguien» reduce los salarios normales y de cambio de "
+"trabajo combinados en $15. El hito «Primer entrenador usado» protege a todos "
+"los empleados cuando la empresa todavía no puede pagar, siguiendo la regla "
+"normal de bancarrota. Un salario de cambio de trabajo se elimina después de "
+"ese Día de pago y nunca se vuelve a cobrar."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:169
+msgid ""
+"Union Organizer: The game uses one card per player, with inactive cards in "
+"the public supply. After all Working Days, ignore companies with fewer than "
+"5 workers, then give one Organizer to every company tied for the largest "
+"eligible workforce. All other Organizer cards return to the public supply."
+msgstr "Organizador sindical: la partida usa una carta por jugador, con las "
+"cartas inactivas en la reserva pública. Después de todos los Días laborales, "
+"ignora las empresas con menos de 5 trabajadores y luego entrega un "
+"Organizador a cada empresa empatada con la plantilla elegible más grande. "
+"Todas las demás cartas de Organizador vuelven a la reserva pública."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:170
+msgid ""
+"Union Organizer example: Companies A, B and C send 6, 6 and 5 employees to "
+"work. All three meet the 5-worker threshold, but only A and B are tied for "
+"the largest workforce, so each receives an Organizer for the next Working "
+"Day; C receives none."
+msgstr "Ejemplo de Organizador sindical: las empresas A, B y C envían a "
+"trabajar 6, 6 y 5 empleados. Las tres superan el umbral de 5 trabajadores, "
+"pero solo A y B están empatadas con la plantilla más grande, así que cada "
+"una recibe un Organizador para el siguiente Día laboral; C no recibe "
+"ninguno."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:171
+msgid ""
+"Each Union Organizer must occupy one slot directly under the CEO on the next "
+"Working Day, provides no action or subordinate slots, and costs $5 at "
+"Payday. It cannot be hired, trained, fired or headhunted, and it is excluded "
+"from workforce counts. A working Temporary Worker counts as one employee "
+"regardless of its number of actions."
+msgstr "Cada Organizador sindical debe ocupar una ranura directamente debajo "
+"del CEO en el siguiente Día laboral, no proporciona ninguna acción ni "
+"ranuras subordinadas, y cuesta $5 en el Día de pago. No se puede contratar, "
+"entrenar, despedir ni captar, y queda excluido de los recuentos de "
+"plantilla. Un Trabajador temporal en activo cuenta como un empleado, "
+"independientemente de su número de acciones."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:177
+msgid "Second Bailout"
+msgstr "Segundo rescate"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:186
+msgid ""
+"In the base game the bank only breaks once. With this module the city steps "
+"in the second time: the bank gets a fresh cash injection and every player "
+"receives a free level-2 marketing employee. The game only ends for good on "
+"the third break."
+msgstr "En el juego básico el banco solo quiebra una vez. Con este módulo, la "
+"ciudad interviene la segunda vez: el banco recibe una nueva inyección de "
+"efectivo y cada jugador recibe un empleado de marketing de nivel 2 gratis. "
+"La partida solo termina definitivamente en la tercera quiebra."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:194
+msgid ""
+"First break: unchanged - reserve cards are cashed in (or prices re-picked "
+"with the price-changing reserve cards) exactly as in the base game."
+msgstr "Primera quiebra: sin cambios; las tarjetas de reserva se cobran (o se "
+"vuelven a elegir precios con las tarjetas de reserva que cambian precios) "
+"exactamente igual que en el juego básico."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:199
+msgid ""
+"Second break: the city bails the bank out. The bank immediately receives "
+"$300 per player (e.g. +$600 in a 2-player game, +$1500 with 5 players)."
+msgstr "Segunda quiebra: la ciudad rescata al banco. El banco recibe "
+"inmediatamente $300 por jugador (por ejemplo, +$600 en una partida de 2 "
+"jugadores, +$1500 con 5 jugadores)."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:204
+msgid ""
+"The gift: on the night of the bailout, players pick one free level-2 "
+"marketing employee each, in turn order, first come first served: Campaign "
+"Manager (always), plus Rural Marketeer, Mass Marketeer, Gourmet Food Critic "
+"or Hawker Marketeer if the matching module is enabled in this game. A card "
+"that is sold out in the talent market cannot be picked; if nothing is left "
+"when your turn comes, you get nothing. You may also decline."
+msgstr "El regalo: la noche del rescate, los jugadores eligen un empleado de "
+"marketing de nivel 2 gratis cada uno, por orden de turno y por orden de "
+"llegada: Gerente de campaña (siempre), más Vendedor rural, Vendedor masivo, "
+"Crítico de comida gourmet o Vendedor ambulante si el módulo correspondiente "
+"está activado en esta partida. Una carta agotada en el mercado de talento no "
+"se puede elegir; si no queda nada cuando llega tu turno, no recibes nada. "
+"También puedes rechazarlo."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:209
+msgid ""
+"The gift is not a hire: it does not trigger \"first to hire 3 employees\" "
+"style milestones. The employee joins your beach and is paid like any other "
+"employee - getting them onto the schedule and affording their salary is your "
+"problem. Module milestones (e.g. \"first Rural Marketeer used\") still "
+"trigger normally the first time you market with them."
+msgstr "El regalo no es una contratación: no activa hitos del estilo «primero "
+"en contratar 3 empleados». El empleado se une a tu playa y se le paga como a "
+"cualquier otro empleado; conseguir ponerlo en el horario y poder pagar su "
+"salario es cosa tuya. Los hitos de módulo (por ejemplo, «primer Vendedor "
+"rural usado») siguen activándose con normalidad la primera vez que hagas "
+"marketing con ellos."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:214
+msgid "Third break: the game ends immediately - there is only one bailout."
+msgstr "Tercera quiebra: la partida termina inmediatamente; solo hay un "
+"rescate."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:219
+msgid ""
+"Short games are unaffected: the first break already ends them, so the "
+"bailout never happens."
+msgstr "Las partidas cortas no se ven afectadas: la primera quiebra ya las "
+"termina, así que el rescate nunca ocurre."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:228
+msgid "Media Line"
+msgstr "Línea de medios"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:229
+msgid "Telemarketer"
+msgstr "Teleoperador"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:230
+msgid "TV Announcer"
+msgstr "Locutor de televisión"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:233
+msgid ""
+"The base game's marketing is paper: billboards, mail, airplanes. This module "
+"adds the airwaves. A Telemarketer calls the houses right next door - no "
+"roads required, one call per house. A TV Announcer mounts antennas on five "
+"nearby roofs and owns the news: one story moves every price in the city by "
+"$5 tomorrow, up or down. Demand is small but surgical - the payoff is one "
+"perfectly stocked jackpot night that can break the bank."
+msgstr "El marketing del juego básico es de papel: vallas publicitarias, "
+"correo, aviones. Este módulo añade las ondas. Un Teleoperador llama a las "
+"casas de al lado; no se necesitan carreteras, una llamada por casa. Un "
+"Locutor de televisión monta antenas en cinco tejados cercanos y es dueño de "
+"las noticias: una noticia mueve mañana todos los precios de la ciudad en $5, "
+"arriba o abajo. La demanda es pequeña, pero quirúrgica: la recompensa es una "
+"noche de premio perfectamente abastecida que puede hacer quebrar el banco."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:236
+msgid ""
+"Training chain: Marketing Trainee → Telemarketer (level 2) → TV Announcer "
+"(level 3) → Brand Director. Six of each; cards may be stacked."
+msgstr "Cadena de formación: Alumno de marketing → Teleoperador (nivel 2) → "
+"Locutor de televisión (nivel 3) → Director de marca. Seis de cada; las "
+"cartas pueden apilarse."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:237
+msgid ""
+"Telemarketer: places 2x1 phone tokens attached to buildings (not roads) "
+"within one orthogonal step of your restaurant (a cross of 5 tiles). Each "
+"action places up to two tokens - two calls with the same food and duration, "
+"placed together; you may place only one. A token wedged between two houses "
+"reaches both. Duration 1-3 nights. The city has only 6 tokens: at most 6 "
+"calls on the board at once."
+msgstr "Teleoperador: coloca fichas de teléfono de 2x1 unidas a edificios (no "
+"a carreteras) a un paso ortogonal de tu restaurante (una cruz de 5 "
+"baldosas). Cada acción coloca hasta dos fichas: dos llamadas con la misma "
+"comida y duración, colocadas juntas; puedes colocar solo una. Una ficha "
+"encajada entre dos casas llega a ambas. Duración de 1 a 3 noches. La ciudad "
+"solo tiene 6 fichas: como máximo 6 llamadas en el tablero a la vez."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:238
+msgid ""
+"TV Announcer: picks exactly 5 houses within 2 steps of your restaurant (a "
+"diamond of 13 tiles) and mounts a rooftop antenna on each. Duration 1-4 "
+"nights. The city has only 2 channels: at most 2 TV campaigns at once; one "
+"player holding both has a monopoly."
+msgstr "Locutor de televisión: elige exactamente 5 casas a 2 pasos de tu "
+"restaurante (un rombo de 13 baldosas) y monta una antena de tejado en cada "
+"una. Duración de 1 a 4 noches. La ciudad solo tiene 2 canales: como máximo 2 "
+"campañas de televisión a la vez; un jugador que tenga ambas tiene el "
+"monopolio."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:239
+msgid ""
+"Headline (TV Announcer only, free, one per working announcer per turn): "
+"tomorrow night every sale in the city pays +$5 (Prime Time) or -$5 (Bad "
+"Press). Stories stack and cancel each other out, clamped to a city-wide "
+"total of +$10 or -$10."
+msgstr "Titular (solo Locutor de televisión, gratis, uno por locutor en "
+"activo por turno): mañana por la noche todas las ventas de la ciudad pagan "
+"+$5 (Horario de máxima audiencia) o -$5 (Mala prensa). Las noticias se "
+"acumulan y se anulan entre sí, con un límite total en toda la ciudad de +$10 "
+"o -$10."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:240
+msgid ""
+"Timing: campaigns start pushing demand the turn after placement, like all "
+"campaigns. Houses keep the usual 3-demand cap; the different media push in a "
+"fixed order."
+msgstr "Momento: las campañas empiezan a empujar la demanda el turno "
+"siguiente a su colocación, como todas las campañas. Las casas mantienen el "
+"límite habitual de 3 de demanda; los distintos medios empujan en un orden "
+"fijo."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:241
+msgid "Unserved orders stay on the house and may be fulfilled by anyone."
+msgstr "Los pedidos sin atender permanecen en la casa y puede satisfacerlos "
+"cualquiera."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:242
+msgid ""
+"Milestone \"First Telemarketer used\": unlocks a permanent group bonus - at "
+"Dinnertime, if every house of one of your media groups (the 2 phone houses "
+"or the 5 antenna houses) is served entirely by you, earn $10 per house ($20 "
+"per phone group, $50 per TV group; groups settle separately). Requires "
+"purity: no other marketing employees or campaigns of yours may be active "
+"that night."
+msgstr "Hito «Primer Teleoperador usado»: desbloquea una bonificación de "
+"grupo permanente; en la fase de la cena, si todas las casas de uno de tus "
+"grupos de medios (las 2 casas de teléfono o las 5 casas de antena) son "
+"atendidas íntegramente por ti, gana $10 por casa ($20 por grupo de teléfono, "
+"$50 por grupo de televisión; los grupos se resuelven por separado). Requiere "
+"pureza: ningún otro empleado de marketing ni campaña tuya puede estar activa "
+"esa noche."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:243
+msgid ""
+"Milestone \"First TV Announcer used\": one-time launch bonus - during your "
+"first TV campaign, every antenna house gets 2 demand per night instead of 1."
+msgstr "Hito «Primer Locutor de televisión usado»: bonificación de "
+"lanzamiento única; durante tu primera campaña de televisión, cada casa de "
+"antena recibe 2 de demanda por noche en lugar de 1."
+
+#: .\FCM\templates\FCM\showFCMgame.html:93
+#: .\FCM\templates\FCM\showFCMgameTutorial.html:49
+msgid "Please enable Javascript to continue."
+msgstr "Activa JavaScript para continuar."
+
+#: .\FCM\templates\FCM\showFCMgame.html:96
+msgid "Food Chain Magnate is loading........"
+msgstr "Food Chain Magnate se está cargando........"
+
+#: .\FCM\templates\FCM\showFCMgameTutorial.html:16
+#: .\FCM\templates\FCM\showFCMgameTutorial.html:76
+msgid "FCM Tutorial"
+msgstr "Tutorial de FCM"
+
+#: .\FCM\templates\FCM\showFCMgameTutorial.html:52
+msgid "The tutorial is loading........"
+msgstr "El tutorial se está cargando........"
+
+#: .\FCM\views.py:437 .\FCM\views.py:459 .\FCM\views.py:1546
+#: .\FCM\views.py:1606
 msgid "Game does not exist"
 msgstr "El juego no existe"
 
-#: .\views.py:393
-msgid "The game is not Active"
-msgstr "El juego no está activo"
+#: .\FCM\views.py:468 .\FCM\views.py:1548 .\FCM\views.py:1608
+msgid "You are not a player in this game"
+msgstr "No eres un jugador de esta partida"
 
-#: .\views.py:1372
+#: .\FCM\views.py:1271 .\FCM\views.py:1332
 msgid ""
-"No rewind data. Rewind limit reached. Please play on to generate more rewind"
-" data"
+"No rewind data. Rewind limit reached. Please play on to generate more rewind "
+"data"
 msgstr ""
 "Sin datos de rebobinado. No hay datos de rebobinado.Límite de rebobinado "
 "alcanzado.Juega para generar más datos de rebobinado"
 
-#: .\views.py:1379
+#: .\FCM\views.py:1281
 msgid "Permissions missing. Please reload the page and check again"
 msgstr "Permisos faltantes.Recargue la página y vuelva a verificar"
+
+#: .\FCM\views.py:1404
+msgid "Permissions missing"
+msgstr "Faltan permisos"
+
+#~ msgid "Open"
+#~ msgstr "Abierto"
+
+#~ msgid "In Progress"
+#~ msgstr "En curso"
+
+#~ msgid "Rounds"
+#~ msgstr "Rondas"
+
+#~ msgid "Knockout"
+#~ msgstr "Knockear"
+
+#~ msgid "Two Lives"
+#~ msgstr "Dos vidas"
+
+#~ msgid "Points"
+#~ msgstr "Agujas"
+
+#~ msgid "Round"
+#~ msgstr "ronda"
+
+#~ msgid "Game"
+#~ msgstr "Juego"
+
+#~ msgid "Winner"
+#~ msgstr "Ganador"
+
+#~ msgid "BYES:"
+#~ msgstr "Adiós:"
+
+#~ msgid "Single Permission"
+#~ msgstr "Permiso único"
+
+#~ msgid "Permanent Permission"
+#~ msgstr "Permiso permanente"
+
+#~ msgid ""
+#~ "Expert options appear in an orange panel. They are meant to allow players "
+#~ "to automate decisions that are obvious choices to make, and thus allow "
+#~ "games to progress a bit faster.<br/> You can select your preference for "
+#~ "Order Of Business during restructuring. A note is added in history as "
+#~ "turn order is resolved if the decision was automatic. Of course, it is "
+#~ "very possible to select \"Earliest possible\" and stll end up in last "
+#~ "position - this just meant that everyone else had more open slots or an "
+#~ "earlier turn order than you, and also chose to go early in turn order. "
+#~ "<br/> You can select to autopay salary even if you don't have enough "
+#~ "money, if you do end up having enough money after dinnertime. Similarly, "
+#~ "if you have the Beer Milestone but no fridge, you can choose to pay in as "
+#~ "much food as possible, and then money. You also have the option of "
+#~ "keeping all remaining food if you have a fridge and end up with less than "
+#~ "10 items.<br/> <b>Note: </b>Even if you select an expert option, you "
+#~ "still might end up playing that phase. For example, if you don't have "
+#~ "enough money for salary, you will need to fire someone, and so must play "
+#~ "the salary phase. Also, if you end up with kimchi plus other items, you "
+#~ "will be required to play the Cleanup phase. Game rewinds and player "
+#~ "kickouts can also result in phases needing to be played that you had "
+#~ "selected to skip."
+#~ msgstr ""
+#~ "Las opciones de expertos aparecen en un panel naranja. Las opciones de "
+#~ "expertos aparecen en un panel naranja.Están destinados a permitir a los "
+#~ "jugadores automatizar las decisiones que son opciones obvias de tomar y, "
+#~ "por lo tanto, permitir que los juegos progresen un poco más rápido. <br/> "
+#~ "Puede seleccionar su preferencia por el orden de los negocios durante la "
+#~ "reestructuración.Se agrega una nota en el historial a medida que se "
+#~ "resuelve la orden de turno si la decisión era automática.Por supuesto, es "
+#~ "muy posible seleccionar \"más temprano posible\" y Stll termina en la "
+#~ "última posición, esto solo significaba que todos los demás tenían más "
+#~ "ranuras abiertas o una orden de turno anterior que usted, y también "
+#~ "eligió ir temprano a la orden de su vez.<br/> Puede seleccionar salario "
+#~ "automático incluso si no tiene suficiente dinero, si termina teniendo "
+#~ "suficiente dinero después de la hora de la cena.Del mismo modo, si tiene "
+#~ "el hito de la cerveza pero no hay refrigerador, puede optar por pagar la "
+#~ "mayor cantidad de comida posible y luego dinero.También tiene la opción "
+#~ "de mantener toda la comida restante si tiene una nevera y termina con "
+#~ "menos de 10 elementos. <br/> <b> Nota: </b> Incluso si selecciona una "
+#~ "opción experta, aún puede terminar jugando esa fase.Por ejemplo, si no "
+#~ "tiene suficiente dinero para el salario, deberá despedir a alguien, y por "
+#~ "lo tanto debe jugar la fase salarial.Además, si termina con Kimchi más "
+#~ "otros artículos, se le pedirá que juegue la fase de limpieza.El juego de "
+#~ "juegos y los inicios de los jugadores también pueden dar lugar a fases "
+#~ "que necesitan ser jugadas que habías seleccionado para omitir."
+
+#~ msgid ""
+#~ "Sandbox mode is the answer to questions such as \"Can I have an option so "
+#~ "that new MS trainer gives a coach instead of a trainer?\" and \"What if "
+#~ "the 1x employees were actually unlimited?\". <br/> Sandbox mode unlocks a "
+#~ "panel under the player summaries allowing you to add and remove employees "
+#~ "at will on your turn. <br/> <b>Note:</b> You must have 'Aid' turned on to "
+#~ "view this.<br/> <b>Note:</b> This game will be automatically excluded "
+#~ "from stats. There is no record in History of using the Sandbox panel. "
+#~ "There is no built in limit on anyone doing anything with the Sandbox "
+#~ "panel. Try to make it clear in the game description what you are after if "
+#~ "you select this option.<br/> <b>Note:</b> Employees gained this way will "
+#~ "not necesserily be saved if in the middle of a simultaneous move (eg "
+#~ "choosing reserve cards). But no worries, it's Sandbox Mode. So just give "
+#~ "yourself the employee again. If you gain an employee this way during "
+#~ "restructuring and place the employee in your structure, then it will be "
+#~ "saved. <br/>"
+#~ msgstr ""
+#~ "El modo Sandbox es la respuesta a preguntas como \"¿Puedo tener una "
+#~ "opción para que el nuevo entrenador de MS le dé a un entrenador en lugar "
+#~ "de un entrenador? \" Y \"¿Qué pasaría si los empleados 1x fueran "
+#~ "realmente ilimitados? \". El modo Sandbox es la respuesta a preguntas "
+#~ "como \"¿Puedo tener una opción para que el nuevo entrenador de MS le dé a "
+#~ "un entrenador en lugar de un entrenador?\"y \"¿Qué pasaría si los "
+#~ "empleados 1X fueran realmente ilimitados?\".<br/> El modo Sandbox "
+#~ "desbloquea un panel debajo de los resúmenes del jugador que le permite "
+#~ "agregar y eliminar a los empleados a voluntad en su turno.<br/> <b> Nota: "
+#~ "</b> Debe tener 'ayuda' para ver esto. <br/> <b> nota: </b> Este juego se "
+#~ "excluirá automáticamente de las estadísticas.No hay registro en la "
+#~ "historia del uso del panel Sandbox.No hay un límite incorporado en "
+#~ "cualquiera que haga nada con el panel Sandbox.Intente dejar en claro en "
+#~ "el juego la descripción de lo que busca si selecciona esta opción. <br/> "
+#~ "<b> Nota: </b> Los empleados ganados de esta manera no se guardarán "
+#~ "necesariamente si en el medio de un movimiento simultáneo (por ejemplo, "
+#~ "elige tarjetas de reserva).Pero no se preocupe, es el modo Sandbox.Así "
+#~ "que solo date al empleado nuevamente.Si obtiene un empleado de esta "
+#~ "manera durante la reestructuración y coloca al empleado en su estructura, "
+#~ "entonces se guardará.<br/>"
+
+#~ msgid "For further help contact"
+#~ msgstr "Para obtener más ayuda para el contacto"
+
+#~ msgid "Home"
+#~ msgstr "Hogar"
+
+#~ msgid "Reserve"
+#~ msgstr "Reservar"
+
+#~ msgid "Rewind"
+#~ msgstr "Rebobinar"
+
+#~ msgid "Aid"
+#~ msgstr "Ayuda"
+
+#~ msgid "Chat"
+#~ msgstr "Charlar"
+
+#~ msgid "Bug"
+#~ msgstr "error"
+
+#~ msgid "History"
+#~ msgstr "Historia"
+
+#~ msgid "Replay"
+#~ msgstr "Repetición"
+
+#~ msgid "Connecting to server....."
+#~ msgstr "Conectarse al servidor ....."
+
+#~ msgid "Logged in as:"
+#~ msgstr "Iniciado sesión como:"
+
+#~ msgid "Time to next kickout:"
+#~ msgstr "Hora del próximo inicio:"
+
+#~ msgid "ZOOM"
+#~ msgstr "ZOOM"
+
+#~ msgid "Rewind Game Info"
+#~ msgstr "Rewind Información del juego"
+
+#~ msgid ""
+#~ "<b><u>Trial Feature</b></u><br/> Anyone may rewind the game at any point "
+#~ "EXCEPT during turn order, and the first person working 9-5.<br/> This is "
+#~ "because the most important hidden information is during restructuring."
+#~ msgstr ""
+#~ "<b> <u> función de prueba </b> </u> <br/> Cualquiera puede rebobinar el "
+#~ "juego en cualquier punto, excepto durante el orden de turno, y la primera "
+#~ "persona que trabaja 9-5. <br/> Esto se debe a que la información oculta "
+#~ "más importante es durante la reestructuración.<b> <u> función de prueba </"
+#~ "b> </u> <br/> Cualquiera puede rebobinar el juego en cualquier punto, "
+#~ "excepto durante el orden de turno, y la primera persona que trabaja 9-5. "
+#~ "<br/> Esto se debe a que la información oculta más importante es durante "
+#~ "la reestructuración."
+
+#~ msgid "REWIND"
+#~ msgstr "REBOBINAR"
+
+#~ msgid ""
+#~ "You can give permission for the host to rewind the game back to the start "
+#~ "of the restructuring phase. All players must give permission before the "
+#~ "host is able to rewind the game."
+#~ msgstr ""
+#~ "Puedes dar permiso para que el anfitrión vuelva a reventar el juego al "
+#~ "comienzo de la fase de reestructuración. Puede dar permiso para que el "
+#~ "anfitrión vuelva a reventar el juego al comienzo de la fase de "
+#~ "reestructuración.Todos los jugadores deben dar permiso antes de que el "
+#~ "anfitrión pueda rebobinar el juego."
+
+#~ msgid ""
+#~ "Tournament games are a bit more competitive, so rewinds should not be "
+#~ "expected"
+#~ msgstr ""
+#~ "los juegos de torneo son un poco más competitivos, por lo que no se debe "
+#~ "esperar rebobosLos juegos de torneo son un poco más competitivos, por lo "
+#~ "que no se debe esperar rebosnos"
+
+#~ msgid "Permission up to last Restructuring"
+#~ msgstr "Permiso hasta la última reestructuración"
+
+#~ msgid "Give Permission"
+#~ msgstr "Dar permiso"
+
+#~ msgid "Exclude game from stats"
+#~ msgstr "Excluir el juego de las estadísticas"
+
+#~ msgid "Exclude From Stats"
+#~ msgstr "Excluir de las estadísticas"
+
+#~ msgid "Excluded from Stats"
+#~ msgstr "excluidos de las estadísticas"
+
+#~ msgid "Waiting for other players"
+#~ msgstr "Esperando a otros jugadores"
+
+#~ msgid ""
+#~ "If all non-bot players tick and confirm this option, this game won't "
+#~ "count in any win/loss stats. You can use this if you simply wish to have "
+#~ "a \"less competitive\" game, or you wish to exclude it for other reasons "
+#~ "(EG multiple player kickouts)"
+#~ msgstr ""
+#~ "Si todos los jugadores que no son de bots marcan y confirman esta opción, "
+#~ "este juego no contará en ninguna estadística de ganancia/pérdida. Si "
+#~ "todos los jugadores que no son Bot marcan y confirman esta opción, este "
+#~ "juego no contará en ninguna estadística de ganancia/pérdida.Puede usar "
+#~ "esto si simplemente desea tener un juego \"menos competitivo\", o desea "
+#~ "excluirlo por otras razones (por ejemplo, múltiples jugadas de jugadores)"
+
+#~ msgid ""
+#~ "As the game host, you must wait for all players to give permission. They "
+#~ "can allow you to rewind once, or as much as you like. Try asking in chat "
+#~ "for permission if you wish to rewind. Current Permissions:"
+#~ msgstr ""
+#~ "Como anfitrión del juego, debes esperar a que todos los jugadores dan "
+#~ "permiso. Como anfitrión del juego, debes esperar a que todos los "
+#~ "jugadores dan permiso.Pueden permitirle rebobinar una vez, o tanto como "
+#~ "desee.Intente pedir permiso en la charla si desea retroceder.Permisos "
+#~ "actuales:"
+
+#~ msgid "Reload the whole page to refresh permissions"
+#~ msgstr "Recargar toda la página para actualizar los permisos"
+
+#~ msgid ""
+#~ "Tournament games are a bit more competitive, so you should not feel "
+#~ "obligated to accept a rewind request"
+#~ msgstr ""
+#~ "los juegos de torneo son un poco más competitivos, por lo que no debe "
+#~ "sentirse obligado a aceptar una solicitud de rebobinadoLos juegos de "
+#~ "torneo son un poco más competitivos, por lo que no debes sentirte "
+#~ "obligado a aceptar una solicitud de rebobinado"
+
+#~ msgid "Please wait for all players to give permission"
+#~ msgstr "Espere a que todos los jugadores dan permiso"
+
+#~ msgid "Game:"
+#~ msgstr "Juego:"
+
+#~ msgid "Bank:"
+#~ msgstr "Banco:"
+
+#~ msgid "Turn:"
+#~ msgstr "Doblar:"
+
+#~ msgid "Phase:"
+#~ msgstr "Fase:"
+
+#~ msgid "Current player:"
+#~ msgstr "Jugador actual:"
+
+#~ msgid "Bug Report"
+#~ msgstr "Informe de error"
+
+#~ msgid ""
+#~ "Please submit a bug report if you encounter any issues, giving as much "
+#~ "detail as possbile."
+#~ msgstr ""
+#~ "Envíe un informe de error si encuentra algún problema, dando tantos "
+#~ "detalles como Possbile.Envíe un informe de error si encuentra algún "
+#~ "problema, dando tantos detalles como Possbile."
+
+#~ msgid ""
+#~ "Do you think there are too many 1x Luxury Managers? Please note that "
+#~ "COFFEE, KIMCHI, SUSHI, and NOODLES add one extra"
+#~ msgstr ""
+#~ "¿Crees que hay demasiados gerentes de lujo 1X? ¿Crees que hay demasiados "
+#~ "gerentes de lujo 1X?Tenga en cuenta que el café, el kimchi, el sushi y "
+#~ "los fideos agregan un extra"
+
+#~ msgid ""
+#~ "Please note: Cart / Truck drivers can drive around a 'roundabout' on the "
+#~ "same tile as many times as they like. Drinks will only be collected once"
+#~ msgstr ""
+#~ "Tenga en cuenta: los conductores de carrito / camiones pueden conducir "
+#~ "alrededor de una 'rotonda' en el mismo mosaico tantas veces como quieran. "
+#~ "Tenga en cuenta: los conductores de carrito / camiones pueden conducir "
+#~ "alrededor de una 'rotonda' en el mismo mosaico tantas veces como "
+#~ "quieran.Las bebidas solo se recopilarán una vez"
+
+#~ msgid ""
+#~ "Please note: In New MS you need to actually USE an employee to get their "
+#~ "Milestone"
+#~ msgstr ""
+#~ "Tenga en cuenta: en la nueva EM debe usar un empleado para obtener su "
+#~ "hitoTenga en cuenta: en la nueva EM, debe usar un empleado para obtener "
+#~ "su hito"
+
+#~ msgid "Submit"
+#~ msgstr "Entregar"
+
+#~ msgid "Reset"
+#~ msgstr "Reiniciar"
+
+#~ msgid "Personal game notes"
+#~ msgstr "Notas del juego personal"
+
+#~ msgid "Only you can see these notes"
+#~ msgstr "Solo tú puedes ver estas notas"
+
+#~ msgid "Clear"
+#~ msgstr "claro"
+
+#~ msgid "Close"
+#~ msgstr "Cerca"
+
+#~ msgid "Send a message"
+#~ msgstr "Enviar un mensaje"
+
+#~ msgid "Send"
+#~ msgstr "Enviar"
+
+#~ msgid "Oldest First"
+#~ msgstr "El más antiguo primero"
+
+#~ msgid "Newest First"
+#~ msgstr "El primero primero"
+
+#~ msgid "Summary"
+#~ msgstr "Resumen"
+
+#~ msgid "Open in Map Editor"
+#~ msgstr "Abrir en el editor de mapas"
+
+#, python-brace-format
+#~ msgid "Error: {username} does not exist"
+#~ msgstr "Error: {username} no existe"
+
+#~ msgid "The game is not Active"
+#~ msgstr "El juego no está activo"

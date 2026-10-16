@@ -1934,53 +1934,52 @@ msgid "Mini Tournament"
 msgstr "Mini Torneo"
 
 #: .\Lobby\momentumViews.py:43
-#, fuzzy
-#| msgid "Any player can rewind the game at any time."
 msgid "Only players in this game can view its momentum."
-msgstr "Qualsiasi giocatore può riavvolgere il gioco in qualsiasi momento."
+msgstr "Solo i giocatori di questa partita possono visualizzarne il momentum."
 
 #: .\Lobby\momentumViews.py:57
 msgid "Invalid nudge request."
-msgstr ""
+msgstr "Richiesta di sollecito non valida."
 
 #: .\Lobby\momentumViews.py:62
 msgid "System busy, please try again."
-msgstr ""
+msgstr "Sistema occupato, riprova."
 
 #: .\Lobby\momentumViews.py:66
-#, fuzzy
-#| msgid "Any player can rewind the game at any time."
 msgid "Only players in this game can send nudges."
-msgstr "Qualsiasi giocatore può riavvolgere il gioco in qualsiasi momento."
+msgstr "Solo i giocatori di questa partita possono inviare solleciti."
 
 #: .\Lobby\momentumViews.py:68
 msgid "The game has changed. Refresh before sending a nudge."
-msgstr ""
+msgstr "La partita è cambiata. Aggiorna la pagina prima di inviare un "
+"sollecito."
 
 #: .\Lobby\momentumViews.py:70
 msgid "Nudges become available when players can vote to kick out."
-msgstr ""
+msgstr "I solleciti diventano disponibili quando i giocatori possono votare "
+"per l'espulsione."
 
 #: .\Lobby\momentumViews.py:73
 msgid "This player is no longer waiting to take a turn."
-msgstr ""
+msgstr "Questo giocatore non è più in attesa di giocare il suo turno."
 
 #: .\Lobby\momentumViews.py:75
 msgid "Choose another player whose turn is pending."
-msgstr ""
+msgstr "Scegli un altro giocatore il cui turno è ancora in attesa."
 
 #: .\Lobby\momentumViews.py:77
 msgid "This player has turned off turn nudges."
-msgstr ""
+msgstr "Questo giocatore ha disattivato i solleciti di turno."
 
 #: .\Lobby\momentumViews.py:80
 msgid ""
 "This player has already been nudged in this match within the last 24 hours."
-msgstr ""
+msgstr "Questo giocatore è già stato sollecitato in questa partita nelle "
+"ultime 24 ore."
 
 #: .\Lobby\momentumViews.py:85
 msgid "Nudge queued."
-msgstr ""
+msgstr "Sollecito in coda."
 
 #: .\Lobby\presenters.py:537
 msgid "Game successfully deleted"
@@ -2004,7 +2003,9 @@ msgid ""
 "Players can now vote to kick you out of %(game)s. %(player)s asked you to "
 "take your turn, or at least message the players in the game to let them know "
 "you are still interested."
-msgstr ""
+msgstr "I giocatori possono ora votare per espellerti da %(game)s. %(player)s "
+"ti ha chiesto di fare la tua mossa, o almeno di scrivere ai giocatori della "
+"partita per far sapere che sei ancora interessato."
 
 #: .\Lobby\sharedFunctions\sharedFunctions.py:104
 msgid "Your game has been created and is waiting for players<br/>Invite Link: "
@@ -3041,27 +3042,25 @@ msgstr ""
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:1832
 #: .\Lobby\templates\Lobby\gameEmails\momentumEmail.html:3
-#, fuzzy
-#| msgid "per game"
 msgid "Open game"
-msgstr "per partita"
+msgstr "Apri il gioco"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:1856
 #, python-format
 msgid ""
 "🔥 %(game)s has a shared %(days)s-day streak. Take a turn before midnight "
 "UTC to keep it alive; one turn by any player meets today's goal."
-msgstr ""
+msgstr "🔥 %(game)s ha una serie condivisa di %(days)s giorni. Fai un turno "
+"prima di mezzanotte UTC per tenerla viva; un turno di qualsiasi giocatore "
+"soddisfa l'obiettivo di oggi."
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:1857
 msgid "Your game's streak is about to expire"
-msgstr ""
+msgstr "La serie della tua partita sta per scadere"
 
 #: .\Lobby\sharedFunctions\sharedNotifications.py:1869
-#, fuzzy
-#| msgid "A player has declined your invitation for Bus"
 msgid "A player asked you to take your turn"
-msgstr "Un giocatore ha rifiutato il tuo invito per il Bus"
+msgstr "Un giocatore ti ha chiesto di fare la tua mossa"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:36
 msgid "BUS"
@@ -3080,7 +3079,7 @@ msgstr "Commerciante di anatre"
 #: .\Lobby\sharedFunctions\sharedRefs.py:46
 #: .\Lobby\templates\Lobby\createROW.html:11
 msgid "Ranchers of the Old West"
-msgstr ""
+msgstr "Ranchers of the Old West"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:50
 msgid "Discord"
@@ -3812,65 +3811,53 @@ msgstr "Usa le tessere promozionali"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1201
 #: .\Lobby\templates\Lobby\createROW.html:126
-#, fuzzy
-#| msgid "2nd Edition"
 msgid "Second edition"
-msgstr "2a edizione"
+msgstr "Seconda edizione"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1203
 #: .\Lobby\templates\Lobby\createROW.html:160
 msgid "Rails to the North"
-msgstr ""
+msgstr "Rails to the North"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1205
 #: .\Lobby\templates\Lobby\createROW.html:167
 msgid "Simmental cattle"
-msgstr ""
+msgstr "Simmental cattle"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1207
 msgid "Strategic mode"
-msgstr ""
+msgstr "Modalità strategica"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1209
-#, fuzzy
-#| msgid "Merger Bidding"
 msgid "Beginner buildings"
-msgstr "Offerta di fusione"
+msgstr "Edifici per principianti"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1211
-#, fuzzy
-#| msgid "Waiting for other players to move"
 msgid "Bidding for player order"
-msgstr "In attesa che gli altri giocatori si muovano"
+msgstr "Asta per l'ordine dei giocatori"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1213
-#, fuzzy
-#| msgid "Balanced"
 msgid "Balanced variant"
-msgstr "Equilibrato"
+msgstr "Variante equilibrata"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1215
 #: .\Lobby\templates\Lobby\createROW.html:174
 msgid "Station master promos"
-msgstr ""
+msgstr "Promo dei capistazione"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1217
 #: .\Lobby\templates\Lobby\createROW.html:181
-#, fuzzy
-#| msgid "Building"
 msgid "Building 11"
-msgstr "Edificio"
+msgstr "Building 11"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1219
 #: .\Lobby\templates\Lobby\createROW.html:188
-#, fuzzy
-#| msgid "Building"
 msgid "Building 13"
-msgstr "Edificio"
+msgstr "Building 13"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1221
 msgid "Garth automa"
-msgstr ""
+msgstr "Garth automa"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:1240
 msgid ""
@@ -4463,7 +4450,7 @@ msgstr "Nuovo design del sito"
 
 #: .\Lobby\templates\Lobby\about.html:63
 msgid "Tournament Matchmaking Improvements"
-msgstr ""
+msgstr "Miglioramenti all'abbinamento dei tornei"
 
 #: .\Lobby\templates\Lobby\about.html:66
 msgid "Chinese (Hans) Lobby &amp; FCM"
@@ -4519,7 +4506,7 @@ msgstr "Playtester aggiuntivi per strade e barche"
 
 #: .\Lobby\templates\Lobby\about.html:105
 msgid "FCM - Fried Chicken &amp; Stadium modules"
-msgstr ""
+msgstr "FCM - moduli Fried Chicken &amp; Stadium"
 
 #: .\Lobby\templates\Lobby\about.html:109
 msgid "Thanks to all the Playtesters!"
@@ -4989,15 +4976,10 @@ msgstr "Giocatori totali del torneo"
 #: .\Lobby\templates\Lobby\createKFW.html:72
 #: .\Lobby\templates\Lobby\createRNB.html:187
 #: .\Lobby\templates\Lobby\createWEB.html:72
-#, fuzzy
-#| msgid ""
-#| "This must be between 6 and 12, and a multiple of the per game player count"
-msgid ""
-"This must be a multiple of the per game player count, or the last games will "
-"be short"
-msgstr ""
-"Questo deve essere compreso tra 6 e 12 e un multiplo del numero di giocatori "
-"per partita"
+msgid "This must be a multiple of the per game player count, or the last "
+"games will be short"
+msgstr "Questo deve essere un multiplo del numero di giocatori per partita, "
+"altrimenti le ultime partite saranno incomplete."
 
 #: .\Lobby\templates\Lobby\createAQY.html:77
 #: .\Lobby\templates\Lobby\createBUS.html:79
@@ -5357,7 +5339,7 @@ msgstr "Opzioni comuni"
 #: .\Lobby\templates\Lobby\createRNB.html:273
 #: .\Lobby\templates\Lobby\createWEB.html:144
 msgid "Standard"
-msgstr ""
+msgstr "Standard"
 
 #: .\Lobby\templates\Lobby\createAQY.html:146
 #: .\Lobby\templates\Lobby\createBUS.html:235
@@ -5367,10 +5349,8 @@ msgstr ""
 #: .\Lobby\templates\Lobby\createKFW.html:159
 #: .\Lobby\templates\Lobby\createRNB.html:274
 #: .\Lobby\templates\Lobby\createWEB.html:145
-#, fuzzy
-#| msgid "Kickout available after 1 day"
 msgid "Kickout available after 12 hours"
-msgstr "Kickout disponibile dopo 1 giorno"
+msgstr "Espulsione disponibile dopo 12 ore"
 
 #: .\Lobby\templates\Lobby\createAQY.html:150
 #: .\Lobby\templates\Lobby\createBUS.html:239
@@ -5667,10 +5647,8 @@ msgid "Keep the same map"
 msgstr "Mantieni la stessa mappa"
 
 #: .\Lobby\templates\Lobby\createAQY.html:218
-#, fuzzy
-#| msgid "Create a Mini Tournament"
 msgid "Create Antiquity Mini Tournament"
-msgstr "Crea un mini torneo"
+msgstr "Crea un Mini Torneo di Antichità"
 
 #: .\Lobby\templates\Lobby\createAQY.html:218
 msgid "Create Antiquity Game"
@@ -5787,10 +5765,8 @@ msgstr ""
 "sarà escluso dalle statistiche"
 
 #: .\Lobby\templates\Lobby\createBUS.html:353
-#, fuzzy
-#| msgid "Create a Mini Tournament"
 msgid "Create Bus Mini Tournament"
-msgstr "Crea un mini torneo"
+msgstr "Crea un Mini Torneo di Bus"
 
 #: .\Lobby\templates\Lobby\createBUS.html:353
 msgid "Create Bus Game"
@@ -5867,10 +5843,8 @@ msgstr ""
 "finiti per 4 milioni di euro"
 
 #: .\Lobby\templates\Lobby\createCNS.html:247
-#, fuzzy
-#| msgid "Create a Mini Tournament"
 msgid "Create Cannes Mini Tournament"
-msgstr "Crea un mini torneo"
+msgstr "Crea un Mini Torneo di Cannes"
 
 #: .\Lobby\templates\Lobby\createCNS.html:247
 msgid "Create Cannes Game"
@@ -6227,10 +6201,8 @@ msgid "Include 4 chinese expansion options"
 msgstr "Include 4 opzioni di espansione cinese"
 
 #: .\Lobby\templates\Lobby\createFCM.html:891
-#, fuzzy
-#| msgid "Include 4 chinese expansion options"
 msgid "Include 4 fan expansion options"
-msgstr "Include 4 opzioni di espansione cinese"
+msgstr "Includi 4 opzioni delle espansioni dei fan"
 
 #: .\Lobby\templates\Lobby\createFCM.html:905
 msgid "Draft modules"
@@ -6320,10 +6292,8 @@ msgstr ""
 "inutilizzabili"
 
 #: .\Lobby\templates\Lobby\createHLC.html:237
-#, fuzzy
-#| msgid "Horseless Carriage - Mini Tournament Won!"
 msgid "Create Horseless Carriage Mini Tournament"
-msgstr "Carrozza senza cavalli - Mini Torneo vinto!"
+msgstr "Crea un Mini Torneo di Carrozza senza cavalli"
 
 #: .\Lobby\templates\Lobby\createHLC.html:237
 msgid "Create Horseless Carriage Game"
@@ -6371,10 +6341,8 @@ msgstr ""
 "statistiche"
 
 #: .\Lobby\templates\Lobby\createIND.html:238
-#, fuzzy
-#| msgid "Create a Mini Tournament"
 msgid "Create Indonesia Mini Tournament"
-msgstr "Crea un mini torneo"
+msgstr "Crea un Mini Torneo dell'Indonesia"
 
 #: .\Lobby\templates\Lobby\createIND.html:238
 #: .\Lobby\templates\Lobby\createIND2.html:189
@@ -6450,10 +6418,8 @@ msgid "Med&#8722;"
 msgstr "Med−"
 
 #: .\Lobby\templates\Lobby\createKFW.html:249
-#, fuzzy
-#| msgid "Create a Mini Tournament"
 msgid "Create Keyflower Mini Tournament"
-msgstr "Crea un mini torneo"
+msgstr "Crea un Mini Torneo di Keyflower"
 
 #: .\Lobby\templates\Lobby\createKFW.html:249
 msgid "Create Keyflower Game"
@@ -6551,10 +6517,8 @@ msgstr ""
 "mappa per selezionarla."
 
 #: .\Lobby\templates\Lobby\createRNB.html:405
-#, fuzzy
-#| msgid "Roads & Boats - Mini Tournament Won!"
 msgid "Create Roads & Boats Mini Tournament"
-msgstr "Strade e Barche - Mini Torneo vinto!"
+msgstr "Crea un Mini Torneo di Strade e Barche"
 
 #: .\Lobby\templates\Lobby\createRNB.html:405
 #: .\Lobby\templates\Lobby\createRNB2.html:377
@@ -6610,31 +6574,22 @@ msgid "Jump Start"
 msgstr "Salta Inizia"
 
 #: .\Lobby\templates\Lobby\createROW.html:18
-#, fuzzy
-#| msgid ""
-#| "New to Roads & Boats? For Rules, How to Play, and Game Guide, please see "
-msgid ""
-"New to Ranchers of the Old West? For Rules, How to Play, and Game Guide, "
-"please see "
-msgstr ""
-"Nuovo su strade e barche? Per le regole, le modalità di gioco e la guida al "
-"gioco, consultare"
+msgid "New to Ranchers of the Old West? For Rules, How to Play, and Game "
+"Guide, please see "
+msgstr "Nuovo su Ranchers of the Old West? Per le regole, le modalità di "
+"gioco e la guida al gioco, consultare "
 
 #: .\Lobby\templates\Lobby\createROW.html:123
-#, fuzzy
-#| msgid "2nd Edition"
 msgid "Edition"
-msgstr "2a edizione"
+msgstr "Edizione"
 
 #: .\Lobby\templates\Lobby\createROW.html:125
-#, fuzzy
-#| msgid "1st Edition"
 msgid "First edition"
-msgstr "1a edizione"
+msgstr "Prima edizione"
 
 #: .\Lobby\templates\Lobby\createROW.html:130
 msgid "Mode"
-msgstr ""
+msgstr "Modalità"
 
 #: .\Lobby\templates\Lobby\createROW.html:132
 #: .\Lobby\templates\Lobby\createROW.html:153
@@ -6646,112 +6601,100 @@ msgstr "Originale"
 
 #: .\Lobby\templates\Lobby\createROW.html:133
 msgid "Strategic (less hidden, e.g. running score)"
-msgstr ""
+msgstr "Strategica (meno informazioni nascoste, ad es. punteggio corrente)"
 
 #: .\Lobby\templates\Lobby\createROW.html:137
-#, fuzzy
-#| msgid "Building"
 msgid "Buildings"
-msgstr "Edificio"
+msgstr "Edifici"
 
 #: .\Lobby\templates\Lobby\createROW.html:139
-#, fuzzy
-#| msgid "Random"
 msgid "Randomize"
 msgstr "Casuale"
 
 #: .\Lobby\templates\Lobby\createROW.html:140
 msgid "Beginner (only a-side)"
-msgstr ""
+msgstr "Principiante (solo lati A)"
 
 #: .\Lobby\templates\Lobby\createROW.html:144
-#, fuzzy
-#| msgid "Player trades"
 msgid "Player order"
-msgstr "Gli scambi dei giocatori"
+msgstr "Ordine dei giocatori"
 
 #: .\Lobby\templates\Lobby\createROW.html:146
-#, fuzzy
-#| msgid "Cool original"
 msgid "Randomize (original)"
-msgstr "Fantastico originale"
+msgstr "Casuale (originale)"
 
 #: .\Lobby\templates\Lobby\createROW.html:147
-#, fuzzy
-#| msgid "Building Phase:"
 msgid "Bidding (VPs)"
-msgstr "Fase di costruzione:"
+msgstr "Asta (PV)"
 
 #: .\Lobby\templates\Lobby\createROW.html:151
 msgid "Variant"
-msgstr ""
+msgstr "Variante"
 
 #: .\Lobby\templates\Lobby\createROW.html:154
 msgid "Balanced (tiles adjusted for 2/3p)"
-msgstr ""
+msgstr "Equilibrata (tessere adattate per 2/3 giocatori)"
 
 #: .\Lobby\templates\Lobby\createROW.html:161
 msgid "Expansion: northern cities, branchlets and extra station towns"
-msgstr ""
+msgstr "Espansione: città del nord, diramazioni e città di stazione extra"
 
 #: .\Lobby\templates\Lobby\createROW.html:168
 msgid ""
 "Second edition only: extra breeding-value 2 cattle that upgrade on delivery"
-msgstr ""
+msgstr "Solo seconda edizione: bovini extra con valore di allevamento 2 che "
+"si potenziano alla consegna"
 
 #: .\Lobby\templates\Lobby\createROW.html:175
 msgid "Adds the promo station master tiles"
-msgstr ""
+msgstr "Aggiunge le tessere promo capostazione"
 
 #: .\Lobby\templates\Lobby\createROW.html:182
 msgid "Adds the building 11 promo tiles"
-msgstr ""
+msgstr "Aggiunge le tessere promo building 11"
 
 #: .\Lobby\templates\Lobby\createROW.html:189
 msgid "Adds the building 13 promo tiles"
-msgstr ""
+msgstr "Aggiunge le tessere promo building 13"
 
 #: .\Lobby\templates\Lobby\createROW.html:195
 msgid "Play against Garth (AI)"
-msgstr ""
+msgstr "Gioca contro Garth (IA)"
 
 #: .\Lobby\templates\Lobby\createROW.html:196
 msgid ""
 "Solo game against the Garth automa. Forces a 2-player game and excludes it "
 "from stats."
-msgstr ""
+msgstr "Partita in solitario contro l'automa Garth. Forza una partita a 2 "
+"giocatori e la esclude dalle statistiche."
 
 #: .\Lobby\templates\Lobby\createROW.html:200
 msgid "Garth difficulty"
-msgstr ""
+msgstr "Difficoltà di Garth"
 
 #: .\Lobby\templates\Lobby\createROW.html:202
 msgid "Garth (easy)"
-msgstr ""
+msgstr "Garth (facile)"
 
 #: .\Lobby\templates\Lobby\createROW.html:203
 msgid "Garth (medium)"
-msgstr ""
+msgstr "Garth (media)"
 
 #: .\Lobby\templates\Lobby\createROW.html:204
 msgid "Garth (hard)"
-msgstr ""
+msgstr "Garth (difficile)"
 
 #: .\Lobby\templates\Lobby\createROW.html:205
 msgid "Garth (very hard)"
-msgstr ""
+msgstr "Garth (molto difficile)"
 
 #: .\Lobby\templates\Lobby\createROW.html:213
-#, fuzzy
-#| msgid "Create Roads & Boats Game"
 msgid "Create Ranchers of the Old West Game"
-msgstr "Crea il gioco Strade e barche"
+msgstr "Crea il gioco Ranchers of the Old West"
 
 #: .\Lobby\templates\Lobby\createROW.html:253
-#, fuzzy
-#| msgid "Creating Roads & Boats Game..."
 msgid "Creating Ranchers of the Old West Game..."
-msgstr "Creazione del gioco Strade e barche..."
+msgstr "Creazione del gioco Ranchers of the Old West..."
 
 #: .\Lobby\templates\Lobby\createTGZ.html:32
 #, python-format
@@ -6978,10 +6921,8 @@ msgstr ""
 "consultare"
 
 #: .\Lobby\templates\Lobby\createWEB.html:211
-#, fuzzy
-#| msgid "Create a Mini Tournament"
 msgid "Create Web Mini Tournament"
-msgstr "Crea un mini torneo"
+msgstr "Crea un Mini Torneo del Web"
 
 #: .\Lobby\templates\Lobby\createWEB.html:211
 msgid "Create Web Game"
@@ -7372,60 +7313,59 @@ msgstr ""
 "a>."
 
 #: .\Lobby\templates\Lobby\extraStats.html:9
-#, fuzzy
-#| msgid "Per-Game Stats"
 msgid "Extra game stats"
-msgstr "Statistiche per partita"
+msgstr "Statistiche di gioco aggiuntive"
 
 #: .\Lobby\templates\Lobby\extraStats.html:10
 msgid "Preview FCM graphs with synthetic data"
-msgstr ""
+msgstr "Anteprima dei grafici FCM con dati sintetici"
 
 #: .\Lobby\templates\Lobby\extraStats.html:11
 msgid ""
 "Finished multiplayer matches, excluding practice, shadow and stats-excluded "
 "games. Refreshed hourly."
-msgstr ""
+msgstr "Partite multigiocatore concluse, escluse quelle di pratica, shadow e "
+"quelle escluse dalle statistiche. Aggiornate ogni ora."
 
 #: .\Lobby\templates\Lobby\extraStats.html:19
 msgid ""
 "Synthetic FCM preview — these are example numbers, not real game statistics."
-msgstr ""
+msgstr "Anteprima FCM sintetica — questi sono numeri di esempio, non "
+"statistiche reali delle partite."
 
 #: .\Lobby\templates\Lobby\extraStats.html:19
 msgid "Show real data"
-msgstr ""
+msgstr "Mostra i dati reali"
 
 #: .\Lobby\templates\Lobby\extraStats.html:25
 msgid "Metric"
-msgstr ""
+msgstr "Metrica"
 
 #: .\Lobby\templates\Lobby\extraStats.html:25
 msgid "Average"
-msgstr ""
+msgstr "Media"
 
 #: .\Lobby\templates\Lobby\extraStats.html:25
-#, fuzzy
-#| msgid "Medium"
 msgid "Median"
-msgstr "Medio"
+msgstr "Mediana"
 
 #: .\Lobby\templates\Lobby\extraStats.html:25
-#, fuzzy
-#| msgid "Simple Ships"
 msgid "Samples"
-msgstr "Navi semplici"
+msgstr "Campioni"
 
 #: .\Lobby\templates\Lobby\extraStats.html:28
 msgid "How to read these numbers"
-msgstr ""
+msgstr "Come leggere questi numeri"
 
 #: .\Lobby\templates\Lobby\extraStats.html:29
 msgid ""
 "Game duration runs from the first real history timestamp to the last. Lobby "
 "wait runs from creation to the first timestamp; setup entries at creation "
 "are ignored. This is elapsed wall time, including nights and pauses."
-msgstr ""
+msgstr "La durata della partita va dal primo timestamp reale della cronologia "
+"all'ultimo. L'attesa in lobby va dalla creazione al primo timestamp; le voci "
+"di configurazione alla creazione vengono ignorate. Si tratta del tempo reale "
+"trascorso, notti e pause incluse."
 
 #: .\Lobby\templates\Lobby\extraStats.html:30
 msgid ""
@@ -7433,21 +7373,31 @@ msgid ""
 "automatic events assigned to a player. They are not necessarily submitted "
 "turns. Each player in each match contributes one sample; system entries have "
 "no player seat and are excluded."
-msgstr ""
+msgstr "Le azioni registrate contano le voci di cronologia assegnate ai posti "
+"dei giocatori, inclusi gli eventi automatici assegnati a un giocatore. Non "
+"sono necessariamente turni inviati. Ogni giocatore in ogni partita "
+"contribuisce con un campione; le voci di sistema non hanno un posto "
+"giocatore e sono escluse."
 
 #: .\Lobby\templates\Lobby\extraStats.html:31
 msgid ""
 "Action gaps use distinct player-action timestamps, so simultaneous or "
 "automatically generated entries at the same time do not inflate the sample. "
 "Gaps measure match inactivity, not an individual player's thinking time."
-msgstr ""
+msgstr "Gli intervalli tra azioni usano timestamp distinti delle azioni dei "
+"giocatori, quindi le voci simultanee o generate automaticamente nello stesso "
+"momento non gonfiano il campione. Gli intervalli misurano l'inattività della "
+"partita, non il tempo di riflessione di un singolo giocatore."
 
 #: .\Lobby\templates\Lobby\extraStats.html:32
 msgid ""
 "Older or unsupported histories with missing or inconsistent timestamps are "
 "excluded from history-based timing metrics. Their action counts can still be "
 "included. DDL histories currently have no timestamps."
-msgstr ""
+msgstr "Le cronologie più vecchie o non supportate con timestamp mancanti o "
+"incoerenti sono escluse dalle metriche temporali basate sulla cronologia. Il "
+"loro conteggio delle azioni può comunque essere incluso. Al momento le "
+"cronologie DDL non hanno timestamp."
 
 #: .\Lobby\templates\Lobby\fcmNewCode.html:11
 msgid "New FCM code"
@@ -7859,51 +7809,52 @@ msgstr ""
 "significa che la casa si trasferisce"
 
 #: .\Lobby\templates\Lobby\fcm_options_grid.html:233
-#, fuzzy
-#| msgid "User Statistics"
 msgid "Use Stadium"
-msgstr "Statistiche utente"
+msgstr "Usa Stadium"
 
 #: .\Lobby\templates\Lobby\fcm_options_grid.html:234
 msgid ""
 "A 2-tile arena hosts a game every 3 turns (the first game is on turn 5); the "
 "demand is announced 2 turns ahead and is always mass-market food (never "
 "sushi)"
-msgstr ""
+msgstr "Un'arena di 2 tessere ospita una partita ogni 3 turni (la prima "
+"partita è al turno 5); la richiesta viene annunciata 2 turni prima ed è "
+"sempre cibo da mercato di massa (mai sushi)"
 
 #: .\Lobby\templates\Lobby\fcm_options_grid.html:240
-#, fuzzy
-#| msgid "Use Mass Marketers"
 msgid "Use Labor Market"
-msgstr "Utilizzare il marketing di massa"
+msgstr "Usa Labor Market"
 
 #: .\Lobby\templates\Lobby\fcm_options_grid.html:241
 msgid "Adds Temporary Workers, Headhunters and Union Organizers"
-msgstr ""
+msgstr "Aggiunge lavoratori temporanei, cacciatori di teste e organizzatori "
+"sindacali"
 
 #: .\Lobby\templates\Lobby\fcm_options_grid.html:247
 msgid "Use Second Bailout"
-msgstr ""
+msgstr "Usa Second Bailout"
 
 #: .\Lobby\templates\Lobby\fcm_options_grid.html:248
 msgid ""
 "When the bank breaks the second time, the city rescues it: the bank gains "
 "$300 per player and each player gets one free L2 marketing employee; the "
 "third break ends the game"
-msgstr ""
+msgstr "Quando la banca si rompe la seconda volta, la città la salva: la "
+"banca guadagna $300 per giocatore e ogni giocatore riceve un dipendente di "
+"marketing di livello 2 gratuito; la terza rottura termina la partita"
 
 #: .\Lobby\templates\Lobby\fcm_options_grid.html:254
-#, fuzzy
-#| msgid "Use Mirrored Tiles"
 msgid "Use Media Line"
-msgstr "Usa piastrelle a specchio"
+msgstr "Usa Media Line"
 
 #: .\Lobby\templates\Lobby\fcm_options_grid.html:255
 msgid ""
 "Adds the Telemarketer (phone calls to the houses beside your restaurant) and "
 "the TV Announcer (antennas on 5 nearby roofs, plus free +/- $5 city "
 "headlines)"
-msgstr ""
+msgstr "Aggiunge l'operatore di telemarketing (telefonate alle case accanto "
+"al tuo ristorante) e l'annunciatore TV (antenne su 5 tetti vicini, più "
+"titoli di giornale gratuiti da +/- $5 in città)"
 
 #: .\Lobby\templates\Lobby\feedback.html:14
 #: .\Lobby\templates\Lobby\lobby.html:74
@@ -7924,22 +7875,19 @@ msgid "Category"
 msgstr "Categoria"
 
 #: .\Lobby\templates\Lobby\feedback.html:34
-#, fuzzy
-#| msgid "New Site Design"
 msgid "New Layout / Website Design"
-msgstr "Nuovo design del sito"
+msgstr "Nuovo layout / design del sito"
 
 #: .\Lobby\templates\Lobby\feedback.html:35
-#, fuzzy
-#| msgid "Generating map"
 msgid "General Question"
-msgstr "Generazione della mappa"
+msgstr "Domanda generale"
 
 #: .\Lobby\templates\Lobby\feedback.html:41
 msgid ""
 "CAUTION: Please use in game bug reporting for games to ensure all the data "
 "is captured"
-msgstr ""
+msgstr "ATTENZIONE: per i bug di gioco usa la segnalazione all'interno del "
+"gioco per assicurarti che tutti i dati vengano acquisiti"
 
 #: .\Lobby\templates\Lobby\feedback.html:44
 msgid "Your Feedback"
@@ -8004,11 +7952,11 @@ msgstr "Chiacchierata"
 
 #: .\Lobby\templates\Lobby\gameDisplay\currentGameRow.html:10
 msgid "Daily goal met · UTC"
-msgstr ""
+msgstr "Obiettivo giornaliero raggiunto · UTC"
 
 #: .\Lobby\templates\Lobby\gameDisplay\currentGameRow.html:10
 msgid "One turn by anyone before midnight UTC keeps the streak alive"
-msgstr ""
+msgstr "Un turno di chiunque prima di mezzanotte UTC tiene viva la serie"
 
 #: .\Lobby\templates\Lobby\gameDisplay\currentGameRow.html:13
 #: .\Lobby\templates\Lobby\gameDisplay\currentGameRow.html:15
@@ -8487,20 +8435,19 @@ msgstr ""
 "<br />\n"
 
 #: .\Lobby\templates\Lobby\gameMomentum.html:5
-#, fuzzy
-#| msgid "Game Setup"
 msgid "Game momentum"
-msgstr "Configurazione del gioco"
+msgstr "Momentum della partita"
 
 #: .\Lobby\templates\Lobby\gameMomentum.html:8
 msgid ""
 "Send the overdue player a reminder to take their turn. Each player can "
 "receive one nudge per game every 24 hours."
-msgstr ""
+msgstr "Invia al giocatore in ritardo un promemoria per fare il suo turno. "
+"Ogni giocatore può ricevere un sollecito per partita ogni 24 ore."
 
 #: .\Lobby\templates\Lobby\gameMomentum.html:11
 msgid "Close"
-msgstr ""
+msgstr "Chiudi"
 
 #: .\Lobby\templates\Lobby\game_card.html:8
 msgid "players"
@@ -10362,19 +10309,18 @@ msgstr "Nessun gioco finito congiunto"
 
 #: .\Lobby\templates\Lobby\profile.html:27
 msgid "Appearance"
-msgstr ""
+msgstr "Aspetto"
 
 #: .\Lobby\templates\Lobby\profile.html:33
-#, fuzzy
-#| msgid "Draft modules"
 msgid "Dark mode"
-msgstr "Bozze di moduli"
+msgstr "Modalità scura"
 
 #: .\Lobby\templates\Lobby\profile.html:36
 msgid ""
 "Applies to the lobby and account pages. Game views keep their current "
 "appearance."
-msgstr ""
+msgstr "Si applica alla lobby e alle pagine dell'account. Le viste di gioco "
+"mantengono l'aspetto attuale."
 
 #: .\Lobby\templates\Lobby\profile.html:45
 msgid "Notifications"
@@ -10431,26 +10377,29 @@ msgstr ""
 
 #: .\Lobby\templates\Lobby\profile.html:114
 msgid "Daily momentum"
-msgstr ""
+msgstr "Momentum giornaliero"
 
 #: .\Lobby\templates\Lobby\profile.html:116
 msgid "Show shared game streaks 🔥"
-msgstr ""
+msgstr "Mostra le serie condivise delle partite 🔥"
 
 #: .\Lobby\templates\Lobby\profile.html:117
 msgid "Remind me when a streak is about to expire"
-msgstr ""
+msgstr "Avvisami quando una serie sta per scadere"
 
 #: .\Lobby\templates\Lobby\profile.html:118
 msgid "Allow other players to nudge me when my turn expires"
-msgstr ""
+msgstr "Consenti agli altri giocatori di sollecitarmi quando il mio turno "
+"scade"
 
 #: .\Lobby\templates\Lobby\profile.html:119
 msgid ""
 "Any player's turn keeps the daily UTC streak alive. Reminders at 22:00 UTC "
 "follow your notification settings when it's your turn. Hiding streaks also "
 "disables reminders."
-msgstr ""
+msgstr "Il turno di qualsiasi giocatore tiene viva la serie giornaliera UTC. "
+"I promemoria alle 22:00 UTC seguono le tue impostazioni di notifica quando è "
+"il tuo turno. Nascondere le serie disattiva anche i promemoria."
 
 #: .\Lobby\templates\Lobby\profile.html:126
 msgid ""
@@ -11738,16 +11687,12 @@ msgstr "Rifiuta invito"
 
 #: .\Lobby\templates\Lobby\tournaments\MainTournament.html:174
 #: .\Lobby\templates\Lobby\tournaments\MiniTournament.html:123
-#, fuzzy
-#| msgid "Creating Mini Tournament..."
 msgid "Generating tournament......"
-msgstr "Creazione del mini torneo..."
+msgstr "Generazione del torneo in corso..."
 
 #: .\Lobby\templates\Lobby\tournaments\MainTournament.html:186
-#, fuzzy
-#| msgid "Tournament Name"
 msgid "Start Tournament Now"
-msgstr "Nome del torneo"
+msgstr "Avvia il torneo ora"
 
 #: .\Lobby\templates\Lobby\tournaments\MainTournament.html:258
 #: .\Lobby\templates\Lobby\tournaments\MainTournament.html:433
@@ -11939,10 +11884,8 @@ msgid "Your password has been changed"
 msgstr "La tua password è stata modificata"
 
 #: .\Lobby\views.py:1773
-#, fuzzy
-#| msgid "Your RNB preferences have been updated successfully"
 msgid "Your appearance preferences have been updated successfully"
-msgstr "Le tue preferenze RNB sono state aggiornate con successo"
+msgstr "Le tue preferenze di aspetto sono state aggiornate con successo"
 
 #: .\Lobby\views.py:1802
 msgid "Your colour preferences have been updated successfully"
@@ -12221,16 +12164,12 @@ msgid "Mini Tournament does not exist"
 msgstr "Il Mini Torneo non esiste"
 
 #: .\Lobby\views.py:5325
-#, fuzzy
-#| msgid "Tournament Game Started"
 msgid "This tournament cannot be started"
-msgstr "Gioco del torneo iniziato"
+msgstr "Questo torneo non può essere avviato"
 
 #: .\Lobby\views.py:5328
-#, fuzzy
-#| msgid "Tournament Game Started"
 msgid "Tournament started"
-msgstr "Gioco del torneo iniziato"
+msgstr "Torneo avviato"
 
 #: .\Lobby\views.py:5332
 msgid "This tournament is not open for signup yet"
@@ -12915,20 +12854,16 @@ msgid "No highscores recorded for this player yet."
 msgstr "Nessun punteggio più alto registrato per questo giocatore ancora."
 
 #: .\ROW\common.py:248
-#, fuzzy
-#| msgid "Your game has started"
 msgid "Your game against Garth has started"
-msgstr "Il tuo gioco è iniziato"
+msgstr "La tua partita contro Garth è iniziata"
 
 #: .\ROW\templates\ROW\ROWhelp.html:5
 msgid "Ranchers of the Old West Help"
-msgstr ""
+msgstr "Aiuto per Ranchers of the Old West"
 
 #: .\ROW\templates\ROW\ROWhelp.html:9
-#, fuzzy
-#| msgid "Overtime"
 msgid "Overview"
-msgstr "Col tempo"
+msgstr "Panoramica"
 
 #: .\ROW\templates\ROW\ROWhelp.html:12
 msgid ""
@@ -12940,11 +12875,17 @@ msgid ""
 "and the player rides back to the start\n"
 "        to do it again. The player with the most victory points when the "
 "game ends wins."
-msgstr ""
+msgstr "Ranchers of the Old West è un gioco da tavolo online ospitato da "
+"Online Board Gamers. Ogni giocatore è un\n        mandriano che guida una "
+"mandria verso nord fino a Kansas City, costruendo il proprio mazzo, "
+"assumendo lavoratori, posando i binari\n        e piazzando edifici. Quando "
+"si raggiunge Kansas City la mandria viene venduta e il giocatore torna al "
+"punto di partenza\n        per ricominciare. Vince il giocatore con il "
+"maggior numero di punti vittoria alla fine della partita."
 
 #: .\ROW\templates\ROW\ROWhelp.html:21
 msgid "A turn in three phases"
-msgstr ""
+msgstr "Un turno in tre fasi"
 
 #: .\ROW\templates\ROW\ROWhelp.html:24
 msgid ""
@@ -12953,7 +12894,12 @@ msgid ""
 "you move onto or over a location showing a hand icon you pay a fee (green/"
 "black hands differ by player count); fees on hazards and teepees go to the "
 "bank, fees on an opponent's building go to that player."
-msgstr ""
+msgstr "<b>1. Muovi.</b> Muovi il tuo mandriano di 1 o più passi in avanti "
+"lungo il sentiero. Non puoi muoverti all'indietro. Gli spazi senza tessera "
+"non contano come passi. Se ti muovi su o oltre una località che mostra "
+"un'icona a forma di mano paghi una tariffa (le mani verdi/nere variano in "
+"base al numero di giocatori); le tariffe su pericoli e teepee vanno alla "
+"banca, quelle su un edificio avversario vanno a quel giocatore."
 
 #: .\ROW\templates\ROW\ROWhelp.html:32
 msgid ""
@@ -12962,18 +12908,25 @@ msgid ""
 "from your player board, or (if you stopped on an opponent's building, a "
 "hazard or a teepee) only an auxiliary action. Actions separated by a divider "
 "can each be used once; a split action means you choose one side."
-msgstr ""
+msgstr "<b>2. Esegui un'azione.</b> A seconda di dove ti sei fermato puoi "
+"usare l'azione locale stampata sulla tessera, oppure compiere una singola "
+"azione ausiliaria sbloccata dalla tua plancia giocatore, oppure (se ti sei "
+"fermato su un edificio avversario, un pericolo o un teepee) solo un'azione "
+"ausiliaria. Le azioni separate da un divisore possono essere usate una volta "
+"ciascuna; un'azione divisa significa che scegli un solo lato."
 
 #: .\ROW\templates\ROW\ROWhelp.html:40
 msgid ""
 "<b>3. Draw up.</b> Draw cards until your hand matches your hand limit. Do "
 "not reshuffle the discard pile until you actually need to draw and the draw "
 "stack is empty."
-msgstr ""
+msgstr "<b>3. Pesca.</b> Pesca carte finché la tua mano non raggiunge il "
+"limite di mano. Non rimescolare il mazzo degli scarti finché non devi "
+"davvero pescare e il mazzo di pesca è esaurito."
 
 #: .\ROW\templates\ROW\ROWhelp.html:49
 msgid "Kansas City"
-msgstr ""
+msgstr "Kansas City"
 
 #: .\ROW\templates\ROW\ROWhelp.html:52
 msgid ""
@@ -12983,84 +12936,100 @@ msgid ""
 "spend) and copy your hand to your discard pile; then deliver to a city whose "
 "value your herd covers. Removing a disc unlocks the upgrade printed on your "
 "player board. The engine then travels back to the start."
-msgstr ""
+msgstr "Fermarsi a Kansas City risolve cinque passi in ordine: scegli le "
+"tessere nelle posizioni di previsione 1, 2 e 3; poi vendi la tua mandria "
+"(somma il valore di allevamento di ogni tipo di bovino diverso in mano, più "
+"eventuali certificati che scegli di spendere) e copia la tua mano nel mazzo "
+"degli scarti; poi consegna a una città il cui valore è coperto dalla tua "
+"mandria. Rimuovere un disco sblocca il potenziamento stampato sulla tua "
+"plancia giocatore. Il motore poi torna al punto di partenza."
 
 #: .\ROW\templates\ROW\ROWhelp.html:64
-#, fuzzy
-#| msgid "Common Options"
 msgid "Common actions"
-msgstr "Opzioni comuni"
+msgstr "Azioni comuni"
 
 #: .\ROW\templates\ROW\ROWhelp.html:67
 msgid ""
 "Hire a worker from the job market (the whole row under the job market token "
 "is locked)."
-msgstr ""
+msgstr "Assumi un lavoratore dal mercato del lavoro (l'intera riga sotto il "
+"segnalino del mercato del lavoro è bloccata)."
 
 #: .\ROW\templates\ROW\ROWhelp.html:68
 msgid ""
 "Buy cattle from the cattle market, single or pair, using cowboys for better "
 "cards."
-msgstr ""
+msgstr "Compra bovini dal mercato dei bovini, singoli o in coppia, usando i "
+"cowboy per carte migliori."
 
 #: .\ROW\templates\ROW\ROWhelp.html:69
 msgid ""
 "Place or upgrade a private building; the craftsmen in your row must cover "
 "the cost."
-msgstr ""
+msgstr "Posiziona o potenzia un edificio privato; gli artigiani nella tua "
+"riga devono coprire il costo."
 
 #: .\ROW\templates\ROW\ROWhelp.html:70
 msgid ""
 "Move your engine forward (up to the number of engineers you have) and "
 "upgrade a station you stop on."
-msgstr ""
+msgstr "Avanza il tuo motore (fino al numero di ingegneri che hai) e potenzia "
+"una stazione su cui ti fermi."
 
 #: .\ROW\templates\ROW\ROWhelp.html:71
 msgid "Trade with the tribes and remove hazards."
-msgstr ""
+msgstr "Commercia con le tribù e rimuovi i pericoli."
 
 #: .\ROW\templates\ROW\ROWhelp.html:72
 msgid ""
 "Take objective cards and play them for their bonus; completed objectives "
 "score points, incomplete ones cost points."
-msgstr ""
+msgstr "Prendi le carte obiettivo e giocale per il loro bonus; gli obiettivi "
+"completati danno punti, quelli incompleti ne tolgono."
 
 #: .\ROW\templates\ROW\ROWhelp.html:78
 msgid "Using the online board"
-msgstr ""
+msgstr "Usare la plancia online"
 
 #: .\ROW\templates\ROW\ROWhelp.html:81
 msgid ""
 "Click a highlighted trail spot to move your cattleman. Cyan spots are more "
 "than one step away."
-msgstr ""
+msgstr "Fai clic su un punto evidenziato del sentiero per muovere il tuo "
+"mandriano. I punti ciano sono a più di un passo di distanza."
 
 #: .\ROW\templates\ROW\ROWhelp.html:82
 msgid ""
 "When several actions are possible the buttons appear in the action bar under "
 "the board. Pick one, then click the card, board space or track space it "
 "needs."
-msgstr ""
+msgstr "Quando sono possibili più azioni, i pulsanti compaiono nella barra "
+"delle azioni sotto la plancia. Scegline uno, poi fai clic sulla carta, sullo "
+"spazio della plancia o su quello del tracciato richiesto."
 
 #: .\ROW\templates\ROW\ROWhelp.html:83
 msgid "Hover a building or heartland tile on the board to see its actions."
-msgstr ""
+msgstr "Passa il mouse su un edificio o su una tessera dell'entroterra per "
+"vederne le azioni."
 
 #: .\ROW\templates\ROW\ROWhelp.html:84
 msgid ""
 "Use Undo to step back one action, or Reset Whole Turn to go back to the "
 "start of your turn."
-msgstr ""
+msgstr "Usa Annulla per tornare indietro di un'azione, oppure Resetta "
+"l'intero turno per tornare all'inizio del tuo turno."
 
 #: .\ROW\templates\ROW\ROWhelp.html:85
 msgid ""
 "The History button lists recent actions, Chat talks to the table, Notes are "
 "private to you, and the magnifier buttons zoom the board."
-msgstr ""
+msgstr "Il pulsante Cronologia elenca le azioni recenti, la Chat parla con il "
+"tavolo, le Note sono private e i pulsanti della lente ingrandiscono la "
+"plancia."
 
 #: .\ROW\templates\ROW\ROWhelp.html:91
 msgid "Scoring at the end"
-msgstr ""
+msgstr "Punteggio finale"
 
 #: .\ROW\templates\ROW\ROWhelp.html:94
 msgid ""
@@ -13068,11 +13037,13 @@ msgid ""
 "station masters, workers in the last two slots of each row, hazards, "
 "buildings on the board, cities you delivered to, upgraded stations, the job-"
 "market token and any extra-step bonus. Ties are shared."
-msgstr ""
+msgstr "I punti finali derivano dal denaro ($1 ogni $5), dalle carte bovino, "
+"dalle carte obiettivo, dai capistazione, dai lavoratori negli ultimi due "
+"slot di ogni riga, dai pericoli, dagli edifici sulla plancia, dalle città a "
+"cui hai consegnato, dalle stazioni potenziate, dal segnalino del mercato del "
+"lavoro e da eventuali bonus passo extra. I pareggi sono condivisi."
 
 #: .\ROW\templates\ROW\ROWhelp.html:104
-#, fuzzy
-#| msgid "Game Options"
 msgid "Game options"
 msgstr "Opzioni di gioco"
 
@@ -13080,43 +13051,50 @@ msgstr "Opzioni di gioco"
 msgid ""
 "Edition: first edition or second edition (different buildings, cities and "
 "objectives)."
-msgstr ""
+msgstr "Edizione: prima o seconda edizione (edifici, città e obiettivi "
+"diversi)."
 
 #: .\ROW\templates\ROW\ROWhelp.html:108
 msgid ""
 "Rails to the North: enables the northern map, branchlets, towns and bonus "
 "station masters."
-msgstr ""
+msgstr "Rails to the North: abilita la mappa settentrionale, le diramazioni, "
+"le città e i capistazione bonus."
 
 #: .\ROW\templates\ROW\ROWhelp.html:109
 msgid "Simmental (second edition): adds the Simmental cattle to the market."
-msgstr ""
+msgstr "Simmental (seconda edizione): aggiunge il Simmental cattle al "
+"mercato."
 
 #: .\ROW\templates\ROW\ROWhelp.html:110
 msgid ""
 "Station master promos, building 11 and building 13: optional promo tiles."
-msgstr ""
+msgstr "Promo capistazione, building 11 e building 13: tessere promo "
+"opzionali."
 
 #: .\ROW\templates\ROW\ROWhelp.html:111
 msgid "Buildings: beginner (all A sides) or randomized."
-msgstr ""
+msgstr "Edifici: principiante (tutti i lati A) o casuali."
 
 #: .\ROW\templates\ROW\ROWhelp.html:112
 msgid ""
 "Player order: randomized, or resolved by an auction before the first turn."
-msgstr ""
+msgstr "Ordine dei giocatori: casuale, oppure stabilito da un'asta prima del "
+"primo turno."
 
 #: .\ROW\templates\ROW\ROWhelp.html:113
 msgid ""
 "Variant: original, or balanced (smaller cattle market and Kansas City "
 "supply)."
-msgstr ""
+msgstr "Variante: originale oppure equilibrata (mercato dei bovini e scorte "
+"di Kansas City più piccoli)."
 
 #: .\ROW\templates\ROW\ROWhelp.html:114
 msgid ""
 "Play against the Garth automa by ticking the computer player and choosing a "
 "difficulty."
-msgstr ""
+msgstr "Gioca contro l'automa Garth selezionando il giocatore computer e "
+"scegliendo una difficoltà."
 
 #: .\TGZ\common.py:257
 msgid "Your Practice game has been started"
@@ -13705,143 +13683,147 @@ msgstr ""
 
 #: .\URR\templates\URR\URRhelp.html:19
 msgid "Open the full rulebook (PDF)"
-msgstr ""
+msgstr "Apri il regolamento completo (PDF)"
 
 #: .\URR\templates\URR\URRhelp.html:20
 msgid "Open the player aid (PDF)"
-msgstr ""
+msgstr "Apri l'aiuto al giocatore (PDF)"
 
 #: .\URR\templates\URR\URRhelp.html:25
 msgid "Icons and pieces"
-msgstr ""
+msgstr "Icone e pezzi"
 
 #: .\URR\templates\URR\URRhelp.html:29
 msgid "Terrain hills"
-msgstr ""
+msgstr "Terreno: colline"
 
 #: .\URR\templates\URR\URRhelp.html:30
 msgid "Terrain forest"
-msgstr ""
+msgstr "Terreno: foresta"
 
 #: .\URR\templates\URR\URRhelp.html:31
 msgid "Terrain savannah"
-msgstr ""
+msgstr "Terreno: savana"
 
 #: .\URR\templates\URR\URRhelp.html:32
 msgid "Terrain desert"
-msgstr ""
+msgstr "Terreno: deserto"
 
 #: .\URR\templates\URR\URRhelp.html:34
 msgid "Terrain"
-msgstr ""
+msgstr "Terreno"
 
 #: .\URR\templates\URR\URRhelp.html:34
 msgid ""
 "Hills, forest, savannah, and desert, in that order. The same pictures "
 "identify terrain in the land market, holdings, and sale plans."
-msgstr ""
+msgstr "Colline, foresta, savana e deserto, in quest'ordine. Le stesse "
+"immagini identificano il terreno nel mercato delle terre, nei possedimenti e "
+"nei piani di vendita."
 
 #: .\URR\templates\URR\URRhelp.html:38
-#, fuzzy
-#| msgid "City builder"
 msgid "City hills"
-msgstr "Costruttore di città"
+msgstr "Città su colline"
 
 #: .\URR\templates\URR\URRhelp.html:39
-#, fuzzy
-#| msgid "City Growth"
 msgid "City forest"
-msgstr "Crescita della città"
+msgstr "Città su foresta"
 
 #: .\URR\templates\URR\URRhelp.html:40
 msgid "City savannah"
-msgstr ""
+msgstr "Città su savana"
 
 #: .\URR\templates\URR\URRhelp.html:41
-#, fuzzy
-#| msgid "City builder"
 msgid "City desert"
-msgstr "Costruttore di città"
+msgstr "Città su deserto"
 
 #: .\URR\templates\URR\URRhelp.html:43
 msgid "Cities"
-msgstr ""
+msgstr "Città"
 
 #: .\URR\templates\URR\URRhelp.html:43
 msgid ""
 "City artwork distinguishes city land from ordinary fields. In holdings, the "
 "small city picture counts cities already included in the terrain total."
-msgstr ""
+msgstr "Le immagini delle città distinguono le terre cittadine dai campi "
+"normali. Nei possedimenti, la piccola immagine della città conta le città "
+"già incluse nel totale del terreno."
 
 #: .\URR\templates\URR\URRhelp.html:47
 msgid "Ownership marker orange"
-msgstr ""
+msgstr "Segnalino di proprietà arancione"
 
 #: .\URR\templates\URR\URRhelp.html:48
 msgid "Ownership marker green"
-msgstr ""
+msgstr "Segnalino di proprietà verde"
 
 #: .\URR\templates\URR\URRhelp.html:49
 msgid "Ownership marker teal"
-msgstr ""
+msgstr "Segnalino di proprietà verde acqua"
 
 #: .\URR\templates\URR\URRhelp.html:51
-#, fuzzy
-#| msgid "Player trades"
 msgid "Player markers"
-msgstr "Gli scambi dei giocatori"
+msgstr "Segnalini dei giocatori"
 
 #: .\URR\templates\URR\URRhelp.html:51
 msgid ""
 "Player colours identify landowners and payment recipients. On the map, a "
 "faded marker inside a dashed frame means the land has been sold and is "
 "available to buy."
-msgstr ""
+msgstr "I colori dei giocatori identificano i proprietari terrieri e i "
+"destinatari dei pagamenti. Sulla mappa, un segnalino sbiadito dentro una "
+"cornice tratteggiata indica che la terra è stata venduta ed è disponibile "
+"all'acquisto."
 
 #: .\URR\templates\URR\URRhelp.html:55
 msgid "State order akkad"
-msgstr ""
+msgstr "Ordine di stato di Akkad"
 
 #: .\URR\templates\URR\URRhelp.html:56
 msgid "State treasury akkad"
-msgstr ""
+msgstr "Tesoro dello stato di Akkad"
 
 #: .\URR\templates\URR\URRhelp.html:58
 msgid "State and treasury"
-msgstr ""
+msgstr "Stato e tesoro"
 
 #: .\URR\templates\URR\URRhelp.html:58
 msgid ""
 "The state badge identifies a state; the treasury board shows its money, "
 "crews, and harvest. State colours on equipment identify its owning state. "
 "Private cash and state treasury money are separate."
-msgstr ""
+msgstr "Il distintivo dello stato identifica uno stato; la plancia del tesoro "
+"mostra denaro, squadre e raccolto. I colori dello stato sull'attrezzatura "
+"identificano lo stato proprietario. Il denaro privato e quello del tesoro "
+"dello stato sono separati."
 
 #: .\URR\templates\URR\URRhelp.html:62 .\URR\templates\URR\URRhelp.html:64
 msgid "Primogeniture"
-msgstr ""
+msgstr "Primogenitura"
 
 #: .\URR\templates\URR\URRhelp.html:64
 msgid ""
 "This marker identifies the player with primogeniture. A pending bid reserves "
 "private cash; Available shows the amount left to spend."
-msgstr ""
+msgstr "Questo segnalino identifica il giocatore con la primogenitura. "
+"Un'offerta in sospeso riserva denaro privato; Disponibile mostra l'importo "
+"rimasto da spendere."
 
 #: .\URR\templates\URR\URRhelp.html:68
 msgid "Waterwork akkad 1"
-msgstr ""
+msgstr "Opera idrica di Akkad 1"
 
 #: .\URR\templates\URR\URRhelp.html:69
 msgid "Waterwork akkad 2"
-msgstr ""
+msgstr "Opera idrica di Akkad 2"
 
 #: .\URR\templates\URR\URRhelp.html:70
 msgid "Waterwork akkad unlimited"
-msgstr ""
+msgstr "Opera idrica di Akkad illimitata"
 
 #: .\URR\templates\URR\URRhelp.html:72
 msgid "Waterworks and crews"
-msgstr ""
+msgstr "Opere idriche e squadre"
 
 #: .\URR\templates\URR\URRhelp.html:72
 msgid ""
@@ -13849,172 +13831,187 @@ msgid ""
 "reservoirs it is water capacity. M means unlimited. In the crew panel, the "
 "number is digging capacity; two pieces represent a split crew, and faded "
 "crews have already dug."
-msgstr ""
+msgstr "Il numero su un pezzo è la sua capacità. Per le pompe è la portata "
+"del canale; per i bacini è la capacità idrica. M significa illimitato. Nel "
+"pannello delle squadre, il numero è la capacità di scavo; due pezzi "
+"rappresentano una squadra divisa, e le squadre sbiadite hanno già scavato."
 
 #: .\URR\templates\URR\URRhelp.html:76
 msgid "Equipment era 1"
-msgstr ""
+msgstr "Attrezzatura dell'era 1"
 
 #: .\URR\templates\URR\URRhelp.html:78
 msgid "Equipment cards"
-msgstr ""
+msgstr "Carte attrezzatura"
 
 #: .\URR\templates\URR\URRhelp.html:78
 msgid ""
 "The equipment card shows the current capacities and prices. Select it to "
 "enlarge it. The crew, pump, and reservoir buttons show the action and cost "
 "before you confirm."
-msgstr ""
+msgstr "La carta attrezzatura mostra le capacità e i prezzi attuali. "
+"Selezionala per ingrandirla. I pulsanti squadra, pompa e bacino mostrano "
+"l'azione e il costo prima della conferma."
 
 #: .\URR\templates\URR\URRhelp.html:82
 msgid "Nation calah"
-msgstr ""
+msgstr "Nazione di Calah"
 
 #: .\URR\templates\URR\URRhelp.html:84
 msgid "Nation cards"
-msgstr ""
+msgstr "Carte nazione"
 
 #: .\URR\templates\URR\URRhelp.html:84
 msgid ""
 "Select a nation card to read it at full size. Map locates its homeland. "
 "Player or state badges beside a nation show its owner."
-msgstr ""
+msgstr "Seleziona una carta nazione per leggerla a grandezza naturale. Mappa "
+"ne individua la patria. I distintivi giocatore o stato accanto a una nazione "
+"ne mostrano il proprietario."
 
 #: .\URR\templates\URR\URRhelp.html:89
 msgid "Map highlights"
-msgstr ""
+msgstr "Evidenziazioni della mappa"
 
 #: .\URR\templates\URR\URRhelp.html:92
-#, fuzzy
-#| msgid "Yellow"
 msgid "Yellow:"
-msgstr "Giallo"
+msgstr "Giallo:"
 
 #: .\URR\templates\URR\URRhelp.html:92
 msgid "The selected or focused hex. Its details appear below the map."
-msgstr ""
+msgstr "L'esagono selezionato o a fuoco. I suoi dettagli compaiono sotto la "
+"mappa."
 
 #: .\URR\templates\URR\URRhelp.html:93
 msgid "Purple:"
-msgstr ""
+msgstr "Viola:"
 
 #: .\URR\templates\URR\URRhelp.html:93
 msgid ""
 "An available Calah waterwork site or Barahshum canal destination. The map "
 "hint and hex description identify the exchange."
-msgstr ""
+msgstr "Un sito di opera idrica di Calah disponibile o una destinazione del "
+"canale di Barahshum. Il suggerimento sulla mappa e la descrizione "
+"dell'esagono identificano lo scambio."
 
 #: .\URR\templates\URR\URRhelp.html:94
 msgid "Amber:"
-msgstr ""
+msgstr "Ambra:"
 
 #: .\URR\templates\URR\URRhelp.html:94
 msgid ""
 "Land eligible for a mandatory crew funding sale, or a waterwork eligible for "
 "removal when storing harvest. Select a hex to see which applies."
-msgstr ""
+msgstr "Terra idonea a una vendita obbligatoria per finanziare le squadre, "
+"oppure un'opera idrica rimovibile quando si immagazzina il raccolto. "
+"Seleziona un esagono per vedere quale caso si applica."
 
 #: .\URR\templates\URR\URRhelp.html:95
 msgid "Cyan outline:"
-msgstr ""
+msgstr "Contorno ciano:"
 
 #: .\URR\templates\URR\URRhelp.html:95
 msgid ""
 "An available water-routing destination. Numbered blue badges match the "
 "destination list; the source has a dashed outline and a Source label. A "
 "small cyan dot on a hex marks irrigation."
-msgstr ""
+msgstr "Una destinazione disponibile per il percorso dell'acqua. I "
+"contrassegni blu numerati corrispondono all'elenco delle destinazioni; la "
+"sorgente ha un contorno tratteggiato e l'etichetta Sorgente. Un piccolo "
+"punto ciano su un esagono indica l'irrigazione."
 
 #: .\URR\templates\URR\URRhelp.html:96
 msgid "Blue lines:"
-msgstr ""
+msgstr "Linee blu:"
 
 #: .\URR\templates\URR\URRhelp.html:96
 msgid ""
 "Canals. The thicker line is the canal path you are drafting. After water "
 "routing is complete, Animate or Step through in history replays where the "
 "water went."
-msgstr ""
+msgstr "Canali. La linea più spessa è il percorso del canale che stai "
+"tracciando. Una volta completato il percorso dell'acqua, in cronologia usa "
+"Anima o Passo per rivedere dove è andata l'acqua."
 
 #: .\URR\templates\URR\URRhelp.html:98
 msgid ""
 "Select a hex to read its owner, terrain, waterwork, and current role; you do "
 "not need to identify a highlight by colour alone."
-msgstr ""
+msgstr "Seleziona un esagono per leggerne proprietario, terreno, opera idrica "
+"e ruolo attuale; non devi identificare un'evidenziazione solo dal colore."
 
 #: .\URR\templates\URR\URRhelp.html:102
-#, fuzzy
-#| msgid "Game Icons"
 msgid "Menu icons"
-msgstr "Icone del gioco"
+msgstr "Icone di menu"
 
 #: .\URR\templates\URR\URRhelp.html:104
 msgid ""
 "Opens this interface guide, the rulebook, and the player aid in a new tab."
-msgstr ""
+msgstr "Apre questa guida all'interfaccia, il regolamento e l'aiuto al "
+"giocatore in una nuova scheda."
 
 #: .\URR\templates\URR\URRhelp.html:105
 msgid "Info"
-msgstr ""
+msgstr "Info"
 
 #: .\URR\templates\URR\URRhelp.html:105
 msgid "Game information and options."
-msgstr ""
+msgstr "Informazioni e opzioni sulla partita."
 
 #: .\URR\templates\URR\URRhelp.html:106
 msgid "Messages shared with the other players."
-msgstr ""
+msgstr "Messaggi condivisi con gli altri giocatori."
 
 #: .\URR\templates\URR\URRhelp.html:107
-#, fuzzy
-#| msgid "Note:"
 msgid "Notes"
-msgstr "Nota:"
+msgstr "Note"
 
 #: .\URR\templates\URR\URRhelp.html:107
 msgid "Your private notes."
-msgstr ""
+msgstr "Le tue note private."
 
 #: .\URR\templates\URR\URRhelp.html:108
 msgid "History"
-msgstr ""
+msgstr "Cronologia"
 
 #: .\URR\templates\URR\URRhelp.html:108
 msgid "The move log, including payments and leadership changes."
-msgstr ""
+msgstr "Il registro delle mosse, compresi i pagamenti e i cambi di "
+"leadership."
 
 #: .\URR\templates\URR\URRhelp.html:109
 msgid "Inspect earlier positions, then Exit Replay to return to the live game."
-msgstr ""
+msgstr "Esamina le posizioni precedenti, poi Esci dal replay per tornare alla "
+"partita in diretta."
 
 #: .\URR\templates\URR\URRhelp.html:110
 msgid "Request a rewind to an earlier position."
-msgstr ""
+msgstr "Richiedi un riavvolgimento a una posizione precedente."
 
 #: .\URR\templates\URR\URRhelp.html:111
-#, fuzzy
-#| msgid "Bus"
 msgid "Bug"
-msgstr "Autobus"
+msgstr "Bug"
 
 #: .\URR\templates\URR\URRhelp.html:111
 msgid "Report a problem with the current game."
-msgstr ""
+msgstr "Segnala un problema con la partita attuale."
 
 #: .\URR\templates\URR\URRhelp.html:112
 msgid "Go to your next game."
-msgstr ""
+msgstr "Vai alla tua prossima partita."
 
 #: .\URR\templates\URR\URRhelp.html:113
 msgid "Return to the lobby."
-msgstr ""
+msgstr "Torna alla lobby."
 
 #: .\URR\templates\URR\URRhelp.html:119
 msgid ""
 "The rows above the board show player order and active state order. Select a "
 "player or state to inspect its holdings; the status panels otherwise follow "
 "the current decision."
-msgstr ""
+msgstr "Le righe sopra la plancia mostrano l'ordine dei giocatori e l'ordine "
+"degli stati attivi. Seleziona un giocatore o uno stato per esaminarne i "
+"possedimenti; gli altri pannelli di stato seguono la decisione corrente."
 
 #: .\URR\templates\URR\URRhelp.html:120
 msgid ""
@@ -14022,7 +14019,11 @@ msgid ""
 "and order, plus each player's ownership across states. Select a name to "
 "inspect its existing status panel. Stars mark monarchs or ownership leaders; "
 "sold land is excluded from ownership counts."
-msgstr ""
+msgstr "Panoramica confronta tesori degli stati, monarchi, terre possedute, "
+"squadre, raccolto e ordine, oltre alle proprietà di ogni giocatore nei vari "
+"stati. Seleziona un nome per esaminare il suo pannello di stato esistente. "
+"Le stelle indicano monarchi o leader di proprietà; le terre vendute sono "
+"escluse dal conteggio delle proprietà."
 
 #: .\URR\templates\URR\URRhelp.html:121
 msgid ""
@@ -14031,7 +14032,12 @@ msgid ""
 "that player's holdings in the same way. Clear map inspection restores the "
 "available action highlights. The action panel identifies the acting state "
 "and player separately from the inspected panels."
-msgstr ""
+msgstr "Gli stati esaminati risaltano sulla mappa mentre gli altri esagoni "
+"sono attenuati e le evidenziazioni delle azioni sono nascoste. Mostra terre "
+"possedute nel pannello giocatore evidenzia allo stesso modo i possedimenti "
+"di quel giocatore. Cancella l'esame mappa ripristina le evidenziazioni delle "
+"azioni disponibili. Il pannello delle azioni identifica lo stato e il "
+"giocatore che agiscono separatamente dai pannelli esaminati."
 
 #: .\URR\templates\URR\URRhelp.html:122
 msgid ""
@@ -14040,7 +14046,12 @@ msgid ""
 "supply. Below the map and side panels, the order-of-play strip shows "
 "Settlement, Development, and Rainy Season. During Development it also shows "
 "the substeps. The current phase and step are bold."
-msgstr ""
+msgstr "La fornitura di attrezzatura mostra in evidenza l'era corrente. Tutte "
+"le ere espande le carte rimanenti. La prossima era inizia con il primo "
+"acquisto dalla sua fornitura. Sotto la mappa e i pannelli laterali, la barra "
+"dell'ordine di gioco mostra Insediamento, Sviluppo e Stagione delle piogge. "
+"Durante lo Sviluppo mostra anche i sotto-passi. La fase e il passo correnti "
+"sono in grassetto."
 
 #: .\URR\templates\URR\URRhelp.html:123
 msgid ""
@@ -14048,13 +14059,16 @@ msgid ""
 "land sale prices on the printed price track. Market after plan previews "
 "price changes from queued sales before you confirm. Small city markers in a "
 "player's holdings count cities included in the terrain totals."
-msgstr ""
+msgstr "Il mercato delle terre stampato è sempre espanso. I segnalini del "
+"terreno mostrano i prezzi di vendita attuali delle terre sulla pista dei "
+"prezzi stampata. Mercato dopo il piano mostra in anteprima le variazioni di "
+"prezzo delle vendite in coda prima che tu confermi. I piccoli segnalini "
+"città nei possedimenti di un giocatore contano le città incluse nei totali "
+"del terreno."
 
 #: .\URR\templates\URR\URRhelp.html:125
-#, fuzzy
-#| msgid "Dividing the Independent Nations"
 msgid "Independent nations:"
-msgstr "Dividere le Nazioni Indipendenti"
+msgstr "Nazioni indipendenti:"
 
 #: .\URR\templates\URR\URRhelp.html:125
 msgid ""
@@ -14063,13 +14077,16 @@ msgid ""
 "at full size; use its zoom controls to enlarge it further. During an "
 "auction, bid or withdraw from the current nation. Bidders who cannot afford "
 "the minimum withdraw automatically."
-msgstr ""
+msgstr "Compra la nazione del trattato corrente oppure espandi la riga di "
+"un'altra nazione per fare un'offerta. Mappa ne individua la patria. "
+"Seleziona l'immagine per leggere una carta a grandezza naturale; usa i suoi "
+"controlli zoom per ingrandirla ulteriormente. Durante un'asta, offri o "
+"ritirati dalla nazione corrente. Gli offerenti che non possono permettersi "
+"il minimo si ritirano automaticamente."
 
 #: .\URR\templates\URR\URRhelp.html:126
-#, fuzzy
-#| msgid "Settlement"
 msgid "Settlement:"
-msgstr "Insediamento"
+msgstr "Insediamento:"
 
 #: .\URR\templates\URR\URRhelp.html:126
 msgid ""
@@ -14077,13 +14094,14 @@ msgid ""
 "and any leadership changes after trade, then complete the trade. Sales "
 "before and after buying are separate batches. Pass when finished, or bid for "
 "primogeniture."
-msgstr ""
+msgstr "Seleziona terra sulla plancia. Metti in coda un acquisto ed eventuali "
+"vendite, controlla il denaro e i cambi di leadership dopo lo scambio, poi "
+"completa lo scambio. Le vendite prima e dopo l'acquisto sono lotti separati. "
+"Passa quando hai finito, oppure fai un'offerta per la primogenitura."
 
 #: .\URR\templates\URR\URRhelp.html:127
-#, fuzzy
-#| msgid "Development"
 msgid "Development:"
-msgstr "Sviluppo"
+msgstr "Sviluppo:"
 
 #: .\URR\templates\URR\URRhelp.html:127
 msgid ""
@@ -14095,20 +14113,30 @@ msgid ""
 "proposal. Private cash and state treasuries are separate. If a required crew "
 "needs land sales, select the highlighted sites and review the final cash and "
 "any leadership changes before confirming."
-msgstr ""
+msgstr "Durante l'Insediamento o tra gli stati, il proprietario di Barahshum "
+"può selezionare Salta i prompt di Barahshum fino al prossimo round, poi "
+"usare Passa e termina il turno per saltare i prompt rimanenti. Gli stati "
+"scavano i canali prima di acquistare l'attrezzatura. Seleziona una squadra "
+"inutilizzata e traccia le aree adiacenti sulla mappa. Poi assumi squadre o "
+"seleziona un sito per una pompa o un bacino. Un altro proprietario terriero "
+"potrebbe dover accettare la tua proposta. Il denaro privato e i tesori degli "
+"stati sono separati. Se una squadra richiesta necessita di vendite di terre, "
+"seleziona i siti evidenziati e controlla il denaro finale e gli eventuali "
+"cambi di leadership prima di confermare."
 
 #: .\URR\templates\URR\URRhelp.html:128
-#, fuzzy
-#| msgid "Rainy Season"
 msgid "Rainy season:"
-msgstr "Stagione delle piogge"
+msgstr "Stagione delle piogge:"
 
 #: .\URR\templates\URR\URRhelp.html:128
 msgid ""
 "Select a highlighted destination to route water. At harvest, review the "
 "payouts before distributing it, or store it in the state treasury and remove "
 "a waterwork when required. Empty harvests resolve automatically."
-msgstr ""
+msgstr "Seleziona una destinazione evidenziata per instradare l'acqua. Al "
+"raccolto, controlla i pagamenti prima di distribuirli, oppure immagazzinalo "
+"nel tesoro dello stato e rimuovi un'opera idrica quando richiesto. I "
+"raccolti vuoti si risolvono automaticamente."
 
 #: .\URR\templates\URR\URRhelp.html:130
 msgid ""
@@ -14116,13 +14144,19 @@ msgid ""
 "screen. It closes while tracing a canal. Selecting a player or state brings "
 "its status into view; Back to board returns to the map. Use the zoom "
 "controls to enlarge the map, and select the percentage to fit it again."
-msgstr ""
+msgstr "Su uno schermo piccolo, Mostra azioni apre il pannello nella parte "
+"inferiore dello schermo. Si chiude mentre tracci un canale. Selezionare un "
+"giocatore o uno stato porta in vista il suo stato; Torna alla plancia "
+"riporta alla mappa. Usa i controlli zoom per ingrandire la mappa e seleziona "
+"la percentuale per adattarla di nuovo."
 
 #: .\URR\templates\URR\URRhelp.html:131
 msgid ""
 "For keyboard play, Tab focuses the board. Arrow keys move between adjacent "
 "hexes; Enter or Space selects a hex. Tab moves on to the other controls."
-msgstr ""
+msgstr "Per giocare da tastiera, Tab porta il focus sulla plancia. I tasti "
+"freccia spostano tra esagoni adiacenti; Invio o Spazio seleziona un esagono. "
+"Tab passa agli altri controlli."
 
 #: .\URR\templates\URR\URRhelp.html:132
 msgid ""
@@ -14141,7 +14175,24 @@ msgid ""
 "Start, Previous, Pause or Play, Next, End, and Close controls on the map. "
 "Playback does not change the game. Use the shared Rewind control for a "
 "previously saved turn."
-msgstr ""
+msgstr "Le tue azioni restano in una bozza locale fino a Termina turno. Le "
+"opere idriche sulla terra di un altro giocatore restano richieste di accordo "
+"mentre continui la costruzione. Termina turno invia le richieste ai "
+"proprietari terrieri. L'accettazione completa lo sviluppo dopo l'accordo "
+"finale. Un rifiuto riapre le tue scelte di costruzione e blocca il sito "
+"rifiutato per il turno di sviluppo di questo stato. Accetta &amp; termina il "
+"turno e Rifiuta &amp; termina il turno salvano immediatamente le risposte "
+"agli accordi. Annulla inverte la tua ultima azione in bozza; Reimposta il "
+"turno ripristina l'inizio della tua sessione decisionale corrente. Termina "
+"turno salva la bozza e passa il controllo. Questi controlli valgono per "
+"aste, accordi, sviluppo e percorso dell'acqua. Durante il raccolto, "
+"Distribuisci e termina il turno o Immagazzina e termina il turno salvano "
+"immediatamente la scelta. L'aggiornamento o l'uscita prima di Termina turno "
+"scartano la bozza. La cronologia del percorso dell'acqua completato offre "
+"Anima e Passo, con i controlli Start, Precedente, Pausa o Riproduci, "
+"Successivo, Fine e Chiudi sulla mappa. La riproduzione non modifica la "
+"partita. Usa il controllo condiviso Riavvolgi per un turno salvato in "
+"precedenza."
 
 #: .\URR\templates\URR\URRhelp.html:133
 msgid ""
@@ -14150,7 +14201,12 @@ msgid ""
 "Cancel clears the selection. Expand Dig canals, Buy equipment, or Buy a "
 "nation during development. Choose a construction or exchange action to "
 "highlight its available sites."
-msgstr ""
+msgstr "Selezionare una destinazione nell'elenco la seleziona anche sulla "
+"mappa. Durante il percorso dell'acqua, Conferma accanto all'esagono "
+"selezionato aggiunge quell'assegnazione alla tua bozza; Annulla cancella la "
+"selezione. Espandi Scava canali, Compra attrezzatura o Compra una nazione "
+"durante lo sviluppo. Scegli un'azione di costruzione o scambio per "
+"evidenziare i siti disponibili."
 
 #: .\URR\templates\URR\URRhelp.html:134
 msgid ""
@@ -14158,19 +14214,23 @@ msgid ""
 "changes. Escape closes a card preview or the history panel. In Replay, "
 "select a history entry or use the step controls to inspect earlier "
 "positions. Exit Replay returns to the live game."
-msgstr ""
+msgstr "Cronologia registra mosse, variazioni del tesoro, nascita di stati e "
+"cambi di leadership. Esc chiude l'anteprima di una carta o il pannello della "
+"cronologia. Nel replay, seleziona una voce della cronologia o usa i "
+"controlli di passo per esaminare posizioni precedenti. Esci dal replay torna "
+"alla partita in diretta."
 
 #: .\URR\templates\URR\showURRgame.html:79
 msgid "UR: 1830 BC is loading........"
-msgstr ""
+msgstr "UR: 1830 a.C. è in caricamento........"
 
 #: .\URR\views.py:169
 msgid "Only another active player can initiate kickout."
-msgstr ""
+msgstr "Solo un altro giocatore attivo può avviare l'espulsione."
 
 #: .\URR\views.py:171
 msgid "This player is not eligible for kickout."
-msgstr ""
+msgstr "Questo giocatore non è idoneo all'espulsione."
 
 #: .\WEB\templates\WEB\WEBhelp.html:5
 msgid "Web Help"

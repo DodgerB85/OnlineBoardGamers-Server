@@ -311,7 +311,7 @@ msgstr "新的扩建装卸区被阻塞"
 
 #: .\static\HLC\JS\HLChistory.js:122
 msgid "%(playerName)s sets up factory"
-msgstr "设置工厂"
+msgstr "%(playerName)s 设置工厂"
 
 #: .\static\HLC\JS\HLChistory.js:134
 msgid "Game rewound to here by %(playerName)s"
@@ -380,25 +380,19 @@ msgstr "（自动）"
 #: .\static\HLC\JS\HLChistory.js:386
 msgid "%(carAmount)s Car for $%(eachSaleAmount)s"
 msgid_plural "%(carAmount)s Cars, each for $%(eachSaleAmount)s"
-msgstr[0] ""
-"%(carAmount)s 轿车 for $%(eachSaleAmount)s\n"
-"%(carAmount)s 轿车, 每个 for $%(eachSaleAmount)s"
+msgstr[0] "%(carAmount)s 辆汽车，每辆 $%(eachSaleAmount)s，另加 $2"
 
 #: .\static\HLC\JS\HLChistory.js:397
 msgid "%(truckAmount)s Truck for $%(eachSaleAmount)s plus bonus $1"
 msgid_plural ""
 "%(truckAmount)s Trucks, each for $%(eachSaleAmount)s plus bonus $1"
-msgstr[0] ""
-"%(truckAmount)s 卡车 for $%(eachSaleAmount)s 额外加 $1\n"
-"%(truckAmount)s 卡车, 每个 for $%(eachSaleAmount)s 额外加 $1"
+msgstr[0] "%(truckAmount)s 辆卡车，每辆 $%(eachSaleAmount)s，另加 $1"
 
 #: .\static\HLC\JS\HLChistory.js:408
 msgid "%(sportsAmount)s Sports Car for $%(eachSaleAmount)s plus bonus $2"
 msgid_plural ""
 "%(sportsAmount)s Sports Cars, each for $%(eachSaleAmount)s plus bonus $2"
-msgstr[0] ""
-"%(sportsAmount)s 跑车 for $%(eachSaleAmount)s 额外加 $2\n"
-"%(sportsAmount)s 跑车, 每个 for $%(eachSaleAmount)s 额外加 $2"
+msgstr[0] "%(sportsAmount)s 辆跑车，每辆 $%(eachSaleAmount)s，另加 $2"
 
 #: .\static\HLC\JS\HLChistory.js:414 .\static\HLC\JS\HLChistory.js:518
 msgid "Total Income:"
@@ -606,10 +600,8 @@ msgid ""
 msgstr "你的工厂已保存。轮到你时将再次验证"
 
 #: .\static\HLC\JS\HLCio.js:676
-#, fuzzy
-#| msgid "You cannot rewind a finished game"
 msgid "You cannot rewind during replay"
-msgstr "你不能倒回已完成的游戏"
+msgstr "回放期间无法回退"
 
 #: .\static\HLC\JS\HLCio.js:682
 msgid "You cannot rewind a finished game"
@@ -691,7 +683,7 @@ msgstr ""
 
 #: .\static\HLC\JS\HLCmain.js:161
 msgid "None"
-msgstr ""
+msgstr "无"
 
 #: .\static\HLC\JS\HLCmain.js:162
 msgid "Votes: "
