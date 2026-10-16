@@ -1272,6 +1272,21 @@ msgstr "Jalon « Premier fournisseur du Stadium » : le premier joueur à "
 "futures lui parviennent 3 tours avant le match au lieu de 2 - en privé, un "
 "tour avant que tous les autres ne l'apprennent."
 
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:150
+msgid ""
+"With the Coffee module: For the Stadium's game-day walk (including coffee "
+"bought along the way), the two arena tiles count as a single building - "
+"moving between them never counts as a tile crossing. The walk can lap the "
+"entire ring road, so a stocked coffee shop next to either half's road can "
+"sell. All other customers count the two tiles as normal map tiles."
+msgstr "Avec le module Café : lors du parcours du jour de match du Stadium (y "
+"compris le café acheté en chemin), les deux tuiles du Stadium comptent comme "
+"un seul bâtiment : se déplacer entre elles ne compte jamais comme un "
+"franchissement de limite de tuile. Le parcours peut faire le tour complet de "
+"la route périphérique, si bien qu'un café approvisionné à côté de la route "
+"de l'une ou l'autre moitié peut vendre. Tous les autres clients comptent les "
+"deux tuiles comme des tuiles de carte normales."
+
 #: .\FCM\templates\FCM\fanExpansionsHelp.html:154
 msgid "Labor Market"
 msgstr "Labor Market"

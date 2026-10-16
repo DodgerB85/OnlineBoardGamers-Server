@@ -1271,6 +1271,21 @@ msgstr "Hito «Primer proveedor del estadio»: el primer jugador que gane un "
 "llegan a este jugador 3 turnos antes del partido en lugar de 2; en privado, "
 "un turno antes de que todos los demás se enteren."
 
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:150
+msgid ""
+"With the Coffee module: For the Stadium's game-day walk (including coffee "
+"bought along the way), the two arena tiles count as a single building - "
+"moving between them never counts as a tile crossing. The walk can lap the "
+"entire ring road, so a stocked coffee shop next to either half's road can "
+"sell. All other customers count the two tiles as normal map tiles."
+msgstr "Con el módulo de Café: en el paseo del día del partido del Estadio "
+"(incluido el café comprado por el camino), las dos baldosas del Estadio "
+"cuentan como un solo edificio: moverse entre ellas nunca cuenta como cruzar "
+"un límite de baldosa. El paseo puede dar la vuelta completa a la carretera "
+"perimetral, así que una cafetería con existencias junto a la carretera de "
+"cualquiera de las dos mitades puede vender. Todos los demás clientes cuentan "
+"las dos baldosas como baldosas normales del mapa."
+
 #: .\FCM\templates\FCM\fanExpansionsHelp.html:154
 msgid "Labor Market"
 msgstr "Mercado laboral"

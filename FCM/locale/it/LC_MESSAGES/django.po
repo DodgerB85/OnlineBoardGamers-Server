@@ -1266,6 +1266,21 @@ msgstr "Traguardo \"Primo fornitore dello stadio\": il primo giocatore a "
 "futuri annunci raggiungono questo giocatore 3 turni prima della partita "
 "invece di 2, privatamente, un turno prima che lo scoprano tutti gli altri."
 
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:150
+msgid ""
+"With the Coffee module: For the Stadium's game-day walk (including coffee "
+"bought along the way), the two arena tiles count as a single building - "
+"moving between them never counts as a tile crossing. The walk can lap the "
+"entire ring road, so a stocked coffee shop next to either half's road can "
+"sell. All other customers count the two tiles as normal map tiles."
+msgstr "Con il modulo Caffè: nel percorso del giorno della partita dello "
+"Stadium (incluso il caffè acquistato lungo il tragitto), le due tessere "
+"dello stadio contano come un unico edificio: spostarsi tra esse non conta "
+"mai come un attraversamento di un confine di tessera. Il percorso può fare "
+"il giro completo della strada ad anello, così un bar con scorte accanto "
+"alla strada di una delle due metà può vendere. Tutti gli altri clienti "
+"contano le due tessere come normali tessere della mappa."
+
 #: .\FCM\templates\FCM\fanExpansionsHelp.html:154
 msgid "Labor Market"
 msgstr "Labor Market"

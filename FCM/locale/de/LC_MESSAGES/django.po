@@ -1273,6 +1273,21 @@ msgstr "Meilenstein „Erster Stadium-Lieferant“: Der erste Spieler, der ein "
 "Ankündigungen erreichen diesen Spieler 3 Runden vor dem Spiel statt 2 – "
 "privat, eine Runde bevor alle anderen davon erfahren."
 
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:150
+msgid ""
+"With the Coffee module: For the Stadium's game-day walk (including coffee "
+"bought along the way), the two arena tiles count as a single building - "
+"moving between them never counts as a tile crossing. The walk can lap the "
+"entire ring road, so a stocked coffee shop next to either half's road can "
+"sell. All other customers count the two tiles as normal map tiles."
+msgstr "Mit dem Kaffee-Modul: Beim Rundgang des Stadiums am Spieltag "
+"(einschließlich unterwegs gekauftem Kaffee) zählen die beiden "
+"Stadion-Plättchen als ein einziges Gebäude – eine Bewegung zwischen ihnen "
+"zählt nie als Überschreiten einer Plättchengrenze. Der Rundgang kann die "
+"gesamte Ringstraße umrunden, sodass ein Café mit Kaffee auf Lager neben der "
+"Straße einer der beiden Hälften verkaufen kann. Alle anderen Kunden zählen "
+"die beiden Plättchen als normale Kartenplättchen."
+
 #: .\FCM\templates\FCM\fanExpansionsHelp.html:154
 msgid "Labor Market"
 msgstr "Arbeitsmarkt"
