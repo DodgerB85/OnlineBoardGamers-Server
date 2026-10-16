@@ -9,8 +9,9 @@ document.addEventListener("DOMContentLoaded", function () {
 		else delete document.documentElement.dataset.theme
 
 		// Toggling the switch saves right away, so the form has no submit button.
+		// form.action is shadowed by the hidden input named "action", so post to the page itself.
 		const form = document.getElementById("appearanceForm")
-		fetch(form.action, {
+		fetch(window.location.href, {
 			method: "POST",
 			body: new FormData(form),
 			headers: { "X-CSRFToken": getCookie("csrftoken") },
@@ -141,7 +142,8 @@ function wireAsyncProfileForm(formId, savingText, savedText) {
 		button.innerHTML = '<span class="btn-spinner"></span>' + savingText
 
 		try {
-			const response = await fetch(form.action, {
+			// These forms post to the profile page; form.action is shadowed by the hidden input named "action".
+			const response = await fetch(window.location.href, {
 				method: "POST",
 				body: new FormData(form),
 				headers: { "X-CSRFToken": getCookie("csrftoken") },
