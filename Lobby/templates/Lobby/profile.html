@@ -26,7 +26,7 @@
             <div class="card-header">
                 <h2 class="card-title">{% translate "Appearance" %}</h2>
             </div>
-            <form method="post">
+            <form method="post" id="appearanceForm">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="updateProfileAppearance">
                 <div class="form-row">
@@ -35,9 +35,6 @@
                         <input type="checkbox" role="switch" class="appearance-toggle" id="darkMode" name="darkMode" aria-describedby="darkModeHelp" {% if request.user.profile.darkMode %}checked{% endif %}>
                         <p id="darkModeHelp">{% translate "Applies to the lobby and account pages. Game views keep their current appearance." %}</p>
                     </div>
-                </div>
-                <div style="margin-top: 16px; text-align: center;">
-                    <button type="submit" class="button button-primary">{% translate "Save Appearance" %}</button>
                 </div>
             </form>
         </div>

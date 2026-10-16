@@ -7,6 +7,18 @@ document.addEventListener("DOMContentLoaded", function () {
 		document.getElementById("darkModeStyles").disabled = !darkMode.checked
 		if (darkMode.checked) document.documentElement.dataset.theme = "dark"
 		else delete document.documentElement.dataset.theme
+
+		// Toggling the switch saves right away, so the form has no submit button.
+		const form = document.getElementById("appearanceForm")
+		fetch(form.action, {
+			method: "POST",
+			body: new FormData(form),
+			headers: { "X-CSRFToken": getCookie("csrftoken") },
+		})
+			.then((response) => {
+				if (!response.ok) throw new Error("Appearance save failed: " + response.status)
+			})
+			.catch((error) => console.error(error))
 	})
 
 	let stopEmailsButton = document.querySelector("#stopEmailsButton")
