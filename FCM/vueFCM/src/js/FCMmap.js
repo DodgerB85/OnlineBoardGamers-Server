@@ -752,6 +752,24 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	const rwSet = new Set(getRoadworkIndexes())
 	const coffeeRoutes = []
 
+	// Stadium mod: the arena spans two tiles but is ONE building - but only
+	// for its own crowd. When the walk is seeded from the arena itself (game
+	// day), moving between its two tiles never counts as a tile crossing, so
+	// the walk can lap the whole ring road instead of stopping at the tile
+	// border. Walks seeded anywhere else (regular houses, RMA) keep counting
+	// the two tiles as normal map tiles. One scan per call (coords is spliced
+	// in place between games, so no caching by reference).
+	const arenaTiles = new Set()
+	for (let i = 0; i < store.mapData.coords.length; i++) {
+		if (store.mapData.coords[i] === rf.HOUSE + rf.STADIUM) arenaTiles.add(giveTileNumber(i))
+	}
+	const freeArenaPair = arenaTiles.size > 1 && arenaTiles.has(giveTileNumber(index))
+	const crossesTileBoundary = (a, b) => {
+		if (onTheSameTile(a, b)) return false
+		if (freeArenaPair) return !(arenaTiles.has(giveTileNumber(a)) && arenaTiles.has(giveTileNumber(b)))
+		return true
+	}
+
 	// Admissible A*-style prune (legacy map.js:899-900, giveMinTileDistance):
 	// reject a tile crossing whose current range plus straight-line tile
 	// distance to the nearest destination already exceeds winningRange. Never
@@ -773,10 +791,21 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	const minTileDist = (idx) => {
 		const x = Math.floor((idx % rf.ssW) / 5)
 		const y = Math.floor(Math.floor(idx / rf.ssW) / 5)
+		// Arena super-tile (arena-seeded walks only): a walker inside the
+		// arena pair can leave from either half for free, so the admissible
+		// bound is the min over both
+		const fromArena = freeArenaPair && arenaTiles.has(y * TILES_WIDE + x)
 		let min = Infinity
 		for (const [dx, dy] of destTiles) {
-			const d = Math.abs(x - dx) + Math.abs(y - dy)
-			if (d < min) min = d
+			if (fromArena) {
+				for (const t of arenaTiles) {
+					const d = Math.abs((t % TILES_WIDE) - dx) + Math.abs(Math.floor(t / TILES_WIDE) - dy)
+					if (d < min) min = d
+				}
+			} else {
+				const d = Math.abs(x - dx) + Math.abs(y - dy)
+				if (d < min) min = d
+			}
 		}
 		return min
 	}
@@ -800,12 +829,12 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 		.filter((n) => ROAD_IDS.has(store.mapData.coords[n]))
 		.map((n) => ({
 			index: n,
-			range: onTheSameTile(index, n) ? 0 : 1,
+			range: crossesTileBoundary(index, n) ? 1 : 0,
 			from: index,
 		}))
 
 	const canEmitAt = (idx, range) =>
-		neighbours(idx).some((n) => restoSet.has(n) && (onTheSameTile(idx, n) || range + 1 <= winningRange))
+		neighbours(idx).some((n) => restoSet.has(n) && (!crossesTileBoundary(idx, n) || range + 1 <= winningRange))
 
 	// getCoffeeRoute keeps only the first route per maximal square-set, so on a
 	// dense block (4x4 = 583k walks) we find those sets directly: phase 1 finds
@@ -814,7 +843,7 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	// DFS range rules minus `from`/bridges/two-visit (those only remove moves). -1 = blocked.
 	const relaxedStep = (idx, range, next, visitedTwice) => {
 		if (!ROAD_IDS.has(store.mapData.coords[next]) || visitedTwice.has(next)) return -1
-		const crossed = !onTheSameTile(idx, next)
+		const crossed = crossesTileBoundary(idx, next)
 		const rw = rwSet.has(next)
 		const nextRange = range + (crossed ? 1 : 0) + (rw ? 1 : 0)
 		if (nextRange > winningRange && (crossed || rw)) return -1
@@ -916,7 +945,7 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 
 			for (const next of nextRoads) {
 				let nextRange = currentRange
-				const crossed = !onTheSameTile(currentIdx, next)
+				const crossed = crossesTileBoundary(currentIdx, next)
 				if (crossed) nextRange++
 				if (rwSet.has(next)) nextRange++
 
@@ -950,7 +979,7 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	dfs((idx, range, path) => {
 		if (++steps > COFFEE_DFS_BUDGET) return false
 		for (const n of neighbours(idx)) {
-			if (restoSet.has(n) && (onTheSameTile(idx, n) || range + 1 <= winningRange)) coffeeRoutes.push([...path])
+			if (restoSet.has(n) && (!crossesTileBoundary(idx, n) || range + 1 <= winningRange)) coffeeRoutes.push([...path])
 		}
 		return true
 	})
