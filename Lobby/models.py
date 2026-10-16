@@ -91,6 +91,7 @@ class Lock(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    darkMode = models.BooleanField(default=False)
     sendEmailNotificationOnTurn = models.BooleanField(default=True)
     hotStreakEnabled = models.BooleanField(default=True)
     hotStreakReminders = models.BooleanField(default=False)

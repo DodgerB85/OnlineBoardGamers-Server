@@ -1,0 +1,100 @@
+/* Only loaded by the authenticated lobby shell; game views have their own shell. */
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --color-page-bg: #101c22;
+    --color-surface: #1a2b32;
+    --color-surface-soft: #22363e;
+    --color-border: #36505a;
+    --color-border-strong: #52717c;
+    --color-muted: #adc1c8;
+    --color-ink: #c5d3d5;
+    --color-ink-soft: #b7c8cc;
+    --color-text: var(--color-ink);
+    --color-accent-strong: #8bcac4;
+    --color-positive: #b2dfa4;
+    --color-positive-bg: #294332;
+    --color-warn: #f0ca83;
+    --color-warn-bg: #493b25;
+    --color-danger: #ffb4b4;
+    --color-danger-bg: #4b2c33;
+}
+
+.col-game a,
+.col-players a,
+.col-status a {
+    color: var(--color-accent-strong);
+    text-decoration-color: currentColor;
+}
+
+.lobby-games-table tbody tr.row09 {
+    border-bottom-color: var(--color-border-strong);
+}
+
+.row09.myMove { background: var(--color-positive-bg); }
+.row09.kickoutRequired1 { background: var(--color-warn-bg); }
+.row09.kickoutRequired2 { background: var(--color-danger-bg); }
+
+@media (hover: hover) {
+    .row09.myMove:hover,
+    .row09.kickoutRequired1:hover,
+    .row09.kickoutRequired2:hover {
+        background: var(--color-surface-soft);
+    }
+}
+
+.opts-slate, .opts-red, .opts-green, .opts-amber,
+.opts-blue, .opts-purple, .opts-orange,
+.autocomplete-items div {
+    background: var(--color-surface);
+}
+
+.expert-options,
+.expert-options .check-label:has(input:disabled),
+.create-page .expertTGZoptions .valueContainer:has(input:disabled),
+#expertOptions.expertTGZoptions .valueContainer:has(input[type="checkbox"]:disabled) {
+    background: var(--color-warn-bg);
+}
+
+.autocomplete-items,
+.autocomplete-items div {
+    border-color: var(--color-border);
+}
+
+.autocomplete-items div:hover {
+    background: var(--color-surface-soft);
+}
+
+.button:not(.button-ghost):not(.button-danger):not(:disabled):hover,
+.create-page .registerbtn:hover,
+.create-page .createNewGameButton:hover,
+.create-page input[type="submit"]:hover {
+    color: var(--color-accent-ink);
+}
+
+#wholeMTchat, .chatentry, .IPleftColumn, .IPleftColumnMG {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+.top14green tr:nth-child(n),
+.top2green tr:nth-child(n),
+.top1green tr:nth-child(n) {
+    background-color: var(--color-surface);
+}
+
+.top14green tr:nth-child(-n + 14),
+.top2green tr:nth-child(-n + 2),
+.top1green tr:nth-child(-n + 1) {
+    background-color: var(--color-positive-bg);
+}
+
+.lobby-social a {
+    color: var(--color-brand-blue);
+}
+
+@media (hover: hover) {
+    .lobby-social a:hover {
+        background-color: var(--color-brand-blue);
+        color: var(--color-nav-bg);
+    }
+}

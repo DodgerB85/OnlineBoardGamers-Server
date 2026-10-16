@@ -3,6 +3,9 @@
 {% block head %}
     
     <link href="{% static 'Lobby/CSS/profile.css' %}" rel="stylesheet">
+    {% if not request.user.profile.darkMode %}
+        <link id="darkModeStyles" href="{% static 'Lobby/CSS/dark.css' %}" rel="stylesheet" disabled>
+    {% endif %}
 {% endblock head %}
 {% block body %}
     <script src="{% url 'javascript-catalog' %}"></script>
@@ -17,6 +20,26 @@
                 <h1 class="page-title">{{ username }}</h1>
                 <p class="page-subtitle">{{ email }}</p>
             </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 16px;">
+            <div class="card-header">
+                <h2 class="card-title">{% translate "Appearance" %}</h2>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="updateProfileAppearance">
+                <div class="form-row">
+                    <label class="form-label" for="darkMode">{% translate "Dark mode" %}</label>
+                    <div class="field appearance-control">
+                        <input type="checkbox" role="switch" class="appearance-toggle" id="darkMode" name="darkMode" aria-describedby="darkModeHelp" {% if request.user.profile.darkMode %}checked{% endif %}>
+                        <p id="darkModeHelp">{% translate "Applies to the lobby and account pages. Game views keep their current appearance." %}</p>
+                    </div>
+                </div>
+                <div style="margin-top: 16px; text-align: center;">
+                    <button type="submit" class="button button-primary">{% translate "Save Appearance" %}</button>
+                </div>
+            </form>
         </div>
 
         {# ── Card 1: Notifications ── #}

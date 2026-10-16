@@ -485,3 +485,48 @@
 	background-color: DodgerBlue !important;
 	color: #ffffff;
 }
+
+.appearance-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.appearance-control p {
+    margin: 0;
+}
+
+.appearance-toggle {
+    appearance: none;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 24px;
+    margin: 0;
+    padding: 2px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 24px;
+    background: var(--color-muted);
+    cursor: pointer;
+}
+
+.appearance-toggle::before {
+    content: "";
+    display: block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--color-surface);
+}
+
+.appearance-toggle:checked {
+    background: var(--color-accent);
+}
+
+.appearance-toggle:checked::before {
+    transform: translateX(20px);
+}
+
+.appearance-toggle:focus-visible {
+    outline: 2px solid var(--color-accent-strong);
+    outline-offset: 3px;
+}
