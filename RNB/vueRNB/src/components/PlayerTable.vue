@@ -111,7 +111,7 @@ const getFullTurnOrderArray = computed(() => {
 					<thead>
 						<tr>
 							<th rowspan="2"><b>Player</b></th>
-							<th colspan="3"><b>Wealth Points</b></th>
+							<th :colspan="store.gameOptions.useArt ? 4 : 3"><b>Wealth Points</b></th>
 							<th v-if="!props.minimiseInfoForMainScreen" colspan="3" style="text-align: center">
 								<b>Transports</b>
 							</th>

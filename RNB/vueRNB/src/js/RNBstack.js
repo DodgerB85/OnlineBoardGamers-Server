@@ -1827,7 +1827,9 @@ export function verifySingleStackAction(stackActionData) {
 		// Check the transporter is on the hex
 		const transporterObj = model.getTransporterByID(transporterID)
 		if (transporterObj.location[1] !== hexID) return 1
-		const playerObj = controller.currentPlayerObj()
+		// The RESEARCHER's own Fundamental Research decides the cost - not whoever is
+		// processing this stack (eg another player's pre-set on our client)
+		const playerObj = store.players[transporterObj.ownerIndex]
 
 		let inputResources = [rf.RES_GOOSE, rf.RES_PAPER]
 		if (playerObj.RnD[rf.RND_FUNDAMENTAL_RESEARCH_IDX] !== 1) inputResources.push(rf.RES_GOOSE)

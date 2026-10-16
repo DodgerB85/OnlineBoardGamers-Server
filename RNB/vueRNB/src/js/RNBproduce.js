@@ -322,9 +322,11 @@ export function findAllDonkeyReproductionHexIDpossibilities(playerIndex) {
 }
 
 export function findAllResearchHexIDpossibilities(playerIndex) {
-	//const store = useModelStore()
+	const store = useModelStore()
 	// This is possibly inefficient. But there are at most 8 transporters in the game anyway
 	let res = []
+	// Fundamental Research: from then on a single goose is enough
+	const requiredGeese = store.players[playerIndex].RnD[rf.RND_FUNDAMENTAL_RESEARCH_IDX] === 1 ? 1 : 2
 	const allPlayerTransporters = model.getTransportersByPlayerIndex(playerIndex)
 	for (const transporterObj of allPlayerTransporters) {
 		if (!loc.isAnyHexLocation(transporterObj.location)) continue
@@ -333,7 +335,7 @@ export function findAllResearchHexIDpossibilities(playerIndex) {
 
 		const paperOnHex = resourceOnHex[rf.RES_PAPER]
 		const geeseOnHex = resourceOnHex[rf.RES_GOOSE]
-		if (paperOnHex >= 1 && geeseOnHex >= 2 && !res.includes(transporterObj.location[1])) {
+		if (paperOnHex >= 1 && geeseOnHex >= requiredGeese && !res.includes(transporterObj.location[1])) {
 			res.push(transporterObj.location[1])
 		}
 	}

@@ -1088,7 +1088,6 @@ export function removeResourcesFromGameUsingTransporter(transporterID, resArr, s
 	let hexID = transporterObj.location[1]
 	// Find the eligible resources
 	let resources = loc.getAllResourcesAccessibleToTransporter(transporterID, true)
-	console.log(JSON.stringify(resources))
 	// Ignore transporter inputs
 	resArr = resArr.filter((resType) => resType < rf.RES_UPPER_LIMIT)
 
