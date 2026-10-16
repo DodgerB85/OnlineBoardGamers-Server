@@ -1766,6 +1766,12 @@ def profile(request):
                 error_string = " ".join(error_messages)
                 messages.error(request, error_string)
                 return redirect("profile")
+        elif request.POST["action"] == "updateProfileAppearance":
+            profile = Profile.objects.get(user=request.user)
+            profile.darkMode = "darkMode" in request.POST
+            profile.save(update_fields=["darkMode"])
+            messages.success(request, gettext("Your appearance preferences have been updated successfully"))
+            return redirect("profile")
         elif request.POST["action"] == "updateProfileFavourites":
             profile = Profile.objects.get(user=request.user)
             profile.preferredRestaurantColour = request.POST["fcmResto"]

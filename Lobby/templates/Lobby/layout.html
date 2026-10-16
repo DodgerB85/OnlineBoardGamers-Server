@@ -1,7 +1,7 @@
 {% load static %}
 {% load i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"{% if user.is_authenticated and user.profile.darkMode %} data-theme="dark"{% endif %}>
     <head>
         <style>
         html {
@@ -79,6 +79,9 @@
               rel="stylesheet">
         <link href="{% static 'Lobby/CSS/layout_new.css' %}" rel="stylesheet">
         {% block head %}{% endblock %}
+        {% if user.is_authenticated and user.profile.darkMode %}
+            <link id="darkModeStyles" href="{% static 'Lobby/CSS/dark.css' %}" rel="stylesheet">
+        {% endif %}
     </head>
     <body class="{% if user.is_authenticated %}authed{% else %}guest{% endif %} {% block body_class %}{% endblock %}">
         <div class="topBar">

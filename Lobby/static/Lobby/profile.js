@@ -2,6 +2,13 @@
 
 // TEXT IN WEBHOOK ALERTS
 document.addEventListener("DOMContentLoaded", function () {
+	const darkMode = document.getElementById("darkMode")
+	darkMode.addEventListener("change", function () {
+		document.getElementById("darkModeStyles").disabled = !darkMode.checked
+		if (darkMode.checked) document.documentElement.dataset.theme = "dark"
+		else delete document.documentElement.dataset.theme
+	})
+
 	let stopEmailsButton = document.querySelector("#stopEmailsButton")
 	if (global.stopEmailsUntil >= 0) {
 		let milliseconds = global.stopEmailsUntil * 60 * 1000 // Convert seconds to milliseconds
