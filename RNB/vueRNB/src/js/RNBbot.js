@@ -53,15 +53,23 @@ export async function actionPlayerKickout() {
 	const timedOutPlayerIndex = controller.timedOutPlayerIndex()
 	if (personal.kickoutRequired === 2) {
 		personal.kickoutRequired = 0
-		const playerObj = controller.timedOutPlayerObj()
 
 		// Ask the server first: 3p+ games need a majority vote to kick,
 		// so this may only record a vote rather than actually kick.
 		const result = await IO.kickout(timedOutPlayerIndex)
 		if (result && result.voteCast) return
 
+		// Discard any unfinalized pre-move preview BEFORE recording the kickout: the save at
+		// the end of this function rolls the whole model back to its pre-preview snapshot,
+		// which would otherwise undo the kickout (and re-import the players array).
+		IO.clearUnfinalizedPreMoveBeforeExport()
+		const playerObj = controller.timedOutPlayerObj()
+
 		// Action the kick in game
 		model.addHistory(rf.HIST_KICKOUT, personal.pov, 0, [timedOutPlayerIndex])
+
+		// The kicked player leaves the game: their transporters and goods come off the map
+		model.removeAllTransportersAndGoodsForPlayerIndex(timedOutPlayerIndex)
 
 		playerObj.displayName = rf.BOT_NAME
 
@@ -140,6 +148,9 @@ export async function actionResign() {
 
 	// This just sets the server settings
 	await IO.resign()
+
+	// The resigning player leaves the game: their transporters and goods come off the map
+	model.removeAllTransportersAndGoodsForPlayerIndex(personal.pov)
 
 	context.resetContextAndHighlights()
 

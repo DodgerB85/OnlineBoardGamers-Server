@@ -1172,6 +1172,16 @@ export function removeTransporterIDfromGame(transporterID) {
 	transporterObj.location = loc.setOOBlocation()
 }
 
+// A player who resigns or is kicked out leaves the game: their transporters and everything
+// riding on them (carried goods and geese, and any transporter they carry) leave with them.
+export function removeAllTransportersAndGoodsForPlayerIndex(playerIndex) {
+	for (const transporterObj of getTransportersByPlayerIndex(playerIndex)) {
+		for (const carriedTransporter of transportersOnTransporter(transporterObj.id)) carriedTransporter.location = loc.setOOBlocation()
+		for (const res of resourcesOnTransport(transporterObj.id).concat(resourcesFollowingTransporter(transporterObj.id))) res.location = loc.setOOBlocation()
+		transporterObj.location = loc.setOOBlocation()
+	}
+}
+
 export function removeBuildingByID(buildingID) {
 	let buildingObj = getBuildingByID(buildingID)
 	buildingObj.location = loc.setOOBlocation()

@@ -233,6 +233,8 @@ export const HIST_CONFLICT_TURN_ORDER = 6
 		else if (store.computedHistory[i][0] === rf.HIST_PRE_PRODUCTION) replayPreProduction(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_PRE_PRODUCTION_MINES) replayPreProductionMines(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_POST_PRODUCTION) replayPostProduction(i, store.computedHistory[i][1], store.computedHistory[i][3])
+		else if (store.computedHistory[i][0] === rf.HIST_RESIGN) replayResign(i, store.computedHistory[i][1], store.computedHistory[i][3])
+		else if (store.computedHistory[i][0] === rf.HIST_KICKOUT) replayKickout(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		// if it is a stack of actions, replay and save each one separately
 		else if (store.computedHistory[i][0] === rf.HIST_STACK_ACTIONS) {
 			const stackActions = store.computedHistory[i][3]
@@ -443,6 +445,15 @@ function replayPostProduction(_historyIndex, _playerIndex, _entry3) {
 	electricity.resetPowerState()
 	// Make sure transporters have correct remaining moves before movement
 	model.resetTransportersForNewTurn()
+}
+
+// A resigned player (entry1) and a kicked player (entry3[0]) leave with their transporters and goods
+function replayResign(_historyIndex, playerIndex, _entry3) {
+	model.removeAllTransportersAndGoodsForPlayerIndex(playerIndex)
+}
+
+function replayKickout(_historyIndex, _playerIndex, entry3) {
+	model.removeAllTransportersAndGoodsForPlayerIndex(entry3[0])
 }
 
 /**************************** STACK ACTION REPLAYS */
