@@ -46,6 +46,9 @@ COMBINED_KEY = "combined"
 # that were created with the matching option, so not every player array has 6 or 7 entries.
 RND_TRACK_NAMES = ["Bid Multiplier", "Slots", "Mergers", "Expansion", "Hull Capacity", "Merger Subsidy", "Shipping Subsidy"]
 
+HIST_RND = 39  # INDhistory event id for an R&D upgrade
+RND_HULL_IDX = 4  # Hull Capacity track index in a player's RnD array
+
 # Company id -> type, for the original map only (the only map that is stats-included)
 COMPANY_TYPES = {
     0: "Shipping",
@@ -142,8 +145,24 @@ def parse_game(game_id, game_data, winner_username):
                 "companies": sum(len(slot) for slot in slots),
                 "mergers": mergers,
                 "company_counts": company_counts,
+                "hull_own": 0,
+                "hull_other": 0,
             }
         )
+
+    # Hull Capacity is the only track another player can research for you. A HIST_RND entry is
+    # [track, newLevel] when the acting player upgrades their own track, and
+    # [track, newLevel, ownerIndex] when they upgrade another player's track.
+    for entry in data[3]:
+        if entry[0] != HIST_RND:
+            continue
+        params = entry[3]
+        if params[0] != RND_HULL_IDX:
+            continue
+        actor = entry[1]
+        owner = params[2] if len(params) > 2 else actor
+        key = "hull_other" if owner != actor else "hull_own"
+        players[owner][key] += 1
 
     return {"game_id": game_id, "turn": game_turn, "players": players}
 
@@ -295,6 +314,30 @@ def calculate_stats(games):
     winner_merged_game_ids = [game["game_id"] for game in games if merged_in_game(game, True)]
     other_merged_game_ids = [game["game_id"] for game in games if merged_in_game(game, False)]
 
+    # Hull Capacity upgrades: how many were paid for by the hull's owner and how many by someone else
+    def hull_group_stats(players, is_winner):
+        own = sum(player["hull_own"] for player in players)
+        other = sum(player["hull_other"] for player in players)
+        pushed_players = [player for player in players if player["hull_other"] > 0]
+        pushed_game_ids = [
+            game["game_id"]
+            for game in games
+            if any(player["is_winner"] == is_winner and player["hull_other"] > 0 for player in game["players"])
+        ]
+        return {
+            "avg_other": mean_or_zero([player["hull_other"] for player in players]),
+            "other_share_pct": round(other / (own + other) * 100) if own + other else 0,
+            "pushed_pct": round(len(pushed_players) / len(players) * 100) if players else 0,
+            "pushed_game_ids": pushed_game_ids,
+            "pushed_game_count": len(pushed_game_ids),
+        }
+
+    hull_own_total = sum(player["hull_own"] for player in all_players)
+    hull_other_total = sum(player["hull_other"] for player in all_players)
+    hull_upgrades_total = hull_own_total + hull_other_total
+    hull_other_pct = round(hull_other_total / hull_upgrades_total * 100) if hull_upgrades_total else 0
+    hull_pushed_game_ids = [game["game_id"] for game in games if any(player["hull_other"] > 0 for player in game["players"])]
+
     return {
         "finishedGamesCount": finished_games_count,
         "game_ids": game_ids,
@@ -302,6 +345,15 @@ def calculate_stats(games):
         "median_turns": median_or_zero(turns),
         "win_pct_baseline": round(len(winners) / len(all_players) * 100) if all_players else 0,
         "rnd_stats": rnd_stats,
+        "hull_stats": {
+            "total": hull_upgrades_total,
+            "own_pct": 100 - hull_other_pct if hull_upgrades_total else 0,
+            "other_pct": hull_other_pct,
+            "pushed_game_ids": hull_pushed_game_ids,
+            "pushed_game_count": len(hull_pushed_game_ids),
+            "winner": hull_group_stats(winners, True),
+            "other": hull_group_stats(others, False),
+        },
         "company_stats": company_stats,
         "player_summary": {
             "winner": {**player_summary(winners), "merged_game_ids": winner_merged_game_ids, "merged_game_count": len(winner_merged_game_ids)},
@@ -341,14 +393,15 @@ def generate_stats_data():
     return ALL_DATA
 
 
-ALL_DATA = generate_stats_data()
+if __name__ == "__main__":
+    ALL_DATA = generate_stats_data()
 
-file_path = BASE_DIR / "IND" / "INDstats" / "IND_stats.json"
+    file_path = BASE_DIR / "IND" / "INDstats" / "IND_stats.json"
 
-with open(file_path, mode="w") as filehandle:
-    json.dump(ALL_DATA, filehandle, indent=4)
+    with open(file_path, mode="w") as filehandle:
+        json.dump(ALL_DATA, filehandle, indent=4)
 
-# Calculate and print execution time
-calc_time = time.perf_counter() - start_calc_time
-if PRINT_TIME:
-    print("****** calc time: " + str(calc_time))
+    # Calculate and print execution time
+    calc_time = time.perf_counter() - start_calc_time
+    if PRINT_TIME:
+        print("****** calc time: " + str(calc_time))

@@ -162,6 +162,39 @@
             {% endfor %}
           </table>
 
+          <h3>{% translate "Hull Capacity: Who Pushed It Up?" %}</h3>
+          <p class="ind-stats-note">
+            {% blocktranslate with total=row.hull_stats.total by_owner=row.hull_stats.own_pct by_others=row.hull_stats.other_pct %}Hull Capacity is the only R&D track another player can research for you. These games contain {{ total }} hull upgrades: {{ by_owner }}% were made by the player who owns the hull and {{ by_others }}% by another player.{% endblocktranslate %}
+            <br />
+            {% translate "Games where another player pushed up a hull:" %}
+            <span class="clickableStatTD"
+                  onclick="openGameIdsPage({{ row.hull_stats.pushed_game_ids }})">{{ row.hull_stats.pushed_game_count }}</span>
+          </p>
+          <table class="generalTable">
+            <tr>
+              <th></th>
+              <th>{% translate "Winners" %}</th>
+              <th>{% translate "Everyone else" %}</th>
+            </tr>
+            <tr>
+              <td>{% translate "Hull upgrades made by another player (avg per player)" %}</td>
+              <td>{{ row.hull_stats.winner.avg_other }}</td>
+              <td>{{ row.hull_stats.other.avg_other }}</td>
+            </tr>
+            <tr>
+              <td>{% translate "Hull upgrades made by another player (share of the group's upgrades)" %}</td>
+              <td>{{ row.hull_stats.winner.other_share_pct }} %</td>
+              <td>{{ row.hull_stats.other.other_share_pct }} %</td>
+            </tr>
+            <tr>
+              <td>{% translate "Players whose hull was pushed up by another player" %}</td>
+              <td class="clickableStatTD"
+                  onclick="openGameIdsPage({{ row.hull_stats.winner.pushed_game_ids }})">{{ row.hull_stats.winner.pushed_pct }} % ({{ row.hull_stats.winner.pushed_game_count }} {% translate "games" %})</td>
+              <td class="clickableStatTD"
+                  onclick="openGameIdsPage({{ row.hull_stats.other.pushed_game_ids }})">{{ row.hull_stats.other.pushed_pct }} % ({{ row.hull_stats.other.pushed_game_count }} {% translate "games" %})</td>
+            </tr>
+          </table>
+
           <h3>{% translate "At Game End (Per Player)" %}</h3>
           <table class="generalTable">
             <tr>
