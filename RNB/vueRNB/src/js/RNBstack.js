@@ -1927,18 +1927,21 @@ export function verifySingleStackAction(stackActionData) {
 	}
 	// BOMB BUILDING
 	else if (action === rf.STACK_BOMB_BUILDING) {
-		// stackAction = [STACK_BOMB_BUILDING, transporterID, buildingType, hexID, bucketID]
+		// stackAction = [STACK_BOMB_BUILDING, transporterID, buildingType, hexID, bucketID, buildingRef?]
 		const transporterID = stackAction[1]
+		const buildingType = stackAction[2]
 		const hexID = stackAction[3]
 		const transporterObj = model.getTransporterByID(transporterID)
 		// Transporter must be on the correct hex
 		if (transporterObj.location[1] !== hexID) return 1
-		// Must have a bomb accessible
-		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], true)
-		if (errorFlag > 0) return errorFlag + 10
-		// Must be at least one non-strengthened building on the hex (a bomb clears the whole hex)
+		// The bomb must be carried by the transporter
+		if (!model.resourcesOnTransport(transporterID).some((r) => r.type === rf.RES_BOMB)) return 11
+		// The target must be one non-strengthened building on the hex
 		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
-		if (!buildingsOnHex.some((b) => !b.strengthened)) return 20
+		let targetBldg = undefined
+		if (stackAction[5] !== undefined) targetBldg = model.getBuildingByID(stackAction[5], "bomb validate")
+		if (!targetBldg) targetBldg = buildingsOnHex.find((b) => b.type === buildingType && !b.strengthened)
+		if (!targetBldg || targetBldg.strengthened) return 20
 		return 0
 	}
 	// STRENGTHEN BUILDING
@@ -2719,12 +2722,18 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 			stackAction[1] = model.getTransporterByID(transporterID).id
 			transporterID = stackAction[1]
 		}
+		const buildingType = stackAction[2]
 		const hexID = stackAction[3]
-		// Remove the bomb from the transporter
-		model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
-		// Remove every non-strengthened building on the hex
-		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && !b.strengthened)
-		for (const b of buildingsOnHex) model.removeBuildingByID(b.id)
+		// Remove the carried bomb (legacy fallback for old entries that used a bomb on the tile)
+		const bomb = model.resourcesOnTransport(transporterID).find((r) => r.type === rf.RES_BOMB)
+		if (bomb) bomb.location = loc.setOOBlocation()
+		else model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
+		// Remove the targeted non-strengthened building only
+		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
+		let targetBldg = undefined
+		if (stackAction[5] !== undefined) targetBldg = model.getBuildingByID(stackAction[5], "bomb apply")
+		if (!targetBldg) targetBldg = buildingsOnHex.find((b) => b.type === buildingType && !b.strengthened)
+		if (targetBldg && !targetBldg.strengthened) model.removeBuildingByID(targetBldg.id)
 	}
 	// STRENGTHEN BUILDING
 	else if (action === rf.STACK_STRENGTHEN_BUILDING) {

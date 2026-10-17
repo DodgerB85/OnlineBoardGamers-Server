@@ -198,15 +198,15 @@ const shouldShowLandBubble = computed(() => {
 	return store.context.planeInFlight
 })
 
-// Bombs: show a bubble above the selected transporter when it can blow up a building
-// on its hex (or when the building there has been strengthened, so it can't)
+// Bombs: show a target bubble per non-strengthened building on the selected
+// transporter's hex. A bomb must be carried by the transporter to be usable.
 const bombBubbleInfo = computed(() => {
 	if (!rf.PHASE_BUILDINGS.includes(store.gameflow.phase)) return null
 	if (store.context.selectedTransporterIDforTM === -1) return null
 	const transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
 	if (!transporterObj || !loc.isAnyHexLocation(transporterObj.location)) return null
-	// The transporter must have a bomb it can use
-	const hasBomb = loc.getAllResourcesAccessibleToTransporter(transporterObj.id, true).some((res) => res.type === rf.RES_BOMB)
+	// The transporter must carry a bomb
+	const hasBomb = model.resourcesOnTransport(transporterObj.id).some((res) => res.type === rf.RES_BOMB)
 	if (!hasBomb) return null
 	const hexID = transporterObj.location[1]
 	const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
@@ -340,11 +340,17 @@ function getBombBubblePosition() {
 	return { transform: `translate(0px, -70px)` }
 }
 
-// Bombs: blow up every (non-strengthened) building on the transporter's hex
+// Bombs: with a single target, blow it up directly; with several (a city), highlight
+// them so the player can click the one they want
 function handleBombBubbleClick() {
 	const info = bombBubbleInfo.value
 	if (!info || info.strengthened) return
-	map.clickedBombOption(info.bombables[0].id)
+	if (info.bombables.length === 1) {
+		map.clickedBombOption(info.bombables[0].id)
+		return
+	}
+	store.context.eligibleBuildingsToBomb = info.bombables.map((b) => b.id)
+	store.context.buildingIDsToHighlight = info.bombables.map((b) => b.id)
 }
 
 // Planes & Aeroports: handle Taxi mode selection

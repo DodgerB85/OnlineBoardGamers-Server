@@ -1020,7 +1020,7 @@ export function importRNBmodel(input, forGameOver) {
 	let newRoads = []
 	let newPowerLines = []
 	let newBuildings = []
-	let bombedBuildings = [] // [buildingType, hexID]
+	let bombedBuildings = [] // [buildingType, hexID, buildingRef]
 	let strengthenedBuildings = [] // [buildingType, hexID]
 	for (let i = 0; i < store.history.length; i++) {
 		const entry = store.history[i]
@@ -1095,11 +1095,11 @@ export function importRNBmodel(input, forGameOver) {
 						const toHexID = stackAction[3]
 						map.addWallToMap_core(-1, fromHexID, toHexID, entry[1], false, false)
 					}
-					// Bomb: note the building type and hex for removal after buildings are created
+					// Bomb: note the building type, hex and identifier for removal after buildings are created
 					else if (stackAction[0] === rf.STACK_BOMB_BUILDING) {
 						const buildingType = stackAction[2]
 						const hexID = stackAction[3]
-						bombedBuildings.push([buildingType, hexID])
+						bombedBuildings.push([buildingType, hexID, stackAction[5]])
 					}
 					// Strengthen: note the building type and hex for strengthening after buildings are created
 					else if (stackAction[0] === rf.STACK_STRENGTHEN_BUILDING) {
@@ -1144,9 +1144,13 @@ export function importRNBmodel(input, forGameOver) {
 		}
 	}
 	// Apply bomb and strengthen operations after buildings are created
-	for (const [, hexID] of bombedBuildings) {
-		const bldgsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && !b.strengthened)
-		for (const bldg of bldgsOnHex) model.removeBuildingByID(bldg.id)
+	for (const [buildingType, hexID, buildingRef] of bombedBuildings) {
+		const bldgsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
+		// Identify the single target; fall back to the first matching type for legacy entries
+		let targetBldg = undefined
+		if (buildingRef !== undefined) targetBldg = model.getBuildingByID(buildingRef, "bomb rebuild")
+		if (!targetBldg) targetBldg = bldgsOnHex.find((b) => b.type === buildingType && !b.strengthened)
+		if (targetBldg && !targetBldg.strengthened) model.removeBuildingByID(targetBldg.id)
 	}
 	for (const [buildingType, hexID] of strengthenedBuildings) {
 		const bldgsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && b.type === buildingType)

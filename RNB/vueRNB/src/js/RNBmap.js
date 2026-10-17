@@ -1153,18 +1153,19 @@ export function clickedBombOption(buildingID) {
 	const transporterObj = model.getTransporterByID(transporterID)
 	const buildingObj = model.getBuildingByID(buildingID)
 	if (!buildingObj || buildingObj.strengthened) return
-	// Deduct the bomb
-	let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], true)
-	if (errorFlag !== 0) return
-	// Remove the bomb for real
-	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
-	// A bomb destroys every building on the hex (a city can hold 2), but strengthened ones survive
+	// A bomb must be carried by the transporter
+	const bomb = model.resourcesOnTransport(transporterID).find((r) => r.type === rf.RES_BOMB)
+	if (!bomb) return
 	const hexID = buildingObj.location[1]
 	const bucketID = buildingObj.location[2]
-	const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && !b.strengthened)
-	for (const b of buildingsOnHex) model.removeBuildingByID(b.id)
-	// Add to stack
-	let stackAction = [rf.STACK_BOMB_BUILDING, stack.getTransIDtoUse(transporterObj), buildingObj.type, hexID, bucketID]
+	// Target must be on the transporter's hex
+	if (transporterObj.location[1] !== hexID) return
+	// Take the carried bomb off the board
+	bomb.location = loc.setOOBlocation()
+	// A bomb destroys exactly one building; strengthened buildings survive
+	model.removeBuildingByID(buildingObj.id)
+	// Add to stack (the building identifier keeps city targets unambiguous on replay)
+	let stackAction = [rf.STACK_BOMB_BUILDING, stack.getTransIDtoUse(transporterObj), buildingObj.type, hexID, bucketID, stack.getBldgIDtoUse(buildingObj)]
 	stack.addItemToStack({
 		action: rf.STACK_BOMB_BUILDING,
 		historyEntry: stackAction,
