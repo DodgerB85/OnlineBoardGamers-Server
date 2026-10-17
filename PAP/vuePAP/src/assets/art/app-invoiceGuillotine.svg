@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+<title>Invoice guillotine</title>
+<circle cx="24" cy="24" r="22" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5"/>
+<rect x="10" y="7" width="3" height="31" fill="#c9a06b" stroke="#2b2233" stroke-width="1.2"/>
+<rect x="35" y="7" width="3" height="31" fill="#c9a06b" stroke="#2b2233" stroke-width="1.2"/>
+<rect x="9" y="4" width="30" height="4" rx="1" fill="#c9a06b" stroke="#2b2233" stroke-width="1.2"/>
+<polygon points="14,10 34,10 31,18 17,18" fill="#2b2233"/>
+<path d="M14 25 H34" stroke="#2b2233" stroke-width="1" stroke-dasharray="2 2"/>
+<rect x="14" y="28" width="20" height="13" fill="#fbf6e8" stroke="#2b2233" stroke-width="1.2"/>
+<path d="M17 33 H31 M17 37 H26" stroke="#6b4fa0" stroke-width="1.4" stroke-linecap="round"/>
+</svg>

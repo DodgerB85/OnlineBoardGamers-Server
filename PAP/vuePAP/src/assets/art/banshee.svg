@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<title>Banshee</title>
+<circle cx="32" cy="32" r="29" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M32 10 C18 10 14 24 16 34 C17 42 12 46 10 52 C16 48 18 50 20 54 C24 48 26 52 30 56 C32 50 34 54 36 56 C40 52 42 48 46 54 C48 50 52 48 54 52 C50 46 47 42 48 34 C50 24 46 10 32 10 Z" fill="#dce7f2" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M22 18 Q32 12 42 18" fill="none" stroke="#2b2233" stroke-width="1" opacity=".5"/>
+<ellipse cx="25" cy="27" rx="3" ry="4.5" fill="#2b2233"/>
+<ellipse cx="39" cy="27" rx="3" ry="4.5" fill="#2b2233"/>
+<ellipse cx="32" cy="39" rx="4" ry="5.5" fill="#2b2233"/>
+<path d="M13 22 Q10 30 12 36" fill="none" stroke="#2b2233" stroke-width="1" opacity=".5"/>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+<title>Poison vial</title>
+<circle cx="24" cy="24" r="22" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M18 13 H30 V17 Q40 22 40 32 V38 Q40 45 33 45 H15 Q8 45 8 38 V32 Q8 22 18 17 Z" fill="#5fae6a" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<rect x="16" y="4" width="16" height="9" rx="2" fill="#c9a06b" stroke="#2b2233" stroke-width="1.5"/>
+<circle cx="24" cy="30" r="7" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.2"/>
+<circle cx="21" cy="29" r="1.8" fill="#2b2233"/>
+<circle cx="27" cy="29" r="1.8" fill="#2b2233"/>
+<path d="M23 33 L24 35 L25 33 Z" fill="#2b2233"/>
+<rect x="20" y="37" width="8" height="4" rx="1" fill="#f3e9d2" stroke="#2b2233" stroke-width="1"/>
+</svg>

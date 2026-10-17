@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+<title>The Loyal Oven</title>
+<circle cx="24" cy="24" r="22" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M8 40 V26 Q8 10 24 10 Q40 10 40 26 V40 Z" fill="#c9a06b" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M16 40 V31 Q16 24 24 24 Q32 24 32 31 V40 Z" fill="#2b2233"/>
+<path d="M24 39 Q19 34 22 30 Q23 33 24 32 Q27 30 26 26 Q30 31 29 35 Q28 39 24 39 Z" fill="#e0a93b"/>
+</svg>

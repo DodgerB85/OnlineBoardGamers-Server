@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 224">
+<title>Scare card back</title>
+<rect x="4" y="4" width="152" height="216" rx="10" fill="#f3e9d2" stroke="#2b2233" stroke-width="2"/>
+<rect x="12" y="12" width="136" height="200" rx="6" fill="none" stroke="#6b4fa0" stroke-width="1.2"/>
+<g fill="#c99a2e" stroke="#2b2233" stroke-width=".8">
+<path d="M20 14 L26 20 L20 26 L14 20 Z"/>
+<path d="M140 14 L146 20 L140 26 L134 20 Z"/>
+<path d="M20 198 L26 204 L20 210 L14 204 Z"/>
+<path d="M140 198 L146 204 L140 210 L134 204 Z"/>
+</g>
+<path d="M30 180 L130 44 M130 180 L30 44" stroke="#2b2233" stroke-width="3" stroke-linecap="round" opacity=".15"/>
+<circle cx="80" cy="100" r="30" fill="#f3e9d2" stroke="#2b2233" stroke-width="2"/>
+<ellipse cx="68" cy="98" rx="7" ry="9" fill="#9b2c3a"/>
+<ellipse cx="92" cy="98" rx="7" ry="9" fill="#9b2c3a"/>
+<path d="M78 112 L80 118 L82 112 Z" fill="#2b2233"/>
+<rect x="62" y="124" width="36" height="14" rx="3" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M68 124 V138 M74 124 V138 M80 124 V138 M86 124 V138 M92 124 V138" stroke="#2b2233" stroke-width="1.2"/>
+<path d="M40 176 Q80 150 120 176" fill="none" stroke="#6b4fa0" stroke-width="2" opacity=".6"/>
+</svg>

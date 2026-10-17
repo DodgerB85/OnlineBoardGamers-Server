@@ -2,9 +2,8 @@
 /**
  * Permits and Poisons - main app shell.
  *
- * Generic layout: top menu (single row of icons), the shared panels
- * (chat / notes / bug / info / history / replay / rewind) and a placeholder
- * board area. Game-specific rendering goes in MapArea.vue / the js modules.
+ * Top menu (single row of icons), the shared panels (chat / notes / bug / info / history / replay /
+ * rewind), then the game: final scores, player table, the prompt for the viewer's move and the board.
  */
 
 import * as model from "./js/PAPmodel"
@@ -12,11 +11,14 @@ import * as model from "./js/PAPmodel"
 import TopMenu from "./components/TopMenu.vue"
 import TopMenuViews from "./components/TopMenuViews.vue"
 import FooterBar from "./components/FooterBar.vue"
-import MapArea from "./components/MapArea.vue"
+import FinalScores from "./components/FinalScores.vue"
 import PlayerTable from "./components/PlayerTable.vue"
 import DebugArea from "./components/DebugArea.vue"
 import HistoryTab from "./components/HistoryTab.vue"
 import ReplayArea from "./components/ReplayArea.vue"
+import GameBoard from "./components/board/GameBoard.vue"
+import IconLegend from "./components/board/IconLegend.vue"
+import PromptPanel from "./components/prompts/PromptPanel.vue"
 
 import { useModelStore } from "./stores/PAPstore.js"
 import { usePersonalStore } from "./stores/PAPpersonal.js"
@@ -36,15 +38,20 @@ function showDebug() {
 		<TopMenuViews />
 		<HistoryTab />
 		<ReplayArea v-if="store.viewSettings.showReplay" />
-		<template v-if="!store.viewSettings.showReplay">
-			<div id="mainAreaLessHistory">
-				<PlayerTable />
-				<div class="mapContainer">
-					<MapArea />
+		<div id="mainAreaLessHistory">
+			<FinalScores />
+			<PlayerTable />
+			<div class="gameLayout">
+				<div class="promptColumn">
+					<PromptPanel />
 				</div>
-				<DebugArea v-if="showDebug()" />
+				<div class="boardColumn">
+					<GameBoard />
+					<IconLegend />
+				</div>
 			</div>
-		</template>
+			<DebugArea v-if="showDebug()" />
+		</div>
 	</div>
 	<FooterBar />
 
@@ -59,26 +66,46 @@ body {
 	background-color: #d4eafd;
 	font-family: Arial, sans-serif;
 	font-size: 16px;
-	width: fit-content;
 	min-width: 100%;
 }
 
 #wholeMipapeArea {
 	width: 100%;
-	min-width: 900px;
 	text-align: center;
 	min-height: 500px;
 }
 
 #mainAreaLessHistory {
 	min-height: 60px;
-	min-width: 620px;
+	min-width: 0;
 }
 
-.mapContainer {
+/* Prompt above the board on narrow screens; a sticky side column on wide ones. */
+.gameLayout {
 	display: flex;
-	justify-content: center;
-	margin: auto;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 8px;
+	margin: 8px;
+}
+
+@media (min-width: 1100px) {
+	.gameLayout {
+		flex-direction: row;
+		align-items: flex-start;
+	}
+	.promptColumn {
+		position: sticky;
+		top: 0;
+		width: 340px;
+		flex-shrink: 0;
+		max-height: 100vh;
+		overflow-y: auto;
+	}
+	.boardColumn {
+		flex: 1;
+		min-width: 0;
+	}
 }
 
 #loaderOverlay {

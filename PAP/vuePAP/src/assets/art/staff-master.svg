@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 64">
+<title>Master</title>
+<ellipse cx="24" cy="61" rx="14" ry="2.5" fill="#2b2233" opacity=".25"/>
+<path d="M14 32 H34 L40 60 H8 Z" fill="currentColor" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M14 52 H34" stroke="#c99a2e" stroke-width="2"/>
+<rect x="13" y="42" width="22" height="3" fill="#c99a2e" stroke="#2b2233" stroke-width="1"/>
+<circle cx="24" cy="22" r="8" fill="#f2dcc0" stroke="#2b2233" stroke-width="1.5"/>
+<circle cx="21.5" cy="22" r="1" fill="#2b2233"/>
+<circle cx="26.5" cy="22" r="1" fill="#2b2233"/>
+<path d="M18 27 Q24 38 30 27 Z" fill="#d9d4cc" stroke="#2b2233" stroke-width="1"/>
+<path d="M11 16 H37 L30 1 H18 Z" fill="#6b4fa0" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<rect x="12" y="13" width="24" height="3" rx="1" fill="#c99a2e" stroke="#2b2233" stroke-width="1"/>
+<circle cx="24" cy="8" r="2" fill="#c99a2e" stroke="#2b2233" stroke-width=".8"/>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 64">
+<title>Apprentice</title>
+<ellipse cx="24" cy="61" rx="14" ry="2.5" fill="#2b2233" opacity=".25"/>
+<path d="M14 32 H34 L40 60 H8 Z" fill="currentColor" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<rect x="13" y="42" width="22" height="3" fill="#2b2233" opacity=".5"/>
+<circle cx="24" cy="22" r="8" fill="#f2dcc0" stroke="#2b2233" stroke-width="1.5"/>
+<circle cx="21.5" cy="22" r="1" fill="#2b2233"/>
+<circle cx="26.5" cy="22" r="1" fill="#2b2233"/>
+<path d="M16 15 Q24 7 32 15 Z" fill="#8a7f96" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<rect x="14" y="14" width="20" height="2.5" rx="1" fill="#8a7f96" stroke="#2b2233" stroke-width="1"/>
+</svg>

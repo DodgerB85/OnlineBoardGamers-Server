@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+<title>Cauldron, plain</title>
+<circle cx="40" cy="40" r="38" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M26 62 L22 74 M54 62 L58 74" stroke="#2b2233" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M32 74 Q29 68 36 66 Q35 71 40 70 Q45 66 44 74 Z" fill="#c24e5c" stroke="#2b2233" stroke-width="1"/>
+<path d="M16 36 H64 Q64 60 40 62 Q16 60 16 36 Z" fill="#3b3346" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<rect x="14" y="32" width="52" height="6" rx="3" fill="#5d5470" stroke="#2b2233" stroke-width="1.5"/>
+<ellipse cx="40" cy="32" rx="21" ry="2.5" fill="#6b4fa0"/>
+</svg>

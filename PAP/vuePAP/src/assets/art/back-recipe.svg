@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 224">
+<title>Recipe card back</title>
+<rect x="4" y="4" width="152" height="216" rx="10" fill="#f3e9d2" stroke="#2b2233" stroke-width="2"/>
+<rect x="12" y="12" width="136" height="200" rx="6" fill="none" stroke="#6b4fa0" stroke-width="1.2"/>
+<g fill="#c99a2e" stroke="#2b2233" stroke-width=".8">
+<path d="M20 14 L26 20 L20 26 L14 20 Z"/>
+<path d="M140 14 L146 20 L140 26 L134 20 Z"/>
+<path d="M20 198 L26 204 L20 210 L14 204 Z"/>
+<path d="M140 198 L146 204 L140 210 L134 204 Z"/>
+</g>
+<path d="M40 120 Q60 110 80 120 Q100 110 120 120 V170 Q100 160 80 170 Q60 160 40 170 Z" fill="#fbf6e8" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M80 120 V170" stroke="#2b2233" stroke-width="1.2"/>
+<path d="M48 132 Q60 128 72 132 M48 142 Q60 138 72 142 M88 132 Q100 128 112 132 M88 142 Q100 138 112 142" fill="none" stroke="#6b4fa0" stroke-width="1.5" opacity=".7"/>
+<rect x="72" y="62" width="16" height="7" rx="2" fill="#c9a06b" stroke="#2b2233" stroke-width="1"/>
+<path d="M74 70 H86 V84 L94 100 V114 H66 V100 L74 84 Z" fill="#9ad0a3" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M66 100 H94 V114 H66 Z" fill="#2f7d5b"/>
+<circle cx="78" cy="106" r="2" fill="#fbf6e8"/>
+<circle cx="85" cy="104" r="1.5" fill="#fbf6e8"/>
+</svg>

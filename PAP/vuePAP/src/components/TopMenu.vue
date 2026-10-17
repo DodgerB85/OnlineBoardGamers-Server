@@ -184,7 +184,7 @@ function getKickoutTimerText() {
 	width: 15px;
 	height: 15px;
 	display: inline-block;
-	vertical-align: mipape;
+	vertical-align: middle;
 }
 .WSconnecting { background-color: #ff9900; }
 .WSconnected { background-color: green; }
@@ -231,4 +231,9 @@ function getKickoutTimerText() {
 .turnOrderSpan { display: inline-block; padding: 5px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
 .gameInfoSpan { white-space: nowrap; }
 .playerLineDiv { white-space: nowrap; }
+/* Phones: the menu wraps onto extra rows instead of widening the page (kept last so it beats the base rules). */
+@media (max-width: 760px) {
+	#top { height: auto; flex-wrap: wrap; white-space: normal; }
+	#menu { flex-shrink: 1; min-width: 0; white-space: normal; }
+}
 </style>

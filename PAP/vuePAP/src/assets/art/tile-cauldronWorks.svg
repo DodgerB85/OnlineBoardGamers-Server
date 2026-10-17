@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+<title>Cauldron works</title>
+<circle cx="48" cy="48" r="44" fill="#f3e9d2" stroke="#2b2233" stroke-width="2"/>
+<path d="M38 36 Q34 28 40 22 M58 36 Q54 28 60 22" fill="none" stroke="#2b2233" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
+<path d="M30 78 L26 90 M66 78 L70 90" stroke="#2b2233" stroke-width="3" stroke-linecap="round"/>
+<path d="M20 46 H76 Q76 74 48 78 Q20 74 20 46 Z" fill="#3b3346" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<rect x="16" y="42" width="64" height="7" rx="3" fill="#5d5470" stroke="#2b2233" stroke-width="1.5"/>
+<ellipse cx="48" cy="42" rx="25" ry="3" fill="#6b4fa0" stroke="#2b2233" stroke-width="1"/>
+<circle cx="48" cy="62" r="8" fill="#c99a2e" stroke="#2b2233" stroke-width="1.5"/>
+<circle cx="48" cy="62" r="11" fill="none" stroke="#c99a2e" stroke-width="3" stroke-dasharray="3 3"/>
+<circle cx="48" cy="62" r="3" fill="#f3e9d2" stroke="#2b2233" stroke-width="1"/>
+</svg>

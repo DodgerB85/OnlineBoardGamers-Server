@@ -93,13 +93,16 @@ def create_pap_game(
         all_players = [User.objects.get(username=username) for username in (current_players_usernames or []) if username]
         usernames_to_notify = [username for username in (current_players_usernames or []) if username]
     else:
+        if max_players > 5:
+            messages.error(request, gettext("Error: Permits and Poisons supports 2 to 5 players"))
+            return HttpResponseRedirect(reverse("createPAPpage"))
         game_name = request.POST.get("gameName", "")
         game_description = request.POST.get("gameDescription", "")
         creator = request.user
         host = request.user
         game_pace = request.POST.get("pace", 30)
         kickout_duration = request.POST.get("kickoutDuration", 100)
-        invited_usernames = [request.POST.get(f"player{i}") for i in range(2, 7) if request.POST.get(f"player{i}")]
+        invited_usernames = [request.POST.get(f"player{i}") for i in range(2, 6) if request.POST.get(f"player{i}")]
 
         if "trainingGame" in request.POST:
             isTrainingGame = True
@@ -128,7 +131,8 @@ def create_pap_game(
         elif "experiencedGame" in request.POST:
             starting_options.append(rf.SO_EXPERIENCED_GAME)
 
-        # PAP-specific options would be appended to starting_options here.
+        if "softerEnding" in request.POST:
+            starting_options.append(rfPAP.SO_SOFTER_ENDING)
 
         all_players.append(request.user)
 

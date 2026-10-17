@@ -1,21 +1,23 @@
 /**
  * The game model (shared state).
  *
- * The whole model is serialised to / from Game.gameData as plain JSON.
- * Extend exportGameData / importGameData (and snapshotState) as you add real
- * game state so that saves, replays and rewinds keep working.
+ * Game.gameData holds plain JSON: {v, seed, options, names, actions, state}.
+ * `actions` is the full move log; `state` is a cache of replaying it through the engine,
+ * so replays and history come straight from the engine (see PAP/ENGINE_SPEC.md).
  */
 
 import { useModelStore } from "../stores/PAPstore.js"
 import { usePersonalStore } from "../stores/PAPpersonal.js"
 import * as rf from "./PAPreference"
 import * as funcs from "./PAPfuncs"
+import * as engine from "./engine/index.js"
 
 export function initGame() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	const initData = window.initData || {}
 
+	personal.name = initData.name || ""
 	personal.gameID = initData.gameID
 	personal.gameCreationTimestamp = initData.gameCreationTimestamp
 	personal.pov = initData.pov !== undefined ? initData.pov : -99
@@ -25,7 +27,6 @@ export function initGame() {
 	personal.yourTurnAudioType = initData.yourTurnAudioType || 0
 	personal.chatNotification = initData.chatNotification || false
 	personal.finishedGame = initData.finishedGame || false
-	personal.gameDataB64 = initData.gameData || {}
 	personal.haltPlay = false
 
 	store.gameName = initData.gameName || ""
@@ -41,44 +42,24 @@ export function initGame() {
 	personal.trainingGame = startingOptions.includes(102)
 	personal.soloGame = (initData.maxPlayers === 1) || false
 
-	const playerNames = initData.playerNames || []
 	const gameData = initData.gameData
-
-	if (gameData && store.players.length === 0 && gameData.players && gameData.players.length > 0) {
+	if (gameData && gameData.v === 1) {
 		importGameData(gameData)
 	} else {
-		initGameFresh(playerNames)
+		initGameFresh(initData.playerNames || [], { softerEnding: startingOptions.includes(rf.SO_SOFTER_ENDING) }, initData.gameID)
 	}
-
 	rebuildTurnOrder()
 }
 
-export function initGameFresh(playerNames) {
+// The seed comes from the game id, so every client that loads an unsaved game builds the same deal.
+export function initGameFresh(playerNames, options, gameID) {
 	const store = useModelStore()
-	store.players.splice(0)
-	for (let i = 0; i < playerNames.length; i++) {
-		store.players.push({
-			name: playerNames[i],
-			displayName: playerNames[i],
-			colour: rf.ALL_COLOURS[i % rf.ALL_COLOURS.length],
-			score: 0,
-		})
-	}
-	store.history.splice(0)
-	addHistory(rf.HIST_NEW_GAME, -1, snapshotState())
-}
-
-// Rebuild the local turn order from the server's list of current players.
-export function rebuildTurnOrder() {
-	const store = useModelStore()
-	const initData = window.initData || {}
-	store.gameflow.fullTurnOrder = store.players.map((_, i) => i)
-	let currentNames = initData.currentPlayers || []
-	if (currentNames.length === 0) {
-		store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
-		return
-	}
-	store.gameflow.turnOrder = currentNames.map((name) => store.players.findIndex((p) => p.name === name)).filter((idx) => idx !== -1)
+	store.seed = ((gameID || 1) * 2654435761) >>> 0
+	store.options = options
+	store.names = [...playerNames]
+	store.actions.splice(0)
+	store.game = engine.createGame(store.seed, store.names, options)
+	syncPlayers()
 }
 
 export function importGameData(obj) {
@@ -91,36 +72,70 @@ export function importGameData(obj) {
 			return
 		}
 	}
-	if (obj.players && obj.players.length > 0) {
-		store.players.splice(0, store.players.length, ...JSON.parse(JSON.stringify(obj.players)))
-	}
-	if (obj.gameflow) {
-		store.gameflow.turn = obj.gameflow.turn
-		store.gameflow.phase = obj.gameflow.phase
-	}
-	if (obj.history) {
-		store.history.splice(0)
-		for (const entry of obj.history) store.history.push(entry)
-	}
+	if (obj.v !== 1) return
+	store.seed = obj.seed
+	store.options = obj.options
+	store.names = obj.names
+	store.actions.splice(0, store.actions.length, ...obj.actions)
+	store.game = obj.state
+	syncPlayers()
+	rebuildTurnOrder()
 }
 
 export function exportGameData() {
 	const store = useModelStore()
-	return {
-		players: JSON.parse(JSON.stringify(store.players)),
-		gameflow: { turn: store.gameflow.turn, phase: store.gameflow.phase },
-		history: JSON.parse(JSON.stringify(store.history)),
+	return { v: 1, seed: store.seed, options: store.options, names: store.names, actions: store.actions, state: store.game }
+}
+
+// Keep the scaffold's player list (used by the shared panels) in step with the engine state.
+function syncPlayers() {
+	const store = useModelStore()
+	const s = store.game
+	store.players.splice(0, store.players.length, ...s.players.map((p, i) => ({
+		name: p.name,
+		displayName: p.name,
+		colour: rf.ALL_COLOURS[i % rf.ALL_COLOURS.length],
+		score: s.result ? s.result.rows.find(r => r.seat === i).vp : p.recognized,
+	})))
+	store.gameflow.turn = s.year
+	store.gameflow.phase = s.phase === "over" ? rf.PHASE_GAME_OVER : rf.PHASE_MAIN
+}
+
+// Exactly one seat acts at a time; the engine says which.
+export function rebuildTurnOrder() {
+	const store = useModelStore()
+	store.gameflow.fullTurnOrder = store.game.order ? [...store.game.order] : store.players.map((_, i) => i)
+	const seat = engine.activeSeat(store.game)
+	store.gameflow.turnOrder = seat === null ? [] : [seat]
+}
+
+// Apply one move for the viewer's seat. Returns the engine error message, or "" on success.
+export function act(action) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	try {
+		store.game = engine.applyAction(store.game, personal.pov, action)
+	} catch (e) {
+		if (e instanceof engine.PAPError) return e.message
+		throw e
 	}
+	store.actions.push({ seat: personal.pov, a: action, t: Date.now() })
+	syncPlayers()
+	rebuildTurnOrder()
+	return ""
 }
 
-export function snapshotState() {
+// Engine states after each action, for the replay panel.
+export function buildReplayFrames() {
 	const store = useModelStore()
-	return { players: JSON.parse(JSON.stringify(store.players)) }
-}
-
-export function addHistory(event, playerIndex, snapshot) {
-	const store = useModelStore()
-	store.history.push([event, playerIndex, JSON.stringify(snapshot !== undefined ? snapshot : snapshotState())])
+	let s = engine.createGame(store.seed, store.names, store.options)
+	const frames = [s]
+	// Plain copies: the engine stores action arrays in state, and Vue reactive proxies cannot be structuredClone'd.
+	for (const { seat, a } of JSON.parse(JSON.stringify(store.actions))) {
+		s = engine.applyAction(s, seat, a)
+		frames.push(s)
+	}
+	return frames
 }
 
 export function getPlayerByIndex(index) {

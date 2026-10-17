@@ -2,18 +2,12 @@ import base64
 import gzip
 import json
 import time
-import uuid
-from datetime import timedelta
 from typing import TYPE_CHECKING, cast
-
-from decouple import config
 
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-from django.utils import timezone
 from django.utils.translation import gettext
-from django_q.tasks import schedule
 
 import Lobby.sharedFunctions.constants as rf
 from Lobby.gameViewHelpers import (
@@ -153,6 +147,9 @@ def _processPAPturn(request):
         _missingPlayer = User.objects.get(username=request.user.username)
         presenter.addMissingPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
+
+        newVer = (int(currentGame.latestUpdate) % 1000) + 1
+        currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
         currentGame.save()
         return JsonResponse({"latestUpdate": currentGame.latestUpdate}, safe=False)
 
@@ -220,6 +217,11 @@ def _processPAPturn(request):
         )
 
     elif jsonData["action"] == "updateDataFromLoadRewind":
+        if str(latest_update) != str(currentGame.latestUpdate):
+            message = f"SYNC ERROR IN: PAP updateDataFromLoadRewind - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} - DB_LU: {currentGame.latestUpdate}"
+            SN_sendAdminErrorMessage(message)
+            return JsonResponse({"syncError": True}, safe=False)
+
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
         presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])

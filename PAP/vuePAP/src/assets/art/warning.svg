@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+<title>Warning wax seal</title>
+<circle cx="24" cy="24" r="22" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5"/>
+<circle cx="24" cy="24" r="17" fill="#9b2c3a" stroke="#2b2233" stroke-width="1.5"/>
+<circle cx="24" cy="24" r="14" fill="none" stroke="#f3e9d2" stroke-width="1" stroke-dasharray="3 2"/>
+<rect x="21.5" y="12" width="5" height="17" rx="2" fill="#f3e9d2"/>
+<circle cx="24" cy="35" r="2.8" fill="#f3e9d2"/>
+</svg>

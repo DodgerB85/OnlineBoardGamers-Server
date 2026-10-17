@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+<title>Civic bunting</title>
+<circle cx="24" cy="24" r="22" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M4 12 Q24 22 44 12" fill="none" stroke="#2b2233" stroke-width="1.2"/>
+<g stroke="#2b2233" stroke-width="1" stroke-linejoin="round">
+<polygon points="5,14.2 13,14.2 9,26" fill="#9b2c3a"/>
+<polygon points="15,16.7 23,16.7 19,28.7" fill="#2e5f9e"/>
+<polygon points="25,16.7 33,16.7 29,28.7" fill="#2f7d5b"/>
+<polygon points="35,14.2 43,14.2 39,26" fill="#c99a2e"/>
+</g>
+</svg>

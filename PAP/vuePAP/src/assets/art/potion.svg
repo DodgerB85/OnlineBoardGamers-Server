@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80">
+<title>Potion bottle</title>
+<rect x="24" y="0" width="16" height="8" rx="2" fill="#c9a06b" stroke="#2b2233" stroke-width="1.5"/>
+<rect x="26" y="7" width="12" height="10" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M26 17 Q14 23 14 37 V70 Q14 77 21 77 H43 Q50 77 50 70 V37 Q50 23 38 17 Z" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M16.5 44 H47.5 V70 Q47.5 74.5 43 74.5 H21 Q16.5 74.5 16.5 70 Z" fill="currentColor" opacity=".9"/>
+<path d="M20 30 Q20 26 23 24" fill="none" stroke="#2b2233" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
+<path d="M24 61 Q32 58 40 61" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>
+</svg>

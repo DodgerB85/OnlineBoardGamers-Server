@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 224">
+<title>Charter card back</title>
+<rect x="4" y="4" width="152" height="216" rx="10" fill="#f3e9d2" stroke="#2b2233" stroke-width="2"/>
+<rect x="12" y="12" width="136" height="200" rx="6" fill="none" stroke="#6b4fa0" stroke-width="1.2"/>
+<g fill="#c99a2e" stroke="#2b2233" stroke-width=".8">
+<path d="M20 14 L26 20 L20 26 L14 20 Z"/>
+<path d="M140 14 L146 20 L140 26 L134 20 Z"/>
+<path d="M20 198 L26 204 L20 210 L14 204 Z"/>
+<path d="M140 198 L146 204 L140 210 L134 204 Z"/>
+</g>
+<rect x="40" y="50" width="80" height="90" fill="#fbf6e8" stroke="#2b2233" stroke-width="1.5"/>
+<g stroke="#6b4fa0" stroke-width="1.5" opacity=".7">
+<path d="M50 62 H110 M50 70 H110 M50 78 H110 M50 86 H110 M50 94 H110"/>
+</g>
+<path d="M66 136 L56 180 L66 172 L72 182 L78 140 Z" fill="#2e5f9e" stroke="#2b2233" stroke-width="1"/>
+<path d="M94 136 L104 180 L94 172 L88 182 L82 140 Z" fill="#2e5f9e" stroke="#2b2233" stroke-width="1"/>
+<circle cx="80" cy="128" r="24" fill="#9b2c3a" stroke="#2b2233" stroke-width="2"/>
+<circle cx="80" cy="128" r="17" fill="none" stroke="#f3e9d2" stroke-width="1.2"/>
+<polygon points="80,116 82.1,121.2 87.6,121.5 83.3,125.1 84.7,130.5 80,127.5 75.3,130.5 76.7,125.1 72.4,121.5 77.9,121.2" fill="#f3e9d2"/>
+</svg>

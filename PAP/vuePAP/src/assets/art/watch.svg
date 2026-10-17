@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+<title>Audit watch ledger</title>
+<rect x="9" y="6" width="30" height="36" rx="2" fill="#2e5f9e" stroke="#2b2233" stroke-width="1.5"/>
+<rect x="9" y="6" width="6" height="36" fill="#1f4475" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M17 24 Q27 13 37 24 Q27 35 17 24 Z" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.2" stroke-linejoin="round"/>
+<circle cx="27" cy="24" r="4.2" fill="#2b2233"/>
+<circle cx="28.4" cy="22.6" r="1.1" fill="#f3e9d2"/>
+</svg>

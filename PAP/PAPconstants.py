@@ -19,4 +19,4 @@ PHASE_LOOKBACK_AMOUNT = 1
 # --- Starting options (bit flags appended to Game.startingOptions) ---
 # Only option values that are PAP-specific belong here. The common options
 # (Practice / Learning / Experienced) come from Lobby.sharedFunctions.constants.
-SO_BASE_GAME = -1
+SO_SOFTER_ENDING = 201

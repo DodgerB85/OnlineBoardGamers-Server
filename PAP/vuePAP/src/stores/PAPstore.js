@@ -5,7 +5,7 @@
  */
 
 import { defineStore } from "pinia"
-import { reactive, ref } from "vue"
+import { computed, reactive, ref, shallowRef } from "vue"
 import * as rf from "../js/PAPreference"
 
 export const useModelStore = defineStore("store", () => {
@@ -20,8 +20,14 @@ export const useModelStore = defineStore("store", () => {
 		fullTurnOrder: [],
 	})
 
+	// Engine state and the move log it is replayed from (see js/PAPmodel.js).
+	const game = shallowRef(null)
+	const actions = reactive([])
+	const seed = ref(0)
+	const options = ref({})
+	const names = ref([])
+
 	const chatData = reactive([])
-	const history = reactive([])
 
 	const viewSettings = reactive({
 		showNotes: false,
@@ -47,9 +53,10 @@ export const useModelStore = defineStore("store", () => {
 	const kickoutVotesData = ref({})
 	const kickoutVoteThreshold = ref(1)
 
-	// Replay
-	const replayData = reactive([])
+	// Replay: replayData holds engine states (one per move); the board shows viewGame.
+	const replayData = shallowRef([])
 	const replayStep = reactive({ index: 0, maxStep: -1 })
+	const viewGame = computed(() => (viewSettings.showReplay && replayData.value.length ? replayData.value[replayStep.index] : game.value))
 
 	function clearMessages() {
 		gameMessages.actionError = ""
@@ -66,8 +73,12 @@ export const useModelStore = defineStore("store", () => {
 		gameName,
 		players,
 		gameflow,
+		game,
+		actions,
+		seed,
+		options,
+		names,
 		chatData,
-		history,
 		viewSettings,
 		gameMessages,
 		deleteVotesData,
@@ -76,6 +87,7 @@ export const useModelStore = defineStore("store", () => {
 		kickoutVoteThreshold,
 		replayData,
 		replayStep,
+		viewGame,
 		clearMessages,
 		clearHistoryHelpers,
 	}

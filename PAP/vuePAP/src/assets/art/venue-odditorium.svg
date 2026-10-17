@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 140">
+<title>Odditorium</title>
+<rect x="2" y="2" width="236" height="136" rx="8" fill="#f3e9d2" stroke="#2b2233" stroke-width="2"/>
+<path d="M36 46 H204 M36 92 H204" stroke="#2b2233" stroke-width="3"/>
+<rect x="44" y="60" width="20" height="30" rx="4" fill="#2f7d5b" stroke="#2b2233" stroke-width="1.5"/>
+<rect x="42" y="54" width="24" height="7" fill="#c9a06b" stroke="#2b2233" stroke-width="1.2"/>
+<rect x="84" y="58" width="24" height="34" rx="4" fill="none" stroke="#2b2233" stroke-width="1.5"/>
+<ellipse cx="96" cy="74" rx="7" ry="5" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.2"/>
+<circle cx="96" cy="74" r="2.5" fill="#2b2233"/>
+<path d="M128 92 Q142 56 156 92 Z" fill="none" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M136 86 L142 72 L148 86 Z" fill="#6b4fa0" stroke="#2b2233" stroke-width="1"/>
+<circle cx="180" cy="74" r="12" fill="#2e5f9e" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M174 70 Q180 66 186 70" fill="none" stroke="#f3e9d2" stroke-width="1.2"/>
+<rect x="48" y="104" width="8" height="18" rx="2" fill="#9b2c3a" stroke="#2b2233" stroke-width="1"/>
+<rect x="64" y="104" width="8" height="18" rx="2" fill="#c99a2e" stroke="#2b2233" stroke-width="1"/>
+<rect x="110" y="104" width="10" height="18" rx="3" fill="#6b4fa0" stroke="#2b2233" stroke-width="1"/>
+<rect x="168" y="100" width="20" height="22" rx="2" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.2"/>
+<path d="M4 4 H30 Q24 40 34 130 H4 Z" fill="#6b4fa0" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M236 4 H210 Q216 40 206 130 H236 Z" fill="#6b4fa0" stroke="#2b2233" stroke-width="1.5"/>
+</svg>

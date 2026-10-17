@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+<title>Preference heart</title>
+<circle cx="24" cy="24" r="22" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M22 36 C12 29 8 23 8 17 C8 12.5 11.5 9.5 15.5 9.5 C18.5 9.5 21 11.2 22 13.5 C23 11.2 25.5 9.5 28.5 9.5 C32.5 9.5 36 12.5 36 17 C36 23 32 29 22 36 Z" fill="#9b2c3a" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M29 31 H37 L39 34.5 L37 38 H29 Z" fill="#fbf6e8" stroke="#2b2233" stroke-width="1.2" stroke-linejoin="round"/>
+<circle cx="31.5" cy="34.5" r="1" fill="#2b2233"/>
+</svg>

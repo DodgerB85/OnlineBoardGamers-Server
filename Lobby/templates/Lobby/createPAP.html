@@ -84,12 +84,6 @@
                             <input type="text" id="player5" name="player5" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
                         </div>
                     </div>
-                    <div class="form-row" id="selPlayer6" style="display:none">
-                        <label class="form-label" for="player6">{% translate "Player 6" %}</label>
-                        <div class="field">
-                            <input type="text" id="player6" name="player6" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
-                        </div>
-                    </div>
                 </div>
 
                 <div class="card">
@@ -140,7 +134,12 @@
                 <div class="card">
                     <div class="card-header"><h2 class="card-title">{% translate "Game Options" %}</h2></div>
                     <div class="check-list">
-                        <div class="opt-help">{% translate "Game options will be added here as the game is implemented." %}</div>
+                        <label class="check-label">
+                            <input type="checkbox" class="myCheckbox" id="softerEnding" name="softerEnding" value="201">
+                            <div>
+                                <div>{% translate "Softer ending: players below the 40 Recognized Profit threshold take -10 VP instead of being eliminated" %}</div>
+                            </div>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -154,7 +153,7 @@
     <script>
     function selectPlayers() {
         var maxPlayers = parseInt(document.getElementById("playerNumber").value);
-        for (var i = 2; i <= 6; i++) {
+        for (var i = 2; i <= 5; i++) {
             var row = document.getElementById("selPlayer" + i);
             if (row) row.style.display = i < maxPlayers ? "block" : "none";
         }
@@ -184,6 +183,8 @@
             var input = document.getElementById("player" + (i + 2));
             if (input) input.value = names[i];
         }
+        var so = {{ startingOptions|safe }};
+        document.getElementById("softerEnding").checked = so.indexOf(201) !== -1;
         selectPlayers();
         {% endif %}
     });

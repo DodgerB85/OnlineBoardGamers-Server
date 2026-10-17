@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 140">
+<title>Overflow market stall</title>
+<rect x="2" y="2" width="236" height="136" rx="8" fill="#f3e9d2" stroke="#2b2233" stroke-width="2"/>
+<path d="M10 116 H230" stroke="#2b2233" stroke-width="1.5"/>
+<rect x="60" y="34" width="120" height="20" fill="#9b2c3a"/>
+<g fill="#f3e9d2">
+<rect x="75" y="34" width="12" height="20"/>
+<rect x="105" y="34" width="12" height="20"/>
+<rect x="135" y="34" width="12" height="20"/>
+<rect x="165" y="34" width="12" height="20"/>
+</g>
+<path d="M60 54 Q66 62 72 54 Q78 62 84 54 Q90 62 96 54 Q102 62 108 54 Q114 62 120 54 Q126 62 132 54 Q138 62 144 54 Q150 62 156 54 Q162 62 168 54 Q174 62 180 54 Z" fill="#9b2c3a" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M58 54 V118 M182 54 V118" stroke="#2b2233" stroke-width="4"/>
+<rect x="100" y="62" width="36" height="12" rx="1" fill="#f3e9d2" stroke="#2b2233" stroke-width="1"/>
+<path d="M106 68 H130" stroke="#2b2233" stroke-width="1.2"/>
+<rect x="56" y="96" width="128" height="8" fill="#b08d6a" stroke="#2b2233" stroke-width="1.5"/>
+<rect x="70" y="84" width="24" height="12" fill="#b08d6a" stroke="#2b2233" stroke-width="1.2"/>
+<rect x="140" y="80" width="26" height="16" fill="#b08d6a" stroke="#2b2233" stroke-width="1.2"/>
+<circle cx="78" cy="82" r="4" fill="#2f7d5b" stroke="#2b2233" stroke-width="1"/>
+<circle cx="88" cy="80" r="3.5" fill="#2e5f9e" stroke="#2b2233" stroke-width="1"/>
+<circle cx="150" cy="78" r="4" fill="#c99a2e" stroke="#2b2233" stroke-width="1"/>
+<circle cx="160" cy="76" r="3" fill="#6b4fa0" stroke="#2b2233" stroke-width="1"/>
+<circle cx="172" cy="112" r="4" fill="#2f7d5b" stroke="#2b2233" stroke-width="1"/>
+<circle cx="180" cy="110" r="3" fill="#c99a2e" stroke="#2b2233" stroke-width="1"/>
+<rect x="64" y="104" width="6" height="12" fill="#2b2233"/>
+<rect x="170" y="104" width="6" height="12" fill="#2b2233"/>
+</svg>

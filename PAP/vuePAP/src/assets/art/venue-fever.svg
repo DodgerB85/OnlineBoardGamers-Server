@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 140">
+<title>Fever ward</title>
+<rect x="2" y="2" width="236" height="136" rx="8" fill="#f3e9d2" stroke="#2b2233" stroke-width="2"/>
+<path d="M10 116 H230" stroke="#2b2233" stroke-width="1.5"/>
+<rect x="40" y="30" width="10" height="70" rx="5" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5"/>
+<rect x="44" y="64" width="2" height="36" fill="#9b2c3a"/>
+<circle cx="45" cy="106" r="7" fill="#9b2c3a" stroke="#2b2233" stroke-width="1.2"/>
+<path d="M52 40 H58 M52 56 H58 M52 72 H58 M52 88 H58" stroke="#2b2233" stroke-width="1.2"/>
+<path d="M114 36 H126 V58 Q144 66 144 84 Q144 104 120 104 Q96 104 96 84 Q96 66 114 58 Z" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M100 90 Q120 82 140 90 V92 Q140 102 120 102 Q100 102 100 92 Z" fill="#9b2c3a"/>
+<circle cx="112" cy="92" r="3" fill="#f3e9d2"/>
+<circle cx="126" cy="96" r="2" fill="#f3e9d2"/>
+<rect x="100" y="106" width="40" height="8" rx="3" fill="#2b2233"/>
+<path d="M106 106 Q100 96 112 94 Q110 102 116 102 Q122 92 118 106 Z" fill="#c99a2e" stroke="#2b2233" stroke-width="1"/>
+<path d="M176 40 Q184 50 176 60 Q168 70 176 80" fill="none" stroke="#2b2233" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+<path d="M194 36 Q202 46 194 56 Q186 66 194 76" fill="none" stroke="#9b2c3a" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+</svg>

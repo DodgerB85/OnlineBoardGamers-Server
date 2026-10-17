@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 224">
+<title>Customer card back</title>
+<rect x="4" y="4" width="152" height="216" rx="10" fill="#f3e9d2" stroke="#2b2233" stroke-width="2"/>
+<rect x="12" y="12" width="136" height="200" rx="6" fill="none" stroke="#6b4fa0" stroke-width="1.2"/>
+<g fill="#c99a2e" stroke="#2b2233" stroke-width=".8">
+<path d="M20 14 L26 20 L20 26 L14 20 Z"/>
+<path d="M140 14 L146 20 L140 26 L134 20 Z"/>
+<path d="M20 198 L26 204 L20 210 L14 204 Z"/>
+<path d="M140 198 L146 204 L140 210 L134 204 Z"/>
+</g>
+<path d="M52 186 Q52 134 80 130 Q108 134 108 186 Z" fill="#6b4fa0" stroke="#2b2233" stroke-width="1.5"/>
+<circle cx="80" cy="112" r="16" fill="#2b2233"/>
+<rect x="66" y="78" width="28" height="22" rx="2" fill="#2b2233"/>
+<rect x="66" y="92" width="28" height="3" fill="#9b2c3a"/>
+<rect x="58" y="98" width="44" height="4" rx="2" fill="#2b2233"/>
+<circle cx="74" cy="112" r="1.8" fill="#c99a2e"/>
+<circle cx="86" cy="112" r="1.8" fill="#c99a2e"/>
+<path d="M30 60 H130 M30 164 H130" stroke="#2b2233" stroke-width="1" opacity=".3"/>
+</svg>

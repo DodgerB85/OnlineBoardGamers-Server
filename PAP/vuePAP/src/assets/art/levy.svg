@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+<title>Levy chit</title>
+<g transform="rotate(-8 18 24)">
+<path d="M7 5 H29 V43 H7 Z" fill="#fbf6e8" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<g stroke="#6b4fa0" stroke-width="1.6" stroke-linecap="round">
+<path d="M12 13 H24"/>
+<path d="M12 18 H24"/>
+<path d="M12 23 H19"/>
+</g>
+<circle cx="19" cy="34" r="4.5" fill="#9b2c3a" stroke="#2b2233" stroke-width="1.2"/>
+<circle cx="19" cy="34" r="2.2" fill="none" stroke="#f3e9d2" stroke-width="1"/>
+</g>
+<circle cx="34" cy="31" r="10" fill="#c99a2e" stroke="#2b2233" stroke-width="1.5"/>
+<circle cx="34" cy="31" r="6.5" fill="none" stroke="#2b2233" stroke-width="1" stroke-dasharray="2 2"/>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 140">
+<title>Noble quarter</title>
+<rect x="2" y="2" width="236" height="136" rx="8" fill="#f3e9d2" stroke="#2b2233" stroke-width="2"/>
+<path d="M10 116 H230" stroke="#2b2233" stroke-width="1.5"/>
+<rect x="52" y="40" width="136" height="76" fill="#efe3c8" stroke="#2b2233" stroke-width="1.5"/>
+<rect x="48" y="34" width="144" height="8" fill="#2b2233"/>
+<path d="M106 34 L104 22 L112 28 L120 16 L128 28 L136 22 L134 34 Z" fill="#c99a2e" stroke="#2b2233" stroke-width="1.2" stroke-linejoin="round"/>
+<path d="M60 44 Q120 64 180 44" fill="none" stroke="#2b2233" stroke-width="1"/>
+<g fill="#2e5f9e" stroke="#2b2233" stroke-width=".8">
+<path d="M70 48 L78 48 L74 58 Z"/>
+<path d="M90 52 L98 52 L94 62 Z"/>
+<path d="M146 52 L154 52 L150 62 Z"/>
+<path d="M166 48 L174 48 L170 58 Z"/>
+</g>
+<rect x="76" y="72" width="88" height="12" fill="none" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M76 84 H164" stroke="#2b2233" stroke-width="3"/>
+<path d="M108 116 V96 Q120 84 132 96 V116 Z" fill="#2e5f9e" stroke="#2b2233" stroke-width="1.5"/>
+<rect x="64" y="56" width="16" height="22" fill="#c99a2e" opacity=".6" stroke="#2b2233" stroke-width="1"/>
+<rect x="160" y="56" width="16" height="22" fill="#c99a2e" opacity=".6" stroke="#2b2233" stroke-width="1"/>
+</svg>

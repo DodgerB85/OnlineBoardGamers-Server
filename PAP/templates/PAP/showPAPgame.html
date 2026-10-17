@@ -1,4 +1,5 @@
-{% load static %}
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -35,8 +36,8 @@
     </style>
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
     {% if settingsDebug %}
-      <script type="module" src="http://localhost:3044/static/@vite/client"></script>
-      <script type="module" src="http://localhost:3044/static/main.js"></script>
+      <script type="module" src="http://localhost:3001/static/@vite/client"></script>
+      <script type="module" src="http://localhost:3001/static/main.js"></script>
     {% else %}
       <link href="{% static 'PAP/PAPvuedist/main.css' %}?" rel="stylesheet" />
       <script type="module" crossorigin="" src="{% static 'PAP/PAPvuedist/main.js' %}"></script>
@@ -54,7 +55,8 @@
     var initData = {};
     initData.gameID = {{ gameID }};
     initData.gameName = "{{ gameName|escapejs }}";
-    initData.gameData = {{ gameData|safe }};
+    initData.locale = "{{ LANGUAGE_CODE }}";
+    initData.gameData = JSON.parse("{{ gameData|escapejs }}");
     initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
     initData.myZoomLevel = {{ myZoomLevel }};
     initData.startingOptions = {{ startingOptions|safe }};

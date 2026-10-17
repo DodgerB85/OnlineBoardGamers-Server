@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 224">
+<title>Paperwork card back</title>
+<rect x="4" y="4" width="152" height="216" rx="10" fill="#f3e9d2" stroke="#2b2233" stroke-width="2"/>
+<rect x="12" y="12" width="136" height="200" rx="6" fill="none" stroke="#6b4fa0" stroke-width="1.2"/>
+<g fill="#c99a2e" stroke="#2b2233" stroke-width=".8">
+<path d="M20 14 L26 20 L20 26 L14 20 Z"/>
+<path d="M140 14 L146 20 L140 26 L134 20 Z"/>
+<path d="M20 198 L26 204 L20 210 L14 204 Z"/>
+<path d="M140 198 L146 204 L140 210 L134 204 Z"/>
+</g>
+<rect x="44" y="70" width="72" height="92" rx="2" fill="#fbf6e8" stroke="#2b2233" stroke-width="1.5" transform="rotate(-8 80 116)"/>
+<rect x="50" y="78" width="72" height="92" rx="2" fill="#fbf6e8" stroke="#2b2233" stroke-width="1.5" transform="rotate(5 86 124)"/>
+<g stroke="#6b4fa0" stroke-width="2" opacity=".6" transform="rotate(5 86 124)">
+<path d="M60 96 H112 M60 106 H112 M60 116 H100 M60 126 H112"/>
+</g>
+<g fill="none" stroke="#9b2c3a" stroke-width="2.5" opacity=".85">
+<circle cx="104" cy="150" r="14"/>
+</g>
+<circle cx="104" cy="150" r="8" fill="none" stroke="#9b2c3a" stroke-width="1"/>
+<rect x="30" y="184" width="100" height="12" fill="none" stroke="#2b2233" stroke-width="1" opacity=".4"/>
+</svg>

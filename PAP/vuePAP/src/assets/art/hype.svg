@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+<title>Hype burst</title>
+<polygon points="45,24 35.1,28.6 38.9,38.9 28.6,35.1 24,45 19.4,35.1 9.2,38.9 12.9,28.6 3,24 12.9,19.4 9.2,9.2 19.4,12.9 24,3 28.6,12.9 38.9,9.2 35.1,19.4" fill="#e0a93b" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<circle cx="24" cy="24" r="8" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.2"/>
+<path d="M21 24 L24 19 L27 24 L24 29 Z" fill="#9b2c3a"/>
+</svg>

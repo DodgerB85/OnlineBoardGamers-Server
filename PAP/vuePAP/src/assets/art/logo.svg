@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120">
+<title>Permits and Poisons</title>
+<rect x="2" y="2" width="396" height="116" rx="10" fill="#f3e9d2" stroke="#2b2233" stroke-width="2"/>
+<rect x="36" y="12" width="14" height="10" rx="2" fill="#c9a06b" stroke="#2b2233" stroke-width="1.5"/>
+<rect x="39" y="21" width="8" height="12" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M39 33 Q26 39 26 55 V92 Q26 102 36 102 H50 Q60 102 60 92 V55 Q60 39 47 33 Z" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M30 66 H56 V92 Q56 98 50 98 H36 Q30 98 30 92 Z" fill="#2f7d5b"/>
+<circle cx="84" cy="74" r="18" fill="#9b2c3a" stroke="#2b2233" stroke-width="1.5"/>
+<circle cx="84" cy="74" r="13" fill="none" stroke="#f3e9d2" stroke-width="1.2"/>
+<polygon points="84,64 86.1,69.2 91.6,69.5 87.3,73.1 88.7,78.5 84,75.5 79.3,78.5 80.7,73.1 76.4,69.5 81.9,69.2" fill="#f3e9d2"/>
+<g font-family="Georgia, 'Times New Roman', serif" fill="#2b2233">
+<text x="118" y="54" font-size="30" font-style="italic">Permits &amp;</text>
+<text x="118" y="102" font-size="50" font-weight="bold" fill="#9b2c3a">Poisons</text>
+</g>
+</svg>

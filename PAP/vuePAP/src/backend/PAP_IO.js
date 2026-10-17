@@ -69,9 +69,10 @@ export async function saveGame(saveRewind = true) {
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
 		postData.status = "FINISHED"
 		postData.saveRewind = false
-		postData.finalPositions = [...store.gameflow.fullTurnOrder]
-		postData.winnerUsername = store.players[store.gameflow.fullTurnOrder[0]].name
-		postData.tournamentData = store.gameflow.fullTurnOrder.map((playerIdx, i) => (i === 0 ? [store.players[playerIdx].name] : [store.players[playerIdx].name, store.players[playerIdx].score]))
+		const result = store.game.result
+		postData.finalPositions = [...result.finalPositions]
+		postData.winnerUsername = store.players[result.winner].name
+		postData.tournamentData = result.finalPositions.map((seat, i) => (i === 0 ? [store.players[seat].name] : [store.players[seat].name, store.players[seat].score]))
 	}
 
 	try {
@@ -373,6 +374,7 @@ async function updateDataFromLoadRewind() {
 			method: "POST",
 			body: JSON.stringify({
 				action: "updateDataFromLoadRewind",
+				latestUpdate: personal.latestUpdate,
 				turn: store.gameflow.turn,
 				allIsCurrentPlayers: allIsCurrentPlayers,
 				allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,

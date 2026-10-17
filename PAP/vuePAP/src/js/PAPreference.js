@@ -25,10 +25,8 @@ export const PHASE_GAME_OVER = 2
 export const MAIN_PHASES = [PHASE_MAIN]
 export const ALL_PHASES = [PHASE_SETUP, PHASE_MAIN, PHASE_GAME_OVER]
 
-// History event types
-export const HIST_NEW_GAME = 0
-export const HIST_END_TURN = 1
-export const HIST_GAME_END = 2
+// Starting options (mirror PAPconstants.py)
+export const SO_SOFTER_ENDING = 201
 
 // Vote topics (mirror Lobby.sharedFunctions.constants)
 export const DELETE_VOTE_TOPIC = "delete_game_votes"

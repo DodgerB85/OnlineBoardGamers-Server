@@ -11,7 +11,7 @@ export default defineConfig(({ command }) => ({
 	root: resolve("./src"),
 	server: {
 		host: "0.0.0.0",
-		port: 3060,
+		port: 3001,
 		open: false,
 		fs: {
 			allow: [resolve(".."), resolve("../.."), resolve("../../")],

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 140">
+<title>Lantern street</title>
+<rect x="2" y="2" width="236" height="136" rx="8" fill="#f3e9d2" stroke="#2b2233" stroke-width="2"/>
+<path d="M10 116 H230" stroke="#2b2233" stroke-width="1.5"/>
+<circle cx="50" cy="32" r="14" fill="#6b4fa0"/>
+<circle cx="56" cy="28" r="12" fill="#f3e9d2"/>
+<rect x="14" y="84" width="26" height="32" fill="#6b4fa0" stroke="#2b2233" stroke-width="1.2"/>
+<rect x="40" y="72" width="20" height="44" fill="#6b4fa0" stroke="#2b2233" stroke-width="1.2"/>
+<rect x="182" y="80" width="30" height="36" fill="#6b4fa0" stroke="#2b2233" stroke-width="1.2"/>
+<rect x="210" y="66" width="20" height="50" fill="#6b4fa0" stroke="#2b2233" stroke-width="1.2"/>
+<circle cx="120" cy="54" r="34" fill="#c99a2e" opacity=".2"/>
+<rect x="118" y="40" width="4" height="76" fill="#2b2233"/>
+<rect x="110" y="114" width="20" height="4" rx="1" fill="#2b2233"/>
+<rect x="108" y="40" width="24" height="26" rx="2" fill="#c99a2e" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M106 40 L120 26 L134 40 Z" fill="#2b2233"/>
+<path d="M116 40 V66 M124 40 V66" stroke="#2b2233" stroke-width="1"/>
+<circle cx="120" cy="54" r="4" fill="#f3e9d2"/>
+</svg>

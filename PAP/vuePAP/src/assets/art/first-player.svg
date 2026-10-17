@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+<title>First player bell</title>
+<circle cx="24" cy="24" r="22" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M20.5 16 Q20.5 10 24 10 Q27.5 10 27.5 16" fill="none" stroke="#2b2233" stroke-width="2" stroke-linecap="round"/>
+<path d="M13 33 Q13 17 24 16 Q35 17 35 33 Z" fill="#c99a2e" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<rect x="9" y="33" width="30" height="3.5" rx="1.5" fill="#2b2233"/>
+<circle cx="24" cy="39" r="2.5" fill="#2b2233"/>
+</svg>

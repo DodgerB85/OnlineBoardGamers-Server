@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+<title>Inspection notice</title>
+<path d="M9 5 H31 L39 13 V43 H9 Z" fill="#fbf6e8" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M31 5 V13 H39" fill="none" stroke="#2b2233" stroke-width="1.2" stroke-linejoin="round"/>
+<path d="M28 29 L37 38" stroke="#2b2233" stroke-width="4.5" stroke-linecap="round"/>
+<circle cx="23" cy="24" r="7.5" fill="#cfe3f0" stroke="#2b2233" stroke-width="2.2"/>
+<path d="M19 22 Q20 19 23 19" fill="none" stroke="#fbf6e8" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

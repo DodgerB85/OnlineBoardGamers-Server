@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+<title>Anchor price tag</title>
+<path d="M4 8 H44" stroke="#9b2c3a" stroke-width="3.2" stroke-linecap="round"/>
+<path d="M11 15 H30 L42 27 L30 39 H11 Q8 39 8 36 V18 Q8 15 11 15 Z" fill="#e6d3a3" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<circle cx="15" cy="27" r="2.4" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.2"/>
+<path d="M20 27 H32" stroke="#6b4fa0" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

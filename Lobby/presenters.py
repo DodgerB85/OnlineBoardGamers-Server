@@ -2047,6 +2047,14 @@ class ROWpresenter(GamePresenter):
 
 
 class PAPpresenter(GamePresenter):
+    # PAP keeps its whole state (move log included) in Game.gameData, so these
+    # server-side move-data hooks are intentionally empty. They exist so the shared show/data endpoints work.
+    def getCurrentMoveDataForPlayer(self, name):
+        return {}
+
+    def getAllMyMoveDataForPlayer(self, name):
+        return []
+
     def startGame(self, request):
         from Lobby.models import GamePlayer
 

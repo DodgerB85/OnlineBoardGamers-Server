@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+<title>Co-op crate and sack</title>
+<circle cx="48" cy="48" r="44" fill="#f3e9d2" stroke="#2b2233" stroke-width="2"/>
+<path d="M34 24 Q30 30 22 38 Q16 48 26 52 H42 Q52 48 46 38 Q38 30 34 24 Z" fill="#d7b98a" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M29 30 H39" stroke="#2b2233" stroke-width="2.5" stroke-linecap="round"/>
+<rect x="20" y="50" width="56" height="28" rx="2" fill="#b98a55" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M20 58 H76 M20 66 H76" stroke="#2b2233" stroke-width="1.2" opacity=".5"/>
+<rect x="44" y="50" width="8" height="28" fill="#c9a06b" stroke="#2b2233" stroke-width="1"/>
+</svg>

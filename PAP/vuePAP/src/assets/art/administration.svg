@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+<title>Under administration</title>
+<rect x="9" y="6" width="30" height="36" rx="2" fill="#2e5f9e" stroke="#2b2233" stroke-width="1.5"/>
+<rect x="9" y="6" width="6" height="36" fill="#1f4475" stroke="#2b2233" stroke-width="1.5"/>
+<g stroke="#f3e9d2" stroke-width="1.6" stroke-linecap="round">
+<path d="M19 13 H35"/>
+<path d="M19 18 H35"/>
+<path d="M19 23 H29"/>
+</g>
+<path d="M32 31 V27 Q32 22 37 22 Q42 22 42 27 V31" fill="none" stroke="#f3e9d2" stroke-width="5"/>
+<path d="M32 31 V27 Q32 22 37 22 Q42 22 42 27 V31" fill="none" stroke="#2b2233" stroke-width="2.2" stroke-linecap="round"/>
+<rect x="29" y="30" width="16" height="13" rx="2" fill="#2b2233" stroke="#f3e9d2" stroke-width="1.5"/>
+<circle cx="37" cy="36" r="1.8" fill="#f3e9d2"/>
+</svg>

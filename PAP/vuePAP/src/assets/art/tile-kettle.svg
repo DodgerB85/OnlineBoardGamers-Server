@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+<title>Bubbling kettle</title>
+<circle cx="48" cy="48" r="44" fill="#f3e9d2" stroke="#2b2233" stroke-width="2"/>
+<path d="M38 90 Q32 80 42 76 Q40 84 48 84 Q52 78 54 86 Q58 80 58 90 Z" fill="#c24e5c" stroke="#2b2233" stroke-width="1"/>
+<path d="M42 28 Q38 22 44 16 Q48 12 44 6 M56 28 Q52 22 58 16" fill="none" stroke="#2b2233" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>
+<path d="M30 40 Q48 18 66 40" fill="none" stroke="#2b2233" stroke-width="3" stroke-linecap="round"/>
+<path d="M24 48 Q14 44 12 34 L16 32 Q18 42 28 52 Z" fill="#5d5470" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M24 46 Q24 36 48 36 Q72 36 72 46 V66 Q72 74 64 74 H32 Q24 74 24 66 Z" fill="#5d5470" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<ellipse cx="48" cy="36" rx="24" ry="3" fill="#6b4fa0" stroke="#2b2233" stroke-width="1"/>
+<circle cx="48" cy="32" r="3" fill="#c99a2e" stroke="#2b2233" stroke-width="1"/>
+<circle cx="36" cy="60" r="2" fill="#f3e9d2"/>
+<circle cx="58" cy="54" r="1.5" fill="#f3e9d2"/>
+<circle cx="50" cy="66" r="1.2" fill="#f3e9d2"/>
+</svg>

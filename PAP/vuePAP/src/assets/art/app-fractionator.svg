@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+<title>The Fractionator</title>
+<circle cx="24" cy="24" r="22" fill="#f3e9d2" stroke="#2b2233" stroke-width="1.5"/>
+<rect x="21" y="6" width="6" height="18" rx="2" fill="#cfe3f0" stroke="#2b2233" stroke-width="1.5"/>
+<path d="M24 24 V28 H14 V30 M24 28 H34 V30" fill="none" stroke="#2b2233" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="14" cy="36" r="6" fill="#5fae6a" stroke="#2b2233" stroke-width="1.5"/>
+<circle cx="34" cy="36" r="6" fill="#6b4fa0" stroke="#2b2233" stroke-width="1.5"/>
+</svg>

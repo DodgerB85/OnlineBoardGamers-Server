@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+<title>Poison tolerance</title>
+<rect x="6" y="4" width="11" height="7" rx="1.5" fill="#c9a06b" stroke="#2b2233" stroke-width="1.4"/>
+<path d="M7 11 H15 V15 Q22 19 22 29 V38 Q22 44 16 44 H7 Q2 44 2 38 V29 Q2 19 7 15 Z" fill="#5fae6a" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M30 12 L43 17 V28 Q43 38 30 45 Q17 38 17 28 V17 Z" fill="#2e5f9e" stroke="#2b2233" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M23 28 L30 21 L37 28" fill="none" stroke="#f3e9d2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
