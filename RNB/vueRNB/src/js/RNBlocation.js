@@ -562,10 +562,11 @@ export function moveTransporterTo(entry, transporterID, event = null) {
 	// NB all locations (except edges for walls, or following transporters) are hexLocations
 	// IE this always runs
 	if (isAnyHexLocation(finalLocation)) {
-		// Planes & Aeroports: a FLY landing must satisfy canPlaneLandOnTile (empty land, no buildings,
-		// no unattended geese, river-shore rule). This guards against clicking a highlighted-invalid tile.
-		if (isFly && isLandVertexLocation(finalLocation) && !model.canPlaneLandOnTile(transporterObj, finalLocation)) {
-			rf.doAdminAlrt("Planes can only land on empty land tiles (no buildings, no unattended geese)")
+		// Planes & Aeroports: a FLY landing must satisfy canPlaneLandOnTile (no buildings,
+		// no unattended geese, river-shore rule). Sea is allowed. This guards against
+		// clicking a highlighted-invalid tile.
+		if (isFly && (isLandVertexLocation(finalLocation) || isSeaVertexLocation(finalLocation)) && !model.canPlaneLandOnTile(transporterObj, finalLocation)) {
+			rf.doAdminAlrt("Planes can only land on empty tiles (no buildings, no unattended geese)")
 			return
 		}
 		const pathfinding = store.context.pathfinding // set in highlight.highlightEligibleHexAreasForTransporterMove
@@ -664,8 +665,8 @@ export function moveTransporterTo(entry, transporterID, event = null) {
 			trans.animationWaypoints = JSON.parse(JSON.stringify(waypoints))
 			trans.location = finalLocation
 			trans.rawTransporterXY = [...finalPixelPt] // NEW LINE
-			// Planes & Aeroports: a fly move consumes the whole turn (one move per turn)
-			trans.remainingMoves = isFly ? 0 : trans.remainingMoves - pathfinding.cost[destinationIdx]
+			// Planes & Aeroports: a fly OR taxi move consumes the whole turn (one move per turn)
+			trans.remainingMoves = isFly || transporterObj.type === rf.PLANE ? 0 : trans.remainingMoves - pathfinding.cost[destinationIdx]
 			}
 
 			transporterOntrans.forEach((carried) => {
@@ -746,7 +747,9 @@ export function moveTransporterTo(entry, transporterID, event = null) {
 
 		// Add to the stack
 		let currentStack = []
-		if (isLandVertexLocation(finalLocation)) {
+		// Planes & Aeroports: a fly landing at sea is still a land-style stack move, with
+		// the isFly flag telling replay/validation to resolve a sea stopping vertex.
+		if (isLandVertexLocation(finalLocation) || (isFly && isSeaVertexLocation(finalLocation))) {
 			const oldBucketLocation = convertLocationToBucket(oldTrandporterLocation)
 			const newBucketLocation = convertLocationToBucket(finalLocation)
 			const compressedOldLocation = [...stack.compressLocation(oldBucketLocation)]
@@ -761,7 +764,9 @@ export function moveTransporterTo(entry, transporterID, event = null) {
 			//if (model.resourcesFollowingTransporter(transporterID).length > 0) currentStack.push(model.resourcesFollowingTransporter(transporterID).length)
 		if (geeseFollowingStack.length > 0) {
 			// Planes & Aeroports: carry the isFly flag as a 3rd element so replay
-			// (validate/apply) knows to rebuild the augmented fly graph.
+			// (validate/apply) knows to rebuild the augmented fly graph. Pad first so
+			// the flag always lands at index 2 (the geese-drop flag at index 1).
+			if (isFly && geeseFollowingStack.length < 2) geeseFollowingStack.push(0)
 			if (isFly) geeseFollowingStack.push(1)
 			currentStack.push([...geeseFollowingStack])
 		} else if (isFly) {
@@ -799,6 +804,12 @@ export function moveTransporterTo(entry, transporterID, event = null) {
 		context.resetContextAndHighlights()
 		// Now highlight the new items for move/pickup/drop
 		store.context.selectedTransporterIDforTM = transporterID
+		// A plane stays in the air after its fly move until the player clicks Land,
+		// so it can still airdrop its remaining goods.
+		if (isFly) {
+			store.context.planeInFlight = true
+			store.context.selectedPlaneMode = rf.MOVE_FLY
+		}
 		store.context.action = rf.ACT_TM_SELECT_PICKUP_DROP_MOVE
 		highlight.updateAllHighlightsForTransporterMode()
 

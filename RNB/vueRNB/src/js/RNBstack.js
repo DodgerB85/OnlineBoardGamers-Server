@@ -1066,11 +1066,16 @@ export function verifySingleStackAction(stackActionData) {
 			rf.doAdminAlrt("Transporter not found")
 			return 1
 		}
-		// Verify it is at the start location
-		if (transporterObj.location[0] !== rf.LOCATION_LAND_VERTEX) {
-			rf.doAdminAlrt(`2.1 - Transporter location type incorrect: ${transporterObj.location} vs ${rf.LOCATION_LAND_VERTEX}`)
+		// Planes & Aeroports: a fly move carries an isFly flag in stackAction[5][2]
+		const isFly = stackAction.length >= 6 && stackAction[5].length > 2 && stackAction[5][2] === 1
+		// Verify it is at the start location. A plane in FLY mode may take off from a sea stop.
+		const validStart = loc.isLandVertexLocation(transporterObj.location) || (isFly && transporterObj.type === rf.PLANE && loc.isSeaVertexLocation(transporterObj.location))
+		if (!validStart) {
+			rf.doAdminAlrt(`2.1 - Transporter location type incorrect: ${transporterObj.location}`)
 			return 2.1
 		}
+		// A taxiing plane may not carry goods.
+		if (transporterObj.type === rf.PLANE && !isFly && model.transporterCarriesAnything(transporterObj.id)) return 2.4
 		if (transporterObj.location[1] !== fromHexID) {
 			rf.doAdminAlrt(`2.2 - Transporter hexID incorrect: ${transporterObj.location} vs ${fromHexID}`)
 			return 2.2
@@ -1135,8 +1140,6 @@ export function verifySingleStackAction(stackActionData) {
 
 		// Find reachable locations
 		const stats = rf.getTransporterStats(transporterObj.type)
-		// Planes & Aeroports: a fly move carries an isFly flag in stackAction[5][2]
-		const isFly = stackAction.length >= 6 && stackAction[5].length > 2 && stackAction[5][2] === 1
 		let movementGraph
 		let effectiveValidMove
 		let effectiveMaxMoves
@@ -1162,10 +1165,17 @@ export function verifySingleStackAction(stackActionData) {
 		const validMoves = util.getByIndices(pathfind.locations, indicesToValid)
 		if (!toBucketID && toBucketID !== 0) rf.doAdminAlrt(`bucket error 1 ${toBucketID}`)
 
-		const toVertex = loc.getAnyVertexInHexIDbucketID(toHexID, toBucketID)
-		if (loc.getBucketIDfromAnyHexIDandVertex(toHexID, toVertex) !== toBucketID) return 7
-
-		const toLocation = [rf.LOCATION_LAND_VERTEX, toHexID, toVertex]
+		let toLocation = []
+		// Planes & Aeroports: a fly move onto a water hex lands on a sea stopping vertex.
+		if (isFly && transporterObj.type === rf.PLANE && rf.TERR_ACTS_LIKE_WATER.includes(model.getHexByID(toHexID).currentTerrain)) {
+			const seaVertex = loc.getSeaVertexForNewTransporterFromHexIDandBucketID(toHexID, toBucketID)
+			toLocation = [rf.LOCATION_SEA_VERTEX, toHexID, seaVertex]
+		} else {
+			const toVertex = loc.getAnyVertexInHexIDbucketID(toHexID, toBucketID)
+			if (loc.getBucketIDfromAnyHexIDandVertex(toHexID, toVertex) !== toBucketID) return 7
+			toLocation = [rf.LOCATION_LAND_VERTEX, toHexID, toVertex]
+		}
+		if (isFly && transporterObj.type === rf.PLANE && !model.canPlaneLandOnTile(transporterObj, toLocation)) return 7
 		if (!util.includesArray(validMoves, toLocation)) return 8
 
 		// Everything checks out
@@ -1252,6 +1262,13 @@ export function verifySingleStackAction(stackActionData) {
 			rf.doAdminAlrt("Invalid water move - no path found")
 			return 7
 		}
+		// Planes & Aeroports: a taxiing plane may only move one sea tile step,
+		// and may not carry goods.
+		if (transporterObj.type === rf.PLANE) {
+			if (model.transporterCarriesAnything(transporterObj.id)) return 8
+			if (!loc.isSeaVertexLocation(transporterObj.location) || !loc.isSeaVertexLocation(result.location)) return 8
+			if (result.cost > 1) return 8
+		}
 
 		// Everything checks out
 		return 0
@@ -1259,6 +1276,8 @@ export function verifySingleStackAction(stackActionData) {
 	if (action === rf.STACK_STRICT_PICKUP_RES) {
 		let transporterID = stackAction[1]
 		//if (transporterID >= knownTransLen) transporterID += transIDdelta
+		// Planes & Aeroports: pickup only at the start of the movement phase
+		if (!model.canPlanePickUpNow(model.getTransporterByID(transporterID))) return 8
 		const resIDs = stackAction[2]
 		const reachableResources = loc.getAllResourcesAccessibleToTransporter(transporterID, false)
 		for (const resID of resIDs) {
@@ -1288,10 +1307,10 @@ export function verifySingleStackAction(stackActionData) {
 		if (hexObj.baseTerrain === rf.TERR_SEA) dropLocation[0] = rf.LOCATION_SEA_VERTEX
 		const reachableLocs = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(transporterObj.location, false, "ssdr")
 		// Check you can reach the drop location.
-		// Planes & Aeroports: a plane may airdrop onto ANY land tile (TERR_ANY_LAND), so skip the
+		// Planes & Aeroports: a plane may airdrop onto ANY land tile, so skip the
 		// normal adjacency check but still forbid sea / wet-polder tiles.
 		if (transporterObj.type === rf.PLANE) {
-			if (!rf.TERR_ANY_LAND.includes(hexObj.currentTerrain)) return 1
+			if (rf.TERR_ACTS_LIKE_WATER.includes(hexObj.currentTerrain) || hexObj.currentTerrain === rf.TERR_VOID) return 1
 		} else if (!util.includesArray(reachableLocs, dropLocation)) return 1
 		// Check all the res are on the transp
 		for (const resID of resIDs) {
@@ -1312,6 +1331,8 @@ export function verifySingleStackAction(stackActionData) {
 	if (action === rf.STACK_PICKUP_RES_TO_FOLLOW) {
 		let transporterID = stackAction[1]
 		//if (transporterID >= knownTransLen) transporterID += transIDdelta
+		// Planes & Aeroports: geese may only be attracted at the start of the movement phase
+		if (!model.canPlanePickUpNow(model.getTransporterByID(transporterID))) return 8
 		const resIDs = stackAction[2]
 		const reachableResources = loc.getAllResourcesAccessibleToTransporter(transporterID, false)
 		for (const resID of resIDs) {
@@ -1365,6 +1386,8 @@ export function verifySingleStackAction(stackActionData) {
 		//if (transporterBeingPickedUpID >= knownTransLen) transporterBeingPickedUpID += transIDdelta
 		const mainTransporterObj = model.getTransporterByID(mainTransporterID)
 		const transporterBeingPickedUpObj = model.getTransporterByID(transporterBeingPickedUpID)
+		// Planes & Aeroports: a plane may never carry another transporter
+		if (mainTransporterObj.type === rf.PLANE) return 4
 		const eligibleLocations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(mainTransporterObj.location, false)
 
 		if (!util.includesArray(eligibleLocations, transporterBeingPickedUpObj.location)) return 1
@@ -1417,6 +1440,8 @@ export function verifySingleStackAction(stackActionData) {
 
 		const droppingLocationFullVertex = loc.getVisualLocationFromBucketLocation(droppingLocationFullBucket)
 
+		// Planes & Aeroports: a plane may never be put in a river
+		if (carriedTransporterObj.type === rf.PLANE && (loc.isRiverBucketLocation(droppingLocationFullBucket) || loc.isRiverVertexLocation(droppingLocationFullVertex))) return 4
 		if (!util.includesArray(eligibleLocations, droppingLocationFullVertex)) return 1
 		// Check the carried trans is being carried
 		if (carriedTransporterObj.location[0] !== rf.LOCATION_TRANSPORTER) return 2
@@ -1430,6 +1455,8 @@ export function verifySingleStackAction(stackActionData) {
 		let otherTransporterID = stackAction[2]
 		//	if (otherTransporterID >= knownTransLen) otherTransporterID += transIDdelta
 		const otherTransObj = model.getTransporterByID(otherTransporterID)
+		// Planes & Aeroports: stealing is a pickup - only at the start of the movement phase
+		if (!model.canPlanePickUpNow(model.getTransporterByID(mainTransporterID))) return 8
 		const resIDs = stackAction[3]
 		//const mainTransporterLocation = stackAction[4]
 		const reachableResources = loc.getAllResourcesAccessibleToTransporter(mainTransporterID, true)
@@ -2050,15 +2077,22 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 		const toBucket = toBucketLocation[2]
 		if (!toBucket && toBucket !== 0) rf.doAdminAlrt(`bucket error 6 ${toBucket}`)
 
-		const toVertex = loc.getAnyVertexInHexIDbucketID(toHexID, toBucket)
-		let toLocationFromStack = [rf.LOCATION_LAND_VERTEX, toHexID, toVertex]
-		const geeseDropLocation = [rf.LOCATION_BUCKET, toHexID, toBucket]
-
 		const transporterObj = model.getTransporterByID(movingTransporterID)
-		// Find reachable locations
-		const stats = rf.getTransporterStats(transporterObj.type)
 		// Planes & Aeroports: a fly move carries an isFly flag in stackAction[5][2]
 		const isFly = stackAction.length >= 6 && stackAction[5].length > 2 && stackAction[5][2] === 1
+		// A plane flying onto a water hex lands on a sea stopping vertex; everything else is a land vertex
+		let toLocationFromStack
+		if (isFly && transporterObj.type === rf.PLANE && rf.TERR_ACTS_LIKE_WATER.includes(model.getHexByID(toHexID).currentTerrain)) {
+			const seaVertex = loc.getSeaVertexForNewTransporterFromHexIDandBucketID(toHexID, toBucket)
+			toLocationFromStack = [rf.LOCATION_SEA_VERTEX, toHexID, seaVertex]
+		} else {
+			const toVertex = loc.getAnyVertexInHexIDbucketID(toHexID, toBucket)
+			toLocationFromStack = [rf.LOCATION_LAND_VERTEX, toHexID, toVertex]
+		}
+		const geeseDropLocation = [rf.LOCATION_BUCKET, toHexID, toBucket]
+
+		// Find reachable locations
+		const stats = rf.getTransporterStats(transporterObj.type)
 		let movementGraph
 		let effectiveValidMove
 		let effectiveMaxMoves
@@ -2106,8 +2140,8 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 		//indicesToValid.sort((i, k) => pathfind.distances[i] - pathfind.distances[k])
 		let cost = pathfind.cost[destinationIdx]
 		// Move the transporter
-		// Planes & Aeroports: a fly move consumes the whole turn (one move per turn)
-		transporterObj.remainingMoves = isFly ? 0 : transporterObj.remainingMoves - cost
+		// Planes & Aeroports: a fly OR taxi move consumes the whole turn (one move per turn)
+		transporterObj.remainingMoves = isFly || transporterObj.type === rf.PLANE ? 0 : transporterObj.remainingMoves - cost
 
 		transporterObj.location = toLocation
 
@@ -2180,7 +2214,8 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 
 		// Move the transporter
 		transporterObj.remainingMoves -= cost
-		if (loc.isDockedLocation(toLocation)) transporterObj.remainingMoves = 0
+		// Planes & Aeroports: taxiing is one step and consumes the whole turn
+		if (transporterObj.type === rf.PLANE || loc.isDockedLocation(toLocation)) transporterObj.remainingMoves = 0
 		transporterObj.location = toLocation
 
 		// Keep visual positions in sync for the moved transporter and anything it carries (especially for docked locations with offsets)

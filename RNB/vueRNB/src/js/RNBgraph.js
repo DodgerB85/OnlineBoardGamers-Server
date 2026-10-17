@@ -900,19 +900,20 @@ export function findValidWaterDestination(toLocationBucket, transporterObj, play
 		const finalLocation = loc.getFinalLocationForDockingTransporterID(toLocationBucket, transporterObj.id)
 		if (!includeCost) return { location: finalLocation }
 
-		// Calculate cost for docked moves
-		const stats = rf.getTransporterStats(transporterObj.type)
+		// Calculate cost for docked moves. Planes taxi with MOVE_WATER, not their base
+		// fly/taxi validMove list, so use the effective params.
+		const eff = model.getEffectiveMoveParams(transporterObj, false)
 		const movementGraph = createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, playerIndex)
-		const pathfindResult = pathfind(movementGraph, transporterObj.location, stats.validMove, transporterObj.remainingMoves)
+		const pathfindResult = pathfind(movementGraph, transporterObj.location, eff.validMove, transporterObj.remainingMoves)
 		const destinationIdx = util.indexOfArrayInArray(pathfindResult.locations, finalLocation)
 		const cost = destinationIdx >= 0 ? pathfindResult.cost[destinationIdx] : 0
 		return { location: finalLocation, cost }
 	}
 
 	const toHexID = toLocationBucket[1]
-	const stats = rf.getTransporterStats(transporterObj.type)
+	const eff = model.getEffectiveMoveParams(transporterObj, false)
 	const movementGraph = createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, playerIndex)
-	const pathfindResult = pathfind(movementGraph, transporterObj.location, stats.validMove, transporterObj.remainingMoves)
+	const pathfindResult = pathfind(movementGraph, transporterObj.location, eff.validMove, transporterObj.remainingMoves)
 
 	const locationIndices = util.indexArray(pathfindResult.locations.length)
 	let indicesToValid = util.boolFilter(
@@ -956,25 +957,30 @@ export function findValidWaterDestination(toLocationBucket, transporterObj, play
 // ============================================================================
 // PLANES & AEROPORTS — Fly movement graph
 // ============================================================================
-// A plane in FLY mode can reach ANY land tile (TERR_ANY_LAND). We model this by
-// connecting every land vertex node to every other land vertex node with a single
-// MOVE_FLY edge, so the existing pathfind() / highlight / move pipeline works
-// unchanged. Sea and wet-polder tiles are intentionally excluded.
+// A plane in FLY mode can reach ANY land tile (TERR_ANY_LAND) and may land at sea.
+// We model this by connecting every land vertex node and every valid sea stopping
+// vertex node to every other such node with a single MOVE_FLY edge, so the existing
+// pathfind() / highlight / move pipeline works unchanged. Rivers are never landings.
 export function addFlyEdges(graph) {
-	const landVertexIndices = []
+	const flyVertexIndices = []
 	for (let i = 0; i < graph.nodes.types.length; i++) {
 		if (graph.nodes.types[i] !== rf.NODE_VERTEX) continue
 		const loc0 = graph.nodes.locations[i]
 		const hex = model.getHexByID(loc0[1])
-		if (hex && rf.TERR_ANY_LAND.includes(hex.currentTerrain)) landVertexIndices.push(i)
+		if (!hex) continue
+		if (loc.isLandVertexLocation(loc0)) {
+			if (rf.TERR_ANY_LAND.includes(hex.currentTerrain)) flyVertexIndices.push(i)
+		} else if (loc.isSeaVertexLocation(loc0) && loc.locationAllowsStop(loc0)) {
+			flyVertexIndices.push(i)
+		}
 	}
 	const edges = graph.edges.nodes
 	const edgeTypes = graph.edges.types
 	const edgeCosts = graph.edges.costs
 	const edgeIsRoad = graph.edges.isRoad || []
-	for (let a = 0; a < landVertexIndices.length; a++) {
-		for (let b = a + 1; b < landVertexIndices.length; b++) {
-			edges.push([landVertexIndices[a], landVertexIndices[b]])
+	for (let a = 0; a < flyVertexIndices.length; a++) {
+		for (let b = a + 1; b < flyVertexIndices.length; b++) {
+			edges.push([flyVertexIndices[a], flyVertexIndices[b]])
 			edgeTypes.push(rf.MOVE_FLY)
 			edgeCosts.push(1)
 			edgeIsRoad.push(false)

@@ -544,10 +544,17 @@ function replayStackMoveLand(stackAction, playerIndex) {
 	const geeseDropped = stackAction.length >= 6 && stackAction[5].length > 1 && stackAction[5][1] === 1
 	const toHexID = toLocationBucket[1]
 	const toBucket = toLocationBucket[2]
+	// Planes & Aeroports: a fly move carries an isFly flag in stackAction[5][2]; a sea
+	// destination must resolve to a sea stopping vertex, not a land vertex.
+	const isFly = stackAction.length >= 6 && stackAction[5].length > 2 && stackAction[5][2] === 1
 
-	//let toLocationFromStack = [rf.LOCATION_LAND_VERTEX, toHexID, toVertex]
 	const transporterObj = model.getTransporterByID(movingTransporterID)
-	let toLocationFinal = [rf.LOCATION_LAND_VERTEX, toHexID, loc.getAnyVertexInHexIDbucketID(toHexID, toBucket)]
+	let toLocationFinal
+	if (isFly && transporterObj.type === rf.PLANE && rf.TERR_ACTS_LIKE_WATER.includes(model.getHexByID(toHexID).currentTerrain)) {
+		toLocationFinal = [rf.LOCATION_SEA_VERTEX, toHexID, loc.getSeaVertexForNewTransporterFromHexIDandBucketID(toHexID, toBucket)]
+	} else {
+		toLocationFinal = [rf.LOCATION_LAND_VERTEX, toHexID, loc.getAnyVertexInHexIDbucketID(toHexID, toBucket)]
+	}
 	const toLocationForced = [...toLocationFinal]
 
 	if (CHECK_EXTRA_DATA) {
@@ -594,8 +601,20 @@ function replayStackMoveLand(stackAction, playerIndex) {
 		const stats = rf.getTransporterStats(transporterObj.type)
 		// Art & The Atelier: caravans move freely through walls and cross-country
 		const isCaravan = transporterObj.type === rf.EXHIBITION_TRANSPORTER
-		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, playerIndex, isCaravan, isCaravan)
-		const pathfind = graph.pathfind(movementGraph, transporterObj.location, stats.validMove, transporterObj.remainingMoves)
+		let movementGraph
+		let effectiveValidMove
+		let effectiveMaxMoves
+		if (transporterObj.type === rf.PLANE) {
+			const eff = model.getEffectiveMoveParams(transporterObj, isFly)
+			movementGraph = graph.createMovementGraph(transporterObj, playerIndex, isFly)
+			effectiveValidMove = eff.validMove
+			effectiveMaxMoves = eff.maxMoves
+		} else {
+			movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, playerIndex, isCaravan, isCaravan)
+			effectiveValidMove = stats.validMove
+			effectiveMaxMoves = transporterObj.remainingMoves
+		}
+		const pathfind = graph.pathfind(movementGraph, transporterObj.location, effectiveValidMove, effectiveMaxMoves)
 		let indicesToValid = util.boolFilter(
 			util.indexArray(pathfind.locations.length),
 			pathfind.cost.map((cost) => cost > 0)

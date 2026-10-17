@@ -469,7 +469,17 @@ export function getEffectiveMoveParams(transporterObj, isFly) {
 	if (isFly) return { validMove: [rf.MOVE_FLY], maxMoves: stats.maxMoves, isFly: true }
 	// TAXI: 1 step over roads (land) or 1 adjacent sea step (sea). Never rivers, never cargo.
 	const onLand = loc.isLandVertexLocation(transporterObj.location)
-	return { validMove: onLand ? [rf.MOVE_ROAD, rf.MOVE_DONKEY] : [rf.MOVE_WATER], maxMoves: 1, isFly: false }
+	return { validMove: onLand ? [rf.MOVE_ROAD] : [rf.MOVE_WATER], maxMoves: 1, isFly: false }
+}
+
+// Planes may only pick up goods or attract geese at the start of the movement phase
+// (never after moving, never in the production or building phase, never while taxiing).
+export function canPlanePickUpNow(transporterObj) {
+	if (transporterObj.type !== rf.PLANE) return true
+	const store = useModelStore()
+	if (!rf.PHASE_MOVEMENTS.includes(store.gameflow.phase)) return false
+	if (store.context.selectedPlaneMode === rf.MOVE_TAXI) return false
+	return transporterObj.remainingMoves === rf.getTransporterStats(rf.PLANE).maxMoves
 }
 
 // A tile blocks plane landing if it has ANY building (except aeroports), or an
@@ -487,10 +497,10 @@ function tileHasPlaneLandingBlocker(hexID) {
 // Rules: no buildings (except aeroports) and no unattended geese (except on aeroports)
 // on the tile; a river blocks BOTH shores if either shore's tile has a
 // building/unattended goose. A plane may also land at sea.
-export function canPlaneLandOnTile(planeObj, location) {
-	const store = useModelStore()
-	// Planes can land at sea
+export function canPlaneLandOnTile(_planeObj, location) {
+	// Planes can land at sea (on a stopping vertex only)
 	if (!loc.isLandVertexLocation(location) && !loc.isSeaVertexLocation(location)) return false
+	if (loc.isSeaVertexLocation(location) && !loc.isSeaStoppingVertex(location)) return false
 	const hexID = location[1]
 	const hex = getHexByID(hexID)
 	if (!hex) return false
@@ -502,7 +512,7 @@ export function canPlaneLandOnTile(planeObj, location) {
 	if (loc.isLandVertexLocation(location) && hex.sideRiverVertexIds) {
 		for (let s = 0; s < hex.sideRiverVertexIds.length; s++) {
 			if (hex.sideRiverVertexIds[s] === -1) continue
-			const neighbour = store.mapData.neighbours[hexID] ? store.mapData.neighbours[hexID][s] : -1
+			const neighbour = hex.hexLookup ? hex.hexLookup[s] : -1
 			if (neighbour >= 0 && tileHasPlaneLandingBlocker(neighbour)) return false
 		}
 	}

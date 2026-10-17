@@ -595,8 +595,14 @@ export function dropResOrTransporterOnLocation(dropLocationInput, strictDrop = f
 		dropTransporterOnLocation_core(store.context.transporterIDbeingDropped, dropLocationInput)
 	}
 
+	const wasPlaneInFlight = store.context.planeInFlight
 	context.resetContextAndHighlights()
 	store.context.selectedTransporterIDforTM = transporterID
+	// Keep a plane in flight while it still has goods to airdrop
+	if (wasPlaneInFlight && model.getTransporterByID(transporterID).type === rf.PLANE) {
+		store.context.planeInFlight = true
+		store.context.selectedPlaneMode = rf.MOVE_FLY
+	}
 	store.context.action = rf.ACT_TM_SELECT_PICKUP_DROP_MOVE
 	highlight.updateAllHighlightsForTransporterMode()
 	context.createUndoPoint()
@@ -617,6 +623,50 @@ export function dropResOnLocation_core(resID, dropLocation) {
 export function dropTransporterOnLocation_core(transporterID, dropLocation) {
 	const transporter = model.getTransporterByID(transporterID)
 	transporter.location = dropLocation
+}
+
+// Where can `carriedObj` be dropped while its carrier sits at its current location?
+// Returns bucket locations in the same shape the drop UI uses (see highlightLocations).
+// Planes may never be put in a river: when the carrier is in/on a river (or docked),
+// only the land buckets of the adjacent shores are offered, so the player picks a shore.
+// If the hex is fully bridged the shores share one bucket and there is no choice to make.
+export function getValidDropLocationsForCarriedTransporter(carrierObj, carriedObj) {
+	const carrierLocation = carrierObj.location
+	const reachable = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(carrierLocation, false)
+	let validDropLocations = []
+	if (carriedObj.type === rf.PLANE) {
+		// Land carrier -> land bucket, sea carrier -> sea bucket, river/docked carrier -> shore land buckets.
+		// Buckets that are bridged together are one choice, so dedupe by current bucket ID: a fully
+		// bridged river hex offers a single option and the plane is dropped without a prompt.
+		const seenBuckets = new Set()
+		for (const resLoc of reachable) {
+			if (!loc.isBucketLocation(resLoc)) continue
+			const currentBucketID = model.getHexByID(resLoc[1]).bucketIdsCurrent[resLoc[2]]
+			const key = `${resLoc[1]}:${currentBucketID}`
+			if (seenBuckets.has(key)) continue
+			seenBuckets.add(key)
+			validDropLocations.push(resLoc)
+		}
+	} else if (rf.LAND_TRANSPORTERS.includes(carriedObj.type) || carriedObj.type === rf.EXHIBITION_TRANSPORTER) {
+		// If you are at sea, you cannot drop it
+		if (model.getHexByID(carrierLocation[1]).currentTerrain === rf.TERR_SEA) return []
+		validDropLocations = reachable.filter((resLoc) => loc.isBucketLocation(resLoc))
+	} else {
+		// WATER transporters can be dropped on SEA, RIVER, or DOCKED locations
+		const isSeaHex = model.getHexByID(carrierLocation[1]).currentTerrain === rf.TERR_SEA
+		validDropLocations = reachable.filter((resLoc) => (isSeaHex && loc.isBucketLocation(resLoc)) || loc.isRiverVertexLocation(resLoc) || loc.isDockedLocation(resLoc))
+		// Now convert any river vertex to river ID, and remove docked offsets
+		for (let i = 0; i < validDropLocations.length; i++) {
+			if (loc.isRiverVertexLocation(validDropLocations[i])) {
+				const hexID = validDropLocations[i][1]
+				const riverID = loc.getRiverIDfromAnyHexIDandRiverVertex(hexID, validDropLocations[i][2])
+				validDropLocations[i] = loc.setRiverBucketLocation(hexID, riverID)
+			} else if (loc.isDockedLocation(validDropLocations[i])) {
+				validDropLocations[i][4] = rf.DOCKED_OFFSET_NONE
+			}
+		}
+	}
+	return util.makeUniqueSubarrays(validDropLocations)
 }
 
 export function addRoadToMap([fromHexID, fromBucketId], [toHexID, toBucketId], deductResources) {
@@ -1717,6 +1767,8 @@ export function clickedRes(event, _hexID, resID) {
 	if (!store.context.resourceIDsToHighlight.includes(resID)) return
 	if (store.context.action === rf.ACT_TM_SELECT_PICKUP_DROP_MOVE || store.context.action === rf.ACT_TM_BUILD_SELECT_BRIDGE_ROAD_WALL_BUILDING_RES_PICKUP_DROP) {
 		let transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
+		// Planes & Aeroports: a plane may only load goods/geese at the start of the movement phase
+		if (!model.canPlanePickUpNow(transporterObj)) return
 		// First check if it is a goose
 		// Only allow goose follows during MOVEMENT phase
 		let isGoose = resObj.type === rf.RES_GOOSE && rf.PHASE_MOVEMENTS.includes(store.gameflow.phase)
@@ -2165,18 +2217,17 @@ export function getPossibleDropBucketsForResourceOnTransporter(resID) {
 	if (loc.getLocationType(resObj.location) !== rf.LOCATION_TRANSPORTER) {
 		transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
 	} else transporterObj = model.getTransporterByID(resObj.location[1])
-	// Planes & Aeroports: a plane in FLY mode can airdrop a single resource onto ANY land
-	// tile (TERR_ANY_LAND). Return every land bucket so each carried good can be dropped
-	// individually at a different location.
-	if (transporterObj.type === rf.PLANE) {
-		let buckets = []
+	// Planes & Aeroports: a plane in FLIGHT can airdrop resources onto ANY land tile.
+	// Build the land-vertex locations of every land hex and let getVertexBucketsFromLocations
+	// collapse them into one entry per bucket, in the [hexID, bucketID, location] shape the
+	// drop UI expects. Wet polders/sea/void are excluded.
+	if (transporterObj.type === rf.PLANE && store.context.planeInFlight) {
+		const landLocations = []
 		for (const hex of store.mapData.hexData) {
-			if (!rf.TERR_ANY_LAND.includes(hex.currentTerrain)) continue
-			for (let v = 0; v < hex.nodeBucketIds.length; v++) {
-				buckets.push([rf.LOCATION_BUCKET, hex.id, hex.nodeBucketIds[v]])
-			}
+			if (rf.TERR_ACTS_LIKE_WATER.includes(hex.currentTerrain) || hex.currentTerrain === rf.TERR_VOID) continue
+			for (let v = 0; v < hex.nodeBucketIds.length; v++) landLocations.push([rf.LOCATION_LAND_VERTEX, hex.hexID, v])
 		}
-		return buckets
+		return model.getVertexBucketsFromLocations(landLocations)
 	}
 	const reachable = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(transporterObj.location, false, "gpdbfrot")
 	const buckets = model.getVertexBucketsFromLocations(reachable)
@@ -2193,6 +2244,8 @@ export function clickedResOnTransporter(transporterID, resourceID) {
 			// Exit if it's not highlighted
 			if (!store.context.resourceIDsToHighlight.includes(resourceID)) return
 			let selectedTransporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
+			// Planes & Aeroports: stealing is a pickup - only at the start of the movement phase
+			if (!model.canPlanePickUpNow(selectedTransporterObj)) return
 			if (model.transporterCarriesTransporter(selectedTransporterObj.id)) {
 				let clientX = event.clientX
 				let clientY = event.clientY
@@ -2305,6 +2358,8 @@ export function clickedResFollowingTransporter(resourceID) {
 export function executePickupTransporter(transporterID) {
 	const store = useModelStore()
 	const selectedTransporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
+	// Planes & Aeroports: a plane may never carry another transporter
+	if (selectedTransporterObj.type === rf.PLANE) return
 	// create the stack
 	const pickerUpLocation = selectedTransporterObj.location
 	const compressedPickedUpLocation = stack.compressLocation(pickerUpLocation)
@@ -2404,12 +2459,14 @@ export function clickedTransporter(transporterID) {
 
 	// Planes & Aeroports: if a plane in flight is clicked, show the Land bubble
 	if (transporterObj.type === rf.PLANE && store.context.planeInFlight && store.context.selectedTransporterIDforTM === transporterID) {
-		// Highlight goods on the plane for the Land bubble
+		// Highlight carried goods so they can be airdropped, then click Land to finish.
+		// The plane must stay in flight while dropping; it may not load anything anymore.
 		context.resetContextAndHighlights()
 		store.context.action = rf.ACT_TM_SELECT_PICKUP_DROP_MOVE
 		store.context.selectedTransporterIDforTM = transporterID
+		store.context.planeInFlight = true
+		store.context.selectedPlaneMode = rf.MOVE_FLY
 		highlight.highlightEligibleItemsForTransporterDrop(transporterID)
-		highlight.highlightEligibleResourcesForTransporterPickup(transporterID)
 		return
 	}
 
@@ -2461,50 +2518,29 @@ export function clickedTransporter(transporterID) {
 			return
 		}
 
-		// If a land is dropping a land or water dropping a water, just put it in the same location
 		let carryingTransporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
-		const carryingTransporterLocation = carryingTransporterObj.location
 		let carriedTransporterObj = transporterObj
-		//const carriedStats = rf.getTransporterStats(carriedTransporterObj.type)
 
-		//const reachable = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(carryingTransporterLocation, false)
-		//const validLocations = reachable.filter((loc) => carriedStats.validDrop.includes(loc[0]))
-		//const validBuckets = model.getVertexBucketsFromLocations(validLocations)
-		//const nonVertices = validLocations.filter((arrLoc) => !loc.isNonRiverVertexLocation(arrLoc))
-		//const validDropLocations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(carryingTransporterLocation, false).filter(resLoc => carriedStats.validDrop.includes(resLoc[0]))
-		let validDropBucketLocations = []
-		// LAND transporters can only be dropped in bucket locations. So find these
-		if (rf.LAND_TRANSPORTERS.includes(carriedTransporterObj.type)) {
-			// If you are at sea, you cannot drop it
-			if (model.getHexByID(carryingTransporterLocation[1]).currentTerrain === rf.TERR_SEA) return
-			validDropBucketLocations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(carryingTransporterLocation, false).filter((resLoc) => loc.isBucketLocation(resLoc))
-		} else {
-			// WATER transporters can be dropped on SEA, RIVER, or DOCKED locations
-			// First filter for bucket (sea hex) or river vertex, or docked loc
-			const isSeaHex = model.getHexByID(carryingTransporterLocation[1]).currentTerrain === rf.TERR_SEA
-			validDropBucketLocations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(carryingTransporterLocation, false).filter((resLoc) => (isSeaHex && loc.isBucketLocation(resLoc)) || loc.isRiverVertexLocation(resLoc) || loc.isDockedLocation(resLoc))
-			// Now convert any river vertex to river ID, and remove docked offsets
-			for (let i = 0; i < validDropBucketLocations.length; i++) {
-				if (loc.isRiverVertexLocation(validDropBucketLocations[i])) {
-					const hexID = validDropBucketLocations[i][1]
-					const riverID = loc.getRiverIDfromAnyHexIDandRiverVertex(hexID, validDropBucketLocations[i][2])
-					validDropBucketLocations[i] = loc.setRiverBucketLocation(hexID, riverID)
-				} else if (loc.isDockedLocation(validDropBucketLocations[i])) {
-					validDropBucketLocations[i][4] = rf.DOCKED_OFFSET_NONE
-				}
-			}
-		}
-		// Now remove duplicate subarrays
-		validDropBucketLocations = util.makeUniqueSubarrays(validDropBucketLocations)
+		// Where can the carried transporter go from the carrier's current location?
+		// Planes get land buckets only (from a river/dock carrier this is the shores, so the
+		// player picks a shore; a fully bridged hex has one merged bucket and no choice).
+		const validDropBucketLocations = getValidDropLocationsForCarriedTransporter(carryingTransporterObj, carriedTransporterObj)
+		if (validDropBucketLocations.length === 0) return
 
 		if (validDropBucketLocations.length === 1) {
 			const hexID = validDropBucketLocations[0][1]
 
-			// TODO - probably replace this with getVisualLocationFromBucketLocation ???
 			let finalDropLocationFull = []
-			if (rf.LAND_TRANSPORTERS.includes(carriedTransporterObj.type)) {
-				const vertex = loc.getLandVertexForNewTransporterFromHexIDandBucketID(hexID, validDropBucketLocations[0][2])
-				finalDropLocationFull = [rf.LOCATION_LAND_VERTEX, hexID, vertex]
+			if (rf.LAND_TRANSPORTERS.includes(carriedTransporterObj.type) || carriedTransporterObj.type === rf.EXHIBITION_TRANSPORTER || carriedTransporterObj.type === rf.PLANE) {
+				// A plane dropped from a sea carrier goes onto a sea stop, otherwise onto land
+				const dropHexObj = model.getHexByID(hexID)
+				if (carriedTransporterObj.type === rf.PLANE && rf.TERR_ACTS_LIKE_WATER.includes(dropHexObj.currentTerrain)) {
+					const vertex = loc.getSeaVertexForNewTransporterFromHexIDandBucketID(hexID, validDropBucketLocations[0][2])
+					finalDropLocationFull = [rf.LOCATION_SEA_VERTEX, hexID, vertex]
+				} else {
+					const vertex = loc.getLandVertexForNewTransporterFromHexIDandBucketID(hexID, validDropBucketLocations[0][2])
+					finalDropLocationFull = [rf.LOCATION_LAND_VERTEX, hexID, vertex]
+				}
 			} else {
 				// Dropping on sea hex
 				if (loc.isBucketLocation(validDropBucketLocations[0])) {

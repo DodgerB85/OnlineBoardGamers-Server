@@ -377,10 +377,12 @@ function handleLandClick() {
 	if (!transporterObj) return
 	// Validate landing using canPlaneLandOnTile on current location
 	if (!model.canPlaneLandOnTile(transporterObj, transporterObj.location)) {
-		rf.doAdminAlrt('Planes can only land on empty land tiles (no buildings, no unattended geese)')
+		rf.doAdminAlrt('Planes can only land on empty tiles (no buildings, no unattended geese)')
 		return
 	}
-	// Exit flight mode - plane lands where it is
+	// Exit flight mode - plane lands where it is. Landing ends its movement, so a
+	// takeoff followed by an immediate land can never be turned into a taxi move.
+	transporterObj.remainingMoves = 0
 	store.context.planeInFlight = false
 	store.context.selectedPlaneMode = rf.MOVE_TAXI
 	context.resetContextAndHighlights()
