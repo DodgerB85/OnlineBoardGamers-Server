@@ -468,8 +468,9 @@ export function getEffectiveMoveParams(transporterObj, isFly) {
 	if (transporterObj.type !== rf.PLANE) return { validMove: stats.validMove, maxMoves: stats.maxMoves, isFly: false }
 	if (isFly) return { validMove: [rf.MOVE_FLY], maxMoves: stats.maxMoves, isFly: true }
 	// TAXI: 1 step over roads (land) or 1 adjacent sea step (sea). Never rivers, never cargo.
+	// MOVE_INTERNAL is free movement inside the tile needed to reach the road's endpoint.
 	const onLand = loc.isLandVertexLocation(transporterObj.location)
-	return { validMove: onLand ? [rf.MOVE_ROAD] : [rf.MOVE_WATER], maxMoves: 1, isFly: false }
+	return { validMove: onLand ? [rf.MOVE_INTERNAL, rf.MOVE_ROAD] : [rf.MOVE_WATER], maxMoves: 1, isFly: false }
 }
 
 // Planes may only pick up goods or attract geese at the start of the movement phase
