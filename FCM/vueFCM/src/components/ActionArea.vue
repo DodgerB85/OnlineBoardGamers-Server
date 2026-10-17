@@ -1,4 +1,5 @@
 <script setup>
+import TurnNudge from "./utils/TurnNudge.vue"
 /** Action area - This is where you interact with the game flow.
  * Confirm actions, end turn, reset turn.
  * Also, it's where you're told what to do next
@@ -44,6 +45,10 @@ watch(
 
 const currentPlayerObj = computed(() => controller.currentPlayerObj())
 const timedOutPlayerIndex = computed(() => (store.gameflow.turnOrder.length > 0 ? store.gameflow.turnOrder[0] : -1))
+// The kickout panel and its buttons act on the timed-out player, not on the
+// viewer: in simul phases personal.pov can still be in the turn order, so
+// currentPlayerObj() would name the viewer while the actions hit turnOrder[0].
+const kickoutTargetObj = computed(() => (timedOutPlayerIndex.value >= 0 ? store.players[timedOutPlayerIndex.value] : currentPlayerObj.value))
 const unionOrganizerPlacementRequired = computed(() => rules.unionOrganizerPlacementRequired(controller.currentPlayerIndex()))
 
 // Second Bailout mod: card choices left in the pool, and whether the current
@@ -74,12 +79,17 @@ function cancelKickout() {
 	personal.kickoutRequired = 0
 }
 
+// Tournament game: no kickout - send the admins a webhook so they can stand in
+function alertAdmins() {
+	IO.alertTourneyAdmins(currentKickoutTarget())
+}
+
 function passKickout() {
 	Bot.passKickout()
 }
 
 function currentKickoutTarget() {
-	return currentPlayerObj.value ? currentPlayerObj.value.name : ""
+	return kickoutTargetObj.value ? kickoutTargetObj.value.name : ""
 }
 function myKickoutVote() {
 	if (personal.pov < 0) return false
@@ -136,7 +146,7 @@ watch(
 		if (personal.pov < 0) return
 		updateSoloKickoutCountdown()
 		if (soloKickoutCountdown.value !== "") {
-			if (personal.kickoutCountdownIntervalTimer != null) clearInterval(personal.kickoutCountdownIntervalTimer)
+			clearInterval(personal.kickoutCountdownIntervalTimer)
 			personal.kickoutCountdownIntervalTimer = setInterval(updateSoloKickoutCountdown, 1000)
 		}
 	},
@@ -179,7 +189,7 @@ const computedNumPays = computed(() => rules.numPayNeeded(controller.currentPlay
 const computedPaysLeft = computed(() => computedNumPays.value - store.context.preMoveData[0][1].length)
 const paidItemsCount = computed(() => store.context.preMoveData[0][1].length)
 const computedMoneyUsed = computed(() => {
-	const unitarySalary = plyr.hasMilestone(controller.currentPlayerIndex(), rf.FIRST_WAITRESS_USED) ? 3 : 5
+	const unitarySalary = plyr.unitarySalary(controller.currentPlayerIndex())
 	return Math.max(computedTotalSalary.value - store.context.preMoveData[0][1].length * unitarySalary, 0)
 })
 const computedNeedFiringMarketers = computed(() => rules.needFiringMarketers(controller.currentPlayerIndex()))
@@ -216,7 +226,6 @@ function localFireEmployee(fireToken) {
 
 function localUnfireEmployee(fireToken) {
 	const idx = store.context.justFired.indexOf(fireToken)
-	if (idx === -1) return
 	const employee = plyr.restoreFiredEmployee(controller.currentPlayerIndex(), fireToken)
 	store.availableEmployees[employee]--
 	store.context.justFired.splice(idx, 1)
@@ -273,9 +282,7 @@ watch(
 )
 
 const filteredBeach = computed(() => {
-	let obj = controller.currentPlayerObj()
-	if (!obj || !obj.beach) return []
-	const beach = obj.beach
+	const beach = controller.currentPlayerObj().beach
 	// Managers are only selectable into a CEO slot
 	return beach.filter((emp) => {
 		if (store.context.selectedEmployeeIndexForRestructuring < controller.currentPlayerObj().ceoSlots) return true
@@ -291,7 +298,6 @@ const ceoEmployees = computed(() => {
 
 const nonCeoEmployees = computed(() => {
 	const player = controller.currentPlayerObj()
-	if (!player) return []
 	// Only slices when employees or ceoSlots actually change
 	return player.employees.slice(player.ceoSlots)
 })
@@ -424,7 +430,7 @@ function skipModuleAndEndTurn() {
 			<template v-if="personal.kickoutRequired > 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER && store.gameflow.turnOrder[0] !== personal.pov">
 				<div v-if="personal.kickoutRequired == 1" id="kickoutDiv">
 					<i18n-t keypath="actionArea.playerUsedAllKickoutTime" tag="div" scope="global">
-						<template #name><b>{{ currentPlayerObj.name }}</b></template>
+						<template #name><b>{{ kickoutTargetObj.name }}</b></template>
 					</i18n-t>
 					<br />
 					<br />
@@ -438,34 +444,47 @@ function skipModuleAndEndTurn() {
 				</div>
 				<div v-else id="kickoutDiv">
 					<br />
-					<template v-if="canKickoutNow()">
+					<!-- Tournament game: the admins stand in for a timed-out player, so alert them -->
+					<template v-if="personal.tournamentGame">
+						<i18n-t keypath="actionArea.playerTimedOut" tag="div" scope="global">
+							<template #name><b>{{ kickoutTargetObj.name }}</b></template>
+						</i18n-t>
+						<br />
+						{{ $t("actionArea.tournamentAlertAdmins") }}
+						<br />
+						<br />
+						<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("actionArea.notNowAllowMoreTime") }}</button></span>
+						<span><button class="actionsLineButton" id="alertAdminsButton" @click="alertAdmins">{{ $t("actionArea.alertAdmins") }}</button></span>
+					</template>
+					<template v-else-if="canKickoutNow()">
 						<template v-if="store.context.action !== rf.ACT_CONFIRM_KICKOUT">
 							<i18n-t keypath="actionArea.playerTimedOut" tag="div" scope="global">
-								<template #name><b>{{ currentPlayerObj.name }}</b></template>
+								<template #name><b>{{ kickoutTargetObj.name }}</b></template>
 							</i18n-t>
 							<br />
 							<i18n-t keypath="actionArea.toKickoutPressConfirm" tag="div" scope="global">
-								<template #name><b>{{ currentPlayerObj.name }}</b></template>
+								<template #name><b>{{ kickoutTargetObj.name }}</b></template>
 							</i18n-t>
 							<br />
 							{{ $t("actionArea.allPlayersCanMoveAgain") }}
 							<br />
 							<br />
 							<i18n-t keypath="actionArea.allowMoreTimeReload" tag="div" scope="global">
-								<template #name><b>{{ currentPlayerObj.name }}</b></template>
+								<template #name><b>{{ kickoutTargetObj.name }}</b></template>
 							</i18n-t>
 							<br />
 
 							<br />
+							<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame && !personal.tutorial" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 							<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("actionArea.notNowAllowMoreTime") }}</button></span>
 							<span v-if="store.gameflow.phase !== rf.PHASE_SETUP_RESTAURANT1 && store.gameflow.phase !== rf.PHASE_SETUP_RESTAURANT2">
-								<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("actionArea.keepName", { name: currentPlayerObj.name }) }}</button>
+								<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("actionArea.keepName", { name: kickoutTargetObj.name }) }}</button>
 							</span>
 							<span><button class="actionsLineButton" id="confirmKickoutButton" @click="store.context.action = rf.ACT_CONFIRM_KICKOUT">{{ $t("actionArea.confirmKickout") }}</button></span>
 						</template>
 						<template v-if="store.context.action === rf.ACT_CONFIRM_KICKOUT">
 							<i18n-t keypath="actionArea.permanentlyRemove" tag="div" scope="global">
-								<template #name><b>{{ currentPlayerObj.name }}</b></template>
+								<template #name><b>{{ kickoutTargetObj.name }}</b></template>
 							</i18n-t>
 							<br />
 							<b>{{ $t("actionArea.cannotBeUndone") }}</b>
@@ -476,20 +495,21 @@ function skipModuleAndEndTurn() {
 							{{ $t("actionArea.gracePeriodNote") }}
 
 							<br />
+							<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame && !personal.tutorial" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 							<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("actionArea.notNowAllowMoreTime") }}</button></span>
 							<span>
-								<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout(timedOutPlayerIndex)">{{ $t("actionArea.permanentlyKickout", { name: currentPlayerObj.name }) }}</button>
+								<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout(timedOutPlayerIndex)">{{ $t("actionArea.permanentlyKickout", { name: kickoutTargetObj.name }) }}</button>
 							</span>
 						</template>
 					</template>
 					<template v-else>
 						<br />
 						<i18n-t keypath="actionArea.playerTimedOut" tag="div" scope="global">
-							<template #name><b>{{ currentPlayerObj.name }}</b></template>
+							<template #name><b>{{ kickoutTargetObj.name }}</b></template>
 						</i18n-t>
 						<br />
 						<i18n-t keypath="actionArea.voteNeededKickout" tag="div" scope="global">
-							<template #name><b>{{ currentPlayerObj.name }}</b></template>
+							<template #name><b>{{ kickoutTargetObj.name }}</b></template>
 						</i18n-t>
 						<br />
 						<br />
@@ -499,18 +519,18 @@ function skipModuleAndEndTurn() {
 						<span v-if="!myKickoutVote()">
 							<template v-if="isLastVoteRequired()">
 								<i18n-t keypath="actionArea.permanentlyRemove" tag="div" scope="global">
-									<template #name><b>{{ currentPlayerObj.name }}</b></template>
+									<template #name><b>{{ kickoutTargetObj.name }}</b></template>
 								</i18n-t>
 								<br />
 								<b>{{ $t("actionArea.cannotBeUndone") }}</b>
 								<br />
 								<br />
 							</template>
-							<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout(timedOutPlayerIndex)">{{ $t("actionArea.voteToKickout", { name: currentPlayerObj.name }) }}</button>
+							<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout(timedOutPlayerIndex)">{{ $t("actionArea.voteToKickout", { name: kickoutTargetObj.name }) }}</button>
 						</span>
 						<span v-else>
 							<i18n-t keypath="actionArea.youHaveVotedKickout" tag="div" scope="global">
-								<template #name><b>{{ currentPlayerObj.name }}</b></template>
+								<template #name><b>{{ kickoutTargetObj.name }}</b></template>
 							</i18n-t>
 							<br />
 							<i18n-t keypath="actionArea.kickDirectlyIn" tag="div" scope="global">
@@ -518,11 +538,12 @@ function skipModuleAndEndTurn() {
 							</i18n-t>
 							<br />
 						</span>
+						<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame && !personal.tutorial" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 						<span>
 							<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("actionArea.notNowAllowMoreTime") }}</button>
 						</span>
 						<span v-if="store.gameflow.phase !== rf.PHASE_SETUP_RESTAURANT1 && store.gameflow.phase !== rf.PHASE_SETUP_RESTAURANT2">
-							<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("actionArea.keepName", { name: currentPlayerObj.name }) }}</button>
+							<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("actionArea.keepName", { name: kickoutTargetObj.name }) }}</button>
 						</span>
 					</template>
 				</div>

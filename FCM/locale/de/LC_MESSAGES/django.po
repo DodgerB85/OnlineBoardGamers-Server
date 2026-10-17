@@ -1,0 +1,1685 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-16 19:49+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\FCM\common.py:230
+msgid "Please Select an Expert Option"
+msgstr "Bitte wählen Sie eine Expertenoption"
+
+#: .\FCM\common.py:248
+msgid "Error: You cannot add yourself"
+msgstr "Fehler: Sie können sich nicht selbst hinzufügen"
+
+#: .\FCM\common.py:390
+msgid "Your Practice game has been started"
+msgstr "Ihr Übungsspiel hat begonnen"
+
+#: .\FCM\common.py:395
+msgid "Your AI game has been started"
+msgstr "Ihr KI-Spiel hat begonnen"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:12
+msgid "China Expansion Help"
+msgstr "Hilfe zur China-Erweiterung"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:13
+#: .\FCM\templates\FCM\coffeeHelp.html:13
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:13
+msgid "FCM Help"
+msgstr "FCM-Hilfe"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:19
+msgid ""
+"These modules are from the Chinese kickstarter (Modian) release from "
+"publisher Yikeguang (一刻馆). Splotter was unaware that these existed before "
+"I contacted them! Therefore you could consider these modules as \"semi-"
+"official\" but unsanctioned by Splotter. <br /> Games with these modules "
+"will therefore be excluded from the stats (except Urban Planning / Urban "
+"Planning Plus). <br /> The rules also don't cover all possiblities. "
+"Therefore, I have made a few judgment calls to tighten up the rules a bit. "
+"In addition, as this content was not designed by Splotter, I'm not sure the "
+"playtesting/balancing was quite as thorough!"
+msgstr "Diese Module stammen aus der chinesischen Kickstarter-Ausgabe "
+"(Modian) des Verlags Yikeguang (一刻馆). Splotter wusste nichts von ihrer "
+"Existenz, bevor ich Kontakt zu ihnen aufgenommen habe! Man könnte diese "
+"Module daher als „halboffiziell“, aber von Splotter nicht sanktioniert "
+"betrachten. <br /> Spiele mit diesen Modulen werden deshalb von den "
+"Statistiken ausgeschlossen (außer Urban Planning / Urban Planning Plus). <br "
+"/> Die Regeln decken auch nicht alle Möglichkeiten ab. Deshalb habe ich "
+"einige Ermessensentscheidungen getroffen, um die Regeln etwas zu straffen. "
+"Da dieser Inhalt außerdem nicht von Splotter entworfen wurde, bin ich mir "
+"nicht sicher, ob das Playtesting/die Balance so gründlich war!"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:31
+msgid "Urban Planning"
+msgstr "Urban Planning"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:32
+#: .\FCM\templates\FCM\FCMchinaHelp.html:57
+#: .\FCM\templates\FCM\FCMchinaHelp.html:84
+#: .\FCM\templates\FCM\FCMchinaHelp.html:129
+#: .\FCM\templates\FCM\FCMchinaHelp.html:171
+#: .\FCM\templates\FCM\FCMchinaHelp.html:214
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:39
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:100
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:159
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:184
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:232
+msgid "Overview"
+msgstr "Überblick"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:34
+msgid ""
+"Random maps can have a huge amount of variance, producing isolated islands "
+"as well as large residential areas. This module allows players to influence "
+"map construction and thus the characteristics of the map to be used."
+msgstr "Zufallskarten können eine enorme Varianz aufweisen: Sie erzeugen "
+"sowohl isolierte Inseln als auch große Wohngebiete. Mit diesem Modul können "
+"Spieler die Kartenkonstruktion beeinflussen und damit den Charakter der "
+"verwendeten Karte."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:42
+msgid ""
+"In turn order, each player may rotate the next tile to be placed, according "
+"to the sequence below. Note you can only rotate the next tile - you cannot "
+"select or change which tile that is."
+msgstr "In Zugreihenfolge darf jeder Spieler das nächste zu platzierende "
+"Plättchen gemäß der untenstehenden Reihenfolge drehen. Beachten Sie, dass "
+"Sie nur das nächste Plättchen drehen können – Sie können nicht auswählen "
+"oder ändern, welches Plättchen das ist."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:47
+msgid ""
+"After all tiles have been placed, turn order will reset to the same order as "
+"when the game started."
+msgstr "Nachdem alle Plättchen platziert wurden, wird die Zugreihenfolge auf "
+"die Reihenfolge vom Spielbeginn zurückgesetzt."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:56
+msgid "Urban Planning Plus"
+msgstr "Urban Planning Plus"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:59
+msgid ""
+"People have asked me in the past about some kind of map tile drafting "
+"option. With the addition of the Urban Planning module, which only allows "
+"players to rotate the next tile, I decided to add this option as well."
+msgstr "Ich wurde in der Vergangenheit nach einer Art Drafting-Option für "
+"Kartenplättchen gefragt. Da nun das Modul Urban Planning hinzugekommen ist, "
+"mit dem Spieler nur das nächste Plättchen drehen können, habe ich "
+"beschlossen, auch diese Option hinzuzufügen."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:67
+msgid ""
+"Same as Urban Planning, except you may now also choose which tile to place, "
+"as well as the rotation."
+msgstr "Wie Urban Planning, außer dass Sie nun zusätzlich zur Drehung auch "
+"wählen können, welches Plättchen platziert wird."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:72
+msgid ""
+"For 6p games then the expansion tiles will be added regardless of whether "
+"New Districts has been selected or not."
+msgstr "Bei Spielen mit 6 Spielern werden die Erweiterungsplättchen "
+"unabhängig davon hinzugefügt, ob New Districts ausgewählt wurde oder nicht."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:77
+msgid "Jazz Musicians"
+msgstr "Jazzmusiker"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:86
+msgid ""
+"Jazz originated in the United States in the late 19th and early 20th "
+"centuries. This moving music caused people to linger longer. Whenever you "
+"have such music in your restaurants, it will cause people to give more "
+"generous tips."
+msgstr "Jazz entstand in den USA im späten 19. und frühen 20. Jahrhundert. "
+"Diese bewegende Musik ließ die Menschen länger verweilen. Wann immer Sie "
+"solche Musik in Ihren Restaurants haben, geben die Leute großzügigere "
+"Trinkgelder."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:94
+msgid ""
+"A Jazz Musician can be trained from a Waitress, and requires a salary. There "
+"are 6 Jazz Musicians in the game."
+msgstr "Ein Jazzmusiker kann aus einer Kellnerin ausgebildet werden und "
+"erfordert ein Gehalt. Im Spiel gibt es 6 Jazzmusiker."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:99
+msgid ""
+"Each Jazz Musician will generate $15 in tips during the Dinnertime phase."
+msgstr "Jeder Jazzmusiker bringt während der Abendessenphase 15 $ an "
+"Trinkgeldern ein."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:104
+msgid ""
+"Jazz Musicians act as a reverse tie-breaker; ie the person with FEWEST "
+"musicians will win ties - so if you have any Jazz Musicians you will lose "
+"ties to anyone with fewer Jazz Musicians."
+msgstr "Jazzmusiker wirken als umgekehrter Tie-Breaker; d. h. die Person mit "
+"den WENIGSTEN Musikern gewinnt Gleichstände – wenn Sie also Jazzmusiker "
+"haben, verlieren Sie Gleichstände gegen jeden mit weniger Jazzmusikern."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:117
+msgid ""
+"As always, employees need to actually be in your structure to count towards "
+"tie breakers."
+msgstr "Wie immer müssen Mitarbeiter tatsächlich in Ihrer Struktur sein, um "
+"für Tie-Breaker zu zählen."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:122
+msgid "Delivery Drivers"
+msgstr "Lieferfahrer"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:131
+msgid ""
+"Takeout! Takeout! Finally we can eat at home. Of course, the emergence of "
+"takeout has made the price war more intense."
+msgstr "Zum Mitnehmen! Zum Mitnehmen! Endlich können wir zu Hause essen. "
+"Natürlich hat das Aufkommen des Außer-Haus-Verkaufs den Preiskampf "
+"verschärft."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:139
+msgid ""
+"The Delivery Driver is a base level employee that can be directly hired, and "
+"requires a salary."
+msgstr "Der Lieferfahrer ist ein Mitarbeiter der Basisebene, der direkt "
+"eingestellt werden kann und ein Gehalt erfordert."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:144
+msgid ""
+"Note that it is not a 1x employee, but you may only ever have one Delivery "
+"Driver in your organisation."
+msgstr "Beachten Sie, dass es sich nicht um einen 1x-Mitarbeiter handelt, "
+"aber Sie dürfen nur jemals einen Lieferfahrer in Ihrem Unternehmen haben."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:149
+msgid ""
+"If a residence has 2 or more demand tokens on it, then any restaurant with a "
+"working Delivery Driver will reduce the distance to 0."
+msgstr "Wenn ein Wohnhaus 2 oder mehr Nachfrageplättchen hat, reduziert jedes "
+"Restaurant mit einem arbeitenden Lieferfahrer die Entfernung auf 0."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:154
+msgid ""
+"If you have a Milestone that reduces distance, and it is more favourable to "
+"ignore the Delivery Driver, then the Delivery Driver won't be used. EG if "
+"you are on the same tile as a house, and have the Ketchup Milestone, your "
+"distance will still count as -1; you won't be penalised by having the "
+"distance increased to 0 if using a Delivery Driver. So any net positive "
+"distance will be reduced to 0."
+msgstr "Wenn Sie einen Meilenstein haben, der die Entfernung verringert, und "
+"es günstiger ist, den Lieferfahrer zu ignorieren, wird der Lieferfahrer "
+"nicht eingesetzt. Bspw. wenn Sie auf demselben Plättchen wie ein Haus sind "
+"und den Ketchup-Meilenstein haben, zählt Ihre Entfernung weiterhin als -1; "
+"Sie werden nicht dadurch benachteiligt, dass die Entfernung bei Verwendung "
+"eines Lieferfahrers auf 0 erhöht wird. Jede positive Netto-Entfernung wird "
+"also auf 0 reduziert."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:159
+msgid "Dumplings"
+msgstr "Knödel"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:173
+msgid "Dumplings are one of China's classic foods."
+msgstr "Knödel gehören zu den klassischen Speisen Chinas."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:181
+msgid ""
+"Marketing Dumplings: You cannot directly market dumplings. Instead, they are "
+"so tasty that ANY marketed item will also add demand for dumplings. "
+"Immediately after a marketing campaign has run, it will run again except the "
+"second time it will add Dumplings demand instead of its original item."
+msgstr "Knödel-Marketing: Sie können Knödel nicht direkt vermarkten. "
+"Stattdessen sind sie so lecker, dass JEDER vermarktete Artikel auch "
+"Nachfrage nach Knödeln erzeugt. Unmittelbar nachdem eine Marketingkampagne "
+"ausgeführt wurde, läuft sie erneut – beim zweiten Mal erzeugt sie jedoch "
+"Nachfrage nach Knödeln statt nach ihrem ursprünglichen Artikel."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:186
+msgid ""
+"The dumpling marketing happens immediately. So if billboards are marketing "
+"item A and item B to the same house, the house will add demand for item A, "
+"then dumpling due billboard A, and then item B. This would normally cause "
+"the maximum demand to be reached, so the dumpling from advertising item B "
+"would only be added if the house has a garden."
+msgstr "Das Knödel-Marketing geschieht sofort. Wenn Plakatwände also Artikel "
+"A und Artikel B beim selben Haus vermarkten, erhält das Haus zunächst "
+"Nachfrage nach Artikel A, dann einen Knödel durch Plakatwand A und dann "
+"Nachfrage nach Artikel B. Normalerweise würde damit die maximale Nachfrage "
+"erreicht, sodass der Knödel aus der Werbung für Artikel B nur hinzugefügt "
+"wird, wenn das Haus einen Garten hat."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:191
+msgid ""
+"Dumplings are produced by Dumpling Cooks and Dumpling Chefs. There are 6 "
+"cooks, each producing.3 dumplings. The chef Is a 1x employee, and will "
+"produce 8 dumplings."
+msgstr "Knödel werden von Knödelköchen und Knödelchefs hergestellt. Es gibt 6 "
+"Köche, die jeweils 3 Knödel produzieren. Der Chef Ist ein 1x-Mitarbeiter und "
+"produziert 8 Knödel."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:196
+msgid ""
+"There is a new Milestone for First Dumpling Sold. After Dinnertime, each "
+"player who has gained this milestone will choose a new action for their CEO. "
+"Their CEO will lose its original action (Hire 1) and replace it with one of "
+"the following: <ul> <li>2x Hire 1 Employee or $5 salary reduction (the same "
+"as a Recruiting Manager)</li> <li>Get 2 training points; you may train one "
+"employee by 2 levels (the same as a Coach)</li> <li>Reduce your base price "
+"by $3 (the same as a permanent Discount Manager.</li> </ul>"
+msgstr "Es gibt einen neuen Meilenstein für den ersten verkauften Knödel. "
+"Nach dem Abendessen wählt jeder Spieler, der diesen Meilenstein erhalten "
+"hat, eine neue Aktion für seinen CEO. Sein CEO verliert seine ursprüngliche "
+"Aktion (1 einstellen) und ersetzt sie durch eine der folgenden: <ul> <li>2x "
+"1 Mitarbeiter einstellen oder 5 $ Gehaltsreduzierung (dasselbe wie ein "
+"Recruiting-Manager)</li> <li>2 Trainingspunkte erhalten; Sie können einen "
+"Mitarbeiter um 2 Stufen ausbilden (dasselbe wie ein Trainer)</li> <li>Ihren "
+"Grundpreis um 3 $ senken (dasselbe wie ein permanenter Rabattmanager.</li> "
+"</ul>"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:207
+msgid "Hawker Marketing"
+msgstr "Hawker-Marketing"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:216
+msgid ""
+"Hawker trucks driving by, with their loud and engaging music, can't help but "
+"attract people's attention to their goods."
+msgstr "Vorbeifahrende Hawker-Trucks mit ihrer lauten, mitreißenden Musik "
+"ziehen die Aufmerksamkeit der Leute unweigerlich auf ihre Waren."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:224
+msgid ""
+"The Hawker Marketeer is a new marketing employee that can be trained from "
+"the Marketing Trainee. The Hawker Marketeer requires a salary. There are 6 "
+"in the game."
+msgstr "Der Hawker Marketeer ist ein neuer Marketing-Mitarbeiter, der aus dem "
+"Marketing-Trainee ausgebildet werden kann. Der Hawker Marketeer erfordert "
+"ein Gehalt. Es gibt 6 im Spiel."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:229
+msgid ""
+"The Hawker Marketeer has a range of 2 and is played in the same way as a "
+"Cart Operator - you need to drive this marketeer out of a restaurant and "
+"along roads up to a range of 2. You can choose campaign number #21 #22 or "
+"#23, and a duration of 1, 2, or 3 turns."
+msgstr "Der Hawker Marketeer hat eine Reichweite von 2 und wird genauso "
+"gespielt wie ein Karrenbetreiber – Sie müssen diesen Vermarkter aus einem "
+"Restaurant heraus und über Straßen bis zu einer Reichweite von 2 fahren. Sie "
+"können die Kampagnennummer #21, #22 oder #23 und eine Dauer von 1, 2 oder 3 "
+"Runden wählen."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:234
+msgid ""
+"When the marketing campaign activates, it will advertise to any residence "
+"directly connected to its route - <b><u>connections through parks or gardens "
+"do not count</u></b>."
+msgstr "Wenn die Marketingkampagne aktiviert wird, wirbt sie bei allen "
+"Wohnhäusern, die direkt mit ihrer Route verbunden sind – <b><u>Verbindungen "
+"durch Parks oder Gärten zählen nicht</u></b>."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:239
+msgid ""
+"This is the only time the precise orientation of new houses actually "
+"matters. Therefore, when using this module, the New Business Developer can "
+"place new houses with the garden at the bottom/left/top/right, rather than "
+"just horizontally or vertically."
+msgstr "Dies ist der einzige Fall, in dem die genaue Ausrichtung neuer Häuser "
+"tatsächlich eine Rolle spielt. Wenn dieses Modul verwendet wird, kann der "
+"Neue Geschäftsentwickler neue Häuser daher mit dem Garten "
+"unten/links/oben/rechts platzieren, statt nur horizontal oder vertikal."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:244
+msgid ""
+"To use a Hawker Marketeer, click the employee as usual. Then you can set a "
+"route, and once you are happy, deploy the marketing campaign using the \"Add "
+"Hawker Truck\" button. You must use all range if possible. If you need to "
+"stop manually because the last tile contains a loop, click the \"Set Hawker "
+"Route\" button again."
+msgstr "Um einen Hawker Marketeer einzusetzen, klicken Sie wie gewohnt auf "
+"den Mitarbeiter. Dann können Sie eine Route festlegen und, sobald Sie "
+"zufrieden sind, die Marketingkampagne über die Schaltfläche „Hawker Truck "
+"hinzufügen“ starten. Sie müssen die volle Reichweite nutzen, wenn möglich. "
+"Wenn Sie manuell anhalten müssen, weil das letzte Plättchen eine Schleife "
+"enthält, klicken Sie erneut auf die Schaltfläche „Hawker-Route festlegen“."
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:249
+msgid ""
+"You can see the truck route by clicking \"Show Route\" in history, or "
+"clicking the marketing token in the hawker marketing area (to the right of "
+"the map)"
+msgstr "Sie können die Truck-Route sehen, indem Sie im Verlauf auf „Route "
+"anzeigen“ klicken oder auf das Marketingplättchen im "
+"Hawker-Marketing-Bereich (rechts neben der Karte) klicken"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:258
+#: .\FCM\templates\FCM\FCMhelp.html:104 .\FCM\templates\FCM\coffeeHelp.html:328
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:249
+msgid "Further Help"
+msgstr "Weitere Hilfe"
+
+#: .\FCM\templates\FCM\FCMchinaHelp.html:260
+#: .\FCM\templates\FCM\FCMhelp.html:106 .\FCM\templates\FCM\coffeeHelp.html:330
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:251
+msgid "For any questions / comments / suggestions, please contact"
+msgstr "Bei Fragen / Kommentaren / Anregungen wenden Sie sich bitte an"
+
+#: .\FCM\templates\FCM\FCMhelp.html:5
+msgid "Food Chain Magnate Help"
+msgstr "Hilfe zu Food Chain Magnate"
+
+#: .\FCM\templates\FCM\FCMhelp.html:8
+msgid "Help"
+msgstr "Hilfe"
+
+#: .\FCM\templates\FCM\FCMhelp.html:12
+msgid "Rules Help"
+msgstr "Regelhilfe"
+
+#: .\FCM\templates\FCM\FCMhelp.html:18
+#, python-format
+msgid ""
+"Food Chain Magnate rules available <a href=\"%(fcm_rules_url)s\">here</a> "
+"<br /> Ketchup Expansion rules available <a "
+"href=\"%(fcm_ketchup_rules_url)s\">here</a> <br /> China Expansion rules "
+"available <a href=\"%(fcm_china_help_url)s\" target=\"_blank\">here</a> <br /"
+"> Fan Expansions rules available <a href=\"%(fcm_fan_help_url)s\" "
+"target=\"_blank\">here</a> <br /> How to play guide example <a "
+"href=\"https://www.myboardgameguides.com/game-strategy/game-specific-"
+"strategy/food-chain-magnate-strategy-guide/\" target=\"_blank\">here</a>"
+msgstr "Regeln für Food Chain Magnate <a href=\"%(fcm_rules_url)s\">hier</a> "
+"<br /> Regeln für die Ketchup-Erweiterung <a "
+"href=\"%(fcm_ketchup_rules_url)s\">hier</a> <br /> Regeln für die "
+"China-Erweiterung <a href=\"%(fcm_china_help_url)s\" "
+"target=\"_blank\">hier</a> <br /> Regeln für die Fan-Erweiterungen <a "
+"href=\"%(fcm_fan_help_url)s\" target=\"_blank\">hier</a> <br /> "
+"Beispiel-Spielanleitung <a "
+"href=\"https://www.myboardgameguides.com/game-strategy/game-specific-strateg"
+"y/food-chain-magnate-strategy-guide/\" target=\"_blank\">hier</a>"
+
+#: .\FCM\templates\FCM\FCMhelp.html:33
+msgid "Game Play"
+msgstr "Spielablauf"
+
+#: .\FCM\templates\FCM\FCMhelp.html:35
+msgid "How exactly does coffee work?"
+msgstr "Wie genau funktioniert Kaffee?"
+
+#: .\FCM\templates\FCM\FCMhelp.html:38
+#, python-format
+msgid ""
+"Please see the dedicated Coffee help page <a href=\"%(the_url)s\">Here</a>"
+msgstr "Siehe die eigene Kaffee-Hilfeseite <a href=\"%(the_url)s\">hier</a>"
+
+#: .\FCM\templates\FCM\FCMhelp.html:42
+msgid "What are the Expert Options?"
+msgstr "Was sind die Expertenoptionen?"
+
+#: .\FCM\templates\FCM\FCMhelp.html:44
+msgid ""
+"Expert options appear in an orange panel. They are meant to allow players to "
+"automate decisions that are obvious choices to make, and thus allow games to "
+"progress a bit faster."
+msgstr "Expertenoptionen erscheinen in einem orangefarbenen Bereich. Sie "
+"sollen Spielern ermöglichen, offensichtliche Entscheidungen zu "
+"automatisieren und so Spiele etwas schneller voranzubringen."
+
+#: .\FCM\templates\FCM\FCMhelp.html:49
+msgid ""
+"You can select your preference for Order Of Business during restructuring. A "
+"note is added in history as turn order is resolved if the decision was "
+"automatic. Of course, it is very possible to select \"Earliest possible\" "
+"and stll end up in last position - this just meant that everyone else had "
+"more open slots or an earlier turn order than you, and also chose to go "
+"early in turn order."
+msgstr "Während der Umstrukturierung können Sie Ihre Präferenz für die "
+"Geschäftsordnung wählen. Wenn die Entscheidung automatisch getroffen wurde, "
+"wird bei der Auflösung der Zugreihenfolge ein Hinweis im Verlauf "
+"hinzugefügt. Natürlich ist es gut möglich, „Frühestmöglich“ zu wählen und "
+"trotzdem auf dem letzten Platz zu landen – das bedeutet nur, dass alle "
+"anderen mehr freie Plätze oder eine frühere Zugreihenfolge als Sie hatten "
+"und ebenfalls früh in der Zugreihenfolge dran sein wollten."
+
+#: .\FCM\templates\FCM\FCMhelp.html:55
+msgid ""
+"You can select to autopay salary even if you don't have enough money, if you "
+"do end up having enough money after dinnertime. Similarly, if you have the "
+"Beer Milestone but no fridge, you can choose to pay in as much food as "
+"possible, and then money. You also have the option of keeping all remaining "
+"food if you have a fridge and end up with less than 10 items."
+msgstr "Sie können auswählen, das Gehalt automatisch zu zahlen, auch wenn Sie "
+"nicht genug Geld haben, falls Sie nach dem Abendessen doch genug Geld haben. "
+"Wenn Sie den Bier-Meilenstein, aber keinen Kühlschrank haben, können Sie "
+"ebenso wählen, mit so vielen Lebensmitteln wie möglich und dann mit Geld zu "
+"zahlen. Sie haben außerdem die Möglichkeit, alle verbleibenden Lebensmittel "
+"zu behalten, wenn Sie einen Kühlschrank haben und mit weniger als 10 "
+"Artikeln dastehen."
+
+#: .\FCM\templates\FCM\FCMhelp.html:61 .\FCM\templates\FCM\FCMhelp.html:83
+#: .\FCM\templates\FCM\FCMhelp.html:86 .\FCM\templates\FCM\FCMhelp.html:93
+msgid "Note:"
+msgstr "Hinweis:"
+
+#: .\FCM\templates\FCM\FCMhelp.html:62
+msgid ""
+"Even if you select an expert option, you still might end up playing that "
+"phase. For example, if you don't have enough money for salary, you will need "
+"to fire someone, and so must play the salary phase. Also, if you end up with "
+"kimchi plus other items, you will be required to play the Cleanup phase. "
+"Game rewinds and player kickouts can also result in phases needing to be "
+"played that you had selected to skip."
+msgstr "Auch wenn Sie eine Expertenoption wählen, kann es sein, dass Sie "
+"diese Phase trotzdem spielen müssen. Wenn Sie beispielsweise nicht genug "
+"Geld für Gehälter haben, müssen Sie jemanden entlassen und deshalb die "
+"Gehaltsphase spielen. Wenn Sie außerdem Kimchi und andere Artikel übrig "
+"haben, müssen Sie die Bereinigungsphase spielen. Auch Zurückspulen und "
+"Kickouts können dazu führen, dass Phasen gespielt werden müssen, die Sie "
+"überspringen wollten."
+
+#: .\FCM\templates\FCM\FCMhelp.html:68
+msgid "Where do the scenarios come from?"
+msgstr "Woher stammen die Szenarien?"
+
+#: .\FCM\templates\FCM\FCMhelp.html:69
+msgid "They are suggested in the Ketchup Expansion manual."
+msgstr "Sie werden im Handbuch der Ketchup-Erweiterung vorgeschlagen."
+
+#: .\FCM\templates\FCM\FCMhelp.html:70
+msgid "What is Sandbox Mode?"
+msgstr "Was ist der Sandbox-Modus?"
+
+#: .\FCM\templates\FCM\FCMhelp.html:72
+msgid ""
+"Sandbox mode is the answer to questions such as \"Can I have an option so "
+"that new MS trainer gives a coach instead of a trainer?\" and \"What if the "
+"1x employees were actually unlimited?\"."
+msgstr "Der Sandbox-Modus ist die Antwort auf Fragen wie „Kann ich eine "
+"Option haben, damit der neue MS-Trainer einen Coach statt eines Trainers "
+"gibt?“ und „Was wäre, wenn die 1x-Mitarbeiter tatsächlich unbegrenzt "
+"wären?“."
+
+#: .\FCM\templates\FCM\FCMhelp.html:78
+msgid ""
+"Sandbox mode unlocks a panel under the player summaries allowing you to add "
+"and remove employees at will on your turn."
+msgstr "Der Sandbox-Modus schaltet einen Bereich unter den Spielerübersichten "
+"frei, in dem Sie in Ihrem Zug nach Belieben Mitarbeiter hinzufügen und "
+"entfernen können."
+
+#: .\FCM\templates\FCM\FCMhelp.html:83
+msgid "You must have 'Aid' turned on to view this."
+msgstr "Sie müssen „Aid“ aktiviert haben, um dies zu sehen."
+
+#: .\FCM\templates\FCM\FCMhelp.html:87
+msgid ""
+"This game will be automatically excluded from stats. There is no record in "
+"History of using the Sandbox panel. There is no built in limit on anyone "
+"doing anything with the Sandbox panel. Try to make it clear in the game "
+"description what you are after if you select this option."
+msgstr "Dieses Spiel wird automatisch von den Statistiken ausgeschlossen. Es "
+"gibt keinen Eintrag im Verlauf über die Verwendung des Sandbox-Bereichs. Es "
+"gibt keine eingebaute Begrenzung dafür, was jemand mit dem Sandbox-Bereich "
+"tun kann. Machen Sie in der Spielbeschreibung möglichst deutlich, was Sie "
+"mit dieser Option bezwecken."
+
+#: .\FCM\templates\FCM\FCMhelp.html:94
+msgid ""
+"Employees gained this way will not necesserily be saved if in the middle of "
+"a simultaneous move (eg choosing reserve cards). But no worries, it's "
+"Sandbox Mode. So just give yourself the employee again. If you gain an "
+"employee this way during restructuring and place the employee in your "
+"structure, then it will be saved."
+msgstr "Auf diese Weise erhaltene Mitarbeiter werden nicht unbedingt "
+"gespeichert, wenn Sie sich mitten in einem gleichzeitigen Zug befinden (z. "
+"B. beim Auswählen von Reservekarten). Aber keine Sorge, es ist der "
+"Sandbox-Modus. Geben Sie sich den Mitarbeiter einfach erneut. Wenn Sie auf "
+"diese Weise während der Umstrukturierung einen Mitarbeiter erhalten und ihn "
+"in Ihrer Struktur platzieren, wird er gespeichert."
+
+#: .\FCM\templates\FCM\FCMhelp.html:99
+msgid "When Can I resign?"
+msgstr "Wann kann ich zurücktreten?"
+
+#: .\FCM\templates\FCM\FCMhelp.html:100
+msgid "You can resign during the \\"
+msgstr "Sie können während der \\"
+
+#: .\FCM\templates\FCM\FCMstats.html:16
+msgid "Food Chain Magnate Stats"
+msgstr "Food Chain Magnate Statistiken"
+
+#: .\FCM\templates\FCM\FCMstats.html:17
+msgid "Back to Main Stats"
+msgstr "Zurück zu den Hauptstatistiken"
+
+#: .\FCM\templates\FCM\FCMstats.html:25
+msgid "Finished games"
+msgstr "Fertige Spiele"
+
+#: .\FCM\templates\FCM\FCMstats.html:29
+msgid "Original MS games"
+msgstr "Spiele mit Original-MS"
+
+#: .\FCM\templates\FCM\FCMstats.html:33
+msgid "Avg turns Original MS"
+msgstr "Ø Runden Original-MS"
+
+#: .\FCM\templates\FCM\FCMstats.html:37
+msgid "New MS games"
+msgstr "Spiele mit Neuen MS"
+
+#: .\FCM\templates\FCM\FCMstats.html:41
+msgid "Avg turns New MS"
+msgstr "Ø Runden Neue MS"
+
+#: .\FCM\templates\FCM\FCMstats.html:45
+msgid ""
+"Any game with a resigned/kicked player is not considered for these stats."
+msgstr "Jedes Spiel mit einem zurückgetretenen/ausgeschiedenen Spieler wird "
+"für diese Statistiken nicht berücksichtigt."
+
+#: .\FCM\templates\FCM\FCMstats.html:48
+msgid ""
+"These are historical stats. They show what has happened in previous games, "
+"but Food Chain Magnate still rewards reading and responding to the current "
+"game state."
+msgstr "Dies sind historische Statistiken. Sie zeigen, was in früheren "
+"Spielen geschehen ist, aber Food Chain Magnate belohnt weiterhin das Lesen "
+"und Reagieren auf den aktuellen Spielzustand."
+
+#: .\FCM\templates\FCM\FCMstats.html:50
+msgid "Module Choices"
+msgstr "Modulauswahl"
+
+#: .\FCM\templates\FCM\FCMstats.html:51
+msgid ""
+"This shows how often a module or option is selected. Original MS vs New MS "
+"can be read from the finished game counts above."
+msgstr "Dies zeigt, wie oft ein Modul oder eine Option ausgewählt wird. "
+"Original-MS vs. Neue MS lässt sich an den fertigen Spielen oben ablesen."
+
+#: .\FCM\templates\FCM\FCMstats.html:340
+msgid "All Players"
+msgstr "Alle Spieler"
+
+#: .\FCM\templates\FCM\FCMstats.html:341
+msgid "2 Player"
+msgstr "2 Spieler"
+
+#: .\FCM\templates\FCM\FCMstats.html:342
+msgid "3 Player"
+msgstr "3 Spieler"
+
+#: .\FCM\templates\FCM\FCMstats.html:343
+msgid "4 Player"
+msgstr "4 Spieler"
+
+#: .\FCM\templates\FCM\FCMstats.html:344
+msgid "5 Player"
+msgstr "5 Spieler"
+
+#: .\FCM\templates\FCM\FCMstats.html:345
+msgid "6 Player"
+msgstr "6 Spieler"
+
+#: .\FCM\templates\FCM\FCMstats.html:351 .\FCM\templates\FCM\FCMstats.html:424
+#: .\FCM\templates\FCM\FCMstats.html:491 .\FCM\templates\FCM\FCMstats.html:556
+#: .\FCM\templates\FCM\FCMstats.html:623 .\FCM\templates\FCM\FCMstats.html:688
+#: .\FCM\templates\FCM\FCMstats.html:755 .\FCM\templates\FCM\FCMstats.html:820
+#: .\FCM\templates\FCM\FCMstats.html:887 .\FCM\templates\FCM\FCMstats.html:952
+#: .\FCM\templates\FCM\FCMstats.html:1019
+#: .\FCM\templates\FCM\FCMstats.html:1084
+msgid "Opening"
+msgstr "Eröffnung"
+
+#: .\FCM\templates\FCM\FCMstats.html:352 .\FCM\templates\FCM\FCMstats.html:425
+#: .\FCM\templates\FCM\FCMstats.html:492 .\FCM\templates\FCM\FCMstats.html:557
+#: .\FCM\templates\FCM\FCMstats.html:624 .\FCM\templates\FCM\FCMstats.html:689
+#: .\FCM\templates\FCM\FCMstats.html:756 .\FCM\templates\FCM\FCMstats.html:821
+#: .\FCM\templates\FCM\FCMstats.html:888 .\FCM\templates\FCM\FCMstats.html:953
+#: .\FCM\templates\FCM\FCMstats.html:1020
+#: .\FCM\templates\FCM\FCMstats.html:1085
+msgid "# Wins"
+msgstr "# Siege"
+
+#: .\FCM\templates\FCM\FCMstats.html:353 .\FCM\templates\FCM\FCMstats.html:426
+#: .\FCM\templates\FCM\FCMstats.html:493 .\FCM\templates\FCM\FCMstats.html:558
+#: .\FCM\templates\FCM\FCMstats.html:625 .\FCM\templates\FCM\FCMstats.html:690
+#: .\FCM\templates\FCM\FCMstats.html:757 .\FCM\templates\FCM\FCMstats.html:822
+#: .\FCM\templates\FCM\FCMstats.html:889 .\FCM\templates\FCM\FCMstats.html:954
+#: .\FCM\templates\FCM\FCMstats.html:1021
+#: .\FCM\templates\FCM\FCMstats.html:1086
+msgid "# Losses"
+msgstr "# Niederlagen"
+
+#: .\FCM\templates\FCM\FCMstats.html:354 .\FCM\templates\FCM\FCMstats.html:427
+#: .\FCM\templates\FCM\FCMstats.html:494 .\FCM\templates\FCM\FCMstats.html:559
+#: .\FCM\templates\FCM\FCMstats.html:626 .\FCM\templates\FCM\FCMstats.html:691
+#: .\FCM\templates\FCM\FCMstats.html:758 .\FCM\templates\FCM\FCMstats.html:823
+#: .\FCM\templates\FCM\FCMstats.html:890 .\FCM\templates\FCM\FCMstats.html:955
+#: .\FCM\templates\FCM\FCMstats.html:1022
+#: .\FCM\templates\FCM\FCMstats.html:1087
+msgid "Win to Loss Ratio"
+msgstr "Siege-zu-Niederlagen-Verhältnis"
+
+#: .\FCM\templates\FCM\FCMstats.html:357 .\FCM\templates\FCM\FCMstats.html:497
+#: .\FCM\templates\FCM\FCMstats.html:629 .\FCM\templates\FCM\FCMstats.html:761
+#: .\FCM\templates\FCM\FCMstats.html:893 .\FCM\templates\FCM\FCMstats.html:1025
+msgid "Marketing Trainee"
+msgstr "Marketing-Trainee"
+
+#: .\FCM\templates\FCM\FCMstats.html:375 .\FCM\templates\FCM\FCMstats.html:511
+#: .\FCM\templates\FCM\FCMstats.html:643 .\FCM\templates\FCM\FCMstats.html:775
+#: .\FCM\templates\FCM\FCMstats.html:907 .\FCM\templates\FCM\FCMstats.html:1039
+msgid "Recruiting Girl"
+msgstr "Rekrutierungsmädchen"
+
+#: .\FCM\templates\FCM\FCMstats.html:393 .\FCM\templates\FCM\FCMstats.html:458
+#: .\FCM\templates\FCM\FCMstats.html:525 .\FCM\templates\FCM\FCMstats.html:590
+#: .\FCM\templates\FCM\FCMstats.html:657 .\FCM\templates\FCM\FCMstats.html:722
+#: .\FCM\templates\FCM\FCMstats.html:789 .\FCM\templates\FCM\FCMstats.html:854
+#: .\FCM\templates\FCM\FCMstats.html:921 .\FCM\templates\FCM\FCMstats.html:986
+#: .\FCM\templates\FCM\FCMstats.html:1053
+#: .\FCM\templates\FCM\FCMstats.html:1118
+msgid "Trainer"
+msgstr "Trainer"
+
+#: .\FCM\templates\FCM\FCMstats.html:407 .\FCM\templates\FCM\FCMstats.html:472
+#: .\FCM\templates\FCM\FCMstats.html:539 .\FCM\templates\FCM\FCMstats.html:604
+#: .\FCM\templates\FCM\FCMstats.html:671 .\FCM\templates\FCM\FCMstats.html:736
+#: .\FCM\templates\FCM\FCMstats.html:803 .\FCM\templates\FCM\FCMstats.html:868
+#: .\FCM\templates\FCM\FCMstats.html:935 .\FCM\templates\FCM\FCMstats.html:1000
+#: .\FCM\templates\FCM\FCMstats.html:1067
+#: .\FCM\templates\FCM\FCMstats.html:1132
+msgid "None of the above"
+msgstr "Nichts davon"
+
+#: .\FCM\templates\FCM\FCMstats.html:430 .\FCM\templates\FCM\FCMstats.html:562
+#: .\FCM\templates\FCM\FCMstats.html:694 .\FCM\templates\FCM\FCMstats.html:826
+#: .\FCM\templates\FCM\FCMstats.html:958 .\FCM\templates\FCM\FCMstats.html:1090
+msgid "First Train AND First Hire 3"
+msgstr "Zuerst trainieren UND zuerst 3 einstellen"
+
+#: .\FCM\templates\FCM\FCMstats.html:444 .\FCM\templates\FCM\FCMstats.html:576
+#: .\FCM\templates\FCM\FCMstats.html:708 .\FCM\templates\FCM\FCMstats.html:840
+#: .\FCM\templates\FCM\FCMstats.html:972 .\FCM\templates\FCM\FCMstats.html:1104
+msgid "First Hire 3 Only"
+msgstr "Nur zuerst 3 einstellen"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:12
+msgid "Coffee Help"
+msgstr "Kaffee-Hilfe"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:24
+#, python-format
+msgid ""
+"Finding the correct coffee route can be quite tricky! First of all, please "
+"read the coffee section of the expansion rules. <br /> Make sure you fully "
+"understand the example and the reasons why each route was chosen. <br /> The "
+"Ketchup Expansion rules are available <a "
+"href=\"%(fcm_ketchup_rules_url)s\">here</a>."
+msgstr "Die richtige Kaffeeroute zu finden, kann ziemlich knifflig sein! "
+"Lesen Sie zunächst den Kaffee-Abschnitt der Erweiterungsregeln. <br /> "
+"Stellen Sie sicher, dass Sie das Beispiel und die Gründe für die Wahl jeder "
+"Route vollständig verstehen. <br /> Die Regeln der Ketchup-Erweiterung "
+"finden Sie <a href=\"%(fcm_ketchup_rules_url)s\">hier</a>."
+
+#: .\FCM\templates\FCM\coffeeHelp.html:35
+msgid "What goes into finding a valid coffee route?"
+msgstr "Was gehört dazu, eine gültige Kaffeeroute zu finden?"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:38
+msgid ""
+"Remember the following: <br /> <li>Players actually need to have coffee in "
+"stock for a sale to be considered</li> <li> A house can travel along any "
+"route to get to the winning restaurant, as long as the <b>tile distance</b> "
+"does not go above the minimum required to get to the restaurant </li> <li> "
+"If the route splits, the house will choose the route that sells the most "
+"coffee <ul> <li> For example, if the route splits and one route sells a "
+"coffee to players A and B, and the other route sells a coffee to player C "
+"only, then the path selling only to player C will be <b>completely ignored</"
+"b> because there is an alternative valid route that sells more coffee, and "
+"the house will take the route that sells the most possible coffee </li> </"
+"ul> </li> <li> If the route splits and each possible split would sell the "
+"<b>same</b> amount of coffee, then <b>no</b> coffee is sold along this split "
+"part of the route <ul> <li> This applies even if each path would sell the "
+"same amount of coffee to the same player. Why? Because that's what the "
+"designer has said! You can think of it as the house arguing about <i>which</"
+"i> of the coffee selling places is better, to the point where they end up "
+"skipping all of them, even if they belong to the same chain. </li> </li> "
+"<li> Consider the example above with one path selling to players A and B, "
+"and the other path only to player C. What would happen if player B had no "
+"coffee? You would now be in the situation where one route woulf sell to "
+"player A and the other route to player C. Both routes would now sell the "
+"same amount of coffe, and so now <b>both</b> routes are skipped. </li>"
+msgstr "Beachten Sie Folgendes: <br /> <li>Spieler müssen tatsächlich Kaffee "
+"auf Lager haben, damit ein Verkauf in Betracht gezogen wird</li> <li> Ein "
+"Haus kann jede Route zum gewinnenden Restaurant nehmen, solange die "
+"<b>Plättchenentfernung</b> nicht über das Minimum hinausgeht, das "
+"erforderlich ist, um zum Restaurant zu gelangen </li> <li> Wenn sich die "
+"Route aufteilt, wählt das Haus die Route, die den meisten Kaffee verkauft "
+"<ul> <li> Wenn sich die Route beispielsweise aufteilt und eine Route einen "
+"Kaffee an die Spieler A und B verkauft, die andere Route hingegen nur an "
+"Spieler C, dann wird der Pfad, der nur an Spieler C verkauft, <b>vollständig "
+"ignoriert</b>, weil es eine alternative gültige Route gibt, die mehr Kaffee "
+"verkauft, und das Haus nimmt die Route, die den meisten Kaffee verkaufen "
+"kann </li> </ul> </li> <li> Wenn sich die Route aufteilt und jede mögliche "
+"Aufteilung die <b>gleiche</b> Menge Kaffee verkaufen würde, dann wird "
+"entlang dieses aufgeteilten Teils der Route <b>kein</b> Kaffee verkauft <ul> "
+"<li> Dies gilt auch dann, wenn jeder Pfad die gleiche Menge Kaffee an "
+"denselben Spieler verkaufen würde. Warum? Weil der Designer das so "
+"entschieden hat! Man kann sich das so vorstellen, dass das Haus darüber "
+"streitet, <i>welcher</i> der Kaffeeverkaufsorte besser ist, bis es "
+"schließlich alle überspringt, selbst wenn sie zur selben Kette gehören. "
+"</li> </li> <li> Betrachten Sie das obige Beispiel mit einem Pfad, der an "
+"die Spieler A und B verkauft, und dem anderen Pfad, der nur an Spieler C "
+"verkauft. Was würde passieren, wenn Spieler B keinen Kaffee hätte? Sie wären "
+"nun in der Situation, dass eine Route an Spieler A und die andere Route an "
+"Spieler C verkaufen würde. Beide Routen würden jetzt die gleiche Menge "
+"Kaffee verkaufen, und daher werden jetzt <b>beide</b> Routen übersprungen. "
+"</li>"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:78
+msgid ""
+"When I click \"More Information\" in the coffee section in \"History\", what "
+"exactly are the non-road highlights?"
+msgstr "Was genau sind die Nicht-Straßen-Hervorhebungen, wenn ich im "
+"Kaffee-Abschnitt unter „Verlauf“ auf „Mehr Informationen“ klicke?"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:81
+msgid ""
+"Restaurants / coffee shops that are highlighted indicate where coffee was "
+"actually sold along the route taken by this house. <br /> Note that the "
+"squares highlighted correspond to where the restaurants / coffee shops were "
+"on this turn, not where they are now if they were moved later. <br /> So if "
+"a non-road square has a highlight but does not contain a restaurant or "
+"coffee shop, then it must have been moved after this turn."
+msgstr "Hervorgehobene Restaurants / Cafés zeigen, wo entlang der von diesem "
+"Haus genommenen Route tatsächlich Kaffee verkauft wurde. <br /> Beachten "
+"Sie, dass die hervorgehobenen Felder angeben, wo sich die Restaurants / "
+"Cafés in dieser Runde befanden, nicht wo sie jetzt sind, falls sie später "
+"verschoben wurden. <br /> Wenn also ein Nicht-Straßen-Feld hervorgehoben "
+"ist, aber kein Restaurant oder Café enthält, muss es nach dieser Runde "
+"verschoben worden sein."
+
+#: .\FCM\templates\FCM\coffeeHelp.html:96
+msgid ""
+"When I click \"More Information\" in the coffee section in \"History\", what "
+"exactly are the road highlights?"
+msgstr "Was genau sind die Straßenhervorhebungen, wenn ich im "
+"Kaffee-Abschnitt unter „Verlauf“ auf „Mehr Informationen“ klicke?"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:99
+msgid ""
+"If there is only one valid coffee route from the house to the restaurant, it "
+"will be shown. <br /> If there are multiple valid routes, the road squares "
+"common to all valid coffee routes will be shown. <br /> This should help you "
+"to work out how the sales occurred. Remember distance is only measured in "
+"map tiles, not road squares. So if the house could travel one tile right and "
+"then one tile down, OR one tile down and then one tile right, AND both "
+"choices would sell the same amount of coffee (which would make both valid "
+"choices), then none of this section will be highlighted. If however only one "
+"of those routes sold coffee, then as both are the same distance, and the "
+"house will always choose the route that sells the most coffee, then both the "
+"route and the location where the coffee sale occurred should have a "
+"highlight. <br /> A route will go all round a tile, if possible, as long as "
+"it stays on the same tile and does not make a U-turn. For example, if the "
+"route includes the triple lemonade tile from the expansion, or the tile with "
+"house 5 on it, then the route will always include all road squares on these "
+"tiles"
+msgstr "Wenn es nur eine gültige Kaffeeroute vom Haus zum Restaurant gibt, "
+"wird sie angezeigt. <br /> Wenn es mehrere gültige Routen gibt, werden die "
+"Straßenfelder angezeigt, die allen gültigen Kaffeerouten gemeinsam sind. <br "
+"/> Dies soll Ihnen helfen, nachzuvollziehen, wie die Verkäufe zustande "
+"kamen. Denken Sie daran, dass die Entfernung nur in Kartenplättchen gemessen "
+"wird, nicht in Straßenfeldern. Wenn das Haus also ein Plättchen nach rechts "
+"und dann eines nach unten fahren könnte ODER eines nach unten und dann eines "
+"nach rechts, UND beide Möglichkeiten würden die gleiche Menge Kaffee "
+"verkaufen (womit beide gültige Möglichkeiten wären), dann wird nichts in "
+"diesem Abschnitt hervorgehoben. Wenn jedoch nur eine dieser Routen Kaffee "
+"verkaufen würde, dann sollten, da beide gleich weit sind und das Haus immer "
+"die Route wählt, die den meisten Kaffee verkauft, sowohl die Route als auch "
+"der Ort des Kaffeeverkaufs hervorgehoben sein. <br /> Eine Route umrundet "
+"ein Plättchen, wenn möglich, vollständig, solange sie auf demselben "
+"Plättchen bleibt und keine Kehrtwende macht. Wenn die Route beispielsweise "
+"das Dreifach-Limonaden-Plättchen aus der Erweiterung oder das Plättchen mit "
+"Haus 5 umfasst, dann umfasst die Route immer alle Straßenfelder auf diesen "
+"Plättchen"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:122
+msgid ""
+"Please consider the following examples to understand better how Coffee "
+"Selling works"
+msgstr "Bitte sehen Sie sich die folgenden Beispiele an, um besser zu "
+"verstehen, wie der Kaffeeverkauf funktioniert"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:124
+msgid ""
+"In the following examples, the building with the lemonade makes a sale. "
+"Assume all players have 6 coffees. <br /> Xango Blues (green colour) makes "
+"the sale, without a drive-thru. Can you work out which locations sell "
+"coffee? <br /> In the answers, the locations that sell are circled in green, "
+"and the locations that don't sell in red. <br /> Common road squares show "
+"the green highlight, and blue lines indicate where there is more than one "
+"possible path."
+msgstr "In den folgenden Beispielen macht das Gebäude mit der Limonade einen "
+"Verkauf. Nehmen Sie an, dass alle Spieler 6 Kaffees haben. <br /> Xango "
+"Blues (grüne Farbe) macht den Verkauf, ohne Drive-thru. Können Sie "
+"herausfinden, welche Orte Kaffee verkaufen? <br /> In den Antworten sind die "
+"Orte, die verkaufen, grün eingekreist, die Orte, die nicht verkaufen, rot. "
+"<br /> Gemeinsame Straßenfelder sind grün hervorgehoben, und blaue Linien "
+"zeigen an, wo es mehr als einen möglichen Pfad gibt."
+
+#: .\FCM\templates\FCM\coffeeHelp.html:135
+msgid "Example 1"
+msgstr "Beispiel 1"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:164
+msgid "Answer 1"
+msgstr "Antwort 1"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:166
+msgid ""
+"One coffee is sold to Gluttony and one to Xango. The house can travel all "
+"the way around the triple lemonade square. It can travel on squares it has "
+"already used, as long as it is not making a U-turn. <b>Coffee selling "
+"locations don't have to be on the same tile as the route, they just have to "
+"be adjacent to the road.</b> House 10 could come out of the house from the "
+"bottom left square or top right square, so this part of the route counts as "
+"\"undecided\", and no coffee sales would occur along here."
+msgstr "Ein Kaffee wird an Gluttony und einer an Xango verkauft. Das Haus "
+"kann das Dreifach-Limonaden-Feld vollständig umrunden. Es darf Felder "
+"befahren, die es bereits benutzt hat, solange es keine Kehrtwende macht. "
+"<b>Kaffeeverkaufsorte müssen nicht auf demselben Plättchen wie die Route "
+"liegen, sie müssen nur an die Straße angrenzen.</b> Haus 10 könnte das Haus "
+"über das Feld unten links oder oben rechts verlassen, daher gilt dieser Teil "
+"der Route als „unentschieden“, und hier würde kein Kaffeeverkauf "
+"stattfinden."
+
+#: .\FCM\templates\FCM\coffeeHelp.html:176
+msgid "Example 2"
+msgstr "Beispiel 2"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:205
+msgid "Answer 2"
+msgstr "Antwort 2"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:207
+msgid ""
+"Santa Maria sells 2 coffees. House 12 will use any route that doesn't "
+"increase tile distance. So they come out onto the road square next to the "
+"overpass and sell to Santa Maria. The red circled coffee shops are on "
+"mutually exclusive valid routes, each of which would sell one coffee. So "
+"both of these coffee shops will be skipped. Note that <b>although there is "
+"no green highlighted road directly adjacent to the Santa Maria coffee shop "
+"in this section, BOTH (all) valid coffee routes must pass adjacent to it, no "
+"matter which route is taken, and so one sale will always occur here as well."
+"</b>"
+msgstr "Santa Maria verkauft 2 Kaffees. Haus 12 nutzt jede Route, die die "
+"Plättchenentfernung nicht erhöht. Es fährt also auf das Straßenfeld neben "
+"der Überführung hinaus und verkauft an Santa Maria. Die rot eingekreisten "
+"Cafés liegen auf sich gegenseitig ausschließenden gültigen Routen, von denen "
+"jede einen Kaffee verkaufen würde. Daher werden beide Cafés übersprungen. "
+"Beachten Sie: <b>Obwohl in diesem Abschnitt keine grün hervorgehobene Straße "
+"direkt an das Café Santa Maria angrenzt, müssen ALLE gültigen Kaffeerouten "
+"daran vorbeiführen, egal welche Route gewählt wird, und daher findet auch "
+"hier immer ein Verkauf statt.</b>"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:220
+msgid "Example 3"
+msgstr "Beispiel 3"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:249
+msgid "Answer 3"
+msgstr "Antwort 3"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:251
+msgid ""
+"One coffee is sold by Santa Maria from the middle right tile. This one is a "
+"bit more complicated! Remember that the \"winning distance\" for the "
+"lemonade sale is 4. So you can never cross more than 4 tile boundaries. "
+"Whichever routes you pick at the start, there are essentially the higher "
+"route and lower route. The higher route would sell to Santa Maria twice and "
+"the lower route to Xango twice. So all of these sales are skipped. "
+"Interestingly, there are no road tiles highlighted anywhere near the green "
+"circled Santa Maria, but <b>every</b> valid route does pass by it. Remember "
+"that a valid route must try to sell as much coffee as possible. So for the "
+"house to exit the centre tile to the bottom, it must first go all the way "
+"around the tile, passing by the Santa Maria coffee shop, before exiting to "
+"the bottom. If the house instead moves onto the right (onto the triple "
+"lemonade tile), then it will travel around the entire tile before exiting to "
+"the bottom, thus also passing this Santa Maria coffee shop. The same will "
+"happen if the house travels along the top and then down onto the triple "
+"lemonade tile. So no matter which valid route the house chooses, it will "
+"<b>always</b> pass by one Santa Maria coffee shop, but never more than 2 of "
+"the other 3 shops, and so these are all skipped. <br /> <br /> Note that "
+"there are technically a lot more valid routes than are shown with the blue "
+"lines; for example you can exit the apartment tile down onto the central "
+"tile from any of the 5 bottom road squares. But in all cases, the outcome is "
+"the same."
+msgstr "Ein Kaffee wird von Santa Maria vom mittleren rechten Plättchen aus "
+"verkauft. Dieser Fall ist etwas komplizierter! Denken Sie daran, dass die "
+"„Gewinnentfernung“ für den Limonadenverkauf 4 beträgt. Sie können also "
+"niemals mehr als 4 Plättchengrenzen überschreiten. Welche Routen Sie am "
+"Anfang auch wählen, es gibt im Wesentlichen die obere Route und die untere "
+"Route. Die obere Route würde zweimal an Santa Maria verkaufen, die untere "
+"zweimal an Xango. Daher werden alle diese Verkäufe übersprungen. "
+"Interessanterweise sind nirgends in der Nähe des grün eingekreisten Santa "
+"Maria Straßenplättchen hervorgehoben, aber <b>jede</b> gültige Route führt "
+"daran vorbei. Denken Sie daran, dass eine gültige Route versuchen muss, so "
+"viel Kaffee wie möglich zu verkaufen. Damit das Haus das mittlere Plättchen "
+"nach unten verlassen kann, muss es zunächst ganz um das Plättchen "
+"herumfahren und dabei am Café Santa Maria vorbeikommen, bevor es nach unten "
+"hinausfährt. Fährt das Haus stattdessen nach rechts (auf das "
+"Dreifach-Limonaden-Plättchen), dann fährt es um das gesamte Plättchen herum, "
+"bevor es nach unten hinausfährt, und passiert so ebenfalls dieses Café Santa "
+"Maria. Dasselbe geschieht, wenn das Haus oben entlang und dann hinunter auf "
+"das Dreifach-Limonaden-Plättchen fährt. Ganz gleich, welche gültige Route "
+"das Haus wählt, es kommt <b>immer</b> an einem Café Santa Maria vorbei, aber "
+"nie an mehr als 2 der anderen 3 Cafés, und daher werden diese alle "
+"übersprungen. <br /> <br /> Beachten Sie, dass es technisch gesehen viel "
+"mehr gültige Routen gibt, als mit den blauen Linien dargestellt; Sie können "
+"das Wohnungsplättchen beispielsweise von jedem der 5 unteren Straßenfelder "
+"nach unten auf das mittlere Plättchen verlassen. In allen Fällen ist das "
+"Ergebnis jedoch dasselbe."
+
+#: .\FCM\templates\FCM\coffeeHelp.html:275
+msgid "Example 4"
+msgstr "Beispiel 4"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:304
+msgid "Answer 4"
+msgstr "Antwort 4"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:306
+msgid ""
+"Siap Faji will sell one coffee. Although both blue routes would each sell "
+"one coffee to Siap Faji, both locations are skipped, as per the designer's "
+"ruling. Think of it as the house arguing about which of the locations is "
+"best (even though they belong to the same chain!) and so both locations are "
+"skipped. Note that if you replaced the green beer location opposite Xango "
+"with a coffee shop, then all routes would now have to pass by this location "
+"in order to be a valid route (because it wouldn't increase the tile "
+"distance), and so that location would also sell one coffee."
+msgstr "Siap Faji verkauft einen Kaffee. Obwohl beide blauen Routen jeweils "
+"einen Kaffee an Siap Faji verkaufen würden, werden beide Orte gemäß der "
+"Entscheidung des Designers übersprungen. Stellen Sie sich vor, das Haus "
+"streitet darüber, welcher der Orte der beste ist (obwohl sie zur selben "
+"Kette gehören!), und daher werden beide Orte übersprungen. Beachten Sie: "
+"Würden Sie den grünen Bier-Ort gegenüber von Xango durch ein Café ersetzen, "
+"müssten nun alle Routen an diesem Ort vorbeiführen, um eine gültige Route zu "
+"sein (weil er die Plättchenentfernung nicht erhöhen würde), und daher würde "
+"auch dieser Ort einen Kaffee verkaufen."
+
+#: .\FCM\templates\FCM\coffeeHelp.html:314
+msgid "I disagree with something on this page?"
+msgstr "Ich bin mit etwas auf dieser Seite nicht einverstanden?"
+
+#: .\FCM\templates\FCM\coffeeHelp.html:316
+msgid ""
+"Coffee is complicated! I had to rewrite the algorithm several times as my "
+"understanding of the finer points of the rules changed as I went through "
+"development. Any things I wasn't certain of I found clarifications from the "
+"game designer on Board Game Geek. I have had a big input from my playtester "
+"as well, ensuring that the rules are strictly followed and any ambiguities "
+"from the rulebook follow the designer's rulings on BGG. <br /> <br /> If you "
+"are unsure, I would strongly urge you to ask in the Board Game Geek forums "
+"about it, and if the answer is different to something on this page, please "
+"contact me."
+msgstr "Kaffee ist kompliziert! Ich musste den Algorithmus mehrmals neu "
+"schreiben, da sich mein Verständnis der Feinheiten der Regeln während der "
+"Entwicklung änderte. Bei allem, bei dem ich mir nicht sicher war, habe ich "
+"Klarstellungen des Spieleautors auf Board Game Geek gefunden. Auch von "
+"meinem Playtester habe ich viel Unterstützung erhalten, um sicherzustellen, "
+"dass die Regeln strikt eingehalten werden und alle Unklarheiten aus dem "
+"Regelbuch den Entscheidungen des Designers auf BGG folgen. <br /> <br /> "
+"Wenn Sie unsicher sind, würde ich Ihnen dringend empfehlen, im Board Game "
+"Geek Forum danach zu fragen, und wenn die Antwort von etwas auf dieser Seite "
+"abweicht, kontaktieren Sie mich bitte."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:12
+msgid "Fan Expansions Help"
+msgstr "Hilfe zu den Fan-Erweiterungen"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:19
+msgid ""
+"These modules are fan-made expansions. They are not official Splotter "
+"Spellen content. <br /> Games with these modules are therefore excluded from "
+"the stats. <br /> Fan modules can be enabled in the options when creating a "
+"new FCM game."
+msgstr "Diese Module sind Fan-Erweiterungen. Sie sind kein offizieller Inhalt "
+"von Splotter Spellen. <br /> Spiele mit diesen Modulen werden daher von den "
+"Statistiken ausgeschlossen. <br /> Fan-Module können beim Erstellen eines "
+"neuen FCM-Spiels in den Optionen aktiviert werden."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:27
+msgid "Fried Chicken"
+msgstr "Fried Chicken"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:41
+msgid ""
+"Fried chicken is a new food born from unhappy customers. When regular demand "
+"goes unserved, frustrated residents start craving fried chicken - and if "
+"nobody delivers, they eventually move out of the neighbourhood. Selling the "
+"very first fried chicken grants a lucrative but risky monopoly."
+msgstr "Fried Chicken ist ein neues Nahrungsmittel, das aus unzufriedenen "
+"Kunden entsteht. Wenn reguläre Nachfrage nicht bedient wird, beginnen "
+"frustrierte Bewohner, sich nach Fried Chicken zu sehnen – und wenn niemand "
+"liefert, ziehen sie schließlich aus dem Viertel weg. Der Verkauf des "
+"allerersten Fried Chicken verschafft ein lukratives, aber riskantes Monopol."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:49
+msgid ""
+"Flipping: At Dinnertime, if none of a house's regular demand can be served "
+"(every restaurant is too far away, sold out, or too expensive), each "
+"unserved regular demand token flips into ownerless demand for Fried Chicken."
+msgstr "Umdrehen: Wenn beim Abendessen keine der regulären Nachfragen eines "
+"Hauses bedient werden kann (jedes Restaurant ist zu weit weg, ausverkauft "
+"oder zu teuer), wird jedes unbediente reguläre Nachfrageplättchen in "
+"herrenlose Nachfrage nach Fried Chicken umgedreht."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:54
+msgid ""
+"Moving out: If flipped Fried Chicken demand is still unserved at its second "
+"Dinnertime, the residents move out. All demand is removed, a SOLD sign is "
+"placed on the house, and it will not accept any marketing for the rest of "
+"the game."
+msgstr "Auszug: Ist die umgedrehte Fried-Chicken-Nachfrage bei ihrem zweiten "
+"Abendessen noch immer unbedient, ziehen die Bewohner aus. Alle Nachfrage "
+"wird entfernt, ein VERKAUFT-Schild wird am Haus platziert, und es nimmt für "
+"den Rest des Spiels kein Marketing mehr an."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:59
+msgid ""
+"Origin of demand: Fried Chicken demand is normally only created by flipping "
+"- marketing employees cannot create it. Fried Chicken is otherwise a normal "
+"food item: it is sold at your normal price, matched by nearest and cheapest "
+"as usual, and may be stored in the fridge."
+msgstr "Herkunft der Nachfrage: Fried-Chicken-Nachfrage entsteht "
+"normalerweise nur durch das Umdrehen – Marketing-Mitarbeiter können sie "
+"nicht erzeugen. Ansonsten ist Fried Chicken ein normales Lebensmittel: Es "
+"wird zu Ihrem normalen Preis verkauft, wie üblich nach nächstgelegenem und "
+"günstigstem Restaurant zugeordnet und kann im Kühlschrank gelagert werden."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:64
+msgid ""
+"Milestone \"First fried chicken sold\": The first player to sell Fried "
+"Chicken gains this Milestone, which grants two permanent perks: 1) the "
+"exclusive right to market Fried Chicken (no other player may ever add it to "
+"a campaign), and 2) a brand premium of +$5 for every Fried Chicken sold. The "
+"premium applies from the sale after the Milestone is earned, so the "
+"milestone-earning sale itself does not get the bonus."
+msgstr "Meilenstein „Erstes verkauftes Fried Chicken“: Der erste Spieler, der "
+"Fried Chicken verkauft, erhält diesen Meilenstein, der zwei dauerhafte "
+"Vorteile gewährt: 1) das exklusive Recht, Fried Chicken zu vermarkten (kein "
+"anderer Spieler darf es jemals einer Kampagne hinzufügen), und 2) eine "
+"Markenprämie von +5 $ für jedes verkaufte Fried Chicken. Die Prämie gilt ab "
+"dem Verkauf nach Erhalt des Meilensteins, der Meilensteinverkauf selbst "
+"erhält den Bonus also nicht."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:69
+msgid ""
+"Strict liability: Fried Chicken marketed by the Milestone player has only "
+"one life. If any marketed Fried Chicken is unserved at Dinnertime, that "
+"house moves out at the very next Dinnertime settlement - before any matching "
+"takes place and with no flip as a buffer. Regular demand gets two lives "
+"(original demand, then flip); marketed Fried Chicken gets just one."
+msgstr "Strenge Haftung: Von dem Meilenstein-Spieler vermarktetes Fried "
+"Chicken hat nur ein Leben. Wenn vermarktetes Fried Chicken beim Abendessen "
+"nicht bedient wird, zieht dieses Haus bei der nächsten Abendessen-Abwicklung "
+"aus – bevor eine Zuordnung stattfindet und ohne Umdrehen als Puffer. "
+"Reguläre Nachfrage hat zwei Leben (ursprüngliche Nachfrage, dann Umdrehen); "
+"vermarktetes Fried Chicken hat nur eines."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:74
+msgid ""
+"Employees: Fried Chicken is produced by the Fried Chicken Cook (3 per turn, "
+"trained from a Kitchen Trainee; there are 6 in the game) and the Fried "
+"Chicken Chef (8 per turn, trained from a Fried Chicken Cook; a 1x employee). "
+"A Kitchen Trainee cannot produce Fried Chicken directly. Salaries and "
+"training follow the standard employee tiers. When the Fry Chefs module is in "
+"use, a Fried Chicken Cook may also be trained into a Fry Chef."
+msgstr "Mitarbeiter: Fried Chicken wird vom Fried-Chicken-Koch (3 pro Runde, "
+"ausgebildet aus einem Küchenpraktikanten; es gibt 6 im Spiel) und dem "
+"Fried-Chicken-Chef (8 pro Runde, ausgebildet aus einem Fried-Chicken-Koch; "
+"ein 1x-Mitarbeiter) produziert. Ein Küchenpraktikant kann Fried Chicken "
+"nicht direkt produzieren. Gehälter und Ausbildung folgen den üblichen "
+"Mitarbeiterstufen. Wenn das Modul Fry Chefs verwendet wird, kann ein "
+"Fried-Chicken-Koch auch zu einem Fry Chef ausgebildet werden."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:79
+msgid ""
+"Rural exemption: The Rural Marketing Area never flips and never moves out."
+msgstr "Ländliche Ausnahme: Das ländliche Marketinggebiet wird niemals "
+"umgedreht und zieht niemals aus."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:88
+msgid "Stadium"
+msgstr "Stadium"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:102
+msgid ""
+"The Stadium is a giant building spanning two map tiles. On game day the "
+"whole city turns into one huge customer: a big crowd with a big appetite for "
+"exactly one food. Games are held every 3 turns and announced well in advance "
+"- stocking up and pricing become a battle for a winner-takes-all jackpot. "
+"Recommended for games with 3 or more players."
+msgstr "Das Stadium ist ein riesiges Gebäude, das sich über zwei "
+"Kartenplättchen erstreckt. Am Spieltag wird die ganze Stadt zu einem "
+"einzigen riesigen Kunden: eine große Menge mit großem Appetit auf genau ein "
+"Lebensmittel. Spiele finden alle 3 Runden statt und werden rechtzeitig "
+"angekündigt – Vorratsaufbau und Preisgestaltung werden zum Kampf um einen "
+"Jackpot, bei dem der Gewinner alles bekommt. Empfohlen für Spiele mit 3 oder "
+"mehr Spielern."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:110
+msgid ""
+"The building: When this module is enabled, the Stadium replaces two adjacent "
+"map tiles at game start, at a random position and orientation, and stays "
+"fixed for the whole game. It is all stadium and surrounding road - no "
+"building lots and no houses, so it produces no regular demand. Its value is "
+"the road network and game day."
+msgstr "Das Gebäude: Wenn dieses Modul aktiviert ist, ersetzt das Stadium zu "
+"Spielbeginn zwei benachbarte Kartenplättchen an einer zufälligen Position "
+"und Ausrichtung und bleibt für das gesamte Spiel unverändert. Es besteht nur "
+"aus Stadion und umgebender Straße – keine Baugrundstücke und keine Häuser, "
+"sodass es keine reguläre Nachfrage erzeugt. Sein Wert sind das Straßennetz "
+"und der Spieltag."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:115
+msgid ""
+"Schedule: Games are played on turns 5, 8, 11, ... - every 3 turns, starting "
+"with turn 5."
+msgstr "Zeitplan: Spiele finden in den Runden 5, 8, 11, ... statt – alle 3 "
+"Runden, beginnend mit Runde 5."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:120
+msgid ""
+"The announcement: At the end of a turn, 2 turns before each game, an "
+"announcement reveals which single food the crowd wants. The food is always "
+"mass-market: pizza or burgers, plus noodles, dumplings or fried chicken if "
+"that module is enabled in the same game - never sushi, never drinks or "
+"kimchi."
+msgstr "Die Ankündigung: Am Ende einer Runde, 2 Runden vor jedem Spiel, "
+"verrät eine Ankündigung, welches einzelne Lebensmittel die Menge möchte. Das "
+"Lebensmittel ist immer Massenware: Pizza oder Burger, plus Nudeln, Knödel "
+"oder Fried Chicken, wenn dieses Modul im selben Spiel aktiviert ist – "
+"niemals Sushi, niemals Getränke oder Kimchi."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:125
+msgid ""
+"Crowd size: 6 units at the first game, 12 at the second, and 16 from the "
+"third game onward."
+msgstr "Größe der Menge: 6 Einheiten beim ersten Spiel, 12 beim zweiten und "
+"16 ab dem dritten Spiel."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:130
+msgid ""
+"Dinnertime on game day: The Stadium (house number 0.1) eats before every "
+"house. Standard matching rules apply: among the restaurants that have the "
+"full amount in stock, the nearest one wins, ties broken by cheapest price. "
+"The winner sells all units in a single sale."
+msgstr "Abendessen am Spieltag: Das Stadium (Hausnummer 0.1) isst vor jedem "
+"Haus. Es gelten die üblichen Zuordnungsregeln: Unter den Restaurants, die "
+"die volle Menge auf Lager haben, gewinnt das nächstgelegene; Gleichstände "
+"werden durch den günstigsten Preis entschieden. Der Gewinner verkauft alle "
+"Einheiten in einem einzigen Verkauf."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:135
+msgid ""
+"One-day event: If no restaurant can supply the full amount, the demand "
+"disappears at Dinnertime - the game is not postponed."
+msgstr "Eintagesereignis: Wenn kein Restaurant die volle Menge liefern kann, "
+"verschwindet die Nachfrage beim Abendessen – das Spiel wird nicht "
+"verschoben."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:140
+msgid ""
+"Isolation: Stadium demand never flips into Fried Chicken and never moves "
+"out. It cannot be targeted by marketing campaigns, and substitution effects "
+"(noodle or sushi replacements, kimchi combos) do not apply. Units sold count "
+"normally towards \"first sold\" milestones."
+msgstr "Isolation: Die Stadium-Nachfrage wird niemals in Fried Chicken "
+"umgedreht und zieht niemals aus. Sie kann nicht Ziel von Marketingkampagnen "
+"sein, und Substitutionseffekte (Nudel- oder Sushi-Ersatz, "
+"Kimchi-Kombinationen) gelten nicht. Verkaufte Einheiten zählen normal für "
+"„Erstes verkauft“-Meilensteine."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:145
+msgid ""
+"Milestone \"First stadium supplier\": The first player to win a stadium game "
+"gains this Milestone. Reward: future announcements reach this player 3 turns "
+"before the game instead of 2 - privately, one turn before everyone else "
+"learns."
+msgstr "Meilenstein „Erster Stadium-Lieferant“: Der erste Spieler, der ein "
+"Stadium-Spiel gewinnt, erhält diesen Meilenstein. Belohnung: Zukünftige "
+"Ankündigungen erreichen diesen Spieler 3 Runden vor dem Spiel statt 2 – "
+"privat, eine Runde bevor alle anderen davon erfahren."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:150
+msgid ""
+"With the Coffee module: For the Stadium's game-day walk (including coffee "
+"bought along the way), the two arena tiles count as a single building - "
+"moving between them never counts as a tile crossing. The walk can lap the "
+"entire ring road, so a stocked coffee shop next to either half's road can "
+"sell. All other customers count the two tiles as normal map tiles."
+msgstr "Mit dem Kaffee-Modul: Beim Rundgang des Stadiums am Spieltag "
+"(einschließlich unterwegs gekauftem Kaffee) zählen die beiden "
+"Stadion-Plättchen als ein einziges Gebäude – eine Bewegung zwischen ihnen "
+"zählt nie als Überschreiten einer Plättchengrenze. Der Rundgang kann die "
+"gesamte Ringstraße umrunden, sodass ein Café mit Kaffee auf Lager neben der "
+"Straße einer der beiden Hälften verkaufen kann. Alle anderen Kunden zählen "
+"die beiden Plättchen als normale Kartenplättchen."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:154
+msgid "Labor Market"
+msgstr "Arbeitsmarkt"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:160
+msgid ""
+"Labor Market turns staffing from private engine-building into a shared "
+"contest. Each company has one Temporary Worker whose value rises as rivals "
+"use theirs; Headhunters turn idle talent on the Beach into both an "
+"opportunity and a liability; and Union Organizers make the largest active "
+"workforces pay for their scale. These pressures overlap: sending more people "
+"to work protects valuable staff but risks attracting a union, while resting "
+"them limits company size but exposes them to competitors. Temporary Workers "
+"offer a third path by producing more actions without adding more workers."
+msgstr "Der Arbeitsmarkt macht die Personalplanung von privatem "
+"Engine-Building zu einem gemeinsamen Wettstreit. Jedes Unternehmen hat eine "
+"Aushilfskraft, deren Wert steigt, wenn Rivalen ihre eigenen einsetzen; "
+"Headhunter machen ungenutztes Talent am Strand zugleich zu einer Chance und "
+"einer Bürde; und Gewerkschaftsorganisatoren lassen die größten aktiven "
+"Belegschaften für ihre Größe zahlen. Diese Belastungen überschneiden sich: "
+"Mehr Leute zur Arbeit zu schicken schützt wertvolle Mitarbeiter, birgt aber "
+"das Risiko, eine Gewerkschaft anzuziehen, während das Ruhenlassen die "
+"Unternehmensgröße begrenzt, aber Konkurrenten aussetzt. Aushilfskräfte "
+"bieten einen dritten Weg, indem sie mehr Aktionen erzeugen, ohne mehr "
+"Arbeiter hinzuzufügen."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:161
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:234
+msgid "Rules"
+msgstr "Regeln"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:163
+msgid ""
+"Temporary Worker: Every player starts with one on their Beach. At the start "
+"of each turn, its action limit is frozen at 1 plus the number of Temporary "
+"Workers removed before that turn. Before hiring, assign each action to "
+"Waitress, Pricing Manager, Recruiting Girl, Trainer, Errand Boy, Marketing "
+"Trainee or Kitchen Trainee. Different actions may copy different employees, "
+"and the same employee may be chosen repeatedly. It is never doubled by Night "
+"Shift, earns no salary and is permanently removed after that player's "
+"Working Day. Unassigned or unused actions are forfeited."
+msgstr "Aushilfskraft: Jeder Spieler beginnt mit einer am Strand. Zu Beginn "
+"jeder Runde wird ihr Aktionslimit auf 1 plus die Anzahl der vor dieser Runde "
+"entfernten Aushilfskräfte eingefroren. Vor dem Einstellen ordnen Sie jede "
+"Aktion einer Kellnerin, einem Preismanager, einem Rekrutierungsmädchen, "
+"einem Trainer, einem Laufburschen, einem Marketing-Trainee oder einem "
+"Küchenpraktikanten zu. Verschiedene Aktionen dürfen verschiedene Mitarbeiter "
+"kopieren, und derselbe Mitarbeiter darf mehrfach gewählt werden. Sie wird "
+"nie durch die Nachtschicht verdoppelt, erhält kein Gehalt und wird nach dem "
+"Arbeitstag dieses Spielers dauerhaft entfernt. Nicht zugewiesene oder "
+"ungenutzte Aktionen verfallen."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:164
+msgid ""
+"Temporary Worker example: Two Temporary Workers had been removed before the "
+"current turn, so every Temporary Worker used this turn receives 3 actions. "
+"You may choose Trainer, Trainer and Recruiting Girl for two training actions "
+"and one recruiting action. A rival using theirs later in the same turn also "
+"receives 3 actions, even after yours has been removed."
+msgstr "Beispiel für Aushilfskräfte: Vor der aktuellen Runde wurden zwei "
+"Aushilfskräfte entfernt, daher erhält jede in dieser Runde eingesetzte "
+"Aushilfskraft 3 Aktionen. Sie können Trainer, Trainer und "
+"Rekrutierungsmädchen wählen, um zwei Trainingsaktionen und eine "
+"Rekrutierungsaktion auszuführen. Ein Rivale, der seine Aushilfskraft später "
+"in derselben Runde einsetzt, erhält ebenfalls 3 Aktionen, auch nachdem Ihre "
+"entfernt wurde."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:165
+msgid ""
+"Temporary campaigns: A Temporary Worker acting as a Marketing Trainee "
+"creates a normal campaign, but no employee card is attached and nothing "
+"returns to the Beach when it expires."
+msgstr "Vorübergehende Kampagnen: Eine Aushilfskraft, die als "
+"Marketing-Trainee fungiert, erstellt eine normale Kampagne, aber es wird "
+"keine Mitarbeiterkarte angehängt und nichts kehrt zum Strand zurück, wenn "
+"sie ausläuft."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:166
+msgid ""
+"Headhunter: Train one level from a Management Trainee. It is a level-2 "
+"salaried employee. Each working Headhunter may take one legal employee from "
+"another player's current Beach. If that employee is still employed at "
+"Payday, pay its normal salary, if any, plus a one-time job-switch salary of "
+"$10 per employee level to the bank. If it is fired before Payday, no job-"
+"switch salary is due. Temporary Workers, Headhunters, Union Organizers and "
+"other non-transferable employees are illegal targets."
+msgstr "Headhunter: Wird um eine Stufe aus einem Management-Trainee "
+"ausgebildet. Es ist ein bezahlter Mitarbeiter der Stufe 2. Jeder arbeitende "
+"Headhunter darf einen zulässigen Mitarbeiter vom aktuellen Strand eines "
+"anderen Spielers nehmen. Wenn dieser Mitarbeiter am Zahltag noch angestellt "
+"ist, zahlen Sie sein normales Gehalt, falls vorhanden, plus ein einmaliges "
+"Wechselgehalt von 10 $ pro Mitarbeiterstufe an die Bank. Wird er vor dem "
+"Zahltag entlassen, ist kein Wechselgehalt fällig. Aushilfskräfte, "
+"Headhunter, Gewerkschaftsorganisatoren und andere nicht übertragbare "
+"Mitarbeiter sind unzulässige Ziele."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:167
+msgid ""
+"Headhunter example: You take a level-4 Senior Vice President from an "
+"opponent's Beach. If you keep it until Payday, you pay its normal $5 salary "
+"plus a one-time $40 job-switch salary to the bank, for $45 total. If you "
+"fire it before Payday, neither payment is due for that employee."
+msgstr "Beispiel für Headhunter: Sie nehmen einen Leitenden Vizepräsidenten "
+"der Stufe 4 vom Strand eines Gegners. Wenn Sie ihn bis zum Zahltag behalten, "
+"zahlen Sie sein normales Gehalt von 5 $ plus ein einmaliges Wechselgehalt "
+"von 40 $ an die Bank, insgesamt 45 $. Wenn Sie ihn vor dem Zahltag "
+"entlassen, ist für diesen Mitarbeiter keine der beiden Zahlungen fällig."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:168
+msgid ""
+"Unique employees and salary milestones: A Headhunter cannot take a unique "
+"employee when the hiring player already owns the same unique employee. The "
+"Headhunter action does not require cash on hand. The First to train someone "
+"milestone reduces the combined normal and job-switch salaries by $15. The "
+"First Trainer Used milestone protects all employees when the company still "
+"cannot pay, following the normal bankruptcy rule. A job-switch salary is "
+"removed after that Payday and is never charged again."
+msgstr "Einzigartige Mitarbeiter und Gehaltsmeilensteine: Ein Headhunter kann "
+"keinen einzigartigen Mitarbeiter nehmen, wenn der einstellende Spieler "
+"denselben einzigartigen Mitarbeiter bereits besitzt. Die Headhunter-Aktion "
+"erfordert kein Bargeld. Der Meilenstein „Zuerst jemanden ausbilden“ senkt "
+"die kombinierten normalen und Wechselgehälter um 15 $. Der Meilenstein "
+"„Erster Trainereinsatz“ schützt alle Mitarbeiter, wenn das Unternehmen "
+"weiterhin nicht zahlen kann, gemäß der üblichen Bankrottregel. Ein "
+"Wechselgehalt entfällt nach diesem Zahltag und wird nie wieder berechnet."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:169
+msgid ""
+"Union Organizer: The game uses one card per player, with inactive cards in "
+"the public supply. After all Working Days, ignore companies with fewer than "
+"5 workers, then give one Organizer to every company tied for the largest "
+"eligible workforce. All other Organizer cards return to the public supply."
+msgstr "Gewerkschaftsorganisator: Das Spiel verwendet eine Karte pro Spieler, "
+"wobei inaktive Karten im allgemeinen Vorrat liegen. Nach allen Arbeitstagen "
+"werden Unternehmen mit weniger als 5 Arbeitern ignoriert; dann erhält jedes "
+"Unternehmen, das bei der größten zulässigen Belegschaft gleichauf liegt, "
+"einen Organisator. Alle anderen Organisator-Karten kommen zurück in den "
+"allgemeinen Vorrat."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:170
+msgid ""
+"Union Organizer example: Companies A, B and C send 6, 6 and 5 employees to "
+"work. All three meet the 5-worker threshold, but only A and B are tied for "
+"the largest workforce, so each receives an Organizer for the next Working "
+"Day; C receives none."
+msgstr "Beispiel für Gewerkschaftsorganisatoren: Die Unternehmen A, B und C "
+"schicken 6, 6 und 5 Mitarbeiter zur Arbeit. Alle drei erreichen die Schwelle "
+"von 5 Arbeitern, aber nur A und B liegen bei der größten Belegschaft "
+"gleichauf, daher erhält jedes für den nächsten Arbeitstag einen Organisator; "
+"C erhält keinen."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:171
+msgid ""
+"Each Union Organizer must occupy one slot directly under the CEO on the next "
+"Working Day, provides no action or subordinate slots, and costs $5 at "
+"Payday. It cannot be hired, trained, fired or headhunted, and it is excluded "
+"from workforce counts. A working Temporary Worker counts as one employee "
+"regardless of its number of actions."
+msgstr "Jeder Gewerkschaftsorganisator muss am nächsten Arbeitstag einen Slot "
+"direkt unter dem CEO besetzen, bietet keine Aktion und keine "
+"Untergebenen-Slots und kostet am Zahltag 5 $. Er kann nicht eingestellt, "
+"ausgebildet, entlassen oder abgeworben werden und wird bei der "
+"Belegschaftszählung nicht berücksichtigt. Eine arbeitende Aushilfskraft "
+"zählt als ein Mitarbeiter, unabhängig von der Anzahl ihrer Aktionen."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:177
+msgid "Second Bailout"
+msgstr "Zweite Rettung"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:186
+msgid ""
+"In the base game the bank only breaks once. With this module the city steps "
+"in the second time: the bank gets a fresh cash injection and every player "
+"receives a free level-2 marketing employee. The game only ends for good on "
+"the third break."
+msgstr "Im Grundspiel geht die Bank nur einmal pleite. Mit diesem Modul "
+"greift die Stadt beim zweiten Mal ein: Die Bank erhält eine frische "
+"Geldspritze und jeder Spieler bekommt einen kostenlosen "
+"Marketing-Mitarbeiter der Stufe 2. Endgültig endet das Spiel erst beim "
+"dritten Bankrott."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:194
+msgid ""
+"First break: unchanged - reserve cards are cashed in (or prices re-picked "
+"with the price-changing reserve cards) exactly as in the base game."
+msgstr "Erster Bankrott: unverändert – Reservekarten werden genau wie im "
+"Grundspiel eingelöst (oder Preise mit den preisverändernden Reservekarten "
+"neu gewählt)."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:199
+msgid ""
+"Second break: the city bails the bank out. The bank immediately receives "
+"$300 per player (e.g. +$600 in a 2-player game, +$1500 with 5 players)."
+msgstr "Zweiter Bankrott: Die Stadt rettet die Bank. Die Bank erhält sofort "
+"300 $ pro Spieler (z. B. +600 $ in einem 2-Spieler-Spiel, +1500 $ bei 5 "
+"Spielern)."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:204
+msgid ""
+"The gift: on the night of the bailout, players pick one free level-2 "
+"marketing employee each, in turn order, first come first served: Campaign "
+"Manager (always), plus Rural Marketeer, Mass Marketeer, Gourmet Food Critic "
+"or Hawker Marketeer if the matching module is enabled in this game. A card "
+"that is sold out in the talent market cannot be picked; if nothing is left "
+"when your turn comes, you get nothing. You may also decline."
+msgstr "Das Geschenk: In der Nacht der Rettung wählt jeder Spieler in "
+"Zugreihenfolge einen kostenlosen Marketing-Mitarbeiter der Stufe 2, wer "
+"zuerst kommt, mahlt zuerst: Kampagnenmanager (immer) sowie ländlicher "
+"Vermarkter, Massenvermarkter, Gourmet-Food-Kritiker oder Hawker Marketeer, "
+"wenn das passende Modul in diesem Spiel aktiviert ist. Eine Karte, die im "
+"Talentmarkt ausverkauft ist, kann nicht gewählt werden; ist nichts mehr "
+"übrig, wenn Sie an der Reihe sind, bekommen Sie nichts. Sie dürfen auch "
+"ablehnen."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:209
+msgid ""
+"The gift is not a hire: it does not trigger \"first to hire 3 employees\" "
+"style milestones. The employee joins your beach and is paid like any other "
+"employee - getting them onto the schedule and affording their salary is your "
+"problem. Module milestones (e.g. \"first Rural Marketeer used\") still "
+"trigger normally the first time you market with them."
+msgstr "Das Geschenk ist keine Einstellung: Es löst keine Meilensteine vom "
+"Typ „zuerst 3 Mitarbeiter einstellen“ aus. Der Mitarbeiter kommt an Ihren "
+"Strand und wird wie jeder andere Mitarbeiter bezahlt – ihn in den Dienstplan "
+"zu bekommen und sein Gehalt aufzubringen, ist Ihr Problem. "
+"Modul-Meilensteine (z. B. „Erster ländlicher Vermarkter im Einsatz“) werden "
+"weiterhin normal ausgelöst, wenn Sie mit ihm zum ersten Mal Marketing "
+"betreiben."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:214
+msgid "Third break: the game ends immediately - there is only one bailout."
+msgstr "Dritter Bankrott: Das Spiel endet sofort – es gibt nur eine Rettung."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:219
+msgid ""
+"Short games are unaffected: the first break already ends them, so the "
+"bailout never happens."
+msgstr "Kurze Spiele sind nicht betroffen: Sie enden bereits beim ersten "
+"Bankrott, die Rettung findet also nie statt."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:228
+msgid "Media Line"
+msgstr "Medienlinie"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:229
+msgid "Telemarketer"
+msgstr "Telemarketer"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:230
+msgid "TV Announcer"
+msgstr "TV-Ansager"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:233
+msgid ""
+"The base game's marketing is paper: billboards, mail, airplanes. This module "
+"adds the airwaves. A Telemarketer calls the houses right next door - no "
+"roads required, one call per house. A TV Announcer mounts antennas on five "
+"nearby roofs and owns the news: one story moves every price in the city by "
+"$5 tomorrow, up or down. Demand is small but surgical - the payoff is one "
+"perfectly stocked jackpot night that can break the bank."
+msgstr "Das Marketing des Grundspiels ist aus Papier: Plakatwände, Post, "
+"Flugzeuge. Dieses Modul ergänzt die Funkwellen. Ein Telemarketer ruft die "
+"Häuser direkt nebenan an – keine Straßen erforderlich, ein Anruf pro Haus. "
+"Ein TV-Ansager montiert Antennen auf fünf Dächern in der Nähe und beherrscht "
+"die Nachrichten: Eine Geschichte bewegt morgen jeden Preis in der Stadt um 5 "
+"$, nach oben oder unten. Die Nachfrage ist klein, aber chirurgisch – der "
+"Lohn ist eine perfekt bevorratete Jackpot-Nacht, die die Bank sprengen kann."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:236
+msgid ""
+"Training chain: Marketing Trainee → Telemarketer (level 2) → TV Announcer "
+"(level 3) → Brand Director. Six of each; cards may be stacked."
+msgstr "Ausbildungskette: Marketing-Trainee → Telemarketer (Stufe 2) → "
+"TV-Ansager (Stufe 3) → Markendirektor. Je sechs Exemplare; Karten dürfen "
+"gestapelt werden."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:237
+msgid ""
+"Telemarketer: places 2x1 phone tokens attached to buildings (not roads) "
+"within one orthogonal step of your restaurant (a cross of 5 tiles). Each "
+"action places up to two tokens - two calls with the same food and duration, "
+"placed together; you may place only one. A token wedged between two houses "
+"reaches both. Duration 1-3 nights. The city has only 6 tokens: at most 6 "
+"calls on the board at once."
+msgstr "Telemarketer: Platziert 2x1-Telefonplättchen, die an Gebäuden (nicht "
+"Straßen) innerhalb eines orthogonalen Schritts von Ihrem Restaurant "
+"angebracht werden (ein Kreuz aus 5 Plättchen). Jede Aktion platziert bis zu "
+"zwei Plättchen – zwei Anrufe mit demselben Lebensmittel und derselben Dauer, "
+"zusammen platziert; Sie dürfen auch nur eines platzieren. Ein Plättchen, das "
+"zwischen zwei Häusern klemmt, erreicht beide. Dauer 1–3 Nächte. Die Stadt "
+"hat nur 6 Plättchen: höchstens 6 Anrufe gleichzeitig auf dem Spielbrett."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:238
+msgid ""
+"TV Announcer: picks exactly 5 houses within 2 steps of your restaurant (a "
+"diamond of 13 tiles) and mounts a rooftop antenna on each. Duration 1-4 "
+"nights. The city has only 2 channels: at most 2 TV campaigns at once; one "
+"player holding both has a monopoly."
+msgstr "TV-Ansager: Wählt genau 5 Häuser innerhalb von 2 Schritten von Ihrem "
+"Restaurant (ein Diamant aus 13 Plättchen) und montiert auf jedem eine "
+"Dachantenne. Dauer 1–4 Nächte. Die Stadt hat nur 2 Kanäle: höchstens 2 "
+"TV-Kampagnen gleichzeitig; ein Spieler, der beide hält, hat ein Monopol."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:239
+msgid ""
+"Headline (TV Announcer only, free, one per working announcer per turn): "
+"tomorrow night every sale in the city pays +$5 (Prime Time) or -$5 (Bad "
+"Press). Stories stack and cancel each other out, clamped to a city-wide "
+"total of +$10 or -$10."
+msgstr "Schlagzeile (nur TV-Ansager, kostenlos, eine pro arbeitendem Ansager "
+"pro Runde): Morgen Abend zahlt jeder Verkauf in der Stadt +5 $ (Prime Time) "
+"oder -5 $ (Bad Press). Geschichten stapeln sich und heben sich gegenseitig "
+"auf, begrenzt auf insgesamt +10 $ oder -10 $ für die ganze Stadt."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:240
+msgid ""
+"Timing: campaigns start pushing demand the turn after placement, like all "
+"campaigns. Houses keep the usual 3-demand cap; the different media push in a "
+"fixed order."
+msgstr "Zeitpunkt: Kampagnen beginnen wie alle Kampagnen in der Runde nach "
+"dem Platzieren Nachfrage zu erzeugen. Häuser behalten die übliche Obergrenze "
+"von 3 Nachfragen; die verschiedenen Medien erzeugen die Nachfrage in einer "
+"festen Reihenfolge."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:241
+msgid "Unserved orders stay on the house and may be fulfilled by anyone."
+msgstr "Unbediente Bestellungen bleiben am Haus und können von jedem erfüllt "
+"werden."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:242
+msgid ""
+"Milestone \"First Telemarketer used\": unlocks a permanent group bonus - at "
+"Dinnertime, if every house of one of your media groups (the 2 phone houses "
+"or the 5 antenna houses) is served entirely by you, earn $10 per house ($20 "
+"per phone group, $50 per TV group; groups settle separately). Requires "
+"purity: no other marketing employees or campaigns of yours may be active "
+"that night."
+msgstr "Meilenstein „Erster Telemarketer im Einsatz“: Schaltet einen "
+"dauerhaften Gruppenbonus frei – wenn beim Abendessen jedes Haus einer Ihrer "
+"Mediengruppen (die 2 Telefonhäuser oder die 5 Antennenhäuser) vollständig "
+"von Ihnen bedient wird, verdienen Sie 10 $ pro Haus (20 $ pro Telefongruppe, "
+"50 $ pro TV-Gruppe; Gruppen werden getrennt abgerechnet). Erfordert "
+"Reinheit: In dieser Nacht dürfen keine anderen Marketing-Mitarbeiter oder "
+"Kampagnen von Ihnen aktiv sein."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:243
+msgid ""
+"Milestone \"First TV Announcer used\": one-time launch bonus - during your "
+"first TV campaign, every antenna house gets 2 demand per night instead of 1."
+msgstr "Meilenstein „Erster TV-Ansager im Einsatz“: Einmaliger Startbonus – "
+"während Ihrer ersten TV-Kampagne erhält jedes Antennenhaus 2 Nachfragen pro "
+"Nacht statt 1."
+
+#: .\FCM\templates\FCM\showFCMgame.html:93
+#: .\FCM\templates\FCM\showFCMgameTutorial.html:49
+msgid "Please enable Javascript to continue."
+msgstr "Bitte aktivieren Sie JavaScript, um fortzufahren."
+
+#: .\FCM\templates\FCM\showFCMgame.html:96
+msgid "Food Chain Magnate is loading........"
+msgstr "Food Chain Magnate wird geladen........"
+
+#: .\FCM\templates\FCM\showFCMgameTutorial.html:16
+#: .\FCM\templates\FCM\showFCMgameTutorial.html:76
+msgid "FCM Tutorial"
+msgstr "FCM-Tutorial"
+
+#: .\FCM\templates\FCM\showFCMgameTutorial.html:52
+msgid "The tutorial is loading........"
+msgstr "Das Tutorial wird geladen........"
+
+#: .\FCM\views.py:437 .\FCM\views.py:459 .\FCM\views.py:1546
+#: .\FCM\views.py:1606
+msgid "Game does not exist"
+msgstr "Spiel existiert nicht"
+
+#: .\FCM\views.py:468 .\FCM\views.py:1548 .\FCM\views.py:1608
+msgid "You are not a player in this game"
+msgstr "Sie sind kein Spieler in diesem Spiel"
+
+#: .\FCM\views.py:1271 .\FCM\views.py:1332
+msgid ""
+"No rewind data. Rewind limit reached. Please play on to generate more rewind "
+"data"
+msgstr "Keine Rückspuldaten. Zurückspullimit erreicht. Bitte spielen Sie "
+"weiter, um weitere Rückspuldaten zu generieren"
+
+#: .\FCM\views.py:1281
+msgid "Permissions missing. Please reload the page and check again"
+msgstr "Berechtigungen fehlen. Bitte laden Sie die Seite neu und prüfen Sie "
+"erneut"
+
+#: .\FCM\views.py:1404
+msgid "Permissions missing"
+msgstr "Berechtigungen fehlen"

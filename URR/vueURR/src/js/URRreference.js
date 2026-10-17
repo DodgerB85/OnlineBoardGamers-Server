@@ -8,6 +8,7 @@
 export const SUPER_USERS = ["BotKickStarter", "admin"]
 export const DEBUG_USERS = []
 export const BOT_NAME = "UrrBot"
+export const KICKOUT_SOLO_DELAY_MS = 2 * 24 * 60 * 60 * 1000
 
 // Mirrors Lobby/sharedFunctions/constants.py SHADOW_PLAYER_NAMES. Practice-game
 // opponents, replaced by the creator's display names on the first page load.

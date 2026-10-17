@@ -12,13 +12,7 @@
   
     <div class="page" id="statsPage">
     
-      {% if messages %}
-        <div class="messages">
-          {% for message in messages %}
-            <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
+      {% include "Lobby/messages.html" %}
       
         <div class="page-header">
           <h1 class="page-title">{% translate "Stats" %}</h1>
@@ -30,6 +24,8 @@
             <a class="button button-sm" href="{% url 'FCM:FCMstats' %}">{% translate "Food Chain Magnate" %}</a>
             <a class="button button-sm" href="{% url 'TGZ:TGZstats' %}">{% translate "The Great Zimbabwe" %}</a>
             <a class="button button-sm" href="{% url 'AQY:AQYstats' %}">{% translate "Antiquity" %}</a>
+            <a class="button button-sm" href="{% url 'IND:INDstats' %}">{% translate "Indonesia" %}</a>
+            <a class="button button-sm" href="{% url 'BUS:BUSstats' %}">{% translate "Bus" %}</a>
           </div>
         </div>
         <div class="card section">

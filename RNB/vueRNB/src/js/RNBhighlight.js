@@ -204,6 +204,7 @@ export function updateAllHighlightsForTransporterMode() {
 	if (rf.PHASE_MOVEMENTS.includes(store.gameflow.phase)) {
 		// Planes: if a mode was already chosen (Taxi/Takeoff), skip the reset and proceed to movement highlights
 		const savedPlaneMode = store.context.selectedPlaneMode
+		const savedPlaneInFlight = store.context.planeInFlight
 		context.resetContextAndHighlights()
 
 		store.context.action = rf.ACT_TM_SELECT_PICKUP_DROP_MOVE
@@ -231,6 +232,8 @@ export function updateAllHighlightsForTransporterMode() {
 		if (isPlane) {
 			store.context.selectedPlaneMode = savedPlaneMode
 			store.context.planeModeSelectionActive = false
+			// Keep a plane in the air while its remaining goods can still be airdropped
+			if (savedPlaneInFlight) store.context.planeInFlight = true
 			// You can load other transporters
 			highlightEligibleTransportersForTransporterPickup(store.context.selectedTransporterIDforTM)
 			// You can load res
@@ -299,6 +302,8 @@ export function updateAllHighlightsForTransporterMode() {
 export function highlightEligibleResourcesForTransporterPickup(transporterID) {
 	const store = useModelStore()
 
+	// Planes & Aeroports: pickup only at the start of the movement phase
+	if (!model.canPlanePickUpNow(model.getTransporterByID(transporterID))) return
 	let resources = loc.getAllResourcesAccessibleToTransporter(transporterID, false)
 
 	for (const res of resources) {
@@ -373,12 +378,9 @@ export function highlightEligibleTransportersForTransporterDrop(transporterID) {
 	let carriedTransporterObj = carriedTransporters[0]
 	let transporterOntransportID = carriedTransporterObj.id
 	let carryingTransporterObj = model.getTransporterByID(transporterID)
-	const location = carryingTransporterObj.location
 	const transporterStats = rf.getTransporterStats(carryingTransporterObj.type)
-	const carriedStats = rf.getTransporterStats(carriedTransporterObj.type)
 	if (carryingTransporterObj.remainingMoves === transporterStats.maxMoves) {
-		const reachable = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(location, false)
-		const validLocations = reachable.filter((loc) => carriedStats.validDrop.includes(loc[0]))
+		const validLocations = map.getValidDropLocationsForCarriedTransporter(carryingTransporterObj, carriedTransporterObj)
 		if (validLocations.length > 0) {
 			context.addTransporterToHighlight(transporterOntransportID)
 		}
@@ -388,9 +390,12 @@ export function highlightEligibleTransportersForTransporterDrop(transporterID) {
 export function highlightEligibleItemsForTransporterDrop(transporterID) {
 	const store = useModelStore()
 	let transporterObj = model.getTransporterByID(transporterID)
-	// You cannot drop at sea UNLESS there is an oil rig
+	// You cannot drop at sea UNLESS there is an oil rig. A plane in flight is the
+	// exception: its goods are dropped on land tiles (see getPossibleDropBuckets...).
 	if (loc.isSeaVertexLocation(transporterObj.location)) {
-		if (!map.hasOilRigOnHexID(transporterObj.location[1])) return
+		if (transporterObj.type === rf.PLANE) {
+			if (!store.context.planeInFlight) return
+		} else if (!map.hasOilRigOnHexID(transporterObj.location[1])) return
 	}
 	let resources = model.resourcesOnTransport(transporterObj.id)
 	let followerResources = model.resourcesFollowingTransporter(transporterID)
@@ -499,6 +504,16 @@ export function highlightEligibleHexAreasForTransporterMove(transporterID) {
 	if (isPlane && isFly) {
 		validMoves = validMoves.filter((l) => model.canPlaneLandOnTile(transporterObj, l))
 	}
+	// Planes & Aeroports: taxiing is one road step on land or one sea-tile step at sea,
+	// never a river/dock, and never with goods aboard.
+	if (isPlane && !isFly) {
+		if (model.transporterCarriesAnything(transporterObj.id)) {
+			validMoves = []
+		} else {
+			const onLand = loc.isLandVertexLocation(transporterObj.location)
+			validMoves = validMoves.filter((l) => (onLand ? loc.isLandVertexLocation(l) : loc.isSeaVertexLocation(l)))
+		}
+	}
 	// Planes & Aeroports: any land tile is a potential airdrop target during a flight
 	if (isPlane && isFly) {
 		store.context.midFlightDropTiles = pathfind.locations.filter(
@@ -515,6 +530,8 @@ export function highlightEligibleTransportersForTransporterPickup(transporterID)
 	store.context.transporterIDsToHighlight.splice(0)
 	const transporterObj = model.getTransporterByID(transporterID)
 
+	// Planes & Aeroports: a plane may never carry another transporter
+	if (transporterObj.type === rf.PLANE) return
 	if (model.transporterCarriesAnything(transporterID)) return
 
 	const otherEmptyTransporters = model.getTransportersByPlayerIndex(controller.currentPlayerIndex()).filter((t) => t.id !== transporterObj.id && !model.transporterCarriesAnything(t.id) && !model.anythingFollowingTransporter(t.id))
@@ -526,6 +543,8 @@ export function highlightEligibleTransportersForTransporterPickup(transporterID)
 export function highlightEligibleResourcesOnOtherTransporters(transporterID) {
 	const store = useModelStore()
 	let transporterObj = model.getTransporterByID(transporterID)
+	// Planes & Aeroports: stealing is a pickup - only at the start of the movement phase
+	if (!model.canPlanePickUpNow(transporterObj)) return
 	let eligibleLocations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(transporterObj.location, false)
 	// DOCK HACK
 	eligibleLocations = loc.addDockedOffsetsToLocations(eligibleLocations)

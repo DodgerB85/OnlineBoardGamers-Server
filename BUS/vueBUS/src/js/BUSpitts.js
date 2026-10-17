@@ -7,8 +7,7 @@ import { useModelStore } from "../stores/BUSstore.js"
 // 0..99 = junction the designer is on
 // 100..499 = their junction plus 100 (has attended Splotter Con)
 // 500+ = parked on a building (or on their convention-centre spot), plus 100 if they have attended;
-//        returned to the base value at round end like a delivered passenger; a designer parked on
-//        their convention spot stays there instead
+//        restored to the base value at round end like a delivered passenger
 
 export function getDesignerStatusJunction(status) {
 	if (status < 0 || status >= rf.DESIGNER_ON_BUILDING_FLAG) return -1
@@ -16,8 +15,8 @@ export function getDesignerStatusJunction(status) {
 }
 
 // The junction a designer can be transported from. While parked (500+, e.g. on a building or the
-// convention-centre spot) a designer cannot be transported at all; an attended designer standing on
-// the convention junction (17) is transported from there
+// convention-centre spot) a designer cannot be transported at all; an attended designer who has
+// returned to the convention junction (17) at round end is transported from there
 export function getDesignerTransportJunction(status) {
 	if (status < 0 || status >= rf.DESIGNER_ON_BUILDING_FLAG) return -1
 	if (status >= rf.DESIGNER_CON_FLAG) return rf.PITTS_CONVENTION_JUNCTION
@@ -50,15 +49,21 @@ export function designerArrivedThisRound() {
 // Was the specific designer placed at the Airport this round?
 // Used for the PITTS 2-point bonus: delivering a designer to the Convention in the
 // same round they arrived at the Airport scores 2 points instead of 1.
-export function designerPlacedAtAirportThisRound(designerIdx) {
+// fromIdx is the last history index to inspect; it defaults to the end of history (live play).
+// The replay passes the entry it is replaying, otherwise it would walk straight into a later
+// round boundary and never see this round's placement.
+export function designerPlacedAtAirportThisRound(designerIdx, fromIdx) {
 	const store = useModelStore()
 	// Check in-progress history (current player's turn, not yet saved)
+	// A placement entry is [junction, designerIdx]; Vrrooomm entries are longer and would
+	// otherwise be mistaken for one when their junction number matches a designer index.
 	for (let i = 0; i < store.context.historyObj.length; i++) {
 		const entry = store.context.historyObj[i]
-		if (Array.isArray(entry) && entry[1] === designerIdx) return true
+		if (Array.isArray(entry) && entry.length === 2 && entry[1] === designerIdx) return true
 	}
 	// Walk backwards through saved history, stopping at the round boundary
-	for (let i = store.history.length - 1; i >= 0; i--) {
+	const startIdx = fromIdx === undefined ? store.history.length - 1 : fromIdx
+	for (let i = startIdx; i >= 0; i--) {
 		const entry = store.history[i]
 		if (entry[0] === rf.HIST_NEW_TURN) break
 		if (entry[0] === rf.HIST_ADD_PAX && Array.isArray(entry[3])) {

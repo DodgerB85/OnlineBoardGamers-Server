@@ -1,10 +1,11 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+    <meta name="viewport" content="width=1400, interactive-widget=resizes-content" />
     <link rel="icon" type="image/png" href="{% static 'Lobby/favicons/favicon-96x96.png' %}" />
     <meta name="title" content="Online Board Gamers - UR: 1830 BC">
     <meta name="description" content="Play Splotter's UR: 1830 BC online for free with others.">
@@ -14,23 +15,51 @@
     <style>
       body {
         margin: 0px !important;
-        background-color: #e9e2d2;
+        background-color: #d4eafd;
         font-family: Arial, sans-serif;
       }
       #app {
         position: relative;
         width: 100%;
-        height: 100vh;
+        min-height: 100vh;
       }
       #loadingText {
         position: absolute;
-        top: 50%;
+        top: 0;
         left: 50%;
-        transform: translate(-50%, -50%);
+        transform: translateX(-50%);
+        margin-top: 20px;
         font-size: 40px;
         text-align: center;
         padding: 0 16px;
         box-sizing: border-box;
+        z-index: 10;
+      }
+      /* The four terrains bounce in turn while the game loads. */
+      #loadingContainer {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        align-items: flex-end;
+        gap: 18px;
+      }
+      .terrainIcon {
+        height: 64px;
+        width: auto;
+        animation: terrainBounce 1.2s infinite ease-in-out;
+      }
+      .terrainIcon:nth-child(2) { animation-delay: 0.12s; }
+      .terrainIcon:nth-child(3) { animation-delay: 0.24s; }
+      .terrainIcon:nth-child(4) { animation-delay: 0.36s; }
+      @keyframes terrainBounce {
+        0%, 60%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-28px); }
+      }
+      @media (max-width: 600px) {
+        #loadingContainer { gap: 10px; }
+        .terrainIcon { height: 44px; }
       }
     </style>
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
@@ -47,8 +76,15 @@
       <strong>Please enable Javascript to continue.</strong>
     </noscript>
     <div id="app">
-      <div id="loadingText">UR: 1830 BC is loading........</div>
+      <div id="loadingText">{% translate "UR: 1830 BC is loading........" %}</div>
+      <div id="loadingContainer">
+        <img class="terrainIcon" src="{% static 'URR/images/terrain-hills.png' %}" alt="" />
+        <img class="terrainIcon" src="{% static 'URR/images/terrain-forest.png' %}" alt="" />
+        <img class="terrainIcon" src="{% static 'URR/images/terrain-savannah.png' %}" alt="" />
+        <img class="terrainIcon" src="{% static 'URR/images/terrain-desert.png' %}" alt="" />
+      </div>
     </div>
+  <div hidden>{% csrf_token %}</div>
   </body>
   <script>
     var initData = {};
@@ -60,6 +96,7 @@
     initData.startingOptions = {{ startingOptions|safe }};
     initData.KickoutFlexiDataArray = {{ KickoutFlexiDataArray|safe }};
     initData.playerNames = {{ allPlayerListBySeat|safe }};
+    initData.missingPlayers = {{ missingPlayers|safe }};
     initData.currentPlayers = {{ currentPlayers|safe }};
     initData.statsExcludeVotesData = {{ statsExcludeVotesData|safe }};
     initData.deleteVotesData = {{ deleteVotesData|safe }};

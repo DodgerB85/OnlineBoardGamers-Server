@@ -88,6 +88,10 @@ const totalBoardNeeds = computed(() => {
 	for (const need of store.needs) {
 		for (const n of need.needs) sums[n[0]]++
 	}
+	// Stadium mod: game-day demand only lives inside doDinnerTime's run, so
+	// derive it from the announcement (same gate as the map arena token)
+	const stadiumDemand = rules.stadiumGameDayDemand()
+	if (stadiumDemand) sums[stadiumDemand.food] += stadiumDemand.units
 	return foodSumGoods(sums)
 })
 
@@ -102,6 +106,15 @@ function buildDiscount(playerIndex, player) {
 	let minPrice = rules.basePrice()
 	let maxPrice = rules.basePrice()
 	let price = plyr.playersPrice(playerIndex)
+
+	// Media Line: tonight's headline shifts every sale price - show what dinner
+	// will actually pay, not the raw base price
+	const headline = rules.giveHeadlineTotal()
+	if (headline !== 0) {
+		price += headline
+		minPrice += headline
+		maxPrice += headline
+	}
 
 	if (player.ceoAction === rf.CEO_ACTION_PRICE_MINUS_3) {
 		minPrice -= 3
@@ -162,7 +175,7 @@ function buildMarketers(playerIndex, player) {
 			continue
 		}
 		const campaignObj = store.campaigns.find((obj) => obj.number === m.campaign)
-		const entry = { campaign: m.campaign, infinite: campaignObj.duration === 9, goods: [] }
+		const entry = { campaign: rules.campaignSortKey(m.campaign), infinite: campaignObj.duration === 9, goods: [] }
 		if (campaignObj.duration === 9) {
 			entry.goods.push({ good: campaignObj.good, copies: 1 })
 			if (plyr.hasMilestone(playerIndex, rf.FIRST_RADIO_CAMPAIGN) && rf.MARKETING_CAMPAIGNS[campaignObj.number].type === rf.RADIO) {
@@ -289,9 +302,9 @@ function buildProduction(playerIndex, player) {
 /* ---------------- Gourmet Food Critics ---------------- */
 const gourmetUsed = computed(() => store.startingOptions.gourmet)
 
-const gfcCampaigns = computed(() => {
-	return store.campaigns
-		.filter((c) => rf.MARKETING_CAMPAIGNS[c.number]?.type === rf.GOURMET_GUIDE)
+const campaignsOfType = (type) =>
+	store.campaigns
+		.filter((c) => rf.MARKETING_CAMPAIGNS[c.number]?.type === type)
 		.map((c) => ({
 			number: c.number,
 			good: c.good,
@@ -299,22 +312,12 @@ const gfcCampaigns = computed(() => {
 			campaignImg: view.getImage("campaign_" + c.number),
 			foodImg: view.getImage("item_" + c.good),
 		}))
-})
+const gfcCampaigns = computed(() => campaignsOfType(rf.GOURMET_GUIDE))
 
 /* ---------------- Hawker Trucks ---------------- */
 const useHawkerTrucks = computed(() => store.startingOptions.hawkers)
 
-const hawkerCampaigns = computed(() => {
-	return store.campaigns
-		.filter((c) => rf.MARKETING_CAMPAIGNS[c.number]?.type === rf.HAWKER_TRUCK)
-		.map((c) => ({
-			number: c.number,
-			good: c.good,
-			duration: c.duration,
-			campaignImg: view.getImage("campaign_" + c.number),
-			foodImg: view.getImage("item_" + c.good),
-		}))
-})
+const hawkerCampaigns = computed(() => campaignsOfType(rf.HAWKER_TRUCK))
 
 function showHawkerRoute(campaignNumber) {
 	// Toggle off if already showing this route
@@ -349,11 +352,27 @@ const useStadium = computed(() => store.startingOptions.stadium)
 const stadiumAnnouncement = computed(() => {
 	const a = store.stadium.announcement
 	if (a === null) return null
-	const gameTurn = 5 + store.stadium.gamesPlayed * 3
+	const gameTurn = rules.stadiumGameTurn(store.stadium.gamesPlayed)
 	let lead = 2
 	if (personal.pov >= 0 && plyr.hasMilestone(personal.pov, rf.FIRST_STADIUM_SOLD)) lead = 3
 	if (store.gameflow.turn < gameTurn - lead + 1) return null
 	return { turn: gameTurn, units: a.units, foodImg: view.getImage("item_" + a.food) }
+})
+
+/* ---------------- Media Line ---------------- */
+const useMediaLine = computed(() => store.startingOptions.mediaLine)
+
+// Public headline board: what shifts every price at tonight's dinner (published
+// last working day, city total clamped to +/-10) plus today's publications.
+const headlineBoard = computed(() => {
+	const tonight = rules.giveHeadlineTotal()
+	const today = store.mediaLine.headlines.filter((h) => h.turn === store.gameflow.turn)
+	if (tonight === 0 && today.length === 0) return null
+	return {
+		hasEffect: tonight !== 0,
+		tonightStr: (tonight > 0 ? "+" : "") + tonight,
+		today: today.map((h) => ({ up: h.value > 0, img: view.getImage(h.value > 0 ? "headline_prime" : "headline_press") })),
+	}
 })
 
 /* ---------------- Rural Marketing Area ---------------- */
@@ -377,8 +396,8 @@ const rmaCampaigns = computed(() => {
 		.filter((c) => rf.MARKETING_CAMPAIGNS[c.number]?.type === rf.GIANT_BILLBOARD)
 		.map((c) => {
 			const idx = c.number - 21
-			const bb = GIANT_BILLBOARD_COORDS[idx] || [0, 0]
-			const bi = GIANT_BILLBOARD_ITEM_COORDS[idx] || [0, 0]
+			const bb = GIANT_BILLBOARD_COORDS[idx]
+			const bi = GIANT_BILLBOARD_ITEM_COORDS[idx]
 			let itemLeft = bi[0]
 			if (c.good === rf.BEER) itemLeft += 11
 			if (c.good === rf.COKE) itemLeft += 9
@@ -410,7 +429,7 @@ const RMA_DEMAND_COORDS = [
 
 const rmaDemands = computed(() => {
 	const rmaNeed = store.needs.find((n) => n.number === rf.RURAL_MARKETING_AREA)
-	if (!rmaNeed || !rmaNeed.needs) return []
+	if (!rmaNeed) return []
 
 	const combined = [0, 0, 0, 0, 0, 0]
 	for (const [good] of rmaNeed.needs) combined[good === rf.DUMPLING ? 5 : good]++
@@ -656,6 +675,19 @@ const playerRows = computed(() => {
 			<div class="stadiumAnnouncement">
 				{{ $t("assistance.stadiumGame", { turn: stadiumAnnouncement.turn, units: stadiumAnnouncement.units }) }}
 				<img class="stadiumItemImg" :src="stadiumAnnouncement.foodImg" />
+			</div>
+		</div>
+
+		<!-- MEDIA LINE -->
+		<div id="headlineBoardDisplay" v-if="useMediaLine && headlineBoard !== null">
+			<strong>{{ $t("assistance.headlineTitle") }}</strong>
+			<div class="headlineAnnouncement">
+				<template v-if="!headlineBoard.hasEffect">{{ $t("assistance.headlineNoEffect") }}</template>
+				<template v-else>{{ $t("assistance.headlineTonight", { amount: headlineBoard.tonightStr }) }}</template>
+			</div>
+			<div v-if="headlineBoard.today.length > 0" class="headlineToday">
+				{{ $t("assistance.headlineToday") }}
+				<img v-for="(h, i) in headlineBoard.today" :key="'hl' + i" class="headlineImg" :src="h.img" alt="" />
 			</div>
 		</div>
 
@@ -940,6 +972,21 @@ const playerRows = computed(() => {
 	vertical-align: bottom;
 }
 
+/* Media Line headlines */
+#headlineBoardDisplay {
+	width: 392px;
+	border: #000 1px solid;
+	margin: 0 auto;
+	margin-top: 5px;
+	padding: 3px;
+	text-align: left;
+}
+
+.headlineImg {
+	height: 22px;
+	vertical-align: bottom;
+}
+
 /* Hawker Trucks */
 #hawkerMarketerActiveDisplay {
 	width: 392px;
@@ -1021,16 +1068,6 @@ const playerRows = computed(() => {
 
 .fixedCampaign img.campaign.w2 {
 	width: 80px;
-}
-
-.fixedCampaign div.inner {
-	position: absolute;
-	bottom: 0;
-	width: 100%;
-	height: 40px;
-	line-height: 40px;
-	color: #fff;
-	font-size: 20px;
 }
 
 .fixedCampaign div.innerGFM {

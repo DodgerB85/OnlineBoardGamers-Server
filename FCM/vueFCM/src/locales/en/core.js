@@ -261,6 +261,14 @@ milestones: {
   firstStadiumSold: "First stadium supplier",
   firstStadiumSoldTitle: "First stadium supplier",
   firstStadiumSoldDesc: "Stadium announcements arrive 3 turns ahead",
+
+  firstTelemarketerUsed: "First Telemarketer used",
+  firstTelemarketerUsedTitle: "First Telemarketer used",
+  firstTelemarketerUsedDesc: "Sell every house you marketed by phone/TV: +$10 each; groups settle separately; void if you ran other campaigns tonight",
+
+  firstTvAnnouncerUsed: "First TV Announcer used",
+  firstTvAnnouncerUsedTitle: "First TV Announcer used",
+  firstTvAnnouncerUsedDesc: "First TV campaign: 2 demand per antenna house per night",
 },
 
 // Employees
@@ -438,7 +446,13 @@ employees: {
   headhunter: "Headhunter",
   headhunterDesc: "Take 1 legal employee from an opponent's Beach. If kept, pay a one-time $10 per level at Payday.",
   unionOrganizer: "Union Organizer",
-  unionOrganizerDesc: "5+ workers: each largest company gets one. CEO-direct slot; no action; $5 salary."
+  unionOrganizerDesc: "5+ workers: each largest company gets one. CEO-direct slot; no action; $5 salary.",
+
+  telemarketer: "Telemarketer",
+  telemarketerDesc: "Place phone tokens on empty ground in the 5-tile cross around a restaurant, no roads needed",
+
+  tvAnnouncer: "TV Announcer",
+  tvAnnouncerDesc: "Pick 5 houses in the 13-tile diamond around a restaurant and publish one headline per turn"
 },
 
 laborMarket: {

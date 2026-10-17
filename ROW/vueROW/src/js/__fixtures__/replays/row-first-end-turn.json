@@ -1,0 +1,2145 @@
+
+{
+    "version": 1,
+    "game": "row",
+    "edition": "FIRST",
+    "initialState": {
+        "edition": "FIRST",
+        "mode": "ORIGINAL",
+        "railsToTheNorth": false,
+        "players": [
+            {
+                "name": "Player 1",
+                "color": "RED",
+                "type": "HUMAN"
+            },
+            {
+                "name": "Player 2",
+                "color": "BLUE",
+                "type": "HUMAN"
+            }
+        ],
+        "originalPlayerOrder": [
+            "Player 1",
+            "Player 2"
+        ],
+        "playerOrder": [
+            "Player 1",
+            "Player 2"
+        ],
+        "playerStates": {
+            "Player 1": {
+                "drawStack": [
+                    {
+                        "type": "JERSEY",
+                        "points": 0,
+                        "value": 1
+                    },
+                    {
+                        "type": "DUTCH_BELT",
+                        "points": 0,
+                        "value": 2
+                    },
+                    {
+                        "type": "BLACK_ANGUS",
+                        "points": 0,
+                        "value": 2
+                    },
+                    {
+                        "type": "BLACK_ANGUS",
+                        "points": 0,
+                        "value": 2
+                    },
+                    {
+                        "type": "JERSEY",
+                        "points": 0,
+                        "value": 1
+                    },
+                    {
+                        "type": "BLACK_ANGUS",
+                        "points": 0,
+                        "value": 2
+                    },
+                    {
+                        "type": "JERSEY",
+                        "points": 0,
+                        "value": 1
+                    },
+                    {
+                        "type": "DUTCH_BELT",
+                        "points": 0,
+                        "value": 2
+                    },
+                    {
+                        "type": "GUERNSEY",
+                        "points": 0,
+                        "value": 2
+                    },
+                    {
+                        "type": "DUTCH_BELT",
+                        "points": 0,
+                        "value": 2
+                    }
+                ],
+                "hand": [
+                    {
+                        "type": "JERSEY",
+                        "points": 0,
+                        "value": 1
+                    },
+                    {
+                        "type": "JERSEY",
+                        "points": 0,
+                        "value": 1
+                    },
+                    {
+                        "type": "GUERNSEY",
+                        "points": 0,
+                        "value": 2
+                    },
+                    {
+                        "type": "GUERNSEY",
+                        "points": 0,
+                        "value": 2
+                    }
+                ],
+                "discardPile": [
+                ],
+                "workers": {
+                    "COWBOY": 1,
+                    "CRAFTSMAN": 1,
+                    "ENGINEER": 1
+                },
+                "buildings": [
+                    "1a",
+                    "6a",
+                    "5a",
+                    "4a",
+                    "2a",
+                    "9a",
+                    "8a",
+                    "10a",
+                    "7a",
+                    "3a"
+                ],
+                "unlocked": {
+                    "AUX_GAIN_DOLLAR": 1,
+                    "AUX_DRAW_CARD_TO_DISCARD_CARD": 1,
+                    "AUX_DISCARD_CATTLE_CARD_TO_PLACE_BRANCHLET": 1
+                },
+                "objectives": [
+                    "START_34B"
+                ],
+                "stationMasters": [
+                ],
+                "teepees": [
+                ],
+                "hazards": [
+                ],
+                "tempCertificates": 0,
+                "bid": null,
+                "balance": 6,
+                "jobMarketToken": false,
+                "usedCowboys": 0,
+                "locationsActivatedInTurn": [
+                ],
+                "lastEngineMove": 0,
+                "lastUpgradedStation": -1,
+                "lastPlacedBranchlet": null,
+                "exchangeTokens": 1,
+                "branchlets": 15,
+                "automaState": null,
+                "turns": 1,
+                "stops": {
+                }
+            },
+            "Player 2": {
+                "drawStack": [
+                    {
+                        "type": "JERSEY",
+                        "points": 0,
+                        "value": 1
+                    },
+                    {
+                        "type": "BLACK_ANGUS",
+                        "points": 0,
+                        "value": 2
+                    },
+                    {
+                        "type": "GUERNSEY",
+                        "points": 0,
+                        "value": 2
+                    },
+                    {
+                        "type": "GUERNSEY",
+                        "points": 0,
+                        "value": 2
+                    },
+                    {
+                        "type": "DUTCH_BELT",
+                        "points": 0,
+                        "value": 2
+                    },
+                    {
+                        "type": "BLACK_ANGUS",
+                        "points": 0,
+                        "value": 2
+                    },
+                    {
+                        "type": "JERSEY",
+                        "points": 0,
+                        "value": 1
+                    },
+                    {
+                        "type": "JERSEY",
+                        "points": 0,
+                        "value": 1
+                    },
+                    {
+                        "type": "DUTCH_BELT",
+                        "points": 0,
+                        "value": 2
+                    },
+                    {
+                        "type": "BLACK_ANGUS",
+                        "points": 0,
+                        "value": 2
+                    }
+                ],
+                "hand": [
+                    {
+                        "type": "DUTCH_BELT",
+                        "points": 0,
+                        "value": 2
+                    },
+                    {
+                        "type": "JERSEY",
+                        "points": 0,
+                        "value": 1
+                    },
+                    {
+                        "type": "GUERNSEY",
+                        "points": 0,
+                        "value": 2
+                    },
+                    {
+                        "type": "JERSEY",
+                        "points": 0,
+                        "value": 1
+                    }
+                ],
+                "discardPile": [
+                ],
+                "workers": {
+                    "COWBOY": 1,
+                    "CRAFTSMAN": 1,
+                    "ENGINEER": 1
+                },
+                "buildings": [
+                    "1a",
+                    "10a",
+                    "4a",
+                    "2a",
+                    "9a",
+                    "6a",
+                    "7a",
+                    "8a",
+                    "3a",
+                    "5a"
+                ],
+                "unlocked": {
+                    "AUX_GAIN_DOLLAR": 1,
+                    "AUX_DRAW_CARD_TO_DISCARD_CARD": 1,
+                    "AUX_DISCARD_CATTLE_CARD_TO_PLACE_BRANCHLET": 1
+                },
+                "objectives": [
+                    "START_SSG"
+                ],
+                "stationMasters": [
+                ],
+                "teepees": [
+                ],
+                "hazards": [
+                ],
+                "tempCertificates": 0,
+                "bid": null,
+                "balance": 7,
+                "jobMarketToken": false,
+                "usedCowboys": 0,
+                "locationsActivatedInTurn": [
+                ],
+                "lastEngineMove": 0,
+                "lastUpgradedStation": -1,
+                "lastPlacedBranchlet": null,
+                "exchangeTokens": 1,
+                "branchlets": 15,
+                "automaState": null,
+                "turns": 0,
+                "stops": {
+                }
+            }
+        },
+        "currentPlayer": "Player 1",
+        "railroadTrack": {
+            "stations": [
+                {
+                    "players": [
+                    ],
+                    "stationMaster": "GAIN_2_DOLLARS_POINT_FOR_EACH_WORKER",
+                    "worker": null
+                },
+                {
+                    "players": [
+                    ],
+                    "stationMaster": "PERM_CERT_POINTS_FOR_EACH_2_HAZARDS",
+                    "worker": null
+                },
+                {
+                    "players": [
+                    ],
+                    "stationMaster": "PERM_CERT_POINTS_FOR_TEEPEE_PAIRS",
+                    "worker": null
+                },
+                {
+                    "players": [
+                    ],
+                    "stationMaster": "REMOVE_HAZARD_OR_TEEPEE_POINTS_FOR_EACH_2_OBJECTIVE_CARDS",
+                    "worker": null
+                },
+                {
+                    "players": [
+                    ],
+                    "stationMaster": "PERM_CERT_POINTS_FOR_EACH_2_CERTS",
+                    "worker": null
+                },
+                {
+                    "players": [
+                    ],
+                    "stationMaster": null,
+                    "worker": null
+                },
+                {
+                    "players": [
+                    ],
+                    "stationMaster": null,
+                    "worker": null
+                },
+                {
+                    "players": [
+                    ],
+                    "stationMaster": null,
+                    "worker": null
+                },
+                {
+                    "players": [
+                    ],
+                    "stationMaster": null,
+                    "worker": null
+                },
+                {
+                    "players": [
+                    ],
+                    "stationMaster": null,
+                    "worker": null
+                },
+                {
+                    "players": [
+                    ],
+                    "stationMaster": null,
+                    "worker": null
+                },
+                {
+                    "players": [
+                    ],
+                    "stationMaster": null,
+                    "worker": null
+                }
+            ],
+            "cities": {
+            },
+            "branchlets": {
+            },
+            "mediumTownTiles": {
+                "57": "HIRE_WORKER_PLUS_2",
+                "52": "GAIN_5_DOLLARS_OR_TAKE_CATTLE_CARD",
+                "59": "PLACE_BUILDING_FOR_FREE",
+                "43": "MOVE_ENGINE_3_FORWARD",
+                "55": "GAIN_5_DOLLARS_OR_TAKE_CATTLE_CARD",
+                "46": "REMOVE_2_CARDS"
+            },
+            "currentSpaces": {
+                "Player 1": "0",
+                "Player 2": "0"
+            },
+            "bonusStationMasters": [
+            ]
+        },
+        "kansasCitySupply": {
+            "drawPiles": [
+                [
+                    {
+                        "teepee": "GREEN"
+                    },
+                    {
+                        "hazard": {
+                            "type": "ROCKFALL",
+                            "hand": "GREEN",
+                            "points": 4
+                        }
+                    },
+                    {
+                        "hazard": {
+                            "type": "ROCKFALL",
+                            "hand": "GREEN",
+                            "points": 3
+                        }
+                    },
+                    {
+                        "teepee": "GREEN"
+                    },
+                    {
+                        "teepee": "GREEN"
+                    },
+                    {
+                        "hazard": {
+                            "type": "FLOOD",
+                            "hand": "BLACK",
+                            "points": 3
+                        }
+                    },
+                    {
+                        "hazard": {
+                            "type": "DROUGHT",
+                            "hand": "GREEN",
+                            "points": 4
+                        }
+                    },
+                    {
+                        "teepee": "GREEN"
+                    },
+                    {
+                        "hazard": {
+                            "type": "FLOOD",
+                            "hand": "GREEN",
+                            "points": 3
+                        }
+                    },
+                    {
+                        "teepee": "BLUE"
+                    },
+                    {
+                        "teepee": "GREEN"
+                    },
+                    {
+                        "hazard": {
+                            "type": "FLOOD",
+                            "hand": "GREEN",
+                            "points": 4
+                        }
+                    },
+                    {
+                        "teepee": "GREEN"
+                    },
+                    {
+                        "hazard": {
+                            "type": "DROUGHT",
+                            "hand": "GREEN",
+                            "points": 2
+                        }
+                    },
+                    {
+                        "hazard": {
+                            "type": "DROUGHT",
+                            "hand": "BLACK",
+                            "points": 2
+                        }
+                    },
+                    {
+                        "hazard": {
+                            "type": "ROCKFALL",
+                            "hand": "GREEN",
+                            "points": 4
+                        }
+                    },
+                    {
+                        "hazard": {
+                            "type": "DROUGHT",
+                            "hand": "GREEN",
+                            "points": 4
+                        }
+                    },
+                    {
+                        "teepee": "GREEN"
+                    },
+                    {
+                        "hazard": {
+                            "type": "FLOOD",
+                            "hand": "GREEN",
+                            "points": 4
+                        }
+                    },
+                    {
+                        "teepee": "BLUE"
+                    },
+                    {
+                        "teepee": "BLUE"
+                    },
+                    {
+                        "teepee": "BLUE"
+                    },
+                    {
+                        "teepee": "BLUE"
+                    },
+                    {
+                        "teepee": "GREEN"
+                    },
+                    {
+                        "hazard": {
+                            "type": "DROUGHT",
+                            "hand": "GREEN",
+                            "points": 3
+                        }
+                    },
+                    {
+                        "teepee": "BLUE"
+                    }
+                ],
+                [
+                    {
+                        "worker": "COWBOY"
+                    },
+                    {
+                        "worker": "CRAFTSMAN"
+                    },
+                    {
+                        "worker": "CRAFTSMAN"
+                    },
+                    {
+                        "worker": "CRAFTSMAN"
+                    },
+                    {
+                        "worker": "ENGINEER"
+                    },
+                    {
+                        "worker": "COWBOY"
+                    },
+                    {
+                        "worker": "ENGINEER"
+                    },
+                    {
+                        "worker": "COWBOY"
+                    },
+                    {
+                        "worker": "ENGINEER"
+                    },
+                    {
+                        "worker": "CRAFTSMAN"
+                    },
+                    {
+                        "worker": "ENGINEER"
+                    },
+                    {
+                        "worker": "CRAFTSMAN"
+                    },
+                    {
+                        "worker": "ENGINEER"
+                    },
+                    {
+                        "worker": "COWBOY"
+                    },
+                    {
+                        "worker": "ENGINEER"
+                    },
+                    {
+                        "worker": "CRAFTSMAN"
+                    },
+                    {
+                        "worker": "COWBOY"
+                    },
+                    {
+                        "worker": "ENGINEER"
+                    },
+                    {
+                        "worker": "COWBOY"
+                    },
+                    {
+                        "worker": "COWBOY"
+                    },
+                    {
+                        "worker": "COWBOY"
+                    },
+                    {
+                        "worker": "CRAFTSMAN"
+                    },
+                    {
+                        "worker": "ENGINEER"
+                    },
+                    {
+                        "worker": "ENGINEER"
+                    },
+                    {
+                        "worker": "CRAFTSMAN"
+                    },
+                    {
+                        "worker": "CRAFTSMAN"
+                    },
+                    {
+                        "worker": "COWBOY"
+                    },
+                    {
+                        "worker": "ENGINEER"
+                    }
+                ],
+                [
+                    {
+                        "worker": "CRAFTSMAN"
+                    },
+                    {
+                        "worker": "CRAFTSMAN"
+                    },
+                    {
+                        "teepee": "BLUE"
+                    },
+                    {
+                        "teepee": "GREEN"
+                    },
+                    {
+                        "teepee": "BLUE"
+                    },
+                    {
+                        "worker": "COWBOY"
+                    },
+                    {
+                        "worker": "COWBOY"
+                    },
+                    {
+                        "worker": "ENGINEER"
+                    },
+                    {
+                        "worker": "CRAFTSMAN"
+                    },
+                    {
+                        "worker": "CRAFTSMAN"
+                    },
+                    {
+                        "worker": "COWBOY"
+                    },
+                    {
+                        "worker": "ENGINEER"
+                    },
+                    {
+                        "worker": "COWBOY"
+                    },
+                    {
+                        "worker": "COWBOY"
+                    },
+                    {
+                        "worker": "ENGINEER"
+                    },
+                    {
+                        "worker": "CRAFTSMAN"
+                    },
+                    {
+                        "worker": "COWBOY"
+                    },
+                    {
+                        "worker": "CRAFTSMAN"
+                    },
+                    {
+                        "worker": "ENGINEER"
+                    },
+                    {
+                        "worker": "COWBOY"
+                    },
+                    {
+                        "teepee": "GREEN"
+                    },
+                    {
+                        "worker": "ENGINEER"
+                    },
+                    {
+                        "teepee": "BLUE"
+                    },
+                    {
+                        "worker": "ENGINEER"
+                    }
+                ]
+            ]
+        },
+        "trail": {
+            "playerLocations": {
+            },
+            "locations": {
+                "A": {
+                    "building": {
+                        "name": "A"
+                    }
+                },
+                "B": {
+                    "building": {
+                        "name": "B"
+                    }
+                },
+                "C": {
+                    "building": {
+                        "name": "C"
+                    }
+                },
+                "D": {
+                    "building": {
+                        "name": "D"
+                    }
+                },
+                "E": {
+                    "building": {
+                        "name": "E"
+                    }
+                },
+                "F": {
+                    "building": {
+                        "name": "F"
+                    }
+                },
+                "G": {
+                    "building": {
+                        "name": "G"
+                    }
+                },
+                "TEEPEE--3": {
+                    "teepee": "GREEN"
+                },
+                "TEEPEE--2": {
+                    "teepee": "BLUE"
+                },
+                "ROCKFALL-1": {
+                    "hazard": {
+                        "type": "ROCKFALL",
+                        "hand": "BLACK",
+                        "points": 2
+                    }
+                },
+                "ROCKFALL-2": {
+                    "hazard": {
+                        "type": "ROCKFALL",
+                        "hand": "BLACK",
+                        "points": 3
+                    }
+                },
+                "ROCKFALL-3": {
+                    "hazard": {
+                        "type": "ROCKFALL",
+                        "hand": "GREEN",
+                        "points": 2
+                    }
+                },
+                "FLOOD-1": {
+                    "hazard": {
+                        "type": "FLOOD",
+                        "hand": "GREEN",
+                        "points": 2
+                    }
+                },
+                "FLOOD-2": {
+                    "hazard": {
+                        "type": "FLOOD",
+                        "hand": "BLACK",
+                        "points": 2
+                    }
+                }
+            }
+        },
+        "jobMarket": {
+            "currentRowIndex": 1,
+            "rows": [
+                {
+                    "workers": [
+                        "COWBOY",
+                        "CRAFTSMAN"
+                    ]
+                },
+                {
+                    "workers": [
+                        "COWBOY"
+                    ]
+                },
+                {
+                    "workers": [
+                    ]
+                },
+                {
+                    "workers": [
+                    ]
+                },
+                {
+                    "workers": [
+                    ]
+                },
+                {
+                    "workers": [
+                    ]
+                },
+                {
+                    "workers": [
+                    ]
+                },
+                {
+                    "workers": [
+                    ]
+                },
+                {
+                    "workers": [
+                    ]
+                },
+                {
+                    "workers": [
+                    ]
+                },
+                {
+                    "workers": [
+                    ]
+                },
+                {
+                    "workers": [
+                    ]
+                }
+            ]
+        },
+        "foresights": {
+            "spaces": [
+                [
+                    {
+                        "hazard": {
+                            "type": "DROUGHT",
+                            "hand": "BLACK",
+                            "points": 3
+                        }
+                    },
+                    {
+                        "teepee": "BLUE"
+                    }
+                ],
+                [
+                    {
+                        "worker": "ENGINEER"
+                    },
+                    {
+                        "worker": "CRAFTSMAN"
+                    }
+                ],
+                [
+                    {
+                        "worker": "ENGINEER"
+                    },
+                    {
+                        "worker": "CRAFTSMAN"
+                    }
+                ]
+            ]
+        },
+        "cattleMarket": {
+            "drawStack": [
+                {
+                    "type": "WEST_HIGHLAND",
+                    "points": 3,
+                    "value": 4
+                },
+                {
+                    "type": "WEST_HIGHLAND",
+                    "points": 3,
+                    "value": 4
+                },
+                {
+                    "type": "AYRSHIRE",
+                    "points": 3,
+                    "value": 3
+                },
+                {
+                    "type": "AYRSHIRE",
+                    "points": 3,
+                    "value": 3
+                },
+                {
+                    "type": "BROWN_SWISS",
+                    "points": 2,
+                    "value": 3
+                },
+                {
+                    "type": "TEXAS_LONGHORN",
+                    "points": 7,
+                    "value": 5
+                },
+                {
+                    "type": "HOLSTEIN",
+                    "points": 1,
+                    "value": 3
+                },
+                {
+                    "type": "BROWN_SWISS",
+                    "points": 2,
+                    "value": 3
+                },
+                {
+                    "type": "WEST_HIGHLAND",
+                    "points": 4,
+                    "value": 4
+                },
+                {
+                    "type": "HOLSTEIN",
+                    "points": 1,
+                    "value": 3
+                },
+                {
+                    "type": "AYRSHIRE",
+                    "points": 3,
+                    "value": 3
+                },
+                {
+                    "type": "AYRSHIRE",
+                    "points": 3,
+                    "value": 3
+                },
+                {
+                    "type": "TEXAS_LONGHORN",
+                    "points": 7,
+                    "value": 5
+                },
+                {
+                    "type": "WEST_HIGHLAND",
+                    "points": 5,
+                    "value": 4
+                },
+                {
+                    "type": "TEXAS_LONGHORN",
+                    "points": 6,
+                    "value": 5
+                },
+                {
+                    "type": "HOLSTEIN",
+                    "points": 1,
+                    "value": 3
+                },
+                {
+                    "type": "WEST_HIGHLAND",
+                    "points": 4,
+                    "value": 4
+                },
+                {
+                    "type": "TEXAS_LONGHORN",
+                    "points": 6,
+                    "value": 5
+                },
+                {
+                    "type": "BROWN_SWISS",
+                    "points": 2,
+                    "value": 3
+                },
+                {
+                    "type": "HOLSTEIN",
+                    "points": 1,
+                    "value": 3
+                },
+                {
+                    "type": "WEST_HIGHLAND",
+                    "points": 3,
+                    "value": 4
+                },
+                {
+                    "type": "BROWN_SWISS",
+                    "points": 2,
+                    "value": 3
+                },
+                {
+                    "type": "WEST_HIGHLAND",
+                    "points": 5,
+                    "value": 4
+                },
+                {
+                    "type": "AYRSHIRE",
+                    "points": 3,
+                    "value": 3
+                },
+                {
+                    "type": "AYRSHIRE",
+                    "points": 3,
+                    "value": 3
+                },
+                {
+                    "type": "AYRSHIRE",
+                    "points": 3,
+                    "value": 3
+                },
+                {
+                    "type": "TEXAS_LONGHORN",
+                    "points": 5,
+                    "value": 5
+                },
+                {
+                    "type": "HOLSTEIN",
+                    "points": 1,
+                    "value": 3
+                },
+                {
+                    "type": "WEST_HIGHLAND",
+                    "points": 5,
+                    "value": 4
+                }
+            ],
+            "market": [
+                {
+                    "type": "WEST_HIGHLAND",
+                    "points": 4,
+                    "value": 4
+                },
+                {
+                    "type": "HOLSTEIN",
+                    "points": 1,
+                    "value": 3
+                },
+                {
+                    "type": "BROWN_SWISS",
+                    "points": 2,
+                    "value": 3
+                },
+                {
+                    "type": "BROWN_SWISS",
+                    "points": 2,
+                    "value": 3
+                },
+                {
+                    "type": "HOLSTEIN",
+                    "points": 1,
+                    "value": 3
+                },
+                {
+                    "type": "BROWN_SWISS",
+                    "points": 2,
+                    "value": 3
+                },
+                {
+                    "type": "TEXAS_LONGHORN",
+                    "points": 5,
+                    "value": 5
+                }
+            ],
+            "simmental": false
+        },
+        "objectiveCards": {
+            "drawStack": [
+                "MOVE_34HH",
+                "GAIN2_SSH",
+                "MOVE_345",
+                "GAIN2_BGBL",
+                "DRAW_333S",
+                "GAIN2_BBLBL",
+                "DRAW_SGG",
+                "AUX_SF",
+                "ENGINE_345",
+                "ENGINE_BBGG",
+                "AUX_SF",
+                "AUX_SF",
+                "MOVE_SSBB",
+                "MOVE_SSBLBL",
+                "DRAW_SGBL",
+                "GAIN2_4HH",
+                "AUX_SF",
+                "GAIN2_333B",
+                "MOVE_BBHH",
+                "ENGINE_BBLHH"
+            ],
+            "available": [
+                "ENGINE_SSHH",
+                "DRAW_BBH",
+                "ENGINE_44SG",
+                "DRAW_5H"
+            ]
+        },
+        "actionStack": {
+            "actions": [
+            ],
+            "immediateActions": [
+            ]
+        },
+        "status": "STARTED",
+        "startingObjectiveCards": [
+        ],
+        "canUndo": false
+    },
+    "commands": [
+        {
+            "kind": "endTurn",
+            "player": "Player 1",
+            "random": [
+            ],
+            "expectedState": {
+                "edition": "FIRST",
+                "mode": "ORIGINAL",
+                "railsToTheNorth": false,
+                "players": [
+                    {
+                        "name": "Player 1",
+                        "color": "RED",
+                        "type": "HUMAN"
+                    },
+                    {
+                        "name": "Player 2",
+                        "color": "BLUE",
+                        "type": "HUMAN"
+                    }
+                ],
+                "originalPlayerOrder": [
+                    "Player 1",
+                    "Player 2"
+                ],
+                "playerOrder": [
+                    "Player 1",
+                    "Player 2"
+                ],
+                "playerStates": {
+                    "Player 1": {
+                        "drawStack": [
+                            {
+                                "type": "JERSEY",
+                                "points": 0,
+                                "value": 1
+                            },
+                            {
+                                "type": "DUTCH_BELT",
+                                "points": 0,
+                                "value": 2
+                            },
+                            {
+                                "type": "BLACK_ANGUS",
+                                "points": 0,
+                                "value": 2
+                            },
+                            {
+                                "type": "BLACK_ANGUS",
+                                "points": 0,
+                                "value": 2
+                            },
+                            {
+                                "type": "JERSEY",
+                                "points": 0,
+                                "value": 1
+                            },
+                            {
+                                "type": "BLACK_ANGUS",
+                                "points": 0,
+                                "value": 2
+                            },
+                            {
+                                "type": "JERSEY",
+                                "points": 0,
+                                "value": 1
+                            },
+                            {
+                                "type": "DUTCH_BELT",
+                                "points": 0,
+                                "value": 2
+                            },
+                            {
+                                "type": "GUERNSEY",
+                                "points": 0,
+                                "value": 2
+                            },
+                            {
+                                "type": "DUTCH_BELT",
+                                "points": 0,
+                                "value": 2
+                            }
+                        ],
+                        "hand": [
+                            {
+                                "type": "JERSEY",
+                                "points": 0,
+                                "value": 1
+                            },
+                            {
+                                "type": "JERSEY",
+                                "points": 0,
+                                "value": 1
+                            },
+                            {
+                                "type": "GUERNSEY",
+                                "points": 0,
+                                "value": 2
+                            },
+                            {
+                                "type": "GUERNSEY",
+                                "points": 0,
+                                "value": 2
+                            }
+                        ],
+                        "discardPile": [
+                        ],
+                        "workers": {
+                            "COWBOY": 1,
+                            "CRAFTSMAN": 1,
+                            "ENGINEER": 1
+                        },
+                        "buildings": [
+                            "1a",
+                            "6a",
+                            "5a",
+                            "4a",
+                            "2a",
+                            "9a",
+                            "8a",
+                            "10a",
+                            "7a",
+                            "3a"
+                        ],
+                        "unlocked": {
+                            "AUX_DISCARD_CATTLE_CARD_TO_PLACE_BRANCHLET": 1,
+                            "AUX_DRAW_CARD_TO_DISCARD_CARD": 1,
+                            "AUX_GAIN_DOLLAR": 1
+                        },
+                        "objectives": [
+                            "START_34B"
+                        ],
+                        "stationMasters": [
+                        ],
+                        "teepees": [
+                        ],
+                        "hazards": [
+                        ],
+                        "tempCertificates": 0,
+                        "bid": null,
+                        "balance": 6,
+                        "jobMarketToken": false,
+                        "usedCowboys": 0,
+                        "locationsActivatedInTurn": [
+                        ],
+                        "lastEngineMove": 0,
+                        "lastUpgradedStation": -1,
+                        "lastPlacedBranchlet": null,
+                        "exchangeTokens": 1,
+                        "branchlets": 15,
+                        "automaState": null,
+                        "turns": 1,
+                        "stops": {
+                        }
+                    },
+                    "Player 2": {
+                        "drawStack": [
+                            {
+                                "type": "JERSEY",
+                                "points": 0,
+                                "value": 1
+                            },
+                            {
+                                "type": "BLACK_ANGUS",
+                                "points": 0,
+                                "value": 2
+                            },
+                            {
+                                "type": "GUERNSEY",
+                                "points": 0,
+                                "value": 2
+                            },
+                            {
+                                "type": "GUERNSEY",
+                                "points": 0,
+                                "value": 2
+                            },
+                            {
+                                "type": "DUTCH_BELT",
+                                "points": 0,
+                                "value": 2
+                            },
+                            {
+                                "type": "BLACK_ANGUS",
+                                "points": 0,
+                                "value": 2
+                            },
+                            {
+                                "type": "JERSEY",
+                                "points": 0,
+                                "value": 1
+                            },
+                            {
+                                "type": "JERSEY",
+                                "points": 0,
+                                "value": 1
+                            },
+                            {
+                                "type": "DUTCH_BELT",
+                                "points": 0,
+                                "value": 2
+                            },
+                            {
+                                "type": "BLACK_ANGUS",
+                                "points": 0,
+                                "value": 2
+                            }
+                        ],
+                        "hand": [
+                            {
+                                "type": "DUTCH_BELT",
+                                "points": 0,
+                                "value": 2
+                            },
+                            {
+                                "type": "JERSEY",
+                                "points": 0,
+                                "value": 1
+                            },
+                            {
+                                "type": "GUERNSEY",
+                                "points": 0,
+                                "value": 2
+                            },
+                            {
+                                "type": "JERSEY",
+                                "points": 0,
+                                "value": 1
+                            }
+                        ],
+                        "discardPile": [
+                        ],
+                        "workers": {
+                            "COWBOY": 1,
+                            "CRAFTSMAN": 1,
+                            "ENGINEER": 1
+                        },
+                        "buildings": [
+                            "1a",
+                            "10a",
+                            "4a",
+                            "2a",
+                            "9a",
+                            "6a",
+                            "7a",
+                            "8a",
+                            "3a",
+                            "5a"
+                        ],
+                        "unlocked": {
+                            "AUX_DISCARD_CATTLE_CARD_TO_PLACE_BRANCHLET": 1,
+                            "AUX_DRAW_CARD_TO_DISCARD_CARD": 1,
+                            "AUX_GAIN_DOLLAR": 1
+                        },
+                        "objectives": [
+                            "START_SSG"
+                        ],
+                        "stationMasters": [
+                        ],
+                        "teepees": [
+                        ],
+                        "hazards": [
+                        ],
+                        "tempCertificates": 0,
+                        "bid": null,
+                        "balance": 7,
+                        "jobMarketToken": false,
+                        "usedCowboys": 0,
+                        "locationsActivatedInTurn": [
+                        ],
+                        "lastEngineMove": 0,
+                        "lastUpgradedStation": -1,
+                        "lastPlacedBranchlet": null,
+                        "exchangeTokens": 1,
+                        "branchlets": 15,
+                        "automaState": null,
+                        "turns": 1,
+                        "stops": {
+                        }
+                    }
+                },
+                "currentPlayer": "Player 2",
+                "railroadTrack": {
+                    "stations": [
+                        {
+                            "players": [
+                            ],
+                            "stationMaster": "GAIN_2_DOLLARS_POINT_FOR_EACH_WORKER",
+                            "worker": null
+                        },
+                        {
+                            "players": [
+                            ],
+                            "stationMaster": "PERM_CERT_POINTS_FOR_EACH_2_HAZARDS",
+                            "worker": null
+                        },
+                        {
+                            "players": [
+                            ],
+                            "stationMaster": "PERM_CERT_POINTS_FOR_TEEPEE_PAIRS",
+                            "worker": null
+                        },
+                        {
+                            "players": [
+                            ],
+                            "stationMaster": "REMOVE_HAZARD_OR_TEEPEE_POINTS_FOR_EACH_2_OBJECTIVE_CARDS",
+                            "worker": null
+                        },
+                        {
+                            "players": [
+                            ],
+                            "stationMaster": "PERM_CERT_POINTS_FOR_EACH_2_CERTS",
+                            "worker": null
+                        },
+                        {
+                            "players": [
+                            ],
+                            "stationMaster": null,
+                            "worker": null
+                        },
+                        {
+                            "players": [
+                            ],
+                            "stationMaster": null,
+                            "worker": null
+                        },
+                        {
+                            "players": [
+                            ],
+                            "stationMaster": null,
+                            "worker": null
+                        },
+                        {
+                            "players": [
+                            ],
+                            "stationMaster": null,
+                            "worker": null
+                        },
+                        {
+                            "players": [
+                            ],
+                            "stationMaster": null,
+                            "worker": null
+                        },
+                        {
+                            "players": [
+                            ],
+                            "stationMaster": null,
+                            "worker": null
+                        },
+                        {
+                            "players": [
+                            ],
+                            "stationMaster": null,
+                            "worker": null
+                        }
+                    ],
+                    "cities": {
+                    },
+                    "branchlets": {
+                    },
+                    "mediumTownTiles": {
+                        "57": "HIRE_WORKER_PLUS_2",
+                        "52": "GAIN_5_DOLLARS_OR_TAKE_CATTLE_CARD",
+                        "59": "PLACE_BUILDING_FOR_FREE",
+                        "43": "MOVE_ENGINE_3_FORWARD",
+                        "55": "GAIN_5_DOLLARS_OR_TAKE_CATTLE_CARD",
+                        "46": "REMOVE_2_CARDS"
+                    },
+                    "currentSpaces": {
+                        "Player 1": "0",
+                        "Player 2": "0"
+                    },
+                    "bonusStationMasters": [
+                    ]
+                },
+                "kansasCitySupply": {
+                    "drawPiles": [
+                        [
+                            {
+                                "teepee": "GREEN"
+                            },
+                            {
+                                "hazard": {
+                                    "type": "ROCKFALL",
+                                    "hand": "GREEN",
+                                    "points": 4
+                                }
+                            },
+                            {
+                                "hazard": {
+                                    "type": "ROCKFALL",
+                                    "hand": "GREEN",
+                                    "points": 3
+                                }
+                            },
+                            {
+                                "teepee": "GREEN"
+                            },
+                            {
+                                "teepee": "GREEN"
+                            },
+                            {
+                                "hazard": {
+                                    "type": "FLOOD",
+                                    "hand": "BLACK",
+                                    "points": 3
+                                }
+                            },
+                            {
+                                "hazard": {
+                                    "type": "DROUGHT",
+                                    "hand": "GREEN",
+                                    "points": 4
+                                }
+                            },
+                            {
+                                "teepee": "GREEN"
+                            },
+                            {
+                                "hazard": {
+                                    "type": "FLOOD",
+                                    "hand": "GREEN",
+                                    "points": 3
+                                }
+                            },
+                            {
+                                "teepee": "BLUE"
+                            },
+                            {
+                                "teepee": "GREEN"
+                            },
+                            {
+                                "hazard": {
+                                    "type": "FLOOD",
+                                    "hand": "GREEN",
+                                    "points": 4
+                                }
+                            },
+                            {
+                                "teepee": "GREEN"
+                            },
+                            {
+                                "hazard": {
+                                    "type": "DROUGHT",
+                                    "hand": "GREEN",
+                                    "points": 2
+                                }
+                            },
+                            {
+                                "hazard": {
+                                    "type": "DROUGHT",
+                                    "hand": "BLACK",
+                                    "points": 2
+                                }
+                            },
+                            {
+                                "hazard": {
+                                    "type": "ROCKFALL",
+                                    "hand": "GREEN",
+                                    "points": 4
+                                }
+                            },
+                            {
+                                "hazard": {
+                                    "type": "DROUGHT",
+                                    "hand": "GREEN",
+                                    "points": 4
+                                }
+                            },
+                            {
+                                "teepee": "GREEN"
+                            },
+                            {
+                                "hazard": {
+                                    "type": "FLOOD",
+                                    "hand": "GREEN",
+                                    "points": 4
+                                }
+                            },
+                            {
+                                "teepee": "BLUE"
+                            },
+                            {
+                                "teepee": "BLUE"
+                            },
+                            {
+                                "teepee": "BLUE"
+                            },
+                            {
+                                "teepee": "BLUE"
+                            },
+                            {
+                                "teepee": "GREEN"
+                            },
+                            {
+                                "hazard": {
+                                    "type": "DROUGHT",
+                                    "hand": "GREEN",
+                                    "points": 3
+                                }
+                            },
+                            {
+                                "teepee": "BLUE"
+                            }
+                        ],
+                        [
+                            {
+                                "worker": "COWBOY"
+                            },
+                            {
+                                "worker": "CRAFTSMAN"
+                            },
+                            {
+                                "worker": "CRAFTSMAN"
+                            },
+                            {
+                                "worker": "CRAFTSMAN"
+                            },
+                            {
+                                "worker": "ENGINEER"
+                            },
+                            {
+                                "worker": "COWBOY"
+                            },
+                            {
+                                "worker": "ENGINEER"
+                            },
+                            {
+                                "worker": "COWBOY"
+                            },
+                            {
+                                "worker": "ENGINEER"
+                            },
+                            {
+                                "worker": "CRAFTSMAN"
+                            },
+                            {
+                                "worker": "ENGINEER"
+                            },
+                            {
+                                "worker": "CRAFTSMAN"
+                            },
+                            {
+                                "worker": "ENGINEER"
+                            },
+                            {
+                                "worker": "COWBOY"
+                            },
+                            {
+                                "worker": "ENGINEER"
+                            },
+                            {
+                                "worker": "CRAFTSMAN"
+                            },
+                            {
+                                "worker": "COWBOY"
+                            },
+                            {
+                                "worker": "ENGINEER"
+                            },
+                            {
+                                "worker": "COWBOY"
+                            },
+                            {
+                                "worker": "COWBOY"
+                            },
+                            {
+                                "worker": "COWBOY"
+                            },
+                            {
+                                "worker": "CRAFTSMAN"
+                            },
+                            {
+                                "worker": "ENGINEER"
+                            },
+                            {
+                                "worker": "ENGINEER"
+                            },
+                            {
+                                "worker": "CRAFTSMAN"
+                            },
+                            {
+                                "worker": "CRAFTSMAN"
+                            },
+                            {
+                                "worker": "COWBOY"
+                            },
+                            {
+                                "worker": "ENGINEER"
+                            }
+                        ],
+                        [
+                            {
+                                "worker": "CRAFTSMAN"
+                            },
+                            {
+                                "worker": "CRAFTSMAN"
+                            },
+                            {
+                                "teepee": "BLUE"
+                            },
+                            {
+                                "teepee": "GREEN"
+                            },
+                            {
+                                "teepee": "BLUE"
+                            },
+                            {
+                                "worker": "COWBOY"
+                            },
+                            {
+                                "worker": "COWBOY"
+                            },
+                            {
+                                "worker": "ENGINEER"
+                            },
+                            {
+                                "worker": "CRAFTSMAN"
+                            },
+                            {
+                                "worker": "CRAFTSMAN"
+                            },
+                            {
+                                "worker": "COWBOY"
+                            },
+                            {
+                                "worker": "ENGINEER"
+                            },
+                            {
+                                "worker": "COWBOY"
+                            },
+                            {
+                                "worker": "COWBOY"
+                            },
+                            {
+                                "worker": "ENGINEER"
+                            },
+                            {
+                                "worker": "CRAFTSMAN"
+                            },
+                            {
+                                "worker": "COWBOY"
+                            },
+                            {
+                                "worker": "CRAFTSMAN"
+                            },
+                            {
+                                "worker": "ENGINEER"
+                            },
+                            {
+                                "worker": "COWBOY"
+                            },
+                            {
+                                "teepee": "GREEN"
+                            },
+                            {
+                                "worker": "ENGINEER"
+                            },
+                            {
+                                "teepee": "BLUE"
+                            },
+                            {
+                                "worker": "ENGINEER"
+                            }
+                        ]
+                    ]
+                },
+                "trail": {
+                    "playerLocations": {
+                    },
+                    "locations": {
+                        "A": {
+                            "building": {
+                                "name": "A"
+                            }
+                        },
+                        "B": {
+                            "building": {
+                                "name": "B"
+                            }
+                        },
+                        "C": {
+                            "building": {
+                                "name": "C"
+                            }
+                        },
+                        "D": {
+                            "building": {
+                                "name": "D"
+                            }
+                        },
+                        "E": {
+                            "building": {
+                                "name": "E"
+                            }
+                        },
+                        "F": {
+                            "building": {
+                                "name": "F"
+                            }
+                        },
+                        "G": {
+                            "building": {
+                                "name": "G"
+                            }
+                        },
+                        "TEEPEE--3": {
+                            "teepee": "GREEN"
+                        },
+                        "TEEPEE--2": {
+                            "teepee": "BLUE"
+                        },
+                        "ROCKFALL-1": {
+                            "hazard": {
+                                "type": "ROCKFALL",
+                                "hand": "BLACK",
+                                "points": 2
+                            }
+                        },
+                        "ROCKFALL-2": {
+                            "hazard": {
+                                "type": "ROCKFALL",
+                                "hand": "BLACK",
+                                "points": 3
+                            }
+                        },
+                        "ROCKFALL-3": {
+                            "hazard": {
+                                "type": "ROCKFALL",
+                                "hand": "GREEN",
+                                "points": 2
+                            }
+                        },
+                        "FLOOD-1": {
+                            "hazard": {
+                                "type": "FLOOD",
+                                "hand": "GREEN",
+                                "points": 2
+                            }
+                        },
+                        "FLOOD-2": {
+                            "hazard": {
+                                "type": "FLOOD",
+                                "hand": "BLACK",
+                                "points": 2
+                            }
+                        }
+                    }
+                },
+                "jobMarket": {
+                    "currentRowIndex": 1,
+                    "rows": [
+                        {
+                            "workers": [
+                                "COWBOY",
+                                "CRAFTSMAN"
+                            ]
+                        },
+                        {
+                            "workers": [
+                                "COWBOY"
+                            ]
+                        },
+                        {
+                            "workers": [
+                            ]
+                        },
+                        {
+                            "workers": [
+                            ]
+                        },
+                        {
+                            "workers": [
+                            ]
+                        },
+                        {
+                            "workers": [
+                            ]
+                        },
+                        {
+                            "workers": [
+                            ]
+                        },
+                        {
+                            "workers": [
+                            ]
+                        },
+                        {
+                            "workers": [
+                            ]
+                        },
+                        {
+                            "workers": [
+                            ]
+                        },
+                        {
+                            "workers": [
+                            ]
+                        },
+                        {
+                            "workers": [
+                            ]
+                        }
+                    ]
+                },
+                "foresights": {
+                    "spaces": [
+                        [
+                            {
+                                "hazard": {
+                                    "type": "DROUGHT",
+                                    "hand": "BLACK",
+                                    "points": 3
+                                }
+                            },
+                            {
+                                "teepee": "BLUE"
+                            }
+                        ],
+                        [
+                            {
+                                "worker": "ENGINEER"
+                            },
+                            {
+                                "worker": "CRAFTSMAN"
+                            }
+                        ],
+                        [
+                            {
+                                "worker": "ENGINEER"
+                            },
+                            {
+                                "worker": "CRAFTSMAN"
+                            }
+                        ]
+                    ]
+                },
+                "cattleMarket": {
+                    "drawStack": [
+                        {
+                            "type": "WEST_HIGHLAND",
+                            "points": 3,
+                            "value": 4
+                        },
+                        {
+                            "type": "WEST_HIGHLAND",
+                            "points": 3,
+                            "value": 4
+                        },
+                        {
+                            "type": "AYRSHIRE",
+                            "points": 3,
+                            "value": 3
+                        },
+                        {
+                            "type": "AYRSHIRE",
+                            "points": 3,
+                            "value": 3
+                        },
+                        {
+                            "type": "BROWN_SWISS",
+                            "points": 2,
+                            "value": 3
+                        },
+                        {
+                            "type": "TEXAS_LONGHORN",
+                            "points": 7,
+                            "value": 5
+                        },
+                        {
+                            "type": "HOLSTEIN",
+                            "points": 1,
+                            "value": 3
+                        },
+                        {
+                            "type": "BROWN_SWISS",
+                            "points": 2,
+                            "value": 3
+                        },
+                        {
+                            "type": "WEST_HIGHLAND",
+                            "points": 4,
+                            "value": 4
+                        },
+                        {
+                            "type": "HOLSTEIN",
+                            "points": 1,
+                            "value": 3
+                        },
+                        {
+                            "type": "AYRSHIRE",
+                            "points": 3,
+                            "value": 3
+                        },
+                        {
+                            "type": "AYRSHIRE",
+                            "points": 3,
+                            "value": 3
+                        },
+                        {
+                            "type": "TEXAS_LONGHORN",
+                            "points": 7,
+                            "value": 5
+                        },
+                        {
+                            "type": "WEST_HIGHLAND",
+                            "points": 5,
+                            "value": 4
+                        },
+                        {
+                            "type": "TEXAS_LONGHORN",
+                            "points": 6,
+                            "value": 5
+                        },
+                        {
+                            "type": "HOLSTEIN",
+                            "points": 1,
+                            "value": 3
+                        },
+                        {
+                            "type": "WEST_HIGHLAND",
+                            "points": 4,
+                            "value": 4
+                        },
+                        {
+                            "type": "TEXAS_LONGHORN",
+                            "points": 6,
+                            "value": 5
+                        },
+                        {
+                            "type": "BROWN_SWISS",
+                            "points": 2,
+                            "value": 3
+                        },
+                        {
+                            "type": "HOLSTEIN",
+                            "points": 1,
+                            "value": 3
+                        },
+                        {
+                            "type": "WEST_HIGHLAND",
+                            "points": 3,
+                            "value": 4
+                        },
+                        {
+                            "type": "BROWN_SWISS",
+                            "points": 2,
+                            "value": 3
+                        },
+                        {
+                            "type": "WEST_HIGHLAND",
+                            "points": 5,
+                            "value": 4
+                        },
+                        {
+                            "type": "AYRSHIRE",
+                            "points": 3,
+                            "value": 3
+                        },
+                        {
+                            "type": "AYRSHIRE",
+                            "points": 3,
+                            "value": 3
+                        },
+                        {
+                            "type": "AYRSHIRE",
+                            "points": 3,
+                            "value": 3
+                        },
+                        {
+                            "type": "TEXAS_LONGHORN",
+                            "points": 5,
+                            "value": 5
+                        },
+                        {
+                            "type": "HOLSTEIN",
+                            "points": 1,
+                            "value": 3
+                        },
+                        {
+                            "type": "WEST_HIGHLAND",
+                            "points": 5,
+                            "value": 4
+                        }
+                    ],
+                    "market": [
+                        {
+                            "type": "WEST_HIGHLAND",
+                            "points": 4,
+                            "value": 4
+                        },
+                        {
+                            "type": "HOLSTEIN",
+                            "points": 1,
+                            "value": 3
+                        },
+                        {
+                            "type": "BROWN_SWISS",
+                            "points": 2,
+                            "value": 3
+                        },
+                        {
+                            "type": "BROWN_SWISS",
+                            "points": 2,
+                            "value": 3
+                        },
+                        {
+                            "type": "HOLSTEIN",
+                            "points": 1,
+                            "value": 3
+                        },
+                        {
+                            "type": "BROWN_SWISS",
+                            "points": 2,
+                            "value": 3
+                        },
+                        {
+                            "type": "TEXAS_LONGHORN",
+                            "points": 5,
+                            "value": 5
+                        }
+                    ],
+                    "simmental": false
+                },
+                "objectiveCards": {
+                    "drawStack": [
+                        "MOVE_34HH",
+                        "GAIN2_SSH",
+                        "MOVE_345",
+                        "GAIN2_BGBL",
+                        "DRAW_333S",
+                        "GAIN2_BBLBL",
+                        "DRAW_SGG",
+                        "AUX_SF",
+                        "ENGINE_345",
+                        "ENGINE_BBGG",
+                        "AUX_SF",
+                        "AUX_SF",
+                        "MOVE_SSBB",
+                        "MOVE_SSBLBL",
+                        "DRAW_SGBL",
+                        "GAIN2_4HH",
+                        "AUX_SF",
+                        "GAIN2_333B",
+                        "MOVE_BBHH",
+                        "ENGINE_BBLHH"
+                    ],
+                    "available": [
+                        "ENGINE_SSHH",
+                        "DRAW_BBH",
+                        "ENGINE_44SG",
+                        "DRAW_5H"
+                    ]
+                },
+                "actionStack": {
+                    "actions": [
+                        {
+                            "mandatory": {
+                                "action": "Move"
+                            }
+                        }
+                    ],
+                    "immediateActions": [
+                    ]
+                },
+                "status": "STARTED",
+                "startingObjectiveCards": [
+                ],
+                "canUndo": false
+            },
+            "expectedScores": {
+                "Player 1": 1,
+                "Player 2": 1
+            }
+        }
+    ]
+}

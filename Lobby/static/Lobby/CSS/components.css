@@ -255,7 +255,17 @@ input.button,
     .create-page input[type="submit"]:disabled:hover {
         background: var(--color-surface-soft);
         border-color: #cbd3db;
+        color: var(--color-ink);
         cursor: not-allowed;
+    }
+}
+
+@media (hover: hover) {
+    .button-primary:disabled:hover {
+        opacity: 1;
+        background: var(--color-accent);
+        border-color: rgba(0, 0, 0, 0.15);
+        color: var(--color-accent-ink);
     }
 }
 
@@ -529,6 +539,20 @@ button {
     display: inline-block;
 }
 
+/* Text badge variant for games without dedicated starting-option artwork (ROW). */
+.startingOptionText {
+    width: auto;
+    height: auto;
+    padding: 2px 6px;
+    border: 1px solid var(--color-border-strong, #888);
+    border-radius: var(--radius-sm, 4px);
+    font-size: 11px;
+    line-height: 1.2;
+    white-space: nowrap;
+    text-align: center;
+    color: var(--color-text, #222);
+}
+
 /* Changelog entry layout */
 .log-entry {
     padding: 14px 0;
@@ -680,6 +704,37 @@ button {
     background: rgba(147, 213, 208, 0.22);
     color: var(--color-accent-strong);
     border-color: transparent;
+}
+
+/* Pill-colored, but a real message box: may contain <br/>, links and buttons
+   (e.g. the game-creation invite message), so it must wrap. */
+.message-box {
+    display: block;
+    white-space: normal;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+.message-box a {
+    color: inherit;
+    text-decoration: underline;
+    font-weight: 700;
+    word-break: break-all;
+}
+.message-box .copyGameLinkButton {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 6px;
+    padding: 4px 10px;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
 }
 
 /* ---------- TABS (09 dense-scoreboard look) ---------- */

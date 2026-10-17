@@ -30,6 +30,12 @@ export function getFlexiKickoutTImerText() {
 	return hoursToGo + ":" + minsToGo + ":" + secsToGo
 }
 
+function blinkRed(el, blink) {
+	if (!el) return
+	if (blink) el.classList.toggle("redText")
+	else el.classList.remove("redText")
+}
+
 export function kickoutTimerTicker() {
 	const personal = usePersonalStore()
 	if (personal.trainingGame) {
@@ -40,15 +46,7 @@ export function kickoutTimerTicker() {
 		clearInterval(personal.kickoutCountdownIntervalTimer)
 	} else {
 		personal.secondsToNextKickout--
-		let el = document.getElementById("kickoutTimerTimer")
-		if (el) {
-			if (personal.secondsToNextKickout < 60) {
-				if (el.classList.contains("redText")) el.classList.remove("redText")
-				else el.classList.add("redText")
-			} else {
-				el.classList.remove("redText")
-			}
-		}
+		blinkRed(document.getElementById("kickoutTimerTimer"), personal.secondsToNextKickout < 60)
 		if (personal.secondsToNextKickout < 0) personal.secondsToNextKickout = 0
 	}
 }
@@ -60,16 +58,15 @@ export function kickoutFlexiTimerTicker() {
 		return
 	}
 	personal.flexiSecondsToNextKickout--
-	let el = document.getElementById("flexiKickoutTimerSpan")
-	if (el) {
-		if (personal.flexiSecondsToNextKickout < 60) {
-			if (el.classList.contains("redText")) el.classList.remove("redText")
-			else el.classList.add("redText")
-		} else {
-			el.classList.remove("redText")
-		}
-	}
+	blinkRed(document.getElementById("flexiKickoutTimerSpan"), personal.flexiSecondsToNextKickout < 60)
 	if (personal.flexiSecondsToNextKickout < 0) personal.flexiSecondsToNextKickout = 0
+}
+
+export function fitHeightToFooter(el) {
+	const cs = getComputedStyle(el)
+	const b = document.getElementById("footer").getBoundingClientRect().top
+	const a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+	el.style["max-height"] = String(parseInt(b - a)) + "px"
 }
 
 export function phaseStr(phase) {
@@ -222,7 +219,7 @@ export function getImage(image) {
 	else if (image === `emp_${rf.MANAGEMENT_TRAINEE}`) {
 		const store = useModelStore()
 		return store.startingOptions.laborMarket
-			? `/static/FCM/images/e_management_trainee_labor_market.png`
+			? `/static/FCM/images/e_management_trainee_labor_market.jpg`
 			: new URL(`../../../static/FCM/images/e_management_trainee.jpg`, import.meta.url).href
 	}
 	else if (image === `emp_${rf.JUNIOR_VICE_PRESIDENT}`) return new URL(`../../../static/FCM/images/e_junior_vp.jpg`, import.meta.url).href
@@ -252,6 +249,8 @@ export function getImage(image) {
 	else if (image === `emp_${rf.PIZZA_COOK}`) return new URL(`../../../static/FCM/images/e_pizza_cook.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.PIZZA_CHEF}`) return new URL(`../../../static/FCM/images/e_pizza_chef.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.FRY_CHEF}`) return new URL(`../../../static/FCM/images/e_fry_chef.jpg`, import.meta.url).href
+	else if (image === `emp_${rf.TELEMARKETER}`) return new URL(`../../../static/FCM/images/e_telemarketer.jpg`, import.meta.url).href
+	else if (image === `emp_${rf.TV_ANNOUNCER}`) return new URL(`../../../static/FCM/images/e_tv_announcer.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.KIMCHI_MASTER}`) return new URL(`../../../static/FCM/images/e_kimchi_master.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.NOODLE_COOK}`) return new URL(`../../../static/FCM/images/e_noodle_cook.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.NOODLE_CHEF}`) return new URL(`../../../static/FCM/images/e_noodle_chef.jpg`, import.meta.url).href
@@ -276,11 +275,13 @@ export function getImage(image) {
 	else if (image === `emp_${rf.FRIED_CHICKEN_CHEF}`) return new URL(`../../../static/FCM/images/e_fried_chicken_chef.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.DELIVERY_DRIVER}`) return new URL(`../../../static/FCM/images/e_delivery_driver.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.HAWKER_MARKETEER}`) return new URL(`../../../static/FCM/images/e_hawker_marketeer.jpg`, import.meta.url).href
-	else if (image === `emp_${rf.TEMPORARY_WORKER}`) return `/static/FCM/images/e_temporary_worker.png`
-	else if (image === `emp_${rf.HEADHUNTER}`) return `/static/FCM/images/e_headhunter.png`
-	else if (image === `emp_${rf.UNION_ORGANIZER}`) return `/static/FCM/images/e_union_organizer.png`
+	else if (image === `emp_${rf.TEMPORARY_WORKER}`) return `/static/FCM/images/e_temporary_worker.jpg`
+	else if (image === `emp_${rf.HEADHUNTER}`) return `/static/FCM/images/e_headhunter.jpg`
+	else if (image === `emp_${rf.UNION_ORGANIZER}`) return `/static/FCM/images/e_union_organizer.jpg`
 	// MS icons - 29 icons
 	else if (image === "m_icon01.png") return new URL(`../../../static/FCM/images/m_icon01.png`, import.meta.url).href
+	else if (image === "m_icon30.png") return new URL(`../../../static/FCM/images/m_icon30.png`, import.meta.url).href
+	else if (image === "m_icon31.png") return new URL(`../../../static/FCM/images/m_icon31.png`, import.meta.url).href
 	else if (image === "m_icon02.png") return new URL(`../../../static/FCM/images/m_icon02.png`, import.meta.url).href
 	else if (image === "m_icon03.png") return new URL(`../../../static/FCM/images/m_icon03.png`, import.meta.url).href
 	else if (image === "m_icon04.png") return new URL(`../../../static/FCM/images/m_icon04.png`, import.meta.url).href
@@ -316,6 +317,8 @@ export function getImage(image) {
 	else if (image === "iconRange2") return new URL(`../../../static/FCM/images/icon-roadRange2.png`, import.meta.url).href
 	else if (image === "iconRange3") return new URL(`../../../static/FCM/images/icon-roadRange3.png`, import.meta.url).href
 	else if (image === "iconRange4") return new URL(`../../../static/FCM/images/icon-airRange4.png`, import.meta.url).href
+	else if (image === "iconWaveRange1") return new URL(`../../../static/FCM/images/icon-waveRange1.png`, import.meta.url).href
+	else if (image === "iconWaveRange2") return new URL(`../../../static/FCM/images/icon-waveRange2.png`, import.meta.url).href
 	else if (image === "iconSalary") return new URL(`../../../static/FCM/images/icon-salary.png`, import.meta.url).href
 	// ITEMS - FOOD/DRINK
 	else if (image === `item_${rf.LEMONADE}`) return new URL(`../../../static/FCM/images/juice.png`, import.meta.url).href
@@ -361,6 +364,12 @@ export function getImage(image) {
 	else if (image === "campaign_25") return new URL(`../../../static/FCM/images/marketing25_h.jpg`, import.meta.url).href
 	else if (image === "campaign_26") return new URL(`../../../static/FCM/images/marketing26_h.jpg`, import.meta.url).href
 	else if (image === "campaign_27") return new URL(`../../../static/FCM/images/marketing27_h.jpg`, import.meta.url).href
+	else if (image === "campaign_30") return new URL(`../../../static/FCM/images/marketing30.jpg`, import.meta.url).href
+	else if (image === "campaign_31") return new URL(`../../../static/FCM/images/marketing31.jpg`, import.meta.url).href
+	else if (image === "campaign_32") return new URL(`../../../static/FCM/images/marketing32.jpg`, import.meta.url).href
+	else if (image === "campaign_33") return new URL(`../../../static/FCM/images/marketing33.jpg`, import.meta.url).href
+	else if (image === "campaign_34") return new URL(`../../../static/FCM/images/marketing34.jpg`, import.meta.url).href
+	else if (image === "campaign_35") return new URL(`../../../static/FCM/images/marketing35.jpg`, import.meta.url).href
 	// Double good airplane campaigns
 	else if (image === "campaign_4a") return new URL(`../../../static/FCM/images/marketing4-a.jpg`, import.meta.url).href
 	else if (image === "campaign_5a") return new URL(`../../../static/FCM/images/marketing5-a.jpg`, import.meta.url).href
@@ -393,6 +402,14 @@ export function getImage(image) {
 	else if (image === "so_bailout") return new URL(`../../../static/FCM/images/so_bailout.svg`, import.meta.url).href
 	else if (image === "so_noodles") return new URL(`../../../static/FCM/images/so_noodles.svg`, import.meta.url).href
 	else if (image === "so_skip") return new URL(`../../../static/FCM/images/so_skip.jpg`, import.meta.url).href
+	// MEDIA LINE (B line) - antenna channel tokens & headline icons
+	else if (image === "so_mediaLine") return new URL(`../../../static/FCM/images/so_mediaLine.svg`, import.meta.url).href
+	else if (image === "campaign_28") return new URL(`../../../static/FCM/images/antenna35.png`, import.meta.url).href
+	else if (image === "campaign_29") return new URL(`../../../static/FCM/images/antenna45.png`, import.meta.url).href
+	else if (image === "antenna35") return new URL(`../../../static/FCM/images/antenna35.png`, import.meta.url).href
+	else if (image === "antenna45") return new URL(`../../../static/FCM/images/antenna45.png`, import.meta.url).href
+	else if (image === "headline_prime") return new URL(`../../../static/FCM/images/headline_prime.png`, import.meta.url).href
+	else if (image === "headline_press") return new URL(`../../../static/FCM/images/headline_press.png`, import.meta.url).href
 	// HOUSES & GARDEN
 	else if (image === "movedOut") return new URL(`../../../static/FCM/images/moved_out.png`, import.meta.url).href
 	else if (image === "garden") return new URL(`../../../static/FCM/images/garden.jpg`, import.meta.url).href
@@ -471,81 +488,41 @@ export function getXYforSmallSquare(index, usedRowCol) {
 }
 
 // Board food tokens - picks the high contrast variant when the user has that setting
-export function giveBoardFoodTokenImage(good) {
-	const highContrast = window.initData.highContrastBoardItems
-	let name = ""
-	if (highContrast) {
-		switch (good) {
-			case rf.BURGER:
-				name = "burger_board2.png"
-				break
-			case rf.PIZZA:
-				name = "pizza_board2.png"
-				break
-			case rf.BEER:
-				name = "beer_board2.png"
-				break
-			case rf.COKE:
-				name = "coke_board2.png"
-				break
-			case rf.LEMONADE:
-				name = "juice_board2.png"
-				break
-			case rf.COFFEE:
-				name = "coffee_board.png"
-				break
-			case rf.SUSHI:
-				name = "sushi_board.png"
-				break
-			case rf.NOODLES:
-				name = "noodles_board.png"
-				break
-			case rf.KIMCHI:
-				name = "kimchi_board.png"
-				break
-			case rf.DUMPLING:
-				name = "dumpling_board.png"
-				break
-			case rf.FRIED_CHICKEN:
-				name = "fried_chicken_board.png"
-				break
-		}
-	} else {
-		switch (good) {
-			case rf.BURGER:
-				name = "burger_board.png"
-				break
-			case rf.PIZZA:
-				name = "pizza_board.png"
-				break
-			case rf.BEER:
-				name = "beer_board.png"
-				break
-			case rf.COKE:
-				name = "coke_board.png"
-				break
-			case rf.LEMONADE:
-				name = "juice_board.png"
-				break
-			case rf.COFFEE:
-				name = "coffee_board.png"
-				break
-			case rf.SUSHI:
-				name = "sushi_board.png"
-				break
-			case rf.NOODLES:
-				name = "noodles_board.png"
-				break
-			case rf.KIMCHI:
-				name = "kimchi_board.png"
-				break
-			case rf.DUMPLING:
-				name = "dumpling_board.png"
-				break
-			case rf.FRIED_CHICKEN:
-				name = "fried_chicken_board.png"
-				break
-		}
+// Board food token sizing - beer/coke halved, lemonade reduced
+export function boardTokenStyle(good, x, y, width) {
+	if (good === rf.BEER || good === rf.COKE) {
+		x += width / 4.5
+		width /= 2
+	} else if (good === rf.LEMONADE) {
+		x += width / 5
+		width /= 1.5
 	}
-	return new URL(`../../../static/FCM/images/` + name, import.meta.url).href
+	return { left: x + "px", top: y + "px", width: width + "px" }
+}
+
+const BOARD_FOOD_IMAGES = {
+	[rf.BURGER]: "burger_board.png",
+	[rf.PIZZA]: "pizza_board.png",
+	[rf.BEER]: "beer_board.png",
+	[rf.COKE]: "coke_board.png",
+	[rf.LEMONADE]: "juice_board.png",
+	[rf.COFFEE]: "coffee_board.png",
+	[rf.SUSHI]: "sushi_board.png",
+	[rf.NOODLES]: "noodles_board.png",
+	[rf.KIMCHI]: "kimchi_board.png",
+	[rf.DUMPLING]: "dumpling_board.png",
+	[rf.FRIED_CHICKEN]: "fried_chicken_board.png",
+}
+const BOARD_FOOD_IMAGES_HIGH_CONTRAST = {
+	...BOARD_FOOD_IMAGES,
+	[rf.BURGER]: "burger_board2.png",
+	[rf.PIZZA]: "pizza_board2.png",
+	[rf.BEER]: "beer_board2.png",
+	[rf.COKE]: "coke_board2.png",
+	[rf.LEMONADE]: "juice_board2.png",
+}
+
+export function giveBoardFoodTokenImage(good) {
+	const images = window.initData.highContrastBoardItems ? BOARD_FOOD_IMAGES_HIGH_CONTRAST : BOARD_FOOD_IMAGES
+	return new URL(`../../../static/FCM/images/` + (images[good] ?? ""), import.meta.url).href
 }

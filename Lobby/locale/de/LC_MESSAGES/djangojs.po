@@ -1301,9 +1301,8 @@ msgstr "5"
 #: .\Private\Z_Deployment\HLCbigString.js:13043
 msgid ""
 "It appears you have an older version of the game. Please refresh the page"
-msgstr ""
-"Anscheinend haben Sie eine ältere Version des Spiels. Bitte aktualisieren "
-"Sie die Seite"
+msgstr "Sie haben offenbar eine ältere Version des Spiels. Bitte laden Sie "
+"die Seite neu"
 
 #: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\FCMbigString.js:25087
@@ -1313,9 +1312,8 @@ msgstr ""
 msgid ""
 "Something went wrong. Please reload the page. If the problem persists, "
 "please contact the webmaster"
-msgstr ""
-"Etwas ist schief gelaufen. Bitte laden Sie die Seite neu. Sollte das Problem"
-" weiterhin bestehen, wenden Sie sich bitte an den Webmaster"
+msgstr "Etwas ist schiefgelaufen. Bitte laden Sie die Seite neu. Wenn das "
+"Problem weiterhin besteht, wenden Sie sich bitte an den Webmaster"
 
 #: .\Private\Z_Deployment\FCMbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\FCMbigString.js:25099
@@ -3674,7 +3672,7 @@ msgstr "Sie können ein beendetes Spiel nicht zurückspulen"
 
 #: .\Private\Z_Deployment\FCMbigString.js:25117
 msgid "You cannot rewind during replay"
-msgstr "Während der Wiedergabe kann nicht zurückgespult werden"
+msgstr "Während der Wiederholung kann nicht zurückgespult werden"
 
 #: .\Private\Z_Deployment\FCMbigString.js:25160
 #: .\Private\Z_Deployment\HCbigString.js:12975
@@ -3693,7 +3691,7 @@ msgstr "Zurückspulen war nicht möglich"
 #: .\Private\Z_Deployment\HCbigString.js:13206
 #: .\Private\Z_Deployment\HLCbigString.js:13388
 msgid "Please tick a permission option first"
-msgstr "Bitte kreuzen Sie zunächst eine Berechtigungsoption an"
+msgstr "Bitte wählen Sie zuerst eine Berechtigungsoption aus"
 
 #: .\Private\Z_Deployment\FCMbigString.js:25568
 #: .\Private\Z_Deployment\HCbigString.js:13279
@@ -3729,9 +3727,8 @@ msgstr "Fehler"
 msgid ""
 "If all players agree, this game can be excluded from the stats<br/>(won't "
 "count towards wins/losses)"
-msgstr ""
-"Wenn alle Spieler einverstanden sind, kann dieses Spiel aus der Statistik "
-"ausgeschlossen werden (wird nicht für Siege/Niederlagen gezählt)."
+msgstr "Wenn alle Spieler zustimmen, kann dieses Spiel von der Statistik "
+"ausgenommen werden<br/>(zählt nicht für Siege/Niederlagen)"
 
 #: .\Private\Z_Deployment\FCMbigString.js:28482
 #: .\Private\Z_Deployment\HCbigString.js:13890
@@ -3739,18 +3736,16 @@ msgstr ""
 msgid ""
 "Please <a href='/register'>REGISTER</a> or <a href='/login'>LOGIN</a> to "
 "play a game"
-msgstr ""
-"Bitte <a href='/register'>REGISTER</a> oder <a href='/login'>LOGIN</a>, um "
-"ein Spiel zu spielen"
+msgstr "Bitte <a href='/register'>REGISTRIEREN</a> oder <a "
+"href='/login'>ANMELDEN</a>, um ein Spiel zu spielen"
 
 #: .\Private\Z_Deployment\FCMbigString.js:28493
 #: .\Private\Z_Deployment\HCbigString.js:13929
 #: .\Private\Z_Deployment\HLCbigString.js:14040
 msgid ""
 "Player <b>%(playerToKickName)s</b> has used all the standard kickout time."
-msgstr ""
-"Spieler <b>%(playerToKickName)s</b> hat die gesamte Standard-Kickout-Zeit "
-"genutzt."
+msgstr "Spieler <b>%(playerToKickName)s</b> hat die gesamte reguläre "
+"Kickout-Zeit verbraucht."
 
 #: .\Private\Z_Deployment\FCMbigString.js:28495
 #: .\Private\Z_Deployment\HCbigString.js:13931
@@ -3783,7 +3778,7 @@ msgstr ""
 #: .\Private\Z_Deployment\HLCbigString.js:14120
 #: .\Private\Z_Deployment\HLCbigString.js:14131
 msgid "Not now - allow more time"
-msgstr "Nicht jetzt – planen Sie mehr Zeit ein"
+msgstr "Nicht jetzt – mehr Zeit geben"
 
 #: .\Private\Z_Deployment\FCMbigString.js:28550
 msgid ""
@@ -3819,7 +3814,7 @@ msgstr ""
 #: .\Private\Z_Deployment\HLCbigString.js:14081
 #: .\Private\Z_Deployment\HLCbigString.js:14095
 msgid "Confirm Kickout"
-msgstr "Bestätigen Sie den Kickout"
+msgstr "Kickout bestätigen"
 
 #: .\Private\Z_Deployment\FCMbigString.js:28759
 msgid "Bug Report"
@@ -3878,7 +3873,7 @@ msgstr "Armaturenbrett"
 #: .\Private\Z_Deployment\HCbigString.js:449
 #: .\Private\Z_Deployment\HLCbigString.js:451
 msgid "Paint"
-msgstr "Malen"
+msgstr "Lackierung"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:449
@@ -3934,14 +3929,14 @@ msgstr "Marketingabteilung"
 #: .\Private\Z_Deployment\HCbigString.js:832
 #: .\Private\Z_Deployment\HLCbigString.js:834
 msgid "Duplicate Tech in Connection"
-msgstr "Doppelte Technologie im Zusammenhang"
+msgstr "Doppelte Technologie in der Verbindung"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:834
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:836
 msgid "No connection to Mainline"
-msgstr "Keine Verbindung zum Mainline"
+msgstr "Keine Verbindung zur Hauptstrecke"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:836
@@ -3954,7 +3949,7 @@ msgstr ""
 #: .\Private\Z_Deployment\HCbigString.js:846
 #: .\Private\Z_Deployment\HLCbigString.js:848
 msgid "No Dealerships"
-msgstr "Keine Händler"
+msgstr "Keine Autohäuser"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:846
@@ -3967,7 +3962,7 @@ msgstr "Bot-Spieler"
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:865
 msgid "Factory Setup"
-msgstr "Werkseinstellung"
+msgstr "Fabrik einrichten"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:874
@@ -3986,10 +3981,7 @@ msgid ""
 "A - Bumper\n"
 "4 x 1\n"
 "Also Reliability 4"
-msgstr ""
-"A – Stoßstange\n"
-"4 x 1\n"
-"Auch Zuverlässigkeit 4"
+msgstr "A - Stoßstange\n4 x 1\nZusätzlich Zuverlässigkeit 4"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:884
@@ -3998,10 +3990,7 @@ msgid ""
 "A - Body\n"
 "3 x 3\n"
 "Also Design 5"
-msgstr ""
-"A - Körper\n"
-"3 x 3\n"
-"Auch Design 5"
+msgstr "A - Karosserie\n3 x 3\nZusätzlich Design 5"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:885
@@ -4010,10 +3999,7 @@ msgid ""
 "A - Bumper\n"
 "4 x 1\n"
 "Also Safety 4"
-msgstr ""
-"A – Stoßstange\n"
-"4 x 1\n"
-"Auch Sicherheit 4"
+msgstr "A - Stoßstange\n4 x 1\nZusätzlich Sicherheit 4"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:887
@@ -4022,10 +4008,7 @@ msgid ""
 "A - Chassis\n"
 "3 x 4\n"
 "Also Reliability 2"
-msgstr ""
-"A – Chassis\n"
-"3 x 4\n"
-"Auch Zuverlässigkeit 2"
+msgstr "A - Chassis\n3 x 4\nZusätzlich Zuverlässigkeit 2"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:890
@@ -4034,10 +4017,7 @@ msgid ""
 "B - Engine\n"
 "4 x 4\n"
 "Also Speed 1 Reliability 5"
-msgstr ""
-"B - Motor\n"
-"4 x 4\n"
-"Auch Geschwindigkeit 1 Zuverlässigkeit 5"
+msgstr "B - Motor\n4 x 4\nZusätzlich Geschwindigkeit 1 Zuverlässigkeit 5"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:895
@@ -4047,10 +4027,7 @@ msgid ""
 "B - Gears\n"
 "3 x 4\n"
 "Also Speed 3"
-msgstr ""
-"B – Gänge\n"
-"3 x 4\n"
-"Auch Geschwindigkeit 3"
+msgstr "B - Getriebe\n3 x 4\nZusätzlich Geschwindigkeit 3"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:900
@@ -4059,10 +4036,7 @@ msgid ""
 "B - Gears\n"
 "3 x 4\n"
 "Also Range 6"
-msgstr ""
-"B – Gänge\n"
-"3 x 4\n"
-"Auch Bereich 6"
+msgstr "B - Getriebe\n3 x 4\nZusätzlich Reichweite 6"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:903
@@ -4072,10 +4046,7 @@ msgid ""
 "C - Dashboard\n"
 "4 x 2\n"
 "Also Design 4"
-msgstr ""
-"C - Armaturenbrett\n"
-"4 x 2\n"
-"Auch Design 4"
+msgstr "C - Armaturenbrett\n4 x 2\nZusätzlich Design 4"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:907
@@ -4094,10 +4065,7 @@ msgid ""
 "D - Headlights\n"
 "2 x 3\n"
 "Also Safety 5"
-msgstr ""
-"D - Scheinwerfer\n"
-"2 x 3\n"
-"Auch Sicherheit 5"
+msgstr "D - Scheinwerfer\n2 x 3\nZusätzlich Sicherheit 5"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:909
@@ -4107,16 +4075,13 @@ msgid ""
 "C - Dashboard\n"
 "4 x 2\n"
 "Also Speed 6"
-msgstr ""
-"C – Armaturenbrett\n"
-"4 x 2\n"
-"Auch Geschwindigkeit 6"
+msgstr "C - Armaturenbrett\n4 x 2\nZusätzlich Geschwindigkeit 6"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:5446
 #: .\Private\Z_Deployment\HLCbigString.js:5495
 msgid "Game ended by Factory Expansions"
-msgstr "Das Spiel wurde durch Fabrikerweiterungen beendet"
+msgstr "Spielende durch: Fabrikerweiterungen"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:5532
@@ -4125,7 +4090,7 @@ msgstr "Das Spiel wurde durch Fabrikerweiterungen beendet"
 #: .\Private\Z_Deployment\HLCbigString.js:5581
 #: .\Private\Z_Deployment\HLCbigString.js:5636
 msgid "Engineering"
-msgstr "Maschinenbau"
+msgstr "Ingenieurwesen"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:6354
@@ -4137,7 +4102,7 @@ msgstr "Phasen"
 #: .\Private\Z_Deployment\HCbigString.js:6356
 #: .\Private\Z_Deployment\HLCbigString.js:6405
 msgid "(Most Gantt &#x2192; Least Gantt)"
-msgstr "(Meistes Gantt → Geringstes Gantt)"
+msgstr "(Meiste Gantt &#x2192; Wenigste Gantt)"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:6203
@@ -4150,7 +4115,7 @@ msgstr "(Meistes Gantt → Geringstes Gantt)"
 #: .\Private\Z_Deployment\HLCbigString.js:6707
 #: .\Private\Z_Deployment\HLCbigString.js:7523
 msgid "Show Pieces"
-msgstr "Stücke anzeigen"
+msgstr "Teile einblenden"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:6185
@@ -4180,7 +4145,7 @@ msgstr "Teile ausblenden"
 #: .\Private\Z_Deployment\HLCbigString.js:8032
 #: .\Private\Z_Deployment\HLCbigString.js:9744
 msgid "A LINES"
-msgstr "EINE LINIEN"
+msgstr "A-LINIEN"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:7986
@@ -4202,7 +4167,7 @@ msgstr "ABTEILUNGEN"
 #: .\Private\Z_Deployment\HLCbigString.js:8052
 #: .\Private\Z_Deployment\HLCbigString.js:9764
 msgid "DEALERSHIPS"
-msgstr "HÄNDLER"
+msgstr "AUTOHÄUSER"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:7994
@@ -4217,9 +4182,8 @@ msgstr "D-LINIEN"
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:10153
 msgid "Resigning will unbalance the game for the remaining players."
-msgstr ""
-"Ein Rücktritt wird das Spiel für die verbleibenden Spieler aus dem "
-"Gleichgewicht bringen."
+msgstr "Ein Rücktritt bringt das Spiel für die verbleibenden Spieler aus dem "
+"Gleichgewicht."
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:10116
@@ -4238,8 +4202,7 @@ msgstr "Verbleibende Forschungspunkte:"
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:10497
 msgid "You are the current player. You can use any available component"
-msgstr ""
-"Du bist der aktuelle Spieler. Sie können jede verfügbare Komponente "
+msgstr "Sie sind der aktuelle Spieler. Sie können jede verfügbare Komponente "
 "verwenden"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
@@ -4270,33 +4233,33 @@ msgstr "Fabrik erweitern"
 #: .\Private\Z_Deployment\HLCbigString.js:10637
 #: .\Private\Z_Deployment\HLCbigString.js:10660
 msgid "Exit Sandbox Mode"
-msgstr "Verlassen Sie den Sandbox-Modus"
+msgstr "Sandbox-Modus verlassen"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:11686
 #: .\Private\Z_Deployment\HLCbigString.js:11771
 msgid "Game rewound to here by %(playerName)s"
-msgstr "Das Spiel wurde um %(playerName)s hierher zurückgespult"
+msgstr "Spiel wurde von %(playerName)s bis hierher zurückgespult"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:11702
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:11787
 msgid "%(playerName)s was kicked out"
-msgstr "%(playerName)s wurden rausgeschmissen"
+msgstr "%(playerName)s wurde ausgeschlossen"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:11733
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:11818
 msgid "to"
-msgstr "Zu"
+msgstr "auf"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:11852
 #: .\Private\Z_Deployment\HLCbigString.js:11938
 msgid "%(playerName)s passes: %(reason)s"
-msgstr "%(playerName)s Durchgänge: %(reason)s"
+msgstr "%(playerName)s passt: %(reason)s"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:11898
@@ -4313,8 +4276,8 @@ msgstr ""
 msgid "%(truckAmount)s Truck for $%(eachSaleAmount)s plus bonus $1"
 msgid_plural ""
 "%(truckAmount)s Trucks, each for $%(eachSaleAmount)s plus bonus $1"
-msgstr[0] "%(truckAmount)s LKW für %(eachSaleAmount)s plus Bonus 1 $"
-msgstr[1] "%(truckAmount)s LKWs, jeder für %(eachSaleAmount)s$ plus 1 $ Bonus"
+msgstr[0] "%(truckAmount)s LKW für $%(eachSaleAmount)s plus Bonus $1"
+msgstr[1] "%(truckAmount)s LKW, jeweils für $%(eachSaleAmount)s plus Bonus $1"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:11993
@@ -4326,9 +4289,8 @@ msgstr[1] "%(truckAmount)s LKWs, jeder für %(eachSaleAmount)s$ plus 1 $ Bonus"
 msgid ""
 "%(techTrackName)s: %(innovationLevel)s - Furthest from Min Marker:  "
 "%(furtehstFromMin)s"
-msgstr ""
-"%(techTrackName)s: %(innovationLevel)s – Am weitesten vom Min-Marker "
-"entfernt: %(furtehstFromMin)s"
+msgstr "%(techTrackName)s: %(innovationLevel)s - Am weitesten von der "
+"Min-Markierung entfernt:  %(furtehstFromMin)s"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:11998
@@ -4342,7 +4304,7 @@ msgstr "Hoch"
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:12231
 msgid "Game Ended by: Punch Clock"
-msgstr "Spiel beendet durch: Punch Clock"
+msgstr "Spielende durch: Stempeluhr"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:12219
@@ -4355,20 +4317,20 @@ msgstr "Montagekapazitätsschiene"
 #: .\Private\Z_Deployment\HCbigString.js:12221
 #: .\Private\Z_Deployment\HLCbigString.js:12411
 msgid "Speed Tech"
-msgstr "Speed-Tech"
+msgstr "Geschwindigkeits-Tech"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:12222
 #: .\Private\Z_Deployment\HLCbigString.js:12412
 msgid "Range Tech"
-msgstr "Reichweite Tech"
+msgstr "Reichweiten-Tech"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:12224
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:12414
 msgid "Reliability Tech"
-msgstr "Zuverlässigkeitstechnik"
+msgstr "Zuverlässigkeits-Tech"
 
 #: .\Private\Z_Deployment\HCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HCbigString.js:12564
@@ -4382,9 +4344,8 @@ msgstr "Ihre Fabrik wurde gespeichert"
 #: .\Private\Z_Deployment\HLCbigString.js:12867
 msgid ""
 "Your factory has been saved. It will be verified again when it's your turn"
-msgstr ""
-"Ihre Fabrik wurde gespeichert. Es wird erneut überprüft, wenn Sie an der "
-"Reihe sind"
+msgstr "Ihre Fabrik wurde gespeichert. Sie wird erneut überprüft, wenn Sie an "
+"der Reihe sind"
 
 #: .\Private\Z_Deployment\HCbigString.js:255
 #: .\Private\Z_Deployment\HLCbigString.js:257
@@ -4433,7 +4394,7 @@ msgstr "LKW-Hauptstrecke"
 #: .\Private\Z_Deployment\HCbigString.js:449
 #: .\Private\Z_Deployment\HLCbigString.js:451
 msgid "Sports Mainline"
-msgstr "Sport-Hauptlinie"
+msgstr "Sportwagen-Hauptstrecke"
 
 #: .\Private\Z_Deployment\HCbigString.js:449
 #: .\Private\Z_Deployment\HLCbigString.js:451
@@ -4448,7 +4409,7 @@ msgstr "Planungsabteilung"
 #: .\Private\Z_Deployment\HCbigString.js:449
 #: .\Private\Z_Deployment\HLCbigString.js:451
 msgid "Body"
-msgstr "Körper"
+msgstr "Karosserie"
 
 #: .\Private\Z_Deployment\HCbigString.js:449
 #: .\Private\Z_Deployment\HLCbigString.js:451
@@ -4552,17 +4513,17 @@ msgstr "Spezifikation (Sicherheit D)"
 #: .\Private\Z_Deployment\HCbigString.js:449
 #: .\Private\Z_Deployment\HLCbigString.js:451
 msgid "Spec (Range A)"
-msgstr "Spezifikation (Bereich A)"
+msgstr "Spezifikation (Reichweite A)"
 
 #: .\Private\Z_Deployment\HCbigString.js:449
 #: .\Private\Z_Deployment\HLCbigString.js:451
 msgid "Spec (Range B)"
-msgstr "Spezifikation (Bereich B)"
+msgstr "Spezifikation (Reichweite B)"
 
 #: .\Private\Z_Deployment\HCbigString.js:449
 #: .\Private\Z_Deployment\HLCbigString.js:451
 msgid "Spec (Range D)"
-msgstr "Spezifikation (Bereich D)"
+msgstr "Spezifikation (Reichweite D)"
 
 #: .\Private\Z_Deployment\HCbigString.js:829
 #: .\Private\Z_Deployment\HLCbigString.js:831
@@ -4572,17 +4533,17 @@ msgstr "Keine Verbindung zur Laderampe"
 #: .\Private\Z_Deployment\HCbigString.js:830
 #: .\Private\Z_Deployment\HLCbigString.js:832
 msgid "Not Adjacent to Dealership"
-msgstr "Nicht neben dem Autohaus"
+msgstr "Nicht an ein Autohaus angrenzend"
 
 #: .\Private\Z_Deployment\HCbigString.js:831
 #: .\Private\Z_Deployment\HLCbigString.js:833
 msgid "Not Adjacent to Mainline"
-msgstr "Nicht an die Hauptstrecke angrenzend"
+msgstr "Nicht an eine Hauptstrecke angrenzend"
 
 #: .\Private\Z_Deployment\HCbigString.js:833
 #: .\Private\Z_Deployment\HLCbigString.js:835
 msgid "No Spec Indicator Attached"
-msgstr "Kein Spezifikationsindikator angebracht"
+msgstr "Kein Spezifikationsanzeiger angebracht"
 
 #: .\Private\Z_Deployment\HCbigString.js:835
 #: .\Private\Z_Deployment\HLCbigString.js:837
@@ -4592,13 +4553,13 @@ msgstr "Unbekannt"
 #: .\Private\Z_Deployment\HCbigString.js:846
 #: .\Private\Z_Deployment\HLCbigString.js:848
 msgid "No stock"
-msgstr "Kein Lagerbestand"
+msgstr "Kein Bestand"
 
 #: .\Private\Z_Deployment\HCbigString.js:846
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:848
 msgid "No Min Spec Dealerships"
-msgstr "Keine Mindestspezifikationshändler"
+msgstr "Alle Autohäuser unter der Mindestspezifikation"
 
 #: .\Private\Z_Deployment\HCbigString.js:846
 #: .\Private\Z_Deployment\HLCbigString.js:848
@@ -4608,7 +4569,7 @@ msgstr "Kein Verkauf mehr möglich"
 #: .\Private\Z_Deployment\HCbigString.js:846
 #: .\Private\Z_Deployment\HLCbigString.js:848
 msgid "Final sale processed automatically"
-msgstr "Der Endverkauf wird automatisch abgewickelt"
+msgstr "Letzter Verkauf wird automatisch abgewickelt"
 
 #: .\Private\Z_Deployment\HCbigString.js:863
 #: .\Private\Z_Deployment\HLCbigString.js:865
@@ -4640,12 +4601,12 @@ msgstr "Verkaufen"
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:865
 msgid "Increase Expectations"
-msgstr "Erhöhen Sie die Erwartungen"
+msgstr "Erwartungen erhöhen"
 
 #: .\Private\Z_Deployment\HCbigString.js:863
 #: .\Private\Z_Deployment\HLCbigString.js:865
 msgid "Grow Demands"
-msgstr "Wachsen Sie die Anforderungen"
+msgstr "Nachfrage steigern"
 
 #: .\Private\Z_Deployment\HCbigString.js:875
 #: .\Private\Z_Deployment\HLCbigString.js:877
@@ -4663,10 +4624,7 @@ msgid ""
 "B - Steering Wheel\n"
 "3 x 3\n"
 "Also Design 6"
-msgstr ""
-"B - Lenkrad\n"
-"3 x 3\n"
-"Auch Design 6"
+msgstr "B - Lenkrad\n3 x 3\nZusätzlich Design 6"
 
 #: .\Private\Z_Deployment\HCbigString.js:878
 #: .\Private\Z_Deployment\HLCbigString.js:880
@@ -4674,10 +4632,7 @@ msgid ""
 "D - Headlights\n"
 "2 x 3\n"
 "Also Design 3"
-msgstr ""
-"D - Scheinwerfer\n"
-"2 x 3\n"
-"Auch Design 3"
+msgstr "D - Scheinwerfer\n2 x 3\nZusätzlich Design 3"
 
 #: .\Private\Z_Deployment\HCbigString.js:879
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
@@ -4686,10 +4641,7 @@ msgid ""
 "D - Tire\n"
 "3 x 3\n"
 "Also Range 3 Speed 4"
-msgstr ""
-"D – Reifen\n"
-"3 x 3\n"
-"Auch Range 3 Speed ​​4"
+msgstr "D - Reifen\n3 x 3\nZusätzlich Reichweite 3 Geschwindigkeit 4"
 
 #: .\Private\Z_Deployment\HCbigString.js:882
 #: .\Private\Z_Deployment\HLCbigString.js:884
@@ -4706,10 +4658,7 @@ msgid ""
 "A - Chassis\n"
 "3 x 4\n"
 "Also Reliability 6"
-msgstr ""
-"A - Chassis\n"
-"3 x 4\n"
-"Auch Zuverlässigkeit 6"
+msgstr "A - Chassis\n3 x 4\nZusätzlich Zuverlässigkeit 6"
 
 #: .\Private\Z_Deployment\HCbigString.js:886
 #: .\Private\Z_Deployment\HLCbigString.js:888
@@ -4717,10 +4666,7 @@ msgid ""
 "B - Engine\n"
 "4 x 4\n"
 "Also Speed 1 Range 1"
-msgstr ""
-"B – Motor\n"
-"4 x 4\n"
-"Auch Geschwindigkeit 1 Bereich 1"
+msgstr "B - Motor\n4 x 4\nZusätzlich Geschwindigkeit 1 Reichweite 1"
 
 #: .\Private\Z_Deployment\HCbigString.js:891
 #: .\Private\Z_Deployment\HLCbigString.js:893
@@ -4728,10 +4674,7 @@ msgid ""
 "A - Radiator\n"
 "2 x 3\n"
 "Also Range 5"
-msgstr ""
-"A – Heizkörper\n"
-"2 x 3\n"
-"Auch Bereich 5"
+msgstr "A - Kühler\n2 x 3\nZusätzlich Reichweite 5"
 
 #: .\Private\Z_Deployment\HCbigString.js:892
 #: .\Private\Z_Deployment\HLCbigString.js:894
@@ -4739,10 +4682,7 @@ msgid ""
 "D - Tire\n"
 "3 x 3\n"
 "Also Speed 4 Safety 6"
-msgstr ""
-"D - Reifen\n"
-"3 x 3\n"
-"Auch Geschwindigkeit 4 Sicherheit 6"
+msgstr "D - Reifen\n3 x 3\nZusätzlich Geschwindigkeit 4 Sicherheit 6"
 
 #: .\Private\Z_Deployment\HCbigString.js:893
 #: .\Private\Z_Deployment\HLCbigString.js:895
@@ -4750,10 +4690,7 @@ msgid ""
 "B - Fuel Tank\n"
 "4 x 2\n"
 "Also Speed 5"
-msgstr ""
-"B – Kraftstofftank\n"
-"4 x 2\n"
-"Auch Geschwindigkeit 5"
+msgstr "B - Kraftstofftank\n4 x 2\nZusätzlich Geschwindigkeit 5"
 
 #: .\Private\Z_Deployment\HCbigString.js:894
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
@@ -4762,10 +4699,7 @@ msgid ""
 "A - Radiator\n"
 "2 x 3\n"
 "Also Range 2"
-msgstr ""
-"A - Heizkörper\n"
-"2 x 3\n"
-"Auch Bereich 2"
+msgstr "A - Kühler\n2 x 3\nZusätzlich Reichweite 2"
 
 #: .\Private\Z_Deployment\HCbigString.js:898
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
@@ -4774,10 +4708,7 @@ msgid ""
 "B - Engine\n"
 "4 x 4\n"
 "Also Range 1 Reliability 5"
-msgstr ""
-"B - Motor\n"
-"4 x 4\n"
-"Auch Reichweite 1 Zuverlässigkeit 5"
+msgstr "B - Motor\n4 x 4\nZusätzlich Reichweite 1 Zuverlässigkeit 5"
 
 #: .\Private\Z_Deployment\HCbigString.js:899
 #: .\Private\Z_Deployment\HLCbigString.js:901
@@ -4794,10 +4725,7 @@ msgid ""
 "D - Tire\n"
 "3 x 3\n"
 "Also Range 3 Safety 6"
-msgstr ""
-"D – Reifen\n"
-"3 x 3\n"
-"Auch Bereich 3 Sicherheit 6"
+msgstr "D - Reifen\n3 x 3\nZusätzlich Reichweite 3 Sicherheit 6"
 
 #: .\Private\Z_Deployment\HCbigString.js:902
 #: .\Private\Z_Deployment\HLCbigString.js:904
@@ -4805,19 +4733,14 @@ msgid ""
 "B - Fuel Tank\n"
 "4 x 2\n"
 "Also Range 4"
-msgstr ""
-"B – Kraftstofftank\n"
-"4 x 2\n"
-"Auch Reichweite 4"
+msgstr "B - Kraftstofftank\n4 x 2\nZusätzlich Reichweite 4"
 
 #: .\Private\Z_Deployment\HCbigString.js:906
 #: .\Private\Z_Deployment\HLCbigString.js:908
 msgid ""
 "C - Paint\n"
 "2 x 3"
-msgstr ""
-"C – Farbe\n"
-"2 x 3"
+msgstr "C - Lackierung\n2 x 3"
 
 #: .\Private\Z_Deployment\HCbigString.js:910
 #: .\Private\Z_Deployment\HLCbigString.js:912
@@ -4825,10 +4748,7 @@ msgid ""
 "A - Body\n"
 "3 x 3\n"
 "Also Reliability 3"
-msgstr ""
-"A - Körper\n"
-"3 x 3\n"
-"Auch Zuverlässigkeit 3"
+msgstr "A - Karosserie\n3 x 3\nZusätzlich Zuverlässigkeit 3"
 
 #: .\Private\Z_Deployment\HCbigString.js:911
 #: .\Private\Z_Deployment\HLCbigString.js:913
@@ -4836,10 +4756,7 @@ msgid ""
 "B - Steering Wheel\n"
 "3 x 3\n"
 "Also Safety 3"
-msgstr ""
-"B - Lenkrad\n"
-"3 x 3\n"
-"Auch Sicherheit 3"
+msgstr "B - Lenkrad\n3 x 3\nZusätzlich Sicherheit 3"
 
 #: .\Private\Z_Deployment\HCbigString.js:2297
 #: .\Private\Z_Deployment\HCbigString.js:2673
@@ -4852,7 +4769,7 @@ msgstr "Kein Platz"
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:2489
 msgid "Not pointing at suitable tech"
-msgstr "Zeigt nicht auf geeignete Technologie"
+msgstr "Zeigt auf keine geeignete Technologie"
 
 #: .\Private\Z_Deployment\HCbigString.js:2476
 #: .\Private\Z_Deployment\HLCbigString.js:2514
@@ -4863,28 +4780,28 @@ msgstr "Tech-Level zu niedrig für Spec"
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:2761
 msgid "Not Adjacent to Factory"
-msgstr "Nicht neben der Fabrik"
+msgstr "Nicht an die Fabrik angrenzend"
 
 #: .\Private\Z_Deployment\HCbigString.js:2790
 #: .\Private\Z_Deployment\HLCbigString.js:2828
 msgid "Blocking Factory Loading Bay"
-msgstr "Blockierung der Werksladerampe"
+msgstr "Blockiert die Laderampe der Fabrik"
 
 #: .\Private\Z_Deployment\HCbigString.js:2858
 #: .\Private\Z_Deployment\HLCbigString.js:2896
 msgid "New Expansion Loading Bay Blocked"
-msgstr "Neue Erweiterungsladebucht blockiert"
+msgstr "Neue Erweiterung: Laderampe blockiert"
 
 #: .\Private\Z_Deployment\HCbigString.js:5445
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:5494
 msgid "Game ended by Punch Clock"
-msgstr "Das Spiel endete mit Punch Clock"
+msgstr "Spielende durch: Stempeluhr"
 
 #: .\Private\Z_Deployment\HCbigString.js:5447
 #: .\Private\Z_Deployment\HLCbigString.js:5496
 msgid "Game ended by King of the Hill"
-msgstr "Das Spiel endete mit King of the Hill"
+msgstr "Spielende durch: King of the Hill"
 
 #: .\Private\Z_Deployment\HCbigString.js:5504
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
@@ -4895,7 +4812,7 @@ msgstr "Markttafel ansehen"
 #: .\Private\Z_Deployment\HCbigString.js:5529
 #: .\Private\Z_Deployment\HLCbigString.js:5578
 msgid "Most Gantt"
-msgstr "Die meisten Gantt"
+msgstr "Meiste Gantt"
 
 #: .\Private\Z_Deployment\HCbigString.js:5530
 #: .\Private\Z_Deployment\HCbigString.js:5589
@@ -4916,12 +4833,12 @@ msgstr "Gewinner"
 #: .\Private\Z_Deployment\HCbigString.js:5586
 #: .\Private\Z_Deployment\HLCbigString.js:5635
 msgid "Least Gantt"
-msgstr "Zumindest Gantt"
+msgstr "Wenigste Gantt"
 
 #: .\Private\Z_Deployment\HCbigString.js:5588
 #: .\Private\Z_Deployment\HLCbigString.js:5637
 msgid "Stuck in Traffic"
-msgstr "Im Stau stecken geblieben"
+msgstr "Im Stau"
 
 #: .\Private\Z_Deployment\HCbigString.js:6355
 #: .\Private\Z_Deployment\HCbigString.js:6357
@@ -4931,12 +4848,12 @@ msgstr "Im Stau stecken geblieben"
 #: .\Private\Z_Deployment\HLCbigString.js:6406
 #: .\Private\Z_Deployment\HLCbigString.js:6411
 msgid "(E &#x2192; S)"
-msgstr "(E → S)"
+msgstr "(I &#x2192; V)"
 
 #: .\Private\Z_Deployment\HCbigString.js:6359
 #: .\Private\Z_Deployment\HLCbigString.js:6408
 msgid "(S &#x2192; E)"
-msgstr "(S → E)"
+msgstr "(V &#x2192; I)"
 
 #: .\Private\Z_Deployment\HCbigString.js:6569
 #: .\Private\Z_Deployment\HLCbigString.js:6619
@@ -4946,28 +4863,26 @@ msgstr "Marktnachfrage:"
 #: .\Private\Z_Deployment\HCbigString.js:7051
 #: .\Private\Z_Deployment\HLCbigString.js:7101
 msgid "Adding a new tech caused: %(componentName)s - %(componentError)s"
-msgstr ""
-"Das Hinzufügen einer neuen Technologie verursachte: %(componentName)s - "
+msgstr "Eine neue Technologie verursachte: %(componentName)s - "
 "%(componentError)s"
 
 #: .\Private\Z_Deployment\HCbigString.js:7071
 #: .\Private\Z_Deployment\HLCbigString.js:7121
 msgid "Please remove: %(componentName)s - previous players already took this"
-msgstr ""
-"Bitte entfernen: %(componentName)s – frühere Spieler haben dies bereits "
-"genommen"
+msgstr "Bitte entfernen: %(componentName)s - vorherige Spieler haben dies "
+"bereits genommen"
 
 #: .\Private\Z_Deployment\HCbigString.js:7182
 #: .\Private\Z_Deployment\HLCbigString.js:7232
 msgid "Enter Sandbox Mode"
-msgstr "Wechseln Sie in den Sandbox-Modus"
+msgstr "Sandbox-Modus starten"
 
 #: .\Private\Z_Deployment\HCbigString.js:7978
 #: .\Private\Z_Deployment\HCbigString.js:9690
 #: .\Private\Z_Deployment\HLCbigString.js:8028
 #: .\Private\Z_Deployment\HLCbigString.js:9740
 msgid "MAINLINES"
-msgstr "HAUPTLINIEN"
+msgstr "HAUPTSTRECKEN"
 
 #: .\Private\Z_Deployment\HCbigString.js:7990
 #: .\Private\Z_Deployment\HCbigString.js:9702
@@ -4981,7 +4896,7 @@ msgstr "C-LINIEN"
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:8215
 msgid "Niche Square exceeds Sepcs of Dealership"
-msgstr "Niche Square übertrifft Sepcs of Dealership"
+msgstr "Nischenfeld übersteigt die Spezifikationen des Autohauses"
 
 #: .\Private\Z_Deployment\HCbigString.js:8851
 #: .\Private\Z_Deployment\HLCbigString.js:8901
@@ -4992,7 +4907,7 @@ msgstr "Unterhalb der Mindestspezifikation"
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:8958
 msgid "Nudge Component"
-msgstr "Nudge-Komponente"
+msgstr "Komponente anstupsen"
 
 #: .\Private\Z_Deployment\HCbigString.js:8968
 #: .\Private\Z_Deployment\HLCbigString.js:9018
@@ -5006,16 +4921,15 @@ msgid ""
 "Welcome to Horseless Carriage Online!=-NEWLINE-==-NEWLINE-=If you have any "
 "suggestions, questions or comments, then please do contact the webmaster at "
 "the email address in Contact (top right in the lobby). Thanks!"
-msgstr ""
-"Willkommen bei Horseless Carriage Online!=-NEWLINE-==-NEWLINE-=Wenn Sie "
-"Vorschläge, Fragen oder Kommentare haben, wenden Sie sich bitte an den "
-"Webmaster unter der E-Mail-Adresse unter „Kontakt“ (oben rechts in der "
-"Lobby). Danke!"
+msgstr "Willkommen bei Horseless Carriage Online!=-NEWLINE-==-NEWLINE-=Wenn "
+"Sie Vorschläge, Fragen oder Kommentare haben, wenden Sie sich bitte an den "
+"Webmaster unter der E-Mail-Adresse in Contact (oben rechts in der Lobby). "
+"Danke!"
 
 #: .\Private\Z_Deployment\HCbigString.js:9710
 #: .\Private\Z_Deployment\HLCbigString.js:9760
 msgid "D'MENTS"
-msgstr "D'MENTS"
+msgstr "ABT."
 
 #: .\Private\Z_Deployment\HCbigString.js:9741
 #: .\Private\Z_Deployment\HLCbigString.js:9791
@@ -5033,14 +4947,13 @@ msgstr ""
 msgid ""
 "These players have passed and will be inserted in leftover spaces in this "
 "order:"
-msgstr ""
-"Diese Spieler haben gepasst und werden in dieser Reihenfolge in die "
-"verbleibenden Felder eingefügt:"
+msgstr "Diese Spieler haben gepasst und werden in dieser Reihenfolge in die "
+"übrigen Plätze eingefügt:"
 
 #: .\Private\Z_Deployment\HCbigString.js:9880
 #: .\Private\Z_Deployment\HLCbigString.js:9930
 msgid "Previous Focus Order:"
-msgstr "Vorherige Focus-Reihenfolge:"
+msgstr "Vorherige Fokusreihenfolge:"
 
 #: .\Private\Z_Deployment\HCbigString.js:9887
 #: .\Private\Z_Deployment\HLCbigString.js:9937
@@ -5064,14 +4977,13 @@ msgstr ""
 msgid ""
 "In this practice game You will play all 3 players. Submit a bug report to "
 "report errors and game data to the webmaster. Thanks!"
-msgstr ""
-"In diesem Übungsspiel spielen Sie alle 3 Spieler. Senden Sie einen "
-"Fehlerbericht, um dem Webmaster Fehler und Spieldaten zu melden. Danke!"
+msgstr "In diesem Übungsspiel spielen Sie alle 3 Spieler. Senden Sie einen "
+"Fehlerbericht, um Fehler und Spieldaten an den Webmaster zu melden. Danke!"
 
 #: .\Private\Z_Deployment\HCbigString.js:10028
 #: .\Private\Z_Deployment\HLCbigString.js:10078
 msgid "Orientate your main factory tile"
-msgstr "Richten Sie Ihre Hauptfabrikplättchen aus"
+msgstr "Richten Sie Ihr Hauptfabrikplättchen aus"
 
 #: .\Private\Z_Deployment\HCbigString.js:10048
 #: .\Private\Z_Deployment\HLCbigString.js:10098
@@ -5081,8 +4993,7 @@ msgstr "Platzieren Sie eine Forschungsabteilung und eine Planungsabteilung"
 #: .\Private\Z_Deployment\HCbigString.js:10087
 #: .\Private\Z_Deployment\HLCbigString.js:10137
 msgid "Advance your Assembly Capacity or any player's Research"
-msgstr ""
-"Verbessere deine Versammlungskapazität oder die Forschung eines beliebigen "
+msgstr "Erhöhen Sie Ihre Montagekapazität oder die Forschung eines beliebigen "
 "Spielers"
 
 #: .\Private\Z_Deployment\HCbigString.js:10091
@@ -5094,9 +5005,8 @@ msgstr ""
 msgid ""
 "NOTE: Bot players do not restrict tech access. So the first human player in "
 "Eng order will have access to all techs"
-msgstr ""
-"HINWEIS: Bot-Spieler schränken den technischen Zugriff nicht ein. Der erste "
-"menschliche Spieler in englischer Reihenfolge hat also Zugriff auf alle "
+msgstr "HINWEIS: Bot-Spieler schränken den Technologiezugang nicht ein. Der "
+"erste menschliche Spieler in der Ing-Reihenfolge hat daher Zugriff auf alle "
 "Technologien"
 
 #: .\Private\Z_Deployment\HCbigString.js:10104
@@ -5109,10 +5019,9 @@ msgstr "Bitte spielen Sie weiter, wenn das überhaupt möglich ist."
 msgid ""
 "Even if you think you can't win, you could still aim for 2nd place / not "
 "last place / funny factory layout / etc."
-msgstr ""
-"Selbst wenn Sie denken, dass Sie nicht gewinnen können, könnten Sie dennoch "
-"den zweiten Platz/nicht den letzten Platz/einen lustigen Fabrikaufbau/usw. "
-"anstreben."
+msgstr "Auch wenn Sie glauben, nicht gewinnen zu können, können Sie immer "
+"noch den 2. Platz / nicht den letzten Platz / ein lustiges Fabriklayout / "
+"usw. anstreben."
 
 #: .\Private\Z_Deployment\HCbigString.js:10115
 #: .\Private\Z_Deployment\HLCbigString.js:10165
@@ -5123,9 +5032,8 @@ msgstr "Ja, ich möchte trotzdem zurücktreten"
 #: .\Private\Z_Deployment\HLCbigString.js:10312
 msgid ""
 "You moved %(playerName)s %(playerToken)s to %(techTrack)s %(newPosition)s"
-msgstr ""
-"Du hast %(playerName)s %(playerToken)s auf %(techTrack)s %(newPosition)s "
-"verschoben"
+msgstr "Sie haben %(playerName)s %(playerToken)s auf %(techTrack)s "
+"%(newPosition)s gezogen"
 
 #: .\Private\Z_Deployment\HCbigString.js:10342
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
@@ -5138,15 +5046,14 @@ msgstr "Vorherige Fokusreihenfolge"
 msgid ""
 "Spend all Gantt to choose focus, or keep your Gantt. Remember: reaching 10 "
 "Gantt will reduce the punch clock by 1"
-msgstr ""
-"Geben Sie das gesamte Gantt-Diagramm aus, um den Fokus zu wählen, oder "
-"behalten Sie Ihr Gantt-Diagramm. Denken Sie daran: Das Erreichen von 10 "
-"Gantt reduziert die Schlagzeit um 1"
+msgstr "Geben Sie alle Gantt aus, um den Fokus zu wählen, oder behalten Sie "
+"Ihre Gantt. Denken Sie daran: Wer 10 Gantt erreicht, verringert die "
+"Stempeluhr um 1"
 
 #: .\Private\Z_Deployment\HCbigString.js:10373
 #: .\Private\Z_Deployment\HLCbigString.js:10424
 msgid "Pass & Keep Gantt"
-msgstr "Gantt weitergeben und beibehalten"
+msgstr "Passen & Gantt behalten"
 
 #: .\Private\Z_Deployment\HCbigString.js:10394
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
@@ -5159,17 +5066,15 @@ msgstr "Ing"
 #: .\Private\Z_Deployment\HLCbigString.js:10482
 #: .\Private\Z_Deployment\HLCbigString.js:12843
 msgid "Previous players used up the components. Please rearrange your factory"
-msgstr ""
-"Frühere Spieler haben die Komponenten aufgebraucht. Bitte ordnen Sie Ihre "
-"Fabrik neu"
+msgstr "Vorherige Spieler haben die Komponenten aufgebraucht. Bitte ordnen "
+"Sie Ihre Fabrik neu an"
 
 #: .\Private\Z_Deployment\HCbigString.js:10433
 #: .\Private\Z_Deployment\HLCbigString.js:10484
 msgid ""
 "IT IS NOT YET YOUR TURN. You will be able to fix your factory on your turn"
-msgstr ""
-"Du bist noch nicht an der Reihe. Du kannst deine Fabrik in deinem Zug "
-"reparieren"
+msgstr "SIE SIND NOCH NICHT AM ZUG. Sie können Ihre Fabrik in Ihrer Runde "
+"anpassen"
 
 #: .\Private\Z_Deployment\HCbigString.js:10436
 #: .\Private\Z_Deployment\HCbigString.js:10557
@@ -5184,9 +5089,9 @@ msgstr "Platzieren Sie Komponenten in Ihrer Fabrik"
 msgid ""
 "You are not the current player. If previous players use up components that "
 "you also use, you will need to modify your factory"
-msgstr ""
-"Du bist nicht der aktuelle Spieler. Wenn frühere Spieler Komponenten "
-"verbrauchen, die Sie auch verwenden, müssen Sie Ihre Fabrik modifizieren"
+msgstr "Sie sind nicht der aktuelle Spieler. Wenn vorherige Spieler "
+"Komponenten aufbrauchen, die Sie ebenfalls verwenden, müssen Sie Ihre Fabrik "
+"anpassen"
 
 #: .\Private\Z_Deployment\HCbigString.js:10459
 #: .\Private\Z_Deployment\HLCbigString.js:10510
@@ -5196,7 +5101,7 @@ msgstr "Speichern, ohne die Runde zu beenden"
 #: .\Private\Z_Deployment\HCbigString.js:10466
 #: .\Private\Z_Deployment\HLCbigString.js:10517
 msgid "Finish Building"
-msgstr "Beenden Sie den Bau"
+msgstr "Bauen abschließen"
 
 #: .\Private\Z_Deployment\HCbigString.js:10528
 #: .\Private\Z_Deployment\HCbigString.js:10605
@@ -5210,25 +5115,25 @@ msgstr "Erweitern Sie Ihre Fabrik"
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:10585
 msgid "Go back to Factory Building"
-msgstr "Gehen Sie zurück zum Fabrikgebäude"
+msgstr "Zurück zum Fabrikbau"
 
 #: .\Private\Z_Deployment\HCbigString.js:10555
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:10608
 msgid "SANDBOX MODE - USE THE BUTTON TO EXIT SANDBOX MODE"
-msgstr "SANDBOX-MODUS – VERWENDEN SIE DEN SANDBOX-MODUS MIT DER TASTE"
+msgstr "SANDBOX-MODUS – VERWENDEN SIE DIE SCHALTFLÄCHE, UM DEN SANDBOX-MODUS "
+"ZU VERLASSEN"
 
 #: .\Private\Z_Deployment\HCbigString.js:10603
 #: .\Private\Z_Deployment\HLCbigString.js:10656
 msgid "SANDBOX MODE - REFRESH THE PAGE OR USE THE BUTTON TO EXIT SANDBOX MODE"
-msgstr ""
-"SANDBOX-MODUS – AKTUALISIEREN SIE DIE SEITE ODER VERWENDEN SIE DEN SANDBOX-"
-"MODUS MIT DER TASTE"
+msgstr "SANDBOX-MODUS – LADEN SIE DIE SEITE NEU ODER VERWENDEN SIE DIE "
+"SCHALTFLÄCHE, UM DEN SANDBOX-MODUS ZU VERLASSEN"
 
 #: .\Private\Z_Deployment\HCbigString.js:10624
 #: .\Private\Z_Deployment\HLCbigString.js:10677
 msgid "Start Building Again"
-msgstr "Beginnen Sie erneut mit dem Bauen"
+msgstr "Wieder mit dem Bauen beginnen"
 
 #: .\Private\Z_Deployment\HCbigString.js:10653
 #: .\Private\Z_Deployment\HLCbigString.js:10706
@@ -5236,11 +5141,10 @@ msgid ""
 "Choose a dealership, place a Market Window, then if possible, sell to a "
 "niche<BR/>Once you select a dealership, you can rotate the market window "
 "using the buttons that appear underneath the dealerships"
-msgstr ""
-"Wählen Sie einen Händler, platzieren Sie ein Marktfenster und verkaufen Sie "
-"dann, wenn möglich, an eine Nische. Sobald Sie einen Händler ausgewählt "
-"haben, können Sie das Marktfenster mithilfe der Schaltflächen drehen, die "
-"unter den Händlern angezeigt werden"
+msgstr "Wählen Sie ein Autohaus und platzieren Sie ein Marktfenster; "
+"verkaufen Sie dann, wenn möglich, an eine Nische<BR/>Sobald Sie ein Autohaus "
+"ausgewählt haben, können Sie das Marktfenster mit den Schaltflächen drehen, "
+"die unter den Autohäusern erscheinen"
 
 #: .\Private\Z_Deployment\HCbigString.js:10857
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
@@ -5259,16 +5163,15 @@ msgstr "Runde beenden"
 #: .\Private\Z_Deployment\HCbigString.js:10977
 #: .\Private\Z_Deployment\HLCbigString.js:11058
 msgid "Choose a card, then select the quadrant you wish to add it to"
-msgstr ""
-"Wählen Sie eine Karte und dann den Quadranten aus, dem Sie sie hinzufügen "
-"möchten"
+msgstr "Wählen Sie eine Karte und dann den Quadranten, in den Sie sie "
+"einfügen möchten"
 
 #: .\Private\Z_Deployment\HCbigString.js:11050
 #: .\Private\Z_Deployment\HCbigString.js:11121
 #: .\Private\Z_Deployment\HLCbigString.js:11131
 #: .\Private\Z_Deployment\HLCbigString.js:11199
 msgid "You are in sandbox mode. Please refresh the page"
-msgstr "Sie befinden sich im Sandbox-Modus. Bitte aktualisieren Sie die Seite"
+msgstr "Sie befinden sich im Sandbox-Modus. Bitte laden Sie die Seite neu"
 
 #: .\Private\Z_Deployment\HCbigString.js:11674
 #: .\Private\Z_Deployment\HLCbigString.js:11759
@@ -5279,19 +5182,17 @@ msgstr "%(playerName)s richtet die Fabrik ein"
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:11815
 msgid "moves"
-msgstr "bewegt sich"
+msgstr "zieht"
 
 #: .\Private\Z_Deployment\HCbigString.js:11763
 #: .\Private\Z_Deployment\HLCbigString.js:11848
 msgid "%(playerName)s passes and keeps their Gantt"
-msgstr "%(playerName)s besteht und behält sein Gantt"
+msgstr "%(playerName)s passt und behält sein Gantt"
 
 #: .\Private\Z_Deployment\HCbigString.js:11774
 #: .\Private\Z_Deployment\HLCbigString.js:11859
 msgid "%(playerName)s spends all Gantt to choose position: %(position)s"
-msgstr ""
-"%(playerName)s gibt den gesamten Gantt aus, um die Position auszuwählen: "
-"%(position)s"
+msgstr "%(playerName)s gibt alle Gantt aus und wählt Position: %(position)s"
 
 #: .\Private\Z_Deployment\HCbigString.js:11788
 #: .\Private\Z_Deployment\HCbigString.js:11806
@@ -5304,7 +5205,7 @@ msgstr "baut"
 #: .\Private\Z_Deployment\HCbigString.js:11861
 #: .\Private\Z_Deployment\HLCbigString.js:11947
 msgid "Gantt Increases"
-msgstr "Gantt-Erhöhungen"
+msgstr "Gantt steigt"
 
 #: .\Private\Z_Deployment\HCbigString.js:11866
 #: .\Private\Z_Deployment\HLCbigString.js:11952
@@ -5314,20 +5215,19 @@ msgstr "%(playerName)s erhält %(numberOfGantt)s Gantt"
 #: .\Private\Z_Deployment\HCbigString.js:11899
 #: .\Private\Z_Deployment\HLCbigString.js:11985
 msgid "%(playerName)s uses %(dealershipName)s but cannot make any sales"
-msgstr ""
-"%(playerName)s verbraucht %(dealershipName)s, kann aber keine Verkäufe "
+msgstr "%(playerName)s nutzt %(dealershipName)s, kann aber keine Verkäufe "
 "tätigen"
 
 #: .\Private\Z_Deployment\HCbigString.js:11901
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:11987
 msgid "%(playerName)s places %(dealershipName)s to sell:"
-msgstr "%(playerName)s Plätze %(dealershipName)s zu verkaufen:"
+msgstr "%(playerName)s platziert %(dealershipName)s und verkauft:"
 
 #: .\Private\Z_Deployment\HCbigString.js:11902
 #: .\Private\Z_Deployment\HLCbigString.js:11988
 msgid "%(playerName)s uses %(dealershipName)s to sell"
-msgstr "%(playerName)s verwendet %(dealershipName)s zum Verkaufen"
+msgstr "%(playerName)s nutzt %(dealershipName)s zum Verkaufen"
 
 #: .\Private\Z_Deployment\HCbigString.js:11902
 #: .\Private\Z_Deployment\HLCbigString.js:11988
@@ -5339,19 +5239,17 @@ msgstr "(automatisch)"
 #: .\Private\Z_Deployment\HLCbigString.js:12016
 msgid "%(carAmount)s Car for $%(eachSaleAmount)s"
 msgid_plural "%(carAmount)s Cars, each for $%(eachSaleAmount)s"
-msgstr[0] "%(carAmount)s Auto für %(eachSaleAmount)s$"
-msgstr[1] "%(carAmount)s Autos, jedes für %(eachSaleAmount)s$"
+msgstr[0] "%(carAmount)s EINMAL DIE Car for $%(eachSaleAmount)s"
+msgstr[1] "%(carAmount)s ZWEIMAL DIE Cars, Jeden Fur $%(eachSaleAmount)s"
 
 #: .\Private\Z_Deployment\HCbigString.js:11952
 #: .\Private\Z_Deployment\HLCbigString.js:12038
 msgid "%(sportsAmount)s Sports Car for $%(eachSaleAmount)s plus bonus $2"
 msgid_plural ""
 "%(sportsAmount)s Sports Cars, each for $%(eachSaleAmount)s plus bonus $2"
-msgstr[0] ""
-"%(sportsAmount)s Sportwagen für %(eachSaleAmount)s plus Bonus von 2 $"
-msgstr[1] ""
-"%(sportsAmount)s Sportwagen, jeder für %(eachSaleAmount)s $ plus Bonus von 2"
-" $"
+msgstr[0] "%(sportsAmount)s Sportwagen für $%(eachSaleAmount)s plus Bonus $2"
+msgstr[1] "%(sportsAmount)s Sportwagen, jeweils für $%(eachSaleAmount)s plus "
+"Bonus $2"
 
 #: .\Private\Z_Deployment\HCbigString.js:11961
 #: .\Private\Z_Deployment\HLCbigString.js:12151
@@ -5362,7 +5260,7 @@ msgstr "Verkaufsübersicht"
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:12177
 msgid "Expectations Advance:"
-msgstr "Erwartungen voraus:"
+msgstr "Erwartungen steigen:"
 
 #: .\Private\Z_Deployment\HCbigString.js:11988
 #: .\Private\Z_Deployment\HLCbigString.js:12178
@@ -5377,12 +5275,12 @@ msgstr "Innovationsstufen:"
 #: .\Private\Z_Deployment\HCbigString.js:11997
 #: .\Private\Z_Deployment\HLCbigString.js:12187
 msgid "New Tech Track Introduced:"
-msgstr "Neuer Tech-Track eingeführt:"
+msgstr "Neue Tech-Leiste eingeführt:"
 
 #: .\Private\Z_Deployment\HCbigString.js:11998
 #: .\Private\Z_Deployment\HLCbigString.js:12188
 msgid "Obsolesence Marker points:"
-msgstr "Obsoleszenz-Markierungspunkte:"
+msgstr "Obsoleszenzmarker-Punkte:"
 
 #: .\Private\Z_Deployment\HCbigString.js:11998
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
@@ -5405,13 +5303,13 @@ msgstr "%(playerName)s hat keine Karten mehr"
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:12232
 msgid "Game Ended by: Turn 7"
-msgstr "Spiel endete bis: Runde 7"
+msgstr "Spielende durch: Runde 7"
 
 #: .\Private\Z_Deployment\HCbigString.js:12043
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:12233
 msgid "Game Ended by: King of the Hill"
-msgstr "Spiel beendet durch: King of the Hill"
+msgstr "Spielende durch: King of the Hill"
 
 #: .\Private\Z_Deployment\HCbigString.js:12047
 #: .\Private\Z_Deployment\HLCbigString.js:12237
@@ -5422,7 +5320,7 @@ msgstr "Klicken Sie hier, um die Spielstatistiken anzuzeigen"
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:12243
 msgid "Punch Clock decreases by: %(amount)s"
-msgstr "Der Schlagtakt verringert sich um: %(amount)s"
+msgstr "Die Stempeluhr verringert sich um: %(amount)s"
 
 #: .\Private\Z_Deployment\HCbigString.js:12111
 #: .\Private\Z_Deployment\HLCbigString.js:12301
@@ -5432,12 +5330,12 @@ msgstr "Neutrale Karten:"
 #: .\Private\Z_Deployment\HCbigString.js:12223
 #: .\Private\Z_Deployment\HLCbigString.js:12413
 msgid "Design Tech"
-msgstr "Designtechnik"
+msgstr "Design-Tech"
 
 #: .\Private\Z_Deployment\HCbigString.js:12225
 #: .\Private\Z_Deployment\HLCbigString.js:12415
 msgid "Safety Tech"
-msgstr "Sicherheitstechnik"
+msgstr "Sicherheits-Tech"
 
 #: .\Private\Z_Deployment\HCbigString.js:12256
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
@@ -5453,12 +5351,8 @@ msgid ""
 "to the next player/phase/turn<BR/><BR/>Otherwise you can allow "
 "<b>%(playerToKickName)s</b> more time - reload the page to initiate kickout "
 "again<BR/>"
-msgstr ""
-"Player <b>%(playerToKickName)s</b> has timed out<BR/>To kick out "
-"<B>%(playerToKickName)s</b> press Confirm Kickout<BR/>The game will proceed "
-"to the next player/phase/turn<BR/><BR/>Otherwise you can allow "
-"<b>%(playerToKickName)s</b> more time - reload the page to initiate kickout "
-"again<BR/>"
+msgstr "<b>%(playerToKickName)s</b> IST EIN NUMPTY. KICK "
+"<b>%(playerToKickName)s</b>"
 
 #: .\Private\Z_Deployment\HCbigString.js:13979
 #: .\Private\Z_Deployment\HLCbigString.js:14092
@@ -5467,12 +5361,11 @@ msgid ""
 "game<br/><b>It cannot be undone</b><br/><br/>Try checking the chat in case "
 "they have given a reason for any temporary absence<br/>Please consider "
 "giving them a short grace period, in case they are just delayed<br/>"
-msgstr ""
-"Dadurch wird <b>%(playerToKickName)s</b> dauerhaft aus dem Spiel "
-"entfernt<br/><b>Der Vorgang kann nicht rückgängig gemacht "
-"werden</b><br/><br/>Überprüfen Sie den Chat, falls sie einen Grund für eine "
-"vorübergehende Abwesenheit angegeben haben<br/>Bitte geben Sie ihnen eine "
-"kurze Nachfrist, falls sie nur verspätet sind<br/>"
+msgstr "Dadurch wird <b>%(playerToKickName)s</b> dauerhaft aus dem Spiel "
+"entfernt<br/><b>Das kann nicht rückgängig gemacht "
+"werden</b><br/><br/>Schauen Sie bitte in den Chat, falls dort ein Grund für "
+"eine vorübergehende Abwesenheit genannt wurde<br/>Erwägen Sie eine kurze "
+"Schonfrist, falls der Spieler nur verspätet ist<br/>"
 
 #: .\Private\Z_Deployment\HCgameSummary-obfuscated.js:1
 #: .\Private\Z_Deployment\HCgameSummary.js:42
@@ -5483,12 +5376,12 @@ msgstr "Einkommen in jeder Runde"
 #: .\Private\Z_Deployment\HCgameSummary.js:37
 #: .\Private\Z_Deployment\HLCgameSummary.js:37
 msgid "Turn"
-msgstr "Drehen"
+msgstr "Runde"
 
 #: .\Private\Z_Deployment\HCgameSummary.js:38
 #: .\Private\Z_Deployment\HLCgameSummary.js:38
 msgid "Turn Income"
-msgstr "Einkommen umwandeln"
+msgstr "Einkommen pro Runde"
 
 #: .\Private\Z_Deployment\HCgameSummary.js:39
 #: .\Private\Z_Deployment\HLCgameSummary.js:39
@@ -5499,20 +5392,20 @@ msgstr "Gesamtgeld"
 #: .\Private\Z_Deployment\HLCgameSummary-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCgameSummary.js:41
 msgid "Total Money VS Turn"
-msgstr "Gesamtgeld vs. Umsatz"
+msgstr "Gesamtgeld im Vergleich zur Runde"
 
 #: .\Private\Z_Deployment\HLCbigString-obfuscated.js:1
 #: .\Private\Z_Deployment\HLCbigString.js:12097
 msgid " at position (%(xcoord)s, %(ycoord)s) "
-msgstr "an Position (%(xcoord)s, %(ycoord)s)"
+msgstr " an Position (%(xcoord)s, %(ycoord)s) "
 
 #: .\Private\Z_Deployment\HLCbigString.js:12069
 msgid "%(playerName)s places %(dealershipName)s "
-msgstr "%(playerName)s Plätze %(dealershipName)s"
+msgstr "%(playerName)s platziert %(dealershipName)s "
 
 #: .\Private\Z_Deployment\HLCbigString.js:12071
 msgid "%(playerName)s uses %(dealershipName)s "
-msgstr "%(playerName)s verbraucht %(dealershipName)s"
+msgstr "%(playerName)s nutzt %(dealershipName)s "
 
 #: .\Private\Z_Deployment\HLCbigString.js:12100
 msgid "but cannot make any sales"
@@ -5520,15 +5413,15 @@ msgstr "kann aber keine Verkäufe tätigen"
 
 #: .\Private\Z_Deployment\HLCbigString.js:12103
 msgid "to sell: "
-msgstr "verkaufen:"
+msgstr "zum Verkaufen: "
 
 #: .\Private\Z_Deployment\HLCbigString.js:12116
 msgid "%(carAmount)s Car for $%(eachSaleAmount)s (%(xCoord)s,%(yCoord)s)"
 msgid_plural ""
 "%(carAmount)s Cars, each for $%(eachSaleAmount)s (%(xCoord)s,%(yCoord)s)"
-msgstr[0] "%(carAmount)s Auto für %(eachSaleAmount)s (%(xCoord)s,%(yCoord)s)"
-msgstr[1] ""
-"%(carAmount)s Autos, jeweils für %(eachSaleAmount)s$ (%(xCoord)s,%(yCoord)s)"
+msgstr[0] "%(carAmount)s Auto für $%(eachSaleAmount)s (%(xCoord)s,%(yCoord)s)"
+msgstr[1] "%(carAmount)s Autos, jeweils für $%(eachSaleAmount)s "
+"(%(xCoord)s,%(yCoord)s)"
 
 #: .\Private\Z_Deployment\HLCbigString.js:12129
 msgid ""
@@ -5537,11 +5430,9 @@ msgid ""
 msgid_plural ""
 "%(truckAmount)s Trucks, each for $%(eachSaleAmount)s plus bonus $1 "
 "(%(xCoord)s,%(yCoord)s)"
-msgstr[0] ""
-"%(truckAmount)s Truck für %(eachSaleAmount)s$ plus Bonus 1$ "
+msgstr[0] "%(truckAmount)s LKW für $%(eachSaleAmount)s plus Bonus $1 "
 "(%(xCoord)s,%(yCoord)s)"
-msgstr[1] ""
-"%(truckAmount)s LKWs, jeder für %(eachSaleAmount)s plus Bonus von 1 $ "
+msgstr[1] "%(truckAmount)s LKW, jeweils für $%(eachSaleAmount)s plus Bonus $1 "
 "(%(xCoord)s,%(yCoord)s)"
 
 #: .\Private\Z_Deployment\HLCbigString.js:12142
@@ -5551,12 +5442,10 @@ msgid ""
 msgid_plural ""
 "%(sportsAmount)s Sports Cars, each for $%(eachSaleAmount)s plus bonus $2 "
 "(%(xCoord)s,%(yCoord)s)"
-msgstr[0] ""
-"%(sportsAmount)s Sportwagen für %(eachSaleAmount)s plus Bonus 2 $ "
+msgstr[0] "%(sportsAmount)s Sportwagen für $%(eachSaleAmount)s plus Bonus $2 "
 "(%(xCoord)s,%(yCoord)s)"
-msgstr[1] ""
-"%(sportsAmount)s Sportwagen, jeweils für %(eachSaleAmount)s$ plus Bonus von "
-"2$ (%(xCoord)s,%(yCoord)s)"
+msgstr[1] "%(sportsAmount)s Sportwagen, jeweils für $%(eachSaleAmount)s plus "
+"Bonus $2 (%(xCoord)s,%(yCoord)s)"
 
 #: .\Private\Z_Deployment\HLCbigString.js:13817
 msgid "Connecting..."
@@ -5566,33 +5455,32 @@ msgstr "Verbinden..."
 msgid ""
 "Player <b>%(playerToKickName)s</b> has timed out<BR/>A vote from the other "
 "players is needed to kick out <b>%(playerToKickName)s</b><BR/>"
-msgstr ""
-"Spieler <b>%(playerToKickName)s</b> ist abgelaufen<BR/>Eine Stimme der "
-"anderen Spieler ist erforderlich, um <b>%(playerToKickName)s</b><BR/> "
-"rauszuschmeißen"
+msgstr "Spieler <b>%(playerToKickName)s</b> hat die Zeit überschritten<BR/>Um "
+"<b>%(playerToKickName)s</b> auszuschließen, ist eine Abstimmung der anderen "
+"Spieler erforderlich<BR/>"
 
 #: .\Private\Z_Deployment\HLCbigString.js:14110
 msgid "Votes: "
-msgstr "Stimmen:"
+msgstr "Stimmen: "
 
 #: .\Private\Z_Deployment\HLCbigString.js:14114
 msgid ""
 "This will permanently remove <b>%(playerToKickName)s</b> from the "
 "game<br/><b>It cannot be undone</b><br/><br/>"
-msgstr ""
-"Dadurch wird <b>%(playerToKickName)s</b> dauerhaft aus dem Spiel "
-"entfernt<br/><b>Es kann nicht rückgängig gemacht werden</b><br/><br/>"
+msgstr "Dadurch wird <b>%(playerToKickName)s</b> dauerhaft aus dem Spiel "
+"entfernt<br/><b>Das kann nicht rückgängig gemacht werden</b><br/><br/>"
 
 #: .\Private\Z_Deployment\HLCbigString.js:14116
 msgid "Vote to Kickout "
-msgstr "Stimmen Sie für Kickout ab"
+msgstr "Für Kickout stimmen: "
 
 #: .\Private\Z_Deployment\HLCbigString.js:14126
 msgid ""
 "You have voted to kick out <b>%(playerToKickName)s</b><br/>If the other "
 "players do not also vote, you will be able to kick them out directly in "
 "<span id='soloKickoutCountdownSpan'></span>"
-msgstr ""
-"Sie haben dafür gestimmt, <b>%(playerToKickName)s</b><br/> rauszuschmeißen. "
-"Wenn die anderen Spieler nicht ebenfalls abstimmen, können Sie sie direkt in"
-" <span id='soloKickoutCountdownSpan'></span> rausschmeißen"
+
+msgstr "Sie haben für den Ausschluss von <b>%(playerToKickName)s</b> "
+"gestimmt<br/>Wenn die anderen Spieler nicht ebenfalls abstimmen, können Sie "
+"den Spieler direkt ausschließen in <span "
+"id='soloKickoutCountdownSpan'></span>"

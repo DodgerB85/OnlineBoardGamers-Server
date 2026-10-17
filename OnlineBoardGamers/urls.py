@@ -92,6 +92,7 @@ urlpatterns = [
     path("URR/", include("URR.urls")),
     path("DDL/", include("DDL.urls")),
     path("PAP/", include("PAP.urls")),
+    path("ROW/", include("ROW.urls")),
     path("admin/", admin.site.urls),
     # path('accounts/', include('django.contrib.auth.urls')),
     # path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='Lobby/password/password_reset_done.html'), name='password_reset_done'),

@@ -9,6 +9,11 @@ import { toRaw } from "vue"
 import { useModelStore } from "../stores/FCMstore.js"
 
 const DRINK_TYPES = new Set([rf.DRINK_BEER, rf.DRINK_COKE, rf.DRINK_LEMONADE])
+const DRINK_ITEMS = {
+	[rf.DRINK_BEER]: rf.BEER,
+	[rf.DRINK_COKE]: rf.COKE,
+	[rf.DRINK_LEMONADE]: rf.LEMONADE,
+}
 
 export function getOffsetForRotation(rotation) {
 	if (rotation === 0) return 1
@@ -45,6 +50,7 @@ export function oneLevelAbove(employee, preservingColour) {
 			break
 		case rf.MARKETING_TRAINEE:
 			level = [rf.CAMPAIGN_MANAGER, rf.RURAL_MARKETEER, rf.MASS_MARKETEER, rf.GOURMET_FOOD_CRITIC, rf.HAWKER_MARKETEER]
+			if (store.startingOptions.mediaLine) level.push(rf.TELEMARKETER)
 			break
 		case rf.CAMPAIGN_MANAGER:
 			level = [rf.BRAND_MANAGER]
@@ -73,6 +79,12 @@ export function oneLevelAbove(employee, preservingColour) {
 			break
 		case rf.FRIED_CHICKEN_COOK:
 			level = [rf.FRIED_CHICKEN_CHEF]
+			break
+		case rf.TELEMARKETER:
+			level = [rf.TV_ANNOUNCER]
+			break
+		case rf.TV_ANNOUNCER:
+			level = [rf.BRAND_DIRECTOR]
 			break
 		case rf.WAITRESS:
 			level = [rf.B_MOVIE_STAR, rf.C_MOVIE_STAR, rf.D_MOVIE_STAR, rf.JAZZ_MUSICIAN]
@@ -208,7 +220,6 @@ export function headhuntCost(employee) {
 }
 
 export function resolveUnionHolders(workedCounts, minimum = 5) {
-	if (!Array.isArray(workedCounts) || workedCounts.length === 0) return []
 	const eligible = workedCounts.map((count, index) => ({ count, index })).filter(({ count }) => Number.isFinite(count) && count >= minimum)
 	if (eligible.length === 0) return []
 	const max = Math.max(...eligible.map(({ count }) => count))
@@ -307,13 +318,21 @@ export function allowedCampaigns(marketer) {
 		case rf.BRAND_MANAGER:
 			return [rf.BILLBOARD, rf.MAIL, rf.AIRPLANE]
 		case rf.BRAND_DIRECTOR:
-			return [rf.BILLBOARD, rf.MAIL, rf.AIRPLANE, rf.RADIO]
+			// Media Line mod: the top of the B-line chain also places TV
+			// channels and phone tokens (pool-gated - absent without the mod)
+			return [rf.BILLBOARD, rf.MAIL, rf.AIRPLANE, rf.RADIO, rf.PHONE, rf.TV_CHANNEL]
 		case rf.GOURMET_FOOD_CRITIC:
 			return [rf.GOURMET_GUIDE]
 		case rf.RURAL_MARKETEER:
 			return [rf.GIANT_BILLBOARD]
 		case rf.HAWKER_MARKETEER:
 			return [rf.HAWKER_TRUCK]
+		// Media Line mod: each card also places every campaign type at or
+		// below its tier, exactly like the A-line managers do
+		case rf.TELEMARKETER:
+			return [rf.BILLBOARD, rf.PHONE]
+		case rf.TV_ANNOUNCER:
+			return [rf.BILLBOARD, rf.PHONE, rf.TV_CHANNEL]
 		default:
 			return []
 	}
@@ -333,6 +352,11 @@ export function giveMaxDurationForMarketer(marketer) {
 			return 3
 		case rf.HAWKER_MARKETEER:
 			return 3
+		// Media Line mod
+		case rf.TELEMARKETER:
+			return 3
+		case rf.TV_ANNOUNCER:
+			return 4
 		default:
 			return 0
 	}
@@ -736,6 +760,35 @@ export function givePossiblePositionsForCoffeeShop(range) {
 	})
 }
 
+// True when the n squares from start, stepping by step, are all empty
+function allEmptyInLine(coords, start, step, n) {
+	for (let j = 0; j < n; j++) if (coords[start + j * step] !== rf.EMPTY_SPACE) return false
+	return true
+}
+
+// Empty squares within range of the player's restaurants (per rotation) and coffee shops
+function reachSpaces(playerObj, range, lobbyist, lobbyistData) {
+	const store = useModelStore()
+	const reachSet = new Set()
+	const hasDriveIn = plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())
+
+	for (const resto of playerObj.restaurants) {
+		const minR = hasDriveIn ? 0 : resto.rotation
+		const maxR = hasDriveIn ? 4 : resto.rotation + 1
+
+		for (let r = minR; r < maxR; r++) {
+			map.emptySpacesAdjacentToRoadsWithinRange(resto.index + getOffsetForRotation(r), range, lobbyist, lobbyistData).forEach((idx) => reachSet.add(idx))
+		}
+	}
+
+	if (store.startingOptions.coffee) {
+		playerObj.coffeeShops.forEach((idx) => {
+			map.emptySpacesAdjacentToRoadsWithinRange(idx, range, lobbyist, lobbyistData).forEach((resIdx) => reachSet.add(resIdx))
+		})
+	}
+	return reachSet
+}
+
 export function givePossiblePositionsForSimpleObject(w, h, range, rotated, lobbyist, newRoad, lobbyistData) {
 	const store = useModelStore()
 	const mapWidth = rf.ssW
@@ -758,28 +811,8 @@ export function givePossiblePositionsForSimpleObject(w, h, range, rotated, lobby
 		})
 	}
 
-	// 4. Build Reachability Set (Replaces _.intersection)
-	const reachSet = new Set()
-	const playerObj = controller.currentPlayerObj()
-	const hasDriveIn = plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())
-
-	// Add ranges from restaurants
-	for (const resto of playerObj.restaurants) {
-		const minR = hasDriveIn ? 0 : resto.rotation
-		const maxR = hasDriveIn ? 4 : resto.rotation + 1
-
-		for (let r = minR; r < maxR; r++) {
-			let offset = r === 0 ? 1 : r === 1 ? mapWidth + 1 : r === 2 ? mapWidth : 0
-			map.emptySpacesAdjacentToRoadsWithinRange(resto.index + offset, range, lobbyist, lobbyistData).forEach((idx) => reachSet.add(idx))
-		}
-	}
-
-	// Add ranges from coffee shops
-	if (store.startingOptions.coffee) {
-		playerObj.coffeeShops.forEach((idx) => {
-			map.emptySpacesAdjacentToRoadsWithinRange(idx, range, lobbyist, lobbyistData).forEach((resIdx) => reachSet.add(resIdx))
-		})
-	}
+	// 4. Build Reachability Set
+	const reachSet = reachSpaces(controller.currentPlayerObj(), range, lobbyist, lobbyistData)
 
 	// 5. Filter possibilities by Reachability
 	possibilities = possibilities.filter((pp) => {
@@ -792,28 +825,23 @@ export function givePossiblePositionsForSimpleObject(w, h, range, rotated, lobby
 		const restoStarts = [...new Set(givePossibleStartsFromRestaurants(true).flat())].filter((idx) => coords[idx] === rf.EMPTY_SPACE)
 
 		for (const idx of restoStarts) {
-			let isValid = true
 			const testResult = restaurantRoadTest(idx)
 
 			if (!rotated) {
 				if (testResult === 1) {
 					// Left to Right
-					for (let j = 0; j < w; j++) if (coords[idx + j] !== rf.EMPTY_SPACE) isValid = false
-					if (isValid) possibilities.push(idx)
+					if (allEmptyInLine(coords, idx, 1, w)) possibilities.push(idx)
 				} else if (testResult === 3) {
 					// Right to Left
-					for (let j = 0; j < w; j++) if (coords[idx - j] !== rf.EMPTY_SPACE) isValid = false
-					if (isValid) possibilities.push(idx - w + 1)
+					if (allEmptyInLine(coords, idx, -1, w)) possibilities.push(idx - w + 1)
 				}
 			} else {
 				if (testResult === 0) {
 					// Up to Down (Top edge)
-					for (let j = 0; j < h; j++) if (coords[idx - j * mapWidth] !== rf.EMPTY_SPACE) isValid = false
-					if (isValid) possibilities.push(idx - (h - 1) * mapWidth)
+					if (allEmptyInLine(coords, idx, -mapWidth, h)) possibilities.push(idx - (h - 1) * mapWidth)
 				} else if (testResult === 2) {
 					// Up to Down (Bottom edge)
-					for (let j = 0; j < h; j++) if (coords[idx + j * mapWidth] !== rf.EMPTY_SPACE) isValid = false
-					if (isValid) possibilities.push(idx)
+					if (allEmptyInLine(coords, idx, mapWidth, h)) possibilities.push(idx)
 				}
 			}
 		}
@@ -835,7 +863,6 @@ export function restaurantRoadTest(index) {
 // Give possible positions for marketing campaign
 export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, rotated) {
 	const store = useModelStore()
-	const mapWidth = rf.ssW
 	const campaignData = rf.MARKETING_CAMPAIGNS[campaignId]
 
 	let w = rotated ? campaignData.height : campaignData.width
@@ -908,34 +935,34 @@ export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, 
 			})
 	}
 
+	// --- CASE A2: PHONE TOKENS (Media Line mod) - 2x1 with its anchor square on
+	// empty ground in the cross of 5 map tiles (the restaurant's tile plus the 4
+	// orthogonal neighbours). Like any other token the card may straddle the
+	// edge of the zone into the next tile (one cell each side); roads are
+	// irrelevant (radio waves), so this bypasses the road-adjacency machinery
+	// of CASE B ---
+	if (campaignData.type === rf.PHONE) {
+		// Measured from the restaurant doors (all four corners with a
+		// Local/Regional Manager), like every other restaurant-distance rule
+		const zone = map.waveRegionSpaces(model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: false }), 1)
+
+		const possibilities = []
+		for (const anchor of zone) {
+			const [ax, ay] = map.giveCoord(anchor)
+			if (ax + w > rf.ssW || ay + h > rf.ssH) continue // never wrap off the board edge
+			const cells = map.giveAllSpaceForAToken(anchor, w, h)
+			const fits = cells.every((c) => store.mapData.coords[c] === rf.EMPTY_SPACE)
+			if (fits) possibilities.push(anchor)
+		}
+		return possibilities
+	}
+
 	// --- CASE B: STANDARD CAMPAIGNS (BILLBOARD/MAIL) ---
 	let possibilities = map.locationFor(w, h, true)
 	const range = giveMaxRangeForMarketer(marketer)
 
 	if (range > -1) {
-		const reachSet = new Set()
-		const player = controller.currentPlayerObj()
-
-		// Build reachability map using Sets (O(1) lookup)
-		const sources = [...player.restaurants]
-
-		for (const s of sources) {
-			const driveIn = plyr.doesPlayerHaveDriveIn(controller.currentPlayerIndex())
-			const minR = !driveIn ? s.rotation : 0
-			const maxR = !driveIn ? s.rotation + 1 : 4
-
-			for (let r = minR; r < maxR; r++) {
-				let off = r === 0 ? 1 : r === 1 ? mapWidth + 1 : r === 2 ? mapWidth : 0
-				map.emptySpacesAdjacentToRoadsWithinRange(s.index + off, range, false, null).forEach((idx) => reachSet.add(idx))
-			}
-		}
-
-		// Coffee shops measure from their own square (no restaurant rotation offsets)
-		if (store.startingOptions.coffee) {
-			player.coffeeShops.forEach((idx) => {
-				map.emptySpacesAdjacentToRoadsWithinRange(idx, range, false, null).forEach((i) => reachSet.add(i))
-			})
-		}
+		const reachSet = reachSpaces(controller.currentPlayerObj(), range, false, null)
 
 		// Final intersection filter
 		possibilities = possibilities.filter((pp) => {
@@ -1002,7 +1029,7 @@ export function givePossiblePositionsForNewRestaurant(rotation, ranged) {
 		}
 
 		// Add Coffee Shops to the reachability set
-		if (store.startingOptions.coffee && player.coffeeShops.length > 0) {
+		if (store.startingOptions.coffee) {
 			for (const shopIdx of player.coffeeShops) {
 				const options = map.emptySpacesAdjacentToRoadsWithinRange(shopIdx, range, false, null)
 				options.forEach((opt) => reachSet.add(opt))
@@ -1059,7 +1086,7 @@ export function givePossibleStartsFromRestaurants(anyIndex) {
 	}
 
 	// Coffee always uses road neighbours, even when anyIndex picks plain neighbours for doors
-	if (store.startingOptions.coffee && playerObj.coffeeShops.length > 0) {
+	if (store.startingOptions.coffee) {
 		for (const shopIdx of playerObj.coffeeShops) {
 			for (const n of map.nextRoadNeighbours(shopIdx, -1, false, true)) {
 				resultSet.add(n)
@@ -1083,7 +1110,7 @@ export function firstStartIsFromTheSameTile(index) {
 		}
 	}
 
-	if (store.startingOptions.coffee && playerObj.coffeeShops.length > 0) {
+	if (store.startingOptions.coffee) {
 		for (const coffeeIdx of playerObj.coffeeShops) {
 			if (vicinity.has(coffeeIdx) && map.onTheSameTile(index, coffeeIdx)) {
 				return true
@@ -1133,27 +1160,9 @@ export function gatherDrinksAlongPath(path, collectionNumber) {
 	const store = useModelStore()
 	const coords = store.mapData.coords
 
-	// 1. Gather all unique neighbors along the entire path
-	const uniqueSpaces = new Set()
-	for (const step of path) {
-		const stepNeighbors = map.neighbours(step)
-		for (const space of stepNeighbors) {
-			if (DRINK_TYPES.has(coords[space])) {
-				uniqueSpaces.add(space)
-			}
-		}
-	}
-
-	// 3. Transform unique drink tiles into items based on collectionNumber
 	const inventory = []
-	for (const space of uniqueSpaces) {
-		const type = coords[space]
-
-		// Determine which item to add
-		let itemType = null
-		if (type === rf.DRINK_LEMONADE) itemType = rf.LEMONADE
-		else if (type === rf.DRINK_COKE) itemType = rf.COKE
-		else if (type === rf.DRINK_BEER) itemType = rf.BEER
+	for (const space of giveDrinkSquaresAlongPath(path)) {
+		const itemType = DRINK_ITEMS[coords[space]]
 
 		// Add to inventory 'collectionNumber' times
 		if (itemType != null) {
@@ -1244,7 +1253,7 @@ export function givePossibleStartsFromRestaurantsForZeppelin() {
 		uniqueTiles.add(map.giveTileNumber(doorIndex))
 	}
 
-	if (store.startingOptions.coffee && playerObj.coffeeShops.length > 0) {
+	if (store.startingOptions.coffee) {
 		for (const shopIndex of playerObj.coffeeShops) {
 			uniqueTiles.add(map.giveTileNumber(shopIndex))
 		}
@@ -1264,21 +1273,14 @@ export function nextAirPossibilitiesForZeppelin(index, path) {
 export function gatherFromTiles(tiles, range) {
 	const inventory = []
 
-	// 1. Define valid sources and their corresponding items
-	const drinkMapping = {
-		[rf.DRINK_BEER]: rf.BEER,
-		[rf.DRINK_COKE]: rf.COKE,
-		[rf.DRINK_LEMONADE]: rf.LEMONADE,
-	}
-
-	// 2. Iterate through provided tiles
+	// 1. Iterate through provided tiles
 	for (const t of tiles) {
 		const tileNumber = map.giveTileAtPosition(t)
 		const contents = rf.TILES[tileNumber] || []
 
-		// 3. Filter and map drinks in one pass
+		// 2. Filter and map drinks in one pass
 		for (const type of contents) {
-			const item = drinkMapping[type]
+			const item = DRINK_ITEMS[type]
 
 			if (item != null) {
 				// Add the item to results 'range' times
@@ -1328,37 +1330,7 @@ export function giveTurnOrderFromFreeSlots() {
 
 export function getRemainingRecruitingPoints(playerIndex) {
 	const store = useModelStore()
-	const playerObj = store.players[playerIndex]
-	const employees = playerObj.employees
-
-	let base = 0
-
-	// 1. CEO Action logic
-	if (playerObj.ceoAction === rf.CEO_ACTION_HIRE_1) {
-		base += 1
-	} else if (playerObj.ceoAction === rf.CEO_ACTION_RECRUITING_MANAGER) {
-		base += 2
-	}
-
-	// 2. Employee and Night Shift logic in a single pass
-	const hasNightShift = store.startingOptions.nightShift && employees.includes(rf.NIGHT_SHIFT_MANAGER)
-
-	for (const employee of employees) {
-		if (employee === rf.RECRUITING_GIRL) {
-			base += 1
-			if (hasNightShift) base += 1 // Add bonus point immediately
-		} else if (employee === rf.RECRUITING_MANAGER) {
-			base += 2
-		} else if (employee === rf.HR_DIRECTOR) {
-			base += 4
-		}
-	}
-	base += temporaryWorkerRemainingActions(playerIndex, rf.RECRUITING_GIRL)
-
-	// 3. Subtract points for hires already made this turn
-	base -= store.context.justHired.length
-
-	return base
+	return getTotalRecruitingPoints(playerIndex) + temporaryWorkerRemainingActions(playerIndex, rf.RECRUITING_GIRL) - store.context.justHired.length
 }
 
 export function getTotalRecruitingPoints(playerIndex) {
@@ -1627,9 +1599,10 @@ export function givePossibleFoodDrinksChoice(employee) {
 	else return []
 }
 
-export function availableLobbyistTiles() {
+// Tiles 0-19 plus the New Districts tiles, before any are used
+function districtTiles() {
 	const store = useModelStore()
-	let allTiles = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+	const allTiles = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 	if (store.startingOptions.newDistricts) {
 		allTiles.push(20)
 		allTiles.push(21)
@@ -1638,30 +1611,27 @@ export function availableLobbyistTiles() {
 		allTiles.push(24)
 		if (store.startingOptions.lobbyists) allTiles.push(25)
 	}
-
-	let usedTiles = []
-	for (let i = 0; i < store.mapData.tiles.length; i += 2) {
-		usedTiles.push(store.mapData.tiles[i])
-	}
-
-	allTiles = allTiles.filter(function (item) {
-		return !usedTiles.includes(item)
-	})
-
 	return allTiles
 }
 
+function usedMapTiles() {
+	const store = useModelStore()
+	const usedTiles = []
+	for (let i = 0; i < store.mapData.tiles.length; i += 2) {
+		usedTiles.push(store.mapData.tiles[i])
+	}
+	return usedTiles
+}
+
+export function availableLobbyistTiles() {
+	const usedTiles = usedMapTiles()
+	return districtTiles().filter(function (item) {
+		return !usedTiles.includes(item)
+	})
+}
 export function availableUrbanPlanningTiles() {
 	const store = useModelStore()
-	let allTiles = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-	if (store.startingOptions.newDistricts) {
-		allTiles.push(20)
-		allTiles.push(21)
-		allTiles.push(22)
-		allTiles.push(23)
-		allTiles.push(24)
-		if (store.startingOptions.lobbyists) allTiles.push(25)
-	}
+	let allTiles = districtTiles()
 
 	if (store.players.length === 6) {
 		if (!allTiles.includes(20)) allTiles.push(20)
@@ -1672,11 +1642,7 @@ export function availableUrbanPlanningTiles() {
 		if (store.startingOptions.lobbyists && !allTiles.includes(25)) allTiles.push(25)
 	}
 
-	let usedTiles = []
-	for (let i = 0; i < store.mapData.tiles.length; i += 2) {
-		usedTiles.push(store.mapData.tiles[i])
-	}
-
+	const usedTiles = usedMapTiles()
 	allTiles = allTiles.filter(function (item) {
 		return !usedTiles.includes(item)
 	})
@@ -1694,15 +1660,10 @@ export function availableUrbanPlanningTiles() {
 export function availableHouses() {
 	const store = useModelStore()
 
-	// 1. Return all if no houses are built
-	if (store.houses.length === 0) {
-		return [...rf.AVAILABLE_HOUSES]
-	}
-
-	// 2. Create a Set of built house numbers for O(1) lookups
+	// Create a Set of built house numbers for O(1) lookups
 	const builtHouseNumbers = new Set(store.houses.map((h) => h.number))
 
-	// 3. Filter the global list to find houses not yet in the Set
+	// Filter the global list to find houses not yet in the Set
 	return rf.AVAILABLE_HOUSES.filter((houseNum) => !builtHouseNumbers.has(houseNum))
 }
 
@@ -1717,46 +1678,47 @@ export function availableParks() {
 	const store = useModelStore()
 	if (!store.startingOptions.lobbyists) return []
 	let res = [0, 1, 2, 2]
-	if (store.parks.length > 0) {
-		if (store.parks.some((r) => r.variety === 0))
-			res = res.filter(function (item) {
-				return item !== 0
-			})
-		if (store.parks.some((r) => r.variety === 1))
-			res = res.filter(function (item) {
-				return item !== 1
-			})
-		let variety2count = 0
-		for (let i = 0; i < store.parks.length; i++) if (store.parks[i].variety === 2) variety2count++
-		if (variety2count >= 2)
-			res = res.filter(function (item) {
-				return item !== 2
-			})
-		//res -= model.parks.length;
-	}
+	if (store.parks.some((r) => r.variety === 0))
+		res = res.filter(function (item) {
+			return item !== 0
+		})
+	if (store.parks.some((r) => r.variety === 1))
+		res = res.filter(function (item) {
+			return item !== 1
+		})
+	let variety2count = 0
+	for (let i = 0; i < store.parks.length; i++) if (store.parks[i].variety === 2) variety2count++
+	if (variety2count >= 2)
+		res = res.filter(function (item) {
+			return item !== 2
+		})
+	//res -= model.parks.length;
 	return res
 }
 
 export function availableNewRoads() {
 	const store = useModelStore()
 	if (!store.startingOptions.lobbyists) return []
-	let res = [0, 0, 0, 0, 1, 1, 2, 2]
-	if (store.newRoads.length > 0) {
-		res = []
-		let variety0count = 4
-		let variety1count = 2
-		let variety2count = 2
-		for (let i = 0; i < store.newRoads.length; i++) {
-			if (store.newRoads[i].variety === 0) variety0count--
-			else if (store.newRoads[i].variety === 1) variety1count--
-			else if (store.newRoads[i].variety === 2) variety2count--
-		}
-		for (let j = 0; j < variety0count; j++) res.push(0)
-		for (let k = 0; k < variety1count; k++) res.push(1)
-		for (let m = 0; m < variety2count; m++) res.push(2)
-		//res -= model.newRoads.length;
+	let res = []
+	let variety0count = 4
+	let variety1count = 2
+	let variety2count = 2
+	for (let i = 0; i < store.newRoads.length; i++) {
+		if (store.newRoads[i].variety === 0) variety0count--
+		else if (store.newRoads[i].variety === 1) variety1count--
+		else if (store.newRoads[i].variety === 2) variety2count--
 	}
+	for (let j = 0; j < variety0count; j++) res.push(0)
+	for (let k = 0; k < variety1count; k++) res.push(1)
+	for (let m = 0; m < variety2count; m++) res.push(2)
+	//res -= model.newRoads.length;
 	return res
+}
+
+// Media Line B-line keys (decimal, interleaved with A-line numbers); A-line keys stay raw
+export function campaignSortKey(number) {
+	if (number >= 28 && number <= 35) return [3.5, 4.5, 6.5, 6.6, 7.5, 7.6, 8.5, 8.6][number - 28]
+	return number
 }
 
 // Used in dinnertime to break ties
@@ -1766,6 +1728,63 @@ export function getPlaceInFullTurnOrderForPlayer(playerIndex) {
 		if (store.gameflow.fullTurnOrder[i] === playerIndex) return i
 	}
 	return -1
+}
+
+// Media Line mod: city-wide headline modifier for tonight's dinner.
+// Headlines are published during a working day and take effect only at the
+// NEXT turn's dinner (gameflow.turn has not yet incremented during dinner).
+// Stacks freely, city total clamped to +/-10.
+export function giveHeadlineTotal() {
+	const store = useModelStore()
+	if (!store.startingOptions.mediaLine) return 0
+	let sum = 0
+	for (const h of store.mediaLine.headlines) {
+		if (h.turn === store.gameflow.turn - 1) sum += h.value
+	}
+	return Math.max(-10, Math.min(10, sum))
+}
+
+// Media Line mod: milestone 1 (First Telemarketer Used) - grouped all-eat
+// bonus, judged after dinner. Purity: none of the holder's own A-line
+// campaigns ran tonight (their pushed demands are what is being matched).
+// All-eat: per B-line campaign, every house it actually pushed into tonight
+// must have been sold - the WHOLE house, including demand other players'
+// ads brought - by the holder (one sale always covers a whole house).
+// Each group pays houses x $10 independently; a group with any house lost
+// to a rival (or left unsold) pays nothing.
+function settleMediaLineGroups(sold, replayOnly) {
+	const store = useModelStore()
+	const bonuses = new Array(store.players.length).fill(0)
+	const night = store.mediaLine.night
+	store.mediaLine.night = { groups: {}, aLinePushers: [] } // reset for the next night
+	if (!store.startingOptions.mediaLine) return bonuses
+
+	for (let i = 0; i < store.players.length; i++) {
+		if (!plyr.hasMilestone(i, rf.FIRST_TELEMARKETER_USED)) continue
+		if (night.aLinePushers.includes(i)) continue // purity broken
+		// Media Line mod: purity also breaks when the holder has an A-line
+		// campaign already on the board at settlement - placed this turn, its
+		// first push only happens tonight, so it escapes the aLinePushers check
+		if (store.campaigns.some((c) => c.number <= 27 && model.findPlayerForCampaign(c.number) === i)) continue
+
+		let total = 0
+		const groups = []
+		for (const g of Object.values(night.groups)) {
+			if (g.owner !== i || g.houses.length === 0) continue
+			const allEaten = g.houses.every((h) => sold.some((s) => s.house === h && s.playerIndex === i))
+			if (allEaten) {
+				total += g.houses.length * 10
+				groups.push([...g.houses].sort((a, b) => a - b))
+			}
+		}
+		if (total > 0) {
+			bonuses[i] = total
+			store.players[i].money += total
+			store.bank -= total
+			if (!replayOnly) model.addHistory(rf.HIST_MEDIA_LINE_BONUS, [i, total, groups], -1, 0)
+		}
+	}
+	return bonuses
 }
 
 export function doDinnerTime(replayOnly) {
@@ -1791,9 +1810,8 @@ export function doDinnerTime(replayOnly) {
 	const fcMod = store.startingOptions.friedChicken
 
 	// Stadium mod: game-day demand injection (deterministic, recomputed on replay)
-	const stadiumMod = store.startingOptions.stadium
 	let stadiumResult = null
-	if (stadiumMod && store.stadium.announcement !== null && !store.needs.some((n) => n.number === rf.STADIUM) && store.gameflow.turn === 5 + store.stadium.gamesPlayed * 3) {
+	if (store.startingOptions.stadium && store.stadium.announcement !== null && !store.needs.some((n) => n.number === rf.STADIUM) && store.gameflow.turn === stadiumGameTurn(store.stadium.gamesPlayed)) {
 		const a = store.stadium.announcement
 		const subNeeds = []
 		for (let i = 0; i < a.units; i++) subNeeds.push([a.food, -1])
@@ -1941,8 +1959,10 @@ export function doDinnerTime(replayOnly) {
 		}
 
 		// Coffee block must come AFTER the house's regular block,
-		// so the history UI can attribute it to the correct house
-		if (winningCompetitors.length > 0 && need.number !== rf.STADIUM && store.startingOptions.coffee && model.getAvailableCoffee(false)) {
+		// so the history UI can attribute it to the correct house.
+		// Stadium included: the game-day sale is a regular sale, so the
+		// standard coffee rule applies to its delivery route as well.
+		if (winningCompetitors.length > 0 && store.startingOptions.coffee && model.getAvailableCoffee(false)) {
 			processCoffee(need.number, winningCompetitors[0], usedFryChefs, coffeeEarnings, histoHouses, possibleCoffeeMS)
 		}
 	}
@@ -1955,6 +1975,9 @@ export function doDinnerTime(replayOnly) {
 	finalizeMilestones(firstPizzas, possiblePizzaBomb)
 
 	// --- PHASE 3: CALCULATE FINAL EARNINGS & BONUSES ---
+	// Media Line mod: headlines published last working day shift every sale
+	// price city-wide tonight (city total clamped to +/-10; negative legal)
+	const headlineTotal = giveHeadlineTotal()
 	sold.forEach((sale) => {
 		const pIdx = sale.playerIndex
 		const p = store.players[pIdx]
@@ -1962,7 +1985,7 @@ export function doDinnerTime(replayOnly) {
 		if (model.hasGarden(sale.house)) multiplier++
 		if (model.adjacentToPark(sale.house)) multiplier++
 
-		let price = sale.needs.length * plyr.playersPrice(pIdx) * multiplier
+		let price = sale.needs.length * (plyr.playersPrice(pIdx) + headlineTotal) * multiplier
 		const bonus = plyr.playerBonus(pIdx, sale.needs)
 		price += bonus
 
@@ -1973,12 +1996,10 @@ export function doDinnerTime(replayOnly) {
 		earnings[pIdx] += price
 
 		const houseHisto = histoHouses.find((h) => h[0] === sale.house)
-		if (houseHisto) {
-			houseHisto.push(bonus)
-			const bits = (model.hasGarden(sale.house) ? 1 : 0) + (model.adjacentToPark(sale.house) ? 2 : 0)
-			houseHisto.push(bits)
-			if (store.startingOptions.fryChefs) houseHisto.push(chefs < 9 ? chefs : 0)
-		}
+		houseHisto.push(bonus)
+		const bits = (model.hasGarden(sale.house) ? 1 : 0) + (model.adjacentToPark(sale.house) ? 2 : 0)
+		houseHisto.push(bits)
+		if (store.startingOptions.fryChefs) houseHisto.push(chefs < 9 ? chefs : 0)
 	})
 
 	// Give MS for selling — AFTER bonus calc so the sale that EARNED the milestone
@@ -1986,6 +2007,11 @@ export function doDinnerTime(replayOnly) {
 	sold.forEach((sale) => {
 		if (!replayOnly) giveSalesMilestones(sale.playerIndex, sale.needs)
 	})
+
+	// Media Line mod: stamp tonight's city-wide headline onto each SOLD house
+	// entry so the history view can show the price shift behind the earnings.
+	// No-sale entries stay length 2; coffee blocks (array at index 0) are skipped
+	if (headlineTotal !== 0) for (const h of histoHouses) if (typeof h[0] === "number" && Array.isArray(h[2])) h.push(headlineTotal)
 
 	if (!replayOnly) model.addHistory(rf.HIST_DINNER_TIME, histoHouses, -1, 0)
 
@@ -2011,15 +2037,19 @@ export function doDinnerTime(replayOnly) {
 	}
 
 	// --- PHASE 4: PAYOUTS & BANK BREAK ---
-	finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayOnly)
+	// Media Line mod: milestone 1 bonus (from the bank, outside sales income)
+	const mediaLineBonuses = settleMediaLineGroups(sold, replayOnly)
+	finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayOnly, mediaLineBonuses)
 
 }
 
-function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayOnly) {
+function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayOnly, mediaLineBonuses) {
 	const store = useModelStore()
 	const histoIncome = []
 	store.players.forEach((p, playerIndex) => {
-		const salesIncome = earnings[playerIndex] + (store.startingOptions.coffee ? coffeeEarnings[playerIndex] : 0)
+		const itemsIncome = earnings[playerIndex]
+		const coffeeIncome = coffeeEarnings[playerIndex]
+		const salesIncome = itemsIncome + coffeeIncome
 		let total = salesIncome
 		const waitressVal = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS) ? 5 : 3
 
@@ -2033,7 +2063,20 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 			const supplement = Math.ceil(total / 2)
 			total += supplement
 			hI.push(supplement)
+		} else if (store.startingOptions.mediaLine) hI.push(0)
+
+		// Coffee split (Coffee module only): pad the CFO slot so coffee income always
+		// lands at index 3. Old entries never have length 4, so the history reader can
+		// tell split rows from the old pooled-sales rows by length alone.
+		if (store.startingOptions.coffee) {
+			while (hI.length < 3) hI.push(0)
+			hI.push(coffeeIncome)
 		}
+
+		// Media Line mod: milestone 1 bonus gets its own column in the income
+		// table, always LAST (index 3 without coffee, index 4 with it); the
+		// money itself was already paid in settleMediaLineGroups
+		if (store.startingOptions.mediaLine) hI.push(mediaLineBonuses[playerIndex])
 
 		histoIncome[playerIndex] = hI
 		p.money += total
@@ -2059,7 +2102,7 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 	})
 
 	if (!replayOnly) {
-		const hasInc = histoIncome.some((h) => h[0] > 0 || (Array.isArray(h[1]) ? h[1].some((v) => v > 0) : h[1] > 0))
+		const hasInc = histoIncome.some((h) => h[0] > 0 || (Array.isArray(h[1]) ? h[1].some((v) => v > 0) : h[1] > 0) || h[3] > 0)
 		model.addHistory(rf.HIST_INCOME, hasInc ? histoIncome : [], -1, 0)
 	}
 
@@ -2176,9 +2219,7 @@ export function processCoffee(houseNum, winner, usedFryChefs, coffeeEarnings, hi
 	})
 
 	historyForCoffeeHouse.push(store.players.map((_, i) => coffeeSalesData[i]))
-	if (store.startingOptions.coffee && historyForCoffeeHouse.length > 0) {
-		histoHouses.push([...historyForCoffeeHouse])
-	}
+	histoHouses.push([...historyForCoffeeHouse])
 }
 
 export function basePrice() {
@@ -2269,7 +2310,6 @@ export function baseSalary(playerIndex, applyFirstTrainDiscount = true) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
 	// Bots should not be paying back into the bank
-	//alert(`name: ${player.name} -- displayName: ${player.displayName} -- equalsBot: ${player.displayName === rf.BOT_NAME}`)
 	if (playerObj.displayName === rf.BOT_NAME) return 0
 
 	let due = 0
@@ -2333,7 +2373,6 @@ export function employeesRequiringASalary(playerIndex) {
 	const store = useModelStore()
 	const palayerObj = store.players[playerIndex]
 	const salarySet = new Set(rf.REQUIRE_SALARY)
-	const marketerSet = new Set(rf.MARKETERS)
 	const hasFreeMarketers = plyr.hasMilestone(playerIndex, rf.FIRST_BILLBOARD)
 
 	const requiring = []
@@ -2341,10 +2380,7 @@ export function employeesRequiringASalary(playerIndex) {
 	// Helper to process a group of employees
 	const processList = (list) => {
 		for (const emp of list) {
-			// An employee requires salary if in REQUIRE_SALARY and not a marketer made free by the billboard milestone
-			if (salarySet.has(emp) && (!hasFreeMarketers || !marketerSet.has(emp))) {
-				requiring.push(emp)
-			}
+			if (doesEmployeeRequireSalary(playerIndex, emp)) requiring.push(emp)
 		}
 	}
 
@@ -2354,19 +2390,20 @@ export function employeesRequiringASalary(playerIndex) {
 
 	// 2. Check marketers currently working on campaigns
 	// If we have the billboard milestone, all marketers are free (length check avoided)
-	if (!hasFreeMarketers) {
-		palayerObj.marketers.forEach((entry, i) => {
-			// Ignore the marketer in the additional campaign slot (usually handled elsewhere)
-			if (i !== palayerObj.additionalCampaignArrayIndex) {
-				const emp = entry.marketer
-				if (salarySet.has(emp)) {
-					requiring.push(emp)
-				}
-			}
-		})
-	}
+	if (!hasFreeMarketers) pushSalaryMarketers(palayerObj, salarySet, requiring)
 
 	return requiring
+}
+
+// Marketers (except the additional campaign slot) whose job needs a salary
+function pushSalaryMarketers(playerObj, salarySet, out) {
+	playerObj.marketers.forEach((entry, i) => {
+		if (i !== playerObj.additionalCampaignArrayIndex && salarySet.has(entry.marketer)) out.push(entry.marketer)
+	})
+}
+
+function countNonCoffeeResources(playerObj) {
+	return playerObj.resources.filter((resource) => resource !== rf.COFFEE).length
 }
 
 export function doesEmployeeRequireSalary(playerIndex, employee) {
@@ -2388,14 +2425,11 @@ export function canAffordPayDay(playerIndex) {
 
 	// 2. Calculate the "gap" in coverage
 	// Milestone reduces the cost of firing an employee from $5 to $3
-	const firingPenalty = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+	const firingPenalty = plyr.unitarySalary(playerIndex)
 	// 3. First Beer Sold Milestone Logic
 	// Resources can replace normal salary, but not the one-time job-switch salary.
 	if (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD)) {
-		// Count how many non-coffee resources the player has
-		const validResourcesCount = playerObj.resources.reduce((acc, item) => {
-			return item !== rf.COFFEE ? acc + 1 : acc
-		}, 0)
+		const validResourcesCount = countNonCoffeeResources(playerObj)
 
 		const resourceCoverage = Math.min(normalDue, validResourcesCount * firingPenalty)
 		return playerObj.money + resourceCoverage >= due
@@ -2413,14 +2447,13 @@ export function canPayWithFood(playerIndex) {
 export function canPayWithMoney(playerIndex, n) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
-	let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+	let unitarySalary = plyr.unitarySalary(playerIndex)
 	return Math.floor(Math.max(0, playerObj.money - headhuntSalaryDue(playerIndex)) / unitarySalary) >= n
 }
 
 export function paySalaries(foodPayements) {
 	const store = useModelStore()
 	let histo = []
-	console.log(`[PAY] ========== PAYSalaries ========== POV=${store.players[0]?.displayName || '?'}`)
 	for (let i = 0; i < store.players.length; i++) {
 		let player = store.players[i]
 		let foodPayement = foodPayements[i]
@@ -2441,12 +2474,11 @@ export function paySalaries(foodPayements) {
 		}
 
 		if (plyr.hasMilestone(i, rf.FIRST_BEER_SOLD) && foodPayement.length > 0) {
-			let unitarySalary = plyr.hasMilestone(i, rf.FIRST_WAITRESS_USED) ? 3 : 5
+			let unitarySalary = plyr.unitarySalary(i)
 			const normalAfterFood = Math.max(normalDue - unitarySalary * foodPayement.length, 0)
 			due = normalAfterFood + switchDue
 		}
 
-		//if (!Rules.canAffordPayDay(player) && plyr.hasMilestone(i, FIRST_TRAINER_USED)) {
 		if (due > player.money && plyr.hasMilestone(i, rf.FIRST_TRAINER_USED)) {
 			store.bank += player.money
 			player.money = 0
@@ -2454,7 +2486,6 @@ export function paySalaries(foodPayements) {
 				histo.push([due, player.resources.length])
 				player.resources = []
 			} else histo.push([due])
-			console.log(`[PAY] ${player.displayName}: due=${due} PRE=$${preMoney} trainer_bust → money=$${player.money}`)
 		} else {
 			player.money -= due
 			store.bank += due
@@ -2464,7 +2495,6 @@ export function paySalaries(foodPayements) {
 			} else {
 				histo.push([due])
 			}
-			console.log(`[PAY] ${player.displayName}: due=${due} PRE=$${preMoney} → money=$${player.money}`)
 		}
 		clearHeadhuntSalaries(i)
 	}
@@ -2543,10 +2573,10 @@ export function marketersNeedingFiring(playerIndex) {
 	}
 
 	// 2. Calculate the cash gap. Resources may cover normal salaries only.
-	const penalty = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+	const penalty = plyr.unitarySalary(playerIndex)
 	const currentSalary = salary(playerIndex)
 	const availableCash = Math.max(0, playerObj.money)
-	const validResources = plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) ? playerObj.resources.filter((resource) => resource !== rf.COFFEE).length : 0
+	const validResources = plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) ? countNonCoffeeResources(playerObj) : 0
 	const resourceCoverage = Math.min(baseSalary(playerIndex), validResources * penalty)
 	const shortfall = currentSalary - availableCash - resourceCoverage
 	if (shortfall <= 0) return []
@@ -2571,21 +2601,13 @@ export function marketersNeedingFiring(playerIndex) {
 	// cover the gap. Firing a newly headhunted employee also removes its switch salary.
 	const result = []
 	const nonMarketerRelief = totalPaidStaff * penalty + headhuntSalaryDue(playerIndex)
-	if (shortfall > nonMarketerRelief && playerObj.marketers.length > 0) {
-		playerObj.marketers.forEach((entry, i) => {
-			const emp = entry.marketer
-			// Ignore the marketer in the additional campaign slot
-			if (i !== playerObj.additionalCampaignArrayIndex && salarySet.has(emp)) {
-				result.push(emp)
-			}
-		})
-	}
+	if (shortfall > nonMarketerRelief && playerObj.marketers.length > 0) pushSalaryMarketers(playerObj, salarySet, result)
 
 	return result
 }
 
 export function numPayNeeded(playerIndex) {
-	let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+	let unitarySalary = plyr.unitarySalary(playerIndex)
 	let due = baseSalary(playerIndex)
 	return Math.ceil(due / unitarySalary)
 }
@@ -2596,7 +2618,7 @@ export function payingWithGoodsRequireAction(playerIndex) {
 	// 1. Return false immediately if the player cannot pay with resources
 	if (!plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD)) return false
 
-	const penalty = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+	const penalty = plyr.unitarySalary(playerIndex)
 	const unpaidStaffCount = employeesRequiringASalary(playerIndex).length
 
 	// 2. Calculate if the player has more payment options than debt
@@ -2617,6 +2639,11 @@ export function payingWithGoodsRequireAction(playerIndex) {
 
 // --- Stadium mod ---
 
+// Turn on which the next stadium game happens, given the games already played
+export function stadiumGameTurn(gamesPlayed) {
+	return 5 + gamesPlayed * 3
+}
+
 // The First Stadium Supplier milestone hears announcements 1 turn earlier
 function stadiumAnnouncementLead() {
 	const store = useModelStore()
@@ -2626,15 +2653,26 @@ function stadiumAnnouncementLead() {
 	return 2
 }
 
+// The injected STADIUM need only exists inside doDinnerTime's synchronous
+// run, so displays that should count it during the working day (map arena
+// token, board total demand) derive it from the announcement instead.
+// Game day only - never the milestone holder's early lead turns, that
+// knowledge stays private.
+export function stadiumGameDayDemand() {
+	const store = useModelStore()
+	if (!store.startingOptions.stadium) return null
+	if (store.stadium.announcement === null) return null
+	if (store.gameflow.turn !== 5 + store.stadium.gamesPlayed * 3) return null
+	return { food: store.stadium.announcement.food, units: store.stadium.announcement.units }
+}
+
 // Called at the end of a turn (after Dinnertime, during clean-up) with the turn
 // that just ended. Creates the announcement for the next game when it is due.
-// With the First Stadium Supplier milestone the announcement is rolled one turn
-// early, but the shared history entry (what everyone else sees) waits until the
-// normal 2-turn lead - the holder's early knowledge stays private.
+// Holder sees the roll early; shared history waits for the normal lead
 export function stadiumEndOfTurn(turnJustEnded) {
 	const store = useModelStore()
 	if (!store.startingOptions.stadium) return
-	const nextGameTurn = 5 + store.stadium.gamesPlayed * 3
+	const nextGameTurn = stadiumGameTurn(store.stadium.gamesPlayed)
 
 	// Roll the next game's demand at the earliest lead that applies (3 with the milestone, else 2)
 	if (store.stadium.announcement === null && turnJustEnded >= nextGameTurn - stadiumAnnouncementLead()) {
@@ -2644,7 +2682,7 @@ export function stadiumEndOfTurn(turnJustEnded) {
 		if (store.startingOptions.dumplings) pool.push(rf.DUMPLING)
 		if (store.startingOptions.friedChicken) pool.push(rf.FRIED_CHICKEN)
 		const food = pool[Math.floor(Math.random() * pool.length)]
-		const units = gameNumber === 1 ? 6 : gameNumber === 2 ? 12 : 16
+		const units = [6, 12][gameNumber - 1] ?? 16
 		store.stadium.announcement = { gameNumber: gameNumber, food: food, units: units }
 	}
 
@@ -2665,7 +2703,10 @@ export function housesAffectedByMarketingCampaign(campaign) {
 
 	// 1. Determine the affected area based on Campaign Type
 	switch (campaignData.type) {
-		case rf.BILLBOARD: {
+		case rf.BILLBOARD:
+		case rf.PHONE: {
+			// Media Line phone token: same rule as a billboard - every house
+			// touching the token footprint catches the call (typically 2).
 			let w = campaign.rotated ? campaignData.height : campaignData.width
 			let h = campaign.rotated ? campaignData.width : campaignData.height
 			// Get neighbors of the billboard's footprint
@@ -2718,6 +2759,12 @@ export function housesAffectedByMarketingCampaign(campaign) {
 		case rf.HAWKER_TRUCK:
 			model.getHousesAffectedByHawkerTruck(campaign.number).forEach((h) => affectedHouses.add(h))
 			break
+
+		case rf.TV_CHANNEL:
+			// Media Line mod - B3 affects exactly the houses the player picked
+			// inside the restaurant's diamond range (stored at placement time).
+			campaign.houses.forEach((h) => affectedHouses.add(h))
+			break
 	}
 
 	// 2. Identify houses within the affected area
@@ -2748,6 +2795,12 @@ export function housesAffectedByMarketingCampaign(campaign) {
 	return Array.from(affectedHouses)
 }
 
+// Media Line mod: the per-night accumulator for milestone 1 (First Telemarketer
+// Used, grouped all-eat bonus) lives in store.mediaLine.night. doMarketingCampaigns
+// fills it at payday (the pushes whose needs are matched at the NEXT turn's dinner)
+// and the next doDinnerTime consumes + resets it. It is part of the saved state so
+// a page reload between payday and dinner cannot silently drop the bonus.
+
 // PHASE_MARKETING_CAMPAIGNS -- fire off marketing campaigns
 // replayFinalPass: replay only. Live play repeats the whole phase once per Mass
 // Marketeer and only ticks campaign durations down on the last repeat. The replay
@@ -2767,8 +2820,9 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 
 	// Phase Loop (Runs once normally, or multiple times for Mass Marketers)
 	for (let mmLoop = totalMassMarketers; mmLoop >= 0; mmLoop--) {
-		// Sort campaigns by number
-		const sortedCampaigns = [...store.campaigns].sort((a, b) => a.number - b.number)
+		// Sort campaigns by number (Media Line mod: B-line campaigns use
+		// decimal sort keys so they interleave into the A-line order)
+		const sortedCampaigns = [...store.campaigns].sort((a, b) => campaignSortKey(a.number) - campaignSortKey(b.number))
 
 		const histObj = []
 		const earnedByPlayers = []
@@ -2781,12 +2835,31 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 			// the campaign still markets, just without a player attribution.
 			const isRadio = rf.MARKETING_CAMPAIGNS[campaign.number].type === rf.RADIO
 			const isAirplane = rf.MARKETING_CAMPAIGNS[campaign.number].type === rf.AIRPLANE
+			const isBLine = store.startingOptions.mediaLine && campaign.number >= 28 && campaign.number <= 35
+
+			// Media Line mod: nightly bookkeeping for the grouped all-eat bonus
+			if (store.startingOptions.mediaLine) {
+				const night = store.mediaLine.night
+				if (isBLine) {
+					if (!night.groups[campaign.number]) night.groups[campaign.number] = { owner: playerIndex, houses: [] }
+					else night.groups[campaign.number].owner = playerIndex
+				} else if (playerIndex !== -1) {
+					// The player's own A-line campaign ran tonight - breaks purity
+					if (!night.aLinePushers.includes(playerIndex)) night.aLinePushers.push(playerIndex)
+				}
+			}
 
 			let good1 = campaign.good
 			let good2 = -1
 
 			// Milestone: Radio double marketing
 			if (player !== -1 && plyr.hasMilestone(playerIndex, rf.FIRST_RADIO_CAMPAIGN) && isRadio) {
+				good2 = campaign.good
+			}
+
+			// Media Line mod: milestone 2 (First TV Announcer Used) - the holder's
+			// first TV campaign pushes 2 identical cards per house per night
+			if (campaign.number === store.mediaLine.doubleCampaign) {
 				good2 = campaign.good
 			}
 
@@ -2803,7 +2876,7 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 			for (const houseId of affectedHouses) {
 				const isApt = rf.APARTMENTS.includes(houseId)
 				const limit = model.hasGarden(houseId) ? 5 : 3
-				const isInfiniteHouse = houseId === 3.2 || houseId === 9.7
+				const isInfiniteHouse = isApt
 
 				const tryAddNeed = (good, history) => {
 					const needs = store.needs.find((n) => n.number === houseId)
@@ -2822,7 +2895,10 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 				}
 
 				// Standard Good 1
-				tryAddNeed(good1, h1)
+				if (tryAddNeed(good1, h1) && isBLine) {
+					const houseList = store.mediaLine.night.groups[campaign.number].houses
+					if (!houseList.includes(houseId)) houseList.push(houseId)
+				}
 
 				// Standard Good 2
 				if (h2) tryAddNeed(good2, h2)
@@ -2855,6 +2931,9 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 					for (let i = 0; i < store.players.length; i++) {
 						plyr.recallMarketeer(i, campaign.number)
 					}
+					// Media Line mod: the doubled campaign is gone - free the slot
+					// (the one-shot latch stays, doubling never repeats)
+					if (store.mediaLine.doubleCampaign === campaign.number) store.mediaLine.doubleCampaign = -1
 				} else if (campaign.duration < 9) {
 					campaign.duration--
 				}
@@ -2916,14 +2995,14 @@ export function handleBankBreak(replayOnly) {
 	if (store.bankBroken === 0) {
 		store.bankBroken = 1
 
-		if (!replayOnly) model.addHistory(rf.HIST_DISPLAY_RESERVE, store.reserveCards.filter((card) => card !== rf.RES_CARD_NOT_CHOSEN && card !== rf.RES_CARD_NONE), -1, 0)
+		// RES_CARD_NOT_CHOSEN = not chosen, RES_CARD_NONE = no reserve card: neither counts at bank break
+		const chosenCards = store.reserveCards.filter((card) => card !== rf.RES_CARD_NOT_CHOSEN && card !== rf.RES_CARD_NONE)
+		if (!replayOnly) model.addHistory(rf.HIST_DISPLAY_RESERVE, chosenCards, -1, 0)
 
 		const reserve = [0, 0, 0]
 		let total = 0
 
-		store.reserveCards.forEach((card) => {
-			// RES_CARD_NOT_CHOSEN = not chosen, RES_CARD_NONE = no reserve card: neither counts at bank break
-			if (card === rf.RES_CARD_NOT_CHOSEN || card === rf.RES_CARD_NONE) return
+		chosenCards.forEach((card) => {
 			total += card * 100
 			reserve[card - 1]++
 		})
@@ -2932,7 +3011,7 @@ export function handleBankBreak(replayOnly) {
 		store.ceoLevel = reserve.lastIndexOf(maxVal) + 2
 
 		if (store.startingOptions.reservePrice) {
-			total = 200 * store.reserveCards.filter((card) => card !== rf.RES_CARD_NOT_CHOSEN && card !== rf.RES_CARD_NONE).length
+			total = 200 * chosenCards.length
 			store.ceoLevel = 3
 		}
 
@@ -3024,11 +3103,8 @@ export function isRequiredToPlayCleanUp(playerIndex) {
 		return false
 	}
 
-	if (plyr.hasFridge(playerIndex) && playerObj.resources.length > 0) {
-		// Rule change to allow throwing away all food
-		return kimchiFridgeCollision(playerIndex) || playerObj.resources.length > 0
-	}
-	return false
+	// Rule change: a fridge owner may throw away all food, so always gets the choice
+	return plyr.hasFridge(playerIndex)
 }
 
 export function autoProcessCleanUp(playerIndex) {
@@ -3069,6 +3145,13 @@ export function giveMarketingMilestones(playerIndex, marketer) {
 		case rf.CAMPAIGN_MANAGER:
 			plyr.awardMilestone(playerIndex, rf.FIRST_MARKETEER_USED)
 			plyr.awardMilestone(playerIndex, rf.FIRST_CAMPAIGN_MANAGER_USED)
+			break
+		// Media Line mod
+		case rf.TELEMARKETER:
+			plyr.awardMilestone(playerIndex, rf.FIRST_TELEMARKETER_USED)
+			break
+		case rf.TV_ANNOUNCER:
+			plyr.awardMilestone(playerIndex, rf.FIRST_TV_ANNOUNCER_USED)
 			break
 		/*case BRAND_MANAGER:
                 model.giveMilestone(FIRST_MARKETEER_USED, player);
@@ -3164,7 +3247,7 @@ export function givePossiblePositionsForRadioPizzaBomb(houseNumber) {
 	const tileSet = new Set()
 
 	// 1. Resolve House or Apartment Object
-	const isApartment = houseNumber === 3.2 || houseNumber === 9.7
+	const isApartment = rf.APARTMENTS.includes(houseNumber)
 	const house = isApartment ? model.findApartment(houseNumber) : model.findHouse(houseNumber)
 
 	if (!house) return []

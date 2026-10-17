@@ -233,6 +233,8 @@ export const HIST_CONFLICT_TURN_ORDER = 6
 		else if (store.computedHistory[i][0] === rf.HIST_PRE_PRODUCTION) replayPreProduction(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_PRE_PRODUCTION_MINES) replayPreProductionMines(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_POST_PRODUCTION) replayPostProduction(i, store.computedHistory[i][1], store.computedHistory[i][3])
+		else if (store.computedHistory[i][0] === rf.HIST_RESIGN) replayResign(i, store.computedHistory[i][1], store.computedHistory[i][3])
+		else if (store.computedHistory[i][0] === rf.HIST_KICKOUT) replayKickout(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		// if it is a stack of actions, replay and save each one separately
 		else if (store.computedHistory[i][0] === rf.HIST_STACK_ACTIONS) {
 			const stackActions = store.computedHistory[i][3]
@@ -445,6 +447,15 @@ function replayPostProduction(_historyIndex, _playerIndex, _entry3) {
 	model.resetTransportersForNewTurn()
 }
 
+// A resigned player (entry1) and a kicked player (entry3[0]) leave with their transporters and goods
+function replayResign(_historyIndex, playerIndex, _entry3) {
+	model.removeAllTransportersAndGoodsForPlayerIndex(playerIndex)
+}
+
+function replayKickout(_historyIndex, _playerIndex, entry3) {
+	model.removeAllTransportersAndGoodsForPlayerIndex(entry3[0])
+}
+
 /**************************** STACK ACTION REPLAYS */
 function replayStackPickupRes(stackAction) {
 	const transporterID = stackAction[1]
@@ -533,10 +544,17 @@ function replayStackMoveLand(stackAction, playerIndex) {
 	const geeseDropped = stackAction.length >= 6 && stackAction[5].length > 1 && stackAction[5][1] === 1
 	const toHexID = toLocationBucket[1]
 	const toBucket = toLocationBucket[2]
+	// Planes & Aeroports: a fly move carries an isFly flag in stackAction[5][2]; a sea
+	// destination must resolve to a sea stopping vertex, not a land vertex.
+	const isFly = stackAction.length >= 6 && stackAction[5].length > 2 && stackAction[5][2] === 1
 
-	//let toLocationFromStack = [rf.LOCATION_LAND_VERTEX, toHexID, toVertex]
 	const transporterObj = model.getTransporterByID(movingTransporterID)
-	let toLocationFinal = [rf.LOCATION_LAND_VERTEX, toHexID, loc.getAnyVertexInHexIDbucketID(toHexID, toBucket)]
+	let toLocationFinal
+	if (isFly && transporterObj.type === rf.PLANE && rf.TERR_ACTS_LIKE_WATER.includes(model.getHexByID(toHexID).currentTerrain)) {
+		toLocationFinal = [rf.LOCATION_SEA_VERTEX, toHexID, loc.getSeaVertexForNewTransporterFromHexIDandBucketID(toHexID, toBucket)]
+	} else {
+		toLocationFinal = [rf.LOCATION_LAND_VERTEX, toHexID, loc.getAnyVertexInHexIDbucketID(toHexID, toBucket)]
+	}
 	const toLocationForced = [...toLocationFinal]
 
 	if (CHECK_EXTRA_DATA) {
@@ -583,8 +601,20 @@ function replayStackMoveLand(stackAction, playerIndex) {
 		const stats = rf.getTransporterStats(transporterObj.type)
 		// Art & The Atelier: caravans move freely through walls and cross-country
 		const isCaravan = transporterObj.type === rf.EXHIBITION_TRANSPORTER
-		const movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, playerIndex, isCaravan, isCaravan)
-		const pathfind = graph.pathfind(movementGraph, transporterObj.location, stats.validMove, transporterObj.remainingMoves)
+		let movementGraph
+		let effectiveValidMove
+		let effectiveMaxMoves
+		if (transporterObj.type === rf.PLANE) {
+			const eff = model.getEffectiveMoveParams(transporterObj, isFly)
+			movementGraph = graph.createMovementGraph(transporterObj, playerIndex, isFly)
+			effectiveValidMove = eff.validMove
+			effectiveMaxMoves = eff.maxMoves
+		} else {
+			movementGraph = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, playerIndex, isCaravan, isCaravan)
+			effectiveValidMove = stats.validMove
+			effectiveMaxMoves = transporterObj.remainingMoves
+		}
+		const pathfind = graph.pathfind(movementGraph, transporterObj.location, effectiveValidMove, effectiveMaxMoves)
 		let indicesToValid = util.boolFilter(
 			util.indexArray(pathfind.locations.length),
 			pathfind.cost.map((cost) => cost > 0)
@@ -807,12 +837,18 @@ function replayStackBuildBuilding(stackAction, playerIndex) {
 
 function replayStackBombBuilding(stackAction) {
 	const transporterID = stackAction[1]
+	const buildingType = stackAction[2]
 	const hexID = stackAction[3]
-	// Remove the bomb
-	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
-	// Remove every non-strengthened building on the hex
-	const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && !b.strengthened)
-	for (const b of buildingsOnHex) model.removeBuildingByID(b.id)
+	// Remove the carried bomb (legacy fallback for old entries that used a bomb on the tile)
+	const bomb = model.resourcesOnTransport(transporterID).find((r) => r.type === rf.RES_BOMB)
+	if (bomb) bomb.location = loc.setOOBlocation()
+	else model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
+	// Remove only the targeted non-strengthened building
+	const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
+	let targetBldg = undefined
+	if (stackAction[5] !== undefined) targetBldg = model.getBuildingByID(stackAction[5], "bomb replay")
+	if (!targetBldg) targetBldg = buildingsOnHex.find((b) => b.type === buildingType && !b.strengthened)
+	if (targetBldg && !targetBldg.strengthened) model.removeBuildingByID(targetBldg.id)
 }
 
 function replayStackStrengthenBuilding(stackAction) {

@@ -9,13 +9,7 @@
         <script src="{% static 'Lobby/common.js' %}"></script>
     {% endcompress %}
     <div class="lobby" id="lobbyPage">
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
+        {% include "Lobby/messages.html" %}
         <div class="lobby-social">
             {% include "Lobby/socialButtons.html" %}
         </div>

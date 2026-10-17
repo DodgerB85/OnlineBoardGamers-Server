@@ -264,7 +264,7 @@ describe("Union enforcement and module composition", () => {
 			[[], Array.from({ length: playerIndex + 4 }, () => rf.WAITRESS), 0],
 		])
 
-		IO.processSimulMoveData(funcs.compressObjectToDB(moves))
+		IO.processSimulMoveData(funcs.compressData(moves))
 
 		expect(store.laborMarket.workedCounts).toEqual([4, 5, 6])
 		expect(rules.resolveUnionHolders(store.laborMarket.workedCounts)).toEqual([2])

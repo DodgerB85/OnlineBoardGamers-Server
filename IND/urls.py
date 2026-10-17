@@ -32,6 +32,8 @@ urlpatterns = [
     # Old URL format redirect (original_id is the old IND model _Game.id)
     path("<int:original_id>/", redirect_old_url, name="redirect_old_url"),
     path("help/", views.INDhelp, name="INDhelp"),
+    path("INDstats/", views.INDstats, name="INDstats"),
+    path("INDstatGames/", views.INDstatGames, name="INDstatGames"),
     ## API routes
     path("createINDgame/", views.createINDgame, name="createINDgame"),
     path("bugEntry/", views.bugEntry, name="bugEntry"),

@@ -40,7 +40,6 @@ function marketerCampaignImage(playerIndex, marketer) {
 // Count of each resource type the player holds
 const resourceCounts = computed(() => {
 	const player = store.players[props.playerIndexProp]
-	if (!player) return {}
 	const counts = {}
 	for (const r of player.resources) counts[r] = (counts[r] || 0) + 1
 	return counts
@@ -56,7 +55,7 @@ const resourceCounts = computed(() => {
 					<div class="milestoneTitle">{{ rf.MILESTONES_STR[ms].title.toUpperCase() }}</div>
 					<div class="milestoneText">{{ rf.MILESTONES_STR[ms].description }}</div>
 					<div class="milestoneSpacer">&nbsp;</div>
-					<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms].img)" :class="rf.MILESTONES_STR[ms].additionalClass ? rf.MILESTONES_STR[ms].additionalClass : ''" />
+					<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms].img)" :class="rf.MILESTONES_STR[ms].additionalClass" />
 				</span>
 			</template>
 			<template v-else>{{ $t("playerDetails.noMilestones") }}</template>
@@ -89,7 +88,7 @@ const resourceCounts = computed(() => {
 				</div>
 			</div>
 			<!-- RESERVE CARD -->
-			<template v-if="store.bankBroken !== 0 || (store.bankBroken === 0 && (personal.trainingGame || playerIndexProp === personal.pov))">
+			<template v-if="store.bankBroken !== 0 || personal.trainingGame || playerIndexProp === personal.pov">
 				<div v-if="store.reserveCards[playerIndexProp] >= 1 && store.reserveCards[playerIndexProp] <= 3" class="cardSummaryDiv">
 					<img class="cardImg" :src="view.getImage(view.getReserveCardImageKey(store.reserveCards[playerIndexProp]))" />
 				</div>
@@ -142,7 +141,9 @@ const resourceCounts = computed(() => {
 						<img v-if="rf.UNIQUE_CARDS.indexOf(emp) > -1" :src="view.getImage('icon1x')" class="iconsImg" />
 						<img v-else-if="rf.HIREABLE_EMPLOYEES.indexOf(emp) > -1" :src="view.getImage('iconRecruit')" class="iconsImg" />
 						<span v-else class="blankIcon">&nbsp;</span>
-						<img v-if="rf.getRangeForEmployee(emp) === 8" :src="view.getImage('iconRangeInfinite')" class="iconsImg iconMiddle" />
+						<img v-if="emp === rf.TELEMARKETER" :src="view.getImage('iconWaveRange1')" class="iconsImg iconMiddle" />
+						<img v-else-if="emp === rf.TV_ANNOUNCER" :src="view.getImage('iconWaveRange2')" class="iconsImg iconMiddle" />
+						<img v-else-if="rf.getRangeForEmployee(emp) === 8" :src="view.getImage('iconRangeInfinite')" class="iconsImg iconMiddle" />
 						<img v-else-if="rf.getRangeForEmployee(emp) >= 1" :src="view.getImage('iconRange' + rf.getRangeForEmployee(emp))" class="iconsImg iconMiddle" :class="{ fixedHeight: rf.getRangeType(emp) === 'road' }" />
 						<span v-else class="blankIcon iconMiddle">&nbsp;</span>
 						<img v-if="rf.REQUIRE_SALARY.indexOf(emp) > -1" :src="view.getImage('iconSalary')" class="iconsImg" />
@@ -167,7 +168,9 @@ const resourceCounts = computed(() => {
 						<img v-if="rf.UNIQUE_CARDS.indexOf(emp) > -1" :src="view.getImage('icon1x')" class="iconsImg" />
 						<img v-else-if="rf.HIREABLE_EMPLOYEES.indexOf(emp) > -1" :src="view.getImage('iconRecruit')" class="iconsImg" />
 						<span v-else class="blankIcon">&nbsp;</span>
-						<img v-if="rf.getRangeForEmployee(emp) === 8" :src="view.getImage('iconRangeInfinite')" class="iconsImg iconMiddle" />
+						<img v-if="emp === rf.TELEMARKETER" :src="view.getImage('iconWaveRange1')" class="iconsImg iconMiddle" />
+						<img v-else-if="emp === rf.TV_ANNOUNCER" :src="view.getImage('iconWaveRange2')" class="iconsImg iconMiddle" />
+						<img v-else-if="rf.getRangeForEmployee(emp) === 8" :src="view.getImage('iconRangeInfinite')" class="iconsImg iconMiddle" />
 						<img v-else-if="rf.getRangeForEmployee(emp) >= 1" :src="view.getImage('iconRange' + rf.getRangeForEmployee(emp))" class="iconsImg iconMiddle" :class="{ fixedHeight: rf.getRangeType(emp) === 'road' }" />
 						<span v-else class="blankIcon iconMiddle">&nbsp;</span>
 						<img v-if="rf.REQUIRE_SALARY.indexOf(emp) > -1" :src="view.getImage('iconSalary')" class="iconsImg" />

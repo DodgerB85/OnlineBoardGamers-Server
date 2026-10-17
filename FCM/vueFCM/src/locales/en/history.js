@@ -62,6 +62,8 @@
       seniorVP: "Senior VP",
       recruitingMgr: "Recruiting Mgr",
       jazzM: "Jazz M",
+      colJazz: "J",
+      colWaitress: "W",
     },
     salaryPay: "{amount} and {count} item|{amount} and {count} items",
 
@@ -105,6 +107,13 @@
     // Fried Chicken mod
     flipToFriedChicken: "Unserved demand at house(s) {houses} flips to fried chicken:",
     houseMovedOut: "House(s) {houses} moved out of the neighbourhood",
+
+    // Media Line mod
+    tvAtHouses: "reaching house(s) {houses}",
+    publishHeadline: "{name} publishes a headline:",
+    headlinePrime: "all base prices +$5 next dinner",
+    headlinePress: "all base prices -$5 next dinner",
+    mediaLineBonus: "{name} sold out every targeted media house, earning ${amount}: houses {houses}",
 
     // Stadium mod
     stadiumAnnounce: "The stadium announces a game on turn {turn}: it will demand {units} \u00D7 {good}",
@@ -156,6 +165,7 @@
     apartmentGoesTo: "Apartment #{num} goes to {player} for ${amount}",
     ruralGoesTo: "Rural Area goes to {player} for ${amount}",
     basePriceItems: "Base price ${price} x {count} item.|Base price ${price} x {count} items.",
+    headlineApplied: "(includes tonight's headline {amount})",
     doubledGarden: "The base price is doubled, because the house has a garden.",
     doubledParkApartment: "The base price is doubled, because the apartment is adjacent to a park.",
     doubledParkHouse: "The base price is doubled, because the house is adjacent to a park.",
@@ -170,11 +180,36 @@
     noCoffeeSold: "No coffee sold",
     moreInformation: "More Information",
 
+    // Dinner time animation
+    animAnimate: "Animate",
+    animStepThrough: "Step through",
+    animHouseLabel: "House #{num}",
+    animApartmentLabel: "Apartment #{num}",
+    animRuralLabel: "Rural Area",
+    animDemandLeaves: "{building} sells to {player}.",
+    animPickup: "{building} sets off to {player}'s restaurant.",
+    animDrive: "The car drives on to the next road square.",
+    animCoffee: "The car passes {player}'s coffee shop — they earn +${amount}!",
+    animArrive: "{building} arrives at {player}'s restaurant. Items bought for +${income}!",
+    animRange: "Current Range: {range}",
+    animCost: "Current Distance Cost: ${cost}",
+    animPrev: "Previous",
+    animNext: "Next",
+    animStart: "Start",
+    animEnd: "End",
+    animSwitchStep: "Switch to Step Through",
+    animClose: "Close",
+    animStepOf: "{current} / {total}",
+
     // Income
     noIncome: "No income",
     incomeHeader: "Income",
+    mediaLineBonusHeader: "Media milestone",
     playerHeader: "Player",
     salesHeader: "Sales",
+    itemsHeader: "Items",
+    coffeeHeader: "Coffee",
+    icHeader: "I+C",
     cfoBonusHeader: "CFO bonus",
     totalHeader: "Total",
 

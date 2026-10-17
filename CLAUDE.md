@@ -1,0 +1,1 @@
+Single source of truth: @AGENTS.md — read it and follow it. Edit AGENTS.md only, not this file.

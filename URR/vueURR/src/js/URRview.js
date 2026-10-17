@@ -3,7 +3,16 @@
  */
 
 import * as rf from "./URRreference"
-import { currentWaterFrame } from "./URRwater"
+import * as water from "./URRwater"
+
+export function playerIndexByName(game, name) {
+	return game.players.findIndex((player) => player.name === name || player.displayName === name)
+}
+
+export function displayedTurnOrder(game) {
+	if (game.turnDraft.ready && !game.viewSettings.showReplay) return [game.turnDraft.player]
+	return game.gameflow.turnOrder
+}
 
 export function currentStateId(game) {
 	if (game.gameflow.pendingOffer) return game.gameflow.pendingOffer.state
@@ -16,7 +25,7 @@ export function currentStateId(game) {
 	}
 	if (game.gameflow.phase === rf.PHASE_RAINY_SEASON) {
 		if (game.rain.step === "harvest") return game.rain.harvestOrder[0] ?? null
-		return game.board.areas.find((area) => area.id === currentWaterFrame(game)?.area)?.waterwork?.state ?? null
+		return game.board.areas.find((area) => area.id === water.currentWaterFrame(game)?.area)?.waterwork?.state ?? null
 	}
 	return null
 }
@@ -43,6 +52,7 @@ export function getLeadershipChanges(before, after) {
 	}).map((state) => ({
 		id: state.id, isActive: state.isActive, king: state.king,
 		hasEmerged: state.isActive && !before.states[state.id].isActive,
+		previousKing: before.states[state.id].king,
 		previousName: before.states[state.id].king === null ? "None" : before.players[before.states[state.id].king].displayName,
 		nextName: state.king === null ? "None" : after.players[state.king].displayName,
 	}))

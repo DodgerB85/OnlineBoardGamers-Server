@@ -21,6 +21,14 @@ from Lobby.models import Profile, User
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendAdminErrorMessage,
 )
+from Lobby.sharedFunctions.availabilityMatchmaking import (
+    availability_profile,
+    build_matchup_counts,
+    multigame_round_one_indices,
+    multigame_round_two_indices,
+    optimize_disjoint_groups,
+    optimize_multigame_order,
+)
 from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
     SR_gamePaceString,
@@ -33,6 +41,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getKFWstartingOptionsHTML,
     SR_getPointsForPosition,
     SR_getRNBstartingOptionsHTML,
+    SR_getROWstartingOptionsHTML,
     SR_getTGZstartingOptionsHTML,
     SR_getWEBstartingOptionsHTML,
     getCleanedAndSortedRoundData,
@@ -42,6 +51,8 @@ from Lobby.sharedFunctions.tournyGenerator import (
     multiGamePlayers4p,
     multiGamePlayersRound2,
 )
+
+from Lobby.sharedFunctions.hotStreaks import get_hot_streak
 
 NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND = ["FCMtourneyAdmin", "TGZtourneyAdmin"]
 
@@ -222,6 +233,8 @@ def SF_serializeGame(game, user, player_context):
         startingOptionsHTML = SR_getKFWstartingOptionsHTML(startingOptionsArr)
     if game_code == "WEB":
         startingOptionsHTML = SR_getWEBstartingOptionsHTML(startingOptionsArr)
+    if game_code == "ROW":
+        startingOptionsHTML = SR_getROWstartingOptionsHTML(startingOptionsArr)
     if game_code == "RNB":
         startingOptionsHTML = SR_getRNBstartingOptionsHTML(startingOptionsArr)
 
@@ -239,6 +252,7 @@ def SF_serializeGame(game, user, player_context):
     )
 
     return {
+        "hotStreak": get_hot_streak(game) if user and user.is_authenticated and user.profile.hotStreakEnabled and game.maxPlayers > 1 and not any(name in rf.SHADOW_USERNAMES for name in all_usernames) else None,
         "gameID": game.id,
         "gameName": gameName,
         "gameDescription": game.gameDescription,
@@ -886,7 +900,10 @@ def SF_createNextRoundGamesSetup(tournamentObj):
     max_p = tournamentObj.maxGamePlayers
     byesRequired = 0
 
-    if tournamentObj.tournamentCategory == "Main":
+    if tournamentType == "MG":
+        # MG's fixed multi-round schedule determines participation without tournament byes.
+        byesRequired = 0
+    elif tournamentObj.tournamentCategory == "Main":
         # Main: Everyone who doesn't fit into a full group gets a bye
         byesRequired = num_players % max_p
 
@@ -924,10 +941,21 @@ def SF_createNextRoundGamesSetup(tournamentObj):
         byePlayers.append(selectedByePlayer)
         allPlayersList.remove(selectedByePlayer)
 
+    matchupCounts = build_matchup_counts(TPDA)
+    roundSeed = f"{tournamentObj.id}:{len(TPDA) + 1}"
+
     # MG use MG creation
     if tournamentType == "MG":
         # First round MUST have more than 14 people
         if len(allPlayersList) >= 15:
+            profiles = _get_tournament_availability_profiles(allPlayersList)
+            allPlayersList = optimize_multigame_order(
+                allPlayersList,
+                multigame_round_one_indices(len(allPlayersList)),
+                profiles,
+                matchupCounts,
+                roundSeed,
+            )
             gamesPlayers = multiGamePlayers4p(allPlayersList)
         # Second round is 2 groups of 7 players, total 14
         elif len(allPlayersList) == 14:
@@ -937,6 +965,22 @@ def SF_createNextRoundGamesSetup(tournamentObj):
             round2playersData = tournamentPointsData[-1]
             allPlayersList = [row[0] for row in round2playersData]
 
+            profiles = _get_tournament_availability_profiles(allPlayersList)
+            groupA = optimize_multigame_order(
+                allPlayersList[:7],
+                multigame_round_two_indices()[:7],
+                profiles,
+                matchupCounts,
+                f"{roundSeed}:A",
+            )
+            groupB = optimize_multigame_order(
+                allPlayersList[7:],
+                [[index - 7 for index in game] for game in multigame_round_two_indices()[7:]],
+                profiles,
+                matchupCounts,
+                f"{roundSeed}:B",
+            )
+            allPlayersList = groupA + groupB
             gamesPlayers = multiGamePlayersRound2(allPlayersList)
         # Final is the top 2 from each group
         elif len(allPlayersList) == 4:
@@ -955,11 +999,32 @@ def SF_createNextRoundGamesSetup(tournamentObj):
             gamesPlayers.append(allPlayersList[:])
             allPlayersList.clear()
 
+        profiles = _get_tournament_availability_profiles(
+            [player for game in gamesPlayers for player in game]
+        )
+        gamesPlayers = optimize_disjoint_groups(
+            gamesPlayers,
+            profiles,
+            matchupCounts,
+            roundSeed,
+        )
+
     ret["roundNumberString"] = roundNumberString
     ret["byePlayers"] = byePlayers
     ret["gamesPlayers"] = gamesPlayers
 
     return ret
+
+
+def _get_tournament_availability_profiles(usernames):
+    usernames = set(usernames)
+    profiles = {username: availability_profile([], []) for username in usernames}
+    for profile in Profile.objects.filter(user__username__in=usernames).select_related("user"):
+        profiles[profile.user.username] = availability_profile(
+            profile.availabilityMoveCounts,
+            profile.availabilityTurnCounts,
+        )
+    return profiles
 
 
 def SF_checkForAnyTournamentEnd(tournamentObj):
@@ -1333,6 +1398,4 @@ def SF_setupTrainingGameShadows(request, max_players, shadow_names=None):
         shadow_display.append(display_name)
     shadow_name_notes = json.dumps(shadow_display, separators=(",", ":"))
     return shadow_users, shadow_name_notes
-
-
 

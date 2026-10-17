@@ -10,7 +10,6 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "dotenv": "^17.3.1",
     "motion": "^12.38.0",
     "motion-v": "^2.2.0",
     "pinia": "^2.1.6",

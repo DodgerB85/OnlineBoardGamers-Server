@@ -1,4 +1,5 @@
 import json
+import time
 from unittest.mock import patch
 
 from django.contrib.messages import get_messages
@@ -6,6 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from Lobby.models import Game, GamePlayer, User
+from Lobby.sharedFunctions.sharedFunctions import SF_kickoutRequired
 
 
 def playing(game, *users, **kwargs):
@@ -142,3 +144,74 @@ class JoinGameTests(TestCase):
         self.client.force_login(self.creator)
         self._post({"gameID": game.id, "action": "deleteTrgGame"})
         self.assertFalse(Game.objects.filter(id=game.id).exists())
+
+
+class StartGameKickoutTimerTests(TestCase):
+    """The join that fills a game must reset latestUpdate, so the kickout timer starts when play starts.
+
+    Regression: FCM's startGame used to overwrite latestUpdate with the game's creation
+    time, so a game that took days to fill started with an already-expired timer and the
+    joiner was offered a kickout against the first-seat player immediately.
+    """
+
+    def setUp(self):
+        self.patcher = patch("django_q.tasks.async_task")
+        self.patcher.start()
+        self.addCleanup(self.patcher.stop)
+
+        self.creator = User.objects.create_user(username="creator", password="pw")
+        self.joiner = User.objects.create_user(username="joiner", password="pw")
+        self.client.force_login(self.joiner)
+
+    def _stale_game(self, gameCode):
+        five_days_ago = str(int(time.time() * 1000) - 5 * 24 * 60 * 60 * 1000)
+        game = Game.objects.create(
+            gameCode=gameCode,
+            creator=self.creator,
+            host=self.creator,
+            gameStatus="AVAILABLE",
+            maxPlayers=2,
+            created=five_days_ago,
+            latestUpdate=five_days_ago,
+        )
+        GamePlayer.objects.create(game=game, player=self.creator, seat_order=0)
+        return game
+
+    def _join(self, game, gameCode):
+        return self.client.post(
+            reverse("joinGame", kwargs={"gameType": gameCode}),
+            data=json.dumps({"gameID": game.id, "source": "ajax", "action": ""}),
+            content_type="application/json",
+        )
+
+    def _assert_fresh_timer(self, game):
+        game.refresh_from_db()
+        self.assertEqual(game.gameStatus, "ACTIVE")
+        self.assertGreater(int(game.latestUpdate), int(time.time() * 1000) - 60 * 1000)
+        self.assertEqual(
+            SF_kickoutRequired(
+                "ACTIVE",
+                ["creator", "joiner"],
+                game.latestUpdate,
+                game.kickoutDuration,
+                game.kickoutFlexiData,
+                "joiner",
+            ),
+            0,
+        )
+
+    def test_fcm_start_does_not_inherit_creation_time(self):
+        game = self._stale_game("FCM")
+
+        response = self._join(game, "FCM")
+
+        self.assertEqual(response.json()["listToShow"], "ACTIVE")
+        self._assert_fresh_timer(game)
+
+    def test_rnb_start_does_not_inherit_creation_time(self):
+        game = self._stale_game("RNB")
+
+        response = self._join(game, "RNB")
+
+        self.assertEqual(response.json()["listToShow"], "ACTIVE")
+        self._assert_fresh_timer(game)

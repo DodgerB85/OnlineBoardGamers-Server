@@ -19,6 +19,8 @@ from django.urls import path
 from django.views.generic import RedirectView
 
 from . import views
+from .extraStats import extra_stats
+from .momentumViews import game_momentum, nudge_player
 from .views import ActivateAccount, registerView
 
 # app_name = 'Lobby' # Requires Lobby:index etc after everything
@@ -122,6 +124,8 @@ urlpatterns = [
     path("createDDLpage/<int:gameID>/", views.createDDLpage, name="createDDLpage"),
     path("createPAPpage/", views.createPAPpage, name="createPAPpage"),
     path("createPAPpage/<int:gameID>/", views.createPAPpage, name="createPAPpage"),
+    path("createROWpage/", views.createROWpage, name="createROWpage"),
+    path("createROWpage/<int:gameID>/", views.createROWpage, name="createROWpage"),
     path("FCMmapEditor/", views.FCMmapEditor, name="FCMmapEditor"),
     path("TGZmapEditor/", views.TGZmapEditor, name="TGZmapEditor"),
     path("AQYmapEditor/", views.AQYmapEditor, name="AQYmapEditor"),
@@ -133,6 +137,10 @@ urlpatterns = [
     path("contact/", views.contact, name="contact"),
     path("feedback/", views.feedback, name="feedback"),
     path("stats/", views.stats, name="stats"),
+    path("extraStats", extra_stats, name="extraStats"),
+    path("extraStats/", extra_stats),
+    path("gameMomentum/<int:game_id>/", game_momentum, name="gameMomentum"),
+    path("nudgePlayer/<int:game_id>/", nudge_player, name="nudgePlayer"),
     path("AllTournaments/", views.AllTournaments, name="AllTournaments"),
     path("TGZtournaments/", views.TGZtournaments, name="TGZtournaments"),
     path(

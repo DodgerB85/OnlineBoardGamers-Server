@@ -111,6 +111,7 @@
              alt="Juice" />
       </div>
     </div>
+  <div hidden>{% csrf_token %}</div>
   </body>
   <script>
   var initData = {};
@@ -138,6 +139,9 @@
   // Game state
   {% if finishedGame %}
   initData.finishedGame = true
+  {% endif %}
+  {% if tournamentGame %}
+  initData.tournamentGame = true
   {% endif %}
 
   {% if spoilerFree %}
@@ -172,7 +176,7 @@
   initData.kickoutVoteThreshold = {{ kickoutVoteThreshold|default:1 }};
   initData.kickoutVotesData = {{ kickoutVotesData|safe|default:"{}" }};
 
-  // Additional variables from original GameTemplate.html
+  // Extra init payload the client needs only on a full page load
   {% if gameData and phase == 13 %}initData.startingOptions = {{ startingOptionsLiteral }};{% endif %}
   initData.assistance = {{ showAssistance|default:1 }};
   {% if currentPlayers %}initData.currentPlayersArray = {{ currentPlayers|safe|default:"[]" }};{% endif %}

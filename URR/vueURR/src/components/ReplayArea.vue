@@ -1,21 +1,21 @@
 <script setup>
 import { onMounted, onBeforeUnmount, computed, watch } from "vue"
-import { restoreState, snapshotState } from "../js/URRmodel.js"
-import { checkForLatestData } from "../backend/URR_IO.js"
+import * as model from "../js/URRmodel.js"
+import * as IO from "../backend/URR_IO.js"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
 
 store.replayStep.index = 0
 const step = computed({ get: () => store.replayStep.index, set: (index) => { store.replayStep.index = index } })
-const liveSnapshot = snapshotState()
+const liveSnapshot = model.snapshotState()
 
 onMounted(applyStep)
 watch(step, applyStep)
 // The menu can close replay without reloading; never leave a historical
 // position available for live moves.
 onBeforeUnmount(() => {
-	restoreState(liveSnapshot)
-	checkForLatestData()
+	model.restoreState(liveSnapshot)
+	IO.checkForLatestData()
 })
 
 function maxStep() {
@@ -28,7 +28,7 @@ function applyStep() {
 	try {
 		const snapshot = JSON.parse(entry[2])
 		if (snapshot && snapshot.players) {
-			restoreState(snapshot)
+			model.restoreState(snapshot)
 		}
 	} catch (e) {
 		console.error("Unable to restore URR replay snapshot:", e)
@@ -65,7 +65,7 @@ function exitReplay() {
 </template>
 
 <style scoped>
-#replayArea { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; background: #d4eafd; border: 1px solid black; padding: 8px; margin: 10px 12px 0; text-align: center; font-size: 13px; }
+#replayArea { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; background: #d4eafd; border: 1px solid black; padding: 8px; margin: 10px 12px 0; text-align: center; font-size: 16px; font-weight: 400; }
 #replayArea input { width: min(300px, 35vw); }.actionsLineButton { border: 1px solid #527349; border-radius: 4px; padding: 6px 10px; background: #f7fff4; font: inherit; cursor: pointer; }.actionsLineButton:disabled { opacity: .4; cursor: default; }
 @media (max-width: 1050px) { .actionsLineButton, #replayArea input { min-height: 44px; box-sizing: border-box; } }
 </style>

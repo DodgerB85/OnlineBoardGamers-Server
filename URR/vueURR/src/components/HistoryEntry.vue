@@ -1,13 +1,15 @@
 <script setup>
+import PlayerMarker from "./PlayerMarker.vue"
 import ArtworkCard from "./ArtworkCard.vue"
-import { timestampToString } from "../js/URRfuncs"
+import * as funcs from "../js/URRfuncs"
 import StateLeadership from "./StateLeadership.vue"
-import { computed } from "vue"
+import { computed, nextTick, ref } from "vue"
+import { useWaterPlaybackStore } from "../stores/URRwaterPlayback.js"
 import * as rf from "../js/URRreference"
-import { currentStateId, phaseStr, waterworkMeasure, getLeadershipChanges } from "../js/URRview"
-import { getAutomaticAction, harvestAmount } from "../js/URRrules"
-import { currentWaterFrame } from "../js/URRwater"
-import { getPlayerMarkerImage, getStateOrderImage, getNationCardImage, getTerrainImage, getWaterworkImage, primogenitureImage } from "../js/URRassets"
+import * as view from "../js/URRview"
+import * as rules from "../js/URRrules"
+import * as water from "../js/URRwater"
+import * as assets from "../js/URRassets"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
 const props = defineProps({ entry: { type: Array, required: true }, index: { type: Number, required: true }, newestFirst: { type: Boolean, default: true } })
@@ -20,27 +22,27 @@ const after = computed(() => snapshot(props.entry))
 const before = computed(() => snapshot(store.history[props.index - 1]) || after.value)
 const player = computed(() => after.value?.players[props.entry[1]] || store.players[props.entry[1]])
 const action = computed(() => props.entry[3])
-const isAutomaticStep = computed(() => action.value && before.value && getAutomaticAction(before.value)?.type === action.value.type)
+const isAutomaticStep = computed(() => action.value && before.value && rules.getAutomaticAction(before.value)?.type === action.value.type)
 const isCurrentReplay = computed(() => store.viewSettings.showReplay && store.replayStep.index === props.index)
-const stateId = computed(() => before.value ? currentStateId(before.value) : null)
+const stateId = computed(() => before.value ? view.currentStateId(before.value) : null)
 const waterDestination = computed(() => action.value?.type === "allocateWater" ? before.value?.board.areas.find((area) => area.id === action.value.area) : null)
 const eventArtwork = computed(() => {
-	if (action.value?.type === "harvest" && stateId.value !== null) return { src: getStateOrderImage(stateId.value), alt: `${rf.STATE_NAMES[stateId.value]} harvest` }
+	if (action.value?.type === "harvest" && stateId.value !== null) return { src: assets.getStateOrderImage(stateId.value), alt: `${rf.STATE_NAMES[stateId.value]} harvest` }
 	const area = waterDestination.value
 	if (!area) return null
 	const work = area.waterwork
-	return work ? { src: getWaterworkImage(work.state, work.capacity), alt: `${rf.STATE_NAMES[work.state]} pump at ${area.label || area.id} · ${waterworkMeasure(work)}` } : { src: getTerrainImage(area.landType, area.isCity), alt: `${rf.LAND_NAMES[area.landType]}${area.isCity ? ' city' : ''} at ${area.label || area.id}` }
+	return work ? { src: assets.getWaterworkImage(work.state, work.capacity), alt: `${rf.STATE_NAMES[work.state]} pump at ${area.label || area.id} · ${view.waterworkMeasure(work)}` } : { src: assets.getTerrainImage(area.landType, area.isCity), alt: `${rf.LAND_NAMES[area.landType]}${area.isCity ? ' city' : ''} at ${area.label || area.id}` }
 })
 const balanceChanges = computed(() => {
 	if (!action.value) return []
 	const changes = []
 	for (const [index, player] of (after.value?.players || []).entries()) {
 		const privateBefore = before.value?.players[index]?.money
-		if (privateBefore !== undefined && player.money !== privateBefore) changes.push({ src: getPlayerMarkerImage(index), label: `${player.displayName}: ${privateBefore} → ${player.money} SPL`, amount: player.money - privateBefore })
+		if (privateBefore !== undefined && player.money !== privateBefore) changes.push({ src: assets.getPlayerMarkerImage(index), title: player.displayName, label: `Private cash: ${privateBefore} → ${player.money} SPL`, amount: player.money - privateBefore })
 	}
 	for (const state of after.value?.states || []) {
 		const treasuryBefore = before.value?.states[state.id]?.money
-		if (treasuryBefore !== undefined && state.money !== treasuryBefore) changes.push({ src: getStateOrderImage(state.id), label: `${rf.STATE_NAMES[state.id]} treasury: ${treasuryBefore} → ${state.money} SPL`, amount: state.money - treasuryBefore })
+		if (treasuryBefore !== undefined && state.money !== treasuryBefore) changes.push({ src: assets.getStateOrderImage(state.id), label: `${rf.STATE_NAMES[state.id]} treasury: ${treasuryBefore} → ${state.money} SPL`, amount: state.money - treasuryBefore })
 	}
 	return changes
 })
@@ -51,14 +53,14 @@ const nationAwards = computed(() => {
 		return { id: nation.id, owner: nation.owner, price }
 	})
 })
-const leadershipChanges = computed(() => getLeadershipChanges(before.value, after.value))
+const leadershipChanges = computed(() => view.getLeadershipChanges(before.value, after.value))
 const phaseHeading = computed(() => {
 	if (props.entry.administration) return ""
 	const flow = before.value?.gameflow
 	const adjacentFlow = (props.newestFirst ? after.value?.gameflow : snapshot(store.history[props.index - 2])?.gameflow) || flow
 	const isFirstVisible = props.newestFirst ? props.index === store.history.length - 1 : props.index === 0
 	if (!flow || (!isFirstVisible && flow.turn === adjacentFlow?.turn && flow.phase === adjacentFlow?.phase)) return ""
-	return `Turn ${flow.turn} · ${phaseStr(flow.phase)}`
+	return `Turn ${flow.turn} · ${view.phaseStr(flow.phase)}`
 })
 function landLabel(id) { return before.value?.board.areas.find((area) => area.id === id)?.label || id }
 function saleLabels(batches = []) { return batches.flat().map(landLabel).join(", ") }
@@ -69,12 +71,12 @@ const eventText = computed(() => {
 	const move = action.value
 	if (!move) return event === rf.HIST_GAME_END ? "Game ended" : "Played a move"
 	const stateName = rf.STATE_NAMES[stateId.value] || "State"
-	const waterSource = move.type === "allocateWater" ? currentWaterFrame(before.value)?.area : null
+	const waterSource = move.type === "allocateWater" ? water.currentWaterFrame(before.value)?.area : null
 	const offer = before.value?.gameflow.pendingOffer?.action
 	const offerDescription = offer?.type === "offerNation" ? `${rf.NATION_NAMES[offer.nation]} for ${offer.amount} SPL` : offer ? `${offer.kind} at ${landLabel(offer.area)}` : "an offer"
 	let passDescription = "Passed"
 	if (before.value?.gameflow.phase === rf.PHASE_DEVELOPMENT && before.value.gameflow.developmentStep === "eridu") passDescription = "Skipped Eridu digging"
-	else if (before.value?.gameflow.auction) passDescription = `${isAutomaticStep.value ? `${player.value.displayName}: ` : ''}Withdrew from the ${rf.NATION_NAMES[before.value.gameflow.auction.nation]} auction${isAutomaticStep.value ? ` · cannot afford ${before.value.gameflow.auction.amount + 5} SPL` : ''}`
+	else if (before.value?.gameflow.auction) passDescription = `Withdrew from the ${rf.NATION_NAMES[before.value.gameflow.auction.nation]} auction${isAutomaticStep.value ? ` · cannot afford ${before.value.gameflow.auction.amount + 5} SPL` : ''}`
 	const labels = {
 		buyNation: `Bought ${rf.NATION_NAMES[move.nation]} for ${move.nation === rf.NATION_ASHUR ? before.value.gameflow.ashurPrice : rf.NATION_PRICES[move.nation]} SPL`,
 		bidNation: `${before.value.gameflow.auction ? 'Bid' : 'Offered'} ${move.amount} SPL for ${rf.NATION_NAMES[move.nation]}`,
@@ -84,67 +86,84 @@ const eventText = computed(() => {
 		dig: `${stateName}: dug ${move.path?.map(landLabel).join(" → ")}`,
 		digEridu: `Eridu: dug ${move.path?.map(landLabel).join(" → ")}`,
 		buyCard: `${stateName}: hired a digging crew`,
-		requestWaterwork: `${stateName}: ${after.value?.gameflow.pendingOffer ? 'requested' : 'built'} a ${move.kind} at ${landLabel(move.area)}`,
+		requestWaterwork: `${stateName}: ${after.value?.gameflow.pendingOffer || after.value?.gameflow.waterworkRequests?.some((offer) => offer.action.area === move.area) ? 'requested' : 'built'} a ${move.kind} at ${landLabel(move.area)}`,
 		offerNation: after.value?.gameflow.pendingOffer ? `${stateName}: offered ${move.amount} SPL for ${rf.NATION_NAMES[move.nation]}` : `${stateName}: assimilated ${rf.NATION_NAMES[move.nation]} for ${move.amount} SPL`,
 		respondOffer: `${move.accept ? 'Accepted' : 'Declined'} ${offerDescription}`,
-		endDevelopment: `${stateName}: ended development${before.value?.states[stateId.value]?.diggers.length === 0 && after.value?.states[stateId.value]?.diggers.length > 0 ? " and hired the mandatory crew" : ""}`,
+		endDevelopment: after.value?.gameflow.pendingOffer ? `${stateName}: requested landowner agreement` : `${stateName}: ended development${before.value?.states[stateId.value]?.diggers.length === 0 && after.value?.states[stateId.value]?.diggers.length > 0 ? " and hired the mandatory crew" : ""}`,
 		beginDevelopment: after.value?.gameflow.phase === rf.PHASE_RAINY_SEASON || after.value?.gameflow.turn !== before.value?.gameflow.turn ? "Started the rainy season" : `Started ${rf.STATE_NAMES[after.value?.gameflow.stateOrder[after.value.gameflow.stateIndex]] || 'the next state'} development`,
 		resolveMaintenance: after.value?.states[stateId.value]?.hasRevolted ? `${stateName}: declared a revolution` : `${stateName}: hired the mandatory crew${move.sales?.some((batch) => batch.length) ? ` by selling ${saleLabels(move.sales)}` : ''}`,
 		exchangeBarahshum: `Exchanged Barahshum for a canal to ${landLabel(move.to)}`,
-		exchangeCalah: `${stateName}: ${after.value?.gameflow.pendingOffer ? 'requested a Calah exchange for' : 'exchanged Calah for'} a ${move.kind} at ${landLabel(move.area)}`,
+		exchangeCalah: `${stateName}: ${after.value?.gameflow.pendingOffer || after.value?.gameflow.waterworkRequests?.some((offer) => offer.action.area === move.area) ? 'requested a Calah exchange for' : 'exchanged Calah for'} a ${move.kind} at ${landLabel(move.area)}`,
 		allocateWater: waterDestination.value?.waterwork?.kind === "pump" ? `${stateName}: Sent ${move.amount ?? 1} water from ${landLabel(waterSource)} to ${landLabel(move.area)}` : `${stateName}: irrigated ${landLabel(move.area)} with one water from ${landLabel(waterSource)}`,
 		advanceWater: "Continued automatic water flow",
-		harvest: `${stateName}: ${move.choice === "store" ? "stored" : "distributed"} ${before.value ? harvestAmount(before.value, stateId.value) : ''} SPL harvest${move.remove ? ` · removed waterwork at ${landLabel(move.remove)}` : ''}`,
+		harvest: `${stateName}: ${move.choice === "store" ? "stored" : "distributed"} ${before.value ? rules.harvestAmount(before.value, stateId.value) : ''} SPL harvest${move.remove ? ` · removed waterwork at ${landLabel(move.remove)}` : ''}`,
 	}
 	return labels[move.type] || move.type
 })
 const actionImages = computed(() => {
 	const move = action.value
 	if (!move) return []
-	if (move.type === "digEridu") return [{ src: getNationCardImage(rf.NATION_ERIDU), alt: "Eridu", card: true }]
+	if (move.type === "digEridu") return [{ src: assets.getNationCardImage(rf.NATION_ERIDU), alt: "Eridu", card: true }]
 	if (move.type === "dig" && stateId.value !== null) {
 		const crew = before.value?.states[stateId.value]?.diggers.find((crew) => crew.id === move.crew)
-		return crew ? String(crew.capacity).split("+").map((capacity) => ({ src: getWaterworkImage(stateId.value, capacity), alt: `Digging crew: ${capacity} points` })) : []
+		return crew ? String(crew.capacity).split("+").map((capacity) => ({ src: assets.getWaterworkImage(stateId.value, capacity), alt: `Digging crew: ${capacity} points` })) : []
 	}
 	if (move.type === "harvest" && move.choice === "store" && move.remove) {
 		const work = before.value?.board.areas.find((area) => area.id === move.remove)?.waterwork
-		return work ? [{ src: getWaterworkImage(work.state, work.capacity), alt: `Removed ${rf.STATE_NAMES[work.state]} ${work.kind} at ${landLabel(move.remove)} · ${waterworkMeasure(work)}` }] : []
+		return work ? [{ src: assets.getWaterworkImage(work.state, work.capacity), alt: `Removed ${rf.STATE_NAMES[work.state]} ${work.kind} at ${landLabel(move.remove)} · ${view.waterworkMeasure(work)}` }] : []
 	}
-	if (move.type === "exchangeBarahshum") return [{ src: getNationCardImage(rf.NATION_BARAHSHUM), alt: "Barahshum", card: true }]
-	if (move.type === "bidPrimogeniture") return [{ src: primogenitureImage, alt: "Primogeniture" }]
+	if (move.type === "exchangeBarahshum") return [{ src: assets.getNationCardImage(rf.NATION_BARAHSHUM), alt: "Barahshum", card: true }]
+	if (move.type === "bidPrimogeniture") return [{ src: assets.primogenitureImage, alt: "Primogeniture" }]
 	if (move.type === "exchangeCalah") {
-		const images = [{ src: getNationCardImage(rf.NATION_CALAH), alt: "Calah", card: true }]
+		const images = [{ src: assets.getNationCardImage(rf.NATION_CALAH), alt: "Calah", card: true }]
 		const work = after.value?.board.areas.find((area) => area.id === move.area)?.waterwork
-		if (work && !after.value.gameflow.pendingOffer) images.push({ src: getWaterworkImage(work.state, work.capacity), alt: `Built ${rf.STATE_NAMES[work.state]} ${work.kind} at ${landLabel(move.area)} · ${waterworkMeasure(work)}` })
+		if (work && !after.value.gameflow.pendingOffer) images.push({ src: assets.getWaterworkImage(work.state, work.capacity), alt: `Built ${rf.STATE_NAMES[work.state]} ${work.kind} at ${landLabel(move.area)} · ${view.waterworkMeasure(work)}` })
 		return images
 	}
 	if (["endDevelopment", "resolveMaintenance"].includes(move.type) && stateId.value !== null && before.value?.states[stateId.value]?.diggers.length === 0 && after.value?.states[stateId.value]?.diggers.length > 0) {
 		const crew = after.value.states[stateId.value].diggers[0]
-		return String(crew.capacity).split("+").map((capacity) => ({ src: getWaterworkImage(stateId.value, capacity), alt: `Mandatory digging crew: ${capacity} points` }))
+		return String(crew.capacity).split("+").map((capacity) => ({ src: assets.getWaterworkImage(stateId.value, capacity), alt: `Mandatory digging crew: ${capacity} points` }))
 	}
 	if (move.type === "respondOffer") {
 		const offer = before.value?.gameflow.pendingOffer
-		if (offer?.action.type === "offerNation") return [{ src: getNationCardImage(offer.action.nation), alt: rf.NATION_NAMES[offer.action.nation], card: true }]
+		if (offer?.action.type === "offerNation") return [{ src: assets.getNationCardImage(offer.action.nation), alt: rf.NATION_NAMES[offer.action.nation], card: true }]
 		if (offer) {
 			const capacity = after.value?.board.areas.find((area) => area.id === offer.action.area)?.waterwork?.capacity
-			if (capacity !== undefined && move.accept) return [{ src: getWaterworkImage(offer.state, capacity), alt: `Accepted ${offer.action.kind} · ${waterworkMeasure({ kind: offer.action.kind, capacity })}` }]
+			if (capacity !== undefined && move.accept) return [{ src: assets.getWaterworkImage(offer.state, capacity), alt: `Accepted ${offer.action.kind} · ${view.waterworkMeasure({ kind: offer.action.kind, capacity })}` }]
 		}
 	}
-	if (["buyNation", "bidNation", "offerNation"].includes(move.type)) return [...new Set([move.nation, ...nationAwards.value.map((award) => award.id)])].map((id) => ({ src: getNationCardImage(id), alt: rf.NATION_NAMES[id], card: true }))
-	if (move.type === "pass" && nationAwards.value.length) return nationAwards.value.map((award) => ({ src: getNationCardImage(award.id), alt: rf.NATION_NAMES[award.id], card: true }))
+	if (["buyNation", "bidNation", "offerNation"].includes(move.type)) return [...new Set([move.nation, ...nationAwards.value.map((award) => award.id)])].map((id) => ({ src: assets.getNationCardImage(id), alt: rf.NATION_NAMES[id], card: true }))
+	if (move.type === "pass" && nationAwards.value.length) return nationAwards.value.map((award) => ({ src: assets.getNationCardImage(award.id), alt: rf.NATION_NAMES[award.id], card: true }))
 	if (move.type === "tradeLand") {
 		const ids = [move.buy, ...(move.sellBefore || []).flat(), ...(move.sellAfter || []).flat()].filter((id) => id !== undefined)
 		const lands = ids.map((id) => before.value?.board.areas.find((area) => area.id === id)).filter(Boolean)
 		const terrains = [...new Map(lands.map((area) => [`${area.landType}-${area.isCity}`, area])).values()]
-		return terrains.map((area) => ({ src: getTerrainImage(area.landType, area.isCity), alt: `${rf.LAND_NAMES[area.landType]}${area.isCity ? ' city' : ''}` }))
+		return terrains.map((area) => ({ src: assets.getTerrainImage(area.landType, area.isCity), alt: `${rf.LAND_NAMES[area.landType]}${area.isCity ? ' city' : ''}` }))
 	}
 	if (["buyCard", "requestWaterwork"].includes(move.type) && stateId.value !== null) {
 		const era = [1, 2, 3, 4].find((era) => before.value?.cardSupply[era] > 0) || 5
 		const capacity = rf.ERA_CARD_DATA[era][move.kind][0]
-		return String(capacity).split("+").map((capacity) => ({ src: getWaterworkImage(stateId.value, capacity), alt: move.kind === "digger" ? `${capacity}-point digging crew` : `${move.kind} · ${waterworkMeasure({ kind: move.kind, capacity })}` }))
+		return String(capacity).split("+").map((capacity) => ({ src: assets.getWaterworkImage(stateId.value, capacity), alt: move.kind === "digger" ? `${capacity}-point digging crew` : `${move.kind} · ${view.waterworkMeasure({ kind: move.kind, capacity })}` }))
 	}
 	return []
 })
+const playback = useWaterPlaybackStore()
+const playbackError = ref("")
+const canReplayWater = computed(() => ["riverComplete", "rainEnd"].includes(props.entry.administration?.kind) && (!store.turnDraft.start || props.entry.historyIndex < store.turnDraft.start.historyLength))
+function startWaterPlayback(advancing, showIrrigated = false) {
+	try {
+		playback.start(store.history, props.entry.historyIndex, advancing)
+		if (showIrrigated) {
+			playback.state.index = playback.state.steps.length - 1
+			playback.state.showIrrigated = true
+		}
+		nextTick(() => document.querySelector("#mapArea .mapSurface").scrollIntoView({ block: "center", behavior: "smooth" }))
+		playbackError.value = ""
+	} catch (error) {
+		playbackError.value = error.message
+		console.error("Unable to replay recorded water flow:", error)
+	}
+}
 function jumpToEntry() {
 	if (!store.viewSettings.showReplay) return
 	store.replayStep.index = props.index
@@ -155,26 +174,28 @@ function jumpToEntry() {
 	<div class="historyGroup">
 		<div v-if="phaseHeading" class="phaseHeading">{{ phaseHeading }}</div>
 		<div class="log" :class="{ selectableHistory: store.viewSettings.showReplay, currentReplay: isCurrentReplay, automaticStep: isAutomaticStep, separator: entry[0] === rf.HIST_NEW_GAME || entry[0] === rf.HIST_GAME_END }" :aria-current="isCurrentReplay ? 'step' : undefined" :role="store.viewSettings.showReplay ? 'button' : undefined" :tabindex="store.viewSettings.showReplay ? 0 : undefined" @click="jumpToEntry" @keydown.enter.prevent="jumpToEntry" @keydown.space.prevent="jumpToEntry">
-			<div class="historyTimestamp">{{ entry[4] != null ? timestampToString(entry[4]) : 'Time not recorded' }}</div>
+			<div class="historyTimestamp">{{ entry[4] != null ? funcs.timestampToString(entry[4]) : 'Time not recorded' }}</div>
 			<span v-if="isCurrentReplay" class="replayPosition">Current replay position</span>
 			<template v-if="entry.administration">
 				<div class="administrationHeading">{{ entry.administration.title }}</div>
 				<p class="administrationExplanation">{{ entry.administration.text }}</p>
+				<div v-if="canReplayWater" class="waterReplayControls"><button @click.stop="startWaterPlayback(true)">Animate</button><button @click.stop="startWaterPlayback(false)">Step through</button><button @click.stop="startWaterPlayback(false, true)">Show irrigated</button></div>
+				<p v-if="playbackError" role="alert">{{ playbackError }}</p>
 				<div class="administrationDetails" v-if="entry.administration.details.length">
 					<div v-for="(detail, detailIndex) in entry.administration.details" :key="detailIndex">
-						<img v-if="detail.player !== undefined" :src="getPlayerMarkerImage(detail.player)" alt="" />
-						<img v-else-if="detail.state !== undefined" :src="getStateOrderImage(detail.state)" alt="" />
-						<img v-else-if="detail.terrain !== undefined" :src="getTerrainImage(detail.terrain)" alt="" />
-						<button v-if="detail.area" @click.stop="store.viewSettings.historyArea = detail.area" :aria-label="`Find ${detail.label} on the board`">{{ detail.label }}</button><span>{{ detail.text }}</span>
+						<PlayerMarker v-if="detail.player !== undefined" :index="detail.player" />
+						<img v-else-if="detail.state !== undefined" :src="assets.getStateOrderImage(detail.state)" alt="" />
+						<img v-else-if="detail.terrain !== undefined" :src="assets.getTerrainImage(detail.terrain)" alt="" />
+						<span>{{ detail.text }}</span>
 					</div>
 				</div>
 			</template>
 			<div v-else-if="entry[0] === rf.HIST_NEW_GAME" class="new_turn">{{ eventText }}</div>
 			<template v-else>
-				<div class="container"><span class="header" v-if="player && !isAutomaticStep"><img :src="getPlayerMarkerImage(entry[1])" alt="" /><b>{{ player.displayName }}</b></span><img v-if="eventArtwork" :src="eventArtwork.src" :alt="eventArtwork.alt" :title="eventArtwork.alt" /><span>{{ eventText }}</span></div>
-				<div v-for="award in nationAwards" :key="award.id" class="nationAwardNotice"><img :src="getPlayerMarkerImage(award.owner)" alt="" /><span>{{ after.players[award.owner].displayName }} acquired {{ rf.NATION_NAMES[award.id] }} for {{ award.price }} SPL</span></div>
+				<div class="container"><span class="header" v-if="player"><PlayerMarker :index="entry[1]" :name="player.displayName" /></span><img v-if="eventArtwork" :src="eventArtwork.src" :alt="eventArtwork.alt" :title="eventArtwork.alt" /><span>{{ eventText }}</span></div>
+				<div v-for="award in nationAwards" :key="award.id" class="nationAwardNotice"><PlayerMarker :index="award.owner" :name="after.players[award.owner].displayName" /><span>Acquired {{ rf.NATION_NAMES[award.id] }} for {{ award.price }} SPL</span></div>
 				<StateLeadership v-for="change in leadershipChanges" :key="change.id" :change="change" />
-				<details class="balanceDetails" v-if="balanceChanges.length" @click.stop @keydown.enter.stop @keydown.space.stop><summary class="balanceChanges" aria-label="Show cash balances before and after"><span v-for="change in balanceChanges" :key="change.label" :title="change.label"><img :src="change.src" :alt="change.label" /><b>{{ change.amount > 0 ? '+' : '' }}{{ change.amount }} SPL</b></span></summary><div class="balanceBreakdown"><div v-for="change in balanceChanges" :key="change.label"><img :src="change.src" alt="" /><span>{{ change.label }}</span></div></div></details>
+				<details class="balanceDetails" v-if="balanceChanges.length" @click.stop @keydown.enter.stop @keydown.space.stop><summary class="balanceChanges" aria-label="Show cash balances before and after"><span v-for="change in balanceChanges" :key="change.label" :title="change.title || change.label"><img :src="change.src" :alt="change.label" /><b>{{ change.amount > 0 ? '+' : '' }}{{ change.amount }} SPL</b></span></summary><div class="balanceBreakdown"><div v-for="change in balanceChanges" :key="change.label"><img :src="change.src" :alt="change.title || change.label" :title="change.title || change.label" /><span>{{ change.label }}</span></div></div></details>
 				<div class="actionImages" :class="{ multipleCards: actionImages.filter((asset) => asset.card).length > 1 }" v-if="actionImages.length"><template v-for="(asset, idx) in actionImages" :key="idx"><div v-if="asset.card" class="historyCard"><ArtworkCard :src="asset.src" :alt="asset.alt" /></div><img v-else :src="asset.src" :alt="asset.alt" :title="asset.alt" /></template></div>
 				<div v-if="entry[0] === rf.HIST_GAME_END" class="new_turn">Game ended<template v-if="after?.gameflow.endReason === 'invasion'"> · The Southern Peoples invade</template><template v-else-if="after?.gameflow.endReason === 'revolution'"> · Revolution</template></div>
 			</template>
@@ -183,6 +204,7 @@ function jumpToEntry() {
 </template>
 
 <style scoped>
+.waterReplayControls { display: flex; gap: 6px; margin: 6px 3px; }.waterReplayControls button { padding: 4px 7px; font: inherit; cursor: pointer; }
 .container { display: flex; align-items: center; }
 .log { direction: ltr; margin: 5px; border: #000 1px solid; text-align: left; padding: 3px; background-color: #d4eafd; z-index: 30; line-height: 25px; }
 .log.separator { padding: 3px; }
@@ -190,12 +212,12 @@ function jumpToEntry() {
 .header { display: inline-flex; align-items: center; gap: 5px; }.header b { min-width: 0; overflow-wrap: anywhere; }.header img { width: 23px; height: 23px; }
 .new_turn { background: black; color: white; text-align: center; font-weight: bold; font-size: 1.2em; padding: 8px; }.phaseHeading { background: black; color: white; text-align: center; font-weight: bold; font-size: 1.2em; padding: 8px; margin: 5px; }
 .selectableHistory { cursor: pointer; }.selectableHistory:hover { border: 1px solid yellow; }.selectableHistory:focus-visible { outline: 2px solid yellow; outline-offset: -2px; }
-.log.currentReplay { box-shadow: inset 3px 0 #177daf; background: #e5f3ff; }.replayPosition { display: block; color: #12628c; font-size: 12px; font-weight: bold; }
+.log.currentReplay { box-shadow: inset 3px 0 #177daf; background: #e5f3ff; }.replayPosition { display: block; color: #12628c; font-size: 16px; font-weight: bold; }
 .actionImages { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }.actionImages img { width: 30px; height: 30px; object-fit: contain; }.historyCard { width: 185px; max-width: 100%; }
 .actionImages.multipleCards .historyCard { width: calc((100% - 4px) / 2); max-width: 185px; }
-.nationAwardNotice { display: flex; align-items: center; gap: 5px; margin-top: 4px; padding: 3px 6px; background: #edf6fd; border-left: 3px solid #177daf; font-size: 12px; }.nationAwardNotice img { width: 23px; height: 23px; flex-shrink: 0; }.nationAwardNotice span { min-width: 0; overflow-wrap: anywhere; }
+.nationAwardNotice { display: flex; align-items: center; gap: 5px; margin-top: 4px; padding: 3px 6px; background: #edf6fd; border-left: 3px solid #177daf; font-size: 16px; font-weight: 400; }.nationAwardNotice img { width: 23px; height: 23px; flex-shrink: 0; }.nationAwardNotice span { min-width: 0; overflow-wrap: anywhere; }
 .container > img { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; margin-right: 6px; }.container > span:last-child { min-width: 0; overflow-wrap: anywhere; }
-.balanceChanges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }.balanceChanges span { display: inline-flex; align-items: center; gap: 4px; padding: 2px 5px; background: #edf6fd; border: 1px solid #adc2d0; font-size: 12px; }.balanceChanges img { width: 22px; height: 22px; }
-.balanceChanges { cursor: pointer; align-items: center; list-style: none; }.balanceChanges::-webkit-details-marker { display: none; }.balanceChanges::before { content: '▸'; font-size: 14px; }.balanceDetails[open] .balanceChanges::before { content: '▾'; }.balanceChanges:focus-visible { outline: 2px solid #177daf; outline-offset: 2px; }.balanceBreakdown { display: grid; gap: 3px; margin-top: 5px; padding: 5px; background: #edf6fd; font-size: 12px; }.balanceBreakdown > div { display: flex; align-items: center; gap: 5px; }.balanceBreakdown img { width: 22px; height: 22px; flex-shrink: 0; }.balanceBreakdown span { min-width: 0; overflow-wrap: anywhere; }
+.balanceChanges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }.balanceChanges span { display: inline-flex; align-items: center; gap: 4px; padding: 2px 5px; background: #edf6fd; border: 1px solid #adc2d0; font-size: 16px; font-weight: 400; }.balanceChanges img { width: 22px; height: 22px; }
+.balanceChanges { cursor: pointer; align-items: center; list-style: none; }.balanceChanges::-webkit-details-marker { display: none; }.balanceChanges::before { content: '▸'; font-size: 16px; font-weight: 400; }.balanceDetails[open] .balanceChanges::before { content: '▾'; }.balanceChanges:focus-visible { outline: 2px solid #177daf; outline-offset: 2px; }.balanceBreakdown { display: grid; gap: 3px; margin-top: 5px; padding: 5px; background: #edf6fd; font-size: 16px; font-weight: 400; }.balanceBreakdown > div { display: flex; align-items: center; gap: 5px; }.balanceBreakdown img { width: 22px; height: 22px; flex-shrink: 0; }.balanceBreakdown span { min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 1050px) { .balanceChanges { min-height: 40px; } }
 </style>

@@ -28,13 +28,7 @@ export function currentPlayerObj() {
 		}
 	}
 	if (store.gameflow.turnOrder.length > 0) return store.players[store.gameflow.turnOrder[0]]
-	else {
-		if (!store.viewSettings.showReplay && personal.pov >= 0) {
-			alert(i18n.global.t("alerts.cpiError", { turnOrder: String(store.gameflow.turnOrder) }))
-		}
-		store.gameflow.turnOrder = [0]
-		return store.players[0]
-	}
+	return store.players[currentPlayerIndex()]
 }
 
 export function currentPlayerIndex() {
@@ -56,22 +50,20 @@ export function getCurrentPlayersArray() {
 	const store = useModelStore()
 	// Why is this using displayname?
 	if (!controller.isSimulPhase(store.gameflow.phase)) return [store.players[store.gameflow.turnOrder[0]].displayName]
-	if (controller.isSimulPhase(store.gameflow.phase)) {
-		let ret = []
-		for (let i = 0; i < store.gameflow.turnOrder.length; i++) {
-			let nameToAdd = store.players[store.gameflow.turnOrder[i]].displayName
-			if (nameToAdd.includes(rf.TOURNAMENT_ADMIN_NAME)) nameToAdd = rf.TOURNAMENT_ADMIN_NAME
-			ret.push(nameToAdd)
-		}
-		return ret
+	let ret = []
+	for (let i = 0; i < store.gameflow.turnOrder.length; i++) {
+		let nameToAdd = store.players[store.gameflow.turnOrder[i]].displayName
+		if (nameToAdd.includes(rf.TOURNAMENT_ADMIN_NAME)) nameToAdd = rf.TOURNAMENT_ADMIN_NAME
+		ret.push(nameToAdd)
 	}
+	return ret
 }
 
 export function chooseTemporaryWorkerRoles(roles) {
 	const store = useModelStore()
 	const playerIndex = currentPlayerIndex()
 	const playerObj = currentPlayerObj()
-	if (!store.startingOptions.laborMarket || !playerObj.employees.includes(rf.TEMPORARY_WORKER) || !Array.isArray(roles)) return false
+	if (!store.startingOptions.laborMarket || !playerObj.employees.includes(rf.TEMPORARY_WORKER)) return false
 	if (store.laborMarket.dailyTemporaryEffects[playerIndex]) return false
 
 	const limit = rules.temporaryWorkerActionCount(store.laborMarket.removedTemporaryWorkersAtTurnStart)
@@ -333,7 +325,10 @@ function setupMarketingPhase() {
 	plyr.sendMassMarketeers(currentPlayerIndex())
 
 	let marketersCopy = funcs.removeItemAll(allMarketers, rf.MASS_MARKETEER)
-	if (marketersCopy.length === 0 && rules.temporaryWorkerRemainingActions(currentPlayerIndex(), rf.MARKETING_TRAINEE) === 0 && store.context.massMarketersOnly === -1) {
+	// Media Line mod: a TV announcer on campaign duty still publishes his
+	// nightly headline - keep the marketing phase alive for the button
+	const headlineLeft = store.startingOptions.mediaLine && mediaLineHeadlinesLeft(currentPlayerIndex()) > 0
+	if (marketersCopy.length === 0 && rules.temporaryWorkerRemainingActions(currentPlayerIndex(), rf.MARKETING_TRAINEE) === 0 && store.context.massMarketersOnly === -1 && !headlineLeft) {
 		// if you only had MM, move to next phase
 		endWorkingDaySubphase()
 	}
@@ -532,10 +527,7 @@ export function setupHousesAndGardensPhase() {
 	context.clearAllHighlights()
 
 	store.context.selectedBuilding = -1
-	store.context.rotation = 0
-	store.context.house = -1
-	store.context.houseIndex = -1
-	store.context.edges.splice(0)
+	resetHouseSelection()
 
 	const numLeft = playerObj.employees.filter((e) => e === rf.NEW_BUSINESS_DEVELOPER).length - store.context.justBuilt.length
 	if (numLeft <= 0) return
@@ -570,10 +562,7 @@ export function updateHousesHighlights() {
 export function selectHouseToBuild(houseNumber) {
 	const store = useModelStore()
 	store.context.selectedBuilding = houseNumber
-	store.context.rotation = 0
-	store.context.house = -1
-	store.context.houseIndex = -1
-	store.context.edges.splice(0)
+	resetHouseSelection()
 	updateHousesHighlights()
 }
 
@@ -581,11 +570,16 @@ export function selectHouseToBuild(houseNumber) {
 export function selectGardenToBuild() {
 	const store = useModelStore()
 	store.context.selectedBuilding = -1
+	resetHouseSelection()
+	updateHousesHighlights()
+}
+
+function resetHouseSelection() {
+	const store = useModelStore()
 	store.context.rotation = 0
 	store.context.house = -1
 	store.context.houseIndex = -1
 	store.context.edges.splice(0)
-	updateHousesHighlights()
 }
 
 // Clicked a highlighted square during the HOUSES subphase
@@ -679,14 +673,10 @@ export function setupLobbyistsPhase() {
 	// Set initial building type and variety
 	if (newRoads.length === 0) {
 		store.context.buildingType = 1
-		for (let i = 0; i < 3; i++) {
-			if (newParks.includes(i)) { store.context.variety = i; break }
-		}
+		setFirstAvailableVariety(newParks)
 	} else {
 		store.context.buildingType = 0
-		for (let i = 0; i < 3; i++) {
-			if (newRoads.includes(i)) { store.context.variety = i; break }
-		}
+		setFirstAvailableVariety(newRoads)
 	}
 	store.context.rotation = 0
 	store.context.flipped = false
@@ -700,11 +690,15 @@ export function selectLobbyistBuilding(type) {
 	store.context.rotation = 0
 	store.context.flipped = false
 
-	const available = type === 0 ? rules.availableNewRoads() : rules.availableParks()
-	for (let i = 0; i < 3; i++) {
-		if (available.includes(i)) { store.context.variety = i; break }
-	}
+	setFirstAvailableVariety(type === 0 ? rules.availableNewRoads() : rules.availableParks())
 	updateLobbyistHighlights()
+}
+
+function setFirstAvailableVariety(available) {
+	const store = useModelStore()
+	for (let i = 0; i < 3; i++) {
+		if (available.includes(i)) { store.context.variety = i; return }
+	}
 }
 
 // Select a specific variety within the current building type
@@ -953,18 +947,22 @@ export function setupCoffeeShopsPhase() {
 	if (remaining > 0) {
 		// leadBaristaCoffeeShopsFromB is always placed first; a TB shop is placed second (after the range-2 shop)
 		const unlimited = store.context.leadBaristaCoffeeShopsFromB > 0 || (store.context.justCoffeeShopped.length === 1 && store.context.leadBaristaCoffeeShopsFromTB > 0)
-
-		if (player.coffeeShops.length < 3) {
-			store.context.coffeeShopAction = "place"
-			store.highlights.indexesToHighlightYellow = rules.givePossiblePositionsForCoffeeShop(unlimited ? 99 : 2)
-		} else {
-			// No more coffee shops available - select a placed one to move it
-			store.context.coffeeShopAction = "remove"
-			store.highlights.indexesToHighlightYellow = [...player.coffeeShops]
-		}
+		highlightCoffeeShopSpots(player, "coffeeShopAction", unlimited ? 99 : 2)
 	} else {
 		store.context.coffeeShopAction = ""
 		if (store.context.justCoffeeShopped.length === 0) endWorkingDaySubphase()
+	}
+}
+
+function highlightCoffeeShopSpots(player, actionKey, range) {
+	const store = useModelStore()
+	if (player.coffeeShops.length < 3) {
+		store.context[actionKey] = "place"
+		store.highlights.indexesToHighlightYellow = rules.givePossiblePositionsForCoffeeShop(range)
+	} else {
+		// No more coffee shops available - select a placed one to move it
+		store.context[actionKey] = "remove"
+		store.highlights.indexesToHighlightYellow = [...player.coffeeShops]
 	}
 }
 
@@ -1020,7 +1018,6 @@ export function setupPizzaBombPhase() {
 
 // Clicked a highlighted square to place the free radio campaign
 export function choosePizzaBombMarketer(index) {
-	const store = useModelStore()
 	const playerIndex = currentPlayerIndex()
 
 	const campaign = rules.firstRadioCampaign()
@@ -1030,22 +1027,20 @@ export function choosePizzaBombMarketer(index) {
 	if (campaign !== 1) histData.push(campaign)
 	model.addHistory(rf.HIST_PIZZA_BOMB, histData, playerIndex, 0)
 
-	store.firstPizzas.splice(0, 3)
-
-	if (store.firstPizzas.length < 3 || store.firstPizzas[2] !== currentPlayerIndex()) {
-		endPlayerTurn(false, false)
-	} else {
-		setupPizzaBombPhase()
-	}
+	advancePizzaBomb(false, false)
 }
 
 // No space left for the pizza radio - skip this bomb
 export function skipPizzaBombMarketer() {
+	advancePizzaBomb(true, true)
+}
+
+function advancePizzaBomb(forced, pointless) {
 	const store = useModelStore()
 	store.firstPizzas.splice(0, 3)
 
 	if (store.firstPizzas.length < 3 || store.firstPizzas[2] !== currentPlayerIndex()) {
-		endPlayerTurn(true, true)
+		endPlayerTurn(forced, pointless)
 	} else {
 		setupPizzaBombPhase()
 	}
@@ -1059,18 +1054,8 @@ export function skipPizzaBombMarketer() {
 
 // Set up the Coffee Shop MS phase.
 export function setupCoffeeShopMSPhase() {
-	const store = useModelStore()
 	context.clearAllHighlights()
-
-	const player = currentPlayerObj()
-	if (player.coffeeShops.length < 3) {
-		store.context.coffeeShopMSAction = "place"
-		store.highlights.indexesToHighlightYellow = rules.givePossiblePositionsForCoffeeShop(99)
-	} else {
-		// No more coffee shops available - select a placed one to move it
-		store.context.coffeeShopMSAction = "remove"
-		store.highlights.indexesToHighlightYellow = [...player.coffeeShops]
-	}
+	highlightCoffeeShopSpots(currentPlayerObj(), "coffeeShopMSAction", 99)
 }
 
 // Clicked a highlighted square to place the milestone coffee shop
@@ -1107,6 +1092,9 @@ export function campaignDurationInfinite() {
 	const playerIndex = currentPlayerIndex()
 	const campaignData = rf.MARKETING_CAMPAIGNS[store.context.campaign]
 
+	// Media Line mod: phone tokens and TV channels are never infinite
+	if (campaignData.type === rf.PHONE || campaignData.type === rf.TV_CHANNEL) return false
+
 	if (store.context.restaurantMilestone) return true
 	if (store.availableMilestones.indexOf(rf.FIRST_BILLBOARD) > -1 && campaignData.type === rf.BILLBOARD) return true
 	if (plyr.hasMilestone(playerIndex, rf.FIRST_BILLBOARD)) return true
@@ -1122,8 +1110,20 @@ export function setCampaignPlacementHighlights() {
 
 	if (store.context.marketer === -1 || store.context.campaign === -1) return
 
-	// Gourmet guides / giant billboards / hawker trucks are placed via button, not map click
-	if (store.context.campaign > 16) return
+	const campaignData = rf.MARKETING_CAMPAIGNS[store.context.campaign]
+
+	// Media Line mod: TV channels - every space of the candidate houses in the
+	// diamond range is clickable (yellow); already-picked houses show in the
+	// house-highlight layer so the selection progress is visible
+	if (campaignData.type === rf.TV_CHANNEL) {
+		store.highlights.indexesToHighlightYellow = model.giveSpacesOfHouses(model.giveHousesInWaveRange(currentPlayerIndex(), 2))
+		store.highlights.indexesToHighlightHouses = model.giveSpacesOfHouses(store.context.tvHouses)
+		return
+	}
+
+	// Gourmet guides / giant billboards / hawker trucks are placed via button, not map click.
+	// Phone tokens (Media Line mod) are placed by map click despite their high numbers.
+	if (store.context.campaign > 16 && campaignData.type !== rf.PHONE) return
 
 	store.highlights.indexesToHighlightYellow = rules.givePossiblePositionsForMarketingCampaign(store.context.marketer, store.context.campaign, store.context.rotated)
 }
@@ -1150,6 +1150,8 @@ export function resetMarketingSelection() {
 	store.context.from = -1
 	store.context.range = 0
 	store.context.temporaryMarketer = false
+	store.context.mediaLineSecondCall = false
+	store.context.tvHouses.splice(0)
 }
 
 export function selectMarketer(marketer, nightShift, temporary = false) {
@@ -1178,6 +1180,8 @@ export function selectMarketer(marketer, nightShift, temporary = false) {
 	if (campaigns.includes(21)) campaigns = [21]
 	if (campaigns.includes(22)) campaigns = [22]
 	if (campaigns.includes(23)) campaigns = [23]
+
+	campaigns = [...campaigns].sort((a, b) => rules.campaignSortKey(a) - rules.campaignSortKey(b))
 
 	store.context.campaigns = campaigns
 
@@ -1325,6 +1329,8 @@ export function placeMarketingCampaign(index) {
 	const playerIndex = currentPlayerIndex()
 	const playerObj = currentPlayerObj()
 	let scmChain = false
+	let mlChain = false
+	const isTV = rf.MARKETING_CAMPAIGNS[store.context.campaign].type === rf.TV_CHANNEL
 
 	// If it's an airplane campaign, return the index to the original position
 	if (rf.MARKETING_CAMPAIGNS[store.context.campaign].type === rf.AIRPLANE) {
@@ -1374,7 +1380,8 @@ export function placeMarketingCampaign(index) {
 	}
 	// --- NORMAL CAMPAIGN ---
 	else {
-		if (store.context.secondCampaignManager) {
+		// Media Line mod: the second phone token hangs off the same telemarketer
+		if (store.context.secondCampaignManager || store.context.mediaLineSecondCall) {
 			plyr.addCampaignToMarketer(playerIndex, store.context.marketer, store.context.campaign)
 		} else if (store.context.temporaryMarketer) {
 			store.laborMarket.temporaryCampaignOwners[store.context.campaign] = playerIndex
@@ -1395,20 +1402,37 @@ export function placeMarketingCampaign(index) {
 
 		store.context.justMarketed.push(store.context.campaign)
 		if (store.context.campaign >= 17 && store.context.campaign <= 27) index = -1
+		// Media Line mod: TV channels have no board token
+		if (isTV) index = -1
 
 		const histObj = [store.context.campaign]
 		if (store.context.campaign >= 25 && store.context.campaign <= 27) histObj.push([...funcs.exportIndexes(store.context.path)])
+		else if (isTV) histObj.push([...store.context.tvHouses])
 		else histObj.push(funcs.exportIndex(index))
 		if (store.context.secondGood > -1) histObj.push([store.context.secondGood, store.context.good])
 		else histObj.push(store.context.good)
 		if (store.context.campaign >= 4 && store.context.campaign <= 16) histObj.push(store.context.marketer)
 		if (rf.ROTATABLE_CAMPAIGNS.includes(store.context.campaign)) histObj.push(funcs.booleanToInt(store.context.rotated))
 		if (store.context.duration < 9) histObj.push(store.context.duration)
+		// Media Line mod: flag the chained second phone token so replay can tell
+		// it apart from a first placement even when Telemarketers are stacked
+		if (store.context.mediaLineSecondCall) histObj.push(1)
+		// Media Line mod: a Brand/Marketing Director can also place phone/TV; log a non-default
+		// marketer last, wrapped in an array so positional readers of older entries stay unambiguous
+		const defaultMediaMarketer = isTV ? rf.TV_ANNOUNCER : rf.MARKETING_CAMPAIGNS[store.context.campaign].type === rf.PHONE ? rf.TELEMARKETER : -1
+		if (defaultMediaMarketer !== -1 && store.context.marketer !== defaultMediaMarketer) histObj.push([store.context.marketer])
 
 		model.addHistory(rf.HIST_START_MARKETING_CAMPAIGN, [...histObj], playerIndex, 0)
 
-		model.addMarketingCampaign(store.context.campaign, index, store.context.rotated, store.context.good, store.context.duration)
+		model.addMarketingCampaign(store.context.campaign, index, store.context.rotated, store.context.good, store.context.duration, isTV ? [...store.context.tvHouses] : undefined)
 		rules.giveMarketingMilestones(playerIndex, store.context.marketer)
+
+		// Media Line mod: milestone 2 (First TV Announcer Used) - latch the
+		// holder's FIRST TV campaign; it pushes double demand until it expires
+		if (isTV && plyr.hasMilestone(playerIndex, rf.FIRST_TV_ANNOUNCER_USED) && !store.mediaLine.doubleUsed) {
+			store.mediaLine.doubleCampaign = store.context.campaign
+			store.mediaLine.doubleUsed = true
+		}
 
 		// SECOND CAMPAIGN MANAGER MILESTONE - add another campaign of the same type
 		if (plyr.hasMilestone(playerIndex, rf.FIRST_CAMPAIGN_MANAGER_USED) && !store.context.alreadyDoneMailboxMS && !store.context.secondCampaignManager && store.availableMilestones.indexOf(rf.FIRST_CAMPAIGN_MANAGER_USED) > -1) {
@@ -1424,6 +1448,23 @@ export function placeMarketingCampaign(index) {
 			awardCampaignTypeAndGoodMilestones(playerIndex)
 			playNightShiftCampaign()
 			return
+		}
+		// MEDIA LINE - phone tokens: a telemarketer places up to two identical
+		// tokens in one action; the second keeps the first token's good and
+		// duration. Only the telemarketer chains - TV announcers and brand
+		// directors may place phone tokens too, but just one per action.
+		else if (rf.MARKETING_CAMPAIGNS[store.context.campaign].type === rf.PHONE && store.context.marketer === rf.TELEMARKETER && !store.context.mediaLineSecondCall) {
+			const remaining = store.availableMarketingCampaigns.filter((c) => rf.MARKETING_CAMPAIGNS[c].type === rf.PHONE)
+			if (remaining.length > 0) {
+				mlChain = true
+				store.context.mediaLineSecondCall = true
+				// The player picks which numbered phone card to spend on the
+				// second token; good and duration stay locked to the first
+				store.context.campaign = remaining[0]
+				store.context.campaigns = remaining
+				store.context.rotated = false
+				setCampaignPlacementHighlights()
+			}
 		} else {
 			store.context.secondCampaignManager = false
 		}
@@ -1441,8 +1482,54 @@ export function placeMarketingCampaign(index) {
 		}
 	}
 
-	// Return to the marketer choice screen unless the Second Campaign Manager chain took over
-	if (!scmChain) resetMarketingSelection()
+	// Return to the marketer choice screen unless the Second Campaign Manager or
+	// Media Line phone chain took over
+	if (!scmChain && !mlChain) resetMarketingSelection()
+}
+
+// MEDIA LINE - toggle a candidate house for the TV channel campaign
+export function toggleTVHouseSelection(index) {
+	const store = useModelStore()
+	const v = store.mapData.coords[index]
+	if (!(v > rf.HOUSE && v < rf.HOUSE + 29)) return
+	const house = model.houseNumberAt(v)
+	if (!model.giveHousesInWaveRange(currentPlayerIndex(), 2).includes(house)) return
+
+	const pos = store.context.tvHouses.indexOf(house)
+	if (pos > -1) store.context.tvHouses.splice(pos, 1)
+	else if (store.context.tvHouses.length < 5) store.context.tvHouses.push(house)
+
+	// Picked houses show in the house-highlight layer so the selection progress is visible
+	store.highlights.indexesToHighlightHouses = model.giveSpacesOfHouses(store.context.tvHouses)
+}
+
+// Media Line - TV channel: 5 houses must be picked (or every candidate when fewer)
+export function tvSelectionComplete() {
+	const store = useModelStore()
+	const needed = Math.min(5, model.giveHousesInWaveRange(currentPlayerIndex(), 2).length)
+	return store.context.tvHouses.length === needed && needed > 0
+}
+
+// MEDIA LINE - headlines.
+// Each on-duty TV Announcer may publish one +$5 or -$5 headline per working
+// day. Publishing is free and takes effect at the next turn's dinner.
+export function mediaLineHeadlinesLeft(playerIndex) {
+	const store = useModelStore()
+	const player = store.players[playerIndex]
+	const onDuty = player.employees.filter((e) => e === rf.TV_ANNOUNCER).length + player.marketers.filter((m) => m.marketer === rf.TV_ANNOUNCER).length
+	const published = store.mediaLine.headlines.filter((h) => h.turn === store.gameflow.turn && h.playerIndex === playerIndex).length
+	return onDuty - published
+}
+
+export function publishHeadline(value) {
+	const store = useModelStore()
+	if (!store.startingOptions.mediaLine) return
+	if (value !== 5 && value !== -5) return
+	const playerIndex = currentPlayerIndex()
+	if (mediaLineHeadlinesLeft(playerIndex) <= 0) return
+
+	store.mediaLine.headlines.push({ turn: store.gameflow.turn, playerIndex: playerIndex, value: value })
+	model.addHistory(rf.HIST_PUBLISH_HEADLINE, [value], playerIndex, 0)
 }
 
 // --- HAWKER TRUCK ROUTE SELECTION ---
@@ -1470,7 +1557,8 @@ export function startHawkerRouteSelection() {
 }
 
 // Called from MapHighlight when clicking a highlighted square during hawker route selection
-export function selectHawkerRoutePosition(index) {
+// Commit the next section of a driving route; returns it so the caller can read its target
+function advanceRoute(index) {
 	const store = useModelStore()
 	clearDrivingPreview()
 
@@ -1483,8 +1571,7 @@ export function selectHawkerRoutePosition(index) {
 			store.context.range--
 		}
 	}
-
-	let nextRoad = rules.nextRoadPossibilities(index, store.context.from, store.context.range)
+	const nextRoad = rules.nextRoadPossibilities(index, store.context.from, store.context.range)
 
 	if (nextRoad.from !== -1) {
 		store.context.from = nextRoad.from
@@ -1495,6 +1582,13 @@ export function selectHawkerRoutePosition(index) {
 
 	store.context.path = store.context.path.concat(nextRoad.path)
 	store.highlights.indexesToHighlightPath = [...store.context.path]
+	return nextRoad
+}
+
+export function selectHawkerRoutePosition(index) {
+	const store = useModelStore()
+	const nextRoad = advanceRoute(index)
+
 	store.highlights.indexesToHighlightHouses = rules.giveHousesAlongHawkerPath(store.context.path)
 
 	if (nextRoad.target.length > 0) {
@@ -1675,7 +1769,7 @@ export function chooseFridgeType(choice) {
 	}
 }
 
-export async function endPlayerTurn(forced, isPointlessMove = false) {
+export async function endPlayerTurn(forced, isPointlessMove = false, extraPostData = undefined) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	if (store.gameflow.phase === rf.PHASE_WORKING_DAY) consumeTemporaryWorker()
@@ -1695,7 +1789,7 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 	// EXIT EARLY FOR CHOOSING RESERVE OUT OF PHASE (not used in training games)
 	if (!personal.trainingGame && (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 || store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT2) && model.alreadyChosenReserveCard() && store.players[personal.pov].restaurants.length > 0) {
 		let moveData = [store.reserveCards[personal.pov]]
-		personal.moveDataRaw = funcs.compressObjectToDB([personal.name, [0, 1, 2], Math.round(new Date().getTime() / 1000), [...moveData]])
+		personal.moveDataRaw = funcs.compressData([personal.name, [0, 1, 2], Math.round(new Date().getTime() / 1000), [...moveData]])
 		IO.saveSimulMove(moveData)
 		return
 	}
@@ -1753,7 +1847,7 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 			let due = normalDue + switchDue
 			if (due >= 20) plyr.awardMilestone(playerIndex, rf.FIRST_20_SALARIES)
 			if (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) && store.context.preMoveData[0][1].length > 0) {
-				let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+				let unitarySalary = plyr.unitarySalary(playerIndex)
 				paidItems = store.context.preMoveData[0][1].length
 				store.context.preMoveData[0][1].splice(0)
 				due = Math.max(normalDue - unitarySalary * paidItems, 0) + switchDue
@@ -1800,7 +1894,6 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 			store.gameflow.turnOrder.splice(0)
 			endCurrentPhase()
 			// Game over is saved on game end
-			//if (store.gameflow.phase === rf.PHASE_GAME_OVER) return
 		}
 
 		// You always want to save a rewind, even at the END of a pointless move
@@ -1811,16 +1904,20 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 		// (the AI just plays it again) and it burns one of the 20 rewind slots, so
 		// skip it. Matches the FcmBot suppression in FCM_IO.saveGameNormal.
 		const moverIsAi = store.players[playerIndex]?.name === rf.AI_NAME
-		await IO.saveGameNormal(!moverIsAi, false, isPointlessMove)
+		await IO.saveGameNormal(!moverIsAi, false, isPointlessMove, extraPostData)
 		// In case it is your turn again right away, run startPlayerTurn
 		// If it isn't then you get returned from that function anyway
 		if (rf.SUPER_USERS.includes(personal.name)) personal.pov = -1
 		startPlayerTurn(false)
 
 		// After save, check if next players can be skipped (e.g. PAYDAY auto-skip)
+		// Never force-end the current player: after a phase change (e.g. into PAYDAY)
+		// the last WD player sits in the fresh turn order as a payer and must choose
+		// their own payday move - force-ending them would auto-submit [[-8],[]]
+		// and process their salary without consent
 		const turnOrderBefore = store.gameflow.turnOrder.length
 		actionAllPlayerSkips()
-		if (store.gameflow.turnOrder.length < turnOrderBefore && store.gameflow.turnOrder.length > 0) {
+		if (store.gameflow.turnOrder.length < turnOrderBefore && store.gameflow.turnOrder.length > 0 && !store.gameflow.turnOrder.includes(personal.pov)) {
 			await endPlayerTurn(true, true)
 		}
 		// Make sure this function is exited now
@@ -1832,7 +1929,6 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 		store.gameflow.turnOrder = store.gameflow.turnOrder.filter((playerIndex) => playerIndex !== personal.pov)
 		// NEED TO REBUILD THE TO ARRAY NOW, OTHERWISE VUE GFX THAT REALLY ON (eg turnOder[0]) WILL CAUSE ERRORS
 		// The turn order should be set/reset again after processing the end of the simul turn
-		//if (store.gameflow.turnOrder.length === 0) store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
 		let moveData = []
 		if (store.gameflow.phase === rf.PHASE_SETUP_RESERVE) moveData.push(store.reserveCards[personal.pov])
 		else if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) {
@@ -1845,7 +1941,6 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 	} else if (store.gameflow.phase === rf.PHASE_PAYDAY) {
 		let paidInFood = [...store.context.preMoveData[0][1]]
 		let paydayMoveData = [[...store.context.justFired], [...paidInFood]]
-		//if (paydayMoveData[0].length === 0) paydayMoveData[0] = [[-8], []]
 		if (paydayMoveData[0].length === 0) paydayMoveData[0] = [-8]
 		// NOW NEED TO ADD ANY CLEANUP ON THE END
 		if (store.context.preMoveData[1].length === 0) store.context.preMoveData[1] = [-9]
@@ -1864,7 +1959,7 @@ export async function endPlayerTurn(forced, isPointlessMove = false) {
 		else if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) phasesArr = [3, 4]
 		else if ([5, 6, 7, 8, 9, 11, 12, 15].includes(store.gameflow.phase)) phasesArr = [5, 6, 7, 8, 9, 11, 12, 15]
 
-		personal.moveDataRaw = funcs.compressObjectToDB([personal.name, [...phasesArr], Math.round(new Date().getTime() / 1000), [...moveData]])
+		personal.moveDataRaw = funcs.compressData([personal.name, [...phasesArr], Math.round(new Date().getTime() / 1000), [...moveData]])
 		await IO.saveSimulMove(moveData)
 		if (rf.SUPER_USERS.includes(personal.name)) personal.pov = -1
 		// Make sure this function is exited now
@@ -1894,6 +1989,22 @@ export function actionAllPlayerSkips() {
 }
 
 // Checks a playerIndex for any moves. NO pizza bomb skips, as only relevant players get into turn order
+function resetNewTurnOrder() {
+	const store = useModelStore()
+	store.gameflow.newTurnOrder.length = 0
+	store.players.forEach(() => store.gameflow.newTurnOrder.push(-1))
+}
+
+function setBotsInNewTurnOrder() {
+	const store = useModelStore()
+	let replacingIdx = 0
+	store.players.forEach((p, i) => {
+		if (p.displayName === rf.BOT_NAME) {
+			store.gameflow.newTurnOrder[replacingIdx++] = i
+		}
+	})
+}
+
 export function canSkipCurrentPlayer(playerIndex) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
@@ -1950,7 +2061,6 @@ export async function endCurrentPhase() {
 	// --- PHASE: SETUP RESTAURANT 1 ---
 	if (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1) {
 		const readyPlayers = store.players.filter((p) => p.restaurants.length > 0 || p.displayName === rf.BOT_NAME)
-		console.log(`readyPlayers: ${readyPlayers.length}`)
 		if (readyPlayers.length === store.players.length) {
 			if (store.startingOptions.shortGame) {
 				if (store.gameflow.turn === 0) {
@@ -1958,10 +2068,9 @@ export async function endCurrentPhase() {
 					model.clearForNewTurn()
 				}
 				store.gameflow.phase = rf.PHASE_TURN_ORDER
-				store.gameflow.newTurnOrder.length = 0
+				resetNewTurnOrder()
 				store.gameflow.fullTurnOrder.reverse()
 				store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
-				store.players.forEach(() => store.gameflow.newTurnOrder.push(-1))
 			} else {
 				store.gameflow.phase = rf.PHASE_SETUP_RESERVE
 				const fto = store.players.map((_, i) => i).reverse()
@@ -1990,16 +2099,10 @@ export async function endCurrentPhase() {
 			const currentMonies = store.players.map((p) => p.money)
 			model.addHistory(rf.HIST_NEW_TURN, [store.gameflow.turn, store.bank, currentMonies], -1, 0)
 		}
-		store.gameflow.newTurnOrder.length = 0
-		store.players.forEach(() => store.gameflow.newTurnOrder.push(-1))
+		resetNewTurnOrder()
 
 		Bot.removeBotPlayers()
-		let replacingIdx = 0
-		store.players.forEach((p, i) => {
-			if (p.displayName === rf.BOT_NAME) {
-				store.gameflow.newTurnOrder[replacingIdx++] = i
-			}
-		})
+		setBotsInNewTurnOrder()
 	}
 
 	// --- PHASE: RESTRUCTURING ---
@@ -2013,15 +2116,8 @@ export async function endCurrentPhase() {
 		Bot.removeBotPlayers()
 
 		store.gameflow.phase = rf.PHASE_TURN_ORDER
-		store.gameflow.newTurnOrder.length = 0
-		store.players.forEach(() => store.gameflow.newTurnOrder.push(-1))
-
-		let replacingIdx = 0
-		store.players.forEach((p, i) => {
-			if (p.displayName === rf.BOT_NAME) {
-				store.gameflow.newTurnOrder[replacingIdx++] = i
-			}
-		})
+		resetNewTurnOrder()
+		setBotsInNewTurnOrder()
 
 		// Optimized Milestone Awarding
 		store.players.forEach((player, i) => {
@@ -2250,10 +2346,8 @@ export function startPlayerTurn(startingMidPhase) {
 	} else if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) {
 		rf.sortEmployees(currentPlayerObj().beach)
 
-		if (currentPlayerObj().employees.length < currentPlayerObj().ceoSlots) {
-			while (currentPlayerObj().employees.length < currentPlayerObj().ceoSlots) {
-				currentPlayerObj().employees.push(rf.BLANK_EMPLOYEE_SPACE)
-			}
+		while (currentPlayerObj().employees.length < currentPlayerObj().ceoSlots) {
+			currentPlayerObj().employees.push(rf.BLANK_EMPLOYEE_SPACE)
 		}
 	} else if (store.gameflow.phase === rf.PHASE_TURN_ORDER) {
 		// No action needed
@@ -2587,7 +2681,7 @@ export function autoFillEmployees() {
 		// add first non manager
 		for (let j = 0; j < playerObj.beach.length; j++) {
 			if (!rf.MANAGERS.includes(playerObj.beach[j])) {
-				if (playerObj.employees[i] === rf.BLANK_EMPLOYEE_SPACE && playerObj.beach.length > 0) plyr.setEmployeeInIndex(currentPlayerIndex(), playerObj.beach[j], i)
+				if (playerObj.employees[i] === rf.BLANK_EMPLOYEE_SPACE) plyr.setEmployeeInIndex(currentPlayerIndex(), playerObj.beach[j], i)
 				break
 			}
 		}
@@ -2694,6 +2788,25 @@ export function trainEmployee(toEmp, steps) {
 
 	store.context.selectedEmployeeToTrainData.employee = -1
 	store.context.selectedEmployeeToTrainData.origin = 0
+}
+
+// Inverse of trainEmployee, for a training still in progress in the training subphase
+export function undoTrainEmployee(entry) {
+	const store = useModelStore()
+	const playerObj = currentPlayerObj()
+
+	store.context.justTrained.splice(store.context.justTrained.indexOf(entry), 1)
+	store.availableEmployees[entry.to]++
+	store.context.endOfDaySummaryData.train.trained.splice(store.context.endOfDaySummaryData.train.trained.lastIndexOf(entry.to), 1)
+
+	if (entry.from > -1) {
+		store.availableEmployees[entry.from]--
+		;(entry.fromStructure ? playerObj.employees : playerObj.beach).push(entry.from)
+	} else {
+		// Train-from-hire: the -1 markers in justHired / hire.hired are the recruiting point it spent
+		store.context.justHired.splice(store.context.justHired.lastIndexOf(-1), 1)
+		store.context.endOfDaySummaryData.hire.hired.splice(store.context.endOfDaySummaryData.hire.hired.lastIndexOf(-1), 1)
+	}
 }
 
 export function headhuntEmployee(playerIndex, targetPlayerIndex, beachIndex) {
@@ -2857,28 +2970,8 @@ function zeppelinTilesToSquares(tiles) {
 // Clicked a highlighted square while driving a cart / truck along the road
 export function selectNextPosition(index) {
 	const store = useModelStore()
-	clearDrivingPreview()
+	const nextRoad = advanceRoute(index)
 
-	if (store.context.from > -1) {
-		if (!map.onTheSameTile(index, store.context.from)) {
-			store.context.range--
-		}
-	} else {
-		if (!rules.firstStartIsFromTheSameTile(index)) {
-			store.context.range--
-		}
-	}
-	let nextRoad = rules.nextRoadPossibilities(index, store.context.from, store.context.range)
-
-	if (nextRoad.from !== -1) {
-		store.context.from = nextRoad.from
-	} else {
-		store.context.from = index
-	}
-	store.context.range = nextRoad.range
-
-	store.context.path = store.context.path.concat(nextRoad.path)
-	store.highlights.indexesToHighlightPath = [...store.context.path]
 	store.highlights.indexesToHighlightDrinks = rules.giveDrinkSquaresAlongPath(store.context.path)
 	if (nextRoad.target.length > 0) {
 		store.highlights.indexesToHighlightYellow = nextRoad.target

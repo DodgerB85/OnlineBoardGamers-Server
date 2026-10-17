@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('Lobby', '0118_alter_game_gamecode_alter_tournament_gamecode'),
+        ('Lobby', '0120_profile_darkmode'),
     ]
 
     operations = [

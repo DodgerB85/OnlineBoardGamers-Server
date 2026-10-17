@@ -359,7 +359,7 @@ for gameCode in GAME_CODES:
     diff_in_s = (now - startTime) // 1000
 
     # Must have been open at least 7 days
-    if diff_in_s < 604800:  # Note: 7 days is 604800, not 60400
+    if diff_in_s < 604700:  # Note: 7 days is 604800, not 604700, but add some slack to account for mismatched runtimes
         print("However, it has not been open for at least 7 days")
         continue
 

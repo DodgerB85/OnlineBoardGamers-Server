@@ -24,8 +24,8 @@ db.sqlite3
 db.sqlite3-journal
 media
 .env
+.opencode/
 
-jinja2_cache/
 local_settings.py
 docker-compose.override.yml
 node_modules

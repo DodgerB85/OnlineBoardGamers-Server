@@ -1,6 +1,4 @@
 import * as rf from "./FCMreference"
-//import * as rules from "./FCMrules"
-//import * as controller from "./FCMcontroller"
 import * as map from "./FCMmap"
 import * as model from "./FCMmodel"
 import * as context from "./FCMcontext"
@@ -28,16 +26,6 @@ export function booleanToInt(b) {
 
 export function sleep(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-export function compressObjectToDB(obj) {
-	// PAKO
-	let step1 = JSON.stringify(obj)
-	// eslint-disable-next-line no-undef
-	let step2B = pako.gzip(step1)
-	let base64Data1 = btoa(String.fromCharCode(...new Uint8Array(step2B)))
-
-	return base64Data1
 }
 
 export function decompressObjectFromDB(str) {
@@ -105,7 +93,6 @@ export function removeItemAll(arr, value) {
 export function htmlEscape(str) {
 	return (
 		String(str)
-			//.replace(/(?:\r|\n|\r\n)/g, "SNLB")
 			.replace(/&/g, "&amp;")
 			.replace(/"/g, "&quot;")
 			.replace(/'/g, "&#39;")
@@ -128,10 +115,7 @@ export function decompressChatData(data) {
 	// NB personal.gameCreationTimestamp must already be loaded
 	const personal = usePersonalStore()
 	if (data.length > 0) {
-		let compressedData = Uint8Array.from(atob(data), (c) => c.charCodeAt(0))
-		// eslint-disable-next-line no-undef
-		let decompressedData = pako.ungzip(compressedData, { to: "string" })
-		var chatArray = JSON.parse(decompressedData)
+		var chatArray = decompressData(data)
 	} else chatArray = []
 	// Update all the timings
 	let currentFullTime = personal.gameCreationTimestamp
@@ -237,12 +221,10 @@ export function simpleExportWholeFCMmodel() {
 	// 23 - Second Bailout mod
 	temp.push(JSON.parse(JSON.stringify(store.bailout)))
 
-	let step1 = JSON.stringify(temp)
-	// eslint-disable-next-line no-undef
-	let step2 = pako.gzip(step1)
-	let base64Data = btoa(String.fromCharCode(...new Uint8Array(step2)))
+	// 24 - Media Line mod (only when chosen)
+	if (store.startingOptions.mediaLine) temp.push(JSON.parse(JSON.stringify(store.mediaLine)))
 
-	return base64Data
+	return compressData(temp)
 }
 
 export function exportIndexes(indexes) {
@@ -281,7 +263,6 @@ function getMapWidthAndShift() {
 }
 
 export function exportIndex(index) {
-	//if (index === 0) return 0
 	if (index === -1) return -1
 	const { mapWidthSq, xShift, yShift } = getMapWidthAndShift()
 
@@ -506,8 +487,10 @@ function padItemCounts(arr) {
 			15 - first pizzas (mid-game)
 			16 - reserve cards (mid-game)
 			17 - context (mid-game + includeContext)
-			18 - stadium (stadium module chosen)
-			19 - second bailout (module chosen, claim night open, mid-game)
+			18 - labor market (module chosen)
+			19 - stadium (module chosen)
+			20 - second bailout (module chosen, claim night open, mid-game)
+			21 - media line (module chosen)
 	 */
 
 export function exportFCMmodel(forGameOver, includeContext) {
@@ -550,10 +533,15 @@ export function exportFCMmodel(forGameOver, includeContext) {
 	temp.push(
 		store.campaigns.map((c) => {
 			const entry = [c.number]
-			if (c.number <= 16) {
+			// Media Line mod phone tokens (30-35) are stored like standard ones;
+			// TV channels (28-29) have no token, so their chosen houses are stored
+			// instead: [number, good, duration, ...houses]
+			if ((c.number >= 30 && c.number <= 35) || c.number <= 16) {
 				entry.push(exportIndex(c.index), c.good)
 				if (c.duration !== 9) entry.push(c.duration)
 				if (rf.ROTATABLE_CAMPAIGNS.includes(c.number) && c.rotated) entry.push(6)
+			} else if (c.number === 28 || c.number === 29) {
+				entry.push(c.good, c.duration, ...(c.houses || []))
 			} else {
 				entry.push(c.good)
 				if (c.duration !== 9) entry.push(c.duration)
@@ -684,12 +672,24 @@ export function exportFCMmodel(forGameOver, includeContext) {
 		temp.push([[...store.bailout.order], Object.entries(store.bailout.pool).flat().map(Number), Object.entries(store.bailout.claims).flat().map(Number)])
 	}
 
-	let step1 = JSON.stringify(temp)
-	// eslint-disable-next-line no-undef
-	let step2B = pako.gzip(step1)
-	let base64Data1 = btoa(String.fromCharCode(...new Uint8Array(step2B)))
+	// Media Line mod (only when the module was chosen; shape-detected on load).
+	// Compact positional slot, tagged like the Labor Market one.
+	if (store.startingOptions.mediaLine) temp.push(exportMediaLineSlot())
 
-	return base64Data1
+	return compressData(temp)
+}
+
+// Dumpling MS CEO actions are not saved on players; rebuild them from history
+function applyDumplingCeoActions() {
+	const store = useModelStore()
+	if (store.startingOptions.dumplings) {
+		for (let i = 0; i < store.history.length; i++) {
+			if (store.history[i][0] === rf.HIST_CEO_BONUS_CHOSEN) {
+				let pIdx = store.history[i][1]
+				store.players[pIdx].ceoAction = store.history[i][3][0]
+			}
+		}
+	}
 }
 
 export function importFCMmodel(inputB64, forGameOver, includeContext) {
@@ -805,18 +805,25 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	store.campaigns.splice(0)
 	store.campaigns = inputArr[IMPORT_INDEX].map((c) => {
 		const num = c[0]
-		const isStandard = num <= 16
+		// Media Line mod: phone tokens (30-35) use the standard layout; TV
+		// channels (28-29) carry [number, good, duration, ...houses] instead
+		const isStandard = num <= 16 || (num >= 30 && num <= 35)
+		const isTV = num === 28 || num === 29
 
 		// Create base object
 		const campaign = {
 			number: num,
-			index: isStandard ? importIndex(c[1]) : 0,
+			index: isStandard ? importIndex(c[1]) : -1,
 			good: isStandard ? c[2] : c[1],
 			duration: 9,
 			rotated: false,
+			houses: [],
 		}
 
-		if (isStandard) {
+		if (isTV) {
+			campaign.duration = c[2]
+			campaign.houses = c.slice(3)
+		} else if (isStandard) {
 			// Handle Duration
 			if (c.length > 3 && c[3] <= 5) campaign.duration = c[3]
 
@@ -834,7 +841,7 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 
 	// Update the Map UI
 	for (const camp of store.campaigns) {
-		if (camp.number >= 1 && camp.number <= 16) {
+		if ((camp.number >= 1 && camp.number <= 16) || (camp.number >= 30 && camp.number <= 35)) {
 			map.addElement(rf.TYPE_CAMPAIGN, camp.number, camp.index, camp.rotated)
 		}
 	}
@@ -975,7 +982,6 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 
 	if (store.startingOptions.lobbyists) {
 		// 12: Parks
-		store.parks.splice(0)
 		store.parks = inputArr[IMPORT_INDEX].map((p) => ({
 			index: importIndex(p[0]),
 			variety: p[1],
@@ -990,7 +996,6 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 		IMPORT_INDEX++
 
 		// 13: New Roads
-		store.newRoads.splice(0)
 		store.newRoads = inputArr[IMPORT_INDEX].map((r) => ({
 			index: importIndex(r[0]),
 			variety: r[1],
@@ -1056,10 +1061,8 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	// INTERNAL OPTIONS NEED TO BE SET BEFORE THIS
 	store.availableEmployees = [...rf.ORIGINAL_AVAILABLE_EMPLOYEES]
 	store.availableMarketingCampaigns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14]
-	if (store.startingOptions.useMilestones === false) {
-		store.availableMilestones.splice(0)
-	} else {
-		store.availableMilestones.splice(0)
+	store.availableMilestones.splice(0)
+	if (store.startingOptions.useMilestones !== false) {
 		Object.assign(store.availableMilestones, rf.BASE_GAME_MILESTONES)
 		if (store.startingOptions.noCeoMilestone === true) {
 			store.availableMilestones.splice(store.availableMilestones.indexOf(rf.FIRST_100_DOL), 1)
@@ -1169,18 +1172,9 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 		removeItemAll(store.availableMilestones, rf.FIRST_HIRE_3)
 	}
 
-	// Adjust CEOs with dumpling MS, using history
-	if (store.startingOptions.dumplings) {
-		for (let i = 0; i < store.history.length; i++) {
-			if (store.history[i][0] === rf.HIST_CEO_BONUS_CHOSEN) {
-				let pIdx = store.history[i][1]
-				store.players[pIdx].ceoAction = store.history[i][3][0]
-			}
-		}
-	}
+	applyDumplingCeoActions()
 
-	// Labor Market mod: written directly before the Stadium slot for chosen-module
-	// saves, so advance the index only when the slot is actually present
+	// Labor Market mod: its slot sits right before the Stadium slot when present
 	let moduleImportIndex = IMPORT_INDEX
 	if (isLaborMarketSlot(inputArr[moduleImportIndex])) moduleImportIndex++
 	restoreLaborMarketState(inputArr, IMPORT_INDEX)
@@ -1188,6 +1182,8 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	restoreStadiumState(inputArr, moduleImportIndex)
 	// Second Bailout mod (trails the stadium slot when that module is chosen)
 	restoreBailoutState(inputArr, moduleImportIndex, forGameOver)
+	// Media Line mod (trailing slot, shape-detected like the other module states)
+	restoreMediaLineState(inputArr)
 }
 
 // Shape check for both bailout slot formats: the older full object and the
@@ -1224,6 +1220,102 @@ export function restoreBailoutState(inputArr, index = inputArr.length - 1, forGa
 	} else {
 		// Older saves stored the full object
 		Object.assign(store.bailout, slot)
+	}
+}
+
+// Media Line wire slot, two shapes (shape-detected so they cannot collide with
+// the compact Stadium/Bailout/Labor Market arrays):
+//   compact: [-SO_MEDIA_LINE, version, headlinesFlat, doubleCampaign, doubleUsed,
+//             groupsFlat, aLinePushers]
+//   legacy:  { headlines, doubleCampaign, doubleUsed, night }
+function isMediaLineSlot(el) {
+	if (Array.isArray(el)) return el.length >= 7 && el[0] === -rf.SO_MEDIA_LINE
+	return Boolean(el && typeof el === "object" && !Array.isArray(el) && Array.isArray(el.headlines))
+}
+
+// Media Line wire slot: compact positional array tagged with the negative option
+// code so it cannot collide with the Stadium/Bailout/Labor Market slots:
+//   [tag, version, headlinesFlat, doubleCampaign, doubleUsed, groupsFlat, aLinePushers]
+// Headlines are flat [turn, playerIndex, value, ...] and pruned to the current
+// and previous turn (only those can still affect quota or tonight's dinner).
+// Groups are flat [campaignNum, owner, houseCount, ...houses].
+export function exportMediaLineSlot() {
+	const store = useModelStore()
+	const ml = store.mediaLine
+	const minTurn = store.gameflow.turn - 1
+	const headlines = []
+	for (const h of ml.headlines) {
+		if (h.turn < minTurn) continue
+		headlines.push(h.turn, h.playerIndex, h.value)
+	}
+	const groups = []
+	for (const [num, g] of Object.entries(ml.night.groups)) {
+		groups.push(Number(num), g.owner, g.houses.length, ...g.houses)
+	}
+	return [-rf.SO_MEDIA_LINE, 1, headlines, ml.doubleCampaign, ml.doubleUsed ? 1 : 0, groups, [...ml.night.aLinePushers]]
+}
+
+// Reads the Media Line slot, scanning the whole save like the Labor Market one.
+// Always resets to defaults first so module-off games never leak state. Accepts
+// both the compact slot and the legacy verbose object.
+export function restoreMediaLineState(inputArr) {
+	const store = useModelStore()
+	store.mediaLine.headlines = []
+	store.mediaLine.doubleCampaign = -1
+	store.mediaLine.doubleUsed = false
+	store.mediaLine.night = { groups: {}, aLinePushers: [] }
+	if (!store.startingOptions.mediaLine) return
+	const slot = [...(inputArr || [])].reverse().find(isMediaLineSlot)
+	if (!slot) return
+
+	if (Array.isArray(slot)) {
+		const flat = Array.isArray(slot[2]) ? slot[2] : []
+		for (let i = 0; i + 2 < flat.length; i += 3) {
+			const turn = flat[i]
+			const playerIndex = flat[i + 1]
+			const value = flat[i + 2]
+			if (Number.isInteger(turn) && Number.isInteger(playerIndex) && (value === 5 || value === -5)) {
+				store.mediaLine.headlines.push({ turn, playerIndex, value })
+			}
+		}
+		if (Number.isInteger(slot[3])) store.mediaLine.doubleCampaign = slot[3]
+		store.mediaLine.doubleUsed = slot[4] === 1
+		const groups = {}
+		const flatGroups = Array.isArray(slot[5]) ? slot[5] : []
+		let gi = 0
+		while (gi + 2 < flatGroups.length) {
+			const num = flatGroups[gi]
+			const owner = flatGroups[gi + 1]
+			const count = flatGroups[gi + 2]
+			const houses = flatGroups.slice(gi + 3, gi + 3 + count)
+			if (Number.isInteger(num) && Number.isInteger(owner) && Number.isInteger(count) && count >= 0 && houses.length === count && houses.every(Number.isInteger)) {
+				groups[num] = { owner, houses }
+			}
+			gi += 3 + count
+		}
+		const pushers = Array.isArray(slot[6]) ? slot[6].filter((x) => Number.isInteger(x)) : []
+		store.mediaLine.night = { groups, aLinePushers: pushers }
+		return
+	}
+
+	// Legacy verbose object
+	store.mediaLine.headlines = (slot.headlines || [])
+		.filter((h) => h && Number.isInteger(h.turn) && Number.isInteger(h.playerIndex) && (h.value === 5 || h.value === -5))
+		.map((h) => ({ turn: h.turn, playerIndex: h.playerIndex, value: h.value }))
+	if (Number.isInteger(slot.doubleCampaign)) store.mediaLine.doubleCampaign = slot.doubleCampaign
+	store.mediaLine.doubleUsed = slot.doubleUsed === true
+	// Milestone 1 per-night accumulator (older saves predate it - keep defaults)
+	if (slot.night && typeof slot.night === "object" && !Array.isArray(slot.night)) {
+		const groups = {}
+		if (slot.night.groups && typeof slot.night.groups === "object" && !Array.isArray(slot.night.groups)) {
+			for (const [key, g] of Object.entries(slot.night.groups)) {
+				if (g && typeof g === "object" && Number.isInteger(g.owner) && Array.isArray(g.houses) && g.houses.every(Number.isInteger)) {
+					groups[Number(key)] = { owner: g.owner, houses: [...g.houses] }
+				}
+			}
+		}
+		const pushers = Array.isArray(slot.night.aLinePushers) ? slot.night.aLinePushers.filter((x) => Number.isInteger(x)) : []
+		store.mediaLine.night = { groups: groups, aLinePushers: pushers }
 	}
 }
 
@@ -1269,13 +1361,7 @@ function applyStadiumSlot(slot) {
 	return false
 }
 
-// Stadium mod: restore state from the trailing wire-format slot (shape-detected).
-// `index` is the next unread import position - the stadium slot sits there
-// whenever the module was chosen (it is pushed before the bailout slot, so no
-// offset is needed). The slot is only scanned when the module was chosen -
-// other games never store it, so their saves load without it. For saves that
-// predate the slot, rebuild from history: gamesPlayed from the result entries,
-// and the last announcement if it is still for an upcoming game.
+// Stadium mod: restore from the trailing slot; older saves rebuild from history
 export function restoreStadiumState(inputArr, index = inputArr.length - 1) {
 	const store = useModelStore()
 	store.stadium.gamesPlayed = 0
@@ -1382,10 +1468,7 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	const store = useModelStore()
 
 	
-	let compressedData = Uint8Array.from(atob(inputBase64), (c) => c.charCodeAt(0))
-	// eslint-disable-next-line no-undef
-	let decompressedData = pako.ungzip(compressedData, { to: "string" })
-	let inputModel = JSON.parse(decompressedData)
+	let inputModel = decompressData(inputBase64)
 
 
 
@@ -1394,8 +1477,6 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	context.resetContextAndHighlights()
 
 	// 0 = tiles
-	//store.mapData.tiles = JSON.parse(JSON.stringify(inputModel[0]))
-	//map.initCoords()
 	store.mapData.tiles.splice(0)
 	store.mapData.coords.splice(0)
 	Object.assign(store.mapData.tiles, inputModel[0][0])
@@ -1438,13 +1519,12 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	// 5 - bank
 	store.bank = inputModel[5]
 	// 6 - gameflow
-	//store.gameflow.splice(0)
 	Object.assign(store.gameflow, inputModel[6])
 	// 7 - campaigns
 	store.campaigns.splice(0)
 	Object.assign(store.campaigns, inputModel[7])
 	for (let i = 0; i < store.campaigns.length; i++) {
-		if (store.campaigns[i].number >= 1 && store.campaigns[i].number <= 16) map.addElement(rf.TYPE_CAMPAIGN, store.campaigns[i].number, store.campaigns[i].index, store.campaigns[i].rotated)
+		if ((store.campaigns[i].number >= 1 && store.campaigns[i].number <= 16) || (store.campaigns[i].number >= 30 && store.campaigns[i].number <= 35)) map.addElement(rf.TYPE_CAMPAIGN, store.campaigns[i].number, store.campaigns[i].index, store.campaigns[i].rotated)
 	}
 
 	// 8 - gardens
@@ -1516,14 +1596,8 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	// by shape so snapshots from before either module existed still load.
 	restoreLaborMarketState(inputModel)
 	restoreBailoutState(inputModel.slice(21))
+	// Media Line mod (shape-detected; older snapshots predate the slot)
+	restoreMediaLineState(inputModel)
 
-	// Adjust CEOs with dumpling MS, using history
-	if (store.startingOptions.dumplings) {
-		for (let i = 0; i < store.history.length; i++) {
-			if (store.history[i][0] === rf.HIST_CEO_BONUS_CHOSEN) {
-				let pIdx = store.history[i][1]
-				store.players[pIdx].ceoAction = store.history[i][3][0]
-			}
-		}
-	}
+	applyDumplingCeoActions()
 }

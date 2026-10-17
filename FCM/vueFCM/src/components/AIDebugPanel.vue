@@ -35,7 +35,7 @@ function barWidth(score) {
 }
 
 function chosenBreakdown(chosen) {
-	if (!chosen || !chosen.breakdown) return ""
+	if (!chosen.breakdown) return ""
 	const b = chosen.breakdown
 	const bits = []
 	if (b.sameTileHouses) bits.push(b.sameTileHouses + " same-tile house x" + W_SAME_TILE_HOUSE)

@@ -123,8 +123,6 @@ function changeBoard(boardNumber) {
 	store.topMenuViews.selectingBoard = false
 	setTimeout(function () {
 		personal.selectedBoard = boardNumber
-		if (boardNumber === 2) store.topMenuViews.displayRightActionSelection = false
-		else store.topMenuViews.displayRightActionSelection = true
 		IO.saveBoardPreference(boardNumber)
 		store.performingBoardChange = false
 	}, 500)

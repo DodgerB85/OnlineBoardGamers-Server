@@ -75,6 +75,8 @@ def showURRgame(request, game_id=1, spoilerFree=False, replayStep=1):
     # The URR client reads the whole model as plain JSON out of gameData.
     returnData["gameData"] = returnData["gameData"] if returnData["gameData"] else "{}"
 
+    returnData["missingPlayers"] = json.dumps(presenter.getMissingPlayersNamesArray())
+
     currentPlayersArr = []
     if currentGame.phase in rfURR.MAIN_PHASES:
         currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else [])
@@ -86,7 +88,7 @@ def showURRgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "spoilerFree": spoilerFree,
             "replayStep": replayStep,
             "pov": -99,
-            "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False, False)),
+            "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(True, False)),
             "currentPlayers": currentPlayersArr,
         }
     )
@@ -161,6 +163,12 @@ def _processURRturn(request):
         return JsonResponse({"latestUpdate": currentGame.latestUpdate}, safe=False)
 
     elif jsonData["action"] == "kickout":
+        participant = currentGame.players.filter(player=request.user, is_missing=False, is_kicked=False).exists()
+        target_is_current = currentGame.players.filter(player__username=jsonData["kickedName"], is_current=True, is_missing=False, is_kicked=False).exists()
+        if not participant or request.user.username == jsonData["kickedName"]:
+            return JsonResponse({"error": gettext("Only another active player can initiate kickout.")}, status=403)
+        if not target_is_current or presenter.kickoutRequired() != 2:
+            return JsonResponse({"error": gettext("This player is not eligible for kickout.")}, status=400)
         if str(latest_update) != str(currentGame.latestUpdate):
             message = f"SYNC ERROR IN: URR kickout - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} - DB_LU: {currentGame.latestUpdate}"
             SN_sendAdminErrorMessage(message)
@@ -186,6 +194,7 @@ def _processURRturn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
+                "missingPlayers": presenter.getMissingPlayersNamesArray(),
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             },
             safe=False,
@@ -232,6 +241,10 @@ def _processURRturn(request):
         presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
         presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
         currentGame.gameData = jsonData["gameData"]
+        # The client may compact a legacy history when confirming the loaded position.
+        # Keep the redo anchor in the same representation to avoid a duplicate point.
+        if currentGame.rewindTempData:
+            currentGame.rewindTempData = currentGame.gameData
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
@@ -327,7 +340,7 @@ def performSaveURRGame(request, currentGame, jsonData):
 def compressRewindPoint(point):
     if point.startswith("gzip:"):
         return point
-    return "gzip:" + base64.b64encode(gzip.compress(point.encode("utf-8"), mtime=0)).decode("ascii")
+    return "gzip:" + base64.b64encode(gzip.compress(point.encode("utf-8"), compresslevel=6, mtime=0)).decode("ascii")
 
 
 def decompressRewindPoint(point):
@@ -370,7 +383,7 @@ def doSaveRewind(currentGame, jsonData, previousGameData):
         # Put back the position we rewound to, so playing on from it does not
         # lose the ability to rewind there again.
         temp_point = compressRewindPoint(currentGame.rewindTempData)
-        if not currentRewindData or currentRewindData[-1] != temp_point:
+        if not currentRewindData or decompressRewindPoint(currentRewindData[-1]) != decompressRewindPoint(temp_point):
             currentRewindData.append(temp_point)
         currentGame.rewindTempData = ""
 
@@ -378,7 +391,7 @@ def doSaveRewind(currentGame, jsonData, previousGameData):
         previousGameData = openingPosition(jsonData["gameData"])
     if previousGameData:
         previous_point = compressRewindPoint(previousGameData)
-        if not currentRewindData or currentRewindData[-1] != previous_point:
+        if not currentRewindData or decompressRewindPoint(currentRewindData[-1]) != decompressRewindPoint(previous_point):
             currentRewindData.append(previous_point)
 
     if len(currentRewindData) > 20:
@@ -451,6 +464,17 @@ def saveZoomURR(request):
     return shared_save_zoom(request, "URR")
 
 
+def getKickoutData(presenter):
+    return {
+        "kickoutRequired": presenter.kickoutRequired(),
+        "kickoutVotesData": presenter.getKickoutVotesData(),
+        "kickoutVoteThreshold": presenter.getKickoutVoteThreshold(),
+        "KickoutFlexiDataArray": json.loads(presenter.gameObj.kickoutFlexiData or "[]"),
+        "missingPlayers": presenter.getMissingPlayersNamesArray(),
+        "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+    }
+
+
 @login_required()
 def URRdata(request, dataType=1):
     if request.method != "POST":
@@ -475,8 +499,8 @@ def URRdata(request, dataType=1):
                 user_gp.save()
         return JsonResponse(
             {
+                **getKickoutData(presenter),
                 "gameData": currentGame.gameData if currentGame.gameData else "{}",
-                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "finishedGame": currentGame.gameStatus == "FINISHED",
                 "latestUpdate": currentGame.latestUpdate,
             }
@@ -490,12 +514,12 @@ def URRdata(request, dataType=1):
         gameUpdate = int(jsonData["latestUpdate"])
         latestUpdate = int(currentGame.latestUpdate)
         if gameUpdate == latestUpdate:
-            return JsonResponse({"latest": True}, safe=False)
+            return JsonResponse({"latest": True, **getKickoutData(presenter)}, safe=False)
         return JsonResponse(
             {
                 "latest": False,
+                **getKickoutData(presenter),
                 "gameData": currentGame.gameData if currentGame.gameData else "{}",
-                "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
             }
         )

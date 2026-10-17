@@ -19,14 +19,30 @@ import { usePersonalStore } from "../stores/FCMpersonal.js"
 
 function restartKickoutTimers() {
 	const personal = usePersonalStore()
-	if (personal.kickoutCountdownIntervalTimer != null) clearInterval(personal.kickoutCountdownIntervalTimer)
-	if (personal.flexiKickoutCountdownIntervalTimer != null) clearInterval(personal.flexiKickoutCountdownIntervalTimer)
+	clearInterval(personal.kickoutCountdownIntervalTimer)
+	clearInterval(personal.flexiKickoutCountdownIntervalTimer)
 	if (personal.secondsToNextKickout <= 1200) {
 		personal.kickoutCountdownIntervalTimer = setInterval(view.kickoutTimerTicker, 1000)
 	}
 	if (personal.kickoutRequired === 1 && personal.secondsToNextKickout <= 1200) {
 		personal.flexiKickoutCountdownIntervalTimer = setInterval(view.kickoutFlexiTimerTicker, 1000)
 	}
+}
+
+async function throwIfNotOk(response) {
+	if (response.ok) return
+	const errorData = await response.json() // Assuming the server returns JSON error data
+	throw new Error(errorData.error || "Network response was not ok")
+}
+
+function reportSaveError(label, payloadInfo, error) {
+	const personal = usePersonalStore()
+	const gameInfo = `Game ${personal.gameID} - User ${personal.name || "unknown"} - ${payloadInfo}`
+	const errorName = error && error.name ? error.name : "Error"
+	const errorMsg = error && error.message ? error.message : String(error)
+	const errorStack = error && error.stack ? String(error.stack).substring(0, 1200) : "no stack"
+	const browserInfo = typeof navigator !== "undefined" ? navigator.userAgent : "unknown UA"
+	sendDiscordWebhook(`${label} - ${gameInfo}: [${errorName}] ${errorMsg} | UA: ${browserInfo} | stack: ${errorStack}`)
 }
 
 /***** PRE-MOVES
@@ -70,6 +86,7 @@ export function deleteMoveData() {
 		method: "POST",
 		body: JSON.stringify({
 			action: "deleteMoveData",
+			latestUpdate: personal.latestUpdate,
 			gameID: personal.gameID,
 			phase: store.gameflow.phase,
 		}),
@@ -77,7 +94,9 @@ export function deleteMoveData() {
 	})
 		.then((response) => response.json())
 		.then((result) => {
-			if (result.result === 2) {
+			if (result.syncError) {
+				store.gameMessages.errorText = i18n.global.t("FCM_IO.olderVersionRefresh")
+			} else if (result.result === 2) {
 				//store.gameMessages.successText = "<b>Save Successful</b> "
 			} else {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.saveErrorSST")
@@ -154,6 +173,7 @@ export async function saveAndUpdateNotifictions(playerIndexesToNotify, referring
 			method: "POST",
 			body: JSON.stringify({
 				action: "saveAndUpdateNotifictions",
+				latestUpdate: personal.latestUpdate,
 				gameID: personal.gameID,
 				data: funcs.exportFCMmodel(false, false),
 				playerIndexesToNotify: playerIndexesToNotify,
@@ -161,12 +181,14 @@ export async function saveAndUpdateNotifictions(playerIndexesToNotify, referring
 			}),
 			headers: { "X-CSRFToken": csrftoken },
 		})
-		if (!response.ok) {
-			const errorData = await response.json() // Assuming the server returns JSON error data
-			const errorMessage = errorData.error || "Network response was not ok"
-			throw new Error(errorMessage)
-		}
+		await throwIfNotOk(response)
 		let _result = await response.json()
+
+		if (_result.syncError) {
+			store.gameMessages.errorText = i18n.global.t("FCM_IO.olderVersionRefresh")
+			store.viewSettings.showGameLoader = false
+			return
+		}
 
 		store.viewSettings.showGameLoader = false
 		
@@ -176,13 +198,7 @@ export async function saveAndUpdateNotifictions(playerIndexesToNotify, referring
 	} catch (error) {
 		console.error("Error fetching data:", error)
 		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
-		const payloadInfo = `referringPhase=${referringPhase}, LU=${personal.latestUpdate}`
-		const gameInfo = `Game ${personal.gameID} - User ${personal.name || "unknown"} - ${payloadInfo}`
-		const errorName = error && error.name ? error.name : "Error"
-		const errorMsg = error && error.message ? error.message : String(error)
-		const errorStack = error && error.stack ? String(error.stack).substring(0, 1200) : "no stack"
-		const browserInfo = typeof navigator !== "undefined" ? navigator.userAgent : "unknown UA"
-		sendDiscordWebhook(`FCM save and notify error - ${gameInfo}: [${errorName}] ${errorMsg} | UA: ${browserInfo} | stack: ${errorStack}`)
+		reportSaveError("FCM save and notify error", `referringPhase=${referringPhase}, LU=${personal.latestUpdate}`, error)
 	}
 }
 
@@ -486,7 +502,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 		...extraPostData,
 	}
 
-	if ((window.initData.gameData === "" || !window.initData.gameData) && store.gameflow.turn === 0) {
+	if (!window.initData.gameData && store.gameflow.turn === 0) {
 		//postData.mapTiles = map.getOriginalTiles(false)
 		window.initData.startingMap = map.getOriginalTiles(false)
 	}
@@ -546,11 +562,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 			body: JSON.stringify(postData),
 			headers: { "X-CSRFToken": csrftoken },
 		})
-		if (!response.ok) {
-			const errorData = await response.json() // Assuming the server returns JSON error data
-			const errorMessage = errorData.error || "Network response was not ok"
-			throw new Error(errorMessage)
-		}
+		await throwIfNotOk(response)
 		result = await response.json()
 
 		if (result.latestUpdate > parseInt(personal.latestUpdate)) personal.latestUpdate = String(result.latestUpdate)
@@ -703,13 +715,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 		console.error("Error fetching data:", error)
 		personal.haltPlay = false
 		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
-		const payloadInfo = `turn=${store.gameflow.turn}, phase=${store.gameflow.phase}, LU=${postData.latestUpdate}, nextPlayer=${postData.nextPlayer?.[0] || "none"}`
-		const gameInfo = `Game ${personal.gameID} - User ${personal.name || "unknown"} - ${payloadInfo}`
-		const errorName = error && error.name ? error.name : "Error"
-		const errorMsg = error && error.message ? error.message : String(error)
-		const errorStack = error && error.stack ? String(error.stack).substring(0, 1200) : "no stack"
-		const browserInfo = typeof navigator !== "undefined" ? navigator.userAgent : "unknown UA"
-		sendDiscordWebhook(`FCM save error - ${gameInfo}: [${errorName}] ${errorMsg} | UA: ${browserInfo} | stack: ${errorStack}`)
+		reportSaveError("FCM save error", `turn=${store.gameflow.turn}, phase=${store.gameflow.phase}, LU=${postData.latestUpdate}, nextPlayer=${postData.nextPlayer?.[0] || "none"}`, error)
 	}
 }
 
@@ -739,11 +745,7 @@ export async function savePreTurn(preMoveDataRaw) {
 			body: JSON.stringify(postData),
 			headers: { "X-CSRFToken": csrftoken },
 		})
-		if (!response.ok) {
-			const errorData = await response.json() // Assuming the server returns JSON error data
-			const errorMessage = errorData.error || "Network response was not ok"
-			throw new Error(errorMessage)
-		}
+		await throwIfNotOk(response)
 		const data = await response.json()
 		if (data.syncError) {
 			store.gameMessages.errorText = i18n.global.t("FCM_IO.olderVersionRefresh")
@@ -803,7 +805,7 @@ export async function saveOOBpreference() {
 	}
 }
 
-export async function saveSimulMove(moveData, continueFromStalledGame = false) {
+export async function saveSimulMove(moveData, continueFromStalledGame = false, passKickoutFor = "") {
 	if (usePersonalStore().tutorial) return // Tutorial game is never persisted
 	const store = useModelStore()
 	const personal = usePersonalStore()
@@ -841,6 +843,13 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false) {
 			}
 		}
 	}
+	// Payday - players auto-skipped for no salary never need to move
+	// (mirrors canSkipCurrentPlayer, so the server doesn't wait on their -9 presets)
+	if (store.gameflow.phase === rf.PHASE_PAYDAY) {
+		for (let i = 0; i < store.players.length; i++) {
+			if (controller.canSkipCurrentPlayer(i) && !notRequiedPlayerNames.includes(store.players[i].name)) notRequiedPlayerNames.push(store.players[i].name)
+		}
+	}
 	// Clean up - no fridge or nothing to bin (mirrors canSkipCurrentPlayer /
 	// isRequiredToPlayCleanUp, so such players never enter the cleanup turn order)
 	if (store.gameflow.phase === rf.PHASE_CLEAN_UP) {
@@ -861,6 +870,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false) {
 		BKSN: BKSN,
 		notRequiedPlayerNames: notRequiedPlayerNames,
 		continueFromStalledGame: continueFromStalledGame,
+		passKickoutFor: passKickoutFor,
 	}
 
 	/* This is only used in PASS_KICKOUT function
@@ -876,11 +886,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false) {
 			body: JSON.stringify(postData),
 			headers: { "X-CSRFToken": csrftoken },
 		})
-		if (!response.ok) {
-			const errorData = await response.json() // Assuming the server returns JSON error data
-			const errorMessage = errorData.error || "Network response was not ok"
-			throw new Error(errorMessage)
-		}
+		await throwIfNotOk(response)
 		const data = await response.json()
 
 		if (data.syncError) {
@@ -916,6 +922,15 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false) {
 		else if (data.allPlayersMoved === true) {
 			// LOAD AND PROCESS ALL DATA
 			personal.latestUpdate = data.latestUpdate
+			// Payday safety: never process salaries if someone cannot pay -
+			// reset their move, keep everyone else's, and stay in PAYDAY
+			if (store.gameflow.phase === rf.PHASE_PAYDAY && (await resetInsolventPaydayPlayers(data.moveData))) {
+				store.viewSettings.showGameLoader = false
+				personal.haltPlay = false
+				if (personal.liveWS) WS.broadcastGameUpdate()
+				controller.startPlayerTurn(false)
+				return
+			}
 			await processSimulMoveData(data.moveData)
 			// Preserve TO settings after working day
 			if (store.gameflow.phase !== rf.PHASE_RESTRUCTURING && store.gameflow.phase !== rf.PHASE_PAYDAY) await deleteMoveData()
@@ -937,13 +952,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false) {
 		console.error("Error fetching data:", error)
 		personal.haltPlay = false
 		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
-		const payloadInfo = `LU=${personal.latestUpdate}`
-		const gameInfo = `Game ${personal.gameID} - User ${personal.name || "unknown"} - ${payloadInfo}`
-		const errorName = error && error.name ? error.name : "Error"
-		const errorMsg = error && error.message ? error.message : String(error)
-		const errorStack = error && error.stack ? String(error.stack).substring(0, 1200) : "no stack"
-		const browserInfo = typeof navigator !== "undefined" ? navigator.userAgent : "unknown UA"
-		sendDiscordWebhook(`FCM simul move save error - ${gameInfo}: [${errorName}] ${errorMsg} | UA: ${browserInfo} | stack: ${errorStack}`)
+		reportSaveError("FCM simul move save error", `LU=${personal.latestUpdate}`, error)
 	}
 }
 
@@ -1001,6 +1010,41 @@ export async function kickout(kickedPlayerIndex) {
 		store.viewSettings.showGameLoader = false
 		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorKicking")
 		return null
+	}
+}
+
+// Tournament game: the timed-out player is covered by the tournament admins, so
+// alert them through the webhook instead of kicking. Message text mirrors what
+// the raw-JS client sent (IO.nudgeTourneyAdmins).
+export async function alertTourneyAdmins(timedOutPlayerName) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	store.viewSettings.showGameLoader = true
+
+	let message = "============\n"
+	message += "GAME TIMEOUT\n"
+	message += "Alerting Player: " + personal.name + "\n"
+	message += "Timed Out Player: " + timedOutPlayerName + "\n"
+	message += "[Click here to go to the game](https://www.OnlineBoardGamers.com/FCM/" + String(personal.gameID) + "/)"
+
+	try {
+		const response = await fetch("/FCM/nudgeTourneyAdmins/", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ content: message }),
+		})
+		store.viewSettings.showGameLoader = false
+
+		if (!response.ok) {
+			store.gameMessages.errorText = i18n.global.t("actionArea.alertAdminsFailed")
+			return
+		}
+
+		// Alert sent: hide the kickout panel like the raw-JS client did
+		personal.kickoutRequired = 0
+	} catch {
+		store.viewSettings.showGameLoader = false
+		store.gameMessages.errorText = i18n.global.t("actionArea.alertAdminsFailed")
 	}
 }
 
@@ -1278,6 +1322,7 @@ export async function submitBug(bugContent) {
 		if (data.bugEntrySuccess) {
 			store.gameMessages.successText = i18n.global.t("FCM_IO.bugReportSubmitted")
 			store.viewSettings.showBug = false
+			store.viewSettings.showGameLoader = false
 			return true
 		} else {
 			store.gameMessages.bugErrorText = i18n.global.t("FCM_IO.bugErrorHtml")
@@ -1520,6 +1565,87 @@ export async function castVote(topic, choice) {
 	}
 }
 
+// Cash still owed at payday after a player's move - mirrors checkPaydayDataValid
+export function paydayDueForGuard(playerIndex, paydayMove) {
+	// paydayMove = [[flagOrFires], [paidInFood]]
+	const flags = paydayMove[0]
+	const food = paydayMove[1] || []
+	// First Trainer Used: never insolvent. The bust rule (rules.paySalaries)
+	// takes all their cash, keeps every employee and never goes negative - this
+	// covers both the -5 pre-move and the in-payday manual keep-all move (-8)
+	if (plyr.hasMilestone(playerIndex, rf.FIRST_TRAINER_USED)) return 0
+	let due = rules.salary(playerIndex)
+	const unitarySalary = plyr.unitarySalary(playerIndex)
+	if (flags.length >= 1 && flags[0] >= 0) {
+		// Fired move: each salaried fire reduces the due
+		for (let i = 0; i < flags.length; i++) {
+			if (rules.doesEmployeeRequireSalary(playerIndex, flags[i]) === true) due -= unitarySalary
+		}
+	} else if ((flags.length === 1 && flags[0] === -4) || (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) && food.length > 0)) {
+		// Food pays base salary only; job-switch salary is cash-only
+		due = Math.max(rules.baseSalary(playerIndex) - unitarySalary * food.length, 0) + rules.headhuntSalaryDue(playerIndex)
+	}
+	return Math.max(due, 0)
+}
+
+// Returns true if play was halted (insolvent player(s) found and reset)
+async function resetInsolventPaydayPlayers(moveDataRaw) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	const decompressedData = funcs.decompressObjectFromDB(moveDataRaw)
+	const insolvent = []
+	for (let i = 0; i < decompressedData.length; i++) {
+		if (store.players[i].displayName === rf.BOT_NAME) continue
+		if (rules.salary(i) === 0) continue
+		// Blank entry (deleted/scaffolded) — no move to check
+		if (!decompressedData[i][3] || decompressedData[i][3].length === 0) continue
+		const paydayMove = decompressedData[i][3][0]
+		if (store.players[i].money >= paydayDueForGuard(i, paydayMove)) continue
+		insolvent.push(i)
+	}
+	if (insolvent.length === 0) return false
+
+	// Delete their stored move server-side and put them back in current players
+	for (const i of insolvent) {
+		const newLU = await unlockPlayerPayday(store.players[i].name)
+		if (newLU) personal.latestUpdate = newLU
+	}
+	// Everyone else's moves stay stored; only the insolvent players replay
+	store.gameflow.turnOrder.splice(0)
+	insolvent.forEach((i) => store.gameflow.turnOrder.push(i))
+	if (insolvent.includes(personal.pov)) {
+		personal.moveDataRaw = ""
+		store.context.preMoveData = [[[-9], []], [-9]]
+	}
+	// Persist the corrected turn order and notify the reset players
+	await saveGameNormal(false, false, false)
+	return true
+}
+
+async function unlockPlayerPayday(playerName) {
+	const personal = usePersonalStore()
+	let csrftoken = funcs.getCookie("csrftoken")
+	try {
+		const response = await fetch("/FCM/processTurn/", {
+			method: "POST",
+			body: JSON.stringify({
+				latestUpdate: personal.latestUpdate,
+				action: "unlockPayday",
+				gameID: personal.gameID,
+				playerName: playerName,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) return null
+		const result = await response.json()
+		if (result.syncError) return null
+		return result.latestUpdate
+	} catch (error) {
+		console.error("Error unlocking payday move:", error)
+		return null
+	}
+}
+
 export function processSimulMoveData(data) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
@@ -1539,7 +1665,7 @@ export function processSimulMoveData(data) {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminPhaseMismatchSetupReserve")
 				sendDiscordWebhook(`JS ERROR: phase mismatch in SETUP_RESERVE - gameID: ${personal.gameID} player: ${store.players[i].name} phase: ${store.gameflow.phase} decompressedData: ${JSON.stringify(decompressedData)}`)
 			}
-			if (!decompressedData[i][0] === store.players[i].name && store.players[i].name !== rf.TOURNAMENT_ADMIN_NAME) {
+			if (decompressedData[i][0] !== store.players[i].name && store.players[i].name !== rf.TOURNAMENT_ADMIN_NAME) {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminNameMismatchSetupReserve")
 				sendDiscordWebhook(`JS ERROR: player name mismatch in SETUP_RESERVE - gameID: ${personal.gameID} player: ${store.players[i].name} decompressedData: ${JSON.stringify(decompressedData)}`)
 			}
@@ -1599,9 +1725,11 @@ export function processSimulMoveData(data) {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminNameMismatchRestructuring")
 				sendDiscordWebhook(`JS ERROR: player name mismatch in PHASE_RESTRUCTURING - gameID: ${personal.gameID} player: ${store.players[i].name} decompressedData: ${JSON.stringify(decompressedData)}`)
 			}
-			if (content.length !== 3) {
+			// Blank entry (deleted/scaffolded) or wrong shape — no move to process
+			if (!content || content.length !== 3) {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminDataErrorRestructuring")
 				sendDiscordWebhook(`JS ERROR: data-error in PHASE_RESTRUCTURING - gameID: ${personal.gameID} player: ${store.players[i].name} decompressedData: ${JSON.stringify(decompressedData)}`)
+				continue
 			}
 
 			store.players[i].beach = content[0]
@@ -1643,6 +1771,11 @@ export function processSimulMoveData(data) {
 				foodPayements.push([])
 				continue
 			}
+			// Blank entry (deleted/scaffolded, e.g. salary-0 skip) — no move to process
+			if (!decompressedData[i][3] || decompressedData[i][3].length === 0) {
+				foodPayements.push([])
+				continue
+			}
 			// NB take the "0 = first" entry from the array - to get payday only and not cleanup
 			let turnDataArray = decompressedData[i][3][0]
 			let timestamp = decompressedData[i][2]
@@ -1655,7 +1788,7 @@ export function processSimulMoveData(data) {
 				turnDataArray[1].splice(0)
 				// Food may replace normal salary only; job-switch salary is cash-only.
 				let due = rules.baseSalary(i)
-				let unitarySalary = plyr.hasMilestone(i, rf.FIRST_WAITRESS_USED) ? 3 : 5
+				let unitarySalary = plyr.unitarySalary(i)
 				// Remove any coffee
 				playerObj.resources = funcs.removeItemAll(playerObj.resources, rf.COFFEE)
 				while (due > 0 && playerObj.resources.length > 0) {
@@ -1829,10 +1962,9 @@ export function checkPaydayDataValid(playerIndex, paydayData) {
 		paydayData[1].splice(0)
 		// Find the salay due
 		let due = rules.salary(playerIndex)
-		let unitarySalary = plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
+		let unitarySalary = plyr.unitarySalary(playerIndex)
 		// Remove any coffee
-		let resourceCopy = [...playerObj.resources]
-		resourceCopy = funcs.removeItemAll(playerObj.resources, rf.COFFEE)
+		let resourceCopy = funcs.removeItemAll(playerObj.resources, rf.COFFEE)
 		let excessItems = true
 		if (plyr.hasMilestone(playerIndex, rf.FIRST_BEER_SOLD) && resourceCopy.length > 0) {
 			due -= unitarySalary * resourceCopy.length
@@ -1852,7 +1984,7 @@ export function checkPaydayDataValid(playerIndex, paydayData) {
 	}
 
 	// Finally, it must be a fired move. So check can pay salary
-	if (paydayData[0].length >= 1 && paydayData[0][0] >= 0) {
+	if (paydayData[0][0] >= 0) {
 		let due = rules.salary(playerIndex)
 
 		// Make sure any paid in food is still valid

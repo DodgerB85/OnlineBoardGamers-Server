@@ -9,6 +9,14 @@ import { toRaw } from "vue"
 import { useModelStore } from "../stores/FCMstore.js"
 
 const ROAD_IDS = new Set(rf.ROADS)
+// Natural (unrotated) size in tiles per player count
+const NATURAL_SIZE = {
+	2: { w: 3, h: 3 },
+	3: { w: 4, h: 3 },
+	4: { w: 4, h: 4 },
+	5: { w: 5, h: 4 },
+	6: { w: 6, h: 4 },
+}
 
 export function numTiles(numPlayers) {
 	switch (numPlayers) {
@@ -101,23 +109,21 @@ export function generateRandomMap(maxPlayers) {
 		}
 	}
 
-	// 6. Stadium mod - force-place the 2 arena half-tiles on a random adjacent
-	// pair of tiles, replacing 2 normal tiles. Horizontal: 27 left, 28 right, rot 0.
-	// Vertical: 27 top, 28 bottom, rot 1 (both halves rotate clockwise).
+	// 6. Stadium mod - force-place the 2 arena half-tiles on a random adjacent pair
 	if (options.stadium) {
-		const dims = { 2: [3, 3], 3: [4, 3], 4: [4, 4], 5: [5, 4], 6: [6, 4] }[maxPlayers] || [3, 3]
+		const { w, h } = NATURAL_SIZE[maxPlayers] || NATURAL_SIZE[2]
 		const horizontal = Math.random() < 0.5
 		const rot = horizontal ? 0 : 1
 		let x, y
 		if (horizontal) {
-			x = Math.floor(Math.random() * (dims[0] - 1))
-			y = Math.floor(Math.random() * dims[1])
+			x = Math.floor(Math.random() * (w - 1))
+			y = Math.floor(Math.random() * h)
 		} else {
-			x = Math.floor(Math.random() * dims[0])
-			y = Math.floor(Math.random() * (dims[1] - 1))
+			x = Math.floor(Math.random() * w)
+			y = Math.floor(Math.random() * (h - 1))
 		}
-		const first = y * dims[0] + x
-		const second = first + (horizontal ? 1 : dims[0])
+		const first = y * w + x
+		const second = first + (horizontal ? 1 : w)
 		res[first * 2] = 27
 		res[first * 2 + 1] = rot
 		res[second * 2] = 28
@@ -137,16 +143,7 @@ export function expandMapToFullGrid(map, maxPlayers) {
 	const GRID_HEIGHT = 16 // 6 top rows + 10 remaining rows
 	const START_OFFSET = 6
 
-	// Determine the active area dimensions based on player count
-	const dimensions = {
-		2: { w: 3, h: 3 },
-		3: { w: 4, h: 3 },
-		4: { w: 4, h: 4 },
-		5: { w: 5, h: 4 },
-		6: { w: 6, h: 4 },
-	}
-
-	const { w: naturalWidth, h: naturalHeight } = dimensions[maxPlayers] || dimensions[2]
+	const { w: naturalWidth, h: naturalHeight } = NATURAL_SIZE[maxPlayers] || NATURAL_SIZE[2]
 
 	let mapPointer = 0
 
@@ -213,21 +210,7 @@ export function getOriginalTiles(tilesOnly) {
 	let originalTiles = []
 	let numPlayers = store.players.length
 
-	let naturalWidth = 3
-	let naturalHeight = 3
-	if (numPlayers == 3) naturalWidth = 4
-	if (numPlayers == 4) {
-		naturalHeight = 4
-		naturalWidth = 4
-	}
-	if (numPlayers == 5) {
-		naturalHeight = 4
-		naturalWidth = 5
-	}
-	if (numPlayers == 6) {
-		naturalHeight = 4
-		naturalWidth = 6
-	}
+	const { w: naturalWidth, h: naturalHeight } = NATURAL_SIZE[numPlayers] || NATURAL_SIZE[2]
 	// start at 6,6, so 102>204 total tiles, plus 6>12
 	let start = 216
 	for (let i = 0; i < naturalHeight; i++) {
@@ -284,19 +267,17 @@ export function getCoordsForTile(index) {
 }
 
 export function isTopLeftOfTile(index) {
-	const store = useModelStore()
-	// Move it on to top row of tiles
-	if (index > store.mapData.dimensions[0] * 5 * 5) index = index % (store.mapData.dimensions[0] * 5 * 5)
-	// Needs to be top row and top left
-	if (index < store.mapData.dimensions[0] * 5 && index % 5 == 0) return true
-	return false
+	return isTopRowInColumn(index, 0)
 }
 export function isTopRightOfTile(index) {
+	return isTopRowInColumn(index, 4)
+}
+function isTopRowInColumn(index, column) {
 	const store = useModelStore()
 	// Move it on to top row of tiles
 	if (index > store.mapData.dimensions[0] * 5 * 5) index = index % (store.mapData.dimensions[0] * 5 * 5)
-	// Needs to be top row and top left
-	if (index < store.mapData.dimensions[0] * 5 && index % 5 == 4) return true
+	// Needs to be top row and in the given column of its tile
+	if (index < store.mapData.dimensions[0] * 5 && index % 5 == column) return true
 	return false
 }
 export function isBottomLeftOfTile(index) {
@@ -441,7 +422,7 @@ export function nextRoadNeighbours(index, comingFrom, sameTile, ignoreCrossing) 
 		}
 
 		// Handle Standard Road/Crossing Logic
-		return ignoreCrossing === true || isCrossing(index) || onTheSameTile(index, space)
+		return true
 	})
 
 	// 3. Final optional same-tile filter
@@ -656,19 +637,11 @@ export function isCollapsePossible(index, width, rotated) {
 // All the roads spaces from the index. Useful for the dinnertime
 
 
-// REPLACE THIS FUNCTION WITH THE BELOW
 export function getRuralMarketingZone() {
 	const store = useModelStore()
 	let freewayIndexes = []
 	for (let i = 0; i < store.mapData.coords.length; i++) if (store.mapData.coords[i] == rf.FREEWAY) freewayIndexes.push(i)
 	return freewayIndexes
-}
-
-export function getRuralMarketingSigns() {
-	const store = useModelStore()
-	let res = []
-	for (let i = 0; i < store.mapData.coords.length; i++) if (store.mapData.coords[i] == rf.FREEWAY) res.push(i)
-	return res
 }
 
 // Only used to place weird object
@@ -779,6 +752,24 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	const rwSet = new Set(getRoadworkIndexes())
 	const coffeeRoutes = []
 
+	// Stadium mod: the arena spans two tiles but is ONE building - but only
+	// for its own crowd. When the walk is seeded from the arena itself (game
+	// day), moving between its two tiles never counts as a tile crossing, so
+	// the walk can lap the whole ring road instead of stopping at the tile
+	// border. Walks seeded anywhere else (regular houses, RMA) keep counting
+	// the two tiles as normal map tiles. One scan per call (coords is spliced
+	// in place between games, so no caching by reference).
+	const arenaTiles = new Set()
+	for (let i = 0; i < store.mapData.coords.length; i++) {
+		if (store.mapData.coords[i] === rf.HOUSE + rf.STADIUM) arenaTiles.add(giveTileNumber(i))
+	}
+	const freeArenaPair = arenaTiles.size > 1 && arenaTiles.has(giveTileNumber(index))
+	const crossesTileBoundary = (a, b) => {
+		if (onTheSameTile(a, b)) return false
+		if (freeArenaPair) return !(arenaTiles.has(giveTileNumber(a)) && arenaTiles.has(giveTileNumber(b)))
+		return true
+	}
+
 	// Admissible A*-style prune (legacy map.js:899-900, giveMinTileDistance):
 	// reject a tile crossing whose current range plus straight-line tile
 	// distance to the nearest destination already exceeds winningRange. Never
@@ -800,10 +791,21 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	const minTileDist = (idx) => {
 		const x = Math.floor((idx % rf.ssW) / 5)
 		const y = Math.floor(Math.floor(idx / rf.ssW) / 5)
+		// Arena super-tile (arena-seeded walks only): a walker inside the
+		// arena pair can leave from either half for free, so the admissible
+		// bound is the min over both
+		const fromArena = freeArenaPair && arenaTiles.has(y * TILES_WIDE + x)
 		let min = Infinity
 		for (const [dx, dy] of destTiles) {
-			const d = Math.abs(x - dx) + Math.abs(y - dy)
-			if (d < min) min = d
+			if (fromArena) {
+				for (const t of arenaTiles) {
+					const d = Math.abs((t % TILES_WIDE) - dx) + Math.abs(Math.floor(t / TILES_WIDE) - dy)
+					if (d < min) min = d
+				}
+			} else {
+				const d = Math.abs(x - dx) + Math.abs(y - dy)
+				if (d < min) min = d
+			}
 		}
 		return min
 	}
@@ -824,15 +826,15 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 
 	// 1. Get initial road neighbors to start paths
 	const startNodes = neighbours(index)
-		.filter((n) => rf.ROADS.includes(store.mapData.coords[n]))
+		.filter((n) => ROAD_IDS.has(store.mapData.coords[n]))
 		.map((n) => ({
 			index: n,
-			range: onTheSameTile(index, n) ? 0 : 1,
+			range: crossesTileBoundary(index, n) ? 1 : 0,
 			from: index,
 		}))
 
 	const canEmitAt = (idx, range) =>
-		neighbours(idx).some((n) => restoSet.has(n) && (onTheSameTile(idx, n) || range + 1 <= winningRange))
+		neighbours(idx).some((n) => restoSet.has(n) && (!crossesTileBoundary(idx, n) || range + 1 <= winningRange))
 
 	// getCoffeeRoute keeps only the first route per maximal square-set, so on a
 	// dense block (4x4 = 583k walks) we find those sets directly: phase 1 finds
@@ -841,7 +843,7 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	// DFS range rules minus `from`/bridges/two-visit (those only remove moves). -1 = blocked.
 	const relaxedStep = (idx, range, next, visitedTwice) => {
 		if (!ROAD_IDS.has(store.mapData.coords[next]) || visitedTwice.has(next)) return -1
-		const crossed = !onTheSameTile(idx, next)
+		const crossed = crossesTileBoundary(idx, next)
 		const rw = rwSet.has(next)
 		const nextRange = range + (crossed ? 1 : 0) + (rw ? 1 : 0)
 		if (nextRange > winningRange && (crossed || rw)) return -1
@@ -943,7 +945,7 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 
 			for (const next of nextRoads) {
 				let nextRange = currentRange
-				const crossed = !onTheSameTile(currentIdx, next)
+				const crossed = crossesTileBoundary(currentIdx, next)
 				if (crossed) nextRange++
 				if (rwSet.has(next)) nextRange++
 
@@ -977,7 +979,7 @@ export function getCoffeeRoutesFromBldgSquare(index, restaurants, winningRange) 
 	dfs((idx, range, path) => {
 		if (++steps > COFFEE_DFS_BUDGET) return false
 		for (const n of neighbours(idx)) {
-			if (restoSet.has(n) && (onTheSameTile(idx, n) || range + 1 <= winningRange)) coffeeRoutes.push([...path])
+			if (restoSet.has(n) && (!crossesTileBoundary(idx, n) || range + 1 <= winningRange)) coffeeRoutes.push([...path])
 		}
 		return true
 	})
@@ -1165,15 +1167,6 @@ export function emptyNeighboursWithinRange(path, lobbyist, lobbyistData) {
 	}
 
 	return Array.from(res)
-}
-
-// Check if the given index is a crossing to a new tile or not
-export function isCrossing() {
-	// Previously, base game only allowed corssing mind tile
-	// But this broke certain possibilities, and doesn't work with expansions
-	// So I think Splotter retro ruled taht any crossing is allowed between tiles
-	// I think the mid point crossing was just to aid simplicity when it made zero difference anyway
-	return true
 }
 
 export function buildingAdjacentToRoad(index, width, height) {
@@ -1569,24 +1562,18 @@ export function getUsedRowCol() {
 	let row = 0
 	let col = 0
 	for (row = 0; row < 14; row++) {
-		//let rowCount = 0
 		let currentRowArr = []
 		for (col = 0; col < store.mapData.dimensions[0] * 2; col += 2) {
-			//rowCount += store.mapData.tiles[row * store.mapData.dimensions[0] * 2 + col]
 			currentRowArr.push(store.mapData.tiles[row * store.mapData.dimensions[0] * 2 + col])
 		}
-		//if (rowCount != -store.mapData.dimensions[0]) usedRows.push(row)
 		if (currentRowArr.some((x) => x !== -1)) usedRows.push(row)
 	}
 	let usedCols = []
 	for (col = 0; col < store.mapData.dimensions[0] * 2; col += 2) {
-		//let colCount = 0
 		let currentColArr = []
 		for (row = 0; row < store.mapData.tiles.length; row += store.mapData.dimensions[0] * 2) {
-			//colCount += store.mapData.tiles[row + col]
 			currentColArr.push(store.mapData.tiles[row + col])
 		}
-		//if (colCount != -store.mapData.dimensions[1]) usedCols.push(col / 2)
 		if (currentColArr.some((x) => x !== -1)) usedCols.push(col / 2)
 	}
 	return [usedRows, usedCols]
@@ -1631,6 +1618,42 @@ export function giveAllSpaceForAToken(index, width, height) {
 	return res
 }
 
+// Media Line mod - radio-wave geometry helpers (waves ignore roads).
+
+// Every board space inside the map tiles (5x5 blocks) within Manhattan
+// distance `tileRange` of any tile containing one of the given anchor
+// squares. Callers pass restaurant DOOR squares (giveRestaurantDoorIndices):
+// without a Local/Regional Manager only the single door corner counts, with
+// one all four corners of the building do - the same rule every other
+// restaurant-distance mechanic uses.
+// tileRange=1 is the cross of 5 tiles (B2 phone placement), tileRange=2 the
+// diamond of 13 tiles (B3 TV house selection).
+export function waveRegionSpaces(anchorSquares, tileRange) {
+	const regionTiles = new Set()
+	for (const s of anchorSquares) {
+		const t = giveTileNumber(s)
+		const tx = t % TILES_WIDE
+		const ty = Math.floor(t / TILES_WIDE)
+		for (let dy = -tileRange; dy <= tileRange; dy++) {
+			for (let dx = -tileRange; dx <= tileRange; dx++) {
+				if (Math.abs(dx) + Math.abs(dy) > tileRange) continue
+				const nx = tx + dx
+				const ny = ty + dy
+				if (nx < 0 || ny < 0 || nx >= TILES_WIDE || ny >= rf.ssH / 5) continue
+				regionTiles.add(ny * TILES_WIDE + nx)
+			}
+		}
+	}
+	const spaces = new Set()
+	for (const t of regionTiles) {
+		const start = giveStartingIndexForTile(t)
+		for (let y = 0; y < 5; y++) {
+			for (let x = 0; x < 5; x++) spaces.add(start + x + y * rf.ssW)
+		}
+	}
+	return spaces
+}
+
 export function findIndexForHouse(number) {
 	const store = useModelStore()
 	return store.mapData.coords.indexOf(number + rf.HOUSE)
@@ -1647,6 +1670,17 @@ export function getZoneOfHouse(houseNumber) {
 	const store = useModelStore()
 	const mapWidth = rf.ssW
 	const index = findIndexForHouse(houseNumber)
+
+	// Stadium mod: the arena is a 24-cell pseudo-house - zone out its full
+	// footprint instead of the generic 2x2 at its anchor corner (no garden
+	// logic needed, the arena never has one)
+	if (houseNumber === rf.STADIUM) {
+		const arenaZone = []
+		for (let i = 0; i < store.mapData.coords.length; i++) {
+			if (store.mapData.coords[i] === rf.HOUSE + rf.STADIUM) arenaZone.push(i)
+		}
+		return arenaZone
+	}
 
 	// 1. Initialize the base 2x2 house zone
 	let zone = []

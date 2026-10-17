@@ -122,10 +122,7 @@ export function setupNewGame(opts = {}) {
 	if (store.startingOptions.draftModules) store.gameflow.phase = rf.PHASE_SETUP_MODULES
 	if (store.startingOptions.urbanPlanning || store.startingOptions.urbanPlanningPlus) store.gameflow.phase = rf.PHASE_URBAN_PLANNING
 
-	store.availableMarketingCampaigns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14]
-	if (store.players.length > 2) store.availableMarketingCampaigns.push(12)
-	if (store.players.length > 3) store.availableMarketingCampaigns.push(15)
-	if (store.players.length > 4) store.availableMarketingCampaigns.push(16)
+	store.availableMarketingCampaigns = baseMarketingCampaigns(store.players.length)
 
 	store.availableEmployees = [...rf.ORIGINAL_AVAILABLE_EMPLOYEES]
 
@@ -160,12 +157,7 @@ export function setupNewGame(opts = {}) {
 
 	addHistory(rf.HIST_SETUP_GAME, [], -1, 0)
 
-	if (store.mapData.tiles.indexOf(20) > -1) {
-		let rotated = 0
-		if (store.mapData.tiles[store.mapData.tiles.indexOf(20) + 1] === 1 || store.mapData.tiles[store.mapData.tiles.indexOf(20) + 1] === 3) rotated = 1
-		let index = map.findIndexForHouse(25)
-		addHouse(25, index, rotated)
-	}
+	addHouse25IfTile20()
 }
 
 export async function initGame() {
@@ -193,6 +185,7 @@ export async function initGame() {
 	}
 	// Tutorial game is built entirely in the browser and is never persisted
 	personal.tutorial = !!window.initData.tutorial
+	personal.tournamentGame = !!window.initData.tournamentGame
 	//store.refSize = window.initData.myZoomLevel
 	store.refSize = 200
 	personal.liveWS = false
@@ -230,8 +223,8 @@ export async function initGame() {
 		if (window.initData.preferedColor > -1) personal.preferredColour = window.initData.preferedColor
 		personal.secondsToNextKickout = window.initData.secondsToNextKickout
 		// Set up kickout timer / kickout options
-		if (personal.kickoutCountdownIntervalTimer != null) clearInterval(personal.kickoutCountdownIntervalTimer)
-		if (personal.flexiKickoutCountdownIntervalTimer != null) clearInterval(personal.flexiKickoutCountdownIntervalTimer)
+		clearInterval(personal.kickoutCountdownIntervalTimer)
+		clearInterval(personal.flexiKickoutCountdownIntervalTimer)
 		if (window.initData.kickoutRequired > 0) {
 			personal.kickoutRequired = window.initData.kickoutRequired
 			if (personal.kickoutRequired === 1) {
@@ -294,7 +287,6 @@ export async function initGame() {
 			personal.moveDataRaw = window.initData.moveData
 		}
 		// If you have a move, import that too for the visuals
-		//IO.loadCurrentMove()
 		// Add expert panel for working day NOT your turn
 		// You must be involved, have moved, and not be able to play
 		if (store.gameflow.phase >= rf.PHASE_WORKING_DAY && window.initData.moveData !== "") {
@@ -312,7 +304,7 @@ export async function initGame() {
 			let decompressedData = funcs.decompressData(window.initData.moveData)
 			if (decompressedData[0] !== window.initData.name) {
 				alert(i18n.global.t("alerts.nameMatchError"))
-			} else {
+			} else if (decompressedData[3] && decompressedData[3].length === 3) {
 				store.players[personal.pov].beach = [...decompressedData[3][0]]
 				store.players[personal.pov].employees = [...decompressedData[3][1]]
 				if (decompressedData[3][2]) store.players[personal.pov].OOBpreference = decompressedData[3][2]
@@ -346,7 +338,6 @@ export async function initGame() {
 	// start WS. NB the tutorial game has no Game row, so there is nothing to listen to
 	if (window.initData.pov >= -9 && !personal.tutorial) {
 		WS.StartWebSocket().catch(() => {
-			console.log("WebSocket background task initialized.")
 		})
 	}
 	// Stalled simul phase: every move is in, but the phase never advanced (eg the client
@@ -415,6 +406,8 @@ export function setInternalStartingOptions(startingOptionsArray) {
 		if (opts[i] === rf.SO_LABOR_MARKET) store.startingOptions.laborMarket = true
 		// Second Bailout mod
 		if (opts[i] === rf.SO_SECOND_BAILOUT) store.startingOptions.secondBailout = true
+		// Media Line mod
+		if (opts[i] === rf.SO_MEDIA_LINE) store.startingOptions.mediaLine = true
 
 		if (opts[i] === rf.SO_STRICT_PAYDAY_FRIDGE) store.startingOptions.strictPaydayFridge = true
 		if (opts[i] === rf.SO_TRAINING_GAME) store.startingOptions.trainingGame = true
@@ -433,6 +426,14 @@ export function maxUnique(playerNumber) {
 	if (playerNumber === 4) max = 2
 	if (playerNumber < 4) max = 1
 	return max
+}
+
+export function baseMarketingCampaigns(playerCount) {
+	const campaigns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14]
+	if (playerCount > 2) campaigns.push(12)
+	if (playerCount > 3) campaigns.push(15)
+	if (playerCount > 4) campaigns.push(16)
+	return campaigns
 }
 
 export function setupKetchupExpansion(playerNumber) {
@@ -521,10 +522,18 @@ export function setupKetchupExpansion(playerNumber) {
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_FRIED_CHICKEN_SOLD)
 	}
 	// Stadium mod
-	if (store.startingOptions.stadium) {
-		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
-	}
+	if (store.startingOptions.stadium && store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_STADIUM_SOLD)
 	if (store.startingOptions.laborMarket) store.availableEmployees[rf.HEADHUNTER] = 6
+	// Media Line mod
+	if (store.startingOptions.mediaLine) {
+		store.availableEmployees[rf.TELEMARKETER] = 6
+		store.availableEmployees[rf.TV_ANNOUNCER] = 6
+		store.availableMarketingCampaigns.push(28, 29, 30, 31, 32, 33, 34, 35)
+		if (store.startingOptions.useMilestones) {
+			store.availableMilestones.push(rf.FIRST_TELEMARKETER_USED)
+			store.availableMilestones.push(rf.FIRST_TV_ANNOUNCER_USED)
+		}
+	}
 }
 
 export function setupLaborMarketExpansion() {
@@ -564,7 +573,7 @@ export function findPlayerForCampaign(number) {
 	return -1
 }
 
-export function addMarketingCampaign(number, index, rotated, good, duration) {
+export function addMarketingCampaign(number, index, rotated, good, duration, houses) {
 	//}, nightShift) {
 	const store = useModelStore()
 	store.campaigns.push({
@@ -573,11 +582,14 @@ export function addMarketingCampaign(number, index, rotated, good, duration) {
 		rotated: rotated,
 		good: good,
 		duration: duration,
+		houses: houses || [],
 		//nightShift: nightShift,
 	})
 	store.availableMarketingCampaigns.splice(store.availableMarketingCampaigns.indexOf(number), 1)
 
-	if (rf.MARKETING_CAMPAIGNS[number].type != rf.GOURMET_GUIDE && rf.MARKETING_CAMPAIGNS[number].type != rf.HAWKER_TRUCK) {
+	// Media Line mod: TV channels have no board token - the selected houses are
+	// marked with antennas instead
+	if (rf.MARKETING_CAMPAIGNS[number].type != rf.GOURMET_GUIDE && rf.MARKETING_CAMPAIGNS[number].type != rf.HAWKER_TRUCK && rf.MARKETING_CAMPAIGNS[number].type != rf.TV_CHANNEL) {
 		map.addElement(rf.TYPE_CAMPAIGN, number, index, rotated)
 	}
 
@@ -671,6 +683,49 @@ export function removeMarketingCampaign(number) {
 	map.addElement(rf.TYPE_CAMPAIGN, number, campaign.index, campaign.rotated, true)
 }
 
+// Board value of a house square (HOUSE + number) back to the house number
+export function houseNumberAt(v) {
+	return Number.isInteger(v) ? v - rf.HOUSE : Math.round((v - rf.HOUSE + Number.EPSILON) * 100) / 100
+}
+
+// Media Line mod - B3 diamond range: houses inside the diamond of 13 map
+// tiles (Manhattan distance `tileRange` in 5x5 tiles) around any of the
+// player's restaurants (waves ignore roads). The stadium is never affected
+// by marketing.
+export function giveHousesInWaveRange(playerIndex, tileRange = 2) {
+	const store = useModelStore()
+	// Media Line mod - the wave is measured from the restaurant doors: the
+	// single door corner normally, all four corners with a Local/Regional
+	// Manager (the same rule billboards and mail campaigns use)
+	const region = map.waveRegionSpaces(giveRestaurantDoorIndices(playerIndex, { openOnly: false }), tileRange)
+
+	const houses = new Set()
+	for (let i = 0; i < store.mapData.coords.length; i++) {
+		const v = store.mapData.coords[i]
+		if (v > rf.HOUSE && v < rf.HOUSE + 29) {
+			const house = houseNumberAt(v)
+			if (house === rf.STADIUM) continue
+			if (region.has(i)) houses.add(house)
+		}
+	}
+	return Array.from(houses).sort((a, b) => a - b)
+}
+
+// Media Line mod: every board space occupied by one of the given house numbers
+export function giveSpacesOfHouses(houses) {
+	const store = useModelStore()
+	const wanted = new Set(houses)
+	const spaces = []
+	for (let i = 0; i < store.mapData.coords.length; i++) {
+		const v = store.mapData.coords[i]
+		if (v > rf.HOUSE && v < rf.HOUSE + 29) {
+			const house = houseNumberAt(v)
+			if (wanted.has(house)) spaces.push(i)
+		}
+	}
+	return spaces
+}
+
 export function addRestaurant_core(playerIndex, index, rotation, open) {
 	const store = useModelStore()
 	plyr.addRestaurantToPlayer(playerIndex, index, rotation, open)
@@ -712,6 +767,17 @@ export function addHouse(number, index, rotated) {
 	})
 
 	map.addElement(rf.TYPE_HOUSE, number, index, rotated)
+}
+
+// House 25 sits on tile 20; re-add it after that tile is placed or the map is rebuilt
+export function addHouse25IfTile20() {
+	const store = useModelStore()
+	if (store.mapData.tiles.indexOf(20) > -1) {
+		let rotated = 0
+		if (store.mapData.tiles[store.mapData.tiles.indexOf(20) + 1] === 1 || store.mapData.tiles[store.mapData.tiles.indexOf(20) + 1] === 3) rotated = 1
+		let index = map.findIndexForHouse(25)
+		addHouse(25, index, rotated)
+	}
 }
 
 export function addNeedToHouse(good, house, ownerIndex) {
@@ -789,64 +855,36 @@ function getUsedBounds() {
 	}
 }
 
-export function isItemOnLeftOfBoard() {
+// Any off-board item (freeway / side-road) inside the given [r0,r1) x [c0,c1) squares
+function isOffBoardItemIn(r0, r1, c0, c1) {
 	const store = useModelStore()
 	const coords = store.mapData.coords
-	const b = getUsedBounds()
-	if (!b) return false
-	const ssW = rf.ssW
-	for (let r = b.rowStart; r < b.rowEnd; r++) {
-		for (let c = b.colStart - 5; c < b.colStart; c++) {
-			if (c < 0) continue
-			if (isOffBoardItem(coords[r * ssW + c])) return true
+	for (let r = Math.max(r0, 0); r < Math.min(r1, rf.ssH); r++) {
+		for (let c = Math.max(c0, 0); c < Math.min(c1, rf.ssW); c++) {
+			if (isOffBoardItem(coords[r * rf.ssW + c])) return true
 		}
 	}
 	return false
+}
+
+export function isItemOnLeftOfBoard() {
+	const b = getUsedBounds()
+	return b !== null && isOffBoardItemIn(b.rowStart, b.rowEnd, b.colStart - 5, b.colStart)
 }
 
 export function isItemOnRightOfBoard() {
-	const store = useModelStore()
-	const coords = store.mapData.coords
 	const b = getUsedBounds()
-	if (!b) return false
-	const ssW = rf.ssW
-	for (let r = b.rowStart; r < b.rowEnd; r++) {
-		for (let c = b.colEnd; c < b.colEnd + 5; c++) {
-			if (c >= ssW) continue
-			if (isOffBoardItem(coords[r * ssW + c])) return true
-		}
-	}
-	return false
+	return b !== null && isOffBoardItemIn(b.rowStart, b.rowEnd, b.colEnd, b.colEnd + 5)
 }
 
 export function isItemOnTopOfBoard() {
-	const store = useModelStore()
-	const coords = store.mapData.coords
 	const b = getUsedBounds()
-	if (!b) return false
-	const ssW = rf.ssW
-	for (let r = b.rowStart - 5; r < b.rowStart; r++) {
-		if (r < 0) continue
-		for (let c = b.colStart; c < b.colEnd; c++) {
-			if (isOffBoardItem(coords[r * ssW + c])) return true
-		}
-	}
-	return false
+	return b !== null && isOffBoardItemIn(b.rowStart - 5, b.rowStart, b.colStart, b.colEnd)
 }
 
 export function isItemOnBottomOfBoard() {
-	const store = useModelStore()
-	const coords = store.mapData.coords
 	const b = getUsedBounds()
-	if (!b) return false
-	const ssW = rf.ssW
-	for (let r = b.rowEnd; r < b.rowEnd + 5; r++) {
-		if (r >= rf.ssH) continue
-		for (let c = b.colStart; c < b.colEnd; c++) {
-			if (isOffBoardItem(coords[r * ssW + c])) return true
-		}
-	}
-	return false
+	return b !== null && isOffBoardItemIn(b.rowEnd, b.rowEnd + 5, b.colStart, b.colEnd)
 }
 
 export function alreadyChosenReserveCard() {
@@ -873,14 +911,7 @@ export function clearForNewTurn() {
 	})
 
 	// 2. Handle Hard Choices / New Milestones logic
-	const removedHC = []
-	if (store.startingOptions.hardChoices) {
-		if (turn === 2) removedHC.push(...rf.HC_OLD_MS_LEAVE_END_TURN_2)
-		if (turn === 3) removedHC.push(...rf.HC_OLD_MS_LEAVE_END_TURN_3)
-	} else if (store.startingOptions.newMilestones && turn === 2) {
-		removedHC.push(...rf.HC_NEW_MS_LEAVE_END_TURN_2)
-	}
-	if (removedHC.length > 0) usedMilestonesArray.push(...removedHC)
+	usedMilestonesArray.push(...rf.hardChoiceMilestonesLeaving(store.startingOptions, turn))
 
 	// 3. Optimized "Difference": Using a Set for O(1) lookups
 	const usedSet = new Set(usedMilestonesArray)
@@ -990,15 +1021,10 @@ export function getAvailableCoffee(returnArray) {
 	return false
 }
 
-// number = house / apartment / RMA number
-export function getCoffeeRoute(number, playerIndex, winningRange) {
+// Squares around a house / apartment / RMA that a restaurant route must reach
+function zoneSquaresForHouse(number, index) {
 	const store = useModelStore()
-	const playerColour = store.players[playerIndex].colour
-	const restaurantSquares = getSinglePlayerRestaurantEntrances(playerIndex)
-	const index = map.findIndexForHouse(number)
 	let zone = []
-
-	// 1. Zone Calculation
 	if (number !== rf.RURAL_MARKETING_AREA) {
 		zone = [index + 1, index + rf.ssW, index + rf.ssW + 1]
 	}
@@ -1028,9 +1054,30 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 	}
 
 	if (number === rf.RURAL_MARKETING_AREA && store.freeways.length > 0) {
-		zone = map.getRuralMarketingSigns()
+		zone = map.getRuralMarketingZone()
 	}
+	return zone
+}
+
+// number = house / apartment / RMA number
+export function getCoffeeRoute(number, playerIndex, winningRange) {
+	const store = useModelStore()
+	const playerColour = store.players[playerIndex].colour
+	const restaurantSquares = getSinglePlayerRestaurantEntrances(playerIndex)
+	const index = map.findIndexForHouse(number)
+	// let: the stadium override below replaces the whole zone
+	let zone = zoneSquaresForHouse(number, index)
 	if (index !== -1) zone.push(index)
+
+	// Stadium mod: the arena is a 24-cell pseudo-house - seed routes from every
+	// arena square, not just the generic 2x2 at its anchor corner (same
+	// footprint scan the history arena highlight uses)
+	if (number === rf.STADIUM) {
+		zone = []
+		for (let i = 0; i < store.mapData.coords.length; i++) {
+			if (store.mapData.coords[i] === rf.HOUSE + rf.STADIUM) zone.push(i)
+		}
+	}
 
 	// 2. Generate and Filter Routes (Subset logic optimized)
 	let possibleRoutes = []
@@ -1226,47 +1273,17 @@ export function getCoffeeRoute(number, playerIndex, winningRange) {
 export function giveRestaurantRangesForHouse(number) {
 	const store = useModelStore()
 	const index = map.findIndexForHouse(number)
-	let zone = []
+	// let: the stadium override below replaces the whole zone
+	let zone = zoneSquaresForHouse(number, index)
 
-	// 1. Initial Zone Setup
-	if (number !== rf.RURAL_MARKETING_AREA) {
-		zone = [index + 1, index + rf.ssW, index + rf.ssW + 1]
-	}
-
-	// 2. Garden Logic
-	if (hasGarden(number)) {
-		if (!rf.BOARD_HOUSES.includes(number)) {
-			const house = store.houses.find((h) => h.number === number)
-			if (house && (house.rotated === 1 || house.rotated === 3)) {
-				zone.push(index + 2, index + rf.ssW + 2)
-			} else {
-				zone.push(index + 2 * rf.ssW, index + 2 * rf.ssW + 1)
-			}
-		} else {
-			const g = store.gardens.find((garden) => garden.house === number)
-			if (g) {
-				const { index: gIdx } = g
-				if (gIdx === index - 1) {
-					zone.push(index - 1, index + rf.ssW - 1)
-				} else if (gIdx === index + 2) {
-					zone.push(index + 2, index + rf.ssW + 2)
-				} else if (gIdx === index - rf.ssW) {
-					zone.push(index - rf.ssW, index - rf.ssW + 1)
-				} else if (gIdx === index + 2 * rf.ssW) {
-					zone.push(index + 2 * rf.ssW, index + 2 * rf.ssW + 1)
-				}
-			}
+	// Stadium mod: the arena spans 24 cells over two tiles - measure from the
+	// nearest arena cell instead of the generic 2x2 at its anchor corner, so
+	// every restaurant on the ring road counts its true (crossing) distance
+	if (number === rf.STADIUM) {
+		zone = []
+		for (let i = 0; i < store.mapData.coords.length; i++) {
+			if (store.mapData.coords[i] === rf.HOUSE + rf.STADIUM) zone.push(i)
 		}
-	}
-
-	// 3. Apartment logig
-	if (rf.APARTMENTS.includes(number)) {
-		zone.push(index + 2, index + rf.ssW + 2, index + 2 * rf.ssW, index + 2 * rf.ssW + 1, index + 2 * rf.ssW + 2)
-	}
-
-	// 4. Rural Marketing Overrides
-	if (number === rf.RURAL_MARKETING_AREA && store.freeways.length > 0) {
-		zone = map.getRuralMarketingZone()
 	}
 
 	// 5. Distance Calculations
@@ -1338,8 +1355,7 @@ export function getHousesAffectedByHawkerTruck(campaignNumber) {
 
 		// Check if the space contains a house
 		if (spaceContent > rf.HOUSE && spaceContent < rf.HOUSE + 29) {
-			const rawHouseNum = spaceContent - rf.HOUSE
-			const houseNum = Number.isInteger(spaceContent) ? rawHouseNum : Math.round((rawHouseNum + Number.EPSILON) * 100) / 100
+			const houseNum = houseNumberAt(spaceContent)
 
 			// Handle Board Houses and Apartments (Simple check)
 			if (rf.BOARD_HOUSES.includes(houseNum) || rf.APARTMENTS.includes(houseNum)) {
@@ -1390,30 +1406,9 @@ export function hasGarden(house) {
 export function adjacentToPark(building) {
 	const store = useModelStore()
 	// building is the number of the bldg, eg 3.2, 9.7, 22
-	let adjacentToPark = false
-	let parkCheckArea
-	if (building != rf.RURAL_MARKETING_AREA) {
-		if (building === 3.2 || building === 9.7) {
-			let appZone = map.giveAllSpaceForAToken(map.findIndexForApartment(building), 3, 3)
-			parkCheckArea = map.neighbours(appZone)
-			for (let i = 0; i < parkCheckArea.length; i++) {
-				if (store.mapData.coords[parkCheckArea[i]] === rf.PARK) {
-					adjacentToPark = true
-					break
-				}
-			}
-		} else {
-			let houseZone = map.getZoneOfHouse(building)
-			parkCheckArea = map.neighbours(houseZone)
-			for (let i = 0; i < parkCheckArea.length; i++) {
-				if (store.mapData.coords[parkCheckArea[i]] === rf.PARK) {
-					adjacentToPark = true
-					break
-				}
-			}
-		}
-	}
-	return adjacentToPark
+	if (building == rf.RURAL_MARKETING_AREA) return false
+	const zone = building === 3.2 || building === 9.7 ? map.giveAllSpaceForAToken(map.findIndexForApartment(building), 3, 3) : map.getZoneOfHouse(building)
+	return map.neighbours(zone).some((i) => store.mapData.coords[i] === rf.PARK)
 }
 
 export function houseForThisGarden(index) {

@@ -127,7 +127,7 @@ def should_skip_availability_tracking(game):
 
 
 def should_skip_availability_username(username):
-    return username in rf.SHADOW_USERNAMES or username == "BotKickStarter" or username.endswith("Bot")
+    return username in rf.SHADOW_USERNAMES or username == "BotKickStarter" or username == "RowAI" or username.endswith("Bot")
 
 
 def get_starting_options(starting_options):

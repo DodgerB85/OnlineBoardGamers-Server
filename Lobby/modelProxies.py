@@ -344,3 +344,12 @@ class PAPgame(Game):
         app_label = "PAP"
         verbose_name = "PAP_Game"
         verbose_name_plural = "PAP_Games"
+
+
+# ROW
+class ROWgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "ROW"
+        verbose_name = "ROW_Game"
+        verbose_name_plural = "ROW_Games"

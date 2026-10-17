@@ -12,10 +12,22 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/KFWpersonal.js"
 const personal = usePersonalStore()
 
-import { ref } from "vue"
+import { ref, computed } from "vue"
 
 const props = defineProps(["playerIndexProp"])
 const exchangingContracts = ref(false)
+
+// Preview my own panel as another player sees it (-1 = normal own view)
+const viewAsSeenBy = ref(-1)
+const otherPlayers = computed(() => store.players.map((p, idx) => ({ idx, name: p.displayName })).filter((p) => p.idx !== personal.pov))
+const showViewAsSelector = computed(() => props.playerIndexProp === personal.pov && !personal.trainingGame && !personal.adminDataInspection && store.gameflow.phase !== rf.PHASE_GAME_OVER)
+
+function playerChipStyle(idx) {
+	return {
+		backgroundColor: personal.getCorrectedColourHex(store.players[idx].colour),
+		color: personal.getCorrectedColourText(store.players[idx].colour),
+	}
+}
 const polygonRef = ref(null)
 
 const exchangeContractOptions = ref({
@@ -420,7 +432,7 @@ function localClickedPurpleMeeple() {
 
 <template>
 	<template
-		v-if="personal.trainingGame || playerIndexProp === personal.pov || personal.adminDataInspection === true || store.gameflow.phase === rf.PHASE_GAME_OVER">
+		v-if="(personal.trainingGame || playerIndexProp === personal.pov || personal.adminDataInspection === true || store.gameflow.phase === rf.PHASE_GAME_OVER) && !(showViewAsSelector && viewAsSeenBy !== -1)">
 		<div class="playerItemsDiv">
 			<span class="mainEntryPlayer" :style="{
 				backgroundColor: personal.getCorrectedColourHex(store.players[playerIndexProp].colour),
@@ -428,6 +440,14 @@ function localClickedPurpleMeeple() {
 			}">
 				{{ store.players[playerIndexProp].displayName }}
 			</span>
+			<div v-if="showViewAsSelector" class="viewAsRow">
+				<select v-model="viewAsSeenBy" class="viewAsSelect"
+					:style="viewAsSeenBy === -1 ? null : playerChipStyle(viewAsSeenBy)">
+					<option :value="-1">My view</option>
+					<option v-for="p in otherPlayers" :key="p.idx" :value="p.idx" :style="playerChipStyle(p.idx)">{{ p.name }}'s view</option>
+				</select>
+				<img class="viewAsResetImg" src="@static/KFW/images/icon-rewind.svg" alt="Reset" @click="viewAsSeenBy = -1" />
+			</div>
 			<div v-if="store.players[playerIndexProp].hasPurpleMeeple" class="meepleImgAndNumberDiv purpleMeepleDiv">
 				<div class="meepleImgDiv">
 					<img class="meepleImg"
@@ -543,6 +563,14 @@ function localClickedPurpleMeeple() {
 			}">
 				{{ store.players[playerIndexProp].displayName }}
 			</span>
+			<div v-if="showViewAsSelector" class="viewAsRow">
+				<select v-model="viewAsSeenBy" class="viewAsSelect"
+					:style="viewAsSeenBy === -1 ? null : playerChipStyle(viewAsSeenBy)">
+					<option :value="-1">My view</option>
+					<option v-for="p in otherPlayers" :key="p.idx" :value="p.idx" :style="playerChipStyle(p.idx)">{{ p.name }}'s view</option>
+				</select>
+				<img class="viewAsResetImg" src="@static/KFW/images/icon-rewind.svg" alt="Reset" @click="viewAsSeenBy = -1" />
+			</div>
 			<div v-if="store.players[playerIndexProp].hasPurpleMeeple" class="meepleImgAndNumberDiv purpleMeepleDiv">
 				<div class="meepleImgDiv">
 					<img class="meepleImg" :src="view.getImage('meeple_purple')" alt="Meeple" />
@@ -683,6 +711,24 @@ function localClickedPurpleMeeple() {
 	height: fit-content;
 	width: 185px;
 	box-sizing: border-box;
+}
+
+.viewAsRow {
+	margin-top: 3px;
+}
+
+.viewAsSelect {
+	max-width: 150px;
+	font-size: 13px;
+	font-weight: bolder;
+	padding: 2px;
+}
+
+.viewAsResetImg {
+	height: 16px;
+	vertical-align: middle;
+	cursor: pointer;
+	margin-left: 4px;
 }
 
 .meepleImgNoDiv {

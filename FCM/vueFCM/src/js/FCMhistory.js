@@ -25,10 +25,7 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 		let rotation = entry3.length > 2 ? entry3[2] : 1
 		if (rotation === true) rotation = 1
 		if (rotation === false) rotation = 0
-		const sideways = rotation === 1 || rotation === 3
-		const height = sideways ? 2 : 3
-		const width = sideways ? 3 : 2
-		for (let i = 0; i < height; i++) for (let j = 0; j < width; j++) squares.push(houseIndex + j + rf.ssW * i)
+		squares.push(...footprintSquares(houseIndex, rotation))
 	} else if (action === rf.HIST_BUILD_GARDEN) {
 		const gardenIndex = funcs.importIndex(entry3[0])
 		let rotated = true
@@ -45,21 +42,21 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 			if (map.isIndexOnLeftEdgeOfMap(index, 1)) {
 				highlightIndex--
 				if (!rotated) squares.push(highlightIndex, highlightIndex - 1, highlightIndex - 2)
-				else if (rotated) squares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
+				else squares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
 			} else {
 				highlightIndex++
 				if (!rotated) squares.push(highlightIndex, highlightIndex + 1, highlightIndex + 2)
-				else if (rotated) squares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
+				else squares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
 			}
-		} else if (!sides) {
+		} else {
 			if (map.isIndexOnBottomEdgeOfMap(index, 1)) {
 				highlightIndex += rf.ssW
 				if (!rotated) squares.push(highlightIndex, highlightIndex + 1, highlightIndex + 2)
-				else if (rotated) squares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
+				else squares.push(highlightIndex, highlightIndex + rf.ssW, highlightIndex + rf.ssW * 2)
 			} else {
 				highlightIndex -= rf.ssW
 				if (!rotated) squares.push(highlightIndex, highlightIndex + 1, highlightIndex + 2)
-				else if (rotated) squares.push(highlightIndex, highlightIndex - rf.ssW, highlightIndex - rf.ssW * 2)
+				else squares.push(highlightIndex, highlightIndex - rf.ssW, highlightIndex - rf.ssW * 2)
 			}
 		}
 	} else if (action === rf.HIST_LOBBYIST_PARK) {
@@ -92,15 +89,7 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 	} else if (action === rf.HIST_FLIP_TO_FRIED_CHICKEN || action === rf.HIST_HOUSE_MOVED_OUT) {
 		// Fried Chicken mod: highlight the affected house(s)
 		for (let h = 0; h < entry3.length; h++) {
-			const houseNumber = action === rf.HIST_HOUSE_MOVED_OUT ? entry3[h] : entry3[h][0]
-			const houseIndex = map.findIndexForHouse(houseNumber)
-			if (houseIndex === -1) continue
-			const houseData = store.houses.find((hs) => hs.number === houseNumber)
-			const rotation = houseData ? houseData.rotated : 1
-			const sideways = rotation === 1 || rotation === 3
-			const height = sideways ? 2 : 3
-			const width = sideways ? 3 : 2
-			for (let i = 0; i < height; i++) for (let j = 0; j < width; j++) squares.push(houseIndex + j + rf.ssW * i)
+			pushHouseFootprint(action === rf.HIST_HOUSE_MOVED_OUT ? entry3[h] : entry3[h][0], squares)
 		}
 	} else if (action === rf.HIST_STADIUM_ANNOUNCE || action === rf.HIST_STADIUM_RESULT) {
 		// Stadium mod: highlight the arena
@@ -121,15 +110,7 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 		const campaignNumber = entry3[0]
 		const campaignIndex = funcs.importIndex(entry3[1])
 		let paramIdx = 3
-		//let campaignEmployee = -1
-		if (campaignNumber <= 3 || campaignNumber >= 17) {
-			//if (campaignNumber <= 3) campaignEmployee = rf.BRAND_DIRECTOR
-			//else if (campaignNumber >= 17 && campaignNumber <= 20) campaignEmployee = rf.GOURMET_FOOD_CRITIC
-			//else if (campaignNumber >= 21 && campaignNumber <= 24) campaignEmployee = rf.RURAL_MARKETEER
-		} else {
-			//campaignEmployee = entry3[paramIdx]
-			paramIdx++
-		}
+		if (campaignNumber > 3 && campaignNumber < 17) paramIdx++
 		let campaignRotated = 0
 		if (rf.ROTATABLE_CAMPAIGNS.includes(campaignNumber)) {
 			campaignRotated = entry3[paramIdx]
@@ -145,16 +126,19 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 				let widthOnLeft = width
 				if (widthOnLeft === 2) widthOnLeft = 1
 				if (map.isIndexOnLeftEdgeOfMap(campaignIndex, widthOnLeft)) highlightIndex -= 1 * width
-				else if (!map.isIndexOnLeftEdgeOfMap(campaignIndex, widthOnLeft)) highlightIndex += 1
+				else highlightIndex += 1
 			} else {
 				let widthOnBottom = width
 				if (entry3[1] === 4) widthOnBottom = 1
 				if (map.isIndexOnBottomEdgeOfMap(campaignIndex, widthOnBottom)) highlightIndex += rf.ssW
-				else if (!map.isIndexOnBottomEdgeOfMap(campaignIndex, widthOnBottom)) highlightIndex -= rf.ssW * height
+				else highlightIndex -= rf.ssW * height
 			}
 		}
-		if (campaignNumber <= 16) {
+		if (campaignNumber <= 16 || (campaignNumber >= 30 && campaignNumber <= 35)) {
 			for (let i = 0; i < height; i++) for (let j = 0; j < width; j++) squares.push(highlightIndex + j + rf.ssW * i)
+		} else if (campaignNumber === 28 || campaignNumber === 29) {
+			// Media Line mod: TV channel - highlight the picked houses
+			for (let h = 0; h < entry3[1].length; h++) pushHouseFootprint(entry3[1][h], squares)
 		} else if (campaignNumber >= 25 && campaignNumber <= 27) {
 			squares.push(...funcs.importIndexes(entry3[1]))
 		}
@@ -167,7 +151,31 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 		const campaignIndex = funcs.importIndex(entry3[1])
 		squares.push(campaignIndex)
 		if (campaignNumber === 7 || campaignNumber === 8) squares.push(campaignIndex + 1, campaignIndex + rf.ssW, campaignIndex + rf.ssW + 1)
+	} else if (action === rf.HIST_MEDIA_LINE_BONUS) {
+		// Media Line mod: highlight every house of the full-order groups
+		for (let g = 0; g < entry3[2].length; g++) {
+			for (let h = 0; h < entry3[2][g].length; h++) pushHouseFootprint(entry3[2][g][h], squares)
+		}
 	}
 
 	store.historyHelpers.indexesToHighlightYellow = squares
+}
+
+// Full footprint (all covered squares) of one house on the board
+function pushHouseFootprint(houseNumber, squares) {
+	const store = useModelStore()
+	const houseIndex = map.findIndexForHouse(houseNumber)
+	if (houseIndex === -1) return
+	const houseData = store.houses.find((hs) => hs.number === houseNumber)
+	squares.push(...footprintSquares(houseIndex, houseData ? houseData.rotated : 1))
+}
+
+// Squares covered by a house whose top-left is index: 3 wide x 2 tall when sideways, else 2 x 3
+export function footprintSquares(index, rotation) {
+	const sideways = rotation === 1 || rotation === 3
+	const height = sideways ? 2 : 3
+	const width = sideways ? 3 : 2
+	const squares = []
+	for (let i = 0; i < height; i++) for (let j = 0; j < width; j++) squares.push(index + j + rf.ssW * i)
+	return squares
 }

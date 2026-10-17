@@ -1,0 +1,15 @@
+{% load static i18n %}
+{% if request.user.is_authenticated %}
+<link href="{% static 'Lobby/CSS/gameMomentum.css' %}" rel="stylesheet">
+<dialog id="gameMomentumDialog" data-game-id="{{ gameID }}" aria-labelledby="gameMomentumHeading">
+  <h2 id="gameMomentumHeading">{% translate "Game momentum" %}</h2>
+  <p id="gameMomentumStreak"></p>
+  <p id="gameMomentumNudge"></p>
+  <p>{% translate "Send the overdue player a reminder to take their turn. Each player can receive one nudge per game every 24 hours." %}</p>
+  <div id="gameMomentumTargets"></div>
+  <p id="gameMomentumMessage" role="status" aria-live="polite"></p>
+  <form method="dialog"><button type="submit">{% translate "Close" %}</button></form>
+</dialog>
+<div id="gameMomentumToken" hidden>{% csrf_token %}</div>
+<script src="{% static 'Lobby/gameMomentum.js' %}" defer></script>
+{% endif %}

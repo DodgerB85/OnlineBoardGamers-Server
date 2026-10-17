@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-15 21:18+0800\n"
+"POT-Creation-Date: 2026-10-12 21:41+0800\n"
 "PO-Revision-Date: 2023-03-22 21:34+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,437 +18,648 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.2.2\n"
 
-#: .\static\HC\HCgameSummary.js:37
+#: .\static\HLC\HLCgameSummary.js:81
 msgid "Turn"
-msgstr "toon"
+msgstr "Runde"
 
-#: .\static\HC\HCgameSummary.js:38
+#: .\static\HLC\HLCgameSummary.js:82
 msgid "Turn Income"
-msgstr ""
+msgstr "Einkommen pro Runde"
 
-#: .\static\HC\HCgameSummary.js:39
+#: .\static\HLC\HLCgameSummary.js:83
 msgid "Total Money"
-msgstr ""
+msgstr "Gesamtgeld"
 
-#: .\static\HC\HCgameSummary.js:41
+#: .\static\HLC\HLCgameSummary.js:85
 msgid "Total Money VS Turn"
-msgstr ""
+msgstr "Gesamtgeld im Vergleich zur Runde"
 
-#: .\static\HC\HCgameSummary.js:42
+#: .\static\HLC\HLCgameSummary.js:86
 msgid "Income On Each Turn"
-msgstr ""
+msgstr "Einkommen in jeder Runde"
 
-#: .\static\HC\JS\HCcontroller.js:31 .\static\HC\JS\HCcontroller.js:419
+#: .\static\HLC\HLCgameSummary.js:179
+msgid "Cars"
+msgstr "Autos"
+
+#: .\static\HLC\HLCgameSummary.js:179
+msgid "Trucks"
+msgstr "LKW"
+
+#: .\static\HLC\HLCgameSummary.js:179
+msgid "Sports Cars"
+msgstr "Sportwagen"
+
+#: .\static\HLC\HLCgameSummary.js:192
+msgid "%(vehicle)s Sold Per Turn"
+msgstr "Pro Runde verkaufte %(vehicle)s"
+
+#: .\static\HLC\HLCgameSummary.js:193 .\static\HLC\HLCgameSummary.js:200
+msgid "%(vehicle)s Sold"
+msgstr "Verkaufte %(vehicle)s"
+
+#: .\static\HLC\HLCgameSummary.js:199
+msgid "Cumulative %(vehicle)s Sold"
+msgstr "Insgesamt verkaufte %(vehicle)s"
+
+#: .\static\HLC\HLCgameSummary.js:214
+msgid "Innovation Levels"
+msgstr "Innovationsstufen"
+
+#: .\static\HLC\HLCgameSummary.js:214
+msgid "Innovation Level"
+msgstr "Innovationsstufe"
+
+#: .\static\HLC\JS\HLCcontroller.js:33 .\static\HLC\JS\HLCcontroller.js:500
 msgid ""
 "These players have passed and will be inserted in leftover spaces in this "
-"order"
-msgstr ""
+"order:"
+msgstr "Diese Spieler haben gepasst und werden in dieser Reihenfolge in die "
+"übrigen Plätze eingefügt:"
 
-#: .\static\HC\JS\HCcontroller.js:39
+#: .\static\HLC\JS\HLCcontroller.js:41
 msgid "Previous Focus Order:"
-msgstr ""
+msgstr "Vorherige Fokusreihenfolge:"
 
-#: .\static\HC\JS\HCcontroller.js:46
+#: .\static\HLC\JS\HLCcontroller.js:48
 msgid "New Focus Order:"
-msgstr ""
+msgstr "Neue Fokusreihenfolge:"
 
-#: .\static\HC\JS\HCcontroller.js:217
+#: .\static\HLC\JS\HLCcontroller.js:137
+msgid "Reset"
+msgstr "Zurücksetzen"
+
+#: .\static\HLC\JS\HLCcontroller.js:191
 msgid ""
 "Welcome to Horseless Carriage Online!</b><BR/>If you have any suggestions, "
-"questions or comments, then please do contact the webmaster at <img src='/"
-"static/Lobby/email.png' width='400px' height='30px'>. Thanks!"
-msgstr ""
+"questions or comments, then please do contact the webmaster at <img "
+"src='/static/Lobby/email.png' width='400px' height='30px'>. Thanks!"
+msgstr "Willkommen bei Horseless Carriage Online!</b><BR/>Wenn Sie "
+"Vorschläge, Fragen oder Kommentare haben, wenden Sie sich bitte an den "
+"Webmaster unter <img src='/static/Lobby/email.png' width='400px' "
+"height='30px'>. Danke!"
 
-#: .\static\HC\JS\HCcontroller.js:220
+#: .\static\HLC\JS\HLCcontroller.js:193
 msgid ""
 "In this practice game You will play all 3 players. Submit a bug report to "
 "report errors and game data to the webmaster. Thanks!"
-msgstr ""
+msgstr "In diesem Übungsspiel spielen Sie alle 3 Spieler. Senden Sie einen "
+"Fehlerbericht, um Fehler und Spieldaten an den Webmaster zu melden. Danke!"
 
-#: .\static\HC\JS\HCcontroller.js:223
-msgid "Orientate your main fatory tile"
-msgstr ""
+#: .\static\HLC\JS\HLCcontroller.js:195
+msgid "Orientate your main factory tile"
+msgstr "Richten Sie Ihr Hauptfabrikplättchen aus"
 
-#: .\static\HC\JS\HCcontroller.js:246
+#: .\static\HLC\JS\HLCcontroller.js:215
 msgid "Place one Research Department and one Planning Department"
-msgstr ""
+msgstr "Platzieren Sie eine Forschungsabteilung und eine Planungsabteilung"
 
-#: .\static\HC\JS\HCcontroller.js:266 .\static\HC\JS\HCcontroller.js:376
-#: .\static\HC\JS\HCcontroller.js:1123 .\static\HC\JS\HCfactory.js:869
+#: .\static\HLC\JS\HLCcontroller.js:231 .\static\HLC\JS\HLCcontroller.js:415
+#: .\static\HLC\JS\HLCcontroller.js:740 .\static\HLC\JS\HLCcontroller.js:1254
+#: .\static\HLC\JS\HLCfactory.js:857
 msgid "End Turn"
-msgstr ""
+msgstr "Runde beenden"
 
-#: .\static\HC\JS\HCcontroller.js:291
+#: .\static\HLC\JS\HLCcontroller.js:254
 msgid "Advance your Assembly Capacity or any player's Research"
-msgstr ""
+msgstr "Erhöhen Sie Ihre Montagekapazität oder die Forschung eines beliebigen "
+"Spielers"
 
-#: .\static\HC\JS\HCcontroller.js:293
-msgid "Research points remaining: "
-msgstr ""
+#: .\static\HLC\JS\HLCcontroller.js:258 .\static\HLC\JS\HLCcontroller.js:517
+#: .\static\HLC\JS\HLCcontroller.js:617
+msgid ""
+"NOTE: Bot players do not restrict tech access. So the first human player in "
+"Eng order will have access to all techs"
+msgstr "HINWEIS: Bot-Spieler schränken den Technologiezugang nicht ein. Der "
+"erste menschliche Spieler in der Ing-Reihenfolge hat daher Zugriff auf alle "
+"Technologien"
 
-#: .\static\HC\JS\HCcontroller.js:427
+#: .\static\HLC\JS\HLCcontroller.js:262
+msgid "Resign"
+msgstr "Zurücktreten"
+
+#: .\static\HLC\JS\HLCcontroller.js:269
+msgid "Are you sure you want to resign?"
+msgstr "Sind Sie sicher, dass Sie zurücktreten möchten?"
+
+#: .\static\HLC\JS\HLCcontroller.js:270
+msgid "Resigning will unbalance the game for the remaining players."
+msgstr "Ein Rücktritt bringt das Spiel für die verbleibenden Spieler aus dem "
+"Gleichgewicht."
+
+#: .\static\HLC\JS\HLCcontroller.js:271
+msgid "Please carry on playing if that is at all possible."
+msgstr "Bitte spielen Sie weiter, wenn das überhaupt möglich ist."
+
+#: .\static\HLC\JS\HLCcontroller.js:272
+msgid ""
+"Even if you think you can't win, you could still aim for 2nd place / not "
+"last place / funny factory layout / etc."
+msgstr "Auch wenn Sie glauben, nicht gewinnen zu können, können Sie immer "
+"noch den 2. Platz / nicht den letzten Platz / ein lustiges Fabriklayout / "
+"usw. anstreben."
+
+#: .\static\HLC\JS\HLCcontroller.js:282
+msgid "Yes, I still want to resign"
+msgstr "Ja, ich möchte trotzdem zurücktreten"
+
+#: .\static\HLC\JS\HLCcontroller.js:283
+msgid "Carry on playing"
+msgstr "Spielen Sie weiter"
+
+#: .\static\HLC\JS\HLCcontroller.js:295
+msgid "Research points remaining:"
+msgstr "Verbleibende Forschungspunkte:"
+
+#: .\static\HLC\JS\HLCcontroller.js:389
+msgid ""
+"You moved %(playerName)s %(playerToken)s to %(techTrack)s %(newPosition)s"
+msgstr "Sie haben %(playerName)s %(playerToken)s auf %(techTrack)s "
+"%(newPosition)s gezogen"
+
+#: .\static\HLC\JS\HLCcontroller.js:508
 msgid "Previous Focus Order"
-msgstr ""
+msgstr "Vorherige Fokusreihenfolge"
 
-#: .\static\HC\JS\HCcontroller.js:435
+#: .\static\HLC\JS\HLCcontroller.js:521
 msgid ""
 "Spend all Gantt to choose focus, or keep your Gantt. Remember: reaching 10 "
 "Gantt will reduce the punch clock by 1"
-msgstr ""
+msgstr "Geben Sie alle Gantt aus, um den Fokus zu wählen, oder behalten Sie "
+"Ihre Gantt. Denken Sie daran: Wer 10 Gantt erreicht, verringert die "
+"Stempeluhr um 1"
 
-#: .\static\HC\JS\HCcontroller.js:455
+#: .\static\HLC\JS\HLCcontroller.js:539
 msgid "Pass & Keep Gantt"
-msgstr ""
+msgstr "Passen & Gantt behalten"
 
-#: .\static\HC\JS\HCcontroller.js:481
+#: .\static\HLC\JS\HLCcontroller.js:560
 msgid "Eng"
-msgstr ""
+msgstr "Ing"
 
-#: .\static\HC\JS\HCcontroller.js:485 .\static\HC\JS\HCview.js:193
-#: .\static\HC\JS\HCview.js:264
+#: .\static\HLC\JS\HLCcontroller.js:563 .\static\HLC\JS\HLCview.js:181
+#: .\static\HLC\JS\HLCview.js:243
 msgid "Sales"
-msgstr ""
+msgstr "Verkäufe"
 
-#: .\static\HC\JS\HCcontroller.js:521 .\static\HC\JS\HCio.js:274
+#: .\static\HLC\JS\HLCcontroller.js:607 .\static\HLC\JS\HLCio.js:380
 msgid "Previous players used up the components. Please rearrange your factory"
-msgstr ""
+msgstr "Vorherige Spieler haben die Komponenten aufgebraucht. Bitte ordnen "
+"Sie Ihre Fabrik neu an"
 
-#: .\static\HC\JS\HCcontroller.js:524 .\static\HC\JS\HCcontroller.js:652
+#: .\static\HLC\JS\HLCcontroller.js:609
+msgid ""
+"IT IS NOT YET YOUR TURN. You will be able to fix your factory on your turn"
+msgstr "SIE SIND NOCH NICHT AM ZUG. Sie können Ihre Fabrik in Ihrer Runde "
+"anpassen"
+
+#: .\static\HLC\JS\HLCcontroller.js:612 .\static\HLC\JS\HLCcontroller.js:751
 msgid "Place components into your factory"
-msgstr ""
+msgstr "Platzieren Sie Komponenten in Ihrer Fabrik"
 
-#: .\static\HC\JS\HCcontroller.js:527
+#: .\static\HLC\JS\HLCcontroller.js:622
 msgid "You are the current player. You can use any available component"
-msgstr ""
+msgstr "Sie sind der aktuelle Spieler. Sie können jede verfügbare Komponente "
+"verwenden"
 
-#: .\static\HC\JS\HCcontroller.js:528
+#: .\static\HLC\JS\HLCcontroller.js:623
 msgid ""
 "You are not the current player. If previous players use up components that "
 "you also use, you will need to modify your factory"
-msgstr ""
+msgstr "Sie sind nicht der aktuelle Spieler. Wenn vorherige Spieler "
+"Komponenten aufbrauchen, die Sie ebenfalls verwenden, müssen Sie Ihre Fabrik "
+"anpassen"
 
-#: .\static\HC\JS\HCcontroller.js:534 .\static\HC\JS\HCcontroller.js:656
+#: .\static\HLC\JS\HLCcontroller.js:629 .\static\HLC\JS\HLCcontroller.js:753
 msgid "Remove Last Component"
-msgstr ""
+msgstr "Letzte Komponente entfernen"
 
-#: .\static\HC\JS\HCcontroller.js:554
+#: .\static\HLC\JS\HLCcontroller.js:635
+msgid "Save Without Ending Turn"
+msgstr "Speichern, ohne die Runde zu beenden"
+
+#: .\static\HLC\JS\HLCcontroller.js:642
 msgid "Finish Building"
-msgstr ""
+msgstr "Bauen abschließen"
 
-#: .\static\HC\JS\HCcontroller.js:605 .\static\HC\JS\HCcontroller.js:703
+#: .\static\HLC\JS\HLCcontroller.js:722 .\static\HLC\JS\HLCcontroller.js:799
 msgid "Expand your Factory"
-msgstr ""
+msgstr "Erweitern Sie Ihre Fabrik"
 
-#: .\static\HC\JS\HCcontroller.js:607
+#: .\static\HLC\JS\HLCcontroller.js:724
 msgid "Reset Whole Factory"
-msgstr ""
+msgstr "Gesamte Fabrik zurücksetzen"
 
-#: .\static\HC\JS\HCcontroller.js:609
+#: .\static\HLC\JS\HLCcontroller.js:726
 msgid "Go back to Factory Building"
-msgstr ""
+msgstr "Zurück zum Fabrikbau"
 
-#: .\static\HC\JS\HCcontroller.js:649
+#: .\static\HLC\JS\HLCcontroller.js:749
 msgid "SANDBOX MODE - USE THE BUTTON TO EXIT SANDBOX MODE"
-msgstr ""
+msgstr "SANDBOX-MODUS – VERWENDEN SIE DIE SCHALTFLÄCHE, UM DEN SANDBOX-MODUS "
+"ZU VERLASSEN"
 
-#: .\static\HC\JS\HCcontroller.js:673
+#: .\static\HLC\JS\HLCcontroller.js:770
 msgid "Expand Factory"
-msgstr ""
+msgstr "Fabrik erweitern"
 
-#: .\static\HC\JS\HCcontroller.js:681 .\static\HC\JS\HCcontroller.js:705
+#: .\static\HLC\JS\HLCcontroller.js:778 .\static\HLC\JS\HLCcontroller.js:801
 msgid "Exit Sandbox Mode"
-msgstr ""
+msgstr "Sandbox-Modus verlassen"
 
-#: .\static\HC\JS\HCcontroller.js:701
+#: .\static\HLC\JS\HLCcontroller.js:797
 msgid "SANDBOX MODE - REFRESH THE PAGE OR USE THE BUTTON TO EXIT SANDBOX MODE"
-msgstr ""
+msgstr "SANDBOX-MODUS – LADEN SIE DIE SEITE NEU ODER VERWENDEN SIE DIE "
+"SCHALTFLÄCHE, UM DEN SANDBOX-MODUS ZU VERLASSEN"
 
-#: .\static\HC\JS\HCcontroller.js:721
+#: .\static\HLC\JS\HLCcontroller.js:818
 msgid "Start Building Again"
-msgstr ""
+msgstr "Wieder mit dem Bauen beginnen"
 
-#: .\static\HC\JS\HCcontroller.js:750
+#: .\static\HLC\JS\HLCcontroller.js:847
 msgid ""
 "Choose a dealership, place a Market Window, then if possible, sell to a "
 "niche<BR/>Once you select a dealership, you can rotate the market window "
 "using the buttons that appear underneath the dealerships"
-msgstr ""
+msgstr "Wählen Sie ein Autohaus und platzieren Sie ein Marktfenster; "
+"verkaufen Sie dann, wenn möglich, an eine Nische<BR/>Sobald Sie ein Autohaus "
+"ausgewählt haben, können Sie das Marktfenster mit den Schaltflächen drehen, "
+"die unter den Autohäusern erscheinen"
 
-#: .\static\HC\JS\HCcontroller.js:951
+#: .\static\HLC\JS\HLCcontroller.js:1057
 msgid "No sales possible"
-msgstr ""
+msgstr "Kein Verkauf möglich"
 
-#: .\static\HC\JS\HCcontroller.js:956 .\static\HC\JS\HCcontroller.js:1037
+#: .\static\HLC\JS\HLCcontroller.js:1062 .\static\HLC\JS\HLCcontroller.js:1124
 msgid "End turn"
-msgstr ""
+msgstr "Runde beenden"
 
-#: .\static\HC\JS\HCcontroller.js:1058
+#: .\static\HLC\JS\HLCcontroller.js:1194
 msgid "Choose a card, then select the quadrant you wish to add it to"
-msgstr ""
+msgstr "Wählen Sie eine Karte und dann den Quadranten, in den Sie sie "
+"einfügen möchten"
 
-#: .\static\HC\JS\HCcontroller.js:1138 .\static\HC\JS\HCcontroller.js:1226
+#: .\static\HLC\JS\HLCcontroller.js:1283 .\static\HLC\JS\HLCcontroller.js:1360
 msgid "You are in sandbox mode. Please refresh the page"
-msgstr ""
+msgstr "Sie befinden sich im Sandbox-Modus. Bitte laden Sie die Seite neu"
 
-#: .\static\HC\JS\HCfactory.js:198 .\static\HC\JS\HCfactory.js:543
+#: .\static\HLC\JS\HLCfactory.js:255 .\static\HLC\JS\HLCfactory.js:644
 msgid "No Space"
-msgstr ""
+msgstr "Kein Platz"
 
-#: .\static\HC\JS\HCfactory.js:349
+#: .\static\HLC\JS\HLCfactory.js:409
 msgid "Not pointing at suitable tech"
-msgstr ""
+msgstr "Zeigt auf keine geeignete Technologie"
 
-#: .\static\HC\JS\HCfactory.js:372
+#: .\static\HLC\JS\HLCfactory.js:434
 msgid "Tech level too low for Spec"
-msgstr ""
+msgstr "Tech-Level zu niedrig für Spec"
 
-#: .\static\HC\JS\HCfactory.js:596
+#: .\static\HLC\JS\HLCfactory.js:694
 msgid "Not Adjacent to Factory"
-msgstr ""
+msgstr "Nicht an die Fabrik angrenzend"
 
-#: .\static\HC\JS\HCfactory.js:685
+#: .\static\HLC\JS\HLCfactory.js:761
 msgid "Blocking Factory Loading Bay"
-msgstr ""
+msgstr "Blockiert die Laderampe der Fabrik"
 
-#: .\static\HC\JS\HCfactory.js:755
+#: .\static\HLC\JS\HLCfactory.js:829
 msgid "New Expansion Loading Bay Blocked"
-msgstr ""
+msgstr "Neue Erweiterung: Laderampe blockiert"
 
-#: .\static\HC\JS\HChistory.js:114
-msgid "  sets up factory"
-msgstr ""
+#: .\static\HLC\JS\HLChistory.js:122
+msgid "%(playerName)s sets up factory"
+msgstr "%(playerName)s richtet die Fabrik ein"
 
-#: .\static\HC\JS\HChistory.js:119
-msgid "Game rewound to here by"
-msgstr ""
+#: .\static\HLC\JS\HLChistory.js:134
+msgid "Game rewound to here by %(playerName)s"
+msgstr "Spiel wurde von %(playerName)s bis hierher zurückgespult"
 
-#: .\static\HC\JS\HChistory.js:124
-msgid "was kicked out"
-msgstr ""
+#: .\static\HLC\JS\HLChistory.js:150
+msgid "%(playerName)s was kicked out"
+msgstr "%(playerName)s wurde ausgeschlossen"
 
-#: .\static\HC\JS\HChistory.js:143
+#: .\static\HLC\JS\HLChistory.js:161
+msgid "%(resignedPlayer)s Resigns"
+msgstr "%(resignedPlayer)s tritt zurück"
+
+#: .\static\HLC\JS\HLChistory.js:178
 msgid "moves"
-msgstr ""
+msgstr "zieht"
 
-#: .\static\HC\JS\HChistory.js:146
+#: .\static\HLC\JS\HLChistory.js:181
 msgid "to"
-msgstr ""
+msgstr "auf"
 
-#: .\static\HC\JS\HChistory.js:177
-msgid "passes and keeps their Gantt"
-msgstr ""
+#: .\static\HLC\JS\HLChistory.js:211
+msgid "%(playerName)s passes and keeps their Gantt"
+msgstr "%(playerName)s passt und behält sein Gantt"
 
-#: .\static\HC\JS\HChistory.js:178
-msgid "spends all Gantt to choose position:"
-msgstr ""
+#: .\static\HLC\JS\HLChistory.js:222
+msgid "%(playerName)s spends all Gantt to choose position: %(position)s"
+msgstr "%(playerName)s gibt alle Gantt aus und wählt Position: %(position)s"
 
-#: .\static\HC\JS\HChistory.js:183
+#: .\static\HLC\JS\HLChistory.js:236 .\static\HLC\JS\HLChistory.js:254
 msgid "builds"
-msgstr ""
+msgstr "baut"
 
-#: .\static\HC\JS\HChistory.js:197
-msgid "passes:"
-msgstr ""
+#: .\static\HLC\JS\HLChistory.js:308
+msgid "%(playerName)s passes: %(reason)s"
+msgstr "%(playerName)s passt: %(reason)s"
 
-#: .\static\HC\JS\HChistory.js:200
+#: .\static\HLC\JS\HLChistory.js:317
 msgid "Gantt Increases"
-msgstr ""
+msgstr "Gantt steigt"
 
-#: .\static\HC\JS\HChistory.js:205
-msgid "gains %(numberOfGantt)s Gantt"
-msgstr ""
+#: .\static\HLC\JS\HLChistory.js:322
+msgid "%(playerName)s gains %(numberOfGantt)s Gantt"
+msgstr "%(playerName)s erhält %(numberOfGantt)s Gantt"
 
-#: .\static\HC\JS\HChistory.js:248
-msgid "places %(dealershipName)s but cannot make any sales"
-msgstr ""
+#: .\static\HLC\JS\HLChistory.js:354
+msgid "%(playerName)s places %(dealershipName)s but cannot make any sales"
+msgstr "%(playerName)s platziert %(dealershipName)s, kann aber keine Verkäufe "
+"tätigen"
 
-#: .\static\HC\JS\HChistory.js:249
-msgid "uses %(dealershipName)s but cannot make any sales"
-msgstr ""
+#: .\static\HLC\JS\HLChistory.js:355
+msgid "%(playerName)s uses %(dealershipName)s but cannot make any sales"
+msgstr "%(playerName)s nutzt %(dealershipName)s, kann aber keine Verkäufe "
+"tätigen"
 
-#: .\static\HC\JS\HChistory.js:258
-msgid "places %(dealershipName)s to sell:"
-msgstr ""
+#: .\static\HLC\JS\HLChistory.js:357
+msgid "%(playerName)s places %(dealershipName)s to sell:"
+msgstr "%(playerName)s platziert %(dealershipName)s und verkauft:"
 
-#: .\static\HC\JS\HChistory.js:259
-msgid "uses %(dealershipName)s to sell:"
-msgstr ""
+#: .\static\HLC\JS\HLChistory.js:358
+msgid "%(playerName)s uses %(dealershipName)s to sell"
+msgstr "%(playerName)s nutzt %(dealershipName)s zum Verkaufen"
 
-#: .\static\HC\JS\HChistory.js:291
+#: .\static\HLC\JS\HLChistory.js:358
+msgid "(automatically)"
+msgstr "(automatisch)"
+
+#: .\static\HLC\JS\HLChistory.js:386
 msgid "%(carAmount)s Car for $%(eachSaleAmount)s"
 msgid_plural "%(carAmount)s Cars, each for $%(eachSaleAmount)s"
 msgstr[0] "%(carAmount)s EINMAL DIE Car for $%(eachSaleAmount)s"
 msgstr[1] "%(carAmount)s ZWEIMAL DIE Cars, Jeden Fur $%(eachSaleAmount)s"
 
-#: .\static\HC\JS\HChistory.js:307
+#: .\static\HLC\JS\HLChistory.js:397
 msgid "%(truckAmount)s Truck for $%(eachSaleAmount)s plus bonus $1"
 msgid_plural ""
 "%(truckAmount)s Trucks, each for $%(eachSaleAmount)s plus bonus $1"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(truckAmount)s LKW für $%(eachSaleAmount)s plus Bonus $1"
+msgstr[1] "%(truckAmount)s LKW, jeweils für $%(eachSaleAmount)s plus Bonus $1"
 
-#: .\static\HC\JS\HChistory.js:323
+#: .\static\HLC\JS\HLChistory.js:408
 msgid "%(sportsAmount)s Sports Car for $%(eachSaleAmount)s plus bonus $2"
 msgid_plural ""
 "%(sportsAmount)s Sports Cars, each for $%(eachSaleAmount)s plus bonus $2"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(sportsAmount)s Sportwagen für $%(eachSaleAmount)s plus Bonus $2"
+msgstr[1] "%(sportsAmount)s Sportwagen, jeweils für $%(eachSaleAmount)s plus "
+"Bonus $2"
 
-#: .\static\HC\JS\HChistory.js:332
+#: .\static\HLC\JS\HLChistory.js:414 .\static\HLC\JS\HLChistory.js:518
 msgid "Total Income:"
-msgstr ""
+msgstr "Gesamteinkommen:"
 
-#: .\static\HC\JS\HChistory.js:339
+#: .\static\HLC\JS\HLChistory.js:439
+msgid "%(playerName)s places %(dealershipName)s "
+msgstr "%(playerName)s platziert %(dealershipName)s "
+
+#: .\static\HLC\JS\HLChistory.js:441
+msgid "%(playerName)s uses %(dealershipName)s "
+msgstr "%(playerName)s nutzt %(dealershipName)s "
+
+#: .\static\HLC\JS\HLChistory.js:467
+msgid " at position (%(xcoord)s, %(ycoord)s) "
+msgstr " an Position (%(xcoord)s, %(ycoord)s) "
+
+#: .\static\HLC\JS\HLChistory.js:470
+msgid "but cannot make any sales"
+msgstr "kann aber keine Verkäufe tätigen"
+
+#: .\static\HLC\JS\HLChistory.js:473
+msgid "to sell: "
+msgstr "zum Verkaufen: "
+
+#: .\static\HLC\JS\HLChistory.js:486
+msgid "%(carAmount)s Car for $%(eachSaleAmount)s (%(xCoord)s,%(yCoord)s)"
+msgid_plural ""
+"%(carAmount)s Cars, each for $%(eachSaleAmount)s (%(xCoord)s,%(yCoord)s)"
+msgstr[0] "%(carAmount)s Auto für $%(eachSaleAmount)s (%(xCoord)s,%(yCoord)s)"
+msgstr[1] "%(carAmount)s Autos, jeweils für $%(eachSaleAmount)s "
+"(%(xCoord)s,%(yCoord)s)"
+
+#: .\static\HLC\JS\HLChistory.js:499
+msgid ""
+"%(truckAmount)s Truck for $%(eachSaleAmount)s plus bonus $1 "
+"(%(xCoord)s,%(yCoord)s)"
+msgid_plural ""
+"%(truckAmount)s Trucks, each for $%(eachSaleAmount)s plus bonus $1 "
+"(%(xCoord)s,%(yCoord)s)"
+msgstr[0] "%(truckAmount)s LKW für $%(eachSaleAmount)s plus Bonus $1 "
+"(%(xCoord)s,%(yCoord)s)"
+msgstr[1] "%(truckAmount)s LKW, jeweils für $%(eachSaleAmount)s plus Bonus $1 "
+"(%(xCoord)s,%(yCoord)s)"
+
+#: .\static\HLC\JS\HLChistory.js:512
+msgid ""
+"%(sportsAmount)s Sports Car for $%(eachSaleAmount)s plus bonus $2 "
+"(%(xCoord)s,%(yCoord)s)"
+msgid_plural ""
+"%(sportsAmount)s Sports Cars, each for $%(eachSaleAmount)s plus bonus $2 "
+"(%(xCoord)s,%(yCoord)s)"
+msgstr[0] "%(sportsAmount)s Sportwagen für $%(eachSaleAmount)s plus Bonus $2 "
+"(%(xCoord)s,%(yCoord)s)"
+msgstr[1] "%(sportsAmount)s Sportwagen, jeweils für $%(eachSaleAmount)s plus "
+"Bonus $2 (%(xCoord)s,%(yCoord)s)"
+
+#: .\static\HLC\JS\HLChistory.js:521
 msgid "Sales Summary"
-msgstr ""
+msgstr "Verkaufsübersicht"
 
-#: .\static\HC\JS\HChistory.js:340
+#: .\static\HLC\JS\HLChistory.js:522
 msgid "Total"
-msgstr ""
+msgstr "Gesamt"
 
-#: .\static\HC\JS\HChistory.js:371
+#: .\static\HLC\JS\HLChistory.js:547
 msgid "Expectations Advance:"
-msgstr ""
+msgstr "Erwartungen steigen:"
 
-#: .\static\HC\JS\HChistory.js:374
+#: .\static\HLC\JS\HLChistory.js:548
 msgid "%(techTrackName)s has a new min value of %(minValue)s"
-msgstr ""
+msgstr "%(techTrackName)s hat einen neuen Mindestwert von %(minValue)s"
 
-#: .\static\HC\JS\HChistory.js:378
+#: .\static\HLC\JS\HLChistory.js:551
 msgid "Innovation Levels:"
-msgstr ""
+msgstr "Innovationsstufen:"
 
-#: .\static\HC\JS\HChistory.js:383 .\static\HC\JS\HChistory.js:384
-#: .\static\HC\JS\HChistory.js:385
+#: .\static\HLC\JS\HLChistory.js:553 .\static\HLC\JS\HLChistory.js:554
+#: .\static\HLC\JS\HLChistory.js:555
 msgid ""
 "%(techTrackName)s: %(innovationLevel)s - Furthest from Min Marker:  "
 "%(furtehstFromMin)s"
-msgstr ""
+msgstr "%(techTrackName)s: %(innovationLevel)s - Am weitesten von der "
+"Min-Markierung entfernt:  %(furtehstFromMin)s"
 
-#: .\static\HC\JS\HChistory.js:387
+#: .\static\HLC\JS\HLChistory.js:557
 msgid "New Tech Track Introduced:"
-msgstr ""
+msgstr "Neue Tech-Leiste eingeführt:"
 
-#: .\static\HC\JS\HChistory.js:388
+#: .\static\HLC\JS\HLChistory.js:558
 msgid "Obsolesence Marker points:"
-msgstr ""
+msgstr "Obsoleszenzmarker-Punkte:"
 
-#: .\static\HC\JS\HChistory.js:388
+#: .\static\HLC\JS\HLChistory.js:558
 msgid "Up"
-msgstr ""
+msgstr "Hoch"
 
-#: .\static\HC\JS\HChistory.js:388
+#: .\static\HLC\JS\HLChistory.js:558
 msgid "Right"
-msgstr ""
+msgstr "Rechts"
 
-#: .\static\HC\JS\HChistory.js:421
+#: .\static\HLC\JS\HLChistory.js:582
+msgid "%(playerName)s plays a card"
+msgstr "%(playerName)s spielt eine Karte"
+
+#: .\static\HLC\JS\HLChistory.js:593
+msgid "%(playerName)s has no more cards"
+msgstr "%(playerName)s hat keine Karten mehr"
+
+#: .\static\HLC\JS\HLChistory.js:601
 msgid "Game Ended by: Punch Clock"
-msgstr ""
+msgstr "Spielende durch: Stempeluhr"
 
-#: .\static\HC\JS\HChistory.js:422
+#: .\static\HLC\JS\HLChistory.js:602
 msgid "Game Ended by: Turn 7"
-msgstr ""
+msgstr "Spielende durch: Runde 7"
 
-#: .\static\HC\JS\HChistory.js:423
+#: .\static\HLC\JS\HLChistory.js:603
 msgid "Game Ended by: King of the Hill"
-msgstr ""
+msgstr "Spielende durch: King of the Hill"
 
-#: .\static\HC\JS\HChistory.js:425
+#: .\static\HLC\JS\HLChistory.js:605
 msgid "The winner is:"
-msgstr ""
+msgstr "Der Gewinner ist:"
 
-#: .\static\HC\JS\HChistory.js:427
+#: .\static\HLC\JS\HLChistory.js:607
 msgid "Click here to see game summary stats"
-msgstr ""
+msgstr "Klicken Sie hier, um die Spielstatistiken anzuzeigen"
 
-#: .\static\HC\JS\HChistory.js:433
+#: .\static\HLC\JS\HLChistory.js:610
 msgid "Start of turn %(turnNumber)s"
-msgstr ""
+msgstr "Beginn der Runde %(turnNumber)s"
 
-#: .\static\HC\JS\HChistory.js:452
+#: .\static\HLC\JS\HLChistory.js:613
 msgid "Punch Clock decreases by: %(amount)s"
-msgstr ""
+msgstr "Die Stempeluhr verringert sich um: %(amount)s"
 
-#: .\static\HC\JS\HChistory.js:511
+#: .\static\HLC\JS\HLChistory.js:671
 msgid "Neutral Cards:"
-msgstr ""
+msgstr "Neutrale Karten:"
 
-#: .\static\HC\JS\HChistory.js:604
+#: .\static\HLC\JS\HLChistory.js:785
 msgid "Assembly Capacity Track"
-msgstr ""
+msgstr "Montagekapazitätsschiene"
 
-#: .\static\HC\JS\HChistory.js:606
+#: .\static\HLC\JS\HLChistory.js:787
 msgid "Speed Tech"
-msgstr ""
+msgstr "Geschwindigkeits-Tech"
 
-#: .\static\HC\JS\HChistory.js:607
+#: .\static\HLC\JS\HLChistory.js:788
 msgid "Range Tech"
-msgstr ""
+msgstr "Reichweiten-Tech"
 
-#: .\static\HC\JS\HChistory.js:608
+#: .\static\HLC\JS\HLChistory.js:789
 msgid "Design Tech"
-msgstr ""
+msgstr "Design-Tech"
 
-#: .\static\HC\JS\HChistory.js:609
+#: .\static\HLC\JS\HLChistory.js:790
 msgid "Reliability Tech"
-msgstr ""
+msgstr "Zuverlässigkeits-Tech"
 
-#: .\static\HC\JS\HChistory.js:610
+#: .\static\HLC\JS\HLChistory.js:791
 msgid "Safety Tech"
-msgstr ""
+msgstr "Sicherheits-Tech"
 
-#: .\static\HC\JS\HCio.js:131 .\static\HC\JS\HCio.js:250
-#: .\static\HC\JS\HCio.js:359 .\static\HC\JS\HCio.js:422
-#: .\static\HC\JS\HCio.js:464
+#: .\static\HLC\JS\HLChistory.js:822
+msgid "Show full history"
+msgstr "Vollständige Historie anzeigen"
+
+#: .\static\HLC\JS\HLCio.js:35
+msgid ""
+"Something went wrong. Please reload the page. If the problem persists, "
+"please contact the webmaster"
+msgstr "Etwas ist schiefgelaufen. Bitte laden Sie die Seite neu. Wenn das "
+"Problem weiterhin besteht, wenden Sie sich bitte an den Webmaster"
+
+#: .\static\HLC\JS\HLCio.js:62 .\static\HLC\JS\HLCio.js:1018
+#: .\static\HLC\JS\HLCio.js:1025
+msgid "Vote Saved"
+msgstr "Abstimmung gespeichert"
+
+#: .\static\HLC\JS\HLCio.js:188 .\static\HLC\JS\HLCio.js:361
+#: .\static\HLC\JS\HLCio.js:446 .\static\HLC\JS\HLCio.js:488
+#: .\static\HLC\JS\HLCio.js:548 .\static\HLC\JS\HLCio.js:580
 msgid ""
 "It appears you have an older version of the game. Please refresh the page"
-msgstr ""
+msgstr "Sie haben offenbar eine ältere Version des Spiels. Bitte laden Sie "
+"die Seite neu"
 
-#: .\static\HC\JS\HCio.js:304
+#: .\static\HLC\JS\HLCio.js:282
+msgid "Your factory has been saved"
+msgstr "Ihre Fabrik wurde gespeichert"
+
+#: .\static\HLC\JS\HLCio.js:404
 msgid ""
-"Your factory has been saved. It will be verified again once you are the "
-"first player"
-msgstr ""
+"Your factory has been saved. It will be verified again when it's your turn"
+msgstr "Ihre Fabrik wurde gespeichert. Sie wird erneut überprüft, wenn Sie an "
+"der Reihe sind"
 
-#: .\static\HC\JS\HCio.js:633
+#: .\static\HLC\JS\HLCio.js:676
+msgid "You cannot rewind during replay"
+msgstr "Während der Wiederholung kann nicht zurückgespult werden"
+
+#: .\static\HLC\JS\HLCio.js:682
 msgid "You cannot rewind a finished game"
-msgstr ""
+msgstr "Sie können ein beendetes Spiel nicht zurückspulen"
 
-#: .\static\HC\JS\HCio.js:668
+#: .\static\HLC\JS\HLCio.js:715
 msgid "Game Rewound"
-msgstr ""
+msgstr "Spiel zurückgespult"
 
-#: .\static\HC\JS\HCio.js:691
+#: .\static\HLC\JS\HLCio.js:735
 msgid "Could not rewind"
-msgstr ""
+msgstr "Zurückspulen war nicht möglich"
 
-#: .\static\HC\JS\HCio.js:880
+#: .\static\HLC\JS\HLCio.js:931
 msgid "Please tick a permission option first"
-msgstr ""
+msgstr "Bitte wählen Sie zuerst eine Berechtigungsoption aus"
 
-#: .\static\HC\JS\HCio.js:919
+#: .\static\HLC\JS\HLCio.js:1004
 msgid "Permission Changed"
-msgstr ""
+msgstr "Berechtigung geändert"
 
-#: .\static\HC\JS\HCio.js:929
-msgid "Please tick ths box first"
-msgstr ""
+#: .\static\HLC\JS\HLCmain.js:8
+msgid "Nudge"
+msgstr "Anstupsen"
 
-#: .\static\HC\JS\HCio.js:960
-msgid "Excluded from Stats"
-msgstr ""
-
-#: .\static\HC\JS\HCio.js:964
-msgid "Waiting for other players"
-msgstr ""
-
-#: .\static\HC\JS\HCmain.js:158
+#: .\static\HLC\JS\HLCmain.js:90
 msgid ""
-"Please <a href='/register'>REGISTER</a> or <a href='/login'>LOGIN</a> to "
-"play a game"
-msgstr ""
+"Player <b>%(playerToKickName)s</b> has used all the standard kickout time."
+msgstr "Spieler <b>%(playerToKickName)s</b> hat die gesamte reguläre "
+"Kickout-Zeit verbraucht."
 
-#: .\static\HC\JS\HCmain.js:186
+#: .\static\HLC\JS\HLCmain.js:92
+msgid "Remaining Flex-Time:"
+msgstr "Verbleibende Gleitzeit:"
+
+#: .\static\HLC\JS\HLCmain.js:95
+msgid "For more information see <b><a href=\"/help/\" target=\"_blank\">Help</a></b>"
+msgstr "Weitere Informationen finden Sie unter <b><a href=\"/help/\" "
+"target=\"_blank\">Hilfe</a></b>"
+
+#: .\static\HLC\JS\HLCmain.js:128
 msgid ""
 "Player <b>%(playerToKickName)s</b> has timed out<BR/>To kick out "
 "<B>%(playerToKickName)s</b> press Confirm Kickout<BR/>The game will proceed "
@@ -458,607 +669,760 @@ msgid ""
 msgstr ""
 "<b>%(playerToKickName)s</b> IST EIN NUMPTY. KICK <b>%(playerToKickName)s</b>"
 
-#: .\static\HC\JS\HCmain.js:193
+#: .\static\HLC\JS\HLCmain.js:130 .\static\HLC\JS\HLCmain.js:145
+#: .\static\HLC\JS\HLCmain.js:172 .\static\HLC\JS\HLCmain.js:184
 msgid "Not now - allow more time"
-msgstr ""
+msgstr "Nicht jetzt – mehr Zeit geben"
 
-#: .\static\HC\JS\HCmain.js:194
+#: .\static\HLC\JS\HLCmain.js:131 .\static\HLC\JS\HLCmain.js:146
 msgid "Confirm Kickout"
-msgstr ""
+msgstr "Kickout bestätigen"
 
-#: .\static\HC\JS\HCreference.js:18
+#: .\static\HLC\JS\HLCmain.js:143
+msgid ""
+"This will permanently remove <b>%(playerToKickName)s</b> from the "
+"game<br/><b>It cannot be undone</b><br/><br/>Try checking the chat in case "
+"they have given a reason for any temporary absence<br/>Please consider "
+"giving them a short grace period, in case they are just delayed<br/>"
+msgstr "Dadurch wird <b>%(playerToKickName)s</b> dauerhaft aus dem Spiel "
+"entfernt<br/><b>Das kann nicht rückgängig gemacht "
+"werden</b><br/><br/>Schauen Sie bitte in den Chat, falls dort ein Grund für "
+"eine vorübergehende Abwesenheit genannt wurde<br/>Erwägen Sie eine kurze "
+"Schonfrist, falls der Spieler nur verspätet ist<br/>"
+
+#: .\static\HLC\JS\HLCmain.js:158
+msgid ""
+"Player <b>%(playerToKickName)s</b> has timed out<BR/>A vote from the other "
+"players is needed to kick out <b>%(playerToKickName)s</b><BR/>"
+msgstr "Spieler <b>%(playerToKickName)s</b> hat die Zeit überschritten<BR/>Um "
+"<b>%(playerToKickName)s</b> auszuschließen, ist eine Abstimmung der anderen "
+"Spieler erforderlich<BR/>"
+
+#: .\static\HLC\JS\HLCmain.js:161
+msgid "None"
+msgstr "Keiner"
+
+#: .\static\HLC\JS\HLCmain.js:162
+msgid "Votes: "
+msgstr "Stimmen: "
+
+#: .\static\HLC\JS\HLCmain.js:166
+msgid ""
+"This will permanently remove <b>%(playerToKickName)s</b> from the "
+"game<br/><b>It cannot be undone</b><br/><br/>"
+msgstr "Dadurch wird <b>%(playerToKickName)s</b> dauerhaft aus dem Spiel "
+"entfernt<br/><b>Das kann nicht rückgängig gemacht werden</b><br/><br/>"
+
+#: .\static\HLC\JS\HLCmain.js:168
+msgid "Vote to Kickout "
+msgstr "Für Kickout stimmen: "
+
+#: .\static\HLC\JS\HLCmain.js:179
+msgid ""
+"You have voted to kick out <b>%(playerToKickName)s</b><br/>If the other "
+"players do not also vote, you will be able to kick them out directly in "
+"<span id='soloKickoutCountdownSpan'></span>"
+msgstr "Sie haben für den Ausschluss von <b>%(playerToKickName)s</b> "
+"gestimmt<br/>Wenn die anderen Spieler nicht ebenfalls abstimmen, können Sie "
+"den Spieler direkt ausschließen in <span "
+"id='soloKickoutCountdownSpan'></span>"
+
+#: .\static\HLC\JS\HLCmain.js:315
+msgid ""
+"If all players agree, this game can be excluded from the stats<br/>(won't "
+"count towards wins/losses)"
+msgstr "Wenn alle Spieler zustimmen, kann dieses Spiel von der Statistik "
+"ausgenommen werden<br/>(zählt nicht für Siege/Niederlagen)"
+
+#: .\static\HLC\JS\HLCmain.js:337
+msgid "If all players agree, this game will be deleted"
+msgstr "Wenn alle Spieler zustimmen, wird dieses Spiel gelöscht"
+
+#: .\static\HLC\JS\HLCmain.js:376
+msgid ""
+"Please <a href='/register'>REGISTER</a> or <a href='/login'>LOGIN</a> to "
+"play a game"
+msgstr "Bitte <a href='/register'>REGISTRIEREN</a> oder <a "
+"href='/login'>ANMELDEN</a>, um ein Spiel zu spielen"
+
+#: .\static\HLC\JS\HLCreference.js:25
 msgid "Speed"
-msgstr ""
+msgstr "Geschwindigkeit"
 
-#: .\static\HC\JS\HCreference.js:18
+#: .\static\HLC\JS\HLCreference.js:25
 msgid "Range"
-msgstr ""
+msgstr "Reichweite"
 
-#: .\static\HC\JS\HCreference.js:18
+#: .\static\HLC\JS\HLCreference.js:25
 msgid "Design"
-msgstr ""
+msgstr "Design"
 
-#: .\static\HC\JS\HCreference.js:18
+#: .\static\HLC\JS\HLCreference.js:25
 msgid "Reliability"
-msgstr ""
+msgstr "Zuverlässigkeit"
 
-#: .\static\HC\JS\HCreference.js:18
+#: .\static\HLC\JS\HLCreference.js:25
 msgid "Safety"
-msgstr ""
+msgstr "Sicherheit"
 
-#: .\static\HC\JS\HCreference.js:263
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Factory Expansion"
-msgstr ""
+msgstr "Fabrikerweiterung"
 
-#: .\static\HC\JS\HCreference.js:264
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Car Mainline"
-msgstr ""
+msgstr "Auto-Hauptstrecke"
 
-#: .\static\HC\JS\HCreference.js:265
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Truck Mainline"
-msgstr ""
+msgstr "LKW-Hauptstrecke"
 
-#: .\static\HC\JS\HCreference.js:266
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Sports Mainline"
-msgstr ""
+msgstr "Sportwagen-Hauptstrecke"
 
-#: .\static\HC\JS\HCreference.js:267
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Research Department"
-msgstr ""
+msgstr "Forschungsabteilung"
 
-#: .\static\HC\JS\HCreference.js:268
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Planning Department"
-msgstr ""
+msgstr "Planungsabteilung"
 
-#: .\static\HC\JS\HCreference.js:269
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Chassis"
-msgstr ""
+msgstr "Chassis"
 
-#: .\static\HC\JS\HCreference.js:270
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Body"
-msgstr ""
+msgstr "Karosserie"
 
-#: .\static\HC\JS\HCreference.js:271
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Radiator"
-msgstr ""
+msgstr "Kühler"
 
-#: .\static\HC\JS\HCreference.js:272
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Door"
-msgstr ""
+msgstr "Tür"
 
-#: .\static\HC\JS\HCreference.js:273
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Bumper"
-msgstr ""
+msgstr "Stoßstange"
 
-#: .\static\HC\JS\HCreference.js:274
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Dashboard"
-msgstr ""
+msgstr "Armaturenbrett"
 
-#: .\static\HC\JS\HCreference.js:275
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Paint"
-msgstr ""
+msgstr "Lackierung"
 
-#: .\static\HC\JS\HCreference.js:276
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Battery"
-msgstr ""
+msgstr "Batterie"
 
-#: .\static\HC\JS\HCreference.js:277
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Engine"
-msgstr ""
+msgstr "Motor"
 
-#: .\static\HC\JS\HCreference.js:278
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Gears"
-msgstr ""
+msgstr "Getriebe"
 
-#: .\static\HC\JS\HCreference.js:279
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Fuel Tank"
-msgstr ""
+msgstr "Kraftstofftank"
 
-#: .\static\HC\JS\HCreference.js:280
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Steering Wheel"
-msgstr ""
+msgstr "Lenkrad"
 
-#: .\static\HC\JS\HCreference.js:281
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Brake"
-msgstr ""
+msgstr "Bremse"
 
-#: .\static\HC\JS\HCreference.js:282
-msgid "gettext(Tire"
-msgstr ""
+#: .\static\HLC\JS\HLCreference.js:219
+msgid "Tire"
+msgstr "Reifen"
 
-#: .\static\HC\JS\HCreference.js:283
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Headlights"
-msgstr ""
+msgstr "Scheinwerfer"
 
-#: .\static\HC\JS\HCreference.js:284
-msgid "Windsheild"
-msgstr ""
+#: .\static\HLC\JS\HLCreference.js:219
+msgid "Windshield"
+msgstr "Windschutzscheibe"
 
-#: .\static\HC\JS\HCreference.js:285
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Claxon"
-msgstr ""
+msgstr "Claxon"
 
-#: .\static\HC\JS\HCreference.js:286
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Spec (Design A)"
-msgstr ""
+msgstr "Spezifikation (Design A)"
 
-#: .\static\HC\JS\HCreference.js:287
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Spec (Design B)"
-msgstr ""
+msgstr "Spezifikation (Design B)"
 
-#: .\static\HC\JS\HCreference.js:288
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Spec (Design C)"
-msgstr ""
+msgstr "Spezifikation (Design C)"
 
-#: .\static\HC\JS\HCreference.js:289
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Spec (Design D)"
-msgstr ""
+msgstr "Spezifikation (Design D)"
 
-#: .\static\HC\JS\HCreference.js:290
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Spec (Reliability A)"
-msgstr ""
+msgstr "Spezifikation (Zuverlässigkeit A)"
 
-#: .\static\HC\JS\HCreference.js:291
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Spec (Reliability B)"
-msgstr ""
+msgstr "Spezifikation (Zuverlässigkeit B)"
 
-#: .\static\HC\JS\HCreference.js:292
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Spec (Reliability C)"
-msgstr ""
+msgstr "Spezifikation (Zuverlässigkeit C)"
 
-#: .\static\HC\JS\HCreference.js:293
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Spec (Speed B)"
-msgstr ""
+msgstr "Spezifikation (Geschwindigkeit B)"
 
-#: .\static\HC\JS\HCreference.js:294
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Spec (Speed C)"
-msgstr ""
+msgstr "Spezifikation (Geschwindigkeit C)"
 
-#: .\static\HC\JS\HCreference.js:295
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Spec (Speed D)"
-msgstr ""
+msgstr "Spezifikation (Geschwindigkeit D)"
 
-#: .\static\HC\JS\HCreference.js:296
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Spec (Safety A)"
-msgstr ""
+msgstr "Spezifikation (Sicherheit A)"
 
-#: .\static\HC\JS\HCreference.js:297
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Spec (Safety B)"
-msgstr ""
+msgstr "Spezifikation (Sicherheit B)"
 
-#: .\static\HC\JS\HCreference.js:298
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Spec (Safety D)"
-msgstr ""
+msgstr "Spezifikation (Sicherheit D)"
 
-#: .\static\HC\JS\HCreference.js:299
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Spec (Range A)"
-msgstr ""
+msgstr "Spezifikation (Reichweite A)"
 
-#: .\static\HC\JS\HCreference.js:300
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Spec (Range B)"
-msgstr ""
+msgstr "Spezifikation (Reichweite B)"
 
-#: .\static\HC\JS\HCreference.js:301
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Spec (Range D)"
-msgstr ""
+msgstr "Spezifikation (Reichweite D)"
 
-#: .\static\HC\JS\HCreference.js:323 .\static\HC\JS\HCreference.js:324
-#: .\static\HC\JS\HCreference.js:325 .\static\HC\JS\HCreference.js:326
-#: .\static\HC\JS\HCreference.js:327
+#: .\static\HLC\JS\HLCreference.js:219
 msgid "Marketing Deparment"
-msgstr ""
+msgstr "Marketingabteilung"
 
-#: .\static\HC\JS\HCreference.js:719
+#: .\static\HLC\JS\HLCreference.js:599
 msgid "No connection to loading bay"
-msgstr ""
+msgstr "Keine Verbindung zur Laderampe"
 
-#: .\static\HC\JS\HCreference.js:720
+#: .\static\HLC\JS\HLCreference.js:600
 msgid "Not Adjacent to Dealership"
-msgstr ""
+msgstr "Nicht an ein Autohaus angrenzend"
 
-#: .\static\HC\JS\HCreference.js:721
+#: .\static\HLC\JS\HLCreference.js:601
 msgid "Not Adjacent to Mainline"
-msgstr ""
+msgstr "Nicht an eine Hauptstrecke angrenzend"
 
-#: .\static\HC\JS\HCreference.js:722
+#: .\static\HLC\JS\HLCreference.js:602
 msgid "Duplicate Tech in Connection"
-msgstr ""
+msgstr "Doppelte Technologie in der Verbindung"
 
-#: .\static\HC\JS\HCreference.js:723
+#: .\static\HLC\JS\HLCreference.js:603
 msgid "No Spec Indicator Attached"
-msgstr ""
+msgstr "Kein Spezifikationsanzeiger angebracht"
 
-#: .\static\HC\JS\HCreference.js:724
+#: .\static\HLC\JS\HLCreference.js:604
 msgid "No connection to Mainline"
-msgstr ""
+msgstr "Keine Verbindung zur Hauptstrecke"
 
-#: .\static\HC\JS\HCreference.js:725
+#: .\static\HLC\JS\HLCreference.js:605
 msgid "Unknown"
-msgstr ""
+msgstr "Unbekannt"
 
-#: .\static\HC\JS\HCreference.js:726
+#: .\static\HLC\JS\HLCreference.js:606
 msgid "You must place One Research Department and One Planning Department"
-msgstr ""
+msgstr "Sie müssen eine Forschungsabteilung und eine Planungsabteilung "
+"platzieren"
 
-#: .\static\HC\JS\HCreference.js:744
+#: .\static\HLC\JS\HLCreference.js:616
 msgid "No Dealerships"
-msgstr ""
+msgstr "Keine Autohäuser"
 
-#: .\static\HC\JS\HCreference.js:744
+#: .\static\HLC\JS\HLCreference.js:616
 msgid "No stock"
-msgstr ""
+msgstr "Kein Bestand"
 
-#: .\static\HC\JS\HCreference.js:744
+#: .\static\HLC\JS\HLCreference.js:616
 msgid "No Min Spec Dealerships"
-msgstr ""
+msgstr "Alle Autohäuser unter der Mindestspezifikation"
 
-#: .\static\HC\JS\HCreference.js:744
+#: .\static\HLC\JS\HLCreference.js:616
 msgid "No more sales possible"
-msgstr ""
+msgstr "Kein Verkauf mehr möglich"
 
-#: .\static\HC\JS\HCreference.js:744
+#: .\static\HLC\JS\HLCreference.js:616
 msgid "Bot player"
-msgstr ""
+msgstr "Bot-Spieler"
 
-#: .\static\HC\JS\HCreference.js:761
+#: .\static\HLC\JS\HLCreference.js:616
+msgid "Final sale processed automatically"
+msgstr "Letzter Verkauf wird automatisch abgewickelt"
+
+#: .\static\HLC\JS\HLCreference.js:633
 msgid "Factory Setup"
-msgstr ""
+msgstr "Fabrik einrichten"
 
-#: .\static\HC\JS\HCreference.js:762
+#: .\static\HLC\JS\HLCreference.js:633
 msgid "Research"
-msgstr ""
+msgstr "Forschung"
 
-#: .\static\HC\JS\HCreference.js:763
+#: .\static\HLC\JS\HLCreference.js:633
 msgid "Set Focus"
-msgstr ""
+msgstr "Fokus setzen"
 
-#: .\static\HC\JS\HCreference.js:764
+#: .\static\HLC\JS\HLCreference.js:633
 msgid "Build Factory"
-msgstr ""
+msgstr "Fabrik bauen"
 
-#: .\static\HC\JS\HCreference.js:765
+#: .\static\HLC\JS\HLCreference.js:633
 msgid "Print Sales Brochures"
-msgstr ""
+msgstr "Verkaufsbroschüren drucken"
 
-#: .\static\HC\JS\HCreference.js:766
+#: .\static\HLC\JS\HLCreference.js:633
 msgid "Sell"
-msgstr ""
+msgstr "Verkaufen"
 
-#: .\static\HC\JS\HCreference.js:767
+#: .\static\HLC\JS\HLCreference.js:633
 msgid "Game End"
-msgstr ""
+msgstr "Spielende"
 
-#: .\static\HC\JS\HCreference.js:768
+#: .\static\HLC\JS\HLCreference.js:633
 msgid "Increase Expectations"
-msgstr ""
+msgstr "Erwartungen erhöhen"
 
-#: .\static\HC\JS\HCreference.js:769
+#: .\static\HLC\JS\HLCreference.js:633
 msgid "Grow Demands"
-msgstr ""
+msgstr "Nachfrage steigern"
 
-#: .\static\HC\JS\HCreference.js:781
+#: .\static\HLC\JS\HLCreference.js:644
 msgid ""
 "B - Brake\n"
 "2 x 2"
-msgstr ""
+msgstr "B - Bremse\n2 x 2"
 
-#: .\static\HC\JS\HCreference.js:782
+#: .\static\HLC\JS\HLCreference.js:645
 msgid ""
 "D - Windshield\n"
 "4 x 2"
-msgstr ""
+msgstr "D - Windschutzscheibe\n4 x 2"
 
-#: .\static\HC\JS\HCreference.js:783
+#: .\static\HLC\JS\HLCreference.js:646
 msgid ""
 "B - Steering Wheel\n"
-"4 x 2\n"
+"3 x 3\n"
 "Also Design 6"
-msgstr ""
+msgstr "B - Lenkrad\n3 x 3\nZusätzlich Design 6"
 
-#: .\static\HC\JS\HCreference.js:784
+#: .\static\HLC\JS\HLCreference.js:647
 msgid ""
 "A - Bumper\n"
 "4 x 1\n"
 "Also Reliability 4"
-msgstr ""
+msgstr "A - Stoßstange\n4 x 1\nZusätzlich Zuverlässigkeit 4"
 
-#: .\static\HC\JS\HCreference.js:785
+#: .\static\HLC\JS\HLCreference.js:648
 msgid ""
 "D - Headlights\n"
 "2 x 3\n"
 "Also Design 3"
-msgstr ""
+msgstr "D - Scheinwerfer\n2 x 3\nZusätzlich Design 3"
 
-#: .\static\HC\JS\HCreference.js:786
+#: .\static\HLC\JS\HLCreference.js:649
 msgid ""
 "D - Tire\n"
 "3 x 3\n"
 "Also Range 3 Speed 4"
-msgstr ""
+msgstr "D - Reifen\n3 x 3\nZusätzlich Reichweite 3 Geschwindigkeit 4"
 
-#: .\static\HC\JS\HCreference.js:789
+#: .\static\HLC\JS\HLCreference.js:652
 msgid ""
 "C - Battery\n"
 "2 x 2"
-msgstr ""
+msgstr "C - Batterie\n2 x 2"
 
-#: .\static\HC\JS\HCreference.js:790
+#: .\static\HLC\JS\HLCreference.js:653
 msgid ""
 "A - Chassis\n"
-"3 x 2\n"
+"3 x 4\n"
 "Also Reliability 6"
-msgstr ""
+msgstr "A - Chassis\n3 x 4\nZusätzlich Zuverlässigkeit 6"
 
-#: .\static\HC\JS\HCreference.js:791
+#: .\static\HLC\JS\HLCreference.js:654
 msgid ""
 "A - Body\n"
 "3 x 3\n"
 "Also Design 5"
-msgstr ""
+msgstr "A - Karosserie\n3 x 3\nZusätzlich Design 5"
 
-#: .\static\HC\JS\HCreference.js:792
+#: .\static\HLC\JS\HLCreference.js:655
 msgid ""
 "A - Bumper\n"
 "4 x 1\n"
 "Also Safety 4"
-msgstr ""
+msgstr "A - Stoßstange\n4 x 1\nZusätzlich Sicherheit 4"
 
-#: .\static\HC\JS\HCreference.js:793
+#: .\static\HLC\JS\HLCreference.js:656
 msgid ""
 "B - Engine\n"
 "4 x 4\n"
 "Also Speed 1 Range 1"
-msgstr ""
+msgstr "B - Motor\n4 x 4\nZusätzlich Geschwindigkeit 1 Reichweite 1"
 
-#: .\static\HC\JS\HCreference.js:794
+#: .\static\HLC\JS\HLCreference.js:657
 msgid ""
 "A - Chassis\n"
-"3 x 2\n"
+"3 x 4\n"
 "Also Reliability 2"
-msgstr ""
+msgstr "A - Chassis\n3 x 4\nZusätzlich Zuverlässigkeit 2"
 
-#: .\static\HC\JS\HCreference.js:797
+#: .\static\HLC\JS\HLCreference.js:660
 msgid ""
 "B - Engine\n"
 "4 x 4\n"
 "Also Speed 1 Reliability 5"
-msgstr ""
+msgstr "B - Motor\n4 x 4\nZusätzlich Geschwindigkeit 1 Zuverlässigkeit 5"
 
-#: .\static\HC\JS\HCreference.js:798
+#: .\static\HLC\JS\HLCreference.js:661
 msgid ""
 "A - Radiator\n"
 "2 x 3\n"
 "Also Range 5"
-msgstr ""
+msgstr "A - Kühler\n2 x 3\nZusätzlich Reichweite 5"
 
-#: .\static\HC\JS\HCreference.js:799
+#: .\static\HLC\JS\HLCreference.js:662
 msgid ""
 "D - Tire\n"
 "3 x 3\n"
 "Also Speed 4 Safety 6"
-msgstr ""
+msgstr "D - Reifen\n3 x 3\nZusätzlich Geschwindigkeit 4 Sicherheit 6"
 
-#: .\static\HC\JS\HCreference.js:800
+#: .\static\HLC\JS\HLCreference.js:663
 msgid ""
 "B - Fuel Tank\n"
 "4 x 2\n"
 "Also Speed 5"
-msgstr ""
+msgstr "B - Kraftstofftank\n4 x 2\nZusätzlich Geschwindigkeit 5"
 
-#: .\static\HC\JS\HCreference.js:801
+#: .\static\HLC\JS\HLCreference.js:664
 msgid ""
 "A - Radiator\n"
 "2 x 3\n"
 "Also Range 2"
-msgstr ""
+msgstr "A - Kühler\n2 x 3\nZusätzlich Reichweite 2"
 
-#: .\static\HC\JS\HCreference.js:802
+#: .\static\HLC\JS\HLCreference.js:665
 msgid ""
 "B - Gears\n"
 "3 x 4\n"
 "Also Speed 3"
-msgstr ""
+msgstr "B - Getriebe\n3 x 4\nZusätzlich Geschwindigkeit 3"
 
-#: .\static\HC\JS\HCreference.js:805
+#: .\static\HLC\JS\HLCreference.js:668
 msgid ""
 "B - Engine\n"
 "4 x 4\n"
 "Also Range 1 Reliability 5"
-msgstr ""
+msgstr "B - Motor\n4 x 4\nZusätzlich Reichweite 1 Zuverlässigkeit 5"
 
-#: .\static\HC\JS\HCreference.js:806
+#: .\static\HLC\JS\HLCreference.js:669
 msgid ""
 "D - Claxon\n"
 "2 x 2"
-msgstr ""
+msgstr "D - Claxon\n2 x 2"
 
-#: .\static\HC\JS\HCreference.js:807
+#: .\static\HLC\JS\HLCreference.js:670
 msgid ""
 "B - Gears\n"
 "3 x 4\n"
 "Also Range 6"
-msgstr ""
+msgstr "B - Getriebe\n3 x 4\nZusätzlich Reichweite 6"
 
-#: .\static\HC\JS\HCreference.js:808
+#: .\static\HLC\JS\HLCreference.js:671
 msgid ""
 "D - Tire\n"
 "3 x 3\n"
 "Also Range 3 Safety 6"
-msgstr ""
+msgstr "D - Reifen\n3 x 3\nZusätzlich Reichweite 3 Sicherheit 6"
 
-#: .\static\HC\JS\HCreference.js:809
+#: .\static\HLC\JS\HLCreference.js:672
 msgid ""
 "B - Fuel Tank\n"
 "4 x 2\n"
 "Also Range 4"
-msgstr ""
+msgstr "B - Kraftstofftank\n4 x 2\nZusätzlich Reichweite 4"
 
-#: .\static\HC\JS\HCreference.js:810
+#: .\static\HLC\JS\HLCreference.js:673
 msgid ""
 "C - Dashboard\n"
 "4 x 2\n"
 "Also Design 4"
-msgstr ""
+msgstr "C - Armaturenbrett\n4 x 2\nZusätzlich Design 4"
 
-#: .\static\HC\JS\HCreference.js:813
+#: .\static\HLC\JS\HLCreference.js:676
 msgid ""
 "C - Paint\n"
 "2 x 3"
-msgstr ""
+msgstr "C - Lackierung\n2 x 3"
 
-#: .\static\HC\JS\HCreference.js:814
+#: .\static\HLC\JS\HLCreference.js:677
 msgid ""
 "A - Door\n"
 "2 x 2"
-msgstr ""
+msgstr "A - Tür\n2 x 2"
 
-#: .\static\HC\JS\HCreference.js:815
+#: .\static\HLC\JS\HLCreference.js:678
 msgid ""
 "D - Headlights\n"
 "2 x 3\n"
 "Also Safety 5"
-msgstr ""
+msgstr "D - Scheinwerfer\n2 x 3\nZusätzlich Sicherheit 5"
 
-#: .\static\HC\JS\HCreference.js:816
+#: .\static\HLC\JS\HLCreference.js:679
 msgid ""
 "C - Dashboard\n"
 "4 x 2\n"
 "Also Speed 6"
-msgstr ""
+msgstr "C - Armaturenbrett\n4 x 2\nZusätzlich Geschwindigkeit 6"
 
-#: .\static\HC\JS\HCreference.js:817
+#: .\static\HLC\JS\HLCreference.js:680
 msgid ""
 "A - Body\n"
 "3 x 3\n"
 "Also Reliability 3"
-msgstr ""
+msgstr "A - Karosserie\n3 x 3\nZusätzlich Zuverlässigkeit 3"
 
-#: .\static\HC\JS\HCreference.js:818
+#: .\static\HLC\JS\HLCreference.js:681
 msgid ""
 "B - Steering Wheel\n"
 "3 x 3\n"
 "Also Safety 3"
-msgstr ""
+msgstr "B - Lenkrad\n3 x 3\nZusätzlich Sicherheit 3"
 
-#: .\static\HC\JS\HCtest.js:110 .\static\HC\JS\HCtest.js:111
-msgid "House %(houseNum)s sold %(burgSold)s burgers and %(beerSold)s beers"
+#: .\static\HLC\JS\HLCreplay.js:604
+msgid ""
+"Use the arrows to step through the game. Click an entry in the history tab "
+"to jump to that point in time."
 msgstr ""
-" %(burgSold)s burgers UND %(beerSold)s beers warren von haus %(houseNum)s "
-"gesolltet"
+"Mit den Pfeilen können Sie Schritt für Schritt durch das Spiel gehen. "
+"Klicken Sie auf einen Eintrag im Verlauf, um zu diesem Zeitpunkt zu "
+"springen."
 
-#: .\static\HC\JS\HCview.js:99
+#: .\static\HLC\JS\HLCreplay.js:609
+msgid "Back to my last turn"
+msgstr "Zurück zu meiner letzten Runde"
+
+#: .\static\HLC\JS\HLCreplay.js:640
+msgid "Exit Replay Mode"
+msgstr "Wiederholungsmodus verlassen"
+
+#: .\static\HLC\JS\HLCreplay.js:666
+msgid ""
+"Caution: This game was created before all the replay data was captured. "
+"Replay may not match actual game"
+msgstr ""
+"Achtung: Dieses Spiel wurde erstellt, bevor alle Wiederholungsdaten erfasst "
+"wurden. Die Wiederholung stimmt möglicherweise nicht mit dem tatsächlichen "
+"Spiel überein"
+
+#: .\static\HLC\JS\HLCreplay.js:685
+msgid "Game data does not match - please submit a bug report"
+msgstr ""
+"Spieldaten stimmen nicht überein – bitte reichen Sie einen Bug-Report ein"
+
+#: .\static\HLC\JS\HLCview.js:96
 msgid "Game ended by Punch Clock"
-msgstr ""
+msgstr "Spielende durch: Stempeluhr"
 
-#: .\static\HC\JS\HCview.js:100
+#: .\static\HLC\JS\HLCview.js:97
 msgid "Game ended by Factory Expansions"
-msgstr ""
+msgstr "Spielende durch: Fabrikerweiterungen"
 
-#: .\static\HC\JS\HCview.js:101
+#: .\static\HLC\JS\HLCview.js:98
 msgid "Game ended by King of the Hill"
-msgstr ""
+msgstr "Spielende durch: King of the Hill"
 
-#: .\static\HC\JS\HCview.js:165
+#: .\static\HLC\JS\HLCview.js:155
 msgid "View Market Board"
-msgstr ""
+msgstr "Markttafel ansehen"
 
-#: .\static\HC\JS\HCview.js:192
+#: .\static\HLC\JS\HLCview.js:180
 msgid "Most Gantt"
-msgstr ""
+msgstr "Meiste Gantt"
 
-#: .\static\HC\JS\HCview.js:194
+#: .\static\HLC\JS\HLCview.js:182
 msgid "Winner"
-msgstr ""
+msgstr "Gewinner"
 
-#: .\static\HC\JS\HCview.js:195 .\static\HC\JS\HCview.js:262
+#: .\static\HLC\JS\HLCview.js:183 .\static\HLC\JS\HLCview.js:241
 msgid "Engineering"
-msgstr ""
+msgstr "Ingenieurwesen"
 
-#: .\static\HC\JS\HCview.js:261
+#: .\static\HLC\JS\HLCview.js:240
 msgid "Least Gantt"
-msgstr ""
+msgstr "Wenigste Gantt"
 
-#: .\static\HC\JS\HCview.js:263
+#: .\static\HLC\JS\HLCview.js:242
 msgid "Stuck in Traffic"
-msgstr ""
+msgstr "Im Stau"
 
-#: .\static\HC\JS\HCview.js:895 .\static\HC\JS\HCview.js:924
-#: .\static\HC\JS\HCview.js:925
+#: .\static\HLC\JS\HLCview.js:839 .\static\HLC\JS\HLCview.js:857
+#: .\static\HLC\JS\HLCview.js:858 .\static\HLC\JS\HLCview.js:1312
+#: .\static\HLC\JS\HLCview.js:1313 .\static\HLC\JS\HLCview.js:2110
+#: .\static\HLC\JS\HLCview.js:2128 .\static\HLC\JS\HLCview.js:2129
 msgid "Hide Pieces"
-msgstr ""
+msgstr "Teile ausblenden"
 
-#: .\static\HC\JS\HCview.js:924
+#: .\static\HLC\JS\HLCview.js:857 .\static\HLC\JS\HLCview.js:1294
+#: .\static\HLC\JS\HLCview.js:1312 .\static\HLC\JS\HLCview.js:2128
 msgid "Show Pieces"
-msgstr ""
+msgstr "Teile einblenden"
 
-#: .\static\HC\JS\HCview.js:1720
-msgid "Adding a new tech caused:"
-msgstr ""
+#: .\static\HLC\JS\HLCview.js:1008
+msgid "Phases"
+msgstr "Phasen"
 
-#: .\static\HC\JS\HCview.js:1729
-msgid "Please remove"
-msgstr ""
+#: .\static\HLC\JS\HLCview.js:1009 .\static\HLC\JS\HLCview.js:1011
+#: .\static\HLC\JS\HLCview.js:1016
+msgid "(E &#x2192; S)"
+msgstr "(I &#x2192; V)"
 
-#: .\static\HC\JS\HCview.js:1729
-msgid "previous players already took this"
-msgstr ""
+#: .\static\HLC\JS\HLCview.js:1010
+msgid "(Most Gantt &#x2192; Least Gantt)"
+msgstr "(Meiste Gantt &#x2192; Wenigste Gantt)"
 
-#: .\static\HC\JS\HCview.js:1987 .\static\HC\JS\HCview.js:3543
+#: .\static\HLC\JS\HLCview.js:1013
+msgid "(S &#x2192; E)"
+msgstr "(V &#x2192; I)"
+
+#: .\static\HLC\JS\HLCview.js:1224
+msgid "Market Demand:"
+msgstr "Marktnachfrage:"
+
+#: .\static\HLC\JS\HLCview.js:1706
+msgid "Adding a new tech caused: %(componentName)s - %(componentError)s"
+msgstr "Eine neue Technologie verursachte: %(componentName)s - "
+"%(componentError)s"
+
+#: .\static\HLC\JS\HLCview.js:1726
+msgid "Please remove: %(componentName)s - previous players already took this"
+msgstr "Bitte entfernen: %(componentName)s - vorherige Spieler haben dies "
+"bereits genommen"
+
+#: .\static\HLC\JS\HLCview.js:1837
+msgid "Enter Sandbox Mode"
+msgstr "Sandbox-Modus starten"
+
+#: .\static\HLC\JS\HLCview.js:2633 .\static\HLC\JS\HLCview.js:4347
 msgid "MAINLINES"
-msgstr ""
+msgstr "HAUPTSTRECKEN"
 
-#: .\static\HC\JS\HCview.js:1991 .\static\HC\JS\HCview.js:3547
+#: .\static\HLC\JS\HLCview.js:2637 .\static\HLC\JS\HLCview.js:4351
 msgid "A LINES"
-msgstr ""
+msgstr "A-LINIEN"
 
-#: .\static\HC\JS\HCview.js:1995 .\static\HC\JS\HCview.js:3551
+#: .\static\HLC\JS\HLCview.js:2641 .\static\HLC\JS\HLCview.js:4355
 msgid "B LINES"
-msgstr ""
+msgstr "B-LINIEN"
 
-#: .\static\HC\JS\HCview.js:1999 .\static\HC\JS\HCview.js:3555
+#: .\static\HLC\JS\HLCview.js:2645 .\static\HLC\JS\HLCview.js:4359
 msgid "C LINES"
-msgstr ""
+msgstr "C-LINIEN"
 
-#: .\static\HC\JS\HCview.js:2003 .\static\HC\JS\HCview.js:3559
+#: .\static\HLC\JS\HLCview.js:2649 .\static\HLC\JS\HLCview.js:4363
 msgid "D LINES"
-msgstr ""
+msgstr "D-LINIEN"
 
-#: .\static\HC\JS\HCview.js:2007
+#: .\static\HLC\JS\HLCview.js:2653
 msgid "DEPARTMENTS"
-msgstr ""
+msgstr "ABTEILUNGEN"
 
-#: .\static\HC\JS\HCview.js:2011 .\static\HC\JS\HCview.js:3567
+#: .\static\HLC\JS\HLCview.js:2657 .\static\HLC\JS\HLCview.js:4371
 msgid "DEALERSHIPS"
-msgstr ""
+msgstr "AUTOHÄUSER"
 
-#: .\static\HC\JS\HCview.js:2209
+#: .\static\HLC\JS\HLCview.js:2820
 msgid "Niche Square exceeds Sepcs of Dealership"
-msgstr ""
+msgstr "Nischenfeld übersteigt die Spezifikationen des Autohauses"
 
-#: .\static\HC\JS\HCview.js:3404
+#: .\static\HLC\JS\HLCview.js:3506
+msgid "Below Min Spec"
+msgstr "Unterhalb der Mindestspezifikation"
+
+#: .\static\HLC\JS\HLCview.js:3563
+msgid "Nudge Component"
+msgstr "Komponente anstupsen"
+
+#: .\static\HLC\JS\HLCview.js:3623
+msgid "Quick Spec Pick"
+msgstr "Schnelle Spezifikationsauswahl"
+
+#: .\static\HLC\JS\HLCview.js:4207
 msgid "Your bug report has been submitted"
-msgstr ""
+msgstr "Ihr Fehlerbericht wurde übermittelt"
 
-#: .\static\HC\JS\HCview.js:3563
+#: .\static\HLC\JS\HLCview.js:4217
+msgid ""
+"Welcome to Horseless Carriage Online!=-NEWLINE-==-NEWLINE-=If you have any "
+"suggestions, questions or comments, then please do contact the webmaster at "
+"the email address in Contact (top right in the lobby). Thanks!"
+msgstr "Willkommen bei Horseless Carriage Online!=-NEWLINE-==-NEWLINE-=Wenn "
+"Sie Vorschläge, Fragen oder Kommentare haben, wenden Sie sich bitte an den "
+"Webmaster unter der E-Mail-Adresse in Contact (oben rechts in der Lobby). "
+"Danke!"
+
+#: .\static\HLC\JS\HLCview.js:4367
 msgid "D'MENTS"
-msgstr ""
+msgstr "ABT."
 
-#: .\static\HC\JS\HCview.js:3593
-msgid "The person having the visual colour:"
-msgstr ""
+#: .\static\HLC\JS\HLCview.js:4398
+msgid ""
+"The person having the visual colour:: %(visualColour)s has the original game"
+" cards in colour: %(originalColour)s"
+msgstr "Die Person mit der visuellen Farbe: %(visualColour)s hat die "
+"Originalspielkarten in der Farbe: %(originalColour)s"
 
-#: .\static\HC\JS\HCview.js:3593
-msgid "has the original game cards in colour:"
-msgstr ""
-
-#: .\static\HC\JS\HCwebsocket.js:32
-msgid "Connected"
-msgstr ""
-
-#: .\static\HC\JS\HCwebsocket.js:36 .\static\HC\JS\HCwebsocket.js:46
+#: .\static\HLC\JS\HLCwebsocket.js:13 .\static\HLC\JS\HLCwebsocket.js:40
+#: .\static\HLC\JS\HLCwebsocket.js:90 .\static\HLC\JS\HLCwebsocket.js:102
 msgid "Disconnected"
-msgstr ""
+msgstr "Getrennt"
 
-#: .\static\HC\JS\HCwebsocket.js:40
+#: .\static\HLC\JS\HLCwebsocket.js:36
+msgid "Connecting..."
+msgstr "Verbinden..."
+
+#: .\static\HLC\JS\HLCwebsocket.js:85
+msgid "Connected"
+msgstr "Verbunden"
+
+#: .\static\HLC\JS\HLCwebsocket.js:95
 msgid "Error"
-msgstr ""
+msgstr "Fehler"
+
+#~ msgid "House %(houseNum)s sold %(burgSold)s burgers and %(beerSold)s beers"
+#~ msgstr ""
+#~ " %(burgSold)s burgers UND %(beerSold)s beers warren von haus %(houseNum)s "
+#~ "gesolltet"

@@ -26,7 +26,6 @@ SO_NO_MILESTONES = 2
 SO_NO_CEO_MILESTONE = 3
 SO_ALLOW_SURRENDER = 5
 SO_NO_RADIO_MILESTONE = 6
-# SO_MAP_SEED = 7
 SO_HARD_CHOICES = 8
 SO_FRY_CHEFS = 9
 SO_KIMCHI = 10
@@ -58,17 +57,19 @@ SO_FRIED_CHICKEN = 46
 SO_STADIUM = 47
 SO_LABOR_MARKET = 48
 SO_SECOND_BAILOUT = 49
+SO_MEDIA_LINE = 50
 
 # Other options
 SO_AUTO_ENABLE_REWINDS = 99
 SO_STRICT_PAYDAY_FRIDGE = 101
 SO_SANDBOX_MODE = 103
 SO_RANDOM_MODULES = 200
-SO_RANDOM_MODULES_OLD_MS = 201
-SO_RANDOM_MODULES_NEW_MS = 202
 # Marker only: add Chinese expansion modules to the random pool at startGame.
 # Not shown as a starting-option icon.
 SO_RANDOM_MODULES_CHINESE = 203
+# Marker only: add fan expansion modules to the random pool at startGame.
+# Not shown as a starting-option icon.
+SO_RANDOM_MODULES_FAN = 204
 SO_DRAFT_MODULES = 205
 SO_MIN_RANDOM_MODULES = 210
 SO_MAX_RANDOM_MODULES = 211

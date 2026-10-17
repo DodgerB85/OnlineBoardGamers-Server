@@ -16,7 +16,7 @@ export const KICKOUT_SOLO_DELAY_MS = 2 * 24 * 60 * 60 * 1000
 
 export const SUPER_USERS = ["BotKickStarter"]
 export const DEBUG_USERS = ["admin", "BotKickStarter", "Ross"]
-export const DEBUG_PRACTICE_USERS = ["JoshuaAcosta", "BlackM", "chaosmagician"]
+export const DEBUG_PRACTICE_USERS = ["JoshuaAcosta", "BlackM", "chaosmagician", "Lacking_Oxygen"]
 export const DEBUG_VERTEX_USERS = ["Ross"]
 export const APP_ONLY_USERS = ["Ross"]
 

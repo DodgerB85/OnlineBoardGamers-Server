@@ -7,6 +7,7 @@
   <td class="col-game" data-label="{% translate "Game Name" %}">
     {% if game.chatNotification %}<img class="startingOption" alt="{% translate "Chat" %}" width="20" height="20" src="{% static "Lobby/images/icon-chat-lobby.svg" %}" title="{% translate "New Chat Message" %}">{% endif %}
     <a href="/{{ game.gameCode }}/{{ game.gameID }}/show/"><strong class="col-game-name">{{ game.gameName }}</strong></a>
+    {% if game.hotStreak.days > 0 %}<span class="game-streak" title="{% if game.hotStreak.hasMovedToday %}{% translate 'Daily goal met · UTC' %}{% else %}{% translate 'One turn by anyone before midnight UTC keeps the streak alive' %}{% endif %}">🔥 {{ game.hotStreak.days }}</span>{% endif %}
     {% if game.gameDescription %}<small class="game-desc col-game-note"><i>{{ game.gameDescription }}</i></small>{% endif %}
     {% if showCurrentTurnColumn %}
       <small class="col-game-note">{{ game.pace|safe }} · {% translate "by" %} <a href="{% url 'playerInfo' usernameToProfile=game.creator %}">{{ game.creator }}</a></small>

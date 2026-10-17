@@ -98,6 +98,10 @@ export const computedHexes = computed(() => {
 				)
 				.toSorted((a, b) => b[1] - a[1])
 
+			// CITY: a city allows two buildings; the newer (higher id) one goes to the top-centre spot
+			// so both stay visible instead of stacking on the normal bottom-centre spot
+			const cityTopBldgID = hex.hexTerrainID === rf.CITY && buildingsInBucket.length > 1 ? Math.max(...buildingsInBucket.map((b) => b.id)) : -1
+
 			// Add buildings
 			for (let k = 0; k < buildingsInBucket.length; k++) {
 				let building = buildingsInBucket[k]
@@ -114,7 +118,7 @@ export const computedHexes = computed(() => {
 				buildingGfx.img = building.gfx
 				buildingGfx.width = rf.DEFAULT_BLDG_WIDTH
 				buildingGfx.height = rf.DEFAULT_BLDG_HEIGHT
-				buildingGfx.pos = bucketBuildingLocations[0]
+				buildingGfx.pos = building.id === cityTopBldgID ? bucketBuildingLocations[bucketBuildingLocations.length - 1] : bucketBuildingLocations[0]
 				buildingGfx.strengthened = building.strengthened === true
 
 				// NO! DO NOT SET IT HERE! CAUSES RECURSIONS!

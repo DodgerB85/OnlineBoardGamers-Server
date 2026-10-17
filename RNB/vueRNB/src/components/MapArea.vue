@@ -198,15 +198,15 @@ const shouldShowLandBubble = computed(() => {
 	return store.context.planeInFlight
 })
 
-// Bombs: show a bubble above the selected transporter when it can blow up a building
-// on its hex (or when the building there has been strengthened, so it can't)
+// Bombs: show a target bubble per non-strengthened building on the selected
+// transporter's hex. A bomb must be carried by the transporter to be usable.
 const bombBubbleInfo = computed(() => {
 	if (!rf.PHASE_BUILDINGS.includes(store.gameflow.phase)) return null
 	if (store.context.selectedTransporterIDforTM === -1) return null
 	const transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
 	if (!transporterObj || !loc.isAnyHexLocation(transporterObj.location)) return null
-	// The transporter must have a bomb it can use
-	const hasBomb = loc.getAllResourcesAccessibleToTransporter(transporterObj.id, true).some((res) => res.type === rf.RES_BOMB)
+	// The transporter must carry a bomb
+	const hasBomb = model.resourcesOnTransport(transporterObj.id).some((res) => res.type === rf.RES_BOMB)
 	if (!hasBomb) return null
 	const hexID = transporterObj.location[1]
 	const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
@@ -340,11 +340,17 @@ function getBombBubblePosition() {
 	return { transform: `translate(0px, -70px)` }
 }
 
-// Bombs: blow up every (non-strengthened) building on the transporter's hex
+// Bombs: with a single target, blow it up directly; with several (a city), highlight
+// them so the player can click the one they want
 function handleBombBubbleClick() {
 	const info = bombBubbleInfo.value
 	if (!info || info.strengthened) return
-	map.clickedBombOption(info.bombables[0].id)
+	if (info.bombables.length === 1) {
+		map.clickedBombOption(info.bombables[0].id)
+		return
+	}
+	store.context.eligibleBuildingsToBomb = info.bombables.map((b) => b.id)
+	store.context.buildingIDsToHighlight = info.bombables.map((b) => b.id)
 }
 
 // Planes & Aeroports: handle Taxi mode selection
@@ -360,13 +366,11 @@ function handleTakeoffModeClick() {
 	store.context.selectedPlaneMode = rf.MOVE_FLY
 	store.context.planeModeSelectionActive = false
 	store.context.planeInFlight = true
-	// Position plane top-center of hex for takeoff
+	// Position the plane image in the top-middle of the hex for takeoff
 	const transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
 	if (transporterObj) {
-		const hex = model.getHexByID(transporterObj.location[1])
-		if (hex) {
-			transporterObj.rawTransporterXY = [hex.rawXY[0], hex.rawXY[1] - 40 * store.RATIO]
-		}
+		const flightPos = map.getPlaneInFlightPosition(transporterObj)
+		if (flightPos) transporterObj.rawTransporterXY = flightPos
 	}
 	highlight.updateAllHighlightsForTransporterMode()
 }
@@ -377,10 +381,12 @@ function handleLandClick() {
 	if (!transporterObj) return
 	// Validate landing using canPlaneLandOnTile on current location
 	if (!model.canPlaneLandOnTile(transporterObj, transporterObj.location)) {
-		rf.doAdminAlrt('Planes can only land on empty land tiles (no buildings, no unattended geese)')
+		rf.doAdminAlrt('Planes can only land on empty tiles (no buildings, no unattended geese)')
 		return
 	}
-	// Exit flight mode - plane lands where it is
+	// Exit flight mode - plane lands where it is. Landing ends its movement, so a
+	// takeoff followed by an immediate land can never be turned into a taxi move.
+	transporterObj.remainingMoves = 0
 	store.context.planeInFlight = false
 	store.context.selectedPlaneMode = rf.MOVE_TAXI
 	context.resetContextAndHighlights()

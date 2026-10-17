@@ -54,3 +54,7 @@ processes:
   urr:
     command: "npm run dev"
     working_dir: "URR/vueURR"
+
+  row:
+    command: "npm run dev"
+    working_dir: "ROW/vueROW"

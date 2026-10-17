@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import path
+from django.views.generic import RedirectView
 
 from Lobby.models import Game
 
@@ -30,19 +31,28 @@ urlpatterns = [
         views.fanExpansionsHelp,
         name="fanExpansionsHelp",
     ),
-    path("test/", views.test, name="test"),
     path("gameAdmin/", views.gameAdmin, name="gameAdmin"),
-    path("<int:game_id>/show2/", views.showGame, name="showFCMgame"),
-    path("<int:game_id>/show/", views.showGameVue, name="showFCMgameVue"),
+    path("<int:game_id>/show/", views.showFCMgame, name="showFCMgame"),
+
+    # --- TEMPORARY: old raw-JS game URLs. The raw-JS client is gone, but
+    # bookmarks and old emails still point at /show2/. Safe to delete this
+    # block (and its test in tests/test_fcm_show_route.py) after a month or
+    # two - nothing in the site generates these URLs any more.
+    path(
+        "<int:game_id>/show2/",
+        RedirectView.as_view(pattern_name="FCM:showFCMgame", permanent=False),
+    ),
+    # --- end TEMPORARY -----------------------------------------------------
+
     path(
         "<int:game_id>/spoilerFree/",
-        views.showGameVue,
+        views.showFCMgame,
         {"spoilerFree": True},
         name="showFCMgameSpoilerFree",
     ),
     path(
         "<int:game_id>/replay/<int:replayStep>/",
-        views.showGameVue,
+        views.showFCMgame,
         {"spoilerFree": True},
         name="showFCMreplayStep",
     ),
@@ -62,4 +72,5 @@ urlpatterns = [
     path("data/<int:dataType>/", views.FCMdata, name="FCMdata"),
     path("sendChatMessage/", views.sendChatMessage, name="sendChatMessage"),
     path("castVote/", views.castVote, name="castVoteCNS"),
+    path("nudgeTourneyAdmins/", views.nudgeTourneyAdmins, name="nudgeTourneyAdmins"),
 ]

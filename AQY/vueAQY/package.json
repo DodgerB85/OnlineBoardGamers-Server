@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "doctrine": "^3.0.0",
-    "dotenv": "^17.3.1",
     "fast-copy": "^3.0.2",
     "pinia": "^2.1.7",
     "prettier-eslint": "^16.3.0",

@@ -6,7 +6,6 @@
  *
  */
 import * as view from "../js/FCMview"
-//import * as model from '../js/FCMmodel'
 import * as controller from "../js/FCMcontroller.js"
 import * as plyr from "../js/FCMplayer"
 

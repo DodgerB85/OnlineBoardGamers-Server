@@ -429,6 +429,7 @@ function validateOptions(change) {
 			removeOption("minModules")
 			removeOption("maxModules")
 			removeOption("includeChineseExpansion")
+			removeOption("includeFanExpansion")
 			removeOption("fcmAI")
 			document.getElementById("nonExpertOptions").style.display = "inline-block"
 		}
@@ -439,6 +440,7 @@ function validateOptions(change) {
 			addOption("minModules")
 			addOption("maxModules")
 			addOption("includeChineseExpansion")
+			addOption("includeFanExpansion")
 			document.getElementById("random_originalMS").checked = true
 			document.getElementById("draftModules").checked = false
 			removeOption("draft_originalMS")
@@ -452,6 +454,7 @@ function validateOptions(change) {
 			removeOption("minModules")
 			removeOption("maxModules")
 			removeOption("includeChineseExpansion")
+			removeOption("includeFanExpansion")
 		}
 	} else if (change === "random_originalMS") {
 		let newOption1 = new Option("15", "15")

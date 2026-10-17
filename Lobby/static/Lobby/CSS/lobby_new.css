@@ -762,3 +762,5 @@
         text-align: center;
     }
 }
+
+.game-streak { display: inline-block; margin-left: 6px; white-space: nowrap; }

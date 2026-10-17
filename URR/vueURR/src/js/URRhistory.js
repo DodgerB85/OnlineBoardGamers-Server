@@ -1,6 +1,6 @@
 import * as rf from "./URRreference.js"
-import { harvestAmount, harvestDistribution, irrigatedRegionCounts } from "./URRrules.js"
-import { startWaterRouting, allocateWater, advanceWaterRouting } from "./URRwater.js"
+import * as rules from "./URRrules.js"
+import * as water from "./URRwater.js"
 
 function readSnapshot(entry) {
 	if (!entry) return null
@@ -10,7 +10,7 @@ function readSnapshot(entry) {
 function irrigationDetails(game, areas) {
 	return areas.map((area) => ({
 		area: area.id, label: area.label || area.id, state: area.irrigatedBy, player: area.owner,
-		text: `${area.label || area.id}${area.isCity ? ' (city)' : ''} · ${rf.STATE_NAMES[area.irrigatedBy]} irrigates · ${game.players[area.owner].displayName} receives ${rf.IRRIGATED_LANDOWNER_INCOME * (area.isCity ? 2 : 1)} SPL`,
+		text: `${area.label || area.id}${area.isCity ? ' (city)' : ''} · ${rf.STATE_NAMES[area.irrigatedBy]} irrigates · Landowner receives ${rf.IRRIGATED_LANDOWNER_INCOME * (area.isCity ? 2 : 1)} SPL`,
 	}))
 }
 
@@ -22,9 +22,9 @@ function routingSnapshot(before, after, action, startsRain) {
 	if (startsRain) {
 		for (const area of game.board.areas) area.irrigatedBy = null
 		game.rain = { step: "routing", outflow: null, harvestOrder: [] }
-		startWaterRouting(game)
-	} else if (action?.type === "allocateWater") allocateWater(game, action)
-	else if (action?.type === "advanceWater") advanceWaterRouting(game)
+		water.startWaterRouting(game)
+	} else if (action?.type === "allocateWater") water.allocateWater(game, action)
+	else if (action?.type === "advanceWater") water.advanceWaterRouting(game)
 	return game
 }
 
@@ -61,8 +61,7 @@ export function computeHistory(history, creationTimestamp) {
 		if (finishesRouting) {
 			wetGame = routingSnapshot(before, after, action, startsRain)
 			const wet = wetGame.board.areas.filter((area) => area.irrigatedBy !== null)
-			const payments = after.players.map((player, playerIndex) => ({ player: playerIndex, amount: wet.filter((area) => area.owner === playerIndex).reduce((total, area) => total + rf.IRRIGATED_LANDOWNER_INCOME * (area.isCity ? 2 : 1), 0), name: player.displayName })).filter((payment) => payment.amount > 0)
-			const text = wet.length ? `${wet.length} hexes irrigated; ${after.rain.outflow} water flows off the board. Landowner income: ${payments.map((payment) => `${payment.name} +${payment.amount} SPL`).join(', ')}. This income is separate from the states' harvests.` : `No land was irrigated. All ${after.rain.outflow} water flows off the board: the reservoirs and pump networks could not irrigate any owned land. No irrigation income or harvest is paid.`
+			const text = wet.length ? `${wet.length} hexes irrigated; ${after.rain.outflow} water flows off the board. Landowner income is shown below. This income is separate from the states' harvests.` : `No land was irrigated. All ${after.rain.outflow} water flows off the board: the reservoirs and pump networks could not irrigate any owned land. No irrigation income or harvest is paid.`
 			const summary = addSummary("riverComplete", wet.length ? "Water routing complete · irrigation income paid" : "Water routing complete · no land irrigated", text, irrigationDetails(wetGame, wet))
 			Object.assign(summary, { waterTotal: wet.length + after.rain.outflow, irrigatedCount: wet.length, outflow: after.rain.outflow })
 		} else if (startsRain || before.rain.step === "routing") {
@@ -79,37 +78,38 @@ export function computeHistory(history, creationTimestamp) {
 			if (after.era >= 4) for (const nation of before.nations.filter((nation) => !nation.isRemoved && after.nations[nation.id].isRemoved)) details.push({ nation: nation.id, text: `${rf.NATION_NAMES[nation.id]} dissolves` })
 			addSummary("era", `Era ${after.era === 5 ? 'M' : after.era} begins`, details.length ? "Old crews retire and independent nations dissolve as shown below." : "The new equipment era begins; no crews retire.", details)
 		}
-		const beginsDevelopment = before.gameflow.phase === rf.PHASE_SETTLEMENT && after.gameflow.phase === rf.PHASE_DEVELOPMENT
+		// With no active state the whole development phase and rainy season resolve inside the move that ends settlement.
+		const beginsDevelopment = before.gameflow.phase === rf.PHASE_SETTLEMENT && (after.gameflow.phase !== rf.PHASE_SETTLEMENT || after.gameflow.turn > before.gameflow.turn)
 		const paysNegotiationIncome = before.gameflow.phase === rf.PHASE_DIVIDING_NATIONS && action?.type === "pass" && before.gameflow.passes === before.players.length - 1 && before.nations[rf.NATION_ASHUR].ownerType !== null
 		if (beginsDevelopment || paysNegotiationIncome) {
-			const details = after.nations.filter((nation) => !nation.isRemoved && nation.ownerType !== null).map((nation) => ({ nation: nation.id, player: nation.ownerType === "player" ? nation.owner : undefined, state: nation.ownerType === "state" ? nation.owner : undefined, text: `${rf.NATION_NAMES[nation.id]} pays ${rf.NATION_INCOMES[nation.id]} SPL to ${nation.ownerType === 'player' ? after.players[nation.owner].displayName : `${rf.STATE_NAMES[nation.owner]} treasury`}` }))
+			const details = after.nations.filter((nation) => !nation.isRemoved && nation.ownerType !== null).map((nation) => ({ nation: nation.id, player: nation.ownerType === "player" ? nation.owner : undefined, state: nation.ownerType === "state" ? nation.owner : undefined, text: `${rf.NATION_NAMES[nation.id]} pays ${rf.NATION_INCOMES[nation.id]} SPL to ${nation.ownerType === 'player' ? 'private cash' : `${rf.STATE_NAMES[nation.owner]} treasury`}` }))
 			addSummary("nationIncome", "Nation income paid", details.length ? "Each surviving nation pays its owner." : "No surviving owned nations; no nation income is paid.", details)
-			if (beginsDevelopment) addSummary("development", "Development begins", "Crews are ready to dig. Active states develop in this order:", after.gameflow.stateOrder.map((id) => ({ state: id, text: `${rf.STATE_NAMES[id]}${before.states[id].isActive ? '' : ' · emerges this round'}` })))
+			if (beginsDevelopment) addSummary("development", "Development begins", after.gameflow.stateOrder.length ? "Crews are ready to dig. Active states develop in this order:" : "No states have 6 lands yet, so nothing to develop this turn.", after.gameflow.stateOrder.map((id) => ({ state: id, text: `${rf.STATE_NAMES[id]}${before.states[id].isActive ? '' : ' · emerges this round'}` })))
 		}
 		if (before.rain.step === "harvest" && action?.type === "harvest") {
 			const id = before.rain.harvestOrder[0]
-			const amount = harvestAmount(before, id)
-			const distribution = harvestDistribution(before, id, amount)
-			const details = action.choice === "store" ? [{ state: id, text: `${rf.STATE_NAMES[id]} treasury receives ${amount} SPL` }] : distribution.payments.flatMap((payment, player) => payment > 0 ? [{ player, text: `${before.players[player].displayName} receives ${payment} SPL` }] : [])
+			const amount = rules.harvestAmount(before, id)
+			const distribution = rules.harvestDistribution(before, id, amount)
+			const details = action.choice === "store" ? [{ state: id, text: `${rf.STATE_NAMES[id]} treasury receives ${amount} SPL` }] : distribution.payments.flatMap((payment, player) => payment > 0 ? [{ player, text: `Receives ${payment} SPL` }] : [])
 			if (action.choice !== "store") details.push({ state: id, text: `${rf.STATE_NAMES[id]} treasury keeps ${distribution.retained} SPL` })
 			addSummary("harvest", `${rf.STATE_NAMES[id]} harvest · ${amount} SPL`, action.choice === "store" ? "Harvest stored in the state treasury." : "Harvest distributed among landowners in this state, in proportion to their owned land. The treasury keeps any remainder.", details)
 		}
 		if (finishesRouting || (before.rain.step === "harvest" && action?.type === "harvest")) {
 			const candidates = finishesRouting ? before.gameflow.stateOrder : before.rain.harvestOrder.slice(1)
 			for (const id of candidates.filter((id) => !after.rain.harvestOrder.includes(id))) {
-				const amount = harvestAmount(wetGame, id)
-				const distribution = harvestDistribution(wetGame, id, amount)
-				const details = distribution.payments.flatMap((payment, player) => payment > 0 ? [{ player, text: `${wetGame.players[player].displayName} receives ${payment} SPL` }] : [])
+				const amount = rules.harvestAmount(wetGame, id)
+				const distribution = rules.harvestDistribution(wetGame, id, amount)
+				const details = distribution.payments.flatMap((payment, player) => payment > 0 ? [{ player, text: `Receives ${payment} SPL` }] : [])
 				details.push({ state: id, text: `${rf.STATE_NAMES[id]} treasury keeps ${distribution.retained} SPL` })
 				addSummary(`automaticHarvest-${id}`, `${rf.STATE_NAMES[id]} · automatic harvest`, amount === 0 ? "No land was irrigated by this state. Harvest is 0 SPL; nobody receives a harvest payment." : `This state revolted and must distribute its ${amount} SPL harvest among its landowners.`, details)
 			}
 		}
 		if ((before.rain.step === "harvest" || finishesRouting) && after.rain.step === "complete") {
-			const prices = rf.ALL_LAND_TYPES.map((type) => ({ terrain: type, text: `${rf.LAND_NAMES[type]}: ${before.landPrices[type]} → ${after.landPrices[type]} SPL · ${irrigatedRegionCounts(wetGame)[type]} irrigated regions` }))
+			const prices = rf.ALL_LAND_TYPES.map((type) => ({ terrain: type, text: `${rf.LAND_NAMES[type]}: ${before.landPrices[type]} → ${after.landPrices[type]} SPL · ${rules.irrigatedRegionCounts(wetGame)[type]} irrigated regions` }))
 			addSummary("rainEnd", "Rainy season complete · land prices updated", "Each irrigated region raises its terrain's market price by one step. Dry terrain stays at the same price. Irrigation markers are cleared for the next round.", prices)
 		}
 		if (before.gameflow.phase !== rf.PHASE_GAME_OVER && after.gameflow.phase === rf.PHASE_GAME_OVER) {
-			addSummary("finalScoring", "Game over · final assets", "Private cash plus land at its final market value determines the winner. State treasuries and independent nations do not count.", after.players.map((player, index) => ({ player: index, text: `${player.displayName}: ${player.money} SPL cash + ${player.score - player.money} SPL land = ${player.score} SPL` })))
+			addSummary("finalScoring", "Game over · final assets", "Private cash plus land at its final market value determines the winner. State treasuries and independent nations do not count.", after.players.map((player, index) => ({ player: index, text: `${player.money} SPL cash + ${player.score - player.money} SPL land = ${player.score} SPL` })))
 		}
 		before = after
 	}

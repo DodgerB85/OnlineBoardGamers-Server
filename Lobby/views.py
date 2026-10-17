@@ -393,6 +393,7 @@ GAME_NAMES_MODELS = {
     "KFW": "KFW",
     "WEB": "WEB",
     "RNB": "RNB",
+    "ROW": "ROW",
 }
 
 
@@ -713,6 +714,7 @@ def feedback(request):
 
     if request.method == "POST":
         feedback_text = request.POST.get("feedback", "")
+        category = request.POST.get("category", "")
         if not feedback_text.strip():
             messages.error(request, gettext("Please enter some feedback."))
             return render(request, "Lobby/feedback.html")
@@ -728,6 +730,7 @@ def feedback(request):
                 "username": username,
                 "email": email,
                 "feedback": feedback_text,
+                "category": category,
                 "domain": "www.OnlineBoardGamers.com",
             },
         )
@@ -745,6 +748,7 @@ def feedback(request):
             f"NEW LOBBY DESIGN FEEDBACK\n"
             f"User: {username}\n"
             #f"Email: {email}\n"
+            f"Category: {category}\n"
             f"Feedback: {feedback_text}"
         )
 
@@ -1629,7 +1633,15 @@ def login_view(request):
             request.session.modified = True  # Force session save
 
             profile = Profile.objects.get(user=user)
-            language_code = profile.profileLanguage
+            # The cookie is the user's live choice - they may have switched language while
+            # logged out, or on another browser. The profile only mirrors it, so that the
+            # language of notification emails matches the language of the site.
+            cookie_language = request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME)
+            supported = [code for code, name in settings.LANGUAGES]
+            language_code = cookie_language if cookie_language in supported else profile.profileLanguage
+            if language_code != profile.profileLanguage:
+                profile.profileLanguage = language_code
+                profile.save()
             translation.activate(language_code)
 
             nxt = request.POST.get("next", None)  # Use .get() to avoid KeyError
@@ -1646,7 +1658,7 @@ def login_view(request):
             else:
                 response = HttpResponseRedirect(nxt)
 
-            response.set_cookie(settings.LANGUAGE_COOKIE_NAME, language_code)
+            response.set_cookie(settings.LANGUAGE_COOKIE_NAME, language_code, max_age=settings.LANGUAGE_COOKIE_AGE)
             return response
         else:
             try:
@@ -1754,6 +1766,12 @@ def profile(request):
                 error_string = " ".join(error_messages)
                 messages.error(request, error_string)
                 return redirect("profile")
+        elif request.POST["action"] == "updateProfileAppearance":
+            profile = Profile.objects.get(user=request.user)
+            profile.darkMode = "darkMode" in request.POST
+            profile.save(update_fields=["darkMode"])
+            messages.success(request, gettext("Your appearance preferences have been updated successfully"))
+            return redirect("profile")
         elif request.POST["action"] == "updateProfileFavourites":
             profile = Profile.objects.get(user=request.user)
             profile.preferredRestaurantColour = request.POST["fcmResto"]
@@ -1791,6 +1809,9 @@ def profile(request):
             profile.liveNotification = request.POST["liveNotif"]
 
             profile.sendEmailNotificationOnTurn = "sendEmails" in request.POST
+            profile.hotStreakEnabled = "hotStreakEnabled" in request.POST
+            profile.hotStreakReminders = "hotStreakReminders" in request.POST
+            profile.receiveTurnNudges = "receiveTurnNudges" in request.POST
 
             emailNotifications = [
                 int(request.POST["yourTurnEmail"]),
@@ -2522,6 +2543,41 @@ def createDDLpage(request, gameID=0):
 
 
 @login_required
+def createROWpage(request, gameID=0):
+    experienced = SF_hasRequiredExperience(request, "ROW", Game)
+    if request.method != "POST" and gameID == 0:
+        return render(request, "Lobby/createROW.html", {"experienced": experienced})
+    elif request.method != "POST" and gameID != 0:
+        try:
+            currentGame = Game.objects.get(id=gameID, gameCode="ROW")
+        except Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist")) from None
+
+        all_players = currentGame.players.exclude(player=request.user).select_related("player")
+        playerNames = [gp.player.username for gp in all_players if gp.player]
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+
+        messages.success(request, (gettext("Game creation for rematch")))
+        return render(
+            request,
+            "Lobby/createROW.html",
+            {
+                "fillData": True,
+                "gameName": currentGame.presenter().getGameName(),
+                "gameDescription": currentGame.gameDescription,
+                "gamePace": currentGame.gamePace,
+                "playerNumber": currentGame.maxPlayers,
+                "playerNames": playerNames,
+                "kickoutDuration": currentGame.kickoutDuration,
+                "startingOptions": loadedStartingOptions,
+                "experienced": experienced,
+            },
+        )
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
 def createPAPpage(request, gameID=0):
     experienced = SF_hasRequiredExperience(request, "PAP", Game)
     if request.method != "POST" and gameID == 0:
@@ -3104,7 +3160,6 @@ def playerInfo(request, usernameToProfile):
             "jointWinPercentage": jointWinPercentage,
             "jointGameStats": jointGameStats,
         },
-        # using="jinja2",
     )
 
     return response
@@ -3531,10 +3586,9 @@ def deleteGame(request, gameCode):
 
     jsonData = json.loads(request.body)
 
-    gameModel = GAME_NAMES_MODELS.get(gameCode)
+    # No GAME_NAMES_MODELS gate here: gameCode is matched against the row itself,
+    # so newer games (URR, DDL, ...) aren't rejected as "Already Deleted".
     try:
-        if gameModel is None:
-            return JsonResponse({"noGame": True}, safe=False)
         currentGame = Game.objects.get(id=jsonData["gameID"], gameCode=gameCode)
     except Game.DoesNotExist:
         return JsonResponse({"noGame": True}, safe=False)
@@ -4432,15 +4486,24 @@ def MiniTournament(request, Mini_Tournament_id):
 
         if "understand_movement" not in request.POST:
             messages.error(request, gettext("Please tick to confirm you can move regularly"))
-            HttpResponseRedirect(reverse("MiniTournament", kwargs={"Mini_Tournament_id": Mini_Tournament_id}))
+            return HttpResponseRedirect(reverse("MiniTournament", kwargs={"Mini_Tournament_id": Mini_Tournament_id}))
 
         # Always remove from invited just in case
         Mini_Tournament.invitedPlayers.remove(request.user)
 
-        if Mini_Tournament and Mini_Tournament.startingPlayers.count() < Mini_Tournament.maxTournamentPlayers:
-            Mini_Tournament.startingPlayers.add(request.user)
-            Mini_Tournament.save()
-            if Mini_Tournament.startingPlayers.count() == Mini_Tournament.maxTournamentPlayers:
+        # Lock the row so two simultaneous joins can't both pass the count check
+        startTournament = False
+        with transaction.atomic():
+            Mini_Tournament = Tournament.objects.select_for_update().get(id=Mini_Tournament_id, tournamentCategory="Mini")
+            joinAccepted = Mini_Tournament.startingPlayers.count() < Mini_Tournament.maxTournamentPlayers
+            if joinAccepted:
+                Mini_Tournament.startingPlayers.add(request.user)
+                Mini_Tournament.save()
+                startTournament = Mini_Tournament.startingPlayers.count() == Mini_Tournament.maxTournamentPlayers
+
+        if joinAccepted:
+            if startTournament:
+                # Start outside the lock: matchmaking can take ~30s
                 SF_startAnyTournament(request, Mini_Tournament)
             messages.success(request, (gettext("You have joined the Tournament")))
         else:
@@ -5290,6 +5353,16 @@ def MainTournament(request, Main_Tournament_id):
         except Tournament.DoesNotExist:
             raise Http404(gettext("Tournament does not exist")) from None
 
+        if "startTournament" in request.POST:
+            if request.user.username != "admin":
+                messages.error(request, gettext("Illegal Access"))
+            elif currentTournament.tournamentStatus != OPEN:
+                messages.error(request, gettext("This tournament cannot be started"))
+            else:
+                SF_startAnyTournament(request, currentTournament)
+                messages.success(request, gettext("Tournament started"))
+            return HttpResponseRedirect(reverse("MainTournament", kwargs={"Main_Tournament_id": Main_Tournament_id}))
+
         if currentTournament.tournamentStatus not in [OPEN, PRIVATE]:
             messages.error(request, gettext("This tournament is not open for signup yet"))
             return HttpResponseRedirect(reverse("MainTournament", kwargs={"Main_Tournament_id": Main_Tournament_id}))
@@ -5298,10 +5371,20 @@ def MainTournament(request, Main_Tournament_id):
             messages.error(request, gettext("Please tick to confirm you can move regularly"))
             return HttpResponseRedirect(reverse("MainTournament", kwargs={"Main_Tournament_id": Main_Tournament_id}))
 
-        if currentTournament and currentTournament.startingPlayers.count() < currentTournament.maxTournamentPlayers:
-            currentTournament.startingPlayers.add(request.user)
-            currentTournament.save()
-            if currentTournament.startingPlayers.count() == currentTournament.maxTournamentPlayers:
+        # Lock the row so two simultaneous joins can't both pass the count check
+        startTournament = False
+        with transaction.atomic():
+            currentTournament = Tournament.objects.select_for_update().get(id=Main_Tournament_id, tournamentCategory="Main")
+            # Re-verify status and count inside the lock, in case the tournament started while waiting
+            joinAccepted = currentTournament.tournamentStatus in [OPEN, PRIVATE] and currentTournament.startingPlayers.count() < currentTournament.maxTournamentPlayers
+            if joinAccepted:
+                currentTournament.startingPlayers.add(request.user)
+                currentTournament.save()
+                startTournament = currentTournament.startingPlayers.count() == currentTournament.maxTournamentPlayers
+
+        if joinAccepted:
+            if startTournament:
+                # Start outside the lock: matchmaking can take ~30s
                 SF_startAnyTournament(request, currentTournament)
             messages.success(request, (gettext("You have joined the Tournament")))
         else:

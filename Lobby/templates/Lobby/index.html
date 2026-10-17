@@ -104,13 +104,7 @@
 {% block body %}
   
     <div class="page landing">
-      {% if messages %}
-        <div class="messages">
-          {% for message in messages %}
-            <div class="pill {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
+      {% include "Lobby/messages.html" %}
       <section class="card hero">
         <div class="hero-text">
           <h1 class="hero-title">{% translate "Play Splotter & other classics online — free, live, with friends or solo." %}</h1>

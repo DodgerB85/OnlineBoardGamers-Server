@@ -30,7 +30,7 @@ const showExpandedEmployees = ref(false)
 const consentLevel = ref(0)
 
 function reserveEmployeeCount(employee) {
-	if (employee === rf.TEMPORARY_WORKER) return store.players.length - (store.laborMarket?.removedTemporaryWorkers || 0)
+	if (employee === rf.TEMPORARY_WORKER) return store.players.length - store.laborMarket.removedTemporaryWorkers
 	return store.availableEmployees[employee]
 }
 
@@ -244,9 +244,10 @@ const computedEmployeeArrangementForDisplay = computed(() => {
 	let employeeArrangement = structuredClone(rf.EMPLOYEE_ARRANGEMENT)
 
 	// If you have jazz musicians, but no movie star B, then combine them onto one line
+	// (indexes shifted +5 by the Media Line marketer row inserted at 50-54)
 	if (store.availableEmployees[rf.B_MOVIE_STAR] < 0 && store.availableEmployees[rf.JAZZ_MUSICIAN] >= 0) {
-		employeeArrangement[56] = rf.JAZZ_MUSICIAN
-		employeeArrangement[71] = -1
+		employeeArrangement[61] = rf.JAZZ_MUSICIAN
+		employeeArrangement[76] = -1
 	}
 
 	// Remove from the general display any employee not in the game
@@ -322,10 +323,27 @@ const svgInstructions = computed(() => {
 	currentLeft = initialLeft
 	addLine(currentLeft, currentTop, currentLeft + horizontalShift * 3, currentTop)
 
-	const extraMarketers = actualArr.filter((id) => [rf.MASS_MARKETEER, rf.RURAL_MARKETEER, rf.GOURMET_FOOD_CRITIC, rf.HAWKER_MARKETEER].includes(id)).length
+	// Module marketers branch straight off the trainee; the Media Line pair
+	// chains trainee -> telemarketer -> TV announcer -> brand director (upgrade rules)
+	const moduleMarketers = actualArr.filter((id) => [rf.MASS_MARKETEER, rf.RURAL_MARKETEER, rf.GOURMET_FOOD_CRITIC, rf.HAWKER_MARKETEER].includes(id)).length
+	const hasTelemarketer = actualArr.includes(rf.TELEMARKETER)
+	const hasTvAnnouncer = actualArr.includes(rf.TV_ANNOUNCER)
+	const extraMarketers = moduleMarketers + (hasTelemarketer || hasTvAnnouncer ? 1 : 0)
 
-	for (let i = 0; i < extraMarketers; i++) {
+	for (let i = 0; i < moduleMarketers; i++) {
 		lines.push(generatePath(currentLeft, currentTop, -1, i + 1))
+	}
+	const tmRow = moduleMarketers + 1 // 1-based row below the marketing chain
+	const marketerColX = initialLeft + horizontalShift
+	if (hasTelemarketer || hasTvAnnouncer) {
+		lines.push(generatePath(currentLeft, currentTop, -1, tmRow)) // trainee down to the Media Line row
+	}
+	if (hasTelemarketer && hasTvAnnouncer) {
+		addLine(marketerColX, currentTop + verticalShift * tmRow, marketerColX + horizontalShift, currentTop + verticalShift * tmRow) // telemarketer -> TV announcer
+	}
+	if (hasTvAnnouncer) {
+		// Over to the brand director's column, then straight up into its card
+		lines.push({ type: "path", d: `M ${marketerColX + horizontalShift} ${currentTop + verticalShift * tmRow} h ${horizontalShift} v ${-verticalShift}` })
 	}
 
 	// --- ERRAND BOYS ---
@@ -403,8 +421,8 @@ function generatePath(x, y, dir, rows) {
 /*** END SVG */
 
 const sortedCampaigns = computed(() => {
-	// We spread into a new array so we don't mutate the store directly
-	return [...store.availableMarketingCampaigns].sort((a, b) => a - b)
+	// We spread into a new array so we don't mutate the store directly.
+	return [...store.availableMarketingCampaigns].sort((a, b) => rules.campaignSortKey(a) - rules.campaignSortKey(b))
 })
 </script>
 
@@ -622,7 +640,7 @@ const sortedCampaigns = computed(() => {
 						<div class="milestoneTitle">{{ rf.MILESTONES_STR[ms].title.toUpperCase() }}</div>
 						<div class="milestoneText">{{ rf.MILESTONES_STR[ms].description }}</div>
 						<div class="milestoneSpacer">&nbsp;</div>
-						<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms].img)" :class="rf.MILESTONES_STR[ms].additionalClass ? rf.MILESTONES_STR[ms].additionalClass : ''" />
+						<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms].img)" :class="rf.MILESTONES_STR[ms].additionalClass" />
 						<br v-if="milestonePlayerColours(ms).length > 0" />
 						<template v-for="(colour, i) in milestonePlayerColours(ms)" :key="i">
 							<img :src="view.getImage('player_' + personal.getCorrectedColour(colour))" style="width:30px;height:30px;padding-left:5px;" />
@@ -648,7 +666,7 @@ const sortedCampaigns = computed(() => {
 						<div class="milestoneTitle">{{ rf.MILESTONES_STR[ms[0]].title.toUpperCase() }}</div>
 						<div class="milestoneText">{{ rf.MILESTONES_STR[ms[0]].description }}</div>
 						<div class="milestoneSpacer">&nbsp;</div>
-						<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms[0]].img)" :class="rf.MILESTONES_STR[ms[0]].additionalClass ? rf.MILESTONES_STR[ms[0]].additionalClass : ''" />
+						<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms[0]].img)" :class="rf.MILESTONES_STR[ms[0]].additionalClass" />
 						<br />
 						<template v-for="(colour, i) in ms.slice(1)" :key="i">
 							<img :src="view.getImage('player_' + personal.getCorrectedColour(colour))" style="width:30px;height:30px;padding-left:5px;" />
@@ -711,7 +729,9 @@ const sortedCampaigns = computed(() => {
 											<img v-if="rf.UNIQUE_CARDS.indexOf(emp) > -1" :src="view.getImage('icon1x')" class="iconsImg" />
 											<img v-else-if="rf.HIREABLE_EMPLOYEES.indexOf(emp) > -1" :src="view.getImage('iconRecruit')" class="iconsImg" />
 											<span v-else class="blankIcon">&nbsp;</span>
-											<img v-if="rf.getRangeForEmployee(emp) === 8" :src="view.getImage('iconRangeInfinite')" class="iconsImg iconMiddle" />
+											<img v-if="emp === rf.TELEMARKETER" :src="view.getImage('iconWaveRange1')" class="iconsImg iconMiddle" />
+											<img v-else-if="emp === rf.TV_ANNOUNCER" :src="view.getImage('iconWaveRange2')" class="iconsImg iconMiddle" />
+										<img v-else-if="rf.getRangeForEmployee(emp) === 8" :src="view.getImage('iconRangeInfinite')" class="iconsImg iconMiddle" />
 											<img v-else-if="rf.getRangeForEmployee(emp) >= 1" :src="view.getImage('iconRange' + rf.getRangeForEmployee(emp))" class="iconsImg iconMiddle" :class="{ fixedHeight: rf.getRangeType(emp) === 'road' }" />
 											<span v-else class="blankIcon iconMiddle">&nbsp;</span>
 											<img v-if="rf.REQUIRE_SALARY.indexOf(emp) > -1" :src="view.getImage('iconSalary')" class="iconsImg" />
@@ -802,7 +822,7 @@ const sortedCampaigns = computed(() => {
 			</div>
 
 			<!-- LOBBYIST TILES -->
-			<div v-if="store.startingOptions && store.startingOptions.lobbyists" class="reserveSection">
+			<div v-if="store.startingOptions.lobbyists" class="reserveSection">
 				<p><b>{{ $t('topMenuViews.availableLobbyistTiles') }}</b></p>
 				<div id="allTileChoiceDivRes">
 					<div v-for="tile in rules.availableLobbyistTiles()" :key="'restile-' + tile">

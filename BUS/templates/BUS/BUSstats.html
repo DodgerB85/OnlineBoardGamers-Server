@@ -1,0 +1,237 @@
+{% extends "Lobby/layout.html" %}
+{% load static i18n compress %}
+{% block head %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+  {% compress js %}
+    <script src="{% static 'BUS/BUSstats.js' %}"></script>
+  {% endcompress %}
+
+  <link href="{% static 'Lobby/CSS/stats.css' %}" rel="stylesheet">
+{% endblock head %}
+{% block body %}
+  <div class="page">
+    {% include "Lobby/messages.html" %}
+
+    <div class="page-header">
+      <h1 class="page-title">{% translate "Bus Stats" %}</h1>
+      <a class="button button-ghost button-sm"
+         href="{% url 'stats' %}">← {% translate "Back to Main Stats" %}</a>
+    </div>
+
+    <div id="BUSstatsPage" class="card section bus-stats">
+      <div class="bus-stats-summary">
+        <div class="stats-tile">
+          <div class="stats-tile-num">{{ all_data.combined.finishedGamesCount }}</div>
+          <div class="stats-tile-label">{% translate "Finished games" %}</div>
+        </div>
+        <div class="stats-tile">
+          <div class="stats-tile-num">{{ all_data.combined.avg_turns }}</div>
+          <div class="stats-tile-label">{% translate "Average turns" %}</div>
+        </div>
+        <div class="stats-tile">
+          <div class="stats-tile-num">{{ all_data.combined.player_summary.winner.median_score }}</div>
+          <div class="stats-tile-label">{% translate "Median score of winners" %}</div>
+        </div>
+      </div>
+      <div class="callout callout-warn">
+        {% translate "Any game with a resigned or kicked player, a practice/learning game, or a Pittsburgh map game is not considered for these stats." %}
+      </div>
+      <div class="callout callout-info">
+        {% translate "These are historical stats. They show what has happened in previous games, but Bus still rewards reading and responding to the current game state." %}
+      </div>
+
+      <h2 class="bus-stats-title">{% translate "Action Statistics" %}</h2>
+      <p>
+        {% translate "Every player starts with 20 action points, and each chosen action costs one. 'Everyone else' is every losing player. Compare 'Win % when used' against a fair share of wins (100% divided by the player count) to see how the action is linked to winning." %}
+      </p>
+
+      <div class="tab">
+        <button class="tablinks" id="players3tab">{% translate "3 Player" %}</button>
+        <button class="tablinks" id="players4tab">{% translate "4 Player" %}</button>
+        <button class="tablinks" id="players5tab">{% translate "5 Player" %}</button>
+        <button class="tablinks" id="playerscombinedtab">{% translate "All Games" %}</button>
+      </div>
+
+      {% for playerCount, row in all_data.items %}
+        <div class="statsDiv" id="players{{ playerCount }}">
+          <p>
+            {% translate "Games:" %} <span class="clickableStatTD" onclick="openGameIdsPage({{ row.game_ids }})">{{ row.finishedGamesCount }}</span>
+            &nbsp;&middot;&nbsp; {% translate "Average turns:" %} {{ row.avg_turns }}
+            ({% translate "median" %} {{ row.median_turns }})
+          </p>
+          <canvas class="bar_canvas"
+                  id="bar-chartplayers{{ playerCount }}"
+                  width="1000"></canvas>
+          <script>
+            var bar_ctx = document.getElementById('bar-chartplayers{{ playerCount }}').getContext('2d');
+
+            var datasets = [{
+              label: 'Winners',
+              data: [{% for value in row.chart.winner_avg %}{{ value }},{% endfor %}],
+              backgroundColor: 'green',
+            }, {
+              label: 'Everyone else',
+              data: [{% for value in row.chart.other_avg %}{{ value }},{% endfor %}],
+              backgroundColor: 'grey',
+            }];
+
+            var bar_chart = new Chart(bar_ctx, {
+              type: 'bar',
+              data: {
+                labels: [{% for label in row.chart.labels %}"{{ label }}",{% endfor %}],
+                datasets: datasets
+              },
+              options: {
+                responsive: false,
+                legend: {
+                  display: true
+                },
+                title: {
+                  display: true,
+                  text: 'Average actions chosen per player',
+                  fontSize: 30
+                },
+                scales: {
+                  yAxes: [{
+                    ticks: {
+                      beginAtZero: true
+                    }
+                  }],
+                  xAxes: [{
+                    ticks: {
+                      fontStyle: 'bold',
+                      fontSize: 16
+                    }
+                  }]
+                }
+              }
+            });
+          </script>
+          <p class="bus-stats-note">
+            {% translate "The chart shows the average number of times each group chose that action over a whole game. Percentages are per player; every bracketed game count is clickable and opens exactly those games." %}
+          </p>
+          <table class="generalTable">
+            <tr>
+              <th>{% translate "Action" %}</th>
+              <th>{% translate "Winner average" %}</th>
+              <th>{% translate "Others average" %}</th>
+              <th>{% translate "Win % when used" %}</th>
+            </tr>
+            {% for action_name, action_data in row.action_stats.items %}
+              <tr>
+                <td>{{ action_name }}</td>
+                <td>{{ action_data.winner_avg }}</td>
+                <td>{{ action_data.other_avg }}</td>
+                <td class="clickableStatTD"
+                    onclick="openGameIdsPage({{ action_data.used_game_ids }})">{{ action_data.used_win_pct }} % ({{ action_data.used_game_count }} {% translate "games" %})</td>
+              </tr>
+            {% endfor %}
+          </table>
+
+          <h3>{% translate "At Game End (Per Player)" %}</h3>
+          <table class="generalTable">
+            <tr>
+              <th></th>
+              <th>{% translate "Winners" %}</th>
+              <th>{% translate "Everyone else" %}</th>
+            </tr>
+            <tr>
+              <td>{% translate "Score (avg and median)" %}</td>
+              <td>{{ row.player_summary.winner.avg_score }} ({{ row.player_summary.winner.median_score }})</td>
+              <td>{{ row.player_summary.other.avg_score }} ({{ row.player_summary.other.median_score }})</td>
+            </tr>
+            <tr>
+              <td>{% translate "Time stones taken" %}</td>
+              <td>{{ row.player_summary.winner.avg_time_stones }}</td>
+              <td>{{ row.player_summary.other.avg_time_stones }}</td>
+            </tr>
+            <tr>
+              <td>{% translate "Buses owned" %}</td>
+              <td>{{ row.player_summary.winner.avg_buses }}</td>
+              <td>{{ row.player_summary.other.avg_buses }}</td>
+            </tr>
+            <tr>
+              <td>{% translate "Action points used" %}</td>
+              <td>{{ row.player_summary.winner.avg_actions_used }}</td>
+              <td>{{ row.player_summary.other.avg_actions_used }}</td>
+            </tr>
+            <tr>
+              <td>{% translate "Line markers placed" %}</td>
+              <td>{{ row.player_summary.winner.avg_lines_placed }}</td>
+              <td>{{ row.player_summary.other.avg_lines_placed }}</td>
+            </tr>
+            <tr>
+              <td>{% translate "Buildings placed" %}</td>
+              <td>{{ row.player_summary.winner.avg_buildings }}</td>
+              <td>{{ row.player_summary.other.avg_buildings }}</td>
+            </tr>
+            <tr>
+              <td>{% translate "Passengers delivered" %}</td>
+              <td>{{ row.player_summary.winner.avg_deliveries }}</td>
+              <td>{{ row.player_summary.other.avg_deliveries }}</td>
+            </tr>
+            <tr>
+              <td>{% translate "Delivered at least one passenger" %}</td>
+              <td class="clickableStatTD"
+                  onclick="openGameIdsPage({{ row.player_summary.winner.delivered_game_ids }})">{{ row.player_summary.winner.delivered_pct }} % ({{ row.player_summary.winner.delivered_game_count }} {% translate "games" %})</td>
+              <td class="clickableStatTD"
+                  onclick="openGameIdsPage({{ row.player_summary.other.delivered_game_ids }})">{{ row.player_summary.other.delivered_pct }} % ({{ row.player_summary.other.delivered_game_count }} {% translate "games" %})</td>
+            </tr>
+          </table>
+
+          <h3>{% translate "How Games Ended" %}</h3>
+          <table class="generalTable">
+            <tr>
+              <th>{% translate "End reason" %}</th>
+              <th>{% translate "Games" %}</th>
+              <th>{% translate "Share" %}</th>
+            </tr>
+            {% for reason, reason_data in row.end_reasons.items %}
+              <tr>
+                <td>{{ reason }}</td>
+                <td class="clickableStatTD" onclick="openGameIdsPage({{ reason_data.game_ids }})">{{ reason_data.game_count }}</td>
+                <td>{{ reason_data.pct }} %</td>
+              </tr>
+            {% endfor %}
+          </table>
+
+          <h3>{% translate "Wins by Starting Turn Position" %}</h3>
+          <table class="generalTable">
+            <tr>
+              <th>{% translate "Starting position" %}</th>
+              <th>{% translate "Wins" %}</th>
+              <th>{% translate "Win %" %}</th>
+              <th>{% translate "Games" %}</th>
+            </tr>
+            {% for seat in row.seat_wins %}
+              <tr>
+                <td>{{ seat.0 }}</td>
+                <td class="clickableStatTD" onclick="openGameIdsPage({{ seat.4 }})">{{ seat.1 }}</td>
+                <td class="clickableStatTD" onclick="openGameIdsPage({{ seat.4 }})">{{ seat.2 }} %</td>
+                <td>{{ seat.3 }}</td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% include "Lobby/common/homeButton.html" %}
+  <form id="gameIdsForm" method="post" action="{% url 'BUS:BUSstatGames' %}">
+    {% csrf_token %}
+    <input type="hidden" id="gameIdsInput" name="game_ids">
+  </form>
+  <script>
+    function openGameIdsPage(gameIds) {
+        // Set the value of the hidden input field
+        if (gameIds.length === 0) {
+            alert("No game IDs");
+            return
+        }
+        document.getElementById('gameIdsInput').value = JSON.stringify(gameIds);
+
+        // Submit the form
+        document.getElementById('gameIdsForm').submit();
+    }
+  </script>
+{% endblock body %}

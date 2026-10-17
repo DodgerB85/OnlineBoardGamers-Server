@@ -1,20 +1,20 @@
 /** Rule queries and economic calculations. All state is explicit and serializable. */
 import * as rf from "./URRreference.js"
-import { requireRule, isNationLandClosed, getArea, canalNeighbours } from "./URRmap.js"
-import { currentWaterFrame, waterChoices } from "./URRwater.js"
+import * as boardRules from "./URRmap.js"
+import * as water from "./URRwater.js"
 
 export function getAutomaticAction(game) {
 	if (game.gameflow.pendingOffer) return null
 	if (game.gameflow.phase === rf.PHASE_DIVIDING_NATIONS && game.gameflow.auction && availableMoney(game, game.gameflow.turnOrder[0]) < game.gameflow.auction.amount + 5) return { type: "pass" }
 	if (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "betweenStates" && !canExchangeBarahshum(game, game.nations[rf.NATION_BARAHSHUM].owner)) return { type: "beginDevelopment" }
 	if (game.gameflow.phase !== rf.PHASE_RAINY_SEASON) return null
-	if (game.rain.step === "routing" && currentWaterFrame(game)) {
-		const frame = currentWaterFrame(game)
-		const choices = waterChoices(game)
+	if (game.rain.step === "routing" && water.currentWaterFrame(game)) {
+		const frame = water.currentWaterFrame(game)
+		const choices = water.waterChoices(game)
 		if (choices.length === 0) return { type: "advanceWater" }
-		// A quantity choice at a pump can affect the downstream monarch's options.
-		// Direct irrigation is forced only when no destination must be sacrificed.
-		if ((choices.length === 1 && (choices[0].kind === "irrigate" || frame.water === 1)) || (choices.every((choice) => choice.kind === "irrigate") && frame.water >= choices.length)) return { type: "allocateWater", area: choices[0].area, amount: 1 }
+		// With one destination, splitting the handoff only sends the rest there later.
+		if (choices.length === 1) return { type: "allocateWater", area: choices[0].area, amount: choices[0].kind === "pump" ? frame.water : 1 }
+		if (choices.every((choice) => choice.kind === "irrigate") && frame.water >= choices.length) return { type: "allocateWater", area: choices[0].area, amount: 1 }
 	}
 	if (game.rain.step === "harvest") {
 		const state = game.states[game.rain.harvestOrder[0]]
@@ -47,7 +47,7 @@ export function landPrice(game, area, colonization = false) {
 export function priceAfterSale(price, count) {
 	const index = rf.LAND_PRICE_TRACK.indexOf(price)
 	const intervention = rf.LAND_PRICE_TRACK.indexOf(rf.LAND_INTERVENTION_PRICE)
-	requireRule(index >= 0, "Unknown land price")
+	boardRules.requireRule(index >= 0, "Unknown land price")
 	if (count === 0) return price
 	return rf.LAND_PRICE_TRACK[index <= intervention ? Math.max(0, index - 1) : Math.max(intervention, index - Math.min(3, count))]
 }
@@ -55,7 +55,7 @@ export function priceAfterSale(price, count) {
 export function getLandPurchaseError(game, player, area) {
 	if (area.isRiver) return "River areas cannot be bought"
 	if (area.owner !== null) return "Land already has an owner"
-	if (isNationLandClosed(game, area)) return "Independent nation land is not available"
+	if (boardRules.isNationLandClosed(game, area)) return "Independent nation land is not available"
 	if (game.players[player].soldLandTypes.includes(area.landType)) return "You sold this terrain during this settlement"
 	if (game.players[player].soldEmergingStates.includes(area.state)) return "You sold land in this emerging state"
 	const used = game.board.areas.filter((land) => land.markerOwner === player).length
@@ -80,6 +80,12 @@ export function getKing(game, stateId) {
 
 export function getDevelopmentOrder(game) {
 	return game.states.filter((state) => state.isActive).map((state) => state.id).sort((a, b) => ownedLand(game, a).length - ownedLand(game, b).length || game.board.stateOrder.indexOf(a) - game.board.stateOrder.indexOf(b))
+}
+
+export function remainingWaterworkTokens(game, stateId, capacity) {
+	const supply = game.board.waterworkLimits[stateId][capacity]
+	const used = game.board.areas.filter((area) => area.waterwork?.state === stateId && area.waterwork.capacity === capacity).length
+	return supply - used
 }
 
 export function nextCardEra(game) {
@@ -109,8 +115,8 @@ export function getMaintenanceSaleError(game, player, area, stateId) {
 
 export function barahshumDestinations(game) {
 	const home = game.board.areas.find((area) => area.nation === rf.NATION_BARAHSHUM)
-	const connected = canalNeighbours(game, home.id)
-	return home.neighbours.filter((id) => !connected.includes(id) && !isNationLandClosed(game, getArea(game, id)))
+		const connected = boardRules.canalNeighbours(game, home.id)
+	return home.neighbours.filter((id) => !connected.includes(id) && !boardRules.isNationLandClosed(game, boardRules.getArea(game, id)))
 }
 
 export function isCalahWaterworkLocation(game, area) {
@@ -123,6 +129,7 @@ export function canExchangeBarahshum(game, player) {
 	const nation = game.nations[rf.NATION_BARAHSHUM]
 	if (!nation || nation.isRemoved || nation.ownerType === null) return false
 	if (!barahshumDestinations(game).length) return false
+	if (nation.ownerType === "player" && game.gameflow.barahshumPass?.turn === game.gameflow.turn && game.gameflow.barahshumPass.player === nation.owner) return false
 	if (nation.ownerType === "player") return nation.owner === player && (game.gameflow.phase === rf.PHASE_SETTLEMENT || (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "betweenStates"))
 	return game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.stateOrder[game.gameflow.stateIndex] === nation.owner && game.states[nation.owner].king === player && ["digging", "purchasing"].includes(game.gameflow.developmentStep) && !game.gameflow.pendingOffer
 }

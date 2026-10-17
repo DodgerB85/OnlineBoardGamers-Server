@@ -34,6 +34,7 @@ from .presenters import (
     KFWpresenter,
     PAPpresenter,
     RNBpresenter,
+    ROWpresenter,
     TGZpresenter,
     URRpresenter,
     WEBpresenter,
@@ -48,6 +49,7 @@ from .sharedFunctions.sharedRefs import (
     SR_getINDstartingOptionsHTML,
     SR_getKFWstartingOptionsHTML,
     SR_getRNBstartingOptionsHTML,
+    SR_getROWstartingOptionsHTML,
     SR_getTGZstartingOptionsHTML,
     SR_getWEBstartingOptionsHTML,
 )
@@ -90,7 +92,11 @@ class Lock(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    darkMode = models.BooleanField(default=False)
     sendEmailNotificationOnTurn = models.BooleanField(default=True)
+    hotStreakEnabled = models.BooleanField(default=True)
+    hotStreakReminders = models.BooleanField(default=False)
+    receiveTurnNudges = models.BooleanField(default=True)
     emailNotifications = models.CharField(
         blank=False,
         default=json.dumps([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], separators=(",", ":")),
@@ -272,6 +278,8 @@ class Tournament(models.Model):
             startingOptionsHTML = SR_getCNSstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
         if self.gameCode == "WEB":
             startingOptionsHTML = SR_getWEBstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
+        if self.gameCode == "ROW":
+            startingOptionsHTML = SR_getROWstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
         if self.gameCode == "KFW":
             startingOptionsHTML = SR_getKFWstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
         if self.gameCode == "TGZ":
@@ -398,6 +406,10 @@ class Game(BaseGame):
         db_column="gameCode",
     )
 
+    streakDays = models.PositiveIntegerField(default=0)
+    streakBestDays = models.PositiveIntegerField(default=0)
+    streakLastMoveDate = models.DateField(null=True, blank=True)
+
     original_id = models.PositiveIntegerField(null=True, blank=True)
 
     models.constraints.UniqueConstraint(fields=["gameCode", "original_id"], name="unique_game_code_and_original_id")
@@ -475,6 +487,7 @@ class Game(BaseGame):
         "RNB": RNBpresenter,
         "URR": URRpresenter,
         "DDL": DDLpresenter,
+        "ROW": ROWpresenter,
         "HLC": HLCpresenter,
         "KFW": KFWpresenter,
         "PAP": PAPpresenter,
@@ -524,6 +537,8 @@ class GamePlayer(models.Model):
     currentMoveData = models.TextField(blank=True)
 
     availabilityAnchor = models.BigIntegerField(null=True, blank=True, default=None)
+    lastNudgedAt = models.DateTimeField(null=True, blank=True)
+    lastNudgedBy = models.CharField(max_length=150, blank=True, default="")
 
     class Meta:
         ordering = ["seat_order"]

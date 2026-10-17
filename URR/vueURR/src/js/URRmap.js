@@ -74,12 +74,16 @@ export function createBoard(definition) {
 // A crew builds one continuous, non-branching stretch. Existing network
 // connections are counted before adding the stretch (rulebook pp.8–9).
 export function getCanalCost(game, path) {
+	return getPathCost(game, path, true)
+}
+
+function getPathCost(game, path, needsWaterConnection) {
 	requireRule(Array.isArray(path) && path.length >= 2 && new Set(path).size === path.length, "A canal must be a simple path")
 	const areas = path.map((id) => getArea(game, id))
 	requireRule(areas.length !== 2 || !areas.every((area) => area.isRiver), "A single canal cannot connect two river areas")
 	// A stretch may be selected from either end; one end must already hold water.
 	const watered = (area) => area.isRiver || canalNeighbours(game, area.id).length > 0
-	requireRule(watered(areas[0]) || watered(areas.at(-1)), "Start at an existing river or canal")
+	requireRule(!needsWaterConnection || watered(areas[0]) || watered(areas.at(-1)), "One end must connect to an existing river or canal")
 	let junctions = 0
 	for (let i = 0; i < areas.length; i++) {
 		const area = areas[i]
@@ -99,6 +103,43 @@ export function canCrewDig(capacity, cost) {
 	if (capacity === "M") return true
 	if (capacity === "1+1") return cost.canals === 1 && cost.junctions <= 1
 	return cost.points <= capacity
+}
+
+// A dry-end draft is selectable only if it can still reach the existing network
+// within this crew's budget. Submission always uses the complete-path validator.
+export function getDigPathPreview(game, path, capacity) {
+	let cost = null
+	try {
+		requireRule(capacity !== null && capacity !== undefined, "Choose an unused digging crew before tracing a route")
+		requireRule(path.length > 0, "Select a starting area")
+		const start = getArea(game, path[0])
+		requireRule(!isNationLandClosed(game, start), "Independent nation land is closed to digging")
+		if (path.length > 1) {
+			const previous = getArea(game, path.at(-2))
+			requireRule(previous.neighbours.includes(path.at(-1)), `Choose a hex adjacent to ${previous.label || previous.id}`)
+			cost = getPathCost(game, path, false)
+			requireRule(canCrewDig(capacity, cost), `This route needs ${cost.points} points: ${cost.canals} canals + ${cost.junctions} junctions. The ${capacity} crew cannot dig it.${capacity === "1+1" ? " A 1+1 crew can build only one canal and at most one junction." : ""}`)
+			if (start.isRiver || canalNeighbours(game, start.id).length || getArea(game, path.at(-1)).isRiver || canalNeighbours(game, path.at(-1)).length) return { cost, isComplete: true, error: "" }
+		}
+		const queue = [path]
+		const visited = new Set(path)
+		for (let index = 0; index < queue.length; index++) {
+			const prefix = queue[index]
+			for (const next of getArea(game, prefix.at(-1)).neighbours) {
+				if (visited.has(next)) continue
+				const end = getArea(game, next)
+				if (isNationLandClosed(game, end) || canalNeighbours(game, next).includes(prefix.at(-1))) continue
+				if (prefix.length === 1 && start.isRiver && end.isRiver) continue
+				const candidate = [...prefix, next]
+				const candidateCost = getPathCost(game, candidate, false)
+				if (!canCrewDig(capacity, candidateCost)) continue
+				if (start.isRiver || canalNeighbours(game, start.id).length || end.isRiver || canalNeighbours(game, next).length) return { cost, isComplete: false, error: "" }
+				visited.add(next)
+				queue.push(candidate)
+			}
+		}
+		return { cost, isComplete: false, error: `No legal route from here can reach an existing river or canal with the ${capacity} crew. Choose another start or undo the last step.` }
+	} catch (error) { return { cost, isComplete: false, error: error.message } }
 }
 
 // Reach excludes crossing rivers and stops at other pumps. Those pumps are

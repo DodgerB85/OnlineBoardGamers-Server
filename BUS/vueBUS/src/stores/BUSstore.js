@@ -101,7 +101,6 @@ export const useModelStore = defineStore("model", () => {
 		showLoader: false,
 		showRewindPanel: false,
 		selectingBoard: false,
-		displayRightActionSelection: true,
 		showReplay: false,
 		generatingReplay: false,
 		showStatsExcludeDropdown: false,

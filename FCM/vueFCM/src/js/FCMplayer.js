@@ -113,6 +113,12 @@ export function clearForNewTurn(playerIndex) {
 	})
 }
 
+// A manager takes its extra blank slots at the end of the employee list
+function pushManagerSubSlots(employees, emp) {
+	const count = rules.getSubSlotsForEmployee(emp)
+	employees.push(...Array(count).fill(rf.BLANK_EMPLOYEE_SPACE))
+}
+
 export function addToStructureFromMiniBeach(emp, anyFreeCEOslots, beachIdx) {
 	if (rf.MANAGERS.includes(emp)) {
 		if (!anyFreeCEOslots) return
@@ -122,11 +128,9 @@ export function addToStructureFromMiniBeach(emp, anyFreeCEOslots, beachIdx) {
 		// Remove from beach
 		controller.currentPlayerObj().beach.splice(beachIdx, 1)
 
-		const count = rules.getSubSlotsForEmployee(emp)
-		const blanks = Array(count).fill(rf.BLANK_EMPLOYEE_SPACE)
-		controller.currentPlayerObj().employees.push(...blanks)
+		pushManagerSubSlots(controller.currentPlayerObj().employees, emp)
 	}
-	if (!rf.MANAGERS.includes(emp)) {
+	else {
 		if (!controller.currentPlayerObj().employees.includes(rf.BLANK_EMPLOYEE_SPACE)) return
 		// Find the first index after CEO slots that is rf.BLANK_EMPLOYEE_SPACE
 		let foundIdx = controller.currentPlayerObj().employees.findIndex((emp, idx) => {
@@ -167,11 +171,7 @@ export function setEmployeeInIndex(playerIndex, emp, idx) {
 	}
 	// Add empployee
 	employees[idx] = emp
-	if (rf.MANAGERS.includes(emp)) {
-		const count = rules.getSubSlotsForEmployee(emp)
-		const blanks = Array(count).fill(rf.BLANK_EMPLOYEE_SPACE)
-		playerObj.employees.push(...blanks)
-	}
+	if (rf.MANAGERS.includes(emp)) pushManagerSubSlots(playerObj.employees, emp)
 	// Remove from beach
 	const beachIdx = playerObj.beach.indexOf(emp)
 	if (beachIdx > -1) {
@@ -190,6 +190,11 @@ export function hasMilestone(playerIndex, ms) {
 	const playerObj = store.players[playerIndex]
 	if (!playerObj) return false
 	return playerObj.milestones.indexOf(ms) > -1
+}
+
+// Salary per employee unit: the waitress milestone makes it 3 instead of 5
+export function unitarySalary(playerIndex) {
+	return hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED) ? 3 : 5
 }
 
 export function hasFridge(playerIndex) {
@@ -368,19 +373,24 @@ export function playersPrice(playerIndex) {
 	return rules.basePrice() - playerDiscount(playerIndex)
 }
 
-export function playerDiscount(playerIndex) {
-	const store = useModelStore()
-	const playerObj = store.players[playerIndex]
+// Price drop from pricing and discount managers (not luxuries managers)
+function managersPriceDrop(playerObj) {
 	let discount = 0
-	if (playerObj.employees.length === 0) return 0 // TODO this was just blank?
 	for (let i = 0; i < playerObj.employees.length; i++) {
 		if (playerObj.employees[i] === rf.PRICING_MANAGER) {
 			discount++
 			if (playerObj.employees.includes(rf.NIGHT_SHIFT_MANAGER)) discount++
 		}
 		if (playerObj.employees[i] === rf.DISCOUNT_MANAGER) discount += 3
-		if (playerObj.employees[i] === rf.LUXURIES_MANAGER) discount -= 10
 	}
+	return discount
+}
+
+export function playerDiscount(playerIndex) {
+	const store = useModelStore()
+	const playerObj = store.players[playerIndex]
+	if (playerObj.employees.length === 0) return 0 // TODO this was just blank?
+	let discount = managersPriceDrop(playerObj) - 10 * playerObj.employees.filter((e) => e === rf.LUXURIES_MANAGER).length
 	if (hasMilestone(playerIndex, rf.FIRST_LOWER_PRICES)) discount++
 	if (playerObj.ceoAction === rf.CEO_ACTION_PRICE_MINUS_3) discount += 3
 	discount += rules.temporaryWorkerUsedActions(playerIndex, rf.PRICING_MANAGER)
@@ -390,15 +400,8 @@ export function playerDiscount(playerIndex) {
 export function purePriceDropFromDiscountersForPlayer(playerIndex) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
-	let discount = 0
 	if (playerObj.employees.length === 0) return 0 // TODO this was just blank?
-	for (let i = 0; i < playerObj.employees.length; i++) {
-		if (playerObj.employees[i] === rf.PRICING_MANAGER) {
-			discount++
-			if (playerObj.employees.includes(rf.NIGHT_SHIFT_MANAGER)) discount++
-		}
-		if (playerObj.employees[i] === rf.DISCOUNT_MANAGER) discount += 3
-	}
+	let discount = managersPriceDrop(playerObj)
 
 	if (hasMilestone(playerIndex, rf.FIRST_LOWER_PRICES)) discount++
 	return discount

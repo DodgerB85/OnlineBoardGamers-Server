@@ -1,7 +1,7 @@
 {% load static %}
 {% load i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"{% if user.is_authenticated and user.profile.darkMode %} data-theme="dark"{% endif %}>
     <head>
         <style>
         html {
@@ -75,10 +75,13 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap"
               rel="stylesheet">
-        <link href="{% static 'Lobby/CSS/components.css' %}?v=26"
+        <link href="{% static 'Lobby/CSS/components.css' %}?v=27"
               rel="stylesheet">
         <link href="{% static 'Lobby/CSS/layout_new.css' %}" rel="stylesheet">
         {% block head %}{% endblock %}
+        {% if user.is_authenticated and user.profile.darkMode %}
+            <link id="darkModeStyles" href="{% static 'Lobby/CSS/dark.css' %}" rel="stylesheet">
+        {% endif %}
     </head>
     <body class="{% if user.is_authenticated %}authed{% else %}guest{% endif %} {% block body_class %}{% endblock %}">
         <div class="topBar">

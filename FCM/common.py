@@ -33,6 +33,7 @@ STATS_EXCLUDED_OPTIONS = [
     rfFCM.SO_STADIUM,
     rfFCM.SO_LABOR_MARKET,
     rfFCM.SO_SECOND_BAILOUT,
+    rfFCM.SO_MEDIA_LINE,
 ]
 
 
@@ -66,6 +67,9 @@ def buildFCMstartingOptions(post_data):
             if "includeChineseExpansion" in post_data:
                 # Marker only — actual Chinese modules are rolled in startGame
                 optionsArr.append(rfFCM.SO_RANDOM_MODULES_CHINESE)
+            if "includeFanExpansion" in post_data:
+                # Marker only — actual fan mods are rolled in startGame
+                optionsArr.append(rfFCM.SO_RANDOM_MODULES_FAN)
         if "draftModules" in post_data:
             if post_data.get("draft_MS") == "302":
                 optionsArr.append(rfFCM.SO_NEW_MS)
@@ -115,10 +119,10 @@ def buildFCMstartingOptions(post_data):
         "stadium",
         "laborMarket",
         "secondBailout",
+        "mediaLine",
         "allowRewind",
     ]
     optionsArr.extend(int(post_data[opt]) for opt in option_names if opt in post_data)
-    # return ",".join(options) if options else ""
     return optionsArr
 
 
@@ -183,7 +187,6 @@ def create_fcm_game(
         game_pace = rf.PACE_STANDARD
         kickout_duration = rf.KICKOUT_12_HOURS
         player_Order_Seed = randint(1000, 32767)
-        # TODO
         starting_options = (
             json.loads(tournamentObj.startingOptions)
             if tournamentObj.startingOptions
@@ -228,11 +231,7 @@ def create_fcm_game(
             return HttpResponseRedirect(reverse("createFCMpage"))
 
         # Validate player usernames
-        usernames = [
-            request.POST.get(f"player{i}")
-            for i in range(2, 7)
-            if request.POST.get(f"player{i}")
-        ]
+        usernames = [u for u in (request.POST.get(f"player{i}") for i in range(2, 7)) if u]
         if "trainingGame" not in request.POST:
             existing_users = set(
                 User.objects.filter(username__in=usernames).values_list(
@@ -373,22 +372,6 @@ def create_fcm_game(
 
             # Notifications and redirects
     if is_tournament or is_main_tournament or is_mini_tournament:
-        #presenter = cast("FCMpresenter", new_game.presenter())
-        #for username in usernames_to_notify:
-        #    tournamentType = "normalTournament"
-        #    if is_mini_tournament:
-        #        tournamentType = "MiniTournament"
-        #    SN_M_T_sendTournamentGameStartNotification(
-        #        request,
-        #        "FCM",
-        #        username,
-        #        new_game.maxPlayers,
-        #        new_game.gameName,
-        #        presenter.currentTurnString(),
-        #        getattr(new_game, "id"),
-        #        False,
-        #        tournamentType,
-        #    )
         return new_game.id
 
     # Now handle normal games

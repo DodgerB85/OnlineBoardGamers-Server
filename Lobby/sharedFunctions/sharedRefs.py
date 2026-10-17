@@ -14,6 +14,7 @@ import FCM.FCMconstants as rfFCM
 import Lobby.sharedFunctions.constants as rf
 import PAP.PAPconstants as rfPAP
 import RNB.RNBconstants as rfRNB
+import ROW.ROWconstants as rfROW
 import URR.URRconstants as rfURR
 
 SHADOW_USERNAMES = [
@@ -44,6 +45,7 @@ SR_GAMES_CODES_AND_NAMES_CHOICES = [
     ("URR", gettext_lazy("UR: 1830 BC")),
     ("DDL", gettext_lazy("Duck Dealer")),
     ("PAP", gettext_lazy("Permits and Poisons")),
+    ("ROW", gettext_lazy("Ranchers of the Old West")),
 ]
 
 SR_WEBHOOK_CHOICES = {
@@ -667,6 +669,17 @@ def SR_currentTurnString(gameCode, turn, phase):
 
         return currentTurnString
 
+    elif gameCode == "ROW":
+        currentTurnString = str(turn) + " - "
+        if phase == rfROW.PHASE_SETUP:
+            currentTurnString += gettext("Setup")
+        elif phase == rfROW.PHASE_MAIN:
+            currentTurnString += gettext("Main")
+        elif phase == rfROW.PHASE_GAME_OVER:
+            currentTurnString += gettext("Game End")
+
+        return currentTurnString
+
 
 def SR_gamePaceString(gamePace):
     gamePaceString = ""
@@ -798,6 +811,7 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
         rfFCM.SO_STADIUM,
         rfFCM.SO_LABOR_MARKET,
         rfFCM.SO_SECOND_BAILOUT,
+        rfFCM.SO_MEDIA_LINE,
     ]
 
     options_map = {
@@ -834,6 +848,7 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
         rfFCM.SO_STADIUM: ("so_stadium.svg", "Stadium"),
         rfFCM.SO_LABOR_MARKET: ("so_laborMarket.svg", "Labor Market"),
         rfFCM.SO_SECOND_BAILOUT: ("so_bailout.svg", "Second Bailout"),
+        rfFCM.SO_MEDIA_LINE: ("so_mediaLine.svg", "Media Line"),
         rfFCM.SO_STRICT_PAYDAY_FRIDGE: ("so_strict.svg", "Turn Order Payday/Fridge"),
         rfFCM.SO_DRAFT_MODULE_BREAKER: ("so_draftMods.jpg", "Draft Modules"),
         rfFCM.SO_DRAFT_SKIP_MODULE: ("so_skip.jpg", "Skip Module"),
@@ -1182,6 +1197,41 @@ def SR_getWEBstartingOptionsHTML(startingOptionsArr):
         if option == rf.SO_EXPERIENCED_GAME:
             # usedOptions += 1
             startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
+
+    return startingOptionsHTML
+
+
+def SR_getROWstartingOptionsHTML(startingOptionsArr):
+    if not startingOptionsArr:
+        return ""
+    startingOptionsHTML = ""
+    for option in startingOptionsArr:
+        if option == rf.SO_LEARNING_GAME:
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
+        if option == rf.SO_EXPERIENCED_GAME:
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
+        if option == rfROW.SO_SECOND_EDITION:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Second edition") + "'>2nd ed</span>"
+        if option == rfROW.SO_RTTN:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Rails to the North") + "'>RttN</span>"
+        if option == rfROW.SO_SIMMENTAL:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Simmental cattle") + "'>Sim</span>"
+        if option == rfROW.SO_MODE_STRATEGIC:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Strategic mode") + "'>Strategic</span>"
+        if option == rfROW.SO_BUILDINGS_BEGINNER:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Beginner buildings") + "'>Beginner</span>"
+        if option == rfROW.SO_PLAYER_ORDER_BIDDING:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Bidding for player order") + "'>Bidding</span>"
+        if option == rfROW.SO_VARIANT_BALANCED:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Balanced variant") + "'>Balanced</span>"
+        if option == rfROW.SO_STATION_MASTER_PROMOS:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Station master promos") + "'>Promos</span>"
+        if option == rfROW.SO_BUILDING_11:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Building 11") + "'>Bldg 11</span>"
+        if option == rfROW.SO_BUILDING_13:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Building 13") + "'>Bldg 13</span>"
+        if option in rfROW.AUTOMA_OPTIONS:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Garth automa") + "'>Garth</span>"
 
     return startingOptionsHTML
 

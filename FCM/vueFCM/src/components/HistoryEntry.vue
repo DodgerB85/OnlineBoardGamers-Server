@@ -4,18 +4,23 @@
  */
 
 import * as rf from "../js/FCMreference.js"
+import * as rules from "../js/FCMrules.js"
 import * as funcs from "../js/FCMfuncs.js"
 import * as history from "../js/FCMhistory.js"
 import * as replay from "../js/FCMreplay.js"
 import * as view from "../js/FCMview.js"
 import * as map from "../js/FCMmap.js"
 import * as plyr from "../js/FCMplayer.js"
+import { buildDinnerScript } from "../js/dinnerScript.js"
 
 import { useModelStore } from "../stores/FCMstore.js"
 const store = useModelStore()
 
 import { usePersonalStore } from "../stores/FCMpersonal.js"
 const personal = usePersonalStore()
+
+import { useDinnerAnimationStore } from "../stores/dinnerAnimation.js"
+const dinner = useDinnerAnimationStore()
 
 import { computed } from "vue"
 
@@ -37,10 +42,10 @@ const props = defineProps({
 function clickedHistoryEntry(action, entry3, entry_id) {
 	// If not replay, or if clicking on the replay entry, just do highlights
 	if (!store.viewSettings.showReplay || entry_id === -1) {
-		if (history.setupHistoryHighlight) history.setupHistoryHighlight(action, entry3, entry_id)
+		history.setupHistoryHighlight(action, entry3, entry_id)
 	}
 	// Otherwise, you are clicking in history during replay
-	else if (replay.goToReplayStep) replay.goToReplayStep(entry_id)
+	else replay.goToReplayStep(entry_id)
 }
 
 const ORDINAL_KEYS = ["first", "second", "third", "fourth", "fifth", "sixth"]
@@ -150,6 +155,23 @@ function goodClass(good) {
 	return ""
 }
 
+// Dinner animation: only offer playback when at least one sale actually happened
+const hasDinnerSales = computed(() => computedEntry3.value.blocks.some((b) => b.kind === "sale" && b.sale))
+
+function startDinnerAnimation(autoplay) {
+	const script = buildDinnerScript(computedEntry3.value.blocks)
+	dinner.start(script.steps, autoplay, script.overlay)
+}
+
+// Playback for one house only: its sale block plus the coffee block that
+// dinnerScript expects to sit immediately after it.
+function startDinnerAnimationFor(bi, autoplay) {
+	const blocks = computedEntry3.value.blocks
+	const end = blocks[bi + 1]?.kind === "coffee" ? bi + 2 : bi + 1
+	const script = buildDinnerScript(blocks.slice(bi, end))
+	dinner.start(script.steps, autoplay, script.overlay)
+}
+
 function salaryPayText(salaryArr) {
 	if (salaryArr.length > 1) return i18n.global.t("history.salaryPay", { amount: salaryArr[0], count: salaryArr[1] })
 	return String(salaryArr[0])
@@ -215,7 +237,6 @@ function showHawkerRoute(routeIndexes) {
 // Toggle the coffee route highlight + the info panel in the action area
 function toggleCoffeeInfo(bi) {
 	const block = computedEntry3.value.blocks[bi]
-	if (!block || block.kind !== "coffee") return
 
 	if (store.viewSettings.coffeeInfoShownBlock === bi) {
 		store.clearCoffeeHistoryInfo()
@@ -229,7 +250,7 @@ function toggleCoffeeInfo(bi) {
 const computedEntry3 = computed(() => {
 	let ret = {}
 	let entry = props.entry
-	const param = entry[3]
+	let param = entry[3]
 
 	if (entry[0] === rf.HIST_CHOOSE_RESTAURANT_STARTING_POSITION) {
 		const restoIndex = funcs.importIndex(param[0])
@@ -263,15 +284,24 @@ const computedEntry3 = computed(() => {
 		}
 	} else if (entry[0] === rf.HIST_START_MARKETING_CAMPAIGN) {
 		ret.campaignNumber = param[0]
-		const campaignIndex = funcs.importIndex(param[1]) // OR ROUTE IF HAWKER
+		// Media Line mod: B-line campaigns display their billboard-style sort key (3.5/4.5/6.5...)
+		ret.campaignDisplayNumber = rules.campaignSortKey(ret.campaignNumber)
+		const isTV = ret.campaignNumber === 28 || ret.campaignNumber === 29
+		const campaignIndex = funcs.importIndex(param[1]) // OR ROUTE IF HAWKER, HOUSE NUMBERS IF TV
 		const campaignGoodEntry = param[2]
+		// Media Line mod: a non-default marketer is logged last as [employee]
+		const loggedMarketer = param.length > 3 && Array.isArray(param[param.length - 1]) ? param[param.length - 1][0] : -1
+		if (loggedMarketer !== -1) param = param.slice(0, -1)
 		let paramIdx = 3
 		let campaignEmployee = -1
 		if (ret.campaignNumber <= 3 || ret.campaignNumber >= 17) {
 			if (ret.campaignNumber <= 3) campaignEmployee = rf.BRAND_DIRECTOR
 			else if (ret.campaignNumber <= 20) campaignEmployee = rf.GOURMET_FOOD_CRITIC
 			else if (ret.campaignNumber <= 24) campaignEmployee = rf.RURAL_MARKETEER
-			else campaignEmployee = rf.HAWKER_MARKETEER
+			else if (ret.campaignNumber <= 27) campaignEmployee = rf.HAWKER_MARKETEER
+			else if (isTV) campaignEmployee = rf.TV_ANNOUNCER
+			else campaignEmployee = rf.TELEMARKETER
+			if (loggedMarketer !== -1) campaignEmployee = loggedMarketer
 		}
 		// Otherwise need to read in the employee
 		else {
@@ -290,9 +320,10 @@ const computedEntry3 = computed(() => {
 		// Add second good for radio campaigns when the First Radio Campaign milestone is held
 		ret.radioDouble = store.players[entry[1]] != null && plyr.hasMilestone(entry[1], rf.FIRST_RADIO_CAMPAIGN) && rf.MARKETING_CAMPAIGNS[ret.campaignNumber]?.type === rf.RADIO
 
-		ret.noCoords = ret.campaignNumber >= 17 && ret.campaignNumber <= 27
+		ret.noCoords = (ret.campaignNumber >= 17 && ret.campaignNumber <= 27) || isTV
 		ret.isHawker = ret.campaignNumber >= 25 && ret.campaignNumber <= 27
 		ret.routeIndexes = ret.isHawker ? funcs.importIndexes(param[1]) : []
+		ret.tvHouses = isTV ? [...param[1]] : []
 
 		let rotString = ""
 		if (!UNROTATABLE_CAMPAIGNS.includes(ret.campaignNumber)) {
@@ -426,7 +457,7 @@ const computedEntry3 = computed(() => {
 		Regular sale house:
 		0 = houseNumber
 		1 = [list of goods]
-		// NO SALE STOPS HERE (length === 2)
+		// NO SALE STOPS HERE (no providers list after the goods)
 		2 = [list of providers, winner first] - each [colour, price, distance, waitresses|[jazz,waitresses], order, movieStar?]
 		3 = bonus_amount
 		4 = garden/park/both status
@@ -464,14 +495,15 @@ const computedEntry3 = computed(() => {
 					isApartment: rf.APARTMENTS.includes(buildingNumber),
 					isRural: buildingNumber == rf.RURAL_MARKETING_AREA,
 					goods: house[1],
-					noSale: house.length === 2,
+					// No-sale: no providers list follows the goods (length-2 entries)
+					noSale: !Array.isArray(house[2]),
 					multipleProviders: false,
 					providers: [],
 					singleProviderColour: null,
 					roadworksNote: false,
 					sale: null,
 				}
-				if (house.length !== 2) {
+				if (!block.noSale) {
 					const providers = house[2]
 					block.multipleProviders = providers.length > 1
 					if (block.multipleProviders) {
@@ -493,6 +525,11 @@ const computedEntry3 = computed(() => {
 					const winner = providers[0]
 					if (winner.length > 0) {
 						const basePrice = winner[1]
+						// Media Line mod: the entry carries tonight's city-wide headline
+						// shift after bonus(3)/bits(4)/fryChefs(5, only if that option
+						// is on) - so its index depends on startingOptions.fryChefs
+						const headlineIdx = store.startingOptions.fryChefs ? 6 : 5
+						const headlineTotal = house.length > headlineIdx ? house[headlineIdx] : 0
 						const bonusAmount = house[3]
 						const numItems = house[1].length
 						const gardenParkStatus = house[4]
@@ -503,11 +540,12 @@ const computedEntry3 = computed(() => {
 						currentGardenParkMultiplier = gardenParkMultiplier
 						let numFryChefs = 0
 						if (store.startingOptions.fryChefs && house.length > 5 && house[5] > 0 && house[5] !== 9) numFryChefs = house[5]
-						const finalSaleAmount = basePrice * numItems * gardenParkMultiplier + bonusAmount + numFryChefs * 10
+						const finalSaleAmount = (basePrice + headlineTotal) * numItems * gardenParkMultiplier + bonusAmount + numFryChefs * 10
 						const winnerIdx = store.players.findIndex((p) => p.colour === winner[0])
 						block.sale = {
 							winnerColour: winner[0],
 							basePrice: basePrice,
+							headlineTotal: headlineTotal,
 							numItems: numItems,
 							gardenParkStatus: gardenParkStatus,
 							bonusAmount: bonusAmount,
@@ -515,6 +553,9 @@ const computedEntry3 = computed(() => {
 							finalSaleAmount: finalSaleAmount,
 							milestoneNote: winnerIdx > -1 && (plyr.hasMilestone(winnerIdx, rf.FIRST_MARKETEER_USED) || plyr.hasMilestone(winnerIdx, rf.SOMEONE_SELLS_YOUR_DEMAND)),
 						}
+						// Media Line mod: surface the city-wide headline once for the
+						// evening header (the same shift applied to every house tonight)
+						if (headlineTotal !== 0) ret.headlineTotal = headlineTotal
 					}
 				}
 				ret.blocks.push(block)
@@ -607,6 +648,12 @@ const computedEntry3 = computed(() => {
 	} else if (entry[0] === rf.HIST_INCOME) {
 		ret.none = param.length === 0
 		ret.jazzTable = !!store.startingOptions.jazzMusicians
+		ret.mediaLine = !!store.startingOptions.mediaLine
+		// Coffee-module rows carry coffee income at index 3 (always length 4).
+		// Older entries only ever had length 2 or 3, so they stay pooled.
+		// Media Line rows also grow to length 4, so gate the split on the
+		// coffee option - media-only rows must not read as split rows.
+		ret.splitSales = !!store.startingOptions.coffee && param.length > 0 && param[0].length >= 4
 		ret.incomeRows = []
 		for (let k = 0; k < param.length; k++) {
 			const waitressVal = plyr.hasMilestone(k, rf.FIRST_WAITRESS) ? 5 : 3
@@ -618,14 +665,22 @@ const computedEntry3 = computed(() => {
 				numberOfJazz = param[k][1][1]
 			} else numberOfWaitress = param[k][1]
 			const CFObonus = param[k].length > 2 ? param[k][2] : 0
+			const coffeeIncome = ret.splitSales ? param[k][3] : 0
+			// Media Line mod: milestone 1 bonus sits after the CFO slot, and
+			// after the coffee column when both modules are on
+			const mlIdx = ret.splitSales ? 4 : 3
+			const mediaLineBonus = param[k].length > mlIdx ? param[k][mlIdx] : 0
 			ret.incomeRows.push({
 				colour: store.players[k]?.colour,
 				salesIncome: salesIncome,
+				itemsIncome: salesIncome - coffeeIncome,
+				coffeeIncome: coffeeIncome,
 				numberOfJazz: numberOfJazz,
 				numberOfWaitress: numberOfWaitress,
 				waitressVal: waitressVal,
 				CFObonus: CFObonus,
-				totalIncome: salesIncome + numberOfJazz * 15 + numberOfWaitress * waitressVal + CFObonus,
+				mediaLineBonus: mediaLineBonus,
+				totalIncome: salesIncome + numberOfJazz * 15 + numberOfWaitress * waitressVal + CFObonus + mediaLineBonus,
 			})
 		}
 	} else if (entry[0] === rf.HIST_SALARY) {
@@ -664,7 +719,7 @@ const computedEntry3 = computed(() => {
 		else if (param[0] === rf.CEO_ACTION_COACH) ret.ceoText = "employees.coachDesc"
 		else ret.ceoText = ""
 	} else if (entry[0] === rf.HIST_CHOOSE_MODULE) {
-		ret.moduleChoice = MODULE_IMGS[param[0]] ?? null
+		ret.moduleChoice = MODULE_IMGS[param[0]]
 	}
 	return ret
 })
@@ -785,9 +840,9 @@ const computedEntry3 = computed(() => {
 		<template v-else-if="entry[0] === rf.HIST_START_MARKETING_CAMPAIGN">
 			<i18n-t keypath="history.campaignStart" tag="span" scope="global">
 				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
-				<template #num>{{ computedEntry3.campaignNumber }}</template>
+				<template #num>{{ computedEntry3.campaignDisplayNumber }}</template>
 				<template #employee><InfoPopup type="employee" :employeeId="computedEntry3.campaignEmployee"><span class="compact" :class="empClass(computedEntry3.campaignEmployee)">{{ empTitle(computedEntry3.campaignEmployee) }}</span></InfoPopup></template>
-			</i18n-t> <template v-if="!computedEntry3.noCoords">{{ computedEntry3.orientationStr ? $t("history.orientAtCoords", { orient: computedEntry3.orientationStr, x: computedEntry3.Xcoord, y: computedEntry3.Ycoord }) : $t("history.atCoords", { x: computedEntry3.Xcoord, y: computedEntry3.Ycoord }) }}</template>{{ $t("history.advertising") + " " }}
+			</i18n-t> <template v-if="!computedEntry3.noCoords">{{ computedEntry3.orientationStr ? $t("history.orientAtCoords", { orient: computedEntry3.orientationStr, x: computedEntry3.Xcoord, y: computedEntry3.Ycoord }) : $t("history.atCoords", { x: computedEntry3.Xcoord, y: computedEntry3.Ycoord }) }}</template><template v-if="computedEntry3.tvHouses.length > 0">{{ $t("history.tvAtHouses", { houses: computedEntry3.tvHouses.join(", ") }) + " " }}</template>{{ $t("history.advertising") + " " }}
 			<img v-for="(g, gi) in computedEntry3.campaignGoods" :key="gi" class="foodTokenImg" :class="goodClass(g)" :src="goodSrc(g)" alt="" />
 			<img v-if="computedEntry3.radioDouble" class="foodTokenImg" :class="goodClass(computedEntry3.campaignGoods[0])" :src="goodSrc(computedEntry3.campaignGoods[0])" alt="" />
 			{{ computedEntry3.durationNum === 9 ? $t("history.eternally") : $t("history.forTurns", computedEntry3.durationNum) }}
@@ -856,7 +911,7 @@ const computedEntry3 = computed(() => {
 		<!-- HIST_STADIUM_ANNOUNCE: the next stadium game is announced (Stadium mod) -->
 		<template v-else-if="entry[0] === rf.HIST_STADIUM_ANNOUNCE">
 			<div><i18n-t keypath="history.stadiumAnnounce" tag="span" scope="global">
-				<template #turn>{{ 3 * entry[3][0] + 2 }}</template>
+				<template #turn>{{ rules.stadiumGameTurn(entry[3][0] - 1) }}</template>
 				<template #units>{{ entry[3][2] }}</template>
 				<template #good><img class="foodTokenImg" :class="goodClass(entry[3][1])" :src="goodSrc(entry[3][1])" alt="" /></template>
 			</i18n-t>
@@ -874,6 +929,24 @@ const computedEntry3 = computed(() => {
 			<div v-else><i18n-t keypath="history.stadiumNobody" tag="span" scope="global">
 				<template #units>{{ entry[3][2] }}</template>
 				<template #good><img class="foodTokenImg" :class="goodClass(entry[3][1])" :src="goodSrc(entry[3][1])" alt="" /></template>
+			</i18n-t>
+			</div>
+		</template>
+
+		<!-- HIST_PUBLISH_HEADLINE: free headline shifts all prices tonight (Media Line mod) -->
+		<template v-else-if="entry[0] === rf.HIST_PUBLISH_HEADLINE">
+			<div><i18n-t keypath="history.publishHeadline" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+			</i18n-t> <img class="headlineHistoryImg" :src="view.getImage(entry[3][0] > 0 ? 'headline_prime' : 'headline_press')" alt="" /> {{ entry[3][0] > 0 ? $t("history.headlinePrime") : $t("history.headlinePress") }}
+			</div>
+		</template>
+
+		<!-- HIST_MEDIA_LINE_BONUS: full neighbourhood orders pay a bonus (Media Line mod) -->
+		<template v-else-if="entry[0] === rf.HIST_MEDIA_LINE_BONUS">
+			<div><i18n-t keypath="history.mediaLineBonus" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][0]].colour)">{{ store.players[entry[3][0]].displayName }}</span></template>
+				<template #amount>{{ entry[3][1] }}</template>
+				<template #houses>{{ entry[3][2].flat().join(", ") }}</template>
 			</i18n-t>
 			</div>
 		</template>
@@ -959,8 +1032,22 @@ const computedEntry3 = computed(() => {
 			<p v-if="computedEntry3.noSalesAtAll">{{ $t("history.noSalesAtAll") }}</p>
 			<div v-else>
 				<h4>{{ $t("history.dinnerTime") }}</h4>
+				<!-- Media Line mod: tonight's city-wide headline shift behind the prices -->
+				<div v-if="computedEntry3.headlineTotal" class="headlineHistNote">{{ $t("assistance.headlineTonight", { amount: (computedEntry3.headlineTotal > 0 ? "+" : "") + computedEntry3.headlineTotal }) }}</div>
+				<div v-if="hasDinnerSales" class="dinnerAnimButtons">
+					<button class="actionsLineButton" @click.stop="startDinnerAnimation(true)">{{ $t("history.animAnimate") }}</button>
+					<button class="actionsLineButton" @click.stop="startDinnerAnimation(false)">{{ $t("history.animStepThrough") }}</button>
+				</div>
 				<template v-for="(block, bi) in computedEntry3.blocks" :key="bi">
 					<div v-if="block.kind === 'sale'" class="house">
+						<div v-if="block.sale" class="houseAnimButtons">
+							<button class="houseAnimBtn" :title="$t('history.animAnimate')" @click.stop="startDinnerAnimationFor(bi, true)">
+								<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+							</button>
+							<button class="houseAnimBtn" :title="$t('history.animStepThrough')" @click.stop="startDinnerAnimationFor(bi, false)">
+								<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5l8 7-8 7zM16 5h3v14h-3z" /></svg>
+							</button>
+						</div>
 						<span v-if="!block.isApartment && !block.isRural">{{ $t("history.houseLabel", { num: block.buildingNumber }) }}</span>
 						<span v-else-if="block.isApartment">{{ $t("history.apartmentLabel", { num: translateApartmentNumber(block.buildingNumber) }) }}</span>
 						<span v-else>{{ $t("history.ruralLabel") }}</span>
@@ -1005,6 +1092,7 @@ const computedEntry3 = computed(() => {
 									<template #amount>{{ block.sale.finalSaleAmount }}</template>
 								</i18n-t>
 								<span>{{ " " + $t("history.basePriceItems", { price: block.sale.basePrice, count: block.sale.numItems }) }}</span>
+								<span v-if="block.sale.headlineTotal">{{ " " + $t("history.headlineApplied", { amount: (block.sale.headlineTotal > 0 ? "+" : "") + block.sale.headlineTotal }) }}</span>
 								<span v-if="block.sale.gardenParkStatus === 1">{{ " " + $t("history.doubledGarden") }}</span>
 								<span v-else-if="block.sale.gardenParkStatus === 2 && block.isApartment">{{ " " + $t("history.doubledParkApartment") }}</span>
 								<span v-else-if="block.sale.gardenParkStatus === 2">{{ " " + $t("history.doubledParkHouse") }}</span>
@@ -1048,9 +1136,12 @@ const computedEntry3 = computed(() => {
 					<thead>
 						<tr>
 							<td>{{ $t("history.playerHeader") }}</td>
-							<td>{{ $t("history.salesHeader") }}</td>
-							<td v-if="computedEntry3.jazzTable"><InfoPopup type="employee" :employeeId="rf.JAZZ_MUSICIAN"><span class="compact" :class="empType(rf.JAZZ_MUSICIAN)">{{ empTitle(rf.JAZZ_MUSICIAN, true) }}</span></InfoPopup></td>
-							<td><InfoPopup type="employee" :employeeId="rf.WAITRESS"><span class="compact" :class="empType(rf.WAITRESS)">{{ empTitle(rf.WAITRESS) }}</span></InfoPopup></td>
+							<td>{{ computedEntry3.splitSales ? $t("history.itemsHeader") : $t("history.salesHeader") }}</td>
+							<td v-if="computedEntry3.splitSales">{{ $t("history.coffeeHeader") }}</td>
+							<td v-if="computedEntry3.splitSales">{{ $t("history.icHeader") }}</td>
+							<td v-if="computedEntry3.jazzTable"><InfoPopup type="employee" :employeeId="rf.JAZZ_MUSICIAN"><span class="compact" :class="empType(rf.JAZZ_MUSICIAN)">{{ $t("history.abbr.colJazz") }}</span></InfoPopup></td>
+							<td><InfoPopup type="employee" :employeeId="rf.WAITRESS"><span class="compact" :class="empType(rf.WAITRESS)">{{ $t("history.abbr.colWaitress") }}</span></InfoPopup></td>
+							<td v-if="computedEntry3.mediaLine">{{ $t("history.mediaLineBonusHeader") }}</td>
 							<td>{{ $t("history.cfoBonusHeader") }}</td>
 							<td>{{ $t("history.totalHeader") }}</td>
 						</tr>
@@ -1058,9 +1149,15 @@ const computedEntry3 = computed(() => {
 					<tbody>
 						<tr v-for="(r, i) in computedEntry3.incomeRows" :key="i">
 							<td><img class="playerImage" :src="playerIconSrc(r.colour)" alt="" /></td>
-							<td>${{ r.salesIncome }}</td>
+							<td v-if="!computedEntry3.splitSales">${{ r.salesIncome }}</td>
+							<template v-else>
+								<td>${{ r.itemsIncome }}</td>
+								<td>${{ r.coffeeIncome }}</td>
+								<td>${{ r.salesIncome }}</td>
+							</template>
 							<td v-if="computedEntry3.jazzTable">${{ r.numberOfJazz * 15 }}</td>
 							<td>${{ r.numberOfWaitress * r.waitressVal }}</td>
+							<td v-if="computedEntry3.mediaLine">${{ r.mediaLineBonus }}</td>
 							<td>${{ r.CFObonus }}</td>
 							<td>${{ r.totalIncome }}</td>
 						</tr>
@@ -1168,7 +1265,7 @@ const computedEntry3 = computed(() => {
 				<div class="milestoneTitle">{{ computedEntry3.ms.title.toUpperCase() }}</div>
 				<div class="milestoneText">{{ computedEntry3.ms.description }}</div>
 				<div class="milestoneSpacer">&nbsp;</div>
-				<img class="milestoneIcon" :src="view.getImage(computedEntry3.ms.img)" :class="computedEntry3.ms.additionalClass ? computedEntry3.ms.additionalClass : ''" alt="" />
+				<img class="milestoneIcon" :src="view.getImage(computedEntry3.ms.img)" :class="computedEntry3.ms.additionalClass" alt="" />
 			</span>
 			<span v-else>?</span>
 		</template>
@@ -1223,7 +1320,7 @@ const computedEntry3 = computed(() => {
 					<div class="milestoneTitle">{{ rf.MILESTONES_STR[ms].title.toUpperCase() }}</div>
 					<div class="milestoneText">{{ rf.MILESTONES_STR[ms].description }}</div>
 					<div class="milestoneSpacer">&nbsp;</div>
-					<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms].img)" :class="rf.MILESTONES_STR[ms].additionalClass ? rf.MILESTONES_STR[ms].additionalClass : ''" alt="" />
+					<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms].img)" :class="rf.MILESTONES_STR[ms].additionalClass" alt="" />
 				</span>
 			</template>
 		</template>
@@ -1392,6 +1489,41 @@ h4 {
 
 .house {
 	border-bottom: #000 1px solid;
+	position: relative;
+}
+
+/* Per-house playback buttons, parked in the entry's right-hand gap
+   (the 45px padding .log reserves for the player icon, unused here). */
+.houseAnimButtons {
+	position: absolute;
+	top: 2px;
+	right: -43px;
+	width: 42px;
+	display: flex;
+	gap: 2px;
+}
+
+.houseAnimBtn {
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #555;
+	border: 1px solid #777;
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+.houseAnimBtn:hover {
+	background: #666;
+}
+
+.houseAnimBtn svg {
+	width: 14px;
+	height: 14px;
+	fill: #fff;
 }
 
 .coffeeDiv {
@@ -1472,6 +1604,12 @@ span.compact {
 
 img.foodTokenImg {
 	width: 25px;
+	vertical-align: middle;
+	margin: 1px 1px;
+}
+
+img.headlineHistoryImg {
+	height: 25px;
 	vertical-align: middle;
 	margin: 1px 1px;
 }

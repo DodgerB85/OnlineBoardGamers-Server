@@ -1,4 +1,5 @@
 <script setup>
+import PlayerMarker from "./PlayerMarker.vue"
 import { onMounted, onBeforeUnmount, ref } from "vue"
 import * as rf from "../js/URRreference"
 import * as view from "../js/URRview"
@@ -21,6 +22,10 @@ onBeforeUnmount(() => {
 	document.documentElement.style.removeProperty("--urr-menu-height")
 })
 
+function fitMap() {
+	store.viewSettings.boardZoom = 1
+	document.querySelector(".mapContainer")?.scrollIntoView({ block: "start", behavior: "smooth" })
+}
 function clearPanels() {
 	store.gameMessages.bugErrorText = ""
 	store.gameMessages.successText = ""
@@ -77,16 +82,10 @@ function toggleReplay() {
 	store.viewSettings.showReplay = !store.viewSettings.showReplay
 }
 
-// Practice games have no votes to cast, so rewind straight from the menu.
+// Practice games have no votes to cast, so rewind straight away; normal games open the rewind/votes panel.
 function loadRewind() {
 	if (!personal.trainingGame) store.viewSettings.showRewindPanel = !store.viewSettings.showRewindPanel
-	else {
-		if (store.viewSettings.performingRewind) return
-		store.viewSettings.performingRewind = true
-		setTimeout(() => {
-			IO.loadRewind()
-		}, 500)
-	}
+	else IO.loadRewind()
 }
 
 function nextGame() {
@@ -182,15 +181,15 @@ function getKickoutTimerText() {
 				| Turn: {{ store.gameflow.turn }} - {{ view.phaseStr(store.gameflow.phase) }}
 			</span>
 			<div class="playerLineDiv">
-				<template v-for="(playerIndex, idx) in store.gameflow.turnOrder" :key="idx">
-					<span v-if="playerIndex !== -1" class="mainEntryPlayer turnOrderSpan" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ store.players[playerIndex].displayName }}</span>
+				<template v-for="(playerIndex, idx) in view.displayedTurnOrder(store)" :key="idx">
+					<span v-if="playerIndex !== -1" class="mainEntryPlayer turnOrderSpan" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)"><PlayerMarker :index="playerIndex" /></span>
 				</template>
 			</div>
 		</div>
 
 		<div id="topRight">
 			<div id="loggedInDiv" v-if="personal.name">
-				{{ personal.name }}
+				<PlayerMarker v-if="personal.pov >= 0" :index="personal.pov" /><span v-else :title="personal.name">Spectator</span>
 				<div id="WSstatus" v-if="personal.pov >= 0" :class="personal.WSstatus"></div>
 				<br alt="" />
 				<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
@@ -200,7 +199,7 @@ function getKickoutTimerText() {
 			<div id="zoomDiv" class="mapZoom">
 				<button @click="store.viewSettings.boardZoom = Math.min(3, store.viewSettings.boardZoom + .25)" :disabled="store.viewSettings.boardZoom >= 3" aria-label="Zoom in">🔍+</button>
 				<button @click="store.viewSettings.boardZoom = Math.max(.5, store.viewSettings.boardZoom - .25)" :disabled="store.viewSettings.boardZoom <= .5" aria-label="Zoom out">🔍−</button>
-				<button @click="store.viewSettings.boardZoom = 1" title="Fit the board">{{ Math.round(store.viewSettings.boardZoom * 100) }}%</button>
+				<button @click="fitMap" title="Map fills the space between the panels">🔍Map</button>
 			</div>
 		</div>
 	</div>
@@ -225,7 +224,7 @@ function getKickoutTimerText() {
 	color: white;
 	padding: 0px;
 	width: 100%;
-	min-width: 1400px;
+	min-width: 1380px;
 	height: 60px;
 	top: 0px;
 	z-index: 2;
@@ -265,10 +264,10 @@ function getKickoutTimerText() {
 	color: lightblue;
 }
 .topMenuItem img { width: 38px; height: 38px; }
-.topMenuItem span { font-size: 14px; font-weight: bold; display: block; }
+.topMenuItem span { font-size: 16px; font-weight: bold; display: block; }
 
-#topRight { flex-shrink: 0; height: 100%; font-size: 14px; text-align: center; margin-right: 5px; }
-#zoomDiv { display: flex; justify-content: flex-end; gap: 4px; margin-top: 3px; }#zoomDiv button { min-height: 25px; font: inherit; font-size: 12px; cursor: pointer; }#zoomDiv button:disabled { opacity: .4; cursor: default; }
+#topRight { flex-shrink: 0; height: 100%; font-size: 16px; font-weight: 400; text-align: center; margin-right: 5px; }
+#zoomDiv { display: flex; justify-content: flex-end; gap: 4px; margin-top: 3px; }#zoomDiv button { min-height: 25px; font: inherit; font-size: 16px; font-weight: 400; cursor: pointer; }#zoomDiv button:disabled { opacity: .4; cursor: default; }
 #topInfos { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; min-width: fit-content; flex-shrink: 0; margin: 0 auto; }
 .menuDivider { display: inline-block; width: 5px; height: 50px; background-color: darkgray; margin: 0px 10px 0px 10px; }
 .turnOrderSpan { display: inline-block; padding: 5px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }

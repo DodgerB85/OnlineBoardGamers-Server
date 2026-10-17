@@ -991,6 +991,7 @@ function buildMapThumbnailSVG(hexData) {
 	if (!hexes.length) return ""
 	const flat = !!setup && setup.ST === 1
 	const hasPolder = hexes.some((e) => e[2] >= 90 && e[2] <= 94)
+	const homeHexIDs = (setup && Array.isArray(setup.HM) ? setup.HM : []).map((m) => (Array.isArray(m) ? m[0] : -1)).filter((id) => hexes[id])
 	const S = 100
 	let minX = Infinity,
 		maxX = -Infinity,
@@ -1031,6 +1032,12 @@ function buildMapThumbnailSVG(hexData) {
 		const rot = e.length > 3 ? e[3] : 0
 		const c = centres[i]
 		body += `<g transform="translate(${c[0]} ${c[1]})${flat ? " rotate(30)" : ""}"><polygon points="${GALLERY_HEX_POINTS}" transform="rotate(${rot * 60})" fill="url(#${uid}_${file})" stroke="black" stroke-width="6"/></g>`
+	})
+	// Pre-set home tile spots. The app draws these at the marker bucket's chit position; hex centre is close enough for a thumbnail
+	const homeSize = S * 0.54
+	homeHexIDs.forEach((id) => {
+		const c = centres[id]
+		body += `<image href="/static/RNB/images/hometiles/homered.jpg" x="${c[0] - homeSize / 2}" y="${c[1] - homeSize / 2}" width="${homeSize}" height="${homeSize}"/>`
 	})
 	return `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="${vbX} ${vbY} ${vbW} ${vbH}" preserveAspectRatio="xMidYMid meet"><rect x="${vbX}" y="${vbY}" width="${vbW}" height="${vbH}" fill="#f9f9f9"/><defs>${defs}</defs>${body}</svg>`
 }

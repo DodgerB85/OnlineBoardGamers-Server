@@ -65,7 +65,9 @@ function setupReplayHighlights(entry3) {
 		for (let i = 0; i < entry3.length; i++) {
 			if (entry3[i].length > 1) {
 				junctions.push(entry3[i][0])
-				buildings.push([-1, entry3[i][1], entry3[i][2]])
+				// Splotter Designer move [origin, junction, destination, designerIdx] - highlight the destination junction
+				if (entry3[i].length > 3) junctions.push(entry3[i][1])
+				else buildings.push([-1, entry3[i][1], entry3[i][2]])
 			}
 		}
 		store.historyHelpers.buildingsToHighlight = [...buildings]
@@ -394,7 +396,7 @@ function replayVrom(historyIndex, playerIndex, entry3) {
 				if (designerIdx === rf.DESIGNER_JEROEN) store.jeroenStatus = rf.DESIGNER_REMOVED
 				else store.jorisStatus = rf.DESIGNER_REMOVED
 			} else if (entry3[i][2] < 0) {
-				// Parked on the convention-centre spot (attended); stays there like a delivered passenger
+				// Parked on the convention-centre spot (attended); returns to the convention junction at round end
 				if (designerIdx === rf.DESIGNER_JEROEN) store.jeroenStatus = rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION
 				else store.jorisStatus = rf.DESIGNER_ON_BUILDING_FLAG + rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION
 			} else {
@@ -410,7 +412,7 @@ function replayVrom(historyIndex, playerIndex, entry3) {
 			}
 			model.increaseScore(store.players[playerIndex])
 			// PITTS bonus: 2 points if delivered to Convention in the same round they arrived at Airport
-			if (entry3[i][2] !== rf.VROM_DEST_AIRPORT && pitts.designerPlacedAtAirportThisRound(designerIdx)) {
+			if (entry3[i][2] !== rf.VROM_DEST_AIRPORT && pitts.designerPlacedAtAirportThisRound(designerIdx, historyIndex)) {
 				model.increaseScore(store.players[playerIndex])
 			}
 			continue

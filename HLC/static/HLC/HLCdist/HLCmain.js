@@ -14858,6 +14858,15 @@ var imagePreURL = "/static/HLC/images/"
 /* exported soundPreURL */
 var soundPreURL = "/static/HLC/Sound/"
 
+function appendNudgeButton() {
+	if (global.pov < 0 || M.trainingGame || global.gameID <= 0) return
+	var button = $("<button type='button' class='actionsLineButton'></button>").text(gettext("Nudge"))
+	button.on("click", function () {
+		document.dispatchEvent(new CustomEvent("gameMomentumOpen", { detail: { gameID: global.gameID } }))
+	})
+	$("#actions").append(button)
+}
+
 function getMyKickoutVote() {
 	if (global.kickoutVotesData == undefined) return undefined
 	return global.kickoutVotesData[global.name]
@@ -14977,6 +14986,7 @@ function buildKickoutActions() {
 			var ConfirmButtonSpan = $("<span><button class='actionsLineButton' id='confirmKickoutButton'>" + gettext("Confirm Kickout") + "</button></span>")
 
 			$("#actions").append(cancelButtonSpan)
+			appendNudgeButton()
 			$("#actions").append(ConfirmButtonSpan)
 			$("#cancelKickoutButton").on("click", function () {
 				$("#actions").hide()
@@ -14991,6 +15001,7 @@ function buildKickoutActions() {
 				var ConfirmButtonSpan = $("<span><button class='actionsLineButton' id='confirmKickoutButton'>" + gettext("Confirm Kickout") + "</button></span>")
 
 				$("#actions").append(cancelButtonSpan)
+				appendNudgeButton()
 				$("#actions").append(ConfirmButtonSpan)
 				$("#cancelKickoutButton").on("click", function () {
 					$("#actions").hide()
@@ -15015,6 +15026,7 @@ function buildKickoutActions() {
 				$("#voteKickoutButton").on("click", { playerToKickName: playerToKickName }, Bot.actionPlayerKickout)
 				var cancelButtonSpan = $("<span><button class='actionsLineButton' id='cancelKickoutButton'>" + gettext("Not now - allow more time") + "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>")
 				$("#actions").append(cancelButtonSpan)
+				appendNudgeButton()
 				$("#cancelKickoutButton").on("click", function () {
 					$("#actions").hide()
 				})
@@ -15026,6 +15038,7 @@ function buildKickoutActions() {
 				$("#actions").append("<br/><br/>")
 				var cancelButtonSpan = $("<BR/><span><button class='actionsLineButton' id='cancelKickoutButton'>" + gettext("Not now - allow more time") + "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>")
 				$("#actions").append(cancelButtonSpan)
+				appendNudgeButton()
 				$("#cancelKickoutButton").on("click", function () {
 					$("#actions").hide()
 				})

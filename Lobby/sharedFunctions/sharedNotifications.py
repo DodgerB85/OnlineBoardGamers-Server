@@ -17,14 +17,17 @@ from django.template.loader import render_to_string
 
 # from django.db import close_old_connections
 # from django.core.mail import send_mail
-from django.utils.translation import activate, get_language, gettext
+from django.utils.translation import activate, get_language, gettext, override
+from django.utils import timezone
+from datetime import timedelta
 
 import Lobby.sharedFunctions.constants as rf
 
 # from django.core.mail import get_connection, EmailMessage
 # from django.urls import reverse
 # from django.http import HttpResponseRedirect
-from Lobby.models import Profile, User
+from Lobby.models import Game, Profile, User
+from Lobby.sharedFunctions.hotStreaks import get_turn_nudge_message
 
 # Website Bots / AI / Shadow
 USERNAMES_NOT_TO_NOTIFY = [
@@ -41,6 +44,7 @@ USERNAMES_NOT_TO_NOTIFY = [
     "RnbBot",
     "WebBot",
     "KfwBot",
+    "RowAI",
     "SHADOW",
     # Shadows
     "SHADOW_2",
@@ -1261,32 +1265,81 @@ def SN_sendDeclineEmail(declinerUsername, creatorUsername, gameCode, gameName, g
 
     activate(originalLang)
 
+def SN_model_dump(obj):
+    """Every column and relation of one model row as "name: value" lines.
+
+    Not all fields are used by all games - sending them all is the point: a
+    copy/paste of the bug report email should carry the whole record.
+    """
+    if obj is None:
+        return ["(row not found)"]
+
+    rows = []
+    for field in obj._meta.concrete_fields:
+        try:
+            value = getattr(obj, field.name)
+            if field.is_relation:
+                value = f"{value} (id={getattr(obj, field.attname)})"
+            else:
+                value = repr(value)
+        except Exception as e:
+            value = f"<unreadable: {e}>"
+        rows.append(f"{field.name}: {value}")
+
+    for field in obj._meta.many_to_many:
+        try:
+            value = list(getattr(obj, field.name).values_list("pk", flat=True))
+        except Exception as e:
+            value = f"<unreadable: {e}>"
+        rows.append(f"{field.name}: {value}")
+
+    return rows
+
+
 # This is async
 def SN_sendBugReportEmail(reporterUsername, reporterEmail, gameCode, gameID, gameData, bugDescription, rewindData, startingMap):
     subject = getGameStrings(gameCode)["bugReportSubject"]
     adminUser = User.objects.get(username="admin")
+
+    try:
+        currentGame = Game.objects.get(id=gameID, gameCode=gameCode)
+    except Game.DoesNotExist:
+        currentGame = None
+
+    gameRows = SN_model_dump(currentGame)
+    playerSections = []
+    if currentGame:
+        for index, gamePlayer in enumerate(currentGame.players.select_related("player").order_by("seat_order"), start=1):
+            rows = SN_model_dump(gamePlayer)
+            rows.append(f"player.username: {gamePlayer.player.username}")
+            rows.append(f"player.email: {gamePlayer.player.email}")
+            playerSections.append({"index": index, "rows": rows})
+
+    the_url = f"https://www.OnlineBoardGamers.com/{gameCode}/{gameID}/show/"
+
     message = render_to_string(
-        "Lobby/gameEmails/email_bug.html",
+        "Lobby/gameEmails/email_bug_full.html",
         {
             "game": gameCode,
             "username": reporterUsername,
             "domain": "www.OnlineBoardGamers.com",
             "gameID": gameID,
+            "the_url": the_url,
             "gameData": gameData,
             "bugDescription": bugDescription,
             "userEmail": reporterEmail,
             "rewindData": rewindData,
             "startingMap": startingMap,
+            "gameRows": gameRows,
+            "playerSections": playerSections,
+            "sentAt": timezone.now().strftime("%Y-%m-%d %H:%M:%S %Z"),
         },
     )
     bug_message = (
         f"BUG REPORT for game {gameCode} (ID: {gameID}).\n"
         f"User: {reporterUsername}\n"
         f"Bug Description: {bugDescription}\n"
-        f"URL: <https://www.OnlineBoardGamers.com/{gameCode}/{gameID}/show/>"  # Added brackets here
-        # f"Game Data: {gameData}\n"
-        # f"Rewind Data: {rewindData}\n"
-        # f"Starting Map: {startingMap}"
+        f"URL: <{the_url}>"
     )
     SN_sendAdminErrorMessage(bug_message)
     try:
@@ -1740,7 +1793,7 @@ def SN_sendDiscordDM(discordID, message_text, urlText, urlRaw):
         SN_sendAdminErrorMessage(f"Discord DM failed for id: ({discordID}): {channel_resp.text}")
 
 
-def SN_sendAdminErrorMessage(message):
+def SN_sendAdminErrorMessage(message, webhook_key="WEBHOOK_ADMIN_ERROR_MSG"):
     # Never reach Discord from the test suite. Several error paths call this on
     # purpose - FCM's map-sync guard rejects saves that a test deliberately makes
     # mismatched, for one - and each one posts to the real admin webhook, so a
@@ -1751,14 +1804,66 @@ def SN_sendAdminErrorMessage(message):
         from django.db import connection
 
         if str(connection.settings_dict.get("NAME", "")).startswith("test_"):
-            return
+            return True
     except Exception:
         pass
 
     try:
-        requests.post(
-            f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
+        response = requests.post(
+            f"https://discord.com/api/webhooks/{config(webhook_key)}",
             data={"content": message},
         )
+        return response.ok
     except Exception as e:
         print("sendAdminErrorMessage ERROR: " + str(e))
+        return False
+
+
+def SN_sendMomentumNotification(game, user, message, subject, is_streak=False):
+    profile = user.profile
+    if user.username in USERNAMES_NOT_TO_NOTIFY:
+        return
+    if is_streak and (not profile.hotStreakEnabled or not profile.hotStreakReminders):
+        return
+    if not is_streak and not profile.receiveTurnNudges:
+        return
+    url = f"https://www.onlineboardgamers.com/{game.gameCode}/{game.id}/show/"
+    with override(profile.profileLanguage):
+        url_text = gettext("Open game")
+        # Respect the existing turn-email preference, live-game suppression,
+        # confirmed address, and temporary email pause.
+        if profile.sendEmailNotificationOnTurn and shouldSendEmail("yourTurn", user.username, profile, game.gamePace):
+            try:
+                body = render_to_string("Lobby/gameEmails/momentumEmail.html", {"message": message, "url": url})
+                SN_sendEmail("yourTurn", subject, body, user.email)
+            except Exception as error:
+                print(f"Momentum email failed for {user.username}, game {game.id}: {error}")
+        if profile.webhooks and profile.webhooks != "[]":
+            SN_sendWebhooks(profile, message, url_text, url)
+        if profile.discord_id:
+            SN_sendDiscordDM(profile.discord_id, message, url_text, url)
+
+
+def SN_sendHotStreakReminder(game_id, last_move_date):
+    game = Game.objects.filter(pk=game_id, gameStatus="ACTIVE", streakLastMoveDate=last_move_date).first()
+    if game is None:
+        return
+    today = timezone.now().date()
+    if game.streakLastMoveDate != today - timedelta(days=1):
+        return
+    for gp in game.players.filter(is_current=True, is_kicked=False, is_missing=False, player__isnull=False).select_related("player__profile"):
+        with override(gp.player.profile.profileLanguage):
+            message = gettext("🔥 %(game)s has a shared %(days)s-day streak. Take a turn before midnight UTC to keep it alive; one turn by any player meets today's goal.") % {"game": game.presenter().getGameName(), "days": game.streakDays}
+            SN_sendMomentumNotification(game, gp.player, message, gettext("Your game's streak is about to expire"), is_streak=True)
+
+
+def SN_sendTurnNudge(game_id, target_id, sender_name, expected_update, nudged_at):
+    game = Game.objects.filter(pk=game_id, gameStatus="ACTIVE", latestUpdate=expected_update).first()
+    if game is None or game.presenter().kickoutRequired() == 0:
+        return
+    gp = game.players.filter(player_id=target_id, is_current=True, is_kicked=False, is_missing=False, lastNudgedAt=nudged_at).select_related("player__profile").first()
+    if gp is None:
+        return
+    with override(gp.player.profile.profileLanguage):
+        message = get_turn_nudge_message(game, sender_name)
+        SN_sendMomentumNotification(game, gp.player, message, gettext("A player asked you to take your turn"))

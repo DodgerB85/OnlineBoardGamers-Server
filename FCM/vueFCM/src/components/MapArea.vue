@@ -3,16 +3,20 @@ import * as map from "../js/FCMmap"
 import * as view from "../js/FCMview"
 import * as rf from "../js/FCMreference"
 import * as model from "../js/FCMmodel"
+import * as rules from "../js/FCMrules.js"
 
 import { useModelStore } from "../stores/FCMstore.js"
 import { usePersonalStore } from "../stores/FCMpersonal.js"
+import { useDinnerAnimationStore } from "../stores/dinnerAnimation.js"
 
 const store = useModelStore()
 const personal = usePersonalStore()
+const dinner = useDinnerAnimationStore()
 
 import { computed } from "vue"
 import MapHighlight from "./MapHighlight.vue"
 import BoardAssistance from "./BoardAssistance.vue"
+import DinnerAnimation from "./DinnerAnimation/DinnerAnimation.vue"
 
 function getTilePos(index) {
 	const cols = map.getUsedRowCol()[1].length
@@ -37,8 +41,9 @@ const campaignDisplays = computed(() => {
 	const sqSize = store.refSize / 5
 
 	for (const c of store.campaigns) {
-		// Gourmet guides / giant billboards / hawker trucks are off-board items
-		if (c.number < 1 || c.number > 16) continue
+		// Gourmet guides / giant billboards / hawker trucks / TV channels are off-board items.
+		// Media Line phone tokens (30-35) render like normal campaigns.
+		if (c.number < 1 || (c.number > 16 && !(c.number >= 30 && c.number <= 35))) continue
 		if (c.index < 0) continue
 
 		const campaignData = rf.MARKETING_CAMPAIGNS[c.number]
@@ -135,22 +140,78 @@ const campaignDisplays = computed(() => {
 	return res
 })
 
+// Media Line mod: TV channel antennas - circular markers straddling the TOP
+// edge of the house body. The house_garden compound is 2x3 (body 2x2 + garden
+// strip); per rotation the garden sits bottom(r0)/left(r1)/top(r2)/right(r3),
+// so the body anchor shifts: r1 body starts 1 square right, r2 one square down
+// Duration chip backgrounds = the advertised food's own token colour
+// (sampled from the official board token art)
+const FOOD_CHIP_COLOURS = {
+	[rf.LEMONADE]: "#ffc700",
+	[rf.COKE]: "#a80a0f",
+	[rf.BEER]: "#004c35",
+	[rf.PIZZA]: "#ee7500",
+	[rf.BURGER]: "#996b2b",
+	[rf.FRIED_CHICKEN]: "#cd972b",
+}
+function chipTextColour(bg) {
+	const r = parseInt(bg.slice(1, 3), 16)
+	const g = parseInt(bg.slice(3, 5), 16)
+	const b = parseInt(bg.slice(5, 7), 16)
+	return 0.299 * r + 0.587 * g + 0.114 * b > 150 ? "#1f2937" : "#fff"
+}
+const tvAntennaDisplays = computed(() => {
+	const res = []
+	const sqSize = store.refSize / 5
+	for (const c of store.campaigns) {
+		if (rf.MARKETING_CAMPAIGNS[c.number].type !== rf.TV_CHANNEL) continue
+		for (const house of c.houses) {
+			// Board apartments (3.2 / 9.7) live outside store.houses - findApartment locates them
+			let houseObj = model.findHouse(house)
+			if (houseObj === -1) houseObj = model.findApartment(house)
+			if (houseObj === -1 || houseObj.index < 0) continue
+			const [x, y] = view.getXYforSmallSquare(houseObj.index)
+			const width = sqSize * 0.6
+			const half = width / 2
+			let hx = x
+			let hy = y
+			if (rf.APARTMENTS.includes(house)) {
+				// Apartment building is 3 squares wide, anchored unrotated at (x, y)
+				hx = x + 0.5 * sqSize
+			} else if (houseObj.rotated === 1 || houseObj.rotated === true) hx = x + sqSize
+			else if (houseObj.rotated === 2) hy = y + sqSize
+			// Remaining-nights chip: its centre rides the antenna's TOP point
+			const chip = width * 0.55
+			const chipBg = FOOD_CHIP_COLOURS[c.good]
+			const slot = res.filter((a) => a.house === house).length
+			// One antenna centred; two sit snugly side by side on centre (+/-0.35sq)
+			const cx = hx + (slot === 0 ? 1 : 1.35) * sqSize
+			if (slot === 1) {
+				const first = res.find((a) => a.house === house)
+				first.x = hx + 0.65 * sqSize - half
+				first.chipX = hx + 0.65 * sqSize - chip / 2 // keep its chip on the new top point
+			}
+			res.push({
+				house,
+				src: view.getImage(c.number === 28 ? "antenna35" : "antenna45"),
+				x: cx - half,
+				y: hy - half,
+				width,
+				duration: c.duration,
+				chipX: cx - chip / 2,
+				chipY: hy - half - chip / 2,
+				chipSize: chip,
+				chipBg,
+				chipText: chipTextColour(chipBg),
+			})
+		}
+	}
+	return res
+})
+
 // Board food token sizing - beer/coke halved, lemonade reduced
 function tokenStyle(token) {
-	let x = token.x
-	let width = token.width
-	if (token.good === rf.BEER || token.good === rf.COKE) {
-		x += width / 4.5
-		width /= 2
-	} else if (token.good === rf.LEMONADE) {
-		x += width / 5
-		width /= 1.5
-	}
-	return {
-		left: x + "px",
-		top: token.y + "px",
-		width: width + "px",
-	}
+	return view.boardTokenStyle(token.good, token.x, token.y, token.width)
 }
 
 // Built houses - house_garden image pasted over the tile + house number
@@ -525,6 +586,9 @@ const GOODS_APARTMENT = [
 ]
 
 const needDisplays = computed(() => {
+	// While the dinner-time playback is running the history-time demand overlay
+	// takes over the board - don't draw the live current demand underneath it.
+	if (dinner.state.visible) return []
 	const res = []
 	const sqSize = store.refSize / 5
 
@@ -545,7 +609,7 @@ const needDisplays = computed(() => {
 			}
 			continue
 		}
-		if (!need.needs || need.needs.length === 0) continue
+		if (need.needs.length === 0) continue
 
 		// House needs
 		const houseObj = model.findHouse(need.number)
@@ -603,7 +667,7 @@ const needDisplays = computed(() => {
 	// Stadium mod - on game day, show the announced demand on the arena itself.
 	// Derived from the announcement: the injected need only exists inside
 	// doDinnerTime's synchronous run, so it can never drive the display.
-	if (store.startingOptions.stadium && store.stadium.announcement !== null && store.gameflow.turn === 5 + store.stadium.gamesPlayed * 3) {
+	if (store.startingOptions.stadium && store.stadium.announcement !== null && store.gameflow.turn === rules.stadiumGameTurn(store.stadium.gamesPlayed)) {
 		const idx = map.findIndexForHouse(rf.STADIUM)
 		if (idx > -1) {
 			const [x, y] = view.getXYforSmallSquare(idx)
@@ -716,6 +780,12 @@ function tileRotationClass(tileData) {
 				<span class="campaignDurationSpan" :class="{ r1: camp.duration === 9, inverted: camp.hasSecondGood }" :style="{ left: camp.numX + 'px', top: camp.numY + 'px' }">{{ camp.duration === 9 ? "8" : camp.duration }}</span>
 			</template>
 
+			<!-- Display Media Line TV channel antennas -->
+			<template v-for="(ant, antIdx) in tvAntennaDisplays" :key="'ant' + antIdx">
+				<img class="boardAntennaImg" :src="ant.src" :style="{ left: ant.x + 'px', top: ant.y + 'px', width: ant.width + 'px' }" :alt="$t('items.antenna')" />
+				<span class="antennaDurationChip" :class="{ r1: ant.duration === 9 }" :style="{ left: ant.chipX + 'px', top: ant.chipY + 'px', width: ant.chipSize + 'px', height: ant.chipSize + 'px', fontSize: ant.chipSize * 0.62 + 'px', backgroundColor: ant.chipBg, color: ant.chipText }">{{ ant.duration === 9 ? "8" : ant.duration }}</span>
+			</template>
+
 			<!-- Display natural board houses -->
 			<template v-for="(h, hIdx) in naturalHouseDisplays" :key="'nh' + hIdx">
 				<img class="boardHouseImg" :src="view.getImage('house_small')" :style="{ left: h.x + 'px', top: h.y + 'px', width: h.width + 'px' }" :alt="$t('items.house')" />
@@ -776,6 +846,9 @@ function tileRotationClass(tileData) {
 
 			<!-- Add highlights on top-->
 			<MapHighlight />
+
+			<!-- Dinner-time resolution playback overlay -->
+			<DinnerAnimation v-if="dinner.state.visible" />
 		</div>
 
 		<!-- Right-hand assistance column (board demand summary + players) -->
@@ -824,6 +897,26 @@ function tileRotationClass(tileData) {
 	position: absolute;
 	z-index: 10;
 	height: auto;
+}
+
+/* Media Line TV channel antennas - above houses, below clickable layers */
+.boardAntennaImg {
+	position: absolute;
+	z-index: 12;
+	height: auto;
+}
+
+/* Remaining-nights chip riding a TV antenna marker (bg/colour set inline
+   from the advertised food's own colour) */
+.antennaDurationChip {
+	position: absolute;
+	font-weight: bold;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 14;
+	pointer-events: none;
 }
 
 .boardTokenImg {
@@ -961,7 +1054,7 @@ function tileRotationClass(tileData) {
 	z-index: 5;
 }
 
-/* Flipped park rotations (mirror horizontally, matching FCM.css) */
+/* Flipped park rotations (mirror horizontally, matching the board tiles) */
 .r0M { transform: rotate(0deg) scaleX(-1); }
 .r1M { transform: rotate(90deg) scaleX(-1); }
 .r2M { transform: rotate(180deg) scaleX(-1); }
