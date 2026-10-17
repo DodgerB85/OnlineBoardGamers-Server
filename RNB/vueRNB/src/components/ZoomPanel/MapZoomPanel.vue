@@ -279,7 +279,13 @@ function getresFollowingTransporterPos(maxPos, idx) {
 	return [-rf.DEFAULT_RES_WIDTH / 2.5, idx * 30]
 }
 
-function getresOnTransporterPos(idx) {
+function getresOnTransporterPos(idx, transporterType) {
+	// Planes show 2 goods per row (2 rows of 2); other transporters keep 4 per row
+	if (transporterType === rf.PLANE) {
+		const row = idx < 2 ? 0 : 1
+		const col = idx % 2
+		return [(rf.DEFAULT_RES_WIDTH / 3) * col, row === 0 ? -rf.DEFAULT_RES_HEIGHT / 8 : rf.DEFAULT_RES_HEIGHT / 8]
+	}
 	if (idx < 4) return [(rf.DEFAULT_RES_WIDTH / 3) * idx, -rf.DEFAULT_RES_HEIGHT / 8]
 
 	const rowIdx = idx - 4
@@ -883,7 +889,7 @@ const computedMaxNeutralBricks = computed(() => {
 								}" />
 							<!-- RESOURCES ON TRANSPORTER-->
 							<g v-for="(computedResObj, idx2) in transporter.resourcesOnTransporter" :key="idx2">
-								<g :transform="`translate(${getresOnTransporterPos(idx2)[0]},${getresOnTransporterPos(idx2)[1]})`">
+								<g :transform="`translate(${getresOnTransporterPos(idx2, transporter.type)[0]},${getresOnTransporterPos(idx2, transporter.type)[1]})`">
 									<rect
 										:class="store.context.resourceIDsToHighlight.includes(computedResObj.id) ? 'resHighlight' : 'resNormal'"
 										:style="{

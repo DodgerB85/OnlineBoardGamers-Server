@@ -77,6 +77,16 @@ watch(
 	}
 )
 
+// Planes & Aeroports: entering/leaving flight changes the display position
+watch(
+	() => store.context.planeInFlight,
+	() => {
+		if (props.transporterObjProp.type !== rf.PLANE) return
+		transitionDuration.value = "700ms"
+		updateToFinalPosition("planeInFlight watch")
+	}
+)
+
 function animateTransporter() {
 	if (isAnimating.value) return
 	isAnimating.value = true
@@ -135,6 +145,11 @@ function updateToFinalPosition(_SOURCE_FLAG) {
 	const transporterObj = model.getTransporterByID(props.transporterObjProp.id)
 	const transporterStats = rf.getTransporterStats(transporterObj.type)
 	let pt = map.getTransporterPositionFromLocation(transporterObj.location, transporterStats, props.transporterObjProp.id)
+	// Planes & Aeroports: in flight the plane is shown at the top-middle of its hex
+	if (transporterObj.type === rf.PLANE && store.context.planeInFlight) {
+		const flightPos = map.getPlaneInFlightPosition(transporterObj)
+		if (flightPos) pt = flightPos
+	}
 	transitionDuration.value = "700ms" // Ensure duration
 	//nextTick(() => {
 	if (pt.length !== 2) {
@@ -168,6 +183,12 @@ function getresFollowingTransporterPos(maxPos, idx) {
 }
 
 function getresOnTransporterPos(idx) {
+	// Planes show 2 goods per row (2 rows of 2); other transporters keep 4 per row
+	if (props.transporterObjProp.type === rf.PLANE) {
+		const row = idx < 2 ? 0 : 1
+		const col = idx % 2
+		return [50 * col * store.RATIO, row === 0 ? -resOnTransporterHeight.value / 2 : 0]
+	}
 	if (idx < 4) return [50 * idx * store.RATIO, -resOnTransporterHeight.value / 2]
 
 	const rowIdx = idx - 4
@@ -207,6 +228,10 @@ const getComputedTransporterHighlightFilter = computed(() => {
 	return `url(#${filter})`
 })
 
+// Planes & Aeroports: a plane in flight is drawn banked at 45 degrees.
+const isPlaneInFlight = computed(() => props.transporterObjProp.type === rf.PLANE && store.context.planeInFlight && store.context.selectedTransporterIDforTM === props.transporterObjProp.id)
+const planeImageTransform = computed(() => (isPlaneInFlight.value ? `rotate(-45 ${imgWidth.value / 2} ${transporterImgHeight.value / 2})` : ""))
+
 // Initialize position
 transitionDuration.value = "0ms" // NEW
 updateToFinalPosition("RAW")
@@ -240,12 +265,13 @@ updateToFinalPosition("RAW")
 		<!-- TRANSPORTER -->
 		<!-- THE SINGLE SHADOW LAYER -->
 		<!-- This one image will become the entire outline thanks to the filter -->
-		<image v-if="transporterObjProp.movedThisTurn" :width="imgWidth" :height="transporterImgHeight" :xlink:href="getComputedImageLocal" :filter="transporterObjProp.remainingMoves > 0 ? 'url(#f_orange)' : 'url(#f_red)'" style="pointer-events: none" />
-		<image :width="imgWidth" :height="transporterImgHeight" :xlink:href="getComputedImageLocal" :filter="getComputedTransporterHighlightFilter" style="pointer-events: none" />
+		<image v-if="transporterObjProp.movedThisTurn" :transform="planeImageTransform" :width="imgWidth" :height="transporterImgHeight" :xlink:href="getComputedImageLocal" :filter="transporterObjProp.remainingMoves > 0 ? 'url(#f_orange)' : 'url(#f_red)'" style="pointer-events: none" />
+		<image :transform="planeImageTransform" :width="imgWidth" :height="transporterImgHeight" :xlink:href="getComputedImageLocal" :filter="getComputedTransporterHighlightFilter" style="pointer-events: none" />
 
 		<!-- THE MAIN TRANSPORTER IMAGE -->
 		<image
 			@click="map.clickedTransporter(transporterObjProp.id)"
+			:transform="planeImageTransform"
 			:width="imgWidth"
 			@mouseover="isHovered = true"
 			@mouseleave="isHovered = false"
@@ -256,17 +282,6 @@ updateToFinalPosition("RAW")
 			:style="{
 				pointerEvents: isTransporterSelectable() ? 'painted' : 'painted',
 			}" />
-		<!-- Planes & Aeroports: show the current movement mode (FLY/TAXI) on the selected plane -->
-		<text
-			v-if="props.transporterObjProp.type === rf.PLANE && store.context.selectedTransporterIDforTM === props.transporterObjProp.id"
-			:x="0"
-			:y="-transporterImgHeight / 2 - 10 * store.RATIO"
-			:font-size="28 * store.RATIO"
-			fill="white"
-			stroke="black"
-			text-anchor="middle">
-			{{ store.context.selectedPlaneMode === rf.MOVE_TAXI ? "TAXI" : "FLY" }}
-		</text>
 		<!-- RESOURCES ON TRANSPORTER-->
 		<g v-for="(computedResObj, idx) in getComputedTransporterResources" :key="idx">
 			<g :transform="`translate(${getresOnTransporterPos(idx)[0]},${getresOnTransporterPos(idx)[1]})`">

@@ -360,13 +360,11 @@ function handleTakeoffModeClick() {
 	store.context.selectedPlaneMode = rf.MOVE_FLY
 	store.context.planeModeSelectionActive = false
 	store.context.planeInFlight = true
-	// Position plane top-center of hex for takeoff
+	// Position the plane image in the top-middle of the hex for takeoff
 	const transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
 	if (transporterObj) {
-		const hex = model.getHexByID(transporterObj.location[1])
-		if (hex) {
-			transporterObj.rawTransporterXY = [hex.rawXY[0], hex.rawXY[1] - 40 * store.RATIO]
-		}
+		const flightPos = map.getPlaneInFlightPosition(transporterObj)
+		if (flightPos) transporterObj.rawTransporterXY = flightPos
 	}
 	highlight.updateAllHighlightsForTransporterMode()
 }

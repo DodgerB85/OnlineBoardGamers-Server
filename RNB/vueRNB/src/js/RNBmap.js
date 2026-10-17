@@ -625,6 +625,26 @@ export function dropTransporterOnLocation_core(transporterID, dropLocation) {
 	transporter.location = dropLocation
 }
 
+// Planes & Aeroports: visual position while in flight - centred on the top-middle
+// edge of the hex, so the plane straddles the boundary with the next tile.
+export function getPlaneInFlightPosition(transporterObj, location = transporterObj.location) {
+	const store = useModelStore()
+	const hex = model.getHexByID(location[1])
+	if (!hex || !hex.vertices || hex.vertices.length === 0) return null
+	const stats = rf.getTransporterStats(transporterObj.type)
+	const imgWidth = stats.width * store.RATIO
+	const imgHeight = stats.height * store.RATIO
+	// Use the tile's outer top point/edge, not the inner map nodes (which sit lower in the hex)
+	let topY = Math.min(...store.VERTICES_POINTY_EXT.map((v) => v[1]))
+	if (store.hexStyle === rf.FLAT) {
+		const angle = Math.PI / 6
+		const rotated = store.VERTICES_POINTY_EXT.map(([x, y]) => [x * Math.cos(angle) - y * Math.sin(angle), x * Math.sin(angle) + y * Math.cos(angle)])
+		topY = Math.min(...rotated.map((v) => v[1]))
+	}
+	topY *= store.RATIO
+	return [hex.rawXY[0] - imgWidth / 2, hex.rawXY[1] + topY - imgHeight / 2]
+}
+
 // Where can `carriedObj` be dropped while its carrier sits at its current location?
 // Returns bucket locations in the same shape the drop UI uses (see highlightLocations).
 // Planes may never be put in a river: when the carrier is in/on a river (or docked),

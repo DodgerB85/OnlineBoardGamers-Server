@@ -597,8 +597,13 @@ export function moveTransporterTo(entry, transporterID, event = null) {
 		// Does the path not contain the final waypoint?
 		//else waypoints.push(map.getTransporterPositionFromLocation(location, transporterStats))
 
-		// Ensure the absolute final coordinate is pixel-perfect for the destination
-		const finalPixelPt = map.getTransporterPositionFromLocation(finalLocation, transporterStats, transporterID)
+		// Ensure the absolute final coordinate is pixel-perfect for the destination.
+		// A plane in flight finishes at the top-middle of the destination tile, not on the vertex.
+		let finalPixelPt = map.getTransporterPositionFromLocation(finalLocation, transporterStats, transporterID)
+		if (isFly && transporterObj.type === rf.PLANE) {
+			const flightPos = map.getPlaneInFlightPosition(transporterObj, finalLocation)
+			if (flightPos) finalPixelPt = flightPos
+		}
 		if (waypoints.length > 0) {
 			// Replace or push the final destination to ensure it matches updateToFinalPosition
 			waypoints[waypoints.length - 1] = [...finalPixelPt]
