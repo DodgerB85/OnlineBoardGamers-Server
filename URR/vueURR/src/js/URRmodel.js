@@ -16,7 +16,8 @@ export function initGame() {
 
 	personal.name = initData.name || "Guest"
 	personal.gameID = initData.gameID
-	personal.gameCreationTimestamp = initData.gameCreationTimestamp
+	// The server sends milliseconds; history times are in seconds.
+	personal.gameCreationTimestamp = Math.floor(initData.gameCreationTimestamp / 1000)
 	personal.pov = initData.pov !== undefined ? initData.pov : -99
 	personal.latestUpdate = initData.latestUpdate
 	personal.secondsToNextKickout = initData.secondsToNextKickout !== undefined ? initData.secondsToNextKickout : 99999
@@ -111,14 +112,16 @@ export function importGameData(obj) {
 	if (data.version === undefined) {
 		// The old scaffold stored only names, dummy turns and zero scores, not
 		// game mechanics. Never apply those dummy phases to a real position.
-		console.warn("Initializing rules state from a legacy URR scaffold save")
+		console.warn("Dealing a fresh URR game from a names-only save")
 		initGameFresh(data.players.map((player) => player.name))
+		for (const [index, player] of data.players.entries()) if (player.displayName) store.players[index].displayName = player.displayName
 		return
 	}
 	if (data.version !== rf.GAME_DATA_VERSION) throw new Error("Unsupported URR save version")
+	data.board = historyStorage.expandBoard(data.board)
 	// Earlier rules saves had no board. Preserve their economy and turn order.
 	if (data.board?.areas.length === 0) data.board = boardRules.createBoard(board.createPrintedBoard())
-	const history = historyStorage.expandHistory(data.history || [])
+	const history = historyStorage.expandHistory(data, rf.HIST_NEW_GAME, usePersonalStore().gameCreationTimestamp)
 	const hadDraft = !!store.turnDraft.start
 	store.clearTurnDraft()
 	if (hadDraft) store.turnDraft.message = "The saved game was updated. Your uncommitted turn has been cleared."
@@ -127,7 +130,10 @@ export function importGameData(obj) {
 }
 
 export function exportGameData() {
-	return { ...snapshotState(), history: historyStorage.compactHistory(useModelStore().history) }
+	const history = useModelStore().history
+	const state = snapshotState()
+	const opening = historyStorage.compactOpening(history)
+	return { ...state, board: historyStorage.compactBoard(state.board), replay: historyStorage.compactHistory(history), ...(opening.length ? { replayStart: opening } : {}) }
 }
 
 export function snapshotState() {
@@ -139,6 +145,20 @@ export function performAction(playerIndex, action) {
 	const next = game.applyAction(snapshotState(), playerIndex, action)
 	restoreState(next)
 	addHistory(next.gameflow.phase === rf.PHASE_GAME_OVER ? rf.HIST_GAME_END : rf.HIST_ACTION, playerIndex, undefined, action)
+}
+
+// Missing seats never hold the turn: their remaining duties resolve with the
+// bot policy as soon as they come up, so the next real player is notified.
+export function playMissingSeats() {
+	const store = useModelStore()
+	// ponytail: bounded loop, a bot policy that stops advancing just leaves the seat to the App.vue fallback
+	for (let guard = 0; guard < 500 && store.gameflow.phase !== rf.PHASE_GAME_OVER; guard++) {
+		const player = store.gameflow.turnOrder[0]
+		if (!store.players[player]?.isMissing) return
+		const action = game.getBotAction(snapshotState())
+		if (!action) return
+		performAction(player, action)
+	}
 }
 
 export function addHistory(event, playerIndex, snapshot, action = null) {
@@ -161,7 +181,9 @@ export function getPlayerIndexByName(name) {
 export function setMissingPlayers(names) {
 	const store = useModelStore()
 	for (const player of store.players) {
-		player.isMissing = names.includes(player.name)
-		if (player.isMissing) player.displayName = `${player.name} (Bot)`
+		// Only missing seats carry the flag, so saves and replays stay free of `isMissing: false`.
+		if (!names.includes(player.name)) continue
+		player.isMissing = true
+		player.displayName = `${player.name} (Bot)`
 	}
 }

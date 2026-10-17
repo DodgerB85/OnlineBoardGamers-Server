@@ -64,6 +64,7 @@ export const useModelStore = defineStore("store", () => {
 		inspectedPlayer: null,
 		inspectedState: null,
 		showRewindPanel: false,
+		showResignPanel: false,
 		performingRewind: false,
 		showReplay: false,
 	})

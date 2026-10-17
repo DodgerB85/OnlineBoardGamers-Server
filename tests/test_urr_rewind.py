@@ -51,6 +51,10 @@ class UrrRewindTests(SimpleTestCase):
         doSaveRewind(game, {"gameData": saved}, "")
         self.assertEqual(json.loads(decompressRewindPoint(json.loads(game.rewindData)[0])), json.loads(expected))
 
+    def test_opening_position_of_replay_save_is_names_only(self):
+        saved = json.dumps({"version": 1, "players": [{"name": "A", "displayName": "Ann", "money": 5}], "replay": [[3, 0, {"type": "pass"}, 4]]})
+        self.assertEqual(json.loads(openingPosition(saved)), {"players": [{"name": "A", "displayName": "Ann"}]})
+
     def test_loaded_position_keeps_redo_anchor_in_client_representation(self):
         presenter = Mock()
         presenter.getSecondsToNextKickout.return_value = 99999

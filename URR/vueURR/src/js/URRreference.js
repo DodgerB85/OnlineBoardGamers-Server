@@ -89,8 +89,9 @@ export const STARTING_MONEY_BY_PLAYER_COUNT = { 3: 600, 4: 450, 5: 360, 6: 300 }
 
 // --- History event types ---
 export const HIST_NEW_GAME = 0
-export const HIST_END_TURN = 1
 export const HIST_GAME_END = 2
+export const HIST_KICKOUT = 4
+export const HIST_RESIGN = 5
 
 // --- Vote topics (mirror Lobby.sharedFunctions.constants) ---
 export const DELETE_VOTE_TOPIC = "delete_game_votes"

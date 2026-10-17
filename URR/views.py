@@ -156,11 +156,15 @@ def _processURRturn(request):
         return performSaveURRGame(request, currentGame, jsonData)
 
     elif jsonData["action"] == "resign":
+        # Settlement only, on your own turn: nobody can resign once the final rainy season is decided.
+        is_current = currentGame.players.filter(player=request.user, is_current=True, is_missing=False, is_kicked=False).exists()
+        if currentGame.phase != rfURR.PHASE_SETTLEMENT or not is_current:
+            return JsonResponse({"error": gettext("You can only resign on your own turn in the settlement phase.")}, status=400)
         _missingPlayer = User.objects.get(username=request.user.username)
         presenter.addMissingPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
         currentGame.save()
-        return JsonResponse({"latestUpdate": currentGame.latestUpdate}, safe=False)
+        return JsonResponse({"latestUpdate": currentGame.latestUpdate, "missingPlayers": presenter.getMissingPlayersNamesArray()}, safe=False)
 
     elif jsonData["action"] == "kickout":
         participant = currentGame.players.filter(player=request.user, is_missing=False, is_kicked=False).exists()
@@ -357,7 +361,11 @@ def openingPosition(gameData):
     rewind of a game would have nothing to go back to.
     """
     try:
-        history = json.loads(gameData).get("history") or []
+        data = json.loads(gameData)
+        if "replay" in data:
+            # An unversioned names-only save makes the client deal a fresh game.
+            return json.dumps({"players": [{"name": p["name"], "displayName": p.get("displayName", p["name"])} for p in data["players"]]})
+        history = data.get("history") or []
         if not history:
             return ""
         opening = json.loads(history[0][2])
