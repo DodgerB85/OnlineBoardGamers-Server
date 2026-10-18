@@ -37,6 +37,26 @@ def messages(response):
     return [str(m) for m in get_messages(response.wsgi_request)]
 
 
+# Per create page: the form fields it must render. These guard the shared Lobby
+# pieces (the kickout options partial, the common options card) from silently
+# dropping a seat or a game-type checkbox for one game.
+CREATE_PAGE_FIELDS = {
+    "createFCMpage": {"seats": [2, 3, 4, 5, 6], "seat_rows": [3, 4, 5, 6], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"], "extras": ['id="fcmAI"']},
+    "createRNBpage": {"seats": [2, 3, 4, 5, 6], "seat_rows": [2, 3, 4, 5, 6], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"], "extras": ['<option value="1">', 'id="useSoloMineRules"']},
+    "createRNBpage2": {"seats": [2, 3, 4, 5, 6], "seat_rows": [2, 3, 4, 5, 6], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"], "extras": ['<option value="1">', 'id="useSoloMineRules"']},
+    "createHLCpage": {"seats": [2, 3, 4, 5], "seat_rows": [3, 4, 5], "game_types": ["trainingGame", "privateGame", "experiencedGame"]},
+    "createTGZpage": {"seats": [2, 3, 4, 5], "seat_rows": [3, 4, 5], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"], "submit": "registerbtn"},
+    "createINDpage": {"seats": [2, 3, 4, 5], "seat_rows": [3, 4, 5], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"]},
+    "createINDpage2": {"seats": [2, 3, 4, 5], "seat_rows": [3, 4, 5], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"]},
+    "createAQYpage": {"seats": [2, 3, 4], "seat_rows": [3, 4], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"]},
+    "createBUSpage": {"seats": [2, 3, 4, 5], "seat_rows": [3, 4, 5], "game_types": ["trainingGame", "privateGame", "experiencedGame"]},
+    "createCNSpage": {"seats": [2, 3, 4], "seat_rows": [3, 4], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"]},
+    "createWEBpage": {"seats": [2, 3, 4], "seat_rows": [3, 4], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"]},
+    "createKFWpage": {"seats": [2, 3, 4, 5, 6], "seat_rows": [3, 4, 5, 6], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"]},
+    "createURRpage": {"seats": [2, 3, 4, 5, 6], "seat_rows": [2, 3, 4, 5, 6], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"]},
+}
+
+
 class AllGamesCreationTests(TestCase):
     """Cross-game smoke tests for the 10 games on the create-new-game page.
 
@@ -125,11 +145,25 @@ class AllGamesCreationTests(TestCase):
                 self.assertEqual(response.status_code, 400, game["code"])
                 self.assertFalse(Game.objects.filter(gameCode=game["code"]).exists(), game["code"])
 
-    def test_create_pages_render_shared_kickout_options(self):
-        pages = [game["page"] for game in GAMES] + ["createURRpage", "createINDpage2", "createRNBpage2"]
-        for page in pages:
+    def test_create_pages_render_their_expected_fields(self):
+        for page, fields in CREATE_PAGE_FIELDS.items():
             with self.subTest(page=page):
                 response = self.client.get(reverse(page))
 
                 self.assertEqual(response.status_code, 200, page)
-                self.assertContains(response, "global.kickoutOptions = {", msg_prefix=page)
+                body = response.content.decode()
+                self.assertIn("global.kickoutOptions = {", body, page)
+                self.assertIn("createGamePage", body, page)
+                self.assertIn('id="kickoutDuration"', body, page)
+                self.assertIn('id="playerNumber"', body, page)
+                self.assertIn('id="player2help"', body, page)
+                self.assertIn('id="blitzWarningSpan"', body, page)
+                self.assertIn(fields.get("submit", "createNewGameButton"), body, page)
+                for extra in fields.get("extras", []):
+                    self.assertIn(extra, body, f"{page} {extra}")
+                for seat in fields["seats"]:
+                    self.assertIn(f'id="player{seat}"', body, f"{page} player{seat}")
+                for row in fields["seat_rows"]:
+                    self.assertIn(f'id="selPlayer{row}"', body, f"{page} selPlayer{row}")
+                for game_type in fields["game_types"]:
+                    self.assertIn(f'id="{game_type}"', body, f"{page} {game_type}")

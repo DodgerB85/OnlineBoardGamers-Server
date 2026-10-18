@@ -532,6 +532,7 @@
     
     {% block script %}
         {% compress js %}
+            <script src="{% static 'Lobby/createGamePage.js' %}"></script>
             <script src="{% static 'Lobby/createTGZgame.js' %}"></script>
             <script src="{% static 'Lobby/miniTournament.js' %}"></script>
         {% endcompress %}

@@ -1,0 +1,51 @@
+{% load i18n %}
+{# Common Options card, shared by the create pages. The calling page passes the #}
+{# translated practice-game sentence as practiceHelp; games without a learning #}
+{# game or without the playing-speed help pass hideLearning / hideSpeedHelp.    #}
+{% url "lobbyHelp" as the_url %}
+                <div class="card">
+                    <div class="card-header"><h2 class="card-title">{% translate "Common Options" %}</h2></div>
+                    <div class="form-row">
+                        <label class="form-label" for="kickoutDuration">{% translate "Kickout available after:" %}</label>
+                        <select name="kickoutDuration" id="kickoutDuration" style="flex:0 0 auto;width:auto">
+                            <option value="100">{% translate "1 day" %}</option>
+                            <option value="200" selected="selected">{% translate "2 days" %}</option>
+                            <option value="300">{% translate "3 days" %}</option>
+                            <option value="500">{% translate "5 days" %}</option>
+                        </select>
+                        {% if not hideSpeedHelp %}<div class="form-help">{% translate "Change Playing Speed for different options" %}</div>{% endif %}
+                    </div>
+                    <div class="check-list">
+                        <label class="check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="trainingGame" name="trainingGame" value="102">
+                            <div>
+                                <div>{% translate "Practice Game" %}</div>
+                                <div class="opt-help">{{ practiceHelp }}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="privateGame" name="privateGame" value="1">
+                            <div>
+                                <div>{% translate "Private Game" %}</div>
+                                <div class="opt-help">{% translate "Players can only join with invite or link" %}</div>
+                            </div>
+                        </label>
+                        {% if not hideLearning %}
+                        <label class="check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="learningGame" name="learningGame" value="110">
+                            <div>
+                                <div>{% translate "Request Learning Game" %}</div>
+                                <div class="opt-help">{% blocktranslate trimmed %}Request help to learn the game. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
+                            </div>
+                        </label>
+                        {% endif %}
+                        <label class="check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="experiencedGame" name="experiencedGame" value="120" disabled>
+                            <div>
+                                <div>{% translate "Experienced Game" %}</div>
+                                <div class="opt-help">{% blocktranslate trimmed %}Minimum Experience Level. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
+                                {% if not experienced %}<div style="font-size:12px;color:var(--color-danger);margin-top:2px">{% translate "You do not have enough experience" %}</div>{% endif %}
+                            </div>
+                        </label>
+                    </div>
+                </div>

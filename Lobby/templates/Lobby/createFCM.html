@@ -1146,6 +1146,7 @@
   {% endif %}
   {% block script %}
     {% compress js %}
+      <script src="{% static 'Lobby/createGamePage.js' %}"></script>
       <script src="{% static 'Lobby/createFCMgame.js' %}"></script>
     {% endcompress %}
     <script>

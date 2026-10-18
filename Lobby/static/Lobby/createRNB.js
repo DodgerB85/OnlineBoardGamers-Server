@@ -45,20 +45,6 @@ function initGameCreation(fillData, setupData = {}) {
 }
 
 // Kickout choices per pace come from Lobby/kickoutOptions.html so the labels stay translated.
-function setKickoutOptions() {
-	var pace = parseInt(document.getElementById("pace").value)
-	var select = document.getElementById("kickoutDuration")
-	var previous = select.value
-	select.innerHTML = ""
-	var options = global.kickoutOptions[pace] || global.kickoutOptions[30]
-	options.forEach(function (option) {
-		select.add(new Option(option[1], option[0]))
-	})
-	select.value = previous
-	if (select.value == "") select.selectedIndex = 0
-	document.getElementById("blitzWarningSpan").style.display = pace == 10 ? "flex" : "none"
-}
-
 function validateOptions(change) {
 	if (change == "pace") {
 		setKickoutOptions()
@@ -67,71 +53,9 @@ function validateOptions(change) {
 			document.getElementById("playerNumber").disabled = false
 			selectPlayers()
 		}
-	} else if (change === "trainingGame") {
-		if (document.getElementById(change).checked == true) {
-			//document.getElementById('playerNumber').value = 2;
-			//document.getElementById('playerNumber').disabled = true;
-			removeOption("learningGame")
-			removeOption("experiencedGame")
-			removeOption("privateGame")
-			selectPlayers()
-		} else {
-			addOption("learningGame")
-			addOption("privateGame")
-			if (global.experienced) addOption("experiencedGame")
-			document.getElementById("player2").value = ""
-			document.getElementById("player2").disabled = false
-			document.getElementById("player3").value = ""
-			document.getElementById("player3").disabled = false
-			document.getElementById("player4").value = ""
-			document.getElementById("player4").disabled = false
-			document.getElementById("player5").value = ""
-			document.getElementById("player5").disabled = false
-			document.getElementById("player6").value = ""
-			document.getElementById("player6").disabled = false
-			selectPlayers()
-		}
-	} else if (change === "learningGame") {
-		if (document.getElementById(change).checked == true) {
-			removeOption("trainingGame")
-			removeOption("experiencedGame")
-			document.getElementById("playerNumber").value = 2
-			document.getElementById("playerNumber").disabled = true
-			selectPlayers()
-		} else {
-			document.getElementById("playerNumber").disabled = false
-			selectPlayers()
-			addOption("trainingGame")
-			if (global.experienced) addOption("experiencedGame")
-		}
-	} else if (change === "experiencedGame") {
-		if (document.getElementById(change).checked == true) {
-			removeOption("trainingGame")
-			removeOption("learningGame")
-			document.getElementById("player2").value = ""
-			document.getElementById("player2").disabled = false
-			document.getElementById("player3").value = ""
-			document.getElementById("player3").disabled = false
-			document.getElementById("player4").value = ""
-			document.getElementById("player4").disabled = false
-			document.getElementById("player5").value = ""
-			document.getElementById("player5").disabled = false
-			selectPlayers()
-		} else {
-			addOption("trainingGame")
-			addOption("learningGame")
-		}
+	} else if (GAME_TYPE_OPTIONS.indexOf(change) !== -1) {
+		validateGameType(change)
 	}
-}
-
-function removeOption(option) {
-	document.getElementById(option).checked = false
-	document.getElementById(option).disabled = true
-}
-
-function addOption(option) {
-	//document.getElementById(option).checked = false;
-	document.getElementById(option).disabled = false
 }
 
 function validateGameOptions(_checkboxID) {
@@ -196,208 +120,30 @@ function updateMapPlayerCountWarning() {
 }
 
 function selectPlayers() {
-	var numberOfPlayers = document.getElementById("playerNumber").value
+	var solo = document.getElementById("playerNumber").value == "1"
+	showSeats()
 
-	if (document.getElementById("trainingGame").checked) {
-		document.getElementById("player2help").innerHTML = '<span style="background-color: yellow; color: darkred;">' + global.player2practiceText + "</span>"
-	} else document.getElementById("player2help").innerHTML = global.player2normText
-
-	switch (numberOfPlayers) {
-		case "1":
-			// Solo mode: tick and disable practice game
-			removeOption("trainingGame")
-			document.getElementById("trainingGame").checked = true
-
-			// Disable kickout options
-			document.getElementById("kickoutDuration").disabled = true
-			// Disable private game
-			removeOption("privateGame")
-			// Disable learning game
-			removeOption("learningGame")
-			// Disable experienced game
-			removeOption("experiencedGame")
-			// Tick and disable solo mine rules
-			removeOption("useSoloMineRules")
-			document.getElementById("useSoloMineRules").checked = true
-			// Hide all player name options
-			document.getElementById("selPlayer2").style.display = "none"
-			document.getElementById("selPlayer3").style.display = "none"
-			document.getElementById("selPlayer4").style.display = "none"
-			document.getElementById("selPlayer5").style.display = "none"
-			document.getElementById("selPlayer6").style.display = "none"
-			// Clear player fields
-			document.getElementById("player2").value = ""
-			document.getElementById("player3").value = ""
-			document.getElementById("player4").value = ""
-			document.getElementById("player5").value = ""
-			document.getElementById("player6").value = ""
-			break
-		case "2":
-			// Re-enable options when switching from solo
-			document.getElementById("kickoutDuration").disabled = false
-			// Only re-enable if practice game is not checked
-			if (!document.getElementById("trainingGame").checked) {
-				addOption("privateGame")
-				addOption("learningGame")
-			}
-			addOption("trainingGame")
-			if (document.getElementById("useSoloMineRules").disabled) {
-				document.getElementById("useSoloMineRules").checked = false
-			}
-			addOption("useSoloMineRules")
-			if (global.experienced) addOption("experiencedGame")
-			document.getElementById("player2").disabled = false
-
-			document.getElementById("selPlayer2").style.display = "flex"
-			document.getElementById("selPlayer3").style.display = "none"
-			document.getElementById("selPlayer4").style.display = "none"
-			document.getElementById("selPlayer5").style.display = "none"
-			document.getElementById("selPlayer6").style.display = "none"
-
-			document.getElementById("player3").value = ""
-			document.getElementById("player4").value = ""
-			document.getElementById("player5").value = ""
-			document.getElementById("player6").value = ""
-
-			if (document.getElementById("trainingGame").checked) document.getElementById("player2").value = "SHADOW"
-			break
-		case "3":
-			// Re-enable options when switching from solo
-			document.getElementById("kickoutDuration").disabled = false
-			// Only re-enable if practice game is not checked
-			if (!document.getElementById("trainingGame").checked) {
-				addOption("privateGame")
-				addOption("learningGame")
-			}
-			addOption("trainingGame")
-			if (document.getElementById("useSoloMineRules").disabled) {
-				document.getElementById("useSoloMineRules").checked = false
-			}
-			addOption("useSoloMineRules")
-
-			if (global.experienced) addOption("experiencedGame")
-			document.getElementById("player2").disabled = false
-			document.getElementById("player3").disabled = false
-
-			document.getElementById("selPlayer2").style.display = "flex"
-			document.getElementById("selPlayer3").style.display = "flex"
-			document.getElementById("selPlayer4").style.display = "none"
-			document.getElementById("selPlayer5").style.display = "none"
-			document.getElementById("selPlayer6").style.display = "none"
-
-			document.getElementById("player4").value = ""
-			document.getElementById("player5").value = ""
-			document.getElementById("player6").value = ""
-
-			if (document.getElementById("trainingGame").checked) {
-				document.getElementById("player2").value = "SHADOW"
-				document.getElementById("player3").value = "SHADOW_2"
-			}
-			break
-		case "4":
-			// Re-enable options when switching from solo
-			document.getElementById("kickoutDuration").disabled = false
-			// Only re-enable if practice game is not checked
-			if (!document.getElementById("trainingGame").checked) {
-				addOption("privateGame")
-				addOption("learningGame")
-			}
-			addOption("trainingGame")
-			if (document.getElementById("useSoloMineRules").disabled) {
-				document.getElementById("useSoloMineRules").checked = false
-			}
-			addOption("useSoloMineRules")
-
-			if (global.experienced) addOption("experiencedGame")
-			document.getElementById("player2").disabled = false
-			document.getElementById("player3").disabled = false
-			document.getElementById("player4").disabled = false
-
-			document.getElementById("selPlayer2").style.display = "flex"
-			document.getElementById("selPlayer3").style.display = "flex"
-			document.getElementById("selPlayer4").style.display = "flex"
-			document.getElementById("selPlayer5").style.display = "none"
-			document.getElementById("selPlayer6").style.display = "none"
-
-			document.getElementById("player5").value = ""
-			document.getElementById("player6").value = ""
-
-			if (document.getElementById("trainingGame").checked) {
-				document.getElementById("player2").value = "SHADOW"
-				document.getElementById("player3").value = "SHADOW_2"
-				document.getElementById("player4").value = "SHADOW_3"
-			}
-			break
-		case "5":
-			// Re-enable options when switching from solo
-			document.getElementById("kickoutDuration").disabled = false
-			// Only re-enable if practice game is not checked
-			if (!document.getElementById("trainingGame").checked) {
-				addOption("privateGame")
-				addOption("learningGame")
-			}
-			addOption("trainingGame")
-			if (document.getElementById("useSoloMineRules").disabled) {
-				document.getElementById("useSoloMineRules").checked = false
-			}
-			addOption("useSoloMineRules")
-
-			if (global.experienced) addOption("experiencedGame")
-			document.getElementById("player2").disabled = false
-			document.getElementById("player3").disabled = false
-			document.getElementById("player4").disabled = false
-			document.getElementById("player5").disabled = false
-
-			document.getElementById("selPlayer2").style.display = "flex"
-			document.getElementById("selPlayer3").style.display = "flex"
-			document.getElementById("selPlayer4").style.display = "flex"
-			document.getElementById("selPlayer5").style.display = "flex"
-			document.getElementById("selPlayer6").style.display = "none"
-
-			document.getElementById("player6").value = ""
-
-			if (document.getElementById("trainingGame").checked) {
-				document.getElementById("player2").value = "SHADOW"
-				document.getElementById("player3").value = "SHADOW_2"
-				document.getElementById("player4").value = "SHADOW_3"
-				document.getElementById("player5").value = "SHADOW_4"
-			}
-			break
-		case "6":
-			// Re-enable options when switching from solo
-			document.getElementById("kickoutDuration").disabled = false
-			// Only re-enable if practice game is not checked
-			if (!document.getElementById("trainingGame").checked) {
-				addOption("privateGame")
-				addOption("learningGame")
-			}
-			addOption("trainingGame")
-			if (document.getElementById("useSoloMineRules").disabled) {
-				document.getElementById("useSoloMineRules").checked = false
-			}
-			addOption("useSoloMineRules")
-
-			if (global.experienced) addOption("experiencedGame")
-			document.getElementById("player2").disabled = false
-			document.getElementById("player3").disabled = false
-			document.getElementById("player4").disabled = false
-			document.getElementById("player5").disabled = false
-			document.getElementById("player6").disabled = false
-
-			document.getElementById("selPlayer2").style.display = "flex"
-			document.getElementById("selPlayer3").style.display = "flex"
-			document.getElementById("selPlayer4").style.display = "flex"
-			document.getElementById("selPlayer5").style.display = "flex"
-			document.getElementById("selPlayer6").style.display = "flex"
-
-			if (document.getElementById("trainingGame").checked) {
-				document.getElementById("player2").value = "SHADOW"
-				document.getElementById("player3").value = "SHADOW_2"
-				document.getElementById("player4").value = "SHADOW_3"
-				document.getElementById("player5").value = "SHADOW_4"
-				document.getElementById("player6").value = "SHADOW_5"
-			}
-			break
+	if (solo) {
+		// Solo mode: the practice game is the only game type, and no kickout.
+		removeOption("trainingGame")
+		document.getElementById("trainingGame").checked = true
+		removeOption("privateGame")
+		removeOption("learningGame")
+		removeOption("experiencedGame")
+		removeOption("useSoloMineRules")
+		document.getElementById("useSoloMineRules").checked = true
+		document.getElementById("kickoutDuration").disabled = true
+	} else {
+		// Re-enable what solo mode locked, unless the practice game is on.
+		document.getElementById("kickoutDuration").disabled = false
+		if (!document.getElementById("trainingGame").checked) {
+			addOption("privateGame")
+			addOption("learningGame")
+		}
+		addOption("trainingGame")
+		if (document.getElementById("useSoloMineRules").disabled) document.getElementById("useSoloMineRules").checked = false
+		addOption("useSoloMineRules")
+		if (global.experienced) addOption("experiencedGame")
 	}
 
 	// Re-sort maps based on new player count
@@ -435,146 +181,6 @@ function selectPlayers() {
 	syncGalleryFilterToPlayerCount()
 }
 
-function autocomplete(inp) {
-	/*the autocomplete function takes two arguments,
-    the text field element and an array of possible autocompleted values:*/
-	var currentFocus
-	var searchtimer
-
-	/*execute a function when someone writes in the text field:*/
-	inp.addEventListener("input", function (e) {
-		if (document.getElementById("trainingGame").checked) return
-		clearTimeout(searchtimer)
-		searchtimer = setTimeout(() => {
-			var a,
-				b,
-				i,
-				val = this.value
-			/*close any already open lists of autocompleted values*/
-			closeAllLists()
-			if (!val) {
-				return false
-			}
-			currentFocus = -1
-			/*create a DIV element that will contain the items (values):*/
-			a = document.createElement("DIV")
-			a.setAttribute("id", this.id + "autocomplete-list")
-			a.setAttribute("class", "autocomplete-items")
-			/*append the DIV element as a child of the autocomplete container:*/
-			this.parentNode.appendChild(a)
-
-			let csrftoken = getCookie("csrftoken")
-
-			fetch("/autoCompleteUsername/", {
-				method: "POST",
-				body: JSON.stringify({
-					//id: global.gameId,
-					partialString: this.value,
-					//turn: turn,
-					//phase: phase,
-					//gameID: global.gameID
-				}),
-				headers: { "X-CSRFToken": csrftoken },
-			})
-				.then((response) => response.json())
-				.then((result) => {
-					var arr = result.matchList
-					var matchesFound = false
-					for (i = 0; i < arr.length; i++) {
-						/*check if the item starts with the same letters as the text field value:*/
-						if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
-							matchesFound = true
-							/*create a DIV element for each matching element:*/
-							b = document.createElement("DIV")
-							/*make the matching letters bold:*/
-							b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>"
-							b.innerHTML += arr[i].substr(val.length)
-							/*insert a input field that will hold the current array item's value:*/
-							b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>"
-							/*execute a function when someone clicks on the item value (DIV element):*/
-							b.addEventListener("click", function (e) {
-								/*insert the value for the autocomplete text field:*/
-								inp.value = this.getElementsByTagName("input")[0].value
-								/*close the list of autocompleted values,
-                                (or any other open lists of autocompleted values:*/
-								closeAllLists()
-							})
-							a.appendChild(b)
-						}
-					}
-					if (matchesFound === false) {
-						b = document.createElement("DIV")
-						b.innerHTML = "<strong>No User Found</strong>"
-						a.appendChild(b)
-					}
-				})
-				.catch((error) => {
-					console.log("Error:", error)
-				})
-		}, 500)
-	})
-
-	/*execute a function presses a key on the keyboard:*/
-	inp.addEventListener("keydown", function (e) {
-		var x = document.getElementById(this.id + "autocomplete-list")
-		if (x) x = x.getElementsByTagName("div")
-		if (e.keyCode == 40) {
-			/*If the arrow DOWN key is pressed,
-            increase the currentFocus variable:*/
-			currentFocus++
-			/*and and make the current item more visible:*/
-			addActive(x)
-		} else if (e.keyCode == 38) {
-			//up
-			/*If the arrow UP key is pressed,
-            decrease the currentFocus variable:*/
-			currentFocus--
-			/*and and make the current item more visible:*/
-			addActive(x)
-		} else if (e.keyCode == 13) {
-			/*If the ENTER key is pressed, prevent the form from being submitted,*/
-			e.preventDefault()
-			if (currentFocus > -1) {
-				/*and simulate a click on the "active" item:*/
-				if (x) x[currentFocus].click()
-			}
-		}
-	})
-
-	function addActive(x) {
-		/*a function to classify an item as "active":*/
-		if (!x) return false
-		/*start by removing the "active" class on all items:*/
-		removeActive(x)
-		if (currentFocus >= x.length) currentFocus = 0
-		if (currentFocus < 0) currentFocus = x.length - 1
-		/*add class "autocomplete-active":*/
-		x[currentFocus].classList.add("autocomplete-active")
-	}
-	function removeActive(x) {
-		/*a function to remove the "active" class from all autocomplete items:*/
-		for (var i = 0; i < x.length; i++) {
-			x[i].classList.remove("autocomplete-active")
-		}
-	}
-
-	function closeAllLists(elmnt) {
-		/*close all autocomplete lists in the document,
-        except the one passed as an argument:*/
-		var x = document.getElementsByClassName("autocomplete-items")
-		for (var i = 0; i < x.length; i++) {
-			if (elmnt != x[i] && elmnt != inp) {
-				x[i].parentNode.removeChild(x[i])
-			}
-		}
-	}
-
-	/*execute a function when someone clicks in the document:*/
-	document.addEventListener("click", function (e) {
-		closeAllLists(e.target)
-	})
-}
-
 // get CSRF for javascript
 // Mini tournament: the map list is filtered by player count. Keep the hidden
 // playerNumber in sync with the tournament's players-per-game and reload maps.
@@ -585,80 +191,6 @@ function rnbMTPlayerCountChanged() {
 	playerNumber.value = playersPerGame.value
 	clearMapSelection()
 	loadMaps()
-}
-
-async function invitePlayerMT(e) {
-	e.preventDefault()
-	document.getElementById("invitedPlayersWarningSpanMT").innerText = ""
-
-	// Get the input value from the autocomplete field
-	const input = document.getElementById("playerToInviteMT")
-	const username = input.value.trim()
-
-	if (!username) {
-		document.getElementById("invitedPlayersWarningSpanMT").innerText = "Please enter a username"
-		return
-	}
-
-	const inviteButton = document.querySelector("#invitePlayerMTbutton")
-	inviteButton.disabled = true
-	inviteButton.textContent = "Adding Player...."
-
-	let csrftoken = getCookie("csrftoken")
-	try {
-		const response = await fetch("/addPlayerToMTinvites/", {
-			method: "POST",
-			body: JSON.stringify({
-				username: username,
-			}),
-			headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
-		})
-		if (!response.ok) {
-			throw new Error("Network response was not ok")
-		}
-		const data = await response.json()
-		if (data.success === 1) {
-			if (global.invitedPlayersArr.includes(username)) {
-				document.getElementById("invitedPlayersWarningSpanMT").innerText = "Player already invited"
-			} else {
-				global.invitedPlayersArr.push(username)
-				displayInvitedPlayersMT()
-			}
-			input.value = ""
-		} else if (data.success === 2) document.getElementById("invitedPlayersWarningSpanMT").innerText = "Player does not exist"
-		else if (data.success === 3) document.getElementById("invitedPlayersWarningSpanMT").innerText = "You will be added automatically"
-		inviteButton.textContent = "Add Player to Invite List"
-		inviteButton.disabled = false
-	} catch (error) {
-		console.error("Error fetching data:", error)
-		document.getElementById("invitedPlayersWarningSpanMT").innerText = "Error adding player to invite list"
-		inviteButton.disabled = false
-	}
-}
-
-function displayInvitedPlayersMT() {
-	let span = document.getElementById("invitedPlayersSpanMT")
-	let invitedPlayers = global.invitedPlayersArr.join(", ")
-	span.innerHTML = "<br/>Invited Players: " + invitedPlayers
-
-	let hiddenInput = document.getElementById("invtedPlayersListMT")
-	hiddenInput.value = JSON.stringify(global.invitedPlayersArr)
-}
-
-function getCookie(name) {
-	var cookieValue = null
-	if (document.cookie && document.cookie !== "") {
-		var cookies = document.cookie.split(";")
-		for (var i = 0; i < cookies.length; i++) {
-			var cookie = cookies[i].trim()
-			// Does this cookie string begin with the name we want?
-			if (cookie.substring(0, name.length + 1) === name + "=") {
-				cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
-				break
-			}
-		}
-	}
-	return cookieValue
 }
 
 /*** MAP FUNCTIONS */
