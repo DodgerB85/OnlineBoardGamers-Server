@@ -76,6 +76,9 @@ export async function saveGame(saveRewind = true) {
 		allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
 	}
 
+	console.log("Saving data....")
+	console.log(JSON.stringify(model.exportGameData()))
+
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
 		postData.status = "FINISHED"
 		postData.saveRewind = false
