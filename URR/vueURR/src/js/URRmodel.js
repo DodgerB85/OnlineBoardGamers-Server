@@ -3,9 +3,8 @@ import { usePersonalStore } from "../stores/URRpersonal.js"
 import * as rf from "./URRreference"
 import * as funcs from "./URRfuncs"
 import * as game from "./URRgame.js"
-import * as board from "./URRboard.js"
-import * as boardRules from "./URRmap.js"
 import * as historyStorage from "./URRhistoryStorage.js"
+import { compactGameData, expandGameData } from "./URRsaveStorage.js"
 
 const STATE_FIELDS = ["version", "players", "gameflow", "states", "nations", "board", "landPrices", "era", "cardSupply", "rain", "nextDiggerId"]
 
@@ -107,20 +106,11 @@ export function restoreState(snapshot) {
 
 export function importGameData(obj) {
 	const store = useModelStore()
-	const data = typeof obj === "string" ? JSON.parse(obj) : obj
+	let data = typeof obj === "string" ? JSON.parse(obj) : obj
 	if (!data || !data.players?.length) throw new Error("Saved URR data contains no players")
-	if (data.version === undefined) {
-		// The old scaffold stored only names, dummy turns and zero scores, not
-		// game mechanics. Never apply those dummy phases to a real position.
-		console.warn("Dealing a fresh URR game from a names-only save")
-		initGameFresh(data.players.map((player) => player.name))
-		for (const [index, player] of data.players.entries()) if (player.displayName) store.players[index].displayName = player.displayName
-		return
-	}
 	if (data.version !== rf.GAME_DATA_VERSION) throw new Error("Unsupported URR save version")
+	data = expandGameData(data)
 	data.board = historyStorage.expandBoard(data.board)
-	// Earlier rules saves had no board. Preserve their economy and turn order.
-	if (data.board?.areas.length === 0) data.board = boardRules.createBoard(board.createPrintedBoard())
 	const history = historyStorage.expandHistory(data, rf.HIST_NEW_GAME, usePersonalStore().gameCreationTimestamp)
 	const hadDraft = !!store.turnDraft.start
 	store.clearTurnDraft()
@@ -133,7 +123,7 @@ export function exportGameData() {
 	const history = useModelStore().history
 	const state = snapshotState()
 	const opening = historyStorage.compactOpening(history)
-	return { ...state, board: historyStorage.compactBoard(state.board), replay: historyStorage.compactHistory(history), ...(opening.length ? { replayStart: opening } : {}) }
+	return compactGameData({ ...state, board: historyStorage.compactBoard(state.board), replay: historyStorage.compactHistory(history), ...(opening.length ? { replayStart: opening } : {}) })
 }
 
 export function snapshotState() {
