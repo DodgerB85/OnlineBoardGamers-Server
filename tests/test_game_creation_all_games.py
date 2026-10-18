@@ -124,3 +124,12 @@ class AllGamesCreationTests(TestCase):
 
                 self.assertEqual(response.status_code, 400, game["code"])
                 self.assertFalse(Game.objects.filter(gameCode=game["code"]).exists(), game["code"])
+
+    def test_create_pages_render_shared_kickout_options(self):
+        pages = [game["page"] for game in GAMES] + ["createURRpage", "createINDpage2", "createRNBpage2"]
+        for page in pages:
+            with self.subTest(page=page):
+                response = self.client.get(reverse(page))
+
+                self.assertEqual(response.status_code, 200, page)
+                self.assertContains(response, "global.kickoutOptions = {", msg_prefix=page)

@@ -1150,6 +1150,7 @@
     {% endcompress %}
     <script>
 	    var global = {};
+	    {% include "Lobby/kickoutOptions.html" %}
 	    document.querySelectorAll(".paceHelpIcon").forEach((icon) => {
 	        const toggleTooltip = () => {
 	            const isOpen = icon.classList.contains("is-open")

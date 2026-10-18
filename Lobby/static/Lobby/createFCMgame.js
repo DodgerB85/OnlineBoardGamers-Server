@@ -230,6 +230,21 @@ function validateScenario(scenario) {
 	}
 }
 
+// Kickout choices per pace come from Lobby/kickoutOptions.html so the labels stay translated.
+function setKickoutOptions() {
+	var pace = parseInt(document.getElementById("pace").value)
+	var select = document.getElementById("kickoutDuration")
+	var previous = select.value
+	select.innerHTML = ""
+	var options = global.kickoutOptions[pace] || global.kickoutOptions[30]
+	options.forEach(function (option) {
+		select.add(new Option(option[1], option[0]))
+	})
+	select.value = previous
+	if (select.value == "") select.selectedIndex = 0
+	document.getElementById("blitzWarningSpan").style.display = pace == 10 ? "block" : "none"
+}
+
 function validateOptions(change) {
 	// Mini Tournamnt
 	if (change === "playersPerGameMT") {
@@ -266,65 +281,11 @@ function validateOptions(change) {
 		if (document.getElementById(change).checked == true) document.getElementById("mapData").value = boardTiles
 		else document.getElementById("mapData").value = ""
 	} else if (change == "pace") {
-		document.getElementById("kickoutDuration").innerHTML = ""
-		// Blitz
-		if (document.getElementById("pace").value == 10) {
-			var el = document.createElement("option")
-			el.value = 5
-			el.innerHTML = "5 Minutes"
-			document.getElementById("kickoutDuration").appendChild(el)
-			el = document.createElement("option")
-			el.value = 10
-			el.innerHTML = "10 Minutes"
-			document.getElementById("kickoutDuration").appendChild(el)
-			el = document.createElement("option")
-			el.value = 20
-			el.innerHTML = "20 Minutes"
-			document.getElementById("kickoutDuration").appendChild(el)
-			// Now lock to 2p
-			/*document.getElementById('playerNumber').value = 2;
-            document.getElementById('playerNumber').disabled = true;
-            selectPlayers();*/
-			document.getElementById("blitzWarningSpan").style.display = "block"
-		}
-		// Live
-		else if (document.getElementById("pace").value == 20) {
-			el = document.createElement("option")
-			el.value = 50
-			el.innerHTML = "12 hours"
-			document.getElementById("kickoutDuration").appendChild(el)
-			el = document.createElement("option")
-			el.value = 100
-			el.innerHTML = "1 day"
-			document.getElementById("kickoutDuration").appendChild(el)
-			el = document.createElement("option")
-			// Unlock from 2p
+		setKickoutOptions()
+		// Unlock from 2p
+		if (document.getElementById("pace").value != 10) {
 			document.getElementById("playerNumber").disabled = false
 			selectPlayers()
-			document.getElementById("blitzWarningSpan").style.display = "none"
-		}
-		// Fast / std / slow
-		else if (document.getElementById("pace").value >= 30) {
-			el = document.createElement("option")
-			el.value = 100
-			el.innerHTML = "1 day"
-			document.getElementById("kickoutDuration").appendChild(el)
-			el = document.createElement("option")
-			el.value = 200
-			el.innerHTML = "2 days"
-			document.getElementById("kickoutDuration").appendChild(el)
-			el = document.createElement("option")
-			el.value = 300
-			el.innerHTML = "3 days"
-			document.getElementById("kickoutDuration").appendChild(el)
-			el = document.createElement("option")
-			el.value = 500
-			el.innerHTML = "5 days"
-			document.getElementById("kickoutDuration").appendChild(el)
-			// Unlock from 2p
-			document.getElementById("playerNumber").disabled = false
-			selectPlayers()
-			document.getElementById("blitzWarningSpan").style.display = "none"
 		}
 	} else if (change === "newMilestones") {
 		if (document.getElementById(change).checked == true) {

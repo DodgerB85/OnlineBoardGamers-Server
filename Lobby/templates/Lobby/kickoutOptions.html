@@ -1,0 +1,16 @@
+{% load i18n %}
+{# Kickout choices per playing speed, shared by every create page. The labels are #}
+{# translated here because the static JS files cannot run gettext.               #}
+{% translate "5 Minutes" as fiveMinutes %}
+{% translate "10 Minutes" as tenMinutes %}
+{% translate "20 Minutes" as twentyMinutes %}
+{% translate "12 hours" as twelveHours %}
+{% translate "1 day" as oneDay %}
+{% translate "2 days" as twoDays %}
+{% translate "3 days" as threeDays %}
+{% translate "5 days" as fiveDays %}
+global.kickoutOptions = {
+	10: [[5, "{{ fiveMinutes|escapejs }}"], [10, "{{ tenMinutes|escapejs }}"], [20, "{{ twentyMinutes|escapejs }}"]],
+	20: [[50, "{{ twelveHours|escapejs }}"], [100, "{{ oneDay|escapejs }}"]],
+	30: [[100, "{{ oneDay|escapejs }}"], [200, "{{ twoDays|escapejs }}"], [300, "{{ threeDays|escapejs }}"], [500, "{{ fiveDays|escapejs }}"]],
+}

@@ -537,6 +537,7 @@
         {% endcompress %}
         <script>
     var global = {};
+    {% include "Lobby/kickoutOptions.html" %}
     global.player2normText = '{% translate "Leave blank to invite anybody" %}';
     global.player2practiceText = '{% translate "You can change the in-game name of the other players" %}';
     {% if experienced %}
