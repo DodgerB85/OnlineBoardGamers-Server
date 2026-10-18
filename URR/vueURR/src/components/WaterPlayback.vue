@@ -17,9 +17,9 @@ const path = computed(() => {
 	for (let index = 0; index < positions.length - 1; index++) {
 		const from = positions[index], to = positions[index + 1]
 		const before = positions[index - 1] || from, after = positions[index + 2] || to
-		const bowX = positions.length === 2 ? (from.y - to.y) * .12 : 0
-		const bowY = positions.length === 2 ? (to.x - from.x) * .12 : 0
-		curve += ` C ${from.x + (to.x - before.x) / 6 + bowX} ${from.y + (to.y - before.y) / 6 + bowY}, ${to.x - (after.x - from.x) / 6 + bowX} ${to.y - (after.y - from.y) / 6 + bowY}, ${to.x} ${to.y}`
+		// No sideways bow: a straight hex-to-hex hop joins the next step without
+		// a kink, so the water flows through each hex instead of zig-zagging.
+		curve += ` C ${from.x + (to.x - before.x) / 6} ${from.y + (to.y - before.y) / 6}, ${to.x - (after.x - from.x) / 6} ${to.y - (after.y - from.y) / 6}, ${to.x} ${to.y}`
 	}
 	return curve
 })
@@ -27,10 +27,29 @@ const blobPosition = computed(() => {
 	const point = points.value.at(-1)
 	return point && (!path.value || reducedMotion) ? `translate(${point.x} ${point.y})` : undefined
 })
+// One speed for every step, and the next step starts as this one's motion ends:
+// consecutive steps share an endpoint, so the water flows on without stopping.
+const SPEED = 135 // board units per second, about one hex per 0.7s
+const duration = computed(() => {
+	if (!path.value) return 0.4
+	let length = 0
+	for (let index = 0; index < points.value.length - 1; index++) {
+		const from = points.value[index], to = points.value[index + 1]
+		length += Math.hypot(to.x - from.x, to.y - from.y)
+	}
+	return Math.min(1.8, Math.max(0.3, length / SPEED))
+})
+const waitingText = (id) => (playback.state.board.areas.find((area) => area.id === id)?.waterwork ? "to continue downstream" : "at the junction")
+// The blob's idle wobble is one continuous animation: hand it the phase the
+// clock is at, so a re-rendered step does not restart it with a visible pulse.
+const BOB_SECONDS = 2.8
+const bobDelay = () => `-${((performance.now() / 1000) % BOB_SECONDS).toFixed(2)}s`
 let timer = null
 function schedule() {
 	clearTimeout(timer)
-	if (playback.state.advancing) timer = setTimeout(() => playback.next(), path.value ? 800 : 400)
+	// Start the next step just before this one's motion ends, so the handoff
+	// leaves no frozen frame between hexes.
+	if (playback.state.advancing) timer = setTimeout(() => playback.next(), Math.max(50, duration.value * 1000 - 30))
 }
 function outsideInteract(event) {
 	if (!event.target.closest(".waterPlayback")) playback.stop()
@@ -52,13 +71,13 @@ onBeforeUnmount(() => { clearTimeout(timer); document.removeEventListener("click
 			<polygon v-for="id in playback.isIrrigationPreview ? [] : step.wet" :key="id" :points="boardDisplay.hexPoints(position(id).x, position(id).y)" class="playbackWet" />
 			<path v-if="path" :d="path" class="flowPath" />
 			<g v-for="water in step.waitingWater" :key="water.area" :transform="`translate(${position(water.area).x} ${position(water.area).y - 36})`" class="waitingWater">
-				<title>{{ water.amount }} water waiting at the junction</title>
+				<title>{{ water.amount }} water waiting {{ waitingText(water.area) }}</title>
 				<rect x="-24" y="-18" width="48" height="36" rx="18" />
 				<text y="7">{{ water.amount }}</text>
 			</g>
 			<g v-if="points.length && !(step.type === 'confluence' && step.waiting)" :transform="blobPosition" class="waterTransit">
-				<animateMotion v-if="path && !reducedMotion" :path="path" dur="0.7s" calcMode="linear" fill="freeze" />
-				<g class="waterBlob" :class="{ paused: !playback.state.advancing }">
+				<animateMotion v-if="path && !reducedMotion" :path="path" :dur="`${duration}s`" calcMode="paced" fill="freeze" />
+				<g class="waterBlob" :class="{ paused: !playback.state.advancing }" :style="{ animationDelay: bobDelay() }">
 					<path d="M -25 1 C -27 -15 -13 -25 2 -24 C 18 -25 29 -12 27 3 C 27 20 11 26 -4 24 C -20 25 -28 15 -25 1 Z" />
 					<ellipse cx="-9" cy="-13" rx="8" ry="4" class="blobHighlight" />
 					<text y="7">{{ step.amount }}</text>

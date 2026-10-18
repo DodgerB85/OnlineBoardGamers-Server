@@ -44,6 +44,10 @@ export function buildWaterPlayback(history, completionIndex) {
 			if (event.waiting) waitingWater.set(event.to, event.amount)
 			else waitingWater.delete(event.to)
 		}
+		// The reservoir's undiverted share stays on the river, and stays visible
+		// there, until its canal play is done and the water is released.
+		if (event.type === "reservoir" && event.downstream > 0) waitingWater.set(event.to, event.downstream)
+		if (event.type === "river" && waitingWater.has(event.from)) waitingWater.delete(event.from)
 		if (event.amount === 0) return
 		const descriptions = {
 			source: `${event.amount} water enters at ${label(event.to)}.`,
