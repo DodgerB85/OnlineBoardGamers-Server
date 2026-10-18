@@ -23,7 +23,7 @@ const store = useModelStore()
 const STEPS = {
 	"setup.recipes": { short: "Learn two House Specials.", help: "Pick two different House Specials. No recipe can be chosen by more than two players.", panel: SetupPrompt },
 	"post.review": { short: "Call a Public Review, or pass.", help: "A Public Review freezes the Recognized leader out of Council until your rallies run out. Calling it spends your first Council contribution (no goods, Hype or progress).", panel: CivicPrompt },
-	"post.rally": { short: "Rally to the Review, or pass.", help: "You hold a live Boone seal. A Rally extends the Public Review by one Council opportunity.", panel: CivicPrompt },
+	"post.rally": { short: "Rally to the Review, or pass.", help: "You earned a Founder's Seal last Year. A Rally extends the Public Review through one additional Council stage.", panel: CivicPrompt },
 	"post.council": { short: "Contribute to Charters, then finish.", help: "Contribute to any open Charters you can afford. Each contribution pays the good, gives +1 Hype and +1 progress.", panel: CivicPrompt },
 	"post.bylaw": { short: "Vote for a Charter.", help: "Each Founder's Seal you hold is one vote. The most votes wins; ties go to the lowest-Recognized tied voter.", panel: CivicPrompt },
 	"admin.name": { short: "Name the rival who takes one ingredient from you.", help: "Administration: that rival takes one ingredient of their choice from you.", panel: PostPrompt },

@@ -40,7 +40,7 @@ Prominence: **H** = highlighted / large / in the prompt panel, M = normal, L = r
 |---|---|---|---|---|
 | Where can I sell? | tier, Wants, my potions | venue card ring: green = I qualify | H | L |
 | Solo or contested? | eligible seats | venue card: eligible-seat dots; 1 dot (mine) = solo at Anchor, ≥2 = exchange | H | — |
-| Will this sale hurt me? | potion poison vs venue tolerance (over = +3 net, Levy, Warning), Panicked + Preference mismatch = Warning | on my qualifying potion per venue: ⚠ badge with the reason in tooltip; also in the sell/commit forms before confirming | H | — |
+| Will this sale hurt me? | potion poison vs venue tolerance (over = +3 net, or +1 when Levies are doubled, plus Levy and Warning), Panicked + Preference mismatch = Warning | on my qualifying potion per venue: ⚠ badge with the reason in tooltip; also in the sell/commit forms before confirming | H | — |
 | What will win the bid? | my potency + Hype − price, rivals' count (not bids), Preference tie-break | commit form: live score, rival count, preference ✓/✗ | H | — |
 | Extra customers? | Boone, Franchise, Desperate | venue badges: boone, desperate shape | H | M |
 
@@ -55,7 +55,7 @@ Prominence: **H** = highlighted / large / in the prompt panel, M = normal, L = r
 
 ## Hidden information (never shown for rivals)
 
-Potion poison counts, hand contents (count only), unrevealed exchange commits, levy owed.
+Potion poison counts and total potency (which would reveal Poison by subtraction), hand contents (count only), unrevealed exchange commits, levy owed. Rival potions show their public recipe stars and Dispensation, with `?` for total potency, including in tooltips and accessible labels.
 
 ## Icon registry (one concept → one icon)
 

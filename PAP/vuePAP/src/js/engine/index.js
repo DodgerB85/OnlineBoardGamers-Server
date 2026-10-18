@@ -27,7 +27,7 @@ export function createGame(seed, names, options = {}) {
 	require(names.length >= 2 && names.length <= 5, 'Permits & Poisons needs 2-5 players')
 	const s = {
 		v: 1, rng: seed >>> 0, serial: 0, year: 1, phase: 'setup', stage: -1, queue: [],
-		options: { softerEnding: !!options.softerEnding },
+		options: { softerEnding: !!options.softerEnding, rulesVersion: options.rulesVersion ?? 2 },
 		first: 0, order: names.map((_, i) => i), watch: null, administered: null,
 		players: names.map((name, seat) => ({
 			name, seat, cash: C.START_CASH, recognized: 0, yearStartRecognized: 0, yearEarned: 0,

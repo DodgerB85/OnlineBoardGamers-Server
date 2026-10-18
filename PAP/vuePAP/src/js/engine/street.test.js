@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import { applyAction, PAPError } from './index.js'
 import * as street from './street.js'
 
 // Minimal High Street state. Workhouse and Golem Pound only; post and audit stages are not needed here.
@@ -25,6 +26,13 @@ function game(potions = [[], []]) {
 function contest(potions) {
 	const s = game(potions)
 	s.venues[0].customer = 'W13'
+	return s
+}
+
+function nobles(potions) {
+	const s = game(potions)
+	s.venues = [{ id: 'nobles', customer: 'N2', mood: 'calm', servedThisYear: 0, unserved: false, boone: false, founder: null, standingSince: 1, overflow: false }]
+	for (const p of s.players) p.tier = 4
 	return s
 }
 
@@ -79,6 +87,68 @@ describe('street', () => {
 		expect(p.levyOwed).toBe(2)
 		expect(p.warnings).toBe(1)
 		expect(p.reputation).toBe(4)
+	})
+
+	it('settles Franchise proceeds against Nobles overhead before checking cash', () => {
+		const s = nobles([[potion('a', 'HS5', { potency: 2 })], [potion('b', 'HS5', { potency: 2 })]])
+		s.players[0].cash = 0
+		s.players[0].franchise = true
+		street.enter['street.solo'](s)
+		street.enter['street.exchange'](s)
+		commit.commit(s, 0, { potionId: 'a', price: 1, hype: 0 })
+		commit.commit(s, 1, { potionId: 'b', price: 1, hype: 0 })
+		expect(s.players[0]).toMatchObject({ cash: 6, recognized: 6 })
+	})
+
+	it('checks Founder’s Cut before Franchise proceeds, as the sale rules sequence it', () => {
+		const s = game([[potion('a', 'HS1')], []])
+		s.players[0].franchise = true
+		s.players[1].recognized = 7
+		s.venues[1].boone = true
+		s.venues[1].founder = 0
+		street.enter['street.solo'](s)
+
+		street.completeSale(s, 0, 'golem', 'a', 5, { kind: 'solo' })
+
+		// Base sale profit leaves the seller behind the rival at the Founder’s Cut checkpoint;
+		// the later Franchise premium then makes the seller the recognized leader.
+		expect(s.players[0]).toMatchObject({ cash: 32, recognized: 12, hype: 3 })
+	})
+
+	it('settles over-tolerance premiums against Nobles overhead before checking cash', () => {
+		const s = nobles([[potion('a', 'HS5', { poison: 1, potency: 3 })], [potion('b', 'HS5', { potency: 2 })]])
+		s.players[0].cash = 0
+		street.enter['street.solo'](s)
+		street.enter['street.exchange'](s)
+		commit.commit(s, 0, { potionId: 'a', price: 1, hype: 0 })
+		commit.commit(s, 1, { potionId: 'b', price: 1, hype: 0 })
+		expect(s.players[0]).toMatchObject({ cash: 3, recognized: 3, levyOwed: 2, warnings: 1, reputation: 4 })
+	})
+
+	it('includes the earned Undercut Bonus when settling a low-price Nobles exchange', () => {
+		const s = nobles([[potion('a', 'HS5', { potency: 2 })], [potion('b', 'HS5', { potency: 2 })]])
+		s.players[0].cash = 0
+		street.enter['street.solo'](s)
+		street.enter['street.exchange'](s)
+		commit.commit(s, 0, { potionId: 'a', price: 1, hype: 0 })
+		commit.commit(s, 1, { potionId: 'b', price: 2, hype: 0 })
+		expect(s.players[0]).toMatchObject({ cash: 0, recognized: 0, reputation: 6 })
+		expect(s.log.some(entry => entry.key === 'undercut')).toBe(true)
+	})
+
+	it('rejects a loss-making Nobles exchange without mutating the submitted state', () => {
+		const s = nobles([[potion('a', 'HS5', { potency: 2 })], [potion('b', 'HS5', { potency: 2 })]])
+		s.players[0].cash = 1
+		s.queue = [{ step: 'street.commit', seat: 0, data: { venue: 'nobles' } }]
+		s.exchange = {
+			venue: 'nobles', eligible: [0, 1],
+			commits: { 1: { potionId: 'b', price: 1, hype: 0, bribe: false, adminEdge: false } },
+		}
+		s.street = { eligible: { nobles: [0, 1] }, served: {}, losers: [], extraUsed: {}, bidders: { nobles: [0, 1] }, contested: [] }
+		const before = structuredClone(s)
+
+		expect(() => applyAction(s, 0, { type: 'commit', potionId: 'a', price: 1, hype: 0 })).toThrow(PAPError)
+		expect(s).toEqual(before)
 	})
 
 	it('dump pays 1 Crown with no overhead and costs 1 Reputation', () => {

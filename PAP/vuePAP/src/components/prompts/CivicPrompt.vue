@@ -58,7 +58,7 @@ const blocked = (o, opt) => frozen.value || o.boone || o.contributed || !opt.ok
 
 		<template v-else-if="prompt.step === 'post.rally'">
 			<div class="pp-row">
-				<button class="pp-btn primary" title="Extends the Public Review by one Council opportunity" @click="controller.act({ type: 'rally' })">
+				<button class="pp-btn primary" title="Extends the Public Review through one additional Council stage" @click="controller.act({ type: 'rally' })">
 					<ArtIcon :name="ICONS.review.art" :size="18" :label="ICONS.review.label" /> Rally
 				</button>
 				<button class="pp-btn" @click="controller.act({ type: 'pass' })">Pass</button>

@@ -25,7 +25,7 @@ const stats = computed(() => [
 	{ icon: ICONS.tier(info.value.tier).art, value: info.value.tier, label: "Needs Cauldron Tier " + info.value.tier + " to sell here" },
 	{ icon: ICONS.anchor.art, value: info.value.anchor, label: "Anchor " + info.value.anchor + ": the most this customer pays" },
 	{ icon: ICONS.overhead.art, value: info.value.overhead, label: "Serving overhead: each sale here costs " + info.value.overhead + " Crown" + (info.value.overhead > 1 ? "s" : "") },
-	{ icon: ICONS.tolerance.art, value: info.value.tolerance, label: "Poison tolerance " + info.value.tolerance + ": more Poison markers is an over-tolerance sale (+3 Crowns net, Levy, Warning)" },
+	{ icon: ICONS.tolerance.art, value: info.value.tolerance, label: "Poison tolerance " + info.value.tolerance + ": more Poison markers is an over-tolerance sale (normally +3 Crowns net, or +1 with doubled Levies; Warning)" },
 	{ icon: ICONS.founderCut.art, value: info.value.founderCut, label: "Founder's Cut: the Founder gains " + info.value.founderCut + " Hype per sale here while the Boone is live" },
 ])
 const customer = computed(() => (props.venue.customer ? CUSTOMERS[props.venue.customer] : null))

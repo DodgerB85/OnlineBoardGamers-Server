@@ -23,7 +23,7 @@ function dropPotion(p, pot) {
 }
 
 // One realised sale. kind: solo | exchange | extra | reoffer | desperate. The caller decides the price.
-export function completeSale(s, seat, venueId, potionId, price, { kind }) {
+export function completeSale(s, seat, venueId, potionId, price, { kind, undercut = false }) {
 	const p = s.players[seat]
 	const v = venue(s, venueId)
 	const info = venueInfo(venueId)
@@ -33,12 +33,18 @@ export function completeSale(s, seat, venueId, potionId, price, { kind }) {
 	const over = pot.poison > info.tolerance
 	const paid = kind === 'exchange' && magnetAt(p, venueId) ? info.anchor : price
 
-	money(s, seat, paid, true)
-	money(s, seat, -info.overhead, true)
-	if (over) {
-		money(s, seat, OVER_TOLERANCE.unlicensed + OVER_TOLERANCE.poison, true)
-		p.levyOwed += OVER_TOLERANCE.levy
+	const baseProceeds = paid - info.overhead + (over ? OVER_TOLERANCE.unlicensed + OVER_TOLERANCE.poison : 0)
+	const founderCutState = {
+		...s,
+		players: s.players.map((player, i) => i === seat ? { ...player, recognized: player.recognized + baseProceeds } : player),
 	}
+	const founderCut = v.founder === null ? 0 : founderCutFor(founderCutState, v.founder, venueId)
+	let proceeds = baseProceeds
+	if (p.franchise && kind !== 'desperate') proceeds += FRANCHISE.premium
+	if (kind === 'exchange' && p.apparatus.includes('invoiceGuillotine')) proceeds += 1
+	if (undercut) proceeds += UNDERCUT_BONUS.crowns
+	money(s, seat, proceeds, true)
+	if (over) p.levyOwed += OVER_TOLERANCE.levy
 	if (panicked || over || p.forcedReliability || pot.disp === 'whistlingCork') {
 		// Properly Licensed Doom passes every check; an over-tolerance sale forfeits the Preference safe harbor.
 		const pass = pot.disp === 'properlyLicensedDoom' || (!over && prefMatch(pot, cust))
@@ -50,10 +56,7 @@ export function completeSale(s, seat, venueId, potionId, price, { kind }) {
 	if (kind !== 'desperate') gainHype(s, seat, panicked ? 2 : 1)
 	if (v.boone) gainHype(s, seat, 1)
 	// The Founder's Cut goes to the venue's Founder on every sale there, whoever sells (rulebook §7).
-	if (v.founder !== null) gainHype(s, v.founder, founderCutFor(s, v.founder, venueId))
-	if (p.franchise && kind !== 'desperate') money(s, seat, FRANCHISE.premium, true)
-	if (kind === 'exchange' && p.apparatus.includes('invoiceGuillotine')) money(s, seat, 1, true)
-
+	if (v.founder !== null) gainHype(s, v.founder, founderCut)
 	if (!p.recipes.includes(cust.reward)) p.recipes.push(cust.reward)
 	p.sales.push({ venue: venueId, overTolerance: over, year: s.year })
 	s.lastStreet.salesByVenue[venueId] = [...(s.lastStreet.salesByVenue[venueId] || []), seat]
@@ -92,9 +95,9 @@ function resolveExchange(s) {
 		s.players[b.seat].exchangesEntered = 1
 		if (b.edge) money(s, b.seat, -1, false)
 	}
-	completeSale(s, win.seat, ex.venue, win.c.potionId, win.c.price, { kind: 'exchange' })
-	if (rivals.length && rivals.every(r => r.c.price > win.c.price)) {
-		money(s, win.seat, UNDERCUT_BONUS.crowns, true)
+	const undercut = rivals.length > 0 && rivals.every(r => r.c.price > win.c.price)
+	completeSale(s, win.seat, ex.venue, win.c.potionId, win.c.price, { kind: 'exchange', undercut })
+	if (undercut) {
 		changeRep(s, win.seat, UNDERCUT_BONUS.rep)
 		log(s, win.seat, 'undercut', { venue: ex.venue })
 	}

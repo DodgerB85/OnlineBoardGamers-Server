@@ -394,6 +394,7 @@ GAME_NAMES_MODELS = {
     "WEB": "WEB",
     "RNB": "RNB",
     "ROW": "ROW",
+    "PAP": "PAP",
 }
 
 

@@ -58,3 +58,7 @@ processes:
   row:
     command: "npm run dev"
     working_dir: "ROW/vueROW"
+
+  pap:
+    command: "npm run dev"
+    working_dir: "PAP/vuePAP"

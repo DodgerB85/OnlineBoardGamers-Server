@@ -56,7 +56,7 @@ state = {
 
 Year y:
 
-1. **post.review** — if eligible caller (4–5p: 2nd in Recognized; 3p: lowest-Recognized non-leader; 2p: none) prompt `callReview|pass`. If called, each rival with a live-Boone seal in turn order: `rally|pass`.
+1. **post.review** — if eligible caller (4–5p: 2nd in Recognized; 3p: lowest-Recognized non-leader; 2p: none) prompt `callReview|pass`. If called, each rival who earned a Seal in the immediately previous Year, in turn order: `rally|pass`.
 2. **post.council** — seats in ascending cumulative Recognized (ties: later in turn order first). Prompt: choose any subset of open charters to contribute to (one unit each), `done`. Each contribution: pay the good, +1 Hype, progress +1; on reaching threshold resolve pass immediately (Boone, Seal to the contributor unless they are the RP leader or frozen), then queue **post.bylaw**.
 3. **post.bylaw** — draw 3 candidate charters. Each seal holder (in ascending Recognized) votes `votes = seals.length` for a candidate. Most votes wins; tie → candidate voted for by the lowest-Recognized tied voter. No seal holders → first candidate. Losers go to the bottom of the charter deck.
 4. **post.events** (auto) — reveal 1 Scare, apply. Testimonials are bought with Hype (step 7), not revealed.
@@ -93,7 +93,8 @@ R12. T10 / Whistling Cork "ignore Wants" still requires the venue Tier.
 R12a. Customer ★ Wants are a minimum potency bar (design doc §8.1, Appendix D; rulebook Setup step 5 calls them potency Wants): `★` = potency ≥ 1, `★★`/`★★+` = ≥ 2, `★★★` = ≥ 3, counting Poison markers and potency Dispensations.
 R12b. The Curator of Regrets (O22) Wants The Grievance Elixir only; the printed "Grievance / Cordial" let it Want its own reward (owner ruling).
 R13. Hire cost and rank: the acting piece may hire its own rank or lower; the hire cannot act until next Year (`hiredYear === year` → cannot be assigned).
-R14. One Charter opportunity = one post.council stage. The Review freeze lasts until its opportunities are spent, so a Rally carries it into the next Year's council stage; at expiry the frozen leader's barred contribution goes to the first open Charter they have not contributed to (venue not under Boone), counts double, and founds nothing.
+R14. One Review opportunity = one full `post.council` stage (the Council contributions in a Year). Each Rally adds one such stage. Rally eligibility comes from a `seal` log event in the immediately previous Year; an older permanent Seal alone does not qualify. At expiry the frozen leader's barred contribution goes to the first open Charter they have not contributed to whose venue has no live Boone, counts double, and founds nothing.
+R14a. `rulesVersion` is stored in game options. New games use version 2, whose Rally eligibility is the prior-Year Seal rule above. Imported saves without a version use version 1 and retain live-Boone Rally eligibility; replay frames use the same version as the saved game.
 R15. Calling a Review spends the caller's first Council contribution: their first `contribute` records the slot on the chosen Charter with no goods, Hype or progress.
 R16. A Charter whose venue has a live Boone takes no contributions until the Boone fades at Audit (exclusivity).
 R17. A venue carries at most one Founder's Seal. The Founder's Cut is 0 for the current Recognized leader and for a frozen seat.

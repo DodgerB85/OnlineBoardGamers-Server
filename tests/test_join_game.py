@@ -3,7 +3,7 @@ import time
 from unittest.mock import patch
 
 from django.contrib.messages import get_messages
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from Lobby.models import Game, GamePlayer, User
@@ -100,6 +100,29 @@ class JoinGameTests(TestCase):
 
         response = self._post({"gameID": game.id, "source": "ajax", "action": ""})
 
+        self.assertEqual(response.json()["listToShow"], "ACTIVE")
+        game.refresh_from_db()
+        self.assertEqual(game.gameStatus, "ACTIVE")
+        self.assertEqual(set(game.players.values_list("player__username", flat=True)), {"creator", "joiner"})
+
+    @override_settings(STORAGES={"staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}})
+    def test_pap_invitation_can_be_opened_and_joined(self):
+        game = self._game(gameCode="PAP", gameStatus="WAITING")
+        playing(game, self.creator)
+        game.invitedPlayers.add(self.joiner)
+
+        invitation = self.client.get(reverse("joinGameLink", kwargs={"joinGameLink": f"PAP{game.id}"}))
+
+        self.assertEqual(invitation.status_code, 200)
+        self.assertTemplateUsed(invitation, "Lobby/joinGameLink.html")
+
+        response = self.client.post(
+            reverse("joinGame", kwargs={"gameType": "PAP"}),
+            data=json.dumps({"gameID": game.id, "source": "ajax", "action": ""}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["listToShow"], "ACTIVE")
         game.refresh_from_db()
         self.assertEqual(game.gameStatus, "ACTIVE")

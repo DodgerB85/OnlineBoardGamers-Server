@@ -17,12 +17,13 @@ const personal = usePersonalStore()
 const recipe = computed(() => RECIPES[props.potion.recipe])
 const disp = computed(() => (props.potion.disp ? DISPENSATIONS[props.potion.disp] : null))
 const colour = computed(() => STAR_COLOURS[recipe.value.stars])
-// Poison is private: only the owner sees the markers.
+// Total potency would reveal Poison by subtracting the public recipe and Dispensation bonuses.
 const showPoison = computed(() => props.owner === personal.pov)
+const potency = computed(() => showPoison.value ? props.potion.potency : "?")
 
 const marks = computed(() => [props.potion.backedFutures && "Backed Futures", props.potion.protected && "Protected"].filter(Boolean))
 const label = computed(() => {
-	const parts = [`${recipe.value.name}, ${recipe.value.stars} star, potency ${props.potion.potency}`]
+	const parts = [`${recipe.value.name}, ${recipe.value.stars} star, potency ${showPoison.value ? potency.value : "hidden"}`]
 	if (disp.value) parts.push(`${disp.value.name} (${FAMILY[disp.value.family].name})`)
 	if (showPoison.value) parts.push(`poison ${props.potion.poison}`)
 	return [...parts, ...marks.value].join(". ")
@@ -33,7 +34,7 @@ const label = computed(() => {
 	<span v-if="compact" class="potionChip compact" role="img" :title="label" :aria-label="label" :style="{ color: colour }">
 		<span class="bottleWrap">
 			<span class="bottle" v-html="potionRaw"></span>
-			<span class="potency">{{ potion.potency }}</span>
+			<span class="potency">{{ potency }}</span>
 			<span v-if="disp" class="dispDot" :style="{ backgroundColor: FAMILY[disp.family].colour }"></span>
 			<span v-if="spoil" class="spoilMark" title="Will spoil at this Audit unless protected">✗</span>
 		</span>
@@ -45,7 +46,7 @@ const label = computed(() => {
 			<div class="recipeName">
 				{{ recipe.name }} <span class="stars" :style="{ color: colour }">{{ "★".repeat(recipe.stars) }}</span>
 			</div>
-			<div class="line">Potency <b>{{ potion.potency }}</b></div>
+			<div class="line">Potency <b>{{ potency }}</b></div>
 			<div v-if="disp" class="disp" :style="{ borderColor: FAMILY[disp.family].colour }">
 				<span class="dispDot" :style="{ backgroundColor: FAMILY[disp.family].colour }"></span>{{ disp.name }}
 			</div>

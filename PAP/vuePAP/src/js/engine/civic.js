@@ -8,6 +8,10 @@ function hasLiveSeal(s, seat) {
 	return s.venues.some(v => v.founder === seat && v.boone)
 }
 
+function hasPriorYearSeal(s, seat) {
+	return s.log.some(event => event.y === s.year - 1 && event.key === 'seal' && event.seat === seat)
+}
+
 // 4-5p: 2nd in Recognized; 3p: lowest-Recognized non-leader; 2p: disabled.
 function reviewCaller(s, leader) {
 	if (s.players.length === 2 || leader === null) return null
@@ -112,7 +116,8 @@ export const actions = {
 		callReview(s, seat) {
 			const leader = recognizedLeader(s)
 			s.council.review = { caller: seat, frozen: leader, opportunities: 1, callerSpent: true }
-			const rivals = s.order.filter(x => x !== leader && x !== seat && hasLiveSeal(s, x))
+			const hasRallySeal = s.options.rulesVersion >= 2 ? hasPriorYearSeal : hasLiveSeal
+			const rivals = s.order.filter(x => x !== leader && x !== seat && hasRallySeal(s, x))
 			s.queue.splice(1, 0, ...rivals.map(x => ({ step: 'post.rally', seat: x, data: {} })))
 			log(s, seat, 'reviewCalled', {})
 			return true

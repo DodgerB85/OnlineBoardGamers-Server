@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { applyAction, createGame } from './engine/index.js'
 import { enter as streetEnter } from './engine/street.js'
-import { enter as auditEnter } from './engine/audit.js'
+import { enter as auditEnter, settleLevies } from './engine/audit.js'
 import { craftPotion } from './engine/workshop.js'
 import { venueAccess, saleRisks, craftable, condemnRisk, spoilRisk, upgradeStatus, yearEarned, projectedScore } from './PAPhints.js'
 import { TIER_VP } from './engine/cards.js'
@@ -73,6 +73,19 @@ describe('saleRisks agrees with completeSale', () => {
 		street(s)
 		expect(saleRisks(s, 0, 'a', 'workhouse')[0].text).not.toMatch(/Warning/)
 		expect(sell(s, 'workhouse', 'a')).toMatchObject({ warnings: 0, levy: 2 })
+	})
+
+	it('shows the reduced Poison premium when a Scare doubles the Levy', () => {
+		const s = fresh()
+		setVenue(s, 'workhouse', 'W15')
+		s.yearFx.doubleLevies = true
+		s.players[0].potions = [potion('a', 'HS1', { poison: 3 })]
+		street(s)
+		expect(saleRisks(s, 0, 'a', 'workhouse')[0].text).toBe('+1 Crown net but a 4-Crown Levy and a Warning')
+		const next = applyAction(s, 0, { type: 'soloSale', venue: 'workhouse', potionId: 'a' })
+		settleLevies(next, 0)
+		// The clean sale nets 2; the Poison premiums add only 1 after the doubled Levy.
+		expect(next.players[0].cash - s.players[0].cash).toBe(3)
 	})
 
 	it('a panicked venue with a Preference the potion lacks predicts a Warning', () => {

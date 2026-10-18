@@ -55,10 +55,10 @@ export function initGame() {
 export function initGameFresh(playerNames, options, gameID) {
 	const store = useModelStore()
 	store.seed = ((gameID || 1) * 2654435761) >>> 0
-	store.options = options
+	store.options = { ...options, rulesVersion: 2 }
 	store.names = [...playerNames]
 	store.actions.splice(0)
-	store.game = engine.createGame(store.seed, store.names, options)
+	store.game = engine.createGame(store.seed, store.names, store.options)
 	syncPlayers()
 }
 
@@ -74,10 +74,12 @@ export function importGameData(obj) {
 	}
 	if (obj.v !== 1) return
 	store.seed = obj.seed
-	store.options = obj.options
+	const rulesVersion = Number.isInteger(obj.options?.rulesVersion) ? obj.options.rulesVersion : 1
+	store.options = { ...obj.options, rulesVersion }
 	store.names = obj.names
 	store.actions.splice(0, store.actions.length, ...obj.actions)
 	store.game = obj.state
+	store.game.options = { ...store.game.options, rulesVersion }
 	syncPlayers()
 	rebuildTurnOrder()
 }

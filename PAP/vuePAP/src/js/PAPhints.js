@@ -1,6 +1,6 @@
 // Pure hints over engine state, for the board and the prompt panel. No Vue, no store.
 // Each rule mirrors the engine module named in its comment; PAPhints.test.js checks them against applyAction.
-import { CUSTOMERS, INGREDIENTS, RECIPES, REP_MAX, SCARES, UPGRADES } from './engine/cards.js'
+import { CUSTOMERS, INGREDIENTS, OVER_TOLERANCE, RECIPES, REP_MAX, SCARES, UPGRADES } from './engine/cards.js'
 import { kettleCapacity, potion, potionPreference, qualifyingPotions, venue, venueInfo } from './engine/state.js'
 import { finalScores } from './engine/audit.js'
 
@@ -23,8 +23,11 @@ export function saleRisks(s, seat, potionId, venueId) {
 	const pld = pot.disp === 'properlyLicensedDoom'
 	const over = pot.poison > venueInfo(venueId).tolerance
 	const risks = []
-	if (over) risks.push({ kind: 'overTolerance', text: '+3 Crowns net but a 2-Crown Levy' + (pld ? '' : ' and a Warning') })
-	else if ((v.mood === 'panicked' || p.forcedReliability || pot.disp === 'whistlingCork') && !pld && !prefMatch(pot, cust)) {
+	if (over) {
+		const levy = OVER_TOLERANCE.levy * (s.yearFx.doubleLevies ? 2 : 1)
+		const premium = OVER_TOLERANCE.unlicensed + OVER_TOLERANCE.poison - levy
+		risks.push({ kind: 'overTolerance', text: `+${premium} Crown${premium === 1 ? '' : 's'} net but a ${levy}-Crown Levy` + (pld ? '' : ' and a Warning') })
+	} else if ((v.mood === 'panicked' || p.forcedReliability || pot.disp === 'whistlingCork') && !pld && !prefMatch(pot, cust)) {
 		risks.push({ kind: 'reliability', text: 'Reliability check fails: no matching Preference, so a Warning' })
 	}
 	if (s.yearFx.pitchBlocked === seat) risks.push({ kind: 'pitchBlocked', text: 'Scare S13: your first sale attempt this High Street is blocked' })

@@ -422,11 +422,11 @@ Once per Year, before Council contributions:
 
 Calling a Review consumes the caller's next contribution slot that Year **before the current Charter's outcome is known**.
 
-For one Charter opportunity, the Recognized-Profit leader is frozen out of the civic lane: they cannot contribute, Found a Charter, or collect a Founder's Cut. Production, sales, unit economics, and the leader's share of a Boone remain unchanged.
+For one Council stage—the full Morning Post's Council contributions—the Recognized-Profit leader is frozen out of the civic lane: they cannot contribute or Found a Charter. Production, sales, unit economics, and the leader's share of a Boone remain unchanged.
 
-Each rival with a Founder's Seal whose Boone is still live may Rally, extending the freeze by one additional Charter opportunity.
+Each rival other than the caller who earned a Founder's Seal during the immediately previous Year may Rally, extending the freeze by one additional Council stage. A permanent Seal from an earlier Year does not qualify by itself.
 
-When the Review ends, the leader's barred contribution to the next open Charter is made by the Review instead and counts **double** toward its threshold. It is recorded in the leader's name but awards no Hype or private control of the Charter. No Crowns or goods are confiscated from the leader.
+When the final frozen Council stage ends, the leader's barred contribution to the first open Charter they have not contributed to, whose venue has no live Boone, is made by the Review instead and counts **double** toward its threshold. It is recorded in the leader's name but awards no Hype or private control of the Charter. No Crowns or goods are confiscated from the leader.
 
 ---
 
