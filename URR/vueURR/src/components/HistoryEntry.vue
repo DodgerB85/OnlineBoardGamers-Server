@@ -67,7 +67,8 @@ function saleLabels(batches = []) { return batches.flat().map(landLabel).join(",
 const eventText = computed(() => {
 	const event = props.entry[0]
 	if (event === rf.HIST_NEW_GAME) return "Welcome to UR: 1830 BC!"
-	if (event === rf.HIST_END_TURN) return "Ended turn"
+	if (event === rf.HIST_KICKOUT) return "Was kicked out. Their remaining turns are passed automatically"
+	if (event === rf.HIST_RESIGN) return "Resigned. Their remaining turns are passed automatically"
 	const move = action.value
 	if (!move) return event === rf.HIST_GAME_END ? "Game ended" : "Played a move"
 	const stateName = rf.STATE_NAMES[stateId.value] || "State"

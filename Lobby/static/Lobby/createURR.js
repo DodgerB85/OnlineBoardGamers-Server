@@ -5,6 +5,26 @@ var SHADOW_NAMES = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
 // A game is either practice, learning or experienced, never a mixture.
 var GAME_TYPE_OPTIONS = ["trainingGame", "learningGame", "experiencedGame"]
 
+// Kickout choices per pace, same as the other games' create pages.
+var KICKOUT_OPTIONS = {
+	10: [[5, "5 Minutes"], [10, "10 Minutes"], [20, "20 Minutes"]],
+	20: [[50, "12 hours"], [100, "1 day"]],
+	30: [[100, "1 day"], [200, "2 days"], [300, "3 days"], [500, "5 days"]],
+}
+
+function setKickoutOptions() {
+	var pace = parseInt(document.getElementById("pace").value)
+	var select = document.getElementById("kickoutDuration")
+	var previous = select.value
+	select.innerHTML = ""
+	KICKOUT_OPTIONS[Math.min(pace, 30)].forEach(function (option) {
+		select.add(new Option(option[1], option[0]))
+	})
+	select.value = previous
+	if (select.value == "") select.selectedIndex = 0
+	document.getElementById("blitzWarningSpan").style.display = pace == 10 ? "block" : "none"
+}
+
 function initGameCreation(fillData, setupData = {}) {
 	if (global.experienced) document.getElementById("experiencedGame").disabled = false
 
@@ -15,6 +35,7 @@ function initGameCreation(fillData, setupData = {}) {
 		document.getElementById("description").value = setupData.gameDescription
 		document.getElementById("pace").value = setupData.gamePace
 		if (document.getElementById("pace").value == "") document.getElementById("pace").selectedIndex = 2
+		setKickoutOptions()
 		document.getElementById("playerNumber").value = setupData.playerNumber
 
 		for (var i = 0; i < setupData.playerNames.length; i++) {
@@ -36,6 +57,7 @@ function initGameCreation(fillData, setupData = {}) {
 }
 
 function validateOptions(change) {
+	if (change === "pace") return setKickoutOptions()
 	if (change === "privateGame") return
 
 	var checked = document.getElementById(change).checked

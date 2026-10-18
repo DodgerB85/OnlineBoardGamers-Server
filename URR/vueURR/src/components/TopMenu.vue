@@ -92,10 +92,8 @@ function nextGame() {
 	window.location.href = window.initData.nextURL
 }
 
-async function resignGame() {
-	if (!personal.canResign()) return
-	if (!window.confirm("Are you sure you want to resign? You will be treated as a missing player.")) return
-	if (await IO.resign()) window.location.reload()
+function resignGame() {
+	store.viewSettings.showResignPanel = !store.viewSettings.showResignPanel
 }
 
 function getKickoutTimerText() {
@@ -169,7 +167,7 @@ function getKickoutTimerText() {
 				<span>Rewind</span>
 			</button>
 
-			<button type="button" v-if="personal.canResign()" class="topMenuItem" @click="resignGame">
+			<button type="button" v-if="personal.canResign()" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showResignPanel }]" :aria-expanded="store.viewSettings.showResignPanel" @click="resignGame">
 				<img :src="view.getImage('resign')" alt="" />
 				<span>Resign</span>
 			</button>

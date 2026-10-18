@@ -55,6 +55,12 @@ export async function saveGame(saveRewind = true) {
 	personal.haltPlay = true
 	store.viewSettings.isSaving = true
 
+	try {
+		model.playMissingSeats()
+	} catch (error) {
+		// The App.vue fallback retries the abandoned seat on the next load.
+		console.error("Unable to pass for a missing seat:", error)
+	}
 	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder } = getNextCurrentPlayers()
 
 	let postData = {
@@ -222,9 +228,12 @@ export async function resign() {
 			body: JSON.stringify({ gameID: personal.gameID, action: "resign", user: personal.name }),
 			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
 		})
-		if (!response.ok) throw new Error("Network response was not ok")
-		await response.json()
-		return true
+		const data = await response.json()
+		if (!response.ok) throw new Error(data.error || "Network response was not ok")
+		model.setMissingPlayers(data.missingPlayers)
+		model.addHistory(rf.HIST_RESIGN, personal.pov)
+		// No rewind point: rewinding cannot undo a resignation on the server.
+		return await saveGame(false)
 	} catch (error) {
 		console.error("Error resigning:", error)
 		store.gameMessages.errorText = "Error resigning"
@@ -274,6 +283,7 @@ export async function kickout() {
 		window.initData.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
 		model.setMissingPlayers(data.missingPlayers)
+		model.addHistory(rf.HIST_KICKOUT, model.getPlayerIndexByName(kickedPlayerObj.name))
 		// Save the abandoned seat without creating a rewind across the kickout.
 		if (!await saveGame(false)) return
 		return data

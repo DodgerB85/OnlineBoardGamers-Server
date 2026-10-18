@@ -1,7 +1,15 @@
-/** Lossless replay storage. Full positions anchor phase changes; intervening
- * entries store only changed values. The UI still receives ordinary snapshots. */
+/** Save format. The engine is deterministic, so a replay entry stores only
+ * [event, player, action, secondsSincePreviousEntry] and, when replaying the
+ * action does not reproduce the position (debug edits, kickouts, renamed
+ * shadows), the changes from the replayed position. The opening position is
+ * rebuilt from createGame. The UI still receives ordinary snapshots. */
+import * as game from "./URRgame.js"
+import * as board from "./URRboard.js"
+import * as boardRules from "./URRmap.js"
+
 const DELTA_FORMAT = "urr-history-delta-v1"
-const encodedSnapshots = new WeakMap()
+const BOARD_FORMAT = "urr-board-v1"
+const encodedEntries = new WeakMap()
 
 function collectChanges(before, after, path, changes) {
 	if (before === after) return
@@ -19,54 +27,116 @@ function collectChanges(before, after, path, changes) {
 	}
 }
 
-function copyEntry(entry, snapshot) {
-	return [entry[0], entry[1], snapshot, ...JSON.parse(JSON.stringify(entry.slice(3)))]
+function applyChanges(target, changes) {
+	// Clone inserted values so later changes cannot mutate the saved records.
+	for (const change of JSON.parse(JSON.stringify(changes))) {
+		const [path, value] = change
+		if (!Array.isArray(path) || path.length === 0) throw new Error("Invalid URR replay change path")
+		let parent = target
+		for (const key of path.slice(0, -1)) parent = parent[key]
+		const key = path.at(-1)
+		if (change.length === 1) delete parent[key]
+		else parent[key] = value
+	}
+	return target
+}
+
+function changesBetween(before, after) {
+	const changes = []
+	collectChanges(before, after, [], changes)
+	return changes
+}
+
+function printedBoard() {
+	return boardRules.createBoard(board.createPrintedBoard())
+}
+
+// The printed layout is rebuilt on load; only areas that differ from it are
+// saved, keyed by id so a corrected layout cannot misplace saved pieces.
+export function compactBoard(current) {
+	const printed = printedBoard()
+	const areas = {}
+	for (const area of current.areas) {
+		const fresh = printed.areas.find((candidate) => candidate.id === area.id)
+		const changed = Object.fromEntries(Object.entries(area).filter(([key, value]) => JSON.stringify(value) !== JSON.stringify(fresh?.[key])))
+		if (Object.keys(changed).length) areas[area.id] = changed
+	}
+	const rest = Object.fromEntries(Object.entries(current).filter(([key, value]) => key !== "areas" && JSON.stringify(value) !== JSON.stringify(printed[key])))
+	return { format: BOARD_FORMAT, areas, ...rest }
+}
+
+export function expandBoard(stored) {
+	if (stored?.format !== BOARD_FORMAT) return stored
+	const { format: _format, areas, ...rest } = stored
+	const result = { ...printedBoard(), ...rest }
+	for (const area of result.areas) Object.assign(area, areas[area.id])
+	return result
+}
+
+function predict(previous, player, action) {
+	if (!action) return previous
+	try {
+		return game.applyAction(previous, player, action)
+	} catch {
+		return previous
+	}
 }
 
 export function compactHistory(history) {
-	return history.map((entry, index) => {
-		const snapshot = entry[2]
-		const previousSnapshot = index > 0 ? history[index - 1][2] : null
-		const cached = encodedSnapshots.get(entry)
-		if (cached?.snapshot === snapshot && cached.previousSnapshot === previousSnapshot) return copyEntry(entry, cached.storedSnapshot)
+	if (!history.length) return []
+	return history.slice(1).map((entry, offset) => {
+		const previousEntry = history[offset]
+		const cached = encodedEntries.get(entry)
+		if (cached?.snapshot === entry[2] && cached.previousSnapshot === previousEntry[2]) return JSON.parse(JSON.stringify(cached.stored))
 
-		let storedSnapshot = snapshot
-		if (previousSnapshot !== null) {
-			const before = JSON.parse(previousSnapshot)
-			const after = JSON.parse(snapshot)
-			if (before.gameflow.turn === after.gameflow.turn && before.gameflow.phase === after.gameflow.phase) {
-				const changes = []
-				collectChanges(before, after, [], changes)
-				const delta = { format: DELTA_FORMAT, changes }
-				if (JSON.stringify(delta).length < snapshot.length) storedSnapshot = delta
-			}
-		}
+		const time = entry[4] != null && previousEntry[4] != null ? entry[4] - previousEntry[4] : null
+		const stored = [entry[0], entry[1], entry[3] ?? null, time]
+		const changes = changesBetween(predict(JSON.parse(previousEntry[2]), entry[1], entry[3]), JSON.parse(entry[2]))
+		if (changes.length) stored.push(changes)
 		// An appended move should not re-encode the entire existing replay.
-		encodedSnapshots.set(entry, { snapshot, previousSnapshot, storedSnapshot })
-		return copyEntry(entry, storedSnapshot)
+		encodedEntries.set(entry, { snapshot: entry[2], previousSnapshot: previousEntry[2], stored })
+		return JSON.parse(JSON.stringify(stored))
 	})
 }
 
-export function expandHistory(history) {
+// The opening differs from createGame only for converted legacy saves.
+export function compactOpening(history) {
+	if (!history.length) return []
+	const opening = JSON.parse(history[0][2])
+	return changesBetween(game.createGame(opening.players.map((player) => player.name)), opening)
+}
+
+export function expandHistory(data, newGameEvent, creationTimestamp) {
+	if (!data.replay) return expandLegacyHistory(data.history || [])
+	let previous = applyChanges(game.createGame(data.players.map((player) => player.name)), data.replayStart || [])
+	let time = creationTimestamp ?? null
+	const result = [[newGameEvent, -1, JSON.stringify(previous), null, time]]
+	for (const stored of data.replay) {
+		const [event, player, action, delta, changes] = stored
+		const snapshot = applyChanges(JSON.parse(JSON.stringify(predict(previous, player, action))), changes || [])
+		time = delta != null && time != null ? time + delta : null
+		const entry = [event, player, JSON.stringify(snapshot), action, time]
+		encodedEntries.set(entry, { snapshot: entry[2], previousSnapshot: result.at(-1)[2], stored })
+		result.push(entry)
+		previous = snapshot
+	}
+	return result
+}
+
+// Earlier saves kept a full position or a delta from the previous one per entry.
+function expandLegacyHistory(history) {
 	let previous = null
-	return history.map((entry) => {
+	return history.map((entry, index) => {
+		// The opening used to be stamped in milliseconds.
+		if (index === 0 && entry[4] > 1e11) entry = [...entry.slice(0, 4), Math.floor(entry[4] / 1000)]
 		const stored = entry[2]
 		let snapshot = stored
 		if (typeof stored === "string") previous = JSON.parse(stored)
 		else {
 			if (!previous || stored?.format !== DELTA_FORMAT || !Array.isArray(stored.changes)) throw new Error("Invalid URR replay delta")
-			// Clone inserted values so later deltas cannot mutate the saved records.
-			for (const change of JSON.parse(JSON.stringify(stored.changes))) {
-				const [path, value] = change
-				if (!Array.isArray(path) || path.length === 0) throw new Error("Invalid URR replay change path")
-				let target = previous
-				for (const key of path.slice(0, -1)) target = target[key]
-				const key = path.at(-1)
-				if (change.length === 1) delete target[key]
-				else target[key] = value
-			}
+			applyChanges(previous, stored.changes)
 			snapshot = JSON.stringify(previous)
 		}
-		return copyEntry(entry, snapshot)
+		return [entry[0], entry[1], snapshot, ...JSON.parse(JSON.stringify(entry.slice(3)))]
 	})
 }

@@ -79,6 +79,10 @@ function getDeleteVotes(returnPlayers = false) {
 function localCastVote(topic) {
 	IO.castVote(topic)
 }
+
+async function confirmResign() {
+	if (await IO.resign()) store.viewSettings.showResignPanel = false
+}
 </script>
 
 <template>
@@ -160,6 +164,16 @@ function localCastVote(topic) {
 		</div>
 	</div>
 
+	<!-- RESIGN PANEL -->
+	<div id="resignPanel" v-if="store.viewSettings.showResignPanel && personal.canResign()">
+		<div class="utilityHeading"><b>Resign</b><button @click="store.viewSettings.showResignPanel = false" aria-label="Close resign panel">×</button></div>
+		<p>Are you sure you want to resign? Resigning will unbalance the game for the remaining players.</p>
+		<p>Your seat keeps its land and money, but all of your remaining turns will be passed automatically. <b>It cannot be undone.</b></p>
+		<p v-if="store.gameMessages.errorText" class="errorText" role="alert">{{ store.gameMessages.errorText }}</p>
+		<button class="actionsLineButton" :disabled="!!store.turnDraft.start || store.viewSettings.showLoader || store.viewSettings.isSaving" :title="store.turnDraft.start ? 'Reset your uncommitted turn first' : 'Resign from this game'" @click="confirmResign">Confirm Resignation</button>
+		<button class="actionsLineButton" @click="store.viewSettings.showResignPanel = false">Cancel</button>
+	</div>
+
 	<!-- Info -->
 	<transition name="slidePanel">
 		<div id="info" v-if="store.viewSettings.showInfo">
@@ -238,7 +252,7 @@ function localCastVote(topic) {
 .chatentry .header .date { font-size: 0.7em; font-style: italic; float: right; }
 .chatentry .header .bold { font-weight: bold; }
 .chatentry .messageBody { overflow: auto; white-space: pre-wrap; }
-#rewindPanel {
+#rewindPanel, #resignPanel {
 	position: absolute;
 	background-color: black;
 	border: 1px solid white;
