@@ -10,7 +10,8 @@ import * as assets from "../js/URRassets"
 				UR: 1830 BC is a board game by Jeroen Doumen and Joris Wiersinga, published by
 				<a target="_blank" href="https://www.splottershop.com/">Splotter Spellen</a>.
 			</p>
-			<p>Permissions provided. Menu icons from <a href="http://game-icons.net">game-icons.net</a></p>
+			<p>Online Board Gamers implementation by Mihai & DodgerB. Permissions Provided.</p>
+			<p>Menu icons from <a href="http://game-icons.net">game-icons.net</a></p>
 		</div>
 	</div>
 </template>
