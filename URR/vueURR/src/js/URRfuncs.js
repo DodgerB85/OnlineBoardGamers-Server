@@ -4,6 +4,11 @@
 
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
+import * as rf from "./URRreference.js"
+import * as historyStorage from "./URRhistoryStorage.js"
+
+const STATE_FIELDS = ["players", "gameflow", "states", "nations", "board", "landPrices", "era", "cardSupply", "rain", "nextDiggerId"]
+const RAIN_STEPS = [null, "routing", "harvest", "complete"]
 
 export const shuffle = (array) => {
 	for (let i = array.length - 1; i > 0; i--) {
@@ -97,6 +102,7 @@ export function timestampToString(timestamp) {
 	else res += d.getMinutes() + ":"
 	if (d.getSeconds() < 10) res += "0" + d.getSeconds()
 	else res += d.getSeconds()
+
 	return res
 }
 
@@ -106,4 +112,278 @@ export function htmlEscape(str) {
 
 export function htmlUnescape(str) {
 	return String(str).replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+}
+
+export function snapshotState() {
+	const store = useModelStore()
+	return JSON.parse(JSON.stringify(Object.fromEntries(STATE_FIELDS.map((field) => [field, store[field]]))))
+}
+
+export function restoreState(snapshot) {
+	const store = useModelStore()
+	const data = JSON.parse(JSON.stringify(snapshot))
+	for (const field of STATE_FIELDS) {
+		if (data[field] === undefined) throw new Error(`Missing URR state field: ${field}`)
+	}
+	store.players.splice(0, store.players.length, ...data.players)
+	for (const key of Object.keys(store.gameflow)) delete store.gameflow[key]
+	Object.assign(store.gameflow, data.gameflow)
+	for (const field of STATE_FIELDS) {
+		if (field !== "players" && field !== "gameflow") store[field] = data[field]
+	}
+}
+
+// Full browser-side snapshot used by resets and replay; never sent to the server.
+export function simpleExportWholeURRmodel() {
+	return compressData64({ state: snapshotState(), history: useModelStore().history })
+}
+
+export function simpleImportWholeURRmodel(input) {
+	const data = decompressData64(input)
+	const store = useModelStore()
+	restoreState(data.state)
+	store.history.splice(0, store.history.length, ...data.history)
+}
+
+function encodePlayers(players, forGameOver) {
+	return players.map((player) => {
+		const soldLandTypes = forGameOver ? 0 : player.soldLandTypes || []
+		const soldEmergingStates = forGameOver ? 0 : player.soldEmergingStates || []
+		const entry = [player.name, player.money, player.score || 0, soldLandTypes, soldEmergingStates, player.displayName !== player.name ? player.displayName : 0, player.isMissing ? 1 : 0]
+		while (entry.length > 2) {
+			const last = entry.at(-1)
+			if (last !== 0 && !(Array.isArray(last) && last.length === 0)) break
+			entry.pop()
+		}
+		return entry
+	})
+}
+
+function decodePlayers(players) {
+	return players.map((entry, index) => ({
+		name: entry[0],
+		displayName: entry[5] || entry[0],
+		colour: rf.ALL_COLOURS[index],
+		money: entry[1],
+		score: entry[2] || 0,
+		soldLandTypes: [...(entry[3] || [])],
+		soldEmergingStates: [...(entry[4] || [])],
+		...(entry[6] ? { isMissing: true } : {}),
+	}))
+}
+
+function isDefault(value) {
+	return value === 0 || value === null || value === undefined || (Array.isArray(value) && value.length === 0)
+}
+
+function encodeGameflow(flow, forGameOver) {
+	if (forGameOver) return [flow.turn, flow.phase, flow.endReason, flow.finalPositions || []]
+	const entry = [
+		flow.turn,
+		flow.phase,
+		[...flow.fullTurnOrder],
+		[...flow.turnOrder],
+		flow.primogeniture,
+		flow.primogenitureBid ? [flow.primogenitureBid.player, flow.primogenitureBid.amount] : 0,
+		flow.passes,
+		flow.treatyResumePlayer,
+		flow.ashurPrice,
+		flow.auction ? [flow.auction.nation, [...flow.auction.bidders], flow.auction.highPlayer, flow.auction.amount] : 0,
+		[...flow.stateOrder],
+		flow.stateIndex,
+		flow.developmentStep ?? 0,
+		flow.endReason ?? 0,
+		flow.pendingOffer ?? 0,
+	]
+	const optional = [flow.barahshumPass ?? 0, flow.waterworkRequests ?? 0, flow.waterworkAgreements ?? 0, flow.declinedWaterworks ?? 0, flow.offerDeclined ?? 0, flow.developmentPlan ?? 0, flow.finalPositions ?? 0]
+	let last = -1
+	optional.forEach((value, index) => {
+		if (!isDefault(value)) last = index
+	})
+	if (last >= 0) entry.push(...optional.slice(0, last + 1))
+	return entry
+}
+
+function decodeGameflow(entry, playerCount) {
+	const flow = {
+		turn: 1, phase: rf.PHASE_DIVIDING_NATIONS, fullTurnOrder: Array.from({ length: playerCount }, (_, index) => index), turnOrder: [0],
+		primogeniture: 0, primogenitureBid: null, passes: 0, treatyResumePlayer: 0, ashurPrice: 20,
+		auction: null, stateOrder: [], stateIndex: 0, developmentStep: null, endReason: null, pendingOffer: null,
+	}
+	if (entry.length === 4) {
+		// Game-over saves only carry the fields the final screen still reads.
+		return { ...flow, turn: entry[0], phase: entry[1], endReason: entry[2] || null, finalPositions: entry[3] || [], turnOrder: [] }
+	}
+	flow.turn = entry[0]
+	flow.phase = entry[1]
+	flow.fullTurnOrder = [...entry[2]]
+	flow.turnOrder = [...entry[3]]
+	flow.primogeniture = entry[4]
+	flow.primogenitureBid = entry[5] ? { player: entry[5][0], amount: entry[5][1] } : null
+	flow.passes = entry[6]
+	flow.treatyResumePlayer = entry[7]
+	flow.ashurPrice = entry[8]
+	flow.auction = entry[9] ? { nation: entry[9][0], bidders: [...entry[9][1]], highPlayer: entry[9][2], amount: entry[9][3] } : null
+	flow.stateOrder = [...entry[10]]
+	flow.stateIndex = entry[11]
+	if (entry[12]) flow.developmentStep = entry[12]
+	if (entry[13]) flow.endReason = entry[13]
+	if (entry[14]) flow.pendingOffer = entry[14]
+	const optionalKeys = ["barahshumPass", "waterworkRequests", "waterworkAgreements", "declinedWaterworks", "offerDeclined", "developmentPlan", "finalPositions"]
+	optionalKeys.forEach((key, index) => {
+		const value = entry[15 + index]
+		if (value !== undefined && value !== 0) flow[key] = value
+	})
+	return flow
+}
+
+function encodeStates(states) {
+	return states.map((state) => {
+		const entry = [state.money, state.king ?? -1]
+		const diggers = state.diggers.map((crew) => {
+			const crewEntry = [crew.id, crew.era]
+			if (crew.hasDug) crewEntry.push(1)
+			return crewEntry
+		})
+		if (state.isActive || diggers.length || state.hasRevolted) {
+			entry.push(state.isActive ? 1 : 0)
+			if (diggers.length || state.hasRevolted) entry.push(diggers)
+			if (state.hasRevolted) entry.push(1)
+		}
+		return entry
+	})
+}
+
+function decodeStates(states) {
+	return states.map((entry, id) => ({
+		id,
+		money: entry[0],
+		king: entry[1] < 0 ? null : entry[1],
+		isActive: !!entry[2],
+		diggers: (entry[3] || []).map(([crewId, era, hasDug]) => ({ id: crewId, era, capacity: rf.ERA_CARD_DATA[era].digger[0], hasDug: !!hasDug })),
+		hasRevolted: !!entry[4],
+	}))
+}
+
+function ownerTypeCode(ownerType) {
+	if (ownerType === null) return -1
+	return ownerType === "player" ? 0 : 1
+}
+
+function encodeNations(nations) {
+	return nations.map((nation) => {
+		const bids = nation.bids.flatMap((bid) => [bid.player, bid.amount])
+		const entry = [ownerTypeCode(nation.ownerType), nation.owner ?? -1]
+		if (nation.isRemoved || bids.length) {
+			entry.push(nation.isRemoved ? 1 : 0)
+			if (bids.length) entry.push(bids)
+		}
+		return entry
+	})
+}
+
+function decodeNations(nations) {
+	return nations.map((entry, id) => ({
+		id,
+		ownerType: entry[0] === undefined || entry[0] < 0 ? null : entry[0] === 0 ? "player" : "state",
+		owner: entry[1] === undefined || entry[1] < 0 ? null : entry[1],
+		isRemoved: !!entry[2],
+		bids: (entry[3] || []).reduce((bids, value, index, all) => {
+			if (index % 2 === 0) bids.push({ player: value, amount: all[index + 1] })
+			return bids
+		}, []),
+	}))
+}
+
+function encodeRain(rain, areaIndex) {
+	if (!rain || (rain.step === null && rain.outflow === null && !rain.harvestOrder?.length && !rain.routing)) return []
+	const step = RAIN_STEPS.indexOf(rain.step)
+	const entry = [step < 0 ? 0 : step, rain.outflow ?? -1, [...(rain.harvestOrder || [])]]
+	if (rain.routing) {
+		const routing = rain.routing
+		entry.push([
+			routing.sourceIndex ?? 0,
+			routing.river ? [areaIndex.get(routing.river.area) ?? routing.river.area, routing.river.water] : 0,
+			Object.entries(routing.arrivals || {}).map(([id, arrival]) => [areaIndex.get(id) ?? id, arrival.count, arrival.water]),
+			routing.outflow ?? 0,
+			(routing.stack || []).map((frame) => [areaIndex.get(frame.area) ?? frame.area, frame.water, frame.downstreamWater, (frame.visited || []).map((id) => areaIndex.get(id) ?? id), areaIndex.get(frame.originReservoir) ?? frame.originReservoir]),
+		])
+	}
+	return entry
+}
+
+function decodeRain(entry, areaIds) {
+	if (!entry?.length) return { step: null, outflow: null, harvestOrder: [] }
+	const areaId = (value) => (typeof value === "number" ? areaIds[value] : value)
+	const [step, outflow, harvestOrder, routing] = entry
+	const rain = { step: RAIN_STEPS[step] ?? null, outflow: outflow < 0 ? null : outflow, harvestOrder: [...(harvestOrder || [])] }
+	if (routing) {
+		rain.routing = {
+			sourceIndex: routing[0],
+			river: routing[1] ? { area: areaId(routing[1][0]), water: routing[1][1] } : null,
+			arrivals: Object.fromEntries((routing[2] || []).map(([id, count, water]) => [areaId(id), { count, water }])),
+			outflow: routing[3],
+			stack: (routing[4] || []).map(([id, water, downstreamWater, visited, originReservoir]) => ({ area: areaId(id), water, downstreamWater, visited: (visited || []).map(areaId), originReservoir: areaId(originReservoir) })),
+		}
+	}
+	return rain
+}
+
+function encodeCardSupply(cardSupply) {
+	return [1, 2, 3, 4].map((era) => cardSupply?.[era] ?? rf.ERA_CARD_COUNTS[era])
+}
+
+function decodeCardSupply(entry) {
+	if (!entry?.length) return { ...rf.ERA_CARD_COUNTS }
+	return Object.fromEntries([1, 2, 3, 4].map((era) => [era, entry[era - 1] ?? rf.ERA_CARD_COUNTS[era]]))
+}
+
+export function exportURRmodel(forGameOver = false) {
+	const store = useModelStore()
+	const state = snapshotState()
+	const areaIndex = historyStorage.printedAreaIndexMap()
+	const opening = historyStorage.compactOpening(store.history)
+	const entry = [
+		encodePlayers(state.players, forGameOver),
+		encodeGameflow(state.gameflow, forGameOver),
+		encodeStates(state.states),
+		encodeNations(state.nations),
+		historyStorage.compactBoard(state.board),
+		state.landPrices,
+		state.era,
+		encodeCardSupply(state.cardSupply),
+		forGameOver ? [] : encodeRain(state.rain, areaIndex),
+		forGameOver ? -1 : state.nextDiggerId,
+		// The replay is the only persisted copy of the move history: reloads
+		// rebuild the history panel from it and finished-game stats read it.
+		historyStorage.compactHistory(store.history),
+	]
+	if (!forGameOver && opening.length) entry.push(opening)
+	return compressData64(entry)
+}
+
+export function importURRmodel(input) {
+	const personal = usePersonalStore()
+	const data = typeof input === "string" ? (input.trim().startsWith("{") ? JSON.parse(input) : decompressData64(input)) : input
+	if (data?.opening) {
+		const history = historyStorage.expandHistory({ players: data.players.map((name) => ({ name })), replay: [], replayStart: data.replayStart }, rf.HIST_NEW_GAME, personal.gameCreationTimestamp)
+		return { state: JSON.parse(history[0][2]), history }
+	}
+	if (!Array.isArray(data) || data.length < 11) throw new Error("Unsupported URR save")
+	const players = decodePlayers(data[0])
+	const states = decodeStates(data[2])
+	const state = {
+		players,
+		gameflow: decodeGameflow(data[1], players.length),
+		states,
+		nations: decodeNations(data[3]),
+		board: historyStorage.expandBoard(data[4]),
+		landPrices: data[5],
+		era: data[6],
+		cardSupply: decodeCardSupply(data[7]),
+		rain: decodeRain(data[8], historyStorage.printedAreaIds()),
+		nextDiggerId: data[9] >= 0 ? data[9] : Math.max(-1, ...states.flatMap((entry) => entry.diggers.map((crew) => crew.id))) + 1,
+	}
+	const history = historyStorage.expandHistory({ players, replay: data[10], replayStart: data[11] }, rf.HIST_NEW_GAME, personal.gameCreationTimestamp)
+	return { state, history }
 }

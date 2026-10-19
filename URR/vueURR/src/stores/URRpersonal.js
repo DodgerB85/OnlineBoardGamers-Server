@@ -3,7 +3,7 @@
  */
 
 import { defineStore } from "pinia"
-import * as rf from "../js/URRreference"
+import * as rf from "../js/URRreference.js"
 import { useModelStore } from "./URRstore.js"
 
 export const usePersonalStore = defineStore("personal", () => {

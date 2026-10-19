@@ -9,7 +9,6 @@ import * as boardRules from "./URRmap.js"
 export function createGame(playerNames, boardDefinition = board.createPrintedBoard()) {
 	boardRules.requireRule(playerNames.length >= 3 && playerNames.length <= 6, "UR: 1830 BC requires 3–6 players")
 	return {
-		version: rf.GAME_DATA_VERSION,
 		players: playerNames.map((name, index) => ({ name, displayName: name, colour: rf.ALL_COLOURS[index], money: rf.STARTING_MONEY_BY_PLAYER_COUNT[playerNames.length], score: 0, soldLandTypes: [], soldEmergingStates: [] })),
 		gameflow: {
 			turn: 1, phase: rf.PHASE_DIVIDING_NATIONS, fullTurnOrder: Array.from(playerNames.keys()), turnOrder: [0],
@@ -550,7 +549,6 @@ function developmentAction(game, action) {
 
 export function applyAction(current, player, action) {
 	const game = JSON.parse(JSON.stringify(current))
-	boardRules.requireRule(game.version === rf.GAME_DATA_VERSION, "Unsupported game data version")
 	boardRules.requireRule(Number.isInteger(player) && game.players[player], "Unknown player")
 	if (action.type === "exchangeBarahshum") {
 		exchangeBarahshum(game, player, action)

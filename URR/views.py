@@ -72,7 +72,7 @@ def showURRgame(request, game_id=1, spoilerFree=False, replayStep=1):
     presenter = cast("URRpresenter", currentGame.presenter())
 
     returnData = {**result["base_data"]}
-    # The URR client reads the whole model as plain JSON out of gameData.
+    # The client decompresses its own gzip+base64 model from gameData.
     returnData["gameData"] = returnData["gameData"] if returnData["gameData"] else "{}"
 
     returnData["missingPlayers"] = json.dumps(presenter.getMissingPlayersNamesArray())
@@ -139,9 +139,8 @@ def _processURRturn(request):
 
     jsonData = json.loads(request.body)
     if "gameDataCompressed" in jsonData:
-        # Compress only the transfer: saved positions and legacy callers retain
-        # the plain JSON format used by show pages, history, and rewind.
-        jsonData["gameData"] = gzip.decompress(base64.b64decode(jsonData["gameDataCompressed"])).decode("utf-8")
+        # The client's gzip+base64 model is stored as-is.
+        jsonData["gameData"] = jsonData["gameDataCompressed"]
     game_id = jsonData["gameID"]
     latest_update = str(jsonData.get("latestUpdate", 0))
 
@@ -217,9 +216,9 @@ def _processURRturn(request):
         if not currentRewindDataArray:
             return JsonResponse({"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")}, safe=False)
 
-        loadData = decompressRewindPoint(currentRewindDataArray.pop()) if currentRewindDataArray else ""
+        loadData = currentRewindDataArray.pop() if currentRewindDataArray else ""
         while len(currentRewindDataArray) > 0 and loadData == currentGame.gameData:
-            loadData = decompressRewindPoint(currentRewindDataArray.pop())
+            loadData = currentRewindDataArray.pop()
 
         currentGame.gameData = loadData if loadData != "" else ""
         currentGame.rewindTempData = loadData
@@ -245,8 +244,7 @@ def _processURRturn(request):
         presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
         presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
         currentGame.gameData = jsonData["gameData"]
-        # The client may compact a legacy history when confirming the loaded position.
-        # Keep the redo anchor in the same representation to avoid a duplicate point.
+        # Keep the redo anchor in the same representation as the loaded model.
         if currentGame.rewindTempData:
             currentGame.rewindTempData = currentGame.gameData
 
@@ -341,66 +339,56 @@ def performSaveURRGame(request, currentGame, jsonData):
     )
 
 
-def compressRewindPoint(point):
-    if point.startswith("gzip:"):
-        return point
-    return "gzip:" + base64.b64encode(gzip.compress(point.encode("utf-8"), compresslevel=6, mtime=0)).decode("ascii")
-
-
-def decompressRewindPoint(point):
-    if point.startswith("gzip:"):
-        return gzip.decompress(base64.b64decode(point[5:])).decode("utf-8")
-    return point
+def decodeGameData(gameData):
+    if not gameData:
+        return None
+    try:
+        return json.loads(gameData)
+    except (json.JSONDecodeError, TypeError):
+        return json.loads(gzip.decompress(base64.b64decode(gameData)).decode("utf-8"))
 
 
 def openingPosition(gameData):
-    """Rebuild the start of the game from a save's own first history entry.
+    """Return the client's opening marker for the first rewind point.
 
-    The client creates the opening position, so a game that has never been
-    saved has no earlier position on the server yet. Without this the first
-    rewind of a game would have nothing to go back to.
+    The client rebuilds the opening from its own createGame + replayStart, so
+    the server only has to hand back the names and opening changes.
     """
     try:
-        data = json.loads(gameData)
-        if "replay" in data:
-            # An unversioned names-only save makes the client deal a fresh game.
-            return json.dumps({"players": [{"name": p["name"], "displayName": p.get("displayName", p["name"])} for p in data["players"]]})
-        history = data.get("history") or []
-        if not history:
+        data = decodeGameData(gameData)
+        if not isinstance(data, list) or not data:
             return ""
-        opening = json.loads(history[0][2])
-        opening["history"] = [history[0]]
-        return json.dumps(opening)
-    except (json.JSONDecodeError, IndexError, TypeError):
+        players = data[0] or []
+        names = [entry[0] for entry in players]
+        if not names or any(name is None for name in names):
+            return ""
+        replay_start = data[11] if len(data) > 11 else []
+        return json.dumps({"opening": True, "players": names, "replayStart": replay_start})
+    except (json.JSONDecodeError, IndexError, TypeError, ValueError, OSError):
         return ""
 
 
 def doSaveRewind(currentGame, jsonData, previousGameData):
-    # Each point holds the complete replay history, so keep them gzipped.
     # Points are the positions from *before* each move: the position after the
-    # latest move is already currentGame.gameData, and storing it too would
-    # leave the first rewind of a game with nothing to step back to.
+    # latest move is already currentGame.gameData.
     currentRewindData = []
     if currentGame.rewindData:
         try:
-            currentRewindData = [compressRewindPoint(point) for point in json.loads(currentGame.rewindData)]
+            currentRewindData = json.loads(currentGame.rewindData)
         except json.JSONDecodeError:
             currentRewindData = []
 
     if currentGame.rewindTempData:
         # Put back the position we rewound to, so playing on from it does not
         # lose the ability to rewind there again.
-        temp_point = compressRewindPoint(currentGame.rewindTempData)
-        if not currentRewindData or decompressRewindPoint(currentRewindData[-1]) != decompressRewindPoint(temp_point):
-            currentRewindData.append(temp_point)
+        if not currentRewindData or currentRewindData[-1] != currentGame.rewindTempData:
+            currentRewindData.append(currentGame.rewindTempData)
         currentGame.rewindTempData = ""
 
     if not previousGameData:
         previousGameData = openingPosition(jsonData["gameData"])
-    if previousGameData:
-        previous_point = compressRewindPoint(previousGameData)
-        if not currentRewindData or decompressRewindPoint(currentRewindData[-1]) != decompressRewindPoint(previous_point):
-            currentRewindData.append(previous_point)
+    if previousGameData and (not currentRewindData or currentRewindData[-1] != previousGameData):
+        currentRewindData.append(previousGameData)
 
     if len(currentRewindData) > 20:
         currentRewindData = currentRewindData[-20:]

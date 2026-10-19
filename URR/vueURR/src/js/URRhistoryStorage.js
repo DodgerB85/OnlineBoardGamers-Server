@@ -7,7 +7,6 @@ import * as game from "./URRgame.js"
 import * as board from "./URRboard.js"
 import * as boardRules from "./URRmap.js"
 
-const BOARD_FORMAT = "urr-board-v1"
 const encodedEntries = new WeakMap()
 
 function collectChanges(before, after, path, changes) {
@@ -50,25 +49,69 @@ function printedBoard() {
 	return boardRules.createBoard(board.createPrintedBoard())
 }
 
-// The printed layout is rebuilt on load; only areas that differ from it are
-// saved, keyed by id so a corrected layout cannot misplace saved pieces.
+export function printedAreaIndexMap() {
+	return new Map(printedBoard().areas.map((area, index) => [area.id, index]))
+}
+
+export function printedAreaIds() {
+	return printedBoard().areas.map((area) => area.id)
+}
+
+function encodeWaterwork(waterwork) {
+	if (!waterwork) return 0
+	return [waterwork.state, waterwork.kind === "pump" ? 0 : 1, waterwork.capacity]
+}
+
+function decodeWaterwork(entry) {
+	if (entry === 0) return null
+	return { state: entry[0], kind: entry[1] === 0 ? "pump" : "reservoir", capacity: entry[2] }
+}
+
+// The printed layout is rebuilt on load; areas are saved as index-keyed deltas
+// so the IDs and unchanged terrain never reach the database.
 export function compactBoard(current) {
 	const printed = printedBoard()
-	const areas = {}
+	const areaIndex = printedAreaIndexMap()
+	const areas = []
 	for (const area of current.areas) {
-		const fresh = printed.areas.find((candidate) => candidate.id === area.id)
-		const changed = Object.fromEntries(Object.entries(area).filter(([key, value]) => JSON.stringify(value) !== JSON.stringify(fresh?.[key])))
-		if (Object.keys(changed).length) areas[area.id] = changed
+		const index = areaIndex.get(area.id)
+		if (index === undefined) continue
+		const fresh = printed.areas[index]
+		const extras = {}
+		for (const [key, value] of Object.entries(area)) {
+			if (["owner", "markerOwner", "waterwork", "irrigatedBy"].includes(key)) continue
+			if (JSON.stringify(value) !== JSON.stringify(fresh[key])) extras[key] = value
+		}
+		const hasRuntime = area.owner != null || area.markerOwner != null || area.waterwork != null || area.irrigatedBy != null
+		if (!hasRuntime && !Object.keys(extras).length) continue
+		const entry = [index, area.owner ?? -1, area.markerOwner ?? -1, encodeWaterwork(area.waterwork), area.irrigatedBy ?? -1]
+		if (Object.keys(extras).length) entry.push(extras)
+		areas.push(entry)
 	}
-	const rest = Object.fromEntries(Object.entries(current).filter(([key, value]) => key !== "areas" && JSON.stringify(value) !== JSON.stringify(printed[key])))
-	return { format: BOARD_FORMAT, areas, ...rest }
+	const canals = JSON.stringify(current.canals) === JSON.stringify(printed.canals) ? null : current.canals.map(([a, b]) => [areaIndex.get(a) ?? a, areaIndex.get(b) ?? b])
+	const rest = {}
+	for (const [key, value] of Object.entries(current)) {
+		if (key === "areas" || key === "canals") continue
+		if (JSON.stringify(value) !== JSON.stringify(printed[key])) rest[key] = value
+	}
+	return [areas, canals, Object.keys(rest).length ? rest : null]
 }
 
 export function expandBoard(stored) {
-	if (stored?.format !== BOARD_FORMAT) throw new Error("Unsupported URR board format")
-	const { format: _format, areas, ...rest } = stored
-	const result = { ...printedBoard(), ...rest }
-	for (const area of result.areas) Object.assign(area, areas[area.id])
+	if (!Array.isArray(stored)) throw new Error("Unsupported URR board")
+	const [areas, canals, rest] = stored
+	const result = printedBoard()
+	for (const [index, owner, markerOwner, waterwork, irrigatedBy, extras] of areas) {
+		const area = result.areas[index]
+		if (!area) continue
+		area.owner = owner < 0 ? null : owner
+		area.markerOwner = markerOwner < 0 ? null : markerOwner
+		area.waterwork = decodeWaterwork(waterwork)
+		area.irrigatedBy = irrigatedBy < 0 ? null : irrigatedBy
+		if (extras) Object.assign(area, extras)
+	}
+	if (canals) result.canals = canals.map(([a, b]) => [typeof a === "number" ? result.areas[a].id : a, typeof b === "number" ? result.areas[b].id : b])
+	if (rest) Object.assign(result, rest)
 	return result
 }
 

@@ -2,6 +2,7 @@
 import PlayerMarker from "./PlayerMarker.vue"
 import { ref } from "vue"
 import * as model from "../js/URRmodel"
+import * as funcs from "../js/URRfuncs"
 import * as rf from "../js/URRreference"
 import * as view from "../js/URRview"
 import * as rules from "../js/URRrules"
@@ -76,7 +77,7 @@ async function save() {
 	model.addHistory(rf.HIST_ACTION, store.debug.player)
 	await IO.saveGame(true)
 }
-function showState() { window.alert(JSON.stringify(model.exportGameData(), null, 2)) }
+function showState() { window.alert(JSON.stringify(funcs.decompressData64(funcs.exportURRmodel()), null, 2)) }
 </script>
 
 <template>

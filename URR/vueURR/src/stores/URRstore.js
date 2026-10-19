@@ -6,7 +6,7 @@
 
 import { defineStore } from "pinia"
 import { computed, reactive, ref } from "vue"
-import * as rf from "../js/URRreference"
+import * as rf from "../js/URRreference.js"
 import { usePersonalStore } from "./URRpersonal.js"
 import { computeHistory } from "../js/URRhistory.js"
 
@@ -14,7 +14,6 @@ export const useModelStore = defineStore("store", () => {
 	var gameName = "Game Name"
 
 	const players = reactive([])
-	const version = ref(rf.GAME_DATA_VERSION)
 	const states = ref([])
 	const nations = ref([])
 	const board = ref({ areas: [], canals: [], stateOrder: [], markerLimit: null })
@@ -102,7 +101,7 @@ export const useModelStore = defineStore("store", () => {
 		gameName,
 		turnDraft, clearTurnDraft,
 		players,
-		version, states, nations, board, landPrices, era, cardSupply, rain, nextDiggerId, debug,
+		states, nations, board, landPrices, era, cardSupply, rain, nextDiggerId, debug,
 		gameflow,
 		chatData,
 		history,

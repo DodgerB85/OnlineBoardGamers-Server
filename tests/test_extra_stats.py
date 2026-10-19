@@ -53,8 +53,10 @@ class HistoryTimingTests(SimpleTestCase):
     def test_ddl_missing_timestamps_are_not_inferred(self):
         self.assertEqual(read_history(self.game("DDL"), {"history": [[1, 0, "{}"], [2, 1, "{}"]]}), [(0, None), (1, None)])
 
-    def test_urr_uses_explicit_timestamp_in_snapshot_history(self):
-        self.assertEqual(read_history(self.game("URR"), {"history": [[1, 0, "{}", None, CREATED + 100]]}), [(0, CREATED + 100)])
+    def test_urr_replay_timestamps_are_relative(self):
+        data = [None] * 11
+        data[10] = [[0, -1, None, None], [1, 0, None, 100], [2, 1, None, 200]]
+        self.assertEqual(read_history(self.game("URR"), data), [(-1, CREATED), (0, CREATED + 100), (1, CREATED + 300)])
 
 
 @override_settings(STORAGES={"default": {"BACKEND": "django.core.files.storage.FileSystemStorage"}, "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}})

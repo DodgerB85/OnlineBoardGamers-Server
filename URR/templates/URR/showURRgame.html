@@ -90,7 +90,7 @@
     var initData = {};
     initData.gameID = {{ gameID }};
     initData.gameName = "{{ gameName|escapejs }}";
-    initData.gameData = {{ gameData|safe }};
+    initData.gameData = '{{ gameData|default:""|escapejs }}';
     initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
     initData.myZoomLevel = {{ myZoomLevel }};
     initData.startingOptions = {{ startingOptions|safe }};

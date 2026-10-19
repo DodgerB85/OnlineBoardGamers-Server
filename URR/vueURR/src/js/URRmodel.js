@@ -3,10 +3,9 @@ import { usePersonalStore } from "../stores/URRpersonal.js"
 import * as rf from "./URRreference"
 import * as funcs from "./URRfuncs"
 import * as game from "./URRgame.js"
-import * as historyStorage from "./URRhistoryStorage.js"
-import { compactGameData, expandGameData } from "./URRsaveStorage.js"
 
-const STATE_FIELDS = ["version", "players", "gameflow", "states", "nations", "board", "landPrices", "era", "cardSupply", "rain", "nextDiggerId"]
+export const snapshotState = funcs.snapshotState
+export const restoreState = funcs.restoreState
 
 export function initGame() {
 	const store = useModelStore()
@@ -48,7 +47,7 @@ export function initGame() {
 	const gameData = initData.gameData
 
 	try {
-		if (gameData && (typeof gameData === "string" || gameData.players?.length)) importGameData(gameData)
+		if (gameData && gameData !== "{}" && (typeof gameData === "string" || gameData.players?.length)) importGameData(gameData)
 		else initGameFresh(playerNames)
 	} catch (error) {
 		console.error("Unable to initialize URR:", error)
@@ -80,55 +79,14 @@ export function initGameFresh(playerNames, boardDefinition) {
 	addHistory(rf.HIST_NEW_GAME, -1)
 }
 
-// The saved engine owns turn order, including auctions and consent requests.
-// Server names are only a fallback for the old, unversioned scaffold.
-export function rebuildTurnOrder() {
-	const store = useModelStore()
-	if (store.gameflow.primogeniture !== undefined) return
-	const currentNames = window.initData?.currentPlayers || []
-	store.gameflow.fullTurnOrder = Array.from(store.players.keys())
-	store.gameflow.turnOrder = currentNames.map((name) => store.players.findIndex((player) => player.name === name)).filter((index) => index !== -1)
-}
-
-export function restoreState(snapshot) {
-	const store = useModelStore()
-	const data = JSON.parse(JSON.stringify(snapshot))
-	for (const field of STATE_FIELDS) {
-		if (data[field] === undefined) throw new Error(`Missing URR state field: ${field}`)
-	}
-	store.players.splice(0, store.players.length, ...data.players)
-	for (const key of Object.keys(store.gameflow)) delete store.gameflow[key]
-	Object.assign(store.gameflow, data.gameflow)
-	for (const field of STATE_FIELDS) {
-		if (field !== "players" && field !== "gameflow") store[field] = data[field]
-	}
-}
-
 export function importGameData(obj) {
 	const store = useModelStore()
-	let data = typeof obj === "string" ? JSON.parse(obj) : obj
-	if (!data || !data.players?.length) throw new Error("Saved URR data contains no players")
-	if (data.version !== rf.GAME_DATA_VERSION) throw new Error("Unsupported URR save version")
-	data = expandGameData(data)
-	data.board = historyStorage.expandBoard(data.board)
-	const history = historyStorage.expandHistory(data, rf.HIST_NEW_GAME, usePersonalStore().gameCreationTimestamp)
+	const data = funcs.importURRmodel(obj)
 	const hadDraft = !!store.turnDraft.start
 	store.clearTurnDraft()
 	if (hadDraft) store.turnDraft.message = "The saved game was updated. Your uncommitted turn has been cleared."
-	restoreState(data)
-	store.history.splice(0, store.history.length, ...history)
-}
-
-export function exportGameData() {
-	const history = useModelStore().history
-	const state = snapshotState()
-	const opening = historyStorage.compactOpening(history)
-	return compactGameData({ ...state, board: historyStorage.compactBoard(state.board), replay: historyStorage.compactHistory(history), ...(opening.length ? { replayStart: opening } : {}) })
-}
-
-export function snapshotState() {
-	const store = useModelStore()
-	return JSON.parse(JSON.stringify(Object.fromEntries(STATE_FIELDS.map((field) => [field, store[field]]))))
+	restoreState(data.state)
+	store.history.splice(0, store.history.length, ...data.history)
 }
 
 export function performAction(playerIndex, action) {

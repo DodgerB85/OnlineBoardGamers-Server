@@ -1,20 +1,21 @@
 <script setup>
 import { onMounted, onBeforeUnmount, computed, watch } from "vue"
 import * as model from "../js/URRmodel.js"
+import * as funcs from "../js/URRfuncs.js"
 import * as IO from "../backend/URR_IO.js"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
 
 store.replayStep.index = 0
 const step = computed({ get: () => store.replayStep.index, set: (index) => { store.replayStep.index = index } })
-const liveSnapshot = model.snapshotState()
+const liveSnapshot = funcs.simpleExportWholeURRmodel()
 
 onMounted(applyStep)
 watch(step, applyStep)
 // The menu can close replay without reloading; never leave a historical
 // position available for live moves.
 onBeforeUnmount(() => {
-	model.restoreState(liveSnapshot)
+	funcs.simpleImportWholeURRmodel(liveSnapshot)
 	IO.checkForLatestData()
 })
 

@@ -437,24 +437,22 @@ const area = (game, areaId) => game.board.areas.find((entry) => entry.id === are
 	game.gameflow.phase = rf.PHASE_SETTLEMENT
 	record()
 	const compact = compactHistory(history)
-	assert.equal(typeof compact[0][2], "string")
-	assert.equal(typeof compact[1][2], "object")
-	assert.equal(typeof compact.at(-1)[2], "string")
-	assert.ok(JSON.stringify(compact).length < JSON.stringify(history).length / 2)
+	assert.equal(compact.length, history.length - 1)
+	assert.ok(compact.filter((entry) => entry[4]).length >= 3, "Array and property changes are stored as deltas")
 	const saved = JSON.stringify(compact)
-	const expanded = expandHistory(compact)
+	const expand = () => expandHistory({ players: game.players, replay: compact }, rf.HIST_NEW_GAME, 12345)
+	const expanded = expand()
 	assert.equal(JSON.stringify(compact), saved, "Expansion must not mutate compact records")
 	for (const [index, entry] of expanded.entries()) {
 		assert.deepEqual(JSON.parse(entry[2]), JSON.parse(history[index][2]))
 		assert.deepEqual(entry.slice(3), history[index].slice(3))
 	}
-	assert.deepEqual(expandHistory(history), history, "Legacy full snapshots remain readable")
 	assert.deepEqual(compactHistory(history), compact, "Cached exports preserve the same history")
 	// A replay branch can replace a snapshot on the same history entry.
 	game.players[0].money += 30
 	history[2][2] = JSON.stringify(game)
-	assert.deepEqual(JSON.parse(expandHistory(compactHistory(history))[2][2]), game)
-	assert.throws(() => expandHistory([[rf.HIST_ACTION, 0, compact[1][2]]]), /Invalid URR replay delta/)
+	assert.deepEqual(JSON.parse(expandHistory({ players: game.players, replay: compactHistory(history) }, rf.HIST_NEW_GAME, 12345)[2][2]), game)
+	assert.throws(() => expandHistory({ players: game.players, replay: [[rf.HIST_ACTION, 0, null, 0, [[[], 1]]]] }), /Invalid URR replay change path/)
 }
 
 // Ending a state's development is a review boundary even when the same king

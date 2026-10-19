@@ -68,8 +68,18 @@ def read_history(game, data):
                 entries.append((entry[0], timestamp))
             return entries
         raise ValueError("Unrecognized FCM history format")
-    if code in {"DDL", "URR"}:
-        return [(entry[1], entry[4] if code == "URR" and len(entry) > 4 else None) for entry in data["history"]]
+    if code == "URR":
+        if not isinstance(data, list) or len(data) < 11:
+            raise ValueError("Unrecognized URR history format")
+        timestamp = created
+        entries = []
+        for event, player, _action, delta, *_changes in data[10]:
+            if delta is not None:
+                timestamp += delta
+            entries.append((player, timestamp))
+        return entries
+    if code == "DDL":
+        return [(entry[1], None) for entry in data["history"]]
     if code == "BUS":
         # The MessagePack export uses nested name/display-name pairs and moves
         # history to slot 4; the legacy JSON export keeps names flat and uses 8.

@@ -66,7 +66,7 @@ export async function saveGame(saveRewind = true) {
 	let postData = {
 		action: "saveGame",
 		latestUpdate: personal.latestUpdate,
-		gameDataCompressed: funcs.compressData64(model.exportGameData()),
+		gameDataCompressed: funcs.exportURRmodel(store.gameflow.phase === rf.PHASE_GAME_OVER),
 		turn: store.gameflow.turn,
 		phase: store.gameflow.phase,
 		status: "ACTIVE",
@@ -77,7 +77,6 @@ export async function saveGame(saveRewind = true) {
 	}
 
 	console.log("Saving data....")
-	console.log(JSON.stringify(model.exportGameData()))
 
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
 		postData.status = "FINISHED"
@@ -180,7 +179,6 @@ export async function reloadGameData() {
 		updateKickoutData(data)
 		model.importGameData(data.gameData)
 		model.setMissingPlayers(data.missingPlayers)
-		model.rebuildTurnOrder()
 		personal.secondsToNextKickout = data.secondsToNextKickout
 		personal.latestUpdate = data.latestUpdate
 		window.initData.latestUpdate = data.latestUpdate
@@ -349,7 +347,6 @@ export async function checkForLatestData() {
 		if (data.latest === true) return
 		model.importGameData(data.gameData)
 		model.setMissingPlayers(data.missingPlayers)
-		model.rebuildTurnOrder()
 		personal.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
 		window.initData.latestUpdate = data.latestUpdate
@@ -366,7 +363,7 @@ export async function submitBug(bugContent) {
 	try {
 		const response = await fetch("/URR/bugEntry/", {
 			method: "POST",
-			body: JSON.stringify({ gameID: personal.gameID, action: "bugentry", description: bugContent, gameData: JSON.stringify(model.exportGameData()) }),
+			body: JSON.stringify({ gameID: personal.gameID, action: "bugentry", description: bugContent, gameData: funcs.exportURRmodel() }),
 			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
 		})
 		if (!response.ok) throw new Error("Network response was not ok")
@@ -444,7 +441,7 @@ async function updateDataFromLoadRewind() {
 				allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
 				gameID: personal.gameID,
 				phase: store.gameflow.phase,
-				gameDataCompressed: funcs.compressData64(model.exportGameData()),
+				gameDataCompressed: funcs.exportURRmodel(store.gameflow.phase === rf.PHASE_GAME_OVER),
 			}),
 			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
 		})

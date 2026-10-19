@@ -1,4 +1,5 @@
 import * as rf from "./URRreference"
+import * as funcs from "./URRfuncs"
 import * as model from "./URRmodel"
 import * as IO from "../backend/URR_IO"
 import * as game from "./URRgame.js"
@@ -25,7 +26,6 @@ export function startPlayerTurn() {
 	if (personal.canPlay() && personal.yourTurnAudioType > 0) {
 		// Optional "your turn" sound. Add sound files to static/Lobby/common/sounds if wanted.
 	}
-	model.rebuildTurnOrder()
 	if (personal.canPlay() && !store.turnDraft.start && !store.gameflow.pendingOffer && store.gameflow.offerDeclined) {
 		try {
 			const restored = game.restoreDevelopmentChoices(model.snapshotState())
@@ -109,7 +109,7 @@ export async function removeDraftStep(index) {
 	const actionIntent = store.viewSettings.actionIntent
 	const steps = store.turnDraft.steps
 	if (!canReviewTurn() || !steps[index]) return false
-	const backup = { state: model.snapshotState(), history: [...store.history], steps: [...steps], ready: store.turnDraft.ready }
+	const backup = { model: funcs.simpleExportWholeURRmodel(), steps: [...steps], ready: store.turnDraft.ready }
 	const later = steps.slice(index + 1).map((step) => step.action)
 	const checkpoint = steps[index]
 	steps.splice(index)
@@ -117,8 +117,7 @@ export async function removeDraftStep(index) {
 	store.viewSettings.actionIntent = actionIntent
 	for (const action of later) {
 		if (await submitAction(action)) continue
-		model.restoreState(backup.state)
-		store.history.splice(0, store.history.length, ...backup.history)
+		funcs.simpleImportWholeURRmodel(backup.model)
 		steps.splice(0, steps.length, ...backup.steps)
 		store.turnDraft.ready = backup.ready
 		store.turnDraft.revision++
