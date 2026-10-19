@@ -358,16 +358,28 @@ export function exportURRmodel(forGameOver = false) {
 		// rebuild the history panel from it and finished-game stats read it.
 		historyStorage.compactHistory(store.history),
 	]
-	if (!forGameOver && opening.length) entry.push(opening)
+	if (opening.length) entry.push(opening)
 	return compressData64(entry)
 }
 
 export function importURRmodel(input) {
 	const personal = usePersonalStore()
+	if (typeof input === "string" && input.startsWith("gzip:")) input = input.slice(5)
 	const data = typeof input === "string" ? (input.trim().startsWith("{") ? JSON.parse(input) : decompressData64(input)) : input
 	if (data?.opening) {
 		const history = historyStorage.expandHistory({ players: data.players.map((name) => ({ name })), replay: [], replayStart: data.replayStart }, rf.HIST_NEW_GAME, personal.gameCreationTimestamp)
 		return { state: JSON.parse(history[0][2]), history }
+	}
+	// Read the previous object saves; all subsequent exports use the compact array.
+	if (data?.players?.length && (data.version === 1 || data.format === "urr-save-v2")) {
+		const state = Object.fromEntries(STATE_FIELDS.map((field) => [field, data[field]]))
+		if (data.format === "urr-save-v2") {
+			state.states = decodeStates(data.states)
+			state.nations = data.nations.map((entry, id) => ({ id, ownerType: entry[0] < 0 ? null : entry[0] === 0 ? "player" : "state", owner: entry[1] < 0 ? null : entry[1], isRemoved: !!entry[2], bids: entry[3] }))
+		}
+		state.board = Array.isArray(data.board?.areas) ? data.board : historyStorage.expandBoard(data.board)
+		const history = historyStorage.expandHistory(data, rf.HIST_NEW_GAME, personal.gameCreationTimestamp)
+		return { state, history }
 	}
 	if (!Array.isArray(data) || data.length < 11) throw new Error("Unsupported URR save")
 	const players = decodePlayers(data[0])

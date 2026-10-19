@@ -3,6 +3,7 @@ import test from "node:test"
 import { createPinia, setActivePinia } from "pinia"
 import "../pakoLib.js"
 import { createGame } from "./URRgame.js"
+import * as historyStorage from "./URRhistoryStorage.js"
 import * as rf from "./URRreference.js"
 import * as funcs from "./URRfuncs.js"
 import { useModelStore } from "../stores/URRstore.js"
@@ -97,4 +98,64 @@ test("the rewind opening marker rebuilds the opening position", () => {
 
 test("invalid save shapes are rejected", () => {
 	assert.throws(() => funcs.importURRmodel({}), /Unsupported URR save/)
+})
+
+
+test("board entries omit trailing defaults and preserve every runtime field", () => {
+	const game = createGame(["A", "B", "C"])
+	const area = game.board.areas.find((entry) => !entry.isRiver)
+	for (const change of [{ owner: 0 }, { markerOwner: 0 }, { waterwork: { state: 0, kind: "reservoir", capacity: 2 } }, { irrigatedBy: 0 }, { landType: 99 }]) {
+		const board = structuredClone(game.board)
+		Object.assign(board.areas.find((entry) => entry.id === area.id), change)
+		const compact = historyStorage.compactBoard(board)
+		if (change.owner === 0) assert.equal(compact[0][0].length, 2)
+		assert.deepEqual(historyStorage.expandBoard(compact), board)
+	}
+})
+
+test("finished replay preserves a modified opening", () => {
+	const game = createGame(["A", "B", "C"])
+	game.players[0].displayName = "Shadow name"
+	const opening = JSON.stringify(game)
+	game.gameflow.phase = rf.PHASE_GAME_OVER
+	game.gameflow.endReason = "invasion"
+	storeGame(game, [[rf.HIST_NEW_GAME, -1, opening, null, 1000]])
+	const imported = funcs.importURRmodel(funcs.exportURRmodel(true))
+	assert.deepEqual(JSON.parse(imported.history[0][2]), JSON.parse(opening))
+})
+
+test("previous object saves and gzip rewind points load and re-export compactly", () => {
+	const game = createGame(["A", "B", "C"])
+	game.nations[0].bids = [{ player: 0, amount: 20 }]
+	const area = game.board.areas.find((entry) => !entry.isRiver)
+	area.owner = 0
+	const legacy = {
+		...game, version: 2, format: "urr-save-v2",
+		states: game.states.map((state) => [state.money, state.king ?? -1, Number(state.isActive), [], Number(state.hasRevolted)]),
+		nations: game.nations.map((nation) => [-1, -1, 0, nation.bids]),
+		board: { format: "urr-board-v1", areas: { [area.id]: { owner: 0 } } },
+		replay: [],
+		replayStart: [[["players", "0", "displayName"], "Shadow name"]],
+	}
+	for (const input of [JSON.stringify(legacy), "gzip:" + funcs.compressData64(legacy)]) {
+		const imported = funcs.importURRmodel(input)
+		assert.deepEqual(imported.state, game)
+		assert.equal(JSON.parse(imported.history[0][2]).players[0].displayName, "Shadow name")
+		storeGame(imported.state, imported.history)
+		assert.ok(Array.isArray(funcs.decompressData64(funcs.exportURRmodel())))
+		assert.deepEqual(funcs.importURRmodel(funcs.exportURRmodel()).state, game)
+	}
+})
+
+test("legacy snapshot and delta histories remain readable", () => {
+	const game = createGame(["A", "B", "C"])
+	const opening = { ...structuredClone(game), version: 1 }
+	const legacy = { ...game, version: 1, history: [
+		[rf.HIST_NEW_GAME, -1, JSON.stringify(opening), null, 1000000000000],
+		[rf.HIST_ACTION, 0, { format: "urr-history-delta-v1", changes: [[["players", "0", "money"], 10]] }, null, 1000000001],
+	] }
+	const imported = funcs.importURRmodel(JSON.stringify(legacy))
+	assert.deepEqual(imported.state, game)
+	assert.equal(imported.history[0][4], 1000000000)
+	assert.equal(JSON.parse(imported.history[1][2]).players[0].money, 10)
 })

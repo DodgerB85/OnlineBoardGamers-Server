@@ -216,9 +216,9 @@ def _processURRturn(request):
         if not currentRewindDataArray:
             return JsonResponse({"errorMessage": gettext("No rewind data. Rewind limit reached. Please play on to generate more rewind data")}, safe=False)
 
-        loadData = currentRewindDataArray.pop() if currentRewindDataArray else ""
+        loadData = decompressRewindPoint(currentRewindDataArray.pop()) if currentRewindDataArray else ""
         while len(currentRewindDataArray) > 0 and loadData == currentGame.gameData:
-            loadData = currentRewindDataArray.pop()
+            loadData = decompressRewindPoint(currentRewindDataArray.pop())
 
         currentGame.gameData = loadData if loadData != "" else ""
         currentGame.rewindTempData = loadData
@@ -339,6 +339,12 @@ def performSaveURRGame(request, currentGame, jsonData):
     )
 
 
+def decompressRewindPoint(point):
+    if point.startswith("gzip:"):
+        return gzip.decompress(base64.b64decode(point[5:])).decode("utf-8")
+    return point
+
+
 def decodeGameData(gameData):
     if not gameData:
         return None
@@ -356,6 +362,15 @@ def openingPosition(gameData):
     """
     try:
         data = decodeGameData(gameData)
+        if isinstance(data, dict) and data.get("players"):
+            if "replay" in data:
+                return json.dumps({"opening": True, "players": [player["name"] for player in data["players"]], "replayStart": data.get("replayStart", [])})
+            history = data.get("history") or []
+            if not history:
+                return ""
+            opening = json.loads(history[0][2])
+            opening["history"] = [history[0]]
+            return json.dumps(opening)
         if not isinstance(data, list) or not data:
             return ""
         players = data[0] or []
@@ -364,7 +379,7 @@ def openingPosition(gameData):
             return ""
         replay_start = data[11] if len(data) > 11 else []
         return json.dumps({"opening": True, "players": names, "replayStart": replay_start})
-    except (json.JSONDecodeError, IndexError, TypeError, ValueError, OSError):
+    except (json.JSONDecodeError, IndexError, KeyError, TypeError, ValueError, OSError):
         return ""
 
 
@@ -381,13 +396,13 @@ def doSaveRewind(currentGame, jsonData, previousGameData):
     if currentGame.rewindTempData:
         # Put back the position we rewound to, so playing on from it does not
         # lose the ability to rewind there again.
-        if not currentRewindData or currentRewindData[-1] != currentGame.rewindTempData:
+        if not currentRewindData or decompressRewindPoint(currentRewindData[-1]) != decompressRewindPoint(currentGame.rewindTempData):
             currentRewindData.append(currentGame.rewindTempData)
         currentGame.rewindTempData = ""
 
     if not previousGameData:
         previousGameData = openingPosition(jsonData["gameData"])
-    if previousGameData and (not currentRewindData or currentRewindData[-1] != previousGameData):
+    if previousGameData and (not currentRewindData or decompressRewindPoint(currentRewindData[-1]) != decompressRewindPoint(previousGameData)):
         currentRewindData.append(previousGameData)
 
     if len(currentRewindData) > 20:
