@@ -551,7 +551,7 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 			<b><PlayerMarker v-if="game.nations[rf.NATION_BARAHSHUM].ownerType === 'player'" :index="game.nations[rf.NATION_BARAHSHUM].owner" /><template v-else>{{ rf.STATE_NAMES[game.nations[rf.NATION_BARAHSHUM].owner] }}</template> Barahshum</b>
 			<p>Dissolve it to dig one canal next to Barahshum, during your own turn. Its {{ rf.NATION_INCOMES[rf.NATION_BARAHSHUM] }} SPL income ends.</p>
 			<button v-if="store.viewSettings.actionIntent !== 'barahshum'" :disabled="store.turnDraft.ready" @click="setIntent('barahshum')">Choose canal site on the map</button>
-			<template v-else><p v-if="barahshumError" class="hint">{{ barahshumError }}</p><button v-else :disabled="store.turnDraft.ready" @click="submit({ type: 'exchangeBarahshum', from: barahshum.id, to: area.id })">Dissolve Barahshum and dig to {{ label(area.id) }}</button></template>
+			<template v-else><button @click="setIntent(game.gameflow.phase === rf.PHASE_DEVELOPMENT ? (showDigging ? 'dig' : 'equip') : '')">Cancel canal selection</button><p v-if="barahshumError" class="hint">{{ barahshumError }}</p><button v-else :disabled="store.turnDraft.ready" @click="submit({ type: 'exchangeBarahshum', from: barahshum.id, to: area.id })">Dissolve Barahshum and dig to {{ label(area.id) }}</button></template>
 		</div>
 	</section>
 </template>
