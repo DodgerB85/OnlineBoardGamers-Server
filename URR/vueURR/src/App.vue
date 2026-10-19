@@ -105,7 +105,7 @@ onBeforeUnmount(() => {
 	window.removeEventListener("resize", resizeBoard)
 })
 const waitingPlayerIndex = computed(() => {
-	if (personal.haltPlay || personal.canPlay() || store.gameflow.phase === rf.PHASE_GAME_OVER || rules.canExchangeBarahshum(store, personal.pov)) return null
+	if (personal.haltPlay || personal.canPlay() || store.gameflow.phase === rf.PHASE_GAME_OVER) return null
 	return view.displayedTurnOrder(store)[0] ?? null
 })
 // vueWEB's page colours: light blue normally, grey while a normal game waits for another player's move.
@@ -113,11 +113,9 @@ const waitingForTurn = computed(() => {
 	const acting = view.displayedTurnOrder(store)[0]
 	return acting !== undefined && !personal.trainingGame && personal.pov >= 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER && personal.pov !== acting
 })
-const isBarahshumExchange = computed(() => !personal.haltPlay && !store.viewSettings.showReplay && personal.pov >= 0 && !personal.canPlay() && rules.canExchangeBarahshum(store, personal.pov))
-const actingPlayer = computed(() => store.turnDraft.ready ? store.turnDraft.player : isBarahshumExchange.value ? personal.pov : view.displayedTurnOrder(store)[0])
+const actingPlayer = computed(() => store.turnDraft.ready ? store.turnDraft.player : view.displayedTurnOrder(store)[0])
 const actingLabel = computed(() => {
 	if (store.turnDraft.ready) return "Reviewing:"
-	if (isBarahshumExchange.value) return "Acting: Barahshum exchange"
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return ""
 	const player = store.players[store.gameflow.turnOrder[0]]
 	const stateId = view.currentStateId(store)
@@ -132,7 +130,7 @@ const actionPanelTitle = computed(() => {
 		const treaty = game.nations.find((nation) => nation.ownerType === null)
 		if (treaty) return `Treaty: ${rf.NATION_NAMES[treaty.id]}`
 	}
-	if (isBarahshumExchange.value || (store.turnDraft.ready && store.turnDraft.steps.at(-1).action.type === "exchangeBarahshum")) return "Barahshum\nfree canal"
+	if (store.viewSettings.actionIntent === "barahshum" || (store.turnDraft.ready && store.turnDraft.steps.at(-1).action.type === "exchangeBarahshum")) return "Barahshum\nfree canal"
 	if (map.value?.isTracing) return `Canal draft\n${Math.max(0, canalPath.value.length - 1)} segment${canalPath.value.length === 2 ? "" : "s"}`
 	if (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "eridu") return canalPath.value.length >= 2 ? "Eridu\ncanal review" : "Eridu\nspecial digging turn"
 	const stateId = view.currentStateId(game)

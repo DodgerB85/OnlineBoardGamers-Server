@@ -25,7 +25,7 @@ function hasCompletedState(id) {
 }
 const exchangeOwner = computed(() => {
 	const nation = store.nations[rf.NATION_BARAHSHUM]
-	return 	nation.ownerType === "player" && nation.owner !== store.gameflow.turnOrder[0] && rules.canExchangeBarahshum(store, nation.owner) ? nation.owner : null
+	return 	nation.ownerType === "player" && rules.canExchangeBarahshum(store, nation.owner) ? nation.owner : null
 })
 const colonized = (id) => store.board.areas.filter((area) => area.state === id && area.markerOwner !== null).length
 const emergingStates = computed(() => store.states.filter((state) => !state.isActive))

@@ -35,6 +35,7 @@ test("the compressed save round-trips state, board and history", () => {
 	storeGame(game, history)
 	const encoded = funcs.exportURRmodel()
 	assert.doesNotMatch(encoded, /^{/)
+	assert.equal(funcs.decompressData64(encoded)[12], 1)
 	const imported = funcs.importURRmodel(encoded)
 	assert.deepEqual(imported.state, game)
 	assert.equal(imported.history.length, 1)

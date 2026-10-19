@@ -91,7 +91,7 @@ test("Barahshum's free canal keeps the owner's settlement turn open for a land p
 	assert.equal(purchased.board.areas.find((area) => area.id === land.id).owner, 0)
 	assert.equal(purchased.nations[rf.NATION_BARAHSHUM].isRemoved, true)
 	Object.assign(game.nations[rf.NATION_BARAHSHUM], { owner: 1 })
-	assert.equal(endsDecision(game, applyAction(game, 1, action), action), true)
+	assert.throws(() => applyAction(game, 1, action), /Barahshum cannot be exchanged now/)
 })
 
 function betweenStatesGame() {
@@ -105,48 +105,62 @@ function betweenStatesGame() {
 	return game
 }
 
-test("Barahshum pass survives reload, skips only this owner's round, and rewinds", () => {
-	const original = betweenStatesGame()
-	assert.throws(() => applyAction(original, 0, { type: "passBarahshum" }), /Only Barahshum's owner/)
-	const passed = applyAction(original, 2, { type: "passBarahshum" })
-	assert.equal(passed.gameflow.developmentStep, "digging")
-	assert.equal(passed.nations[rf.NATION_BARAHSHUM].isRemoved, false)
-	const reloaded = JSON.parse(JSON.stringify(passed))
-	const next = applyAction(reloaded, 0, { type: "endDevelopment" })
-	assert.equal(next.gameflow.stateIndex, 1)
+test("privately owned Barahshum is only available on its owner's settlement turn", () => {
+	const game = betweenStatesGame()
+	Object.assign(game.gameflow, { phase: rf.PHASE_SETTLEMENT, turnOrder: [0] })
+	assert.equal(canExchangeBarahshum(game, 2), false)
+	game.gameflow.turnOrder = [2]
+	game.gameflow.barahshumPass = { turn: game.gameflow.turn, player: 2 }
+	assert.equal(canExchangeBarahshum(game, 2), true, "Old prompt preferences must not disable the own-turn option")
+	game.gameflow.phase = rf.PHASE_DEVELOPMENT
+	assert.equal(canExchangeBarahshum(game, 2), false)
+	assert.throws(() => applyAction(game, 2, { type: "passBarahshum" }), /no longer needs a separate pass/)
+})
+
+test("development moves directly to the next state without Barahshum interruptions", () => {
+	const game = betweenStatesGame()
+	game.gameflow.developmentStep = "digging"
+	const next = applyAction(game, 0, { type: "endDevelopment" })
 	assert.equal(next.gameflow.developmentStep, "digging")
-	next.gameflow.turn++
-	assert.equal(applyAction(next, 1, { type: "endDevelopment" }).gameflow.developmentStep, "betweenStates")
-	passed.nations[rf.NATION_BARAHSHUM].owner = 1
-	assert.equal(applyAction(passed, 0, { type: "endDevelopment" }).gameflow.developmentStep, "betweenStates")
-	const rewound = applyAction(original, 0, { type: "beginDevelopment" })
-	assert.equal(applyAction(rewound, 0, { type: "endDevelopment" }).gameflow.developmentStep, "betweenStates")
-	assert.equal(original.gameflow.barahshumPass, undefined)
+	assert.equal(next.gameflow.stateIndex, 1)
+	assert.deepEqual(next.gameflow.turnOrder, [1])
+	assert.equal(next.nations[rf.NATION_BARAHSHUM].isRemoved, false)
+	assert.deepEqual(getAutomaticAction(game), null)
 })
 
-test("Barahshum can skip prompts during settlement without passing the settlement turn", () => {
+test("settlement and Eridu lead directly into state development", () => {
 	const game = betweenStatesGame()
-	game.gameflow.phase = rf.PHASE_SETTLEMENT
-	const passed = applyAction(game, 2, { type: "passBarahshum" })
-	assert.equal(passed.gameflow.phase, rf.PHASE_SETTLEMENT)
-	assert.deepEqual(passed.gameflow.turnOrder, [0])
-	assert.equal(canExchangeBarahshum(passed, 2), false)
-	Object.assign(passed.gameflow, { phase: rf.PHASE_DEVELOPMENT, developmentStep: "digging" })
-	assert.equal(applyAction(passed, 0, { type: "endDevelopment" }).gameflow.developmentStep, "digging")
-	passed.gameflow.phase = rf.PHASE_SETTLEMENT
-	passed.gameflow.turn++
-	assert.equal(canExchangeBarahshum(passed, 2), true)
+	game.states[0].isActive = true
+	game.nations[rf.NATION_ERIDU].isRemoved = true
+	Object.assign(game.gameflow, { phase: rf.PHASE_SETTLEMENT, passes: 2 })
+	const next = applyAction(game, 0, { type: "pass" })
+	assert.equal(next.gameflow.phase, rf.PHASE_DEVELOPMENT)
+	assert.equal(next.gameflow.developmentStep, "digging")
+	assert.deepEqual(next.gameflow.turnOrder, [0])
+	Object.assign(game.gameflow, { phase: rf.PHASE_DEVELOPMENT, developmentStep: "eridu", turnOrder: [2] })
+	const afterEridu = applyAction(game, 2, { type: "pass" })
+	assert.equal(afterEridu.gameflow.developmentStep, "digging")
+	assert.deepEqual(afterEridu.gameflow.turnOrder, [0])
 })
 
-test("Checked Barahshum pass also passes the current settlement turn", () => {
+test("an old between-state save automatically starts the next state's turn", () => {
 	const game = betweenStatesGame()
-	Object.assign(game.gameflow, { phase: rf.PHASE_SETTLEMENT, turnOrder: [2], passes: 0 })
-	const passed = applyAction(game, 2, { type: "passBarahshum", passTurn: true })
-	assert.equal(passed.gameflow.passes, 1)
-	assert.deepEqual(passed.gameflow.turnOrder, [0])
-	assert.equal(canExchangeBarahshum(passed, 2), false)
-	game.gameflow.turnOrder = [0]
-	assert.throws(() => applyAction(game, 2, { type: "passBarahshum", passTurn: true }), /Only the current player/)
+	assert.equal(canExchangeBarahshum(game, 2), false)
+	assert.deepEqual(getAutomaticAction(game), { type: "beginDevelopment" })
+	const next = applyAction(game, 0, getAutomaticAction(game))
+	assert.equal(next.gameflow.developmentStep, "digging")
+	assert.deepEqual(next.gameflow.turnOrder, [0])
+})
+
+test("assimilated Barahshum can only be exchanged during its owning state's turn", () => {
+	const game = betweenStatesGame()
+	game.gameflow.developmentStep = "digging"
+	Object.assign(game.nations[rf.NATION_BARAHSHUM], { ownerType: "state", owner: 0 })
+	assert.equal(canExchangeBarahshum(game, 0), true)
+	assert.equal(canExchangeBarahshum(game, 1), false)
+	game.gameflow.stateIndex = 1
+	game.gameflow.turnOrder = [1]
+	assert.equal(canExchangeBarahshum(game, 0), false)
 })
 
 test("Waterwork agreements wait for End Turn and allow other purchases", () => {
@@ -217,7 +231,7 @@ test("Declined development restores editable purchases and blocks only the refus
 	assert.equal(next.gameflow.declinedWaterworks, undefined)
 	restored.state.nations[rf.NATION_BARAHSHUM].isRemoved = false
 	const between = applyAction(restored.state, 0, { type: "endDevelopment" })
-	assert.equal(between.gameflow.developmentStep, "betweenStates")
+	assert.equal(between.gameflow.developmentStep, "digging")
 	assert.equal(between.gameflow.developmentPlan, undefined)
 	assert.equal(between.gameflow.offerDeclined, undefined)
 })

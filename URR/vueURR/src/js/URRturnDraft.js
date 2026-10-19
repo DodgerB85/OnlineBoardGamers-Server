@@ -20,10 +20,7 @@ export function turnContext(game) {
 }
 
 export function endsDecision(before, after, action) {
-	if (action.type === "exchangeBarahshum") {
-		const nation = before.nations[rf.NATION_BARAHSHUM]
-		return nation.ownerType === "player" && (before.gameflow.phase !== rf.PHASE_SETTLEMENT || nation.owner !== before.gameflow.turnOrder[0])
-	}
+	if (action.type === "exchangeBarahshum") return false
 	return turnContext(before) !== turnContext(after) || ["pass", "buyNation", "bidNation", "tradeLand", "bidPrimogeniture", "digEridu", "beginDevelopment", "endDevelopment", "respondOffer", "harvest", "passBarahshum"].includes(action.type)
 }
 

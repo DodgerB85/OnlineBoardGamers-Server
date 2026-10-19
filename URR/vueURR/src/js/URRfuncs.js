@@ -358,7 +358,8 @@ export function exportURRmodel(forGameOver = false) {
 		// rebuild the history panel from it and finished-game stats read it.
 		historyStorage.compactHistory(store.history),
 	]
-	if (opening.length) entry.push(opening)
+	// Slot 12 distinguishes own-turn replay timing from historical Barahshum interruptions.
+	entry.push(opening, 1)
 	return compressData64(entry)
 }
 
@@ -396,6 +397,6 @@ export function importURRmodel(input) {
 		rain: decodeRain(data[8], historyStorage.printedAreaIds()),
 		nextDiggerId: data[9] >= 0 ? data[9] : Math.max(-1, ...states.flatMap((entry) => entry.diggers.map((crew) => crew.id))) + 1,
 	}
-	const history = historyStorage.expandHistory({ players, replay: data[10], replayStart: data[11] }, rf.HIST_NEW_GAME, personal.gameCreationTimestamp)
+	const history = historyStorage.expandHistory({ players, replay: data[10], replayStart: data[11], replayRules: data[12] }, rf.HIST_NEW_GAME, personal.gameCreationTimestamp)
 	return { state, history }
 }

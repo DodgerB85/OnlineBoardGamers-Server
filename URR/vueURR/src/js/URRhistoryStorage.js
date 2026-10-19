@@ -125,10 +125,10 @@ export function expandBoard(stored) {
 	return result
 }
 
-function predict(previous, player, action) {
+function predict(previous, player, action, isLegacyReplay = false) {
 	if (!action) return previous
 	try {
-		return game.applyAction(previous, player, action)
+		return game.applyAction(previous, player, action, isLegacyReplay)
 	} catch {
 		return previous
 	}
@@ -178,10 +178,10 @@ export function expandHistory(data, newGameEvent, creationTimestamp) {
 	const result = [[newGameEvent, -1, JSON.stringify(previous), null, time]]
 	for (const stored of data.replay) {
 		const [event, player, action, delta, changes] = stored
-		const snapshot = applyChanges(JSON.parse(JSON.stringify(predict(previous, player, action))), changes || [])
+		const snapshot = applyChanges(JSON.parse(JSON.stringify(predict(previous, player, action, data.replayRules !== 1))), changes || [])
 		time = delta != null && time != null ? time + delta : null
 		const entry = [event, player, JSON.stringify(snapshot), action, time]
-		encodedEntries.set(entry, { snapshot: entry[2], previousSnapshot: result.at(-1)[2], stored })
+		if (data.replayRules === 1) encodedEntries.set(entry, { snapshot: entry[2], previousSnapshot: result.at(-1)[2], stored })
 		result.push(entry)
 		previous = snapshot
 	}
