@@ -7,7 +7,6 @@ import * as game from "./URRgame.js"
 import * as board from "./URRboard.js"
 import * as boardRules from "./URRmap.js"
 
-const DELTA_FORMAT = "urr-history-delta-v1"
 const BOARD_FORMAT = "urr-board-v1"
 const encodedEntries = new WeakMap()
 
@@ -66,7 +65,7 @@ export function compactBoard(current) {
 }
 
 export function expandBoard(stored) {
-	if (stored?.format !== BOARD_FORMAT) return stored
+	if (stored?.format !== BOARD_FORMAT) throw new Error("Unsupported URR board format")
 	const { format: _format, areas, ...rest } = stored
 	const result = { ...printedBoard(), ...rest }
 	for (const area of result.areas) Object.assign(area, areas[area.id])
@@ -99,7 +98,7 @@ export function compactHistory(history) {
 	})
 }
 
-// The opening differs from createGame only for converted legacy saves.
+// Preserve opening changes from debug edits or shadow renames.
 export function compactOpening(history) {
 	if (!history.length) return []
 	const opening = JSON.parse(history[0][2])
@@ -107,7 +106,7 @@ export function compactOpening(history) {
 }
 
 export function expandHistory(data, newGameEvent, creationTimestamp) {
-	if (!data.replay) return expandLegacyHistory(data.history || [])
+	if (!Array.isArray(data.replay)) throw new Error("Unsupported URR replay format")
 	let previous = applyChanges(game.createGame(data.players.map((player) => player.name)), data.replayStart || [])
 	let time = creationTimestamp ?? null
 	const result = [[newGameEvent, -1, JSON.stringify(previous), null, time]]
@@ -121,22 +120,4 @@ export function expandHistory(data, newGameEvent, creationTimestamp) {
 		previous = snapshot
 	}
 	return result
-}
-
-// Earlier saves kept a full position or a delta from the previous one per entry.
-function expandLegacyHistory(history) {
-	let previous = null
-	return history.map((entry, index) => {
-		// The opening used to be stamped in milliseconds.
-		if (index === 0 && entry[4] > 1e11) entry = [...entry.slice(0, 4), Math.floor(entry[4] / 1000)]
-		const stored = entry[2]
-		let snapshot = stored
-		if (typeof stored === "string") previous = JSON.parse(stored)
-		else {
-			if (!previous || stored?.format !== DELTA_FORMAT || !Array.isArray(stored.changes)) throw new Error("Invalid URR replay delta")
-			applyChanges(previous, stored.changes)
-			snapshot = JSON.stringify(previous)
-		}
-		return [entry[0], entry[1], snapshot, ...JSON.parse(JSON.stringify(entry.slice(3)))]
-	})
 }
