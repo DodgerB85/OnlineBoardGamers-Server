@@ -4,6 +4,9 @@ import * as rf from "../js/WEBreference.js"
 import * as model from "../js/WEBmodel.js"
 import * as Bot from "../js/WEBbot.js"
 import * as WS from "./WEBwebsocket.js"
+import i18n from "../i18n"
+
+const t = (key, named) => i18n.global.t(key, named)
 
 import { useModelStore } from "../stores/WEBstore.js"
 import { usePersonalStore } from "../stores/WEBpersonal.js"
@@ -34,13 +37,13 @@ export async function submitBug(bugContent) {
 		}
 		const data = await response.json()
 		if (data.bugEntrySuccess) {
-			store.gameMessages.bugSuccessText = "Your bug report has been submitted"
+			store.gameMessages.bugSuccessText = t("io.bugSubmitted")
 			store.viewSettings.showLoader = false
 			store.viewSettings.showBug = false
-		} else store.gameMessages.bugErrorText = "Sorry, there was a problem.<br/>Please email the webmaster directly or report on the Discord"
+		} else store.gameMessages.bugErrorText = t("io.bugError")
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.bugErrorText = "Sorry, there was a problem.<br/>Please email the webmaster directly or report on the Discord"
+		store.gameMessages.bugErrorText = t("io.bugError")
 	}
 	store.viewSettings.showLoader = false
 }
@@ -74,17 +77,17 @@ export async function simpleSave() {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			alert("It appears you have an older version of the game. Please refresh the page")
+			alert(t("io.olderVersion"))
 			return
 		}
 		//personal.latestUpdate = data.latestUpdate
-		if (!data.completed) alert("Error occurred")
+		if (!data.completed) alert(t("io.genericError"))
 		store.viewSettings.showLoader = false
 		personal.haltPlay = false
 		controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert("Error saving the game")
+		alert(t("io.saveError"))
 	}
 }
 
@@ -160,7 +163,7 @@ export async function saveGame(saveRewind, saveContext = false) {
 		}
 		const data = await response.json()
 		if (data.syncError === "12345") {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = t("io.olderVersion")
 			return
 		}
 		personal.latestUpdate = data.latestUpdate
@@ -174,7 +177,7 @@ export async function saveGame(saveRewind, saveContext = false) {
 		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.errorText = "Error saving the game"
+		store.gameMessages.errorText = t("io.saveError")
 	}
 }
 
@@ -201,7 +204,7 @@ export async function sendChatMessage(newEntry) {
 		}
 		const data = await response.json()
 		if (!data.chatData) {
-			store.gameMessages.errorText = "Sorry, there was a problem. Please email the webmaster directly"
+			store.gameMessages.errorText = t("io.webmasterProblem")
 			return
 		}
 		store.chatData = funcs.decompressChatData(data.chatData)
@@ -209,7 +212,7 @@ export async function sendChatMessage(newEntry) {
 		store.viewSettings.showLoader = false
 	} catch (error) {
 		console.error("Error sending chat:", error)
-		store.gameMessages.errorText = "Error sending chat message"
+		store.gameMessages.errorText = t("io.chatError")
 	}
 }
 
@@ -311,13 +314,13 @@ export async function saveNotes() {
 			throw new Error("Network response was not ok")
 		}
 		if (!data.notePosted) {
-			store.gameMessages.errorText = "Sorry, there was a problem. Please email the webmaster directly"
+			store.gameMessages.errorText = t("io.webmasterProblem")
 			return
 		}
 		store.viewSettings.showLoader = false
 	} catch (error) {
 		console.error("Error saving Notes:", error)
-		store.gameMessages.errorText = "Error saving Notes"
+		store.gameMessages.errorText = t("io.notesError")
 	}
 }
 
@@ -338,14 +341,14 @@ export async function loadRewind() {
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	if (store.viewSettings.showReplay) {
-		store.gameMessages.errorText = "Error: Exit Replay Mode First"
+		store.gameMessages.errorText = t("io.exitReplayFirst")
 		store.viewSettings.performingRewind = false
 		store.viewSettings.showLoader = false
 		return
 	}
 
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
-		store.gameMessages.errorText = "Error: Game Ended"
+		store.gameMessages.errorText = t("io.gameEnded")
 		store.viewSettings.performingRewind = false
 		store.viewSettings.showLoader = false
 		return
@@ -366,7 +369,7 @@ export async function loadRewind() {
 		}
 		const data = await response.json()
 		if (data.syncError === "12345") {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = t("io.olderVersion")
 			store.viewSettings.performingRewind = false
 			return
 		}
@@ -404,7 +407,7 @@ export async function loadRewind() {
 		store.viewSettings.showLoader = false
 	} catch (error) {
 		console.error("Error rewinding data:", error)
-		store.gameMessages.errorText = "Error rewinding the game"
+		store.gameMessages.errorText = t("io.rewindError")
 		store.viewSettings.performingRewind = false
 	}
 }
@@ -458,7 +461,7 @@ async function updateDataFromLoadRewind() {
 		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error updating data:", error)
-		store.gameMessages.errorText = "Error updating the game"
+		store.gameMessages.errorText = t("io.updateError")
 		store.viewSettings.performingRewind = false
 		controller.startPlayerTurn()
 	}
@@ -490,7 +493,7 @@ export async function resign() {
 		console.log(data)
 	} catch (error) {
 		console.error("Error resiging:", error)
-		store.gameMessages.errorText = "Error Resigning"
+		store.gameMessages.errorText = t("io.resignError")
 	}
 }
 
@@ -518,7 +521,7 @@ export async function kickout() {
 		}
 		const data = await response.json()
 		if (data.syncError === "12345") {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = t("io.olderVersion")
 			return
 		}
 		if (data.voteCast) {
@@ -532,7 +535,7 @@ export async function kickout() {
 		return data
 	} catch (error) {
 		console.error("Error kicking:", error)
-		store.gameMessages.errorText = "Error Kicking Player"
+		store.gameMessages.errorText = t("io.kickoutError")
 	}
 }
 
@@ -623,7 +626,7 @@ export async function castVote(topic) {
 			headers: { "X-CSRFToken": csrftoken },
 		})
 		if (!response.ok) {
-			store.gameMessages.errorText = "Error; Contact Admin"
+			store.gameMessages.errorText = t("io.contactAdmin")
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
@@ -631,7 +634,7 @@ export async function castVote(topic) {
 		store.viewSettings.showLoader = false
 		console.log(data)
 		if (data.voteChanged === true) {
-			store.gameMessages.bugSuccessText = "Vote Saved"
+			store.gameMessages.bugSuccessText = t("io.voteSaved")
 
 			if (topic === rf.DELETE_VOTE_TOPIC) {
 				personal.votedToDelete = true
@@ -641,10 +644,10 @@ export async function castVote(topic) {
 				personal.votedToExclude = true
 				store.statsExcludeVotesData = JSON.parse(data.votesData)
 			}
-		} else store.gameMessages.errorText = "Error; Contact Admin"
+		} else store.gameMessages.errorText = t("io.contactAdmin")
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.errorText = "Error; Contact Admin"
+		store.gameMessages.errorText = t("io.contactAdmin")
 		return false
 	}
 }

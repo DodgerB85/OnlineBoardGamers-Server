@@ -87,10 +87,11 @@ function getOrdinalForIdx1(idx1) {
 			num++
 		}
 	}
-	if (num === 2) return "2nd"
-	else if (num === 3) return "3rd"
-	else if (num === 4) return "4th"
-	return "Unknown"
+	return num
+}
+
+function ordinalKey(num) {
+	return num >= 1 && num <= 6 ? String(num) : "unknown"
 }
 
 function cancelKickout() {
@@ -179,11 +180,11 @@ onUnmounted(() => {
 		<!-- LOGGED OUT TEXT -->
 		<template v-if="personal.pov === -99">
 			<div id="loggedOutText">
-				Please
-				<a href="/register">REGISTER</a>
-				or
-				<a href="/login">LOGIN</a>
-				to play a game
+				{{ $t("action.loggedOutPlease") }}
+				<a href="/register">{{ $t("action.register") }}</a>
+				{{ $t("action.loggedOutOr") }}
+				<a href="/login">{{ $t("action.login") }}</a>
+				{{ $t("action.loggedOutToPlay") }}
 				<br />
 			</div>
 			<br />
@@ -192,106 +193,89 @@ onUnmounted(() => {
 		<!-- KICKOUT INFO -->
 		<template v-if="personal.kickoutRequired > 0 && !personal.canPlay() && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 			<div v-if="personal.kickoutRequired == 1" id="kickoutDiv">
-				Player
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				has used all the standard kickout time.
+				{{ $t("action.standardKickoutTimeUsed", { name: controller.currentPlayerObj().name }) }}
 				<br />
 				<br />
-				Remaining Flex-Time:
+				{{ $t("action.remainingFlexiTime") }}
 				<span id="flexiKickoutTimerSpan">{{ view.getFlexiKickoutTImerText() }}</span>
 				<br />
 				<br />
-				For more information see
-				<b><a href="/help/" target="_blank">Help</a></b>
+				{{ $t("action.forMoreInfoSee") }}
+				<b><a href="/help/" target="_blank">{{ $t("action.help") }}</a></b>
 			</div>
 			<div v-else id="kickoutDiv">
 				<template v-if="canKickoutNow()">
 				<br />
 				<template v-if="store.context.action !== rf.ACT_CONFIRM_KICKOUT">
-					Player
-					<b>{{ controller.currentPlayerObj().name }}</b>
-					has timed out
+					{{ $t("action.timedOut", { name: controller.currentPlayerObj().name }) }}
 					<br />
-					To kick out
-					<b>{{ controller.currentPlayerObj().name }}</b>
-					press Confirm Kickout
+					{{ $t("action.toKickOut", { name: controller.currentPlayerObj().name }) }}
 					<br />
-					The game will proceed to the next player/phase/turn
+					{{ $t("action.gameWillProceed") }}
 					<br />
 					<br />
-					Otherwise you can allow
-					<b>{{ controller.currentPlayerObj().name }}</b>
-					more time - reload the page to initiate kickout again
+					{{ $t("action.otherwiseAllow", { name: controller.currentPlayerObj().name }) }}
 					<br />
 
 					<br />
 					<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
+					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("action.notNow") }}</button></span>
 					<span>
-						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
+						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("action.keepInGame", { name: controller.currentPlayerObj().name }) }}</button>
 					</span>
-					<span><button class="actionsLineButton" id="confirmKickoutButton" @click="store.context.action = rf.ACT_CONFIRM_KICKOUT">Confirm Kickout</button></span>
+					<span><button class="actionsLineButton" id="confirmKickoutButton" @click="store.context.action = rf.ACT_CONFIRM_KICKOUT">{{ $t("action.confirmKickout") }}</button></span>
 				</template>
 				<template v-if="store.context.action === rf.ACT_CONFIRM_KICKOUT">
-					This will permanently remove
-					<b>{{ controller.currentPlayerObj().name }}</b>
-					from the game
+					{{ $t("action.permanentlyRemove", { name: controller.currentPlayerObj().name }) }}
 					<br />
-					<b>It cannot be undone</b>
+					<b>{{ $t("action.cannotBeUndone") }}</b>
 					<br />
 					<br />
-					Try checking the chat in case they have given a reason for any temporary absence
+					{{ $t("action.checkChat") }}
 					<br />
-					Please consider giving them a short grace period, in case they are just delayed
+					{{ $t("action.gracePeriod") }}
 
 					<br />
 					<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
+					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("action.notNow") }}</button></span>
 					<span>
-						<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">Permanently Kickout {{ controller.currentPlayerObj().name }}</button>
+						<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">{{ $t("action.permanentlyKickout", { name: controller.currentPlayerObj().name }) }}</button>
 					</span>
 				</template>
 				</template>
 				<template v-else>
 					<br />
-					Player
-					<b>{{ controller.currentPlayerObj().name }}</b>
-					has timed out
+					{{ $t("action.timedOut", { name: controller.currentPlayerObj().name }) }}
 					<br />
-					A vote from the other players is needed to kick out
-					<b>{{ controller.currentPlayerObj().name }}</b>
+					{{ $t("action.voteNeeded", { name: controller.currentPlayerObj().name }) }}
 					<br />
 					<br />
-					Votes: {{ kickoutVoteCount() }}/{{ store.kickoutVoteThreshold }} ({{ kickoutVoters() }})
+					{{ $t("action.votes", { votes: kickoutVoteCount(), threshold: store.kickoutVoteThreshold, voters: kickoutVoters() }) }}
 					<br />
 					<br />
 					<span v-if="!myKickoutVote()">
 						<template v-if="isLastVoteRequired()">
-							This will permanently remove
-							<b>{{ controller.currentPlayerObj().name }}</b>
-							from the game
+							{{ $t("action.permanentlyRemove", { name: controller.currentPlayerObj().name }) }}
 							<br />
-							<b>It cannot be undone</b>
+							<b>{{ $t("action.cannotBeUndone") }}</b>
 							<br />
 							<br />
 						</template>
-						<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout">Vote to Kickout {{ controller.currentPlayerObj().name }}</button>
+						<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout">{{ $t("action.voteKickout", { name: controller.currentPlayerObj().name }) }}</button>
 					</span>
 					<span v-else>
-						You have voted to kick out
-						<b>{{ controller.currentPlayerObj().name }}</b>
+						{{ $t("action.votedToKickOut", { name: controller.currentPlayerObj().name }) }}
 						<br />
-						If the other players do not also vote, you will be able to kick them out directly in
-						{{ soloKickoutCountdown }}
+						{{ $t("action.kickoutCountdown", { countdown: soloKickoutCountdown }) }}
 					</span>
 					<br />
 					<br />
 					<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 					<span>
-						<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button>
+						<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("action.notNow") }}</button>
 					</span>
 					<span>
-						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
+						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("action.keepInGame", { name: controller.currentPlayerObj().name }) }}</button>
 					</span>
 				</template>
 			</div>
@@ -306,16 +290,16 @@ onUnmounted(() => {
 		<template v-if="store.gameflow.phase === rf.PHASE_GAME_OVER">
 			<!-- THIS IS THE MAIN AREA FOR GAME OVER -->
 			<div id="gameEndDiv">
-				Game Over
+				{{ $t("action.gameOver") }}
 				<template v-if="model.endGame_core()[0].includes(personal.pov)">
-					<h1>Congratulations!</h1>
+					<h1>{{ $t("action.congratulations") }}</h1>
 				</template>
 				<template v-else>
 					<br />
 					<br />
 				</template>
 				<template v-if="model.endGame_core()[0].length === 1">
-					Winner:
+					{{ $t("action.winner") }}
 					<span
 						class="mainEntryPlayer"
 						:style="{
@@ -328,7 +312,7 @@ onUnmounted(() => {
 					<br />
 				</template>
 				<template v-if="model.endGame_core()[0].length > 1">
-					Winners:
+					{{ $t("action.winners") }}
 					<span
 						v-for="(playerIndex, idx) in model.endGame_core()[0]"
 						:key="idx"
@@ -343,7 +327,7 @@ onUnmounted(() => {
 					<br />
 				</template>
 				<template v-for="(entry, idx1) in model.endGame_core().slice(1)" :key="idx1">
-					{{ getOrdinalForIdx1(idx1 + 1) }}:
+					{{ $t("ordinals." + ordinalKey(getOrdinalForIdx1(idx1 + 1))) }}:
 					<span
 						v-for="(playerIndex, idx2) in entry"
 						:key="idx2"
@@ -358,9 +342,9 @@ onUnmounted(() => {
 					<br />
 				</template>
 				<br />
-				Fancy a
-				<a :href="'/createWEBpage/' + String(personal.gameID) + '/'">rematch</a>
-				?
+				<i18n-t keypath="action.rematch" tag="span" scope="global">
+					<template #link><a :href="'/createWEBpage/' + String(personal.gameID) + '/'">{{ $t("action.rematchLink") }}</a></template>
+				</i18n-t>
 				<br />
 				<br />
 			</div>
@@ -372,13 +356,13 @@ onUnmounted(() => {
 			<div v-if="store.context.action === rf.ACT_CHOOSE_INTIIAL_TILE">
 				<div class="containerDiv">
 					<div class="leftDiv">
-						<span v-if="store.context.selectedTileIDtoPlaceArr[0] === -1">Select one of your tiles to add to the Grid</span>
-						<span v-else>Click tile to rotate</span>
+						<span v-if="store.context.selectedTileIDtoPlaceArr[0] === -1">{{ $t("action.selectTileToGrid") }}</span>
+						<span v-else>{{ $t("action.clickTileToRotate") }}</span>
 						<br />
-						<button @click="model.resetWholeTurn" class="actionsLineButton">Reset</button>
+						<button @click="model.resetWholeTurn" class="actionsLineButton">{{ $t("action.reset") }}</button>
 					</div>
 					<div class="rightDiv">
-						<template v-if="store.context.selectedTileIDtoPlaceArr[0] === -1">Select a tile to Place</template>
+						<template v-if="store.context.selectedTileIDtoPlaceArr[0] === -1">{{ $t("action.selectTileToPlace") }}</template>
 						<template v-else>
 							<div class="tileAndRotationButtonsDiv">
 								<div class="tileRotateDiv leftRotatePos">
@@ -404,31 +388,31 @@ onUnmounted(() => {
 
 			<!-- Choose Action -->
 			<div v-if="store.context.action === rf.ACT_CHOOSE_ACTION">
-				You may add a cable, get more cables from your reserve, or select a new Tile
+				{{ $t("action.mayAddCable") }}
 				<br />
-				Remaining Actions: {{ store.context.remainingActions }}
+				{{ $t("action.remainingActions", { count: store.context.remainingActions }) }}
 				<br />
 				<b>
-					CAUTION: Taking a new tile will reveal hidden information
+					{{ $t("action.newTileRevealsInfo") }}
 					<br />
-					The game will be saved and you will not be able to undo this action
+					{{ $t("action.savedNoUndo") }}
 				</b>
 				<br />
 				<span v-if="controller.currentPlayerObj().tileIDarrays.length === 0" class="cautionSpan">
-					CAUTION: If you do not pick up a tile you will not be able to take any more turns
+					{{ $t("action.noTileCaution") }}
 					<br />
 				</span>
-				<button @click="model.resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>
-				<button @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length <= 1">Undo Action</button>
+				<button @click="model.resetWholeTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+				<button @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length <= 1">{{ $t("action.undoAction") }}</button>
 				<button @click="controller.endPlayerTurn()" class="actionsLineButton">
-					<span v-if="store.context.remainingActions === 0">End Turn</span>
-					<span v-else>Forefeit Actions & End Turn</span>
+					<span v-if="store.context.remainingActions === 0">{{ $t("action.endTurn") }}</span>
+					<span v-else>{{ $t("action.forfeitActionsEndTurn") }}</span>
 				</button>
 			</div>
 
 			<!-- Place Cable -->
 			<div v-if="store.context.action === rf.ACT_PLACE_CABLE">
-				Add a Cable to the Grid (Click to Rotate)
+				{{ $t("action.addCableToGrid") }}
 				<br />
 				<div class="cableAndRotationContainer">
 					<div class="cableRotateDiv leftRotatePos">
@@ -450,23 +434,23 @@ onUnmounted(() => {
 						<img @click="rotateNewCable(playerIndex, tileIDarr, 1)" :src="view.getImage('rot_clockwise')" />
 					</div>
 				</div>
-				<button @click="cancelAddingCable" class="actionsLineButton">Cancel</button>
+				<button @click="cancelAddingCable" class="actionsLineButton">{{ $t("action.cancel") }}</button>
 			</div>
 
 			<!-- Confirm Turn End -->
 			<div v-if="store.context.action === rf.ACT_CONFIRM_END_TURN">
-				<button @click="model.resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>
-				<button @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length <= 1">Undo Action</button>
-				<button @click="controller.endPlayerTurn()" class="actionsLineButton">End Turn</button>
+				<button @click="model.resetWholeTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+				<button @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length <= 1">{{ $t("action.undoAction") }}</button>
+				<button @click="controller.endPlayerTurn()" class="actionsLineButton">{{ $t("action.endTurn") }}</button>
 			</div>
 
 			<!-- Confirm Turn End -->
 			<div v-if="store.context.action === rf.CONFIRM_GAME_END_EMPTY_SUPPLY">
-				Emptying a supply plie will immediately end the game. Are you sure?
+				{{ $t("action.emptySupplyEnd") }}
 				<br />
-				<button @click="model.resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>
-				<button @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length <= 1">Undo Action</button>
-				<button @click="controller.endPlayerTurn()" class="actionsLineButton">Confirm Game End</button>
+				<button @click="model.resetWholeTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+				<button @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length <= 1">{{ $t("action.undoAction") }}</button>
+				<button @click="controller.endPlayerTurn()" class="actionsLineButton">{{ $t("action.confirmGameEnd") }}</button>
 			</div>
 		</template>
 	</div>

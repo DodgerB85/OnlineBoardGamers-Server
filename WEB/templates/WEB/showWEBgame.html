@@ -1,6 +1,8 @@
 {% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE|default:'en-gb' }}">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -200,10 +202,10 @@
   </head>
   <body>
     <noscript>
-      <strong>Please enable Javascript to continue.</strong>
+      <strong>{% translate "Please enable Javascript to continue." %}</strong>
     </noscript>
     <div id="app">
-      <div id="loadingText">Web is loading........</div>
+      <div id="loadingText">{% translate "Web is loading........" %}</div>
       <div id="loadingContainer">
         <img id="s1Image" src="{% static 'WEB/images/s1.jpg' %}" alt="s1" />
         <div id="cablesContainer">
@@ -237,6 +239,7 @@
   <script>
   var initData = {};
   
+  initData.locale = "{{ LANGUAGE_CODE|default:'en-gb' }}";
   initData.gameID = {{ gameID }};
   initData.gameName = "{{ gameName }}";
   initData.gameData = '{{ gameData|safe }}';

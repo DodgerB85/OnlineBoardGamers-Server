@@ -12,17 +12,19 @@
 		<div class="content">
 			<img src="@static/WEB/images/WEBbox.jpg" class="cover" />
 			<p>
-				Web is a board game by Jeroen Doumen and Joris Wiersinga, published by
-				<a target="_blank" href="https://www.splottershop.com/">Splotter Spellen.</a>
+				<i18n-t keypath="footer.gameBy" tag="span" scope="global">
+					<template #publisher><a target="_blank" href="https://www.splottershop.com/">{{ $t("footer.publisher") }}</a></template>
+				</i18n-t>
 			</p>
-			<p>2025 Edition brought to you by Dean Brandt, with artwork by Sai Beppu.</p>
+			<p>{{ $t("footer.edition") }}</p>
 
 			<p>
-				Online Board Gamers implementation by DodgerB. Permissions Provided.
+				{{ $t("footer.implementation") }}
 				<br />
 
-				Menu icons from
-				<a href="http://game-icons.net">game-icons.net</a>
+				<i18n-t keypath="footer.menuIcons" tag="span" scope="global">
+					<template #link><a href="http://game-icons.net">game-icons.net</a></template>
+				</i18n-t>
 			</p>
 		</div>
 	</div>

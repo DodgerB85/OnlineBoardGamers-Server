@@ -71,11 +71,7 @@ function getRewindName(num) {
 }
 
 function getOrdinal(num) {
-	if (num === 1) return "1st"
-	else if (num === 2) return "2nd"
-	else if (num === 3) return "3rd"
-	else if (num === 4) return "4th"
-	return "Unknown"
+	return num >= 1 && num <= 6 ? String(num) : "unknown"
 }
 </script>
 
@@ -85,7 +81,7 @@ function getOrdinal(num) {
 	<template v-if="entry[0] === rf.HIST_NEW_GAME">
 		<div class="log separator mainEntry" :class="{ selectableHistory: store.viewSettings.showReplay }" @click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
 			<div class="new_turn">
-				Welcome to Web!
+				{{ $t("history.welcome") }}
 				<br />
 				<div v-for="(player, idx) in store.players" :key="idx" class="playerScoreSummaryDiv">
 					<span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(player.colour)">{{ store.players[idx].name }}</span>
@@ -101,13 +97,13 @@ function getOrdinal(num) {
 				<span>{{ funcs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
 			</div>
 			<div class="mainEntry rewind">
-				Game rewound to here by {{ getRewindName(entry[1]) }}
+				{{ $t("history.rewoundBy", { name: getRewindName(entry[1]) }) }}
 				<br />
 				<span v-for="(playerIndex, idx) in entry[3]" :key="idx">
 					<span v-if="idx > 0">,</span>
 					<span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ store.players[playerIndex].name }}</span>
 				</span>
-				Saw Hidden Info
+				{{ $t("history.sawHiddenInfo") }}
 			</div>
 		</div>
 	</template>
@@ -118,7 +114,7 @@ function getOrdinal(num) {
 			<div class="header">
 				<span>{{ funcs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
 			</div>
-			<div class="mainEntry rewind">{{ entry[3][0] }} Resigns</div>
+			<div class="mainEntry rewind">{{ $t("history.resigns", { name: entry[3][0] }) }}</div>
 		</div>
 	</template>
 
@@ -128,7 +124,7 @@ function getOrdinal(num) {
 			<div class="header">
 				<span>{{ funcs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
 			</div>
-			<div class="mainEntry rewind">{{ entry[3][0] }} was kicked out</div>
+			<div class="mainEntry rewind">{{ $t("history.kickedOut", { name: entry[3][0] }) }}</div>
 		</div>
 	</template>
 
@@ -139,7 +135,7 @@ function getOrdinal(num) {
 				<span>{{ funcs.timestampToString(entry[2]) }}</span>
 			</div>
 			<div class="mainEntry new_turn">
-				<b><u>Final Scores</u></b>
+				<b><u>{{ $t("history.finalScores") }}</u></b>
 				<br />
 				<br />
 				<!--<template v-if="store.context.finalPositions.length === 1">
@@ -148,14 +144,14 @@ function getOrdinal(num) {
 				</template>
 				<template v-else>-->
 				<template v-for="(finalEntry, idx) in entry[3]" :key="idx">
-					{{ getOrdinal(idx + 1) }}:
+					{{ $t("ordinals." + getOrdinal(idx + 1)) }}:
 					<template v-for="(playerIndex, idx2) in finalEntry" :key="idx2">
 						<div class="mainEntryPlayer" :style="{
               backgroundColor: personal.getCorrectedColourHex(store.players[playerIndex].colour),
               color: personal.getCorrectedColourText(store.players[playerIndex].colour),
               borderColor: personal.getCorrectedColour(store.players[playerIndex].colour) === rf.BLACK ? 'white !important' : 'black',
               }">{{ store.players[playerIndex].displayName }}</div>
-						Total: {{ cb.getScore(playerIndex) }}
+						{{ $t("history.total", { score: cb.getScore(playerIndex) }) }}
 						<br />
 					</template>
 				</template>
@@ -176,13 +172,13 @@ function getOrdinal(num) {
 			</div>
 			<div class="container">
 				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				Adds
+				{{ $t("history.addsTileVerb") }}
 				<div class="singleTileDiv">
 					<svg class="singleTileSVG" xmlns="http://www.w3.org/2000/svg" :viewBox="rf.ALL_RECT_TILES.includes(computedEntry3.tileID) ? '0 0 100 100' : '0 0 100 100'">
 						<polygon class="singleTilePolygon" :x="getAnchorTilePos()[0]" :y="getAnchorTilePos()[1]" :transform="view.getRotateString(computedEntry3.tileID, computedEntry3.rotation, 0, 0, 50)" :points="view.getPolygonPointsFromTileID(computedEntry3.tileID, computedEntry3.rotation, 0, 0, 50)" :fill="view.getTilePatternFromID(computedEntry3.tileID)" />
 					</svg>
 				</div>
-				at position ({{ getDisplayCoordFromIndex(entry[3][0]) }})
+				{{ $t("history.atPosition", { position: getDisplayCoordFromIndex(entry[3][0]) }) }}
 			</div>
 		</div>
 	</template>
@@ -197,9 +193,9 @@ function getOrdinal(num) {
 			</div>
 			<div class="container">
 				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				Adds a cable at position ({{ getDisplayCoordFromIndex(entry[3][0]) }})
-				<span v-if="entry[3].length === 1">&nbsp;vertically</span>
-				<span v-else>&nbsp;horizontally</span>
+				{{ $t("history.addsCable", { name: store.players[entry[1]].displayName, position: getDisplayCoordFromIndex(entry[3][0]) }) }}
+				<span v-if="entry[3].length === 1">&nbsp;{{ $t("history.vertically") }}</span>
+				<span v-else>&nbsp;{{ $t("history.horizontally") }}</span>
 			</div>
 		</div>
 	</template>
@@ -214,7 +210,7 @@ function getOrdinal(num) {
 			</div>
 			<div class="container">
 				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				Adds 3 cables ({{ entry[3][0] }} available, {{ entry[3][1] }} in store)
+				{{ $t("history.addsCables", { name: store.players[entry[1]].displayName, available: entry[3][0], stored: entry[3][1] }) }}
 			</div>
 		</div>
 	</template>
@@ -229,7 +225,7 @@ function getOrdinal(num) {
 			</div>
 			<div class="container">
 				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				Picks up
+				{{ $t("history.picksUpVerb") }}
 				<div class="singleTileDiv">
 					<svg class="singleTileSVG" xmlns="http://www.w3.org/2000/svg" :viewBox="rf.ALL_RECT_TILES.includes(computedEntry3.tileID) ? '0 0 100 100' : '0 0 100 100'">
 						<polygon class="singleTilePolygon" :x="getAnchorTilePos()[0]" :y="getAnchorTilePos()[1]" :transform="view.getRotateString(computedEntry3.tileID, computedEntry3.rotation, 0, 0, 50)" :points="view.getPolygonPointsFromTileID(computedEntry3.tileID, computedEntry3.rotation, 0, 0, 50)" :fill="view.getTilePatternFromID(computedEntry3.tileID)" />

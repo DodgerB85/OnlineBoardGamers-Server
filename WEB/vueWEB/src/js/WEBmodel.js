@@ -57,6 +57,7 @@ import * as funcs from "./WEBfuncs.js"
 import * as IO from "../backend/WEB_IO.js"
 import * as WS from "../backend/WEBwebsocket.js"
 import * as cb from "./WEBcables.js"
+import i18n from "../i18n"
 import * as view from "./WEBview.js"
 import * as replay from "./WEBreplay.js"
 
@@ -95,7 +96,7 @@ export async function initGame() {
 		// Create the <h1> element
 		var heading = document.createElement("h1")
 		// Set the text content of the <h1> element
-		heading.textContent = "The game has not yet started"
+		heading.textContent = i18n.global.t("io.gameNotStarted")
 		// Get a reference to the body element
 		var body = document.body
 		// Append the <h1> element to the body

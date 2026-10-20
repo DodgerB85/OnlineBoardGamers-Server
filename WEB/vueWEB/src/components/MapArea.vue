@@ -15,11 +15,15 @@ import * as controller from "../js/WEBcontroller"
 import * as model from "../js/WEBmodel"
 import * as cb from "../js/WEBcables"
 
+import { useI18n } from "vue-i18n"
+
 import { useModelStore } from "../stores/WEBstore.js"
 const store = useModelStore()
 
 import { usePersonalStore } from "../stores/WEBpersonal.js"
 const personal = usePersonalStore()
+
+const { t } = useI18n()
 
 //import { usePersonalStore } from "../stores/RNBpersonal.js"
 //const personal = usePersonalStore()
@@ -110,10 +114,10 @@ function clickedHighlightSquare(event, index) {
 		if (cableError > 0) {
 			let clientX = event.clientX
 			let clientY = event.clientY
-			let htmlMessage = "Must fit<br/>On Tiles"
-			if (cableError === 2) htmlMessage = "Cannot Parrlel<br/>Existing Cables"
-			if (cableError === 3) htmlMessage = "Only One Cable<br/>Per Computer"
-			if (cableError === 4) htmlMessage = "Must connect<br/>to Server<br/>or Your Cables"
+			let htmlMessage = t("mapErrors.mustFitOnTiles")
+			if (cableError === 2) htmlMessage = t("mapErrors.cannotParallel")
+			if (cableError === 3) htmlMessage = t("mapErrors.oneCablePerComputer")
+			if (cableError === 4) htmlMessage = t("mapErrors.mustConnectServer")
 			showErrorPopup(clientX, clientY, htmlMessage)
 			return
 		}
@@ -125,8 +129,8 @@ function clickedHighlightSquare(event, index) {
 	if (placementError > 0) {
 		let clientX = event.clientX
 		let clientY = event.clientY
-		let htmlMessage = "Overlaps<br/>Existing Tile"
-		if (placementError === 2) htmlMessage = "Must connect<br/>to Existing Tile"
+		let htmlMessage = t("mapErrors.overlapsTile")
+		if (placementError === 2) htmlMessage = t("mapErrors.mustConnectTile")
 		showErrorPopup(clientX, clientY, htmlMessage)
 		return
 	}

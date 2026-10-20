@@ -73,10 +73,10 @@ function shouldShowActionNumber(playerIndex) {
 			<table id="playerTable">
 				<thead>
 					<tr>
-						<th><b>Player</b></th>
-						<th><b>Score</b></th>
-						<th><b>Cables (Stored)</b></th>
-						<th><b>Tiles</b></th>
+						<th><b>{{ $t("playerTable.player") }}</b></th>
+						<th><b>{{ $t("playerTable.score") }}</b></th>
+						<th><b>{{ $t("playerTable.cablesStored") }}</b></th>
+						<th><b>{{ $t("playerTable.tiles") }}</b></th>
 					</tr>
 				</thead>
 				<tr v-for="(playerIndex, idx) in store.gameflow.fullTurnOrder" :key="idx">
@@ -106,9 +106,7 @@ function shouldShowActionNumber(playerIndex) {
 								<template v-if="personal.canPlay() && controller.currentPlayerIndex() === playerIndex && store.context.action === rf.ACT_CHOOSE_ACTION && store.context.remainingActions > 0 && controller.currentPlayerObj().storedCables > 0">
 									<br />
 									<button class="actionsLineButton" @click="model.addCablesToPlayer(controller.currentPlayerIndex())">
-										Add
-										<br />
-										Cables
+										<span v-html="$t('playerTable.addCables')"></span>
 									</button>
 								</template>
 							</div>
