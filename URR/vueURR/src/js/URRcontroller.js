@@ -49,13 +49,12 @@ export function startPlayerTurn() {
 export async function submitAction(action) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	let player = personal.trainingGame || rf.SUPER_USERS.includes(personal.name) ? currentPlayerIndex() : personal.pov
-	if (["exchangeBarahshum", "passBarahshum"].includes(action.type)) {
+	const player = personal.trainingGame || rf.SUPER_USERS.includes(personal.name) ? currentPlayerIndex() : personal.pov
+	if (!personal.canPlay()) return false
+	if (action.type === "exchangeBarahshum") {
 		if (store.turnDraft.ready || personal.haltPlay || store.viewSettings.showReplay || personal.pov < 0) return false
-		const nation = store.nations[rf.NATION_BARAHSHUM]
-		if ((personal.trainingGame || rf.SUPER_USERS.includes(personal.name)) && nation.ownerType === "player") player = nation.owner
 		if (!rules.canExchangeBarahshum(store, player)) return false
-	} else if (!personal.canPlay()) return false
+	}
 	const before = model.snapshotState()
 	const checkpoint = { state: before, historyLength: store.history.length }
 	try {
@@ -80,7 +79,7 @@ export function canReviewTurn() {
 	const personal = usePersonalStore()
 	if (personal.haltPlay || store.viewSettings.showReplay || store.viewSettings.showLoader || personal.pov < 0) return false
 	if (store.turnDraft.start) return personal.trainingGame || rf.SUPER_USERS.includes(personal.name) || personal.pov === store.turnDraft.player
-	return personal.canPlay() || rules.canExchangeBarahshum(store, personal.pov)
+	return personal.canPlay()
 }
 
 function restoreCheckpoint(checkpoint) {
@@ -144,10 +143,6 @@ export async function endPlayerTurn() {
 	const store = useModelStore()
 	if (!canReviewTurn()) return false
 	if (!store.turnDraft.ready) {
-		if (!usePersonalStore().canPlay()) {
-			store.gameMessages.actionError = "Choose the Barahshum exchange before ending your turn."
-			return false
-		}
 		try {
 			// Reuse the existing forced-action rules after an Undo or Reset.
 			let automatic = rules.getAutomaticAction(store)

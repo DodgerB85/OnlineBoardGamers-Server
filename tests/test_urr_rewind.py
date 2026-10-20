@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 
 from django.test import RequestFactory, SimpleTestCase
 
-from URR.views import _processURRturn, doSaveRewind, openingPosition
+from URR.views import _processURRturn, decompressRewindPoint, doSaveRewind, openingPosition
 
 
 def encode_model(players, replay_start=None):
@@ -57,3 +57,37 @@ class UrrRewindTests(SimpleTestCase):
         self.assertEqual(game.gameData, "rewound model")
         self.assertEqual(game.rewindTempData, game.gameData)
         game.save.assert_called_once()
+
+
+    def test_legacy_gzip_points_are_decoded_and_not_duplicated(self):
+        position = json.dumps({"version": 2, "players": [{"name": "A"}]})
+        compressed = "gzip:" + base64.b64encode(gzip.compress(position.encode("utf-8"))).decode("ascii")
+        self.assertEqual(decompressRewindPoint(compressed), position)
+        game = SimpleNamespace(rewindData=json.dumps([compressed]), rewindTempData=position)
+        doSaveRewind(game, {}, position)
+        self.assertEqual(json.loads(game.rewindData), [compressed])
+
+    def test_previous_object_save_keeps_its_opening_changes(self):
+        changes = [[["players", "0", "displayName"], "Ann"]]
+        saved = json.dumps({"version": 2, "players": [{"name": "A"}], "replay": [], "replayStart": changes})
+        self.assertEqual(json.loads(openingPosition(saved)), {"opening": True, "players": ["A"], "replayStart": changes})
+
+
+    def test_load_rewind_accepts_a_previous_gzip_point(self):
+        position = json.dumps({"version": 2, "players": [{"name": "A"}]})
+        compressed = "gzip:" + base64.b64encode(gzip.compress(position.encode("utf-8"))).decode("ascii")
+        presenter = Mock()
+        presenter.getMissingPlayersNamesArray.return_value = []
+        game = SimpleNamespace(gameData="current model", rewindData=json.dumps([compressed]), rewindTempData="", latestUpdate="12345", presenter=Mock(return_value=presenter), save=Mock())
+        request = RequestFactory().post(
+            "/URR/processURRturn/",
+            data=json.dumps({"action": "loadRewind", "gameID": 1, "latestUpdate": "12345"}),
+            content_type="application/json",
+        )
+        request.user = SimpleNamespace(is_authenticated=True)
+        with patch("URR.views.Game.objects.get", return_value=game):
+            response = _processURRturn(request)
+        self.assertEqual(json.loads(response.content)["gameData"], position)
+        self.assertEqual(game.gameData, position)
+        self.assertEqual(game.rewindTempData, position)
+        self.assertEqual(json.loads(game.rewindData), [])

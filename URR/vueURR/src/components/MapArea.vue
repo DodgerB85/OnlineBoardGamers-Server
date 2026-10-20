@@ -266,31 +266,6 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 		</div>
 			<div class="mapZoom"><button :aria-pressed="showCoordinates" @click="showCoordinates = !showCoordinates" title="Show coordinates on every hex">Hex labels</button></div>
 		</div>
-		<div class="inspection" v-if="selectedArea">
-			<b>{{ selectedArea.label || selectedArea.id }}</b>
-			<span v-if="selectedArea.nation !== null">{{ rf.NATION_NAMES[selectedArea.nation] }} homeland</span>
-			<span v-if="selectedArea.isRiver">River</span>
-			<template v-else>
-				<img :src="assets.getTerrainImage(selectedArea.landType, selectedArea.isCity)" :alt="`${rf.LAND_NAMES[selectedArea.landType]}${selectedArea.isCity ? ' city' : ''}`" :title="`${rf.LAND_NAMES[selectedArea.landType]}${selectedArea.isCity ? ' city' : ''}`" />
-				<span v-if="selectedArea.isCity">City</span>
-				<img :src="assets.getStateOrderImage(selectedArea.state)" :alt="rf.STATE_NAMES[selectedArea.state]" :title="rf.STATE_NAMES[selectedArea.state]" />
-				<span class="inspectionOwner" v-if="selectedArea.owner !== null"><PlayerMarker :index="selectedArea.owner" /></span>
-				<span v-else-if="selectedArea.markerOwner !== null" class="inspectionOwner"><PlayerMarker :index="selectedArea.markerOwner" />For sale</span>
-				<span v-else>{{ boardRules.isNationLandClosed(store, selectedArea) ? 'Independent nation' : 'Uncolonized' }}</span>
-			</template>
-			<span class="inspectionWork" v-if="selectedArea.waterwork"><img :src="assets.getWaterworkImage(selectedArea.waterwork.state, selectedArea.waterwork.capacity)" :alt="rf.STATE_NAMES[selectedArea.waterwork.state]" />{{ selectedArea.waterwork.kind }} · {{ view.waterworkMeasure(selectedArea.waterwork) }}</span>
-			<span v-if="selectedArea.irrigatedBy !== null">Irrigated by {{ rf.STATE_NAMES[selectedArea.irrigatedBy] }}</span>
-			<span v-if="queuedPurchase === selectedArea.id">Queued purchase</span>
-			<span v-if="queuedSales.includes(selectedArea.id)">Queued sale</span>
-			<span v-if="chosenRemoval === selectedArea.id">Selected for removal if harvest is stored</span>
-			<span v-else-if="harvestRemovalSites.includes(selectedArea.id)">Removable if harvest is stored</span>
-			<span v-if="calahSites.includes(selectedArea.id)">Calah free-waterwork location</span>
-			<span v-if="barahshumSites.includes(selectedArea.id)">Barahshum canal destination</span>
-			<span v-if="store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === 'routing' && selectedArea.id !== routingArea && !waterDestinations.includes(selectedArea.id)">Outside current water destinations</span>
-			<span v-if="!selectedArea.isRiver && (store.gameflow.phase === rf.PHASE_SETTLEMENT || store.gameflow.phase === rf.PHASE_GAME_OVER || needsMaintenanceSales)">{{ selectedArea.markerOwner === null ? 'Colonization' : 'Market' }} price {{ rules.landPrice(store, selectedArea, selectedArea.markerOwner === null) }} SPL</span>
-			<span v-if="!selectedArea.isRiver && boardRules.isNationLandClosed(store, selectedArea) && store.gameflow.phase !== rf.PHASE_RAINY_SEASON">Nation land closed</span>
-			<span v-if="selectedArea.waterwork">{{ selectedArea.waterwork.kind === 'pump' ? 'Reach highlighted' : 'Connected destinations highlighted' }}</span>
-		</div>
 		<div class="inspection" v-if="store.debug.tool && debug.canDebug()">Debug: {{ store.debug.tool }} — click the map to place. <button @click="store.debug.tool = ''; store.debug.path = []">Stop placement</button></div>
 
 	</div>
@@ -321,7 +296,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 .mapZoom button[aria-pressed=true] { background: #e1edf5; border-color: #177daf; color: #145575; }
 .areaLabel { font-size: 22px; }
 .mapZoom button { min-width: 40px; min-height: 40px; }
-.inspection { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }.inspection img { width: 25px; height: 25px; object-fit: contain; }.inspectionOwner, .inspectionWork { display: inline-flex; align-items: center; gap: 4px; }.inspectionOwner { min-width: 0; overflow-wrap: anywhere; }
+.inspection { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .controls button { min-height: 30px; border: 1px solid #998a67; border-radius: 3px; background: #fffdf4; color: #302f27; font: inherit; padding: 4px 8px; }.controls button:disabled { opacity: .5; cursor: default; }@media (max-width: 1050px) { .controls button { min-height: 40px; } }
 .mapDecisionHighlight { pointer-events: none; --decision-color: #007cac; }.mapDecisionHighlight.finish { --decision-color: #176a3b; }.mapDecisionHighlight.build { --decision-color: #75439c; }.mapDecisionHighlight.sale { --decision-color: #a34720; }.mapDecisionHighlight.path { --decision-color: #234872; }.mapDecisionHalo { fill: none; stroke: white; stroke-width: 12; }.mapDecisionOutline { fill: none; stroke: var(--decision-color); stroke-width: 7; }.mapDecisionOutline.source { stroke-dasharray: 12 6; }
 .mapDecisionOutline.planned { stroke-width: 12; fill: var(--decision-color); fill-opacity: .22; }.mapDecisionOutline.chosen { stroke: #a57000; }.decisionBadge { fill: var(--decision-color); stroke: white; stroke-width: 3; }.destinationNumber, .decisionLabel { fill: white; font-size: 20px; font-weight: bold; text-anchor: middle; dominant-baseline: central; }.decisionLabel { font-size: 16px; }

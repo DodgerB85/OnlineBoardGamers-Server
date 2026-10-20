@@ -30,16 +30,18 @@
     border-bottom-color: var(--color-border-strong);
 }
 
-.row09.myMove { background: var(--color-positive-bg); }
+.row09.myMove {
+    --color-muted: var(--color-ink-soft);
+    --color-accent-strong: var(--color-positive);
+    background: #285b35;
+}
 .row09.kickoutRequired1 { background: var(--color-warn-bg); }
 .row09.kickoutRequired2 { background: var(--color-danger-bg); }
 
 @media (hover: hover) {
-    .row09.myMove:hover,
-    .row09.kickoutRequired1:hover,
-    .row09.kickoutRequired2:hover {
-        background: var(--color-surface-soft);
-    }
+    .row09.myMove:hover { background: #2c6039; }
+    .row09.kickoutRequired1:hover { background: #59482d; }
+    .row09.kickoutRequired2:hover { background: #613741; }
 }
 
 .opts-slate, .opts-red, .opts-green, .opts-amber,

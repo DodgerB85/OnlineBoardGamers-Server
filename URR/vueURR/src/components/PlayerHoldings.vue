@@ -7,9 +7,7 @@ import * as rules from "../js/URRrules"
 import * as view from "../js/URRview"
 import * as assets from "../js/URRassets"
 import { useModelStore } from "../stores/URRstore.js"
-import { usePersonalStore } from "../stores/URRpersonal.js"
 const store = useModelStore()
-const personal = usePersonalStore()
 const inspectedPlayer = computed({ get: () => store.viewSettings.inspectedPlayer, set: (index) => { store.viewSettings.inspectedPlayer = index } })
 const isSettlement = computed(() => store.gameflow.phase === rf.PHASE_SETTLEMENT)
 const showLand = computed(() => {
@@ -21,9 +19,6 @@ const showLand = computed(() => {
 const activePlayer = computed(() => {
 	if (inspectedPlayer.value !== null) return inspectedPlayer.value
 	if (store.turnDraft.ready && !store.viewSettings.showReplay) return view.displayedTurnOrder(store)[0]
-	const barahshum = store.nations[rf.NATION_BARAHSHUM]
-	if (!personal.haltPlay && !store.viewSettings.showReplay && !personal.canPlay() && barahshum.ownerType === "player" && barahshum.owner === personal.pov && rules.canExchangeBarahshum(store, personal.pov)) return personal.pov
-	if (store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep === "betweenStates" && rules.canExchangeBarahshum(store, barahshum.owner)) return barahshum.owner
 	return store.gameflow.turnOrder[0] ?? store.gameflow.finalPositions?.[0] ?? 0
 })
 const player = computed(() => store.players[activePlayer.value])

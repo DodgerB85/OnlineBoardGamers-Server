@@ -35,7 +35,6 @@ const digButton = ref(null)
 const nationToBuy = ref(null)
 const nationPrice = ref(0)
 const removeWaterwork = ref(null)
-const skipBarahshum = ref(false)
 const waterTarget = ref(null)
 const waterAmount = ref(1)
 const activeSection = ref("")
@@ -111,12 +110,8 @@ const selectedNation = computed(() => assimilationChoices.value.find((nation) =>
 const nationOfferError = computed(() => selectedNation.value ? preview({ type: "offerNation", nation: nationToBuy.value, amount: nationPrice.value }) : "Choose a nation")
 const nationPurchaseRecipient = computed(() => selectedNation.value ? nationRecipient(selectedNation.value, nationPrice.value) : null)
 const requiresNationConsent = computed(() => selectedNation.value && (selectedNation.value.ownerType === "player" ? selectedNation.value.owner : game.value.states[selectedNation.value.owner].king) !== state.value.king)
-const barahPlayer = computed(() => {
-	const nation = game.value.nations[rf.NATION_BARAHSHUM]
-	return (personal.trainingGame || rf.SUPER_USERS.includes(personal.name)) && nation?.ownerType === "player" ? nation.owner : personal.trainingGame || rf.SUPER_USERS.includes(personal.name) ? actor.value : personal.pov
-})
+const barahPlayer = computed(() => personal.trainingGame || rf.SUPER_USERS.includes(personal.name) ? actor.value : personal.pov)
 const canExchangeBarahshum = computed(() => !store.turnDraft.ready && !personal.haltPlay && !store.viewSettings.showReplay && personal.pov >= 0 && rules.canExchangeBarahshum(game.value, barahPlayer.value))
-const hasBarahshumOpportunity = computed(() => rules.canExchangeBarahshum(game.value, game.value.nations[rf.NATION_BARAHSHUM].owner))
 const barahshum = computed(() => game.value.board.areas.find((entry) => entry.nation === rf.NATION_BARAHSHUM))
 const barahshumError = computed(() => {
 	if (!area.value || !barahshum.value?.neighbours.includes(area.value.id)) return "Select an area adjacent to Barahshum."
@@ -243,7 +238,6 @@ const tradeLeadershipChanges = computed(() => view.getLeadershipChanges(game.val
 const maintenanceLeadershipChanges = computed(() => view.getLeadershipChanges(game.value, maintenanceFundingGame.value))
 const willRevolt = computed(() => maintenancePreview.value?.game?.states[state.value?.id]?.hasRevolted || false)
 const developmentTurnAction = computed(() => {
-	if (skipBarahshum.value && canExchangeBarahshum.value && !hasTrade.value) return { label: "Pass & End Turn" }
 	if (game.value.gameflow.phase !== rf.PHASE_DEVELOPMENT || !state.value || ["eridu", "betweenStates"].includes(game.value.gameflow.developmentStep) || pendingOffer.value || store.turnDraft.ready) return null
 	const hasSales = maintenanceSales.value.length > 0
 	return { hasPendingSales: hasSales || maintenanceSelection.value.length > 0, label: willRevolt.value ? "Declare revolution" : hasSales ? "Sell land & End Turn" : !rules.hasMaintenanceCrew(game.value, state.value.id) ? "Hire crew & End Turn" : "End Turn", error: props.path.length ? "Add or clear the canal draft before finishing development." : !canFinishDevelopment.value || hasSales ? maintenanceError.value : "" }
@@ -376,8 +370,6 @@ function cancelMapAction() {
 async function finishTurn() {
 	if (game.value.gameflow.phase === rf.PHASE_SETTLEMENT && hasTrade.value) {
 		if (!await controller.submitAction(tradeAction.value)) return false
-	} else if (skipBarahshum.value && canExchangeBarahshum.value) {
-		if (!await controller.submitAction({ type: "passBarahshum", passTurn: game.value.gameflow.phase === rf.PHASE_SETTLEMENT && personal.canPlay() })) return false
 	} else if (game.value.gameflow.phase === rf.PHASE_DEVELOPMENT && !store.turnDraft.ready && state.value && !rules.hasMaintenanceCrew(game.value, state.value.id) && (maintenanceSales.value.length || !canFinishDevelopment.value)) {
 		if (!await controller.submitAction(maintenanceAction.value)) return false
 	} else if (props.path.length >= 2) {
@@ -389,7 +381,6 @@ async function finishTurn() {
 defineExpose({ finishTurn, confirmMapAction, cancelMapAction, planClick, showDigging })
 
 watch([() => game.value.gameflow.phase, () => actor.value, () => game.value.gameflow.stateIndex], () => {
-	skipBarahshum.value = false
 	resetTrade()
 	maintenanceSales.value = []
 	maintenanceSelection.value = []
@@ -445,7 +436,7 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 			<template v-else><div class="offeredWork"><img :src="assets.getWaterworkImage(pendingOffer.state, cardData[pendingOffer.action.kind][0])" :title="view.waterworkMeasure({ kind: pendingOffer.action.kind, capacity: cardData[pendingOffer.action.kind][0] })" :alt="`Proposed ${pendingOffer.action.kind} · ${view.waterworkMeasure({ kind: pendingOffer.action.kind, capacity: cardData[pendingOffer.action.kind][0] })}`" /><img v-if="offeredLand && !offeredLand.isRiver" :src="assets.getTerrainImage(offeredLand.landType, offeredLand.isCity)" :alt="`${rf.LAND_NAMES[offeredLand.landType]}${offeredLand.isCity ? ' city' : ' land'}`" /><span><b>{{ label(pendingOffer.action.area) }}</b><small class="workMeasure"><template v-if="offeredLand && !offeredLand.isRiver">{{ rf.LAND_NAMES[offeredLand.landType] }} {{ offeredLand.isCity ? 'city' : 'land' }}{{ ' ' }}</template>{{ pendingOffer.action.kind }}</small></span></div><p>The state treasury pays {{ pendingOffer.action.type === 'exchangeCalah' ? 0 : cardData[pendingOffer.action.kind][1] }} SPL. The site is highlighted on the board.</p><div v-if="offeredLand && offeredLand.owner !== null" class="paymentRow consentIncome"><img :src="assets.getPlayerMarkerImage(offeredLand.owner)" alt="" /><span>If irrigated</span><b>+{{ offeredLandIncome }} SPL</b></div></template>
 			<div class="buttonRow consentControls"><button class="primaryAction" :disabled="!personal.canPlay() || ending || store.viewSettings.isSaving" @click="confirmAgreement(true)">Accept &amp; End Turn</button><button :disabled="!personal.canPlay() || ending || store.viewSettings.isSaving" @click="confirmAgreement(false)">Decline &amp; End Turn</button></div>
 		</template>
-		<fieldset v-else-if="game.gameflow.phase === rf.PHASE_SETTLEMENT && (!canExchangeBarahshum || personal.canPlay())" :disabled="!personal.canPlay()">
+		<fieldset v-else-if="game.gameflow.phase === rf.PHASE_SETTLEMENT" :disabled="!personal.canPlay()">
 			<p class="hint">Use the map to buy and sell land.</p>
 			<ol v-if="hasTrade" class="turnPlan" aria-label="Your settlement turn">
 				<li v-for="(step, index) in tradeSteps" :key="index">{{ tradeStepLabel(step, index) }}
@@ -461,10 +452,9 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 			<button v-if="hasTrade" @click="resetTrade">Clear plan</button>
 			<form v-if="!hasTrade" class="buttonRow primogenitureBid" @submit.prevent="confirmSettlementBid"><label for="primogeniture">Or bid for primogeniture:</label><input id="primogeniture" type="number" inputmode="numeric" v-model.number="primogenitureAmount" :min="(game.gameflow.primogenitureBid?.amount || 0) + 1" :max="primogenitureBudget" step="1" required /><button :disabled="!!primogenitureError || ending || store.viewSettings.isSaving">Bid {{ primogenitureAmount }} SPL &amp; End Turn</button><small>{{ primogenitureBudget }} SPL available<br>Refunded after settlement</small><span v-if="game.gameflow.primogenitureBid"><PlayerMarker :index="game.gameflow.primogenitureBid.player" /> holds the high bid: {{ game.gameflow.primogenitureBid.amount }} SPL</span><span v-if="primogenitureError" class="error">{{ primogenitureError }}</span></form>
 		</fieldset>
-		<fieldset v-else-if="game.gameflow.phase === rf.PHASE_DEVELOPMENT && (!canExchangeBarahshum || personal.canPlay())" class="developmentActions plain" :disabled="!personal.canPlay()">
+		<fieldset v-else-if="game.gameflow.phase === rf.PHASE_DEVELOPMENT" class="developmentActions plain" :disabled="!personal.canPlay()">
 			<template v-if="game.gameflow.developmentStep === 'betweenStates'">
 				<p>End Turn to {{ state ? `start ${rf.STATE_NAMES[state.id]} development` : 'start the rainy season' }}.</p>
-				<p v-if="hasBarahshumOpportunity && !canExchangeBarahshum" class="hint"><PlayerMarker v-if="game.nations[rf.NATION_BARAHSHUM].ownerType === 'player'" :index="game.nations[rf.NATION_BARAHSHUM].owner" /><template v-else>{{ rf.STATE_NAMES[game.nations[rf.NATION_BARAHSHUM].owner] }}</template> may dissolve Barahshum to dig a canal first.</p>
 			</template>
 			<template v-else>
 				<div v-if="showDigging" class="actionGroup">
@@ -559,10 +549,9 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 		<div v-if="store.turnDraft.ready && (game.gameflow.phase !== rf.PHASE_DEVELOPMENT || (!showDigging && !showEquipment))" class="turnSummary" role="status"><p v-for="(step, index) in store.turnDraft.steps" :key="index">{{ step.label }}</p></div>
 		<div v-if="canExchangeBarahshum || (store.turnDraft.ready && store.turnDraft.steps.at(-1).action.type === 'exchangeBarahshum')" class="actionGroup">
 			<b><PlayerMarker v-if="game.nations[rf.NATION_BARAHSHUM].ownerType === 'player'" :index="game.nations[rf.NATION_BARAHSHUM].owner" /><template v-else>{{ rf.STATE_NAMES[game.nations[rf.NATION_BARAHSHUM].owner] }}</template> Barahshum</b>
-			<p>Dissolve it to dig one canal next to Barahshum, outside a normal turn. Its {{ rf.NATION_INCOMES[rf.NATION_BARAHSHUM] }} SPL income ends.</p>
+			<p>Dissolve it to dig one canal next to Barahshum, during your own turn. Its {{ rf.NATION_INCOMES[rf.NATION_BARAHSHUM] }} SPL income ends.</p>
 			<button v-if="store.viewSettings.actionIntent !== 'barahshum'" :disabled="store.turnDraft.ready" @click="setIntent('barahshum')">Choose canal site on the map</button>
-			<template v-else><p v-if="barahshumError" class="hint">{{ barahshumError }}</p><button v-else :disabled="store.turnDraft.ready" @click="submit({ type: 'exchangeBarahshum', from: barahshum.id, to: area.id })">Dissolve Barahshum and dig to {{ label(area.id) }}</button></template>
-			<label v-if="game.nations[rf.NATION_BARAHSHUM].ownerType === 'player'" class="barahshumSkip"><input type="checkbox" v-model="skipBarahshum" :disabled="store.turnDraft.ready || ending || store.viewSettings.isSaving" /><span>Skip Barahshum prompts until next round.</span></label>
+			<template v-else><button @click="setIntent(game.gameflow.phase === rf.PHASE_DEVELOPMENT ? (showDigging ? 'dig' : 'equip') : '')">Cancel canal selection</button><p v-if="barahshumError" class="hint">{{ barahshumError }}</p><button v-else :disabled="store.turnDraft.ready" @click="submit({ type: 'exchangeBarahshum', from: barahshum.id, to: area.id })">Dissolve Barahshum and dig to {{ label(area.id) }}</button></template>
 		</div>
 	</section>
 </template>
@@ -570,7 +559,6 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 <style scoped>
 .equipLegend { display: flex; align-items: center; gap: 8px; margin: 4px 0; }.swatch { width: 18px; height: 18px; border-radius: 3px; border: 3px solid #007cac; box-sizing: border-box; flex-shrink: 0; }.swatch.reservoir { border-color: #a34720; }.draftList { list-style: none; margin: 6px 0; padding: 0; }.draftList li { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0; }.draftList button { min-height: 28px; padding: 0 9px; margin: 0; flex-shrink: 0; }.crewStepper { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 0; }.stepper { display: flex; align-items: center; gap: 10px; }.stepper button { min-width: 36px; margin: 0; }.equipmentChoices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }.equipmentChoices button { text-align: left; min-height: 65px; margin: 0; padding: 8px; }.equipmentChoices small { display: block; margin-top: 5px; }.equipmentChoices [aria-pressed=true], .fundingTerrain [aria-pressed=true] { background: #e3eddb; border: 2px solid #547751; }.equipmentPreview { padding: 8px; margin-top: 8px; border: 1px solid #c4b894; border-radius: 4px; }.equipmentReference { margin-top: 8px; }.equipmentReference :deep(img) { max-width: 100%; }.fundingGap { font-weight: bold; }.fundingTerrain { margin: 8px 0; }.crewFunding ol { padding-left: 20px; }
 
-.barahshumSkip { display: flex; align-items: flex-start; gap: 6px; margin-top: 8px; }.barahshumSkip input { flex-shrink: 0; margin-top: 3px; }
 .gameActions { width: 100%; box-sizing: border-box; background: #fff9df; border: 2px solid #8e805e; border-radius: 7px; padding: 8px; margin: 8px 0; text-align: left; font-size: 16px; font-weight: 400; }
 fieldset.plain { border: 0; padding: 0; }fieldset { border: 1px solid #c4b894; border-radius: 4px; padding: 8px; margin: 0; min-width: 0; }legend { max-width: 100%; overflow-wrap: anywhere; box-sizing: border-box; font-weight: bold; font-size: 15px; }p { margin: 6px 0; }.buttonRow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 6px 0; }button, input, select { font: inherit; }button { cursor: pointer; margin: 2px; padding: 4px 7px; }button:disabled { cursor: default; }input[type=number] { width: 70px; }label { margin: 3px; }summary { cursor: pointer; font-weight: bold; padding: 5px 0; }
 .actionGroup { margin: 8px 0; padding: 7px 0; border-top: 1px solid #c4b894; }.saleGroup { margin: 5px 0; }.error { color: #a40000; font-weight: bold; }.hint { color: #655a42; margin: 4px 0; }.piece { width: 24px; height: 24px; object-fit: contain; vertical-align: middle; margin-right: 5px; }

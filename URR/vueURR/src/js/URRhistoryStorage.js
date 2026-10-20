@@ -86,6 +86,10 @@ export function compactBoard(current) {
 		if (!hasRuntime && !Object.keys(extras).length) continue
 		const entry = [index, area.owner ?? -1, area.markerOwner ?? -1, encodeWaterwork(area.waterwork), area.irrigatedBy ?? -1]
 		if (Object.keys(extras).length) entry.push(extras)
+		else {
+			// The empty waterwork slot uses 0; empty ownership slots use -1.
+			while (entry.length > 1 && entry.at(-1) === (entry.length === 4 ? 0 : -1)) entry.pop()
+		}
 		areas.push(entry)
 	}
 	const canals = JSON.stringify(current.canals) === JSON.stringify(printed.canals) ? null : current.canals.map(([a, b]) => [areaIndex.get(a) ?? a, areaIndex.get(b) ?? b])
@@ -98,10 +102,16 @@ export function compactBoard(current) {
 }
 
 export function expandBoard(stored) {
+	if (stored?.format === "urr-board-v1") {
+		const { format, areas, ...rest } = stored
+		const result = { ...printedBoard(), ...rest }
+		for (const area of result.areas) Object.assign(area, areas[area.id])
+		return result
+	}
 	if (!Array.isArray(stored)) throw new Error("Unsupported URR board")
 	const [areas, canals, rest] = stored
 	const result = printedBoard()
-	for (const [index, owner, markerOwner, waterwork, irrigatedBy, extras] of areas) {
+	for (const [index, owner = -1, markerOwner = -1, waterwork = 0, irrigatedBy = -1, extras] of areas) {
 		const area = result.areas[index]
 		if (!area) continue
 		area.owner = owner < 0 ? null : owner
@@ -115,10 +125,10 @@ export function expandBoard(stored) {
 	return result
 }
 
-function predict(previous, player, action) {
+function predict(previous, player, action, isLegacyReplay = false) {
 	if (!action) return previous
 	try {
-		return game.applyAction(previous, player, action)
+		return game.applyAction(previous, player, action, isLegacyReplay)
 	} catch {
 		return previous
 	}
@@ -149,16 +159,29 @@ export function compactOpening(history) {
 }
 
 export function expandHistory(data, newGameEvent, creationTimestamp) {
-	if (!Array.isArray(data.replay)) throw new Error("Unsupported URR replay format")
+	if (!Array.isArray(data.replay)) {
+		if (!Array.isArray(data.history)) throw new Error("Unsupported URR replay format")
+		let previous = null
+		return data.history.map((entry, index) => {
+			if (index === 0 && entry[4] > 1e11) entry = [...entry.slice(0, 4), Math.floor(entry[4] / 1000)]
+			const stored = entry[2]
+			if (typeof stored === "string") previous = JSON.parse(stored)
+			else {
+				if (!previous || stored?.format !== "urr-history-delta-v1" || !Array.isArray(stored.changes)) throw new Error("Invalid URR replay delta")
+				applyChanges(previous, stored.changes)
+			}
+			return [entry[0], entry[1], JSON.stringify(previous), ...JSON.parse(JSON.stringify(entry.slice(3)))]
+		})
+	}
 	let previous = applyChanges(game.createGame(data.players.map((player) => player.name)), data.replayStart || [])
 	let time = creationTimestamp ?? null
 	const result = [[newGameEvent, -1, JSON.stringify(previous), null, time]]
 	for (const stored of data.replay) {
 		const [event, player, action, delta, changes] = stored
-		const snapshot = applyChanges(JSON.parse(JSON.stringify(predict(previous, player, action))), changes || [])
+		const snapshot = applyChanges(JSON.parse(JSON.stringify(predict(previous, player, action, data.replayRules !== 1))), changes || [])
 		time = delta != null && time != null ? time + delta : null
 		const entry = [event, player, JSON.stringify(snapshot), action, time]
-		encodedEntries.set(entry, { snapshot: entry[2], previousSnapshot: result.at(-1)[2], stored })
+		if (data.replayRules === 1) encodedEntries.set(entry, { snapshot: entry[2], previousSnapshot: result.at(-1)[2], stored })
 		result.push(entry)
 		previous = snapshot
 	}
