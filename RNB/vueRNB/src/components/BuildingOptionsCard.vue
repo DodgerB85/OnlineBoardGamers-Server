@@ -62,7 +62,7 @@ function closeCard() {
 		<div v-if="store.context.eligibleBuildingsToBuild.length > 0" class="building-options-overlay" :style="{ left: cardPosition.x + 'px', top: cardPosition.y + 'px' }">
 			<div class="building-options-card">
 				<div class="card-header">
-					<span>Building Options</span>
+					<span>{{ $t("optionsCard.buildingOptions") }}</span>
 					<button @click="closeCard" class="close-button">&times;</button>
 				</div>
 				<div class="card-content" :class="{ hasWideBuildings: hasWideBuildings, hasOnlyOneBuilding: hasOnlyOneBuilding }">

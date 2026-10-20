@@ -15,69 +15,77 @@ import * as computes from "./RNBcomputes"
 
 import { useModelStore } from "../stores/RNBstore.js"
 import { usePersonalStore } from "../stores/RNBpersonal"
+import i18n from "../i18n"
+
+const t = (key, named) => i18n.global.t(key, named)
 
 export function phaseStr(phase) {
-	if (phase === rf.PHASE_CONFLICT_PRODUCTION_DECISION) return "Conflict Decision: Production"
-	if (phase === rf.PHASE_CONFLICT_PRODUCTION_PRAYING) return "Conflict Praying: Production"
-	if (phase === rf.PHASE_CONFLICT_PRODUCTION_TURN_ORDER) return "Conflict Turn Order: Production"
-	if (phase === rf.PHASE_PRODUCTION_TO) return "Production"
-	if (phase === rf.PHASE_CONFLICT_MOVEMENT_DECISION) return "Conflict Decision: Movement"
-	if (phase === rf.PHASE_CONFLICT_MOVEMENT_PRAYING) return "Conflict Praying: Movement"
-	if (phase === rf.PHASE_CONFLICT_MOVEMENT_TURN_ORDER) return "Conflict Turn Order: Movement"
-	if (phase === rf.PHASE_MOVEMENT_TO) return "Movement"
-	if (phase === rf.PHASE_CONFLICT_BUILDING_DECISION) return "Conflict Decision: Building"
-	if (phase === rf.PHASE_CONFLICT_BUILDING_PRAYING) return "Conflict Praying: Building"
-	if (phase === rf.PHASE_CONFLICT_BUILDING_TURN_ORDER) return "Conflict Turn Order: Building"
-	if (phase === rf.PHASE_BUILDING_TO) return "Building"
-	if (phase === rf.PHASE_CONFLICT_WONDER_DECISION) return "Conflict Decision: Wonder"
-	if (phase === rf.PHASE_CONFLICT_WONDER_PRAYING) return "Conflict Praying: Wonder"
-	if (phase === rf.PHASE_CONFLICT_WONDER_TURN_ORDER) return "Conflict Turn Order: Wonder"
-	if (phase === rf.PHASE_WONDER_TO) return "Wonder"
+	if (phase === rf.PHASE_CONFLICT_PRODUCTION_DECISION) return t("phases.conflictProductionDecision")
+	if (phase === rf.PHASE_CONFLICT_PRODUCTION_PRAYING) return t("phases.conflictProductionPraying")
+	if (phase === rf.PHASE_CONFLICT_PRODUCTION_TURN_ORDER) return t("phases.conflictProductionTurnOrder")
+	if (phase === rf.PHASE_PRODUCTION_TO) return t("phases.production")
+	if (phase === rf.PHASE_CONFLICT_MOVEMENT_DECISION) return t("phases.conflictMovementDecision")
+	if (phase === rf.PHASE_CONFLICT_MOVEMENT_PRAYING) return t("phases.conflictMovementPraying")
+	if (phase === rf.PHASE_CONFLICT_MOVEMENT_TURN_ORDER) return t("phases.conflictMovementTurnOrder")
+	if (phase === rf.PHASE_MOVEMENT_TO) return t("phases.movement")
+	if (phase === rf.PHASE_CONFLICT_BUILDING_DECISION) return t("phases.conflictBuildingDecision")
+	if (phase === rf.PHASE_CONFLICT_BUILDING_PRAYING) return t("phases.conflictBuildingPraying")
+	if (phase === rf.PHASE_CONFLICT_BUILDING_TURN_ORDER) return t("phases.conflictBuildingTurnOrder")
+	if (phase === rf.PHASE_BUILDING_TO) return t("phases.building")
+	if (phase === rf.PHASE_CONFLICT_WONDER_DECISION) return t("phases.conflictWonderDecision")
+	if (phase === rf.PHASE_CONFLICT_WONDER_PRAYING) return t("phases.conflictWonderPraying")
+	if (phase === rf.PHASE_CONFLICT_WONDER_TURN_ORDER) return t("phases.conflictWonderTurnOrder")
+	if (phase === rf.PHASE_WONDER_TO) return t("phases.wonder")
 
-	if (phase === rf.PHASE_CHOOSE_HOME_TILE) return "Choose Home Tile"
+	if (phase === rf.PHASE_CHOOSE_HOME_TILE) return t("phases.chooseHomeTile")
 
-	if (phase === rf.PHASE_GAME_OVER) return "Game Over"
+	if (phase === rf.PHASE_GAME_OVER) return t("phases.gameOver")
 
-	if (phase === rf.PRE_PHASE_CONFLICT_PRODUCTION) return "Production Conflict (pre-phase)"
-	if (phase === rf.PRE_PHASE_PRODUCTION) return "Production (pre-phase)"
-	if (phase === rf.PRE_PHASE_CONFLICT_MOVEMENT) return "Movement Conflict (pre-phase)"
-	if (phase === rf.PRE_PHASE_MOVEMENT) return "Movement (pre-phase)"
-	if (phase === rf.PRE_PHASE_CONFLICT_BUILDING) return "Building Conflict (pre-phase)"
-	if (phase === rf.PRE_PHASE_BUILDING) return "Building (pre-phase)"
-	if (phase === rf.PRE_PHASE_CONFLICT_WONDER) return "Wonder Conflict (pre-phase)"
-	if (phase === rf.PRE_PHASE_WONDER) return "Wonder (pre-phase)"
+	if (phase === rf.PRE_PHASE_CONFLICT_PRODUCTION) return t("phases.prePhaseConflictProduction")
+	if (phase === rf.PRE_PHASE_PRODUCTION) return t("phases.prePhaseProduction")
+	if (phase === rf.PRE_PHASE_CONFLICT_MOVEMENT) return t("phases.prePhaseConflictMovement")
+	if (phase === rf.PRE_PHASE_MOVEMENT) return t("phases.prePhaseMovement")
+	if (phase === rf.PRE_PHASE_CONFLICT_BUILDING) return t("phases.prePhaseConflictBuilding")
+	if (phase === rf.PRE_PHASE_BUILDING) return t("phases.prePhaseBuilding")
+	if (phase === rf.PRE_PHASE_CONFLICT_WONDER) return t("phases.prePhaseConflictWonder")
+	if (phase === rf.PRE_PHASE_WONDER) return t("phases.prePhaseWonder")
 
-	return `"NO PHASE - ${phase}`
+	return t("phases.noPhase", { phase })
 }
 
 export function getOrdinal(num) {
-	var n = num % 10
-	if (n === 1) return num + "st"
-	else if (n === 2) return num + "nd"
-	else if (n === 3) return num + "rd"
-	else return num + "th"
+	const key = `ordinals.${num}`
+	return i18n.global.te(key) ? t(key) : String(num)
+}
+
+export function rndName(idx) {
+	return t(`names.rnd.${idx}`)
+}
+
+export function buildingName(buildingType) {
+	return t(`names.buildings.${buildingType}`)
 }
 
 export function basePhaseStr(phase) {
-	if (rf.PHASE_PRODUCTIONS.includes(phase)) return "Production"
-	else if (rf.PHASE_MOVEMENTS.includes(phase)) return "Movement"
-	else if (rf.PHASE_BUILDINGS.includes(phase)) return "Building"
-	else if (rf.PHASE_WONDERS.includes(phase)) return "Wonder"
-	else if (rf.PHASE_CONFLICT_PRODUCTIONS.includes(phase)) return "Production"
-	else if (rf.PHASE_CONFLICT_MOVEMENTS.includes(phase)) return "Movement"
-	else if (rf.PHASE_CONFLICT_BUILDINGS.includes(phase)) return "Building"
-	else if (rf.PHASE_CONFLICT_WONDERS.includes(phase)) return "Wonder"
+	if (rf.PHASE_PRODUCTIONS.includes(phase)) return t("phases.production")
+	else if (rf.PHASE_MOVEMENTS.includes(phase)) return t("phases.movement")
+	else if (rf.PHASE_BUILDINGS.includes(phase)) return t("phases.building")
+	else if (rf.PHASE_WONDERS.includes(phase)) return t("phases.wonder")
+	else if (rf.PHASE_CONFLICT_PRODUCTIONS.includes(phase)) return t("phases.production")
+	else if (rf.PHASE_CONFLICT_MOVEMENTS.includes(phase)) return t("phases.movement")
+	else if (rf.PHASE_CONFLICT_BUILDINGS.includes(phase)) return t("phases.building")
+	else if (rf.PHASE_CONFLICT_WONDERS.includes(phase)) return t("phases.wonder")
 }
 
 export function nextBasePhaseStr(phase) {
-	if (rf.PHASE_PRODUCTIONS.includes(phase)) return "Movement"
-	else if (rf.PHASE_MOVEMENTS.includes(phase)) return "Building"
-	else if (rf.PHASE_BUILDINGS.includes(phase)) return "Wonder"
-	else if (rf.PHASE_WONDERS.includes(phase)) return "Production"
-	else if (phase === rf.PRE_PHASE_CONFLICT_PRODUCTION) return "Next Production"
-	else if (phase === rf.PRE_PHASE_CONFLICT_MOVEMENT) return "Next Movement"
-	else if (phase === rf.PRE_PHASE_CONFLICT_BUILDING) return "Next Building"
-	else if (phase === rf.PRE_PHASE_CONFLICT_WONDER) return "Next Wonder"
+	if (rf.PHASE_PRODUCTIONS.includes(phase)) return t("phases.movement")
+	else if (rf.PHASE_MOVEMENTS.includes(phase)) return t("phases.building")
+	else if (rf.PHASE_BUILDINGS.includes(phase)) return t("phases.wonder")
+	else if (rf.PHASE_WONDERS.includes(phase)) return t("phases.production")
+	else if (phase === rf.PRE_PHASE_CONFLICT_PRODUCTION) return t("phases.nextProduction")
+	else if (phase === rf.PRE_PHASE_CONFLICT_MOVEMENT) return t("phases.nextMovement")
+	else if (phase === rf.PRE_PHASE_CONFLICT_BUILDING) return t("phases.nextBuilding")
+	else if (phase === rf.PRE_PHASE_CONFLICT_WONDER) return t("phases.nextWonder")
 }
 
 export function getFlexiKickoutTImerText() {

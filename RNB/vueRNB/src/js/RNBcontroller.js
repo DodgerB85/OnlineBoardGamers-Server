@@ -16,6 +16,7 @@ import * as context from "./RNBcontext"
 import * as stack from "./RNBstack"
 import * as wonder from "./RNBwonder"
 import * as Bot from "./RNBbot"
+import i18n from "../i18n"
 
 import * as IO from "../backend/RNB_IO.js"
 
@@ -144,7 +145,7 @@ export function startPlayerTurn(loadedPreMove = false) {
 
 	if (personal.soloGame) {
 		const neutralBricksUsed = store.wonderBricks.filter((num) => num === 8 || num === 9).length
-		if (neutralBricksUsed >= 36) store.gameMessages.errorText = "Caution: Final Turn"
+		if (neutralBricksUsed >= 36) store.gameMessages.errorText = i18n.global.t("io.finalTurn")
 	}
 	if (!loadedPreMove) {
 		// Reset all transporter movements -- BUT ONLY if you haven't loaded a stack

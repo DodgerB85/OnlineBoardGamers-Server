@@ -963,7 +963,7 @@ function getAtelierRecipeGfx(recipeIdx) {
 						<div v-if="isResearched === 0 && (idx !== rf.RND_FUNDAMENTAL_RESEARCH_IDX || (idx === rf.RND_FUNDAMENTAL_RESEARCH_IDX && store.gameOptions.useFundamentalResearch))" class="researchBubble" @click="produce.doResearch(idx)" :style="getBubblePosition(idx)">
 							<div class="researchBubbleContent">
 								<img :src="view.getImage(`research_${idx}`)" class="researchBubbleImg" />
-								<span class="researchBubbleText">{{ rf.RND_STRINGS[idx] }}</span>
+								<span class="researchBubbleText">{{ view.rndName(idx) }}</span>
 							</div>
 						</div>
 					</template>

@@ -11,6 +11,7 @@ import * as highlight from "../js/RNBhighlight"
 import * as context from "../js/RNBcontext"
 import * as stack from "../js/RNBstack"
 import * as atelier from "../js/RNBatelier"
+import i18n from "../i18n"
 
 import { useModelStore } from "../stores/RNBstore.js"
 
@@ -711,7 +712,7 @@ export function moveTransporterTo(entry, transporterID, event = null) {
 				else if (isSeaVertexLocation(finalLocation) && !map.hasOilRigOnHexID(finalLocation[1])) {
 					let clientX = event ? event.clientX : window.innerWidth / 2
 					let clientY = event ? event.clientY : window.innerHeight / 2
-					let htmlMessage = "Geese cannot end<br/>turn at sea<br/>following transporter"
+					let htmlMessage = i18n.global.t("action.geeseCannotEndAtSea")
 					model.showPopup("error", clientX, clientY, htmlMessage)
 					store.context.errorUnableToDropGeeseAtSea = true
 					// DO NOT RETURN = allow function to finish to clear highlights, etc

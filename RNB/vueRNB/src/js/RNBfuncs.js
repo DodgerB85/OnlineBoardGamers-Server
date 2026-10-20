@@ -18,6 +18,7 @@ import * as hd from "./RNBhex"
 import * as loc from "./RNBlocation"
 import * as stack from "./RNBstack"
 import * as context from "./RNBcontext"
+import i18n from "../i18n"
 import * as wonder from "./RNBwonder"
 
 import { useModelStore } from "../stores/RNBstore.js"
@@ -106,7 +107,7 @@ export function decompressChatData(data) {
 		chatArray[i][1] = currentFullTime
 	}
 
-	chatArray.push(["WelcomeBot", personal.gameCreationTimestamp, "Welcome to Roads & Boats Online!\n\nIf you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"])
+	chatArray.push(["WelcomeBot", personal.gameCreationTimestamp, i18n.global.t("io.welcomeChat")])
 
 	return chatArray
 }

@@ -91,62 +91,62 @@ watch(() => store.conflictPreset.conflictDecision, (newVal, _oldVal) => {
 <template>
 	<!-- CONFLICT WAIT & SEE -- NB this could be from a preset, which is always the conflict decision -->
 	<div v-if="rf.PHASE_CONFLICT_DECISIONS.includes(store.gameflow.phase)">
-		Conflict Decision for {{ view.basePhaseStr(store.gameflow.phase) }} phase
+		{{ $t("conflict.decisionFor", { phase: view.basePhaseStr(store.gameflow.phase) }) }}
 		<div class="nextTurnPrefDiv">
-			<p><strong>You must decide whether or not you wish to call conflict</strong></p>
+			<p><strong>{{ $t("conflict.mustDecide") }}</strong></p>
 			<div class="conflictOptionsDiv">
 				<label class="radioLabel">
 					<input type="radio" v-model="store.conflictPreset.conflictDecision" :value="rf.CONFLICT_DECISION_WAIT_AND_SEE" />
-					Wait & See
+					{{ $t("conflict.waitAndSee") }}
 				</label>
 				<label class="radioLabel">
 					<input type="radio" v-model="store.conflictPreset.conflictDecision" :value="rf.CONFLICT_DECISION_CONFLICT" />
-					I wish to call conflict
+					{{ $t("conflict.callConflict") }}
 				</label>
 				<label class="radioLabel">
 					<input type="radio" v-model="store.conflictPreset.conflictDecision" :value="rf.CONFLICT_DECISION_NO_CONFLICT" />
-					I do not wish to call conflict
+					{{ $t("conflict.noCallConflict") }}
 				</label>
 			</div>
-			<p><strong>For Praying I wish to:</strong></p>
+			<p><strong>{{ $t("conflict.forPraying") }}</strong></p>
 
 			<div class="conflictOptionsDiv">
 				<label class="radioLabel">
 					<input type="radio" v-model="store.conflictPreset.prayingDecision" :value="rf.CONFLICT_PRAYING_KEEP_PRAYING" />
-					Keep Praying
+					{{ $t("conflict.keepPraying") }}
 				</label>
 				<label class="radioLabel">
 					<input type="radio" v-model="store.conflictPreset.prayingDecision" :value="rf.CONFLICT_PRAYING_CASH_IN" />
-					Cash In
+					{{ $t("conflict.cashIn") }}
 				</label>
 				<label class="radioLabel">
 					<input type="radio" v-model="store.conflictPreset.prayingDecision" :value="rf.CONFLICT_PRAYING_WAIT_AND_SEE" />
-					Wait & See
+					{{ $t("conflict.waitAndSee") }}
 				</label>
 			</div>
-			<p><strong>For turn order I wish to:</strong></p>
+			<p><strong>{{ $t("conflict.forTurnOrder") }}</strong></p>
 
 			<div class="conflictOptionsDiv">
 				<label class="radioLabel">
 					<input type="radio" v-model="store.conflictPreset.turnOrderDecision" :value="rf.CONFLICT_TURN_ORDER_EARLIEST" />
-					Go earliest
+					{{ $t("conflict.goEarliest") }}
 				</label>
 				<label class="radioLabel">
 					<input type="radio" v-model="store.conflictPreset.turnOrderDecision" :value="rf.CONFLICT_TURN_ORDER_LATEST" />
-					Go latest
+					{{ $t("conflict.goLatest") }}
 				</label>
 				<label class="radioLabel">
 					<input type="radio" v-model="store.conflictPreset.turnOrderDecision" :value="rf.CONFLICT_TURN_ORDER_WAIT_AND_SEE" />
-					Wait & See
+					{{ $t("conflict.waitAndSee") }}
 				</label>
 			</div>
 		</div>
 		<button v-if="store.conflictPreset.conflictDecision !== rf.CONFLICT_DECISION_WAIT_AND_SEE" class="actionsLineButton" @click="localEndPlayerTurn">
-			<span v-if="store.conflictPreset.conflictDecision === rf.CONFLICT_DECISION_CONFLICT">End Turn: Call Conflict</span>
-			<span v-if="store.conflictPreset.conflictDecision === rf.CONFLICT_DECISION_NO_CONFLICT">End Turn: Do Not Call Conflict</span>
+			<span v-if="store.conflictPreset.conflictDecision === rf.CONFLICT_DECISION_CONFLICT">{{ $t("conflict.endTurnCall") }}</span>
+			<span v-if="store.conflictPreset.conflictDecision === rf.CONFLICT_DECISION_NO_CONFLICT">{{ $t("conflict.endTurnNoCall") }}</span>
 		</button>
 		<span v-else-if="store.conflictPreset.conflictDecision === rf.CONFLICT_DECISION_WAIT_AND_SEE" class="errorText">
-			Make a conflict decision to end your turn
+			{{ $t("conflict.makeDecision") }}
 		</span>
 	</div>
 
@@ -156,20 +156,20 @@ watch(() => store.conflictPreset.conflictDecision, (newVal, _oldVal) => {
 			<!-- Section 1: Phase Transition -->
 			<div class="conflictGroup">
 				<p class="sectionHeader">
-					<strong>Before {{ view.nextBasePhaseStr(store.gameflow.phase) }} phase:</strong>
+					<strong>{{ $t("conflict.beforePhase", { phase: view.nextBasePhaseStr(store.gameflow.phase) }) }}</strong>
 				</p>
 				<div class="conflictOptionsDiv" v-if="shouldShowConflictDecision">
 					<label :class="['radioLabelButton', { active: store.conflictPreset.conflictDecision === rf.CONFLICT_DECISION_WAIT_AND_SEE }]">
 						<input type="radio" v-model="store.conflictPreset.conflictDecision" :value="rf.CONFLICT_DECISION_WAIT_AND_SEE" />
-						<span>Wait & See</span>
+						<span>{{ $t("conflict.waitAndSee") }}</span>
 					</label>
 					<label :class="['radioLabelButton', { active: store.conflictPreset.conflictDecision === rf.CONFLICT_DECISION_CONFLICT }]">
 						<input type="radio" v-model="store.conflictPreset.conflictDecision" :value="rf.CONFLICT_DECISION_CONFLICT" />
-						<span>I wish to call conflict</span>
+						<span>{{ $t("conflict.callConflict") }}</span>
 					</label>
 					<label :class="['radioLabelButton', { active: store.conflictPreset.conflictDecision === rf.CONFLICT_DECISION_NO_CONFLICT }]">
 						<input type="radio" v-model="store.conflictPreset.conflictDecision" :value="rf.CONFLICT_DECISION_NO_CONFLICT" />
-						<span>I do not wish to call conflict</span>
+						<span>{{ $t("conflict.noCallConflict") }}</span>
 					</label>
 				</div>
 			</div>
@@ -178,22 +178,22 @@ watch(() => store.conflictPreset.conflictDecision, (newVal, _oldVal) => {
 			<div class="conflictGroup" v-if="shouldShowPrayingDecision">
 				<p class="sectionHeader">
 					<strong v-if="shouldShowConflictDecision">
-						<span v-if="store.conflictPreset.conflictDecision === rf.CONFLICT_DECISION_CONFLICT">For praying I wish to:</span>
-						<span v-else>In case anyone else calls conflict:</span>
+						<span v-if="store.conflictPreset.conflictDecision === rf.CONFLICT_DECISION_CONFLICT">{{ $t("conflict.forPraying") }}</span>
+						<span v-else>{{ $t("conflict.inCaseConflict") }}</span>
 					</strong>
 				</p>
 				<div class="conflictOptionsDiv">
 					<label :class="['radioLabelButton', { active: store.conflictPreset.prayingDecision === rf.CONFLICT_PRAYING_KEEP_PRAYING }]">
 						<input type="radio" v-model="store.conflictPreset.prayingDecision" :value="rf.CONFLICT_PRAYING_KEEP_PRAYING" />
-						<span>Keep Praying</span>
+						<span>{{ $t("conflict.keepPraying") }}</span>
 					</label>
 					<label :class="['radioLabelButton', { active: store.conflictPreset.prayingDecision === rf.CONFLICT_PRAYING_CASH_IN }]">
 						<input type="radio" v-model="store.conflictPreset.prayingDecision" :value="rf.CONFLICT_PRAYING_CASH_IN" />
-						<span>Cash In</span>
+						<span>{{ $t("conflict.cashIn") }}</span>
 					</label>
 					<label :class="['radioLabelButton', { active: store.conflictPreset.prayingDecision === rf.CONFLICT_PRAYING_WAIT_AND_SEE }]">
 						<input type="radio" v-model="store.conflictPreset.prayingDecision" :value="rf.CONFLICT_PRAYING_WAIT_AND_SEE" />
-						<span>Wait & See</span>
+						<span>{{ $t("conflict.waitAndSee") }}</span>
 					</label>
 				</div>
 			</div>
@@ -202,22 +202,22 @@ watch(() => store.conflictPreset.conflictDecision, (newVal, _oldVal) => {
 			<div class="conflictGroup">
 				<p class="sectionHeader">
 					<strong>
-						<span v-if="store.conflictPreset.conflictDecision === rf.CONFLICT_DECISION_CONFLICT">For turn order I wish to:</span>
-						<span v-else>In case anyone else calls conflict, for turn order I wish to:</span>
+						<span v-if="store.conflictPreset.conflictDecision === rf.CONFLICT_DECISION_CONFLICT">{{ $t("conflict.forTurnOrder") }}</span>
+						<span v-else>{{ $t("conflict.inCaseConflictTurnOrder") }}</span>
 					</strong>
 				</p>
 				<div class="conflictOptionsDiv">
 					<label :class="['radioLabelButton', { active: store.conflictPreset.turnOrderDecision === rf.CONFLICT_TURN_ORDER_EARLIEST }]">
 						<input type="radio" v-model="store.conflictPreset.turnOrderDecision" :value="rf.CONFLICT_TURN_ORDER_EARLIEST" />
-						<span>Go earliest</span>
+						<span>{{ $t("conflict.goEarliest") }}</span>
 					</label>
 					<label :class="['radioLabelButton', { active: store.conflictPreset.turnOrderDecision === rf.CONFLICT_TURN_ORDER_LATEST }]">
 						<input type="radio" v-model="store.conflictPreset.turnOrderDecision" :value="rf.CONFLICT_TURN_ORDER_LATEST" />
-						<span>Go latest</span>
+						<span>{{ $t("conflict.goLatest") }}</span>
 					</label>
 					<label :class="['radioLabelButton', { active: store.conflictPreset.turnOrderDecision === rf.CONFLICT_TURN_ORDER_WAIT_AND_SEE }]">
 						<input type="radio" v-model="store.conflictPreset.turnOrderDecision" :value="rf.CONFLICT_TURN_ORDER_WAIT_AND_SEE" />
-						<span>Wait & See</span>
+						<span>{{ $t("conflict.waitAndSee") }}</span>
 					</label>
 				</div>
 			</div>
@@ -225,13 +225,13 @@ watch(() => store.conflictPreset.conflictDecision, (newVal, _oldVal) => {
 			<!-- Conditional Panels: Alrts -->
 			<div v-if="store.context.noTransportersOnHomeTile && rf.PHASE_BUILDINGS.includes(store.gameflow.phase)" class="expertPanelInfo">
 				<p class="alertText">
-					<strong>⚠️ No transporters on home tile:</strong>
-					Cannot build wonder bricks.
+					<strong>{{ $t("conflict.noTransportersHome") }}</strong>
+					{{ $t("conflict.cannotBuildBricks") }}
 				</p>
 				<div class="conflictOptionsDiv">
 					<label :class="['radioLabelButton', { active: store.conflictPreset.skipWonderPhaseDecision === rf.CONFLICT_SKIP_WONDER_PHASE_SKIP_ALL }]">
 						<input @click="clickedPrePhaseSkipAtConflictDecision(rf.CONFLICT_SKIP_WONDER_PHASE_SKIP_ALL)" type="radio" v-model="store.conflictPreset.skipWonderPhaseDecision" :value="rf.CONFLICT_SKIP_WONDER_PHASE_SKIP_ALL" />
-						<span>Skip Wonder Phase & Production Conflict</span>
+						<span>{{ $t("conflict.skipWonderAll") }}</span>
 					</label>
 					<!-- No point in just setting a wonder phase skip without the conflict. This also messes up allowing setting phases after that -->
 					<!--
@@ -242,27 +242,27 @@ watch(() => store.conflictPreset.conflictDecision, (newVal, _oldVal) => {
 				-->
 					<label :class="['radioLabelButton', { active: store.conflictPreset.skipWonderPhaseDecision === rf.CONFLICT_SKIP_WONDER_PHASE_WAIT_AND_SEE }]">
 						<input type="radio" v-model="store.conflictPreset.skipWonderPhaseDecision" :value="rf.CONFLICT_SKIP_WONDER_PHASE_WAIT_AND_SEE" />
-						<span>Play as Normal</span>
+						<span>{{ $t("conflict.playNormal") }}</span>
 					</label>
 				</div>
 			</div>
 
 			<div v-if="(rf.PHASE_BUILDINGS.includes(store.gameflow.phase) && store.context.noTransportersOnHomeTile && noProductionOptions) || (rf.PHASE_WONDERS.includes(store.gameflow.phase) && noProductionOptions)" class="expertPanelInfo">
 				<p class="alertText">
-					<strong>⚠️ No manual production options available.</strong>
+					<strong>{{ $t("conflict.noManualProduction") }}</strong>
 				</p>
 				<div class="conflictOptionsDiv">
 					<label :class="['radioLabelButton', { active: store.conflictPreset.skipProductionPhaseDecision === rf.CONFLICT_SKIP_PRODUCTION_PHASE_SKIP_ALL }]">
 						<input type="radio" v-model="store.conflictPreset.skipProductionPhaseDecision" :value="rf.CONFLICT_SKIP_PRODUCTION_PHASE_SKIP_ALL" />
-						<span>Skip Production Phase & Movement Conflict</span>
+						<span>{{ $t("conflict.skipProductionAll") }}</span>
 					</label>
 					<label :class="['radioLabelButton', { active: store.conflictPreset.skipProductionPhaseDecision === rf.CONFLICT_SKIP_PRODUCTION_PHASE_SKIP_PRODUCTION_ONLY }]">
 						<input type="radio" v-model="store.conflictPreset.skipProductionPhaseDecision" :value="rf.CONFLICT_SKIP_PRODUCTION_PHASE_SKIP_PRODUCTION_ONLY" />
-						<span>Skip Production Phase Only</span>
+						<span>{{ $t("conflict.skipProductionOnly") }}</span>
 					</label>
 					<label :class="['radioLabelButton', { active: store.conflictPreset.skipProductionPhaseDecision === rf.CONFLICT_SKIP_PRODUCTION_PHASE_WAIT_AND_SEE }]">
 						<input type="radio" v-model="store.conflictPreset.skipProductionPhaseDecision" :value="rf.CONFLICT_SKIP_PRODUCTION_PHASE_WAIT_AND_SEE" />
-						<span>Play as Normal</span>
+						<span>{{ $t("conflict.playNormal") }}</span>
 					</label>
 				</div>
 			</div>

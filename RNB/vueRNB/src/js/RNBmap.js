@@ -41,6 +41,7 @@ import * as prod from "./RNBproduce"
 import * as stack from "./RNBstack"
 import * as produce from "./RNBproduce"
 import * as atelier from "./RNBatelier"
+import i18n from "../i18n"
 
 import { useModelStore } from "../stores/RNBstore.js"
 import { usePersonalStore } from "../stores/RNBpersonal.js"
@@ -1810,7 +1811,7 @@ export function clickedRes(event, _hexID, resID) {
 		if (model.transporterCarriesTransporter(transporterObj.id)) {
 			let clientX = event.clientX
 			let clientY = event.clientY
-			let htmlMessage = "Transporter is<br/>already full<br/>Max Capacity: 1"
+			let htmlMessage = i18n.global.t("action.transporterFull")
 			model.showPopup("error", clientX, clientY, htmlMessage)
 			if (isGoose) spaceToLoadGoose = false
 			else {
@@ -1836,7 +1837,7 @@ export function clickedRes(event, _hexID, resID) {
 			else {
 				let clientX = event.clientX
 				let clientY = event.clientY
-				let htmlMessage = "Transporter is<br/>already full<br/>Max Capacity: " + transporterStats.maxCapacity
+				let htmlMessage = i18n.global.t("action.transporterFullCapacity", { capacity: transporterStats.maxCapacity })
 				if (showPopup) model.showPopup("error", clientX, clientY, htmlMessage)
 				// Now set up for a possible ferry
 				const buckets = getPossibleDropBucketsForResourceOnTransporter(resID)
@@ -1858,7 +1859,7 @@ export function clickedRes(event, _hexID, resID) {
 			resObj.location = loc.setFollowerLocation(transporterObj.id)
 			let clientX = event.clientX
 			let clientY = event.clientY
-			let htmlMessage = "Transporter is<br/>already full<br/>Max Capacity: " + transporterStats.maxCapacity
+			let htmlMessage = i18n.global.t("action.transporterFullCapacity", { capacity: transporterStats.maxCapacity })
 			if (showPopup) model.showPopup("info", clientX, clientY, htmlMessage)
 			// create the stack
 			const compressedTransporterLocation = stack.compressLocation(transporterObj.location)
@@ -1887,7 +1888,7 @@ export function clickedRes(event, _hexID, resID) {
 		if (transporterObj.type === rf.EXHIBITION_TRANSPORTER && !atelier.canCaravanCarry(transporterObj, resObj.type)) {
 			let clientX = event.clientX
 			let clientY = event.clientY
-			let htmlMessage = "Exhibition caravans can only carry artwork, one of each type"
+			let htmlMessage = i18n.global.t("action.exhibitionCaravanArtwork")
 			model.showPopup("error", clientX, clientY, htmlMessage)
 			return
 		}
@@ -2269,7 +2270,7 @@ export function clickedResOnTransporter(transporterID, resourceID) {
 			if (model.transporterCarriesTransporter(selectedTransporterObj.id)) {
 				let clientX = event.clientX
 				let clientY = event.clientY
-				let htmlMessage = "Transporter is<br/>already full<br/>Max Capacity: 1"
+				let htmlMessage = i18n.global.t("action.transporterFull")
 				model.showPopup("error", clientX, clientY, htmlMessage)
 				return
 			}
@@ -2278,7 +2279,7 @@ export function clickedResOnTransporter(transporterID, resourceID) {
 			if (resourcesOnTransporter.length >= transporterStats.maxCapacity) {
 				let clientX = event.clientX
 				let clientY = event.clientY
-				let htmlMessage = "Transporter is<br/>already full<br/>Max Capacity: " + transporterStats.maxCapacity
+				let htmlMessage = i18n.global.t("action.transporterFullCapacity", { capacity: transporterStats.maxCapacity })
 				model.showPopup("error", clientX, clientY, htmlMessage)
 				return
 			}
@@ -2287,7 +2288,7 @@ export function clickedResOnTransporter(transporterID, resourceID) {
 			if (selectedTransporterObj.type === rf.EXHIBITION_TRANSPORTER && !atelier.canCaravanCarry(selectedTransporterObj, stolenResObj.type)) {
 				let clientX = event.clientX
 				let clientY = event.clientY
-				let htmlMessage = "Exhibition caravans can only carry artwork, one of each type"
+				let htmlMessage = i18n.global.t("action.exhibitionCaravanArtwork")
 				model.showPopup("error", clientX, clientY, htmlMessage)
 				return
 			}

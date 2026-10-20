@@ -43,6 +43,7 @@ import MapControlPanel from "./components/MapControlPanel.vue"
 import ReplayArea from "./components/History/ReplayArea.vue"
 
 import { useModelStore } from "./stores/RNBstore.js"
+import i18n from "./i18n"
 const store = useModelStore()
 
 import { usePersonalStore } from "./stores/RNBpersonal.js"
@@ -82,7 +83,7 @@ if (window.initData.mapEditor || window.initData.showMapOnly) {
 
 /********************************* */
 if (!window.initData.showMapOnly && !window.initData.mapEditor) {
-	if (personal.mapName === "") personal.mapName =  "[No map found]"
+	if (personal.mapName === "") personal.mapName = i18n.global.t("common.noMapFound")
 	if (!personal.showMapOnly && !rf.SUPER_USERS.includes(personal.name) && !rf.DEBUG_USERS.includes(personal.name) && personal.name !== "DodgerB") {
 		window.addEventListener("contextmenu", (e) => {
 			e.preventDefault()

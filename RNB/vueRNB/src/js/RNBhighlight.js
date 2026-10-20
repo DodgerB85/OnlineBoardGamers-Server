@@ -18,6 +18,7 @@ import * as util from "./RNButil"
 import * as model from "./RNBmodel"
 import * as build from "./RNBbuild"
 import * as map from "./RNBmap"
+import i18n from "../i18n"
 import * as loc from "./RNBlocation.js"
 import * as graph from "./RNBgraph.js"
 import * as controller from "./RNBcontroller"
@@ -93,7 +94,7 @@ export function higlightTilesForStartTile() {
 	// If you have valid options, highlight those
 	if (store.context.hexPiecesToHighlight.length > 0) return
 
-	store.gameMessages.actionError = "No valid start tile found - allowing anywhere"
+	store.gameMessages.actionError = i18n.global.t("io.noValidStartTile")
 	for (let i = 0; i < store.mapData.hexData.length; i++) {
 		const hex = store.mapData.hexData[i]
 		for (const bucketId of util.uniqueOnly(hex.bucketIdsCurrent)) {

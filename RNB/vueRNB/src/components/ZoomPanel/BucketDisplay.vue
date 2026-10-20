@@ -185,7 +185,7 @@ function shouldShowUnableToDropGeeseText(transporterID) {
 							</div>
 						</div>
 
-						<span class="gooseTextSpan" v-if="transporter.resourcesFollowingTransporter.length === 0">Geese</span>
+						<span class="gooseTextSpan" v-if="transporter.resourcesFollowingTransporter.length === 0">{{ $t("bucket.geese") }}</span>
 					</div>
 					<!-- Display Trans-->
 					<img
@@ -246,23 +246,23 @@ function shouldShowUnableToDropGeeseText(transporterID) {
 				</div>
 
 				<div class="transporterInfoDiv" v-if="rf.PHASE_MOVEMENTS.includes(store.gameflow.phase) && transporter.ownerIndex === controller.currentPlayerIndex()">
-					Moves: {{ transporter.remainingMoves }}
+					{{ $t("bucket.moves") }} {{ transporter.remainingMoves }}
 					<br />
 					<template v-if="model.doesTransporterHaveAlreadyMovedResource(transporter.id)">
-						<span class="resAlreadyMovedSpan">Another transporter has already moved a good</span>
+						<span class="resAlreadyMovedSpan">{{ $t("bucket.alreadyMovedGood") }}</span>
 						<br />
 					</template>
 				</div>
 				<div class="transporterInfoDiv" v-if="shouldShowTransporterUnloadText(transporter.id)">
-					<span class="resAlreadyMovedSpan">You can only unload transporters at the start of movement phase</span>
+					<span class="resAlreadyMovedSpan">{{ $t("bucket.unloadOnlyStart") }}</span>
 					<br />
 				</div>
 				<div class="transporterInfoDiv" v-if="model.doesTransporterHaveAlreadyMovedTransporter(transporter.id)">
-					<span class="resAlreadyMovedSpan">The carried transporter has already moved</span>
+					<span class="resAlreadyMovedSpan">{{ $t("bucket.carriedAlreadyMoved") }}</span>
 					<br />
 				</div>
 				<div class="transporterInfoDiv" v-if="shouldShowUnableToDropGeeseText(transporter.id)">
-					<span class="resAlreadyMovedSpan">There is nowhere to drop the geese</span>
+					<span class="resAlreadyMovedSpan">{{ $t("bucket.nowhereDropGeese") }}</span>
 					<br />
 				</div>
 			</template>

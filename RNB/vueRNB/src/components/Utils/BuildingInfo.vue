@@ -348,7 +348,7 @@ function transporterLimitIssue() {
 			<!-- Left: Building Image -->
 			<div class="flexHolderLeftDiv">
 				<span class="bldgNameSpan">
-					{{ buildingStats.bldg_name_summary }}
+					{{ view.buildingName(buildingStats.building) }}
 				</span>
 				<br />
 				<template v-if="!rf.ALL_PSEUDO_BUILDINGS.includes(buildingStats.building)">
@@ -413,7 +413,7 @@ function transporterLimitIssue() {
 			<div class="flexHolderRightDiv">
 				<div>
 					<template v-if="showCost">
-						<strong>Cost:&nbsp;</strong>
+						<strong>{{ $t("buildingInfo.cost") }}&nbsp;</strong>
 						<img v-for="(imgName, idx) in buildingCostImages" :key="idx" class="resProdSummaryImg" :src="view.getImage(imgName)" />
 						<span v-if="buildingStats.building === rf.BLDG_PSEUDO_WALL || buildingStats.building === rf.BLDG_PSEUDO_DEMOLISH_WALL">x ?</span>
 						<br />
@@ -421,14 +421,14 @@ function transporterLimitIssue() {
 					<!-- Don't show inputs / outputs for pseudo buildings-->
 					<template v-if="!rf.ALL_PSEUDO_BUILDINGS.includes(buildingStats.building)">
 						<template v-if="buildingInputImages[0].length === 0">
-							<span class="primaryTextSpan">Primary</span>
+							<span class="primaryTextSpan">{{ $t("buildingInfo.primary") }}</span>
 						</template>
 						<template v-else-if="buildingInputImages.length === 1">
-							<strong>Input:&nbsp;</strong>
+							<strong>{{ $t("buildingInfo.input") }}&nbsp;</strong>
 							<img v-for="(imgName, idx) in buildingInputImages[0]" :key="idx" :class="imgName.startsWith('transporter') ? 'transporterProdSummaryImg' : 'resProdSummaryImg'" :src="view.getImage(imgName)" />
 						</template>
 						<template v-else>
-							<strong><u>Input</u></strong>
+							<strong><u>{{ $t("buildingInfo.inputTitle") }}</u></strong>
 							<br />
 							<template v-for="(resSet, idx) in buildingInputImages" :key="idx">
 								<span v-if="idx > 0">&nbsp;/&nbsp;</span>
@@ -437,7 +437,7 @@ function transporterLimitIssue() {
 						</template>
 
 						<div style="margin-top: auto">
-							<strong>Output:&nbsp;</strong>
+							<strong>{{ $t("buildingInfo.output") }}&nbsp;</strong>
 							<template v-if="buildingStats.building !== rf.BLDG_MINE">
 								<img v-for="(imgName, idx) in buildingOutputImages" :key="idx" :class="imgName.startsWith('transporter') ? 'transporterProdSummaryImg' : 'resProdSummaryImg'" :src="view.getImage(imgName)" />
 							</template>
@@ -460,13 +460,13 @@ function transporterLimitIssue() {
 						</div>
 					</template>
 					<!-- RE-SHAFT MINE TEXT-->
-					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_RESHAFT_MINE">Add to mine stock</template>
+					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_RESHAFT_MINE">{{ $t("buildingInfo.addToMineStock") }}</template>
 					<!-- BOMB TEXT -->
-					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_BOMB">Destroy a building</template>
+					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_BOMB">{{ $t("buildingInfo.destroyBuilding") }}</template>
 					<!-- STRENGTHEN TEXT -->
-					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_STRENGTHEN">Make bomb-proof</template>
+					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_STRENGTHEN">{{ $t("buildingInfo.makeBombProof") }}</template>
 					<!-- ROAD & BRIDGE (CITY) TEXT -->
-					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_ROAD_BRIDGE">Bridge the city moat</template>
+					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_ROAD_BRIDGE">{{ $t("buildingInfo.bridgeCityMoat") }}</template>
 				</div>
 			</div>
 		</div>
@@ -477,7 +477,7 @@ function transporterLimitIssue() {
 			<div class="radioLine">
 				<label class="mineRadioLabel" @click.stop>
 					<input type="radio" :value="0" v-model="store.context.mineSelectionType" />
-					Standard
+					{{ $t("buildingInfo.standard") }}
 				</label>
 			</div>
 
@@ -485,11 +485,11 @@ function transporterLimitIssue() {
 			<div class="radioLine" v-if="controller.currentPlayerObj().RnD[rf.RND_MINE_SPEC_IDX] === 1">
 				<label class="mineRadioLabel" @click.stop>
 					<input type="radio" :value="1" v-model="store.context.mineSelectionType" />
-					Spec (Iron)
+					{{ $t("buildingInfo.specIron") }}
 				</label>
 				<label class="mineRadioLabel" @click.stop>
 					<input type="radio" :value="2" v-model="store.context.mineSelectionType" />
-					Spec (Gold)
+					{{ $t("buildingInfo.specGold") }}
 				</label>
 			</div>
 
@@ -497,22 +497,22 @@ function transporterLimitIssue() {
 			<div class="radioLine" v-if="controller.currentPlayerObj().RnD[rf.RND_MINE_BIG_IDX] === 1">
 				<label class="mineRadioLabel" @click.stop>
 					<input type="radio" :value="3" v-model="store.context.mineSelectionType" />
-					Big
+					{{ $t("buildingInfo.big") }}
 				</label>
 			</div>
 		</div>
 
 		<!-- Bottom: Remaining Production (Now inside the border) -->
 		<div v-if="showRemainingProd" class="remainingProdRow">
-			<strong>Remaining production: {{ bldg.remainingConversions * buildingStats.outputRes.length }}</strong>
+			<strong>{{ $t("buildingInfo.remainingProduction", { count: bldg.remainingConversions * buildingStats.outputRes.length }) }}</strong>
 		</div>
 		<div v-if="noWaterSpaceForNewTransporter()" class="remainingProdRow">
-			<strong class="warningSpan">No space for a new water transporter</strong>
+			<strong class="warningSpan">{{ $t("buildingInfo.noSpaceWaterTransporter") }}</strong>
 		</div>
 		<div v-if="transporterLimitIssue()[0] || transporterLimitIssue()[1] || transporterLimitIssue()[2]" class="remainingProdRow">
-			<strong v-if="transporterLimitIssue()[0]" class="warningSpan">Max 8 transporters</strong>
-			<strong v-if="transporterLimitIssue()[1]" class="warningSpan">Max 5 land transporters</strong>
-			<strong v-if="transporterLimitIssue()[2]" class="warningSpan">Max 5 water transporters</strong>
+			<strong v-if="transporterLimitIssue()[0]" class="warningSpan">{{ $t("buildingInfo.max8Transporters") }}</strong>
+			<strong v-if="transporterLimitIssue()[1]" class="warningSpan">{{ $t("buildingInfo.max5Land") }}</strong>
+			<strong v-if="transporterLimitIssue()[2]" class="warningSpan">{{ $t("buildingInfo.max5Water") }}</strong>
 		</div>
 	</div>
 </template>

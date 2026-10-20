@@ -7,6 +7,7 @@ import * as model from "../../js/RNBmodel.js"
 import * as loc from "../../js/RNBlocation"
 import * as stack from "../../js/RNBstack"
 import * as atelier from "../../js/RNBatelier"
+import i18n from "../../i18n"
 //import * as map from "../../js/RNBmap"
 
 import { useModelStore } from "../../stores/RNBstore.js"
@@ -442,18 +443,18 @@ const computedEntry3 = computed(() => {
 			ret.newTurnOrder[ret.missingPlayerData[1]] = ret.missingPlayerData[0]
 		}
 	} else if (entry[0] === rf.HIST_STACK_ACTIONS) {
-		ret.title = "TITLE"
+		ret.title = ""
 		ret.stackSteps = []
-		if (rf.PHASE_MOVEMENTS.includes(entry[3][0])) ret.title = "Movement Phase"
-		else if (rf.PHASE_PRODUCTIONS.includes(entry[3][0])) ret.title = "Production Phase"
-		else if (rf.PHASE_BUILDINGS.includes(entry[3][0])) ret.title = "Building Phase"
-		else if (rf.PHASE_WONDERS.includes(entry[3][0])) ret.title = "Wonder Phase"
+		if (rf.PHASE_MOVEMENTS.includes(entry[3][0])) ret.title = i18n.global.t("history.movementPhase")
+		else if (rf.PHASE_PRODUCTIONS.includes(entry[3][0])) ret.title = i18n.global.t("history.productionPhase")
+		else if (rf.PHASE_BUILDINGS.includes(entry[3][0])) ret.title = i18n.global.t("history.buildingPhase")
+		else if (rf.PHASE_WONDERS.includes(entry[3][0])) ret.title = i18n.global.t("history.wonderPhase")
 		// If there is only 1 entry, then the phase was skipped
 		if (entry[3].length === 1) {
-			if (rf.PHASE_MOVEMENTS.includes(entry[3][0])) ret.title = "Skips Movement"
-			else if (rf.PHASE_PRODUCTIONS.includes(entry[3][0])) ret.title = "Skips Production"
-			else if (rf.PHASE_BUILDINGS.includes(entry[3][0])) ret.title = "Skips Building"
-			else if (rf.PHASE_WONDERS.includes(entry[3][0])) ret.title = "Skips Wonder"
+			if (rf.PHASE_MOVEMENTS.includes(entry[3][0])) ret.title = i18n.global.t("history.skipsMovement")
+			else if (rf.PHASE_PRODUCTIONS.includes(entry[3][0])) ret.title = i18n.global.t("history.skipsProduction")
+			else if (rf.PHASE_BUILDINGS.includes(entry[3][0])) ret.title = i18n.global.t("history.skipsBuilding")
+			else if (rf.PHASE_WONDERS.includes(entry[3][0])) ret.title = i18n.global.t("history.skipsWonder")
 		}
 		for (let i = 1; i < entry[3].length; i++) {
 			let thisStepHist = {}
@@ -978,7 +979,7 @@ const computedEntry3 = computed(() => {
 			else if (stackAction[0] === rf.STACK_ADD_WONDER_BRICKS) {
 				thisStepHist.action = rf.STACK_ADD_WONDER_BRICKS
 				const numBricks = stackAction.length - 1
-				const addBrickText = numBricks === 1 ? "1 brick" : `${numBricks} bricks`
+				const addBrickText = numBricks === 1 ? i18n.global.t("history.addsBricks", { count: numBricks }) : i18n.global.t("history.addsBricksPlural", { count: numBricks })
 				const bricks = []
 				for (const brick of stackAction.slice(1)) {
 					let resGfxs = []
@@ -1018,7 +1019,7 @@ const computedEntry3 = computed(() => {
 	<template v-if="entry[0] === rf.HIST_NEW_GAME">
 		<div class="log separator mainEntry" :class="{ selectableHistory: store.viewSettings.showReplay }" @click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
 			<div class="new_turn">
-				Welcome to Roads & Boats!
+				{{ $t("history.welcome") }}
 				<br />
 				<div v-for="(player, idx) in store.players" :key="idx" class="playerScoreSummaryDiv">
 					<span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(player.colour)">{{ store.players[idx].name }}</span>
@@ -1034,7 +1035,7 @@ const computedEntry3 = computed(() => {
 				<span>{{ funcs.timestampToString(entry[2]) }}</span>
 			</div>
 			<div class="mainEntry new_turn">
-				<b><u>Final Scores</u></b>
+				<b><u>{{ $t("history.finalScores") }}</u></b>
 				<br />
 				<br />
 				<!--<template v-if="store.context.finalPositions.length === 1">
@@ -1045,7 +1046,7 @@ const computedEntry3 = computed(() => {
 				<template v-for="(finalEntry, idx) in entry[3]" :key="idx">
 					{{ view.getOrdinal(idx + 1) }}:
 					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[finalEntry[0]].colour)">{{ store.players[finalEntry[0]].displayName }}</span>
-					Total: {{ finalEntry[1] }}
+					{{ $t("history.total", { score: finalEntry[1] }) }}
 					<br />
 				</template>
 				<br />
@@ -1056,7 +1057,7 @@ const computedEntry3 = computed(() => {
 	<!-- New Turn -->
 	<template v-if="entry[0] === rf.HIST_NEW_TURN">
 		<div class="log separator mainEntry" :class="{ selectableHistory: store.viewSettings.showReplay }" @click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
-			<div class="new_turn">Start of turn {{ entry[3][0] }}</div>
+			<div class="new_turn">{{ $t("history.startOfTurn", { turn: entry[3][0] }) }}</div>
 		</div>
 	</template>
 
@@ -1068,7 +1069,7 @@ const computedEntry3 = computed(() => {
 					{{ funcs.timestampToString(entry[2]) }}
 				</span>
 			</div>
-			<div class="container">Custom Scenario Elements Added</div>
+			<div class="container">{{ $t("history.customScenario") }}</div>
 		</div>
 	</template>
 	<!-- HIST_PRE_PRODUCTION_MINES -->
@@ -1080,7 +1081,7 @@ const computedEntry3 = computed(() => {
 				</span>
 			</div>
 			<div class="container">
-				<b><u>Mine Production</u></b>
+				<b><u>{{ $t("history.mineProduction") }}</u></b>
 				<br />
 				<template v-for="(primaryEntry, idx) in computedEntry3.primaryProductions" :key="idx">
 					<div class="flexContainer">
@@ -1092,12 +1093,12 @@ const computedEntry3 = computed(() => {
 							<div class="rightArrow"></div>
 							<img v-for="(resGfx, idx2) in primaryEntry.outputResourcesGfx" :key="idx2" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
 							<!-- ELECTRICITY: a powered mine pulls an extra good -->
-							<span v-if="primaryEntry.powered" class="electricitySymbol" title="Powered by electricity - doubled output">⚡</span>
+							<span v-if="primaryEntry.powered" class="electricitySymbol" :title="$t('history.poweredDoubled')">⚡</span>
 							<template v-if="primaryEntry.powered">
 								<img v-for="(resGfx, idx3) in primaryEntry.outputResourcesGfx" :key="'d' + idx3" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
 							</template>
 						</template>
-						<template v-else>is empty</template>
+						<template v-else>{{ $t("history.emptyMine") }}</template>
 					</div>
 				</template>
 			</div>
@@ -1113,7 +1114,7 @@ const computedEntry3 = computed(() => {
 				</span>
 			</div>
 			<div class="container">
-				<b><u>Primary Production</u></b>
+				<b><u>{{ $t("history.primaryProduction") }}</u></b>
 				<br />
 				<template v-for="(primaryEntry, idx) in computedEntry3.primaryProductions" :key="idx">
 					<div class="flexContainer">
@@ -1122,9 +1123,9 @@ const computedEntry3 = computed(() => {
 							<!-- ELECTRICITY: powered power plant - fuel in, doubled electricity out -->
 							<img v-for="(resGfx, pi) in primaryEntry.inputResGfx" :key="'ppin' + pi" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
 							<div class="rightArrow"></div>
-							<span class="electricitySymbol" title="Powered by electricity - doubled output">⚡</span>
-							<span class="electricitySymbol" title="Powered by electricity - doubled output">⚡</span>
-							<span class="electricitySymbol" title="Powered by electricity - doubled output">⚡</span>
+							<span class="electricitySymbol" :title="$t('history.poweredDoubled')">⚡</span>
+							<span class="electricitySymbol" :title="$t('history.poweredDoubled')">⚡</span>
+							<span class="electricitySymbol" :title="$t('history.poweredDoubled')">⚡</span>
 						</template>
 						<template v-else>
 							<img v-if="!primaryEntry.isMine" class="buildingProductionSummaryImg" :src="view.getImage(primaryEntry.bldgGfx)" />
@@ -1135,30 +1136,30 @@ const computedEntry3 = computed(() => {
 								<div class="rightArrow"></div>
 								<img v-for="(resGfx, idx2) in primaryEntry.outputResourcesGfx" :key="idx2" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
 								<!-- ELECTRICITY: a powered primary also produces another of its goods -->
-								<span v-if="primaryEntry.powered" class="electricitySymbol" title="Powered by electricity - doubled output">⚡</span>
+								<span v-if="primaryEntry.powered" class="electricitySymbol" :title="$t('history.poweredDoubled')">⚡</span>
 								<template v-if="primaryEntry.powered">
 									<img v-for="(resGfx, idx3) in primaryEntry.outputResourcesGfx" :key="'d' + idx3" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
 								</template>
 							</template>
-							<template v-else>is empty</template>
+							<template v-else>{{ $t("history.emptyMine") }}</template>
 						</template>
 					</div>
 				</template>
 				<span v-if="computedEntry3.primaryProductions.length === 0">
-					No primary production
+					{{ $t("history.noPrimary") }}
 					<br />
 				</span>
-				<b><u>Geese Reproduction</u></b>
+				<b><u>{{ $t("history.geeseReproduction") }}</u></b>
 				<br />
 				<template v-if="computedEntry3.totalGeeseReproduction !== 0">
 					<MiniHex v-for="(data, idx) in computedEntry3.geeseReproductionData" :key="idx" :hexID="data.hexID" :hexPiecesToOutline="data.hexPiecesToOutline" />
 					<br />
 				</template>
 				<span v-if="computedEntry3.totalGeeseReproduction === 0">
-					No geese reproduced
+					{{ $t("history.noGeese") }}
 					<br />
 				</span>
-				<b><u>Unattended Secondary Production</u></b>
+				<b><u>{{ $t("history.unattendedSecondary") }}</u></b>
 				<br />
 				<template v-for="(secondaryEntry, idx) in computedEntry3.secondaryProductions" :key="idx">
 					<div class="flexContainer">
@@ -1170,7 +1171,7 @@ const computedEntry3 = computed(() => {
 					</div>
 				</template>
 				<span v-if="computedEntry3.secondaryProductions.length === 0">
-					No secondary production
+					{{ $t("history.noSecondary") }}
 					<br />
 				</span>
 			</div>
@@ -1186,7 +1187,7 @@ const computedEntry3 = computed(() => {
 				</span>
 			</div>
 			<div class="container">
-				<b><u>Remaining Secondary Production</u></b>
+				<b><u>{{ $t("history.remainingSecondary") }}</u></b>
 				<br />
 				<template v-for="(secondaryEntry, idx) in computedEntry3.secondaryProductions" :key="idx">
 					<div class="flexContainer">
@@ -1197,10 +1198,10 @@ const computedEntry3 = computed(() => {
 						<img v-for="(resGfx, idx2) in secondaryEntry.outputResourcesGfx" :key="idx2" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
 					</div>
 				</template>
-				<span v-if="computedEntry3.secondaryProductions.length === 0">No Production</span>
+				<span v-if="computedEntry3.secondaryProductions.length === 0">{{ $t("history.noProduction") }}</span>
 
 				<template v-if="computedEntry3.metaResearchEntries.length > 0">
-					<b><u>Metaphysical Research</u></b>
+					<b><u>{{ $t("history.metaphysicalResearch") }}</u></b>
 					<br />
 					<template v-for="(metaResearchEntry, idx) in computedEntry3.metaResearchEntries" :key="idx">
 						<div class="flexContainer">
@@ -1226,7 +1227,7 @@ const computedEntry3 = computed(() => {
 				</span>
 			</div>
 			<div class="container">
-				Conflict called by:
+				{{ $t("history.conflictCalledBy") }}
 				<template v-for="(playerIndex, idx) in entry[3]" :key="idx">
 					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ store.players[playerIndex].displayName }}</span>
 				</template>
@@ -1243,22 +1244,22 @@ const computedEntry3 = computed(() => {
 				</span>
 			</div>
 			<div class="container">
-				<b><u>Conflict - Praying</u></b>
+				<b><u>{{ $t("history.conflictPraying") }}</u></b>
 				<br />
 				<template v-for="(entry, idx) in computedEntry3.playerOrderDataArrs" :key="idx">
 					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[0]].colour)">{{ store.players[entry[0]].displayName }}</span>
-					<span v-if="entry[1] === 1">Cashes in</span>
-					<span v-else-if="entry[1] === 0">Keeps Praying</span>
-					<span v-if="entry.length > 2 && entry[2] === 1">&nbsp;(preset)</span>
+					<span v-if="entry[1] === 1">{{ $t("history.cashesIn") }}</span>
+					<span v-else-if="entry[1] === 0">{{ $t("history.keepsPraying") }}</span>
+					<span v-if="entry.length > 2 && entry[2] === 1">&nbsp;{{ $t("history.preset") }}</span>
 					<br />
 				</template>
 				<template v-if="computedEntry3.missingPlayerIndex >= 0">
 					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[computedEntry3.missingPlayerIndex].colour)">{{ store.players[computedEntry3.missingPlayerIndex].displayName }}</span>
-					is the last player and keeps praying
+					{{ $t("history.lastPlayerKeepsPraying") }}
 				</template>
 				<template v-if="computedEntry3.newPrayingOrder.length > 0">
 					<br />
-					<b><u>New Praying Order</u></b>
+					<b><u>{{ $t("history.newPrayingOrder") }}</u></b>
 					<br />
 					<template v-for="(playerIndex, idx) in computedEntry3.newPrayingOrder" :key="idx">
 						<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ store.players[playerIndex].displayName }}</span>
@@ -1278,21 +1279,21 @@ const computedEntry3 = computed(() => {
 				</span>
 			</div>
 			<div class="container">
-				<b><u>Conflict - Turn order</u></b>
+				<b><u>{{ $t("history.conflictTurnOrder") }}</u></b>
 				<br />
 				<template v-for="(choiceEntry, idx) in computedEntry3.playerOrderData" :key="idx">
 					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[choiceEntry[0]].colour)">{{ store.players[choiceEntry[0]].displayName }}</span>
-					chooses to play {{ view.getOrdinal(choiceEntry[1] + 1) }}
-					<span v-if="choiceEntry.length > 2 && choiceEntry[2] === 1">(preset)</span>
+					{{ $t("history.choosesToPlay", { position: view.getOrdinal(choiceEntry[1] + 1) }) }}
+					<span v-if="choiceEntry.length > 2 && choiceEntry[2] === 1">{{ $t("history.preset") }}</span>
 					<br />
 				</template>
 				<template v-if="computedEntry3.missingPlayerData[0] >= 0">
 					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[computedEntry3.missingPlayerData[0]].colour)">{{ store.players[computedEntry3.missingPlayerData[0]].displayName }}</span>
-					has to play {{ view.getOrdinal(computedEntry3.missingPlayerData[1] + 1) }}
+					{{ $t("history.hasToPlay", { position: view.getOrdinal(computedEntry3.missingPlayerData[1] + 1) }) }}
 				</template>
 				<template v-if="computedEntry3.newTurnOrder.length > 0">
 					<br />
-					<b><u>New Turn Order</u></b>
+					<b><u>{{ $t("history.newTurnOrder") }}</u></b>
 					<br />
 					<template v-for="(playerIndex, idx) in computedEntry3.newTurnOrder" :key="idx">
 						<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ store.players[playerIndex].displayName }}</span>
@@ -1311,7 +1312,7 @@ const computedEntry3 = computed(() => {
 				</span>
 			</div>
 			<div class="container">
-				<b><u>No Conflict</u></b>
+				<b><u>{{ $t("history.noConflict") }}</u></b>
 			</div>
 		</div>
 	</template>
@@ -1322,7 +1323,7 @@ const computedEntry3 = computed(() => {
 			<div class="header">
 				<span>{{ funcs.timestampToString(entry[2]) }}</span>
 			</div>
-			<div class="mainEntry rewind">Game rewound to here by {{ getRewindName(entry[1]) }}</div>
+			<div class="mainEntry rewind">{{ $t("history.gameRewound", { name: getRewindName(entry[1]) }) }}</div>
 		</div>
 	</template>
 
@@ -1332,7 +1333,7 @@ const computedEntry3 = computed(() => {
 			<div class="header">
 				<span>{{ funcs.timestampToString(entry[2]) }}</span>
 			</div>
-			<div class="mainEntry rewind">{{ entry[3][0] }} Resigns</div>
+			<div class="mainEntry rewind">{{ $t("history.resigns", { name: entry[3][0] }) }}</div>
 		</div>
 	</template>
 
@@ -1342,7 +1343,7 @@ const computedEntry3 = computed(() => {
 			<div class="header">
 				<span>{{ funcs.timestampToString(entry[2]) }}</span>
 			</div>
-			<div class="mainEntry rewind">{{ store.players[entry[3][0]].displayName }} was kicked out</div>
+			<div class="mainEntry rewind">{{ $t("history.kickedOut", { name: store.players[entry[3][0]].displayName }) }}</div>
 		</div>
 	</template>
 
@@ -1360,10 +1361,10 @@ const computedEntry3 = computed(() => {
 			</div>
 			<div class="container">
 				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				<span v-if="entry[0] === rf.HIST_NO_PRODUCTION_ACTIONS">Skips Production</span>
-				<span v-else-if="entry[0] === rf.HIST_NO_MOVEMENT_ACTIONS">Skips Movement</span>
-				<span v-else-if="entry[0] === rf.HIST_NO_BUILDING_ACTIONS">Skips Building</span>
-				<span v-else-if="entry[0] === rf.HIST_NO_WONDER_ACTIONS">Skips Wonder</span>
+				<span v-if="entry[0] === rf.HIST_NO_PRODUCTION_ACTIONS">{{ $t("history.skipsProduction") }}</span>
+				<span v-else-if="entry[0] === rf.HIST_NO_MOVEMENT_ACTIONS">{{ $t("history.skipsMovement") }}</span>
+				<span v-else-if="entry[0] === rf.HIST_NO_BUILDING_ACTIONS">{{ $t("history.skipsBuilding") }}</span>
+				<span v-else-if="entry[0] === rf.HIST_NO_WONDER_ACTIONS">{{ $t("history.skipsWonder") }}</span>
 			</div>
 		</div>
 	</template>
@@ -1380,7 +1381,7 @@ const computedEntry3 = computed(() => {
 			</div>
 			<div class="container">
 				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				Chooses Home Tile:
+				{{ $t("history.choosesHomeTile") }}
 				<br />
 				<div class="flexContainer">
 					<MiniHex :hexID="computedEntry3.hexID" :hexPiecesToOutline="computedEntry3.hexPiecesToOutline" />
@@ -1402,7 +1403,7 @@ const computedEntry3 = computed(() => {
 			</div>
 			<div class="container">
 				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				<strong>{{ computedEntry3.title }}</strong>
+				<strong v-if="computedEntry3.title">{{ computedEntry3.title }}</strong>
 				<br />
 				<template v-for="(stackEntry, idx) in computedEntry3.stackSteps" :key="idx">
 					<!-- LAND MOVE -->
@@ -1414,7 +1415,7 @@ const computedEntry3 = computed(() => {
 							<img class="stackContentsImg" v-for="(content, idx2) in stackEntry.contentsGfx" :key="idx2" :src="view.getImage(content)" />
 							<div class="rightArrow"></div>
 							<MiniHex :hexID="stackEntry.toHexID" :hexPiecesToOutline="[[stackEntry.toHexID, [stackEntry.toBucketId]]]" />
-							<span v-if="stackEntry.droppedGeese">Drops Geese</span>
+							<span v-if="stackEntry.droppedGeese">{{ $t("history.dropsGeese") }}</span>
 						</div>
 					</template>
 					<!-- WATER MOVE -->
@@ -1427,7 +1428,7 @@ const computedEntry3 = computed(() => {
 							<div class="rightArrow"></div>
 							<MiniHex :hexID="stackEntry.toHexID" :hexPiecesToOutline="stackEntry.toData.hexPiecesToOutline" :riversToOutline="stackEntry.toData.riversToOutline" :shoresToOutline="stackEntry.toData.shoresToOutline" :halfShoresToOutline="stackEntry.toData.halfShoresToOutline" />
 							<template v-if="stackEntry.geeseDropLocation.hexID !== -1">
-								Drops Geese
+								{{ $t("history.dropsGeese") }}
 								<MiniHex :hexID="stackEntry.toHexID" :hexPiecesToOutline="stackEntry.geeseDropLocation.hexPiecesToOutline" :riversToOutline="stackEntry.geeseDropLocation.riversToOutline" :shoresToOutline="stackEntry.geeseDropLocation.shoresToOutline" :halfShoresToOutline="stackEntry.geeseDropLocation.halfShoresToOutline" />
 							</template>
 						</div>
@@ -1437,7 +1438,7 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, stackEntry.riversToHighlight)">
 							<MiniHex :hexID="stackEntry.hexID" :hexPiecesToOutline="stackEntry.hexPiecesToOutline" :riversToOutline="stackEntry.riversToOutline" />
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
-							Picks Up&nbsp;
+							{{ $t("history.picksUp") }}&nbsp;
 							<img v-for="(resGfx, idx) in stackEntry.resGfxs" :key="idx" class="stackContentsImg" :src="view.getImage(resGfx)" />
 						</div>
 					</template>
@@ -1446,7 +1447,7 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, stackEntry.riversToHighlight, stackEntry.shoresToHighlight, stackEntry.halfShoresToHighlight)">
 							<MiniHex :hexID="stackEntry.hexID" :hexPiecesToOutline="stackEntry.hexPiecesToOutline" :riversToOutline="stackEntry.riversToOutline" :shoresToOutline="stackEntry.shoresToHighlight" :halfShoresToOutline="stackEntry.halfShoresToHighlight" />
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.pickingUpTransporterGfx}`)" />
-							Picks Up&nbsp;
+							{{ $t("history.picksUp") }}&nbsp;
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.beingCarriedTransporterGfx}`)" />
 						</div>
 					</template>
@@ -1455,7 +1456,7 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight)">
 							<MiniHex :hexID="stackEntry.hexID" :hexPiecesToOutline="stackEntry.hexPiecesToOutline" />
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
-							Drops&nbsp;
+							{{ $t("history.drops") }}&nbsp;
 							<img v-for="(resGfx, idx) in stackEntry.resGfxs" :key="idx" class="stackContentsImg" :src="view.getImage(resGfx)" />
 						</div>
 					</template>
@@ -1463,7 +1464,7 @@ const computedEntry3 = computed(() => {
 					<template v-else-if="stackEntry.action === rf.STACK_STRICT_FERRY_RES">
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight)">
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
-							Ferries&nbsp;
+							{{ $t("history.ferries") }}&nbsp;
 							<img v-for="(resGfx, idx) in stackEntry.resGfxs" :key="idx" class="stackContentsImg" :src="view.getImage(resGfx)" />
 							<MiniHex :hexID="stackEntry.hexID" :hexPiecesToOutline="stackEntry.hexPiecesToOutline" />
 						</div>
@@ -1472,7 +1473,7 @@ const computedEntry3 = computed(() => {
 					<template v-else-if="stackEntry.action === rf.STACK_DROP_TRANSPORTER">
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, stackEntry.riversToHighlight, stackEntry.shoresToHighlight, stackEntry.halfShoresToHighlight)">
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.carryingTransporterGfx}`)" />
-							Drops&nbsp;
+							{{ $t("history.drops") }}&nbsp;
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.beingDroppedTransporterGfx}`)" />
 							<MiniHex :hexID="stackEntry.hexID" :hexPiecesToOutline="stackEntry.hexPiecesToOutline" :riversToOutline="stackEntry.riversToOutline" :shoresToOutline="stackEntry.shoresToHighlight" :halfShoresToOutline="stackEntry.halfShoresToHighlight" />
 						</div>
@@ -1482,9 +1483,9 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, stackEntry.riversToHighlight, stackEntry.shoresToHighlight, stackEntry.halfShoresToHighlight)">
 							<MiniHex :hexID="stackEntry.hexID" :hexPiecesToOutline="stackEntry.hexPiecesToOutline" :riversToOutline="stackEntry.riversToOutline" :shoresToOutline="stackEntry.shoresToOutline" :halfShoresToOutline="stackEntry.halfShoresToOutline" />
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
-							Transfers&nbsp;
+							{{ $t("history.transfers") }}&nbsp;
 							<img v-for="(resGfx, idx) in stackEntry.resGfxs" :key="idx" class="stackContentsImg" :src="view.getImage(resGfx)" />
-							from
+							{{ $t("history.from") }}
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.otherTransporterGfx}`)" />
 						</div>
 					</template>
@@ -1493,7 +1494,7 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, stackEntry.riversToHighlight)">
 							<MiniHex :hexID="stackEntry.hexID" :hexPiecesToOutline="stackEntry.hexPiecesToOutline" :riversToOutline="stackEntry.riversToOutline" />
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
-							Picks Up a follower&nbsp;
+							{{ $t("history.picksUpFollower") }}&nbsp;
 							<img v-for="(resGfx, idx) in stackEntry.resGfxs" :key="idx" class="stackContentsImg" :src="view.getImage(resGfx)" />
 						</div>
 					</template>
@@ -1501,7 +1502,7 @@ const computedEntry3 = computed(() => {
 					<template v-else-if="stackEntry.action === rf.STACK_DROP_RES_FOLLOWING">
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight)">
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
-							Deposits Follower&nbsp;
+							{{ $t("history.depositsFollower") }}&nbsp;
 							<img v-for="(resGfx, idx) in stackEntry.resGfxs" :key="idx" class="stackContentsImg" :src="view.getImage(resGfx)" />
 							<MiniHex :hexID="stackEntry.hexID" :hexPiecesToOutline="stackEntry.hexPiecesToOutline" />
 						</div>
@@ -1511,7 +1512,7 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.fromData.hexPiecesToHighlight.concat(stackEntry.toData.hexPiecesToHighlight))">
 							<MiniHex :hexID="stackEntry.fromHexID" :hexPiecesToOutline="stackEntry.fromData.hexPiecesToOutline" />
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
-							Builds Road
+							{{ $t("history.buildsRoad") }}
 							<div class="rightArrow"></div>
 							<MiniHex :hexID="stackEntry.toHexID" :hexPiecesToOutline="stackEntry.toData.hexPiecesToOutline" />
 						</div>
@@ -1521,7 +1522,7 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.fromData.hexPiecesToHighlight.concat(stackEntry.toData.hexPiecesToHighlight))">
 							<MiniHex :hexID="stackEntry.fromHexID" :hexPiecesToOutline="stackEntry.fromData.hexPiecesToOutline" />
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
-							Builds Power Line
+							{{ $t("history.buildsPowerLine") }}
 							<div class="rightArrow"></div>
 							<MiniHex :hexID="stackEntry.toHexID" :hexPiecesToOutline="stackEntry.toData.hexPiecesToOutline" />
 						</div>
@@ -1531,7 +1532,7 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], [], [], [], [], stackEntry.bridgeHighlight)">
 							<MiniHex :hexID="stackEntry.hexID" :bridgehighlight="stackEntry.bridgeHighlight" />
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
-							Builds Bridge
+							{{ $t("history.buildsBridge") }}
 						</div>
 					</template>
 					<!-- BUILD ROAD & BRIDGE (CITY) -->
@@ -1539,7 +1540,7 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], [], [], [], [], stackEntry.bridgeHighlight)">
 							<MiniHex :hexID="stackEntry.hexID" :bridgehighlight="stackEntry.bridgeHighlight" />
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
-							Builds Road &amp; Bridge
+							{{ $t("history.buildsRoadBridge") }}
 						</div>
 					</template>
 					<!-- BUILD WALL -->
@@ -1547,11 +1548,11 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], [], [], [], [], [], stackEntry.hex1wallHighlight.concat(stackEntry.hex2wallHighlight))">
 							<MiniHex :hexID="stackEntry.hex1ID" :wallsToOutline="stackEntry.hex1wallHighlight" />
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
-							Builds Wall to Level {{ stackEntry.newLevel }}
+							{{ $t("history.buildsWall", { level: stackEntry.newLevel }) }}
 							<MiniHex :hexID="stackEntry.hex2ID" :wallsToOutline="stackEntry.hex2wallHighlight" />
 
 							<g v-if="stackEntry.ejectedTransporterGfxs.length > 0">
-								Pushes to sea:
+								{{ $t("history.pushesToSea") }}
 								<g v-for="ejectedTransporterGfx in stackEntry.ejectedTransporterGfxs" :key="ejectedTransporterGfx">
 									<img class="stackTransporterImg" :src="view.getImage(`${ejectedTransporterGfx}`)" />
 								</g>
@@ -1563,7 +1564,7 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], [], [], [], [], [], stackEntry.hex1wallHighlight.concat(stackEntry.hex2wallHighlight))">
 							<MiniHex :hexID="stackEntry.hex1ID" :wallsToOutline="stackEntry.hex1wallHighlight" />
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
-							Demolishes Level {{ stackEntry.currentLevel }} Wall&nbsp;
+							{{ $t("history.demolishesWall", { level: stackEntry.currentLevel }) }}&nbsp;
 							<MiniHex :hexID="stackEntry.hex2ID" :wallsToOutline="stackEntry.hex2wallHighlight" />
 						</div>
 					</template>
@@ -1572,7 +1573,7 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, [], [], [], [], [], stackEntry.buildingsToHighlight)">
 							<MiniHex :hexID="stackEntry.hexID" :hexPiecesToOutline="stackEntry.hexPiecesToOutline" />
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
-							Builds
+							{{ $t("history.builds") }}
 							<img v-if="!stackEntry.isMine" class="buildingProductionSummaryImg" :src="view.getImage(stackEntry.bldgGfx)" />
 							<svg v-if="stackEntry.isMine" class="buildingProductionSummaryImg" xmlns="http://www.w3.org/2000/svg" viewBox="-110 -110 220 220">
 								<circle cx="0" cy="0" r="100" fill="gray" stroke="#734A36" stroke-width="20" />
@@ -1590,7 +1591,7 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, [], [], [], [], [], stackEntry.buildingsToHighlight)">
 							<MiniHex :hexID="stackEntry.hexID" :hexPiecesToOutline="stackEntry.hexPiecesToOutline" />
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
-							Reshafts mine with
+							{{ $t("history.reshaftsMine") }}
 							<svg class="buildingProductionSummaryImg" xmlns="http://www.w3.org/2000/svg" viewBox="-110 -110 220 220">
 								<circle cx="0" cy="0" r="100" fill="gray" stroke="#734A36" stroke-width="20" />
 								<text x="-40" y="10" class="mineText redMineText">
@@ -1607,7 +1608,7 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, [], [], [], [], [], stackEntry.buildingsToHighlight)">
 							<MiniHex :hexID="stackEntry.hexID" :hexPiecesToOutline="stackEntry.hexPiecesToOutline" />
 							<img class="buildingProductionTransporterImg" :src="view.getImage(stackEntry.transporterGfx)" />
-							Bombs
+							{{ $t("history.bombs") }}
 							<img class="buildingProductionSummaryImg" :src="view.getImage(stackEntry.bldgGfx)" />
 						</div>
 					</template>
@@ -1616,7 +1617,7 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, [], [], [], [], [], stackEntry.buildingsToHighlight)">
 							<MiniHex :hexID="stackEntry.hexID" :hexPiecesToOutline="stackEntry.hexPiecesToOutline" />
 							<img class="buildingProductionTransporterImg" :src="view.getImage(stackEntry.transporterGfx)" />
-							Strengthens
+							{{ $t("history.strengthens") }}
 							<img class="buildingProductionSummaryImg" :src="view.getImage(stackEntry.bldgGfx)" />
 						</div>
 					</template>
@@ -1644,12 +1645,12 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, [], [], [], [])">
 							<MiniHex :hexID="stackEntry.hexID" />
 							<img class="buildingProductionTransporterImg" :src="view.getImage(stackEntry.transporterGfx)" />
-							researches
+							{{ $t("history.researches") }}
 							<img class="researchImg" :src="view.getImage(`research_${stackEntry.RND_IDX}`)" />
-							{{ rf.RND_STRINGS[stackEntry.RND_IDX] }}
+							{{ view.rndName(stackEntry.RND_IDX) }}
 							<span v-if="stackEntry.geeseUsed === 1">
 								<br />
-								Fundamental Research reduces geese required to 1
+								{{ $t("history.fundamentalResearch") }}
 							</span>
 						</div>
 					</template>
@@ -1658,14 +1659,14 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, [], [], [], [])">
 							<MiniHex :hexID="stackEntry.hexID" :hexPiecesToOutline="stackEntry.hexPiecesToOutline" />
 							<img class="buildingProductionSummaryImg" :src="view.getImage(stackEntry.oldBldgGfx)" />
-							upgraded to&nbsp;
+							{{ $t("history.upgradedTo") }}&nbsp;
 							<img class="buildingProductionSummaryImg" :src="view.getImage(stackEntry.newBldgGfx)" />
 						</div>
 					</template>
 					<!-- DONKEY REPRODUCTION -->
 					<template v-if="stackEntry.action === rf.STACK_DONKEY_REPRODUCTION">
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, [], [], [], [])">
-							Donkey Reproduction
+							{{ $t("history.donkeyReproduction") }}
 							<div class="lineBreak"></div>
 							<template v-for="(entry, idx) in stackEntry.donkeyTileIDsAndBuckets" :key="idx">
 								<div class="flexContainer">
@@ -1678,7 +1679,7 @@ const computedEntry3 = computed(() => {
 							</template>
 							<template v-if="stackEntry.transporterRemovedGfxs.length > 0">
 								<div class="flexContainer">
-									by removing&nbsp;
+									{{ $t("history.byRemoving") }}&nbsp;
 									<img class="buildingProductionTransporterImg" :src="view.getImage(stackEntry.transporterRemovedGfxs[0])" />
 								</div>
 							</template>
@@ -1689,14 +1690,14 @@ const computedEntry3 = computed(() => {
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], [], [], [], [], [])">
 							<MiniHex :hexID="stackEntry.hexID" />
 
-							Excess transporter removed&nbsp;
+							{{ $t("history.excessTransporterRemoved") }}&nbsp;
 							<img class="buildingProductionTransporterImg" :src="view.getImage(stackEntry.transporterGfx)" />
 						</div>
 					</template>
 					<!-- WONDER -->
 					<template v-if="stackEntry.action === rf.STACK_ADD_WONDER_BRICKS">
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, [], [], [], [])">
-							Adds {{ stackEntry.addBrickText }}:
+							{{ stackEntry.addBrickText }}
 							<br />
 							<div v-for="(brick, idx) in stackEntry.bricks" :key="idx" class="flexContainer">
 								<span v-if="idx > 0">+&nbsp;</span>
@@ -1707,9 +1708,11 @@ const computedEntry3 = computed(() => {
 					<!-- Art & The Atelier: EXHIBITION -->
 					<template v-if="stackEntry.action === rf.STACK_EXHIBITION">
 						<div class="flexContainer stackEntryDiv">
-							<span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.stagerIdx].colour)">{{ store.players[stackEntry.stagerIdx].displayName }}</span>
-							&nbsp;staged an exhibition of {{ stackEntry.beauty }} works at
-							<span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.targetIdx].colour)">{{ stackEntry.targetName }}</span>'s tile
+							<i18n-t keypath="history.stagedExhibition" tag="span" scope="global">
+								<template #name><span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.stagerIdx].colour)">{{ store.players[stackEntry.stagerIdx].displayName }}</span></template>
+								<template #target><span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.targetIdx].colour)">{{ stackEntry.targetName }}</span></template>
+								<template #beauty>{{ stackEntry.beauty }}</template>
+							</i18n-t>
 						</div>
 					</template>
 					<!-- End of stack entries -->

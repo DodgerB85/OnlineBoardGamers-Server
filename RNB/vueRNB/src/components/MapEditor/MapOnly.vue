@@ -184,8 +184,8 @@ const playerFilledSVG = `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.or
 	<div>
 		<h2>{{ personal.mapName }}</h2>
 		<div class="mapDescriptionDiv">{{ personal.mapDescription }}</div>
-		<div v-for="player in personal.playerCount" :key="player" class="playerCount" title="Player" v-html="playerFilledSVG"></div>
-		<p v-if="personal.showPlayerCountWarning" class="errorText">Caution: Number of players do not match this map's player count</p>
+		<div v-for="player in personal.playerCount" :key="player" class="playerCount" :title="$t('playerTable.player')" v-html="playerFilledSVG"></div>
+		<p v-if="personal.showPlayerCountWarning" class="errorText">{{ $t("mapEditor.playerCountWarning") }}</p>
 		<div
 			id="hexDIV"
 			:style="{

@@ -21,6 +21,7 @@
     </style>
 {% endblock head %}
 {% block body %}
+    {% get_current_language as LANGUAGE_CODE %}
     <div class="page map-editor">
         {% include "Lobby/messages.html" %}
         {% if settingsDebug %}
@@ -44,6 +45,7 @@
 var initData = {};
 
 ///////////////////////
+initData.locale = "{{ LANGUAGE_CODE|default:'en-gb' }}";
 initData.mapEditor = true;
 initData.username = "{{ username }}";
         </script>

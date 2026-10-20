@@ -16,6 +16,7 @@ import * as util from "../../js/RNButil.js"
 import * as model from "../../js/RNBmodel.js"
 import * as stack from "../../js/RNBstack.js"
 import * as funcs from "../../js/RNBfuncs.js"
+import i18n from "../../i18n"
 
 export function clickedHighlight(entry) {
 	const store = useModelStore()
@@ -173,7 +174,7 @@ export async function replaceMapInDB(mapId, mapName, mapDescription, playerCount
 		return false
 	} catch (error) {
 		console.error("Error replacing map:", error)
-		store.gameMessages.errorText = "Error replacing the map"
+		store.gameMessages.errorText = i18n.global.t("mapEditor.mapReplaceError")
 		return false
 	}
 }
@@ -214,7 +215,7 @@ export async function saveMapToDB(mapName, mapDescription, playerCount, isVerifi
 		return false
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.errorText = "Error saving the game"
+		store.gameMessages.errorText = i18n.global.t("io.saveError")
 		return false
 	}
 }

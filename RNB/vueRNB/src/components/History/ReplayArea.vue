@@ -5,6 +5,7 @@ import * as model from '../js/RNBmodel'*/
 //import * as rf from "../../js/RNBreference"
 //import * as IO from '../backend/RNB_IO'
 import * as replay from "./RNBreplay"
+import i18n from "../../i18n"
 
 import HistoryEntry from "./HistoryEntry.vue"
 
@@ -17,7 +18,7 @@ import { ref } from "vue"
 
 const spinoffSuccessText = ref("")
 const spinoffErrorText = ref("")
-const copyMessage = ref("https://www.onlineboardgamers.com/RNB/110/replay/5 Copied to Clipboard")
+const copyMessage = ref("")
 
 function performStep(amount) {
 	store.clearMessages()
@@ -27,7 +28,7 @@ function performStep(amount) {
 }
 
 async function localCopyGameToPracticeGame2() {
-	store.gameMessages.rewindErrorText = "Not implemented yet"
+	store.gameMessages.rewindErrorText = i18n.global.t("replay.notImplemented")
 }
 
 function copyToClipboard() {
@@ -42,7 +43,7 @@ function copyToClipboard() {
 
 	document.body.removeChild(textarea)
 
-	copyMessage.value = textToCopy + " Copied to Clipboard"
+	copyMessage.value = i18n.global.t("replay.copiedToClipboard", { url: textToCopy })
 
 	const button = document.getElementById("copyURLbutton")
 	const popup = document.getElementById("popup")
@@ -88,7 +89,7 @@ function shouldDisableForwardsReplay() {
 		<button class="actionsLineButton" :disabled="shouldDisableBackwardsReplay()" @click="performStep(-1)">&lt;</button>
 		<div id="replayStepSpan">
 		{{ store.replayStep.computedHistoryIndex + 1 }} / {{ store.computedHistory.length }}
-		<template v-if="store.replayStep.subStep !== -1">Step: {{ store.replayStep.subStep + 1 }} / {{ store.replayStep.maxStep + 1 }}</template>
+		<template v-if="store.replayStep.subStep !== -1">{{ $t("replay.step", { current: store.replayStep.subStep + 1, total: store.replayStep.maxStep + 1 }) }}</template>
 		</div>
 		<button class="actionsLineButton" :disabled="shouldDisableForwardsReplay()" @click="performStep(1)">&gt;</button>
 		<button class="actionsLineButton" :disabled="shouldDisableForwardsReplay()" @click="performStep(9)">&gt;&gt;</button>
@@ -101,21 +102,21 @@ function shouldDisableForwardsReplay() {
         </div>-->
 		<div class="copyGameButtonDiv" v-if="personal.name != undefined">
 			<button @click="localCopyGameToPracticeGame2()" class="actionsLineButton">
-				Copy This Game
+				{{ $t("replay.copyGame") }}
 				<br />
-				To New Game
+				{{ $t("replay.toNewGame") }}
 			</button>
 			<button @click="store.viewSettings.replayAtBottom = !store.viewSettings.replayAtBottom" class="actionsLineButton">
 				<template v-if="!store.viewSettings.replayAtBottom">
-					Move UI
+					{{ $t("replay.moveUi") }}
 					<br />
-					to Bottom
+					{{ $t("replay.toBottom") }}
 					<b>▼</b>
 				</template>
 				<template v-if="store.viewSettings.replayAtBottom">
-					Move UI
+					{{ $t("replay.moveUi") }}
 					<br />
-					to Top
+					{{ $t("replay.toTop") }}
 					<b>▲</b>
 				</template>
 			</button>
@@ -127,9 +128,9 @@ function shouldDisableForwardsReplay() {
             </button>
         </div>-->
 		<br />
-		Use the arrows to step through the game. This will not alter the current game in any way
+		{{ $t("replay.useArrows") }}
 		<br />
-		<button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">Copy URL to this move to clipboard</button>
+		<button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">{{ $t("replay.copyUrl") }}</button>
 		<div id="popup" class="popup">{{ copyMessage }}</div>
 
 		<div v-if="spinoffSuccessText !== ''" class="spinoffSuccessText" v-html="spinoffSuccessText"></div>

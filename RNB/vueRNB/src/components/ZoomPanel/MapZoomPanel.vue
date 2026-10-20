@@ -601,7 +601,7 @@ const computedMaxNeutralBricks = computed(() => {
 			],
 		</div>
 		<!-- END VERTEX POSITIONING -->
-		<div id="noZoomHexDiv" v-if="store.mapData.zoomData.hexID === -1">Mouse over or long press a hex to view it in detail</div>
+		<div id="noZoomHexDiv" v-if="store.mapData.zoomData.hexID === -1">{{ $t("zoom.mouseOverHex") }}</div>
 		<div v-else>
 			<div id="zoomHexDiv">
 				<svg @mousemove="doDrag" @mouseup="draggingIdx = null" @mouseleave="draggingIdx = null" v-if="store.mapData.zoomData.hexID >= 0" id="zoomSVG" :viewBox="store.hexStyle === rf.POINTY ? '-400 -464 800 928' : '-462.692 -401.000 925 802'">

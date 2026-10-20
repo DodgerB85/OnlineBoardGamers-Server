@@ -1,6 +1,7 @@
 {% extends "Lobby/layout.html" %}
 {% load static i18n compress %}
 {% block head %}
+    {% get_current_language as LANGUAGE_CODE %}
     <link href="{% static 'RNB/highScore.css' %}" rel="stylesheet">
     <style>
         /* Ensure topBar stays on top of map */
@@ -67,6 +68,7 @@
     {% endcompress %}
     <script>
     window.initData = {
+        locale: "{{ LANGUAGE_CODE|default:'en-gb' }}",
         showMapOnly: true,
         gameID: -1,
         startingMap: [],

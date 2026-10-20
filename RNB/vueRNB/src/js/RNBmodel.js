@@ -51,6 +51,7 @@ import * as context from "./RNBcontext.js"
 import * as stack from "./RNBstack.js"
 import * as highlight from "./RNBhighlight.js"
 import * as view from "./RNBview.js"
+import i18n from "../i18n"
 
 export async function initGame() {
 	const store = useModelStore()
@@ -1058,7 +1059,7 @@ export function dropAllGeeseForPlayerIndex(playerIndex, event = null) {
 		if (loc.isSeaVertexLocation(followedTransporterLocation) && !map.hasOilRigOnHexID(followedTransporterHexID)) {
 			let clientX = event ? event.clientX : window.innerWidth / 2
 			let clientY = event ? event.clientY : window.innerHeight / 2
-			let htmlMessage = "Geese cannot end<br/>turn at sea<br/>following transporter"
+			let htmlMessage = i18n.global.t("action.geeseCannotEndAtSea")
 			showPopup("error", clientX, clientY, htmlMessage)
 			store.context.errorUnableToDropGeeseAtSea = true
 			return

@@ -47,11 +47,11 @@ const showHexIcons = ref(true)
 const showCustomRules = ref(false)
 
 const customRuleOptions = [
-	{ value: rf.CR_START_2_DONKEY_3RD_ON_WONDER_BRICK_27, label: "Start with 2 Donkeys (3rd arrives at Wonder brick 27)" },
-	{ value: rf.CR_START_WITH_ONE_EXTRA_STONE, label: "Start with one extra Stone" },
-	{ value: rf.CR_START_WITH_ONE_EXTRA_BOARDS, label: "Start with one extra Board" },
-	{ value: rf.CR_USE_ONLY_28_NEUTRAL_BRICKS, label: "Game ends when 28 neutral bricks are used in the Wonder" },
-	{ value: rf.CR_ONLY_START_WITH_1_DONKEY, label: "Start with only 1 Donkey" },
+	{ value: rf.CR_START_2_DONKEY_3RD_ON_WONDER_BRICK_27, labelKey: "mapEditor.customRuleStart2Donkeys" },
+	{ value: rf.CR_START_WITH_ONE_EXTRA_STONE, labelKey: "mapEditor.customRuleExtraStone" },
+	{ value: rf.CR_START_WITH_ONE_EXTRA_BOARDS, labelKey: "mapEditor.customRuleExtraBoards" },
+	{ value: rf.CR_USE_ONLY_28_NEUTRAL_BRICKS, labelKey: "mapEditor.customRule28NeutralBricks" },
+	{ value: rf.CR_ONLY_START_WITH_1_DONKEY, labelKey: "mapEditor.customRuleOnly1Donkey" },
 ]
 
 //import { usePersonalStore } from "../stores/RNBpersonal.js"
@@ -982,13 +982,13 @@ store.refSize = 2400
 			</svg>
 		</div>
 		<div id="customRulesArea">
-			<button type="button" class="customRulesToggle" @click="showCustomRules = !showCustomRules" :aria-expanded="showCustomRules">Add Custom Map Rules {{ showCustomRules ? "▾" : "▸" }}</button>
+			<button type="button" class="customRulesToggle" @click="showCustomRules = !showCustomRules" :aria-expanded="showCustomRules">{{ $t("mapEditor.customRules") }} {{ showCustomRules ? "▾" : "▸" }}</button>
 			<div class="customRulesCollapse" :class="{ open: showCustomRules }" :inert="!showCustomRules">
 				<div class="customRulesCollapseInner">
 					<div class="customRulesPanel">
 						<label v-for="rule in customRuleOptions" :key="rule.value" class="customRuleLabel">
 							<input type="checkbox" :value="rule.value" v-model="store.CUSTOM_RULES" />
-							{{ rule.label }}
+							{{ $t(rule.labelKey) }}
 						</label>
 					</div>
 				</div>

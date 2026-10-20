@@ -13,6 +13,7 @@ import * as stack from "../../js/RNBstack"
 import * as wonder from "../../js/RNBwonder"
 import * as electricity from "../../js/RNBelectricity"
 import * as atelier from "../../js/RNBatelier"
+import i18n from "../../i18n"
 
 import { useModelStore } from "../../stores/RNBstore.js"
 import { usePersonalStore } from "../../stores/RNBpersonal"
@@ -1015,7 +1016,7 @@ function replayDropAllGeese(playerIndex) {
 		if (loc.isSeaVertexLocation(followedTransporterLocation) && !map.hasOilRigOnHexID(followedTransporterHexID)) {
 			let clientX = event ? event.clientX : window.innerWidth / 2
 			let clientY = event ? event.clientY : window.innerHeight / 2
-			let htmlMessage = "Geese cannot end<br/>turn at sea<br/>following transporter"
+			let htmlMessage = i18n.global.t("action.geeseCannotEndAtSea")
 			model.showPopup("error", clientX, clientY, htmlMessage)
 			store.context.errorUnableToDropGeeseAtSea = true
 			rf.doAdminAlrt("Dropping geese on sea during replay")
