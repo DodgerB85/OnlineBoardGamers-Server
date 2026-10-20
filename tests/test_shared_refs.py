@@ -88,7 +88,7 @@ class TestSRgetRNBstartingOptionsHTML(TestCase):
 
     def test_solo_mine_option_renders_icon(self):
         result = SR_getRNBstartingOptionsHTML([rfRNB.SO_USE_SOLO_MINE_RULES])
-        self.assertIn("RNB_useSokoMineRules.svg", result)
+        self.assertIn("RNB_useSoloMineRules.svg", result)
 
     def test_unknown_option_is_ignored(self):
         self.assertEqual(SR_getRNBstartingOptionsHTML([999]), "")

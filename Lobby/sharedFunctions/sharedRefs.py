@@ -1253,7 +1253,7 @@ def SR_getRNBstartingOptionsHTML(startingOptionsArr):
         if option == rfRNB.SO_JUMP_START:
             startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/RNB_jumpStart.svg' title='" + gettext("Jump Start") + "'>"
         if option == rfRNB.SO_USE_SOLO_MINE_RULES:
-            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/RNB_useSokoMineRules.svg' title='" + gettext("Solo Mine Rules\nFixed Mine Output") + "'>"
+            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/RNB_useSoloMineRules.svg' title='" + gettext("Solo Mine Rules\nFixed Mine Output") + "'>"
 
     return startingOptionsHTML
 
