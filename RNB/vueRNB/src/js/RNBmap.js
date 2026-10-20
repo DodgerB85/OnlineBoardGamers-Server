@@ -1153,15 +1153,14 @@ export function clickedBombOption(buildingID) {
 	const transporterObj = model.getTransporterByID(transporterID)
 	const buildingObj = model.getBuildingByID(buildingID)
 	if (!buildingObj || buildingObj.strengthened) return
-	// A bomb must be carried by the transporter
-	const bomb = model.resourcesOnTransport(transporterID).find((r) => r.type === rf.RES_BOMB)
-	if (!bomb) return
 	const hexID = buildingObj.location[1]
 	const bucketID = buildingObj.location[2]
 	// Target must be on the transporter's hex
 	if (transporterObj.location[1] !== hexID) return
-	// Take the carried bomb off the board
-	bomb.location = loc.setOOBlocation()
+	// The bomb must be accessible, not necessarily carried
+	let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], true)
+	if (errorFlag !== 0) return
+	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
 	// A bomb destroys exactly one building; strengthened buildings survive
 	model.removeBuildingByID(buildingObj.id)
 	// Add to stack (the building identifier keeps city targets unambiguous on replay)

@@ -199,14 +199,14 @@ const shouldShowLandBubble = computed(() => {
 })
 
 // Bombs: show a target bubble per non-strengthened building on the selected
-// transporter's hex. A bomb must be carried by the transporter to be usable.
+// transporter's hex. The bomb must be accessible, not necessarily carried.
 const bombBubbleInfo = computed(() => {
 	if (!rf.PHASE_BUILDINGS.includes(store.gameflow.phase)) return null
 	if (store.context.selectedTransporterIDforTM === -1) return null
 	const transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
 	if (!transporterObj || !loc.isAnyHexLocation(transporterObj.location)) return null
-	// The transporter must carry a bomb
-	const hasBomb = model.resourcesOnTransport(transporterObj.id).some((res) => res.type === rf.RES_BOMB)
+	// The bomb must be accessible, not necessarily carried
+	const hasBomb = loc.getAllResourcesAccessibleToTransporter(transporterObj.id, true).some((res) => res.type === rf.RES_BOMB)
 	if (!hasBomb) return null
 	const hexID = transporterObj.location[1]
 	const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))

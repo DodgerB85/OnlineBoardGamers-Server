@@ -839,10 +839,8 @@ function replayStackBombBuilding(stackAction) {
 	const transporterID = stackAction[1]
 	const buildingType = stackAction[2]
 	const hexID = stackAction[3]
-	// Remove the carried bomb (legacy fallback for old entries that used a bomb on the tile)
-	const bomb = model.resourcesOnTransport(transporterID).find((r) => r.type === rf.RES_BOMB)
-	if (bomb) bomb.location = loc.setOOBlocation()
-	else model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
+	// Remove an accessible bomb (it may be on the tile or another of the player's transporters)
+	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
 	// Remove only the targeted non-strengthened building
 	const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
 	let targetBldg = undefined
