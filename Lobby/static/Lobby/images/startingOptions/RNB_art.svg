@@ -1,9 +1,22 @@
 <svg style="height: 128px; width: 128px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <filter id="outline" x="-10%" y="-10%" width="120%" height="120%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="7" result="dilated"/>
+      <feFlood flood-color="#1b1b1b" result="color"/>
+      <feComposite in="color" in2="dilated" operator="in" result="outline"/>
+      <feMerge>
+        <feMergeNode in="outline"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
   <rect width="512" height="512" fill="#87c2c8"/>
-  <path d="M256 48C135 48 40 141 40 256c0 115 95 208 216 208 37 0 64-24 64-57 0-19-11-32-11-50 0-24 20-42 48-42h54c33 0 61-27 61-61C472 144 375 48 256 48z" fill="#ffffff"/>
-  <circle cx="378" cy="312" r="30" fill="#87c2c8"/>
-  <circle cx="174" cy="184" r="20" fill="#87c2c8"/>
-  <circle cx="248" cy="132" r="20" fill="#87c2c8"/>
-  <circle cx="326" cy="160" r="20" fill="#87c2c8"/>
-  <circle cx="408" cy="232" r="20" fill="#87c2c8"/>
+  <g filter="url(#outline)">
+    <path d="M256 48C135 48 40 141 40 256c0 115 95 208 216 208 37 0 64-24 64-57 0-19-11-32-11-50 0-24 20-42 48-42h54c33 0 61-27 61-61C472 144 375 48 256 48z" fill="#ffffff"/>
+    <circle cx="378" cy="312" r="30" fill="#87c2c8"/>
+    <circle cx="174" cy="184" r="20" fill="#87c2c8"/>
+    <circle cx="248" cy="132" r="20" fill="#87c2c8"/>
+    <circle cx="326" cy="160" r="20" fill="#87c2c8"/>
+    <circle cx="408" cy="232" r="20" fill="#87c2c8"/>
+  </g>
 </svg>

@@ -1,4 +1,17 @@
 <svg style="height: 128px; width: 128px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <filter id="outline" x="-10%" y="-10%" width="120%" height="120%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="7" result="dilated"/>
+      <feFlood flood-color="#1b1b1b" result="color"/>
+      <feComposite in="color" in2="dilated" operator="in" result="outline"/>
+      <feMerge>
+        <feMergeNode in="outline"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
   <rect width="512" height="512" fill="#87c2c8"/>
-  <path d="M296 32 120 288h120l-32 192 184-256H272z" fill="#ffffff"/>
+  <g filter="url(#outline)">
+    <path d="M296 32 120 288h120l-32 192 184-256H272z" fill="#ffffff"/>
+  </g>
 </svg>
