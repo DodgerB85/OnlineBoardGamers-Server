@@ -1,3 +1,6 @@
+import i18n from "../i18n"
+const t = i18n.global.t
+
 export const DELETE_VOTE_TOPIC = "delete_game_votes"
 export const STATS_EXCLUDE_VOTE_TOPIC = "stats_exclude_votes"
 export const KICKOUT_VOTE_TOPIC = "kickout_player_votes"
@@ -397,78 +400,71 @@ export const god_NAMES = [
 ]
 
 export const missinggod_TEXT = [
-    'Extra Plaque',// Shadipinyi
-    '3 bid cows',// Elegua
-    'Lower Prices',// Dziva
-    'Range 6',// Eshu
-    '1 VR Technologies', // Gu
-    'Build 2 Monuments', // Obatala
-    'Use Resources twice', // Atete
-    'Any goods combo', // TG
-    'Pay 1 cow per good', // Anansi
-    'Get hub cows', // Qamata
-    '2 cow income', // Engai
-    '-2 VR', // Xango
-    // Schism
-    'Use any Res', // Agwu Nsi
-    'Bid to god', // Aja
-    'Raise Skip', // Aje Shaluga
-    'Others +5 VR', // Alajire
-    'Raise to 3', // Anyanwu
-    'Build Cows', // Ekwensu
-    'Blacksmith Tech', // Ogun
-    '1st Craftsmen Cows', // Ovia
-    'Monument for RG', // Oya
-    'Craftsmen as Water', // Simbi
-    'One Less RG', // Tiurakh
-    'Raise Any Mon', // Yemoja
-    // Other
-    '', // Ala
-    '', // Ajaka
-    '', // Aje Shaluga Old
-    '', // Igwekala
-    'Bid Cows', // Nyami Nyami
-    'Extra Water', // Olokun
-    '', // Orisha Aje
+    t("reference.missingGod.0"), // Shadipinyi
+    t("reference.missingGod.1"), // Elegua
+    t("reference.missingGod.2"), // Dziva
+    t("reference.missingGod.3"), // Eshu
+    t("reference.missingGod.4"), // Gu
+    t("reference.missingGod.5"), // Obatala
+    t("reference.missingGod.6"), // Atete
+    t("reference.missingGod.7"), // TG
+    t("reference.missingGod.8"), // Anansi
+    t("reference.missingGod.9"), // Qamata
+    t("reference.missingGod.10"), // Engai
+    t("reference.missingGod.11"), // Xango
+    t("reference.missingGod.12"), // Agwu Nsi
+    t("reference.missingGod.13"), // Aja
+    t("reference.missingGod.14"), // Aje Shaluga
+    t("reference.missingGod.15"), // Alajire
+    t("reference.missingGod.16"), // Anyanwu
+    t("reference.missingGod.17"), // Ekwensu
+    t("reference.missingGod.18"), // Ogun
+    t("reference.missingGod.19"), // Ovia
+    t("reference.missingGod.20"), // Oya
+    t("reference.missingGod.21"), // Simbi
+    t("reference.missingGod.22"), // Tiurakh
+    t("reference.missingGod.23"), // Yemoja
+    t("reference.missingGod.24"), // Ala
+    t("reference.missingGod.25"), // Ajaka
+    t("reference.missingGod.26"), // Aje Shaluga Old
+    t("reference.missingGod.27"), // Igwekala
+    t("reference.missingGod.28"), // Nyami Nyami
+    t("reference.missingGod.29"), // Olokun
+    t("reference.missingGod.30"), // Orisha Aje
 ]
 
 export const god_TEXT = [
-    // Original
-    'Take the first cattle in each round of the generosity of kings phase', // Shadipinyi
-    'Each turn, pay up to 3 cattle of your first turn order bid from the common stock',// Elegua
-    'On pickup, and at the beginning of your turn, you may raise/lower prices on your craftsman technology cards',// Dziva
-    'Transportation range during your turn is 6 (applies to everything on the map)',// Eshu
-    'Every craftsman technology card costs 1 VR only (Includes technologies you already have)',// Gu
-    'When building a new monument as your action, you may build 2 monuments instead of 1', // Obatala
-    'May use each resource twice', // Atete
-    'You can upgrade monuments with any combination of goods', // TG
-    'Pay only 1 cattle per good bought', // Anansi
-    'Anyone using hubs of any color for transport pays to this card', // Qamata
-    'Additional 2 cattle income each turn', // Engai
-    'Easygoing, no special benefits (2nd of 4 tiebreakers in end game scoring)', // Xango
-    // Schism
-    'Craftsmen you use can consume any resource type within range', // Agwu Nsi
-    'Once per round, place your turn order bid on this card', // Aja
-    'When using your own secondary craftsmen, you pay 0 cattle for the primary ritual good', /*'When upgrading monuments, your secondary craftsmen can either skip a resource, or primary ritual good',*/ // Aje Shaluga 
-    'All other players receive VR + 5 (Max 40)', // Alajire
-    'Immediately raise a monument to level 3', // Anyanwu 'Your VR becomes 40. Immediately raise your highest monument to level 5',
-    'Other players may use up to 12 cattle from the bank to pay your craftsmen',//'Set aside 12 cattle from the bank. You may use this cattle to pay other craftsmen. Other players may use this cattle to pay your craftsmen', // Ekwensu
-    'Take the "Blacksmith" technology card', // Ogun
-    'The first cattle you would pay to any craftsmen is paid to this card instead', // Ovia
-    'After raising monuments, place a monument',// Oya
-    'You travel over orthogonally adjacent craftsmen and resources as one area',// simbi
-    'Monuments that are level 2 or higher require one less ritual good to upgrade', // Tiurakh
-    'You may upgrade other players\' monuments', // Yemoja
-    // Other
-    'Your monuments may not be higher than levl 2', // Ala
-    'Before Revenues, if any technology cards have 6 or more cattle on them, move half (rounded up) of the cattle on each of those cards to this card', // Ajaka
-    '', // Aje Shaluga Old
-    'Immediately gain 8 cattle', // IGWEKALA
-    /*'You bid first during the Generosity of Kings. */'All turn order bids are paid starting from the leftmost plaque', // Nyami-Nyami
-    'You may travel over craftsmen and resources as though they were water', // Olokun
-    'Immediately take another action', // Orisha Aje
-    //'Anyone except Olokun using water for transport pays 2 cattle to this card', // Olokun
-
+    t("reference.godText.0"), // Shadipinyi
+    t("reference.godText.1"), // Elegua
+    t("reference.godText.2"), // Dziva
+    t("reference.godText.3"), // Eshu
+    t("reference.godText.4"), // Gu
+    t("reference.godText.5"), // Obatala
+    t("reference.godText.6"), // Atete
+    t("reference.godText.7"), // TG
+    t("reference.godText.8"), // Anansi
+    t("reference.godText.9"), // Qamata
+    t("reference.godText.10"), // Engai
+    t("reference.godText.11"), // Xango
+    t("reference.godText.12"), // Agwu Nsi
+    t("reference.godText.13"), // Aja
+    t("reference.godText.14"), // Aje Shaluga
+    t("reference.godText.15"), // Alajire
+    t("reference.godText.16"), // Anyanwu
+    t("reference.godText.17"), // Ekwensu
+    t("reference.godText.18"), // Ogun
+    t("reference.godText.19"), // Ovia
+    t("reference.godText.20"), // Oya
+    t("reference.godText.21"), // Simbi
+    t("reference.godText.22"), // Tiurakh
+    t("reference.godText.23"), // Yemoja
+    t("reference.godText.24"), // Ala
+    t("reference.godText.25"), // Ajaka
+    t("reference.godText.26"), // Aje Shaluga Old
+    t("reference.godText.27"), // Igwekala
+    t("reference.godText.28"), // Nyami-Nyami
+    t("reference.godText.29"), // Olokun
+    t("reference.godText.30"), // Orisha Aje
 ]
 
 export const ALL_gods = [SHADIPINYI, ELEGUA, DZIVA, ESHU, GU, OBATALA, ATETE, TSUI_GOAB, ANANSI, QAMATA, ENGAI, XANGO] 
@@ -566,19 +562,19 @@ export const SHAMAN = 3 // place resources
 export const BUILDER = 4 // 2 cow rebate when buildingCmen
 
 export const SPEC_NAMES = [
-    'Herd',
-    'Nomads',
-    'Rain Ceremony',
-    'Shaman',
-    'Builder'
+    t("reference.specNames.herd"),
+    t("reference.specNames.nomads"),
+    t("reference.specNames.rainCeremony"),
+    t("reference.specNames.shaman"),
+    t("reference.specNames.builder"),
 ]
 
 export const SPEC_TEXT = [
-    'May pay 2 cattle to gain 1 cattle from the common stock. Use at most 3 times per turn',
-    'Pay 2 cattle to ignore zoning restriction when building a new monument',
-    'May place one water tile for 3 cattle',
-    'May place 1 resource for 2 cattle',
-    'Pay 2 cattle to activate for this turn. If active, you pay the first 2 cattle of each new craftsman to this card'
+    t("reference.specText.0"),
+    t("reference.specText.1"),
+    t("reference.specText.2"),
+    t("reference.specText.3"),
+    t("reference.specText.4"),
 ]
 
 export const ALL_SPECIALISTS = [HERD, NOMADS, RAIN_CEREMONY, SHAMAN, BUILDER]

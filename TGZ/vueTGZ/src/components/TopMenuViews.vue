@@ -15,6 +15,9 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/TGZpersonal.js"
 const personal = usePersonalStore()
 
+import i18n from "../i18n"
+const t = i18n.global.t
+
 const chatMessage = ref("")
 const submittingBug = ref(false)
 
@@ -28,7 +31,7 @@ async function submitBug() {
 	store.topMenuViews.bugSuccessText = ""
 	let bugContent = document.getElementById("bugContent").value
 	if (bugContent.length === 0) {
-		store.topMenuViews.rewindErrorText = "Please enter a bug report"
+		store.topMenuViews.rewindErrorText = t("topMenuViews.bugErrorRequired")
 		submittingBug.value = false
 		return
 	}
@@ -189,13 +192,13 @@ function getTilesArray() {
 
 function getStatsExcludeVotes(returnPlayers = false) {
 	let votes = 0
-	let players = "None"
+	let players = t("common.none")
 
 	for (const player in store.statsExcludeVotesData) {
 		// Use const or let for player
 		if (store.statsExcludeVotesData[player] === true) {
 			votes += 1
-			if (players === "None") players = String(player)
+			if (players === t("common.none")) players = String(player)
 			else players += ", " + player
 		}
 	}
@@ -205,13 +208,13 @@ function getStatsExcludeVotes(returnPlayers = false) {
 
 function getDeleteVotes(returnPlayers = false) {
 	let votes = 0
-	let players = "None"
+	let players = t("common.none")
 
 	for (const player in store.deleteVotesData) {
 		// Use const or let for player
 		if (store.deleteVotesData[player] === true) {
 			votes += 1
-			if (players === "None") players = String(player)
+			if (players === t("common.none")) players = String(player)
 			else players += ", " + player
 		}
 	}
@@ -228,25 +231,25 @@ function localCastVote(topic) {
 	<!-- BUG REPORT -->
 	<transition name="slideBug">
 		<div id="bugReport" v-if="store.topMenuViews.showBug">
-			<h2>Bug Report</h2>
+			<h2>{{ $t("topMenuViews.bugReport") }}</h2>
 			<p>
-				Please submit a bug report if you encounter any issues, giving as much detail as possbile.
+				{{ $t("topMenuViews.bugIntro") }}
 				<br />
-				The game data will be submitted along with your report.
+				{{ $t("topMenuViews.bugData") }}
 				<br />
-				You can also report it on the OBG discord. Click
-				<a href="https://discord.gg/hCU7Fr77yV" class="linkOther" target="_blank">Here</a>
-				to join
+				{{ $t("topMenuViews.discordReport") }}
+				<a href="https://discord.gg/hCU7Fr77yV" class="linkOther" target="_blank">{{ $t("topMenuViews.here") }}</a>
+				{{ $t("topMenuViews.toJoin") }}
 			</p>
 
 			<div><textarea cols="150" rows="10" name="bugContent" id="bugContent"></textarea></div>
 			<div>
 				<button class="actionsLineButton" @click="submitBug" :disabled="submittingBug">
-					<span v-if="submittingBug">Submitting Bug Report...</span>
-					<span v-else>Submit</span>
+					<span v-if="submittingBug">{{ $t("topMenuViews.submittingBug") }}</span>
+					<span v-else>{{ $t("topMenuViews.submit") }}</span>
 				</button>
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<button class="actionsLineButton" @click="toggleBug">Cancel</button>
+				<button class="actionsLineButton" @click="toggleBug">{{ $t("topMenuViews.cancel") }}</button>
 			</div>
 		</div>
 	</transition>
@@ -254,13 +257,13 @@ function localCastVote(topic) {
 	<!-- NOTES -->
 	<transition name="slideNotes">
 		<div id="notesBox" v-if="store.topMenuViews.showNotes">
-			<h2>Personal game notes</h2>
-			<p>Only you can see these notes</p>
+			<h2>{{ $t("topMenuViews.notesTitle") }}</h2>
+			<p>{{ $t("topMenuViews.notesPrivate") }}</p>
 			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes" maxlength="5000"></textarea></div>
 			<div>
-				<button id="submitNotes" class="actionsLineButton" @click="IO.saveNotes">Save</button>
-				<button id="clearNotes" class="actionsLineButton" @click="clearNotes">Clear</button>
-				<button id="closeNotes" class="actionsLineButton" @click="toggleNotes">Close</button>
+				<button id="submitNotes" class="actionsLineButton" @click="IO.saveNotes">{{ $t("topMenuViews.save") }}</button>
+				<button id="clearNotes" class="actionsLineButton" @click="clearNotes">{{ $t("topMenuViews.clear") }}</button>
+				<button id="closeNotes" class="actionsLineButton" @click="toggleNotes">{{ $t("topMenuViews.close") }}</button>
 			</div>
 		</div>
 	</transition>
@@ -269,9 +272,9 @@ function localCastVote(topic) {
 	<transition name="fade">
 		<div id="wholeChat" v-if="store.topMenuViews.showChat">
 			<div id="chatBox">
-				<h2>Send a message</h2>
+				<h2>{{ $t("topMenuViews.chatTitle") }}</h2>
 				<div><textarea rows="6" name="chatMessage" id="chatMessage" v-model="chatMessage"></textarea></div>
-				<div><button class="actionsLineButton" @click="sendChatMessage">Send</button></div>
+				<div><button class="actionsLineButton" @click="sendChatMessage">{{ $t("topMenuViews.send") }}</button></div>
 			</div>
 			<div id="messageList">
 				<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
@@ -292,42 +295,36 @@ function localCastVote(topic) {
 		<div id="rewindPanel" v-if="store.topMenuViews.showRewindPanel" :style="{
 			left: getRewindPanelLeft() + 'px',
 		}">
-			Any player can rewind the game at any time.
+			{{ $t("topMenuViews.rewindAnyone") }}
 			<br />
-			Please be courteous and rewind only if absolutely necessary - send a chat message to inform the other
-			players.
+			{{ $t("topMenuViews.rewindCourtesy") }}
 			<br />
 			<br />
-			This will permanently alter the game - it will be rewound to the start of the previous player's turn.
+			{{ $t("topMenuViews.rewindPermanent") }}
 			<br />
 			<br />
 
 			<span class="topMenuItem" @click="loadRewind">
 				<img :src="view.getImage('icon-rewind')" />
-				<span>Rewind</span>
+				<span>{{ $t("topMenuViews.rewind") }}</span>
 			</span>
 
 			<hr />
 			<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
-				If all players agree, this game can be excluded from the stats (won't count towards wins/losses)
+				{{ $t("topMenuViews.statsExcludeIntro") }}
 				<br />
-				Votes: {{ getStatsExcludeVotes(false) }} - Players: {{ getStatsExcludeVotes(true) }}
+				{{ $t("topMenuViews.votesPlayers", { votes: getStatsExcludeVotes(false), players: getStatsExcludeVotes(true) }) }}
 				<br />
 				<button v-if="!personal.votedToExclude" class="actionsLineButton"
-					@click="localCastVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">Vote to
-					Exclude
-					Game from Stats</button>
+					@click="localCastVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">{{ $t("topMenuViews.voteExclude") }}</button>
 			</div>
 			<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
-				If all players agree, this game will be deleted
+				{{ $t("topMenuViews.deleteGameIntro") }}
 				<br />
-				Votes: {{ getDeleteVotes(false) }} - Players: {{ getDeleteVotes(true) }}
+				{{ $t("topMenuViews.votesPlayers", { votes: getDeleteVotes(false), players: getDeleteVotes(true) }) }}
 				<br />
 				<button v-if="!personal.votedToDelete" class="actionsLineButton"
-					@click="localCastVote(rf.DELETE_VOTE_TOPIC)">Vote
-					to
-					Delete
-					Game</button>
+					@click="localCastVote(rf.DELETE_VOTE_TOPIC)">{{ $t("topMenuViews.voteDelete") }}</button>
 			</div>
 
 		</div>
@@ -337,11 +334,11 @@ function localCastVote(topic) {
 	<transition name="slideC">
 		<div id="reserve" v-if="store.topMenuViews.showReserve">
 			<!-- Bidding order -->
-			<h2>Expected Bidding Order</h2>
+			<h2>{{ $t("topMenuViews.biddingOrder") }}</h2>
 			<PlayerBiddingLine />
 
 			<!-- gods-->
-			<h2>Available/Taken gods</h2>
+			<h2>{{ $t("topMenuViews.availableTakenGods") }}</h2>
 			<div v-for="(god, idx) in store.availablegods" :key="idx"
 				:class="[personal.aidText ? 'godResDiv' : 'godResDivNoText']">
 				<b>{{ rf.god_NAMES[god] }}</b>
@@ -368,7 +365,7 @@ function localCastVote(topic) {
 				</div>
 			</template>
 			<br />
-			<b>Unused gods:</b>
+			<b>{{ $t("topMenuViews.unusedGods") }}</b>
 			<span v-for="(god, idx) in getMissinggods()" :key="idx">
 				<b>{{ rf.god_NAMES[god] }}</b>
 				({{ rf.missinggod_TEXT[god] }})
@@ -376,7 +373,7 @@ function localCastVote(topic) {
 			</span>
 
 			<!-- specs-->
-			<h2>Available/Taken Specialists</h2>
+			<h2>{{ $t("topMenuViews.availableTakenSpecialists") }}</h2>
 			<div v-for="(spec, idx) in store.availableSpecialists" :key="idx"
 				:class="[personal.aidText ? 'specResDiv' : 'specResDivNoText']">
 				<b>{{ rf.SPEC_NAMES[spec] }}</b>
@@ -406,7 +403,7 @@ function localCastVote(topic) {
 			</template>
 
 			<!-- TECHS -->
-			<h2>Available/Taken Technologies</h2>
+			<h2>{{ $t("topMenuViews.availableTakenTechs") }}</h2>
 			<div class="techHolderDiv">
 				<template v-for="(row, idx) in getTechsArray()" :key="idx">
 					<div class="techPairDiv">
@@ -427,7 +424,7 @@ function localCastVote(topic) {
 			</div>
 
 			<!--Craftsmen -->
-			<h2>Available Tiles</h2>
+			<h2>{{ $t("topMenuViews.availableTiles") }}</h2>
 			<template v-for="(tile, idx) in getTilesArray()" :key="idx">
 				<div class="tileDiv" :style="{
 					width: rf.ROTATABLE_TILES.includes(tile) ? '50px' : '100px',
@@ -447,7 +444,7 @@ function localCastVote(topic) {
 			</template>
 
 			<div id="timesDiv">
-				Flexi-Times:
+				{{ $t("topMenuViews.flexiTimes") }}
 				<span v-for="(player, idx) in store.players" :key="idx">{{ player.name }}: {{
 					getFlexiTimeString(player.name)
 					}}&nbsp;&nbsp;&nbsp;</span>

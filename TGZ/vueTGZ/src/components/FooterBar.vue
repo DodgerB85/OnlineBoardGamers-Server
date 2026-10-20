@@ -7,11 +7,11 @@ import * as view from '../js/TGZview'
     <div class="content">
       <img :src="view.getImage('TGZ_box')" class="cover" />
       <p>
-        The Great Zimbabwe is a board game by Jeroen Doumen and Joris Wiersinga, published by <a target='_blank'
-          href='https://www.splottershop.com/'>Splotter Spellen</a>.
+        {{ $t("footer.gameCredit") }} <a target='_blank'
+          href='https://www.splottershop.com/'>{{ $t("footer.splotter") }}</a>.
       </p>
-      <p>Online Board Gamers implementation by DodgerB. Permissions Provided. </p>
-      <p>Menu icons from <a href="http://game-icons.net">game-icons.net</a></p>
+      <p>{{ $t("footer.implementation") }}</p>
+      <p>{{ $t("footer.icons") }} <a href="http://game-icons.net">game-icons.net</a></p>
     </div>
 
     <div class="scoreImg-wrapper">

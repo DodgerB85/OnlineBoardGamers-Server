@@ -85,7 +85,7 @@ function getStatsFor_god(god) {
 			:style="{
 				'border-color': personal.getCorrectedColour(store.players[playerIndex].colour) === rf.BLACK ? 'white' : 'black',
 			}">
-			No god
+			{{ $t("playerDetails.noGod") }}
 		</div>
 
 		<!-- SPECIALISTS -->

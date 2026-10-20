@@ -20,6 +20,8 @@ import * as rf from "./TGZreference"
 import * as model from "./TGZmodel"
 
 import { useModelStore } from "../stores/TGZstore.js"
+import i18n from "../i18n"
+const t = i18n.global.t
 
 export const shuffle = (array) => {
 	for (let i = array.length - 1; i > 0; i--) {
@@ -128,7 +130,7 @@ export function decompressChatData(data) {
     }*/
 	} else chatArray = []
 
-	chatArray.push(["WelcomeBot", 0, "Welcome to The Great Zimbabwe Online!SNLBSNLBIf you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"])
+	chatArray.push(["WelcomeBot", 0, t("io.welcomeBot")])
 
 	return chatArray
 }

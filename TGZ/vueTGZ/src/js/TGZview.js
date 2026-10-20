@@ -1,5 +1,7 @@
 import * as rf from "./TGZreference"
 import * as map from "./TGZmap"
+import i18n from "../i18n"
+const t = i18n.global.t
 
 import { useModelStore } from "../stores/TGZstore.js"
 import { usePersonalStore } from "../stores/TGZpersonal"
@@ -61,12 +63,12 @@ export function getIndexPosForCraftsmanPip(craftsmanData) {
 export function phaseStr() {
 	const store = useModelStore()
 	var phaseStr = ""
-	if (store.gameflow.phase === rf.PHASE_FIRST_MON) phaseStr = "Place First Monument"
-	else if (store.gameflow.phase === rf.PHASE_BID) phaseStr = "The Generosity Of Kings"
-	else if (store.gameflow.phase === rf.PHASE_BUILD) phaseStr = "Religion & Culture"
-	else if (store.gameflow.phase === rf.PHASE_REVENUES) phaseStr = "Revenues"
-	else if (store.gameflow.phase === rf.PHASE_CHECK_END) phaseStr = "Let us compare mythologies"
-	else if (store.gameflow.phase === rf.PHASE_GAME_OVER) phaseStr = "We have found the best mythology"
+	if (store.gameflow.phase === rf.PHASE_FIRST_MON) phaseStr = t("phase.firstMonument")
+	else if (store.gameflow.phase === rf.PHASE_BID) phaseStr = t("phase.bid")
+	else if (store.gameflow.phase === rf.PHASE_BUILD) phaseStr = t("phase.build")
+	else if (store.gameflow.phase === rf.PHASE_REVENUES) phaseStr = t("phase.revenues")
+	else if (store.gameflow.phase === rf.PHASE_CHECK_END) phaseStr = t("phase.compare")
+	else if (store.gameflow.phase === rf.PHASE_GAME_OVER) phaseStr = t("phase.gameOver")
 
 	return phaseStr
 }

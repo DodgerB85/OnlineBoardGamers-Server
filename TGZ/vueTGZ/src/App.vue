@@ -9,6 +9,9 @@ import * as model from "./js/TGZmodel"
 import * as history from "./js/TGZhistory"
 import * as replay from "./js/TGZreplay"
 
+import i18n from "./i18n"
+const t = i18n.global.t
+
 import TopMenu from "./components/TopMenu.vue"
 import TopMenuViews from "./components/TopMenuViews.vue"
 import DebugArea from "./components/DebugArea.vue"
@@ -267,12 +270,12 @@ async function initGame() {
 
 	// If new, save, otherwise, import data
 	if (window.initData.pov == undefined && window.initData.gameData === "") {
-		store.topMenuViews.rewindErrorText = "The game has not yet started"
+		store.topMenuViews.rewindErrorText = t("app.gameNotStarted")
 		// Create the <h1> element
 		var heading = document.createElement("h1")
 
 		// Set the text content of the <h1> element
-		heading.textContent = "The game has not yet started"
+		heading.textContent = t("app.gameNotStarted")
 
 		// Get a reference to the body element
 		var body = document.body
@@ -386,7 +389,7 @@ function getSplitUIleftMinWidth() {
 					<TopMenuViews />
 					<HistoryTab />
 					<div v-if="store.topMenuViews.showLoader" id="fLoadingBar">
-						Saving Game.... Please Wait....
+						{{ $t("app.savingGame") }}
 						<br />
 						<img :src="view.getImage('loading-bar-black')" />
 					</div>

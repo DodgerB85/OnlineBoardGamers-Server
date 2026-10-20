@@ -16,6 +16,9 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/TGZpersonal.js"
 const personal = usePersonalStore()
 
+import i18n from "../i18n"
+const t = i18n.global.t
+
 const autoPass = ref(window.initData.autoPass || false)
 const confirmTournamentReplacement = ref(false)
 
@@ -75,9 +78,12 @@ function getBidRange() {
 	for (let i = store.ongoingVars.currentBid + 1; i <= maxCows; i++) possibleBids.push(i)
 	let res = []
 	// Pass
-	res.push([0, "Pass (" + String(getCurrentCows(0)) + " cows for actions)"])
+	res.push([0, t("actionArea.passWithCows", { count: getCurrentCows(0), cows: t(getCurrentCows(0) !== 1 ? "common.cows" : "common.cow") })])
 	for (let i = 0; i < possibleBids.length; i++) {
-		res.push([possibleBids[i], "" + String(possibleBids[i]) + (model.eleguaAvailable() ? " (Cost after Elegua: " + (possibleBids[i] - 3 <= 0 ? "Free" : String(possibleBids[i] - 3)) + ")" : "") + " (" + String(getCurrentCows(possibleBids[i])) + " cow" + (getCurrentCows(possibleBids[i]) !== 1 ? "s" : "") + " for actions)"])
+		let label = String(possibleBids[i])
+		if (model.eleguaAvailable()) label += t("actionArea.bidWithCowsElegua", { cost: possibleBids[i] - 3 <= 0 ? t("actionArea.free") : String(possibleBids[i] - 3) })
+		label += t("actionArea.bidWithCows", { count: getCurrentCows(possibleBids[i]), cows: t(getCurrentCows(possibleBids[i]) !== 1 ? "common.cows" : "common.cow") })
+		res.push([possibleBids[i], label])
 	}
 	return res
 }
@@ -91,27 +97,27 @@ function getFirstPositionOrdinal() {
 		}
 	}
 	pos++
-	if (pos === 1) return "1st"
-	if (pos === 2) return "2nd"
-	if (pos === 3) return "3rd"
-	if (pos === 4) return "4th"
-	if (pos === 5) return "5th"
+	if (pos === 1) return t("common.ordinal1")
+	if (pos === 2) return t("common.ordinal2")
+	if (pos === 3) return t("common.ordinal3")
+	if (pos === 4) return t("common.ordinal4")
+	if (pos === 5) return t("common.ordinal5")
 }
 
 function getOrdinal(num) {
-	if (num === 2) return "2nd"
-	else if (num === 3) return "3rd"
-	else if (num === 4) return "4th"
-	else if (num === 5) return "5th"
+	if (num === 2) return t("common.ordinal2")
+	else if (num === 3) return t("common.ordinal3")
+	else if (num === 4) return t("common.ordinal4")
+	else if (num === 5) return t("common.ordinal5")
 }
 
 function getReason(num, idx) {
-	if (num === 1) return (idx !== 0 ? "Next " : "") + "Highest Difference Between VP / VR"
-	else if (num === 2) return (idx !== 0 ? "Next " : "") + "Xango wins ties with same difference between VP / VR"
-	else if (num === 3) return (idx !== 0 ? "Next " : "") + "Highest Total VP"
-	else if (num === 4) return (idx !== 0 ? "Next " : "") + "Earlier in Turn Order"
-	else if (num === 5) return "Next in order"
-	else return "Unfavourable Famines"
+	if (num === 1) return (idx !== 0 ? t("common.next") : "") + t("actionArea.highestDifference")
+	else if (num === 2) return (idx !== 0 ? t("common.next") : "") + t("actionArea.xangoTie")
+	else if (num === 3) return (idx !== 0 ? t("common.next") : "") + t("actionArea.highestTotalVp")
+	else if (num === 4) return (idx !== 0 ? t("common.next") : "") + t("actionArea.earlierTurnOrder")
+	else if (num === 5) return t("actionArea.nextInOrder")
+	else return t("actionArea.unfavourableFamines")
 }
 
 function getCurrentCows(bidAmount) {
@@ -264,7 +270,7 @@ function localSetupPlaceCraftsman(cman) {
 	store.topMenuViews.currentGhostIndex = -1
 	// Remaining check
 	if (store.remainingItems[cman] <= 0) {
-		store.context.actionError = "No Remaining Craftsmen"
+		store.context.actionError = t("actionArea.noRemainingCraftsmen")
 		return
 	}
 
@@ -274,18 +280,18 @@ function localSetupPlaceCraftsman(cman) {
 		let techCard = cman * 2 + 1
 		if (techs.includes(cman * 2)) techCard = cman * 2
 		if (!model.has_god(controller.currentPlayerObj(), rf.GU) && model.getVR(controller.currentPlayerObj()) + rf.TECH_VR[techCard] > 40) {
-			store.context.actionError = "Taking Tech would increase VR over 40"
+			store.context.actionError = t("actionArea.techOver40")
 			return
 		}
 		if (model.has_god(controller.currentPlayerObj(), rf.GU) && model.getVR(controller.currentPlayerObj()) + 1 > 40) {
-			store.context.actionError = "Taking Tech would increase VR over 40"
+			store.context.actionError = t("actionArea.techOver40")
 			return
 		}
 	}
 
 	// COW CHECK
 	if (controller.currentPlayerObj().cows < rf.COW_COST_TO_BUILD_CMAN[cman]) {
-		store.context.actionError = "Not enough cows to place craftsman"
+		store.context.actionError = t("actionArea.notEnoughCowsCraftsman")
 		store.context.itemBeingAdded = -1
 		store.context.indexesToHighlightClick.splice(0)
 		return
@@ -317,28 +323,28 @@ function endBuildActions() {
 	// Check for activated and unused specialist
 	for (let i = 0; i < controller.currentPlayerObj().specialists.length; i++) {
 		if (controller.currentPlayerObj().specialists[i][0] === rf.RAIN_CEREMONY && controller.currentPlayerObj().specialists[i][1] !== 0 && !store.context.actionsTaken.includes(rf.ACT_BUILD_WATER)) {
-			store.context.actionError = "You must use your Rain Ceremony to place a water tile in order to take the specialist"
+			store.context.actionError = t("actionArea.mustUseRain")
 			return
 		} else if (controller.currentPlayerObj().specialists[i][0] === rf.SHAMAN && controller.currentPlayerObj().specialists[i][1] !== 0 && !store.context.actionsTaken.includes(rf.ACT_BUILD_RES)) {
-			store.context.actionError = "You must use your Shaman to place a resource in order to take the specialist"
+			store.context.actionError = t("actionArea.mustUseShaman")
 			return
 		}
 	}
 	store.context.actionError = ""
 	store.context.action = rf.ACT_END_BUILD
-	if (store.context.actionsTaken.length === 0) store.context.actionError = "CAUTION: You Have Not Taken Any Actions"
+	if (store.context.actionsTaken.length === 0) store.context.actionError = t("actionArea.noActionsTaken")
 }
 
 function clickedSpecialistChoice(spec) {
 	store.context.actionError = ""
 	// VR check
 	if (model.getVR(controller.currentPlayerObj()) + rf.SPEC_VR[spec] > 40) {
-		store.context.actionError = "Taking " + rf.SPEC_NAMES[spec] + " would increase your VR over 40"
+		store.context.actionError = t("actionArea.takingSpecOver40", { name: rf.SPEC_NAMES[spec] })
 		return
 	}
 	// Cow check
 	if (controller.currentPlayerObj().cows - rf.SPEC_COST[spec] < 0) {
-		store.context.actionError = "You must be able to pay the cow cost to take " + rf.SPEC_NAMES[spec]
+		store.context.actionError = t("actionArea.paySpecCost", { name: rf.SPEC_NAMES[spec] })
 		return
 	}
 
@@ -350,7 +356,7 @@ function clickedgodChoice(god) {
 
 	// god is included, so don't add it on again
 	if (model.getVR(controller.currentPlayerObj(), true) > 40) {
-		store.context.actionError = "Taking " + rf.god_NAMES[god] + " would increase your VR over 40"
+		store.context.actionError = t("actionArea.takingGodOver40", { name: rf.god_NAMES[god] })
 		return
 	}
 
@@ -411,14 +417,14 @@ function getCurrentUpgradeCost() {
 		}
 	}
 
-	let ret = "<b>" + String(hubCosts) + "</b> hub" + (hubCosts !== 1 ? "s" : "") + " "
+	let ret = "<b>" + String(hubCosts) + "</b> " + t(hubCosts !== 1 ? "history.hubs" : "history.hub") + " "
 	for (let i = 0; i < cmenCosts.length; i++) {
 		if (cmenCosts[i] !== 0) {
 			ret += '<span class="mainEntryPlayer" style="background-color: ' + personal.getCorrectedColourHex(store.players[i].colour) + ";color: " + (personal.getCorrectedColour(store.players[i].colour) === rf.WHITE || personal.getCorrectedColour(store.players[i].colour) === rf.YELLOW ? "black" : "white") + '">' + store.players[i].displayName + "</span>" + String(cmenCosts[i]) + " "
 		}
 	}
 	// Total
-	ret += " Total: " + String(cmenCosts.reduce((a, b) => a + b, 0) + hubCosts) + " "
+	ret += " " + t("history.totalLabel") + " " + String(cmenCosts.reduce((a, b) => a + b, 0) + hubCosts) + " "
 	return ret
 }
 
@@ -594,11 +600,11 @@ function failedToJustPlaceCraftsmanFlag() {
 <template>
 	<template v-if="personal.name == undefined">
 		<div id="loggedOutText">
-			Please
-			<a href="/register">REGISTER</a>
-			or
-			<a href="/login">LOGIN</a>
-			to play a game
+			{{ $t("actionArea.loggedOutPlease") }}
+			<a href="/register">{{ $t("actionArea.register") }}</a>
+			{{ $t("actionArea.or") }}
+			<a href="/login">{{ $t("actionArea.login") }}</a>
+			{{ $t("actionArea.toPlayGame") }}
 			<br />
 		</div>
 		<br />
@@ -608,35 +614,35 @@ function failedToJustPlaceCraftsmanFlag() {
 	<template v-if="rf.SUPER_USERS.includes(personal.name)">
 		<template v-if="confirmTournamentReplacement === false">
 			<button class="actionsLineButton" @click="confirmTournamentReplacement = true">
-				Confirm Replacement For:
+				{{ $t("actionArea.confirmReplacementFor") }}
 				<b>{{ controller.currentPlayerObj().name }}</b>
 			</button>
 		</template>
 		<template v-if="confirmTournamentReplacement === true">
 			<br />
 			<br />
-			Are you sure you want to replace
+			{{ $t("actionArea.sureReplace") }}
 			<b>{{ controller.currentPlayerObj().name }}</b>
 			?
 			<br />
 			<br />
-			This action cannot be undone.
+			{{ $t("actionArea.actionCannotBeUndone") }}
 			<br />
 			<br />
-			This action will delete current rewind data.
+			{{ $t("actionArea.deletesRewindData") }}
 			<br />
 			<br />
-			The TGZtourneyAdmin player will replace
+			{{ $t("actionArea.adminWillReplace") }}
 			<b>{{ controller.currentPlayerObj().name }}</b>
 			.
 			<br />
 			<br />
-			Mr.Moo will get notifications, and this game will show up in "Current Games".
+			{{ $t("actionArea.mrMooNotification") }}
 			<br />
 			<br />
-			<button class="actionsLineButton" @click="confirmTournamentReplacement = false">CANCEL</button>
+			<button class="actionsLineButton" @click="confirmTournamentReplacement = false">{{ $t("common.cancel").toUpperCase() }}</button>
 			<button class="actionsLineButton" @click="localReplaceExternalTournamentPlayer()">
-				CONFIRM Kick and replacement for
+				{{ $t("actionArea.confirmKickReplacement") }}
 				<b>{{ controller.currentPlayerObj().name }}</b>
 			</button>
 		</template>
@@ -644,120 +650,103 @@ function failedToJustPlaceCraftsmanFlag() {
 
 	<template v-if="personal.kickoutRequired > 0 && !personal.canPlay() && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 		<div v-if="personal.kickoutRequired == 1" id="kickoutDiv">
-			Player
-			<b>{{ controller.currentPlayerObj().name }}</b>
-			has used all the standard kickout time.
+			{{ $t("actionArea.kickoutStandardUsed", { name: controller.currentPlayerObj().name }) }}
 			<br />
 			<br />
-			Remaining Flex-Time:
+			{{ $t("actionArea.remainingFlexTime") }}
 			<span id="flexiKickoutTimerSpan">{{ getFlexiKickoutTImerText() }}</span>
 			<br />
 			<br />
-			For more information see
-			<b><a href="/help/" target="_blank">Help</a></b>
+			{{ $t("actionArea.forMoreInfo") }}
+			<b><a href="/help/" target="_blank">{{ $t("actionArea.help") }}</a></b>
 		</div>
 		<div v-else-if="personal.externalTournamentGame" id="kickoutDiv">
-			Under the tournament rules set by the external tournament organisers, you cannot kick other players from this type of tournament game
+			{{ $t("actionArea.tournamentNoKick") }}
 			<br />
 			<br />
-			Please use the button below to alert the admins, who will continue to make moves for this player
+			{{ $t("actionArea.tournamentAdminsHint") }}
 			<br />
 			<br />
 			<br />
 			<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-			<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
+			<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("actionArea.notNow") }}</button></span>
 
-			<button class="actionsLineButton" @click="IO.nudgeTourneyAdmins(1)">Alert Admins</button>
+			<button class="actionsLineButton" @click="IO.nudgeTourneyAdmins(1)">{{ $t("actionArea.alertAdmins") }}</button>
 		</div>
 
 		<div v-else id="kickoutDiv">
 			<template v-if="canKickoutNow()">
 			<br />
 			<template v-if="store.context.action !== rf.ACT_CONFIRM_KICKOUT">
-				Player
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				has timed out
+				{{ $t("actionArea.timedOut", { name: controller.currentPlayerObj().name }) }}
 				<br />
-				To kick out
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				press Confirm Kickout
+				{{ $t("actionArea.toKickout", { name: controller.currentPlayerObj().name }) }}
 				<br />
-				The game will proceed to the next player/phase/turn
+				{{ $t("actionArea.gameProceeds") }}
 				<br />
 				<br />
-				Otherwise you can allow
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				more time - reload the page to initiate kickout again
+				{{ $t("actionArea.allowMoreTime", { name: controller.currentPlayerObj().name }) }}
 				<br />
 
 				<br />
 				<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
+				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("actionArea.notNow") }}</button></span>
 				<span>
-					<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
+					<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("actionArea.keepInGame", { name: controller.currentPlayerObj().name }) }}</button>
 				</span>
-				<span><button class="actionsLineButton" id="confirmKickoutButton" @click="store.context.action = rf.ACT_CONFIRM_KICKOUT">Confirm Kickout</button></span>
+				<span><button class="actionsLineButton" id="confirmKickoutButton" @click="store.context.action = rf.ACT_CONFIRM_KICKOUT">{{ $t("actionArea.confirmKickout") }}</button></span>
 			</template>
 			<template v-if="store.context.action === rf.ACT_CONFIRM_KICKOUT">
-				This will permanently remove
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				from the game
+				{{ $t("actionArea.willRemove", { name: controller.currentPlayerObj().name }) }}
 				<br />
-				<b>It cannot be undone</b>
+				<b>{{ $t("actionArea.cannotBeUndone") }}</b>
 				<br />
 				<br />
-				Try checking the chat in case they have given a reason for any temporary absence
+				{{ $t("actionArea.checkChat") }}
 				<br />
-				Please consider giving them a short grace period, in case they are just delayed
+				{{ $t("actionArea.gracePeriod") }}
 
 				<br />
 				<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
+				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("actionArea.notNow") }}</button></span>
 				<span>
-					<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">Permanently Kickout {{ controller.currentPlayerObj().name }}</button>
+					<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">{{ $t("actionArea.permanentlyKickout", { name: controller.currentPlayerObj().name }) }}</button>
 				</span>
 			</template>
 			</template>
 			<template v-else>
 				<br />
-				Player
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				has timed out
+				{{ $t("actionArea.timedOut", { name: controller.currentPlayerObj().name }) }}
 				<br />
-				A vote from the other players is needed to kick out
-				<b>{{ controller.currentPlayerObj().name }}</b>
+				{{ $t("actionArea.voteNeeded", { name: controller.currentPlayerObj().name }) }}
 				<br />
 				<br />
-				Votes: {{ kickoutVoteCount() }}/{{ store.kickoutVoteThreshold }} ({{ kickoutVoters() }})
+				{{ $t("actionArea.votes", { votes: kickoutVoteCount(), threshold: store.kickoutVoteThreshold, voters: kickoutVoters() }) }}
 				<br />
 				<br />
 				<span v-if="!myKickoutVote()">
 					<template v-if="isLastVoteRequired()">
-						This will permanently remove
-						<b>{{ controller.currentPlayerObj().name }}</b>
-						from the game
+						{{ $t("actionArea.willRemove", { name: controller.currentPlayerObj().name }) }}
 						<br />
-						<b>It cannot be undone</b>
+						<b>{{ $t("actionArea.cannotBeUndone") }}</b>
 						<br />
 						<br />
 					</template>
-					<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout">Vote to Kickout {{ controller.currentPlayerObj().name }}</button>
+					<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout">{{ $t("actionArea.voteToKickout", { name: controller.currentPlayerObj().name }) }}</button>
 				</span>
 				<span v-else>
-					You have voted to kick out
-					<b>{{ controller.currentPlayerObj().name }}</b>
+					{{ $t("actionArea.votedToKickout", { name: controller.currentPlayerObj().name }) }}
 					<br />
-					If the other players do not also vote, you will be able to kick them out directly in
-					{{ soloKickoutCountdown }}
+					{{ $t("actionArea.voteCountdown", { time: soloKickoutCountdown }) }}
 				</span>
 				<br />
 				<br />
 				<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 				<span>
-					<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button>
+					<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("actionArea.notNow") }}</button>
 				</span>
 				<span>
-					<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
+					<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("actionArea.keepInGame", { name: controller.currentPlayerObj().name }) }}</button>
 				</span>
 			</template>
 		</div>
@@ -780,40 +769,40 @@ function failedToJustPlaceCraftsmanFlag() {
 
 	<!-- ALWAYS SHOWS ON TURN 0 -->
 	<template v-if="store.gameflow.turn === 0 && !store.topMenuViews.showReplay && store.topMenuViews.showIntroInfo">
-		<h2>Welcome to Africa!</h2>
+		<h2>{{ $t("actionArea.welcomeTitle") }}</h2>
 		<b>
-			NOTE: Check the option in your
-			<a href="/profile/">Profile</a>
-			to remove god/specs description/VR
+			{{ $t("actionArea.welcomeNote") }}
+			<a href="/profile/">{{ $t("actionArea.profile") }}</a>
+			{{ $t("actionArea.welcomeRemoveText") }}
 		</b>
 		<br />
 		<br />
-		In The Great Zimbabwe Online the following symbols can help you whilst positioning tiles or raising monuments
+		{{ $t("actionArea.welcomeSymbols") }}
 		<br />
 		<div class="intro_items_list_div">
 			<div class="intro_inRange"></div>
-			Item in range
+			{{ $t("actionArea.inRange") }}
 			<br />
 			<div class="intro_OutOfRange"></div>
-			Item not in range
+			{{ $t("actionArea.outOfRange") }}
 			<br />
 			<div class="intro_resNotUsed"></div>
-			Resource not in range of another Craftsman of same type
+			{{ $t("actionArea.resNotUsed") }}
 			<br />
 			<div class="intro_resUsed"></div>
-			Resource already in range of another Craftsman of same type
+			{{ $t("actionArea.resUsed") }}
 			<br />
 			<div class="intro_imgDiv"><img class="intro_img" :src="view.getImage('noResource5')" alt="NR" /></div>
-			Depleted Resource / No resource available for craftsman
+			{{ $t("actionArea.depletedResource") }}
 			<br />
 			<div class="intro_imgDiv">
 				<img class="intro_img" :src="view.getImage('noResource5')" alt="NR" />
 				<div class="crossBackground_Atete"></div>
 			</div>
-			Depleted Resource / No resource available for craftsman (for Atete)
+			{{ $t("actionArea.depletedResourceAtete") }}
 			<br />
 			<div class="intro_imgDiv"><img class="intro_img" :src="view.getImage('noCows')" alt="NR" /></div>
-			Not enough cattle to pay craftsman (including any hub costs)
+			{{ $t("actionArea.notEnoughCattle") }}
 			<br />
 
 			<div
@@ -826,40 +815,40 @@ function failedToJustPlaceCraftsmanFlag() {
 					<img :src="view.getImage('noCmen')" alt="NC" />
 				</div>
 			</div>
-			Not enough available Craftsmen/Resources to Raise Monument
+			{{ $t("actionArea.notEnoughCraftsmen") }}
 			<br />
 			<br />
-			<b>REWIND</b>
-			will literally roll the game back by one player turn.
+			<b>{{ $t("actionArea.rewindTitle") }}</b>
+			{{ $t("actionArea.rewindInto") }}
 			<br />
-			So in the bidding phase, it will go back to the last player to make an actual bid,
+			{{ $t("actionArea.rewindBid1") }}
 			<br />
-			or if at the first player to bid, it will rewind to the last player to take actions during the last actions phase.
+			{{ $t("actionArea.rewindBid2") }}
 			<br />
-			Similarly during actions, it will either rewind to the previous player's action turn,
+			{{ $t("actionArea.rewindAction1") }}
 			<br />
-			or if already at the first player, it will rewind to the last player who made an actual bid.
+			{{ $t("actionArea.rewindAction2") }}
 			<br />
 			<br />
-			<b>REPLAY</b>
-			does not alter the game state in any way. You can view all the moves made from the
+			<b>{{ $t("actionArea.replayTitle") }}</b>
+			{{ $t("actionArea.replayIntro") }}
 			<br />
-			start of the game, stepping through move by move, and viewing the game state exactly as it was at that time.
+			{{ $t("actionArea.replayIntro2") }}
 			<br />
-			Once you exit replay mode, the game will return to the same state as when you entered replay mode.
+			{{ $t("actionArea.replayExit") }}
 			<br />
-			For information on Bidding, Replay, Map Inspector, Ranges, and Game-Spinoff please see
-			<b><a class="linkOther" href="/TGZ/help/" target="_blank">TGZ Help</a></b>
+			{{ $t("actionArea.helpIntro") }}
+			<b><a class="linkOther" href="/TGZ/help/" target="_blank">{{ $t("actionArea.helpLink") }}</a></b>
 		</div>
 	</template>
 	<template v-else-if="store.topMenuViews.showIntroInfo === false">
-		<button class="actionsLineButton" @click="store.topMenuViews.showIntroInfo = true">Show Help</button>
+		<button class="actionsLineButton" @click="store.topMenuViews.showIntroInfo = true">{{ $t("actionArea.showHelp") }}</button>
 	</template>
 
 	<!-- ALWAYS SHOWS BID INFO-->
 	<template v-if="store.gameflow.phase === rf.PHASE_BID">
 		<div id="bidLine">
-			<b>New Turn Order:</b>
+			<b>{{ $t("actionArea.newTurnOrder") }}</b>
 			<template v-for="(playerIndex, idx) in store.ongoingVars.newTurnOrder" :key="idx">
 				<div v-if="playerIndex === -1" class="newTurnOrderDiv">
 					<span class="newTurnOrderNumber">{{ idx + 1 }}</span>
@@ -870,7 +859,7 @@ function failedToJustPlaceCraftsmanFlag() {
 			</template>
 			<br v-if="!store.topMenuViews.showReplay" />
 			<template v-if="store.ongoingVars.totalBids > 0">
-				<b>Current Bid:</b>
+				<b>{{ $t("actionArea.currentBid") }}</b>
 				<b>{{ store.ongoingVars.currentBid }}</b>
 				<img :src="view.getImage('cows1')" class="bidCow" alt="Cows" />
 				<span
@@ -909,12 +898,12 @@ function failedToJustPlaceCraftsmanFlag() {
 		<!-- EXPERT PANEL TO PASS BID-->
 		<template v-if="!personal.canPlay() && !store.topMenuViews.showReplay && store.gameflow.turnOrder.includes(personal.pov)">
 			<div class="expertPanel">
-				<b>Expert Option</b>
-				: If unsure leave blank
+				<b>{{ $t("actionArea.expertOption") }}</b>
+				: {{ $t("actionArea.expertIgnore") }}
 				<br />
 				<input type="checkbox" id="autoPassCheckbox" v-model="autoPass" />
-				<label for="autoPassCheckbox">Auto-pass on your next bid</label>
-				<button @click="handleAutoPassCheckbox" class="actionsLineButton">Submit</button>
+				<label for="autoPassCheckbox">{{ $t("actionArea.autoPass") }}</label>
+				<button @click="handleAutoPassCheckbox" class="actionsLineButton">{{ $t("actionArea.submit") }}</button>
 				<span id="autoPassResponse" class="messageSuccess"></span>
 			</div>
 		</template>
@@ -923,30 +912,30 @@ function failedToJustPlaceCraftsmanFlag() {
 	<!-- ALWAYS SHOWS GAME END-->
 	<template v-if="store.gameflow.phase === rf.PHASE_GAME_OVER">
 		<div id="gameEndDiv">
-			Game Over
+			{{ $t("actionArea.gameOver") }}
 			<br />
 			<br />
-			Winner: {{ store.players[store.history[store.history.length - 1][3][0][1]].displayName }}
+			{{ $t("actionArea.winner") }} {{ store.players[store.history[store.history.length - 1][3][0][1]].displayName }}
 			<br />
 			<template v-if="store.players[store.history[store.history.length - 1][3][0][1]].name === personal.name">
-				<h1>Congratulations!</h1>
+				<h1>{{ $t("actionArea.congratulations") }}</h1>
 			</template>
 			<template v-else></template>
 			{{ getReason(store.history[store.history.length - 1][3][0][2], 0) }}
 			<br />
-			Fancy a
-			<a :href="'/createTGZpage/' + String(personal.gameID) + '/'">rematch</a>
+			{{ $t("actionArea.fancyA") }}
+			<a :href="'/createTGZpage/' + String(personal.gameID) + '/'">{{ $t("actionArea.rematch") }}</a>
 			?
 			<br />
-			Winning Kingdom:
+			{{ $t("actionArea.winningKingdom") }}
 			<img class="winningTribeImg" :src="view.getPlayerTribeImage(personal.getCorrectedColour(store.players[store.history[store.history.length - 1][3][0][1]].colour))" alt="Tribe" />
-			Best Mythology:
+			{{ $t("actionArea.bestMythology") }}
 			<template v-if="store.players[store.history[store.history.length - 1][3][0][1]].god[0][0] !== rf.NO_god">
 				<template v-for="(godData, index) in model.getPlayer_gods(store.players[store.history[store.history.length - 1][3][0][1]])" :key="index">
 					<img v-if="godData[0] !== rf.NO_god" :src="view.getImage('god' + godData[0])" alt="god" class="winningMythImg" />
 				</template>
 			</template>
-			<span v-else>None</span>
+			<span v-else>{{ $t("actionArea.none") }}</span>
 			<br />
 			<div class="intro_items_list_div">
 				<template v-for="(entry, idx) in store.history[store.history.length - 1][3]" :key="idx">
@@ -956,14 +945,14 @@ function failedToJustPlaceCraftsmanFlag() {
 					</template>
 				</template>
 			</div>
-			<span v-if="store.statsModeData.statsMode">Stats view - craftsman and techs show total game income</span>
-			<span v-else>Normal view</span>
+			<span v-if="store.statsModeData.statsMode">{{ $t("actionArea.statsView") }}</span>
+			<span v-else>{{ $t("actionArea.normalView") }}</span>
 			<br />
 			<button @click="store.statsModeData.statsMode = !store.statsModeData.statsMode" class="actionsLineButton">
-				Cick to change to
-				<span v-if="!store.statsModeData.statsMode">Stats</span>
-				<span v-else>Normal</span>
-				View
+				{{ $t("actionArea.clickToChange") }}
+				<span v-if="!store.statsModeData.statsMode">{{ $t("actionArea.stats") }}</span>
+				<span v-else>{{ $t("actionArea.normal") }}</span>
+				{{ $t("actionArea.view") }}
 			</button>
 		</div>
 	</template>
@@ -972,22 +961,22 @@ function failedToJustPlaceCraftsmanFlag() {
 	<template v-if="!personal.canPlay() && !store.topMenuViews.showReplay">
 		<div id="mapInspectorButtonDiv">
 			<button @click="model.toggleMapInspector" class="actionsLineButton">
-				<span v-if="!store.topMenuViews.mapInspectorMode">Enable</span>
-				<span v-else>Disable</span>
+				<span v-if="!store.topMenuViews.mapInspectorMode">{{ $t("actionArea.enable") }}</span>
+				<span v-else>{{ $t("actionArea.disable") }}</span>
 				<br />
-				Map
+				{{ $t("actionArea.map") }}
 				<br />
-				Inspector
+				{{ $t("actionArea.inspector") }}
 			</button>
 			<template v-if="store.topMenuViews.mapInspectorMode">
 				<br />
 				<input type="checkbox" id="mapInspectorEshuCheckbox" v-model="store.topMenuViews.mapInspectorEshu" />
-				<label for="mapInspectorEshuCheckbox">Use Eshu</label>
+				<label for="mapInspectorEshuCheckbox">{{ $t("actionArea.useEshu") }}</label>
 			</template>
 		</div>
 		<template v-if="store.topMenuViews.mapInspectorMode && !store.topMenuViews.showReplay">
 			<br />
-			Click an item to view ranges. Hubs Used:
+			{{ $t("actionArea.clickItemRanges") }}
 			<span class="hubRangeSq hubRangeSq0">0</span>
 			<span v-for="idx in Math.max(store.topMenuViews.hubRangesToHighlight.length - 1, 0)" :key="idx" class="hubRangeSq" :class="'hubRangeSq' + String(idx % 8)">
 				{{ idx }}
@@ -1002,18 +991,18 @@ function failedToJustPlaceCraftsmanFlag() {
 			<!-- ADD FIRST MONUMENT  -->
 			<template v-if="store.gameflow.phase === rf.PHASE_FIRST_MON">
 				<button @click="model.toggleMapInspector" class="actionsLineButton" id="mapInspectFirstMon">
-					<span v-if="!store.topMenuViews.mapInspectorMode">Enable</span>
-					<span v-else>Disable</span>
+					<span v-if="!store.topMenuViews.mapInspectorMode">{{ $t("actionArea.enable") }}</span>
+					<span v-else>{{ $t("actionArea.disable") }}</span>
 					<br />
-					Map
+					{{ $t("actionArea.map") }}
 					<br />
-					Inspector
+					{{ $t("actionArea.inspector") }}
 				</button>
-				<b>Build your first monument on a highlighted start square</b>
+				<b>{{ $t("actionArea.buildFirstMonument") }}</b>
 				<template v-if="store.context.action !== rf.ACT_NONE">
 					<br />
 					<br />
-					Hubs Used:
+					{{ $t("actionArea.hubsUsed") }}
 					<span class="hubRangeSq hubRangeSq0">0</span>
 					<span v-for="idx in Math.max(store.topMenuViews.hubRangesToHighlight.length - 1, 0)" :key="idx" class="hubRangeSq" :class="'hubRangeSq' + String(idx % 8)">
 						{{ idx }}
@@ -1022,74 +1011,74 @@ function failedToJustPlaceCraftsmanFlag() {
 					<br />
 				</template>
 				<div v-if="store.context.action === rf.ACT_NONE">
-					<button v-if="controller.canResign()" class="actionsLineButton" @click="localCheckResign">Resign</button>
-					<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset</button>
-					<button class="actionsLineButton" @click="localEndPlayerTurn">End Turn</button>
+					<button v-if="controller.canResign()" class="actionsLineButton" @click="localCheckResign">{{ $t("actionArea.resign") }}</button>
+					<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t("common.reset") }}</button>
+					<button class="actionsLineButton" @click="localEndPlayerTurn">{{ $t("common.endTurn") }}</button>
 				</div>
 			</template>
 
 			<!-- CHEAT ACTION -->
 			<template v-if="store.context.action === rf.ACT_CHOOSE_CHEAT">
-				<h2>Cheat Options</h2>
-				(If you got here accidentally please CANCEL. Other players will be able to see your cheat in the History!)
+				<h2>{{ $t("actionArea.cheatOptions") }}</h2>
+				{{ $t("actionArea.cheatWarning") }}
 				<br />
 				<br />
 				<div class="cheatOptionsContainer">
 					<div class="cheatOptionDiv">
 						<span>
-							Allow choosing multiple gods
+							{{ $t("actionArea.allowMultipleGods") }}
 							<br />
-							(Choosing the same one twice won't work)
+							{{ $t("actionArea.allowMultipleGodsNote") }}
 						</span>
 						<br />
 						<button class="actionsLineButton" @click="allowMultipleGods">
-							Allow Multiple
+							{{ $t("actionArea.allowMultiple") }}
 							<br />
-							gods
+							{{ $t("actionArea.gods") }}
 						</button>
 					</div>
 					<div class="cheatOptionDiv">
 						<span>
-							Unlock all gods for selection
+							{{ $t("actionArea.unlockAllGods") }}
 							<br />
-							This adds ALL gods to the Reserve
+							{{ $t("actionArea.unlockAllGodsNote1") }}
 							<br />
-							(even already chosen ones)
+							{{ $t("actionArea.unlockAllGodsNote2") }}
 							<br />
-							When you end your turn, all gods
+							{{ $t("actionArea.unlockAllGodsNote3") }}
 							<br />
-							will remain in the reserve
+							{{ $t("actionArea.unlockAllGodsNote4") }}
 							<br />
-							(So you only need to enable this once, then finish your turn)
+							{{ $t("actionArea.unlockAllGodsNote5") }}
 						</span>
 						<br />
 						<button class="actionsLineButton" @click="enableAllGods">
-							Enable All
+							{{ $t("actionArea.enableAll") }}
 							<br />
-							gods
+							{{ $t("actionArea.gods") }}
 						</button>
 					</div>
 				</div>
 				<br />
-				<button class="actionsLineButton" @click="cancelCheat">Cancel</button>
+				<button class="actionsLineButton" @click="cancelCheat">{{ $t("common.cancel") }}</button>
 			</template>
 
 			<!-- BID  -->
 			<template v-if="store.gameflow.phase === rf.PHASE_BID">
 				<template v-if="store.context.action === rf.ACT_BID">
-					<b>Provide a gift, or Pass</b>
+					<b>{{ $t("actionArea.provideGift") }}</b>
 					<br />
 					<span v-if="model.has_god(controller.currentPlayerObj(), rf.AJA) && model.get_godData(controller.currentPlayerObj(), rf.AJA)[1] === 0">
-						To place your bid on Aja, select a bid amount and then use "Confirm Bid to Aja"
+						{{ $t("actionArea.ajaBidHint") }}
 						<br />
 					</span>
 					<span v-if="model.anyoneHasNYAMI(false)" class="orangeText">
 						<!--Remember: Nyami-Nyami allows that player to go first
 						<br />-->
-						Remember: Nyami-Nyami is placing all bid cows starting from the first plaque
+						{{ $t("actionArea.nyamiHint") }}
 						<br />
 					</span>
-					<label class="choiceLabel" for="bidAmount">Bid Amount:</label>
+					<label class="choiceLabel" for="bidAmount">{{ $t("actionArea.bidAmount") }}</label>
 
 					<select name="bidAmount" id="bidAmount" @change="newBidSelected($event.target.value)">
 						<option v-for="(amount, idx) in getBidRange()" :key="idx" :value="amount[0]">{{ amount[1] }}</option>
@@ -1097,43 +1086,43 @@ function failedToJustPlaceCraftsmanFlag() {
 
 					<br />
 					<button @click="model.toggleMapInspector" class="actionsLineButton" id="mapInspectBid">
-						<span v-if="!store.topMenuViews.mapInspectorMode">Enable</span>
-						<span v-else>Disable</span>
+						<span v-if="!store.topMenuViews.mapInspectorMode">{{ $t("actionArea.enable") }}</span>
+						<span v-else>{{ $t("actionArea.disable") }}</span>
 						<br />
-						Map
+						{{ $t("actionArea.map") }}
 						<br />
-						Inspector
+						{{ $t("actionArea.inspector") }}
 					</button>
 
 					<span v-if="store.context.selectedBid === 0">
-						Passing will place you in
+						{{ $t("actionArea.passPosition") }}
 						<b>{{ getFirstPositionOrdinal() }}</b>
-						position with
+						{{ $t("actionArea.position") }}
 						<b>{{ getCurrentCows(store.context.selectedBid) }}</b>
-						cows
+						{{ $t("common.cows") }}
 					</span>
 					<span v-else>
-						Bidding {{ store.context.selectedBid }} means you will currently have {{ getCurrentCows(store.context.selectedBid) }}
-						<span v-if="getCurrentCows(store.context.selectedBid) !== 1">cows</span>
-						<span v-else>cow</span>
-						to use for your actions
+						{{ $t("actionArea.biddingMeans", { bid: store.context.selectedBid, count: getCurrentCows(store.context.selectedBid) }) }}
+						<span v-if="getCurrentCows(store.context.selectedBid) !== 1">{{ $t("common.cows") }}</span>
+						<span v-else>{{ $t("common.cow") }}</span>
+						{{ $t("actionArea.toUseActions") }}
 					</span>
 
 					<br />
 
 					<!--DEFUNCT SCHISM AJA <button v-if="controller.ajaPlayerCanFreePass()" class="actionsLineButton" @click="confirmFreeAjaPass">Confirm Free Pass with Aja</button>-->
-					<button v-if="store.context.selectedBid > 0 && model.has_god(controller.currentPlayerObj(), rf.AJA) && model.get_godData(controller.currentPlayerObj(), rf.AJA)[1] === 0" class="actionsLineButton" @click="confirmAjaBid(store.context.selectedBid)">Confirm Bid to Aja</button>
+					<button v-if="store.context.selectedBid > 0 && model.has_god(controller.currentPlayerObj(), rf.AJA) && model.get_godData(controller.currentPlayerObj(), rf.AJA)[1] === 0" class="actionsLineButton" @click="confirmAjaBid(store.context.selectedBid)">{{ $t("actionArea.confirmBidAja") }}</button>
 
 					<button class="actionsLineButton" @click="confirmBid(store.context.selectedBid)">
-						Confirm
-						<span v-if="store.context.selectedBid === 0">Pass & End Turn</span>
-						<span v-else>Bid & End Turn</span>
+						{{ $t("common.confirm") }}
+						<span v-if="store.context.selectedBid === 0">{{ $t("actionArea.passEndTurn") }}</span>
+						<span v-else>{{ $t("actionArea.bidEndTurn") }}</span>
 					</button>
 				</template>
 
 				<div v-if="store.context.action === rf.ACT_NONE">
-					<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset</button>
-					<button class="actionsLineButton" @click="localEndPlayerTurn">End Turn</button>
+					<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t("common.reset") }}</button>
+					<button class="actionsLineButton" @click="localEndPlayerTurn">{{ $t("common.endTurn") }}</button>
 				</div>
 			</template>
 
@@ -1141,98 +1130,98 @@ function failedToJustPlaceCraftsmanFlag() {
 			<template v-if="store.gameflow.phase === rf.PHASE_BUILD && store.context.action === rf.ACT_NONE">
 				<div id="mapInspectorButtonDiv">
 					<button @click="model.toggleMapInspector" class="actionsLineButton">
-						<span v-if="!store.topMenuViews.mapInspectorMode">Enable</span>
-						<span v-else>Disable</span>
+						<span v-if="!store.topMenuViews.mapInspectorMode">{{ $t("actionArea.enable") }}</span>
+						<span v-else>{{ $t("actionArea.disable") }}</span>
 						<br />
-						Map
+						{{ $t("actionArea.map") }}
 						<br />
-						Inspector
+						{{ $t("actionArea.inspector") }}
 					</button>
 					<template v-if="store.topMenuViews.mapInspectorMode">
 						<br />
 						<input type="checkbox" id="mapInspectorEshuCheckbox" v-model="store.topMenuViews.mapInspectorEshu" />
-						<label for="mapInspectorEshuCheckbox">Use Eshu</label>
+						<label for="mapInspectorEshuCheckbox">{{ $t("actionArea.useEshu") }}</label>
 					</template>
 				</div>
 				<fieldset class="optionsGroup">
-					<legend class="optionsHeader">Pick One</legend>
+					<legend class="optionsHeader">{{ $t("actionArea.pickOne") }}</legend>
 					<template v-if="!store.context.actionsTaken.includes(rf.ACT_BUILD_MON) && !store.context.actionsTaken.includes(rf.ACT_RAISE_MON) && !store.context.actionsTaken.includes(rf.ACT_BUILD_CRAFTSMEN)">
 						<button class="actionsLineButton mainActionButton" @click="model.setupPlaceMonument">
-							Build
+							{{ $t("actionArea.build") }}
 							<br />
-							Monument
+							{{ $t("actionArea.monument") }}
 						</button>
 						<br />
 						<button class="actionsLineButton mainActionButton" @click="model.setupRaiseMonument(false)">
-							Raise
+							{{ $t("actionArea.raise") }}
 							<br />
-							Monuments
+							{{ $t("actionArea.monuments") }}
 						</button>
 						<br />
 						<button class="actionsLineButton mainActionButton" @click="model.setupPlaceCraftsmen(false)">
-							Place
+							{{ $t("actionArea.place") }}
 							<br />
-							Craftsmen
+							{{ $t("actionArea.craftsmen") }}
 						</button>
 					</template>
 					<template v-else-if="store.context.actionsTaken.includes(rf.ACT_BUILD_MON)">
-						You Chose:
+						{{ $t("actionArea.youChose") }}
 						<br />
-						Building
+						{{ $t("actionArea.building") }}
 						<br />
-						Monuments
+						{{ $t("actionArea.monuments") }}
 					</template>
 					<template v-else-if="store.context.actionsTaken.includes(rf.ACT_RAISE_MON)">
-						You Chose:
+						{{ $t("actionArea.youChose") }}
 						<br />
-						Raising
+						{{ $t("actionArea.raising") }}
 						<br />
-						Monuments
+						{{ $t("actionArea.monuments") }}
 					</template>
 					<template v-else-if="store.context.actionsTaken.includes(rf.ACT_BUILD_CRAFTSMEN)">
-						You Chose:
+						{{ $t("actionArea.youChose") }}
 						<br />
-						Building
+						{{ $t("actionArea.building") }}
 						<br />
-						Craftsmen
+						{{ $t("actionArea.craftsmen") }}
 					</template>
 				</fieldset>
 				<fieldset class="optionsGroup">
-					<legend class="optionsHeader">Once Each</legend>
+					<legend class="optionsHeader">{{ $t("actionArea.onceEach") }}</legend>
 					<span v-if="controller.currentPlayerObj().specialists.length === 0">
 						<div class="noSpecsTextDiv">
-							You Have
+							{{ $t("actionArea.youHave") }}
 							<br />
-							No Specialists
+							{{ $t("actionArea.noSpecialists") }}
 							<br />
 						</div>
 					</span>
 					<span v-else>
-						You Have:
+						{{ $t("actionArea.youHaveColon") }}
 						<br />
 						<span v-for="(spec, idx) in controller.currentPlayerObj().specialists" :key="idx">
 							{{ rf.SPEC_NAMES[spec[0]] }}
 							<br />
 						</span>
 						<button class="actionsLineButton mainActionButton" @click="model.setupUseSpec">
-							Use
+							{{ $t("actionArea.use") }}
 							<br />
-							Specialist
+							{{ $t("actionArea.specialist") }}
 						</button>
 					</span>
 				</fieldset>
 				<fieldset class="optionsGroup" v-if="store.availableSpecialists.length > 0 || model.has_god(controller.currentPlayerObj(), rf.NO_god)">
-					<legend class="optionsHeader">Pick One</legend>
+					<legend class="optionsHeader">{{ $t("actionArea.pickOne") }}</legend>
 					<span v-if="(model.has_god(controller.currentPlayerObj(), rf.NO_god) || store.allowMultiple_gods) && !store.context.actionsTaken.includes(rf.ACT_CHOOSE_god) && !store.context.actionsTaken.includes(rf.ACT_CHOOSE_SPEC)">
 						<button class="actionsLineButton mainActionButton" @click="model.setupChoosegod">
-							Choose
+							{{ $t("actionArea.choose") }}
 							<br />
-							god
+							{{ $t("actionArea.god") }}
 						</button>
 						<br />
 					</span>
 					<span v-else-if="!model.has_god(controller.currentPlayerObj(), rf.NO_god)">
-						You adore:
+						{{ $t("actionArea.youAdore") }}
 						<template v-for="(godData, index) in model.getPlayer_gods(controller.currentPlayerObj())" :key="index">
 							<span v-if="godData[0] !== rf.NO_god">
 								{{ rf.god_NAMES[godData[0]] }}
@@ -1242,38 +1231,38 @@ function failedToJustPlaceCraftsmanFlag() {
 						<br />
 					</span>
 					<button v-if="store.availableSpecialists.length > 0 && !store.context.actionsTaken.includes(rf.ACT_CHOOSE_god) && !store.context.actionsTaken.includes(rf.ACT_CHOOSE_SPEC)" class="actionsLineButton mainActionButton" @click="model.setupChooseSpec">
-						Choose
+						{{ $t("actionArea.choose") }}
 						<br />
-						Specialist
+						{{ $t("actionArea.specialist") }}
 					</button>
 					<template v-if="store.context.actionsTaken.includes(rf.ACT_CHOOSE_SPEC)">
-						You chose:
+						{{ $t("actionArea.youChose") }}
 						<br />
-						A New Spec
+						{{ $t("actionArea.newSpec") }}
 					</template>
 				</fieldset>
 
 				<template v-if="store.topMenuViews.mapInspectorMode">
 					<br />
 					<br />
-					Click an item to view ranges. Hubs Used:
+					{{ $t("actionArea.clickItemRanges") }}
 					<span class="hubRangeSq hubRangeSq0">0</span>
 					<span v-for="idx in Math.max(store.topMenuViews.hubRangesToHighlight.length - 1, 0)" :key="idx" class="hubRangeSq" :class="'hubRangeSq' + String(idx % 8)">
 						{{ idx }}
 					</span>
 				</template>
 				<br />
-				<button v-if="controller.canResign()" class="actionsLineButton" @click="localCheckResign">Resign</button>
-				<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
-				<button class="actionsLineButton" @click="endBuildActions">End Turn</button>
+				<button v-if="controller.canResign()" class="actionsLineButton" @click="localCheckResign">{{ $t("actionArea.resign") }}</button>
+				<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t("common.resetWholeTurn") }}</button>
+				<button class="actionsLineButton" @click="endBuildActions">{{ $t("common.endTurn") }}</button>
 			</template>
 
 			<!-- CONFIRM END TURN -->
 			<template v-if="store.context.action === rf.ACT_END_BUILD">
 				<template v-if="model.anyPlayerMeetsVR()">
-					The game will end this round!
+					{{ $t("actionArea.endGameThisRound") }}
 					<br />
-					Current Standings:
+					{{ $t("actionArea.currentStandings") }}
 					<br />
 					<br />
 					<span v-for="(scoreObj, idx) in model.endGame_core(true)" :key="idx">
@@ -1283,69 +1272,69 @@ function failedToJustPlaceCraftsmanFlag() {
 					<br />
 				</template>
 				<template v-else>
-					Ending your turn now will give you
+					{{ $t("actionArea.endingTurnGives") }}
 					<b>+{{ model.getTurnEndCows(controller.currentPlayerIndex(), 9) }}</b>
 					<img class="miniCowImg" :src="view.getImage('cows1')" alt="Cows" />
-					next turn - Total:
+					{{ $t("actionArea.nextTurnTotal") }}
 					<b>{{ model.getTurnEndCows(controller.currentPlayerIndex(), 9) + controller.currentPlayerObj().cows }}</b>
 					<img class="miniCowImg" :src="view.getImage('cows1')" alt="Cows" />
 					<br />
-					Your income is from:
+					{{ $t("actionArea.incomeFrom") }}
 					<b>{{ model.getTurnEndCows(controller.currentPlayerIndex(), 0) }}</b>
-					(god),
+					{{ $t("actionArea.godIncome") }},
 					<b>{{ model.getTurnEndCows(controller.currentPlayerIndex(), 1) }}</b>
-					(specialists),
+					{{ $t("actionArea.specsIncome") }},
 					<b>{{ model.getTurnEndCows(controller.currentPlayerIndex(), 2) }}</b>
-					(techs),
+					{{ $t("actionArea.techsIncome") }},
 					<b>{{ model.getTurnEndCows(controller.currentPlayerIndex(), 3) }}</b>
-					(monuments)
+					{{ $t("actionArea.monumentsIncome") }}
 					<br />
-					You could receive more cows if other players use your craftsmen
+					{{ $t("actionArea.couldReceiveMore") }}
 					<br />
 					<template v-if="model.anyoneHasAJAKA(false) && controller.currentPlayerObj().techs.some((t) => t[1] >= 6)">
 						<!-- YOU DO NOT HAVE AJAKA - SO YOU ARE LOSING COWS -->
 						<template v-if="!model.has_god(controller.currentPlayerObj(), rf.AJAKA)">
 							<span class="orangeText">
-								Ajaka is taking half the cows from your tech cards that have 6+ cows
+								{{ $t("actionArea.ajakaWarning") }}
 								<br />
 							</span>
 						</template>
 					</template>
 				</template>
-				<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
-				<button class="actionsLineButton" @click="localEndPlayerTurn">Confirm End Turn</button>
+				<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t("common.resetWholeTurn") }}</button>
+				<button class="actionsLineButton" @click="localEndPlayerTurn">{{ $t("actionArea.confirmEndTurn") }}</button>
 			</template>
 
 			<template v-if="store.context.action === rf.ACT_CONFIRM_RESIGN && !personal.externalTournamentGame">
-				<p>Are you sure you want to resign?</p>
-				<p>Resigning will unbalance the game for the remaining players</p>
-				<p>Please carry on playing if that is at all possible</p>
-				<p>Even if you think you can't win, you can still aim for not last / most monuments / funny monument positions / etc</p>
-				<button class="actionsLineButton" @click="resetWholePlayerTurn">Carry On Playing</button>
-				<button class="actionsLineButton" @click="Bot.actionResign">Confirm Resignation</button>
+				<p>{{ $t("actionArea.resignQuestion") }}</p>
+				<p>{{ $t("actionArea.resignUnbalance") }}</p>
+				<p>{{ $t("actionArea.resignCarryOn") }}</p>
+				<p>{{ $t("actionArea.resignAim") }}</p>
+				<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t("actionArea.carryOnPlaying") }}</button>
+				<button class="actionsLineButton" @click="Bot.actionResign">{{ $t("actionArea.confirmResignation") }}</button>
 			</template>
 			<template v-else-if="store.context.action === rf.ACT_CONFIRM_RESIGN && personal.externalTournamentGame">
 				<div id="resignConfirmDiv">
-					Under the tournament rules set by the external tournament organisers, you cannot resign from this type of tournament game
+					{{ $t("actionArea.tournamentNoResign") }}
 					<br />
 					<br />
-					Please continue to play
+					{{ $t("actionArea.continuePlay") }}
 					<br />
 					<br />
-					If you are unable to continue, please contact the admins via BGG or Discord, or alert them using the button below
+					{{ $t("actionArea.contactAdmins") }}
 					<br />
-					You will probably be removed from the tournament
+					{{ $t("actionArea.willBeRemoved") }}
 					<br />
 					<br />
-					<button class="actionsLineButton" @click="resetWholePlayerTurn">Carry On Playing</button>
-					<button class="actionsLineButton" @click="IO.nudgeTourneyAdmins(0)">Alert Admins</button>
+					<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t("actionArea.carryOnPlaying") }}</button>
+					<button class="actionsLineButton" @click="IO.nudgeTourneyAdmins(0)">{{ $t("actionArea.alertAdmins") }}</button>
 				</div>
 			</template>
 
 			<!-- CHOOSE god  -->
 			<template v-if="store.context.action === rf.ACT_CHOOSE_god">
 				<template v-if="store.context.itemBeingAdded === -1">
-					Choose a god. You may only have 1, and your choice is permanent
+					{{ $t("actionArea.chooseGod") }}
 					<br />
 					<div v-for="(god, idx) in store.availablegods" :key="idx" :class="[personal.aidText ? 'godChoiceDiv' : 'godChoiceDivNoText']" @click="clickedgodChoice(god)">
 						<template v-if="personal.aidText">
@@ -1361,7 +1350,7 @@ function failedToJustPlaceCraftsmanFlag() {
 					</div>
 
 					<br />
-					<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">Cancel</button>
+					<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">{{ $t("common.cancel") }}</button>
 				</template>
 				<template v-else>
 					<div :class="[personal.aidText ? 'godChoiceDivSingle fixedBorder' : 'godChoiceDivSingleNoText fixedBorder']">
@@ -1374,15 +1363,15 @@ function failedToJustPlaceCraftsmanFlag() {
 						<span v-if="rf.isVRchanged(store.context.itemBeingAdded) || personal.aidText" :class="{ changedVR: rf.isVRchanged(store.context.itemBeingAdded) }">VR: {{ rf.gods_VR[store.context.itemBeingAdded] }}</span>
 					</div>
 					<br />
-					<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">Cancel</button>
-					<button class="actionsLineButton" @click="model.setgod(store.context.itemBeingAdded)">Confirm Choice</button>
+					<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">{{ $t("common.cancel") }}</button>
+					<button class="actionsLineButton" @click="model.setgod(store.context.itemBeingAdded)">{{ $t("common.confirmChoice") }}</button>
 				</template>
 			</template>
 
 			<!-- CHOOSE SPEC  -->
 			<template v-if="store.context.action === rf.ACT_CHOOSE_SPEC">
 				<template v-if="store.context.itemBeingAdded === -1">
-					Choose a Specialist
+					{{ $t("actionArea.chooseSpecialist") }}
 					<br />
 					<div v-for="(spec, idx) in store.availableSpecialists" :key="idx" :class="[personal.aidText ? 'specChoiceDiv' : 'specChoiceDivNoText']" @click="clickedSpecialistChoice(spec)">
 						<img class="specChoiceImg" :src="view.getImage('spec' + spec)" alt="SPEC" />
@@ -1395,7 +1384,7 @@ function failedToJustPlaceCraftsmanFlag() {
 						<span v-if="rf.isSpecVRchanged(spec) || personal.aidText" :class="{ changedVR: rf.isSpecVRchanged(spec) }">VR: {{ rf.SPEC_VR[spec] }}</span>
 					</div>
 					<br />
-					<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">Cancel</button>
+					<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">{{ $t("common.cancel") }}</button>
 				</template>
 				<template v-else>
 					<div :class="[personal.aidText ? 'specChoiceDivSingle fixedBorder' : 'specChoiceDivSingleNoText fixedBorder']">
@@ -1408,14 +1397,14 @@ function failedToJustPlaceCraftsmanFlag() {
 						<span v-if="rf.isSpecVRchanged(store.context.itemBeingAdded) || personal.aidText" :class="{ changedVR: rf.isSpecVRchanged(store.context.itemBeingAdded) }">VR: {{ rf.SPEC_VR[store.context.itemBeingAdded] }}</span>
 					</div>
 					<br />
-					<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">Cancel</button>
-					<button class="actionsLineButton" @click="model.addSpecialist(store.context.itemBeingAdded)">Confirm Choice</button>
+					<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">{{ $t("common.cancel") }}</button>
+					<button class="actionsLineButton" @click="model.addSpecialist(store.context.itemBeingAdded)">{{ $t("common.confirmChoice") }}</button>
 				</template>
 			</template>
 
 			<!-- USE SPEC  -->
 			<template v-if="store.context.action === rf.ACT_USE_SPEC">
-				Use a Specialist
+				{{ $t("actionArea.useSpecialist") }}
 				<br />
 				<!-- SPECIALISTS -->
 				<div v-for="(spec, idx) in controller.currentPlayerObj().specialists" :key="idx" :class="[{ usedSpec: unableToUseSpec(spec) }, personal.aidText ? 'specChoiceDiv' : 'specChoiceDivNoText']" @click="localSetupUseSingleSpec(spec)">
@@ -1436,13 +1425,13 @@ function failedToJustPlaceCraftsmanFlag() {
 					VR: {{ rf.SPEC_VR[spec[0]] }}
 					<template v-if="spec[0] === rf.HERD">
 						<br />
-						<span v-if="spec[1] === 6" class="redText">Max 6 Cows</span>
-						<span v-else-if="controller.currentPlayerObj().cows < 2" class="redText">Not enough cows to add</span>
-						<span v-else class="greenText">Select to increase Cows</span>
+						<span v-if="spec[1] === 6" class="redText">{{ $t("actionArea.max6Cows") }}</span>
+						<span v-else-if="controller.currentPlayerObj().cows < 2" class="redText">{{ $t("actionArea.notEnoughCowsAdd") }}</span>
+						<span v-else class="greenText">{{ $t("actionArea.selectIncreaseCows") }}</span>
 					</template>
 				</div>
 				<br />
-				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">Back</button>
+				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">{{ $t("common.back") }}</button>
 			</template>
 
 			<!-- USE HERD  -->
@@ -1463,7 +1452,7 @@ function failedToJustPlaceCraftsmanFlag() {
 						</div>
 
 						<br />
-						Choose the new Total Number of Cows for you Herd
+						{{ $t("actionArea.chooseHerdTotal") }}
 						<br />
 						<div v-if="spec[1] === 0 && controller.currentPlayerObj().cows >= 2" class="herdCowChoiceDiv" :class="{ selectedItem: store.context.chosenPrice === 2 }" @click="store.context.chosenPrice = 2">
 							<img :src="view.getImage('cows1_bid')" alt="Cows" />
@@ -1481,64 +1470,64 @@ function failedToJustPlaceCraftsmanFlag() {
 				</template>
 
 				<br />
-				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">Cancel</button>
-				<button class="actionsLineButton" @click="model.addHerdCows(store.context.chosenPrice)">Confirm Choice</button>
+				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">{{ $t("common.cancel") }}</button>
+				<button class="actionsLineButton" @click="model.addHerdCows(store.context.chosenPrice)">{{ $t("common.confirmChoice") }}</button>
 			</template>
 
 			<!-- ADD MONUMENT  -->
 			<template v-if="store.context.action === rf.ACT_BUILD_MON">
-				<b>Build a monument</b>
+				<b>{{ $t("actionArea.buildMonument") }}</b>
 				<span v-if="model.hasNomads(controller.currentPlayerObj())">
 					<br />
-					Your active Nomads allow you to build on any empty space
+					{{ $t("actionArea.nomadsAnySpace") }}
 				</span>
 				<span v-if="!model.hasNomads(controller.currentPlayerObj())">
 					<br />
-					You may not build adjacent to any existing monument
+					{{ $t("actionArea.noAdjacentMonument") }}
 				</span>
 				<span v-if="model.has_god(controller.currentPlayerObj(), rf.OBATALA)">
 					<br />
-					Monuments to place: {{ store.context.monumentsToPlace }}
+					{{ $t("actionArea.monumentsToPlace", { count: store.context.monumentsToPlace }) }}
 				</span>
 				<br />
 				<br />
-				Hubs Used:
+				{{ $t("actionArea.hubsUsed") }}
 				<span class="hubRangeSq hubRangeSq0">0</span>
 				<span v-for="idx in Math.max(store.topMenuViews.hubRangesToHighlight.length - 1, 0)" :key="idx" class="hubRangeSq" :class="'hubRangeSq' + String(idx % 8)">
 					{{ idx }}
 				</span>
 				<br />
-				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">Cancel</button>
-				<button v-if="model.has_god(controller.currentPlayerObj(), rf.OBATALA) && store.context.monumentsToPlace === 1" class="actionsLineButton" @click="onlyPlaceOneMonument">Only Place 1 Monument</button>
+				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">{{ $t("common.cancel") }}</button>
+				<button v-if="model.has_god(controller.currentPlayerObj(), rf.OBATALA) && store.context.monumentsToPlace === 1" class="actionsLineButton" @click="onlyPlaceOneMonument">{{ $t("actionArea.onlyPlaceOne") }}</button>
 			</template>
 
 			<!-- ADD RESOURCE -->
 			<template v-if="store.context.action === rf.ACT_BUILD_RES">
-				Add a resource
+				{{ $t("actionArea.addResource") }}
 				<br />
 				<img class="resSelectImg" :src="view.getImage('res' + String(rf.WOOD_TILE))" :class="[{ selectedItem: store.context.itemBeingAdded === rf.WOOD_TILE }, store.remainingItems[rf.WOOD_TILE] > 0 ? 'availableRes' : 'runOutRes']" @click="localSetupPlaceResource(rf.WOOD_TILE)" />
 				<img class="resSelectImg" :src="view.getImage('res' + String(rf.CLAY_TILE))" :class="[{ selectedItem: store.context.itemBeingAdded === rf.CLAY_TILE }, store.remainingItems[rf.CLAY_TILE] > 0 ? 'availableRes' : 'runOutRes']" @click="localSetupPlaceResource(rf.CLAY_TILE)" />
 				<img class="resSelectImg" :src="view.getImage('res' + String(rf.IVORY_TILE))" :class="[{ selectedItem: store.context.itemBeingAdded === rf.IVORY_TILE }, store.remainingItems[rf.IVORY_TILE] > 0 ? 'availableRes' : 'runOutRes']" @click="localSetupPlaceResource(rf.IVORY_TILE)" />
 				<img class="resSelectImg" :src="view.getImage('res' + String(rf.DIAMOND_TILE))" :class="[{ selectedItem: store.context.itemBeingAdded === rf.DIAMOND_TILE }, store.remainingItems[rf.DIAMOND_TILE] > 0 ? 'availableRes' : 'runOutRes']" @click="localSetupPlaceResource(rf.DIAMOND_TILE)" />
 				<br />
-				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">Cancel</button>
+				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">{{ $t("common.cancel") }}</button>
 			</template>
 
 			<!-- ADD WATER  -->
 			<template v-if="store.context.action === rf.ACT_BUILD_WATER">
-				<b>Place a water tile on any free area</b>
+				<b>{{ $t("actionArea.placeWater") }}</b>
 				<div id="itemBeingAddedDiv">
 					<img class="rot_img rot_img_enabled" @click="rotateNewTile(-1)" :src="view.getImage('rot_anticlockwise')" />
 					<img class="newTileImg newTileWater" :src="view.getImage('res' + String(store.context.itemBeingAdded))" :style="rotationStyle" />
 					<img class="rot_img rot_img_enabled" @click="rotateNewTile(1)" :src="view.getImage('rot_clockwise')" />
 				</div>
-				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">Cancel</button>
+				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">{{ $t("common.cancel") }}</button>
 			</template>
 
 			<!-- ANYANWU LEVEL 3 -->
 			<template v-if="store.context.action === rf.ACT_CHOOSE_ANYANWU_MON">
 				<br />
-				<b>Select a monument to raise to level 3</b>
+				<b>{{ $t("actionArea.selectMonumentLevel3") }}</b>
 				<br />
 				<br />
 			</template>
@@ -1546,9 +1535,9 @@ function failedToJustPlaceCraftsmanFlag() {
 			<!-- ADD NEW CRAFTSMAN  -->
 			<template v-if="store.context.action === rf.ACT_BUILD_CRAFTSMEN || store.context.action === rf.ACT_BUILD_PRI_CRAFTSMAN || store.context.action === rf.ACT_BUILD_SEC_CRAFTSMAN">
 				<b>
-					Add a craftsman
+					{{ $t("actionArea.addCraftsman") }}
 					<br />
-					A primary resource must be within range that is not already within range of a craftsman of the same type
+					{{ $t("actionArea.addCraftsmanHint") }}
 				</b>
 				<br />
 				<template v-for="(cman, idx) in rf.CRAFTSMEN_TILES" :key="idx">
@@ -1565,13 +1554,13 @@ function failedToJustPlaceCraftsmanFlag() {
 							<br />
 						</template>
 						<template v-else>
-							You already have
+							{{ $t("actionArea.alreadyHaveTech") }}
 							<br />
-							this Technology
+							{{ $t("actionArea.thisTechnology") }}
 							<br />
-							Cost: {{ rf.COW_COST_TO_BUILD_CMAN[cman] }}
+							{{ $t("actionArea.cost", { count: rf.COW_COST_TO_BUILD_CMAN[cman] }) }}
 							<img class="miniCowImg" :src="view.getImage('cows1')" alt="Cows" />
-							VP +{{ rf.CRAFTSMEN_SCORE[cman] }}
+							{{ $t("actionArea.vpPlus", { count: rf.CRAFTSMEN_SCORE[cman] }) }}
 							<br />
 						</template>
 						<div class="cmanActionHolder">
@@ -1581,30 +1570,30 @@ function failedToJustPlaceCraftsmanFlag() {
 					</div>
 				</template>
 				<br />
-				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">Cancel</button>
-				<button class="actionsLineButton" @click="model.endAddingCraftsmen">Confirm Craftsmen - Set Prices</button>
+				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">{{ $t("common.cancel") }}</button>
+				<button class="actionsLineButton" @click="model.endAddingCraftsmen">{{ $t("actionArea.confirmCraftsmen") }}</button>
 			</template>
 
 			<!-- ADD CRAFTSMAN  -->
 			<template v-if="store.context.itemBeingAdded !== -1 && (store.context.action === rf.ACT_BUILD_PRI_CRAFTSMAN || store.context.action === rf.ACT_BUILD_SEC_CRAFTSMAN)">
 				<span v-if="!model.hasTechForCman(store.context.itemBeingAdded)">
 					<br />
-					Taking tech for this craftsman is +{{ rf.TECH_VR[cmanDisplayInfo(store.context.itemBeingAdded, 2)] }} VR
+					{{ $t("actionArea.takingTechVR", { count: rf.TECH_VR[cmanDisplayInfo(store.context.itemBeingAdded, 2)] }) }}
 				</span>
 				<br />
-				Placing this Craftman costs {{ rf.COW_COST_TO_BUILD_CMAN[store.context.itemBeingAdded] }} cows
+				{{ $t("actionArea.placingCraftsmanCost", { count: rf.COW_COST_TO_BUILD_CMAN[store.context.itemBeingAdded] }) }}
 				<template v-if="model.hasActiveBuilder(controller.currentPlayerIndex())">
-					<template v-if="Math.max(0, rf.COW_COST_TO_BUILD_CMAN[store.context.itemBeingAdded] - 2) == 0">(to your builder)</template>
-					<template v-else>({{ Math.min(rf.COW_COST_TO_BUILD_CMAN[store.context.itemBeingAdded], 2) }} to your builder, and {{ Math.max(0, rf.COW_COST_TO_BUILD_CMAN[store.context.itemBeingAdded] - 2) }} to the common stock)</template>
+					<template v-if="Math.max(0, rf.COW_COST_TO_BUILD_CMAN[store.context.itemBeingAdded] - 2) == 0">{{ $t("actionArea.toYourBuilder") }}</template>
+					<template v-else>{{ $t("actionArea.builderSplit", { builder: Math.min(rf.COW_COST_TO_BUILD_CMAN[store.context.itemBeingAdded], 2), stock: Math.max(0, rf.COW_COST_TO_BUILD_CMAN[store.context.itemBeingAdded] - 2) }) }}</template>
 				</template>
-				<template v-else>(to the common stock)</template>
+				<template v-else>{{ $t("actionArea.toCommonStock") }}</template>
 				<div id="itemBeingAddedDiv">
 					<img class="rot_img" :class="rf.ROTATABLE_TILES.includes(store.context.itemBeingAdded) ? 'rot_img_enabled' : 'rot_img_disabled'" @click="rotateNewTile(-1)" :src="view.getImage('rot_anticlockwise')" />
 					<img class="newTileImg newTileCraftsman" :src="view.getImage('craftsman' + String(store.context.itemBeingAdded))" :style="rotationStyle" alt="Craftsman" />
 					<img class="rot_img" :class="rf.ROTATABLE_TILES.includes(store.context.itemBeingAdded) ? 'rot_img_enabled' : 'rot_img_disabled'" @click="rotateNewTile(1)" :src="view.getImage('rot_clockwise')" />
 				</div>
 				<br />
-				Hubs Used:
+				{{ $t("actionArea.hubsUsed") }}
 				<span class="hubRangeSq hubRangeSq0">0</span>
 				<span v-for="idx in Math.max(store.topMenuViews.hubRangesToHighlight.length - 1, 0)" :key="idx" class="hubRangeSq" :class="'hubRangeSq' + String(idx % 8)">
 					{{ idx }}
@@ -1635,75 +1624,72 @@ function failedToJustPlaceCraftsmanFlag() {
 				</template>
 				<br />
 				<template v-if="failedToJustPlaceCraftsmanFlag() >= 1">
-					<span class="orangeText">CAUTION: YOU DID NOT PLACE ANY CRAFTSMEN</span>
+					<span class="orangeText">{{ $t("actionArea.noCraftsmenPlaced") }}</span>
 					<br />
 				</template>
-				<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
-				<button v-if="failedToJustPlaceCraftsmanFlag() <= 1" class="actionsLineButton" @click="model.setCraftsmanPrice(controller.currentPlayerObj(), store.context.choosingPrices)">Confirm Price</button>
+				<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t("common.resetWholeTurn") }}</button>
+				<button v-if="failedToJustPlaceCraftsmanFlag() <= 1" class="actionsLineButton" @click="model.setCraftsmanPrice(controller.currentPlayerObj(), store.context.choosingPrices)">{{ $t("actionArea.confirmPrice") }}</button>
 			</template>
 
 			<!-- RAISE MON -->
 			<template v-if="store.context.action === rf.ACT_RAISE_MON">
 				<template v-if="store.context.upgradingMonumentProcess.length === 0">
-					Select a Monument to Raise
+					{{ $t("actionArea.selectMonumentRaise") }}
 					<span v-if="model.has_god(controller.currentPlayerObj(), rf.TSUI_GOAB)">
 						<br />
-						Tsui-Goab allows you to upgrade monuments with any combination of goods
+						{{ $t("actionArea.tsuiGoab") }}
 					</span>
 					<span v-if="model.has_god(controller.currentPlayerObj(), rf.ATETE)">
 						<br />
-						Atete allows you to use each resource twice
+						{{ $t("actionArea.atete") }}
 					</span>
 					<span v-if="model.has_god(controller.currentPlayerObj(), rf.OYA) && 1 === 2">
 						<br />
-						Oya allows you to place a monument after making one extra ritual good
+						{{ $t("actionArea.oya") }}
 						<br />
-						<button v-if="!store.context.OYAused" class="actionsLineButton" @click="setupOya()">Create Monument with 1 Ritual good</button>
-						<span v-else>You have already used Oya's power</span>
+						<button v-if="!store.context.OYAused" class="actionsLineButton" @click="setupOya()">{{ $t("actionArea.createMonumentOya") }}</button>
+						<span v-else>{{ $t("actionArea.oyaUsed") }}</span>
 					</span>
 				</template>
 				<span v-if="store.context.upgradingMonumentProcess.length > 0">
-					Upgrading this monument requires
-					{{ store.context.upgradingMonumentProcess[0][1] }} Ritual Good
-					<span v-if="store.context.upgradingMonumentProcess[0][1] !== 1">s</span>
-					<span v-if="store.context.upgradingMonumentProcess[0] > 1">s</span>
+					{{ store.context.upgradingMonumentProcess[0][1] !== 1 ? $t("actionArea.upgradingRequiresPlural", { count: store.context.upgradingMonumentProcess[0][1] }) : $t("actionArea.upgradingRequires", { count: store.context.upgradingMonumentProcess[0][1] }) }}
 					<br />
 					<br />
-					Current Cost:
+					{{ $t("actionArea.currentCost") }}
 					<span v-html="getCurrentUpgradeCost()"></span>
 					<img class="miniCowImg" :src="view.getImage('cows1')" alt="Cows" />
 
 					<span v-if="store.context.currentRitualGood.length === 0">
 						<br />
 						<br />
-						Choose a craftsman to produce a ritual good
+						{{ $t("actionArea.chooseCraftsmanRitual") }}
 					</span>
 					<span v-if="store.context.currentRitualGood.length === 1">
 						<br />
 						<br />
-						Choose a resource
+						{{ $t("actionArea.chooseResource") }}
 						<template v-if="!store.context.ignoreAjeShaluga && model.has_god(controller.currentPlayerObj(), rf.AJE_SHALUGA_OLD) && model.getPlayerIndexForCraftsmanPriIndex(store.context.currentRitualGood[0][0]) === controller.currentPlayerIndex()">
-							to skip a primary ritual good, or
-							<button class="actionsLineButton" @click="skipResource">Skip this resource</button>
-							instead, or
-							<button class="actionsLineButton" @click="store.context.ignoreAjeShaluga = true">Ignore Aje-Shaluga's power</button>
+							{{ $t("actionArea.skipPrimaryGood") }}
+							<button class="actionsLineButton" @click="skipResource">{{ $t("actionArea.skipThisResource") }}</button>
+							{{ $t("actionArea.insteadOr") }}
+							<button class="actionsLineButton" @click="store.context.ignoreAjeShaluga = true">{{ $t("actionArea.ignoreAjeShaluga") }}</button>
 						</template>
 					</span>
 					<span v-if="store.context.currentRitualGood.length === 2">
 						<br />
 						<br />
-						Choose a Primary Craftsman to support the Secondary Craftsman
+						{{ $t("actionArea.choosePrimaryCraftsman") }}
 					</span>
 					<span v-if="store.context.currentRitualGood.length === 3">
 						<br />
 						<br />
-						Choose a Resource to support the Primary Craftsman
+						{{ $t("actionArea.chooseResourcePrimary") }}
 					</span>
 
 					<template v-if="store.context.currentRitualGood.length !== 1">
 						<br />
 						<br />
-						Hub Range:
+						{{ $t("actionArea.hubRange") }}
 						<span class="hubRangeSq hubRangeSq0">0</span>
 						<span v-for="idx in Math.max(store.topMenuViews.hubRangesToHighlight.length - 1, 0)" :key="idx" class="hubRangeSq" :class="'hubRangeSq' + String(idx % 8)">
 							{{ idx }}
@@ -1711,49 +1697,49 @@ function failedToJustPlaceCraftsmanFlag() {
 					</template>
 				</span>
 				<br />
-				<button class="actionsLineButton" @click="cancelRaising">Cancel Raising</button>
-				<button v-if="store.context.canSelectRaiseMonument.length === 0 && store.context.actionError !== 'No monument to raise (No more monuments / not enough cows / not enough available craftsmen)'" class="actionsLineButton" @click="funcs.importModel(store.lastMonumentResetData, true)">Restart Current Raise</button>
-				<button v-if="store.context.OYAused || (store.history[store.history.length - 1][0] === rf.HIST_RAISE_MON && (store.context.canSelectRaiseMonument.length > 0 || store.context.actionError === 'No monument to raise (No more monuments / not enough cows / not enough available craftsmen)'))" class="actionsLineButton" @click="localConfirmRaising">Confirm Raising</button>
+				<button class="actionsLineButton" @click="cancelRaising">{{ $t("actionArea.cancelRaising") }}</button>
+				<button v-if="store.context.canSelectRaiseMonument.length === 0 && store.context.actionError !== $t('model.noMonumentToRaise')" class="actionsLineButton" @click="funcs.importModel(store.lastMonumentResetData, true)">{{ $t("actionArea.restartRaise") }}</button>
+				<button v-if="store.context.OYAused || (store.history[store.history.length - 1][0] === rf.HIST_RAISE_MON && (store.context.canSelectRaiseMonument.length > 0 || store.context.actionError === $t('model.noMonumentToRaise')))" class="actionsLineButton" @click="localConfirmRaising">{{ $t("actionArea.confirmRaising") }}</button>
 			</template>
 
 			<template v-if="store.context.action === rf.ACT_OYA_RUITUALGOOD">
-				Current Cost:
+				{{ $t("actionArea.currentCost") }}
 				<span v-html="getCurrentUpgradeCost()"></span>
 				<img class="miniCowImg" :src="view.getImage('cows1')" alt="Cows" />
 
 				<span v-if="store.context.currentRitualGood.length === 0">
 					<br />
 					<br />
-					Choose a craftsman to produce a ritual good
+					{{ $t("actionArea.chooseCraftsmanRitual") }}
 				</span>
 				<span v-if="store.context.currentRitualGood.length === 1">
 					<br />
 					<br />
-					Choose a resource
+					{{ $t("actionArea.chooseResource") }}
 				</span>
 				<span v-if="store.context.currentRitualGood.length === 2">
 					<br />
 					<br />
-					Choose a Primary Craftsman to support the Secondary Craftsman
+					{{ $t("actionArea.choosePrimaryCraftsman") }}
 				</span>
 				<span v-if="store.context.currentRitualGood.length === 3">
 					<br />
 					<br />
-					Choose a Resource to support the Primary Craftsman
+					{{ $t("actionArea.chooseResourcePrimary") }}
 				</span>
 
 				<template v-if="store.context.currentRitualGood.length !== 1">
 					<br />
 					<br />
-					Hub Range:
+					{{ $t("actionArea.hubRange") }}
 					<span class="hubRangeSq hubRangeSq0">0</span>
 					<span v-for="idx in Math.max(store.topMenuViews.hubRangesToHighlight.length - 1, 0)" :key="idx" class="hubRangeSq" :class="'hubRangeSq' + String(idx % 8)">
 						{{ idx }}
 					</span>
 				</template>
 				<br />
-				<button class="actionsLineButton" @click="funcs.importModel(store.lastMonumentResetData, true)">Cancel Oya Ritual Good</button>
-				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">Cancel Raising</button>
+				<button class="actionsLineButton" @click="funcs.importModel(store.lastMonumentResetData, true)">{{ $t("actionArea.cancelOya") }}</button>
+				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">{{ $t("actionArea.cancelRaising") }}</button>
 			</template>
 
 			<span class="actionError" v-if="store.context.actionError !== ''">

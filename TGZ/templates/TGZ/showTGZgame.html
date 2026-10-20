@@ -1,6 +1,8 @@
 {% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE|default:'en-gb' }}">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -100,6 +102,7 @@
   var initData = {};
 
   ///////////////////////
+  initData.locale = "{{ LANGUAGE_CODE|default:'en-gb' }}";
   initData.gameID = {{ gameID }};
   initData.gameName = "{{ gameName }}";
   initData.gameData = '{{ gameData|safe }}';

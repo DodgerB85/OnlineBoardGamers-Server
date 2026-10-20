@@ -16,6 +16,9 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/TGZpersonal.js"
 const personal = usePersonalStore()
 
+import i18n from "../i18n"
+const t = i18n.global.t
+
 import { ref } from "vue"
 
 const nameClickCounter = ref(0)
@@ -74,7 +77,7 @@ async function toggleReplay() {
 			postCows.push(store.players[i].cows)
 		}
 		for (let i = 0; i < preCows.length; i++) {
-			if (preCows[i] !== postCows[i]) store.topMenuViews.rewindErrorText = "Game data does not match - Submit bug report"
+			if (preCows[i] !== postCows[i]) store.topMenuViews.rewindErrorText = t("topMenu.gameDataMismatch")
 		}
 	} else {
 		// TURN OFF
@@ -209,14 +212,14 @@ function adminBKSbutton() {
 			<a href="/">
 				<span class="topMenuItem">
 					<img :src="view.getImage('icon-house')" />
-					<span>Home</span>
+					<span>{{ $t("topMenu.home") }}</span>
 				</span>
 			</a>
 
 			<!-- IF LOGGED IN -->
 			<span v-if="personal.name != undefined" class="topMenuItem" id="menuButtonNext" @click="nextGame">
 				<img :src="view.getImage('icon-nextGame')" />
-				<span>Next</span>
+				<span>{{ $t("topMenu.next") }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
@@ -225,13 +228,13 @@ function adminBKSbutton() {
 			<a href="/TGZ/help/" target="_blank">
 				<span class="topMenuItem">
 					<img :src="view.getImage('icon-rulebook')" />
-					<span>Rules</span>
+					<span>{{ $t("topMenu.rules") }}</span>
 				</span>
 			</a>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showReserve }]" id="menuButtonReserve" @click="toggleReserve">
 				<img :src="view.getImage('icon-box')" />
-				<span>Reserve</span>
+				<span>{{ $t("topMenu.reserve") }}</span>
 			</span>
 
 			<div class="menuDivider"></div>
@@ -239,7 +242,7 @@ function adminBKSbutton() {
 			<!-- IF INVOLVED PLAYER-->
 			<span v-if="personal.pov >= 0" id="menuButtonRewindPos" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showRewindPanel }]" @click="loadRewind()">
 				<img :src="view.getImage('icon-rewind')" />
-				<span>Rewind</span>
+				<span>{{ $t("topMenu.rewind") }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
@@ -248,13 +251,13 @@ function adminBKSbutton() {
 			<!-- IF LOGGED IN -->
 			<span v-if="personal.name != undefined" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showChat }]" id="menuButtonChat" @click="toggleChat">
 				<img :src="view.getImage('icon-chat')" />
-				<span>Chat</span>
+				<span>{{ $t("topMenu.chat") }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 			<!-- IF LOGGED IN -->
 			<span v-if="personal.name != undefined" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showBug }]" id="menuButtonBug" @click="toggleBug">
 				<img :src="view.getImage('icon-stop')" />
-				<span>Bug</span>
+				<span>{{ $t("topMenu.bug") }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
@@ -263,20 +266,20 @@ function adminBKSbutton() {
 			<!-- IF INVOLVED PLAYER-->
 			<span v-if="personal.pov >= 0" class="topMenuItem" :class="['topMenuItem', { hasNotes: personal.notes.length > 0 }, , { topMenuItemSelected: store.topMenuViews.showNotes }]" id="menuButtonNotes" @click="toggleNotes">
 				<img :src="view.getImage('icon-notebook')" />
-				<span>Notes</span>
+				<span>{{ $t("topMenu.notes") }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showHistory }]" id="menuButtonHistory" @click="toggleHistory">
 				<img :src="view.getImage('icon-scroll')" />
-				<span>History</span>
+				<span>{{ $t("topMenu.history") }}</span>
 			</span>
 
 			<div class="menuDivider"></div>
 
 			<span class="topMenuItem" @click="toggleReplay">
 				<img :src="view.getImage('icon-replay')" />
-				<span>Replay</span>
+				<span>{{ $t("topMenu.replay") }}</span>
 			</span>
 		</div>
 
@@ -291,13 +294,13 @@ function adminBKSbutton() {
 			<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 				<br />
 				<span id="kickoutTimerSpan">
-					Time to next kickout:
+					{{ $t("topMenu.timeToNextKickout") }}
 					<span id="kickoutTimerTimer">{{ getKickoutTImerText() }}</span>
 				</span>
 			</template>
 			<template v-if="personal.name === 'admin' || personal.name === 'BotKickStarter'">
 				<br />
-				<button class="actionsLineButton" @click="adminBKSbutton">Admin / BKS button</button>
+				<button class="actionsLineButton" @click="adminBKSbutton">{{ $t("topMenu.adminButton") }}</button>
 			</template>
 			<!-- Stats exclude bit
 			<br />
@@ -328,18 +331,18 @@ function adminBKSbutton() {
 			<!-- DROP DOWN FOR SPLOTTER CON-->
 			<template v-else-if="personal.pov > -1 && personal.trainingGame && rf.SPLOTTER_CON_USERS.includes(personal.name)">
 				<div id="dropdownContainerSplotterCon">
-					<div @click="toggleStatsExcludeDropdown" id="showDropdownSplotterCon">↓ Edit Players / Colours ↓</div>
+					<div @click="toggleStatsExcludeDropdown" id="showDropdownSplotterCon">{{ $t("topMenu.splotterConToggle") }}</div>
 					<transition name="fade">
 						<div id="dropdownSplotterCon" v-if="store.topMenuViews.showStatsExcludeDropdown">
-							Change the Player Names / Colours to match the real game
+							{{ $t("topMenu.splotterConIntro") }}
 							<br />
-							Note: Top player is currently the first in turn order.
+							{{ $t("topMenu.splotterConNote") }}
 							<br />
 							<br />
 							<b>
-								NOTE THAT THE COLOUR SELECTION IS THE "BEHIND THE SCENES COLOUR SETTING"
+								{{ $t("topMenu.splotterConColourNote") }}
 								<br />
-								IF YOU HAVE PREFERRED COLOUR ENABLED IN YOUR PROFILE, IT COULD AFFECT THE COLOUR OUTPUT
+								{{ $t("topMenu.splotterConColourNote2") }}
 							</b>
 
 							<br />
@@ -348,36 +351,36 @@ function adminBKSbutton() {
 								<div class="splotterConSelectionLineDiv">
 									<input type="text" v-model="store.players[playerIndex].displayName" />
 									<select v-model="store.players[playerIndex].colour">
-										<option :value="rf.BLACK">Black</option>
-										<option :value="rf.GREEN">Green</option>
-										<option :value="rf.RED">Red</option>
-										<option :value="rf.WHITE">White</option>
-										<option :value="rf.YELLOW">Yellow</option>
+										<option :value="rf.BLACK">{{ $t("topMenu.black") }}</option>
+										<option :value="rf.GREEN">{{ $t("topMenu.green") }}</option>
+										<option :value="rf.RED">{{ $t("topMenu.red") }}</option>
+										<option :value="rf.WHITE">{{ $t("topMenu.white") }}</option>
+										<option :value="rf.YELLOW">{{ $t("topMenu.yellow") }}</option>
 									</select>
 								</div>
 							</template>
 
 							<div id="dropdownText">
-								Edit the names / colours and then make a move to save
+								{{ $t("topMenu.editSaveHint") }}
 								<br />
-								Or you can use this button
+								{{ $t("topMenu.orUseButton") }}
 								<br />
-								<button @click="IO.doSimpleSave()" class="actionsLineButton">Save</button>
+								<button @click="IO.doSimpleSave()" class="actionsLineButton">{{ $t("common.save") }}</button>
 							</div>
 
 							<div id="dropdownText">
-								If people start using the in-game chat, it will show up every time there's a new message.
+								{{ $t("topMenu.chatPopupIntro") }}
 								<br />
-								If this gets annoying or interrupts the game flow, use this checkbox to inhibit the auto-popup.
+								{{ $t("topMenu.chatPopupInhibit") }}
 								<br />
-								Just remember to check the chat occasionally in case there's an important message!
+								{{ $t("topMenu.chatPopupRemember") }}
 								<br />
 								<br />
 								<input name="inhibitChatPopup" id="inhibitChatPopup" type="checkbox" v-model="personal.inhibitChatPopup" />
-								<label for="inhibitChatPopup">Inhibit Chat Popup</label>
+								<label for="inhibitChatPopup">{{ $t("topMenu.inhibitChatPopup") }}</label>
 								<br />
 								<br />
-								(You will need to re-tick this each time you reload the page)
+								{{ $t("topMenu.chatPopupRetick") }}
 							</div>
 						</div>
 					</transition>

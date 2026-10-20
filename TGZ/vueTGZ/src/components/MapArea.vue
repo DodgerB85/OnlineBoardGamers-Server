@@ -14,6 +14,9 @@ import { usePersonalStore } from "../stores/TGZpersonal.js"
 const store = useModelStore()
 const personal = usePersonalStore()
 
+import i18n from "../i18n"
+const t = i18n.global.t
+
 import { ref, reactive, onMounted } from "vue"
 
 const showWATERTOLLpopup = ref(0)
@@ -525,7 +528,7 @@ function clickedResource(index) {
 				store.context.monumentsToPlace = 1
 				store.context.indexesToHighlightClick.splice(0)
 				store.context.indexesToHighlightClick = map.getSpacesForMonument(model.hasNomads(controller.currentPlayerObj()), false)
-				if (store.context.indexesToHighlightClick.length === 0) store.context.actionError = "No Space Left for Any Monuments"
+				if (store.context.indexesToHighlightClick.length === 0) store.context.actionError = t("model.noSpaceMonuments")
 			} else {
 				// +1 to monument level
 				store.context.upgradingMonumentProcess[0][1]++ // ONLY WORKS BECAUSE IT IS A POINTER
@@ -605,14 +608,14 @@ function localSelectEWKWENSUcows(val) {
 			}"
 			@mouseover="hideErrorPopup">
 			<span v-if="showWATERTOLLpopup === 1">
-				Unable to Afford
+				{{ $t("map.unableToAfford") }}
 				<br />
-				WATERTOLL Water Toll
+				{{ $t("map.watertollWaterToll") }}
 			</span>
 			<span v-if="showWATERTOLLpopup === 2">
-				WATERTOLL Water
+				{{ $t("map.watertollWater") }}
 				<br />
-				Toll Paid
+				{{ $t("map.tollPaid") }}
 			</span>
 		</div>
 	</transition>
@@ -626,9 +629,9 @@ function localSelectEWKWENSUcows(val) {
 			left: EKWENSUdata.popupPosition.x + 'px',
 		}">
 		<div class="EKWENSUpopupTextDiv">
-			You may use Ekwensu cows
+			{{ $t("map.ekwensuTitle") }}
 			<br />
-			Ekwensu has {{ EKWENSUdata.EKWENSUcowsAvailable }} cows. You need to pay {{ EKWENSUdata.craftsmanCost }} total
+			{{ $t("map.ekwensuDetail", { cows: EKWENSUdata.EKWENSUcowsAvailable, cost: EKWENSUdata.craftsmanCost }) }}
 			<br />
 			<img :src="view.getImage('cows1')" :class="[{ selectedEKWENSUcowImg: EKWENSUdata.EKWENSUcowsSelected === 1 }, { EKWENSUcowImgSelectable: controller.currentPlayerObj().cows + 1 >= EKWENSUdata.hubsUsed + EKWENSUdata.craftsmanCost }, { EKWENSUcowImgNOTselectable: controller.currentPlayerObj().cows + 1 < EKWENSUdata.hubsUsed + EKWENSUdata.craftsmanCost }]" class="EKWENSUcowImg" alt="1 cow" @click="localSelectEWKWENSUcows(1)" />
 			<img v-if="EKWENSUdata.EKWENSUcowsAvailable >= 2 && EKWENSUdata.craftsmanCost >= 2" :src="view.getImage('cows2')" :class="[{ selectedEKWENSUcowImg: EKWENSUdata.EKWENSUcowsSelected === 2 }, { EKWENSUcowImgSelectable: controller.currentPlayerObj().cows + 2 >= EKWENSUdata.hubsUsed + EKWENSUdata.craftsmanCost }, { EKWENSUcowImgNOTselectable: controller.currentPlayerObj().cows + 2 < EKWENSUdata.hubsUsed + EKWENSUdata.craftsmanCost }]" class="EKWENSUcowImg" alt="2 cows" @click="localSelectEWKWENSUcows(2)" />
