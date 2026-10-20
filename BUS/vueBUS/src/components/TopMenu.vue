@@ -163,26 +163,26 @@ function toggleStatsExcludeDropdown() {
 			<a href="/">
 				<span class="topMenuItem">
 					<img :src="view.getImage('icon-house')" />
-					<span>Home</span>
+					<span>{{ $t('topMenu.home') }}</span>
 				</span>
 			</a>
 
 			<span v-if="personal.name != undefined" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showChat }]" id="menuButtonChat" @click="toggleChat">
 				<img :src="view.getImage('icon-chat')" />
-				<span>Chat</span>
+				<span>{{ $t('topMenu.chat') }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
 			<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showBug }]" id="menuButtonBug" @click="toggleBug">
 				<img :src="view.getImage('icon-stop')" />
-				<span>Bug</span>
+				<span>{{ $t('topMenu.bug') }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
 			<!-- IF LOGGED IN -->
 			<span v-if="personal.name != undefined" class="topMenuItem" id="menuButtonNext" @click="nextGame">
 				<img :src="view.getImage('icon-nextGame')" />
-				<span>Next</span>
+				<span>{{ $t('topMenu.next') }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
@@ -190,20 +190,20 @@ function toggleStatsExcludeDropdown() {
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.selectingBoard }]" id="menuButtonSelectBoard" @click="toggleBoardSelect()">
 				<img :src="view.getImage('icon-board')" />
-				<span>Board</span>
+				<span>{{ $t('topMenu.board') }}</span>
 			</span>
 
 			<a href="/BUS/help/" target="_blank">
 				<span class="topMenuItem">
 					<img :src="view.getImage('icon-rulebook')" />
-					<span>Rules</span>
+					<span>{{ $t('topMenu.rules') }}</span>
 				</span>
 			</a>
 
 			<!-- IF INVOLVED PLAYER-->
 			<span v-if="personal.pov >= 0" class="topMenuItem" :class="['topMenuItem', { hasNotes: personal.notes.length > 0 }, { topMenuItemSelected: store.topMenuViews.showNotes }]" id="menuButtonNotes" @click="toggleNotes">
 				<img :src="view.getImage('icon-notebook')" />
-				<span>Notes</span>
+				<span>{{ $t('topMenu.notes') }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
@@ -211,12 +211,12 @@ function toggleStatsExcludeDropdown() {
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showHistory }]" id="menuButtonHistory" @click="toggleHistory">
 				<img :src="view.getImage('icon-scroll')" />
-				<span>History</span>
+				<span>{{ $t('topMenu.history') }}</span>
 			</span>
 
 			<span class="topMenuItem" @click="toggleReplay()">
 				<img :src="view.getImage('icon-replay')" />
-				<span>Replay</span>
+				<span>{{ $t('topMenu.replay') }}</span>
 			</span>
 
 			<div class="menuDivider"></div>
@@ -224,20 +224,20 @@ function toggleStatsExcludeDropdown() {
 			<!-- IF INVOLVED PLAYER-->
 			<span v-if="personal.pov >= 0" id="menuButtonRewindPos" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showRewindPanel }]" @click="loadRewind()">
 				<img :src="view.getImage('icon-rewind')" />
-				<span>Rewind</span>
+				<span>{{ $t('topMenu.rewind') }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 		</div>
 
 		<div id="topRight">
 			<div id="loggedInDiv" v-if="personal.name" @click="clickedLoggedInDiv()">
-				Logged in as: {{ personal.name }}
+				{{ $t('topMenu.loggedInAs') }} {{ personal.name }}
 				<div id="WSstatus" v-if="personal.pov >= 0" :class="personal.WSstatus"></div>
 				<br />
 
 				<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 					<span id="kickoutTimerSpan">
-						Time to next kickout:
+						{{ $t('topMenu.timeToNextKickout') }}
 						<span id="kickoutTimerTimer">{{ getKickoutTImerText() }}</span>
 					</span>
 				</template>
@@ -251,38 +251,38 @@ function toggleStatsExcludeDropdown() {
 			<!-- DROP DOWN FOR SPLOTTER CON-->
 			<template v-if="personal.pov > -1 && personal.trainingGame && IO.SPLOTTER_CON_USERS.includes(personal.name)">
 				<div id="dropdownContainerSplotterCon">
-					<div @click="toggleStatsExcludeDropdown" id="showDropdownSplotterCon">↓ Edit Players / Colours ↓</div>
+					<div @click="toggleStatsExcludeDropdown" id="showDropdownSplotterCon">{{ $t('topMenu.editPlayersColours') }}</div>
 					<transition name="fade">
 						<div id="dropdownSplotterCon" v-if="store.topMenuViews.showStatsExcludeDropdown">
-							Change the Player Names / Colours to match the real game
+							{{ $t('topMenu.changeNamesColours') }}
 							<br />
 							<br />
 							<template v-for="(playerIndex, idx) in store.gameflow.fullTurnOrder" :key="idx">
 								<div class="splotterConSelectionLineDiv">
 									<input type="text" v-model="store.players[playerIndex].displayName" />
 									<select v-model="store.players[playerIndex].colour">
-										<option :value="rf.BLUE">Blue</option>
-										<option :value="rf.GREEN">Green</option>
-										<option :value="rf.PURPLE">Purple</option>
-										<option :value="rf.RED">Red</option>
-										<option :value="rf.YELLOW">Yellow</option>
+										<option :value="rf.BLUE">{{ $t('topMenu.blue') }}</option>
+										<option :value="rf.GREEN">{{ $t('topMenu.green') }}</option>
+										<option :value="rf.PURPLE">{{ $t('topMenu.purple') }}</option>
+										<option :value="rf.RED">{{ $t('topMenu.red') }}</option>
+										<option :value="rf.YELLOW">{{ $t('topMenu.yellow') }}</option>
 									</select>
 								</div>
 							</template>
 
 							<div id="dropdownText">
-								Edit the names / colours and then make a move to save
+								{{ $t('topMenu.editThenSave') }}
 								<br />
-								<button @click="IO.saveGame(false)" class="actionsLineButton">Save</button>
+								<button @click="IO.saveGame(false)" class="actionsLineButton">{{ $t('topMenu.save') }}</button>
 							</div>
 
 							<div id="dropdownText">
 								<input name="inhibitChatPopup" id="inhibitChatPopup" type="checkbox" v-model="personal.inhibitChatPopup" />
-								<label for="inhibitChatPopup">Inhibit Chat Popup</label>
+								<label for="inhibitChatPopup">{{ $t('topMenu.inhibitChatPopup') }}</label>
 							</div>
 
 							<div id="dropdownText">
-								<button @click="forceEndTurn" class="actionsLineButton">CHEAT: Force player to end turn</button>
+								<button @click="forceEndTurn" class="actionsLineButton">{{ $t('topMenu.cheatForceEndTurn') }}</button>
 							</div>
 						</div>
 					</transition>
@@ -308,7 +308,7 @@ function toggleStatsExcludeDropdown() {
 				left: getMapBubblePosition(1) + 'px',
 			}">
 			<div class="pittsMapMessage">
-				Board Options for Original Board Only
+				{{ $t('topMenu.boardOptionsOriginalOnly') }}
 			</div>
 		</div>
 	</transition>

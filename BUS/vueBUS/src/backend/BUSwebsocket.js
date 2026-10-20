@@ -4,6 +4,8 @@ import { usePersonalStore } from "../stores/BUSpersonal.js"
 import { useModelStore } from "../stores/BUSstore.js"
 import * as view from "../js/BUSview.js"
 
+import i18n from "../i18n"
+
 import * as IO from "./BUS_IO.js"
 
 export var BUSwebSocket
@@ -137,7 +139,7 @@ async function BUSwebSocketOnInfo(IncomingInfo) {
 						let decodedGameName = tempElement.textContent
 
 						Notification.requestPermission(function (status) {
-							const title = "It is your turn in Bus"
+							const title = i18n.global.t("websocket.yourTurn")
 
 							const options = {
 								body: "" + decodedGameName + ": " + store.gameflow.turn + " - " + view.phaseStr(),

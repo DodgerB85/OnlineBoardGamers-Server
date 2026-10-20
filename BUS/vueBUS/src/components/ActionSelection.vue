@@ -8,6 +8,8 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 const personal = usePersonalStore()
 
+import i18n from "../i18n"
+
 import { computed } from "vue"
 
 const forwardChars = ["A", "B", "C", "D", "E", "F"]
@@ -75,19 +77,19 @@ function clickedActionOption(action, index) {
 	let expansionBonus = 0
 	if (store.players.length === 5) expansionBonus = 1
 
-	if (action === 0 && index - 5 + model.maxBuses() + expansionBonus <= 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
+	if (action === 0 && index - 5 + model.maxBuses() + expansionBonus <= 0) store.context.turnEndingErrorMessage = i18n.global.t("actionSelection.cautionMaxBuses")
 	else if (action === 2) {
 		if (store.actionAreaData[1][0] !== -1 && model.maxBusesWithNewBus() - index <= 0) {
-			store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
-		} else if (store.actionAreaData[1][0] === -1 && model.maxBuses() - index === 0) store.context.turnEndingErrorMessage = "Caution: Unless a player chooses 'New Bus' then Max Buses will be too low for this action to have any effect"
+			store.context.turnEndingErrorMessage = i18n.global.t("actionSelection.cautionMaxBuses")
+		} else if (store.actionAreaData[1][0] === -1 && model.maxBuses() - index === 0) store.context.turnEndingErrorMessage = i18n.global.t("actionSelection.cautionNewBus")
 		//else if (store.actionAreaData[1][0] === -1 && controller.currentPlayerObj().buses - index === model.maxBuses()) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
 		//else if (store.actionAreaData[1][0] === -1 && controller.currentPlayerObj().buses - index < model.maxBuses()) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
 		//else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() === 0) store.context.turnEndingErrorMessage = "Caution: Unless a player chooses 'New Bus' then Max Buses will be too low for this action to have any effect"
-		else if (store.actionAreaData[1][0] === -1 && model.maxBuses() - index < 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
+		else if (store.actionAreaData[1][0] === -1 && model.maxBuses() - index < 0) store.context.turnEndingErrorMessage = i18n.global.t("actionSelection.cautionMaxBuses")
 	} else if (action === 3) {
-		if (store.actionAreaData[1][0] !== -1 && index - 5 + model.maxBusesWithNewBus() <= 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
-		else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() === 0) store.context.turnEndingErrorMessage = "Caution: Unless a player chooses 'New Bus' then Max Buses will be too low for this action to have any effect"
-		else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() < 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
+		if (store.actionAreaData[1][0] !== -1 && index - 5 + model.maxBusesWithNewBus() <= 0) store.context.turnEndingErrorMessage = i18n.global.t("actionSelection.cautionMaxBuses")
+		else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() === 0) store.context.turnEndingErrorMessage = i18n.global.t("actionSelection.cautionNewBus")
+		else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() < 0) store.context.turnEndingErrorMessage = i18n.global.t("actionSelection.cautionMaxBuses")
 	}
 }
 </script>
@@ -97,7 +99,7 @@ function clickedActionOption(action, index) {
 		<table class="actionTable">
 			<thead>
 				<tr>
-					<th colspan="6" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_LINE_EXPANSION }">Line Expansion</th>
+					<th colspan="6" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_LINE_EXPANSION }">{{ $t('actionSelection.lineExpansion') }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -127,7 +129,7 @@ function clickedActionOption(action, index) {
 		<table class="actionTable">
 			<thead>
 				<tr>
-					<th :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ADD_BUS }">New Bus</th>
+					<th :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ADD_BUS }">{{ $t('actionSelection.newBus') }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -153,7 +155,7 @@ function clickedActionOption(action, index) {
 		<table class="actionTable">
 			<thead>
 				<tr>
-					<th colspan="6" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ADD_PAX }">Passengers ({{ store.remainingPassengers }})</th>
+					<th colspan="6" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ADD_PAX }">{{ $t('actionSelection.passengers', { count: store.remainingPassengers }) }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -183,7 +185,7 @@ function clickedActionOption(action, index) {
 		<table class="actionTable">
 			<thead>
 				<tr>
-					<th colspan="6" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ADD_BLDGS }">New Building ({{ getReminaingBuildingSpots() }})</th>
+					<th colspan="6" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ADD_BLDGS }">{{ $t('actionSelection.newBuilding', { count: getReminaingBuildingSpots() }) }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -213,7 +215,7 @@ function clickedActionOption(action, index) {
 		<table class="actionTable">
 			<thead>
 				<tr>
-					<th :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ALTER_TIME }">Stop Time</th>
+					<th :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ALTER_TIME }">{{ $t('actionSelection.stopTime') }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -239,7 +241,7 @@ function clickedActionOption(action, index) {
 		<table class="actionTable">
 			<thead>
 				<tr>
-					<th colspan="6" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_VROM }">Vrrooomm!</th>
+					<th colspan="6" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_VROM }">{{ $t('actionSelection.vrrooomm') }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -269,7 +271,7 @@ function clickedActionOption(action, index) {
 		<table class="actionTable" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_CHANGE_START_PLAYER }">
 			<thead>
 				<tr>
-					<th>Starting Player</th>
+					<th>{{ $t('actionSelection.startingPlayer') }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -296,15 +298,15 @@ function clickedActionOption(action, index) {
 			<tbody>
 				<tr>
 					<td>
-						Remaining Passengers:
+						{{ $t('actionSelection.remainingPassengers') }}
 						<span :class="{ noMoreLeft: store.remainingPassengers === 0 }">
 							{{ store.remainingPassengers }}
 						</span>
 						<br />
-						Remaining Time Stones:
+						{{ $t('actionSelection.remainingTimeStones') }}
 						<span :class="{ noMoreLeft: store.remainingTimeStones === 0 }">{{ store.remainingTimeStones }}</span>
 						<br />
-						Max Buses:
+						{{ $t('actionSelection.maxBuses') }}
 						<span>{{ model.maxBuses() }}</span>
 					</td>
 				</tr>
@@ -315,14 +317,14 @@ function clickedActionOption(action, index) {
 			<tbody>
 				<tr>
 					<td>
-						Building Spots:
+						{{ $t('actionSelection.buildingSpots') }}
 						<br />
 						<br v-if="personal.selectedBoard !== rf.BOARD_PITTS" />
 						{{ model.getEmptyBuildingSpotsByNumberTotal(1) }} / {{ model.getEmptyBuildingSpotsByNumberTotal(2) }} / {{ model.getEmptyBuildingSpotsByNumberTotal(3) }} /
 						{{ model.getEmptyBuildingSpotsByNumberTotal(4) }}
 						<span v-if="personal.selectedBoard === rf.BOARD_PITTS">
 							<br />
-							Bridges: <span :class="{ noMoreLeft: store.remainingBridgeMarkers === 0 }">{{ store.remainingBridgeMarkers }}</span>
+							{{ $t('actionSelection.bridges') }} <span :class="{ noMoreLeft: store.remainingBridgeMarkers === 0 }">{{ store.remainingBridgeMarkers }}</span>
 						</span>
 					</td>
 				</tr>

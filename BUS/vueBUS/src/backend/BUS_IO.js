@@ -9,6 +9,8 @@ import * as model from "../js/BUSmodel.js"
 
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 
+import i18n from "../i18n"
+
 export const SPLOTTER_CON_USERS = ["admin", "DodgerB", "agundlachi", "pgh_gamer", "cheen"]
 
 export async function saveGame(saveRewind) {
@@ -39,7 +41,7 @@ export async function saveGame(saveRewind) {
 	if (store.gameflow.turnOrder.length > 0) postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name]
 	// USED > goes to currentPlayers
 	else {
-		if (store.gameflow.gameEnded === 0) alert("ZERO TO LENGTH")
+		if (store.gameflow.gameEnded === 0) alert(i18n.global.t("io.zeroToLength"))
 		store.gameflow.turnOrder.push(0)
 		postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name]
 		postData.data = funcs.exportBUSmodel(false)
@@ -77,7 +79,7 @@ export async function saveGame(saveRewind) {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			alert("It appears you have an older version of the game. Please refresh the page")
+			alert(i18n.global.t("io.olderVersion"))
 			return
 		}
 		personal.latestUpdate = data.latestUpdate
@@ -89,7 +91,7 @@ export async function saveGame(saveRewind) {
 		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert("Error saving the game")
+		alert(i18n.global.t("io.saveError"))
 	}
 }
 
@@ -116,7 +118,7 @@ export async function sendChatMessage(newEntry) {
 		}
 		const data = await response.json()
 		if (!data.chatData) {
-			alert("Sorry, there was a problem. Please email the webmaster directly")
+			alert(i18n.global.t("io.webmasterProblem"))
 			return
 		}
 		store.chatData = funcs.decompressChatData(data.chatData)
@@ -124,7 +126,7 @@ export async function sendChatMessage(newEntry) {
 		store.topMenuViews.showLoader = false
 	} catch (error) {
 		console.error("Error sending chat:", error)
-		alert("Error sending chat message")
+		alert(i18n.global.t("io.chatError"))
 	}
 }
 
@@ -245,14 +247,14 @@ export async function saveNotes() {
 			throw new Error("Network response was not ok")
 		}
 		if (!data.notePosted) {
-			store.topMenuViews.errorText = "Sorry, there was a problem. Please email the webmaster directly"
+			store.topMenuViews.errorText = i18n.global.t("io.webmasterProblem")
 			return
 		}
 
 		store.topMenuViews.showLoader = false
 	} catch (error) {
 		console.error("Error saving Notes:", error)
-		alert("Error saving Notes")
+		alert(i18n.global.t("io.saveNotesError"))
 	}
 }
 
@@ -263,13 +265,13 @@ export async function loadRewind() {
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	if (store.gameflow.gameEnded > 0) {
-		store.rewindErrorText = "Error: Game Ended"
+		store.rewindErrorText = i18n.global.t("io.rewindGameEnded")
 		store.performingRewind = false
 		store.topMenuViews.showLoader = false
 		return
 	}
 	if (store.topMenuViews.showReplay) {
-		store.rewindErrorText = "Error: Exit Replay Mode First"
+		store.rewindErrorText = i18n.global.t("io.rewindExitReplay")
 		store.performingRewind = false
 		store.topMenuViews.showLoader = false
 		return
@@ -289,7 +291,7 @@ export async function loadRewind() {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			alert("It appears you have an older version of the game. Please refresh the page")
+			alert(i18n.global.t("io.olderVersion"))
 			store.performingRewind = false
 			return
 		}
@@ -320,7 +322,7 @@ export async function loadRewind() {
 		store.topMenuViews.showLoader = false
 	} catch (error) {
 		console.error("Error rewinding data:", error)
-		alert("Error rewinding the game")
+		alert(i18n.global.t("io.rewindError"))
 		store.performingRewind = false
 	}
 }
@@ -367,7 +369,7 @@ async function updateDataFromLoadRewind() {
 		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error updating data:", error)
-		alert("Error updating the game")
+		alert(i18n.global.t("io.updateError"))
 		store.performingRewind = false
 		controller.startPlayerTurn()
 	}
@@ -404,7 +406,7 @@ export async function resign() {
 		controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error resiging:", error)
-		alert("Error Resigning")
+		alert(i18n.global.t("io.resignError"))
 	}
 }
 
@@ -432,13 +434,13 @@ export async function saveGameDataAfterKickout() {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			alert("It appears you have an older version of the game. Please refresh the page")
+			alert(i18n.global.t("io.olderVersion"))
 			return
 		}
 		if (data.voteCast) {
 			store.kickoutVotesData = data.votesData
 			store.topMenuViews.showLoader = false
-			store.successText = "Kickout vote recorded"
+			store.successText = i18n.global.t("io.kickoutVoteRecorded")
 			return data
 		}
 		personal.latestUpdate = data.latestUpdate
@@ -461,7 +463,7 @@ export async function saveGameDataAfterKickout() {
 		}
 	} catch (error) {
 		console.error("Error kicking:", error)
-		alert("Error Kicking")
+		alert(i18n.global.t("io.kickError"))
 	}
 }
 
@@ -514,14 +516,14 @@ export async function castVote(topic) {
 			headers: { "X-CSRFToken": csrftoken },
 		})
 		if (!response.ok) {
-			store.rewindErrorText = "Error; Contact Admin"
+			store.rewindErrorText = i18n.global.t("io.contactAdmin")
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
 
 		store.topMenuViews.showLoader = false
 		if (data.voteChanged === true) {
-			store.successText = "Vote Saved"
+			store.successText = i18n.global.t("io.voteSaved")
 
 			if (topic === rf.DELETE_VOTE_TOPIC) {
 				personal.votedToDelete = true
@@ -531,10 +533,10 @@ export async function castVote(topic) {
 				personal.votedToExclude = true
 				store.statsExcludeVotesData = JSON.parse(data.votesData)
 			}
-		} else store.rewindErrorText = "Error; Contact Admin"
+		} else store.rewindErrorText = i18n.global.t("io.contactAdmin")
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.rewindErrorText = "Error; Contact Admin"
+		store.rewindErrorText = i18n.global.t("io.contactAdmin")
 		return false
 	}
 }

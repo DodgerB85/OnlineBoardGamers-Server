@@ -115,7 +115,7 @@ function getFlexiTimeString(playerName) {
 		</transition>
 	</div>
 	<div id="timesDiv">
-		Flexi-Times:
+		{{ $t('topMenu.flexiTimes') }}
 		<span v-for="(player, idx) in store.players" :key="idx">{{ player.name }}: {{ getFlexiTimeString(player.name)
 		}}&nbsp;&nbsp;&nbsp;</span>
 		&nbsp;&nbsp;&nbsp;

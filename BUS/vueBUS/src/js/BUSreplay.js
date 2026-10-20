@@ -4,6 +4,8 @@ import * as funcs from "../js/BUSfuncs.js"
 import * as pitts from "./BUSpitts.js"
 import * as rf from "./BUSreference.js"
 
+import i18n from "../i18n"
+
 import { useModelStore } from "../stores/BUSstore.js"
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 
@@ -358,7 +360,7 @@ function replayAddPax(historyIndex, _playerIndex, entry3) {
 			else if (entry3[i][1] === rf.DESIGNER_JORIS) store.jorisStatus = entry3[i][0]
 			continue
 		}
-		if (entry3[i].length != undefined) alert("Anomaly detected. Please submit bug report")
+		if (entry3[i].length != undefined) alert(i18n.global.t("io.anomalyDetected"))
 		if (entry3[i] !== -1) {
 			store.junctions[entry3[i]][rf.paxIdx]++
 			store.remainingPassengers--

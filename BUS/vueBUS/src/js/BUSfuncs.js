@@ -6,6 +6,8 @@ import * as view from "./BUSview.js"
 import { useModelStore } from "../stores/BUSstore.js"
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 
+import i18n from "../i18n"
+
 export function removeItemAll(arr, value) {
 	var arrCopy = [...arr]
 	var i = 0
@@ -896,7 +898,7 @@ export function decompressChatData(data) {
 		var chatArray = JSON.parse(step1)
 	} else chatArray = []
 
-	chatArray.push(["WelcomeBot", 0, "Welcome to Bus Online!SNLBSNLBIf you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"])
+	chatArray.push(["WelcomeBot", 0, i18n.global.t("io.welcomeBot")])
 
 	return chatArray
 }

@@ -31,7 +31,7 @@ function exitReplayMode() {
   <template v-if="store.topMenuViews.showReplay">
     <div class="replayButtonsDiv">
       <button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="store.replayStep === 0"
-        @click="performStep(-999)">Back to my last move</button>
+        @click="performStep(-999)">{{ $t('replay.backToMyLastMove') }}</button>
       <button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-99)">
         |&lt;
       </button>
@@ -57,7 +57,7 @@ function exitReplayMode() {
 
       <div class="exitReplayButtonDiv">
         <button class="actionsLineButton" @click="exitReplayMode()">
-          Exit<br />Replay<br />Mode
+          {{ $t('replay.exitReplayMode') }}
         </button>
       </div>
     </div>

@@ -1,5 +1,7 @@
 import * as rf from "./BUSreference.js"
 
+import i18n from "../i18n"
+
 import { useModelStore } from "../stores/BUSstore.js"
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 
@@ -1097,18 +1099,18 @@ export function getLineSVGpoints(lineID, index, raw) {
 export function phaseStr() {
 	const store = useModelStore()
 	var phaseStr = "333"
-	if (store.gameflow.phase === rf.PHASE_SETUP_BLDGS) phaseStr = "Setup Buildings" // TO: 2 bldgs on zone 1 per player
-	if (store.gameflow.phase === rf.PHASE_SETUP_LINES) phaseStr = "Setup Lines" // TO then reverse TO,eg 1,2,3,4,4,3,2,1, place 1 line
-	if (store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS) phaseStr = "Choose Actions" // TO: At least 2 actions, then can pass
-	if (store.gameflow.phase === rf.PHASE_LINE_EXPANSION) phaseStr = "Line Expansion" // 5p: +1 to maxNumBus
-	if (store.gameflow.phase === rf.PHASE_ADD_BUS) phaseStr = "Add a Bus"
-	if (store.gameflow.phase === rf.PHASE_ADD_PAX) phaseStr = "Add Passengers"
-	if (store.gameflow.phase === rf.PHASE_ADD_BLDGS) phaseStr = "Add Buildings" // (GE check)
-	if (store.gameflow.phase === rf.PHASE_ALTER_TIME) phaseStr = "Alter Time" // AND POSSIBLE IMMEDIATE GAME END
-	if (store.gameflow.phase === rf.PHASE_VROM) phaseStr = "VRROOOMM!!"
-	if (store.gameflow.phase === rf.PHASE_CHANGE_START_PLAYER) phaseStr = "Change Start Player" // GE check, if no more bldg spots
-	if (store.gameflow.phase === rf.PHASE_GAME_END_CHECK) phaseStr = "Game End Check" // bldg spots, only 1 player with action markers
-	if (store.gameflow.phase === rf.PHASE_GAME_OVER) phaseStr = "Game Finished"
+	if (store.gameflow.phase === rf.PHASE_SETUP_BLDGS) phaseStr = i18n.global.t("phase.setupBuildings") // TO: 2 bldgs on zone 1 per player
+	if (store.gameflow.phase === rf.PHASE_SETUP_LINES) phaseStr = i18n.global.t("phase.setupLines") // TO then reverse TO,eg 1,2,3,4,4,3,2,1, place 1 line
+	if (store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS) phaseStr = i18n.global.t("phase.chooseActions") // TO: At least 2 actions, then can pass
+	if (store.gameflow.phase === rf.PHASE_LINE_EXPANSION) phaseStr = i18n.global.t("phase.lineExpansion") // 5p: +1 to maxNumBus
+	if (store.gameflow.phase === rf.PHASE_ADD_BUS) phaseStr = i18n.global.t("phase.addBus")
+	if (store.gameflow.phase === rf.PHASE_ADD_PAX) phaseStr = i18n.global.t("phase.addPassengers")
+	if (store.gameflow.phase === rf.PHASE_ADD_BLDGS) phaseStr = i18n.global.t("phase.addBuildings") // (GE check)
+	if (store.gameflow.phase === rf.PHASE_ALTER_TIME) phaseStr = i18n.global.t("phase.alterTime") // AND POSSIBLE IMMEDIATE GAME END
+	if (store.gameflow.phase === rf.PHASE_VROM) phaseStr = i18n.global.t("phase.vroom")
+	if (store.gameflow.phase === rf.PHASE_CHANGE_START_PLAYER) phaseStr = i18n.global.t("phase.changeStartPlayer") // GE check, if no more bldg spots
+	if (store.gameflow.phase === rf.PHASE_GAME_END_CHECK) phaseStr = i18n.global.t("phase.gameEndCheck") // bldg spots, only 1 player with action markers
+	if (store.gameflow.phase === rf.PHASE_GAME_OVER) phaseStr = i18n.global.t("phase.gameFinished")
 
 	return phaseStr
 }

@@ -11,58 +11,61 @@ import * as controller from "../js/BUScontroller.js"
 import * as model from "../js/BUSmodel.js"
 import * as pitts from "../js/BUSpitts.js"
 
+import i18n from "../i18n"
+
 import { useModelStore } from "../stores/BUSstore.js"
 const store = useModelStore()
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 const personal = usePersonalStore()
 
 function getActionText() {
+	const t = i18n.global.t
 	let phaseStr = ""
 	if (store.gameflow.phase === rf.PHASE_SETUP_BLDGS) {
-		phaseStr = "Place 2 buildings on Number 1 Locations" // TO: 2 bldgs on zone 1 per player
-		phaseStr += "<br/>Remaining Buildings: " + store.context.buildingsLeftToPlace
+		phaseStr = t("actionArea.phasePlace2Buildings") // TO: 2 bldgs on zone 1 per player
+		phaseStr += "<br/>" + t("actionArea.phaseRemainingBuildings", { count: store.context.buildingsLeftToPlace })
 	}
 	if (store.gameflow.phase === rf.PHASE_SETUP_LINES) {
-		phaseStr = "Place a Bus Line" // TO then reverse TO,eg 1,2,3,4,3,2,1, place 1 line
-		phaseStr += "<br/>Remaining Lines: " + store.context.linesLeftToPlace
-		if (personal.selectedBoard === rf.BOARD_PITTS) phaseStr += "<br/><span style='color: #ff9900'>You may not place a Bridge during setup</span>"
-		if (store.context.endJunctionsOptions.length > 0) phaseStr += "<br/>Choose a junction where your lines will meet"
+		phaseStr = t("actionArea.phasePlaceBusLine") // TO then reverse TO,eg 1,2,3,4,3,2,1, place 1 line
+		phaseStr += "<br/>" + t("actionArea.phaseRemainingLines", { count: store.context.linesLeftToPlace })
+		if (personal.selectedBoard === rf.BOARD_PITTS) phaseStr += "<br/><span style='color: #ff9900'>" + t("actionArea.phaseNoBridgeSetup") + "</span>"
+		if (store.context.endJunctionsOptions.length > 0) phaseStr += "<br/>" + t("actionArea.phaseChooseJunction")
 	}
 	if (store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS) {
-		phaseStr = "Choose an Action in the upper right area or next to the board"
-		phaseStr += "<br/>Actions are chosen A to F. The 'A' square has the highest number of actions. Actions are resolved Left to Right"
-		phaseStr += "<br/>Once you have chosen at least 2 actions this round, you will have the option to pass"
-		if (controller.currentPlayerObj().remainingActions === 0 && !store.context.actionChosen) phaseStr += "<br/><br/><span style='color: red'>YOU HAVE NO ACTIONS REMAINING - YOU MUST PASS</span>"
+		phaseStr = t("actionArea.phaseChooseAction")
+		phaseStr += "<br/>" + t("actionArea.phaseChooseActionHint")
+		phaseStr += "<br/>" + t("actionArea.phaseCanPass")
+		if (controller.currentPlayerObj().remainingActions === 0 && !store.context.actionChosen) phaseStr += "<br/><br/><span style='color: red'>" + t("actionArea.phaseNoActions") + "</span>"
 	}
 	if (store.gameflow.phase === rf.PHASE_LINE_EXPANSION) {
-		phaseStr = "Expand your bus line from either end" // 5p: +1 to maxNumBus
-		phaseStr += "<br/>Remaining Lines: " + store.context.linesLeftToPlace
-		if (personal.selectedBoard === rf.BOARD_PITTS) phaseStr += "<br/>Remaining Bridges: <span style='color: " + (store.remainingBridgeMarkers > 0 ? "green" : "red") + "'>" + store.remainingBridgeMarkers + "</span>"
+		phaseStr = t("actionArea.phaseExpandLine") // 5p: +1 to maxNumBus
+		phaseStr += "<br/>" + t("actionArea.phaseRemainingLines", { count: store.context.linesLeftToPlace })
+		if (personal.selectedBoard === rf.BOARD_PITTS) phaseStr += "<br/>" + t("actionArea.phaseRemainingBridges", { count: "<span style='color: " + (store.remainingBridgeMarkers > 0 ? "green" : "red") + "'>" + store.remainingBridgeMarkers + "</span>" })
 	}
-	if (store.gameflow.phase === rf.PHASE_ADD_BUS) phaseStr = "AddBus"
+	if (store.gameflow.phase === rf.PHASE_ADD_BUS) phaseStr = t("actionArea.phaseAddBus")
 	if (store.gameflow.phase === rf.PHASE_ADD_PAX) {
-		phaseStr = "Choose one of the two stations to add a Passenger"
-		phaseStr += "<br/>Remaining Passengers: " + store.context.passengersLeftToPlace
+		phaseStr = t("actionArea.phaseChooseStation")
+		phaseStr += "<br/>" + t("actionArea.phaseRemainingPassengers", { count: store.context.passengersLeftToPlace })
 		if (personal.selectedBoard === rf.BOARD_PITTS) {
-			if (pitts.designerArrivedThisRound()) phaseStr += "<br/><span style='color: red'>Designer has already arrived this round</span>"
-			else if (store.jeroenStatus === rf.DESIGNER_NOT_ARRIVED && store.jorisStatus === rf.DESIGNER_NOT_ARRIVED) phaseStr += "<br/><span style='color: #ff9900'>Remember: You may only bring one designer onto the board per round</span>"
+			if (pitts.designerArrivedThisRound()) phaseStr += "<br/><span style='color: red'>" + t("actionArea.phaseDesignerArrived") + "</span>"
+			else if (store.jeroenStatus === rf.DESIGNER_NOT_ARRIVED && store.jorisStatus === rf.DESIGNER_NOT_ARRIVED) phaseStr += "<br/><span style='color: #ff9900'>" + t("actionArea.phaseOneDesigner") + "</span>"
 		}
 	}
 	if (store.gameflow.phase === rf.PHASE_ADD_BLDGS) {
-		phaseStr = "Choose a location to add a Building" // (GE check)
-		phaseStr += "<br/>Remaining Buildings: " + store.context.buildingsLeftToPlace
+		phaseStr = t("actionArea.phaseChooseBuilding") // (GE check)
+		phaseStr += "<br/>" + t("actionArea.phaseRemainingBuildings", { count: store.context.buildingsLeftToPlace })
 	}
 
 	// PHASE 7 IN TEMPLATE
 	//if (store.gameflow.phase === rf.PHASE_ALTER_TIME) {phaseStr = 'Choose to stop time, or pass' // AND POSSIBLE IMMEDIATE GAME END
 
 	if (store.gameflow.phase === rf.PHASE_VROM) {
-		phaseStr = "Choose a passenger to move to their desired destination"
-		phaseStr += "<br/>Remaining Moves: " + store.context.remainingVroms
+		phaseStr = t("actionArea.phaseChooseDestination")
+		phaseStr += "<br/>" + t("actionArea.phaseRemainingMoves", { count: store.context.remainingVroms })
 	}
-	if (store.gameflow.phase === rf.PHASE_CHANGE_START_PLAYER) phaseStr = "ChangeStartPlayer" // GE check, if no more bldg spots
-	if (store.gameflow.phase === rf.PHASE_GAME_END_CHECK) phaseStr = "GameEndCheck" // bldg spots, only 1 player with action markers
-	if (store.gameflow.phase === rf.PHASE_GAME_OVER) phaseStr = "GameFinished"
+	if (store.gameflow.phase === rf.PHASE_CHANGE_START_PLAYER) phaseStr = t("actionArea.phaseChangeStartPlayer") // GE check, if no more bldg spots
+	if (store.gameflow.phase === rf.PHASE_GAME_END_CHECK) phaseStr = t("actionArea.phaseGameEndCheck") // bldg spots, only 1 player with action markers
+	if (store.gameflow.phase === rf.PHASE_GAME_OVER) phaseStr = t("actionArea.phaseGameFinished")
 	return phaseStr
 }
 
@@ -225,11 +228,11 @@ onUnmounted(() => {
 <template>
 	<template v-if="personal.name == undefined">
 		<div id="loggedOutText">
-			Please
-			<a href="/register">REGISTER</a>
-			or
-			<a href="/login">LOGIN</a>
-			to play a game
+			{{ $t('actionArea.loggedOutPlease') }}
+			<a href="/register">{{ $t('actionArea.register') }}</a>
+			{{ $t('actionArea.or') }}
+			<a href="/login">{{ $t('actionArea.login') }}</a>
+			{{ $t('actionArea.toPlayGame') }}
 			<br />
 		</div>
 		<br />
@@ -249,43 +252,43 @@ onUnmounted(() => {
 		<div id="actions">
 			<template v-if="store.gameflow.phase === rf.PHASE_SETUP_BLDGS">
 				<h2>
-					<b>Welcome to Bus Online!</b>
+					<b>{{ $t('actionArea.welcomeTitle') }}</b>
 					<br />
-					If you have any suggestions, questions or comments, then please do contact the webmaster at
+					{{ $t('actionArea.welcomeContact') }}
 					<img :src="view.getImage('email')" width="400" height="30" />
-					. Thanks!
+					{{ $t('actionArea.welcomeThanks') }}
 				</h2>
 				<div id="listDiv">
 					<ul class="centreList">
-						<li>Place buildings, lines, and passengers directly on the board. Vrrooomm by selecting passengers and destinations on the board</li>
-						<li>Choose your actions in the upper right area or next to the board</li>
-						<li>Both action selection areas display the same information, just in a different format</li>
-						<li>To view another player's actions, open the "History" tab and select a "board" action to highlight that move</li>
-						<li>Score is calculated as you play - Time Stone deductions happen immediately, not at the end</li>
-						<li>Rewind is always available</li>
+						<li>{{ $t('actionArea.welcomeList1') }}</li>
+						<li>{{ $t('actionArea.welcomeList2') }}</li>
+						<li>{{ $t('actionArea.welcomeList3') }}</li>
+						<li>{{ $t('actionArea.welcomeList4') }}</li>
+						<li>{{ $t('actionArea.welcomeList5') }}</li>
+						<li>{{ $t('actionArea.welcomeList6') }}</li>
 						<li>
-							The Player Table is in order of the "Choose Actions" phase. So top player picks first.
+							{{ $t('actionArea.welcomeList7') }}
 							<br />
-							&nbsp;&nbsp;&nbsp;&nbsp;If no one chooses the "Starting Player" choice, then the player on the 2nd line will become the new start player.
+							&nbsp;&nbsp;&nbsp;&nbsp;{{ $t('actionArea.welcomeList7b') }}
 						</li>
 						<li>
-							You can change which board you are playing on from the menu. Select a preference in your
-							<a href="/profile" target="_blank">Profile</a>
+							{{ $t('actionArea.welcomeList8') }}
+							<a href="/profile" target="_blank">{{ $t('actionArea.profile') }}</a>
 							<br />
 							<b>
-								NOTE: THE CHANGE IS COSMETIC ONLY. BOTH BOARDS HAVE THE SAME CONNECTIONS
+								{{ $t('actionArea.welcomeNote') }}
 								<br />
-								THE ORIGINAL BOARD IS ROTATED 90 DEGREES FROM THE 20TH ANNIVERSARY BOARD
+								{{ $t('actionArea.welcomeNote2') }}
 							</b>
 						</li>
 					</ul>
 				</div>
 				<h3 v-if="personal.trainingGame">
-					Welcome to this training game. If you wish to rewind your game, use the button at the top.
+					{{ $t('actionArea.trainingWelcome') }}
 					<br />
-					Each rewind will move the game back by one step.
+					{{ $t('actionArea.trainingRewind') }}
 				</h3>
-				Submit a bug report to report errors and game data to the webmaster. You can also use the bug report to submit suggestions or improvements. Thanks!
+				{{ $t('actionArea.bugSuggestion') }}
 				<br />
 				<br />
 			</template>
@@ -334,86 +337,86 @@ onUnmounted(() => {
 				<template v-if="store.gameflow.phase !== rf.PHASE_ALTER_TIME">
 					<br />
 					<template v-if="canResign()">
-						<button class="actionsLineButton resignButton" @click="confirmResign()">Resign</button>
+						<button class="actionsLineButton resignButton" @click="confirmResign()">{{ $t('actionArea.resign') }}</button>
 					</template>
-					<button class="actionsLineButton" @click="resetPlayerTurn()">Reset</button>
+					<button class="actionsLineButton" @click="resetPlayerTurn()">{{ $t('actionArea.reset') }}</button>
 					<template v-if="controller.currentPlayerCanPass() && !store.context.actionChosen">
-						<button class="actionsLineButton" @click="passChooseAction()">Pass Choose Actions Phase - End Turn</button>
+						<button class="actionsLineButton" @click="passChooseAction()">{{ $t('actionArea.passChooseActions') }}</button>
 					</template>
 				</template>
 			</template>
 
 			<template v-if="controller.currentPlayerCanPass() && personal.canEndTurn()">
-				<button class="actionsLineButton" @click="endTurnAndPass()">End Turn & Pass Next Turn</button>
+				<button class="actionsLineButton" @click="endTurnAndPass()">{{ $t('actionArea.endTurnPass') }}</button>
 			</template>
 
-			<button v-if="personal.canEndTurn()" class="actionsLineButton" @click="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS ? controller.endPlayerChooseActionTurn() : controller.endPlayerTurn()">End Turn</button>
+			<button v-if="personal.canEndTurn()" class="actionsLineButton" @click="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS ? controller.endPlayerChooseActionTurn() : controller.endPlayerTurn()">{{ $t('actionArea.endTurn') }}</button>
 
 			<!-- Phase STOP TIME -->
 			<template v-if="store.gameflow.phase === rf.PHASE_ALTER_TIME && !store.context.confirmEndTurn">
-				Choose to stop time, or pass
+				{{ $t('actionArea.stopTimePrompt') }}
 				<span v-if="store.remainingTimeStones <= 1" class="actionError">
 					<br />
-					CAUTION: Taking the last TIme Stone will end the game IMMEDIATELY
+					{{ $t('actionArea.cautionLastTimeStone') }}
 				</span>
 				<br />
-				<button class="actionsLineButton" @click="alterTime(false)">Pass</button>
-				<button class="actionsLineButton" @click="alterTime(true)">Stop Time</button>
+				<button class="actionsLineButton" @click="alterTime(false)">{{ $t('actionArea.pass') }}</button>
+				<button class="actionsLineButton" @click="alterTime(true)">{{ $t('actionArea.stopTime') }}</button>
 			</template>
 
 			<!-- Confirm End Turn -->
 			<template v-if="store.context.confirmEndTurn">
-				Confirm your choice
+				{{ $t('actionArea.confirmChoice') }}
 				<span v-if="store.remainingTimeStones === 0" class="actionError">
 					<br />
-					CAUTION: Taking the last TIme Stone will end the game IMMEDIATELY
+					{{ $t('actionArea.cautionLastTimeStone') }}
 				</span>
 				<br />
-				<button class="actionsLineButton" @click="resetPlayerTurn()">Reset</button>
-				<button class="actionsLineButton" @click="localEndPlayerTurn">End Turn</button>
+				<button class="actionsLineButton" @click="resetPlayerTurn()">{{ $t('actionArea.reset') }}</button>
+				<button class="actionsLineButton" @click="localEndPlayerTurn">{{ $t('actionArea.endTurn') }}</button>
 			</template>
 
 			<!-- Confirm RESIGN -->
 			<template v-if="store.context.confirmResign">
-				<p>Are you sure you want to resign?</p>
-				<p>Resigning will unbalance the game for the remaining players</p>
-				<p>Please carry on playing if that is at all possible</p>
-				<p>Even if you think you can't win, you can still aim for 2nd place / not last place / etc</p>
+				<p>{{ $t('actionArea.resignQuestion') }}</p>
+				<p>{{ $t('actionArea.resignUnbalance') }}</p>
+				<p>{{ $t('actionArea.resignCarryOn') }}</p>
+				<p>{{ $t('actionArea.resignAim') }}</p>
 
 				<br />
-				<button class="actionsLineButton" @click="resetPlayerTurn()">Cancel</button>
-				<button class="actionsLineButton" @click="IO.resign()">Confirm Resign</button>
+				<button class="actionsLineButton" @click="resetPlayerTurn()">{{ $t('actionArea.cancel') }}</button>
+				<button class="actionsLineButton" @click="IO.resign()">{{ $t('actionArea.confirmResign') }}</button>
 			</template>
 		</div>
 	</template>
 
 	<template v-if="store.gameflow.gameEnded > 0 && !store.topMenuViews.showReplay">
 		<div id="gameEndDiv">
-			Game Over
+			{{ $t('actionArea.gameOver') }}
 			<br />
 			<br />
-			<span v-if="store.gameflow.gameEnded === 1">Game ends immediately once all Time Stones have been used</span>
-			<span v-if="store.gameflow.gameEnded === 2">All building spots used</span>
-			<span v-if="store.gameflow.gameEnded === 3">Only one player has actions remaining</span>
-			<span v-if="store.gameflow.gameEnded === 4">Last player standing</span>
+			<span v-if="store.gameflow.gameEnded === 1">{{ $t('actionArea.gameEnd1') }}</span>
+			<span v-if="store.gameflow.gameEnded === 2">{{ $t('actionArea.gameEnd2') }}</span>
+			<span v-if="store.gameflow.gameEnded === 3">{{ $t('actionArea.gameEnd3') }}</span>
+			<span v-if="store.gameflow.gameEnded === 4">{{ $t('actionArea.gameEnd4') }}</span>
 			<br />
 			<br />
-			Winner: {{ model.getWinnerName()[0] }}
+			{{ $t('actionArea.winner', { name: model.getWinnerName()[0] }) }}
 			<template v-if="model.getWinnerName()[0] === personal.name">
-				<h1>Congratulations!</h1>
+				<h1>{{ $t('actionArea.congratulations') }}</h1>
 			</template>
 			<template v-else>
 				<br />
 				<br />
 			</template>
-			<span v-if="model.getWinnerName()[1] === 0">Highest Score</span>
-			<span v-if="model.getWinnerName()[1] === 1">Joint score with more Time Stones</span>
-			<span v-if="model.getWinnerName()[1] === 2">Joint score, same Time Stones, achieved score first</span>
+			<span v-if="model.getWinnerName()[1] === 0">{{ $t('actionArea.highestScore') }}</span>
+			<span v-if="model.getWinnerName()[1] === 1">{{ $t('actionArea.jointMoreStones') }}</span>
+			<span v-if="model.getWinnerName()[1] === 2">{{ $t('actionArea.jointScoreFirst') }}</span>
 			<br />
 			<br />
-			Fancy a
-			<a :href="'/createBusPage/' + String(personal.gameID) + '/'">rematch</a>
-			?
+			{{ $t('actionArea.fancyRematch') }}
+			<a :href="'/createBusPage/' + String(personal.gameID) + '/'">{{ $t('actionArea.rematch') }}</a>
+			{{ $t('actionArea.fancyRematchEnd') }}
 			<br />
 			<br />
 		</div>
@@ -421,83 +424,68 @@ onUnmounted(() => {
 
 	<template v-if="personal.kickoutRequired > 0 && !personal.canPlay() && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 		<div v-if="personal.kickoutRequired === 1" id="kickoutDiv">
-			Player
-			<b>{{ controller.currentPlayerObj().name }}</b>
-			has used all of standard kickout time.
+			{{ $t('actionArea.kickoutStandardUsed', { name: controller.currentPlayerObj().name }) }}
 			<br />
 			<br />
-			Remaining Flex-Time:
+			{{ $t('actionArea.remainingFlexTime') }}
 			<span id="flexiKickoutTimerSpan">{{ getFlexiKickoutTImerText() }}</span>
 			<br />
 			<br />
-			For more information see
-			<b><a href="/help/" target="_blank">Help</a></b>
+			{{ $t('actionArea.forMoreInfo') }}
+			<b><a href="/help/" target="_blank">{{ $t('actionArea.help') }}</a></b>
 		</div>
 		<div v-else id="kickoutDiv">
 			<template v-if="canKickoutNow()">
-				Player
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				has timed out
+				{{ $t('actionArea.timedOut', { name: controller.currentPlayerObj().name }) }}
 				<br />
 				<br />
-				To kick out
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				press Confirm Kickout
+				{{ $t('actionArea.toKickout', { name: controller.currentPlayerObj().name }) }}
 				<br />
 				<br />
-				Otherwise you can allow
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				more time - reload the page to initiate kickout again
+				{{ $t('actionArea.allowMoreTime', { name: controller.currentPlayerObj().name }) }}
 				<br />
 				<br />
 				<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
+				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t('actionArea.notNow') }}</button></span>
 				<span>
-					<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
+					<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t('actionArea.keepInGame', { name: controller.currentPlayerObj().name }) }}</button>
 				</span>
 				<span>
-					<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">Confirm Kickout</button>
+					<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">{{ $t('actionArea.confirmKickout') }}</button>
 				</span>
 			</template>
 			<template v-else>
-				Player
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				has timed out
+				{{ $t('actionArea.timedOut', { name: controller.currentPlayerObj().name }) }}
 				<br />
-				A vote from the other players is needed to kick out
-				<b>{{ controller.currentPlayerObj().name }}</b>
+				{{ $t('actionArea.voteNeeded', { name: controller.currentPlayerObj().name }) }}
 				<br />
 				<br />
-				Votes: {{ kickoutVoteCount() }}/{{ store.kickoutVoteThreshold }} ({{ kickoutVoters() }})
+				{{ $t('actionArea.votes', { votes: kickoutVoteCount(), threshold: store.kickoutVoteThreshold, voters: kickoutVoters() }) }}
 				<br />
 				<br />
 				<span v-if="!myKickoutVote()">
 					<template v-if="isLastVoteRequired()">
-						This will permanently remove
-						<b>{{ controller.currentPlayerObj().name }}</b>
-						from the game
+						{{ $t('actionArea.willRemove', { name: controller.currentPlayerObj().name }) }}
 						<br />
-						<b>It cannot be undone</b>
+						<b>{{ $t('actionArea.cannotBeUndone') }}</b>
 						<br />
 						<br />
 					</template>
-					<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout">Vote to Kickout {{ controller.currentPlayerObj().name }}</button>
+					<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout">{{ $t('actionArea.voteToKickout', { name: controller.currentPlayerObj().name }) }}</button>
 				</span>
 				<span v-else>
-					You have voted to kick out
-					<b>{{ controller.currentPlayerObj().name }}</b>
+					{{ $t('actionArea.votedToKickout', { name: controller.currentPlayerObj().name }) }}
 					<br />
-					If the other players do not also vote, you will be able to kick them out directly in
-					{{ soloKickoutCountdown }}
+					{{ $t('actionArea.voteCountdown', { time: soloKickoutCountdown }) }}
 				</span>
 				<br />
 				<br />
 				<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 				<span>
-					<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button>
+					<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t('actionArea.notNow') }}</button>
 				</span>
 				<span>
-					<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
+					<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t('actionArea.keepInGame', { name: controller.currentPlayerObj().name }) }}</button>
 				</span>
 			</template>
 		</div>

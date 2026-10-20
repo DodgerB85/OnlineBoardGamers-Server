@@ -10,6 +10,8 @@ import * as controller from "./BUScontroller.js"
 import { useModelStore } from "../stores/BUSstore.js"
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 
+import i18n from "../i18n"
+
 export function initGame() {
 	// Set up all Data
 	const store = useModelStore()
@@ -137,12 +139,12 @@ export function initGame() {
 
 	// If new, save, otherwise, import data
 	if (window.initData.pov == undefined && window.initData.gameData === "") {
-		store.rewindErrorText = "The game has not yet started"
+		store.rewindErrorText = i18n.global.t("io.gameNotStarted")
 		// Create the <h1> element
 		var heading = document.createElement("h1")
 
 		// Set the text content of the <h1> element
-		heading.textContent = "The game has not yet started"
+		heading.textContent = i18n.global.t("io.gameNotStarted")
 
 		// Get a reference to the body element
 		var body = document.body
