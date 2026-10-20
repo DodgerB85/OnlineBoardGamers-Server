@@ -5,6 +5,7 @@ import * as controller from "../js/KFWcontroller"
 import * as model from "../js/KFWmodel"
 import * as village from "../js/KFWvillage"
 import * as rules from "../js/KFWrules"
+import i18n from "../i18n"
 
 import { useModelStore } from "../stores/KFWstore.js"
 const store = useModelStore()
@@ -115,7 +116,7 @@ function clickedMeeple(colour) {
 
 			// If it would push the meepls > 6 then return
 			if (store.context.selectedTileArea === rf.TILE_ACTION_AREA && store.context.selectedTile.meeplesOnTile.reduce((sum, subarray) => sum + subarray.length, 0) === 6) {
-				store.gameMessages.errorText = "Tile Full"
+				store.gameMessages.errorText = i18n.global.t("meeplePopup.tileFull")
 				return
 			}
 		}
@@ -443,10 +444,10 @@ function localClickedPurpleMeeple() {
 			<div v-if="showViewAsSelector" class="viewAsRow">
 				<select v-model="viewAsSeenBy" class="viewAsSelect"
 					:style="viewAsSeenBy === -1 ? null : playerChipStyle(viewAsSeenBy)">
-					<option :value="-1">My view</option>
-					<option v-for="p in otherPlayers" :key="p.idx" :value="p.idx" :style="playerChipStyle(p.idx)">{{ p.name }}'s view</option>
+					<option :value="-1">{{ $t("playerItems.myView") }}</option>
+					<option v-for="p in otherPlayers" :key="p.idx" :value="p.idx" :style="playerChipStyle(p.idx)">{{ $t("playerItems.playerView", { name: p.name }) }}</option>
 				</select>
-				<img class="viewAsResetImg" src="@static/KFW/images/icon-rewind.svg" alt="Reset" @click="viewAsSeenBy = -1" />
+				<img class="viewAsResetImg" src="@static/KFW/images/icon-rewind.svg" :alt="$t('common.reset')" @click="viewAsSeenBy = -1" />
 			</div>
 			<div v-if="store.players[playerIndexProp].hasPurpleMeeple" class="meepleImgAndNumberDiv purpleMeepleDiv">
 				<div class="meepleImgDiv">
@@ -526,8 +527,8 @@ function localClickedPurpleMeeple() {
 				</template>
 				<button v-if="personal.canPlay() && playerIndexProp === controller.currentPlayerIndex()"
 					class="actionsLineButton" @click="localEnableExchangeContracts">
-					<span v-if="exchangingContracts">Cancel</span>
-					<span v-else>Exchange Contract</span>
+					<span v-if="exchangingContracts">{{ $t("common.cancel") }}</span>
+					<span v-else>{{ $t("playerItems.exchangeContract") }}</span>
 				</button>
 				<br v-else />
 			</template>
@@ -566,10 +567,10 @@ function localClickedPurpleMeeple() {
 			<div v-if="showViewAsSelector" class="viewAsRow">
 				<select v-model="viewAsSeenBy" class="viewAsSelect"
 					:style="viewAsSeenBy === -1 ? null : playerChipStyle(viewAsSeenBy)">
-					<option :value="-1">My view</option>
-					<option v-for="p in otherPlayers" :key="p.idx" :value="p.idx" :style="playerChipStyle(p.idx)">{{ p.name }}'s view</option>
+					<option :value="-1">{{ $t("playerItems.myView") }}</option>
+					<option v-for="p in otherPlayers" :key="p.idx" :value="p.idx" :style="playerChipStyle(p.idx)">{{ $t("playerItems.playerView", { name: p.name }) }}</option>
 				</select>
-				<img class="viewAsResetImg" src="@static/KFW/images/icon-rewind.svg" alt="Reset" @click="viewAsSeenBy = -1" />
+				<img class="viewAsResetImg" src="@static/KFW/images/icon-rewind.svg" :alt="$t('common.reset')" @click="viewAsSeenBy = -1" />
 			</div>
 			<div v-if="store.players[playerIndexProp].hasPurpleMeeple" class="meepleImgAndNumberDiv purpleMeepleDiv">
 				<div class="meepleImgDiv">

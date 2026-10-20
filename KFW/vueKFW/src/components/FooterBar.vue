@@ -13,11 +13,16 @@
     <div class="content">
       <img src="@static/KFW/images/KFWbox.jpg" class="cover" />
       <p>
-        Keyflower is a board game by Richard Breese & Sebastian Bleasdale, published by 
-        <a target='_blank' href='https://boardgamegeek.com/boardgamepublisher/83/r-and-d-games'>R&D Games</a>.
+        <i18n-t keypath="footer.gameBy" tag="span" scope="global">
+          <template #publisher><a target='_blank' href='https://boardgamegeek.com/boardgamepublisher/83/r-and-d-games'>{{ $t("footer.publisher") }}</a></template>
+        </i18n-t>
       </p>
-      <p>Online Board Gamers implementation by DodgerB & vraid. Permissions Provided. </p>
-      <p>Menu icons from <a href="http://game-icons.net">game-icons.net</a></p>
+      <p>{{ $t("footer.implementation") }}</p>
+      <p>
+        <i18n-t keypath="footer.menuIcons" tag="span" scope="global">
+          <template #link><a href="http://game-icons.net">game-icons.net</a></template>
+        </i18n-t>
+      </p>
     </div>
 
 

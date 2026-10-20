@@ -5,6 +5,7 @@ import * as view from "../js/KFWview.js"
 import * as controller from "../js/KFWcontroller.js"
 import * as village from "../js/KFWvillage.js"
 import * as rules from "../js/KFWrules.js"
+import i18n from "../i18n"
 
 import { useModelStore } from "../stores/KFWstore.js"
 const store = useModelStore()
@@ -85,7 +86,7 @@ function clickedSupplyMeeple(colour) {
 
 	// If it would push the meepls > 6 then return
 	if (store.context.selectedTileArea === rf.TILE_ACTION_AREA && store.context.selectedTile.meeplesOnTile.reduce((sum, subarray) => sum + subarray.length, 0) === 6) {
-		store.gameMessages.errorText ="Tile Full"
+		store.gameMessages.errorText = i18n.global.t("meeplePopup.tileFull")
 		return
 	}
 
@@ -100,15 +101,15 @@ function clickedOutbidMeeple(entry) {
 
 <template>
 	<div v-if="store.meeplePopupSetter.showPopup" class="meeplePopup" :style="{ left: computedMeeplePopupData.left + 'px', top: computedMeeplePopupData.top + 'px' }">
-		<div class="addMeeplesDiv">Add Workers:</div>
+		<div class="addMeeplesDiv">{{ $t("meeplePopup.addWorkers") }}</div>
 		<!-- Meeples In Supply -->
 		<template v-if="!computedMeeplePopupData.anyHiddenMeepleSelectable">
 			<div class="noSupplyMeeplesDiv">
-				<b>No eligible workers in your supply</b>
+				<b>{{ $t("meeplePopup.noEligibleWorkers") }}</b>
 			</div>
 		</template>
 		<template v-else>
-			<b><u>Hidden Workers</u></b>
+			<b><u>{{ $t("meeplePopup.hiddenWorkers") }}</u></b>
 			<br />
 			<template v-for="(meepleAmount, idx) in controller.currentPlayerObj().hiddenMeeples" :key="idx">
 				<div v-if="computedMeeplePopupData.selectableMeepleArray.includes(idx)" class="meepleImgAndNumberDiv" @click="clickedSupplyMeeple(idx)">
@@ -123,11 +124,11 @@ function clickedOutbidMeeple(entry) {
 		<!-- Outbid Meeples -->
 		<template v-if="computedMeeplePopupData.outbidMeepleInfo.length === 0">
 			<div class="noSupplyMeeplesDiv">
-				<b>No eligible outbid workers</b>
+				<b>{{ $t("meeplePopup.noEligibleOutbid") }}</b>
 			</div>
 		</template>
 		<template v-else>
-			<b><u>Outbid Workers</u></b>
+			<b><u>{{ $t("meeplePopup.outbidWorkers") }}</u></b>
 			<br />
 			<template v-for="(entry, idx) in computedMeeplePopupData.outbidMeepleInfo" :key="idx">
 				{{ entry[3] }}
@@ -140,17 +141,15 @@ function clickedOutbidMeeple(entry) {
 			</template>
 			<br />
 		</template>
-		<button @click="store.meeplePopupSetter.showPopup = false" class="actionsLineButton">Close</button>
-		<button @click="resetWholePlayerTurn" class="actionsLineButton">Cancel</button>
+		<button @click="store.meeplePopupSetter.showPopup = false" class="actionsLineButton">{{ $t("common.close") }}</button>
+		<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("common.cancel") }}</button>
 		<button v-if="store.gameMessages.actionError === '' && store.context.minMeeplesRequired <= 0" class="actionsLineButton" @click="finishAddingMeeples">
-			<span v-if="store.context.selectedTileArea === rf.TILE_BIDDING_AREA">Finish Adding Workers & End Turn</span>
-			<span v-else>Finish Adding Workers</span>
+			<span v-if="store.context.selectedTileArea === rf.TILE_BIDDING_AREA">{{ $t("meeplePopup.finishAddingEndTurn") }}</span>
+			<span v-else>{{ $t("meeplePopup.finishAdding") }}</span>
 		</button>
 		<template v-else-if="store.context.minMeeplesRequired > 0">
 			<div class="requiredMeeplesDiv">
-				You need: {{ store.context.minMeeplesRequired }}
-				<span v-if="store.context.minMeeplesRequired > 1">workers</span>
-				<span v-else>worker</span>
+				{{ $t("meeplePopup.youNeed", { count: store.context.minMeeplesRequired, unit: store.context.minMeeplesRequired > 1 ? $t("action.workers") : $t("action.worker") }) }}
 			</div>
 		</template>
 	</div>

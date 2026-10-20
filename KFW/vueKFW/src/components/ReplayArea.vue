@@ -6,6 +6,7 @@ import * as model from '../js/KFWmodel'*/
 import * as rf from '../js/KFWreference'
 //import * as IO from '../backend/KFW_IO'
 import * as replay from '../js/KFWreplay'
+import i18n from '../i18n'
 
 import HistoryEntry from './HistoryEntry.vue'
 
@@ -19,7 +20,7 @@ import { ref } from 'vue';
 
 const spinoffSuccessText = ref('')
 const spinoffErrorText = ref('')
-const copyMessage = ref('https://www.onlineboardgamers.com/KFW/110/replay/5 Copied to Clipboard');
+const copyMessage = ref('');
 
 
 function performStep(amount) {
@@ -30,7 +31,7 @@ function performStep(amount) {
 }
 
 async function localCopyGameToPracticeGame2() {
-    store.gameMessages.errorText = "Not implemented yet"
+    store.gameMessages.errorText = i18n.global.t("replay.notImplemented")
     /*let copyStep = 0
     // Check if we are at the end of the data
     if (store.replayStep === store.replayData.length - 1) {
@@ -97,7 +98,7 @@ function copyToClipboard() {
 
     document.body.removeChild(textarea);
 
-    copyMessage.value = textToCopy + " Copied to Clipboard"
+    copyMessage.value = i18n.global.t("replay.copiedToClipboard", { url: textToCopy })
 
     const button = document.getElementById("copyURLbutton");
     const popup = document.getElementById("popup");
@@ -148,12 +149,11 @@ function copyToClipboard() {
             </button>
         </div>-->
         <div class="copyGameButtonDiv" v-if="personal.name != undefined">
-            <button @click="localCopyGameToPracticeGame2()" class="actionsLineButton">
-                Copy This Game<br />To New Game
+            <button @click="localCopyGameToPracticeGame2()" class="actionsLineButton" v-html="$t('replay.copyThisGame')">
             </button>
             <button @click="store.viewSettings.replayAtBottom = !store.viewSettings.replayAtBottom" class="actionsLineButton">
-                <template v-if="!store.viewSettings.replayAtBottom">Move UI<br/>to Bottom <b>▼</b></template>
-                <template v-if="store.viewSettings.replayAtBottom">Move UI<br/>to Top <b>▲</b></template>
+                <template v-if="!store.viewSettings.replayAtBottom">{{ $t("replay.moveUi") }}<br/>{{ $t("replay.toBottom") }} <b>▼</b></template>
+                <template v-if="store.viewSettings.replayAtBottom">{{ $t("replay.moveUi") }}<br/>{{ $t("replay.toTop") }} <b>▲</b></template>
             </button>
         </div>
         <!--<div v-if="personal.name != undefined && store.replayStep === store.replayData.length - 1 && store.gameflow.phase !== rf.PHASE_GAME_OVER"
@@ -162,9 +162,8 @@ function copyToClipboard() {
                 Copy Game From<br />After This Move<br />To Practice Game
             </button>
         </div>-->
-        <br />Use the arrows to step through the game. This will not alter the current game in any way
-        <br /><button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">Copy URL to this move to
-            clipboard</button>
+        <br />{{ $t("replay.useArrows") }}
+        <br /><button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">{{ $t("replay.copyUrl") }}</button>
         <div id="popup" class="popup">{{ copyMessage }}</div>
 
         <div v-if="spinoffSuccessText !== ''" class="spinoffSuccessText" v-html="spinoffSuccessText"></div>

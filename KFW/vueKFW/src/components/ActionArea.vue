@@ -8,6 +8,7 @@ import * as Bot from "../js/KFWbot"
 import * as IO from "../backend/KFW_IO"
 import * as village from "../js/KFWvillage"
 import * as rules from "../js/KFWrules"
+import i18n from "../i18n"
 
 import { ref, watch, onUnmounted } from "vue"
 
@@ -165,7 +166,7 @@ function finishedMovingAndUpgrading() {
 }
 
 function localSetRandomMeepleOrSkill(type) {
-	let message = "End your turn to get "
+	let message = i18n.global.t("model.endTurnToGet")
 	if (type === 0) {
 		message += `<img class="meepleInMessage" src="${view.getImage("meeple_random")}" />`
 		let histData = [0, rf.MEEPLE_RANDOM] // NB 0 INDICATED NEEPLE WAS CHOSEN
@@ -225,7 +226,7 @@ function localAddResToPlayer(playerIndex, res) {
 		// This only comes from a tile action, so if it's complete, add the history
 		if (store.context.action !== rf.ACT_PLACE_BOAT_7A_RESOURCES) model.addHistory(rf.HIST_ACT_ON_TILE, playerIndex, 0, [...store.context.historyObj])
 	} else {
-		store.gameMessages.actionError = "There are no moure of that resource available"
+		store.gameMessages.actionError = i18n.global.t("action.noMoreResource")
 	}
 }
 
@@ -264,11 +265,10 @@ function shouldShowIntroText() {
 		}">
 		<template v-if="personal.pov === -99">
 			<div id="loggedOutText">
-				Please
-				<a href="/register">REGISTER</a>
-				or
-				<a href="/login">LOGIN</a>
-				to play a game
+				<i18n-t keypath="action.loggedOutPrompt" tag="span" scope="global">
+					<template #register><a href="/register">{{ $t("action.register") }}</a></template>
+					<template #login><a href="/login">{{ $t("action.login") }}</a></template>
+				</i18n-t>
 				<br />
 			</div>
 			<br />
@@ -315,98 +315,84 @@ function shouldShowIntroText() {
 		<!-- KICKOUT INFO -->
 		<template v-if="personal.kickoutRequired > 0 && !personal.canPlay() && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 			<div v-if="personal.kickoutRequired == 1" id="kickoutDiv">
-				Player
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				has used all the standard kickout time.
+				{{ $t("action.kickoutUsedAllTime", { name: controller.currentPlayerObj().name }) }}
 				<br />
 				<br />
-				Remaining Flex-Time:
+				{{ $t("action.remainingFlexTime") }}
 				<span id="flexiKickoutTimerSpan">{{ getFlexiKickoutTImerText() }}</span>
 				<br />
 				<br />
-				For more information see
-				<b><a href="/help/" target="_blank">Help</a></b>
+				<i18n-t keypath="action.forMoreInfo" tag="span" scope="global">
+					<template #help><b><a href="/help/" target="_blank">{{ $t("action.help") }}</a></b></template>
+				</i18n-t>
 			</div>
 			<div v-else-if="personal.externalTournamentGame" id="kickoutDiv">
-				Under the tournament rules set by the external tournament organisers, you cannot kick other players from this type of tournament game
+				{{ $t("action.tournamentNoKick") }}
 				<br />
 				<br />
-				Please use the button below to alert the admins, who will continue to make moves for this player
+				{{ $t("action.tournamentAdminsHint") }}
 				<br />
 				<br />
 				<br />
 				<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
+				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("action.notNow") }}</button></span>
 
-				<button class="actionsLineButton" @click="IO.nudgeTourneyAdmins(1)">Alert Admins</button>
+				<button class="actionsLineButton" @click="IO.nudgeTourneyAdmins(1)">{{ $t("action.alertAdmins") }}</button>
 			</div>
 
 			<div v-else id="kickoutDiv">
 				<template v-if="canKickoutNow()">
-					Player
-					<b>{{ controller.currentPlayerObj().name }}</b>
-					has timed out
+					{{ $t("action.timedOut", { name: controller.currentPlayerObj().name }) }}
 					<br />
-					To kick out
-					<b>{{ controller.currentPlayerObj().name }}</b>
-					press Confirm Kickout
+					{{ $t("action.toKickout", { name: controller.currentPlayerObj().name }) }}
 					<br />
-					The game will proceed to the next player/phase/turn
+					{{ $t("action.gameProceeds") }}
 					<br />
 					<br />
-					Otherwise you can allow
-					<b>{{ controller.currentPlayerObj().name }}</b>
-					more time - reload the page to initiate kickout again
+					{{ $t("action.allowMoreTime", { name: controller.currentPlayerObj().name }) }}
 					<br />
 
 					<br />
 					<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
+					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("action.notNow") }}</button></span>
 					<span>
-						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
+						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("action.keepInGame", { name: controller.currentPlayerObj().name }) }}</button>
 					</span>
-					<span><button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">Confirm Kickout</button></span>
+					<span><button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">{{ $t("action.confirmKickout") }}</button></span>
 				</template>
 				<template v-else>
 					<br />
-					Player
-					<b>{{ controller.currentPlayerObj().name }}</b>
-					has timed out
+					{{ $t("action.timedOut", { name: controller.currentPlayerObj().name }) }}
 					<br />
-					A vote from the other players is needed to kick out
-					<b>{{ controller.currentPlayerObj().name }}</b>
+					{{ $t("action.voteNeeded", { name: controller.currentPlayerObj().name }) }}
 					<br />
 					<br />
-					Votes: {{ kickoutVoteCount() }}/{{ store.kickoutVoteThreshold }} ({{ kickoutVoters() }})
+					{{ $t("action.votes", { count: kickoutVoteCount(), threshold: store.kickoutVoteThreshold, voters: kickoutVoters() }) }}
 					<br />
 					<br />
 					<span v-if="!myKickoutVote()">
 						<template v-if="isLastVoteRequired()">
-							This will permanently remove
-							<b>{{ controller.currentPlayerObj().name }}</b>
-							from the game
+							{{ $t("action.willRemove", { name: controller.currentPlayerObj().name }) }}
 							<br />
-							<b>It cannot be undone</b>
+							<b>{{ $t("action.cannotBeUndone") }}</b>
 							<br />
 							<br />
 						</template>
-						<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout">Vote to Kickout {{ controller.currentPlayerObj().name }}</button>
+						<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout">{{ $t("action.voteToKickout", { name: controller.currentPlayerObj().name }) }}</button>
 					</span>
 					<span v-else>
-						You have voted to kick out
-						<b>{{ controller.currentPlayerObj().name }}</b>
+						{{ $t("action.voted", { name: controller.currentPlayerObj().name }) }}
 						<br />
-						If the other players do not also vote, you will be able to kick them out directly in
-						{{ soloKickoutCountdown }}
+						{{ $t("action.voteCountdown", { time: soloKickoutCountdown }) }}
 					</span>
 					<br />
 					<br />
 					<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 					<span>
-						<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button>
+						<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("action.notNow") }}</button>
 					</span>
 					<span>
-						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
+						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("action.keepInGame", { name: controller.currentPlayerObj().name }) }}</button>
 					</span>
 				</template>
 			</div>
@@ -420,13 +406,13 @@ function shouldShowIntroText() {
 		<!-- ALWAYS SHOWS ON TURN 0 -->
 		<template v-if="shouldShowIntroText() && store.viewSettings.showIntroInfo">
 			<div class="introTextDiv">
-				<h2>Welcome to Keyflower!</h2>
+				<h2>{{ $t("action.welcomeTitle") }}</h2>
 				<b>
-					Select a bidding area or tile action, then add workers, then perform the action or end your turn.
+					{{ $t("action.welcomeIntro") }}
 					<br />
 					<br />
 					<template v-if="!personal.trainingGame">
-						At the start of your turn, moves made by players since your previous turn will be highlighted
+						{{ $t("action.welcomeHighlights") }}
 						<br />
 						<br />
 					</template>
@@ -447,52 +433,53 @@ function shouldShowIntroText() {
 								fill: '#E4EBCA',
 							}" />
 					</svg>
-					During village expansion, tile edges with roads will have an indicator added for extra clarity
+					{{ $t("action.welcomeRoads") }}
 					<br />
 					<br />
 					<img class="boatWarnIntroIcon" :src="view.getImage('boat_warn_icon')" />
-					Tile placement that would block a possible boat chain from your home tile will also be indiated
+					{{ $t("action.welcomeBoatChain") }}
 					<br />
 					<br />
-					<b><u>Hidden Information</u></b>
+					<b><u>{{ $t("action.welcomeHiddenTitle") }}</u></b>
 					<br />
 					<span v-if="personal.trainingGame">
-						As this is a practice game, all players' hidden information is displayed openly.
+						{{ $t("action.welcomePractice") }}
 						<br />
-						In a normal game, it is not possible to see another player's hidden items
+						{{ $t("action.welcomePracticeNormal") }}
 					</span>
-					<span v-else-if="store.hiddenInformationKnowledge === 9">High Knowledge Level: Any hidden information revealed during the game will be recorded and shown to you</span>
+					<span v-else-if="store.hiddenInformationKnowledge === 9">{{ $t("action.welcomeHighKnowledge") }}</span>
 					<span v-else-if="store.hiddenInformationKnowledge === 8">
-						High Knowledge Level: Any hidden information revealed during the game will be recorded and shown to you
+						{{ $t("action.welcomeHighKnowledge") }}
 						<br />
-						(Any "Known" workers just before a boat is picked will be moved to "Unknown" workers)
+						{{ $t("action.welcomeHighKnowledge2") }}
 					</span>
 					<span v-else-if="store.hiddenInformationKnowledge === 7">
-						Medium Knowledge Level: Other players' workers / skills that at some point you saw them collect will show up as “relative” amounts.
+						{{ $t("action.welcomeMediumKnowledge") }}
 						<br />
-						So a mostly coloured blue worker will indicate that a high proportion of their “known” workers are blue.
+						{{ $t("action.welcomeMediumKnowledge2") }}
 						<br />
-						<b>Note: The TOTAL amount of all of another player's workers is shown by the number in the white worker</b>
+						<b>{{ $t("action.welcomeMediumNote") }}</b>
 					</span>
 					<span v-else-if="store.hiddenInformationKnowledge === 6">
-						Medium Knowledge Level: Other players' workers / skills that at some point you saw them collect will show up as “relative” amounts.
+						{{ $t("action.welcomeMediumKnowledge") }}
 						<br />
-						So a mostly coloured blue worker will indicate that a high proportion of their “known” workers are blue.
+						{{ $t("action.welcomeMediumKnowledge2") }}
 					</span>
 					<span v-else-if="store.hiddenInformationKnowledge === 5">
-						Low Knowledge Level: Others players' items are totally hidden, even those that you know they have (eg from boat collection).
+						{{ $t("action.welcomeLowKnowledge") }}
 						<br />
-						History is limited to the last two of your turns.
+						{{ $t("action.welcomeLowKnowledge2") }}
 					</span>
 					<br />
 					<br />
-					For more information please see
-					<a class="linkOther" href="/KFW/help/" target="_blank">Keyflower Help</a>
+					<i18n-t keypath="action.welcomeHelp" tag="span" scope="global">
+						<template #help><a class="linkOther" href="/KFW/help/" target="_blank">{{ $t("action.helpPage") }}</a></template>
+					</i18n-t>
 				</b>
 			</div>
 		</template>
 		<template v-else-if="shouldShowIntroText() && store.viewSettings.showIntroInfo === false">
-			<button class="actionsLineButton" @click="store.viewSettings.showIntroInfo = true">Show Help</button>
+			<button class="actionsLineButton" @click="store.viewSettings.showIntroInfo = true">{{ $t("action.showHelp") }}</button>
 		</template>
 
 		<!-- ALWAYS SHOWS GAME END-->
@@ -522,140 +509,139 @@ function shouldShowIntroText() {
 					<br />
 				</span>
 				<br />
-				<template v-if="store.gameflow.phase === rf.PHASE_GET_BOOKKEEPER_B_CONTRACT">Choose a contract</template>
-				<template v-if="store.gameflow.phase === rf.PHASE_GET_SECOND_CONTRACT_UPGRADED_MERCHANTS_TILE">Choose your second contract</template>
+				<template v-if="store.gameflow.phase === rf.PHASE_GET_BOOKKEEPER_B_CONTRACT">{{ $t("action.chooseContract") }}</template>
+				<template v-if="store.gameflow.phase === rf.PHASE_GET_SECOND_CONTRACT_UPGRADED_MERCHANTS_TILE">{{ $t("action.chooseSecondContract") }}</template>
 
 				<!-- PHASE_BIDDING_AND_ACTIONS -->
 				<template v-else-if="store.gameflow.phase === rf.PHASE_BIDDING_AND_ACTIONS">
 					<!-- RESIGN -->
 					<template v-if="store.context.action === rf.ACT_CONFIRM_RESIGN">
-						Are you sure you want to resign?
+						{{ $t("action.resignConfirm") }}
 						<br />
-						Resigning will unbalance the game for the remaining players
+						{{ $t("action.resignUnbalance") }}
 						<br />
-						Please carry on playing if that is at all possible
+						{{ $t("action.resignCarryOn") }}
 						<br />
-						Even if you think you can't win, you can still aim for not last / biggest village / etc
+						{{ $t("action.resignStillCompete") }}
 						<br />
-						<button class="actionsLineButton" @click="resetWholePlayerTurn">Carry On Playing</button>
-						<button class="actionsLineButton" @click="Bot.actionResign">Confirm Resignation</button>
+						<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t("action.carryOnPlaying") }}</button>
+						<button class="actionsLineButton" @click="Bot.actionResign">{{ $t("action.confirmResignation") }}</button>
 					</template>
 					<!-- NOTHING SELECTED YET -->
 					<template v-if="store.context.action === rf.ACT_NONE">
-						Select a bidding area to bid on a tile, a tile action area to perform an action, or pass
+						{{ $t("action.selectBiddingArea") }}
 						<br />
 						<!-- Reserve space for remaining meeples-->
 						<br />
-						<button v-if="store.gameflow.passedPlayerIndexes.length < store.gameflow.fullTurnOrder.length - 1 && store.computedHistory[store.computedHistory.length - 1][0] === rf.HIST_EXCHANGE_CONTRACT_AUTO" @click="resetWholePlayerTurn" class="actionsLineButton">Reset Whole Turn</button>
+						<button v-if="store.gameflow.passedPlayerIndexes.length < store.gameflow.fullTurnOrder.length - 1 && store.computedHistory[store.computedHistory.length - 1][0] === rf.HIST_EXCHANGE_CONTRACT_AUTO" @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
 
-						<button v-if="rules.canResign()" class="actionsLineButton" @click="localClickResign">Resign</button>
+						<button v-if="rules.canResign()" class="actionsLineButton" @click="localClickResign">{{ $t("action.resign") }}</button>
 						<template v-if="!store.context.meepleActionFound">
-							<span class="noActionsSpan">There are no actions left for you to take</span>
+							<span class="noActionsSpan">{{ $t("action.noActionsLeft") }}</span>
 							<br />
 						</template>
 						<template v-if="store.gameflow.passedPlayerIndexes.length >= store.gameflow.fullTurnOrder.length - 1">
-							As everyone else has passed, passing will end this phase
+							{{ $t("action.everyonePassed") }}
 							<br />
-							<button v-if="store.computedHistory[store.computedHistory.length - 1][0] === rf.HIST_EXCHANGE_CONTRACT_AUTO" @click="resetWholePlayerTurn" class="actionsLineButton">Reset Whole Turn</button>
+							<button v-if="store.computedHistory[store.computedHistory.length - 1][0] === rf.HIST_EXCHANGE_CONTRACT_AUTO" @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
 							<button class="actionsLineButton" @click="localPassTurn">
-								<span v-if="selectedPassOption === '1'">Pass & End Turn</span>
+								<span v-if="selectedPassOption === '1'">{{ $t("action.passAndEndTurn") }}</span>
 							</button>
 						</template>
 						<template v-else>
 							<select class="actionsLineSelect" v-model="selectedPassOption" @change="setPassFlag">
-								<option value="1" :selected="controller.currentPlayerObj().passFlag === 1">Pass Once</option>
-								<option value="2" :selected="controller.currentPlayerObj().passFlag === 2">Pass Until Outbid</option>
-								<option value="3" :selected="controller.currentPlayerObj().passFlag === 3">Pass Every Turn</option>
+								<option value="1" :selected="controller.currentPlayerObj().passFlag === 1">{{ $t("action.passOnce") }}</option>
+								<option value="2" :selected="controller.currentPlayerObj().passFlag === 2">{{ $t("action.passUntilOutbid") }}</option>
+								<option value="3" :selected="controller.currentPlayerObj().passFlag === 3">{{ $t("action.passEveryTurn") }}</option>
 							</select>
 							<button class="actionsLineButton" @click="localPassTurn">
-								<span v-if="selectedPassOption === '1'">Pass & End Turn</span>
-								<span v-else-if="selectedPassOption === '2'">End Turn & Pass Until Outbid</span>
-								<span v-else-if="selectedPassOption === '3'">End Turn & Pass Every Turn</span>
+								<span v-if="selectedPassOption === '1'">{{ $t("action.passAndEndTurn") }}</span>
+								<span v-else-if="selectedPassOption === '2'">{{ $t("action.endTurnPassUntilOutbid") }}</span>
+								<span v-else-if="selectedPassOption === '3'">{{ $t("action.endTurnPassEveryTurn") }}</span>
 							</button>
 						</template>
 					</template>
-					<template v-else-if="store.context.action === rf.ACT_PLACE_BOAT_7A_RESOURCES">Boat 7A allows you to place new resources from outside your village on any tile</template>
+					<template v-else-if="store.context.action === rf.ACT_PLACE_BOAT_7A_RESOURCES">{{ $t("action.boat7aPlace") }}</template>
 					<template v-else-if="store.context.action === rf.ACT_END_TURN_FOR_BOOKKEEPER_B_SKILL">
-						Confirm your turn up to now to receive:
+						{{ $t("action.confirmTurnGetSkillIntro") }}
 						<img class="skillTileIMGsmall" :src="view.getImage('skillTile_random')" />
-						and then choose a contract
+						{{ $t("action.chooseContractNext") }}
 						<br />
-						<button @click="resetWholePlayerTurn" class="actionsLineButton">Cancel</button>
-						<button @click="controller.endPlayerTurn(true)" class="actionsLineButton">Confirm turn & get skill</button>
+						<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("common.cancel") }}</button>
+						<button @click="controller.endPlayerTurn(true)" class="actionsLineButton">{{ $t("action.confirmTurnGetSkill") }}</button>
 					</template>
 					<template v-else-if="store.context.action === rf.ACT_END_TURN_FOR_MERCHANTS_B_CONTRACT">
-						Confirm your turn to 
-						<span v-if="store.history[store.history.length - 1][1] === controller.currentPlayerIndex()">deal a new contract</span>
-						<span v-else>reveal your chosen contract</span><br/>and then choose your second
+						<span v-if="store.history[store.history.length - 1][1] === controller.currentPlayerIndex()">{{ $t("action.confirmTurnToDealContract") }}</span>
+						<span v-else>{{ $t("action.confirmTurnToRevealContract") }}</span><br/>{{ $t("action.chooseSecondContractNext") }}
 												<br />
-						<button @click="resetWholePlayerTurn" class="actionsLineButton">Cancel</button>
-						<button @click="controller.endPlayerTurn(false, true)" class="actionsLineButton">Confirm turn & First Contract</button>
+						<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("common.cancel") }}</button>
+						<button @click="controller.endPlayerTurn(false, true)" class="actionsLineButton">{{ $t("action.confirmTurnFirstContract") }}</button>
 					</template>
 					<template v-else-if="store.context.action === rf.ACT_CHOOSE_MEEPLES">
-						Choose workers from your supply or losing bids to place on the {{ store.context.selectedTile.name[0] }} tile
+						{{ $t("action.chooseWorkersOnTile", { tile: store.context.selectedTile.name[0] }) }}
 						<br />
 						<template v-if="store.context.minMeeplesRequired > 0">
-							You need: {{ store.context.minMeeplesRequired }}
-							<span v-if="store.context.minMeeplesRequired > 1">workers</span>
-							<span v-else>worker</span>
+							{{ $t("action.youNeed", { count: store.context.minMeeplesRequired }) }}
+							<span v-if="store.context.minMeeplesRequired > 1">{{ $t("action.workers") }}</span>
+							<span v-else>{{ $t("action.worker") }}</span>
 							<br />
-							<button @click="resetWholePlayerTurn" class="actionsLineButton">Cancel</button>
+							<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("common.cancel") }}</button>
 						</template>
 						<template v-else-if="store.context.minMeeplesRequired <= 0">
-							You may add more workers, or finish adding workers
+							{{ $t("action.mayAddMoreWorkers") }}
 							<br />
-							<button @click="resetWholePlayerTurn" class="actionsLineButton">Cancel</button>
+							<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("common.cancel") }}</button>
 							<button v-if="store.gameMessages.actionError === ''" class="actionsLineButton" @click="finishAddingMeeples">
-								<span v-if="store.context.selectedTileArea === rf.TILE_BIDDING_AREA">Finish Adding Workers & End Turn</span>
-								<span v-else>Finish Adding Workers</span>
+								<span v-if="store.context.selectedTileArea === rf.TILE_BIDDING_AREA">{{ $t("action.finishAddingWorkersEndTurn") }}</span>
+								<span v-else>{{ $t("action.finishAddingWorkers") }}</span>
 							</button>
 						</template>
 					</template>
 					<template v-else-if="store.context.action === rf.ACT_CHOOSE_RANDOM_MEEPLE_OR_SKILL">
-						Choose to receive a random worker or skill tile
+						{{ $t("action.chooseRandomWorkerOrSkill") }}
 						<br />
 						<img @click="localSetRandomMeepleOrSkill(0)" class="chooseMeepleOrSkillTileIMG" :src="view.getImage('meeple_random')" />
 						<img @click="localSetRandomMeepleOrSkill(1)" class="chooseMeepleOrSkillTileIMG" :src="view.getImage('skillTile_random')" />
 					</template>
 					<template v-else-if="store.context.action === rf.ACT_CHOOSE_SINGLE_RES">
-						Choose a single resource to receive
+						{{ $t("action.chooseSingleResource") }}
 						<br />
 						<img @click="localAddResToPlayer(controller.currentPlayerIndex(), 0)" class="chooseSingleResImg" :src="view.getImage('res_0')" />
 						<img @click="localAddResToPlayer(controller.currentPlayerIndex(), 1)" class="chooseSingleResImg" :src="view.getImage('res_1')" />
 						<img @click="localAddResToPlayer(controller.currentPlayerIndex(), 2)" class="chooseSingleResImg" :src="view.getImage('res_2')" />
 					</template>
-					<template v-else-if="store.context.action === rf.ACT_CHOOSE_ANY_MEEPLE_FOR_EXCHANGE">Choose a worker to exchange</template>
+					<template v-else-if="store.context.action === rf.ACT_CHOOSE_ANY_MEEPLE_FOR_EXCHANGE">{{ $t("action.chooseWorkerToExchange") }}</template>
 					<template v-else-if="store.context.action === rf.ACT_CHOOSE_SET_MEEPLE_FOR_EXCHANGE">
-						Choose a
-						<img class="meepleInMessage" :src="view.getImage(`meeple_${store.context.selectedTile.action[store.context.selectedTile.upgraded + 1][0]}`)" />
-						to exchange
+						<i18n-t keypath="action.chooseMeepleToExchange" tag="span" scope="global">
+							<template #meeple><img class="meepleInMessage" :src="view.getImage(`meeple_${store.context.selectedTile.action[store.context.selectedTile.upgraded + 1][0]}`)" /></template>
+						</i18n-t>
 						<br />
-						<button @click="resetWholePlayerTurn" class="actionsLineButton">Reset Whole Turn</button>
+						<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
 					</template>
-					<template v-else-if="store.context.action === rf.ACT_CHOOSE_SKILL_TILE_FOR_SKILL_TILE_EXCHANGE">Choose a skill tile to exchange for skill tiles</template>
-					<template v-else-if="store.context.action === rf.ACT_CHOOSE_SKILL_TILE_FOR_MEEPLE">Choose a skill tile to exchange for workers</template>
-					<template v-else-if="store.context.action === rf.ACT_CHOOSE_SKILL_TILE_FOR_GREEN">Choose a skill tile to exchange</template>
+					<template v-else-if="store.context.action === rf.ACT_CHOOSE_SKILL_TILE_FOR_SKILL_TILE_EXCHANGE">{{ $t("action.chooseSkillForSkillTiles") }}</template>
+					<template v-else-if="store.context.action === rf.ACT_CHOOSE_SKILL_TILE_FOR_MEEPLE">{{ $t("action.chooseSkillForWorkers") }}</template>
+					<template v-else-if="store.context.action === rf.ACT_CHOOSE_SKILL_TILE_FOR_GREEN">{{ $t("action.chooseSkillToExchange") }}</template>
 					<template v-else-if="store.context.action === rf.ACT_MOVE_AND_UPGRADE || store.context.action === rf.ACT_MOVE_RES">
-						You may move resources and upgrade Tiles
+						{{ $t("action.mayMoveUpgrade") }}
 						<br />
-						Remaining moves: {{ store.context.remainingMoves }}
+						{{ $t("action.remainingMoves", { count: store.context.remainingMoves }) }}
 						<br />
-						Remaining upgrades: {{ store.context.remainingUpgrades }}
+						{{ $t("action.remainingUpgrades", { count: store.context.remainingUpgrades }) }}
 						<br />
-						<button @click="resetWholePlayerTurn" class="actionsLineButton">Reset Whole Turn</button>
-						<button @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length <= 1">Undo</button>
-						<button v-if="store.context.action === rf.ACT_MOVE_RES" class="actionsLineButton" @click="cancelMovingRes">Cancel Moving Resource</button>
-						<button class="actionsLineButton" @click="finishedMovingAndUpgrading">Finish Actions - End Turn</button>
+						<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+						<button @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length <= 1">{{ $t("action.undo") }}</button>
+						<button v-if="store.context.action === rf.ACT_MOVE_RES" class="actionsLineButton" @click="cancelMovingRes">{{ $t("action.cancelMovingResource") }}</button>
+						<button class="actionsLineButton" @click="finishedMovingAndUpgrading">{{ $t("action.finishActionsEndTurn") }}</button>
 					</template>
 					<template v-else-if="store.context.action === rf.ACT_CHOOSE_ITEMS">
 						<template v-if="store.context.action2 === rf.ACT_MOVE_AND_UPGRADE">
 							<!-- You must be selecting an extension that requires picking items-->
 							<template v-if="store.context.action === rf.ACT_CHOOSE_ITEMS">
-								To upgrade this tile you need:
+								{{ $t("action.toUpgradeNeed") }}
 								<img v-for="(meeple, idx) in store.context.itemsRequired.meeplesReq" :key="idx" class="itemsetImg" :src="view.getImage('meeple_' + meeple)" />
 								<img v-for="(skill, idx) in store.context.itemsRequired.skillsReq" :key="idx" class="itemsetImg" :src="view.getImage('skillTile_' + skill)" />
 								<img v-for="(res, idx) in store.context.itemsRequired.resReq" :key="idx" class="itemsetImg" :src="view.getImage('res_' + res)" />
-								You have chosen:
+								{{ $t("action.youHaveChosen") }}
 								<img v-for="(meeple, idx) in store.context.itemsChosen.meeplesChosen" :key="idx" class="itemsetImg" :src="view.getImage('meeple_' + meeple)" />
 								<img v-for="(skill, idx) in store.context.itemsChosen.skillsChosen" :key="idx" class="itemsetImg" :src="view.getImage('skillTile_' + skill)" />
 								<img v-for="(res, idx) in store.context.itemsChosen.resChosen" :key="idx" class="itemsetImg" :src="view.getImage('res_' + res)" />
@@ -664,11 +650,11 @@ function shouldShowIntroText() {
 						<template v-if="store.context.action2 === rf.ACT_CHOOSE_EXTENSION">
 							<!-- You must be selecting an extension that requires picking items-->
 							<template v-if="store.context.action === rf.ACT_CHOOSE_ITEMS">
-								To add thie Extension you need:
+								{{ $t("action.toAddExtensionNeed") }}
 								<img v-for="(meeple, idx) in store.context.itemsRequired.meeplesReq" :key="idx" class="itemsetImg" :src="view.getImage('meeple_' + meeple)" />
 								<img v-for="(skill, idx) in store.context.itemsRequired.skillsReq" :key="idx" class="itemsetImg" :src="view.getImage('skillTile_' + skill)" />
 								<img v-for="(res, idx) in store.context.itemsRequired.resReq" :key="idx" class="itemsetImg" :src="view.getImage('res_' + res)" />
-								You have chosen:
+								{{ $t("action.youHaveChosen") }}
 								<img v-for="(meeple, idx) in store.context.itemsChosen.meeplesChosen" :key="idx" class="itemsetImg" :src="view.getImage('meeple_' + meeple)" />
 								<img v-for="(skill, idx) in store.context.itemsChosen.skillsChosen" :key="idx" class="itemsetImg" :src="view.getImage('skillTile_' + skill)" />
 								<img v-for="(res, idx) in store.context.itemsChosen.resChosen" :key="idx" class="itemsetImg" :src="view.getImage('res_' + res)" />
@@ -679,13 +665,13 @@ function shouldShowIntroText() {
 						<!-- If choosing a contract, with an OR Res, add the choice -->
 						<template v-if="store.context.selectedTile.action[0] === rf.ACT_TILE_CONTRACT_OR_AND_ITEMS && store.context.selectedTile.upgraded === 0">
 							<template v-if="store.context.selectedTile.tileID[0] === rf.TILE_M_SPRING_ASSAYER_A">
-								Choose a single resource to receive, or choose one of the available contracts
+								{{ $t("action.chooseResourceOrContract") }}
 								<br />
 								<img @click="localAddResToPlayer(controller.currentPlayerIndex(), 1)" class="chooseSingleResImg" :src="view.getImage('res_1')" />
 								<img @click="localAddResToPlayer(controller.currentPlayerIndex(), 2)" class="chooseSingleResImg" :src="view.getImage('res_2')" />
 							</template>
 							<template v-else-if="store.context.selectedTile.tileID[1] === rf.TILE_M_SUMMER_BOOKKEEPER_B">
-								Choose a random skill tile, or one of the available contracts
+								{{ $t("action.chooseRandomSkillOrContract") }}
 								<br />
 								<img @click="localSetRandomMeepleOrSkill(1)" class="chooseMeepleOrSkillTileIMG" :src="view.getImage('skillTile_random')" />
 							</template>
@@ -693,44 +679,44 @@ function shouldShowIntroText() {
 						<!-- If UPGRADED show them all -->
 						<template v-else-if="store.context.selectedTile.action[0] === rf.ACT_TILE_CONTRACT_OR_AND_ITEMS && store.context.selectedTile.upgraded === 1">
 							<template v-if="store.context.selectedTile.tileID[1] === rf.TILE_M_SPRING_ASSAYER_B">
-								You can choose a contract (you have already gained):
+								{{ $t("action.canChooseContractGained") }}
 								<img class="singleResImg" :src="view.getImage('res_1')" />
 								<img class="singleResImg" :src="view.getImage('res_2')" />
 							</template>
 						</template>
 						<!-- OTHERWISE just rely on store.context.contractsRemaining -->
 						<template v-else-if="store.context.remainingContracts > 0">
-							<template v-if="store.context.remainingContracts === 1">Choose a contract - remaining contracts: {{ store.context.remainingContracts }}</template>
+							<template v-if="store.context.remainingContracts === 1">{{ $t("action.chooseContractRemaining", { count: store.context.remainingContracts }) }}</template>
 							<template v-else-if="store.context.remainingContracts === 2">
-								Choose your first contract - remaining contracts: {{ store.context.remainingContracts }}
+								{{ $t("action.chooseFirstContractRemaining", { count: store.context.remainingContracts }) }}
 								<br />
 								<br />
-								The game will be saved before you choose your second contract
+								{{ $t("action.gameSavedBeforeSecond") }}
 								<br />
-								to either deal a new contract or reveal your chosen random contract
+								{{ $t("action.dealOrReveal") }}
 							</template>
 						</template>
 						<br />
-						<button @click="resetWholePlayerTurn" class="actionsLineButton">Reset Whole Turn</button>
+						<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
 					</template>
-					<template v-else-if="store.context.action === rf.ACT_CHOOSE_SORCERER_TILE">Choose a tile to copy its action</template>
+					<template v-else-if="store.context.action === rf.ACT_CHOOSE_SORCERER_TILE">{{ $t("action.chooseTileToCopy") }}</template>
 					<!-- ACT_CONFIRM_END_TURN -->
 					<template v-if="store.context.action === rf.ACT_CONFIRM_END_TURN">
 						<template v-if="store.gameMessages.turnEndText !== ''">
 							<span v-html="store.gameMessages.turnEndText"></span>
 							<br />
 						</template>
-						<button @click="resetWholePlayerTurn" class="actionsLineButton">Reset Whole Turn</button>
-						<button @click="controller.endPlayerTurn" class="actionsLineButton">End Turn</button>
+						<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+						<button @click="controller.endPlayerTurn" class="actionsLineButton">{{ $t("action.endTurn") }}</button>
 					</template>
 				</template>
 
 				<!-- PHASE_COLLECT_BOAT_RESOURCES -->
 				<template v-else-if="store.gameflow.phase === rf.PHASE_COLLECT_BOAT_RESOURCES">
-					<template v-if="store.context.action === rf.ACT_COLLECT_BOAT_RESOURCES">Select a boat tile to collect the resources</template>
-					<template v-else-if="store.context.action === rf.ACT_COLLECT_BOAT_TILES">Select a boat tile to add to your village</template>
+					<template v-if="store.context.action === rf.ACT_COLLECT_BOAT_RESOURCES">{{ $t("action.collectBoatResources") }}</template>
+					<template v-else-if="store.context.action === rf.ACT_COLLECT_BOAT_TILES">{{ $t("action.collectBoatTile") }}</template>
 					<template v-else-if="store.context.action === rf.ACT_CHOOSE_NEW_BOAT_TILE">
-						Choosing Sea Bastion II allows you to replace it with a new boat tile
+						{{ $t("action.seaBastionReplace") }}
 						<br />
 						<template v-for="(tileID, idx) in store.context.newBoatTileIDs" :key="idx">
 							<div class="winterTileSelectDiv">
@@ -746,27 +732,27 @@ function shouldShowIntroText() {
 							</div>
 						</template>
 					</template>
-					<template v-else-if="store.context.action === rf.ACT_PLACE_BOAT_7A_RESOURCES">Boat 7A allows you to place new resources from outside your village on any tile</template>
+					<template v-else-if="store.context.action === rf.ACT_PLACE_BOAT_7A_RESOURCES">{{ $t("action.boat7aPlace") }}</template>
 					<template v-else-if="store.context.action === rf.ACT_CONFIRM_END_TURN">
 						<template v-if="store.gameMessages.turnEndText !== ''">
 							<span v-html="store.gameMessages.turnEndText"></span>
 							<br />
 						</template>
-						<button @click="resetWholePlayerTurn" class="actionsLineButton">Reset Whole Turn</button>
-						<button @click="controller.endPlayerTurn" class="actionsLineButton">End Turn</button>
+						<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+						<button @click="controller.endPlayerTurn" class="actionsLineButton">{{ $t("action.endTurn") }}</button>
 					</template>
 				</template>
 
 				<!-- PHASE_VILLAGE_EXPANDING -->
 				<template v-else-if="store.gameflow.phase === rf.PHASE_VILLAGE_EXPANDING || store.gameflow.phase === rf.PRE_PHASE_VILLAGE_EXPANDING">
 					<template v-if="store.context.action === rf.ACT_ADD_TILES_TO_VILLAGE">
-						Select a tile to to view available expansion locations
+						{{ $t("action.selectTileExpansion") }}
 						<br />
-						You can rotate the tile before adding it to your village
+						{{ $t("action.rotateBeforeAdding") }}
 						<br />
 
-						<button @click="resetWholePlayerTurn" class="actionsLineButton">Reset Whole Turn</button>
-						<button @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length <= 1">Undo</button>
+						<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+						<button @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length <= 1">{{ $t("action.undo") }}</button>
 					</template>
 					<template v-else-if="store.context.action === rf.ACT_CONFIRM_END_TURN">
 						<!--<template v-if="store.context.boatChainWarnings.some((warning) => warning.errorTile_ids.length > 0)">
@@ -781,24 +767,24 @@ function shouldShowIntroText() {
 							<br />
 						</template>-->
 
-						<button @click="resetWholePlayerTurn" class="actionsLineButton">Reset Whole Turn</button>
-						<button v-if="store.gameflow.phase === rf.PHASE_VILLAGE_EXPANDING || store.gameflow.phase === rf.PRE_PHASE_VILLAGE_EXPANDING" @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length <= 1">Undo</button>
+						<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+						<button v-if="store.gameflow.phase === rf.PHASE_VILLAGE_EXPANDING || store.gameflow.phase === rf.PRE_PHASE_VILLAGE_EXPANDING" @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length <= 1">{{ $t("action.undo") }}</button>
 						<template v-if="village.isVillageValid(controller.currentPlayerIndex()) === 0">
-							<button @click="controller.endPlayerTurn" class="actionsLineButton">End Turn</button>
+							<button @click="controller.endPlayerTurn" class="actionsLineButton">{{ $t("action.endTurn") }}</button>
 						</template>
-						<template v-else-if="village.isVillageValid(controller.currentPlayerIndex()) === 1">Finish placing all tiles</template>
-						<template v-else-if="village.isVillageValid(controller.currentPlayerIndex()) === 2">Invalid tile placement</template>
-						<template v-else-if="village.isVillageValid(controller.currentPlayerIndex()) === 3">Your village tiles must all be connected</template>
+						<template v-else-if="village.isVillageValid(controller.currentPlayerIndex()) === 1">{{ $t("action.finishPlacingTiles") }}</template>
+						<template v-else-if="village.isVillageValid(controller.currentPlayerIndex()) === 2">{{ $t("action.invalidTilePlacement") }}</template>
+						<template v-else-if="village.isVillageValid(controller.currentPlayerIndex()) === 3">{{ $t("action.tilesMustConnect") }}</template>
 					</template>
 				</template>
 
 				<!-- PHASE_CHOOSE_WINNER_TILES -->
 				<template v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_WINTER_TILES">
 					<template v-if="store.context.action === rf.ACT_CHOOSE_WINTER_TILES">
-						Select a Winter Tile to include it in the game
+						{{ $t("action.selectWinterTile") }}
 						<template v-if="store.context.selectedWinterTileIDs.length === 0">
 							<br />
-							You must select at least one Winter Tile
+							{{ $t("action.mustSelectWinterTile") }}
 						</template>
 						<br />
 						<template v-for="(tileID, idx) in controller.currentPlayerObj().hiddenWinterTile_tileIDs" :key="idx">
@@ -815,7 +801,7 @@ function shouldShowIntroText() {
 							</div>
 						</template>
 						<br />
-						These tiles will be used
+						{{ $t("action.theseTilesUsed") }}
 						<br />
 						<template v-for="(tileID, idx) in store.context.selectedWinterTileIDs" :key="idx">
 							<div class="winterTileChosenDiv">
@@ -830,27 +816,27 @@ function shouldShowIntroText() {
 							</div>
 						</template>
 						<br />
-						<button @click="resetWholePlayerTurn" class="actionsLineButton">Reset Whole Turn</button>
-						<button v-if="store.context.selectedWinterTileIDs.length > 0" @click="controller.endPlayerTurn" class="actionsLineButton">End Turn</button>
+						<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+						<button v-if="store.context.selectedWinterTileIDs.length > 0" @click="controller.endPlayerTurn" class="actionsLineButton">{{ $t("action.endTurn") }}</button>
 					</template>
 				</template>
 
 				<template v-else-if="store.gameflow.phase === rf.PHASE_FINAL_SCORING && store.context.preFinalActions.length === 0">
-					Allocate your items to get your final score
+					{{ $t("action.allocateItems") }}
 					<br />
-					"On the tile" scoring resources have been left in place. Click on them in your village to move them to your supply
+					{{ $t("action.onTileResources") }}
 					<br />
-					You may select resources from your supply area to add to a scoring item
+					{{ $t("action.selectResourcesFromSupply") }}
 					<br />
 					<template v-if="controller.currentPlayerObj().hasPurpleMeeple">
-						Click your purple worker to exchange it for something else
+						{{ $t("action.clickPurpleWorker") }}
 						<br />
 					</template>
-					<button @click="resetWholePlayerTurn" class="actionsLineButton">Reset Whole Turn</button>
-					<button @click="controller.endPlayerTurn" class="actionsLineButton">End Turn</button>
+					<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+					<button @click="controller.endPlayerTurn" class="actionsLineButton">{{ $t("action.endTurn") }}</button>
 					<template v-if="store.context.action === rf.ACT_EXCHANGE_PURPLE_MEEPLE">
 						<br />
-						Exchange your purple worker for one of the following
+						{{ $t("action.exchangePurpleWorker") }}
 						<br />
 						<img @click="localExchangePurpleMeeple(0, meeple)" v-for="(meeple, idx) in [0, 1, 2, 3]" :key="idx" class="chooseMeepleOrSkillTileIMGpurple" :src="view.getImage('meeple_' + String(meeple))" alt="Meeple" />
 						<img @click="localExchangePurpleMeeple(1, skillTile)" v-for="(skillTile, idx) in [0, 1, 2]" :key="idx" class="chooseMeepleOrSkillTileIMGpurple" :src="view.getImage('skillTile_' + String(skillTile))" alt="Skill Tile" />
@@ -858,14 +844,14 @@ function shouldShowIntroText() {
 					</template>
 				</template>
 				<template v-else-if="store.gameflow.phase === rf.PHASE_FINAL_SCORING && store.context.preFinalActions.length > 0">
-					<template v-if="store.context.action === rf.ACT_FREE_UPGRADE">Using Flipper you may select a tile to upgrade for free</template>
-					<template v-else-if="store.context.action === rf.ACT_FREE_EXTENSION">Using Flipper II you may add an extension for free</template>
+					<template v-if="store.context.action === rf.ACT_FREE_UPGRADE">{{ $t("action.usingFlipper") }}</template>
+					<template v-else-if="store.context.action === rf.ACT_FREE_EXTENSION">{{ $t("action.usingFlipperII") }}</template>
 					<template v-if="store.context.tileIDsForPreFinalAction.length === 0">
 						<br />
-						<span class="redText">You have no eligible tiles to select</span>
+						<span class="redText">{{ $t("action.noEligibleTiles") }}</span>
 					</template>
 					<br />
-					<button @click="controller.finishPreFinalAction" class="actionsLineButton">Skip Action</button>
+					<button @click="controller.finishPreFinalAction" class="actionsLineButton">{{ $t("action.skipAction") }}</button>
 				</template>
 			</div>
 		</template>

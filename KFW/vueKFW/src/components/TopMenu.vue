@@ -457,24 +457,24 @@ function getMapBubblePosition(bubble) {
 			<a href="/">
 				<span class="topMenuItem">
 					<img src="@static/KFW/images/icon-house.svg" />
-					<span>Home</span>
+					<span>{{ $t("topMenu.home") }}</span>
 				</span>
 			</a>
 
 			<span v-if="personal.name != undefined" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showChat }]" id="menuButtonChat" @click="toggleChat">
 				<img src="@static/KFW/images/icon-chat.svg" />
-				<span>Chat</span>
+				<span>{{ $t("topMenu.chat") }}</span>
 			</span>
 
 			<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showBug }]" id="menuButtonBug" @click="toggleBug">
 				<img src="@static/KFW/images/icon-stop.svg" />
-				<span>Bug</span>
+				<span>{{ $t("topMenu.bug") }}</span>
 			</span>
 
 			<!-- IF LOGGED IN -->
 			<span v-if="personal.name != undefined" class="topMenuItem" id="menuButtonNext" @click="nextGame">
 				<img src="@static/KFW/images/icon-nextGame.svg" />
-				<span>Next</span>
+				<span>{{ $t("topMenu.next") }}</span>
 			</span>
 
 			<div class="menuDivider"></div>
@@ -487,26 +487,26 @@ function getMapBubblePosition(bubble) {
 			<a href="/KFW/help/" target="_blank">
 				<span class="topMenuItem">
 					<img src="@static/KFW/images/icon-rulebook.svg" />
-					<span>Rules</span>
+					<span>{{ $t("topMenu.rules") }}</span>
 				</span>
 			</a>
 
 			<!-- IF INVOLVED PLAYER-->
 			<span v-if="personal.pov >= 0" class="topMenuItem" :class="['topMenuItem', { hasNotes: personal.notes.length > 0 }, { topMenuItemSelected: store.viewSettings.showNotes }]" id="menuButtonNotes" @click="toggleNotes">
 				<img src="@static/KFW/images/icon-notebook.svg" />
-				<span>Notes</span>
+				<span>{{ $t("topMenu.notes") }}</span>
 			</span>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showReserve }]" id="menuButtonReserve" @click="toggleReserve">
 				<img src="@static/KFW/images/icon-box.svg" />
-				<span>Reserve</span>
+				<span>{{ $t("topMenu.reserve") }}</span>
 			</span>
 
 			<div class="menuDivider"></div>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showHistory }]" id="menuButtonHistory" @click="toggleHistory">
 				<img src="@static/KFW/images/icon-scroll.svg" />
-				<span>History</span>
+				<span>{{ $t("topMenu.history") }}</span>
 			</span>
 
 			<!--<span class="topMenuItem" @click="toggleReplay()">
@@ -519,7 +519,7 @@ function getMapBubblePosition(bubble) {
 			<!-- IF INVOLVED PLAYER-->
 			<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showRewindPanel }]" @click="loadRewind()">
 				<img src="@static/KFW/images/icon-rewind.svg" />
-				<span>Rewind</span>
+				<span>{{ $t("topMenu.rewind") }}</span>
 			</span>
 		</div>
 
@@ -531,7 +531,7 @@ function getMapBubblePosition(bubble) {
 
 				<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 					<span id="kickoutTimerSpan">
-						Time to next kickout:
+						{{ $t("topMenu.timeToNextKickout") }}
 						<span id="kickoutTimerTimer">{{ getKickoutTImerText() }}</span>
 					</span>
 				</template>
@@ -569,7 +569,7 @@ function getMapBubblePosition(bubble) {
 				</span>
 			</div>
 			<div id="playerLineDiv">
-				Turn Order:
+				{{ $t("topMenu.turnOrder") }}
 				<span
 					v-for="(playerIndex, idx) in store.gameflow.turnOrder"
 					:key="idx"
@@ -609,7 +609,7 @@ function getMapBubblePosition(bubble) {
 			:style="{
 				left: getMapBubblePosition(3) + 'px',
 			}">
-			<a class="settingsBubbleLink" target="_blank" href="/profileKFW/">Click here to set your Indonesia Preferences</a>
+			<a class="settingsBubbleLink" target="_blank" href="/profileKFW/">{{ $t("topMenu.preferencesLink") }}</a>
 		</div>
 	</transition>
 	<transition name="slideRmap">

@@ -4,6 +4,7 @@ import * as view from "../js/KFWview"
 import * as rf from "../js/KFWreference"
 import * as funcs from "../js/KFWfuncs"
 import * as rules from "../js/KFWrules"
+import i18n from "../i18n"
 
 import { ref } from "vue"
 
@@ -94,7 +95,7 @@ async function submitBug() {
 	store.gameMessages.bugSuccessText = ""
 
 	if (bugReportText.value.length === 0) {
-		store.gameMessages.bugErrorText = "Please enter a bug report"
+		store.gameMessages.bugErrorText = i18n.global.t("topMenuViews.bugErrorRequired")
 		submittingBug.value = false
 		return
 	}
@@ -146,25 +147,25 @@ function hidePopup() {
 	<!-- BUG REPORT -->
 	<transition name="slideBug">
 		<div id="bugReport" v-if="store.viewSettings.showBug">
-			<h1>Bug Report</h1>
+			<h1>{{ $t("topMenuViews.bugReport") }}</h1>
 			
 			<p>
-				Please submit a bug report if you encounter any issues, giving as much detail as possbile.
+				{{ $t("topMenuViews.bugIntro") }}
 				<br />
-				The game data will be submitted along with your report.
+				{{ $t("topMenuViews.bugData") }}
 				<br />
-				You can also report it on the OBG discord. Click
-				<a href="https://discord.gg/hCU7Fr77yV" class="linkOther" target="_blank">Here</a>
-				to join
+				<i18n-t keypath="topMenuViews.discordReport" tag="span" scope="global">
+					<template #link><a href="https://discord.gg/hCU7Fr77yV" class="linkOther" target="_blank">{{ $t("topMenuViews.here") }}</a></template>
+				</i18n-t>
 			</p>
 
 			<div><textarea cols="150" rows="10" name="bugContent" id="bugContent" v-model="bugReportText"></textarea></div>
 			<div>
 				<button class="actionsLineButton" id="submitBug" @click="submitBug" :disabled="submittingBug">
-					<span v-if="submittingBug">Submitting Bug Report...</span>
-					<span v-else>Submit</span>
+					<span v-if="submittingBug">{{ $t("topMenuViews.submittingBug") }}</span>
+					<span v-else>{{ $t("topMenuViews.submit") }}</span>
 				</button>
-				<button class="actionsLineButton" id="resetBug" @click="toggleBug">Cancel</button>
+				<button class="actionsLineButton" id="resetBug" @click="toggleBug">{{ $t("common.cancel") }}</button>
 			</div>
 		</div>
 	</transition>
@@ -172,13 +173,13 @@ function hidePopup() {
 	<!-- NOTES -->
 	<transition name="slideNotes">
 		<div id="notesBox" v-if="store.viewSettings.showNotes">
-			<h2>Personal game notes</h2>
-			<p>Only you can see these notes</p>
+			<h2>{{ $t("topMenuViews.notesTitle") }}</h2>
+			<p>{{ $t("topMenuViews.notesPrivate") }}</p>
 			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes" maxlength="5000"></textarea></div>
 			<div>
-				<button class="actionsLineButton" id="submitNotes" @click="IO.saveNotes">Save</button>
-				<button class="actionsLineButton" id="clearNotes" @click="clearNotes">Clear</button>
-				<button class="actionsLineButton" id="closeNotes" @click="toggleNotes">Close</button>
+				<button class="actionsLineButton" id="submitNotes" @click="IO.saveNotes">{{ $t("common.save") }}</button>
+				<button class="actionsLineButton" id="clearNotes" @click="clearNotes">{{ $t("topMenuViews.clear") }}</button>
+				<button class="actionsLineButton" id="closeNotes" @click="toggleNotes">{{ $t("common.close") }}</button>
 			</div>
 		</div>
 	</transition>
@@ -187,9 +188,9 @@ function hidePopup() {
 	<transition name="fade">
 		<div id="wholeChat" v-if="store.viewSettings.showChat">
 			<div id="chatBox">
-				<h2>Send a message</h2>
+				<h2>{{ $t("topMenuViews.chatTitle") }}</h2>
 				<div><textarea rows="6" name="chatMessage" id="chatMessage" v-model="chatMessage"></textarea></div>
-				<div><button class="actionsLineButton" @click="sendChatMessage">Send</button></div>
+				<div><button class="actionsLineButton" @click="sendChatMessage">{{ $t("topMenuViews.send") }}</button></div>
 			</div>
 			<div id="messageList">
 				<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
@@ -208,68 +209,68 @@ function hidePopup() {
 	<!-- REWKFW PANEL -->
 	<transition name="fade">
 		<div id="rewindPanel" v-if="store.viewSettings.showRewindPanel">
-			Any player can rewind the game at any time.
+			{{ $t("topMenuViews.rewindIntro") }}
 			<br />
-			Please be courteous and rewind only if absolutely neessary - send a chat message to inform the other players.
+			{{ $t("topMenuViews.rewindCourtesy") }}
 			<br />
-			Misuse of this feature will result in rewinds requiring permission from all players.
+			{{ $t("topMenuViews.rewindMisuse") }}
 
 			<br />
 			<br />
 			<span v-if="rules.getRewindHiddenDataResult(1).length > 0" class="rewindCautionSpan">
-				Caution: Rewinding now will change hidden information
+				{{ $t("topMenuViews.rewindCaution") }}
 				<br />
-				This will be added as a note in the history
+				{{ $t("topMenuViews.rewindCautionHistory") }}
 				<br />
 				<br />
 			</span>
 			<template v-for="(entry, idx) in rules.getRewindHiddenDataResult(1)" :key="idx">
 				<span v-if="entry[0] === -1" class="rewindCautionSpan">
-					The boats were randomly filled
+					{{ $t("topMenuViews.boatsRandomFilled") }}
 					<br />
-					This rewind will result in different resources on the boats
+					{{ $t("topMenuViews.boatsRandomRewind") }}
 					<br />
 				</span>
 				<span v-else-if="entry[0] === -2" class="rewindCautionSpan">
-					The season tiles were randomly dealt
+					{{ $t("topMenuViews.seasonTilesRandom") }}
 					<br />
-					This rewind will result in new season tiles being drawn.
+					{{ $t("topMenuViews.seasonTilesRewind") }}
 					<br />
 				</span>
 				<span v-else-if="entry[0] === -3" class="rewindCautionSpan">
-					This rewind will change which random workers were obtained from Summer boat 1a
+					{{ $t("topMenuViews.boat1aRandom") }}
 					<br />
 				</span>
 				<span v-else-if="entry[0] === -4" class="rewindCautionSpan">
-					New contracts have been revealed
+					{{ $t("topMenuViews.contractsRevealed") }}
 					<br />
-					This rewind will result in re-drawing: {{ entry[1] }}
+					{{ $t("topMenuViews.contractsRewind", { tiles: entry[1] }) }}
 					<br />
 				</span>
 				<span v-else-if="entry[0] === -5" class="rewindCautionSpan">
-					The Winter tiles were revealed
+					{{ $t("topMenuViews.winterRevealed") }}
 					<br />
-					This rewind could result in choosing different Winter tiles after seeing what other players had done
+					{{ $t("topMenuViews.winterRewind") }}
 					<br />
 				</span>
 				<span v-else-if="entry[0] === -6" class="rewindCautionSpan">
-					A contract was collected from a boat
+					{{ $t("topMenuViews.contractCollected") }}
 					<br />
-					This rewind would happen after this contract had been seen
+					{{ $t("topMenuViews.contractRewind") }}
 					<br />
 				</span>
 				<!-- Otherwise, it's a tile action -->
 				<span v-else class="rewindCautionSpan">
-					This rewind would undo hidden information revealed as part of a tile Action
+					{{ $t("topMenuViews.tileActionHidden") }}
 					<br />
-					The tile used was: {{ rf.ALL_TILES.find((tile) => tile.tileID.includes(entry[0])).name[0] }}
+					{{ $t("topMenuViews.tileUsed", { tile: rf.ALL_TILES.find((tile) => tile.tileID.includes(entry[0])).name[0] }) }}
 					<br />
 				</span>
 			</template>
 
 			<span class="rewindButtonSpan" @click="loadRewind()">
 				<img src="@static/KFW/images/icon-rewind.svg" />
-				<span>Rewind</span>
+				<span>{{ $t("topMenuViews.rewindButton") }}</span>
 			</span>
 		</div>
 	</transition>
@@ -278,7 +279,7 @@ function hidePopup() {
 	<transition name="slideRes">
 		<div id="reserve" v-if="store.viewSettings.showReserve">
 			<!-- Unused Season Tiles -->
-			<h2>Unused / Upcoming Season Tiles</h2>
+			<h2>{{ $t("topMenuViews.reserveTitle") }}</h2>
 
 			<template v-for="(season, idx) in [rf.SPRING, rf.SUMMER, rf.AUTUMN, rf.WINTER]" :key="idx">
 				<template v-if="season >= store.gameflow.season">
@@ -301,7 +302,7 @@ function hidePopup() {
 
 			<!-- FLEXI-TIMES -->
 			<div id="timesDiv">
-				Flexi-Times:
+				{{ $t("topMenuViews.flexiTimes") }}
 				<span v-for="(player, idx) in store.players" :key="idx">{{ player.displayName }}: {{ getFlexiTimeString(player.name) }}&nbsp;&nbsp;&nbsp;</span>
 				&nbsp;&nbsp;&nbsp;
 			</div>

@@ -12,6 +12,7 @@ import * as model from "../js/KFWmodel"
 //import * as funcs from '../js/KFWfuncs'
 import * as view from "../js/KFWview"
 import * as village from "../js/KFWvillage"
+import i18n from "../i18n"
 
 import { useModelStore } from "../stores/KFWstore.js"
 const store = useModelStore()
@@ -139,13 +140,13 @@ const computedScoringData = computed(() => {
 			if (tile.tileID[tile.upgraded] === rf.TILE_BOAT_SEA_BASTION_B) {
 				ret.manualActionScore += tile.victoryPoints[tile.upgraded]
 				totalScore += tile.victoryPoints[tile.upgraded]
-				tile.buttonText = "Select tile to start Route"
-				if (store.context.seaBastionScoringRoute.length > 0) tile.buttonText = "Restart Route"
+				tile.buttonText = i18n.global.t("finalScore.selectTileStartRoute")
+				if (store.context.seaBastionScoringRoute.length > 0) tile.buttonText = i18n.global.t("finalScore.restartRoute")
 			} else if (tile.tileID[tile.upgraded] === rf.TILE_WINTER_DELIVERY_MAN_A) {
 				ret.manualActionScore += tile.victoryPoints[tile.upgraded]
 				totalScore += tile.victoryPoints[tile.upgraded]
-				tile.buttonText = "Select tile to Start Delivery Man"
-				if (store.context.seaBastionScoringRoute.length > 0) tile.buttonText = "Restart Delivery Man Route"
+				tile.buttonText = i18n.global.t("finalScore.selectTileStartDeliveryMan")
+				if (store.context.seaBastionScoringRoute.length > 0) tile.buttonText = i18n.global.t("finalScore.restartDeliveryManRoute")
 			}
 		}
 		// VP that isn't fixed but can be auto-scored
@@ -153,9 +154,9 @@ const computedScoringData = computed(() => {
 			ret.autoVP.push(tile)
 			if (tile.tileID[tile.upgraded] === rf.TILE_BOAT_SEA_BREESE_B) {
 				let boatChain = rf.getBreeseScore(tile.victoryPoints[tile.upgraded], false)
-				if (boatChain === 1) tile.itemMessage = "1 tile in chain"
-				else if (boatChain > 1) tile.itemMessage = boatChain + " tiles in chain"
-				else tile.itemMessage = "No tiles in chain"
+				if (boatChain === 1) tile.itemMessage = i18n.global.t("finalScore.oneTileInChain")
+				else if (boatChain > 1) tile.itemMessage = i18n.global.t("finalScore.tilesInChain", { count: boatChain })
+				else tile.itemMessage = i18n.global.t("finalScore.noTilesInChain")
 			}
 			ret.autoVPscore += tile.victoryPoints[tile.upgraded]
 			totalScore += tile.victoryPoints[tile.upgraded]
@@ -499,40 +500,40 @@ function itemTypeNumToString(itemNum) {
 
 <template>
 	<template v-if="store.context.action === rf.ACT_CHOOSE_ITEMS">
-		You need:
+		{{ $t("finalScore.youNeed") }}
 		<img v-for="(meeple, idx) in store.context.itemsRequired.meeplesReq" :key="idx" class="itemsetImg" :src="view.getImage('meeple_' + meeple)" />
 		<img v-for="(skill, idx) in store.context.itemsRequired.skillsReq" :key="idx" class="itemsetImg" :src="view.getImage('skillTile_' + skill)" />
 		<img v-for="(res, idx) in store.context.itemsRequired.resReq" :key="idx" class="itemsetImg" :src="view.getImage('res_' + res)" />
-		You have chosen:
+		{{ $t("finalScore.youHaveChosen") }}
 		<img v-for="(meeple, idx) in store.context.itemsChosen.meeplesChosen" :key="idx" class="itemsetImg" :src="view.getImage('meeple_' + meeple)" />
 		<img v-for="(skill, idx) in store.context.itemsChosen.skillsChosen" :key="idx" class="itemsetImg" :src="view.getImage('skillTile_' + skill)" />
 		<img v-for="(res, idx) in store.context.itemsChosen.resChosen" :key="idx" class="itemsetImg" :src="view.getImage('res_' + res)" />
 	</template>
 	<template v-if="store.context.action === rf.ACT_CHOOSE_MEEPLES || store.context.action === rf.ACT_CHOOSE_SKILL_TILE_FOR_SCORING || store.context.action === rf.ACT_CHOOSE_RES_FOR_SCORING">
-		You need:
+		{{ $t("finalScore.youNeed") }}
 		<img v-for="(item, idx) in store.context.remainingItemSet" :key="idx" class="itemsetImg" :src="view.getImage(itemTypeNumToString(store.context.selectedTile.tileItemType) + '_' + item)" />
-		You have chosen:
+		{{ $t("finalScore.youHaveChosen") }}
 		<img v-for="(item, idx) in store.context.currentItemSet" :key="idx" class="itemsetImg" :src="view.getImage(itemTypeNumToString(store.context.selectedTile.tileItemType) + '_' + item)" />
 	</template>
 	<div id="playerTableDiv">
 		<table id="playerTable">
 			<thead>
 				<tr>
-					<th><b>Tile</b></th>
-					<th>Items</th>
-					<th>Score</th>
+					<th><b>{{ $t("finalScore.tile") }}</b></th>
+					<th>{{ $t("finalScore.items") }}</th>
+					<th>{{ $t("finalScore.score") }}</th>
 				</tr>
 			</thead>
 			<tbody>
 				<!-- 1 vp / gold -->
 				<tr>
-					<td class="sectionHeader" colspan="3">1 VP for any remaining gold</td>
+					<td class="sectionHeader" colspan="3">{{ $t("finalScore.oneVpPerGold") }}</td>
 				</tr>
 				<tr>
 					<td>
-						1 VP / gold
+						{{ $t("finalScore.oneVpPerGoldShort") }}
 						<br />
-						(Scored Automatically for any unused gold)
+						{{ $t("finalScore.scoredAutomatically") }}
 					</td>
 					<td>
 						<div class="completedItemSetDiv" v-for="(res, idx) in store.players[playerIndexProp].villageTiles[0].resources[rf.GOLD]" :key="idx">
@@ -545,7 +546,7 @@ function itemTypeNumToString(itemNum) {
 				</tr>
 				<!-- REQUIRES ITEMS -->
 				<tr>
-					<td class="sectionHeader" colspan="3">Score for Items</td>
+					<td class="sectionHeader" colspan="3">{{ $t("finalScore.scoreForItems") }}</td>
 				</tr>
 				<tr v-for="(tile, idx) in computedScoringData.needsItems" :key="idx">
 					<td>
@@ -567,13 +568,13 @@ function itemTypeNumToString(itemNum) {
 					<td>
 						{{ tile.pointsPerSet * tile.completedSets.length }}
 						<br />
-						{{ tile.pointsPerSet }} / set
+						{{ $t("finalScore.perSet", { points: tile.pointsPerSet }) }}
 					</td>
 				</tr>
 				<!-- REQUIRES ITEMS - CONTRACT -->
 				<template v-if="store.players[playerIndexProp].hiddenContracts.length > 0">
 					<tr>
-						<td class="sectionHeader" colspan="3">Score for Contracts</td>
+						<td class="sectionHeader" colspan="3">{{ $t("finalScore.scoreForContracts") }}</td>
 					</tr>
 					<tr v-for="(contract, idx) in computedScoringData.computedContracts" :key="idx">
 						<td>
@@ -600,14 +601,14 @@ function itemTypeNumToString(itemNum) {
 						<td>
 							{{ contract.score }}
 							<br />
-							{{ 7 }} / set
+							{{ $t("finalScore.perSet", { points: 7 }) }}
 						</td>
 					</tr>
 				</template>
 				<!-- Manual Actions -->
 				<template v-if="computedScoringData.needsAction.length > 0">
 					<tr>
-						<td class="sectionHeader" colspan="3">Manual Scoring</td>
+						<td class="sectionHeader" colspan="3">{{ $t("finalScore.manualScoring") }}</td>
 					</tr>
 					<tr v-for="(tile, idx) in computedScoringData.needsAction" :key="idx">
 						<td>
@@ -625,7 +626,7 @@ function itemTypeNumToString(itemNum) {
 				</template>
 				<!-- Auto VP tiles-->
 				<tr>
-					<td class="sectionHeader" colspan="3">VP Tiles - Auto Scoring</td>
+					<td class="sectionHeader" colspan="3">{{ $t("finalScore.vpTilesAuto") }}</td>
 				</tr>
 				<tr v-for="(tile, idx) in computedScoringData.autoVP" :key="idx">
 					<td>
@@ -640,7 +641,7 @@ function itemTypeNumToString(itemNum) {
 				</tr>
 				<!-- VP only tiles-->
 				<tr>
-					<td class="sectionHeader" colspan="3">VP Tiles (no action)</td>
+					<td class="sectionHeader" colspan="3">{{ $t("finalScore.vpTilesNoAction") }}</td>
 				</tr>
 				<tr>
 					<td>
@@ -655,7 +656,7 @@ function itemTypeNumToString(itemNum) {
 				</tr>
 				<!-- TILES THAT SCORE WHEN UPGRADED ONLY-->
 				<tr>
-					<td class="sectionHeader" colspan="3">Upgraded Tiles</td>
+					<td class="sectionHeader" colspan="3">{{ $t("finalScore.upgradedTiles") }}</td>
 				</tr>
 				<tr>
 					<td>
@@ -669,7 +670,7 @@ function itemTypeNumToString(itemNum) {
 					<td>{{ computedScoringData.scoreUpgradeOnlyPoint }}</td>
 				</tr>
 				<tr>
-					<td colspan="3" id="totalScoreTD">Total Score: {{ computedScoringData.totalScore }}</td>
+					<td colspan="3" id="totalScoreTD">{{ $t("finalScore.totalScore", { score: computedScoringData.totalScore }) }}</td>
 				</tr>
 			</tbody>
 		</table>

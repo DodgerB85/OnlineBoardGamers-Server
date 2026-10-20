@@ -5,6 +5,7 @@ import * as controller from "../js/KFWcontroller"
 import * as view from "../js/KFWview"
 import * as village from "../js/KFWvillage"
 import * as IO from "../backend/KFW_IO"
+import i18n from "../i18n"
 
 import { computed, ref } from "vue"
 const polygonRef = ref(null)
@@ -79,7 +80,7 @@ function localClickedMeeple(playerIndex) {
 		let outbidMeepleArrayLength = props.tileProp.bids[playerIndex][0].length
 
 		if (store.context.selectedTile.meeplesOnTile.reduce((sum, subarray) => sum + subarray.length, 0) + outbidMeepleArrayLength > 6) {
-			store.gameMessages.errorText = "Not enough space for workers"
+			store.gameMessages.errorText = i18n.global.t("action.noSpaceForWorkers")
 			return
 		}
 	}
