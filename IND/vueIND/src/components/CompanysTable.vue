@@ -64,9 +64,9 @@ const computedShipMarkerDisplayData = computed(() => {
 		<table id="companysTable">
 			<thead>
 				<tr>
-					<th><b>Owner</b></th>
-					<th><b>Company</b></th>
-					<th><b>No. Territories</b></th>
+					<th><b>{{ $t('companies.owner') }}</b></th>
+					<th><b>{{ $t('companies.company') }}</b></th>
+					<th><b>{{ $t('companies.territories') }}</b></th>
 				</tr>
 			</thead>
 			<tr v-for="(company, idx) in computedShipMarkerDisplayData" :key="idx">

@@ -102,18 +102,18 @@ function localRemoveShippingRow(entry) {
 
 <template>
 	<div id="manualShipDiv" >
-		Current Deliveries:
+		{{ $t('shipping.currentDeliveries') }}
 		<br />
-		(Click a row to view that good movement)
+		{{ $t('shipping.clickRow') }}
 		<table id="manualShipPlayerTable">
 			<thead>
 				<tr>
-					<th><b>Player</b></th>
-					<th><b>Ships</b></th>
-					<th><b>Ship cost</b></th>
-					<th><b>Net Income</b></th>
-					<th><b>City</b></th>
-					<th><b>Remove</b></th>
+					<th><b>{{ $t('shipping.player') }}</b></th>
+					<th><b>{{ $t('shipping.ships') }}</b></th>
+					<th><b>{{ $t('shipping.shipCost') }}</b></th>
+					<th><b>{{ $t('shipping.netIncome') }}</b></th>
+					<th><b>{{ $t('shipping.city') }}</b></th>
+					<th><b>{{ $t('shipping.remove') }}</b></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -153,22 +153,22 @@ function localRemoveShippingRow(entry) {
 		</table>
 		<span v-if="computedManualShipping.length === 0">
 			<br />
-			No Deliveries
+			{{ $t('shipping.noDeliveries') }}
 			<br />
 			<br />
 		</span>
-		Total Income:
+		{{ $t('shipping.totalIncome') }}
 		<template v-for="(incomeEntry, idx) in getManualShipTotalIncomes()" :key="idx">
 			&nbsp;
 			<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[incomeEntry[0]].colour)">{{ store.players[incomeEntry[0]].displayName }}</span>
 			{{ incomeEntry[1] }}
 			<span v-if="incomeEntry[2] > 0">
-				(+{{ incomeEntry[2] }} Subsidy)
+				{{ $t('shipping.subsidy', { amount: incomeEntry[2] }) }}
 			</span>
 		</template>
 		<br />
 
-		<button class="actionsLineButton" @click="localShowCities">Show Destination Cities</button>
+		<button class="actionsLineButton" @click="localShowCities">{{ $t('shipping.showCities') }}</button>
 	</div>
 </template>
 

@@ -1346,11 +1346,11 @@ function handlePointerEnter(event, company) {
 							'font-size': `${store.mapData.selectedMapData.RNDhelpText[2]}px !important`,
 							'stroke-width': `${store.mapData.selectedMapData.strokeWidthBase05}`,
 						}">
-						<tspan v-if="rowIdx === 0">Bid Multiplier</tspan>
-						<tspan v-else-if="rowIdx === 1">Slots</tspan>
-						<tspan v-else-if="rowIdx === 2">Mergers</tspan>
-						<tspan v-else-if="rowIdx === 3">Expansions</tspan>
-						<tspan v-else-if="rowIdx === 4">Hull Capacity</tspan>
+						<tspan v-if="rowIdx === 0">{{ $t('map.bidMultiplier') }}</tspan>
+						<tspan v-else-if="rowIdx === 1">{{ $t('map.slots') }}</tspan>
+						<tspan v-else-if="rowIdx === 2">{{ $t('map.mergers') }}</tspan>
+						<tspan v-else-if="rowIdx === 3">{{ $t('map.expansions') }}</tspan>
+						<tspan v-else-if="rowIdx === 4">{{ $t('map.hullCapacity') }}</tspan>
 					</text>
 				</g>
 			</g>
@@ -1455,12 +1455,12 @@ function handlePointerEnter(event, company) {
 			<!-- END DEBUG ONLY -->
 		</svg>
 		<button class="actionsLineButton" @click="store.topMenuViews.showTerrOutline = !store.topMenuViews.showTerrOutline">
-			<span v-if="store.topMenuViews.showTerrOutline">Hide Territory Outline</span>
-			<span v-else>Show Territory Outline</span>
+			<span v-if="store.topMenuViews.showTerrOutline">{{ $t('map.hideOutline') }}</span>
+			<span v-else>{{ $t('map.showOutline') }}</span>
 		</button>
 		<button v-if="personal.pov >= 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER" class="actionsLineButton" @click="localToggleFutureBoardState">
-			<span v-if="store.topMenuViews.showFutureBoardState === 0">Show All Available Companies and My Era Card Provinces</span>
-			<span v-else>Show Game</span>
+			<span v-if="store.topMenuViews.showFutureBoardState === 0">{{ $t('map.showAvailable') }}</span>
+			<span v-else>{{ $t('map.showGame') }}</span>
 		</button>
 	</div>
 	<!-- AG MAP-->
@@ -1572,12 +1572,12 @@ function handlePointerEnter(event, company) {
 		</svg>
 		<button class="actionsLineButton" @click="store.topMenuViews.showTerrOutline = !store.topMenuViews.showTerrOutline">
 			THIS SHOULD NEVER BE USED?
-			<span v-if="store.topMenuViews.showTerrOutline">Hide Territory Outline</span>
-			<span v-else>Show Territory Outline</span>
+			<span v-if="store.topMenuViews.showTerrOutline">{{ $t('map.hideOutline') }}</span>
+			<span v-else>{{ $t('map.showOutline') }}</span>
 		</button>
 		<button v-if="personal.pov >= 0" class="actionsLineButton" @click="localToggleFutureBoardState">
-			<span v-if="store.topMenuViews.showFutureBoardState === 0">Show All Available Companies and My Era Card Provinces</span>
-			<span v-else>Show Game</span>
+			<span v-if="store.topMenuViews.showFutureBoardState === 0">{{ $t('map.showAvailable') }}</span>
+			<span v-else>{{ $t('map.showGame') }}</span>
 		</button>
 	</div>
 </template>

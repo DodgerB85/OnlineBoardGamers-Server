@@ -4,6 +4,8 @@ import * as model from "../js/INDmodel.js"
 import * as map from "../js/INDmap.js"
 import * as view from "../js/INDview.js"
 
+import i18n from "../i18n"
+
 import { useModelStore } from "../stores/INDstore.js"
 const store = useModelStore()
 import { usePersonalStore } from "../stores/INDpersonal.js"
@@ -50,27 +52,27 @@ const computedPopupData = computed(() => {
 			company = rf.PH_ALL_COMPANIES.find((comp) => comp.id === popupObjectData[0])
 			popupHTML = `<strong>${rf.PHP_PROVINCE_STRINGS[company.province]}<br/>${company.typeText}${getShippingExtraHTML(company)}`
 		}
-		if (rf.LAND_COMPANIES.includes(company.type)) popupHTML += `<br/>Value: ${company.goodValue}`
+		if (rf.LAND_COMPANIES.includes(company.type)) popupHTML += `<br/>${i18n.global.t("map.value")}: ${company.goodValue}`
 		popupHTML += "</strong>"
 	}
 	// City
 	else if (popupObjectType === 1) {
 		let city = popupObjectData[0]
-		if (rf.ORIGINAL_MAPS.includes(store.mapData.selectedMap)) popupHTML = `<strong>${rf.OM_PROVINCE_STRINGS[map.getProvinceFromTerrID(city.territory)]}<br/>Size: ${city.size}${getCityReceivedGoodsExtraHTML(city)}</strong>`
-		else if (store.mapData.selectedMap === rf.MAP_AEGEAN) popupHTML = `<strong>${rf.AG_PROVINCE_STRINGS[map.getProvinceFromTerrID(city.territory)]}<br/>Size: ${city.size}${getCityReceivedGoodsExtraHTML(city)}</strong>`
-		else if (store.mapData.selectedMap === rf.MAP_PHP) popupHTML = `<strong>${rf.PHP_PROVINCE_STRINGS[map.getProvinceFromTerrID(city.territory)]}<br/>Size: ${city.size}${getCityReceivedGoodsExtraHTML(city)}</strong>`
+		if (rf.ORIGINAL_MAPS.includes(store.mapData.selectedMap)) popupHTML = `<strong>${rf.OM_PROVINCE_STRINGS[map.getProvinceFromTerrID(city.territory)]}<br/>${i18n.global.t("map.size")}: ${city.size}${getCityReceivedGoodsExtraHTML(city)}</strong>`
+		else if (store.mapData.selectedMap === rf.MAP_AEGEAN) popupHTML = `<strong>${rf.AG_PROVINCE_STRINGS[map.getProvinceFromTerrID(city.territory)]}<br/>${i18n.global.t("map.size")}: ${city.size}${getCityReceivedGoodsExtraHTML(city)}</strong>`
+		else if (store.mapData.selectedMap === rf.MAP_PHP) popupHTML = `<strong>${rf.PHP_PROVINCE_STRINGS[map.getProvinceFromTerrID(city.territory)]}<br/>${i18n.global.t("map.size")}: ${city.size}${getCityReceivedGoodsExtraHTML(city)}</strong>`
 	}
 	// Prod Marker
 	else if (popupObjectType === 2) {
 		let company = popupObjectData[0]
-		popupHTML = `<strong>${getMainPlayerHTML(company.ownerIndex)}<br/>${company.typeText}<br>Slot: ${model.getSlotIDXfromCompanyID(company.id) + 1}<br/>Value: ${company.goodValue}</strong>`
+		popupHTML = `<strong>${getMainPlayerHTML(company.ownerIndex)}<br/>${company.typeText}<br>${i18n.global.t("map.slot")}: ${model.getSlotIDXfromCompanyID(company.id) + 1}<br/>${i18n.global.t("map.value")}: ${company.goodValue}</strong>`
 	}
 	// Ship Marker
 	else if (popupObjectType === 3) {
 		// popupObjectData = [x, y, shipGfx, company.id, terrID, l, company.ownerIndex]
 		let company = store.activeCompanies.find((comp) => comp.id === popupObjectData[3])
-		popupHTML = `<strong>${getMainPlayerHTML(company.ownerIndex)}<br>Slot: ${model.getSlotIDXfromCompanyID(company.id) + 1}<br/>Hull: ${company.hullCapacity}`
-		if (store.gameflow.phase === rf.PHASE_OPERATIONS) popupHTML += `<br/>Used: ${view.getRemainingHullText(popupObjectData[3], popupObjectData[4], popupObjectData[5])}`
+		popupHTML = `<strong>${getMainPlayerHTML(company.ownerIndex)}<br>${i18n.global.t("map.slot")}: ${model.getSlotIDXfromCompanyID(company.id) + 1}<br/>${i18n.global.t("map.hull")}: ${company.hullCapacity}`
+		if (store.gameflow.phase === rf.PHASE_OPERATIONS) popupHTML += `<br/>${i18n.global.t("map.used")}: ${view.getRemainingHullText(popupObjectData[3], popupObjectData[4], popupObjectData[5])}`
 		popupHTML += `</strong>`
 	}
 
@@ -117,7 +119,7 @@ function getCityReceivedGoodsExtraHTML(city) {
 		for (let i = 0; i < riceCount; i++) extraHTML += `<div class='popCityDeliveredDiv' style="background-color: ${view.getGoodColour(rf.GOOD_RICE)}"></div>`
 		for (let i = 0; i < city.size - riceCount; i++) extraHTML += `<div class='popCityDeliveredDiv popCityNotDeliveredDiv' style="background-color: ${view.getGoodColour(rf.GOOD_RICE)}"></div>`
 		extraHTML += riceCount === city.size ? "<span style='color: red;'>" : ""
-		extraHTML += "Rice:" + riceCount + "<br/>"
+		extraHTML += `${i18n.global.t("goods.rice")}:` + riceCount + "<br/>"
 		extraHTML += "</span>"
 	}
 
@@ -126,7 +128,7 @@ function getCityReceivedGoodsExtraHTML(city) {
 		for (let i = 0; i < spiceCount; i++) extraHTML += `<div class='popCityDeliveredDiv' style="background-color: ${view.getGoodColour(rf.GOOD_SPICE)}"></div>`
 		for (let i = 0; i < city.size - spiceCount; i++) extraHTML += `<div class='popCityDeliveredDiv popCityNotDeliveredDiv' style="background-color: ${view.getGoodColour(rf.GOOD_SPICE)}"></div>`
 		extraHTML += spiceCount === city.size ? "<span style='color: red;'>" : ""
-		extraHTML += "Spice:" + spiceCount + "<br/>"
+		extraHTML += `${i18n.global.t("goods.spice")}:` + spiceCount + "<br/>"
 		extraHTML += "</span>"
 		if (store.gameflow.currentEra === rf.ERA_A) return extraHTML
 	}
@@ -136,7 +138,7 @@ function getCityReceivedGoodsExtraHTML(city) {
 		for (let i = 0; i < rubberCount; i++) extraHTML += `<div class='popCityDeliveredDiv' style="background-color: ${view.getGoodColour(rf.GOOD_RUBBER)}"></div>`
 		for (let i = 0; i < city.size - rubberCount; i++) extraHTML += `<div class='popCityDeliveredDiv popCityNotDeliveredDiv' style="background-color: ${view.getGoodColour(rf.GOOD_RUBBER)}"></div>`
 		extraHTML += rubberCount === city.size ? "<span style='color: red;'>" : ""
-		extraHTML += "Rubber:" + rubberCount + "<br/>"
+		extraHTML += `${i18n.global.t("goods.rubber")}:` + rubberCount + "<br/>"
 		extraHTML += "</span>"
 	}
 
@@ -145,7 +147,7 @@ function getCityReceivedGoodsExtraHTML(city) {
 		for (let i = 0; i < siapCount; i++) extraHTML += `<div class='popCityDeliveredDiv' style="background-color: ${view.getGoodColour(rf.GOOD_SIAP_FAJI)}"></div>`
 		for (let i = 0; i < city.size - siapCount; i++) extraHTML += `<div class='popCityDeliveredDiv popCityNotDeliveredDiv' style="background-color: ${view.getGoodColour(rf.GOOD_SIAP_FAJI)}"></div>`
 		extraHTML += siapCount === city.size ? "<span style='color: red;'>" : ""
-		extraHTML += "Siap Saji:" + siapCount + "<br/>"
+		extraHTML += `${i18n.global.t("goods.siapFaji")}:` + siapCount + "<br/>"
 		extraHTML += "</span>"
 		if (store.gameflow.currentEra === rf.ERA_B) return extraHTML
 	}
@@ -155,7 +157,7 @@ function getCityReceivedGoodsExtraHTML(city) {
 		for (let i = 0; i < oilCount; i++) extraHTML += `<div class='popCityDeliveredDiv' style="background-color: ${view.getGoodColour(rf.GOOD_OIL)}"></div>`
 		for (let i = 0; i < city.size - oilCount; i++) extraHTML += `<div class='popCityDeliveredDiv popCityNotDeliveredDiv' style="background-color: ${view.getGoodColour(rf.GOOD_OIL)}"></div>`
 		extraHTML += oilCount === city.size ? "<span style='color: red;'>" : ""
-		extraHTML += "Oil:" + oilCount + "<br/>"
+		extraHTML += `${i18n.global.t("goods.oil")}:` + oilCount + "<br/>"
 		extraHTML += "</span>"
 	}
 	return extraHTML

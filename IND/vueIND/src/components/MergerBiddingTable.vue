@@ -5,6 +5,8 @@ import * as model from "../js/INDmodel"
 import * as controller from "../js/INDcontroller"
 //import * as map from "../js/INDmap"
 
+import i18n from "../i18n"
+
 //import { ref, computed } from "vue"
 
 import { useModelStore } from "../stores/INDstore.js"
@@ -34,6 +36,7 @@ function newBidSelected(newBid) {
 }
 
 function getBidRange() {
+	const t = i18n.global.t
 	let possibleBids = []
 	let maxBid = controller.currentPlayerObj().moneyCash
 	let mergerSubsidyAmount = 0
@@ -45,11 +48,11 @@ function getBidRange() {
 	for (let i = store.ongoingVars.currentBid + store.ongoingVars.bidIncrement; i <= maxBid; i += store.ongoingVars.bidIncrement) possibleBids.push(i)
 	let res = []
 	// Pass
-	if (store.gameflow.phase === rf.PHASE_MERGER_BIDDING) res.push([0, "Pass (Keep " + String(controller.currentPlayerObj().moneyCash) + ")"])
+	if (store.gameflow.phase === rf.PHASE_MERGER_BIDDING) res.push([0, t("merger.passKeep", { cash: controller.currentPlayerObj().moneyCash })])
 	for (let i = 0; i < possibleBids.length; i++) {
 		if (store.useMergerSubsidy && mergerSubsidyAmount > 0) {
-			res.push([possibleBids[i], `${String(possibleBids[i])} (${String(getRemainingCashIfBidSuccessful(controller.currentPlayerIndex(), possibleBids[i], false))} remaining after subsidy of ${String(mergerSubsidyAmount)})`])
-		} else res.push([possibleBids[i], "" + String(possibleBids[i]) + " (" + String(getRemainingCashIfBidSuccessful(controller.currentPlayerIndex(), possibleBids[i], false)) + " remaining)"])
+			res.push([possibleBids[i], t("merger.bidRemainingSubsidy", { amount: possibleBids[i], remaining: getRemainingCashIfBidSuccessful(controller.currentPlayerIndex(), possibleBids[i], false), subsidy: mergerSubsidyAmount })])
+		} else res.push([possibleBids[i], t("merger.bidRemaining", { amount: possibleBids[i], remaining: getRemainingCashIfBidSuccessful(controller.currentPlayerIndex(), possibleBids[i], false) })])
 	}
 	return res
 }
@@ -116,6 +119,7 @@ function newPreBidSelected(newBid) {
 }
 
 function getPreBidRange() {
+	const t = i18n.global.t
 	let possibleBids = []
 	let maxBid = controller.currentPlayerObj().moneyCash
 	let mergerSubsidyAmount = 0
@@ -125,21 +129,21 @@ function getPreBidRange() {
 	if (store.context.selectedMergerBid === 0 || store.context.selectedMergerBid + store.ongoingVars.bidIncrement * 2 > maxBid) {
 		store.context.selectedMergerPreBid = 0
 		// Forced pass with hidden money
-		if (controller.currentPlayerObj().moneyCash + mergerSubsidyAmount < store.ongoingVars.currentBid + store.ongoingVars.bidIncrement) return [[0, "No Money - You must manually pass to help hide your money"]]
+		if (controller.currentPlayerObj().moneyCash + mergerSubsidyAmount < store.ongoingVars.currentBid + store.ongoingVars.bidIncrement) return [[0, t("merger.noMoneyManualPass")]]
 
 		if (store.context.selectedMergerBid === 0) {
-            store.context.selectedMergerPreBid = -1
-            return [[-1, "Place Bid First"]]
-        }
-		if (store.context.selectedMergerBid + store.ongoingVars.bidIncrement * 2 > maxBid) return [[0, "No higher bids possible"]]
+			store.context.selectedMergerPreBid = -1
+			return [[-1, t("merger.placeBidFirst")]]
+		}
+		if (store.context.selectedMergerBid + store.ongoingVars.bidIncrement * 2 > maxBid) return [[0, t("merger.noHigherBids")]]
 	}
 
 	for (let i = store.context.selectedMergerBid + store.ongoingVars.bidIncrement * 2; i <= maxBid; i += store.ongoingVars.bidIncrement) possibleBids.push(i)
 	let res = []
-	res.push([-1, "Do not set an auto bid"])
-	res.push([0, "Pass for your next bid"])
+	res.push([-1, t("merger.doNotAutoBid")])
+	res.push([0, t("merger.passNextBid")])
 	for (let i = 0; i < possibleBids.length; i++) {
-		res.push([possibleBids[i], "" + String(possibleBids[i]) + " (" + String(getRemainingCashIfBidSuccessful(controller.currentPlayerIndex(), possibleBids[i], false)) + " remaining)"])
+		res.push([possibleBids[i], t("merger.bidRemaining", { amount: possibleBids[i], remaining: getRemainingCashIfBidSuccessful(controller.currentPlayerIndex(), possibleBids[i], false) })])
 	}
 	return res
 }
@@ -225,7 +229,7 @@ function updatePassIfOutbid() {
 				<!-- 2. INJECT HIGH BIDDER (Only after first company, during bidding phase) -->
 				<div v-if="idx === 0 && store.ongoingVars.selectedMergerInfo.length === 2 && store.gameflow.phase === rf.PHASE_MERGER_BIDDING" class="current-bidder-mid-section">
 					<div class="bidder-info-small">
-						<div class="label-tiny">High Bidder</div>
+						<div class="label-tiny">{{ $t('merger.highBidder') }}</div>
 						<span class="mainEntryPlayer limitedPlayerNameSpan" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[store.ongoingVars.currentBidderIndex].colour)">
 							{{ store.players[store.ongoingVars.currentBidderIndex].displayName }}
 						</span>
@@ -239,11 +243,11 @@ function updatePassIfOutbid() {
 		<div v-if="store.ongoingVars.selectedMergerInfo.length === 2" class="biddingAreaLessCompaniesDiv">
 			<div class="nominalIncrementDiv">
 				<span>
-					Nominal:
+					{{ $t('merger.nominal') }}
 					<strong>{{ store.ongoingVars.nominalValue }}</strong>
 				</span>
 				<span>
-					Increment:
+					{{ $t('merger.increment') }}
 					<strong>{{ store.ongoingVars.bidIncrement }}</strong>
 				</span>
 			</div>
@@ -252,13 +256,13 @@ function updatePassIfOutbid() {
 			<template v-if="getPlayerAvailableCashForMergerBidding(controller.currentPlayerIndex()) >= store.ongoingVars.nominalValue">
 				<div class="bidSelectorsDiv" v-if="store.context.action !== rf.ACT_CONFIRM_END_TURN">
 					<div class="singleBidSelectDiv">
-						<label>Current Bid</label>
+						<label>{{ $t('merger.currentBid') }}</label>
 						<select class="bidSelect" @change="newBidSelected($event.target.value)">
 							<option v-for="(amount, idx) in getBidRange()" :key="idx" :value="amount[0]">{{ amount[1] }}</option>
 						</select>
 					</div>
 					<div v-if="!personal.trainingGame" class="singleBidSelectDiv">
-						<label>Auto-Bid</label>
+						<label>{{ $t('merger.autoBid') }}</label>
 						<select class="bidSelect" @change="newPreBidSelected($event.target.value)">
 							<option v-for="(amount, idx) in getPreBidRange()" :key="idx" :value="amount[0]" :selected="amount[0] === store.context.selectedMergerPreBid" :disabled="store.context.selectedMergerBid === -1">{{ amount[1] }}</option>
 						</select>
@@ -267,24 +271,24 @@ function updatePassIfOutbid() {
 
 				<!-- Current Commitment -->
 				<div class="yourBidDiv">
-					Your Bid:
-					<template v-if="store.context.selectedMergerBid === 0"><strong>Pass</strong></template>
+					{{ $t('merger.yourBid') }}
+					<template v-if="store.context.selectedMergerBid === 0"><strong>{{ $t('merger.pass') }}</strong></template>
 					<template v-else>
 						<strong>{{ store.context.selectedMergerBid }}</strong>
 						<!-- Inline checkbox for auto-bid behavior -->
 						<div v-if="!personal.trainingGame && store.context.selectedMergerPreBid > 0" class="inline-checkbox-container">
 							<input type="checkbox" id="passIfOutbid" v-model="passIfOutbid" @change="updatePassIfOutbid" />
 							<label for="passIfOutbid" class="inline-checkbox-label">
-								Pass if  Outbid
+								{{ $t('merger.passIfOutbid') }}
 							</label>
 						</div>
 						<div v-if="store.context.selectedMergerPreBid !== -1" class="auto-status-text">
 							<template v-if="store.context.selectedMergerPreBid === 0">
 								⚠️
-								<em>Auto-pass active if outbid.</em>
+								<em>{{ $t('merger.autoPassActive') }}</em>
 							</template>
 							<template v-else>
-								<em>Auto-bidding to {{ store.context.selectedMergerPreBid }}</em>
+								<em>{{ $t('merger.autoBiddingTo', { amount: store.context.selectedMergerPreBid }) }}</em>
 							</template>
 						</div>
 					</template>
@@ -292,8 +296,8 @@ function updatePassIfOutbid() {
 
 				<!-- Resulting Cash Table -->
 				<div class="cashResultsDiv">
-					<p v-if="store.context.selectedMergerBid > 0" class="title-small">CASH IF SUCCESSFUL</p>
-					<p v-else class="title-small">CASH IF YOU PASS</p>
+					<p v-if="store.context.selectedMergerBid > 0" class="title-small">{{ $t('merger.cashIfSuccessful') }}</p>
+					<p v-else class="title-small">{{ $t('merger.cashIfPass') }}</p>
 
 					<!-- YOUR CASH -->
 					<div class="cashResutSingleRowDiv">
@@ -347,7 +351,7 @@ function updatePassIfOutbid() {
 				<!-- Competition Panel -->
 				<div v-if="personal.trainingGame || !store.hiddenMoney" class="otherBiddersDiv">
 					<div v-if="localGetEligibleBidderIndexes().length > 0">
-						<p class="title-small">COMPETITORS IN BIDDING ORDER</p>
+						<p class="title-small">{{ $t('merger.competitors') }}</p>
 						<div class="otherBiddersNamesDiv">
 							<span v-for="pIdx in localGetEligibleBidderIndexes()" :key="pIdx" class="otherSingleBidderNameDiv">
 								<span class="mainEntryPlayer limitedPlayerNameSpan" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[pIdx].colour)">{{ store.players[pIdx].displayName }}</span>
@@ -356,30 +360,30 @@ function updatePassIfOutbid() {
 							</span>
 						</div>
 					</div>
-					<p v-else class="mergerBidWinP">You will win the merger with this bid</p>
+					<p v-else class="mergerBidWinP">{{ $t('merger.youWillWin') }}</p>
 				</div>
 
 				<!-- Actions Footer -->
 				<div class="mergerBottomButtonsDiv" v-if="store.context.action !== rf.ACT_CONFIRM_END_TURN">
-					<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
+					<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('merger.resetWholeTurn') }}</button>
 					<button v-if="store.context.selectedMergerPreBid === -1" class="actionsLineButton" @click="confirmBid">
 						<template v-if="store.context.selectedMergerBid === 0">
-							<template v-if="localGetEligibleBidderIndexes().length <= 1">Pass - lose merger - End Turn</template>
-							<template v-else>Pass & End Turn</template>
+							<template v-if="localGetEligibleBidderIndexes().length <= 1">{{ $t('merger.passLoseMergerEndTurn') }}</template>
+							<template v-else>{{ $t('merger.passEndTurn') }}</template>
 						</template>
-						<template v-else>Bid {{ store.context.selectedMergerBid }} & End Turn</template>
+						<template v-else>{{ $t('merger.bidEndTurn', { amount: store.context.selectedMergerBid }) }}</template>
 					</button>
-					<button v-else-if="store.context.selectedMergerPreBid === 0" class="actionsLineButton" @click="confirmPreBid(false)">Bid {{ store.context.selectedMergerBid }} & Pass</button>
-					<button v-else class="actionsLineButton" @click="confirmPreBid(passIfOutbid)">Bid {{ store.context.selectedMergerBid }} & End Turn. Auto bid to {{ store.context.selectedMergerPreBid }}<template v-if="passIfOutbid">. Pass if outbid</template></button>
+					<button v-else-if="store.context.selectedMergerPreBid === 0" class="actionsLineButton" @click="confirmPreBid(false)">{{ $t('merger.bidPass', { amount: store.context.selectedMergerBid }) }}</button>
+					<button v-else class="actionsLineButton" @click="confirmPreBid(passIfOutbid)">{{ passIfOutbid ? $t('merger.bidAutoPass', { amount: store.context.selectedMergerBid, auto: store.context.selectedMergerPreBid }) : $t('merger.bidAuto', { amount: store.context.selectedMergerBid, auto: store.context.selectedMergerPreBid }) }}</button>
 				</div>
 			</template>
 
 			<!-- Error State -->
 			<template v-else>
 				<div class="insufficientFunds">
-					<p>Insufficient funds for this merger.<br/>
-					(You were not auto-passed to hide your available money)</p>
-					<button class="actionsLineButton" @click="confirmPass">Pass & End Turn</button>
+					<p>{{ $t('merger.insufficientFunds') }}<br/>
+					{{ $t('merger.insufficientFunds2') }}</p>
+					<button class="actionsLineButton" @click="confirmPass">{{ $t('merger.passEndTurn') }}</button>
 				</div>
 			</template>
 		</div>
@@ -387,8 +391,8 @@ function updatePassIfOutbid() {
 		<!-- Single Company Selected State -->
 		<template v-else>
 			<div class="single-selection-footer">
-				<p class="hint-text">Click a non-highlighted slot to see why you cannot merge with it.</p>
-				<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Selection</button>
+				<p class="hint-text">{{ $t('merger.clickSlotHint') }}</p>
+				<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('merger.resetSelection') }}</button>
 			</div>
 		</template>
 	</div>

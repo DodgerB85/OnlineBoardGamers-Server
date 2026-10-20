@@ -5,6 +5,8 @@ import * as model from "../js/INDmodel.js"
 import * as funcs from "../js/INDfuncs.js"
 import * as controller from "../js/INDcontroller.js"
 
+import i18n from "../i18n"
+
 import { useModelStore } from "../stores/INDstore.js"
 const store = useModelStore()
 import { usePersonalStore } from "../stores/INDpersonal.js"
@@ -53,37 +55,39 @@ function canSelectSlot(playerIndex, slotIdx, companySlot) {
 }
 
 function generateMergerSingleErrors(reasonArr) {
-	if (reasonArr.invalidType) return "Invalid merger type"
-	if (reasonArr.alreadyMerged) return "Company has already merged this turn"
-	if (reasonArr.insufficientMerger) return "Your merger tech is too low"
-	if (reasonArr.noFreeSlot) return "You do not have a free slot, or own a merging company"
-	if (reasonArr.lowCash) return "Not enough cash"
-	if (reasonArr.tooEarlyForSiap) return "Siap Saji mergers can only be done in Era B or later"
-	return "UNKNOWN REASON"
+	const t = i18n.global.t
+	if (reasonArr.invalidType) return t("playerTable.mergeInvalidType")
+	if (reasonArr.alreadyMerged) return t("playerTable.mergeAlreadyMerged")
+	if (reasonArr.insufficientMerger) return t("playerTable.mergeTechLow")
+	if (reasonArr.noFreeSlot) return t("playerTable.mergeNoFreeSlot")
+	if (reasonArr.lowCash) return t("playerTable.mergeLowCash")
+	if (reasonArr.tooEarlyForSiap) return t("playerTable.mergeSiapEarly")
+	return t("playerTable.mergeUnknown")
 }
 
 function generateMergerMultiErrors(reasonArr) {
+	const t = i18n.global.t
 	// Check EVERYTHING already merged
 	let errorArr = []
 
-	if (reasonArr.every((x) => x.invalidType)) return "No other company to merge with"
+	if (reasonArr.every((x) => x.invalidType)) return t("playerTable.mergeNoOtherCompany")
 
-	if (reasonArr.every((x) => x.alreadyMerged)) return "Already merged this turn"
+	if (reasonArr.every((x) => x.alreadyMerged)) return t("playerTable.mergeAlreadyMergedTurn")
 
-	if (reasonArr.every((x) => x.insufficientMerger)) return "Your merger tech is too low for any merger with this company"
+	if (reasonArr.every((x) => x.insufficientMerger)) return t("playerTable.mergeTechLowAny")
 	else if (reasonArr.some((x) => x.insufficientMerger)) errorArr.push(2) // SOME insufficient merger tech
 
-	if (reasonArr.every((x) => x.noFreeSlot)) return "You do not have a free slot for any merger with this company"
+	if (reasonArr.every((x) => x.noFreeSlot)) return t("playerTable.mergeNoFreeSlotAny")
 	else if (reasonArr.some((x) => x.noFreeSlot)) errorArr.push(4) // SOME insufficient slot tech
 
-	if (reasonArr.every((x) => x.lowCash)) return "You do not have enough cash for any merger with this company"
+	if (reasonArr.every((x) => x.lowCash)) return t("playerTable.mergeLowCashAny")
 	else if (reasonArr.some((x) => x.lowCash)) errorArr.push(6) // SOME insufficient cash
 
 	// Now record all the partials
 	let errorStr = ""
-	if (errorArr.includes(2)) errorStr += "Insufficient merger tech, "
-	if (errorArr.includes(4)) errorStr += "No free slot, "
-	if (errorArr.includes(6)) errorStr += "Not enough cash, "
+	if (errorArr.includes(2)) errorStr += t("playerTable.mergeInsufficientTech") + ", "
+	if (errorArr.includes(4)) errorStr += t("playerTable.mergeNoFreeSlotShort") + ", "
+	if (errorArr.includes(6)) errorStr += t("playerTable.mergeLowCashShort") + ", "
 	errorStr = errorStr.slice(0, -2)
 	return errorStr
 }
@@ -106,7 +110,7 @@ function clickedSlot(companySlot, slotIdx, playerIndex) {
 				} else if (store.ongoingVars.selectedMergerInfo.length === 1) {
 					// Did you click the same slot twice?
 					if (playerIndex === store.ongoingVars.selectedMergerInfo[0][0] && slotIdx === store.ongoingVars.selectedMergerInfo[0][1]) {
-						store.gameMessages.actionError = "You cannot select the same slot twice"
+						store.gameMessages.actionError = i18n.global.t("playerTable.mergeSameSlot")
 					}
 					// Otherwise, find the entry in store.context.mergerStatusArray
 					// Filter the main array for the first subArr
@@ -181,19 +185,19 @@ function getRNDfontSize() {
 
 <template>
 	<b>
-		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_NEW_ERA }">1) New Era</span>
+		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_NEW_ERA }">1) {{ $t('playerTable.newEra') }}</span>
 		►
-		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_BID_TURN_ORDER }">2) Turn Order Bidding</span>
+		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_BID_TURN_ORDER }">2) {{ $t('playerTable.bidTurnOrder') }}</span>
 		►
-		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_MERGERS || store.gameflow.phase === rf.PHASE_MERGER_BIDDING }">3) Mergers</span>
+		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_MERGERS || store.gameflow.phase === rf.PHASE_MERGER_BIDDING }">3) {{ $t('playerTable.mergers') }}</span>
 		►
-		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ACQUISITIONS }">4) Acquisitions</span>
+		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ACQUISITIONS }">4) {{ $t('playerTable.acquisitions') }}</span>
 		►
-		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_R_AND_D }">5) R&D</span>
+		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_R_AND_D }">5) {{ $t('playerTable.rnd') }}</span>
 		►
-		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_OPERATIONS }">6) Operations</span>
+		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_OPERATIONS }">6) {{ $t('playerTable.operations') }}</span>
 		►
-		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_CITY_GROWTH }">7) City Growth</span>
+		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_CITY_GROWTH }">7) {{ $t('playerTable.cityGrowth') }}</span>
 	</b>
 	<div id="container">
 		<div id="topAreaContainerDiv">
@@ -201,14 +205,14 @@ function getRNDfontSize() {
 				<table id="playerTable">
 					<thead>
 						<tr>
-							<th><b>Player</b></th>
-							<th><b>Money</b></th>
-							<th><b>R & D</b></th>
-							<th><b>Slot 1</b></th>
-							<th><b>Slot 2</b></th>
-							<th><b>Slot 3</b></th>
-							<th><b>Slot 4</b></th>
-							<th><b>Slot 5</b></th>
+							<th><b>{{ $t('playerTable.player') }}</b></th>
+							<th><b>{{ $t('playerTable.money') }}</b></th>
+							<th><b>{{ $t('playerTable.rndHeader') }}</b></th>
+							<th><b>{{ $t('playerTable.slot', { num: 1 }) }}</b></th>
+							<th><b>{{ $t('playerTable.slot', { num: 2 }) }}</b></th>
+							<th><b>{{ $t('playerTable.slot', { num: 3 }) }}</b></th>
+							<th><b>{{ $t('playerTable.slot', { num: 4 }) }}</b></th>
+							<th><b>{{ $t('playerTable.slot', { num: 5 }) }}</b></th>
 						</tr>
 					</thead>
 					<tr v-for="(playerIndex, idx) in store.gameflow.fullTurnOrder" :key="idx">
@@ -227,18 +231,18 @@ function getRNDfontSize() {
 						<td v-else class="money-cell">
 							<div class="money-row">
 								<span v-if="store.options.playerTableStyle === 0" class="money-label">💵</span>
-								<span v-else>Cash: </span>
+								<span v-else>{{ $t('playerTable.cash') }} </span>
 								<span class="money-value">{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyCash) }}</span>
 								<span v-if="store.players[playerIndex].moneyRoundIncome > 0" class="income">+{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyRoundIncome) }}</span>
 							</div>
 							<div class="money-row">
 								<span v-if="store.options.playerTableStyle === 0" class="money-label">🏦</span>
-								<span v-else>Bank: </span>
+								<span v-else>{{ $t('playerTable.bank') }} </span>
 								<span class="money-value">{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyBank) }}</span>
 							</div>
 							<div class="money-row total-row">
 								<span v-if="store.options.playerTableStyle === 0" class="money-label">💰</span>
-								<span v-else>Total: </span>
+								<span v-else>{{ $t('playerTable.total') }} </span>
 								<span class="money-value total-value">{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyCash + store.players[playerIndex].moneyBank) }}</span>
 							</div>
 						</td>
@@ -258,22 +262,22 @@ function getRNDfontSize() {
 							:style="{
 								fontSize: String(getRNDfontSize()) + 'px',
 							}">
-							Bid: {{ store.players[playerIndex].RnD[rf.RnD_BID_IDX] }}
+							{{ $t('playerTable.bid') }}: {{ store.players[playerIndex].RnD[rf.RnD_BID_IDX] }}
 							<br />
-							Slots: {{ store.players[playerIndex].RnD[rf.RnD_SLOTS_IDX] }}
+							{{ $t('playerTable.slots') }}: {{ store.players[playerIndex].RnD[rf.RnD_SLOTS_IDX] }}
 							<br />
-							Merger: {{ store.players[playerIndex].RnD[rf.RnD_MERGER_IDX] }}
+							{{ $t('playerTable.merger') }}: {{ store.players[playerIndex].RnD[rf.RnD_MERGER_IDX] }}
 							<br />
-							Expansion: {{ store.players[playerIndex].RnD[rf.RnD_EXPANSION_IDX] }}
+							{{ $t('playerTable.expansion') }}: {{ store.players[playerIndex].RnD[rf.RnD_EXPANSION_IDX] }}
 							<br />
-							Hull: {{ store.players[playerIndex].RnD[rf.RnD_HULL_IDX] }}
+							{{ $t('playerTable.hull') }}: {{ store.players[playerIndex].RnD[rf.RnD_HULL_IDX] }}
 							<br v-if="store.useMergerSubsidy || store.useShippingSubsidy" />
 							<template v-if="store.useMergerSubsidy">
-								Merger Subsidy: {{ store.players[playerIndex].RnD[rf.RnD_MERGER_SUBSIDY_IDX] }}
+								{{ $t('playerTable.mergerSubsidy') }}: {{ store.players[playerIndex].RnD[rf.RnD_MERGER_SUBSIDY_IDX] }}
 								<br />
 							</template>
 							<template v-if="store.useShippingSubsidy">
-								Shipping Subsidy: {{ store.players[playerIndex].RnD[rf.RnD_SHIPPING_SUBSIDY_IDX] }}
+								{{ $t('playerTable.shippingSubsidy') }}: {{ store.players[playerIndex].RnD[rf.RnD_SHIPPING_SUBSIDY_IDX] }}
 								<br />
 							</template>
 						</td>
@@ -289,7 +293,7 @@ function getRNDfontSize() {
 									</div>
 								</template>
 								<template v-else-if="slotIdx + 1 > store.players[playerIndex].RnD[rf.RnD_SLOTS_IDX]">
-									<b>N/A</b>
+									<b>{{ $t('playerTable.notAvailable') }}</b>
 								</template>
 								<template v-else>
 									<b>-</b>
@@ -313,11 +317,11 @@ function getRNDfontSize() {
 										</div>
 
 										<div class="companyInfoDiv">
-											<span v-if="model.getActiveCompanyDataFromID(companySlot[0]).type === rf.COMPANY_SHIPPING" :class="{ redText: model.getSlotTerrSize(playerIndex, slotIdx) >= model.getActiveCompanyDataFromID(companySlot[0]).combinedCapacity[store.gameflow.currentEra] }">Size: {{ model.getSlotTerrSize(playerIndex, slotIdx) }} / {{ model.getActiveCompanyDataFromID(companySlot[0]).combinedCapacity[store.gameflow.currentEra] }}</span>
-											<span v-else>Size: {{ model.getSlotTerrSize(playerIndex, slotIdx) }}</span>
+											<span v-if="model.getActiveCompanyDataFromID(companySlot[0]).type === rf.COMPANY_SHIPPING" :class="{ redText: model.getSlotTerrSize(playerIndex, slotIdx) >= model.getActiveCompanyDataFromID(companySlot[0]).combinedCapacity[store.gameflow.currentEra] }">{{ $t('playerTable.size') }}: {{ model.getSlotTerrSize(playerIndex, slotIdx) }} / {{ model.getActiveCompanyDataFromID(companySlot[0]).combinedCapacity[store.gameflow.currentEra] }}</span>
+											<span v-else>{{ $t('playerTable.size') }}: {{ model.getSlotTerrSize(playerIndex, slotIdx) }}</span>
 											<br />
 											<template v-if="model.getActiveCompanyDataFromID(companySlot[0]).type === rf.COMPANY_SHIPPING">
-												<b><u>Max Size</u></b>
+												<b><u>{{ $t('playerTable.maxSize') }}</u></b>
 												<br />
 												<span :class="{ lightGreenBackground: store.gameflow.currentEra === rf.ERA_A }">
 													<span v-if="model.getActiveCompanyDataFromID(companySlot[0]).combinedCapacity[0] !== 0">{{ model.getActiveCompanyDataFromID(companySlot[0]).combinedCapacity[0] }}</span>
@@ -328,25 +332,25 @@ function getRNDfontSize() {
 												,
 												<span :class="{ lightGreenBackground: store.gameflow.currentEra === rf.ERA_C }">{{ model.getActiveCompanyDataFromID(companySlot[0]).combinedCapacity[2] }}</span>
 												<br />
-												Hull: {{ model.getActiveCompanyDataFromID(companySlot[0]).hullCapacity }}
+												{{ $t('playerTable.hullInfo') }}: {{ model.getActiveCompanyDataFromID(companySlot[0]).hullCapacity }}
 												<br />
 											</template>
-											Value: {{ model.getNominalValueFromSlotID(playerIndex, slotIdx, false) }}
+											{{ $t('playerTable.value') }}: {{ model.getNominalValueFromSlotID(playerIndex, slotIdx, false) }}
 											<!--<span
 												v-if="rf.LAND_COMPANIES.includes(model.getActiveCompanyDataFromID(companySlot[0]).type)"><br />Good:
 												{{
 													model.getActiveCompanyDataFromID(companySlot[0]).goodValue }}</span>
 											-->
 											<br />
-											Income: {{ getSlotIncome(playerIndex, slotIdx) }}
+											{{ $t('playerTable.income') }}: {{ getSlotIncome(playerIndex, slotIdx) }}
 										</div>
 									</div>
 								</template>
 								<template v-else-if="slotIdx + 1 > store.players[playerIndex].RnD[rf.RnD_SLOTS_IDX]">
-									<b>N/A</b>
+									<b>{{ $t('playerTable.notAvailable') }}</b>
 								</template>
 								<template v-else>
-									<b>- Empty -</b>
+									<b>{{ $t('playerTable.empty') }}</b>
 								</template>
 							</td>
 						</template>
@@ -355,8 +359,8 @@ function getRNDfontSize() {
 			</div>
 			<div id="infoDiv">
 				<button class="actionsLineButton" @click="store.topMenuViews.minimalPlayerTable = !store.topMenuViews.minimalPlayerTable">
-					<span v-if="store.topMenuViews.minimalPlayerTable">Expand Player Table</span>
-					<span v-else>Minimize Player Table</span>
+					<span v-if="store.topMenuViews.minimalPlayerTable">{{ $t('playerTable.expandTable') }}</span>
+					<span v-else>{{ $t('playerTable.minimizeTable') }}</span>
 				</button>
 			</div>
 		</div>

@@ -16,6 +16,8 @@
 import { useModelStore } from "../stores/INDstore.js"
 import { usePersonalStore } from "../stores/INDpersonal.js"
 
+import i18n from "../i18n"
+
 import * as rf from "./INDreference.js"
 import * as map from "./INDmap.js"
 import * as controller from "./INDcontroller.js"
@@ -218,7 +220,7 @@ export async function initGame() {
 
 	// If new and no data, give an error; otherwise if new, save, otherwise, import data
 	if (window.initData.pov < 0 && window.initData.gameData === "") {
-		store.topMenuViews.rewindErrorText = "The game has not yet started"
+		store.topMenuViews.rewindErrorText = i18n.global.t("io.gameNotStarted")
 		// Create the <h1> element
 		var heading = document.createElement("h1")
 
@@ -638,7 +640,7 @@ export function setupPaidExpansion() {
 	store.context.territoriesToHighlight = [...getValidTerrsForExpansionFromLandSlotIdx(slotIdx)]
 
 	if (store.context.territoriesToHighlight.length === 0) {
-		store.gameMessages.actionError = "There are no valid territories to expand into"
+		store.gameMessages.actionError = i18n.global.t("actionArea.noValidExpansionTerritories")
 		return
 	}
 }
@@ -669,7 +671,7 @@ export function setupExpansionHighlights(slotIdx) {
 		store.context.remainingExpansions = Math.min(store.context.remainingExpansions, remainingShipCompanyExpansions)
 
 		if (store.context.remainingExpansions <= 0) {
-			store.gameMessages.actionError = "No more expansions for this company"
+			store.gameMessages.actionError = i18n.global.t("actionArea.noMoreExpansions")
 			store.context.action = rf.ACT_CONFIRM_END_TURN
 			return
 		}
@@ -719,7 +721,7 @@ export function setupExpansionHighlights(slotIdx) {
 		// Otherwise, add a new entry
 		else store.context.historyObj.push([...store.context.currentGoodJourney])
 
-		store.gameMessages.actionError = "There are no valid territories to expand into"
+		store.gameMessages.actionError = i18n.global.t("actionArea.noValidExpansionTerritories")
 		store.context.action = rf.ACT_CONFIRM_END_TURN
 		return
 	}
@@ -1104,7 +1106,7 @@ export function setupSlotToOperate(playerIndex, slotIdx) {
 	// Check if any can be shipped
 	if (!map.canShipGoodFromSlotIDX(controller.currentPlayerIndex(), slotIdx)) {
 		store.context.prodMarkerTerritoriesToHighlight.splice(0)
-		store.gameMessages.actionError = "You cannot ship any goods with this company"
+		store.gameMessages.actionError = i18n.global.t("actionArea.cannotShipGoods")
 		store.context.action = rf.ACT_DECIDE_PAID_EXPANSION
 		return
 	}
@@ -1188,7 +1190,7 @@ export function checkForResponseAfterDeliverGoodsToCity(slotContent, preventMaxP
 		store.context.territoriesToHighlightBlue = [...getAllTerrIDsForSlot(slotContent)]
 		store.context.territoriesToHighlight = [...getValidTerrsForExpansionFromLandSlotIdx(slotIdx)]
 		if (store.context.territoriesToHighlight.length === 0) {
-			store.gameMessages.actionError = "There are no valid territories to expand into"
+			store.gameMessages.actionError = i18n.global.t("actionArea.noValidExpansionTerritories")
 			store.context.action = rf.ACT_CONFIRM_END_TURN
 			store.context.historyObj.push(-1)
 		}*/
@@ -1228,12 +1230,12 @@ export function checkForResponseAfterDeliverGoodsToCity(slotContent, preventMaxP
 		store.context.prodMarkerTerritoriesToHighlight.splice(0)
 		//store.context.action = rf.ACT_DECIDE_PAID_EXPANSION
 		store.context.action = rf.ACT_CONFIRM_ALL_DELIVERIES
-		store.gameMessages.actionError = "You cannot ship any more goods with this company"
+		store.gameMessages.actionError = i18n.global.t("actionArea.cannotShipMoreGoods")
 	}
 	// OTHERWISE, NO MORE SHIPPING, AND NOT MET THE MAX POSS
 	else if (!map.canShipGoodFromSlotIDX(controller.currentPlayerIndex(), slotIdx) && soldCount < store.context.maxPoss) {
 		store.context.prodMarkerTerritoriesToHighlight.splice(0)
-		store.gameMessages.actionError = "You cannot ship any more goods with this company, but you did not ship the most possible. Please restart your turn or remove a manual delivery"
+		store.gameMessages.actionError = i18n.global.t("actionArea.cannotShipMoreGoodsIncomplete")
 	}
 	/*else {
 		

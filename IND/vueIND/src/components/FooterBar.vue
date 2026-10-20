@@ -10,11 +10,11 @@ import * as view from "../js/INDview"
 import * as rf from "../js/INDreference"
 
 const goods = [
-  { name: "Rice", good: rf.GOOD_RICE, gfx: "prod_marker_rice" },
-  { name: "Spice", good: rf.GOOD_SPICE, gfx: "prod_marker_spice" },
-  { name: "Rubber", good: rf.GOOD_RUBBER, gfx: "prod_marker_rubber" },
-  { name: "Siap Saji", good: rf.GOOD_SIAP_FAJI, gfx: "prod_marker_siap_faji" },
-  { name: "Oil", good: rf.GOOD_OIL, gfx: "prod_marker_oil" },
+  { nameKey: "goods.rice", good: rf.GOOD_RICE, gfx: "prod_marker_rice" },
+  { nameKey: "goods.spice", good: rf.GOOD_SPICE, gfx: "prod_marker_spice" },
+  { nameKey: "goods.rubber", good: rf.GOOD_RUBBER, gfx: "prod_marker_rubber" },
+  { nameKey: "goods.siapFaji", good: rf.GOOD_SIAP_FAJI, gfx: "prod_marker_siap_faji" },
+  { nameKey: "goods.oil", good: rf.GOOD_OIL, gfx: "prod_marker_oil" },
 ]
 </script>
 
@@ -23,12 +23,12 @@ const goods = [
     <table class="goodsTable">
       <thead>
         <tr>
-          <th colspan="2">Goods values</th>
+          <th colspan="2">{{ $t('footer.goodsValues') }}</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="g in goods" :key="g.good">
-          <td><img class="goodsTableIcon" :src="view.getImage(g.gfx)" alt="" />{{ g.name }}</td>
+          <td><img class="goodsTableIcon" :src="view.getImage(g.gfx)" alt="" />{{ $t(g.nameKey) }}</td>
           <td>{{ rf.GOOD_INCOME[g.good] }}</td>
         </tr>
       </tbody>

@@ -8,6 +8,8 @@ import * as Bot from "../js/INDbot"
 import * as IO from "../backend/IND_IO"
 import * as map from "../js/INDmap"
 
+import i18n from "../i18n"
+
 import AutoShip from "./AutoShip.vue"
 import ManualShip from "./ManualShip.vue"
 import HistoryEntry from "./HistoryEntry.vue"
@@ -24,6 +26,11 @@ const personal = usePersonalStore()
 
 const turnbidAmount = ref(0)
 const isValidBid = ref(true)
+
+const RND_KEYS = ["rnd.bidMultiplier", "rnd.slots", "rnd.mergers", "rnd.expansion", "rnd.hullCapacity", "rnd.mergerSubsidy", "rnd.shippingSubsidy"]
+function rndString(idx) {
+	return i18n.global.t(RND_KEYS[idx])
+}
 
 const decrement = (value) => {
 	turnbidAmount.value = Math.max(0, turnbidAmount.value - value)
@@ -162,10 +169,11 @@ function localEndPlayerTurn() {
 }
 
 function getOrdinal(num) {
-	if (num === 2) return "2nd"
-	else if (num === 3) return "3rd"
-	else if (num === 4) return "4th"
-	else if (num === 5) return "5th"
+	const t = i18n.global.t
+	if (num === 2) return t("actionArea.ordinal2")
+	else if (num === 3) return t("actionArea.ordinal3")
+	else if (num === 4) return t("actionArea.ordinal4")
+	else if (num === 5) return t("actionArea.ordinal5")
 }
 
 function localClickResign() {
@@ -301,40 +309,42 @@ function clickedEraCard(cardID) {
 }
 
 function getRNDoptions() {
-	let possibleRND = [[-1, "Select a Category to Research"]]
+	const t = i18n.global.t
+	let possibleRND = [[-1, t("actionArea.selectCategory")]]
 	for (let i = 0; i < controller.currentPlayerObj().RnD.length; i++) {
 		// Add hull capacity options at the end
 		if (i == 4) continue
 		const rndLevel = controller.currentPlayerObj().RnD[i]
-		if (rndLevel < 5) possibleRND.push([i, "" + rf.RND_STRINGS[i] + " : " + model.getRndDisplayValue(i, rndLevel) + " ► " + model.getRndDisplayValue(i, rndLevel + 1)])
+		if (rndLevel < 5) possibleRND.push([i, "" + rndString(i) + " : " + model.getRndDisplayValue(i, rndLevel) + " ► " + model.getRndDisplayValue(i, rndLevel + 1)])
 	}
 	const ownHullLevel = controller.currentPlayerObj().RnD[4]
-	if (ownHullLevel < 5) possibleRND.push([4, " Your " + rf.RND_STRINGS[4] + " : " + ownHullLevel + " ► " + (ownHullLevel + 1)])
+	if (ownHullLevel < 5) possibleRND.push([4, t("actionArea.yourHull", { category: rndString(4), from: ownHullLevel, to: ownHullLevel + 1 })])
 	for (let i = 0; i < store.players.length; i++) {
 		const hullLevel = store.players[i].RnD[4]
 		if (i !== controller.currentPlayerIndex() && hullLevel < 5) {
-			possibleRND.push([String(4) + String(i), store.players[i].displayName + "'s " + rf.RND_STRINGS[4] + " : " + hullLevel + " ► " + (hullLevel + 1)])
+			possibleRND.push([String(4) + String(i), t("actionArea.playerHull", { name: store.players[i].displayName, category: rndString(4), from: hullLevel, to: hullLevel + 1 })])
 		}
 	}
 	return possibleRND
 }
 
 function getRNDoptionsPreMove() {
-	if (personal.pov < 0) return [[-1, "No POV"]]
+	const t = i18n.global.t
+	if (personal.pov < 0) return [[-1, t("actionArea.noPov")]]
 	let playerObj = store.players[personal.pov]
-	let possibleRND = [[-1, "Select a Category to Research"]]
+	let possibleRND = [[-1, t("actionArea.selectCategory")]]
 	for (let i = 0; i < playerObj.RnD.length; i++) {
 		// Add hull capacity options at the end
 		if (i == 4) continue
 		const rndLevel = playerObj.RnD[i]
-		if (rndLevel < 5) possibleRND.push([i, "" + rf.RND_STRINGS[i] + " : " + model.getRndDisplayValue(i, rndLevel) + " ► " + model.getRndDisplayValue(i, rndLevel + 1)])
+		if (rndLevel < 5) possibleRND.push([i, "" + rndString(i) + " : " + model.getRndDisplayValue(i, rndLevel) + " ► " + model.getRndDisplayValue(i, rndLevel + 1)])
 	}
 	const ownHullLevel = playerObj.RnD[4]
-	if (ownHullLevel < 5) possibleRND.push([4, " Your " + rf.RND_STRINGS[4] + " : " + ownHullLevel + " ► " + (ownHullLevel + 1)])
+	if (ownHullLevel < 5) possibleRND.push([4, t("actionArea.yourHull", { category: rndString(4), from: ownHullLevel, to: ownHullLevel + 1 })])
 	for (let i = 0; i < store.players.length; i++) {
 		const hullLevel = store.players[i].RnD[4]
 		if (i !== personal.pov && hullLevel < 5) {
-			possibleRND.push([String(4) + String(i), store.players[i].name + "'s " + rf.RND_STRINGS[4] + " : " + hullLevel + " ► " + (hullLevel + 1)])
+			possibleRND.push([String(4) + String(i), t("actionArea.playerHull", { name: store.players[i].name, category: rndString(4), from: hullLevel, to: hullLevel + 1 })])
 		}
 	}
 	return possibleRND
@@ -413,7 +423,7 @@ function localConfirmDeliveries() {
 		store.context.territoriesToHighlightBlue = [...model.getAllTerrIDsForSlot(slotContent)]
 		store.context.territoriesToHighlight = [...model.getValidTerrsForExpansionFromLandSlotIdx(slotIdx)]
 		if (store.context.territoriesToHighlight.length === 0) {
-			store.gameMessages.actionError = "There are no valid territories to expand into"
+			store.gameMessages.actionError = i18n.global.t("actionArea.noValidExpansionTerritories")
 			store.context.action = rf.ACT_CONFIRM_END_TURN
 			store.context.historyObj.push(-1)
 		}
@@ -440,14 +450,15 @@ function shouldShowPreResearchOption() {
 }
 
 function getResearchPreMove() {
-	if (personal.pov < 0) return "No POV"
+	const t = i18n.global.t
+	if (personal.pov < 0) return t("actionArea.noPov")
 	let playerObj = store.players[personal.pov]
 	if (playerObj.preMoves[0] === personal.name && playerObj.preMoves[1].includes(rf.PRE_PHASE_R_AND_D)) {
 		let moveData = playerObj.preMoves[3]
 		// First, check the current turn
 		if (moveData[0] !== store.gameflow.turn) {
 			playerObj.preMoves.splice(0)
-			return "No Data (Data from old turn)"
+			return t("actionArea.noDataOldTurn")
 		}
 
 		// Process YOUR RnD
@@ -456,9 +467,9 @@ function getResearchPreMove() {
 			const rndLevel = playerObj.RnD[idxToResearch]
 			if (moveData[2] !== playerObj.RnD[idxToResearch]) {
 				playerObj.preMoves.splice(0)
-				return "No Data (Move no longer available)"
+				return t("actionArea.noDataMoveGone")
 			}
-			return "" + rf.RND_STRINGS[idxToResearch] + " : " + model.getRndDisplayValue(idxToResearch, rndLevel) + " ► " + model.getRndDisplayValue(idxToResearch, rndLevel + 1)
+			return "" + rndString(idxToResearch) + " : " + model.getRndDisplayValue(idxToResearch, rndLevel) + " ► " + model.getRndDisplayValue(idxToResearch, rndLevel + 1)
 		}
 
 		if (idxToResearch >= 10) {
@@ -466,7 +477,7 @@ function getResearchPreMove() {
 			let rndIdx = parseInt(idxToResearchString[0])
 			let playerIdx = parseInt(idxToResearchString[1])
 			const hullLevel = store.players[playerIdx].RnD[4]
-			return store.players[playerIdx].name + "'s " + rf.RND_STRINGS[rndIdx] + " : " + hullLevel + " ► " + (hullLevel + 1)
+			return t("actionArea.playerHull", { name: store.players[playerIdx].name, category: rndString(rndIdx), from: hullLevel, to: hullLevel + 1 })
 		}
 
 		/*for (let i = 0; i < store.players.length; i++) {
@@ -475,7 +486,7 @@ function getResearchPreMove() {
 			possibleRND.push([String(4) + String(i), store.players[i].name + "'s " + rf.RND_STRINGS[4] + " : " + hullLevel + " ► " + (hullLevel + 1)])
 		}*/
 	}
-	return "No Data"
+	return t("actionArea.noData")
 }
 
 function localSavePreResearch() {
@@ -506,11 +517,11 @@ function selectC0() {
 		}">
 		<template v-if="personal.name == undefined">
 			<div id="loggedOutText">
-				Please
-				<a href="/register">REGISTER</a>
-				or
-				<a href="/login">LOGIN</a>
-				to play a game
+				{{ $t('actionArea.loggedOutPlease') }}
+				<a href="/register">{{ $t('actionArea.register') }}</a>
+				{{ $t('actionArea.or') }}
+				<a href="/login">{{ $t('actionArea.login') }}</a>
+				{{ $t('actionArea.toPlayGame') }}
 				<br />
 			</div>
 			<br />
@@ -557,119 +568,102 @@ function selectC0() {
 		<!-- KICKOUT INFO -->
 		<template v-if="personal.kickoutRequired > 0 && !personal.canPlay() && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 			<div v-if="personal.kickoutRequired == 1" id="kickoutDiv">
-				Player
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				has used all the standard kickout time.
+				{{ $t('actionArea.kickoutStandardUsed', { name: controller.currentPlayerObj().name }) }}
 				<br />
 				<br />
-				Remaining Flex-Time:
+				{{ $t('actionArea.remainingFlexTime') }}
 				<span id="flexiKickoutTimerSpan">{{ getFlexiKickoutTImerText() }}</span>
 				<br />
 				<br />
-				For more information see
-				<b><a href="/help/" target="_blank">Help</a></b>
+				{{ $t('actionArea.forMoreInfo') }}
+				<b><a href="/help/" target="_blank">{{ $t('actionArea.help') }}</a></b>
 			</div>
 			<div v-else-if="personal.externalTournamentGame" id="kickoutDiv">
-				Under the tournament rules set by the external tournament organisers, you cannot kick other players from this type of tournament game
+				{{ $t('actionArea.tournamentNoKick') }}
 				<br />
 				<br />
-				Please use the button below to alert the admins, who will continue to make moves for this player
+				{{ $t('actionArea.tournamentAdminsHint') }}
 				<br />
 				<br />
 				<br />
 				<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
+				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t('actionArea.notNow') }}</button></span>
 
-				<button class="actionsLineButton" @click="IO.nudgeTourneyAdmins(1)">Alert Admins</button>
+				<button class="actionsLineButton" @click="IO.nudgeTourneyAdmins(1)">{{ $t('actionArea.alertAdmins') }}</button>
 			</div>
 
 			<div v-else id="kickoutDiv">
 				<template v-if="canKickoutNow()">
 					<template v-if="store.context.action !== rf.ACT_CONFIRM_KICKOUT">
-						Player
-						<b>{{ controller.currentPlayerObj().name }}</b>
-						has timed out
+						{{ $t('actionArea.timedOut', { name: controller.currentPlayerObj().name }) }}
 						<br />
-						To kick out
-						<b>{{ controller.currentPlayerObj().name }}</b>
-						press Confirm Kickout
+						{{ $t('actionArea.toKickout', { name: controller.currentPlayerObj().name }) }}
 						<br />
-						The game will proceed to the next player/phase/turn
+						{{ $t('actionArea.gameProceeds') }}
 						<br />
 						<br />
-						Otherwise you can allow
-						<b>{{ controller.currentPlayerObj().name }}</b>
-						more time - reload the page to initiate kickout again
+						{{ $t('actionArea.allowMoreTime', { name: controller.currentPlayerObj().name }) }}
 						<br />
 
 						<br />
 						<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-						<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
+						<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t('actionArea.notNow') }}</button></span>
 						<span>
-							<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
+							<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t('actionArea.keepInGame', { name: controller.currentPlayerObj().name }) }}</button>
 						</span>
-						<span><button class="actionsLineButton" id="confirmKickoutButton" @click="store.context.action = rf.ACT_CONFIRM_KICKOUT">Confirm Kickout</button></span>
+						<span><button class="actionsLineButton" id="confirmKickoutButton" @click="store.context.action = rf.ACT_CONFIRM_KICKOUT">{{ $t('actionArea.confirmKickout') }}</button></span>
 					</template>
 					<template v-if="store.context.action === rf.ACT_CONFIRM_KICKOUT">
-						This will permanently remove
-						<b>{{ controller.currentPlayerObj().name }}</b>
-						from the game
+						{{ $t('actionArea.willRemove', { name: controller.currentPlayerObj().name }) }}
 						<br />
-						<b>It cannot be undone</b>
+						<b>{{ $t('actionArea.cannotBeUndone') }}</b>
 						<br />
 						<br />
-						Try checking the chat in case they have given a reason for any temporary absence
+						{{ $t('actionArea.checkChat') }}
 						<br />
-						Please consider giving them a short grace period, in case they are just delayed
+						{{ $t('actionArea.gracePeriod') }}
 
 						<br />
 						<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-						<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
+						<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t('actionArea.notNow') }}</button></span>
 						<span>
-							<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">Permanently Kickout {{ controller.currentPlayerObj().name }}</button>
+							<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">{{ $t('actionArea.permanentlyKickout', { name: controller.currentPlayerObj().name }) }}</button>
 						</span>
 					</template>
 				</template>
 				<template v-else>
 					<br />
-					Player
-					<b>{{ controller.currentPlayerObj().name }}</b>
-					has timed out
+					{{ $t('actionArea.timedOut', { name: controller.currentPlayerObj().name }) }}
 					<br />
-					A vote from the other players is needed to kick out
-					<b>{{ controller.currentPlayerObj().name }}</b>
+					{{ $t('actionArea.voteNeeded', { name: controller.currentPlayerObj().name }) }}
 					<br />
 					<br />
-					Votes: {{ kickoutVoteCount() }}/{{ store.kickoutVoteThreshold }} ({{ kickoutVoters() }})
+					{{ $t('actionArea.votes', { votes: kickoutVoteCount(), threshold: store.kickoutVoteThreshold, voters: kickoutVoters() }) }}
 					<br />
 					<br />
 					<span v-if="!myKickoutVote()">
 						<template v-if="isLastVoteRequired()">
-							This will permanently remove
-							<b>{{ controller.currentPlayerObj().name }}</b>
-							from the game
+							{{ $t('actionArea.willRemove', { name: controller.currentPlayerObj().name }) }}
 							<br />
-							<b>It cannot be undone</b>
+							<b>{{ $t('actionArea.cannotBeUndone') }}</b>
 							<br />
 							<br />
 						</template>
-						<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout">Vote to Kickout {{ controller.currentPlayerObj().name }}</button>
+						<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout">{{ $t('actionArea.voteToKickout', { name: controller.currentPlayerObj().name }) }}</button>
 					</span>
 					<span v-else>
-						You have voted to kick out
-						<b>{{ controller.currentPlayerObj().name }}</b>
+						{{ $t('actionArea.votedToKickout', { name: controller.currentPlayerObj().name }) }}
 						<br />
-						If the other players do not also vote, you will be able to kick them out directly in
-						{{ soloKickoutCountdown }}
+						{{ $t('actionArea.voteCountdown', { time: soloKickoutCountdown }) }}
 					</span>
 					<br />
 					<br />
 					<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 					<span>
-						<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button>
+						<button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t('actionArea.notNow') }}</button>
 					</span>
 					<span>
-						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
+						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t('actionArea.keepInGame', { name: controller.currentPlayerObj().name }) }}</button>
 					</span>
 				</template>
 			</div>
@@ -690,84 +684,84 @@ function selectC0() {
 		<template v-if="shouldShowPreResearchOption()">
 			<br />
 			<div class="expertPanel">
-				<b>Expert Options</b>
-				: If unsure then ignore
+				<b>{{ $t('actionArea.expertOptions') }}</b>
+				: {{ $t('actionArea.expertIgnore') }}
 				<hr />
 				<span class="preMoveDataSpan">
 					{{ getResearchPreMove() }}
 					<span v-if="personal.name === 'admin' && personal.pov >= 0">{{ store.players[personal.pov].preMoves }}</span>
 				</span>
 				&nbsp;&nbsp;
-				<label class="choiceLabel" for="dropdownRND_PRE">Set Research:</label>
+				<label class="choiceLabel" for="dropdownRND_PRE">{{ $t('actionArea.setResearch') }}</label>
 				<select name="dropdownRND_PRE" id="dropdownRND_PRE" class="actionsLineSelect" @change="store.context.selectDropdownRND = $event.target.value">
 					<option v-for="(optionArr, idx) in getRNDoptionsPreMove()" :key="idx" :value="optionArr[0]">{{ optionArr[1] }}</option>
 				</select>
-				<button :disabled="parseInt(store.context.selectDropdownRND) === -1" class="actionsLineButton" @click="localSavePreResearch">Save Research Turn</button>
-				<span v-if="getResearchPreMove() !== 'No Data'">
+				<button :disabled="parseInt(store.context.selectDropdownRND) === -1" class="actionsLineButton" @click="localSavePreResearch">{{ $t('actionArea.saveResearchTurn') }}</button>
+				<span v-if="getResearchPreMove() !== $t('actionArea.noData')">
 					<br />
-					<button class="actionsLineButton" @click="localCancelResearch">Cancel Research Turn</button>
+					<button class="actionsLineButton" @click="localCancelResearch">{{ $t('actionArea.cancelResearchTurn') }}</button>
 				</span>
 			</div>
 		</template>
 
 		<!-- ALWAYS SHOWS ON TURN 0 -->
 		<template v-if="store.gameflow.turn === 1 && store.gameflow.phase === rf.PHASE_NEW_ERA && !store.topMenuViews.showReplay && store.topMenuViews.showIntroInfo">
-			<h2>Welcome to Indonesia!</h2>
+			<h2>{{ $t('actionArea.welcomeTitle') }}</h2>
 			<b>
-				You can view your Era cards in the "Cards" section"
+				{{ $t('actionArea.welcomeCards') }}
 				<img :src="view.getImage('icon-hand-card')" class="helpImage infoIcon" />
 				<br />
-				Change the map using "Settings"
+				{{ $t('actionArea.welcomeSettings') }}
 				<img :src="view.getImage('icon-cog')" class="helpImage infoIcon" />
 				<br />
-				You can expand/collapse the player table using the button next to it
+				{{ $t('actionArea.welcomeExpandTable') }}
 				<br />
-				View the phase order above the player table
+				{{ $t('actionArea.welcomePhaseOrder') }}
 				<br />
-				Don't forget to set your Indonesia Preferences!
-				<a class="linkOther" href="/profileIND" target="_blank">Indonesia Preferences</a>
+				{{ $t('actionArea.welcomePreferences') }}
+				<a class="linkOther" href="/profileIND" target="_blank">{{ $t('actionArea.preferences') }}</a>
 				<br />
-				For more information please see
-				<a class="linkOther" href="/IND/help/" target="_blank">Indonesia Help</a>
+				{{ $t('actionArea.welcomeHelpIntro') }}
+				<a class="linkOther" href="/IND/help/" target="_blank">{{ $t('actionArea.helpLink') }}</a>
 			</b>
 			<br />
 			<br />
 		</template>
 		<template v-else-if="store.topMenuViews.showIntroInfo === false">
-			<button class="actionsLineButton" @click="store.topMenuViews.showIntroInfo = true">Show Help</button>
+			<button class="actionsLineButton" @click="store.topMenuViews.showIntroInfo = true">{{ $t('actionArea.showHelp') }}</button>
 		</template>
 
 		<!-- ALWAYS SHOWS GAME END-->
 		<template v-if="store.gameflow.phase === rf.PHASE_GAME_OVER">
 			<div id="gameEndDiv">
-				Game Over
+				{{ $t('actionArea.gameOver') }}
 				<br />
 				<br />
 				<!-- BOT WIN -->
 				<template v-if="store.history[store.history.length - 1][3].length === 1">
-					Winner:
+					{{ $t('actionArea.winner') }}
 					<div class="playerScoreSummaryDiv">
 						<span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[store.history[store.history.length - 1][3][0]].colour)">{{ store.players[store.history[store.history.length - 1][3][0]].displayName }}</span>
 					</div>
 
 					<br />
 					<br />
-					Last Man Standing
+					{{ $t('actionArea.lastManStanding') }}
 					<br />
 					<br />
 				</template>
 				<template v-else>
-					Winner:
+					{{ $t('actionArea.winner') }}
 					<div class="playerScoreSummaryDiv">
 						<span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[store.history[store.history.length - 1][3][0][0]].colour)">{{ store.players[store.history[store.history.length - 1][3][0][0]].displayName }}</span>
 					</div>
 					{{ store.history[store.history.length - 1][3][0][1] }}
 					<!-- Winner Reason -->
-					<span v-if="store.history[store.history.length - 1][3][0][1] === store.history[store.history.length - 1][3][1][1]">- (Higher in Turn Order)</span>
+					<span v-if="store.history[store.history.length - 1][3][0][1] === store.history[store.history.length - 1][3][1][1]">{{ $t('actionArea.higherTurnOrder') }}</span>
 
 					<br />
 					<template v-if="store.players[store.history[store.history.length - 1][3][0][0]].name === personal.name">
-						<h1>Congratulations!</h1>
+						<h1>{{ $t('actionArea.congratulations') }}</h1>
 					</template>
 					<!-- REASON -->
 					<template v-for="(finalEntry, idx) in store.history[store.history.length - 1][3].slice(1)" :key="idx">
@@ -777,17 +771,17 @@ function selectC0() {
 						</div>
 						{{ finalEntry[1] }}
 						<template v-if="idx !== store.history[store.history.length - 1][3].length - 2">
-							<span v-if="finalEntry[1] === store.history[store.history.length - 1][3][idx + 2][1]">- (Higher in Turn Order)</span>
+							<span v-if="finalEntry[1] === store.history[store.history.length - 1][3][idx + 2][1]">{{ $t('actionArea.higherTurnOrder') }}</span>
 						</template>
-						<template v-else>- (Enjoying the beaches)</template>
+						<template v-else>{{ $t('actionArea.enjoyingBeaches') }}</template>
 						<br />
 					</template>
 					<br />
 					<br />
 				</template>
-				Fancy a
-				<a :href="'/createINDpage/' + String(personal.gameID) + '/'">rematch</a>
-				?
+				{{ $t('actionArea.fancyRematch') }}
+				<a :href="'/createINDpage/' + String(personal.gameID) + '/'">{{ $t('actionArea.rematch') }}</a>
+				{{ $t('actionArea.fancyRematchEnd') }}
 				<br />
 				<br />
 			</div>
@@ -821,7 +815,7 @@ function selectC0() {
 		<template v-if="!personal.canPlay() && store.gameflow.phase === rf.PHASE_BID_TURN_ORDER">
 			<div id="actions">
 				<template v-if="store.ongoingVars.newTurnOrderBids.length > 0">
-					Current new turn order:
+					{{ $t('actionArea.currentTurnOrder') }}
 					<template v-for="(entry, idx) in store.ongoingVars.newTurnOrderBids" :key="idx">
 						<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[0]].colour)">{{ store.players[entry[0]].displayName }} ({{ entry[1] * entry[2] }})</span>
 					</template>
@@ -829,7 +823,7 @@ function selectC0() {
 					<br />
 				</template>
 				<template v-else>
-					No turn order bids
+					{{ $t('actionArea.noTurnOrderBids') }}
 					<br />
 					<br />
 				</template>
@@ -854,8 +848,8 @@ function selectC0() {
 				<!-- NEW ERA > PLACE CITY -->
 				<template v-if="store.gameflow.phase === rf.PHASE_NEW_ERA && store.context.action !== rf.ACT_CONFIRM_END_TURN">
 					<!-- Display relevant era cards-->
-					<template v-if="controller.currentPlayerObj().eraCards.length === 6">Select an Era card and then place a city</template>
-					<template v-else>Place a city in a territory on your Era Card</template>
+					<template v-if="controller.currentPlayerObj().eraCards.length === 6">{{ $t('actionArea.selectEraCard') }}</template>
+					<template v-else>{{ $t('actionArea.placeCity') }}</template>
 					<br />
 					<template v-for="(cardID, idx) in controller.currentPlayerObj().eraCards" :key="idx">
 						<template v-if="rf.ORIGINAL_MAPS.includes(store.mapData.selectedMap)">
@@ -875,7 +869,7 @@ function selectC0() {
 					<div class="actionsPanel">
 						<!-- Header and Current Order in one line -->
 						<div class="bid-header-compact">
-							<span class="bid-title-compact">Turn Order Bidding:</span>
+							<span class="bid-title-compact">{{ $t('actionArea.bidTitle') }}</span>
 							<span class="current-order-compact">
 								<template v-if="store.ongoingVars.newTurnOrderBids.length > 0">
 									<template v-for="(entry, idx) in store.ongoingVars.newTurnOrderBids" :key="idx">
@@ -883,18 +877,18 @@ function selectC0() {
 									</template>
 								</template>
 								<template v-else>
-									<span class="no-bids-compact">No bids yet</span>
+									<span class="no-bids-compact">{{ $t('actionArea.noBidsYet') }}</span>
 								</template>
 							</span>
 						</div>
 
 						<!-- Your Bid Info in one line -->
 						<div class="yourTurnOrderBidLine">
-							<span class="bid-label-compact">Your bid:</span>
+							<span class="bid-label-compact">{{ $t('actionArea.yourBid') }}</span>
 							<span class="bid-value-compact primary">{{ turnbidAmount * model.getBidMultiplierAmount(controller.currentPlayerIndex()) }}</span>
 							<span class="bid-detail-compact">({{ turnbidAmount }} × {{ model.getBidMultiplierAmount(controller.currentPlayerIndex()) }}x)</span>
 							<span class="bid-cash-compact">
-								Remaining Cash:
+								{{ $t('actionArea.remainingCash') }}
 								<span class="cashIconTurnOrderBid">💵</span>
 								{{ controller.currentPlayerObj().moneyCash - turnbidAmount }}
 							</span>
@@ -910,15 +904,15 @@ function selectC0() {
 									<input type="number" v-model="turnbidAmount" @input="validateTurnOrderBidInput" :max="controller.currentPlayerObj().moneyCash" min="0" class="bid-input-compact" />
 									<button class="actionsLineButton" @click="increment(1)">+1</button>
 									<button class="actionsLineButton" @click="increment(10)">+10</button>
-									<button class="actionsLineButton" @click="increment(controller.currentPlayerObj().moneyCash)">Max</button>
+									<button class="actionsLineButton" @click="increment(controller.currentPlayerObj().moneyCash)">{{ $t('actionArea.max') }}</button>
 								</div>
 
 								<div class="bid-actions-compact">
-									<button v-if="controller.canResign()" @click="localClickResign()" class="actionsLineButton">Resign</button>
-									<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset</button>
+									<button v-if="controller.canResign()" @click="localClickResign()" class="actionsLineButton">{{ $t('actionArea.resign') }}</button>
+									<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('actionArea.reset') }}</button>
 									<button class="actionsLineButton" :disabled="!isValidBid" @click="localConfirmTurnBid">
-										<span v-if="!isValidBid">Invalid</span>
-										<span v-else>Confirm {{ turnbidAmount }} & End Turn</span>
+										<span v-if="!isValidBid">{{ $t('actionArea.invalid') }}</span>
+										<span v-else>{{ $t('actionArea.confirmEndTurn', { amount: turnbidAmount }) }}</span>
 									</button>
 								</div>
 							</div>
@@ -929,10 +923,10 @@ function selectC0() {
 				<!-- MERGERS -->
 				<template v-if="store.gameflow.phase === rf.PHASE_MERGERS">
 					<template v-if="store.ongoingVars.selectedMergerInfo.length === 0">
-						Choose companies to merge. You can merge at most 2 slots
+						{{ $t('actionArea.mergeChoose') }}
 						<template v-if="store.ongoingVars.passedPlayerIndexes.length > 0">
 							<br />
-							The following players have passed:
+							{{ $t('actionArea.mergePassedPlayers') }}
 							<template v-for="(playerIndex, idx) in store.ongoingVars.passedPlayerIndexes" :key="idx">
 								<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ store.players[playerIndex].displayName }}</span>
 							</template>
@@ -945,10 +939,10 @@ function selectC0() {
 					<!-- If not selected any companies, offer reset and pass-->
 					<template v-else>
 						<br />
-						<span class="greenText">You may click a slot that is not highlighted to see why you are unable to merge that company</span>
+						<span class="greenText">{{ $t('actionArea.mergeClickHint') }}</span>
 						<br />
-						<button v-if="store.context.action !== rf.ACT_CONFIRM_END_TURN" class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
-						<button v-if="store.context.action !== rf.ACT_CONFIRM_END_TURN" class="actionsLineButton" @click="localPassMergerTurn">Pass Merger & End Turn</button>
+						<button v-if="store.context.action !== rf.ACT_CONFIRM_END_TURN" class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('actionArea.resetWholeTurn') }}</button>
+						<button v-if="store.context.action !== rf.ACT_CONFIRM_END_TURN" class="actionsLineButton" @click="localPassMergerTurn">{{ $t('actionArea.passMergerEndTurn') }}</button>
 					</template>
 				</template>
 
@@ -959,47 +953,47 @@ function selectC0() {
 
 				<!-- PHASE: PHASE_MERGER_REMOVE_SIAP_FAJI_TERRS-->
 				<template v-if="store.gameflow.phase === rf.PHASE_MERGER_REMOVE_SIAP_FAJI_TERRS">
-					You must remove half of the Siap Saji Territories (rounded up)
+					{{ $t('actionArea.siapRemoveHalf') }}
 					<br />
-					Territories next to exisiting Siap Saji companies have already been removed
+					{{ $t('actionArea.siapNextToExisting') }}
 					<br />
-					You cannot split the company territories into unconnected sections
+					{{ $t('actionArea.siapNoSplit') }}
 					<br />
 					<br />
-					Territories to remove: {{ store.context.siapFajiTerrsToRemove }}
+					{{ $t('actionArea.siapToRemove', { count: store.context.siapFajiTerrsToRemove }) }}
 					<br />
 				</template>
 
 				<!-- PHASE: PHASE_MERGER_SHIP_REDEPLOYMENT-->
 				<template v-if="store.gameflow.phase === rf.PHASE_MERGER_SHIP_REDEPLOYMENT">
-					To redeploy ships in your new shipping company, you may remove ships from territories that contain more than one
+					{{ $t('actionArea.redeployIntro') }}
 					<br />
 					<br />
-					Max redelpoyments remaining: {{ store.context.shippingTerrsToRedeploy.length }}
+					{{ $t('actionArea.maxRedeploy', { count: store.context.shippingTerrsToRedeploy.length }) }}
 					<br />
 					<br />
-					<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
+					<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('actionArea.resetWholeTurn') }}</button>
 					<button class="actionsLineButton" @click="localEndPlayerTurn">
-						<span v-if="store.context.shippingTerrsToRedeploy.length > 0">Stop Redeploying & End Turn</span>
-						<span v-else>End Turn</span>
+						<span v-if="store.context.shippingTerrsToRedeploy.length > 0">{{ $t('actionArea.stopRedeploy') }}</span>
+						<span v-else>{{ $t('actionArea.endTurn') }}</span>
 					</button>
 				</template>
 
 				<!-- PHASE: ACQUISITIONS -->
 				<template v-if="store.gameflow.phase === rf.PHASE_ACQUISITIONS">
 					<template v-if="store.context.action === rf.ACT_ACQUIRE_COMPANY">
-						Choose a company to acquire
+						{{ $t('actionArea.chooseCompanyAcquire') }}
 						<br />
 						<template v-if="store.context.selectedCompanyToAcquire === -1">
-							<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
-							<button class="actionsLineButton" @click="localPassAcquisitiosn">Pass Acquisitions & End Turn</button>
+							<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('actionArea.resetWholeTurn') }}</button>
+							<button class="actionsLineButton" @click="localPassAcquisitiosn">{{ $t('actionArea.passAcquisitions') }}</button>
 						</template>
 					</template>
 					<template v-if="store.context.action === rf.ACT_FREE_EXPANSION">
-						<span v-if="model.getActiveCompanyDataFromID(store.context.selectedCompanyToAcquire).type === rf.COMPANY_SHIPPING">Place a ship in your new company's starting sea zone</span>
-						<span v-else>Place a goods marker in your new company's province</span>
+						<span v-if="model.getActiveCompanyDataFromID(store.context.selectedCompanyToAcquire).type === rf.COMPANY_SHIPPING">{{ $t('actionArea.placeShip') }}</span>
+						<span v-else>{{ $t('actionArea.placeGoods') }}</span>
 						<br />
-						<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
+						<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('actionArea.resetWholeTurn') }}</button>
 					</template>
 				</template>
 
@@ -1007,19 +1001,19 @@ function selectC0() {
 				<template v-if="store.gameflow.phase === rf.PHASE_OPERATIONS">
 					<!-- No company selected -->
 					<template v-if="store.context.action === rf.ACT_NONE && store.context.currentGoodJourney.length === 0">
-						Select a Company in one of your slots to Operate, or select an item directly on the map
+						{{ $t('actionArea.selectCompanyOperate') }}
 						<br />
-						<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
+						<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('actionArea.resetWholeTurn') }}</button>
 					</template>
 					<!-- Selected company OR prod marker -->
 					<template v-else-if="(store.context.action === rf.ACT_NONE || store.context.action === rf.ACT_CONFIRM_ALL_DELIVERIES) && store.context.historyObj.length >= 1">
-						You can ship your goods manually, or automatically using the table below
+						{{ $t('actionArea.shippingIntro') }}
 						<br />
-						Auto-shipping will ship the most possible goods (as per the rules) at the cheapest cost to you
+						{{ $t('actionArea.shippingAutoExplain') }}
 						<br />
-						There may be multiple solutions with the same lowest cost
+						{{ $t('actionArea.shippingMultipleSolutions') }}
 						<br />
-						If you wish to pay more than the minimum cost (perhaps to reach a particular city), you should ship your goods manually
+						{{ $t('actionArea.shippingPayMore') }}
 						<br />
 						<br />
 						<div
@@ -1038,149 +1032,149 @@ function selectC0() {
 						</div>
 
 						<br />
-						To ship your goods manually, select a production marker on the map
+						{{ $t('actionArea.shipManually') }}
 						<br />
-						You can then select eligible ships, or a city if it is connected to the current ship
+						{{ $t('actionArea.selectShips') }}
 						<br />
 						<br />
-						You must ship a total of: {{ store.context.maxPoss }}
-						<span v-if="store.context.maxPoss !== 1">goods</span>
-						<span v-else>good</span>
+						{{ $t('actionArea.mustShipTotal', { count: store.context.maxPoss }) }}
+						<span v-if="store.context.maxPoss !== 1">{{ $t('actionArea.goods') }}</span>
+						<span v-else>{{ $t('actionArea.good') }}</span>
 						<br />
-						You still need to ship: {{ store.context.maxPoss - (store.context.historyObj.length - 1) }}
-						<span v-if="store.context.maxPoss - (store.context.historyObj.length - 1) !== 1">goods</span>
-						<span v-else>good</span>
+						{{ $t('actionArea.stillNeedShip', { count: store.context.maxPoss - (store.context.historyObj.length - 1) }) }}
+						<span v-if="store.context.maxPoss - (store.context.historyObj.length - 1) !== 1">{{ $t('actionArea.goods') }}</span>
+						<span v-else>{{ $t('actionArea.good') }}</span>
 
 						<br />
-						<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
-						<button v-if="store.context.currentGoodJourney.length > 1" class="actionsLineButton" @click="restartGoodJourney">Restart Good Shipment</button>
-						<button v-if="store.context.action === rf.ACT_CONFIRM_ALL_DELIVERIES" class="actionsLineButton" @click="localConfirmDeliveries">Confirm Deliveries</button>
+						<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('actionArea.resetWholeTurn') }}</button>
+						<button v-if="store.context.currentGoodJourney.length > 1" class="actionsLineButton" @click="restartGoodJourney">{{ $t('actionArea.restartShipment') }}</button>
+						<button v-if="store.context.action === rf.ACT_CONFIRM_ALL_DELIVERIES" class="actionsLineButton" @click="localConfirmDeliveries">{{ $t('actionArea.confirmDeliveries') }}</button>
 					</template>
 
 					<template v-else-if="store.context.action === rf.ACT_FREE_EXPANSION">
-						You Must Expand For Free
+						{{ $t('actionArea.mustExpandFree') }}
 						<br />
-						Remaining Expansion: {{ store.context.remainingExpansions }}
+						{{ $t('actionArea.remainingExpansion', { count: store.context.remainingExpansions }) }}
 						<br />
-						<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
+						<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('actionArea.resetWholeTurn') }}</button>
 						<br />
 					</template>
 					<!-- Shipping company - free expansion - fully optional -->
 					<template v-else-if="store.context.action === rf.ACT_EXPAND_COMPANY && store.context.remainingExpansions > 0 && model.getActiveCompanyDataFromID(controller.currentPlayerObj().slots[store.context.selectedSlotToOperate][0]).type === rf.COMPANY_SHIPPING">
-						You may expand your Shipping Company for free
+						{{ $t('actionArea.expandShippingFree') }}
 						<br />
-						Remaining Expansion: {{ store.context.remainingExpansions }} (Expansion R&D: {{ controller.currentPlayerObj().RnD[rf.RnD_EXPANSION_IDX] }}, Remaining Company Size: {{ model.getActiveCompanyDataFromID(controller.currentPlayerObj().slots[store.context.selectedSlotToOperate][0]).combinedCapacity[store.gameflow.currentEra] - model.getSlotTerrSize(controller.currentPlayerIndex(), store.context.selectedSlotToOperate) }})
+						{{ $t('actionArea.expansionDetails', { count: store.context.remainingExpansions, rnd: controller.currentPlayerObj().RnD[rf.RnD_EXPANSION_IDX], size: model.getActiveCompanyDataFromID(controller.currentPlayerObj().slots[store.context.selectedSlotToOperate][0]).combinedCapacity[store.gameflow.currentEra] - model.getSlotTerrSize(controller.currentPlayerIndex(), store.context.selectedSlotToOperate) }) }}
 						<br />
-						<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
-						<button class="actionsLineButton" @click="model.stopExpandingEarly">Stop Expanding</button>
+						<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('actionArea.resetWholeTurn') }}</button>
+						<button class="actionsLineButton" @click="model.stopExpandingEarly">{{ $t('actionArea.stopExpanding') }}</button>
 						<br />
 					</template>
 					<!-- Land Company - OFFER paid expansion -->
 					<template v-else-if="store.context.action === rf.ACT_DECIDE_PAID_EXPANSION">
-						You may expand your {{ model.getActiveCompanyDataFromID(controller.currentPlayerObj().slots[store.context.selectedSlotToOperate][0]).typeText }} Company
+						{{ $t('actionArea.expandCompany', { type: model.getActiveCompanyDataFromID(controller.currentPlayerObj().slots[store.context.selectedSlotToOperate][0]).typeText }) }}
 						<br />
-						Each Expansion will cost:
+						{{ $t('actionArea.eachExpansionCost') }}
 						<b>{{ model.getActiveCompanyDataFromID(controller.currentPlayerObj().slots[store.context.selectedSlotToOperate][0]).goodValue }}</b>
 						<br />
 						<template v-if="store.context.action === rf.ACT_EXPAND_COMPANY">
-							Remaining Expansion: {{ store.context.remainingExpansions }}
+							{{ $t('actionArea.remainingExpansion', { count: store.context.remainingExpansions }) }}
 							<br />
 						</template>
-						<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
-						<button class="actionsLineButton" @click="localSkipExpansion">Skip Expansion & End Turn</button>
-						<button class="actionsLineButton" @click="model.setupPaidExpansion">Pay for Expansions</button>
+						<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('actionArea.resetWholeTurn') }}</button>
+						<button class="actionsLineButton" @click="localSkipExpansion">{{ $t('actionArea.skipExpansion') }}</button>
+						<button class="actionsLineButton" @click="model.setupPaidExpansion">{{ $t('actionArea.payForExpansions') }}</button>
 					</template>
 					<!-- Land Company - Paid Expansion -->
 					<template v-else-if="store.context.action === rf.ACT_EXPAND_COMPANY && store.context.remainingExpansions > 0 && rf.LAND_COMPANIES.includes(model.getActiveCompanyDataFromID(controller.currentPlayerObj().slots[store.context.selectedSlotToOperate][0]).type)">
-						You may expand your {{ model.getActiveCompanyDataFromID(controller.currentPlayerObj().slots[store.context.selectedSlotToOperate][0]).typeText }} Company
+						{{ $t('actionArea.expandCompany', { type: model.getActiveCompanyDataFromID(controller.currentPlayerObj().slots[store.context.selectedSlotToOperate][0]).typeText }) }}
 						<br />
-						Each Expansion will cost:
+						{{ $t('actionArea.eachExpansionCost') }}
 						<b>{{ model.getActiveCompanyDataFromID(controller.currentPlayerObj().slots[store.context.selectedSlotToOperate][0]).goodValue }}</b>
 						<br />
-						Remaining Expansion: {{ store.context.remainingExpansions }}
+						{{ $t('actionArea.remainingExpansion', { count: store.context.remainingExpansions }) }}
 						<br />
-						<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
-						<button class="actionsLineButton" @click="localStopPaidExpansion">Stop Expanding</button>
+						<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('actionArea.resetWholeTurn') }}</button>
+						<button class="actionsLineButton" @click="localStopPaidExpansion">{{ $t('actionArea.stopExpanding') }}</button>
 					</template>
 				</template>
 
 				<template v-if="store.gameflow.phase === rf.PHASE_CITY_GROWTH && store.context.action !== rf.ACT_CONFIRM_END_TURN">
-					There are not enough big cities to upgrade all the elgible cities
+					{{ $t('actionArea.cityGrowthIntro') }}
 					<br />
-					Select the cities you wish to upgrade
+					{{ $t('actionArea.selectCities') }}
 					<br />
 					<br />
 					<span v-if="store.context.citySize1GrowsRemaining !== 0">
-						Remaining size 1 cities to upgrade: {{ store.context.citySize1GrowsRemaining }}
+						{{ $t('actionArea.remainingSize1', { count: store.context.citySize1GrowsRemaining }) }}
 						<br />
 						<br />
 					</span>
 					<span v-if="store.context.citySize2GrowsRemaining !== 0">
-						Remaining size 2 cities to upgrade: {{ store.context.citySize2GrowsRemaining }}
+						{{ $t('actionArea.remainingSize2', { count: store.context.citySize2GrowsRemaining }) }}
 						<br />
 						<br />
 					</span>
-					<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
+					<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('actionArea.resetWholeTurn') }}</button>
 				</template>
 
 				<!-- PHASE: RND -->
 				<template v-if="store.gameflow.phase === rf.PHASE_R_AND_D">
 					<template v-if="store.context.action !== rf.ACT_CONFIRM_END_TURN">
-						Advance your research, or any player's Hull Capacity
+						{{ $t('actionArea.advanceResearch') }}
 						<br />
-						You may click on the map, or use the dropdown box
+						{{ $t('actionArea.clickMapOrDropdown') }}
 						<br />
-						<label class="choiceLabel" for="dropdownRND">Research:</label>
+						<label class="choiceLabel" for="dropdownRND">{{ $t('actionArea.research') }}</label>
 						<select name="dropdownRND" id="dropdownRND" class="actionsLineSelect" @change="store.context.selectDropdownRND = $event.target.value">
 							<option v-for="(optionArr, idx) in getRNDoptions()" :key="idx" :value="optionArr[0]">{{ optionArr[1] }}</option>
 						</select>
 						<br />
 						<button v-if="parseInt(store.context.selectDropdownRND) !== -1" class="actionsLineButton" @click="researchFromSelect">
-							<span v-if="store.context.selectDropdownRND.length === 1">Research & End Turn</span>
-							<span v-else>Research</span>
+							<span v-if="store.context.selectDropdownRND.length === 1">{{ $t('actionArea.researchEndTurn') }}</span>
+							<span v-else>{{ $t('actionArea.researchHeading') }}</span>
 						</button>
 					</template>
 					<span v-else :class="{ orangeText: store.context.justResearched.length === 3 && store.context.justResearched[2] !== controller.currentPlayerIndex() }">
-						You researched
+						{{ $t('actionArea.youResearched') }}
 						<template v-if="store.context.justResearched.length === 3 && store.context.justResearched[2] !== controller.currentPlayerIndex()">
 							<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[store.context.justResearched[2]].colour)">{{ store.players[store.context.justResearched[2]].displayName }}</span>
-							's
+							{{ $t('actionArea.namePossessive') }}
 						</template>
-						<span v-if="store.context.justResearched.length === 2 && store.context.justResearched[0] === rf.RnD_HULL_IDX">Your</span>
-						<b>{{ rf.RND_STRINGS[store.context.justResearched[0]] }} {{ model.getRndDisplayValue(store.context.justResearched[0], store.context.justResearched[1]) }}</b>
+						<span v-if="store.context.justResearched.length === 2 && store.context.justResearched[0] === rf.RnD_HULL_IDX">{{ $t('actionArea.your') }}</span>
+						<b>{{ rndString(store.context.justResearched[0]) }} {{ model.getRndDisplayValue(store.context.justResearched[0], store.context.justResearched[1]) }}</b>
 					</span>
 					<br />
 				</template>
 
 				<!-- CONFIRM END TURN -->
 				<template v-if="store.context.action === rf.ACT_CONFIRM_END_TURN">
-					<button class="actionsLineButton" @click="resetWholePlayerTurn">Reset Whole Turn</button>
-					<button class="actionsLineButton" @click="localEndPlayerTurn">End Turn</button>
+					<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('actionArea.resetWholeTurn') }}</button>
+					<button class="actionsLineButton" @click="localEndPlayerTurn">{{ $t('actionArea.endTurn') }}</button>
 				</template>
 
 				<template v-if="store.context.action === rf.ACT_CONFIRM_RESIGN && !personal.externalTournamentGame">
-					<p>Are you sure you want to resign?</p>
-					<p>Resigning will unbalance the game for the remaining players</p>
-					<p>Please carry on playing if that is at all possible</p>
-					<p>Even if you think you can't win, you can still aim for not last / most companies / biggest company / etc</p>
-					<button class="actionsLineButton" @click="resetWholePlayerTurn">Carry On Playing</button>
-					<button class="actionsLineButton" @click="Bot.actionResign">Confirm Resignation</button>
+					<p>{{ $t('actionArea.resignQuestion') }}</p>
+					<p>{{ $t('actionArea.resignUnbalance') }}</p>
+					<p>{{ $t('actionArea.resignCarryOn') }}</p>
+					<p>{{ $t('actionArea.resignAim') }}</p>
+					<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('actionArea.carryOn') }}</button>
+					<button class="actionsLineButton" @click="Bot.actionResign">{{ $t('actionArea.confirmResignation') }}</button>
 				</template>
 				<template v-else-if="store.context.action === rf.ACT_CONFIRM_RESIGN && personal.externalTournamentGame">
 					<div id="resignConfirmDiv">
-						Under the tournament rules set by the external tournament organisers, you cannot resign from this type of tournament game
+						{{ $t('actionArea.tournamentNoResign') }}
 						<br />
 						<br />
-						Please continue to play
+						{{ $t('actionArea.continuePlay') }}
 						<br />
 						<br />
-						If you are unable to continue, please contact the admins via BGG or Discord, or alert them using the button below
+						{{ $t('actionArea.contactAdmins') }}
 						<br />
-						You will probably be removed from the tournament
+						{{ $t('actionArea.willBeRemoved') }}
 						<br />
 						<br />
-						<button class="actionsLineButton" @click="resetWholePlayerTurn">Carry On Playing</button>
-						<button class="actionsLineButton" @click="IO.nudgeTourneyAdmins(0)">Alert Admins</button>
+						<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('actionArea.carryOn') }}</button>
+						<button class="actionsLineButton" @click="IO.nudgeTourneyAdmins(0)">{{ $t('actionArea.alertAdmins') }}</button>
 					</div>
 				</template>
 			</div>

@@ -15,6 +15,8 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/INDpersonal.js"
 const personal = usePersonalStore()
 
+import i18n from "../i18n"
+
 function doZoom(dir) {
 	if (IO.SUPER_USERS.includes(personal.name)) store.hiddenMoney = false
 	let doSave = false
@@ -50,7 +52,7 @@ function toggleBug() {
 async function toggleReplay() {
 	if (!store.topMenuViews.showReplay) {
 		if (store.hiddenMoney) {
-			store.gameMessages.rewindErrorText = "You cannot view a replay during a hidden money game"
+			store.gameMessages.rewindErrorText = i18n.global.t("topMenu.replayHiddenMoney")
 			return
 		}
 		store.replayResetData = funcs.simpleExportWholeModel()
@@ -123,7 +125,7 @@ function clickedLoggedInDiv() {
 		personal.pov++
 		if (personal.pov === store.players.length) personal.pov = -1
 		if (personal.pov >= 0) store.gameName = String(personal.pov) + "  :  " + store.players[personal.pov].name
-		else store.gameName = String(personal.pov) + "  :  " + "NOT INVOVLED"
+		else store.gameName = String(personal.pov) + "  :  " + i18n.global.t("topMenu.notInvolved")
 		if (personal.pov >= 0) controller.startPlayerTurn()
 	}
 	if (personal.trainingGame) {
@@ -399,9 +401,10 @@ function debugButton() {
 }
 
 function getEraText() {
-	if (store.gameflow.currentEra === rf.ERA_A) return "Era A"
-	if (store.gameflow.currentEra === rf.ERA_B) return "Era B"
-	if (store.gameflow.currentEra === rf.ERA_C) return "Era C"
+	const t = i18n.global.t
+	if (store.gameflow.currentEra === rf.ERA_A) return t("topMenu.era", { era: "A" })
+	if (store.gameflow.currentEra === rf.ERA_B) return t("topMenu.era", { era: "B" })
+	if (store.gameflow.currentEra === rf.ERA_C) return t("topMenu.era", { era: "C" })
 }
 
 function toggleMapSelect() {
@@ -438,61 +441,61 @@ function localForkGame() {
 			<a href="/">
 				<span class="topMenuItem">
 					<img :src="view.getImage('icon-house')" />
-					<span>Home</span>
+					<span>{{ $t('topMenu.home') }}</span>
 				</span>
 			</a>
 
 			<span v-if="personal.name != undefined" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showChat }]" id="menuButtonChat" @click="toggleChat">
 				<img :src="view.getImage('icon-chat')" />
-				<span>Chat</span>
+				<span>{{ $t('topMenu.chat') }}</span>
 			</span>
 
 			<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showBug }]" id="menuButtonBug" @click="toggleBug">
 				<img :src="view.getImage('icon-stop')" />
-				<span>Bug</span>
+				<span>{{ $t('topMenu.bug') }}</span>
 			</span>
 
 			<!-- IF LOGGED IN -->
 			<span v-if="personal.name != undefined" class="topMenuItem" id="menuButtonNext" @click="nextGame">
 				<img :src="view.getImage('icon-nextGame')" />
-				<span>Next</span>
+				<span>{{ $t('topMenu.next') }}</span>
 			</span>
 
 			<div class="menuDivider"></div>
 
 			<span @click="toggleMapSelect" id="menuButtonMap" class="topMenuItem" :class="{ topMenuItemSelected: store.topMenuViews.selectingBoard }">
 				<img :src="view.getImage('icon-cog')" />
-				<span>Settings</span>
+				<span>{{ $t('topMenu.settings') }}</span>
 			</span>
 
 			<a href="/IND/help/" target="_blank">
 				<span class="topMenuItem">
 					<img :src="view.getImage('icon-rulebook')" />
-					<span>Rules</span>
+					<span>{{ $t('topMenu.rules') }}</span>
 				</span>
 			</a>
 
 			<!-- IF INVOLVED PLAYER-->
 			<span v-if="personal.pov >= 0" class="topMenuItem" :class="['topMenuItem', { hasNotes: personal.notes.length > 0 }, { topMenuItemSelected: store.topMenuViews.showNotes }]" id="menuButtonNotes" @click="toggleNotes">
 				<img :src="view.getImage('icon-notebook')" />
-				<span>Notes</span>
+				<span>{{ $t('topMenu.notes') }}</span>
 			</span>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showReserve }]" id="menuButtonReserve" @click="toggleReserve">
 				<img :src="view.getImage('icon-hand-card')" />
-				<span>Cards</span>
+				<span>{{ $t('topMenu.cards') }}</span>
 			</span>
 
 			<div class="menuDivider"></div>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showHistory }]" id="menuButtonHistory" @click="toggleHistory">
 				<img :src="view.getImage('icon-scroll')" />
-				<span>History</span>
+				<span>{{ $t('topMenu.history') }}</span>
 			</span>
 
 			<span class="topMenuItem" @click="toggleReplay()">
 				<img :src="view.getImage('icon-replay')" />
-				<span>Replay</span>
+				<span>{{ $t('topMenu.replay') }}</span>
 			</span>
 
 			<div class="menuDivider"></div>
@@ -500,7 +503,7 @@ function localForkGame() {
 			<!-- IF INVOLVED PLAYER-->
 			<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showRewindPanel }]" @click="loadRewind()">
 				<img :src="view.getImage('icon-rewind')" />
-				<span>Rewind</span>
+				<span>{{ $t('topMenu.rewind') }}</span>
 			</span>
 		</div>
 
@@ -512,7 +515,7 @@ function localForkGame() {
 
 				<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 					<span id="kickoutTimerSpan">
-						Time to next kickout:
+						{{ $t('topMenu.timeToNextKickout') }}
 						<span id="kickoutTimerTimer">{{ getKickoutTImerText() }}</span>
 					</span>
 				</template>
@@ -524,10 +527,10 @@ function localForkGame() {
 				<button class="zoomButton" @click="doZoom(-1)">🔍-</button>
 				<template v-if="IO.DEBUG_USERS.includes(personal.name)">
 					<br />
-					<button class="actionsLineButton" @click="cheatStart">Cheat Start</button>
-					<button class="actionsLineButton" @click="controller.endPlayerTurn">ET</button>
-					<button class="actionsLineButton" @click="endAllTurns">End ALL Ts</button>
-					<button class="actionsLineButton" @click="debugButton">Debug</button>
+					<button class="actionsLineButton" @click="cheatStart">{{ $t('topMenu.cheatStart') }}</button>
+					<button class="actionsLineButton" @click="controller.endPlayerTurn">{{ $t('topMenu.endTurnShort') }}</button>
+					<button class="actionsLineButton" @click="endAllTurns">{{ $t('topMenu.endAllTurns') }}</button>
+					<button class="actionsLineButton" @click="debugButton">{{ $t('topMenu.debug') }}</button>
 				</template>
 			</div>
 		</div>
@@ -542,7 +545,7 @@ function localForkGame() {
 				</span>
 			</div>
 			<div id="playerLineDiv">
-				Turn Order:
+				{{ $t('topMenu.turnOrder') }}
 				<span v-for="(playerIndex, idx) in store.gameflow.turnOrder" :key="idx" class="mainEntryPlayer turnOrderSpan" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ store.players[playerIndex].displayName }}</span>
 			</div>
 		</div>
@@ -577,7 +580,7 @@ function localForkGame() {
 			:style="{
 				left: getMapBubblePosition(3) + 'px',
 			}">
-			<a target="_blank" href="/profileIND/">Click here to set your Indonesia Preferences</a>
+			<a target="_blank" href="/profileIND/">{{ $t('topMenu.preferences') }}</a>
 		</div>
 	</transition>
 
@@ -605,9 +608,9 @@ function localForkGame() {
 				left: getMapBubblePosition(3) + 'px',
 				top: '240px',
 			}">
-			As game host, you may copy this game at this point to fork the game. Other players will receive a game invite and will need to accept.
+			{{ $t('topMenu.forkIntro') }}
 			<br />
-			<button class="actionsLineButton" @click="localForkGame">Fork Game</button>
+			<button class="actionsLineButton" @click="localForkGame">{{ $t('topMenu.forkGame') }}</button>
 		</div>
 	</transition>
 
