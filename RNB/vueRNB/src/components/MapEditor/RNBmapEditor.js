@@ -124,6 +124,11 @@ export function compressMapForDB() {
 		additionalData.HM = homeMarkerLocations
 	}
 
+	// Custom Rules
+	if (store.CUSTOM_RULES.length > 0) {
+		additionalData.CR = [...store.CUSTOM_RULES]
+	}
+
 	// Add default style if flat
 	if (store.hexStyle === rf.FLAT) {
 		additionalData.ST = 1

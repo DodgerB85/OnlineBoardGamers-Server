@@ -116,6 +116,7 @@ function saveMap() {
 				messageType.value = "success"
 				context.resetContextAndHighlights()
 				funcs.clearMap()
+				store.CUSTOM_RULES.splice(0)
 				mapName.value = ""
 				mapDescription.value = ""
 				isVerified.value = false
@@ -180,6 +181,7 @@ function deleteMap() {
 				selectedMapId.value = ""
 				fetchExistingMaps()
 				funcs.clearMap()
+				store.CUSTOM_RULES.splice(0)
 				mapName.value = ""
 				mapDescription.value = ""
 				isVerified.value = false
@@ -235,6 +237,7 @@ async function loadMap() {
 
 	try {
 		funcs.importStartingMap(selectedMap.hexData)
+		store.CUSTOM_RULES = store.mapData.setupData.CR ? [...store.mapData.setupData.CR] : []
 		mapName.value = selectedMap.name
 		mapDescription.value = selectedMap.description
 		isVerified.value = selectedMap.isVerified || false

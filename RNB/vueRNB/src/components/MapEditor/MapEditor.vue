@@ -43,6 +43,17 @@ const canReplaceMap = ref(false)
 // State for showing/hiding hex icons
 const showHexIcons = ref(true)
 
+// State for showing/hiding the custom map rules panel
+const showCustomRules = ref(false)
+
+const customRuleOptions = [
+	{ value: rf.CR_START_2_DONKEY_3RD_ON_WONDER_BRICK_27, label: "Start with 2 Donkeys (3rd arrives at Wonder brick 27)" },
+	{ value: rf.CR_START_WITH_ONE_EXTRA_STONE, label: "Start with one extra Stone" },
+	{ value: rf.CR_START_WITH_ONE_EXTRA_BOARDS, label: "Start with one extra Board" },
+	{ value: rf.CR_USE_ONLY_28_NEUTRAL_BRICKS, label: "Game ends when 28 neutral bricks are used in the Wonder" },
+	{ value: rf.CR_ONLY_START_WITH_1_DONKEY, label: "Start with only 1 Donkey" },
+]
+
 //import { usePersonalStore } from "../stores/RNBpersonal.js"
 //const personal = usePersonalStore()
 
@@ -278,6 +289,7 @@ function toggleHexStyle() {
 function clearMap() {
 	context.resetContextAndHighlights()
 	funcs.clearMap()
+	store.CUSTOM_RULES.splice(0)
 	canReplaceMap.value = false
 	if (hexPileSelectionAreaRef.value && hexPileSelectionAreaRef.value.resetIsVerified) {
 		hexPileSelectionAreaRef.value.resetIsVerified()
@@ -969,6 +981,15 @@ store.refSize = 2400
 				</g>
 			</svg>
 		</div>
+		<div id="customRulesArea">
+			<button type="button" class="customRulesToggle" @click="showCustomRules = !showCustomRules">Add Custom Map Rules {{ showCustomRules ? "▾" : "▸" }}</button>
+			<div v-if="showCustomRules" class="customRulesPanel">
+				<label v-for="rule in customRuleOptions" :key="rule.value" class="customRuleLabel">
+					<input type="checkbox" :value="rule.value" v-model="store.CUSTOM_RULES" />
+					{{ rule.label }}
+				</label>
+			</div>
+		</div>
 	</div>
 </template>
 
@@ -1312,6 +1333,42 @@ store.refSize = 2400
 
 .disabledButton:hover {
 	opacity: 0.5;
+}
+
+#customRulesArea {
+	width: fit-content;
+	margin: 10px auto;
+}
+
+.customRulesToggle {
+	display: block;
+	padding: 8px 12px;
+	border: 2px solid black;
+	background-color: white;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.customRulesToggle:hover {
+	background-color: #f0f0f0;
+}
+
+.customRulesPanel {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 10px;
+	border: 2px solid black;
+	border-top: none;
+	background-color: white;
+}
+
+.customRuleLabel {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	cursor: pointer;
+	user-select: none;
 }
 
 /*
