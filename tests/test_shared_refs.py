@@ -5,10 +5,12 @@ from unittest.mock import patch
 from django.test import TestCase
 
 import FCM.FCMconstants as rfFCM
+import RNB.RNBconstants as rfRNB
 from Lobby.sharedFunctions.sharedRefs import (
     SR_gamePaceString,
     SR_getFCMstartingOptionsHTML,
     SR_getPointsForPosition,
+    SR_getRNBstartingOptionsHTML,
     SR_getTimeNow,
     SR_getTournamentTypeDisplay,
     SR_getTournamentWinnerHTML,
@@ -61,6 +63,35 @@ class TestSRgetFCMstartingOptionsHTML(TestCase):
         result = SR_getFCMstartingOptionsHTML([rfFCM.SO_NEW_MS])
         self.assertIn("so_newMS.svg", result)
         self.assertIn("New Milestones", result)
+
+
+class TestSRgetRNBstartingOptionsHTML(TestCase):
+    def test_empty_options_return_empty_html(self):
+        self.assertEqual(SR_getRNBstartingOptionsHTML([]), "")
+
+    def test_each_module_renders_its_icon(self):
+        modules = [
+            (rfRNB.SO_ELECTRICITY, "RNB_electricity.svg", "Electricity"),
+            (rfRNB.SO_MANAGEMENT, "RNB_management.svg", "Management"),
+            (rfRNB.SO_ART, "RNB_art.svg", "Art"),
+            (rfRNB.SO_TRADE, "RNB_trade.svg", "Trade"),
+            (rfRNB.SO_FUNDAMENTAL_RESEARCH, "RNB_fundamentalResearch.svg", "Fundamental Research"),
+            (rfRNB.SO_PLANES, "RNB_planes.svg", "Planes"),
+            (rfRNB.SO_BOMBS, "RNB_bombs.svg", "Bombs"),
+            (rfRNB.SO_JUMP_START, "RNB_jumpStart.svg", "Jump Start"),
+        ]
+        for option, filename, title in modules:
+            with self.subTest(option=option):
+                result = SR_getRNBstartingOptionsHTML([option])
+                self.assertIn(filename, result)
+                self.assertIn(title, result)
+
+    def test_solo_mine_option_renders_icon(self):
+        result = SR_getRNBstartingOptionsHTML([rfRNB.SO_USE_SOLO_MINE_RULES])
+        self.assertIn("RNB_useSokoMineRules.svg", result)
+
+    def test_unknown_option_is_ignored(self):
+        self.assertEqual(SR_getRNBstartingOptionsHTML([999]), "")
 
 
 class TestSRgetTournamentTypeDisplay(TestCase):
