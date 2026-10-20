@@ -172,9 +172,14 @@ def SF_serializeGame(game, user, player_context):
         current_usernames = {u.strip() for u in current_players_str.split(",") if u.strip()} if current_players_str else set()
         is_my_move = not current_players_str or user.username in current_usernames or any(s in current_usernames for s in rf.SHADOW_USERNAMES)
 
-        # For HLC, if it is factory phase, AND you have submitted your move, set it back to false
-        if game_code == "HLC" and is_my_move and game.phase == 3 and game.presenter().hasMoveData(user.username):
+        # For HLC Build Factory, submitted players are not "my move", and they
+        # see only their own name dropped - everyone else stays current so no
+        # early submission is leaked
+        if game_code == "HLC" and game.phase == 3 and (is_my_move or user.username in current_player_usernames) and game.presenter().hasMoveData(user.username):
             is_my_move = False
+            if user.username in current_player_usernames:
+                current_player_usernames = [u for u in current_player_usernames if u != user.username]
+                current_players_str = ", ".join(current_player_usernames)
         if game_code == "RNB" and is_my_move and not game.presenter().quickIsMyMove(user.username):
             is_my_move = False
 
@@ -242,6 +247,10 @@ def SF_serializeGame(game, user, player_context):
 
     # Compute kickout inline using already-extracted data to avoid extra queries
     current_username = current_players_str.split(", ")[0] if current_players_str else ""
+    if game_code == "HLC" and game.phase == 3:
+        # The flexi ledger belongs to the head of the factory queue, not seat order
+        hlcCurrent = game.presenter().getArrayOfIsCurrentPlayers()
+        current_username = hlcCurrent[0] if hlcCurrent else current_username
     kickoutRequiredNum = SF_kickoutRequired(
         game.gameStatus,
         all_usernames,

@@ -111,14 +111,12 @@ for game in allActiveGames:
     days_elapsed = daysSinceLastMove(game.latestUpdate)
 
     if 1 <= days_elapsed <= 6:
-        # NEW LOGIC: Extract usernames from the intermediate GamePlayer model
-        # Use .all() on the prefetched manager to avoid new DB hits
+        # Presenter is game-aware: HLC Build Factory (phase 3) keeps everyone
+        # current but only the head of the factory queue should be emailed
         current_game_usernames = [
-            gp.player.username
-            for gp in game.players.all()
-            if gp.is_current
-            and gp.player
-            and gp.player.username not in ["SHADOW", "FcmAI"]
+            name
+            for name in game.presenter().getArrayOfIsCurrentPlayers()
+            if name not in ["SHADOW", "FcmAI"]
         ]
 
         for username in current_game_usernames:

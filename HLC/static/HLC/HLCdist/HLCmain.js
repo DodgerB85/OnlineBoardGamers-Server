@@ -13096,6 +13096,10 @@ var IO = {
 					global.move = true
 					// Clear factory expansion excesses -- need to keep components inactive
 					global.justMoved = true
+					// Drop only your own name - later players must still look unprocessed to you
+					global.currentPlayers = global.currentPlayers.filter(function (n) {
+						return n !== global.name && n !== M.players[global.pov].name
+					})
 					V.render(M.gameFlow.unalteredTurnOrder.indexOf(global.pov))
 				}
 

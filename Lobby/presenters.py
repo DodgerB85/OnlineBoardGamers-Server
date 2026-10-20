@@ -2661,6 +2661,17 @@ class HLCpresenter(GamePresenter):
         current_players_arr = json.loads(self.gameObj.currentPlayersInTurnOrder) if self.gameObj.currentPlayersInTurnOrder and self.gameObj.currentPlayersInTurnOrder is not None and self.gameObj.currentPlayersInTurnOrder != "" else []
         return current_players_arr
 
+    def getArrayOfIsCurrentPlayers(self):
+        if self.gameObj.phase == 3:
+            # Build Factory is simultaneous but processed in turn order, and early
+            # submissions stay secret - so only the head of the queue is actually
+            # blocking, and only they should get reminders/timeout emails
+            for name in self.getCurrentPlayersInOrderArrHLC():
+                if name != "HcBot" and not self.hasMoveData(name):
+                    return [name]
+            return []
+        return super().getArrayOfIsCurrentPlayers()
+
     def isMyMove(self, loggedInPlayerUsername=None):
         currentPlayers = self.getCurrentPlayersInOrderArrHLC()
         if len(currentPlayers) == 0:
@@ -2800,6 +2811,11 @@ class HLCpresenter(GamePresenter):
                         _currentPlayers.append("HcBot")
                     else:
                         _currentPlayers.append(gp.player.username)
+
+        # Return in queue order, not seat order, so [0] is always the head of the
+        # factory queue - the kickout panel targets currentPlayers[0]
+        queue = self.getCurrentPlayersInOrderArrHLC()
+        _currentPlayers.sort(key=lambda n: queue.index(n) if n in queue else len(queue))
 
         return _currentPlayers
 

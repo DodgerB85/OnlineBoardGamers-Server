@@ -785,6 +785,10 @@ def showHLCgame(request, game_id):
     # But if the game is NOT finished, need to be able to supply 0 players to kickstart factory hang ups
     if len(currentPlayers) == 0 and currentGame.gameStatus == "FINISHED":
         currentPlayers = [presenter.getAllPlayersOrderedySeatInArray()[0]]
+    # Build Factory submissions are secret, so everyone stays current for everyone
+    # else - but a submitter may see their own name dropped from the queue
+    if currentGame.phase == 3 and presenter.hasMoveData(username):
+        currentPlayers = [n for n in currentPlayers if n != username]
     statsExcludedGame = currentGame.statsExcludedGame
     displayNames = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4"]
 
