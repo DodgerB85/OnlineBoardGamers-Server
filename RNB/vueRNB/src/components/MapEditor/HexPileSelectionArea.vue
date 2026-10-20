@@ -38,7 +38,7 @@ const props = defineProps({
 	},
 })
 
-const emit = defineEmits(["update:playerCount", "update:canReplaceMap"])
+const emit = defineEmits(["update:playerCount", "update:canReplaceMap", "showCustomRules"])
 
 // Computed property that includes admin exception for canReplaceMap
 const effectiveCanReplaceMap = computed(() => props.canReplaceMap || personal.name === "admin")
@@ -238,6 +238,7 @@ async function loadMap() {
 	try {
 		funcs.importStartingMap(selectedMap.hexData)
 		store.CUSTOM_RULES = store.mapData.setupData.CR ? [...store.mapData.setupData.CR] : []
+		if (store.CUSTOM_RULES.length > 0) emit("showCustomRules")
 		mapName.value = selectedMap.name
 		mapDescription.value = selectedMap.description
 		isVerified.value = selectedMap.isVerified || false

@@ -1222,6 +1222,11 @@ def _processRNBturn(request):
 
 # ===== PLAYER TRADE =====
 
+RNB_HIST_CHOOSE_HOME_TILE = 2
+RNB_LOCATION_DOCKED = 3
+RNB_WATER_TRANSPORTER_TYPES = {33, 34, 35}  # raft, rowboat, steamer
+
+
 def _decompress_rnb_trade_data(raw_trade_data):
     if not raw_trade_data:
         return {"playerTrades": []}
@@ -1240,16 +1245,68 @@ def _compress_rnb_gamedata(raw_data):
     return base64.b64encode(gzip.compress(json.dumps(raw_data).encode("utf-8"))).decode("utf-8")
 
 
-def _get_rnb_player_home_hex_id(raw_data, player_index):
-    if len(raw_data) <= 8:
-        return None
-    home_markers = raw_data[8]
-    if not isinstance(home_markers, list):
-        return None
-    for marker in home_markers:
-        if int(marker.get("ownerIndex", -1)) == int(player_index):
-            return marker["location"][1]
+def _get_rnb_home_location(raw_data, player_index):
+    """Home bucket location in exported compressed form, e.g. [hex] or [hex, bucket]."""
+    if len(raw_data) > 4:
+        for entry in reversed(raw_data[4]):
+            if entry[0] == RNB_HIST_CHOOSE_HOME_TILE and int(entry[1]) == int(player_index):
+                compressed = entry[3]
+                if isinstance(compressed, list) and compressed and compressed[0] >= 0:
+                    if len(compressed) > 2 and compressed[0] == 7:
+                        return [compressed[1]] if compressed[2] == 0 else [compressed[1], compressed[2]]
+                    return compressed
+    # Legacy saves that stored home markers directly at index 8
+    if len(raw_data) > 8 and isinstance(raw_data[8], list):
+        for marker in raw_data[8]:
+            if int(marker.get("ownerIndex", -1)) == int(player_index):
+                location = marker["location"]
+                if len(location) > 2 and location[0] == 7:
+                    return [location[1]] if location[2] == 0 else [location[1], location[2]]
     return None
+
+
+def _rnb_player_has_transporter_on_home(raw_data, player_index, home_location):
+    if not home_location or len(raw_data) <= 2:
+        return False
+    home_hex = home_location[0]
+    for transporter in raw_data[2]:
+        if int(transporter[0]) != int(player_index):
+            continue
+        transporter_type = transporter[1]
+        location = transporter[2]
+        if not location:
+            continue
+        if transporter_type in RNB_WATER_TRANSPORTER_TYPES:
+            # River vertices use [hex] or [hex, vertex]; sea vertices and docks use a -1/3 flag.
+            if location[0] == home_hex:
+                return True
+            if location[0] == -1 and len(location) >= 3 and location[1] == home_hex:
+                return True
+            if location[0] == RNB_LOCATION_DOCKED and len(location) >= 2 and location[1] == home_hex:
+                return True
+        elif len(location) >= 2 and location[0] == home_hex:
+            return True
+    return False
+
+
+def _rnb_validate_trade_resources(resources, res_ids, home_location):
+    if not isinstance(res_ids, list):
+        return False
+    home_hex = home_location[0]
+    seen = set()
+    for rid in res_ids:
+        if not isinstance(rid, int) or isinstance(rid, bool) or rid < 0 or rid >= len(resources):
+            return False
+        location = resources[rid][1]
+        if rid in seen or not location or location[0] != home_hex:
+            return False
+        seen.add(rid)
+    return True
+
+
+def _rnb_trade_option_enabled(currentGame):
+    loaded_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    return rfRNB.SO_TRADE in loaded_options
 
 
 def _broadcast_trade_update(game_id):
@@ -1276,9 +1333,10 @@ def _cancel_trades_for_player(trade_data, player_index):
 
 @login_required()
 def processRNBtrade(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
+    return process_game_with_mutex(request, _processRNBtrade, mutex_prefix="processTurn_")
 
+
+def _processRNBtrade(request):
     jsonData = json.loads(request.body)
     game_id = jsonData["gameID"]
 
@@ -1319,15 +1377,35 @@ def _handle_rnb_propose_trade(request, currentGame, presenter, raw_data, trade_d
     your_res_ids = jsonData["yourResIDs"]
     their_res_ids = jsonData["theirResIDs"]
 
+    if not isinstance(target_idx, int) or isinstance(target_idx, bool) or target_idx < 0:
+        return JsonResponse({"tradeError": "Invalid opponent"}, safe=False)
+
     if proposer_idx == target_idx:
         return JsonResponse({"tradeError": "Cannot trade with yourself"}, safe=False)
 
     if currentGame.phase != rfRNB.PHASE_WONDER_TO:
         return JsonResponse({"tradeError": "Trade only allowed during wonder phase"}, safe=False)
 
-    loaded_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-    if rfRNB.SO_TRADE not in loaded_options:
+    if not _rnb_trade_option_enabled(currentGame):
         return JsonResponse({"tradeError": "Trade option not enabled"}, safe=False)
+
+    if not your_res_ids and not their_res_ids:
+        return JsonResponse({"tradeError": "Trade must include goods"}, safe=False)
+
+    if len(raw_data) <= 3:
+        return JsonResponse({"tradeError": "Game data not available"}, safe=False)
+    proposer_home = _get_rnb_home_location(raw_data, proposer_idx)
+    target_home = _get_rnb_home_location(raw_data, target_idx)
+    if proposer_home is None or target_home is None:
+        return JsonResponse({"tradeError": "Could not find home tiles"}, safe=False)
+    if not _rnb_player_has_transporter_on_home(raw_data, proposer_idx, proposer_home):
+        return JsonResponse({"tradeError": "You need a transporter on your home tile"}, safe=False)
+    if not _rnb_player_has_transporter_on_home(raw_data, target_idx, target_home):
+        return JsonResponse({"tradeError": "Opponent has no transporter on their home tile"}, safe=False)
+    if not _rnb_validate_trade_resources(raw_data[3], your_res_ids, proposer_home):
+        return JsonResponse({"tradeError": "Offered goods are not on your home tile"}, safe=False)
+    if not _rnb_validate_trade_resources(raw_data[3], their_res_ids, target_home):
+        return JsonResponse({"tradeError": "Requested goods are not on their home tile"}, safe=False)
 
     if len(trade_data.get("playerTrades", [])) >= 5:
         return JsonResponse({"tradeError": "Maximum concurrent trades reached"}, safe=False)
@@ -1366,33 +1444,43 @@ def _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_da
     if currentGame.phase != rfRNB.PHASE_WONDER_TO:
         return JsonResponse({"tradeError": "Trade only allowed during wonder phase"}, safe=False)
 
+    if not _rnb_trade_option_enabled(currentGame):
+        return JsonResponse({"tradeError": "Trade option not enabled"}, safe=False)
+
     proposer_idx = trade_entry[0]
     offered_res_ids = trade_entry[2]  # proposer offered these
     requested_res_ids = trade_entry[3]  # acceptor gives these
 
-    proposer_home_hex = _get_rnb_player_home_hex_id(raw_data, proposer_idx)
-    target_home_hex = _get_rnb_player_home_hex_id(raw_data, acceptor_idx)
+    matching_trades = [
+        t
+        for t in trade_data.get("playerTrades", [])
+        if len(t) >= 5 and t[0] == proposer_idx and t[1] == acceptor_idx and t[2] == offered_res_ids and t[3] == requested_res_ids
+    ]
+    if not matching_trades:
+        return JsonResponse({"tradeError": "Trade not found"}, safe=False)
 
-    # Fallback: use client-provided hex IDs if server can't find them in gameData
-    if proposer_home_hex is None:
-        proposer_home_hex = jsonData.get("proposerHomeHex")
-    if target_home_hex is None:
-        target_home_hex = jsonData.get("targetHomeHex")
+    if len(raw_data) <= 3:
+        return JsonResponse({"tradeError": "Game data not available"}, safe=False)
+    proposer_home = _get_rnb_home_location(raw_data, proposer_idx)
+    target_home = _get_rnb_home_location(raw_data, acceptor_idx)
+    if proposer_home is None or target_home is None:
+        return JsonResponse({"tradeError": "Could not find home tiles"}, safe=False)
+    if not _rnb_player_has_transporter_on_home(raw_data, proposer_idx, proposer_home) or not _rnb_player_has_transporter_on_home(
+        raw_data, acceptor_idx, target_home
+    ):
+        return JsonResponse({"tradeError": "Both players need a transporter on their home tile"}, safe=False)
+    if not _rnb_validate_trade_resources(raw_data[3], offered_res_ids, proposer_home) or not _rnb_validate_trade_resources(
+        raw_data[3], requested_res_ids, target_home
+    ):
+        return JsonResponse({"tradeError": "Trade goods are no longer on the home tiles"}, safe=False)
 
-    if proposer_home_hex is not None and target_home_hex is not None:
-        # gameData format (exportRNBmodel):
-        #   0 players, 1 wonderBricks, 2 transporters, 3 resources, 4 history,
-        #   5 mineContent, 6 gameflow, 7 ongoingVars
-        # resource entry: [type, [location], uniqueID]
-        #   location is [hexID] for bucket 0 (home tile)
-        all_resources = raw_data[3]
-        for rid in offered_res_ids:
-            if rid < len(all_resources):
-                all_resources[rid][1] = [target_home_hex]
-        for rid in requested_res_ids:
-            if rid < len(all_resources):
-                all_resources[rid][1] = [proposer_home_hex]
-        currentGame.gameData = _compress_rnb_gamedata(raw_data)
+    # gameData resource location is compressed: [hexID] for bucket 0, [hexID, bucketID] otherwise.
+    all_resources = raw_data[3]
+    for rid in offered_res_ids:
+        all_resources[rid][1] = list(target_home)
+    for rid in requested_res_ids:
+        all_resources[rid][1] = list(proposer_home)
+    currentGame.gameData = _compress_rnb_gamedata(raw_data)
 
     trade_data["playerTrades"] = [
         t for t in trade_data.get("playerTrades", [])

@@ -4,7 +4,6 @@ import * as model from "../js/RNBmodel"
 import * as view from "../js/RNBview"
 import * as highlight from "../js/RNBhighlight"
 import * as IO from "../backend/RNB_IO"
-import * as funcs from "../js/RNBfuncs"
 
 import { useModelStore } from "../stores/RNBstore.js"
 import { usePersonalStore } from "../stores/RNBpersonal.js"
@@ -51,6 +50,13 @@ const theirResIDsOnHomeTile = computed(() => {
 	return store.ALL_RESOURCES.filter((r) => r.location[0] === rf.LOCATION_BUCKET && r.location[1] === hexID).map((r) => r.id)
 })
 
+const proposerHasTransporter = computed(() => {
+	if (personal.pov < 0) return false
+	const homeMarker = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === personal.pov)
+	if (!homeMarker) return false
+	return model.getTransportersByPlayerIndexAndHexID(personal.pov, homeMarker.location[1]).length > 0
+})
+
 const opponentHasTransporter = computed(() => {
 	if (tradeOpponentIdx.value < 0) return false
 	const homeMarker = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === tradeOpponentIdx.value)
@@ -60,7 +66,7 @@ const opponentHasTransporter = computed(() => {
 })
 
 const canPropose = computed(() => {
-	return tradeOpponentIdx.value >= 0 && (tradeYourResIDs.value.length > 0 || tradeTheirResIDs.value.length > 0) && opponentHasTransporter.value && store.context.tradeRelevantOutgoing.length < rf.MAX_PLAYER_TRADES
+	return tradeOpponentIdx.value >= 0 && (tradeYourResIDs.value.length > 0 || tradeTheirResIDs.value.length > 0) && proposerHasTransporter.value && opponentHasTransporter.value && store.context.tradeRelevantOutgoing.length < rf.MAX_PLAYER_TRADES
 })
 
 const incomingCount = computed(() => store.context.tradeRelevantIncoming.length)
@@ -221,6 +227,7 @@ function resName(resID) {
 					</select>
 
 					<div v-if="tradeOpponentIdx >= 0">
+						<div v-if="!proposerHasTransporter" class="donkeyWarningSpan">You have no transporter on your home tile</div>
 						<div v-if="!opponentHasTransporter" class="donkeyWarningSpan">Opponent has no transporter on their home tile</div>
 
 						<div class="tradeGoodsSection">
