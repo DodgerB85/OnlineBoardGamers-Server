@@ -404,7 +404,7 @@ store.refSize = 2400
 
 <template>
 	<div id="wholeMapEditorDiv">
-		<HexPileSelectionArea ref="hexPileSelectionAreaRef" :playerCount="playerCount" @update:playerCount="setPlayerCount" :canReplaceMap="canReplaceMap" @update:canReplaceMap="setCanReplaceMap" />
+		<HexPileSelectionArea ref="hexPileSelectionAreaRef" :playerCount="playerCount" @update:playerCount="setPlayerCount" :canReplaceMap="canReplaceMap" @update:canReplaceMap="setCanReplaceMap" @showCustomRules="showCustomRules = true" />
 		<!-- Buttons -->
 		<div class="mapButtonsDiv">
 			<button class="actionsLineButton showIconsButton" @click="toggleHexIcons" :title="showHexIcons ? 'Hide Hex Icons' : 'Show Hex Icons'">
@@ -982,12 +982,16 @@ store.refSize = 2400
 			</svg>
 		</div>
 		<div id="customRulesArea">
-			<button type="button" class="customRulesToggle" @click="showCustomRules = !showCustomRules">Add Custom Map Rules {{ showCustomRules ? "▾" : "▸" }}</button>
-			<div v-if="showCustomRules" class="customRulesPanel">
-				<label v-for="rule in customRuleOptions" :key="rule.value" class="customRuleLabel">
-					<input type="checkbox" :value="rule.value" v-model="store.CUSTOM_RULES" />
-					{{ rule.label }}
-				</label>
+			<button type="button" class="customRulesToggle" @click="showCustomRules = !showCustomRules" :aria-expanded="showCustomRules">Add Custom Map Rules {{ showCustomRules ? "▾" : "▸" }}</button>
+			<div class="customRulesCollapse" :class="{ open: showCustomRules }" :inert="!showCustomRules">
+				<div class="customRulesCollapseInner">
+					<div class="customRulesPanel">
+						<label v-for="rule in customRuleOptions" :key="rule.value" class="customRuleLabel">
+							<input type="checkbox" :value="rule.value" v-model="store.CUSTOM_RULES" />
+							{{ rule.label }}
+						</label>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -1336,12 +1340,13 @@ store.refSize = 2400
 }
 
 #customRulesArea {
-	width: fit-content;
+	width: max-content;
 	margin: 10px auto;
 }
 
 .customRulesToggle {
 	display: block;
+	width: 100%;
 	padding: 8px 12px;
 	border: 2px solid black;
 	background-color: white;
@@ -1351,6 +1356,21 @@ store.refSize = 2400
 
 .customRulesToggle:hover {
 	background-color: #f0f0f0;
+}
+
+.customRulesCollapse {
+	display: grid;
+	grid-template-rows: 0fr;
+	transition: grid-template-rows 0.3s ease;
+}
+
+.customRulesCollapse.open {
+	grid-template-rows: 1fr;
+}
+
+.customRulesCollapseInner {
+	overflow: hidden;
+	min-height: 0;
 }
 
 .customRulesPanel {

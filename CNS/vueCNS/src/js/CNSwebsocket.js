@@ -3,6 +3,7 @@ import { usePersonalStore } from "../stores/CNSpersonal.js"
 
 import * as IO from "./CNS_IO"
 import * as view from "./CNSview"
+import i18n from "../i18n"
 
 export var CNSwebSocket
 let CNSconnectionPromise = null // Track the in-progress connection
@@ -136,7 +137,7 @@ async function CNSwebSocketOnInfo(IncomingInfo) {
 							let decodedGameName = tempElement.textContent
 
 							Notification.requestPermission(function (status) {
-								const title = "It is your turn in Cannes"
+								const title = i18n.global.t("io.yourTurnNotification")
 
 								const options = {
 									body: "" + decodedGameName + ": " + store.gameflow.turn + " - " + view.phaseStr(),

@@ -11,6 +11,7 @@
  */
 
 import * as map from "./CNSmap"
+import i18n from "../i18n"
 
 import seedrandom from "seedrandom"
 import hexlib from "./hexlib"
@@ -139,7 +140,7 @@ export function decompressChatData(data) {
 		//var chatArray = JSON.parse(step1)
 	} else chatArray = []
 
-	chatArray.push(["WelcomeBot", 0, "Welcome to Cannes Online!SNLBSNLBIf you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"])
+	chatArray.push(["WelcomeBot", 0, i18n.global.t("io.welcomeChat")])
 
 	return chatArray
 }

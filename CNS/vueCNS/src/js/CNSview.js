@@ -6,6 +6,7 @@
  */
 
 import * as rf from './CNSreference'
+import i18n from '../i18n'
 
 import { useModelStore } from '../stores/CNSstore.js'
 import { usePersonalStore } from '../stores/CNSpersonal.js'
@@ -14,12 +15,12 @@ import { usePersonalStore } from '../stores/CNSpersonal.js'
 export function phaseStr() {
   const store = useModelStore()
 
-  if (store.gameflow.phase === rf.PHASE_PLACE_HEXES) return "Place Hexes"
-  if (store.gameflow.phase === rf.PHASE_NETWORK) return "Develop Network"
-  if (store.gameflow.phase === rf.PHASE_PRODUCTION) return "Production"
-  if (store.gameflow.phase === rf.PHASE_CONFIRM_PIRATE) return "Production"
-  if (store.gameflow.phase === rf.PHASE_MOVE_PIRATE) return "Move Pirates"
-  if (store.gameflow.phase === rf.PHASE_STORE_RES) return "Store Resources"
+  if (store.gameflow.phase === rf.PHASE_PLACE_HEXES) return i18n.global.t("phases.placeHexes")
+  if (store.gameflow.phase === rf.PHASE_NETWORK) return i18n.global.t("phases.developNetwork")
+  if (store.gameflow.phase === rf.PHASE_PRODUCTION) return i18n.global.t("phases.production")
+  if (store.gameflow.phase === rf.PHASE_CONFIRM_PIRATE) return i18n.global.t("phases.production")
+  if (store.gameflow.phase === rf.PHASE_MOVE_PIRATE) return i18n.global.t("phases.movePirates")
+  if (store.gameflow.phase === rf.PHASE_STORE_RES) return i18n.global.t("phases.storeResources")
 
 }
 

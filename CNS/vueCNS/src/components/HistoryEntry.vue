@@ -4,6 +4,7 @@ import * as refFuncs from '../js/CNSfuncs'
 import * as view from '../js/CNSview'
 import * as history from '../js/CNShistory'
 import * as replay from '../js/CNSreplay'
+import i18n from '../i18n'
 
 import { useModelStore } from "../stores/CNSstore.js";
 const store = useModelStore()
@@ -28,14 +29,12 @@ function getHistLinkText(entry3) {
     else if (entry3[i].length === 4) numMoves++
   }
   if (numMoves === 0) {
-    if (numAdds === 1) return "Adds 1 Link"
-    else if (numAdds === 2) return "Adds 2 Links"
+    if (numAdds > 0) return i18n.global.t("history.addsLinks", numAdds)
   }
   else if (numAdds === 0) {
-    if (numMoves === 1) return "Moves 1 Link"
-    else if (numMoves === 2) return "Moves 2 Links"
+    if (numMoves > 0) return i18n.global.t("history.movesLinks", numMoves)
   }
-  else if (numAdds === 1 && numMoves === 1) return "Adds a Link and Moves a Link"
+  else if (numAdds === 1 && numMoves === 1) return i18n.global.t("history.addsAndMovesLink")
 }
 function canSelectPirateEntry(entry3) {
   if (store.topMenuViews.showReplay) return true
@@ -50,7 +49,7 @@ function canSelectPirateEntry(entry3) {
     <div class="log separator mainEntry" :class="{ 'selectableHistory': store.topMenuViews.showReplay }"
       @click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
       <div class="new_turn">
-        Welcome to Cannes!<br />
+        {{ $t("history.welcome") }}<br />
         <div v-for="(player, idx) in store.players" :key="idx" class="playerScoreSummaryDiv">
           <span class="mainEntryPlayerNewTurn"
             :class="'mainEntryPlayer' + personal.getCorrectedColour(player.colour)">{{ store.players[idx].name }}
@@ -72,7 +71,7 @@ function canSelectPirateEntry(entry3) {
         <span class="mainEntryPlayer"
           :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
             store.players[entry[1]].displayName }} </span>
-        Adds {{ (entry[3].length === 1) ? '1 Tile' : '2 Tiles' }}
+        {{ $t("history.addsTiles", entry[3].length) }}
         <div class="singleHexDiv" v-for="(singleAdd, idx) in entry[3]" :key="idx">
           <svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
             <polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500" :fill="`url(#pattern${singleAdd[0]})`"
@@ -95,7 +94,7 @@ function canSelectPirateEntry(entry3) {
         <span class="mainEntryPlayer"
           :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
             store.players[entry[1]].displayName }} </span>
-        Stores:
+        {{ $t("history.stores") }}
         <div class="singleHexDiv">
           <svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
             <polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500" :fill="`url(#pattern${entry[3]})`"
@@ -132,9 +131,9 @@ function canSelectPirateEntry(entry3) {
       <span class="mainEntryPlayer"
         :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
           store.players[entry[1]].displayName }} </span>
-      Adds a Cigar
+      {{ $t("history.addsCigar") }}
       <template v-if="entry[3].length > 2">
-        . New Resources:
+        {{ $t("history.newResources") }}
         <template v-for="(res, idx) in entry[3][2]" :key="idx">
           <img :src="view.getImage('res' + String(res))" class="stdResImg storedResImg" />
         </template>
@@ -155,7 +154,7 @@ function canSelectPirateEntry(entry3) {
         <span class="mainEntryPlayer"
           :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
             store.players[entry[1]].displayName }} </span>
-        Produces:
+        {{ $t("history.produces") }}
         <!-- FROM TILES -->
         <template v-for="(amount, index) in entry[3][0]" :key="index">
           <div v-if="amount !== 0" class="singleResDiv">
@@ -167,7 +166,7 @@ function canSelectPirateEntry(entry3) {
 
       <!-- Add in already stored Res -->
       <template v-if="entry[3].length > 1">
-        And adds from storage:
+        {{ $t("history.addsFromStorage") }}
         <template v-for="(res, idx) in entry[3][1]" :key="idx">
           <img v-if="res < 20 && ![rf.RES_MOVIE_ACTION, rf.RES_MOVIE_GIRLIE, rf.RES_MOVIE_SCIFI].includes(res)"
             :src="view.getImage('res' + String(res))" class="stdResImg storedResImg" />
@@ -190,7 +189,7 @@ function canSelectPirateEntry(entry3) {
       <span class="mainEntryPlayer"
         :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
           store.players[entry[1]].displayName }} </span>
-      Converts:
+      {{ $t("history.converts") }}
       <!-- Only One Res Input -->
       <template
         v-if="rf.getInputForProduction(entry[3][0]).length === 1 || rf.getInputForProduction(entry[3][0])[0] === rf.getInputForProduction(entry[3][0])[1]">
@@ -220,7 +219,7 @@ function canSelectPirateEntry(entry3) {
       <span class="mainEntryPlayer"
         :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
           store.players[entry[1]].displayName }} </span>
-      Increases Price:
+      {{ $t("history.increasesPrice") }}
       <img :src="view.getImage('res' + String(entry[3][0]))" class="movieImg" />
       <div class="rightArrow"></div>
       <span class="bigFont">€ {{ entry[3][1] }} M</span>
@@ -239,19 +238,22 @@ function canSelectPirateEntry(entry3) {
       <span class="mainEntryPlayer"
         :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
           store.players[entry[1]].displayName }} </span>
-      Sells Movies to Cannes:<br>
+      {{ $t("history.sellsMoviesToCannes") }}<br>
       <template v-for="(amount, idx) in entry[3][0]" :key="idx">
         <div v-if="amount > 0" class="movieSalesDiv">
           <span class="bigFont">{{ amount }}x </span>
           <img :src="view.getImage('res' + String(idx + rf.RES_MOVIE_OFFET))" class="movieImg" />
-          <span class="bigFont"> for € {{ entry[3][1][idx] + amount }} M, Total: € {{ amount * (entry[3][1][idx] +
-            amount) }} M</span>
+          <span class="bigFont"> {{ $t("history.saleLine", { price: entry[3][1][idx] + amount, total: amount * (entry[3][1][idx] + amount) }) }}</span>
         </div>
       </template>
-      <div><span class="bigFont">Grand Total: € {{ entry[3][0][0] * (entry[3][1][0] + entry[3][0][0]) + entry[3][0][1] *
-        (entry[3][1][1] + entry[3][0][1]) + entry[3][0][2] * (entry[3][1][2] + entry[3][0][2]) }} M
-          <br />New Score: € {{ entry[3][2][0] }} M</span></div>
-      New Prices:<br />
+      <div><span class="bigFont">{{ $t("history.grandTotal", {
+        total:
+          entry[3][0][0] * (entry[3][1][0] + entry[3][0][0]) +
+          entry[3][0][1] * (entry[3][1][1] + entry[3][0][1]) +
+          entry[3][0][2] * (entry[3][1][2] + entry[3][0][2])
+      }) }}
+          <br />{{ $t("history.newScore", { score: entry[3][2][0] }) }}</span></div>
+      {{ $t("history.newPrices") }}<br />
       <template v-for="(amount, idx) in entry[3][1]" :key="idx">
         <div v-if="amount > 0" class="newPriceDiv">
           <span class="bigFont">&nbsp;€ {{ amount }} M </span>
@@ -275,35 +277,35 @@ function canSelectPirateEntry(entry3) {
           store.players[entry[1]].displayName }} </span>
       <!-- Multiple SALES, MOVE TO PARTY -->
       <template v-if="entry[3][0] === 0">
-        Pirates
+        {{ $t("history.pirates") }}
         <img v-for="(res, idx) in entry[3].slice(1, -1)" :key="idx" :src="view.getImage('res' + String(res))"
           class="stdResImg" />
-        <span v-if="entry[3].length % 2 === 1"><br />Ship moves to other party</span>
-        <span v-else><br />Ship ends up in same party</span>
+        <span v-if="entry[3].length % 2 === 1"><br />{{ $t("history.shipMovesOtherParty") }}</span>
+        <span v-else><br />{{ $t("history.shipEndsSameParty") }}</span>
       </template>
       <!-- SINGLE SALE, MOVE TO OTHER PARTY -->
       <template v-if="entry[3][0] === 1">
-        Pirates
+        {{ $t("history.pirates") }}
         <img :src="view.getImage('res' + String(entry[3][1]))" class="stdResImg" />
-        Ship moves to other party
+        {{ $t("history.shipMovesOtherParty") }}
       </template>
       <!-- No other player invovled, show income this way -->
       <template v-if="entry[3][0] <= 1">
-        <br />Score: € {{ entry[3].slice(1, -1).length * 4 }} M
+        <br />{{ $t("history.score", { score: entry[3].slice(1, -1).length * 4 }) }}
       </template>
 
       <!-- SINGLE SALE, END TURN-->
       <template v-if="entry[3][0] === 11">
-        Pirates
+        {{ $t("history.pirates") }}
         <img :src="view.getImage('res' + String(entry[3][1]))" class="stdResImg" />
-        Score: € 4 M
+        {{ $t("history.score", { score: 4 }) }}
       </template>
       <!-- Multiple SALES, END TURN -->
       <template v-if="entry[3][0] === 10">
-        Pirates
+        {{ $t("history.pirates") }}
         <img v-for="(res, idx) in entry[3].slice(1)" :key="idx" :src="view.getImage('res' + String(res))"
           class="stdResImg" />
-        <br />Score: € {{ entry[3].slice(1).length * 4 }} M
+        <br />{{ $t("history.score", { score: entry[3].slice(1).length * 4 }) }}
       </template>
     </div>
   </template>
@@ -320,7 +322,7 @@ function canSelectPirateEntry(entry3) {
         <span class="mainEntryPlayer"
           :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
             store.players[entry[1]].displayName }} </span>
-        Moves the Pirates to
+        {{ $t("history.movesPiratesTo") }}
         <div class="singleHexDiv">
           <svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
             <polygon points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500" :fill="`url(#pattern${entry[3][0]})`"
@@ -344,7 +346,7 @@ function canSelectPirateEntry(entry3) {
         <span class="mainEntryPlayer"
           :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
             store.players[entry[1]].displayName }} </span>
-        Stores:
+        {{ $t("history.stores") }}
         <template v-for="(res, idx) in entry[3]" :key="idx">
           <div v-if="res >= 20" class="singleHexDiv">
             <svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
@@ -366,7 +368,7 @@ function canSelectPirateEntry(entry3) {
   <template v-if="entry[0] === rf.HIST_NEW_TURN">
     <div class="log separator mainEntry" :class="{ 'selectableHistory': store.topMenuViews.showReplay }"
       @click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
-      <div class="new_turn">Start of turn {{ entry[3][0] }}
+      <div class="new_turn">{{ $t("history.startOfTurn", { turn: entry[3][0] }) }}
         <br />
         <div v-for="(score, idx) in entry[3][1]" :key="idx" class="playerScoreSummaryDiv">
           <span class="mainEntryPlayerNewTurn"
@@ -385,12 +387,12 @@ function canSelectPirateEntry(entry3) {
         <span>{{ refFuncs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
       </div>
       <div class="mainEntry new_turn">
-        Game Ended<br /><br />
-        <span v-if="store.oldBoysNetwork.length >= 10">All Cigars Used</span>
-        <span v-else-if="store.hexDrawPile.length + store.hexDiscardPile.length === 0">All Tiles Used</span>
-        <span v-else>One Player Remaining</span>
+        {{ $t("history.gameEnded") }}<br /><br />
+        <span v-if="store.oldBoysNetwork.length >= 10">{{ $t("history.allCigarsUsed") }}</span>
+        <span v-else-if="store.hexDrawPile.length + store.hexDiscardPile.length === 0">{{ $t("history.allTilesUsed") }}</span>
+        <span v-else>{{ $t("history.onePlayerRemaining") }}</span>
         <br /><br />
-        <u>Winner</u><br />
+        <u>{{ $t("history.winner") }}</u><br />
         <div class="playerScoreSummaryDiv">
           <span class="mainEntryPlayerNewTurn"
             :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][0][0]].colour)">{{
@@ -407,7 +409,7 @@ function canSelectPirateEntry(entry3) {
         <span>{{ refFuncs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
       </div>
       <div class="mainEntry rewind">
-        Game rewound to here by {{ store.players[entry[3][0]].name }}
+        {{ $t("history.gameRewound", { name: store.players[entry[3][0]].name }) }}
       </div>
     </div>
   </template>
@@ -425,7 +427,7 @@ function canSelectPirateEntry(entry3) {
             {{ entry[3][0] }}
           </span>
         </div>
-        Resigns
+        {{ $t("history.resigns") }}
       </div>
     </div>
   </template>
@@ -437,7 +439,7 @@ function canSelectPirateEntry(entry3) {
         <span>{{ refFuncs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
       </div>
       <div class="mainEntry rewind">
-        {{ entry[3][0] }} was kicked out
+        {{ $t("history.wasKickedOut", { name: entry[3][0] }) }}
       </div>
     </div>
   </template>

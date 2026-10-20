@@ -12,8 +12,9 @@ import * as funcs from "../js/CNSfuncs"
 import * as model from "../js/CNSmodel"
 import * as map from "../js/CNSmap"
 import * as Bot from "../js/CNSbot"
+import i18n from "../i18n"
 
-import { ref, watch, onUnmounted } from "vue"
+import { ref, computed, watch, onUnmounted } from "vue"
 
 import { useModelStore } from "../stores/CNSstore.js"
 const store = useModelStore()
@@ -84,9 +85,7 @@ function stopStoringResources() {
 }
 
 function getOrdinal(num) {
-	if (num === 2) return "2nd"
-	else if (num === 3) return "3rd"
-	else if (num === 4) return "4th"
+	return i18n.global.t("action.ordinal" + num)
 }
 function localCheckResign() {
 	store.context.action = rf.ACT_CONFIRM_RESIGN
@@ -143,11 +142,11 @@ function kickoutVoteCount() {
 
 function kickoutVoters() {
 	const target = currentKickoutTarget()
-	let voters = "None"
+	let voters = i18n.global.t("common.none")
 	for (const voter in store.kickoutVotesData) {
 		const vote = store.kickoutVotesData[voter]
 		if (Array.isArray(vote) && vote[0] === target) {
-			if (voters === "None") voters = String(voter)
+			if (voters === i18n.global.t("common.none")) voters = String(voter)
 			else voters += ", " + voter
 		}
 	}
@@ -197,6 +196,8 @@ onUnmounted(() => {
 	if (soloKickoutCountdownTimer != null) clearInterval(soloKickoutCountdownTimer)
 })
 
+const totalAvailableResources = computed(() => store.context.availableResources.reduce((acc, curr) => acc + curr, 0))
+
 function localSellMovies() {
 	model.sellMovies(controller.currentPlayerIndex())
 }
@@ -210,11 +211,10 @@ function cancelSales() {
 	<div id="actionAreaDiv">
 		<template v-if="personal.name == undefined">
 			<div id="loggedOutText">
-				Please
-				<a href="/register">REGISTER</a>
-				or
-				<a href="/login">LOGIN</a>
-				to play a game
+				<i18n-t keypath="action.loggedOutPrompt" tag="span" scope="global">
+					<template #register><a href="/register">{{ $t("action.register") }}</a></template>
+					<template #login><a href="/login">{{ $t("action.login") }}</a></template>
+				</i18n-t>
 				<br />
 			</div>
 			<br />
@@ -222,102 +222,86 @@ function cancelSales() {
 
 		<template v-if="personal.kickoutRequired > 0 && !personal.canPlay() && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 			<div v-if="personal.kickoutRequired == 1" id="kickoutDiv">
-				Player
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				has used all the standard kickout time.
+				{{ $t("action.kickoutUsedAllTime", { name: controller.currentPlayerObj().name }) }}
 				<br />
 				<br />
-				Remaining Flex-Time:
+				{{ $t("action.remainingFlexTime") }}
 				<span id="flexiKickoutTimerSpan">{{ getFlexiKickoutTImerText() }}</span>
 				<br />
 				<br />
-				For more information see
-				<b><a href="/help/" target="_blank">Help</a></b>
+				<i18n-t keypath="action.forMoreInfo" tag="span" scope="global">
+					<template #help><b><a href="/help/" target="_blank">{{ $t("action.help") }}</a></b></template>
+				</i18n-t>
 			</div>
 			<div v-else id="kickoutDiv">
 				<br />
 				<template v-if="canKickoutNow()">
 					<template v-if="store.context.action !== rf.ACT_CONFIRM_KICKOUT">
-						Player
-						<b>{{ controller.currentPlayerObj().name }}</b>
-						has timed out
+						{{ $t("action.kickoutTimedOut", { name: controller.currentPlayerObj().name }) }}
 						<br />
-						To kick out
-						<b>{{ controller.currentPlayerObj().name }}</b>
-						press Confirm Kickout
+						{{ $t("action.kickoutDirectPrompt", { name: controller.currentPlayerObj().name }) }}
 						<br />
-						The game will proceed to the next player/phase/turn
+						{{ $t("action.kickoutProceed") }}
 						<br />
 						<br />
-						Otherwise you can allow
-						<b>{{ controller.currentPlayerObj().name }}</b>
-						more time - reload the page to initiate kickout again
+						{{ $t("action.kickoutAllowMoreTimeReload", { name: controller.currentPlayerObj().name }) }}
 						<br />
 
 						<br />
 						<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-						<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
+						<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("action.notNow") }}</button></span>
 						<span>
-							<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
+							<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("action.keepPlayer", { name: controller.currentPlayerObj().name }) }}</button>
 						</span>
-						<span><button class="actionsLineButton" id="confirmKickoutButton" @click="store.context.action = rf.ACT_CONFIRM_KICKOUT">Confirm Kickout</button></span>
+						<span><button class="actionsLineButton" id="confirmKickoutButton" @click="store.context.action = rf.ACT_CONFIRM_KICKOUT">{{ $t("action.confirmKickout") }}</button></span>
 					</template>
 					<template v-if="store.context.action === rf.ACT_CONFIRM_KICKOUT">
-						This will permanently remove
-						<b>{{ controller.currentPlayerObj().name }}</b>
-						from the game
+						{{ $t("action.permanentlyRemove", { name: controller.currentPlayerObj().name }) }}
 						<br />
-						<b>It cannot be undone</b>
+						<b>{{ $t("action.cannotBeUndone") }}</b>
 						<br />
 						<br />
-						Try checking the chat in case they have given a reason for any temporary absence
+						{{ $t("action.checkChat") }}
 						<br />
-						Please consider giving them a short grace period, in case they are just delayed
+						{{ $t("action.gracePeriod") }}
 
 						<br />
 						<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-						<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
+						<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("action.notNow") }}</button></span>
 						<span>
-							<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">Permanently Kickout {{ controller.currentPlayerObj().name }}</button>
+							<button class="actionsLineButton" id="confirmKickoutButton" @click="Bot.actionPlayerKickout">{{ $t("action.permanentlyKickout", { name: controller.currentPlayerObj().name }) }}</button>
 						</span>
 					</template>
 				</template>
 				<template v-else>
-					Player
-					<b>{{ controller.currentPlayerObj().name }}</b>
-					has timed out
+					{{ $t("action.kickoutTimedOut", { name: controller.currentPlayerObj().name }) }}
 					<br />
-					A vote is required to kick out
-					<b>{{ controller.currentPlayerObj().name }}</b>
+					{{ $t("action.voteRequired", { name: controller.currentPlayerObj().name }) }}
 					<br />
-					Votes: {{ kickoutVoteCount() }}/{{ store.kickoutVoteThreshold }}
-					({{ kickoutVoters() }})
+					{{ $t("action.votesLine", { count: kickoutVoteCount(), threshold: store.kickoutVoteThreshold, voters: kickoutVoters() }) }}
 					<br />
 					<br />
 					<span v-if="!myKickoutVote()">
 						<template v-if="isLastVoteRequired()">
-							This will permanently remove
-							<b>{{ controller.currentPlayerObj().name }}</b>
-							from the game
+							{{ $t("action.permanentlyRemove", { name: controller.currentPlayerObj().name }) }}
 							<br />
-							<b>It cannot be undone</b>
+							<b>{{ $t("action.cannotBeUndone") }}</b>
 							<br />
 							<br />
 						</template>
-						<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout">Vote to Kickout {{ controller.currentPlayerObj().name }}</button>
+						<button class="actionsLineButton" id="voteKickoutButton" @click="Bot.actionPlayerKickout">{{ $t("action.voteToKickout", { name: controller.currentPlayerObj().name }) }}</button>
 					</span>
 					<span v-else>
-						You have voted to kick out
-						<b>{{ controller.currentPlayerObj().name }}</b>
+						{{ $t("action.youVoted", { name: controller.currentPlayerObj().name }) }}
 						<br />
-						If the other players do not also vote, you will be able to kick them out directly in {{ soloKickoutCountdown }}
+						{{ $t("action.soloKickout", { countdown: soloKickoutCountdown }) }}
 					</span>
 					<br />
 					<br />
 					<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow more time</button></span>
+					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("action.notNow") }}</button></span>
 					<span>
-						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{ controller.currentPlayerObj().name }} in the game - but end their current turn</button>
+						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("action.keepPlayer", { name: controller.currentPlayerObj().name }) }}</button>
 					</span>
 				</template>
 			</div>
@@ -338,33 +322,33 @@ function cancelSales() {
 		<!-- ALWAYS SHOWS GAME END-->
 		<template v-if="store.gameflow.phase === rf.PHASE_GAME_OVER">
 			<div id="gameEndDiv">
-				Game Over
+				{{ $t("action.gameOver") }}
 				<br />
 				<br />
-				<span v-if="store.oldBoysNetwork.length >= 10">All Cigars Used</span>
-				<span v-else-if="store.hexDrawPile.length + store.hexDiscardPile.length === 0">All Tiles Used</span>
-				<span v-else>One Player Remaining</span>
+				<span v-if="store.oldBoysNetwork.length >= 10">{{ $t("action.allCigarsUsed") }}</span>
+				<span v-else-if="store.hexDrawPile.length + store.hexDiscardPile.length === 0">{{ $t("action.allTilesUsed") }}</span>
+				<span v-else>{{ $t("action.onePlayerRemaining") }}</span>
 				<br />
 				<br />
-				Winner:
+				{{ $t("action.winner") }}
 				<div class="playerScoreSummaryDiv">
 					<span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[store.history[store.history.length - 1][3][0][0]].colour)">{{ store.players[store.history[store.history.length - 1][3][0][0]].displayName }} € {{ store.players[store.history[store.history.length - 1][3][0][0]].score }} M</span>
 				</div>
 
 				<br />
 				<template v-if="store.players[store.history[store.history.length - 1][3][0][0]].name === personal.name">
-					<h1>Congratulations!</h1>
+					<h1>{{ $t("action.congratulations") }}</h1>
 				</template>
 
 				<br />
-				<span v-if="store.players[store.gameflow.fullTurnOrder[0]].score === store.players[store.gameflow.fullTurnOrder[1]].score">Next in Turn Order</span>
-				<span v-else>Outright Winner</span>
+				<span v-if="store.players[store.gameflow.fullTurnOrder[0]].score === store.players[store.gameflow.fullTurnOrder[1]].score">{{ $t("action.nextInTurnOrder") }}</span>
+				<span v-else>{{ $t("action.outrightWinner") }}</span>
 
 				<br />
 				<br />
-				Fancy a
-				<a :href="'/createCNSpage/' + String(personal.gameID) + '/'">rematch</a>
-				?
+				<i18n-t keypath="action.fancyARematch" tag="span" scope="global">
+					<template #rematch><a :href="'/createCNSpage/' + String(personal.gameID) + '/'">{{ $t("action.rematch") }}</a></template>
+				</i18n-t>
 				<br />
 
 				<template v-for="(entry, idx) in store.history[store.history.length - 1][3]" :key="idx">
@@ -382,157 +366,144 @@ function cancelSales() {
 		<template v-if="personal.canPlay()">
 			<!-- TURN 1 INFO -->
 			<template v-if="store.gameflow.turn === 1 && !store.topMenuViews.showReplay">
-				<h2>Welcome to Cannes!</h2>
+				<h2>{{ $t("action.welcomeTitle") }}</h2>
 				<b>
-					NOTE: To see the entire play area, including any table / table junk,
-					<br />
-					use the "Table" button in the top right, next to the +/- Zoom buttons
+					{{ $t("action.welcomeTableNote") }}
 				</b>
 				<br />
 				<br />
 				<div class="intro_items_list_div">
-					Use this area to carry out your main actions.
+					{{ $t("action.welcomeActions") }}
 					<br />
-					Place tiles and links directly on the map below.
+					{{ $t("action.welcomePlace") }}
 					<br />
-					Use the area above and right to choose new tiles, increase film prices, sell films, and pirate films.
-					<br />
-					<br />
-					<b>REWIND</b>
-					will literally roll the game back by one player turn.
-					<br />
-					It should not normally be used other than immediately after you have ended your turn,
-					<br />
-					if you immediately realise you have made a mistake.
-					<br />
-					Rewinding too much will reveal hidden information about which tiles will be drawn next,
-					<br />
-					and if the rewind goes too far, it could even change what tiles are drawn.
+					{{ $t("action.welcomeChoose") }}
 					<br />
 					<br />
-					<b>REPLAY</b>
-					does not alter the game state in any way. You can view all the moves made from the
+					{{ $t("action.welcomeRewind") }}
 					<br />
-					start of the game, stepping through move by move, and viewing the game state exactly as it was at that time.
+					{{ $t("action.welcomeRewindNormal") }}
 					<br />
-					Once you exit replay mode, the game will return to the same state as when you entered replay mode.
-					<br />
-					Until the game is finished, all "Drawn Tiles" will be obscured during Replay mode.
+					{{ $t("action.welcomeRewindHidden") }}
 					<br />
 					<br />
-					For more information please see
-					<b><a class="linkOther" href="/CNS/help/" target="_blank">Cannes Help</a></b>
+					{{ $t("action.welcomeReplay") }}
+					<br />
+					{{ $t("action.welcomeReplayExit") }}
+					<br />
+					{{ $t("action.welcomeReplayHidden") }}
+					<br />
+					<br />
+					<i18n-t keypath="action.welcomeMoreInfo" tag="span" scope="global">
+						<template #help><b><a class="linkOther" href="/CNS/help/" target="_blank">{{ $t("action.cannesHelp") }}</a></b></template>
+					</i18n-t>
 				</div>
 				<br />
 			</template>
 			<!-- MOVE PIRATE -->
 			<template v-if="store.gameflow.phase === rf.PHASE_MOVE_PIRATE">
-				Move the pirates to a new party
+				{{ $t("action.movePirates") }}
 				<br />
 				<br />
 				<span v-if="store.context.pirateActionsUsed >= 2">
-					As the previous player is connected to all parties and sold multiple pirates,
-					<br />
-					you may place the pirates in any party
+					{{ $t("action.piratesAnyParty") }}
 				</span>
-				<span v-else>The previous player sold once, so you must move the pirates to a new party</span>
+				<span v-else>{{ $t("action.piratesNewParty") }}</span>
 				<br />
 				<br />
 			</template>
 			<!-- CONFIRM RESIGN -->
 			<template v-if="store.context.action === rf.ACT_CONFIRM_RESIGN">
-				<p>Are you sure you want to resign?</p>
-				<p>Resigning will unbalance the game for the remaining players</p>
-				<p>Please carry on playing if that is at all possible</p>
-				<p>Even if you think you can't win, you can still aim for not last / most monuments / funny monument positions / etc</p>
-				<button class="actionsLineButton resignButton" @click="resetWholeTurn">Carry On Playing</button>
-				<button class="actionsLineButton" @click="Bot.actionResign">Confirm Resignation</button>
+				<p>{{ $t("action.resignConfirm") }}</p>
+				<p>{{ $t("action.resignUnbalance") }}</p>
+				<p>{{ $t("action.resignCarryOn") }}</p>
+				<p>{{ $t("action.resignStillCompete") }}</p>
+				<button class="actionsLineButton resignButton" @click="resetWholeTurn">{{ $t("action.carryOnPlaying") }}</button>
+				<button class="actionsLineButton" @click="Bot.actionResign">{{ $t("action.confirmResignation") }}</button>
 			</template>
 
 			<!-- PLACE HEXES -->
 			<div v-if="store.gameflow.phase === rf.PHASE_PLACE_HEXES && store.context.action !== rf.ACT_CONFIRM_END_TURN && store.context.action !== rf.ACT_CONFIRM_RESIGN">
-				You must place at least one Tile. You may then place a second Tile, or add to your Network
+				{{ $t("action.placeHexesIntro") }}
 				<span v-if="store.useExpansion && !controller.currentPlayerObj().storedResources.some((value) => value >= 20)">
 					<br />
-					Instead of placing a Tile, you may store a single Tile instead - it will take up 2 spaces
+					{{ $t("action.storeTileInstead") }}
 					<template v-if="controller.currentPlayerObj().links.length === 0">
 						<br />
-						<span class="warningSpan">You must place a link before being able to store tiles</span>
+						<span class="warningSpan">{{ $t("action.mustPlaceLink") }}</span>
 					</template>
 				</span>
 				<span v-if="store.context.realEstateAgentsInNetwork === 1">
 					<br />
-					The estate agent in your network allows you to place an additional Tile (3 total, or 1/2 and then add to your network)
+					{{ $t("action.oneEstateAgent") }}
 				</span>
 				<span v-if="store.context.realEstateAgentsInNetwork === 2">
 					<br />
-					The 2 estate agents in your network allow you to place 2 additional Tiles (Up to 3 total - you may then also add to your Network)
+					{{ $t("action.twoEstateAgents") }}
 				</span>
 				<span v-if="controller.currentPlayerObj().storedResources.some((value) => value >= 20)">
 					<br />
-					As an action, you may place your stored Tile
+					{{ $t("action.placeStoredTile") }}
 				</span>
 				<br />
-				<button @click="localCheckResign" v-if="controller.canResign()" class="actionsLineButton resignButton">Resign</button>
-				<button @click="resetWholeTurn" class="actionsLineButton">Reset</button>
-				<button @click="controller.endCurrentPhase(true)" v-if="canMoveToNetworkPhase(store.context.hexActionsUsed, store.context.realEstateAgentsInNetwork)" class="actionsLineButton">Move on to Network Phase</button>
-				<button @click="localEndPlayerTurn(true)" v-if="store.context.hexActionsUsed >= 2" class="actionsLineButton">End Turn</button>
+				<button @click="localCheckResign" v-if="controller.canResign()" class="actionsLineButton resignButton">{{ $t("action.resign") }}</button>
+				<button @click="resetWholeTurn" class="actionsLineButton">{{ $t("common.reset") }}</button>
+				<button @click="controller.endCurrentPhase(true)" v-if="canMoveToNetworkPhase(store.context.hexActionsUsed, store.context.realEstateAgentsInNetwork)" class="actionsLineButton">{{ $t("action.moveOnNetwork") }}</button>
+				<button @click="localEndPlayerTurn(true)" v-if="store.context.hexActionsUsed >= 2" class="actionsLineButton">{{ $t("action.endTurn") }}</button>
 			</div>
 
 			<!-- PLACE LINKS -->
 			<div v-if="store.gameflow.phase === rf.PHASE_NETWORK">
 				<span v-if="store.context.linksPlacedThisTurn === 0">
-					<span v-if="controller.currentPlayerObj().links.length <= 3">You may place 2 Links</span>
-					<span v-else-if="controller.currentPlayerObj().links.length == 4">You may place 1 Link and then Move 1 Link</span>
-					<span v-else>You may move 2 Links</span>
+					<span v-if="controller.currentPlayerObj().links.length <= 3">{{ $t("action.mayPlace2Links") }}</span>
+					<span v-else-if="controller.currentPlayerObj().links.length == 4">{{ $t("action.mayPlace1Move1") }}</span>
+					<span v-else>{{ $t("action.mayMove2Links") }}</span>
 				</span>
 				<span v-if="store.context.linksPlacedThisTurn === 1">
-					You have placed 1 link.
-					<span v-if="controller.currentPlayerObj().links.length < 5">You may place 1 more</span>
-					<span v-else>You may move 1 more</span>
+					{{ $t("action.placed1Link") }}
+					<span v-if="controller.currentPlayerObj().links.length < 5">{{ $t("action.mayPlace1More") }}</span>
+					<span v-else>{{ $t("action.mayMove1More") }}</span>
 				</span>
 
 				<br />
-				<button @click="resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>
-				<button @click="resetNetworkPhase" class="actionsLineButton">Reset Network</button>
-				<button v-if="store.context.action !== rf.ACT_READD_LINK" @click="controller.endCurrentPhase(true)" class="actionsLineButton">Move on to Production Phase</button>
+				<button @click="resetWholeTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+				<button @click="resetNetworkPhase" class="actionsLineButton">{{ $t("action.resetNetwork") }}</button>
+				<button v-if="store.context.action !== rf.ACT_READD_LINK" @click="controller.endCurrentPhase(true)" class="actionsLineButton">{{ $t("action.moveOnProduction") }}</button>
 			</div>
 
 			<!-- PRODUCTION -->
 			<div v-if="store.gameflow.phase === rf.PHASE_PRODUCTION && store.context.action !== rf.ACT_CONFIRM_END_TURN && store.context.action !== rf.ACT_PIRATE && store.context.action !== rf.ACT_SELL_CANNES">
-				Convert Available Resources into New Resources
+				{{ $t("action.convertResources") }}
 
 				<br />
-				<button @click="resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>
-				<button v-if="store.networkPhaseResetData !== ''" @click="resetNetworkPhase" class="actionsLineButton">Reset Network</button>
-				<button @click="resetPhase" class="actionsLineButton">Reset Production</button>
-				<button @click="controller.endCurrentPhase(true)" class="actionsLineButton">Finish Production</button>
+				<button @click="resetWholeTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+				<button v-if="store.networkPhaseResetData !== ''" @click="resetNetworkPhase" class="actionsLineButton">{{ $t("action.resetNetwork") }}</button>
+				<button @click="resetPhase" class="actionsLineButton">{{ $t("action.resetProduction") }}</button>
+				<button @click="controller.endCurrentPhase(true)" class="actionsLineButton">{{ $t("action.finishProduction") }}</button>
 			</div>
 
 			<div v-if="store.gameflow.phase === rf.PHASE_PRODUCTION && store.context.action === rf.ACT_SELL_CANNES">
-				Confirm Movie Sales (See upper right panel)
+				{{ $t("action.confirmMovieSales") }}
 				<br />
-				<button class="actionsLineButton" @click="localSellMovies">Sell Movies</button>
-				<button class="actionsLineButton" @click="cancelSales">Cancel</button>
+				<button class="actionsLineButton" @click="localSellMovies">{{ $t("action.sellMovies") }}</button>
+				<button class="actionsLineButton" @click="cancelSales">{{ $t("common.cancel") }}</button>
 			</div>
 
 			<!-- STORE RESOURCES -->
 			<div v-if="offerResourceStoragePhase()">
-				You may only store 5 resources. Click resources to remove them
+				{{ $t("action.store5Resources") }}
 				<br />
-				<span :class="[{ tooManyResources: store.context.availableResources.reduce((acc, curr) => acc + curr, 0) > 5 }, { tooManyResForTile: store.context.availableResources.reduce((acc, curr) => acc + curr, 0) >= 4 && store.context.availableResources.reduce((acc, curr) => acc + curr, 0) <= 5 }, { canStoreAllRes: store.context.availableResources.reduce((acc, curr) => acc + curr, 0) <= 3 }]">
-					(You have {{ store.context.availableResources.reduce((acc, curr) => acc + curr, 0) }} resources
-					<span v-if="store.context.availableResources.reduce((acc, curr) => acc + curr, 0) > 5">- you must discard</span>
-					<span v-else-if="store.context.availableResources.reduce((acc, curr) => acc + curr, 0) >= 4 && store.context.availableResources.reduce((acc, curr) => acc + curr, 0) <= 5">- you can store all resources, but will be unable to store a tile</span>
-					<span v-else>- you can store all resources</span>
-					)
+				<span :class="[{ tooManyResources: totalAvailableResources > 5 }, { tooManyResForTile: totalAvailableResources >= 4 && totalAvailableResources <= 5 }, { canStoreAllRes: totalAvailableResources <= 3 }]">
+					<template v-if="totalAvailableResources > 5">{{ $t("action.youHaveResourcesDiscard", { count: totalAvailableResources }) }}</template>
+					<template v-else-if="totalAvailableResources >= 4">{{ $t("action.youHaveResourcesNoTile", { count: totalAvailableResources }) }}</template>
+					<template v-else>{{ $t("action.youHaveResourcesAll", { count: totalAvailableResources }) }}</template>
 				</span>
 
 				<br />
-				<button @click="resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>
-				<button v-if="store.networkPhaseResetData !== ''" @click="resetNetworkPhase" class="actionsLineButton">Reset Network</button>
-				<button @click="resetPhase" class="actionsLineButton">Reset Resources</button>
-				<button v-if="offerResourceStoragePhaseButton()" class="actionsLineButton" @click="stopStoringResources">Store current resources & End Turn (No room to store a tile)</button>
+				<button @click="resetWholeTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+				<button v-if="store.networkPhaseResetData !== ''" @click="resetNetworkPhase" class="actionsLineButton">{{ $t("action.resetNetwork") }}</button>
+				<button @click="resetPhase" class="actionsLineButton">{{ $t("action.resetResources") }}</button>
+				<button v-if="offerResourceStoragePhaseButton()" class="actionsLineButton" @click="stopStoringResources">{{ $t("action.storeCurrentEndTurn") }}</button>
 			</div>
 
 			<!-- Confirm Turn End -->
@@ -540,46 +511,43 @@ function cancelSales() {
 				<span v-if="store.gameflow.phase === rf.PHASE_PRODUCTION">
 					<br />
 					<br />
-					As you have less than
-					<span v-if="!store.useExpansion">5</span>
-					<span v-else>3</span>
-					resources, they will all be stored
+					{{ $t("action.lessThanResourcesStored", { count: store.useExpansion ? 3 : 5 }) }}
 					<br />
 				</span>
 
 				<br />
-				<button @click="resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>
-				<button v-if="store.networkPhaseResetData !== ''" @click="resetNetworkPhase" class="actionsLineButton">Reset Network</button>
+				<button @click="resetWholeTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+				<button v-if="store.networkPhaseResetData !== ''" @click="resetNetworkPhase" class="actionsLineButton">{{ $t("action.resetNetwork") }}</button>
 
 				<button @click="resetPhase" v-if="store.gameflow.phase !== rf.PHASE_PLACE_HEXES" class="actionsLineButton">
-					<span v-if="store.gameflow.phase === rf.PHASE_STORE_RES">Reset Resource Phase</span>
-					<span v-else>Reset Production Phase</span>
+					<span v-if="store.gameflow.phase === rf.PHASE_STORE_RES">{{ $t("action.resetResourcePhase") }}</span>
+					<span v-else>{{ $t("action.resetProductionPhase") }}</span>
 				</button>
-				<button @click="controller.endPlayerTurn()" class="actionsLineButton">End Turn</button>
+				<button @click="controller.endPlayerTurn()" class="actionsLineButton">{{ $t("action.endTurn") }}</button>
 			</div>
 
 			<!-- Confirm PIRATE Turn End -->
 			<div v-if="store.context.action === rf.ACT_CONFIRM_PIRATE_PLACEMENT">
-				Confirm Pirate Placement
+				{{ $t("action.confirmPiratePlacement") }}
 				<br />
-				<button @click="resetWholeTurn" class="actionsLineButton">Cancel</button>
-				<button @click="controller.endPlayerPiratePlacementTurn()" class="actionsLineButton">Confirm</button>
+				<button @click="resetWholeTurn" class="actionsLineButton">{{ $t("common.cancel") }}</button>
+				<button @click="controller.endPlayerPiratePlacementTurn()" class="actionsLineButton">{{ $t("action.confirm") }}</button>
 			</div>
 
 			<!-- Confirm Turn End -->
 			<div v-if="store.gameflow.phase === rf.PHASE_CONFIRM_PIRATE">
-				You have completed pirating movies and now the next player in turn order needs to move the pirates
+				{{ $t("action.piratedIntro") }}
 				<br />
 				<br />
-				<span class="warningSpan">YOUR ACTIONS UP TO THIS POINT WILL BE SAVED - YOU WILL NOT BE ABLE TO UNDO THEM LATER</span>
+				<span class="warningSpan">{{ $t("action.actionsSaved") }}</span>
 				<!--<br/>Your actions up to this point will be saved. You will not be able to undo them later.-->
 				<br />
 				<br />
-				Are you sure you want to end your turn?
+				{{ $t("action.confirmEndTurnQuestion") }}
 				<br />
-				<button @click="resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>
-				<button @click="resetPhase" v-if="store.gameflow.phase !== rf.PHASE_PLACE_HEXES" class="actionsLineButton">Reset Phase</button>
-				<button @click="controller.endPlayerPirateTurn()" class="actionsLineButton">Confirm Turn To This Point</button>
+				<button @click="resetWholeTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+				<button @click="resetPhase" v-if="store.gameflow.phase !== rf.PHASE_PLACE_HEXES" class="actionsLineButton">{{ $t("action.resetPhase") }}</button>
+				<button @click="controller.endPlayerPirateTurn()" class="actionsLineButton">{{ $t("action.confirmTurnToPoint") }}</button>
 			</div>
 		</template>
 	</div>

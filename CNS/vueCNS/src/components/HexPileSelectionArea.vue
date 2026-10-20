@@ -276,7 +276,7 @@ function clickedCigar() {
       <transition name="fadeOut">
         <div class="errorPopup" v-if="showErrorPopup"
           :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }">
-          Max Price 15
+          {{ $t("hexPiles.maxPrice15") }}
         </div>
       </transition>
 
@@ -303,7 +303,7 @@ function clickedCigar() {
           <img @click="rotateNewHexTile(-1)" :src="view.getImage('rot_anticlockwise')" />
         </div>
         <div v-if="canStoreHex(hexRef)" class="newHexStoreDiv">
-          <button @click="locStoreHex()" class="actionsLineButton">Store Tile</button>
+          <button @click="locStoreHex()" class="actionsLineButton">{{ $t("hexPiles.storeTile") }}</button>
         </div>
         <div class="newHexRotateDiv rightRotatePos" v-if="
           rf.HEX_PARTY_ROTATABLE.includes(hexRef) && store.context.hexRefBeingAdded === hexRef
@@ -314,7 +314,7 @@ function clickedCigar() {
 
       <!-- FILM CRITIC -->
       <div v-if="store.context.action === rf.ACT_FILM_CRITIC" id="filmCriticDiv">
-        Select a film to increase in value<br />
+        {{ $t("hexPiles.selectFilm") }}<br />
         <img v-for="(res, idx) in [rf.RES_MOVIE_ACTION, rf.RES_MOVIE_GIRLIE, rf.RES_MOVIE_SCIFI]" :key="idx"
           :src="view.getImage('res' + String(res))" class="movieResImg" @click="clickedFilmCriticMovieImg(res)" />
       </div>
@@ -322,7 +322,7 @@ function clickedCigar() {
       <!-- SELL TO CANNES -->
       <div v-if="store.context.action === rf.ACT_SELL_CANNES" id="cannesSellingContainer">
         <div id="cannesSellingDiv">
-          Sell Films to Cannes<br />
+          {{ $t("hexPiles.sellFilmsToCannes") }}<br />
 
           <div v-for="(res, idx) in [rf.RES_MOVIE_ACTION, rf.RES_MOVIE_GIRLIE, rf.RES_MOVIE_SCIFI]" :key="idx"
             @click="clickedMoveImgToSell(res)" onselectstart="return false;" class="cannesMovieResDiv"
@@ -336,38 +336,37 @@ function clickedCigar() {
             :class="{ 'selectableRes': store.context.availableResources[res] > 0 }" />-->
         </div>
         <div id="cannesSummaryDiv">
-          Selling Summary<br />
+          {{ $t("hexPiles.sellingSummary") }}<br />
           <div v-for="(res, idx) in [rf.RES_MOVIE_ACTION, rf.RES_MOVIE_GIRLIE, rf.RES_MOVIE_SCIFI]" :key="idx">
             <img :src="view.getImage('res' + String(res))" class="movieSellSummaryImg" />
-            x {{ store.context.sellingSummary[idx] }} : Total €
-            {{ store.context.sellingSummary[idx] * store.moviePrices[idx] }} M
+            {{ $t("hexPiles.saleLine", { count: store.context.sellingSummary[idx], total: store.context.sellingSummary[idx] * store.moviePrices[idx] }) }}
           </div>
-          Grand Total: €
-          {{
-            store.context.sellingSummary[0] * store.moviePrices[0] +
-            store.context.sellingSummary[1] * store.moviePrices[1] +
-            store.context.sellingSummary[2] * store.moviePrices[2]
-          }}
+          {{ $t("hexPiles.grandTotal", {
+            total:
+              store.context.sellingSummary[0] * store.moviePrices[0] +
+              store.context.sellingSummary[1] * store.moviePrices[1] +
+              store.context.sellingSummary[2] * store.moviePrices[2]
+          }) }}
         </div>
         <div id="cannesButtonsDiv">
-          Confirm Sales<br />
-          <button class="actionsLineButton" @click="localSellMovies">Sell Movies</button><br />
-          <button class="actionsLineButton" @click="cancelSales">Cancel</button>
+          {{ $t("hexPiles.confirmSales") }}<br />
+          <button class="actionsLineButton" @click="localSellMovies">{{ $t("hexPiles.sellMovies") }}</button><br />
+          <button class="actionsLineButton" @click="cancelSales">{{ $t("common.cancel") }}</button>
         </div>
       </div>
 
       <!-- PIRATE SALES -->
       <div v-if="store.context.action === rf.ACT_PIRATE" id="filmCriticDiv">
-        Select a pre-release to pirate<br />
-        <span v-if="afterPirateResult() === 0">You are in both parties. You can pirate as much as you like<br />
-          The pirate ship will switch between parties after each sale<br /></span>
-        <span v-else-if="afterPirateResult() === 1">You are not in the other party. You can pirate one movie<br />
-          After you pirate a movie, the pirate ship will move to the other party<br /></span>
-        <span v-else-if="afterPirateResult() === 10">You are in all parties. You can pirate as much as you like<br />
-          The next player in turn order will select the final destination for the pirates
+        {{ $t("hexPiles.selectPreRelease") }}<br />
+        <span v-if="afterPirateResult() === 0">{{ $t("hexPiles.inBothParties") }}<br />
+          {{ $t("hexPiles.shipSwitches") }}<br /></span>
+        <span v-else-if="afterPirateResult() === 1">{{ $t("hexPiles.notInOtherParty") }}<br />
+          {{ $t("hexPiles.shipMovesOtherParty") }}<br /></span>
+        <span v-else-if="afterPirateResult() === 10">{{ $t("hexPiles.inAllParties") }}<br />
+          {{ $t("hexPiles.nextPlayerFinalDestination") }}
           <br /></span>
-        <span v-else-if="afterPirateResult() === 11">You are not in all parties. You can pirate one movie<br />
-          The next player in turn order will select the new destination for the pirates
+        <span v-else-if="afterPirateResult() === 11">{{ $t("hexPiles.notInAllParties") }}<br />
+          {{ $t("hexPiles.nextPlayerNewDestination") }}
           <br /></span>
 
         <div v-for="(res, idx) in [rf.RES_SCRIPT, rf.RES_ACTRESS, rf.RES_SFX]" :key="idx" @click="clickedPirateRes(res)"
@@ -377,9 +376,9 @@ function clickedCigar() {
           <div class="singleResNumDivPirate">{{ store.context.availableResources[res] }}</div>
         </div>
 
-        <br /><button @click="cancelPirate" class="actionsLineButton lessMargins">Cancel</button>
+        <br /><button @click="cancelPirate" class="actionsLineButton lessMargins">{{ $t("common.cancel") }}</button>
         <button @click="finishPirate" v-if="store.context.pirateActionsUsed > 0" class="actionsLineButton lessMargins">
-          Finish Pirating
+          {{ $t("hexPiles.finishPirating") }}
         </button>
       </div>
     </div>

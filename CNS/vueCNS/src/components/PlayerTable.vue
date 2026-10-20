@@ -65,11 +65,11 @@ function canSelectStoredHex(idx) {
     <table id="playerTable">
       <thead>
         <tr>
-          <th><b>Player</b></th>
-          <th><b>Score</b></th>
-          <th :class="{ hidden: !anyPlayerHasUnusedLinks() }"><span v-if="anyPlayerHasUnusedLinks()"><b>Links</b></span>
+          <th><b>{{ $t("playerTable.player") }}</b></th>
+          <th><b>{{ $t("playerTable.score") }}</b></th>
+          <th :class="{ hidden: !anyPlayerHasUnusedLinks() }"><span v-if="anyPlayerHasUnusedLinks()"><b>{{ $t("playerTable.links") }}</b></span>
           </th>
-          <th><b>Stored Resources</b>
+          <th><b>{{ $t("playerTable.storedResources") }}</b>
           </th>
         </tr>
       </thead>
@@ -86,7 +86,7 @@ function canSelectStoredHex(idx) {
           <div class="storedResDIV">
             <template
               v-if="idx === controller.currentPlayerIndex() && store.gameflow.phase === rf.PHASE_PRODUCTION && store.context.action !== rf.ACT_CONFIRM_END_TURN && !store.useExpansion">
-              Stored Resources<br />Added to Available Resources
+              {{ $t("playerTable.storedResources") }}<br />{{ $t("playerTable.addedToAvailable") }}
             </template>
             <template v-else>
               <template v-for="(res, idx2) in store.players[arrayIndex].storedResources" :key="idx2">

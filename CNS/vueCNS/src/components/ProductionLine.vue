@@ -108,21 +108,21 @@ function enoughResForProd(prod) {
         <div class="errorPopup" v-if="showErrorPopup > 0"
           :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }">
           <template v-if="showErrorPopup === 1">
-            No Valid Positions<br />
-            To Place Cigar
+            {{ $t("production.noValidPositions") }}<br />
+            {{ $t("production.toPlaceCigar") }}
           </template>
           <template v-else-if="showErrorPopup === 2">
-            No more Cigars
+            {{ $t("production.noMoreCigars") }}
           </template>
           <template v-else-if="showErrorPopup === 3">
-            No Player Links
+            {{ $t("production.noPlayerLinks") }}
           </template>
         </div>
       </transition>
 
       <div class="productionRow">
         <div class="APtextDiv">
-          Available<br />Production:
+          {{ $t("production.availableProduction") }}
         </div>
 
         <div v-for="(prod, idx) in store.context.availableProduction" :key="idx" class="productionColumn"
@@ -149,7 +149,7 @@ function enoughResForProd(prod) {
       </div>
     </div>
     <div v-else-if="store.context.availableProduction.length === 0 && store.context.action !== rf.ACT_CONFIRM_END_TURN"
-      id="noProductionLineDiv">No Available Production</div>
+      id="noProductionLineDiv">{{ $t("production.noAvailableProduction") }}</div>
   </template>
 
   <template v-else-if="store.gameflow.phase === rf.PHASE_NETWORK">
@@ -158,7 +158,7 @@ function enoughResForProd(prod) {
 
       <div class="productionRow">
         <div class="APtextDiv">
-          Current<br />Production:
+          {{ $t("production.currentProduction") }}
         </div>
 
         <div v-for="(prod, idx) in store.context.availableProduction" :key="idx" class="productionColumn">
@@ -184,7 +184,7 @@ function enoughResForProd(prod) {
       </div>
     </div>
     <div v-else-if="store.context.availableProduction.length === 0 && store.context.action !== rf.ACT_CONFIRM_END_TURN"
-      id="productionLineDivNetwork">No Current Production</div>
+      id="productionLineDivNetwork">{{ $t("production.noCurrentProduction") }}</div>
   </template>
 
 </template>
