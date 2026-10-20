@@ -291,15 +291,15 @@ function getTHandTDstyle() {
 				<thead>
 					<tr>
 						<th :style="getTHandTDstyle()"></th>
-						<th :style="getTHandTDstyle()">Wood</th>
-						<th :style="getTHandTDstyle()">Mine</th>
-						<th id="farmHead" :style="getTHandTDstyle()">Farm</th>
-						<th :style="getTHandTDstyle()">Fishery</th>
+						<th :style="getTHandTDstyle()">{{ $t("resourceTable.wood") }}</th>
+						<th :style="getTHandTDstyle()">{{ $t("resourceTable.mine") }}</th>
+						<th id="farmHead" :style="getTHandTDstyle()">{{ $t("resourceTable.farm") }}</th>
+						<th :style="getTHandTDstyle()">{{ $t("resourceTable.fishery") }}</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
-						<th :style="getTHandTDstyle()">Raw</th>
+						<th :style="getTHandTDstyle()">{{ $t("resourceTable.raw") }}</th>
 						<td :style="getTHandTDstyle()">
 							<!-- RAW + WOOD -->
 							<template v-for="(res, idx) in [rf.RES_WOOD]" :key="idx">
@@ -331,7 +331,7 @@ function getTHandTDstyle() {
 						<td :style="getTHandTDstyle()"></td>
 					</tr>
 					<tr>
-						<th :style="getTHandTDstyle()">Food</th>
+						<th :style="getTHandTDstyle()">{{ $t("resourceTable.food") }}</th>
 						<td :style="getTHandTDstyle()"></td>
 						<td :style="getTHandTDstyle()"></td>
 						<td :style="getTHandTDstyle()">
@@ -360,7 +360,7 @@ function getTHandTDstyle() {
 						</td>
 					</tr>
 					<tr>
-						<th :style="getTHandTDstyle()">Lux</th>
+						<th :style="getTHandTDstyle()">{{ $t("resourceTable.lux") }}</th>
 						<td :style="getTHandTDstyle()"></td>
 						<td :style="getTHandTDstyle()">
 							<!-- LUX + MINE -->

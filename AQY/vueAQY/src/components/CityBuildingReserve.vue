@@ -202,7 +202,7 @@ function getStokeClass(bldgNum) {
 		</div>
 
 		<div id="personBuildingsDiv">
-			Unique Buildings
+			{{ $t("cityBuildingReserve.uniqueBuildings") }}
 			<br />
 			<div id="personablBuildginsSpacerDiv">&nbsp;</div>
 			<div

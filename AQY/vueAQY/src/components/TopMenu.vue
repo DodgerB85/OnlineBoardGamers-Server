@@ -242,13 +242,13 @@ function getCurrentPlayerNames() {
 			<a href="/">
 				<span class="topMenuItem">
 					<img :src="view.getImage('icon-house')" />
-					<span>Home</span>
+					<span>{{ $t("topMenu.home") }}</span>
 				</span>
 			</a>
 			<!-- IF LOGGED IN -->
 			<span v-if="personal.name != undefined" class="topMenuItem" id="menuButtonNext" @click="nextGame">
 				<img :src="view.getImage('icon-nextGame')" />
-				<span>Next</span>
+				<span>{{ $t("topMenu.next") }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
@@ -257,20 +257,20 @@ function getCurrentPlayerNames() {
 			<a href="/AQY/help/" target="_blank">
 				<span class="topMenuItem">
 					<img :src="view.getImage('icon-rulebook')" />
-					<span>Rules</span>
+					<span>{{ $t("topMenu.rules") }}</span>
 				</span>
 			</a>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showReserve }]" id="menuButtonReserve" @click="toggleReserve">
 				<img :src="view.getImage('icon-info')" />
-				<span>Info</span>
+				<span>{{ $t("topMenu.info") }}</span>
 			</span>
 			<div class="menuDivider"></div>
 
 			<!-- IF INVOLVED PLAYER-->
 			<span v-if="personal.pov >= 0" id="menuButtonRewindPos" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showRewindPanel }]" @click="loadRewind()">
 				<img :src="view.getImage('icon-rewind')" />
-				<span>Rewind</span>
+				<span>{{ $t("topMenu.rewind") }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
@@ -278,13 +278,13 @@ function getCurrentPlayerNames() {
 
 			<span v-if="personal.name != undefined" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showChat }]" id="menuButtonChat" @click="toggleChat">
 				<img :src="view.getImage('icon-chat')" />
-				<span>Chat</span>
+				<span>{{ $t("topMenu.chat") }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
 			<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showBug }]" id="menuButtonBug" @click="toggleBug">
 				<img :src="view.getImage('icon-stop')" />
-				<span>Bug</span>
+				<span>{{ $t("topMenu.bug") }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
@@ -293,20 +293,20 @@ function getCurrentPlayerNames() {
 			<!-- IF INVOLVED PLAYER-->
 			<span v-if="personal.pov >= 0" class="topMenuItem" :class="['topMenuItem', { hasNotes: personal.notes.length > 0 }, { topMenuItemSelected: store.topMenuViews.showNotes }]" id="menuButtonNotes" @click="toggleNotes">
 				<img :src="view.getImage('icon-notebook')" />
-				<span>Notes</span>
+				<span>{{ $t("topMenu.notes") }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showHistory }]" id="menuButtonHistory" @click="toggleHistory">
 				<img :src="view.getImage('icon-scroll')" />
-				<span>History</span>
+				<span>{{ $t("topMenu.history") }}</span>
 			</span>
 
 			<div class="menuDivider"></div>
 
 			<span class="topMenuItem" @click="toggleReplay()">
 				<img :src="view.getImage('icon-replay')" />
-				<span>Replay</span>
+				<span>{{ $t("topMenu.replay") }}</span>
 			</span>
 		</div>
 
@@ -318,7 +318,7 @@ function getCurrentPlayerNames() {
 
 				<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 					<span id="kickoutTimerSpan">
-						Time to next kickout:
+						{{ $t("topMenu.timeToNextKickout") }}
 						<span id="kickoutTimerTimer">{{ getKickoutTImerText() }}</span>
 					</span>
 				</template>

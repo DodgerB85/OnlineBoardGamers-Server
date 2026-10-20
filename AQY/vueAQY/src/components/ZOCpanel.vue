@@ -183,51 +183,51 @@ function clearAllZOC() {
 
 <template>
 	<div id="ZOCpanelDiv">
-		<span class="infoSpan" id="famineSpan">Famine Level: {{ model.getFamineLevel() }}</span>
+		<span class="infoSpan" id="famineSpan">{{ $t("zocPanel.famineLevel", { level: model.getFamineLevel() }) }}</span>
 		<br />
 		<span class="infoSpan" id="pollutionSpan">
-			Pollution:
+			{{ $t("zocPanel.pollution") }}
 			<span v-if="personal.trainingGame">{{ country.getPendingPollution(controller.currentPlayerIndex()) }}</span>
 			<span v-else-if="personal.pov >= 0">{{ country.getPendingPollution(personal.pov) }}</span>
 			<span v-else>{{ country.getPendingPollution(controller.currentPlayerIndex()) }}</span>
 		</span>
 		<br />
 		<span class="infoSpan" id="graveSpan">
-			Graves:
+			{{ $t("zocPanel.graves") }}
 			<span v-if="personal.trainingGame">{{ city.getTotalGravesToPlace(controller.currentPlayerIndex()) }}</span>
 			<span v-else-if="personal.pov >= 0">{{ city.getTotalGravesToPlace(personal.pov) }}</span>
 			<span v-else>{{ city.getTotalGravesToPlace(controller.currentPlayerIndex()) }}</span>
 		</span>
 		<br />
 		<br />
-		<b><u>Map Settings</u></b>
+		<b><u>{{ $t("zocPanel.mapSettings") }}</u></b>
 		<br />
 		<button @click="toggleFullColourHex" class="actionsLineButton">
-			Map Fill:
-			<span v-if="store.topMenuViews.showFullColourHex === 0">Original tile</span>
-			<span v-else-if="store.topMenuViews.showFullColourHex === 1">Hybrid</span>
-			<span v-else-if="store.topMenuViews.showFullColourHex === 2">Solid Colour</span>
+			{{ $t("zocPanel.mapFill") }}
+			<span v-if="store.topMenuViews.showFullColourHex === 0">{{ $t("zocPanel.originalTile") }}</span>
+			<span v-else-if="store.topMenuViews.showFullColourHex === 1">{{ $t("zocPanel.hybrid") }}</span>
+			<span v-else-if="store.topMenuViews.showFullColourHex === 2">{{ $t("zocPanel.solidColour") }}</span>
 		</button>
 		<br />
 		<button @click="toggleResourceIcon" class="actionsLineButton">
-			Resource Icon:
-			<span v-if="store.topMenuViews.resourceIconType === 0">Original</span>
-			<span v-else-if="store.topMenuViews.resourceIconType === 1">Border</span>
+			{{ $t("zocPanel.resourceIcon") }}
+			<span v-if="store.topMenuViews.resourceIconType === 0">{{ $t("zocPanel.original") }}</span>
+			<span v-else-if="store.topMenuViews.resourceIconType === 1">{{ $t("zocPanel.border") }}</span>
 		</button>
 		<br />
 		<button @click="store.topMenuViews.showMapObjects = !store.topMenuViews.showMapObjects" class="actionsLineButton">
-			<span v-if="store.topMenuViews.showMapObjects">Hide Map Objects</span>
-			<span v-else-if="!store.topMenuViews.showMapObjects">Show Map Objects</span>
+			<span v-if="store.topMenuViews.showMapObjects">{{ $t("zocPanel.hideMapObjects") }}</span>
+			<span v-else-if="!store.topMenuViews.showMapObjects">{{ $t("zocPanel.showMapObjects") }}</span>
 		</button>
 		<br />
 		<br />
-		<b><u>Zone of Control</u></b>
+		<b><u>{{ $t("zocPanel.zoneOfControl") }}</u></b>
 		<br />
 		<!--<button @click="clickedZOCtoggleAll" class="actionsLineButton">Toggle ZOCs</button>-->
-		<button @click="clickedZOCwithDottedLines" class="actionsLineButton">Toggle All ZoCs</button>
-		<button @click="clickedZOCoverlap" class="actionsLineButton">Toggle All ZOC Overlap</button>
+		<button @click="clickedZOCwithDottedLines" class="actionsLineButton">{{ $t("zocPanel.toggleAllZocs") }}</button>
+		<button @click="clickedZOCoverlap" class="actionsLineButton">{{ $t("zocPanel.toggleAllZocOverlap") }}</button>
 		<br />
-		<b><u>Individual ZoC</u></b>
+		<b><u>{{ $t("zocPanel.individualZoc") }}</u></b>
 		<br />
 		<br />
 		<div v-for="(player, idx) in store.players" :key="idx" class="playerNameAndSelectDiv">
@@ -236,31 +236,31 @@ function clearAllZOC() {
 			<input type="checkbox" v-model="player.selectedForZOCline" class="playerCheckboxDiv" />
 		</div>
 		<button class="actionsLineButton individualZocButton" @click="clickedZOCwithDottedLinesSelectedPlayers">
-			<span v-if="store.ZOCpathsWithMultiples.length > 0">Hide</span>
-			<span v-else>Show</span>
+			<span v-if="store.ZOCpathsWithMultiples.length > 0">{{ $t("zocPanel.hide") }}</span>
+			<span v-else>{{ $t("zocPanel.show") }}</span>
 			<br />
-			ZoC
+			{{ $t("zocPanel.zoc") }}
 			<br />
-			Lines
+			{{ $t("zocPanel.lines") }}
 		</button>
 		<button class="actionsLineButton individualZocButton" @click="clickedZOCoverlapSelectedPlayers">
-			<span v-if="store.ZOCoverlapData.length > 0">Hide</span>
-			<span v-else>Show</span>
+			<span v-if="store.ZOCoverlapData.length > 0">{{ $t("zocPanel.hide") }}</span>
+			<span v-else>{{ $t("zocPanel.show") }}</span>
 			<br />
-			Overlap
+			{{ $t("zocPanel.overlap") }}
 			<br />
-			Hexes
+			{{ $t("zocPanel.hexes") }}
 		</button>
 		<button class="actionsLineButton individualZocButton" @click="clickedZOCuniqueSelectedPlayers">
-			<span v-if="store.ZOCuniqueData.length > 0">Hide</span>
-			<span v-else>Show</span>
+			<span v-if="store.ZOCuniqueData.length > 0">{{ $t("zocPanel.hide") }}</span>
+			<span v-else>{{ $t("zocPanel.show") }}</span>
 			<br />
-			Unique
+			{{ $t("zocPanel.unique") }}
 			<br />
-			Hexes
+			{{ $t("zocPanel.hexes") }}
 		</button>
 		<br />
-		<button class="actionsLineButton" @click="clearAllZOC">Clear All</button>
+		<button class="actionsLineButton" @click="clearAllZOC">{{ $t("zocPanel.clearAll") }}</button>
 	</div>
 </template>
 

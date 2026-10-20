@@ -62,7 +62,7 @@ function showCurrentPlayerGlow(playerIndex) {
 			<span v-if="store.players[playerIndex].saint !== rf.SAINT_NONE">
 				{{ rf.SAINT_INFO[store.players[playerIndex].saint].name }}
 			</span>
-			<span v-else>No Saint</span>
+			<span v-else>{{ $t("playerLine.noSaint") }}</span>
 		</div>
 	</div>
 
@@ -80,7 +80,7 @@ function showCurrentPlayerGlow(playerIndex) {
 			<br />
 			<span class="playerNameSpan">{{ store.players[playerIndex].displayName }}</span>
 			<br />
-			No Saint
+			{{ $t("playerLine.noSaint") }}
 		</div>
 	</div>
 </template>

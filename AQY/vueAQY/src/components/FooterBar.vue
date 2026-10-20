@@ -14,16 +14,13 @@ import * as view from '../js/AQYview'
 	<div id="footer">
 		<div class="content">
 			<img :src="view.getImage('AQYbox')" class="cover" />
-			<p>
-				Antiquity is a board game by Jeroen Doumen and Joris Wiersinga, published by
-				<a target="_blank" href="https://www.splottershop.com/">Splotter Spellen</a>
-				.
-			</p>
-			<p>Online Board Gamers implementation by DodgerB, kbbr & Rastko. Permissions Provided.</p>
-			<p>
-				Menu icons from
-				<a href="http://game-icons.net">game-icons.net</a>
-			</p>
+			<i18n-t keypath="footer.antiquityCredits" tag="p" scope="global">
+				<template #publisher><a target="_blank" href="https://www.splottershop.com/">{{ $t("footer.splotterSpellen") }}</a></template>
+			</i18n-t>
+			<p>{{ $t("footer.implementationCredits") }}</p>
+			<i18n-t keypath="footer.menuIcons" tag="p" scope="global">
+				<template #link><a href="http://game-icons.net">{{ $t("footer.gameIconsNet") }}</a></template>
+			</i18n-t>
 		</div>
 	</div>
 </template>

@@ -15,6 +15,9 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/AQYpersonal.js"
 const personal = usePersonalStore()
 
+import { useI18n } from "vue-i18n"
+const { t } = useI18n()
+
 const props = defineProps({
 	playerIndexProp: {
 		type: Number,
@@ -49,15 +52,15 @@ function getBldgPath(bldg_str, offsetX, offsetY) {
 }
 
 function getNewBldgName() {
-	if (store.gameflow.subPhase === rf.SUB_PHASE_SAINT_HOUSE) return "Select a House to add for free"
-	if (store.context.cityBuildingToDisplay === -1) return "Select a Building"
+	if (store.gameflow.subPhase === rf.SUB_PHASE_SAINT_HOUSE) return t("cityNewBuildingArea.selectFreeHouse")
+	if (store.context.cityBuildingToDisplay === -1) return t("cityNewBuildingArea.selectBuilding")
 	else if (store.context.cityBuildingToDisplay < 20) return rf.BLDG_DATA[rf.BLDG_ARRAY[store.context.cityBuildingToDisplay]].name
-	else return `House ${store.context.cityBuildingToDisplay - 20}`
+	else return t("cityNewBuildingArea.houseNumber", { number: store.context.cityBuildingToDisplay - 20 })
 }
 function getNewBldgDescription() {
-	if (store.context.cityBuildingToDisplay === -1) return "(Building Function)"
+	if (store.context.cityBuildingToDisplay === -1) return t("cityNewBuildingArea.buildingFunction")
 	else if (store.context.cityBuildingToDisplay < 20) return rf.BLDG_DATA[rf.BLDG_ARRAY[store.context.cityBuildingToDisplay]].description
-	else return "Gain 1 worker"
+	else return t("cityNewBuildingArea.gainWorker")
 }
 
 function rotateNewBuilding(dir) {
@@ -253,10 +256,10 @@ function totalGraveCount(playerIndex) {
 				</g>
 				<g v-else-if="store.context.cityBuildingToDisplay === rf.BLDG_STORAGE && (store.context.newStorageHeight * store.context.newStorageWidth) % 2 === 1">
 					<text class="invalidStorageText" x="50%" y="33%" text-anchor="middle" alignment-baseline="middle">
-						<tspan x="50%" dy="0px">Stores must be</tspan>
-						<tspan x="50%" dy="25px">in 2x1 blocks</tspan>
-						<tspan x="50%" dy="25px">EG 1x6, 3x4</tspan>
-						<tspan x="50%" dy="25px">2x3, 5x2</tspan>
+						<tspan x="50%" dy="0px">{{ $t("cityNewBuildingArea.storesMustBe") }}</tspan>
+						<tspan x="50%" dy="25px">{{ $t("cityNewBuildingArea.inBlocks") }}</tspan>
+						<tspan x="50%" dy="25px">{{ $t("cityNewBuildingArea.blockExamples1") }}</tspan>
+						<tspan x="50%" dy="25px">{{ $t("cityNewBuildingArea.blockExamples2") }}</tspan>
 					</text>
 				</g>
 				<!-- NEW HOUSE PATH -->
@@ -292,11 +295,11 @@ function totalGraveCount(playerIndex) {
 
 		<!-- STORAGE SELECTOR -->
 		<div v-if="store.context.cityBuildingBeingAdded === rf.BLDG_STORAGE">
-			Size: W
+			{{ $t("cityNewBuildingArea.sizeWidth") }}
 			<select v-model="store.context.newStorageWidth" @change="adjustStoreSize(1)" :disabled="store.players[props.playerIndexProp].requiredRebuilds.some((subarray) => subarray.bldgNum === rf.BLDG_STORAGE)">
 				<option v-for="number in 7" :key="number" :value="number">{{ number }}</option>
 			</select>
-			x H
+			{{ $t("cityNewBuildingArea.sizeHeight") }}
 			<select v-model="store.context.newStorageHeight" @change="adjustStoreSize(2)" :disabled="store.players[props.playerIndexProp].requiredRebuilds.some((subarray) => subarray.bldgNum === rf.BLDG_STORAGE)">
 				<option v-for="number in 7" :key="number" :value="number">{{ number }}</option>
 			</select>
@@ -305,33 +308,33 @@ function totalGraveCount(playerIndex) {
 		<!-- REMOVE GRAVES BUTTON -->
 		<template v-if="store.context.cityBuildingToDisplay === rf.BLDG_HOSPITAL && city.hasWorkingUniqueBuilding(playerIndexProp, rf.BLDG_HOSPITAL)">
 			<button @click="hospitalActionButton" :disabled="store.context.gravesLeftToRemove <= 0" class="actionsLineButton">
-				<span v-if="store.context.action === rf.ACT_HOSPITAL_GRAVES">Stop Removing Graves</span>
-				<span v-else-if="totalGraveCount(playerIndexProp) <= store.context.gravesLeftToRemove">Remove All Graves ({{ totalGraveCount(playerIndexProp) }})</span>
-				<span v-else>Remove Graves ({{ store.context.gravesLeftToRemove }} Left)</span>
+				<span v-if="store.context.action === rf.ACT_HOSPITAL_GRAVES">{{ $t("cityNewBuildingArea.stopRemovingGraves") }}</span>
+				<span v-else-if="totalGraveCount(playerIndexProp) <= store.context.gravesLeftToRemove">{{ $t("cityNewBuildingArea.removeAllGraves", { count: totalGraveCount(playerIndexProp) }) }}</span>
+				<span v-else>{{ $t("cityNewBuildingArea.removeGraves", { count: store.context.gravesLeftToRemove }) }}</span>
 			</button>
 			<br />
 		</template>
 
 		<!-- RAZE BUTTON -->
 		<template v-if="(store.context.cityBuildingToDisplay === rf.BLDG_CATHEDRAL || store.context.cityBuildingToDisplay === rf.BLDG_THEOLOGY) && store.players[playerIndexProp].cathedralStatus < 5 && city.hasWorkingUniqueBuilding(playerIndexProp, rf.BLDG_THEOLOGY) && city.hasWorkingUniqueBuilding(playerIndexProp, rf.BLDG_CATHEDRAL)">
-			<button v-if="store.players[playerIndexProp].saint !== rf.SAINT_MARIA" @click="city.razeCathedral(playerIndexProp)" class="actionsLineButton">Raze Cathedral</button>
-			<span v-else class="redText">You cannot Raze Santa Maria's Cathedral</span>
+			<button v-if="store.players[playerIndexProp].saint !== rf.SAINT_MARIA" @click="city.razeCathedral(playerIndexProp)" class="actionsLineButton">{{ $t("cityNewBuildingArea.razeCathedral") }}</button>
+			<span v-else class="redText">{{ $t("cityNewBuildingArea.cannotRazeCathedral") }}</span>
 			<br />
 		</template>
 
 		<!-- TRADE BUTTONS -->
 		<template v-else-if="store.context.cityBuildingToDisplay === rf.BLDG_MARKET && store.context.action !== rf.ACT_TRADE_BOARD && store.context.action !== rf.ACT_SETUP_PLAYER_TRADE && city.hasWorkingUniqueBuilding(playerIndexProp, store.context.cityBuildingToDisplay, false) && personal.canPlay() && store.gameflow.phase === rf.PHASE_CITY_BUILDING">
-			<button @click="setUpBoardTrade" class="actionsLineButton">Trade Goods With Board</button>
+			<button @click="setUpBoardTrade" class="actionsLineButton">{{ $t("cityNewBuildingArea.tradeWithBoard") }}</button>
 			<br />
-			<button v-if="!personal.trainingGame && !store.sandboxMode" @click="setUpPlayerTrade" class="actionsLineButton">Trade Goods With Other Players</button>
+			<button v-if="!personal.trainingGame && !store.sandboxMode" @click="setUpPlayerTrade" class="actionsLineButton">{{ $t("cityNewBuildingArea.tradeWithPlayers") }}</button>
 			<br />
 		</template>
 
 		<template v-else-if="store.context.cityBuildingToDisplay === rf.BLDG_MARKET && store.context.action === rf.ACT_TRADE_BOARD">
-			Trade Goods 2:1 in the upper left resource area
+			{{ $t("cityNewBuildingArea.tradeBoardHint") }}
 			<br />
 			<template v-if="store.context.tradingAwayGoods.length > 0">
-				Trading:
+				{{ $t("cityNewBuildingArea.trading") }}
 				<img v-for="(res, idx) in store.context.tradingAwayGoods" :key="idx" class="newBuildingCostResMultiple" :src="view.getImage('res_' + String(res))" />
 			</template>
 			<br />
@@ -341,10 +344,10 @@ function totalGraveCount(playerIndex) {
 		<template v-if="showCancelButton()">
 			<button @click="city.cancelButton" class="actionsLineButton">
 				<span v-if="store.context.action === rf.ACT_TRADE_BOARD">
-					Stop Trading
+					{{ $t("cityNewBuildingArea.stopTrading") }}
 				</span>
 				<span v-else>
-				Cancel
+				{{ $t("cityNewBuildingArea.cancel") }}
 				</span>
 			</button>
 			<br />
@@ -355,26 +358,26 @@ function totalGraveCount(playerIndex) {
 		</b>
 		<br />
 		<span v-if="store.gameflow.subPhase === rf.SUB_PHASE_SAINT_HOUSE">
-			<button class="actionsLineButton" @click="cancelSaintHouse">Cancel</button>
+			<button class="actionsLineButton" @click="cancelSaintHouse">{{ $t("cityNewBuildingArea.cancel") }}</button>
 			<br />
 		</span>
 		{{ getNewBldgDescription() }}
 		<br />
 		<template v-if="store.context.cityBuildingBeingAdded !== rf.BLDG_GRAVE">
-			<b><u>Cost</u></b>
+			<b><u>{{ $t("cityNewBuildingArea.cost") }}</u></b>
 		</template>
 		<br />
 
-		<span v-if="store.context.cityBuildingToDisplay === -1">(Building Cost)</span>
+		<span v-if="store.context.cityBuildingToDisplay === -1">{{ $t("cityNewBuildingArea.buildingCost") }}</span>
 
 		<!-- PREVIOUS TURN BUILDING BEING READDED -->
 		<div v-if="store.players[props.playerIndexProp].requiredRebuilds.some((subarray) => subarray.bldgNum === store.context.cityBuildingBeingAdded)">
 			<br />
-			Free (Cost paid previously)
+			{{ $t("cityNewBuildingArea.freePaidPreviously") }}
 		</div>
 		<div v-else-if="store.context.saintHousesThisTurn.includes(store.context.cityBuildingBeingAdded)">
 			<br />
-			Free (Cost paid when house used with Saint Power)
+			{{ $t("cityNewBuildingArea.freePaidSaintPower") }}
 		</div>
 
 		<!-- NEW BUILDING COST NORMAL BUILDING -->
@@ -401,17 +404,17 @@ function totalGraveCount(playerIndex) {
 				<template v-if="store.context.cityBuildingToDisplayData.cost[2] > 1">
 					<span v-if="city.hasWorkingUniqueBuilding(props.playerIndexProp, rf.BLDG_PHILOSOPHY)" class="newBuildingLuxText">
 						<br />
-						Your Faculty of Philosophy allows you to use the same Luxury Good
+						{{ $t("cityNewBuildingArea.philosophySameLuxury") }}
 					</span>
-					<span v-else class="newBuildingLuxText">The Luxury Goods must be different</span>
+					<span v-else class="newBuildingLuxText">{{ $t("cityNewBuildingArea.luxuryMustDiffer") }}</span>
 				</template>
 			</template>
 		</div>
 
 		<!-- NEW BUILDING COST HOUSE -->
-		<div v-else-if="store.context.cityBuildingToDisplay >= 20 && store.context.cityBuildingToDisplay <= 24" class="newBuildingCostSpan">Free</div>
+		<div v-else-if="store.context.cityBuildingToDisplay >= 20 && store.context.cityBuildingToDisplay <= 24" class="newBuildingCostSpan">{{ $t("cityNewBuildingArea.free") }}</div>
 		<div v-else-if="store.context.cityBuildingToDisplay >= 25 && store.context.cityBuildingToDisplay <= 45" class="newBuildingCostSpan">
-			<template v-if="store.gameflow.subPhase === rf.SUB_PHASE_SAINT_HOUSE">Free (Saint Power)</template>
+			<template v-if="store.gameflow.subPhase === rf.SUB_PHASE_SAINT_HOUSE">{{ $t("cityNewBuildingArea.freeSaintPower") }}</template>
 			<template v-else>
 				<!-- FOOD -->
 				<template v-if="rf.HOUSE_COSTS[store.context.cityBuildingToDisplay - 25][0] > 0">
@@ -440,35 +443,35 @@ function totalGraveCount(playerIndex) {
 				<template v-if="rf.HOUSE_COSTS[store.context.cityBuildingToDisplay - 25][0] > 1 || rf.HOUSE_COSTS[store.context.cityBuildingToDisplay - 25][1] > 1">
 					<span v-if="city.hasWorkingUniqueBuilding(props.playerIndexProp, rf.BLDG_PHILOSOPHY)" class="newBuildingLuxText">
 						<br />
-						Your Faculty of Philosophy allows you to use the same Goods
+						{{ $t("cityNewBuildingArea.philosophySameGoods") }}
 					</span>
-					<span v-else class="newBuildingLuxText">The Goods must be different</span>
+					<span v-else class="newBuildingLuxText">{{ $t("cityNewBuildingArea.goodsMustDiffer") }}</span>
 				</template>
 			</template>
 		</div>
 
 		<span v-if="store.context.cityBuildingBeingAddedPayment[0] === -1 && personal.canPlay() && controller.shouldShowActivePlayerInfo(playerIndexProp)" class="redText">
 			<br />
-			You Cannot Afford This Building
+			{{ $t("cityNewBuildingArea.cannotAfford") }}
 		</span>
 		<span v-if="store.context.buildingMoveError > 0" class="redText">
 			<br />
-			<span v-if="store.context.buildingMoveError === 1">Not built this turn</span>
-			<span v-else-if="store.context.buildingMoveError === 2">A manned Hospital cannot be moved without the Saint power</span>
-			<span v-else-if="store.context.buildingMoveError === 3">A manned University cannot be moved without the Saint power</span>
-			<span v-else-if="store.context.buildingMoveError === 4">You have used your Faculty of Theology to raze your Cathedral</span>
-			<span v-else-if="store.context.buildingMoveError === 5">You have used your Market to Trade</span>
-			<span v-else-if="store.context.buildingMoveError === 6">A cathedral cannot be moved after a saint power has been used</span>
-			<span v-else-if="store.context.buildingMoveError === 7">No free space to move grave</span>
-			<span v-else-if="store.context.buildingMoveError === 8">You cannot build a hospital in the middle of moving buildings</span>
+			<span v-if="store.context.buildingMoveError === 1">{{ $t("cityNewBuildingArea.moveErrorNotBuiltThisTurn") }}</span>
+			<span v-else-if="store.context.buildingMoveError === 2">{{ $t("cityNewBuildingArea.moveErrorMannedHospital") }}</span>
+			<span v-else-if="store.context.buildingMoveError === 3">{{ $t("cityNewBuildingArea.moveErrorMannedUniversity") }}</span>
+			<span v-else-if="store.context.buildingMoveError === 4">{{ $t("cityNewBuildingArea.moveErrorRazedCathedral") }}</span>
+			<span v-else-if="store.context.buildingMoveError === 5">{{ $t("cityNewBuildingArea.moveErrorMarketTrade") }}</span>
+			<span v-else-if="store.context.buildingMoveError === 6">{{ $t("cityNewBuildingArea.moveErrorCathedralAfterSaint") }}</span>
+			<span v-else-if="store.context.buildingMoveError === 7">{{ $t("cityNewBuildingArea.moveErrorNoSpaceForGrave") }}</span>
+			<span v-else-if="store.context.buildingMoveError === 8">{{ $t("cityNewBuildingArea.moveErrorHospitalWhileMoving") }}</span>
 		</span>
 
 		<!-- ONLY SHOW SELECTED PAYMENT FOR YOU IN YOUR CITY IN YOUR TURN-->
 		<template v-if="personal.canPlay() && controller.shouldShowActivePlayerInfo(playerIndexProp)">
 			<span v-if="store.context.action === rf.ACT_CHOOSE_BUILDING_PAYMENT || rf.BLDG_COMPLEX_COST.includes(store.context.cityBuildingBeingAdded)">
-				<b><u>Selected Payment</u></b>
+				<b><u>{{ $t("cityNewBuildingArea.selectedPayment") }}</u></b>
 				<br />
-				<span v-if="store.context.cityBuildingBeingAddedPayment.length === 0">None</span>
+				<span v-if="store.context.cityBuildingBeingAddedPayment.length === 0">{{ $t("cityNewBuildingArea.none") }}</span>
 				<span v-else>
 					<img v-for="(res, idx) in store.context.cityBuildingBeingAddedPayment" :key="idx" class="resPaymentImg" :src="view.getImage('res_' + String(res))" />
 				</span>

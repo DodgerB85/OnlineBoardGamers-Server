@@ -25,6 +25,7 @@ import * as city from "./AQYcity.js"
 import * as model from "./AQYmodel.js"
 import * as IO from "../backend/AQY_IO.js"
 import * as country from "./AQYcountry.js"
+import i18n from "../i18n"
 
 import { usePersonalStore } from "../stores/AQYpersonal.js"
 import { useModelStore } from "../stores/AQYstore.js"
@@ -130,7 +131,7 @@ export function decompressChatData(data) {
 		var chatArray = JSON.parse(decompressedData)
 	} else chatArray = []
 
-	chatArray.push(["WelcomeBot", 0, "Welcome to Antiquity Online!SNLBSNLBIf you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"])
+	chatArray.push(["WelcomeBot", 0, i18n.global.t("game.welcomeMessage")])
 
 	return chatArray
 }

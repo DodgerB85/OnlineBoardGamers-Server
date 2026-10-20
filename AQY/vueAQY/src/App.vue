@@ -44,6 +44,9 @@ const store = useModelStore()
 import { usePersonalStore } from "./stores/AQYpersonal.js"
 const personal = usePersonalStore()
 
+import { useI18n } from "vue-i18n"
+const { t } = useI18n()
+
 async function initGame() {
 	personal.haltPlay = true
 
@@ -148,12 +151,12 @@ async function initGame() {
 
 	// If new, save, otherwise, import data
 	if (window.initData.pov == undefined && window.initData.gameData === "") {
-		store.topMenuViews.rewindErrorText = "The game has not yet started"
+		store.topMenuViews.rewindErrorText = t("app.gameNotStarted")
 		// Create the <h1> element
 		var heading = document.createElement("h1")
 
 		// Set the text content of the <h1> element
-		heading.textContent = "The game has not yet started"
+		heading.textContent = t("app.gameNotStarted")
 
 		// Get a reference to the body element
 		var body = document.body

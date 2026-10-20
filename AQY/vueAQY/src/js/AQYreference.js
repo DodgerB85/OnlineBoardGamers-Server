@@ -5,6 +5,9 @@
  *
  */
 
+import i18n from "../i18n"
+const t = i18n.global.t // Shortcut
+
 export const BOT_NAME = "AqyBot"
 export const DELETE_VOTE_TOPIC = "delete_game_votes"
 export const STATS_EXCLUDE_VOTE_TOPIC = "stats_exclude_votes"
@@ -47,7 +50,22 @@ export const PRE_PHASE_FAMINE = 18
 export const PRE_PHASE_POLLUTION = 19
 // END EXTERNAL VARS
 
-export const PHASE_STRINGS = ["No Phase", "All Rise", "City Building", "Turn Order", "Countryside Building", "Store Goods", "Harvest", "Explore", "Famine", "Pollution", "Check Victory", "Game Over"]
+// ponytail: translated once at module load (initData.locale is set before this runs);
+// rebuild these as getters if in-app locale switching is ever added without a page reload
+export const PHASE_STRINGS = [
+	t("reference.phases.noPhase"),
+	t("reference.phases.allRise"),
+	t("reference.phases.cityBuilding"),
+	t("reference.phases.turnOrder"),
+	t("reference.phases.countrysideBuilding"),
+	t("reference.phases.storeGoods"),
+	t("reference.phases.harvest"),
+	t("reference.phases.explore"),
+	t("reference.phases.famine"),
+	t("reference.phases.pollution"),
+	t("reference.phases.checkVictory"),
+	t("reference.phases.gameOver"),
+]
 
 export const COUNTRY_PHASES = [PHASE_FIRST_CITY, PHASE_COUNTRYSIDE_BUILDING, PHASE_HARVEST, PHASE_EXPLORE, PHASE_POLLUTION]
 // This is mainly so the city knows when to display an End Turn button NB: Pollution included in city phases
@@ -199,7 +217,7 @@ export const RES_DYE = 9
 export const RES_FOODS = [RES_GRAIN, RES_SHEEP, RES_OLIVES, RES_FISH]
 export const RES_LUXS = [RES_GOLD, RES_WINE, RES_PEARLS, RES_DYE]
 
-export const RES_TEXT = ["Wood", "Stone", "Grain", "Sheep", "Olives", "Fish", "Gold", "Wine", "Pearls", "Dye"]
+export const RES_TEXT = [t("reference.resources.wood"), t("reference.resources.stone"), t("reference.resources.grain"), t("reference.resources.sheep"), t("reference.resources.olives"), t("reference.resources.fish"), t("reference.resources.gold"), t("reference.resources.wine"), t("reference.resources.pearls"), t("reference.resources.dye")]
 
 export const RES_DATA = {
 	// Woodcutters
@@ -232,56 +250,56 @@ export const SAINT_MARIA = 4 // All bonuses,  // need 2 VR
 export const SAINT_INFO = [
 	{
 		id: SAINT_GIORGIO,
-		name: "San Giorgio",
-		bonus: "Get 1 fish per cathedral built this turn",
-		VR: "Enclose another player with your ZoC",
+		name: t("reference.saints.giorgio.name"),
+		bonus: t("reference.saints.giorgio.bonus"),
+		VR: t("reference.saints.giorgio.victoryRequirement"),
 	},
 	{
 		id: SAINT_BARBARA,
-		name: "Santa Barbara",
-		bonus: "Allows moving buildings (graves can only move to free space)",
-		VR: "Build all Buildings (Ungraved)",
+		name: t("reference.saints.barbara.name"),
+		bonus: t("reference.saints.barbara.bonus"),
+		VR: t("reference.saints.barbara.victoryRequirement"),
 	},
 	{
 		id: SAINT_CHRISTOFORI,
-		name: "San Christofori",
-		bonus: "Store any amount of goods",
-		VR: "At least 3 of each Food and Luxury Goods",
+		name: t("reference.saints.christofori.name"),
+		bonus: t("reference.saints.christofori.bonus"),
+		VR: t("reference.saints.christofori.victoryRequirement"),
 	},
 	{
 		id: SAINT_NICOLO,
-		name: "San Nicolo",
-		bonus: "When building a house, build.a second lower numbered house for free",
-		VR: "Build all houses",
+		name: t("reference.saints.nicolo.name"),
+		bonus: t("reference.saints.nicolo.bonus"),
+		VR: t("reference.saints.nicolo.victoryRequirement"),
 	},
 	{
 		id: SAINT_MARIA,
-		name: "Santa Maria",
-		bonus: "All Saint Bonuses",
-		VR: "Any 2 Victory Requirements",
+		name: t("reference.saints.maria.name"),
+		bonus: t("reference.saints.maria.bonus"),
+		VR: t("reference.saints.maria.victoryRequirement"),
 	},
 ]
 
 export const TERRAIN_TYPES = [
 	{
-		name: "forest",
+		name: t("reference.terrain.forest"),
 		color: "#228B22",
 	},
 	{
-		name: "plains",
+		name: t("reference.terrain.plains"),
 		color: "#9acd32",
 	},
 	{
-		name: "mountains",
+		name: t("reference.terrain.mountains"),
 		//color: "#616E71",
 		color: "#CF832C",
 	},
 	{
-		name: "water",
+		name: t("reference.terrain.water"),
 		color: "#416bdf",
 	},
 	{
-		name: "grass",
+		name: t("reference.terrain.grass"),
 		//color: "#cdcd32",
 		color: "#90C43D",
 	},
@@ -654,7 +672,7 @@ export const COUNTRYSIDE_BLDG_MINE = 3
 export const COUNTRYSIDE_BLDG_FARM = 4
 export const COUNTRYSIDE_BLDG_FISHERY = 5
 
-export const COUNTRYSIDE_BLDG_NAMES = ["City", "Inn", "Woodcutter", "Mine", "Farm", "Fishery"]
+export const COUNTRYSIDE_BLDG_NAMES = [t("reference.countrysideBuildings.city"), t("reference.countrysideBuildings.inn"), t("reference.countrysideBuildings.woodcutter"), t("reference.countrysideBuildings.mine"), t("reference.countrysideBuildings.farm"), t("reference.countrysideBuildings.fishery")]
 
 /** BUILDINGS */
 export const BLDG_NONE = 0
@@ -751,28 +769,28 @@ export const BLDG_ARRAY = [
 // The sqaure shape that will just fit the building
 export const BLDG_DATA = {
 	// First path number is the offset from the top left corner to get to the first path in the shape
-	BLDG_THEOLOGY: { id: BLDG_THEOLOGY, width: 3, height: 3, path: [0, 3, 2, -1, 1, -2, -3], name: "Faculty of Theology", description: "May Raze Cathedral", imgName: "b_theology", bldgModel: [1, 1, 1, 1, 1, 1, 1, 1, 0], bldgSq: BLDG_THEOLOGY_SQ, cost: [0, 1, 0], reqdSqs: 8, manIdx: [0.25, 0.25] },
-	BLDG_BIOLOGY: { id: BLDG_BIOLOGY, width: 3, height: 3, path: [0, 3, 3, -2, -1, -1, -2], name: "Faculty of Biology", description: "Build 1 Free Farm per Turn", imgName: "b_biology", bldgModel: [1, 1, 1, 1, 1, 1, 0, 1, 1], bldgSq: BLDG_BIOLOGY_SQ, cost: [0, 2, 0], reqdSqs: 8, manIdx: [0.35, 0.15] },
-	BLDG_UNIVERSITY: { id: BLDG_UNIVERSITY, width: 2, height: 2, path: [0, 2, 2, -2, -2], name: "University", description: "Joins adjacent Faculties (Only need to Man the Uni)", imgName: "b_university", bldgModel: [1, 1, 1, 1], bldgSq: BLDG_UNIVERSITY_SQ, cost: [1, 0, 0], reqdSqs: 4, manIdx: [0.5, 0.5] },
-	BLDG_ALCHEMY: { id: BLDG_ALCHEMY, width: 3, height: 3, path: [0, 2, 1, 1, 2, -3, -3], name: "Faculty of Alchemy", description: "Clean 1 Hex and all Neighbours of Pollution", imgName: "b_alchemy", bldgModel: [1, 1, 0, 1, 1, 1, 1, 1, 1], bldgSq: BLDG_ALCHEMY_SQ, cost: [0, 2, 0], reqdSqs: 8, manIdx: [0.35, 1.1] },
-	BLDG_PHILOSOPHY: { id: BLDG_PHILOSOPHY, width: 3, height: 3, path: [1, 2, 3, -3, -2, 1, -1, 2], name: "Faculty of Philosophy", description: "Ignore 'D'", imgName: "b_philosophy", bldgModel: [0, 1, 1, 1, 1, 1, 1, 1, 1], bldgSq: BLDG_PHILOSOPHY_SQ, cost: [0, 1, 0], reqdSqs: 8, manIdx: [1.85, 1.1] },
-	BLDG_BREWERY: { id: BLDG_BREWERY, width: 4, height: 2, path: [0, 4, 1, -3, 1, -1, -2], name: "Brewery", description: "Allows Building Inn", imgName: "b_brewery", bldgModel: [1, 1, 1, 1, 1, 0, 0, 0], bldgSq: BLDG_BREWERY_SQ, cost: [1, 0, 0], reqdSqs: 5, manIdx: [0, 0] },
-	BLDG_FORCED_LABOUR: { id: BLDG_FORCED_LABOUR, width: 4, height: 3, path: [3, 1, 2, -3, 1, -1, -2, 3, -1], name: "Forced Labour", description: "Countryside Harvests 3x, but Discards 1", imgName: "b_forcedLabour", bldgModel: [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0], bldgSq: BLDG_FORCED_LABOUR_SQ, cost: [0, 1, 0], reqdSqs: 6, manIdx: [0, 2] },
-	BLDG_STABLE: { id: BLDG_STABLE, width: 2, height: 2, path: [0, 2, 2, -2, -2], name: "Stable", description: "ZoC Grows by 1 Step", imgName: "b_stable", bldgModel: [1, 1, 1, 1], bldgSq: BLDG_STABLE_SQ, cost: [0, 0, 2], reqdSqs: 4, manIdx: [0.5, 0.5] },
-	BLDG_HARBOUR: { id: BLDG_HARBOUR, width: 4, height: 2, path: [0, 1, 1, 2, -1, 1, 2, -4, -2], name: "Harbour", description: "Add Water plus Coast to ZoC", imgName: "b_harbour", bldgModel: [1, 0, 0, 1, 1, 1, 1, 1], bldgSq: BLDG_HARBOUR_SQ, cost: [1, 0, 0], reqdSqs: 6, manIdx: [0, 0] },
-	BLDG_EXPLORER: { id: BLDG_EXPLORER, width: 3, height: 1, path: [0, 3, 1, -3, -1], name: "Explorer", description: "Allows Sending Out Explorers", imgName: "b_explorer", bldgModel: [1, 1, 1], bldgSq: BLDG_EXPLORER_SQ, cost: [1, 0, 0], reqdSqs: 3, manIdx: [1, 0] },
-	BLDG_GRANARY: { id: BLDG_GRANARY, width: 3, height: 2, path: [1, 1, 1, 1, 1, -3, -1, 1, -1], name: "Granary", description: "Prevents 3 Famine", imgName: "b_granary", bldgModel: [0, 1, 0, 1, 1, 1], bldgSq: BLDG_GRANARY_SQ, cost: [1, 0, 0], reqdSqs: 4, manIdx: [0, 0] },
-	BLDG_DUMP: { id: BLDG_DUMP, width: 3, height: 3, path: [0, 3, 3, -3, -3], name: "Dump", description: "Prevents 4 Pollution; Opponents may not Pollute your ZoC", imgName: "b_dump", bldgModel: [1, 1, 1, 1, 1, 1, 1, 1, 1], bldgSq: BLDG_DUMP_SQ, cost: [0, 1, 0], reqdSqs: 9, manIdx: [1, 1] },
-	BLDG_CATHEDRAL: { id: BLDG_CATHEDRAL, width: 3, height: 4, path: [1, 1, 1, 1, 1, -1, 2, -1, -2, -1, -1, 1, -1], name: "Cathedral", description: "Choose Patron Saint", imgName: "b_cathedral", bldgModel: [0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0], bldgSq: BLDG_CATHEDRAL_SQ, cost: [0, 1, 0], reqdSqs: 6, manIdx: [0, 0] },
-	BLDG_HOSPITAL: { id: BLDG_HOSPITAL, width: 3, height: 2, path: [0, 3, 2, -3, -2], name: "Hospital", description: "Clear 5 Graves", imgName: "b_hospital", bldgModel: [1, 1, 1, 1, 1, 1], bldgSq: BLDG_HOSPITAL_SQ, cost: [0, 0, 1], reqdSqs: 6, manIdx: [1, 0.5] },
-	BLDG_MARKET: { id: BLDG_MARKET, width: 2, height: 2, path: [0, 2, 2, -2, -2], name: "Market", description: "Trade with Players, or 2:1 with Game", imgName: "b_market", bldgModel: [1, 1, 1, 1], bldgSq: BLDG_MARKET_SQ, cost: [1, 0, 0], reqdSqs: 4, manIdx: [0.5, 0] },
-	BLDG_CART: { id: BLDG_CART, width: 2, height: 2, path: [1, 1, 2, -2, -1, 1, -1], name: "Cart Shop", description: "Allows Building in Countryside", imgName: "b_cart", bldgModel: [0, 1, 1, 1], bldgSq: BLDG_CART_SQ, cost: [1, 0, 0], reqdSqs: 3, manIdx: [1, 0.2] },
-	BLDG_FOUNTAIN: { id: BLDG_FOUNTAIN, width: 1, height: 1, path: [0, 1, 1, -1, -1], name: "Fountain", description: "Drops Famine Level 1 on Build. Reduces Pollution by 1", imgName: "b_fountain", bldgModel: [1], bldgSq: BLDG_FOUNTAIN_SQ, cost: [0, 0, 1], reqdSqs: 1, manIdx: [0, 0] },
-	BLDG_STORAGE: { id: BLDG_STORAGE, width: 2, height: 1, path: [0, 2, 1, -2, -1], name: "Storage", description: "Store 1 Good per Square", imgName: "b_storage", bldgModel: [1, 1], bldgSq: BLDG_STORAGE_SQ, cost: [1, 0, 0], reqdSqs: 2, manIdx: [0, 0] },
+	BLDG_THEOLOGY: { id: BLDG_THEOLOGY, width: 3, height: 3, path: [0, 3, 2, -1, 1, -2, -3], name: t("reference.theology.name"), description: t("reference.theology.description"), imgName: "b_theology", bldgModel: [1, 1, 1, 1, 1, 1, 1, 1, 0], bldgSq: BLDG_THEOLOGY_SQ, cost: [0, 1, 0], reqdSqs: 8, manIdx: [0.25, 0.25] },
+	BLDG_BIOLOGY: { id: BLDG_BIOLOGY, width: 3, height: 3, path: [0, 3, 3, -2, -1, -1, -2], name: t("reference.biology.name"), description: t("reference.biology.description"), imgName: "b_biology", bldgModel: [1, 1, 1, 1, 1, 1, 0, 1, 1], bldgSq: BLDG_BIOLOGY_SQ, cost: [0, 2, 0], reqdSqs: 8, manIdx: [0.35, 0.15] },
+	BLDG_UNIVERSITY: { id: BLDG_UNIVERSITY, width: 2, height: 2, path: [0, 2, 2, -2, -2], name: t("reference.university.name"), description: t("reference.university.description"), imgName: "b_university", bldgModel: [1, 1, 1, 1], bldgSq: BLDG_UNIVERSITY_SQ, cost: [1, 0, 0], reqdSqs: 4, manIdx: [0.5, 0.5] },
+	BLDG_ALCHEMY: { id: BLDG_ALCHEMY, width: 3, height: 3, path: [0, 2, 1, 1, 2, -3, -3], name: t("reference.alchemy.name"), description: t("reference.alchemy.description"), imgName: "b_alchemy", bldgModel: [1, 1, 0, 1, 1, 1, 1, 1, 1], bldgSq: BLDG_ALCHEMY_SQ, cost: [0, 2, 0], reqdSqs: 8, manIdx: [0.35, 1.1] },
+	BLDG_PHILOSOPHY: { id: BLDG_PHILOSOPHY, width: 3, height: 3, path: [1, 2, 3, -3, -2, 1, -1, 2], name: t("reference.philosophy.name"), description: t("reference.philosophy.description"), imgName: "b_philosophy", bldgModel: [0, 1, 1, 1, 1, 1, 1, 1, 1], bldgSq: BLDG_PHILOSOPHY_SQ, cost: [0, 1, 0], reqdSqs: 8, manIdx: [1.85, 1.1] },
+	BLDG_BREWERY: { id: BLDG_BREWERY, width: 4, height: 2, path: [0, 4, 1, -3, 1, -1, -2], name: t("reference.brewery.name"), description: t("reference.brewery.description"), imgName: "b_brewery", bldgModel: [1, 1, 1, 1, 1, 0, 0, 0], bldgSq: BLDG_BREWERY_SQ, cost: [1, 0, 0], reqdSqs: 5, manIdx: [0, 0] },
+	BLDG_FORCED_LABOUR: { id: BLDG_FORCED_LABOUR, width: 4, height: 3, path: [3, 1, 2, -3, 1, -1, -2, 3, -1], name: t("reference.forcedLabour.name"), description: t("reference.forcedLabour.description"), imgName: "b_forcedLabour", bldgModel: [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0], bldgSq: BLDG_FORCED_LABOUR_SQ, cost: [0, 1, 0], reqdSqs: 6, manIdx: [0, 2] },
+	BLDG_STABLE: { id: BLDG_STABLE, width: 2, height: 2, path: [0, 2, 2, -2, -2], name: t("reference.stable.name"), description: t("reference.stable.description"), imgName: "b_stable", bldgModel: [1, 1, 1, 1], bldgSq: BLDG_STABLE_SQ, cost: [0, 0, 2], reqdSqs: 4, manIdx: [0.5, 0.5] },
+	BLDG_HARBOUR: { id: BLDG_HARBOUR, width: 4, height: 2, path: [0, 1, 1, 2, -1, 1, 2, -4, -2], name: t("reference.harbour.name"), description: t("reference.harbour.description"), imgName: "b_harbour", bldgModel: [1, 0, 0, 1, 1, 1, 1, 1], bldgSq: BLDG_HARBOUR_SQ, cost: [1, 0, 0], reqdSqs: 6, manIdx: [0, 0] },
+	BLDG_EXPLORER: { id: BLDG_EXPLORER, width: 3, height: 1, path: [0, 3, 1, -3, -1], name: t("reference.explorer.name"), description: t("reference.explorer.description"), imgName: "b_explorer", bldgModel: [1, 1, 1], bldgSq: BLDG_EXPLORER_SQ, cost: [1, 0, 0], reqdSqs: 3, manIdx: [1, 0] },
+	BLDG_GRANARY: { id: BLDG_GRANARY, width: 3, height: 2, path: [1, 1, 1, 1, 1, -3, -1, 1, -1], name: t("reference.granary.name"), description: t("reference.granary.description"), imgName: "b_granary", bldgModel: [0, 1, 0, 1, 1, 1], bldgSq: BLDG_GRANARY_SQ, cost: [1, 0, 0], reqdSqs: 4, manIdx: [0, 0] },
+	BLDG_DUMP: { id: BLDG_DUMP, width: 3, height: 3, path: [0, 3, 3, -3, -3], name: t("reference.dump.name"), description: t("reference.dump.description"), imgName: "b_dump", bldgModel: [1, 1, 1, 1, 1, 1, 1, 1, 1], bldgSq: BLDG_DUMP_SQ, cost: [0, 1, 0], reqdSqs: 9, manIdx: [1, 1] },
+	BLDG_CATHEDRAL: { id: BLDG_CATHEDRAL, width: 3, height: 4, path: [1, 1, 1, 1, 1, -1, 2, -1, -2, -1, -1, 1, -1], name: t("reference.cathedral.name"), description: t("reference.cathedral.description"), imgName: "b_cathedral", bldgModel: [0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0], bldgSq: BLDG_CATHEDRAL_SQ, cost: [0, 1, 0], reqdSqs: 6, manIdx: [0, 0] },
+	BLDG_HOSPITAL: { id: BLDG_HOSPITAL, width: 3, height: 2, path: [0, 3, 2, -3, -2], name: t("reference.hospital.name"), description: t("reference.hospital.description"), imgName: "b_hospital", bldgModel: [1, 1, 1, 1, 1, 1], bldgSq: BLDG_HOSPITAL_SQ, cost: [0, 0, 1], reqdSqs: 6, manIdx: [1, 0.5] },
+	BLDG_MARKET: { id: BLDG_MARKET, width: 2, height: 2, path: [0, 2, 2, -2, -2], name: t("reference.market.name"), description: t("reference.market.description"), imgName: "b_market", bldgModel: [1, 1, 1, 1], bldgSq: BLDG_MARKET_SQ, cost: [1, 0, 0], reqdSqs: 4, manIdx: [0.5, 0] },
+	BLDG_CART: { id: BLDG_CART, width: 2, height: 2, path: [1, 1, 2, -2, -1, 1, -1], name: t("reference.cart.name"), description: t("reference.cart.description"), imgName: "b_cart", bldgModel: [0, 1, 1, 1], bldgSq: BLDG_CART_SQ, cost: [1, 0, 0], reqdSqs: 3, manIdx: [1, 0.2] },
+	BLDG_FOUNTAIN: { id: BLDG_FOUNTAIN, width: 1, height: 1, path: [0, 1, 1, -1, -1], name: t("reference.fountain.name"), description: t("reference.fountain.description"), imgName: "b_fountain", bldgModel: [1], bldgSq: BLDG_FOUNTAIN_SQ, cost: [0, 0, 1], reqdSqs: 1, manIdx: [0, 0] },
+	BLDG_STORAGE: { id: BLDG_STORAGE, width: 2, height: 1, path: [0, 2, 1, -2, -1], name: t("reference.storage.name"), description: t("reference.storage.description"), imgName: "b_storage", bldgModel: [1, 1], bldgSq: BLDG_STORAGE_SQ, cost: [1, 0, 0], reqdSqs: 2, manIdx: [0, 0] },
 
-	HOUSE: { id: 1, width: 1, height: 1, path: [0, 1, 1, -1, -1], name: "House", description: "Get a worker", imgName: "b_storage", bldgModel: [1], bldgSq: BLDG_HOUSE_SQ, reqdSqs: 1 },
+	HOUSE: { id: 1, width: 1, height: 1, path: [0, 1, 1, -1, -1], name: t("reference.house.name"), description: t("reference.house.description"), imgName: "b_storage", bldgModel: [1], bldgSq: BLDG_HOUSE_SQ, reqdSqs: 1 },
 
-	BLDG_GRAVE: { id: BLDG_GRAVE, width: 1, height: 1, path: [0, 1, 1, -1, -1], name: "Grave", description: "Uses up Space", imgName: "grave", bldgModel: [1], bldgSq: BLDG_GRAVE_SQ, cost: [0], reqdSqs: 1 },
+	BLDG_GRAVE: { id: BLDG_GRAVE, width: 1, height: 1, path: [0, 1, 1, -1, -1], name: t("reference.grave.name"), description: t("reference.grave.description"), imgName: "grave", bldgModel: [1], bldgSq: BLDG_GRAVE_SQ, cost: [0], reqdSqs: 1 },
 }
 
 // Obviously starts at index 0. This equals house FIVE (ie bldg 25)

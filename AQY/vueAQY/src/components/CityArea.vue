@@ -475,44 +475,44 @@ function clickedManOnBuilding(bldg) {
 				<div id="availableMenDiv">
 					<!-- EXPECTED HARVDEST -->
 					<div class="expectedHarvestDiv">
-						Expected Harvest:
+						{{ $t("cityArea.expectedHarvest") }}
 						<span v-if="country.getExpectedHarvestResources(playerIndexProp, city.hasWorkingUniqueBuilding(playerIndexProp, rf.BLDG_FORCED_LABOUR, false)).length > 0">
 							<img v-for="(res, idx) in country.getExpectedHarvestResources(playerIndexProp, city.hasWorkingUniqueBuilding(playerIndexProp, rf.BLDG_FORCED_LABOUR, false))" :key="idx" class="expectedHarvestRes" :src="view.getImage('res_' + String(res))" />
 						</span>
-						<span v-else>None</span>
+						<span v-else>{{ $t("cityArea.none") }}</span>
 					</div>
-					<button v-if="store.sandboxMode && store.players[playerIndexProp].cities.length < 4" @click="sandboxAddCity" class="actionsLineButton">Sandbox: Add city</button>
-					<button v-if="store.sandboxMode" @click="sandboxAddGrave" class="actionsLineButton">Sandbox: Add Grave</button>
-					<button v-if="store.sandboxMode && store.players[playerIndexProp].cities.some((city) => city.graves.length > 0)" @click="sandboxRemoveGrave" class="actionsLineButton">Sandbox: Remove Grave</button>
+					<button v-if="store.sandboxMode && store.players[playerIndexProp].cities.length < 4" @click="sandboxAddCity" class="actionsLineButton">{{ $t("cityArea.sandboxAddCity") }}</button>
+					<button v-if="store.sandboxMode" @click="sandboxAddGrave" class="actionsLineButton">{{ $t("cityArea.sandboxAddGrave") }}</button>
+					<button v-if="store.sandboxMode && store.players[playerIndexProp].cities.some((city) => city.graves.length > 0)" @click="sandboxRemoveGrave" class="actionsLineButton">{{ $t("cityArea.sandboxRemoveGrave") }}</button>
 
 					<template v-if="personal.canPlay() && store.gameflow.subPhase !== rf.SUB_PHASE_CHOOSE_SAINT">
 						<button v-if="personal.canPlay() && controller.shouldShowActivePlayerInfo(playerIndexProp) && store.gameflow.phase === rf.PHASE_CITY_BUILDING && (store.gameflow.subPhase === rf.SUB_PHASE_ADD_BUILDINGS || store.gameflow.subPhase === rf.SUB_PHASE_MOVE_BUILDINGS)" @click="menDivButton" class="actionsLineButton">
-							<span v-if="store.context.action === rf.ACT_HOSPITAL_GRAVES">Stop Removing Graves</span>
-							<span v-else-if="personal.canPlay() && store.gameflow.subPhase === rf.SUB_PHASE_ADD_BUILDINGS && controller.shouldShowActivePlayerInfo(playerIndexProp)">(Re)move Buildings</span>
-							<span v-else>Stop (Re)moving</span>
+							<span v-if="store.context.action === rf.ACT_HOSPITAL_GRAVES">{{ $t("cityArea.stopRemovingGraves") }}</span>
+							<span v-else-if="personal.canPlay() && store.gameflow.subPhase === rf.SUB_PHASE_ADD_BUILDINGS && controller.shouldShowActivePlayerInfo(playerIndexProp)">{{ $t("cityArea.moveBuildings") }}</span>
+							<span v-else>{{ $t("cityArea.stopMoving") }}</span>
 						</button>
-						<button v-if="canManAllBuildings() && controller.shouldShowActivePlayerInfo(playerIndexProp)" @click="localManAllBuildings" class="actionsLineButton">Man All</button>
+						<button v-if="canManAllBuildings() && controller.shouldShowActivePlayerInfo(playerIndexProp)" @click="localManAllBuildings" class="actionsLineButton">{{ $t("cityArea.manAll") }}</button>
 						<button v-if="controller.shouldShowActivePlayerInfo(playerIndexProp) && ((canUnManAnyBuilding() && store.context.action !== rf.ACT_UNMAN_BUILDING) || store.context.action === rf.ACT_UNMAN_BUILDING)" @click="unmanButton" class="actionsLineButton">
-							<span v-if="store.context.action === rf.ACT_UNMAN_BUILDING">Cancel</span>
-							<span v-else-if="store.context.action === rf.ACT_MAN_BLDG">Cancel</span>
-							<span v-else>Un-man</span>
+							<span v-if="store.context.action === rf.ACT_UNMAN_BUILDING">{{ $t("cityArea.cancel") }}</span>
+							<span v-else-if="store.context.action === rf.ACT_MAN_BLDG">{{ $t("cityArea.cancel") }}</span>
+							<span v-else>{{ $t("cityArea.unman") }}</span>
 						</button>
 					</template>
 					<template v-else-if="personal.canPlay() && store.gameflow.subPhase === rf.SUB_PHASE_CHOOSE_SAINT">
-						Please choose a saint (See above city screen)
+						{{ $t("cityArea.chooseSaintHint") }}
 					</template>
 					<br />
 					<span v-if="store.players[playerIndexProp].availableMen <= 0">
-						No Available Men
+						{{ $t("cityArea.noAvailableMen") }}
 						<span v-if="store.players[playerIndexProp].availableMen < 0" class="redText">
 							<br />
-							You have removed a house after using the man
+							{{ $t("cityArea.removedHouseAfterMan") }}
 							<br />
-							A house must be readded before ending your turn
+							{{ $t("cityArea.houseMustBeReadded") }}
 						</span>
 					</span>
 					<span v-else-if="store.gameflow.subPhase !== rf.SUB_PHASE_CHOOSE_SAINT">
-						Available Men:
+						{{ $t("cityArea.availableMen") }}
 						<div
 							v-for="manNum in store.players[playerIndexProp].availableMen"
 							:key="manNum"
@@ -525,7 +525,7 @@ function clickedManOnBuilding(bldg) {
 					</span>
 					<template v-if="personal.canPlay() && controller.shouldShowActivePlayerInfo(playerIndexProp) && store.context.gravesLeftToPlace > 0">
 						<br />
-						Graves:
+						{{ $t("cityArea.graves") }}
 						<div v-for="graveNum in store.context.gravesLeftToPlace" :key="graveNum" class="availableGrave" @click="city.startGravePlacement(playerIndexProp)">
 							<img :src="view.getImage('grave')" />
 						</div>
@@ -548,14 +548,14 @@ function clickedManOnBuilding(bldg) {
 						<transition name="fadeOut">
 							<div class="bldgPlaceErrorPopup" v-if="showErrorPopup > 0" :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }" @mouseover="hideErrorPopup">
 								<span v-if="showErrorPopup === 1">
-									Building Must
+									{{ $t("cityArea.buildingMust") }}
 									<br />
-									Fit in City
+									{{ $t("cityArea.fitInCity") }}
 								</span>
 								<span v-if="showErrorPopup === 2">
-									Must be Placed
+									{{ $t("cityArea.mustBePlaced") }}
 									<br />
-									on Free Space
+									{{ $t("cityArea.onFreeSpace") }}
 								</span>
 							</div>
 						</transition>
@@ -670,13 +670,13 @@ function clickedManOnBuilding(bldg) {
 				:style="{
 					width: store.permanentSettings.housesInNumberOrder === 2 ? '890px' : '790px',
 				}">
-				<span class="infoSpan" id="famineSpan">Famine Level: {{ model.getFamineLevel() }}</span>
+				<span class="infoSpan" id="famineSpan">{{ $t("cityArea.famineLevel", { level: model.getFamineLevel() }) }}</span>
 				<span class="infoSpan" id="pollutionSpan">
-					- Pollution:
+					{{ $t("cityArea.pollution") }}
 					<span>{{ country.getPendingPollution(playerIndexProp) }}</span>
 				</span>
 				<span class="infoSpan" id="graveSpan">
-					- Graves:
+					{{ $t("cityArea.gravesCount") }}
 					<span>{{ city.getTotalGravesToPlace(playerIndexProp) }}</span>
 				</span>
 				<br />
@@ -713,7 +713,7 @@ function clickedManOnBuilding(bldg) {
 				<img class="countryCostResImg" :src="view.getImage('res_' + String(rf.RES_FISH))" />
 				)
 			-->
-				Countryside Costs: Woodcutter: W, Mine: W, Fishery: W, Farm: Seed, City: W+S+F+2DL, Inn: F
+				{{ $t("cityArea.countrysideCosts") }}
 			</b>
 			<br />
 			<template v-for="idx in Array.from({ length: store.players.length }, (_, idx) => idx)" :key="idx">

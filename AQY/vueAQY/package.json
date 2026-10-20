@@ -14,7 +14,8 @@
     "pinia": "^2.1.7",
     "prettier-eslint": "^16.3.0",
     "vue": "^3.4.21",
-    "vue-eslint-parser": "^9.4.2"
+    "vue-eslint-parser": "^9.4.2",
+    "vue-i18n": "^11.4.16"
   },
   "devDependencies": {
     "@eslint/js": "^9.1.1",

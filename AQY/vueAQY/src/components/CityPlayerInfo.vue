@@ -35,25 +35,25 @@ const props = defineProps({
 				<img v-if="store.players[playerIndexProp].saint !== rf.SAINT_NONE" :src="view.getImage('saint_' + String(store.players[playerIndexProp].saint))" />
 				<span v-else>
 					<br />
-					No
+					{{ $t("cityPlayerInfo.no") }}
 					<br />
-					Saint
+					{{ $t("cityPlayerInfo.saint") }}
 				</span>
 			</div>
 			<div class="saintText">
 				<span v-if="store.players[playerIndexProp].saint !== rf.SAINT_NONE">
 					<strong>{{ rf.SAINT_INFO[store.players[playerIndexProp].saint].name }}</strong>
 					<br />
-					<strong>Bonus: </strong>
+					<strong>{{ $t("cityPlayerInfo.bonus") }}</strong>
 					{{ rf.SAINT_INFO[store.players[playerIndexProp].saint].bonus }}
 				</span>
-				<span v-else><strong>None</strong></span>
+				<span v-else><strong>{{ $t("cityPlayerInfo.none") }}</strong></span>
 				<br />
-				<strong>VR: </strong>
+				<strong>{{ $t("cityPlayerInfo.vr") }}</strong>
 				<span v-if="store.players[playerIndexProp].saint !== rf.SAINT_NONE">
 					{{ rf.SAINT_INFO[store.players[playerIndexProp].saint].VR }}
 				</span>
-				<span v-else>Choose a Saint</span>
+				<span v-else>{{ $t("cityPlayerInfo.chooseSaint") }}</span>
 			</div>
 		</div>
 	</div>

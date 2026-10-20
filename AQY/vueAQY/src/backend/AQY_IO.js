@@ -10,6 +10,8 @@ import { useModelStore } from "../stores/AQYstore.js"
 
 import { usePersonalStore } from "../stores/AQYpersonal.js"
 
+import i18n from "../i18n"
+
 export const SUPER_USERS = ["BotKickStarter"]
 export const DEBUG_USERS = ["BotKickStarter", "admin"]
 
@@ -35,11 +37,11 @@ export async function submitBug(bugContent) {
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
-		if (data.bugEntrySuccess) store.topMenuViews.bugSuccessText = "Your bug report has been submitted"
-		else store.topMenuViews.bugErrorText = "Sorry, there was a problem.<br/>Please email the webmaster directly or report on the Discord"
+		if (data.bugEntrySuccess) store.topMenuViews.bugSuccessText = i18n.global.t("io.bugReportSubmitted")
+		else store.topMenuViews.bugErrorText = i18n.global.t("io.bugErrorHtml")
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.topMenuViews.bugErrorText = "Sorry, there was a problem.<br/>Please email the webmaster directly or report on the Discord"
+		store.topMenuViews.bugErrorText = i18n.global.t("io.bugErrorHtml")
 	}
 	store.topMenuViews.showLoader = false
 }
@@ -126,7 +128,7 @@ export async function saveGame(saveRewind, saveContext = false, deleteMoves = fa
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			store.topMenuViews.rewindErrorText = "It appears you have an older version of the game. Please refresh the page"
+			store.topMenuViews.rewindErrorText = i18n.global.t("io.olderVersionRefresh")
 			return
 		}
 		personal.latestUpdate = data.latestUpdate
@@ -161,7 +163,7 @@ export async function saveGame(saveRewind, saveContext = false, deleteMoves = fa
 		await controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		rf.doAdminAlrt("Error saving the game")
+		rf.doAdminAlrt(i18n.global.t("io.errorSavingGame"))
 	}
 }
 
@@ -209,7 +211,7 @@ export async function sendNotification(name) {
 		await controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		rf.doAdminAlrt("Error saving the game")
+		rf.doAdminAlrt(i18n.global.t("io.errorSavingGame"))
 	}
 }
 
@@ -247,7 +249,7 @@ export async function savePreTurn(prePhase, data) {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			store.topMenuViews.rewindErrorText = "It appears you have an older version of the game. Please refresh the page"
+			store.topMenuViews.rewindErrorText = i18n.global.t("io.olderVersionRefresh")
 			return
 		}
 
@@ -258,7 +260,7 @@ export async function savePreTurn(prePhase, data) {
 		store.players[personal.pov].preMoves = [...funcs.decompressData(data.data)]
 	} catch (error) {
 		console.error("Error saving pre-move:", error)
-		rf.doAdminAlrt("Error saving the pre-move")
+		rf.doAdminAlrt(i18n.global.t("io.errorSavingPreMove"))
 	}
 }
 
@@ -309,7 +311,9 @@ export async function sendProposeTrade(selectedOpponent, yourResources, opponent
 		if (data.endMoveError) {
 			store.clearVars()
 			store.clearMessages()
-			store.topMenuViews.tradeErrorText = `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[selectedOpponent].colour) + `">${store.players[selectedOpponent].displayName}</span></div> has already finished their move. You are unable to trade with them`
+			store.topMenuViews.tradeErrorText = i18n.global.t("io.tradeAlreadyFinished", {
+				name: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[selectedOpponent].colour) + `">${store.players[selectedOpponent].displayName}</span></div>`,
+			})
 			store.topMenuViews.showLoader = false
 			personal.haltPlay = false
 			return
@@ -317,7 +321,9 @@ export async function sendProposeTrade(selectedOpponent, yourResources, opponent
 		if (data.resourceError) {
 			store.clearVars()
 			store.clearMessages()
-			store.topMenuViews.tradeErrorText = `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[selectedOpponent].colour) + `">${store.players[selectedOpponent].displayName}</span></div> no longer has those resources - they must have traded. Please refresh the page`
+			store.topMenuViews.tradeErrorText = i18n.global.t("io.tradeNoResources", {
+				name: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[selectedOpponent].colour) + `">${store.players[selectedOpponent].displayName}</span></div>`,
+			})
 			store.topMenuViews.showLoader = false
 			personal.haltPlay = false
 			return
@@ -327,12 +333,14 @@ export async function sendProposeTrade(selectedOpponent, yourResources, opponent
 			store.clearVars()
 			//store.topMenuViews.tradeSuccessText = `Your trade has been sent to 	<div class="playerScoreSummaryDiv"><span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[selectedOpponent].colour)">{{ store.players[selectedOpponent].displayName }}</span>
 			//	</div>" + store.players[selectedOpponent].displayName`
-			store.topMenuViews.tradeSuccessText = `Your trade has been sent to <div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[selectedOpponent].colour) + `">${store.players[selectedOpponent].displayName}</span></div> `
+			store.topMenuViews.tradeSuccessText = i18n.global.t("io.tradeSentTo", {
+				name: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[selectedOpponent].colour) + `">${store.players[selectedOpponent].displayName}</span></div>`,
+			})
 
 			// Just a proposal, so no need to force update
 			funcs.decompressTradeData(data.playerTradeData, false)
 
-			store.topMenuViews.bugSuccessText = "Your trade has been proposed to " + store.players[selectedOpponent].displayName
+			store.topMenuViews.bugSuccessText = i18n.global.t("io.tradeProposedTo", { name: store.players[selectedOpponent].displayName })
 			store.topMenuViews.showLoader = false
 			personal.haltPlay = false
 
@@ -340,7 +348,7 @@ export async function sendProposeTrade(selectedOpponent, yourResources, opponent
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		rf.doAdminAlrt("Error proposing trade")
+		rf.doAdminAlrt(i18n.global.t("io.errorProposingTrade"))
 	}
 }
 
@@ -385,21 +393,21 @@ export async function acceptTrade(entry) {
 
 		if (data.endMoveError) {
 			store.clearVars()
-			store.topMenuViews.rewindErrorText = store.players[entry[0]].displayName + " has already finished their move. You are unable to trade with them. Please refresh the page to update"
+			store.topMenuViews.rewindErrorText = i18n.global.t("io.acceptTradeAlreadyFinished", { name: store.players[entry[0]].displayName })
 			store.topMenuViews.showLoader = false
 			personal.haltPlay = false
 			return
 		}
 		if (data.resourceError) {
 			store.clearVars()
-			store.topMenuViews.rewindErrorText = store.players[entry[0]].displayName + " no longer has those resources - they must have traded. Please refresh the page to update"
+			store.topMenuViews.rewindErrorText = i18n.global.t("io.acceptTradeNoResources", { name: store.players[entry[0]].displayName })
 			store.topMenuViews.showLoader = false
 			personal.haltPlay = false
 			return
 		}
 		if (data.tradeExistError) {
 			store.clearVars()
-			store.topMenuViews.rewindErrorText = "The trade no longer exists - please refresh the page to update"
+			store.topMenuViews.rewindErrorText = i18n.global.t("io.tradeNoLongerExists")
 			store.topMenuViews.showLoader = false
 			personal.haltPlay = false
 			return
@@ -418,7 +426,7 @@ export async function acceptTrade(entry) {
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		rf.doAdminAlrt("Error processing trade")
+		rf.doAdminAlrt(i18n.global.t("io.errorProcessingTrade"))
 	}
 }
 
@@ -463,7 +471,9 @@ export async function rejectTrade(entry) {
 			store.clearVars()
 			// Trade rejected, so no need to force an update
 			funcs.decompressTradeData(data.playerTradeData, false)
-			store.topMenuViews.tradeSuccessText = `You have rejected the trade with <div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[entry[0]].colour) + `">${store.players[entry[0]].displayName}</span></div> `
+			store.topMenuViews.tradeSuccessText = i18n.global.t("io.tradeRejectedWith", {
+				name: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[entry[0]].colour) + `">${store.players[entry[0]].displayName}</span></div>`,
+			})
 
 			//store.topMenuViews.bugSuccessText = "Your trade has been proposed to " + store.players[selectedOpponent].displayName
 			store.topMenuViews.showLoader = false
@@ -473,7 +483,7 @@ export async function rejectTrade(entry) {
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		rf.doAdminAlrt("Error rejecting trade")
+		rf.doAdminAlrt(i18n.global.t("io.errorRejectingTrade"))
 	}
 }
 
@@ -525,7 +535,7 @@ export async function markPromiseComplete(playerIndex, promise) {
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		rf.doAdminAlrt("Error marking promise as complete")
+		rf.doAdminAlrt(i18n.global.t("io.errorMarkingPromiseComplete"))
 	}
 }
 
@@ -574,7 +584,7 @@ export async function saveSimulTurn(playerIndex) {
 		const data = await response.json()
 
 		if (data.syncError) {
-			store.topMenuViews.rewindErrorText = "It appears you have an older version of the game. Please refresh the page"
+			store.topMenuViews.rewindErrorText = i18n.global.t("io.olderVersionRefresh")
 			return
 		}
 		// If not ready
@@ -603,7 +613,7 @@ export async function saveSimulTurn(playerIndex) {
 		personal.haltPlay = false
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		rf.doAdminAlrt("Error saving the game")
+		rf.doAdminAlrt(i18n.global.t("io.errorSavingGame"))
 	}
 }
 
@@ -663,7 +673,7 @@ export async function kickstartGame() {
 		const data = await response.json()
 
 		if (data.syncError) {
-			store.topMenuViews.rewindErrorText = "It appears you have an older version of the game. Please refresh the page"
+			store.topMenuViews.rewindErrorText = i18n.global.t("io.olderVersionRefresh")
 			return
 		}
 		// If not ready
@@ -692,7 +702,7 @@ export async function kickstartGame() {
 		personal.haltPlay = false
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		rf.doAdminAlrt("Error saving the game")
+		rf.doAdminAlrt(i18n.global.t("io.errorSavingGame"))
 	}
 }
 
@@ -719,7 +729,7 @@ export async function sendChatMessage(newEntry) {
 		}
 		const data = await response.json()
 		if (!data.chatData) {
-			rf.doAdminAlrt("Sorry, there was a problem. Please email the webmaster directly")
+			rf.doAdminAlrt(i18n.global.t("io.problemEmailWebmaster"))
 			return
 		}
 		store.chatData = funcs.decompressChatData(data.chatData)
@@ -728,7 +738,7 @@ export async function sendChatMessage(newEntry) {
 		if (personal.liveWS) WS.AQYwebSocket.send("NEWCHATTS" + String(personal.gameID)) //+ String(result.latestUpdate));
 	} catch (error) {
 		console.error("Error sending chat:", error)
-		rf.doAdminAlrt("Error sending chat message")
+		rf.doAdminAlrt(i18n.global.t("io.errorSendingChat"))
 	}
 }
 
@@ -851,13 +861,13 @@ export async function saveNotes() {
 			throw new Error("Network response was not ok")
 		}
 		if (!data.notePosted) {
-			rf.doAdminAlrt("Sorry, there was a problem. Please email the webmaster directly")
+			rf.doAdminAlrt(i18n.global.t("io.problemEmailWebmaster"))
 			return
 		}
 		store.topMenuViews.showLoader = false
 	} catch (error) {
 		console.error("Error saving Notes:", error)
-		rf.doAdminAlrt("Error saving Notes")
+		rf.doAdminAlrt(i18n.global.t("io.errorSavingNotes"))
 	}
 }
 
@@ -869,14 +879,14 @@ export async function loadRewind() {
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	if (store.topMenuViews.showReplay) {
-		store.topMenuViews.rewindErrorText = "Error: Exit Replay Mode First"
+		store.topMenuViews.rewindErrorText = i18n.global.t("io.exitReplayFirst")
 		store.topMenuViews.performingRewind = false
 		store.topMenuViews.showLoader = false
 		return
 	}
 
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
-		store.topMenuViews.rewindErrorText = "Error: Game Ended"
+		store.topMenuViews.rewindErrorText = i18n.global.t("io.gameEnded")
 		store.topMenuViews.performingRewind = false
 		store.topMenuViews.showLoader = false
 		return
@@ -897,7 +907,7 @@ export async function loadRewind() {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			store.topMenuViews.rewindErrorText = "It appears you have an older version of the game. Please refresh the page"
+			store.topMenuViews.rewindErrorText = i18n.global.t("io.olderVersionRefresh")
 			store.topMenuViews.performingRewind = false
 			return
 		}
@@ -929,7 +939,7 @@ export async function loadRewind() {
 		store.topMenuViews.showLoader = false
 	} catch (error) {
 		console.error("Error rewinding data:", error)
-		rf.doAdminAlrt("Error rewinding the game")
+		rf.doAdminAlrt(i18n.global.t("io.errorRewindingGame"))
 		store.topMenuViews.performingRewind = false
 	}
 }
@@ -975,7 +985,7 @@ async function updateDataFromLoadRewind() {
 		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error updating data:", error)
-		rf.doAdminAlrt("Error updating the game")
+		rf.doAdminAlrt(i18n.global.t("io.errorUpdatingGame"))
 		store.topMenuViews.performingRewind = false
 		controller.startPlayerTurn()
 	}
@@ -1007,7 +1017,7 @@ export async function resign(lossDueToGraves) {
 		const data = await response.json()
 	} catch (error) {
 		console.error("Error resiging:", error)
-		rf.doAdminAlrt("Error Resigning")
+		rf.doAdminAlrt(i18n.global.t("io.errorResigning"))
 	}
 }
 
@@ -1035,14 +1045,14 @@ export async function kickout() {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			store.topMenuViews.rewindErrorText = "It appears you have an older version of the game. Please refresh the page"
+			store.topMenuViews.rewindErrorText = i18n.global.t("io.olderVersionRefresh")
 			return
 		}
 		if (data.voteCast) {
 			// Vote recorded but no kickout (yet): show the updated vote state
 			store.kickoutVotesData = JSON.parse(data.votesData)
 			store.kickoutVoteThreshold = data.threshold
-			store.topMenuViews.tradeSuccessText = "Kickout vote recorded"
+			store.topMenuViews.tradeSuccessText = i18n.global.t("io.kickoutVoteRecorded")
 			store.topMenuViews.showLoader = false
 			return data
 		}
@@ -1051,7 +1061,7 @@ export async function kickout() {
 		return data
 	} catch (error) {
 		console.error("Error kicking:", error)
-		rf.doAdminAlrt("Error Kicking")
+		rf.doAdminAlrt(i18n.global.t("io.errorKicking"))
 		return false
 	}
 }
@@ -1184,14 +1194,14 @@ export async function castVote(topic) {
 			headers: { "X-CSRFToken": csrftoken },
 		})
 		if (!response.ok) {
-			store.topMenuViews.rewindErrorText = "Error; Contact Admin"
+			store.topMenuViews.rewindErrorText = i18n.global.t("io.contactAdmin")
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
 
 		store.topMenuViews.showLoader = false
 		if (data.voteChanged === true) {
-			store.topMenuViews.tradeSuccessText = "Vote Saved"
+			store.topMenuViews.tradeSuccessText = i18n.global.t("io.voteSaved")
 
 			if (topic === rf.DELETE_VOTE_TOPIC) {
 				personal.votedToDelete = true
@@ -1201,10 +1211,10 @@ export async function castVote(topic) {
 				personal.votedToExclude = true
 				store.statsExcludeVotesData = JSON.parse(data.votesData)
 			}
-		} else store.topMenuViews.rewindErrorText = "Error; Contact Admin"
+		} else store.topMenuViews.rewindErrorText = i18n.global.t("io.contactAdmin")
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.topMenuViews.rewindErrorText = "Error; Contact Admin"
+		store.topMenuViews.rewindErrorText = i18n.global.t("io.contactAdmin")
 		return false
 	}
 }

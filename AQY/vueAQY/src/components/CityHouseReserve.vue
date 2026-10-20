@@ -145,18 +145,18 @@ function getNumberFill(rawNum) {
 </script>
 
 <template>
-	Houses
+	{{ $t("cityHouseReserve.houses") }}
 	<br />
 	<template v-if="store.permanentSettings.housesInNumberOrder === 0">
-		<div class="houseIndexDiv" :style="{ left: '110px', top: '55px' }">Free</div>
-		<div class="houseIndexDiv" :style="{ left: '47px', top: '140px' }">1-F</div>
-		<div class="houseIndexDiv" :style="{ left: '90px', top: '188px' }">2D-F</div>
-		<div class="houseIndexDiv" :style="{ left: '137px', top: '188px' }">3D-F</div>
-		<div class="houseIndexDiv" :style="{ left: '185px', top: '188px' }">4D-F</div>
+		<div class="houseIndexDiv" :style="{ left: '110px', top: '55px' }">{{ $t("cityHouseReserve.free") }}</div>
+		<div class="houseIndexDiv" :style="{ left: '47px', top: '140px' }">{{ $t("cityHouseReserve.cost1F") }}</div>
+		<div class="houseIndexDiv" :style="{ left: '90px', top: '188px' }">{{ $t("cityHouseReserve.cost2DF") }}</div>
+		<div class="houseIndexDiv" :style="{ left: '137px', top: '188px' }">{{ $t("cityHouseReserve.cost3DF") }}</div>
+		<div class="houseIndexDiv" :style="{ left: '185px', top: '188px' }">{{ $t("cityHouseReserve.cost4DF") }}</div>
 
-		<div class="houseIndexDiv" :style="{ left: '6px', top: '270px' }">1-L</div>
-		<div class="houseIndexDiv" :style="{ left: '1px', top: '316px' }">2D-L</div>
-		<div class="houseIndexDiv" :style="{ left: '1px', top: '364px' }">3D-L</div>
+		<div class="houseIndexDiv" :style="{ left: '6px', top: '270px' }">{{ $t("cityHouseReserve.cost1L") }}</div>
+		<div class="houseIndexDiv" :style="{ left: '1px', top: '316px' }">{{ $t("cityHouseReserve.cost2DL") }}</div>
+		<div class="houseIndexDiv" :style="{ left: '1px', top: '364px' }">{{ $t("cityHouseReserve.cost3DL") }}</div>
 	</template>
 
 	<div

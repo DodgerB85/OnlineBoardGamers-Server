@@ -27,6 +27,9 @@ const personal = usePersonalStore()
 
 const store = useModelStore()
 
+import { useI18n } from "vue-i18n"
+const { t } = useI18n()
+
 const props = defineProps({
 	playerIndexProp: {
 		type: Number,
@@ -74,18 +77,18 @@ function clickedSaint(saintID) {
 
 function getReasonUnableToEndPhase() {
 	if (store.gameflow.phase === rf.PHASE_POLLUTION) {
-		if (store.context.pollutionLeftToPlace > 0) return "Place remaining Pollution"
-		if (store.context.gravesLeftToPlace > 0) return "Place remaining Graves"
+		if (store.context.pollutionLeftToPlace > 0) return t("cityActionArea.placeRemainingPollution")
+		if (store.context.gravesLeftToPlace > 0) return t("cityActionArea.placeRemainingGraves")
 		return ""
 	}
-	if (store.gameflow.subPhase === rf.SUB_PHASE_SAINT_HOUSE) return `Finish placing free house`
+	if (store.gameflow.subPhase === rf.SUB_PHASE_SAINT_HOUSE) return t("cityActionArea.finishPlacingFreeHouse")
 
-	if (store.context.action !== rf.ACT_NONE) return "You cannot end the phase mid-action"
-	if (store.gameflow.subPhase === rf.SUB_PHASE_MOVE_BUILDINGS) return "Finish (Re)moving buildings to end phase"
-	if (store.context.gravesLeftToPlace > 0) return "Finish placing all graves"
+	if (store.context.action !== rf.ACT_NONE) return t("cityActionArea.cannotEndMidAction")
+	if (store.gameflow.subPhase === rf.SUB_PHASE_MOVE_BUILDINGS) return t("cityActionArea.finishMovingBuildings")
+	if (store.context.gravesLeftToPlace > 0) return t("cityActionArea.finishPlacingAllGraves")
 	if (city.getAvailableStorage(controller.currentPlayerIndex()) > 0 && store.context.resourcesToDiscard > 0) return "" // return "Finish storing all goods"
 	if (store.players[controller.currentPlayerIndex()].requiredRebuilds.length !== 0) {
-		let str = "Before ending the phase, you must re-add: "
+		let str = t("cityActionArea.mustReAdd")
 		for (let i = 0; i < store.players[controller.currentPlayerIndex()].requiredRebuilds.length; i++) {
 			let bldgNum = store.players[controller.currentPlayerIndex()].requiredRebuilds[i].bldgNum
 			if (bldgNum > 20) bldgNum = 20
@@ -95,8 +98,8 @@ function getReasonUnableToEndPhase() {
 		}
 		return str
 	}
-	if (store.players[controller.currentPlayerIndex()].availableMen === -1) return "You need to re-add 1 house"
-	if (store.players[controller.currentPlayerIndex()].availableMen < -1) return `You need to re-add ${store.players[controller.currentPlayerIndex()].availableMen * -1} houses`
+	if (store.players[controller.currentPlayerIndex()].availableMen === -1) return t("cityActionArea.reAddOneHouse")
+	if (store.players[controller.currentPlayerIndex()].availableMen < -1) return t("cityActionArea.reAddHouses", { count: store.players[controller.currentPlayerIndex()].availableMen * -1 })
 
 	return ""
 }
@@ -115,7 +118,7 @@ function getCityEndTurnWarnings() {
 			}
 		}
 	}
-	if (storageCount > 1) ret.push(["red", "Warning: You have built 2 separate Storage Buildings. Did you mean to build 1 big storage?"])
+	if (storageCount > 1) ret.push(["red", t("cityActionArea.warningTwoStorages")])
 	// Caution: Mannable buildings (carts??), spare men, buildings not manned
 	if (player.availableMen > 0) {
 		let cautionFound = false
@@ -128,7 +131,7 @@ function getCityEndTurnWarnings() {
 			}
 			if (cautionFound) break
 		}
-		if (cautionFound) ret.push(["orange", "Caution: You have spare men and unmanned buildings"])
+		if (cautionFound) ret.push(["orange", t("cityActionArea.cautionSpareMen")])
 	}
 	// Caution: storage < current resources
 	if (player.saint !== rf.SAINT_CHRISTOFORI && player.saint !== rf.SAINT_MARIA) {
@@ -143,17 +146,17 @@ the number of Stone, Gold, Pearl and Dye can be properly stored
 the eccess of resources does not exceed the number of manne carts*/
 		/*if I have 4 storage spaces and 6 resources, with 2 manned carts
 then I only need to be sure that I have no more than 5 of Gold, Stone, Dye, Pearl altogether. */
-		if (availableStorage < resCount) ret.push(["orange", "Caution: You cannot currently store all your resources (More might be spent in the Countryside Building phase)"])
+		if (availableStorage < resCount) ret.push(["orange", t("cityActionArea.cautionStorage")])
 	}
 	// Warning: No wood, no manned cart shops, no wood harvest
-	if (resources[rf.RES_WOOD] <= 0 && city.getCartShopStatus(playerIndex)[0] === 0 && !country.getExpectedHarvestResources(playerIndex, city.hasWorkingUniqueBuilding(playerIndex, rf.BLDG_FORCED_LABOUR, false)).includes(rf.RES_WOOD)) ret.push(["red", "WARNING: You have no wood and no manned Cart Shops"])
+	if (resources[rf.RES_WOOD] <= 0 && city.getCartShopStatus(playerIndex)[0] === 0 && !country.getExpectedHarvestResources(playerIndex, city.hasWorkingUniqueBuilding(playerIndex, rf.BLDG_FORCED_LABOUR, false)).includes(rf.RES_WOOD)) ret.push(["red", t("cityActionArea.warningNoWood")])
 
 	// Unresolved trades
-	if (store.context.relevantIncomingTrades.length > 0) ret.push(["orange", "Caution: You have unresolved trades These will be cancelled"])
-	if (store.context.relevantOutgoingTrades.length > 0) ret.push(["orange", "Caution: You have unresolved trades. These will be cancelled"])
+	if (store.context.relevantIncomingTrades.length > 0) ret.push(["orange", t("cityActionArea.cautionUnresolvedTradesNoPeriod")])
+	if (store.context.relevantOutgoingTrades.length > 0) ret.push(["orange", t("cityActionArea.cautionUnresolvedTrades")])
 	
 	// Manned and unused hospital
-	if (player.cities.some(city => city.buildings.some(building => building.bldgNum === rf.BLDG_HOSPITAL && building.manned && !building.usedThisTurn))) ret.push(["red", "Caution: You have manned a Hospital but not used it. Click the Hospital then the button in the centre"])
+	if (player.cities.some(city => city.buildings.some(building => building.bldgNum === rf.BLDG_HOSPITAL && building.manned && !building.usedThisTurn))) ret.push(["red", t("cityActionArea.cautionHospitalUnused")])
 	
 	return ret
 }
@@ -214,37 +217,38 @@ function cancelButton() {
 
 		<!-- CITY PHASE, NOT ending turn, NOT confirm resign -->
 		<template v-if="store.gameflow.phase === rf.PHASE_CITY_BUILDING && store.context.action !== rf.ACT_CONFIRM_END_TURN && store.context.action !== rf.ACT_CONFIRM_RESIGN">
-			<span v-if="store.gameflow.subPhase === rf.SUB_PHASE_ADD_BUILDINGS">Build New City Buildings</span>
-			<span v-else-if="store.gameflow.subPhase === rf.SUB_PHASE_MOVE_BUILDINGS">Re(move) City Buildings</span>
+			<span v-if="store.gameflow.subPhase === rf.SUB_PHASE_ADD_BUILDINGS">{{ $t("cityActionArea.buildNewBuildings") }}</span>
+			<span v-else-if="store.gameflow.subPhase === rf.SUB_PHASE_MOVE_BUILDINGS">{{ $t("cityActionArea.moveBuildings") }}</span>
 			<div v-else-if="store.gameflow.subPhase === rf.SUB_PHASE_CHOOSE_SAINT">
-				Choose your Patron Saint
+				{{ $t("cityActionArea.choosePatronSaint") }}
 				<br />
 				<div class="chooseSaintDiv" v-for="(saint, idx) in rf.SAINT_INFO" :key="idx" @click="clickedSaint(saint.id)">
 					<b>{{ saint.name }}</b>
 					<br />
 					<img class="newSaintImg" :src="view.getImage('saint_' + idx)" />
 					<br />
-					Bonus: {{ saint.bonus }}
+					{{ $t("cityActionArea.bonus", { bonus: saint.bonus }) }}
 					<br />
-					VR: {{ saint.VR }}
+					{{ $t("cityActionArea.vr", { vr: saint.VR }) }}
 				</div>
 			</div>
 
 			<span v-if="store.context.action === rf.ACT_CHOOSE_BUILDING_PAYMENT">
 				<br />
-				Choose your payment to add a:
-				<b>{{ store.context.cityBuildingToDisplayData.name }}</b>
+				<i18n-t keypath="cityActionArea.choosePayment" tag="span" scope="global">
+					<template #building><b>{{ store.context.cityBuildingToDisplayData.name }}</b></template>
+				</i18n-t>
 			</span>
 
 			<!-- BUTTONS -->
 			<br />
-			<button v-if="controller.canResign()" @click="localClickResign()" class="actionsLineButton resignButton">Resign</button>
-			<button @click="model.resetWholeTurn" class="actionsLineButton">Reset whole turn</button>
-			<button v-if="store.gameflow.phase === rf.PHASE_CITY_BUILDING" @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length === 0">Undo</button>
+			<button v-if="controller.canResign()" @click="localClickResign()" class="actionsLineButton resignButton">{{ $t("cityActionArea.resign") }}</button>
+			<button @click="model.resetWholeTurn" class="actionsLineButton">{{ $t("cityActionArea.resetWholeTurn") }}</button>
+			<button v-if="store.gameflow.phase === rf.PHASE_CITY_BUILDING" @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length === 0">{{ $t("cityActionArea.undo") }}</button>
 			<button class="actionsLineButton" @click="toggleSandboxPhase">
-				<span v-if="!store.sandboxMode">Enter</span>
-				<span v-else>Exit</span>
-				Sandbox Mode
+				<span v-if="!store.sandboxMode">{{ $t("cityActionArea.enter") }}</span>
+				<span v-else>{{ $t("cityActionArea.exit") }}</span>
+				{{ $t("cityActionArea.sandboxMode") }}
 			</button>
 		</template>
 
@@ -262,54 +266,54 @@ function cancelButton() {
 			</template>
 			<!-- BUTTONS -->
 			<br />
-			<button @click="model.resetWholeTurn" class="actionsLineButton">Reset whole turn</button>
+			<button @click="model.resetWholeTurn" class="actionsLineButton">{{ $t("cityActionArea.resetWholeTurn") }}</button>
 			<!--<button v-if="store.gameflow.phase === rf.PHASE_CITY_BUILDING" @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length === 0">Undo</button>-->
-			<button v-if="store.gameflow.phase === rf.PHASE_CITY_BUILDING" @click="store.clearVars()" class="actionsLineButton">Back To City</button>
+			<button v-if="store.gameflow.phase === rf.PHASE_CITY_BUILDING" @click="store.clearVars()" class="actionsLineButton">{{ $t("cityActionArea.backToCity") }}</button>
 		</template>
 
 		<!-- COUNTRY PHASE -->
 		<template v-if="store.gameflow.phase === rf.PHASE_COUNTRYSIDE_BUILDING">
-			Manned Cart Shops: {{ city.getCartShopStatus(0)[0] }}
+			{{ $t("cityActionArea.mannedCartShops", { count: city.getCartShopStatus(0)[0] }) }}
 			<br />
-			Un-manned Cart Shops: {{ city.getCartShopStatus(0)[1] }}
+			{{ $t("cityActionArea.unmannedCartShops", { count: city.getCartShopStatus(0)[1] }) }}
 			<br />
-			Graved Cart Shops: {{ city.getCartShopStatus(0)[2] }}
+			{{ $t("cityActionArea.gravedCartShops", { count: city.getCartShopStatus(0)[2] }) }}
 			<br />
 			<br />
-			Build in the countryside
+			{{ $t("cityActionArea.buildInCountryside") }}
 		</template>
 
 		<!-- FAMINE PHASE -->
 		<template v-if="store.gameflow.phase === rf.PHASE_FAMINE">
-			Graves Left To Place: {{ store.context.gravesLeftToPlace }}
+			{{ $t("cityActionArea.gravesLeftToPlace", { count: store.context.gravesLeftToPlace }) }}
 			<br />
 			<button v-if="IO.DEBUG_USERS.includes(personal.name)" class="actionsLineButton" @click="store.context.gravesLeftToPlace = 0">CHEAT: REMOVE ALL GRAVES</button>
-			<button @click="model.resetWholeTurn" class="actionsLineButton">Reset whole turn</button>
+			<button @click="model.resetWholeTurn" class="actionsLineButton">{{ $t("cityActionArea.resetWholeTurn") }}</button>
 		</template>
 
 		<!-- PRE FAMINE PHASE -->
 		<template v-if="store.gameflow.phase === rf.PRE_PHASE_FAMINE">
-			Graves Left To Place: {{ store.context.gravesLeftToPlace }}
+			{{ $t("cityActionArea.gravesLeftToPlace", { count: store.context.gravesLeftToPlace }) }}
 			<br />
-			(You will need to place
-			{{ Math.max(store.context.preMoveGravesArr[0] - store.context.preMoveGravesArr[1], 0) }}
-			<span v-if="store.context.preMoveGravesArr[1] > 0">- {{ store.context.preMoveGravesArr[0] }}</span>
-			graves)
+			<i18n-t keypath="cityActionArea.preMoveGravesHint" tag="span" scope="global">
+				<template #number>{{ Math.max(store.context.preMoveGravesArr[0] - store.context.preMoveGravesArr[1], 0) }}</template>
+				<template #max><span v-if="store.context.preMoveGravesArr[1] > 0">- {{ store.context.preMoveGravesArr[0] }}</span></template>
+			</i18n-t>
 			<br />
-			<button @click="model.resetPreMove" class="actionsLineButton">Cancel Pre Move</button>
-			<button v-if="store.players[personal.pov].preMoves.some((move) => move.phase === rf.PRE_PHASE_FAMINE)" @click="IO.savePreTurn(rf.PRE_PHASE_FAMINE, [-999])" class="actionsLineButton">Delete Pre Move</button>
-			<button v-if="store.context.gravesLeftToPlace === 0" @click="IO.savePreTurn(rf.PRE_PHASE_FAMINE, [...store.context.historyObj])" class="actionsLineButton">Save Famine Turn</button>
+			<button @click="model.resetPreMove" class="actionsLineButton">{{ $t("cityActionArea.cancelPreMove") }}</button>
+			<button v-if="store.players[personal.pov].preMoves.some((move) => move.phase === rf.PRE_PHASE_FAMINE)" @click="IO.savePreTurn(rf.PRE_PHASE_FAMINE, [-999])" class="actionsLineButton">{{ $t("cityActionArea.deletePreMove") }}</button>
+			<button v-if="store.context.gravesLeftToPlace === 0" @click="IO.savePreTurn(rf.PRE_PHASE_FAMINE, [...store.context.historyObj])" class="actionsLineButton">{{ $t("cityActionArea.saveFamineTurn") }}</button>
 		</template>
 
 		<!-- POLLUTION PHASE -->
 		<template v-if="store.gameflow.phase === rf.PHASE_POLLUTION && store.context.gravesLeftToPlace === 0">
-			Place pollution into your Zone of Control
+			{{ $t("cityActionArea.placePollution") }}
 			<br />
 		</template>
 		<template v-else-if="store.gameflow.phase === rf.PHASE_POLLUTION && store.context.gravesLeftToPlace > 0">
-			No space for pollution in your Zone of Control - Pollution converted to graves
+			{{ $t("cityActionArea.noSpaceForPollution") }}
 			<br />
-			Graves Left To Place: {{ store.context.gravesLeftToPlace }}
+			{{ $t("cityActionArea.gravesLeftToPlace", { count: store.context.gravesLeftToPlace }) }}
 			<br />
 			<button v-if="IO.DEBUG_USERS.includes(personal.name)" class="actionsLineButton" @click="store.context.gravesLeftToPlace = 0">CHEAT: REMOVE ALL GRAVES</button>
 		</template>
@@ -318,13 +322,13 @@ function cancelButton() {
 		<template v-if="store.gameflow.phase === rf.PHASE_STORE_GOODS || store.gameflow.phase === rf.PRE_PHASE_STORE_GOODS">
 			<div v-if="showStorage()" style="clear: both">
 				<div class="boldDiv">
-					Available storage: {{ city.getAvailableStorage(controller.currentPlayerIndex()) }}
+					{{ $t("cityActionArea.availableStorage", { count: city.getAvailableStorage(controller.currentPlayerIndex()) }) }}
 					<button v-if="IO.DEBUG_USERS.includes(personal.name)" @click="store.context.resourcesToDiscard = 0">CHEAT: Store all</button>
 				</div>
-				<div class="boldDiv" :class="{ moreToDiscard: store.context.resourcesToDiscard > 0 }">Resources to discard: {{ store.context.resourcesToDiscard }}</div>
+				<div class="boldDiv" :class="{ moreToDiscard: store.context.resourcesToDiscard > 0 }">{{ $t("cityActionArea.resourcesToDiscard", { count: store.context.resourcesToDiscard }) }}</div>
 				<div class="boldDiv">
-					<span v-if="store.context.discardedResources.length === 0">Click Resources in your Resource Table to Discard</span>
-					<span v-else>Discarded resources (click to keep):</span>
+					<span v-if="store.context.discardedResources.length === 0">{{ $t("cityActionArea.clickResourcesToDiscard") }}</span>
+					<span v-else>{{ $t("cityActionArea.discardedResources") }}</span>
 				</div>
 				<div v-for="(res, idx) in store.context.discardedResources" :key="idx" class="discardedResDiv">
 					<img :src="view.getImage('res_' + String(res))" @click="putBackToStorage(res)" />
@@ -332,29 +336,29 @@ function cancelButton() {
 			</div>
 		</template>
 
-		<button v-if="store.gameflow.phase === rf.PHASE_POLLUTION" @click="model.resetWholeTurn" class="actionsLineButton">Reset whole turn</button>
+		<button v-if="store.gameflow.phase === rf.PHASE_POLLUTION" @click="model.resetWholeTurn" class="actionsLineButton">{{ $t("cityActionArea.resetWholeTurn") }}</button>
 
 		<!-- PRE_PHASE_STORAGE - ADDITIONAL-->
 		<template v-if="store.gameflow.phase === rf.PRE_PHASE_STORE_GOODS">
-			<button @click="model.resetPreMove" class="actionsLineButton">Cancel Pre Move</button>
-			<button v-if="store.players[personal.pov].preMoves.some((move) => move.phase === rf.PRE_PHASE_STORE_GOODS)" @click="IO.savePreTurn(rf.PRE_PHASE_STORE_GOODS, [-999])" class="actionsLineButton">Delete Pre Move</button>
+			<button @click="model.resetPreMove" class="actionsLineButton">{{ $t("cityActionArea.cancelPreMove") }}</button>
+			<button v-if="store.players[personal.pov].preMoves.some((move) => move.phase === rf.PRE_PHASE_STORE_GOODS)" @click="IO.savePreTurn(rf.PRE_PHASE_STORE_GOODS, [-999])" class="actionsLineButton">{{ $t("cityActionArea.deletePreMove") }}</button>
 		</template>
 
 		<template v-if="store.gameflow.phase === rf.PRE_PHASE_STORE_GOODS && store.context.resourcesToDiscard === 0">
-			<button @click="IO.savePreTurn(rf.PRE_PHASE_STORE_GOODS, [...store.players[personal.pov].availableResources])" class="actionsLineButton">Save Storage Turn</button>
+			<button @click="IO.savePreTurn(rf.PRE_PHASE_STORE_GOODS, [...store.players[personal.pov].availableResources])" class="actionsLineButton">{{ $t("cityActionArea.saveStorageTurn") }}</button>
 		</template>
 
 		<!-- END TURN BUTTONS -->
 		<template v-if="rf.CITY_PHASES.includes(store.gameflow.phase) && controller.canEndPlayerTurn()">
 			<button @click="localEndTurn" class="actionsLineButton">
-				<span v-if="[rf.PHASE_CITY_BUILDING].includes(store.gameflow.phase)">Finish Actions</span>
-				<span v-else>End Turn</span>
+				<span v-if="[rf.PHASE_CITY_BUILDING].includes(store.gameflow.phase)">{{ $t("cityActionArea.finishActions") }}</span>
+				<span v-else>{{ $t("cityActionArea.endTurn") }}</span>
 			</button>
 		</template>
 
 		<!-- CONFIRM END TURN -->
 		<template v-else-if="rf.CITY_PHASES.includes(store.gameflow.phase) && store.context.action === rf.ACT_CONFIRM_END_TURN">
-			<button @click="localEndTurn" class="actionsLineButton">End Turn</button>
+			<button @click="localEndTurn" class="actionsLineButton">{{ $t("cityActionArea.endTurn") }}</button>
 		</template>
 		<!-- Rason unable to end turn-->
 		<template v-else-if="rf.CITY_PHASES.includes(store.gameflow.phase) && store.context.action !== rf.ACT_CONFIRM_RESIGN">
@@ -363,24 +367,24 @@ function cancelButton() {
 			</div>
 			<template v-if="store.context.action === rf.ACT_SETUP_PLAYER_TRADE || store.gameflow.subPhase === rf.SUB_PHASE_MOVE_BUILDINGS || store.context.action === rf.ACT_MAN_BLDG || store.context.action === rf.ACT_UNMAN_BUILDING || store.context.action === rf.ACT_PLACE_BUILDING || store.context.action === rf.ACT_TRADE_BOARD || store.context.action === rf.ACT_CHOOSE_BUILDING_PAYMENT || store.context.action === rf.ACT_HOSPITAL_GRAVES || store.gameflow.subPhase === rf.SUB_PHASE_SAINT_HOUSE">
 				<button @click="cancelButton" class="actionsLineButton">
-					<span v-if="store.gameflow.subPhase === rf.SUB_PHASE_SAINT_HOUSE">Cancel Free House</span>
-					<span v-else-if="store.context.action === rf.ACT_PLACE_BUILDING">Cancel Placing Building</span>
+					<span v-if="store.gameflow.subPhase === rf.SUB_PHASE_SAINT_HOUSE">{{ $t("cityActionArea.cancelFreeHouse") }}</span>
+					<span v-else-if="store.context.action === rf.ACT_PLACE_BUILDING">{{ $t("cityActionArea.cancelPlacingBuilding") }}</span>
 
-					<span v-if="store.context.action === rf.ACT_SETUP_PLAYER_TRADE">Cancel Trading</span>
-					<span v-if="store.gameflow.subPhase === rf.SUB_PHASE_MOVE_BUILDINGS">Finish (Re)Moving</span>
-					<span v-if="store.context.action === rf.ACT_MAN_BLDG">Stop Manning Buildings</span>
-					<span v-if="store.context.action === rf.ACT_UNMAN_BUILDING">Stop Unmanning Buildings</span>
-					<span v-if="store.context.action === rf.ACT_TRADE_BOARD">Stop Trading</span>
-					<span v-if="store.context.action === rf.ACT_CHOOSE_BUILDING_PAYMENT">Cancel Choosing Payment</span>
-					<span v-if="store.context.action === rf.ACT_HOSPITAL_GRAVES">Stop Removing Graves</span>
+					<span v-if="store.context.action === rf.ACT_SETUP_PLAYER_TRADE">{{ $t("cityActionArea.cancelTrading") }}</span>
+					<span v-if="store.gameflow.subPhase === rf.SUB_PHASE_MOVE_BUILDINGS">{{ $t("cityActionArea.finishMoving") }}</span>
+					<span v-if="store.context.action === rf.ACT_MAN_BLDG">{{ $t("cityActionArea.stopManning") }}</span>
+					<span v-if="store.context.action === rf.ACT_UNMAN_BUILDING">{{ $t("cityActionArea.stopUnmanning") }}</span>
+					<span v-if="store.context.action === rf.ACT_TRADE_BOARD">{{ $t("cityActionArea.stopTrading") }}</span>
+					<span v-if="store.context.action === rf.ACT_CHOOSE_BUILDING_PAYMENT">{{ $t("cityActionArea.cancelChoosingPayment") }}</span>
+					<span v-if="store.context.action === rf.ACT_HOSPITAL_GRAVES">{{ $t("cityActionArea.stopRemovingGraves") }}</span>
 				</button>
 			</template>
 		</template>
 		<template v-if="store.context.action === rf.ACT_CONFIRM_RESIGN">
-			<span class="resigntext">Are you sure you want to resign?</span>
+			<span class="resigntext">{{ $t("cityActionArea.resignConfirm") }}</span>
 			<br />
-			<button @click="store.clearVars()" class="actionsLineButton resignButton">Cancel</button>
-			<button @click="localClickResign()" class="actionsLineButton">Resign</button>
+			<button @click="store.clearVars()" class="actionsLineButton resignButton">{{ $t("cityActionArea.cancel") }}</button>
+			<button @click="localClickResign()" class="actionsLineButton">{{ $t("cityActionArea.resign") }}</button>
 		</template>
 	</div>
 	<div v-if="store.topMenuViews.showLoader" class="fLoadingBar">
