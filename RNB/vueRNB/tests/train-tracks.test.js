@@ -86,7 +86,7 @@ globalThis.msgpack = globalThis.msgpack || {
 	decode: (buffer) => JSON.parse(new TextDecoder().decode(buffer)),
 }
 
-let rf, hd, map, computes, model, stack, train, loc, useModelStore, usePersonalStore, createPinia, setActivePinia, setupError
+let rf, hd, map, computes, model, stack, train, loc, funcs, useModelStore, usePersonalStore, createPinia, setActivePinia, setupError
 try {
 	await import("../src/pakoLib.js")
 	;({ createPinia, setActivePinia } = await import("pinia"))
@@ -98,6 +98,7 @@ try {
 	stack = await import("../src/js/RNBstack.js")
 	train = await import("../src/js/RNBtrain.js")
 	loc = await import("../src/js/RNBlocation.js")
+	funcs = await import("../src/js/RNBfuncs.js")
 	;({ useModelStore } = await import("../src/stores/RNBstore.js"))
 	;({ usePersonalStore } = await import("../src/stores/RNBpersonal.js"))
 } catch (error) {
@@ -306,4 +307,180 @@ test("a ride to an unconnected tile is rejected", { skip: skip }, () => {
 		playerIndex: 0,
 	}
 	assert.notEqual(stack.verifySingleStackAction(badAction), 0, "riding to the departure tile is not a valid destination")
+})
+
+// Two tiles the river runs straight across - the shared edge is a river edge and
+// carries two banks, exactly like roads do.
+function setupRiverBankPair() {
+	setActivePinia(createPinia())
+	const store = useModelStore()
+	store.mapData.hexData.splice(0)
+	store.mapData.edgeData.splice(0)
+	const hex0 = hd.createActualHex([0, 0, 0], 0, rf.PASTURE_RIVER_STRAIGHT)
+	hex0.hexID = 0
+	store.mapData.hexData.push(hex0)
+	hd.updateAllHexRawXY()
+
+	let hex1 = null
+	let side = -1
+	for (const [dx, dy, dz] of [
+		[1, -1, 0],
+		[1, 0, -1],
+		[0, 1, -1],
+		[-1, 1, 0],
+		[-1, 0, 1],
+		[0, -1, 1],
+	]) {
+		const candidateSide = hd.getJoiningSide(hex0.coord, [dx, dy, dz])
+		if (hex0.sideRiverVertexIds[candidateSide] < 0) continue
+		hex1 = hd.createActualHex([dx, dy, dz], 0, rf.PASTURE_RIVER_STRAIGHT)
+		if (hex1.sideRiverVertexIds[(candidateSide + 3) % 6] < 0) {
+			hex1 = null
+			continue
+		}
+		side = candidateSide
+		hex1.hexID = 1
+		store.mapData.hexData.push(hex1)
+		map.addNewEdge([0, 1])
+		hd.updateAllHexRawXY()
+		break
+	}
+	assert.ok(hex1, "found the neighbour the river runs across")
+	assert.equal(store.mapData.edgeData[0].hasRiver, true, "the shared edge is crossed by the river")
+	return { store, edge: store.mapData.edgeData[0], hex0, hex1, side }
+}
+
+test("a track follows one bank of a river onto the neighbouring tile", { skip: skip }, () => {
+	const { edge, hex0, hex1, side } = setupRiverBankPair()
+	const otherSide = (side + 3) % 6
+	assert.deepEqual(edge.hasTrainTrack, [false, false], "a river edge carries one lane per bank")
+
+	const bank = (hex, s) => hex.cornerNodeIds[s].map((node) => hex.bucketIdsInitial[hex.nodeBucketIds[node]])
+	const fromBanks = bank(hex0, side)
+	const toBanks = bank(hex1, otherSide)
+	assert.notEqual(fromBanks[0], fromBanks[1], "the river splits the shared side into two banks")
+
+	const options = map.allVertexBucketsWithoutTrainTracksAdjacentTo(0, [fromBanks[0]])
+	assert.equal(options.length, 1, "only one bank of the neighbour is reachable - the same side of the river")
+	assert.equal(options[0][0], 1, "the offer is the neighbouring tile")
+	assert.equal(options[0][1][0], toBanks[1], "lane 0 on hex 0 carries on to the matching corner of hex 1")
+
+	assert.equal(map.addTrainTrackToMap_core([0, fromBanks[0]], [1, toBanks[1]]), true, "the track builds along that bank")
+	assert.deepEqual(edge.hasTrainTrack, [true, false], "only the bank that was drawn is tracked")
+	assert.ok(train.getTrackBucketsInHex(0).includes(fromBanks[0]), "the drawn bank is on the network")
+	assert.equal(train.getTrackBucketsInHex(0).includes(fromBanks[1]), false, "the far bank is not on the network")
+	assert.deepEqual(train.getTrackAdjacencies()[0], [1], "the river crossing is part of the track network")
+
+	assert.equal(map.addTrainTrackToMap_core([0, fromBanks[0]], [1, toBanks[0]]), false, "the opposite bank of the neighbour is not reachable from this one")
+	assert.deepEqual(edge.hasTrainTrack, [true, false], "a mismatched pair of banks builds nothing")
+
+	const otherOptions = map.allVertexBucketsWithoutTrainTracksAdjacentTo(0, [fromBanks[1]])
+	assert.equal(otherOptions.length, 1, "the far bank can still be drawn in its own right")
+	assert.equal(map.addTrainTrackToMap_core([0, fromBanks[1]], [1, otherOptions[0][1][0]]), true, "the far bank builds too")
+	assert.deepEqual(edge.hasTrainTrack, [true, true], "each bank keeps its own lane")
+})
+
+// The sea tile the river runs into: the whole sea tile is one bucket, so the click
+// on the sea cannot say which bank of the river the track stays on.
+function setupSeaRiverPair() {
+	setActivePinia(createPinia())
+	const store = useModelStore()
+	store.mapData.hexData.splice(0)
+	store.mapData.edgeData.splice(0)
+	const riverHex = hd.createActualHex([0, 0, 0], 0, rf.PASTURE_RIVER_STRAIGHT)
+	riverHex.hexID = 0
+	store.mapData.hexData.push(riverHex)
+	hd.updateAllHexRawXY()
+
+	let sea = null
+	let side = -1
+	for (const [dx, dy, dz] of [
+		[1, -1, 0],
+		[1, 0, -1],
+		[0, 1, -1],
+		[-1, 1, 0],
+		[-1, 0, 1],
+		[0, -1, 1],
+	]) {
+		const candidateSide = hd.getJoiningSide(riverHex.coord, [dx, dy, dz])
+		if (riverHex.sideRiverVertexIds[candidateSide] < 0) continue
+		sea = hd.createActualHex([dx, dy, dz], 0, rf.SEA_1)
+		sea.hexID = 1
+		side = candidateSide
+		store.mapData.hexData.push(sea)
+		map.addNewEdge([0, 1])
+		hd.updateAllHexRawXY()
+		break
+	}
+	assert.ok(sea, "found the sea tile the river runs into")
+	return { store, edge: store.mapData.edgeData[0], sea, riverHex, side }
+}
+
+test("a track from the sea follows the bank clicked on the river tile", { skip: skip }, () => {
+	// Fresh map per click - the first build fills a lane on the edge
+	function bankPair() {
+		const { edge, sea, riverHex, side } = setupSeaRiverPair()
+		const seaBucket = sea.bucketIdsInitial[0]
+		const toBanks = riverHex.cornerNodeIds[side].map((node) => riverHex.bucketIdsInitial[riverHex.nodeBucketIds[node]])
+		assert.deepEqual(sea.bucketIdsInitial, [0], "the whole sea tile is a single bucket")
+		assert.deepEqual(edge.hasTrainTrack, [false, false], "the sea-river edge carries one lane per bank")
+		assert.notEqual(toBanks[0], toBanks[1], "the river splits the shared side into two banks")
+		const options = map.allVertexBucketsWithoutTrainTracksAdjacentTo(sea.hexID, [seaBucket])
+		assert.equal(options.length, 2, "the sea tile offers both banks of the river")
+		return { edge, seaBucket, toBanks }
+	}
+
+	const far = bankPair()
+	assert.equal(map.addTrainTrackToMap_core([1, far.seaBucket], [0, far.toBanks[1]]), true, "the far bank builds")
+	assert.deepEqual(far.edge.hasTrainTrack, [false, true], "the lane follows the bank clicked on the river tile")
+
+	const near = bankPair()
+	assert.equal(map.addTrainTrackToMap_core([1, near.seaBucket], [0, near.toBanks[0]]), true, "the near bank builds too")
+	assert.deepEqual(near.edge.hasTrainTrack, [true, false], "the other click picks the other lane")
+})
+
+test("the player picks which good pays for the ride", { skip: skip }, () => {
+	const { store, startBucket } = setupTrainRideMap()
+	const first = train.findTrainFare(0)
+	model.addResourceToGame_core(rf.RES_CLAY, [rf.LOCATION_BUCKET, 0, startBucket], 9)
+	const second = model.getAllInGameResources().find((r) => r.id !== first.id)
+
+	const fares = train.getEligibleTrainFares(0)
+	assert.equal(fares.length, 2, "both goods on the tile can pay")
+	assert.ok(fares[0].id < fares[1].id, "eligible goods are offered lowest id first")
+
+	store.context.selectedTransporterIDforTM = 0
+	train.selectTrainFare(second.id)
+	assert.equal(store.context.selectedTrainFareResID, second.id, "the picked good is remembered")
+	assert.ok(store.context.resourceIDsToHighlight.includes(first.id), "every eligible good is highlighted")
+	assert.ok(store.context.resourceIDsToHighlight.includes(second.id), "the picked good stays highlighted")
+	assert.notEqual(first.location[0], rf.LOCATION_OOB, "picking a good moves nothing")
+
+	// Backing out of the pick leaves the goods exactly where they were
+	store.context.selectedTrainFareResID = -1
+	train.selectTrainFare(second.id)
+	assert.equal(store.context.selectedTrainFareResID, second.id, "the pick can be made again")
+
+	train.takeTrain(0, 2, train.getTrackBucketsInHex(2)[0], second)
+	assert.equal(second.location[0], rf.LOCATION_OOB, "the good you picked pays the fare")
+	assert.notEqual(first.location[0], rf.LOCATION_OOB, "the good you did not pick is untouched")
+})
+
+test("train tracks survive a whole-turn reset", { skip: skip }, async () => {
+	const { store } = setupTwoHexMap()
+	store.mapData.setupData = {}
+
+	// A reset point captured before any track existed
+	const staleSnapshot = funcs.simpleExportWholeRNBmodel()
+
+	assert.equal(map.addTrainTrackToMap_core([0, 0], [1, 0]), true, "the map editor builds a track")
+	store.mapData.setupData = { TN: map.compressTrainTracksForMap() }
+	store.gameOptions.useTrains = true
+
+	await funcs.simpleImportWholeRNBmodel(staleSnapshot, false)
+
+	const reloaded = store.mapData.edgeData[0]
+	assert.deepEqual(reloaded.hasTrainTrack, [true], "the track is re-applied from the map definition")
+	assert.equal(store.gameOptions.useTrains, true, "trains are still enabled after the reset")
+	assert.ok(train.isTrainsEnabled(), "the ride is still available after the reset")
 })

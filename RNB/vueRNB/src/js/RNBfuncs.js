@@ -588,6 +588,11 @@ export async function simpleImportWholeRNBmodelNoCompression(inputModel, keepHis
 	}
 
 	wonder.resolveAllTransportersForCurrentTerrain()
+
+	// Tracks are map data - clearMap() blanked the flag, so re-derive it (see
+	// simpleImportWholeRNBmodel)
+	map.applyTrainTracksFromMap(store.mapData.setupData.TN)
+	map.refreshUseTrainsFlag()
 }
 
 export async function simpleImportWholeRNBmodel(inputBase64, keepHistory = false) {
@@ -699,6 +704,12 @@ export async function simpleImportWholeRNBmodel(inputBase64, keepHistory = false
 	wonder.syncPoldersToBrickCount()
 	// Fix any boat left on terrain that polder syncing just invalidated
 	wonder.resolveAllTransportersForCurrentTerrain()
+
+	// Train tracks are map data, not turn data: clearMap() above blanked the flag,
+	// and a reset point saved before the tracks were built would drop them entirely.
+	// Re-apply from the map definition so they survive every reset.
+	map.applyTrainTracksFromMap(store.mapData.setupData.TN)
+	map.refreshUseTrainsFlag()
 }
 
 export function exportRNBmodel(forGameOver) {

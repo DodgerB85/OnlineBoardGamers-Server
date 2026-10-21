@@ -135,6 +135,7 @@ export function resetContext() {
 
 	// Trains vars
 	context.selectedTrainMode = false
+	context.selectedTrainFareResID = -1
 	context.trainModeSelectionActive = false
 
 	// Building Vars

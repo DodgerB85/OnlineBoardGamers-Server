@@ -204,7 +204,8 @@ export const ACT_TM_SELECT_TRANSPORTER = 10
 export const ACT_TM_SELECT_PICKUP_DROP_MOVE = 11 // This works for production and movement. For prod, simply don't highlight any move options
 export const ACT_TM_ANY_PHASE_DROP_RES_OR_TRANSPORT = 12 // You can ferry in any phase
 export const ACT_TM_ANY_PHASE_STRICT_DROP_RES_OR_TRANSPORT = 13 // We need to know if it's a ferry or a drop
-export const ACT_TM_TAKE_TRAIN = 14 // Trains: only destination buckets are highlighted
+export const ACT_TM_TAKE_TRAIN = 14 // Trains: destination buckets are highlighted, ride awaits a click
+export const ACT_TM_SELECT_TRAIN_FARE = 15 // Trains: eligible goods are highlighted, waiting for the fare pick
 
 // Production
 //export const ACT_TM_SELECT_BUILDING_RES = 12

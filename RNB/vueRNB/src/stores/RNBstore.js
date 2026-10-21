@@ -274,6 +274,7 @@ export const useModelStore = defineStore("store", () => {
 
 		// Train (Trains) vars
 		selectedTrainMode: false, // true once the player clicks the Train bubble
+		selectedTrainFareResID: -1, // the goods chosen to pay for the ride
 		trainModeSelectionActive: false, // true when the Train bubble should show
 
 		// Building Vars

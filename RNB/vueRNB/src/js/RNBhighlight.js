@@ -207,14 +207,16 @@ export function updateAllHighlightsForTransporterMode() {
 		// Planes: if a mode was already chosen (Taxi/Takeoff), skip the reset and proceed to movement highlights
 		const savedPlaneMode = store.context.selectedPlaneMode
 		const savedPlaneInFlight = store.context.planeInFlight
-		// Trains: a chosen mode survives the reset so the destinations can be highlighted
+		// Trains: a chosen mode and a chosen fare survive the reset so the highlights can be rebuilt
 		const savedTrainMode = store.context.selectedTrainMode
+		const savedTrainFareResID = store.context.selectedTrainFareResID
 		context.resetContextAndHighlights()
 
 		store.context.action = rf.ACT_TM_SELECT_PICKUP_DROP_MOVE
 
 		store.context.selectedTransporterIDforTM = transporterID
 		store.context.selectedTrainMode = savedTrainMode
+		store.context.selectedTrainFareResID = savedTrainFareResID
 
 		const isPlane = transporterObj.type === rf.PLANE
 
@@ -260,6 +262,17 @@ export function updateAllHighlightsForTransporterMode() {
 		// Trains: a selected mode skips normal movement - the ride is the whole action
 		if (store.context.selectedTrainMode) {
 			if (store.context.trainModeSelectionActive) {
+				// A fare picked for one transporter means nothing to another
+				const fare = store.context.selectedTrainFareResID === -1 ? null : model.getResByID(store.context.selectedTrainFareResID)
+				if (!fare || !train.isFareAccessible(fare, transporterObj)) store.context.selectedTrainFareResID = -1
+
+				// Step 1: no good picked yet - offer the goods that can pay
+				if (store.context.selectedTrainFareResID === -1) {
+					store.context.action = rf.ACT_TM_SELECT_TRAIN_FARE
+					for (const eligible of train.getEligibleTrainFares(transporterID)) context.addResourceToHighlight(eligible.id)
+					return
+				}
+				// Step 2: good picked - offer the tiles the ride can reach
 				store.context.action = rf.ACT_TM_TAKE_TRAIN
 				const destinations = train.getTrainDestinations(transporterID).map(([hexID, bucketID]) => [rf.LOCATION_LAND_VERTEX, hexID, loc.getAnyVertexInHexIDbucketID(hexID, bucketID)])
 				highlightLocations(destinations)
@@ -268,6 +281,7 @@ export function updateAllHighlightsForTransporterMode() {
 				return
 			}
 			store.context.selectedTrainMode = false
+			store.context.selectedTrainFareResID = -1
 		}
 
 		// You can load other transporters

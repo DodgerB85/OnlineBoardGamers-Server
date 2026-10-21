@@ -23,12 +23,12 @@ export function isTrainsEnabled() {
 }
 
 // Hexes are adjacent for trains when the edge between them carries a track.
-// Tracks never cross a river, so river edges are never part of the network.
+// A river edge has one lane per bank, so a track on it stays on that bank -
+// adjacency is therefore safe to read straight off the lanes.
 export function getTrackAdjacencies() {
 	const store = useModelStore()
 	const adj = {}
 	for (const edge of store.mapData.edgeData) {
-		if (edge.hasRiver) continue
 		if (!edge.hasTrainTrack || !edge.hasTrainTrack.some(Boolean)) continue
 		const [a, b] = edge.edgeHexIDs
 		if (a == null || b == null || a < 0 || b < 0) continue
@@ -76,20 +76,24 @@ export function isFareResource(res) {
 	return true
 }
 
-// Deterministic: carried goods first (the transporter carries its own fare),
+// Every good that may pay: carried first (the transporter carries its own fare),
 // then goods lying on the departure tile, lowest id wins in each group.
-export function findTrainFare(transporterID) {
+export function getEligibleTrainFares(transporterID) {
 	const transporterObj = model.getTransporterByID(transporterID)
 	const fromHexID = transporterObj.location[1]
 	const carried = model.resourcesOnTransport(transporterID)
 		.filter(isFareResource)
 		.sort((a, b) => a.id - b.id)
-	if (carried.length > 0) return carried[0]
 	const onTile = model
 		.getAllInGameResources()
 		.filter((r) => isFareResource(r) && !loc.isOnAnyTransporter(r.location) && loc.isSpecificHexLocation(r.location, fromHexID))
 		.sort((a, b) => a.id - b.id)
-	return onTile[0] ?? null
+	return carried.concat(onTile)
+}
+
+// shortcut: eligibility only - the player picks which one actually pays
+export function findTrainFare(transporterID) {
+	return getEligibleTrainFares(transporterID)[0] ?? null
 }
 
 // shortcut: the fare must be lying on the departure tile or already aboard,
@@ -152,6 +156,17 @@ export function canTransporterUseTrain(transporterID) {
 	return true
 }
 
+// Step 1 of the ride: remember which good will pay. Nothing is moved or spent
+// here, so cancelling back out leaves the good exactly where it was.
+export function selectTrainFare(resID) {
+	const store = useModelStore()
+	const transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
+	const fareRes = model.getResByID(resID)
+	if (!fareRes || !isFareAccessible(fareRes, transporterObj)) return
+	store.context.selectedTrainFareResID = resID
+	highlight.updateAllHighlightsForTransporterMode()
+}
+
 export function performTrainRide_core(transporterID, toBucketLocation, fareRes) {
 	const transporterObj = model.getTransporterByID(transporterID)
 	const stats = rf.getTransporterStats(transporterObj.type)
@@ -179,7 +194,9 @@ export function performTrainRide_core(transporterID, toBucketLocation, fareRes) 
 	}
 }
 
-export function takeTrain(transporterID, toHexID, toBucketID) {
+// fareRes is the good the player picked in the Select Good step; passing null
+// falls back to the deterministic pick (used by replay-less callers and tests).
+export function takeTrain(transporterID, toHexID, toBucketID, fareRes) {
 	const store = useModelStore()
 	const transporterObj = model.getTransporterByID(transporterID)
 	if (!canTransporterUseTrain(transporterID)) {
@@ -191,8 +208,8 @@ export function takeTrain(transporterID, toHexID, toBucketID) {
 		rf.doAdminAlrt(`takeTrain: hex ${toHexID} bucket ${toBucketID} is not a train destination`)
 		return
 	}
-	const fare = findTrainFare(transporterID)
-	if (!fare) {
+	const fare = fareRes ?? findTrainFare(transporterID)
+	if (!fare || !isFareAccessible(fare, transporterObj)) {
 		rf.doAdminAlrt(`takeTrain: no goods available for the train fare`)
 		return
 	}

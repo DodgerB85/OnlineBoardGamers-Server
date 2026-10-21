@@ -353,10 +353,11 @@ function getTrainBubblePosition() {
 	return { transform: `translate(0px, -60px)` }
 }
 
-// Trains: click the bubble to ride; the second click (or picking another
-// transporter) drops back to normal movement
+// Trains: click to start picking the good, click again (or Cancel) to back out -
+// backing out moves nothing, the good stays where it was
 function handleTrainModeClick() {
-	store.context.selectedTrainMode = !store.context.selectedTrainMode
+	if (store.context.selectedTrainFareResID !== -1) store.context.selectedTrainFareResID = -1
+	else store.context.selectedTrainMode = !store.context.selectedTrainMode
 	highlight.updateAllHighlightsForTransporterMode()
 }
 
@@ -1086,7 +1087,7 @@ function getAtelierRecipeGfx(recipeIdx) {
 					<div class="researchBubble" @click="handleTrainModeClick" :style="getTrainBubblePosition()">
 						<div class="researchBubbleContent">
 							<span class="researchBubbleImg trainBubbleIcon">&#128642;</span>
-							<span class="researchBubbleText">{{ store.context.selectedTrainMode ? "Cancel" : "Take Train" }}</span>
+							<span class="researchBubbleText">{{ store.context.selectedTrainFareResID !== -1 ? "Cancel" : "Select Good to Take Train" }}</span>
 						</div>
 					</div>
 				</div>

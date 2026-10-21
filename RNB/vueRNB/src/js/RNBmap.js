@@ -454,7 +454,8 @@ export function clickedHighlight(entry, event = null) {
 			// Ride the train to the clicked tile area. Read the CURRENT bucket off the
 			// clicked vertex - the highlight entry only carries initial bucket ids.
 			const toBucketLocation = loc.convertLocationToBucket(clickedLocation)
-			train.takeTrain(store.context.selectedTransporterIDforTM, toBucketLocation[1], toBucketLocation[2])
+			const fare = model.getResByID(store.context.selectedTrainFareResID)
+			train.takeTrain(store.context.selectedTransporterIDforTM, toBucketLocation[1], toBucketLocation[2], fare)
 			context.createUndoPoint()
 			return
 		}
@@ -926,22 +927,37 @@ export function refreshUseTrainsFlag() {
 }
 
 // Map editor: build one track edge between the two clicked tile areas.
-// River edges are never crossed; sea <-> land is allowed.
-export function addTrainTrackToMap_core([fromHexID], [toHexID]) {
+// A river edge carries one track lane per bank (like roads); a track never
+// switches banks, so it never crosses the river. Sea <-> land is allowed.
+export function addTrainTrackToMap_core([fromHexID, fromBucketId], [toHexID, toBucketId]) {
 	const store = useModelStore()
 	const fromHex = model.getHexByID(fromHexID)
 	const toHex = model.getHexByID(toHexID)
+	// City moats are never crossed: a track has no bridge option
 	if (fromHex.hexTerrainID === rf.CITY || toHex.hexTerrainID === rf.CITY) return false
 	const fromHexSide = hd.getJoiningSide(fromHex.coord, toHex.coord)
 	const toHexSide = (fromHexSide + 3) % 6
 	const edgeData = store.mapData.edgeData[fromHex.edgeLookup[fromHexSide]]
-	if (!edgeData || edgeData.hasRiver) return false
-	if (!edgeData.hasTrainTrack) edgeData.hasTrainTrack = [false]
-	if (edgeData.hasTrainTrack[0]) return true
+	if (!edgeData) return false
+	if (!edgeData.hasTrainTrack || edgeData.hasTrainTrack.length !== edgeData.hasRoad.length) edgeData.hasTrainTrack = util.makeArrayOfSizeWithFill(edgeData.hasRoad.length, false)
 
-	edgeData.hasTrainTrack[0] = true
-	updateHexInternalTrainTracks(fromHexID, [fromHex.sideNodeIds[fromHexSide]])
-	updateHexInternalTrainTracks(toHexID, [toHex.sideNodeIds[toHexSide]])
+	// One lane: the only option. Otherwise the clicked buckets pick the bank. Both
+	// are checked, because a sea tile is a single bucket and cannot tell the banks apart.
+	let lane = 0
+	if (edgeData.hasTrainTrack.length > 1) {
+		const laneCount = edgeData.hasTrainTrack.length
+		const inClickedBucket = (hex, node, bucketId) => node >= 0 && hex.bucketIdsInitial[hex.nodeBucketIds[node]] === bucketId
+		lane = util
+			.indexArray(laneCount)
+			.find((k) => inClickedBucket(fromHex, getTrainTrackEntryNode(fromHex, fromHexSide, k, laneCount, edgeData), fromBucketId) && inClickedBucket(toHex, getTrainTrackEntryNode(toHex, toHexSide, k, laneCount, edgeData), toBucketId))
+		if (lane === undefined) return false
+	}
+	if (edgeData.hasTrainTrack[lane]) return true
+
+	edgeData.hasTrainTrack[lane] = true
+	const laneCount = edgeData.hasTrainTrack.length
+	updateHexInternalTrainTracks(fromHexID, [getTrainTrackEntryNode(fromHex, fromHexSide, lane, laneCount, edgeData)])
+	updateHexInternalTrainTracks(toHexID, [getTrainTrackEntryNode(toHex, toHexSide, lane, laneCount, edgeData)])
 	refreshUseTrainsFlag()
 	return true
 }
@@ -960,14 +976,26 @@ export function allVertexBucketsWithoutTrainTracksAdjacentTo(hexID, bucketIds) {
 		const otherHex = model.getHexByID(otherHexId)
 		const otherSide = (side + 3) % 6
 		if (!rf.TERR_ANY.includes(hex.currentTerrain) || !rf.TERR_ANY.includes(otherHex.currentTerrain)) continue
-		// Tracks never cross rivers or city moats
-		if (edge.hasRiver) continue
+		// Tracks never cross city moats, and have no bridge option
 		if (hex.hexTerrainID === rf.CITY || otherHex.hexTerrainID === rf.CITY) continue
-		if (edge.hasTrainTrack?.[0]) continue
-		if (hex.sideNodeIds[side] === -1 || otherHex.sideNodeIds[otherSide] === -1) continue
-		if (!inBucket(hex.sideNodeIds[side])) continue
-		const otherBucketId = otherHex.bucketIdsInitial[otherHex.nodeBucketIds[otherHex.sideNodeIds[otherSide]]]
-		res.push([otherHexId, [otherBucketId]])
+		if (!edge.hasTrainTrack || edge.hasTrainTrack.length !== edge.hasRoad.length) edge.hasTrainTrack = util.makeArrayOfSizeWithFill(edge.hasRoad.length, false)
+		const laneCount = edge.hasTrainTrack.length
+		// Same edge, same bank: a track on one side of a river carries on to the
+		// same bank on the neighbour, so it never crosses the river.
+		if (laneCount === 1) {
+			if (edge.hasTrainTrack[0]) continue
+			if (hex.sideNodeIds[side] === -1 || otherHex.sideNodeIds[otherSide] === -1) continue
+			if (!inBucket(hex.sideNodeIds[side])) continue
+			res.push([otherHexId, [otherHex.bucketIdsInitial[otherHex.nodeBucketIds[otherHex.sideNodeIds[otherSide]]]]])
+		} else {
+			const cornerSide = edge.edgeHexIDs[0] === hexID ? [0, 1] : [1, 0]
+			const otherCornerSide = cornerSide.map((i) => (i + 1) % 2)
+			for (const k of [0, 1].filter((k) => !edge.hasTrainTrack[k] && inBucket(hex.cornerNodeIds[side][cornerSide[k]]))) {
+				const otherNodeId = otherHex.cornerNodeIds[otherSide][otherCornerSide[k]]
+				if (otherNodeId === undefined || otherNodeId < 0) continue
+				res.push([otherHexId, [otherHex.bucketIdsInitial[otherHex.nodeBucketIds[otherNodeId]]]])
+			}
+		}
 	}
 	return res
 }
@@ -1960,6 +1988,12 @@ export function clickedRes(event, _hexID, resID) {
 
 	// Exit if it's not highlighted
 	if (!store.context.resourceIDsToHighlight.includes(resID)) return
+	// Trains: picking which good pays for the ride. Nothing moves until the
+	// destination is clicked, so backing out here leaves the good where it was.
+	if (store.context.action === rf.ACT_TM_SELECT_TRAIN_FARE) {
+		train.selectTrainFare(resID)
+		return
+	}
 	if (store.context.action === rf.ACT_TM_SELECT_PICKUP_DROP_MOVE || store.context.action === rf.ACT_TM_BUILD_SELECT_BRIDGE_ROAD_WALL_BUILDING_RES_PICKUP_DROP) {
 		let transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
 		// Planes & Aeroports: a plane may only load goods/geese at the start of the movement phase
@@ -2432,6 +2466,13 @@ export function getPossibleDropBucketsForResourceOnTransporter(resID) {
 export function clickedResOnTransporter(transporterID, resourceID) {
 	const store = useModelStore()
 	if (store.context.action === rf.ACT_CONFIRM_END_TURN) return
+
+	// Trains: a good carried aboard may pay too
+	if (store.context.action === rf.ACT_TM_SELECT_TRAIN_FARE) {
+		if (!store.context.resourceIDsToHighlight.includes(resourceID)) return
+		train.selectTrainFare(resourceID)
+		return
+	}
 
 	if (store.context.action === rf.ACT_TM_SELECT_PICKUP_DROP_MOVE || store.context.action === rf.ACT_TM_BUILD_SELECT_BRIDGE_ROAD_WALL_BUILDING_RES_PICKUP_DROP) {
 		// If you are clicking a resource on another transporter, then try to steal it
