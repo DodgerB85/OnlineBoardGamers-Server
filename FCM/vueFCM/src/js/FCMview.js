@@ -467,7 +467,7 @@ export function getXYforSmallSquare(index, usedRowCol) {
 		w = store.refSize
 	}
 	let coords = map.giveCoord(index, isTile)
-	let xOffset = model.isItemOnLeftOfBoard() === true ? 2.5 : 0
+	let xOffset = model.leftBoardMargin()
 	let yOffset = model.isItemOnTopOfBoard() === true ? 2.5 : 0
 	let x = coords[0]
 	let y = coords[1]

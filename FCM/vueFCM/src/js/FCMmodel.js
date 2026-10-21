@@ -887,6 +887,15 @@ export function isItemOnBottomOfBoard() {
 	return b !== null && isOffBoardItemIn(b.rowEnd, b.rowEnd + 5, b.colStart, b.colEnd)
 }
 
+// Left margin of #mapTilesDiv in small squares (5 = one tile): room for
+// off-board items, plus one free tile while a new map tile is being placed
+// (lobbyist/park milestone) - otherwise the left-edge hotspots and the ghost
+// tile sit at negative x and are unreachable on small screens.
+export function leftBoardMargin() {
+	const store = useModelStore()
+	return (isItemOnLeftOfBoard() ? 2.5 : 0) + (store.context.lobbyistMilestoneActive ? 5 : 0)
+}
+
 export function alreadyChosenReserveCard() {
 	const store = useModelStore()
 	const personal = usePersonalStore()

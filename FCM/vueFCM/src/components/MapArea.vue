@@ -22,8 +22,9 @@ function getTilePos(index) {
 	const cols = map.getUsedRowCol()[1].length
 	const row = Math.floor(index / cols)
 	const col = index % cols
-	// Shift the board when planes/freeways are off the edge
-	const xOffset = model.isItemOnLeftOfBoard() ? 0.5 : 0
+	// Shift the board when planes/freeways are off the edge or a new tile is
+	// being placed (left margin for its hotspots / ghost tile)
+	const xOffset = model.leftBoardMargin() / 5
 	const yOffset = model.isItemOnTopOfBoard() ? 0.5 : 0
 	return [(yOffset + row) * store.refSize, (xOffset + col) * store.refSize]
 }
@@ -309,7 +310,7 @@ const roadDisplays = computed(() => {
 		if (road.variety === 1) w = 4 * sqSize
 
 		// Off-board items shift the whole board
-		const xOffset = model.isItemOnLeftOfBoard() ? 2.5 : 0
+		const xOffset = model.leftBoardMargin()
 		const yOffset = model.isItemOnTopOfBoard() ? 2.5 : 0
 		let adjustedX = (xOffset + x) * sqSize
 		let adjustedY = (yOffset + y) * sqSize
@@ -344,7 +345,7 @@ const roadworkDisplays = computed(() => {
 	const rwIdxs = map.getRoadworkIndexes()
 	if (rwIdxs.length === 0) return []
 	const sqSize = store.refSize / 5
-	const xOffset = model.isItemOnLeftOfBoard() ? 2.5 : 0
+	const xOffset = model.leftBoardMargin()
 	const yOffset = model.isItemOnTopOfBoard() ? 2.5 : 0
 	const res = []
 	for (const rwIdx of rwIdxs) {
@@ -369,7 +370,7 @@ const freewayDisplays = computed(() => {
 
 		const [freewayXcoord, freewayYcoord] = boardOffsetPos(fw.index)
 
-		const xOffset = model.isItemOnLeftOfBoard() ? 2.5 : 0
+		const xOffset = model.leftBoardMargin()
 		const yOffset = model.isItemOnTopOfBoard() ? 2.5 : 0
 		let adjustedX = (xOffset + freewayXcoord) * sqSize
 		let adjustedY = (yOffset + freewayYcoord) * sqSize
@@ -455,7 +456,7 @@ const parkDisplays = computed(() => {
 		if (park.variety === 0) w = 4 * sqSize
 
 		// Off-board items shift the whole board
-		const xOffset = model.isItemOnLeftOfBoard() ? 2.5 : 0
+		const xOffset = model.leftBoardMargin()
 		const yOffset = model.isItemOnTopOfBoard() ? 2.5 : 0
 		let adjustedX = (xOffset + x) * sqSize
 		let adjustedY = (yOffset + y) * sqSize
@@ -719,7 +720,7 @@ function tileRotationClass(tileData) {
 		<div
 			id="mapTilesDiv"
 			:style="{
-				width: (map.getUsedRowCol()[1].length + (model.isItemOnLeftOfBoard() ? 0.5 : 0) + (model.isItemOnRightOfBoard() ? 0.5 : 0)) * store.refSize + 'px',
+				width: (map.getUsedRowCol()[1].length + model.leftBoardMargin() / 5 + (model.isItemOnRightOfBoard() ? 0.5 : 0)) * store.refSize + 'px',
 				height: (map.getUsedRowCol()[0].length + (model.isItemOnTopOfBoard() ? 0.5 : 0) + (model.isItemOnBottomOfBoard() ? 0.5 : 0)) * store.refSize + 'px',
 			}">
 		<template v-for="(tileData, index) in store.mapData.displayTiles" :key="index">
