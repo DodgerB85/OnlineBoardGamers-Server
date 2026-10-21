@@ -451,14 +451,18 @@ export function getRemainingRecruitPointsAvailableForDiscount() {
 export function giveSmallSquaresOutsideBoard() {
 	const store = useModelStore()
 	let ssWidth = store.mapData.dimensions[0] * 5
+	let last = store.mapData.coords.length - 1
 	let edgeSquares = []
 	for (let i = 0; i < store.mapData.coords.length; i++) {
 		// check if an empty SS is next to a non-empty SS
+		// Every neighbour must stay inside the grid: out-of-range lookups read
+		// undefined, which is != OFF_BOARD, so the grid's outer rows would all
+		// count as board edges and produce hotspots far off the map.
 		if (store.mapData.coords[i] === rf.OFF_BOARD) {
-			if (store.mapData.coords[i - 1] !== rf.OFF_BOARD) edgeSquares.push(i)
-			if (store.mapData.coords[i + 1] !== rf.OFF_BOARD) edgeSquares.push(i)
-			if (store.mapData.coords[i - ssWidth] !== rf.OFF_BOARD) edgeSquares.push(i)
-			if (store.mapData.coords[i + ssWidth] !== rf.OFF_BOARD) edgeSquares.push(i)
+			if (i % ssWidth !== 0 && store.mapData.coords[i - 1] !== rf.OFF_BOARD) edgeSquares.push(i)
+			if (i % ssWidth !== ssWidth - 1 && i < last && store.mapData.coords[i + 1] !== rf.OFF_BOARD) edgeSquares.push(i)
+			if (i >= ssWidth && store.mapData.coords[i - ssWidth] !== rf.OFF_BOARD) edgeSquares.push(i)
+			if (i + ssWidth <= last && store.mapData.coords[i + ssWidth] !== rf.OFF_BOARD) edgeSquares.push(i)
 		}
 	}
 	return edgeSquares
