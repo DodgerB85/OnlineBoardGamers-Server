@@ -25,6 +25,56 @@ export const computedToXY = computed(() => {
 	}
 })
 
+// Turn unordered track segments into continuous polylines so rails have no
+// caps/gaps at internal joints. Chains end at junctions and hex edges.
+function trainTrackSegmentsToPath(segments, scale) {
+	if (!segments.length) return ""
+	const key = (p) => `${p[0].toFixed(2)},${p[1].toFixed(2)}`
+	const nodeSegments = new Map()
+	for (let i = 0; i < segments.length; i++) {
+		for (const p of segments[i]) {
+			const k = key(p)
+			if (!nodeSegments.has(k)) nodeSegments.set(k, [])
+			nodeSegments.get(k).push(i)
+		}
+	}
+	const otherPoint = (segIndex, pointKey) => {
+		const seg = segments[segIndex]
+		return key(seg[0]) === pointKey ? seg[1] : seg[0]
+	}
+	const used = new Array(segments.length).fill(false)
+	let path = ""
+	for (let i = 0; i < segments.length; i++) {
+		if (used[i]) continue
+		used[i] = true
+		const points = [segments[i][0], segments[i][1]]
+
+		// Walk backwards from the first point while the joint is a simple pass-through
+		while (true) {
+			const startKey = key(points[0])
+			const connections = nodeSegments.get(startKey) || []
+			if (connections.length !== 2) break
+			const next = connections.find((j) => !used[j])
+			if (next === undefined) break
+			used[next] = true
+			points.unshift(otherPoint(next, startKey))
+		}
+		// Walk forwards from the last point
+		while (true) {
+			const endKey = key(points[points.length - 1])
+			const connections = nodeSegments.get(endKey) || []
+			if (connections.length !== 2) break
+			const next = connections.find((j) => !used[j])
+			if (next === undefined) break
+			used[next] = true
+			points.push(otherPoint(next, endKey))
+		}
+
+		path += (path ? " " : "") + "M" + points.map((p) => `${p[0] * scale} ${p[1] * scale}`).join(" L")
+	}
+	return path
+}
+
 export const computedHexes = computed(() => {
 	const store = useModelStore()
 	const personal = usePersonalStore()
@@ -43,6 +93,7 @@ export const computedHexes = computed(() => {
 				mineData: [],
 				roadSegments: [],
 				powerLineSegments: [],
+				trainTrackSegments: [],
 			}) //)
 		)
 
@@ -52,6 +103,7 @@ export const computedHexes = computed(() => {
 		const hex = computedHexes[i]
 		computedHexes[i].roadSegments = util.boolFilter(computedHexes[i].nodeEdges, computedHexes[i].edgeHasRoad).map((arr) => arr.map((a) => hex.vertices[a]))
 		computedHexes[i].powerLineSegments = util.boolFilter(computedHexes[i].nodeEdges, computedHexes[i].edgeHasPowerLine).map((arr) => arr.map((a) => hex.vertices[a]))
+		computedHexes[i].trainTrackSegments = util.boolFilter(computedHexes[i].nodeEdges, computedHexes[i].edgeHasTrainTrack || []).map((arr) => arr.map((a) => hex.vertices[a]))
 		let resourcesOnHex = model.resourcesOnHex(hex.hexID)
 		let buildingsOnHex = model.buildingsOnHex(hex.hexID)
 		let homeMarkersOnHex = model.homeMarkersOnHex(hex.hexID)
@@ -275,6 +327,39 @@ export const computedHexes = computed(() => {
 				}
 			}
 		}
+		// TRAIN TRACKS - mirror the roads so tracks use the same anchors and
+		// river-bank entry nodes. Bridges are never used to extend a track.
+		const trainTrackLanes = edge.hasTrainTrack || []
+		if (trainTrackLanes.length === 1) {
+			if (trainTrackLanes[0]) {
+				for (const j of [0, 1]) {
+					const hex = hexes[j]
+					const side = hexSides[j]
+					const entryNode = hex.sideNodeIds[side]
+					if (entryNode !== -1) hex.trainTrackSegments.push([hex.nodeVertexDefinitions[entryNode], coord.relative([side, 0.5, 0])].map((c) => toXY(c, true)))
+				}
+			}
+		} else {
+			for (const k of [0, 1].filter((k) => trainTrackLanes[k])) {
+				for (const j of [0, 1]) {
+					const hex = hexes[j]
+					const side = hexSides[j]
+					const lr = j === 0 ? k : (k + 1) % 2
+					let entryNode = hex.cornerNodeIds[side][lr]
+					if (entryNode === -1) continue
+					// CITY: on city-river edges the track attaches at the bank node matching slot k
+					let cityEntryNode = entryNode
+					if (hex.hexTerrainID === rf.CITY) {
+						const gi = hex.cornerNodeIds[side][0] - 1
+						const bankNodes = [rf.CITY_BANK_NODE_BASE + 2 * gi, rf.CITY_BANK_NODE_BASE + 2 * gi + 1]
+						cityEntryNode = trainTrackLanes.length === 2 ? bankNodes[(k + j) % 2] : hex.sideNodeIds[side]
+					}
+					hex.trainTrackSegments.push(
+						[hex.nodeVertexDefinitions[cityEntryNode], coord.relative([side, rf.ROAD_SIDE_ALIGNMENT + (1 - 2 * rf.ROAD_SIDE_ALIGNMENT) * lr, 0])].map((c) => toXY(c, true))
+					)
+				}
+			}
+		}
 	}
 
 	// road joins
@@ -322,6 +407,8 @@ export const computedHexes = computed(() => {
 				return `M${seg[0][0] * 1} ${seg[0][1] * 1} L${seg[1][0] * 1} ${seg[1][1] * 1}`
 			})
 			.join(" ")
+		hex.fullTrainTrackPath = trainTrackSegmentsToPath(hex.trainTrackSegments, store.RATIO)
+		hex.fullTrainTrackPathZP = trainTrackSegmentsToPath(hex.trainTrackSegments, 1)
 	}
 
 	return computedHexes

@@ -157,6 +157,9 @@ export async function initGame() {
 		await initLoadGame(gameDataB64)
 	}
 
+	// Trains is map-defined: any rail track on the map enables the expansion.
+	map.refreshUseTrainsFlag()
+
 	// Shared post-initialization code run across all branches
 	if (store.players.length === 1) {
 		personal.soloGame = true

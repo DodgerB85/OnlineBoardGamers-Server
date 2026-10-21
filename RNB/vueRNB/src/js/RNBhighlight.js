@@ -26,6 +26,7 @@ import * as context from "./RNBcontext"
 import * as produce from "./RNBproduce"
 import * as wonder from "./RNBwonder"
 import * as stack from "./RNBstack"
+import * as train from "./RNBtrain"
 
 export function deselectTransporter() {
 	const store = useModelStore()
@@ -206,11 +207,14 @@ export function updateAllHighlightsForTransporterMode() {
 		// Planes: if a mode was already chosen (Taxi/Takeoff), skip the reset and proceed to movement highlights
 		const savedPlaneMode = store.context.selectedPlaneMode
 		const savedPlaneInFlight = store.context.planeInFlight
+		// Trains: a chosen mode survives the reset so the destinations can be highlighted
+		const savedTrainMode = store.context.selectedTrainMode
 		context.resetContextAndHighlights()
 
 		store.context.action = rf.ACT_TM_SELECT_PICKUP_DROP_MOVE
 
 		store.context.selectedTransporterIDforTM = transporterID
+		store.context.selectedTrainMode = savedTrainMode
 
 		const isPlane = transporterObj.type === rf.PLANE
 
@@ -248,6 +252,22 @@ export function updateAllHighlightsForTransporterMode() {
 			// You can drop transporters
 			highlightEligibleTransportersForTransporterDrop(store.context.selectedTransporterIDforTM)
 			return
+		}
+
+		// Offer the ride whenever a land transporter sits on a live track.
+		// While the mode is on, the same bubble becomes the way back out.
+		store.context.trainModeSelectionActive = train.canTransporterUseTrain(transporterID)
+		// Trains: a selected mode skips normal movement - the ride is the whole action
+		if (store.context.selectedTrainMode) {
+			if (store.context.trainModeSelectionActive) {
+				store.context.action = rf.ACT_TM_TAKE_TRAIN
+				const destinations = train.getTrainDestinations(transporterID).map(([hexID, bucketID]) => [rf.LOCATION_LAND_VERTEX, hexID, loc.getAnyVertexInHexIDbucketID(hexID, bucketID)])
+				highlightLocations(destinations)
+				// The mode carries over to another selected transporter, as plane modes do
+				highlightEligibleTransportersForTransporterPickup(store.context.selectedTransporterIDforTM)
+				return
+			}
+			store.context.selectedTrainMode = false
 		}
 
 		// You can load other transporters

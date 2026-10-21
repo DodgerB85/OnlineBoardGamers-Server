@@ -100,6 +100,7 @@ export function resetContext() {
 	context.hexBeingAddedRotation = 0
 	context.historyObj.splice(0)
 	context.newRoadInfo.splice(0)
+	context.newTrainTrackInfo.splice(0)
 	context.transporterMoveInfo.splice(0)
 	context.resIDbeingMoved = -1
 	context.transporterIDbeingDropped = -1
@@ -131,6 +132,10 @@ export function resetContext() {
 	context.planeModeSelectionActive = false
 	context.planeInFlight = false
 	context.midFlightDropTiles.splice(0)
+
+	// Trains vars
+	context.selectedTrainMode = false
+	context.trainModeSelectionActive = false
 
 	// Building Vars
 	context.selectedBuildingToBuild = -1

@@ -2,6 +2,7 @@
  * ST: 1 - Set style to FLAT top
  * HM: Home marker locations
  * CR: Custom Rules
+ * TN: [x1, y1, x2, y2, lane] - train track lanes
  * RS: [res idx's already researched]
  * RX: [res on map]
  * BX: [bldgs on map]
@@ -14,12 +15,17 @@ import * as rf from "../../js/RNBreference.js"
 import * as context from "../../js/RNBcontext.js"
 import * as util from "../../js/RNButil.js"
 import * as model from "../../js/RNBmodel.js"
+import * as map from "../../js/RNBmap.js"
 import * as stack from "../../js/RNBstack.js"
 import * as funcs from "../../js/RNBfuncs.js"
 import i18n from "../../i18n"
 
 export function clickedHighlight(entry) {
 	const store = useModelStore()
+	if (store.context.action === rf.ACT_MAP_EDITOR_EDIT_TRAIN_TRACKS) {
+		clickedTrainTrackArea(entry)
+		return
+	}
 	const hexID = entry[0]
 	const bucketIds = entry[1]
 	if (store.context.action === rf.ACT_MAP_EDITOR_ADD_HOME_MARKER) {
@@ -95,6 +101,43 @@ export function setupRemoveHomeMarker() {
 	store.context.action = rf.ACT_MAP_EDITOR_REMOVE_HOME_MARKER
 }
 
+export function setupTrainTrackEditing() {
+	const store = useModelStore()
+	if (store.context.action === rf.ACT_MAP_EDITOR_EDIT_TRAIN_TRACKS) {
+		context.resetContextAndHighlights()
+		return
+	}
+
+	context.resetContextAndHighlights()
+
+	// First click picks the FROM area; each following click extends the chain
+	store.context.action = rf.ACT_MAP_EDITOR_EDIT_TRAIN_TRACKS
+	for (const hex of store.mapData.hexData) {
+		if (!rf.TERR_ANY.includes(hex.currentTerrain)) continue
+		for (const bucketId of hex.bucketIdsInitial) {
+			context.addHexPieceToHighlight([hex.hexID, [bucketId]])
+		}
+	}
+}
+
+export function clickedTrainTrackArea(entry) {
+	const store = useModelStore()
+	if (store.context.action !== rf.ACT_MAP_EDITOR_EDIT_TRAIN_TRACKS) return
+	const chain = store.context.newTrainTrackInfo
+	if (chain.length === 0) {
+		chain.push([entry[0], [...entry[1]]])
+	} else {
+		const from = chain[0]
+		const built = map.addTrainTrackToMap_core([from[0], from[1][0]], [entry[0], entry[1][0]])
+		if (!built) return
+		// The clicked area becomes the FROM for the next segment
+		chain.splice(0)
+		chain.push([entry[0], [...entry[1]]])
+	}
+	context.clearAllHighlights()
+	context.setHexPiecesToHighlight(map.allVertexBucketsWithoutTrainTracksAdjacentTo(entry[0], entry[1]))
+}
+
 export function compressMapForDB() {
 	const store = useModelStore()
 	let res = []
@@ -133,6 +176,12 @@ export function compressMapForDB() {
 	// Add default style if flat
 	if (store.hexStyle === rf.FLAT) {
 		additionalData.ST = 1
+	}
+
+	// Train tracks
+	const trainTracks = map.compressTrainTracksForMap()
+	if (trainTracks.length > 0) {
+		additionalData.TN = trainTracks
 	}
 
 	res.push(additionalData)

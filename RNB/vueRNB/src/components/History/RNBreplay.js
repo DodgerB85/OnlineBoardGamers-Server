@@ -13,6 +13,7 @@ import * as stack from "../../js/RNBstack"
 import * as wonder from "../../js/RNBwonder"
 import * as electricity from "../../js/RNBelectricity"
 import * as atelier from "../../js/RNBatelier"
+import * as train from "../../js/RNBtrain"
 import i18n from "../../i18n"
 
 import { useModelStore } from "../../stores/RNBstore.js"
@@ -142,6 +143,8 @@ async function resetDataForReplay() {
 	}
 
 	let mapData = funcs.exportMapOnly()
+	// Static map tracks are not history actions, so carry them across the rebuild
+	const trainTracks = map.compressTrainTracksForMap()
 
 	// First, remove all items from the map
 	store.ALL_TRANSPORTERS.splice(0)
@@ -163,6 +166,7 @@ async function resetDataForReplay() {
 	store.mapData.hexData.splice(0)
 
 	funcs.importMapOnly(mapData, true)
+	map.applyTrainTracksFromMap(trainTracks)
 
 	// Reset gameflow
 	store.gameflow.turn = 1
@@ -255,6 +259,7 @@ export const HIST_CONFLICT_TURN_ORDER = 6
 
 				if (stackAction[0] === rf.STACK_STRICT_PICKUP_RES) replayStackPickupRes(stackAction)
 				else if (stackAction[0] === rf.STACK_MOVE_LAND) replayStackMoveLand(stackAction, store.computedHistory[i][1])
+				else if (stackAction[0] === rf.STACK_TAKE_TRAIN) replayStackTakeTrain(stackAction)
 				else if (stackAction[0] === rf.STACK_MOVE_WATER) replayStackMoveWater(stackAction, store.computedHistory[i][1])
 				else if (stackAction[0] === rf.STACK_DROP_RES_FOLLOWING) replayStackDropResFollowing(stackAction)
 				else if (stackAction[0] === rf.STACK_STRICT_DROP_RES) replayStackDropRes(stackAction)
@@ -670,6 +675,23 @@ function replayStackMoveLand(stackAction, playerIndex) {
 	for (let i = 0; i < resourcesOnTransporter.length; i++) {
 		resourcesOnTransporter[i].movedTransporterID = transporterObj.id
 	}
+}
+
+function replayStackTakeTrain(stackAction) {
+	/*
+		currentStack.push(rf.STACK_TAKE_TRAIN)
+		currentStack.push(stack.getTransIDtoUse(transporterObj))
+		currentStack.push([...compressedFromBucket])
+		currentStack.push([...compressedToBucket])
+		currentStack.push(contents)
+		currentStack.push(fareResID)
+		currentStack.push([numGeeseFollowing, 1])
+	*/
+	const movingTransporterID = stackAction[1]
+	const toLocationBucket = stack.decompressLocation(stackAction[3])
+	const fareRes = model.getResByID(stackAction[5])
+	// shortcut: no pathfind needed - the whole network is reachable in one ride
+	train.performTrainRide_core(movingTransporterID, toLocationBucket, fareRes)
 }
 
 function replayStackMoveWater(stackAction, playerIndex) {

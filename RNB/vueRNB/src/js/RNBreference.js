@@ -23,6 +23,7 @@ export const APP_ONLY_USERS = ["Ross"]
 // MAP EDITOR VAR
 export const ACT_MAP_EDITOR_ADD_HOME_MARKER = 901
 export const ACT_MAP_EDITOR_REMOVE_HOME_MARKER = 902
+export const ACT_MAP_EDITOR_EDIT_TRAIN_TRACKS = 903
 
 // EXTERNAL VARS
 // Starting options
@@ -203,6 +204,7 @@ export const ACT_TM_SELECT_TRANSPORTER = 10
 export const ACT_TM_SELECT_PICKUP_DROP_MOVE = 11 // This works for production and movement. For prod, simply don't highlight any move options
 export const ACT_TM_ANY_PHASE_DROP_RES_OR_TRANSPORT = 12 // You can ferry in any phase
 export const ACT_TM_ANY_PHASE_STRICT_DROP_RES_OR_TRANSPORT = 13 // We need to know if it's a ferry or a drop
+export const ACT_TM_TAKE_TRAIN = 14 // Trains: only destination buckets are highlighted
 
 // Production
 //export const ACT_TM_SELECT_BUILDING_RES = 12
@@ -253,6 +255,7 @@ export const STACK_DROP_TRANSPORTER = 12
 export const STACK_PICKUP_RES_TO_FOLLOW = 13
 export const STACK_DROP_RES_FOLLOWING = 14
 export const STACK_DROP_TRANSPORTER_JUST_PICKED_UP = 15
+export const STACK_TAKE_TRAIN = 16 // Trains: [transID, fromBucket, toBucket, contents, fareResID, numGeeseFollowing]
 
 // BUILD ACTIONS
 export const STACK_BUILD_ROAD = 20 // [] -- [hexIDFrom, bucketsFrom, hexIDTo, bucketsTo, transType]

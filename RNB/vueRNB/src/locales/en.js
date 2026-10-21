@@ -443,6 +443,7 @@ export default {
 		buildingPhase: "Building Phase",
 		wonderPhase: "Wonder Phase",
 		dropsGeese: "Drops Geese",
+		takesTrain: "Takes Train",
 		picksUp: "Picks Up",
 		drops: "Drops",
 		ferries: "Ferries",

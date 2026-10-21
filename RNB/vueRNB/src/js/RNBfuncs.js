@@ -167,6 +167,7 @@ export function clearMap(keepHistory) {
 	store.mapData.zoomData.hexID = -1
 	// Remove edgeData
 	store.mapData.edgeData.splice(0)
+	map.refreshUseTrainsFlag()
 	// Remove all hexes
 	store.mapData.hexData.splice(0)
 }
@@ -227,6 +228,9 @@ export function importStartingMap(inputArr) {
 	hd.setNeighbours()
 	map.updateEdgeData()
 	hd.updateAllHexRawXY()
+
+	// TN = train tracks: [[x1, y1, x2, y2, lane], ...]
+	map.applyTrainTracksFromMap(store.mapData.setupData.TN)
 
 	// if gameID is -1, load the home markers to show the locations
 	if (personal.gameID === -1 || personal.showMapOnly) {

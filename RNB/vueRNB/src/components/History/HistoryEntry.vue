@@ -503,6 +503,48 @@ const computedEntry3 = computed(() => {
 					let resObj = history.getResByID_HIST(contentIDs[j])
 					thisStepHist.contentsGfx.push(`res_${resObj.type}`)
 				}
+			} else if (stackAction[0] === rf.STACK_TAKE_TRAIN) {
+				// Same shape as a land move, plus the goods paid as the fare
+				const movingTransporterID = stackAction[1]
+				const fromLocation = stack.decompressLocation(stackAction[2])
+				const toLocation = stack.decompressLocation(stackAction[3])
+				const contentIDs = stackAction[4]
+				const fareResID = stackAction[5]
+				let numGeeseFollowing = 0
+				let droppedGeese = false
+				if (stackAction.length >= 7) {
+					numGeeseFollowing = stackAction[6][0]
+					if (stackAction[6].length > 1) droppedGeese = stackAction[6][1] === 1
+				}
+
+				thisStepHist.action = rf.STACK_TAKE_TRAIN
+				thisStepHist.movingTransporterID = movingTransporterID
+				thisStepHist.fromHexID = fromLocation[1]
+				thisStepHist.toHexID = toLocation[1]
+				thisStepHist.droppedGeese = droppedGeese
+
+				const fromBucketId = fromLocation[2]
+				const toBucketId = toLocation[2]
+				thisStepHist.fromBucketId = fromBucketId
+				thisStepHist.toBucketId = toBucketId
+				Object.assign(thisStepHist, getHighlightData([fromLocation, toLocation]))
+
+				thisStepHist.numGeeseFollowing = numGeeseFollowing
+				let transporterObj = history.getTransporterByID_HIST(movingTransporterID)
+				const transporterOwnerIndex = transporterObj.ownerIndex
+				thisStepHist.transporterGfx = `transporter_${transporterObj.type}_${personal.getCorrectedColour(store.players[transporterOwnerIndex].colour)}`
+				thisStepHist.contentsGfx = []
+				for (let j = 0; j < contentIDs.length; j++) {
+					if (contentIDs[0] === -1) {
+						const transporterBeingCarried = history.getTransporterByID_HIST(contentIDs[1])
+						thisStepHist.contentsGfx.push(`transporter_${transporterBeingCarried.type}_${personal.getCorrectedColour(store.players[transporterOwnerIndex].colour)}`)
+						break
+					}
+					let resObj = history.getResByID_HIST(contentIDs[j])
+					thisStepHist.contentsGfx.push(`res_${resObj.type}`)
+				}
+				const fareResObj = history.getResByID_HIST(fareResID)
+				thisStepHist.fareGfx = `res_${fareResObj.type}`
 			} else if (stackAction[0] === rf.STACK_MOVE_WATER) {
 				const transporterID = stackAction[1]
 				const fromLocation = stack.decompressWaterLocation(stackAction[2])
@@ -1406,10 +1448,12 @@ const computedEntry3 = computed(() => {
 				<strong v-if="computedEntry3.title">{{ computedEntry3.title }}</strong>
 				<br />
 				<template v-for="(stackEntry, idx) in computedEntry3.stackSteps" :key="idx">
-					<!-- LAND MOVE -->
-					<template v-if="stackEntry.action === rf.STACK_MOVE_LAND">
+					<!-- LAND MOVE (a train ride reuses this, minus the fare shown as spent) -->
+					<template v-if="stackEntry.action === rf.STACK_MOVE_LAND || stackEntry.action === rf.STACK_TAKE_TRAIN">
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, [])">
+							<span v-if="stackEntry.action === rf.STACK_TAKE_TRAIN" class="trainRideLabel">{{ $t("history.takesTrain") }}</span>
 							<MiniHex :hexID="stackEntry.fromHexID" :hexPiecesToOutline="[[stackEntry.fromHexID, [stackEntry.fromBucketId]]]" />
+							<img v-if="stackEntry.action === rf.STACK_TAKE_TRAIN" class="stackResFollowingTransporterImg" :src="view.getImage(stackEntry.fareGfx)" />
 							<img v-for="i in stackEntry.numGeeseFollowing" :key="i" class="stackResFollowingTransporterImg" :src="view.getImage(`res_${rf.RES_GOOSE}`)" />
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
 							<img class="stackContentsImg" v-for="(content, idx2) in stackEntry.contentsGfx" :key="idx2" :src="view.getImage(content)" />
@@ -1877,6 +1921,13 @@ const computedEntry3 = computed(() => {
 	margin-right: 2px;
 	border: 2px solid black;
 	box-sizing: border-box;
+}
+
+/* Trains: labels the entry as a train ride; the goods icon beside it is the fare */
+.trainRideLabel {
+	font-weight: bold;
+	margin-right: 4px;
+	white-space: nowrap;
 }
 
 .stackTransporterImg {

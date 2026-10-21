@@ -41,6 +41,7 @@ import * as prod from "./RNBproduce"
 import * as stack from "./RNBstack"
 import * as produce from "./RNBproduce"
 import * as atelier from "./RNBatelier"
+import * as train from "./RNBtrain"
 import i18n from "../i18n"
 
 import { useModelStore } from "../stores/RNBstore.js"
@@ -80,6 +81,7 @@ export function addNewEdge(hexIds) {
 		],
 		hasRoad: hasRiver || cityRiverNeighbour ? [false, false] : [false], // Road either side of the river,
 		hasPowerLine: hasRiver || cityRiverNeighbour ? [false, false] : [false], // Power line either side of the river,
+		hasTrainTrack: hasRiver || cityRiverNeighbour ? [false, false] : [false], // Rail track either side of the river,
 		hasRiver: hasRiver,
 	})
 
@@ -222,12 +224,14 @@ function addRedundantPaths(hexId, edgeHasKey) {
 	}
 }
 
-export function updateHexInternalRoadsViaNode(hexId, hexGraph, initialEntryPoints, nodeId, edgeHasKey = "edgeHasRoad") {
+export function updateHexInternalRoadsViaNode(hexId, hexGraph, initialEntryPoints, nodeId, edgeHasKey = "edgeHasRoad", includeBridges = true, anchorNodes = null) {
 	const hex = model.getHexByID(hexId)
 	let isEntryPoint = initialEntryPoints.slice()
-	for (const bridge of hex.builtBridges) {
-		for (const node of bridge) {
-			isEntryPoint[node] = true
+	if (includeBridges) {
+		for (const bridge of hex.builtBridges) {
+			for (const node of bridge) {
+				isEntryPoint[node] = true
+			}
 		}
 	}
 	isEntryPoint[nodeId] = false
@@ -243,7 +247,7 @@ export function updateHexInternalRoadsViaNode(hexId, hexGraph, initialEntryPoint
 
 	let entryPointIndices = indices.filter((i) => loc.isNonRiverVertexLocation(pathfind.locations[i]) && isEntryPoint[pathfind.locations[i][2]])
 	if (entryPointIndices.length === 0) {
-		let anchorIndices = indices.filter((i) => loc.isNonRiverVertexLocation(pathfind.locations[i]) && hex.nodeIsRoadAnchor[pathfind.locations[i][2]])
+		let anchorIndices = indices.filter((i) => loc.isNonRiverVertexLocation(pathfind.locations[i]) && (anchorNodes ? anchorNodes.includes(pathfind.locations[i][2]) : hex.nodeIsRoadAnchor[pathfind.locations[i][2]]))
 		if (anchorIndices.length > 0) {
 			let dest = anchorIndices[0]
 			while (dest !== pathfind.previous[dest]) {
@@ -284,6 +288,58 @@ export function updateHexInternalPowerLines(hexId, nodeIds) {
 	for (const nodeId of nodeIds) {
 		if (nodeId < 0) continue
 		updateHexInternalRoadsViaNode(hexId, hexGraph, isEntryPoint, nodeId, "edgeHasPowerLine")
+	}
+}
+
+export function existingTrainTrackEntryPoints(hexId) {
+	const store = useModelStore()
+	const hex = model.getHexByID(hexId)
+	let isEntryPoint = util.makeArrayOfSizeWithFill(hex.nodeBucketIds.length, false)
+	for (const side of util.indexArray(6)) {
+		const edgeId = hex.edgeLookup[side]
+		if (edgeId !== -1) {
+			const edge = store.mapData.edgeData[edgeId]
+			const lanes = edge.hasTrainTrack || []
+			if (lanes.length === 1) {
+				isEntryPoint[hex.sideNodeIds[side]] = lanes[0]
+			} else {
+				let offset = hexId === edge.edgeHexIDs[0] ? 0 : 1
+				for (const k of [0, 1].filter((k) => lanes[k])) {
+					if (hex.hexTerrainID === rf.CITY) {
+						const node = lanes.length === 2 ? cityBankNodeForEdgeSlot(hex, side, edge, k) : hex.sideNodeIds[side]
+						isEntryPoint[node] = true
+					} else isEntryPoint[hex.cornerNodeIds[side][(k + offset) % 2]] = true
+				}
+			}
+		}
+	}
+	return isEntryPoint
+}
+
+export function updateHexInternalTrainTracks(hexId, nodeIds) {
+	const hex = model.getHexByID(hexId)
+	if (!hex.edgeHasTrainTrack) hex.edgeHasTrainTrack = util.makeArrayOfSizeWithFill(hex.nodeEdges.length, false)
+
+	// Sea/wet polders use the simplified water graph, which only has vertex moves.
+	// Draw a direct line from each entry node to the tile centre instead.
+	if (rf.TERR_ACTS_LIKE_WATER.includes(hex.currentTerrain)) {
+		for (const nodeId of nodeIds) {
+			if (nodeId < 0) continue
+			const edgeIdx = hex.nodeEdges.findIndex((nodes) => (nodes[0] === 0 && nodes[1] === nodeId) || (nodes[1] === 0 && nodes[0] === nodeId))
+			if (edgeIdx !== -1) hex.edgeHasTrainTrack[edgeIdx] = true
+		}
+		return
+	}
+
+	const hexGraph = graph.createCompleteGraph([hex], [], -1)
+	const isEntryPoint = existingTrainTrackEntryPoints(hexId)
+	// Land hexes without road anchors (none currently) fall back to the centre node
+	const anchorNodes = (hex.nodeIsRoadAnchor || []).some(Boolean) ? null : [0]
+
+	for (const nodeId of nodeIds) {
+		if (nodeId < 0) continue
+		// Tracks never use bridges: includeBridges = false
+		updateHexInternalRoadsViaNode(hexId, hexGraph, isEntryPoint, nodeId, "edgeHasTrainTrack", false, anchorNodes)
 	}
 }
 
@@ -392,6 +448,14 @@ export function clickedHighlight(entry, event = null) {
 			const strictDrop = store.context.action === rf.ACT_TM_ANY_PHASE_STRICT_DROP_RES_OR_TRANSPORT
 			const strictDeposit = store.context.action === rf.ACT_TM_CHOOSE_GOOSE_DEPOSIT_LOCATION
 			dropResOrTransporterOnLocation(clickedLocation, strictDrop, strictDeposit)
+			return
+		}
+		if (store.context.action === rf.ACT_TM_TAKE_TRAIN) {
+			// Ride the train to the clicked tile area. Read the CURRENT bucket off the
+			// clicked vertex - the highlight entry only carries initial bucket ids.
+			const toBucketLocation = loc.convertLocationToBucket(clickedLocation)
+			train.takeTrain(store.context.selectedTransporterIDforTM, toBucketLocation[1], toBucketLocation[2])
+			context.createUndoPoint()
 			return
 		}
 		if (store.context.action === rf.ACT_TM_SELECT_PICKUP_DROP_MOVE) {
@@ -850,6 +914,116 @@ export function addPowerLineToMap_core([fromHexID, fromBucketId], [toHexID, toBu
 	for (const k of [0, 1]) {
 		updateHexInternalPowerLines(hexIds[k], [entryNodes[k]])
 	}
+}
+
+// ============================================================================
+// TRAIN TRACKS (map editor only - gameplay is not implemented yet)
+// ============================================================================
+
+export function refreshUseTrainsFlag() {
+	const store = useModelStore()
+	store.gameOptions.useTrains = store.mapData.edgeData.some((edge) => (edge.hasTrainTrack || []).some(Boolean))
+}
+
+// Map editor: build one track edge between the two clicked tile areas.
+// River edges are never crossed; sea <-> land is allowed.
+export function addTrainTrackToMap_core([fromHexID], [toHexID]) {
+	const store = useModelStore()
+	const fromHex = model.getHexByID(fromHexID)
+	const toHex = model.getHexByID(toHexID)
+	if (fromHex.hexTerrainID === rf.CITY || toHex.hexTerrainID === rf.CITY) return false
+	const fromHexSide = hd.getJoiningSide(fromHex.coord, toHex.coord)
+	const toHexSide = (fromHexSide + 3) % 6
+	const edgeData = store.mapData.edgeData[fromHex.edgeLookup[fromHexSide]]
+	if (!edgeData || edgeData.hasRiver) return false
+	if (!edgeData.hasTrainTrack) edgeData.hasTrainTrack = [false]
+	if (edgeData.hasTrainTrack[0]) return true
+
+	edgeData.hasTrainTrack[0] = true
+	updateHexInternalTrainTracks(fromHexID, [fromHex.sideNodeIds[fromHexSide]])
+	updateHexInternalTrainTracks(toHexID, [toHex.sideNodeIds[toHexSide]])
+	refreshUseTrainsFlag()
+	return true
+}
+
+// Which tile areas can the chain continue to from this tile area?
+export function allVertexBucketsWithoutTrainTracksAdjacentTo(hexID, bucketIds) {
+	const store = useModelStore()
+	const hex = model.getHexByID(hexID)
+	function inBucket(nodeId) {
+		return nodeId >= 0 && bucketIds.includes(hex.bucketIdsInitial[hex.nodeBucketIds[nodeId]])
+	}
+	let res = []
+	for (const side of util.indexArray(6).filter((side) => hex.hexLookup[side] !== -1)) {
+		const edge = store.mapData.edgeData[hex.edgeLookup[side]]
+		const otherHexId = hex.hexLookup[side]
+		const otherHex = model.getHexByID(otherHexId)
+		const otherSide = (side + 3) % 6
+		if (!rf.TERR_ANY.includes(hex.currentTerrain) || !rf.TERR_ANY.includes(otherHex.currentTerrain)) continue
+		// Tracks never cross rivers or city moats
+		if (edge.hasRiver) continue
+		if (hex.hexTerrainID === rf.CITY || otherHex.hexTerrainID === rf.CITY) continue
+		if (edge.hasTrainTrack?.[0]) continue
+		if (hex.sideNodeIds[side] === -1 || otherHex.sideNodeIds[otherSide] === -1) continue
+		if (!inBucket(hex.sideNodeIds[side])) continue
+		const otherBucketId = otherHex.bucketIdsInitial[otherHex.nodeBucketIds[otherHex.sideNodeIds[otherSide]]]
+		res.push([otherHexId, [otherBucketId]])
+	}
+	return res
+}
+
+// Map storage format: [[x1, y1, x2, y2, lane], ...], one entry per active lane.
+// Coordinates (not hex IDs) keep tracks attached to the same tiles when hexes
+// are removed or reordered in the editor.
+export function compressTrainTracksForMap() {
+	const store = useModelStore()
+	const res = []
+	for (const edge of store.mapData.edgeData) {
+		const lanes = edge.hasTrainTrack || []
+		for (let lane = 0; lane < lanes.length; lane++) {
+			if (!lanes[lane]) continue
+			const hex1 = model.getHexByID(edge.edgeHexIDs[0])
+			const hex2 = model.getHexByID(edge.edgeHexIDs[1])
+			res.push([hex1.coord[0], hex1.coord[1], hex2.coord[0], hex2.coord[1], lane])
+		}
+	}
+	return res
+}
+
+// Entry node for one track lane on one of the edge's hexes (same node roads use).
+function getTrainTrackEntryNode(hex, side, lane, laneCount, edge) {
+	if (laneCount === 1) return hex.sideNodeIds[side]
+	const offset = hex.hexID === edge.edgeHexIDs[0] ? 0 : 1
+	if (hex.hexTerrainID === rf.CITY) return cityBankNodeForEdgeSlot(hex, side, edge, lane)
+	return hex.cornerNodeIds[side][(lane + offset) % 2]
+}
+
+export function applyTrainTracksFromMap(tnData) {
+	const store = useModelStore()
+	if (!tnData) return
+	const entryNodesByHex = {}
+	for (const [x1, y1, x2, y2, lane] of tnData) {
+		const hex1 = store.mapData.hexData.find((h) => h.coord[0] === x1 && h.coord[1] === y1)
+		const hex2 = store.mapData.hexData.find((h) => h.coord[0] === x2 && h.coord[1] === y2)
+		if (!hex1 || !hex2) continue
+		const edge = store.mapData.edgeData.find((e) => e.edgeHexIDs.includes(hex1.hexID) && e.edgeHexIDs.includes(hex2.hexID))
+		if (!edge || lane >= edge.hasRoad.length) continue
+		if (!edge.hasTrainTrack || edge.hasTrainTrack.length !== edge.hasRoad.length) edge.hasTrainTrack = util.makeArrayOfSizeWithFill(edge.hasRoad.length, false)
+		edge.hasTrainTrack[lane] = true
+
+		const laneCount = edge.hasRoad.length
+		for (const hex of [hex1, hex2]) {
+			const side = hex.hexID === edge.edgeHexIDs[0] ? edge.joiningSides[0] : edge.joiningSides[1]
+			const node = getTrainTrackEntryNode(hex, side, lane, laneCount, edge)
+			if (node < 0) continue
+			if (!entryNodesByHex[hex.hexID]) entryNodesByHex[hex.hexID] = []
+			entryNodesByHex[hex.hexID].push(node)
+		}
+	}
+	for (const [hexID, nodes] of Object.entries(entryNodesByHex)) {
+		updateHexInternalTrainTracks(Number(hexID), nodes)
+	}
+	refreshUseTrainsFlag()
 }
 
 export function clickedBridgeOption(entry) {
