@@ -3,7 +3,7 @@ certifi==2026.10.19
 charset-normalizer==3.5.2
 config==0.5.1
 Django==5.2.18
-django-user-visit==2.1
+django-user-visit==2.3
 idna==3.20
 mysqlclient==2.3.0
 python-decouple==3.8
