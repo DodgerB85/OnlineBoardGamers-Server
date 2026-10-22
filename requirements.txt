@@ -11,7 +11,7 @@ requests==2.34.2
 six==1.17.0
 sqlparse==0.6.0
 tzdata==2025.3
-ua-parser==1.0.1
+ua-parser==1.0.2
 ua-parser-builtins==0.18.0.post1
 urllib3==2.8.0
 user-agents==2.2.0
