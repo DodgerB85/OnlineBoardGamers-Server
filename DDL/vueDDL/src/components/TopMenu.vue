@@ -2,9 +2,11 @@
 import * as rf from "../js/DDLreference"
 import * as view from "../js/DDLview"
 import * as IO from "../backend/DDL_IO"
+import { useI18n } from "vue-i18n"
 
 import { useModelStore } from "../stores/DDLstore.js"
 import { usePersonalStore } from "../stores/DDLpersonal.js"
+const { t } = useI18n()
 const store = useModelStore()
 const personal = usePersonalStore()
 
@@ -78,7 +80,7 @@ function loadRewind() {
 
 function resignGame() {
 	if (!personal.canResign()) return
-	if (!window.confirm("Are you sure you want to resign? You will be treated as a missing player.")) return
+	if (!window.confirm(t("topMenu.resignConfirm"))) return
 	IO.resign()
 	window.location.reload()
 }
@@ -97,23 +99,23 @@ function getKickoutTimerText() {
 			<a href="/">
 				<span class="topMenuItem">
 					<img :src="view.getImage('icon-house')" />
-					<span>Home</span>
+					<span>{{ $t("topMenu.home") }}</span>
 				</span>
 			</a>
 
 			<span v-if="personal.name !== undefined" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showChat }]" @click="toggleChat">
 				<img :src="view.getImage('icon-chat')" />
-				<span>Chat</span>
+				<span>{{ $t("topMenu.chat") }}</span>
 			</span>
 
 			<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showBug }]" @click="toggleBug">
 				<img :src="view.getImage('icon-stop')" />
-				<span>Bug</span>
+				<span>{{ $t("topMenu.bug") }}</span>
 			</span>
 
 			<span v-if="personal.name !== undefined" class="topMenuItem" @click="nextGame">
 				<img :src="view.getImage('icon-nextGame')" />
-				<span>Next</span>
+				<span>{{ $t("topMenu.next") }}</span>
 			</span>
 
 			<div class="menuDivider"></div>
@@ -121,49 +123,49 @@ function getKickoutTimerText() {
 			<a href="/DDL/help/" target="_blank">
 				<span class="topMenuItem">
 					<img :src="view.getImage('icon-rulebook')" />
-					<span>Rules</span>
+					<span>{{ $t("topMenu.rules") }}</span>
 				</span>
 			</a>
 
 			<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showNotes }]" @click="toggleNotes">
 				<img :src="view.getImage('icon-notebook')" />
-				<span>Notes</span>
+				<span>{{ $t("topMenu.notes") }}</span>
 			</span>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showInfo }]" @click="toggleInfo">
 				<img :src="view.getImage('icon-info')" />
-				<span>Info</span>
+				<span>{{ $t("topMenu.info") }}</span>
 			</span>
 
 			<div class="menuDivider"></div>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showHistory }]" @click="toggleHistory">
 				<img :src="view.getImage('icon-scroll')" />
-				<span>History</span>
+				<span>{{ $t("topMenu.history") }}</span>
 			</span>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showReplay }]" @click="toggleReplay">
 				<img :src="view.getImage('icon-replay')" />
-				<span>Replay</span>
+				<span>{{ $t("topMenu.replay") }}</span>
 			</span>
 
 			<div class="menuDivider"></div>
 
 			<span v-if="personal.pov >= 0 && !personal.trainingGame" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showRewindPanel }]" @click="store.viewSettings.showRewindPanel = !store.viewSettings.showRewindPanel">
 				<img :src="view.getImage('icon-rewind')" />
-				<span>Rewind</span>
+				<span>{{ $t("topMenu.rewind") }}</span>
 			</span>
 
 			<span v-if="personal.canResign()" class="topMenuItem" @click="resignGame">
 				<img :src="view.getImage('resign')" />
-				<span>Resign</span>
+				<span>{{ $t("topMenu.resign") }}</span>
 			</span>
 		</div>
 
 		<div id="topInfos">
 			<span class="gameInfoSpan">
 				<span v-html="store.gameName"></span>
-				| Turn: {{ store.gameflow.turn }} - {{ view.phaseStr(store.gameflow.phase) }}
+				| {{ $t("topMenu.turn") }}: {{ store.gameflow.turn }} - {{ view.phaseStr(store.gameflow.phase) }}
 			</span>
 			<div class="playerLineDiv">
 				<template v-for="(playerIndex, idx) in store.gameflow.turnOrder" :key="idx">
@@ -178,7 +180,7 @@ function getKickoutTimerText() {
 				<div id="WSstatus" v-if="personal.pov >= 0" :class="personal.WSstatus"></div>
 				<br />
 				<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
-					<span id="kickoutTimerSpan">Time to next kickout: <span id="kickoutTimerTimer">{{ getKickoutTimerText() }}</span></span>
+					<span id="kickoutTimerSpan">{{ $t("topMenu.timeToNextKickout") }} <span id="kickoutTimerTimer">{{ getKickoutTimerText() }}</span></span>
 				</template>
 			</div>
 		</div>

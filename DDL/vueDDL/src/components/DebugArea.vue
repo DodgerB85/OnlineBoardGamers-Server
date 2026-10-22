@@ -10,10 +10,10 @@ function showState() {
 
 <template>
 	<div id="debugArea">
-		<h3>Debug</h3>
-		<div>Phase: {{ store.gameflow.phase }} | Turn: {{ store.gameflow.turn }}</div>
-		<div>Turn order: {{ store.gameflow.turnOrder }}</div>
-		<button class="actionsLineButton" @click="showState">Show game data</button>
+		<h3>{{ $t("debug.title") }}</h3>
+		<div>{{ $t("debug.phase", { phase: store.gameflow.phase }) }} | {{ $t("debug.turn", { turn: store.gameflow.turn }) }}</div>
+		<div>{{ $t("debug.turnOrder", { order: store.gameflow.turnOrder }) }}</div>
+		<button class="actionsLineButton" @click="showState">{{ $t("debug.showData") }}</button>
 	</div>
 </template>
 

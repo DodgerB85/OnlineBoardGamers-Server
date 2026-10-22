@@ -3,7 +3,7 @@
  */
 
 import { defineStore } from "pinia"
-import * as rf from "../js/DDLreference"
+import * as rf from "../js/DDLreference.js"
 import { useModelStore } from "./DDLstore.js"
 
 export const usePersonalStore = defineStore("personal", () => {
@@ -19,7 +19,7 @@ export const usePersonalStore = defineStore("personal", () => {
 	var liveWS = true
 	var name = "NAME"
 	var latestUpdate = 0
-	var pov = -99 // -99 not logged in, -9 not involved, -1 admin, 0+ seat
+	var pov = -99
 	var secondsToNextKickout = 99999
 	var statsExcludedGame = false
 	var kickoutRequired = 0
@@ -32,6 +32,12 @@ export const usePersonalStore = defineStore("personal", () => {
 	var transactionID = ""
 	var votedToExclude = false
 	var votedToDelete = false
+	var removeCurrentFlexTime = false
+	var removeCurrentFlexTimeName = ""
+	var auctionSubmitted = false
+	var auctionBid = 0
+	var myTradeOffers = []
+	var preferredColour = 0
 
 	function canPlay() {
 		if (this.haltPlay) return false
@@ -40,7 +46,15 @@ export const usePersonalStore = defineStore("personal", () => {
 		if (this.pov < 0) return false
 		if (rf.SUPER_USERS.includes(this.name)) return true
 		if (this.trainingGame) return true
-		return this.pov === store.gameflow.turnOrder[0]
+		const current = store.gameflow.turnOrder[0]
+		return this.pov === current
+	}
+
+	function canBid() {
+		if (this.pov < 0 || this.finishedGame) return false
+		if (store.gameflow.phase !== rf.PHASE_SETUP) return false
+		if (!store.gameflow.setup.auction) return false
+		return store.gameflow.setup.stage === rf.TURN_SETUP_AUCTION
 	}
 
 	function canResign() {
@@ -48,8 +62,7 @@ export const usePersonalStore = defineStore("personal", () => {
 		if (this.pov < 0) return false
 		if (this.trainingGame) return false
 		if (this.soloGame) return false
-		if (this.canPlay() && store.gameflow.turnOrder[0] === this.pov) return true
-		return false
+		return this.canPlay()
 	}
 
 	function getCorrectedColour(colour) {
@@ -57,13 +70,7 @@ export const usePersonalStore = defineStore("personal", () => {
 	}
 
 	function getCorrectedColourHex(colour) {
-		if (colour === rf.BLACK) return "#333333"
-		if (colour === rf.BLUE) return "#334CCC"
-		if (colour === rf.GREEN) return "#4C9726"
-		if (colour === rf.GREY) return "#7F7F7F"
-		if (colour === rf.RED) return "#CC3333"
-		if (colour === rf.YELLOW) return "#CCBF33"
-		return "none"
+		return rf.COLOUR_HEX[colour] || "#333333"
 	}
 
 	return {
@@ -90,7 +97,14 @@ export const usePersonalStore = defineStore("personal", () => {
 		transactionID,
 		votedToExclude,
 		votedToDelete,
+		removeCurrentFlexTime,
+		removeCurrentFlexTimeName,
+		auctionSubmitted,
+		auctionBid,
+		myTradeOffers,
+		preferredColour,
 		canPlay,
+		canBid,
 		canResign,
 		getCorrectedColour,
 		getCorrectedColourHex,

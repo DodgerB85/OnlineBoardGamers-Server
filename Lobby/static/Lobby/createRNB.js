@@ -473,6 +473,48 @@ function galleryPlayerIconClicked(e) {
 	renderMapGallery()
 }
 
+// Weld unordered [[x1,y1],[x2,y2]] segments into continuous polylines so a run of
+// track tiles draws as one line with no gap at shared corners. Port of the editor's
+// trainTrackSegmentsToPath.
+function trackSegmentsToPath(segments) {
+	if (!segments.length) return ""
+	const key = (p) => `${p[0].toFixed(2)},${p[1].toFixed(2)}`
+	const nodeSegments = new Map()
+	for (let i = 0; i < segments.length; i++)
+		for (const p of segments[i]) {
+			const k = key(p)
+			if (!nodeSegments.has(k)) nodeSegments.set(k, [])
+			nodeSegments.get(k).push(i)
+		}
+	const otherPoint = (segIndex, pointKey) => {
+		const seg = segments[segIndex]
+		return key(seg[0]) === pointKey ? seg[1] : seg[0]
+	}
+	const used = new Array(segments.length).fill(false)
+	const r = (n) => Math.round(n * 100) / 100
+	let path = ""
+	for (let i = 0; i < segments.length; i++) {
+		if (used[i]) continue
+		used[i] = true
+		const points = [segments[i][0], segments[i][1]]
+		for (const dir of [0, 1]) {
+			for (;;) {
+				const endKey = key(dir === 0 ? points[0] : points[points.length - 1])
+				const connections = nodeSegments.get(endKey) || []
+				if (connections.length !== 2) break
+				const next = connections.find((j) => !used[j])
+				if (next === undefined) break
+				used[next] = true
+				const p = otherPoint(next, endKey)
+				if (dir === 0) points.unshift(p)
+				else points.push(p)
+			}
+		}
+		path += (path ? " " : "") + "M" + points.map((p) => `${r(p[0])} ${r(p[1])}`).join(" L")
+	}
+	return `<path d="${path}" stroke="#1A237E" stroke-width="34" stroke-linejoin="round" stroke-linecap="round" fill="none"/>`
+}
+
 function buildMapThumbnailSVG(hexData) {
 	if (!Array.isArray(hexData) || hexData.length < 2) return ""
 	const last = hexData[hexData.length - 1]
@@ -529,7 +571,86 @@ function buildMapThumbnailSVG(hexData) {
 		const c = centres[id]
 		body += `<image href="/static/RNB/images/hometiles/homered.jpg" x="${c[0] - homeSize / 2}" y="${c[1] - homeSize / 2}" width="${homeSize}" height="${homeSize}"/>`
 	})
-	return `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="${vbX} ${vbY} ${vbW} ${vbH}" preserveAspectRatio="xMidYMid meet"><rect x="${vbX}" y="${vbY}" width="${vbW}" height="${vbH}" fill="#f9f9f9"/><defs>${defs}</defs>${body}</svg>`
+	// Train tracks (TN = [[x1, y1, x2, y2, lane], ...]). Simplified routing: a track between two
+	// plain tiles runs straight centre-to-centre. When either tile is a river (terrains 0-22) the
+	// river sits at the tile centre and exits at the edge midpoints, so the track crosses the
+	// shared edge at the 1/4 point (halfway between the midpoint and a corner); a river tile then
+	// joins each lane's entry/exit points with a direct chord, skirting the river, never the centre.
+	const RIVER_TERRAINS = new Set()
+	for (let id = 0; id <= 22; id++) RIVER_TERRAINS.add(id)
+	const centreByCoord = {}
+	const terrByCoord = {}
+	hexes.forEach((e, i) => {
+		centreByCoord[e[0] + "," + e[1]] = centres[i]
+		terrByCoord[e[0] + "," + e[1]] = e[2]
+	})
+	const segments = []
+	const crossByCoord = {}
+	const seenTracks = {}
+	const tn = setup && Array.isArray(setup.TN) ? setup.TN : []
+	tn.forEach((t) => {
+		if (!Array.isArray(t) || t.length < 4) return
+		const lane = t.length > 4 ? t[4] : 0
+		const key = t[0] + "," + t[1] + "," + t[2] + "," + t[3] + "," + lane
+		if (seenTracks[key]) return
+		seenTracks[key] = true
+		const aK = t[0] + "," + t[1],
+			bK = t[2] + "," + t[3]
+		const aC = centreByCoord[aK],
+			bC = centreByCoord[bK]
+		if (!aC || !bC) return
+		if (!RIVER_TERRAINS.has(terrByCoord[aK]) && !RIVER_TERRAINS.has(terrByCoord[bK])) {
+			segments.push([aC, bC]) // no river on either tile: straight through both centres
+			return
+		}
+		// A river tile is crossed at its entry/exit points, not its centre. Cross the shared edge
+		// a quarter-edge off its midpoint (the river exits there) onto this lane's bank. TN stores
+		// [edgeHexIDs0, edgeHexIDs1, lane]; the editor maps lane 0 to vertex[side] and lane 1 to
+		// vertex[side+1] of the side facing B, so offset off the A->B perpendicular accordingly.
+		const mid = [(aC[0] + bC[0]) / 2, (aC[1] + bC[1]) / 2]
+		const dx = bC[0] - aC[0],
+			dy = bC[1] - aC[1]
+		const len = Math.hypot(dx, dy) || 1
+		const off = (lane === 1 ? 1 : -1) * (S / 4) // edge length == hex side S
+		const X = [mid[0] - (dy / len) * off, mid[1] + (dx / len) * off]
+		// A tile's track continuity runs bank-to-bank: the editor's node chains always join a
+		// bank-0 entry to a bank-1 exit on a different edge. TN's `lane` is edge-relative (it
+		// flips meaning between the two hexes of an edge), so pair on the tile-local bank index
+		// b instead: b = lane on edgeHexIDs0, lane^1 on edgeHexIDs1.
+		;(crossByCoord[aK] ||= []).push({ X, b: lane & 1, nk: bK })
+		;(crossByCoord[bK] ||= []).push({ X, b: lane ^ 1, nk: aK })
+	})
+	// Join each river-adjacent tile's crossings: a plain tile runs them through its centre; a river
+	// tile links a bank-0 crossing to a bank-1 crossing on another edge (a chord), never the centre.
+	Object.keys(crossByCoord).forEach((k) => {
+		const xs = crossByCoord[k]
+		const c = centreByCoord[k]
+		if (!RIVER_TERRAINS.has(terrByCoord[k])) {
+			xs.forEach((o) => segments.push([o.X, c]))
+			return
+		}
+		const ones = xs.filter((o) => o.b === 1)
+		const used = new Set()
+		xs.forEach((z) => {
+			if (z.b !== 0) return
+			let best = -1
+			let bestD = Infinity
+			ones.forEach((o, i) => {
+				if (used.has(i) || o.nk === z.nk) return // pair only across different edges
+				const d = (o.X[0] - z.X[0]) ** 2 + (o.X[1] - z.X[1]) ** 2
+				if (d < bestD) {
+					bestD = d
+					best = i
+				}
+			})
+			if (best >= 0) {
+				used.add(best)
+				segments.push([z.X, ones[best].X])
+			}
+		})
+	})
+	const tracks = trackSegmentsToPath(segments)
+	return `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="${vbX} ${vbY} ${vbW} ${vbH}" preserveAspectRatio="xMidYMid meet"><rect x="${vbX}" y="${vbY}" width="${vbW}" height="${vbH}" fill="#f9f9f9"/><defs>${defs}</defs>${body}${tracks}</svg>`
 }
 
 function escapeGalleryHTML(str) {

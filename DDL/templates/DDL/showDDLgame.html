@@ -1,11 +1,15 @@
 {% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="{% static 'Lobby/favicons/favicon-96x96.png' %}" />
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'Lobby/favicons/favicon-32x32.png' %}?v=20261022b" />
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'Lobby/favicons/favicon-16x16.png' %}?v=20261022b" />
+    <link rel="icon" href="{% static 'Lobby/favicons/favicon.ico' %}?v=20261022b" />
     <meta name="title" content="Online Board Gamers - Duck Dealer">
     <meta name="description" content="Play Splotter's Duck Dealer online for free with others.">
     <meta name="robots" content="index, follow">
@@ -47,16 +51,20 @@
       <strong>Please enable Javascript to continue.</strong>
     </noscript>
     <div id="app">
-      <div id="loadingText">Duck Dealer is loading........</div>
+      <div id="loadingText">{% translate "Duck Dealer is loading........" %}</div>
     </div>
   <div hidden>{% csrf_token %}</div>
   </body>
   <script>
     var initData = {};
+    initData.locale = "{{ LANGUAGE_CODE|default:'en' }}";
     initData.gameID = {{ gameID }};
     initData.gameName = "{{ gameName|escapejs }}";
-    initData.gameData = {{ gameData|safe }};
+    initData.gameData = "{{ gameData|escapejs }}";
     initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
+    initData.setupSeed = {{ setupSeed }};
+    initData.maxPlayers = {{ maxPlayers }};
+    initData.displayNames = JSON.parse('{{ displayNames|escapejs }}');
     initData.myZoomLevel = {{ myZoomLevel }};
     initData.startingOptions = {{ startingOptions|safe }};
     initData.KickoutFlexiDataArray = {{ KickoutFlexiDataArray|safe }};
