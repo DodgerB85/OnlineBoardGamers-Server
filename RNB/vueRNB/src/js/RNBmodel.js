@@ -131,6 +131,10 @@ export async function initGame() {
 		heading.textContent = "The game has not yet started"
 		var body = document.body
 		body.appendChild(heading)
+		// Logged-out / not-started viewers still get the starting map (the server sends it);
+		// without this the early return skipped importStartingMap and left a blank board.
+		store.mapData.externalMapData = [...window.initData.startingMap]
+		funcs.importStartingMap(window.initData.startingMap)
 		return
 	}
 

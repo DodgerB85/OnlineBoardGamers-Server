@@ -172,7 +172,9 @@ def build_show_game_data(
 
     # --- Involved player ---
     pov = presenter.seatPosition(username)
-    if is_game_admin(request.user):
+    # A game admin observing (no seat, or a missing one) views as -1; a seated
+    # admin keeps their own seat so they can still play.
+    if is_game_admin(request.user) and (pov < 0 or is_missing):
         pov = -1
 
     secondsToNextKickout = presenter.getSecondsToNextKickout()
