@@ -777,11 +777,10 @@ def showHLCgame(request, game_id):
     user_id = request.user.id
 
     now = int(time.time()) * 1000
-    chatData = currentGame.chatData
-
-    c = bytes(chatData, "utf-8")
-    # Keep the JSON fragment intact for the template but stop </script> breakouts.
-    chatData = c.decode("unicode-escape").replace("<", "\\u003C")
+    # The template embeds this JSON fragment as-is (JS parses the \u escapes),
+    # so only stop </script> breakouts. Decoding it here mangles non-BMP characters
+    # into lone surrogates, which the response cannot encode.
+    chatData = currentGame.chatData.replace("<", "\\u003C")
 
     currentMove = ""
     currentNotes = ""

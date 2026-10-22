@@ -53,8 +53,8 @@ var Log = {
 	},
 
 	log: function (model, player, action, param, timestamp) {
-		if (timestamp == undefined) timestamp = Math.round((new Date().getTime() - IO.timeOffset) / 1000)
-		if (timestamp < 0) timestamp = 0
+		if (timestamp == undefined) timestamp = Math.round((new Date().getTime() - (IO.timeOffset || 0)) / 1000)
+		if (!(timestamp >= 0)) timestamp = 0 // also catches NaN, which would be saved as null
 
 		if (this.TECH_LOGS.indexOf(action) == -1) {
 			this.history(model, player, action, param, timestamp)
