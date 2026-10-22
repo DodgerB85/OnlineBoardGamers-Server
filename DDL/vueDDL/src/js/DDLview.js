@@ -37,11 +37,11 @@ export function getOrdinal(num) {
 }
 
 export function boardImage() {
-	return new URL("../DDL/images/board.jpg", import.meta.url).href
+	return "/static/DDL/images/board.jpg"
 }
 
 export function playerAidImage() {
-	return new URL("../DDL/images/player-aid.jpg", import.meta.url).href
+	return "/static/DDL/images/player-aid.jpg"
 }
 
 export function goodImg(id) {
@@ -68,6 +68,6 @@ export function getImage(image) {
 	if (image === "icon-notebook") return new URL(`../../../static/DDL/images/icon-notebook.svg`, import.meta.url).href
 	if (image === "icon-scroll") return new URL(`../../../static/DDL/images/icon-scroll.svg`, import.meta.url).href
 	if (image === "icon-replay") return new URL(`../../../static/DDL/images/icon-replay.svg`, import.meta.url).href
-	if (image === "resign") return new URL(`../../../static/DDL/images/resign.jpg`, import.meta.url).href
+	if (image === "resign") return "/static/DDL/images/resign.jpg"
 	return ""
 }

@@ -116,7 +116,7 @@ export function decompressGameData(input) {
 
 const goodImageUrls = {}
 for (const good of rf.GOODS) {
-	goodImageUrls[good.id] = new URL(`../DDL/images/goods/${good.img}`, import.meta.url).href
+	goodImageUrls[good.id] = "/static/DDL/images/" + good.img
 }
 
 export function goodImage(goodId) {

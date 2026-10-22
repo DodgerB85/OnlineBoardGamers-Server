@@ -51,11 +51,12 @@ const showRemainingProd = computed(() => {
 })
 
 // The panel can render before store.players finishes loading, so the current-player index may
-// point nowhere; fall back to a missing icon rather than crash the whole view.
+// point nowhere; fall back to a neutral grey (a colour getImage resolves) so no malformed
+// transporter_<type>_ name trips the V-GI alert.
 const transporterColour = computed(() => {
 	let i = controller.currentPlayerIndex()
 	if (store.players[i] === undefined) i = 0
-	return store.players[i] ? personal.getCorrectedColour(store.players[i].colour) : ""
+	return store.players[i] ? personal.getCorrectedColour(store.players[i].colour) : rf.GREY
 })
 
 const buildingInputImages = computed(() => {
