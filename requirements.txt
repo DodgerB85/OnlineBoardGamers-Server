@@ -1,6 +1,6 @@
 asgiref==3.11.0
 certifi==2026.10.19
-charset-normalizer==3.4.4
+charset-normalizer==3.5.2
 config==0.5.1
 Django==5.2.18
 django-user-visit==2.1
