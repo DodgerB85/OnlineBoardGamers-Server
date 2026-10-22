@@ -37,11 +37,18 @@
 }
 .row09.kickoutRequired1 { background: var(--color-warn-bg); }
 .row09.kickoutRequired2 { background: var(--color-danger-bg); }
+.row09.pendingFinish,
+.colour-guide-item.pendingFinish {
+    background-image: repeating-conic-gradient(var(--color-surface-soft) 0% 25%, var(--color-surface) 0% 50%);
+}
 
 @media (hover: hover) {
     .row09.myMove:hover { background: #2c6039; }
     .row09.kickoutRequired1:hover { background: #59482d; }
     .row09.kickoutRequired2:hover { background: #613741; }
+    .row09.pendingFinish:hover {
+        background-image: repeating-conic-gradient(#2a424b 0% 25%, #203138 0% 50%);
+    }
 }
 
 .opts-slate, .opts-red, .opts-green, .opts-amber,
