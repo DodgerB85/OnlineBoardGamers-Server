@@ -24,6 +24,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
+from Lobby.sharedFunctions.permissions import is_game_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_updateFlexiTime,
@@ -69,9 +70,6 @@ def createTGZgame(request):
 
 
 def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
-    # TGZ has TGZtourneyAdmin as additional super user
-    super_users = ["BotKickStarter"]
-
     result = build_show_game_data(
         request,
         game_id,
@@ -79,7 +77,6 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
         default_zoom=240,
         settings_debug_key="TGZ_USE_SOURCE_CODE",
         extra_select_related=["relatedMainTournament"],
-        super_users=super_users,
     )
     if isinstance(result, HttpResponseRedirect):
         return result
@@ -143,9 +140,9 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
             }
         )
 
-    # TGZ: BotKickStarter gets pov=0
+    # TGZ: game admins get pov=0
     pov = result["pov"] if result["is_involved"] else returnData["pov"]
-    if username == "BotKickStarter":
+    if is_game_admin(request.user):
         pov = 0
         returnData["pov"] = pov
 
@@ -495,7 +492,7 @@ def _processTGZturn(request):
     elif action == "resign":
         # Always do this
         usernameToUse = request.user.username
-        if usernameToUse == "BotKickStarter":
+        if is_game_admin(request.user):
             usernameToUse = jsonData["BKSN"]
         _missingPlayer = User.objects.get(username=usernameToUse)
 

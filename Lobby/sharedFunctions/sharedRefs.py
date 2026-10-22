@@ -5,6 +5,7 @@ import json
 import math
 import time
 from collections import Counter
+from urllib.parse import urlparse
 
 from django.utils.translation import gettext, gettext_lazy
 
@@ -52,6 +53,22 @@ SR_WEBHOOK_CHOICES = {
     TELEGRAM: gettext_lazy("Telegram"),
     OTHER: gettext_lazy("Other"),
 }
+
+SR_WEBHOOK_HOSTS = {
+    DISCORD: {"discord.com", "www.discord.com", "ptb.discord.com", "canary.discord.com", "discordapp.com"},
+    SLACK: {"hooks.slack.com"},
+}
+
+
+def SR_valid_webhook_url(webhook_type, url):
+    try:
+        parsed = urlparse(url)
+    except ValueError:
+        return False
+    if parsed.scheme != "https" or parsed.hostname not in SR_WEBHOOK_HOSTS.get(webhook_type, set()):
+        return False
+    path_prefix = "/api/webhooks/" if webhook_type == DISCORD else "/services/"
+    return parsed.path.startswith(path_prefix)
 
 
 OPEN = "OP"

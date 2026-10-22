@@ -63,7 +63,8 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     search_fields = ["user__username", "email_confirmed"]
-    list_display = ("user", "email_confirmed", "availabilityMoveCounts", "availabilityTurnCounts")
+    list_display = ("user", "email_confirmed", "is_site_admin", "is_game_admin", "availabilityMoveCounts", "availabilityTurnCounts")
+    list_filter = ("is_site_admin", "is_game_admin")
 
 
 @admin.register(Tournament)

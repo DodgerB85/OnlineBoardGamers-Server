@@ -21,6 +21,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
+from Lobby.sharedFunctions.permissions import is_game_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_updateFlexiTime,
@@ -35,7 +36,6 @@ from .common import create_aqy_game
 if TYPE_CHECKING:
     from Lobby.presenters import AQYpresenter
 
-AQY_SUPER_USERS = ["BotKickStarter"]
 AQY_DB_LOCK_NAME = "lockAQYgame_"
 
 
@@ -695,7 +695,7 @@ def _processAQYturn(request):
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
         acting_username = request.user.username
-        if request.user.username not in AQY_SUPER_USERS:
+        if not is_game_admin(request.user):
             presenter.updateSingleMove(request.user.username, jsonData["moveData"])
         else:
             acting_username = jsonData["BKSN"]
@@ -703,7 +703,7 @@ def _processAQYturn(request):
 
         presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayersArrayAQY(), acting_username=acting_username, old_latest_update=currentGame.latestUpdate)
 
-        if request.user.username in AQY_SUPER_USERS:
+        if is_game_admin(request.user):
             SF_updateFlexiTime(
                 currentGame.kickoutFlexiData,
                 currentGame.latestUpdate,

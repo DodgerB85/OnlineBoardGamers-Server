@@ -21,6 +21,7 @@ from Lobby.gameViewHelpers import (
     shared_save_notes,
 )
 from Lobby.models import Game, User
+from Lobby.sharedFunctions.permissions import is_game_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -540,7 +541,7 @@ def _processHLCturn(request):
                 {"message": gettext("<b>No rewind data. Rewind limit reached. Please play on to generate more rewind data </b>")},
                 safe=False,
             )
-        if not presenter.getRewindHostPossible() and request.user.username != "BotKickStarter":
+        if not presenter.getRewindHostPossible() and not is_game_admin(request.user):
             return JsonResponse(
                 {"message": gettext("<b>Permissions missing. Please reload the page and check again</b>")},
                 safe=False,
@@ -762,7 +763,8 @@ def showHLCgame(request, game_id):
     chatData = currentGame.chatData
 
     c = bytes(chatData, "utf-8")
-    chatData = c.decode("unicode-escape")
+    # Keep the JSON fragment intact for the template but stop </script> breakouts.
+    chatData = c.decode("unicode-escape").replace("<", "\\u003C")
 
     currentMove = ""
     currentNotes = ""
@@ -806,10 +808,10 @@ def showHLCgame(request, game_id):
 
     if involvedPlayer:
         rewindPanelType = 1
-        if currentGame.host == request.user or username == "BotKickStarter":
+        if currentGame.host == request.user or is_game_admin(request.user):
             rewindPanelType = 2
             rewindHostPossible = presenter.getRewindHostPossible()
-            if username == "BotKickStarter":
+            if is_game_admin(request.user):
                 rewindHostPossible = True
             rewindHostHTML = presenter.getRewindHostHTML()
 
@@ -946,15 +948,18 @@ def chat(request):
         currentChatData = currentGame.chatData
 
         newMessage = jsonData["message"]
-        newMessage = newMessage.encode("unicode-escape").decode("ASCII")
-
         newMessage = newMessage.replace("\n", " ").replace("\r", "")
 
         playerName = jsonData["player"]
-        playerName = playerName.encode("unicode-escape").decode("ASCII")
 
         now = str(int(time.time()) * 1000)
-        newChatString = '{"name":"' + playerName + '","timestamp":' + str(now) + ',"message":"' + newMessage + '"},'
+        newChatString = (
+            json.dumps(
+                {"name": playerName, "timestamp": int(now), "message": newMessage},
+                separators=(",", ":"),
+            )
+            + ","
+        )
         currentChatData = newChatString + currentChatData
         currentGame.chatData = currentChatData
         currentGame.save()

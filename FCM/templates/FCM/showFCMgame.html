@@ -120,7 +120,7 @@
   // Core game data
   initData.gameID = {{ gameID|default:0 }};
   initData.gameName = "{{ gameName|default:"" }}";
-  initData.gameData = '{{ gameData|default:""|safe }}';
+  initData.gameData = '{{ gameData|default:""|escapejs }}';
   initData.gameCreationTimestamp = {{ gameCreationTimestamp|default:0 }};
   initData.myZoomLevel = {{ myZoomLevel|default:200 }};
   initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe|default:"[]"}};
@@ -169,7 +169,7 @@
   initData.notes = '{{ currentNotes | escapejs }}';
   {% if not gameData %}
   {% if displayNames %}
-  initData.displayNames = {{ displayNames | safe }};
+  initData.displayNames = JSON.parse('{{ displayNames|escapejs }}');
   {% endif %}
   {% endif %}
   {% endif %}

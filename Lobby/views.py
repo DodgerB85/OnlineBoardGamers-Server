@@ -5,6 +5,7 @@ import gzip
 import json
 import logging
 import re
+import secrets
 import time
 import traceback
 from collections import Counter
@@ -65,6 +66,7 @@ from user_visit.models import UserVisit
 import Lobby.sharedFunctions.constants as rf
 from FCM.common import buildFCMstartingOptions
 from Lobby.sharedFunctions.db_mutex import db_mutex
+from Lobby.sharedFunctions.permissions import is_site_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_getMiniTournamentCreationJsonReturn,
@@ -95,6 +97,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getTGZstartingOptionsHTML,
     SR_getTournamentTypeDisplay,
     SR_getWEBstartingOptionsHTML,
+    SR_valid_webhook_url,
 )
 
 from .forms import (
@@ -335,6 +338,8 @@ def telegram_bot_response(request):
 
 @login_required
 def addTGid(request, TGid):
+    if request.method != "POST":
+        return render(request, "Lobby/confirmAddTG.html", {"TGid": TGid})
     try:
         webhookType = "TG"
         webhookURL = ""
@@ -456,7 +461,7 @@ def set_language_custom(request):
 
 @login_required()
 def userStats(request):
-    if request.user.username != "admin" and request.user.username != "DodgerB":
+    if not is_site_admin(request.user):
         raise Http404()
 
     user_stats_data = User.objects.annotate(date_joined_date=TruncDate("date_joined")).values("date_joined_date").annotate(total_users=Count("id")).order_by("date_joined_date")
@@ -532,7 +537,7 @@ def userStats(request):
 
 @login_required()
 def DBO(request):
-    if request.user.username != "admin" and request.user.username != "DodgerB":
+    if not is_site_admin(request.user):
         raise Http404()
 
     gamesList = []
@@ -590,7 +595,7 @@ def DBO(request):
 @login_required
 def DBO_deleteGame(request, game_type):
     # 1. Authorization check
-    if request.user.username not in ["admin", "DodgerB"]:
+    if not is_site_admin(request.user):
         raise Http404()
 
     if request.method != "DELETE":
@@ -627,7 +632,7 @@ def DBO_deleteGame(request, game_type):
 
     # 5. Logic execution
     if data.get("action") == "deleteTrgGame":
-        if request.user.username == "admin":
+        if is_site_admin(request.user):
             status = current_game.gameStatus
             current_game.delete()
 
@@ -684,7 +689,7 @@ def fcmNewCode(request):
 def changelog_view(request):
     allChanges = changelog.objects.order_by("-timestamp").all()
 
-    if request.user.username == "admin":
+    if is_site_admin(request.user):
         # create object of form
         changelogFormVar = changelogForm(request.POST or None, request.FILES or None)
 
@@ -696,6 +701,7 @@ def changelog_view(request):
             requests.post(
                 f"https://discord.com/api/webhooks/{config('WEBHOOK_DISCORD_UPDATES')}",
                 data={"content": message},
+                timeout=5,
             )
 
         return render(
@@ -807,6 +813,7 @@ def handler404(request, exception):
             requests.post(
                 f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                 data={"content": message},
+                timeout=5,
             )
     except Exception as e:
         print("404 handler error: " + str(e))
@@ -1590,6 +1597,15 @@ def index(request):
     )
 
 
+LOGIN_MAX_FAILURES = 10
+LOGIN_FAILURE_WINDOW = 15 * 60
+LOGIN_FAILURE_KEY = "login_fail:{ip}:{username}"
+
+
+def _client_ip(request):
+    return request.META.get("HTTP_CF_CONNECTING_IP") or request.META.get("REMOTE_ADDR", "")
+
+
 def login_view(request):
     if request.method == "POST":
         # Attempt to sign user in
@@ -1626,10 +1642,17 @@ def login_view(request):
             messages.error(request, gettext("Username and password are required."))
             return render(request, "Lobby/login.html")
 
+        # shortcut: per-process cache; move to a shared cache if multiple web workers are added.
+        failure_key = LOGIN_FAILURE_KEY.format(ip=_client_ip(request), username=username.lower())
+        if cache.get(failure_key, 0) >= LOGIN_MAX_FAILURES:
+            messages.error(request, gettext("Too many failed sign-in attempts. Please wait 15 minutes and try again."))
+            return render(request, "Lobby/login.html")
+
         user = authenticate(request, username=username, password=password)
 
         # Check if authentication successful
         if user is not None:
+            cache.delete(failure_key)
             login(request, user)
             request.session.modified = True  # Force session save
 
@@ -1662,6 +1685,7 @@ def login_view(request):
             response.set_cookie(settings.LANGUAGE_COOKIE_NAME, language_code, max_age=settings.LANGUAGE_COOKIE_AGE)
             return response
         else:
+            cache.set(failure_key, cache.get(failure_key, 0) + 1, LOGIN_FAILURE_WINDOW)
             try:
                 user = User.objects.get(username=request.POST["username"])
                 if not user.is_active:
@@ -1935,6 +1959,7 @@ def profile(request):
                 "blacklistedPlayers": blacklisted_players,
                 "stop_emails_until": stop_emails_until,  # -1 if not set
                 "discord_client_id": config("DISCORD_CLIENT_ID"),
+                "discord_oauth_state": request.session.setdefault("discord_oauth_state", secrets.token_urlsafe(32)),
                 "discord_id": profile.discord_id,
             },
         )
@@ -3401,6 +3426,7 @@ def checkJoinGame(request, gameType, gameID):
                 requests.post(
                     f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                     data={"content": message},
+                    timeout=5,
                 )
             except Exception as e:
                 print(f"Discord webhook failed (new user exp): {e}")
@@ -3456,6 +3482,7 @@ def checkJoinGame(request, gameType, gameID):
                 requests.post(
                     f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                     data={"content": message},
+                    timeout=5,
                 )
             except Exception as e:
                 print(f"Discord webhook failed (fair play): {e}")
@@ -3587,6 +3614,7 @@ def deleteGame(request, gameCode):
                 requests.post(
                     f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                     data={"content": message},
+                    timeout=5,
                 )
             except Exception as e:
                 print(f"Discord webhook failed (delete game alert): {e}")
@@ -3655,7 +3683,7 @@ def testWebhook(request):
 
     if notification[0] == "Discord":
         # Validate Discord URL
-        if notification[1] and notification[1][0:15] != "https://discord" and notification[1][0:19] != "https://ptb.discord" and notification[1][0:18] != "https://discordapp":
+        if not SR_valid_webhook_url("DC", notification[1]):
             error_string = gettext("Please enter a Valid Discord Webhook URL")
             return JsonResponse({"errorMessage": error_string, "type": 0})
         # Validate Discord ID:
@@ -3671,12 +3699,12 @@ def testWebhook(request):
         if len(notification[2]) != 0:
             message += "<@" + notification[2] + ">\n"
         message += gettext("This is a test message from Online Board Gamers")
-        requests.post("" + notification[1], data={"content": message})
+        requests.post("" + notification[1], data={"content": message}, timeout=5)
         return JsonResponse({"response": "ok", "type": 0})
 
     if notification[0] == "Slack":
         # Validate Slack URL
-        if notification[1] and notification[1][0:33] != "https://hooks.slack.com/services/":
+        if not SR_valid_webhook_url("SL", notification[1]):
             error_string = gettext("Please enter a Valid Slack Webhook URL")
             return JsonResponse({"errorMessage": error_string, "type": 1})
 
@@ -3698,7 +3726,7 @@ def testWebhook(request):
         payload = {"text": message, "link_names": 1}  # Enables @mentions
 
         # Send via POST (your existing method works fine)
-        requests.post(notification[1], json=payload)
+        requests.post(notification[1], json=payload, timeout=5)
 
         return JsonResponse({"response": "ok", "type": 1})
 
@@ -3706,13 +3734,16 @@ def testWebhook(request):
         TOKEN = config("TELEGRAM_OBG_BOT_TOKEN", default="BOT_TOKEN", cast=str)
         message = "This is a test message from Online Board Gamers"
         url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={notification[2]}&text={message}"
-        requests.post(url)
+        requests.post(url, timeout=5)
         return JsonResponse({"response": "ok", "type": 1})
 
     if notification[0] == "Other":
-        message = "This is a test message from Online Board Gamers"
-        requests.post(notification[1], data={"content": message})
-        return JsonResponse({"response": "ok", "type": 1})
+        return JsonResponse(
+            {
+                "errorMessage": gettext("Custom webhook URLs are not supported"),
+                "type": 0,
+            }
+        )
 
     return JsonResponse({"errorMessage": gettext("Server Error")})
 
@@ -4173,6 +4204,11 @@ def discord_callback(request):
     if not code:
         return redirect("profile")
 
+    expected_state = request.session.pop("discord_oauth_state", None)
+    if not expected_state or request.GET.get("state") != expected_state:
+        messages.error(request, gettext("Discord link expired. Please try again from your profile."))
+        return redirect("profile")
+
     # Use config to get secrets from your .env file
     client_id = config("DISCORD_CLIENT_ID")
     client_secret = config("DISCORD_CLIENT_SECRET")
@@ -4187,7 +4223,7 @@ def discord_callback(request):
 
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
-    response = requests.post("https://discord.com/api/oauth2/token", data=data, headers=headers)
+    response = requests.post("https://discord.com/api/oauth2/token", data=data, headers=headers, timeout=10)
     credentials = response.json()
     access_token = credentials.get("access_token")
 
@@ -4199,7 +4235,7 @@ def discord_callback(request):
 
     # 2. GET THE USER ID
     user_headers = {"Authorization": f"Bearer {access_token}"}
-    user_resp = requests.get("https://discord.com/api/users/@me", headers=user_headers)
+    user_resp = requests.get("https://discord.com/api/users/@me", headers=user_headers, timeout=10)
     discord_data = user_resp.json()
     discord_user_id = discord_data["id"]
 
@@ -4218,7 +4254,7 @@ def discord_callback(request):
 
     # This 'PUT' request actually adds the user to the server
     # This sends the "Join" request to Discord
-    requests.put(join_url, json=join_data, headers=join_headers)
+    requests.put(join_url, json=join_data, headers=join_headers, timeout=10)
 
     new_join_message = "👋 **Welcome to the OnlineBoardGamers Discord Bot!**\n\n🔔 You'll receive game notifications here\n\n⚙️ You can turn off messages at any time from your profile"
     SN_sendDiscordDM(discord_user_id, new_join_message, "https://onlineboardgamers.com/profile/", "https://onlineboardgamers.com/profile/")
@@ -4264,14 +4300,19 @@ def addWebhook(request):
             return redirect("profile")
 
     # Valid URL, so check discord patterns
-    if webhookType == "DC" and webhookURL[0:15] != "https://discord" and webhookURL[0:19] != "https://ptb.discord" and webhookURL[0:18] != "https://discordapp":
+    if webhookType == "DC" and not SR_valid_webhook_url("DC", webhookURL):
         error_string = gettext("Please enter a Valid Discord Webhook URL")
         messages.error(request, error_string)
         return redirect("profile")
 
     # Valid URL, so check Slack patterns
-    if webhookType == "SL" and webhookURL[0:33] != "https://hooks.slack.com/services/":
+    if webhookType == "SL" and not SR_valid_webhook_url("SL", webhookURL):
         error_string = gettext("Please enter a Valid Slack Webhook URL")
+        messages.error(request, error_string)
+        return redirect("profile")
+
+    if webhookType not in ("DC", "SL", "TG"):
+        error_string = gettext("Please select a valid webhook type")
         messages.error(request, error_string)
         return redirect("profile")
 
@@ -4376,7 +4417,7 @@ def sendAdminMessage(request):
 @login_required
 def BGH_API(request, options):
     url = "http://api.boardgamehelpers.com/api/FoodChainMagnate/GenerateMap/" + options
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     data = response.json()
     final_dictionary = {}
     if isinstance(data, dict):
@@ -5319,7 +5360,7 @@ def MainTournament(request, Main_Tournament_id):
             raise Http404(gettext("Tournament does not exist")) from None
 
         if "startTournament" in request.POST:
-            if request.user.username != "admin":
+            if not is_site_admin(request.user):
                 messages.error(request, gettext("Illegal Access"))
             elif currentTournament.tournamentStatus != OPEN:
                 messages.error(request, gettext("This tournament cannot be started"))

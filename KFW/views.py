@@ -19,6 +19,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
+from Lobby.sharedFunctions.permissions import is_game_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -28,8 +29,6 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 if TYPE_CHECKING:
     from Lobby.presenters import KFWpresenter
-
-KFW_SUPER_USERS = ["BotKickStarter"]
 
 
 def index(request):
@@ -58,7 +57,6 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "KFW",
         default_zoom=0,
         settings_debug_key="KFW_USE_SOURCE_CODE",
-        super_users=KFW_SUPER_USERS,
         clear_chat_notification=False,
     )
     if isinstance(result, HttpResponseRedirect):
@@ -114,9 +112,9 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     returnData.update(result["involved_data"])
 
-    # KFW super users get pov=0 instead of -1
+    # Game admins get pov=0 instead of -1
     pov = result["pov"]
-    if username in KFW_SUPER_USERS:
+    if is_game_admin(request.user):
         pov = 0
         returnData["pov"] = pov
         with contextlib.suppress(json.JSONDecodeError, IndexError, TypeError):
@@ -263,7 +261,7 @@ def _processKFWturn(request):
         # If it is boat collection phase, and there is a submitted village, then that player has no pending tiles
         if currentGame.phase == 1 or currentGame.phase == 2 and not presenter.isTrainingGame():
             if jsonData["IPM"] != "":
-                if request.user.username not in KFW_SUPER_USERS:
+                if not is_game_admin(request.user):
                     presenter.updateSingleMove(request.user.username, jsonData["IPM"])
                 else:
                     presenter.updateSingleMove(jsonData["BKSN"], jsonData["IPM"])
@@ -391,7 +389,7 @@ def _processKFWturn(request):
         # currentGame.phase = jsonData["phase"]
 
         acting_username = request.user.username
-        if request.user.username not in KFW_SUPER_USERS:
+        if not is_game_admin(request.user):
             presenter.updateSingleMove(request.user.username, jsonData["moveData"])
         else:
             acting_username = jsonData["BKSN"]
@@ -399,7 +397,7 @@ def _processKFWturn(request):
 
         presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayers(), acting_username=acting_username, old_latest_update=currentGame.latestUpdate, )
 
-        if request.user.username in KFW_SUPER_USERS:
+        if is_game_admin(request.user):
             SF_updateFlexiTime(
                 currentGame.kickoutFlexiData,
                 currentGame.latestUpdate,
@@ -447,7 +445,7 @@ def _processKFWturn(request):
 
         # If you're not a super user, and it's not a practice game, then save according to your login
         acting_username = request.user.username
-        if request.user.username not in KFW_SUPER_USERS and 102 not in json.loads(currentGame.startingOptions):
+        if not is_game_admin(request.user) and 102 not in json.loads(currentGame.startingOptions):
             presenter.updateSingleMove(request.user.username, jsonData["moveData"])
         else:
             # Otherwise, save according to the name sent by the game
@@ -456,7 +454,7 @@ def _processKFWturn(request):
 
         presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentPlayers(), acting_username=acting_username, old_latest_update=currentGame.latestUpdate, )
 
-        if request.user.username in KFW_SUPER_USERS:
+        if is_game_admin(request.user):
             SF_updateFlexiTime(
                 currentGame.kickoutFlexiData,
                 currentGame.latestUpdate,

@@ -32,8 +32,6 @@ from .common import create_ind_game
 if TYPE_CHECKING:
     from Lobby.presenters import INDpresenter
 
-INDsuperUsers = ["BotKickStarter"]
-
 
 def index(request):
     return HttpResponse("Hello, world. You're at IND")

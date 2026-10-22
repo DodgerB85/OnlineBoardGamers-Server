@@ -133,6 +133,9 @@ class Profile(models.Model):
 
     liveNotification = models.SmallIntegerField(null=True, blank=False, default=1)
     email_confirmed = models.BooleanField(default=False)
+    # Explicit staff rights; usernames are not permission checks.
+    is_site_admin = models.BooleanField(default=False)
+    is_game_admin = models.BooleanField(default=False)
     showAssistance = models.BooleanField(default=True)
 
     profileLanguage = models.CharField(max_length=10, choices=settings.LANGUAGES, default=settings.LANGUAGE_CODE)

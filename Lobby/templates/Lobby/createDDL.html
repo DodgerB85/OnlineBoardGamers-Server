@@ -45,8 +45,7 @@
                     <div class="form-row">
                         <label class="form-label" for="playerNumber">{% translate "Number of players" %}</label>
                         <select name="playerNumber" id="playerNumber" onchange="selectPlayers();">
-                            <option value="2" selected="selected">2</option>
-                            <option value="3">3</option>
+                            <option value="3" selected="selected">3</option>
                             <option value="4">4</option>
                             <option value="5">5</option>
                         </select>
@@ -132,7 +131,13 @@
                 <div class="card">
                     <div class="card-header"><h2 class="card-title">{% translate "Game Options" %}</h2></div>
                     <div class="check-list">
-                        <div class="opt-help">{% translate "Game options will be added here as the game is implemented." %}</div>
+                        <label class="check-label">
+                            <input type="checkbox" class="myCheckbox" id="startingOptionAuction" name="startingOptionAuction" value="1">
+                            <div>
+                                <div>{% translate "Starting Auction" %}</div>
+                                <div class="opt-help">{% translate "Players secretly bid victory points for turn order. Bids are subtracted from final scores." %}</div>
+                            </div>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -171,6 +176,8 @@
         document.getElementById("pace").value = "{{ gamePace }}";
         document.getElementById("kickoutDuration").value = "{{ kickoutDuration }}";
         document.getElementById("playerNumber").value = "{{ playerNumber }}";
+        var opts = {{ startingOptions|safe }};
+        if (opts.includes(1)) document.getElementById("startingOptionAuction").checked = true;
         var names = {{ playerNames|safe }};
         for (var i = 0; i < names.length; i++) {
             var input = document.getElementById("player" + (i + 2));

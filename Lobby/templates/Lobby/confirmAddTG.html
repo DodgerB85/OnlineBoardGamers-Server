@@ -1,0 +1,13 @@
+{% extends "Lobby/layout.html" %}
+{% load i18n %}
+{% block body %}
+<div class="mainContent" style="max-width:600px;margin:40px auto;padding:0 16px;">
+    <h1>{% translate "Telegram notifications" %}</h1>
+    <p>{% blocktranslate with tg=TGid %}Add Telegram user ID {{ tg }} to your account?{% endblocktranslate %}</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="button">{% translate "Confirm" %}</button>
+        <a class="button button-ghost" href="{% url 'profile' %}">{% translate "Cancel" %}</a>
+    </form>
+</div>
+{% endblock %}

@@ -39,6 +39,8 @@ SESSION_COOKIE_AGE = 30 * 24 * 60 * 60
 
 if not DEBUG:
     SECURE_SSL_REDIRECT = False  # Handled by cloudflare
+    # Cloudflare terminates TLS and forwards the original scheme.
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
     CSRF_COOKIE_SECURE = True
     CSRF_TRUSTED_ORIGINS = [
@@ -53,7 +55,7 @@ if not DEBUG:
     SESSION_COOKIE_HTTPONLY = True  # Prevents JavaScript from accessing the session cookie
     SESSION_COOKIE_SAMESITE = "Lax"  # Or 'Strict', depending on your needs
 
-    SECURE_HSTS_SECONDS = 60
+    SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 

@@ -24,6 +24,7 @@ from Lobby.gameViewHelpers import (
     shared_save_notes,
 )
 from Lobby.models import Game, GamePlayer, Profile, User
+from Lobby.sharedFunctions.permissions import is_game_admin, is_site_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_updateFlexiTime,
@@ -39,10 +40,6 @@ from .common import create_fcm_game
 if TYPE_CHECKING:
     from Lobby.presenters import FCMpresenter
 
-FCMsuperUsers = ["BotKickStarter"]
-# Accounts allowed to drive developer tooling. Kept here so the "Reset AI"
-# board-replacement path cannot be reached by an ordinary player's save.
-FCMadminUsers = ["admin", "DodgerB"]
 USE_NEW_CODE = False
 
 logger = logging.getLogger(__name__)
@@ -68,8 +65,7 @@ def _syncErrorResponse(label, request, currentGame, presenter, jsonData):
 
 def _canActInGame(request, currentGame):
     # Kicked players stay included: they can still chat and resign
-    username = request.user.username
-    return username in FCMsuperUsers or username in FCMadminUsers or currentGame.players.filter(player=request.user).exists()
+    return is_game_admin(request.user) or currentGame.players.filter(player=request.user).exists()
 
 
 def _resolvePassKickoutTarget(request, currentGame, presenter, jsonData):
@@ -237,7 +233,6 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
         "FCM",
         default_zoom=200,
         settings_debug_key="FCM_USE_SOURCE_CODE",
-        super_users=FCMsuperUsers,
         clear_chat_notification=False,
     )
     if isinstance(result, HttpResponseRedirect):
@@ -247,10 +242,6 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
     presenter = cast("FCMpresenter", currentGame.presenter())
     all_players = result["all_players"]
     username = request.user.username
-
-    # FCMtourneyAdmin super user check (needs game data)
-    if currentGame.relatedMainTournament and username == "FCMtourneyAdmin" and "FCMtourneyAdmin" not in FCMsuperUsers:
-        FCMsuperUsers.append("FCMtourneyAdmin")
 
     finishedGame = currentGame.gameStatus == "FINISHED"
     USE_NEW_CODE = int(currentGame.created) > rfFCM.TS_USE_NEW_CODE
@@ -327,7 +318,7 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
 
     involvedPlayer = result["is_involved"]
     # Re-check involvement if FCMtourneyAdmin was added after helper ran
-    if not involvedPlayer and username in FCMsuperUsers:
+    if not involvedPlayer and is_game_admin(request.user):
         involvedPlayer = True
 
     if involvedPlayer:
@@ -339,7 +330,7 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
             rewindHostPossible = presenter.getRewindHostPossible()
             rewindHostHTML = presenter.getRewindHostHTML()
 
-        if username in FCMsuperUsers:
+        if is_game_admin(request.user):
             rewindPanelType = 2
             rewindHostPossible = True
             rewindHostHTML = presenter.getRewindHostHTML()
@@ -459,9 +450,6 @@ def _processTurn(request):
         raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("FCMpresenter", currentGame.presenter())
-
-    if currentGame.relatedMainTournament and request.user.username == "FCMtourneyAdmin":
-        FCMsuperUsers.append("FCMtourneyAdmin")
 
     # Spectators may poll loadNew; every other action mutates the game
     if jsonData["action"] != "loadNew" and not _canActInGame(request, currentGame):
@@ -723,7 +711,7 @@ def _processTurn(request):
         # from the server's, so it rightly rejects a different map - but a
         # deliberate reset has to be able to replace startingMap, so it carries its
         # own flag and is restricted to admin accounts.
-        isGameReset = bool(jsonData.get("resetGame")) and (request.user.username in FCMsuperUsers or request.user.username in FCMadminUsers)
+        isGameReset = bool(jsonData.get("resetGame")) and is_game_admin(request.user)
 
         if "mapTiles" in jsonData and jsonData["mapTiles"] and currentGame.startingMap != "" and not isGameReset:
             incomingTiles = jsonData["mapTiles"]
@@ -757,7 +745,7 @@ def _processTurn(request):
             currentGame.startingMap = json.dumps(jsonData["mapTiles"], separators=(",", ":"))
 
         nameToUse = request.user.username
-        if request.user.username in FCMsuperUsers:
+        if is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
             if nameToUse.startswith("FCMtourneyAdmin/"):
                 name_parts = nameToUse.split("/", 1)
@@ -1024,7 +1012,7 @@ def _processTurn(request):
 
         if not continueFromStalledGame:
             passKickoutTarget = ""
-            if request.user.username not in FCMsuperUsers and jsonData.get("passKickoutFor"):
+            if not is_game_admin(request.user) and jsonData.get("passKickoutFor"):
                 passKickoutTarget, passKickoutReject = _resolvePassKickoutTarget(request, currentGame, presenter, jsonData)
                 if passKickoutReject:
                     return JsonResponse({"syncError": True}, safe=False)
@@ -1033,7 +1021,7 @@ def _processTurn(request):
             currentGame.phase = jsonData["phase"]
 
             nameToUpdate = request.user.username
-            if request.user.username in FCMsuperUsers:
+            if is_game_admin(request.user):
                 nameToUpdate = jsonData["BKSN"]
                 if nameToUpdate.startswith("FCMtourneyAdmin/"):
                     name_parts = nameToUpdate.split("/", 1)
@@ -1078,7 +1066,7 @@ def _processTurn(request):
             if currentGame.phase != rfFCM.PHASE_SETUP_RESTAURANT1 and currentGame.phase != rfFCM.PHASE_SETUP_RESTAURANT2:
                 presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayersFCM(), acting_username=nameToUpdate, old_latest_update=oldVer)
 
-            if request.user.username in FCMsuperUsers:
+            if is_game_admin(request.user):
                 flexName = jsonData["BKSN"]
                 if flexName.startswith("FCMtourneyAdmin/"):
                     name_parts = flexName.split("/", 1)
@@ -1276,7 +1264,7 @@ def _processTurn(request):
         if "latency" in jsonData and jsonData["latency"] == 20:
             allowAnyRewind = True
 
-        if not allowAnyRewind and not presenter.getRewindHostPossible() and request.user.username not in FCMsuperUsers:
+        if not allowAnyRewind and not presenter.getRewindHostPossible() and not is_game_admin(request.user):
             return JsonResponse(
                 {"message": "<b>" + gettext("Permissions missing. Please reload the page and check again") + "</b>"},
                 safe=False,
@@ -1400,7 +1388,7 @@ def _processTurn(request):
         )
 
     elif jsonData["action"] == "adminKickout":
-        if request.user.username not in FCMsuperUsers and request.user.username not in FCMadminUsers:
+        if not is_game_admin(request.user):
             return JsonResponse({"error": gettext("Permissions missing")}, status=403)
         # Check if old version is older than DB version, and if so, return
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
@@ -1633,7 +1621,7 @@ def changeAssistance(request):
 
 @login_required()
 def gameAdmin(request):
-    if request.user.username != "admin" and request.user.username != "DodgerB":
+    if not is_site_admin(request.user):
         return JsonResponse({"error": "Wrong request."}, status=400)
     return render(
         request,
@@ -1647,7 +1635,7 @@ def gameAdmin(request):
 
 @login_required()
 def gameAdminGetMoveData(request):
-    if request.user.username != "admin" and request.user.username != "DodgerB":
+    if not is_site_admin(request.user):
         return JsonResponse({"error": "Wrong request."}, status=400)
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)

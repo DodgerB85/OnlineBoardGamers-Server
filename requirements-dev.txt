@@ -2,3 +2,4 @@
 django-debug-toolbar
 django-debug-toolbar-template-profiler
 pyinstrument
+pip-audit

@@ -29,6 +29,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
+from Lobby.sharedFunctions.permissions import is_game_admin, is_site_admin
 
 # from django.urls import reverse
 # from django.db.models import Q
@@ -345,7 +346,7 @@ def _processRNBturn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         nameToUse = request.user.username
-        if request.user.username == "BotKickStarter":
+        if is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
         check_name = jsonData.get("checkName", "")
         if check_name:
@@ -557,7 +558,7 @@ def _processRNBturn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         nameToUse = request.user.username
-        if request.user.username == "BotKickStarter":
+        if is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
 
         # First, ALWAYS add the conflict preset move
@@ -620,7 +621,7 @@ def _processRNBturn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         nameToUse = request.user.username
-        if request.user.username == "BotKickStarter":
+        if is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
         check_name = jsonData.get("checkName", "")
         if check_name:
@@ -839,7 +840,7 @@ def _processRNBturn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         nameToUse = request.user.username
-        if request.user.username == "BotKickStarter":
+        if is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
 
         conflictPresetMove = PdecompressData(jsonData["conflictPresetData"])
@@ -880,7 +881,7 @@ def _processRNBturn(request):
             currentGame.transactionID = ""
 
         nameToUse = request.user.username
-        if request.user.username == "BotKickStarter":
+        if is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
 
         gameDataB64 = jsonData["gameDataB64"]
@@ -1008,7 +1009,7 @@ def _processRNBturn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         nameToUse = request.user.username
-        if request.user.username == "BotKickStarter":
+        if is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
 
         presenter.cancelPreMovesForPlayer(nameToUse, jsonData["startingTurn"], jsonData["startingPhase"])
@@ -1191,7 +1192,7 @@ def _processRNBturn(request):
         # If the vote is only recorded, return straight away without kicking.
         # A super-user (BotKickStarter) votes as the seat it is currently POV-ing
         nameToUse = request.user.username
-        if request.user.username == "BotKickStarter":
+        if is_game_admin(request.user):
             nameToUse = jsonData.get("BKSN", nameToUse)
         kickout_vote_result = presenter.processKickoutVote(nameToUse, jsonData["kickedName"])
         if kickout_vote_result["voteCast"]:
@@ -1366,7 +1367,7 @@ def _processRNBtrade(request):
 
 def _handle_rnb_propose_trade(request, currentGame, presenter, raw_data, trade_data, jsonData):
     nameToUse = request.user.username
-    if request.user.username == "BotKickStarter":
+    if is_game_admin(request.user):
         nameToUse = jsonData.get("BKSN", nameToUse)
 
     proposer_idx = _get_player_idx_from_name(presenter, nameToUse)
@@ -1427,7 +1428,7 @@ def _handle_rnb_propose_trade(request, currentGame, presenter, raw_data, trade_d
 
 def _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_data, jsonData):
     nameToUse = request.user.username
-    if request.user.username == "BotKickStarter":
+    if is_game_admin(request.user):
         nameToUse = jsonData.get("BKSN", nameToUse)
 
     acceptor_idx = _get_player_idx_from_name(presenter, nameToUse)
@@ -1513,7 +1514,7 @@ def _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_da
 
 def _handle_rnb_reject_trade(request, currentGame, presenter, raw_data, trade_data, jsonData):
     nameToUse = request.user.username
-    if request.user.username == "BotKickStarter":
+    if is_game_admin(request.user):
         nameToUse = jsonData.get("BKSN", nameToUse)
 
     rejector_idx = _get_player_idx_from_name(presenter, nameToUse)
@@ -1542,7 +1543,7 @@ def _handle_rnb_reject_trade(request, currentGame, presenter, raw_data, trade_da
 
 def _handle_rnb_cancel_trade(request, currentGame, presenter, raw_data, trade_data, jsonData):
     nameToUse = request.user.username
-    if request.user.username == "BotKickStarter":
+    if is_game_admin(request.user):
         nameToUse = jsonData.get("BKSN", nameToUse)
 
     canceller_idx = _get_player_idx_from_name(presenter, nameToUse)
@@ -1808,7 +1809,7 @@ def saveRNBmap(request):
         map_description = data.get("mapDescription", "")
         map_data = data.get("mapData", [])
         map_playerCount = data.get("playerCount", 2)
-        map_isVerified = data.get("isVerified", False) if request.user.username == "admin" else False
+        map_isVerified = data.get("isVerified", False) if is_site_admin(request.user) else False
 
         # Validate required fields
         # if not map_name:
@@ -1869,9 +1870,9 @@ def replaceRNBmap(request):
 
         # Double-check the request user is the creator and map is not official
         # Admin user can replace any map, including official maps
-        if existing_map.creator != request.user and request.user.username != "admin":
+        if existing_map.creator != request.user and not is_site_admin(request.user):
             return JsonResponse({"error": "Only the map creator can replace this map"}, status=403)
-        if existing_map.isVerified and request.user.username != "admin":
+        if existing_map.isVerified and not is_site_admin(request.user):
             return JsonResponse({"error": "Verified maps cannot be replaced"}, status=403)
 
         # Ensure the incoming map_data has the correct uniqueID metadata at the end
@@ -1886,7 +1887,7 @@ def replaceRNBmap(request):
         existing_map.playerCount = map_playerCount
         existing_map.hexData = map_data
         # Only allow isVerified to be changed by admin
-        if request.user.username == "admin":
+        if is_site_admin(request.user):
             existing_map.isVerified = map_isVerified
         existing_map.save()
 
@@ -1907,7 +1908,7 @@ def deleteRNBmap(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST method required"}, status=405)
 
-    if request.user.username != "admin":
+    if not is_site_admin(request.user):
         return JsonResponse({"error": "Only admin can delete maps"}, status=403)
 
     try:
@@ -1962,7 +1963,7 @@ def getRNBmaps(request):
                     "playerCount": map_obj.playerCount,
                     "isVerified": map_obj.isVerified,
                     "hexData": map_obj.hexData,
-                    "canReplace": (map_obj.creator == request.user and not map_obj.isVerified) or request.user.username == "admin",
+                    "canReplace": (map_obj.creator == request.user and not map_obj.isVerified) or is_site_admin(request.user),
                 }
             )
 

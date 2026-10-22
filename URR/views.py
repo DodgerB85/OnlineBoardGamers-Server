@@ -25,6 +25,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
+from Lobby.sharedFunctions.permissions import is_game_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -279,7 +280,7 @@ def performSaveURRGame(request, currentGame, jsonData):
         return JsonResponse({"syncError": True}, safe=False)
 
     nameToUse = request.user.username
-    if request.user.username == "BotKickStarter":
+    if is_game_admin(request.user):
         nameToUse = jsonData.get("BKSN", nameToUse)
     check_name = jsonData.get("checkName", "")
     if check_name:

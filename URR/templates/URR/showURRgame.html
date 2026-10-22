@@ -135,7 +135,7 @@
     {% endif %}
 
     {% if displayNames %}
-    initData.displayNames = {{ displayNames|safe }};
+    initData.displayNames = JSON.parse('{{ displayNames|escapejs }}');
     {% endif %}
   </script>
 </html>

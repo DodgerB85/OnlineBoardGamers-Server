@@ -396,7 +396,7 @@
   initData.gameName = "{{ gameName }}";
   initData.mapName = "{{ mapName | escapejs}}";
   initData.mapDescription = "{{ mapDescription | escapejs }}";
-  initData.gameDataB64  = '{{ gameDataB64 | safe }}';
+  initData.gameDataB64  = '{{ gameDataB64 | escapejs }}';
   initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
   initData.myZoomLevel = {{ myZoomLevel }};
   initData.startingOptions = {{startingOptions}};
@@ -449,7 +449,7 @@ initData.preMove = "{{preMove}}";
   /////////////////////
   {% if not gameData %}
   {% if displayNames %}
-  initData.displayNames = {{ displayNames | safe }};
+  initData.displayNames = JSON.parse('{{ displayNames|escapejs }}');
   {% endif %}
   {% endif %}
   {% endif %}
