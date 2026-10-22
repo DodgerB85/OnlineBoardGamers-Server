@@ -45,12 +45,14 @@ class UrrRewindTests(SimpleTestCase):
         presenter = Mock()
         presenter.getSecondsToNextKickout.return_value = 99999
         game = SimpleNamespace(gameData="compressed", rewindTempData="compressed", latestUpdate="12345", turn=1, phase=3, presenter=Mock(return_value=presenter), save=Mock())
+        game.players = Mock()
+        game.players.filter.return_value.exists.return_value = True
         request = RequestFactory().post(
             "/URR/processURRturn/",
             data=json.dumps({"action": "updateDataFromLoadRewind", "gameID": 1, "gameData": "rewound model", "turn": 1, "phase": 3, "allIsCurrentPlayers": ["A"], "allRemainingPlayersInTurnOrder": ["A"]}),
             content_type="application/json",
         )
-        request.user = SimpleNamespace(is_authenticated=True)
+        request.user = SimpleNamespace(is_authenticated=True, is_superuser=False, profile=SimpleNamespace(is_game_admin=False))
         with patch("URR.views.Game.objects.get", return_value=game):
             response = _processURRturn(request)
         self.assertEqual(response.status_code, 200)
@@ -79,12 +81,14 @@ class UrrRewindTests(SimpleTestCase):
         presenter = Mock()
         presenter.getMissingPlayersNamesArray.return_value = []
         game = SimpleNamespace(gameData="current model", rewindData=json.dumps([compressed]), rewindTempData="", latestUpdate="12345", presenter=Mock(return_value=presenter), save=Mock())
+        game.players = Mock()
+        game.players.filter.return_value.exists.return_value = True
         request = RequestFactory().post(
             "/URR/processURRturn/",
             data=json.dumps({"action": "loadRewind", "gameID": 1, "latestUpdate": "12345"}),
             content_type="application/json",
         )
-        request.user = SimpleNamespace(is_authenticated=True)
+        request.user = SimpleNamespace(is_authenticated=True, is_superuser=False, profile=SimpleNamespace(is_game_admin=False))
         with patch("URR.views.Game.objects.get", return_value=game):
             response = _processURRturn(request)
         self.assertEqual(json.loads(response.content)["gameData"], position)

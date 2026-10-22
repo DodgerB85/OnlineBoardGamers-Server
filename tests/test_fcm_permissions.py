@@ -1,4 +1,6 @@
 """Non-players cannot mutate an FCM game; adminKickout is admin-only."""
+import base64
+import gzip
 import json
 
 from django.test import TestCase
@@ -31,9 +33,13 @@ class FcmPermissionsTest(TestCase):
         response = self._post(self.player, reverse("FCM:processTurn"), {"action": "adminKickout", "kickedName": "player"})
         self.assertEqual(response.status_code, 403)
 
-    def test_outsider_cannot_chat(self):
-        response = self._post(self.outsider, reverse("FCM:sendChatMessage"), {"action": "sendChatMessage", "newEntry": ["outsider", "hi"]})
-        self.assertEqual(response.status_code, 403)
+    def test_outsider_can_chat_only_under_own_name(self):
+        response = self._post(self.outsider, reverse("FCM:sendChatMessage"), {"action": "sendChatMessage", "newEntry": ["player", 1, "hi"]})
+        self.assertEqual(response.status_code, 200)
+
+        self.game.refresh_from_db()
+        data = json.loads(gzip.decompress(base64.b64decode(self.game.chatData)).decode("utf-8"))
+        self.assertEqual(data[0][0], self.outsider.username)
 
     def test_outsider_cannot_zoom(self):
         response = self._post(self.outsider, reverse("FCM:changeAssistance"), {"action": "zoom", "playerNumber": 0, "zoomLevel": "100", "allPlayers": True}, method="put")

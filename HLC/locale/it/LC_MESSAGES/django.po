@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-16 19:49+0800\n"
+"POT-Creation-Date: 2026-10-23 00:35+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -495,11 +495,15 @@ msgstr ""
 "Le preferenze di notifica possono essere modificate nel tuo profilo\n"
 "\n"
 
-#: .\HLC\views.py:45 .\HLC\views.py:85
+#: .\HLC\views.py:46 .\HLC\views.py:86
 msgid "Game does not exist"
 msgstr "Il gioco non esiste"
 
-#: .\HLC\views.py:540
+#: .\HLC\views.py:91
+msgid "You are not a player in this game"
+msgstr "Non sei un giocatore in questa partita"
+
+#: .\HLC\views.py:544
 msgid ""
 "<b>No rewind data. Rewind limit reached. Please play on to generate more "
 "rewind data </b>"
@@ -507,6 +511,6 @@ msgstr ""
 "<b>Nessun dato di riavvolgimento. Limite di riavvolgimento raggiunto. "
 "Continua a giocare per generare altri dati di riavvolgimento </b>"
 
-#: .\HLC\views.py:545
+#: .\HLC\views.py:549
 msgid "<b>Permissions missing. Please reload the page and check again</b>"
 msgstr "<b>Permessi mancanti. Ricarica la pagina e controlla di nuovo</b>"

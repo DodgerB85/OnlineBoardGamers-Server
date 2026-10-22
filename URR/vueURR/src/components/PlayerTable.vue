@@ -20,8 +20,8 @@ function isCurrent(index) {
 	<div id="playerTable" :class="{ minimise: minimiseInfoForMainScreen }">
 		<div class="playerRow" v-for="(player, idx) in store.players" :key="idx" :class="{ currentPlayer: isCurrent(idx), me: idx === personal.pov }">
 			<PlayerMarker class="colourSwatch" :index="idx" />
-			<span class="playerCash" title="Private treasury">{{ player.money }} SPL cash</span>
-			<span class="playerScore" title="Private cash plus the market value of owned land">{{ rules.playerAssets(store, idx) }} SPL assets</span>
+			<span class="playerCash" :title="$t('playerTable.privateTreasury')">{{ $t("playerTable.cash", { amount: player.money }) }}</span>
+			<span class="playerScore" :title="$t('playerTable.assetsTitle')">{{ $t("playerTable.assets", { amount: rules.playerAssets(store, idx) }) }}</span>
 		</div>
 	</div>
 </template>

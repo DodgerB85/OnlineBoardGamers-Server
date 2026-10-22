@@ -6,6 +6,7 @@
  * discs with the same coordinates as the original SVG.
  */
 import { computed, ref } from "vue"
+import { useI18n } from "vue-i18n"
 import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
 import * as map from "../js/ROWmap"
@@ -17,6 +18,7 @@ import CardView from "./CardView.vue"
 const props = defineProps({ playerName: { type: String, default: "" } })
 
 const { ActionType, Unlockable, CattleType } = rf
+const { t } = useI18n()
 const store = useModelStore()
 const personal = usePersonalStore()
 
@@ -210,8 +212,8 @@ const collections = computed(() => {
 	const p = ps.value
 	return {
 		masters: (p?.stationMasters ?? []).map((m) => ({ name: m, img: view.stationMasterImage(m) })),
-		hazards: (p?.hazards ?? []).map((h) => ({ img: view.hazardImage(h.type, h.hand), label: `${h.type} (${h.hand}) ${h.points} pts` })),
-		teepees: (p?.teepees ?? []).map((t) => ({ img: view.teepeeImage(t), label: `${t} teepee` })),
+		hazards: (p?.hazards ?? []).map((h) => ({ img: view.hazardImage(h.type, h.hand), label: t("row.playerTable.hazardTitle", { type: h.type, hand: h.hand, points: h.points }) })),
+		teepees: (p?.teepees ?? []).map((tp) => ({ img: view.teepeeImage(tp), label: t("row.playerTable.teepeeTitle", { teepee: tp }) })),
 		token: p?.jobMarketToken ?? false,
 	}
 })
@@ -275,21 +277,21 @@ function selectCard(card) {
 	<div v-if="ps" id="playerBoard" :style="{ borderColor: color }">
 		<div class="header">
 			<span class="balance">${{ ps.balance }}</span>
-			<span v-if="ps.handValue()">hand value {{ ps.handValue() }}</span>
-			<span>certs {{ ps.tempCertificates }}/{{ ps.tempCertificates + ps.permanentCertificates() }}</span>
-			<span>engine {{ store.game?.getRailroadTrack().currentSpace(ps.player) }}</span>
+			<span v-if="ps.handValue()">{{ t('row.playerTable.handValue', { value: ps.handValue() }) }}</span>
+			<span>{{ t('row.playerTable.certs', { temp: ps.tempCertificates, total: ps.tempCertificates + ps.permanentCertificates() }) }}</span>
+			<span>{{ t('row.playerTable.engine', { space: store.game?.getRailroadTrack().currentSpace(ps.player) }) }}</span>
 		</div>
 		<div class="collections">
-			<span class="stack" :title="`Draw pile (${drawStackSize}) — click to inspect`" @click="toggleStack('draw')">
-				<img :src="view.cardBackGreyImage()" alt="" /><b>{{ drawStackSize }}</b><em class="stackLabel">Draw</em>
+			<span class="stack" :title="t('row.playerTable.drawPileTitle', { count: drawStackSize })" @click="toggleStack('draw')">
+				<img :src="view.cardBackGreyImage()" alt="" /><b>{{ drawStackSize }}</b><em class="stackLabel">{{ t('app.draw') }}</em>
 			</span>
-			<span class="stack discard" :title="`Discard pile (${discardSize}) — click to inspect`" @click="toggleStack('discard')">
-				<img :src="view.cardBackGreyImage()" alt="" /><b>{{ discardSize }}</b><em class="stackLabel">Discard</em>
+			<span class="stack discard" :title="t('row.playerTable.discardPileTitle', { count: discardSize })" @click="toggleStack('discard')">
+				<img :src="view.cardBackGreyImage()" alt="" /><b>{{ discardSize }}</b><em class="stackLabel">{{ t('app.discard') }}</em>
 			</span>
 			<img v-for="m in collections.masters" :key="'sm' + m.name" class="collect" :src="m.img" :title="view.humanizeAction(m.name)" alt="" />
 			<img v-for="(h, i) in collections.hazards" :key="'hz' + i" class="collect" :src="h.img" :title="h.label" alt="" />
-			<img v-for="(t, i) in collections.teepees" :key="'tp' + i" class="collect" :src="t.img" :title="t.label" alt="" />
-			<img v-if="collections.token" class="collect" :src="view.jobMarketTokenImage()" title="Job market token" alt="" />
+			<img v-for="(tp, i) in collections.teepees" :key="'tp' + i" class="collect" :src="tp.img" :title="tp.label" alt="" />
+			<img v-if="collections.token" class="collect" :src="view.jobMarketTokenImage()" :title="t('row.playerTable.jobMarketToken')" alt="" />
 		</div>
 		<div class="hand">
 			<template v-if="!readonly">
@@ -370,12 +372,12 @@ function selectCard(card) {
 		</svg>
 		<div v-if="showStack" class="stackDialog">
 			<div class="stackDialogHead">
-				{{ showStack === "draw" ? "Draw pile (shown in value order)" : "Discard pile" }} ({{ showStack === "draw" ? drawStackSize : discardSize }})
-				<button @click="showStack = null">Close</button>
+				{{ showStack === "draw" ? t('row.playerTable.drawPileValueOrder') : t('row.playerTable.discardPile') }} ({{ showStack === "draw" ? drawStackSize : discardSize }})
+				<button @click="showStack = null">{{ t('panels.close') }}</button>
 			</div>
 			<div class="stackDialogCards">
 				<CardView v-for="(c, i) in viewedCards" :key="i" :card="c" />
-				<span v-if="viewedCards.length === 0" class="empty">Empty</span>
+				<span v-if="viewedCards.length === 0" class="empty">{{ t('app.empty') }}</span>
 			</div>
 		</div>
 	</div>

@@ -4,6 +4,7 @@ import json
 import logging
 import time
 from typing import TYPE_CHECKING, cast
+from urllib.parse import urlparse
 
 from decouple import config
 from django.contrib.auth.decorators import login_required
@@ -1532,8 +1533,6 @@ def _sendChatMessage(request):
             currentGame = Game.objects.get(id=game_id, gameCode="FCM")
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist")) from None
-        if not _canActInGame(request, currentGame):
-            return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
         presenter = cast("FCMpresenter", currentGame.presenter())
 
         currentChatData = []
@@ -1541,6 +1540,10 @@ def _sendChatMessage(request):
             compressed_data = base64.b64decode(currentGame.chatData)
             unzipped = gzip.decompress(compressed_data).decode("utf-8")
             currentChatData = json.loads(unzipped)
+        new_entry = jsonData["newEntry"]
+        if not isinstance(new_entry, list) or len(new_entry) < 3:
+            return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
+        new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
 
         json_string = json.dumps(currentChatData, separators=(",", ":"))
@@ -1778,8 +1781,10 @@ def load_rewind_data(currentGame):
 def nudgeTourneyAdmins(request):
     # Webhook lives in .env; callers post {content} with no CSRF header.
     origin = request.headers.get("Origin") or request.headers.get("Referer", "")
-    if origin and request.get_host().lower() not in origin.lower():
-        return JsonResponse({"error": "Bad origin"}, status=403)
+    if origin:
+        origin_host = (urlparse(origin).hostname or "").lower()
+        if origin_host != request.get_host().split(":")[0].lower():
+            return JsonResponse({"error": "Bad origin"}, status=403)
 
     try:
         jsonData = json.loads(request.body.decode("utf-8"))

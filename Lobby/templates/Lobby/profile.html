@@ -82,11 +82,12 @@
                                 {% translate "Add Discord DMs" %}
                             </button>
                             {% if discord_id %}
-                                <button type="button"
-                                        class="button button-danger button-sm"
-                                        onclick="window.location.href='{% url 'stop_discord_dms' %}'">
-                                    {% translate "Stop Discord DMs" %}
-                                </button>
+                                <form method="post" action="{% url 'stop_discord_dms' %}" style="display:inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="button button-danger button-sm">
+                                        {% translate "Stop Discord DMs" %}
+                                    </button>
+                                </form>
                             {% endif %}
                         </div>
                         <p class="" style="font-size: 12px; margin: 0;">

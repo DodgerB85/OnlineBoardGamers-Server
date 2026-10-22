@@ -112,6 +112,8 @@ Every mutating endpoint goes through `process_game_with_mutex(request, handler, 
 - Acquires a DB mutex (row in the `Lock` table, `Lobby/sharedFunctions/db_mutex.py`) so two players submitting simultaneously cannot interleave.
 - Inside, the handler compares the request's `latestUpdate` with the DB's. If the request is older → the server replies with a `syncError` payload instead of applying the write; the client re-syncs from the data endpoint. This is the core defence against double-submits and stale tabs.
 
+- The handler also checks that the caller is a player in that game (or a game admin) via `Lobby.sharedFunctions.permissions.can_act_in_game`. `latestUpdate` is visible to spectators, so it is not an authorization control. Read-only actions (`load`, `refreshChat`, `getBoatMeeplesAndSkills`) stay open to spectators. DDL is still being reworked and is not covered yet.
+
 RNB adds one more layer: during multi-step "stack" moves the game holds a `transactionID`; a disconnect can be recovered by re-posting the same transaction (see `tests/test_rnb_transaction_recovery.py`).
 
 ## Game lifecycle

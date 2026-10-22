@@ -42,7 +42,7 @@
 
       <h2 class="ind-stats-title">{% translate "R&D (Tech) Statistics" %}</h2>
       <p>
-        {% translate "Every R&D track starts at level 1, so an upgrade is one research action spent on that track. 'Everyone else' is every losing player. Compare 'Win % when upgraded' against the baseline win rate to see how the track is linked to winning." %}
+        {% translate "Every R&D track starts at level 1, so an upgrade is one research action spent on that track. 'Everyone else' is every losing player. Compare 'Win &#37; when upgraded' against the baseline win rate to see how the track is linked to winning." %}
       </p>
 
       <div class="tab">
@@ -120,7 +120,7 @@
               <th>{% translate "Winner median upgrades" %}</th>
               <th>{% translate "Others avg upgrades" %}</th>
               <th>{% translate "Others median upgrades" %}</th>
-              <th>{% translate "Win % when upgraded" %}</th>
+              <th>{% translate "Win &#37; when upgraded" %}</th>
             </tr>
             {% for track_name, track_data in row.rnd_stats.items %}
               <tr>
@@ -263,7 +263,7 @@
             <tr>
               <th>{% translate "Starting position" %}</th>
               <th>{% translate "Wins" %}</th>
-              <th>{% translate "Win %" %}</th>
+              <th>{% translate "Win &#37;" %}</th>
               <th>{% translate "Games" %}</th>
             </tr>
             {% for seat in row.seat_wins %}

@@ -4,9 +4,11 @@
  * breakdown (ported from the reference ended-dialog).
  */
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { useModelStore } from "../stores/ROWstore.js"
 import { City } from "../js/ROWreference"
 
+const { t } = useI18n()
 const store = useModelStore()
 
 const nextURL = String(window.initData?.nextURL ?? "")
@@ -75,32 +77,32 @@ const stats = computed(() => {
 	})
 })
 const STAT_ROWS = [
-	["Seat", "seat"],
-	["Turns", "turns"],
-	["Cowboys", "cowboys"],
-	["Craftsmen", "craftsmen"],
-	["Engineers", "engineers"],
-	["Step limit", "stepLimit"],
-	["Hand limit", "handLimit"],
-	["Permanent certificates", "permCerts"],
-	["Temporary certificates", "tempCerts"],
-	["Certificate limit", "tempCertLimit"],
-	["Stops at buildings", "buildingStops"],
-	["Stops at teepees", "teepeeStops"],
-	["Stops at hazards", "hazardStops"],
+	["row.stats.seat", "seat"],
+	["row.stats.turns", "turns"],
+	["row.stats.cowboys", "cowboys"],
+	["row.stats.craftsmen", "craftsmen"],
+	["row.stats.engineers", "engineers"],
+	["row.stats.stepLimit", "stepLimit"],
+	["row.stats.handLimit", "handLimit"],
+	["row.stats.permCerts", "permCerts"],
+	["row.stats.tempCerts", "tempCerts"],
+	["row.stats.tempCertLimit", "tempCertLimit"],
+	["row.stats.stops", "buildingStops"],
+	["row.stats.stopsTeepee", "teepeeStops"],
+	["row.stats.stopsHazard", "hazardStops"],
 ]
 </script>
 
 <template>
 	<div v-if="ended && store.viewSettings.showEndedDialog" id="endedDialog">
-		<h2>Game over</h2>
+		<h2>{{ t('row.ended.title') }}</h2>
 		<div class="dialog-actions">
-			<a v-if="nextURL" class="ended-action" :href="nextURL">Next game</a>
-			<button class="ended-action" @click="store.viewSettings.showEndedDialog = false">Close</button>
+			<a v-if="nextURL" class="ended-action" :href="nextURL">{{ t('app.nextGame') }}</a>
+			<button class="ended-action" @click="store.viewSettings.showEndedDialog = false">{{ t('panels.close') }}</button>
 		</div>
 		<table>
 			<thead>
-				<tr><th>#</th><th>Player</th><th>Total</th><th>Breakdown</th></tr>
+				<tr><th>#</th><th>{{ t('app.player') }}</th><th>{{ t('row.ended.total') }}</th><th>{{ t('row.ended.breakdown') }}</th></tr>
 			</thead>
 			<tbody>
 				<tr v-for="(p, i) in ranking" :key="p" :class="{ winner: winners.has(p) }">
@@ -108,14 +110,14 @@ const STAT_ROWS = [
 					<td>{{ p }}<span v-if="winners.has(p)"> 🏆</span></td>
 					<td class="total">{{ score(p) }}</td>
 					<td class="cats">
-						<span v-for="([k, v], j) in details(p)" :key="j" class="cat">{{ k }}: {{ v }}</span>
+						<span v-for="([k, v], j) in details(p)" :key="j" class="cat">{{ t('row.score.' + k) }}: {{ v }}</span>
 					</td>
 				</tr>
 			</tbody>
 		</table>
-		<div v-if="winners.size > 1" class="tie">Tie between {{ [...winners].join(", ") }}</div>
+		<div v-if="winners.size > 1" class="tie">{{ t('row.ended.tie', { players: [...winners].join(", ") }) }}</div>
 
-		<h3>Detailed results</h3>
+		<h3>{{ t('row.statsHeader') }}</h3>
 		<table>
 			<thead>
 				<tr>
@@ -125,11 +127,11 @@ const STAT_ROWS = [
 			</thead>
 			<tbody>
 				<tr v-for="[label, key] in STAT_ROWS" :key="key">
-					<th>{{ label }}</th>
+					<th>{{ t(label) }}</th>
 					<td v-for="s in stats" :key="s.name + key">{{ s[key] }}</td>
 				</tr>
 				<tr v-for="city in Object.keys(stats[0]?.deliveries ?? {})" :key="city">
-					<th>Deliveries to {{ city }}</th>
+					<th>{{ t('row.stats.deliveries') }} {{ city }}</th>
 					<td v-for="s in stats" :key="s.name + city">{{ s.deliveries[city] }}</td>
 				</tr>
 			</tbody>

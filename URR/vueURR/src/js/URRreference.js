@@ -5,6 +5,10 @@
  * rulebook. Keep the two files in sync.
  */
 
+import i18n from "../i18n.js"
+
+const t = i18n.global.t
+
 export const SUPER_USERS = ["BotKickStarter", "admin"]
 export const DEBUG_USERS = []
 export const BOT_NAME = "UrrBot"
@@ -39,7 +43,7 @@ export const STATE_ELAM = 2
 export const STATE_PERSIA = 3
 export const STATE_SUMER = 4
 export const STATE_URARTU = 5
-export const STATE_NAMES = ["Akkad", "Babylon", "Elam", "Persia", "Sumer", "Urartu"]
+export const STATE_NAMES = [t("stateName.akkad"), t("stateName.babylon"), t("stateName.elam"), t("stateName.persia"), t("stateName.sumer"), t("stateName.urartu")]
 export const STATE_COLOURS = ["grey", "blue", "green", "black", "yellow", "red"]
 export const ALL_STATES = [STATE_AKKAD, STATE_BABYLON, STATE_ELAM, STATE_PERSIA, STATE_SUMER, STATE_URARTU]
 
@@ -48,7 +52,7 @@ export const LAND_HILLS = 0
 export const LAND_FOREST = 1
 export const LAND_SAVANNAH = 2
 export const LAND_DESERT = 3
-export const LAND_NAMES = ["Hills", "Forest", "Savannah", "Desert"]
+export const LAND_NAMES = [t("landName.hills"), t("landName.forest"), t("landName.savannah"), t("landName.desert")]
 export const LAND_COLONIZATION_PRICES = [100, 82, 71, 60]
 export const LAND_CITY_COLONIZATION_PRICES = [100, 100, 82, 71]
 export const ALL_LAND_TYPES = [LAND_HILLS, LAND_FOREST, LAND_SAVANNAH, LAND_DESERT]
@@ -61,7 +65,7 @@ export const NATION_CALAH = 2
 export const NATION_DER = 3
 export const NATION_ERIDU = 4
 export const NATION_FIRST_AKKADIANS = 5
-export const NATION_NAMES = ["Ashur", "Barahshum", "Calah", "Der", "Eridu", "First Akkadians"]
+export const NATION_NAMES = [t("nationName.ashur"), t("nationName.barahshum"), t("nationName.calah"), t("nationName.der"), t("nationName.eridu"), t("nationName.firstAkkadians")]
 export const NATION_PRICES = [20, 40, 70, 110, 160, 220]
 export const NATION_INCOMES = [10, 20, 25, 30, 35, 35]
 export const ALL_NATIONS = [NATION_ASHUR, NATION_BARAHSHUM, NATION_CALAH, NATION_DER, NATION_ERIDU, NATION_FIRST_AKKADIANS]

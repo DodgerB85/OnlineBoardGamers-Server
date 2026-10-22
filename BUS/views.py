@@ -25,6 +25,7 @@ from Lobby.gameViewHelpers import (
 # from django.utils import translation
 # fore change comment
 from Lobby.models import Game, Profile, User
+from Lobby.sharedFunctions.permissions import can_act_in_game
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_updateFlexiTime,
@@ -207,7 +208,11 @@ def _sendChatMessage(request):
         # if currentGame.chatData != "":
         #    currentChatData = json.loads(LZS.decompressFromEncodedURIComponent(currentGame.chatData)) if currentGame.chatData else []
 
-        currentChatData.insert(0, jsonData["newEntry"])
+        new_entry = jsonData["newEntry"]
+        if not isinstance(new_entry, list) or len(new_entry) < 3:
+            return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
+        new_entry[0] = request.user.username
+        currentChatData.insert(0, new_entry)
 
         # save chat data.
         compressedChatData = LZS.compressToEncodedURIComponent(json.dumps(currentChatData))
@@ -245,6 +250,9 @@ def _processBUSturn(request):
         raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("BUSpresenter", currentGame.presenter())
+
+    if not can_act_in_game(request.user, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return

@@ -24,26 +24,26 @@ async function sendChat() {
 		chatMessage.value = ""
 		broadcastChatUpdate()
 	} catch {
-		store.gameMessages.errorText = "Error sending chat message"
+		store.gameMessages.errorText = t("error.sendingChat")
 	}
 }
 
 async function saveNotesWithFeedback() {
 	try {
 		await saveNotes(personal.gameID, personal.notes)
-		store.gameMessages.successText = "Notes saved"
+		store.gameMessages.successText = t("feedback.notesSaved")
 	} catch {
-		store.gameMessages.errorText = "Error saving notes"
+		store.gameMessages.errorText = t("error.savingNotes")
 	}
 }
 
 async function submitBugReport() {
 	try {
 		const ok = await submitBug(personal.gameID, bugReport.value, model.serialize())
-		store.gameMessages.successText = ok ? "Bug report submitted" : "Bug report failed"
+		store.gameMessages.successText = ok ? t("feedback.bugSubmitted") : t("feedback.bugFailed")
 		if (ok) bugReport.value = ""
 	} catch {
-		store.gameMessages.errorText = "Error submitting bug report"
+		store.gameMessages.errorText = t("error.submittingBug")
 	}
 }
 
@@ -51,7 +51,7 @@ async function submitBugReport() {
 function voteSummary(data) {
 	const entries = Object.entries(data ?? {})
 	const voters = entries.filter(([, v]) => v === true || v === 2).map(([k]) => k)
-	return `${voters.length} of ${entries.length}${voters.length ? ": " + voters.join(", ") : ""}`
+	return t("votesPanel.summary", { count: voters.length, total: entries.length }) + (voters.length ? ": " + voters.join(", ") : "")
 }
 
 async function castVoteFor(topic) {
@@ -70,7 +70,7 @@ async function castVoteFor(topic) {
 			personal.votedToExclude = true
 		}
 	} catch {
-		store.gameMessages.errorText = "Error casting vote"
+		store.gameMessages.errorText = t("error.castingVote")
 	}
 }
 </script>
@@ -107,19 +107,19 @@ async function castVoteFor(topic) {
 		<div v-if="store.viewSettings.showInfo" class="panel">
 			<h3>{{ t('topMenu.info') }}</h3>
 			<div v-for="p in store.state?.players ?? []" :key="p.name">{{ p.name }}</div>
-			<div v-if="store.missingPlayers.length" class="missing">Missing: {{ store.missingPlayers.join(", ") }}</div>
+			<div v-if="store.missingPlayers.length" class="missing">{{ t('app.missing', { players: store.missingPlayers.join(", ") }) }}</div>
 		</div>
 		<div v-if="store.viewSettings.showVotes && personal.pov >= 0 && !personal.trainingGame" class="panel">
-			<h3>Votes</h3>
+			<h3>{{ t('app.votes') }}</h3>
 			<div class="voteBlock">
-				<div>If all players agree, this game will be deleted.</div>
+				<div>{{ t('votesPanel.deleteExplain') }}</div>
 				<div class="voteSummary">{{ voteSummary(store.deleteVotesData) }}</div>
-				<button v-if="!personal.votedToDelete" @click="castVoteFor(rf.DELETE_VOTE_TOPIC)">Vote to delete game</button>
+				<button v-if="!personal.votedToDelete" @click="castVoteFor(rf.DELETE_VOTE_TOPIC)">{{ t('votesPanel.deleteButton') }}</button>
 			</div>
 			<div class="voteBlock">
-				<div>If all players agree, this game will be excluded from statistics.</div>
+				<div>{{ t('votesPanel.excludeExplain') }}</div>
 				<div class="voteSummary">{{ voteSummary(store.statsExcludeVotesData) }}</div>
-				<button v-if="!personal.votedToExclude" @click="castVoteFor(rf.STATS_EXCLUDE_VOTE_TOPIC)">Vote to exclude from stats</button>
+				<button v-if="!personal.votedToExclude" @click="castVoteFor(rf.STATS_EXCLUDE_VOTE_TOPIC)">{{ t('votesPanel.excludeButton') }}</button>
 			</div>
 		</div>
 		<div v-if="store.gameMessages.successText" class="feedback success">{{ store.gameMessages.successText }}</div>

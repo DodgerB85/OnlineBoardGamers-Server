@@ -42,7 +42,7 @@
 
       <h2 class="bus-stats-title">{% translate "Action Statistics" %}</h2>
       <p>
-        {% translate "Every player starts with 20 action points, and each chosen action costs one. 'Everyone else' is every losing player. Compare 'Win % when used' against a fair share of wins (100% divided by the player count) to see how the action is linked to winning." %}
+        {% translate "Every player starts with 20 action points, and each chosen action costs one. 'Everyone else' is every losing player. Compare 'Win &#37; when used' against a fair share of wins (100&#37; divided by the player count) to see how the action is linked to winning." %}
       </p>
 
       <div class="tab">
@@ -115,7 +115,7 @@
               <th>{% translate "Action" %}</th>
               <th>{% translate "Winner average" %}</th>
               <th>{% translate "Others average" %}</th>
-              <th>{% translate "Win % when used" %}</th>
+              <th>{% translate "Win &#37; when used" %}</th>
             </tr>
             {% for action_name, action_data in row.action_stats.items %}
               <tr>
@@ -200,7 +200,7 @@
             <tr>
               <th>{% translate "Starting position" %}</th>
               <th>{% translate "Wins" %}</th>
-              <th>{% translate "Win %" %}</th>
+              <th>{% translate "Win &#37;" %}</th>
               <th>{% translate "Games" %}</th>
             </tr>
             {% for seat in row.seat_wins %}

@@ -211,9 +211,9 @@ var bar_chart = new Chart(bar_ctx, {
               <th>{% translate "Picked" %}</th>
               <th>{% translate "Lost" %}</th>
               <th>{% translate "Won" %}</th>
-              <th>{% translate "Picked When Available %" %}</th>
-              <th>{% translate "Won When Available %" %}</th>
-              <th>{% translate "Won When Picked %" %}</th>
+              <th>{% translate "Picked When Available &#37;" %}</th>
+              <th>{% translate "Won When Available &#37;" %}</th>
+              <th>{% translate "Won When Picked &#37;" %}</th>
             </tr>
             {% for god_name, god_data in row.god_stats.items %}
               <tr>
@@ -358,9 +358,9 @@ var bar_chart = new Chart(bar_ctx, {
               <th>{% translate "Specialist" %}</th>
               <th>{% translate "Lost When Picked" %}</th>
               <th>{% translate "Won When Picked" %}</th>
-              <th>{% translate "Lost %" %}</th>
-              <th>{% translate "Won %" %}</th>
-              <th>{% translate "Win to Loss when picked %" %}</th>
+              <th>{% translate "Lost &#37;" %}</th>
+              <th>{% translate "Won &#37;" %}</th>
+              <th>{% translate "Win to Loss when picked &#37;" %}</th>
             </tr>
             {% for spec_name, spec_data in row.spec_stats.items %}
               <tr onclick="openGameIdsPage({{ spec_data.won_game_ids }})">
@@ -601,9 +601,9 @@ var bar_chart = new Chart(bar_ctx, {
               <th>{% translate "Picked" %}</th>
               <th>{% translate "Lost" %}</th>
               <th>{% translate "Won" %}</th>
-              <th>{% translate "Picked When Available %" %}</th>
-              <th>{% translate "Won When Available %" %}</th>
-              <th>{% translate "Won When Picked %" %}</th>
+              <th>{% translate "Picked When Available &#37;" %}</th>
+              <th>{% translate "Won When Available &#37;" %}</th>
+              <th>{% translate "Won When Picked &#37;" %}</th>
             </tr>
             {% for god_name, god_data in row.god_stats.items %}
               <tr onclick="openGameIdsPage({{ god_data.won_game_ids }})">
@@ -748,9 +748,9 @@ var bar_chart = new Chart(bar_ctx, {
               <th>{% translate "Specialist" %}</th>
               <th>{% translate "Lost When Picked" %}</th>
               <th>{% translate "Won When Picked" %}</th>
-              <th>{% translate "Lost %" %}</th>
-              <th>{% translate "Won %" %}</th>
-              <th>{% translate "Win to Loss when picked %" %}</th>
+              <th>{% translate "Lost &#37;" %}</th>
+              <th>{% translate "Won &#37;" %}</th>
+              <th>{% translate "Win to Loss when picked &#37;" %}</th>
             </tr>
             {% for spec_name, spec_data in row.spec_stats.items %}
               <tr>

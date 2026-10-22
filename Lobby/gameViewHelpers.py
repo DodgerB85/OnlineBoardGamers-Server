@@ -11,6 +11,7 @@ import Lobby.sharedFunctions.constants as rf
 from Lobby.models import Game, Profile
 from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.permissions import is_game_admin
+from Lobby.sharedFunctions.rateLimit import is_rate_limited
 
 
 def build_show_game_data(
@@ -306,6 +307,13 @@ def shared_bug_entry(request, game_code, extra_info_fn=None):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
+    if is_rate_limited(f"bugEntry:{request.user.id}", 5, 600):
+        return JsonResponse({"error": gettext("Too many bug reports. Please try again later.")}, status=429)
+
+    description = jsonData.get("description", "")
+    if len(description) > 5000:
+        return JsonResponse({"error": gettext("Bug description is too long.")}, status=400)
+
     try:
         currentGame = Game.objects.get(id=gameID, gameCode=game_code)
     except Game.DoesNotExist:
@@ -319,7 +327,7 @@ def shared_bug_entry(request, game_code, extra_info_fn=None):
         game_code,
         gameID,
         jsonData["gameData"],
-        jsonData["description"],
+        description,
         currentGame.rewindData,
         extra_info,
     )

@@ -14,8 +14,8 @@ function markerPosition(type) {
 </script>
 
 <template>
-	<section class="marketPanel" aria-label="Land market">
-		<svg viewBox="0 0 1650 515" aria-label="Current land sale prices"><image :href="assets.landPriceTrackImage" width="1650" height="515" /><image v-for="type in rf.ALL_LAND_TYPES" :key="type" :href="assets.getTerrainImage(type)" :x="markerPosition(type).x" :y="markerPosition(type).y" :width="markerPosition(type).size" :height="markerPosition(type).size"><title>{{ rf.LAND_NAMES[type] }}: {{ store.landPrices[type] }} SPL</title></image></svg>
+	<section class="marketPanel" :aria-label="$t('market.aria')">
+		<svg viewBox="0 0 1650 515" :aria-label="$t('market.pricesAria')"><image :href="assets.landPriceTrackImage" width="1650" height="515" /><image v-for="type in rf.ALL_LAND_TYPES" :key="type" :href="assets.getTerrainImage(type)" :x="markerPosition(type).x" :y="markerPosition(type).y" :width="markerPosition(type).size" :height="markerPosition(type).size"><title>{{ $t("market.priceTitle", { land: rf.LAND_NAMES[type], price: store.landPrices[type] }) }}</title></image></svg>
 	</section>
 </template>
 

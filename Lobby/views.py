@@ -66,7 +66,15 @@ from user_visit.models import UserVisit
 import Lobby.sharedFunctions.constants as rf
 from FCM.common import buildFCMstartingOptions
 from Lobby.sharedFunctions.db_mutex import db_mutex
+from Lobby.sharedFunctions.loginThrottle import (
+    LOGIN_FAILURE_KEY,
+    clear_failures,
+    failure_key as make_failure_key,
+    is_locked,
+    record_failure,
+)
 from Lobby.sharedFunctions.permissions import is_site_admin
+from Lobby.sharedFunctions.rateLimit import is_rate_limited
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_getMiniTournamentCreationJsonReturn,
@@ -403,12 +411,6 @@ GAME_NAMES_MODELS = {
 }
 
 
-def trigger_500_error(request):
-    # This deliberately forces a 500 server error
-    division_by_zero = 1 / 0
-    return HttpResponse("This will not be reached.")
-
-
 def testLobby(request):
     # subject = 'Thank you for registering to our site'
     # message = ' it  means a world to us '
@@ -720,6 +722,9 @@ def feedback(request):
     from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
 
     if request.method == "POST":
+        if is_rate_limited(f"feedback:{request.user.id}", 3, 600):
+            messages.error(request, gettext("Too many feedback messages. Please try again later."))
+            return redirect("/")
         feedback_text = request.POST.get("feedback", "")
         category = request.POST.get("category", "")
         if not feedback_text.strip():
@@ -1597,13 +1602,6 @@ def index(request):
     )
 
 
-LOGIN_MAX_FAILURES = 10
-LOGIN_FAILURE_WINDOW = 15 * 60
-LOGIN_FAILURE_KEY = "login_fail:{ip}:{username}"
-
-
-def _client_ip(request):
-    return request.META.get("HTTP_CF_CONNECTING_IP") or request.META.get("REMOTE_ADDR", "")
 
 
 def login_view(request):
@@ -1625,13 +1623,6 @@ def login_view(request):
                 "POST_Keys": list(request.POST.keys()),
             }
 
-            # Try to peek at the raw body in case it's JSON
-            try:
-                body_sample = request.body.decode("utf-8")[:500]
-                debug_info["Raw_Body_Sample"] = body_sample
-            except (UnicodeDecodeError, AttributeError):
-                debug_info["Raw_Body_Status"] = "Not decodable"
-
             formatted_data = json.dumps(debug_info, indent=2)
             # Discord has a 2000 character limit, so we truncate if needed
             content = f"**!!! LOGIN ATTEMPT: Missing Fields !!!**\n```json\n{formatted_data[:1800]}\n```"
@@ -1643,8 +1634,8 @@ def login_view(request):
             return render(request, "Lobby/login.html")
 
         # shortcut: per-process cache; move to a shared cache if multiple web workers are added.
-        failure_key = LOGIN_FAILURE_KEY.format(ip=_client_ip(request), username=username.lower())
-        if cache.get(failure_key, 0) >= LOGIN_MAX_FAILURES:
+        failure_key = make_failure_key(LOGIN_FAILURE_KEY, request, username)
+        if is_locked(failure_key):
             messages.error(request, gettext("Too many failed sign-in attempts. Please wait 15 minutes and try again."))
             return render(request, "Lobby/login.html")
 
@@ -1652,7 +1643,7 @@ def login_view(request):
 
         # Check if authentication successful
         if user is not None:
-            cache.delete(failure_key)
+            clear_failures(failure_key)
             login(request, user)
             request.session.modified = True  # Force session save
 
@@ -1685,7 +1676,7 @@ def login_view(request):
             response.set_cookie(settings.LANGUAGE_COOKIE_NAME, language_code, max_age=settings.LANGUAGE_COOKIE_AGE)
             return response
         else:
-            cache.set(failure_key, cache.get(failure_key, 0) + 1, LOGIN_FAILURE_WINDOW)
+            record_failure(failure_key)
             try:
                 user = User.objects.get(username=request.POST["username"])
                 if not user.is_active:
@@ -3628,11 +3619,12 @@ def autoCompleteUsername(request):
         jsonData = json.loads(request.body)
         partialString = jsonData["partialString"]
 
-        matchObjects = User.objects.filter(username__icontains=partialString).all()
+        if not isinstance(partialString, str) or len(partialString) < 2:
+            return JsonResponse({"matchList": []}, safe=False)
 
-        matchList = []
-        for user in matchObjects:
-            matchList.append(user.username)
+        matchObjects = User.objects.filter(username__icontains=partialString).order_by("username")[:20]
+
+        matchList = [user.username for user in matchObjects]
         return JsonResponse({"matchList": matchList}, safe=False)
 
     else:
@@ -4266,6 +4258,7 @@ def discord_callback(request):
 
 
 @login_required()
+@require_POST
 def stop_discord_dms(request):
     profile = Profile.objects.get(user=request.user)
     profile.discord_id = None
@@ -4393,6 +4386,8 @@ def deleteWebhook(request):
 @login_required
 @require_POST
 def sendAdminMessage(request):
+    if is_rate_limited(f"sendAdminMessage:{request.user.id}", 10, 600):
+        return JsonResponse({"status": "error", "message": "Too many messages, please try again later"}, status=429)
     # if not request.user.is_superuser:
     #    return JsonResponse({"status": "error", "message": "Forbidden"}, status=403)
 
@@ -4416,6 +4411,8 @@ def sendAdminMessage(request):
 
 @login_required
 def BGH_API(request, options):
+    if not re.fullmatch(r"[A-Za-z0-9_,.-]{1,100}", options):
+        return JsonResponse({"error": "Invalid options"}, status=400)
     url = "http://api.boardgamehelpers.com/api/FoodChainMagnate/GenerateMap/" + options
     response = requests.get(url, timeout=10)
     data = response.json()

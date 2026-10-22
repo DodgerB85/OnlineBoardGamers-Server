@@ -5,6 +5,7 @@
  * a buy (single or pair), plus a draw-stack placeholder.
  */
 import { computed, ref } from "vue"
+import { useI18n } from "vue-i18n"
 import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
 import * as view from "../js/ROWview"
@@ -14,6 +15,7 @@ import { useModelStore } from "../stores/ROWstore.js"
 import CardView from "./CardView.vue"
 
 const { ActionType } = rf
+const { t } = useI18n()
 const store = useModelStore()
 
 const game = computed(() => {
@@ -66,9 +68,9 @@ const drawingTwo = computed(() => store.actions.includes(ActionType.DRAW_2_CATTL
 const selected = ref([])
 
 const hint = computed(() => {
-	if (takingThree.value) return "Take a breeding value 3 card"
-	if (buying.value) return possibleBuys.value.length ? "Select card(s) to buy" : "Not enough dollars or cowboys to buy cattle"
-	return `Click the draw pile to draw 2 cattle cards for 1 cowboy (${g().currentPlayerState().cowboysRemaining()} left)`
+	if (takingThree.value) return t("row.cattleMarket.takeThree")
+	if (buying.value) return possibleBuys.value.length ? t("row.cattleMarket.selectToBuy") : t("row.cattleMarket.notEnough")
+	return t("row.cattleMarket.drawTwoHint", { cowboys: g().currentPlayerState().cowboysRemaining() })
 })
 
 function drawTwo() {
@@ -149,7 +151,7 @@ function confirm() {
 	<div id="cattleMarket" v-if="game">
 		<div v-if="buying || takingThree || drawingTwo" class="hint">
 			<span>{{ hint }}</span>
-			<button v-if="buying" class="buy" :disabled="!canConfirm" @click="confirm">Buy</button>
+			<button v-if="buying" class="buy" :disabled="!canConfirm" @click="confirm">{{ t('row.cattleMarket.confirmBuy') }}</button>
 		</div>
 		<div class="cards" :class="{ buying: buying || takingThree, selecting: selected.length > 0 }">
 			<CardView
@@ -165,13 +167,13 @@ function confirm() {
 			<div
 				class="drawStack"
 				:class="{ empty: drawStackSize === 0, selectable: drawingTwo }"
-				:title="drawingTwo ? 'Draw 2 cattle cards for 1 cowboy' : `Draw pile (${drawStackSize}) — cattle cards still to be turned face up into the market`"
+				:title="drawingTwo ? t('row.cattleMarket.drawTwoTitle') : t('row.cattleMarket.drawPileTitle', { count: drawStackSize })"
 				@click="drawTwo"
 			>
 				<img :src="view.cardBackImage()" alt="" draggable="false" />
-				<em class="stackLabel">{{ drawingTwo ? "Draw 2" : "Draw" }}</em>
+				<em class="stackLabel">{{ drawingTwo ? t('row.cattleMarket.drawTwo') : t('app.draw') }}</em>
 				<span class="count">({{ drawStackSize }})</span>
-				<em v-if="drawingTwo" class="cost">1 cowboy</em>
+				<em v-if="drawingTwo" class="cost">{{ t('row.cattleMarket.cowboyCost') }}</em>
 			</div>
 		</div>
 	</div>

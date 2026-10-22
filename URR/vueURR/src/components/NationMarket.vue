@@ -2,6 +2,7 @@
 import PlayerMarker from "./PlayerMarker.vue"
 import ArtworkCard from "./ArtworkCard.vue"
 import { computed, reactive, watch } from "vue"
+import { useI18n } from "vue-i18n"
 import * as rf from "../js/URRreference"
 import * as view from "../js/URRview"
 import * as rules from "../js/URRrules"
@@ -11,6 +12,7 @@ import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
 const store = useModelStore()
 const personal = usePersonalStore()
+const { t } = useI18n()
 defineProps({ isBoardLayout: { type: Boolean, default: false } })
 const emit = defineEmits(["locateNation"])
 const amounts = reactive({})
@@ -32,7 +34,7 @@ function moneyForBid(nation) {
 	return available.value + (!auction.value && highest?.player === actor.value ? highest.amount : 0)
 }
 function amountError(nation) {
-	if (amount(nation) > moneyForBid(nation)) return `Only ${moneyForBid(nation)} SPL available`
+	if (amount(nation) > moneyForBid(nation)) return t("nationMarket.onlyAvailable", { amount: moneyForBid(nation) })
 	return ""
 }
 function isAuction(nation) { return auction.value?.nation === nation.id }
@@ -52,44 +54,44 @@ watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.val
 </script>
 
 <template>
-	<section class="nationMarket" :class="{ boardLayout: isBoardLayout, hasPendingBids }" aria-label="Independent nations">
-		<p class="marketHeading"><b>{{ auction ? `Auction: ${rf.NATION_NAMES[auction.nation]}` : "Independent nations" }}</b><span>{{ available }} SPL available</span></p>
-		<p v-if="reservedMoney" class="moneySummary" title="Reserved money becomes available when outbid; the winner pays when the nation is awarded.">{{ reservedMoney }} SPL reserved for highest bids<br>{{ totalMoney }} SPL total</p>
-		<p v-if="auction" class="auctionInfo">High bid {{ auction.amount }} SPL<br><PlayerMarker :index="auction.highPlayer" /></p>
-		<p v-else-if="!store.turnDraft.ready" class="marketHint">Buy the current nation, or make an offer on another. Buying, offering, or passing <b>ends your turn</b>.</p>
+	<section class="nationMarket" :class="{ boardLayout: isBoardLayout, hasPendingBids }" :aria-label="$t('nationMarket.aria')">
+		<p class="marketHeading"><b>{{ auction ? $t("nationMarket.auction", { nation: rf.NATION_NAMES[auction.nation] }) : $t("nationMarket.aria") }}</b><span>{{ $t("nationMarket.available", { amount: available }) }}</span></p>
+		<p v-if="reservedMoney" class="moneySummary" :title="$t('nationMarket.reservedTitle')">{{ $t("nationMarket.reserved", { amount: reservedMoney }) }}<br>{{ $t("nationMarket.total", { amount: totalMoney }) }}</p>
+		<p v-if="auction" class="auctionInfo">{{ $t("nationMarket.highBid", { amount: auction.amount }) }}<br><PlayerMarker :index="auction.highPlayer" /></p>
+		<p v-else-if="!store.turnDraft.ready" class="marketHint">{{ $t("nationMarket.hint") }} <b>{{ $t("nationMarket.endsTurn") }}</b></p>
 		<div class="nationList">
 			<article v-for="nation in displayedNations" :key="nation.id" class="nationRow" :aria-label="rf.NATION_NAMES[nation.id]" :class="{ current: isAuction(nation) || (!auction && treaty?.id === nation.id), acquired: nation.ownerType !== null, ashur: nation.id === rf.NATION_ASHUR }">
 				<div class="cardHeading"><ArtworkCard :src="assets.getNationCardImage(nation.id)" :alt="rf.NATION_NAMES[nation.id]" /></div>
-				<p v-if="nation.ownerType !== null" class="nationOwner">Owned by <PlayerMarker :index="nation.owner" /></p>
-				<ol v-if="nation.bids.length" class="nationBids" :aria-label="isAuction(nation) ? 'Auction participants in bidding order' : 'Interested players in bidding order'">
+				<p v-if="nation.ownerType !== null" class="nationOwner">{{ $t("nationMarket.ownedBy") }} <PlayerMarker :index="nation.owner" /></p>
+				<ol v-if="nation.bids.length" class="nationBids" :aria-label="isAuction(nation) ? $t('nationMarket.auctionParticipants') : $t('nationMarket.interestedPlayers')">
 					<li v-for="(offer, position) in nation.bids" :key="offer.player" :class="{ currentBidder: isAuction(nation) && offer.player === actor }" :aria-current="isAuction(nation) && offer.player === actor ? 'step' : undefined">
-						<span class="bidPosition">{{ position + 1 }}</span><PlayerMarker :index="offer.player" /><b v-if="offer.player === highestBid(nation).player" aria-label="Highest offer" title="Highest offer">{{ offer.amount }} SPL</b>
+						<span class="bidPosition">{{ position + 1 }}</span><PlayerMarker :index="offer.player" /><b v-if="offer.player === highestBid(nation).player" :aria-label="$t('nationMarket.highestOffer')" :title="$t('nationMarket.highestOffer')">{{ offer.amount }} SPL</b>
 					</li>
 				</ol>
 				<div class="nationActions">
-					<button type="button" class="nationLocation" :aria-label="`Find ${rf.NATION_NAMES[nation.id]} in ${rf.STATE_NAMES[nationState(nation)]} on the board`" :title="`${rf.NATION_NAMES[nation.id]} · ${rf.STATE_NAMES[nationState(nation)]}`" @click.stop.prevent="emit('locateNation', nation.id)"><img :src="assets.getStateOrderImage(nationState(nation))" alt="" />Map</button>
+					<button type="button" class="nationLocation" :aria-label="$t('nationMarket.findNation', { nation: rf.NATION_NAMES[nation.id], state: rf.STATE_NAMES[nationState(nation)] })" :title="`${rf.NATION_NAMES[nation.id]} · ${rf.STATE_NAMES[nationState(nation)]}`" @click.stop.prevent="emit('locateNation', nation.id)"><img :src="assets.getStateOrderImage(nationState(nation))" alt="" />{{ $t("nationMarket.map") }}</button>
 				<template v-if="nation.ownerType === null">
 					<form v-if="!auction && treaty?.id !== nation.id" @submit.prevent="bid(nation)">
-						<label :for="`nation-bid-${nation.id}`">{{ auction ? "Bid" : "Offer" }} SPL</label>
+						<label :for="`nation-bid-${nation.id}`">{{ auction ? $t("nationMarket.bid") : $t("nationMarket.offer") }} SPL</label>
 						<input :id="`nation-bid-${nation.id}`" type="number" inputmode="numeric" :value="amount(nation)" @input="amounts[nation.id] = Number($event.target.value)" :min="minimum(nation)" :max="moneyForBid(nation)" step="1" required :disabled="!personal.canPlay()" />
-						<template v-if="nation.bids.length"><button v-for="increment in [1, 5, 10]" :key="increment" type="button" class="bidAdjustment" :aria-label="`Raise bid by ${increment} SPL`" :disabled="!personal.canPlay() || amount(nation) + increment > moneyForBid(nation)" @click="adjustBid(nation, increment)">+{{ increment }}</button></template>
-						<button :disabled="!personal.canPlay() || amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)">{{ auction ? "Bid" : "Make offer" }}</button>
+						<template v-if="nation.bids.length"><button v-for="increment in [1, 5, 10]" :key="increment" type="button" class="bidAdjustment" :aria-label="$t('nationMarket.raiseBy', { amount: increment })" :disabled="!personal.canPlay() || amount(nation) + increment > moneyForBid(nation)" @click="adjustBid(nation, increment)">+{{ increment }}</button></template>
+						<button :disabled="!personal.canPlay() || amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)">{{ auction ? $t("nationMarket.bid") : $t("nationMarket.makeOffer") }}</button>
 					</form>
 					<p v-if="!auction && treaty?.id !== nation.id && amountError(nation)" class="amountError" role="status">{{ amountError(nation) }}</p>
 				</template>
 				<div v-if="nation.ownerType === null && !auction && treaty?.id === nation.id" class="marketControls treatyControls">
-					<button class="primaryAction" :disabled="!personal.canPlay() || available < price(nation)" @click="endTurnWith({ type: 'buyNation', nation: nation.id })">Buy for {{ price(nation) }} SPL</button>
-					<button class="passButton" :disabled="!personal.canPlay()" @click="endTurnWith({ type: 'pass' })">Pass</button>
+					<button class="primaryAction" :disabled="!personal.canPlay() || available < price(nation)" @click="endTurnWith({ type: 'buyNation', nation: nation.id })">{{ $t("nationMarket.buyFor", { price: price(nation) }) }}</button>
+					<button class="passButton" :disabled="!personal.canPlay()" @click="endTurnWith({ type: 'pass' })">{{ $t("nationMarket.pass") }}</button>
 				</div>
 				<div v-if="nation.ownerType === null && isAuction(nation)" class="marketControls auctionControls">
 					<form @submit.prevent="bid(nation)">
-						<label :for="`nation-bid-${nation.id}`">Bid SPL</label>
+						<label :for="`nation-bid-${nation.id}`">{{ $t("nationMarket.bidSpl") }}</label>
 						<input :id="`nation-bid-${nation.id}`" type="number" inputmode="numeric" :value="amount(nation)" @input="amounts[nation.id] = Number($event.target.value)" :min="minimum(nation)" :max="moneyForBid(nation)" step="1" required :disabled="!personal.canPlay()" />
-						<button v-for="increment in [1, 5, 10]" :key="increment" type="button" class="bidAdjustment" :aria-label="`Raise bid by ${increment} SPL`" :disabled="!personal.canPlay() || amount(nation) + increment > moneyForBid(nation)" @click="adjustBid(nation, increment)">+{{ increment }}</button>
-						<button class="primaryAction" :disabled="!personal.canPlay() || amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)">Bid {{ amount(nation) }} SPL &amp; End Turn</button>
+						<button v-for="increment in [1, 5, 10]" :key="increment" type="button" class="bidAdjustment" :aria-label="$t('nationMarket.raiseBy', { amount: increment })" :disabled="!personal.canPlay() || amount(nation) + increment > moneyForBid(nation)" @click="adjustBid(nation, increment)">+{{ increment }}</button>
+						<button class="primaryAction" :disabled="!personal.canPlay() || amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)">{{ $t("nationMarket.bidEndTurn", { amount: amount(nation) }) }}</button>
 					</form>
 					<p v-if="amountError(nation)" class="amountError" role="status">{{ amountError(nation) }}</p>
-					<button class="passButton" :disabled="!personal.canPlay()" @click="endTurnWith({ type: 'pass' })">Withdraw &amp; End Turn</button>
+					<button class="passButton" :disabled="!personal.canPlay()" @click="endTurnWith({ type: 'pass' })">{{ $t("nationMarket.withdrawEndTurn") }}</button>
 				</div>
 				</div>
 			</article>

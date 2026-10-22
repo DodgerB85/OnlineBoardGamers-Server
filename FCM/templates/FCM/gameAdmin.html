@@ -159,7 +159,7 @@
         }
     }
 </script>
-<script src="{% url 'javascript-catalog' %}"></script>
+{# The Vue admin app does not use the legacy JS gettext catalog. #}
 {% if settingsDEBUG %}
     <script type="module" src="http://localhost:3048/static/@vite/client"></script>
     <script type="module" src="http://localhost:3048/static/admin.js"></script>

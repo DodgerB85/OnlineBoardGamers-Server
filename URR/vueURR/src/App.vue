@@ -1,5 +1,6 @@
 <script setup>
 import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from "vue"
+import { useI18n } from "vue-i18n"
 import * as model from "./js/URRmodel"
 import * as rf from "./js/URRreference"
 import * as view from "./js/URRview"
@@ -34,6 +35,7 @@ import { useModelStore } from "./stores/URRstore.js"
 import { usePersonalStore } from "./stores/URRpersonal.js"
 const store = useModelStore()
 const personal = usePersonalStore()
+const { t } = useI18n()
 
 const isWelcomeDismissed = ref(false)
 const isNationDivision = computed(() => (store.turnDraft.ready ? store.turnDraft.start.state.gameflow.phase : store.gameflow.phase) === rf.PHASE_DIVIDING_NATIONS && !store.viewSettings.showReplay)
@@ -115,33 +117,33 @@ const waitingForTurn = computed(() => {
 })
 const actingPlayer = computed(() => store.turnDraft.ready ? store.turnDraft.player : view.displayedTurnOrder(store)[0])
 const actingLabel = computed(() => {
-	if (store.turnDraft.ready) return "Reviewing:"
+	if (store.turnDraft.ready) return t("app.reviewing")
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return ""
 	const player = store.players[store.gameflow.turnOrder[0]]
 	const stateId = view.currentStateId(store)
-	const context = store.gameflow.pendingOffer ? "Responding" : store.gameflow.developmentStep === "betweenStates" ? "Next" : "Acting"
-	return `${context}: ${stateId === null ? '' : `${rf.STATE_NAMES[stateId]}\n`}${player ? '' : 'Automatic resolution'}`
+	const context = store.gameflow.pendingOffer ? t("app.responding") : store.gameflow.developmentStep === "betweenStates" ? t("app.nextStep") : t("app.acting")
+	return `${context}: ${stateId === null ? '' : `${rf.STATE_NAMES[stateId]}\n`}${player ? '' : t("app.automaticResolution")}`
 })
 const actionPanelTitle = computed(() => {
 	const game = actionPanelGame(store)
-	if (game.gameflow.pendingOffer) return "Agreement requested"
+	if (game.gameflow.pendingOffer) return t("app.agreementRequested")
 	if (game.gameflow.phase === rf.PHASE_DIVIDING_NATIONS) {
-		if (game.gameflow.auction) return `Auction: ${rf.NATION_NAMES[game.gameflow.auction.nation]}`
+		if (game.gameflow.auction) return t("app.auction", { nation: rf.NATION_NAMES[game.gameflow.auction.nation] })
 		const treaty = game.nations.find((nation) => nation.ownerType === null)
-		if (treaty) return `Treaty: ${rf.NATION_NAMES[treaty.id]}`
+		if (treaty) return t("app.treaty", { nation: rf.NATION_NAMES[treaty.id] })
 	}
-	if (store.viewSettings.actionIntent === "barahshum" || (store.turnDraft.ready && store.turnDraft.steps.at(-1).action.type === "exchangeBarahshum")) return "Barahshum\nfree canal"
-	if (map.value?.isTracing) return `Canal draft\n${Math.max(0, canalPath.value.length - 1)} segment${canalPath.value.length === 2 ? "" : "s"}`
-	if (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "eridu") return canalPath.value.length >= 2 ? "Eridu\ncanal review" : "Eridu\nspecial digging turn"
+	if (store.viewSettings.actionIntent === "barahshum" || (store.turnDraft.ready && store.turnDraft.steps.at(-1).action.type === "exchangeBarahshum")) return t("app.barahshumFreeCanal")
+	if (map.value?.isTracing) return canalPath.value.length === 2 ? t("app.canalDraft", { count: 1 }) : t("app.canalDraftPlural", { count: Math.max(0, canalPath.value.length - 1) })
+	if (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "eridu") return canalPath.value.length >= 2 ? t("app.eriduCanalReview") : t("app.eriduSpecialDigging")
 	const stateId = view.currentStateId(game)
-	if (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "digging" && canalPath.value.length >= 2) return `${rf.STATE_NAMES[stateId]}\ncanal review`
-	if (stateId !== null && game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep !== "betweenStates" && game.players[game.states[stateId].king].money < rules.maintenanceShortfall(game, stateId)) return `${rf.STATE_NAMES[stateId]}\ncrew funding`
+	if (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "digging" && canalPath.value.length >= 2) return t("app.canalReview", { state: rf.STATE_NAMES[stateId] })
+	if (stateId !== null && game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep !== "betweenStates" && game.players[game.states[stateId].king].money < rules.maintenanceShortfall(game, stateId)) return t("app.crewFunding", { state: rf.STATE_NAMES[stateId] })
 	if (stateId !== null && game.gameflow.phase === rf.PHASE_RAINY_SEASON) {
-		if (game.gameflow.endReason) return `${rf.STATE_NAMES[stateId]}\nfinal ${game.rain.step === "harvest" ? "harvest" : "water"}`
-		return game.rain.step === "harvest" ? `${rf.STATE_NAMES[stateId]}\nharvest ${rules.harvestAmount(game, stateId)} SPL` : `${rf.STATE_NAMES[stateId]}\nroute water`
+		if (game.gameflow.endReason) return game.rain.step === "harvest" ? t("app.finalHarvest", { state: rf.STATE_NAMES[stateId] }) : t("app.finalWater", { state: rf.STATE_NAMES[stateId] })
+		return game.rain.step === "harvest" ? t("app.harvestState", { state: rf.STATE_NAMES[stateId], amount: rules.harvestAmount(game, stateId) }) : t("app.routeWaterState", { state: rf.STATE_NAMES[stateId] })
 	}
-	if (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "betweenStates") return stateId === null ? "Before rainy season" : `Before ${rf.STATE_NAMES[stateId]} development`
-	return stateId === null ? view.phaseStr(game.gameflow.phase) : `${rf.STATE_NAMES[stateId]}\n${view.phaseStr(game.gameflow.phase)}`
+	if (game.gameflow.phase === rf.PHASE_DEVELOPMENT && game.gameflow.developmentStep === "betweenStates") return stateId === null ? t("app.beforeRainySeason") : t("app.beforeStateDevelopment", { state: rf.STATE_NAMES[stateId] })
+	return stateId === null ? view.phaseStr(game.gameflow.phase) : t("app.statePhase", { state: rf.STATE_NAMES[stateId], phase: view.phaseStr(game.gameflow.phase) })
 })
 function selectArea(id) {
 	selectedArea.value = id
@@ -196,9 +198,9 @@ function showDebug() {
 </script>
 
 <template>
-	<Teleport to="body"><dialog ref="mapPreview" class="nationMapPreview" aria-label="Game board" @close="isMapPreviewOpen = false" @click="$event.target === mapPreview && closeMapPreview()">
-		<div class="mapPreviewHeader"><b>Game board</b><button type="button" @click="closeMapPreview">Close</button></div>
-		<div class="mapPreviewViewport" tabindex="0" aria-label="Enlarged map"><div id="nationMapPreviewBody"></div></div>
+	<Teleport to="body"><dialog ref="mapPreview" class="nationMapPreview" :aria-label="$t('app.gameBoard')" @close="isMapPreviewOpen = false" @click="$event.target === mapPreview && closeMapPreview()">
+		<div class="mapPreviewHeader"><b>{{ $t("app.gameBoard") }}</b><button type="button" @click="closeMapPreview">{{ $t("common.close") }}</button></div>
+		<div class="mapPreviewViewport" tabindex="0" :aria-label="$t('app.enlargedMap')"><div id="nationMapPreviewBody"></div></div>
 	</dialog></Teleport>
 	<TopMenu />
 	<div id="wholeMiddleArea" :class="{ historyOpen: store.viewSettings.showHistory, nationDivision: isNationDivision, greyBackground: waitingForTurn, normalBackground: !waitingForTurn }">
@@ -209,13 +211,13 @@ function showDebug() {
 		<TurnOrder @inspect="revealStatus" />
 		<GameOverview @inspect="revealStatus" />
 		<div v-if="store.gameflow.turn === 1 && store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS && !store.viewSettings.showReplay && !isWelcomeDismissed" class="welcomeHelper">
-			<div><b>Welcome to UR: 1830 BC!</b><button type="button" aria-label="Dismiss welcome" @click="isWelcomeDismissed = true">×</button></div>
-			<p>Select a hex to inspect it, or a card to enlarge it. Choose a nation below; click the map to enlarge it.</p>
-			<p><a href="/URR/help/" target="_blank" rel="noopener">Icons and interface help</a> is also available from Rules in the menu. Enjoy the game!</p>
+			<div><b>{{ $t("app.welcomeTitle") }}</b><button type="button" :aria-label="$t('app.dismissWelcome')" @click="isWelcomeDismissed = true">×</button></div>
+			<p>{{ $t("app.welcomeIntro") }}</p>
+			<p><a href="/URR/help/" target="_blank" rel="noopener">{{ $t("app.welcomeHelp") }}</a> {{ $t("app.welcomeHelpRest") }}</p>
 		</div>
 		<div id="mainAreaLessHistory" :class="{ nationDivisionLayout: isNationDivision }" ref="mainArea" :style="{ '--board-width': `${boardBaseWidth * store.viewSettings.boardZoom}px` }">
 			<aside ref="statusPanels" class="stateSidebar"><PlayerHoldings ref="holdings" /><EquipmentSupply v-if="!isNationDivision" /><StateStrip v-if="!isNationDivision" @inspect="revealStatus" /></aside>
-			<div class="mapContainer" :title="isNationDivision ? 'Click the map to enlarge' : undefined" @keydown.enter="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()" @keydown.space="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()" @click="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()">
+			<div class="mapContainer" :title="isNationDivision ? $t('app.clickMapEnlarge') : undefined" @keydown.enter="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()" @keydown.space="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()" @click="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()">
 				<TerrainMarket />
 				<Teleport to="#nationMapPreviewBody" :disabled="!isMapPreviewOpen">
 				<MapArea ref="map" :selected-hex="selectedArea" :map-action="mapAction" :action-targets="actionTargets" @confirm-action="gameActions?.confirmMapAction()" @cancel-action="gameActions?.cancelMapAction()" :highlighted-player="store.viewSettings.showOwnedLand ? holdings?.activePlayer ?? null : null" :removal-area="removalArea" :land-draft="landDraft" :waiting-player-index="waitingPlayerIndex" :dig-capacity="digCapacity" @select-area="selectArea" @click-area="gameActions?.planClick($event)" @change-path="canalPath = $event" />
@@ -233,10 +235,10 @@ function showDebug() {
 		</div>
 	</div>
 	<FooterBar />
-	<div class="saveStatus" v-if="store.viewSettings.isSaving || store.viewSettings.isSavingNotes || store.viewSettings.isSendingChat" role="status">{{ store.viewSettings.isSaving ? 'Saving…' : store.viewSettings.isSavingNotes ? 'Saving notes…' : 'Sending chat…' }}</div>
+	<div class="saveStatus" v-if="store.viewSettings.isSaving || store.viewSettings.isSavingNotes || store.viewSettings.isSendingChat" role="status">{{ store.viewSettings.isSaving ? $t('app.savingGame') : store.viewSettings.isSavingNotes ? $t('app.savingNotes') : $t('app.sendingChat') }}</div>
 
 	<div id="loaderOverlay" v-if="store.viewSettings.showLoader" role="status">
-		<div id="loadingText">Loading........<br /><img :src="assets.getAsset('loading-bar-black.gif')" alt="" /></div>
+		<div id="loadingText">{{ $t("app.loading") }}<br /><img :src="assets.getAsset('loading-bar-black.gif')" alt="" /></div>
 	</div>
 </template>
 

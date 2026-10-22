@@ -564,7 +564,7 @@ export default {
 		"needToPayWithFood": "Devi pagare: ${currentSalary} o {nbPays} gettoni risorsa (o un mix di entrambi)",
 		"needToPay": "Devi pagare: ${currentSalary}",
 		"cantAffordTrainer": "Non puoi permetterti di pagare tutti i tuoi dipendenti! Tuttavia, il tuo traguardo {trainer} ti consente di mantenere tutti.",
-		"fireAnyway": "Se lo desideri, puoi fare clic sui dipendenti per licenziarli comunque",
+		"fireAnyway": "Se lo desideri, {may} fare clic sui dipendenti per licenziarli comunque",
 		"firstTrainerUsed": "Primo trainer utilizzato",
 		"may": "Maggio",
 		"cantPayEmployees": "Non puoi pagare per tutti i tuoi dipendenti: devi licenziare i dipendenti finché non puoi pagare il resto",

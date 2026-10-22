@@ -21,7 +21,7 @@ from Lobby.gameViewHelpers import (
     shared_save_notes,
 )
 from Lobby.models import Game, User
-from Lobby.sharedFunctions.permissions import is_game_admin
+from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -86,6 +86,9 @@ def _processHLCturn(request):
         raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("HLCpresenter", currentGame.presenter())
+
+    if jsonData.get("action") not in ("load", "refreshChat") and not can_act_in_game(request.user, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
     if jsonData["action"] == "turn0move":
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
@@ -950,7 +953,7 @@ def chat(request):
         newMessage = jsonData["message"]
         newMessage = newMessage.replace("\n", " ").replace("\r", "")
 
-        playerName = jsonData["player"]
+        playerName = request.user.username
 
         now = str(int(time.time()) * 1000)
         newChatString = (

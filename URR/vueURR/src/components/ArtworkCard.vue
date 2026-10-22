@@ -8,8 +8,8 @@ function close() { preview.value.close() }
 
 <template>
 	<div class="artworkCard">
-		<a class="artworkButton" :href="src" @click.stop.prevent="open" @keydown.enter.stop @keydown.space.stop.prevent="open" :aria-label="`Enlarge ${alt}`" title="Click to enlarge"><img :src="src" :alt="alt" /><svg class="enlargeCue" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8" cy="8" r="4.5" /><path d="M11.5 11.5 16 16M8 5.5v5M5.5 8h5" /></svg></a>
-		<Teleport to="body"><dialog ref="preview" class="artworkPreview" :aria-label="alt" @click="($event.target === preview) && close()"><div class="artworkHeader"><div class="artworkTitle"><b>{{ alt }}</b><button type="button" @click="close">Close</button></div></div><div class="artworkImageViewport" role="region" :aria-label="`${alt} card image`" tabindex="0"><img :src="src" :alt="alt" /></div></dialog></Teleport>
+		<a class="artworkButton" :href="src" @click.stop.prevent="open" @keydown.enter.stop @keydown.space.stop.prevent="open" :aria-label="$t('artwork.enlarge', { alt })" :title="$t('artwork.clickToEnlarge')"><img :src="src" :alt="alt" /><svg class="enlargeCue" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8" cy="8" r="4.5" /><path d="M11.5 11.5 16 16M8 5.5v5M5.5 8h5" /></svg></a>
+		<Teleport to="body"><dialog ref="preview" class="artworkPreview" :aria-label="alt" @click="($event.target === preview) && close()"><div class="artworkHeader"><div class="artworkTitle"><b>{{ alt }}</b><button type="button" @click="close">{{ $t("common.close") }}</button></div></div><div class="artworkImageViewport" role="region" :aria-label="$t('artwork.cardImage', { alt })" tabindex="0"><img :src="src" :alt="alt" /></div></dialog></Teleport>
 	</div>
 </template>
 

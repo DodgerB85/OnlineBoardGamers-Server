@@ -1,6 +1,8 @@
 {% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -48,12 +50,13 @@
       <strong>Please enable Javascript to continue.</strong>
     </noscript>
     <div id="app">
-      <div id="loadingText">Ranchers of the Old West is loading........</div>
+      <div id="loadingText">{% translate "Ranchers of the Old West is loading........" %}</div>
     </div>
   <div hidden>{% csrf_token %}</div>
   </body>
   <script>
     var initData = {};
+    initData.locale = "{{ LANGUAGE_CODE|default:'en' }}";
     initData.gameID = {{ gameID }};
     initData.gameName = "{{ gameName|escapejs }}";
     initData.gameData = JSON.parse('{{ gameData|default:"{}"|escapejs }}');

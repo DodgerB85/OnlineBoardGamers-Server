@@ -5,11 +5,13 @@
  * `points` VPs. A cell is bid-able when it beats the current best bid for that seat.
  */
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
 import { useModelStore } from "../stores/ROWstore.js"
 
 const { ActionType, Status } = rf
+const { t } = useI18n()
 const store = useModelStore()
 
 const game = () => store.game
@@ -53,11 +55,11 @@ function placeBid(position, points) {
 
 <template>
 	<div v-if="bidding" id="biddingArea">
-		<div class="title">Bidding for turn order — bid VPs (the higher the bid, the earlier you play; a bid costs its value in VP)</div>
+		<div class="title">{{ t('row.bidding.title') }}</div>
 		<table>
 			<thead>
 				<tr>
-					<th>Seat</th>
+					<th>{{ t('row.stats.seat') }}</th>
 					<th v-for="p in columns" :key="p">-{{ p }}</th>
 				</tr>
 			</thead>
@@ -65,13 +67,13 @@ function placeBid(position, points) {
 				<tr v-for="row in rows" :key="row.position">
 					<th>#{{ row.position + 1 }}</th>
 					<td v-for="cell in row.cells" :key="cell.points">
-						<button v-if="canBid && cell.selectable" class="bid" @click="placeBid(row.position, cell.points)">Bid</button>
+						<button v-if="canBid && cell.selectable" class="bid" @click="placeBid(row.position, cell.points)">{{ t('row.bidding.bid') }}</button>
 						<span v-for="p in cell.players" :key="p" class="marker" :title="p">{{ p }}</span>
 					</td>
 				</tr>
 			</tbody>
 		</table>
-		<div v-if="!canBid" class="wait">Waiting for the other players to bid…</div>
+		<div v-if="!canBid" class="wait">{{ t('row.bidding.waiting') }}</div>
 	</div>
 </template>
 

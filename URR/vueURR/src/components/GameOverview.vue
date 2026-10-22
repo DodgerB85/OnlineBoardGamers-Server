@@ -24,22 +24,22 @@ function hasEridu(id) { return store.nations.some((nation) => nation.id === rf.N
 </script>
 
 <template>
-	<section v-if="store.viewSettings.showOverview" class="gameOverview" aria-label="Game overview">
-		<div class="overviewHeading"><b>Overview</b><button @click="close">Close overview</button></div>
+	<section v-if="store.viewSettings.showOverview" class="gameOverview" :aria-label="$t('overview.aria')">
+		<div class="overviewHeading"><b>{{ $t("overview.title") }}</b><button @click="close">{{ $t("overview.close") }}</button></div>
 		<div class="overviewTables">
 			<div class="tableScroll"><table class="statesTable">
-				<caption>States · money in SPL</caption>
-				<thead><tr><th scope="col">State</th><th scope="col">Monarch / leader</th><th scope="col">Treasury</th><th scope="col">Owned lands</th><th scope="col">Crews</th><th scope="col">Harvest</th><th scope="col">Order</th></tr></thead>
+				<caption>{{ $t("overview.statesCaption") }}</caption>
+				<thead><tr><th scope="col">{{ $t("overview.state") }}</th><th scope="col">{{ $t("overview.monarchLeader") }}</th><th scope="col">{{ $t("overview.treasury") }}</th><th scope="col">{{ $t("overview.ownedLands") }}</th><th scope="col">{{ $t("overview.crews") }}</th><th scope="col">{{ $t("overview.harvest") }}</th><th scope="col">{{ $t("overview.order") }}</th></tr></thead>
 				<tbody><tr v-for="state in store.states" :key="state.id" :class="{ current: view.currentStateId(store) === state.id }">
-					<th scope="row"><button @click="inspect('state', state.id)">{{ rf.STATE_NAMES[state.id] }}</button><small v-if="!state.isActive">Emerging</small></th>
+					<th scope="row"><button @click="inspect('state', state.id)">{{ rf.STATE_NAMES[state.id] }}</button><small v-if="!state.isActive">{{ $t("overview.emerging") }}</small></th>
 					<td><button v-if="state.king !== null" @click="inspect('player', state.king)"><PlayerMarker :index="state.king" /></button><span v-else>—</span></td>
-					<td>{{ state.money }}</td><td>{{ rules.ownedLand(store, state.id).length }}</td><td>{{ state.diggers.length }}<span v-if="hasEridu(state.id)" title="Eridu special crew"> + Eridu</span></td><td>{{ state.isActive ? rules.harvestAmount(store, state.id) : '—' }}</td><td>{{ stateOrder(state.id) }}</td>
+					<td>{{ state.money }}</td><td>{{ rules.ownedLand(store, state.id).length }}</td><td>{{ state.diggers.length }}<span v-if="hasEridu(state.id)" :title="$t('overview.eriduCrew')"> + {{ $t("nationName.eridu") }}</span></td><td>{{ state.isActive ? rules.harvestAmount(store, state.id) : '—' }}</td><td>{{ stateOrder(state.id) }}</td>
 				</tr></tbody>
 			</table></div>
 			<div class="tableScroll"><table>
-				<caption>Player ownership · owned lands per state (excludes sold land)</caption>
-				<thead><tr><th scope="col">Player</th><th scope="col">Private cash</th><th scope="col">Assets</th><th v-for="state in store.states" :key="state.id" scope="col"><button @click="inspect('state', state.id)">{{ rf.STATE_NAMES[state.id] }}</button></th></tr></thead>
-				<tbody><tr v-for="(player, index) in store.players" :key="index"><th scope="row"><button @click="inspect('player', index)"><PlayerMarker :index="index" /></button></th><td>{{ player.money }}</td><td>{{ rules.playerAssets(store, index) }}</td><td v-for="state in store.states" :key="state.id" :class="{ monarch: state.king === index }" :title="state.king === index ? state.isActive ? 'Monarch' : 'Ownership leader' : undefined">{{ rules.ownedLand(store, state.id, index).length }}<span v-if="state.king === index" aria-label="Ownership leader"> ★</span></td></tr></tbody>
+				<caption>{{ $t("overview.playersCaption") }}</caption>
+				<thead><tr><th scope="col">{{ $t("overview.player") }}</th><th scope="col">{{ $t("overview.privateCash") }}</th><th scope="col">{{ $t("overview.assets") }}</th><th v-for="state in store.states" :key="state.id" scope="col"><button @click="inspect('state', state.id)">{{ rf.STATE_NAMES[state.id] }}</button></th></tr></thead>
+				<tbody><tr v-for="(player, index) in store.players" :key="index"><th scope="row"><button @click="inspect('player', index)"><PlayerMarker :index="index" /></button></th><td>{{ player.money }}</td><td>{{ rules.playerAssets(store, index) }}</td><td v-for="state in store.states" :key="state.id" :class="{ monarch: state.king === index }" :title="state.king === index ? state.isActive ? $t('overview.monarch') : $t('overview.ownershipLeader') : undefined">{{ rules.ownedLand(store, state.id, index).length }}<span v-if="state.king === index" :aria-label="$t('overview.ownershipLeader')"> ★</span></td></tr></tbody>
 			</table></div>
 		</div>
 	</section>

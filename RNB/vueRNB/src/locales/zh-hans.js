@@ -443,6 +443,7 @@ export default {
 		buildingPhase: "建造阶段",
 		wonderPhase: "奇迹阶段",
 		dropsGeese: "放下鹅",
+		takesTrain: "乘坐火车",
 		picksUp: "拾取",
 		drops: "放下",
 		ferries: "渡运",

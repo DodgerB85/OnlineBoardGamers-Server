@@ -146,6 +146,7 @@ MIDDLEWARE = [
     # 1. Always let security handle SSL/headers first
     "django.middleware.security.SecurityMiddleware",
     "Lobby.middleware.ForceTrailingSlashMiddleware",
+    "Lobby.middleware.AdminLoginThrottleMiddleware",
     # This must come before Authentication and CsrfView
     "django.contrib.sessions.middleware.SessionMiddleware",
     # This must come after Session and Authentication
@@ -163,15 +164,6 @@ ROOT_URLCONF = "OnlineBoardGamers.urls"
 
 # Enable translation caching for better performance
 USE_L10N = True
-LANGUAGE_CODE = "en"
-LANGUAGES = [
-    ("en", "English"),
-]
-
-# Translation cache settings
-LOCALE_PATHS = [
-    BASE_DIR / "locale",
-]
 
 
 # Enable Django's built-in translation caching
@@ -353,6 +345,7 @@ LOCALE_PATHS = [
     join(BASE_DIR, "Lobby", "locale"),
     join(BASE_DIR, "FCM", "locale"),
     join(BASE_DIR, "HLC", "locale"),
+    join(BASE_DIR, "BUS", "locale"),
 ]
 
 # TIME_ZONE = 'Asia/Hong_Kong'

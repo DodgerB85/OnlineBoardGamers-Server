@@ -11,20 +11,20 @@ const currentStep = computed(() => {
 </script>
 
 <template>
-	<section class="developmentProgress" aria-label="Order of play">
+	<section class="developmentProgress" :aria-label="$t('development.aria')">
 		<ol class="mainPhases">
-			<li :class="{ current: store.gameflow.phase === rf.PHASE_SETTLEMENT }" :aria-current="store.gameflow.phase === rf.PHASE_SETTLEMENT ? 'step' : undefined">Settlement</li>
-			<li :class="{ current: store.gameflow.phase === rf.PHASE_DEVELOPMENT }" :aria-current="store.gameflow.phase === rf.PHASE_DEVELOPMENT ? 'step' : undefined">Development</li>
-			<li :class="{ current: store.gameflow.phase === rf.PHASE_RAINY_SEASON }" :aria-current="store.gameflow.phase === rf.PHASE_RAINY_SEASON ? 'step' : undefined">Rainy season</li>
+			<li :class="{ current: store.gameflow.phase === rf.PHASE_SETTLEMENT }" :aria-current="store.gameflow.phase === rf.PHASE_SETTLEMENT ? 'step' : undefined">{{ $t("development.settlement") }}</li>
+			<li :class="{ current: store.gameflow.phase === rf.PHASE_DEVELOPMENT }" :aria-current="store.gameflow.phase === rf.PHASE_DEVELOPMENT ? 'step' : undefined">{{ $t("development.development") }}</li>
+			<li :class="{ current: store.gameflow.phase === rf.PHASE_RAINY_SEASON }" :aria-current="store.gameflow.phase === rf.PHASE_RAINY_SEASON ? 'step' : undefined">{{ $t("development.rainySeason") }}</li>
 		</ol>
 		<div v-if="store.gameflow.phase === rf.PHASE_DEVELOPMENT" class="developmentOrder">
 			<ol class="developmentSteps">
-				<li><span>Nation income</span><small>Paid automatically</small></li>
-				<li><span :class="{ current: currentStep === 'eridu' }" :aria-current="currentStep === 'eridu' ? 'step' : undefined">Eridu</span><small>Optional canal with a free 2-digger</small></li>
-				<li><span :class="{ current: currentStep === 'digging' }" :aria-current="currentStep === 'digging' ? 'step' : undefined">Build canals</span><small>Each active state's first step</small></li>
-				<li><span :class="{ current: currentStep === 'purchasing' }" :aria-current="currentStep === 'purchasing' ? 'step' : undefined">Purchases</span><small>Waterworks, crews, nations (era 3), in any order.<br>At least one crew required.</small></li>
+				<li><span>{{ $t("development.nationIncome") }}</span><small>{{ $t("development.paidAutomatically") }}</small></li>
+				<li><span :class="{ current: currentStep === 'eridu' }" :aria-current="currentStep === 'eridu' ? 'step' : undefined">{{ $t("development.eridu") }}</span><small>{{ $t("development.eriduHint") }}</small></li>
+				<li><span :class="{ current: currentStep === 'digging' }" :aria-current="currentStep === 'digging' ? 'step' : undefined">{{ $t("development.buildCanals") }}</span><small>{{ $t("development.buildCanalsHint") }}</small></li>
+				<li><span :class="{ current: currentStep === 'purchasing' }" :aria-current="currentStep === 'purchasing' ? 'step' : undefined">{{ $t("development.purchases") }}</span><small>{{ $t("development.purchasesHint") }}<br>{{ $t("development.crewRequired") }}</small></li>
 			</ol>
-			<div class="stateLoop" aria-label="Repeat from Purchases to Build canals for each active state"><span>Per active state</span></div>
+			<div class="stateLoop" :aria-label="$t('development.repeatAria')"><span>{{ $t("development.perActiveState") }}</span></div>
 		</div>
 	</section>
 </template>

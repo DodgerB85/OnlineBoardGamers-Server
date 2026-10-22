@@ -1,8 +1,10 @@
 <script setup>
 import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from "vue"
+import { useI18n } from "vue-i18n"
 import * as boardDisplay from "../js/URRboardDisplay.js"
 import { useWaterPlaybackStore } from "../stores/URRwaterPlayback.js"
 const playback = useWaterPlaybackStore()
+const { t } = useI18n()
 const svg = ref(null)
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
 const step = computed(() => playback.current)
@@ -39,7 +41,7 @@ const duration = computed(() => {
 	}
 	return Math.min(1.8, Math.max(0.3, length / SPEED))
 })
-const waitingText = (id) => (playback.state.board.areas.find((area) => area.id === id)?.waterwork ? "to continue downstream" : "at the junction")
+const waitingText = (id) => (playback.state.board.areas.find((area) => area.id === id)?.waterwork ? t("waterPlayback.toContinue") : t("waterPlayback.atJunction"))
 // The blob's idle wobble is one continuous animation: hand it the phase the
 // clock is at, so a re-rendered step does not restart it with a visible pulse.
 const BOB_SECONDS = 2.8
@@ -65,13 +67,13 @@ onBeforeUnmount(() => { clearTimeout(timer); document.removeEventListener("click
 
 <template>
 	<div class="waterPlayback">
-		<svg ref="svg" :key="playback.state.index" :viewBox="`0 0 ${boardDisplay.MAP_WIDTH} ${boardDisplay.MAP_HEIGHT}`" aria-label="Recorded water flow" @click.stop>
+		<svg ref="svg" :key="playback.state.index" :viewBox="`0 0 ${boardDisplay.MAP_WIDTH} ${boardDisplay.MAP_HEIGHT}`" :aria-label="$t('waterPlayback.aria')" @click.stop>
 			<defs><radialGradient id="waterBlobFill" cx="35%" cy="25%" r="75%"><stop offset="0" stop-color="#e1fbff" /><stop offset=".55" stop-color="#8be4f6" /><stop offset="1" stop-color="#27b5dc" /></radialGradient></defs>
 			<rect :width="boardDisplay.MAP_WIDTH" :height="boardDisplay.MAP_HEIGHT" fill="transparent" pointer-events="all" />
 			<polygon v-for="id in playback.isIrrigationPreview ? [] : step.wet" :key="id" :points="boardDisplay.hexPoints(position(id).x, position(id).y)" class="playbackWet" />
 			<path v-if="path" :d="path" class="flowPath" />
 			<g v-for="water in step.waitingWater" :key="water.area" :transform="`translate(${position(water.area).x} ${position(water.area).y - 36})`" class="waitingWater">
-				<title>{{ water.amount }} water waiting {{ waitingText(water.area) }}</title>
+				<title>{{ $t("waterPlayback.waiting", { amount: water.amount, where: waitingText(water.area) }) }}</title>
 				<rect x="-24" y="-18" width="48" height="36" rx="18" />
 				<text y="7">{{ water.amount }}</text>
 			</g>
@@ -86,7 +88,7 @@ onBeforeUnmount(() => { clearTimeout(timer); document.removeEventListener("click
 		</svg>
 		<div class="waterPanel">
 			<div role="status">{{ step.text }}</div>
-			<div class="playbackControls"><button @click="playback.state.index = 0" :disabled="!playback.state.index">Start</button><button @click="playback.state.index--" :disabled="!playback.state.index">Previous</button><button @click="playback.state.advancing = !playback.state.advancing">{{ playback.state.advancing ? 'Pause' : 'Play' }}</button><button @click="playback.next()" :disabled="playback.atEnd">Next</button><button @click="playback.state.index = playback.state.steps.length - 1">End</button><span>{{ playback.state.index + 1 }} / {{ playback.state.steps.length }}</span><button @click="playback.stop()">Close</button></div>
+			<div class="playbackControls"><button @click="playback.state.index = 0" :disabled="!playback.state.index">{{ $t("waterPlayback.start") }}</button><button @click="playback.state.index--" :disabled="!playback.state.index">{{ $t("waterPlayback.previous") }}</button><button @click="playback.state.advancing = !playback.state.advancing">{{ playback.state.advancing ? $t("waterPlayback.pause") : $t("waterPlayback.play") }}</button><button @click="playback.next()" :disabled="playback.atEnd">{{ $t("waterPlayback.next") }}</button><button @click="playback.state.index = playback.state.steps.length - 1">{{ $t("waterPlayback.end") }}</button><span>{{ playback.state.index + 1 }} / {{ playback.state.steps.length }}</span><button @click="playback.stop()">{{ $t("waterPlayback.close") }}</button></div>
 		</div>
 	</div>
 </template>

@@ -1,10 +1,13 @@
 <script setup>
+import { useI18n } from "vue-i18n"
+
+const { t } = useI18n()
 </script>
 
 <template>
 	<div id="footer">
-		<p>Great Western Trail is a board game by Alexander Pfister. Ported to Online Board Gamers.</p>
-		<p>Original code GPL-3.0 (Tom Wetjens / Board Game Fiesta). Artwork attribution in <code>static/ROW/artwork-license.txt</code>.</p>
+		<p>{{ t('app.footerAttribution') }}</p>
+		<p>{{ t('app.footerLicense') }} <code>static/ROW/artwork-license.txt</code>.</p>
 	</div>
 </template>
 

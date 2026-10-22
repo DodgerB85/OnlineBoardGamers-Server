@@ -42,14 +42,14 @@ function findReplayPosition() {
 
 <template>
 	<transition name="fade">
-		<div id="history" ref="historyPanel" v-if="store.viewSettings.showHistory" aria-label="Game history" @keydown.esc.stop.prevent="close">
+		<div id="history" ref="historyPanel" v-if="store.viewSettings.showHistory" :aria-label="$t('historyTab.aria')" @keydown.esc.stop.prevent="close">
 			<div class="historyControls"><div id="historyToggleDiv">
-				<span>Oldest First</span>
-				<label class="switch"><input type="checkbox" v-model="toggleNewestFirst" aria-label="Newest first" /><span class="slider round"></span></label>
-				<span>Newest First</span>
-				<button class="closeHistory" @click="close" aria-label="Close history">×</button>
+				<span>{{ $t("historyTab.oldestFirst") }}</span>
+				<label class="switch"><input type="checkbox" v-model="toggleNewestFirst" :aria-label="$t('historyTab.newestFirst')" /><span class="slider round"></span></label>
+				<span>{{ $t("historyTab.newestFirst") }}</span>
+				<button class="closeHistory" @click="close" :aria-label="$t('historyTab.close')">×</button>
 			</div>
-			<p v-if="store.viewSettings.showReplay" class="replayHint"><span>Select a move to replay.</span><button @click="findReplayPosition">Find current move</button></p></div>
+			<p v-if="store.viewSettings.showReplay" class="replayHint"><span>{{ $t("historyTab.selectMove") }}</span><button @click="findReplayPosition">{{ $t("historyTab.findCurrent") }}</button></p></div>
 			<div id="historyMainDiv">
 				<HistoryEntry v-for="{ entry, index } in orderedEntries" :key="entry.historyKey" :entry="entry" :index="index" :newest-first="newestFirst" />
 			</div>

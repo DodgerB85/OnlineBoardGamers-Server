@@ -20,6 +20,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
+from Lobby.sharedFunctions.permissions import can_act_in_game
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -141,6 +142,9 @@ def _processCNSturn(request):
         raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("CNSpresenter", currentGame.presenter())
+
+    if not can_act_in_game(request.user, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
@@ -430,6 +434,10 @@ def _sendChatMessage(request):
             compressed_data = base64.b64decode(base64_data)
             unzipped = gzip.decompress(compressed_data).decode("utf-8")
             currentChatData = json.loads(unzipped)
+        new_entry = jsonData["newEntry"]
+        if not isinstance(new_entry, list) or len(new_entry) < 3:
+            return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
+        new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
 
         json_string = json.dumps(currentChatData)

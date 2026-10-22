@@ -564,7 +564,7 @@ export default {
 		"needToPayWithFood": "Vous devez payer : ${currentSalary} ou {nbPays} jetons de ressources (ou un mélange des deux)",
 		"needToPay": "Vous devez payer : ${currentSalary}",
 		"cantAffordTrainer": "Vous ne pouvez pas vous permettre de payer tous vos employés ! Cependant, votre cap {trainer} vous permet de garder tout le monde.",
-		"fireAnyway": "Si vous le souhaitez, vous cliquez sur les employés pour les licencier quand même",
+		"fireAnyway": "Si vous le souhaitez, vous {may} cliquer sur les employés pour les licencier quand même",
 		"firstTrainerUsed": "Premier entraîneur utilisé",
 		"may": "peut",
 		"cantPayEmployees": "Vous ne pouvez pas payer pour tous vos employés - Vous devez licencier des employés jusqu'à ce que vous puissiez payer le reste",

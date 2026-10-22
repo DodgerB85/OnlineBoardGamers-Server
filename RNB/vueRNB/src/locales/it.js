@@ -443,6 +443,7 @@ export default {
 		buildingPhase: "Fase di costruzione",
 		wonderPhase: "Fase della Meraviglia",
 		dropsGeese: "Lascia le oche",
+		takesTrain: "Prende il treno",
 		picksUp: "Raccoglie",
 		drops: "Lascia",
 		ferries: "Traghetta",

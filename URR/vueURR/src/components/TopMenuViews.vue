@@ -5,12 +5,14 @@ import * as rf from "../js/URRreference"
 import * as IO from "../backend/URR_IO"
 
 import { ref } from "vue"
+import { useI18n } from "vue-i18n"
 
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
 import PlayerTable from "./PlayerTable.vue"
 const store = useModelStore()
 const personal = usePersonalStore()
+const { t } = useI18n()
 
 const chatMessage = ref("")
 const bugReportText = ref("")
@@ -44,7 +46,7 @@ async function submitBug() {
 	store.gameMessages.bugErrorText = ""
 	store.gameMessages.successText = ""
 	if (bugReportText.value.length === 0) {
-		store.gameMessages.bugErrorText = "Please enter a bug report"
+		store.gameMessages.bugErrorText = t("bug.required")
 		submittingBug.value = false
 		return
 	}
@@ -89,20 +91,20 @@ async function confirmResign() {
 	<!-- BUG REPORT -->
 	<transition name="slidePanel">
 		<div id="bugReport" v-if="store.viewSettings.showBug">
-			<h1>Bug Report</h1>
+			<h1>{{ $t("bug.title") }}</h1>
 			<h2 class="errorText" v-if="store.gameMessages.bugErrorText !== ''" v-html="store.gameMessages.bugErrorText"></h2>
 			<p>
-				Please submit a bug report if you encounter any issues, giving as much detail as possible.
+				{{ $t("bug.intro") }}
 				<br />
-				The game data will be submitted along with your report.
+				{{ $t("bug.data") }}
 			</p>
 			<div><textarea cols="150" rows="10" v-model="bugReportText"></textarea></div>
 			<div>
 				<button class="actionsLineButton" @click="submitBug" :disabled="submittingBug">
-					<span v-if="submittingBug">Submitting Bug Report...</span>
-					<span v-else>Submit</span>
+					<span v-if="submittingBug">{{ $t("bug.submitting") }}</span>
+					<span v-else>{{ $t("bug.submit") }}</span>
 				</button>
-				<button class="actionsLineButton" @click="toggleBug">Cancel</button>
+				<button class="actionsLineButton" @click="toggleBug">{{ $t("common.cancel") }}</button>
 			</div>
 		</div>
 	</transition>
@@ -110,29 +112,29 @@ async function confirmResign() {
 	<!-- NOTES -->
 	<transition name="slidePanel">
 		<div id="notesBox" v-if="store.viewSettings.showNotes">
-			<h2>Personal game notes</h2>
-			<p>Only you can see these notes</p>
+			<h2>{{ $t("notes.title") }}</h2>
+			<p>{{ $t("notes.private") }}</p>
 			<p v-if="store.gameMessages.notesErrorText" class="errorText" role="alert">{{ store.gameMessages.notesErrorText }}</p>
-			<div><textarea cols="120" rows="10" v-model="personal.notes" maxlength="5000" aria-label="Personal game notes"></textarea></div>
+			<div><textarea cols="120" rows="10" v-model="personal.notes" maxlength="5000" :aria-label="$t('notes.aria')"></textarea></div>
 			<div>
-				<button class="actionsLineButton" :disabled="store.viewSettings.isSavingNotes" @click="IO.saveNotes">{{ store.viewSettings.isSavingNotes ? 'Saving…' : 'Save' }}</button>
-				<button class="actionsLineButton" :disabled="store.viewSettings.isSavingNotes" @click="clearNotes">Clear</button>
-				<button class="actionsLineButton" @click="toggleNotes">Close</button>
+				<button class="actionsLineButton" :disabled="store.viewSettings.isSavingNotes" @click="IO.saveNotes">{{ store.viewSettings.isSavingNotes ? $t('notes.saving') : $t('notes.save') }}</button>
+				<button class="actionsLineButton" :disabled="store.viewSettings.isSavingNotes" @click="clearNotes">{{ $t("notes.clear") }}</button>
+				<button class="actionsLineButton" @click="toggleNotes">{{ $t("notes.close") }}</button>
 			</div>
 		</div>
 	</transition>
 
 	<!-- CHAT -->
-	<div id="wholeChat" v-if="store.viewSettings.showChat" role="region" aria-label="Game chat">
-		<div class="chatHeading"><h2>Send a message</h2><button @click="store.viewSettings.showChat = false" aria-label="Close chat">×</button></div>
+	<div id="wholeChat" v-if="store.viewSettings.showChat" role="region" :aria-label="$t('chat.aria')">
+		<div class="chatHeading"><h2>{{ $t("chat.title") }}</h2><button @click="store.viewSettings.showChat = false" :aria-label="$t('chat.close')">×</button></div>
 		<div id="chatBox">
 			<p v-if="store.gameMessages.chatErrorText" class="errorText" role="alert">{{ store.gameMessages.chatErrorText }}</p>
-			<div><textarea rows="6" v-model="chatMessage" aria-label="Chat message"></textarea></div>
-			<div><button class="actionsLineButton" :disabled="store.viewSettings.isSendingChat || !chatMessage" @click="sendChatMessage">{{ store.viewSettings.isSendingChat ? 'Sending…' : 'Send' }}</button></div>
+			<div><textarea rows="6" v-model="chatMessage" :aria-label="$t('chat.messageAria')"></textarea></div>
+			<div><button class="actionsLineButton" :disabled="store.viewSettings.isSendingChat || !chatMessage" @click="sendChatMessage">{{ store.viewSettings.isSendingChat ? $t('chat.sending') : $t('chat.send') }}</button></div>
 		</div>
 		<div id="messageList">
 			<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
-				<div class="header"><PlayerMarker v-if="view.playerIndexByName(store, message[0]) >= 0" :index="view.playerIndexByName(store, message[0])" /><span v-else :title="message[0]">Observer</span><span class="date">{{ new Date(message[1] * 1000).toLocaleString() }}</span></div>
+				<div class="header"><PlayerMarker v-if="view.playerIndexByName(store, message[0]) >= 0" :index="view.playerIndexByName(store, message[0])" /><span v-else :title="message[0]">{{ $t("chat.observer") }}</span><span class="date">{{ new Date(message[1] * 1000).toLocaleString() }}</span></div>
 				<div class="messageBody">{{ message[2] }}</div>
 			</div>
 		</div>
@@ -140,46 +142,46 @@ async function confirmResign() {
 
 	<!-- REWIND PANEL -->
 	<div id="rewindPanel" v-if="store.viewSettings.showRewindPanel">
-		<div class="utilityHeading"><b>Rewind and game votes</b><button @click="store.viewSettings.showRewindPanel = false" aria-label="Close rewind panel">×</button></div>
-		<p>Rewind restores the previous saved position. Please tell the other players in chat.</p>
+		<div class="utilityHeading"><b>{{ $t("rewind.title") }}</b><button @click="store.viewSettings.showRewindPanel = false" :aria-label="$t('rewind.close')">×</button></div>
+		<p>{{ $t("rewind.intro") }}</p>
 		<p v-if="store.gameMessages.errorText" class="errorText" role="alert">{{ store.gameMessages.errorText }}</p>
-		<button class="topMenuItem" :disabled="!!store.turnDraft.start || store.viewSettings.showLoader || store.viewSettings.isSaving || personal.haltPlay || store.viewSettings.showReplay" :title="store.turnDraft.start ? 'Reset your uncommitted turn first' : 'Rewind the previous saved turn'" @click="IO.loadRewind()">
+		<button class="topMenuItem" :disabled="!!store.turnDraft.start || store.viewSettings.showLoader || store.viewSettings.isSaving || personal.haltPlay || store.viewSettings.showReplay" :title="store.turnDraft.start ? $t('rewind.resetFirst') : $t('rewind.previousTurn')" @click="IO.loadRewind()">
 			<img :src="view.getImage('icon-rewind')" alt="" />
-			<span>Rewind</span>
+			<span>{{ $t("rewind.rewind") }}</span>
 		</button>
 		<hr />
 		<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
-			If all players agree, this game can be excluded from the stats (won't count towards wins/losses)
+			{{ $t("rewind.statsIntro") }}
 			<br />
-			Votes: {{ getStatsExcludeVotes(false) }} - Players: <PlayerMarker v-for="name in getStatsExcludeVotes(true)" :key="name" :index="view.playerIndexByName(store, name)" /><template v-if="!getStatsExcludeVotes(false)">None</template>
+			{{ $t("rewind.votesPlayers", { votes: getStatsExcludeVotes(false), players: "" }) }}<PlayerMarker v-for="name in getStatsExcludeVotes(true)" :key="name" :index="view.playerIndexByName(store, name)" /><template v-if="!getStatsExcludeVotes(false)">{{ $t("common.none") }}</template>
 			<br />
-			<button v-if="!personal.votedToExclude" class="actionsLineButton" @click="localCastVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">Vote to Exclude Game from Stats</button>
+			<button v-if="!personal.votedToExclude" class="actionsLineButton" @click="localCastVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">{{ $t("rewind.voteExclude") }}</button>
 		</div>
 		<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
-			If all players agree, this game will be deleted
+			{{ $t("rewind.deleteIntro") }}
 			<br />
-			Votes: {{ getDeleteVotes(false) }} - Players: <PlayerMarker v-for="name in getDeleteVotes(true)" :key="name" :index="view.playerIndexByName(store, name)" /><template v-if="!getDeleteVotes(false)">None</template>
+			{{ $t("rewind.votesPlayers", { votes: getDeleteVotes(false), players: "" }) }}<PlayerMarker v-for="name in getDeleteVotes(true)" :key="name" :index="view.playerIndexByName(store, name)" /><template v-if="!getDeleteVotes(false)">{{ $t("common.none") }}</template>
 			<br />
-			<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="localCastVote(rf.DELETE_VOTE_TOPIC)">Vote to Delete Game</button>
+			<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="localCastVote(rf.DELETE_VOTE_TOPIC)">{{ $t("rewind.voteDelete") }}</button>
 		</div>
 	</div>
 
 	<!-- RESIGN PANEL -->
 	<div id="resignPanel" v-if="store.viewSettings.showResignPanel && personal.canResign()">
-		<div class="utilityHeading"><b>Resign</b><button @click="store.viewSettings.showResignPanel = false" aria-label="Close resign panel">×</button></div>
-		<p>Are you sure you want to resign? Resigning will unbalance the game for the remaining players.</p>
-		<p>Your seat keeps its land and money, but all of your remaining turns will be passed automatically. <b>It cannot be undone.</b></p>
+		<div class="utilityHeading"><b>{{ $t("resign.title") }}</b><button @click="store.viewSettings.showResignPanel = false" :aria-label="$t('resign.close')">×</button></div>
+		<p>{{ $t("resign.question") }}</p>
+		<p>{{ $t("resign.consequences") }} <b>{{ $t("resign.cannotBeUndone") }}</b></p>
 		<p v-if="store.gameMessages.errorText" class="errorText" role="alert">{{ store.gameMessages.errorText }}</p>
-		<button class="actionsLineButton" :disabled="!!store.turnDraft.start || store.viewSettings.showLoader || store.viewSettings.isSaving" :title="store.turnDraft.start ? 'Reset your uncommitted turn first' : 'Resign from this game'" @click="confirmResign">Confirm Resignation</button>
-		<button class="actionsLineButton" @click="store.viewSettings.showResignPanel = false">Cancel</button>
+		<button class="actionsLineButton" :disabled="!!store.turnDraft.start || store.viewSettings.showLoader || store.viewSettings.isSaving" :title="store.turnDraft.start ? $t('resign.resetFirst') : $t('resign.resignGame')" @click="confirmResign">{{ $t("resign.confirm") }}</button>
+		<button class="actionsLineButton" @click="store.viewSettings.showResignPanel = false">{{ $t("common.cancel") }}</button>
 	</div>
 
 	<!-- Info -->
 	<transition name="slidePanel">
 		<div id="info" v-if="store.viewSettings.showInfo">
-			<div class="utilityHeading infoHeading"><b>Game information</b><button @click="store.viewSettings.showInfo = false" aria-label="Close game information">×</button></div>
+			<div class="utilityHeading infoHeading"><b>{{ $t("topMenu.info") }}</b><button @click="store.viewSettings.showInfo = false" :aria-label="$t('common.close')">×</button></div>
 			<PlayerTable :minimiseInfoForMainScreen="false" />
-			<p><b>Game name:</b> {{ store.gameName }}</p>
+			<p><b>{{ $t("app.gameName") }}:</b> {{ store.gameName }}</p>
 		</div>
 	</transition>
 </template>

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 14:20+0800\n"
+"POT-Creation-Date: 2026-10-23 00:59+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,9 +18,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: .\BUS\common.py:209
+#: .\BUS\common.py:214
 msgid "Your Practice game has started"
-msgstr "你的练习局已开始"
+msgstr "你的练习游戏已开始"
 
 #: .\BUS\templates\BUS\BUShelp.html:5
 msgid "Bus Help"
@@ -32,8 +32,10 @@ msgstr "规则"
 
 #: .\BUS\templates\BUS\BUShelp.html:13
 #, python-format
-msgid "Bus rules available <a href=\"%(bus_rules_url)s\" target=\"_blank\">here</a>"
-msgstr "Bus 规则见<a href=\"%(bus_rules_url)s\" target=\"_blank\">此处</a>"
+msgid ""
+"Bus rules available <a href=\"%(bus_rules_url)s\" target=\"_blank\">here</a>"
+msgstr ""
+"Bus 规则可在<a href=\"%(bus_rules_url)s\" target=\"_blank\">此处</a>查看"
 
 #: .\BUS\templates\BUS\BUShelp.html:19
 #, python-format
@@ -41,16 +43,15 @@ msgid ""
 "Pittsburgh rules available <a class=\"linkOther\" "
 "href=\"%(pitts_rules_url)s\" target=\"_blank\">here</a>"
 msgstr ""
-"Pittsburgh 规则见 <a class=\"linkOther\" href=\"%(pitts_rules_url)s\" "
-"target=\"_blank\">此处</a>"
+"匹兹堡规则可在<a class=\"linkOther\" href=\"%(pitts_rules_url)s\" "
+"target=\"_blank\">此处</a>查看"
 
 #: .\BUS\templates\BUS\BUShelp.html:24
 msgid ""
-"How to play guide example <a "
-"href=\"https://www.youtube.com/watch?v=CKW0tYoIU_k\" "
-"target=\"_blank\">here</a>"
+"How to play guide example <a href=\"https://www.youtube.com/watch?"
+"v=CKW0tYoIU_k\" target=\"_blank\">here</a>"
 msgstr ""
-"玩法示例见 <a href=\"https://www.youtube.com/watch?v=CKW0tYoIU_k\" "
+"玩法指南示例见<a href=\"https://www.youtube.com/watch?v=CKW0tYoIU_k\" "
 "target=\"_blank\">此处</a>"
 
 #: .\BUS\templates\BUS\BUShelp.html:31
@@ -73,62 +74,69 @@ msgid ""
 "order of the \"Choose Actions\" phase. So top player picks first <br /> If "
 "no one chooses the \"Starting Player\" choice, then the player on the 2nd "
 "line will become the new start player. </li> <li> To view another player's "
-"actions, open the \"History\" tab and select a \"board\" action to highlight"
-" that move </li> <li>Score is calculated as you play - Time Stone deductions"
-" happen immediately, not at the end</li> <li>Any player can rewind at any "
-"time. Please be courteous. Misuse will result in alteration of this "
-"feature</li> <li> You can change which board you are playing on from the "
-"menu. Select a preference in your <a class=\"linkOther\" "
+"actions, open the \"History\" tab and select a \"board\" action to highlight "
+"that move </li> <li>Score is calculated as you play - Time Stone deductions "
+"happen immediately, not at the end</li> <li>Any player can rewind at any "
+"time. Please be courteous. Misuse will result in alteration of this feature</"
+"li> <li> You can change which board you are playing on from the menu. Select "
+"a preference in your <a class=\"linkOther\" "
 "href=\"%(profile_url)s\">Profile</a> <br /> <b>NOTE: THE CHANGE IS COSMETIC "
 "ONLY. BOTH BOARDS HAVE THE SAME CONNECTIONS <br /> THE ORIGINAL BOARD IS "
 "ROTATED 90 DEGREES FROM THE 20TH ANNIVERSARY BOARD </b> </li>"
 msgstr ""
-"<li> 检查右上角名字旁的圆点，确认与实时更新服务器的连接。 <br /> 橙色 = 连接中，绿色 = 已连接，红色 = 已断开 </li> "
-"<li>当前行动玩家在玩家表中为绿色背景</li> <li> 另外，选择行动后，当前走子会在行动选择区以绿色高亮 </li> "
-"<li>在“选择行动”阶段，已过牌的玩家为橙色背景</li> <li> 将建筑、线路和乘客直接放在版图上。在版图上选择乘客与目的地即可 VRROOOMM"
-" </li> <li>在右上区域或版图旁选择行动</li> <li> 玩家表按“选择行动”阶段顺序排列，因此最上方玩家先选 <br /> "
-"若无人选择“起始玩家”，则第二行玩家成为新的起始玩家。 </li> <li> 要查看其他玩家的走子，打开“历史”标签并选择“board”动作以高亮该步 "
-"</li> <li>分数随游戏进行即时计算——时间石扣分立即生效，而非结束时 </li> "
-"<li>任何玩家可随时回退。请礼貌使用。滥用将导致此功能被修改</li> <li> 可在菜单中更换所用版图。在<a "
+"<li> 查看右上角名字旁的圆圈以确认与实时更新服务器的连接。<br /> 橙色 = 连接"
+"中，绿色 = 已连接，红色 = 已断开 </li> <li>当前玩家在玩家表中以绿色背景显示</"
+"li> <li> 此外，选择行动后，当前移动会在行动选择区以绿色高亮 </li> <li>在“选择"
+"行动”阶段，已跳过的玩家会显示橙色背景</li> <li> 直接在版图上放置建筑、线路和"
+"乘客。在版图上选择乘客和目的地即可 Vrrooomm </li> <li>在右上角或版图旁选择你"
+"的行动</li> <li> 玩家表按“选择行动”阶段的顺序排列，最上方的玩家先选 <br /> 如"
+"果无人选择“起始玩家”，则第 2 行的玩家成为新的起始玩家。 </li> <li> 要查看其他"
+"玩家的行动，请打开“历史”标签并选择“版图”行动以高亮该移动 </li> <li>得分会边玩"
+"边计算——时间石扣除立即生效，而不是在最后</li> <li>任何玩家都可以随时回退。请"
+"礼貌使用。滥用将导致此功能被调整</li> <li> 你可以在菜单中更换版图。在<a "
 "class=\"linkOther\" href=\"%(profile_url)s\">个人资料</a>中选择偏好 <br /> "
-"<b>注意：此更改仅为外观。两块版图连接相同 <br /> 原版图相对 20 周年版图旋转 90 度 </b> </li>"
+"<b>注意：此更改仅影响外观。两个版图的连接完全相同 <br /> 原版版图相对于 20 周"
+"年版图旋转了 90 度 </b> </li>"
 
 #: .\BUS\templates\BUS\BUShelp.html:77
 msgid "How can I find other players' moves?"
-msgstr "如何查看其他玩家的走子？"
+msgstr "如何查看其他玩家的行动？"
 
 #: .\BUS\templates\BUS\BUShelp.html:80
 msgid ""
-"Click on History from the top menu to open the history, and then click on an"
-" entry to highlight where it happened on the board. You can click entries to"
-" see where buildings or lines were added, and to see where passengers were "
+"Click on History from the top menu to open the history, and then click on an "
+"entry to highlight where it happened on the board. You can click entries to "
+"see where buildings or lines were added, and to see where passengers were "
 "VRROOOMM'd from and to."
 msgstr ""
-"点击顶部菜单的“历史”打开历史，然后点击条目以在版图上高亮发生的位置。你可以点击查看建筑或线路添加的位置，以及乘客 VRROOOMM 的起点与终点。"
+"点击顶部菜单中的“历史”，然后点击一条记录以在版图上高亮其发生位置。你可以查看"
+"建筑或线路添加的位置，以及乘客 VRROOOMM 的起点和终点。"
 
 #: .\BUS\templates\BUS\BUShelp.html:88
 msgid "Why did I miss my turn?"
-msgstr "为什么我的回合被跳过？"
+msgstr "为什么我错过了回合？"
 
 #: .\BUS\templates\BUS\BUShelp.html:91
 msgid ""
-"Turns where you cannot do anything are skipped. For example, during VRROOOMM"
-" if you either have no possible destination buildings, or no available "
+"Turns where you cannot do anything are skipped. For example, during VRROOOMM "
+"if you either have no possible destination buildings, or no available "
 "passengers to move. During Line Expansion, Add Passengers and New Buildings "
 "then players are skipped if they would have 0 actions. In this case, it "
 "means that the Max number of Buses is too low for these players to have any "
 "actions. Check the history for the reason a player's turn was skipped."
 msgstr ""
-"无法做任何事的回合会被跳过。例如 VRROOOMM 中若没有可去建筑或没有可运乘客。线路扩展、添加乘客和新建筑阶段，若玩家行动数为 0 "
-"也会被跳过。此时意味着巴士上限太低，这些玩家无法行动。请查看历史了解跳过原因。"
+"无法做任何事的回合会被跳过。例如在 VRROOOMM 期间，如果没有可到达的目的地建筑"
+"或没有可用乘客。在线路扩展、添加乘客和新建筑阶段，如果玩家将获得 0 个行动也会"
+"被跳过；这意味着最大巴士数量太低，导致这些玩家没有行动。请查看历史记录了解跳"
+"过原因。"
 
 #: .\BUS\templates\BUS\BUShelp.html:101
 msgid "When can I resign?"
-msgstr "何时可以认输？"
+msgstr "我什么时候可以认输？"
 
 #: .\BUS\templates\BUS\BUShelp.html:103
-msgid "You can resign during your \\"
-msgstr "你可以在你的 \\ 阶段认输"
+msgid "You can resign during your \"Choose Actions\" phase."
+msgstr "你可以在“选择行动”阶段认输。"
 
 #: .\BUS\templates\BUS\BUShelp.html:107
 msgid "Further Help"
@@ -136,15 +144,212 @@ msgstr "更多帮助"
 
 #: .\BUS\templates\BUS\BUShelp.html:109
 msgid "For any questions / comments / suggestions, please contact"
-msgstr "如有问题/意见/建议，请联系"
+msgstr "如有问题、意见或建议，请联系"
 
-#: .\BUS\views.py:142 .\BUS\views.py:191 .\BUS\views.py:240 .\BUS\views.py:529
-#: .\BUS\views.py:582
+#: .\BUS\templates\BUS\BUSstats.html:16
+msgid "Bus Stats"
+msgstr "Bus 统计"
+
+#: .\BUS\templates\BUS\BUSstats.html:18
+msgid "Back to Main Stats"
+msgstr "返回主统计"
+
+#: .\BUS\templates\BUS\BUSstats.html:25
+msgid "Finished games"
+msgstr "已结束游戏"
+
+#: .\BUS\templates\BUS\BUSstats.html:29
+msgid "Average turns"
+msgstr "平均回合数"
+
+#: .\BUS\templates\BUS\BUSstats.html:33
+msgid "Median score of winners"
+msgstr "获胜者得分中位数"
+
+#: .\BUS\templates\BUS\BUSstats.html:37
+msgid ""
+"Any game with a resigned or kicked player, a practice/learning game, or a "
+"Pittsburgh map game is not considered for these stats."
+msgstr "有玩家认输或被踢出、练习/学习游戏，或匹兹堡地图游戏不计入这些统计。"
+
+#: .\BUS\templates\BUS\BUSstats.html:40
+msgid ""
+"These are historical stats. They show what has happened in previous games, "
+"but Bus still rewards reading and responding to the current game state."
+msgstr ""
+"这些是历史统计，显示以往游戏中的情况；但 Bus 仍然奖励阅读并应对当前游戏状态。"
+
+#: .\BUS\templates\BUS\BUSstats.html:43
+msgid "Action Statistics"
+msgstr "行动统计"
+
+#: .\BUS\templates\BUS\BUSstats.html:45
+#| msgid ""
+#| "Every player starts with 20 action points, and each chosen action costs "
+#| "one. 'Everyone else' is every losing player. Compare 'Win %% when used' "
+#| "against a fair share of wins (100%% divided by the player count) to see "
+#| "how the action is linked to winning."
+msgid ""
+"Every player starts with 20 action points, and each chosen action costs one. "
+"'Everyone else' is every losing player. Compare 'Win &#37; when used' "
+"against a fair share of wins (100&#37; divided by the player count) to see "
+"how the action is linked to winning."
+msgstr "每位玩家起始有 20 点行动点，每个选择的行动消耗 1 点。“其他所有人”指所有失败玩家。将“使用时胜率 &#37;”与公平胜率（100&#37; 除以玩家数）比较，可看出该行动与获胜的关联。"
+
+#: .\BUS\templates\BUS\BUSstats.html:49
+msgid "3 Player"
+msgstr "3 人"
+
+#: .\BUS\templates\BUS\BUSstats.html:50
+msgid "4 Player"
+msgstr "4 人"
+
+#: .\BUS\templates\BUS\BUSstats.html:51
+msgid "5 Player"
+msgstr "5 人"
+
+#: .\BUS\templates\BUS\BUSstats.html:52
+msgid "All Games"
+msgstr "所有游戏"
+
+#: .\BUS\templates\BUS\BUSstats.html:58
+msgid "Games:"
+msgstr "游戏："
+
+#: .\BUS\templates\BUS\BUSstats.html:59
+msgid "Average turns:"
+msgstr "平均回合数："
+
+#: .\BUS\templates\BUS\BUSstats.html:60
+msgid "median"
+msgstr "中位数"
+
+#: .\BUS\templates\BUS\BUSstats.html:111
+msgid ""
+"The chart shows the average number of times each group chose that action "
+"over a whole game. Percentages are per player; every bracketed game count is "
+"clickable and opens exactly those games."
+msgstr ""
+"图表显示每组每局平均选择该行动的次数。百分比按玩家计算；每个括号中的游戏数均"
+"可点击，并打开对应的游戏。"
+
+#: .\BUS\templates\BUS\BUSstats.html:115
+msgid "Action"
+msgstr "行动"
+
+#: .\BUS\templates\BUS\BUSstats.html:116
+msgid "Winner average"
+msgstr "获胜者平均"
+
+#: .\BUS\templates\BUS\BUSstats.html:117
+msgid "Others average"
+msgstr "其他人平均"
+
+#: .\BUS\templates\BUS\BUSstats.html:118
+#| msgid "Win %% when used"
+msgid "Win &#37; when used"
+msgstr "使用时胜率 %"
+
+#: .\BUS\templates\BUS\BUSstats.html:126 .\BUS\templates\BUS\BUSstats.html:176
+#: .\BUS\templates\BUS\BUSstats.html:178
+msgid "games"
+msgstr "局"
+
+#: .\BUS\templates\BUS\BUSstats.html:131
+msgid "At Game End (Per Player)"
+msgstr "游戏结束时（每名玩家）"
+
+#: .\BUS\templates\BUS\BUSstats.html:135
+msgid "Winners"
+msgstr "获胜者"
+
+#: .\BUS\templates\BUS\BUSstats.html:136
+msgid "Everyone else"
+msgstr "其他所有人"
+
+#: .\BUS\templates\BUS\BUSstats.html:139
+msgid "Score (avg and median)"
+msgstr "得分（平均与中位数）"
+
+#: .\BUS\templates\BUS\BUSstats.html:144
+msgid "Time stones taken"
+msgstr "取得的时间石"
+
+#: .\BUS\templates\BUS\BUSstats.html:149
+msgid "Buses owned"
+msgstr "拥有巴士"
+
+#: .\BUS\templates\BUS\BUSstats.html:154
+msgid "Action points used"
+msgstr "已用行动点"
+
+#: .\BUS\templates\BUS\BUSstats.html:159
+msgid "Line markers placed"
+msgstr "放置的线路标记"
+
+#: .\BUS\templates\BUS\BUSstats.html:164
+msgid "Buildings placed"
+msgstr "放置的建筑"
+
+#: .\BUS\templates\BUS\BUSstats.html:169
+msgid "Passengers delivered"
+msgstr "运送的乘客"
+
+#: .\BUS\templates\BUS\BUSstats.html:174
+msgid "Delivered at least one passenger"
+msgstr "至少运送一名乘客"
+
+#: .\BUS\templates\BUS\BUSstats.html:182
+msgid "How Games Ended"
+msgstr "游戏结束方式"
+
+#: .\BUS\templates\BUS\BUSstats.html:185
+msgid "End reason"
+msgstr "结束原因"
+
+#: .\BUS\templates\BUS\BUSstats.html:186 .\BUS\templates\BUS\BUSstats.html:204
+msgid "Games"
+msgstr "游戏"
+
+#: .\BUS\templates\BUS\BUSstats.html:187
+msgid "Share"
+msgstr "占比"
+
+#: .\BUS\templates\BUS\BUSstats.html:198
+msgid "Wins by Starting Turn Position"
+msgstr "按起始位置统计的胜利"
+
+#: .\BUS\templates\BUS\BUSstats.html:201
+msgid "Starting position"
+msgstr "起始位置"
+
+#: .\BUS\templates\BUS\BUSstats.html:202
+msgid "Wins"
+msgstr "胜利"
+
+#: .\BUS\templates\BUS\BUSstats.html:203
+msgid "Win &#37;"
+msgstr "胜率 %"
+
+#: .\BUS\views.py:148 .\BUS\views.py:197 .\BUS\views.py:250 .\BUS\views.py:542
+#: .\BUS\views.py:595
 msgid "Game does not exist"
 msgstr "游戏不存在"
 
-#: .\BUS\views.py:388
+#: .\BUS\views.py:213
+msgid "Invalid chat entry"
+msgstr "无效的聊天记录"
+
+#: .\BUS\views.py:255
+msgid "You are not a player in this game"
+msgstr "你不是本局游戏的玩家"
+
+#: .\BUS\views.py:401
 msgid ""
-"No rewind data. Rewind limit reached. Please play on to generate more rewind"
-" data"
-msgstr "没有回退数据。已达回退上限。请继续游玩以生成更多回退数据"
+"No rewind data. Rewind limit reached. Please play on to generate more rewind "
+"data"
+msgstr "没有回退数据。已达到回退上限。请继续游戏以生成更多回退数据"
+
+#, python-format
+#~ msgid "Win %%"
+#~ msgstr "胜率 %%"

@@ -3,6 +3,9 @@ import { usePersonalStore } from "../stores/URRpersonal.js"
 import * as rf from "./URRreference"
 import * as funcs from "./URRfuncs"
 import * as game from "./URRgame.js"
+import i18n from "../i18n.js"
+
+const t = i18n.global.t
 
 export const snapshotState = funcs.snapshotState
 export const restoreState = funcs.restoreState
@@ -84,7 +87,7 @@ export function importGameData(obj) {
 	const data = funcs.importURRmodel(obj)
 	const hadDraft = !!store.turnDraft.start
 	store.clearTurnDraft()
-	if (hadDraft) store.turnDraft.message = "The saved game was updated. Your uncommitted turn has been cleared."
+	if (hadDraft) store.turnDraft.message = t("io.uncommittedCleared")
 	restoreState(data.state)
 	store.history.splice(0, store.history.length, ...data.history)
 }

@@ -1,6 +1,7 @@
 <script setup>
 import PlayerMarker from "./PlayerMarker.vue"
 import { ref } from "vue"
+import { useI18n } from "vue-i18n"
 import * as model from "../js/URRmodel"
 import * as funcs from "../js/URRfuncs"
 import * as rf from "../js/URRreference"
@@ -10,10 +11,11 @@ import * as debug from "../js/URRdebug"
 import * as IO from "../backend/URR_IO"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
+const { t } = useI18n()
 const money = ref(100)
 const nation = ref(0)
 const phase = ref(rf.PHASE_SETTLEMENT)
-const tools = { land: "Give land", removeLand: "Remove ownership", terrain: "Set terrain / state", river: "Set river", city: "Toggle city", pump: "Place pump", reservoir: "Place reservoir", removeWaterwork: "Remove waterwork", canal: "Draw canal", irrigate: "Irrigate", dry: "Remove irrigation" }
+const tools = { land: t("debug.tools.land"), removeLand: t("debug.tools.removeLand"), terrain: t("debug.tools.terrain"), river: t("debug.tools.river"), city: t("debug.tools.city"), pump: t("debug.tools.pump"), reservoir: t("debug.tools.reservoir"), removeWaterwork: t("debug.tools.removeWaterwork"), canal: t("debug.tools.canal"), irrigate: t("debug.tools.irrigate"), dry: t("debug.tools.dry") }
 
 function startTool(tool) {
 	store.debug.tool = tool
@@ -82,26 +84,26 @@ function showState() { window.alert(JSON.stringify(funcs.decompressData64(funcs.
 
 <template>
 	<section id="debugArea">
-		<h3>Debug cheats</h3>
-		<p>Free placement: no costs, turn, supply or placement checks. Changes stay local until saved.</p>
-		<p v-if="!store.board.areas.length">The logical board is not configured. Clicking printed hexes creates debug areas using the selected terrain and state.</p>
+		<h3>{{ $t("debug.title") }}</h3>
+		<p>{{ $t("debug.intro") }}</p>
+		<p v-if="!store.board.areas.length">{{ $t("debug.noBoard") }}</p>
 		<fieldset :disabled="!debug.canDebug()">
 			<div class="debugRow">
-				<span>Player</span><button v-for="(player, index) in store.players" :key="index" :aria-pressed="store.debug.player === index" @click="store.debug.player = index"><PlayerMarker :index="index" /></button>
-				<label>State <select v-model="store.debug.state"><option v-for="id in rf.ALL_STATES" :key="id" :value="id">{{ rf.STATE_NAMES[id] }}</option></select></label>
-				<label>Card era <select v-model="store.debug.era"><option v-for="era in rf.ALL_ERAS" :key="era" :value="era">{{ era }}</option></select></label>
-				<label>Terrain <select v-model="store.debug.landType"><option v-for="type in rf.ALL_LAND_TYPES" :key="type" :value="type">{{ rf.LAND_NAMES[type] }}</option></select></label>
+				<span>{{ $t("debug.player") }}</span><button v-for="(player, index) in store.players" :key="index" :aria-pressed="store.debug.player === index" @click="store.debug.player = index"><PlayerMarker :index="index" /></button>
+				<label>{{ $t("debug.state") }} <select v-model="store.debug.state"><option v-for="id in rf.ALL_STATES" :key="id" :value="id">{{ rf.STATE_NAMES[id] }}</option></select></label>
+				<label>{{ $t("debug.cardEra") }} <select v-model="store.debug.era"><option v-for="era in rf.ALL_ERAS" :key="era" :value="era">{{ era }}</option></select></label>
+				<label>{{ $t("debug.terrain") }} <select v-model="store.debug.landType"><option v-for="type in rf.ALL_LAND_TYPES" :key="type" :value="type">{{ rf.LAND_NAMES[type] }}</option></select></label>
 			</div>
-			<div class="debugRow"><button v-for="(label, tool) in tools" :key="tool" :class="{ selected: store.debug.tool === tool }" @click="startTool(tool)">{{ label }}</button><button @click="startTool('')">Stop placement</button></div>
-			<div v-if="store.debug.tool"><b>{{ tools[store.debug.tool] }}: click the map.</b><span v-if="store.debug.tool === 'canal'"> Click consecutive endpoints. Stop placement to start a new path.</span></div>
-			<div class="debugRow"><button @click="addCrew">Add unused crew</button><button @click="debug.changePosition(game => { const state = game.states[store.debug.state]; state.isActive = true; state.king = store.debug.player })">Activate state / set king</button><button @click="debug.changePosition(game => { for (const crew of game.states[store.debug.state].diggers) crew.hasDug = false })">Reset crews</button></div>
-			<div class="debugRow"><label>SPL <input type="number" min="0" step="1" v-model.number="money" /></label><button :disabled="!Number.isInteger(money) || money < 0" @click="debug.changePosition(game => { game.players[store.debug.player].money = money })">Set private treasury</button><button :disabled="!Number.isInteger(money) || money < 0" @click="debug.changePosition(game => { game.states[store.debug.state].money = money })">Set state treasury</button></div>
-			<div class="debugRow"><label>Nation <select v-model="nation"><option v-for="id in rf.ALL_NATIONS" :key="id" :value="id">{{ rf.NATION_NAMES[id] }}</option></select></label><button @click="giveNation(false)">Give to player</button><button @click="giveNation(true)">Assimilate into state</button><button @click="debug.changePosition(game => { game.nations[nation].isRemoved = true })">Remove nation</button></div>
-			<div class="debugRow"><label>Phase <select v-model="phase"><option v-for="id in rf.ALL_PHASES.filter(id => id !== rf.PHASE_GAME_OVER)" :key="id" :value="id">{{ view.phaseStr(id) }}</option></select></label><button @click="setPhase">Start phase as selected player / state</button><button @click="debug.changePosition(game => { game.era = store.debug.era })">Set game era</button></div>
-			<div class="debugRow"><button @click="debug.changePosition(game => { game.gameflow.primogeniture = store.debug.player; game.gameflow.primogenitureBid = null })">Give primogeniture</button><button @click="harvest(false)">Store harvest income</button><button @click="harvest(true)">Distribute harvest income</button></div>
-			<div class="debugRow"><button :disabled="!store.debug.undo.length" @click="undo">Undo cheat</button><button @click="save">Save debug position</button></div>
+			<div class="debugRow"><button v-for="(label, tool) in tools" :key="tool" :class="{ selected: store.debug.tool === tool }" @click="startTool(tool)">{{ label }}</button><button @click="startTool('')">{{ $t("debug.stopPlacement") }}</button></div>
+			<div v-if="store.debug.tool"><b>{{ $t("debug.clickMap", { tool: tools[store.debug.tool] }) }}</b><span v-if="store.debug.tool === 'canal'">{{ $t("debug.canalHint") }}</span></div>
+			<div class="debugRow"><button @click="addCrew">{{ $t("debug.addCrew") }}</button><button @click="debug.changePosition(game => { const state = game.states[store.debug.state]; state.isActive = true; state.king = store.debug.player })">{{ $t("debug.activateState") }}</button><button @click="debug.changePosition(game => { for (const crew of game.states[store.debug.state].diggers) crew.hasDug = false })">{{ $t("debug.resetCrews") }}</button></div>
+			<div class="debugRow"><label>{{ $t("debug.spl") }} <input type="number" min="0" step="1" v-model.number="money" /></label><button :disabled="!Number.isInteger(money) || money < 0" @click="debug.changePosition(game => { game.players[store.debug.player].money = money })">{{ $t("debug.setPrivateTreasury") }}</button><button :disabled="!Number.isInteger(money) || money < 0" @click="debug.changePosition(game => { game.states[store.debug.state].money = money })">{{ $t("debug.setStateTreasury") }}</button></div>
+			<div class="debugRow"><label>{{ $t("debug.nation") }} <select v-model="nation"><option v-for="id in rf.ALL_NATIONS" :key="id" :value="id">{{ rf.NATION_NAMES[id] }}</option></select></label><button @click="giveNation(false)">{{ $t("debug.giveToPlayer") }}</button><button @click="giveNation(true)">{{ $t("debug.assimilateIntoState") }}</button><button @click="debug.changePosition(game => { game.nations[nation].isRemoved = true })">{{ $t("debug.removeNation") }}</button></div>
+			<div class="debugRow"><label>{{ $t("debug.phase") }} <select v-model="phase"><option v-for="id in rf.ALL_PHASES.filter(id => id !== rf.PHASE_GAME_OVER)" :key="id" :value="id">{{ view.phaseStr(id) }}</option></select></label><button @click="setPhase">{{ $t("debug.startPhase") }}</button><button @click="debug.changePosition(game => { game.era = store.debug.era })">{{ $t("debug.setGameEra") }}</button></div>
+			<div class="debugRow"><button @click="debug.changePosition(game => { game.gameflow.primogeniture = store.debug.player; game.gameflow.primogenitureBid = null })">{{ $t("debug.givePrimogeniture") }}</button><button @click="harvest(false)">{{ $t("debug.storeHarvest") }}</button><button @click="harvest(true)">{{ $t("debug.distributeHarvest") }}</button></div>
+			<div class="debugRow"><button :disabled="!store.debug.undo.length" @click="undo">{{ $t("debug.undoCheat") }}</button><button @click="save">{{ $t("debug.savePosition") }}</button></div>
 		</fieldset>
-		<button @click="showState">Show game data</button>
+		<button @click="showState">{{ $t("debug.showGameData") }}</button>
 		<div class="debugError" v-if="store.gameMessages.actionError">{{ store.gameMessages.actionError }}</div>
 	</section>
 </template>

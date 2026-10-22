@@ -29,7 +29,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
-from Lobby.sharedFunctions.permissions import is_game_admin, is_site_admin
+from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin, is_site_admin
 
 # from django.urls import reverse
 # from django.db.models import Q
@@ -294,6 +294,9 @@ def _processRNBturn(request):
         raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("RNBpresenter", currentGame.presenter())
+
+    if not can_act_in_game(request.user, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
     #    if jsonData["action"] == "simpleSave":
     #        # Check if old version is older than DB version, and if so, return
@@ -1348,6 +1351,9 @@ def _processRNBtrade(request):
 
     presenter = cast("RNBpresenter", currentGame.presenter())
 
+    if not can_act_in_game(request.user, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
+
     raw_data = _decompress_rnb_gamedata(currentGame.gameData)
     trade_data = _decompress_rnb_trade_data(currentGame.playerTradeData or "")
 
@@ -1759,6 +1765,10 @@ def _sendChatMessageRNB(request):
             compressed_data = base64.b64decode(base64_data)
             unzipped = gzip.decompress(compressed_data).decode("utf-8")
             currentChatData = json.loads(unzipped)
+        new_entry = jsonData["newEntry"]
+        if not isinstance(new_entry, list) or len(new_entry) < 3:
+            return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
+        new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
 
         json_string = json.dumps(currentChatData)

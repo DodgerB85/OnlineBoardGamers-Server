@@ -54,14 +54,14 @@ function exitReplay() {
 </script>
 
 <template>
-	<div id="replayArea" aria-label="Replay controls">
-		<b>Replay</b>
-		<button class="actionsLineButton" :disabled="step === 0" @click="prev">&lt; Prev</button>
-		<input aria-label="Replay step" type="range" min="0" :max="Math.max(0, maxStep())" v-model.number="step" />
-		<span>Step {{ step }} / {{ maxStep() }}</span>
-		<button class="actionsLineButton" :disabled="step >= maxStep()" @click="next">Next &gt;</button>
-		<button class="actionsLineButton" @click="store.viewSettings.showHistory = !store.viewSettings.showHistory">History</button>
-		<button class="actionsLineButton" @click="exitReplay">Exit Replay</button>
+	<div id="replayArea" :aria-label="$t('replay.aria')">
+		<b>{{ $t("replay.title") }}</b>
+		<button class="actionsLineButton" :disabled="step === 0" @click="prev">&lt; {{ $t("replay.prev") }}</button>
+		<input :aria-label="$t('replay.stepAria')" type="range" min="0" :max="Math.max(0, maxStep())" v-model.number="step" />
+		<span>{{ $t("replay.step", { step, total: maxStep() }) }}</span>
+		<button class="actionsLineButton" :disabled="step >= maxStep()" @click="next">{{ $t("replay.next") }} &gt;</button>
+		<button class="actionsLineButton" @click="store.viewSettings.showHistory = !store.viewSettings.showHistory">{{ $t("replay.history") }}</button>
+		<button class="actionsLineButton" @click="exitReplay">{{ $t("replay.exit") }}</button>
 	</div>
 </template>
 

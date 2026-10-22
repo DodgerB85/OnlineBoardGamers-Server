@@ -19,6 +19,8 @@ NEW_TILES = [3, 0, 17, 1, 10, 1, 16, 0, 8, 0, 9, 3, 19, 3, 18, 0, 15, 2]
 class FcmResetMapTest(TestCase):
     def setUp(self):
         self.admin = User.objects.create_user("admin", "a@example.com", "pw")
+        self.admin.profile.is_game_admin = True
+        self.admin.profile.save(update_fields=["is_game_admin"])
         self.rival = User.objects.create_user("rival", "r@example.com", "pw")
         self.url = reverse("FCM:processTurn")
         self.game = Game.objects.create(

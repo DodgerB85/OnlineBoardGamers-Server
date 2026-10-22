@@ -19,7 +19,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
-from Lobby.sharedFunctions.permissions import is_game_admin
+from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -165,6 +165,9 @@ def _processKFWturn(request):
         raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("KFWpresenter", currentGame.presenter())
+
+    if jsonData.get("action") != "getBoatMeeplesAndSkills" and not can_act_in_game(request.user, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
     if jsonData["action"] == "getBoatMeeplesAndSkills":
         incomingData = presenter.decompressData(jsonData["gameData"])
@@ -708,6 +711,8 @@ def _processKFWturn(request):
         )
 
     elif jsonData["action"] == "adminDataInspection":
+        if not is_game_admin(request.user):
+            return JsonResponse({"error": gettext("Permissions missing")}, status=403)
         # data1
         playersHiddenDataArr = json.loads(currentGame.KFWplayersHiddenData)
         returnData1 = []
@@ -836,6 +841,10 @@ def _sendChatMessage(request):
             compressed_data = base64.b64decode(base64_data)
             unzipped = gzip.decompress(compressed_data).decode("utf-8")
             currentChatData = json.loads(unzipped)
+        new_entry = jsonData["newEntry"]
+        if not isinstance(new_entry, list) or len(new_entry) < 3:
+            return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
+        new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
 
         json_string = json.dumps(currentChatData)

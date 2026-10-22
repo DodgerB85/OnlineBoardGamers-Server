@@ -25,7 +25,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
-from Lobby.sharedFunctions.permissions import is_game_admin
+from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -156,6 +156,9 @@ def _processROWturn(request):
         raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("ROWpresenter", currentGame.presenter())
+
+    if not can_act_in_game(request.user, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
     if jsonData["action"] == "saveGame":
         return performSaveROWGame(request, currentGame, jsonData)
@@ -399,6 +402,10 @@ def _sendChatMessageROW(request):
             raise Http404(gettext("Game does not exist")) from None
 
         currentChatData = _decompressGenericChat(currentGame.chatData)
+        new_entry = jsonData["newEntry"]
+        if not isinstance(new_entry, list) or len(new_entry) < 3:
+            return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
+        new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
         currentGame.chatData = _compressGenericChat(currentChatData)
 

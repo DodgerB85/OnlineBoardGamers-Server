@@ -5,6 +5,9 @@ import * as IO from "../backend/URR_IO"
 import * as game from "./URRgame.js"
 import * as turnDraft from "./URRturnDraft.js"
 import * as rules from "./URRrules.js"
+import i18n from "../i18n.js"
+
+const t = i18n.global.t
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
 
@@ -39,7 +42,7 @@ export function startPlayerTurn() {
 			draft.pauseAutomatic = true
 			draft.revision++
 		} catch (error) {
-			store.gameMessages.actionError = `Unable to restore construction choices: ${error.message}`
+			store.gameMessages.actionError = t("controller.restoreChoices", { error: error.message })
 			console.error("Unable to restore declined development plan:", error)
 		}
 	}
@@ -99,7 +102,7 @@ export function undoAction() {
 	if (!canReviewTurn() || !store.turnDraft.steps.length) return
 	const checkpoint = store.turnDraft.steps.pop()
 	restoreCheckpoint(checkpoint)
-	store.turnDraft.message = "Last action undone."
+	store.turnDraft.message = t("controller.actionUndone")
 }
 
 // Remove one choice from the draft by replaying the later ones without it; if they no longer fit, nothing changes.
@@ -120,10 +123,10 @@ export async function removeDraftStep(index) {
 		steps.splice(0, steps.length, ...backup.steps)
 		store.turnDraft.ready = backup.ready
 		store.turnDraft.revision++
-		store.gameMessages.actionError = "That choice can't be removed because later choices depend on it. Undo those first."
+		store.gameMessages.actionError = t("controller.choiceLocked")
 		return false
 	}
-	store.turnDraft.message = "Choice removed."
+	store.turnDraft.message = t("controller.choiceRemoved")
 	return true
 }
 
@@ -136,7 +139,7 @@ export function resetTurn() {
 	store.viewSettings.actionIntent = ""
 	store.clearTurnDraft()
 	store.turnDraft.pauseAutomatic = true
-	store.turnDraft.message = "Turn reset."
+	store.turnDraft.message = t("controller.turnReset")
 }
 
 export async function endPlayerTurn() {

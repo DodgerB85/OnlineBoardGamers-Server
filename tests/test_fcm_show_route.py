@@ -40,6 +40,8 @@ class FcmGameAdminTest(TestCase):
     def test_game_admin_is_gated_and_renders(self):
         player = User.objects.create_user("player", "p@example.com", "pw")
         admin = User.objects.create_user("DodgerB", "d@example.com", "pw")
+        admin.profile.is_site_admin = True
+        admin.profile.save(update_fields=["is_site_admin"])
 
         self.client.force_login(player)
         self.assertEqual(self.client.get(reverse("FCM:gameAdmin")).status_code, 400)
@@ -49,8 +51,15 @@ class FcmGameAdminTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "FCM/gameAdmin.html")
 
+    def test_username_alone_does_not_grant_admin(self):
+        impostor = User.objects.create_user("DodgerB", "x@example.com", "pw")
+        self.client.force_login(impostor)
+        self.assertEqual(self.client.get(reverse("FCM:gameAdmin")).status_code, 400)
+
     def test_move_data_endpoint_returns_restructuring_moves(self):
         admin = User.objects.create_user("admin", "a@example.com", "pw")
+        admin.profile.is_site_admin = True
+        admin.profile.save(update_fields=["is_site_admin"])
         game = Game.objects.create(
             gameCode="FCM",
             creator=admin,

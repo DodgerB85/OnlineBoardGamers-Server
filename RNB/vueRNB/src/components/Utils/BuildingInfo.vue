@@ -50,19 +50,23 @@ const showRemainingProd = computed(() => {
 	return props.bldg !== undefined && rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase)
 })
 
+// The panel can render before store.players finishes loading, so the current-player index may
+// point nowhere; fall back to a missing icon rather than crash the whole view.
+const transporterColour = computed(() => {
+	let i = controller.currentPlayerIndex()
+	if (store.players[i] === undefined) i = 0
+	return store.players[i] ? personal.getCorrectedColour(store.players[i].colour) : ""
+})
+
 const buildingInputImages = computed(() => {
 	const bldgStats = buildingStats.value
 	const buildingType = bldgStats.building
 	let ret = []
 
-	// Quick emergency check here
-	let localCurrentPlayerIndex = controller.currentPlayerIndex()
-	if (localCurrentPlayerIndex < 0) localCurrentPlayerIndex = 0
-
 	// Handle BLDG_WAGON_FACTORY as it requires transporter input as well as res
 	if (buildingType === rf.BLDG_WAGON_FACTORY) {
 		ret.push([])
-		ret[0].push("transporter_" + String(rf.DONKEY) + "_" + personal.getCorrectedColour(store.players[localCurrentPlayerIndex].colour))
+		ret[0].push("transporter_" + String(rf.DONKEY) + "_" + transporterColour.value)
 		ret[0].push(`res_${rf.RES_BOARDS}`)
 		ret[0].push(`res_${rf.RES_BOARDS}`)
 		return ret
@@ -82,7 +86,7 @@ const buildingInputImages = computed(() => {
 		for (let j = 0; j < bldgStats.inputRes[i].length; j++) {
 			// If it's a res, show the resource; otherwise it's a transporter input (donkey)
 			if (bldgStats.inputRes[i][j] < rf.RES_UPPER_LIMIT) ret[i].push(`res_${bldgStats.inputRes[i][j]}`)
-			else ret[i].push(`transporter_${bldgStats.inputRes[i][j]}_${personal.getCorrectedColour(store.players[localCurrentPlayerIndex].colour)}`)
+			else ret[i].push(`transporter_${bldgStats.inputRes[i][j]}_${transporterColour.value}`)
 		}
 	}
 	return ret

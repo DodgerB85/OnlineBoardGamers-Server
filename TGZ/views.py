@@ -24,7 +24,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
-from Lobby.sharedFunctions.permissions import is_game_admin
+from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_updateFlexiTime,
@@ -219,6 +219,9 @@ def _processTGZturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist")) from None
 
+    if not can_act_in_game(request.user, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
+
     # Helper function to update current players
     def set_current_players(next_player_str, acting_username=None, old_latest_update=None):
         """Update current players for Game model"""
@@ -273,6 +276,8 @@ def _processTGZturn(request):
         return JsonResponse(response_data, safe=False)
 
     elif action == "replaceExternalTournamentPlayer":
+        if not is_game_admin(request.user):
+            return JsonResponse({"error": gettext("Permissions missing")}, status=403)
         # Check if old version is older than DB version, and if so, return
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")
@@ -685,7 +690,11 @@ def _sendChatMessage(request):
                 # Handle potential errors during decompression or JSON parsing
                 print(f"Error processing chat data: {e}")
                 currentChatData = []  # Or handle the error as appropriate
-        currentChatData.insert(0, jsonData["newEntry"])
+        new_entry = jsonData["newEntry"]
+        if not isinstance(new_entry, list) or len(new_entry) < 3:
+            return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
+        new_entry[0] = request.user.username
+        currentChatData.insert(0, new_entry)
 
         # save chat data.
         compressedChatData = LZS.compressToEncodedURIComponent(json.dumps(currentChatData))
