@@ -35,6 +35,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 from . import ROWconstants as rfROW
 from .common import create_row_game
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 ROW_DB_LOCK_NAME = "lockROWgame_"
 
@@ -403,7 +404,12 @@ def _sendChatMessageROW(request):
 
         currentChatData = _decompressGenericChat(currentGame.chatData)
         new_entry = jsonData["newEntry"]
-        if not isinstance(new_entry, list) or len(new_entry) < 3:
+        if (
+            not isinstance(new_entry, list)
+            or len(new_entry) < 3
+            or not isinstance(new_entry[2], str)
+            or len(new_entry[2]) > 2000
+        ):
             return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
         new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
@@ -422,7 +428,7 @@ def _decompressGenericChat(base64_data):
     currentChatData = []
     if base64_data and len(base64_data) > 0:
         compressed_data = base64.b64decode(base64_data)
-        unzipped = gzip.decompress(compressed_data).decode("utf-8")
+        unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
         currentChatData = json.loads(unzipped)
     return currentChatData
 

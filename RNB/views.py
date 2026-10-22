@@ -44,6 +44,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from . import RNBconstants as rfRNB
 from .common import create_rnb_game
 from .models import RNBmap, RNBMapScore
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 RNB_DB_LOCK_NAME = "lockRNBgame_"
 
@@ -1234,7 +1235,7 @@ RNB_WATER_TRANSPORTER_TYPES = {33, 34, 35}  # raft, rowboat, steamer
 def _decompress_rnb_trade_data(raw_trade_data):
     if not raw_trade_data:
         return {"playerTrades": []}
-    return json.loads(gzip.decompress(bytearray(base64.b64decode(raw_trade_data))).decode("utf-8"))
+    return json.loads(safe_gzip_decompress(bytearray(base64.b64decode(raw_trade_data))).decode("utf-8"))
 
 
 def _compress_rnb_trade_data(trade_data):
@@ -1242,7 +1243,7 @@ def _compress_rnb_trade_data(trade_data):
 
 
 def _decompress_rnb_gamedata(string_to_decompress):
-    return json.loads(gzip.decompress(bytearray(base64.b64decode(string_to_decompress))).decode("utf-8"))
+    return json.loads(safe_gzip_decompress(bytearray(base64.b64decode(string_to_decompress))).decode("utf-8"))
 
 
 def _compress_rnb_gamedata(raw_data):
@@ -1763,10 +1764,15 @@ def _sendChatMessageRNB(request):
         base64_data = currentGame.chatData if currentGame.chatData else ""
         if len(base64_data) > 0:
             compressed_data = base64.b64decode(base64_data)
-            unzipped = gzip.decompress(compressed_data).decode("utf-8")
+            unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
             currentChatData = json.loads(unzipped)
         new_entry = jsonData["newEntry"]
-        if not isinstance(new_entry, list) or len(new_entry) < 3:
+        if (
+            not isinstance(new_entry, list)
+            or len(new_entry) < 3
+            or not isinstance(new_entry[2], str)
+            or len(new_entry[2]) > 2000
+        ):
             return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
         new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
@@ -2257,8 +2263,8 @@ def PwipeAllMoveData(currentGame):
 
 
 def PdecompressData(string_to_decompress):
-    # return json.loads(gzip.decompress(base64.b64decode(string_to_decompress)).decode("utf-8"))
-    return json.loads(gzip.decompress(bytearray(base64.b64decode(string_to_decompress))).decode("utf-8"))
+    # return json.loads(safe_gzip_decompress(base64.b64decode(string_to_decompress)).decode("utf-8"))
+    return json.loads(safe_gzip_decompress(bytearray(base64.b64decode(string_to_decompress))).decode("utf-8"))
 
 
 def setPlayerStackToCurrent(currentGame, playerName):

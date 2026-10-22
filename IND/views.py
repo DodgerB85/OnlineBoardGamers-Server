@@ -29,6 +29,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 
 from .common import create_ind_game
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 if TYPE_CHECKING:
     from Lobby.presenters import INDpresenter
@@ -548,7 +549,7 @@ def _processINDturn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         # decompress the move data array
-        # moveDataArray = json.loads(gzip.decompress(bytearray(base64.b64decode(jsonData["data"]))).decode("utf-8"))
+        # moveDataArray = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(jsonData["data"]))).decode("utf-8"))
         moveDataArray = jsonData["data"]
 
         # First, check for deletion
@@ -668,10 +669,15 @@ def _sendChatMessage(request):
         base64_data = currentGame.chatData if currentGame.chatData else ""
         if len(base64_data) > 0:
             compressed_data = base64.b64decode(base64_data)
-            unzipped = gzip.decompress(compressed_data).decode("utf-8")
+            unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
             currentChatData = json.loads(unzipped)
         new_entry = jsonData["newEntry"]
-        if not isinstance(new_entry, list) or len(new_entry) < 3:
+        if (
+            not isinstance(new_entry, list)
+            or len(new_entry) < 3
+            or not isinstance(new_entry[2], str)
+            or len(new_entry[2]) > 2000
+        ):
             return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
         new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)

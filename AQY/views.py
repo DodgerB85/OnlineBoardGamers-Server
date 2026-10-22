@@ -32,6 +32,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 from . import AQYconstants as rfAQY
 from .common import create_aqy_game
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 if TYPE_CHECKING:
     from Lobby.presenters import AQYpresenter
@@ -222,7 +223,7 @@ def _processAQYturn(request):
         if moveDataTime == "PRE_MOVE":
             moveData = presenter.getMoveData(jsonData["nextPlayer"][0])
             # decompress the move data
-            preTurnArray = json.loads(gzip.decompress(bytearray(base64.b64decode(moveData))).decode("utf-8"))
+            preTurnArray = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(moveData))).decode("utf-8"))
             preTurnIndex = next(
                 (index for index, entry in enumerate(preTurnArray) if entry.get("phase") == jsonData["phase"] + rfAQY.PRE_PHASE_OFFSET),
                 None,
@@ -359,7 +360,7 @@ def _processAQYturn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         # decompress the move data array
-        moveDataArray = json.loads(gzip.decompress(bytearray(base64.b64decode(jsonData["data"]))).decode("utf-8"))
+        moveDataArray = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(jsonData["data"]))).decode("utf-8"))
         # add / replace the current phase move data. # recompress and save.
         presenter.updatePreMove(request.user.username, jsonData["prePhase"], moveDataArray)
 
@@ -407,17 +408,17 @@ def _processAQYturn(request):
         # playerTradeData[0] contains a possible update to the player's data
         opponentsAvailableResources = []
         if currentGame.playerTradeData != "":
-            playerTradeData = json.loads(gzip.decompress(bytearray(base64.b64decode(currentGame.playerTradeData))).decode("utf-8"))
+            playerTradeData = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(currentGame.playerTradeData))).decode("utf-8"))
             if len(playerTradeData["playerCityLockedData"][opponentsPlayerIndex]) > 0:
                 # This is already compressed. So need to also decompress it
-                opponentData = json.loads(gzip.decompress(bytearray(base64.b64decode(playerTradeData["playerCityLockedData"][opponentsPlayerIndex]))).decode("utf-8"))
+                opponentData = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(playerTradeData["playerCityLockedData"][opponentsPlayerIndex]))).decode("utf-8"))
                 opponentsAvailableResources = opponentData[4]
             else:
-                raw_data = json.loads(gzip.decompress(bytearray(base64.b64decode(currentGame.gameData))).decode("utf-8"))
+                raw_data = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(currentGame.gameData))).decode("utf-8"))
                 opponentData = raw_data[1][opponentsPlayerIndex]
                 opponentsAvailableResources = opponentData[6]
         else:
-            raw_data = json.loads(gzip.decompress(bytearray(base64.b64decode(currentGame.gameData))).decode("utf-8"))
+            raw_data = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(currentGame.gameData))).decode("utf-8"))
             opponentData = raw_data[1][opponentsPlayerIndex]
             opponentsAvailableResources = opponentData[6]
         for res in opponentsResources:
@@ -430,7 +431,7 @@ def _processAQYturn(request):
         # So save the trade
         playerTradeData = []
         if currentGame.playerTradeData != "":
-            playerTradeData = json.loads(gzip.decompress(bytearray(base64.b64decode(currentGame.playerTradeData))).decode("utf-8"))
+            playerTradeData = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(currentGame.playerTradeData))).decode("utf-8"))
         else:
             # first_entry = [[] for _ in range(currentGame.maxPlayers)]
             # playerTradeData = [first_entry, []]
@@ -492,7 +493,7 @@ def _processAQYturn(request):
             currentGame.save()
             return JsonResponse({"endMoveError": True}, safe=False)
 
-        playerTradeData = json.loads(gzip.decompress(bytearray(base64.b64decode(currentGame.playerTradeData))).decode("utf-8"))
+        playerTradeData = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(currentGame.playerTradeData))).decode("utf-8"))
 
         # Check trade is still valid
         if currentGame.playerTradeData == "":
@@ -516,14 +517,14 @@ def _processAQYturn(request):
         #    if len(playerTradeData['playerCityLockedData'][fromPlayerIndex]) > 0:
         #        # This is already compressed. So need to also decompress it
         #        #raw_opponentData = raw_data[0][fromPlayerIndex]
-        #        opponentData = json.loads(gzip.decompress(bytearray(base64.b64decode(playerTradeData['playerCityLockedData'][fromPlayerIndex]))).decode('utf-8'))
+        #        opponentData = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(playerTradeData['playerCityLockedData'][fromPlayerIndex]))).decode('utf-8'))
         #        fromAvailableResources = opponentData[4]
         #    else:
-        #        raw_data = json.loads(gzip.decompress(bytearray(base64.b64decode(currentGame.gameData))).decode('utf-8'))
+        #        raw_data = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(currentGame.gameData))).decode('utf-8'))
         #        opponentData = raw_data[1][fromPlayerIndex]
         #        fromAvailableResources = opponentData[6]
         # else:
-        #    raw_data = json.loads(gzip.decompress(bytearray(base64.b64decode(currentGame.gameData))).decode('utf-8'))
+        #    raw_data = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(currentGame.gameData))).decode('utf-8'))
         #    opponentData = raw_data[1][opponentsPlayerIndex]
         #    fromAvailableResources = opponentData[6]
         # if len(fromAvailableResources) > 0:
@@ -544,12 +545,12 @@ def _processAQYturn(request):
         opponentsAvailableResources = []
 
         byte_array = bytearray(base64.b64decode(yourMoveDataCompressed))
-        decompressed_data = gzip.decompress(byte_array)
+        decompressed_data = safe_gzip_decompress(byte_array)
         decompressed_string = decompressed_data.decode("utf-8")
         yourMoveData = json.loads(decompressed_string)
         yourAvailableResources = yourMoveData[4]
         byte_array = bytearray(base64.b64decode(opponentsMoveDataCompressed))
-        decompressed_data = gzip.decompress(byte_array)
+        decompressed_data = safe_gzip_decompress(byte_array)
         decompressed_string = decompressed_data.decode("utf-8")
         opponentsMoveData = json.loads(decompressed_string)
         opponentsAvailableResources = opponentsMoveData[4]
@@ -668,7 +669,7 @@ def _processAQYturn(request):
     elif jsonData["action"] == "removePlayerFromHardTradeReset":
         playerIndex = jsonData["playerIndex"]
 
-        playerTradeData = json.loads(gzip.decompress(bytearray(base64.b64decode(currentGame.playerTradeData))).decode("utf-8"))
+        playerTradeData = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(currentGame.playerTradeData))).decode("utf-8"))
 
         if playerIndex in playerTradeData["playersRequiringHardReset"]:
             playerTradeData["playersRequiringHardReset"].remove(playerIndex)
@@ -727,7 +728,7 @@ def _processAQYturn(request):
         if currentGame.playerTradeData != "":
             seat = presenter.seatPosition(jsonData["BKSN"])
             byte_array = bytearray(base64.b64decode(currentGame.playerTradeData))
-            decompressed_data = gzip.decompress(byte_array)
+            decompressed_data = safe_gzip_decompress(byte_array)
             decompressed_string = decompressed_data.decode("utf-8")
             playerTradeData = json.loads(decompressed_string)
             # Find and remove the entry from playerTradeData
@@ -765,7 +766,7 @@ def _processAQYturn(request):
         if currentGame.playerTradeData != "":
             seat = presenter.seatPosition(jsonData["BKSN"])
             byte_array = bytearray(base64.b64decode(currentGame.playerTradeData))
-            decompressed_data = gzip.decompress(byte_array)
+            decompressed_data = safe_gzip_decompress(byte_array)
             decompressed_string = decompressed_data.decode("utf-8")
             playerTradeData = json.loads(decompressed_string)
             # Find and remove the entry from playerTradeData
@@ -1065,10 +1066,15 @@ def _sendChatMessage(request):
         base64_data = currentGame.chatData if currentGame.chatData else ""
         if len(base64_data) > 0:
             compressed_data = base64.b64decode(base64_data)
-            unzipped = gzip.decompress(compressed_data).decode("utf-8")
+            unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
             currentChatData = json.loads(unzipped)
         new_entry = jsonData["newEntry"]
-        if not isinstance(new_entry, list) or len(new_entry) < 3:
+        if (
+            not isinstance(new_entry, list)
+            or len(new_entry) < 3
+            or not isinstance(new_entry[2], str)
+            or len(new_entry[2]) > 2000
+        ):
             return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
         new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)

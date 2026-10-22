@@ -35,6 +35,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 from . import URRconstants as rfURR
 from .common import create_urr_game
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 URR_DB_LOCK_NAME = "lockURRgame_"
 
@@ -345,7 +346,7 @@ def performSaveURRGame(request, currentGame, jsonData):
 
 def decompressRewindPoint(point):
     if point.startswith("gzip:"):
-        return gzip.decompress(base64.b64decode(point[5:])).decode("utf-8")
+        return safe_gzip_decompress(base64.b64decode(point[5:])).decode("utf-8")
     return point
 
 
@@ -355,7 +356,7 @@ def decodeGameData(gameData):
     try:
         return json.loads(gameData)
     except (json.JSONDecodeError, TypeError):
-        return json.loads(gzip.decompress(base64.b64decode(gameData)).decode("utf-8"))
+        return json.loads(safe_gzip_decompress(base64.b64decode(gameData)).decode("utf-8"))
 
 
 def openingPosition(gameData):
@@ -438,7 +439,12 @@ def _sendChatMessageURR(request):
 
         currentChatData = _decompressGenericChat(currentGame.chatData)
         new_entry = jsonData["newEntry"]
-        if not isinstance(new_entry, list) or len(new_entry) < 3:
+        if (
+            not isinstance(new_entry, list)
+            or len(new_entry) < 3
+            or not isinstance(new_entry[2], str)
+            or len(new_entry[2]) > 2000
+        ):
             return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
         new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
@@ -457,7 +463,7 @@ def _decompressGenericChat(base64_data):
     currentChatData = []
     if base64_data and len(base64_data) > 0:
         compressed_data = base64.b64decode(base64_data)
-        unzipped = gzip.decompress(compressed_data).decode("utf-8")
+        unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
         currentChatData = json.loads(unzipped)
     return currentChatData
 

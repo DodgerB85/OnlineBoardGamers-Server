@@ -20,6 +20,7 @@ from Lobby.sharedFunctions.hotStreaks import record_hot_streak
 from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
 )
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 
 class GamePresenter:
@@ -961,7 +962,7 @@ class AQYpresenter(GamePresenter):
             gp.save()
             return
 
-        current_data = json.loads(gzip.decompress(bytearray(base64.b64decode(gp.currentMoveData))).decode("utf-8"))
+        current_data = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(gp.currentMoveData))).decode("utf-8"))
         index_to_remove = next(
             (index for index, entry in enumerate(current_data) if entry.get("phase") == phase),
             None,
@@ -1038,7 +1039,7 @@ class AQYpresenter(GamePresenter):
         if self.gameObj.playerTradeData == "":
             return
 
-        playerTradeData = json.loads(gzip.decompress(bytearray(base64.b64decode(self.gameObj.playerTradeData))).decode("utf-8"))
+        playerTradeData = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(self.gameObj.playerTradeData))).decode("utf-8"))
 
         for subarray in playerTradeData["playerTrades"]:
             if subarray == entry:
@@ -1052,11 +1053,11 @@ class AQYpresenter(GamePresenter):
         import json
 
         if self.gameObj.playerTradeData != "":
-            playerTradeData = json.loads(gzip.decompress(bytearray(base64.b64decode(self.gameObj.playerTradeData))).decode("utf-8"))
+            playerTradeData = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(self.gameObj.playerTradeData))).decode("utf-8"))
 
             for i, player in enumerate(playerTradeData["playerCityLockedData"]):
                 if len(player) > 0:
-                    playerData = json.loads(gzip.decompress(bytearray(base64.b64decode(player))).decode("utf-8"))
+                    playerData = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(player))).decode("utf-8"))
                     for playerPromise in playerData[8]:
                         if playerPromise == promise:
                             playerData[8].remove(promise)
@@ -1064,7 +1065,7 @@ class AQYpresenter(GamePresenter):
 
             self.gameObj.playerTradeData = base64.b64encode(gzip.compress(json.dumps(playerTradeData).encode("utf-8"))).decode("utf-8")
 
-        raw_data = json.loads(gzip.decompress(bytearray(base64.b64decode(self.gameObj.gameData))).decode("utf-8"))
+        raw_data = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(self.gameObj.gameData))).decode("utf-8"))
         for playerData in raw_data[1]:
             for playerPromise in playerData[9]:
                 if playerPromise == promise:
@@ -1711,7 +1712,7 @@ class RNBpresenter(GamePresenter):
             gp.save()
             return
 
-        current_data = json.loads(gzip.decompress(bytearray(base64.b64decode(gp.currentMoveData))).decode("utf-8"))
+        current_data = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(gp.currentMoveData))).decode("utf-8"))
         index_to_remove = next(
             (index for index, entry in enumerate(current_data) if entry.get("phase") == phase),
             None,
@@ -3360,7 +3361,7 @@ class KFWpresenter(GamePresenter):
         return base64.b64encode(gzip.compress(json.dumps(data_to_compress).encode("utf-8"))).decode("utf-8")
 
     def decompressData(self, string_to_decompress):
-        return json.loads(gzip.decompress(bytearray(base64.b64decode(string_to_decompress))).decode("utf-8"))
+        return json.loads(safe_gzip_decompress(bytearray(base64.b64decode(string_to_decompress))).decode("utf-8"))
 
     def getGameData3compressed(self):
         if self.gameObj.KFWserverData == "":

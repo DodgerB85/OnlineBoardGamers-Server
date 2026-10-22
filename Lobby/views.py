@@ -69,12 +69,13 @@ from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.loginThrottle import (
     LOGIN_FAILURE_KEY,
     clear_failures,
+    client_ip,
     failure_key as make_failure_key,
     is_locked,
     record_failure,
 )
 from Lobby.sharedFunctions.permissions import is_site_admin
-from Lobby.sharedFunctions.rateLimit import is_rate_limited
+from Lobby.sharedFunctions.rateLimit import is_rate_limited, rate_limit
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_getMiniTournamentCreationJsonReturn,
@@ -123,6 +124,7 @@ from .models import (
     changelog,
 )
 from .tokens import account_activation_token
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 User = get_user_model()
 
@@ -858,6 +860,9 @@ def handler500(request, exception=None, *_, **_k):
         message = f"Failed to build full report: {str(format_error)}\n\nRaw Traceback:\n{raw_traceback}"
 
     # 2. GUARANTEED EMAIL ATTEMPT (Isolated from Discord)
+    notify = not is_rate_limited(f"handler500:{client_ip(request)}:{request.path}", 3, 600) and not is_rate_limited("handler500:global", 20, 600)
+    if not notify:
+        return render(request, "Lobby/500.html", status=500)
     try:
         mail_admins(subject, message, fail_silently=False)
     except Exception as email_error:
@@ -929,45 +934,48 @@ def next_game_redirect(request):
 
 
 def password_reset_request(request):
+    generic_message = gettext("If that email address is registered, a reset link has been sent. Please check your inbox and spam folder.")
     if request.method == "POST":
+        if is_rate_limited(f"password_reset:{client_ip(request)}", 5, 3600):
+            messages.success(request, generic_message)
+            return redirect("/")
+
         password_reset_form = PasswordResetFormCustom(request.POST)
         if password_reset_form.is_valid():
             data = password_reset_form.cleaned_data["email"]
-            associated_users = User.objects.filter(Q(email=data))
-            if associated_users.exists():
-                for user in associated_users:
-                    current_site = get_current_site(request)
-                    subject = gettext("Password Reset Requested")
-                    email_template_name = "Lobby/password/password_reset_email.txt"
-                    c = {
-                        "email": user.email,
-                        "domain": current_site.domain,
-                        "site_name": "Website",
-                        "uid": urlsafe_base64_encode(force_bytes(user.pk)),
-                        "user": user,
-                        "token": default_token_generator.make_token(user),
-                        "protocol": "https",
-                        "username": user.username,
-                    }
-                    email = render_to_string(email_template_name, c)
-                    try:
-                        send_mail(
-                            subject,
-                            email,
-                            config("OBG_EMAIL_HOST_USER"),
-                            [user.email],
-                            fail_silently=False,
-                        )
-                    except BadHeaderError:
-                        return HttpResponse("Invalid header found.")
+            if is_rate_limited(f"password_reset_email:{data.strip().lower()}", 3, 3600):
+                messages.success(request, generic_message)
+                return redirect("/")
 
-                    messages.success(
-                        request,
-                        gettext("An email with password reset instructions has been sent to your inbox. Please check spam folders"),
+            associated_users = User.objects.filter(Q(email=data))
+            for user in associated_users:
+                current_site = get_current_site(request)
+                subject = gettext("Password Reset Requested")
+                email_template_name = "Lobby/password/password_reset_email.txt"
+                c = {
+                    "email": user.email,
+                    "domain": current_site.domain,
+                    "site_name": "Website",
+                    "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+                    "user": user,
+                    "token": default_token_generator.make_token(user),
+                    "protocol": "https",
+                    "username": user.username,
+                }
+                email = render_to_string(email_template_name, c)
+                try:
+                    send_mail(
+                        subject,
+                        email,
+                        config("OBG_EMAIL_HOST_USER"),
+                        [user.email],
+                        fail_silently=False,
                     )
-                    return redirect("/")
-            else:
-                messages.error(request, gettext("No user found with this email"))
+                except BadHeaderError:
+                    return HttpResponse("Invalid header found.")
+
+            messages.success(request, generic_message)
+            return redirect("/")
         else:
             messages.error(request, gettext("Please enter a valid email address"))
     password_reset_form = PasswordResetFormCustom()
@@ -1627,8 +1635,9 @@ def login_view(request):
             # Discord has a 2000 character limit, so we truncate if needed
             content = f"**!!! LOGIN ATTEMPT: Missing Fields !!!**\n```json\n{formatted_data[:1800]}\n```"
 
-            # Send to Discord
-            SN_sendAdminErrorMessage(content)
+            # Send to Discord (rate-limited: this branch is reachable without login)
+            if not is_rate_limited(f"login_missing:{client_ip(request)}", 5, 600):
+                SN_sendAdminErrorMessage(content)
 
             messages.error(request, gettext("Username and password are required."))
             return render(request, "Lobby/login.html")
@@ -2767,6 +2776,10 @@ class registerView(View):
         return render(request, self.template_name, {"form": form})
 
     def post(self, request, *args, **kwargs):
+        if is_rate_limited(f"register:{client_ip(request)}", 5, 3600):
+            messages.error(request, gettext("Too many sign-up attempts. Please try again later."))
+            return render(request, self.template_name, {"form": self.form_class()})
+
         form = self.form_class(request.POST)
         if form.is_valid():
             # Limit intial signups
@@ -4662,7 +4675,7 @@ def _sendMTchatMessage(request):
     base64_data = currentMT.chatData if currentMT.chatData else ""
     if len(base64_data) > 0:
         compressed_data = base64.b64decode(base64_data)
-        unzipped = gzip.decompress(compressed_data).decode("utf-8")
+        unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
         currentChatData = json.loads(unzipped)
     currentChatData.insert(0, new_entry)
 
@@ -4696,6 +4709,7 @@ def reloadMTchatData(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createFCMminiTournament(request):
     # experienced = SF_hasRequiredExperience(request, "FCM", Game)
     if request.method != "POST":
@@ -4756,6 +4770,8 @@ def createFCMminiTournament(request):
     return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
 
 
+@login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createTGZminiTournament(request):
     if request.method != "POST":
         return render(
@@ -4824,6 +4840,7 @@ def createTGZminiTournament(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createHLCminiTournament(request):
     if request.method != "POST":
         return render(
@@ -4888,6 +4905,7 @@ def createHLCminiTournament(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createBUSminiTournament(request):
     if request.method != "POST":
         return render(
@@ -4949,6 +4967,7 @@ def createBUSminiTournament(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createAQYminiTournament(request):
     if request.method != "POST":
         return render(
@@ -5008,6 +5027,7 @@ def createAQYminiTournament(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createINDminiTournament(request):
     if request.method != "POST":
         return render(
@@ -5071,6 +5091,7 @@ def createINDminiTournament(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createRNBminiTournament(request):
     if request.method != "POST":
         return render(
@@ -5136,6 +5157,7 @@ def createRNBminiTournament(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createCNSminiTournament(request):
     if request.method != "POST":
         return render(
@@ -5201,6 +5223,7 @@ def createCNSminiTournament(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createWEBminiTournament(request):
     if request.method != "POST":
         return render(
@@ -5260,6 +5283,7 @@ def createWEBminiTournament(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createKFWminiTournament(request):
     if request.method != "POST":
         return render(
@@ -5536,7 +5560,7 @@ def _sendMainTchatMessage(request):
     base64_data = currentMainT.chatData if currentMainT.chatData else ""
     if len(base64_data) > 0:
         compressed_data = base64.b64decode(base64_data)
-        unzipped = gzip.decompress(compressed_data).decode("utf-8")
+        unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
         currentChatData = json.loads(unzipped)
     currentChatData.insert(0, new_entry)
 

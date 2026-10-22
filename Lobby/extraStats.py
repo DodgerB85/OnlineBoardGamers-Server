@@ -1,5 +1,4 @@
 import base64
-import gzip
 import json
 import logging
 from collections import Counter
@@ -16,6 +15,7 @@ from lzstring import LZString
 import Lobby.sharedFunctions.constants as rf
 from Lobby.models import Game
 from Lobby.sharedFunctions.sharedRefs import SR_GAMES_CODES_AND_NAMES_CHOICES
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ def decode_game_data(game):
         return json.loads(LZString().decompressFromEncodedURIComponent(game.gameData))
     if game.gameData.lstrip().startswith(("[", "{")):
         return json.loads(game.gameData)
-    raw = gzip.decompress(base64.b64decode(game.gameData))
+    raw = safe_gzip_decompress(base64.b64decode(game.gameData))
     if game.gameCode == "BUS" and not raw.lstrip().startswith((b"[", b"{")):
         return msgpack.unpackb(raw, raw=False)
     return json.loads(raw)

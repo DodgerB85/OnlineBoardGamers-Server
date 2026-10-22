@@ -35,6 +35,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 from . import DDLconstants as rfDDL
 from .common import create_ddl_game
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 DDL_DB_LOCK_NAME = "lockDDLgame_"
 
@@ -455,7 +456,7 @@ def _decompressGenericChat(base64_data):
     currentChatData = []
     if base64_data and len(base64_data) > 0:
         compressed_data = base64.b64decode(base64_data)
-        unzipped = gzip.decompress(compressed_data).decode("utf-8")
+        unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
         currentChatData = json.loads(unzipped)
     return currentChatData
 

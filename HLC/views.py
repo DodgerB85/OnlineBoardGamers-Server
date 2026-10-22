@@ -90,6 +90,11 @@ def _processHLCturn(request):
     if jsonData.get("action") not in ("load", "refreshChat") and not can_act_in_game(request.user, currentGame):
         return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
+    for key in ("content", "data", "other"):
+        value = jsonData.get(key)
+        if isinstance(value, str) and len(value) > 500_000:
+            return JsonResponse({"error": gettext("Payload too large")}, status=413)
+
     if jsonData["action"] == "turn0move":
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             return JsonResponse({"syncError": True}, safe=False)
@@ -114,6 +119,8 @@ def _processHLCturn(request):
             # open up the game data.
             x = lzstring.LZString()
             raw_game_data = x.decompressFromEncodedURIComponent(currentGame.gameData or "{}")
+            if raw_game_data and len(raw_game_data) > 8_000_000:
+                return JsonResponse({"error": gettext("Payload too large")}, status=413)
             # Fallback to "{}" if decompression returns None
             gameDataString = raw_game_data if raw_game_data is not None else "{}"
             rawModel = json.loads(gameDataString)
@@ -124,6 +131,8 @@ def _processHLCturn(request):
                 move_data_raw = all_gps[i].currentMoveData if i < len(all_gps) else ""
 
                 decompressed_move = x.decompressFromEncodedURIComponent(move_data_raw or "")
+                if decompressed_move and len(decompressed_move) > 8_000_000:
+                    return JsonResponse({"error": gettext("Payload too large")}, status=413)
                 # Fallback to "{}" if decompression fails
                 rawModel[3][i][0] = json.loads(decompressed_move if decompressed_move is not None else "{}")
 
@@ -177,10 +186,15 @@ def _processHLCturn(request):
             name = jsonData["BKSN"]
 
         # Use a fallback string if decompression returns None
-        incomingFactoryDataRaw = json.loads(LZS.decompressFromEncodedURIComponent(jsonData["data"]) or "{}")
-        DBgameDataRaw = json.loads(LZS.decompressFromEncodedURIComponent(currentGame.gameData) or "[]")
+        incoming_data = LZS.decompressFromEncodedURIComponent(jsonData["data"]) or "{}"
+        db_data = LZS.decompressFromEncodedURIComponent(currentGame.gameData) or "[]"
+        other_data = LZS.decompressFromEncodedURIComponent(jsonData["other"]) or "[]"
+        if max(len(incoming_data), len(db_data), len(other_data)) > 8_000_000:
+            return JsonResponse({"error": gettext("Payload too large")}, status=413)
+        incomingFactoryDataRaw = json.loads(incoming_data)
+        DBgameDataRaw = json.loads(db_data)
         DBavailableComponents = DBgameDataRaw[0].copy() if DBgameDataRaw else []
-        other = json.loads(LZS.decompressFromEncodedURIComponent(jsonData["other"]) or "[]")
+        other = json.loads(other_data)
 
         FDBE = other[0]
         FCIATT = other[1]
@@ -951,6 +965,8 @@ def chat(request):
         currentChatData = currentGame.chatData
 
         newMessage = jsonData["message"]
+        if not isinstance(newMessage, str) or len(newMessage) > 2000:
+            return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
         newMessage = newMessage.replace("\n", " ").replace("\r", "")
 
         playerName = request.user.username

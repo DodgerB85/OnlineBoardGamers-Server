@@ -37,6 +37,7 @@ from Lobby.sharedFunctions.sharedRefs import SR_getFCMstartingOptionsHTML
 
 from . import FCMconstants as rfFCM
 from .common import create_fcm_game
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 if TYPE_CHECKING:
     from Lobby.presenters import FCMpresenter
@@ -866,7 +867,7 @@ def _processTurn(request):
         # If it WAS a working day save the side data (pre moves) - UNLESS it is now working day again
         # So also check you're not coming from Turn Order
         if not trainingGame and nameToUse != "" and oldPhase != rfFCM.PHASE_TURN_ORDER and jsonData["phase"] != rfFCM.PHASE_RESTRUCTURING and (jsonData["phase"] == rfFCM.PHASE_WORKING_DAY or oldPhase == rfFCM.PHASE_WORKING_DAY) and jsonData["sideData"] and jsonData["sideData"] != "":
-            preMoveArray = json.loads(gzip.decompress(bytearray(base64.b64decode(jsonData["sideData"]))).decode("utf-8"))
+            preMoveArray = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(jsonData["sideData"]))).decode("utf-8"))
             # currentGame.updateWholeMoveData(nameToUse, json.dumps(preMoveArray, separators=(",", ":")))
             phases = [
                 rfFCM.PHASE_WORKING_DAY,
@@ -1059,7 +1060,7 @@ def _processTurn(request):
                     rfFCM.PHASE_CHOOSE_CEO_BONUS,
                 ]
             # Decompress the incoming data
-            decompressedData = json.loads(gzip.decompress(bytearray(base64.b64decode(jsonData["moveData"]))).decode("utf-8"))
+            decompressedData = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(jsonData["moveData"]))).decode("utf-8"))
 
             presenter.insertPlayerMoveData(nameToUpdate, phaseArr, decompressedData)
 
@@ -1100,7 +1101,7 @@ def _processTurn(request):
             return _syncErrorResponse("FCM kickout - preTurn:", request, currentGame, presenter, jsonData)
 
         # decompress the move data array
-        preMoveArray = json.loads(gzip.decompress(bytearray(base64.b64decode(jsonData["data"]))).decode("utf-8"))
+        preMoveArray = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(jsonData["data"]))).decode("utf-8"))
 
         # FIX THIS TO ALLOW NAME CHECK (or just don't do pre turns with FCMtA)
         phaseArr = [
@@ -1538,10 +1539,15 @@ def _sendChatMessage(request):
         currentChatData = []
         if currentGame.chatData:
             compressed_data = base64.b64decode(currentGame.chatData)
-            unzipped = gzip.decompress(compressed_data).decode("utf-8")
+            unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
             currentChatData = json.loads(unzipped)
         new_entry = jsonData["newEntry"]
-        if not isinstance(new_entry, list) or len(new_entry) < 3:
+        if (
+            not isinstance(new_entry, list)
+            or len(new_entry) < 3
+            or not isinstance(new_entry[2], str)
+            or len(new_entry[2]) > 2000
+        ):
             return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
         new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
