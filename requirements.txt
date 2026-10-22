@@ -7,7 +7,7 @@ django-user-visit==2.1
 idna==3.15
 mysqlclient==2.3.0
 python-decouple==3.8
-requests==2.33.0
+requests==2.34.2
 six==1.17.0
 sqlparse==0.6.0
 tzdata==2025.3
