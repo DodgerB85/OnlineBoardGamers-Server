@@ -120,7 +120,7 @@ urlpatterns = [
     path(
         "favicon.ico",
         RedirectView.as_view(
-            url=settings.STATIC_URL + "Lobby/favicon.ico",
+            url=settings.STATIC_URL + "Lobby/favicons/favicon.ico",
             permanent=True,
         ),
     ),

@@ -1,12 +1,15 @@
 {% load static %}
 {% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE|default:'en-gb' }}">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=1400, interactive-widget=resizes-content" />
-    <link rel="icon" type="image/png" href="{% static 'Lobby/favicons/favicon-96x96.png' %}" />
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'Lobby/favicons/favicon-32x32.png' %}?v=20261022b" />
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'Lobby/favicons/favicon-16x16.png' %}?v=20261022b" />
+    <link rel="icon" href="{% static 'Lobby/favicons/favicon.ico' %}?v=20261022b" />
     <meta name="title" content="Online Board Gamers - UR: 1830 BC">
     <meta name="description" content="Play Splotter's UR: 1830 BC online for free with others.">
     <meta name="robots" content="index, follow">
@@ -88,6 +91,7 @@
   </body>
   <script>
     var initData = {};
+    initData.locale = "{{ LANGUAGE_CODE|default:'en-gb' }}";
     initData.gameID = {{ gameID }};
     initData.gameName = "{{ gameName|escapejs }}";
     initData.gameData = '{{ gameData|default:""|escapejs }}';
