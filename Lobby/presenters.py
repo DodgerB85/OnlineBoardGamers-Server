@@ -3249,10 +3249,13 @@ class KFWpresenter(GamePresenter):
                 allPlayerReturnData.append({"timestamp": int(player_time), "content": player_data})
 
         readyWithBots = False
+        absent_names = {gp.player.username for gp in self.gameObj.players.select_related("player") if gp.player and (gp.is_missing or gp.is_kicked)}
+        # Never finish on an empty slot: a submit while nobody is current would otherwise end the game without that player's scoring data
+        allRequiredMovesIn = all(playerMoveData[2] != "" for playerMoveData in playersMoveDataArr if playerMoveData[0] not in absent_names)
 
-        if all(readyPlayers) or readyWithBots:
+        if (all(readyPlayers) and allRequiredMovesIn) or readyWithBots:
             jsonResponse.append({"allPlayerReturnData": allPlayerReturnData})
-            self.clearAllMoveData()
+            # Not cleared here: if the client's saveEndGame never arrives, endGame() cannot recover the moves, so keep them for a retry
 
             ### GAME DATA 1
             playersHiddenDataArr = json.loads(self.gameObj.KFWplayersHiddenData)

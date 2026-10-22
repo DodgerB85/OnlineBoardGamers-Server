@@ -349,6 +349,12 @@ export async function initGame() {
 			if (personal.trainingGame && store.gameflow.phase === rf.PHASE_FINAL_SCORING) store.gameflow.turnOrder.sort((a, b) => a - b)
 		}
 
+		// All final scoring moves are in but the game-over save never landed - re-send ours to retry it
+		if (!personal.trainingGame && store.gameflow.phase === rf.PHASE_FINAL_SCORING && store.gameflow.turnOrder.length === 0 && personal.pov >= 0 && window.initData.move !== "") {
+			await IO.saveFinalScoringMove(personal.pov, window.initData.move)
+			return
+		}
+
 		doturnStartHighlights()
 		// Go to replay mode if requested
 		/*if (window.initData.spoilerFree) {
