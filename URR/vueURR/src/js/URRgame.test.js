@@ -3,7 +3,7 @@ import test from "node:test"
 import { createGame, applyAction, restoreDevelopmentChoices } from "./URRgame.js"
 import * as rf from "./URRreference.js"
 import { canExchangeBarahshum, getAutomaticAction, remainingWaterworkTokens } from "./URRrules.js"
-import { actionPanelGame, endsDecision, turnCost } from "./URRturnDraft.js"
+import { actionPanelGame, defaultEndAction, endsDecision, turnCost } from "./URRturnDraft.js"
 import { startWaterRouting, waterChoices } from "./URRwater.js"
 
 test("A sole pump receives all water automatically and stops at its downstream choice", () => {
@@ -138,7 +138,8 @@ test("settlement and Eridu lead directly into state development", () => {
 	assert.equal(next.gameflow.developmentStep, "digging")
 	assert.deepEqual(next.gameflow.turnOrder, [0])
 	Object.assign(game.gameflow, { phase: rf.PHASE_DEVELOPMENT, developmentStep: "eridu", turnOrder: [2] })
-	const afterEridu = applyAction(game, 2, { type: "pass" })
+	assert.deepEqual(defaultEndAction(game), { type: "pass" })
+	const afterEridu = applyAction(game, 2, defaultEndAction(game))
 	assert.equal(afterEridu.gameflow.developmentStep, "digging")
 	assert.deepEqual(afterEridu.gameflow.turnOrder, [0])
 })

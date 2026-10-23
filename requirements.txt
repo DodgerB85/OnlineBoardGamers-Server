@@ -1,4 +1,4 @@
-asgiref==3.11.0
+asgiref==3.12.1
 certifi==2026.10.19
 charset-normalizer==3.5.2
 config==0.5.1
@@ -10,15 +10,15 @@ python-decouple==3.8
 requests==2.34.2
 six==1.17.0
 sqlparse==0.6.0
-tzdata==2025.3
-ua-parser==1.0.1
-ua-parser-builtins==0.18.0.post1
+tzdata==2026.5
+ua-parser==1.0.2
+ua-parser-builtins==202610
 urllib3==2.8.0
 user-agents==2.2.0
 django-statici18n 
 lzstring
 djlint
-django-compressor>=4.5
+django-compressor>=4.6.0
 jsmin>=3.0.1
 django-q2
 python-telegram-bot[webhooks,ext]
