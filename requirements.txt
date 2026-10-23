@@ -2,7 +2,7 @@ asgiref==3.12.1
 certifi==2026.10.19
 charset-normalizer==3.5.2
 config==0.5.1
-Django==5.2.18
+Django==6.1.2
 django-user-visit==2.3
 idna==3.20
 mysqlclient==2.3.0
