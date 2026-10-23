@@ -35,12 +35,11 @@ msgid "Rules"
 msgstr "Règles"
 
 #: .\HLC\templates\HLC\HLChelp.html:12
+#, python-format
 msgid ""
-"Horseless Carriage rules available <a href=\"https://boardgamegeek.com/"
-"filepage/251309/first-edition-english-rulebook\" target=\"_blank\">here</a>"
+"Horseless Carriage rules available <a href=\"%(hlc_rules_url)s\" target=\"_blank\">here</a>"
 msgstr ""
-"Règles de Horseless Carriage disponibles <a href=\"https://boardgamegeek.com/"
-"filepage/251309/first-edition-english-rulebook\" target=\"_blank\">ici</a>"
+"Règles de Horseless Carriage disponibles <a href=\"%(hlc_rules_url)s\" target=\"_blank\">ici</a>"
 
 #: .\HLC\templates\HLC\HLChelp.html:19
 msgid ""

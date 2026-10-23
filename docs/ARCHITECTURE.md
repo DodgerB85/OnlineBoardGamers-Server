@@ -52,7 +52,7 @@ Each game app's `urls.py` exposes its API under its prefix, always with the same
 
 All in `Lobby/models.py`:
 
-- **`User`** (`AbstractUser`) with a one-to-one **`Profile`**: email/notification preferences (per notification type), webhooks (Discord/Slack/Telegram), per-game display preferences (colours etc.), availability tracking arrays. Admin rights are explicit `Profile.is_site_admin` / `is_game_admin` flags (Django superusers always pass); views never authorize by username.
+- **`User`** (`AbstractUser`) with a one-to-one **`Profile`**: email/notification preferences (per notification type), webhooks (Discord/Slack/Telegram), per-game display preferences (colours etc.), availability tracking arrays. Admin rights are explicit `Profile.is_site_admin` / `is_game_admin` flags only — Django superusers get neither by default, and grant themselves the flags the same way anyone else does (Django admin); views never authorize by username.
 - **`Game`**: `gameCode` (3-char choice), `gameName`, `creator`, `host`, `maxPlayers`, `gameStatus` (`AVAILABLE` / `WAITING` / `PRIVATE` / `ACTIVE` / `FINISHED`), `turn`/`phase`, `gameData` (opaque per-game state the client produced, often gzip+base64), `latestUpdate` (monotonic ms timestamp), `startingOptions` (JSON array of option ints), `kickoutDuration`, `zoomLevels`, plus per-game blob fields (`XXXplayersMoveData`, rewind data, ...).
 - **`GamePlayer`**: row per (game, human/bot) seat — `seat_order`, `is_current`, `is_kicked`, `is_missing`, `winner`, private `notes`. Unique on (game, player).
 - **`Tournament`**: rounds of `Game`s per game code (`Main`/`Mini` categories, `RR`/`PL`/`TL`/`MG` types), `tournamentProgressionData`/`PointsData`/`SideData` JSON, `nextRoundPlayers` M2M.
