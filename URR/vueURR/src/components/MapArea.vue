@@ -270,6 +270,12 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 					<path :d="border.path" :clip-path="`url(#hex-clip-${border.areaId})`" stroke-width="14" />
 				</g>
 				<path v-for="(border, index) in outerStateBorders" :key="`outer-${index}`" :d="border.path" :stroke="boardDisplay.MAP_STATE_COLOURS[border.state]" fill="none" stroke-width="14" stroke-linecap="butt" stroke-linejoin="miter" pointer-events="none" />
+				<template v-for="entry in renderedAreas" :key="`selection-${entry.area.id}`">
+					<g v-if="mapDecisions[entry.area.id] && (mapDecisions[entry.area.id].planned || selectedHexId === entry.area.id)" class="mapDecisionHighlight" :class="mapDecisions[entry.area.id].kind">
+						<polygon :points="areaClips[entry.area.id]" class="mapDecisionOutline selectionOutline" :class="{ source: mapDecisions[entry.area.id].source, chosen: (selectedHexId === entry.area.id && store.gameflow.phase !== rf.PHASE_SETTLEMENT) || chosenRemoval === entry.area.id, planned: mapDecisions[entry.area.id].planned }" />
+					</g>
+				</template>
+				<polygon v-if="selectedHexId && !mapDecisions[selectedHexId] && !hasMapInspection && !store.turnDraft.ready && !store.viewSettings.showReplay" :points="areaClips[selectedHexId]" class="areaHit selected selectionOutline" />
 			</svg>
 			<WaterPlayback v-if="playback.state.visible" />
 			<div v-if="!playback.state.visible && mapAction && confirmationPosition && !hasMapInspection && !store.turnDraft.ready" class="mapConfirmation" :style="confirmationPosition">
@@ -325,6 +331,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 .boardArea.hasDecision > .areaHit { stroke: transparent; }
 .mapDecisionHighlight { pointer-events: none; --decision-color: #007cac; }.mapDecisionHighlight.finish { --decision-color: #176a3b; }.mapDecisionHighlight.build { --decision-color: #75439c; }.mapDecisionHighlight.sale { --decision-color: #a34720; }.mapDecisionHighlight.path { --decision-color: #234872; }.mapDecisionOutline { fill: none; stroke: var(--decision-color); stroke-width: 7; }.mapDecisionOutline.source { stroke-dasharray: 12 6; }
 .mapDecisionOutline.planned { stroke-width: 12; fill: var(--decision-color); fill-opacity: .22; }.mapDecisionOutline.chosen { stroke: #a57000; }.decisionBadge { fill: var(--decision-color); stroke: white; stroke-width: 3; }.destinationNumber, .decisionLabel { fill: white; font-size: 20px; font-weight: bold; text-anchor: middle; dominant-baseline: central; }.decisionLabel { font-size: 16px; }
+.areaHit.selectionOutline, .mapDecisionOutline.selectionOutline { fill: none; pointer-events: none; }
 
 .inspectionHalo { fill: none; stroke: #fffdf5; stroke-width: 9; pointer-events: none; }.inspectionShade { fill: #e9e2d2; fill-opacity: .78; pointer-events: none; }.inspectionHighlight { fill: white; fill-opacity: .12; stroke: #514632; stroke-width: 3; stroke-dasharray: 3 5; pointer-events: none; }.inspectionHighlight.ownedLandHighlight { stroke-width: 4; stroke-dasharray: 10 5; }.mapInspectionCue { width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 16px; font-weight: 400; text-align: left; background: #fff9df; }.mapInspectionCue button { font: inherit; margin-left: 8px; padding: 4px 6px; background: #fffdf5; border: 1px solid #b3a481; border-radius: 3px; cursor: pointer; }
 </style>
