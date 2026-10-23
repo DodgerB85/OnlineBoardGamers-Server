@@ -324,6 +324,11 @@ async function confirmSettlementBid() {
 		if (await controller.submitAction({ type: "bidPrimogeniture", amount: primogenitureAmount.value })) await controller.endPlayerTurn()
 	} finally { ending.value = false }
 }
+async function skipEridu() {
+	if (ending.value || store.viewSettings.isSaving) return
+	ending.value = true
+	try { await controller.endPlayerTurn() } finally { ending.value = false }
+}
 async function confirmHarvest(choice) {
 	if (ending.value || store.viewSettings.isSaving) return
 	ending.value = true
@@ -473,7 +478,7 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 					<div v-if="fittingCrews.length > 1" class="buttonRow fittingCrews"><span>{{ $t("actions.otherFittingCrews") }}</span><button v-for="crew in fittingCrews.filter((entry) => entry.id !== chosenCrew?.id)" :key="crew.id" :aria-label="$t('actions.useCrewAria', { points: crew.capacity, number: crew.id + 1 })" @click="useFittingCrew(crew)">{{ $t("actions.useCrew", { points: crew.capacity, number: crew.id + 1 }) }}</button></div>
 					<button v-if="path.length >= 2" ref="digButton" class="digAction primaryAction" :disabled="!!digError" @click="submitDig">{{ $t("actions.addCanal") }}<small>{{ path.map(label).join(' → ') }}</small></button>
 					<button v-if="path.length" @click="emit('clearPath')">{{ $t("actions.clearCanalDraft") }}</button>
-					<button v-if="game.gameflow.developmentStep === 'eridu'" @click="submit({ type: 'pass' })">{{ $t("actions.skipEridu") }}</button>
+					<button v-if="game.gameflow.developmentStep === 'eridu'" :disabled="ending || store.viewSettings.isSaving" @click="skipEridu">{{ $t("actions.skipEridu") }}</button>
 					<button v-else :disabled="!!path.length" @click="finishDigging">{{ $t("actions.doneDigging") }}</button>
 				</div>
 				<template v-if="game.gameflow.developmentStep !== 'eridu'">
@@ -509,10 +514,9 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 					<p v-if="game.gameflow.offerDeclined && state" role="status">{{ $t("actions.agreementDeclined", { area: label(game.gameflow.offerDeclined) }) }}</p>
 					<div v-if="showEquipment" class="actionGroup equipmentShop">
 						<b>{{ $t("actions.buyEquipment") }}</b>
-						<p class="hint">{{ $t("actions.eraSupply", { era: cardEra === 5 ? 'M' : cardEra }) }}<br>{{ cardEra === 5 ? $t("actions.unlimitedSupply") : $t("actions.cardsLeft", { count: game.cardSupply[cardEra] }) }}{{ $t("actions.clickLitSite") }}</p>
+						<p class="hint">{{ $t("actions.eraSupply", { era: cardEra === 5 ? 'M' : cardEra }) }} - {{ cardEra === 5 ? $t("actions.unlimitedSupply") : $t("actions.cardsLeft", { count: game.cardSupply[cardEra] }) }}</p>
 						<p class="equipLegend"><span class="swatch pump"></span><span>{{ $t("actions.pump", { price: siteCost.pump[1] }) }}<br>{{ $t("actions.reach", { reach: siteCost.pump[0], tokens: rules.remainingWaterworkTokens(game, state.id, siteCost.pump[0]) }) }}</span></p>
 						<p class="equipLegend"><span class="swatch reservoir"></span><span>{{ $t("actions.reservoir", { price: siteCost.reservoir[1] }) }}<br>{{ $t("actions.holds", { capacity: siteCost.reservoir[0], tokens: rules.remainingWaterworkTokens(game, state.id, siteCost.reservoir[0]) }) }}</span></p>
-						<p class="hint">{{ $t("actions.tokensHint") }}</p>
 						<label v-if="ownedCalah"><input type="checkbox" v-model="useCalah" /> {{ $t("actions.useCalah", { income: rf.NATION_INCOMES[rf.NATION_CALAH] }) }}</label>
 						<p v-if="!store.turnDraft.ready && !equipSites.length" class="hint">{{ noSiteReason }}</p>
 						<div class="crewStepper"><span>{{ $t("actions.crewStepper", { capacity: cardData.digger[0] }) }}<br>{{ cardData.digger[1] }} SPL</span><span class="stepper"><button :disabled="!crewCount" :aria-label="$t('actions.removeCrew')" @click="removeCrew">−</button><b>{{ crewCount }}</b><button :disabled="!!crewError" :aria-label="$t('actions.addCrew')" @click="submit({ type: 'buyCard', kind: 'digger' })">+</button></span></div>
