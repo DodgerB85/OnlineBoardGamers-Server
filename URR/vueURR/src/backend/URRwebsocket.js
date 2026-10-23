@@ -95,7 +95,7 @@ async function URRwebSocketOnInfo(IncomingInfo) {
 				// Advance the version only when the matching live position is imported.
 				// Replay and pending saves defer this refresh without losing the update.
 				await IO.checkForLatestData()
-			} else URRwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
+			} else if (newTS < personal.latestUpdate) URRwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
 		}
 	}
 }
