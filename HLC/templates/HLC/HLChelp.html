@@ -9,10 +9,9 @@
     <h2>{% translate "Rules" %}</h2>
     <div class="help-qa">
       <p>
+        {% static 'rules/Horseless_Carriage_Rules.pdf' as hlc_rules_url %}
         {% blocktranslate trimmed %}
-          Horseless Carriage rules available
-          <a href="https://boardgamegeek.com/filepage/251309/first-edition-english-rulebook"
-             target="_blank">here</a>
+          Horseless Carriage rules available <a href="{{ hlc_rules_url }}" target="_blank">here</a>
         {% endblocktranslate %}
       </p>
       <p>

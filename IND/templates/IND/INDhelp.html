@@ -9,11 +9,9 @@
     <h2>{% translate "Rules" %}</h2>
     <div class="help-qa">
       <p>
+        {% static 'rules/Indonesia_Rules.pdf' as ind_rules_url %}
         {% blocktrans trimmed %}
-          Indonesia Rules Available <a class="linkOther"
-    href="https://tesera.ru/images/items/174714/indonesia_E.pdf"
-    target="_blank"
-    download>here</a>
+          Indonesia Rules Available <a class="linkOther" href="{{ ind_rules_url }}" target="_blank" download>here</a>
         {% endblocktrans %}
       </p>
     </div>

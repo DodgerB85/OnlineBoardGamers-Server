@@ -11,15 +11,11 @@ def _profile_flag(user, field):
 
 
 def is_site_admin(user):
-    return getattr(user, "is_authenticated", False) and (
-        getattr(user, "is_superuser", False) or _profile_flag(user, "is_site_admin")
-    )
+    return _profile_flag(user, "is_site_admin")
 
 
 def is_game_admin(user):
-    return getattr(user, "is_authenticated", False) and (
-        getattr(user, "is_superuser", False) or _profile_flag(user, "is_game_admin")
-    )
+    return _profile_flag(user, "is_game_admin")
 
 
 def can_act_in_game(user, game):

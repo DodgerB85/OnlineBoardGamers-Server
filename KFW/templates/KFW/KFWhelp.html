@@ -9,10 +9,12 @@
     <h2>{% translate "Rules" %}</h2>
     <div class="help-qa">
       <p>
-        {% blocktranslate %}Keyflower Rules Available <a class='linkOther' href='https://fgbradleys.com/wp-content/uploads/rules/Keyflower%20-%20rules.pdf?srsltid=AfmBOop3dONhZoXgiTeHUqHDAex0gC7guoM19D3yA91RXA1Txe2VfQbf' target='_blank' downlod>here</a>{% endblocktranslate %}
+        {% static 'rules/Keyflower_Rules.pdf' as kfw_rules_url %}
+        {% blocktranslate %}Keyflower Rules Available <a class='linkOther' href='{{ kfw_rules_url }}' target='_blank' downlod>here</a>{% endblocktranslate %}
       </p>
       <p>
-        {% blocktranslate %}Keyflower the Merchants Rules Available <a class='linkOther' href='https://store.pakufuda.com/wp-content/uploads/2022/08/Keyflower_Merchants_Pravyla-anhliyskoiu.pdf?srsltid=AfmBOoqdQ5gNb_S1UiibHd5OppCC1BSVMJCRFmvAgvX9vIQYOEcldCZX' target='_blank' downlod>here</a>{% endblocktranslate %}
+        {% static 'rules/Keyflower_Merchants_Rules.pdf' as kfw_merchants_rules_url %}
+        {% blocktranslate %}Keyflower the Merchants Rules Available <a class='linkOther' href='{{ kfw_merchants_rules_url }}' target='_blank' downlod>here</a>{% endblocktranslate %}
       </p>
       <p>
         {% blocktranslate %}Promo Tile Rules Available <a class='linkOther' href='https://boardgamegeek.com/boardgame/122515/keyflower/expansions' target='_blank' downlod>here</a>{% endblocktranslate %}
