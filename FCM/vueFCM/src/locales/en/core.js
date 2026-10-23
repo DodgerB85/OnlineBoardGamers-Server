@@ -176,7 +176,7 @@ milestones: {
   
   firstCampaignManager: "First campaign manager",
   firstCampaignManagerTitle: "First campaign manager used",
-  firstCampaignManagerDesc: "This turn, may place 1 marketing tile (same duration, type & range)",
+  firstCampaignManagerDesc: "This turn, may place 1 marketing tile (same duration, type & good)",
   
   firstBrandManager: "First brand manager",
   firstBrandManagerTitle: "First brand manager used",
