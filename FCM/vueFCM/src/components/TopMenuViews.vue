@@ -460,7 +460,7 @@ const sortedCampaigns = computed(() => {
 				</i18n-t>
 				<br />
 				<i18n-t keypath="topMenuViews.coffeeRulesFound" tag="span" scope="global">
-					<template #link><a href="https://www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf" target="_blank">{{ $t('topMenuViews.hereLower') }}</a></template>
+					<template #link><a href="/static/FCM/rules/FCM_Ketchup_rules.pdf" target="_blank">{{ $t('topMenuViews.hereLower') }}</a></template>
 				</i18n-t>
 				<br />
 				<br />
