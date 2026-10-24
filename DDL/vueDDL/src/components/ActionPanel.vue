@@ -400,8 +400,9 @@ function openTradeModal() {
 #actionPanel {
 	width: 100%;
 	box-sizing: border-box;
-	height: 132px;
-	overflow-y: auto;
+	min-height: 132px;
+	overflow: visible;
+	position: relative;
 	background: #fffdf3;
 	border: 2px solid #7a5b19;
 	border-radius: 6px;
@@ -423,7 +424,20 @@ function openTradeModal() {
 .bigAction { margin-top: 0; font-size: 14px; }
 .actionInfo { font-weight: bold; background: #f2e4b8; padding: 3px 6px; border-radius: 3px; margin: 0; }
 .endTurnButton { border-color: #a33; color: #800; }
-.subPanel { flex: 1 1 100%; border: 1px solid #b49a54; border-radius: 4px; padding: 3px 4px; margin-top: 0; background: #fffbe8; }
+.subPanel {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	z-index: 30;
+	border: 1px solid #b49a54;
+	border-radius: 4px;
+	padding: 4px 6px;
+	background: #fffbe8;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+	max-height: 40vh;
+	overflow-y: auto;
+}
 .subPanel .actionsLineButton { margin: 2px; padding: 4px 8px; }
 .planetHeader { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
 .subSection { border-top: 1px solid #d8c58f; padding-top: 4px; margin-top: 4px; }

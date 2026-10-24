@@ -109,7 +109,7 @@ function showState() { window.alert(JSON.stringify(funcs.decompressData64(funcs.
 </template>
 
 <style scoped>
-#debugArea { border: 1px dashed darkred; background: #fff3cd; padding: 8px; margin: 8px auto; max-width: 900px; text-align: left; box-sizing: border-box; font-size: 16px; font-weight: 400; }
+#debugArea { border: 1px dashed darkred; background: lightpink; padding: 8px; margin: 8px 0; width: 100%; text-align: left; box-sizing: border-box; font-size: 16px; font-weight: 400; }
 h3 { margin: 0; } p { margin: 6px 0; } fieldset { border: 0; padding: 0; min-width: 0; }
 .debugRow { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin: 6px 0; }
 button, select, input { font: inherit; } button { cursor: pointer; padding: 4px 7px; } input { width: 80px; } .selected { outline: 2px solid #247422; font-weight: bold; } .debugError { color: #a40000; }
