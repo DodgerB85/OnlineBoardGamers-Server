@@ -70,12 +70,6 @@ function getBidIncomeCows(playerIndex) {
 function getPlayerGod(player) {
 	return model.getPlayer_gods(player).find((god) => god[0] !== rf.NO_god)
 }
-
-function getMaxMonumentLevel(player) {
-	let max = 0
-	for (let i = 0; i < player.monuments.length; i++) if (player.monuments[i][1] > max) max = player.monuments[i][1]
-	return max
-}
 </script>
 
 <template>
@@ -106,10 +100,7 @@ function getMaxMonumentLevel(player) {
 			<img :src="view.getImage('cows1' + personal.getCorrectedColour(store.players[playerIndex].colour))" class="playerCow" alt="Cows: " />
 			<span :class="{ VRmet: model.getScore(playerIndex) >= model.getVR(store.players[playerIndex]) }">VR: {{ model.getScore(playerIndex) }} / {{ model.getVR(store.players[playerIndex]) }}</span>
 			<span v-if="scoreDeltas[playerIndex]" class="vpGain">+{{ scoreDeltas[playerIndex] }}</span>
-			<span v-if="store.players[playerIndex].monuments.length || store.players[playerIndex].specialists.length" class="playerExtraInfo" :title="$t('playerLine.extraInfo')">
-				<span v-if="store.players[playerIndex].monuments.length">M{{ getMaxMonumentLevel(store.players[playerIndex]) }}</span>
-				<span v-if="store.players[playerIndex].specialists.length">S{{ store.players[playerIndex].specialists.length }}</span>
-			</span>
+
 		</div>
 	</div>
 	<div class="playerLineDiv" v-else>
@@ -185,18 +176,6 @@ function getMaxMonumentLevel(player) {
 	border: 1px solid black;
 	border-radius: 3px;
 	z-index: 2;
-}
-
-.playerExtraInfo {
-	position: absolute;
-	right: 3px;
-	bottom: 2px;
-	font-size: 10px;
-	line-height: 11px;
-	background: rgba(0, 0, 0, 0.55);
-	color: white;
-	padding: 0 3px;
-	border-radius: 3px;
 }
 
 .vpGain {
