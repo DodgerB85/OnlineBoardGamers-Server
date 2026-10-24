@@ -380,7 +380,7 @@ onUnmounted(() => {
 					<template v-if="canResign()">
 						<button class="actionsLineButton resignButton" @click="confirmResign()">{{ $t('actionArea.resign') }}</button>
 					</template>
-					<button v-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && store.context.actionChosen" class="actionsLineButton" @click="resetPlayerTurn()">{{ $t('actionArea.reset') }}</button>
+					<button class="actionsLineButton" @click="resetPlayerTurn()">{{ $t('actionArea.reset') }}</button>
 					<template v-if="controller.currentPlayerCanPass() && !store.context.actionChosen">
 						<button class="actionsLineButton" @click="passChooseAction()">{{ $t('actionArea.passChooseActions') }}</button>
 					</template>
