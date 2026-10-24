@@ -11,6 +11,7 @@ export const useModelStore = defineStore('store', () => {
   const players = reactive([])
 
   const refSize = ref(240)
+  const gameReady = ref(false)
 
   const mapTiles = reactive([])
   const addedResources = reactive([])
@@ -97,7 +98,8 @@ export const useModelStore = defineStore('store', () => {
     EKWENSUdecision: -1,
     WATERTOLLpaymentStatus: 0,
     OYAused: false,
-    ignoreAjeShaluga: false
+    ignoreAjeShaluga: false,
+    lastClickPosition: { x: 0, y: 0 },
   })
 
   const topMenuViews = reactive({
@@ -231,6 +233,7 @@ function resetTurnVars() {
     mapTiles,
     coords,
     refSize,
+    gameReady,
     context,
     players,
     //addMonument,

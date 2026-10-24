@@ -124,6 +124,8 @@ function parseMessage(message) {
 	return message
 }
 
+const reserveFilter = ref("all")
+
 function getMissinggods() {
 	let all = [...store.availablegods]
 	for (let i = 0; i < store.players.length; i++) {
@@ -132,11 +134,9 @@ function getMissinggods() {
 			if (gods[g][0] !== rf.NO_god) all.push(gods[g][0])
 		}
 	}
-	let missing = []
-	for (let i = 0; i < 12; i++) {
-		if (!all.includes(i)) missing.push(i)
-	}
-	return missing
+	const schismInGame = all.some((god) => rf.SCHISM_gods.includes(god))
+	const candidates = schismInGame ? rf.ALL_gods.concat(rf.SCHISM_gods) : rf.ALL_gods
+	return candidates.filter((god) => !all.includes(god))
 }
 
 function getFlexiTimeString(playerName) {
@@ -333,11 +333,21 @@ function localCastVote(topic) {
 	<!-- RESERVE -->
 	<transition name="slideC">
 		<div id="reserve" v-if="store.topMenuViews.showReserve">
+			<label for="reserveFilter" class="reserveFilterLabel">{{ $t("topMenuViews.filter") }}</label>
+			<select id="reserveFilter" v-model="reserveFilter" class="reserveFilter">
+				<option value="all">{{ $t("topMenuViews.all") }}</option>
+				<option value="gods">{{ $t("topMenuViews.availableTakenGods") }}</option>
+				<option value="specs">{{ $t("topMenuViews.availableTakenSpecialists") }}</option>
+				<option value="techs">{{ $t("topMenuViews.availableTakenTechs") }}</option>
+				<option value="tiles">{{ $t("topMenuViews.availableTiles") }}</option>
+			</select>
+
 			<!-- Bidding order -->
 			<h2>{{ $t("topMenuViews.biddingOrder") }}</h2>
 			<PlayerBiddingLine />
 
 			<!-- gods-->
+			<template v-if="reserveFilter === 'all' || reserveFilter === 'gods'">
 			<h2>{{ $t("topMenuViews.availableTakenGods") }}</h2>
 			<div v-for="(god, idx) in store.availablegods" :key="idx"
 				:class="[personal.aidText ? 'godResDiv' : 'godResDivNoText']">
@@ -373,6 +383,8 @@ function localCastVote(topic) {
 			</span>
 
 			<!-- specs-->
+			</template>
+			<template v-if="reserveFilter === 'all' || reserveFilter === 'specs'">
 			<h2>{{ $t("topMenuViews.availableTakenSpecialists") }}</h2>
 			<div v-for="(spec, idx) in store.availableSpecialists" :key="idx"
 				:class="[personal.aidText ? 'specResDiv' : 'specResDivNoText']">
@@ -403,6 +415,8 @@ function localCastVote(topic) {
 			</template>
 
 			<!-- TECHS -->
+			</template>
+			<template v-if="reserveFilter === 'all' || reserveFilter === 'techs'">
 			<h2>{{ $t("topMenuViews.availableTakenTechs") }}</h2>
 			<div class="techHolderDiv">
 				<template v-for="(row, idx) in getTechsArray()" :key="idx">
@@ -424,6 +438,8 @@ function localCastVote(topic) {
 			</div>
 
 			<!--Craftsmen -->
+			</template>
+			<template v-if="reserveFilter === 'all' || reserveFilter === 'tiles'">
 			<h2>{{ $t("topMenuViews.availableTiles") }}</h2>
 			<template v-for="(tile, idx) in getTilesArray()" :key="idx">
 				<div class="tileDiv" :style="{
@@ -443,6 +459,8 @@ function localCastVote(topic) {
 				</div>
 			</template>
 
+			</template>
+
 			<div id="timesDiv">
 				{{ $t("topMenuViews.flexiTimes") }}
 				<span v-for="(player, idx) in store.players" :key="idx">{{ player.name }}: {{
@@ -458,6 +476,17 @@ function localCastVote(topic) {
 .changedVR {
 	background-color: yellow;
 	color: darkred;
+}
+
+.reserveFilterLabel {
+	margin-right: 6px;
+	font-weight: bold;
+}
+
+.reserveFilter {
+	margin-bottom: 10px;
+	padding: 4px 8px;
+	font-size: 15px;
 }
 
 .slideC-enter-active,

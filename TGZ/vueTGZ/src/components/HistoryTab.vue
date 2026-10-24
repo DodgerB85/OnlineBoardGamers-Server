@@ -6,6 +6,7 @@ import { usePersonalStore } from "../stores/TGZpersonal.js"
 import * as rf from "../js/TGZreference"
 import * as refFuncs from "../js/TGZfuncs"
 import * as view from "../js/TGZview"
+import * as map from "../js/TGZmap"
 
 import i18n from "../i18n"
 const t = i18n.global.t
@@ -14,7 +15,7 @@ const store = useModelStore()
 const personal = usePersonalStore()
 
 function getCoordsForIndex(index) {
-	let Sw = 7
+	let Sw = map.getSw()
 	let x = (index % Sw) + 1
 	let y = Math.floor(index / Sw) + 1
 	return `(${x}, ${y})`
@@ -36,7 +37,7 @@ function playerSpan(playerIdx) {
 	const hex = personal.getCorrectedColourHex(p.colour)
 	const c = personal.getCorrectedColour(p.colour)
 	const textColor = (c === rf.WHITE || c === rf.YELLOW) ? "black" : "white"
-	return `<span style="background-color:${hex};color:${textColor};padding:1px 5px;font-weight:bold;">${p.displayName}</span>`
+	return `<span style="background-color:${hex};color:${textColor};padding:1px 5px;font-weight:bold;">${refFuncs.escapeHtml(p.displayName)}</span>`
 }
 
 function downloadHistoryAsPDF() {
@@ -57,7 +58,7 @@ function downloadHistoryAsPDF() {
 	</style></head><body>`
 
 	html += `<h1>${t("historyPdf.title")}</h1>`
-	html += `<h2>${store.players.map(p => p.displayName).join(" " + t("historyPdf.vs") + " ")}</h2>`
+	html += `<h2>${store.players.map((p) => refFuncs.escapeHtml(p.displayName)).join(" " + t("historyPdf.vs") + " ")}</h2>`
 
 	for (const entry of store.history) {
 		const action = entry[0]
@@ -73,7 +74,7 @@ function downloadHistoryAsPDF() {
 		} else if (action === rf.HIST_NEW_TURN) {
 			html += `<div class="turn-marker">${t("historyPdf.startOfTurn", { turn: data[0] })}</div>`
 		} else if (action === rf.HIST_GAME_END) {
-			html += `<div class="game-over">${t("historyPdf.gameEnded")}<br>${t("historyPdf.winner")} ${tribeImg(data[0][1])} ${store.players[data[0][1]].displayName}</div>`
+			html += `<div class="game-over">${t("historyPdf.gameEnded")}<br>${t("historyPdf.winner")} ${tribeImg(data[0][1])} ${refFuncs.escapeHtml(store.players[data[0][1]].displayName)}</div>`
 		} else if (action === rf.HIST_BID) {
 			html += tribeImg(playerIdx) + " " + playerSpan(playerIdx) + " "
 			if (data[0] > 0) html += `${t("historyPdf.bids", { count: data[0] })} ${img("cows1", "cow")} ${data[0] !== 1 ? t("common.cows") : t("common.cow")}`
@@ -84,20 +85,23 @@ function downloadHistoryAsPDF() {
 		} else if (action === rf.HIST_END_BIDS) {
 			html += `<b>${t("historyPdf.endOfBidding")}</b><br>`
 			for (let i = 0; i < data[0].length; i++) {
-				html += `${tribeImg(data[0][i])} ${store.players[data[0][i]].displayName} ${t("historyPdf.gains", { count: data[1][i] })} ${img("cows1", "cow")} ${data[1][i] !== 1 ? t("common.cows") : t("common.cow")}. ${t("historyPdf.total", { count: data[2][i] })}<br>`
+				html += `${tribeImg(data[0][i])} ${refFuncs.escapeHtml(store.players[data[0][i]].displayName)} ${t("historyPdf.gains", { count: data[1][i] })} ${img("cows1", "cow")} ${data[1][i] !== 1 ? t("common.cows") : t("common.cow")}. ${t("historyPdf.total", { count: data[2][i] })}<br>`
 			}
 		} else if (action === rf.HIST_CHOOSE_god) {
 			const godName = data[0] === rf.OGUN ? "Ogun" : rf.god_NAMES[data[0]]
 			const godImg = img("god" + data[0], "", "height:24px;vertical-align:middle;border:1px solid #000;")
 			html += `${tribeImg(playerIdx)} ${playerSpan(playerIdx)} ${t("historyPdf.chooses")} ${godImg} ${godName}. ${t("historyPdf.vrPlus", { count: rf.gods_VR[data[0]] })}`
 		} else if (action === rf.HIST_CHOOSE_SPEC) {
-			const specImg = img("spec" + data[0], "spec")
 			html += `${tribeImg(playerIdx)} ${playerSpan(playerIdx)} ${t("historyPdf.choosesSpec", { name: rf.SPEC_NAMES[data[0]], cost: rf.SPEC_COST[data[0]] })} ${img("cows1", "cow")}) ${t("historyPdf.vrPlus", { count: rf.SPEC_VR[data[0]] })}`
 		} else if (action === rf.HIST_BUILD_MON || action === rf.HIST_BUILD_FIRST_MON) {
 			const coords = data.map(i => getCoordsForIndex(i)).join(", ")
 			html += `${tribeImg(playerIdx)} ${playerSpan(playerIdx)} ${t("historyPdf.buildsMonument", { what: data.length === 1 ? t("historyPdf.aMonument") : t("historyPdf.monuments"), coords: coords })}`
 		} else if (action === rf.HIST_RAISE_MON) {
 			html += `${tribeImg(playerIdx)} ${playerSpan(playerIdx)} ${t("historyPdf.raisesMonument", { coords: getCoordsForIndex(data[0][0]), level: data[0][1] })}`
+		} else if (action === rf.HIST_CHOOSE_ANYANWU_MON) {
+			html += `${tribeImg(playerIdx)} ${playerSpan(playerIdx)} ${t("historyPdf.raisesMonument", { coords: getCoordsForIndex(data[0]), level: 3 })}`
+		} else if (action === rf.HIST_BUILD_OYA_MON) {
+			html += `${tribeImg(playerIdx)} ${playerSpan(playerIdx)} ${t("historyPdf.buildsMonument", { what: t("historyPdf.aMonument"), coords: getCoordsForIndex(data[0]) })}`
 		} else if (action === rf.HIST_BUILD_CRAFTSMAN) {
 			const cmanImg = img("craftsman" + data[1], "cman")
 			const cost = data[3] !== 0 ? data[3] : rf.COW_COST_TO_BUILD_CMAN[data[1]]
@@ -129,12 +133,12 @@ function downloadHistoryAsPDF() {
 			html += `<b>${t("historyPdf.revenue")}</b><br>`
 			for (const r of data) {
 				const total = r.reduce((a, b) => a + b, 0) - r[5] - r[0]
-				html += `${tribeImg(r[0])} ${store.players[r[0]].displayName}: +${total} ${t("historyPdf.total", { count: r[5] })}${t("historyPdf.revenueBreakdown", { god: r[1], specs: r[2], techs: r[3], monument: r[4] })}<br>`
+				html += `${tribeImg(r[0])} ${refFuncs.escapeHtml(store.players[r[0]].displayName)}: +${total} ${t("historyPdf.total", { count: r[5] })}${t("historyPdf.revenueBreakdown", { god: r[1], specs: r[2], techs: r[3], monument: r[4] })}<br>`
 			}
 		} else if (action === rf.HIST_COMPARE_MYTHOLOGIES) {
 			html += `<b>${t("historyPdf.compare")}</b><br>`
 			for (const s of data) {
-				html += `${tribeImg(s[1])} ${store.players[s[1]].displayName}: ${s[2]} / ${s[3]} (${s[2] - s[3]})<br>`
+				html += `${tribeImg(s[1])} ${refFuncs.escapeHtml(store.players[s[1]].displayName)}: ${s[2]} / ${s[3]} (${s[2] - s[3]})<br>`
 			}
 		} else if (action === rf.HIST_REWIND) {
 			html += `<i>${t("historyPdf.rewoundBy", { name: store.players[data[0]].name })}</i>`

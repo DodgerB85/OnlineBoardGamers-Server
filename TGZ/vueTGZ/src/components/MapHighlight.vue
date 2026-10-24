@@ -15,7 +15,8 @@ const personal = usePersonalStore()
 const ghostImgRef = ref(null)
 const ghostDivRef = ref(null)
 
-function clickedOnSquare(index) {
+function clickedOnSquare(index, event) {
+	if (event) store.context.lastClickPosition = { x: event.clientX, y: event.clientY }
 	ghostImgRef.value.style.display = "none"
 	ghostDivRef.value.style.display = "none"
 
@@ -68,7 +69,7 @@ function handleTouchStart(event, index) {
 	event.target.addEventListener("touchend", touchEndHandler)
 }
 
-function changeGhost(event, index, add) {
+function changeGhost(_event, index, add) {
 
 	if (index === store.topMenuViews.currentGhostIndex) return
 	store.topMenuViews.currentGhostIndex = index
@@ -225,7 +226,7 @@ function hubRangeSqRightBorder(hubRange, index) {
 					top: view.getIndexPos(index)[0] + 'px',
 					left: view.getIndexPos(index)[1] + 'px',
 				}"
-				@click="clickedOnSquare(index)"
+				@click="clickedOnSquare(index, $event)"
 				@mouseover="changeGhost($event, index, true)"
 				@mouseleave="changeGhost($event, index, false)"
 				@touchstart="handleTouchStart($event, index)">

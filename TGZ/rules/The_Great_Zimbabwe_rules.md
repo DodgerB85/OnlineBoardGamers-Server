@@ -8,7 +8,7 @@
 
 <!-- PDF page 2 -->
 
-## Colofon
+## Colophon
 
 **Game design:** Jeroen Doumen, Joris Wiersinga
 **Graphic design:** Ynze Moedt
@@ -17,7 +17,7 @@
 
 **Playtesting:** Åke Wallin, Alan How, Alexander Freudenthal, Andrea Nini, Andreas Trieb, Anke Schmidt, Anthony Billardon, Arnaud Leclerc, Bianca van Duijl, Björn Diekjobst, Bodo von Neuhaus, Bram van Dam, Christian Koch, Christine Quodbach, Christophe Denoize, Damiano Ferraro, Daniel Källander, David Krantz, Dominik Trieb, Eric Demont, Erik Aundt, Even Liauzu, Ferdy Hanssen, Ferry van Putten, Francois Blanc, Frank Fleischacker, Frank Wehrmeijer, Geoff Simons, Geoffrey Bereti, Gerhard Wiegand, Gianluca Miglietti, Henriëtte Verburg, Herbert Carrick, Holger Kreitmeijer, James Hayward, James Wood, Jan Philipp Weitze, Jean-Claude Calonne, Jean-Luc Lavaux, Jerome Besnard, Jochen Förstner, Johan Kristensson, Jonas Bell, Julien Janvier, Kimmo Leivo, Knud Gentz, Laurent Bourdat, Laurent Imperatrice, Ludwig Seitz, Maarten Bonsema, Marc Jager, Marion Menrath, Marion Vankersschaver, Martin Warnecke, Mathias Renard, Mats Karlöf, Members of boardgame society Het Duivelsei, Michael Debije, Michael König, Mike Neumann, Moia Florent, Morten Larsen, Nicolas Schlewitz, Nicolas Seinlet, Nicolas Vigot, Nora Ghaoui, Patrick Fautré, Pierre-Emmanuel Legrain, Ragnar Krempel, Ragnar Röök, Renaud Velter, Roseline de Boer, Roy Cross, Sarah Margot Barras, Sofie Hååg, Stefan Scholt, Stefan Wegner, Stefan Ziegler, Thibaut Palfer-Sollier, Thomas Cauet, Timothy Luffingham, Torsten Toltmann, Uwe Gemming, Wolfgang Becker.
 
-Apologies if you are not on the list, or if we spelled your name wrong! Special thanks to Ragnar Krempel and Bianca van Duijl who playtested the game 2-4 times a day on many, many sundays for almost two years. Without them, this game would not exist.
+Apologies if you are not on the list, or if we spelled your name wrong! Special thanks to Ragnar Krempel and Bianca van Duijl who playtested the game 2-4 times a day on many, many Sundays for almost two years. Without them, this game would not exist.
 
 The artwork is based on authentic African art using photographs © by iStockphoto.
 
@@ -74,7 +74,7 @@ The game is played in rounds, each one divided in 4 phases. In Phase I and II, p
 
 **Cattle.** All prices are paid in heads of cattle. Silver coloured cattle is worth 1, gold coloured cattle is worth 3.
 
-**Paying to a card.** A player has his own stock of cattle. Some payments are made to the common stock, but most are paid to a card. This means the cattle is placed on the card. Cattle placed on a card cannot be used by the card’s owner and remains on the card until collected by the owner in the revenue phase.
+**Paying to a card.** A player has his own stock of cattle. Some payments are made to the common stock, but most are paid to a card. This means the cattle is placed on the card. Cattle placed on a card cannot be used by the card’s owner and remain on the card until collected by the owner in the revenue phase.
 
 **Craftsmen.** There are 7 types of craftsmen, which can be placed on the board. There are four primary craftsmen: potters, ivory carvers, wood carvers and diamond cutters. There are also three secondary craftsmen: vessel makers, throne makers, and sculptors.
 
@@ -132,7 +132,7 @@ In this phase, the order of play is determined. Each player gives away as much o
 
 **Passing.** If a player passes, he places his turn marker on the turn order track at the last spot that is still open.
 
-**End of phase.** When all players except one have passed, they all take their own plaque and add all the cattle on it to their stock. The turn order track now shows the order of play for this turn.
+**End of phase.** When all players except one have passed, they each take their own plaque and add all the cattle on it to their stock. The turn order track now shows the order of play for this turn.
 
 **Example.** The Mutapa, Zulu and Kilwa empires are playing. Currently, the Kilwa need 23 VR to win, and the Mutapa and Zulu both need 21 VR. The Mutapa VR marker is on top of the Zulu marker.
 
@@ -152,9 +152,9 @@ In this phase, each player takes a turn following the order of play determined i
 
 - Either choose a god or choose a specialist. You may only perform ONE of these two actions in a turn.
 - Use a specialist.
-- Either (1) build a monument, (2) place craftsmen, or (3) raise monuments. You may only perform only ONE of these three actions.
+- Either (1) build a monument, (2) place craftsmen, or (3) raise monuments. You may perform only ONE of these three actions.
 
-**Choosing a God.** If the player does not have a god the player may choose a god by taking the card of that god and placing it in front of him. The player then adjusts his VR marker according to the modifier printed on the card. It is not allowed to choose a God that would take your VR over 40 points. Each God provides certain advantages. These can be used immediately upon choosing a god. Most African cultures were monotheistic, and you are only allowed to choose ONE god in the course of a game. You cannot change this choice later on, nor can you add more gods. See the list at the end of the rules for details on the god’s advantages. You may not choose a god and a specialist in the same turn.
+**Choosing a God.** If the player does not have a god, the player may choose a god by taking the card of that god and placing it in front of him. The player then adjusts his VR marker according to the modifier printed on the card. It is not allowed to choose a God that would take your VR over 40 points. Each god provides certain advantages. These can be used immediately upon choosing a god. Most African cultures were monotheistic, and you are only allowed to choose ONE god in the course of a game. You cannot change this choice later on, nor can you add more gods. See the list at the end of the rules for details on the god’s advantages. You may not choose a god and a specialist in the same turn.
 
 **Choosing a specialist.** A player may choose a specialist by selecting the card from those that are still available and placing the card of that specialist in front of him. The player then adjusts his VR marker according to the modifier printed on the card. It is not allowed to choose a specialist that would take your VR over 40 points. If you choose a specialist, you must pay and use the specialist that turn. You may have any number of specialists, but you cannot choose more than one per turn. You may not choose a god and a specialist in the same turn.
 
@@ -202,8 +202,9 @@ The Kilwa want to build an extra ivory carver next to the big water. They alread
 
 Next, the Kilwa want to build a sculptor as well. They take the required technology card, adding the indicated 3 VR to their victory requirement. They pay 4 cattle to the common stock, and score another 2 victory points. The Kilwa set the price of sculptures at 2 cattle.
 
-**Raising monuments.** A player may raise one or more of his existing monuments. This scores victory points as indicated on the point overview chart. Each monument may only be raised by one level each turn. A monument of level 5 can not be raised further. To raise a monument, a player must provide the correct combination of ritual goods. These are bought from craftsmen in range of the monument being raised. The player then adjusts his victory points on the track according to the current level of his monuments.
+**Raising monuments.** A player may raise one or more of his existing monuments. This scores victory points as indicated on the point overview chart. Each monument may only be raised by one level each turn. A monument of level 5 cannot be raised further. To raise a monument, a player must provide the correct combination of ritual goods. These are bought from craftsmen in range of the monument being raised. The player then adjusts his victory points on the track according to the current level of his monuments.
 
+“Each turn” means each player turn: a monument may be raised once by its owner, and a different player may raise it again on their own turn only if a god such as Yemoja allows it.
 | Monument level | 1 | 2 | 3 | 4 | 5 |
 | --- | --- | --- | --- | --- | --- |
 | VP gained | 1 | +2 | +4 | +6 | +8 |
@@ -221,11 +222,11 @@ Next, the Kilwa want to build a sculptor as well. They take the required technol
 
 **Example.** The Zulu want to raise their monuments. They currently have two monuments on the map: one of level 1, and one of level 2. The price of ivory carvings is still low at 1 cattle, and sculptures cost 2 cattle each.
 
-The Zulu decide to raise their level 2 monument with two ritual goods. For the first good, an ivory carving is used. The craftsman is in range of the monument as shown by the yellow arrows, so the Zulu player has only to pay the Kilwa ivory carver technology card (1 cattle). The second ritual good needs to be a sculpture. Unfortunately, the sculptor craftsman is not in direct range, and can only be reached by using the top left monument as a hub, as shown by the orange arrows. To add pain to injury, the sculptor cannot reach the wood carver directly either, and again the top left monument needs to be used as a hub, as shown by the purple arrows. The total cost for the sculpture is 5 cattle: 2 cattle for the double use of the hub is paid to the common stock, 2 cattle is paid to Kilwa’s sculptor technology card, and 1 cattle is paid to the Zulu’s own wood carver technology card. All together, this uses up two wood resources and an ivory resource.
+The Zulu decide to raise their level 2 monument with two ritual goods. For the first good, an ivory carving is used. The craftsman is in range of the monument as shown by the yellow arrows, so the Zulu player only has to pay the Kilwa ivory carver technology card (1 cattle). The second ritual good needs to be a sculpture. Unfortunately, the sculptor craftsman is not in direct range, and can only be reached by using the top left monument as a hub, as shown by the orange arrows. To add pain to injury, the sculptor cannot reach the wood carver directly either, and again the top left monument needs to be used as a hub, as shown by the purple arrows. The total cost for the sculpture is 5 cattle: 2 cattle for the double use of the hub are paid to the common stock, 2 cattle are paid to Kilwa's sculptor technology card, and 1 cattle is paid to the Zulu's own wood carver technology card. Altogether, this uses up two wood resources and an ivory resource.
 
 <!-- PDF page 8 -->
 
-To raise the level 1 monument, only one ritual goods are required. Using the water, the ivory carver is again in range, so the Zulu only have to pay 1 cattle to the Kilwa technology card and mark one of the ivory resources with a used marker on the map.
+To raise the level 1 monument, only one ritual good is required. Using the water, the ivory carver is again in range, so the Zulu only have to pay 1 cattle to the Kilwa technology card and mark one of the ivory resources with a used marker on the map.
 
 Finally, the Zulu add the 6 gained victory points to their VP total: 2 VP are gained for raising the level 1 monument a step, and 4 VP for raising the level 2 monument.
 
@@ -241,7 +242,7 @@ In this phase, all players play simultaneously.
 
 This phase is used to determine if someone has won the game.
 
-**Victory condition.** If at least one player has collected victory points equal or higher to his VR, the game ends immediately. If there is only one player who has achieved this, he wins the game.
+**Victory condition.** If at least one player has collected victory points equal to or higher than his VR, the game ends immediately. If there is only one player who has achieved this, he wins the game.
 
 **Tie breaker.** If multiple players have achieved their VR level, the player among them who overshoots his VR requirement by the most points wins. If this is equal as well, the tied player who has the most points in total wins. If even this is equal, the tied player who stands first in the order of play wins.
 
@@ -251,11 +252,40 @@ This phase is used to determine if someone has won the game.
 
 Below is a list of the available gods. They are listed in the order of what phase in the game (I, II, III, IV) they have their main effect. Each god changes the rules for the player choosing him/her in some way.
 
+The VR modifier printed on each card is:
+
+| God | VR |
+| --- | --- |
+| Shadipinyi | +4 |
+| Elegua | +4 |
+| Dziva | +2 |
+| Eshu | +4 |
+| Gu | +4 |
+| Obatala | +7 |
+| Atete | +5 |
+| Tsui-Goab | +3 |
+| Anansi | +5 |
+| Qamata | +2 |
+| Engai | +5 |
+| Xango | −2 |
+
+The specialist cards have these VR and cattle costs:
+
+| Specialist | VR | Cost |
+| --- | --- | --- |
+| Herd | +6 | 2 |
+| Nomads | +1 | 2 |
+| Rain Ceremony | +1 | 3 |
+| Shaman | +3 | 2 |
+| Builder | +2 | 2 |
+
 **Shadipinyi, God of Drunks (I).** If the god Shadipinyi is in play, place his plaque at the front of the queue, before the first player. The plaque functions just like the player plaques, and receives cattle during the generosity of the kings phase. The player who adores Shadipinyi gets all of the cattle placed on this plaque in addition to his own, so he receives about double the amount of cattle as other players do.
 
 **Elegua, God of Beginnings (I).** In each generosity of the kings phase, the player who adores Elegua may pay up to three cattle for his first gift from the common stock instead of paying them from his own stock. If the player wants to bid more, he needs to add cattle from his personal stock.
 
 **Dziva, who changes her mind (II).** The player adoring Dziva may raise and/or lower the prices on all of his technology cards at the beginning of his turn, even if he has not chosen a place craftsman action. Note that this is the only way you can lower prices.
+
+> **Online implementation:** when you take Dziva, you may also raise or lower prices immediately. This is the small Splotter-sanctioned addition used by this site, so Dziva is not limited to the start of a turn.
 
 **Eshu, God of Connections (II: Build Craftsmen / Raise Monuments).** The player adoring Eshu has a transportation range of 6 instead of 3. Note that all craftsmen on the board have range 6, increasing the number of map resources available to craftsman. This may increase or decrease the number of available building spots! The range effect occurs only during the turn of the Eshu player.
 
@@ -273,7 +303,7 @@ Below is a list of the available gods. They are listed in the order of what phas
 
 **Engai, Provider of Cattle (III).** The player adoring Engai gains 2 additional cattle in each revenue phase.
 
-**Xango, Lord of Drummers (IV).** Xango has no particular benefits, but he lowers the VR of the player adoring him by two. In addition, should multiple players reach their VR in the same round, Xango wins any ties.
+**Xango, Lord of Drummers (IV).** Xango has no particular benefits, but he lowers the VR of the player adoring him by two (VR −2). In addition, should multiple players reach their VR in the same round, Xango wins any ties.
 
 <!-- PDF page 9 -->
 
@@ -281,9 +311,9 @@ Below is a list of the available gods. They are listed in the order of what phas
 
 - First play: remove all specialists and use only 6 gods: Xango, Tsui-Goab, Elegua, Gu, Engai, Obatala.
 - Do not bid too much on turn order at the start of the game; and do not bid too little towards the end.
-- Place secondary craftsmen to increase the cost of raising monuments and stop players who are advancing to fast.
+- Place secondary craftsmen to increase the cost of raising monuments and stop players who are advancing too fast.
 - Do not forget to erect new monuments; it is hard to win if you build too few monuments.
 - Near the endgame, consider diamond cutters; victory points are forever.
 - Every god has his strengths, but each can be countered by other gods or combinations of play.
 - It is hard to win on your own – use infrastructure built by other players to your advantage.
-- Cattle makes the world go round: figure out early how you are going to pay for raising your monuments.
+- Cattle make the world go round: figure out early how you are going to pay for raising your monuments.

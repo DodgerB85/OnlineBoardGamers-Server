@@ -124,9 +124,6 @@
   initData.chatData = "{{ chatData }}";
 
   initData.nextURL = '{{ nextURL|safe }}';
-  {% if TGZminimalText %}
-  initData.TGZminimalText = true;
-  {% endif %}
   {% endif %}
 
   initData.kickoutVotesData = {{ kickoutVotesData | default:'{}' | safe }};
@@ -149,7 +146,7 @@
   {% if chatNotification %}
   initData.chatNotification = true;
   {% endif %}
-  initData.preferredTGZcolour = {{ preferredTGZcolour }};
+  initData.preferredTGZoptions = {{ preferredTGZoptions|safe }};
   initData.yourTurnAudioType = {{ yourTurnAudioType }};
   {% if externalTournamentGame %}
   initData.externalTournamentGame = true;

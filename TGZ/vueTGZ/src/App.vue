@@ -24,13 +24,28 @@ import FooterBar from "./components/FooterBar.vue"
 
 import * as controller from "./js/TGZcontroller"
 
-import { watchEffect } from "vue"
+import { watchEffect, ref, watch, nextTick } from "vue"
 
 import { useModelStore } from "./stores/TGZstore.js"
 const store = useModelStore()
 
 import { usePersonalStore } from "./stores/TGZpersonal.js"
 const personal = usePersonalStore()
+
+const turnBanner = ref("")
+let turnBannerTimer
+watch(
+	() => store.history.length,
+	() => {
+		const last = store.history[store.history.length - 1]
+		if (!last || last[0] !== rf.HIST_NEW_TURN || !store.gameReady || store.topMenuViews.showReplay || store.topMenuViews.generatingReplay || personal.prefersReducedMotion) return
+		turnBanner.value = t("history.startOfTurn", { turn: store.gameflow.turn })
+		clearTimeout(turnBannerTimer)
+		turnBannerTimer = setTimeout(() => {
+			turnBanner.value = ""
+		}, 1200)
+	}
+)
 
 watchEffect(() => {
 	let backgroundColour = "floralwhite"
@@ -43,6 +58,7 @@ watchEffect(() => {
 
 	// Update the body background color directly
 	document.body.style.backgroundColor = backgroundColour
+	document.body.classList.toggle("reduced-motion", personal.prefersReducedMotion)
 })
 
 /***************************** */
@@ -69,7 +85,8 @@ async function initGame() {
 		store.chatData = funcs.decompressChatData(window.initData.chatData)
 		personal.latestUpdate = window.initData.latestUpdate
 		personal.aidText = true
-		if (window.initData.TGZminimalText) personal.aidText = false
+		if (window.initData.preferredTGZoptions && window.initData.preferredTGZoptions[1]) personal.aidText = false
+		if (window.initData.preferredTGZoptions) personal.prefersReducedMotion = Boolean(window.initData.preferredTGZoptions[2])
 	}
 
 	// Set up Involved Player data
@@ -127,7 +144,7 @@ async function initGame() {
 				el.style["max-height"] = String(parseInt(b - a)) + "px"
 			}, 500)
 		}
-		personal.preferredColour = window.initData.preferredTGZcolour
+		personal.preferredColour = window.initData.preferredTGZoptions ? window.initData.preferredTGZoptions[0] : -1
 		personal.yourTurnAudioType = window.initData.yourTurnAudioType
 		if (window.initData.startingOptions[0] === 102) personal.trainingGame = true
 
@@ -299,6 +316,8 @@ async function initGame() {
 	}
 
 	personal.haltPlay = false
+	await nextTick()
+	store.gameReady = true
 	controller.startPlayerTurn()
 
 	WS.StartWebSocket().catch(() => {
@@ -315,24 +334,34 @@ if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
 /********************************* */
 
 if (personal.name !== "admin" && personal.name !== "BotKickStarter" && personal.name !== "TGZtourneyAdmin") {
-	window.addEventListener("contextmenu", (e) => {
-		e.preventDefault()
-		e.stopPropagation() // not necessary in my case, could leave in case stopImmediateProp isn't available?
-		e.stopImmediatePropagation()
-		return false
-	})
-	/* window.addEventListener("touchend", e => {
-	 e.preventDefault()
-	 e.stopPropagation(); // not necessary in my case, could leave in case stopImmediateProp isn't available? 
-	 e.stopImmediatePropagation();
-	 return false;
-   });*/
+	// Context-menu suppression now lives on the map board only; the rest of the page keeps normal browser behaviour.
 }
 //map.newMap(2)
 
-controller.startPlayerTurn() // Will return early anyway if ineligiible
+function isTypingTarget(target) {
+	const tag = target && target.tagName
+	return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (target && target.isContentEditable)
+}
 
 document.addEventListener("keyup", function (event) {
+	if (isTypingTarget(event.target) || event.ctrlKey || event.metaKey || event.altKey) return
+	if (event.key === "Escape") {
+		store.topMenuViews.showChat = false
+		store.topMenuViews.showNotes = false
+		store.topMenuViews.showBug = false
+		store.topMenuViews.showHistory = false
+		store.topMenuViews.showReserve = false
+		store.topMenuViews.showRewindPanel = false
+		return
+	}
+	if (event.key === "h" || event.key === "H") {
+		document.getElementById("menuButtonHistory")?.click()
+		return
+	}
+	if (event.key === "c" || event.key === "C") {
+		document.getElementById("menuButtonChat")?.click()
+		return
+	}
 	if (store.topMenuViews.showChat) return
 	//if (event.altKey && event.which === 82)
 	// r = rotate
@@ -374,6 +403,9 @@ function getSplitUIleftMinWidth() {
 
 <template>
 	<TopMenu />
+	<transition name="turnBanner">
+		<div v-if="turnBanner" class="turn-banner">{{ turnBanner }}</div>
+	</transition>
 
 	<div
 		id="wholeMiddleArea"
@@ -629,5 +661,50 @@ body {
 	width: fit-content;
 	margin: 5px;
 	margin-top: 20px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+body.reduced-motion *,
+body.reduced-motion *::before,
+body.reduced-motion *::after {
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.01ms !important;
+	scroll-behavior: auto !important;
+}
+
+.turn-banner {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 5000;
+	background: rgba(0, 0, 0, 0.8);
+	color: white;
+	padding: 10px 20px;
+	border-radius: 6px;
+	font-size: 22px;
+	font-weight: bold;
+	pointer-events: none;
+}
+
+.turnBanner-enter-active,
+.turnBanner-leave-active {
+	transition: opacity 0.35s ease-in-out;
+}
+
+.turnBanner-enter-from,
+.turnBanner-leave-to {
+	opacity: 0;
 }
 </style>

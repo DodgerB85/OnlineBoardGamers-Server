@@ -1,3 +1,4 @@
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import * as rf from '../js/TGZreference'
 
@@ -5,6 +6,8 @@ import { useModelStore } from './TGZstore.js'
 
 export const usePersonalStore = defineStore('personal', () => {
   const store = useModelStore()
+
+  const prefersReducedMotion = ref(false)
 
   /******* SET ONCE VARS - IN SETUP */
   //var pov = 0
@@ -69,5 +72,6 @@ export const usePersonalStore = defineStore('personal', () => {
     getCorrectedColour,
     getCorrectedColourHex,
     WSstatus,
+    prefersReducedMotion,
   }
 })

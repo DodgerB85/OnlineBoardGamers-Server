@@ -4,10 +4,34 @@ import * as rf from "../js/TGZreference"
 import * as model from "../js/TGZmodel"
 import * as controller from "../js/TGZcontroller"
 
+import { ref, watch } from "vue"
+
 import { useModelStore } from "../stores/TGZstore.js"
 const store = useModelStore()
 import { usePersonalStore } from "../stores/TGZpersonal.js"
 const personal = usePersonalStore()
+
+const scoreDeltas = ref({})
+const previousScores = {}
+const deltaTimers = {}
+
+function checkScoreChanges() {
+	for (let i = 0; i < store.players.length; i++) {
+		const score = model.getScore(i)
+		if (previousScores[i] !== undefined && score > previousScores[i] && store.gameReady && !personal.prefersReducedMotion) {
+			scoreDeltas.value = { ...scoreDeltas.value, [i]: (scoreDeltas.value[i] || 0) + (score - previousScores[i]) }
+			clearTimeout(deltaTimers[i])
+			deltaTimers[i] = setTimeout(() => {
+				const next = { ...scoreDeltas.value }
+				delete next[i]
+				scoreDeltas.value = next
+			}, 1000)
+		}
+		previousScores[i] = score
+	}
+}
+
+watch(() => [store.history.length, store.gameflow.turn, store.gameflow.phase], checkScoreChanges, { immediate: true })
 
 async function clickedPlayerBox(playerIndex) {
 	if (store.topMenuViews.showingPlayerIndex === playerIndex) store.topMenuViews.showingPlayerIndex = -1
@@ -42,6 +66,16 @@ function getBidIncomeCows(playerIndex) {
 	}
 	return cowsTotal
 }
+
+function getPlayerGod(player) {
+	return model.getPlayer_gods(player).find((god) => god[0] !== rf.NO_god)
+}
+
+function getMaxMonumentLevel(player) {
+	let max = 0
+	for (let i = 0; i < player.monuments.length; i++) if (player.monuments[i][1] > max) max = player.monuments[i][1]
+	return max
+}
 </script>
 
 <template>
@@ -56,6 +90,12 @@ function getBidIncomeCows(playerIndex) {
 				color: personal.getCorrectedColour(store.players[playerIndex].colour) === rf.WHITE || personal.getCorrectedColour(store.players[playerIndex].colour) === rf.YELLOW ? 'black' : 'white',
 			}"
 			@click="clickedPlayerBox(playerIndex)">
+			<img
+				v-if="getPlayerGod(store.players[playerIndex])"
+				class="playerGodImg"
+				:src="view.getImage('god' + getPlayerGod(store.players[playerIndex])[0])"
+				:title="rf.god_NAMES[getPlayerGod(store.players[playerIndex])[0]]"
+				alt="God" />
 			<img class="playerTribeImg" :src="view.getPlayerTribeImage(personal.getCorrectedColour(store.players[playerIndex].colour))" alt="NR" />
 			<br />
 			<span class="playerNameSpan" :class="{ currentPlayerNameGlow: playerIndex === store.gameflow.turnOrder[0] }">{{ store.players[playerIndex].displayName }}</span>
@@ -65,6 +105,11 @@ function getBidIncomeCows(playerIndex) {
 			<template v-else-if="store.gameflow.phase === rf.PHASE_BID">(+{{ getBidIncomeCows(playerIndex) }})</template>
 			<img :src="view.getImage('cows1' + personal.getCorrectedColour(store.players[playerIndex].colour))" class="playerCow" alt="Cows: " />
 			<span :class="{ VRmet: model.getScore(playerIndex) >= model.getVR(store.players[playerIndex]) }">VR: {{ model.getScore(playerIndex) }} / {{ model.getVR(store.players[playerIndex]) }}</span>
+			<span v-if="scoreDeltas[playerIndex]" class="vpGain">+{{ scoreDeltas[playerIndex] }}</span>
+			<span v-if="store.players[playerIndex].monuments.length || store.players[playerIndex].specialists.length" class="playerExtraInfo" :title="$t('playerLine.extraInfo')">
+				<span v-if="store.players[playerIndex].monuments.length">M{{ getMaxMonumentLevel(store.players[playerIndex]) }}</span>
+				<span v-if="store.players[playerIndex].specialists.length">S{{ store.players[playerIndex].specialists.length }}</span>
+			</span>
 		</div>
 	</div>
 	<div class="playerLineDiv" v-else>
@@ -76,10 +121,10 @@ function getBidIncomeCows(playerIndex) {
 				'background-color': personal.getCorrectedColourHex(player.colour),
 				color: personal.getCorrectedColour(player.colour) === rf.WHITE || personal.getCorrectedColour(player.colour) === rf.YELLOW ? 'black' : 'white',
 			}"
-			@click="clickedPlayerBox(playerIndex)">
+			>
 			<img class="playerTribeImg" :src="view.getPlayerTribeImage(personal.getCorrectedColour(player.colour))" alt="NR" />
 			<br />
-			<span class="playerNameSpan" :class="{ currentPlayerNameGlow: playerIndex === store.gameflow.turnOrder[0] }">{{ player.displayName }}</span>
+			<span class="playerNameSpan">{{ player.displayName }}</span>
 			<br />
 			3
 			<img :src="view.getImage('cows1' + personal.getCorrectedColour(player.colour))" class="playerCow" alt="Cows: " />
@@ -123,11 +168,63 @@ function getBidIncomeCows(playerIndex) {
 	padding-bottom: 5px;
 	width: 170px;
 	height: 93px;
+	position: relative;
 
 	white-space: nowrap;
 	/*overflow: hidden;*/
 	text-overflow: ellipsis;
 	font-weight: bolder;
+}
+
+.playerGodImg {
+	position: absolute;
+	top: 2px;
+	right: 2px;
+	width: 28px;
+	height: 38px;
+	border: 1px solid black;
+	border-radius: 3px;
+	z-index: 2;
+}
+
+.playerExtraInfo {
+	position: absolute;
+	right: 3px;
+	bottom: 2px;
+	font-size: 10px;
+	line-height: 11px;
+	background: rgba(0, 0, 0, 0.55);
+	color: white;
+	padding: 0 3px;
+	border-radius: 3px;
+}
+
+.vpGain {
+	position: absolute;
+	right: 4px;
+	top: 4px;
+	z-index: 3;
+	background: darkgreen;
+	color: white;
+	font-size: 13px;
+	padding: 1px 4px;
+	border-radius: 4px;
+	animation: vpGain 1s ease-out forwards;
+}
+
+@keyframes vpGain {
+	0% {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+	20% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	100% {
+		opacity: 0;
+		transform: translateY(-14px);
+	}
 }
 
 .playerBox:hover {

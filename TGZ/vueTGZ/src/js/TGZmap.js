@@ -912,7 +912,7 @@ export function getAllUndepletedResourceSquaresToHighlight(craftsmanData, range,
 	return allRes
 }
 
-export function getAllUndepletedResourceSquaresToHighlightWithoutWater(craftsmanData, range, excludeArr) {
+export function getAllUndepletedResourceSquaresToHighlightWithoutWater(craftsmanData, range, _excludeArr) {
 	const store = useModelStore()
 	const toFindDuplicates = (arry) => arry.filter((item, index) => arry.indexOf(item) !== index)
 

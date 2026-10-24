@@ -965,13 +965,11 @@ export function setgod(god) {
 	} else if (has_god(controller.currentPlayerObj(), rf.ANYANWU)) {
 		store.context.action = rf.ACT_CHOOSE_ANYANWU_MON
 		for (let i = 0; i < controller.currentPlayerObj().monuments.length; i++) {
-			if (controller.currentPlayerObj().monuments[i][1] <= 3) store.context.canSelectRaiseMonument.push(controller.currentPlayerObj().monuments[i][0])
+			if (controller.currentPlayerObj().monuments[i][1] === 1 || controller.currentPlayerObj().monuments[i][1] === 2) store.context.canSelectRaiseMonument.push(controller.currentPlayerObj().monuments[i][0])
 		}
 		if (store.context.canSelectRaiseMonument.length === 0) {
-			// NB THIS EXACT TEXT IS LINKED TO IN ACTIONAREA
-			store.context.actionError = t("model.noMonumentBelow4")
-			//store.clearVars(true) // NO - this will remove error text
-			store.context.action = rf.ACT_NONE
+			// Keep the state open so the UI can show the empty option and a Continue button.
+			store.context.actionError = ""
 		}
 	} else {
 		store.clearVars(true)
@@ -1208,7 +1206,7 @@ export function getTurnEndCows(playerIndex, incomeType) {
 	return income
 }
 
-export function getVR(playerObj, withoutClamping = false) {
+export function getVR(playerObj, withoutClamping = false, candidateGod = rf.NO_god) {
 	const store = useModelStore()
 
 	if (playerObj.displayName === rf.BOT_NAME) return 41
@@ -1220,13 +1218,15 @@ export function getVR(playerObj, withoutClamping = false) {
 	for (let g = 0; g < gods.length; g++) {
 		if (gods[g][0] !== rf.NO_god) VR += rf.gods_VR[gods[g][0]]
 	}
+	if (candidateGod !== rf.NO_god) VR += rf.gods_VR[candidateGod]
 	// Add Specs
 	for (let i = 0; i < playerObj.specialists.length; i++) {
 		VR += rf.SPEC_VR[playerObj.specialists[i][0]]
 	}
 	// Add Techs
+	const hasGu = has_god(playerObj, rf.GU) || candidateGod === rf.GU
 	for (let i = 0; i < playerObj.techs.length; i++) {
-		if (has_god(playerObj, rf.GU)) VR++
+		if (hasGu) VR++
 		else VR += rf.TECH_VR[playerObj.techs[i][0]]
 	}
 	// Add ALIJIRE penalty

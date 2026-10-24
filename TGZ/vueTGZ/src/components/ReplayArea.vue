@@ -2,9 +2,9 @@
 import * as history from "../js/TGZhistory"
 import * as IO from "../js/TGZ_IO"
 import * as rf from "../js/TGZreference"
-import * as model from "../js/TGZmodel"
-
 import HistoryEntry from "./HistoryEntry.vue"
+import MapInspectorButton from "./utils/MapInspectorButton.vue"
+import HubRangeLegend from "./utils/HubRangeLegend.vue"
 
 import { useModelStore } from "../stores/TGZstore.js"
 const store = useModelStore()
@@ -107,33 +107,19 @@ function moveReplayUIsplitScreen() {
 
 <template>
 	<template v-if="store.topMenuViews.showReplay">
-		<div id="mapInspectorButtonDiv">
-			<button @click="model.toggleMapInspector" class="actionsLineButton">
-				<span v-if="!store.topMenuViews.mapInspectorMode">{{ $t("replay.enable") }}</span>
-				<span v-else>{{ $t("replay.disable") }}</span>
-				<br />
-				{{ $t("replay.map") }}
-				<br />
-				{{ $t("replay.inspector") }}
-			</button>
-			<template v-if="store.topMenuViews.mapInspectorMode">
-				<br />
-				<input type="checkbox" id="mapInspectorEshuCheckbox" v-model="store.topMenuViews.mapInspectorEshu" />
-				<label for="mapInspectorEshuCheckbox">{{ $t("replay.useEshu") }}</label>
-			</template>
-		</div>
+		<MapInspectorButton prefix="replay" show-eshu />
 		<button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="store.replayStep === 0"
 			@click="performStep(-999)">{{ $t("replay.backToMyLastMove") }}</button>
-		<button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-99)">|&lt;</button>
-		<button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-9)">&lt;&lt;</button>
-		<button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-1)">&lt;</button>
+		<button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-99)" :title="$t('replay.first')" :aria-label="$t('replay.first')">|&lt;</button>
+		<button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-9)" :title="$t('replay.backFive')" :aria-label="$t('replay.backFive')">&lt;&lt;</button>
+		<button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-1)" :title="$t('replay.backOne')" :aria-label="$t('replay.backOne')">&lt;</button>
 		{{ store.replayStep + 1 }} / {{ store.replayData.length }}
 		<button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
-			@click="performStep(1)">&gt;</button>
+			@click="performStep(1)" :title="$t('replay.forwardOne')" :aria-label="$t('replay.forwardOne')">&gt;</button>
 		<button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
-			@click="performStep(9)">&gt;&gt;</button>
+			@click="performStep(9)" :title="$t('replay.forwardFive')" :aria-label="$t('replay.forwardFive')">&gt;&gt;</button>
 		<button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
-			@click="performStep(99)">&gt;|</button>
+			@click="performStep(99)" :title="$t('replay.last')" :aria-label="$t('replay.last')">&gt;|</button>
 
 		<div class="copyGameButtonDiv" v-if="personal.name != undefined">
 			<button @click="localCopyGameToPracticeGame2()" class="actionsLineButton">
@@ -180,11 +166,7 @@ function moveReplayUIsplitScreen() {
 		<template v-if="store.topMenuViews.mapInspectorMode && store.topMenuViews.showReplay">
 			<br />
 			{{ $t("replay.clickItemRanges") }}
-			<span class="hubRangeSq hubRangeSq0">0</span>
-			<span v-for="idx in Math.max(store.topMenuViews.hubRangesToHighlight.length - 1, 0)" :key="idx"
-				class="hubRangeSq" :class="'hubRangeSq' + String(idx % 8)">
-				{{ idx }}
-			</span>
+			<HubRangeLegend :ranges="store.topMenuViews.hubRangesToHighlight" />
 			<br />
 			<br />
 		</template>

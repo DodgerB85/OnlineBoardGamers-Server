@@ -64,13 +64,13 @@ function getTotalRaiseCostHTML(entry3, entry1) {
 	let ret = "<b><u>" + t("history.summary") + "</u> " + String(hubCosts) + "</b> " + t(hubCosts !== 1 ? "history.hubs" : "history.hub") + " "
 	for (let i = 0; i < cmenCosts.length; i++) {
 		if (cmenCosts[i] !== 0) {
-			ret += '<span class="mainEntryPlayer" style="background-color: ' + personal.getCorrectedColourHex(store.players[i].colour) + ";color: " + (personal.getCorrectedColour(store.players[i].colour) === rf.WHITE || personal.getCorrectedColour(store.players[i].colour) === rf.YELLOW ? "black" : "white") + '">' + store.players[i].displayName + "</span><b>" + String(cmenCosts[i]) + "</b> "
+			ret += '<span class="mainEntryPlayer" style="background-color: ' + personal.getCorrectedColourHex(store.players[i].colour) + ";color: " + (personal.getCorrectedColour(store.players[i].colour) === rf.WHITE || personal.getCorrectedColour(store.players[i].colour) === rf.YELLOW ? "black" : "white") + '">' + refFuncs.escapeHtml(store.players[i].displayName) + "</span><b>" + String(cmenCosts[i]) + "</b> "
 		}
 	}
 	// Total
 	ret += " " + t("history.totalLabel") + " <b>" + String(cmenCosts.reduce((a, b) => a + b, 0) + hubCosts + OVIAcows) + "</b> "
 
-	if (OVIAused) ret += '<br/> <span class="mainEntryPlayer" style="background-color: ' + personal.getCorrectedColourHex(store.players[entry1].colour) + ";color: " + (personal.getCorrectedColour(store.players[entry1].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry1].colour) === rf.YELLOW ? "black" : "white") + '">' + store.players[entry1].displayName + "</span>" + t("history.oviaPossessive") + " <b>" + String(OVIAcows) + "</b> "
+	if (OVIAused) ret += '<br/> <span class="mainEntryPlayer" style="background-color: ' + personal.getCorrectedColourHex(store.players[entry1].colour) + ";color: " + (personal.getCorrectedColour(store.players[entry1].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry1].colour) === rf.YELLOW ? "black" : "white") + '">' + refFuncs.escapeHtml(store.players[entry1].displayName) + "</span>" + t("history.oviaPossessive") + " <b>" + String(OVIAcows) + "</b> "
 	return ret
 }
 

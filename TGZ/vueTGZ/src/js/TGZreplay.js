@@ -58,7 +58,7 @@ async function resetDataForReplay() {
 	store.clearVars()
 }
 
-function replayAddMonument(historyIndex, playerIndex, indexes) {
+function replayAddMonument(_historyIndex, playerIndex, indexes) {
 	const store = useModelStore()
 
 	// Add monument to player
@@ -68,7 +68,7 @@ function replayAddMonument(historyIndex, playerIndex, indexes) {
 	store.context.actionsTaken.push(rf.ACT_BUILD_MON)
 }
 
-function replayBid(historyIndex, playerIndex, entry3) {
+function replayBid(_historyIndex, _playerIndex, entry3) {
 	const store = useModelStore()
 
 	if (entry3[0] > 0) {
@@ -77,7 +77,10 @@ function replayBid(historyIndex, playerIndex, entry3) {
 		// Check for elegua used; refund if +ve
 		if (entry3.length > 2 && entry3[2] > 0) controller.currentPlayerObj().cows += entry3[2]
 		// if aja used, move cows to god not bid
-		if (entry3.length > 2 && entry3[2] === -1) model.update_godData(controller.currentPlayerObj(), rf.AJA, entry3[0])
+		if (entry3.length > 2 && entry3[2] === -1) {
+			model.update_godData(controller.currentPlayerObj(), rf.AJA, entry3[0])
+			if (entry3.length > 3 && entry3[3] > 0) controller.currentPlayerObj().cows += entry3[3]
+		}
 		// Otherwise Add cows to the bid
 		else store.ongoingVars.totalBids += parseInt(entry3[0])
 		store.ongoingVars.currentBid = parseInt(entry3[0])
@@ -91,7 +94,7 @@ function replayBid(historyIndex, playerIndex, entry3) {
 	}
 }
 
-function replayEndBids(historyIndex, playerIndex, entry3) {
+function replayEndBids(_historyIndex, _playerIndex, entry3) {
 	const store = useModelStore()
 
 	let cowsOnPlaques = model.getCowsOnPlaque(-1, 0)
@@ -112,15 +115,15 @@ function replayEndBids(historyIndex, playerIndex, entry3) {
 	store.ongoingVars.totalBids = 0
 }
 
-function replayChoosegod(historyIndex, playerIndex, entry3) {
+function replayChoosegod(_historyIndex, _playerIndex, entry3) {
 	model.setgod_core(entry3[0])
 }
 
-function replayChooseSpecialist(historyIndex, playerIndex, entry3) {
+function replayChooseSpecialist(_historyIndex, _playerIndex, entry3) {
 	model.addSpecialist_core(entry3[0])
 }
 
-function replayAddResource(historyIndex, playerIndex, entry3) {
+function replayAddResource(_historyIndex, _playerIndex, entry3) {
 	let index = entry3[0]
 	let resource = entry3[1]
 	// Add cows to shaman, if required
@@ -136,7 +139,7 @@ function replayAddResource(historyIndex, playerIndex, entry3) {
 	}
 	model.addResource_core(index, resource, 0)
 }
-function replayAddWater(historyIndex, playerIndex, entry3) {
+function replayAddWater(_historyIndex, _playerIndex, entry3) {
 	let index = entry3[0]
 	let rotation = entry3[1]
 	// Add cows to Rain Ceremony, if required
@@ -153,7 +156,7 @@ function replayAddWater(historyIndex, playerIndex, entry3) {
 	model.addResource_core(index, rf.WATER_TILE, rotation)
 }
 
-function replayAddCraftsman(historyIndex, playerIndex, entry3) {
+function replayAddCraftsman(_historyIndex, playerIndex, entry3) {
 	const store = useModelStore()
 	let player = store.players[playerIndex]
 	let index = entry3[0]
@@ -163,13 +166,13 @@ function replayAddCraftsman(historyIndex, playerIndex, entry3) {
 	store.context.actionsTaken.push(rf.ACT_BUILD_CRAFTSMEN)
 }
 
-function replaySetPrices(historyIndex, playerIndex, entry3) {
+function replaySetPrices(_historyIndex, playerIndex, entry3) {
 	const store = useModelStore()
 	let player = store.players[playerIndex]
 	model.setCraftsmanPrice_core(player, entry3)
 }
 
-function replayActivateSpec(historyIndex, playerIndex, entry3) {
+function replayActivateSpec(_historyIndex, _playerIndex, entry3) {
 	let specID = entry3[0]
 	for (let i = 0; i < controller.currentPlayerObj().specialists.length; i++) {
 		if (controller.currentPlayerObj().specialists[i][0] === specID) {
@@ -179,11 +182,11 @@ function replayActivateSpec(historyIndex, playerIndex, entry3) {
 	}
 }
 
-function replayAddHerdCows(historyIndex, playerIndex, entry3) {
+function replayAddHerdCows(_historyIndex, _playerIndex, entry3) {
 	model.addHerdCows_core(entry3[0])
 }
 
-function replayChoseAnyanwuMon(historyIndex, playerIndex, entry3) {
+function replayChoseAnyanwuMon(_historyIndex, playerIndex, entry3) {
 	const store = useModelStore()
 	let player = store.players[playerIndex]
 	let monumentSq = entry3[0]
@@ -197,7 +200,7 @@ function replayChoseAnyanwuMon(historyIndex, playerIndex, entry3) {
 	player.monuments[monumentIndex][1] = 3
 }
 
-function replayRaiseMonument(historyIndex, playerIndex, entry3) {
+function replayRaiseMonument(_historyIndex, playerIndex, entry3) {
 	const store = useModelStore()
 	let player = store.players[playerIndex]
 	let monumentSq = entry3[0][0]
@@ -332,7 +335,7 @@ function replayRaiseMonument(historyIndex, playerIndex, entry3) {
 	// pay costs to correct places
 }
 
-function replayBuildOyaMon(historyIndex, playerIndex, entry3) {
+function replayBuildOyaMon(_historyIndex, playerIndex, entry3) {
 	const store = useModelStore()
 	let player = store.players[playerIndex]
 	let monumentSq = entry3[0]
@@ -393,7 +396,7 @@ function replayBuildOyaMon(historyIndex, playerIndex, entry3) {
 	store.context.actionsTaken.push(rf.ACT_RAISE_MON)
 }
 
-function replayRevenues(historyIndex, playerIndex, entry3) {
+function replayRevenues(_historyIndex, _playerIndex, _entry3) {
 	const store = useModelStore()
 
 	store.gameflow.phase = rf.PHASE_REVENUES
@@ -413,7 +416,7 @@ function replayCompareMythologies() {
 	}
 }
 
-function replayNewTurn(historyIndex, playerIndex, entry3) {
+function replayNewTurn(_historyIndex, _playerIndex, _entry3) {
 	const store = useModelStore()
 	store.gameflow.phase = rf.PHASE_BID
 }

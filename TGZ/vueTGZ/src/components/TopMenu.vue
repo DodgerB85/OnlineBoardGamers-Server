@@ -6,7 +6,6 @@ import * as rf from "../js/TGZreference"
 import * as controller from "../js/TGZcontroller"
 import * as funcs from "../js/TGZfuncs"
 import * as replay from "../js/TGZreplay"
-import * as model from "../js/TGZmodel"
 
 import PlayerLine from "./PlayerLine.vue"
 
@@ -23,16 +22,8 @@ import { ref } from "vue"
 
 const nameClickCounter = ref(0)
 
-function zoomClick() {
-	let doSave = false
-	if (personal.pov >= 0) doSave = true
-	store.refSize = 240
-	if (doSave) {
-		personal.zoomInterval = setTimeout(function () {
-			clearInterval(personal.zoomInterval)
-			IO.saveZoom(store.refSize)
-		}, 1000)
-	}
+function toggleStatsExcludeDropdown() {
+	store.topMenuViews.showStatsExcludeDropdown = !store.topMenuViews.showStatsExcludeDropdown
 }
 
 function doZoom(dir) {
@@ -49,6 +40,21 @@ function doZoom(dir) {
 	if (doSave) {
 		personal.zoomInterval = setTimeout(function () {
 			clearInterval(personal.zoomInterval)
+			IO.saveZoom(store.refSize)
+		}, 1000)
+	}
+}
+
+function fitMapToScreen() {
+	const columns = store.mapTiles.length === 8 ? 2 : 3
+	const actionWidth = store.topMenuViews.replayUIlocation === 2 ? 780 : 520
+	const available = Math.max(480, document.documentElement.clientWidth - actionWidth)
+	let size = Math.floor(available / columns / 20) * 20
+	size = Math.max(160, Math.min(480, size))
+	store.refSize = size
+	if (personal.pov >= 0) {
+		clearTimeout(personal.zoomInterval)
+		personal.zoomInterval = setTimeout(function () {
 			IO.saveZoom(store.refSize)
 		}, 1000)
 	}
@@ -289,6 +295,7 @@ function adminBKSbutton() {
 				<div id="WSstatus" v-if="personal.pov >= 0" :class="personal.WSstatus"></div>
 				<br />
 			</div>
+			<button class="zoomButton" @click="fitMapToScreen">🔍{{ $t("topMenu.fitMap") }}</button>
 			<button class="zoomButton" @click="doZoom(1)">🔍+</button>
 			<button class="zoomButton" @click="doZoom(-1)">🔍-</button>
 			<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
@@ -391,7 +398,7 @@ function adminBKSbutton() {
 		<div id="topInfos">
 			<div class="infoSpanDiv">
 				<span id="infoSpan">
-					<span v-html="store.gameName"></span>
+					<span>{{ store.gameName }}</span>
 					| {{ store.gameflow.turn }}: {{ view.phaseStr() }}
 					<span v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER">| {{ controller.currentPlayerObj().displayName }}</span>
 				</span>
@@ -525,7 +532,7 @@ function adminBKSbutton() {
 .topMenuItem img {
 	/*filter: brightness(0) saturate(100%) invert(100%) sepia(17%) saturate(6440%) hue-rotate(174deg) brightness(98%) contrast(102%);
 */
-	width: 38x;
+	width: 38px;
 	height: 38px;
 }
 

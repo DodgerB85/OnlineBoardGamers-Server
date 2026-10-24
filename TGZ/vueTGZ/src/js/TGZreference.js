@@ -379,7 +379,7 @@ export const god_NAMES = [
     // Schism
     'Agwu Nsi',//12
     'Aja', 
-    'Aje Shaluga',
+    'Aje-Shaluga',
     'Alajire',
     'Anyanwu',
     'Ekwensu',//17
@@ -392,7 +392,7 @@ export const god_NAMES = [
     // Other
     'Ala', //24
     'Ajaka',
-    'Aje Shaluga Old',
+    'Aje-Shaluga Old',
     'Igwekala',
     'Nyami Nyami',
     'Olokun',

@@ -123,7 +123,7 @@ export async function StartWebSocket() {
 				resolve(null)
 			}
 
-			TGZwebSocket.onerror = (evt) => {
+			TGZwebSocket.onerror = (_evt) => {
 				cleanup()
 				handleFailure("Socket Error (Blocked)")
 				resolve(null)

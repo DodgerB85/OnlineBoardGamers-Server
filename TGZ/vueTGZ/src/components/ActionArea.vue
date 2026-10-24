@@ -1,5 +1,7 @@
 <script setup>
 import TurnNudge from "./utils/TurnNudge.vue"
+import MapInspectorButton from "./utils/MapInspectorButton.vue"
+import HubRangeLegend from "./utils/HubRangeLegend.vue"
 import * as rf from "../js/TGZreference"
 import * as map from "../js/TGZmap"
 import * as view from "../js/TGZview"
@@ -88,6 +90,67 @@ function getBidRange() {
 	return res
 }
 
+function changeBid(dir) {
+	const options = getBidRange().map((option) => option[0])
+	if (options.length === 0) return
+	let idx = options.indexOf(store.context.selectedBid)
+	if (idx === -1) idx = 0
+	idx = Math.max(0, Math.min(options.length - 1, idx + dir))
+	store.context.selectedBid = options[idx]
+}
+
+function getBidAmountLabel() {
+	return store.context.selectedBid === 0 ? t("actionArea.pass") : String(store.context.selectedBid)
+}
+
+function getRitualGoodsDone() {
+	return Math.max(0, store.context.upgradingMonumentProcess.length - 1)
+}
+
+function getRequiredRitualGoods() {
+	if (store.context.upgradingMonumentProcess.length === 0) return 0
+	const level = store.context.upgradingMonumentProcess[0][1]
+	if (model.has_god(controller.currentPlayerObj(), rf.TIURAKH) && level >= 2) return level - 1
+	return level
+}
+
+function getGoodCraftsman(good) {
+	return map.getCraftsmanDataFromAnySq(good[0][0], true)
+}
+
+function getGoodResourceIndexes(good) {
+	return good.slice(1).filter((item) => typeof item === "number" && item >= 0)
+}
+
+function getGoodResourceImage(resourceIndex) {
+	const tile = rf.resSqToTile(store.coords[resourceIndex])
+	return view.getImage("res" + String(tile))
+}
+
+function getActionsTakenText() {
+	const labels = {
+		[rf.ACT_BUILD_MON]: t("actionArea.build") + " " + t("actionArea.monument"),
+		[rf.ACT_RAISE_MON]: t("actionArea.raise") + " " + t("actionArea.monuments"),
+		[rf.ACT_BUILD_CRAFTSMEN]: t("actionArea.place") + " " + t("actionArea.craftsmen"),
+		[rf.ACT_CHOOSE_god]: t("actionArea.choose") + " " + t("actionArea.god"),
+		[rf.ACT_CHOOSE_SPEC]: t("actionArea.choose") + " " + t("actionArea.specialist"),
+		[rf.ACT_USE_SPEC]: t("actionArea.use") + " " + t("actionArea.specialist"),
+		[rf.ACT_BUILD_RES]: t("actionArea.addResource"),
+		[rf.ACT_BUILD_WATER]: t("actionArea.placeWater"),
+		[rf.ACT_USE_HERD]: t("actionArea.use") + " " + rf.SPEC_NAMES[rf.HERD],
+		[rf.ACT_SET_PRICES]: t("actionArea.confirmPrice"),
+		[rf.ACT_BUILD_PRI_CRAFTSMAN]: t("actionArea.place") + " " + t("actionArea.craftsmen"),
+		[rf.ACT_BUILD_SEC_CRAFTSMAN]: t("actionArea.place") + " " + t("actionArea.craftsmen"),
+	}
+	const texts = store.context.actionsTaken.map((action) => labels[action]).filter(Boolean)
+	return texts.length ? texts.join(", ") : t("common.none")
+}
+
+function getLastUpdateText() {
+	if (!personal.latestUpdate) return ""
+	return new Date(personal.latestUpdate * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+}
+
 function getFirstPositionOrdinal() {
 	let pos = 0
 	for (let i = store.ongoingVars.newTurnOrder.length - 1; i >= 0; i--) {
@@ -157,7 +220,10 @@ function confirmAjaBid(cowCost) {
 	}
 
 	store.context.action = rf.ACT_NONE
-	model.addHistory(rf.HIST_BID, controller.currentPlayerIndex(), 0, [parseInt(cowCost), pos, -1])
+	let eleguaDiscount = 0
+	if (model.eleguaAvailable()) eleguaDiscount = Math.min(cowCost, 3)
+	model.addHistory(rf.HIST_BID, controller.currentPlayerIndex(), 0, [parseInt(cowCost), pos, -1, eleguaDiscount])
+	localEndPlayerTurn()
 }
 
 function confirmBid(cowCost, preventTurnEnd) {
@@ -355,7 +421,7 @@ function clickedgodChoice(god) {
 	store.context.actionError = ""
 
 	// god is included, so don't add it on again
-	if (model.getVR(controller.currentPlayerObj(), true) > 40) {
+	if (model.getVR(controller.currentPlayerObj(), true, god) > 40) {
 		store.context.actionError = t("actionArea.takingGodOver40", { name: rf.god_NAMES[god] })
 		return
 	}
@@ -420,7 +486,7 @@ function getCurrentUpgradeCost() {
 	let ret = "<b>" + String(hubCosts) + "</b> " + t(hubCosts !== 1 ? "history.hubs" : "history.hub") + " "
 	for (let i = 0; i < cmenCosts.length; i++) {
 		if (cmenCosts[i] !== 0) {
-			ret += '<span class="mainEntryPlayer" style="background-color: ' + personal.getCorrectedColourHex(store.players[i].colour) + ";color: " + (personal.getCorrectedColour(store.players[i].colour) === rf.WHITE || personal.getCorrectedColour(store.players[i].colour) === rf.YELLOW ? "black" : "white") + '">' + store.players[i].displayName + "</span>" + String(cmenCosts[i]) + " "
+			ret += '<span class="mainEntryPlayer" style="background-color: ' + personal.getCorrectedColourHex(store.players[i].colour) + ";color: " + (personal.getCorrectedColour(store.players[i].colour) === rf.WHITE || personal.getCorrectedColour(store.players[i].colour) === rf.YELLOW ? "black" : "white") + '">' + funcs.escapeHtml(store.players[i].displayName) + "</span>" + String(cmenCosts[i]) + " "
 		}
 	}
 	// Total
@@ -432,10 +498,6 @@ function handleAutoPassCheckbox() {
 	document.querySelector("#autoPassResponse").innerHTML = ""
 	const autoPass = document.querySelector("#autoPassCheckbox").checked
 	IO.saveAutoPass(autoPass)
-}
-
-function newBidSelected(newBid) {
-	store.context.selectedBid = parseInt(newBid)
 }
 
 function isThisTheLastPlaque(idx) {
@@ -560,6 +622,11 @@ function setupOya() {
 	store.context.canSelectRaiseMonument.splice(0)
 	model.getValidCraftsmenToRaiseMonument([0], false)
 	store.topMenuViews.hubRangesToHighlight = map.getAllOrAnySquaresWithinRangeOfZoneUsingHubs([0], 17)
+}
+
+function continueAfterAnyanwu() {
+	store.clearVars(true)
+	store.context.action = rf.ACT_NONE
 }
 
 function skipResource() {
@@ -767,6 +834,11 @@ function failedToJustPlaceCraftsmanFlag() {
 		</div>
 	</template>
 
+	<div v-if="!personal.canPlay() && !store.topMenuViews.showReplay && store.gameflow.phase !== rf.PHASE_GAME_OVER && store.players.length > 0 && store.gameflow.turnOrder.length > 0" class="waitingInfo">
+		{{ $t("actionArea.waitingFor", { name: controller.currentPlayerObj().displayName }) }}
+		<span v-if="getLastUpdateText()"> · {{ $t("actionArea.lastUpdate") }} {{ getLastUpdateText() }}</span>
+	</div>
+
 	<!-- ALWAYS SHOWS ON TURN 0 -->
 	<template v-if="store.gameflow.turn === 0 && !store.topMenuViews.showReplay && store.topMenuViews.showIntroInfo">
 		<h2>{{ $t("actionArea.welcomeTitle") }}</h2>
@@ -959,28 +1031,11 @@ function failedToJustPlaceCraftsmanFlag() {
 
 	<!-- Not your turn, map inspector button -->
 	<template v-if="!personal.canPlay() && !store.topMenuViews.showReplay">
-		<div id="mapInspectorButtonDiv">
-			<button @click="model.toggleMapInspector" class="actionsLineButton">
-				<span v-if="!store.topMenuViews.mapInspectorMode">{{ $t("actionArea.enable") }}</span>
-				<span v-else>{{ $t("actionArea.disable") }}</span>
-				<br />
-				{{ $t("actionArea.map") }}
-				<br />
-				{{ $t("actionArea.inspector") }}
-			</button>
-			<template v-if="store.topMenuViews.mapInspectorMode">
-				<br />
-				<input type="checkbox" id="mapInspectorEshuCheckbox" v-model="store.topMenuViews.mapInspectorEshu" />
-				<label for="mapInspectorEshuCheckbox">{{ $t("actionArea.useEshu") }}</label>
-			</template>
-		</div>
+		<MapInspectorButton show-eshu />
 		<template v-if="store.topMenuViews.mapInspectorMode && !store.topMenuViews.showReplay">
 			<br />
 			{{ $t("actionArea.clickItemRanges") }}
-			<span class="hubRangeSq hubRangeSq0">0</span>
-			<span v-for="idx in Math.max(store.topMenuViews.hubRangesToHighlight.length - 1, 0)" :key="idx" class="hubRangeSq" :class="'hubRangeSq' + String(idx % 8)">
-				{{ idx }}
-			</span>
+			<HubRangeLegend :ranges="store.topMenuViews.hubRangesToHighlight" />
 			<br />
 			<br />
 		</template>
@@ -990,23 +1045,13 @@ function failedToJustPlaceCraftsmanFlag() {
 		<div id="actions">
 			<!-- ADD FIRST MONUMENT  -->
 			<template v-if="store.gameflow.phase === rf.PHASE_FIRST_MON">
-				<button @click="model.toggleMapInspector" class="actionsLineButton" id="mapInspectFirstMon">
-					<span v-if="!store.topMenuViews.mapInspectorMode">{{ $t("actionArea.enable") }}</span>
-					<span v-else>{{ $t("actionArea.disable") }}</span>
-					<br />
-					{{ $t("actionArea.map") }}
-					<br />
-					{{ $t("actionArea.inspector") }}
-				</button>
+				<MapInspectorButton />
 				<b>{{ $t("actionArea.buildFirstMonument") }}</b>
 				<template v-if="store.context.action !== rf.ACT_NONE">
 					<br />
 					<br />
 					{{ $t("actionArea.hubsUsed") }}
-					<span class="hubRangeSq hubRangeSq0">0</span>
-					<span v-for="idx in Math.max(store.topMenuViews.hubRangesToHighlight.length - 1, 0)" :key="idx" class="hubRangeSq" :class="'hubRangeSq' + String(idx % 8)">
-						{{ idx }}
-					</span>
+					<HubRangeLegend :ranges="store.topMenuViews.hubRangesToHighlight" />
 					<br />
 					<br />
 				</template>
@@ -1080,19 +1125,14 @@ function failedToJustPlaceCraftsmanFlag() {
 					</span>
 					<label class="choiceLabel" for="bidAmount">{{ $t("actionArea.bidAmount") }}</label>
 
-					<select name="bidAmount" id="bidAmount" @change="newBidSelected($event.target.value)">
-						<option v-for="(amount, idx) in getBidRange()" :key="idx" :value="amount[0]">{{ amount[1] }}</option>
-					</select>
+					<div class="bidPicker">
+						<button class="bidStepButton" :disabled="store.context.selectedBid === 0" @click="changeBid(-1)" :aria-label="$t('actionArea.lowerBid')">−</button>
+						<span class="bidAmount" aria-live="polite">{{ getBidAmountLabel() }}</span>
+						<button class="bidStepButton" :disabled="store.context.selectedBid === getBidRange()[getBidRange().length - 1][0]" @click="changeBid(1)" :aria-label="$t('actionArea.raiseBid')">+</button>
+					</div>
 
 					<br />
-					<button @click="model.toggleMapInspector" class="actionsLineButton" id="mapInspectBid">
-						<span v-if="!store.topMenuViews.mapInspectorMode">{{ $t("actionArea.enable") }}</span>
-						<span v-else>{{ $t("actionArea.disable") }}</span>
-						<br />
-						{{ $t("actionArea.map") }}
-						<br />
-						{{ $t("actionArea.inspector") }}
-					</button>
+					<MapInspectorButton />
 
 					<span v-if="store.context.selectedBid === 0">
 						{{ $t("actionArea.passPosition") }}
@@ -1128,23 +1168,9 @@ function failedToJustPlaceCraftsmanFlag() {
 
 			<!-- BUILD PHASE - NO ACTION  -->
 			<template v-if="store.gameflow.phase === rf.PHASE_BUILD && store.context.action === rf.ACT_NONE">
-				<div id="mapInspectorButtonDiv">
-					<button @click="model.toggleMapInspector" class="actionsLineButton">
-						<span v-if="!store.topMenuViews.mapInspectorMode">{{ $t("actionArea.enable") }}</span>
-						<span v-else>{{ $t("actionArea.disable") }}</span>
-						<br />
-						{{ $t("actionArea.map") }}
-						<br />
-						{{ $t("actionArea.inspector") }}
-					</button>
-					<template v-if="store.topMenuViews.mapInspectorMode">
-						<br />
-						<input type="checkbox" id="mapInspectorEshuCheckbox" v-model="store.topMenuViews.mapInspectorEshu" />
-						<label for="mapInspectorEshuCheckbox">{{ $t("actionArea.useEshu") }}</label>
-					</template>
-				</div>
+				<MapInspectorButton show-eshu />
 				<fieldset class="optionsGroup">
-					<legend class="optionsHeader">{{ $t("actionArea.pickOne") }}</legend>
+					<legend class="optionsHeader"><span class="stepBadge">1</span>{{ $t("actionArea.pickOne") }}</legend>
 					<template v-if="!store.context.actionsTaken.includes(rf.ACT_BUILD_MON) && !store.context.actionsTaken.includes(rf.ACT_RAISE_MON) && !store.context.actionsTaken.includes(rf.ACT_BUILD_CRAFTSMEN)">
 						<button class="actionsLineButton mainActionButton" @click="model.setupPlaceMonument">
 							{{ $t("actionArea.build") }}
@@ -1187,7 +1213,7 @@ function failedToJustPlaceCraftsmanFlag() {
 					</template>
 				</fieldset>
 				<fieldset class="optionsGroup">
-					<legend class="optionsHeader">{{ $t("actionArea.onceEach") }}</legend>
+					<legend class="optionsHeader"><span class="stepBadge">2</span>{{ $t("actionArea.onceEach") }}</legend>
 					<span v-if="controller.currentPlayerObj().specialists.length === 0">
 						<div class="noSpecsTextDiv">
 							{{ $t("actionArea.youHave") }}
@@ -1211,7 +1237,7 @@ function failedToJustPlaceCraftsmanFlag() {
 					</span>
 				</fieldset>
 				<fieldset class="optionsGroup" v-if="store.availableSpecialists.length > 0 || model.has_god(controller.currentPlayerObj(), rf.NO_god)">
-					<legend class="optionsHeader">{{ $t("actionArea.pickOne") }}</legend>
+					<legend class="optionsHeader"><span class="stepBadge">3</span>{{ $t("actionArea.pickOne") }}</legend>
 					<span v-if="(model.has_god(controller.currentPlayerObj(), rf.NO_god) || store.allowMultiple_gods) && !store.context.actionsTaken.includes(rf.ACT_CHOOSE_god) && !store.context.actionsTaken.includes(rf.ACT_CHOOSE_SPEC)">
 						<button class="actionsLineButton mainActionButton" @click="model.setupChoosegod">
 							{{ $t("actionArea.choose") }}
@@ -1246,10 +1272,7 @@ function failedToJustPlaceCraftsmanFlag() {
 					<br />
 					<br />
 					{{ $t("actionArea.clickItemRanges") }}
-					<span class="hubRangeSq hubRangeSq0">0</span>
-					<span v-for="idx in Math.max(store.topMenuViews.hubRangesToHighlight.length - 1, 0)" :key="idx" class="hubRangeSq" :class="'hubRangeSq' + String(idx % 8)">
-						{{ idx }}
-					</span>
+					<HubRangeLegend :ranges="store.topMenuViews.hubRangesToHighlight" />
 				</template>
 				<br />
 				<button v-if="controller.canResign()" class="actionsLineButton" @click="localCheckResign">{{ $t("actionArea.resign") }}</button>
@@ -1301,6 +1324,13 @@ function failedToJustPlaceCraftsmanFlag() {
 						</template>
 					</template>
 				</template>
+				<div class="endTurnSummary">
+					<b>{{ $t("actionArea.endTurnSummary") }}</b>
+					<br />
+					{{ $t("actionArea.actionsTakenThisTurn") }}: {{ getActionsTakenText() }}
+					<br />
+					{{ $t("actionArea.victoryPoints") }}: {{ model.getScore(controller.currentPlayerIndex()) }} / {{ model.getVR(controller.currentPlayerObj()) }}
+				</div>
 				<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t("common.resetWholeTurn") }}</button>
 				<button class="actionsLineButton" @click="localEndPlayerTurn">{{ $t("actionArea.confirmEndTurn") }}</button>
 			</template>
@@ -1492,10 +1522,7 @@ function failedToJustPlaceCraftsmanFlag() {
 				<br />
 				<br />
 				{{ $t("actionArea.hubsUsed") }}
-				<span class="hubRangeSq hubRangeSq0">0</span>
-				<span v-for="idx in Math.max(store.topMenuViews.hubRangesToHighlight.length - 1, 0)" :key="idx" class="hubRangeSq" :class="'hubRangeSq' + String(idx % 8)">
-					{{ idx }}
-				</span>
+				<HubRangeLegend :ranges="store.topMenuViews.hubRangesToHighlight" />
 				<br />
 				<button class="actionsLineButton" @click="funcs.importModel(store.actionResetData, true)">{{ $t("common.cancel") }}</button>
 				<button v-if="model.has_god(controller.currentPlayerObj(), rf.OBATALA) && store.context.monumentsToPlace === 1" class="actionsLineButton" @click="onlyPlaceOneMonument">{{ $t("actionArea.onlyPlaceOne") }}</button>
@@ -1528,6 +1555,13 @@ function failedToJustPlaceCraftsmanFlag() {
 			<template v-if="store.context.action === rf.ACT_CHOOSE_ANYANWU_MON">
 				<br />
 				<b>{{ $t("actionArea.selectMonumentLevel3") }}</b>
+				<br />
+				<template v-if="store.context.canSelectRaiseMonument.length === 0">
+					<span class="actionError">{{ $t("actionArea.noLevelOneOrTwoMonuments") }}</span>
+					<br />
+					<br />
+					<button class="actionsLineButton" @click="continueAfterAnyanwu">{{ $t("actionArea.continue") }}</button>
+				</template>
 				<br />
 				<br />
 			</template>
@@ -1594,10 +1628,7 @@ function failedToJustPlaceCraftsmanFlag() {
 				</div>
 				<br />
 				{{ $t("actionArea.hubsUsed") }}
-				<span class="hubRangeSq hubRangeSq0">0</span>
-				<span v-for="idx in Math.max(store.topMenuViews.hubRangesToHighlight.length - 1, 0)" :key="idx" class="hubRangeSq" :class="'hubRangeSq' + String(idx % 8)">
-					{{ idx }}
-				</span>
+				<HubRangeLegend :ranges="store.topMenuViews.hubRangesToHighlight" />
 				<br />
 				<br />
 			</template>
@@ -1659,6 +1690,16 @@ function failedToJustPlaceCraftsmanFlag() {
 					<span v-html="getCurrentUpgradeCost()"></span>
 					<img class="miniCowImg" :src="view.getImage('cows1')" alt="Cows" />
 
+					<div class="raiseProgress">
+						<b>{{ $t("actionArea.ritualGoodProgress", { done: getRitualGoodsDone(), total: getRequiredRitualGoods() }) }}</b>
+						<div class="raiseGoodsList">
+							<div v-for="(good, goodIdx) in store.context.upgradingMonumentProcess.slice(1)" :key="goodIdx" class="raiseGoodChip">
+								<img v-if="getGoodCraftsman(good)" :src="view.getImage('craftsman' + getGoodCraftsman(good)[1])" alt="Craftsman" />
+								<img v-for="(resourceIndex, resIdx) in getGoodResourceIndexes(good)" :key="resIdx" :src="getGoodResourceImage(resourceIndex)" alt="Resource" />
+							</div>
+						</div>
+					</div>
+
 					<span v-if="store.context.currentRitualGood.length === 0">
 						<br />
 						<br />
@@ -1690,10 +1731,7 @@ function failedToJustPlaceCraftsmanFlag() {
 						<br />
 						<br />
 						{{ $t("actionArea.hubRange") }}
-						<span class="hubRangeSq hubRangeSq0">0</span>
-						<span v-for="idx in Math.max(store.topMenuViews.hubRangesToHighlight.length - 1, 0)" :key="idx" class="hubRangeSq" :class="'hubRangeSq' + String(idx % 8)">
-							{{ idx }}
-						</span>
+						<HubRangeLegend :ranges="store.topMenuViews.hubRangesToHighlight" />
 					</template>
 				</span>
 				<br />
@@ -1732,10 +1770,7 @@ function failedToJustPlaceCraftsmanFlag() {
 					<br />
 					<br />
 					{{ $t("actionArea.hubRange") }}
-					<span class="hubRangeSq hubRangeSq0">0</span>
-					<span v-for="idx in Math.max(store.topMenuViews.hubRangesToHighlight.length - 1, 0)" :key="idx" class="hubRangeSq" :class="'hubRangeSq' + String(idx % 8)">
-						{{ idx }}
-					</span>
+					<HubRangeLegend :ranges="store.topMenuViews.hubRangesToHighlight" />
 				</template>
 				<br />
 				<button class="actionsLineButton" @click="funcs.importModel(store.lastMonumentResetData, true)">{{ $t("actionArea.cancelOya") }}</button>
@@ -2452,5 +2487,100 @@ function failedToJustPlaceCraftsmanFlag() {
 #bugSuccessText {
 	color: darkgreen;
 	background-color: lightblue;
+}
+
+.waitingInfo {
+	margin: 8px auto;
+	padding: 6px 10px;
+	border: 1px solid #666;
+	border-radius: 4px;
+	background: #eef4e8;
+	font-weight: bold;
+	width: fit-content;
+}
+
+.stepBadge {
+	display: inline-block;
+	min-width: 18px;
+	height: 18px;
+	line-height: 18px;
+	border-radius: 50%;
+	background: #333;
+	color: white;
+	font-size: 12px;
+	text-align: center;
+	margin-right: 6px;
+}
+
+.bidPicker {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin: 8px;
+}
+
+.bidStepButton {
+	font-size: 22px;
+	font-weight: bold;
+	width: 36px;
+	height: 36px;
+	border: 2px solid green;
+	border-radius: 4px;
+	background: white;
+	cursor: pointer;
+}
+
+.bidStepButton:disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+
+.bidAmount {
+	display: inline-block;
+	min-width: 76px;
+	text-align: center;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+.endTurnSummary {
+	margin: 8px auto;
+	padding: 8px;
+	border: 1px solid #666;
+	border-radius: 4px;
+	background: #f8f8e8;
+	width: fit-content;
+}
+
+.raiseProgress {
+	margin: 8px auto;
+	padding: 6px;
+	border: 1px solid #999;
+	border-radius: 4px;
+	background: #f4f4f4;
+}
+
+.raiseGoodsList {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	justify-content: center;
+	margin-top: 4px;
+}
+
+.raiseGoodChip {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	border: 1px solid #333;
+	border-radius: 4px;
+	padding: 2px;
+	background: white;
+}
+
+.raiseGoodChip img {
+	width: 34px;
+	height: 34px;
+	object-fit: cover;
 }
 </style>

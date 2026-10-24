@@ -42,6 +42,21 @@ if TYPE_CHECKING:
 TGZ_DB_LOCK_NAME = "lockTGZgame_"
 
 
+def _preferred_tgz_options(profile):
+    options = []
+    if profile is not None and getattr(profile, "preferredTGZoptions", ""):
+        try:
+            options = json.loads(profile.preferredTGZoptions)
+        except (TypeError, ValueError):
+            options = []
+    if not isinstance(options, list):
+        options = []
+    options = options[:3]
+    while len(options) < 3:
+        options.append([-1, 0, 0][len(options)])
+    return options
+
+
 def index(request):
     return HttpResponse("Secret tip! Click your name in the top right in a PRACTICE game to unlock all gods!")
 
@@ -90,6 +105,7 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
     returnData["settingsDEBUG"] = returnData.pop("settingsDebug")
     # TGZ includes latestUpdateLiteral in base data
     returnData["latestUpdateLiteral"] = currentGame.latestUpdate
+    returnData["preferredTGZoptions"] = _preferred_tgz_options(result.get("user_profile"))
     returnData.update(
         {
             "spoilerFree": spoilerFree,
@@ -107,7 +123,6 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
 
     returnData.update(result["auth_data"])
     returnData["nextURL"] = f"/nextGame?current_id={currentGame.id}&current_code={presenter.getGameCode()}"
-    returnData["TGZminimalText"] = result["user_profile"].TGZminimalText
 
     if not is_involved:
         return render(request, "TGZ/showTGZgame.html", returnData)
@@ -158,7 +173,6 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
 
     startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
     returnData["startingOptions"] = startingOptions
-    returnData["preferredTGZcolour"] = result["user_profile"].preferredTGZcolour
 
     autoPass = "false"
     if hasattr(currentGame, "autoMoves") and currentGame.autoMoves is not None:

@@ -10,7 +10,7 @@
 
 **schism** /ˈs(k)izəm/ (noun): a split or division between strongly opposed sections or parties, caused by differences in opinion or belief.
 
-Schism is a fanmade expansion for The Great Zimbabwe. Splotter Spellen was not involved in design or playtesting, and thus this expansion should not be viewed as a canonical addition to the base game.
+Schism is a fan-made expansion for The Great Zimbabwe. Splotter Spellen was not involved in design or playtesting, and thus this expansion should not be viewed as a canonical addition to the base game.
 
 Even though The Great Zimbabwe's base game already offers so much depth, we couldn’t help but think of ways to continue exploring the edges and in-betweens of this amazing decision space.
 
@@ -52,7 +52,7 @@ During the Generosity of Kings phase, the player who adores Aja may place one of
 
 > “When using your own secondary craftsmen, you pay 0 cattle for the primary ritual good”
 
-When the player adoring Aje-Shaluga raises monuments using their own secondary craftsmen, they pay 0 cattle for the primary ritual good provided to the secondary craftsman. This effect does not apply to secondary craftsmen belonging to other players and other players still use Aje-Shaluga’s secondary craftsmen as normal.
+When the player adoring Aje-Shaluga raises monuments using their own secondary craftsmen, they pay 0 cattle for the primary ritual good provided to the secondary craftsman. This effect does not apply to secondary craftsmen belonging to other players, and other players still use Aje-Shaluga's secondary craftsmen as normal.
 
 ### Alajire, God of Suffering (VR+2)
 
@@ -64,7 +64,7 @@ When a player chooses to adore Alajire, all other players gain VR+5. If this act
 
 > “Raise a monument to Level 3”
 
-The player who chooses to adore Anyanwu immediately raises a monument to Level 3 and scores points for the difference (6 points from Level 1, 4 points from Level 2). Choosing to adore Anyanwu does not count as a raise monuments action. This monument will be considered for revenue and may be raised again (even on the same turn the player chose to adore Anyanwu).
+The player who chooses to adore Anyanwu immediately raises a monument to Level 3 and scores points for the difference (6 points from Level 1, 4 points from Level 2). Choosing to adore Anyanwu does not count as a raise monuments action. This monument will count for revenue and may be raised again (even on the same turn the player chose to adore Anyanwu). Anyanwu may only be used on one of your own Level 1 or Level 2 monuments.
 
 <!-- PDF page 2 -->
 
@@ -110,13 +110,15 @@ When raising any monument that is Level 2 or higher, the player adoring Tiurakh 
 
 > “You may raise other players’ monuments and score points for the upgrade”
 
-The player adoring Yemoja may raise other players’ monuments. When doing so, place a disc on top of another player’s monument and score points for the upgrade (2 points for Level 2, 4 points for Level 3, 6 points for Level 4, and 8 points for Level 5). The monument still belongs to the player who placed it. They will consider that monument’s full height for revenue and may raise it, but subtract points for any levels added by the player adoring Yemoja.
+The player adoring Yemoja may raise other players' monuments. When doing so, place a disc on top of another player's monument and score points for the upgrade (2 points for Level 2, 4 points for Level 3, 6 points for Level 4, and 8 points for Level 5). The monument still belongs to the player who placed it. They will consider that monument's full height for revenue and may raise it, but subtract points for any levels added by the player adoring Yemoja.
+
+This is a separate raise on Yemoja's own turn. It is allowed even if the monument's owner already raised that monument on an earlier turn in the same round. Likewise, if Yemoja raises it first, the owner may raise it on their own later turn. The “one level each turn” limit applies to each player's turn, not once per round for the monument.
 
 **Example:** Red adores Engai and Green adores Yemoja. Red has a Level 4 monument with discs in this order (bottom to top) Red-Red-Green-Red. This monument is worth 9 points for Red and 4 points for Green.
 
 ## Development notes
 
-In May 2022, our playgroup started toying with ideas about how to introduce new interactions to Zimbabwe and challenge existing play patterns. What we initially thought would be just a fun weekend of brainstorming ended up turning into a 3 year project.
+In May 2022, our playgroup started toying with ideas about how to introduce new interactions to Zimbabwe and challenge existing play patterns. What we initially thought would be just a fun weekend of brainstorming ended up turning into a three-year project.
 
 Over the course of Schism’s development, we realized just how much Splotter got right, creating rich interactions from a limited set of simple powers. Though eventually we realized there was a lot we could offer to create more entanglement while also providing tools for players to express themselves in creative ways.
 
