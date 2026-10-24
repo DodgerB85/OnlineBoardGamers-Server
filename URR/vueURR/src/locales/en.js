@@ -97,7 +97,7 @@ export default {
 		savingNotes: "Saving notes…",
 		sendingChat: "Sending chat…",
 		welcomeTitle: "Welcome to UR: 1830 BC!",
-		welcomeIntro: "Select a hex to inspect it, or a card to enlarge it. Choose a nation below; click the map to enlarge it.",
+		welcomeIntro: "Buy or make an offer on an independent nation.\nYou can click a card or the map to enlarge it, and click a hex to inspect it.",
 		welcomeHelp: "Icons and interface help",
 		welcomeHelpRest: "is also available from Rules in the menu. Enjoy the game!",
 		dismissWelcome: "Dismiss welcome",

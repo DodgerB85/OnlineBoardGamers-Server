@@ -307,6 +307,7 @@ body {
 .welcomeHelper > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .welcomeHelper button { flex-shrink: 0; min-width: 40px; min-height: 40px; font: inherit; font-size: 20px; }
 .welcomeHelper a { color: #235e88; }
+.welcomeHelper p { white-space: pre-line; }
 
 .welcomeHelper { text-align: center; }
 .welcomeHelper > div { justify-content: center; position: relative; }
