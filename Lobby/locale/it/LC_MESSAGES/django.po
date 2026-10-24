@@ -4917,7 +4917,7 @@ msgstr "Statistiche utente"
 #: .\Lobby\templates\Lobby\layout.html:116
 #: .\Lobby\templates\Lobby\layout.html:243
 msgid "Updates"
-msgstr "Aggiornamenti"
+msgstr "Novità"
 
 #: .\Lobby\templates\Lobby\changelog.html:15
 msgid "Join Discord for discussion"
@@ -7199,7 +7199,7 @@ msgstr ""
 
 #: .\Lobby\templates\Lobby\donate\donateBanner.html:3
 msgid "Wish to support the project?"
-msgstr "Desideri sostenere il progetto?"
+msgstr "Vuoi sostenere il progetto?"
 
 #: .\Lobby\templates\Lobby\splotterconSponsor.html:4
 msgid "Proud Sponsor of"
@@ -9522,11 +9522,11 @@ msgstr "Legenda dei colori"
 
 #: .\Lobby\templates\Lobby\lobby.html:254
 msgid "It is your move"
-msgstr "È la tua mossa"
+msgstr "Tocca a te"
 
 #: .\Lobby\templates\Lobby\lobby.html:255
 msgid "Waiting for other players to move"
-msgstr "In attesa che gli altri giocatori si muovano"
+msgstr "In attesa delle mosse degli altri giocatori"
 
 #: .\Lobby\templates\Lobby\lobby.html:256
 msgid "Need to move - using Flexi-Time"
