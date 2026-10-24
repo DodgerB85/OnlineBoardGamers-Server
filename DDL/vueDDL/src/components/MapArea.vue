@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from "vue"
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import * as rf from "../js/DDLreference.js"
 import * as map from "../js/DDLmap.js"
 import * as rules from "../js/DDLrules.js"
@@ -15,6 +15,75 @@ const store = useModelStore()
 const personal = usePersonalStore()
 
 const boardStyle = computed(() => ({ backgroundImage: `url(${view.boardImage()})` }))
+
+// The board art and every overlay are laid out for a 1060px wide board; the
+// whole thing is scaled to the column width (zoom 100) and then by the user.
+const BOARD_CSS_WIDTH = 1060
+const BOARD_CSS_HEIGHT = 706
+const MIN_ZOOM = 40
+const MAX_ZOOM = 220
+const wrapEl = ref(null)
+const colWidth = ref(BOARD_CSS_WIDTH)
+const wrapMaxHeight = ref(600)
+// Zoom lives in the store so the top-menu buttons can drive it.
+const zoomPct = computed(() => store.viewSettings.zoomPct)
+let fitting = false
+
+const fitScale = computed(() => colWidth.value / BOARD_CSS_WIDTH)
+const scale = computed(() => Math.min(3, (fitScale.value * zoomPct.value) / 100))
+const boardWidth = computed(() => BOARD_CSS_WIDTH * scale.value)
+const boardHeight = computed(() => BOARD_CSS_HEIGHT * scale.value)
+
+function measure() {
+	if (!wrapEl.value) return
+	const width = wrapEl.value.getBoundingClientRect().width
+	if (width > 0) colWidth.value = width
+	// Keep the map viewport inside the window so zooming never grows the page.
+	const top = wrapEl.value.getBoundingClientRect().top + window.scrollY
+	wrapMaxHeight.value = Math.max(240, window.innerHeight - top - 12)
+}
+
+function centerScroll() {
+	const el = wrapEl.value
+	if (!el) return
+	el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2
+	el.scrollTop = (el.scrollHeight - el.clientHeight) / 2
+}
+
+function fitToScreen() {
+	measure()
+	fitting = true
+	const target = Math.min(fitScale.value, wrapMaxHeight.value / BOARD_CSS_HEIGHT)
+	const pct = Math.floor((target / fitScale.value) * 100)
+	store.viewSettings.zoomPct = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pct))
+	window.scrollTo({ top: 0, behavior: "auto" })
+	nextTick(() => {
+		if (wrapEl.value) {
+			wrapEl.value.scrollLeft = 0
+			wrapEl.value.scrollTop = 0
+		}
+		fitting = false
+	})
+}
+
+watch(() => store.viewSettings.zoomFitToken, fitToScreen)
+watch(zoomPct, () => {
+	if (fitting) return
+	nextTick(centerScroll)
+})
+
+function onResize() {
+	measure()
+}
+
+onMounted(() => {
+	measure()
+	fitToScreen()
+	window.addEventListener("resize", onResize)
+})
+onUnmounted(() => {
+	window.removeEventListener("resize", onResize)
+})
 
 function pct(pos) {
 	return { left: (pos[0] / rf.BOARD_WIDTH) * 100 + "%", top: (pos[1] / rf.BOARD_HEIGHT) * 100 + "%" }
@@ -78,6 +147,10 @@ const highlighted = computed(() => {
 	}
 	return new Set()
 })
+
+// Only highways need dot targets; movement is played by clicking a highlighted
+// planet, which walks the graph for you.
+const highwayTargets = computed(() => (store.context.action === rf.ACT_PLACE_HIGHWAYS ? Array.from(highlighted.value) : []))
 
 const highlightedPlanets = computed(() => {
 	if (activePlayerIndex.value >= 0 && store.context.action === rf.ACT_MOVE && store.gameflow.movement.remaining > 0 && store.players[activePlayerIndex.value].ship.node) {
@@ -196,15 +269,15 @@ function privilegeColour(owner) {
 </script>
 
 <template>
-	<div class="boardWrap">
-		<div class="board" :style="boardStyle">
+	<div class="boardWrap" ref="wrapEl" :style="{ maxHeight: wrapMaxHeight + 'px' }">
+		<div class="boardScaler" :style="{ width: boardWidth + 'px', height: boardHeight + 'px' }">
+		<div class="board" :style="[boardStyle, { transform: `scale(${scale})` }]">
 			<svg class="overlaySvg" viewBox="0 0 1800 1200" preserveAspectRatio="none">
 				<path v-for="route in rf.ROUTES" :key="route.id" :d="map.routePathD(route)" fill="none" stroke="#7fb8e8" stroke-width="18" stroke-opacity="0" />
 			</svg>
 
 			<div v-for="item in planetItems" :key="item.planet.id" class="planet" :class="{ startPlanet: item.planet.start, highlighted: highlightedPlanets.has(item.planet.id), selected: store.context.selectedPlanet === item.planet.id }" :style="item.style" @click="onPlanetClick(item.planet)">
-				<div class="planetName">{{ item.planet.name }}</div>
-				<div class="planetDisc" :class="{ start: item.planet.start }"></div>
+				<div class="planetDisc" :class="{ start: item.planet.start }" :title="item.planet.name"></div>
 				<div class="planetStatus">
 					<img v-if="item.mine !== null" class="mineIcon" :src="funcs.goodImage(item.mine)" :title="$t('map.mineTitle', { good: rf.goodName(item.mine) })" />
 					<span v-if="item.site" class="siteChip" :class="{ built: item.site.built, unbuilt: !item.site.built }" :title="siteLabel(item.site)">
@@ -233,7 +306,7 @@ function privilegeColour(owner) {
 
 			<div v-for="item in pathwayItems" :key="item.planetId + item.dir + item.owner" class="pathwayMarker" :class="item.dir" :style="{ ...item.style, borderColor: item.colour, color: item.colour }">{{ item.dir === "in" ? $t("map.in") : $t("map.out") }}</div>
 
-			<div v-for="node in highlighted" :key="node" class="dotTarget" :style="pct(map.nodePosition(node))" :title="map.nodeLabel(node)" @click="onNodeClick(node)"></div>
+			<div v-for="node in highwayTargets" :key="node" class="dotTarget" :style="pct(map.nodePosition(node))" :title="map.nodeLabel(node)" @click="onNodeClick(node)"></div>
 
 			<div v-for="card in consumerCards" :key="card.col + '-' + card.row" class="consumerCard" :class="{ empty: card.tileId === null, top: card.top }" :style="card.style">
 				<img v-if="card.tileId !== null" :src="funcs.goodImage(card.tileId)" :title="$t('map.cardTitle', { good: rf.goodName(card.tileId), value: card.value })" />
@@ -241,23 +314,29 @@ function privilegeColour(owner) {
 				<span class="vpBadge">{{ card.value }}</span>
 			</div>
 		</div>
+		</div>
 	</div>
 </template>
 
 <style scoped>
 .boardWrap {
-	width: 1060px;
+	width: 100%;
+	overflow: auto;
+}
+.boardScaler {
+	position: relative;
 	margin: 0 auto;
 }
 .board {
-	position: relative;
+	position: absolute;
+	top: 0;
+	left: 0;
 	width: 1060px;
 	height: 706px;
+	transform-origin: top left;
 	background-size: 100% 100%;
 	background-repeat: no-repeat;
-	border: 3px solid #10233f;
-	border-radius: 6px;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+	box-shadow: inset 0 0 0 3px #10233f, 0 2px 8px rgba(0, 0, 0, 0.35);
 	overflow: hidden;
 }
 .overlaySvg {
@@ -299,25 +378,11 @@ function privilegeColour(owner) {
 	box-shadow: 0 0 18px #ffe600;
 }
 .planet.selected .planetDisc { outline: 3px solid #00ff88; outline-offset: 2px; }
-.planetName {
-	position: absolute;
-	left: 50%;
-	top: -10px;
-	transform: translate(-50%, -100%);
-	font-size: 11px;
-	font-weight: bold;
-	color: #fff;
-	background: rgba(8, 20, 40, 0.75);
-	padding: 1px 4px;
-	border-radius: 3px;
-	white-space: nowrap;
-	pointer-events: none;
-}
 .planetStatus {
 	position: absolute;
 	left: 50%;
-	top: 100%;
-	transform: translate(-50%, 0);
+	top: 50%;
+	transform: translate(-50%, 28px);
 	display: flex;
 	gap: 3px;
 	align-items: center;
@@ -348,8 +413,8 @@ function privilegeColour(owner) {
 .privilegeRow {
 	position: absolute;
 	left: 50%;
-	top: 68%;
-	transform: translate(-50%, 0);
+	top: 50%;
+	transform: translate(-50%, -40px);
 	display: flex;
 	gap: 2px;
 	pointer-events: none;
@@ -402,8 +467,8 @@ function privilegeColour(owner) {
 }
 .dotTarget {
 	position: absolute;
-	width: 20px;
-	height: 20px;
+	width: 14px;
+	height: 14px;
 	transform: translate(-50%, -50%);
 	border-radius: 50%;
 	background: rgba(255, 230, 0, 0.55);

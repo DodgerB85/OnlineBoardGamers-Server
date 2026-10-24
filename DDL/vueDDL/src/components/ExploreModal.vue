@@ -53,8 +53,8 @@ async function choose(column) {
 </template>
 
 <style scoped>
-.modalOverlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); display: flex; align-items: center; justify-content: center; z-index: 5000; }
-.modalBox { background: #fffdf3; border: 3px solid #7a5b19; border-radius: 8px; padding: 18px; width: 520px; max-width: 90vw; text-align: center; }
+.modalOverlay { position: fixed; top: 60px; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 5000; pointer-events: none; }
+.modalBox { background: #fffdf3; border: 3px solid #7a5b19; border-radius: 8px; padding: 18px; width: 520px; max-width: 90vw; text-align: center; pointer-events: auto; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); }
 .choices { display: flex; gap: 12px; justify-content: center; margin-top: 10px; }
 .choice { width: 180px; border: 2px solid #7a5b19; border-radius: 6px; background: #f5e7a8; padding: 10px; cursor: pointer; font-size: 13px; }
 .choice:hover { background: #ffe680; }

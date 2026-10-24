@@ -99,6 +99,9 @@ export default {
 		turn: "Turn",
 		timeToNextKickout: "Time to next kickout:",
 		resignConfirm: "Are you sure you want to resign? You will be treated as a missing player.",
+		map: "Map",
+		zoomIn: "Zoom in",
+		zoomOut: "Zoom out",
 	},
 	footer: {
 		credit: "Duck Dealer is a board game by Jeroen Doumen and Joris Wiersinga, published by",
@@ -210,6 +213,7 @@ export default {
 		cargoBonus: "+2 cargo",
 		crew: "crew: {colour}",
 		selected: "{count} / 3 selected",
+		clear: "Clear",
 		confirm: "Confirm gear",
 	},
 	planetPicker: {

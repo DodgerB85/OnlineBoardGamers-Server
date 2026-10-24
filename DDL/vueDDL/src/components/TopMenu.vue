@@ -10,6 +10,17 @@ const { t } = useI18n()
 const store = useModelStore()
 const personal = usePersonalStore()
 
+const MIN_ZOOM = 40
+const MAX_ZOOM = 220
+
+function doZoom(step) {
+	store.viewSettings.zoomPct = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, store.viewSettings.zoomPct + step))
+}
+
+function wholeMapZoom() {
+	store.viewSettings.zoomFitToken += 1
+}
+
 function clearPanels() {
 	store.gameMessages.bugErrorText = ""
 	store.gameMessages.successText = ""
@@ -183,6 +194,12 @@ function getKickoutTimerText() {
 					<span id="kickoutTimerSpan">{{ $t("topMenu.timeToNextKickout") }} <span id="kickoutTimerTimer">{{ getKickoutTimerText() }}</span></span>
 				</template>
 			</div>
+
+			<div id="zoomDiv">
+				<button class="tableZoomButton" :title="$t('topMenu.map')" @click="wholeMapZoom">{{ $t("topMenu.map") }}</button>
+				<button class="zoomButton" :title="$t('topMenu.zoomIn')" @click="doZoom(15)">+</button>
+				<button class="zoomButton" :title="$t('topMenu.zoomOut')" @click="doZoom(-15)">−</button>
+			</div>
 		</div>
 	</div>
 </template>
@@ -199,6 +216,20 @@ function getKickoutTimerText() {
 .WSconnecting { background-color: #ff9900; }
 .WSconnected { background-color: green; }
 .WSdisconnected { background-color: darkred; }
+
+#zoomDiv {
+	display: flex;
+	justify-content: center;
+	gap: 3px;
+	margin-top: 2px;
+}
+.zoomButton,
+.tableZoomButton {
+	min-width: 22px;
+	font-weight: bolder;
+	font-size: 14px;
+	cursor: pointer;
+}
 
 #top {
 	background-color: #333;

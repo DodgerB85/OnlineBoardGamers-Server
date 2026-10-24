@@ -45,7 +45,17 @@ function buildTournamentData() {
 	return result
 }
 
-export async function saveGame(saveRewind = true, options = {}) {
+// Saves are queued so two actions in quick succession cannot drop one: the old
+// code returned early while a previous save was still in flight.
+let saveQueue = Promise.resolve()
+
+export function saveGame(saveRewind = true, options = {}) {
+	const run = saveQueue.then(() => performSave(saveRewind, options))
+	saveQueue = run.catch(() => {})
+	return run
+}
+
+async function performSave(saveRewind = true, options = {}) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	if (personal.haltPlay) return

@@ -108,6 +108,8 @@ export const useModelStore = defineStore("store", () => {
 		showExplore: false,
 		showGearPicker: false,
 		showPlanetPicker: false,
+		zoomPct: 100,
+		zoomFitToken: 0,
 	})
 
 	const gameMessages = reactive({

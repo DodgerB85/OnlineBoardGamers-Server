@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { computed, ref } from "vue"
 import * as rf from "../js/DDLreference.js"
 import * as rules from "../js/DDLrules.js"
@@ -196,6 +196,9 @@ function openTradeModal() {
 <template>
 	<div id="actionPanel">
 		<div class="actionTitle">{{ $t("action.title") }}</div>
+		<div v-if="store.gameMessages.errorText" class="errorText">{{ store.gameMessages.errorText }}</div>
+		<div v-if="store.gameMessages.actionError" class="errorText">{{ store.gameMessages.actionError }}</div>
+		<div v-if="store.gameMessages.successText" class="successText">{{ store.gameMessages.successText }}</div>
 
 		<div v-if="store.gameflow.phase === rf.PHASE_GAME_OVER" class="gameOverBox">
 			<h2>{{ $t("action.gameOver") }}</h2>
@@ -208,7 +211,7 @@ function openTradeModal() {
 		<template v-else>
 			<div class="turnLine">
 				<span v-if="store.gameflow.phase === rf.PHASE_SETUP">{{ $t("phase.setup") }}: <b>{{ current ? current.displayName : "?" }}</b></span>
-				<span v-else>{{ $t("action.actionTurnLabel", { turn: store.gameflow.turn }) }} · {{ $t("action.current") }} <b>{{ current ? current.displayName : "?" }}</b></span>
+				<span v-else>{{ $t("action.actionTurnLabel", { turn: store.gameflow.turn }) }} Â· {{ $t("action.current") }} <b>{{ current ? current.displayName : "?" }}</b></span>
 			</div>
 
 			<div v-if="store.gameflow.phase === rf.PHASE_SETUP" class="waitBox">
@@ -218,10 +221,6 @@ function openTradeModal() {
 			</div>
 
 			<template v-else-if="isMyTurn">
-				<div v-if="store.gameMessages.errorText" class="errorText">{{ store.gameMessages.errorText }}</div>
-				<div v-if="store.gameMessages.actionError" class="errorText">{{ store.gameMessages.actionError }}</div>
-				<div v-if="store.gameMessages.successText" class="successText">{{ store.gameMessages.successText }}</div>
-
 				<template v-if="store.gameflow.turnType === rf.TURN_CHOOSE">
 					<p class="hint">{{ $t("action.collectHint") }}</p>
 					<div class="buttonGrid">
@@ -305,7 +304,7 @@ function openTradeModal() {
 					<div v-if="store.context.action === rf.ACT_TRADE" class="subPanel">
 						<div v-if="!planet" class="hint">{{ $t("action.mustBeOnPlanetToTrade") }}</div>
 						<template v-else>
-							<div class="planetHeader">{{ planet.name }} — {{ currentPlanetShips.map((p) => p.displayName).join(", ") }}</div>
+							<div class="planetHeader">{{ planet.name }} â€” {{ currentPlanetShips.map((p) => p.displayName).join(", ") }}</div>
 							<div class="subSection">
 								<b>{{ $t("action.mine") }}</b>
 								<div>{{ $t("action.produces", { good: rf.goodName(planetState.mine) }) }}</div>
@@ -364,9 +363,8 @@ function openTradeModal() {
 						</template>
 					</div>
 
-					<div class="subSection offers">
+					<div class="subSection offers" v-if="incomingTrades.length || outgoingTrades.length">
 						<b>{{ $t("action.tradeOffers") }}</b>
-						<div v-if="incomingTrades.length === 0" class="smallNote">{{ $t("action.noIncomingOffers") }}</div>
 						<div v-for="trade in incomingTrades" :key="trade.id" class="tradeOffer">
 							<div>{{ $t("action.offerLine", { player: store.players[trade.from].displayName, give: funcs.formatGoods(trade.give), receive: funcs.formatGoods(trade.receive) }) }}</div>
 							<button class="actionsLineButton" @click="respond(trade.id, true)">{{ $t("common.accept") }}</button>
@@ -400,26 +398,33 @@ function openTradeModal() {
 
 <style scoped>
 #actionPanel {
-	width: 300px;
+	width: 100%;
+	box-sizing: border-box;
+	height: 132px;
+	overflow-y: auto;
 	background: #fffdf3;
 	border: 2px solid #7a5b19;
 	border-radius: 6px;
-	padding: 6px;
+	padding: 6px 10px;
 	text-align: left;
 	font-size: 12px;
 	flex: 0 0 auto;
-	min-height: 400px;
+	display: flex;
+	flex-wrap: wrap;
+	align-content: flex-start;
+	gap: 6px 18px;
 }
-.actionTitle { text-align: center; font-weight: bold; font-size: 16px; border-bottom: 2px solid #7a5b19; margin-bottom: 4px; }
-.turnLine { text-align: center; margin-bottom: 5px; }
+.actionTitle { font-weight: bold; font-size: 16px; border-right: 2px solid #7a5b19; padding-right: 12px; margin: 0; }
+.turnLine { margin: 0; }
 .hint { color: #444; font-size: 12px; }
 .buttonGrid { display: flex; flex-wrap: wrap; gap: 3px; }
 .energyButton { min-width: 84px; padding: 4px; font-size: 12px; }
 .energyButton small { font-size: 10px; font-weight: normal; }
-.bigAction { width: 100%; margin-top: 6px; font-size: 14px; }
-.actionInfo { text-align: center; font-weight: bold; background: #f2e4b8; padding: 3px; border-radius: 3px; margin-bottom: 4px; }
+.bigAction { margin-top: 0; font-size: 14px; }
+.actionInfo { font-weight: bold; background: #f2e4b8; padding: 3px 6px; border-radius: 3px; margin: 0; }
 .endTurnButton { border-color: #a33; color: #800; }
-.subPanel { border: 1px solid #b49a54; border-radius: 4px; padding: 5px; margin-top: 5px; background: #fffbe8; }
+.subPanel { flex: 1 1 100%; border: 1px solid #b49a54; border-radius: 4px; padding: 3px 4px; margin-top: 0; background: #fffbe8; }
+.subPanel .actionsLineButton { margin: 2px; padding: 4px 8px; }
 .planetHeader { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
 .subSection { border-top: 1px solid #d8c58f; padding-top: 4px; margin-top: 4px; }
 .smallNote { color: #666; font-size: 11px; }
@@ -429,8 +434,8 @@ function openTradeModal() {
 select { max-width: 100%; font-size: 11px; margin: 2px; }
 .tradeOffer { border: 1px solid #c9b06a; border-radius: 3px; padding: 3px; margin-top: 3px; background: #fff; }
 .tradeOffer.out { background: #eef3ff; color: #445; }
-.waitBox { text-align: center; margin-top: 10px; }
-.gameOverBox { text-align: center; }
+.waitBox { text-align: left; margin-top: 0; }
+.gameOverBox { text-align: left; }
 .finalGroup { margin: 4px 0; }
 .finalPlayer { margin-left: 6px; }
 </style>

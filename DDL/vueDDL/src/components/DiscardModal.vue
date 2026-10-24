@@ -60,8 +60,8 @@ function close() {
 </template>
 
 <style scoped>
-.modalOverlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); display: flex; align-items: center; justify-content: center; z-index: 5000; }
-.modalBox { background: #fffdf3; border: 3px solid #7a5b19; border-radius: 8px; padding: 18px; width: 560px; max-width: 90vw; text-align: center; }
+.modalOverlay { position: fixed; top: 60px; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 5000; pointer-events: none; }
+.modalBox { background: #fffdf3; border: 3px solid #7a5b19; border-radius: 8px; padding: 18px; width: 560px; max-width: 90vw; text-align: center; pointer-events: auto; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); }
 .goodsGrid { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin: 8px 0; }
 .goodButton { width: 70px; border: 1px solid #aaa; border-radius: 4px; background: #fff; cursor: pointer; font-size: 9px; padding: 2px; }
 .goodButton img { width: 40px; height: 40px; object-fit: contain; display: block; margin: 0 auto; }

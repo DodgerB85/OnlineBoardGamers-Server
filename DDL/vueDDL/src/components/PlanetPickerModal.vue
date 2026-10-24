@@ -44,8 +44,8 @@ async function choose(planetId) {
 </template>
 
 <style scoped>
-.modalOverlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); display: flex; align-items: center; justify-content: center; z-index: 5000; }
-.modalBox { background: #fffdf3; border: 3px solid #7a5b19; border-radius: 8px; padding: 18px; width: 560px; max-width: 90vw; text-align: center; }
+.modalOverlay { position: fixed; top: 60px; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 5000; pointer-events: none; }
+.modalBox { background: #fffdf3; border: 3px solid #7a5b19; border-radius: 8px; padding: 18px; width: 560px; max-width: 90vw; text-align: center; pointer-events: auto; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); }
 .planetGrid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 10px; }
 .planetButton { width: 150px; border: 2px solid #1d5f8a; border-radius: 6px; background: #e9f7ff; padding: 8px; cursor: pointer; }
 .planetButton:disabled { opacity: 0.45; cursor: default; }

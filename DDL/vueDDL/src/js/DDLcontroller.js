@@ -18,6 +18,13 @@ export function currentPlayerIndex() {
 	return store.gameflow.turnOrder.length > 0 ? store.gameflow.turnOrder[0] : -1
 }
 
+// A practice game lets one browser drive every seat, so the acting player is
+// whoever's turn it is; otherwise it is the viewer's own seat.
+export function actingPlayerIndex() {
+	const personal = usePersonalStore()
+	return personal.trainingGame ? currentPlayerIndex() : personal.pov
+}
+
 export function currentPlayerObj() {
 	const store = useModelStore()
 	const idx = currentPlayerIndex()
@@ -26,7 +33,7 @@ export function currentPlayerObj() {
 
 export function isMyTurn() {
 	const personal = usePersonalStore()
-	return personal.canPlay() && currentPlayerIndex() === personal.pov
+	return personal.canPlay() && currentPlayerIndex() === actingPlayerIndex()
 }
 
 export function isSimulPhase() {
@@ -199,12 +206,12 @@ function handleAuctionBids(data, round = 1) {
 export async function collectEnergy(colour) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.collectEnergy(model.stateFromStore(), personal.pov, colour)
+	const result = rules.collectEnergy(model.stateFromStore(), actingPlayerIndex(), colour)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_ENERGY, personal.pov, [colour, result.produced, result.virtual, result.gains])
+	model.addHistory(rf.HIST_ENERGY, actingPlayerIndex(), [colour, result.produced, result.virtual, result.gains])
 	const energyKeys = ["movement", "build", "trade"]
 	const collected = result.gains.map((n, i) => (n ? n + " " + t("energy." + energyKeys[i]) : "")).filter(Boolean).join(", ")
 	store.gameMessages.successText = result.virtual ? result.message : t("energy.collectedGains", { gains: collected })
@@ -215,12 +222,12 @@ export async function collectEnergy(colour) {
 export async function chooseAction() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.chooseAction(model.stateFromStore(), personal.pov)
+	const result = rules.chooseAction(model.stateFromStore(), actingPlayerIndex())
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_ACTION_START, personal.pov, [store.gameflow.turn])
+	model.addHistory(rf.HIST_ACTION_START, actingPlayerIndex(), [store.gameflow.turn])
 	store.context.action = store.gameflow.freeHighwaysLeft > 0 ? rf.ACT_PLACE_HIGHWAYS : rf.ACT_NONE
 	await IO.saveGame(true)
 	return true
@@ -230,12 +237,12 @@ export async function placeHighway(nodeId, free = true) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	const before = store.gameflow.freeHighwaysLeft
-	const result = rules.placeHighway(model.stateFromStore(), personal.pov, nodeId, free)
+	const result = rules.placeHighway(model.stateFromStore(), actingPlayerIndex(), nodeId, free)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_HIGHWAY, personal.pov, [nodeId, free])
+	model.addHistory(rf.HIST_HIGHWAY, actingPlayerIndex(), [nodeId, free])
 	store.context.highlightNodes.splice(0)
 	store.gameMessages.successText = t("messages.highwayPlaced")
 	await IO.saveGame(true)
@@ -246,7 +253,7 @@ export async function placeHighway(nodeId, free = true) {
 export async function startMovement() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.startMovement(model.stateFromStore(), personal.pov)
+	const result = rules.startMovement(model.stateFromStore(), actingPlayerIndex())
 	if (!result.ok) {
 		if (result.needsCargoDiscard) {
 			store.viewSettings.showDiscardCargo = true
@@ -264,12 +271,12 @@ export async function startMovement() {
 export async function moveTo(nodeId) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.moveToNode(model.stateFromStore(), personal.pov, nodeId)
+	const result = rules.moveToNode(model.stateFromStore(), actingPlayerIndex(), nodeId)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_MOVE, personal.pov, [nodeId, result.path])
+	model.addHistory(rf.HIST_MOVE, actingPlayerIndex(), [nodeId, result.path])
 	store.context.highlightNodes.splice(0)
 	if (store.gameflow.pendingExplore) store.viewSettings.showExplore = true
 	await IO.saveGame(true)
@@ -280,7 +287,7 @@ export async function moveTo(nodeId) {
 export async function explore(column) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.explorePlanet(model.stateFromStore(), personal.pov, column)
+	const result = rules.explorePlanet(model.stateFromStore(), actingPlayerIndex(), column)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
@@ -294,12 +301,12 @@ export async function explore(column) {
 export async function placePathways(inPlanetId, outPlanetId) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.placePathways(model.stateFromStore(), personal.pov, inPlanetId, outPlanetId)
+	const result = rules.placePathways(model.stateFromStore(), actingPlayerIndex(), inPlanetId, outPlanetId)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_PATHWAY, personal.pov, [inPlanetId, outPlanetId])
+	model.addHistory(rf.HIST_PATHWAY, actingPlayerIndex(), [inPlanetId, outPlanetId])
 	store.viewSettings.showInfo = false
 	await IO.saveGame(true)
 	return true
@@ -308,12 +315,12 @@ export async function placePathways(inPlanetId, outPlanetId) {
 export async function usePathway() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.usePathway(model.stateFromStore(), personal.pov)
+	const result = rules.usePathway(model.stateFromStore(), actingPlayerIndex())
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_PATHWAY, personal.pov, [result.planetId])
+	model.addHistory(rf.HIST_PATHWAY, actingPlayerIndex(), [result.planetId])
 	if (store.gameflow.pendingExplore) store.viewSettings.showExplore = true
 	await IO.saveGame(true)
 	return true
@@ -322,12 +329,12 @@ export async function usePathway() {
 export async function buildFactory(factoryTypeId) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.buildFactory(model.stateFromStore(), personal.pov, factoryTypeId)
+	const result = rules.buildFactory(model.stateFromStore(), actingPlayerIndex(), factoryTypeId)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_BUILD, personal.pov, ["factory", factoryTypeId, result.points])
+	model.addHistory(rf.HIST_BUILD, actingPlayerIndex(), ["factory", factoryTypeId, result.points])
 	store.gameMessages.successText = t("messages.factoryBuilt", { points: result.points })
 	await IO.saveGame(true)
 	return true
@@ -336,12 +343,12 @@ export async function buildFactory(factoryTypeId) {
 export async function buildSite(randomGoodId, gearSlotIndex = -1) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.buildSite(model.stateFromStore(), personal.pov, randomGoodId, gearSlotIndex)
+	const result = rules.buildSite(model.stateFromStore(), actingPlayerIndex(), randomGoodId, gearSlotIndex)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_BUILD, personal.pov, ["site", result.points])
+	model.addHistory(rf.HIST_BUILD, actingPlayerIndex(), ["site", result.points])
 	store.gameMessages.successText = result.points ? t("messages.siteBuiltPoints", { points: result.points }) : t("messages.siteBuilt")
 	if (result.gear) store.gameMessages.successText += " " + t("messages.gearInstalled")
 	await IO.saveGame(true)
@@ -351,12 +358,12 @@ export async function buildSite(randomGoodId, gearSlotIndex = -1) {
 export async function claimPrivilege(kind) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.claimPrivilege(model.stateFromStore(), personal.pov, kind)
+	const result = rules.claimPrivilege(model.stateFromStore(), actingPlayerIndex(), kind)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_BUILD, personal.pov, ["privilege", kind])
+	model.addHistory(rf.HIST_BUILD, actingPlayerIndex(), ["privilege", kind])
 	store.gameMessages.successText = t("messages.privilegeClaimed")
 	await IO.saveGame(true)
 	return true
@@ -365,12 +372,12 @@ export async function claimPrivilege(kind) {
 export async function tradeMine() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.tradeMine(model.stateFromStore(), personal.pov)
+	const result = rules.tradeMine(model.stateFromStore(), actingPlayerIndex())
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_TRADE, personal.pov, ["mine", result.good])
+	model.addHistory(rf.HIST_TRADE, actingPlayerIndex(), ["mine", result.good])
 	await IO.saveGame(true)
 	return true
 }
@@ -378,12 +385,12 @@ export async function tradeMine() {
 export async function tradeFactory() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.tradeFactory(model.stateFromStore(), personal.pov)
+	const result = rules.tradeFactory(model.stateFromStore(), actingPlayerIndex())
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_TRADE, personal.pov, ["factory", result.good])
+	model.addHistory(rf.HIST_TRADE, actingPlayerIndex(), ["factory", result.good])
 	await IO.saveGame(true)
 	return true
 }
@@ -391,12 +398,12 @@ export async function tradeFactory() {
 export async function tradeConsumer() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.tradeConsumer(model.stateFromStore(), personal.pov)
+	const result = rules.tradeConsumer(model.stateFromStore(), actingPlayerIndex())
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_TRADE, personal.pov, ["consumer", result.points])
+	model.addHistory(rf.HIST_TRADE, actingPlayerIndex(), ["consumer", result.points])
 	store.gameMessages.successText = t("messages.goodsSold", { points: result.points })
 	await IO.saveGame(true)
 	return true
@@ -405,12 +412,12 @@ export async function tradeConsumer() {
 export async function buyGear(slotIndex, randomGoodId) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.buyGear(model.stateFromStore(), personal.pov, slotIndex, randomGoodId)
+	const result = rules.buyGear(model.stateFromStore(), actingPlayerIndex(), slotIndex, randomGoodId)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_TRADE, personal.pov, ["gear", result.gear, slotIndex])
+	model.addHistory(rf.HIST_TRADE, actingPlayerIndex(), ["gear", result.gear, slotIndex])
 	store.gameMessages.successText = t("messages.gearInstalled")
 	await IO.saveGame(true)
 	return true
@@ -419,12 +426,12 @@ export async function buyGear(slotIndex, randomGoodId) {
 export async function proposeTrade(toIndex, give, receive) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.proposeTrade(model.stateFromStore(), personal.pov, toIndex, give, receive)
+	const result = rules.proposeTrade(model.stateFromStore(), actingPlayerIndex(), toIndex, give, receive)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_TRADE_OFFER, personal.pov, ["propose", toIndex, give, receive])
+	model.addHistory(rf.HIST_TRADE_OFFER, actingPlayerIndex(), ["propose", toIndex, give, receive])
 	store.viewSettings.showTrade = false
 	await IO.saveGame(true)
 	return true
@@ -433,13 +440,13 @@ export async function proposeTrade(toIndex, give, receive) {
 export async function respondTrade(tradeId, accept) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.respondTrade(model.stateFromStore(), tradeId, personal.pov, accept)
+	const result = rules.respondTrade(model.stateFromStore(), tradeId, actingPlayerIndex(), accept)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_TRADE_OFFER, personal.pov, [accept ? "accept" : "decline", tradeId])
-	personal.myTradeOffers = store.board.trades.filter((t) => t.status === "pending" && t.to === personal.pov)
+	model.addHistory(rf.HIST_TRADE_OFFER, actingPlayerIndex(), [accept ? "accept" : "decline", tradeId])
+	personal.myTradeOffers = store.board.trades.filter((t) => t.status === "pending" && t.to === actingPlayerIndex())
 	await IO.saveGame(true, { noNotify: true })
 	return true
 }
@@ -447,7 +454,7 @@ export async function respondTrade(tradeId, accept) {
 export async function discardCargo(goodId) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.discardGood(model.stateFromStore(), personal.pov, goodId)
+	const result = rules.discardGood(model.stateFromStore(), actingPlayerIndex(), goodId)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
@@ -459,7 +466,7 @@ export async function discardCargo(goodId) {
 export async function discardEnergy(colour) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.discardEnergy(model.stateFromStore(), personal.pov, colour)
+	const result = rules.discardEnergy(model.stateFromStore(), actingPlayerIndex(), colour)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
@@ -485,7 +492,7 @@ export async function endActionTurn() {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_END_TURN, personal.pov, [endingTurn])
+	model.addHistory(rf.HIST_END_TURN, actingPlayerIndex(), [endingTurn])
 	store.viewSettings.showDiscardCargo = false
 	store.viewSettings.showDiscardEnergy = false
 	await IO.saveGame(!result.gameOver)

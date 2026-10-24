@@ -61,9 +61,14 @@ export const SEGMENT_POSITIONS = {}
 for (const route of rf.ROUTES) {
 	const points = sampleCurve(route.ctrl)
 	ROUTE_POINTS[route.id] = points
+	// Prefer the measured printed dots; the hand-drawn control points only
+	// describe the shape of the route, not where its dots landed on the art.
+	const measured = rf.ROUTE_DOTS[route.id]
 	SEGMENT_POSITIONS[route.id] = []
 	for (let i = 1; i < route.length; i++) {
-		SEGMENT_POSITIONS[route.id].push(pointAtFraction(points, i / route.length))
+		const fallback = pointAtFraction(points, i / route.length)
+		const dot = measured && measured[i - 1] ? measured[i - 1] : fallback
+		SEGMENT_POSITIONS[route.id].push([dot[0], dot[1]])
 	}
 }
 

@@ -60,11 +60,13 @@ function showDebug() {
 		<div id="mainAreaLessHistory">
 			<PlayerTable />
 			<div class="gameArea">
-				<ShipPanel />
-				<div class="boardColumn">
-					<MapArea />
-				</div>
 				<ActionPanel />
+				<div class="boardRow">
+					<ShipPanel />
+					<div class="boardColumn">
+						<MapArea />
+					</div>
+				</div>
 			</div>
 			<DebugArea v-if="showDebug()" />
 		</div>
@@ -89,12 +91,10 @@ body {
 	background-color: #d4eafd;
 	font-family: Arial, sans-serif;
 	font-size: 16px;
-	width: fit-content;
-	min-width: 100%;
+	width: 100%;
 }
 #wholeMiddleArea {
 	width: 100%;
-	min-width: 1700px;
 	text-align: center;
 	min-height: 500px;
 	transition: background-color 0.3s;
@@ -106,13 +106,22 @@ body {
 }
 .gameArea {
 	display: flex;
-	justify-content: center;
-	align-items: flex-start;
-	gap: 12px;
-	margin: 4px auto 20px auto;
-	width: fit-content;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 8px;
+	margin: 4px auto 12px auto;
+	width: 100%;
+	max-width: 1696px;
+	box-sizing: border-box;
+	padding: 0 16px;
 }
-.boardColumn { flex: 0 0 auto; }
+.boardRow {
+	display: flex;
+	gap: 12px;
+	align-items: flex-start;
+	min-width: 0;
+}
+.boardColumn { flex: 1 1 auto; min-width: 0; }
 #loaderOverlay {
 	position: fixed;
 	inset: 0;
