@@ -1318,9 +1318,10 @@ function awardCampaignTypeAndGoodMilestones(playerIndex) {
 		plyr.awardMilestone(playerIndex, rf.FIRST_BURGER_MARKETED)
 	} else if (store.context.good === rf.PIZZA) {
 		plyr.awardMilestone(playerIndex, rf.FIRST_PIZZA_MARKETED)
-	} else {
+	} else if (rf.DRINK.includes(store.context.good)) {
 		plyr.awardMilestone(playerIndex, rf.FIRST_DRINK_MARKETED)
 	}
+	// Fried chicken is food, not a drink; it has no base "first marketed" milestone.
 }
 
 // Place campaign in model - after you click on square / press Place button
@@ -2058,8 +2059,8 @@ export async function endCurrentPhase() {
 	store.clearCoffeeHistoryInfo()
 	const phase = store.gameflow.phase
 
-	// --- PHASE: SETUP RESTAURANT 1 ---
-	if (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1) {
+	// --- PHASE: SETUP RESTAURANTS, ROUNDS 1 AND 2 ---
+	if (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 || store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT2) {
 		const readyPlayers = store.players.filter((p) => p.restaurants.length > 0 || p.displayName === rf.BOT_NAME)
 		if (readyPlayers.length === store.players.length) {
 			if (store.startingOptions.shortGame) {
@@ -2078,16 +2079,20 @@ export async function endCurrentPhase() {
 				store.gameflow.turnOrder = [...fto]
 			}
 			return
-		} else {
-			store.gameflow.fullTurnOrder.reverse()
-			store.gameflow.turnOrder.length = 0
-			store.gameflow.fullTurnOrder.forEach((idx) => {
-				if (store.players[idx].restaurants.length === 0 && store.players[idx].displayName !== rf.BOT_NAME) {
-					store.gameflow.turnOrder.push(idx)
-				}
-			})
-			return
 		}
+
+		// A pass in round 1 starts round 2. Round 2 is played in turn order
+		// and cannot be passed; every unplaced player must place.
+		if (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1) {
+			store.gameflow.phase = rf.PHASE_SETUP_RESTAURANT2
+		}
+		store.gameflow.turnOrder.length = 0
+		store.gameflow.fullTurnOrder.forEach((idx) => {
+			if (store.players[idx].restaurants.length === 0 && store.players[idx].displayName !== rf.BOT_NAME) {
+				store.gameflow.turnOrder.push(idx)
+			}
+		})
+		return
 	}
 
 	// --- PHASE: SETUP RESERVE ---
@@ -2863,11 +2868,8 @@ function completeTraining() {
 
 		playerObj.employees.push(...newEmployeeItems)
 
-		// 3. Milestones
-		if (store.context.justHired.length >= 3) {
-			plyr.awardMilestone(playerIndex, rf.FIRST_HIRE_3)
-		}
-
+		// 3. Milestones. First to hire 3 is awarded during the hiring subphase:
+		// only employees actually hired there count, not train-from-hire.
 		plyr.awardMilestone(playerIndex, rf.FIRST_TRAIN)
 
 		// 4. Trainer Check

@@ -640,7 +640,9 @@ you may not voluntarily pay salaries.
 ## First to hire three people in one turn
 
 This milestone is awarded when you hire three people or more in the
-same turn.
+same turn. Only employees actually hired during the recruitment step
+count. A card trained directly from the supply using the “hire and
+immediately train” option does not count as one of the three hires.
 
 You immediately receive 2 management trainee cards that are placed
 on the beach. If you have active training capacity, you may immediately

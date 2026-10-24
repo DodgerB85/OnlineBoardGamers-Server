@@ -1994,7 +1994,7 @@ export function checkPaydayDataValid(playerIndex, paydayData) {
 		for (let i = 0; i < paydayData[0].length; i++) {
 			let unitarySalary = 5
 			if (plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED)) unitarySalary = 3
-			if (rules.doesEmployeeRequireSalary(i, paydayData[0][i]) === true) due -= unitarySalary
+			if (rules.doesEmployeeRequireSalary(playerIndex, paydayData[0][i]) === true) due -= unitarySalary
 		}
 		if (playerObj.money >= due) return 1
 		else return 9

@@ -939,12 +939,11 @@ export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, 
 			})
 	}
 
-	// --- CASE A2: PHONE TOKENS (Media Line mod) - 2x1 with its anchor square on
-	// empty ground in the cross of 5 map tiles (the restaurant's tile plus the 4
-	// orthogonal neighbours). Like any other token the card may straddle the
-	// edge of the zone into the next tile (one cell each side); roads are
-	// irrelevant (radio waves), so this bypasses the road-adjacency machinery
-	// of CASE B ---
+	// --- CASE A2: PHONE TOKENS (Media Line mod) - 2x1 attached to a building in
+	// the cross of 5 map tiles (the restaurant's tile plus the 4 orthogonal
+	// neighbours). Like any other token the card may straddle the edge of the
+	// zone into the next tile (one cell each side); roads are irrelevant (radio
+	// waves), so this bypasses the road-adjacency machinery of CASE B ---
 	if (campaignData.type === rf.PHONE) {
 		// Measured from the restaurant doors (all four corners with a
 		// Local/Regional Manager), like every other restaurant-distance rule
@@ -956,7 +955,12 @@ export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, 
 			if (ax + w > rf.ssW || ay + h > rf.ssH) continue // never wrap off the board edge
 			const cells = map.giveAllSpaceForAToken(anchor, w, h)
 			const fits = cells.every((c) => store.mapData.coords[c] === rf.EMPTY_SPACE)
-			if (fits) possibilities.push(anchor)
+			// A phone token must touch at least one house/apartment building.
+			const touchesBuilding = map.neighbours(cells).some((c) => {
+				const v = store.mapData.coords[c]
+				return v > rf.HOUSE && v < rf.HOUSE + 29
+			})
+			if (fits && touchesBuilding) possibilities.push(anchor)
 		}
 		return possibilities
 	}
@@ -2093,9 +2097,9 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 		}
 		if (p.money >= 100) {
 			if (!replayOnly) plyr.awardMilestone(playerIndex, rf.FIRST_100_DOL)
-			if (p.employees.includes(rf.CFO) && plyr.hasMilestone(playerIndex, rf.FIRST_100_DOL)) {
-				plyr.fireEmployee(playerIndex, rf.CFO)
-				store.availableEmployees[rf.CFO]++
+			// The CFO must be fired wherever it is: structure or beach.
+			if (plyr.hasEmployee(playerIndex, rf.CFO) && plyr.hasMilestone(playerIndex, rf.FIRST_100_DOL)) {
+				if (plyr.fireEmployee(playerIndex, rf.CFO)) store.availableEmployees[rf.CFO]++
 			}
 		}
 		if (!replayOnly) {
@@ -2132,16 +2136,20 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 	}
 }
 
+// Keep only as many [marker, house, playerIndex] groups as there are radio
+// campaigns left. Always drop the LAST group, never an offset inside the queue.
+export function trimPizzaBombQueue(firstPizzas, numRadios) {
+	while (firstPizzas.length >= 3 && firstPizzas.length / 3 > numRadios) {
+		firstPizzas.splice(firstPizzas.length - 3, 3)
+	}
+	return firstPizzas
+}
+
 function finalizeMilestones(firstPizzas, possiblePizzaBomb) {
 	const store = useModelStore()
 	if (possiblePizzaBomb && firstPizzas.length > 0) {
-		let numPizzaBomb = firstPizzas.length / 3
 		const numRadios = store.availableMarketingCampaigns.filter((c) => rf.MARKETING_CAMPAIGNS[c].type === rf.RADIO).length
-
-		while (numPizzaBomb > numRadios) {
-			firstPizzas.splice(firstPizzas.length - 4, 3)
-			numPizzaBomb = firstPizzas.length / 3
-		}
+		trimPizzaBombQueue(firstPizzas, numRadios)
 
 		if (firstPizzas.length >= 3) {
 			// firstPizzas entries are already playerIndex ([1, house, playerIndex, ...])
@@ -2241,8 +2249,10 @@ export function basePrice() {
 			}
 		}
 
-		// Find the highest count
+		// Find the highest count. No usable cards (all timed out/missing):
+		// keep the normal $10 base price.
 		const maxCount = Math.max(...reserveCounts)
+		if (maxCount === 0) return price
 
 		// Logic check:
 		// 1. If Card 3 (index 2) is the most frequent, price is 20
@@ -2464,8 +2474,7 @@ export function paySalaries(foodPayements) {
 
 		// Add in case of skip payday
 		if (plyr.hasEmployee(i, rf.CFO) && plyr.hasMilestone(i, rf.FIRST_100_DOL)) {
-			plyr.fireEmployee(i, rf.CFO)
-			store.availableEmployees[rf.CFO]++
+			if (plyr.fireEmployee(i, rf.CFO)) store.availableEmployees[rf.CFO]++
 		}
 
 		const normalDue = baseSalary(i)
@@ -2921,6 +2930,13 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 				model.addNeedToHouse(good1, houseId, playerIndex)
 				const reward = rewardMarketingOnHouse(playerIndex, houseId)
 				if (reward > 0) earnedByPlayers.push([houseId, reward, playerIndex])
+				if (store.startingOptions.dumplings) {
+					// The giant billboard markets twice, so it also adds two dumplings.
+					model.addNeedToHouse(rf.DUMPLING, houseId, playerIndex)
+					model.addNeedToHouse(rf.DUMPLING, houseId, playerIndex)
+					const dumplingReward = rewardMarketingOnHouse(playerIndex, houseId)
+					if (dumplingReward > 0) earnedByPlayers.push([houseId, dumplingReward, playerIndex])
+				}
 				h1[1].push(houseId)
 			}
 
@@ -3011,8 +3027,13 @@ export function handleBankBreak(replayOnly) {
 			reserve[card - 1]++
 		})
 
-		const maxVal = Math.max(...reserve)
-		store.ceoLevel = reserve.lastIndexOf(maxVal) + 2
+		if (chosenCards.length === 0) {
+			// No usable cards (all timed out/missing): keep the normal 3 slots.
+			store.ceoLevel = 3
+		} else {
+			const maxVal = Math.max(...reserve)
+			store.ceoLevel = reserve.lastIndexOf(maxVal) + 2
+		}
 
 		if (store.startingOptions.reservePrice) {
 			total = 200 * chosenCards.length

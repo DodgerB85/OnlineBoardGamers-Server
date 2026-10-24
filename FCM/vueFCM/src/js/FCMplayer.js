@@ -404,6 +404,7 @@ export function purePriceDropFromDiscountersForPlayer(playerIndex) {
 	let discount = managersPriceDrop(playerObj)
 
 	if (hasMilestone(playerIndex, rf.FIRST_LOWER_PRICES)) discount++
+	if (playerObj.ceoAction === rf.CEO_ACTION_PRICE_MINUS_3) discount += 3
 	return discount
 }
 

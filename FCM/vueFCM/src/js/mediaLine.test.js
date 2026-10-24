@@ -271,15 +271,13 @@ describe("Media Line B2 phone token placement", () => {
 		return store
 	}
 
-	it("allows any empty 2x1 pair anchored inside the cross of 5 tiles", () => {
-		phoneBoard(false)
+	it("allows empty 2x1 pairs attached to a building inside the cross", () => {
+		phoneBoard(true)
 		const positions = rules.givePossiblePositionsForMarketingCampaign(rf.TELEMARKETER, 30, false)
-		// deep inside the west tile (7,8)
-		expect(positions).toContain(mapMod.giveIndex(37, 41))
+		// touching the house on its west side, inside the cross
+		expect(positions).toContain(mapMod.giveIndex(37, 43))
 		// straddling the boundary between the west and centre tiles
 		expect(positions).toContain(mapMod.giveIndex(39, 43))
-		// anchored on the cross edge - the second cell may sit in the next tile
-		expect(positions).toContain(mapMod.giveIndex(49, 43))
 		// the diagonally adjacent tile (7,7) is not part of the cross
 		expect(positions).not.toContain(mapMod.giveIndex(37, 37))
 		// two tiles west (6,8) is beyond the cross
@@ -288,19 +286,21 @@ describe("Media Line B2 phone token placement", () => {
 		expect(positions).not.toContain(mapMod.giveIndex(40, 40))
 		// an anchor outside the cross does not become valid by reaching in
 		expect(positions).not.toContain(mapMod.giveIndex(50, 43))
+		// empty ground in the cross is not enough without a nearby building
+		expect(positions).not.toContain(mapMod.giveIndex(45, 43))
 	})
 
-	it("rotated tokens run vertically anywhere in the cross", () => {
-		phoneBoard(false)
+	it("rotated tokens run vertically and still attach to a building", () => {
+		phoneBoard(true)
 		const positions = rules.givePossiblePositionsForMarketingCampaign(rf.TELEMARKETER, 30, true)
-		// vertical pair inside the north tile (8,7)
-		expect(positions).toContain(mapMod.giveIndex(41, 37))
-		// vertical pair inside the west tile (7,8)
-		expect(positions).toContain(mapMod.giveIndex(37, 41))
-		// anchored on the top row of the north tile pokes into the tile above
-		expect(positions).toContain(mapMod.giveIndex(41, 35))
+		// vertical pair touching the house's west side
+		expect(positions).toContain(mapMod.giveIndex(37, 40))
+		// vertical pair crossing the west/centre tile boundary near the house
+		expect(positions).toContain(mapMod.giveIndex(40, 42))
 		// diagonal tile (7,7) again excluded
 		expect(positions).not.toContain(mapMod.giveIndex(37, 37))
+		// a detached vertical pair in the cross is not allowed
+		expect(positions).not.toContain(mapMod.giveIndex(45, 37))
 	})
 
 	it("house-occupied cells inside the cross are not placeable", () => {

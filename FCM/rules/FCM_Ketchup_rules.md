@@ -175,7 +175,7 @@ The campaign manager may place a second marketing tile of the same type (billboa
 
 ### First brand manager used
 
-If your brand manager places an aircraft this turn, you may place two goods on it. The aircraft will market both, in order from A to B. Use the new airplane marketing tiles provided for this. If you use a second brand manager in the same turn, you do not get this benefit a second time. You may not use this ability for a mailbox or a billboard; and you may not save it until a later turn.
+If your brand manager places an aircraft this turn, you may place two goods on it (these must be different). The aircraft will market both, in order from A to B. Use the new airplane marketing tiles provided for this. If you use a second brand manager in the same turn, you do not get this benefit a second time. You may not use this ability for a mailbox or a billboard; and you may not save it until a later turn.
 
 ### First brand director used
 
@@ -223,7 +223,7 @@ You get an additional trainer card. In addition, you no longer have to fire any 
 
 ### First discount manager used
 
-From now on, each turn in which you discount by $3 or more, remove $100 from the bank at the end of the restructuring phase. This money is removed from the game. If multiple players have this milestone, it will be applied for each of them, so a lot of money can leave the bank each turn.
+From now on, each turn (including this one) in which you discount by $3 or more, remove $100 from the bank at the end of the restructuring phase. This money is removed from the game. If multiple players have this milestone, it will be applied for each of them, so a lot of money can leave the bank each turn.
 
 ### First house built
 
@@ -239,7 +239,7 @@ Your salaries are now $3 per employee that requires a salary. Unused recruiting 
 
 ### First cart operator used
 
-When collecting drinks using cart operators, trucks or zeppelins, get 2 drinks per drink symbol instead of 1.
+When collecting drinks using cart operators, trucks or zeppelins, get double the normal amount of drinks per drink symbol.
 
 <!-- PDF page 6 -->
 
@@ -479,9 +479,9 @@ Each Mass marketeer employee cards played will add an additional marketing phase
 
 ### Rules
 
-- The mass marketeer employee cards is an employee card that can be trained from the mass marketeer employee cards.
+- The mass marketeer employee card can be trained from the marketing trainee employee card.
 
-- The mass marketeer is a marketing employee and follows all the rules for those cards.
+- The mass marketeer is a marketing employee, but its action adds an extra marketing campaign phase rather than placing a marketing tile itself.
 
 - For each active mass marketeer, run an additional marketing campaign phase. So, if there is one mass marketeer, you will have 2 campaign phases, with 2 mass marketeers, play 3 phases, etc. It does not matter which player played the Mass Marketeer(s) — their effect is global and additive.
 
@@ -587,7 +587,7 @@ The bank reserve cards chosen at the start of the game no longer impact the numb
 
 - At the start of the game, determine bank reserve cards using the alternate set.
 
-- When the bank breaks for the first time, add $200 per player to the bank.
+- When the bank breaks for the first time, add $200 for each player who actually chose a reserve card. Timed-out or missing players do not add money; if they have no reserve card, the bank is funded by the players who did choose. If no usable reserve cards were chosen at all, the base price remains the normal $10.
 
 - This may change the base price for the rest of the game. First, check if there is one type of bank reserve card that occurs more than any other. If so, take this price as the new base unit price.
 
