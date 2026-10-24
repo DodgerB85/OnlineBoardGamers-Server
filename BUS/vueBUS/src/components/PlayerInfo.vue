@@ -41,7 +41,6 @@ function getPlayerIndexOrderForTable() {
           <span
               :class="['playerInfoName', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[arrayIndex].colour)]">
               {{ store.players[arrayIndex].displayName }} </span>
-          <span v-if="personal.pov === arrayIndex" class="youTag">{{ $t('playerInfo.you') }}</span>
         </td>
         <td :title="$t('playerInfo.actionsTooltip')" :class="{ 'noMoreLeft': (store.players[arrayIndex].remainingActions === 0) }">{{ store.players[arrayIndex].remainingActions }}</td>
         <td :title="$t('playerInfo.busesTooltip')">{{ store.players[arrayIndex].buses }}</td>
@@ -187,17 +186,6 @@ function getPlayerIndexOrderForTable() {
   font-weight: bolder;
   padding: 3px;
   border: 1px solid black;
-}
-
-.youTag {
-  display: inline-block;
-  margin-left: 4px;
-  padding: 0 5px;
-  border: 1px solid black;
-  background-color: white;
-  color: black;
-  font-size: 0.8em;
-  font-weight: bold;
 }
 
 .playerLineName {

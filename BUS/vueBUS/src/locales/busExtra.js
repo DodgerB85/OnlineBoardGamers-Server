@@ -53,7 +53,6 @@ export const busExtra = {
 			stonesTooltip: "Time stones: -1 point each, already included in the score",
 			actionsTooltip: "Remaining Action markers",
 			busesTooltip: "Buses (maximum 5)",
-			you: "You",
 		},
 		topMenu: {
 			editPlayersBeforeMove: "Player names and colours can only be changed before the first move.",
@@ -122,7 +121,6 @@ export const busExtra = {
 			stonesTooltip: "Zeitsteine: je -1 Punkt, bereits im Punktestand enthalten",
 			actionsTooltip: "Verbleibende Aktionsmarker",
 			busesTooltip: "Busse (maximal 5)",
-			you: "Du",
 		},
 		topMenu: {
 			editPlayersBeforeMove: "Spielernamen und Farben können nur vor dem ersten Zug geändert werden.",
@@ -191,7 +189,6 @@ export const busExtra = {
 			stonesTooltip: "Piedras de tiempo: -1 punto cada una, ya incluidas en la puntuación",
 			actionsTooltip: "Marcadores de acción restantes",
 			busesTooltip: "Autobuses (máximo 5)",
-			you: "Tú",
 		},
 		topMenu: {
 			editPlayersBeforeMove: "Los nombres y colores de los jugadores solo se pueden cambiar antes del primer movimiento.",
@@ -260,7 +257,6 @@ export const busExtra = {
 			stonesTooltip: "Pierres de temps : -1 point chacune, déjà incluses dans le score",
 			actionsTooltip: "Marqueurs d'action restants",
 			busesTooltip: "Bus (maximum 5)",
-			you: "Vous",
 		},
 		topMenu: {
 			editPlayersBeforeMove: "Les noms et couleurs des joueurs ne peuvent être modifiés qu'avant le premier mouvement.",
@@ -329,7 +325,6 @@ export const busExtra = {
 			stonesTooltip: "Pietre del tempo: -1 punto ciascuna, già incluse nel punteggio",
 			actionsTooltip: "Segnalini azione rimanenti",
 			busesTooltip: "Autobus (massimo 5)",
-			you: "Tu",
 		},
 		topMenu: {
 			editPlayersBeforeMove: "Nomi e colori dei giocatori possono essere modificati solo prima della prima mossa.",
@@ -398,7 +393,6 @@ export const busExtra = {
 			stonesTooltip: "时间石：每颗 -1 分，已计入得分",
 			actionsTooltip: "剩余行动标记",
 			busesTooltip: "公交车（最多 5 辆）",
-			you: "你",
 		},
 		topMenu: {
 			editPlayersBeforeMove: "玩家名称和颜色只能在第一步之前更改。",
