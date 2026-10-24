@@ -186,6 +186,9 @@ export function maxBuses() {
 export function maxBusesWithNewBus() {
 	const store = useModelStore()
 	if (store.actionAreaData[1][0] === -1) return maxBuses()
+	// Once the New Bus phase has resolved, its bus is already counted in maxBuses().
+	// Only anticipate it while choosing actions or resolving Line Expansion.
+	if (store.gameflow.phase >= rf.PHASE_ADD_BUS) return maxBuses()
 	return Math.max(maxBuses(), Math.min(5, controller.getPlayerByColour(store.actionAreaData[1][0]).buses + 1))
 }
 
