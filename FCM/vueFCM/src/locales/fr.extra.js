@@ -1,6 +1,18 @@
 // fr messages added after the main translation pass. Merged over fr.js in index.js.
 export default {
 	"actionArea": {
+		"turnNudge": {
+		"streak": "🔥 {days} jours d'affilée · Meilleur : {best}. {goal}",
+		"goalMet": "L'objectif du jour est atteint.",
+		"goalRemaining": "Un tour de n'importe quel joueur avant minuit UTC atteint l'objectif du jour.",
+		"button": "Relancer {name}",
+		"tooltipSend": "Envoyer un rappel de tour",
+		"tooltipDisabled": "Rappels désactivés ou un rappel a déjà été envoyé dans les dernières 24 heures",
+		"limit": "Chaque joueur peut recevoir un rappel par partie toutes les 24 heures.",
+		"sending": "Envoi…",
+		"failed": "Impossible d'envoyer le rappel. Réessayez.",
+		"loadFailed": "Impossible de charger les rappels de tour."
+		},
 		"bailoutTitle": "La ville renfloue la banque !",
 		"bailoutBody": "Choisissez un employé marketing de niveau 2 gratuit (premier arrivé, premier servi). Le cadeau ne compte pas comme une embauche – l'employé rejoint votre plage et est payé comme tout autre employé.",
 		"bailoutNothingLeft": "Plus rien à réclamer.",

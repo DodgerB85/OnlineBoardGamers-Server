@@ -69,29 +69,33 @@ export function fitHeightToFooter(el) {
 	el.style["max-height"] = String(parseInt(b - a)) + "px"
 }
 
+function phaseLabel(key) {
+	return t(key).replace(/^\s*\d+\s*[-?]\s*/, "")
+}
+
 export function phaseStr(phase) {
 	if (phase === rf.PHASE_SETUP_RESTAURANT1)
-		return t("phases.setupRestaurants") //0
-	else if (phase === rf.PHASE_SETUP_RESTAURANT2) return " " + t("phases.setupRestaurantsRound2")
-	else if (phase === rf.PHASE_SETUP_RESERVE) return " " + t("phases.setupReserveCards")
-	else if (phase === rf.PHASE_RESTRUCTURING) return " " + t("phases.restructuring")
-	else if (phase === rf.PHASE_TURN_ORDER) return " " + t("phases.orderOfBusiness")
+		return phaseLabel("phases.setupRestaurants") //0
+	else if (phase === rf.PHASE_SETUP_RESTAURANT2) return " " + phaseLabel("phases.setupRestaurantsRound2")
+	else if (phase === rf.PHASE_SETUP_RESERVE) return " " + phaseLabel("phases.setupReserveCards")
+	else if (phase === rf.PHASE_RESTRUCTURING) return " " + phaseLabel("phases.restructuring")
+	else if (phase === rf.PHASE_TURN_ORDER) return " " + phaseLabel("phases.orderOfBusiness")
 	else if (phase === rf.PHASE_WORKING_DAY)
-		return " " + t("phases.workingHours") //5
-	else if (phase === rf.PHASE_DINNERTIME) return " " + t("phases.dinnertime")
-	else if (phase === rf.PHASE_PAYDAY) return " " + t("phases.payday")
-	else if (phase === rf.PHASE_MARKETING_CAMPAIGNS) return " " + t("phases.marketingCampaigns")
-	else if (phase === rf.PHASE_CLEAN_UP) return " " + t("phases.cleanUp")
+		return " " + phaseLabel("phases.workingHours") //5
+	else if (phase === rf.PHASE_DINNERTIME) return " " + phaseLabel("phases.dinnertime")
+	else if (phase === rf.PHASE_PAYDAY) return " " + phaseLabel("phases.payday")
+	else if (phase === rf.PHASE_MARKETING_CAMPAIGNS) return " " + phaseLabel("phases.marketingCampaigns")
+	else if (phase === rf.PHASE_CLEAN_UP) return " " + phaseLabel("phases.cleanUp")
 	else if (phase === rf.PHASE_GAME_OVER)
-		return " " + t("phases.gameEnd") //10
-	else if (phase === rf.PHASE_PIZZA_BOMB) return " " + t("phases.pizzaMilestone")
+		return " " + phaseLabel("phases.gameEnd") //10
+	else if (phase === rf.PHASE_PIZZA_BOMB) return " " + phaseLabel("phases.pizzaMilestone")
 	else if (phase === rf.PHASE_COFFE_SHOP_MS)
-		return " " + t("phases.coffeeSellingMilestone") //12
+		return " " + phaseLabel("phases.coffeeSellingMilestone") //12
 	else if (phase === rf.PHASE_SETUP_MODULES)
-		return " " + t("phases.setupDraftModules") //13
+		return " " + phaseLabel("phases.setupDraftModules") //13
 	else if (phase === rf.PHASE_URBAN_PLANNING)
-		return " " + t("phases.setupUrbanPlanning") //14
-	else if (phase === rf.PHASE_CHOOSE_CEO_BONUS) return " " + t("phases.chooseCEOBonus") //15
+		return " " + phaseLabel("phases.setupUrbanPlanning") //14
+	else if (phase === rf.PHASE_CHOOSE_CEO_BONUS) return " " + phaseLabel("phases.chooseCEOBonus") //15
 }
 
 export function getImage(image) {

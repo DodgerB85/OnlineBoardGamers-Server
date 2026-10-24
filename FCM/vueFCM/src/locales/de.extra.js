@@ -1,6 +1,18 @@
 // de messages added after the main translation pass. Merged over de.js in index.js.
 export default {
 	"actionArea": {
+		"turnNudge": {
+		"streak": "🔥 {days} Tage in Folge · Bestwert: {best}. {goal}",
+		"goalMet": "Das heutige Ziel ist erreicht.",
+		"goalRemaining": "Ein Zug eines beliebigen Spielers vor Mitternacht UTC erfüllt das heutige Ziel.",
+		"button": "{name} anstupsen",
+		"tooltipSend": "Zugerinnerung senden",
+		"tooltipDisabled": "Erinnerungen deaktiviert oder in den letzten 24 Stunden bereits gesendet",
+		"limit": "Jeder Spieler kann pro Spiel alle 24 Stunden eine Erinnerung erhalten.",
+		"sending": "Wird gesendet…",
+		"failed": "Erinnerung konnte nicht gesendet werden. Bitte erneut versuchen.",
+		"loadFailed": "Zugerinnerungen konnten nicht geladen werden."
+		},
 		"bailoutTitle": "Die Stadt rettet die Bank!",
 		"bailoutBody": "Wähle einen kostenlosen Marketing-Mitarbeiter der Stufe 2 (wer zuerst kommt, mahlt zuerst). Das Geschenk zählt nicht als Einstellung – der Mitarbeiter kommt an deinen Strand und wird wie jeder andere Mitarbeiter bezahlt.",
 		"bailoutNothingLeft": "Nichts mehr zu holen.",

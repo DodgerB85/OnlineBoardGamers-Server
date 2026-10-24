@@ -101,7 +101,7 @@ export default {
 	},
 	"welcome": {
 		"instructions": {
-			"placeItem": "要将物品放置在棋盘上，请点击任何红色高亮的方格",
+			"placeItem": "要将物品放置在棋盘上，请点击任何黄色高亮的方格",
 			"rotateItem": "要旋转物品，请使用棋盘正上方显示的箭头",
 			"viewEmployees": "要查看任何玩家的员工和当前结构，请点击屏幕顶部黑色栏中的玩家名字",
 			"viewReserve": "要查看剩余的员工、里程碑和其他物品，请点击顶部菜单中的“可用”",
@@ -484,7 +484,6 @@ export default {
 		"enoughMoney": "您有<b>足够的钱</b>来支付所有员工的薪水。您可以决定现在保留所有员工以节省时间",
 		"remainingPoints": "剩余 {count} 点",
 		"salaryPoints": "1点可将薪水减少$5 | {count}点可将薪水减少${amount}",
-		"resetWorkingDay": "重置工作日",
 		"resetRecruiting": "重置招聘",
 		"finishRecruiting": "完成招聘",
 		"canTrainSlots": "您可以培训 {count} 名员工 | 您可以培训 {count} 个工位",
@@ -510,7 +509,7 @@ export default {
 		"setHawkerRoute": "设置小贩路线",
 		"hawkerRouteRangeLeft": "设置小贩路线：剩余范围 {count}",
 		"hawkerRouteNoRange": "设置小贩路线：范围为0 — 点击高亮方格停止",
-		"doneDrawingRoute": "完成绘制路线",
+		"doneDrawingRoute": "??????",
 		"addHawkerTruck": "添加小贩货车",
 		"placeCampaign": "放置营销板块",
 		"clickToPlaceCampaign": "点击地图上的高亮方格放置您的营销板块",
@@ -556,7 +555,6 @@ export default {
 		"usedToReduceSalary": "{count} - 已用于减少薪水",
 		"canReduceSalary": "（{count} 可用于减少薪水）",
 		"confirmWorkingDay": "您即将确认整个工作日",
-		"resetWholeTurn": "重置整个回合",
 		"endTurn": "结束回合",
 		"paydaySkipped": "因为您没有薪水要支付，且现在是第1或第2回合，发薪日将被跳过",
 		"paydayTurnOrder": "发薪日将按回合顺序进行",

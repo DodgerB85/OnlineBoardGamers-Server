@@ -347,7 +347,7 @@ const computedProducers = computed(() => {
 				</div>
 			</template>
 
-			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWorkingDay") }}</button>
+			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 			<button v-if="store.startingOptions.laborMarket" class="actionsLineButton" @click="controller.resetHiringSubphase()">{{ $t("workingDay.resetRecruiting") }}</button>
 			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ $t("workingDay.finishRecruiting") }}</button>
 		</div>
@@ -427,7 +427,7 @@ const computedProducers = computed(() => {
 
 			<button v-if="rules.getRemainingRecruitingPoints(controller.currentPlayerIndex()) > 0 && computedTrainingData.total > 0" class="actionsLineButton" @click="selectEmployeeToTrain(-1, 1)">{{ $t("workingDay.trainFromHiring") }}</button>
 			<br />
-			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWorkingDay") }}</button>
+			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 			<button class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.resetTraining") }}</button>
 			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ $t("workingDay.finishTraining") }}</button>
 		</template>
@@ -562,7 +562,6 @@ const computedProducers = computed(() => {
 					<template v-else-if="store.context.hawkerRouteActive">
 						<p v-if="store.context.range > 0">{{ $t("workingDay.hawkerRouteRangeLeft", store.context.range) }}</p>
 						<p v-else>{{ $t("workingDay.hawkerRouteNoRange") }}</p>
-						<button class="actionsLineButton" @click="controller.stopHawkerTruck()">{{ $t("workingDay.doneDrawingRoute") }}</button>
 					</template>
 					<p v-else-if="store.context.path.length > 0"><button class="actionsLineButton" @click="controller.addHawkerTruck()">{{ $t("workingDay.addHawkerTruck") }}</button></p>
 					<p v-else><button class="actionsLineButton" @click="controller.placeMarketingCampaign(0)">{{ $t("workingDay.placeCampaign") }}</button></p>
@@ -616,7 +615,6 @@ const computedProducers = computed(() => {
 			<!-- DRIVING A CART / TRUCK / ZEPPELIN TO COLLECT DRINKS -->
 			<template v-if="isCollectingDrinks">
 				<p>{{ $t("workingDay.tracePathCollectDrinks") }}</p>
-				<button class="actionsLineButton" @click="controller.stopCollecting()">{{ $t("workingDay.stopCollectDrinks") }}</button>
 			</template>
 
 			<template v-else>
@@ -649,7 +647,7 @@ const computedProducers = computed(() => {
 					</div>
 				</template>
 
-				<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWorkingDay") }}</button>
+				<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 				<button class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.resetProduction") }}</button>
 				<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ $t("workingDay.finishProduction") }}</button>
 			</template>
@@ -668,7 +666,7 @@ const computedProducers = computed(() => {
 				<AddItemBox :itemBeingAdded="rf.ITEM_BOX_HOUSE" />
 			</template>
 
-			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWorkingDay") }}</button>
+			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 			<button class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.resetHousesGardens") }}</button>
 			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ $t("workingDay.finishHousesGardens") }}</button>
 		</div>
@@ -719,7 +717,7 @@ const computedProducers = computed(() => {
 				<p v-else-if="store.context.justLobbied.length === 0">{{ $t("workingDay.noLobbyistsAvailable") }}</p>
 			</template>
 
-			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWorkingDay") }}</button>
+			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 			<button class="actionsLineButton" @click="controller.resetLobbying()">{{ $t("workingDay.resetLobbying") }}</button>
 			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ store.context.justLobbied.length === 0 ? $t("workingDay.skipLobbying") : $t("workingDay.finishLobbying") }}</button>
 		</div>
@@ -781,7 +779,7 @@ const computedProducers = computed(() => {
 				<p v-else-if="store.context.justOpened.length === 0">{{ $t("workingDay.noManagersAvailable") }}</p>
 			</template>
 
-			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWorkingDay") }}</button>
+			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 			<button class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.resetNewRestaurants") }}</button>
 			<button v-if="store.context.restaurantMilestone === false && store.context.newRestaurantAction === ''" class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ store.context.justOpened.length === 0 ? $t("workingDay.skipExpanding") : $t("workingDay.finishExpanding") }}</button>
 		</div>
@@ -939,19 +937,19 @@ const computedProducers = computed(() => {
 
 			<template v-if="store.gameflow.turn === 1 && eodCurrentSalary === 0">
 				<p v-if="controller.currentPlayerObj().beach.length === 0"><b>{{ $t("workingDay.warningNoHires") }}</b></p>
-				<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+				<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 				<button class="actionsLineButton" @click="endTurnPlayPayday">{{ $t("workingDay.endTurn") }}</button>
 			</template>
 
 			<template v-else-if="eodIsLastOrShort">
-				<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+				<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 				<button class="actionsLineButton" @click="endTurnPlayPayday">{{ $t("workingDay.endTurn") }}</button>
 			</template>
 
 			<template v-else-if="(eodCurrentSalary === 0 && store.gameflow.turn <= 2) || store.startingOptions.strictPaydayFridge">
 				<p v-if="eodCurrentSalary === 0 && store.gameflow.turn <= 2 && !store.startingOptions.strictPaydayFridge">{{ $t("workingDay.paydaySkipped") }}</p>
 				<p v-else>{{ $t("workingDay.paydayTurnOrder") }}</p>
-				<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+				<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 				<button class="actionsLineButton" @click="endTurnPlayPayday">{{ $t("workingDay.endTurn") }}</button>
 			</template>
 
@@ -963,7 +961,7 @@ const computedProducers = computed(() => {
 			</template>
 
 			<template v-else>
-				<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+				<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 				<button class="actionsLineButton" @click="endTurnPlayPayday">{{ $t("workingDay.endTurn") }}</button>
 			</template>
 		</div>

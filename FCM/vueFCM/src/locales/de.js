@@ -144,7 +144,7 @@ export default {
 		"title": "Willkommen bei Food Chain Magnate Online!",
 		"contact": "Wenn Sie Vorschläge, Fragen oder Kommentare haben, wenden Sie sich bitte an den Webmaster unter",
 		"instructions": {
-			"placeItem": "Um einen Gegenstand auf der Tafel zu platzieren, klicken Sie auf eines der rot hervorgehobenen Quadrate",
+			"placeItem": "Um einen Gegenstand auf der Tafel zu platzieren, klicken Sie auf eines der gelb hervorgehobenen Quadrate",
 			"rotateItem": "Um einen Gegenstand zu drehen, verwenden Sie die Pfeile, die neben dem Gegenstand direkt über der Tafel angezeigt werden",
 			"viewEmployees": "Um die Mitarbeiter und die aktuelle Struktur eines Spielers anzuzeigen, klicken Sie auf seinen Namen in der schwarzen Leiste oben auf dem Bildschirm",
 			"viewReserve": "Um die verbleibenden Mitarbeiter, Meilensteine ​​und andere Elemente anzuzeigen, klicken Sie im Menü oben auf „Reservieren“.",
@@ -450,7 +450,6 @@ export default {
 	"workingDay": {
 		"remainingPoints": "{count} verbleibender Punkt | {count} verbleibende Punkte",
 		"salaryPoints": "1 Punkt kann verwendet werden, um die Gehälter um 5 $ zu senken Mit {count} Punkten kann das Gehalt um ${amount} gekürzt werden",
-		"resetWorkingDay": "Arbeitstag zurücksetzen",
 		"finishRecruiting": "Beenden Sie die Rekrutierung",
 		"trainedLabel": "Ausgebildet:",
 		"nightShiftTrainTwice": "Ihr Nachtschichtleiter erlaubt jedem Trainer, zweimal zu arbeiten",
@@ -495,7 +494,7 @@ export default {
 		"setHawkerRoute": "Legen Sie die Hawker-Route fest",
 		"hawkerRouteRangeLeft": "Hawker-Route festlegen: {count} verbleibende Reichweite",
 		"hawkerRouteNoRange": "Stellen Sie die Hawker-Route auf einen Bereich von 0 ein – klicken Sie auf ein hervorgehobenes Quadrat, um anzuhalten",
-		"doneDrawingRoute": "Zeichnungsroute fertig",
+		"doneDrawingRoute": "Hawker-LKW anhalten",
 		"addHawkerTruck": "Hawker Truck hinzufügen",
 		"placeCampaign": "Platzkampagne",
 		"clickToPlaceCampaign": "Klicken Sie auf ein hervorgehobenes Quadrat auf der Karte, um Ihre Kampagne zu platzieren",
@@ -551,7 +550,6 @@ export default {
 		"canReduceSalary": "({count} können zur Gehaltskürzung genutzt werden)",
 		"confirmWorkingDay": "Sie sind dabei, den gesamten Arbeitstag zu bestätigen",
 		"warningNoHires": "ACHTUNG: SIE HABEN KEINEN ANGESTELLT",
-		"resetWholeTurn": "Gesamte Runde zurücksetzen",
 		"endTurn": "Runde beenden",
 		"paydaySkipped": "Der Zahltag wird übersprungen, da Sie kein Gehalt zu zahlen haben und es Runde 1 oder 2 ist",
 		"paydayTurnOrder": "Payday wird in der Reihenfolge der Runden gespielt",

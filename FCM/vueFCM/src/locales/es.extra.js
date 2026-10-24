@@ -1,6 +1,18 @@
 // es messages added after the main translation pass. Merged over es.js in index.js.
 export default {
 	"actionArea": {
+		"turnNudge": {
+		"streak": "🔥 {days} días seguidos · Mejor: {best}. {goal}",
+		"goalMet": "El objetivo de hoy está cumplido.",
+		"goalRemaining": "Un turno de cualquier jugador antes de medianoche UTC cumple el objetivo de hoy.",
+		"button": "Avisar a {name}",
+		"tooltipSend": "Enviar un recordatorio de turno",
+		"tooltipDisabled": "Avisos desactivados o ya se envió uno en las últimas 24 horas",
+		"limit": "Cada jugador puede recibir un aviso por partida cada 24 horas.",
+		"sending": "Enviando…",
+		"failed": "No se pudo enviar el aviso. Inténtalo de nuevo.",
+		"loadFailed": "No se pudieron cargar los recordatorios de turno."
+		},
 		"bailoutTitle": "¡La ciudad rescata al banco!",
 		"bailoutBody": "Elige un empleado de marketing de nivel 2 gratis (por orden de llegada). El regalo no cuenta como contratación: el empleado se une a tu playa y cobra como cualquier otro empleado.",
 		"bailoutNothingLeft": "No queda nada que reclamar.",

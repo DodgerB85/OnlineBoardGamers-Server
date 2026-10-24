@@ -1085,8 +1085,7 @@ export function givePossibleStartsFromRestaurants(anyIndex) {
 	const playerObj = controller.currentPlayerObj()
 	const resultSet = new Set()
 
-	// openOnly: false — rules historically ignore resto.open (unlike model entrances)
-	for (const idx of model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: false })) {
+	for (const idx of model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: true })) {
 		const neighbors = anyIndex ? map.neighbours(idx) : map.nextRoadNeighbours(idx, -1, false, true)
 		for (const n of neighbors) {
 			resultSet.add(n)
@@ -1111,8 +1110,7 @@ export function firstStartIsFromTheSameTile(index) {
 
 	const vicinity = new Set(map.neighbours(index))
 
-	// openOnly: false — matches givePossibleStartsFromRestaurants
-	for (const doorIdx of model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: false })) {
+	for (const doorIdx of model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: true })) {
 		if (vicinity.has(doorIdx) && map.onTheSameTile(index, doorIdx)) {
 			return true
 		}
@@ -1256,8 +1254,7 @@ export function givePossibleStartsFromRestaurantsForZeppelin() {
 	const playerObj = controller.currentPlayerObj()
 	const uniqueTiles = new Set()
 
-	// openOnly: false — matches the other rules-side entrance walks
-	for (const doorIndex of model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: false })) {
+	for (const doorIndex of model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: true })) {
 		uniqueTiles.add(map.giveTileNumber(doorIndex))
 	}
 
@@ -1795,6 +1792,42 @@ function settleMediaLineGroups(sold, replayOnly) {
 	return bonuses
 }
 
+// Route UI: a repeated square only offers a stop bubble when the route cannot
+// usefully continue (no range, or every remaining exit stays on this tile).
+export function shouldStopRepeatRoute(path, targets, range) {
+	if (path.length < 2) return false
+	if (new Set(path).size === path.length) return false
+	if (range <= 0) return true
+	const last = path[path.length - 1]
+	return targets.length > 0 && targets.every((target) => map.onTheSameTile(target, last))
+}
+
+// Lexicographic tie-breakers: price+distance, best Movie Star, fewest Jazz
+// Musicians only when neither side has a Movie Star, most waitresses, turn order.
+export function compareDinnerCompetitors(a, b) {
+	const priceDistance = a.price + a.distance - (b.price + b.distance)
+	if (priceDistance !== 0) return priceDistance
+
+	const starRank = (emp) => {
+		if (emp.includes(rf.B_MOVIE_STAR)) return 3
+		if (emp.includes(rf.C_MOVIE_STAR)) return 2
+		if (emp.includes(rf.D_MOVIE_STAR)) return 1
+		return 0
+	}
+	const starA = starRank(a.emp)
+	const starB = starRank(b.emp)
+	if (starA !== starB) return starB - starA
+
+	if (starA === 0) {
+		const jazz = a.musicians - b.musicians
+		if (jazz !== 0) return jazz
+	}
+
+	const waitresses = b.waitress - a.waitress
+	if (waitresses !== 0) return waitresses
+	return a.order - b.order
+}
+
 export function doDinnerTime(replayOnly) {
 	const store = useModelStore()
 
@@ -1884,18 +1917,7 @@ export function doDinnerTime(replayOnly) {
 		}
 
 		if (winningCompetitors.length > 0) {
-			// Sort by ranking (lowest wins)
-			winningCompetitors.sort((a, b) => {
-				const getRank = (item) => {
-					let r = (item.price + item.distance) * 10000
-					if (item.emp.includes(rf.B_MOVIE_STAR)) r -= 5000
-					else if (item.emp.includes(rf.C_MOVIE_STAR)) r -= 4000
-					else if (item.emp.includes(rf.D_MOVIE_STAR)) r -= 3000
-					r += item.musicians * 450 - item.waitress * 10 + item.order
-					return r
-				}
-				return getRank(a) - getRank(b)
-			})
+			winningCompetitors.sort(compareDinnerCompetitors)
 
 			const winner = winningCompetitors[0]
 			const winnerColour = store.players[winner.playerIndex].colour
@@ -2352,7 +2374,7 @@ export function baseSalary(playerIndex, applyFirstTrainDiscount = true) {
 	let recruitsUsed = 999
 	for (let i = store.history.length - 1; i >= 0; i--) {
 		if (store.history[i][0] === rf.HIST_HIRE && store.history[i][1] === playerIndex) {
-			recruitsUsed = store.history[i][3].length
+			recruitsUsed = store.history[i][3].length + (store.history[i][4] || 0)
 			break
 		}
 	}
@@ -2479,35 +2501,37 @@ export function paySalaries(foodPayements) {
 
 		const normalDue = baseSalary(i)
 		const switchDue = headhuntSalaryDue(i)
-		let due = normalDue + switchDue
-		let preMoney = player.money
-
-		if (due >= 20) {
-			plyr.awardMilestone(i, rf.FIRST_20_SALARIES)
-		}
-
+		let foodValue = 0
 		if (plyr.hasMilestone(i, rf.FIRST_BEER_SOLD) && foodPayement.length > 0) {
-			let unitarySalary = plyr.unitarySalary(i)
-			const normalAfterFood = Math.max(normalDue - unitarySalary * foodPayement.length, 0)
-			due = normalAfterFood + switchDue
+			foodValue = Math.min(normalDue, plyr.unitarySalary(i) * foodPayement.length)
 		}
+		const cashDue = Math.max(normalDue - foodValue, 0) + switchDue
 
-		if (due > player.money && plyr.hasMilestone(i, rf.FIRST_TRAINER_USED)) {
-			store.bank += player.money
+		let cashPaid = 0
+		if (cashDue > player.money && plyr.hasMilestone(i, rf.FIRST_TRAINER_USED)) {
+			cashPaid = Math.max(0, player.money)
+			store.bank += cashPaid
 			player.money = 0
 			if (plyr.hasMilestone(i, rf.FIRST_BEER_SOLD) && player.resources.length > 0) {
-				histo.push([due, player.resources.length])
+				histo.push([cashDue, player.resources.length])
 				player.resources = []
-			} else histo.push([due])
+			} else histo.push([cashDue])
 		} else {
-			player.money -= due
-			store.bank += due
+			cashPaid = Math.max(0, cashDue)
+			player.money -= cashDue
+			store.bank += cashDue
 
 			if (foodPayement && foodPayement.length > 0) {
-				histo.push([due, foodPayement.length])
+				histo.push([cashDue, foodPayement.length])
 			} else {
-				histo.push([due])
+				histo.push([cashDue])
 			}
+		}
+
+		// The milestone requires salaries to have actually been paid, not just
+		// owed. First Trainer Used can reduce the cash actually handed over.
+		if (cashPaid + foodValue >= 20) {
+			plyr.awardMilestone(i, rf.FIRST_20_SALARIES)
 		}
 		clearHeadhuntSalaries(i)
 	}

@@ -144,7 +144,7 @@ export default {
 		"title": "Bienvenue sur Food Chain Magnate Online !",
 		"contact": "Si vous avez des suggestions, des questions ou des commentaires, veuillez contacter le webmaster au",
 		"instructions": {
-			"placeItem": "Pour placer un élément sur le tableau, cliquez sur l'un des carrés surlignés en rouge.",
+			"placeItem": "Pour placer un élément sur le tableau, cliquez sur l'un des carrés surlignés en jaune.",
 			"rotateItem": "Pour faire pivoter un élément, utilisez les flèches affichées à côté de l'élément juste au-dessus du tableau.",
 			"viewEmployees": "Pour voir les employés et la structure actuelle d'un joueur, cliquez sur son nom dans la barre noire en haut de l'écran.",
 			"viewReserve": "Pour voir les employés restants, les jalons et autres éléments, cliquez sur « Réserver » dans le menu en haut.",
@@ -450,7 +450,6 @@ export default {
 	"workingDay": {
 		"remainingPoints": "{count} points restants | {count} points restants",
 		"salaryPoints": "1 point peut être utilisé pour réduire les salaires de 5 $ | {count} points peuvent être utilisés pour réduire les salaires de ${amount}",
-		"resetWorkingDay": "Réinitialiser le jour ouvrable",
 		"finishRecruiting": "Terminer le recrutement",
 		"trainedLabel": "Qualifié:",
 		"nightShiftTrainTwice": "Votre Night Shift Manager permet à chaque formateur de travailler deux fois",
@@ -495,7 +494,7 @@ export default {
 		"setHawkerRoute": "Définir l'itinéraire Hawker",
 		"hawkerRouteRangeLeft": "Définir l'itinéraire Hawker : portée {count} à gauche",
 		"hawkerRouteNoRange": "Définir l'itinéraire Hawker : portée 0 – cliquez sur un carré en surbrillance pour arrêter",
-		"doneDrawingRoute": "Itinéraire de dessin terminé",
+		"doneDrawingRoute": "Arr?ter le camion ambulant",
 		"addHawkerTruck": "Ajouter un camion Hawker",
 		"placeCampaign": "Placer une campagne",
 		"clickToPlaceCampaign": "Cliquez sur un carré en surbrillance sur la carte pour placer votre campagne",
@@ -551,7 +550,6 @@ export default {
 		"canReduceSalary": "({count} peut être utilisé pour réduire le salaire)",
 		"confirmWorkingDay": "Vous êtes sur le point de confirmer toute la journée ouvrable",
 		"warningNoHires": "ATTENTION : VOUS N'AVEZ ENGAGÉ PERSONNE",
-		"resetWholeTurn": "Réinitialiser un tour entier",
 		"endTurn": "Fin du tour",
 		"paydaySkipped": "Le jour de paie sera ignoré car vous n'avez pas de salaire à payer et c'est le tour 1 ou 2",
 		"paydayTurnOrder": "Payday sera joué dans l'ordre du tour",

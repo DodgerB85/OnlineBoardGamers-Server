@@ -1,6 +1,7 @@
 <script setup>
 
 import * as replay from '../js/FCMreplay'
+import * as IO from '../backend/FCM_IO'
 import i18n from '../i18n'
 
 import HistoryEntry from './HistoryEntry.vue'
@@ -26,7 +27,19 @@ function performStep(amount) {
 }
 
 async function localCopyGameToPracticeGame2() {
-    store.gameMessages.rewindErrorText = i18n.global.t("replay.notImplementedYet")
+    spinoffSuccessText.value = ''
+    spinoffErrorText.value = ''
+    try {
+        const result = await IO.copyGameToNewPracticeGame()
+        if (result.response === "ok") {
+            spinoffSuccessText.value = i18n.global.t("replay.gameCreated") + ' <a href="/FCM/' + String(result.newID) + '/show/" target="_blank">' + i18n.global.t("replay.here") + "</a>"
+        } else {
+            spinoffErrorText.value = result.error || i18n.global.t("replay.errorCreating")
+        }
+    } catch (error) {
+        console.error(error)
+        spinoffErrorText.value = i18n.global.t("replay.errorCreating")
+    }
 }
 
 function copyToClipboard() {
@@ -85,7 +98,7 @@ function copyToClipboard() {
         <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
             @click="performStep(99)">&gt;|</button>
 
-        <div class="copyGameButtonDiv" v-if="personal.name">
+        <div class="copyGameButtonDiv" v-if="personal.pov >= 0">
             <button @click="localCopyGameToPracticeGame2()" class="actionsLineButton"
                 v-html="$t('replay.copyThisGame')"></button>
             <button @click="store.viewSettings.replayAtBottom = !store.viewSettings.replayAtBottom"

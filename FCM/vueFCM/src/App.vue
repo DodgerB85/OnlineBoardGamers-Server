@@ -20,8 +20,10 @@ import PlayerDetails from "./components/PlayerDetails.vue"
 
 import ReplayArea from "./components/ReplayArea.vue"
 import TutorialPanel from "./components/tutorial/TutorialPanel.vue"
+import GameToast from "./components/GameToast.vue"
 
 import * as replay from "./js/FCMreplay"
+import { watch } from "vue"
 
 /*
 import * as view from './js/FCMview'
@@ -43,6 +45,12 @@ model.initGame()
 
 store.wholeTestResetData = funcs.simpleExportWholeFCMmodel()
 
+watch(
+	() => personal.prefersReducedMotion,
+	(value) => document.body.classList.toggle("reduced-motion", value),
+	{ immediate: true },
+)
+
 /********************************* */
 
 // NB the "r = rotate" shortcut used to live here, but the whole branch was
@@ -51,6 +59,8 @@ store.wholeTestResetData = funcs.simpleExportWholeFCMmodel()
 // has the per-item logic (2 vs 4 rotations, campaign orientation, re-highlighting).
 document.addEventListener("keyup", function (event) {
 	if (store.viewSettings.showChat) return
+	const target = event.target
+	if (target instanceof HTMLElement && (target.closest("input, textarea, select, [contenteditable='true']") || target.isContentEditable)) return
 	if (event.key == "ArrowLeft") {
 		// left arrow
 		if (store.viewSettings.showReplay) replay.performStep(-1)
@@ -62,6 +72,7 @@ document.addEventListener("keyup", function (event) {
 
 <template>
 	<TopMenu />
+	<GameToast />
 
 	<div
 		id="wholeMiddleArea"
@@ -294,6 +305,15 @@ body {
 	margin: 2px;
 	vertical-align: middle;
 	line-height: 30px;
+}
+
+body.reduced-motion *,
+body.reduced-motion *::before,
+body.reduced-motion *::after {
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.01ms !important;
+	scroll-behavior: auto !important;
 }
 
 /** UNIVERSAL CSS */

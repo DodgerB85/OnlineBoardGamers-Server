@@ -135,6 +135,7 @@
   initData.startingMap = {{ startingMap|default:"[]" }}
   initData.moveData = '{{ moveData|default:"" }}'
   initData.highContrastBoardItems = {% if highContrastBoardItems %}true{% else %}false{% endif %};
+  initData.prefersReducedMotion = {% if prefersReducedMotion %}true{% else %}false{% endif %};
 
   // Game state
   {% if finishedGame %}

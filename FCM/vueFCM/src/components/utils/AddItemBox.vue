@@ -8,6 +8,8 @@ let activeRotate = null
 
 function rotateKeyHandler(event) {
 	if (event.key !== "r" && event.key !== "R") return
+	const target = event.target
+	if (target instanceof HTMLElement && (target.closest("input, textarea, select, [contenteditable='true']") || target.isContentEditable)) return
 	if (activeRotate) activeRotate()
 }
 

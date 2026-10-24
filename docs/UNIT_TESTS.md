@@ -49,12 +49,14 @@ Notes:
 | `test_urr_rewind.py` | 8 | URR compressed rewind points, duplicate avoidance, twenty-point retention, the opening marker rebuilt by the client, matching the redo anchor to a client-compacted rewind position, and previous object/gzip rewind compatibility |
 | `test_fcm_rewind.py` | 8 | FCM `saveNormal` rewind stack: `saveRewind=True` records the pre-save state, `saveRewind=False` records nothing at all, one save makes exactly one rewind point, repeated AI-style saves never grow the stack, and rewinding after your own move returns *your* turn rather than the next player's (FcmAI's). Plus the brand-new-game empty state (`gameData == ""`) is never recorded as a rewind point, and a rewind to that legacy empty seed is refused without draining the stack or changing the board |
 | `test_fcm_reset.py` | 5 | Admin "Reset AI": a reset-flagged save replaces `startingMap` and clears the discarded game's rewind stack; the map-sync drift guard still rejects a changed board on an ordinary save, and still rejects a player without the game-admin flag claiming `resetGame` |
+| `test_fcm_spinoff.py` | 1 | Copying an FCM game to a practice game stores the copied state as `gameData` (not a fresh setup), seeds the rewind stack with it, adds `SO_TRAINING_GAME`, and seats the copying player at the requested seat |
 | `test_fcm_passkickout.py` | 5 | FCM "skip turn instead of kickout": a timed-out player's auto-skip move is attributed to *them* (not the clicker) in `saveSimulMove` and `saveNormal` with correct flexi-time credit; the same attribute is refused (syncError) when the target is not the current player, when kickout isn't due, or when the target isn't a participant |
 | `test_fcm_show_route.py` | 5 | The canonical `/FCM/<id>/show/` route renders the Vue page (`FCM/showFCMgame.html`) rather than the removed raw-JS page; the temporary `/show2/` block redirects to it; the admin move-data tool and its endpoint are gated to the site-admin flag (a matching username alone is not enough) and still return the restructuring moves |
 | `test_admin_webhook_guard.py` | 2 | `SN_sendAdminErrorMessage` never posts to the admin Discord webhook while Django is on a test database - directly, and via the FCM map-sync rejection path that prompted it |
 | `test_webhook_urls.py` | 3 | Webhook allowlist: Discord and Slack URLs must be HTTPS on the provider host and the provider path; userinfo/host-prefix tricks, plain HTTP and custom types are rejected |
 | `test_discord_state.py` | 2 | Discord OAuth callback refuses a missing or wrong `state` value |
 | `test_turn_authorization.py` | 3 | A non-player is refused (403) on a BUS turn save and cannot change `gameData`; a player's save succeeds; chat forces the logged-in username even when the client sends another name |
+| `test_permissions.py` | 4 | Admin rights come from `Profile` flags only: a superuser is neither site nor game admin, a flag grants only its own side, plain and anonymous users are neither, and `can_act_in_game` lets a flagged non-player act in a game |
 | `test_rate_limit.py` | 1 | The shared cache rate limiter allows `limit` calls and refuses the next one |
 | `test_password_reset.py` | 1 | An unknown email gets the same "if that address is registered" message, so the reset form does not enumerate accounts |
 | `test_game_end.py` | 8 | `clearGeneralDataOnGameEndWithoutSave` (the shared choke point every presenter's `endGame` calls): per-player `moveDataJSON` / `currentMoveTime` / `currentMoveData` are wiped for all 12 games, the wipe is persisted rather than only in-memory, the Game-level scratch fields are still cleared, and `endGame` still marks exactly one winner. Plus vote cleanup: rewind-consent and kickout votes are refused once a game is FINISHED (delete / stats-exclude votes still allowed), rewind votes still work while ACTIVE, and an FCM `saveNormal` with `status=FINISHED` no longer re-creates `activeVotes` after `endGame` cleared it |
@@ -84,6 +86,10 @@ Run on Linux with `.venv/bin/python manage.py test tests.test_momentum tests.tes
 ## Known expected failure
 
 `tests/test_rnb_transaction_recovery.py::TransactionRecoveryTest::test_F_FAILING_recovery_player_gets_no_notification` is marked `@unittest.expectedFailure`: it documents the open bug in issue #64 where the notification filter in `RNB/views.py` excludes `request.user`, so the player who triggers recovery is never told it is their turn. Remove the decorator when that filter is fixed.
+
+## TGZ frontend tests
+
+Run `npm test` from `TGZ/vueTGZ/`. The Vitest suite covers VR modifiers (including Alajire + Xango and Gu technology rebates), monument scoring, Yemoja upgrade splitting, and Anyanwu’s Level 1/2 monument restriction.
 
 ## URR frontend checks
 

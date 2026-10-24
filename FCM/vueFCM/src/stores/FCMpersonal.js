@@ -42,6 +42,7 @@ export const usePersonalStore = defineStore("personal", () => {
 	var notes = ""
 	var yourTurnAudioType = 0
 	var preferredColour = -1
+	var prefersReducedMotion = false
 	var moveDataRaw = ""
 	var currentRewindConsent = 0
 	var votedToExclude = false
@@ -144,6 +145,7 @@ export const usePersonalStore = defineStore("personal", () => {
 		notes,
 		yourTurnAudioType,
 		preferredColour,
+		prefersReducedMotion,
 		moveDataRaw,
 		currentRewindConsent,
 		votedToExclude,

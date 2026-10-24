@@ -1,6 +1,18 @@
 // zh-hans messages added after the main translation pass. Merged over zh-hans.js in index.js.
 export default {
 	"actionArea": {
+		"turnNudge": {
+		"streak": "🔥 连续 {days} 天 · 最佳：{best}。{goal}",
+		"goalMet": "今天的目标已达成。",
+		"goalRemaining": "任意玩家在 UTC 午夜前完成一回合即可达成今天的目标。",
+		"button": "提醒 {name}",
+		"tooltipSend": "发送回合提醒",
+		"tooltipDisabled": "提醒已关闭，或过去 24 小时内已发送过提醒",
+		"limit": "每位玩家每局每 24 小时只能收到一次提醒。",
+		"sending": "正在发送…",
+		"failed": "无法发送提醒，请重试。",
+		"loadFailed": "无法加载回合提醒。"
+		},
 		"savingGame": "正在保存游戏.... 请稍候....",
 		"loggedOutPrompt": "请{register}或{login}以开始游戏",
 		"register": "注册",

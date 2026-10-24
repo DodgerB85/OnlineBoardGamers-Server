@@ -247,10 +247,12 @@ export const useModelStore = defineStore("store", () => {
 		indexes: [],
 		edges: [],
 		producer: -1,
+		routeTargets: [],
 		hawkerRouteActive: false,
 		showingHawkerRoute: -1,
 		selectedModuleIndex: 0,
 		marketer: -1,
+		marketerSelectionMilestones: [],
 		refusePlaneDouble: false,
 		firstCampaignDuration: 1,
 		firstCampaignCampaign: 11,
@@ -384,6 +386,7 @@ export const useModelStore = defineStore("store", () => {
 		errorText: "",
 		bugErrorText: "",
 		turnEndText: "", // Store text to display after an auto-action
+		retrySave: null, // closure that retries the exact failed save
 
 		endTurnMessage: "", // store text to display AFTER YOU ENDED YOUR TURN
 	})
@@ -394,6 +397,7 @@ export const useModelStore = defineStore("store", () => {
 		gameMessages.bugErrorText = ""
 		gameMessages.successText = ""
 		gameMessages.turnEndText = ""
+		gameMessages.retrySave = null
 
 		if (!keepEndTurnMessage) gameMessages.endTurnMessage = ""
 	}

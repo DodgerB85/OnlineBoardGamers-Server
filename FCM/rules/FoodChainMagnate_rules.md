@@ -349,6 +349,8 @@ the same type, including the errand boy just played.
 If a player has the _**“First Cart Operator Played”**_ milestone, his cart
 operators, truck drivers and zeppelin pilots have one additional range.
 
+Online UI note: when a buyer’s route repeats a square and cannot continue, a “Stop and collect drinks” bubble appears above the current square.
+
 ## Place new houses and gardens
 
 If your structure contains a new business developer, you may place a
@@ -378,7 +380,7 @@ entrance of another restaurant.
 _**Local manager:**_ A local manager may place a new restaurant within
 a range of 3 tiles, travelled by road, from one of the chain’s existing
 restaurants. The new restaurant must be placed with the printed entrance connecting to a road. This does not have to be the road used to
-determine the range. The new restaurant is placed with the “COMING
+determine the range. Because the Local Manager grants a drive-in, the new restaurant is considered to have entrances in each corner, so the range may be measured to any square of its 2×2 footprint. The new restaurant is placed with the “COMING
 SOON” side up. It will only open at the end of the turn. Note that as
 long as the local manager is active, restaurants of that chain have a drive-in, and are considered to have entrances in each corner.
 
@@ -773,6 +775,9 @@ card. If you already have a CFO card, you must fire the CFO in phase 5
 of this turn. You may not train a CFO anymore after you have achieved
 this milestone.
 
+Online exception: the online game fires the CFO at the end of phase 4
+instead of phase 5. This has no effect on salary or gameplay.
+
 The new ability takes effect only from the next turn onward, as you can
 get it only after phase 4 has just ended.
 
@@ -785,6 +790,8 @@ all discounts still available to you at the start of phase 5. You may not
 voluntarily pay more salaries than you have to. (Of course, you may use
 a recruiting manager or HR director to hire an employee in phase 2 so
 her salary discounts are no longer available in phase 5).
+
+This milestone is part of the original milestone set and is replaced entirely when using the New Milestones module, which includes the First beer sold milestone. The two milestones are never in play together; if you combine the sets in a custom setup, food or drink tokens used to pay salary still count as salary actually paid for this milestone.
 
 For the rest of the game, you may use training actions provided by multiple employees to train the same person. For instance, with 2 trainers
 and a coach, you could now train a management trainee up to an executive vice president in one turn.
@@ -805,6 +812,8 @@ game to alter the rules as follows:
    - Do not pay any salaries (skip phase 5).
 
    - The game ends when the bank breaks once.
+
+Online Short Game applies all five points above, including removing all milestones.
 
 This will allow for a somewhat shorter game that enables everyone to
 get to know the rules without running their companies into the ground.

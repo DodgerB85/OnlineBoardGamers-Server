@@ -133,6 +133,9 @@ export function setupNewGame(opts = {}) {
 		}
 	}
 
+	// The online short game applies the rulebook introductory variant: no
+	// milestones at all.
+	if (store.startingOptions.shortGame === true) store.startingOptions.useMilestones = false
 	if (store.startingOptions.useMilestones === false) {
 		store.availableMilestones = []
 	} else {
@@ -154,6 +157,7 @@ export function setupNewGame(opts = {}) {
 	// INTERNAL OPTIONS NEED TO BE SET BEFORE THIS
 	setupKetchupExpansion(store.players.length)
 	setupLaborMarketExpansion()
+	if (store.startingOptions.shortGame === true) store.availableMilestones = []
 
 	addHistory(rf.HIST_SETUP_GAME, [], -1, 0)
 
@@ -194,6 +198,7 @@ export async function initGame() {
 		personal.name = window.initData.name || "Guest"
 		store.chatData = funcs.decompressChatData(window.initData.chatData)
 		personal.latestUpdate = window.initData.latestUpdate
+		personal.prefersReducedMotion = !!window.initData.prefersReducedMotion
 	}
 
 	// 1. Get the string from the script tag
@@ -419,6 +424,7 @@ export function setInternalStartingOptions(startingOptionsArray) {
 		// export/include-lobby-tiles disagree with import on reload
 		if (opts[i] === rf.SO_DRAFT_MODULE_BREAKER) store.startingOptions.draftModules = true
 	}
+	if (store.startingOptions.shortGame) store.startingOptions.useMilestones = false
 }
 
 export function maxUnique(playerNumber) {

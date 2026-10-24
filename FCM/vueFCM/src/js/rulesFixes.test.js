@@ -9,7 +9,7 @@
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
 import { createPinia, setActivePinia } from "pinia"
 
-let controller, IO, plyr, rf, rules, useModelStore
+let controller, IO, mapMod, model, plyr, rf, rules, useModelStore
 
 beforeAll(async () => {
 	globalThis.alert = () => {}
@@ -17,6 +17,8 @@ beforeAll(async () => {
 	globalThis.window.performance = performance
 	controller = await import("./FCMcontroller.js")
 	IO = await import("../backend/FCM_IO.js")
+	mapMod = await import("./FCMmap.js")
+	model = await import("./FCMmodel.js")
 	plyr = await import("./FCMplayer.js")
 	rf = await import("./FCMreference.js")
 	rules = await import("./FCMrules.js")
@@ -34,6 +36,8 @@ function makePlayer(index, overrides = {}) {
 		milestones: [],
 		resources: [],
 		restaurants: [],
+		additionalCampaignArrayIndex: -1,
+		additionalMarketedGood: [],
 		ceoSlots: 3,
 		ceoAction: rf.CEO_ACTION_HIRE_1,
 		OOBpreference: "0",
@@ -128,6 +132,106 @@ describe("payday validation", () => {
 		// remove its $5 salary. The old code checked player 0 and rejected this.
 		expect(rules.salary(1)).toBe(5)
 		expect(IO.checkPaydayDataValid(1, [[rf.CAMPAIGN_MANAGER], []])).toBe(1)
+	})
+})
+
+describe("train-from-hire salary discount", () => {
+	it("counts the train-from-hire as a used recruiting action", () => {
+		const store = useModelStore()
+		store.players.push(makePlayer(0, { employees: [rf.RECRUITING_MANAGER, rf.BURGER_COOK, rf.BURGER_COOK, rf.BURGER_COOK] }))
+		store.history.push([rf.HIST_HIRE, 0, 0, [rf.BURGER_COOK], 1])
+		// 4 x $5 salary, 3 recruiting actions, 1 direct hire + 1 train-from-hire
+		// used => one unused action => $5 discount.
+		expect(rules.salary(0)).toBe(15)
+	})
+})
+
+describe("short game", () => {
+	it("disables milestones in the starting options", () => {
+		const store = useModelStore()
+		model.setInternalStartingOptions([rf.SO_SHORT_GAME])
+		expect(store.startingOptions.shortGame).toBe(true)
+		expect(store.startingOptions.useMilestones).toBe(false)
+	})
+})
+
+describe("cancelling a Brand Manager selection", () => {
+	it("rolls back milestones that were only awarded by opening the selection", () => {
+		const store = useModelStore()
+		store.players.push(makePlayer(0, { employees: [rf.BRAND_MANAGER] }))
+		store.gameflow.turnOrder = [0]
+		store.availableMilestones = [rf.FIRST_MARKETEER_USED, rf.FIRST_BRAND_MANAGER_USED]
+		store.availableMarketingCampaigns = [4, 11]
+
+		controller.selectMarketer(rf.BRAND_MANAGER, false)
+		expect(store.players[0].milestones).toEqual([rf.FIRST_MARKETEER_USED, rf.FIRST_BRAND_MANAGER_USED])
+
+		controller.cancelMarketer()
+		expect(store.players[0].milestones).toEqual([])
+		expect(store.history.filter((entry) => entry[0] === rf.HIST_NEW_MILESTONE && entry[1] === 0)).toEqual([])
+	})
+
+	it("does not remove a milestone the player already held", () => {
+		const store = useModelStore()
+		store.players.push(makePlayer(0, { employees: [rf.BRAND_MANAGER], milestones: [rf.FIRST_MARKETEER_USED] }))
+		store.gameflow.turnOrder = [0]
+		store.availableMilestones = [rf.FIRST_BRAND_MANAGER_USED]
+		store.availableMarketingCampaigns = [4, 11]
+
+		controller.selectMarketer(rf.BRAND_MANAGER, false)
+		controller.cancelMarketer()
+		expect(store.players[0].milestones).toEqual([rf.FIRST_MARKETEER_USED])
+	})
+})
+
+describe("repeat route stop bubble", () => {
+	it("only shows after a repeat when range is gone or all exits stay on the tile", () => {
+		useModelStore().mapData.dimensions = [10, 10]
+		const a = mapMod.giveIndex(0, 0)
+		const sameTile = a + 1
+		const offTile = mapMod.giveIndex(6, 6)
+
+		expect(rules.shouldStopRepeatRoute([a, sameTile], [offTile], 2)).toBe(false)
+		expect(rules.shouldStopRepeatRoute([a, sameTile, a], [offTile], 2)).toBe(false)
+		expect(rules.shouldStopRepeatRoute([a, sameTile, a], [sameTile], 2)).toBe(true)
+		expect(rules.shouldStopRepeatRoute([a, sameTile, a], [offTile], 0)).toBe(true)
+	})
+})
+
+describe("dinner tie-breakers", () => {
+	const base = { price: 10, distance: 0, waitress: 0, order: 0 }
+
+	it("a better Movie Star beats Jazz Musicians", () => {
+		const bStar = { ...base, emp: [rf.B_MOVIE_STAR], musicians: 3 }
+		const cStar = { ...base, emp: [rf.C_MOVIE_STAR], musicians: 0 }
+		expect(rules.compareDinnerCompetitors(bStar, cStar)).toBeLessThan(0)
+	})
+
+	it("without Movie Stars, fewer Jazz Musicians wins", () => {
+		const quiet = { ...base, emp: [], musicians: 0 }
+		const loud = { ...base, emp: [], musicians: 3 }
+		expect(rules.compareDinnerCompetitors(quiet, loud)).toBeLessThan(0)
+	})
+
+	it("price + distance remains the primary factor", () => {
+		const cheap = { ...base, price: 9, emp: [] }
+		const closeButPricier = { ...base, price: 10, distance: 0, emp: [rf.B_MOVIE_STAR] }
+		expect(rules.compareDinnerCompetitors(cheap, closeButPricier)).toBeLessThan(0)
+	})
+})
+
+describe("First to pay $20 in salaries", () => {
+	it("is not awarded when First Trainer Used means no cash was actually paid", () => {
+		const store = useModelStore()
+		store.players.push(makePlayer(0, { employees: Array(4).fill(rf.BURGER_COOK), milestones: [rf.FIRST_TRAINER_USED] }))
+		store.availableMilestones = [rf.FIRST_20_SALARIES]
+
+		rules.paySalaries([[]])
+		expect(store.players[0].milestones).not.toContain(rf.FIRST_20_SALARIES)
+
+		store.players[0].money = 20
+		rules.paySalaries([[]])
+		expect(store.players[0].milestones).toContain(rf.FIRST_20_SALARIES)
 	})
 })
 

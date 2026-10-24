@@ -223,7 +223,74 @@ def FCMstatGames(request):
     )
 
 
-@login_required()
+@login_required
+@require_POST
+def createFCMspinoff(request):
+    jsonData = json.loads(request.body)
+    if jsonData.get("action") != "copyGame":
+        return JsonResponse({"error": "Wrong request."}, status=400)
+
+    currentGame = Game.objects.filter(id=jsonData.get("gameID"), gameCode="FCM").first()
+    if currentGame is None:
+        raise Http404(gettext("Game does not exist"))
+    if not currentGame.players.filter(player=request.user).exists():
+        return JsonResponse({"error": "Not a player in this game."}, status=403)
+    if not jsonData.get("data"):
+        return JsonResponse({"error": "No game data."}, status=400)
+
+    startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    if rf.SO_TRAINING_GAME not in startingOptions:
+        startingOptions = [rf.SO_TRAINING_GAME, *startingOptions]
+    maxPlayers = currentGame.maxPlayers
+    pov = int(jsonData.get("pov", 0))
+    if pov < 0 or pov >= maxPlayers:
+        pov = 0
+    now = int(time.time()) * 1000
+    shadowNames = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
+
+    with transaction.atomic():
+        newGame = Game(
+            gameCode="FCM",
+            gameName="[Copy] - " + (currentGame.gameName or f"Game {currentGame.id}"),
+            gameDescription=currentGame.gameDescription,
+            creator=request.user,
+            host=request.user,
+            gamePace=currentGame.gamePace,
+            turn=int(jsonData.get("turn", currentGame.turn)),
+            phase=int(jsonData.get("phase", currentGame.phase)),
+            created=now,
+            latestUpdate=str(now),
+            playerOrderSeed=currentGame.playerOrderSeed,
+            startingOptions=json.dumps(startingOptions, separators=(",", ":")),
+            maxPlayers=maxPlayers,
+            gameStatus="ACTIVE",
+            kickoutDuration=currentGame.kickoutDuration,
+            zoomLevels=currentGame.zoomLevels,
+            startingMap=currentGame.startingMap,
+            gameData=jsonData["data"],
+            statsExcludedGame=True,
+            FCMnotificationSuppression="0" * maxPlayers,
+        )
+        newGame.save()
+
+        shadowIndex = 0
+        for seat in range(maxPlayers):
+            if seat == pov:
+                GamePlayer.objects.create(game=newGame, player=request.user, seat_order=seat, is_current=True)
+            else:
+                GamePlayer.objects.create(
+                    game=newGame,
+                    player=User.objects.get(username=shadowNames[shadowIndex]),
+                    seat_order=seat,
+                )
+                shadowIndex += 1
+
+        newGame.rewindData = json.dumps([jsonData["data"]])
+        newGame.save()
+
+    return JsonResponse({"response": "ok", "newID": newGame.id})
+
+
 def createFCMgame(request):
     return create_fcm_game(request)
 
@@ -280,7 +347,20 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
     user_profile = result["user_profile"]
     user_id = request.user.id
 
-    highContrastBoardItems = user_profile.highContrastBoardItems
+    preferredFCMoptions = []
+    if user_profile.preferredFCMoptions:
+        try:
+            preferredFCMoptions = json.loads(user_profile.preferredFCMoptions)
+        except (TypeError, ValueError):
+            preferredFCMoptions = []
+    if not isinstance(preferredFCMoptions, list):
+        preferredFCMoptions = []
+    preferredFCMoptions = preferredFCMoptions[:3]
+    while len(preferredFCMoptions) < 3:
+        preferredFCMoptions.append([-1, 0, 0][len(preferredFCMoptions)])
+    preferredRestaurantColour = preferredFCMoptions[0]
+    highContrastBoardItems = bool(preferredFCMoptions[1])
+    prefersReducedMotion = bool(preferredFCMoptions[2])
     showAssistance = "true" if user_profile.showAssistance else "false"
     now = int(time.time()) * 1000
 
@@ -340,7 +420,6 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
         pov = presenter.seatPosition(username)
         currentRewindConsent = presenter.getCurrentRewindConsent(username)
 
-        preferredRestaurantColour = user_profile.preferredRestaurantColour
         liveNotification = user_profile.liveNotification
 
         moveData = ""
@@ -403,6 +482,7 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
             "kickoutVotesData": json.dumps(presenter.getKickoutVotesData()),
             "tournamentGame": tournamentGame,
             "highContrastBoardItems": highContrastBoardItems,
+            "prefersReducedMotion": prefersReducedMotion,
             "startingOptionsHTML": startingOptionsHTML,
             "statsExcludedGame": statsExcludedGame,
             "displayNames": displayNames,

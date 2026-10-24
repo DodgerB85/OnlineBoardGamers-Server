@@ -493,7 +493,43 @@ function padItemCounts(arr) {
 			21 - media line (module chosen)
 	 */
 
-export function exportFCMmodel(forGameOver, includeContext) {
+// Practice-game copy: export the current replay position without any private
+// simultaneous move/context data. If copying during Restructuring, put every
+// card back on the beach and start from the first player with an empty
+// structure, so no player's half-made choices leak into the new game.
+export function exportPracticeFCMmodel() {
+	const store = useModelStore()
+	// A replay copy must carry only the history up to the displayed step, or the
+	// new game would infer a later turn from entries that never happened in it.
+	let historyCutoff
+	if (store.viewSettings.showReplay) {
+		historyCutoff = 0
+		for (let i = 0; i <= store.replayStep && i < store.computedHistory.length; i++) {
+			if (store.computedHistory[i][0] !== rf.HIST_REMOVE_HC_MS) historyCutoff++
+		}
+	}
+	const data = decompressData(exportFCMmodel(false, false, historyCutoff))
+	// The optional lobbyists map-tile block shifts the players/gameflow slots.
+	const mapOffset = store.startingOptions.lobbyists ? 1 : 0
+	const players = data[mapOffset]
+	const flow = data[mapOffset + 2]
+
+	if (flow?.[1] === rf.PHASE_RESTRUCTURING) {
+		for (let i = 0; i < players.length; i++) {
+			const player = players[i]
+			const cards = [...(player[4] || []).filter((employee) => employee !== rf.BLANK_EMPLOYEE_SPACE), ...(player[5] || [])]
+			player[4] = Array(store.players[i].ceoSlots || 3).fill(rf.BLANK_EMPLOYEE_SPACE)
+			player[5] = cards
+		}
+		flow[1] = rf.PHASE_RESTRUCTURING
+		flow[2] = [...flow[0]]
+		if (flow.length > 3) flow.splice(3)
+	}
+
+	return { data: compressData(data), turn: store.gameflow.turn, phase: store.gameflow.phase }
+}
+
+export function exportFCMmodel(forGameOver, includeContext, historyCutoff) {
 	const store = useModelStore()
 	const temp = []
 
@@ -589,12 +625,13 @@ export function exportFCMmodel(forGameOver, includeContext) {
 	)
 
 	// 9 & 10: History and Timestamps
-	if (store.history.length > 0) {
-		let tRef = store.history[0][2]
+	const history = historyCutoff === undefined ? store.history : store.history.slice(0, historyCutoff)
+	if (history.length > 0) {
+		let tRef = history[0][2]
 		const histData = [tRef]
 		const timestamps = []
 
-		store.history.forEach((entry) => {
+		history.forEach((entry) => {
 			histData.push([entry[1], entry[0], entry[3]])
 			const diff = entry[2] - tRef
 			timestamps.push(diff)
@@ -1184,6 +1221,13 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	restoreBailoutState(inputArr, moduleImportIndex, forGameOver)
 	// Media Line mod (trailing slot, shape-detected like the other module states)
 	restoreMediaLineState(inputArr)
+
+	// Online short game is the rulebook introductory variant: no milestones.
+	if (store.startingOptions.shortGame) {
+		store.startingOptions.useMilestones = false
+		store.availableMilestones.length = 0
+		for (const player of store.players) player.milestones.length = 0
+	}
 }
 
 // Shape check for both bailout slot formats: the older full object and the

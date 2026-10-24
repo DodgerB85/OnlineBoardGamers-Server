@@ -64,7 +64,7 @@ Takeout! Takeout! Finally we can eat at home. Of course, the emergence of takeou
 ### Rules
 - The Delivery Driver is a base level employee that can be directly hired, and requires a salary.
 - Note that it is not a 1x employee, but you may only ever have one Delivery Driver in your organisation.
-- If a residence has 2 or more demand tokens on it, then any restaurant with a working Delivery Driver will reduce the distance to 0.
+- If a residence has 2 or more demand tokens on it, then any restaurant with a working Delivery Driver will reduce the distance to 0. For this rule, “residence” also includes the Stadium and the Rural Marketing Area.
 - If you have a Milestone that reduces distance, and it is more favourable to ignore the Delivery Driver, then the Delivery Driver won't be used. EG if you are on the same tile as a house, and have the Ketchup Milestone, your distance will still count as -1; you won't be penalised by having the distance increased to 0 if using a Delivery Driver. So any net positive distance will be reduced to 0.
 
 ## Dumplings
@@ -98,5 +98,5 @@ Hawker trucks driving by, with their loud and engaging music, can't help but att
 - When the marketing campaign activates, it will advertise to any residence directly connected to its route - **connections through parks or gardens do not count**.
 - This is the only time the precise orientation of new houses actually matters. Therefore, when using this module, the New Business Developer can place new houses with the garden at the bottom/left/top/right, rather than just horizontally or vertically.
 - The physical Hawker campaign cards are numbered #21, #22 and #23. The implementation stores these internally as #25, #26 and #27; this is only an internal numbering difference.
-- To use a Hawker Marketeer, click the employee as usual. Then you can set a route, and once you are happy, deploy the marketing campaign using the "Add Hawker Truck" button. You must use all range if possible. If you need to stop manually because the last tile contains a loop, click the "Done Drawing Route" button.
+- To use a Hawker Marketeer, click the employee as usual. Then set a route, and once you are happy, deploy the marketing campaign using the "Add Hawker Truck" button. You must use all range if possible. Online, if the route repeats a square and has no range or no exit off that tile, a "Stop Hawker Truck" bubble appears above the current square; click it to stop.
 - You can see the truck route by clicking "Show Route" in history, or clicking the marketing token in the hawker marketing area (to the right of the map)

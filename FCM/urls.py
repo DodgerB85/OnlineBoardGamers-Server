@@ -61,6 +61,7 @@ urlpatterns = [
     path("FCMstatGames/", views.FCMstatGames, name="FCMstatGames"),
     # API Routes
     path("createFCMgame/", views.createFCMgame, name="createFCMgame"),
+    path("createFCMspinoff/", views.createFCMspinoff, name="createFCMspinoff"),
     path("processTurn/", views.processTurn, name="processTurn"),
     path("bugEntry/", views.bugEntry, name="bugEntry"),
     path("notes/", views.notes, name="notes"),

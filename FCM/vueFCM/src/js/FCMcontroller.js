@@ -1135,6 +1135,7 @@ export function resetMarketingSelection() {
 
 	store.context.action = rf.ACT_NONE
 	store.context.marketer = -1
+	store.context.marketerSelectionMilestones.length = 0
 	store.context.campaign = -1
 	store.context.campaigns.splice(0)
 	store.context.double = false
@@ -1147,6 +1148,7 @@ export function resetMarketingSelection() {
 	store.context.hawkerRouteActive = false
 	store.context.showingHawkerRoute = -1
 	store.context.path.splice(0)
+	store.context.routeTargets.splice(0)
 	store.context.from = -1
 	store.context.range = 0
 	store.context.temporaryMarketer = false
@@ -1163,13 +1165,21 @@ export function selectMarketer(marketer, nightShift, temporary = false) {
 	store.context.nightShift = nightShift === true
 	store.context.temporaryMarketer = temporary === true
 
-	// Award "used" milestones on selection
+	// Award "used" milestones on selection. Track them so Cancel can roll back
+	// a milestone that was only earned by opening this selection.
+	if (store.context.marketerSelectionMilestones.length > 0) rollbackMarketerSelectionMilestones()
+	store.context.marketerSelectionMilestones.length = 0
+	const awardSelectionMilestone = (milestone) => {
+		if (plyr.hasMilestone(playerIndex, milestone) || !store.availableMilestones.includes(milestone)) return
+		plyr.awardMilestone(playerIndex, milestone)
+		store.context.marketerSelectionMilestones.push(milestone)
+	}
 	if (marketer === rf.BRAND_MANAGER) {
-		plyr.awardMilestone(playerIndex, rf.FIRST_MARKETEER_USED)
-		plyr.awardMilestone(playerIndex, rf.FIRST_BRAND_MANAGER_USED)
+		awardSelectionMilestone(rf.FIRST_MARKETEER_USED)
+		awardSelectionMilestone(rf.FIRST_BRAND_MANAGER_USED)
 	} else if (marketer === rf.BRAND_DIRECTOR) {
-		plyr.awardMilestone(playerIndex, rf.FIRST_MARKETEER_USED)
-		plyr.awardMilestone(playerIndex, rf.FIRST_BRAND_DIRECTOR_USED)
+		awardSelectionMilestone(rf.FIRST_MARKETEER_USED)
+		awardSelectionMilestone(rf.FIRST_BRAND_DIRECTOR_USED)
 	}
 
 	store.context.marketer = marketer
@@ -1259,10 +1269,29 @@ export function rotateCampaign() {
 }
 
 // Happens when you run out of campaigns for this marketer
+function rollbackMarketerSelectionMilestones() {
+	const store = useModelStore()
+	const playerIndex = currentPlayerIndex()
+	const playerObj = currentPlayerObj()
+	for (const milestone of store.context.marketerSelectionMilestones) {
+		const milestoneIndex = playerObj.milestones.lastIndexOf(milestone)
+		if (milestoneIndex > -1) playerObj.milestones.splice(milestoneIndex, 1)
+		for (let i = store.history.length - 1; i >= 0; i--) {
+			const entry = store.history[i]
+			if (entry[0] === rf.HIST_NEW_MILESTONE && entry[1] === playerIndex && entry[3]?.[0] === milestone) {
+				store.history.splice(i, 1)
+				break
+			}
+		}
+	}
+	store.context.marketerSelectionMilestones.length = 0
+}
+
 export function cancelMarketer() {
 	const store = useModelStore()
 	const playerObj = currentPlayerObj()
 
+	rollbackMarketerSelectionMilestones()
 	if (playerObj.employees.indexOf(store.context.marketer) !== -1) store.context.justMarketed.push(store.context.marketer)
 	store.context.temporaryMarketer = false
 	resetMarketingSelection()
@@ -1548,6 +1577,7 @@ export function startHawkerRouteSelection() {
 	}
 
 	store.context.path.splice(0)
+	store.context.routeTargets.splice(0)
 	store.context.from = -1
 	store.context.range = 2
 	store.context.collectionNumber = 0
@@ -1582,6 +1612,7 @@ function advanceRoute(index) {
 	store.context.range = nextRoad.range
 
 	store.context.path = store.context.path.concat(nextRoad.path)
+	store.context.routeTargets = [...nextRoad.target]
 	store.highlights.indexesToHighlightPath = [...store.context.path]
 	return nextRoad
 }
@@ -1616,6 +1647,7 @@ export function stopHawkerTruck() {
 
 	store.context.path = [...new Set(store.context.path)]
 	store.highlights.indexesToHighlightPath = [...store.context.path]
+	store.context.routeTargets.splice(0)
 	store.context.hawkerRouteActive = false
 }
 
@@ -1626,6 +1658,7 @@ export function addHawkerTruck() {
 	placeMarketingCampaign(0)
 	// Clean up hawker state
 	store.context.path.splice(0)
+	store.context.routeTargets.splice(0)
 	store.context.from = -1
 	store.context.range = 0
 	store.context.hawkerRouteActive = false
@@ -2776,6 +2809,16 @@ export function trainEmployee(toEmp, steps) {
 
 	if (fromHire) {
 		store.context.justHired.push(fromEmp)
+		// The hire history was written before training started. Record the
+		// extra used recruiting action on that entry so salary discounts do not
+		// treat it as unused.
+		for (let i = store.history.length - 1; i >= 0; i--) {
+			const entry = store.history[i]
+			if (entry[0] === rf.HIST_HIRE && entry[1] === currentPlayerIndex()) {
+				entry[4] = (entry[4] || 0) + 1
+				break
+			}
+		}
 	} else {
 		if (fromStructure === true) {
 			playerObj.employees.splice(playerObj.employees.indexOf(fromEmp), 1)
@@ -2811,6 +2854,13 @@ export function undoTrainEmployee(entry) {
 		// Train-from-hire: the -1 markers in justHired / hire.hired are the recruiting point it spent
 		store.context.justHired.splice(store.context.justHired.lastIndexOf(-1), 1)
 		store.context.endOfDaySummaryData.hire.hired.splice(store.context.endOfDaySummaryData.hire.hired.lastIndexOf(-1), 1)
+		for (let i = store.history.length - 1; i >= 0; i--) {
+			const entry = store.history[i]
+			if (entry[0] === rf.HIST_HIRE && entry[1] === currentPlayerIndex() && entry[4] > 0) {
+				entry[4]--
+				break
+			}
+		}
 	}
 }
 
@@ -2931,6 +2981,7 @@ export function clickedProducer(producer) {
 		// Else no possibilities given, so must be some sort of driving drink person
 		// Reset drink driving vars
 		store.context.path.splice(0)
+		store.context.routeTargets.splice(0)
 		store.context.from = -1
 		store.context.range = 0
 		store.context.collectionNumber = 0
@@ -3059,6 +3110,7 @@ export function stopCollecting() {
 
 	store.context.producer = -1
 	store.context.path.splice(0)
+	store.context.routeTargets.splice(0)
 	store.context.from = -1
 	store.context.range = 0
 	store.context.collectionNumber = 0

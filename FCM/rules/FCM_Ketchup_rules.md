@@ -167,6 +167,8 @@ This milestone has two separate effects. 1. From now on, you gain $5 for each de
 
 - The distance reduction stacks with the similar bonus provided by the Ketchup milestone “Someone sells your demand”.
 
+Note: First Marketeer Used is part of the New Milestones’ built-in disappearing milestones. If nobody claims it by the end of turn 2 it is gone, so later-trained marketeers such as the Rural, Gourmet or Hawker marketeer normally cannot claim it.
+
 ### First marketing trainee used
 
 This provides free employee cards on the beach: a kitchen trainee and an errand boy. As the marketing trainee is always used after all training has been completed, the new cards cannot be trained immediately.
@@ -189,7 +191,7 @@ From now on your CEO will have 4 slots. This is independent of any bank reserve 
 
 ### First pizza sold
 
-For the first three houses that buy a pizza this turn, the person selling to that house must place a radio advertising pizza for two turns on the tile containing the house (if there is room). These will function as normal marketing tiles. However, they are not linked to any marketeer, so will not provide $5 for the first marketeer milestone.
+For the first houses that buy a pizza this turn, in house order, while radio campaigns remain available, the person selling to that house must place a radio advertising pizza for two turns on the tile containing the house (if there is room). If fewer radio campaigns remain than houses bought pizza, only the first houses with radios remaining get one. These will function as normal marketing tiles. However, they are not linked to any marketeer, so will not provide $5 for the first marketeer milestone.
 
 ### First lemonade sold
 
@@ -204,6 +206,8 @@ When paying salaries, you can pay employees with food or drink tokens. One token
 - In the rare case that you cannot fire anyone and have food tokens but no cash, you are obliged to pay your employees using the food tokens;
 
 - Coffee does not count as food or drink. Noodles, kimchi, and sushi do count as food.
+
+Note: First beer sold is part of the New Milestones set, which replaces the base milestone set. “First to pay $20 or more in salaries” is a base-game milestone, so the two are never in play together.
 
 ### First coke sold
 
@@ -638,4 +642,4 @@ The game does not change except for the initial setup.
 
 ### Rules
 
-Start with a 4x6 grid (you will need to use the New Districts module). In all other respects, the game proceeds normally.
+Start with a 4x6 grid (you will need to use the New Districts module). For 6 players the map considers all available tiles, including the two-park tile. In all other respects, the game proceeds normally.

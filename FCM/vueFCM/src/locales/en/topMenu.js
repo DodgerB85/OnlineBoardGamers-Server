@@ -11,6 +11,7 @@
     history: "History",
     replay: "Replay",
     timeToNextKickout: "Time to next kickout:",
+    reconnecting: "Connection lost — reconnecting…",
     bank: "Bank: ${bank}",
   },
   topMenuViews: {

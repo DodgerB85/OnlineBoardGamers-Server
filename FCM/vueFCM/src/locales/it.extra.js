@@ -1,6 +1,18 @@
 // it messages added after the main translation pass. Merged over it.js in index.js.
 export default {
 	"actionArea": {
+		"turnNudge": {
+		"streak": "🔥 {days} giorni di fila · Migliore: {best}. {goal}",
+		"goalMet": "L'obiettivo di oggi è raggiunto.",
+		"goalRemaining": "Un turno di qualsiasi giocatore prima di mezzanotte UTC raggiunge l'obiettivo di oggi.",
+		"button": "Sollecita {name}",
+		"tooltipSend": "Invia un promemoria di turno",
+		"tooltipDisabled": "Promemoria disattivati o già inviato nelle ultime 24 ore",
+		"limit": "Ogni giocatore può ricevere un promemoria per partita ogni 24 ore.",
+		"sending": "Invio…",
+		"failed": "Impossibile inviare il promemoria. Riprova.",
+		"loadFailed": "Impossibile caricare i promemoria di turno."
+		},
 		"bailoutTitle": "La città salva la banca!",
 		"bailoutBody": "Scegli un dipendente marketing di livello 2 gratuito (primo arrivato, primo servito). Il regalo non conta come assunzione: il dipendente si unisce alla tua spiaggia e viene pagato come qualsiasi altro dipendente.",
 		"bailoutNothingLeft": "Non resta più nulla da riscattare.",

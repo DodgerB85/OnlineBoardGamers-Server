@@ -11,6 +11,7 @@ Other docs in this folder:
 - [Big picture](#big-picture)
 - [Apps and URL layout](#apps-and-url-layout)
 - [Core models](#core-models)
+- [Admin flags](#admin-flags)
 - [Presenters](#presenters)
 - [Page shell and the game client](#page-shell-and-the-game-client)
 - [Turn processing and stale-write protection](#turn-processing-and-stale-write-protection)
@@ -59,6 +60,35 @@ All in `Lobby/models.py`:
 - **`Lock`**: row backing `db_mutex` (see below).
 
 `Game` has a `PRESENTER_MAP` …→ per-game presenter class (see next section).
+
+## Admin flags
+
+Two independent booleans on `Profile` (`is_site_admin`, `is_game_admin`), read only through `Lobby/sharedFunctions/permissions.py` (`is_site_admin(user)`, `is_game_admin(user)`, `can_act_in_game(user, game)`). **`is_superuser` grants neither** — a superuser gets exactly what its Profile flags say, so grant it the flags like anyone else. The flags are the only source: views never authorize by username. Change them at `/admin` → *Lobby → Profiles* (both columns are list-filterable).
+
+### `is_site_admin` — the site, never a running game
+
+Gates whole pages; false ⇒ 404/403:
+
+- `/userStats` (`Lobby/views.py`) — signups-per-day and last-login charts.
+- `/DBO` and `DBO_deleteGame` — browse every game of every type, hard-delete one (unauthorised attempts are webhookbed to the admin Discord).
+- Posting a changelog entry.
+- Starting a Main tournament.
+- `/FCM/gameAdmin` + `gameAdminGetMoveData` (`FCM/views.py`) — the FCM move-data tool.
+- RNB maps: set `isVerified`, edit another creator's map, delete a map.
+
+It grants nothing inside a game: no turns, kickouts or rewinds.
+
+### `is_game_admin` — moderating any game
+
+Three overlapping powers, each repeated per game in its `views.py`:
+
+1. **Treated as in the game.** `Lobby/gameViewHelpers.build_show_game_data` forces `involvedPlayer = True` for a game admin, so the show page renders for them (as `pov = -1` observer unless they hold a seat) and `myMove` is computed — an admin can be *offered a turn* in a game they do not play. `GamePresenter.isMyMove` also returns `True` for everybody while no player is `is_current`, so idle games look like everyone's move. FCM (`FCM/views.py`) and TGZ re-check the flag after the helper.
+2. **Passes the write gate.** `can_act_in_game(user, game)` = "game admin **or** a seated player" is the standard check at the top of every `processXXXturn` endpoint.
+3. **Acts as somebody else, and moderates.** Submit a move under another player's name via the `BKSN` field (FCM, AQY, RNB, DDL); host-level rewind controls without being the host; `resetGame`; skipping the `passKickoutFor` route; flexi-time bookkeeping; `replaceExternalTournamentPlayer` (TGZ); starting-option bypasses (KFW).
+
+It grants no `is_site_admin` page above.
+
+Client-side footnote: HLC's template sets `global.superuser = true` for the literal username `BotKickStarter` (`HLC/templates/HLC/HLCtemplate.html`) — a hardcoded per-game name, unrelated to Django's `is_superuser`.
 
 ## Presenters
 

@@ -144,7 +144,7 @@ export default {
 		"title": "Benvenuti su Food Chain Magnate Online!",
 		"contact": "Se avete suggerimenti, domande o commenti, contattate il webmaster all'indirizzo",
 		"instructions": {
-			"placeItem": "Per posizionare un oggetto sul tabellone, fai clic su uno qualsiasi dei quadrati evidenziati in rosso",
+			"placeItem": "Per posizionare un oggetto sul tabellone, fai clic su uno qualsiasi dei quadrati evidenziati in giallo",
 			"rotateItem": "Per ruotare un oggetto, utilizza le frecce visualizzate accanto all'oggetto appena sopra il tabellone",
 			"viewEmployees": "Per vedere i dipendenti e la struttura attuale di qualsiasi giocatore, fai clic sul loro nome nella barra nera nella parte superiore dello schermo",
 			"viewReserve": "Per vedere i dipendenti rimanenti, i traguardi e altri elementi, fai clic su \"Prenota\" nel menu in alto",
@@ -450,7 +450,6 @@ export default {
 	"workingDay": {
 		"remainingPoints": "{count} punto rimanente | {count} punti rimanenti",
 		"salaryPoints": "1 punto può essere utilizzato per ridurre gli stipendi di 5$ | {count} punti possono essere utilizzati per ridurre gli stipendi di ${amount}",
-		"resetWorkingDay": "Reimposta il giorno lavorativo",
 		"finishRecruiting": "Termina il reclutamento",
 		"trainedLabel": "addestrato:",
 		"nightShiftTrainTwice": "Il tuo responsabile del turno di notte consente a ciascun formatore di lavorare due volte",
@@ -495,7 +494,7 @@ export default {
 		"setHawkerRoute": "Imposta il percorso Hawker",
 		"hawkerRouteRangeLeft": "Imposta la rotta Hawker: {count} raggio rimasto",
 		"hawkerRouteNoRange": "Imposta percorso Hawker: intervallo 0: fai clic su un quadrato evidenziato per interrompere",
-		"doneDrawingRoute": "Percorso di disegno completato",
+		"doneDrawingRoute": "Ferma il camion ambulante",
 		"addHawkerTruck": "Aggiungi il camion Hawker",
 		"placeCampaign": "Posizionare la campagna",
 		"clickToPlaceCampaign": "Fai clic su un quadrato evidenziato sulla mappa per posizionare la tua campagna",
@@ -551,7 +550,6 @@ export default {
 		"canReduceSalary": "({count} può essere utilizzato per ridurre lo stipendio)",
 		"confirmWorkingDay": "Stai per confermare l'intera giornata lavorativa",
 		"warningNoHires": "ATTENZIONE: NON HAI ASSUNTO NESSUNO",
-		"resetWholeTurn": "Resetta l'intero turno",
 		"endTurn": "Fine turno",
 		"paydaySkipped": "Il giorno di paga verrà saltato poiché non hai stipendio da pagare ed è il turno 1 o 2",
 		"paydayTurnOrder": "Payday verrà giocato in ordine di turno",
