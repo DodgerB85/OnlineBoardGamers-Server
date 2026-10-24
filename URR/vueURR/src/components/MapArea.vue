@@ -17,7 +17,7 @@ import { useModelStore } from "../stores/URRstore.js"
 const emit = defineEmits(["selectArea", "clickArea", "changePath", "confirmAction", "cancelAction"])
 const props = defineProps({ selectedHex: { type: String, default: null }, mapAction: { type: Object, default: null }, actionTargets: { type: Array, default: () => [] }, highlightedPlayer: { type: Number, default: null }, removalArea: { type: String, default: null }, landDraft: { type: Object, default: null }, waitingPlayerIndex: { type: Number, default: null }, digCapacity: { type: [Number, String, Array], default: null } })
 const store = useModelStore()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const playback = useWaterPlaybackStore()
 const displayedBoard = computed(() => playback.state.visible ? playback.state.board : store.board)
 const reservoirCapacities = Object.values(rf.ERA_CARD_DATA).map((card) => card.reservoir[0])
@@ -183,7 +183,34 @@ function undoDraft() {
 }
 function clearDraft() { draftPath.value = []; previewError.value = "" }
 function finishDig() { clearDraft(); previewOpen.value = false }
+// Firefox deoptimizes vue-i18n's formatter after many calls; describe each hex
+// only when the fields that feed its text change.
+const descriptionCache = new Map()
+// Keep this list in sync with buildAreaDescription.
+function areaDescriptionKey(area) {
+	const nation = area.nation === null ? null : store.nations[area.nation]
+	return JSON.stringify([
+		area.label, area.landType, area.isCity, area.isRiver, area.state, area.nation, nation?.isRemoved, nation?.ownerType,
+		area.owner, area.markerOwner, area.waterwork, area.irrigatedBy,
+		area.owner === null ? null : store.players[area.owner]?.displayName,
+		area.markerOwner === null ? null : store.players[area.markerOwner]?.displayName,
+		store.gameflow.phase, needsMaintenanceSales.value, store.landPrices, locale.value,
+		props.landDraft?.blocked?.[area.id] ?? "",
+		queuedPurchase.value === area.id, queuedSales.value.includes(area.id),
+		chosenRemoval.value === area.id, harvestRemovalSites.value.includes(area.id),
+		calahSites.value.includes(area.id), barahshumSites.value.includes(area.id),
+		previewOpen.value, digOptions.value[area.id]?.error ?? "", digOptions.value[area.id]?.isComplete ?? false,
+	])
+}
 function areaDescription(area) {
+	const key = areaDescriptionKey(area)
+	const cached = descriptionCache.get(area.id)
+	if (cached?.key === key) return cached.value
+	const value = buildAreaDescription(area)
+	descriptionCache.set(area.id, { key, value })
+	return value
+}
+function buildAreaDescription(area) {
 	let digDescription = ""
 	if (previewOpen.value) {
 		const option = digOptions.value[area.id]

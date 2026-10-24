@@ -47,7 +47,7 @@ export const useModelStore = defineStore("store", () => {
 	const historyReplay = { entries: [], snapshots: [], times: [] }
 	const historyDisplay = { entries: [], rows: [], reports: [] }
 	const historyRows = shallowRef([])
-	const historyRiverReports = shallowRef([])
+	const riverReports = shallowRef([])
 
 	function resetHistoryReplay() {
 		historyReplay.entries.length = 0
@@ -60,7 +60,7 @@ export const useModelStore = defineStore("store", () => {
 		historyDisplay.rows.length = 0
 		historyDisplay.reports.length = 0
 		historyRows.value = []
-		historyRiverReports.value = []
+		riverReports.value = []
 	}
 
 	function refreshHistory() {
@@ -85,7 +85,7 @@ export const useModelStore = defineStore("store", () => {
 		}
 		if (rebuild || historyDisplay.rows.length !== firstRow) historyRows.value = historyDisplay.rows.slice()
 		// Keep the map subscribed to river rows only, not to every saved action.
-		if (rebuild || historyDisplay.reports.length !== firstReport) historyRiverReports.value = historyDisplay.reports.slice()
+		if (rebuild || historyDisplay.reports.length !== firstReport) riverReports.value = historyDisplay.reports.slice()
 	}
 
 	function setHistory(entries) {
@@ -192,7 +192,7 @@ export const useModelStore = defineStore("store", () => {
 		historyTimeAt,
 		setHistoryOpening,
 		computedHistory,
-		historyRiverReports,
+		historyRiverReports: computed(() => riverReports.value),
 		refreshHistory,
 		viewSettings,
 		gameMessages,
