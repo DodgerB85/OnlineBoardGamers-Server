@@ -204,7 +204,7 @@ function newMap(num) {
 </script>
 
 <template>
-	<div v-if="rf.debugUsers.includes(personal.name)">
+	<body v-if="rf.debugUsers.includes(personal.name)">
 		<template v-if="fullDebug">
 			{{ store.context.historyObj }}
 			<br />
@@ -372,7 +372,7 @@ function newMap(num) {
 
 			[debug]count
 		</template>
-	</div>
+	</body>
 </template>
 
 <style scoped>

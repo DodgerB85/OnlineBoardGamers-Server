@@ -372,7 +372,6 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
     moveData = ""
     currentNotes = ""
     pov = -9
-    preferredRestaurantColour = -1
     allPlayerListBySeat = presenter.getAllPlayersOrderedySeatInArray()
     kickoutRequired = 0
     chatNotification = False

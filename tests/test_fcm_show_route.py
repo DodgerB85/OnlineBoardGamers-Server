@@ -27,6 +27,13 @@ class FcmShowRouteTest(TestCase):
         self.assertTemplateUsed(response, "FCM/showFCMgame.html")
         self.assertIn('<div id="app">', response.content.decode())
 
+    def test_preferred_resto_colour_reaches_the_page(self):
+        self.player.profile.preferredFCMoptions = json.dumps([3, 0, 0])
+        self.player.profile.save(update_fields=["preferredFCMoptions"])
+        self.client.force_login(self.player)
+        response = self.client.get(reverse("FCM:showFCMgame", args=[self.game.id]))
+        self.assertContains(response, "initData.preferedColor = 3;")
+
     def test_temporary_show2_redirects_to_the_vue_page(self):
         """TEMPORARY: remove with the show2 block in FCM/urls.py."""
         response = self.client.get(f"/FCM/{self.game.id}/show2/")

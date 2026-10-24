@@ -1899,7 +1899,7 @@ class DDLpresenter(GamePresenter):
     # DDL is client-owned: the whole state lives in Game.gameData, so there is
     # no server-side move data.
     def getCurrentMoveDataForPlayer(self, name):
-        return None
+        return {}
 
     def getAllMyMoveDataForPlayer(self, name):
         return []

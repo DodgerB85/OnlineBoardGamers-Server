@@ -90,19 +90,6 @@ function getBidRange() {
 	return res
 }
 
-function changeBid(dir) {
-	const options = getBidRange().map((option) => option[0])
-	if (options.length === 0) return
-	let idx = options.indexOf(store.context.selectedBid)
-	if (idx === -1) idx = 0
-	idx = Math.max(0, Math.min(options.length - 1, idx + dir))
-	store.context.selectedBid = options[idx]
-}
-
-function getBidAmountLabel() {
-	return store.context.selectedBid === 0 ? t("actionArea.pass") : String(store.context.selectedBid)
-}
-
 function getRitualGoodsDone() {
 	return Math.max(0, store.context.upgradingMonumentProcess.length - 1)
 }
@@ -498,6 +485,10 @@ function handleAutoPassCheckbox() {
 	document.querySelector("#autoPassResponse").innerHTML = ""
 	const autoPass = document.querySelector("#autoPassCheckbox").checked
 	IO.saveAutoPass(autoPass)
+}
+
+function newBidSelected(newBid) {
+	store.context.selectedBid = parseInt(newBid)
 }
 
 function isThisTheLastPlaque(idx) {
@@ -1125,11 +1116,9 @@ function failedToJustPlaceCraftsmanFlag() {
 					</span>
 					<label class="choiceLabel" for="bidAmount">{{ $t("actionArea.bidAmount") }}</label>
 
-					<div class="bidPicker">
-						<button class="bidStepButton" :disabled="store.context.selectedBid === 0" @click="changeBid(-1)" :aria-label="$t('actionArea.lowerBid')">−</button>
-						<span class="bidAmount" aria-live="polite">{{ getBidAmountLabel() }}</span>
-						<button class="bidStepButton" :disabled="store.context.selectedBid === getBidRange()[getBidRange().length - 1][0]" @click="changeBid(1)" :aria-label="$t('actionArea.raiseBid')">+</button>
-					</div>
+					<select name="bidAmount" id="bidAmount" @change="newBidSelected($event.target.value)">
+						<option v-for="(amount, idx) in getBidRange()" :key="idx" :value="amount[0]">{{ amount[1] }}</option>
+					</select>
 
 					<br />
 					<MapInspectorButton />
@@ -2510,37 +2499,6 @@ function failedToJustPlaceCraftsmanFlag() {
 	font-size: 12px;
 	text-align: center;
 	margin-right: 6px;
-}
-
-.bidPicker {
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-	margin: 8px;
-}
-
-.bidStepButton {
-	font-size: 22px;
-	font-weight: bold;
-	width: 36px;
-	height: 36px;
-	border: 2px solid green;
-	border-radius: 4px;
-	background: white;
-	cursor: pointer;
-}
-
-.bidStepButton:disabled {
-	opacity: 0.4;
-	cursor: default;
-}
-
-.bidAmount {
-	display: inline-block;
-	min-width: 76px;
-	text-align: center;
-	font-size: 20px;
-	font-weight: bold;
 }
 
 .endTurnSummary {
