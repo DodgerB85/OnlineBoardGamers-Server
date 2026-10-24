@@ -349,7 +349,7 @@ the same type, including the errand boy just played.
 If a player has the _**“First Cart Operator Played”**_ milestone, his cart
 operators, truck drivers and zeppelin pilots have one additional range.
 
-Online UI note: when a buyer’s route repeats a square and cannot continue, a “Stop and collect drinks” bubble appears above the current square.
+Online UI note: when a buyer’s route repeats a square on the current tile and cannot continue, a “Stop and collect drinks” bubble appears above the current square.
 
 ## Place new houses and gardens
 

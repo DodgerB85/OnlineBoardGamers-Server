@@ -1593,15 +1593,6 @@ function advanceRoute(index) {
 	const store = useModelStore()
 	clearDrivingPreview()
 
-	if (store.context.from > -1) {
-		if (!map.onTheSameTile(index, store.context.from)) {
-			store.context.range--
-		}
-	} else {
-		if (!rules.firstStartIsFromTheSameTile(index)) {
-			store.context.range--
-		}
-	}
 	const nextRoad = rules.nextRoadPossibilities(index, store.context.from, store.context.range)
 
 	if (nextRoad.from !== -1) {

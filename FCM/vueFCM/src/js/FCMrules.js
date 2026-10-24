@@ -1128,6 +1128,14 @@ export function firstStartIsFromTheSameTile(index) {
 }
 
 export function nextRoadPossibilities(index, comingFrom, range) {
+	// Entering this square costs a tile crossing (if any); moving within a tile is free.
+	// Kept here so the hover preview and the committed move count range the same way.
+	if (comingFrom === -1) {
+		if (!firstStartIsFromTheSameTile(index)) range--
+	} else if (!map.onTheSameTile(index, comingFrom)) {
+		range--
+	}
+
 	// 1. Get the road segment until a junction or choice point is reached
 	let possibilities = map.traceRoadUntilChoice(index, comingFrom, range)
 
@@ -1794,11 +1802,14 @@ function settleMediaLineGroups(sold, replayOnly) {
 
 // Route UI: a repeated square only offers a stop bubble when the route cannot
 // usefully continue (no range, or every remaining exit stays on this tile).
+// Only repeats on the current tile count: looping around an earlier tile does
+// not trap the route, and driving within a tile is free until a square repeats.
 export function shouldStopRepeatRoute(path, targets, range) {
 	if (path.length < 2) return false
-	if (new Set(path).size === path.length) return false
-	if (range <= 0) return true
 	const last = path[path.length - 1]
+	const currentTilePath = path.filter((step) => map.onTheSameTile(step, last))
+	if (new Set(currentTilePath).size === currentTilePath.length) return false
+	if (range <= 0) return true
 	return targets.length > 0 && targets.every((target) => map.onTheSameTile(target, last))
 }
 

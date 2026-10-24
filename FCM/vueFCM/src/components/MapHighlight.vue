@@ -800,7 +800,7 @@ function changeGhost(index, add, event) {
 	position: absolute;
 	z-index: 300;
 	transform: translate(-50%, -115%);
-	white-space: nowrap;
+	max-width: 7.5em;
 	border: 2px solid green;
 	border-radius: 5px;
 	background: white;

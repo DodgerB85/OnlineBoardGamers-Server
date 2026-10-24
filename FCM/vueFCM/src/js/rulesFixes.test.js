@@ -196,6 +196,34 @@ describe("repeat route stop bubble", () => {
 		expect(rules.shouldStopRepeatRoute([a, sameTile, a], [sameTile], 2)).toBe(true)
 		expect(rules.shouldStopRepeatRoute([a, sameTile, a], [offTile], 0)).toBe(true)
 	})
+
+	it("ignores a repeat left behind on an earlier tile", () => {
+		useModelStore().mapData.dimensions = [10, 10]
+		const a = mapMod.giveIndex(0, 0)
+		const sameTile = a + 1
+		const offTile = mapMod.giveIndex(6, 6)
+
+		expect(rules.shouldStopRepeatRoute([a, sameTile, a, offTile], [offTile + 1], 0)).toBe(false)
+		expect(rules.shouldStopRepeatRoute([offTile, offTile + 1, offTile], [offTile + 1], 0)).toBe(true)
+	})
+})
+
+describe("route preview range", () => {
+	it("counts entering the hovered tile before tracing the no-choice road", () => {
+		const store = useModelStore()
+		store.mapData.dimensions = [17, 16]
+		const coords = new Array(rf.ssW * rf.ssH).fill(rf.EMPTY_SPACE)
+		const y = 20
+		for (let x = 15; x <= 35; x++) coords[mapMod.giveIndex(x, y)] = rf.ROAD
+		store.mapData.coords = coords
+
+		const from = mapMod.giveIndex(19, y) // previous tile
+		const target = mapMod.giveIndex(20, y) // entering this tile uses the last range
+		const preview = rules.nextRoadPossibilities(target, from, 1)
+
+		expect(preview.path.every((idx) => mapMod.onTheSameTile(idx, target))).toBe(true)
+		expect(preview.range).toBe(0)
+	})
 })
 
 describe("dinner tie-breakers", () => {

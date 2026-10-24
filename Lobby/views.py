@@ -2041,6 +2041,7 @@ def profileAQY(request):
         AQYoptions.append(int(request.POST["keepForestUnderWoodRes"]))
         AQYoptions.append(int(request.POST["showPollutionUnderRes"]))
         AQYoptions.append(int(request.POST["housesInNumOrder"]))
+        AQYoptions.append(1 if "reducedMotion" in request.POST else 0)
 
         profile.preferredAQYoptions = json.dumps(AQYoptions, separators=(",", ":"))
 
@@ -2054,9 +2055,11 @@ def profileAQY(request):
 
     else:
         profile = Profile.objects.get(user=request.user)
-        preferredAQYoptions = json.loads(request.user.profile.preferredAQYoptions) if request.user.profile.preferredAQYoptions != "" else [-1, 1, 0, 0, 1, 1, 0]
+        preferredAQYoptions = json.loads(request.user.profile.preferredAQYoptions) if request.user.profile.preferredAQYoptions != "" else [-1, 1, 0, 0, 1, 1, 0, 0]
+        if len(preferredAQYoptions) < 8:
+            preferredAQYoptions.append(0)
 
-        # [colour, mapHybrid, resourceIconType, pullResToMan, keepForestUnderWoodRes, showPollutionUnderRes, housesInNumOrder]
+        # [colour, mapHybrid, resourceIconType, pullResToMan, keepForestUnderWoodRes, showPollutionUnderRes, housesInNumOrder, reducedMotion]
 
         return render(
             request,
@@ -2069,6 +2072,7 @@ def profileAQY(request):
                 "keepForestUnderWoodRes": preferredAQYoptions[4],
                 "showPollutionUnderRes": preferredAQYoptions[5],
                 "housesInNumOrder": preferredAQYoptions[6],
+                "reducedMotion": preferredAQYoptions[7],
             },
         )
 

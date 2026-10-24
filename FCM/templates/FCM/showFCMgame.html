@@ -181,7 +181,7 @@
   {% if gameData and phase == 13 %}initData.startingOptions = {{ startingOptionsLiteral }};{% endif %}
   initData.assistance = {{ showAssistance|default:1 }};
   {% if currentPlayers %}initData.currentPlayersArray = {{ currentPlayers|safe|default:"[]" }};{% endif %}
-  initData.preferedColor = {{ preferredColour|default:-1 }};
+  initData.preferedColor = {{ preferredColour|default_if_none:-1 }};
   {% if secondsToNextKickout %}initData.secondsToNextKickout = {{ secondsToNextKickout }};{% endif %}
   {% if currentNotes %}initData.currentNotes = '{{ currentNotes | escapejs }}';{% endif %}
   {% if nextURL %}initData.nextURLGlobal = "{{ nextURL|safe }}";{% endif %}
