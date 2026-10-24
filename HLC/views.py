@@ -486,7 +486,7 @@ def _processHLCturn(request):
 
         ################ REWIND EVERY SAVE #######################
 
-        if jsonData["saveRewind"]:
+        if jsonData.get("saveRewind", True):
             currentRewindData = currentGame.rewindData
             currentRewindDataArray = currentRewindData.split("'SPLIT'")
 
