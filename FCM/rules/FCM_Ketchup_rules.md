@@ -21,7 +21,7 @@ This expansion introduces a large set of new modules. Each module can be played 
 
 ### Components
 
-5 new map tiles (or 6 if you are playing with lobbyists).
+5 new map tiles (or 6 if you are playing with Lobbyists or the standalone Park Tile).
 
 ### Background
 
@@ -33,7 +33,7 @@ These tiles are shuffled into the mix at the start of the game and alter the map
 
 ### Rules
 
-- Shuffle the additional cards into the mix at the start of the game and place them as you normally would. Note that the tile with the two parks is only used in combination with the lobbyist.
+- Shuffle the additional cards into the mix at the start of the game and place them as you normally would. The tile with the two parks is used when the Lobbyist module is chosen. It can also be used without Lobbyists as the standalone Park Tile module.
 
 ### Standard tiles
 
@@ -59,7 +59,7 @@ These tiles are shuffled into the mix at the start of the game and alter the map
 
 ### Parks
 
-The tile with the two parks puts parks in play from the start of the game and is only used in combination with the lobbyist. Refer to the lobbyist section for the rules regarding parks.
+The tile with the two parks puts parks in play from the start of the game. Use it with the Lobbyist module, or on its own as the standalone Park Tile module. Refer to the lobbyist section for the rules regarding parks.
 
 ## Lobbyists
 
@@ -121,7 +121,7 @@ Players can hire a lobbyist; during 9-5, a lobbyist can build an additional road
 
 - The new tile cannot be placed on a side that contains an airplane or a highway offramp.
 
-- The new tile can immediately be used to place new restaurants on. If a player has played more than 1 lobbyist, they can place a park or new road on the new tile.
+- The new tile can immediately be used to place new restaurants on. If a player has played more than 1 lobbyist, they can place a park or new road on the new tile, but only if that placement is otherwise legal: the tile must still be within the Lobbyist’s range of 2 by road and adjacent to a reachable road.
 
 <!-- PDF page 5 -->
 
@@ -139,7 +139,7 @@ The milestones have a very strong impact on strategy in Food Chain Magnate; chan
 
 We wanted players who start with an early marketing strategy to have more options; we also tried to make all the new milestones to feel as different as possible from the base set.
 
-### rules
+### Rules
 
 ### Setup
 
@@ -149,7 +149,9 @@ Place a “Remove after turn 2” marker on the “First marketeer used”, “F
 
 Milestones are awarded in the same way as in the base game. Note that many of the new milestones require you to use a card, not just play it. A card is used if it performs at least one function printed on the card during the working 9:00-5:00, dinnertime or payday phase. Playing a card, training a card, or paying salary for it, does not in itself count as using it. Marketeers are only used if you actually place a marketing tile with them; if you do not place a tile, you do not get the corresponding milestone.
 
-### Hard choices
+### Disappearing milestones (built in)
+
+This is the New Milestones version of “Hard Choices”: it is always part of the New Milestones module. The separate Hard Choices module applies the same idea to the original milestone set.
 
 After turn 2, if any of the milestones with a “Remove after turn 2” marker are still available, remove them from play.
 
@@ -317,19 +319,14 @@ There are two houses: house 1 has demand for a burger and a pizza, and house 2 h
 
 ### Sushi/Kimchi/Noodles/Coffee interaction
 
-When playing with multiple modules, there can be some confusion as to the priority. In short, kimchi has priority over sushi or noodles. So, a house with a garden would rate restaurants in the below order of preference:
+When playing with multiple modules, this priority order always applies. In short, kimchi has priority over sushi or noodles. A house with a garden rates restaurants in this order of preference:
 
-### 1. Kimchi + sufficient sushi
-
-### 2. Kimchi + correct mix of food and drinks
-
-### 3. Kimchi + sufficient noodles
-
-### 4. Sufficient sushi
-
-### 5. Correct mix of food and drinks
-
-### 6. Sufficient noodles
+1. Kimchi + sufficient sushi
+2. Kimchi + correct mix of food and drinks
+3. Kimchi + sufficient noodles
+4. Sufficient sushi
+5. Correct mix of food and drinks
+6. Sufficient noodles
 
 If multiple of these modules are used together, only a single extra luxury manager is added at setup (even though three are provided).
 
@@ -347,7 +344,7 @@ The Japanese edition of Food Chain Magnate was the first Splotter game ever publ
 
 ### Core idea
 
-Sushi is a dish eaten only by people in houses with gardens; they will prefer it over any other food or drink.
+Sushi is a dish eaten only by people in houses with gardens. When Kimchi and Noodles are not in play, those houses prefer sushi over any other food or drink. When those modules are combined, the priority order in the Kimchi section above always applies: kimchi is checked before sushi, and noodles are checked after it.
 
 ### Rules
 
@@ -610,6 +607,8 @@ In many playtest sessions and online games, we see that players follow a similar
 The initial set of Milestones are only available if you aim for them in round one, forcing players to choose between them.
 
 ### Rules
+
+This module is the optional version for the original milestone set. If you are using the New Milestones module, its built-in disappearing-milestone rule already applies instead.
 
 The hard choices module must be combined with the standard milestone set from the base game. Place the “Remove after turn 2” on the following milestone piles:
 

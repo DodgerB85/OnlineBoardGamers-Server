@@ -2870,9 +2870,9 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 				good2 = campaign.good
 			}
 
-			// Media Line mod: milestone 2 (First TV Announcer Used) - the holder's
+			// Media Line mod: milestone 2 (First TV Announcer Used) - each holder's
 			// first TV campaign pushes 2 identical cards per house per night
-			if (campaign.number === store.mediaLine.doubleCampaign) {
+			if (store.mediaLine.doubleCampaigns.includes(campaign.number)) {
 				good2 = campaign.good
 			}
 
@@ -2951,9 +2951,10 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 					for (let i = 0; i < store.players.length; i++) {
 						plyr.recallMarketeer(i, campaign.number)
 					}
-					// Media Line mod: the doubled campaign is gone - free the slot
-					// (the one-shot latch stays, doubling never repeats)
-					if (store.mediaLine.doubleCampaign === campaign.number) store.mediaLine.doubleCampaign = -1
+					// Media Line mod: the doubled campaign is gone - free its slot
+					// (the per-player one-shot latch stays, doubling never repeats)
+					const doubleIndex = store.mediaLine.doubleCampaigns.indexOf(campaign.number)
+					if (doubleIndex > -1) store.mediaLine.doubleCampaigns.splice(doubleIndex, 1)
 				} else if (campaign.duration < 9) {
 					campaign.duration--
 				}

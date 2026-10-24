@@ -49,7 +49,7 @@ If you lay out the cards as pictured, you will have an overview of
 upgrade paths and you can easily see which cards are in danger
 of running out.
 
-cards so that you end up with the following number:
+For each employee card marked with the 1x symbol, remove a number of cards so that you end up with the following number:
 
 |players|employee<br>cards used|Billboards<br>removed|Map size|
 |---|---|---|---|
@@ -370,7 +370,7 @@ have been placed on the board by a new business developer automatically come wit
 If you have a local manager or a regional manager in your structure,
 you may place a new restaurant or move an existing one. A restaurant
 must be placed fully on empty squares that do not contain any other
-map elements. It must be also be placed so that its entrance is adjacent
+map elements. It must also be placed so that its entrance is adjacent
 to a road. However, unlike during the initial placement, a restaurant
 may be placed in such a way that its entrance is on the same tile as the
 entrance of another restaurant.
@@ -431,7 +431,7 @@ discount manager will charge a unit price of $5.
 to the closest restaurant of each of the chains. You must follow
 the road and end up at an entrance of the restaurant. Each tile
 border you cross counts as one step. So, a house on the same
-tile as an restaurant entrance will be at distance 0 if the two are
+tile as a restaurant entrance will be at distance 0 if the two are
 connected by a road on the same tile.
 
    - Add up the unit price and the distance. Note that the number of
@@ -511,7 +511,7 @@ into the general stock of available cards.
 Normally, marketeers that are busy may not be fired.
 
 Then, each chain needs to pay $5 for each card in their structure or on
-the beach that has a on the card. Note that there are a number of
+the beach that has a salary symbol on the card. Note that there are a number of
 milestones and employee abilities that allow you to reduce the amount
 of salary you pay. Paid wages are returned to the bank.
 
@@ -612,7 +612,9 @@ are taken out of the game and can no longer be claimed by other players.
 Milestones are very important in the game and it is vital to plan your
 strategy around them.
 
-## First billboard placed
+## Milestones
+
+### First billboard placed
 
 This milestone is awarded when you place a billboard campaign on the map.
 
@@ -629,7 +631,7 @@ game. It will not be returned to the stock or the player’s hand.
 This rule already applies to the billboard you place to get the
 milestone.
 
-## First to train someone
+### First to train someone
 
 This milestone is awarded when you train an employee to a higher level.
 
@@ -637,7 +639,7 @@ For the rest of the game, you will receive a $15 discount on salary costs.
 Salary costs can never go below $0. Using the discount is obligatory;
 you may not voluntarily pay salaries.
 
-## First to hire three people in one turn
+### First to hire three people in one turn
 
 This milestone is awarded when you hire three people or more in the
 same turn. Only employees actually hired during the recruitment step
@@ -649,7 +651,7 @@ on the beach. If you have active training capacity, you may immediately
 train these cards as recruitment happens before training. In the unlikely case that there are not enough management trainee cards left, you
 receive whatever is left.
 
-## First burger/pizza/drink marketed
+### First burger/pizza/drink marketed
 
 These milestones are awarded when you place a marketing campaign
 that advertises burgers/pizza/any type of drink, respectively.
@@ -663,7 +665,7 @@ however, it can be boosted by a CFO.
 In the case of drinks, the bonus counts for all drinks, not just the type
 originally marketed.
 
-## First errand boy played
+### First errand boy played
 
 This milestone is awarded when you play an errand boy in your structure. It is not awarded for errand boys on the beach.
 
@@ -673,7 +675,7 @@ pass, and truck drivers will receive 4.
 
 This bonus applies to the errand boy played to get the milestone.
 
-## First to have $20
+### First to have $20
 
 This milestone is awarded if you have $20 cash at any time (in practice
 this means after getting income and before paying out salaries).
@@ -681,7 +683,7 @@ this means after getting income and before paying out salaries).
 You may look at the face down reserve cards. You are allowed to make
 truthful or confusing noises about whatever you see on the cards. However, you may not show them to other players.
 
-## First burger/pizza produced
+### First burger/pizza produced
 
 These milestones are awarded when you produce a burger/pizza, respectively.
 
@@ -692,7 +694,7 @@ cards of the correct type, you receive nothing. The cook will require a
 salary in the Payday phase. If you do not want to pay her, you may fire
 the cook instead.
 
-## First waitress played
+### First waitress played
 
 This milestone is awarded when you play a waitress in your structure. It
 is not awarded for waitresses on the beach.
@@ -701,7 +703,7 @@ For the rest of the game, you will receive $5 for each waitress in your
 structure rather than $3. This bonus already applies to the waitress
 played to get the milestone.
 
-## First to throw away drink/food
+### First to throw away drink/food
 
 This milestone is awarded when you throw away at least one food or
 drink token in phase 7 (Cleanup).
@@ -717,7 +719,7 @@ receive this milestone.
 
 <!-- PDF page 14 -->
 
-## First to lower prices
+### First to lower prices
 
 This milestone is awarded when you play a pricing manager or a discount manager into your structure, thereby lowering your prices.
 
@@ -728,7 +730,7 @@ cannot undo this effect.
 This takes effect immediately, so your prices will already be $1 lower in
 the turn in which you first lowered prices.
 
-## First cart operator played
+### First cart operator played
 
 This milestone is awarded when you place the first cart operator into
 your structure. It is not awarded for cart operators on the beach.
@@ -737,7 +739,7 @@ For the rest of the game, your cart operators, truck drivers and zeppelin
 pilots will have +1 range. This takes effect immediately, so your first
 cart operator will already have a range of 3.
 
-## First airplane campaign
+### First airplane campaign
 
 This milestone is awarded when you place an airplane campaign.
 
@@ -745,7 +747,7 @@ For the rest of the game, when determining order of play, you add 2
 extra open slots. These slots cannot be used to play managers or other
 employees, they are just a bonus when determining the order of play.
 
-## First radio campaign
+### First radio campaign
 
 This milestone is awarded when you place a radio campaign.
 
@@ -760,7 +762,7 @@ market the same good twice, it cannot market two different goods.
 This takes effect immediately, so in phase 6 of the turn in which the
 milestone is achieved.
 
-## First to have $100
+### First to have $100
 
 This milestone is awarded if you have $100 or more in cash at the end
 of phase 4.
@@ -774,7 +776,7 @@ this milestone.
 The new ability takes effect only from the next turn onward, as you can
 get it only after phase 4 has just ended.
 
-## First to pay $20 or more in salaries
+### First to pay $20 or more in salaries
 
 This milestone is awarded if you have to pay $20 or more in salaries
 in phase 5. These salaries have to be actually paid out— you may not

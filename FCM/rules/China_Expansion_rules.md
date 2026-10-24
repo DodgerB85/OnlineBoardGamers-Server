@@ -9,7 +9,7 @@ Therefore you could consider these modules as "semi-official" but unsanctioned b
 
 Games with these modules will therefore be excluded from the stats (except Urban Planning / Urban Planning Plus).
 
-The rules also don't cover all possiblities.
+The rules also don't cover all possibilities.
 Therefore, I have made a few judgment calls to tighten up the rules a bit.
 In addition, as this content was not designed by Splotter, I'm not sure the playtesting/balancing was quite as thorough!
 
@@ -78,11 +78,11 @@ Dumplings are one of China's classic foods.
 ### Rules
 - Marketing Dumplings: You cannot directly market dumplings. Instead, they are so tasty that ANY marketed item will also add demand for dumplings. Immediately after a marketing campaign has run, it will run again except the second time it will add Dumplings demand instead of its original item.
 - The dumpling marketing happens immediately. So if billboards are marketing item A and item B to the same house, the house will add demand for item A, then dumpling due billboard A, and then item B. This would normally cause the maximum demand to be reached, so the dumpling from advertising item B would only be added if the house has a garden.
-- Dumplings are produced by Dumpling Cooks and Dumpling Chefs. There are 6 cooks, each producing.3 dumplings. The chef Is a 1x employee, and will produce 8 dumplings.
+- Dumplings are produced by Dumpling Cooks and Dumpling Chefs. There are 6 cooks, each producing 3 dumplings. The chef is a 1x employee and will produce 8 dumplings.
 - There is a new Milestone for First Dumpling Sold. After Dinnertime, each player who has gained this milestone will choose a new action for their CEO. Their CEO will lose its original action (Hire 1) and replace it with one of the following:
   - 2x Hire 1 Employee or $5 salary reduction (the same as a Recruiting Manager)
   - Get 2 training points; you may train one employee by 2 levels (the same as a Coach)
-  - Reduce your base price by $3 (the same as a permanent Discount Manager.
+  - Reduce your base price by $3 (the same as a permanent Discount Manager).
 - The new CEO action is permanent.
 
 ## Hawker Marketing
@@ -97,5 +97,6 @@ Hawker trucks driving by, with their loud and engaging music, can't help but att
 - The Hawker Marketeer has a range of 2 and is played in the same way as a Cart Operator - you need to drive this marketeer out of a restaurant and along roads up to a range of 2. You can choose campaign number #21 #22 or #23, and a duration of 1, 2, or 3 turns.
 - When the marketing campaign activates, it will advertise to any residence directly connected to its route - **connections through parks or gardens do not count**.
 - This is the only time the precise orientation of new houses actually matters. Therefore, when using this module, the New Business Developer can place new houses with the garden at the bottom/left/top/right, rather than just horizontally or vertically.
-- To use a Hawker Marketeer, click the employee as usual. Then you can set a route, and once you are happy, deploy the marketing campaign using the "Add Hawker Truck" button. You must use all range if possible. If you need to stop manually because the last tile contains a loop, click the "Set Hawker Route" button again.
+- The physical Hawker campaign cards are numbered #21, #22 and #23. The implementation stores these internally as #25, #26 and #27; this is only an internal numbering difference.
+- To use a Hawker Marketeer, click the employee as usual. Then you can set a route, and once you are happy, deploy the marketing campaign using the "Add Hawker Truck" button. You must use all range if possible. If you need to stop manually because the last tile contains a loop, click the "Done Drawing Route" button.
 - You can see the truck route by clicking "Show Route" in history, or clicking the marketing token in the hawker marketing area (to the right of the map)

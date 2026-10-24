@@ -1225,8 +1225,8 @@ export function restoreBailoutState(inputArr, index = inputArr.length - 1, forGa
 
 // Media Line wire slot, two shapes (shape-detected so they cannot collide with
 // the compact Stadium/Bailout/Labor Market arrays):
-//   compact: [-SO_MEDIA_LINE, version, headlinesFlat, doubleCampaign, doubleUsed,
-//             groupsFlat, aLinePushers]
+//   compact: [-SO_MEDIA_LINE, version, headlinesFlat, doubleCampaigns,
+//             doubleUsedBy, groupsFlat, aLinePushers]
 //   legacy:  { headlines, doubleCampaign, doubleUsed, night }
 function isMediaLineSlot(el) {
 	if (Array.isArray(el)) return el.length >= 7 && el[0] === -rf.SO_MEDIA_LINE
@@ -1235,7 +1235,9 @@ function isMediaLineSlot(el) {
 
 // Media Line wire slot: compact positional array tagged with the negative option
 // code so it cannot collide with the Stadium/Bailout/Labor Market slots:
-//   [tag, version, headlinesFlat, doubleCampaign, doubleUsed, groupsFlat, aLinePushers]
+//   [tag, version, headlinesFlat, doubleCampaigns, doubleUsedBy, groupsFlat, aLinePushers]
+// Version 1 used single values (doubleCampaign, doubleUsed); version 2 stores
+// the per-holder campaign list and per-player latch.
 // Headlines are flat [turn, playerIndex, value, ...] and pruned to the current
 // and previous turn (only those can still affect quota or tonight's dinner).
 // Groups are flat [campaignNum, owner, houseCount, ...houses].
@@ -1252,7 +1254,7 @@ export function exportMediaLineSlot() {
 	for (const [num, g] of Object.entries(ml.night.groups)) {
 		groups.push(Number(num), g.owner, g.houses.length, ...g.houses)
 	}
-	return [-rf.SO_MEDIA_LINE, 1, headlines, ml.doubleCampaign, ml.doubleUsed ? 1 : 0, groups, [...ml.night.aLinePushers]]
+	return [-rf.SO_MEDIA_LINE, 2, headlines, [...ml.doubleCampaigns], [...ml.doubleUsedBy], groups, [...ml.night.aLinePushers]]
 }
 
 // Reads the Media Line slot, scanning the whole save like the Labor Market one.
@@ -1261,8 +1263,8 @@ export function exportMediaLineSlot() {
 export function restoreMediaLineState(inputArr) {
 	const store = useModelStore()
 	store.mediaLine.headlines = []
-	store.mediaLine.doubleCampaign = -1
-	store.mediaLine.doubleUsed = false
+	store.mediaLine.doubleCampaigns = []
+	store.mediaLine.doubleUsedBy = []
 	store.mediaLine.night = { groups: {}, aLinePushers: [] }
 	if (!store.startingOptions.mediaLine) return
 	const slot = [...(inputArr || [])].reverse().find(isMediaLineSlot)
@@ -1278,8 +1280,15 @@ export function restoreMediaLineState(inputArr) {
 				store.mediaLine.headlines.push({ turn, playerIndex, value })
 			}
 		}
-		if (Number.isInteger(slot[3])) store.mediaLine.doubleCampaign = slot[3]
-		store.mediaLine.doubleUsed = slot[4] === 1
+		if (slot[1] >= 2) {
+			store.mediaLine.doubleCampaigns = Array.isArray(slot[3]) ? slot[3].filter(Number.isInteger) : []
+			store.mediaLine.doubleUsedBy = Array.isArray(slot[4]) ? slot[4].filter(Number.isInteger) : []
+		} else {
+			// Version 1 had one global campaign and one global latch. Keep the
+			// active campaign doubled, and block further doubles for every seat.
+			if (Number.isInteger(slot[3])) store.mediaLine.doubleCampaigns = [slot[3]]
+			if (slot[4] === 1) store.mediaLine.doubleUsedBy = store.players.map((_, index) => index)
+		}
 		const groups = {}
 		const flatGroups = Array.isArray(slot[5]) ? slot[5] : []
 		let gi = 0
@@ -1302,8 +1311,17 @@ export function restoreMediaLineState(inputArr) {
 	store.mediaLine.headlines = (slot.headlines || [])
 		.filter((h) => h && Number.isInteger(h.turn) && Number.isInteger(h.playerIndex) && (h.value === 5 || h.value === -5))
 		.map((h) => ({ turn: h.turn, playerIndex: h.playerIndex, value: h.value }))
-	if (Number.isInteger(slot.doubleCampaign)) store.mediaLine.doubleCampaign = slot.doubleCampaign
-	store.mediaLine.doubleUsed = slot.doubleUsed === true
+	if (Array.isArray(slot.doubleCampaigns)) {
+		store.mediaLine.doubleCampaigns = slot.doubleCampaigns.filter(Number.isInteger)
+	} else if (Number.isInteger(slot.doubleCampaign)) {
+		store.mediaLine.doubleCampaigns = [slot.doubleCampaign]
+	}
+	if (Array.isArray(slot.doubleUsedBy)) {
+		store.mediaLine.doubleUsedBy = slot.doubleUsedBy.filter(Number.isInteger)
+	} else if (slot.doubleUsed === true) {
+		// Legacy global latch: no seat may double again.
+		store.mediaLine.doubleUsedBy = store.players.map((_, index) => index)
+	}
 	// Milestone 1 per-night accumulator (older saves predate it - keep defaults)
 	if (slot.night && typeof slot.night === "object" && !Array.isArray(slot.night)) {
 		const groups = {}

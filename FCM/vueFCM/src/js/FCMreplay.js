@@ -892,12 +892,12 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 	// first TV campaign. Live play awards the milestone right AFTER this history
 	// entry (giveMarketingMilestones trails placeMarketingCampaign), so look
 	// ahead for it when the holder does not have it replayed yet.
-	if (isTV && !store.mediaLine.doubleUsed) {
+	if (isTV && !store.mediaLine.doubleUsedBy.includes(playerIndex)) {
 		const nextEntry = store.computedHistory[historyIndex + 1]
 		const milestoneEarnedHere = nextEntry && nextEntry[0] === rf.HIST_NEW_MILESTONE && nextEntry[1] === playerIndex && Array.isArray(nextEntry[3]) && nextEntry[3][0] === rf.FIRST_TV_ANNOUNCER_USED
 		if (plyr.hasMilestone(playerIndex, rf.FIRST_TV_ANNOUNCER_USED) || milestoneEarnedHere) {
-			store.mediaLine.doubleCampaign = campaignNumber
-			store.mediaLine.doubleUsed = true
+			store.mediaLine.doubleCampaigns.push(campaignNumber)
+			store.mediaLine.doubleUsedBy.push(playerIndex)
 		}
 	}
 }
