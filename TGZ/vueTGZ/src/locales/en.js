@@ -487,9 +487,6 @@ export default {
 	playerDetails: {
 		noGod: "No god",
 	},
-	playerLine: {
-		extraInfo: "M = highest monument level, S = number of specialists",
-	},
 	mapHover: {
 		water: "Water",
 		startingArea: "Starting area",
