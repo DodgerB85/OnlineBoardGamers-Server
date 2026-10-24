@@ -56,6 +56,7 @@ function toggleBug() {
 }
 
 function toggleNotes() {
+	if (store.topMenuViews.showNotes) IO.saveNotes()
 	store.topMenuViews.showBug = false
 	store.topMenuViews.showNotes = !store.topMenuViews.showNotes
 }
@@ -212,7 +213,7 @@ function localCastVote(topic) {
 		<div id="notesBox" v-if="store.topMenuViews.showNotes">
 			<h2>{{ $t('topMenuViews.notesTitle') }}</h2>
 			<p>{{ $t('topMenuViews.notesPrivate') }}</p>
-			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes" maxlength="5000"></textarea></div>
+			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes" maxlength="5000" @blur="IO.saveNotes"></textarea></div>
 			<div>
 				<button class="actionsLineButton" id="submitNotes" @click="IO.saveNotes">{{ $t('topMenuViews.save') }}</button>
 				<button class="actionsLineButton" id="clearNotes" @click="clearNotes">{{ $t('topMenuViews.clear') }}</button>

@@ -78,7 +78,7 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False)),
             "currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
             "finishedGame": currentGame.gameStatus == "FINISHED",
-            "preferredINDoptions": [-1, 0, 0, 1, 1, 1, 0],
+            "preferredINDoptions": [-1, 0, 0, 1, 1, 1, 0, 0],
             "pov": -99,
             "preMoves": "",
             "sideData": "",
@@ -91,10 +91,12 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData.update(result["auth_data"])
     returnData["pov"] = -9
 
-    preferredINDoptions = json.loads(result["user_profile"].preferredINDoptions) if result["user_profile"].preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1, 0]
+    preferredINDoptions = json.loads(result["user_profile"].preferredINDoptions) if result["user_profile"].preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1, 0, 0]
     if len(preferredINDoptions) < 7:
         preferredINDoptions.extend([0] * (7 - len(preferredINDoptions)))
         preferredINDoptions[6] = 0
+    if len(preferredINDoptions) < 8:
+        preferredINDoptions.append(0)
     # Option 4 (goods icon) must be 1 or 2, for the edition. Check it hasn't slipped to 0.
     if preferredINDoptions[4] == 0:
             preferredINDoptions[4] = 1
@@ -174,7 +176,7 @@ def showINDhistory(request, game_id=1):
             "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False)),
             "currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
             "finishedGame": currentGame.gameStatus == "FINISHED",
-            "preferredINDoptions": [-1, 0, 0, 1, 1, 1, 0],
+            "preferredINDoptions": [-1, 0, 0, 1, 1, 1, 0, 0],
             "pov": -99,
             "preMoves": "",
             "sideData": "",
@@ -188,10 +190,12 @@ def showINDhistory(request, game_id=1):
     returnData.update(result["auth_data"])
     returnData["pov"] = -9
 
-    preferredINDoptions = json.loads(result["user_profile"].preferredINDoptions) if result["user_profile"].preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1, 0]
+    preferredINDoptions = json.loads(result["user_profile"].preferredINDoptions) if result["user_profile"].preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1, 0, 0]
     if len(preferredINDoptions) < 7:
         preferredINDoptions.extend([0] * (7 - len(preferredINDoptions)))
         preferredINDoptions[6] = 0
+    if len(preferredINDoptions) < 8:
+        preferredINDoptions.append(0)
     if preferredINDoptions[4] == 0:
             preferredINDoptions[4] = 1
     returnData["preferredINDoptions"] = preferredINDoptions

@@ -114,6 +114,17 @@ function copyToClipboard() {
 		<button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1" @click="performStep(1)">&gt;</button>
 		<button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1" @click="performStep(9)">&gt;&gt;</button>
 		<button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1" @click="performStep(99)">&gt;|</button>
+		<br />
+		<input
+			v-if="store.replayData.length > 1"
+			class="replaySlider"
+			type="range"
+			min="0"
+			:max="store.replayData.length - 1"
+			:value="store.replayStep"
+			@change="replay.goToReplayStep(parseInt($event.target.value))"
+			:title="$t('replay.jumpToStep', { step: store.replayStep + 1, total: store.replayData.length })" />
+		<br />
 
 		<div class="copyGameButtonDiv" v-if="personal.name != undefined">
 			<button @click="localCopyGameToPracticeGame()" class="actionsLineButton">
@@ -160,6 +171,11 @@ function copyToClipboard() {
 	background-color: #999;
 	height: 30px;
 	position: relative;
+}
+
+.replaySlider {
+	width: min(600px, 80%);
+	margin: 6px auto;
 }
 
 .progress-bar div {

@@ -14,7 +14,7 @@ import AutoShip from "./AutoShip.vue"
 import ManualShip from "./ManualShip.vue"
 import HistoryEntry from "./HistoryEntry.vue"
 
-import { ref, computed, watch, onUnmounted } from "vue"
+import { ref, computed, watch, onMounted, onUnmounted } from "vue"
 
 import { useModelStore } from "../stores/INDstore.js"
 const store = useModelStore()
@@ -291,7 +291,50 @@ watch(
 	},
 	{ immediate: true }
 )
+function isTypingTarget(event) {
+	const target = event.target
+	if (!target) return false
+	const tag = target.tagName
+	return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || tag === "BUTTON" || tag === "A" || target.isContentEditable
+}
+
+function handleGlobalShortcut(event) {
+	if (event.ctrlKey || event.metaKey || event.altKey) return
+	if (!personal.canPlay() || store.topMenuViews.showReplay || isTypingTarget(event)) return
+	if (event.key === "Escape") {
+		event.preventDefault()
+		resetWholePlayerTurn()
+		return
+	}
+	if (event.key === "Enter") {
+		if (store.gameflow.phase === rf.PHASE_BID_TURN_ORDER && store.context.action !== rf.ACT_CONFIRM_END_TURN) {
+			if (isValidBid.value) {
+				event.preventDefault()
+				localConfirmTurnBid()
+			}
+			return
+		}
+		if (store.context.action === rf.ACT_CONFIRM_END_TURN) {
+			event.preventDefault()
+			localEndPlayerTurn()
+		}
+		return
+	}
+	if (store.gameflow.phase === rf.PHASE_BID_TURN_ORDER && store.context.action !== rf.ACT_CONFIRM_END_TURN) {
+		if (event.key === "+" || event.key === "=") {
+			event.preventDefault()
+			increment(1)
+		} else if (event.key === "-" || event.key === "_") {
+			event.preventDefault()
+			decrement(1)
+		}
+	}
+}
+
+onMounted(() => window.addEventListener("keydown", handleGlobalShortcut))
+
 onUnmounted(() => {
+	window.removeEventListener("keydown", handleGlobalShortcut)
 	if (personal.kickoutCountdownIntervalTimer != undefined) clearInterval(personal.kickoutCountdownIntervalTimer)
 })
 /*function localReplaceExternalTournamentPlayer() {

@@ -257,6 +257,10 @@ function updatePassIfOutbid() {
 					{{ $t('merger.increment') }}
 					<strong>{{ store.ongoingVars.bidIncrement }}</strong>
 				</span>
+				<span>
+					{{ $t('merger.resultingSize') }}
+					<strong>{{ store.ongoingVars.selectedMergerInfo[0][2] + store.ongoingVars.selectedMergerInfo[1][2] }}</strong>
+				</span>
 			</div>
 
 			<!-- Affordable State -->

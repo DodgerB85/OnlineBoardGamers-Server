@@ -1809,8 +1809,14 @@ def profile(request):
             )
             profile.preferredHCcolour = request.POST["hcColour"]
 
-            profile.preferredBusColour = request.POST["busColour"]
-            profile.preferredBusBoard = request.POST["BusBoard"]
+            profile.preferredBUSoptions = json.dumps(
+                [
+                    int(request.POST.get("busColour") or -1),
+                    int(request.POST.get("BusBoard") or 0),
+                    1 if "BUShighContrast" in request.POST else 0,
+                ],
+                separators=(",", ":"),
+            )
 
             profile.preferredTGZoptions = json.dumps(
                 [
@@ -1918,6 +1924,21 @@ def profile(request):
         preferredWEBoptions = json.loads(profile.preferredWEBoptions) if profile.preferredWEBoptions != "" and profile.preferredWEBoptions is not None else [-1]
         favWEBcolour = preferredWEBoptions[0]
 
+        preferredBUSoptions = []
+        if profile.preferredBUSoptions:
+            try:
+                preferredBUSoptions = json.loads(profile.preferredBUSoptions)
+            except (TypeError, ValueError):
+                preferredBUSoptions = []
+        if not isinstance(preferredBUSoptions, list):
+            preferredBUSoptions = []
+        preferredBUSoptions = preferredBUSoptions[:3]
+        while len(preferredBUSoptions) < 3:
+            preferredBUSoptions.append([-1, 0, 0][len(preferredBUSoptions)])
+        busOptColour = preferredBUSoptions[0]
+        busOptBoard = preferredBUSoptions[1]
+        BUShighContrast = bool(preferredBUSoptions[2])
+
         preferredTGZoptions = []
         if profile.preferredTGZoptions:
             try:
@@ -1975,8 +1996,9 @@ def profile(request):
                 "liveNotification": liveNotification,
                 "username": request.user.username,
                 "email": request.user.email,
-                "preferredBusColour": profile.preferredBusColour,
-                "preferredBusBoard": profile.preferredBusBoard,
+                "busOptColour": busOptColour,
+                "busOptBoard": busOptBoard,
+                "BUShighContrast": BUShighContrast,
                 "favTGZcolour": favTGZcolour,
                 "favCNScolour": preferredCNScolour,
                 "favKFWcolour": favKFWcolour,
@@ -2064,6 +2086,7 @@ def profileIND(request):
         INDoptions.append(int(request.POST.get("goodsIcon", 1)))
         INDoptions.append(int(request.POST.get("shipIcon", 1)))
         INDoptions.append(int(request.POST.get("playerTableStyle", 0)))
+        INDoptions.append(1 if "reducedMotion" in request.POST else 0)
 
         profile.preferredINDoptions = json.dumps(INDoptions, separators=(",", ":"))
 
@@ -2077,15 +2100,17 @@ def profileIND(request):
 
     else:
         profile = Profile.objects.get(user=request.user)
-        preferredINDoptions = json.loads(request.user.profile.preferredINDoptions) if request.user.profile.preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1, 0]
+        preferredINDoptions = json.loads(request.user.profile.preferredINDoptions) if request.user.profile.preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1, 0, 0]
 
         if len(preferredINDoptions) < 7:
             preferredINDoptions.extend([0] * (7 - len(preferredINDoptions)))
             preferredINDoptions[6] = 0
+        if len(preferredINDoptions) < 8:
+            preferredINDoptions.append(0)
         # Option 4 (goods icon) must be 1 or 2, for the edition. Check it hasn't slipped to 0.
         if preferredINDoptions[4] == 0:
             preferredINDoptions[4] = 1
-        # [colour, mapType, citySizeColour, indOutline, goodsIcon, shipIcon, playerTableStyle]
+        # [colour, mapType, citySizeColour, indOutline, goodsIcon, shipIcon, playerTableStyle, reducedMotion]
 
         return render(
             request,
@@ -2098,6 +2123,7 @@ def profileIND(request):
                 "goodsIcon": preferredINDoptions[4],
                 "shipIcon": preferredINDoptions[5],
                 "playerTableStyle": preferredINDoptions[6],
+                "reducedMotion": preferredINDoptions[7],
             },
         )
 

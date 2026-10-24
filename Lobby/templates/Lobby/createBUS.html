@@ -336,7 +336,7 @@
 
     {% if fillData %}
     var setupData = {};
-    setupData.gameName = "{{ gameName }}";
+    setupData.gameName = "{{ gameName|escapejs }}";
     setupData.gameDescription = "{{ gameDescription }}";
     setupData.gamePace = {{ gamePace }};
     setupData.kickoutDuration = "{{ kickoutDuration }}";

@@ -179,7 +179,7 @@ function toggleCheckbox(playerIndexToggled) {
 			</thead>
 			<tbody>
 				<!-- journeys.push([].concat([goodId, shipCompany.player, shipCompany.id], trace, [city])) -->
-				<tr v-for="(entry, idx) in store.context.maxPossData" :key="idx">
+				<tr v-for="(entry, idx) in store.context.maxPossData" :key="idx" :title="$t('actionArea.shippingAutoExplain')">
 					<!-- Player-->
 					<td @click="localClickedShippingRow(entry)">
 						<span class="mainEntryPlayer"

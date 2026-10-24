@@ -110,8 +110,7 @@ class Profile(models.Model):
 
     preferredHCcolour = models.SmallIntegerField(null=False, blank=False, default=-1)
 
-    preferredBusColour = models.SmallIntegerField(null=False, blank=False, default=-1)
-    preferredBusBoard = models.SmallIntegerField(null=False, blank=False, default=0)
+    preferredBUSoptions = models.CharField(max_length=30, blank=True)
 
     preferredTGZoptions = models.CharField(max_length=30, blank=True)
 

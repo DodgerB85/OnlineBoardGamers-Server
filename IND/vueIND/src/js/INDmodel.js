@@ -1786,6 +1786,12 @@ export function getRndDisplayValue(rnd, level) {
 	if (rnd === rf.RnD_BID_IDX) {
 		return rf.RND_BID_MULTIPLIER[level]
 	}
+	if (rnd === rf.RnD_MERGER_SUBSIDY_IDX) {
+		return Math.max(level - 1, 0) * rf.MERGER_SUBSIDY_MULTIPLIER
+	}
+	if (rnd === rf.RnD_SHIPPING_SUBSIDY_IDX) {
+		return Math.max(level - 1, 0) * rf.SHIPPING_SUBSIDY_MULTIPLIER
+	}
 	return level
 }
 

@@ -28,7 +28,7 @@
              alt="Box Icon" />
       </p>
       <p>
-        {% translate "Change the map using the Settings icon. The maps all function identically - it is just a visual change" %}
+        {% translate "Change the base map using the Settings icon. The three base maps are only a visual change - the game and territory layout are identical. Fan maps (Aegean and Pilipinas) are chosen when the game is created and cannot be switched in-game." %}
         <img src="{% static 'IND/images/icon-cog.svg' %}"
              width="38"
              height="38"
@@ -208,6 +208,12 @@
         {% endblocktranslate %}
       </p>
       <b><u>{% translate "Visual Guide" %}</u></b>
+      <p>
+        <b>{% translate "Keyboard shortcuts:" %}</b>
+        {% blocktranslate trimmed %}
+          Enter = confirm / end turn, Esc = reset turn, + / - = adjust the turn-order bid, A = show available companies and your era-card provinces.
+        {% endblocktranslate %}
+      </p>
       <p>
         <img src="{% static 'Lobby/images/help/ind_help_gfx.jpg' %}"
              width="1300"
