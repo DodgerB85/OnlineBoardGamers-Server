@@ -27,10 +27,6 @@ export default {
 			cancel: "Cancel",
 			onlyYourGoods: "You can only trade your own goods",
 		},
-		storage: {
-			used: "Storage used: {used} / {total}",
-			limit: "You can only store a total of {count} goods",
-		},
 		summary: {
 			houses: "Houses",
 			men: "Men",

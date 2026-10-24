@@ -936,10 +936,6 @@ export default {
 			cancel: "Abbrechen",
 			onlyYourGoods: "Du kannst nur deine eigenen Waren handeln",
 		},
-		storage: {
-			used: "Lager belegt: {used} / {total}",
-			limit: "Du kannst insgesamt nur {count} Waren lagern",
-		},
 		summary: {
 			houses: "Häuser",
 			men: "Arbeiter",

@@ -936,10 +936,6 @@ export default {
 			cancel: "Annulla",
 			onlyYourGoods: "Puoi scambiare solo le tue merci",
 		},
-		storage: {
-			used: "Magazzino usato: {used} / {total}",
-			limit: "Puoi immagazzinare solo {count} merci in totale",
-		},
 		summary: {
 			houses: "Case",
 			men: "Lavoratori",

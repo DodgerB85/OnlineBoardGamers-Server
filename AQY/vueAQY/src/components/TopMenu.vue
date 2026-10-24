@@ -319,6 +319,17 @@ const currentNames = computed(() => getCurrentPlayerNames())
 			</span>
 		</div>
 
+		<div id="topInfos">
+			<div class="infoSpanDiv">
+				<span id="infoSpan">
+					<span v-html="store.gameName"></span>
+				</span>
+			</div>
+			<div id="playerLineDiv">
+				<PlayerLine />
+			</div>
+		</div>
+
 		<div id="topRight">
 			<div id="loggedInDiv" v-if="personal.name" @click="clickedLoggedInDiv()">
 				{{ personal.name }}
@@ -342,24 +353,10 @@ const currentNames = computed(() => getCurrentPlayerNames())
 			</div>
 		</div>
 
-		<div id="statusBanner">
+		<div id="statusBanner" :class="{ myTurn: isMyTurn, gameOver: store.gameflow.phase === rf.PHASE_GAME_OVER }">
 			<span class="statusTurn">{{ $t("aqyUi.status.turn", { turn: store.gameflow.turn }) }}</span>
 			<span class="statusPhase"><template v-if="phaseNumber > 0">{{ $t("aqyUi.status.phase", { number: phaseNumber }) }} · </template>{{ phaseName }}</span>
 			<span class="statusWho">{{ isMyTurn ? $t("aqyUi.status.yourTurn") : $t("aqyUi.status.waitingFor", { names: currentNames }) }}</span>
-			<div class="phaseDots">
-				<span v-for="step in 10" :key="step" :class="{ active: step === phaseNumber, done: step < phaseNumber }"></span>
-			</div>
-		</div>
-
-		<div id="topInfos">
-			<div class="infoSpanDiv">
-				<span id="infoSpan">
-					<span v-html="store.gameName"></span>
-				</span>
-			</div>
-			<div id="playerLineDiv">
-				<PlayerLine />
-			</div>
 		</div>
 	</div>
 </template>
@@ -428,11 +425,13 @@ const currentNames = computed(() => getCurrentPlayerNames())
 	top: 0px;
 	z-index: 2;
 	position: relative;
-	display: inline-block;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
 }
 
 #menu {
-	float: left;
+	flex-shrink: 0;
 	color: white;
 }
 
@@ -495,7 +494,7 @@ const currentNames = computed(() => getCurrentPlayerNames())
 }
 
 #topRight {
-	float: right;
+	flex-shrink: 0;
 	height: 100%;
 	font-size: 14px;
 	text-align: center;
@@ -503,53 +502,38 @@ const currentNames = computed(() => getCurrentPlayerNames())
 }
 
 #statusBanner {
-	clear: both;
+	flex-basis: 100%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	gap: 14px;
-	width: 100%;
-	padding: 4px 0px;
-	background-color: rgba(255, 255, 255, 0.08);
+	padding: 4px 8px;
+	background-color: #c4dff7;
+	border-bottom: 1px solid #8bb8d8;
+	color: black;
 	font-weight: bolder;
 	font-size: 15px;
 }
 
+#statusBanner.myTurn {
+	background-color: lightgreen;
+}
+
+#statusBanner.gameOver {
+	background-color: lightgoldenrodyellow;
+}
+
 .statusPhase {
-	color: #bfe3ff;
+	color: #1a4f73;
 }
 
 .statusWho {
-	color: #d8ffd8;
-}
-
-.phaseDots {
-	display: inline-flex;
-	gap: 3px;
-	align-items: center;
-}
-
-.phaseDots span {
-	width: 9px;
-	height: 9px;
-	border-radius: 50%;
-	border: 1px solid #aaa;
-	background-color: transparent;
-}
-
-.phaseDots span.done {
-	background-color: #7bbf7b;
-	border-color: #7bbf7b;
-}
-
-.phaseDots span.active {
-	background-color: lightgreen;
-	border-color: lightgreen;
-	box-shadow: 0 0 5px lightgreen;
+	color: #1a5c1a;
 }
 
 #topInfos {
-	display: inline;
+	flex: 1 1 auto;
+	min-width: 0;
 	/*display: flex;*/
 	/*flex-direction: column;
     /* Add this line to change the direction to column */

@@ -936,10 +936,6 @@ export default {
 			cancel: "取消",
 			onlyYourGoods: "只能交易自己的货物",
 		},
-		storage: {
-			used: "已用仓库：{used} / {total}",
-			limit: "你总共只能储存 {count} 件货物",
-		},
 		summary: {
 			houses: "房屋",
 			men: "工人",

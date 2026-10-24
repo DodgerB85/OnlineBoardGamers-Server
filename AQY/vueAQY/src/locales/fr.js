@@ -936,10 +936,6 @@ export default {
 			cancel: "Annuler",
 			onlyYourGoods: "Vous ne pouvez échanger que vos propres marchandises",
 		},
-		storage: {
-			used: "Stockage utilisé : {used} / {total}",
-			limit: "Vous pouvez stocker au total {count} marchandises",
-		},
 		summary: {
 			houses: "Maisons",
 			men: "Ouvriers",

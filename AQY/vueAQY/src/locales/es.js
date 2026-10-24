@@ -895,10 +895,6 @@ export default {
 			cancel: "Cancelar",
 			onlyYourGoods: "Solo puedes comerciar con tus propios bienes",
 		},
-		storage: {
-			used: "Almacenamiento usado: {used} / {total}",
-			limit: "Solo puedes almacenar un total de {count} bienes",
-		},
 		summary: {
 			houses: "Casas",
 			men: "Trabajadores",
