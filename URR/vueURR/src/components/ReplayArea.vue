@@ -24,13 +24,10 @@ function maxStep() {
 }
 
 function applyStep() {
-	const entry = store.history[step.value]
-	if (!entry) return
+	const snapshot = store.historySnapshotAt(step.value)
+	if (!snapshot?.players) return
 	try {
-		const snapshot = JSON.parse(entry[2])
-		if (snapshot && snapshot.players) {
-			model.restoreState(snapshot)
-		}
+		model.restoreState(snapshot)
 	} catch (e) {
 		console.error("Unable to restore URR replay snapshot:", e)
 	}

@@ -11,21 +11,19 @@ import * as view from "../js/URRview"
 import * as rules from "../js/URRrules"
 import * as water from "../js/URRwater"
 import * as assets from "../js/URRassets"
+import { historyAction } from "../js/URRhistoryActions"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
 const { t } = useI18n()
 const props = defineProps({ entry: { type: Array, required: true }, index: { type: Number, required: true }, newestFirst: { type: Boolean, default: true } })
 
-function snapshot(entry) {
-	if (!entry) return null
-	try { return JSON.parse(entry[2]) } catch (error) { console.error("Unable to read URR history snapshot:", error); return null }
-}
-const after = computed(() => snapshot(props.entry))
-const before = computed(() => snapshot(store.history[props.index - 1]) || after.value)
+const after = computed(() => store.historySnapshotAt(props.index))
+const before = computed(() => store.historySnapshotAt(props.index - 1) || after.value)
 const player = computed(() => after.value?.players[props.entry[1]] || store.players[props.entry[1]])
-const action = computed(() => props.entry[3])
+const action = computed(() => historyAction(props.entry))
 const isAutomaticStep = computed(() => action.value && before.value && rules.getAutomaticAction(before.value)?.type === action.value.type)
 const isCurrentReplay = computed(() => store.viewSettings.showReplay && store.replayStep.index === props.index)
+const isGameEnd = computed(() => !props.entry.administration && props.entry[0] !== rf.HIST_NEW_GAME && after.value?.gameflow.phase === rf.PHASE_GAME_OVER)
 const stateId = computed(() => before.value ? view.currentStateId(before.value) : null)
 const waterDestination = computed(() => action.value?.type === "allocateWater" ? before.value?.board.areas.find((area) => area.id === action.value.area) : null)
 const eventArtwork = computed(() => {
@@ -59,7 +57,7 @@ const leadershipChanges = computed(() => view.getLeadershipChanges(before.value,
 const phaseHeading = computed(() => {
 	if (props.entry.administration) return ""
 	const flow = before.value?.gameflow
-	const adjacentFlow = (props.newestFirst ? after.value?.gameflow : snapshot(store.history[props.index - 2])?.gameflow) || flow
+	const adjacentFlow = (props.newestFirst ? after.value?.gameflow : store.historySnapshotAt(props.index - 2)?.gameflow) || flow
 	const isFirstVisible = props.newestFirst ? props.index === store.history.length - 1 : props.index === 0
 	if (!flow || (!isFirstVisible && flow.turn === adjacentFlow?.turn && flow.phase === adjacentFlow?.phase)) return ""
 	return t("history.phaseHeading", { turn: flow.turn, phase: view.phaseStr(flow.phase) })
@@ -72,7 +70,7 @@ const eventText = computed(() => {
 	if (event === rf.HIST_KICKOUT) return t("history.kickedOut")
 	if (event === rf.HIST_RESIGN) return t("history.resigned")
 	const move = action.value
-	if (!move) return event === rf.HIST_GAME_END ? t("history.gameEnded") : t("history.playedMove")
+	if (!move) return t("history.playedMove")
 	const stateName = rf.STATE_NAMES[stateId.value] || t("history.stateFallback")
 	const waterSource = move.type === "allocateWater" ? water.currentWaterFrame(before.value)?.area : null
 	const offer = before.value?.gameflow.pendingOffer?.action
@@ -155,7 +153,7 @@ const playbackError = ref("")
 const canReplayWater = computed(() => ["riverComplete", "rainEnd"].includes(props.entry.administration?.kind) && (!store.turnDraft.start || props.entry.historyIndex < store.turnDraft.start.historyLength))
 function startWaterPlayback(advancing, showIrrigated = false) {
 	try {
-		playback.start(store.history, props.entry.historyIndex, advancing)
+		playback.start(store.history, store.historySnapshots(), props.entry.historyIndex, advancing)
 		if (showIrrigated) {
 			playback.state.index = playback.state.steps.length - 1
 			playback.state.showIrrigated = true
@@ -176,8 +174,8 @@ function jumpToEntry() {
 <template>
 	<div class="historyGroup">
 		<div v-if="phaseHeading" class="phaseHeading">{{ phaseHeading }}</div>
-		<div class="log" :class="{ selectableHistory: store.viewSettings.showReplay, currentReplay: isCurrentReplay, automaticStep: isAutomaticStep, separator: entry[0] === rf.HIST_NEW_GAME || entry[0] === rf.HIST_GAME_END }" :aria-current="isCurrentReplay ? 'step' : undefined" :role="store.viewSettings.showReplay ? 'button' : undefined" :tabindex="store.viewSettings.showReplay ? 0 : undefined" @click="jumpToEntry" @keydown.enter.prevent="jumpToEntry" @keydown.space.prevent="jumpToEntry">
-			<div class="historyTimestamp">{{ entry[4] != null ? funcs.timestampToString(entry[4]) : $t("history.timeNotRecorded") }}</div>
+		<div class="log" :class="{ selectableHistory: store.viewSettings.showReplay, currentReplay: isCurrentReplay, automaticStep: isAutomaticStep, separator: entry[0] === rf.HIST_NEW_GAME || isGameEnd }" :aria-current="isCurrentReplay ? 'step' : undefined" :role="store.viewSettings.showReplay ? 'button' : undefined" :tabindex="store.viewSettings.showReplay ? 0 : undefined" @click="jumpToEntry" @keydown.enter.prevent="jumpToEntry" @keydown.space.prevent="jumpToEntry">
+			<div class="historyTimestamp">{{ entry.historyTime != null ? funcs.timestampToString(entry.historyTime) : $t("history.timeNotRecorded") }}</div>
 			<span v-if="isCurrentReplay" class="replayPosition">{{ $t("history.currentReplay") }}</span>
 			<template v-if="entry.administration">
 				<div class="administrationHeading">{{ entry.administration.title }}</div>
@@ -200,7 +198,7 @@ function jumpToEntry() {
 				<StateLeadership v-for="change in leadershipChanges" :key="change.id" :change="change" />
 				<details class="balanceDetails" v-if="balanceChanges.length" @click.stop @keydown.enter.stop @keydown.space.stop><summary class="balanceChanges" :aria-label="$t('history.showBalances')"><span v-for="change in balanceChanges" :key="change.label" :title="change.title || change.label"><img :src="change.src" :alt="change.label" /><b>{{ change.amount > 0 ? '+' : '' }}{{ change.amount }} SPL</b></span></summary><div class="balanceBreakdown"><div v-for="change in balanceChanges" :key="change.label"><img :src="change.src" :alt="change.title || change.label" :title="change.title || change.label" /><span>{{ change.label }}</span></div></div></details>
 				<div class="actionImages" :class="{ multipleCards: actionImages.filter((asset) => asset.card).length > 1 }" v-if="actionImages.length"><template v-for="(asset, idx) in actionImages" :key="idx"><div v-if="asset.card" class="historyCard"><ArtworkCard :src="asset.src" :alt="asset.alt" /></div><img v-else :src="asset.src" :alt="asset.alt" :title="asset.alt" /></template></div>
-				<div v-if="entry[0] === rf.HIST_GAME_END" class="new_turn">{{ after?.gameflow.endReason === 'invasion' ? $t("history.gameEndedInvasion") : after?.gameflow.endReason === 'revolution' ? $t("history.gameEndedRevolution") : $t("history.gameEnded") }}</div>
+				<div v-if="isGameEnd" class="new_turn">{{ after?.gameflow.endReason === 'invasion' ? $t("history.gameEndedInvasion") : after?.gameflow.endReason === 'revolution' ? $t("history.gameEndedRevolution") : $t("history.gameEnded") }}</div>
 			</template>
 		</div>
 	</div>

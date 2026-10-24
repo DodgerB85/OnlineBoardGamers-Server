@@ -9,6 +9,7 @@ import { computed, reactive, ref } from "vue"
 import * as rf from "../js/URRreference.js"
 import { usePersonalStore } from "./URRpersonal.js"
 import { computeHistory } from "../js/URRhistory.js"
+import { syncHistoryReplay } from "../js/URRhistoryStorage.js"
 
 export const useModelStore = defineStore("store", () => {
 	var gameName = "Game Name"
@@ -42,8 +43,51 @@ export const useModelStore = defineStore("store", () => {
 
 	const chatData = reactive([])
 	const history = reactive([])
+	// Replayed positions are derived and never exported.
+	const historyReplay = { entries: [], snapshots: [], times: [] }
+
+	function resetHistoryReplay() {
+		historyReplay.entries.length = 0
+		historyReplay.snapshots.length = 0
+		historyReplay.times.length = 0
+	}
+
+	function setHistory(entries) {
+		history.splice(0, history.length, ...entries)
+		resetHistoryReplay()
+	}
+
+	function syncHistory() {
+		return syncHistoryReplay(historyReplay, history, players.map((player) => player.name), usePersonalStore().gameCreationTimestamp)
+	}
+
+	function historySnapshotAt(index) {
+		if (index < 0 || index >= history.length) return null
+		return syncHistory().snapshots[index]
+	}
+
+	function historySnapshots() {
+		return syncHistory().snapshots
+	}
+
+	function historyTimeAt(index) {
+		if (index < 0 || index >= history.length) return null
+		return syncHistory().times[index]
+	}
+
+	// Pre-game edits (shadow names, missing seats) belong to the opening, not a move.
+	function setHistoryOpening(changes) {
+		if (!history.length) return
+		if (changes?.length) history[0][3] = changes
+		else if (history[0].length > 3) history[0].length = 3
+		resetHistoryReplay()
+	}
+
 	// Display-only entries and metadata belong here, not in exported history.
-	const computedHistory = computed(() => computeHistory(history, usePersonalStore().gameCreationTimestamp))
+	const computedHistory = computed(() => {
+		const replay = syncHistory()
+		return computeHistory(history, usePersonalStore().gameCreationTimestamp, replay.snapshots, replay.times)
+	})
 
 	const viewSettings = reactive({
 		boardZoom: 1,
@@ -105,6 +149,11 @@ export const useModelStore = defineStore("store", () => {
 		gameflow,
 		chatData,
 		history,
+		setHistory,
+		historySnapshotAt,
+		historySnapshots,
+		historyTimeAt,
+		setHistoryOpening,
 		computedHistory,
 		viewSettings,
 		gameMessages,

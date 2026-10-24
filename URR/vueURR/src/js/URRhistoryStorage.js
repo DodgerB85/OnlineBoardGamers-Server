@@ -6,8 +6,8 @@
 import * as game from "./URRgame.js"
 import * as board from "./URRboard.js"
 import * as boardRules from "./URRmap.js"
-
-const encodedEntries = new WeakMap()
+import * as rf from "./URRreference.js"
+import { historyAction, historyChanges } from "./URRhistoryActions.js"
 
 function collectChanges(before, after, path, changes) {
 	if (before === after) return
@@ -39,7 +39,7 @@ function applyChanges(target, changes) {
 	return target
 }
 
-function changesBetween(before, after) {
+export function changesBetween(before, after) {
 	const changes = []
 	collectChanges(before, after, [], changes)
 	return changes
@@ -102,12 +102,6 @@ export function compactBoard(current) {
 }
 
 export function expandBoard(stored) {
-	if (stored?.format === "urr-board-v1") {
-		const { format, areas, ...rest } = stored
-		const result = { ...printedBoard(), ...rest }
-		for (const area of result.areas) Object.assign(area, areas[area.id])
-		return result
-	}
 	if (!Array.isArray(stored)) throw new Error("Unsupported URR board")
 	const [areas, canals, rest] = stored
 	const result = printedBoard()
@@ -125,65 +119,63 @@ export function expandBoard(stored) {
 	return result
 }
 
-function predict(previous, player, action, isLegacyReplay = false) {
-	if (!action) return previous
+function predict(previous, player, action, quiet = false) {
+	if (!previous) throw new Error("URR history must start with the new game entry")
+	// A no-action entry carries its own changes; clone so cached positions stay immutable.
+	if (!action) return JSON.parse(JSON.stringify(previous))
 	try {
-		return game.applyAction(previous, player, action, isLegacyReplay)
-	} catch {
-		return previous
+		return game.applyAction(previous, player, action)
+	} catch (error) {
+		if (!quiet) console.warn("Unable to replay URR history entry:", error)
+		return JSON.parse(JSON.stringify(previous))
 	}
 }
 
-export function compactHistory(history) {
-	if (!history.length) return []
-	return history.slice(1).map((entry, offset) => {
-		const previousEntry = history[offset]
-		const cached = encodedEntries.get(entry)
-		if (cached?.snapshot === entry[2] && cached.previousSnapshot === previousEntry[2]) return JSON.parse(JSON.stringify(cached.stored))
-
-		const time = entry[4] != null && previousEntry[4] != null ? entry[4] - previousEntry[4] : null
-		const stored = [entry[0], entry[1], entry[3] ?? null, time]
-		const changes = changesBetween(predict(JSON.parse(previousEntry[2]), entry[1], entry[3]), JSON.parse(entry[2]))
-		if (changes.length) stored.push(changes)
-		// An appended move should not re-encode the entire existing replay.
-		encodedEntries.set(entry, { snapshot: entry[2], previousSnapshot: previousEntry[2], stored })
-		return JSON.parse(JSON.stringify(stored))
-	})
+export function openingState(playerNames, changes = []) {
+	return applyChanges(game.createGame(playerNames), changes)
 }
 
-// Preserve opening changes from debug edits or shadow renames.
-export function compactOpening(history) {
-	if (!history.length) return []
-	const opening = JSON.parse(history[0][2])
-	return changesBetween(game.createGame(opening.players.map((player) => player.name)), opening)
+export function replayHistoryEntry(previous, entry, playerNames) {
+	if (entry[0] === rf.HIST_NEW_GAME) return openingState(playerNames, entry[3] || [])
+	const action = historyAction(entry)
+	const changes = historyChanges(entry)
+	return applyChanges(predict(previous, entry[1], action, Array.isArray(changes) && changes.length > 0), changes || [])
 }
 
-export function expandHistory(data, newGameEvent, creationTimestamp) {
-	if (!Array.isArray(data.replay)) {
-		if (!Array.isArray(data.history)) throw new Error("Unsupported URR replay format")
-		let previous = null
-		return data.history.map((entry, index) => {
-			if (index === 0 && entry[4] > 1e11) entry = [...entry.slice(0, 4), Math.floor(entry[4] / 1000)]
-			const stored = entry[2]
-			if (typeof stored === "string") previous = JSON.parse(stored)
-			else {
-				if (!previous || stored?.format !== "urr-history-delta-v1" || !Array.isArray(stored.changes)) throw new Error("Invalid URR replay delta")
-				applyChanges(previous, stored.changes)
-			}
-			return [entry[0], entry[1], JSON.stringify(previous), ...JSON.parse(JSON.stringify(entry.slice(3)))]
-		})
+// Replays only the entries appended since the last call. Undo truncates and
+// import replaces entries, so identity is checked before reusing a position.
+export function syncHistoryReplay(cache, history, playerNames, creationTimestamp) {
+	if (cache.entries.length > history.length) {
+		cache.entries.length = cache.snapshots.length = cache.times.length = history.length
 	}
-	let previous = applyChanges(game.createGame(data.players.map((player) => player.name)), data.replayStart || [])
-	let time = creationTimestamp ?? null
-	const result = [[newGameEvent, -1, JSON.stringify(previous), null, time]]
-	for (const stored of data.replay) {
-		const [event, player, action, delta, changes] = stored
-		const snapshot = applyChanges(JSON.parse(JSON.stringify(predict(previous, player, action, data.replayRules !== 1))), changes || [])
-		time = delta != null && time != null ? time + delta : null
-		const entry = [event, player, JSON.stringify(snapshot), action, time]
-		if (data.replayRules === 1) encodedEntries.set(entry, { snapshot: entry[2], previousSnapshot: result.at(-1)[2], stored })
-		result.push(entry)
+	for (let index = 0; index < cache.entries.length; index++) {
+		if (cache.entries[index] === history[index]) continue
+		cache.entries.length = 0
+		cache.snapshots.length = 0
+		cache.times.length = 0
+		break
+	}
+	let previous = cache.snapshots.at(-1) ?? null
+	let time = cache.times.at(-1) ?? creationTimestamp ?? null
+	// Practice games without a server timestamp still need a real opening time.
+	const startTime = creationTimestamp || Math.floor(Date.now() / 1000)
+	for (let index = cache.entries.length; index < history.length; index++) {
+		const entry = history[index]
+		if (index === 0) time = startTime
+		else time = entry[2] != null && time != null ? time + entry[2] : null
+		const snapshot = replayHistoryEntry(previous, entry, playerNames)
+		cache.entries.push(entry)
+		cache.snapshots.push(snapshot)
+		cache.times.push(time)
 		previous = snapshot
 	}
-	return result
+	return cache
+}
+
+export function expandHistory(data, newGameEvent) {
+	if (!Array.isArray(data.replay)) throw new Error("Unsupported URR replay format")
+	if (!data.replay.every((entry) => Array.isArray(entry) && typeof entry[0] === "number" && typeof entry[1] === "number" && typeof entry[2] === "number")) throw new Error("Unsupported URR replay format")
+	const opening = [newGameEvent, -1, null]
+	if (Array.isArray(data.replayStart) && data.replayStart.length) opening.push(data.replayStart)
+	return [opening, ...data.replay]
 }

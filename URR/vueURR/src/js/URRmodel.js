@@ -1,8 +1,10 @@
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
-import * as rf from "./URRreference"
-import * as funcs from "./URRfuncs"
+import * as rf from "./URRreference.js"
+import * as funcs from "./URRfuncs.js"
 import * as game from "./URRgame.js"
+import * as historyStorage from "./URRhistoryStorage.js"
+import { encodeAction } from "./URRhistoryActions.js"
 import i18n from "../i18n.js"
 
 const t = i18n.global.t
@@ -72,13 +74,14 @@ export function applyShadowDisplayNames(names) {
 		const player = store.players.find((candidate) => candidate.name === rf.SHADOW_PLAYER_NAMES[index])
 		if (player && name) player.displayName = name
 	}
+	captureOpening()
 }
 
 export function initGameFresh(playerNames, boardDefinition) {
 	const store = useModelStore()
 	restoreState(game.createGame(playerNames, boardDefinition))
 	store.clearTurnDraft()
-	store.history.splice(0)
+	store.setHistory([])
 	addHistory(rf.HIST_NEW_GAME, -1)
 }
 
@@ -89,13 +92,13 @@ export function importGameData(obj) {
 	store.clearTurnDraft()
 	if (hadDraft) store.turnDraft.message = t("io.uncommittedCleared")
 	restoreState(data.state)
-	store.history.splice(0, store.history.length, ...data.history)
+	store.setHistory(data.history)
 }
 
 export function performAction(playerIndex, action) {
 	const next = game.applyAction(snapshotState(), playerIndex, action)
 	restoreState(next)
-	addHistory(next.gameflow.phase === rf.PHASE_GAME_OVER ? rf.HIST_GAME_END : rf.HIST_ACTION, playerIndex, undefined, action)
+	addHistory(rf.HIST_ACTION, playerIndex, action)
 }
 
 // Missing seats never hold the turn: their remaining duties resolve with the
@@ -112,11 +115,37 @@ export function playMissingSeats() {
 	}
 }
 
-export function addHistory(event, playerIndex, snapshot, action = null) {
-	const entry = [event, playerIndex, JSON.stringify(snapshot === undefined ? snapshotState() : snapshot)]
-	entry.push(action ? JSON.parse(JSON.stringify(action)) : null)
-	entry.push(event === rf.HIST_NEW_GAME ? usePersonalStore().gameCreationTimestamp || Math.floor(Date.now() / 1000) : Math.floor(Date.now() / 1000))
-	useModelStore().history.push(entry)
+export function addHistory(event, playerIndex, action = null) {
+	const store = useModelStore()
+	const entry = [event, playerIndex, null]
+	if (event !== rf.HIST_NEW_GAME) {
+		const now = Math.floor(Date.now() / 1000)
+		const previousTime = store.historyTimeAt(store.history.length - 1)
+		entry[2] = previousTime == null ? now : now - previousTime
+	}
+	if (action) {
+		// Clone now: callers may clear draft arrays (canal paths, sale batches) after submit.
+		const [code, params] = encodeAction(JSON.parse(JSON.stringify(action)))
+		entry[0] = code
+		entry.push(...params)
+	} else if (event !== rf.HIST_NEW_GAME) {
+		// Only out-of-band state needs a patch; actions replay exactly.
+		const previous = store.historySnapshotAt(store.history.length - 1)
+		if (previous) {
+			const changes = historyStorage.changesBetween(previous, snapshotState())
+			if (changes.length) entry.push(changes)
+		}
+	}
+	store.history.push(entry)
+}
+
+// Opening-only edits (shadow names, missing seats) are not a move: keep them
+// in the new-game entry so replay starts from the right position.
+function captureOpening() {
+	const store = useModelStore()
+	if (store.history.length !== 1) return
+	const names = store.players.map((player) => player.name)
+	store.setHistoryOpening(historyStorage.changesBetween(game.createGame(names), snapshotState()))
 }
 
 export function getPlayerByIndex(index) {
@@ -137,4 +166,5 @@ export function setMissingPlayers(names) {
 		player.isMissing = true
 		player.displayName = `${player.name} (Bot)`
 	}
+	captureOpening()
 }

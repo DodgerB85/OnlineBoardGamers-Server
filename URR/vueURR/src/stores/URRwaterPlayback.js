@@ -7,8 +7,8 @@ export const useWaterPlaybackStore = defineStore("waterPlayback", () => {
 	const current = computed(() => state.steps[state.index] ?? null)
 	const atEnd = computed(() => state.index >= state.steps.length - 1)
 	const isIrrigationPreview = computed(() => state.showIrrigated && atEnd.value && !state.advancing)
-	function start(history, index, advancing) {
-		const script = buildWaterPlayback(history, index)
+	function start(history, snapshots, index, advancing) {
+		const script = buildWaterPlayback(history, snapshots, index)
 		Object.assign(state, script, { visible: true, index: 0, advancing, showIrrigated: false })
 	}
 	function next() {

@@ -1,5 +1,6 @@
 import * as rf from "./URRreference.js"
 import * as water from "./URRwater.js"
+import { historyAction } from "./URRhistoryActions.js"
 import i18n from "../i18n.js"
 
 const t = i18n.global.t
@@ -23,19 +24,19 @@ function canalPath(board, from, to) {
 	throw new Error(t("waterPlayback.noCanalPath"))
 }
 
-export function buildWaterPlayback(history, completionIndex) {
-	const snapshots = history.slice(0, completionIndex + 1).map((entry) => JSON.parse(entry[2]))
-	const completed = snapshots.at(-1)
+export function buildWaterPlayback(history, snapshots, completionIndex) {
+	const selected = snapshots.slice(0, completionIndex + 1)
+	const completed = selected.at(-1)
 	if (!completed || completed.rain.outflow === null || completed.rain.step === "routing") throw new Error(t("waterPlayback.notComplete"))
 	let startIndex = completionIndex
 	while (startIndex > 0) {
-		const before = snapshots[startIndex - 1]
-		const after = snapshots[startIndex]
+		const before = selected[startIndex - 1]
+		const after = selected[startIndex]
 		if ([rf.PHASE_DEVELOPMENT, rf.PHASE_SETTLEMENT].includes(before.gameflow.phase) && (after.gameflow.phase === rf.PHASE_RAINY_SEASON || after.gameflow.turn > before.gameflow.turn || after.gameflow.phase === rf.PHASE_GAME_OVER)) break
 		startIndex--
 	}
 	if (startIndex === 0) throw new Error(t("waterPlayback.noStart"))
-	const game = JSON.parse(JSON.stringify(snapshots[startIndex]))
+	const game = JSON.parse(JSON.stringify(selected[startIndex]))
 	for (const area of game.board.areas) area.irrigatedBy = null
 	game.rain = { step: "routing", outflow: null, harvestOrder: [] }
 	const board = JSON.parse(JSON.stringify(game.board))
@@ -67,7 +68,7 @@ export function buildWaterPlayback(history, completionIndex) {
 	}
 	let finished = water.startWaterRouting(game, record)
 	for (let index = startIndex + 1; index <= completionIndex; index++) {
-		const action = history[index][3]
+		const action = historyAction(history[index])
 		if (action?.type === "allocateWater") finished = water.allocateWater(game, action, record)
 		else if (action?.type === "advanceWater") finished = water.advanceWaterRouting(game, record)
 	}

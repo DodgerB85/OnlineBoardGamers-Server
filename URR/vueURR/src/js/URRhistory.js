@@ -1,14 +1,10 @@
 import * as rf from "./URRreference.js"
 import * as rules from "./URRrules.js"
 import * as water from "./URRwater.js"
+import { historyAction } from "./URRhistoryActions.js"
 import i18n from "../i18n.js"
 
 const t = i18n.global.t
-
-function readSnapshot(entry) {
-	if (!entry) return null
-	try { return JSON.parse(entry[2]) } catch (error) { console.error("Unable to read URR history snapshot:", error); return null }
-}
 
 function irrigationDetails(game, areas, future = false) {
 	return areas.map((area) => ({
@@ -36,22 +32,23 @@ function routingSnapshot(before, after, action, startsRain) {
 	return game
 }
 
-export function computeHistory(history, creationTimestamp) {
+export function computeHistory(history, creationTimestamp, snapshots = [], times = []) {
 	const result = []
-	let before = null
 	for (const [index, entry] of history.entries()) {
 		const displayEntry = [...entry]
-		displayEntry[4] = entry[4] ?? (entry[0] === rf.HIST_NEW_GAME ? creationTimestamp : null)
 		displayEntry.historyIndex = index
 		displayEntry.historyKey = `${index}-move`
+		displayEntry.historyTime = times[index] ?? (index === 0 ? creationTimestamp : null)
 		result.push(displayEntry)
-		const after = readSnapshot(entry)
-		if (!before || !after) { before = after; continue }
-		const action = entry[3]
+		const before = index > 0 ? snapshots[index - 1] : null
+		const after = snapshots[index] ?? null
+		if (!before || !after) continue
+		const action = historyAction(entry)
 		function addSummary(kind, title, text, details = []) {
-			const summary = [rf.HIST_ACTION, -1, entry[2], null, displayEntry[4]]
+			const summary = [rf.HIST_ACTION, -1, null, 0]
 			summary.historyIndex = index
 			summary.historyKey = `${index}-${kind}`
+			summary.historyTime = displayEntry.historyTime
 			summary.administration = { kind, title, text, details, turn: before.gameflow.turn }
 			result.push(summary)
 			return summary.administration
@@ -119,7 +116,6 @@ export function computeHistory(history, creationTimestamp) {
 		if (before.gameflow.phase !== rf.PHASE_GAME_OVER && after.gameflow.phase === rf.PHASE_GAME_OVER) {
 			addSummary("finalScoring", t("historyPage.gameOver"), t("historyPage.gameOverText"), after.players.map((player, index) => ({ player: index, text: t("historyPage.finalAssets", { money: player.money, land: player.score - player.money, score: player.score }) })))
 		}
-		before = after
 	}
 	return result
 }

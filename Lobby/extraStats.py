@@ -73,10 +73,11 @@ def read_history(game, data):
             raise ValueError("Unrecognized URR history format")
         timestamp = created
         entries = []
-        for event, player, _action, delta, *_changes in data[10]:
+        for entry in data[10]:
+            delta = entry[2]
             if delta is not None:
                 timestamp += delta
-            entries.append((player, timestamp))
+            entries.append((entry[1], timestamp))
         return entries
     if code == "DDL":
         return [(entry[1], None) for entry in data["history"]]

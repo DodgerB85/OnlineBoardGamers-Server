@@ -142,7 +142,7 @@ export function simpleImportWholeURRmodel(input) {
 	const data = decompressData64(input)
 	const store = useModelStore()
 	restoreState(data.state)
-	store.history.splice(0, store.history.length, ...data.history)
+	store.setHistory(data.history)
 }
 
 function encodePlayers(players, forGameOver) {
@@ -342,7 +342,7 @@ export function exportURRmodel(forGameOver = false) {
 	const store = useModelStore()
 	const state = snapshotState()
 	const areaIndex = historyStorage.printedAreaIndexMap()
-	const opening = historyStorage.compactOpening(store.history)
+	const history = store.history
 	const entry = [
 		encodePlayers(state.players, forGameOver),
 		encodeGameflow(state.gameflow, forGameOver),
@@ -354,35 +354,23 @@ export function exportURRmodel(forGameOver = false) {
 		encodeCardSupply(state.cardSupply),
 		forGameOver ? [] : encodeRain(state.rain, areaIndex),
 		forGameOver ? -1 : state.nextDiggerId,
-		// The replay is the only persisted copy of the move history: reloads
-		// rebuild the history panel from it and finished-game stats read it.
-		historyStorage.compactHistory(store.history),
+		// The compact replay is already the stored shape; slot 11 keeps the
+		// opening-only changes, not a full position.
+		history.slice(1),
 	]
-	// Slot 12 distinguishes own-turn replay timing from historical Barahshum interruptions.
-	entry.push(opening, 1)
+	entry.push(history[0]?.[3] ?? [])
+
 	return compressData64(entry)
 }
 
 export function importURRmodel(input) {
-	const personal = usePersonalStore()
-	if (typeof input === "string" && input.startsWith("gzip:")) input = input.slice(5)
 	const data = typeof input === "string" ? (input.trim().startsWith("{") ? JSON.parse(input) : decompressData64(input)) : input
 	if (data?.opening) {
-		const history = historyStorage.expandHistory({ players: data.players.map((name) => ({ name })), replay: [], replayStart: data.replayStart }, rf.HIST_NEW_GAME, personal.gameCreationTimestamp)
-		return { state: JSON.parse(history[0][2]), history }
+		const names = data.players.map((player) => (typeof player === "string" ? player : player.name))
+		const history = historyStorage.expandHistory({ replay: [], replayStart: data.replayStart }, rf.HIST_NEW_GAME)
+		return { state: historyStorage.openingState(names, data.replayStart || []), history }
 	}
-	// Read the previous object saves; all subsequent exports use the compact array.
-	if (data?.players?.length && (data.version === 1 || data.format === "urr-save-v2")) {
-		const state = Object.fromEntries(STATE_FIELDS.map((field) => [field, data[field]]))
-		if (data.format === "urr-save-v2") {
-			state.states = decodeStates(data.states)
-			state.nations = data.nations.map((entry, id) => ({ id, ownerType: entry[0] < 0 ? null : entry[0] === 0 ? "player" : "state", owner: entry[1] < 0 ? null : entry[1], isRemoved: !!entry[2], bids: entry[3] }))
-		}
-		state.board = Array.isArray(data.board?.areas) ? data.board : historyStorage.expandBoard(data.board)
-		const history = historyStorage.expandHistory(data, rf.HIST_NEW_GAME, personal.gameCreationTimestamp)
-		return { state, history }
-	}
-	if (!Array.isArray(data) || data.length < 11) throw new Error("Unsupported URR save")
+	if (!Array.isArray(data) || data.length < 12) throw new Error("Unsupported URR save")
 	const players = decodePlayers(data[0])
 	const states = decodeStates(data[2])
 	const state = {
@@ -397,6 +385,6 @@ export function importURRmodel(input) {
 		rain: decodeRain(data[8], historyStorage.printedAreaIds()),
 		nextDiggerId: data[9] >= 0 ? data[9] : Math.max(-1, ...states.flatMap((entry) => entry.diggers.map((crew) => crew.id))) + 1,
 	}
-	const history = historyStorage.expandHistory({ players, replay: data[10], replayStart: data[11], replayRules: data[12] }, rf.HIST_NEW_GAME, personal.gameCreationTimestamp)
+	const history = historyStorage.expandHistory({ replay: data[10], replayStart: data[11] }, rf.HIST_NEW_GAME)
 	return { state, history }
 }

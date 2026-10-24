@@ -54,8 +54,8 @@ class HistoryTimingTests(SimpleTestCase):
         self.assertEqual(read_history(self.game("DDL"), {"history": [[1, 0, "{}"], [2, 1, "{}"]]}), [(0, None), (1, None)])
 
     def test_urr_replay_timestamps_are_relative(self):
-        data = [None] * 11
-        data[10] = [[0, -1, None, None], [1, 0, None, 100], [2, 1, None, 200]]
+        data = [None] * 12
+        data[10] = [[10, -1, None], [11, 0, 100], [12, 1, 200]]
         self.assertEqual(read_history(self.game("URR"), data), [(-1, CREATED), (0, CREATED + 100), (1, CREATED + 300)])
 
 
