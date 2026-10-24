@@ -38,31 +38,64 @@
         box-sizing: border-box;
         z-index: 10;
       }
-      /* The four terrains bounce in turn while the game loads. */
+      /* Water runs down the canal and irrigates the desert into pasture. */
       #loadingContainer {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         display: flex;
-        align-items: flex-end;
-        gap: 18px;
+        align-items: stretch;
       }
-      .terrainIcon {
-        height: 64px;
-        width: auto;
-        animation: terrainBounce 1.2s infinite ease-in-out;
+      .fieldCol {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
       }
-      .terrainIcon:nth-child(2) { animation-delay: 0.12s; }
-      .terrainIcon:nth-child(3) { animation-delay: 0.24s; }
-      .terrainIcon:nth-child(4) { animation-delay: 0.36s; }
-      @keyframes terrainBounce {
-        0%, 60%, 100% { transform: translateY(0); }
-        30% { transform: translateY(-28px); }
+      .field {
+        width: 92px;
+        height: 52px;
+        border-radius: 4px;
+        background-color: #d8bd7d;
+        box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.08);
+        animation: irrigate 1s infinite;
+      }
+      .fieldCol .field:nth-child(2) { animation-delay: 0.15s; }
+      .fieldCol .field:nth-child(3) { animation-delay: 0.3s; }
+      @keyframes irrigate {
+        0%, 30% { background-color: #d8bd7d; }
+        55%, 85% { background-color: #7fa950; }
+        100% { background-color: #d8bd7d; }
+      }
+      .canal {
+        width: 26px;
+        margin: 0 6px;
+        padding: 0 4px;
+        box-sizing: border-box;
+        border-radius: 4px;
+        background-color: #b99a5f;
+        overflow: hidden;
+      }
+      .canal::before {
+        content: "";
+        display: block;
+        height: 200%;
+        background: repeating-linear-gradient(
+          to bottom,
+          #6fb0ec 0 8px,
+          #3f7fc4 8px 24px
+        );
+        animation: waterFlow 1s infinite linear;
+      }
+      @keyframes waterFlow {
+        from { transform: translateY(0); }
+        to { transform: translateY(-24px); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .field, .canal::before { animation: none; }
       }
       @media (max-width: 600px) {
-        #loadingContainer { gap: 10px; }
-        .terrainIcon { height: 44px; }
+        #loadingContainer { transform: translate(-50%, -50%) scale(0.7); }
       }
     </style>
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
@@ -80,11 +113,18 @@
     </noscript>
     <div id="app">
       <div id="loadingText">{% translate "UR: 1830 BC is loading........" %}</div>
-      <div id="loadingContainer">
-        <img class="terrainIcon" src="{% static 'URR/images/terrain-hills.png' %}" alt="" />
-        <img class="terrainIcon" src="{% static 'URR/images/terrain-forest.png' %}" alt="" />
-        <img class="terrainIcon" src="{% static 'URR/images/terrain-savannah.png' %}" alt="" />
-        <img class="terrainIcon" src="{% static 'URR/images/terrain-desert.png' %}" alt="" />
+      <div id="loadingContainer" aria-hidden="true">
+        <div class="fieldCol">
+          <div class="field"></div>
+          <div class="field"></div>
+          <div class="field"></div>
+        </div>
+        <div class="canal"></div>
+        <div class="fieldCol">
+          <div class="field"></div>
+          <div class="field"></div>
+          <div class="field"></div>
+        </div>
       </div>
     </div>
   <div hidden>{% csrf_token %}</div>
