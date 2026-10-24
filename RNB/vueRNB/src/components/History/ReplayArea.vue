@@ -84,6 +84,7 @@ function shouldDisableForwardsReplay() {
 
 <template>
 	<template v-if="store.viewSettings.showReplay">
+		<button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="shouldDisableBackwardsReplay()" @click="performStep(-999)">{{ $t("replay.backToMyLastMove") }}</button>
 		<button class="actionsLineButton" :disabled="shouldDisableBackwardsReplay()" @click="performStep(-99)">|&lt;</button>
 		<button class="actionsLineButton" :disabled="shouldDisableBackwardsReplay()" @click="performStep(-9)">&lt;&lt;</button>
 		<button class="actionsLineButton" :disabled="shouldDisableBackwardsReplay()" @click="performStep(-1)">&lt;</button>

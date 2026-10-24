@@ -41,6 +41,7 @@ export function resetReplayStop() {
 
 export function performStep(amount) {
 	const store = useModelStore()
+	const personal = usePersonalStore()
 	const maxIdx = store.replayData.length - 1
 	// Exit if we are already at the end - mainly hotkey check
 	//if (amount > 0 && store.replayStep.computedHistoryIndex === store.computedHistory.length - 1 && (store.replayStep.subStep === -1 || store.replayStep.subStep === store.replayStep.maxStep)) return
@@ -73,6 +74,20 @@ export function performStep(amount) {
 	// Bounds checking
 	if (store.replayStep.index < 0) store.replayStep.index = 0
 	if (store.replayStep.index > maxIdx) store.replayStep.index = maxIdx
+
+	// Performing back to my last: land on the final replay entry of my previous history entry
+	if (amount === -999) {
+		const currentHistIdx = store.replayData[store.replayStep.index].computedHistoryIndex
+		let idx = store.replayStep.index - 1
+		while (idx > 0) {
+			const prevHistIdx = store.replayData[idx].computedHistoryIndex
+			if (prevHistIdx < currentHistIdx && store.computedHistory[prevHistIdx][1] === personal.pov) {
+				store.replayStep.index = idx
+				break
+			}
+			idx--
+		}
+	}
 
 	//funcs.importModel(store.replayData[store.replayStep], false, false)
 	//funcs.simpleImportWholeRNBmodel(store.replayData[store.replayStep], true)

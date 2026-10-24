@@ -477,6 +477,7 @@ export default {
 	},
 	replay: {
 		step: "步骤：{current} / {total}",
+		backToMyLastMove: "返回我的上一步",
 		copyGame: "复制此游戏",
 		toNewGame: "到新游戏",
 		notImplemented: "尚未实现",

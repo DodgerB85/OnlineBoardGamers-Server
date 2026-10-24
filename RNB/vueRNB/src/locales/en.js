@@ -477,6 +477,7 @@ export default {
 	},
 	replay: {
 		step: "Step: {current} / {total}",
+		backToMyLastMove: "Back to my last move",
 		copyGame: "Copy This Game",
 		toNewGame: "To New Game",
 		notImplemented: "Not implemented yet",
