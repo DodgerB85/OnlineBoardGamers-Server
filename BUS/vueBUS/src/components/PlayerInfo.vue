@@ -17,19 +17,8 @@ function getActivePlayerClass(index) {
 }
 
 function getPlayerIndexOrderForTable() {
-	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
-		let scoreObj = model.getScoreObj()
-		let resArr = [...store.players]
-		for (let i = 0; i < resArr.length; i++) resArr[i].playerIndex = i
-		let order = []
-		for (let i = 0; i < scoreObj.length; i++) {
-			for (let j = 0; j < scoreObj[i][1].length; j++) {
-				let player = resArr.find((el) => el.colour === scoreObj[i][1][j])
-				order.push(player.playerIndex)
-			}
-		}
-		return order
-	} else return [...store.gameflow.fullTurnOrder]
+	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return model.getFinalRankingIndices()
+	else return [...store.gameflow.fullTurnOrder]
 }
 
 </script>
@@ -49,14 +38,15 @@ function getPlayerIndexOrderForTable() {
       <tbody>
       <tr v-for="(arrayIndex, index) in getPlayerIndexOrderForTable()" :key="index">
         <td :class="getActivePlayerClass(arrayIndex)">
-          <a><span
+          <span
               :class="['playerInfoName', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[arrayIndex].colour)]">
-              {{ store.players[arrayIndex].displayName }} </span></a>
+              {{ store.players[arrayIndex].displayName }} </span>
+          <span v-if="personal.pov === arrayIndex" class="youTag">{{ $t('playerInfo.you') }}</span>
         </td>
-        <td :class="{ 'noMoreLeft': (store.players[arrayIndex].remainingActions === 0) }">{{ store.players[arrayIndex].remainingActions }}</td>
-        <td>{{ store.players[arrayIndex].buses }}</td>
-        <td>{{ store.players[arrayIndex].timeStones }}</td>
-        <td>{{ Math.floor(store.players[arrayIndex].score) }}</td>
+        <td :title="$t('playerInfo.actionsTooltip')" :class="{ 'noMoreLeft': (store.players[arrayIndex].remainingActions === 0) }">{{ store.players[arrayIndex].remainingActions }}</td>
+        <td :title="$t('playerInfo.busesTooltip')">{{ store.players[arrayIndex].buses }}</td>
+        <td :title="$t('playerInfo.stonesTooltip')">{{ store.players[arrayIndex].timeStones }}</td>
+        <td :title="$t('playerInfo.scoreTooltip')">{{ Math.floor(store.players[arrayIndex].score) }}</td>
       </tr>
       </tbody>
     </table>
@@ -199,6 +189,17 @@ function getPlayerIndexOrderForTable() {
   border: 1px solid black;
 }
 
+.youTag {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 5px;
+  border: 1px solid black;
+  background-color: white;
+  color: black;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+
 .playerLineName {
   color: white;
   font-weight: bolder;
@@ -264,7 +265,7 @@ function getPlayerIndexOrderForTable() {
 }
 
 #playerTable tr {
-  cursor: pointer;
+  cursor: default;
   text-align: center;
 }
 

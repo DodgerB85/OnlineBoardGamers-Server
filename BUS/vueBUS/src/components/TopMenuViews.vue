@@ -14,9 +14,22 @@ const personal = usePersonalStore()
 
 import i18n from "../i18n"
 
-import { ref } from "vue"
+import { computed, onMounted, onUnmounted, ref } from "vue"
 
 const chatMessage = ref("")
+const historyPlayerFilter = ref(-1)
+const historyMineOnly = ref(false)
+
+const filteredHistory = computed(() => {
+	return store.history
+		.map((entry, index) => ({ entry, index }))
+		.filter(({ entry }) => {
+			if (entry[1] === undefined || entry[1] < 0 || entry[0] < 10) return true
+			if (historyMineOnly.value && entry[1] !== personal.pov) return false
+			if (historyPlayerFilter.value > -1 && entry[1] !== historyPlayerFilter.value) return false
+			return true
+		})
+})
 
 function toggleBug() {
 	store.topMenuViews.showNotes = false
@@ -26,7 +39,7 @@ function toggleBug() {
 async function submitBug() {
 	let bugContent = document.getElementById("bugContent").value
 	if (bugContent.length === 0) {
-		alert(i18n.global.t("topMenuViews.bugErrorRequired"))
+		store.topMenuViews.errorText = i18n.global.t("topMenuViews.bugErrorRequired")
 		return
 	}
 
@@ -48,10 +61,11 @@ async function submitBug() {
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
-		if (data.bugEntrySuccess) alert(i18n.global.t("io.bugReportSubmitted"))
-		else alert(i18n.global.t("io.webmasterProblem"))
+		if (data.bugEntrySuccess) store.successText = i18n.global.t("io.bugReportSubmitted")
+		else store.topMenuViews.errorText = i18n.global.t("io.webmasterProblem")
 	} catch (error) {
 		console.error("Error fetching data:", error)
+		store.topMenuViews.errorText = i18n.global.t("io.webmasterProblem")
 	}
 
 	store.topMenuViews.showLoader = false
@@ -67,19 +81,30 @@ function parseMessage(message) {
 	return message
 }
 
+function updateHistoryHeight() {
+	const el = document.getElementById("history")
+	if (!el) return
+	const cs = getComputedStyle(el)
+	const footerTop = document.getElementById("footer").getBoundingClientRect().top
+	const historyTop = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+	el.style["max-height"] = String(Math.max(0, parseInt(footerTop - historyTop))) + "px"
+}
+
 function historyToggle() {
 	setTimeout(function () {
-		if (document.getElementById("historyMainDiv").classList.contains("reverseHistory")) document.getElementById("historyMainDiv").classList.remove("reverseHistory")
-		else document.getElementById("historyMainDiv").classList.add("reverseHistory")
-
-		//document.getElementById('boardContainer').classList.add('historyShowing');
-		var el = document.getElementById("history")
-		var cs = getComputedStyle(el)
-		var b = document.getElementById("footer").getBoundingClientRect().top
-		var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
-		el.style["max-height"] = String(parseInt(b - a)) + "px"
+		const mainDiv = document.getElementById("historyMainDiv")
+		if (mainDiv.classList.contains("reverseHistory")) mainDiv.classList.remove("reverseHistory")
+		else mainDiv.classList.add("reverseHistory")
+		updateHistoryHeight()
 	}, 400)
 }
+
+function resizeHistory() {
+	if (store.topMenuViews.showHistory) updateHistoryHeight()
+}
+
+onMounted(() => window.addEventListener("resize", resizeHistory))
+onUnmounted(() => window.removeEventListener("resize", resizeHistory))
 
 function sendChatMessage() {
 	if (chatMessage.value === "") return
@@ -253,12 +278,22 @@ function localCastVote(topic) {
 				<br />
 				<span v-if="store.topMenuViews.showReplay">{{ $t('topMenuViews.clickEntryReplay') }}</span>
 				<span v-else>{{ $t('topMenuViews.clickEntryHighlight') }}</span>
+				<div id="historyFilter">
+					<select v-model.number="historyPlayerFilter">
+						<option :value="-1">{{ $t('history.filterAllPlayers') }}</option>
+						<option v-for="(player, index) in store.players" :key="'filter' + index" :value="index">{{ player.displayName }}</option>
+					</select>
+					<label>
+						<input type="checkbox" v-model="historyMineOnly" />
+						{{ $t('history.filterMine') }}
+					</label>
+				</div>
 				<!--<br /><button @click="toggleReplayMode()"><span v-if="store.topMenuViews.showReplay">Exit</span><span
             v-else>Enter</span> Replay Mode</button>-->
 			</div>
 			<div id="historyMainDiv" class="reverseHistory">
-				<template v-for="(entry, index1) in store.history" v-bind:key="index1">
-					<HistoryEntry :entry="entry" :entry_-i-d="index1" />
+				<template v-for="{ entry, index } in filteredHistory" v-bind:key="index">
+					<HistoryEntry :entry="entry" :entry_-i-d="index" />
 				</template>
 			</div>
 			<div id="historyButtonDiv"></div>
@@ -270,6 +305,15 @@ function localCastVote(topic) {
 .reverseHistory {
 	display: flex;
 	flex-direction: column-reverse;
+}
+
+#historyFilter {
+	margin-top: 6px;
+}
+
+#historyFilter select {
+	max-width: 180px;
+	margin-right: 8px;
 }
 
 #bugReport,
@@ -478,7 +522,7 @@ function localCastVote(topic) {
 .topMenuItem img {
 	/*filter: brightness(0) saturate(100%) invert(100%) sepia(17%) saturate(6440%) hue-rotate(174deg) brightness(98%) contrast(102%);
 */
-	width: 38x;
+	width: 38px;
 	height: 38px;
 }
 

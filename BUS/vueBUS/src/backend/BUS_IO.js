@@ -13,6 +13,21 @@ import i18n from "../i18n"
 
 export const SPLOTTER_CON_USERS = ["admin", "DodgerB", "agundlachi", "pgh_gamer", "cheen"]
 
+function clearLoader() {
+	const store = useModelStore()
+	store.topMenuViews.showLoader = false
+	store.topMenuViews.retryAction = null
+	store.topMenuViews.errorText = ""
+}
+
+// Keep the loader up on failure, show the reason and offer a retry.
+function failLoader(retry, message) {
+	const store = useModelStore()
+	store.topMenuViews.showLoader = true
+	store.topMenuViews.retryAction = retry
+	store.topMenuViews.errorText = message
+}
+
 export async function saveGame(saveRewind) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
@@ -23,6 +38,8 @@ export async function saveGame(saveRewind) {
 	}
 
 	store.topMenuViews.showLoader = true
+	store.topMenuViews.retryAction = null
+	store.topMenuViews.errorText = ""
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -40,8 +57,8 @@ export async function saveGame(saveRewind) {
 	}
 	if (store.gameflow.turnOrder.length > 0) postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name]
 	// USED > goes to currentPlayers
-	else {
-		if (store.gameflow.gameEnded === 0) alert(i18n.global.t("io.zeroToLength"))
+	else if (store.gameflow.gameEnded === 0) {
+		alert(i18n.global.t("io.zeroToLength"))
 		store.gameflow.turnOrder.push(0)
 		postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name]
 		postData.data = funcs.exportBUSmodel(false)
@@ -50,16 +67,10 @@ export async function saveGame(saveRewind) {
 	// GAME ENDED
 	if (store.gameflow.gameEnded > 0) {
 		postData.status = "FINISHED" // USED
-		postData.winner = model.getWinnerName()[0] // USED
+		const finalRanking = model.getFinalRanking()
+		postData.winner = finalRanking.length > 0 ? finalRanking[0].name : undefined // server expects a username
 		postData.saveRewind = false
-		let finalPositions = [...store.players]
-		let cmp = (a, b) => (a > b) - (a < b)
-		finalPositions.sort(function (a, b) {
-			return cmp(b.score, a.score) || cmp(b.timeStones, a.timeStones)
-		})
-		let finalPositionsNames = []
-		for (let i = 0; i < finalPositions.length; i++) finalPositionsNames.push(finalPositions[i].name)
-		postData.finalPositions = finalPositionsNames
+		postData.finalPositions = finalRanking.map((player) => player.name)
 		postData.data = funcs.exportBUSmodel(true)
 	}
 	if (personal.removeCurrentFlexTime) {
@@ -79,19 +90,19 @@ export async function saveGame(saveRewind) {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			alert(i18n.global.t("io.olderVersion"))
+			failLoader(() => saveGame(saveRewind), i18n.global.t("io.olderVersion"))
 			return
 		}
 		personal.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
 
-		store.topMenuViews.showLoader = false
+		clearLoader()
 		controller.startPlayerTurn()
 
 		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert(i18n.global.t("io.saveError"))
+		failLoader(() => saveGame(saveRewind), i18n.global.t("io.saveError"))
 	}
 }
 
@@ -99,6 +110,8 @@ export async function sendChatMessage(newEntry) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.topMenuViews.showLoader = true
+	store.topMenuViews.retryAction = null
+	store.topMenuViews.errorText = ""
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -118,15 +131,15 @@ export async function sendChatMessage(newEntry) {
 		}
 		const data = await response.json()
 		if (!data.chatData) {
-			alert(i18n.global.t("io.webmasterProblem"))
+			failLoader(() => sendChatMessage(newEntry), i18n.global.t("io.webmasterProblem"))
 			return
 		}
 		store.chatData = funcs.decompressChatData(data.chatData)
 		if (personal.liveWS) WS.BUSwebSocket.send("NEWCHATTS" + String(personal.gameID)) //+ String(result.latestUpdate));
-		store.topMenuViews.showLoader = false
+		clearLoader()
 	} catch (error) {
 		console.error("Error sending chat:", error)
-		alert(i18n.global.t("io.chatError"))
+		failLoader(() => sendChatMessage(newEntry), i18n.global.t("io.chatError"))
 	}
 }
 
@@ -164,6 +177,8 @@ export async function reloadGameData() {
 	const personal = usePersonalStore()
 	let csrftoken = funcs.getCookie("csrftoken")
 	store.topMenuViews.showLoader = true
+	store.topMenuViews.retryAction = null
+	store.topMenuViews.errorText = ""
 
 	// Function to fetch data from the database
 	try {
@@ -183,10 +198,11 @@ export async function reloadGameData() {
 		funcs.importBUSmodel(data.gameData, personal.finishedGame, false)
 		personal.secondsToNextKickout = data.secondsToNextKickout
 		personal.latestUpdate = data.latestUpdate
-		store.topMenuViews.showLoader = false
+		clearLoader()
 		controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error fetching data:", error)
+		failLoader(() => reloadGameData(), i18n.global.t("io.updateError"))
 	}
 }
 
@@ -223,6 +239,7 @@ export async function saveNotes() {
 	const personal = usePersonalStore()
 	store.topMenuViews.showLoader = true
 	store.topMenuViews.errorText = ""
+	store.topMenuViews.retryAction = null
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -239,22 +256,21 @@ export async function saveNotes() {
 		})
 		const data = await response.json()
 		if (data.error) {
-			store.topMenuViews.errorText = data.error
-			store.topMenuViews.showLoader = false
+			failLoader(() => saveNotes(), data.error)
 			return
 		}
 		if (!response.ok) {
 			throw new Error("Network response was not ok")
 		}
 		if (!data.notePosted) {
-			store.topMenuViews.errorText = i18n.global.t("io.webmasterProblem")
+			failLoader(() => saveNotes(), i18n.global.t("io.webmasterProblem"))
 			return
 		}
 
-		store.topMenuViews.showLoader = false
+		clearLoader()
 	} catch (error) {
 		console.error("Error saving Notes:", error)
-		alert(i18n.global.t("io.saveNotesError"))
+		failLoader(() => saveNotes(), i18n.global.t("io.saveNotesError"))
 	}
 }
 
@@ -262,6 +278,8 @@ export async function loadRewind() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.topMenuViews.showLoader = true
+	store.topMenuViews.retryAction = null
+	store.topMenuViews.errorText = ""
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	if (store.gameflow.gameEnded > 0) {
@@ -291,8 +309,8 @@ export async function loadRewind() {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			alert(i18n.global.t("io.olderVersion"))
 			store.performingRewind = false
+			failLoader(() => loadRewind(), i18n.global.t("io.olderVersion"))
 			return
 		}
 		personal.latestUpdate = data.latestUpdate
@@ -319,11 +337,11 @@ export async function loadRewind() {
 			// Send back to DB with another save
 			updateDataFromLoadRewind()
 		}
-		store.topMenuViews.showLoader = false
+		clearLoader()
 	} catch (error) {
 		console.error("Error rewinding data:", error)
-		alert(i18n.global.t("io.rewindError"))
 		store.performingRewind = false
+		failLoader(() => loadRewind(), i18n.global.t("io.rewindError"))
 	}
 }
 
@@ -337,6 +355,8 @@ async function updateDataFromLoadRewind() {
 	}
 
 	store.topMenuViews.showLoader = true
+	store.topMenuViews.retryAction = null
+	store.topMenuViews.errorText = ""
 	let csrftoken = funcs.getCookie("csrftoken")
 	// IF AT THE END OF NON-SIMUL PHASE, SET UP NEXT PLAYER
 
@@ -359,7 +379,7 @@ async function updateDataFromLoadRewind() {
 		const data = await response.json()
 		personal.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
-		store.topMenuViews.showLoader = false
+		clearLoader()
 		store.performingRewind = false
 		Bot.actionAnyBotMooves()
 		store.resetVarsOnTurnEnd()
@@ -369,9 +389,9 @@ async function updateDataFromLoadRewind() {
 		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error updating data:", error)
-		alert(i18n.global.t("io.updateError"))
 		store.performingRewind = false
 		controller.startPlayerTurn()
+		failLoader(() => updateDataFromLoadRewind(), i18n.global.t("io.updateError"))
 	}
 }
 
@@ -386,6 +406,8 @@ export async function resign() {
 	store.gameflow.turnOrder.shift()
 
 	store.topMenuViews.showLoader = true
+	store.topMenuViews.retryAction = null
+	store.topMenuViews.errorText = ""
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	try {
@@ -402,11 +424,12 @@ export async function resign() {
 			throw new Error("Network response was not ok")
 		}
 		//const data = await response.json()
+		clearLoader()
 		Bot.actionResign()
 		controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error resiging:", error)
-		alert(i18n.global.t("io.resignError"))
+		failLoader(() => reloadGameData(), i18n.global.t("io.resignError"))
 	}
 }
 
@@ -414,6 +437,8 @@ export async function saveGameDataAfterKickout() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.topMenuViews.showLoader = true
+	store.topMenuViews.retryAction = null
+	store.topMenuViews.errorText = ""
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	var postData = {
@@ -434,12 +459,12 @@ export async function saveGameDataAfterKickout() {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			alert(i18n.global.t("io.olderVersion"))
+			failLoader(() => reloadGameData(), i18n.global.t("io.olderVersion"))
 			return
 		}
 		if (data.voteCast) {
 			store.kickoutVotesData = data.votesData
-			store.topMenuViews.showLoader = false
+			clearLoader()
 			store.successText = i18n.global.t("io.kickoutVoteRecorded")
 			return data
 		}
@@ -463,7 +488,7 @@ export async function saveGameDataAfterKickout() {
 		}
 	} catch (error) {
 		console.error("Error kicking:", error)
-		alert(i18n.global.t("io.kickError"))
+		failLoader(() => reloadGameData(), i18n.global.t("io.kickError"))
 	}
 }
 
@@ -501,6 +526,8 @@ export async function castVote(topic) {
 	const personal = usePersonalStore()
 
 	store.topMenuViews.showLoader = true
+	store.topMenuViews.retryAction = null
+	store.topMenuViews.errorText = ""
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	let postData = {
@@ -521,7 +548,7 @@ export async function castVote(topic) {
 		}
 		const data = await response.json()
 
-		store.topMenuViews.showLoader = false
+		clearLoader()
 		if (data.voteChanged === true) {
 			store.successText = i18n.global.t("io.voteSaved")
 
@@ -536,7 +563,7 @@ export async function castVote(topic) {
 		} else store.rewindErrorText = i18n.global.t("io.contactAdmin")
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.rewindErrorText = i18n.global.t("io.contactAdmin")
+		failLoader(() => castVote(topic), i18n.global.t("io.contactAdmin"))
 		return false
 	}
 }

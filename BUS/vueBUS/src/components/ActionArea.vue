@@ -18,6 +18,26 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 const personal = usePersonalStore()
 
+const forwardChars = ["A", "B", "C", "D", "E", "F"]
+const reverseChars = ["F", "E", "D", "C", "B", "A"]
+
+function chosenActionName(action) {
+	if (action === 0) return i18n.global.t("actionSelection.lineExpansion")
+	if (action === 1) return i18n.global.t("actionSelection.newBus")
+	if (action === 2) return i18n.global.t("actionSelection.passengersName")
+	if (action === 3) return i18n.global.t("actionSelection.newBuildingName")
+	if (action === 4) return i18n.global.t("actionSelection.stopTime")
+	if (action === 5) return i18n.global.t("actionSelection.vrrooomm")
+	if (action === 6) return i18n.global.t("actionSelection.startingPlayer")
+	return ""
+}
+
+function chosenActionPosition(action, index) {
+	if (action === 0 || action === 3) return i18n.global.t("actionArea.atPosition", { position: reverseChars[index] })
+	if (action === 2 || action === 5) return i18n.global.t("actionArea.atPosition", { position: forwardChars[index] })
+	return ""
+}
+
 function getActionText() {
 	const t = i18n.global.t
 	let phaseStr = ""
@@ -32,10 +52,19 @@ function getActionText() {
 		if (store.context.endJunctionsOptions.length > 0) phaseStr += "<br/>" + t("actionArea.phaseChooseJunction")
 	}
 	if (store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS) {
-		phaseStr = t("actionArea.phaseChooseAction")
-		phaseStr += "<br/>" + t("actionArea.phaseChooseActionHint")
-		phaseStr += "<br/>" + t("actionArea.phaseCanPass")
-		if (controller.currentPlayerObj().remainingActions === 0 && !store.context.actionChosen) phaseStr += "<br/><br/><span style='color: red'>" + t("actionArea.phaseNoActions") + "</span>"
+		if (store.context.actionChosen && store.context.historyObj.length >= 2) {
+			const action = store.context.historyObj[0]
+			const index = store.context.historyObj[1]
+			phaseStr = t("actionArea.actionChosen", {
+				action: chosenActionName(action),
+				position: chosenActionPosition(action, index),
+			})
+		} else {
+			phaseStr = t("actionArea.phaseChooseAction")
+			phaseStr += "<br/>" + t("actionArea.phaseChooseActionHint")
+			phaseStr += "<br/>" + t("actionArea.phaseCanPass")
+			if (controller.currentPlayerObj().remainingActions === 0) phaseStr += "<br/><br/><span style='color: red'>" + t("actionArea.phaseNoActions") + "</span>"
+		}
 	}
 	if (store.gameflow.phase === rf.PHASE_LINE_EXPANSION) {
 		phaseStr = t("actionArea.phaseExpandLine") // 5p: +1 to maxNumBus
@@ -85,6 +114,7 @@ function getBuildingImgBorder(bldgNum) {
 	else return "4px solid yellow"
 }
 function alterTime(stoppingTime) {
+	funcs.pushUndoPoint()
 	if (!stoppingTime) {
 		store.desiredBuilding++
 		if (store.desiredBuilding > rf.BLDG_PUB) store.desiredBuilding = rf.BLDG_HOME
@@ -102,7 +132,17 @@ function localEndPlayerTurn() {
 	if (store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS) controller.endPlayerChooseActionTurn()
 	else controller.endPlayerTurn()
 }
+function requestReset() {
+	store.context.confirmReset = true
+}
+function cancelReset() {
+	store.context.confirmReset = false
+}
+function undoTurnAction() {
+	funcs.undoLastAction()
+}
 function resetPlayerTurn() {
+	store.context.confirmReset = false
 	store.resetVarsOnTurnEnd()
 	funcs.importBUSmodel(store.turnResetData, false, true)
 	controller.startPlayerTurn()
@@ -162,6 +202,18 @@ function currentKickoutTarget() {
 function myKickoutVote() {
 	return store.kickoutVotesData[personal.name]
 }
+function winnerDisplayName() {
+	const winner = model.getWinnerPlayer()
+	return winner ? winner.displayName : ""
+}
+function winnerIsMe() {
+	const winner = model.getWinnerPlayer()
+	return winner !== null && winner.name === personal.name
+}
+function winnerReason() {
+	return model.getWinnerName()[1]
+}
+
 function canKickoutNow() {
 	const target = currentKickoutTarget()
 	const myVote = myKickoutVote()
@@ -293,7 +345,7 @@ onUnmounted(() => {
 				<br />
 			</template>
 
-			<template v-if="!store.context.confirmEndTurn && !store.context.confirmResign">
+			<template v-if="!store.context.confirmEndTurn && !store.context.confirmResign && !store.context.confirmReset">
 				<span v-html="getActionText()"></span>
 				<span class="actionError" v-if="store.context.turnEndingErrorMessage !== ''">
 					<br />
@@ -339,21 +391,22 @@ onUnmounted(() => {
 					<template v-if="canResign()">
 						<button class="actionsLineButton resignButton" @click="confirmResign()">{{ $t('actionArea.resign') }}</button>
 					</template>
-					<button class="actionsLineButton" @click="resetPlayerTurn()">{{ $t('actionArea.reset') }}</button>
+					<button v-if="store.undoPoints.length > 0" class="actionsLineButton" @click="undoTurnAction">{{ $t('actionArea.undo') }}</button>
+					<button class="actionsLineButton" @click="requestReset()">{{ $t('actionArea.reset') }}</button>
 					<template v-if="controller.currentPlayerCanPass() && !store.context.actionChosen">
 						<button class="actionsLineButton" @click="passChooseAction()">{{ $t('actionArea.passChooseActions') }}</button>
 					</template>
 				</template>
 			</template>
 
-			<template v-if="controller.currentPlayerCanPass() && personal.canEndTurn()">
+			<template v-if="!store.context.confirmReset && controller.currentPlayerCanPass() && personal.canEndTurn()">
 				<button class="actionsLineButton" @click="endTurnAndPass()">{{ $t('actionArea.endTurnPass') }}</button>
 			</template>
 
-			<button v-if="personal.canEndTurn()" class="actionsLineButton" @click="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS ? controller.endPlayerChooseActionTurn() : controller.endPlayerTurn()">{{ $t('actionArea.endTurn') }}</button>
+			<button v-if="!store.context.confirmReset && personal.canEndTurn()" class="actionsLineButton" @click="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS ? controller.endPlayerChooseActionTurn() : controller.endPlayerTurn()">{{ $t('actionArea.endTurn') }}</button>
 
 			<!-- Phase STOP TIME -->
-			<template v-if="store.gameflow.phase === rf.PHASE_ALTER_TIME && !store.context.confirmEndTurn">
+			<template v-if="!store.context.confirmReset && store.gameflow.phase === rf.PHASE_ALTER_TIME && !store.context.confirmEndTurn">
 				{{ $t('actionArea.stopTimePrompt') }}
 				<span v-if="store.remainingTimeStones <= 1" class="actionError">
 					<br />
@@ -365,19 +418,28 @@ onUnmounted(() => {
 			</template>
 
 			<!-- Confirm End Turn -->
-			<template v-if="store.context.confirmEndTurn">
+			<template v-if="store.context.confirmEndTurn && !store.context.confirmReset">
 				{{ $t('actionArea.confirmChoice') }}
 				<span v-if="store.remainingTimeStones === 0" class="actionError">
 					<br />
 					{{ $t('actionArea.cautionLastTimeStone') }}
 				</span>
 				<br />
-				<button class="actionsLineButton" @click="resetPlayerTurn()">{{ $t('actionArea.reset') }}</button>
+				<button v-if="store.undoPoints.length > 0" class="actionsLineButton" @click="undoTurnAction">{{ $t('actionArea.undo') }}</button>
+				<button class="actionsLineButton" @click="requestReset()">{{ $t('actionArea.reset') }}</button>
 				<button class="actionsLineButton" @click="localEndPlayerTurn">{{ $t('actionArea.endTurn') }}</button>
 			</template>
 
+			<!-- Confirm RESET -->
+			<template v-if="store.context.confirmReset">
+				<p>{{ $t('actionArea.confirmResetQuestion') }}</p>
+				<br />
+				<button class="actionsLineButton" @click="cancelReset">{{ $t('actionArea.cancel') }}</button>
+				<button class="actionsLineButton" @click="resetPlayerTurn()">{{ $t('actionArea.confirmReset') }}</button>
+			</template>
+
 			<!-- Confirm RESIGN -->
-			<template v-if="store.context.confirmResign">
+			<template v-if="store.context.confirmResign && !store.context.confirmReset">
 				<p>{{ $t('actionArea.resignQuestion') }}</p>
 				<p>{{ $t('actionArea.resignUnbalance') }}</p>
 				<p>{{ $t('actionArea.resignCarryOn') }}</p>
@@ -401,17 +463,17 @@ onUnmounted(() => {
 			<span v-if="store.gameflow.gameEnded === 4">{{ $t('actionArea.gameEnd4') }}</span>
 			<br />
 			<br />
-			{{ $t('actionArea.winner', { name: model.getWinnerName()[0] }) }}
-			<template v-if="model.getWinnerName()[0] === personal.name">
+			{{ $t('actionArea.winner', { name: winnerDisplayName() }) }}
+			<template v-if="winnerIsMe()">
 				<h1>{{ $t('actionArea.congratulations') }}</h1>
 			</template>
 			<template v-else>
 				<br />
 				<br />
 			</template>
-			<span v-if="model.getWinnerName()[1] === 0">{{ $t('actionArea.highestScore') }}</span>
-			<span v-if="model.getWinnerName()[1] === 1">{{ $t('actionArea.jointMoreStones') }}</span>
-			<span v-if="model.getWinnerName()[1] === 2">{{ $t('actionArea.jointScoreFirst') }}</span>
+			<span v-if="winnerReason() === 0">{{ $t('actionArea.highestScore') }}</span>
+			<span v-if="winnerReason() === 1">{{ $t('actionArea.jointMoreStones') }}</span>
+			<span v-if="winnerReason() === 2">{{ $t('actionArea.jointScoreFirst') }}</span>
 			<br />
 			<br />
 			{{ $t('actionArea.fancyRematch') }}

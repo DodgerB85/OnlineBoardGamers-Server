@@ -95,7 +95,7 @@
     ///////////////////////
     initData.locale = "{{ LANGUAGE_CODE|default:'en-gb' }}";
     initData.gameID = {{ gameID }};
-    initData.gameName = "{{ gameName }}";
+    initData.gameName = "{{ gameName|escapejs }}";
     initData.gameData = '{{ gameData|escapejs }}';
     initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
     initData.myZoomLevel = {{ myZoomLevel}};
@@ -118,7 +118,7 @@
     {% if user.is_authenticated %}
     initData.name = '{{ name }}'; 
     initData.chatData = "{{ chatData }}";
-    initData.preferredBusBoard = {{ preferredBusBoard }};
+    initData.preferredBUSoptions = {{ preferredBUSoptions|default:"[-1,0,0]"|safe }};
 
     initData.nextURL = '{{ nextURL|safe }}';
     {% endif %}
@@ -139,7 +139,6 @@
     {% if chatNotification %}
     initData.chatNotification = true;
     {% endif %}
-    initData.preferredBusColour = {{ preferredBusColour }};
 
     initData.yourTurnAudioType = {{yourTurnAudioType}};
 

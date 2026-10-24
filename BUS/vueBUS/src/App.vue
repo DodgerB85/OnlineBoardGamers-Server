@@ -53,6 +53,20 @@ document.addEventListener("keyup", function (event) {
 	}
 })
 
+function retryFailedAction() {
+	const retry = store.topMenuViews.retryAction
+	if (retry) retry()
+}
+
+function currentTurnPlayer() {
+	const index = store.gameflow.turnOrder[0]
+	return index === undefined ? null : store.players[index]
+}
+
+function isMyTurn() {
+	return personal.canPlay() && !store.topMenuViews.showReplay && !store.topMenuViews.generatingReplay
+}
+
 // THis is needed as it's used right here to display under the board
 function getFlexiTimeString(playerName) {
 	let KickoutFlexiDataArray = window.initData.KickoutFlexiDataArray
@@ -87,6 +101,22 @@ function getFlexiTimeString(playerName) {
 
 <template>
 	<TopMenu />
+	<div id="turnStatus" :class="{ myTurn: isMyTurn(), gameOver: store.gameflow.gameEnded > 0 }">
+		<template v-if="store.gameflow.gameEnded > 0">
+			{{ $t('status.gameOver') }}
+		</template>
+		<template v-else-if="isMyTurn()">
+			<span class="yourTurnBadge">{{ $t('status.yourTurnBadge') }}</span>
+			{{ $t('status.yourTurn', { phase: view.phaseStr() }) }}
+		</template>
+		<template v-else-if="currentTurnPlayer()">
+			<span class="turnPlayerChip" :class="'mainEntryPlayer' + personal.getCorrectedColour(currentTurnPlayer().colour)">{{ currentTurnPlayer().displayName }}</span>
+			{{ $t('status.waiting', { phase: view.phaseStr() }) }}
+		</template>
+		<template v-else>
+			{{ $t('status.waitingNoPlayer', { phase: view.phaseStr() }) }}
+		</template>
+	</div>
 	<div id="wholeMiddleArea" :class="store.topMenuViews.showReplay ? 'greyBackground' : 'normalBackground'">
 		<transition name="fadeMainArea">
 			<div id="middle" v-if="!store.performingRewind">
@@ -102,8 +132,17 @@ function getFlexiTimeString(playerName) {
 								<ActionSelection />
 							</div>
 						</div>
-						<div v-if="store.topMenuViews.showLoader" id="fLoadingBar"><img
-								:src="view.getImage('loading-bar-black')" /></div>
+						<div v-if="store.topMenuViews.showLoader" id="fLoadingBar">
+							<template v-if="store.topMenuViews.retryAction">
+								<div class="loaderError">{{ store.topMenuViews.errorText }}</div>
+								<button class="actionsLineButton" @click="retryFailedAction">{{ $t('io.retrySave') }}</button>
+							</template>
+							<template v-else>
+								{{ $t('io.savingGame') }}
+								<br />
+								<img :src="view.getImage('loading-bar-black')" />
+							</template>
+						</div>
 
 						<ActionArea />
 
@@ -116,7 +155,7 @@ function getFlexiTimeString(playerName) {
 	</div>
 	<div id="timesDiv">
 		{{ $t('topMenu.flexiTimes') }}
-		<span v-for="(player, idx) in store.players" :key="idx">{{ player.name }}: {{ getFlexiTimeString(player.name)
+		<span v-for="(player, idx) in store.players" :key="idx">{{ player.displayName }}: {{ getFlexiTimeString(player.name)
 		}}&nbsp;&nbsp;&nbsp;</span>
 		&nbsp;&nbsp;&nbsp;
 	</div>
@@ -124,6 +163,45 @@ function getFlexiTimeString(playerName) {
 </template>
 
 <style>
+#turnStatus {
+	text-align: center;
+	font-weight: bolder;
+	padding: 4px 8px;
+	background-color: #c4dff7;
+	border-bottom: 1px solid #8bb8d8;
+}
+
+#turnStatus.myTurn {
+	background-color: lightgreen;
+}
+
+#turnStatus.gameOver {
+	background-color: lightgoldenrodyellow;
+}
+
+.yourTurnBadge {
+	display: inline-block;
+	background-color: darkgreen;
+	color: white;
+	border-radius: 10px;
+	padding: 1px 8px;
+	margin-right: 6px;
+	font-size: 0.9em;
+}
+
+.turnPlayerChip {
+	display: inline-block;
+	color: white;
+	border: 1px solid black;
+	padding: 1px 6px;
+	margin-right: 6px;
+}
+
+[role="button"]:focus-visible {
+	outline: 3px solid #0055ff;
+	outline-offset: 2px;
+}
+
 #timesDiv {
 	text-align: center;
 	margin: auto;
@@ -182,12 +260,37 @@ function getFlexiTimeString(playerName) {
 #fLoadingBar {
 	width: 100%;
 	text-align: center;
+	font-weight: bolder;
+}
+
+.loaderError {
+	color: darkred;
+	background-color: lightgoldenrodyellow;
+	padding: 6px;
+	margin-bottom: 6px;
 }
 
 .historyShowing {
 	padding-left: max(454px, 100px);
 	/*position: flex;*/
 	/*left: 454px;*/
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-delay: 0ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+
+	.new-line {
+		animation: none !important;
+		opacity: 1 !important;
+	}
 }
 
 body {

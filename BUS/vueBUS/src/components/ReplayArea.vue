@@ -32,25 +32,25 @@ function exitReplayMode() {
     <div class="replayButtonsDiv">
       <button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="store.replayStep === 0"
         @click="performStep(-999)">{{ $t('replay.backToMyLastMove') }}</button>
-      <button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-99)">
+      <button class="actionsLineButton" :aria-label="$t('replay.start')" :title="$t('replay.start')" :disabled="store.replayStep === 0" @click="performStep(-99)">
         |&lt;
       </button>
-      <button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-9)">
+      <button class="actionsLineButton" :aria-label="$t('replay.back5')" :title="$t('replay.back5')" :disabled="store.replayStep === 0" @click="performStep(-9)">
         &lt;&lt;
       </button>
-      <button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-1)">
+      <button class="actionsLineButton" :aria-label="$t('replay.stepBack')" :title="$t('replay.stepBack')" :disabled="store.replayStep === 0" @click="performStep(-1)">
         &lt;
       </button>
       {{ store.replayStep + 1 }} / {{ store.replayData.length }}
-      <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
+      <button class="actionsLineButton" :aria-label="$t('replay.stepForward')" :title="$t('replay.stepForward')" :disabled="store.replayStep === store.replayData.length - 1"
         @click="performStep(1)">
         &gt;
       </button>
-      <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
+      <button class="actionsLineButton" :aria-label="$t('replay.forward5')" :title="$t('replay.forward5')" :disabled="store.replayStep === store.replayData.length - 1"
         @click="performStep(9)">
         &gt;&gt;
       </button>
-      <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
+      <button class="actionsLineButton" :aria-label="$t('replay.end')" :title="$t('replay.end')" :disabled="store.replayStep === store.replayData.length - 1"
         @click="performStep(99)">
         &gt;|
       </button>
@@ -60,6 +60,7 @@ function exitReplayMode() {
           {{ $t('replay.exitReplayMode') }}
         </button>
       </div>
+      <div class="replayStepHint">{{ $t('replay.stepHint') }}</div>
     </div>
     <div class="replayHistoryEntry">
       <HistoryEntry :entry="store.history[store.replayStep]" :entry_-i-d="-1" />
@@ -119,6 +120,14 @@ function exitReplayMode() {
   width: fit-content;
   margin: auto;
   min-height: 111px;
+}
+
+.replayStepHint {
+  position: absolute;
+  right: 5px;
+  top: 2px;
+  font-size: 0.8em;
+  color: #555;
 }
 
 .actionsLineButton {

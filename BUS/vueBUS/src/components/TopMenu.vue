@@ -155,6 +155,10 @@ function nextGame() {
 function toggleStatsExcludeDropdown() {
 	store.topMenuViews.showStatsExcludeDropdown = !store.topMenuViews.showStatsExcludeDropdown
 }
+
+function canEditPlayers() {
+	return store.history.length === 0 && store.context.historyObj.length === 0 && store.gameflow.turn === 0 && store.gameflow.phase === rf.PHASE_SETUP_BLDGS
+}
 </script>
 
 <template>
@@ -232,6 +236,7 @@ function toggleStatsExcludeDropdown() {
 		<div id="topRight">
 			<div id="loggedInDiv" v-if="personal.name" @click="clickedLoggedInDiv()">
 				{{ $t('topMenu.loggedInAs') }} {{ personal.name }}
+				<span v-if="personal.canPlay()" class="yourTurnBadge">{{ $t('status.yourTurnBadge') }}</span>
 				<div id="WSstatus" v-if="personal.pov >= 0" :class="personal.WSstatus"></div>
 				<br />
 
@@ -244,8 +249,8 @@ function toggleStatsExcludeDropdown() {
 			</div>
 
 			<div id="zoomDiv">
-				<button class="zoomButton" @click="doZoom(1)">🔍+</button>
-				<button class="zoomButton" @click="doZoom(-1)">🔍-</button>
+				<button class="zoomButton" :aria-label="$t('topMenu.zoomIn')" @click="doZoom(1)">🔍+</button>
+				<button class="zoomButton" :aria-label="$t('topMenu.zoomOut')" @click="doZoom(-1)">🔍-</button>
 			</div>
 
 			<!-- DROP DOWN FOR SPLOTTER CON-->
@@ -257,7 +262,8 @@ function toggleStatsExcludeDropdown() {
 							{{ $t('topMenu.changeNamesColours') }}
 							<br />
 							<br />
-							<template v-for="(playerIndex, idx) in store.gameflow.fullTurnOrder" :key="idx">
+							<div v-if="!canEditPlayers()" id="dropdownText">{{ $t('topMenu.editPlayersBeforeMove') }}</div>
+							<template v-if="canEditPlayers()" v-for="(playerIndex, idx) in store.gameflow.fullTurnOrder" :key="idx">
 								<div class="splotterConSelectionLineDiv">
 									<input type="text" v-model="store.players[playerIndex].displayName" />
 									<select v-model="store.players[playerIndex].colour">
@@ -270,7 +276,7 @@ function toggleStatsExcludeDropdown() {
 								</div>
 							</template>
 
-							<div id="dropdownText">
+							<div v-if="canEditPlayers()" id="dropdownText">
 								{{ $t('topMenu.editThenSave') }}
 								<br />
 								<button @click="IO.saveGame(false)" class="actionsLineButton">{{ $t('topMenu.save') }}</button>
@@ -292,10 +298,10 @@ function toggleStatsExcludeDropdown() {
 
 		<div id="topInfos">
 			<span id="infoSpan">
-				<span v-html="store.gameName"></span>
+				<span>{{ store.gameName }}</span>
 				| {{ store.gameflow.turn }}: {{ view.phaseStr() }}
 			</span>
-			<span>{{ controller.currentPlayerObj().displayName }}</span>
+			<span>{{ store.gameflow.gameEnded > 0 ? '' : controller.currentPlayerObj().displayName }}</span>
 		</div>
 	</div>
 	<!-- Show message for Pittsburgh map -->
@@ -351,6 +357,16 @@ function toggleStatsExcludeDropdown() {
 </template>
 
 <style scoped>
+.yourTurnBadge {
+	display: inline-block;
+	background-color: darkgreen;
+	color: white;
+	border-radius: 10px;
+	padding: 1px 8px;
+	margin-left: 6px;
+	font-size: 0.9em;
+}
+
 #infoSpan {
 	white-space: nowrap;
 	overflow: hidden;
@@ -527,7 +543,7 @@ function toggleStatsExcludeDropdown() {
 .topMenuItem img {
 	/*filter: brightness(0) saturate(100%) invert(100%) sepia(17%) saturate(6440%) hue-rotate(174deg) brightness(98%) contrast(102%);
 */
-	width: 38x;
+	width: 38px;
 	height: 38px;
 }
 

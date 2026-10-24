@@ -3,6 +3,7 @@ import * as rf from "../js/BUSreference.js"
 import * as view from "../js/BUSview.js"
 import * as controller from "../js/BUScontroller.js"
 import * as model from "../js/BUSmodel.js"
+import * as funcs from "../js/BUSfuncs.js"
 
 import { useModelStore } from "../stores/BUSstore.js"
 const store = useModelStore()
@@ -53,12 +54,27 @@ function highlight(e, entering) {
 		e.target.style["background-color"] = ""
 	}
 }
+function isNewMarker(action, index) {
+	const marker = store.context.lastActionMarker
+	return marker !== null && marker[0] === action && marker[1] === index
+}
+
 function clickedActionOption(action, index) {
+	funcs.pushUndoPoint()
 	store.context.historyObj.push(action, index)
 	controller.currentPlayerObj().remainingActions--
 	store.actionAreaData[action][index] = controller.currentPlayerObj().colour
+	store.context.lastActionMarker = [action, index]
 	store.context.actionChosen = true
 }
+
+const timeStoneSlots = [
+	{ top: 1873, left: 532, image: "stone_blue" },
+	{ top: 1873, left: 650, image: "stone_green" },
+	{ top: 1935, left: 743, image: "stone_blue" },
+	{ top: 1997, left: 650, image: "stone_green" },
+	{ top: 1997, left: 532, image: "stone_blue" },
+]
 
 function getActionSelectionWidth() {
 	if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL) return 279
@@ -112,7 +128,7 @@ function getPointerCoords() {
 			<div
 				v-if="marker !== -1"
 				class="actionDisc"
-				:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_LINE_EXPANSION && index === 6 - store.gameflow.turnOrder.length }]"
+				:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_LINE_EXPANSION && index === 6 - store.gameflow.turnOrder.length, markerIn: isNewMarker(0, index) }]"
 				:style="{
 					width: (store.refSize * 120) / 400 + 'px',
 					height: (store.refSize * 110) / 400 + 'px',
@@ -123,7 +139,7 @@ function getPointerCoords() {
 			<!-- Else IF action time, add a circle -->
 			<div
 				v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && (index === 5 || store.actionAreaData[0][index + 1] !== -1)"
-				class="actionDiscOption"
+				class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 				:style="{
 					width: (store.refSize * 120) / 400 + 'px',
 					height: (store.refSize * 110) / 400 + 'px',
@@ -144,7 +160,7 @@ function getPointerCoords() {
 		<div
 			v-if="store.actionAreaData[1][0] !== -1"
 			class="actionDisc"
-			:class="['actionDisc' + personal.getCorrectedColour(store.actionAreaData[1][0]), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_BUS }]"
+			:class="['actionDisc' + personal.getCorrectedColour(store.actionAreaData[1][0]), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_BUS, markerIn: isNewMarker(1, 0) }]"
 			:style="{
 				width: (store.refSize * 120) / 400 + 'px',
 				height: (store.refSize * 110) / 400 + 'px',
@@ -155,7 +171,7 @@ function getPointerCoords() {
 		<!-- Else IF action time, add a circle -->
 		<div
 			v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && store.actionAreaData[1][0] === -1"
-			class="actionDiscOption"
+			class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 			:style="{
 				width: (store.refSize * 120) / 400 + 'px',
 				height: (store.refSize * 110) / 400 + 'px',
@@ -174,7 +190,7 @@ function getPointerCoords() {
 			<div
 				v-if="marker !== -1"
 				class="actionDisc"
-				:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_PAX && index === store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length }]"
+				:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_PAX && index === store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length, markerIn: isNewMarker(2, index) }]"
 				:style="{
 					width: (store.refSize * 120) / 400 + 'px',
 					height: (store.refSize * 110) / 400 + 'px',
@@ -185,7 +201,7 @@ function getPointerCoords() {
 			<!-- Else IF action time, add a circle -->
 			<div
 				v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && ((index === 0 && store.actionAreaData[2][0] === -1) || (store.actionAreaData[2][index] === -1 && store.actionAreaData[2][index - 1] !== -1))"
-				class="actionDiscOption"
+				class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 				:style="{
 					width: (store.refSize * 120) / 400 + 'px',
 					height: (store.refSize * 110) / 400 + 'px',
@@ -207,7 +223,7 @@ function getPointerCoords() {
 			<div
 				v-if="marker !== -1"
 				class="actionDisc"
-				:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_BUS && index === 6 - store.gameflow.turnOrder.length }]"
+				:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_BLDGS && index === 6 - store.gameflow.turnOrder.length, markerIn: isNewMarker(3, index) }]"
 				:style="{
 					width: (store.refSize * 120) / 400 + 'px',
 					height: (store.refSize * 110) / 400 + 'px',
@@ -219,7 +235,7 @@ function getPointerCoords() {
 			<!-- Else IF action time, add a circle -->
 			<div
 				v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && (index === 5 || store.actionAreaData[3][index + 1] !== -1)"
-				class="actionDiscOption"
+				class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 				:style="{
 					width: (store.refSize * 120) / 400 + 'px',
 					height: (store.refSize * 110) / 400 + 'px',
@@ -240,7 +256,7 @@ function getPointerCoords() {
 		<div
 			v-if="store.actionAreaData[4][0] !== -1"
 			class="actionDisc"
-			:class="['actionDisc' + personal.getCorrectedColour(store.actionAreaData[4][0]), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_BUS }]"
+			:class="['actionDisc' + personal.getCorrectedColour(store.actionAreaData[4][0]), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ALTER_TIME, markerIn: isNewMarker(4, 0) }]"
 			:style="{
 				width: (store.refSize * 120) / 400 + 'px',
 				height: (store.refSize * 110) / 400 + 'px',
@@ -252,7 +268,7 @@ function getPointerCoords() {
 		<!-- Else IF action time, add a circle -->
 		<div
 			v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && store.actionAreaData[4][0] === -1"
-			class="actionDiscOption"
+			class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 			:style="{
 				width: (store.refSize * 120) / 400 + 'px',
 				height: (store.refSize * 110) / 400 + 'px',
@@ -271,7 +287,7 @@ function getPointerCoords() {
 			<div
 				v-if="marker !== -1"
 				class="actionDisc"
-				:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_VROM && index === store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length }]"
+				:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_VROM && index === store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length, markerIn: isNewMarker(5, index) }]"
 				:style="{
 					width: (store.refSize * 120) / 400 + 'px',
 					height: (store.refSize * 110) / 400 + 'px',
@@ -282,7 +298,7 @@ function getPointerCoords() {
 			<!-- Else IF action time, add a circle -->
 			<div
 				v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && ((index === 0 && store.actionAreaData[5][0] === -1) || (store.actionAreaData[5][index] === -1 && store.actionAreaData[5][index - 1] !== -1))"
-				class="actionDiscOption"
+				class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 				:style="{
 					width: (store.refSize * 120) / 400 + 'px',
 					height: (store.refSize * 110) / 400 + 'px',
@@ -294,7 +310,7 @@ function getPointerCoords() {
 				@mouseover="highlight($event, true)"
 				@mouseleave="highlight($event, false)"
 				@click="clickedActionOption(5, index)">
-				{{ controller.currentPlayerObj().buses + (controller.currentPlayerObj().colour === store.actionAreaData[1][0] ? 1 : 0) }}
+				{{ Math.min(5, controller.currentPlayerObj().buses + (controller.currentPlayerObj().colour === store.actionAreaData[1][0] ? 1 : 0)) }}
 			</div>
 		</template>
 
@@ -303,7 +319,7 @@ function getPointerCoords() {
 		<div
 			v-if="store.actionAreaData[6][0] !== -1"
 			class="actionDisc"
-			:class="['actionDisc' + personal.getCorrectedColour(store.actionAreaData[6][0]), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_BUS }]"
+			:class="['actionDisc' + personal.getCorrectedColour(store.actionAreaData[6][0]), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_CHANGE_START_PLAYER, markerIn: isNewMarker(6, 0) }]"
 			:style="{
 				width: (store.refSize * 120) / 400 + 'px',
 				height: (store.refSize * 110) / 400 + 'px',
@@ -314,7 +330,7 @@ function getPointerCoords() {
 		<!-- Else IF action time, add a circle -->
 		<div
 			v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && store.actionAreaData[6][0] === -1"
-			class="actionDiscOption"
+			class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 			:style="{
 				width: (store.refSize * 120) / 400 + 'px',
 				height: (store.refSize * 110) / 400 + 'px',
@@ -329,59 +345,17 @@ function getPointerCoords() {
 
 		<!-- TIME STONES -->
 		<div
-			v-if="store.remainingTimeStones >= 1"
+			v-for="(stone, index) in timeStoneSlots"
+			:key="'stone' + index"
 			class="timestoneDiv"
 			:style="{
 				width: (store.refSize * 100) / 400 + 'px',
 				height: (store.refSize * 100) / 400 + 'px',
-				top: (store.refSize * 1873) / 400 + 'px',
-				left: (store.refSize * 532) / 400 + 'px',
+				top: (store.refSize * stone.top) / 400 + 'px',
+				left: (store.refSize * stone.left) / 400 + 'px',
 			}">
-			<img :src="view.getImage('stone_blue')" class="timestoneImg" />
-		</div>
-		<div
-			v-if="store.remainingTimeStones >= 2"
-			class="timestoneDiv"
-			:style="{
-				width: (store.refSize * 100) / 400 + 'px',
-				height: (store.refSize * 100) / 400 + 'px',
-				top: (store.refSize * 1873) / 400 + 'px',
-				left: (store.refSize * 650) / 400 + 'px',
-			}">
-			<img :src="view.getImage('stone_green')" class="timestoneImg" />
-		</div>
-		<div
-			v-if="store.remainingTimeStones >= 3"
-			class="timestoneDiv"
-			:style="{
-				width: (store.refSize * 100) / 400 + 'px',
-				height: (store.refSize * 100) / 400 + 'px',
-				top: (store.refSize * 1935) / 400 + 'px',
-				left: (store.refSize * 743) / 400 + 'px',
-			}">
-			<img :src="view.getImage('stone_blue')" class="timestoneImg" />
-		</div>
-		<div
-			v-if="store.remainingTimeStones >= 4"
-			class="timestoneDiv"
-			:style="{
-				width: (store.refSize * 100) / 400 + 'px',
-				height: (store.refSize * 100) / 400 + 'px',
-				top: (store.refSize * 1997) / 400 + 'px',
-				left: (store.refSize * 650) / 400 + 'px',
-			}">
-			<img :src="view.getImage('stone_green')" class="timestoneImg" />
-		</div>
-		<div
-			v-if="store.remainingTimeStones >= 5"
-			class="timestoneDiv"
-			:style="{
-				width: (store.refSize * 100) / 400 + 'px',
-				height: (store.refSize * 100) / 400 + 'px',
-				top: (store.refSize * 1997) / 400 + 'px',
-				left: (store.refSize * 532) / 400 + 'px',
-			}">
-			<img :src="view.getImage('stone_blue')" class="timestoneImg" />
+			<img :src="view.getImage(stone.image)" class="timestoneImg" />
+			<div class="timestoneGoneDiv" :class="{ gone: store.remainingTimeStones < index + 1 }"></div>
 		</div>
 
 		<!-- BUSES -->
@@ -390,6 +364,7 @@ function getPointerCoords() {
 				v-for="i in player.buses"
 				v-bind:key="i"
 				class="busDiv"
+				:class="{ busIn: store.context.lastBusPlayer === index && store.context.lastBusIndex === i }"
 				:style="{
 					width: (store.refSize * 122) / 400 + 'px',
 					height: (store.refSize * 70) / 400 + 'px',
@@ -468,8 +443,17 @@ function getPointerCoords() {
 	position: absolute;
 	box-shadow: 0px 0px 10px 5px lightgreen;
 	background-color: rgba(144, 238, 144, 0.5);
-	/*opacity: 0.7;*/
 	z-index: 20;
+	animation: glowIn 0.2s ease-out;
+}
+
+@keyframes glowIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 .busDiv,
@@ -480,6 +464,38 @@ function getPointerCoords() {
 
 .timestoneDiv {
 	position: absolute;
+}
+
+.timestoneImg {
+	transition: opacity 0.2s ease;
+}
+
+.timestoneGoneDiv {
+	position: absolute;
+	inset: 0;
+	border-radius: 100%;
+	background-color: grey;
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+
+.timestoneGoneDiv.gone {
+	opacity: 0.7;
+}
+
+.busIn {
+	animation: busIn 0.25s ease-out;
+}
+
+@keyframes busIn {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 .busImg {
@@ -531,6 +547,19 @@ function getPointerCoords() {
 .actionDisc {
 	position: absolute;
 	border-radius: 100%;
+}
+
+.actionDisc.markerIn {
+	animation: markerIn 0.15s ease-out;
+}
+
+@keyframes markerIn {
+	from {
+		transform: scale(0.6);
+	}
+	to {
+		transform: scale(1);
+	}
 }
 
 .actionDisc0 {

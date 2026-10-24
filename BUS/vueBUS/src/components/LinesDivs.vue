@@ -1,7 +1,7 @@
 <script setup>
 import { motion } from "motion-v"
 import * as view from "../js/BUSview.js"
-//import * as funcs from "../js/BUSfuncs.js"
+import * as funcs from "../js/BUSfuncs.js"
 import * as rf from "../js/BUSreference.js"
 import * as controller from "../js/BUScontroller.js"
 import * as model from "../js/BUSmodel.js"
@@ -37,6 +37,7 @@ const bridgeAngles = computed(() => {
 
 // Track animated lines to avoid re-animating existing lines
 const animatedLines = ref(new Set())
+const reduceMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
 function getAnimatedLinePolygon(circle, progress = 0.5) {
     const strokeWidth =  store.refSize/12; // Get your 2 or 3px width
@@ -96,23 +97,33 @@ function isBridgeSpace(lineID) {
 	return personal.selectedBoard === rf.BOARD_PITTS && rf.PITTS_BRIDGE_LINE_IDS.includes(lineID) && store.lines[lineID].length === 0
 }
 
+function visibleLineOption(lineID) {
+	return document.querySelector(`.lineOption[data-line-id="${lineID}"]`)
+}
 function changeFillColor(e) {
-	if (isBridgeSpace(Number(e.target.dataset.lineId))) {
-		e.target.style.fill = `url(#bridgePattern-${e.target.dataset.lineId})`
-		e.target.style.stroke = "yellow"
-		e.target.style["fill-opacity"] = 1
+	const lineID = e.currentTarget.dataset.lineId
+	const option = visibleLineOption(lineID)
+	if (!option) return
+	if (isBridgeSpace(Number(lineID))) {
+		option.style.fill = `url(#bridgePattern-${lineID})`
+		option.style.stroke = "yellow"
+		option.style["fill-opacity"] = 1
 		return
 	}
-	e.target.style.fill = rf.getColourNameFromNumber(personal.getCorrectedColour(controller.currentPlayerObj().colour))
-	e.target.style.stroke = rf.getColourNameFromNumber(personal.getCorrectedColour(controller.currentPlayerObj().colour))
-	e.target.style["fill-opacity"] = 1
+	const colour = rf.getColourNameFromNumber(personal.getCorrectedColour(controller.currentPlayerObj().colour))
+	option.style.fill = colour
+	option.style.stroke = colour
+	option.style["fill-opacity"] = 1
 }
 function resetFillColor(e) {
-	e.target.style.fill = "white"
-	e.target.style.stroke = "yellow"
-	e.target.style["fill-opacity"] = 0
+	const option = visibleLineOption(e.currentTarget.dataset.lineId)
+	if (!option) return
+	option.style.fill = "white"
+	option.style.stroke = "yellow"
+	option.style["fill-opacity"] = 0
 }
 function addNewLine(lineID) {
+	funcs.pushUndoPoint()
 	store.context.historyObj.push([lineID, store.lines[lineID].length])
 	store.context.linesLeftToPlace--
 
@@ -129,14 +140,6 @@ function addNewLine(lineID) {
 	markLineAsAnimated(lineID, lineIndex)
 
 	let endJuncs = view.getJunctionsAtEndOfLine(lineID)
-	console.log("addNewLine debug:", {
-		turn: store.gameflow.turn,
-		startedEqual: startedEqual,
-		playerEndJunctions: controller.currentPlayerObj().endJunctions,
-		endJuncs: endJuncs,
-		condition1: controller.currentPlayerObj().endJunctions[0] === endJuncs[0] && controller.currentPlayerObj().endJunctions[1] === endJuncs[1],
-		condition2: controller.currentPlayerObj().endJunctions[1] === endJuncs[0] && controller.currentPlayerObj().endJunctions[0] === endJuncs[1]
-	})
 	// Don't offer end junction selection on turn 0 otherwise FIRST line placed will trigger it
 	// (and never for bridge placements - a bridge does not move the player's end junctions)
 	if (store.gameflow.turn !== 0 && !startedEqual && !isBridgeSpace(lineID)) {
@@ -145,7 +148,6 @@ function addNewLine(lineID) {
 		// ELSE find the new end junctions possibilities
 		if ((controller.currentPlayerObj().endJunctions[0] === endJuncs[0] && controller.currentPlayerObj().endJunctions[1] === endJuncs[1]) || (controller.currentPlayerObj().endJunctions[1] === endJuncs[0] && controller.currentPlayerObj().endJunctions[0] === endJuncs[1])) {
 			// Need to highlight which junction to pick
-			console.log("Setting endJunctionsOptions:", [lineID, [...endJuncs]])
 			store.context.endJunctionsOptions = [lineID, [...endJuncs]]
 			return
 		}
@@ -153,6 +155,7 @@ function addNewLine(lineID) {
 }
 
 function selectedEndJunction(junction) {
+	funcs.pushUndoPoint()
 	controller.currentPlayerObj().endJunctions = [junction, junction]
 	for (let i = 0; i < controller.currentPlayerObj().endLines.length; i++) {
 		// if junction not at end of line, update it
@@ -239,6 +242,7 @@ const lineEndCircles = computed(() => {
 			ret.push({
 				id: `p${i}-l${j}-${endLine}`, // Stable ID for the key!
 				colour: player.colour,
+				initial: (player.displayName || player.name || "").charAt(0).toUpperCase(),
 				x: correctedX,
 				y: correctedY,
 				startX: startCorrectedX,
@@ -264,6 +268,10 @@ const lineEndCircles = computed(() => {
 			<rect x="0" y="0" width="12" height="12" fill="white" />
 			<line x1="0" y1="0" x2="0" y2="12" stroke="grey" stroke-width="12" />
 		</pattern>
+		<pattern v-for="colour in [0, 1, 2, 3, 4]" :key="`contrast-${colour}`" :id="`busContrastPattern-${colour}`" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+			<rect x="0" y="0" width="12" height="12" :fill="rf.getColourNameFromNumber(personal.getCorrectedColour(colour))" />
+			<line x1="0" y1="0" x2="0" y2="12" stroke="white" stroke-width="3" />
+		</pattern>
 
 		<!-- render the played lines -->
 		<g v-for="(lines, index1) in store.lines" v-bind:key="`lines-${index1}`">
@@ -278,8 +286,7 @@ const lineEndCircles = computed(() => {
 					:style="{
 						stroke: getStrokeColourForBusLine(line),
 						'stroke-width': getStrokeWidthForBusLine(),
-						fill: rf.getColourNameFromNumber(personal.getCorrectedColour(line)),
-						//fill: url(#outerPattern),
+						fill: personal.prefersHighContrast ? `url(#busContrastPattern-${personal.getCorrectedColour(line)})` : rf.getColourNameFromNumber(personal.getCorrectedColour(line)),
 					}"></polygon>
 				<!-- Add animated growing line for new lines -->
 				<g v-for="circle in lineEndCircles" :key="`${circle.id}-${circle.x}-${circle.y}`">
@@ -288,7 +295,7 @@ const lineEndCircles = computed(() => {
 						:points="getAnimatedLinePolygon(circle, 0.1)"
 						:initial="{ }"
 						:animate="{ points: getAnimatedLinePolygon(circle, 1) }"
-						:transition="{ duration: 2.0, ease: 'circOut' }"
+						:transition="{ duration: reduceMotion ? 0 : 2.0, ease: 'circOut' }"
 						:style="{
 							stroke: 'black',
 							'stroke-width': 2,
@@ -302,6 +309,8 @@ const lineEndCircles = computed(() => {
 		<!-- render the bridges (Pittsburgh) -->
 		<g v-for="bridgeLineID in store.bridges" v-bind:key="`bridge-${bridgeLineID}`">
 			<polygon
+				class="bridgePolygon"
+				:class="{ bridgeIn: store.context.lastBridge === bridgeLineID }"
 				:data-line-id="bridgeLineID"
 				:points="view.getLineSVGpoints(bridgeLineID, 0)"
 				:style="{
@@ -313,8 +322,9 @@ const lineEndCircles = computed(() => {
 
 		<!-- Add Line End circles -->
 		<!-- Add Line End circles -->
-		<motion.g v-for="(circle, index) in lineEndCircles" :key="`${circle.id}-${circle.x}-${circle.y}`" :initial="{ transform: `translate(${circle.startX - circle.x}px, ${circle.startY - circle.y}px)` }" :animate="{ transform: 'translate(0px, 0px)' }" :transition="{ duration: 2.0, ease: 'circOut' }">
+		<motion.g v-for="(circle, index) in lineEndCircles" :key="`${circle.id}-${circle.x}-${circle.y}`" :initial="{ transform: `translate(${circle.startX - circle.x}px, ${circle.startY - circle.y}px)` }" :animate="{ transform: 'translate(0px, 0px)' }" :transition="{ duration: reduceMotion ? 0 : 2.0, ease: 'circOut' }">
 			<circle :cx="circle.x" :cy="circle.y" :r="(store.refSize * 7) / 100" :fill="rf.getColourNameFromNumber(personal.getCorrectedColour(circle.colour))" stroke="black" stroke-width="2" />
+			<text v-if="personal.prefersHighContrast" :x="circle.x" :y="circle.y" text-anchor="middle" dominant-baseline="central" :font-size="(store.refSize * 10) / 100" font-weight="bold" fill="white" stroke="black" stroke-width="1">{{ circle.initial }}</text>
 			<!-- Arrow uses circle.x and circle.y for center -->
 			<path
 				:d="`M ${circle.x} ${circle.y - (store.refSize * 7) / 100} 
@@ -326,8 +336,22 @@ const lineEndCircles = computed(() => {
 				:stroke-width="1 * (store.refSize / 100)" />
 		</motion.g>
 
-		<!-- render the Lines option -->
-		<polygon class="lineOption" v-for="(option, index) in model.getLinePlacementOptions(personal.getCorrectedColour(controller.currentPlayerObj().colour))" v-bind:key="index" :data-line-id="option" :points="view.getLineSVGpoints(option, 10, false)" style="fill: white; stroke: yellow; stroke-width: 3" @mouseover="changeFillColor" @mouseout="resetFillColor" @click="addNewLine(option)" />
+		<!-- render the Lines option, with a wider invisible hit area for touch -->
+		<template v-for="(option, index) in model.getLinePlacementOptions(personal.getCorrectedColour(controller.currentPlayerObj().colour))" :key="'lineOption' + index">
+			<polygon class="lineOption" :data-line-id="option" :points="view.getLineSVGpoints(option, 10, false)" style="fill: white; stroke: yellow; stroke-width: 3" />
+			<polygon
+				class="lineHitArea"
+				role="button"
+				tabindex="0"
+				:aria-label="$t('actionArea.placeLine')"
+				:data-line-id="option"
+				:points="view.getLineSVGpoints(option, 10, false)"
+				@mouseover="changeFillColor"
+				@mouseout="resetFillColor"
+				@click="addNewLine(option)"
+				@keydown.enter.prevent="addNewLine(option)"
+				@keydown.space.prevent="addNewLine(option)" />
+		</template>
 
 		<!-- Render the HISTORY HIGHLIGH -->
 		<polygon class="lineHistory" v-for="(line, index) in store.historyHelpers.linesToHighlight" v-bind:key="index" :points="view.getLineSVGpoints(line[0], line[1], false)" />
@@ -345,7 +369,7 @@ const lineEndCircles = computed(() => {
 				height: (store.refSize * 32) / 100 + 'px',
 				border: String((store.refSize * 5) / 100) + 'px solid yellow',
 			}"
-			class="endJuncOption"
+			class="endJuncOption" role="button" tabindex="0" :aria-label="$t('actionArea.choose')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 			@click="selectedEndJunction(junction)"></div>
 	</template>
 </template>
@@ -374,9 +398,21 @@ const lineEndCircles = computed(() => {
 .lineOption {
 	z-index: 20;
 	fill-opacity: 0;
+	pointer-events: none;
 }
-.lineOption:hover {
+
+.lineHitArea {
+	fill: transparent;
+	stroke: transparent;
+	stroke-width: 24;
+	pointer-events: all;
 	cursor: pointer;
+	z-index: 21;
+}
+
+.lineHitArea:focus {
+	stroke: rgba(0, 120, 255, 0.55);
+	outline: none;
 }
 
 .lineHistory {
@@ -384,6 +420,19 @@ const lineEndCircles = computed(() => {
 	fill: yellow;
 	stroke: yellow;
 	stroke-width: 30;
+}
+
+.bridgePolygon.bridgeIn {
+	animation: bridgeIn 0.25s ease-out;
+}
+
+@keyframes bridgeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 .new-line {

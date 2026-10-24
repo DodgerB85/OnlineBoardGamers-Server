@@ -29,7 +29,7 @@ export default {
 	topMenuViews: {
 		bugReportTitle: "Bug Report",
 		bugErrorRequired: "Please enter a bug report",
-		bugIntro: "Please submit a bug report if you encounter any issues, giving as much detail as possbile.",
+		bugIntro: "Please submit a bug report if you encounter any issues, giving as much detail as possible.",
 		bugData: "The game data will be submitted along with your report.",
 		discordInvite: "You can also report it on the OBG discord. Click",
 		here: "Here",
@@ -44,7 +44,7 @@ export default {
 		chatTitle: "Send a message",
 		send: "Send",
 		rewindAnyone: "Any player can rewind the game at any time.",
-		rewindCourtesy: "Please be courteous and rewind only if absolutely neessary - send a chat message to inform the other players.",
+		rewindCourtesy: "Please be courteous and rewind only if absolutely necessary - send a chat message to inform the other players.",
 		rewindMisuse: "Misuse of this feature will result in rewinds requiring permission from all players.",
 		rewind: "Rewind",
 		statsExcludeIntro: "If all players agree, this game can be excluded from the stats (won't count towards wins/losses)",

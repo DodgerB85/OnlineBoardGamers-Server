@@ -53,10 +53,6 @@ export const useModelStore = defineStore("model", () => {
 	// Bridge markers available for Pittsburgh (5 total, shared)
 	const remainingBridgeMarkers = ref(5)
 
-	// Track which end of each line has a bridge (for expansion options)
-	// Format: { lineID: 0 | 1 } where 0 = first end, 1 = second end
-	const bridgeEnds = reactive({})
-
 	const actionAreaData = reactive([[-1, -1, -1, -1, -1, -1], [-1], [-1, -1, -1, -1, -1, -1], [-1, -1, -1, -1, -1, -1], [-1], [-1, -1, -1, -1, -1, -1], [-1]])
 
 	const gameflow = reactive({
@@ -86,12 +82,15 @@ export const useModelStore = defineStore("model", () => {
 		endJunctionsOptions: [],
 		actionChosen: false,
 		confirmEndTurn: false,
+		confirmReset: false,
 		confirmResign: false,
 		historyObj: [],
 		action: -1,
 		eligibleJunctionsToVromPitts: [],
-		// Bridge expansion option for Pittsburgh
-		bridgeExpansionOption: null,
+		lastBusPlayer: -1,
+		lastBusIndex: -1,
+		lastActionMarker: null,
+		lastBridge: -1,
 	})
 	const topMenuViews = reactive({
 		showNotes: false,
@@ -105,10 +104,12 @@ export const useModelStore = defineStore("model", () => {
 		generatingReplay: false,
 		showStatsExcludeDropdown: false,
 		errorText: "",
+		retryAction: null,
 	})
 
 	const turnResetData = ref("")
 	const endReplayResetData = ref("")
+	const undoPoints = reactive([])
 
 	const historyHelpers = reactive({
 		buildingsToHighlight: [],
@@ -142,12 +143,19 @@ export const useModelStore = defineStore("model", () => {
 		context.endJunctionsOptions = []
 		context.actionChosen = false
 		context.confirmEndTurn = false
+		context.confirmReset = false
 		context.confirmResign = false
 		context.historyObj.splice(0, context.historyObj.length)
 		context.eligibleJunctionsToVromPitts.splice(0)
+		context.lastBusPlayer = -1
+		context.lastBusIndex = -1
+		context.lastActionMarker = null
+		context.lastBridge = -1
+		undoPoints.splice(0)
 		rewindErrorText.value = ""
 		successText.value = ""
 		topMenuViews.errorText = ""
+		topMenuViews.retryAction = null
 
 	}
 
@@ -184,7 +192,7 @@ export const useModelStore = defineStore("model", () => {
 		// Pittsburgh variables
 		bridges,
 		remainingBridgeMarkers,
-		bridgeEnds,
+		undoPoints,
 		jeroenStatus,
 		jorisStatus,
 	}

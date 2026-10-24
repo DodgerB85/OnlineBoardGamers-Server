@@ -342,7 +342,8 @@ function clickedEntry(index) {
 				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">
 					{{ store.players[entry[1]].displayName }}
 				</span>
-				{{ $t('history.increasesBuses', { count: entry[3][0] }) }}
+				<span v-if="entry[3].length > 1 && entry[3][1] === 0">{{ $t('history.newBusNoEffect') }}</span>
+				<span v-else>{{ $t('history.increasesBuses', { count: entry[3][0] }) }}</span>
 			</div>
 		</template>
 
