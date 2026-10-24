@@ -13,6 +13,7 @@ const store = useModelStore()
 const personal = usePersonalStore()
 
 const randomGood = ref(-1)
+const siteGearSlot = ref(-1)
 const gearSlot = ref(-1)
 const gearRandomGood = ref(-1)
 const pathwayIn = ref(-1)
@@ -51,6 +52,17 @@ const spaceyardType = computed(() => {
 	if (!site.value || site.value.kind !== "spaceyard") return null
 	return rf.SPACEYARD_TYPES[site.value.tileId]
 })
+const firstEmptyGearSlot = computed(() => (me.value ? rules.firstEmptyGearSlot(me.value) : -1))
+const siteGearSlotNeeded = computed(() => !!site.value && site.value.kind === "spaceyard" && !site.value.built && firstEmptyGearSlot.value < 0)
+const validGearSlots = computed(() => {
+	if (!me.value) return []
+	if (firstEmptyGearSlot.value >= 0) return [{ slot: rf.SHIP_SLOTS[firstEmptyGearSlot.value], index: firstEmptyGearSlot.value }]
+	return rf.SHIP_SLOTS.map((slot, index) => ({ slot, index }))
+})
+const validSiteGearSlots = computed(() => {
+	if (!me.value) return []
+	return rf.SHIP_SLOTS.map((slot, index) => ({ slot, index })).filter((entry) => me.value.gear[entry.index])
+})
 const consumerTile = computed(() => {
 	if (!site.value || site.value.kind !== "consumer") return null
 	return rf.CONSUMER_TILES.find((t) => t.id === site.value.tileId)
@@ -60,7 +72,7 @@ const factoryRecipe = computed(() => {
 	return rf.FACTORIES_BY_ID[planetState.value.factory.typeId]
 })
 const buildableFactories = computed(() => {
-	if (!planetState.value || planetState.value.factory) return []
+	if (!planetState.value || planetState.value.factory || (planet.value && planet.value.start)) return []
 	return store.board.factoryStock
 		.filter((f) => f.count > 0)
 		.map((stock) => {
@@ -120,16 +132,28 @@ function openTrade() {
 function openPathways() {
 	store.context.action = rf.ACT_PATHWAY
 }
-function buildSiteNow() {
-	const chosen = randomGood.value >= 0 ? randomGood.value : goodChoices.value.find((g) => g.id !== siteCost.value.printed)?.id
-	if (chosen === undefined || chosen < 0) return
-	controller.buildSite(chosen)
+async function buildSiteNow() {
+	if (!siteCost.value) return
+	const chosen = siteCost.value.random
+		? randomGood.value >= 0
+			? randomGood.value
+			: goodChoices.value.find((g) => g.id !== siteCost.value.printed)?.id
+		: -1
+	if (siteCost.value.random && (chosen === undefined || chosen < 0)) return
+	if (siteGearSlotNeeded.value && siteGearSlot.value < 0) return
+	if (await controller.buildSite(chosen, siteGearSlotNeeded.value ? siteGearSlot.value : -1)) {
+		randomGood.value = -1
+		siteGearSlot.value = -1
+	}
 }
-function buyGearNow() {
+async function buyGearNow() {
 	if (gearSlot.value < 0) return
 	const chosen = gearRandomGood.value >= 0 ? gearRandomGood.value : goodChoices.value.find((g) => g.id !== spaceyardType.value.cost[0])?.id
 	if (chosen === undefined || chosen < 0) return
-	controller.buyGear(gearSlot.value, chosen)
+	if (await controller.buyGear(gearSlot.value, chosen)) {
+		gearSlot.value = -1
+		gearRandomGood.value = -1
+	}
 }
 function placePathwaysNow() {
 	controller.placePathways(pathwayIn.value, pathwayOut.value)
@@ -253,12 +277,18 @@ function openTradeModal() {
 								<div v-if="!site" class="smallNote">{{ $t("action.emptyExploreFirst") }}</div>
 								<div v-else-if="site.built" class="smallNote">{{ $t("action.alreadyBuilt", { kind: site.kind === "spaceyard" ? $t("action.spaceyard") : $t("action.consumerSite") }) }}</div>
 								<div v-else>
-									<div>{{ $t("action.buildSiteLine", { kind: site.kind === "spaceyard" ? $t("action.spaceyard") : $t("action.consumerSite"), good: rf.goodName(siteCost.printed) }) }}</div>
-									<select v-model.number="randomGood">
+									<div v-if="siteCost.random">{{ $t("action.buildSiteLine", { kind: $t("action.spaceyard"), good: rf.goodName(siteCost.printed) }) }}</div>
+									<div v-else>{{ $t("action.buildConsumerLine", { good: rf.goodName(siteCost.printed) }) }}</div>
+									<select v-if="siteCost.random" v-model.number="randomGood">
 										<option :value="-1">{{ $t("common.chooseSecondGood") }}</option>
 										<option v-for="g in goodChoices" :key="g.id" :value="g.id" :disabled="g.id === siteCost.printed">{{ $t("common.goodCount", { good: rf.goodName(g.id), count: g.count }) }}</option>
 									</select>
-									<button class="actionsLineButton" :disabled="me.energy[rf.YELLOW_ENERGY] <= 0" @click="buildSiteNow">{{ $t("action.buildSite") }}</button>
+									<div v-if="site.kind === 'spaceyard'" class="smallNote">{{ $t("action.spaceyardReward", { gear: rf.gearName(spaceyardType.gear) }) }}</div>
+									<select v-if="siteGearSlotNeeded" v-model.number="siteGearSlot">
+										<option :value="-1">{{ $t("common.chooseSlot") }}</option>
+										<option v-for="entry in validSiteGearSlots" :key="entry.index" :value="entry.index">{{ $t("action.slotOption", { number: entry.index + 1, gear: view.gearLabel(me.gear[entry.index]) }) }}</option>
+									</select>
+									<button class="actionsLineButton" :disabled="me.energy[rf.YELLOW_ENERGY] <= 0 || (siteGearSlotNeeded && siteGearSlot < 0)" @click="buildSiteNow">{{ $t("action.buildSite") }}</button>
 								</div>
 							</div>
 							<div class="subSection">
@@ -296,7 +326,7 @@ function openTradeModal() {
 								<div>{{ $t("action.buildsGear", { gear: rf.gearName(spaceyardType.gear), good: rf.goodName(spaceyardType.cost[0]) }) }}</div>
 								<select v-model.number="gearSlot">
 									<option :value="-1">{{ $t("common.chooseSlot") }}</option>
-									<option v-for="(slot, index) in rf.SHIP_SLOTS" :key="index" :value="index">{{ $t("action.slotOption", { number: index + 1, gear: me.gear[index] ? view.gearLabel(me.gear[index]) : $t("action.emptySlotSpeed", { number: slot.number }) }) }}</option>
+									<option v-for="entry in validGearSlots" :key="entry.index" :value="entry.index">{{ $t("action.slotOption", { number: entry.index + 1, gear: me.gear[entry.index] ? view.gearLabel(me.gear[entry.index]) : $t("action.emptySlotSpeed", { number: entry.slot.number }) }) }}</option>
 								</select>
 								<select v-model.number="gearRandomGood">
 									<option :value="-1">{{ $t("common.chooseSecondGood") }}</option>

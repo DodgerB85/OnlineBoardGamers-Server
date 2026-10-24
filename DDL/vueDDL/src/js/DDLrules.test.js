@@ -107,22 +107,60 @@ describe("movement", () => {
 	})
 })
 
+describe("turn flow", () => {
+	it("gives 1/2/3 free highways on turns 1-8/9-16/17-24", () => {
+		for (const [turn, expected] of [
+			[1, 1],
+			[8, 1],
+			[9, 2],
+			[16, 2],
+			[17, 3],
+			[24, 3],
+		]) {
+			const state = game()
+			state.gameflow.turn = turn
+			state.gameflow.turnType = rf.TURN_CHOOSE
+			rules.beginActionTurn(state, 0)
+			expect(state.gameflow.freeHighwaysLeft).toBe(expected)
+		}
+	})
+})
+
 describe("building and trading", () => {
-	it("builds a factory and scores its points", () => {
+	it("uses the printed factory and spaceyard recipes", () => {
+		expect(rf.FACTORY_TYPES.find((f) => f.key === "pills").input).toEqual([1, 2])
+		expect(rf.FACTORY_TYPES.find((f) => f.key === "art").input).toEqual([9, 5])
+		expect(rf.FACTORY_TYPES.find((f) => f.key === "politics").input).toEqual([9, 2])
+		expect(rf.SPACEYARD_TYPES.find((s) => s.key === "cargo-phone").cost).toEqual([3, "R"])
+	})
+
+	it("builds a factory on a non-starting planet and scores its points", () => {
 		const state = game()
 		const player = state.players[0]
 		const factory = rf.FACTORY_TYPES[0]
-		player.ship.node = "P8"
+		player.ship.node = "P0"
 		player.goods.push(...factory.input)
 		player.energy[rf.YELLOW_ENERGY] = 1
 		const before = player.score
 		const result = rules.buildFactory(state, 0, factory.id)
 		expect(result.ok).toBe(true)
 		expect(player.score).toBe(before + factory.points)
-		expect(rules.planetState(state, 8).factory.typeId).toBe(factory.id)
+		expect(rules.planetState(state, 0).factory.typeId).toBe(factory.id)
 	})
 
-	it("builds a starting spaceyard for 10 points", () => {
+	it("does not allow a factory on a starting planet", () => {
+		const state = game()
+		const player = state.players[0]
+		const factory = rf.FACTORY_TYPES[0]
+		player.ship.node = "P8"
+		player.goods.push(...factory.input)
+		player.energy[rf.YELLOW_ENERGY] = 1
+		const result = rules.buildFactory(state, 0, factory.id)
+		expect(result.ok).toBe(false)
+		expect(rules.planetState(state, 8).factory).toBeNull()
+	})
+
+	it("builds a starting spaceyard for 10 points and gives the gear part", () => {
 		const state = game()
 		const player = state.players[0]
 		const planet = rules.planetState(state, 8)
@@ -134,12 +172,65 @@ describe("building and trading", () => {
 		expect(result.ok).toBe(true)
 		expect(planet.site.built).toBe(true)
 		expect(player.score).toBe(yard.points)
+		expect(player.gear[0]).toBe(yard.gear)
+	})
+
+	it("builds a consumer site with one good and scores its build value", () => {
+		const state = game()
+		const player = state.players[0]
+		player.ship.node = "P0"
+		const planet = rules.planetState(state, 0)
+		planet.site = { kind: "consumer", tileId: 10, built: false }
+		player.goods.push(10)
+		player.energy[rf.YELLOW_ENERGY] = 1
+		const result = rules.buildSite(state, 0, -1)
+		expect(result.ok).toBe(true)
+		expect(result.points).toBe(25)
+		expect(player.score).toBe(25)
+		expect(planet.site.built).toBe(true)
+		expect(player.goods).toHaveLength(0)
+	})
+
+	it("requires a slot choice for the spaceyard part when the ship is full", () => {
+		const state = game()
+		const player = state.players[0]
+		player.ship.node = "P8"
+		player.gear = ["cargo", "cargo", "cargo", "cargo", "cargo", "cargo", "cargo", "cargo"]
+		const planet = rules.planetState(state, 8)
+		const yard = rf.SPACEYARD_TYPES[planet.site.tileId]
+		const other = rf.PRIMARY_GOODS.find((g) => g !== yard.cost[0])
+		player.goods.push(yard.cost[0], other)
+		player.energy[rf.YELLOW_ENERGY] = 1
+		const failed = rules.buildSite(state, 0, other)
+		expect(failed.ok).toBe(false)
+		expect(planet.site.built).toBe(false)
+		const result = rules.buildSite(state, 0, other, 3)
+		expect(result.ok).toBe(true)
+		expect(player.gear[3]).toBe(yard.gear)
+	})
+
+	it("fills the first empty gear slot before lower slots", () => {
+		const state = game()
+		const player = state.players[0]
+		player.ship.node = "P8"
+		const planet = rules.planetState(state, 8)
+		const yard = rf.SPACEYARD_TYPES[planet.site.tileId]
+		const other = rf.PRIMARY_GOODS.find((g) => g !== yard.cost[0])
+		planet.site.built = true
+		player.goods.push(yard.cost[0], other)
+		player.energy[rf.BLUE_ENERGY] = 1
+		const failed = rules.buyGear(state, 0, 3, other)
+		expect(failed.ok).toBe(false)
+		const result = rules.buyGear(state, 0, 0, other)
+		expect(result.ok).toBe(true)
+		expect(player.gear[0]).toBe(yard.gear)
 	})
 
 	it("sells to a consumer for its points", () => {
 		const state = game()
 		const player = state.players[0]
-		const planet = rules.planetState(state, 8)
+		player.ship.node = "P0"
+		const planet = rules.planetState(state, 0)
 		planet.site = { kind: "consumer", tileId: 10, built: true }
 		player.goods.push(10)
 		player.energy[rf.BLUE_ENERGY] = 1

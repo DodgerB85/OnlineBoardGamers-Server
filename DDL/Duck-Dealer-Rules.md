@@ -156,6 +156,21 @@ To build a factory, spaceyard, or consumer tile, you pay one building energy mar
 
 **Factories.** You can build a factory by paying the input goods for that factory. Take the factory from the stock and place it in the planet's factory slot. This scores points as indicated on the player aid: 10 points for an intermediate factory, 25 points for a 10-point final factory, and 50 points for a 30-point final factory. There are two of each type of factory. Building a factory does not give you its output good; you must use a separate trade action to produce.
 
+| Factory | Inputs | Output | Build points |
+| --- | --- | --- | ---: |
+| Modern radio | Phone box + yellow duck | Modern radio | 10 |
+| Stealth duck | Blue paint + yellow duck | Stealth duck | 10 |
+| Linear accelerator | Solar panels + plastic beads | Linear accelerator | 10 |
+| Diet pills | Plastic beads + blue paint | Diet pills | 10 |
+| Satellite | Phone box + solar panels | Satellite | 10 |
+| Modern art | Satellite + modern radio | Modern art | 25 |
+| Science | Linear accelerator + yellow duck | Science | 25 |
+| Economics | Plastic beads + modern radio | Economics | 25 |
+| Religion | Stealth duck + modern radio | Religion | 50 |
+| Politics | Satellite + blue paint | Politics | 50 |
+| Medicine | Plastic beads + linear accelerator | Medicine | 50 |
+| Military | Linear accelerator + satellite | Military | 50 |
+
 **Privileges.** For three building energy markers, you can claim a mine on the planet that you are on, which has no privilege marker yet. Simply put a privilege marker of your colour on that mine. Factories, spaceyards and consumers can be claimed in the same manner.
 
 **Intergalactic highway.** In addition to building on your current location, you can build intergalactic highway parts anywhere on the board. The free parts from the start of your action turn cost nothing; each further highway part costs one building energy marker. The highway parts (wooden cubes) can be placed on any dot (not planet) in the universe that does not contain a spaceship or another highway token.
@@ -182,6 +197,16 @@ A player may trade only on the planet on which he has a spaceship. Any trade cos
 **Mines.** All planets have one mine. For each trade energy marker you spend, you may take one good produced in that planet's mine and put it on your ship.
 
 **Spaceyards.** The starting planets all have a spaceyard, where you can buy ship gear: crew quarters that produce energy (put one energy marker of the corresponding colour on your ship) or a cargo hold. Ship gear can only be acquired at the appropriate spaceyard. The spaceyard site must have been built (blue side up). The costs for ship gear are indicated on the tile — e.g., a cargo hold costs 1 phone box and 1 blue paint, in addition to a trade energy marker.
+
+| Spaceyard | Cost | Gear |
+| --- | --- | --- |
+| Navigator | Yellow duck + any other different good | Navigator (red) |
+| Merchant | Plastic beads + any other different good | Merchant (blue) |
+| Builder | Blue paint + any other different good | Builder (yellow) |
+| Cargo hold | Phone box + any other different good | Cargo hold |
+| Cargo hold | Blue paint + any other different good | Cargo hold |
+
+"Any other different good" means any good except the printed one; two different goods are always required.
 
 The new gear is placed in the ship and takes up a slot. If you build over the first "5" or "2" slot, your ship's speed will be affected accordingly. It is allowed to build ship gear into a slot that was already filled with other gear, in effect exchanging the gear (put the old gear back in the common stock). However, once a slot is filled, it can never be emptied again. Place new gear in the highest-numbered empty slot first (8 before 5 before 2), as shown on the player aid.
 
@@ -229,7 +254,7 @@ These are the official answers to the rulebook's ambiguities from the [BGG rules
 - **Unlimited goods.** The physical supply of goods is not a limit; use substitutes if the pile runs out.
 - **Crew quarters.** After setup, a crew quarter can only be acquired at a spaceyard. It occupies a ship slot and cannot be discarded; it can only be built over. An empty cargo hold still counts as a filled slot for ship speed.
 - **Gear slots.** Place new gear in the highest-numbered empty slot first (8 before 5 before 2), as printed on the player aid.
-- **Starting planets.** Starting planets have a mine and a spaceyard and are never explored.
+- **Starting planets.** Starting planets have a mine and a spaceyard, no factory slot, and are never explored.
 - **Online starting player.** The online version chooses the starting player at random. If an auction ends in another tie after the re-bid, the tied players' order is also decided randomly.
 
 ## CREDITS

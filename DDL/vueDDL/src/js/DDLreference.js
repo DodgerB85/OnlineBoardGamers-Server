@@ -122,17 +122,17 @@ export function goodValue(id) {
 // Factories ---------------------------------------------------------------
 // tier 1 = intermediate factory, tier 2 = 10-point final, tier 3 = 30-point final.
 export const FACTORY_TYPES = [
-	{ id: 0, key: "radio", tier: 1, input: [4, 0], output: 5, points: 10, copies: 2 },
+	{ id: 0, key: "radio", tier: 1, input: [3, 0], output: 5, points: 10, copies: 2 },
 	{ id: 1, key: "stealthduck", tier: 1, input: [2, 0], output: 6, points: 10, copies: 2 },
-	{ id: 2, key: "accelerator", tier: 1, input: [1, 2], output: 7, points: 10, copies: 2 },
-	{ id: 3, key: "pills", tier: 1, input: [1, 3], output: 8, points: 10, copies: 2 },
-	{ id: 4, key: "satellite", tier: 1, input: [4, 3], output: 9, points: 10, copies: 2 },
-	{ id: 5, key: "art", tier: 2, input: [9, 2], output: 10, points: 25, copies: 2 },
+	{ id: 2, key: "accelerator", tier: 1, input: [4, 1], output: 7, points: 10, copies: 2 },
+	{ id: 3, key: "pills", tier: 1, input: [1, 2], output: 8, points: 10, copies: 2 },
+	{ id: 4, key: "satellite", tier: 1, input: [3, 4], output: 9, points: 10, copies: 2 },
+	{ id: 5, key: "art", tier: 2, input: [9, 5], output: 10, points: 25, copies: 2 },
 	{ id: 6, key: "science", tier: 2, input: [7, 0], output: 11, points: 25, copies: 2 },
-	{ id: 7, key: "coins", tier: 2, input: [8, 5], output: 12, points: 25, copies: 2 },
+	{ id: 7, key: "coins", tier: 2, input: [1, 5], output: 12, points: 25, copies: 2 },
 	{ id: 8, key: "religion", tier: 3, input: [6, 5], output: 13, points: 50, copies: 2 },
-	{ id: 9, key: "politics", tier: 3, input: [9, 5], output: 14, points: 50, copies: 2 },
-	{ id: 10, key: "medicine", tier: 3, input: [7, 8], output: 15, points: 50, copies: 2 },
+	{ id: 9, key: "politics", tier: 3, input: [9, 2], output: 14, points: 50, copies: 2 },
+	{ id: 10, key: "medicine", tier: 3, input: [1, 7], output: 15, points: 50, copies: 2 },
 	{ id: 11, key: "military", tier: 3, input: [7, 9], output: 16, points: 50, copies: 2 },
 ]
 
@@ -150,11 +150,13 @@ export function factoryPoints(id) {
 
 // Consumers ---------------------------------------------------------------
 // One consumer tile per non-primary good. Building costs the demanded good plus
-// any other different good; selling costs the demanded good again.
+// 1 build energy and scores buildPoints; selling costs the demanded good again
+// plus 1 trade energy and scores points.
 export const CONSUMER_TILES = GOODS.filter((g) => g.tier >= 1).map((g) => ({
 	id: g.id,
 	good: g.id,
 	points: g.tier === 1 ? 3 : g.value,
+	buildPoints: g.tier === 1 ? 10 : g.value === 10 ? 25 : 50,
 }))
 
 // The two columns on the board, top to bottom. The value is fixed by the board;
@@ -189,7 +191,7 @@ export const SPACEYARD_TYPES = [
 	{ id: 0, key: "navigator", gear: "navigator", cost: [0, "R"], points: 10 },
 	{ id: 1, key: "builder", gear: "builder", cost: [2, "R"], points: 10 },
 	{ id: 2, key: "merchant", gear: "merchant", cost: [1, "R"], points: 10 },
-	{ id: 3, key: "cargo-tower", gear: "cargo", cost: [4, "R"], points: 10 },
+	{ id: 3, key: "cargo-phone", gear: "cargo", cost: [3, "R"], points: 10 },
 	{ id: 4, key: "cargo-paint", gear: "cargo", cost: [2, "R"], points: 10 },
 ]
 

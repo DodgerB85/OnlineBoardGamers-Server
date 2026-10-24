@@ -102,6 +102,10 @@ export function filledGear(player) {
 	return player.gear.filter(Boolean).length
 }
 
+export function firstEmptyGearSlot(player) {
+	return player.gear.findIndex((gear) => !gear)
+}
+
 export function shipSpeed(player) {
 	return rf.shipSpeed(player.gear)
 }
@@ -370,7 +374,7 @@ export function beginActionTurn(state, playerIndex, free = false) {
 	state.gameflow.turnType = rf.TURN_ACTION
 	state.gameflow.actionStage = rf.ACT_PLACE_HIGHWAYS
 	state.gameflow.freeActionTurn = free
-	state.gameflow.freeHighwaysLeft = state.gameflow.turn <= 6 ? 1 : state.gameflow.turn <= 12 ? 2 : 3
+	state.gameflow.freeHighwaysLeft = state.gameflow.turn <= 8 ? 1 : state.gameflow.turn <= 16 ? 2 : 3
 	state.gameflow.movement = { remaining: 0, active: false }
 	state.gameflow.pendingExplore = null
 	player.freeTradeTiles = []
@@ -563,6 +567,7 @@ export function buildFactory(state, playerIndex, factoryTypeId) {
 	const player = state.players[playerIndex]
 	const planet = playerPlanet(state, playerIndex)
 	if (!planet) return { ok: false, message: t("errors.planetRequired") }
+	if (planet.start) return { ok: false, message: t("errors.noFactorySlot") }
 	const planetObj = planetState(state, planet.id)
 	if (planetObj.factory) return { ok: false, message: t("errors.planetHasFactory") }
 	const factory = rf.FACTORIES_BY_ID[factoryTypeId]
@@ -585,28 +590,46 @@ export function siteCost(state, planetId) {
 	if (!planet || !planet.site) return null
 	if (planet.site.kind === "spaceyard") {
 		const type = rf.SPACEYARD_TYPES[planet.site.tileId]
-		return { printed: type.cost[0], random: true, points: type.points }
+		return { printed: type.cost[0], random: true, points: type.points, gear: type.gear }
 	}
 	const tile = rf.CONSUMER_TILES.find((t) => t.id === planet.site.tileId)
-	return { printed: tile.good, random: true, points: 0 }
+	return { printed: tile.good, random: false, points: tile.buildPoints }
 }
 
-export function buildSite(state, playerIndex, randomGoodId) {
+function spaceyardRewardSlot(player, requestedSlot) {
+	const emptySlot = firstEmptyGearSlot(player)
+	if (emptySlot >= 0) return emptySlot
+	if (requestedSlot >= 0 && requestedSlot < player.gear.length) return requestedSlot
+	return -1
+}
+
+export function buildSite(state, playerIndex, randomGoodId, gearSlotIndex = -1) {
 	const player = state.players[playerIndex]
 	const planet = playerPlanet(state, playerIndex)
 	if (!planet) return { ok: false, message: t("errors.planetRequired") }
 	const planetObj = planetState(state, planet.id)
 	if (!planetObj.site || planetObj.site.built) return { ok: false, message: t("errors.noUnbuiltSite") }
 	const cost = siteCost(state, planet.id)
-	if (randomGoodId === cost.printed) return { ok: false, message: t("errors.secondGoodDifferent") }
-	if (!hasGoods(player, [cost.printed, randomGoodId])) return { ok: false, message: t("errors.missingRequiredGoods") }
+	if (cost.random) {
+		if (randomGoodId === cost.printed) return { ok: false, message: t("errors.secondGoodDifferent") }
+		if (!hasGoods(player, [cost.printed, randomGoodId])) return { ok: false, message: t("errors.missingRequiredGoods") }
+	} else if (!hasGoods(player, [cost.printed])) {
+		return { ok: false, message: t("errors.missingRequiredGoods") }
+	}
 	if (player.energy[rf.YELLOW_ENERGY] <= 0) return { ok: false, message: t("errors.buildCost") }
-	removeGoods(player, [cost.printed, randomGoodId])
+	let rewardSlot = -1
+	if (planetObj.site.kind === "spaceyard") {
+		rewardSlot = spaceyardRewardSlot(player, gearSlotIndex)
+		if (rewardSlot < 0) return { ok: false, message: t("errors.chooseShipSlot") }
+	}
+	if (cost.random) removeGoods(player, [cost.printed, randomGoodId])
+	else removeGoods(player, [cost.printed])
 	spendEnergy(state, playerIndex, rf.YELLOW_ENERGY)
 	planetObj.site.built = true
+	if (planetObj.site.kind === "spaceyard") player.gear[rewardSlot] = cost.gear
 	player.score += cost.points
 	state.gameflow.movement.remaining = 0
-	return { ok: true, points: cost.points }
+	return { ok: true, points: cost.points, gear: cost.gear || null, gearSlotIndex: rewardSlot }
 }
 
 export function claimPrivilege(state, playerIndex, kind) {
@@ -685,6 +708,8 @@ export function buyGear(state, playerIndex, slotIndex, randomGoodId) {
 	const planetObj = planetState(state, planet.id)
 	if (!planetObj.site || planetObj.site.kind !== "spaceyard" || !planetObj.site.built) return { ok: false, message: t("errors.noSpaceyard") }
 	if (slotIndex < 0 || slotIndex >= player.gear.length) return { ok: false, message: t("errors.chooseShipSlot") }
+	const emptySlot = firstEmptyGearSlot(player)
+	if (emptySlot >= 0 && slotIndex !== emptySlot) return { ok: false, message: t("errors.gearSlotOrder") }
 	const type = rf.SPACEYARD_TYPES[planetObj.site.tileId]
 	if (randomGoodId === type.cost[0]) return { ok: false, message: t("errors.secondGoodDifferent") }
 	if (!hasGoods(player, [type.cost[0], randomGoodId])) return { ok: false, message: t("errors.missingRequiredGoods") }

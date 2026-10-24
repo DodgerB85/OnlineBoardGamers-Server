@@ -333,16 +333,17 @@ export async function buildFactory(factoryTypeId) {
 	return true
 }
 
-export async function buildSite(randomGoodId) {
+export async function buildSite(randomGoodId, gearSlotIndex = -1) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const result = rules.buildSite(model.stateFromStore(), personal.pov, randomGoodId)
+	const result = rules.buildSite(model.stateFromStore(), personal.pov, randomGoodId, gearSlotIndex)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
 	model.addHistory(rf.HIST_BUILD, personal.pov, ["site", result.points])
 	store.gameMessages.successText = result.points ? t("messages.siteBuiltPoints", { points: result.points }) : t("messages.siteBuilt")
+	if (result.gear) store.gameMessages.successText += " " + t("messages.gearInstalled")
 	await IO.saveGame(true)
 	return true
 }

@@ -166,7 +166,10 @@ function siteLabel(site) {
 	if (!site) return ""
 	if (site.kind === "consumer") {
 		const tile = rf.CONSUMER_TILES.find((t) => t.id === site.tileId)
-		return tile ? t("map.siteValue", { good: rf.goodName(tile.good), points: tile.points }) : t("action.consumer")
+		if (!tile) return t("action.consumer")
+		return site.built
+			? t("map.siteValue", { good: rf.goodName(tile.good), points: tile.points })
+			: t("map.siteBuildValue", { good: rf.goodName(tile.good), points: tile.buildPoints })
 	}
 	const type = rf.SPACEYARD_TYPES[site.tileId]
 	return type ? t("map.gearYard", { gear: rf.gearName(type.gear) }) : t("action.spaceyard")
