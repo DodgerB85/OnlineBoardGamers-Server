@@ -8923,7 +8923,7 @@ msgid "Need to move - could be kicked out"
 msgstr "需要行动 - 可能被踢出"
 
 #: .\Lobby\templates\Lobby\lobby.html:258
-msgid "Current Player is using Flex-Time"
+msgid "Current Player is using Flexi-Time"
 msgstr "当前玩家正在使用弹性时间"
 
 #: .\Lobby\templates\Lobby\lobby.html:259

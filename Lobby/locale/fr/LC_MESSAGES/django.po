@@ -9586,8 +9586,8 @@ msgid "Need to move - could be kicked out"
 msgstr "Besoin de déménager - pourrait être expulsé"
 
 #: .\Lobby\templates\Lobby\lobby.html:258
-msgid "Current Player is using Flex-Time"
-msgstr "Le joueur actuel utilise Flex-Time"
+msgid "Current Player is using Flexi-Time"
+msgstr "Le joueur actuel utilise Flexi-Time"
 
 #: .\Lobby\templates\Lobby\lobby.html:259
 msgid "Enter game to kickout inactive player"

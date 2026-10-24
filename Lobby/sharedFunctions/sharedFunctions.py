@@ -164,7 +164,7 @@ def SF_serializeGame(game, user, player_context):
     d, rem = divmod(elapsed, 86400)
     h, rem = divmod(rem, 3600)
     m, s = divmod(rem, 60)
-    elapsed_str = f"{f'{d}d ' if d else ''}{f'{h}h ' if h else ''}{f'{m}m ' if m else ''}{s}s"
+    elapsed_str = f"{f'{d}d ' if d else ''}{f'{h}h ' if h else ''}{f'{m}min ' if m else ''}{s}s"
 
     # 4. MyMove & Involved Logic
     is_my_move = False

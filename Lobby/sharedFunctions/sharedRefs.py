@@ -765,7 +765,8 @@ def SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds):
         latestUpdateElapsedTimeString += " " + str(elapsedHours) + "h"
         # if (elapsedHours > 1): latestUpdateElapsedTimeString += "s"
     if elapsedmins > 0:
-        latestUpdateElapsedTimeString += " " + str(elapsedmins) + "m"
+        # "min", not "m": in Italian "m" reads as metres.
+        latestUpdateElapsedTimeString += " " + str(elapsedmins) + "min"
     latestUpdateElapsedTimeString += " " + str(elapsedTotalSeconds) + "s"
     return latestUpdateElapsedTimeString
 

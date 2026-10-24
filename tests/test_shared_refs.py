@@ -181,16 +181,16 @@ class TestSRlatestUpdateElapsedTimeString(TestCase):
 
     def test_minutes_and_seconds(self):
         result = SR_latestUpdateElapsedTimeStringFromTotalSeconds(125)
-        self.assertEqual(result, " 2m 5s")
+        self.assertEqual(result, " 2min 5s")
 
     def test_hours_minutes_seconds(self):
         result = SR_latestUpdateElapsedTimeStringFromTotalSeconds(3661)
-        self.assertEqual(result, " 1h 1m 1s")
+        self.assertEqual(result, " 1h 1min 1s")
 
     def test_days_hours_minutes_seconds(self):
         total = 2 * 86400 + 3 * 3600 + 15 * 60 + 30
         result = SR_latestUpdateElapsedTimeStringFromTotalSeconds(total)
-        self.assertEqual(result, "2d 3h 15m 30s")
+        self.assertEqual(result, "2d 3h 15min 30s")
 
     def test_exactly_one_day(self):
         result = SR_latestUpdateElapsedTimeStringFromTotalSeconds(86400)

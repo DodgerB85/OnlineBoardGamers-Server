@@ -571,7 +571,7 @@ msgstr "Si gira per vincere"
 #: .\Lobby\templates\Lobby\tournaments\AllMiniTournaments.html:32
 #: .\TGZ\templates\TGZ\TGZstats.html:209 .\TGZ\templates\TGZ\TGZstats.html:599
 msgid "Available"
-msgstr "Disponibile"
+msgstr "Disponibili"
 
 #: .\AQY\templates\AQY\AQYstats.html:205 .\TGZ\templates\TGZ\TGZstats.html:210
 #: .\TGZ\templates\TGZ\TGZstats.html:600
@@ -3408,7 +3408,7 @@ msgstr "In corso"
 #: .\Lobby\templates\Lobby\lobby.html:113
 #: .\Lobby\templates\Lobby\tournaments\AllMiniTournaments.html:84
 msgid "Finished"
-msgstr "Finito"
+msgstr "Concluse"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:95
 #: .\Lobby\templates\Lobby\tournamentsHelp.html:64
@@ -3579,7 +3579,7 @@ msgstr "Ricerca"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:455
 msgid "Set Focus"
-msgstr "Imposta la messa a fuoco"
+msgstr "Set Focus"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:457
 msgid "Build Factory"
@@ -3892,7 +3892,7 @@ msgstr "Veloce<br/>(Più mosse al giorno)"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:695
 msgid "Standard<br/>(1-2+ moves/day)"
-msgstr "Standard<br/>(1-2+ mosse/giorno)"
+msgstr "Standard<br/>(1-2+ mosse al giorno)"
 
 #: .\Lobby\sharedFunctions\sharedRefs.py:697
 msgid "Slow<br/>(1 move/day)"
@@ -4231,7 +4231,7 @@ msgstr "Errore"
 #: .\Lobby\templates\Lobby\layout.html:256
 #: .\Lobby\templates\Lobby\layout.html:263
 msgid "Home"
-msgstr "Casa"
+msgstr "Home"
 
 #: .\Lobby\templates\Lobby\500.html:12
 msgid "Sorry, the page you are requesting cannot be delivered"
@@ -4619,7 +4619,7 @@ msgstr "Giocatori attuali"
 #: .\Lobby\templates\Lobby\playerInfo.html:182
 #: .\Lobby\templates\Lobby\schism.html:54
 msgid "Current Turn"
-msgstr "Turno attuale"
+msgstr "Turno in corso"
 
 #: .\Lobby\templates\Lobby\TGZtournaments.html:37
 #: .\Lobby\templates\Lobby\admin\DBO.html:51
@@ -5095,7 +5095,7 @@ msgstr "Mini tornei"
 #: .\Lobby\templates\Lobby\layout.html:110
 #: .\Lobby\templates\Lobby\layout.html:229
 msgid "New Game"
-msgstr "Nuovo gioco"
+msgstr "Nuova partita"
 
 #: .\Lobby\templates\Lobby\createAQY.html:23
 msgid "New to Antiquity? For Rules, How to Play, and Game Guide, please see "
@@ -6165,7 +6165,7 @@ msgstr "Configurazione del torneo"
 #: .\Lobby\templates\Lobby\lobby.html:233
 #: .\Lobby\templates\Lobby\lobby.html:377
 msgid "Game Name"
-msgstr "Nome del gioco"
+msgstr "Nome partita"
 
 #: .\Lobby\templates\Lobby\createFCM.html:157
 #: .\Lobby\templates\Lobby\tournaments\AllMainTournaments.html:44
@@ -7201,6 +7201,10 @@ msgstr ""
 msgid "Wish to support the project?"
 msgstr "Desideri sostenere il progetto?"
 
+#: .\Lobby\templates\Lobby\splotterconSponsor.html:4
+msgid "Proud Sponsor of"
+msgstr "Siamo sponsor di"
+
 #: .\Lobby\templates\Lobby\donate\donate_success.html:12
 msgid "Thank you!"
 msgstr "Grazie!"
@@ -8202,12 +8206,12 @@ msgstr "Un turno di chiunque prima di mezzanotte UTC tiene viva la serie"
 #: .\Lobby\templates\Lobby\gameDisplay\invitationGameRow.html:8
 #: .\Lobby\templates\Lobby\gameDisplay\waitingGameRow.html:8
 msgid "by"
-msgstr "di"
+msgstr "creata da"
 
 #: .\Lobby\templates\Lobby\gameDisplay\currentGameRow.html:19
 #: .\Lobby\templates\Lobby\lobby.html:203
 msgid "Current player"
-msgstr "Giocatore attuale"
+msgstr "Giocatore di turno"
 
 #: .\Lobby\templates\Lobby\gameDisplay\currentGameRow.html:39
 #: .\Lobby\templates\Lobby\lobby.html:207
@@ -9387,24 +9391,24 @@ msgstr "Esci"
 
 #: .\Lobby\templates\Lobby\layout.html:98
 msgid "Logged in as"
-msgstr "Effettuato l'accesso come"
+msgstr "Connesso come"
 
 #: .\Lobby\templates\Lobby\layout.html:112
 #: .\Lobby\templates\Lobby\layout.html:231
 msgid "My Games"
-msgstr "I miei giochi"
+msgstr "Le mie partite"
 
 #: .\Lobby\templates\Lobby\layout.html:117
 #: .\Lobby\templates\Lobby\layout.html:246
 msgid "Support"
-msgstr "Supporto"
+msgstr "Sostieni"
 
 #: .\Lobby\templates\Lobby\layout.html:118
 #: .\Lobby\templates\Lobby\layout.html:192
 #: .\Lobby\templates\Lobby\layout.html:249
 #: .\Lobby\templates\Lobby\layout.html:269
 msgid "About"
-msgstr "Di"
+msgstr "Info"
 
 #: .\Lobby\templates\Lobby\layout.html:158
 msgid " Username"
@@ -9469,8 +9473,8 @@ msgid ""
 "New Design Active! All feedback being processed. Please let us know what "
 "improvements you would like."
 msgstr ""
-"Nuovo design attivo! Tutti i feedback sono in fase di elaborazione. Fateci "
-"sapere quali miglioramenti vorreste."
+"È attivo il nuovo design! Stiamo esaminando tutti i feedback. Dicci quali "
+"miglioramenti vorresti."
 
 #: .\Lobby\templates\Lobby\lobby.html:87 .\Lobby\templates\Lobby\lobby.html:107
 msgid "New chat"
@@ -9478,7 +9482,7 @@ msgstr "Nuova chiacchierata"
 
 #: .\Lobby\templates\Lobby\lobby.html:93
 msgid "Current"
-msgstr "Attuale"
+msgstr "In corso"
 
 #: .\Lobby\templates\Lobby\lobby.html:97
 msgid "Waiting"
@@ -9514,7 +9518,7 @@ msgstr "Nessun gioco attuale o mini torneo."
 
 #: .\Lobby\templates\Lobby\lobby.html:252
 msgid "Colour Guide"
-msgstr "Guida ai colori"
+msgstr "Legenda dei colori"
 
 #: .\Lobby\templates\Lobby\lobby.html:254
 msgid "It is your move"
@@ -9526,23 +9530,23 @@ msgstr "In attesa che gli altri giocatori si muovano"
 
 #: .\Lobby\templates\Lobby\lobby.html:256
 msgid "Need to move - using Flexi-Time"
-msgstr "Hai bisogno di spostarti: usa Flexi-Time"
+msgstr "Devi muovere (stai usando Flexi-Time)"
 
 #: .\Lobby\templates\Lobby\lobby.html:257
 msgid "Need to move - could be kicked out"
-msgstr "È necessario trasferirsi: potrebbe essere espulso"
+msgstr "Devi muovere: rischi di essere rimosso dalla partita"
 
 #: .\Lobby\templates\Lobby\lobby.html:258
-msgid "Current Player is using Flex-Time"
-msgstr "Il giocatore attuale utilizza Flex-Time"
+msgid "Current Player is using Flexi-Time"
+msgstr "Il giocatore di turno sta usando Flexi-Time"
 
 #: .\Lobby\templates\Lobby\lobby.html:259
 msgid "Enter game to kickout inactive player"
-msgstr "Entra nel gioco per espellere il giocatore inattivo"
+msgstr "Entra nella partita per rimuovere il giocatore inattivo"
 
 #: .\Lobby\templates\Lobby\lobby.html:260
 msgid "Finished - result not yet viewed"
-msgstr "Finito - risultato non ancora visualizzato"
+msgstr "Conclusa: risultato non ancora visualizzato"
 
 #: .\Lobby\templates\Lobby\lobby.html:289
 msgid ""
@@ -9798,7 +9802,7 @@ msgid ""
 "amount of time that has passed since the last move was made, or since the "
 "game was created."
 msgstr ""
-"Il tempo trascorso sotto la data/ora, ad esempio 1h 5m 23s, indica la "
+"Il tempo trascorso sotto la data/ora, ad esempio 1h 5min 23s, indica la "
 "quantità di tempo trascorso da quando è stata effettuata l'ultima mossa o da "
 "quando è stata creata la partita."
 
@@ -10579,7 +10583,7 @@ msgstr "Giochi attuali congiunti"
 #: .\Lobby\templates\Lobby\playerInfo.html:181
 #: .\Lobby\templates\Lobby\stats.html:1177
 msgid "Current Player"
-msgstr "Giocatore attuale"
+msgstr "Giocatore di turno"
 
 #: .\Lobby\templates\Lobby\playerInfo.html:127
 msgid "No Joint Current Games"
