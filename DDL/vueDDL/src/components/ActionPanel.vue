@@ -211,7 +211,7 @@ function openTradeModal() {
 		<template v-else>
 			<div class="turnLine">
 				<span v-if="store.gameflow.phase === rf.PHASE_SETUP">{{ $t("phase.setup") }}: <b>{{ current ? current.displayName : "?" }}</b></span>
-				<span v-else>{{ $t("action.actionTurnLabel", { turn: store.gameflow.turn }) }} Â· {{ $t("action.current") }} <b>{{ current ? current.displayName : "?" }}</b></span>
+				<span v-else>{{ $t("action.actionTurnLabel", { turn: store.gameflow.turn }) }} · {{ $t("action.current") }} <b>{{ current ? current.displayName : "?" }}</b></span>
 			</div>
 
 			<div v-if="store.gameflow.phase === rf.PHASE_SETUP" class="waitBox">
@@ -304,7 +304,7 @@ function openTradeModal() {
 					<div v-if="store.context.action === rf.ACT_TRADE" class="subPanel">
 						<div v-if="!planet" class="hint">{{ $t("action.mustBeOnPlanetToTrade") }}</div>
 						<template v-else>
-							<div class="planetHeader">{{ planet.name }} â€” {{ currentPlanetShips.map((p) => p.displayName).join(", ") }}</div>
+							<div class="planetHeader">{{ planet.name }} — {{ currentPlanetShips.map((p) => p.displayName).join(", ") }}</div>
 							<div class="subSection">
 								<b>{{ $t("action.mine") }}</b>
 								<div>{{ $t("action.produces", { good: rf.goodName(planetState.mine) }) }}</div>
@@ -441,6 +441,8 @@ function openTradeModal() {
 .subPanel .actionsLineButton { margin: 2px; padding: 4px 8px; }
 .planetHeader { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
 .subSection { border-top: 1px solid #d8c58f; padding-top: 4px; margin-top: 4px; }
+/* Cap the offers list so a pile of trade offers scrolls instead of growing the panel and shifting the board. */
+.subSection.offers { max-height: 40vh; overflow-y: auto; }
 .smallNote { color: #666; font-size: 11px; }
 .factoryList { display: flex; flex-direction: column; gap: 2px; }
 .factoryOption { display: flex; justify-content: space-between; align-items: center; gap: 4px; font-size: 11px; }
