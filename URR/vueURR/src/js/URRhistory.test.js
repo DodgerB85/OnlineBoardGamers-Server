@@ -35,3 +35,19 @@ test("computed history keeps moves when snapshots are unavailable", () => {
 	assert.equal(result[1].historyTime, null)
 	assert.equal(result[1].historyIndex, 1)
 })
+
+test("appending computes only the new entries' display rows", () => {
+	const first = createGame(["A", "B", "C"])
+	const second = structuredClone(first)
+	second.era = 2
+	const third = structuredClone(second)
+	third.era = 3
+	const history = [[rf.HIST_NEW_GAME, -1, null], entry({ type: "pass" }, 10), entry({ type: "pass" }, 5)]
+	const snapshots = [first, second, third]
+	const times = [1000, 1010, 1015]
+	const full = computeHistory(history, 1000, snapshots, times)
+	const appended = computeHistory(history.slice(0, 2), 1000, snapshots.slice(0, 2), times.slice(0, 2))
+	computeHistory(history, 1000, snapshots, times, appended, 2)
+
+	assert.deepEqual(appended, full)
+})

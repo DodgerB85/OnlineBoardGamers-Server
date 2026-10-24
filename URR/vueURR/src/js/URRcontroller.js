@@ -89,6 +89,7 @@ function restoreCheckpoint(checkpoint) {
 	const store = useModelStore()
 	model.restoreState(checkpoint.state)
 	store.history.splice(checkpoint.historyLength)
+	store.refreshHistory()
 	store.gameMessages.actionError = ""
 	store.viewSettings.actionIntent = ""
 	store.viewSettings.historyArea = null

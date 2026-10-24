@@ -137,6 +137,7 @@ export function addHistory(event, playerIndex, action = null) {
 		}
 	}
 	store.history.push(entry)
+	store.refreshHistory()
 }
 
 // Opening-only edits (shadow names, missing seats) are not a move: keep them

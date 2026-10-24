@@ -58,7 +58,14 @@ const savedCanals = computed(() => displayedBoard.value.canals.map(([from, to]) 
 	const b = actualAreas.value.find((entry) => entry.area.id === to)?.position
 	return a && b ? `${a.x},${a.y} ${b.x},${b.y}` : null
 }).filter(Boolean))
-const waterReport = computed(() => [...store.computedHistory].reverse().find((entry) => (!store.viewSettings.showReplay || entry.historyIndex <= store.replayStep.index) && ["riverStart", "riverComplete"].includes(entry.administration?.kind))?.administration)
+const waterReport = computed(() => {
+	// River rows are kept separately so a new history entry does not invalidate the map.
+	for (let index = store.historyRiverReports.length - 1; index >= 0; index--) {
+		const report = store.historyRiverReports[index]
+		if (!store.viewSettings.showReplay || report.historyIndex <= store.replayStep.index) return report.administration
+	}
+	return null
+})
 const selectedArea = computed(() => store.board.areas.find((area) => area.id === selectedHexId.value))
 const reachable = computed(() => !previewOpen.value && !store.viewSettings.actionIntent && selectedArea.value?.waterwork ? boardRules.getWaterworkReach(store, selectedArea.value.id) : [])
 const waterDestinations = computed(() => water.waterChoices(store).map((choice) => choice.area))

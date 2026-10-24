@@ -32,9 +32,11 @@ function routingSnapshot(before, after, action, startsRain) {
 	return game
 }
 
-export function computeHistory(history, creationTimestamp, snapshots = [], times = []) {
-	const result = []
-	for (const [index, entry] of history.entries()) {
+// `result` and `start` let the store append the rows of new entries instead of
+// rebuilding the whole display list after every save.
+export function computeHistory(history, creationTimestamp, snapshots = [], times = [], result = [], start = 0) {
+	for (let index = start; index < history.length; index++) {
+		const entry = history[index]
 		const displayEntry = [...entry]
 		displayEntry.historyIndex = index
 		displayEntry.historyKey = `${index}-move`

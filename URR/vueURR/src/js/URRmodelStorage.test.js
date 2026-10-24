@@ -94,6 +94,29 @@ test("the simple export restores state and history without touching the server",
 	assert.equal(store.history.length, 1)
 })
 
+test("display history appends without invalidating the map's river reports", () => {
+	const game = createGame(["A", "B", "C"])
+	storeGame(game)
+	const rows = store.computedHistory
+	const reports = store.historyRiverReports
+	model.addHistory(rf.HIST_ACTION, 0, { type: "pass" })
+
+	assert.equal(store.computedHistory.length, 2)
+	assert.notEqual(store.computedHistory, rows)
+	assert.equal(store.historyRiverReports, reports)
+})
+
+test("river summaries are kept separately for the map", () => {
+	const game = createGame(["A", "B", "C"])
+	Object.assign(game.gameflow, { phase: rf.PHASE_DEVELOPMENT, stateOrder: [], stateIndex: 0, developmentStep: "betweenStates", turnOrder: [0] })
+	const opening = historyStorage.changesBetween(createGame(["A", "B", "C"]), game)
+	funcs.restoreState(game)
+	store.setHistory([[rf.HIST_NEW_GAME, -1, null, opening]])
+	model.addHistory(rf.HIST_ACTION, 0, { type: "beginDevelopment" })
+
+	assert.deepEqual(store.historyRiverReports.map((report) => report.administration.kind), ["riverStart", "riverComplete"])
+})
+
 test("the rewind opening marker rebuilds the opening position", () => {
 	const opening = { opening: true, players: ["A", "B", "C"], replayStart: [] }
 	const imported = funcs.importURRmodel(JSON.stringify(opening))
