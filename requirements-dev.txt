@@ -3,3 +3,9 @@ django-debug-toolbar
 django-debug-toolbar-template-profiler
 pyinstrument
 pip-audit
+
+# Used to regenerate the rulebook markdown in FCM/rules/
+pymupdf==1.28.2
+pymupdf4llm==0.3.4
+markdownify==1.2.3
+pdfplumber
