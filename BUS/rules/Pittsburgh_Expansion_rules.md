@@ -6,35 +6,38 @@
 
 ## Setup
 
-Place one Passenger on each of the four building locations marked on the map.
+The map pre-prints every construction site and its number. Players place buildings on those sites using the normal rules.
+
+Place one Passenger on each of the four marked building locations on the map.
 
 ## One-Way Streets
 
-Some streets display directional arrows. During the Vrrooomm! action, Passengers can only be transported along those streets in the direction indicated by the arrows.
+Some streets display directional arrows. During the Vrrooomm! action, Passengers and Designers can only be transported along those streets in the direction indicated by the arrows.
 
 - Line Expansion may be performed in either direction, regardless of arrows.
 
 ## Bridges
 
-There are five white Bridge line markers and nine designated Bridge spaces on the game map. A Bridge may be placed on any unoccupied Bridge space at one of the ends of a player's line by using one of their Bus Line marker placements granted by the Line Expansion action.
+There are five white Bridge line markers and nine designated Bridge spaces on the game map. A Bridge may be placed on any unoccupied Bridge space at one of the ends of a player's line by using one of the Bus Line marker placements granted by the Line Expansion action.
 
-- Placing a Bridge does not consume the entire action unless the Player only has one (1) Line Expansion.
+- Placing a Bridge uses one of that Line Expansion action's line placements; it does not use up the whole action unless that action gave only one placement.
 - Bridges may not be placed during the first line marker placements (initial setup).
-- A bridge may never be placed on a crossing that is not one of the ends of the player's line.
+- A Bridge may never be placed on a crossing that is not one of the ends of the player's line.
 
 ### Expanding After a Bridge
 
-- If a Bridge exists at the end of your bus line, then during your next Line Expansion action, you may choose either to:
-  - Expand your line from the far end of the Bridge, or
-  - Expand from the last line marker of your line before the Bridge.
-- Whichever option you choose becomes the new end of your line.
+- If a Bridge exists at the end of your bus line, then during your next Line Expansion action, you may expand from either side of it:
+  - from the far end of the Bridge, or
+  - from the last line marker of your line before the Bridge.
+- The Bridge remains usable either way. Choosing the near side does not remove the Bridge or make it unavailable to anyone.
+- Online implementation: both sides of a Bridge at one of your line ends are offered as legal Line Expansion placements; no separate either/or prompt is shown.
 
 ### Forced Bridge Continuation
 
-- A Bridge is not considered the end of a line when determining legal positions for placing a line marker unless:
-  - The only empty street from the end of your bus line is a Bridge space, and
-  - At least one Bridge Bus Line marker is available.
-- If both conditions are met, you must expand your line across that Bridge. If no Bridge Bus Line marker is available, standard Line Expansion rules apply.
+Rewrite of the printed rule: a Bridge space counts as a legal line end only when it is the **only empty street** from the end of your bus line. If that is true and at least one Bridge Bus Line marker is available, you must expand across that Bridge. If no Bridge Bus Line marker is available, standard Line Expansion rules apply.
+
+- Occupied non-Bridge streets do not count as an alternative when an empty Bridge space exists.
+- If several empty Bridge spaces are the only empty streets, choose one of them.
 
 ### Using Bridges
 
@@ -53,7 +56,8 @@ There are five white Bridge line markers and nine designated Bridge spaces on th
 ### Transporting Designers
 
 - Designers (and any accompanying passengers) can be transported during the same round in which they are placed, using the Vrrooomm! action.
-- Designers follow the normal rules for transporting passengers and may be delivered to houses, offices, or pubs while visiting Pittsburgh.
+- Designers follow the normal rules for transporting passengers and may be delivered to houses, offices, or pubs while visiting Pittsburgh. This includes the one-way street rules: Designers can only travel along an arrowed street in the direction shown.
+- At the end of the round, a Designer parked on a building (or on the Splotter Con spot) returns to the junction, exactly like a delivered Passenger.
 
 ### Attending Splotter Con
 

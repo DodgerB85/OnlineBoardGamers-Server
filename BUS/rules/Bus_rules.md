@@ -28,7 +28,7 @@ Turn order is clockwise, starting with this player.
 
 ## First Buildings
 
-One time around in turn order, each player chooses 2 unoccupied, lowest-number construction sites (the lowest number is 1 at this stage), and places a building on each — each building can be any type:
+One time around in turn order, each player chooses 2 unoccupied, lowest-number construction sites (the lowest number is 1 at this stage), and places a building on each — each building can be any type (house, office or pub).
 
 ## First Bus Lines
 
@@ -44,7 +44,21 @@ Each round of the game comprises two phases: Select Actions, then Resolve Action
 
 ### Phase 1: Select Actions
 
-In turn order, each player selects an action by placing one of their Action markers on a space along the right side of the gameboard (the actions are explained in Phase 2: Resolve Actions). The actions Buses, Clock, and Starting Player each have only 1 space. The other actions have spaces labeled A–F, and we’ll call these actions multi-use actions; when you select a multi-use action, place your Action marker on the empty space earliest in the alphabet (e.g. A for the first player to choose it, B for the second, and so on).
+In turn order, each player selects an action by placing one of their Action markers on a space along the right side of the gameboard (the actions are explained in Phase 2: Resolve Actions). The actions New Bus, Stop Time, and Starting Player each have only 1 space. The other actions have spaces labeled A–F, and we’ll call these actions multi-use actions; when you select a multi-use action, place your Action marker on the empty space earliest in the alphabet (e.g. A for the first player to choose it, B for the second, and so on).
+
+The board layout and resolution order are easiest to read from this table (UI names are used):
+
+| Action | Spaces left to right | Resolution | Action power |
+| --- | --- | --- | --- |
+| Line Expansion | F E D C B A | left to right (F first, A last) | A = M, B = M−1, C = M−2, ... |
+| New Bus | single space | after Line Expansion | add 1 bus |
+| Passengers | A B C D E F | left to right (A first) | A = M, B = M−1, C = M−2, ... |
+| New Building | F E D C B A | left to right (F first, A last) | A = M, B = M−1, C = M−2, ... |
+| Stop Time | single space | after New Building | stop time or advance the clock |
+| Vrrooomm! | A B C D E F | left to right (A first) | up to your number of buses |
+| Starting Player | single space | last | take the Start bus |
+
+A always has the highest action power, but for Line Expansion and New Building it resolves last. In a 5-player game, add 1 to the Line Expansion action power only, and apply that +1 **before** checking whether the power is ≤ 0.
 
 Repeat this process so everyone places a second Action marker (you can even choose the same action again).
 
@@ -56,7 +70,7 @@ Once everyone has dropped out of action selection, continue to the next phase.
 
 Resolve the actions from top to bottom on the gameboard, starting with Line Expansion and ending with Starting Player.
 
-For multi-use actions, resolve them left to right, despite alphabetical order. This means that for Line Expansion and Buildings, the last person to select it will resolve it first; for Passengers and Vrrooomm!, the first to select it will resolve it first.
+For multi-use actions, resolve them left to right, despite alphabetical order. This means that for Line Expansion and New Building, the last person to select it will resolve it first; for Passengers and Vrrooomm!, the first to select it will resolve it first.
 
 When it is time for one of your Action markers to resolve its action, you must resolve it as fully as possible; you cannot opt to do fewer actions.
 
@@ -104,27 +118,29 @@ If Purple says it’s from A to B (center), they place a spent Action marker on 
 
 If Purple says it’s from B to A (right), they place a spent Action marker on each end of their bus line where it meets at A. The next time Purple extends their bus line, it will be from A onto one of the adjoining streets (purple arrows).
 
-### Action: Buses
+### Action: New Bus
 
-The more buses on a bus line, the more passengers you can transport!
+The more buses you have, the more passengers you can transport!
 
 When you resolve your Action marker here, you must add 1 of your buses to 1 of your empty spaces here. If you had (or were tied for) the most buses, your new bus increases the bus maximum (M) immediately, which will affect subsequent dwindling-action-power actions this round!
+
+Online implementation: if all 5 of your buses are already in the Buses area, choosing this action is still legal as a block, but no bus is added. The history records that no bus was added.
 
 ### Action: Passengers
 
 New passengers stream into the city by train.
 
-The train stations bustle with passengers rushing home, or to work, or out for a drink....
+The train stations bustle with passengers rushing home, or to work, or out for a drink.
 
 Passengers is an action with dwindling action power. A is on the left, so the first to resolve the action gets to do it the most.
 
 Each time you resolve an Action marker here, you must add a number of passengers equal to its action power (if the supply runs out, do not place any more). Each passenger must go on a train station of your choice (there are 2 on the map), and it doesn’t matter whether your bus line connects to the station(s).
 
-### Action: Buildings
+### Action: New Building
 
 This city is developing quickly. Houses, offices, and pubs seem to pop up constantly!
 
-Buildings is an action with dwindling action power. A is on the right, so the first to resolve the action gets to do it the least.
+New Building is an action with dwindling action power. A is on the right, so the first to resolve the action gets to do it the least.
 
 Each time you resolve an Action marker here, you must erect a number of buildings equal to its action power. Each building must go on a lowest-number unoccupied construction site (it doesn’t have to be on anyone’s bus line).
 
@@ -132,13 +148,15 @@ At the beginning of the game, this will be 1; however, once the 1s are full, you
 
 If all construction sites are occupied, the game ends at the end of this round.
 
-### Action: Clock
+### Action: Stop Time
 
 In this strange universe, someone with a scientific bent, but little regard for cosmic consequences has created a device that can stretch time. They’re thrilled to demonstrate it for anyone curious, even the local bus companies!
 
 When you resolve your Action marker here, you choose whether to pause the cadence of house → office → pub → house…. If you pause time, take a Time stone from the clock; it will count as −1 point for you at the end of the game. If you took the final Time stone from the clock, the game ends immediately due to rupture of the space-time continuum.
 
 Otherwise, advance the clock to the next building type clockwise: house → office → pub → house.
+
+If nobody chose this action, the clock advances one step automatically at the end of the round.
 
 Either way, passengers prepare to travel to their new destination (or same destination, if you paused time):
 
@@ -149,6 +167,11 @@ Either way, passengers prepare to travel to their new destination (or same desti
 Only 1 passenger per building!
 
 Passengers still outside buildings will need to catch a bus to get to their destination!
+
+Online implementation details:
+- Passengers on Building discs move out to their intersection at the end of the round (in the Starting Player phase), whether or not the Stop Time action was chosen.
+- Passengers at an intersection with an empty matching building step in at the start of the Vrrooomm! phase.
+- The −1 point for a Time stone is applied to the Score track immediately when the stone is taken. The displayed score therefore already includes all Time stone penalties (this differs from the printed rules, which deduct them only at the end).
 
 ### Action: Vrrooomm!
 
@@ -168,7 +191,7 @@ In other words, you can transport a waiting passenger on your bus line to an emp
 
 Note: You do not actually move your bus pieces on the map. If it helps you to do so, you could, but put them back in the Buses area after your turn.
 
-Example 1: The person who selected the Clock action allows time to march forward, and now passengers want to go to work (left). All passengers on Building discs step into the adjacent intersection. Then 2 of the passengers at A simply step onto the office beside them.
+Example 1: The person who selected the Stop Time action allows time to march forward, and now passengers want to go to work (left). All passengers on Building discs step into the adjacent intersection. Then 2 of the passengers at A simply step onto the office beside them.
 
 The passenger at B enters 1 of the offices at B.
 
@@ -190,7 +213,7 @@ If nobody chose this action, pass the Start bus clockwise.
 
 Return all spent Action markers to the box.
 
-If only 1 player still has Action markers, the game ends immediately.
+If only 1 player still has Action markers at the end of the round, the game ends immediately.
 
 ## End of the Game
 
@@ -203,3 +226,5 @@ The game can end in 1 of 3 ways:
 - If only 1 player has Action markers at the end of the round, the game ends immediately.
 
 Each Time stone you have is −1 point, but don’t move down on the Score track. The player with the most points wins. If tied, the tied player with the most Time stones wins. If still tied, the tied player whose Score marker is lowest in its stack wins (they reached that score first).
+
+Online implementation: the Score track is updated immediately when a Time stone is taken, so the online score is already net of Time stones. Final ranking is therefore: highest net score, then most Time stones, then first to reach that net score. The online game uses the same ranking for the winner, the game-over table, the score discs, the history entry and the saved final positions.
