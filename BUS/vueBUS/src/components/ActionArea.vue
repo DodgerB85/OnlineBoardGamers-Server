@@ -114,7 +114,6 @@ function getBuildingImgBorder(bldgNum) {
 	else return "4px solid yellow"
 }
 function alterTime(stoppingTime) {
-	funcs.pushUndoPoint()
 	if (!stoppingTime) {
 		store.desiredBuilding++
 		if (store.desiredBuilding > rf.BLDG_PUB) store.desiredBuilding = rf.BLDG_HOME
@@ -132,17 +131,7 @@ function localEndPlayerTurn() {
 	if (store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS) controller.endPlayerChooseActionTurn()
 	else controller.endPlayerTurn()
 }
-function requestReset() {
-	store.context.confirmReset = true
-}
-function cancelReset() {
-	store.context.confirmReset = false
-}
-function undoTurnAction() {
-	funcs.undoLastAction()
-}
 function resetPlayerTurn() {
-	store.context.confirmReset = false
 	store.resetVarsOnTurnEnd()
 	funcs.importBUSmodel(store.turnResetData, false, true)
 	controller.startPlayerTurn()
@@ -345,7 +334,7 @@ onUnmounted(() => {
 				<br />
 			</template>
 
-			<template v-if="!store.context.confirmEndTurn && !store.context.confirmResign && !store.context.confirmReset">
+			<template v-if="!store.context.confirmEndTurn && !store.context.confirmResign">
 				<span v-html="getActionText()"></span>
 				<span class="actionError" v-if="store.context.turnEndingErrorMessage !== ''">
 					<br />
@@ -391,22 +380,21 @@ onUnmounted(() => {
 					<template v-if="canResign()">
 						<button class="actionsLineButton resignButton" @click="confirmResign()">{{ $t('actionArea.resign') }}</button>
 					</template>
-					<button v-if="store.undoPoints.length > 0" class="actionsLineButton" @click="undoTurnAction">{{ $t('actionArea.undo') }}</button>
-					<button class="actionsLineButton" @click="requestReset()">{{ $t('actionArea.reset') }}</button>
+					<button v-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && store.context.actionChosen" class="actionsLineButton" @click="resetPlayerTurn()">{{ $t('actionArea.reset') }}</button>
 					<template v-if="controller.currentPlayerCanPass() && !store.context.actionChosen">
 						<button class="actionsLineButton" @click="passChooseAction()">{{ $t('actionArea.passChooseActions') }}</button>
 					</template>
 				</template>
 			</template>
 
-			<template v-if="!store.context.confirmReset && controller.currentPlayerCanPass() && personal.canEndTurn()">
+			<template v-if="controller.currentPlayerCanPass() && personal.canEndTurn()">
 				<button class="actionsLineButton" @click="endTurnAndPass()">{{ $t('actionArea.endTurnPass') }}</button>
 			</template>
 
-			<button v-if="!store.context.confirmReset && personal.canEndTurn()" class="actionsLineButton" @click="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS ? controller.endPlayerChooseActionTurn() : controller.endPlayerTurn()">{{ $t('actionArea.endTurn') }}</button>
+			<button v-if="personal.canEndTurn()" class="actionsLineButton" @click="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS ? controller.endPlayerChooseActionTurn() : controller.endPlayerTurn()">{{ $t('actionArea.endTurn') }}</button>
 
 			<!-- Phase STOP TIME -->
-			<template v-if="!store.context.confirmReset && store.gameflow.phase === rf.PHASE_ALTER_TIME && !store.context.confirmEndTurn">
+			<template v-if="store.gameflow.phase === rf.PHASE_ALTER_TIME && !store.context.confirmEndTurn">
 				{{ $t('actionArea.stopTimePrompt') }}
 				<span v-if="store.remainingTimeStones <= 1" class="actionError">
 					<br />
@@ -418,28 +406,19 @@ onUnmounted(() => {
 			</template>
 
 			<!-- Confirm End Turn -->
-			<template v-if="store.context.confirmEndTurn && !store.context.confirmReset">
+			<template v-if="store.context.confirmEndTurn">
 				{{ $t('actionArea.confirmChoice') }}
 				<span v-if="store.remainingTimeStones === 0" class="actionError">
 					<br />
 					{{ $t('actionArea.cautionLastTimeStone') }}
 				</span>
 				<br />
-				<button v-if="store.undoPoints.length > 0" class="actionsLineButton" @click="undoTurnAction">{{ $t('actionArea.undo') }}</button>
-				<button class="actionsLineButton" @click="requestReset()">{{ $t('actionArea.reset') }}</button>
+				<button class="actionsLineButton" @click="resetPlayerTurn()">{{ $t('actionArea.reset') }}</button>
 				<button class="actionsLineButton" @click="localEndPlayerTurn">{{ $t('actionArea.endTurn') }}</button>
 			</template>
 
-			<!-- Confirm RESET -->
-			<template v-if="store.context.confirmReset">
-				<p>{{ $t('actionArea.confirmResetQuestion') }}</p>
-				<br />
-				<button class="actionsLineButton" @click="cancelReset">{{ $t('actionArea.cancel') }}</button>
-				<button class="actionsLineButton" @click="resetPlayerTurn()">{{ $t('actionArea.confirmReset') }}</button>
-			</template>
-
 			<!-- Confirm RESIGN -->
-			<template v-if="store.context.confirmResign && !store.context.confirmReset">
+			<template v-if="store.context.confirmResign">
 				<p>{{ $t('actionArea.resignQuestion') }}</p>
 				<p>{{ $t('actionArea.resignUnbalance') }}</p>
 				<p>{{ $t('actionArea.resignCarryOn') }}</p>

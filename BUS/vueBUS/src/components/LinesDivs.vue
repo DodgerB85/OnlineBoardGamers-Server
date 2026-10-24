@@ -1,7 +1,6 @@
 <script setup>
 import { motion } from "motion-v"
 import * as view from "../js/BUSview.js"
-import * as funcs from "../js/BUSfuncs.js"
 import * as rf from "../js/BUSreference.js"
 import * as controller from "../js/BUScontroller.js"
 import * as model from "../js/BUSmodel.js"
@@ -123,7 +122,6 @@ function resetFillColor(e) {
 	option.style["fill-opacity"] = 0
 }
 function addNewLine(lineID) {
-	funcs.pushUndoPoint()
 	store.context.historyObj.push([lineID, store.lines[lineID].length])
 	store.context.linesLeftToPlace--
 
@@ -155,7 +153,6 @@ function addNewLine(lineID) {
 }
 
 function selectedEndJunction(junction) {
-	funcs.pushUndoPoint()
 	controller.currentPlayerObj().endJunctions = [junction, junction]
 	for (let i = 0; i < controller.currentPlayerObj().endLines.length; i++) {
 		// if junction not at end of line, update it

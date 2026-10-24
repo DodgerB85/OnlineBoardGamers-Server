@@ -346,7 +346,6 @@ export function startPlayerTurn() {
 
 	// Save Reset
 	store.turnResetData = funcs.exportBUSmodel(false, true)
-	store.undoPoints.splice(0)
 }
 
 export function endPlayerChooseActionTurn() {

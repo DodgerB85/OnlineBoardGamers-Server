@@ -415,22 +415,6 @@ export function decompressActionArea(compressed) {
 	})
 }
 
-// Snapshot the turn before a local mutation, so the player can step back one click.
-export function pushUndoPoint() {
-	const store = useModelStore()
-	store.undoPoints.push(exportBUSmodel(false, true))
-}
-
-export function undoLastAction() {
-	const store = useModelStore()
-	if (store.undoPoints.length === 0) return
-	const snapshot = store.undoPoints.pop()
-	importBUSmodel(snapshot, false, true)
-	store.clearHistoryHelpers()
-	store.context.selectedPaxToVromJunction = -1
-	store.context.selectedDesignerToVrom = -1
-}
-
 export function exportBUSmodel(forGameOver, saveContext) {
 	const store = useModelStore()
 	const personal = usePersonalStore()

@@ -11,9 +11,6 @@ export const busExtra = {
 		actionArea: {
 			actionChosen: "You chose {action}{position}. End Turn to confirm, or Reset.",
 			atPosition: " at position {position}",
-			undo: "Undo",
-			confirmResetQuestion: "Reset the whole turn? All placements made this turn will be undone.",
-			confirmReset: "Reset Turn",
 			noMoreBuildingSpots: "No more building spots available",
 			noLinePlacements: "No valid line placements left",
 			noPassengersNetwork: "No available passengers in your network",
@@ -32,8 +29,6 @@ export const busExtra = {
 		},
 		history: {
 			newBusNoEffect: "does not add a bus - all 5 buses are already in play",
-			filterAllPlayers: "All players",
-			filterMine: "My moves only",
 		},
 		status: {
 			yourTurnBadge: "YOUR TURN",
@@ -79,9 +74,6 @@ export const busExtra = {
 		actionArea: {
 			actionChosen: "Du hast {action}{position} gewählt. Zug beenden zum Bestätigen oder Zurücksetzen.",
 			atPosition: " auf Position {position}",
-			undo: "Rückgängig",
-			confirmResetQuestion: "Den ganzen Zug zurücksetzen? Alle Platzierungen dieses Zuges werden rückgängig gemacht.",
-			confirmReset: "Zug zurücksetzen",
 			noMoreBuildingSpots: "Keine freien Baustellen mehr",
 			noLinePlacements: "Keine gültigen Linienplatzierungen mehr",
 			noPassengersNetwork: "Keine verfügbaren Fahrgäste in deinem Netz",
@@ -100,8 +92,6 @@ export const busExtra = {
 		},
 		history: {
 			newBusNoEffect: "fügt keinen Bus hinzu - alle 5 Busse sind bereits im Einsatz",
-			filterAllPlayers: "Alle Spieler",
-			filterMine: "Nur meine Züge",
 		},
 		status: {
 			yourTurnBadge: "DU BIST DRAN",
@@ -147,9 +137,6 @@ export const busExtra = {
 		actionArea: {
 			actionChosen: "Has elegido {action}{position}. Pulsa Terminar turno para confirmar o Reiniciar.",
 			atPosition: " en la posición {position}",
-			undo: "Deshacer",
-			confirmResetQuestion: "¿Reiniciar todo el turno? Se desharán todas las colocaciones de este turno.",
-			confirmReset: "Reiniciar turno",
 			noMoreBuildingSpots: "No quedan solares disponibles",
 			noLinePlacements: "No quedan colocaciones de línea válidas",
 			noPassengersNetwork: "No hay pasajeros disponibles en tu red",
@@ -168,8 +155,6 @@ export const busExtra = {
 		},
 		history: {
 			newBusNoEffect: "no añade un autobús: los 5 autobuses ya están en juego",
-			filterAllPlayers: "Todos los jugadores",
-			filterMine: "Solo mis movimientos",
 		},
 		status: {
 			yourTurnBadge: "TU TURNO",
@@ -215,9 +200,6 @@ export const busExtra = {
 		actionArea: {
 			actionChosen: "Vous avez choisi {action}{position}. Terminez le tour pour confirmer, ou Réinitialisez.",
 			atPosition: " à la position {position}",
-			undo: "Annuler",
-			confirmResetQuestion: "Réinitialiser tout le tour ? Tous les placements de ce tour seront annulés.",
-			confirmReset: "Réinitialiser le tour",
 			noMoreBuildingSpots: "Plus aucun emplacement de construction disponible",
 			noLinePlacements: "Plus aucun placement de ligne valide",
 			noPassengersNetwork: "Aucun passager disponible dans votre réseau",
@@ -236,8 +218,6 @@ export const busExtra = {
 		},
 		history: {
 			newBusNoEffect: "n'ajoute pas de bus - les 5 bus sont déjà en jeu",
-			filterAllPlayers: "Tous les joueurs",
-			filterMine: "Mes coups uniquement",
 		},
 		status: {
 			yourTurnBadge: "À VOUS",
@@ -283,9 +263,6 @@ export const busExtra = {
 		actionArea: {
 			actionChosen: "Hai scelto {action}{position}. Termina il turno per confermare, o Reimposta.",
 			atPosition: " nella posizione {position}",
-			undo: "Annulla",
-			confirmResetQuestion: "Reimpostare l'intero turno? Tutti i posizionamenti di questo turno saranno annullati.",
-			confirmReset: "Reimposta turno",
 			noMoreBuildingSpots: "Nessun lotto edificabile disponibile",
 			noLinePlacements: "Nessun posizionamento di linea valido",
 			noPassengersNetwork: "Nessun passeggero disponibile nella tua rete",
@@ -304,8 +281,6 @@ export const busExtra = {
 		},
 		history: {
 			newBusNoEffect: "non aggiunge un autobus - tutti e 5 gli autobus sono già in gioco",
-			filterAllPlayers: "Tutti i giocatori",
-			filterMine: "Solo le mie mosse",
 		},
 		status: {
 			yourTurnBadge: "TOCCA A TE",
@@ -351,9 +326,6 @@ export const busExtra = {
 		actionArea: {
 			actionChosen: "你选择了{action}{position}。结束回合以确认，或重置。",
 			atPosition: "（位置 {position}）",
-			undo: "撤销",
-			confirmResetQuestion: "重置整个回合？本回合的所有放置都将被撤销。",
-			confirmReset: "重置回合",
 			noMoreBuildingSpots: "没有更多建筑地点",
 			noLinePlacements: "没有有效的线路放置",
 			noPassengersNetwork: "你的网络中没有可用乘客",
@@ -372,8 +344,6 @@ export const busExtra = {
 		},
 		history: {
 			newBusNoEffect: "未增加公交车 - 5 辆公交车已全部在场",
-			filterAllPlayers: "所有玩家",
-			filterMine: "仅我的行动",
 		},
 		status: {
 			yourTurnBadge: "轮到你了",

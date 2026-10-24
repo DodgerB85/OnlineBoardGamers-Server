@@ -82,7 +82,6 @@ export const useModelStore = defineStore("model", () => {
 		endJunctionsOptions: [],
 		actionChosen: false,
 		confirmEndTurn: false,
-		confirmReset: false,
 		confirmResign: false,
 		historyObj: [],
 		action: -1,
@@ -109,7 +108,6 @@ export const useModelStore = defineStore("model", () => {
 
 	const turnResetData = ref("")
 	const endReplayResetData = ref("")
-	const undoPoints = reactive([])
 
 	const historyHelpers = reactive({
 		buildingsToHighlight: [],
@@ -143,7 +141,6 @@ export const useModelStore = defineStore("model", () => {
 		context.endJunctionsOptions = []
 		context.actionChosen = false
 		context.confirmEndTurn = false
-		context.confirmReset = false
 		context.confirmResign = false
 		context.historyObj.splice(0, context.historyObj.length)
 		context.eligibleJunctionsToVromPitts.splice(0)
@@ -151,7 +148,6 @@ export const useModelStore = defineStore("model", () => {
 		context.lastBusIndex = -1
 		context.lastActionMarker = null
 		context.lastBridge = -1
-		undoPoints.splice(0)
 		rewindErrorText.value = ""
 		successText.value = ""
 		topMenuViews.errorText = ""
@@ -192,7 +188,6 @@ export const useModelStore = defineStore("model", () => {
 		// Pittsburgh variables
 		bridges,
 		remainingBridgeMarkers,
-		undoPoints,
 		jeroenStatus,
 		jorisStatus,
 	}

@@ -3,7 +3,6 @@ import * as rf from "../js/BUSreference.js"
 import * as view from "../js/BUSview.js"
 import * as controller from "../js/BUScontroller.js"
 import * as model from "../js/BUSmodel.js"
-import * as funcs from "../js/BUSfuncs.js"
 import * as pitts from "../js/BUSpitts.js"
 
 import { useModelStore } from "../stores/BUSstore.js"
@@ -135,7 +134,6 @@ function playPlopAnimation(junction, building) {
 
 // Clicked free building spot to add building
 function clickedBldg(junction, building) {
-	funcs.pushUndoPoint()
 	// Remove ghost
 	ghostBuildingRef.value.style.display = "none"
 	// Remove action
@@ -194,7 +192,6 @@ function playPassengerPlopAnimation(junction, image, leftOffset, plopWidth, plop
 
 function addPassengerToJunction(junction) {
 	if (store.remainingPassengers === 0) return
-	funcs.pushUndoPoint()
 	store.junctions[junction][rf.paxIdx]++
 	store.context.passengersLeftToPlace--
 	store.remainingPassengers--
@@ -224,7 +221,6 @@ function addDesignerToJunction(designerIdx) {
 	if (pitts.designerArrivedThisRound()) return
 	const designerStatus = designerIdx === rf.DESIGNER_JEROEN ? store.jeroenStatus : store.jorisStatus
 	if (designerStatus !== rf.DESIGNER_NOT_ARRIVED) return
-	funcs.pushUndoPoint()
 	if (designerIdx === rf.DESIGNER_JEROEN) store.jeroenStatus = rf.PITTS_AIRPORT_JUNCTION
 	else store.jorisStatus = rf.PITTS_AIRPORT_JUNCTION
 	store.context.passengersLeftToPlace -= 2
@@ -310,7 +306,6 @@ function clickedVromBldg(junction, buildingIndex) {
 		if (buildingIndex === rf.VROM_DEST_JEROEN_CON && designerIdx !== rf.DESIGNER_JEROEN) return
 		else if (buildingIndex === rf.VROM_DEST_JORIS_CON && designerIdx !== rf.DESIGNER_JORIS) return
 		else if (buildingIndex === rf.VROM_DEST_AIRPORT && designerIdx !== rf.DESIGNER_JEROEN && designerIdx !== rf.DESIGNER_JORIS) return
-		funcs.pushUndoPoint()
 		store.context.historyObj.push([origin, junction, buildingIndex, designerIdx])
 		if (buildingIndex === rf.VROM_DEST_AIRPORT) {
 			setDesignerStatus(designerIdx, rf.DESIGNER_REMOVED)
@@ -333,7 +328,6 @@ function clickedVromBldg(junction, buildingIndex) {
 	// A designer rides to any normal building destination too
 	if (store.context.selectedDesignerToVrom !== -1) {
 		const designerIdx = store.context.selectedDesignerToVrom
-		funcs.pushUndoPoint()
 		store.context.historyObj.push([origin, junction, buildingIndex, designerIdx])
 		const attended = pitts.hasDesignerAttendedCon(getDesignerStatus(designerIdx))
 		// Park the designer on the building like a delivered pax (21-23 Jeroen, 31-33 Joris)
@@ -346,7 +340,6 @@ function clickedVromBldg(junction, buildingIndex) {
 		controller.canPlayerVrom(true)
 		return
 	}
-	funcs.pushUndoPoint()
 	store.context.historyObj.push([store.context.selectedPaxToVromJunction, junction, buildingIndex])
 	// Remove a pax from the junction
 	store.junctions[store.context.selectedPaxToVromJunction][rf.paxIdx]--

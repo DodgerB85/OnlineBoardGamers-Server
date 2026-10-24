@@ -2,7 +2,6 @@
 import * as rf from "../js/BUSreference.js"
 import * as controller from "../js/BUScontroller.js"
 import * as model from "../js/BUSmodel.js"
-import * as funcs from "../js/BUSfuncs.js"
 
 import { useModelStore } from "../stores/BUSstore.js"
 const store = useModelStore()
@@ -87,7 +86,6 @@ function isNewMarker(action, index) {
 }
 
 function clickedActionOption(action, index) {
-	funcs.pushUndoPoint()
 	store.context.historyObj.push(action, index)
 	controller.currentPlayerObj().remainingActions--
 	store.actionAreaData[action][index] = controller.currentPlayerObj().colour

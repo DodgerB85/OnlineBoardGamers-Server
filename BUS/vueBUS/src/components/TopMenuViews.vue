@@ -14,22 +14,9 @@ const personal = usePersonalStore()
 
 import i18n from "../i18n"
 
-import { computed, onMounted, onUnmounted, ref } from "vue"
+import { onMounted, onUnmounted, ref } from "vue"
 
 const chatMessage = ref("")
-const historyPlayerFilter = ref(-1)
-const historyMineOnly = ref(false)
-
-const filteredHistory = computed(() => {
-	return store.history
-		.map((entry, index) => ({ entry, index }))
-		.filter(({ entry }) => {
-			if (entry[1] === undefined || entry[1] < 0 || entry[0] < 10) return true
-			if (historyMineOnly.value && entry[1] !== personal.pov) return false
-			if (historyPlayerFilter.value > -1 && entry[1] !== historyPlayerFilter.value) return false
-			return true
-		})
-})
 
 function toggleBug() {
 	store.topMenuViews.showNotes = false
@@ -278,21 +265,9 @@ function localCastVote(topic) {
 				<br />
 				<span v-if="store.topMenuViews.showReplay">{{ $t('topMenuViews.clickEntryReplay') }}</span>
 				<span v-else>{{ $t('topMenuViews.clickEntryHighlight') }}</span>
-				<div id="historyFilter">
-					<select v-model.number="historyPlayerFilter">
-						<option :value="-1">{{ $t('history.filterAllPlayers') }}</option>
-						<option v-for="(player, index) in store.players" :key="'filter' + index" :value="index">{{ player.displayName }}</option>
-					</select>
-					<label>
-						<input type="checkbox" v-model="historyMineOnly" />
-						{{ $t('history.filterMine') }}
-					</label>
-				</div>
-				<!--<br /><button @click="toggleReplayMode()"><span v-if="store.topMenuViews.showReplay">Exit</span><span
-            v-else>Enter</span> Replay Mode</button>-->
 			</div>
 			<div id="historyMainDiv" class="reverseHistory">
-				<template v-for="{ entry, index } in filteredHistory" v-bind:key="index">
+				<template v-for="(entry, index) in store.history" v-bind:key="index">
 					<HistoryEntry :entry="entry" :entry_-i-d="index" />
 				</template>
 			</div>
@@ -307,15 +282,6 @@ function localCastVote(topic) {
 	flex-direction: column-reverse;
 }
 
-#historyFilter {
-	margin-top: 6px;
-}
-
-#historyFilter select {
-	max-width: 180px;
-	margin-right: 8px;
-}
-
 #bugReport,
 #notesBox {
 	/*display: none;*/
@@ -327,7 +293,7 @@ function localCastVote(topic) {
 	/*display: none;*/
 	position: absolute;
 	left: 2px;
-	top: 62px;
+	top: 60px;
 	width: 450px;
 	z-index: 9999;
 	border: 2px solid black;
@@ -409,7 +375,7 @@ function localCastVote(topic) {
 	position: absolute;
 	padding-top: 5px;
 	left: 2px;
-	top: 62px;
+	top: 60px;
 	width: 450px;
 	z-index: 9999;
 	border: 2px solid black;

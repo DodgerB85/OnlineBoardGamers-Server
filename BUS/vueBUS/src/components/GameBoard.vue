@@ -3,7 +3,6 @@ import * as rf from "../js/BUSreference.js"
 import * as view from "../js/BUSview.js"
 import * as controller from "../js/BUScontroller.js"
 import * as model from "../js/BUSmodel.js"
-import * as funcs from "../js/BUSfuncs.js"
 
 import scoreDiv from "./scoreDiv.vue"
 import BuildingsDivs from "./BuildingsDivs.vue"
@@ -89,7 +88,6 @@ function isNewMarker(action, index) {
 }
 
 function clickedActionOption(action, index) {
-	funcs.pushUndoPoint()
 	store.context.historyObj.push(action, index)
 	controller.currentPlayerObj().remainingActions--
 	store.actionAreaData[action][index] = controller.currentPlayerObj().colour
