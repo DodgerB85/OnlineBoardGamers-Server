@@ -7,6 +7,7 @@ import city from "./city.js"
 import history from "./history.js"
 import reference from "./reference.js"
 import io from "./io.js"
+import ui from "./ui.js"
 
 function merge(target, source) {
 	for (const key of Object.keys(source)) {
@@ -28,5 +29,6 @@ merge(en, city)
 merge(en, history)
 merge(en, reference)
 merge(en, io)
+merge(en, ui)
 
 export default en

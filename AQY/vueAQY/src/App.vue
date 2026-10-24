@@ -30,7 +30,7 @@ import * as IO from './js/AQY_IO'
 import * as replay from './js/AQYreplay'
 */
 import * as model from "./js/AQYmodel"
-//import * as city from "./js/AQYcity"
+import * as city from "./js/AQYcity"
 
 //import hexLib from "./js/hexlib.js"
 import * as rf from "./js/AQYreference"
@@ -46,6 +46,11 @@ const personal = usePersonalStore()
 
 import { useI18n } from "vue-i18n"
 const { t } = useI18n()
+
+import { ref, watch } from "vue"
+
+const turnBanner = ref("")
+let turnBannerTimer
 
 async function initGame() {
 	personal.haltPlay = true
@@ -145,6 +150,8 @@ async function initGame() {
 
 	personal.yourTurnAudioType = window.initData.yourTurnAudioType
 	if (window.initData.startingOptions.includes(102)) personal.trainingGame = true
+	personal.prefersReducedMotion = options[7] === 1
+	document.body.classList.toggle("reduced-motion", personal.prefersReducedMotion)
 
 	// Always iuit game vars
 	model.initiateGameVars()
@@ -240,33 +247,61 @@ store.wholeTestResetData = funcs.simpleExportWholeModel()
 
 /********************************* */
 
-document.addEventListener("keyup", function (event) {
-	if (store.topMenuViews.showChat) return
-	//if (event.altKey && event.which === 82)
-	// r = rotate
-	if (event.key === "r" || event.key === "R") {
-		/*
-if (!rf.ROTATABLE_TILES.includes(store.context.itemBeingAdded)) return
-// Remove ghosts
-let ghostDivs = document.getElementsByClassName('ghostDiv')
-let ghostImgs = document.getElementsByClassName('ghostImg')
-for (let i = 0; i < ghostDivs.length; i++) ghostDivs[i].style.display = 'none'
-for (let i = 0; i < ghostImgs.length; i++) ghostImgs[i].style.display = 'none'
-store.topMenuViews.currentGhostIndex = -1
+function isTypingTarget(event) {
+	const el = event.target
+	if (!el) return false
+	if (el.isContentEditable) return true
+	return ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName)
+}
 
-store.context.itemBeingAddedRotation += 1
-if (store.context.itemBeingAddedRotation === 2) store.context.itemBeingAddedRotation = 0
-else if (store.context.itemBeingAddedRotation === -1) store.context.itemBeingAddedRotation = 1
-store.context.indexesToHighlightClick.splice(0)
-if (store.context.action === rf.ACT_BUILD_WATER) store.context.indexesToHighlightClick = map.getSpacesForResource()
-else if (store.context.action === rf.ACT_BUILD_PRI_CRAFTSMAN) store.context.indexesToHighlightClick = map.getAllowedIndexesToPlacePriCraftsman(store.context.itemBeingAdded, store.context.range, store.context.itemBeingAddedRotation)[0]
-else if (store.context.action === rf.ACT_BUILD_SEC_CRAFTSMAN) store.context.indexesToHighlightClick = map.getAllowedIndexesToPlaceSecCraftsman(store.context.itemBeingAdded, store.context.range, store.context.itemBeingAddedRotation)[0]
-*/
+function hotkeyPlayerIndex() {
+	const showing = store.topMenuViews.showingPlayerIndex
+	if (showing >= 0) return showing
+	return personal.actingPlayerIndex()
+}
+
+function retrySave() {
+	const retry = store.topMenuViews.retrySave
+	if (retry) retry()
+}
+
+watch(
+	() => store.history.length,
+	() => {
+		const last = store.history[store.history.length - 1]
+		if (!last || last[0] !== rf.HIST_NEW_TURN || store.topMenuViews.showReplay || store.topMenuViews.generatingReplay || personal.prefersReducedMotion || personal.haltPlay) return
+		turnBanner.value = t("historyEntry.startOfTurn", { turn: store.gameflow.turn })
+		clearTimeout(turnBannerTimer)
+		turnBannerTimer = setTimeout(() => {
+			turnBanner.value = ""
+		}, 1200)
+	}
+)
+
+document.addEventListener("keyup", function (event) {
+	if (store.topMenuViews.showChat || store.topMenuViews.showBug || store.topMenuViews.showNotes) return
+	if (isTypingTarget(event)) return
+
+	if (event.key === "r" || event.key === "R") {
+		city.rotateCurrentBuilding(event.shiftKey ? -1 : 1, hotkeyPlayerIndex())
+	} else if (event.key === "Escape") {
+		store.clearVars()
+		store.clearHistoryHelpers()
+		if (store.gameflow.phase === rf.PHASE_CITY_BUILDING && [rf.SUB_PHASE_MOVE_BUILDINGS, rf.SUB_PHASE_SAINT_HOUSE, rf.SUB_PHASE_READD_GRAVE].includes(store.gameflow.subPhase)) {
+			store.gameflow.subPhase = rf.SUB_PHASE_ADD_BUILDINGS
+		}
+	} else if (event.key === "Enter") {
+		if (document.activeElement?.tagName === "BUTTON") return
+		document.getElementById("endTurnButton")?.click()
+	} else if ((event.ctrlKey || event.metaKey) && (event.key === "z" || event.key === "Z")) {
+		if (store.topMenuViews.showReplay || store.undoPoints.length === 0) return
+		event.preventDefault()
+		model.undoLastAction()
+	} else if (event.key === "?") {
+		window.open("/AQY/help/", "_blank")
 	} else if (event.key == "ArrowLeft") {
-		// left arrow
 		if (store.topMenuViews.showReplay) replay.performStep(-1)
 	} else if (event.key == "ArrowRight") {
-		// right arrow
 		if (store.topMenuViews.showReplay) replay.performStep(1)
 	}
 })
@@ -381,6 +416,10 @@ else if (store.context.action === rf.ACT_BUILD_SEC_CRAFTSMAN) store.context.inde
 
 	<TopMenu />
 
+	<transition name="turnBanner">
+		<div v-if="turnBanner" class="turn-banner">{{ turnBanner }}</div>
+	</transition>
+
 	<div
 		id="wholeMiddleArea"
 		:class="store.topMenuViews.showReplay ? 'greyBackground' : 'normalBackground'"
@@ -391,6 +430,7 @@ else if (store.context.action === rf.ACT_BUILD_SEC_CRAFTSMAN) store.context.inde
 			<div id="boardContainer" v-if="!store.topMenuViews.performingRewind">
 				<template v-if="store.topMenuViews.rewindErrorText !== ''">
 					<h1 id="rewindErrorText">{{ store.topMenuViews.rewindErrorText }}</h1>
+					<button v-if="store.topMenuViews.retrySave" class="actionsLineButton" @click="retrySave">{{ $t("aqyUi.save.redoSave") }}</button>
 				</template>
 				<template v-if="store.topMenuViews.tradeSuccessText !== ''">
 					<h1 id="tradeSuccessText" v-html="store.topMenuViews.tradeSuccessText"></h1>
@@ -593,5 +633,50 @@ body {
 #tradeErrorText {
 	color: darkred;
 	background-color: lightblue;
+}
+
+.turn-banner {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 5000;
+	background: rgba(0, 0, 0, 0.8);
+	color: white;
+	padding: 10px 20px;
+	border-radius: 6px;
+	font-size: 22px;
+	font-weight: bold;
+	pointer-events: none;
+}
+
+.turnBanner-enter-active,
+.turnBanner-leave-active {
+	transition: opacity 0.35s ease-in-out;
+}
+
+.turnBanner-enter-from,
+.turnBanner-leave-to {
+	opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+body.reduced-motion *,
+body.reduced-motion *::before,
+body.reduced-motion *::after {
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.01ms !important;
+	scroll-behavior: auto !important;
 }
 </style>

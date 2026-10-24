@@ -8,13 +8,45 @@ import * as model from "./AQYmodel.js"
 import * as map from "./AQYmap.js"
 import * as country from "./AQYcountry.js"
 import * as Bot from "./AQYbot.js"
+import { canPairNicoloHouse } from "./AQYrules.js"
 
 import { useModelStore } from "../stores/AQYstore.js"
 import { usePersonalStore } from "../stores/AQYpersonal.js"
 
 export function createFirstCity(playerIndex, hex) {
 	createNewCity_core(playerIndex, hex)
+	country.grassCityWater(hex)
 	model.addHistory(rf.HIST_FIRST_CITY, playerIndex, 0, [map.getIDfromHex(hex)])
+}
+
+export function rotateCurrentBuilding(dir, playerIndex) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+
+	if (!personal.canPlay() || !personal.canPlayInCity(playerIndex)) return
+	if (store.gameflow.phase !== rf.PHASE_CITY_BUILDING) return
+	if (store.gameflow.subPhase !== rf.SUB_PHASE_ADD_BUILDINGS && store.gameflow.subPhase !== rf.SUB_PHASE_SAINT_HOUSE) return
+	if (store.context.cityBuildingBeingAdded < 0) return
+
+	// Hide the ghost preview; it will be redrawn on the next hover.
+	const ghostPaths = document.getElementsByClassName("ghostPath")
+	for (let i = 0; i < ghostPaths.length; i++) ghostPaths[i].style.display = "none"
+	store.topMenuViews.currentGhostIndex = -1
+
+	if (store.context.cityBuildingBeingAdded === rf.BLDG_STORAGE) {
+		const temp = store.context.newStorageHeight
+		store.context.newStorageHeight = store.context.newStorageWidth
+		store.context.newStorageWidth = temp
+		if ((store.context.newStorageWidth * store.context.newStorageHeight) % 2 === 0) getAllFreeCitySquaresToHighlight(playerIndex)
+		else store.context.cityIndexesToHighlightClick.splice(0)
+		return
+	}
+
+	if (!rf.BLDG_ROTATABLE.includes(store.context.cityBuildingBeingAdded)) return
+
+	store.context.cityBuildingBeingAddedRotation += dir
+	if (store.context.cityBuildingBeingAddedRotation === 4) store.context.cityBuildingBeingAddedRotation = 0
+	else if (store.context.cityBuildingBeingAddedRotation === -1) store.context.cityBuildingBeingAddedRotation = 3
 }
 
 export function createNewCity_core(playerIndex, hex) {
@@ -34,8 +66,12 @@ export function createNewCity_core(playerIndex, hex) {
 
 	let hexID = map.getIDfromHex(hex)
 	country.removeExplorerFromHexID(hexID)
+	country.removePollution_core(hexID)
 	let neigbourIDs = store.mapNeighbours[hexID]
-	for (let i = 0; i < neigbourIDs.length; i++) country.removeExplorerFromHexID(neigbourIDs[i])
+	for (let i = 0; i < neigbourIDs.length; i++) {
+		country.removeExplorerFromHexID(neigbourIDs[i])
+		country.removePollution_core(neigbourIDs[i])
+	}
 }
 
 export function payAndCreateNewCity(playerIndex, hex, costArr) {
@@ -281,6 +317,25 @@ export function autoSelectResources(playerIndex, building, cost) {
 	}
 	if (!canPickFood || !canPickLux) return [-1]
 	return res
+}
+
+export function completeBoardTrade(playerIndex) {
+	const store = useModelStore()
+	const goods = store.context.tradingAwayGoods
+	const incoming = store.context.boardTradeIncoming
+	if (goods.length !== 2 || incoming < 0) return
+
+	const player = store.players[playerIndex]
+	for (const res of goods) player.availableResources[res]--
+	player.availableResources[incoming]++
+	player.cityHistory.boardTrades.push([goods[0], goods[1], incoming])
+
+	store.clearVars()
+	store.context.cityBuildingToDisplay = rf.BLDG_MARKET
+	store.context.cityBuildingToDisplayData = rf.BLDG_DATA[rf.BLDG_ARRAY[rf.BLDG_MARKET]]
+	store.context.action = rf.ACT_TRADE_BOARD
+	markBuildingAsUsed(playerIndex, rf.BLDG_MARKET)
+	model.createUndoPoint()
 }
 
 export function manAllBuildings(playerIndex) {
@@ -618,6 +673,7 @@ export function addBuildingToCity(playerIndex, cityIndex, index, bldgNum, rotati
 			originalMovedFromCity: originalMovedFromCity,
 			originalMovedFromIndex: originalMovedFromIndex,
 			lockedDueTrade: lockedDueTrade,
+			plop: !store.topMenuViews.showReplay,
 		})
 		// Remove from store.players[playerIndexProp].availableBuildings
 		if (bldgNum < 20) store.players[playerIndex].availableBuildings = store.players[playerIndex].availableBuildings.filter((num) => num !== bldgNum)
@@ -627,7 +683,7 @@ export function addBuildingToCity(playerIndex, cityIndex, index, bldgNum, rotati
 		// Only change FL at end of round
 		//if (bldgNum === rf.BLDG_FOUNTAIN && builtThisTurn) store.famineLevel--
 
-		if (store.context.cityBuildingBeingAdded >= 26 && store.context.cityBuildingBeingAdded <= 40 && store.gameflow.subPhase !== rf.SUB_PHASE_SAINT_HOUSE && !stopSaintHousePower && !store.context.saintHousesThisTurn.includes(store.context.cityBuildingBeingAdded) && model.hasWorkingSaint(playerIndex, rf.SAINT_NICOLO)) {
+		if (canPairNicoloHouse(store.context.cityBuildingBeingAdded) && store.context.cityBuildingBeingAdded <= 40 && store.gameflow.subPhase !== rf.SUB_PHASE_SAINT_HOUSE && !stopSaintHousePower && !store.context.saintHousesThisTurn.includes(store.context.cityBuildingBeingAdded) && model.hasWorkingSaint(playerIndex, rf.SAINT_NICOLO)) {
 			// Mark the intial house as used
 			markBuildingAsUsed(playerIndex, store.context.cityBuildingBeingAdded)
 			store.gameflow.subPhase = rf.SUB_PHASE_SAINT_HOUSE
@@ -777,6 +833,7 @@ export function addStorageToCity(playerIndex, cityIndex, index, width, height, a
 			usedThisTurn: false, // needed to allow un-man
 			originalMovedFromCity: originalMovedFromCity,
 			originalMovedFromIndex: originalMovedFromIndex,
+			plop: !store.topMenuViews.showReplay,
 		})
 	} else {
 		// Delete from city

@@ -21,11 +21,15 @@ import * as replay from "../js/AQYreplay"
 
 import PlayerLine from "./PlayerLine.vue"
 
+import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { useModelStore } from "../stores/AQYstore.js"
 const store = useModelStore()
 
 import { usePersonalStore } from "../stores/AQYpersonal.js"
 const personal = usePersonalStore()
+
+const { t } = useI18n()
 
 function debugButton() {
 	//model.endGame()
@@ -234,6 +238,11 @@ function getCurrentPlayerNames() {
 	for (let i = 0; i < store.gameflow.turnOrder.length; i++) res.push(store.players[store.gameflow.turnOrder[i]].displayName)
 	return res.join(", ")
 }
+
+const phaseName = computed(() => (store.gameflow.phase === rf.PHASE_FIRST_CITY ? t("aqyUi.status.firstCity") : (rf.PHASE_STRINGS[store.gameflow.phase] ?? "")))
+const phaseNumber = computed(() => (store.gameflow.phase === rf.PHASE_FIRST_CITY ? 0 : Math.min(10, Math.max(1, store.gameflow.phase))))
+const isMyTurn = computed(() => personal.canPlay())
+const currentNames = computed(() => getCurrentPlayerNames())
 </script>
 
 <template>
@@ -254,7 +263,7 @@ function getCurrentPlayerNames() {
 
 			<div class="menuDivider"></div>
 
-			<a href="/AQY/help/" target="_blank">
+			<a href="/AQY/help/" target="_blank" :title="$t('aqyUi.hotkeys.help')">
 				<span class="topMenuItem">
 					<img :src="view.getImage('icon-rulebook')" />
 					<span>{{ $t("topMenu.rules") }}</span>
@@ -333,12 +342,19 @@ function getCurrentPlayerNames() {
 			</div>
 		</div>
 
+		<div id="statusBanner">
+			<span class="statusTurn">{{ $t("aqyUi.status.turn", { turn: store.gameflow.turn }) }}</span>
+			<span class="statusPhase"><template v-if="phaseNumber > 0">{{ $t("aqyUi.status.phase", { number: phaseNumber }) }} · </template>{{ phaseName }}</span>
+			<span class="statusWho">{{ isMyTurn ? $t("aqyUi.status.yourTurn") : $t("aqyUi.status.waitingFor", { names: currentNames }) }}</span>
+			<div class="phaseDots">
+				<span v-for="step in 10" :key="step" :class="{ active: step === phaseNumber, done: step < phaseNumber }"></span>
+			</div>
+		</div>
+
 		<div id="topInfos">
 			<div class="infoSpanDiv">
 				<span id="infoSpan">
 					<span v-html="store.gameName"></span>
-					| {{ store.gameflow.turn }}{{ view.phaseStr() }}
-					<span v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER">| {{ getCurrentPlayerNames() }}</span>
 				</span>
 			</div>
 			<div id="playerLineDiv">
@@ -407,7 +423,8 @@ function getCurrentPlayerNames() {
 	padding: 0px;
 	width: 100%;
 	min-width: 1050px;
-	height: 120px;
+	min-height: 120px;
+	height: auto;
 	top: 0px;
 	z-index: 2;
 	position: relative;
@@ -467,7 +484,7 @@ function getCurrentPlayerNames() {
 .topMenuItem img {
 	/*filter: brightness(0) saturate(100%) invert(100%) sepia(17%) saturate(6440%) hue-rotate(174deg) brightness(98%) contrast(102%);
 */
-	width: 38x;
+	width: 38px;
 	height: 38px;
 }
 
@@ -483,6 +500,52 @@ function getCurrentPlayerNames() {
 	font-size: 14px;
 	text-align: center;
 	margin-right: 5px;
+}
+
+#statusBanner {
+	clear: both;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+	width: 100%;
+	padding: 4px 0px;
+	background-color: rgba(255, 255, 255, 0.08);
+	font-weight: bolder;
+	font-size: 15px;
+}
+
+.statusPhase {
+	color: #bfe3ff;
+}
+
+.statusWho {
+	color: #d8ffd8;
+}
+
+.phaseDots {
+	display: inline-flex;
+	gap: 3px;
+	align-items: center;
+}
+
+.phaseDots span {
+	width: 9px;
+	height: 9px;
+	border-radius: 50%;
+	border: 1px solid #aaa;
+	background-color: transparent;
+}
+
+.phaseDots span.done {
+	background-color: #7bbf7b;
+	border-color: #7bbf7b;
+}
+
+.phaseDots span.active {
+	background-color: lightgreen;
+	border-color: lightgreen;
+	box-shadow: 0 0 5px lightgreen;
 }
 
 #topInfos {

@@ -31,6 +31,7 @@ import * as country from "./AQYcountry.js"
 import * as map from "./AQYmap.js"
 import * as IO from "../backend/AQY_IO.js"
 import * as Bot from "./AQYbot.js"
+import { clampFamine } from "./AQYrules.js"
 
 export function addHistory(event, playerIndex, timeOffset, params) {
 	const personal = usePersonalStore()
@@ -261,7 +262,7 @@ export function getFamineLevel() {
 			}
 		}
 	}
-	return store.famineLevel - fountainsBuilt
+	return clampFamine(store.famineLevel, fountainsBuilt)
 }
 
 export function createUndoPoint() {
@@ -300,6 +301,7 @@ export function undoLastAction() {
 	//store.undoPoints.pop()
 	store.context.cityIndexesToHighlightClick.splice(0)
 	store.context.action = rf.ACT_NONE
+	store.context.boardTradeIncoming = rf.RES_NONE
 	// remove mine oulines
 	store.clearHistoryHelpers()
 	//createUndoPoint()

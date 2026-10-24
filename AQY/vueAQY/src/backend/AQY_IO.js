@@ -57,6 +57,7 @@ export async function saveGame(saveRewind, saveContext = false, deleteMoves = fa
 
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
+	store.topMenuViews.retrySave = null
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -128,8 +129,10 @@ export async function saveGame(saveRewind, saveContext = false, deleteMoves = fa
 		}
 		const data = await response.json()
 		if (data.syncError) {
+			store.topMenuViews.showLoader = false
+			store.topMenuViews.retrySave = null
 			store.topMenuViews.rewindErrorText = i18n.global.t("io.olderVersionRefresh")
-			return
+			return false
 		}
 		personal.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
@@ -149,8 +152,8 @@ export async function saveGame(saveRewind, saveContext = false, deleteMoves = fa
 			// If no error found, process the move, and stop this function early
 			if (!errorFound) {
 				let gameSavedDueModelEndGame = model.processPreMove(preMoveJSON)
-				if (!gameSavedDueModelEndGame) await saveGame(true, false, false)
-				return
+				if (!gameSavedDueModelEndGame) return await saveGame(true, false, false)
+				return true
 			}
 		}
 
@@ -161,9 +164,14 @@ export async function saveGame(saveRewind, saveContext = false, deleteMoves = fa
 		WS.broadcastGameUpdate(wsConnecting).catch((err) => console.warn("Broadcast failed:", err))
 
 		await controller.startPlayerTurn()
+		return true
 	} catch (error) {
 		console.error("Error fetching data:", error)
+		store.topMenuViews.showLoader = false
+		store.topMenuViews.rewindErrorText = i18n.global.t("io.errorSavingGame")
+		store.topMenuViews.retrySave = () => saveGame(saveRewind, saveContext, deleteMoves)
 		rf.doAdminAlrt(i18n.global.t("io.errorSavingGame"))
+		return false
 	}
 }
 
@@ -221,6 +229,8 @@ export async function savePreTurn(prePhase, data) {
 
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
+	store.topMenuViews.retrySave = null
+	const retryData = JSON.parse(JSON.stringify(data))
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -249,6 +259,8 @@ export async function savePreTurn(prePhase, data) {
 		}
 		const data = await response.json()
 		if (data.syncError) {
+			store.topMenuViews.showLoader = false
+			store.topMenuViews.retrySave = null
 			store.topMenuViews.rewindErrorText = i18n.global.t("io.olderVersionRefresh")
 			return
 		}
@@ -260,6 +272,9 @@ export async function savePreTurn(prePhase, data) {
 		store.players[personal.pov].preMoves = [...funcs.decompressData(data.data)]
 	} catch (error) {
 		console.error("Error saving pre-move:", error)
+		store.topMenuViews.showLoader = false
+		store.topMenuViews.rewindErrorText = i18n.global.t("io.errorSavingPreMove")
+		store.topMenuViews.retrySave = () => savePreTurn(prePhase, retryData)
 		rf.doAdminAlrt(i18n.global.t("io.errorSavingPreMove"))
 	}
 }
@@ -545,6 +560,7 @@ export async function saveSimulTurn(playerIndex) {
 
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
+	store.topMenuViews.retrySave = null
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -584,6 +600,8 @@ export async function saveSimulTurn(playerIndex) {
 		const data = await response.json()
 
 		if (data.syncError) {
+			store.topMenuViews.showLoader = false
+			store.topMenuViews.retrySave = null
 			store.topMenuViews.rewindErrorText = i18n.global.t("io.olderVersionRefresh")
 			return
 		}
@@ -606,13 +624,17 @@ export async function saveSimulTurn(playerIndex) {
 			// End the city phase
 			controller.endCurrentPhase()
 			// save the game
-			await saveGame(true, false, true)
+			const saved = await saveGame(true, false, true)
+			if (!saved || store.topMenuViews.retrySave) return
 		}
 
 		store.topMenuViews.showLoader = false
 		personal.haltPlay = false
 	} catch (error) {
 		console.error("Error fetching data:", error)
+		store.topMenuViews.showLoader = false
+		store.topMenuViews.rewindErrorText = i18n.global.t("io.errorSavingGame")
+		store.topMenuViews.retrySave = () => saveSimulTurn(playerIndex)
 		rf.doAdminAlrt(i18n.global.t("io.errorSavingGame"))
 	}
 }
@@ -644,6 +666,7 @@ export async function kickstartGame() {
 
 	personal.haltPlay = true
 	store.topMenuViews.showLoader = true
+	store.topMenuViews.retrySave = null
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -673,6 +696,8 @@ export async function kickstartGame() {
 		const data = await response.json()
 
 		if (data.syncError) {
+			store.topMenuViews.showLoader = false
+			store.topMenuViews.retrySave = null
 			store.topMenuViews.rewindErrorText = i18n.global.t("io.olderVersionRefresh")
 			return
 		}
@@ -695,13 +720,17 @@ export async function kickstartGame() {
 			// End the city phase
 			controller.endCurrentPhase()
 			// save the game
-			await saveGame(true, false, true)
+			const saved = await saveGame(true, false, true)
+			if (!saved || store.topMenuViews.retrySave) return
 		}
 
 		store.topMenuViews.showLoader = false
 		personal.haltPlay = false
 	} catch (error) {
 		console.error("Error fetching data:", error)
+		store.topMenuViews.showLoader = false
+		store.topMenuViews.rewindErrorText = i18n.global.t("io.errorSavingGame")
+		store.topMenuViews.retrySave = () => kickstartGame()
 		rf.doAdminAlrt(i18n.global.t("io.errorSavingGame"))
 	}
 }
@@ -1045,6 +1074,8 @@ export async function kickout() {
 		}
 		const data = await response.json()
 		if (data.syncError) {
+			store.topMenuViews.showLoader = false
+			store.topMenuViews.retrySave = null
 			store.topMenuViews.rewindErrorText = i18n.global.t("io.olderVersionRefresh")
 			return
 		}

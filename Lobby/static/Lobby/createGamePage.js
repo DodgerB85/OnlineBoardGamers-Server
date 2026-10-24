@@ -112,9 +112,11 @@ function validateGameType(change, followers) {
 function setKickoutOptions() {
 	var pace = parseInt(document.getElementById("pace").value)
 	var select = document.getElementById("kickoutDuration")
+	// Read the new list before clearing: a missing kickoutOptions must not leave
+	// the select empty, or the field is dropped from the POST.
+	var options = global.kickoutOptions[pace] || global.kickoutOptions[30]
 	var previous = select.value
 	select.innerHTML = ""
-	var options = global.kickoutOptions[pace] || global.kickoutOptions[30]
 	options.forEach(function (option) {
 		select.add(new Option(option[1], option[0]))
 	})

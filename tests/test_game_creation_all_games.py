@@ -2,6 +2,7 @@ from django.contrib.messages import get_messages
 from django.test import TestCase
 from django.urls import reverse
 
+import Lobby.sharedFunctions.constants as rf
 from Lobby.models import Game, User
 
 # The 10 games shown on the "Start a new game" page (Lobby/newGames.html).
@@ -167,3 +168,14 @@ class AllGamesCreationTests(TestCase):
                     self.assertIn(f'id="selPlayer{row}"', body, f"{page} selPlayer{row}")
                 for game_type in fields["game_types"]:
                     self.assertIn(f'id="{game_type}"', body, f"{page} {game_type}")
+
+    def test_fcm_missing_kickout_falls_back_to_one_day(self):
+        # A create page whose kickout select lost its value must still create
+        # the game instead of raising MultiValueDictKeyError.
+        data = base_post(GAMES[0])
+        del data["kickoutDuration"]
+
+        response = self.client.post(reverse("FCM:createFCMgame"), data)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Game.objects.get(gameCode="FCM").kickoutDuration, rf.KICKOUT_1_DAY)

@@ -908,5 +908,55 @@ export default {
 	game: {
 		welcomeMessage: "Willkommen bei Antiquity Online!SNLBSNLBWenn Sie Vorschläge, Fragen oder Kommentare haben, kontaktieren Sie bitte den Webmaster unter der E-Mail-Adresse in Kontakt (oben rechts in der Lobby). Danke!",
 	},
+	aqyUi: {
+		status: {
+			turn: "Zug {turn}",
+			phase: "Phase {number}/10",
+			firstCity: "Erste Stadt",
+			yourTurn: "Du bist am Zug",
+			waitingFor: "Warte auf {names}",
+			playing: "Spielt",
+			viewingCity: "Ansicht: Stadt von {player}",
+			backToMyCity: "Zurück zu meiner Stadt",
+		},
+		legend: {
+			title: "Kartenlegende",
+			selectable: "Auswählbar",
+			valid: "Gültiger Nachbar / zweites Feld",
+			blocked: "Durch Deponie blockiert",
+			mountain: "Gebirgszug",
+			discard: "Ware verwerfen",
+		},
+		trade: {
+			boardHint: "Handel mit dem Spiel: 2 Waren gegen 1",
+			youGive: "Du gibst:",
+			youReceive: "Du erhältst:",
+			chooseReceive: "Klicke auf eine deiner Waren, um sie zu erhalten",
+			confirm: "Handel bestätigen",
+			cancel: "Abbrechen",
+			onlyYourGoods: "Du kannst nur deine eigenen Waren handeln",
+		},
+		storage: {
+			used: "Lager belegt: {used} / {total}",
+			limit: "Du kannst insgesamt nur {count} Waren lagern",
+		},
+		summary: {
+			houses: "Häuser",
+			men: "Arbeiter",
+			carts: "Karren",
+			freeSquares: "Freie Felder",
+			storage: "Lager",
+		},
+		save: {
+			redoSave: "Speichern erneut",
+		},
+		hotkeys: {
+			rotate: "Drehen (R)",
+			cancel: "Abbrechen (Esc)",
+			endTurn: "Zug beenden (Enter)",
+			undo: "Rückgängig (Strg+Z)",
+			help: "Hilfe (?)",
+		},
+	},
 	historyText: {},
 }

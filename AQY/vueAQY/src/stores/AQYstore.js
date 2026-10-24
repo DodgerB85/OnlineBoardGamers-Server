@@ -140,6 +140,7 @@ export const useModelStore = defineStore("store", () => {
 		saintHouse: -1, // This denotes the paid for house - free houses must be less than this
 
 		tradingAwayGoods: [],
+		boardTradeIncoming: rf.RES_NONE,
 
 		setupPlayerTrade: {
 			yourResources: [],
@@ -261,6 +262,7 @@ export const useModelStore = defineStore("store", () => {
 		//context.saintHouse = -1 // This shouldn't be reset on clear
 
 		context.tradingAwayGoods.splice(0)
+		context.boardTradeIncoming = rf.RES_NONE
 
 		context.setupPlayerTrade.yourResources.splice(0)
 		context.setupPlayerTrade.opponentsResources.splice(0)
@@ -303,6 +305,7 @@ export const useModelStore = defineStore("store", () => {
 		tradeSuccessText: "",
 		tradeErrorText: "",
 		WStradeToDisplay: [],
+		retrySave: null,
 
 		showReplay: false,
 		showingPlayerIndex: -1, // -1 for countryside, 0-3 for player city screens
@@ -359,6 +362,7 @@ export const useModelStore = defineStore("store", () => {
 		topMenuViews.tradeSuccessText = ""
 		topMenuViews.tradeErrorText = ""
 		topMenuViews.WStradeToDisplay.splice(0)
+		topMenuViews.retrySave = null
 	}
 
 	const sandboxMode = ref(false)

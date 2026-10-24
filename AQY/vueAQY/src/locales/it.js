@@ -908,5 +908,55 @@ export default {
 	game: {
 		welcomeMessage: "Benvenuto in Antiquity Online!SNLBSNLBSe ha suggerimenti, domande o commenti, contatti il webmaster all'indirizzo email indicato in Contatti (in alto a destra nella lobby). Grazie!",
 	},
+	aqyUi: {
+		status: {
+			turn: "Turno {turn}",
+			phase: "Fase {number}/10",
+			firstCity: "Prima città",
+			yourTurn: "È il tuo turno",
+			waitingFor: "In attesa di {names}",
+			playing: "In gioco",
+			viewingCity: "Città di {player}",
+			backToMyCity: "Torna alla mia città",
+		},
+		legend: {
+			title: "Legenda della mappa",
+			selectable: "Selezionabile",
+			valid: "Vicino valido / secondo esagono",
+			blocked: "Bloccato dalla discarica",
+			mountain: "Catena montuosa",
+			discard: "Scarta merci",
+		},
+		trade: {
+			boardHint: "Scambio con il gioco: 2 merci per 1",
+			youGive: "Dai:",
+			youReceive: "Ricevi:",
+			chooseReceive: "Clicca una delle tue risorse per riceverla",
+			confirm: "Conferma scambio",
+			cancel: "Annulla",
+			onlyYourGoods: "Puoi scambiare solo le tue merci",
+		},
+		storage: {
+			used: "Magazzino usato: {used} / {total}",
+			limit: "Puoi immagazzinare solo {count} merci in totale",
+		},
+		summary: {
+			houses: "Case",
+			men: "Lavoratori",
+			carts: "Carri",
+			freeSquares: "Celle libere",
+			storage: "Magazzino",
+		},
+		save: {
+			redoSave: "Riprova salvataggio",
+		},
+		hotkeys: {
+			rotate: "Ruota (R)",
+			cancel: "Annulla (Esc)",
+			endTurn: "Termina turno (Invio)",
+			undo: "Annulla (Ctrl+Z)",
+			help: "Aiuto (?)",
+		},
+	},
 	historyText: {},
 }

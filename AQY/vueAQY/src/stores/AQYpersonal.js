@@ -10,16 +10,18 @@
  *
  */
 
-//import { ref } from 'vue'
+import { ref } from "vue"
 import { defineStore } from "pinia"
 import * as rf from "../js/AQYreference.js"
 import * as controller from "../js/AQYcontroller.js"
 import * as IO from "../backend/AQY_IO.js"
+import { actingPlayerIndex as getActingPlayerIndex } from "../js/AQYrules.js"
 
 import { useModelStore } from "./AQYstore.js"
 
 export const usePersonalStore = defineStore("personal", () => {
 	const store = useModelStore()
+	const prefersReducedMotion = ref(false)
 
 	/******* SET ONCE VARS - IN SETUP */
 	//var pov = 0
@@ -28,6 +30,10 @@ export const usePersonalStore = defineStore("personal", () => {
 	//var pov = 0
 	//var preferredColour = 0
 	var WSstatus = "WSconnecting" // Use for light colour
+
+	function actingPlayerIndex() {
+		return getActingPlayerIndex(this.trainingGame, this.pov, store.gameflow.turnOrder[0])
+	}
 
 	function canPlay() {
 		if (this.haltPlay) return false
@@ -107,6 +113,8 @@ export const usePersonalStore = defineStore("personal", () => {
 	return {
 		canPlay,
 		canPlayInCity,
+		actingPlayerIndex,
+		prefersReducedMotion,
 		getCorrectedColour,
 		getCorrectedColourHex,
 		//canEndTurn,

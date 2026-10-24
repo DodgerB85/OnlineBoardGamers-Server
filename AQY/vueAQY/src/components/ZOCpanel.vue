@@ -261,6 +261,15 @@ function clearAllZOC() {
 		</button>
 		<br />
 		<button class="actionsLineButton" @click="clearAllZOC">{{ $t("zocPanel.clearAll") }}</button>
+
+		<div id="mapLegend">
+			<b>{{ $t("aqyUi.legend.title") }}</b>
+			<div><span class="legendSwatch legendSelectable"></span>{{ $t("aqyUi.legend.selectable") }}</div>
+			<div><span class="legendSwatch legendValid"></span>{{ $t("aqyUi.legend.valid") }}</div>
+			<div><span class="legendSwatch legendBlocked"></span>{{ $t("aqyUi.legend.blocked") }}</div>
+			<div><span class="legendSwatch legendMountain"></span>{{ $t("aqyUi.legend.mountain") }}</div>
+			<div><span class="legendSwatch legendDiscard"></span>{{ $t("aqyUi.legend.discard") }}</div>
+		</div>
 	</div>
 </template>
 
@@ -269,8 +278,55 @@ function clearAllZOC() {
 	display: inline-block;
 	border: 2px solid black;
 	height: fit-content;
-	width: 200px;
+	width: 220px;
 	margin-left: 20px;
+}
+
+#mapLegend {
+	border-top: 1px solid black;
+	margin-top: 8px;
+	padding-top: 5px;
+	font-size: 12px;
+	text-align: left;
+}
+
+#mapLegend > div {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	margin: 2px 0px;
+}
+
+.legendSwatch {
+	display: inline-block;
+	width: 14px;
+	height: 14px;
+	border: 2px solid black;
+}
+
+.legendSelectable {
+	border-color: yellow;
+	background-color: white;
+}
+
+.legendValid {
+	border-color: blue;
+	background-color: white;
+}
+
+.legendBlocked {
+	border-color: red;
+	background-color: white;
+}
+
+.legendMountain {
+	border-color: lightgreen;
+	background-color: white;
+}
+
+.legendDiscard {
+	border-color: red;
+	background-color: #ffd6d6;
 }
 
 .playerNameAndSelectDiv {

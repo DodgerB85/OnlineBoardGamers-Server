@@ -13,7 +13,7 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/AQYpersonal.js"
 const personal = usePersonalStore()
 
-const props = defineProps({
+defineProps({
 	playerIndexProp: {
 		type: Number,
 		required: true,
@@ -26,6 +26,8 @@ import { ref, computed } from "vue"
 
 const confirmTradeBoo = ref(false)
 
+const actingPlayerIndex = computed(() => personal.actingPlayerIndex())
+
 const yourSelectedPromisePhase = ref(0)
 const opponentsSelectedPromisePhase = ref(0)
 
@@ -34,7 +36,7 @@ const opponentsSelectedPromisePhase = ref(0)
 })*/
 
 const filteredPlayers = computed(() => {
-	return store.players.map((player, idx) => ({ originalIndex: idx, displayName: player.displayName })).filter(({ originalIndex }) => originalIndex !== personal.pov)
+	return store.players.map((player, idx) => ({ originalIndex: idx, displayName: player.displayName })).filter(({ originalIndex }) => originalIndex !== actingPlayerIndex.value)
 })
 function cancelTrade() {
 	store.clearVars()
@@ -72,7 +74,7 @@ function localAcceptTrade(entry) {
 }
 
 function unableToAffordTrade(entry) {
-	let availableResourcesCopy = [...store.players[props.playerIndexProp].availableResources]
+	let availableResourcesCopy = [...store.players[actingPlayerIndex.value].availableResources]
 
 	for (let i = 0; i < entry[4].length; i++) {
 		availableResourcesCopy[entry[4][i]] -= 1
@@ -98,7 +100,7 @@ function unableToAffordTrade(entry) {
 					<br />
 					<br />
 					<br />
-					<ResourceTable :playerIndexProp="playerIndexProp" class="" />
+					<ResourceTable :playerIndexProp="actingPlayerIndex" class="" />
 					<br />
 					{{ $t("playerTradeArea.resourcesToTrade") }}
 					<img v-for="(res, idx) in store.context.setupPlayerTrade.yourResources" :key="idx" class="tradingRes" :src="view.getImage('res_' + String(res))" />

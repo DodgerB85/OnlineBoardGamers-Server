@@ -908,5 +908,55 @@ export default {
 	game: {
 		welcomeMessage: "欢迎来到 Antiquity Online！SNLBSNLB如果你有任何建议、问题或意见，请通过大厅右上角“联系方式”中的邮箱地址联系网站管理员。谢谢！",
 	},
+	aqyUi: {
+		status: {
+			turn: "回合 {turn}",
+			phase: "阶段 {number}/10",
+			firstCity: "第一座城市",
+			yourTurn: "轮到你了",
+			waitingFor: "等待 {names}",
+			playing: "进行中",
+			viewingCity: "正在查看 {player} 的城市",
+			backToMyCity: "返回我的城市",
+		},
+		legend: {
+			title: "地图图例",
+			selectable: "可选择",
+			valid: "有效相邻格 / 第二格",
+			blocked: "被垃圾场阻挡",
+			mountain: "山脉",
+			discard: "丢弃货物",
+		},
+		trade: {
+			boardHint: "与游戏交易：2 件货物换 1 件",
+			youGive: "你给出：",
+			youReceive: "你获得：",
+			chooseReceive: "点击你的资源以选择获得的货物",
+			confirm: "确认交易",
+			cancel: "取消",
+			onlyYourGoods: "只能交易自己的货物",
+		},
+		storage: {
+			used: "已用仓库：{used} / {total}",
+			limit: "你总共只能储存 {count} 件货物",
+		},
+		summary: {
+			houses: "房屋",
+			men: "工人",
+			carts: "推车",
+			freeSquares: "空格",
+			storage: "仓库",
+		},
+		save: {
+			redoSave: "重试保存",
+		},
+		hotkeys: {
+			rotate: "旋转 (R)",
+			cancel: "取消 (Esc)",
+			endTurn: "结束回合 (Enter)",
+			undo: "撤销 (Ctrl+Z)",
+			help: "帮助 (?)",
+		},
+	},
 	historyText: {},
 }

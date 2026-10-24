@@ -53,7 +53,7 @@ export const PRE_PHASE_POLLUTION = 19
 // ponytail: translated once at module load (initData.locale is set before this runs);
 // rebuild these as getters if in-app locale switching is ever added without a page reload
 export const PHASE_STRINGS = [
-	t("reference.phases.noPhase"),
+	t("aqyUi.status.firstCity"),
 	t("reference.phases.allRise"),
 	t("reference.phases.cityBuilding"),
 	t("reference.phases.turnOrder"),

@@ -77,7 +77,7 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "replayStep": replayStep,
             "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False)),
             "currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
-            "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0],
+            "preferredAQYoptions": [-1, 1, 0, 0, 1, 1, 0, 0],
         }
     )
 
@@ -95,7 +95,9 @@ def showAQYgame(request, game_id=1, spoilerFree=False, replayStep=1):
         presenter.removeChatNotification(request.user)
         currentGame.save()
 
-    preferredAQYoptions = json.loads(result["user_profile"].preferredAQYoptions) if result["user_profile"].preferredAQYoptions != "" else [-1, 1, 0, 0, 1, 1, 0]
+    preferredAQYoptions = json.loads(result["user_profile"].preferredAQYoptions) if result["user_profile"].preferredAQYoptions != "" else [-1, 1, 0, 0, 1, 1, 0, 0]
+    if len(preferredAQYoptions) < 8:
+        preferredAQYoptions.append(0)
     returnData["preferredAQYoptions"] = preferredAQYoptions
 
     if not result["is_involved"]:

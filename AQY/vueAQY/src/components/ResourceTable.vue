@@ -5,8 +5,6 @@
 
 import * as view from "../js/AQYview.js"
 import * as rf from "../js/AQYreference.js"
-import * as city from "../js/AQYcity.js"
-import * as model from "../js/AQYmodel.js"
 
 import { useModelStore } from "../stores/AQYstore.js"
 import { usePersonalStore } from "../stores/AQYpersonal.js"
@@ -23,9 +21,32 @@ const props = defineProps({
 	},
 })
 
+const vCountPop = {
+	mounted(el, binding) {
+		el._lastCount = binding.value
+	},
+	updated(el, binding) {
+		if (binding.value === el._lastCount) return
+		el._lastCount = binding.value
+		el.classList.remove("res-pop")
+		void el.offsetWidth
+		el.classList.add("res-pop")
+		el.addEventListener(
+			"animationend",
+			() => {
+				el.classList.remove("res-pop")
+			},
+			{ once: true }
+		)
+	},
+}
+
 function isResSelectable(res) {
+	if (store.context.action === rf.ACT_TRADE_BOARD && props.playerIndexProp !== personal.actingPlayerIndex()) return false
 	// Can if you are trading IN
-	if (store.gameflow.phase === rf.PHASE_CITY_BUILDING && store.context.tradingAwayGoods.length == 2) return true
+	if (store.gameflow.phase === rf.PHASE_CITY_BUILDING && store.context.tradingAwayGoods.length == 2) {
+		return props.playerIndexProp === personal.actingPlayerIndex()
+	}
 	if (store.context.action === rf.ACT_SETUP_PLAYER_TRADE) {
 		if (props.playerIndexProp === personal.pov) {
 			let availableRes = store.players[props.playerIndexProp].availableResources[res]
@@ -64,6 +85,7 @@ function isResSelectable(res) {
 
 function clickedRes(res) {
 	if (!isResSelectable(res)) return
+	if (store.context.action === rf.ACT_TRADE_BOARD && props.playerIndexProp !== personal.actingPlayerIndex()) return
 
 	if ((store.gameflow.phase == rf.PHASE_STORE_GOODS || store.gameflow.phase == rf.PRE_PHASE_STORE_GOODS) && store.context.resourcesToDiscard > 0 && store.players[props.playerIndexProp].availableResources[res] > 0) {
 		store.players[props.playerIndexProp].availableResources[res]--
@@ -86,23 +108,8 @@ function clickedRes(res) {
 	if (store.context.tradingAwayGoods.length < 2) {
 		store.context.tradingAwayGoods.push(res)
 	} else {
-		// Action the trade
-		for (let i = 0; i < store.context.tradingAwayGoods.length; i++) {
-			store.players[props.playerIndexProp].availableResources[store.context.tradingAwayGoods[i]]--
-		}
-		store.players[props.playerIndexProp].availableResources[res]++
-		store.players[props.playerIndexProp].cityHistory.boardTrades.push([store.context.tradingAwayGoods[0], store.context.tradingAwayGoods[1], res])
-		store.clearVars()
-
-		// RESET BUILDING TO MARKET
-		store.context.cityBuildingToDisplay = rf.BLDG_MARKET
-		store.context.cityBuildingBeingAddedRotation = 0
-		store.context.cityBuildingToDisplayData = rf.BLDG_DATA[rf.BLDG_ARRAY[store.context.cityBuildingToDisplay]]
-		store.context.action = rf.ACT_TRADE_BOARD
-
-		// Mark market as used this turn
-		city.markBuildingAsUsed(props.playerIndexProp, rf.BLDG_MARKET)
-		model.createUndoPoint()
+		if (props.playerIndexProp !== personal.actingPlayerIndex()) return
+		store.context.boardTradeIncoming = res
 	}
 }
 
@@ -157,7 +164,7 @@ function getTHandTDstyle() {
 					left: String(getLeftPos(res)) + 'px',
 				}"
 				@click="clickedRes(res)">
-				<img :src="view.getImage('res_' + String(res))" />
+				<img :src="view.getImage('res_' + String(res))" v-tooltip="rf.RES_TEXT[res]" />
 				<div v-if="num !== 0" onselectstart="return false;" class="resNumDiv">{{ num }}</div>
 			</div>
 		</template>
@@ -187,8 +194,8 @@ function getTHandTDstyle() {
 							<template v-for="(res, idx) in [rf.RES_GRAIN, rf.RES_OLIVES, rf.RES_SHEEP]" :key="idx">
 								<div class="resAndTextDiv">
 									<div class="resImgInTableDiv" :class="[{ noRes: store.players[playerIndexProp].availableResources[res] === 0 }, { resSelectable: isResSelectable(res) }]" @click="clickedRes(res)">
-										<img :src="view.getImage('res_' + String(res))" />
-										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv">{{ store.players[playerIndexProp].availableResources[res] }}</div>
+										<img :src="view.getImage('res_' + String(res))" v-tooltip="rf.RES_TEXT[res]" />
+										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv" v-count-pop="store.players[playerIndexProp].availableResources[res]">{{ store.players[playerIndexProp].availableResources[res] }}</div>
 									</div>
 									<br />
 									{{ rf.RES_TEXT[res] }}
@@ -198,8 +205,8 @@ function getTHandTDstyle() {
 						<td>
 							<div class="resAndTextDiv">
 								<div class="resImgInTableDiv" :class="[{ noRes: store.players[playerIndexProp].availableResources[rf.RES_FISH] === 0 }, { resSelectable: isResSelectable(rf.RES_FISH) }]" @click="clickedRes(rf.RES_FISH)">
-									<img :src="view.getImage('res_' + String(rf.RES_FISH))" />
-									<div v-if="store.players[playerIndexProp].availableResources[rf.RES_FISH] !== 0" onselectstart="return false;" class="resNumDiv">{{ store.players[playerIndexProp].availableResources[rf.RES_FISH] }}</div>
+									<img :src="view.getImage('res_' + String(rf.RES_FISH))" v-tooltip="rf.RES_TEXT[rf.RES_FISH]" />
+									<div v-if="store.players[playerIndexProp].availableResources[rf.RES_FISH] !== 0" onselectstart="return false;" class="resNumDiv" v-count-pop="store.players[playerIndexProp].availableResources[rf.RES_FISH]">{{ store.players[playerIndexProp].availableResources[rf.RES_FISH] }}</div>
 								</div>
 								<br />
 								{{ rf.RES_TEXT[rf.RES_FISH] }}
@@ -213,8 +220,8 @@ function getTHandTDstyle() {
 						<td>
 							<div class="resAndTextDiv">
 								<div class="resImgInTableDiv" :class="[{ noRes: store.players[playerIndexProp].availableResources[rf.RES_WINE] === 0 }, { resSelectable: isResSelectable(rf.RES_WINE) }]" @click="clickedRes(rf.RES_WINE)">
-									<img :src="view.getImage('res_' + String(rf.RES_WINE))" />
-									<div v-if="store.players[playerIndexProp].availableResources[rf.RES_WINE] !== 0" onselectstart="return false;" class="resNumDiv">{{ store.players[playerIndexProp].availableResources[rf.RES_WINE] }}</div>
+									<img :src="view.getImage('res_' + String(rf.RES_WINE))" v-tooltip="rf.RES_TEXT[rf.RES_WINE]" />
+									<div v-if="store.players[playerIndexProp].availableResources[rf.RES_WINE] !== 0" onselectstart="return false;" class="resNumDiv" v-count-pop="store.players[playerIndexProp].availableResources[rf.RES_WINE]">{{ store.players[playerIndexProp].availableResources[rf.RES_WINE] }}</div>
 								</div>
 								<br />
 								{{ rf.RES_TEXT[rf.RES_WINE] }}
@@ -224,8 +231,8 @@ function getTHandTDstyle() {
 							<template v-for="(res, idx) in [rf.RES_PEARLS, rf.RES_DYE]" :key="idx">
 								<div class="resAndTextDiv">
 									<div class="resImgInTableDiv" :class="[{ noRes: store.players[playerIndexProp].availableResources[res] === 0 }, { resSelectable: isResSelectable(res) }]" @click="clickedRes(res)">
-										<img :src="view.getImage('res_' + String(res))" />
-										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv">{{ store.players[playerIndexProp].availableResources[res] }}</div>
+										<img :src="view.getImage('res_' + String(res))" v-tooltip="rf.RES_TEXT[res]" />
+										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv" v-count-pop="store.players[playerIndexProp].availableResources[res]">{{ store.players[playerIndexProp].availableResources[res] }}</div>
 									</div>
 									<br />
 									{{ rf.RES_TEXT[res] }}
@@ -236,8 +243,8 @@ function getTHandTDstyle() {
 							<template v-for="(res, idx) in [rf.RES_GOLD]" :key="idx">
 								<div class="resAndTextDiv">
 									<div class="resImgInTableDiv" :class="[{ noRes: store.players[playerIndexProp].availableResources[res] === 0 }, { resSelectable: isResSelectable(res) }]" @click="clickedRes(res)">
-										<img :src="view.getImage('res_' + String(res))" />
-										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv">{{ store.players[playerIndexProp].availableResources[res] }}</div>
+										<img :src="view.getImage('res_' + String(res))" v-tooltip="rf.RES_TEXT[res]" />
+										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv" v-count-pop="store.players[playerIndexProp].availableResources[res]">{{ store.players[playerIndexProp].availableResources[res] }}</div>
 									</div>
 									<br />
 									{{ rf.RES_TEXT[res] }}
@@ -254,8 +261,8 @@ function getTHandTDstyle() {
 							<template v-for="(res, idx) in [rf.RES_STONE]" :key="idx">
 								<div class="resAndTextDiv">
 									<div class="resImgInTableDiv" :class="[{ noRes: store.players[playerIndexProp].availableResources[res] === 0 }, { resSelectable: isResSelectable(res) }]" @click="clickedRes(res)">
-										<img :src="view.getImage('res_' + String(res))" />
-										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv">{{ store.players[playerIndexProp].availableResources[res] }}</div>
+										<img :src="view.getImage('res_' + String(res))" v-tooltip="rf.RES_TEXT[res]" />
+										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv" v-count-pop="store.players[playerIndexProp].availableResources[res]">{{ store.players[playerIndexProp].availableResources[res] }}</div>
 									</div>
 									<br />
 									{{ rf.RES_TEXT[res] }}
@@ -266,8 +273,8 @@ function getTHandTDstyle() {
 							<template v-for="(res, idx) in [rf.RES_WOOD]" :key="idx">
 								<div class="resAndTextDiv">
 									<div class="resImgInTableDiv" :class="[{ noRes: store.players[playerIndexProp].availableResources[res] === 0 }, { resSelectable: isResSelectable(res) }]" @click="clickedRes(res)">
-										<img :src="view.getImage('res_' + String(res))" />
-										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv">{{ store.players[playerIndexProp].availableResources[res] }}</div>
+										<img :src="view.getImage('res_' + String(res))" v-tooltip="rf.RES_TEXT[res]" />
+										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv" v-count-pop="store.players[playerIndexProp].availableResources[res]">{{ store.players[playerIndexProp].availableResources[res] }}</div>
 									</div>
 									<br />
 									{{ rf.RES_TEXT[res] }}
@@ -305,8 +312,8 @@ function getTHandTDstyle() {
 							<template v-for="(res, idx) in [rf.RES_WOOD]" :key="idx">
 								<div class="resAndTextDiv">
 									<div class="resImgInTableDiv" :class="[{ noRes: store.players[playerIndexProp].availableResources[res] === 0 }, { resSelectable: isResSelectable(res) }]" @click="clickedRes(res)">
-										<img :src="view.getImage('res_' + String(res))" />
-										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv">{{ store.players[playerIndexProp].availableResources[res] }}</div>
+										<img :src="view.getImage('res_' + String(res))" v-tooltip="rf.RES_TEXT[res]" />
+										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv" v-count-pop="store.players[playerIndexProp].availableResources[res]">{{ store.players[playerIndexProp].availableResources[res] }}</div>
 									</div>
 									<br />
 									{{ rf.RES_TEXT[res] }}
@@ -319,8 +326,8 @@ function getTHandTDstyle() {
 							<template v-for="(res, idx) in [rf.RES_STONE]" :key="idx">
 								<div class="resAndTextDiv">
 									<div class="resImgInTableDiv" :class="[{ noRes: store.players[playerIndexProp].availableResources[res] === 0 }, { resSelectable: isResSelectable(res) }]" @click="clickedRes(res)">
-										<img :src="view.getImage('res_' + String(res))" />
-										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv">{{ store.players[playerIndexProp].availableResources[res] }}</div>
+										<img :src="view.getImage('res_' + String(res))" v-tooltip="rf.RES_TEXT[res]" />
+										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv" v-count-pop="store.players[playerIndexProp].availableResources[res]">{{ store.players[playerIndexProp].availableResources[res] }}</div>
 									</div>
 									<br />
 									{{ rf.RES_TEXT[res] }}
@@ -339,8 +346,8 @@ function getTHandTDstyle() {
 							<template v-for="(res, idx) in [rf.RES_GRAIN, rf.RES_OLIVES, rf.RES_SHEEP]" :key="idx">
 								<div class="resAndTextDiv">
 									<div class="resImgInTableDiv" :class="[{ noRes: store.players[playerIndexProp].availableResources[res] === 0 }, { resSelectable: isResSelectable(res) }]" @click="clickedRes(res)">
-										<img :src="view.getImage('res_' + String(res))" />
-										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv">{{ store.players[playerIndexProp].availableResources[res] }}</div>
+										<img :src="view.getImage('res_' + String(res))" v-tooltip="rf.RES_TEXT[res]" />
+										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv" v-count-pop="store.players[playerIndexProp].availableResources[res]">{{ store.players[playerIndexProp].availableResources[res] }}</div>
 									</div>
 									<br />
 									{{ rf.RES_TEXT[res] }}
@@ -351,8 +358,8 @@ function getTHandTDstyle() {
 							<!-- FOOD + FISHERMAN -->
 							<div class="resAndTextDiv">
 								<div class="resImgInTableDiv" :class="[{ noRes: store.players[playerIndexProp].availableResources[rf.RES_FISH] === 0 }, { resSelectable: isResSelectable(rf.RES_FISH) }]" @click="clickedRes(rf.RES_FISH)">
-									<img :src="view.getImage('res_' + String(rf.RES_FISH))" />
-									<div v-if="store.players[playerIndexProp].availableResources[rf.RES_FISH] !== 0" onselectstart="return false;" class="resNumDiv">{{ store.players[playerIndexProp].availableResources[rf.RES_FISH] }}</div>
+									<img :src="view.getImage('res_' + String(rf.RES_FISH))" v-tooltip="rf.RES_TEXT[rf.RES_FISH]" />
+									<div v-if="store.players[playerIndexProp].availableResources[rf.RES_FISH] !== 0" onselectstart="return false;" class="resNumDiv" v-count-pop="store.players[playerIndexProp].availableResources[rf.RES_FISH]">{{ store.players[playerIndexProp].availableResources[rf.RES_FISH] }}</div>
 								</div>
 								<br />
 								{{ rf.RES_TEXT[rf.RES_FISH] }}
@@ -367,8 +374,8 @@ function getTHandTDstyle() {
 							<template v-for="(res, idx) in [rf.RES_GOLD]" :key="idx">
 								<div class="resAndTextDiv">
 									<div class="resImgInTableDiv" :class="[{ noRes: store.players[playerIndexProp].availableResources[res] === 0 }, { resSelectable: isResSelectable(res) }]" @click="clickedRes(res)">
-										<img :src="view.getImage('res_' + String(res))" />
-										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv">{{ store.players[playerIndexProp].availableResources[res] }}</div>
+										<img :src="view.getImage('res_' + String(res))" v-tooltip="rf.RES_TEXT[res]" />
+										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv" v-count-pop="store.players[playerIndexProp].availableResources[res]">{{ store.players[playerIndexProp].availableResources[res] }}</div>
 									</div>
 									<br />
 									{{ rf.RES_TEXT[res] }}
@@ -379,8 +386,8 @@ function getTHandTDstyle() {
 							<!-- LUX + FARM -->
 							<div class="resAndTextDiv">
 								<div class="resImgInTableDiv" :class="[{ noRes: store.players[playerIndexProp].availableResources[rf.RES_WINE] === 0 }, { resSelectable: isResSelectable(rf.RES_WINE) }]" @click="clickedRes(rf.RES_WINE)">
-									<img :src="view.getImage('res_' + String(rf.RES_WINE))" />
-									<div v-if="store.players[playerIndexProp].availableResources[rf.RES_WINE] !== 0" onselectstart="return false;" class="resNumDiv">{{ store.players[playerIndexProp].availableResources[rf.RES_WINE] }}</div>
+									<img :src="view.getImage('res_' + String(rf.RES_WINE))" v-tooltip="rf.RES_TEXT[rf.RES_WINE]" />
+									<div v-if="store.players[playerIndexProp].availableResources[rf.RES_WINE] !== 0" onselectstart="return false;" class="resNumDiv" v-count-pop="store.players[playerIndexProp].availableResources[rf.RES_WINE]">{{ store.players[playerIndexProp].availableResources[rf.RES_WINE] }}</div>
 								</div>
 								<br />
 								{{ rf.RES_TEXT[rf.RES_WINE] }}
@@ -391,8 +398,8 @@ function getTHandTDstyle() {
 							<template v-for="(res, idx) in [rf.RES_PEARLS, rf.RES_DYE]" :key="idx">
 								<div class="resAndTextDiv">
 									<div class="resImgInTableDiv" :class="[{ noRes: store.players[playerIndexProp].availableResources[res] === 0 }, { resSelectable: isResSelectable(res) }]" @click="clickedRes(res)">
-										<img :src="view.getImage('res_' + String(res))" />
-										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv">{{ store.players[playerIndexProp].availableResources[res] }}</div>
+										<img :src="view.getImage('res_' + String(res))" v-tooltip="rf.RES_TEXT[res]" />
+										<div v-if="store.players[playerIndexProp].availableResources[res] !== 0" onselectstart="return false;" class="resNumDiv" v-count-pop="store.players[playerIndexProp].availableResources[res]">{{ store.players[playerIndexProp].availableResources[res] }}</div>
 									</div>
 									<br />
 									{{ rf.RES_TEXT[res] }}
@@ -495,6 +502,22 @@ function getTHandTDstyle() {
 		1px -1px 0 #000,
 		-1px 1px 0 #000,
 		1px 1px 0 #000;
+}
+
+.res-pop {
+	animation: res-pop 0.16s ease-out;
+}
+
+@keyframes res-pop {
+	0% {
+		transform: scale(1);
+	}
+	60% {
+		transform: scale(1.22);
+	}
+	100% {
+		transform: scale(1);
+	}
 }
 
 .noRes {

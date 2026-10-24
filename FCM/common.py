@@ -275,7 +275,7 @@ def create_fcm_game(
         game_pace = request.POST["pace"]
         creator = request.user
         host = request.user
-        kickout_duration = request.POST["kickoutDuration"]
+        kickout_duration = request.POST.get("kickoutDuration", rf.KICKOUT_1_DAY)
         notificationSuppression = "0" * max_players
 
         # Handle map data

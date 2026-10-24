@@ -64,23 +64,7 @@ function getNewBldgDescription() {
 }
 
 function rotateNewBuilding(dir) {
-	if (store.context.cityBuildingBeingAdded === rf.BLDG_STORAGE) {
-		let temp = store.context.newStorageHeight
-		store.context.newStorageHeight = store.context.newStorageWidth
-		store.context.newStorageWidth = temp
-		return
-	}
-	if (!rf.BLDG_ROTATABLE.includes(store.context.cityBuildingBeingAdded)) return
-	// Remove ghosts
-	let ghostDivs = document.getElementsByClassName("ghostDiv")
-	let ghostPaths = document.getElementsByClassName("ghostPath")
-	for (let i = 0; i < ghostDivs.length; i++) ghostDivs[i].style.display = "none"
-	for (let i = 0; i < ghostPaths.length; i++) ghostPaths[i].style.display = "none"
-	store.topMenuViews.currentGhostIndex = -1
-
-	store.context.cityBuildingBeingAddedRotation += dir
-	if (store.context.cityBuildingBeingAddedRotation === 4) store.context.cityBuildingBeingAddedRotation = 0
-	else if (store.context.cityBuildingBeingAddedRotation === -1) store.context.cityBuildingBeingAddedRotation = 3
+	city.rotateCurrentBuilding(dir, props.playerIndexProp)
 }
 
 function canSelectCostRes(res) {
@@ -165,20 +149,28 @@ function cancelSaintHouse() {
 }
 
 function setUpBoardTrade() {
+	if (!personal.canPlay() || !personal.canPlayInCity(props.playerIndexProp)) return
 	store.context.action = rf.ACT_TRADE_BOARD
 }
 
 function setUpPlayerTrade() {
+	if (!personal.canPlay() || !personal.canPlayInCity(props.playerIndexProp)) return
 	store.context.setupPlayerTrade.yourResources.splice(0)
 	store.context.setupPlayerTrade.opponentsResources.splice(0)
 	store.context.setupPlayerTrade.selectedOpponent = -1
 	store.context.setupPlayerTrade.yourPromise = ""
 	store.context.setupPlayerTrade.opponentsPromise = ""
 	if (store.players.length === 2) {
+		const acting = personal.actingPlayerIndex()
 		store.context.setupPlayerTrade.selectedOpponent = 1
-		if (personal.pov === 1) store.context.setupPlayerTrade.selectedOpponent = 0
+		if (acting === 1) store.context.setupPlayerTrade.selectedOpponent = 0
 	}
 	store.context.action = rf.ACT_SETUP_PLAYER_TRADE
+}
+
+function confirmBoardTrade() {
+	if (!personal.canPlay() || !personal.canPlayInCity(props.playerIndexProp)) return
+	city.completeBoardTrade(personal.actingPlayerIndex())
 }
 
 function showCancelButton() {
@@ -189,6 +181,7 @@ function showCancelButton() {
 }
 
 function hospitalActionButton() {
+	if (!personal.canPlay() || !personal.canPlayInCity(props.playerIndexProp)) return
 	let playerIndex = props.playerIndexProp
 	// End action
 	if (store.context.action === rf.ACT_HOSPITAL_GRAVES) store.clearVars()
@@ -216,7 +209,7 @@ function totalGraveCount(playerIndex) {
 <template>
 	<div id="newBuildingDiv">
 		<!-- ROT ANTI-CLOCKWISE -->
-		<img class="rot_img" :class="(store.context.cityBuildingBeingAdded === rf.BLDG_STORAGE || rf.BLDG_ROTATABLE.includes(store.context.cityBuildingBeingAdded)) && city.canAddBuilding(playerIndexProp, store.context.cityBuildingBeingAdded) ? 'rot_img_enabled' : 'rot_img_disabled'" @click="rotateNewBuilding(-1)" :src="view.getImage('rot_anticlockwise')" />
+		<img class="rot_img" :title="$t('aqyUi.hotkeys.rotate')" :class="(store.context.cityBuildingBeingAdded === rf.BLDG_STORAGE || rf.BLDG_ROTATABLE.includes(store.context.cityBuildingBeingAdded)) && city.canAddBuilding(playerIndexProp, store.context.cityBuildingBeingAdded) ? 'rot_img_enabled' : 'rot_img_disabled'" @click="rotateNewBuilding(-1)" :src="view.getImage('rot_anticlockwise')" />
 
 		<div
 			id="newBuildingSVGdiv"
@@ -290,7 +283,7 @@ function totalGraveCount(playerIndex) {
 			</svg>
 		</div>
 		<!-- ROT CLOCKWISE -->
-		<img class="rot_img" :class="(store.context.cityBuildingBeingAdded === rf.BLDG_STORAGE || rf.BLDG_ROTATABLE.includes(store.context.cityBuildingBeingAdded)) && city.canAddBuilding(playerIndexProp, store.context.cityBuildingBeingAdded) ? 'rot_img_enabled' : 'rot_img_disabled'" @click="rotateNewBuilding(1)" :src="view.getImage('rot_clockwise')" />
+		<img class="rot_img" :title="$t('aqyUi.hotkeys.rotate')" :class="(store.context.cityBuildingBeingAdded === rf.BLDG_STORAGE || rf.BLDG_ROTATABLE.includes(store.context.cityBuildingBeingAdded)) && city.canAddBuilding(playerIndexProp, store.context.cityBuildingBeingAdded) ? 'rot_img_enabled' : 'rot_img_disabled'" @click="rotateNewBuilding(1)" :src="view.getImage('rot_clockwise')" />
 		<br />
 
 		<!-- STORAGE SELECTOR -->
@@ -306,7 +299,7 @@ function totalGraveCount(playerIndex) {
 		</div>
 
 		<!-- REMOVE GRAVES BUTTON -->
-		<template v-if="store.context.cityBuildingToDisplay === rf.BLDG_HOSPITAL && city.hasWorkingUniqueBuilding(playerIndexProp, rf.BLDG_HOSPITAL)">
+		<template v-if="store.context.cityBuildingToDisplay === rf.BLDG_HOSPITAL && city.hasWorkingUniqueBuilding(playerIndexProp, rf.BLDG_HOSPITAL) && personal.canPlayInCity(playerIndexProp)">
 			<button @click="hospitalActionButton" :disabled="store.context.gravesLeftToRemove <= 0" class="actionsLineButton">
 				<span v-if="store.context.action === rf.ACT_HOSPITAL_GRAVES">{{ $t("cityNewBuildingArea.stopRemovingGraves") }}</span>
 				<span v-else-if="totalGraveCount(playerIndexProp) <= store.context.gravesLeftToRemove">{{ $t("cityNewBuildingArea.removeAllGraves", { count: totalGraveCount(playerIndexProp) }) }}</span>
@@ -316,14 +309,14 @@ function totalGraveCount(playerIndex) {
 		</template>
 
 		<!-- RAZE BUTTON -->
-		<template v-if="(store.context.cityBuildingToDisplay === rf.BLDG_CATHEDRAL || store.context.cityBuildingToDisplay === rf.BLDG_THEOLOGY) && store.players[playerIndexProp].cathedralStatus < 5 && city.hasWorkingUniqueBuilding(playerIndexProp, rf.BLDG_THEOLOGY) && city.hasWorkingUniqueBuilding(playerIndexProp, rf.BLDG_CATHEDRAL)">
+		<template v-if="(store.context.cityBuildingToDisplay === rf.BLDG_CATHEDRAL || store.context.cityBuildingToDisplay === rf.BLDG_THEOLOGY) && store.players[playerIndexProp].cathedralStatus < 5 && city.hasWorkingUniqueBuilding(playerIndexProp, rf.BLDG_THEOLOGY) && city.hasWorkingUniqueBuilding(playerIndexProp, rf.BLDG_CATHEDRAL) && personal.canPlayInCity(playerIndexProp)">
 			<button v-if="store.players[playerIndexProp].saint !== rf.SAINT_MARIA" @click="city.razeCathedral(playerIndexProp)" class="actionsLineButton">{{ $t("cityNewBuildingArea.razeCathedral") }}</button>
 			<span v-else class="redText">{{ $t("cityNewBuildingArea.cannotRazeCathedral") }}</span>
 			<br />
 		</template>
 
 		<!-- TRADE BUTTONS -->
-		<template v-else-if="store.context.cityBuildingToDisplay === rf.BLDG_MARKET && store.context.action !== rf.ACT_TRADE_BOARD && store.context.action !== rf.ACT_SETUP_PLAYER_TRADE && city.hasWorkingUniqueBuilding(playerIndexProp, store.context.cityBuildingToDisplay, false) && personal.canPlay() && store.gameflow.phase === rf.PHASE_CITY_BUILDING">
+		<template v-else-if="store.context.cityBuildingToDisplay === rf.BLDG_MARKET && store.context.action !== rf.ACT_TRADE_BOARD && store.context.action !== rf.ACT_SETUP_PLAYER_TRADE && city.hasWorkingUniqueBuilding(playerIndexProp, store.context.cityBuildingToDisplay, false) && personal.canPlay() && personal.canPlayInCity(playerIndexProp) && store.gameflow.phase === rf.PHASE_CITY_BUILDING">
 			<button @click="setUpBoardTrade" class="actionsLineButton">{{ $t("cityNewBuildingArea.tradeWithBoard") }}</button>
 			<br />
 			<button v-if="!personal.trainingGame && !store.sandboxMode" @click="setUpPlayerTrade" class="actionsLineButton">{{ $t("cityNewBuildingArea.tradeWithPlayers") }}</button>
@@ -331,18 +324,24 @@ function totalGraveCount(playerIndex) {
 		</template>
 
 		<template v-else-if="store.context.cityBuildingToDisplay === rf.BLDG_MARKET && store.context.action === rf.ACT_TRADE_BOARD">
-			{{ $t("cityNewBuildingArea.tradeBoardHint") }}
+			{{ $t("aqyUi.trade.boardHint") }}
 			<br />
-			<template v-if="store.context.tradingAwayGoods.length > 0">
-				{{ $t("cityNewBuildingArea.trading") }}
-				<img v-for="(res, idx) in store.context.tradingAwayGoods" :key="idx" class="newBuildingCostResMultiple" :src="view.getImage('res_' + String(res))" />
-			</template>
+			{{ $t("aqyUi.trade.onlyYourGoods") }}
+			<br />
+			{{ $t("aqyUi.trade.youGive") }}
+			<img v-for="(res, idx) in store.context.tradingAwayGoods" :key="idx" class="newBuildingCostResMultiple" :src="view.getImage('res_' + String(res))" />
+			<br />
+			{{ $t("aqyUi.trade.youReceive") }}
+			<img v-if="store.context.boardTradeIncoming >= 0" class="newBuildingCostResMultiple" :src="view.getImage('res_' + String(store.context.boardTradeIncoming))" />
+			<span v-else>{{ $t("aqyUi.trade.chooseReceive") }}</span>
+			<br />
+			<button class="actionsLineButton" :disabled="store.context.tradingAwayGoods.length !== 2 || store.context.boardTradeIncoming < 0" @click="confirmBoardTrade">{{ $t("aqyUi.trade.confirm") }}</button>
 			<br />
 		</template>
 
 		<!-- CANCEL BUTTON -->
 		<template v-if="showCancelButton()">
-			<button @click="city.cancelButton" class="actionsLineButton">
+			<button @click="city.cancelButton" class="actionsLineButton" :title="$t('aqyUi.hotkeys.cancel')">
 				<span v-if="store.context.action === rf.ACT_TRADE_BOARD">
 					{{ $t("cityNewBuildingArea.stopTrading") }}
 				</span>

@@ -1047,7 +1047,7 @@ function flatmapResourceArray(array) {
 	<!-- EXPLORER RESULT -->
 	<div v-if="store.newlyExplorerResource !== rf.RES_NONE" class="generalActions explorerRevealDiv">
 		{{ $t("mapActionArea.explorerRevealed") }}
-		<img class="newBuildingCostRes" :src="view.getImage('res_' + String(store.newlyExplorerResource))" />
+		<img class="newBuildingCostRes explorer-reveal-res" :src="view.getImage('res_' + String(store.newlyExplorerResource))" />
 		<br />
 		<span v-if="store.newlyExplorerResource === rf.RES_WINE">{{ $t("mapActionArea.famineRemainsAt", { level: store.famineLevel }) }}</span>
 		<span v-else>{{ $t("mapActionArea.famineIncreasesTo", { level: store.famineLevel }) }}</span>
@@ -1544,10 +1544,10 @@ function flatmapResourceArray(array) {
 				<button
 					v-if="store.gameflow.phase === rf.PHASE_COUNTRYSIDE_BUILDING && !store.context.needToPlaceSecondFisheryHex"
 					@click="model.undoLastAction" class="actionsLineButton"
-					:disabled="store.undoPoints.length === 0">{{ $t("mapActionArea.undo") }}</button>
+					:disabled="store.undoPoints.length === 0" :title="$t('aqyUi.hotkeys.undo')">{{ $t("mapActionArea.undo") }}</button>
 			</div>
 			<div class="inlineDiv">
-				<button v-if="controller.canEndPlayerTurn()" class="actionsLineButton" @click="localEndTurn">
+				<button v-if="controller.canEndPlayerTurn()" id="endTurnButton" class="actionsLineButton" @click="localEndTurn" :title="$t('aqyUi.hotkeys.endTurn')">
 					<span
 						v-if="store.gameflow.phase === rf.PHASE_POLLUTION || store.gameflow.phase === rf.PHASE_HARVEST">{{ $t("mapActionArea.endTurn") }}</span>
 					<span v-else-if="store.gameflow.phase === rf.PHASE_EXPLORE">{{ $t("mapActionArea.skipExplorationAction") }}</span>
@@ -1580,7 +1580,7 @@ function flatmapResourceArray(array) {
 			</div>
 
 			<div class="inlineDiv">
-				<button class="actionsLineButton" @click="localEndTurn">{{ $t("mapActionArea.endTurn") }}</button>
+				<button id="endTurnButton" class="actionsLineButton" @click="localEndTurn" :title="$t('aqyUi.hotkeys.endTurn')">{{ $t("mapActionArea.endTurn") }}</button>
 			</div>
 		</div>
 	</template>
@@ -1726,6 +1726,21 @@ function flatmapResourceArray(array) {
 	margin-top: 10px;
 	margin-bottom: 10px;
 	padding: 5px;
+}
+
+.explorer-reveal-res {
+	animation: explorer-reveal 0.25s ease-out;
+}
+
+@keyframes explorer-reveal {
+	0% {
+		transform: rotateY(90deg) scale(0.8);
+		opacity: 0;
+	}
+	100% {
+		transform: rotateY(0deg) scale(1);
+		opacity: 1;
+	}
 }
 
 .winningSaintImage {

@@ -908,5 +908,55 @@ export default {
 	game: {
 		welcomeMessage: "Bienvenue dans Antiquity Online !SNLBSNLBSi vous avez des suggestions, des questions ou des commentaires, veuillez contacter l'administrateur du site à l'adresse e-mail indiquée dans Contact (en haut à droite du lobby). Merci !",
 	},
+	aqyUi: {
+		status: {
+			turn: "Tour {turn}",
+			phase: "Phase {number}/10",
+			firstCity: "Première ville",
+			yourTurn: "À votre tour",
+			waitingFor: "En attente de {names}",
+			playing: "En jeu",
+			viewingCity: "Ville de {player}",
+			backToMyCity: "Retour à ma ville",
+		},
+		legend: {
+			title: "Légende de la carte",
+			selectable: "Sélectionnable",
+			valid: "Voisin valide / deuxième hexagone",
+			blocked: "Bloqué par la décharge",
+			mountain: "Chaîne de montagnes",
+			discard: "Défausser des marchandises",
+		},
+		trade: {
+			boardHint: "Échange avec le jeu : 2 marchandises contre 1",
+			youGive: "Vous donnez :",
+			youReceive: "Vous recevez :",
+			chooseReceive: "Cliquez sur une de vos marchandises pour la recevoir",
+			confirm: "Confirmer l'échange",
+			cancel: "Annuler",
+			onlyYourGoods: "Vous ne pouvez échanger que vos propres marchandises",
+		},
+		storage: {
+			used: "Stockage utilisé : {used} / {total}",
+			limit: "Vous pouvez stocker au total {count} marchandises",
+		},
+		summary: {
+			houses: "Maisons",
+			men: "Ouvriers",
+			carts: "Chariots",
+			freeSquares: "Cases libres",
+			storage: "Stockage",
+		},
+		save: {
+			redoSave: "Réessayer la sauvegarde",
+		},
+		hotkeys: {
+			rotate: "Pivoter (R)",
+			cancel: "Annuler (Échap)",
+			endTurn: "Terminer le tour (Entrée)",
+			undo: "Annuler (Ctrl+Z)",
+			help: "Aide (?)",
+		},
+	},
 	historyText: {},
 }

@@ -719,7 +719,7 @@ function localCastVote(topic) {
 }
 
 .topMenuItem img {
-	width: 38x;
+	width: 38px;
 	height: 38px;
 }
 

@@ -25,6 +25,7 @@ import * as city from "./AQYcity.js"
 import * as model from "./AQYmodel.js"
 import * as IO from "../backend/AQY_IO.js"
 import * as country from "./AQYcountry.js"
+import * as rules from "./AQYrules.js"
 import i18n from "../i18n"
 
 import { usePersonalStore } from "../stores/AQYpersonal.js"
@@ -311,15 +312,15 @@ export function simpleImportPlayerCityTurnData(playerIndex, content) {
 	)
 	let player = store.players[playerIndex]
 
-	Object.assign(player.cities, inputContent[0])
-	Object.assign(player.availableBuildings, inputContent[1])
-	Object.assign(player.availableHouses, inputContent[2])
+	rules.assignArray(player.cities, inputContent[0])
+	rules.assignArray(player.availableBuildings, inputContent[1])
+	rules.assignArray(player.availableHouses, inputContent[2])
 	player.availableMen = inputContent[3]
-	Object.assign(player.availableResources, inputContent[4])
+	rules.assignArray(player.availableResources, inputContent[4])
 	player.saint = inputContent[5]
 	Object.assign(player.cityHistory, inputContent[6])
 	player.cathedralStatus = inputContent[7]
-	Object.assign(player.promises, inputContent[8])
+	rules.assignArray(player.promises, inputContent[8])
 }
 
 export function simpleExportWholeModel() {
@@ -667,20 +668,9 @@ function recreateGrass() {
 function grassInitialCityWater() {
 	const store = useModelStore()
 
-	// Grass the water under initial cities. Can add any city, as subsequent won't have water anyway.
-	let cityCentreHexes = country.getCityTiles()
-	let cityIDs = []
-	for (let i = 0; i < cityCentreHexes.length; i++) {
-		cityIDs.push(map.getIDfromHex(cityCentreHexes[i]))
-	}
-	//let neighbourIDs = []
-	for (let i = cityIDs.length - 1; i >= 0; i--) {
-		cityIDs = cityIDs.concat(store.mapNeighbours[cityIDs[i]])
-	}
-
-	for (let i = 0; i < cityIDs.length; i++) {
-		let hexData = map.getHexDataFromID(cityIDs[i])
-		if (hexData.terrainType === rf.TERR_WATER) hexData.terrainType = rf.TERR_GRASS
+	// Grass the water under cities. Can add any city, as subsequent won't have water anyway.
+	for (const player of store.players) {
+		for (const city of player.cities) country.grassCityWater(city.hex)
 	}
 }
 

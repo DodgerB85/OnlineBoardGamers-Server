@@ -86,7 +86,9 @@ function getReasonUnableToEndPhase() {
 	if (store.context.action !== rf.ACT_NONE) return t("cityActionArea.cannotEndMidAction")
 	if (store.gameflow.subPhase === rf.SUB_PHASE_MOVE_BUILDINGS) return t("cityActionArea.finishMovingBuildings")
 	if (store.context.gravesLeftToPlace > 0) return t("cityActionArea.finishPlacingAllGraves")
-	if (city.getAvailableStorage(controller.currentPlayerIndex()) > 0 && store.context.resourcesToDiscard > 0) return "" // return "Finish storing all goods"
+	if (store.gameflow.phase === rf.PHASE_STORE_GOODS || store.gameflow.phase === rf.PRE_PHASE_STORE_GOODS) {
+		if (store.context.resourcesToDiscard > 0) return t("aqyUi.storage.limit", { count: city.getAvailableStorage(controller.currentPlayerIndex()) })
+	}
 	if (store.players[controller.currentPlayerIndex()].requiredRebuilds.length !== 0) {
 		let str = t("cityActionArea.mustReAdd")
 		for (let i = 0; i < store.players[controller.currentPlayerIndex()].requiredRebuilds.length; i++) {
@@ -181,6 +183,16 @@ function showStorage() {
 	return false
 }
 
+function storageTotal() {
+	return city.getAvailableStorage(controller.currentPlayerIndex())
+}
+
+function storageUsed() {
+	const total = storageTotal()
+	const resCount = store.players[controller.currentPlayerIndex()].availableResources.reduce((acc, curr) => acc + curr, 0)
+	return Math.min(resCount, total)
+}
+
 function putBackToStorage(res) {
 	if (!store.context.discardedResources.includes(res)) {
 		return
@@ -244,7 +256,7 @@ function cancelButton() {
 			<br />
 			<button v-if="controller.canResign()" @click="localClickResign()" class="actionsLineButton resignButton">{{ $t("cityActionArea.resign") }}</button>
 			<button @click="model.resetWholeTurn" class="actionsLineButton">{{ $t("cityActionArea.resetWholeTurn") }}</button>
-			<button v-if="store.gameflow.phase === rf.PHASE_CITY_BUILDING" @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length === 0">{{ $t("cityActionArea.undo") }}</button>
+			<button v-if="store.gameflow.phase === rf.PHASE_CITY_BUILDING" @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length === 0" :title="$t('aqyUi.hotkeys.undo')">{{ $t("cityActionArea.undo") }}</button>
 			<button class="actionsLineButton" @click="toggleSandboxPhase">
 				<span v-if="!store.sandboxMode">{{ $t("cityActionArea.enter") }}</span>
 				<span v-else>{{ $t("cityActionArea.exit") }}</span>
@@ -325,6 +337,10 @@ function cancelButton() {
 					{{ $t("cityActionArea.availableStorage", { count: city.getAvailableStorage(controller.currentPlayerIndex()) }) }}
 					<button v-if="IO.DEBUG_USERS.includes(personal.name)" @click="store.context.resourcesToDiscard = 0">CHEAT: Store all</button>
 				</div>
+				<div class="storageBar" :title="$t('aqyUi.storage.used', { used: storageUsed(), total: storageTotal() })">
+					<div class="storageBarFill" :style="{ width: (storageTotal() === 0 ? 0 : (storageUsed() / storageTotal()) * 100) + '%' }"></div>
+				</div>
+				<div class="boldDiv">{{ $t("aqyUi.storage.used", { used: storageUsed(), total: storageTotal() }) }}</div>
 				<div class="boldDiv" :class="{ moreToDiscard: store.context.resourcesToDiscard > 0 }">{{ $t("cityActionArea.resourcesToDiscard", { count: store.context.resourcesToDiscard }) }}</div>
 				<div class="boldDiv">
 					<span v-if="store.context.discardedResources.length === 0">{{ $t("cityActionArea.clickResourcesToDiscard") }}</span>
@@ -350,7 +366,7 @@ function cancelButton() {
 
 		<!-- END TURN BUTTONS -->
 		<template v-if="rf.CITY_PHASES.includes(store.gameflow.phase) && controller.canEndPlayerTurn()">
-			<button @click="localEndTurn" class="actionsLineButton">
+			<button id="endTurnButton" @click="localEndTurn" class="actionsLineButton" :title="$t('aqyUi.hotkeys.endTurn')">
 				<span v-if="[rf.PHASE_CITY_BUILDING].includes(store.gameflow.phase)">{{ $t("cityActionArea.finishActions") }}</span>
 				<span v-else>{{ $t("cityActionArea.endTurn") }}</span>
 			</button>
@@ -358,7 +374,7 @@ function cancelButton() {
 
 		<!-- CONFIRM END TURN -->
 		<template v-else-if="rf.CITY_PHASES.includes(store.gameflow.phase) && store.context.action === rf.ACT_CONFIRM_END_TURN">
-			<button @click="localEndTurn" class="actionsLineButton">{{ $t("cityActionArea.endTurn") }}</button>
+			<button id="endTurnButton" @click="localEndTurn" class="actionsLineButton" :title="$t('aqyUi.hotkeys.endTurn')">{{ $t("cityActionArea.endTurn") }}</button>
 		</template>
 		<!-- Rason unable to end turn-->
 		<template v-else-if="rf.CITY_PHASES.includes(store.gameflow.phase) && store.context.action !== rf.ACT_CONFIRM_RESIGN">
@@ -462,6 +478,21 @@ function cancelButton() {
 
 .moreToDiscard {
 	color: red;
+}
+
+.storageBar {
+	width: 260px;
+	max-width: 100%;
+	height: 12px;
+	border: 1px solid black;
+	background-color: #eee;
+	margin: 4px auto;
+}
+
+.storageBarFill {
+	height: 100%;
+	background-color: #4caf50;
+	transition: width 0.2s ease-out;
 }
 
 .resignButton {

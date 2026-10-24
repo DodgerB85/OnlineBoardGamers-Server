@@ -867,5 +867,55 @@ export default {
 	game: {
 		welcomeMessage: "¡Bienvenido a Antiquity Online!SNLBSNLBSi tiene sugerencias, preguntas o comentarios, escriba al webmaster a la dirección de correo que aparece en Contacto (arriba a la derecha en la sala de espera). ¡Gracias!",
 	},
+	aqyUi: {
+		status: {
+			turn: "Turno {turn}",
+			phase: "Fase {number}/10",
+			firstCity: "Primera ciudad",
+			yourTurn: "Tu turno",
+			waitingFor: "Esperando a {names}",
+			playing: "Jugando",
+			viewingCity: "Viendo la ciudad de {player}",
+			backToMyCity: "Volver a mi ciudad",
+		},
+		legend: {
+			title: "Leyenda del mapa",
+			selectable: "Seleccionable",
+			valid: "Vecino válido / segundo hexágono",
+			blocked: "Bloqueado por el vertedero",
+			mountain: "Cordillera",
+			discard: "Descartar bienes",
+		},
+		trade: {
+			boardHint: "Comercio con el juego: 2 bienes por 1",
+			youGive: "Entregas:",
+			youReceive: "Recibes:",
+			chooseReceive: "Haz clic en uno de tus recursos para recibirlo",
+			confirm: "Confirmar comercio",
+			cancel: "Cancelar",
+			onlyYourGoods: "Solo puedes comerciar con tus propios bienes",
+		},
+		storage: {
+			used: "Almacenamiento usado: {used} / {total}",
+			limit: "Solo puedes almacenar un total de {count} bienes",
+		},
+		summary: {
+			houses: "Casas",
+			men: "Trabajadores",
+			carts: "Carros",
+			freeSquares: "Casillas libres",
+			storage: "Almacenamiento",
+		},
+		save: {
+			redoSave: "Reintentar guardado",
+		},
+		hotkeys: {
+			rotate: "Girar (R)",
+			cancel: "Cancelar (Esc)",
+			endTurn: "Terminar turno (Enter)",
+			undo: "Deshacer (Ctrl+Z)",
+			help: "Ayuda (?)",
+		},
+	},
 	historyText: {},
 }
