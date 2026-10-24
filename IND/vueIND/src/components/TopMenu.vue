@@ -575,7 +575,6 @@ function localForkGame() {
 	<transition name="slideCdiv">
 		<div
 			class="settingsBubble"
-			@click="changeBoard(rf.MAP_OM_1E2E)"
 			v-if="store.topMenuViews.selectingBoard"
 			:style="{
 				left: getMapBubblePosition(3) + 'px',

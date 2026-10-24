@@ -156,7 +156,6 @@ function resetWholePlayerTurn() {
 	turnbidAmount.value = 0
 
 	model.resetWholeTurn()
-	controller.startPlayerTurn()
 }
 
 function restartGoodJourney() {
@@ -315,6 +314,7 @@ function getRNDoptions() {
 		// Add hull capacity options at the end
 		if (i == 4) continue
 		const rndLevel = controller.currentPlayerObj().RnD[i]
+		if (rndLevel < 0) continue
 		if (rndLevel < 5) possibleRND.push([i, "" + rndString(i) + " : " + model.getRndDisplayValue(i, rndLevel) + " ► " + model.getRndDisplayValue(i, rndLevel + 1)])
 	}
 	const ownHullLevel = controller.currentPlayerObj().RnD[4]
@@ -337,6 +337,7 @@ function getRNDoptionsPreMove() {
 		// Add hull capacity options at the end
 		if (i == 4) continue
 		const rndLevel = playerObj.RnD[i]
+		if (rndLevel < 0) continue
 		if (rndLevel < 5) possibleRND.push([i, "" + rndString(i) + " : " + model.getRndDisplayValue(i, rndLevel) + " ► " + model.getRndDisplayValue(i, rndLevel + 1)])
 	}
 	const ownHullLevel = playerObj.RnD[4]
@@ -1076,10 +1077,8 @@ function selectC0() {
 						{{ $t('actionArea.eachExpansionCost') }}
 						<b>{{ model.getActiveCompanyDataFromID(controller.currentPlayerObj().slots[store.context.selectedSlotToOperate][0]).goodValue }}</b>
 						<br />
-						<template v-if="store.context.action === rf.ACT_EXPAND_COMPANY">
-							{{ $t('actionArea.remainingExpansion', { count: store.context.remainingExpansions }) }}
-							<br />
-						</template>
+						{{ $t('actionArea.remainingExpansion', { count: controller.currentPlayerObj().RnD[rf.RnD_EXPANSION_IDX] }) }}
+						<br />
 						<button class="actionsLineButton" @click="resetWholePlayerTurn">{{ $t('actionArea.resetWholeTurn') }}</button>
 						<button class="actionsLineButton" @click="localSkipExpansion">{{ $t('actionArea.skipExpansion') }}</button>
 						<button class="actionsLineButton" @click="model.setupPaidExpansion">{{ $t('actionArea.payForExpansions') }}</button>

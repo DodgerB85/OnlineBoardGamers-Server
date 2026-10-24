@@ -89,7 +89,7 @@ export async function saveGame(saveRewind, saveContext = false) {
 		// THIS IS JUST AN EMERGENCY CHECK
 		store.gameflow.turnOrder.push(0)
 		postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name]
-		alert("RE-EXPORT")
+		console.error("IND save: empty turn order outside merger bidding; re-exporting")
 		postData.data = funcs.exportModel()
 	}
 	if (store.gameflow.phase === rf.PHASE_MERGER_BIDDING) {

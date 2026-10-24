@@ -106,16 +106,14 @@ class Profile(models.Model):
     webhooks = models.TextField(blank=True, null=True)
     discord_id = models.CharField(max_length=100, blank=True, null=True)
 
-    preferredRestaurantColour = models.SmallIntegerField(null=False, blank=False, default=-1)
-    highContrastBoardItems = models.BooleanField(default=False)
+    preferredFCMoptions = models.CharField(max_length=30, blank=True)
 
     preferredHCcolour = models.SmallIntegerField(null=False, blank=False, default=-1)
 
     preferredBusColour = models.SmallIntegerField(null=False, blank=False, default=-1)
     preferredBusBoard = models.SmallIntegerField(null=False, blank=False, default=0)
 
-    preferredTGZcolour = models.SmallIntegerField(null=False, blank=False, default=-1)
-    TGZminimalText = models.BooleanField(blank=False, default=False)
+    preferredTGZoptions = models.CharField(max_length=30, blank=True)
 
     preferredCNScolour = models.PositiveSmallIntegerField(null=True, blank=True, default=None)
 

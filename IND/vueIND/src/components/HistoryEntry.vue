@@ -1018,6 +1018,19 @@ function landOperatingOwnerAlsoHadShips(entry) {
 		</div>
 	</template>
 
+	<!-- CITY GROWTH SKIPPED - NO TOKENS -->
+	<template v-if="entry[0] === rf.HIST_SKIP_CITY_GROWTH">
+		<div class="log mainEntry" :class="{ selectableHistory: store.topMenuViews.showReplay }"
+			@click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
+			<div class="header">
+				<span>
+					{{ getTimeString(entry[2]) }}
+				</span>
+			</div>
+			<span class="centreSpan">{{ $t('history.cityGrowthSkippedNoTokens') }}</span>
+		</div>
+	</template>
+
 	<!-- CITY GROWTH -->
 	<template v-if="entry[0] === rf.HIST_CITY_GROWTH">
 		<div class="log mainEntry selectableHistory" @click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">

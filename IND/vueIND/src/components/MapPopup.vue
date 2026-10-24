@@ -3,6 +3,7 @@ import * as rf from "../js/INDreference.js"
 import * as model from "../js/INDmodel.js"
 import * as map from "../js/INDmap.js"
 import * as view from "../js/INDview.js"
+import * as funcs from "../js/INDfuncs.js"
 
 import i18n from "../i18n"
 
@@ -164,7 +165,7 @@ function getCityReceivedGoodsExtraHTML(city) {
 }
 
 function getMainPlayerHTML(playerIndex) {
-	return `<span class="mainEntryPlayer mainEntryPlayer${personal.getCorrectedColour(store.players[playerIndex].colour)}">${store.players[playerIndex].displayName}</span>`
+	return `<span class="mainEntryPlayer mainEntryPlayer${personal.getCorrectedColour(store.players[playerIndex].colour)}">${funcs.htmlEscape(store.players[playerIndex].displayName)}</span>`
 }
 </script>
 

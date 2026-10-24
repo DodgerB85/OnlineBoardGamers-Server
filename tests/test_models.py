@@ -31,8 +31,7 @@ class TestProfileCreation(TestCase):
         self.assertTrue(profile.sendEmailNotificationOnTurn)
         self.assertFalse(profile.email_confirmed)
         self.assertTrue(profile.showAssistance)
-        self.assertEqual(profile.preferredRestaurantColour, -1)
-        self.assertFalse(profile.highContrastBoardItems)
+        self.assertEqual(profile.preferredFCMoptions, "")
         self.assertEqual(profile.liveNotification, 1)
 
     def test_profile_str(self):

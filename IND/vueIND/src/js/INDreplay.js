@@ -165,7 +165,7 @@ export async function generateReplayData(spoilerFree = false) {
 		else if (store.computedHistory[i][0] === rf.HIST_REMOVE_ERA_CARD) replayRemoveEraCard(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_FINAL_INCOME) replayFinalIncome(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_GAME_END) replayGameEnd(i, store.computedHistory[i][1], store.computedHistory[i][3])
-		else if (store.computedHistory[i][0] === rf.HIST_CITY_GROWTH) replayCityGrowth(i, store.computedHistory[i][1], store.computedHistory[i][3])
+		else if (store.computedHistory[i][0] === rf.HIST_CITY_GROWTH || store.computedHistory[i][0] === rf.HIST_MANUAL_CITY_GROWTH) replayCityGrowth(i, store.computedHistory[i][1], store.computedHistory[i][3])
 
 		replayData.push(funcs.simpleExportWholeINDmodelNoCompression())
 
@@ -217,8 +217,26 @@ function replayNewEra(historyIndex, playerIndex, entry3) {
 			if (rf.AG_ALL_COMPANIES[i].era === store.gameflow.currentEra) newAvailableCompanies.push(JSON.parse(JSON.stringify(rf.AG_ALL_COMPANIES[i])))
 		}
 	} else if (store.mapData.selectedMap === rf.MAP_PHP) {
+		// Mirror actionEraChange: the initial new-era entry lists all companies removed
+		// from the A/B decks; those province oil companies replace the era C oil set.
+		let removedCompanyIDs = []
+		for (let i = store.history.length - 1; i >= 0; i--) {
+			if (store.history[i][0] === rf.HIST_NEW_ERA && store.history[i][3].length > 1) removedCompanyIDs = removedCompanyIDs.concat(store.history[i][3][1])
+		}
+		removedCompanyIDs = [...new Set(removedCompanyIDs)]
 		for (let i = 0; i < rf.PH_ALL_COMPANIES.length; i++) {
-			if (rf.PH_ALL_COMPANIES[i].era === store.gameflow.currentEra) newAvailableCompanies.push(JSON.parse(JSON.stringify(rf.PH_ALL_COMPANIES[i])))
+			if (rf.PH_ALL_COMPANIES[i].era !== store.gameflow.currentEra) continue
+			if (store.gameflow.currentEra === rf.ERA_C && rf.PH_ALL_COMPANIES[i].type === rf.COMPANY_OIL) continue
+			if (removedCompanyIDs.includes(rf.PH_ALL_COMPANIES[i].id)) continue
+			newAvailableCompanies.push(JSON.parse(JSON.stringify(rf.PH_ALL_COMPANIES[i])))
+		}
+		if (store.gameflow.currentEra === rf.ERA_C) {
+			for (let i = 0; i < removedCompanyIDs.length; i++) {
+				let removedCompany = rf.PH_ALL_COMPANIES.find((company) => company.id === removedCompanyIDs[i])
+				if (!removedCompany) continue
+				let oilCompany = rf.PH_ALL_COMPANIES.find((company) => company.province === removedCompany.province && company.type === rf.COMPANY_OIL && company.era === rf.ERA_C)
+				if (oilCompany) newAvailableCompanies.push(JSON.parse(JSON.stringify(oilCompany)))
+			}
 		}
 	}
 	store.availableCompanies.splice(0, store.availableCompanies.length, ...newAvailableCompanies)
@@ -519,6 +537,7 @@ function replayAcquireCompany(historyIndex, playerIndex, entry3) {
 	let companyID = entry3[0]
 	let slotIdx = model.acquireCompany_core(playerIndex, companyID)
 	model.expandCompany_core(playerIndex, slotIdx, entry3[1], true)
+	model.markActiveCompaniesWithNoStartTerritoriesForRemoval()
 }
 
 function checkAndPerformTurnEnd(historyIndex) {
@@ -553,7 +572,7 @@ export const HIST_SKIP_ACQUISITOIN_NO_COMPANIES = 47
 */
 
 	// Ignore player trades, as they won't ever end a turn or player (which is done by city build)
-	let entriesToIgnore = [rf.HIST_REWIND, rf.HIST_RESIGN, rf.HIST_KICKOUT, rf.HIST_CITY_GROWTH, rf.HIST_NO_CITY_GROWTH, rf.HIST_NEW_GAME, rf.HIST_NEW_TURN, rf.HIST_SET_NEW_TURN_ORDER, rf.HIST_OPERATION_INCOME_SUMMARY]
+	let entriesToIgnore = [rf.HIST_REWIND, rf.HIST_RESIGN, rf.HIST_KICKOUT, rf.HIST_CITY_GROWTH, rf.HIST_NO_CITY_GROWTH, rf.HIST_SKIP_CITY_GROWTH, rf.HIST_NEW_GAME, rf.HIST_NEW_TURN, rf.HIST_SET_NEW_TURN_ORDER, rf.HIST_OPERATION_INCOME_SUMMARY]
 	if (entriesToIgnore.includes(currentAction)) return // NOTHING
 
 	let currentPlayerIndex = store.computedHistory[historyIndex][1]

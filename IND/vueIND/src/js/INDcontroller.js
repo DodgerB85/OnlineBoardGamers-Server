@@ -112,7 +112,8 @@ export function startPlayerTurn() {
 		store.context.historyObj.splice(0)
 		let newSlot = store.ongoingVars.siapFajiOrShippingTerrsToRemoveData[1]
 		let slotIdx = store.players[currentPlayerIndex()].slots.findIndex((slot) => JSON.stringify(slot) === JSON.stringify(newSlot))
-		store.context.historyObj.push(slotIdx)
+		let preRemovedTerrs = store.ongoingVars.siapFajiOrShippingTerrsToRemoveData[3] || []
+		store.context.historyObj.push(slotIdx, ...preRemovedTerrs)
 		let terrsToRemove = store.ongoingVars.siapFajiOrShippingTerrsToRemoveData[2]
 
 		store.context.siapFajiTerrsToRemove = terrsToRemove
@@ -221,6 +222,14 @@ export function startPlayerTurn() {
 		if (size2grows.length > 0) {
 			store.context.citySize2GrowsRemaining = Math.min(size2grows.length, 3 - city3Count)
 			if (store.context.citySize2GrowsRemaining === 0) size2grows.splice(0)
+		}
+
+		// No city can actually grow: end the phase automatically and tell the players why.
+		if (store.context.citySize1GrowsRemaining === 0 && store.context.citySize2GrowsRemaining === 0) {
+			addHistory(rf.HIST_SKIP_CITY_GROWTH, -1, 0, [])
+			endCurrentPhase()
+			startPlayerTurn()
+			return
 		}
 
 		// Convert city indexes to terrID
@@ -878,7 +887,7 @@ export function canSkipCurrentPlayer() {
 		return false
 	} else if (store.gameflow.phase === rf.PHASE_R_AND_D) {
 		for (let i = 0; i < playerObj.RnD.length; i++) {
-			if (playerObj.RnD[i] < 5) return false
+			if (playerObj.RnD[i] >= 0 && playerObj.RnD[i] < 5) return false
 		}
 		return true
 	} else if (store.gameflow.phase === rf.PHASE_OPERATIONS) {

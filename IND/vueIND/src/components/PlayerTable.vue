@@ -225,7 +225,7 @@ function getRNDfontSize() {
 							<div class="money-row">
 								<span class="money-label">💵</span>
 								<span class="money-value">{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyCash) }}</span>
-								<span v-if="store.players[playerIndex].moneyRoundIncome > 0" class="income">+{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyRoundIncome) }}</span>
+								<span v-if="store.players[playerIndex].moneyRoundIncome !== 0 && (!store.hiddenMoney || playerIndex === personal.pov || personal.trainingGame)" :class="store.players[playerIndex].moneyRoundIncome < 0 ? 'negativeIncome' : 'income'"><template v-if="store.gameflow.phase === rf.PHASE_GAME_OVER">{{ $t('playerTable.lastRoundIncome') }} </template><template v-if="store.players[playerIndex].moneyRoundIncome > 0">+</template>{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyRoundIncome) }}</span>
 							</div>
 						</td>
 						<td v-else class="money-cell">
@@ -233,7 +233,7 @@ function getRNDfontSize() {
 								<span v-if="store.options.playerTableStyle === 0" class="money-label">💵</span>
 								<span v-else>{{ $t('playerTable.cash') }} </span>
 								<span class="money-value">{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyCash) }}</span>
-								<span v-if="store.players[playerIndex].moneyRoundIncome > 0" class="income">+{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyRoundIncome) }}</span>
+								<span v-if="store.players[playerIndex].moneyRoundIncome !== 0 && (!store.hiddenMoney || playerIndex === personal.pov || personal.trainingGame)" :class="store.players[playerIndex].moneyRoundIncome < 0 ? 'negativeIncome' : 'income'"><template v-if="store.gameflow.phase === rf.PHASE_GAME_OVER">{{ $t('playerTable.lastRoundIncome') }} </template><template v-if="store.players[playerIndex].moneyRoundIncome > 0">+</template>{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyRoundIncome) }}</span>
 							</div>
 							<div class="money-row">
 								<span v-if="store.options.playerTableStyle === 0" class="money-label">🏦</span>
@@ -248,7 +248,7 @@ function getRNDfontSize() {
 						</td>
 						<!-- R & D -->
 						<td v-if="store.topMenuViews.minimalPlayerTable" class="rightAlign">
-							{{ store.players[playerIndex].RnD[rf.RnD_BID_IDX] }}-{{ store.players[playerIndex].RnD[rf.RnD_SLOTS_IDX] }}-{{ store.players[playerIndex].RnD[rf.RnD_MERGER_IDX] }}-{{ store.players[playerIndex].RnD[rf.RnD_EXPANSION_IDX] }}-{{ store.players[playerIndex].RnD[rf.RnD_HULL_IDX] }}
+							×{{ model.getRndDisplayValue(rf.RnD_BID_IDX, store.players[playerIndex].RnD[rf.RnD_BID_IDX]) }}-{{ store.players[playerIndex].RnD[rf.RnD_SLOTS_IDX] }}-{{ store.players[playerIndex].RnD[rf.RnD_MERGER_IDX] }}-{{ store.players[playerIndex].RnD[rf.RnD_EXPANSION_IDX] }}-{{ store.players[playerIndex].RnD[rf.RnD_HULL_IDX] }}
 							<span v-if="store.useMergerSubsidy || store.useShippingSubsidy">-</span>
 							<span v-if="store.useMergerSubsidy">
 								{{ store.players[playerIndex].RnD[rf.RnD_MERGER_SUBSIDY_IDX] }}
@@ -262,7 +262,7 @@ function getRNDfontSize() {
 							:style="{
 								fontSize: String(getRNDfontSize()) + 'px',
 							}">
-							{{ $t('playerTable.bid') }}: {{ store.players[playerIndex].RnD[rf.RnD_BID_IDX] }}
+							{{ $t('playerTable.bid') }}: ×{{ model.getRndDisplayValue(rf.RnD_BID_IDX, store.players[playerIndex].RnD[rf.RnD_BID_IDX]) }}
 							<br />
 							{{ $t('playerTable.slots') }}: {{ store.players[playerIndex].RnD[rf.RnD_SLOTS_IDX] }}
 							<br />
@@ -608,6 +608,12 @@ function getRNDfontSize() {
 
 .income {
 	color: #28a745;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+.negativeIncome {
+	color: #c0392b;
 	font-size: 12px;
 	font-weight: bold;
 }

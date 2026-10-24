@@ -135,16 +135,23 @@ def create_ind_game(
             starting_options.append(int(request.POST.get("experiencedGame")))
         if "keepMoneyHidden" in request.POST:
             starting_options.append(int(request.POST["keepMoneyHidden"]))
+        if "useAegeanMap" in request.POST and "usePHPmap" in request.POST:
+            messages.error(request, gettext("Choose either the Aegean or the Pilipinas map, not both."))
+            return HttpResponseRedirect(reverse("createINDpage"))
+        if ("useMergerSubsidy" in request.POST or "useShippingSubsidy" in request.POST) and "usePHPmap" not in request.POST:
+            messages.error(request, gettext("The subsidy modules require the Pilipinas map."))
+            return HttpResponseRedirect(reverse("createINDpage"))
         if "useAegeanMap" in request.POST:
             starting_options.append(int(request.POST["useAegeanMap"]))
             stats_exclude = True
         if "usePHPmap" in request.POST:
             starting_options.append(int(request.POST["usePHPmap"]))
             stats_exclude = True
-        if "useMergerSubsidy" in request.POST:
-            starting_options.append(int(request.POST["useMergerSubsidy"]))
-        if "useShippingSubsidy" in request.POST:
-            starting_options.append(int(request.POST["useShippingSubsidy"]))
+            # The subsidy modules only exist in the Pilipinas expansion rules.
+            if "useMergerSubsidy" in request.POST:
+                starting_options.append(int(request.POST["useMergerSubsidy"]))
+            if "useShippingSubsidy" in request.POST:
+                starting_options.append(int(request.POST["useShippingSubsidy"]))
 
         if "trainingGame" in request.POST:
             starting_options.append(int(request.POST["trainingGame"]))

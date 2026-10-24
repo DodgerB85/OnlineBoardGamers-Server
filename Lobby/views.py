@@ -1799,15 +1799,27 @@ def profile(request):
             return redirect("profile")
         elif request.POST["action"] == "updateProfileFavourites":
             profile = Profile.objects.get(user=request.user)
-            profile.preferredRestaurantColour = request.POST["fcmResto"]
+            profile.preferredFCMoptions = json.dumps(
+                [
+                    int(request.POST["fcmResto"]),
+                    1 if "highContrastBoardItems" in request.POST else 0,
+                    1 if "FCMprefersReducedMotion" in request.POST else 0,
+                ],
+                separators=(",", ":"),
+            )
             profile.preferredHCcolour = request.POST["hcColour"]
-            profile.highContrastBoardItems = "highContrastBoardItems" in request.POST
 
             profile.preferredBusColour = request.POST["busColour"]
             profile.preferredBusBoard = request.POST["BusBoard"]
 
-            profile.preferredTGZcolour = request.POST["tgzColour"]
-            profile.TGZminimalText = "TGZminimalText" in request.POST
+            profile.preferredTGZoptions = json.dumps(
+                [
+                    int(request.POST["tgzColour"]),
+                    1 if "TGZminimalText" in request.POST else 0,
+                    1 if "TGZprefersReducedMotion" in request.POST else 0,
+                ],
+                separators=(",", ":"),
+            )
 
             preferredCNScolour = request.POST["cnsColour"] if request.POST["cnsColour"] != "-1" else None
             profile.preferredCNScolour = preferredCNScolour
@@ -1880,13 +1892,23 @@ def profile(request):
         else:
             stop_emails_until = -1
         profile_form = UpdateProfileForm(instance=request.user.profile)
-        favColour = profile.preferredRestaurantColour
-        if favColour == "":
-            favColour = -1
+        preferredFCMoptions = []
+        if profile.preferredFCMoptions:
+            try:
+                preferredFCMoptions = json.loads(profile.preferredFCMoptions)
+            except (TypeError, ValueError):
+                preferredFCMoptions = []
+        if not isinstance(preferredFCMoptions, list):
+            preferredFCMoptions = []
+        preferredFCMoptions = preferredFCMoptions[:3]
+        while len(preferredFCMoptions) < 3:
+            preferredFCMoptions.append([-1, 0, 0][len(preferredFCMoptions)])
+        favColour = preferredFCMoptions[0]
+        highContrastBoardItems = bool(preferredFCMoptions[1])
+        FCMprefersReducedMotion = bool(preferredFCMoptions[2])
         favHLCcolour = profile.preferredHCcolour
         if favHLCcolour == "":
             favHLCcolour = -1
-        highContrastBoardItems = profile.highContrastBoardItems
 
         preferredCNScolour = profile.preferredCNScolour if profile.preferredCNScolour is not None else -1
 
@@ -1895,6 +1917,21 @@ def profile(request):
 
         preferredWEBoptions = json.loads(profile.preferredWEBoptions) if profile.preferredWEBoptions != "" and profile.preferredWEBoptions is not None else [-1]
         favWEBcolour = preferredWEBoptions[0]
+
+        preferredTGZoptions = []
+        if profile.preferredTGZoptions:
+            try:
+                preferredTGZoptions = json.loads(profile.preferredTGZoptions)
+            except (TypeError, ValueError):
+                preferredTGZoptions = []
+        if not isinstance(preferredTGZoptions, list):
+            preferredTGZoptions = []
+        preferredTGZoptions = preferredTGZoptions[:3]
+        while len(preferredTGZoptions) < 3:
+            preferredTGZoptions.append([-1, 0, 0][len(preferredTGZoptions)])
+        favTGZcolour = preferredTGZoptions[0]
+        TGZminimalText = bool(preferredTGZoptions[1])
+        TGZprefersReducedMotion = bool(preferredTGZoptions[2])
 
         sendEmails = profile.sendEmailNotificationOnTurn
 
@@ -1933,17 +1970,19 @@ def profile(request):
                 "favColour": favColour,
                 "favHLCcolour": favHLCcolour,
                 "highContrastBoardItems": highContrastBoardItems,
+                "FCMprefersReducedMotion": FCMprefersReducedMotion,
                 "sendEmails": sendEmails,
                 "liveNotification": liveNotification,
                 "username": request.user.username,
                 "email": request.user.email,
                 "preferredBusColour": profile.preferredBusColour,
                 "preferredBusBoard": profile.preferredBusBoard,
-                "favTGZcolour": profile.preferredTGZcolour,
+                "favTGZcolour": favTGZcolour,
                 "favCNScolour": preferredCNScolour,
                 "favKFWcolour": favKFWcolour,
                 "favWEBcolour": favWEBcolour,
-                "TGZminimalText": profile.TGZminimalText,
+                "TGZminimalText": TGZminimalText,
+                "TGZprefersReducedMotion": TGZprefersReducedMotion,
                 "webhooks": webhooks,
                 "yourTurnEmail": yourTurnEmail,
                 "gameInviteEmail": gameInviteEmail,

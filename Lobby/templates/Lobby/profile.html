@@ -351,6 +351,17 @@
                 </div>
 
                 <div class="form-row">
+                    <label class="form-label">{% translate "FCM Reduced Motion" %}</label>
+                    <div class="field">
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="checkbox" class="myCheckbox" id="FCMprefersReducedMotion" name="FCMprefersReducedMotion"
+                                   value="FCMprefersReducedMotion" {% if FCMprefersReducedMotion %}checked{% endif %} />
+                            {% translate "Reduce animations and motion" %}
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-row">
                     <label class="form-label">{% translate "HLC Colour" %}</label>
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favHLCchoice">
@@ -471,6 +482,17 @@
                             <input type="checkbox" class="myCheckbox" id="TGZminimalText" name="TGZminimalText"
                                    value="TGZminimalText" {% if TGZminimalText %}checked{% endif %} />
                             {% translate "Remove god and specialist descriptions below the cards" %}
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">{% translate "TGZ Animations" %}</label>
+                    <div class="field">
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="checkbox" class="myCheckbox" id="TGZprefersReducedMotion" name="TGZprefersReducedMotion"
+                                   value="TGZprefersReducedMotion" {% if TGZprefersReducedMotion %}checked{% endif %} />
+                            {% translate "Reduce animations and motion" %}
                         </label>
                     </div>
                 </div>

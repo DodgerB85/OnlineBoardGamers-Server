@@ -15,13 +15,20 @@ import { usePersonalStore } from "../stores/INDpersonal.js"
 const personal = usePersonalStore()
 
 // Reactive data for checkbox
-import { ref } from "vue"
+import { ref, watch } from "vue"
 const passIfOutbid = ref(false)
+
+// A new merger must not inherit the previous merger's "pass if outbid" checkbox.
+watch(
+	() => store.ongoingVars.selectedMergerInfo.length,
+	(newLength) => {
+		if (newLength !== 2) passIfOutbid.value = false
+	}
+)
 
 function resetWholePlayerTurn() {
 	store.clearVars()
 	model.resetWholeTurn()
-	controller.startPlayerTurn()
 }
 
 function getPlayerAvailableCashForMergerBidding(playerIndex) {

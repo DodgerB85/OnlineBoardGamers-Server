@@ -463,7 +463,7 @@ const MAX_SHIPPING_MEMO_SIZE = 16
 export function getCheapestMaxPossibleShipmentsFromSlotIDX(cities, activeCompanies, playerCosts, unfavouredPlayerSubsidies, playerSlots, playerIndex, slotIDX, subtractedRoutes, recalculate) {
 	const mapData = useModelStore().mapData
 
-	const memoKey = JSON.stringify([playerIndex, slotIDX, playerCosts, unfavouredPlayerSubsidies, mapData, cities, activeCompanies, playerSlots, subtractedRoutes])
+	const memoKey = JSON.stringify([playerIndex, slotIDX, playerCosts, unfavouredPlayerSubsidies, mapData?.selectedMap, cities, activeCompanies, playerSlots, subtractedRoutes])
 	if (!recalculate) {
 		const memoHit = maxShippingMemo.get(memoKey)
 		if (memoHit !== undefined) {
