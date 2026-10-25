@@ -54,9 +54,9 @@ export async function saveGame(saveRewind) {
 		status: "ACTIVE", // USED - only if FINISHED
 		gameID: personal.gameID, // USED
 		saveRewind: saveRewind,
+		nextPlayer: [], // USED > goes to currentPlayers
 	}
 	if (store.gameflow.turnOrder.length > 0) postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name]
-	// USED > goes to currentPlayers
 	else if (store.gameflow.gameEnded === 0) {
 		alert(i18n.global.t("io.zeroToLength"))
 		store.gameflow.turnOrder.push(0)

@@ -9,6 +9,7 @@ import RNB.RNBconstants as rfRNB
 from Lobby.sharedFunctions.sharedRefs import (
     SR_gamePaceString,
     SR_getFCMstartingOptionsHTML,
+    SR_getKFWstartingOptionsHTML,
     SR_getPointsForPosition,
     SR_getRNBstartingOptionsHTML,
     SR_getTimeNow,
@@ -92,6 +93,13 @@ class TestSRgetRNBstartingOptionsHTML(TestCase):
 
     def test_unknown_option_is_ignored(self):
         self.assertEqual(SR_getRNBstartingOptionsHTML([999]), "")
+
+
+class TestSRgetKFWstartingOptionsHTML(TestCase):
+    def test_farmers_option_renders_icon(self):
+        result = SR_getKFWstartingOptionsHTML([3])
+        self.assertIn("so_farmers.svg", result)
+        self.assertIn("Use Farmers Expansion", result)
 
 
 class TestSRgetTournamentTypeDisplay(TestCase):
