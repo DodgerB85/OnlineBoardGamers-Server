@@ -585,7 +585,8 @@ fieldset.plain { border: 0; padding: 0; }fieldset { border: 1px solid #c4b894; b
 .harvestChoice .paymentRow { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: start; }.harvestChoice .paymentRow b { margin-left: 0; }
 .harvestChoice .paymentRow small { display: block; margin-top: 2px; font-size: 16px; font-weight: 400; color: #655a42; }.harvestChoice .paymentRow b { flex-shrink: 0; white-space: nowrap; }
 .harvestControls, .routingControls, .developmentControls, .tradeControls { align-items: stretch; }.harvestControls button, .routingControls button, .developmentControls button, .tradeControls button { flex: 1; min-width: 0; margin: 0; }.harvestControls small, .tradeControls small { display: block; margin-top: 3px; font-size: 16px; font-weight: 400; }
-.maintenanceControls, .tradeControls, .consentControls, .harvestControls, .routingControls, .developmentControls { position: sticky; bottom: -12px; z-index: 1; background: #fff9e9; padding: 7px 0 12px; border-top: 1px solid #c4b894; }
+/* No sticky bottom: a pinned bar makes the panel above it slide behind, which reads as an inner scroll. */
+.maintenanceControls, .tradeControls, .consentControls, .harvestControls, .routingControls, .developmentControls { background: #fff9e9; padding: 7px 0 12px; border-top: 1px solid #c4b894; }
 .developmentControls > small { flex-basis: 100%; font-size: 16px; font-weight: 400; color: #655a42; }
 .routingControls small { font-size: 16px; font-weight: 400; font-weight: normal; }
 .digAction { max-width: 100%; box-sizing: border-box; }.digAction small { display: block; margin-top: 3px; font-size: 16px; font-weight: 400; font-weight: normal; }

@@ -31,7 +31,7 @@ function resetAll() {
 </template>
 
 <style scoped>
-.turnControls { position: sticky; bottom: 0; background: #fff9e9; padding: 10px 0 0; border-top: 1px solid #aa9b77; text-align: left; font-size: 16px; font-weight: 400; z-index: 2; }p { margin: 4px 0 8px; }.draftNotice { color: #655a42; } .turnControls > div { display: flex; flex-wrap: wrap; gap: 5px; }ol { padding-left: 20px; }.error { color: #a40000; }
+.turnControls { background: #fff9e9; padding: 10px 0 0; border-top: 1px solid #aa9b77; text-align: left; font-size: 16px; font-weight: 400; z-index: 2; }p { margin: 4px 0 8px; }.draftNotice { color: #655a42; } .turnControls > div { display: flex; flex-wrap: wrap; gap: 5px; }ol { padding-left: 20px; }.error { color: #a40000; }
 .agreementResponse { border-top: 0; padding-top: 0; }
 .nationConfirmation { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .nationConfirmation > p[role=status] { flex: 1 1 280px; margin: 0; }
