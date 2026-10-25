@@ -7,6 +7,7 @@ import time
 from collections import defaultdict
 
 
+# MG's weighted objective only; standard draws compare rematches before speed.
 # Three 40-player cohorts from Result_availability.csv: 72 reduced historical repeat-pairs
 # from 18 to 5 while keeping the mean slowest-table score within 3% of the speed-only search.
 REMATCH_PENALTY = 72.0
@@ -105,15 +106,19 @@ def _stable_seed(seed):
     return sum((index + 1) * byte for index, byte in enumerate(str(seed).encode("utf-8")))
 
 
-def _anneal(initial_state, make_groups, profiles, matchup_counts, seed, swap_slots):
+def _anneal(initial_state, make_groups, profiles, matchup_counts, seed, swap_slots, score_groups=None):
+    if score_groups is None:
+        def score_groups(groups, cache):
+            return (_schedule_score(groups, profiles, matchup_counts, cache),)
+
     rng = random.Random(_stable_seed(seed))
     current = initial_state[:]
     best = current[:]
     duration_cache = {}
     started = time.monotonic()
-    current_score = _schedule_score(make_groups(current), profiles, matchup_counts, duration_cache)
+    current_score = score_groups(make_groups(current), duration_cache)
     best_score = current_score
-    initial_temperature = max(1.0, current_score * 0.08)
+    initial_temperatures = tuple(max(1.0, value * 0.08) for value in current_score)
     cycle_step = 0
 
     while time.monotonic() - started < ANNEALING_TIME_LIMIT_SECONDS:
@@ -121,16 +126,18 @@ def _anneal(initial_state, make_groups, profiles, matchup_counts, seed, swap_slo
         if cycle_step == ANNEALING_CYCLE_STEPS:
             current = best[:]
             current_score = best_score
-            initial_temperature = max(1.0, current_score * 0.08)
+            initial_temperatures = tuple(max(1.0, value * 0.08) for value in current_score)
             cycle_step = 0
 
         candidate = current[:]
         first_slot, second_slot = swap_slots(rng, candidate)
         candidate[first_slot], candidate[second_slot] = candidate[second_slot], candidate[first_slot]
-        candidate_score = _schedule_score(make_groups(candidate), profiles, matchup_counts, duration_cache)
-        temperature = initial_temperature * (1 - cycle_step / ANNEALING_CYCLE_STEPS) ** 2
+        candidate_score = score_groups(make_groups(candidate), duration_cache)
+        # Compare priorities in order; speed cannot compensate for an extra rematch.
+        score_index = next((index for index, value in enumerate(candidate_score) if value != current_score[index]), len(current_score) - 1)
+        temperature = initial_temperatures[score_index] * (1 - cycle_step / ANNEALING_CYCLE_STEPS) ** 2
 
-        if candidate_score < current_score or (temperature > 0 and rng.random() < math.exp((current_score - candidate_score) / temperature)):
+        if candidate_score < current_score or (temperature > 0 and rng.random() < math.exp((current_score[score_index] - candidate_score[score_index]) / temperature)):
             current = candidate
             current_score = candidate_score
         if candidate_score < best_score:
@@ -141,13 +148,13 @@ def _anneal(initial_state, make_groups, profiles, matchup_counts, seed, swap_slo
     return best
 
 
-def optimize_disjoint_groups(groups, profiles, matchup_counts, seed):
-    """Swap players between standard tournament games while retaining game sizes."""
+def optimize_disjoint_groups(groups, profiles, matchup_counts, seed, player_points):
+    """Keep score bands fixed, then minimize rematches, then the slowest table."""
     if len(groups) < 2:
         return groups
 
     group_sizes = [len(group) for group in groups]
-    state = [player for group in groups for player in group]
+    state = sorted((player for group in groups for player in group), key=player_points.__getitem__, reverse=True)
 
     def make_groups(players):
         result = []
@@ -157,13 +164,23 @@ def optimize_disjoint_groups(groups, profiles, matchup_counts, seed):
             offset += size
         return result
 
-    def choose_slots(rng, players):
-        first_group, second_group = rng.sample(range(len(groups)), 2)
-        first_slot = sum(group_sizes[:first_group]) + rng.randrange(group_sizes[first_group])
-        second_slot = sum(group_sizes[:second_group]) + rng.randrange(group_sizes[second_group])
-        return first_slot, second_slot
+    slot_groups = [index for index, size in enumerate(group_sizes) for slot in range(size)]
+    swap_pairs = [
+        (first, second)
+        for first, second in itertools.combinations(range(len(state)), 2)
+        if slot_groups[first] != slot_groups[second] and player_points[state[first]] == player_points[state[second]]
+    ]
+    if not swap_pairs:
+        return make_groups(state)
 
-    optimized = _anneal(state, make_groups, profiles, matchup_counts, seed, choose_slots)
+    def choose_slots(rng, players):
+        return rng.choice(swap_pairs)
+
+    def score_groups(tables, cache):
+        rematches = sum(matchup_counts.get(frozenset(pair), 0) for table in tables for pair in itertools.combinations(table, 2))
+        return rematches, _schedule_score(tables, profiles, {}, cache)
+
+    optimized = _anneal(state, make_groups, profiles, matchup_counts, seed, choose_slots, score_groups)
     return make_groups(optimized)
 
 

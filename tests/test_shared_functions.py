@@ -338,6 +338,23 @@ class TestTournamentSharedFunctions(PrintSuccessTestCase):
         self.assertEqual(len(result["gamesPlayers"][0]), 4)
         self.assertFalse(set(result["byePlayers"]).intersection(result["gamesPlayers"][0]))
 
+    def test_second_round_preserves_points_before_avoiding_rematches(self):
+        users = self._create_users(8)
+        points = {user.username: int(index < 4) for index, user in enumerate(users)}
+        for tournament_type in ("PT", "RR", "TL"):
+            with self.subTest(tournament_type=tournament_type):
+                tournament = self._create_tournament(users, tournament_type=tournament_type, game_code="IND", category="Main")
+                tournament.tournamentPointsData = json.dumps(list(points.items()))
+                tournament.tournamentSideData = json.dumps([[user.username, 2] for user in users])
+                tournament.tournamentProgressionData = json.dumps([
+                    [[[user.username for user in group], 0, [], "Round 1"] for group in (users[:4], users[4:])]
+                ])
+
+                result = SF_createNextRoundGamesSetup(tournament)
+
+                self.assertEqual(result["byePlayers"], [])
+                self.assertEqual([[points[player] for player in game] for game in result["gamesPlayers"]], [[1] * 4, [0] * 4])
+
     def test_create_next_round_mg_first_round_preserves_four_appearances(self):
         users = self._create_users(20)
         tournament = self._create_tournament(users, tournament_type="MG", category="Main")

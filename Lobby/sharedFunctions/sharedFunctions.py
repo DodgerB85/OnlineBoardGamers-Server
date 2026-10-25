@@ -875,9 +875,11 @@ def SF_createNextRoundGamesSetup(tournamentObj):
     # Get players sorted by points (weakest first) for RR, PT, or TL
     # This first call ist just for KO - it gets overwritten later for RR / TL / PT
     allPlayersList = list(tournamentObj.nextRoundPlayers.all().order_by("?").values_list("username", flat=True))
+    playerPoints = dict.fromkeys(allPlayersList, 0)
 
     if tournamentType in ["RR", "PT", "TL"] and len(TPDA) < tournamentObj.roundsBeforeKnockout:
         pointsList = json.loads(tournamentObj.tournamentPointsData)
+        playerPoints.update((row[0], row[1]) for row in pointsList)
         # Being lowest points to front, in case a bye is needed
         pointsList.sort(key=lambda x: x[1])
         allPlayersList = [row[0] for row in pointsList if row[0] in allPlayersList]
@@ -1016,6 +1018,7 @@ def SF_createNextRoundGamesSetup(tournamentObj):
             profiles,
             matchupCounts,
             roundSeed,
+            playerPoints,
         )
 
     ret["roundNumberString"] = roundNumberString
