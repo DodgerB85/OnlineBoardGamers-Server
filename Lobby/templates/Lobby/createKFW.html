@@ -195,6 +195,12 @@
                             <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useMerchants" name="useMerchants" value="1">
                             <div><div>{% translate "Use Merchants Expansion" %}</div></div>
                         </label>
+                        {% if user.username == "admin" or user.username == "DodgerB" %}
+                        <label class="check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useFarmers" name="useFarmers" value="3">
+                            <div><div>{% translate "Use Farmers Expansion" %}</div></div>
+                        </label>
+                        {% endif %}
                         <label class="check-label">
                             <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useAllPromos" name="useAllPromos" value="2">
                             <div><div>{% translate "Use Promo Tiles" %}</div></div>

@@ -216,6 +216,7 @@ export function exportPlayerVIllageMoveData(playerIndex) {
 			newEntry.push(tile.extension)
 			if (i === 0) newEntry.push(tile.cabins)
 		}
+		if (store.useFarmersExpansion) newEntry.push(JSON.parse(JSON.stringify(tile.animals || [])))
 		res.push(newEntry)
 	}
 	return res
@@ -237,10 +238,17 @@ export function importPlayerVIllageMoveData(playerIndex, moveDataCompressed) {
 		tile.coord = [...moveData[i][5]]
 		tile.cabins = 0
 		tile.extension = rf.EXTENSION_NONE
+		let nextImportIdx = 6
 		if (store.useMerchantsExpansion) {
-			tile.extension = moveData[i][6]
-			if (i === 0) tile.cabins = moveData[i][7]
+			tile.extension = moveData[i][nextImportIdx]
+			nextImportIdx++
+			if (i === 0) {
+				tile.cabins = moveData[i][nextImportIdx]
+				nextImportIdx++
+			}
 		}
+		tile.animals = []
+		if (store.useFarmersExpansion && moveData[i].length > nextImportIdx) tile.animals = JSON.parse(JSON.stringify(moveData[i][nextImportIdx]))
 		store.players[playerIndex].villageTiles.push(tile)
 	}
 	map.calculateCanvasSizeForPlayerVillage(playerIndex, false)
@@ -341,6 +349,9 @@ export function importContractsForFinalScoring(playerIndex, inputData) {
 export function exportPlayerFinalScoringMoveData(playerIndex) {
 	const store = useModelStore()
 
+	// Make sure the submitted score includes the final tile/animal/manual scoring values
+	model.calculateTotalFinalScore(playerIndex)
+
 	let res = []
 	let villageData = village.exportVillageEndGame(playerIndex)
 
@@ -348,6 +359,11 @@ export function exportPlayerFinalScoringMoveData(playerIndex) {
 
 	if (store.useMerchantsExpansion) res = [villageData, store.players[playerIndex].finalScore, contractData]
 	else res = [villageData, store.players[playerIndex].finalScore]
+
+	if (store.useFarmersExpansion) {
+		let p = store.players[playerIndex]
+		res.push([p.wheat || 0, p.animalScore || 0, p.bakeryScore || 0, p.granaryScore || 0, p.purpleAnimalScore || 0])
+	}
 
 	return res
 }
@@ -357,10 +373,25 @@ export function importPlayerFinalScoringMoveData(playerIndex, moveData) {
 	let playeObj = store.players[playerIndex]
 	village.importVillageEndGame(playerIndex, moveData[0])
 	playeObj.finalScore = moveData[1]
+	// Farmers Bakery scoring needs the player's hidden skill tiles; on a page reload those
+	// arrive in gameData1 after this move is applied, so load them before rescoring.
+	if (store.useFarmersExpansion && window.initData.gameData1 && window.initData.gameData3) importCompressedGameData13(window.initData.gameData1, window.initData.gameData3)
 	if (store.useMerchantsExpansion) importContractsForFinalScoring(playerIndex, moveData[2])
+	if (store.useFarmersExpansion) {
+		let farmersData = moveData[store.useMerchantsExpansion ? 3 : 2]
+		if (farmersData) {
+			playeObj.wheat = farmersData[0] || 0
+			playeObj.animalScore = farmersData[1] || 0
+			playeObj.bakeryScore = farmersData[2] || 0
+			playeObj.granaryScore = farmersData[3] || 0
+			playeObj.purpleAnimalScore = farmersData[4] || 0
+		}
+	}
 
 	// Recomputes auto tiles AND manual-action tiles (Sea Bastion / Delivery Man) from the restored scoredRoute
 	model.calculateTotalFinalScore(playerIndex)
+	// Newer moves already contain the authoritative score; keep it if the recomputation could not see hidden items.
+	if (moveData[1] > 0) playeObj.finalScore = moveData[1]
 	store.context.action = rf.ACT_CHOOSE_SCORING_AREAS
 }
 
@@ -412,6 +443,10 @@ export function simpleExportWholeKFWmodel() {
 
 	// 14 - context
 	temp.push(JSON.parse(JSON.stringify(store.context)))
+
+	// 15/16 - Farmers supplies
+	temp.push(store.availableWheat)
+	temp.push(JSON.parse(JSON.stringify(store.availableAnimals)))
 
 	let step1 = JSON.stringify(temp)
 	// eslint-disable-next-line no-undef
@@ -507,6 +542,13 @@ export async function simpleImportWholeKFWmodel(input, importContext) {
 
 	// 14 - context
 	if (importContext) Object.assign(store.context, inputModel[14])
+
+	// 15/16 - Farmers supplies
+	if (inputModel.length > 15) store.availableWheat = inputModel[15]
+	if (inputModel.length > 16) {
+		store.availableAnimals.splice(0, store.availableAnimals.length)
+		Object.assign(store.availableAnimals, inputModel[16])
+	}
 }
 
 export function exportKFWmodel(includeContext = false) {
@@ -564,6 +606,8 @@ export function exportKFWmodel(includeContext = false) {
 			}
 			tempPlayer.push(JSON.parse(JSON.stringify(hiddenContractsArr)))
 		}
+		// 10 - farmers wheat
+		if (store.useFarmersExpansion) tempPlayer.push(store.players[i].wheat || 0)
 		//}
 		tempPlayers.push(tempPlayer)
 	}
@@ -642,6 +686,10 @@ export function exportKFWmodel(includeContext = false) {
 
 	// 12 - context?
 	if (includeContext) temp.push(JSON.parse(JSON.stringify(store.context)))
+
+	// 13/14 - Farmers supplies (after context so old saves still line up)
+	temp.push(store.availableWheat)
+	temp.push(JSON.parse(JSON.stringify(store.availableAnimals)))
 
 	for (let i = 0; i < temp.length; i++) {
 		//console.log(i)
@@ -727,6 +775,12 @@ export async function importKFWmodel(input, includeContext) {
 				hiddenContracts.push(contract)
 				hiddenContracts[hiddenContracts.length - 1].visible = inputModel[1][i][IMPORT_IDX][j][1]
 			}
+			IMPORT_IDX++
+		}
+		let wheat = 0
+		if (store.useFarmersExpansion) {
+			wheat = inputModel[1][i][IMPORT_IDX] || 0
+			IMPORT_IDX++
 		}
 		store.players.push({
 			name: name,
@@ -749,6 +803,11 @@ export async function importKFWmodel(input, includeContext) {
 			manualScoreScore: 0,
 			contractScore: 0,
 			goldScore: 0,
+			animalScore: 0,
+			bakeryScore: 0,
+			granaryScore: 0,
+			purpleAnimalScore: 0,
+			wheat: wheat,
 			passFlag: passFlag,
 
 			// Tracking Data
@@ -865,6 +924,14 @@ export async function importKFWmodel(input, includeContext) {
 		Object.assign(store.context, inputModel[12])
 	}
 
+	// Farmers supplies
+	let supplyImportIdx = includeContext ? 13 : 12
+	if (inputModel.length > supplyImportIdx) store.availableWheat = inputModel[supplyImportIdx]
+	if (inputModel.length > supplyImportIdx + 1) {
+		store.availableAnimals.splice(0, store.availableAnimals.length)
+		Object.assign(store.availableAnimals, inputModel[supplyImportIdx + 1])
+	}
+
 	importCompressedGameData13(window.initData.gameData1, window.initData.gameData3)
 }
 
@@ -898,6 +965,11 @@ export function exportKFWmodelForGameOver() {
 			let hiddenContractsArr = exportContractsForFinalScoring(i)
 			tempPlayer.push(JSON.parse(JSON.stringify(hiddenContractsArr)))
 		}
+		// 6? - Farmers wheat
+		if (store.useFarmersExpansion) {
+			tempPlayer.push(store.players[i].wheat || 0)
+			tempPlayer.push(store.players[i].hasPurpleMeeple ? 1 : 0)
+		}
 		tempPlayers.push(tempPlayer)
 	}
 	temp.push(JSON.parse(JSON.stringify(tempPlayers)))
@@ -923,6 +995,12 @@ export function exportKFWmodelForGameOver() {
 		contractData.push(store.hiddenContracts.length)
 		contractData = contractData.concat(store.visibleContracts)
 		temp.push(JSON.parse(JSON.stringify(contractData)))
+	}
+
+	// 7/8 Farmers supplies
+	if (store.useFarmersExpansion) {
+		temp.push(store.availableWheat)
+		temp.push(JSON.parse(JSON.stringify(store.availableAnimals)))
 	}
 
 	for (let i = 0; i < temp.length; i++) {
@@ -986,6 +1064,11 @@ export function importKFWmodelForGameOver(input) {
 			manualScoreScore: 0,
 			contractScore: 0,
 			goldScore: 0,
+			animalScore: 0,
+			bakeryScore: 0,
+			granaryScore: 0,
+			purpleAnimalScore: 0,
+			wheat: 0,
 			passFlag: 1,
 
 			// Tracking Data
@@ -1000,8 +1083,14 @@ export function importKFWmodelForGameOver(input) {
 		village.importVillageEndGame(i, inputModel[0][i][2]) //2
 		store.players[i].hiddenMeeples = [...inputModel[0][i][3]]
 		store.players[i].hiddenSkillTiles = [...inputModel[0][i][4]]
+		let gameOverImportIdx = 5
 		if (store.useMerchantsExpansion) {
-			importContractsForFinalScoring(i, inputModel[0][i][5])
+			importContractsForFinalScoring(i, inputModel[0][i][gameOverImportIdx])
+			gameOverImportIdx++
+		}
+		if (store.useFarmersExpansion) {
+			store.players[i].wheat = inputModel[0][i][gameOverImportIdx] || 0
+			if (inputModel[0][i].length > gameOverImportIdx + 1) store.players[i].hasPurpleMeeple = inputModel[0][i][gameOverImportIdx + 1] === 1
 		}
 
 		map.calculateCanvasSizeForPlayerVillage(i, false)
@@ -1033,6 +1122,14 @@ export function importKFWmodelForGameOver(input) {
 		for (let i = 0; i < numHidden; i++) store.hiddenContracts.push(0)
 		store.visibleContracts.splice(0)
 		Object.assign(store.visibleContracts, inputModel[6])
+	}
+
+	// Farmers supplies
+	let gameOverSupplyIdx = store.useMerchantsExpansion ? 7 : 6
+	if (store.useFarmersExpansion && inputModel.length > gameOverSupplyIdx) {
+		store.availableWheat = inputModel[gameOverSupplyIdx]
+		store.availableAnimals.splice(0, store.availableAnimals.length)
+		Object.assign(store.availableAnimals, inputModel[gameOverSupplyIdx + 1])
 	}
 
 	// Recreate gameflow

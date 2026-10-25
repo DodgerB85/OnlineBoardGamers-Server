@@ -63,8 +63,13 @@ export const useModelStore = defineStore("store", () => {
 	const availableSkillsCount = ref(48)
 	// game flags
 	const useMerchantsExpansion = ref(false)
+	const useFarmersExpansion = ref(false)
 	const promoTileIDsToInclude = reactive([])
 	const hiddenInformationKnowledge = ref(5) // default to 9, max hidden
+
+	// Farmers expansion supplies
+	const availableWheat = ref(30)
+	const availableAnimals = reactive([32, 24, 12])
 
 	const gameflow = reactive({
 		turn: 0,
@@ -147,6 +152,10 @@ export const useModelStore = defineStore("store", () => {
 		boat4bEligible: false,
 		finalPositions: [], // Only set at game over - never need to reset
 		hideContractFromBoatCollection: false,
+		// Farmers
+		animalMoveSource: null,
+		animalMoveDestinations: [],
+		animalMoveType: -1,
 
 		// itemsRequired
 		itemsRequired: {
@@ -218,6 +227,9 @@ export const useModelStore = defineStore("store", () => {
 		context.meepleActionFound = false
 		context.boat4bEligible = false
 		context.hideContractFromBoatCollection = false
+		context.animalMoveSource = null
+		context.animalMoveDestinations.splice(0)
+		context.animalMoveType = -1
 
 		// itemsRequired
 		context.itemsRequired.meeplesReq.splice(0)
@@ -385,7 +397,10 @@ export const useModelStore = defineStore("store", () => {
 		//currentPlayer,
 		//decompressChatData,
 		useMerchantsExpansion,
+		useFarmersExpansion,
 		promoTileIDsToInclude,
+		availableWheat,
+		availableAnimals,
 
 		refSize,
 

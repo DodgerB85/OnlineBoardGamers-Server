@@ -194,6 +194,20 @@ function clickedExtensionsButton() {
 				<div class="resNumberDiv" :class="resAmount === 0 ? 'noMoreResNumer' : ''">{{ resAmount }}</div>
 			</div>
 		</template>
+		<template v-if="store.useFarmersExpansion">
+			<div class="resImgAndNumberDiv">
+				<div class="resImgDiv">
+					<img class="resImg" :src="view.getImage('wheat')" alt="Wheat" />
+				</div>
+				<div class="resNumberDiv" :class="store.availableWheat === 0 ? 'noMoreResNumer' : ''">{{ store.availableWheat }}</div>
+			</div>
+			<div v-for="(amount, idx) in store.availableAnimals" :key="'animal' + idx" class="resImgAndNumberDiv">
+				<div class="resImgDiv">
+					<img class="resImg" :src="view.getImage('animal_' + idx)" alt="Animal" />
+				</div>
+				<div class="resNumberDiv" :class="amount === 0 ? 'noMoreResNumer' : ''">{{ amount }}</div>
+			</div>
+		</template>
 		<!-- Cabins NOT NEEDED AS 6 IN GAME AND MAX 6 USED -->
 		<!--<div class="supplyDiv">
 			<div class="itemAndNumberDiv">

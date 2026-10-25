@@ -78,6 +78,7 @@ let options = window.initData.preferredKFWoptions
 personal.preferredColour = options[0]
 if (window.initData.startingOptions.includes(1)) store.useMerchantsExpansion = true
 if (window.initData.startingOptions.includes(2)) store.promoTileIDsToInclude = [...rf.ALL_PROMO_TILE_SIDE_A_SEASON_IDs]
+if (window.initData.startingOptions.includes(3)) store.useFarmersExpansion = true
 // 5 is low amounts of info
 // NB THIS IS CONVERTED TO PURE 9-5 NUMBERS
 if (window.initData.startingOptions.includes(7)) store.hiddenInformationKnowledge = 5

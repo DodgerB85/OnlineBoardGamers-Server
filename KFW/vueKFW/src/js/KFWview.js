@@ -197,6 +197,11 @@ export function getImage(image) {
 	else if (image === "res_1") return new URL(`@static/KFW/images/res_stone.png`, import.meta.url).href
 	else if (image === "res_2") return new URL(`@static/KFW/images/res_iron.png`, import.meta.url).href
 	else if (image === "res_3") return new URL(`@static/KFW/images/res_gold.png`, import.meta.url).href
+	// Farmers
+	else if (image === "wheat") return new URL(`@static/KFW/images/wheat.png`, import.meta.url).href
+	else if (image === "animal_0") return new URL(`@static/KFW/images/animal_sheep.png`, import.meta.url).href
+	else if (image === "animal_1") return new URL(`@static/KFW/images/animal_pig.png`, import.meta.url).href
+	else if (image === "animal_2") return new URL(`@static/KFW/images/animal_cow.png`, import.meta.url).href
 	// contracts
 	else if (image === "c_m_00") return new URL(`@static/KFW/images/contracts/c_m_00.jpg`, import.meta.url).href
 	else if (image === "c_m_01") return new URL(`@static/KFW/images/contracts/c_m_01.jpg`, import.meta.url).href
@@ -411,6 +416,28 @@ export function getImage(image) {
 	else if (image === "t_p_winter_5.jpg") return new URL(`@static/KFW/images/tiles/t_p_winter_5.jpg`, import.meta.url).href
 	else if (image === "t_p_winter_6.jpg") return new URL(`@static/KFW/images/tiles/t_p_winter_6.jpg`, import.meta.url).href
 	else if (image === "t_p_winter_7.jpg") return new URL(`@static/KFW/images/tiles/t_p_winter_7.jpg`, import.meta.url).href
+	/******************************FARMERS TILES  */
+	else if (image === "t_f_turnorder_1.jpg") return new URL(`@static/KFW/images/tiles/t_f_turnorder_1.jpg`, import.meta.url).href
+	else if (image === "t_f_turnorder_2.jpg") return new URL(`@static/KFW/images/tiles/t_f_turnorder_2.jpg`, import.meta.url).href
+	else if (image === "t_f_turnorder_3.jpg") return new URL(`@static/KFW/images/tiles/t_f_turnorder_3.jpg`, import.meta.url).href
+	else if (image === "t_f_spring_farmyard.jpg") return new URL(`@static/KFW/images/tiles/t_f_spring_farmyard.jpg`, import.meta.url).href
+	else if (image === "t_f_spring_paddock.jpg") return new URL(`@static/KFW/images/tiles/t_f_spring_paddock.jpg`, import.meta.url).href
+	else if (image === "t_f_spring_sheepfold.jpg") return new URL(`@static/KFW/images/tiles/t_f_spring_sheepfold.jpg`, import.meta.url).href
+	else if (image === "t_f_spring_wheatfield.jpg") return new URL(`@static/KFW/images/tiles/t_f_spring_wheatfield.jpg`, import.meta.url).href
+	else if (image === "t_f_summer_boat5.jpg") return new URL(`@static/KFW/images/tiles/t_f_summer_boat5.jpg`, import.meta.url).href
+	else if (image === "t_f_summer_boat6.jpg") return new URL(`@static/KFW/images/tiles/t_f_summer_boat6.jpg`, import.meta.url).href
+	else if (image === "t_f_summer_shepherdshut.jpg") return new URL(`@static/KFW/images/tiles/t_f_summer_shepherdshut.jpg`, import.meta.url).href
+	else if (image === "t_f_summer_pigsty.jpg") return new URL(`@static/KFW/images/tiles/t_f_summer_pigsty.jpg`, import.meta.url).href
+	else if (image === "t_f_autumn_cowshed.jpg") return new URL(`@static/KFW/images/tiles/t_f_autumn_cowshed.jpg`, import.meta.url).href
+	else if (image === "t_f_autumn_piggery.jpg") return new URL(`@static/KFW/images/tiles/t_f_autumn_piggery.jpg`, import.meta.url).href
+	else if (image === "t_f_autumn_ranch.jpg") return new URL(`@static/KFW/images/tiles/t_f_autumn_ranch.jpg`, import.meta.url).href
+	else if (image === "t_f_autumn_sheepshelter.jpg") return new URL(`@static/KFW/images/tiles/t_f_autumn_sheepshelter.jpg`, import.meta.url).href
+	else if (image === "t_f_winter_bakery.jpg") return new URL(`@static/KFW/images/tiles/t_f_winter_bakery.jpg`, import.meta.url).href
+	else if (image === "t_f_winter_dairy.jpg") return new URL(`@static/KFW/images/tiles/t_f_winter_dairy.jpg`, import.meta.url).href
+	else if (image === "t_f_winter_granary.jpg") return new URL(`@static/KFW/images/tiles/t_f_winter_granary.jpg`, import.meta.url).href
+	else if (image === "t_f_winter_hillside.jpg") return new URL(`@static/KFW/images/tiles/t_f_winter_hillside.jpg`, import.meta.url).href
+	else if (image === "t_f_winter_truffleorchard.jpg") return new URL(`@static/KFW/images/tiles/t_f_winter_truffleorchard.jpg`, import.meta.url).href
+	else if (image === "t_f_winter_weaver.jpg") return new URL(`@static/KFW/images/tiles/t_f_winter_weaver.jpg`, import.meta.url).href
 	/******************************MERCHANTS TILES  */
 	// Spring
 	else if (image === "t_m_spring_1a.jpg") return new URL(`@static/KFW/images/tiles/t_m_spring_1a.jpg`, import.meta.url).href

@@ -30,6 +30,8 @@ export function getInitialWinterTileOptions() {
 		// If using Merchants expansion, then add in the Merchants tiles
 		else if (store.useMerchantsExpansion && tile.tileset === rf.TILESET_MERCHANTS && tile.season === rf.WINTER) {
 			winterTileOptions.push(tile)
+		} else if (store.useFarmersExpansion && tile.tileset === rf.TILESET_FARMERS && tile.season === rf.WINTER) {
+			winterTileOptions.push(tile)
 		} else if (tile.tileset === rf.TILESET_PROMO && tile.season === rf.WINTER && store.promoTileIDsToInclude.includes(tile.tileID[0])) {
 			// Add in the promo tiles
 			winterTileOptions.push(tile)
@@ -157,6 +159,7 @@ export function setupSeasonTiles(season) {
 	let possibleSeasonTiles = []
 	let baseSeasonTiles = JSON.parse(JSON.stringify(rf.ALL_TILES.filter((tile) => tile.tileset === rf.TILESET_BASE && tile.season === season)))
 	let merchantSeasonTiles = JSON.parse(JSON.stringify(rf.ALL_TILES.filter((tile) => tile.tileset === rf.TILESET_MERCHANTS && tile.season === season)))
+	let farmersSeasonTiles = JSON.parse(JSON.stringify(rf.ALL_TILES.filter((tile) => tile.tileset === rf.TILESET_FARMERS && tile.season === season)))
 	let promoSeasonTiles = JSON.parse(JSON.stringify(rf.ALL_TILES.filter((tile) => tile.tileset === rf.TILESET_PROMO && tile.season === season && store.promoTileIDsToInclude.includes(tile.tileID[0]))))
 
 	possibleSeasonTiles = baseSeasonTiles
@@ -164,6 +167,8 @@ export function setupSeasonTiles(season) {
 	if (store.promoTileIDsToInclude.length > 0) possibleSeasonTiles = possibleSeasonTiles.concat(promoSeasonTiles)
 
 	possibleSeasonTiles = funcs.shuffle(possibleSeasonTiles)
+	// The Farmers variant puts all four expansion tiles in each season.
+	if (store.useFarmersExpansion) possibleSeasonTiles = farmersSeasonTiles.concat(possibleSeasonTiles)
 
 	//Use spring tiles according to player count. Start with min 6 tiles
 	store.availableTiles.splice(0)
@@ -235,10 +240,10 @@ export function getRewindHiddenDataResult(returnFlag) {
 
 	const ENTRIES_TO_IGNORE = [rf.HIST_NEW_GAME, rf.HIST_RESIGN, rf.HIST_KICKOUT, rf.HIST_REWIND]
 	//const NO_HIDDEN_INFO = [rf.HIST_BID_ON_TILE, rf.HIST_PASS_TURN, rf.HIST_COLLECT_VILLAGE_MEEPLES, rf.HIST_COLLECT_OUTBID_MEEPLES, rf.HIST_COLLECT_SEASON_TILES, rf.HIST_VILLAGE_EXPANSION, rf.HIST_EXCHANGE_CONTRACT_AUTO, rf.HIST_REPLACE_SEA_BASTION_2, rf.HIST_COLLECT_BOAT_TILE, rf.HIST_FREE_UPGRADE, rf.HIST_FREE_EXTENSION, rf.HIST_KEYSIDE_BOAT_INCOME]
-	const ALWAYS_HIDDEN_INFO = [rf.HIST_FILL_BOAT_TILES, rf.HIST_SEASON_TILES, rf.HIST_COLLECT_BOAT1A_RANDOM_MEEPLES, rf.HIST_NEW_CONTRACTS, rf.HIST_CHOSEN_WINTER_TILES]
+	const ALWAYS_HIDDEN_INFO = [rf.HIST_FILL_BOAT_TILES, rf.HIST_SEASON_TILES, rf.HIST_COLLECT_BOAT1A_RANDOM_MEEPLES, rf.HIST_NEW_CONTRACTS, rf.HIST_CHOSEN_WINTER_TILES, rf.HIST_GET_FARM_ITEMS]
 	const SOMETIMES_HIDDEN_INFO = [rf.HIST_ACT_ON_TILE, rf.HIST_COLLECT_BOAT_RESOURCES]
 
-	const ENTRIES_WITHOUT_STOP_POINT = [rf.HIST_FILL_BOAT_TILES, rf.HIST_COLLECT_VILLAGE_MEEPLES, rf.HIST_COLLECT_OUTBID_MEEPLES, rf.HIST_COLLECT_SEASON_TILES, rf.HIST_SEASON_TILES, rf.HIST_COLLECT_BOAT1A_RANDOM_MEEPLES, rf.HIST_EXCHANGE_CONTRACT_AUTO, rf.HIST_NEW_CONTRACTS, rf.HIST_REPLACE_SEA_BASTION_2, rf.HIST_FREE_UPGRADE, rf.HIST_FREE_EXTENSION, rf.HIST_KEYSIDE_BOAT_INCOME]
+	const ENTRIES_WITHOUT_STOP_POINT = [rf.HIST_FILL_BOAT_TILES, rf.HIST_COLLECT_VILLAGE_MEEPLES, rf.HIST_COLLECT_OUTBID_MEEPLES, rf.HIST_COLLECT_SEASON_TILES, rf.HIST_SEASON_TILES, rf.HIST_COLLECT_BOAT1A_RANDOM_MEEPLES, rf.HIST_EXCHANGE_CONTRACT_AUTO, rf.HIST_NEW_CONTRACTS, rf.HIST_REPLACE_SEA_BASTION_2, rf.HIST_FREE_UPGRADE, rf.HIST_FREE_EXTENSION, rf.HIST_KEYSIDE_BOAT_INCOME, rf.HIST_GET_FARM_ITEMS]
 
 	let idx = store.history.length - 1
 	let stopPointFound = false
@@ -262,6 +267,7 @@ export function getRewindHiddenDataResult(returnFlag) {
 			else if (store.history[idx][0] === rf.HIST_COLLECT_BOAT1A_RANDOM_MEEPLES) rewindCautionArray.push([-3])
 			else if (store.history[idx][0] === rf.HIST_NEW_CONTRACTS) rewindCautionArray.push([-4, store.history[idx][3].length])
 			else if (store.history[idx][0] === rf.HIST_CHOSEN_WINTER_TILES) rewindCautionArray.push([-5])
+			else if (store.history[idx][0] === rf.HIST_GET_FARM_ITEMS && store.history[idx][3][4] && store.history[idx][3][4].length > 0) rewindCautionArray.push([-7])
 		} else if (SOMETIMES_HIDDEN_INFO.includes(store.history[idx][0])) {
 			if (store.history[idx][0] === rf.HIST_COLLECT_BOAT_RESOURCES) {
 				let tileID = store.history[idx][3][0]

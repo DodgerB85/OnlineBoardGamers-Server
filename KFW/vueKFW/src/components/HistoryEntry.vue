@@ -213,6 +213,12 @@ const computedEntry3 = computed(() => {
 				ret.boat7atileName = boat7atile.name[boat7atile.tileID.indexOf(ret.boat7atileID)]
 			}
 		}
+	} else if (entry[0] === rf.HIST_GET_FARM_ITEMS) {
+		ret.farmTileID = entry[3][0]
+		ret.farmAnimalType = entry[3][1]
+		ret.farmAnimalCount = entry[3][2]
+		ret.farmWheatCount = entry[3][3]
+		ret.farmSkillCount = Array.isArray(entry[3][4]) ? entry[3][4].length : 0
 	} else if (entry[0] === rf.HIST_CHOSEN_WINTER_TILES) {
 		ret.chosenWinterTiles = []
 		ret.chosenCount = []
@@ -564,6 +570,29 @@ function getTileNameForVillageExpansion(tileID) {
 					{{ rf.ALL_TILES.find((t) => t.id === tile_id).name[0] }}
 					<br />
 				</span>
+			</div>
+		</div>
+	</template>
+
+	<!-- HIST_GET_FARM_ITEMS -->
+	<template v-if="entry[0] === rf.HIST_GET_FARM_ITEMS">
+		<div class="log mainEntry selectableHistory">
+			<div class="header">
+				<span>{{ getTimeString(entry[2]) }}</span>
+				<div class="topRightNameDiv">
+					<span class="mainEntryPlayer topRightNameSpan" :style="{ backgroundColor: personal.getCorrectedColourHex(store.players[entry[1]].colour), color: personal.getCorrectedColourText(store.players[entry[1]].colour) }">{{ store.players[entry[1]].displayName }}</span>
+				</div>
+			</div>
+			<div class="container">
+				<div class="leftDiv">
+					<HistoryHex :tileID_prop="computedEntry3.farmTileID" />
+				</div>
+				<div class="rightDiv">
+					{{ $t("history.received") }}
+					<img v-for="n in computedEntry3.farmAnimalCount" :key="'a' + n" class="animalImg" :src="view.getImage('animal_' + computedEntry3.farmAnimalType)" />
+					<img v-for="n in computedEntry3.farmWheatCount" :key="'w' + n" class="wheatImg" :src="view.getImage('wheat')" />
+					<img v-for="n in computedEntry3.farmSkillCount" :key="'s' + n" class="skillTileImg" :src="view.getImage('skillTile_random')" />
+				</div>
 			</div>
 		</div>
 	</template>
@@ -1460,6 +1489,14 @@ function getTileNameForVillageExpansion(tileID) {
 	vertical-align: middle;
 	height: 35px;
 	border: 1px solid black;
+	margin-top: 5px;
+	margin-right: 5px;
+}
+
+.animalImg,
+.wheatImg {
+	vertical-align: middle;
+	height: 35px;
 	margin-top: 5px;
 	margin-right: 5px;
 }

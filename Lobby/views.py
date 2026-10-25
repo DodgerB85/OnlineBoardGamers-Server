@@ -5370,6 +5370,8 @@ def createKFWminiTournament(request):
         startingOptions.append(int(request.POST["hiddenInfoLevel"]))
     if "useMerchants" in request.POST:
         startingOptions.append(int(request.POST["useMerchants"]))
+    if "useFarmers" in request.POST:
+        startingOptions.append(int(request.POST["useFarmers"]))
     if "useAllPromos" in request.POST:
         startingOptions.append(int(request.POST["useAllPromos"]))
 

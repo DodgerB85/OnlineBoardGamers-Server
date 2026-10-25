@@ -1179,6 +1179,8 @@ def SR_getKFWstartingOptionsHTML(startingOptionsArr):
 
         if option == 1:
             startingOptionsHTML += "<img class='startingOption' src='/static/KFW/images/so_merchants.svg' title='" + gettext("Use Merchants Expansion") + "'>"
+        if option == 3:
+            startingOptionsHTML += "<img class='startingOption' src='/static/KFW/images/so_farmers.svg' title='" + gettext("Use Farmers Expansion") + "'>"
         if option == 2:
             startingOptionsHTML += "<img class='startingOption' src='/static/KFW/images/so_promos.svg' title='" + gettext("Use Promo Tiles") + "'>"
         if option == rf.SO_LEARNING_GAME:

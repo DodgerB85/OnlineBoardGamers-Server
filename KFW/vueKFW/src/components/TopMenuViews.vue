@@ -259,6 +259,12 @@ function hidePopup() {
 					{{ $t("topMenuViews.contractRewind") }}
 					<br />
 				</span>
+				<span v-else-if="entry[0] === -7" class="rewindCautionSpan">
+					{{ $t("topMenuViews.farmSkillGained") }}
+					<br />
+					{{ $t("topMenuViews.farmSkillRewind") }}
+					<br />
+				</span>
 				<!-- Otherwise, it's a tile action -->
 				<span v-else class="rewindCautionSpan">
 					{{ $t("topMenuViews.tileActionHidden") }}

@@ -25,6 +25,7 @@ import * as WS from "../backend/KFWwebsocket.js"
 import * as view from "./KFWview.js"
 import * as village from "./KFWvillage.js"
 import * as rules from "./KFWrules.js"
+import * as farmers from "./KFWfarmers.js"
 import i18n from "../i18n.js"
 
 export function addHistory(event, playerIndex, timeOffset, params) {
@@ -113,6 +114,10 @@ export async function initGame() {
 	store.availableSkills = gameData3[1]*/
 
 	store.refSize = window.initData.myZoomLevel * 100
+
+	// Farmers supplies (overwritten from saved data for an existing game)
+	store.availableWheat = rf.AVAILABLE_WHEAT_START
+	store.availableAnimals.splice(0, store.availableAnimals.length, ...rf.AVAILABLE_ANIMALS_START)
 
 	personal.liveWS = false
 
@@ -232,6 +237,11 @@ export async function initGame() {
 					manualScoreScore: 0,
 					contractScore: 0,
 					goldScore: 0,
+					animalScore: 0,
+					bakeryScore: 0,
+					granaryScore: 0,
+					purpleAnimalScore: 0,
+					wheat: 0,
 					passFlag: 1,
 
 					// Tracking Data
@@ -252,6 +262,8 @@ export async function initGame() {
 					if (window.initData.playerNames.length <= 5) winterTileAmount = 3
 					if (window.initData.playerNames.length <= 3) winterTileAmount = 4
 				}
+				// The Farmers rules apply when both expansions are used
+				if (store.useFarmersExpansion) winterTileAmount = window.initData.playerNames.length <= 4 ? 4 : 3
 				for (let j = 0; j < winterTileAmount; j++) store.players[i].hiddenWinterTile_tileIDs.push(WINTER_TILES.pop().tileID[0])
 			} // End looping and inserting player names
 
@@ -263,6 +275,7 @@ export async function initGame() {
 			})
 			for (let i = 0; i < store.players.length; i++) {
 				store.players[i].villageTiles.push(JSON.parse(JSON.stringify(availableHomeTiles[i])))
+				store.players[i].villageTiles[0].animals = []
 				map.calculateCanvasSizeForPlayerVillage(i, false)
 			}
 
@@ -299,7 +312,16 @@ export async function initGame() {
 			await rules.setupBoatTiles()
 
 			//Use the number and side of turn order tiles according to the number of players
-			store.availableTurnOrderTiles = rf.ALL_TILES.filter((tile) => tile.season === rf.SEASON_TURN_ORDER_TILE && tile.minPlayers <= store.players.length && tile.maxPlayers >= store.players.length)
+			if (store.useFarmersExpansion) {
+				let farmerTurnOrderTiles = rf.ALL_TILES.filter((tile) => tile.tileset === rf.TILESET_FARMERS && tile.season === rf.SEASON_TURN_ORDER_TILE && tile.minPlayers <= store.players.length && tile.maxPlayers >= store.players.length)
+				let baseTurnOrderTiles = []
+				if (store.players.length === 2) baseTurnOrderTiles = rf.ALL_TILES.filter((tile) => tile.tileID[0] === rf.TILE_TURNORDER_2P)
+				else if (store.players.length === 3) baseTurnOrderTiles = rf.ALL_TILES.filter((tile) => tile.tileID[0] === rf.TILE_TURNORDER_3P)
+				else if (store.players.length >= 5) baseTurnOrderTiles = rf.ALL_TILES.filter((tile) => tile.tileID[0] === rf.TILE_TURNORDER_5_6P || tile.tileID[0] === rf.TILE_TURNORDER_5_6P2)
+				store.availableTurnOrderTiles = farmerTurnOrderTiles.concat(baseTurnOrderTiles)
+			} else {
+				store.availableTurnOrderTiles = rf.ALL_TILES.filter((tile) => tile.tileset === rf.TILESET_BASE && tile.season === rf.SEASON_TURN_ORDER_TILE && tile.minPlayers <= store.players.length && tile.maxPlayers >= store.players.length)
+			}
 
 			rules.setupSeasonTiles(rf.SPRING)
 
@@ -462,6 +484,164 @@ export function deductHiddenSkillTile(playerIndex, skill) {
 	if (playerObj.knownHiddenSkillTiles[skill] > 0) playerObj.knownHiddenSkillTiles[skill]--
 	else playerObj.knownHiddenSkillTiles[3]--
 }
+
+export function addWheatToPlayer(playerIndex, amount) {
+	const store = useModelStore()
+	let gained = 0
+	for (let i = 0; i < amount; i++) {
+		if (store.availableWheat <= 0) break
+		store.availableWheat--
+		store.players[playerIndex].wheat++
+		gained++
+	}
+	return gained
+}
+
+export function removeWheatFromPlayer(playerIndex, amount) {
+	const store = useModelStore()
+	let removed = 0
+	for (let i = 0; i < amount; i++) {
+		if (store.players[playerIndex].wheat <= 0) break
+		store.players[playerIndex].wheat--
+		store.availableWheat++
+		removed++
+	}
+	return removed
+}
+
+function playerHasBoat5a(playerIndex) {
+	return village.doesPlayerHaveTileID(playerIndex, rf.TILE_F_SUMMER_BOAT5_A)
+}
+
+// Place a newly generated animal. Own tile first, otherwise the home tile.
+export function placeAnimalInVillage(playerIndex, animalType, sourceTileId) {
+	const store = useModelStore()
+	const playerObj = store.players[playerIndex]
+	if (!playerObj) return null
+	if (store.availableAnimals[animalType] <= 0) return null
+
+	let targetTile = playerObj.villageTiles.find((tile) => tile.id === sourceTileId)
+	if (!targetTile) targetTile = playerObj.villageTiles[0]
+	if (!targetTile) return null
+
+	// shortcut: the first legal field is chosen automatically (no field-choice prompt).
+	const field = farmers.findAvailableAnimalField(playerIndex, targetTile.id, animalType, playerHasBoat5a(playerIndex))
+	if (!field) return null
+
+	// The final chosen region is the one on the target tile (a field can span tiles).
+	const region = field.regions.find((r) => r.tileId === targetTile.id)
+	if (!region) return null
+	farmers.addAnimalToTileField(region.tile, region.fieldIndex, animalType)
+	store.availableAnimals[animalType]--
+	return { tileId: targetTile.id, fieldIndex: region.fieldIndex, fieldKey: field.key, animalType: animalType }
+}
+
+export function addAnimalsToVillage(playerIndex, animalType, amount, sourceTileId) {
+	let placed = []
+	for (let i = 0; i < amount; i++) {
+		const result = placeAnimalInVillage(playerIndex, animalType, sourceTileId)
+		if (!result) break
+		placed.push(result)
+	}
+	return placed
+}
+
+// End of spring/summer/autumn: each field with 2+ of one type gets one more.
+// shortcut: breeding is applied directly at season end; it has no history entry of its own.
+export function breedAnimals() {
+	const store = useModelStore()
+	if (!store.useFarmersExpansion || store.gameflow.season === rf.WINTER) return
+	let turnOrder = store.gameflow.fullTurnOrder.length > 0 ? store.gameflow.fullTurnOrder : store.gameflow.turnOrder
+	for (let p = 0; p < turnOrder.length; p++) {
+		const playerIndex = turnOrder[p]
+		const allowMixed = playerHasBoat5a(playerIndex)
+		const fields = farmers.getPlayerFields(playerIndex)
+		for (let f = 0; f < fields.length; f++) {
+			const field = fields[f]
+			for (let animalType = 0; animalType < 3; animalType++) {
+				if (field.animals[animalType] < 2) continue
+				if (!allowMixed) {
+					let mixed = false
+					for (let a = 0; a < 3; a++) if (a !== animalType && field.animals[a] > 0) mixed = true
+					if (mixed) continue
+				}
+				if (store.availableAnimals[animalType] <= 0) continue
+				// The newly bred animal joins the same field, so add it to any region of that field.
+				const region = field.regions[0]
+				if (!region) continue
+				farmers.addAnimalToTileField(region.tile, region.fieldIndex, animalType)
+				store.availableAnimals[animalType]--
+			}
+		}
+	}
+}
+
+// Animal fields score for the end of the game.
+export function calculateAnimalFieldScore(playerIndex) {
+	const store = useModelStore()
+	const playerObj = store.players[playerIndex]
+	if (!store.useFarmersExpansion || !playerObj) return { total: 0, fields: [], purpleScore: 0 }
+
+	const hasWeaver = village.doesPlayerHaveTileID(playerIndex, rf.TILE_F_WINTER_WEAVER_A)
+	const hasTruffle = village.doesPlayerHaveTileID(playerIndex, rf.TILE_F_WINTER_TRUFFLE_ORCHARD_A)
+	const hasDairy = village.doesPlayerHaveTileID(playerIndex, rf.TILE_F_WINTER_DAIRY_A)
+	const shelter = playerObj.villageTiles.find((tile) => tile.tileID[tile.upgraded] === rf.TILE_F_AUTUMN_SHEEP_SHELTER_A || tile.tileID[tile.upgraded] === rf.TILE_F_AUTUMN_SHEEP_SHELTER_B)
+	const fields = farmers.getPlayerFields(playerIndex)
+	let shelterFieldKey = null
+	if (shelter) {
+		const shelterField = fields.find((field) => field.tileIds.includes(shelter.id))
+		if (shelterField) shelterFieldKey = shelterField.key
+	}
+	const pointValue = (animalType) => {
+		if (animalType === rf.ANIMAL_SHEEP) return hasWeaver ? 3 : 1
+		if (animalType === rf.ANIMAL_PIG) return hasTruffle ? 5 : 2
+		return hasDairy ? 7 : 3
+	}
+
+	let total = 0
+	const fieldScores = []
+	for (let i = 0; i < fields.length; i++) {
+		const field = fields[i]
+		let score = 0
+		const shelterSheep = field.key === shelterFieldKey ? field.animals[rf.ANIMAL_SHEEP] : 0
+		if (shelter && shelterSheep > 0) {
+			const shelterValue = shelter.upgraded === 1 ? 2 : 1
+			// Optionally leave one sheep in the field so the Weaver scores the field instead.
+			score += Math.max(shelterSheep * shelterValue, (shelterSheep - 1) * shelterValue + (hasWeaver ? 3 : 1))
+		}
+		for (let animalType = 0; animalType < 3; animalType++) {
+			let countForField = field.animals[animalType]
+			if (animalType === rf.ANIMAL_SHEEP && field.key === shelterFieldKey) countForField -= shelterSheep
+			if (countForField > 0) score += pointValue(animalType)
+		}
+		if (score > 0) fieldScores.push({ key: field.key, animals: [...field.animals], score: score })
+		total += score
+	}
+
+	// The purple start player marker may be declared as one animal in any field.
+	let purpleScore = 0
+	if (playerObj.hasPurpleMeeple) {
+		if (fields.length === 0) {
+			// No field: it can still be declared as wheat (scored by Granary/Bakery).
+			purpleScore = 0
+		} else {
+			for (let animalType = 0; animalType < 3; animalType++) {
+				for (let i = 0; i < fields.length; i++) {
+					const field = fields[i]
+					if (field.animals[animalType] > 0) continue
+					// Adding a new type only scores if the field has no other animals, or boat 5a allows mixing.
+					const hasOtherType = field.animals.some((c, idx) => idx !== animalType && c > 0)
+					if (hasOtherType) continue
+					let value = pointValue(animalType)
+					if (shelter && animalType === rf.ANIMAL_SHEEP && field.key === shelterFieldKey) value = shelter.upgraded === 1 ? 2 : 1
+					purpleScore = Math.max(purpleScore, value)
+				}
+			}
+		}
+	}
+	return { total: total + purpleScore, fields: fieldScores, purpleScore: purpleScore }
+}
+
 
 // find and locate a tile object in the game
 export function getTile(tile_id) {
@@ -1310,6 +1490,38 @@ export function checkPassFlagsForOutbidMeeples(tile_id) {
 	}
 }
 
+function recordFarmItemsResult(tile, animalType, placedAnimals, wheatGained, skillWanted) {
+	const store = useModelStore()
+	const playerIndex = controller.currentPlayerIndex()
+	addHistory(rf.HIST_GET_FARM_ITEMS, playerIndex, 0, [tile.tileID[tile.upgraded], animalType, placedAnimals.length, wheatGained, skillWanted ? [rf.SKILL_ANY_RANDOM] : []])
+	if (skillWanted) {
+		const histData = [rf.SKILL_ANY_RANDOM]
+		store.context.endTurnActions.push([playerIndex, rf.SERV_GET_RADOM_SKILLS_FROM_BAG_TO_PLAYER, 1, store.history.length - 1, [...histData]])
+		controller.currentPlayerObj().knownHiddenSkillTiles[3]++
+	}
+}
+
+function applyFarmAnimalAndWheat(tile, animalType, animalCount, wheatCount, skillWanted = false) {
+	const store = useModelStore()
+	const playerIndex = controller.currentPlayerIndex()
+	const tileID = tile.tileID[tile.upgraded]
+	const sourceTileId = village.doesPlayerHaveTileID(playerIndex, tileID) ? tile.id : -1
+	const placedAnimals = animalType >= 0 && animalType <= 2 ? addAnimalsToVillage(playerIndex, animalType, animalCount, sourceTileId) : []
+	const wheatGained = addWheatToPlayer(playerIndex, wheatCount)
+	let message = ""
+	if (animalType >= 0 && placedAnimals.length > 0) {
+		message += i18n.global.t("model.youGot")
+		for (let i = 0; i < placedAnimals.length; i++) message += `<img class="animalInMessage" src="${view.getImage("animal_" + animalType)}" />`
+	}
+	if (wheatGained > 0) {
+		message += i18n.global.t("model.youGot")
+		for (let i = 0; i < wheatGained; i++) message += `<img class="wheatInMessage" src="${view.getImage("wheat")}" />`
+	}
+	if (skillWanted) message += i18n.global.t("model.endTurnToGet") + `<img class="skillTileInMessage" src="${view.getImage("skillTile_random")}" />`
+	recordFarmItemsResult(tile, animalType, placedAnimals, wheatGained, skillWanted)
+	return message
+}
+
 export function processTileAction(tile) {
 	const store = useModelStore()
 	let action = tile.action[0]
@@ -1345,6 +1557,17 @@ export function processTileAction(tile) {
 			addHistory(rf.HIST_ACT_ON_TILE, controller.currentPlayerIndex(), 0, [...store.context.historyObj])
 			store.context.endTurnActions.push([controller.currentPlayerIndex(), rf.SERV_GET_RADOM_MEEPLES_FROM_BAG_TO_PLAYER, tile.action[tile.upgraded + 1], store.history.length - 1, [...histData]])
 			controller.currentPlayerObj().knownHiddenMeeples[4] += tile.action[tile.upgraded + 1]
+		} else if (action === rf.ACT_TILE_GET_ANIMALS) {
+			const params = tile.action[tile.upgraded + 1]
+			addHistory(rf.HIST_ACT_ON_TILE, controller.currentPlayerIndex(), 0, [...store.context.historyObj])
+			message = applyFarmAnimalAndWheat(tile, params[0], params[1], 0)
+		} else if (action === rf.ACT_TILE_GET_WHEAT) {
+			addHistory(rf.HIST_ACT_ON_TILE, controller.currentPlayerIndex(), 0, [...store.context.historyObj])
+			message = applyFarmAnimalAndWheat(tile, -1, 0, tile.action[tile.upgraded + 1])
+		} else if (action === rf.ACT_TILE_GET_ANIMAL_AND_WHEAT) {
+			const params = tile.action[tile.upgraded + 1]
+			addHistory(rf.HIST_ACT_ON_TILE, controller.currentPlayerIndex(), 0, [...store.context.historyObj])
+			message = applyFarmAnimalAndWheat(tile, params[0], params[1], params[2])
 		} else if (action === rf.ACT_TILE_GET_RANDOM_SKILL_TILE) {
 			message = i18n.global.t("model.endTurnToGet")
 			for (let i = 0; i < tile.action[tile.upgraded + 1]; i++) message += `<img class="skillTileInMessage" src="${view.getImage("skillTile_random")}" />`
@@ -1563,6 +1786,33 @@ export function processTileAction(tile) {
 			store.context.action = rf.ACT_CHOOSE_SKILL_TILE_FOR_MEEPLE
 		} else if (action === rf.ACT_TILE_SKILL_FOR_GREEN) {
 			store.context.action = rf.ACT_CHOOSE_SKILL_TILE_FOR_GREEN
+		} else if (action === rf.ACT_TILE_GET_FARM_ITEMS) {
+			if (tile.upgraded === 1) {
+				addHistory(rf.HIST_ACT_ON_TILE, controller.currentPlayerIndex(), 0, [...store.context.historyObj])
+				message = applyFarmAnimalAndWheat(tile, rf.ANIMAL_SHEEP, 1, 1, true)
+				store.gameMessages.turnEndText = message
+				store.context.action = rf.ACT_CONFIRM_END_TURN
+				store.removeAllActiveHighlights()
+				unhighlightOutbidMeeples()
+				return
+			}
+			store.context.action = rf.ACT_CHOOSE_FARM_ITEM
+		} else if (action === rf.ACT_TILE_GET_WHEAT_AND_MOVE_UPGRADE) {
+			const params = tile.action[tile.upgraded + 1]
+			addHistory(rf.HIST_ACT_ON_TILE, controller.currentPlayerIndex(), 0, [...store.context.historyObj])
+			let wheatMessage = applyFarmAnimalAndWheat(tile, -1, 0, params[0])
+			store.gameMessages.turnEndText = wheatMessage
+			store.context.remainingMoves = params[1]
+			store.context.remainingUpgrades = params[2]
+			if (village.doesPlayerHaveTileID(controller.currentPlayerIndex(), rf.TILE_SUMMER_BOAT2_B)) {
+				store.context.remainingMoves *= 2
+				store.context.remainingUpgrades *= 2
+			}
+			store.viewSettings.showFullExtensions = true
+			store.context.action = rf.ACT_MOVE_AND_UPGRADE
+			store.context.historyObj.push([])
+			store.undoPoints.splice(0)
+			createUndoPoint()
 		} else if (action === rf.ACT_TILE_MOVE_AND_UPGRADE) {
 			store.context.remainingMoves = tile.action[tile.upgraded + 1][0]
 			store.context.remainingUpgrades = tile.action[tile.upgraded + 1][1]
@@ -1592,6 +1842,72 @@ export function processTileAction(tile) {
 			store.context.action = rf.ACT_CHOOSE_SORCERER_TILE
 		}
 	}
+}
+
+export function chooseFarmItem(itemType) {
+	const store = useModelStore()
+	const tile = store.context.selectedTile
+	addHistory(rf.HIST_ACT_ON_TILE, controller.currentPlayerIndex(), 0, [...store.context.historyObj])
+	let message = ""
+	if (itemType === 0) message = applyFarmAnimalAndWheat(tile, rf.ANIMAL_SHEEP, 1, 0)
+	else if (itemType === 1) message = applyFarmAnimalAndWheat(tile, -1, 0, 1)
+	else if (itemType === 2) message = applyFarmAnimalAndWheat(tile, -1, 0, 0, true)
+	store.gameMessages.turnEndText = message
+	store.context.action = rf.ACT_CONFIRM_END_TURN
+	store.removeAllActiveHighlights()
+	unhighlightOutbidMeeples()
+}
+
+export function spendWheatForMove() {
+	const store = useModelStore()
+	if (!store.useFarmersExpansion) return
+	if (store.context.action !== rf.ACT_MOVE_AND_UPGRADE && store.context.action !== rf.ACT_MOVE_ANIMAL) return
+	if (removeWheatFromPlayer(controller.currentPlayerIndex(), 1) === 0) return
+	store.context.remainingMoves++
+}
+
+export function startMovingAnimal(fieldKey) {
+	const store = useModelStore()
+	if (!store.useFarmersExpansion) return
+	store.context.animalMoveSource = fieldKey
+	const allowMixed = village.doesPlayerHaveTileID(controller.currentPlayerIndex(), rf.TILE_F_SUMMER_BOAT5_A)
+	// shortcut: destinations are only fields the animal may finish in; passing through a mixed field is not offered.
+	store.context.animalMoveDestinations = farmers.getAdjacentFields(controller.currentPlayerIndex(), fieldKey).filter((field) => farmers.canPlaceAnimalInField(field, store.context.animalMoveType, allowMixed))
+	store.context.action = rf.ACT_MOVE_ANIMAL
+}
+
+export function finishMovingAnimal() {
+	const store = useModelStore()
+	store.context.animalMoveSource = null
+	store.context.animalMoveDestinations.splice(0)
+	store.context.action = rf.ACT_MOVE_AND_UPGRADE
+}
+
+// Move every animal of one type from the selected field into a destination field.
+export function moveAnimalToField(destinationFieldKey) {
+	const store = useModelStore()
+	if (!store.useFarmersExpansion) return
+	if (store.context.remainingMoves <= 0) return
+	const playerIndex = controller.currentPlayerIndex()
+	const source = farmers.getFieldByKey(playerIndex, store.context.animalMoveSource)
+	const destination = farmers.getFieldByKey(playerIndex, destinationFieldKey)
+	if (!source || !destination) return
+	const animalType = store.context.animalMoveType
+	if (animalType < 0 || source.animals[animalType] <= 0) return
+	const allowMixed = village.doesPlayerHaveTileID(playerIndex, rf.TILE_F_SUMMER_BOAT5_A)
+	if (!farmers.canPlaceAnimalInField(destination, animalType, allowMixed)) return
+	const sourceRegion = source.regions.find((r) => (r.tile.animals?.[r.fieldIndex]?.[animalType] || 0) > 0)
+	const destRegion = destination.regions[0]
+	if (!sourceRegion || !destRegion) return
+	if (!farmers.removeAnimalFromTileField(sourceRegion.tile, sourceRegion.fieldIndex, animalType)) return
+	farmers.addAnimalToTileField(destRegion.tile, destRegion.fieldIndex, animalType)
+	// shortcut: animal moves are reflected in the saved model but not added to the move history entry.
+	store.context.remainingMoves--
+	store.context.animalMoveSource = null
+	store.context.animalMoveDestinations.splice(0)
+	store.context.animalMoveType = -1
+	store.context.action = rf.ACT_MOVE_AND_UPGRADE
+	createUndoPoint()
 }
 
 export function upgradeTile(playerIndex, tile_id) {
@@ -2661,6 +2977,17 @@ export function processTurnOrderTiles() {
 
 			// NB outbid meeples have already been procesed
 
+			// Award the Farmers turn order resources
+			if (currentTile.turnOrderResources && currentTile.turnOrderResources.length > 0) {
+				for (let r = 0; r < currentTile.turnOrderResources.length; r++) {
+					const res = currentTile.turnOrderResources[r]
+					if (store.availableResources[res] > 0) {
+						store.availableResources[res]--
+						store.players[winningPlayerIndex].villageTiles[0].resources[res]++
+					}
+				}
+			}
+
 			// Award the purple meeple, if it has it
 			if (currentTile.hasPurpleMeeple) {
 				newPurpleMeepleIndex = winningPlayerIndex
@@ -2851,6 +3178,16 @@ export function collectBoatResources_core(playerIndex, tileID, season) {
 			if (index === -1) store.context.endTurnActions.push([playerIndex, rf.SERV_MEEPLES_JUST_TO_PLAYER, [rf.MEEPLE_GREEN]])
 			else store.context.endTurnActions[index][2].push(rf.MEEPLE_GREEN)
 		} else if (store.availableGreenMeeples === 0) historyFlags.push(3)
+	}
+
+	// Farmers boat 6a / 6b bonuses
+	if (season !== rf.SPRING) {
+		if (village.doesPlayerHaveTileID(playerIndex, rf.TILE_F_SUMMER_BOAT6_A)) {
+			addWheatToPlayer(playerIndex, 2)
+		} else if (village.doesPlayerHaveTileID(playerIndex, rf.TILE_F_SUMMER_BOAT6_B)) {
+			placeAnimalInVillage(playerIndex, rf.ANIMAL_PIG, -1)
+			placeAnimalInVillage(playerIndex, rf.ANIMAL_SHEEP, -1)
+		}
 	}
 
 	// 7b gets you res income at end of season
@@ -3093,6 +3430,38 @@ export function scoreAutoProcessingTilesAndMoveResources(playerIndex) {
 		}
 	}
 
+	// Farmers scoring tiles
+	if (store.useFarmersExpansion) {
+		const hasBoat5b = village.doesPlayerHaveTileID(playerIndex, rf.TILE_F_SUMMER_BOAT5_B)
+		const playerWheat = playerObj.wheat || 0
+		let totalResources = 0
+		for (let i = 0; i < playerObj.villageTiles.length; i++) {
+			if (!SCORE_RES_ON_TILE.includes(playerObj.villageTiles[i].tileID[playerObj.villageTiles[i].upgraded])) {
+				totalResources += playerObj.villageTiles[i].resources.reduce((sum, r) => sum + r, 0)
+			}
+		}
+		const totalSkills = playerObj.hiddenSkillTiles.reduce((sum, s) => sum + s, 0)
+		const fields = farmers.getPlayerFields(playerIndex)
+		for (let i = 0; i < playerObj.villageTiles.length; i++) {
+			const tile = playerObj.villageTiles[i]
+			const tileID = tile.tileID[tile.upgraded]
+			if (tileID === rf.TILE_F_WINTER_HILLSIDE_A) {
+				const field = fields.find((f) => f.tileIds.includes(tile.id))
+				tile.victoryPoints[tile.upgraded] = field ? Math.max(0, field.tileIds.length - 1) : 0
+			} else if (tileID === rf.TILE_F_WINTER_GRANARY_A) {
+				// shortcut: Granary and Bakery score independently, so wheat can be counted by both.
+				const wheatForGranary = playerWheat + (hasBoat5b ? totalResources : 0)
+				tile.victoryPoints[tile.upgraded] = Math.floor(wheatForGranary / 2) * 3
+			} else if (tileID === rf.TILE_F_WINTER_BAKERY_A) {
+				// shortcut: Bakery counts items but does not reserve them from contracts/other scoring tiles.
+				let sets = 0
+				if (hasBoat5b) sets = Math.min(Math.floor((playerWheat + totalResources) / 2), totalSkills)
+				else sets = Math.min(playerWheat, totalResources, totalSkills)
+				tile.victoryPoints[tile.upgraded] = sets * 4
+			}
+		}
+	}
+
 	// Now move all other resources to home tile. Assume any RES_ON_TILE scoring should keep resources
 	for (let i = 1; i < store.players[playerIndex].villageTiles.length; i++) {
 		let tile = store.players[playerIndex].villageTiles[i]
@@ -3327,6 +3696,23 @@ export function calculateTotalFinalScore(playerIndex) {
 			ret.nonScoringAction.push(tile)
 		}*/
 	}
+	let animalScore = 0
+	let bakeryScore = 0
+	let granaryScore = 0
+	if (store.useFarmersExpansion) {
+		const animalData = calculateAnimalFieldScore(playerIndex)
+		animalScore = animalData.total
+		playerObj.purpleAnimalScore = animalData.purpleScore
+		totalScore += animalScore
+		for (let i = 0; i < playerObj.villageTiles.length; i++) {
+			const tile = playerObj.villageTiles[i]
+			const tileID = tile.tileID[tile.upgraded]
+			if (tileID === rf.TILE_F_WINTER_BAKERY_A) bakeryScore += tile.victoryPoints[tile.upgraded]
+			if (tileID === rf.TILE_F_WINTER_GRANARY_A) granaryScore += tile.victoryPoints[tile.upgraded]
+		}
+	}
+
+	// shortcut: Farmers boat 5b's wheat/resource wildcard is applied to Granary/Bakery but not contract requirements.
 	let hasWhiteWind2b = village.doesPlayerHaveTileID(playerIndex, rf.TILE_M_BOAT_WHITE_WIND_2_B)
 	let hasMuleteer = village.doesPlayerHaveTileID(playerIndex, rf.TILE_M_WINTER_MULETEER)
 	// Go through contracts
@@ -3353,6 +3739,9 @@ export function calculateTotalFinalScore(playerIndex) {
 	playerObj.manualScoreScore = manualScoreScore
 	playerObj.contractScore = contractScore
 	playerObj.goldScore = goldScore
+	playerObj.animalScore = animalScore
+	playerObj.bakeryScore = bakeryScore
+	playerObj.granaryScore = granaryScore
 
 	if (playerObj.displayName === rf.BOT_NAME) {
 		totalScore = -1

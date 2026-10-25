@@ -207,6 +207,7 @@ export function addTileToVillage_core(playerIndex, tile_id, rotation, newCoord, 
 	const store = useModelStore()
 	let newTile = JSON.parse(JSON.stringify(rf.ALL_TILES.find((tile) => tile.id === tile_id)))
 	newTile.coord = newCoord
+	newTile.animals = []
 	model.rotateTileMultipleTimes(newTile, 1, rotation)
 	newTile.upgraded = upgraded
 
@@ -395,6 +396,7 @@ export function exportVillageMidGame(playerIndex) {
 				if (tile.extension !== rf.EXTENSION_NONE && tile.extension !== rf.EXTENSION_BANNED) newEntry.push(tile.extension)
 			} else if (tile.extension !== rf.EXTENSION_NONE && tile.extension !== rf.EXTENSION_BANNED) newEntry.push(tile.extension)
 		}
+		if (store.useFarmersExpansion) newEntry.push(JSON.parse(JSON.stringify(tile.animals || [])))
 		res.push(newEntry)
 	}
 	return res
@@ -422,10 +424,21 @@ export function importVillageMidGame(villageDataArr) {
 			if (i === 0) {
 				newCabins = villageDataArr[i][IMPORT_IDX]
 				IMPORT_IDX++
-				if (villageDataArr[i].length > IMPORT_IDX) newExtension = villageDataArr[i][IMPORT_IDX]
+				if (villageDataArr[i].length > IMPORT_IDX && !Array.isArray(villageDataArr[i][IMPORT_IDX])) {
+					newExtension = villageDataArr[i][IMPORT_IDX]
+					IMPORT_IDX++
+				}
 			} else {
-				if (villageDataArr[i].length > IMPORT_IDX) newExtension = villageDataArr[i][IMPORT_IDX]
+				if (villageDataArr[i].length > IMPORT_IDX && !Array.isArray(villageDataArr[i][IMPORT_IDX])) {
+					newExtension = villageDataArr[i][IMPORT_IDX]
+					IMPORT_IDX++
+				}
 			}
+		}
+		let newAnimals = []
+		if (store.useFarmersExpansion && villageDataArr[i].length > IMPORT_IDX && Array.isArray(villageDataArr[i][IMPORT_IDX])) {
+			newAnimals = JSON.parse(JSON.stringify(villageDataArr[i][IMPORT_IDX]))
+			IMPORT_IDX++
 		}
 
 		let newTile = JSON.parse(JSON.stringify(rf.ALL_TILES.find((t) => t.tileID.includes(newTileID))))
@@ -435,6 +448,7 @@ export function importVillageMidGame(villageDataArr) {
 		newTile.coord = [...newCoord]
 		newTile.resources = [...newResources]
 		newTile.meeplesOnTile = [...newMeeplesOnTile]
+		newTile.animals = [...newAnimals]
 
 		if (store.useMerchantsExpansion) {
 			newTile.cabins = newCabins
@@ -468,6 +482,7 @@ export function exportVillageEndGame(playerIndex) {
 				if (tile.upgradable && tile.upgraded === 1) newEntry.push(tile.extension) // 6?
 			} else if (tile.upgradable && tile.upgraded === 1) newEntry.push(tile.extension) //4?
 		}
+		if (store.useFarmersExpansion) newEntry.push(JSON.parse(JSON.stringify(tile.animals || [])))
 
 		if (tile.completedSets.length > 0) {
 			newEntry.push([0])
@@ -539,11 +554,17 @@ export function importVillageEndGame(playerIndex, villageDataArr) {
 				}
 			}
 		}
+		let newAnimals = []
+		if (store.useFarmersExpansion && villageDataArr[i].length > IMPORT_IDX && Array.isArray(villageDataArr[i][IMPORT_IDX])) {
+			newAnimals = JSON.parse(JSON.stringify(villageDataArr[i][IMPORT_IDX]))
+			IMPORT_IDX++
+		}
 
 		if (store.useMerchantsExpansion) {
 			newTile.cabins = newCabins
 			newTile.extension = newExtension
 		}
+		newTile.animals = [...newAnimals]
 		// DO this here so home tile res are added
 		newTile.resources = [...newResources]
 		if (newTileID === rf.TILE_WINTER_DELIVERY_MAN_A) newTile.scoredRoute = [...scoredRoute]

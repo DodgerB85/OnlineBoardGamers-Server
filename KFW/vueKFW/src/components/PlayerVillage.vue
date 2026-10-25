@@ -12,6 +12,7 @@ import * as view from "../js/KFWview"
 import * as controller from "../js/KFWcontroller"
 import * as model from "../js/KFWmodel"
 import * as village from "../js/KFWvillage"
+import * as farmers from "../js/KFWfarmers"
 import * as IO from "../backend/KFW_IO"
 
 //import MapHighlights from './MapHighlights.vue'
@@ -562,6 +563,30 @@ function clickedRes(tile_id, resAmount, idx) {
 	}
 }
 
+function getAnimalGroupsOnTile(tile) {
+	if (!store.useFarmersExpansion) return []
+	return farmers.getAnimalGroupsForTile(props.playerIndexProp, tile)
+}
+
+function isAnimalSelectable(animalType) {
+	if (!store.useFarmersExpansion) return false
+	if (props.playerIndexProp !== controller.currentPlayerIndex()) return false
+	if (!personal.canPlay()) return false
+	if (store.gameflow.phase !== rf.PHASE_BIDDING_AND_ACTIONS) return false
+	if (store.context.action !== rf.ACT_MOVE_AND_UPGRADE) return false
+	if (store.context.remainingMoves <= 0) return false
+	return store.context.animalMoveType === -1 || store.context.animalMoveType === animalType
+}
+
+function clickedAnimalGroup(group, animalType) {
+	if (!store.useFarmersExpansion) return
+	if (props.playerIndexProp !== controller.currentPlayerIndex()) return
+	if (store.gameflow.phase !== rf.PHASE_BIDDING_AND_ACTIONS) return
+	if (store.context.action !== rf.ACT_MOVE_AND_UPGRADE || store.context.remainingMoves <= 0) return
+	store.context.animalMoveType = animalType
+	model.startMovingAnimal(group.fieldKey)
+}
+
 const showPopupFunc = (event, tile) => {
 	polygonRef.value = event.target // Set the polygonRef to the target element
 	const rect = polygonRef.value.getBoundingClientRect()
@@ -843,6 +868,39 @@ function getScoringPathStroke(newTile_id) {
 							'stroke-width': 20 * canvasRef,
 						}">
 						{{ amount }}
+					</text>
+				</g>
+
+				<!-- Animals in fields (Farmers) -->
+				<g v-for="(group, groupIdx) in getAnimalGroupsOnTile(tile)" :key="'animalGroup' + groupIdx">
+					<g v-for="(count, animalType) in group.counts" :key="animalType">
+						<image
+							v-if="count > 0"
+							@click="clickedAnimalGroup(group, animalType)"
+							:x="hexCenter(tile.coord, true, false)[0] - 560 * canvasRef + animalType * 175 * canvasRef"
+							:y="hexCenter(tile.coord, true, false)[1] - 390 * canvasRef + groupIdx * 155 * canvasRef"
+							:width="150 * canvasRef"
+							:height="150 * canvasRef"
+							:xlink:href="view.getImage('animal_' + animalType)"
+							:style="{
+								pointerEvents: isAnimalSelectable(animalType) ? 'painted' : 'none',
+								filter: isAnimalSelectable(animalType) ? `drop-shadow(${20 * canvasRef}px ${20 * canvasRef}px 0 yellow)` : 'none',
+							}" />
+						<text
+							v-if="count > 1"
+							class="animalCountText"
+							:x="hexCenter(tile.coord, true, false)[0] - 500 * canvasRef + animalType * 175 * canvasRef"
+							:y="hexCenter(tile.coord, true, false)[1] - 400 * canvasRef + groupIdx * 155 * canvasRef"
+							:style="{ 'font-size': 280 * canvasRef + 'px', 'stroke-width': 16 * canvasRef }">
+							{{ count }}
+						</text>
+					</g>
+					<text
+						class="fieldIndexText"
+						:x="hexCenter(tile.coord, true, false)[0] - 610 * canvasRef"
+						:y="hexCenter(tile.coord, true, false)[1] - 280 * canvasRef + groupIdx * 155 * canvasRef"
+						:style="{ 'font-size': 220 * canvasRef + 'px', 'stroke-width': 12 * canvasRef }">
+						F{{ group.fieldIndex + 1 }}
 					</text>
 				</g>
 
@@ -1190,6 +1248,20 @@ function getScoringPathStroke(newTile_id) {
 	font-weight: bolder;
 	stroke: white;
 	fill: black;
+	pointer-events: none;
+}
+
+.animalCountText {
+	font-weight: bolder;
+	stroke: black;
+	fill: white;
+	pointer-events: none;
+}
+
+.fieldIndexText {
+	font-weight: bolder;
+	stroke: black;
+	fill: yellow;
 	pointer-events: none;
 }
 

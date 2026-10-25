@@ -427,6 +427,8 @@ export async function endCurrentPhase() {
 		// You can simply check all turn order tiles in order. If they weren't in the game they simply won't be bid on at all
 		model.processTurnOrderTiles()
 	} else if (store.gameflow.phase === rf.PHASE_COLLECT_BOAT_RESOURCES) {
+		// Breed before the newly won tiles are placed (Farmers)
+		model.breedAnimals()
 		// Reform the turn order
 		store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
 		Bot.removeBotPlayers()

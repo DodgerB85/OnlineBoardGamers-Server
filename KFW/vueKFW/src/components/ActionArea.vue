@@ -217,6 +217,20 @@ function cancelMovingRes() {
 	store.context.action = rf.ACT_MOVE_AND_UPGRADE
 }
 
+function chooseFarmItem(itemType) {
+	model.chooseFarmItem(itemType)
+}
+
+function fieldLabel(field) {
+	if (!field || !field.regions || field.regions.length === 0) return ""
+	const region = field.regions[0]
+	return `${region.tile.name[region.tile.upgraded]} (field ${region.fieldIndex + 1})`
+}
+
+function moveToAnimalField(field) {
+	model.moveAnimalToField(field.key)
+}
+
 function localAddResToPlayer(playerIndex, res) {
 	store.context.action = rf.ACT_CONFIRM_END_TURN
 	store.context.action2 = rf.ACT_CONFIRM_END_TURN
@@ -627,11 +641,30 @@ function shouldShowIntroText() {
 						{{ $t("action.remainingMoves", { count: store.context.remainingMoves }) }}
 						<br />
 						{{ $t("action.remainingUpgrades", { count: store.context.remainingUpgrades }) }}
+						<template v-if="store.useFarmersExpansion">
+							<br />
+							{{ $t("action.clickAnimalToMove") }}
+						</template>
 						<br />
 						<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
 						<button @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length <= 1">{{ $t("action.undo") }}</button>
 						<button v-if="store.context.action === rf.ACT_MOVE_RES" class="actionsLineButton" @click="cancelMovingRes">{{ $t("action.cancelMovingResource") }}</button>
+						<button v-if="store.useFarmersExpansion && store.context.remainingMoves > 0 && controller.currentPlayerObj().wheat > 0" class="actionsLineButton" @click="model.spendWheatForMove()">{{ $t("action.spendWheatForMove", { count: controller.currentPlayerObj().wheat }) }}</button>
 						<button class="actionsLineButton" @click="finishedMovingAndUpgrading">{{ $t("action.finishActionsEndTurn") }}</button>
+					</template>
+					<template v-else-if="store.context.action === rf.ACT_MOVE_ANIMAL">
+						{{ $t("action.chooseAnimalDestination") }}
+						<br />
+						<button v-for="(field, idx) in store.context.animalMoveDestinations" :key="idx" class="actionsLineButton" @click="moveToAnimalField(field)">{{ fieldLabel(field) }}</button>
+						<br />
+						<button class="actionsLineButton" @click="model.finishMovingAnimal()">{{ $t("common.cancel") }}</button>
+					</template>
+					<template v-else-if="store.context.action === rf.ACT_CHOOSE_FARM_ITEM">
+						{{ $t("action.chooseFarmItem") }}
+						<br />
+						<img @click="chooseFarmItem(0)" class="chooseSingleResImg" :src="view.getImage('animal_0')" alt="Sheep" />
+						<img @click="chooseFarmItem(1)" class="chooseSingleResImg" :src="view.getImage('wheat')" alt="Wheat" />
+						<img @click="chooseFarmItem(2)" class="chooseSingleResImg" :src="view.getImage('skillTile_random')" alt="Skill" />
 					</template>
 					<template v-else-if="store.context.action === rf.ACT_CHOOSE_ITEMS">
 						<template v-if="store.context.action2 === rf.ACT_MOVE_AND_UPGRADE">
@@ -1052,6 +1085,14 @@ function shouldShowIntroText() {
 	height: 50px;
 	margin-right: 6px;
 	border: 2px solid black;
+}
+
+:deep(.animalInMessage),
+:deep(.wheatInMessage) {
+	vertical-align: middle;
+	width: 45px;
+	height: 45px;
+	margin-right: 6px;
 }
 .itemsetImg {
 	height: 40px;

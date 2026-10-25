@@ -37,6 +37,10 @@ function initGameCreation(fillData, setupData = {}) {
 		if (startingOptions.includes(1)) {
 			document.getElementById("useMerchants").checked = true
 		}
+		// The Farmers checkbox is only rendered for admin and DodgerB.
+		if (startingOptions.includes(3) && document.getElementById("useFarmers")) {
+			document.getElementById("useFarmers").checked = true
+		}
 		if (startingOptions.includes(2)) {
 			document.getElementById("useAllPromos").checked = true
 		}

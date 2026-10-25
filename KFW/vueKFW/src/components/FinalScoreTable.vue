@@ -215,6 +215,15 @@ const computedScoringData = computed(() => {
 	// Add in 1 vp/gold
 	totalScore += store.players[props.playerIndexProp].villageTiles[0].resources[rf.GOLD]
 
+	ret.animalScore = 0
+	ret.animalFields = 0
+	if (store.useFarmersExpansion) {
+		const animalData = model.calculateAnimalFieldScore(props.playerIndexProp)
+		ret.animalScore = animalData.total
+		ret.animalFields = animalData.fields.length + (animalData.purpleScore > 0 ? 1 : 0)
+		totalScore += ret.animalScore
+	}
+
 	ret.totalScore = totalScore
 
 	return ret
@@ -544,6 +553,21 @@ function itemTypeNumToString(itemNum) {
 						{{ store.players[playerIndexProp].villageTiles[0].resources[rf.GOLD] }}
 					</td>
 				</tr>
+				<!-- FARMERS: ANIMALS IN FIELDS -->
+				<template v-if="store.useFarmersExpansion">
+					<tr>
+						<td class="sectionHeader" colspan="3">{{ $t("finalScore.animalsInFields") }}</td>
+					</tr>
+					<tr>
+						<td>{{ $t("finalScore.fieldsWithAnimals", { count: computedScoringData.animalFields }) }}</td>
+						<td>
+							<img class="itemsetImg" :src="view.getImage('animal_0')" />
+							<img class="itemsetImg" :src="view.getImage('animal_1')" />
+							<img class="itemsetImg" :src="view.getImage('animal_2')" />
+						</td>
+						<td>{{ computedScoringData.animalScore }}</td>
+					</tr>
+				</template>
 				<!-- REQUIRES ITEMS -->
 				<tr>
 					<td class="sectionHeader" colspan="3">{{ $t("finalScore.scoreForItems") }}</td>

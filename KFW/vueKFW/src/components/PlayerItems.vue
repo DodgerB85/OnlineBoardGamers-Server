@@ -481,6 +481,13 @@ function localClickedPurpleMeeple() {
 					<div class="skillTileNumberDiv">{{ skillTileAmount }}</div>
 				</div>
 			</template>
+			<!-- WHEAT (Farmers) - public for now; skills/meeples stay behind the screen -->
+			<div v-if="store.useFarmersExpansion" class="skillTileImgAndNumberDiv">
+				<div class="skillTileImgDiv">
+					<img class="skillTileImg" :src="view.getImage('wheat')" alt="Wheat" />
+				</div>
+				<div class="skillTileNumberDiv">{{ store.players[playerIndexProp].wheat || 0 }}</div>
+			</div>
 			<!-- RESOURCES ON HOME TILE - FINAL SCORING ONLY -->
 			<template v-if="store.gameflow.phase === rf.PHASE_FINAL_SCORING">
 				<template v-for="(resAmount, idx) in store.players[playerIndexProp].villageTiles[0].resources"

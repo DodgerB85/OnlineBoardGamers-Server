@@ -78,6 +78,9 @@ function parsePopupText(text) {
 	text = text.replace(/<MG>/g, () => {
 		return `<img class='meepleOnPopupImg' src='${view.getImage("meeple_green")}' alt='meeple' />`
 	})
+	text = text.replace(/<MP>/g, () => {
+		return `<img class='meepleOnPopupImg' src='${view.getImage("meeple_purple")}' alt='meeple' />`
+	})
 	// Skills
 	text = text.replace(/<SR>/g, () => {
 		return `<img class='skillOnPopupImg' src='${view.getImage("skillTile_random")}' alt='skill' />`

@@ -110,6 +110,8 @@ def create_kfw_game(
             starting_options.append(int(request.POST.get("experiencedGame")))
         if "useMerchants" in request.POST:
             starting_options.append(int(request.POST["useMerchants"]))
+        if "useFarmers" in request.POST:
+            starting_options.append(int(request.POST["useFarmers"]))
         if "useAllPromos" in request.POST:
             starting_options.append(int(request.POST["useAllPromos"]))
 
