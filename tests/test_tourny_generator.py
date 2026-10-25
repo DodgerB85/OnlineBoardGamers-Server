@@ -307,10 +307,71 @@ class TestAvailabilityMatchmaking(PrintSuccessTestCase):
         groups = [["A", "B"], ["C", "D"]]
         profiles = {player: availability_profile([], []) for player in "ABCD"}
 
-        optimized = optimize_disjoint_groups(groups, profiles, {}, "test-seed")
+        optimized = optimize_disjoint_groups(groups, profiles, {}, "test-seed", dict.fromkeys("ABCD", 0))
 
         self.assertEqual([len(group) for group in optimized], [2, 2])
         self.assertEqual(sorted(player for group in optimized for player in group), list("ABCD"))
+
+    def test_standard_optimizer_groups_by_points_even_when_rematches_are_unavoidable(self):
+        groups = [["A", "C"], ["B", "D"]]
+        profiles = {player: availability_profile([], []) for player in "ABCD"}
+        points = {"A": 1, "B": 1, "C": 0, "D": 0}
+        counts = {frozenset("AB"): 1, frozenset("CD"): 1}
+
+        optimized = optimize_disjoint_groups(groups, profiles, counts, "points-first", points)
+
+        self.assertEqual(optimized, [["A", "B"], ["C", "D"]])
+        self.assertEqual(groups, [["A", "C"], ["B", "D"]])
+
+    def test_standard_optimizer_only_mixes_points_to_fill_tables_including_mini_leftover(self):
+        groups = [["A", "D", "F", "H"], ["B", "C", "E", "G"], ["I", "J"]]
+        profiles = {player: availability_profile([], []) for player in "ABCDEFGHIJ"}
+        points = {player: int(player in "ABCDE") for player in profiles}
+
+        optimized = optimize_disjoint_groups(groups, profiles, {}, "mixed-band", points)
+
+        self.assertEqual([[points[player] for player in table] for table in optimized], [[1] * 4, [1, 0, 0, 0], [0, 0]])
+        self.assertEqual(sorted(player for table in optimized for player in table), list("ABCDEFGHIJ"))
+
+    def test_standard_optimizer_prefers_no_rematches_even_if_much_slower(self):
+        groups = [["A", "B"], ["C", "D"]]
+        profiles = {player: availability_profile([], []) for player in "ABCD"}
+        counts = {frozenset("AB"): 1, frozenset("CD"): 1}
+        with (
+            patch("Lobby.sharedFunctions.availabilityMatchmaking.time.monotonic", side_effect=[0, 0, 1]),
+            patch("Lobby.sharedFunctions.availabilityMatchmaking.random.Random") as random_generator,
+            patch("Lobby.sharedFunctions.availabilityMatchmaking._schedule_score", side_effect=[1.0, 1000000.0]),
+        ):
+            random_generator.return_value.choice.return_value = (1, 3)
+            optimized = optimize_disjoint_groups(groups, profiles, counts, "rematches-first", dict.fromkeys("ABCD", 0))
+
+        self.assertEqual(optimized, [["A", "D"], ["C", "B"]])
+
+    def test_annealing_saves_best_priorities_despite_accepting_a_faster_rematch(self):
+        with (
+            patch("Lobby.sharedFunctions.availabilityMatchmaking.time.monotonic", side_effect=[0, 0, 1]),
+            patch("Lobby.sharedFunctions.availabilityMatchmaking.random.Random") as random_generator,
+        ):
+            random_generator.return_value.random.return_value = 0.0
+            optimized = _anneal(
+                ["A", "B"], lambda players: [players], {}, {}, "priorities",
+                lambda rng, players: (0, 1), Mock(side_effect=[(0, 1000000.0), (1, 1.0)]),
+            )
+
+        self.assertEqual(optimized, ["A", "B"])
+
+    def test_standard_optimizer_uses_speed_when_rematches_are_equal(self):
+        groups = [["A", "B"], ["C", "D"]]
+        profiles = {player: availability_profile([], []) for player in "ABCD"}
+        with (
+            patch("Lobby.sharedFunctions.availabilityMatchmaking.time.monotonic", side_effect=[0, 0, 1]),
+            patch("Lobby.sharedFunctions.availabilityMatchmaking.random.Random") as random_generator,
+            patch("Lobby.sharedFunctions.availabilityMatchmaking._schedule_score", side_effect=[100.0, 50.0]),
+        ):
+            random_generator.return_value.choice.return_value = (1, 3)
+            optimized = optimize_disjoint_groups(groups, profiles, {}, "speed-last", dict.fromkeys("ABCD", 0))
+
+        self.assertEqual(optimized, [["A", "D"], ["C", "B"]])
 
     def test_mg_optimizers_preserve_schedule_shape_and_round_two_groups(self):
         profiles = {f"P{index}": availability_profile([], []) for index in range(20)}

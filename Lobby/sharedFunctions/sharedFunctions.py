@@ -10,7 +10,7 @@ import Lobby.sharedFunctions.constants as rf
 
 # from django.urls import reverse
 # from django.http import HttpResponseRedirect
-from Lobby.models import Profile, User
+from Lobby.models import GamePlayer, Profile, User
 
 # from django.contrib import messages
 # from django.core.mail import get_connection, EmailMessage
@@ -859,6 +859,17 @@ def start_next_any_tournament_round(
     tournamentObj.save()
 
 
+def _get_rounds_tournament_leaders(tournamentObj):
+    tournamentField = "game__relatedMainTournament" if tournamentObj.tournamentCategory == "Main" else "game__relatedMiniTournament"
+    kickedPlayers = set(GamePlayer.objects.filter(is_kicked=True, **{tournamentField: tournamentObj}).values_list("player__username", flat=True))
+    # Old scores stay in the standings, but a kicked player cannot enter another game.
+    pointsList = [row for row in json.loads(tournamentObj.tournamentPointsData) if row[0] not in kickedPlayers]
+    if not pointsList:
+        return []
+    maxPoints = max(row[1] for row in pointsList)
+    return [row[0] for row in pointsList if row[1] == maxPoints]
+
+
 # Pass in a tournament. Returns an object of { gamesPlayers: [[p1, p2...], [p5,p6...]], byePlayers: [p3, p4] }
 def SF_createNextRoundGamesSetup(tournamentObj):
     ret = {}
@@ -875,9 +886,11 @@ def SF_createNextRoundGamesSetup(tournamentObj):
     # Get players sorted by points (weakest first) for RR, PT, or TL
     # This first call ist just for KO - it gets overwritten later for RR / TL / PT
     allPlayersList = list(tournamentObj.nextRoundPlayers.all().order_by("?").values_list("username", flat=True))
+    playerPoints = dict.fromkeys(allPlayersList, 0)
 
     if tournamentType in ["RR", "PT", "TL"] and len(TPDA) < tournamentObj.roundsBeforeKnockout:
         pointsList = json.loads(tournamentObj.tournamentPointsData)
+        playerPoints.update((row[0], row[1]) for row in pointsList)
         # Being lowest points to front, in case a bye is needed
         pointsList.sort(key=lambda x: x[1])
         allPlayersList = [row[0] for row in pointsList if row[0] in allPlayersList]
@@ -890,10 +903,8 @@ def SF_createNextRoundGamesSetup(tournamentObj):
 
     # Switch to knockout mode for RR after roundsBeforeKnockout
     if tournamentType == "RR" and len(TPDA) >= tournamentObj.roundsBeforeKnockout:
-        pointsList = json.loads(tournamentObj.tournamentPointsData)
-        pointsList.sort(key=lambda x: x[1], reverse=True)  # Sort by points (descending)
-        maxPoints = pointsList[0][1]
-        allPlayersList = [row[0] for row in pointsList if row[1] >= maxPoints]
+        allPlayersList = _get_rounds_tournament_leaders(tournamentObj)
+        playerPoints = dict.fromkeys(allPlayersList, 0)
         # if len(allPlayersList) < tournament.maxGamePlayers:
         #    ret["endTournament"] = True
         #    return ret
@@ -1016,6 +1027,7 @@ def SF_createNextRoundGamesSetup(tournamentObj):
             profiles,
             matchupCounts,
             roundSeed,
+            playerPoints,
         )
 
     ret["roundNumberString"] = roundNumberString
@@ -1043,12 +1055,7 @@ def SF_checkForAnyTournamentEnd(tournamentObj):
     if tournamentObj.tournamentType == "RR":
         TPDA = json.loads(tournamentObj.tournamentProgressionData)
         if len(TPDA) >= tournamentObj.roundsBeforeKnockout:
-            pointsList = json.loads(tournamentObj.tournamentPointsData)
-            pointsList.sort(key=lambda x: x[1], reverse=True)  # Sort by points (descending)
-            maxPoints = pointsList[0][1]
-            allPlayersList = [row[0] for row in pointsList if row[1] >= maxPoints]
-            if len(allPlayersList) < tournamentObj.maxGamePlayers:
-                return True
+            return len(_get_rounds_tournament_leaders(tournamentObj)) < tournamentObj.maxGamePlayers
         # For any tournament, check if there's a winner or not enough players for a FULL game
     return tournamentObj.nextRoundPlayers.count() < tournamentObj.maxGamePlayers
 
