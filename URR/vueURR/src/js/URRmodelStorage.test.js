@@ -32,6 +32,7 @@ test("the compressed save round-trips state, board and history", () => {
 	game.rain.step = "harvest"
 	game.rain.outflow = 3
 	game.rain.harvestOrder = [2, 0]
+	game.gameflow.developmentStep = "digging"
 
 	const history = [[rf.HIST_NEW_GAME, -1, null]]
 	storeGame(game, history)
@@ -39,6 +40,7 @@ test("the compressed save round-trips state, board and history", () => {
 	assert.doesNotMatch(encoded, /^{/)
 	const saved = funcs.decompressData64(encoded)
 	assert.equal(saved.length, 12)
+	assert.equal(saved[1][12], rf.DEVELOPMENT_STEPS.indexOf("digging"), "the step is stored as its index")
 	assert.deepEqual(saved[10], [])
 	assert.deepEqual(saved[11], [])
 	const imported = funcs.importURRmodel(encoded)
@@ -73,7 +75,10 @@ test("game-over saves drop transient state but keep the final result", () => {
 	game.players[0].soldLandTypes = [2]
 	storeGame(game)
 
-	const imported = funcs.importURRmodel(funcs.exportURRmodel(true)).state
+	const encoded = funcs.exportURRmodel(true)
+	const saved = funcs.decompressData64(encoded)
+	assert.equal(saved[1][2], rf.END_REASONS.indexOf("invasion"), "the end reason is stored as its index")
+	const imported = funcs.importURRmodel(encoded).state
 	assert.equal(imported.gameflow.phase, rf.PHASE_GAME_OVER)
 	assert.equal(imported.gameflow.endReason, "invasion")
 	assert.deepEqual(imported.gameflow.finalPositions, [0, 1, 2])

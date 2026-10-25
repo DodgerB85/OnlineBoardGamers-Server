@@ -3,8 +3,9 @@
  *
  * History stores [code, player, deltaSeconds, ...params]. Parameterless
  * actions carry no payload, so a pass is three numbers. Optional params come
- * last so absent ones are dropped, and params with a fixed vocabulary (kind,
- * choice) are stored as an index into their rf table. Unknown action types
+ * last so absent ones are dropped, params with a fixed vocabulary (kind,
+ * choice) are stored as an index into their rf table, and area params are
+ * stored as their row * 10 + column board index. Unknown action types
  * fall back to the raw object.
  */
 import * as rf from "./URRreference.js"
@@ -47,8 +48,27 @@ function cleanEmptyArray(value) {
 const BY_CODE = new Map(SPECS.map((spec) => [spec.code, spec]))
 const BY_TYPE = new Map(SPECS.map((spec) => [spec.type, spec]))
 const PARAM_TABLES = { kind: rf.EQUIPMENT_KINDS, choice: rf.HARVEST_CHOICES }
+// Area ids are "printed-<row>-<column>" on a fixed 9x10 board, so row * 10 +
+// column is a compact index. Nested params (sale batches, paths) recurse.
+const AREA_FIELDS = new Set(["area", "buy", "from", "to", "path", "remove", "sales", "sellBefore", "sellAfter"])
+const AREA_ID = /^printed-(\d+)-(\d+)$/
+
+function encodeArea(value) {
+	if (typeof value === "string") {
+		const match = AREA_ID.exec(value)
+		return match ? Number(match[1]) * 10 + Number(match[2]) : value
+	}
+	return Array.isArray(value) ? value.map(encodeArea) : value
+}
+
+// A number is only decoded where an area is expected, so amounts and bids stay numbers.
+function decodeArea(value) {
+	if (typeof value === "number") return `printed-${Math.floor(value / 10)}-${value % 10}`
+	return Array.isArray(value) ? value.map(decodeArea) : value
+}
 
 function encodeValue(field, value) {
+	if (AREA_FIELDS.has(field)) return encodeArea(value)
 	const table = PARAM_TABLES[field]
 	const index = table ? table.indexOf(value) : -1
 	return index < 0 ? value : index
@@ -56,6 +76,7 @@ function encodeValue(field, value) {
 
 // A value that is not in the table passes through unchanged.
 function decodeValue(field, value) {
+	if (AREA_FIELDS.has(field)) return decodeArea(value)
 	return PARAM_TABLES[field]?.[value] ?? value
 }
 
@@ -84,6 +105,16 @@ export function historyAction(entry) {
 
 export function isActionEntry(entry) {
 	return entry[0] === ACTION_RAW || BY_CODE.has(entry[0])
+}
+
+// Rewrites a row in the current encoding, so a save carries one shape even when
+// the row was written by an older build. Rows that are not actions pass through.
+export function normalizeEntry(row) {
+	if (!isActionEntry(row)) return row
+	const action = historyAction(row)
+	if (!action) return row
+	const [code, params] = encodeAction(action)
+	return [code, row[1], row[2], ...params]
 }
 
 export function historyChanges(entry) {

@@ -6,6 +6,7 @@ import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
 import * as rf from "./URRreference.js"
 import * as historyStorage from "./URRhistoryStorage.js"
+import { normalizeEntry } from "./URRhistoryActions.js"
 
 const STATE_FIELDS = ["players", "gameflow", "states", "nations", "board", "landPrices", "era", "cardSupply", "rain", "nextDiggerId"]
 const RAIN_STEPS = [null, "routing", "harvest", "complete"]
@@ -176,8 +177,19 @@ function isDefault(value) {
 	return value === 0 || value === null || value === undefined || (Array.isArray(value) && value.length === 0)
 }
 
+// Slot 0 of each table means "none", so the save stores the table index; text
+// that is not in the table (an older save) passes through unchanged.
+function encodeToken(table, value) {
+	const index = table.indexOf(value ?? null)
+	return index < 0 ? (value ?? 0) : index
+}
+
+function decodeToken(table, value) {
+	return typeof value === "number" ? table[value] ?? null : value ?? null
+}
+
 function encodeGameflow(flow, forGameOver) {
-	if (forGameOver) return [flow.turn, flow.phase, flow.endReason, flow.finalPositions || []]
+	if (forGameOver) return [flow.turn, flow.phase, encodeToken(rf.END_REASONS, flow.endReason), flow.finalPositions || []]
 	const entry = [
 		flow.turn,
 		flow.phase,
@@ -191,8 +203,8 @@ function encodeGameflow(flow, forGameOver) {
 		flow.auction ? [flow.auction.nation, [...flow.auction.bidders], flow.auction.highPlayer, flow.auction.amount] : 0,
 		[...flow.stateOrder],
 		flow.stateIndex,
-		flow.developmentStep ?? 0,
-		flow.endReason ?? 0,
+		encodeToken(rf.DEVELOPMENT_STEPS, flow.developmentStep),
+		encodeToken(rf.END_REASONS, flow.endReason),
 		flow.pendingOffer ?? 0,
 	]
 	const optional = [flow.barahshumPass ?? 0, flow.waterworkRequests ?? 0, flow.waterworkAgreements ?? 0, flow.declinedWaterworks ?? 0, flow.offerDeclined ?? 0, flow.developmentPlan ?? 0, flow.finalPositions ?? 0]
@@ -212,7 +224,7 @@ function decodeGameflow(entry, playerCount) {
 	}
 	if (entry.length === 4) {
 		// Game-over saves only carry the fields the final screen still reads.
-		return { ...flow, turn: entry[0], phase: entry[1], endReason: entry[2] || null, finalPositions: entry[3] || [], turnOrder: [] }
+		return { ...flow, turn: entry[0], phase: entry[1], endReason: decodeToken(rf.END_REASONS, entry[2]), finalPositions: entry[3] || [], turnOrder: [] }
 	}
 	flow.turn = entry[0]
 	flow.phase = entry[1]
@@ -226,8 +238,8 @@ function decodeGameflow(entry, playerCount) {
 	flow.auction = entry[9] ? { nation: entry[9][0], bidders: [...entry[9][1]], highPlayer: entry[9][2], amount: entry[9][3] } : null
 	flow.stateOrder = [...entry[10]]
 	flow.stateIndex = entry[11]
-	if (entry[12]) flow.developmentStep = entry[12]
-	if (entry[13]) flow.endReason = entry[13]
+	if (entry[12]) flow.developmentStep = decodeToken(rf.DEVELOPMENT_STEPS, entry[12])
+	if (entry[13]) flow.endReason = decodeToken(rf.END_REASONS, entry[13])
 	if (entry[14]) flow.pendingOffer = entry[14]
 	const optionalKeys = ["barahshumPass", "waterworkRequests", "waterworkAgreements", "declinedWaterworks", "offerDeclined", "developmentPlan", "finalPositions"]
 	optionalKeys.forEach((key, index) => {
@@ -354,9 +366,9 @@ export function exportURRmodel(forGameOver = false) {
 		encodeCardSupply(state.cardSupply),
 		forGameOver ? [] : encodeRain(state.rain, areaIndex),
 		forGameOver ? -1 : state.nextDiggerId,
-		// The compact replay is already the stored shape; slot 11 keeps the
-		// opening-only changes, not a full position.
-		history.slice(1),
+		// Action rows are re-encoded so the save carries one shape; slot 11 keeps
+		// the opening-only changes, not a full position.
+		history.slice(1).map(normalizeEntry),
 	]
 	entry.push(history[0]?.[3] ?? [])
 

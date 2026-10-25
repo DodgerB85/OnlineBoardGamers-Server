@@ -63,7 +63,7 @@ Never cut:
 Prefer JPG for image assets when possible; compression saves space.
 Frontend source is `<GAME>/vue<GAME>/src`. `<GAME>/static/<GAME>/<GAME>vuedist` is build output: never edit it by hand, and never include dist/build output in a commit.
 `npm run build` leaves a stray `images/` dir in the dist folder (RNB also `help/`); delete it after building. The `<game>.bat` scripts hardcode the maintainer's Windows paths and don't run here.
-Backend tests: root `/tests/test_*.py`, plain `unittest`, `manage.py test tests.test_x`. No pytest, no per-app `tests.py`. Frontend tests: vitest `src/**/*.test.js`, `npm test`, only FCM, IND, ROW.
+Backend tests: root `/tests/test_*.py`, plain `unittest`, `manage.py test tests.test_x`. No pytest, no per-app `tests.py`. Frontend tests: vitest `src/**/*.test.js`, `npm test`, only FCM, IND, ROW, KFW.
 If you change behavior described in `/docs/`, update that doc.
 
 End each reply with one or two lines: what you skipped or did not check, and any risk the user must know.

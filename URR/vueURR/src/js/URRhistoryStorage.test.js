@@ -3,7 +3,7 @@ import test from "node:test"
 import { applyAction, createGame, getBotAction } from "./URRgame.js"
 import * as rf from "./URRreference.js"
 import { computeHistory } from "./URRhistory.js"
-import { encodeAction, historyAction } from "./URRhistoryActions.js"
+import { encodeAction, historyAction, normalizeEntry } from "./URRhistoryActions.js"
 import { changesBetween, compactBoard, expandBoard, expandHistory, openingState, syncHistoryReplay } from "./URRhistoryStorage.js"
 
 function replay(history, names, creationTimestamp = 1000) {
@@ -71,18 +71,24 @@ test("parameterless actions are stored as a single code", () => {
 	assert.deepEqual(historyAction(entry(0, { type: "respondOffer", accept: false }, 11)), { type: "respondOffer", accept: false })
 })
 
-test("fixed-vocabulary params are stored as indexes and trades store no holes", () => {
+test("params are stored as indexes and trades store no holes", () => {
 	const card = entry(0, { type: "buyCard", kind: "digger", area: "printed-4-3" }, 1)
-	assert.deepEqual(card, [17, 0, 1, 0, "printed-4-3"])
+	assert.deepEqual(card, [17, 0, 1, 0, 43])
 	assert.deepEqual(historyAction(card), { type: "buyCard", kind: "digger", area: "printed-4-3" })
 
 	const work = entry(1, { type: "requestWaterwork", kind: "reservoir", area: "printed-5-6" }, 2)
-	assert.deepEqual(work.slice(3), [2, "printed-5-6"])
+	assert.deepEqual(work.slice(3), [2, 56])
 	assert.deepEqual(historyAction(work), { type: "requestWaterwork", kind: "reservoir", area: "printed-5-6" })
 
 	const harvest = entry(2, { type: "harvest", choice: "store", remove: "printed-5-6" }, 3)
-	assert.deepEqual(harvest.slice(3), [0, "printed-5-6"])
+	assert.deepEqual(harvest.slice(3), [0, 56])
 	assert.deepEqual(historyAction(harvest), { type: "harvest", choice: "store", remove: "printed-5-6" })
+
+	// Nested area params (paths, sale batches) become nested indexes.
+	assert.deepEqual(entry(0, { type: "dig", crew: 2, path: ["printed-1-4", "printed-1-5"] }, 4).slice(3), [2, [14, 15]])
+	const batch = JSON.parse(JSON.stringify(entry(1, { type: "resolveMaintenance", sales: [["printed-1-4", "printed-1-5"]] }, 5)))
+	assert.deepEqual(batch.slice(3), [[[14, 15]]])
+	assert.deepEqual(historyAction(batch), { type: "resolveMaintenance", sales: [["printed-1-4", "printed-1-5"]] })
 
 	// Entries reach the database through JSON, so read them back the same way.
 	const plain = JSON.parse(JSON.stringify(entry(1, { type: "tradeLand", buy: "printed-4-3", exchangeDer: false, sellBefore: [], sellAfter: [] }, 7)))
@@ -93,6 +99,15 @@ test("fixed-vocabulary params are stored as indexes and trades store no holes", 
 	// A sale after the buy leaves a hole in front of it: the hole reads as absent, not as null.
 	const sellAfterOnly = JSON.parse(JSON.stringify(entry(1, { type: "tradeLand", sellAfter: [["printed-2-4"]] }, 9)))
 	assert.deepEqual(historyAction(sellAfterOnly), { type: "tradeLand", sellAfter: [["printed-2-4"]] })
+})
+
+test("action rows are re-encoded on save and other rows pass through", () => {
+	assert.deepEqual(normalizeEntry([17, 0, 1, 0, "printed-4-3"]), [17, 0, 1, 0, 43])
+	assert.deepEqual(historyAction(normalizeEntry([17, 0, 1, 0, "printed-4-3"])), { type: "buyCard", kind: "digger", area: "printed-4-3" })
+	assert.deepEqual(normalizeEntry([13, 2, 2, "printed-5-5"]), [13, 2, 2, 55])
+	assert.deepEqual(normalizeEntry([10, 0, 5]), [10, 0, 5], "a row already in the current shape is untouched")
+	const kickout = [rf.HIST_KICKOUT, 2, 0, [[["players", "2", "isMissing"], true]]]
+	assert.equal(normalizeEntry(kickout), kickout, "rows that are not actions are untouched")
 })
 
 test("opening-only changes replay without a stored snapshot", () => {

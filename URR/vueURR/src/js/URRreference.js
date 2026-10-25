@@ -91,6 +91,9 @@ export const ERA_CARD_DATA = {
 // Stored action params keep these as indexes; the model itself uses the strings.
 export const EQUIPMENT_KINDS = ["digger", "pump", "reservoir"]
 export const HARVEST_CHOICES = ["store", "distribute"]
+// Gameflow saves these as indexes too; slot 0 of each table means "none".
+export const DEVELOPMENT_STEPS = [null, "digging", "eridu", "betweenStates", "purchasing"]
+export const END_REASONS = [null, "invasion", "revolution"]
 
 // --- Starting money ---
 export const STARTING_MONEY_BY_PLAYER_COUNT = { 3: 600, 4: 450, 5: 360, 6: 300 }
