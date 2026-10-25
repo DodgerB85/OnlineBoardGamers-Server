@@ -115,13 +115,14 @@ export function rebuildTurnOrder() {
 export function act(action) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	const seat = personal.trainingGame ? engine.activeSeat(store.game) : personal.pov
 	try {
-		store.game = engine.applyAction(store.game, personal.pov, action)
+		store.game = engine.applyAction(store.game, seat, action)
 	} catch (e) {
 		if (e instanceof engine.PAPError) return e.message
 		throw e
 	}
-	store.actions.push({ seat: personal.pov, a: action, t: Date.now() })
+	store.actions.push({ seat, a: action, t: Date.now() })
 	syncPlayers()
 	rebuildTurnOrder()
 	return ""

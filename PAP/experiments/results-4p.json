@@ -1,0 +1,172 @@
+[
+  {
+    "variant": "baseline",
+    "games": 20,
+    "players": 4,
+    "cumulativeCrafts": [
+      0,
+      0,
+      0.0875,
+      0.5,
+      0.9875,
+      1.4125,
+      1.9875
+    ],
+    "cumulativeSales": [
+      0,
+      0,
+      0.0875,
+      0.4125,
+      0.8375,
+      1.25,
+      1.725
+    ],
+    "meanFinalProfit": 1.9375,
+    "meanFinalCash": 18.225,
+    "meanFinalStaff": 1.1875,
+    "meanFinalTier": 1.4,
+    "contestedSalesPerGame": 2.05,
+    "spoiledPerPlayer": 0.1375,
+    "gamesReaching40": 0,
+    "auditThreshold": 40,
+    "gamesActivatingFinalAudit": 0,
+    "payrollShortfallGames": 0,
+    "seed0": 0
+  },
+  {
+    "variant": "opening",
+    "games": 20,
+    "players": 4,
+    "cumulativeCrafts": [
+      0.95,
+      1.4875,
+      2.2875,
+      3.1625,
+      4.075,
+      4.925,
+      5.9125
+    ],
+    "cumulativeSales": [
+      0.625,
+      1.05,
+      1.65,
+      2.2375,
+      2.9625,
+      3.6375,
+      4.4125
+    ],
+    "meanFinalProfit": 12.55,
+    "meanFinalCash": 29.025,
+    "meanFinalStaff": 2.4,
+    "meanFinalTier": 1.425,
+    "contestedSalesPerGame": 8,
+    "spoiledPerPlayer": 0.8375,
+    "gamesReaching40": 0,
+    "auditThreshold": 40,
+    "gamesActivatingFinalAudit": 0,
+    "payrollShortfallGames": 0,
+    "seed0": 0
+  },
+  {
+    "variant": "redesign",
+    "games": 20,
+    "players": 4,
+    "cumulativeCrafts": [
+      0.95,
+      1.55,
+      2.4875,
+      3.825,
+      5.1875,
+      6.35,
+      7.5875
+    ],
+    "cumulativeSales": [
+      0.625,
+      1.075,
+      1.7375,
+      2.5125,
+      3.3875,
+      4.2625,
+      5.1375
+    ],
+    "meanFinalProfit": -4.35,
+    "meanFinalCash": 11.6125,
+    "meanFinalStaff": 2.55,
+    "meanFinalTier": 1.4,
+    "contestedSalesPerGame": 12.15,
+    "spoiledPerPlayer": 1.875,
+    "gamesReaching40": 0,
+    "auditThreshold": 40,
+    "gamesActivatingFinalAudit": 0,
+    "payrollShortfallGames": 10,
+    "seed0": 0
+  },
+  {
+    "variant": "redesignNoWages",
+    "games": 20,
+    "players": 4,
+    "cumulativeCrafts": [
+      0.95,
+      1.55,
+      2.4875,
+      3.8125,
+      5.2625,
+      6.5875,
+      8.0625
+    ],
+    "cumulativeSales": [
+      0.625,
+      1.075,
+      1.7375,
+      2.5,
+      3.4875,
+      4.4,
+      5.4875
+    ],
+    "meanFinalProfit": 12.9,
+    "meanFinalCash": 28.6875,
+    "meanFinalStaff": 2.8,
+    "meanFinalTier": 1.4125,
+    "contestedSalesPerGame": 12.25,
+    "spoiledPerPlayer": 1.975,
+    "gamesReaching40": 2,
+    "auditThreshold": 40,
+    "gamesActivatingFinalAudit": 2,
+    "payrollShortfallGames": 0,
+    "seed0": 0
+  },
+  {
+    "variant": "licensedMarket",
+    "games": 20,
+    "players": 4,
+    "cumulativeCrafts": [
+      0.95,
+      1.625,
+      2.525,
+      3.9,
+      5.325,
+      6.5875,
+      8.05
+    ],
+    "cumulativeSales": [
+      0.9125,
+      1.5,
+      2.325,
+      3.3875,
+      4.625,
+      5.675,
+      6.8
+    ],
+    "meanFinalProfit": 14.7625,
+    "meanFinalCash": 30.675,
+    "meanFinalStaff": 2.8,
+    "meanFinalTier": 1.4,
+    "contestedSalesPerGame": 17.75,
+    "spoiledPerPlayer": 0.5125,
+    "gamesReaching40": 0,
+    "auditThreshold": 20,
+    "gamesActivatingFinalAudit": 17,
+    "payrollShortfallGames": 0,
+    "seed0": 0
+  }
+]

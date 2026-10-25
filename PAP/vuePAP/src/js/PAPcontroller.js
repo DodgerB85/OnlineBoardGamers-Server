@@ -16,7 +16,7 @@ export function currentPlayerIndex() {
 
 export function isMyTurn() {
 	const personal = usePersonalStore()
-	return personal.canPlay() && currentPlayerIndex() === personal.pov
+	return personal.canPlay() && (personal.trainingGame || currentPlayerIndex() === personal.pov)
 }
 
 export function isSimulPhase() {
@@ -36,9 +36,10 @@ export function act(action) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	if (!isMyTurn() || personal.haltPlay) return
+	const seat = personal.trainingGame ? currentPlayerIndex() : personal.pov
 	store.gameMessages.actionError = model.act(action)
 	if (store.gameMessages.actionError) return
-	IO.saveGame(engine.activeSeat(store.game) !== personal.pov)
+	IO.saveGame(engine.activeSeat(store.game) !== seat)
 }
 
 export function timedOutPlayerObj() {

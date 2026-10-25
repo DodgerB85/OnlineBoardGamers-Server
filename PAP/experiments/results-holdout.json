@@ -1,0 +1,21 @@
+{
+  "variant": "licensedMarket",
+  "seeds": "100–119",
+  "games": 20,
+  "players": 4,
+  "cumulativeSales": [
+    0.95,
+    1.5375,
+    2.275,
+    3.4125,
+    4.6375,
+    5.7625,
+    7.0375
+  ],
+  "meanFinalProfit": 15.6,
+  "contestedSalesPerGame": 18.3,
+  "auditThreshold": 20,
+  "gamesActivatingFinalAudit": 19,
+  "gamesReaching40": 0,
+  "payrollShortfallGames": 0
+}

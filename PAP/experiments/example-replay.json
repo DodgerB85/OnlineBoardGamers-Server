@@ -1,0 +1,4048 @@
+{
+  "variant": "licensedMarket",
+  "seed": 42,
+  "names": [
+    "poison",
+    "marketing",
+    "grow",
+    "lean"
+  ],
+  "actions": [
+    {
+      "seat": 0,
+      "a": {
+        "type": "chooseRecipes",
+        "recipes": [
+          "HS3",
+          "HS4"
+        ]
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "chooseRecipes",
+        "recipes": [
+          "HS6",
+          "HS8"
+        ]
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "chooseRecipes",
+        "recipes": [
+          "HS6",
+          "HS8"
+        ]
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "chooseRecipes",
+        "recipes": [
+          "HS11",
+          "HS1"
+        ]
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "assign",
+        "staffId": "s0_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS3",
+          "poison": 0,
+          "poisonPay": []
+        }
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "assign",
+        "staffId": "s0_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "crystal"
+        }
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "assign",
+        "staffId": "s1_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS6"
+        }
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "assign",
+        "staffId": "s1_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "s2_2",
+        "tile": "coop",
+        "choice": {
+          "hire": "apprentice"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "s2_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS6"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "assign",
+        "staffId": "s3_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "crystal"
+        }
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "assign",
+        "staffId": "s3_1",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "crystal"
+        }
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "soloSale",
+        "venue": "golem",
+        "potionId": "pt1"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "commit",
+        "potionId": "pt2",
+        "price": 2,
+        "hype": 0
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "commit",
+        "potionId": "pt4",
+        "price": 2,
+        "hype": 0
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "commit",
+        "potionId": "pt4",
+        "price": 5,
+        "hype": 0
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "callReview"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "discard",
+        "card": "bribe"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "discard",
+        "card": "sabotage"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "discard",
+        "card": "inspection"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "discard",
+        "card": "inspection"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "assign",
+        "staffId": "s0_2",
+        "tile": "mushroomCrown",
+        "choice": {
+          "mode": "mixed",
+          "kind": "toad"
+        }
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "assign",
+        "staffId": "s0_1",
+        "tile": "kettle",
+        "choice": {
+          "batch": [
+            {
+              "recipe": "HS3"
+            },
+            {
+              "recipe": "HS3"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "assign",
+        "staffId": "s1_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "assign",
+        "staffId": "s1_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS8"
+        }
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "s2_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "crystal"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "s2_1",
+        "tile": "cauldronWorks",
+        "choice": {
+          "upgrade": true,
+          "pay": {
+            "crystal": 2,
+            "toad": 0,
+            "quick": 0,
+            "banshee": 0
+          }
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "st3",
+        "tile": "coop",
+        "choice": {
+          "hire": "apprentice"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "assign",
+        "staffId": "s3_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS11"
+        }
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "assign",
+        "staffId": "s3_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "soloSale",
+        "venue": "odditorium",
+        "potionId": "pt7"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "commit",
+        "potionId": "pt5",
+        "price": 2,
+        "hype": 1
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "commit",
+        "potionId": "pt9",
+        "price": 1,
+        "hype": 0
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "commit",
+        "potionId": "pt6",
+        "price": 4,
+        "hype": 1
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "commit",
+        "potionId": "pt9",
+        "price": 3,
+        "hype": 0
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "commit",
+        "potionId": "pt9",
+        "price": 5,
+        "hype": 0
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "favor",
+        "mode": "cancel"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "callReview"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "discard",
+        "card": "inspection"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "discard",
+        "card": "sabotage"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "discard",
+        "card": "sabotage"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "assign",
+        "staffId": "s0_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "crystal"
+        }
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "assign",
+        "staffId": "s0_1",
+        "tile": "mushroomCrown",
+        "choice": {
+          "mode": "mixed",
+          "kind": "toad"
+        }
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "assign",
+        "staffId": "s1_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "assign",
+        "staffId": "s1_1",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "s2_2",
+        "tile": "cauldronWorks",
+        "choice": {
+          "promote": "s2_2"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "st3",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "s2_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS8"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "st8",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "assign",
+        "staffId": "s3_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS11"
+        }
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "assign",
+        "staffId": "s3_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "commit",
+        "potionId": "pt10",
+        "price": 4,
+        "hype": 1
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "commit",
+        "potionId": "pt11",
+        "price": 3,
+        "hype": 1
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "commit",
+        "potionId": "pt10",
+        "price": 7,
+        "hype": 0
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "callReview"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "discard",
+        "card": "sabotage"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "discard",
+        "card": "bribe"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "discard",
+        "card": "inspection"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "discard",
+        "card": "inspection"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "assign",
+        "staffId": "s3_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS11"
+        }
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "assign",
+        "staffId": "s3_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "assign",
+        "staffId": "s0_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS3",
+          "poison": 1,
+          "poisonPay": [
+            "toad"
+          ]
+        }
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "assign",
+        "staffId": "s0_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "crystal"
+        }
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "assign",
+        "staffId": "s1_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "assign",
+        "staffId": "s1_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS8"
+        }
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "st3",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "s2_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS8"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "st8",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "s2_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "soloSale",
+        "venue": "nobles",
+        "potionId": "pt13"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "sabotage",
+        "targetSeat": 1,
+        "potionId": "pt14"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "commit",
+        "potionId": "pt12",
+        "price": 1,
+        "hype": 1
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "commit",
+        "potionId": "pt15",
+        "price": 2,
+        "hype": 1
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "commit",
+        "potionId": "pt15",
+        "price": 5,
+        "hype": 0
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "favor",
+        "mode": "cancel"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "callReview"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "discard",
+        "card": "bribe"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "discard",
+        "card": "bribe"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "discard",
+        "card": "sabotage"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "assign",
+        "staffId": "s0_2",
+        "tile": "mushroomCrown",
+        "choice": {
+          "mode": "mixed",
+          "kind": "toad"
+        }
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "assign",
+        "staffId": "s0_1",
+        "tile": "kettle",
+        "choice": {
+          "batch": [
+            {
+              "recipe": "HS3"
+            },
+            {
+              "recipe": "HS3"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "assign",
+        "staffId": "s1_2",
+        "tile": "mushroomCrown",
+        "choice": {
+          "mode": "mixed",
+          "kind": "toad"
+        }
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "assign",
+        "staffId": "s1_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "M20"
+        }
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "s2_1",
+        "tile": "kettle",
+        "choice": {
+          "batch": [
+            {
+              "recipe": "HS8"
+            },
+            {
+              "recipe": "HS8"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "st3",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "banshee"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "s2_2",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "M17"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "st8",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "banshee"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "assign",
+        "staffId": "s3_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS11"
+        }
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "assign",
+        "staffId": "s3_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "soloSale",
+        "venue": "overflow1",
+        "potionId": "pt19"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "commit",
+        "potionId": "pt16",
+        "price": 2,
+        "hype": 1
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "commit",
+        "potionId": "pt18",
+        "price": 2,
+        "hype": 2
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "commit",
+        "potionId": "pt20",
+        "price": 2,
+        "hype": 1
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "commit",
+        "potionId": "pt22",
+        "price": 1,
+        "hype": 1
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "commit",
+        "potionId": "pt21",
+        "price": 5,
+        "hype": 1
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "sell",
+        "venue": "nobles",
+        "potionId": "pt20"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "callReview"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "contribute",
+        "charterIdx": 2,
+        "good": "crystal"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "contribute",
+        "charterIdx": 2,
+        "good": "crystal"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "contribute",
+        "charterIdx": 2,
+        "good": "crystal"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "discard",
+        "card": "bribe"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "discard",
+        "card": "inspection"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "discard",
+        "card": "inspection"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "s2_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "M17"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "st3",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "s2_2",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS8"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "st8",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "assign",
+        "staffId": "s3_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS11"
+        }
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "assign",
+        "staffId": "s3_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "assign",
+        "staffId": "s0_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "crystal"
+        }
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "assign",
+        "staffId": "s0_1",
+        "tile": "mushroomCrown",
+        "choice": {
+          "mode": "mixed",
+          "kind": "toad"
+        }
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "assign",
+        "staffId": "s1_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "assign",
+        "staffId": "s1_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS4"
+        }
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "soloSale",
+        "venue": "workhouse",
+        "potionId": "pt23"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "commit",
+        "potionId": "pt24",
+        "price": 5,
+        "hype": 1
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "commit",
+        "potionId": "pt25",
+        "price": 4,
+        "hype": 1
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "commit",
+        "potionId": "pt26",
+        "price": 5,
+        "hype": 2
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "commit",
+        "potionId": "pt24",
+        "price": 6,
+        "hype": 1
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "commit",
+        "potionId": "pt25",
+        "price": 5,
+        "hype": 0
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "commit",
+        "potionId": "pt25",
+        "price": 7,
+        "hype": 0
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "callReview"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "contribute",
+        "charterIdx": 2,
+        "good": "crystal"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "discard",
+        "card": "bribe"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "discard",
+        "card": "sabotage"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "discard",
+        "card": "inspection"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "discard",
+        "card": "bribe"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "s2_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS8"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "st3",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "s2_2",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS8"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "assign",
+        "staffId": "st8",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "assign",
+        "staffId": "s3_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS11"
+        }
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "assign",
+        "staffId": "s3_2",
+        "tile": "mushroomCrown",
+        "choice": {
+          "mode": "mixed",
+          "kind": "toad"
+        }
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "assign",
+        "staffId": "s0_1",
+        "tile": "kettle",
+        "choice": {
+          "batch": [
+            {
+              "recipe": "HS3"
+            },
+            {
+              "recipe": "HS3"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "assign",
+        "staffId": "s0_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "crystal"
+        }
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "assign",
+        "staffId": "s1_2",
+        "tile": "crystalQuarry",
+        "choice": {
+          "mode": "mixed",
+          "kind": "quick"
+        }
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "assign",
+        "staffId": "s1_1",
+        "tile": "kettle",
+        "choice": {
+          "recipe": "HS4"
+        }
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "soloSale",
+        "venue": "fever",
+        "potionId": "pt27"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "sabotage",
+        "targetSeat": 0,
+        "potionId": "pt30"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "soloSale",
+        "venue": "nobles",
+        "potionId": "pt31"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "commit",
+        "potionId": "pt28",
+        "price": 5,
+        "hype": 1
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "commit",
+        "potionId": "pt32",
+        "price": 5,
+        "hype": 1
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "commit",
+        "potionId": "pt29",
+        "price": 1,
+        "hype": 1
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "commit",
+        "potionId": "pt32",
+        "price": 2,
+        "hype": 0
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "pass"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 3,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 0,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 1,
+      "a": {
+        "type": "done"
+      }
+    },
+    {
+      "seat": 2,
+      "a": {
+        "type": "payCondemnation"
+      }
+    }
+  ],
+  "expectedLog": [
+    {
+      "y": 1,
+      "seat": 0,
+      "key": "choseRecipes",
+      "args": {
+        "recipes": [
+          "HS3",
+          "HS4"
+        ]
+      }
+    },
+    {
+      "y": 1,
+      "seat": 1,
+      "key": "choseRecipes",
+      "args": {
+        "recipes": [
+          "HS6",
+          "HS8"
+        ]
+      }
+    },
+    {
+      "y": 1,
+      "seat": 2,
+      "key": "choseRecipes",
+      "args": {
+        "recipes": [
+          "HS6",
+          "HS8"
+        ]
+      }
+    },
+    {
+      "y": 1,
+      "seat": 3,
+      "key": "choseRecipes",
+      "args": {
+        "recipes": [
+          "HS11",
+          "HS1"
+        ]
+      }
+    },
+    {
+      "y": 1,
+      "seat": null,
+      "key": "yearStart",
+      "args": {
+        "year": 1
+      }
+    },
+    {
+      "y": 1,
+      "seat": null,
+      "key": "scare",
+      "args": {
+        "scare": "S6"
+      }
+    },
+    {
+      "y": 1,
+      "seat": 0,
+      "key": "craft",
+      "args": {
+        "recipe": "HS3",
+        "disp": null
+      }
+    },
+    {
+      "y": 1,
+      "seat": 1,
+      "key": "craft",
+      "args": {
+        "recipe": "HS6",
+        "disp": null
+      }
+    },
+    {
+      "y": 1,
+      "seat": 2,
+      "key": "craft",
+      "args": {
+        "recipe": "HS6",
+        "disp": null
+      }
+    },
+    {
+      "y": 1,
+      "seat": 0,
+      "key": "sale",
+      "args": {
+        "venue": "golem",
+        "price": 5,
+        "kind": "solo"
+      }
+    },
+    {
+      "y": 1,
+      "seat": 1,
+      "key": "sale",
+      "args": {
+        "venue": "workhouse",
+        "price": 2,
+        "kind": "exchange"
+      }
+    },
+    {
+      "y": 1,
+      "seat": null,
+      "key": "exchange",
+      "args": {
+        "venue": "workhouse",
+        "winner": 1,
+        "bids": [
+          {
+            "seat": 1,
+            "price": 2,
+            "hype": 0
+          },
+          {
+            "seat": 2,
+            "price": 2,
+            "hype": 0
+          }
+        ]
+      }
+    },
+    {
+      "y": 1,
+      "seat": 2,
+      "key": "sale",
+      "args": {
+        "venue": "lantern",
+        "price": 5,
+        "kind": "exchange"
+      }
+    },
+    {
+      "y": 1,
+      "seat": null,
+      "key": "exchange",
+      "args": {
+        "venue": "lantern",
+        "winner": 2,
+        "bids": [
+          {
+            "seat": 2,
+            "price": 5,
+            "hype": 0
+          }
+        ]
+      }
+    },
+    {
+      "y": 1,
+      "seat": 0,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 1,
+      "seat": 1,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 1,
+      "seat": 2,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 1,
+      "seat": 3,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 1,
+      "seat": 0,
+      "key": "firstPlayer",
+      "args": {}
+    },
+    {
+      "y": 1,
+      "seat": 3,
+      "key": "watch",
+      "args": {}
+    },
+    {
+      "y": 2,
+      "seat": null,
+      "key": "yearStart",
+      "args": {
+        "year": 2
+      }
+    },
+    {
+      "y": 2,
+      "seat": 2,
+      "key": "reviewCalled",
+      "args": {}
+    },
+    {
+      "y": 2,
+      "seat": 0,
+      "key": "reviewContribution",
+      "args": {
+        "charter": "C9"
+      }
+    },
+    {
+      "y": 2,
+      "seat": null,
+      "key": "scare",
+      "args": {
+        "scare": "S3"
+      }
+    },
+    {
+      "y": 2,
+      "seat": 0,
+      "key": "craft",
+      "args": {
+        "recipe": "HS3",
+        "disp": null
+      }
+    },
+    {
+      "y": 2,
+      "seat": 0,
+      "key": "craft",
+      "args": {
+        "recipe": "HS3",
+        "disp": null
+      }
+    },
+    {
+      "y": 2,
+      "seat": 1,
+      "key": "craft",
+      "args": {
+        "recipe": "HS8",
+        "disp": null
+      }
+    },
+    {
+      "y": 2,
+      "seat": 3,
+      "key": "craft",
+      "args": {
+        "recipe": "HS11",
+        "disp": null
+      }
+    },
+    {
+      "y": 2,
+      "seat": 1,
+      "key": "sale",
+      "args": {
+        "venue": "odditorium",
+        "price": 8,
+        "kind": "solo"
+      }
+    },
+    {
+      "y": 2,
+      "seat": 0,
+      "key": "sale",
+      "args": {
+        "venue": "workhouse",
+        "price": 2,
+        "kind": "exchange"
+      }
+    },
+    {
+      "y": 2,
+      "seat": null,
+      "key": "exchange",
+      "args": {
+        "venue": "workhouse",
+        "winner": 0,
+        "bids": [
+          {
+            "seat": 0,
+            "price": 2,
+            "hype": 1
+          },
+          {
+            "seat": 3,
+            "price": 1,
+            "hype": 0
+          }
+        ]
+      }
+    },
+    {
+      "y": 2,
+      "seat": 0,
+      "key": "warning",
+      "args": {
+        "reason": "reliability"
+      }
+    },
+    {
+      "y": 2,
+      "seat": 0,
+      "key": "sale",
+      "args": {
+        "venue": "golem",
+        "price": 4,
+        "kind": "exchange"
+      }
+    },
+    {
+      "y": 2,
+      "seat": null,
+      "key": "exchange",
+      "args": {
+        "venue": "golem",
+        "winner": 0,
+        "bids": [
+          {
+            "seat": 0,
+            "price": 4,
+            "hype": 1
+          },
+          {
+            "seat": 3,
+            "price": 3,
+            "hype": 0
+          }
+        ]
+      }
+    },
+    {
+      "y": 2,
+      "seat": 3,
+      "key": "sale",
+      "args": {
+        "venue": "fever",
+        "price": 5,
+        "kind": "exchange"
+      }
+    },
+    {
+      "y": 2,
+      "seat": null,
+      "key": "exchange",
+      "args": {
+        "venue": "fever",
+        "winner": 3,
+        "bids": [
+          {
+            "seat": 3,
+            "price": 5,
+            "hype": 0
+          }
+        ]
+      }
+    },
+    {
+      "y": 2,
+      "seat": 0,
+      "key": "favor",
+      "args": {
+        "mode": "cancel"
+      }
+    },
+    {
+      "y": 2,
+      "seat": 0,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 2,
+      "seat": 1,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 2,
+      "seat": 2,
+      "key": "payroll",
+      "args": {
+        "bill": 1,
+        "paid": 1
+      }
+    },
+    {
+      "y": 2,
+      "seat": 3,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 2,
+      "seat": 0,
+      "key": "firstPlayer",
+      "args": {}
+    },
+    {
+      "y": 2,
+      "seat": 3,
+      "key": "watch",
+      "args": {}
+    },
+    {
+      "y": 3,
+      "seat": null,
+      "key": "yearStart",
+      "args": {
+        "year": 3
+      }
+    },
+    {
+      "y": 3,
+      "seat": 1,
+      "key": "reviewCalled",
+      "args": {}
+    },
+    {
+      "y": 3,
+      "seat": 0,
+      "key": "reviewContribution",
+      "args": {
+        "charter": "C9"
+      }
+    },
+    {
+      "y": 3,
+      "seat": 0,
+      "key": "charterPassed",
+      "args": {
+        "charter": "C9"
+      }
+    },
+    {
+      "y": 3,
+      "seat": null,
+      "key": "scare",
+      "args": {
+        "scare": "S4"
+      }
+    },
+    {
+      "y": 3,
+      "seat": 2,
+      "key": "craft",
+      "args": {
+        "recipe": "HS8",
+        "disp": null
+      }
+    },
+    {
+      "y": 3,
+      "seat": 3,
+      "key": "craft",
+      "args": {
+        "recipe": "HS11",
+        "disp": null
+      }
+    },
+    {
+      "y": 3,
+      "seat": 3,
+      "key": "sale",
+      "args": {
+        "venue": "golem",
+        "price": 3,
+        "kind": "exchange"
+      }
+    },
+    {
+      "y": 3,
+      "seat": 3,
+      "key": "undercut",
+      "args": {
+        "venue": "golem"
+      }
+    },
+    {
+      "y": 3,
+      "seat": null,
+      "key": "exchange",
+      "args": {
+        "venue": "golem",
+        "winner": 3,
+        "bids": [
+          {
+            "seat": 3,
+            "price": 3,
+            "hype": 1
+          },
+          {
+            "seat": 2,
+            "price": 4,
+            "hype": 1
+          }
+        ]
+      }
+    },
+    {
+      "y": 3,
+      "seat": 2,
+      "key": "sale",
+      "args": {
+        "venue": "odditorium",
+        "price": 7,
+        "kind": "exchange"
+      }
+    },
+    {
+      "y": 3,
+      "seat": null,
+      "key": "exchange",
+      "args": {
+        "venue": "odditorium",
+        "winner": 2,
+        "bids": [
+          {
+            "seat": 2,
+            "price": 7,
+            "hype": 0
+          }
+        ]
+      }
+    },
+    {
+      "y": 3,
+      "seat": 0,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 3,
+      "seat": 1,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 3,
+      "seat": 2,
+      "key": "payroll",
+      "args": {
+        "bill": 2,
+        "paid": 2
+      }
+    },
+    {
+      "y": 3,
+      "seat": 3,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 3,
+      "seat": 3,
+      "key": "firstPlayer",
+      "args": {}
+    },
+    {
+      "y": 3,
+      "seat": 2,
+      "key": "watch",
+      "args": {}
+    },
+    {
+      "y": 4,
+      "seat": null,
+      "key": "yearStart",
+      "args": {
+        "year": 4
+      }
+    },
+    {
+      "y": 4,
+      "seat": 3,
+      "key": "reviewCalled",
+      "args": {}
+    },
+    {
+      "y": 4,
+      "seat": 0,
+      "key": "reviewContribution",
+      "args": {
+        "charter": "C5"
+      }
+    },
+    {
+      "y": 4,
+      "seat": null,
+      "key": "scare",
+      "args": {
+        "scare": "S14"
+      }
+    },
+    {
+      "y": 4,
+      "seat": 3,
+      "key": "craft",
+      "args": {
+        "recipe": "HS11",
+        "disp": null
+      }
+    },
+    {
+      "y": 4,
+      "seat": 0,
+      "key": "craft",
+      "args": {
+        "recipe": "HS3",
+        "disp": null
+      }
+    },
+    {
+      "y": 4,
+      "seat": 1,
+      "key": "craft",
+      "args": {
+        "recipe": "HS8",
+        "disp": null
+      }
+    },
+    {
+      "y": 4,
+      "seat": 2,
+      "key": "craft",
+      "args": {
+        "recipe": "HS8",
+        "disp": null
+      }
+    },
+    {
+      "y": 4,
+      "seat": 0,
+      "key": "warning",
+      "args": {
+        "reason": "reliability"
+      }
+    },
+    {
+      "y": 4,
+      "seat": 0,
+      "key": "sale",
+      "args": {
+        "venue": "nobles",
+        "price": 9,
+        "kind": "solo"
+      }
+    },
+    {
+      "y": 4,
+      "seat": 0,
+      "key": "sabotage",
+      "args": {
+        "target": 1
+      }
+    },
+    {
+      "y": 4,
+      "seat": 3,
+      "key": "sale",
+      "args": {
+        "venue": "workhouse",
+        "price": 1,
+        "kind": "exchange"
+      }
+    },
+    {
+      "y": 4,
+      "seat": 3,
+      "key": "undercut",
+      "args": {
+        "venue": "workhouse"
+      }
+    },
+    {
+      "y": 4,
+      "seat": null,
+      "key": "exchange",
+      "args": {
+        "venue": "workhouse",
+        "winner": 3,
+        "bids": [
+          {
+            "seat": 3,
+            "price": 1,
+            "hype": 1
+          },
+          {
+            "seat": 2,
+            "price": 2,
+            "hype": 1
+          }
+        ]
+      }
+    },
+    {
+      "y": 4,
+      "seat": 2,
+      "key": "sale",
+      "args": {
+        "venue": "lantern",
+        "price": 5,
+        "kind": "exchange"
+      }
+    },
+    {
+      "y": 4,
+      "seat": null,
+      "key": "exchange",
+      "args": {
+        "venue": "lantern",
+        "winner": 2,
+        "bids": [
+          {
+            "seat": 2,
+            "price": 5,
+            "hype": 0
+          }
+        ]
+      }
+    },
+    {
+      "y": 4,
+      "seat": 0,
+      "key": "favor",
+      "args": {
+        "mode": "cancel"
+      }
+    },
+    {
+      "y": 4,
+      "seat": 3,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 4,
+      "seat": 0,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 4,
+      "seat": 0,
+      "key": "levies",
+      "args": {
+        "paid": 2
+      }
+    },
+    {
+      "y": 4,
+      "seat": 1,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 4,
+      "seat": 2,
+      "key": "payroll",
+      "args": {
+        "bill": 2,
+        "paid": 2
+      }
+    },
+    {
+      "y": 4,
+      "seat": 0,
+      "key": "firstPlayer",
+      "args": {}
+    },
+    {
+      "y": 4,
+      "seat": 1,
+      "key": "watch",
+      "args": {}
+    },
+    {
+      "y": 5,
+      "seat": null,
+      "key": "yearStart",
+      "args": {
+        "year": 5
+      }
+    },
+    {
+      "y": 5,
+      "seat": 3,
+      "key": "reviewCalled",
+      "args": {}
+    },
+    {
+      "y": 5,
+      "seat": 0,
+      "key": "reviewContribution",
+      "args": {
+        "charter": "C5"
+      }
+    },
+    {
+      "y": 5,
+      "seat": 0,
+      "key": "charterPassed",
+      "args": {
+        "charter": "C5"
+      }
+    },
+    {
+      "y": 5,
+      "seat": null,
+      "key": "scare",
+      "args": {
+        "scare": "S8"
+      }
+    },
+    {
+      "y": 5,
+      "seat": 0,
+      "key": "craft",
+      "args": {
+        "recipe": "HS3",
+        "disp": null
+      }
+    },
+    {
+      "y": 5,
+      "seat": 0,
+      "key": "craft",
+      "args": {
+        "recipe": "HS3",
+        "disp": null
+      }
+    },
+    {
+      "y": 5,
+      "seat": 1,
+      "key": "craft",
+      "args": {
+        "recipe": "M20",
+        "disp": null
+      }
+    },
+    {
+      "y": 5,
+      "seat": 2,
+      "key": "craft",
+      "args": {
+        "recipe": "HS8",
+        "disp": null
+      }
+    },
+    {
+      "y": 5,
+      "seat": 2,
+      "key": "craft",
+      "args": {
+        "recipe": "HS8",
+        "disp": null
+      }
+    },
+    {
+      "y": 5,
+      "seat": 2,
+      "key": "craft",
+      "args": {
+        "recipe": "M17",
+        "disp": null
+      }
+    },
+    {
+      "y": 5,
+      "seat": 3,
+      "key": "craft",
+      "args": {
+        "recipe": "HS11",
+        "disp": null
+      }
+    },
+    {
+      "y": 5,
+      "seat": 2,
+      "key": "sale",
+      "args": {
+        "venue": "overflow1",
+        "price": 3,
+        "kind": "solo"
+      }
+    },
+    {
+      "y": 5,
+      "seat": 1,
+      "key": "sale",
+      "args": {
+        "venue": "workhouse",
+        "price": 2,
+        "kind": "exchange"
+      }
+    },
+    {
+      "y": 5,
+      "seat": null,
+      "key": "exchange",
+      "args": {
+        "venue": "workhouse",
+        "winner": 1,
+        "bids": [
+          {
+            "seat": 1,
+            "price": 2,
+            "hype": 2
+          },
+          {
+            "seat": 3,
+            "price": 1,
+            "hype": 1
+          },
+          {
+            "seat": 0,
+            "price": 2,
+            "hype": 1
+          },
+          {
+            "seat": 2,
+            "price": 2,
+            "hype": 1
+          }
+        ]
+      }
+    },
+    {
+      "y": 5,
+      "seat": 2,
+      "key": "sale",
+      "args": {
+        "venue": "lantern",
+        "price": 5,
+        "kind": "exchange"
+      }
+    },
+    {
+      "y": 5,
+      "seat": null,
+      "key": "exchange",
+      "args": {
+        "venue": "lantern",
+        "winner": 2,
+        "bids": [
+          {
+            "seat": 2,
+            "price": 5,
+            "hype": 1
+          }
+        ]
+      }
+    },
+    {
+      "y": 5,
+      "seat": 2,
+      "key": "sale",
+      "args": {
+        "venue": "overflow1",
+        "price": 3,
+        "kind": "desperate"
+      }
+    },
+    {
+      "y": 5,
+      "seat": 0,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 5,
+      "seat": 1,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 5,
+      "seat": 2,
+      "key": "payroll",
+      "args": {
+        "bill": 2,
+        "paid": 2
+      }
+    },
+    {
+      "y": 5,
+      "seat": 3,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 5,
+      "seat": 0,
+      "key": "spoiled",
+      "args": {
+        "count": 2
+      }
+    },
+    {
+      "y": 5,
+      "seat": 3,
+      "key": "spoiled",
+      "args": {
+        "count": 1
+      }
+    },
+    {
+      "y": 5,
+      "seat": 2,
+      "key": "firstPlayer",
+      "args": {}
+    },
+    {
+      "y": 5,
+      "seat": 1,
+      "key": "watch",
+      "args": {}
+    },
+    {
+      "y": 6,
+      "seat": null,
+      "key": "yearStart",
+      "args": {
+        "year": 6
+      }
+    },
+    {
+      "y": 6,
+      "seat": 2,
+      "key": "reviewCalled",
+      "args": {}
+    },
+    {
+      "y": 6,
+      "seat": 1,
+      "key": "contributed",
+      "args": {
+        "charter": "C8"
+      }
+    },
+    {
+      "y": 6,
+      "seat": 3,
+      "key": "contributed",
+      "args": {
+        "charter": "C8"
+      }
+    },
+    {
+      "y": 6,
+      "seat": 2,
+      "key": "reviewSlotSpent",
+      "args": {}
+    },
+    {
+      "y": 6,
+      "seat": 0,
+      "key": "reviewContribution",
+      "args": {
+        "charter": "C1"
+      }
+    },
+    {
+      "y": 6,
+      "seat": null,
+      "key": "scare",
+      "args": {
+        "scare": "S7"
+      }
+    },
+    {
+      "y": 6,
+      "seat": 2,
+      "key": "craft",
+      "args": {
+        "recipe": "M17",
+        "disp": null
+      }
+    },
+    {
+      "y": 6,
+      "seat": 2,
+      "key": "craft",
+      "args": {
+        "recipe": "HS8",
+        "disp": null
+      }
+    },
+    {
+      "y": 6,
+      "seat": 3,
+      "key": "craft",
+      "args": {
+        "recipe": "HS11",
+        "disp": null
+      }
+    },
+    {
+      "y": 6,
+      "seat": 1,
+      "key": "craft",
+      "args": {
+        "recipe": "HS4",
+        "disp": null
+      }
+    },
+    {
+      "y": 6,
+      "seat": 2,
+      "key": "sale",
+      "args": {
+        "venue": "workhouse",
+        "price": 3,
+        "kind": "solo"
+      }
+    },
+    {
+      "y": 6,
+      "seat": 1,
+      "key": "sale",
+      "args": {
+        "venue": "lantern",
+        "price": 5,
+        "kind": "exchange"
+      }
+    },
+    {
+      "y": 6,
+      "seat": null,
+      "key": "exchange",
+      "args": {
+        "venue": "lantern",
+        "winner": 1,
+        "bids": [
+          {
+            "seat": 1,
+            "price": 5,
+            "hype": 2
+          },
+          {
+            "seat": 3,
+            "price": 4,
+            "hype": 1
+          },
+          {
+            "seat": 2,
+            "price": 5,
+            "hype": 1
+          }
+        ]
+      }
+    },
+    {
+      "y": 6,
+      "seat": 2,
+      "key": "sale",
+      "args": {
+        "venue": "fever",
+        "price": 6,
+        "kind": "exchange"
+      }
+    },
+    {
+      "y": 6,
+      "seat": null,
+      "key": "exchange",
+      "args": {
+        "venue": "fever",
+        "winner": 2,
+        "bids": [
+          {
+            "seat": 2,
+            "price": 6,
+            "hype": 1
+          },
+          {
+            "seat": 3,
+            "price": 5,
+            "hype": 0
+          }
+        ]
+      }
+    },
+    {
+      "y": 6,
+      "seat": 3,
+      "key": "sale",
+      "args": {
+        "venue": "nobles",
+        "price": 7,
+        "kind": "exchange"
+      }
+    },
+    {
+      "y": 6,
+      "seat": null,
+      "key": "exchange",
+      "args": {
+        "venue": "nobles",
+        "winner": 3,
+        "bids": [
+          {
+            "seat": 3,
+            "price": 7,
+            "hype": 0
+          }
+        ]
+      }
+    },
+    {
+      "y": 6,
+      "seat": 2,
+      "key": "payroll",
+      "args": {
+        "bill": 2,
+        "paid": 2
+      }
+    },
+    {
+      "y": 6,
+      "seat": 3,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 6,
+      "seat": 0,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 6,
+      "seat": 1,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 6,
+      "seat": 2,
+      "key": "firstPlayer",
+      "args": {}
+    },
+    {
+      "y": 6,
+      "seat": 1,
+      "key": "watch",
+      "args": {}
+    },
+    {
+      "y": 7,
+      "seat": null,
+      "key": "yearStart",
+      "args": {
+        "year": 7
+      }
+    },
+    {
+      "y": 7,
+      "seat": 0,
+      "key": "reviewCalled",
+      "args": {}
+    },
+    {
+      "y": 7,
+      "seat": 3,
+      "key": "contributed",
+      "args": {
+        "charter": "C8"
+      }
+    },
+    {
+      "y": 7,
+      "seat": 2,
+      "key": "reviewContribution",
+      "args": {
+        "charter": "C1"
+      }
+    },
+    {
+      "y": 7,
+      "seat": 2,
+      "key": "charterPassed",
+      "args": {
+        "charter": "C1"
+      }
+    },
+    {
+      "y": 7,
+      "seat": null,
+      "key": "scare",
+      "args": {
+        "scare": "S1"
+      }
+    },
+    {
+      "y": 7,
+      "seat": 2,
+      "key": "craft",
+      "args": {
+        "recipe": "HS8",
+        "disp": null
+      }
+    },
+    {
+      "y": 7,
+      "seat": 2,
+      "key": "craft",
+      "args": {
+        "recipe": "HS8",
+        "disp": null
+      }
+    },
+    {
+      "y": 7,
+      "seat": 3,
+      "key": "craft",
+      "args": {
+        "recipe": "HS11",
+        "disp": null
+      }
+    },
+    {
+      "y": 7,
+      "seat": 0,
+      "key": "craft",
+      "args": {
+        "recipe": "HS3",
+        "disp": null
+      }
+    },
+    {
+      "y": 7,
+      "seat": 0,
+      "key": "craft",
+      "args": {
+        "recipe": "HS3",
+        "disp": null
+      }
+    },
+    {
+      "y": 7,
+      "seat": 1,
+      "key": "craft",
+      "args": {
+        "recipe": "HS4",
+        "disp": null
+      }
+    },
+    {
+      "y": 7,
+      "seat": 2,
+      "key": "warning",
+      "args": {
+        "reason": "reliability"
+      }
+    },
+    {
+      "y": 7,
+      "seat": 2,
+      "key": "sale",
+      "args": {
+        "venue": "fever",
+        "price": 7,
+        "kind": "solo"
+      }
+    },
+    {
+      "y": 7,
+      "seat": 2,
+      "key": "sabotage",
+      "args": {
+        "target": 0
+      }
+    },
+    {
+      "y": 7,
+      "seat": 0,
+      "key": "sale",
+      "args": {
+        "venue": "nobles",
+        "price": 9,
+        "kind": "solo"
+      }
+    },
+    {
+      "y": 7,
+      "seat": 2,
+      "key": "sale",
+      "args": {
+        "venue": "lantern",
+        "price": 5,
+        "kind": "exchange"
+      }
+    },
+    {
+      "y": 7,
+      "seat": null,
+      "key": "exchange",
+      "args": {
+        "venue": "lantern",
+        "winner": 2,
+        "bids": [
+          {
+            "seat": 2,
+            "price": 5,
+            "hype": 1
+          },
+          {
+            "seat": 1,
+            "price": 5,
+            "hype": 1
+          }
+        ]
+      }
+    },
+    {
+      "y": 7,
+      "seat": 3,
+      "key": "sale",
+      "args": {
+        "venue": "overflow1",
+        "price": 1,
+        "kind": "exchange"
+      }
+    },
+    {
+      "y": 7,
+      "seat": 3,
+      "key": "undercut",
+      "args": {
+        "venue": "overflow1"
+      }
+    },
+    {
+      "y": 7,
+      "seat": null,
+      "key": "exchange",
+      "args": {
+        "venue": "overflow1",
+        "winner": 3,
+        "bids": [
+          {
+            "seat": 3,
+            "price": 1,
+            "hype": 1
+          },
+          {
+            "seat": 1,
+            "price": 2,
+            "hype": 0
+          }
+        ]
+      }
+    },
+    {
+      "y": 7,
+      "seat": 2,
+      "key": "payroll",
+      "args": {
+        "bill": 2,
+        "paid": 2
+      }
+    },
+    {
+      "y": 7,
+      "seat": 3,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 7,
+      "seat": 0,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 7,
+      "seat": 1,
+      "key": "payroll",
+      "args": {
+        "bill": 0,
+        "paid": 0
+      }
+    },
+    {
+      "y": 7,
+      "seat": 2,
+      "key": "condemned",
+      "args": {
+        "excess": 1
+      }
+    },
+    {
+      "y": 7,
+      "seat": 2,
+      "key": "condemnation",
+      "args": {
+        "choice": "pay"
+      }
+    },
+    {
+      "y": 7,
+      "seat": 1,
+      "key": "spoiled",
+      "args": {
+        "count": 1
+      }
+    },
+    {
+      "y": 7,
+      "seat": 2,
+      "key": "firstPlayer",
+      "args": {}
+    },
+    {
+      "y": 7,
+      "seat": 1,
+      "key": "watch",
+      "args": {}
+    },
+    {
+      "y": 7,
+      "seat": null,
+      "key": "gameOver",
+      "args": {}
+    }
+  ],
+  "expectedResult": {
+    "rows": [
+      {
+        "seat": 0,
+        "name": "poison",
+        "breakdown": {
+          "profit": 5,
+          "tier": 0,
+          "staff": 3,
+          "cash": 4,
+          "warnings": 0,
+          "softer": 0
+        },
+        "vp": 12,
+        "eligible": false
+      },
+      {
+        "seat": 1,
+        "name": "marketing",
+        "breakdown": {
+          "profit": 3,
+          "tier": 0,
+          "staff": 3,
+          "cash": 3,
+          "warnings": 0,
+          "softer": 0
+        },
+        "vp": 9,
+        "eligible": false
+      },
+      {
+        "seat": 2,
+        "name": "grow",
+        "breakdown": {
+          "profit": 7,
+          "tier": 3,
+          "staff": 3,
+          "cash": 3,
+          "warnings": 0,
+          "softer": 0
+        },
+        "vp": 16,
+        "eligible": true
+      },
+      {
+        "seat": 3,
+        "name": "lean",
+        "breakdown": {
+          "profit": 3,
+          "tier": 0,
+          "staff": 3,
+          "cash": 3,
+          "warnings": 0,
+          "softer": 0
+        },
+        "vp": 9,
+        "eligible": false
+      }
+    ],
+    "winner": 2,
+    "finalPositions": [
+      2,
+      0,
+      3,
+      1
+    ]
+  }
+}
