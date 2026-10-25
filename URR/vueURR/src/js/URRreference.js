@@ -88,6 +88,10 @@ export const ERA_CARD_DATA = {
 	5: { reservoir: ["M", 200], pump: ["M", 200], digger: ["M", 400] },
 }
 
+// Stored action params keep these as indexes; the model itself uses the strings.
+export const EQUIPMENT_KINDS = ["digger", "pump", "reservoir"]
+export const HARVEST_CHOICES = ["store", "distribute"]
+
 // --- Starting money ---
 export const STARTING_MONEY_BY_PLAYER_COUNT = { 3: 600, 4: 450, 5: 360, 6: 300 }
 

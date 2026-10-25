@@ -71,6 +71,30 @@ test("parameterless actions are stored as a single code", () => {
 	assert.deepEqual(historyAction(entry(0, { type: "respondOffer", accept: false }, 11)), { type: "respondOffer", accept: false })
 })
 
+test("fixed-vocabulary params are stored as indexes and trades store no holes", () => {
+	const card = entry(0, { type: "buyCard", kind: "digger", area: "printed-4-3" }, 1)
+	assert.deepEqual(card, [17, 0, 1, 0, "printed-4-3"])
+	assert.deepEqual(historyAction(card), { type: "buyCard", kind: "digger", area: "printed-4-3" })
+
+	const work = entry(1, { type: "requestWaterwork", kind: "reservoir", area: "printed-5-6" }, 2)
+	assert.deepEqual(work.slice(3), [2, "printed-5-6"])
+	assert.deepEqual(historyAction(work), { type: "requestWaterwork", kind: "reservoir", area: "printed-5-6" })
+
+	const harvest = entry(2, { type: "harvest", choice: "store", remove: "printed-5-6" }, 3)
+	assert.deepEqual(harvest.slice(3), [0, "printed-5-6"])
+	assert.deepEqual(historyAction(harvest), { type: "harvest", choice: "store", remove: "printed-5-6" })
+
+	// Entries reach the database through JSON, so read them back the same way.
+	const plain = JSON.parse(JSON.stringify(entry(1, { type: "tradeLand", buy: "printed-4-3", exchangeDer: false, sellBefore: [], sellAfter: [] }, 7)))
+	const full = JSON.parse(JSON.stringify(entry(1, { type: "tradeLand", buy: "printed-4-3", exchangeDer: true, sellBefore: [["printed-1-4"]], sellAfter: [["printed-2-4"]] }, 8)))
+	assert.ok(!JSON.stringify(plain).includes("null") && !JSON.stringify(full).includes("null"), "optional trailing params leave no holes")
+	assert.deepEqual(historyAction(full), { type: "tradeLand", buy: "printed-4-3", exchangeDer: true, sellBefore: [["printed-1-4"]], sellAfter: [["printed-2-4"]] })
+
+	// A sale after the buy leaves a hole in front of it: the hole reads as absent, not as null.
+	const sellAfterOnly = JSON.parse(JSON.stringify(entry(1, { type: "tradeLand", sellAfter: [["printed-2-4"]] }, 9)))
+	assert.deepEqual(historyAction(sellAfterOnly), { type: "tradeLand", sellAfter: [["printed-2-4"]] })
+})
+
 test("opening-only changes replay without a stored snapshot", () => {
 	const opening = createGame(["A", "B", "C"])
 	opening.players[0].displayName = "Shadow name"

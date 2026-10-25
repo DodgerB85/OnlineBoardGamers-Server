@@ -98,7 +98,9 @@ export function compactBoard(current) {
 		if (key === "areas" || key === "canals") continue
 		if (JSON.stringify(value) !== JSON.stringify(printed[key])) rest[key] = value
 	}
-	return [areas, canals, Object.keys(rest).length ? rest : null]
+	const stored = [areas, canals, Object.keys(rest).length ? rest : null]
+	while (stored.at(-1) === null) stored.pop()
+	return stored
 }
 
 export function expandBoard(stored) {
